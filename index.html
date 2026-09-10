@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground — Experiments</title>
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+  .card { display: block; color: inherit; text-decoration: none; }
+  .card h2 { color: var(--accent); }
+  .card:hover { border-color: var(--accent); }
+  .tag { margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Playground</h1>
+  <p class="muted">Experiments and prototypes for future games. Each lives in its own folder with a README. This page is maintained by Claude whenever an experiment is added.</p>
+
+  <a class="panel card" href="voice-lab/">
+    <h2>1. Voice Lab</h2>
+    <p>Synthetic character voices in the browser, Tomodachi Life style. Compare engines (Web Speech, espeak, SAM, babble, Piper neural), tune pitch / speed / tone / texture knobs, apply audio effects, build presets, stress-test crowds, and export voice JSON.</p>
+    <span class="badge tag">audio</span><span class="badge tag">tts</span><span class="badge tag">web-audio</span>
+  </a>
+
+  <a class="panel card" href="lingo/">
+    <h2>2. Lingo</h2>
+    <p>Text-based language system: phrase templates with <code>{placeholders}</code>, a game-defined dictionary (races, spells, items, people) with singular/plural/possessive forms, personality knobs, trait tags, custom catchphrases, and a two-character conversation simulator.</p>
+    <span class="badge tag">text</span><span class="badge tag">dialog</span><span class="badge tag">personality</span>
+  </a>
+
+  <a class="panel card" href="avatar-2d/">
+    <h2>3a. Avatar 2D</h2>
+    <p>Paper-doll character builder from stacked SVG layers: hair, eyes, brows, nose, mouth, body height / width, tops, bottoms, shoes, accessories. Presets, randomize, save in browser, export JSON.</p>
+    <span class="badge tag">svg</span><span class="badge tag">character</span>
+  </a>
+
+  <a class="panel card" href="avatar-3d/">
+    <h2>3b. Avatar 3D</h2>
+    <p>Three.js character builder. Mii-style procedural body with a drawn face, plus a Quaternius (CC0) modular-mesh mode. Height / width, hair, outfits, idle + walk animation. Same JSON as the 2D version.</p>
+    <span class="badge tag">three.js</span><span class="badge tag">character</span>
+  </a>
+
+  <a class="panel card" href="combined/">
+    <h2>Combined demo</h2>
+    <p>One character sheet that ties the three together: an avatar with a voice and a personality that talks.</p>
+    <span class="badge tag">integration</span>
+  </a>
+
+  <p class="small muted">Serve with <code>./serve.sh --bg</code> (port 8400). See <code>CLAUDE.md</code> for the conventions.</p>
+</div>
+</body>
+</html>

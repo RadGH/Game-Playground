@@ -1,0 +1,22 @@
+# Shared character JSON (schema 1)
+
+One document describes a character for all experiments. **Every section is optional and independent**: a game can keep only `avatar`, only `voice`, or only `speech`. Each experiment reads/writes its own section and ignores the rest, so you can paste a whole character or a single section into any tool.
+
+```json
+{
+  "schema": 1,
+  "id": "wizard_01",
+  "name": "Thalen",
+  "avatar": { "...": "see avatar-2d/README.md — same shape for avatar-3d" },
+  "voice":  { "...": "see voice-lab/README.md" },
+  "speech": { "...": "see lingo/README.md" }
+}
+```
+
+Rules:
+- `schema` is an integer; bump it when a section's shape changes incompatibly and add a migration note in that experiment's README.
+- Sections must be plain JSON (no functions, no references), so a character can be saved in localStorage, exported, and pasted into a prompt for Claude ("here's the wizard, add it to the game").
+- Colors are `#rrggbb`. Numeric knobs are documented with their range in the owning README; most are 0–1 or -1..1 so games can map them to their own scales.
+- Part ids reference catalogs shipped with the experiment (`avatar-2d/js/parts/`, `voice-lab/data/presets.json`, `lingo/data/`). Unknown ids should fall back to defaults, not crash.
+
+See `shared/character.example.json` for a full example once all three experiments exist.

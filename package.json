@@ -1,0 +1,15 @@
+{
+  "name": "playground",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Radley's game-prototype playground: voice lab, lingo (language system), 2D/3D avatar builders.",
+  "author": "Radley Sustaire",
+  "scripts": {
+    "serve": "./serve.sh",
+    "test": "npx playwright test",
+    "test:unit": "node --test lingo/tests/"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

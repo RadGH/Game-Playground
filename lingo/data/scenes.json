@@ -1,0 +1,13 @@
+{
+  "_doc": "Example scenes for context-aware talk. place = lexicon id; tags feed tag weights (dark damp cold enclosed holy crowded wild high ruined wet hot quiet loud); threats = creatures believed nearby; danger/comfort 0..1; timeOfDay dawn|day|dusk|night. Games build these from their world state.",
+  "scenes": [
+    { "id": "goblin_cave", "name": "Goblin cave", "place": "cave", "tags": ["dark", "damp", "enclosed", "quiet"], "threats": [{ "id": "goblin", "count": 8 }, { "id": "bat", "count": 30 }], "weather": null, "timeOfDay": "day", "danger": 0.75, "comfort": 0.1, "smell": "guano and old smoke", "sound": "dripping water" },
+    { "id": "tavern_night", "name": "Tavern, night", "place": "tavern", "tags": ["crowded", "loud", "warm"], "threats": [], "weather": "rain", "timeOfDay": "night", "danger": 0.05, "comfort": 0.9, "smell": "ale and wet wool", "sound": "a bad fiddle" },
+    { "id": "forest_road_night", "name": "Forest road, night", "place": "thalen_wood", "tags": ["dark", "wild", "cold", "quiet"], "threats": [{ "id": "wolf", "count": 5 }], "weather": "fog", "timeOfDay": "night", "danger": 0.5, "comfort": 0.2, "smell": "pine and rot", "sound": "something moving in the brush" },
+    { "id": "battlefield_after", "name": "Battlefield, after", "place": "the_maw", "tags": ["ruined", "wet", "quiet"], "threats": [{ "id": "ghoul", "count": 3 }], "weather": "rain", "timeOfDay": "dusk", "danger": 0.4, "comfort": 0.05, "smell": "blood and rain", "sound": "crows" },
+    { "id": "mountain_pass", "name": "Mountain pass", "place": "frostspine_pass", "tags": ["cold", "high", "wild", "loud"], "threats": [{ "id": "mire_drake", "count": 1 }], "weather": "frost", "timeOfDay": "day", "danger": 0.35, "comfort": 0.1, "smell": "snow", "sound": "wind" },
+    { "id": "chapel", "name": "Chapel of the Pale Lady", "place": "chapel", "tags": ["holy", "quiet", "enclosed", "cold"], "threats": [], "weather": null, "timeOfDay": "dawn", "danger": 0.05, "comfort": 0.6, "smell": "wax and dust", "sound": "nothing at all" },
+    { "id": "camp", "name": "Camp at night", "place": "camp", "tags": ["dark", "wild", "warm", "quiet"], "threats": [], "weather": null, "timeOfDay": "night", "danger": 0.15, "comfort": 0.7, "smell": "woodsmoke", "sound": "the fire" },
+    { "id": "sewer", "name": "Greyharbor sewers", "place": "sewer", "tags": ["dark", "damp", "wet", "enclosed", "hot"], "threats": [{ "id": "rat", "count": 40 }, { "id": "gloomcap", "count": 6 }], "weather": null, "timeOfDay": "day", "danger": 0.45, "comfort": 0.0, "smell": "everything bad", "sound": "squeaking" }
+  ]
+}

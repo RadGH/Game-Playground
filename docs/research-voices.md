@@ -24,7 +24,7 @@ Windows 11 Chrome `getVoices()` = offline SAPI voices (David, Zira, Mark) + Goog
 Anything giving PCM (espeak, SAM, Piper, babble) can run through Web Audio: playbackRate (chipmunk/giant), pitch shift w/ formant preservation (SoundTouchJS, LGPL), ring modulation (robot), bitcrusher/lowpass, convolver reverb, chorus via delay. Web Speech API is the exception (no buffer access).
 
 ## Recommendation applied in voice-lab
-Compare espeak (closest to Tomodachi knobs), SAM (cheapest, retro), babble (crowd-safe, license-free), Web Speech (reference), Piper (natural reference, optional). For hundreds of NPCs: babble or pre-rendered espeak/SAM buffers with effects; neural only for one "hero" line at a time.
+Compare espeak (closest to Tomodachi knobs), babble (crowd-safe, license-free), Web Speech (reference), Piper (natural reference, optional). For hundreds of NPCs: babble or pre-rendered espeak/SAM buffers with effects; neural only for one "hero" line at a time.
 
 ## Phoneme input
 espeak accepts `[[h@l'oU]]` (Kirshenbaum ASCII); SAM accepts its own phoneme alphabet; Piper/Kokoro need a wrapper fork; Web Speech none.

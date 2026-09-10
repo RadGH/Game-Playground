@@ -4,7 +4,7 @@ test.describe('avatar-3d', () => {
   test.setTimeout(120_000);
   async function waitBuilt(page, contains) { await expect(page.locator('#status')).toContainText(contains, { timeout: 90_000 }); await page.waitForTimeout(600); }
   async function drawnPixels(page) {
-    return page.evaluate(() => { const c = document.querySelector('#viewport canvas'); const s = document.createElement('canvas'); s.width = 160; s.height = 120; const ctx = s.getContext('2d'); ctx.drawImage(c, 0, 0, 160, 120); const d = ctx.getImageData(0, 0, 160, 120).data; let skin = 0; for (let i = 0; i < d.length; i += 4) { const r = d[i], g = d[i + 1], b = d[i + 2]; if (r > 150 && g > 100 && b < 160 && r > b + 30) skin++; } return { skin, w: c.width, h: c.height }; });
+    return page.evaluate(() => { const c = document.querySelector('#viewport canvas'); const s = document.createElement('canvas'); s.width = 160; s.height = 120; const ctx = s.getContext('2d'); ctx.drawImage(c, 0, 0, 160, 120); const d = ctx.getImageData(0, 0, 160, 120).data; let skin = 0, drawn = 0; for (let i = 0; i < d.length; i += 4) { const r = d[i], g = d[i + 1], b = d[i + 2]; if (r > 150 && g > 100 && b < 160 && r > b + 30) skin++; if (Math.abs(r - 30) + Math.abs(g - 33) + Math.abs(b - 40) > 60) drawn++; } return { skin, drawn, w: c.width, h: c.height }; });
   }
   test('mii mode renders a character with skin-coloured pixels and animates', async ({ page }) => {
     const errors = []; page.on('pageerror', e => errors.push(e.message));
@@ -23,7 +23,7 @@ test.describe('avatar-3d', () => {
     await page.goto('avatar-3d/'); await page.waitForFunction(() => !!window.avatar3d, null, { timeout: 60_000 }); await page.evaluate(() => window.avatar3d.setMode('quaternius')); await waitBuilt(page, 'Quaternius');
     const info = await page.evaluate(async () => { const c = window.avatar3d.character; c.setAnim('Walk_Loop'); await new Promise(r => setTimeout(r, 900)); let meshes = 0; c.group.traverse(o => { if (o.isSkinnedMesh) meshes++; }); const head = c.group.getObjectByName('Head'); return { parts: c.group.children.length, meshes, anim: c.anim, mixerTime: c.mixers[0].time, headScale: head?.scale.x }; });
     expect(info.meshes).toBeGreaterThan(3); expect(info.anim).toBe('Walk_Loop'); expect(info.mixerTime).toBeGreaterThan(0.05);
-    const px = await drawnPixels(page); expect(px.skin).toBeGreaterThan(20);
+    const px = await drawnPixels(page); expect(px.drawn).toBeGreaterThan(800); // the trimmed body leaves little bare skin, so check the character is drawn at all
     await page.screenshot({ path: 'test-results/avatar-3d-quaternius.png' });
     await page.evaluate(() => { const a = window.avatar3d.avatar; a.body.height = 1; a.body.width = 1; a.body.frame = 'f'; a.top.id = 'plate'; a.hat.id = 'hood'; window.avatar3d.set(a); });
     await page.waitForTimeout(300); await page.waitForFunction(() => !window.avatar3d.isBuilding(), null, { timeout: 90_000 }); await page.waitForTimeout(300);

@@ -2,10 +2,13 @@
 import { el, knob, select, checkbox, button, textInput, panel, toast, downloadJSON, copyText, readJSONFile } from '../../shared/ui.js';
 import { makeStore } from '../../shared/store.js';
 import { Lingo, Lexicon, Speaker, Entity, SLIDERS, CUSTOM_SLOTS, DEFAULT_FILTERS, respellToEspeak } from './lingo.js';
+import { MemoryBank, generateEvent, ageWords, DAY, HOUR } from './memory.js';
+import { Scene } from './context.js';
 
 const store = makeStore('lingo', 1);
 const load = async f => (await fetch('data/' + f)).json();
-const [lexData, grammarData, traitsData, speakersData] = await Promise.all([load('lexicon.json'), load('grammar.json'), load('traits.json'), load('speakers.json')]);
+const [lexData, grammarData, traitsData, speakersData, eventsData, scenesData] = await Promise.all([load('lexicon.json'), load('grammar.json'), load('traits.json'), load('speakers.json'), load('events.json'), load('scenes.json')]);
+const EV = eventsData.types;
 const savedLex = store.get('lexicon'); if (savedLex) lexData.entries = savedLex.entries;
 const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData });
 const TRAITS = traitsData.traits; const status = document.getElementById('status');
@@ -13,7 +16,7 @@ const TRAITS = traitsData.traits; const status = document.getElementById('status
 // ---------- speakers ----------
 function makeSpeaker(def) { return new Speaker({ id: def.id, name: def.name, entry: lingo.lexicon.get(def.entry), lexicon: lingo.lexicon, speech: JSON.parse(JSON.stringify(def.speech)) }); }
 function customSpeaker(name = 'Custom', race = 'human', pronouns = 'they') { const entry = { id: 'custom_' + name.toLowerCase().replace(/\W+/g, '_'), type: 'person', proper: true, pronouns, race, forms: { sg: name, short: name } }; return new Speaker({ id: entry.id, name, entry, lexicon: lingo.lexicon, speech: { ...SLIDERS, traits: [], custom: {}, customRate: {}, tics: [], mood: 0 } }); }
-const state = { A: null, B: null, opinionAB: 0, opinionBA: 0, showSpeech: false, voice: false };
+const state = { A: null, B: null, opinionAB: 0, opinionBA: 0, showSpeech: false, voice: false, now: 12, scene: null, banks: {} };
 const savedA = store.get('speakerA'); state.A = savedA ? new Speaker({ ...savedA, entry: savedA.entry, lexicon: lingo.lexicon }) : makeSpeaker(speakersData.speakers[0]);
 state.B = makeSpeaker(speakersData.speakers[1]);
 
@@ -69,18 +72,32 @@ function renderLine(out, sp, cls = '') {
   const binds = Object.entries(out.bindings || {}).filter(([k]) => !['speaker', 'listener', 'listenerSpeaker'].includes(k)).map(([k, v]) => `${k}=${v.id}`).join(' ');
   return el('div', { class: 'line ' + cls }, el('span', { class: 'who', text: sp.name + ':' }), el('span', { text: out.text }), el('div', { class: 'meta', text: meta + (binds ? ' · ' + binds : '') }), state.showSpeech ? el('div', { class: 'speech', text: 'speech: ' + out.speech }) : null);
 }
-function ctxA() { return { speaker: state.A, listener: state.B, opinion: state.opinionAB }; }
-const sayBtn = button('Say it', async () => { const out = lingo.speak(intentSel.value, ctxA()); output.prepend(renderLine(out, state.A)); if (state.voice) speakAloud(out.speech, state.A); }, 'primary');
-const say10 = button('10 variations', () => { for (let i = 0; i < 10; i++) output.prepend(renderLine(lingo.speak(intentSel.value, ctxA()), state.A)); });
-const allIntents = button('One of each intent', () => { for (const it of intents) output.prepend(renderLine(lingo.speak(it, ctxA()), state.A)); });
+function ctxA() { return { speaker: state.A, listener: state.B, opinion: state.opinionAB, scene: state.scene }; }
+function bankFor(sp) { if (!state.banks[sp.id]) state.banks[sp.id] = new MemoryBank({ ownerId: sp.id, traits: sp.traits, eventTypes: EV, lexicon: lingo.lexicon }); state.banks[sp.id].traits = sp.traits; return state.banks[sp.id]; }
+const MEMORY_INTENTS = grammarData.meta.memoryIntents || [], SCENE_INTENTS = grammarData.meta.sceneIntents || [];
+/** Speak an intent for A. Memory intents use (or roll) a matching memory; scene intents need a scene. */
+function speakIntent(intent) {
+  if (MEMORY_INTENTS.includes(intent)) {
+    const type = Object.keys(EV).find(t => EV[t].intent === intent); const bank = bankFor(state.A);
+    let m = bank.list(state.now).map(x => x.memory).find(x => x.type === type);
+    if (!m) { m = bank.remember(generateEvent(type, EV[type], { lexicon: lingo.lexicon, rng: lingo.rng, participants: [state.A.id, state.B.id], time: state.now, exclude: [state.A.id, state.B.id] }), state.now); renderMemories(); }
+    const out = lingo.speakAbout(m, bank, state.now, ctxA()); out.entry = { id: 'memory:' + m.type + (m.recalled > 1 ? '' : ' (rolled)') }; return out;
+  }
+  if (intent === 'recall_reply') { const m = bankFor(state.B).strongest(state.now)?.memory; return m ? lingo.replyToMemory(m, state.now, ctxA()) : { text: '(B has no memory to reply to)', intent, tags: [], parts: {} }; }
+  if (SCENE_INTENTS.includes(intent) && !state.scene) return { text: '(pick a scene first)', intent, tags: [], parts: {} };
+  return lingo.speak(intent, ctxA());
+}
+const sayBtn = button('Say it', async () => { const out = speakIntent(intentSel.value); output.prepend(renderLine(out, state.A)); if (state.voice) speakAloud(out.speech || out.text, state.A); }, 'primary');
+const say10 = button('10 variations', () => { for (let i = 0; i < 10; i++) output.prepend(renderLine(speakIntent(intentSel.value), state.A)); });
+const allIntents = button('One of each intent', () => { for (const it of intents) output.prepend(renderLine(speakIntent(it), state.A)); });
 const clearBtn = button('Clear', () => output.replaceChildren(), 'small');
 const sayPanel = el('div', { class: 'panel' }, el('h3', { text: 'Make A talk to B' }), intentSel, intentDoc, el('div', { class: 'row' }, sayBtn, say10, allIntents, clearBtn), el('div', { class: 'row' }, speechCb, voiceCb), output);
 
 // conversation
 const convOut = el('div'); const turnsK = knob('Turns', { min: 2, max: 16, step: 1, value: 8 });
 const convBtn = button('Simulate conversation', async () => {
-  convOut.replaceChildren(); const lines = lingo.converse(state.A, state.B, { turns: turnsK.value, opinionAB: state.opinionAB, opinionBA: state.opinionBA });
-  for (const l of lines) { convOut.append(renderLine({ ...l, bindings: {} }, l.speaker, l.speaker === state.B ? 'b' : '')); if (state.voice) await speakAloud(l.speech, l.speaker); }
+  convOut.replaceChildren(); const lines = lingo.converse(state.A, state.B, { turns: turnsK.value, opinionAB: state.opinionAB, opinionBA: state.opinionBA, banks: { [state.A.id]: bankFor(state.A), [state.B.id]: bankFor(state.B) }, now: state.now, scene: state.scene }); renderMemories();
+  for (const l of lines) { convOut.append(renderLine({ ...l, bindings: {}, entry: l.memory ? { id: 'memory:' + l.memory.type } : null }, l.speaker, l.speaker === state.B ? 'b' : '')); if (state.voice) await speakAloud(l.speech, l.speaker); }
 }, 'primary');
 const convPanel = panel('Conversation simulator', el('p', { class: 'small muted', text: 'A and B take turns. The planner picks beats from opinion + traits (hostile → insults/threats, friendly → compliments/flirting), and reacts (insult → retort, question → answer). Opinion sliders are in the left column.' }), turnsK, convBtn, convOut);
 
@@ -112,7 +129,46 @@ const weightsOut = el('div', { class: 'tag-list' });
 function renderWeights() { const w = lingo.tagWeights(state.A, ctxA()); weightsOut.textContent = Object.entries(w).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ×${v.toFixed(2)}`).join('  '); }
 const covPanel = panel('Coverage for Speaker A', el('p', { class: 'small muted', text: 'How many phrases per intent this personality can still reach (traits with weight 0 remove lines; conditions on mood/opinion/race remove more). Red = dead intent: add phrases or soften the trait.' }), covGrid, el('h3', { text: 'Tag weights', style: { marginTop: '8px' } }), weightsOut);
 covPanel.classList.add('closed');
-main.append(sayPanel, convPanel, tplPanel, covPanel);
+
+// ---------- scene (context awareness) ----------
+const sceneSel = select('Scene', [{ value: '', label: '— none (no surroundings) —' }, ...scenesData.scenes.map(s => ({ value: s.id, label: s.name }))], '', v => { state.scene = v ? new Scene(scenesData.scenes.find(s => s.id === v), lingo.lexicon) : null; renderScene(); changed(); });
+const sceneInfo = el('div', { class: 'small' });
+function renderScene() { const sc = state.scene; if (!sc) { sceneInfo.textContent = 'No scene: characters talk about nothing in particular.'; return; } sceneInfo.replaceChildren(el('div', {}, el('b', { text: sc.name }), ` · ${sc.place?.toString() || ''} · ${sc.timeOfDay} · danger ${sc.danger} · comfort ${sc.comfort}`), el('div', { class: 'muted', text: `tags: ${sc.tags.join(', ')}${sc.threats.length ? ' · threats: ' + sc.threats.map(t => t.count + ' ' + t.pl).join(', ') : ''}${sc.weather ? ' · ' + sc.weather : ''} · smells of ${sc.def.smell || '?'} · sounds: ${sc.def.sound || '?'}` }), el('div', { class: 'muted', text: 'Scene tag weights: ' + Object.entries(sc.tagWeights()).filter(([, v]) => v !== 1).map(([k, v]) => `${k} ×${v.toFixed(1)}`).join('  ') })); }
+const scenePanel = panel('Scene (context awareness)', el('p', { class: 'small muted', text: 'Where they are. Danger pushes fear/plan/warning lines, comfort pushes relaxed ones; tags like dark/damp/cold pick matching observations; threats become {threat} bindings. The planner uses scene beats most of the time in dangerous or cosy places.' }), sceneSel, sceneInfo, el('div', { class: 'row' }, ...['observe', 'fear', 'plan', 'relief'].map(it => button(it, () => output.prepend(renderLine(lingo.speak(it, ctxA()), state.A)), 'small'))));
+renderScene();
+
+// ---------- memories ----------
+const clockEl = el('span', { class: 'badge' }); const memList = el('div');
+function clockText() { const d = Math.floor(state.now / DAY), h = Math.floor(state.now % DAY); return `Day ${d + 1}, ${String(h).padStart(2, '0')}:00`; }
+function renderMemories() {
+  clockEl.textContent = clockText(); memList.replaceChildren();
+  for (const key of ['A', 'B']) {
+    const sp = state[key], bank = bankFor(sp); const rows = bank.list(state.now);
+    memList.append(el('h3', { text: `${sp.name} (${rows.length} memories)` }));
+    if (!rows.length) memList.append(el('p', { class: 'muted small', text: 'Nothing remembered yet.' }));
+    for (const { memory: m, salience } of rows.slice(0, 12)) {
+      const words = ageWords(state.now - m.time); const who = Object.entries(m.bindings).map(([k, v]) => `${k}=${v.id}${v.count > 1 ? '×' + v.count : ''}`).join(' ');
+      memList.append(el('div', { class: 'mem' }, el('div', { class: 'row', style: { justifyContent: 'space-between', marginBottom: '2px' } }, el('span', {}, el('b', { text: m.type }), ` ${words.when}${m.count > 1 ? ' ×' + m.count : ''}${m.core ? ' ★' : ''}${m.participants.includes(state[key === 'A' ? 'B' : 'A'].id) ? ' (shared)' : ''}`), el('span', { class: 'small muted', text: `imp ${m.importance.toFixed(2)} · sal ${salience.toFixed(2)} · recalled ${m.recalled}` })), el('div', { class: 'bar' }, el('div', { style: { width: Math.min(100, salience * 100) + '%' } })), el('div', { class: 'small muted', text: who + (Object.keys(m.details).length ? ' · ' + Object.entries(m.details).map(([k, v]) => `${k}=${v}`).join(' ') : '') })));
+    }
+  }
+}
+const evSel = select('Event', Object.keys(EV).map(t => ({ value: t, label: `${t} (imp ${EV[t].importance}, ½-life ${EV[t].halfLifeDays}d)` })), 'combat');
+const whoSel = select('Who was there', [{ value: 'both', label: 'A and B (shared)' }, { value: 'A', label: 'only A' }, { value: 'B', label: 'only B' }], 'both');
+function rollEvent(type) {
+  const parts = whoSel.value === 'both' ? [state.A.id, state.B.id] : [state[whoSel.value].id];
+  const ev = generateEvent(type, EV[type], { lexicon: lingo.lexicon, rng: lingo.rng, participants: parts, time: state.now, exclude: [state.A.id, state.B.id] });
+  for (const id of parts) bankFor(state[id === state.A.id ? 'A' : 'B']).remember(ev, state.now);
+  renderMemories(); toast(`${type}: ${Object.entries(ev.bindings).map(([k, v]) => `${k}=${v.id}${v.count > 1 ? '×' + v.count : ''}`).join(', ')}`);
+}
+function passTime(hours) { state.now += hours; for (const b of Object.values(state.banks)) { const gone = b.tick(state.now); if (gone.length) toast(`${b.ownerId} forgot ${gone.length} memor${gone.length === 1 ? 'y' : 'ies'}`); } renderMemories(); }
+const memPanel = panel('Memories', el('p', { class: 'small muted', text: 'Roll events into the characters\' memory banks; importance depends on their traits (a bloodlust orc remembers fights, a greedy goblin remembers loot). Salience fades by each type\'s half-life and rises when retold or repeated. Pass time to watch them fade and vanish; core memories (deaths) never do. Conversations bring up the strongest, most relevant memory.' }),
+  el('div', { class: 'row' }, el('label', { text: 'Clock' }), clockEl, button('+1 hour', () => passTime(HOUR), 'small'), button('+6 hours', () => passTime(6 * HOUR), 'small'), button('+1 day', () => passTime(DAY), 'small'), button('+1 week', () => passTime(7 * DAY), 'small'), button('+1 month', () => passTime(30 * DAY), 'small'), button('+1 year', () => passTime(365 * DAY), 'small')),
+  evSel, whoSel, el('div', { class: 'row' }, button('Roll this event', () => rollEvent(evSel.value), 'primary'), button('Roll 5 random events', () => { const types = Object.keys(EV); for (let i = 0; i < 5; i++) rollEvent(types[Math.floor(Math.random() * types.length)]); }), button('Clear memories', () => { state.banks = {}; renderMemories(); }, 'small')),
+  el('div', { class: 'row' }, button('A reminisces', () => { const out = lingo.speakMemory(bankFor(state.A), state.now, ctxA()); output.prepend(out ? renderLine({ ...out, entry: { id: 'memory:' + out.memory.type } }, state.A) : el('div', { class: 'line muted', text: state.A.name + ' has nothing worth mentioning.' })); renderMemories(); }, 'primary'), button('B reminisces', () => { const out = lingo.speakMemory(bankFor(state.B), state.now, { speaker: state.B, listener: state.A, opinion: state.opinionBA, scene: state.scene }); output.prepend(out ? renderLine({ ...out, entry: { id: 'memory:' + out.memory.type } }, state.B, 'b') : el('div', { class: 'line muted', text: state.B.name + ' has nothing worth mentioning.' })); renderMemories(); })),
+  memList);
+renderMemories();
+
+main.append(sayPanel, scenePanel, memPanel, convPanel, tplPanel, covPanel);
 
 // ---------- right: lexicon editor + speech JSON ----------
 const right = document.getElementById('right');
@@ -141,4 +197,4 @@ right.append(lexPanel, jsonPanel);
 
 function changed() { store.set('speakerA', { id: state.A.id, name: state.A.name, entry: state.A.entry, speech: state.A.speech }); renderJson(); renderCoverage(); renderWeights(); }
 changed(); status.textContent = `${lingo.lexicon.all().length} words · ${Object.values(lingo.grammar.symbols).reduce((a, b) => a + b.length, 0)} phrases · ${intents.length} intents`;
-window.lingoLab = { lingo, state, speak: (intent) => lingo.speak(intent, ctxA()), converse: (n) => lingo.converse(state.A, state.B, { turns: n, opinionAB: state.opinionAB, opinionBA: state.opinionBA }), Speaker, Entity };
+window.lingoLab = { lingo, state, speak: (intent) => lingo.speak(intent, ctxA()), converse: (n) => lingo.converse(state.A, state.B, { turns: n, opinionAB: state.opinionAB, opinionBA: state.opinionBA, banks: { [state.A.id]: bankFor(state.A), [state.B.id]: bankFor(state.B) }, now: state.now, scene: state.scene }), Speaker, Entity, rollEvent, passTime, bankFor, setScene: id => { sceneSel.set(id); sceneSel.select.dispatchEvent(new Event('change')); } };

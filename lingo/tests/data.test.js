@@ -4,8 +4,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { Lingo, Speaker, parseTemplate } from '../js/lingo.js';
+import { MemoryBank, generateEvent, memoryBindings } from '../js/memory.js';
+import { Scene } from '../js/context.js';
 const read = f => JSON.parse(readFileSync(new URL('../data/' + f, import.meta.url)));
-const lexicon = read('lexicon.json'), grammar = read('grammar.json'), traits = read('traits.json'), speakersData = read('speakers.json');
+const lexicon = read('lexicon.json'), grammar = read('grammar.json'), traits = read('traits.json'), speakersData = read('speakers.json'), EV = read('events.json').types, SCENES = read('scenes.json').scenes;
 const lingo = new Lingo({ lexicon, grammar, traits, seed: 42 });
 const speakers = speakersData.speakers.map(s => new Speaker({ id: s.id, name: s.name, entry: lingo.lexicon.get(s.entry), lexicon: lingo.lexicon, speech: s.speech }));
 
@@ -18,7 +20,14 @@ test('every entry expands without unresolved markers for every speaker/listener 
   for (const [name, list] of Object.entries(lingo.grammar.symbols)) for (const e of list) {
     for (let i = 0; i < speakers.length; i++) {
       const sp = speakers[i], li = speakers[(i + 3) % speakers.length];
-      const ctx = { speaker: sp, listener: li, opinion: 0 };
+      const ctx = { speaker: sp, listener: li, opinion: 0, scene: new Scene(SCENES[i % SCENES.length], lingo.lexicon) };
+      Object.assign(ctx, ctx.scene.bindings());
+      if (name.startsWith('recall')) { // memory symbols need a memory: roll one of the matching type (or combat)
+        const type = Object.keys(EV).find(t => EV[t].intent === name) || 'combat'; const bank = new MemoryBank({ ownerId: sp.id, traits: sp.traits, eventTypes: EV, lexicon: lingo.lexicon });
+        const m = bank.remember(generateEvent(type, EV[type], { lexicon: lingo.lexicon, rng: lingo.rng, participants: [sp.id, li.id], time: 0 }), 0);
+        Object.assign(ctx, memoryBindings(m, lingo.lexicon, 30, { speakerId: li.id }));
+      }
+      if (e.cond && !lingo.cond(e.cond, ctx)) continue; // conditions guard optional bindings (threat, weather…)
       const state = lingo.newState(ctx); if (e.bind) lingo.bind(e.bind, ctx, state);
       const text = lingo.expand(e.t, ctx, state).text;
       if (!text.trim() || /\{[^}]*\?\}|\.\w+\?/.test(text) || /<no \w+>/.test(text)) bad.push(`${name} [${e.id}] with ${sp.name}: "${text}"`);
@@ -29,9 +38,10 @@ test('every entry expands without unresolved markers for every speaker/listener 
 
 test('every intent produces a line for every speaker (no personality dead-ends)', () => {
   const bad = [];
+  const scene = new Scene(SCENES[0], lingo.lexicon);
   for (const intent of lingo.grammar.intents()) for (const sp of speakers) for (const li of speakers) {
     if (sp === li) continue;
-    for (const opinion of [-1, 0, 1]) { const out = lingo.speak(intent, { speaker: sp, listener: li, opinion }); if (out.error || !out.text) bad.push(`${intent} / ${sp.name} → ${li.name} @${opinion}: ${out.error}`); }
+    for (const opinion of [-1, 0, 1]) { const out = lingo.speak(intent, { speaker: sp, listener: li, opinion, scene }); if (out.error || !out.text) bad.push(`${intent} / ${sp.name} → ${li.name} @${opinion}: ${out.error}`); }
   }
   assert.deepEqual(bad, []);
 });

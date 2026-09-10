@@ -5,9 +5,9 @@
 import { Biquad } from '../dsp.js';
 
 export const meta = {
-  id: 'babble', name: 'Babble (Animalese-style synth)', license: 'ours (MIT-style)', commercial: 'yes',
+  id: 'babble', name: 'Babble (gibberish, Animalese-style)', license: 'ours (MIT-style)', commercial: 'yes',
   licenseNote: 'Written for this playground; no third-party code.',
-  offline: true, size: '8 KB', quality: 'Cartoon gibberish. Emotion and rhythm, not words.',
+  offline: true, size: '8 KB', quality: 'Intentional gibberish (like Animal Crossing / The Sims): rhythm, pitch and emotion follow the text, but no real words. Pair with subtitles.',
   crowd: 'Practically free. Hundreds of simultaneous talkers.',
   pros: ['No license, no download', 'Works for any language or invented words', 'Rhythm follows the text length, pitch follows punctuation', 'Simlish mode: the same word always sounds the same', 'Every knob is meaningful (formant size, breath, jitter, contour)'],
   cons: ['Not intelligible — needs subtitles', 'Can grate if overused (keep syllables short, vary pitch per character)'],

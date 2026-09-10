@@ -1,13 +1,237 @@
 {
   "_doc": "Sample characters: identity (lexicon person id) + the 'speech' section of the shared character JSON. Games create these per NPC.",
   "speakers": [
-    { "id": "thalen", "name": "Thalen Ashvine", "entry": "thalen", "speech": { "traits": ["pompous", "honorable", "scholar"], "formality": 0.85, "verbosity": 0.7, "cheer": 0.4, "aggression": 0.3, "confidence": 0.8, "custom": { "greeting": "Well met", "farewell": "Walk with the Root", "catchphrase": "The roots remember.", "oath": "by the Root", "curse": "rot and ruin" }, "customRate": { "catchphrase": 0.3 }, "tics": [], "mood": 0.1 } },
-    { "id": "mara", "name": "Mara Ironjaw", "entry": "mara", "speech": { "traits": ["abrasive", "brave", "bloodlust"], "formality": 0.15, "verbosity": 0.4, "cheer": 0.5, "aggression": 0.8, "confidence": 0.9, "custom": { "greeting": "Oi", "farewell": "Don't die stupid", "catchphrase": "Blood pays for blood.", "curse": "Forge take it", "yes": "Aye", "no": "Piss off" }, "customRate": { "catchphrase": 0.25 }, "tics": [], "mood": 0 } },
-    { "id": "bran", "name": "Bran Holloway", "entry": "bran", "speech": { "traits": ["kind", "nervous", "hungry"], "formality": 0.4, "verbosity": 0.5, "cheer": 0.6, "aggression": 0.1, "confidence": 0.3, "custom": { "greeting": "Morning", "farewell": "Mind the mud", "prefix": "Lost the game.", "worried": "The turnips won't come in. I can feel it.", "happy": "Good soil today. Good soil." }, "customRate": { "prefix": 0.35 }, "tics": [], "mood": 0.2 } },
-    { "id": "kaelith", "name": "Kaelith Vorrun", "entry": "kaelith", "speech": { "traits": ["cruel", "archaic", "pompous", "scholar"], "formality": 0.95, "verbosity": 0.8, "cheer": 0.2, "aggression": 0.7, "confidence": 1, "custom": { "greeting": "Be brief", "farewell": "Return to the dust", "catchphrase": "Death is merely a door I hold the key to.", "suffix": "mortal", "curse": "Pale Lady's teeth", "oath": "by the silent throne" }, "customRate": { "suffix": 0.35, "catchphrase": 0.2 }, "tics": [], "mood": -0.2 } },
-    { "id": "pip", "name": "Pip Nine-Fingers", "entry": "pip", "speech": { "traits": ["jolly", "greedy", "coward", "third_person"], "formality": 0.1, "verbosity": 0.6, "cheer": 0.9, "aggression": 0.2, "confidence": 0.4, "custom": { "greeting": "Heyo heyo", "farewell": "Pip goes now, yes yes", "catchphrase": "Shiny shiny.", "yes": "Yes yes", "no": "No no no" }, "customRate": { "catchphrase": 0.3 }, "tics": [], "mood": 0.5 } },
-    { "id": "durgan", "name": "Durgan Stonebrow", "entry": "durgan", "speech": { "traits": ["gruff", "loyal", "drunkard", "pious"], "formality": 0.3, "verbosity": 0.2, "cheer": 0.4, "aggression": 0.5, "confidence": 0.7, "custom": { "greeting": "Hm", "farewell": "Keep your head down", "oath": "by the Hammerfather's beard", "curse": "slag and cinders" }, "customRate": {}, "tics": [], "mood": -0.1 } },
-    { "id": "sela", "name": "Sela of the Tides", "entry": "sela", "speech": { "traits": ["kind", "pious", "grieving"], "formality": 0.6, "verbosity": 0.5, "cheer": 0.3, "aggression": 0.05, "confidence": 0.5, "custom": { "greeting": "Tides keep you", "farewell": "May the salt hold you", "sad": "The sea took my sister. It will take me too, one day.", "oath": "by the Salt Mother" }, "customRate": {}, "tics": [], "mood": -0.4 } },
-    { "id": "ember", "name": "Ember Coalvein", "entry": "ember", "speech": { "traits": ["sarcastic", "cynical", "brave", "paranoid"], "formality": 0.3, "verbosity": 0.5, "cheer": 0.3, "aggression": 0.6, "confidence": 0.8, "custom": { "greeting": "Great, it's you", "farewell": "Try not to get stabbed", "catchphrase": "Everyone's a liar. Some are just better at it.", "no": "Not a chance" }, "customRate": { "catchphrase": 0.2 }, "tics": [], "mood": -0.1 } }
+    {
+      "id": "thalen",
+      "name": "Thalen Ashvine",
+      "entry": "thalen",
+      "speech": {
+        "traits": [
+          "pompous",
+          "honorable",
+          "scholar"
+        ],
+        "formality": 0.85,
+        "verbosity": 0.7,
+        "cheer": 0.4,
+        "aggression": 0.3,
+        "confidence": 0.8,
+        "custom": {
+          "greeting": "Well met",
+          "farewell": "Walk with the Root",
+          "catchphrase": "The roots remember.",
+          "oath": "by the Root",
+          "curse": "rot and ruin"
+        },
+        "customRate": {
+          "catchphrase": 0.3
+        },
+        "tics": [],
+        "mood": 0.1
+      }
+    },
+    {
+      "id": "mara",
+      "name": "Mara Ironjaw",
+      "entry": "mara",
+      "speech": {
+        "traits": [
+          "abrasive",
+          "brave",
+          "bloodlust"
+        ],
+        "formality": 0.15,
+        "verbosity": 0.4,
+        "cheer": 0.5,
+        "aggression": 0.8,
+        "confidence": 0.9,
+        "custom": {
+          "greeting": "Oi",
+          "farewell": "Don't die stupid",
+          "catchphrase": "Blood pays for blood.",
+          "curse": "Forge take it",
+          "yes": "Aye",
+          "no": "Piss off"
+        },
+        "customRate": {
+          "catchphrase": 0.25
+        },
+        "tics": [],
+        "mood": 0
+      }
+    },
+    {
+      "id": "bran",
+      "name": "Bran Holloway",
+      "entry": "bran",
+      "speech": {
+        "traits": [
+          "kind",
+          "nervous",
+          "hungry"
+        ],
+        "formality": 0.4,
+        "verbosity": 0.5,
+        "cheer": 0.6,
+        "aggression": 0.1,
+        "confidence": 0.3,
+        "custom": {
+          "greeting": "Morning",
+          "farewell": "Mind the mud",
+          "prefix": "Lost the game.",
+          "worried": "The turnips won't come in. I can feel it.",
+          "happy": "Good soil today. Good soil."
+        },
+        "customRate": {
+          "prefix": 0.35
+        },
+        "tics": [],
+        "mood": 0.2
+      }
+    },
+    {
+      "id": "kaelith",
+      "name": "Kaelith Vorrun",
+      "entry": "kaelith",
+      "speech": {
+        "traits": [
+          "cruel",
+          "archaic",
+          "pompous",
+          "scholar"
+        ],
+        "formality": 0.95,
+        "verbosity": 0.8,
+        "cheer": 0.2,
+        "aggression": 0.7,
+        "confidence": 1,
+        "custom": {
+          "greeting": "Be brief",
+          "farewell": "Return to the dust",
+          "catchphrase": "Death is merely a door I hold the key to.",
+          "suffix": "mortal",
+          "curse": "Pale Lady's teeth",
+          "oath": "by the silent throne"
+        },
+        "customRate": {
+          "suffix": 0.35,
+          "catchphrase": 0.2
+        },
+        "tics": [],
+        "mood": -0.2
+      }
+    },
+    {
+      "id": "pip",
+      "name": "Pip Nine-Fingers",
+      "entry": "pip",
+      "speech": {
+        "traits": [
+          "jolly",
+          "greedy",
+          "coward",
+          "third_person"
+        ],
+        "formality": 0.1,
+        "verbosity": 0.6,
+        "cheer": 0.9,
+        "aggression": 0.2,
+        "confidence": 0.4,
+        "custom": {
+          "greeting": "Heyo heyo",
+          "farewell": "Pip goes now, yes yes",
+          "catchphrase": "Shiny shiny.",
+          "yes": "Yes yes",
+          "no": "No no no"
+        },
+        "customRate": {
+          "catchphrase": 0.3
+        },
+        "tics": [],
+        "mood": 0.5
+      }
+    },
+    {
+      "id": "durgan",
+      "name": "Durgan Stonebrow",
+      "entry": "durgan",
+      "speech": {
+        "traits": [
+          "gruff",
+          "loyal",
+          "drunkard",
+          "pious"
+        ],
+        "formality": 0.3,
+        "verbosity": 0.2,
+        "cheer": 0.4,
+        "aggression": 0.5,
+        "confidence": 0.7,
+        "custom": {
+          "greeting": "Hm",
+          "farewell": "Keep your head down",
+          "oath": "by the Hammerfather's beard",
+          "curse": "slag and cinders"
+        },
+        "customRate": {},
+        "tics": [],
+        "mood": -0.1
+      }
+    },
+    {
+      "id": "sela",
+      "name": "Sela of the Tides",
+      "entry": "sela",
+      "speech": {
+        "traits": [
+          "kind",
+          "pious",
+          "grieving"
+        ],
+        "formality": 0.6,
+        "verbosity": 0.5,
+        "cheer": 0.3,
+        "aggression": 0.05,
+        "confidence": 0.5,
+        "custom": {
+          "greeting": "Tides keep you",
+          "farewell": "May the salt hold you",
+          "sad": "The sea took my sister. It will take me too, one day.",
+          "oath": "by the Salt Mother"
+        },
+        "customRate": {},
+        "tics": [],
+        "mood": -0.4
+      }
+    },
+    {
+      "id": "ember",
+      "name": "Ember Coalvein",
+      "entry": "ember",
+      "speech": {
+        "traits": [
+          "sarcastic",
+          "cynical",
+          "brave",
+          "paranoid"
+        ],
+        "formality": 0.3,
+        "verbosity": 0.5,
+        "cheer": 0.3,
+        "aggression": 0.6,
+        "confidence": 0.8,
+        "custom": {
+          "greeting": "Great, it's you",
+          "farewell": "Try not to get stabbed",
+          "catchphrase": "Everyone's a liar. Some are just better at it.",
+          "no": "Not a chance"
+        },
+        "customRate": {
+          "catchphrase": 0.2
+        },
+        "tics": [],
+        "mood": -0.1
+      }
+    }
   ]
 }

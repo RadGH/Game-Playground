@@ -106,8 +106,10 @@ export async function createMiiCharacter(avatar) {
     if (a.ears.id === 'pointed') for (const s of [-1, 1]) { const e = cone(0.045, 0.22, skin, 12); e.rotation.z = s * -Math.PI / 2 + s * 0.35; e.position.set(s * (earX + 0.07), earY + 0.03, 0); head.add(e); }
     if (a.ears.id === 'fins') for (const s of [-1, 1]) { const e = box(0.14, 0.16, 0.02, skin); e.rotation.y = s * 0.3; e.position.set(s * (earX + 0.05), earY, 0); head.add(e); }
     // hair
-    buildHair(head, a, R, skull.scale);
-    buildHat(head, a, R);
+    const fit = (hs === 'box' || hs === 'box2') ? new THREE.Vector3(1.17, 1.03, 1.1) : skull.scale.clone();
+    buildHair(head, a, R, fit);
+    buildBeard(head, a, R, fit);
+    buildHat(head, a, R, fit);
     return group;
   }
   function disposeObj(o) { o.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) { if (c.material.map) c.material.map.dispose(); c.material.dispose(); } }); }
@@ -147,9 +149,11 @@ function buildHair(head, a, R, skullScale) {
   if (cap) capOf(cap, 0, Math.PI * 2);
   if (id === 'tonsure') { const ring = capOf(1.55, 0, Math.PI * 2); const hole = new THREE.Mesh(capGeo(r * 1.01, 0.75), mat(a.body.skin)); hole.position.y = y; head.add(hole); }
   if (id === 'bangs' || id === 'bob' || id === 'long' || id === 'wavy' || id === 'hood_hair') { /* fringe: cap already reaches the brow */ }
-  if (id === 'bob') { const back = cyl(r * 0.98, r * 1.05, R * 1.1, hc, 32); back.position.set(0, y - R * 0.25, -0.02); back.scale.set(1, 1, 0.9); head.add(back); }
-  if (id === 'long' || id === 'wavy') { const back = cyl(r * 0.95, r * 1.2, R * 2.4, hc, 32, true); back.position.set(0, y - R * 0.9, -0.06); back.scale.set(1, 1, 0.75); head.add(back); if (id === 'wavy') { for (const s of [-1, 1]) { const w = capsule(0.06, R * 1.4, hd); w.position.set(s * r * 0.95, y - R * 1.1, 0.02); head.add(w); } } }
-  if (id === 'hood_hair') { const back = cyl(r, r * 1.15, R * 1.3, hc, 12); back.position.set(0, y - R * 0.4, -0.04); head.add(back); }
+  // hanging hair is a HALF cylinder open at the front (theta from +x round the back to -x), so it never wraps the face
+  const backHair = (rt, rb, h, yy, seg = 32) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg, 1, false, Math.PI / 2, Math.PI), mat(hc, { side: THREE.DoubleSide })); m.castShadow = true; m.position.set(0, y + yy, -0.02); m.scale.set(skullScale.x, 1, skullScale.z * 0.95); head.add(m); return m; };
+  if (id === 'bob') backHair(r * 0.98, r * 1.02, R * 1.1, -R * 0.25);
+  if (id === 'long' || id === 'wavy') { backHair(r * 0.96, r * 1.0, R * 2.2, -R * 0.8); if (id === 'wavy') { for (const s of [-1, 1]) { const w = capsule(0.06, R * 1.3, hd); w.position.set(s * r * 0.9, y - R * 1.0, -0.02); head.add(w); } } }
+  if (id === 'hood_hair') backHair(r, r * 1.1, R * 1.3, -R * 0.4, 12);
   if (id === 'ponytail') { const tail = capsule(0.07, R * 1.6, hc); tail.rotation.x = 0.35; add(tail, 0, -R * 0.4, -r * 0.95); const band = torus(0.075, 0.02, hd); band.rotation.x = Math.PI / 2 + 0.35; add(band, 0, R * 0.3, -r * 0.85); }
   if (id === 'bun') add(sphere(R * 0.42, hc), 0, R * 1.05, -R * 0.15);
   if (id === 'buns') for (const s of [-1, 1]) add(sphere(R * 0.36, hc), s * R * 0.85, R * 0.8, -R * 0.1);
@@ -162,15 +166,26 @@ function buildHair(head, a, R, skullScale) {
   if (id === 'side_part') { const part = box(R * 1.2, 0.01, R * 0.8, hd); part.position.set(R * 0.25, y + R * 1.05, R * 0.2); part.rotation.z = -0.15; head.add(part); }
 }
 
-function buildHat(head, a, R) {
+function buildBeard(head, a, R, fit) {
+  const id = a.facialHair.id; if (!['full', 'long', 'chinstrap'].includes(id)) return; // stubble/goatee/mustache stay on the face texture
+  const hc = a.hair.color, y = R + 0.01;
+  // lower-front band hugging the jaw (phi around the front, theta below the mouth)
+  const jaw = new THREE.Mesh(new THREE.SphereGeometry(R * 1.05, 32, 16, Math.PI / 2 - 1.15, 2.3, Math.PI / 2 + 0.25, 0.95), mat(hc, { side: THREE.DoubleSide })); jaw.position.y = y; jaw.scale.copy(fit); head.add(jaw);
+  if (id === 'long') { const tail = cone(R * 0.42, R * 1.5, hc, 16); tail.rotation.x = Math.PI + 0.25; tail.position.set(0, y - R * 1.35, R * 0.45); head.add(tail); }
+  if (id === 'full') { const chin = sphere(R * 0.38, hc, 16); chin.scale.set(1.2, 0.8, 1); chin.position.set(0, y - R * 0.85, R * 0.55); head.add(chin); }
+}
+function buildHat(head, a, R, fit = new THREE.Vector3(1, 1, 1)) {
   const id = a.hat.id, hc = a.hat.color; if (id === 'none') return;
   const y = R + 0.01, top = y + R * 0.98;
   const add = (m, x, yy, z) => { m.position.set(x, yy, z); head.add(m); return m; };
   if (id === 'wizard') { add(cone(R * 0.95, R * 2.6, hc, 24), 0, top + R * 1.1, -0.02).rotation.z = 0.12; add(cyl(R * 1.7, R * 1.75, 0.03, hc, 32), 0, top - 0.05, -0.02); add(torus(R * 1.0, 0.025, shade(hc, 0.3)), 0, top - 0.02, -0.02).rotation.x = Math.PI / 2; }
-  if (id === 'helmet' || id === 'horned_helm') { const h = new THREE.Mesh(capGeo(R * 1.12, 1.75), mat(hc, { metalness: 0.5, roughness: 0.4 })); h.position.y = y; head.add(h); const guard = box(0.05, 0.2, 0.03, hc); guard.position.set(0, y - 0.02, R * 1.05); head.add(guard); if (id === 'horned_helm') for (const s of [-1, 1]) { const horn = cone(R * 0.2, R * 1.1, '#d9cfa8', 10); horn.position.set(s * R * 1.05, y + R * 0.5, 0); horn.rotation.z = s * -0.9; head.add(horn); } }
+  if (id === 'helmet' || id === 'horned_helm') { const h = new THREE.Mesh(capGeo(R * 1.12, 1.75), mat(hc, { metalness: 0.5, roughness: 0.4 })); h.position.y = y; h.scale.copy(fit); head.add(h); const guard = box(0.05, 0.2, 0.03, hc); guard.position.set(0, y - 0.02, R * 1.05); head.add(guard); if (id === 'horned_helm') for (const s of [-1, 1]) { const horn = cone(R * 0.2, R * 1.1, '#d9cfa8', 10); horn.position.set(s * R * 1.05, y + R * 0.5, 0); horn.rotation.z = s * -0.9; head.add(horn); } }
   if (id === 'crown') { const ring = cyl(R * 0.85, R * 0.8, R * 0.5, hc, 24, true); ring.material.side = THREE.DoubleSide; ring.material.metalness = 0.7; ring.material.roughness = 0.3; add(ring, 0, top, 0); for (let i = 0; i < 6; i++) { const ang = (i / 6) * Math.PI * 2; const spike = cone(R * 0.12, R * 0.35, hc, 6); spike.material.metalness = 0.7; spike.position.set(Math.sin(ang) * R * 0.82, top + R * 0.4, Math.cos(ang) * R * 0.82); head.add(spike); } }
-  if (id === 'cap') { const c = new THREE.Mesh(capGeo(R * 1.1, 1.3), mat(hc)); c.position.y = y; head.add(c); const visor = box(R * 1.1, 0.02, R * 0.7, shade(hc, -0.2), 0.01); visor.position.set(0, y + R * 0.35, R * 1.05); head.add(visor); }
-  if (id === 'hood') { const h = new THREE.Mesh(capGeo(R * 1.25, 2.2), mat(hc)); h.position.set(0, y + 0.02, -0.03); head.add(h); const inner = new THREE.Mesh(capGeo(R * 1.2, 1.9, Math.PI / 2 - 1.1, 2.2), mat('#111', { side: THREE.BackSide })); inner.position.copy(h.position); head.add(inner); }
+  if (id === 'cap') { const c = new THREE.Mesh(capGeo(R * 1.1, 1.3), mat(hc)); c.position.y = y; c.scale.copy(fit); head.add(c); const visor = box(R * 1.1, 0.02, R * 0.7, shade(hc, -0.2), 0.01); visor.position.set(0, y + R * 0.35, R * 1.05); head.add(visor); }
+  if (id === 'hood') { // top cap + a lower band that leaves the face open (phi excludes ±0.85 rad around the front)
+    const top = new THREE.Mesh(capGeo(R * 1.22, 0.95), mat(hc, { side: THREE.DoubleSide })); top.position.set(0, y + 0.02, -0.02); top.scale.copy(fit); head.add(top);
+    const band = new THREE.Mesh(new THREE.SphereGeometry(R * 1.22, 32, 16, Math.PI / 2 + 0.85, Math.PI * 2 - 1.7, 0.9, 1.5), mat(hc, { side: THREE.DoubleSide })); band.position.copy(top.position); band.scale.copy(fit); head.add(band);
+    const drape = new THREE.Mesh(new THREE.CylinderGeometry(R * 1.05, R * 1.35, R * 0.9, 24, 1, true, Math.PI / 2 + 0.6, Math.PI * 2 - 1.2), mat(hc, { side: THREE.DoubleSide })); drape.position.set(0, y - R * 0.95, -0.03); head.add(drape); }
   if (id === 'bandana' || id === 'headband') { const band = new THREE.Mesh(capGeo(R * 1.1, id === 'bandana' ? 1.35 : 0.9, 0, Math.PI * 2), mat(hc)); band.position.y = y + (id === 'headband' ? -R * 0.05 : 0); if (id === 'headband') { band.geometry.dispose(); band.geometry = new THREE.SphereGeometry(R * 1.1, 32, 8, 0, Math.PI * 2, 0.85, 0.3); } head.add(band); const knot = box(0.12, 0.05, 0.03, hc); knot.position.set(R * 0.9, y + R * 0.3, -R * 0.5); knot.rotation.y = -0.6; head.add(knot); }
   if (id === 'straw') { add(cyl(R * 1.9, R * 1.9, 0.02, hc, 32), 0, top - 0.06, 0); add(cyl(R * 0.85, R * 0.9, R * 0.5, hc, 24), 0, top + R * 0.2, 0); }
   if (id === 'circlet') { const t = torus(R * 1.05, 0.012, hc); t.material.metalness = 0.8; t.material.roughness = 0.3; t.rotation.x = Math.PI / 2; add(t, 0, y + R * 0.55, 0); }

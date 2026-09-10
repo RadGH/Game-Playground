@@ -7,12 +7,12 @@ test.describe('voice-lab', () => {
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
     await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
-    await expect(page.locator('.engine-list button')).toHaveCount(5);
+    await expect(page.locator('.engine-list button')).toHaveCount(4);
     await expect(page.locator('.preset-grid button').first()).toBeVisible();
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  for (const engine of ['espeak', 'sam', 'babble']) {
+  for (const engine of ['espeak', 'babble']) {
     test(`synthesizes with ${engine}`, async ({ page }) => {
       await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
       const r = await page.evaluate(async (engine) => {
@@ -60,7 +60,7 @@ test.describe('voice-lab quality checks', () => {
     for (let lag = minLag; lag <= maxLag; lag++) { let c = 0; for (let j = 0; j < seg.length - lag; j++) c += seg[j] * seg[j + lag]; r[lag] = c / e; }
     let max = 0; for (let lag = minLag; lag <= maxLag; lag++) max = Math.max(max, r[lag]);
     for (let lag = minLag + 1; lag < maxLag; lag++) if (r[lag] > 0.7 * max && r[lag] >= r[lag - 1] && r[lag] >= r[lag + 1]) return sr / lag; return 0; }`;
-  for (const engine of ['espeak', 'sam', 'babble']) {
+  for (const engine of ['espeak', 'babble']) {
     test(`${engine}: child preset is higher pitched than giant preset`, async ({ page }) => {
       await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
       const r = await page.evaluate(async ([engine, pitchOf]) => {
@@ -70,9 +70,7 @@ test.describe('voice-lab quality checks', () => {
         return { child: f(child), giant: f(giant) };
       }, [engine, pitchOf]);
       console.log(`${engine}: child ≈ ${r.child.toFixed(0)} Hz, giant ≈ ${r.giant.toFixed(0)} Hz`);
-      // SAM's buzzy formant waveform defeats autocorrelation pitch tracking (verified by hand: pitch 30 ≈ 380 Hz, 64 ≈ 130 Hz),
-      // so for SAM we only assert the two renders differ and log the estimate for a human to eyeball.
-      if (engine === 'sam') expect(r.child).not.toBe(r.giant); else expect(r.child).toBeGreaterThan(r.giant * 1.3);
+      expect(r.child).toBeGreaterThan(r.giant * 1.3);
     });
   }
   test('every effect produces finite, non-silent audio', async ({ page }) => {

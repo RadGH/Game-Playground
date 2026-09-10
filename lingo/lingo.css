@@ -20,3 +20,6 @@ textarea.tpl { font-family: var(--mono); font-size: 12px; min-height: 48px; }
 .speaker-head select { flex: 1; }
 .tag-list { font-size: 11px; color: var(--fg2); }
 .opinion { margin: 6px 0; }
+
+.mem { padding: 4px 6px; background: var(--bg3); border-radius: 4px; margin-bottom: 4px; font-size: 12px; }
+.mem .bar { height: 4px; background: var(--bg2); border-radius: 2px; margin: 3px 0; } .mem .bar div { height: 100%; background: var(--accent2); border-radius: 2px; }

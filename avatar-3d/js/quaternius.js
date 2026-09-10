@@ -55,6 +55,8 @@ export async function createQuaterniusCharacter(avatar) {
     // the base body ships with its own hair mesh; hide it (we attach a hairstyle) — the eyebrows stay
     body.traverse(o => { if (o.isMesh && /Hair/.test(o.material?.name || '') && !/brow/i.test(o.name) && o.name !== 'Eyebrows') o.visible = a.hair.id === 'bald' ? false : false; });
     state.headBone = body.getObjectByName('Head');
+    // cut the body under the clothes: keep head + neck (+ hands/feet only when the outfit does not cover them)
+    body.traverse(o => { if (o.isSkinnedMesh && /Superhero|Regular/.test(o.material?.name || '')) trimSkinnedMeshToBones(o, ['Head', 'neck_01'], 0.25); });
     // hairstyle (unrigged, origin at 0) → attach to head bone
     const hairFile = MAP.hair[a.hair.id];
     if (hairFile && a.hat.id !== 'hood' && a.hat.id !== 'helmet' && a.hat.id !== 'horned_helm') {
@@ -110,6 +112,20 @@ export async function createQuaterniusCharacter(avatar) {
     dispose() { for (const p of state.parts) p.traverse(o => { if (o.geometry) o.geometry.dispose(); }); },
   };
 }
+
+/** Keep only the triangles whose vertices are weighted (≥ minWeight) to the given bone names. Used to cut the body
+ *  away under clothes: the free-tier body is one mesh, and Quaternius outfits are modelled to be worn over the HEAD only. */
+export function trimSkinnedMeshToBones(mesh, boneNames, minWeight = 0.35) {
+  const geo = mesh.geometry, skel = mesh.skeleton; if (!geo.attributes.skinIndex) return;
+  const keepBone = new Set(skel.bones.map((b, i) => boneNames.includes(b.name) ? i : -1).filter(i => i >= 0));
+  const si = geo.attributes.skinIndex, sw = geo.attributes.skinWeight;
+  const vertexOk = new Uint8Array(si.count);
+  for (let v = 0; v < si.count; v++) { let w = 0; for (let k = 0; k < 4; k++) if (keepBone.has(si.getComponent(v, k))) w += sw.getComponent(v, k); vertexOk[v] = w >= minWeight ? 1 : 0; }
+  const idx = geo.index ? geo.index.array : null; const tri = []; const n = idx ? idx.length : si.count;
+  for (let t = 0; t < n; t += 3) { const a = idx ? idx[t] : t, b = idx ? idx[t + 1] : t + 1, c = idx ? idx[t + 2] : t + 2; if (vertexOk[a] || vertexOk[b] || vertexOk[c]) tri.push(a, b, c); }
+  const g2 = geo.clone(); g2.setIndex(tri); g2.computeBoundingSphere(); mesh.geometry = g2;
+}
+
 function cloneScene(scene) { return SkeletonUtilsClone(scene); }
 // minimal SkeletonUtils.clone (avoids importing the whole addon): clones the hierarchy and rebinds skinned meshes
 function SkeletonUtilsClone(source) {

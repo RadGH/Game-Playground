@@ -44,7 +44,28 @@
       "happy",
       "angry",
       "sad",
-      "worried"
+      "worried",
+      "observe",
+      "fear",
+      "plan",
+      "relief",
+      "recall_combat",
+      "recall_kill",
+      "recall_death",
+      "recall_wounded",
+      "recall_levelup",
+      "recall_skill",
+      "recall_join",
+      "recall_leave",
+      "recall_loot",
+      "recall_travel",
+      "recall_meal",
+      "recall_insulted",
+      "recall_kindness",
+      "recall_omen",
+      "recall_lore",
+      "recall_lineage",
+      "recall_reply"
     ],
     "intentDoc": {
       "greet": "opening line to listener",
@@ -89,8 +110,54 @@
       "happy": "mood line (custom slot first)",
       "angry": "mood line",
       "sad": "mood line",
-      "worried": "mood line"
-    }
+      "worried": "mood line",
+      "observe": "comment on the current scene (needs scene bindings)",
+      "fear": "worry about a scene threat",
+      "plan": "what we should do here",
+      "relief": "comfortable place",
+      "recall_combat": "memory of a fight (memory bindings)",
+      "recall_kill": "memory of a kill",
+      "recall_death": "memory of someone's death",
+      "recall_wounded": "memory of an injury",
+      "recall_levelup": "memory of getting stronger",
+      "recall_skill": "memory of learning a skill",
+      "recall_join": "memory of someone joining",
+      "recall_leave": "memory of someone leaving",
+      "recall_loot": "memory of finding loot",
+      "recall_travel": "memory of a journey",
+      "recall_meal": "memory of a meal",
+      "recall_insulted": "memory of an insult (grudge)",
+      "recall_kindness": "memory of a kindness (gratitude)",
+      "recall_omen": "memory of a bad sign",
+      "recall_lore": "knowledge of a historical figure",
+      "recall_lineage": "family history",
+      "recall_reply": "listener answers a memory"
+    },
+    "memoryIntents": [
+      "recall_combat",
+      "recall_kill",
+      "recall_death",
+      "recall_wounded",
+      "recall_levelup",
+      "recall_skill",
+      "recall_join",
+      "recall_leave",
+      "recall_loot",
+      "recall_travel",
+      "recall_meal",
+      "recall_insulted",
+      "recall_kindness",
+      "recall_omen",
+      "recall_lore",
+      "recall_lineage",
+      "recall_generic"
+    ],
+    "sceneIntents": [
+      "observe",
+      "fear",
+      "plan",
+      "relief"
+    ]
   },
   "symbols": {
     "greetword": [
@@ -2010,7 +2077,7 @@
         ]
       },
       {
-        "t": "I'm warning you. I— I mean it. I do.",
+        "t": "I'm warning you. I mean it. I do.",
         "tags": [
           "threat",
           "timid"
@@ -2454,7 +2521,7 @@
         ]
       },
       {
-        "t": "{listener.name}. Your {$bodypart.pl}. They're— I've been drinking. Never mind.",
+        "t": "{listener.name}. Your {$bodypart.pl}. They're... I've been drinking. Never mind.",
         "tags": [
           "flirt",
           "drink",
@@ -2761,7 +2828,7 @@
         ]
       },
       {
-        "t": "Please just go away please please",
+        "t": "Please just go away. Please.",
         "tags": [
           "timid",
           "cowardly"
@@ -2815,7 +2882,7 @@
         ]
       },
       {
-        "t": "I'm hit! I'm— I'm fine. I'm fine.",
+        "t": "I'm hit! I'm fine. I'm fine.",
         "tags": [
           "timid"
         ]
@@ -2890,7 +2957,7 @@
         ]
       },
       {
-        "t": "It's done. It's— it's done.",
+        "t": "It's done. It's done.",
         "tags": [
           "worried",
           "timid"
@@ -2961,7 +3028,7 @@
         ]
       },
       {
-        "t": "I'll come back for you! I— I'll come back!",
+        "t": "I'll come back for you! I will!",
         "tags": [
           "timid",
           "worried"
@@ -3464,7 +3531,7 @@
         ]
       },
       {
-        "t": "I'm not afraid. I'm not— I'm not afraid.",
+        "t": "I'm not afraid. I'm not afraid.",
         "tags": [
           "timid",
           "earnest"
@@ -3587,7 +3654,7 @@
         ]
       },
       {
-        "t": "Um. We... we can do this? Probably? Let's do this.",
+        "t": "Um. We can do this? Probably? Let's do this.",
         "tags": [
           "timid",
           "joke"
@@ -3682,7 +3749,7 @@
         ]
       },
       {
-        "t": "Don't. I'll— I'll tell you where {$faction} keeps the {$item.pl}.",
+        "t": "Don't. I'll tell you where {$faction} keeps the {$item.pl}.",
         "tags": [
           "treacherous",
           "cowardly"
@@ -3961,6 +4028,875 @@
           "worried",
           "grief",
           "earnest"
+        ]
+      }
+    ],
+    "recall_when": [
+      {
+        "t": "{memory.when}",
+        "w": 3
+      },
+      {
+        "t": "{memory.ago}"
+      },
+      {
+        "t": "back at {place.the}",
+        "cond": "memory.place",
+        "tags": [
+          "long"
+        ]
+      }
+    ],
+    "recall_combat": [
+      {
+        "t": "Remember {memory.when}? {foe.count} {foe.pl} at {place.the}. I still smell it.",
+        "cond": "memory.shared",
+        "w": 2
+      },
+      {
+        "t": "{memory.when.cap} we fought {foe.count} {foe.pl} at {place.the}. {memory.outcome, select, won{We won, if you can call it that.} fled{We ran. I'm not ashamed.} lost{We lost. Don't ask me more.} other{It was a mess.}}",
+        "w": 2
+      },
+      {
+        "t": "{foe.count} {foe.pl}, {memory.when}. Just my {weapon} and {ally.name}'s bad jokes.",
+        "cond": "memory.ally && memory.weapon"
+      },
+      {
+        "t": "That fight {memory.ago}. I've stopped counting {foe.pl}, but I counted those.",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "My {weapon} still has {foe.sg} blood on it from {memory.when}. I'm keeping it there.",
+        "tags": [
+          "violent",
+          "gore"
+        ],
+        "cond": "memory.weapon"
+      },
+      {
+        "t": "{memory.when.cap}, the {foe.pl}. I keep waking up thinking they're at the door.",
+        "tags": [
+          "worried",
+          "timid"
+        ]
+      },
+      {
+        "t": "Ha! {memory.when}, {foe.count} {foe.pl}! I'd do it again tonight.",
+        "tags": [
+          "brag",
+          "confident",
+          "joyful"
+        ],
+        "cond": "memory.outcome == 'won'"
+      },
+      {
+        "t": "We should have died at {place.the} {memory.when}. {foe.count} of them. We didn't. Think about why.",
+        "tags": [
+          "religious",
+          "long"
+        ]
+      },
+      {
+        "t": "{memory.count, plural, one{One fight} other{# fights}} with the {foe.pl} now. They'll come back. They always come back.",
+        "cond": "memory.count > 1",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{foe.cap.pl}. {memory.when.cap}. I got {memory.wounded, select, true{cut for it} other{lucky}}.",
+        "tags": [
+          "short",
+          "blunt"
+        ]
+      }
+    ],
+    "recall_kill": [
+      {
+        "t": "I killed {foe.a} {memory.when}. {memory.how.cap}. I'm not proud. I'm not sorry either.",
+        "w": 2
+      },
+      {
+        "t": "{memory.when.cap}, {foe.a}, {memory.how}. My {weapon} did the rest.",
+        "cond": "memory.weapon"
+      },
+      {
+        "t": "Every {foe.sg} I put down, I remember. {memory.when.cap} was {memory.how}.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "Killed {foe.a} {memory.when}! {memory.how.cap}! Buy me a drink.",
+        "tags": [
+          "brag",
+          "joyful",
+          "drink"
+        ]
+      },
+      {
+        "t": "{foe.cap.a} {memory.when}. {memory.how.cap}. May {$deity} sort it out.",
+        "tags": [
+          "religious"
+        ]
+      }
+    ],
+    "recall_death": [
+      {
+        "t": "{victim.name} died {memory.when}. {memory.how.cap}. I was there.",
+        "cond": "memory.shared",
+        "w": 2
+      },
+      {
+        "t": "{victim.name}. {memory.when.cap}, at {place.the}. {foe.cap.pl}. {memory.how.cap}.",
+        "w": 2
+      },
+      {
+        "t": "I keep expecting {victim.name} to walk in. It's been {memory.when}. It doesn't get easier.",
+        "tags": [
+          "grief",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Don't talk about {victim.name}. Not {memory.when}, not ever.",
+        "tags": [
+          "angry",
+          "short",
+          "grief"
+        ]
+      },
+      {
+        "t": "{victim.name} would've laughed at this. {victim.they.cap} laughed at everything, right up to the {foe.pl}.",
+        "tags": [
+          "grief",
+          "long"
+        ]
+      },
+      {
+        "t": "{memory.when.cap} {victim.name} died {memory.how}. I promised {victim.them} something. I haven't done it yet.",
+        "tags": [
+          "loyal",
+          "honor",
+          "grief"
+        ]
+      },
+      {
+        "t": "{$deity} took {victim.name} {memory.when}. I've stopped asking why.",
+        "tags": [
+          "religious",
+          "grief"
+        ]
+      }
+    ],
+    "recall_wounded": [
+      {
+        "t": "My {bodypart} still aches from {memory.when}. {foe.cap.a} got a hand in.",
+        "w": 2
+      },
+      {
+        "t": "{memory.when.cap}, {foe.a} took a piece of my {bodypart} at {place.the}. I took more from it.",
+        "tags": [
+          "violent"
+        ]
+      },
+      {
+        "t": "See this {bodypart}? {memory.when.cap}. {foe.cap.pl}. Don't touch it.",
+        "tags": [
+          "short",
+          "gruff"
+        ]
+      },
+      {
+        "t": "I nearly lost the {bodypart} {memory.when}. I still dream about the {foe.pl}.",
+        "tags": [
+          "worried",
+          "timid"
+        ]
+      }
+    ],
+    "recall_levelup": [
+      {
+        "t": "I've never felt stronger than {memory.when}. Something changed. Something clicked.",
+        "w": 2
+      },
+      {
+        "t": "{memory.when.cap} I understood something about myself. Don't ask me to explain it.",
+        "tags": [
+          "long"
+        ]
+      },
+      {
+        "t": "Level {memory.level}, {memory.when}. Not that I count. I count.",
+        "tags": [
+          "brag",
+          "joke"
+        ]
+      },
+      {
+        "t": "I'm better than I was {memory.when}. I'd like to say it was study. It was mostly surviving.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      }
+    ],
+    "recall_skill": [
+      {
+        "t": "{teacher.name} taught me {skill} {memory.when}. Best thing anyone's given me.",
+        "cond": "memory.teacher",
+        "w": 2
+      },
+      {
+        "t": "I learned {skill} {memory.when}. Watch.",
+        "tags": [
+          "short",
+          "confident"
+        ]
+      },
+      {
+        "t": "{skill.cap}, {memory.when}. Took me {~a week|three tries|a burned hand} to get it right.",
+        "tags": [
+          "long"
+        ]
+      },
+      {
+        "t": "Since {memory.when} I can do {skill}. Ask {teacher.name}, {teacher.they} saw me fail first.",
+        "cond": "memory.teacher",
+        "tags": [
+          "joke"
+        ]
+      }
+    ],
+    "recall_join": [
+      {
+        "t": "{newcomer.name} joined us {memory.when}. {memory.impression.cap}.",
+        "w": 2
+      },
+      {
+        "t": "When {newcomer.name} turned up at {place.the} {memory.when}, I didn't trust {newcomer.them}. {memory.impression.cap}.",
+        "tags": [
+          "suspicious",
+          "long"
+        ]
+      },
+      {
+        "t": "{newcomer.name}'s been with us since {memory.when}. Feels longer.",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "{newcomer.name} {memory.impression}, {memory.when}. I'm watching {newcomer.them}.",
+        "tags": [
+          "suspicious",
+          "paranoid"
+        ]
+      }
+    ],
+    "recall_leave": [
+      {
+        "t": "{leaver.name} left {memory.when}, {memory.why}.",
+        "w": 2
+      },
+      {
+        "t": "I still think about {leaver.name} going, {memory.when}. {memory.why.cap}. Cowards, all of us.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "{leaver.name}? Gone {memory.when}. {memory.why.cap}. Good riddance.",
+        "tags": [
+          "rude",
+          "hostile"
+        ]
+      },
+      {
+        "t": "{leaver.name} walked out {memory.when}. I'd have gone too, if I had somewhere.",
+        "tags": [
+          "gloomy"
+        ]
+      }
+    ],
+    "recall_loot": [
+      {
+        "t": "Found {item.a} at {place.the} {memory.when}. Worth {memory.worth}.",
+        "w": 2
+      },
+      {
+        "t": "That {item} from {memory.when}? Still got it. Still {memory.worth}.",
+        "tags": [
+          "money"
+        ]
+      },
+      {
+        "t": "{memory.when.cap} we pulled {item.a} out of {place.the}. {memory.worth.cap}, and I want my share.",
+        "tags": [
+          "money",
+          "greedy",
+          "long"
+        ]
+      },
+      {
+        "t": "{item.cap.a}, {memory.when}. I gave it to the {$title}. Don't look at me like that.",
+        "tags": [
+          "generous",
+          "gentle"
+        ]
+      }
+    ],
+    "recall_travel": [
+      {
+        "t": "We came through {place.the} {memory.when}. {weather.cap} the whole way.",
+        "cond": "memory.weather",
+        "w": 2
+      },
+      {
+        "t": "{place.the.cap}, {memory.when}. My feet remember it.",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "{memory.when.cap}, {place.the}. I'd not go back without a good reason and a better {$item}.",
+        "tags": [
+          "long"
+        ]
+      }
+    ],
+    "recall_meal": [
+      {
+        "t": "That {food} at {place.the} {memory.when} was {memory.quality}.",
+        "w": 2
+      },
+      {
+        "t": "I'm still thinking about the {food} from {memory.when}. {memory.quality.cap}.",
+        "tags": [
+          "food",
+          "hunger"
+        ]
+      },
+      {
+        "t": "{memory.when.cap}: {food}, {memory.quality}. That's the whole story of my life.",
+        "tags": [
+          "gloomy",
+          "joke"
+        ]
+      }
+    ],
+    "recall_insulted": [
+      {
+        "t": "{by.name} {memory.what} {memory.when}. I haven't forgotten.",
+        "w": 2
+      },
+      {
+        "t": "{memory.when.cap} {by.name} {memory.what}. One day. One day.",
+        "tags": [
+          "threat",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{by.name} {memory.what}, {memory.when}. I laughed. I'm still laughing. Inside.",
+        "tags": [
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "Ask {by.name} what {by.they} said {memory.when}. Go on. See if {by.they} {by.verb(remembers)}.",
+        "tags": [
+          "hostile",
+          "long"
+        ]
+      }
+    ],
+    "recall_kindness": [
+      {
+        "t": "{by.name} {memory.what} {memory.when}. I owe {by.them}.",
+        "w": 2
+      },
+      {
+        "t": "{memory.when.cap}, {by.name} {memory.what}. Nobody else would have.",
+        "tags": [
+          "earnest",
+          "gentle"
+        ]
+      },
+      {
+        "t": "People say {by.name}'s hard. {by.they.cap} {memory.what} {memory.when}. That's all I need to know.",
+        "tags": [
+          "loyal",
+          "long"
+        ]
+      }
+    ],
+    "recall_omen": [
+      {
+        "t": "{memory.when.cap} I saw {memory.sign} at {place.the}. {deity.cap} is trying to tell us something.",
+        "tags": [
+          "religious"
+        ],
+        "w": 2
+      },
+      {
+        "t": "{memory.sign.cap}, {memory.when}. You can laugh. I'm not laughing.",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "There was {memory.sign} {memory.when}. Then the {$creature.pl} came. Coincidence, {listener.name}?",
+        "tags": [
+          "suspicious",
+          "long"
+        ]
+      }
+    ],
+    "recall_lore": [
+      {
+        "t": "{figure.name} held {place.the} once. Before your time. Before mine.",
+        "w": 2
+      },
+      {
+        "t": "They say {figure.name} could {~outdrink a {$race.sg}|talk down a {$creature}|cast {$spell} with a word|make a {$race.sg} weep}. They say a lot.",
+        "tags": [
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "Ask the {$race.pl} about {figure.name}. Then ask the {$race2.pl}. Two different people.",
+        "tags": [
+          "lore",
+          "scholar"
+        ]
+      },
+      {
+        "t": "{figure.name} is buried under {place.the}, or so the {$title.pl} claim.",
+        "tags": [
+          "lore"
+        ]
+      }
+    ],
+    "recall_lineage": [
+      {
+        "t": "My {memory.relation} served {figure.name}. We don't talk about how it ended.",
+        "w": 2
+      },
+      {
+        "t": "{figure.name}'s blood is in my line, through my {memory.relation}. It shows, some days.",
+        "tags": [
+          "brag",
+          "pompous"
+        ]
+      },
+      {
+        "t": "My {memory.relation} knew {figure.name}. Said {figure.they} {figure.verb(was)} shorter than the songs.",
+        "tags": [
+          "joke",
+          "lore"
+        ]
+      }
+    ],
+    "recall_generic": [
+      {
+        "t": "Something happened {memory.when}. I'd rather not go into it."
+      },
+      {
+        "t": "{memory.when.cap}. Never mind. It's gone."
+      }
+    ],
+    "recall_reply": [
+      {
+        "t": "I was there. I remember.",
+        "cond": "memory.shared",
+        "w": 2
+      },
+      {
+        "t": "You've told me. {~Twice.|More than once.|Every night.}",
+        "cond": "memory.count > 1 || memory.recalledBefore",
+        "tags": [
+          "blunt",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "I wasn't there. I'm glad I wasn't.",
+        "cond": "!memory.shared",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{#yesword}. I think of it too.",
+        "tags": [
+          "gentle"
+        ]
+      },
+      {
+        "t": "Stop living in {memory.when}. It's now.",
+        "tags": [
+          "blunt",
+          "rude"
+        ]
+      },
+      {
+        "t": "Tell me again. Slowly. I want to remember it right.",
+        "tags": [
+          "earnest",
+          "long"
+        ]
+      },
+      {
+        "t": "Ha. Yes. What a day that was.",
+        "tags": [
+          "joke",
+          "casual"
+        ]
+      }
+    ],
+    "observe": [
+      {
+        "t": "It's {~too|so} dark in {here.the}. I can't see my own {$bodypart.pl}.",
+        "tags": [
+          "dark"
+        ],
+        "w": 2
+      },
+      {
+        "t": "This damp gets into everything. My {$item}'s already rusting.",
+        "tags": [
+          "damp"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Cold. Cold as {$deity.poss} welcome.",
+        "tags": [
+          "cold",
+          "short"
+        ]
+      },
+      {
+        "t": "I don't like walls this close. Or ceilings.",
+        "tags": [
+          "enclosed",
+          "worried"
+        ]
+      },
+      {
+        "t": "Smells of {scene.smell} in here.",
+        "cond": "scene.smell",
+        "w": 2
+      },
+      {
+        "t": "Listen. {scene.sound.cap}. That's all I've heard for an hour.",
+        "cond": "scene.sound"
+      },
+      {
+        "t": "{here.the.cap}. I've been in worse. I can't think of one right now.",
+        "tags": [
+          "gloomy",
+          "joke"
+        ]
+      },
+      {
+        "t": "Too many people in here. Watch your purse.",
+        "tags": [
+          "crowded",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "It's loud enough in here to plan a murder.",
+        "tags": [
+          "loud",
+          "joke"
+        ]
+      },
+      {
+        "t": "Quiet. Too quiet. Say something, {listener.name}.",
+        "tags": [
+          "quiet",
+          "worried"
+        ]
+      },
+      {
+        "t": "This is holy ground. Mind your tongue.",
+        "tags": [
+          "holy",
+          "religious"
+        ]
+      },
+      {
+        "t": "Ruins. Somebody's whole life, and now it's a place to hide from the {$weather}.",
+        "tags": [
+          "ruin",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "Out here in the wild, nobody hears you. Nobody helps.",
+        "tags": [
+          "wild",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Night. The worst of the {$creature.pl} come out at night.",
+        "tags": [
+          "night",
+          "worried"
+        ]
+      },
+      {
+        "t": "Look at that {weather}. It's {~lifting|getting worse|just sitting there}.",
+        "cond": "weather"
+      },
+      {
+        "t": "{here.the.cap}. Fine. Let's get it over with.",
+        "tags": [
+          "short",
+          "gruff"
+        ]
+      },
+      {
+        "t": "Water everywhere. My boots are done for.",
+        "tags": [
+          "wet",
+          "complain"
+        ]
+      },
+      {
+        "t": "Hot as a forge in here.",
+        "tags": [
+          "hot",
+          "short"
+        ]
+      },
+      {
+        "t": "I could get used to {here.the}. Warm, dry, nobody dying.",
+        "tags": [
+          "relaxed",
+          "joyful"
+        ],
+        "cond": "comfort > 0.6"
+      }
+    ],
+    "fear": [
+      {
+        "t": "{threat.cap.pl}. There are {threat.pl} in here. I can feel it.",
+        "cond": "threat",
+        "w": 2
+      },
+      {
+        "t": "If the {threat.pl} come at us in here we're finished. Finished.",
+        "tags": [
+          "fear",
+          "timid"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "{threat.count} {threat.pl}, they said. They always say fewer than there are.",
+        "tags": [
+          "gloomy",
+          "worried"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "I hate {threat.pl}. I hate this place. I hate that I came.",
+        "tags": [
+          "fear",
+          "complain"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "{threat.cap.pl} ambush. That's how they do it. Wait, then all at once.",
+        "tags": [
+          "alert",
+          "suspicious"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "Keep your {$item} ready. {threat.cap.pl} don't announce themselves.",
+        "tags": [
+          "alert",
+          "confident"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "Something's watching us. {threat.cap.pl}, {threat2.pl}, I don't care which.",
+        "cond": "threat && threat2",
+        "tags": [
+          "fear"
+        ]
+      },
+      {
+        "t": "{threat.cap.pl}? Ha. Let them come. My {$item} is bored.",
+        "tags": [
+          "confident",
+          "brag",
+          "violent"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "{$deity}, if you're listening, no {threat.pl} today. Please.",
+        "tags": [
+          "religious",
+          "fear"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "I want to go home. I don't have a home. I want to go somewhere without {threat.pl}.",
+        "tags": [
+          "timid",
+          "gloomy",
+          "long"
+        ],
+        "cond": "threat"
+      },
+      {
+        "t": "Something's wrong here. I can't say what. That's what worries me.",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "I keep looking over my shoulder. Nothing there. Yet.",
+        "tags": [
+          "worried",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "Stay close, {listener.name}. I don't trust {here.the}.",
+        "tags": [
+          "alert"
+        ],
+        "cond": "here"
+      },
+      {
+        "t": "My gut says leave. My gut's been right before.",
+        "tags": [
+          "timid",
+          "short"
+        ]
+      }
+    ],
+    "plan": [
+      {
+        "t": "We go slow, stay together, and nobody touches anything that glows.",
+        "w": 2
+      },
+      {
+        "t": "You take the left, I take the right. If you see {threat.a}, shout.",
+        "cond": "threat"
+      },
+      {
+        "t": "I say we turn back. Nothing in {here.the} is worth a {$bodypart}.",
+        "tags": [
+          "timid",
+          "cowardly"
+        ]
+      },
+      {
+        "t": "Torches low. {threat.cap.pl} see light before they see us.",
+        "cond": "threat",
+        "tags": [
+          "alert"
+        ]
+      },
+      {
+        "t": "Whatever happens, don't run. Running is how the {threat.pl} eat.",
+        "cond": "threat",
+        "tags": [
+          "confident"
+        ]
+      },
+      {
+        "t": "We could wait for {~dawn|the {weather} to clear|the others}. Or we could be stupid now.",
+        "tags": [
+          "sarcastic"
+        ],
+        "cond": "weather"
+      },
+      {
+        "t": "Kill the {threat.pl} fast, before they scream. A scream brings more.",
+        "cond": "threat",
+        "tags": [
+          "violent",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Let's rest here, if we can. Eat. Then decide.",
+        "tags": [
+          "gentle",
+          "relaxed",
+          "food"
+        ]
+      },
+      {
+        "t": "If I fall, take my {$item} and keep going. Promise me.",
+        "tags": [
+          "gloomy",
+          "loyal"
+        ]
+      }
+    ],
+    "relief": [
+      {
+        "t": "Warm at last. I'd forgotten what my {$bodypart.pl} felt like.",
+        "tags": [
+          "relaxed"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Nobody's trying to kill us. Enjoy it. It won't last.",
+        "tags": [
+          "gloomy",
+          "joke"
+        ]
+      },
+      {
+        "t": "{$food.cap}, a fire, and a roof. I'll take it.",
+        "tags": [
+          "food",
+          "relaxed"
+        ]
+      },
+      {
+        "t": "Sit. Drink. We earned {here.the}.",
+        "tags": [
+          "drink",
+          "short"
+        ]
+      },
+      {
+        "t": "I could sleep for a week. I'll settle for an hour.",
+        "tags": [
+          "relaxed"
+        ]
+      },
+      {
+        "t": "Listen to that. {scene.sound.cap}. Best sound in the world.",
+        "cond": "scene.sound",
+        "tags": [
+          "joyful"
         ]
       }
     ]

@@ -42,3 +42,16 @@ test.describe('lingo', () => {
     expect(r.speech).toContain('[[');
   });
 });
+test('scene + memories drive the conversation in the demo', async ({ page }) => {
+  await page.goto('lingo/'); await expect(page.locator('#status')).toContainText('phrases');
+  const r = await page.evaluate(() => {
+    const L = window.lingoLab; L.setScene('goblin_cave'); L.rollEvent('combat'); L.rollEvent('death'); L.rollEvent('loot'); L.passTime(30);
+    const bank = L.bankFor(L.state.A); const n = bank.memories.length; const lines = L.converse(10);
+    return { n, memoryLines: lines.filter(l => l.memory).length, sceneLines: lines.filter(l => ['observe', 'fear', 'plan'].includes(l.intent)).length, unresolved: lines.filter(l => /\?\}|<no /.test(l.text)).length, sample: lines.map(l => l.intent + ': ' + l.text).join('\n') };
+  });
+  console.log(r.sample);
+  expect(r.n).toBe(3); expect(r.unresolved).toBe(0); expect(r.memoryLines + r.sceneLines).toBeGreaterThan(2);
+  await page.getByRole('button', { name: 'One of each intent' }).click();
+  const bad = await page.locator('.line').evaluateAll(els => els.map(e => e.textContent).filter(t => /\?\}|<no /.test(t)));
+  expect(bad).toEqual([]);
+});

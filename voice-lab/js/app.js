@@ -126,16 +126,16 @@ const crowdBtn = button('Run crowd test', async () => {
   for (const { res } of results) play(res, { when: r.range(0, crowdSpread.value), pan: r.range(-1, 1), volume: 0.6 });
   setStatus(`crowd: ${n} talkers`);
 });
-const crowdEngine = select('Engine', [{ value: 'preset', label: "each preset's own engine" }, 'espeak', 'sam', 'babble'], 'preset');
+const crowdEngine = select('Engine', [{ value: 'preset', label: "each preset's own engine" }, 'espeak', 'babble'], 'preset');
 const crowdPanel = panel('Crowd stress test', el('p', { class: 'small muted', text: 'Synthesizes N random NPC lines with random presets, reports CPU time, then plays them all overlapping. This is the real answer to "how many characters can talk at once".' }), crowdEngine, crowdN, crowdSpread, crowdBtn, crowdLog);
 
 // engine comparison table (static, from meta)
 const compareTable = el('table', {}, el('thead', {}, el('tr', {}, ...['Engine', 'License', 'Size', 'Quality', 'Crowds', 'Knobs', 'Phonemes'].map(t => el('th', { text: t })))),
   el('tbody', {}, ...ENGINE_ORDER.map(id => { const m = ENGINES[id].meta; return el('tr', {}, el('td', { text: m.name }), el('td', {}, licenseBadge(m), el('div', { class: 'small muted', text: m.license })), el('td', { text: m.size }), el('td', { text: m.quality }), el('td', { text: m.crowd }), el('td', { class: 'small', text: m.knobs.join(', ') }), el('td', { text: m.supportsPhonemes ? 'yes' : 'no' })); })));
 
-// phoneme cheat sheet (espeak / SAM)
+// phoneme cheat sheet (espeak)
 const phonPanel = panel('Phoneme input cheat sheet',
-  el('p', { class: 'small muted', text: 'Wrap text in [[ ]] to bypass the dictionary. espeak uses its own ASCII alphabet (below); SAM uses ARPAbet-like codes (AH, EY, IY, OW, UW…). This is how lingo will feed pronunciations of invented words.' }),
+  el('p', { class: 'small muted', text: 'Wrap text in [[ ]] to bypass the dictionary; espeak uses its own ASCII alphabet (below). This is how lingo feeds pronunciations of invented words.' }),
   el('table', { class: 'phon-table' }, el('tbody', {},
     ...[["a", "cat"], ["A:", "father"], ["e", "bed"], ["i:", "see"], ["I", "sit"], ["O", "hot (UK)"], ["u:", "boot"], ["U", "put"], ["V", "cup"], ["3:", "bird"], ["@", "about (schwa)"], ["eI", "day"], ["aI", "my"], ["OI", "boy"], ["oU", "go"], ["aU", "now"],
       ["T", "thin"], ["D", "this"], ["S", "ship"], ["Z", "vision"], ["tS", "chin"], ["dZ", "judge"], ["N", "sing"], ["j", "yes"], ["'", "stress on next syllable"], [",", "secondary stress"], ["_", "short pause"], ["_:", "long pause"]]
@@ -162,9 +162,8 @@ renderGender();
 const accentSel = select('Accent', espeakEngine.ACCENTS, voice.accent, v => { voice.accent = v; changed(); });
 const variantSel = select('Variant', [], voice.variant, v => { voice.variant = v; changed(); });
 const babbleSel = select('Babble mode', [{ value: 'letters', label: 'letters (Animalese)' }, { value: 'syllables', label: 'syllables' }, { value: 'simlish', label: 'simlish (word → fixed syllables)' }], voice.babbleMode, v => { voice.babbleMode = v; changed(); });
-const singCb = checkbox('Sing mode (SAM: flat pitch per phoneme)', voice.sing, v => { voice.sing = v; changed(); });
 const piperDl = button('Download this Piper voice now', async () => { setStatus('downloading piper voice…'); try { await piperEngine.download(voice.variant || 'en_US-hfc_female-medium'); toast('Voice ready'); } catch (e) { toast('Download failed: ' + e.message); } setStatus('idle'); }, 'small');
-const engineOptsPanel = panel('Engine options', el('div', { class: 'row' }, el('label', { text: 'Gender' }), genderChips), accentSel, variantSel, babbleSel, singCb, piperDl);
+const engineOptsPanel = panel('Engine options', el('div', { class: 'row' }, el('label', { text: 'Gender' }), genderChips), accentSel, variantSel, babbleSel, piperDl);
 
 const fxEls = {};
 const fxPanel = panel('Effects (post-processing)');
@@ -198,7 +197,6 @@ async function syncUI() {
   for (const k in knobEls) knobEls[k].style.opacity = supported.includes(k) ? 1 : 0.35;
   accentSel.style.display = voice.engine === 'espeak' ? '' : 'none';
   babbleSel.style.display = voice.engine === 'babble' ? '' : 'none';
-  singCb.style.display = voice.engine === 'sam' ? '' : 'none';
   piperDl.style.display = voice.engine === 'piper' ? '' : 'none';
   genderChips.parentElement.style.display = voice.engine === 'espeak' ? '' : 'none';
   fxPanel.style.opacity = ENGINES[voice.engine].meta.yieldsBuffer ? 1 : 0.35;

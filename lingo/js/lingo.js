@@ -15,6 +15,8 @@
 //   {x, select, a{...} b{...} other{...}}    select branch on a value
 //   {{ and }}                                literal braces
 import * as M from './morph.js';
+import { memoryBindings as memoryBindingsFor } from './memory.js';
+import { scenePools as scenePoolsFor } from './context.js';
 
 // ---------------------------------------------------------------- random
 export function makeRng(seed) {
@@ -195,6 +197,7 @@ export class Lingo {
     mul('angry', s.mood < -0.3 ? 1 + (-s.mood) * 2 : 0.3); mul('sad', s.mood < -0.3 ? 1 + (-s.mood) : 0.3); mul('joyful', s.mood > 0.3 ? 1 + s.mood * 2 : 0.3);
     if (ctx.opinion != null) { mul('friendly', lin((ctx.opinion + 1) / 2, 0.1, 2.5)); mul('hostile', lin((1 - ctx.opinion) / 2, 0.1, 2.5)); }
     for (const [tag, f] of Object.entries(s.tagWeights || {})) mul(tag, f);
+    if (ctx.scene?.tagWeights) for (const [tag, f] of Object.entries(ctx.scene.tagWeights())) mul(tag, f);
     return w;
   }
 
@@ -205,7 +208,8 @@ export class Lingo {
   }
   condScope(ctx) {
     const s = ctx.speaker, l = ctx.listener;
-    return { ...ctx, has: t => !!s?.has(t), listenerHas: t => !!l?.has?.(t), mood: s?.mood ?? 0, opinion: ctx.opinion ?? 0, speakerType: s?.entity?.type, listenerType: l?.entity?.type ?? l?.type, sameRace: !!(s?.entity?.ref('race')?.id && s.entity.ref('race').id === (l?.entity?.ref?.('race')?.id ?? l?.ref?.('race')?.id)), chance: p => this.rng.chance(p) };
+    const sc = ctx.scene;
+    return { ...ctx, has: t => !!s?.has(t), listenerHas: t => !!l?.has?.(t), mood: s?.mood ?? 0, opinion: ctx.opinion ?? 0, sceneHas: t => !!sc?.has?.(t), danger: sc?.danger ?? 0, comfort: sc?.comfort ?? 0.5, timeOfDay: sc?.timeOfDay ?? 'day', speakerType: s?.entity?.type, listenerType: l?.entity?.type ?? l?.type, sameRace: !!(s?.entity?.ref('race')?.id && s.entity.ref('race').id === (l?.entity?.ref?.('race')?.id ?? l?.ref?.('race')?.id)), chance: p => this.rng.chance(p) };
   }
 
   /** Pick one entry from a symbol using weights × tags × conditions, avoiding recent repeats. */
@@ -309,6 +313,7 @@ export class Lingo {
    */
   speak(intent, ctx = {}, { wrap = true, tidy = true } = {}) {
     ctx = { ...ctx }; const sp = ctx.speaker;
+    if (ctx.scene?.bindings) for (const [k, v] of Object.entries(ctx.scene.bindings())) if (ctx[k] === undefined) ctx[k] = v;
     if (ctx.listener instanceof Speaker) ctx.listenerSpeaker = ctx.listener; // keep the Speaker (traits) reachable for cond()
     const state = this.newState(ctx);
     const parts = { prefix: null, body: null, catchphrase: null, suffix: null };
@@ -347,30 +352,60 @@ export class Lingo {
   }
   invalidatePronunciations() { this._pron = null; }
 
+  /**
+   * Talk about a memory. bank: MemoryBank of the speaker; now: game hours. Picks a memory (weighted by salience ×
+   * relevance to scene/listener) and speaks its type's recall intent with memory bindings. Returns null if nothing to say.
+   */
+  speakMemory(bank, now, ctx = {}, opts = {}) {
+    const m = bank.recall(now, { rng: this.rng, listenerId: ctx.listener?.id, scene: ctx.scene, ...opts }); if (!m) return null;
+    const out = this.speakAbout(m, bank, now, ctx); return out;
+  }
+  /** Speak about a specific memory (already chosen). */
+  speakAbout(m, bank, now, ctx = {}) {
+    const intent = bank.def(m.type).intent || 'recall_generic';
+    const b = memoryBindingsFor(m, this.lexicon, now, { speakerId: ctx.listener?.id, recalledBefore: m.recalled > 1 });
+    const out = this.speak(intent, { ...ctx, ...b });
+    out.memory = m; return out;
+  }
+  /** Listener's reply to a memory line. */
+  replyToMemory(m, now, ctx = {}) {
+    const b = memoryBindingsFor(m, this.lexicon, now, { speakerId: ctx.speaker?.id, recalledBefore: m.recalled > 1 });
+    return this.speak('recall_reply', { ...ctx, ...b });
+  }
+
   /** Two speakers take turns. Returns an array of { speaker, listener, intent, text, speech }. */
-  converse(a, b, { turns = 6, opinionAB = 0, opinionBA = 0, topics = null, ...extra } = {}) {
-    const lines = []; let cur = a, other = b, opinion = opinionAB, opinionOther = opinionBA;
-    const plan = topics || this.planConversation(a, b, opinionAB, opinionBA, turns);
+  converse(a, b, { turns = 6, opinionAB = 0, opinionBA = 0, topics = null, banks = null, now = 0, scene = null, ...extra } = {}) {
+    const lines = []; let cur = a, other = b, opinion = opinionAB, opinionOther = opinionBA; let lastMemory = null;
+    const plan = topics || this.planConversation(a, b, opinionAB, opinionBA, turns, { banks, now, scene });
     for (let i = 0; i < plan.length; i++) {
-      const intent = plan[i];
-      const out = this.speak(intent, { speaker: cur, listener: other, opinion, ...extra });
-      lines.push({ speaker: cur, listener: other, intent, text: out.text, speech: out.speech, tags: out.tags });
+      const intent = plan[i]; const ctx = { speaker: cur, listener: other, opinion, scene, ...extra }; let out;
+      if (intent === 'recall') { const bank = banks?.[cur.id]; out = bank ? this.speakMemory(bank, now, ctx) : null; if (!out) out = this.speak('smalltalk', ctx); else lastMemory = out.memory; }
+      else if (intent === 'recall_reply' && lastMemory) { out = this.replyToMemory(lastMemory, now, ctx); lastMemory = null; }
+      else out = this.speak(intent, ctx);
+      lines.push({ speaker: cur, listener: other, intent: out.intent || intent, text: out.text, speech: out.speech, tags: out.tags, memory: out.memory || null });
       [cur, other] = [other, cur]; [opinion, opinionOther] = [opinionOther, opinion];
     }
     return lines;
   }
   /** Simple topic planner: greet → middle beats chosen by opinion/traits → farewell. */
-  planConversation(a, b, opAB, opBA, turns) {
+  planConversation(a, b, opAB, opBA, turns, { banks = null, now = 0, scene = null } = {}) {
     const plan = ['greet', 'greet_reply'];
     const beats = [];
     const hostile = (op, sp) => op < -0.3 || (sp.speech.aggression > 0.7 && op < 0.2);
     const friendly = (op) => op > 0.3;
+    const sceneMix = scenePoolsFor(scene);
     let sp = a, op = opAB, opO = opBA;
     for (let i = 2; i < turns - 1; i++) {
-      const pool = hostile(op, sp) ? ['insult', 'threat', 'complain', 'gossip', 'disagree'] : friendly(op) ? ['compliment', 'smalltalk', 'gossip', 'lore', 'brag', 'agree', 'thanks', 'flirt'] : ['smalltalk', 'gossip', 'complain', 'lore', 'question', 'brag', 'work'];
+      let pool = hostile(op, sp) ? ['insult', 'threat', 'complain', 'gossip', 'disagree'] : friendly(op) ? ['compliment', 'smalltalk', 'gossip', 'lore', 'brag', 'agree', 'thanks', 'flirt'] : ['smalltalk', 'gossip', 'complain', 'lore', 'question', 'brag', 'work'];
+      // scene awareness: in danger or comfort, most beats are about the surroundings
+      if (sceneMix && this.rng.chance(sceneMix.weight)) pool = sceneMix.pool;
       let intent = this.rng.pick(pool.filter(p => this.grammar.has(p)));
+      // memories: the stronger the speaker's strongest memory, the likelier they bring it up
+      const bank = banks?.[sp.id]; const top = bank?.strongest(now);
+      if (top && this.rng.chance(Math.min(0.6, top.salience * 0.9)) && !beats.includes('recall')) intent = 'recall';
       // reactive beats: an insult/threat is answered with a retort; a compliment/flirt with thanks or a rejection
       const prev = beats[beats.length - 1];
+      if (prev === 'recall') intent = 'recall_reply';
       if (prev === 'insult' || prev === 'threat') intent = this.rng.pick(['retort', 'insult', 'apology', 'threat'].filter(p => this.grammar.has(p)));
       if (prev === 'compliment') intent = this.rng.pick(['thanks', 'compliment', 'disagree'].filter(p => this.grammar.has(p)));
       if (prev === 'flirt') intent = this.rng.pick(['flirt_reply', 'reject', 'thanks'].filter(p => this.grammar.has(p)));
@@ -413,7 +448,6 @@ function pickEntities(ctx) { const o = {}; for (const [k, v] of Object.entries(c
 // ---------------------------------------------------------------- post filters (verbal tics)
 export const DEFAULT_FILTERS = {
   um: (t, rng) => t.replace(/(^|[.!?,]\s+)(\w)/g, (m, pre, c) => rng.chance(0.3) ? `${pre}${rng.pick(['um, ', 'uh, ', 'er, '])}${c}` : m),
-  stutter: (t, rng) => t.replace(/\b([b-df-hj-np-tv-z])(\w{2,})/gi, (m, c, rest) => rng.chance(0.18) ? `${c}-${c.toLowerCase()}${rest}` : m),
   drawl: (t, rng) => t.replace(/\b(\w*?)([aeiou])(\w{0,2})\b/gi, (m, a, v, b) => (m.length > 3 && rng.chance(0.2)) ? `${a}${v}${v}${v}${b}` : m),
   shout: t => t.toUpperCase().replace(/\.(\s|$)/g, '!$1'),
   whisper: t => t.toLowerCase().replace(/[!]/g, '...'),

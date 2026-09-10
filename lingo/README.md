@@ -90,14 +90,17 @@ Identity (`entry` = lexicon person id) + the `speech` section.
   "mood": 0,                                                       // -1..1, runtime
   "custom": { "greeting": "Oi", "farewell": "Don't die stupid", "catchphrase": "Blood pays for blood.", "prefix": "", "suffix": "", "happy": "", "angry": "", "sad": "", "worried": "", "yes": "Aye", "no": "Piss off", "thanks": "", "curse": "Forge take it", "oath": "" },
   "customRate": { "catchphrase": 0.25 },                           // per-slot probability (defaults: greeting/farewell/etc 0.85, prefix/suffix/catchphrase scale with verbosity, mood lines 0.7)
-  "tics": ["stutter"],                                             // post-filters: um stutter drawl shout whisper hesitant archaic lisp growl clipped flowery curses thirdperson pirate posh
+  "tics": ["hesitant"],                                             // post-filters: um drawl shout whisper hesitant archaic lisp growl clipped flowery curses thirdperson pirate posh
   "tagWeights": { "religious": 2 }                                 // extra manual multipliers
 }
 ```
 How the layers combine (`Lingo.tagWeights`): trait multipliers × slider curves (formality→`formal`/`casual`/`crude`, verbosity→`long`/`short`, cheer+mood→`happy`/`gloomy`, aggression→`aggressive`/`gentle`, confidence→`confident`/`timid`) × mood (`angry`/`sad`/`joyful`) × opinion (`friendly`/`hostile`) × manual `tagWeights`. Then `speak()`: pick phrase → expand → custom slots replace `greetword`/`farewellword`/`yesword`/`noword`/`thanksword`/`curse`/`oath` → prefix/catchphrase/suffix wrappers → contractions by formality → tics → tidy (sentence case, punctuation). Recently used phrases are down-weighted per speaker (anti-repeat).
 
+## Memories and scene awareness
+See **`MEMORY.md`** for the full design. In short: `js/memory.js` gives each character a `MemoryBank` (events weighted by traits, fading by half-life, merging repeats, recalled by salience × relevance) and `js/context.js` a `Scene` (place, tags, threats, danger, comfort) that biases phrase tags and the planner. Grammar intents: `observe fear plan relief` (scene) and `recall_<type>` + `recall_reply` (memories). Data: `data/events.json` (16 event types), `data/scenes.json` (8 example scenes). Demo: the Scene and Memories panels.
+
 ## Conversation planner
-`planConversation`: greet → greet_reply → beats chosen from opinion and aggression (hostile pool: insult/threat/complain/gossip/disagree; friendly: compliment/smalltalk/gossip/lore/brag/agree/thanks/flirt; neutral: smalltalk/gossip/complain/lore/question/brag/work) with reactions (insult → retort/apology/threat, compliment → thanks, flirt → flirt_reply/reject, question → answer) → farewell. Games should replace this with their own social simulation and just call `speak(intent, ctx)`.
+`planConversation(a, b, opAB, opBA, turns, { banks, now, scene })`: greet → greet_reply → beats chosen from opinion and aggression, replaced by scene beats (observe/fear/plan/relief/warning/rally…) most of the time when the scene is dangerous or cosy, and by a `recall` beat (answered by `recall_reply`) with probability ≈ the speaker's strongest memory salience (hostile pool: insult/threat/complain/gossip/disagree; friendly: compliment/smalltalk/gossip/lore/brag/agree/thanks/flirt; neutral: smalltalk/gossip/complain/lore/question/brag/work) with reactions (insult → retort/apology/threat, compliment → thanks, flirt → flirt_reply/reject, question → answer) → farewell. Games should replace this with their own social simulation and just call `speak(intent, ctx)`.
 
 ## Pronunciation bridge to the Voice Lab
 `lingo.toSpeech(text)` (also returned as `line.speech`) replaces every word that has a lexicon `pron` with `[[espeak phonemes]]`. The Voice Lab's espeak engine reads those inline. Babble ignores them. Piper/Web Speech get plain text (strip with `text.replace(/\[\[|\]\]/g,'')`).
@@ -112,7 +115,7 @@ How the layers combine (`Lingo.tagWeights`): trait multipliers × slider curves 
 - Speech JSON panel: copy / export / import / apply.
 
 ## Tests
-- `node --test lingo/tests/*.test.js` — engine unit tests (parser, morphology, scoring, filters, conversation) and data validation (every phrase expands for every speaker with no unresolved markers; every intent reachable for every personality/opinion; lexicon refs valid; traits' tags exist).
+- `node --test lingo/tests/*.test.js` — engine unit tests, memory/scene tests (decay, traits, merging, relevance, every event type renders, planner) (parser, morphology, scoring, filters, conversation) and data validation (every phrase expands for every speaker with no unresolved markers; every intent reachable for every personality/opinion; lexicon refs valid; traits' tags exist).
 - `npm test -- lingo` — Playwright: UI loads clean, speaks, converses, traits change tone, dictionary edits reach templates.
 
 ## Extending

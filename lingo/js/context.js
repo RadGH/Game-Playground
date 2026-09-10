@@ -27,7 +27,9 @@ export class Scene {
     const d = this.danger, c = this.comfort, w = {};
     w.fear = 0.3 + d * 3; w.worried = 0.6 + d * 2; w.alert = 0.4 + d * 3; w.short = 1 + d * 0.8; w.long = 1 - d * 0.5;
     w.relaxed = 0.4 + c * 2; w.joke = 0.5 + c * 1.2 - d * 0.4; w.drink = 0.3 + c * 2; w.romantic = 0.4 + c * 1.2 - d * 0.6;
-    if (this.has('holy')) w.religious = 2.5; if (this.has('dark')) w.dark = 3; if (this.has('cold')) w.cold = 3; if (this.has('damp') || this.has('wet')) w.damp = 3; if (this.has('enclosed')) w.enclosed = 3; if (this.has('crowded')) w.crowded = 3; if (this.has('ruined')) w.ruin = 3; if (this.has('wild')) w.wild = 3; if (this.has('hot')) w.hot = 3;
+    // descriptor tags: boosted when the scene has them, nearly silenced when it does not (a cave is never 'hot as a forge')
+    for (const t of ['dark', 'cold', 'damp', 'enclosed', 'crowded', 'ruin', 'wild', 'hot', 'wet', 'loud', 'quiet', 'night', 'holy']) w[t] = 0.08;
+    if (this.has('holy')) w.religious = 2.5; if (this.has('dark')) w.dark = 3; if (this.has('cold')) w.cold = 3; if (this.has('damp')) w.damp = 3; if (this.has('wet')) w.wet = 3; if (this.has('loud')) w.loud = 3; if (this.has('quiet')) w.quiet = 3; if (this.has('holy')) w.holy = 3; if (this.has('enclosed')) w.enclosed = 3; if (this.has('crowded')) w.crowded = 3; if (this.has('ruined')) w.ruin = 3; if (this.has('wild')) w.wild = 3; if (this.has('hot')) w.hot = 3;
     if (this.timeOfDay === 'night') w.night = 3;
     for (const k in w) w[k] = Math.max(0.05, w[k]);
     return w;

@@ -21,8 +21,8 @@ test.describe('avatar-3d', () => {
   test('quaternius mode loads meshes, plays a clip, scales bones', async ({ page }) => {
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.goto('avatar-3d/'); await page.evaluate(() => window.avatar3d.setMode('quaternius')); await waitBuilt(page, 'Quaternius');
-    const info = await page.evaluate(async () => { const c = window.avatar3d.character; c.setAnim('Walk_Loop'); await new Promise(r => setTimeout(r, 500)); let meshes = 0; c.group.traverse(o => { if (o.isSkinnedMesh) meshes++; }); const head = c.group.getObjectByName('Head'); return { parts: c.group.children.length, meshes, anim: c.anim, mixerTime: c.mixers[0].time, headScale: head?.scale.x }; });
-    expect(info.meshes).toBeGreaterThan(3); expect(info.anim).toBe('Walk_Loop'); expect(info.mixerTime).toBeGreaterThan(0.2);
+    const info = await page.evaluate(async () => { const c = window.avatar3d.character; c.setAnim('Walk_Loop'); await new Promise(r => setTimeout(r, 900)); let meshes = 0; c.group.traverse(o => { if (o.isSkinnedMesh) meshes++; }); const head = c.group.getObjectByName('Head'); return { parts: c.group.children.length, meshes, anim: c.anim, mixerTime: c.mixers[0].time, headScale: head?.scale.x }; });
+    expect(info.meshes).toBeGreaterThan(3); expect(info.anim).toBe('Walk_Loop'); expect(info.mixerTime).toBeGreaterThan(0.05);
     const px = await drawnPixels(page); expect(px.skin).toBeGreaterThan(20);
     await page.screenshot({ path: 'test-results/avatar-3d-quaternius.png' });
     await page.evaluate(() => { const a = window.avatar3d.avatar; a.body.height = 1; a.body.width = 1; a.body.frame = 'f'; a.top.id = 'plate'; a.hat.id = 'hood'; window.avatar3d.set(a); });

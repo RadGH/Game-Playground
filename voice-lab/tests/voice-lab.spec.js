@@ -6,7 +6,7 @@ test.describe('voice-lab', () => {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-    await page.goto('voice-lab/');
+    await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
     await expect(page.locator('.engine-list button')).toHaveCount(5);
     await expect(page.locator('.preset-grid button').first()).toBeVisible();
     expect(errors, errors.join('\n')).toEqual([]);
@@ -14,7 +14,7 @@ test.describe('voice-lab', () => {
 
   for (const engine of ['espeak', 'sam', 'babble']) {
     test(`synthesizes with ${engine}`, async ({ page }) => {
-      await page.goto('voice-lab/');
+      await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
       const r = await page.evaluate(async (engine) => {
         const v = { ...window.voiceLab.voice, engine, variant: 'custom' };
         const res = await window.voiceLab.synthesize('Hello there, how are you?', v, { noCache: true });
@@ -28,7 +28,7 @@ test.describe('voice-lab', () => {
   }
 
   test('effects chain changes the output and presets apply', async ({ page }) => {
-    await page.goto('voice-lab/');
+    await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
     const r = await page.evaluate(async () => {
       const base = { ...window.voiceLab.voice, engine: 'babble', fx: {} };
       const a = await window.voiceLab.synthesize('Testing one two', base, { noCache: true });
@@ -43,7 +43,7 @@ test.describe('voice-lab', () => {
   });
 
   test('espeak phoneme input works', async ({ page }) => {
-    await page.goto('voice-lab/');
+    await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
     const r = await page.evaluate(async () => {
       const v = { ...window.voiceLab.voice, engine: 'espeak', variant: 'custom' };
       const res = await window.voiceLab.synthesize("[[h@l'oU]]", v, { noCache: true });
@@ -62,7 +62,7 @@ test.describe('voice-lab quality checks', () => {
     for (let lag = minLag + 1; lag < maxLag; lag++) if (r[lag] > 0.7 * max && r[lag] >= r[lag - 1] && r[lag] >= r[lag + 1]) return sr / lag; return 0; }`;
   for (const engine of ['espeak', 'sam', 'babble']) {
     test(`${engine}: child preset is higher pitched than giant preset`, async ({ page }) => {
-      await page.goto('voice-lab/');
+      await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
       const r = await page.evaluate(async ([engine, pitchOf]) => {
         const f = eval(pitchOf); const P = window.voiceLab.PRESETS.presets; const get = id => ({ ...P.find(p => p.id === id).voice, engine, variant: 'custom', fx: {} });
         const child = await window.voiceLab.synthesize('Hello there my friend', get('child_girl'), { noCache: true });
@@ -76,7 +76,7 @@ test.describe('voice-lab quality checks', () => {
     });
   }
   test('every effect produces finite, non-silent audio', async ({ page }) => {
-    await page.goto('voice-lab/');
+    await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
     const r = await page.evaluate(async () => {
       const base = { ...window.voiceLab.voice, engine: 'babble', fx: {} }; const out = {};
       const fxs = { pitchShift: 5, formant: -4, speed: 1.6, chipmunk: 0.7, bright: 0.6, highpass: 400, lowpass: 3000, robot: 0.7, vibrato: 0.5, tremolo: 0.5, lofi: 0.5, chorus: 0.5, echo: 0.5, reverb: 0.6, gain: 1.5 };
@@ -91,7 +91,7 @@ test.describe('voice-lab quality checks', () => {
     console.log(JSON.stringify(r));
   });
   test('babble modes all produce audio and simlish is stable per word', async ({ page }) => {
-    await page.goto('voice-lab/');
+    await page.goto('voice-lab/'); await expect(page.locator('#status')).toHaveText('idle');
     const r = await page.evaluate(async () => {
       const base = { ...window.voiceLab.voice, engine: 'babble', fx: {} }; const out = {};
       for (const m of ['letters', 'syllables', 'simlish']) { const res = await window.voiceLab.synthesize('Greetings traveler, welcome to Thalen', { ...base, babbleMode: m }, { noCache: true }); out[m] = res.samples.length; }

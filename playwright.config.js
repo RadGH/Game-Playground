@@ -5,6 +5,7 @@ export default defineConfig({
   testDir: '.',
   testMatch: ['tests/**/*.spec.js', '*/tests/**/*.spec.js'],
   timeout: 60_000,
+  workers: 1, // WebGL + audio synthesis pages are CPU heavy; run serially for stable timings
   use: { baseURL: 'http://localhost:8400/', headless: true, viewport: { width: 1280, height: 800 } },
   webServer: { command: 'python3 -m http.server 8400 --bind 0.0.0.0', url: 'http://localhost:8400/', reuseExistingServer: true },
   reporter: [['list']],

@@ -8,7 +8,7 @@ test.describe('avatar-3d', () => {
   }
   test('mii mode renders a character with skin-coloured pixels and animates', async ({ page }) => {
     const errors = []; page.on('pageerror', e => errors.push(e.message));
-    await page.goto('avatar-3d/'); await page.evaluate(() => window.avatar3d.setMode('mii')); await waitBuilt(page, 'Mii-style');
+    await page.goto('avatar-3d/'); await page.waitForFunction(() => !!window.avatar3d, null, { timeout: 60_000 }); await page.evaluate(() => window.avatar3d.setMode('mii')); await waitBuilt(page, 'Mii-style');
     const px = await drawnPixels(page); expect(px.w).toBeGreaterThan(100); expect(px.skin).toBeGreaterThan(50);
     await page.screenshot({ path: 'test-results/avatar-3d-mii.png' });
     const moved = await page.evaluate(async () => { const c = window.avatar3d.character; c.setAnim('walk'); const g = c.group; const before = g.children[0].children[0].rotation.x; await new Promise(r => setTimeout(r, 400)); return g.children[0].children[0].rotation.x !== before; });
@@ -20,7 +20,7 @@ test.describe('avatar-3d', () => {
   });
   test('quaternius mode loads meshes, plays a clip, scales bones', async ({ page }) => {
     const errors = []; page.on('pageerror', e => errors.push(e.message));
-    await page.goto('avatar-3d/'); await page.evaluate(() => window.avatar3d.setMode('quaternius')); await waitBuilt(page, 'Quaternius');
+    await page.goto('avatar-3d/'); await page.waitForFunction(() => !!window.avatar3d, null, { timeout: 60_000 }); await page.evaluate(() => window.avatar3d.setMode('quaternius')); await waitBuilt(page, 'Quaternius');
     const info = await page.evaluate(async () => { const c = window.avatar3d.character; c.setAnim('Walk_Loop'); await new Promise(r => setTimeout(r, 900)); let meshes = 0; c.group.traverse(o => { if (o.isSkinnedMesh) meshes++; }); const head = c.group.getObjectByName('Head'); return { parts: c.group.children.length, meshes, anim: c.anim, mixerTime: c.mixers[0].time, headScale: head?.scale.x }; });
     expect(info.meshes).toBeGreaterThan(3); expect(info.anim).toBe('Walk_Loop'); expect(info.mixerTime).toBeGreaterThan(0.05);
     const px = await drawnPixels(page); expect(px.skin).toBeGreaterThan(20);

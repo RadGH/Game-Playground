@@ -112,7 +112,7 @@ How the layers combine (`Lingo.tagWeights`): trait multipliers × slider curves 
 - Speech JSON panel: copy / export / import / apply.
 
 ## Tests
-- `node --test lingo/tests/` — engine unit tests (parser, morphology, scoring, filters, conversation) and data validation (every phrase expands for every speaker with no unresolved markers; every intent reachable for every personality/opinion; lexicon refs valid; traits' tags exist).
+- `node --test lingo/tests/*.test.js` — engine unit tests (parser, morphology, scoring, filters, conversation) and data validation (every phrase expands for every speaker with no unresolved markers; every intent reachable for every personality/opinion; lexicon refs valid; traits' tags exist).
 - `npm test -- lingo` — Playwright: UI loads clean, speaks, converses, traits change tone, dictionary edits reach templates.
 
 ## Extending

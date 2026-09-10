@@ -1,0 +1,626 @@
+{
+  "_doc": "Voice presets. 'voice' holds generic knobs (see README: pitch/speed/depth/tone 0..1, intonation 1-4) plus an engine recommendation and optional fx. A preset can be applied to any engine; engines ignore knobs they do not support.",
+  "groups": [
+    "Human",
+    "Age",
+    "Fantasy",
+    "Machine",
+    "Babble"
+  ],
+  "presets": [
+    {
+      "id": "child_boy",
+      "name": "Child (boy)",
+      "group": "Age",
+      "desc": "High, quick, small vocal tract, lively intonation.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.8,
+        "speed": 0.45,
+        "depth": 0.2,
+        "tone": 0.6,
+        "breath": 0.1,
+        "rough": 0,
+        "flutter": 0.05,
+        "intonation": 3,
+        "gender": "m"
+      }
+    },
+    {
+      "id": "child_girl",
+      "name": "Child (girl)",
+      "group": "Age",
+      "desc": "Highest human range, bright, sing-song.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.85,
+        "speed": 0.45,
+        "depth": 0.15,
+        "tone": 0.65,
+        "breath": 0.15,
+        "rough": 0,
+        "flutter": 0.05,
+        "intonation": 3,
+        "gender": "f"
+      }
+    },
+    {
+      "id": "teen_boy",
+      "name": "Teen (boy)",
+      "group": "Age",
+      "desc": "Cracking mid range, a bit fast.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.55,
+        "speed": 0.42,
+        "depth": 0.4,
+        "tone": 0.55,
+        "breath": 0.1,
+        "rough": 0.15,
+        "flutter": 0.2,
+        "intonation": 2,
+        "gender": "m"
+      }
+    },
+    {
+      "id": "teen_girl",
+      "name": "Teen (girl)",
+      "group": "Age",
+      "desc": "Upper-mid, bright, quick.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.7,
+        "speed": 0.42,
+        "depth": 0.3,
+        "tone": 0.6,
+        "breath": 0.15,
+        "rough": 0,
+        "flutter": 0.05,
+        "intonation": 3,
+        "gender": "f"
+      }
+    },
+    {
+      "id": "adult_male",
+      "name": "Adult (male)",
+      "group": "Human",
+      "desc": "Neutral baseline male.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.45,
+        "speed": 0.3,
+        "depth": 0.55,
+        "tone": 0.5,
+        "breath": 0.1,
+        "rough": 0.1,
+        "flutter": 0.1,
+        "intonation": 2,
+        "gender": "m"
+      }
+    },
+    {
+      "id": "adult_female",
+      "name": "Adult (female)",
+      "group": "Human",
+      "desc": "Neutral baseline female.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.6,
+        "speed": 0.32,
+        "depth": 0.4,
+        "tone": 0.5,
+        "breath": 0.15,
+        "rough": 0.05,
+        "flutter": 0.1,
+        "intonation": 2,
+        "gender": "f"
+      }
+    },
+    {
+      "id": "adult_neutral",
+      "name": "Adult (neutral)",
+      "group": "Human",
+      "desc": "Androgynous middle voice.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.52,
+        "speed": 0.3,
+        "depth": 0.48,
+        "tone": 0.5,
+        "breath": 0.12,
+        "rough": 0.08,
+        "flutter": 0.1,
+        "intonation": 2,
+        "gender": "n"
+      }
+    },
+    {
+      "id": "announcer",
+      "name": "Announcer",
+      "group": "Human",
+      "desc": "Deep, bright, deliberate, a little room echo.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.4,
+        "speed": 0.28,
+        "depth": 0.6,
+        "tone": 0.65,
+        "breath": 0.05,
+        "rough": 0.05,
+        "flutter": 0,
+        "intonation": 3,
+        "gender": "m",
+        "fx": {
+          "reverb": 0.25,
+          "bright": 0.2
+        }
+      }
+    },
+    {
+      "id": "nasal",
+      "name": "Nasal / snooty",
+      "group": "Human",
+      "desc": "Pinched, bright, high-passed.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.55,
+        "speed": 0.38,
+        "depth": 0.35,
+        "tone": 0.85,
+        "breath": 0,
+        "rough": 0.1,
+        "flutter": 0.1,
+        "intonation": 3,
+        "gender": "m",
+        "fx": {
+          "bright": 0.5,
+          "highpass": 500
+        }
+      }
+    },
+    {
+      "id": "gruff",
+      "name": "Gruff / gravelly",
+      "group": "Human",
+      "desc": "Low, rough, slow.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.3,
+        "speed": 0.25,
+        "depth": 0.7,
+        "tone": 0.35,
+        "breath": 0.2,
+        "rough": 0.8,
+        "flutter": 0.1,
+        "intonation": 1,
+        "gender": "m",
+        "fx": {
+          "lowpass": 3500
+        }
+      }
+    },
+    {
+      "id": "drunk",
+      "name": "Slurred / drunk",
+      "group": "Human",
+      "desc": "Slow, wobbly pitch, extra flutter.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.45,
+        "speed": 0.2,
+        "depth": 0.55,
+        "tone": 0.4,
+        "breath": 0.2,
+        "rough": 0.4,
+        "flutter": 0.9,
+        "intonation": 2,
+        "gender": "m",
+        "fx": {
+          "vibrato": 0.3,
+          "vibratoHz": 2
+        }
+      }
+    },
+    {
+      "id": "elder_male",
+      "name": "Elder (male)",
+      "group": "Age",
+      "desc": "Slower, flutter and gravel, flat intonation.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.35,
+        "speed": 0.22,
+        "depth": 0.6,
+        "tone": 0.35,
+        "breath": 0.3,
+        "rough": 0.5,
+        "flutter": 0.6,
+        "intonation": 1,
+        "gender": "m"
+      }
+    },
+    {
+      "id": "elder_female",
+      "name": "Elder (female)",
+      "group": "Age",
+      "desc": "Thin, wavering, breathy.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.5,
+        "speed": 0.22,
+        "depth": 0.45,
+        "tone": 0.35,
+        "breath": 0.35,
+        "rough": 0.4,
+        "flutter": 0.7,
+        "intonation": 1,
+        "gender": "f"
+      }
+    },
+    {
+      "id": "giant",
+      "name": "Giant / ogre",
+      "group": "Fantasy",
+      "desc": "Huge vocal tract, very low, slow, roomy.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.15,
+        "speed": 0.18,
+        "depth": 1,
+        "tone": 0.3,
+        "breath": 0.2,
+        "rough": 0.5,
+        "flutter": 0.1,
+        "intonation": 1,
+        "gender": "m",
+        "fx": {
+          "formant": -2,
+          "reverb": 0.3,
+          "reverbSize": 0.7
+        }
+      }
+    },
+    {
+      "id": "tiny_fairy",
+      "name": "Tiny / fairy",
+      "group": "Fantasy",
+      "desc": "Tiny tract, very high and fast, sparkly.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.95,
+        "speed": 0.6,
+        "depth": 0,
+        "tone": 0.8,
+        "breath": 0.2,
+        "rough": 0,
+        "flutter": 0,
+        "intonation": 4,
+        "gender": "f",
+        "fx": {
+          "formant": 3,
+          "vibrato": 0.15,
+          "vibratoHz": 7,
+          "chorus": 0.3
+        }
+      }
+    },
+    {
+      "id": "creature",
+      "name": "Creature / beast",
+      "group": "Fantasy",
+      "desc": "Growly, rough, dark, trembling.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.3,
+        "speed": 0.3,
+        "depth": 0.8,
+        "tone": 0.2,
+        "breath": 0.6,
+        "rough": 1,
+        "flutter": 0.3,
+        "intonation": 4,
+        "gender": "m",
+        "fx": {
+          "vibrato": 0.3,
+          "vibratoHz": 4,
+          "lowpass": 2500,
+          "tremolo": 0.3,
+          "tremoloHz": 9,
+          "formant": -3
+        }
+      }
+    },
+    {
+      "id": "ghost",
+      "name": "Ghost / whisper",
+      "group": "Fantasy",
+      "desc": "Whispered, airy, long reverb and echo.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.55,
+        "speed": 0.2,
+        "depth": 0.5,
+        "tone": 0.5,
+        "breath": 1,
+        "rough": 0,
+        "flutter": 0.3,
+        "intonation": 2,
+        "gender": "n",
+        "variant": "whisper",
+        "fx": {
+          "reverb": 0.9,
+          "reverbSize": 0.9,
+          "echo": 0.4,
+          "echoSec": 0.25,
+          "highpass": 400
+        }
+      }
+    },
+    {
+      "id": "alien",
+      "name": "Alien",
+      "group": "Fantasy",
+      "desc": "Warbling, metallic, chorused.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.6,
+        "speed": 0.4,
+        "depth": 0.3,
+        "tone": 0.9,
+        "breath": 0,
+        "rough": 0.2,
+        "flutter": 0,
+        "intonation": 4,
+        "gender": "n",
+        "fx": {
+          "vibrato": 0.6,
+          "vibratoHz": 8,
+          "robot": 0.4,
+          "robotHz": 220,
+          "chorus": 0.5
+        }
+      }
+    },
+    {
+      "id": "undead",
+      "name": "Undead / lich",
+      "group": "Fantasy",
+      "desc": "Dry, rasping, hollow.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.25,
+        "speed": 0.22,
+        "depth": 0.7,
+        "tone": 0.6,
+        "breath": 0.7,
+        "rough": 0.9,
+        "flutter": 0.4,
+        "intonation": 1,
+        "gender": "m",
+        "fx": {
+          "highpass": 300,
+          "lowpass": 4000,
+          "echo": 0.3,
+          "echoSec": 0.12,
+          "lofi": 0.15
+        }
+      }
+    },
+    {
+      "id": "robot",
+      "name": "Robot",
+      "group": "Machine",
+      "desc": "Ring-modulated, flat intonation, a touch of lo-fi.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.5,
+        "speed": 0.35,
+        "depth": 0.5,
+        "tone": 0.7,
+        "breath": 0,
+        "rough": 0,
+        "flutter": 0,
+        "intonation": 1,
+        "gender": "n",
+        "fx": {
+          "robot": 0.8,
+          "robotHz": 55,
+          "lofi": 0.2
+        }
+      }
+    },
+    {
+      "id": "retro_computer",
+      "name": "Retro computer (SAM)",
+      "group": "Machine",
+      "desc": "The 1982 sound. Uses the SAM engine.",
+      "voice": {
+        "engine": "sam",
+        "pitch": 0.55,
+        "speed": 0.55,
+        "depth": 0.5,
+        "tone": 0.5,
+        "intonation": 1
+      }
+    },
+    {
+      "id": "sam_elf",
+      "name": "SAM elf",
+      "group": "Machine",
+      "desc": "SAM manual preset: speed 72 pitch 64 throat 110 mouth 160.",
+      "voice": {
+        "engine": "sam",
+        "pitch": 0.75,
+        "speed": 0.67,
+        "depth": 0.57,
+        "tone": 0.63
+      }
+    },
+    {
+      "id": "sam_little_robot",
+      "name": "SAM little robot",
+      "group": "Machine",
+      "desc": "SAM manual preset: throat 190 mouth 190.",
+      "voice": {
+        "engine": "sam",
+        "pitch": 0.78,
+        "speed": 0.55,
+        "depth": 0.25,
+        "tone": 0.75
+      }
+    },
+    {
+      "id": "sam_old_lady",
+      "name": "SAM little old lady",
+      "group": "Machine",
+      "desc": "SAM manual preset: pitch 32 throat 145 mouth 145.",
+      "voice": {
+        "engine": "sam",
+        "pitch": 0.93,
+        "speed": 0.61,
+        "depth": 0.43,
+        "tone": 0.57
+      }
+    },
+    {
+      "id": "sam_et",
+      "name": "SAM extra-terrestrial",
+      "group": "Machine",
+      "desc": "SAM manual preset: speed 100 throat 150 mouth 200.",
+      "voice": {
+        "engine": "sam",
+        "pitch": 0.75,
+        "speed": 0.5,
+        "depth": 0.41,
+        "tone": 0.78
+      }
+    },
+    {
+      "id": "megaphone",
+      "name": "Megaphone / radio",
+      "group": "Machine",
+      "desc": "Band-limited, distorted, dry.",
+      "voice": {
+        "engine": "espeak",
+        "pitch": 0.45,
+        "speed": 0.35,
+        "depth": 0.5,
+        "tone": 0.7,
+        "breath": 0,
+        "rough": 0.3,
+        "flutter": 0,
+        "intonation": 3,
+        "gender": "m",
+        "fx": {
+          "highpass": 700,
+          "lowpass": 2800,
+          "lofi": 0.25,
+          "gain": 1.4
+        }
+      }
+    },
+    {
+      "id": "animalese",
+      "name": "Animalese",
+      "group": "Babble",
+      "desc": "Animal Crossing-style: one blip per letter, quick and high.",
+      "voice": {
+        "engine": "babble",
+        "pitch": 0.7,
+        "speed": 0.8,
+        "depth": 0.3,
+        "tone": 0.6,
+        "breath": 0.05,
+        "rough": 0.2,
+        "intonation": 3,
+        "babbleMode": "letters"
+      }
+    },
+    {
+      "id": "simlish",
+      "name": "Simlish",
+      "group": "Babble",
+      "desc": "Made-up syllables that stay the same for the same word.",
+      "voice": {
+        "engine": "babble",
+        "pitch": 0.55,
+        "speed": 0.55,
+        "depth": 0.5,
+        "tone": 0.5,
+        "breath": 0.1,
+        "rough": 0.25,
+        "intonation": 3,
+        "babbleMode": "simlish"
+      }
+    },
+    {
+      "id": "monster_babble",
+      "name": "Monster babble",
+      "group": "Babble",
+      "desc": "Low, slow, growly gibberish.",
+      "voice": {
+        "engine": "babble",
+        "pitch": 0.2,
+        "speed": 0.35,
+        "depth": 1,
+        "tone": 0.3,
+        "breath": 0.3,
+        "rough": 0.6,
+        "intonation": 2,
+        "babbleMode": "syllables",
+        "fx": {
+          "lowpass": 1800,
+          "tremolo": 0.2,
+          "tremoloHz": 8
+        }
+      }
+    },
+    {
+      "id": "fairy_babble",
+      "name": "Fairy babble",
+      "group": "Babble",
+      "desc": "Tiny, fast, tinkling gibberish.",
+      "voice": {
+        "engine": "babble",
+        "pitch": 0.95,
+        "speed": 0.9,
+        "depth": 0,
+        "tone": 0.9,
+        "breath": 0.1,
+        "rough": 0.3,
+        "intonation": 4,
+        "babbleMode": "letters",
+        "fx": {
+          "chorus": 0.4,
+          "reverb": 0.2
+        }
+      }
+    },
+    {
+      "id": "piper_female",
+      "name": "Natural female (Piper)",
+      "group": "Human",
+      "desc": "Neural reference voice; downloads ~60 MB on first use.",
+      "voice": {
+        "engine": "piper",
+        "variant": "en_US-hfc_female-medium",
+        "pitch": 0.5,
+        "speed": 0.5,
+        "depth": 0.5
+      }
+    },
+    {
+      "id": "piper_male",
+      "name": "Natural male (Piper)",
+      "group": "Human",
+      "desc": "Neural reference voice; downloads ~60 MB on first use.",
+      "voice": {
+        "engine": "piper",
+        "variant": "en_US-hfc_male-medium",
+        "pitch": 0.5,
+        "speed": 0.5,
+        "depth": 0.5
+      }
+    }
+  ]
+}

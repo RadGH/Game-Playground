@@ -7,3 +7,4 @@ playwright-report/
 # Large third-party model files are downloaded on demand (see vendor/README.md)
 vendor/piper/*.onnx
 vendor/piper/*.onnx.json
+.scratch/

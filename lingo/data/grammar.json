@@ -1,0 +1,3968 @@
+{
+  "_doc": "Phrase library. symbols = { name: [entry] }. entry = string | { t: template, tags: [...], w: weight, cond: 'js expression', bind: { key: { type, tags } } }. Symbols starting with _ are helpers, never intents. Tone: dark fantasy, RimWorld-style colonists who can die.",
+  "meta": {
+    "intents": [
+      "greet",
+      "greet_reply",
+      "farewell",
+      "smalltalk",
+      "gossip",
+      "lore",
+      "question",
+      "answer",
+      "compliment",
+      "thanks",
+      "insult",
+      "retort",
+      "threat",
+      "apology",
+      "agree",
+      "disagree",
+      "complain",
+      "brag",
+      "work",
+      "flirt",
+      "flirt_reply",
+      "reject",
+      "combat_bark",
+      "combat_taunt",
+      "combat_hurt",
+      "combat_kill",
+      "combat_flee",
+      "ally_down",
+      "trade_offer",
+      "trade_haggle",
+      "trade_accept",
+      "trade_refuse",
+      "grief",
+      "last_words",
+      "warning",
+      "rally",
+      "drunk",
+      "beg",
+      "pray",
+      "happy",
+      "angry",
+      "sad",
+      "worried"
+    ],
+    "intentDoc": {
+      "greet": "opening line to listener",
+      "greet_reply": "answer to a greeting",
+      "farewell": "closing line",
+      "smalltalk": "weather, food, work, nothing important",
+      "gossip": "about a third person or faction",
+      "lore": "history, gods, magic",
+      "question": "asks the listener something",
+      "answer": "vague answer to a question",
+      "compliment": "praise the listener",
+      "thanks": "gratitude",
+      "insult": "attack the listener verbally",
+      "retort": "answer to an insult",
+      "threat": "promise violence",
+      "apology": "sorry",
+      "agree": "yes / same",
+      "disagree": "no / wrong",
+      "complain": "hunger, tiredness, weather, wounds",
+      "brag": "self praise",
+      "work": "chatter while working",
+      "flirt": "romantic advance",
+      "flirt_reply": "positive answer to flirt",
+      "reject": "negative answer to flirt",
+      "combat_bark": "shouted in battle",
+      "combat_taunt": "to an enemy (foe binding)",
+      "combat_hurt": "just took damage",
+      "combat_kill": "just killed foe",
+      "combat_flee": "running away",
+      "ally_down": "a friend fell (fallen binding)",
+      "trade_offer": "sell/buy (item binding)",
+      "trade_haggle": "argue price",
+      "trade_accept": "deal",
+      "trade_refuse": "no deal",
+      "grief": "mourning (fallen binding)",
+      "last_words": "dying",
+      "warning": "danger nearby (foe binding)",
+      "rally": "encourage allies",
+      "drunk": "in their cups",
+      "beg": "please spare/help me",
+      "pray": "to a deity (god binding)",
+      "happy": "mood line (custom slot first)",
+      "angry": "mood line",
+      "sad": "mood line",
+      "worried": "mood line"
+    }
+  },
+  "symbols": {
+    "greetword": [
+      "Hello",
+      "Hi",
+      {
+        "t": "Hey",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "Well met",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "Good {#timeofday}",
+        "tags": [
+          "formal",
+          "polite"
+        ]
+      },
+      {
+        "t": "Oi",
+        "tags": [
+          "casual",
+          "rude"
+        ]
+      },
+      {
+        "t": "Greetings",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "Ah",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "You",
+        "tags": [
+          "rude",
+          "hostile"
+        ]
+      },
+      {
+        "t": "Look who it is",
+        "tags": [
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "Hail",
+        "tags": [
+          "formal",
+          "archaic"
+        ]
+      },
+      {
+        "t": "Peace",
+        "tags": [
+          "religious",
+          "gentle"
+        ]
+      }
+    ],
+    "farewellword": [
+      "Farewell",
+      "Goodbye",
+      {
+        "t": "See you",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "Later",
+        "tags": [
+          "casual",
+          "short"
+        ]
+      },
+      {
+        "t": "Go well",
+        "tags": [
+          "polite"
+        ]
+      },
+      {
+        "t": "Stay alive",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "Until next time",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "Get lost",
+        "tags": [
+          "rude",
+          "hostile"
+        ]
+      },
+      {
+        "t": "Gods keep you",
+        "tags": [
+          "religious"
+        ]
+      },
+      {
+        "t": "Don't die",
+        "tags": [
+          "casual",
+          "blunt"
+        ]
+      }
+    ],
+    "yesword": [
+      "Yes",
+      {
+        "t": "Aye",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "Indeed",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "Sure",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "Fine",
+        "tags": [
+          "short",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Of course",
+        "tags": [
+          "polite"
+        ]
+      },
+      {
+        "t": "Obviously",
+        "tags": [
+          "sarcastic"
+        ]
+      }
+    ],
+    "noword": [
+      "No",
+      {
+        "t": "Nah",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "Certainly not",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "Not a chance",
+        "tags": [
+          "confident"
+        ]
+      },
+      {
+        "t": "Piss off",
+        "tags": [
+          "crude",
+          "rude"
+        ]
+      },
+      {
+        "t": "I'd rather not",
+        "tags": [
+          "polite",
+          "timid"
+        ]
+      }
+    ],
+    "thanksword": [
+      "Thank you",
+      {
+        "t": "Thanks",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "My thanks",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "Cheers",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "I owe you",
+        "tags": [
+          "honor"
+        ]
+      },
+      {
+        "t": "You have my gratitude",
+        "tags": [
+          "formal",
+          "long"
+        ]
+      }
+    ],
+    "timeofday": [
+      "morning",
+      "day",
+      "evening"
+    ],
+    "intensifier": [
+      "very",
+      {
+        "t": "bloody",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "damned",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "terribly",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "so",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "utterly",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "right",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "properly",
+        "tags": [
+          "casual"
+        ]
+      }
+    ],
+    "curse": [
+      {
+        "t": "Damn it",
+        "w": 2
+      },
+      {
+        "t": "Blast",
+        "tags": [
+          "polite"
+        ]
+      },
+      {
+        "t": "Rot and ruin",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{$deity.poss} teeth",
+        "tags": [
+          "blasphemy",
+          "crude"
+        ]
+      },
+      {
+        "t": "Piss and vinegar",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "Seven hells",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "Bleeding {$creature.pl}",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "Ashes",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "Bother",
+        "tags": [
+          "polite",
+          "timid"
+        ]
+      }
+    ],
+    "oath": [
+      {
+        "t": "by {$deity}",
+        "tags": [
+          "religious",
+          "oath"
+        ],
+        "w": 2
+      },
+      {
+        "t": "on my {~mother's|father's} grave",
+        "tags": [
+          "oath"
+        ]
+      },
+      {
+        "t": "by my blade",
+        "tags": [
+          "violent",
+          "oath"
+        ]
+      },
+      {
+        "t": "by the {$place.adj} stones",
+        "tags": [
+          "lore",
+          "oath"
+        ]
+      },
+      {
+        "t": "I swear it",
+        "tags": [
+          "short",
+          "oath"
+        ]
+      },
+      {
+        "t": "on my honor",
+        "tags": [
+          "honor",
+          "oath"
+        ]
+      },
+      {
+        "t": "by every coin I own",
+        "tags": [
+          "money",
+          "oath"
+        ]
+      }
+    ],
+    "endearment": [
+      {
+        "t": "friend",
+        "tags": [
+          "friendly"
+        ]
+      },
+      {
+        "t": "my dear",
+        "tags": [
+          "romantic",
+          "flowery"
+        ]
+      },
+      {
+        "t": "love",
+        "tags": [
+          "casual",
+          "romantic"
+        ]
+      },
+      {
+        "t": "old thing",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "you beautiful disaster",
+        "tags": [
+          "flirt",
+          "joke"
+        ]
+      },
+      {
+        "t": "{listener.name}",
+        "w": 2
+      }
+    ],
+    "insultnoun": [
+      "fool",
+      {
+        "t": "coward",
+        "tags": [
+          "aggressive"
+        ]
+      },
+      {
+        "t": "wretch",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "sack of {$creature} guts",
+        "tags": [
+          "crude",
+          "gore"
+        ]
+      },
+      {
+        "t": "half-wit"
+      },
+      {
+        "t": "worm",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "{listener.race.sg}",
+        "tags": [
+          "hostile",
+          "cruel"
+        ],
+        "cond": "!sameRace"
+      },
+      {
+        "t": "mud-eater",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "oathbreaker",
+        "tags": [
+          "honor"
+        ]
+      },
+      {
+        "t": "thief",
+        "tags": [
+          "suspicious"
+        ]
+      },
+      {
+        "t": "bootlicker",
+        "tags": [
+          "rude"
+        ]
+      },
+      {
+        "t": "carrion",
+        "tags": [
+          "cruel",
+          "gore"
+        ]
+      }
+    ],
+    "insultadj": [
+      "useless",
+      {
+        "t": "spineless",
+        "tags": [
+          "aggressive"
+        ]
+      },
+      {
+        "t": "pox-ridden",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "witless"
+      },
+      {
+        "t": "gutless",
+        "tags": [
+          "aggressive"
+        ]
+      },
+      {
+        "t": "greasy",
+        "tags": [
+          "crude"
+        ]
+      },
+      {
+        "t": "pathetic",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "mewling",
+        "tags": [
+          "cruel",
+          "formal"
+        ]
+      },
+      {
+        "t": "thrice-damned",
+        "tags": [
+          "formal"
+        ]
+      }
+    ],
+    "praiseadj": [
+      "fine",
+      {
+        "t": "brave",
+        "tags": [
+          "heroic"
+        ]
+      },
+      {
+        "t": "clever"
+      },
+      {
+        "t": "steady"
+      },
+      {
+        "t": "sharp"
+      },
+      {
+        "t": "kind",
+        "tags": [
+          "gentle"
+        ]
+      },
+      {
+        "t": "handsome",
+        "tags": [
+          "flirt"
+        ]
+      },
+      {
+        "t": "formidable",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "decent",
+        "tags": [
+          "blunt"
+        ]
+      }
+    ],
+    "bodyharm": [
+      {
+        "t": "break your {$bodypart.pl}"
+      },
+      {
+        "t": "take your {$bodypart}",
+        "tags": [
+          "gore"
+        ]
+      },
+      {
+        "t": "feed you to the {$creature.pl}",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "open you from throat to belt",
+        "tags": [
+          "gore",
+          "violent"
+        ]
+      },
+      {
+        "t": "put you in the ground"
+      },
+      {
+        "t": "make you eat your own {$bodypart.pl}",
+        "tags": [
+          "gore",
+          "crude"
+        ]
+      },
+      {
+        "t": "end you",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "see you hanged",
+        "tags": [
+          "formal"
+        ]
+      }
+    ],
+    "weathertalk": [
+      {
+        "t": "the {$weather} won't let up"
+      },
+      {
+        "t": "this {$weather} gets into your bones"
+      },
+      {
+        "t": "at least the {$weather} keeps the {$creature.pl} away"
+      },
+      {
+        "t": "I've seen worse {$weather}, but not by much"
+      },
+      {
+        "t": "{$weather} again. Of course."
+      }
+    ],
+    "foodtalk": [
+      {
+        "t": "the {$food} was {~cold|burnt|mostly gristle|edible, barely}"
+      },
+      {
+        "t": "I'd kill for {$food.a}",
+        "tags": [
+          "hunger"
+        ]
+      },
+      {
+        "t": "somebody's been at the {$food} again",
+        "tags": [
+          "suspicious"
+        ]
+      },
+      {
+        "t": "we're down to {$food} and prayers",
+        "tags": [
+          "gloomy"
+        ]
+      }
+    ],
+    "worktalk": [
+      {
+        "t": "the {$place} needs {~shoring up|clearing|a new roof|burning down}"
+      },
+      {
+        "t": "somebody left {$item.a} out in the {$weather}"
+      },
+      {
+        "t": "the {$item.pl} won't sort themselves"
+      },
+      {
+        "t": "three days on the {$place} and my {$bodypart.pl} are done"
+      }
+    ],
+    "greet": [
+      {
+        "t": "{#greetword}, {listener.name}.",
+        "w": 3
+      },
+      {
+        "t": "{#greetword}, {listener.name}. How {~are you|goes it|fare you}?",
+        "tags": [
+          "polite"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. Good to see you still breathing.",
+        "tags": [
+          "casual",
+          "friendly",
+          "joke"
+        ]
+      },
+      {
+        "t": "{#greetword}. {listener.name}. Didn't expect you back.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "{#greetword}, {#endearment}.",
+        "tags": [
+          "friendly"
+        ],
+        "cond": "opinion > 0.2"
+      },
+      {
+        "t": "{#greetword}, {listener.race.sg}.",
+        "tags": [
+          "hostile",
+          "rude"
+        ],
+        "cond": "!sameRace && opinion < 0.2"
+      },
+      {
+        "t": "{#greetword}, {listener.name}. Still alive, then. {~Shame.|Pity.|Well.}",
+        "tags": [
+          "hostile",
+          "cruel"
+        ],
+        "cond": "opinion < -0.3"
+      },
+      {
+        "t": "{#greetword}. I'd say it's good to see you, {listener.name}, but we both know I'd be lying.",
+        "tags": [
+          "sarcastic",
+          "hostile",
+          "long"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. The {$weather} suits you.",
+        "tags": [
+          "sarcastic",
+          "joke"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. {#oath.cap}, you look terrible.",
+        "tags": [
+          "blunt",
+          "casual"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. Come, sit. The fire's warm and the {$food} is {~almost|nearly|technically} hot.",
+        "tags": [
+          "gentle",
+          "friendly",
+          "long"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. I was just thinking of you. {~Not kindly.|Fondly, for once.|Mostly about what you owe me.}",
+        "tags": [
+          "joke",
+          "long"
+        ]
+      },
+      {
+        "t": "{#greetword}. {listener.name}. {~What do you want?|Speak.|Be quick.}",
+        "tags": [
+          "gruff",
+          "short",
+          "blunt"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. Any news from {$place}?",
+        "tags": [
+          "long",
+          "polite"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. May {$deity} keep the {$weather} off you.",
+        "tags": [
+          "religious",
+          "polite"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. {~Um, |Er, }it's good to, um, see you.",
+        "tags": [
+          "timid"
+        ]
+      },
+      {
+        "t": "{listener.name}. {~I have a bad feeling about today.|Something's wrong. I can smell it.}",
+        "tags": [
+          "worried",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}, you {#praiseadj} {listener.race.sg}.",
+        "tags": [
+          "compliment",
+          "friendly"
+        ],
+        "cond": "opinion > 0"
+      },
+      {
+        "t": "{#greetword}, {listener.name}. Have you eaten? You should eat.",
+        "tags": [
+          "gentle",
+          "food"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. I trust {$faction} hasn't hanged anyone yet today.",
+        "tags": [
+          "lore",
+          "sarcastic",
+          "long"
+        ]
+      }
+    ],
+    "greet_reply": [
+      {
+        "t": "{#greetword}, {listener.name}.",
+        "w": 2
+      },
+      {
+        "t": "{listener.name}.",
+        "tags": [
+          "short"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Well enough. You?",
+        "tags": [
+          "casual",
+          "short"
+        ]
+      },
+      {
+        "t": "Alive. That's the most I'll claim.",
+        "tags": [
+          "gloomy",
+          "blunt"
+        ]
+      },
+      {
+        "t": "{#greetword}. I'm {~tired|hungry|cold|still here}, since you ask.",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "Same as ever. Nothing changes here except the dead.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "{#greetword}! Good, good. Sit, sit.",
+        "tags": [
+          "happy",
+          "friendly"
+        ]
+      },
+      {
+        "t": "Mm.",
+        "tags": [
+          "short",
+          "gruff"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. I've no time for pleasantries.",
+        "tags": [
+          "blunt",
+          "formal"
+        ]
+      },
+      {
+        "t": "Don't 'hello' me. Where were you last night?",
+        "tags": [
+          "hostile",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "{#greetword}. I'll be honest, I hoped it was someone else.",
+        "tags": [
+          "sarcastic",
+          "hostile"
+        ]
+      },
+      {
+        "t": "Oh! {listener.name}. You startled me. Sorry. Sorry.",
+        "tags": [
+          "timid",
+          "worried"
+        ]
+      },
+      {
+        "t": "{#greetword}, {#endearment}. Better now that you're here.",
+        "tags": [
+          "romantic",
+          "friendly"
+        ],
+        "cond": "opinion > 0.3"
+      },
+      {
+        "t": "{#greetword}. Is it true about {$person}? Never mind. Later.",
+        "tags": [
+          "gossip",
+          "long"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. {$deity} smiles on the day.",
+        "tags": [
+          "religious",
+          "happy"
+        ]
+      }
+    ],
+    "farewell": [
+      {
+        "t": "{#farewellword}, {listener.name}.",
+        "w": 3
+      },
+      {
+        "t": "{#farewellword}.",
+        "tags": [
+          "short"
+        ],
+        "w": 2
+      },
+      {
+        "t": "{#farewellword}, {listener.name}. Watch the {$place} road; {$creature.pl} have been seen.",
+        "tags": [
+          "long",
+          "worried"
+        ]
+      },
+      {
+        "t": "{#farewellword}, {#endearment}.",
+        "tags": [
+          "friendly"
+        ],
+        "cond": "opinion > 0.2"
+      },
+      {
+        "t": "{#farewellword}. Try not to bleed on anything I own.",
+        "tags": [
+          "sarcastic",
+          "joke"
+        ]
+      },
+      {
+        "t": "{#farewellword}, {listener.name}. We'll speak again, if the {$weather} lets us.",
+        "tags": [
+          "polite"
+        ]
+      },
+      {
+        "t": "{#farewellword}. And {listener.name}? {~Eat something.|Sleep.|Wash.}",
+        "tags": [
+          "gentle",
+          "blunt"
+        ]
+      },
+      {
+        "t": "I'm done here.",
+        "tags": [
+          "gruff",
+          "blunt",
+          "short"
+        ]
+      },
+      {
+        "t": "{#farewellword}, {listener.name}. {$deity} walk with you.",
+        "tags": [
+          "religious"
+        ]
+      },
+      {
+        "t": "Go. Before I change my mind about you.",
+        "tags": [
+          "hostile",
+          "threat"
+        ],
+        "cond": "opinion < -0.2"
+      },
+      {
+        "t": "{#farewellword}, {listener.name}. If you see {$person}, tell {~them|him|her} nothing.",
+        "tags": [
+          "suspicious",
+          "long"
+        ]
+      },
+      {
+        "t": "That's enough talk. Talk doesn't fill bellies.",
+        "tags": [
+          "gruff",
+          "food"
+        ]
+      },
+      {
+        "t": "{#farewellword}. I mean it, {listener.name}. Come back.",
+        "tags": [
+          "gentle",
+          "worried",
+          "earnest"
+        ]
+      },
+      {
+        "t": "{#farewellword}, {listener.name}. Next time, bring {$food}.",
+        "tags": [
+          "food",
+          "casual"
+        ]
+      }
+    ],
+    "smalltalk": [
+      {
+        "t": "{#weathertalk.cap}.",
+        "w": 2
+      },
+      {
+        "t": "{#foodtalk.cap}.",
+        "w": 2
+      },
+      {
+        "t": "{#worktalk.cap}.",
+        "w": 2
+      },
+      {
+        "t": "Quiet today. Too quiet. I don't trust it.",
+        "tags": [
+          "suspicious",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Heard a {$creature} in the night. Or a {$creature2}. Either way, I didn't sleep.",
+        "tags": [
+          "long",
+          "worried"
+        ]
+      },
+      {
+        "t": "{$person} says the {$weather} will break by {#timeofday}. {$person} says a lot of things.",
+        "tags": [
+          "sarcastic",
+          "long"
+        ]
+      },
+      {
+        "t": "Another day above ground. That's a good day.",
+        "tags": [
+          "hopeful",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Did you see the sky over {$place}? Red as a butcher's apron.",
+        "tags": [
+          "lore",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "I keep thinking about {$food}. Just... {$food}.",
+        "tags": [
+          "hunger",
+          "food"
+        ]
+      },
+      {
+        "t": "My {$bodypart} aches when the {$weather} comes. Old wound. Older than you.",
+        "tags": [
+          "long"
+        ]
+      },
+      {
+        "t": "Nothing to report. Nothing ever is, until it's too late.",
+        "tags": [
+          "gloomy",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "The {$item} I bought off {$person} broke already. Never buy from a {$person.race.sg}.",
+        "tags": [
+          "rude",
+          "money",
+          "long"
+        ]
+      },
+      {
+        "t": "We should fix the {$place} before the {$weather} gets worse.",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "You ever wonder what {$deity} makes of all this? No? Just me, then.",
+        "tags": [
+          "religious",
+          "long"
+        ]
+      },
+      {
+        "t": "I found {$item.a} in the mud. Somebody's, once. Nobody's now.",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Fine {#timeofday} for it, whatever 'it' is.",
+        "tags": [
+          "casual",
+          "joke"
+        ]
+      },
+      {
+        "t": "Counted the stores again. We'll last the month. Probably.",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "Saw a {$creature} the size of a cart out past the {$place}. Didn't stay to measure.",
+        "tags": [
+          "long",
+          "joke"
+        ]
+      }
+    ],
+    "gossip": [
+      {
+        "t": "Heard {$person} got caught with {$item.a} that wasn't theirs.",
+        "tags": [
+          "suspicious"
+        ],
+        "w": 2
+      },
+      {
+        "t": "{$person} hasn't been the same since {$place}. Nobody says it, but we all see it.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "They say {$faction} is recruiting. Paying in {$item.pl}, if you believe it.",
+        "tags": [
+          "money",
+          "trade"
+        ]
+      },
+      {
+        "t": "{$person} and {$person2}? Oh, everyone knows. Everyone except {$person2}.",
+        "tags": [
+          "joke",
+          "romantic",
+          "long"
+        ]
+      },
+      {
+        "t": "Don't trust {$person}. I've seen {$person.them} talking to {$faction}.",
+        "tags": [
+          "suspicious",
+          "hostile"
+        ]
+      },
+      {
+        "t": "{$person} drank a whole cask of {$food} and fought a {$creature}. Lost. Badly.",
+        "tags": [
+          "joke",
+          "drink",
+          "long"
+        ]
+      },
+      {
+        "t": "Word is {$faction} lost {~half their people|a whole caravan|their leader} to the {$creature.pl} near {$place}.",
+        "tags": [
+          "lore",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "{$person} prays to {$deity} now. Since the funeral. Can't blame {$person.them}.",
+        "tags": [
+          "religious",
+          "grief"
+        ]
+      },
+      {
+        "t": "I'm not one to talk, but {$person} owes half of {$place} money.",
+        "tags": [
+          "money",
+          "joke"
+        ]
+      },
+      {
+        "t": "They found {$person.poss} {$item} in the {$place}. Just the {$item}.",
+        "tags": [
+          "gloomy",
+          "suspicious",
+          "short"
+        ]
+      },
+      {
+        "t": "{$person} is a {#insultadj} {#insultnoun}, and I'll say it to {$person.their} face.",
+        "tags": [
+          "rude",
+          "insult",
+          "confident"
+        ]
+      },
+      {
+        "t": "{$person} did right by me once. I don't forget that.",
+        "tags": [
+          "loyal",
+          "honor"
+        ]
+      },
+      {
+        "t": "Between us: {$faction} is finished. The {$creature.pl} saw to that.",
+        "tags": [
+          "lore",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{$person} thinks {$person.they} can cast {$spell}. Watched {$person.them} try. We'll need a new {$place}.",
+        "tags": [
+          "joke",
+          "long"
+        ]
+      }
+    ],
+    "lore": [
+      {
+        "t": "Before {$concept}, {$place} was {~green|whole|ours}. My grandmother remembered.",
+        "tags": [
+          "lore",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{$deity} made the {$race.pl} first, they say. {~Made them badly, too.|You'd not know it to look at them.|A first draft.}",
+        "tags": [
+          "lore",
+          "sarcastic",
+          "long"
+        ]
+      },
+      {
+        "t": "{$spell.cap} was forbidden after {$concept}. There's a reason.",
+        "tags": [
+          "lore",
+          "worried"
+        ]
+      },
+      {
+        "t": "The {$race.pl} have a word for this {$weather}. It means 'the sky mourning'.",
+        "tags": [
+          "lore",
+          "flowery"
+        ]
+      },
+      {
+        "t": "{$faction} once held every road from {$place} to {$place2}. Now they hold a ditch.",
+        "tags": [
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "My people, {speaker.race.people}, have a saying: {~'the grave is patient'|'sharpen the blade, not the tongue'|'every debt is paid in the end'}.",
+        "tags": [
+          "lore",
+          "formal",
+          "long"
+        ]
+      },
+      {
+        "t": "There are older things than {$deity} under {$place}. Pray you never learn their names.",
+        "tags": [
+          "lore",
+          "gloomy",
+          "religious"
+        ]
+      },
+      {
+        "t": "{$item.pl.cap} like this were made in {$place} before {$concept}. Nobody remembers how.",
+        "tags": [
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "Every {$race.sg} child learns of {$concept}. Every {$race2.sg} child learns to blame us for it.",
+        "tags": [
+          "lore",
+          "hostile",
+          "long"
+        ]
+      },
+      {
+        "t": "{$creature.pl.cap} weren't always this size. Something is feeding them.",
+        "tags": [
+          "lore",
+          "worried"
+        ]
+      },
+      {
+        "t": "In {lang_place}, the dead are not buried. They are asked to leave.",
+        "tags": [
+          "lore",
+          "joke",
+          "flowery"
+        ],
+        "bind": {
+          "lang_place": {
+            "type": "place",
+            "tags": [
+              "city"
+            ]
+          }
+        }
+      },
+      {
+        "t": "{$deity} does not answer. {~That is the answer.|Never has.|Perhaps that is mercy.}",
+        "tags": [
+          "lore",
+          "gloomy",
+          "religious",
+          "short"
+        ]
+      }
+    ],
+    "question": [
+      {
+        "t": "Where were you when the {$creature.pl} came?",
+        "tags": [
+          "suspicious"
+        ]
+      },
+      {
+        "t": "Do you believe in {$deity}, {listener.name}? Honestly?",
+        "tags": [
+          "religious",
+          "long"
+        ]
+      },
+      {
+        "t": "What would you do with {$item.a}, if you had one?",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "Have you ever killed a {listener.race.sg}? Your own kind?",
+        "tags": [
+          "violent",
+          "blunt"
+        ],
+        "cond": "!sameRace || chance(0.3)"
+      },
+      {
+        "t": "Why do you stay here, {listener.name}?",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "Is it true you can cast {$spell}?",
+        "tags": [
+          "lore"
+        ]
+      },
+      {
+        "t": "What's {$person} really like? You've known {$person.them} longest.",
+        "tags": [
+          "gossip"
+        ]
+      },
+      {
+        "t": "If you had to choose, {listener.name}: {$food} or {$food2}, for the rest of your life?",
+        "tags": [
+          "joke",
+          "food",
+          "long"
+        ]
+      },
+      {
+        "t": "Who do you trust here? Name one.",
+        "tags": [
+          "suspicious",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Are you afraid of dying, {listener.name}?",
+        "tags": [
+          "gloomy",
+          "earnest"
+        ]
+      },
+      {
+        "t": "How much for the {$item}? And don't say 'priceless'.",
+        "tags": [
+          "money",
+          "trade"
+        ]
+      }
+    ],
+    "answer": [
+      {
+        "t": "{~That's a long story.|Ask me when I'm drunk.|Not here.}",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "Honestly? I don't know anymore.",
+        "tags": [
+          "gloomy",
+          "earnest"
+        ]
+      },
+      {
+        "t": "{#yesword}. And no. It's complicated.",
+        "tags": [
+          "long"
+        ]
+      },
+      {
+        "t": "Why do you want to know?",
+        "tags": [
+          "suspicious"
+        ]
+      },
+      {
+        "t": "I could tell you, but then {$faction} would want a word.",
+        "tags": [
+          "joke",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "{#noword}. Next question.",
+        "tags": [
+          "blunt",
+          "short"
+        ]
+      },
+      {
+        "t": "I've thought about it every night since {$place}.",
+        "tags": [
+          "gloomy",
+          "earnest"
+        ]
+      },
+      {
+        "t": "Ha! You'd have to pay me for that one.",
+        "tags": [
+          "money",
+          "joke"
+        ]
+      },
+      {
+        "t": "{#oath.cap}, that's the first honest question anyone's asked me in a year.",
+        "tags": [
+          "long",
+          "earnest"
+        ]
+      }
+    ],
+    "compliment": [
+      {
+        "t": "You're {#praiseadj}, {listener.name}. Don't let it go to your head.",
+        "tags": [
+          "compliment"
+        ],
+        "w": 2
+      },
+      {
+        "t": "That was {#praiseadj} work with the {$item}.",
+        "tags": [
+          "compliment"
+        ]
+      },
+      {
+        "t": "I'd want you beside me in {$place}. Not many I'd say that of.",
+        "tags": [
+          "compliment",
+          "honor",
+          "long"
+        ]
+      },
+      {
+        "t": "You've got {~good hands|a steady eye|a hard head|a clean cut}, {listener.name}.",
+        "tags": [
+          "compliment",
+          "blunt"
+        ]
+      },
+      {
+        "t": "For a {listener.race.sg}, you're all right.",
+        "tags": [
+          "compliment",
+          "rude",
+          "joke"
+        ],
+        "cond": "!sameRace"
+      },
+      {
+        "t": "{listener.name}, you are the finest {listener.race.sg} I have had the honor to know.",
+        "tags": [
+          "compliment",
+          "formal",
+          "flowery",
+          "long"
+        ]
+      },
+      {
+        "t": "You held the line when {$person} ran. I saw.",
+        "tags": [
+          "compliment",
+          "heroic"
+        ]
+      },
+      {
+        "t": "Anyone else would've left me in the {$place}. You didn't.",
+        "tags": [
+          "compliment",
+          "loyal",
+          "earnest"
+        ]
+      },
+      {
+        "t": "You cook {$food} better than my mother, and she was a {~witch|saint|professional}.",
+        "tags": [
+          "compliment",
+          "food",
+          "joke"
+        ]
+      },
+      {
+        "t": "Your {$bodypart.pl} are... nice. Very nice {$bodypart.pl}.",
+        "tags": [
+          "compliment",
+          "flirt",
+          "joke"
+        ]
+      }
+    ],
+    "thanks": [
+      {
+        "t": "{#thanksword}, {listener.name}.",
+        "w": 3
+      },
+      {
+        "t": "{#thanksword}. I won't forget it.",
+        "tags": [
+          "honor",
+          "loyal"
+        ]
+      },
+      {
+        "t": "{#thanksword}. {~Don't expect it to happen again.|Don't tell anyone I said that.}",
+        "tags": [
+          "gruff",
+          "joke"
+        ]
+      },
+      {
+        "t": "{#thanksword}, {#endearment}.",
+        "tags": [
+          "friendly"
+        ]
+      },
+      {
+        "t": "{#thanksword}. {$deity} bless you for it.",
+        "tags": [
+          "religious"
+        ]
+      },
+      {
+        "t": "{#thanksword}. I'd have been {$creature} food without you.",
+        "tags": [
+          "long",
+          "joke"
+        ]
+      },
+      {
+        "t": "{#thanksword}... I suppose.",
+        "tags": [
+          "gloomy",
+          "rude"
+        ]
+      },
+      {
+        "t": "{#thanksword}. How much do I owe you?",
+        "tags": [
+          "money",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "{#thanksword}. Keep the {$item}. Consider us square, and then some.",
+        "tags": [
+          "generous",
+          "friendly"
+        ]
+      }
+    ],
+    "insult": [
+      {
+        "t": "You {#insultadj} {#insultnoun}.",
+        "tags": [
+          "insult"
+        ],
+        "w": 3
+      },
+      {
+        "t": "{listener.name}, you {#insultadj} {#insultnoun}, get out of my sight.",
+        "tags": [
+          "insult",
+          "hostile"
+        ]
+      },
+      {
+        "t": "Your mother was a {$creature} and your father apologised to her.",
+        "tags": [
+          "insult",
+          "crude",
+          "joke"
+        ]
+      },
+      {
+        "t": "I've scraped better than you off my {$item}.",
+        "tags": [
+          "insult",
+          "crude"
+        ]
+      },
+      {
+        "t": "You are a {#insultadj} stain on {listener.race.people}.",
+        "tags": [
+          "insult",
+          "cruel",
+          "formal"
+        ]
+      },
+      {
+        "t": "Every {listener.race.sg} I ever met was a {#insultnoun}. You're no exception.",
+        "tags": [
+          "insult",
+          "hostile"
+        ],
+        "cond": "!sameRace"
+      },
+      {
+        "t": "Shut your {$food}-hole, {#insultnoun}.",
+        "tags": [
+          "insult",
+          "crude",
+          "casual"
+        ]
+      },
+      {
+        "t": "If brains were {$food}, you'd starve.",
+        "tags": [
+          "insult",
+          "joke",
+          "food"
+        ]
+      },
+      {
+        "t": "{$person} said you were a {#insultnoun}. I defended you. I was wrong.",
+        "tags": [
+          "insult",
+          "long",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "Go cast {$spell} on yourself. See if it helps.",
+        "tags": [
+          "insult",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "You are beneath contempt, and contempt is beneath me. So.",
+        "tags": [
+          "insult",
+          "formal",
+          "pompous"
+        ]
+      },
+      {
+        "t": "I'd call you a {#insultnoun}, but {#insultnoun.pl} have their uses.",
+        "tags": [
+          "insult",
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "Say that again and I'll {#bodyharm}.",
+        "tags": [
+          "insult",
+          "threat",
+          "violent"
+        ]
+      },
+      {
+        "t": "Look at you. Just look at you.",
+        "tags": [
+          "insult",
+          "short",
+          "cruel"
+        ]
+      },
+      {
+        "t": "You'd sell your own {$bodypart} to {$faction} for {$item.a}.",
+        "tags": [
+          "insult",
+          "money",
+          "long"
+        ]
+      },
+      {
+        "t": "{#curse.cap}, you're {#intensifier} {#insultadj}.",
+        "tags": [
+          "insult",
+          "casual"
+        ]
+      }
+    ],
+    "retort": [
+      {
+        "t": "Say that again.",
+        "tags": [
+          "threat",
+          "short",
+          "confident"
+        ]
+      },
+      {
+        "t": "Big words from a {#insultnoun}.",
+        "tags": [
+          "insult"
+        ]
+      },
+      {
+        "t": "I've been called worse by better.",
+        "tags": [
+          "confident",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "At least I'm not a {listener.race.sg}.",
+        "tags": [
+          "rude",
+          "hostile"
+        ],
+        "cond": "!sameRace"
+      },
+      {
+        "t": "...I'm sorry. I'm sorry. Please don't.",
+        "tags": [
+          "timid",
+          "cowardly"
+        ]
+      },
+      {
+        "t": "Is that all? {$person} does it better. Drunk.",
+        "tags": [
+          "sarcastic",
+          "joke"
+        ]
+      },
+      {
+        "t": "Keep talking. My {$item} is listening.",
+        "tags": [
+          "threat",
+          "violent"
+        ]
+      },
+      {
+        "t": "You're right. And I hate you for it.",
+        "tags": [
+          "gloomy",
+          "earnest"
+        ]
+      },
+      {
+        "t": "Ha! {#oath.cap}, you've got spine. I'll give you that.",
+        "tags": [
+          "joke",
+          "confident"
+        ]
+      },
+      {
+        "t": "I won't dignify that. I will remember it.",
+        "tags": [
+          "formal",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Careful. Last {#insultnoun} who spoke to me like that is feeding {$creature.pl}.",
+        "tags": [
+          "threat",
+          "gore",
+          "long"
+        ]
+      },
+      {
+        "t": "Fine. Fine! Everyone's against me. Fine.",
+        "tags": [
+          "worried",
+          "gloomy"
+        ]
+      }
+    ],
+    "threat": [
+      {
+        "t": "Cross me again and I'll {#bodyharm}.",
+        "tags": [
+          "threat",
+          "violent"
+        ],
+        "w": 2
+      },
+      {
+        "t": "I'll {#bodyharm}, {listener.name}. {#oath.cap}.",
+        "tags": [
+          "threat",
+          "violent"
+        ]
+      },
+      {
+        "t": "Touch my {$item} again. Go on. I want you to.",
+        "tags": [
+          "threat",
+          "confident"
+        ]
+      },
+      {
+        "t": "There's a shallow grave near {$place} with your name on it.",
+        "tags": [
+          "threat",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "I have buried better {listener.race.pl} than you, and I did not weep.",
+        "tags": [
+          "threat",
+          "formal",
+          "cruel"
+        ]
+      },
+      {
+        "t": "One more word. One. And we'll see what {$deity} thinks of you.",
+        "tags": [
+          "threat",
+          "religious"
+        ]
+      },
+      {
+        "t": "I won't kill you. I'll just make sure you wish I had.",
+        "tags": [
+          "threat",
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "Run. Now. While you still can.",
+        "tags": [
+          "threat",
+          "short"
+        ]
+      },
+      {
+        "t": "Leave, or I'll feed you to the {$creature.pl} a {$bodypart} at a time.",
+        "tags": [
+          "threat",
+          "gore",
+          "cruel"
+        ]
+      },
+      {
+        "t": "I'm warning you. I— I mean it. I do.",
+        "tags": [
+          "threat",
+          "timid"
+        ]
+      }
+    ],
+    "apology": [
+      {
+        "t": "I'm sorry, {listener.name}.",
+        "w": 3
+      },
+      {
+        "t": "I was wrong. There. Don't make me say it twice.",
+        "tags": [
+          "gruff",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Forgive me. It was the {~ale|hunger|fear|{$weather}} talking.",
+        "tags": [
+          "casual",
+          "drink"
+        ]
+      },
+      {
+        "t": "I apologise. It was beneath me.",
+        "tags": [
+          "formal",
+          "honor"
+        ]
+      },
+      {
+        "t": "Sorry. Sorry, sorry. I didn't mean it. I never mean it.",
+        "tags": [
+          "timid",
+          "worried"
+        ]
+      },
+      {
+        "t": "I shouldn't have said that about your {$bodypart.pl}.",
+        "tags": [
+          "joke",
+          "casual"
+        ]
+      },
+      {
+        "t": "You deserved better from me. {$deity} knows I know it.",
+        "tags": [
+          "religious",
+          "earnest"
+        ]
+      },
+      {
+        "t": "...Sorry.",
+        "tags": [
+          "short"
+        ]
+      }
+    ],
+    "agree": [
+      {
+        "t": "{#yesword}.",
+        "tags": [
+          "short"
+        ],
+        "w": 3
+      },
+      {
+        "t": "{#yesword}, exactly.",
+        "tags": [
+          "casual"
+        ]
+      },
+      {
+        "t": "{#yesword}. I've said the same to {$person}.",
+        "tags": [
+          "gossip"
+        ]
+      },
+      {
+        "t": "{#yesword}. {#oath.cap}, {#yesword.lower}.",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "You're not wrong. For once.",
+        "tags": [
+          "sarcastic",
+          "joke"
+        ]
+      },
+      {
+        "t": "{#yesword}. Couldn't have said it better. Wouldn't have tried.",
+        "tags": [
+          "blunt",
+          "joke"
+        ]
+      },
+      {
+        "t": "Agreed. Let's not waste words on it.",
+        "tags": [
+          "formal",
+          "short"
+        ]
+      },
+      {
+        "t": "{#yesword}, {#yesword.lower}. Whatever you say.",
+        "tags": [
+          "timid",
+          "gloomy"
+        ]
+      }
+    ],
+    "disagree": [
+      {
+        "t": "{#noword}.",
+        "tags": [
+          "short"
+        ],
+        "w": 3
+      },
+      {
+        "t": "{#noword}. You're wrong.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "{#noword}. That's {$faction} talk.",
+        "tags": [
+          "suspicious"
+        ]
+      },
+      {
+        "t": "With respect, {listener.name}: {#noword.lower}.",
+        "tags": [
+          "formal",
+          "polite"
+        ]
+      },
+      {
+        "t": "{#noword}. And if you believe that, I've {$item.a} to sell you.",
+        "tags": [
+          "sarcastic",
+          "money",
+          "joke"
+        ]
+      },
+      {
+        "t": "I... don't think that's right. But what do I know.",
+        "tags": [
+          "timid"
+        ]
+      },
+      {
+        "t": "{#noword}. {#noword}. A thousand times {#noword.lower}.",
+        "tags": [
+          "long",
+          "flowery"
+        ]
+      },
+      {
+        "t": "That's the {$weather} talking, not you.",
+        "tags": [
+          "gentle",
+          "casual"
+        ]
+      },
+      {
+        "t": "{#noword}, and I'll {#bodyharm} if you say it again.",
+        "tags": [
+          "threat",
+          "violent"
+        ]
+      }
+    ],
+    "complain": [
+      {
+        "t": "I'm starving. Actually starving. Not the pretty kind.",
+        "tags": [
+          "hunger",
+          "food"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Haven't slept in {~two|three|four} days. The {$creature.pl} don't sleep, so why should I.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "{#weathertalk.cap}, and my {$bodypart} is {~throbbing|weeping|useless}.",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{$person} got the last of the {$food}. Again. Funny how that works.",
+        "tags": [
+          "suspicious",
+          "food",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "My {$bodypart} still hasn't healed from {$place}. It won't, will it?",
+        "tags": [
+          "worried",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Work, eat {$food}, sleep in the {$weather}, work. That's the whole song.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "{#curse.cap}. This {$item} is worthless. {$person} sold me scrap.",
+        "tags": [
+          "money",
+          "rude"
+        ]
+      },
+      {
+        "t": "I miss {~real bread|hot water|a bed with legs|being warm}. Is that so much?",
+        "tags": [
+          "earnest",
+          "hunger"
+        ]
+      },
+      {
+        "t": "Nobody listens. I said the {$place} would flood. Did it flood? It flooded.",
+        "tags": [
+          "sarcastic",
+          "long"
+        ]
+      },
+      {
+        "t": "My feet. My back. My {$bodypart}. Pick one.",
+        "tags": [
+          "short",
+          "blunt"
+        ]
+      },
+      {
+        "t": "We're going to die here. I just wanted to say it out loud once.",
+        "tags": [
+          "gloomy",
+          "worried",
+          "earnest"
+        ]
+      },
+      {
+        "t": "The {$food} tastes of {$weather} and regret.",
+        "tags": [
+          "joke",
+          "food",
+          "flowery"
+        ]
+      }
+    ],
+    "brag": [
+      {
+        "t": "I once killed {~three|five|seven} {$creature.pl} with {$item.a}. A broken {$item}.",
+        "tags": [
+          "brag",
+          "violent"
+        ],
+        "w": 2
+      },
+      {
+        "t": "There isn't a {$race.sg} alive who can outdrink me.",
+        "tags": [
+          "brag",
+          "drink"
+        ]
+      },
+      {
+        "t": "{$faction} offered me command. I told them where to put it.",
+        "tags": [
+          "brag",
+          "confident",
+          "long"
+        ]
+      },
+      {
+        "t": "I've walked into {$place} and walked out. Twice.",
+        "tags": [
+          "brag",
+          "heroic"
+        ]
+      },
+      {
+        "t": "They still sing of me in {$place}. Badly, but they sing.",
+        "tags": [
+          "brag",
+          "joke"
+        ]
+      },
+      {
+        "t": "I can cast {$spell} in my sleep. I have. Burned a {$place}.",
+        "tags": [
+          "brag",
+          "lore",
+          "joke"
+        ]
+      },
+      {
+        "t": "I am the finest {speaker.title.or(warrior)} {speaker.race.people} ever produced, and I say that with humility.",
+        "tags": [
+          "brag",
+          "formal",
+          "pompous",
+          "long"
+        ]
+      },
+      {
+        "t": "Nothing scares me. Not {$creature.pl}, not {$deity}, not you.",
+        "tags": [
+          "brag",
+          "confident",
+          "blasphemy"
+        ]
+      },
+      {
+        "t": "I've made more coin in a season than {$person} will see in a life.",
+        "tags": [
+          "brag",
+          "money"
+        ]
+      }
+    ],
+    "work": [
+      {
+        "t": "Hand me the {$item}.",
+        "tags": [
+          "short"
+        ],
+        "w": 2
+      },
+      {
+        "t": "{#worktalk.cap}. Not that anyone asked me.",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Careful with that. {$person} lost a {$bodypart} to one.",
+        "tags": [
+          "worried",
+          "gore"
+        ]
+      },
+      {
+        "t": "Almost done. Then {$food}. Then sleep. Then this again.",
+        "tags": [
+          "casual",
+          "food"
+        ]
+      },
+      {
+        "t": "Hold it steady. Steady! {#curse.cap}.",
+        "tags": [
+          "gruff"
+        ]
+      },
+      {
+        "t": "My father did this work. His father too. All of them dead now, mind.",
+        "tags": [
+          "gloomy",
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "Sing something, {listener.name}. Anything but the one about {$place}.",
+        "tags": [
+          "casual",
+          "friendly"
+        ]
+      },
+      {
+        "t": "{$deity} put us here to work, my mother said. She worked herself to death.",
+        "tags": [
+          "religious",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "If {$faction} paid what they promised, I'd not be lifting this.",
+        "tags": [
+          "money",
+          "rude"
+        ]
+      },
+      {
+        "t": "Good. Good. That'll hold till the next {$weather}.",
+        "tags": [
+          "hopeful",
+          "casual"
+        ]
+      }
+    ],
+    "flirt": [
+      {
+        "t": "You've got the kind of face I'd like to see more of, {listener.name}.",
+        "tags": [
+          "flirt",
+          "romantic"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Walk with me after the {$weather} clears? Just walk.",
+        "tags": [
+          "flirt",
+          "gentle"
+        ]
+      },
+      {
+        "t": "If the {$creature.pl} come tonight, I'd want it to be beside you.",
+        "tags": [
+          "flirt",
+          "romantic",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "I saved you the last of the {$food}. Don't read into it. Read into it.",
+        "tags": [
+          "flirt",
+          "joke",
+          "food"
+        ]
+      },
+      {
+        "t": "{listener.name}. Your {$bodypart.pl}. They're— I've been drinking. Never mind.",
+        "tags": [
+          "flirt",
+          "drink",
+          "timid",
+          "joke"
+        ]
+      },
+      {
+        "t": "There's a poem in {speaker.race.lang} about eyes like yours. It ends badly, but the middle is lovely.",
+        "tags": [
+          "flirt",
+          "flowery",
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "Marry me. Or don't. But share a fire with me tonight.",
+        "tags": [
+          "flirt",
+          "blunt",
+          "romantic"
+        ]
+      },
+      {
+        "t": "I'd fight {$faction} bare-handed for one evening with you.",
+        "tags": [
+          "flirt",
+          "heroic",
+          "romantic"
+        ]
+      },
+      {
+        "t": "You're trouble, {listener.name}. I've always liked trouble.",
+        "tags": [
+          "flirt",
+          "casual",
+          "confident"
+        ]
+      }
+    ],
+    "flirt_reply": [
+      {
+        "t": "Took you long enough.",
+        "tags": [
+          "flirt",
+          "confident",
+          "short"
+        ]
+      },
+      {
+        "t": "...Yes. Yes, all right.",
+        "tags": [
+          "timid",
+          "romantic"
+        ]
+      },
+      {
+        "t": "Careful, {listener.name}. I bite.",
+        "tags": [
+          "flirt",
+          "joke"
+        ]
+      },
+      {
+        "t": "Tonight, then. Bring {$food}.",
+        "tags": [
+          "casual",
+          "food",
+          "romantic"
+        ]
+      },
+      {
+        "t": "I thought you'd never ask. I mean that. I was losing hope.",
+        "tags": [
+          "romantic",
+          "earnest",
+          "long"
+        ]
+      },
+      {
+        "t": "Ha. {#oath.cap}. Fine. But if you die on me, I'll never forgive you.",
+        "tags": [
+          "romantic",
+          "joke",
+          "gloomy"
+        ]
+      }
+    ],
+    "reject": [
+      {
+        "t": "No, {listener.name}.",
+        "tags": [
+          "short",
+          "gentle"
+        ]
+      },
+      {
+        "t": "I'm... not there. Not with anyone. Not since {$place}.",
+        "tags": [
+          "gloomy",
+          "grief",
+          "earnest"
+        ]
+      },
+      {
+        "t": "You're a good {listener.race.sg}. That's a no.",
+        "tags": [
+          "blunt",
+          "joke"
+        ]
+      },
+      {
+        "t": "Ask me again when you've bathed.",
+        "tags": [
+          "joke",
+          "rude"
+        ]
+      },
+      {
+        "t": "I'd sooner kiss a {$creature}.",
+        "tags": [
+          "insult",
+          "cruel"
+        ]
+      },
+      {
+        "t": "That's kind. It's still no.",
+        "tags": [
+          "polite",
+          "gentle"
+        ]
+      },
+      {
+        "t": "{$deity} has my heart. There's no room.",
+        "tags": [
+          "religious",
+          "formal"
+        ]
+      }
+    ],
+    "combat_bark": [
+      {
+        "t": "For {$deity}!",
+        "tags": [
+          "religious",
+          "heroic"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Die!",
+        "tags": [
+          "short",
+          "aggressive"
+        ],
+        "w": 2
+      },
+      {
+        "t": "{#curse.cap}!",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "Hold the line!",
+        "tags": [
+          "heroic"
+        ]
+      },
+      {
+        "t": "Blood! Blood and {$item.pl}!",
+        "tags": [
+          "violent",
+          "gore"
+        ]
+      },
+      {
+        "t": "I don't want to die here!",
+        "tags": [
+          "timid",
+          "cowardly"
+        ]
+      },
+      {
+        "t": "{speaker.race.people.upper}!",
+        "tags": [
+          "heroic",
+          "loyal"
+        ]
+      },
+      {
+        "t": "Come on then! COME ON!",
+        "tags": [
+          "aggressive",
+          "confident"
+        ]
+      },
+      {
+        "t": "Watch my left!",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "{$spell.cap}! {$spell.cap}! Why is nobody running?!",
+        "tags": [
+          "joke",
+          "lore"
+        ]
+      },
+      {
+        "t": "This is for {$person}!",
+        "tags": [
+          "grief",
+          "violent"
+        ]
+      },
+      {
+        "t": "Not today. Not today!",
+        "tags": [
+          "heroic",
+          "confident"
+        ]
+      },
+      {
+        "t": "{$deity}, if you're watching, now would be good!",
+        "tags": [
+          "religious",
+          "joke",
+          "worried"
+        ]
+      },
+      {
+        "t": "I won't fight! I won't! Just— stop!",
+        "tags": [
+          "pacifist",
+          "timid"
+        ]
+      }
+    ],
+    "combat_taunt": [
+      {
+        "t": "Is that all, {foe.sg}?",
+        "tags": [
+          "confident"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        },
+        "w": 2
+      },
+      {
+        "t": "I've killed prettier {foe.pl} than you!",
+        "tags": [
+          "insult",
+          "violent"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Your kind bleeds like everyone else, {foe.sg}.",
+        "tags": [
+          "cruel",
+          "gore"
+        ],
+        "bind": {
+          "foe": {
+            "type": "race"
+          }
+        }
+      },
+      {
+        "t": "Come closer. I'll {#bodyharm}!",
+        "tags": [
+          "threat",
+          "violent"
+        ]
+      },
+      {
+        "t": "{foe.pl.cap}! I'll wear your {$bodypart.pl} as a necklace!",
+        "tags": [
+          "gore",
+          "cruel",
+          "violent"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "You picked the wrong {speaker.race.sg}!",
+        "tags": [
+          "confident",
+          "heroic"
+        ]
+      },
+      {
+        "t": "Please just go away please please",
+        "tags": [
+          "timid",
+          "cowardly"
+        ]
+      },
+      {
+        "t": "My {$item} is hungry, {foe.sg}. Feed it.",
+        "tags": [
+          "violent",
+          "flowery"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Go home, {foe.sg}. Nobody has to die here.",
+        "tags": [
+          "pacifist",
+          "gentle"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      }
+    ],
+    "combat_hurt": [
+      {
+        "t": "Argh!",
+        "tags": [
+          "short"
+        ],
+        "w": 3
+      },
+      {
+        "t": "My {$bodypart}!",
+        "tags": [
+          "gore"
+        ],
+        "w": 2
+      },
+      {
+        "t": "{#curse.cap}, that's blood. That's a lot of blood.",
+        "tags": [
+          "worried",
+          "gore"
+        ]
+      },
+      {
+        "t": "I'm hit! I'm— I'm fine. I'm fine.",
+        "tags": [
+          "timid"
+        ]
+      },
+      {
+        "t": "Is that it? Is that all you've got?",
+        "tags": [
+          "confident",
+          "aggressive"
+        ]
+      },
+      {
+        "t": "Healer! HEALER!",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "{$deity}, not like this.",
+        "tags": [
+          "religious",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Ha! Barely felt it. ...Felt it.",
+        "tags": [
+          "joke",
+          "confident"
+        ]
+      },
+      {
+        "t": "Mother...",
+        "tags": [
+          "short",
+          "gloomy"
+        ]
+      }
+    ],
+    "combat_kill": [
+      {
+        "t": "Stay down.",
+        "tags": [
+          "short",
+          "blunt"
+        ],
+        "w": 2
+      },
+      {
+        "t": "One less {foe.sg}.",
+        "tags": [
+          "blunt"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Ha! Who's next?",
+        "tags": [
+          "aggressive",
+          "confident"
+        ]
+      },
+      {
+        "t": "{$deity} forgive me. Again.",
+        "tags": [
+          "religious",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "It's done. It's— it's done.",
+        "tags": [
+          "worried",
+          "timid"
+        ]
+      },
+      {
+        "t": "That was for {$person}.",
+        "tags": [
+          "grief",
+          "loyal"
+        ]
+      },
+      {
+        "t": "Look at it twitch. Look at it.",
+        "tags": [
+          "cruel",
+          "gore"
+        ]
+      },
+      {
+        "t": "Another for the count.",
+        "tags": [
+          "gloomy",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Yes! YES! Did you see that?!",
+        "tags": [
+          "joyful",
+          "brag"
+        ]
+      },
+      {
+        "t": "I'll take your {$item}. You won't need it.",
+        "tags": [
+          "money",
+          "cruel"
+        ]
+      }
+    ],
+    "combat_flee": [
+      {
+        "t": "Run! RUN!",
+        "tags": [
+          "short",
+          "cowardly"
+        ],
+        "w": 2
+      },
+      {
+        "t": "I'm not dying for {$faction}'s coin!",
+        "tags": [
+          "money",
+          "cowardly"
+        ]
+      },
+      {
+        "t": "Fall back! Fall back to the {$place}!",
+        "tags": [
+          "heroic"
+        ]
+      },
+      {
+        "t": "Every {speaker.race.sg} for themselves!",
+        "tags": [
+          "cowardly"
+        ]
+      },
+      {
+        "t": "I'll come back for you! I— I'll come back!",
+        "tags": [
+          "timid",
+          "worried"
+        ]
+      },
+      {
+        "t": "This isn't cowardice. It's arithmetic.",
+        "tags": [
+          "sarcastic",
+          "long"
+        ]
+      },
+      {
+        "t": "{$deity} help you, I can't.",
+        "tags": [
+          "religious",
+          "gloomy"
+        ]
+      }
+    ],
+    "ally_down": [
+      {
+        "t": "{fallen.name}! No!",
+        "tags": [
+          "grief"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        },
+        "w": 2
+      },
+      {
+        "t": "{fallen.name}'s down! Somebody— anybody!",
+        "tags": [
+          "worried"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "They killed {fallen.name}. They killed {fallen.name}!",
+        "tags": [
+          "grief",
+          "violent"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Hold on, {fallen.name}. Hold on. Look at me.",
+        "tags": [
+          "gentle",
+          "worried"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Leave {fallen.them}! {fallen.they.cap}'s gone!",
+        "tags": [
+          "blunt",
+          "gloomy"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "{fallen.name}... I'll take your {$item}. I'll finish it.",
+        "tags": [
+          "grief",
+          "loyal",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Not {fallen.name}. Anyone but {fallen.name}.",
+        "tags": [
+          "grief",
+          "earnest"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      }
+    ],
+    "trade_offer": [
+      {
+        "t": "{item.a.cap}. Fine make. {~Ten|Twenty|Forty} {coin.pl} and it's yours.",
+        "tags": [
+          "trade",
+          "money"
+        ],
+        "bind": {
+          "item": {
+            "type": "item"
+          },
+          "coin": {
+            "type": "item",
+            "tags": [
+              "money"
+            ]
+          }
+        },
+        "w": 2
+      },
+      {
+        "t": "I've got {item.a} going cheap. Cheaper than {$person} would give you.",
+        "tags": [
+          "trade",
+          "casual"
+        ],
+        "bind": {
+          "item": {
+            "type": "item"
+          }
+        }
+      },
+      {
+        "t": "Buying {item.pl}. Good ones. No, that's not a good one.",
+        "tags": [
+          "trade",
+          "blunt",
+          "joke"
+        ],
+        "bind": {
+          "item": {
+            "type": "item"
+          }
+        }
+      },
+      {
+        "t": "This {item} belonged to a {$race.sg} of {$place}. Dead now. Won't miss it.",
+        "tags": [
+          "trade",
+          "gloomy",
+          "long"
+        ],
+        "bind": {
+          "item": {
+            "type": "item"
+          }
+        }
+      },
+      {
+        "t": "For you, {listener.name}, the {item} at cost. Don't tell {$faction}.",
+        "tags": [
+          "trade",
+          "friendly"
+        ],
+        "bind": {
+          "item": {
+            "type": "item"
+          }
+        },
+        "cond": "opinion > 0.2"
+      },
+      {
+        "t": "{item.a.cap}, or {$food}? I'll take either for the {$item2}.",
+        "tags": [
+          "trade",
+          "food"
+        ],
+        "bind": {
+          "item": {
+            "type": "item"
+          }
+        }
+      },
+      {
+        "t": "Take the {item}. No charge. You need it more than I need the coin.",
+        "tags": [
+          "generous",
+          "gentle",
+          "trade"
+        ],
+        "bind": {
+          "item": {
+            "type": "item"
+          }
+        }
+      }
+    ],
+    "trade_haggle": [
+      {
+        "t": "Half that.",
+        "tags": [
+          "short",
+          "blunt"
+        ],
+        "w": 2
+      },
+      {
+        "t": "That's robbery. I've been robbed by {$creature.pl} with more shame.",
+        "tags": [
+          "sarcastic",
+          "joke"
+        ]
+      },
+      {
+        "t": "I'll give you {~six|nine|twelve}, and my silence about the {$person} business.",
+        "tags": [
+          "suspicious",
+          "money",
+          "long"
+        ]
+      },
+      {
+        "t": "Throw in {$food.a} and we'll talk.",
+        "tags": [
+          "food",
+          "casual"
+        ]
+      },
+      {
+        "t": "My {$bodypart} is worth more than that {$item}.",
+        "tags": [
+          "rude",
+          "joke"
+        ]
+      },
+      {
+        "t": "That's a fair price. I don't pay fair prices.",
+        "tags": [
+          "money",
+          "confident"
+        ]
+      },
+      {
+        "t": "I... could maybe do a little more? If that's all right?",
+        "tags": [
+          "timid",
+          "polite"
+        ]
+      },
+      {
+        "t": "Pay what you can. Pay nothing. I've eaten today.",
+        "tags": [
+          "generous",
+          "gentle"
+        ]
+      }
+    ],
+    "trade_accept": [
+      {
+        "t": "Done.",
+        "tags": [
+          "short"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Done, and {$deity} witness it.",
+        "tags": [
+          "religious",
+          "honor"
+        ]
+      },
+      {
+        "t": "Fine. Fine! You're bleeding me dry, but fine.",
+        "tags": [
+          "casual",
+          "joke"
+        ]
+      },
+      {
+        "t": "A pleasure doing business, {listener.name}. Genuinely. That's rare.",
+        "tags": [
+          "polite",
+          "friendly"
+        ]
+      },
+      {
+        "t": "Take it. Take it before I count what it cost me.",
+        "tags": [
+          "gloomy",
+          "money"
+        ]
+      }
+    ],
+    "trade_refuse": [
+      {
+        "t": "{#noword}. Not at that price.",
+        "tags": [
+          "money"
+        ],
+        "w": 2
+      },
+      {
+        "t": "I'd sooner throw it in the {$place}.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "Come back with real coin, {#insultnoun}.",
+        "tags": [
+          "rude",
+          "money"
+        ]
+      },
+      {
+        "t": "{#noword}. And I'll be telling {$faction} you tried.",
+        "tags": [
+          "suspicious",
+          "threat"
+        ]
+      },
+      {
+        "t": "I'm sorry, I can't. I have children. Well, a child. Well, a {$creature}.",
+        "tags": [
+          "timid",
+          "joke",
+          "long"
+        ]
+      }
+    ],
+    "grief": [
+      {
+        "t": "{fallen.name} is gone. I keep saying it and it keeps being true.",
+        "tags": [
+          "grief",
+          "earnest"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        },
+        "w": 2
+      },
+      {
+        "t": "I should have been there. At {$place}. With {fallen.them}.",
+        "tags": [
+          "grief",
+          "gloomy"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "{fallen.name} owed me {~ten|twenty} {coin.pl}. I'd pay a thousand to be owed again.",
+        "tags": [
+          "grief",
+          "money",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          },
+          "coin": {
+            "type": "item",
+            "tags": [
+              "money"
+            ]
+          }
+        }
+      },
+      {
+        "t": "We buried {fallen.name} under the {$place}. {fallen.they.cap} hated the {$place}.",
+        "tags": [
+          "grief",
+          "joke",
+          "gloomy"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Don't say {fallen.name}'s name to me. Don't.",
+        "tags": [
+          "grief",
+          "angry",
+          "short"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "{$deity} took {fallen.name}. I've stopped asking why. I've stopped asking anything.",
+        "tags": [
+          "grief",
+          "religious",
+          "gloomy"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "I still set out {fallen.their} bowl. Stupid. I know it's stupid.",
+        "tags": [
+          "grief",
+          "earnest",
+          "food"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "{fallen.name} laughed at everything. Even the {$creature.pl}. Even at the end.",
+        "tags": [
+          "grief",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      }
+    ],
+    "last_words": [
+      {
+        "t": "Tell {$person}... tell {$person.them}...",
+        "tags": [
+          "gloomy"
+        ],
+        "w": 2
+      },
+      {
+        "t": "It doesn't hurt. That's a lie. It doesn't matter.",
+        "tags": [
+          "earnest",
+          "long"
+        ]
+      },
+      {
+        "t": "{$deity}, I'm coming. Make room.",
+        "tags": [
+          "religious"
+        ]
+      },
+      {
+        "t": "Take my {$item}. Don't let {$faction} have it.",
+        "tags": [
+          "loyal"
+        ]
+      },
+      {
+        "t": "Not... like this. Not in the {$weather}.",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Ha. Ha. I really thought... I'd be the one who...",
+        "tags": [
+          "joke",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Is that you, mother? It's dark.",
+        "tags": [
+          "gloomy",
+          "short"
+        ]
+      },
+      {
+        "t": "Kill them. All of them. For me.",
+        "tags": [
+          "violent",
+          "cruel"
+        ]
+      },
+      {
+        "t": "I'm not afraid. I'm not— I'm not afraid.",
+        "tags": [
+          "timid",
+          "earnest"
+        ]
+      },
+      {
+        "t": "The roots... remember...",
+        "tags": [
+          "lore",
+          "short"
+        ]
+      }
+    ],
+    "warning": [
+      {
+        "t": "{foe.pl.cap}! {foe.pl.cap} at the {$place}!",
+        "tags": [
+          "worried"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        },
+        "w": 2
+      },
+      {
+        "t": "Get inside. Now. Don't ask.",
+        "tags": [
+          "blunt",
+          "short"
+        ]
+      },
+      {
+        "t": "I saw {foe.a} by the {$place}. A big one. Arm yourselves.",
+        "tags": [
+          "worried"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{$faction} riders on the road. They're not here to trade.",
+        "tags": [
+          "suspicious",
+          "worried"
+        ]
+      },
+      {
+        "t": "Something's wrong with the {$food}. Don't eat the {$food}.",
+        "tags": [
+          "food",
+          "worried"
+        ]
+      },
+      {
+        "t": "Wake the others. {$deity} help us, wake them all.",
+        "tags": [
+          "religious",
+          "worried"
+        ]
+      },
+      {
+        "t": "The {$weather}'s hiding something. Listen. Listen!",
+        "tags": [
+          "suspicious"
+        ]
+      }
+    ],
+    "rally": [
+      {
+        "t": "On your feet! We are not dying in this {$place}!",
+        "tags": [
+          "heroic"
+        ],
+        "w": 2
+      },
+      {
+        "t": "For {$place}! For those we buried!",
+        "tags": [
+          "heroic",
+          "grief"
+        ]
+      },
+      {
+        "t": "They're only {foe.pl}. They bleed. So make them.",
+        "tags": [
+          "confident",
+          "violent"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Stand with me. Just this once. Just today.",
+        "tags": [
+          "earnest",
+          "gentle"
+        ]
+      },
+      {
+        "t": "{$deity} sees you. Make {$deity.them} proud.",
+        "tags": [
+          "religious"
+        ]
+      },
+      {
+        "t": "Whoever runs, I'll kill myself. Whoever stands eats first tonight.",
+        "tags": [
+          "threat",
+          "food",
+          "blunt",
+          "long"
+        ]
+      },
+      {
+        "t": "Um. We... we can do this? Probably? Let's do this.",
+        "tags": [
+          "timid",
+          "joke"
+        ]
+      }
+    ],
+    "drunk": [
+      {
+        "t": "More {$food}! And— and something to drink.",
+        "tags": [
+          "drink",
+          "rambling"
+        ],
+        "w": 2
+      },
+      {
+        "t": "You're my best friend. You. Yes. What's your name?",
+        "tags": [
+          "drink",
+          "joke",
+          "friendly"
+        ]
+      },
+      {
+        "t": "I loved {$person} once. Or I hated {$person.them}. Something strong.",
+        "tags": [
+          "drink",
+          "rambling",
+          "romantic"
+        ]
+      },
+      {
+        "t": "{$deity} can kiss my {$bodypart}.",
+        "tags": [
+          "drink",
+          "blasphemy",
+          "crude"
+        ]
+      },
+      {
+        "t": "The {$place}... the {$place}, {listener.name}. I never told anyone what we did there.",
+        "tags": [
+          "drink",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "I could take a {$creature}. Right now. Where's a {$creature}?",
+        "tags": [
+          "drink",
+          "brag",
+          "joke"
+        ]
+      },
+      {
+        "t": "Sing with me! You know the one. About the {$race.sg} and the {$item}.",
+        "tags": [
+          "drink",
+          "happy"
+        ]
+      },
+      {
+        "t": "Everybody dies, {listener.name}. Everybody. Pass the cask.",
+        "tags": [
+          "drink",
+          "gloomy"
+        ]
+      }
+    ],
+    "beg": [
+      {
+        "t": "Please. Please, I have {~children|a family|nothing else}.",
+        "tags": [
+          "timid",
+          "cowardly"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Mercy. By {$deity}, mercy.",
+        "tags": [
+          "religious",
+          "timid"
+        ]
+      },
+      {
+        "t": "I'll give you the {$item}. Everything. Just let me go.",
+        "tags": [
+          "money",
+          "cowardly"
+        ]
+      },
+      {
+        "t": "Don't. I'll— I'll tell you where {$faction} keeps the {$item.pl}.",
+        "tags": [
+          "treacherous",
+          "cowardly"
+        ]
+      },
+      {
+        "t": "I'm not asking for me. Just... spare {$person}. Spare {$person.them}.",
+        "tags": [
+          "loyal",
+          "earnest"
+        ]
+      },
+      {
+        "t": "Kill me if you must. But do it quick. I've earned quick.",
+        "tags": [
+          "honor",
+          "gloomy"
+        ]
+      }
+    ],
+    "pray": [
+      {
+        "t": "{god.cap}, keep us through the {$weather}.",
+        "tags": [
+          "religious"
+        ],
+        "bind": {
+          "god": {
+            "type": "deity"
+          }
+        },
+        "w": 2
+      },
+      {
+        "t": "{god.cap}, I ask nothing for myself. Only {$person}. Only {$person.them}.",
+        "tags": [
+          "religious",
+          "loyal",
+          "gentle"
+        ],
+        "bind": {
+          "god": {
+            "type": "deity"
+          }
+        }
+      },
+      {
+        "t": "{god.cap}, if you're there, I'll settle for a sign. A small one. Any one.",
+        "tags": [
+          "religious",
+          "gloomy",
+          "joke"
+        ],
+        "bind": {
+          "god": {
+            "type": "deity"
+          }
+        }
+      },
+      {
+        "t": "Give me strength. Give me a sharp {$item}. Give me {$creature.pl} to use it on.",
+        "tags": [
+          "religious",
+          "violent"
+        ],
+        "bind": {
+          "god": {
+            "type": "deity"
+          }
+        }
+      },
+      {
+        "t": "{god.cap}. It's me again. Sorry about the {$place}.",
+        "tags": [
+          "religious",
+          "joke",
+          "casual"
+        ],
+        "bind": {
+          "god": {
+            "type": "deity"
+          }
+        }
+      },
+      {
+        "t": "Watch over {$person}. And the {$food} stores. And my {$bodypart}.",
+        "tags": [
+          "religious",
+          "food",
+          "joke"
+        ],
+        "bind": {
+          "god": {
+            "type": "deity"
+          }
+        }
+      }
+    ],
+    "happy": [
+      {
+        "t": "Ha! Good day. Good {$weather}, even.",
+        "tags": [
+          "happy"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Did you see? The {$food}! Real {$food}!",
+        "tags": [
+          "happy",
+          "food"
+        ]
+      },
+      {
+        "t": "I could kiss {$person}. I might.",
+        "tags": [
+          "happy",
+          "joke",
+          "romantic"
+        ]
+      },
+      {
+        "t": "Nobody died today. Nobody. That's a feast day where I'm from.",
+        "tags": [
+          "happy",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "{$deity} smiled on us. For once.",
+        "tags": [
+          "happy",
+          "religious"
+        ]
+      },
+      {
+        "t": "Feel that? Warm. I'd forgotten warm.",
+        "tags": [
+          "happy",
+          "earnest"
+        ]
+      }
+    ],
+    "angry": [
+      {
+        "t": "Don't. Not now.",
+        "tags": [
+          "angry",
+          "short"
+        ],
+        "w": 2
+      },
+      {
+        "t": "{#curse.cap}! {#curse.cap}!",
+        "tags": [
+          "angry"
+        ]
+      },
+      {
+        "t": "If {$person} says one more word about the {$item}, I'll {#bodyharm}.",
+        "tags": [
+          "angry",
+          "violent"
+        ]
+      },
+      {
+        "t": "I'm going to break something. Get out of the way of it.",
+        "tags": [
+          "angry",
+          "threat"
+        ]
+      },
+      {
+        "t": "Everyone. Out. NOW.",
+        "tags": [
+          "angry",
+          "blunt"
+        ]
+      },
+      {
+        "t": "{$deity} can watch me do this. I don't care.",
+        "tags": [
+          "angry",
+          "blasphemy"
+        ]
+      }
+    ],
+    "sad": [
+      {
+        "t": "Leave me be.",
+        "tags": [
+          "sad",
+          "short"
+        ],
+        "w": 2
+      },
+      {
+        "t": "It's nothing. It's the {$weather}. It's nothing.",
+        "tags": [
+          "sad",
+          "earnest"
+        ]
+      },
+      {
+        "t": "I dreamt of {$place} again. Everyone was still alive.",
+        "tags": [
+          "sad",
+          "grief",
+          "long"
+        ]
+      },
+      {
+        "t": "What's the point of the {$food}? What's the point of any of it?",
+        "tags": [
+          "sad",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "I'm tired, {listener.name}. Not sleep-tired.",
+        "tags": [
+          "sad",
+          "earnest"
+        ]
+      },
+      {
+        "t": "{$person} would have known what to say.",
+        "tags": [
+          "sad",
+          "grief",
+          "short"
+        ]
+      }
+    ],
+    "worried": [
+      {
+        "t": "Something's coming. I can feel it in my {$bodypart}.",
+        "tags": [
+          "worried"
+        ],
+        "w": 2
+      },
+      {
+        "t": "Did you bar the door? Check. Check again.",
+        "tags": [
+          "worried",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "We don't have enough {$food}. We don't. I counted.",
+        "tags": [
+          "worried",
+          "food",
+          "hunger"
+        ]
+      },
+      {
+        "t": "{$person} hasn't come back from {$place}. It's been too long.",
+        "tags": [
+          "worried",
+          "long"
+        ]
+      },
+      {
+        "t": "What if the {$creature.pl} come back? What then? What then?",
+        "tags": [
+          "worried",
+          "timid"
+        ]
+      },
+      {
+        "t": "I can't lose anyone else. I can't.",
+        "tags": [
+          "worried",
+          "grief",
+          "earnest"
+        ]
+      }
+    ]
+  }
+}

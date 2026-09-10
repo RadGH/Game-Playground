@@ -8,7 +8,7 @@ import { applyFx, FX_DEFAULTS } from './fx.js';
 import * as piper from './engines/piper.js';
 
 export const DEFAULT_VOICE = {
-  engine: 'espeak', pitch: 0.5, speed: 0.3, depth: 0.5, tone: 0.5, breath: 0.1, rough: 0.1, flutter: 0.1, intonation: 2, wordgap: 0,
+  engine: 'formant', pitch: 0.5, speed: 0.3, depth: 0.5, tone: 0.5, breath: 0.1, rough: 0.1, flutter: 0.1, intonation: 2, wordgap: 0,
   gender: 'm', accent: 'en-us', variant: 'custom', babbleMode: 'letters', fx: {},
 };
 export const KNOB_RANGES = {

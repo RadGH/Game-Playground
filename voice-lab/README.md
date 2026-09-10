@@ -1,6 +1,6 @@
 # Voice Lab
 
-Browser-only synthetic character voices, inspired by Tomodachi Life's voice editor. Compare four engines, tune generic knobs, add effects, save presets, and stress-test crowds. Everything a game needs is in `js/voice.js`; `js/app.js` is only the demo UI.
+Browser-only synthetic character voices, inspired by Tomodachi Life's voice editor. Compare five engines (including our own bespoke formant synthesizer, see `FORMANT.md`), tune generic knobs, add effects, save presets, and stress-test crowds. Everything a game needs is in `js/voice.js`; `js/app.js` is only the demo UI.
 
 Open: `http://<LAN-IP>:8400/voice-lab/` (start `./serve.sh --bg` in the playground root).
 
@@ -24,7 +24,7 @@ stopAll();
 
 ```json
 {
-  "engine": "espeak",          // espeak | babble | piper | webspeech
+  "engine": "formant",         // formant (ours) | espeak | babble | piper | webspeech
   "pitch": 0.5,   "speed": 0.3, "depth": 0.5, "tone": 0.5,   // 0..1 generic knobs (see table)
   "breath": 0.1,  "rough": 0.1, "flutter": 0.1, "intonation": 2, "wordgap": 0,
   "gender": "m",               // m | f | n  (espeak base pitch range)
@@ -39,17 +39,17 @@ Unknown fields are ignored; missing fields take `DEFAULT_VOICE`. `normalizeVoice
 
 ### Generic knobs and how each engine maps them
 
-| Knob | Meaning | espeak | babble | piper | Web Speech |
-|---|---|---|---|---|---|
-| `pitch` 0..1 | low → high | `-p 0..99` | f0 90→405 Hz | fx pitchShift −8..+8 st | pitch 0..2 |
-| `speed` 0..1 | slow → fast | 80→400 wpm | 130→35 ms per letter | fx speed 0.6→1.5 | rate 0.5→2.2 |
-| `depth` 0..1 | tiny vocal tract → giant | all formant freqs 125%→75% | formant scale 1.3→0.7 | fx formant +4→−4 st | – |
-| `tone` 0..1 | dull → bright | upper formant strength 40%→160%, consonant strength | filter brightness | – | – |
-| `breath` 0..1 | breathiness | `breath` per formant 0→10 | noise mix | – | – |
-| `rough` 0..1 | gravel | `roughness` 0→7 | per-syllable pitch jitter | – | – |
-| `flutter` 0..1 | wobble (elderly) | `flutter` 0→20 | – | – | – |
-| `intonation` 1..4 | flat → sing-song | espeak intonation 1–4 | contour amount | – | – |
-| `wordgap` 0..1 | pause between words | `-g 0..20` | 40→240 ms | – | – |
+| Knob | Meaning | formant (ours) | espeak | babble | piper | Web Speech |
+|---|---|---|---|---|---|---|
+| `pitch` 0..1 | low → high | f0 = gender base × 2.6^(pitch−0.5) | `-p 0..99` | f0 90→405 Hz | fx pitchShift −8..+8 st | pitch 0..2 |
+| `speed` 0..1 | slow → fast | duration ÷ 0.55..2.05 | 80→400 wpm | 130→35 ms per letter | fx speed 0.6→1.5 | rate 0.5→2.2 |
+| `depth` 0..1 | tiny vocal tract → giant | vocal-tract scale 1.28→0.72 (all formants) | all formant freqs 125%→75% | formant scale 1.3→0.7 | fx formant +4→−4 st | – |
+| `tone` 0..1 | dull → bright | spectral tilt | upper formant strength 40%→160%, consonant strength | filter brightness | – | – |
+| `breath` 0..1 | breathiness | aspiration + open quotient | `breath` per formant 0→10 | noise mix | – | – |
+| `rough` 0..1 | gravel | jitter + shimmer | `roughness` 0→7 | per-syllable pitch jitter | – | – |
+| `flutter` 0..1 | wobble (elderly) | slow f0 wobble | `flutter` 0→20 | – | – | – |
+| `intonation` 1..4 | flat → sing-song | contour strength | espeak intonation 1–4 | contour amount | – | – |
+| `wordgap` 0..1 | pause between words | up to 220 ms | `-g 0..20` | 40→240 ms | – | – |
 
 Tomodachi Life mapping: Pitch→`pitch`, Speed→`speed`, Quality→`depth`+`breath`, Tone→`tone`, Accent→`accent` (espeak only), Intonation→`intonation`.
 
@@ -63,6 +63,7 @@ The DSP is pure JS on `Float32Array` (`js/dsp.js`) so it can run in a worker: `r
 
 | id | What | License | Commercial | Buffer | Phonemes | Crowd cost |
 |---|---|---|---|---|---|---|
+| `formant` | **Ours**: rule-based formant synthesizer (CMUdict + letter-to-sound rules → Klatt-style resonators). See `FORMANT.md`. | ours (MIT-style) + CMUdict BSD | **yes** | yes | ARPAbet `[[HH AH0 L OW1]]` or espeak `[[h@l'oU]]` | very cheap |
 | `espeak` | meSpeak.js (espeak 1.47, asm.js). Custom voice-variant file generated from knobs. | **GPL-3.0** | yes | `[[h@l'oU]]` espeak ASCII | very cheap |
 | `babble` | Our own Animalese/Simlish gibberish synth (formant filters on a pulse) | ours | yes | n/a (letters) | near zero; hundreds at once |
 | `piper` | Piper VITS neural via ONNX Runtime Web (vits-web; `onnxruntime-web` resolved through an importmap to `vendor/onnxruntime-web/ort.min.mjs`) | MIT + per-voice | yes | no | seconds per line; not real-time |
@@ -90,6 +91,7 @@ Each module exports `meta` (license, pros/cons, knob support), `load()`, and `sy
 - Voice JSON panel: apply / copy / export / import / save to browser (localStorage, namespace `playground:voice-lab:v1`).
 
 ## Findings so far (2026-09)
+- Our own formant engine (2026-09-10) removes the license question: it is the default engine now. Quality is espeak-class; tune tables in `js/engines/formant/phonemes.js` and rules in `rules.js` (see `FORMANT.md`).
 - espeak is the only engine with real timbre knobs; it is also GPL. Decide before shipping: accept GPL, or use it only to prototype and switch to babble/pre-rendered audio.
 - SAM (the 1982 C64 synth) was tried and removed on 2026-09-10: unlicensed and unintelligible at the knob ranges we need.
 - Babble is the practical answer for crowds and invented languages; pair it with subtitles from lingo.

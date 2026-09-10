@@ -25,8 +25,8 @@ const SAMPLE_LINES = [
 ];
 
 // ---------- state ----------
-let voice = normalizeVoice(store.get('current', PRESETS.presets[4].voice));
-let activePreset = store.get('activePreset', 'adult_male');
+let voice = normalizeVoice(store.get('current', PRESETS.presets.find(p => p.id === 'ours_male').voice));
+let activePreset = store.get('activePreset', 'ours_male');
 let lastResult = null; let autoPlay = store.get('autoPlay', false); let followEngine = true;
 const status = document.getElementById('status');
 const setStatus = t => { status.textContent = t; };
@@ -221,7 +221,7 @@ async function speak() {
     setStatus('synthesizing (' + voice.engine + ')…'); btnSay.disabled = true;
     const { result, done } = await say(text, voice, { noCache: false });
     lastResult = result;
-    if (result) { drawWave(result); infoLine.textContent = `${voice.engine}: ${result.info.totalMs.toFixed(0)} ms to synthesize, ${result.duration.toFixed(2)} s of audio @ ${result.sampleRate} Hz. fx: ${describeFx(result.info.fxApplied)}` + (result.info.variantText ? `\n--- espeak variant file ---\n${result.info.variantText}` : '') + (result.info.opts ? `\nengine opts: ${JSON.stringify(result.info.opts)}` : ''); }
+    if (result) { drawWave(result); infoLine.textContent = `${voice.engine}: ${result.info.totalMs.toFixed(0)} ms to synthesize, ${result.duration.toFixed(2)} s of audio @ ${result.sampleRate} Hz. fx: ${describeFx(result.info.fxApplied)}` + (result.info.phonemes ? `\nphonemes (d=dictionary, r=rules, c=custom, p=given): ${result.info.phonemes}` : '') + (result.info.variantText ? `\n--- espeak variant file ---\n${result.info.variantText}` : '') + (result.info.opts ? `\nengine opts: ${JSON.stringify(result.info.opts)}` : ''); }
     else { wave.getContext('2d').clearRect(0, 0, wave.width, wave.height); infoLine.textContent = 'Web Speech API: played directly by the browser, no audio buffer available.'; }
     setStatus('playing'); await done; setStatus('idle');
   } catch (e) { console.error(e); infoLine.textContent = 'Error: ' + e.message; setStatus('error'); toast(e.message); }

@@ -1,6 +1,7 @@
 {
   "_doc": "Voice presets. 'voice' holds generic knobs (see README: pitch/speed/depth/tone 0..1, intonation 1-4) plus an engine recommendation and optional fx. A preset can be applied to any engine; engines ignore knobs they do not support.",
   "groups": [
+    "Ours",
     "Human",
     "Age",
     "Fantasy",
@@ -554,6 +555,142 @@
         "pitch": 0.5,
         "speed": 0.5,
         "depth": 0.5
+      }
+    },
+    {
+      "id": "ours_male",
+      "name": "Ours: adult male",
+      "group": "Ours",
+      "desc": "Bespoke formant engine, neutral male.",
+      "voice": {
+        "engine": "formant",
+        "pitch": 0.5,
+        "speed": 0.3,
+        "depth": 0.5,
+        "tone": 0.5,
+        "breath": 0.1,
+        "rough": 0.1,
+        "flutter": 0.1,
+        "intonation": 2,
+        "gender": "m"
+      }
+    },
+    {
+      "id": "ours_female",
+      "name": "Ours: adult female",
+      "group": "Ours",
+      "desc": "Bespoke formant engine, neutral female.",
+      "voice": {
+        "engine": "formant",
+        "pitch": 0.5,
+        "speed": 0.3,
+        "depth": 0.5,
+        "tone": 0.55,
+        "breath": 0.15,
+        "rough": 0.05,
+        "flutter": 0.1,
+        "intonation": 3,
+        "gender": "f"
+      }
+    },
+    {
+      "id": "ours_child",
+      "name": "Ours: child",
+      "group": "Ours",
+      "desc": "Small vocal tract, high, lively.",
+      "voice": {
+        "engine": "formant",
+        "pitch": 0.8,
+        "speed": 0.4,
+        "depth": 0.15,
+        "tone": 0.65,
+        "breath": 0.15,
+        "rough": 0.05,
+        "flutter": 0.05,
+        "intonation": 4,
+        "gender": "f"
+      }
+    },
+    {
+      "id": "ours_elder",
+      "name": "Ours: elder",
+      "group": "Ours",
+      "desc": "Slow, wobbly, breathy, rough.",
+      "voice": {
+        "engine": "formant",
+        "pitch": 0.4,
+        "speed": 0.2,
+        "depth": 0.55,
+        "tone": 0.35,
+        "breath": 0.4,
+        "rough": 0.6,
+        "flutter": 0.7,
+        "intonation": 1,
+        "gender": "m"
+      }
+    },
+    {
+      "id": "ours_giant",
+      "name": "Ours: giant",
+      "group": "Ours",
+      "desc": "Huge tract, very low.",
+      "voice": {
+        "engine": "formant",
+        "pitch": 0.12,
+        "speed": 0.15,
+        "depth": 1,
+        "tone": 0.3,
+        "breath": 0.2,
+        "rough": 0.5,
+        "flutter": 0.1,
+        "intonation": 1,
+        "gender": "m",
+        "fx": {
+          "reverb": 0.3
+        }
+      }
+    },
+    {
+      "id": "ours_robot",
+      "name": "Ours: robot",
+      "group": "Ours",
+      "desc": "Flat pitch, no jitter, ring-modulated.",
+      "voice": {
+        "engine": "formant",
+        "pitch": 0.5,
+        "speed": 0.3,
+        "depth": 0.5,
+        "tone": 0.7,
+        "breath": 0,
+        "rough": 0,
+        "flutter": 0,
+        "intonation": 1,
+        "gender": "n",
+        "fx": {
+          "robot": 0.7,
+          "robotHz": 60
+        }
+      }
+    },
+    {
+      "id": "ours_whisper",
+      "name": "Ours: breathy",
+      "group": "Ours",
+      "desc": "Mostly aspiration, dull tilt.",
+      "voice": {
+        "engine": "formant",
+        "pitch": 0.5,
+        "speed": 0.25,
+        "depth": 0.5,
+        "tone": 0.3,
+        "breath": 0.9,
+        "rough": 0.2,
+        "flutter": 0.2,
+        "intonation": 2,
+        "gender": "f",
+        "fx": {
+          "reverb": 0.4
+        }
       }
     }
   ]

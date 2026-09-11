@@ -484,6 +484,8 @@ METALS=["steel","iron","bronze","mithril"]
 MAT_WORDS=("iron","steel","bronze","mithril","silver","gold","gilt","copper","brass","pewter","wood","wooden","yew","livingwood","bone","horn","stone","obsidian","crystal","leather","hide","cloth","clay","glass","dragonscale","vellum","paper","bark","silk","wool","tooth","teeth","fang","skull","scale","fey wing","moss","straw","wax","bread","reed")
 for d in items:
     t=set(d["tags"]); cat=d["category"]; sub=d["sub"]; name=d["name"].lower()
+    if ("crude" in t or "stone" in t or "gore" in t) and "troll" not in d["affinity"]: d["affinity"]["troll"]=2
+    if ("gold" in t or "precious" in t or "fire" in t or "hoard" in t or "royal" in t or "jewelled" in t or "gem" in t or "ancient" in t or "dragon" in t) and "dragon" not in d["affinity"]: d["affinity"]["dragon"]=2
     if any(w in name for w in MAT_WORDS) or "consumable" in t: d["materials"]=[]; continue
     if cat=="weapon":
         if sub=="ranged":
@@ -524,8 +526,6 @@ for d in items:
     elif cat=="instrument": d["materials"]=["wood","bone","brass","horn","silver"] if "gadget" not in t else ["brass"]
     elif cat=="religious": d["materials"]=["wood","brass","silver","gold","bone","stone"]
     else: d["materials"]=[]
-    if ("crude" in t or "stone" in t or "gore" in t) and "troll" not in d["affinity"]: d["affinity"]["troll"]=2
-    if ("gold" in t or "precious" in t or "fire" in t or "hoard" in t or "royal" in t or "jewelled" in t or "gem" in t) and "dragon" not in d["affinity"]: d["affinity"]["dragon"]=2
 ids=[i["id"] for i in items]; assert len(ids)==len(set(ids)), [x for x in ids if ids.count(x)>1]
 json.dump({"_doc":"Item catalog. Fields: id, name (singular), category, sub, tags (blade, one-handed, kitchen, gore, magic…), affinity {race: 0..3; missing = rare for that race}, exclusive (only that race), rarity common|uncommon|rare|epic|legendary, value [min,max] silver marks, materials (allowed material ids from materials.json; empty = none), desc, damage (weapons). Built by tools/build-items.py; games extend this file or load their own.","items":items},open('items/data/items.json','w'),indent=1,ensure_ascii=False)
 json.dump(materials,open('items/data/materials.json','w'),indent=1,ensure_ascii=False)

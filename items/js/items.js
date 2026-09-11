@@ -53,11 +53,15 @@ export class ItemCatalog {
     let pool = this.query({ ...opts, rarity: undefined, maxRarity: undefined }).filter(x => x.item.rarity === rarity);
     if (!pool.length) pool = this.query({ ...opts, rarity: undefined, maxRarity: undefined }); if (!pool.length) return null;
     const base = rng.weighted(pool, x => x.weight).item;
-    const material = this.pickMaterial(base, race, rng, rarity), quality = this.pickQuality(race, rng, rarity);
-    const ri = RARITY.indexOf(rarity); const enchant = ri >= 2 && rng() < 0.35 + ri * 0.2 && !['food', 'material', 'trophy'].includes(base.category) ? rng.pick(this.enchants) : null;
-    const artifact = (ri >= 3 || (ri === 2 && rng() < 0.3)) && opts.namegen ? opts.namegen.generate('object', { race: race || 'human', seed }).text : null;
-    const matAdj = material && !base.name.toLowerCase().includes(material.adj.toLowerCase()) && !base.tags.includes('consumable') && base.category !== 'material' && base.category !== 'food' ? material.adj + ' ' : '';
-    const qAdj = quality.adj ? quality.adj + ' ' : '';
+    const material = this.pickMaterial(base, race, rng, rarity), quality = ['tool', 'household', 'container', 'weapon', 'armour', 'regalia', 'vessel', 'instrument', 'lore'].includes(base.category) ? this.pickQuality(race, rng, rarity) : this.qualities.find(q => q.id === 'plain');
+    const ri = RARITY.indexOf(rarity);
+    // only "heroic" things get enchantments and names (weapons, armour, regalia, vessels, instruments, books); tools/household also get quality words
+    const heroic = ['weapon', 'armour', 'regalia', 'vessel', 'instrument', 'lore'].includes(base.category) && !base.tags.some(t => ['consumable', 'ammo', 'humble', 'crude', 'junk', 'trophy', 'paper', 'gore'].includes(t));
+    const craftable = heroic || ['tool', 'household', 'container'].includes(base.category);
+    const enchant = heroic && ri >= 2 && rng() < 0.35 + ri * 0.2 ? rng.pick(this.enchants) : null;
+    const artifact = heroic && (ri >= 3 || (ri === 2 && rng() < 0.3)) && opts.namegen ? opts.namegen.generate('object', { race: race || 'human', seed }).text : null;
+    const matAdj = material ? material.adj + ' ' : ''; // items whose name already names a material have an empty materials list
+    const qAdj = craftable && quality.adj ? quality.adj + ' ' : '';
     const name = `${qAdj}${matAdj}${base.name}`.trim(); const fullName = artifact ? `${artifact}, ${enchant ? enchant.toLowerCase() + ' ' : ''}${name}` : (enchant ? `${enchant} ${name}` : name);
     const [lo, hi] = base.value; const value = Math.round((lo + rng() * (hi - lo)) * (material?.value ?? 1) * quality.value * (enchant ? 3 + ri : 1) * (artifact ? 2 : 1));
     const tags = [...new Set([...base.tags, ...(material?.tags || []), ...quality.tags, ...(enchant ? this.enchantTags[enchant] || [] : []), rarity, ...(artifact ? ['artifact', 'named'] : [])])];

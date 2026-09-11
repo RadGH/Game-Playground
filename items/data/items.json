@@ -376,7 +376,8 @@
     "ancient"
    ],
    "affinity": {
-    "elf": 3
+    "elf": 3,
+    "dragon": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -466,7 +467,8 @@
    "affinity": {
     "orc": 2,
     "goblin": 2,
-    "undead": 2
+    "undead": 2,
+    "troll": 2
    },
    "rarity": "common",
    "value": [
@@ -682,7 +684,8 @@
    "affinity": {
     "human": 1,
     "undead": 2,
-    "giant": 1
+    "giant": 1,
+    "dragon": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -2816,7 +2819,8 @@
    "affinity": {
     "human": 1,
     "elf": 1,
-    "orc": 1
+    "orc": 1,
+    "dragon": 2
    },
    "rarity": "epic",
    "value": [
@@ -2963,7 +2967,8 @@
    ],
    "affinity": {
     "halfling": 3,
-    "goblin": 1
+    "goblin": 1,
+    "troll": 2
    },
    "rarity": "common",
    "value": [
@@ -3605,7 +3610,8 @@
    "affinity": {
     "orc": 2,
     "undead": 2,
-    "goblin": 1
+    "goblin": 1,
+    "troll": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -3765,7 +3771,8 @@
    ],
    "affinity": {
     "human": 1,
-    "dwarf": 1
+    "dwarf": 1,
+    "dragon": 2
    },
    "rarity": "epic",
    "value": [
@@ -5004,7 +5011,8 @@
    ],
    "affinity": {
     "human": 2,
-    "elf": 1
+    "elf": 1,
+    "dragon": 2
    },
    "rarity": "common",
    "value": [
@@ -6264,7 +6272,8 @@
    "affinity": {
     "human": 2,
     "giant": 1,
-    "undead": 1
+    "undead": 1,
+    "dragon": 2
    },
    "rarity": "common",
    "value": [
@@ -6289,7 +6298,9 @@
    "affinity": {
     "dwarf": 3,
     "giant": 2,
-    "human": 1
+    "human": 1,
+    "troll": 2,
+    "dragon": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -6314,7 +6325,8 @@
    "affinity": {
     "dwarf": 3,
     "giant": 2,
-    "human": 1
+    "human": 1,
+    "troll": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -6872,7 +6884,8 @@
     "huge"
    ],
    "affinity": {
-    "giant": 3
+    "giant": 3,
+    "troll": 2
    },
    "rarity": "rare",
    "value": [
@@ -8780,7 +8793,8 @@
    ],
    "affinity": {
     "dwarf": 3,
-    "halfling": 1
+    "halfling": 1,
+    "troll": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -9246,7 +9260,8 @@
    ],
    "affinity": {
     "dwarf": 3,
-    "elf": 2
+    "elf": 2,
+    "dragon": 2
    },
    "rarity": "epic",
    "value": [
@@ -9363,7 +9378,8 @@
    ],
    "affinity": {
     "dwarf": 3,
-    "goblin": 2
+    "goblin": 2,
+    "dragon": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -9436,7 +9452,8 @@
    "affinity": {
     "orc": 2,
     "goblin": 2,
-    "dragon": 1
+    "dragon": 1,
+    "troll": 2
    },
    "rarity": "common",
    "value": [
@@ -9669,7 +9686,8 @@
    "affinity": {
     "orc": 2,
     "human": 2,
-    "dragon": 1
+    "dragon": 1,
+    "troll": 2
    },
    "rarity": "uncommon",
    "value": [

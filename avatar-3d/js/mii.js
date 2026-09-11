@@ -6,6 +6,8 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { normalizeAvatar, shade } from '../../avatar-2d/js/render.js';
 import { faceTexture } from './face-texture.js';
+import { buildGearHat, buildGearTop, buildCape, buildHeld, buildBodyMarks, LONG_SKIRT_TOPS, LONG_SLEEVE_TOPS, BARE_ARM_TOPS } from './mii-gear.js';
+const GEAR_HELPERS = () => ({ mat, box, sphere, cyl, cone, torus, capsule, capGeo, shade });
 
 export const MII = { hip: 0.75, neck: 1.32, headR: 0.25, shoulderX: 0.2, legX: 0.11 };
 
@@ -63,7 +65,7 @@ export async function createMiiCharacter(avatar) {
     // skirts (in legs group so they follow leg length)
     if (['skirt', 'kilt'].includes(bottomId)) { const s = cyl(0.17, 0.3, 0.3, a.bottom.color, 24); s.position.y = legLen - 0.16; legs.add(s); }
     if (bottomId === 'loincloth') { const s = box(0.18, 0.28, 0.02, a.bottom.color); s.position.set(0, legLen - 0.15, 0.1); legs.add(s); }
-    if (['robe', 'dress', 'coat'].includes(a.top.id)) { const len = a.top.id === 'robe' ? 0.7 : a.top.id === 'dress' ? 0.55 : 0.5; const s = cyl(0.2, 0.34, len, a.top.color, 24); s.position.y = legLen - len / 2 + 0.02; legs.add(s); if (a.top.id === 'coat') { const split = box(0.02, len, 0.02, shade(a.top.color, -0.2)); split.position.set(0, legLen - len / 2 + 0.02, 0.33); s.add(split); } }
+    const skirtLen = a.top.id === 'robe' ? 0.7 : a.top.id === 'dress' ? 0.55 : a.top.id === 'coat' ? 0.5 : LONG_SKIRT_TOPS[a.top.id]; if (skirtLen) { const len = skirtLen; const s = cyl(0.2, 0.34, len, a.top.color, 24); s.position.y = legLen - len / 2 + 0.02; legs.add(s); if (a.top.id === 'coat' || a.top.id === 'open_coat' || a.top.id === 'trench') { const split = box(0.02, len, 0.02, shade(a.top.color, -0.2)); split.position.set(0, legLen - len / 2 + 0.02, 0.33); s.add(split); } }
     // ---- torso
     const torso = new THREE.Group(); torso.position.y = m.hipY; torso.scale.set(m.widthScale, m.torsoScale, m.widthScale); group.add(torso); P.torso = torso;
     const tl = MII.neck - MII.hip; const topId = a.top.id, tc = a.top.color, tc2 = a.top.color2 || '#fff';
@@ -77,7 +79,8 @@ export async function createMiiCharacter(avatar) {
     // neck
     const neck = cyl(0.07, 0.08, 0.12, skinD); neck.position.y = tl; torso.add(neck);
     // arms
-    const longSleeve = ['tunic', 'hoodie', 'vest', 'plate', 'robe', 'coat', 'chainmail'].includes(topId), noSleeve = ['tank', 'apron'].includes(topId) ;
+    buildGearTop(torso, body, a, tl, GEAR_HELPERS());
+    const longSleeve = ['tunic', 'hoodie', 'vest', 'plate', 'robe', 'coat', 'chainmail', ...LONG_SLEEVE_TOPS].includes(topId), noSleeve = ['tank', 'apron', ...BARE_ARM_TOPS].includes(topId);
     for (const side of [-1, 1]) {
       const pivot = new THREE.Group(); pivot.position.set(side * (0.21 + 0.04), tl - 0.06, 0); torso.add(pivot); P['arm' + (side < 0 ? 'L' : 'R')] = pivot;
       const upper = capsule(0.065, 0.2, noSleeve ? skin : tc); upper.position.y = -0.14; pivot.add(upper);
@@ -86,6 +89,7 @@ export async function createMiiCharacter(avatar) {
       if (topId === 'robe') { const cuff = cyl(0.09, 0.12, 0.14, tc); cuff.position.y = -0.42; pivot.add(cuff); }
       pivot.rotation.z = side * 0.12;
     }
+    buildCape(torso, a, tl, GEAR_HELPERS()); buildHeld(P.armR, P.armL, a, GEAR_HELPERS()); buildBodyMarks(torso, a, tl, GEAR_HELPERS());
     // ---- head
     const head = new THREE.Group(); head.position.y = m.neckY; head.scale.setScalar(m.headScale); group.add(head); P.head = head;
     const R = MII.headR; const hs = HEAD_SHAPES[a.headShape] || HEAD_SHAPES.round;
@@ -190,5 +194,6 @@ function buildHat(head, a, R, fit = new THREE.Vector3(1, 1, 1)) {
   if (id === 'straw') { add(cyl(R * 1.9, R * 1.9, 0.02, hc, 32), 0, top - 0.06, 0); add(cyl(R * 0.85, R * 0.9, R * 0.5, hc, 24), 0, top + R * 0.2, 0); }
   if (id === 'circlet') { const t = torus(R * 1.05, 0.012, hc); t.material.metalness = 0.8; t.material.roughness = 0.3; t.rotation.x = Math.PI / 2; add(t, 0, y + R * 0.55, 0); }
   if (id === 'top_hat') { add(cyl(R * 0.75, R * 0.75, R * 1.3, hc, 24), 0, top + R * 0.6, 0); add(cyl(R * 1.3, R * 1.3, 0.02, hc, 32), 0, top - 0.04, 0); const band = cyl(R * 0.77, R * 0.77, R * 0.2, shade(hc, 0.35), 24); add(band, 0, top + R * 0.1, 0); }
+  buildGearHat(head, a, R, fit, GEAR_HELPERS());
   if (id === 'flower') { for (let i = 0; i < 5; i++) { const ang = (i / 5) * Math.PI * 2; add(sphere(0.03, hc), R * 0.75 + Math.sin(ang) * 0.045, y + R * 0.75 + Math.cos(ang) * 0.045, R * 0.5); } add(sphere(0.02, '#ffd54a'), R * 0.75, y + R * 0.75, R * 0.53); }
 }

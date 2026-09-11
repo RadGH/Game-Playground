@@ -18,7 +18,7 @@ test('every part of every slot renders to valid-looking SVG', () => {
 });
 
 test('all presets render and normalize without changes', () => {
-  for (const p of DATA.presets) { const n = normalizeAvatar(p.avatar); for (const slot of SLOTS) { const want = slot === 'headShape' ? p.avatar.headShape : p.avatar[slot].id; const got = slot === 'headShape' ? n.headShape : n[slot].id; assert.equal(got, want, `${p.id}: ${slot} fell back (unknown id ${want})`); } assert.ok(renderSVG(n).length > 500); }
+  for (const p of DATA.presets) { const n = normalizeAvatar(p.avatar); for (const slot of SLOTS) { const want = slot === 'headShape' ? p.avatar.headShape : (p.avatar[slot]?.id ?? DEFAULT_AVATAR[slot].id); /* presets may omit newer optional slots (cape/held/offhand) */ const got = slot === 'headShape' ? n.headShape : n[slot].id; assert.equal(got, want, `${p.id}: ${slot} fell back (unknown id ${want})`); } assert.ok(renderSVG(n).length > 500); }
 });
 
 test('unknown part ids fall back to defaults instead of crashing', () => {

@@ -1,0 +1,1987 @@
+{
+ "PROLOGUE_ZONES": [
+  {
+   "id": "prologue",
+   "name": "The Lonely Road",
+   "act": 0,
+   "zoneIndex": 0,
+   "nodes": [
+    {
+     "id": "start",
+     "type": "lore",
+     "name": "Trailhead",
+     "x": 0.06,
+     "y": 0.5,
+     "exits": [
+      "first_combat"
+     ],
+     "noEvent": true
+    },
+    {
+     "id": "first_combat",
+     "type": "combat",
+     "name": "Lone Goblin",
+     "x": 0.28,
+     "y": 0.5,
+     "exits": [
+      "second_combat"
+     ],
+     "encounter": "prologue_scout"
+    },
+    {
+     "id": "second_combat",
+     "type": "combat",
+     "name": "Goblin Pair",
+     "x": 0.5,
+     "y": 0.5,
+     "exits": [
+      "warning"
+     ],
+     "encounter": "prologue_pair"
+    },
+    {
+     "id": "warning",
+     "type": "dialog",
+     "name": "Silas Veilward",
+     "x": 0.72,
+     "y": 0.5,
+     "exits": [
+      "prologue_boss"
+     ],
+     "dialogEventId": "prologue_warning"
+    },
+    {
+     "id": "prologue_boss",
+     "type": "boss",
+     "name": "Veilspawn Herald",
+     "x": 0.92,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "prologue_miniboss"
+    }
+   ]
+  }
+ ],
+ "ACT1_ZONES": [
+  {
+   "id": "border_roads",
+   "name": "The Border Roads",
+   "act": 1,
+   "zoneIndex": 0,
+   "nodes": [
+    {
+     "id": "start",
+     "type": "town",
+     "name": "Emberglen",
+     "x": 0.08,
+     "y": 0.5,
+     "exits": [
+      "road_ambush",
+      "crossroads_b",
+      "iris_corruption_notes"
+     ]
+    },
+    {
+     "id": "road_ambush",
+     "type": "dialog",
+     "name": "Shady Wanderer",
+     "x": 0.28,
+     "y": 0.4,
+     "exits": [
+      "crossroads_a",
+      "crossroads_b",
+      "garrick_redemption",
+      "recruit_dorn"
+     ]
+    },
+    {
+     "id": "iris_corruption_notes",
+     "type": "dialog",
+     "name": "Wandering Scholar",
+     "x": 0.2,
+     "y": 0.18,
+     "exits": [
+      "crossroads_a"
+     ]
+    },
+    {
+     "id": "garrick_redemption",
+     "type": "dialog",
+     "name": "A Knight on the Roadside",
+     "x": 0.42,
+     "y": 0.55,
+     "exits": [
+      "crossroads_a",
+      "crossroads_b"
+     ]
+    },
+    {
+     "id": "recruit_dorn",
+     "type": "dialog",
+     "name": "The Bridge to Nowhere",
+     "x": 0.4,
+     "y": 0.16,
+     "exits": [
+      "crossroads_a"
+     ]
+    },
+    {
+     "id": "crossroads_a",
+     "type": "combat",
+     "name": "Goblin Scout Pack",
+     "x": 0.5,
+     "y": 0.22,
+     "exits": [
+      "ruined_watch"
+     ],
+     "encounter": "goblin_patrol"
+    },
+    {
+     "id": "crossroads_b",
+     "type": "shrine",
+     "name": "Roadside Shrine",
+     "x": 0.5,
+     "y": 0.7,
+     "exits": [
+      "ruined_watch",
+      "border_skill"
+     ],
+     "shrineType": "heal"
+    },
+    {
+     "id": "border_skill",
+     "type": "skillCheck",
+     "name": "Collapsed Passage",
+     "x": 0.62,
+     "y": 0.85,
+     "exits": [
+      "ruined_watch"
+     ],
+     "skillCheck": {
+      "stat": "STR",
+      "dc": 13,
+      "flavor": "A boulder blocks a collapsed passage. Heave it aside to find what lies within.",
+      "success": {
+       "gold": 80,
+       "text": "You muscle the stone aside. Inside: a cache of coins (+80 gold)."
+      },
+      "failure": {
+       "hpLoss": 20,
+       "text": "The boulder shifts and pins your arm. You wrench free but lose HP."
+      }
+     }
+    },
+    {
+     "id": "ruined_watch",
+     "type": "combat",
+     "name": "Ruined Watchtower",
+     "x": 0.72,
+     "y": 0.5,
+     "exits": [
+      "border_boss"
+     ],
+     "encounter": "corrupted_outpost"
+    },
+    {
+     "id": "border_boss",
+     "type": "boss",
+     "name": "Warlord's Vanguard",
+     "x": 0.92,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "border_boss"
+    }
+   ]
+  },
+  {
+   "id": "thornwood",
+   "name": "Thornwood Forest",
+   "act": 1,
+   "zoneIndex": 1,
+   "nodes": [
+    {
+     "id": "forest_enter",
+     "type": "dialog",
+     "name": "Forest Edge",
+     "x": 0.08,
+     "y": 0.5,
+     "exits": [
+      "spider_hollow",
+      "hidden_path",
+      "tomek_caravan_burn",
+      "krix_offering",
+      "recruit_kessa"
+     ]
+    },
+    {
+     "id": "tomek_caravan_burn",
+     "type": "dialog",
+     "name": "Burning Caravan",
+     "x": 0.18,
+     "y": 0.18,
+     "exits": [
+      "spider_hollow"
+     ]
+    },
+    {
+     "id": "krix_offering",
+     "type": "dialog",
+     "name": "A Cast-Out Goblin",
+     "x": 0.18,
+     "y": 0.82,
+     "exits": [
+      "hidden_path"
+     ]
+    },
+    {
+     "id": "recruit_kessa",
+     "type": "dialog",
+     "name": "The Hunter's Trail",
+     "x": 0.3,
+     "y": 0.1,
+     "exits": [
+      "hidden_path"
+     ]
+    },
+    {
+     "id": "spider_hollow",
+     "type": "combat",
+     "name": "Spider Hollow",
+     "x": 0.3,
+     "y": 0.28,
+     "exits": [
+      "goblin_camp"
+     ],
+     "encounter": "spider_nest"
+    },
+    {
+     "id": "hidden_path",
+     "type": "dialog",
+     "name": "Ancient Runestone",
+     "x": 0.3,
+     "y": 0.72,
+     "exits": [
+      "goblin_camp",
+      "wood_test"
+     ]
+    },
+    {
+     "id": "wood_test",
+     "type": "skillCheck",
+     "name": "Faded Trail Sign",
+     "x": 0.44,
+     "y": 0.88,
+     "exits": [
+      "goblin_camp"
+     ],
+     "skillCheck": {
+      "stat": "DEX",
+      "dc": 12,
+      "flavor": "Ancient carvings mark a shortcut deeper into the forest. Can you decipher them in the failing light?",
+      "success": {
+       "gold": 60,
+       "xp": 40,
+       "text": "You trace the markings and find a hidden shortcut — and a pouch left behind."
+      },
+      "failure": {
+       "statusType": "blind",
+       "statusDur": 2,
+       "text": "You misread the sign and stumble into a thicket. Your vision blurs for 2 rounds in the next fight."
+      }
+     }
+    },
+    {
+     "id": "goblin_camp",
+     "type": "combat",
+     "name": "Goblin Camp",
+     "x": 0.5,
+     "y": 0.5,
+     "exits": [
+      "seer_hut",
+      "treasure_grove",
+      "spider_queen"
+     ],
+     "encounter": "goblin_camp"
+    },
+    {
+     "id": "seer_hut",
+     "type": "dialog",
+     "name": "The Seer's Hut",
+     "x": 0.7,
+     "y": 0.22,
+     "exits": [
+      "thornwood_boss"
+     ]
+    },
+    {
+     "id": "treasure_grove",
+     "type": "treasure",
+     "name": "Hidden Grove",
+     "x": 0.7,
+     "y": 0.52,
+     "exits": [
+      "thornwood_boss"
+     ]
+    },
+    {
+     "id": "spider_queen",
+     "type": "challenge",
+     "name": "Queen Spider Lair",
+     "x": 0.68,
+     "y": 0.85,
+     "exits": [
+      "silk_cache"
+     ],
+     "encounter": "spider_nest"
+    },
+    {
+     "id": "silk_cache",
+     "type": "treasure",
+     "name": "Silk Cache",
+     "x": 0.85,
+     "y": 0.85,
+     "exits": [
+      "thornwood_boss"
+     ]
+    },
+    {
+     "id": "thornwood_boss",
+     "type": "boss",
+     "name": "The Veil Wardens",
+     "x": 0.92,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "thornwood_boss"
+    }
+   ]
+  }
+ ],
+ "ACT2_ZONES": [
+  {
+   "id": "dust_roads",
+   "name": "The Dust Roads",
+   "act": 2,
+   "zoneIndex": 0,
+   "nodes": [
+    {
+     "id": "ash_gate",
+     "type": "dialog",
+     "name": "Ashen Gate",
+     "x": 0.06,
+     "y": 0.5,
+     "exits": [
+      "dust_patrol",
+      "ash_lore",
+      "salt_wastes",
+      "garrick_old_oath",
+      "tomek_recovery",
+      "krix_trap",
+      "recruit_veya"
+     ]
+    },
+    {
+     "id": "garrick_old_oath",
+     "type": "dialog",
+     "name": "A Borrowed Oath",
+     "x": 0.16,
+     "y": 0.2,
+     "exits": [
+      "obsidian_fort"
+     ]
+    },
+    {
+     "id": "recruit_veya",
+     "type": "dialog",
+     "name": "The Wounded Road",
+     "x": 0.3,
+     "y": 0.12,
+     "exits": [
+      "obsidian_fort"
+     ]
+    },
+    {
+     "id": "tomek_recovery",
+     "type": "dialog",
+     "name": "Tomek's Caravan",
+     "x": 0.16,
+     "y": 0.78,
+     "exits": [
+      "salt_wastes"
+     ]
+    },
+    {
+     "id": "krix_trap",
+     "type": "dialog",
+     "name": "A Goblin Shortcut",
+     "x": 0.34,
+     "y": 0.62,
+     "exits": [
+      "veil_camp"
+     ]
+    },
+    {
+     "id": "dust_patrol",
+     "type": "combat",
+     "name": "Ash Patrol",
+     "x": 0.22,
+     "y": 0.22,
+     "exits": [
+      "obsidian_fort"
+     ],
+     "encounter": "ash_patrol"
+    },
+    {
+     "id": "ash_lore",
+     "type": "dialog",
+     "name": "Ruined Outpost",
+     "x": 0.22,
+     "y": 0.55,
+     "exits": [
+      "obsidian_fort"
+     ]
+    },
+    {
+     "id": "salt_wastes",
+     "type": "ambush",
+     "name": "Salt Wastes",
+     "x": 0.22,
+     "y": 0.85,
+     "exits": [
+      "salt_tunnels"
+     ],
+     "encounter": "ash_patrol"
+    },
+    {
+     "id": "salt_tunnels",
+     "type": "challenge",
+     "name": "Salt Tunnels",
+     "x": 0.4,
+     "y": 0.88,
+     "exits": [
+      "buried_cache"
+     ],
+     "encounter": "obsidian_garrison"
+    },
+    {
+     "id": "buried_cache",
+     "type": "treasure",
+     "name": "Buried Cache",
+     "x": 0.58,
+     "y": 0.88,
+     "exits": [
+      "veil_camp"
+     ]
+    },
+    {
+     "id": "obsidian_fort",
+     "type": "combat",
+     "name": "Obsidian Garrison",
+     "x": 0.46,
+     "y": 0.4,
+     "exits": [
+      "ember_path",
+      "veil_camp",
+      "black_spire"
+     ],
+     "encounter": "obsidian_garrison"
+    },
+    {
+     "id": "black_spire",
+     "type": "dialog",
+     "name": "Black Spire",
+     "x": 0.58,
+     "y": 0.18,
+     "exits": [
+      "ember_path"
+     ]
+    },
+    {
+     "id": "ember_path",
+     "type": "ambush",
+     "name": "Ember Path",
+     "x": 0.72,
+     "y": 0.28,
+     "exits": [
+      "dust_boss"
+     ],
+     "encounter": "ember_ambush"
+    },
+    {
+     "id": "veil_camp",
+     "type": "combat",
+     "name": "Veil Cult Camp",
+     "x": 0.72,
+     "y": 0.62,
+     "exits": [
+      "dust_boss",
+      "dust_int_check"
+     ],
+     "encounter": "veil_cult_camp"
+    },
+    {
+     "id": "dust_int_check",
+     "type": "skillCheck",
+     "name": "Cult Cipher Tablet",
+     "x": 0.82,
+     "y": 0.78,
+     "exits": [
+      "dust_boss"
+     ],
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 15,
+      "flavor": "A glowing tablet bears Veil-cult glyphs. Decipher them to learn their next move.",
+      "success": {
+       "gold": 120,
+       "xp": 60,
+       "loreFlag": "veil_cipher",
+       "text": "You crack the cipher. A Veil supply route is revealed — and a purse the cultists left behind."
+      },
+      "failure": {
+       "gold": -60,
+       "text": "The tablet discharges when misread, shocking you and alerting a distant patrol. You lose some coin in the scramble."
+      }
+     }
+    },
+    {
+     "id": "dust_boss",
+     "type": "boss",
+     "name": "The Lava Titan",
+     "x": 0.92,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "lava_titan"
+    }
+   ]
+  },
+  {
+   "id": "ember_plateau",
+   "name": "The Ember Plateau",
+   "act": 2,
+   "zoneIndex": 1,
+   "nodes": [
+    {
+     "id": "plateau_enter",
+     "type": "dialog",
+     "name": "Plateau Ascent",
+     "x": 0.06,
+     "y": 0.5,
+     "exits": [
+      "lava_fields",
+      "ancient_shrine",
+      "cinder_gorge",
+      "iris_ember_field",
+      "yssira_first_vision",
+      "recruit_magnus"
+     ]
+    },
+    {
+     "id": "iris_ember_field",
+     "type": "dialog",
+     "name": "Scholar in the Ash",
+     "x": 0.18,
+     "y": 0.18,
+     "exits": [
+      "lava_fields"
+     ]
+    },
+    {
+     "id": "recruit_magnus",
+     "type": "dialog",
+     "name": "The Stranded Scholar",
+     "x": 0.32,
+     "y": 0.3,
+     "exits": [
+      "lava_fields"
+     ]
+    },
+    {
+     "id": "yssira_first_vision",
+     "type": "dialog",
+     "name": "The Blind Seer",
+     "x": 0.18,
+     "y": 0.82,
+     "exits": [
+      "cinder_gorge"
+     ]
+    },
+    {
+     "id": "lava_fields",
+     "type": "combat",
+     "name": "Lava Fields",
+     "x": 0.22,
+     "y": 0.22,
+     "exits": [
+      "veil_stronghold",
+      "obsidian_vein"
+     ],
+     "encounter": "ash_patrol"
+    },
+    {
+     "id": "ancient_shrine",
+     "type": "treasure",
+     "name": "Ancient Shrine",
+     "x": 0.22,
+     "y": 0.5,
+     "exits": [
+      "veil_stronghold"
+     ]
+    },
+    {
+     "id": "cinder_gorge",
+     "type": "ambush",
+     "name": "Cinder Gorge",
+     "x": 0.22,
+     "y": 0.82,
+     "exits": [
+      "magma_vault"
+     ],
+     "encounter": "ember_ambush"
+    },
+    {
+     "id": "magma_vault",
+     "type": "challenge",
+     "name": "Magma Vault",
+     "x": 0.4,
+     "y": 0.88,
+     "exits": [
+      "ember_hoard"
+     ],
+     "encounter": "veil_cult_camp"
+    },
+    {
+     "id": "ember_hoard",
+     "type": "treasure",
+     "name": "Ember Hoard",
+     "x": 0.58,
+     "y": 0.86,
+     "exits": [
+      "lore_monolith"
+     ]
+    },
+    {
+     "id": "obsidian_vein",
+     "type": "dialog",
+     "name": "Obsidian Vein",
+     "x": 0.38,
+     "y": 0.1,
+     "exits": [
+      "veil_stronghold"
+     ]
+    },
+    {
+     "id": "veil_stronghold",
+     "type": "combat",
+     "name": "Veil Stronghold",
+     "x": 0.5,
+     "y": 0.42,
+     "exits": [
+      "rift_access",
+      "lore_monolith"
+     ],
+     "encounter": "veil_cult_camp"
+    },
+    {
+     "id": "rift_access",
+     "type": "dialog",
+     "name": "The Rift Access",
+     "x": 0.75,
+     "y": 0.22,
+     "exits": [
+      "plateau_boss"
+     ]
+    },
+    {
+     "id": "lore_monolith",
+     "type": "dialog",
+     "name": "Veil Monolith",
+     "x": 0.75,
+     "y": 0.62,
+     "exits": [
+      "plateau_boss",
+      "plateau_con_check"
+     ]
+    },
+    {
+     "id": "plateau_con_check",
+     "type": "skillCheck",
+     "name": "Superheated Passage",
+     "x": 0.88,
+     "y": 0.78,
+     "exits": [
+      "plateau_boss"
+     ],
+     "skillCheck": {
+      "stat": "CON",
+      "dc": 16,
+      "flavor": "A narrow corridor breathes fire with every gust. Endure it to claim the prize beyond.",
+      "success": {
+       "gold": 180,
+       "xp": 80,
+       "text": "Your party grits through the heat. A war-chest sits untouched on the other side."
+      },
+      "failure": {
+       "hpLossPct": 0.15,
+       "text": "The heat is overwhelming. The party staggers out scorched, losing 15% of their HP."
+      }
+     }
+    },
+    {
+     "id": "plateau_boss",
+     "type": "boss",
+     "name": "Veil High Priest",
+     "x": 0.92,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "veil_high_priest"
+    }
+   ]
+  }
+ ],
+ "ACT3_ZONES": [
+  {
+   "id": "hell_breach",
+   "name": "The Hell Breach",
+   "act": 3,
+   "zoneIndex": 0,
+   "nodes": [
+    {
+     "id": "breach_gate",
+     "type": "dialog",
+     "name": "The Veil Breach",
+     "x": 0.06,
+     "y": 0.5,
+     "exits": [
+      "demon_patrol",
+      "fell_ruins",
+      "bone_pit",
+      "garrick_hell_stand",
+      "tomek_last_deal",
+      "krix_redemption"
+     ]
+    },
+    {
+     "id": "garrick_hell_stand",
+     "type": "dialog",
+     "name": "Garrick's Last Line",
+     "x": 0.16,
+     "y": 0.16,
+     "exits": [
+      "demon_patrol"
+     ]
+    },
+    {
+     "id": "tomek_last_deal",
+     "type": "dialog",
+     "name": "A Final Bargain",
+     "x": 0.16,
+     "y": 0.84,
+     "exits": [
+      "bone_pit"
+     ]
+    },
+    {
+     "id": "krix_redemption",
+     "type": "dialog",
+     "name": "Krix Atones",
+     "x": 0.32,
+     "y": 0.62,
+     "exits": [
+      "inferno_keep"
+     ]
+    },
+    {
+     "id": "demon_patrol",
+     "type": "combat",
+     "name": "Demon Patrol",
+     "x": 0.22,
+     "y": 0.22,
+     "exits": [
+      "inferno_keep",
+      "brimstone_shrine"
+     ],
+     "encounter": "demon_patrol"
+    },
+    {
+     "id": "brimstone_shrine",
+     "type": "shrine",
+     "name": "Brimstone Shrine",
+     "x": 0.38,
+     "y": 0.08,
+     "exits": [
+      "inferno_keep"
+     ],
+     "shrineType": "heal"
+    },
+    {
+     "id": "fell_ruins",
+     "type": "dialog",
+     "name": "Fell Ruins",
+     "x": 0.22,
+     "y": 0.52,
+     "exits": [
+      "inferno_keep"
+     ]
+    },
+    {
+     "id": "bone_pit",
+     "type": "ambush",
+     "name": "Bone Pit",
+     "x": 0.22,
+     "y": 0.84,
+     "exits": [
+      "ashen_hollow"
+     ],
+     "encounter": "demon_patrol"
+    },
+    {
+     "id": "ashen_hollow",
+     "type": "challenge",
+     "name": "Ashen Hollow",
+     "x": 0.4,
+     "y": 0.88,
+     "exits": [
+      "demon_reliquary"
+     ],
+     "encounter": "hell_garrison"
+    },
+    {
+     "id": "demon_reliquary",
+     "type": "treasure",
+     "name": "Demon Reliquary",
+     "x": 0.58,
+     "y": 0.88,
+     "exits": [
+      "soul_prison"
+     ]
+    },
+    {
+     "id": "inferno_keep",
+     "type": "combat",
+     "name": "Inferno Keep",
+     "x": 0.5,
+     "y": 0.38,
+     "exits": [
+      "void_altar",
+      "soul_prison"
+     ],
+     "encounter": "hell_garrison"
+    },
+    {
+     "id": "void_altar",
+     "type": "dialog",
+     "name": "The Void Altar",
+     "x": 0.75,
+     "y": 0.22,
+     "exits": [
+      "breach_boss"
+     ]
+    },
+    {
+     "id": "soul_prison",
+     "type": "treasure",
+     "name": "Soul Prison",
+     "x": 0.75,
+     "y": 0.62,
+     "exits": [
+      "breach_boss"
+     ]
+    },
+    {
+     "id": "breach_boss",
+     "type": "boss",
+     "name": "Archfiend Malgrath",
+     "x": 0.92,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "archfiend_malgrath"
+    }
+   ]
+  },
+  {
+   "id": "shattered_core",
+   "name": "The Shattered Core",
+   "act": 3,
+   "zoneIndex": 1,
+   "nodes": [
+    {
+     "id": "core_enter",
+     "type": "dialog",
+     "name": "Core Entrance",
+     "x": 0.05,
+     "y": 0.5,
+     "exits": [
+      "rift_demons",
+      "void_nexus",
+      "shattered_path",
+      "iris_shard_archive",
+      "yssira_breaking"
+     ]
+    },
+    {
+     "id": "iris_shard_archive",
+     "type": "dialog",
+     "name": "Iris's Archive",
+     "x": 0.16,
+     "y": 0.16,
+     "exits": [
+      "rift_demons"
+     ]
+    },
+    {
+     "id": "yssira_breaking",
+     "type": "dialog",
+     "name": "The Seer Snaps",
+     "x": 0.16,
+     "y": 0.84,
+     "exits": [
+      "shattered_path"
+     ]
+    },
+    {
+     "id": "rift_demons",
+     "type": "combat",
+     "name": "Rift Demons",
+     "x": 0.2,
+     "y": 0.22,
+     "exits": [
+      "shard_fortress",
+      "memory_crypt"
+     ],
+     "encounter": "rift_assault"
+    },
+    {
+     "id": "memory_crypt",
+     "type": "dialog",
+     "name": "Memory Crypt",
+     "x": 0.34,
+     "y": 0.08,
+     "exits": [
+      "shard_fortress"
+     ]
+    },
+    {
+     "id": "void_nexus",
+     "type": "ambush",
+     "name": "Void Nexus",
+     "x": 0.2,
+     "y": 0.5,
+     "exits": [
+      "shard_fortress"
+     ],
+     "encounter": "void_nexus_ambush"
+    },
+    {
+     "id": "shattered_path",
+     "type": "ambush",
+     "name": "Shattered Path",
+     "x": 0.2,
+     "y": 0.85,
+     "exits": [
+      "rift_cache"
+     ],
+     "encounter": "rift_assault"
+    },
+    {
+     "id": "rift_cache",
+     "type": "challenge",
+     "name": "Rift Warden",
+     "x": 0.36,
+     "y": 0.9,
+     "exits": [
+      "shard_vault"
+     ],
+     "encounter": "hell_garrison"
+    },
+    {
+     "id": "shard_vault",
+     "type": "treasure",
+     "name": "Shard Vault",
+     "x": 0.54,
+     "y": 0.88,
+     "exits": [
+      "ancient_seal"
+     ]
+    },
+    {
+     "id": "shard_fortress",
+     "type": "combat",
+     "name": "Shard Fortress",
+     "x": 0.48,
+     "y": 0.38,
+     "exits": [
+      "the_wound",
+      "ancient_seal",
+      "oblivion_spire"
+     ],
+     "encounter": "hell_garrison"
+    },
+    {
+     "id": "oblivion_spire",
+     "type": "shrine",
+     "name": "Oblivion Spire",
+     "x": 0.66,
+     "y": 0.1,
+     "exits": [
+      "the_wound"
+     ],
+     "shrineType": "empower"
+    },
+    {
+     "id": "the_wound",
+     "type": "dialog",
+     "name": "The Wound",
+     "x": 0.78,
+     "y": 0.22,
+     "exits": [
+      "core_boss"
+     ]
+    },
+    {
+     "id": "ancient_seal",
+     "type": "dialog",
+     "name": "Ancient Seal",
+     "x": 0.78,
+     "y": 0.62,
+     "exits": [
+      "core_boss"
+     ]
+    },
+    {
+     "id": "core_boss",
+     "type": "boss",
+     "name": "The Emberveil Sovereign",
+     "x": 0.94,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "emberveil_sovereign"
+    }
+   ]
+  }
+ ],
+ "ACT4_ZONES": [
+  {
+   "id": "cosmic_rift",
+   "name": "The Cosmic Rift",
+   "act": 4,
+   "zoneIndex": 0,
+   "nodes": [
+    {
+     "id": "rift_entry",
+     "type": "dialog",
+     "name": "Edge of Reality",
+     "x": 0.05,
+     "y": 0.5,
+     "exits": [
+      "star_fields",
+      "void_expanse",
+      "nebula_drift",
+      "garrick_final_charge"
+     ]
+    },
+    {
+     "id": "garrick_final_charge",
+     "type": "dialog",
+     "name": "Garrick's Final Charge",
+     "x": 0.18,
+     "y": 0.18,
+     "exits": [
+      "star_fields"
+     ]
+    },
+    {
+     "id": "star_fields",
+     "type": "combat",
+     "name": "The Broken Stars",
+     "x": 0.2,
+     "y": 0.2,
+     "exits": [
+      "cosmic_bastion",
+      "star_tomb"
+     ],
+     "encounter": "void_horde"
+    },
+    {
+     "id": "star_tomb",
+     "type": "dialog",
+     "name": "Tomb of Stars",
+     "x": 0.34,
+     "y": 0.08,
+     "exits": [
+      "cosmic_bastion"
+     ]
+    },
+    {
+     "id": "void_expanse",
+     "type": "shrine",
+     "name": "Cosmic Shrine",
+     "x": 0.2,
+     "y": 0.5,
+     "exits": [
+      "cosmic_bastion"
+     ],
+     "shrineType": "empower"
+    },
+    {
+     "id": "nebula_drift",
+     "type": "ambush",
+     "name": "Nebula Drift",
+     "x": 0.2,
+     "y": 0.84,
+     "exits": [
+      "event_horizon"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "event_horizon",
+     "type": "challenge",
+     "name": "Event Horizon",
+     "x": 0.36,
+     "y": 0.9,
+     "exits": [
+      "void_vault"
+     ],
+     "encounter": "void_horde"
+    },
+    {
+     "id": "void_vault",
+     "type": "treasure",
+     "name": "Void Vault",
+     "x": 0.54,
+     "y": 0.88,
+     "exits": [
+      "titan_pit"
+     ]
+    },
+    {
+     "id": "cosmic_bastion",
+     "type": "combat",
+     "name": "Cosmic Bastion",
+     "x": 0.48,
+     "y": 0.38,
+     "exits": [
+      "prophet_sanctum",
+      "titan_pit",
+      "collapse_rift"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "collapse_rift",
+     "type": "ambush",
+     "name": "Collapse Rift",
+     "x": 0.6,
+     "y": 0.15,
+     "exits": [
+      "prophet_sanctum"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "prophet_sanctum",
+     "type": "dialog",
+     "name": "Void Prophet's Sanctum",
+     "x": 0.76,
+     "y": 0.22,
+     "exits": [
+      "rift_boss"
+     ]
+    },
+    {
+     "id": "titan_pit",
+     "type": "challenge",
+     "name": "Titan's Pit",
+     "x": 0.76,
+     "y": 0.64,
+     "exits": [
+      "rift_boss"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "rift_boss",
+     "type": "boss",
+     "name": "The Void Herald",
+     "x": 0.94,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "void_horde"
+    }
+   ]
+  },
+  {
+   "id": "eternal_void",
+   "name": "The Eternal Void",
+   "act": 4,
+   "zoneIndex": 1,
+   "nodes": [
+    {
+     "id": "void_gates",
+     "type": "dialog",
+     "name": "Gates of the Void",
+     "x": 0.05,
+     "y": 0.5,
+     "exits": [
+      "star_horror_swarm",
+      "void_library",
+      "echo_wastes",
+      "yssira_last_song"
+     ]
+    },
+    {
+     "id": "yssira_last_song",
+     "type": "dialog",
+     "name": "Yssira's Last Song",
+     "x": 0.18,
+     "y": 0.18,
+     "exits": [
+      "star_horror_swarm"
+     ]
+    },
+    {
+     "id": "star_horror_swarm",
+     "type": "combat",
+     "name": "Star Horror Swarm",
+     "x": 0.2,
+     "y": 0.22,
+     "exits": [
+      "unraveler_ante",
+      "forgotten_altar"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "forgotten_altar",
+     "type": "shrine",
+     "name": "Forgotten Altar",
+     "x": 0.34,
+     "y": 0.08,
+     "exits": [
+      "unraveler_ante"
+     ],
+     "shrineType": "heal"
+    },
+    {
+     "id": "void_library",
+     "type": "dialog",
+     "name": "The Void Library",
+     "x": 0.2,
+     "y": 0.5,
+     "exits": [
+      "unraveler_ante"
+     ]
+    },
+    {
+     "id": "echo_wastes",
+     "type": "ambush",
+     "name": "Echo Wastes",
+     "x": 0.2,
+     "y": 0.86,
+     "exits": [
+      "oblivion_warden"
+     ],
+     "encounter": "void_horde"
+    },
+    {
+     "id": "oblivion_warden",
+     "type": "challenge",
+     "name": "Oblivion Warden",
+     "x": 0.36,
+     "y": 0.9,
+     "exits": [
+      "oblivion_cache"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "oblivion_cache",
+     "type": "treasure",
+     "name": "Oblivion Cache",
+     "x": 0.54,
+     "y": 0.88,
+     "exits": [
+      "final_trial"
+     ]
+    },
+    {
+     "id": "unraveler_ante",
+     "type": "combat",
+     "name": "Antechamber of Unmaking",
+     "x": 0.48,
+     "y": 0.38,
+     "exits": [
+      "last_shrine",
+      "final_trial",
+      "rift_spiral"
+     ],
+     "encounter": "void_horde"
+    },
+    {
+     "id": "rift_spiral",
+     "type": "ambush",
+     "name": "Rift Spiral",
+     "x": 0.6,
+     "y": 0.12,
+     "exits": [
+      "last_shrine"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "last_shrine",
+     "type": "shrine",
+     "name": "The Last Shrine",
+     "x": 0.76,
+     "y": 0.22,
+     "exits": [
+      "void_boss"
+     ],
+     "shrineType": "fullrestore"
+    },
+    {
+     "id": "final_trial",
+     "type": "challenge",
+     "name": "Trial of the Void",
+     "x": 0.76,
+     "y": 0.62,
+     "exits": [
+      "void_boss"
+     ],
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "void_boss",
+     "type": "boss",
+     "name": "The Unraveler",
+     "x": 0.94,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "unraveler"
+    }
+   ]
+  }
+ ],
+ "ACT5_ZONES": [
+  {
+   "id": "abyssal_depths",
+   "name": "The Abyssal Depths",
+   "act": 5,
+   "zoneIndex": 0,
+   "nodes": [
+    {
+     "id": "abyss_gate",
+     "type": "dialog",
+     "name": "The Abyss Gate",
+     "x": 0.04,
+     "y": 0.5,
+     "exits": [
+      "drowned_halls",
+      "memory_pool",
+      "deep_trench",
+      "tidekeeper_lament"
+     ]
+    },
+    {
+     "id": "tidekeeper_lament",
+     "type": "dialog",
+     "name": "The Tidekeeper",
+     "x": 0.16,
+     "y": 0.18,
+     "exits": [
+      "drowned_halls"
+     ]
+    },
+    {
+     "id": "drowned_halls",
+     "type": "combat",
+     "name": "Drowned Halls",
+     "x": 0.18,
+     "y": 0.2,
+     "exits": [
+      "nexus_core",
+      "salt_shrine"
+     ],
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "salt_shrine",
+     "type": "shrine",
+     "name": "Salt Shrine",
+     "x": 0.32,
+     "y": 0.06,
+     "exits": [
+      "nexus_core"
+     ],
+     "shrineType": "heal"
+    },
+    {
+     "id": "memory_pool",
+     "type": "dialog",
+     "name": "Pool of Memories",
+     "x": 0.18,
+     "y": 0.5,
+     "exits": [
+      "nexus_core",
+      "echoing_trench"
+     ]
+    },
+    {
+     "id": "echoing_trench",
+     "type": "ambush",
+     "name": "Echoing Trench",
+     "x": 0.32,
+     "y": 0.38,
+     "exits": [
+      "nexus_core"
+     ],
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "deep_trench",
+     "type": "ambush",
+     "name": "Deep Trench",
+     "x": 0.18,
+     "y": 0.84,
+     "exits": [
+      "leviathan_nest"
+     ],
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "leviathan_nest",
+     "type": "challenge",
+     "name": "Leviathan's Nest",
+     "x": 0.34,
+     "y": 0.9,
+     "exits": [
+      "sunken_vault"
+     ],
+     "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "sunken_vault",
+     "type": "treasure",
+     "name": "Sunken Vault",
+     "x": 0.52,
+     "y": 0.88,
+     "exits": [
+      "worm_den"
+     ]
+    },
+    {
+     "id": "nexus_core",
+     "type": "combat",
+     "name": "Nexus Core",
+     "x": 0.48,
+     "y": 0.38,
+     "exits": [
+      "origin_shrine",
+      "worm_den",
+      "abyssal_archive"
+     ],
+     "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "abyssal_archive",
+     "type": "dialog",
+     "name": "Abyssal Archive",
+     "x": 0.62,
+     "y": 0.1,
+     "exits": [
+      "origin_shrine"
+     ]
+    },
+    {
+     "id": "origin_shrine",
+     "type": "shrine",
+     "name": "Origin Shrine",
+     "x": 0.76,
+     "y": 0.22,
+     "exits": [
+      "abyss_boss"
+     ],
+     "shrineType": "empower"
+    },
+    {
+     "id": "worm_den",
+     "type": "combat",
+     "name": "Genesis Worm Den",
+     "x": 0.76,
+     "y": 0.62,
+     "exits": [
+      "abyss_boss"
+     ],
+     "encounter": "genesis_nest"
+    },
+    {
+     "id": "abyss_boss",
+     "type": "boss",
+     "name": "The Primordial King",
+     "x": 0.94,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "abyssal_garrison"
+    }
+   ]
+  },
+  {
+   "id": "primordial_nexus",
+   "name": "The Primordial Nexus",
+   "act": 5,
+   "zoneIndex": 1,
+   "nodes": [
+    {
+     "id": "nexus_gates",
+     "type": "dialog",
+     "name": "Gates of Creation",
+     "x": 0.04,
+     "y": 0.5,
+     "exits": [
+      "shard_storm",
+      "echo_chamber",
+      "creation_loom",
+      "yssira_final_rite"
+     ]
+    },
+    {
+     "id": "yssira_final_rite",
+     "type": "dialog",
+     "name": "Yssira's Final Rite",
+     "x": 0.16,
+     "y": 0.18,
+     "exits": [
+      "shard_storm"
+     ]
+    },
+    {
+     "id": "shard_storm",
+     "type": "combat",
+     "name": "Reality Shard Storm",
+     "x": 0.18,
+     "y": 0.2,
+     "exits": [
+      "architect_bridge",
+      "unmade_gallery"
+     ],
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "unmade_gallery",
+     "type": "dialog",
+     "name": "Gallery of the Unmade",
+     "x": 0.32,
+     "y": 0.06,
+     "exits": [
+      "architect_bridge"
+     ]
+    },
+    {
+     "id": "echo_chamber",
+     "type": "dialog",
+     "name": "Echo Chamber",
+     "x": 0.18,
+     "y": 0.5,
+     "exits": [
+      "architect_bridge"
+     ]
+    },
+    {
+     "id": "creation_loom",
+     "type": "ambush",
+     "name": "Creation Loom",
+     "x": 0.18,
+     "y": 0.86,
+     "exits": [
+      "shattered_spire"
+     ],
+     "encounter": "genesis_nest"
+    },
+    {
+     "id": "shattered_spire",
+     "type": "challenge",
+     "name": "Shattered Spire",
+     "x": 0.34,
+     "y": 0.9,
+     "exits": [
+      "final_reliquary"
+     ],
+     "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "final_reliquary",
+     "type": "treasure",
+     "name": "Final Reliquary",
+     "x": 0.52,
+     "y": 0.88,
+     "exits": [
+      "crucible"
+     ]
+    },
+    {
+     "id": "architect_bridge",
+     "type": "combat",
+     "name": "Bridge of Making",
+     "x": 0.48,
+     "y": 0.38,
+     "exits": [
+      "last_prayer",
+      "crucible",
+      "primal_vein"
+     ],
+     "encounter": "genesis_nest"
+    },
+    {
+     "id": "primal_vein",
+     "type": "ambush",
+     "name": "Primal Vein",
+     "x": 0.6,
+     "y": 0.1,
+     "exits": [
+      "last_prayer"
+     ],
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "last_prayer",
+     "type": "shrine",
+     "name": "The Last Prayer",
+     "x": 0.76,
+     "y": 0.22,
+     "exits": [
+      "architect_boss"
+     ],
+     "shrineType": "fullrestore"
+    },
+    {
+     "id": "crucible",
+     "type": "challenge",
+     "name": "The Crucible",
+     "x": 0.76,
+     "y": 0.62,
+     "exits": [
+      "architect_boss"
+     ],
+     "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "architect_boss",
+     "type": "boss",
+     "name": "The Architect",
+     "x": 0.94,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "the_architect_final"
+    }
+   ]
+  }
+ ],
+ "ACT6_ZONES": [
+  {
+   "id": "dragons_reach",
+   "name": "The Dragon's Reach",
+   "act": 6,
+   "zoneIndex": 0,
+   "nodes": [
+    {
+     "id": "reach_gate",
+     "type": "dialog",
+     "name": "Gate of the Dragon's Reach",
+     "x": 0.05,
+     "y": 0.5,
+     "exits": [
+      "dragon_skyroad",
+      "wyrm_shrine",
+      "ember_pass"
+     ]
+    },
+    {
+     "id": "dragon_skyroad",
+     "type": "combat",
+     "name": "Dragon Skyroad",
+     "x": 0.2,
+     "y": 0.22,
+     "exits": [
+      "wyrm_citadel",
+      "dragon_hoard_a"
+     ],
+     "encounter": "dragon_patrol"
+    },
+    {
+     "id": "wyrm_shrine",
+     "type": "shrine",
+     "name": "Shrine of the Wyrm",
+     "x": 0.2,
+     "y": 0.5,
+     "exits": [
+      "wyrm_citadel"
+     ],
+     "shrineType": "heal"
+    },
+    {
+     "id": "ember_pass",
+     "type": "ambush",
+     "name": "Ember Dragon Pass",
+     "x": 0.2,
+     "y": 0.82,
+     "exits": [
+      "frost_wyrm_lair"
+     ],
+     "encounter": "dragon_patrol"
+    },
+    {
+     "id": "frost_wyrm_lair",
+     "type": "challenge",
+     "name": "Frost Wyrm Lair",
+     "x": 0.36,
+     "y": 0.9,
+     "exits": [
+      "dragon_hoard_b"
+     ],
+     "encounter": "frost_wyrm_pack"
+    },
+    {
+     "id": "dragon_hoard_a",
+     "type": "treasure",
+     "name": "Lesser Dragon's Hoard",
+     "x": 0.36,
+     "y": 0.08,
+     "exits": [
+      "wyrm_citadel"
+     ]
+    },
+    {
+     "id": "dragon_hoard_b",
+     "type": "treasure",
+     "name": "Dragon's Hoard",
+     "x": 0.54,
+     "y": 0.88,
+     "exits": [
+      "storm_rookery"
+     ]
+    },
+    {
+     "id": "wyrm_citadel",
+     "type": "combat",
+     "name": "Wyrm Citadel",
+     "x": 0.5,
+     "y": 0.38,
+     "exits": [
+      "storm_rookery",
+      "dragon_cult_altar",
+      "dragon_boss"
+     ],
+     "encounter": "wyrm_citadel"
+    },
+    {
+     "id": "dragon_cult_altar",
+     "type": "dialog",
+     "name": "Dragon Cult Altar",
+     "x": 0.66,
+     "y": 0.14,
+     "exits": [
+      "dragon_boss"
+     ]
+    },
+    {
+     "id": "storm_rookery",
+     "type": "combat",
+     "name": "Storm Dragon Rookery",
+     "x": 0.72,
+     "y": 0.62,
+     "exits": [
+      "dragon_boss"
+     ],
+     "encounter": "storm_dragon_nest"
+    },
+    {
+     "id": "dragon_boss",
+     "type": "boss",
+     "name": "The Ancient Dragon",
+     "x": 0.92,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "ancient_dragon_fight"
+    }
+   ]
+  },
+  {
+   "id": "dragon_throne",
+   "name": "The Dragon Throne",
+   "act": 6,
+   "zoneIndex": 1,
+   "nodes": [
+    {
+     "id": "throne_gate",
+     "type": "dialog",
+     "name": "Gate of the Dragon Throne",
+     "x": 0.05,
+     "y": 0.5,
+     "exits": [
+      "dragon_spine",
+      "dragon_archive",
+      "burning_spires"
+     ]
+    },
+    {
+     "id": "dragon_spine",
+     "type": "combat",
+     "name": "Dragon Spine Ridge",
+     "x": 0.2,
+     "y": 0.22,
+     "exits": [
+      "dragon_fortress",
+      "dragon_scale_vault"
+     ],
+     "encounter": "dragon_elite"
+    },
+    {
+     "id": "dragon_archive",
+     "type": "dialog",
+     "name": "Archive of Dragons",
+     "x": 0.2,
+     "y": 0.5,
+     "exits": [
+      "dragon_fortress"
+     ]
+    },
+    {
+     "id": "burning_spires",
+     "type": "ambush",
+     "name": "Burning Dragon Spires",
+     "x": 0.2,
+     "y": 0.84,
+     "exits": [
+      "dragon_trial"
+     ],
+     "encounter": "dragon_elite"
+    },
+    {
+     "id": "dragon_trial",
+     "type": "challenge",
+     "name": "Trial of the Dragon King",
+     "x": 0.36,
+     "y": 0.9,
+     "exits": [
+      "dragonking_shrine"
+     ],
+     "encounter": "storm_dragon_nest"
+    },
+    {
+     "id": "dragon_scale_vault",
+     "type": "treasure",
+     "name": "Dragon Scale Vault",
+     "x": 0.36,
+     "y": 0.08,
+     "exits": [
+      "dragon_fortress"
+     ]
+    },
+    {
+     "id": "dragonking_shrine",
+     "type": "shrine",
+     "name": "Shrine of the Dragon King",
+     "x": 0.54,
+     "y": 0.88,
+     "exits": [
+      "dragonking_boss"
+     ],
+     "shrineType": "fullrestore"
+    },
+    {
+     "id": "dragon_fortress",
+     "type": "combat",
+     "name": "Fortress of Dragons",
+     "x": 0.5,
+     "y": 0.38,
+     "exits": [
+      "dragonking_boss",
+      "dragon_oracle"
+     ],
+     "encounter": "wyrm_citadel"
+    },
+    {
+     "id": "dragon_oracle",
+     "type": "dialog",
+     "name": "Oracle of the Dragon King",
+     "x": 0.72,
+     "y": 0.22,
+     "exits": [
+      "dragonking_boss"
+     ]
+    },
+    {
+     "id": "dragonking_boss",
+     "type": "boss",
+     "name": "Bahamorth, the Dragon King",
+     "x": 0.94,
+     "y": 0.5,
+     "exits": [],
+     "encounter": "dragon_king_fight"
+    }
+   ]
+  }
+ ],
+ "ZONE_ENCOUNTER_POOLS": {
+  "border_roads": [
+   "goblin_patrol",
+   "corrupted_outpost",
+   "bandit_ambush"
+  ],
+  "thornwood": [
+   "spider_nest",
+   "goblin_camp",
+   "wolf_pack",
+   "bear_ambush"
+  ],
+  "dust_roads": [
+   "ash_patrol",
+   "obsidian_garrison",
+   "ember_ambush"
+  ],
+  "ember_plateau": [
+   "ash_patrol",
+   "veil_cult_camp",
+   "obsidian_garrison"
+  ],
+  "hell_breach": [
+   "demon_patrol",
+   "hell_garrison",
+   "rift_assault"
+  ],
+  "shattered_core": [
+   "hell_garrison",
+   "rift_assault",
+   "void_nexus_ambush"
+  ],
+  "cosmic_rift": [
+   "void_horde",
+   "cosmic_assault"
+  ],
+  "eternal_void": [
+   "void_horde",
+   "cosmic_assault"
+  ],
+  "abyssal_depths": [
+   "primordial_patrol",
+   "abyssal_garrison",
+   "genesis_nest"
+  ],
+  "primordial_nexus": [
+   "primordial_patrol",
+   "abyssal_garrison",
+   "genesis_nest"
+  ],
+  "dragons_reach": [
+   "dragon_patrol",
+   "wyrm_citadel",
+   "frost_wyrm_pack",
+   "storm_dragon_nest"
+  ],
+  "dragon_throne": [
+   "dragon_elite",
+   "wyrm_citadel",
+   "storm_dragon_nest"
+  ]
+ }
+}

@@ -69,6 +69,10 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 
 `avatar-3d/js/creatures.js` gives you wolves, boars, bears, rats, horses, deer, bats, spiders, snakes, drakes and dragons as procedural 3D bodies with the same `{ group, update, setAnim }` interface as people. Store the spec under `character.creature`; creatures have no `speech`, so give them narrated actions ("the wolf snarls") instead of lines. See `avatar-3d/README.md` (Creatures).
 
+## Worked example: Emberveil (a full RPG on the pieces)
+
+`prototypes/emberveil/` rebuilds the user's Emberveil RPG: its own data (copied by `tools/build-emberveil-data.mjs`), a loot engine with affixes/uniques/sets, a stat + talent system, an auto-battle simulator and a branching world map, all presented with Mii bodies (30 class looks with new gear parts), creature bodies and Lingo barks. Read its README for what maps to what.
+
 ## Worked example: Party Quest
 
 `prototypes/party-quest/` is a complete small game made only from the pieces above: party from the library, Lingo talk with memories and relationships for combat barks, town gossip and camp conversations, Name Forge NPCs, Item Vault loot and shops, Mii bodies on a cinematic stage, Formant voices. Its `README.md` maps each feature to the experiment it came from. Read `js/main.js` top to bottom for the glue.

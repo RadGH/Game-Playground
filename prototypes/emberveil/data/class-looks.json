@@ -1,1410 +1,12 @@
 {
- "_doc": "Premade characters (avatar section only), colour palettes, and race rules used by 'random within race'. Games can ship their own.",
- "palettes": {
-  "skin": [
-   "#ffdbb4",
-   "#f1c27d",
-   "#e0ac69",
-   "#c68642",
-   "#8d5524",
-   "#5c3a1e",
-   "#9db38a",
-   "#7fa86a",
-   "#c9cfc3",
-   "#b8a1d9",
-   "#6e8fb3",
-   "#d98f6a"
-  ],
-  "hair": [
-   "#111111",
-   "#3b2a1a",
-   "#6b4a2a",
-   "#a86a3a",
-   "#d9c27a",
-   "#f2e2b0",
-   "#8a1a1a",
-   "#d94a2a",
-   "#888888",
-   "#eeeeee",
-   "#4a3a8a",
-   "#2a7a5a",
-   "#e66aa8"
-  ],
-  "eye": [
-   "#4a6b8a",
-   "#3a8a5a",
-   "#6b4a2a",
-   "#222222",
-   "#8a6a2a",
-   "#5a4aaa",
-   "#c33333",
-   "#7fe0ee",
-   "#e0c040"
-  ],
-  "cloth": [
-   "#2e7d32",
-   "#2f4f7f",
-   "#8a2e2e",
-   "#c9a227",
-   "#3b3d8a",
-   "#6b4a2a",
-   "#4a3a2a",
-   "#8a8f99",
-   "#2a2a3a",
-   "#7a2a6a",
-   "#e8e8e8",
-   "#1a1a2a",
-   "#5a5f66",
-   "#b5651d",
-   "#2a6a6a",
-   "#f2d9e6"
-  ]
- },
- "raceRules": {
-  "human": {
-   "skin": [
-    "#ffdbb4",
-    "#f1c27d",
-    "#e0ac69",
-    "#c68642",
-    "#8d5524",
-    "#5c3a1e"
-   ],
-   "ears": [
-    "normal",
-    "big"
-   ],
-   "mouth": [
-    "smile",
-    "neutral",
-    "frown",
-    "open",
-    "grin",
-    "smirk",
-    "o"
-   ],
-   "nose": [
-    "small",
-    "dot",
-    "button",
-    "long",
-    "wide",
-    "hook",
-    "upturned"
-   ],
-   "eyes": [
-    "round",
-    "almond",
-    "narrow",
-    "wide",
-    "sleepy",
-    "angry",
-    "dot",
-    "anime",
-    "happy",
-    "wink",
-    "tired"
-   ],
-   "hairColor": [
-    "#111111",
-    "#3b2a1a",
-    "#6b4a2a",
-    "#a86a3a",
-    "#d9c27a",
-    "#f2e2b0",
-    "#8a1a1a",
-    "#888888",
-    "#eeeeee"
-   ]
-  },
-  "elf": {
-   "skin": [
-    "#ffdbb4",
-    "#f1c27d",
-    "#e0ac69",
-    "#c9cfc3",
-    "#b8a1d9"
-   ],
-   "ears": [
-    "pointed"
-   ],
-   "hair": [
-    "long",
-    "wavy",
-    "braids",
-    "ponytail",
-    "bun",
-    "side_part",
-    "bangs",
-    "pixie"
-   ],
-   "hairColor": [
-    "#d9c27a",
-    "#f2e2b0",
-    "#eeeeee",
-    "#111111",
-    "#4a3a8a",
-    "#2a7a5a"
-   ],
-   "nose": [
-    "small",
-    "upturned",
-    "long",
-    "dot"
-   ],
-   "shoes": [
-    "pointed",
-    "boots",
-    "sandals",
-    "barefoot"
-   ],
-   "top": [
-    "robe",
-    "tunic",
-    "leather",
-    "dress",
-    "coat"
-   ]
-  },
-  "dwarf": {
-   "skin": [
-    "#f1c27d",
-    "#e0ac69",
-    "#c68642",
-    "#d98f6a"
-   ],
-   "facialHair": [
-    "full",
-    "long",
-    "goatee",
-    "mustache",
-    "chinstrap"
-   ],
-   "hair": [
-    "braids",
-    "buzz",
-    "short",
-    "bald",
-    "bun",
-    "slicked"
-   ],
-   "hairColor": [
-    "#a86a3a",
-    "#d94a2a",
-    "#3b2a1a",
-    "#888888",
-    "#eeeeee"
-   ],
-   "top": [
-    "plate",
-    "chainmail",
-    "apron",
-    "leather",
-    "tunic"
-   ],
-   "shoes": [
-    "heavy",
-    "boots"
-   ],
-   "body": {
-    "height": [
-     0,
-     0.35
-    ],
-    "width": [
-     0.6,
-     1
-    ],
-    "headSize": [
-     0.5,
-     0.8
-    ]
-   }
-  },
-  "orc": {
-   "skin": [
-    "#9db38a",
-    "#7fa86a",
-    "#6e8fb3"
-   ],
-   "mouth": [
-    "tusks",
-    "grin",
-    "frown",
-    "neutral"
-   ],
-   "nose": [
-    "wide",
-    "snout",
-    "hook"
-   ],
-   "ears": [
-    "pointed",
-    "big"
-   ],
-   "hair": [
-    "mohawk",
-    "bald",
-    "buzz",
-    "braids",
-    "ponytail",
-    "spiky",
-    "hood_hair"
-   ],
-   "hairColor": [
-    "#111111",
-    "#3b2a1a",
-    "#8a1a1a"
-   ],
-   "top": [
-    "leather",
-    "rags",
-    "plate",
-    "tank",
-    "chainmail"
-   ],
-   "bottom": [
-    "ragged",
-    "loincloth",
-    "greaves",
-    "pants"
-   ],
-   "shoes": [
-    "barefoot",
-    "heavy",
-    "boots"
-   ],
-   "extras": [
-    "warpaint",
-    "scar",
-    "scar_cheek",
-    "tattoo",
-    "none"
-   ],
-   "body": {
-    "height": [
-     0.4,
-     1
-    ],
-    "width": [
-     0.6,
-     1
-    ]
-   }
-  },
-  "goblin": {
-   "skin": [
-    "#7fa86a",
-    "#9db38a",
-    "#d98f6a"
-   ],
-   "ears": [
-    "big",
-    "pointed"
-   ],
-   "nose": [
-    "long",
-    "hook",
-    "wide"
-   ],
-   "eyes": [
-    "wide",
-    "narrow",
-    "slit",
-    "angry"
-   ],
-   "mouth": [
-    "grin",
-    "fangs",
-    "smirk",
-    "open"
-   ],
-   "hair": [
-    "bald",
-    "spiky",
-    "mohawk",
-    "buzz",
-    "hood_hair"
-   ],
-   "top": [
-    "rags",
-    "vest",
-    "leather",
-    "tank"
-   ],
-   "bottom": [
-    "ragged",
-    "shorts",
-    "loincloth"
-   ],
-   "shoes": [
-    "barefoot",
-    "sandals",
-    "boots"
-   ],
-   "body": {
-    "height": [
-     0,
-     0.3
-    ],
-    "width": [
-     0.2,
-     0.6
-    ],
-    "headSize": [
-     0.6,
-     1
-    ]
-   }
-  },
-  "undead": {
-   "skin": [
-    "#c9cfc3",
-    "#b8a1d9",
-    "#9db38a"
-   ],
-   "eyes": [
-    "hollow",
-    "narrow",
-    "tired",
-    "dot"
-   ],
-   "mouth": [
-    "stitched",
-    "frown",
-    "neutral",
-    "fangs",
-    "sad_open"
-   ],
-   "extras": [
-    "undead_skin",
-    "scar",
-    "wrinkles",
-    "dirt"
-   ],
-   "hair": [
-    "bald",
-    "slicked",
-    "long",
-    "wavy",
-    "hood_hair",
-    "tonsure"
-   ],
-   "hairColor": [
-    "#eeeeee",
-    "#888888",
-    "#111111"
-   ],
-   "top": [
-    "rags",
-    "coat",
-    "robe",
-    "chainmail"
-   ],
-   "bottom": [
-    "ragged",
-    "pants"
-   ],
-   "shoes": [
-    "barefoot",
-    "boots"
-   ],
-   "hat": [
-    "none",
-    "hood",
-    "crown",
-    "circlet"
-   ]
-  },
-  "beast": {
-   "skin": [
-    "#8d5524",
-    "#5c3a1e",
-    "#c68642",
-    "#9db38a"
-   ],
-   "eyes": [
-    "slit",
-    "angry",
-    "wide",
-    "narrow"
-   ],
-   "nose": [
-    "snout",
-    "wide"
-   ],
-   "mouth": [
-    "fangs",
-    "grin",
-    "tusks",
-    "open"
-   ],
-   "ears": [
-    "pointed",
-    "big",
-    "fins"
-   ],
-   "hair": [
-    "horns_hair",
-    "hood_hair",
-    "spiky",
-    "afro",
-    "curly"
-   ],
-   "shoes": [
-    "hooves",
-    "barefoot"
-   ],
-   "top": [
-    "rags",
-    "tank",
-    "leather",
-    "loincloth"
-   ],
-   "bottom": [
-    "loincloth",
-    "ragged",
-    "kilt"
-   ],
-   "body": {
-    "height": [
-     0.3,
-     1
-    ],
-    "width": [
-     0.5,
-     1
-    ]
-   }
-  }
- },
- "presets": [
-  {
-   "id": "villager",
-   "name": "Villager",
-   "race": "human",
-   "avatar": {
-    "body": {
-     "height": 0.5,
-     "width": 0.5,
-     "headSize": 0.5,
-     "skin": "#f1c27d"
-    },
-    "headShape": "round",
-    "hair": {
-     "id": "short",
-     "color": "#3b2a1a"
-    },
-    "eyes": {
-     "id": "round",
-     "color": "#4a6b8a"
-    },
-    "brows": {
-     "id": "straight"
-    },
-    "nose": {
-     "id": "small"
-    },
-    "mouth": {
-     "id": "smile",
-     "color": "#b5484d"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "tunic",
-     "color": "#6b4a2a",
-     "color2": "#c9a227"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#4a3a2a"
-    },
-    "shoes": {
-     "id": "boots",
-     "color": "#3b2a1a"
-    },
-    "accessory": {
-     "id": "none"
-    },
-    "hat": {
-     "id": "none"
-    },
-    "extras": {
-     "id": "none"
-    }
-   }
-  },
-  {
-   "id": "knight",
-   "name": "Knight",
-   "race": "human",
-   "avatar": {
-    "body": {
-     "height": 0.65,
-     "width": 0.75,
-     "headSize": 0.45,
-     "skin": "#e0ac69"
-    },
-    "headShape": "square",
-    "hair": {
-     "id": "buzz",
-     "color": "#111111"
-    },
-    "eyes": {
-     "id": "narrow",
-     "color": "#222222"
-    },
-    "brows": {
-     "id": "thick"
-    },
-    "nose": {
-     "id": "long"
-    },
-    "mouth": {
-     "id": "neutral",
-     "color": "#a04040"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "stubble"
-    },
-    "top": {
-     "id": "plate",
-     "color": "#8a8f99",
-     "color2": "#c9a227"
-    },
-    "bottom": {
-     "id": "greaves",
-     "color": "#5a5f66"
-    },
-    "shoes": {
-     "id": "heavy",
-     "color": "#3a2a1a"
-    },
-    "accessory": {
-     "id": "none"
-    },
-    "hat": {
-     "id": "helmet",
-     "color": "#8a8f99"
-    },
-    "extras": {
-     "id": "scar_cheek",
-     "color": "#8a2e2e"
-    }
-   }
-  },
-  {
-   "id": "wizard",
-   "name": "Wizard",
-   "race": "human",
-   "avatar": {
-    "body": {
-     "height": 0.7,
-     "width": 0.3,
-     "headSize": 0.5,
-     "skin": "#ffdbb4"
-    },
-    "headShape": "long",
-    "hair": {
-     "id": "long",
-     "color": "#eeeeee"
-    },
-    "eyes": {
-     "id": "sleepy",
-     "color": "#5a4aaa"
-    },
-    "brows": {
-     "id": "thick"
-    },
-    "nose": {
-     "id": "hook"
-    },
-    "mouth": {
-     "id": "neutral",
-     "color": "#a04040"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "long"
-    },
-    "top": {
-     "id": "robe",
-     "color": "#3b3d8a",
-     "color2": "#c9a227"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#2a2a3a"
-    },
-    "shoes": {
-     "id": "pointed",
-     "color": "#5a3d1a"
-    },
-    "accessory": {
-     "id": "round_glasses",
-     "color": "#c9a227"
-    },
-    "hat": {
-     "id": "wizard",
-     "color": "#3b3d8a"
-    },
-    "extras": {
-     "id": "wrinkles"
-    }
-   }
-  },
-  {
-   "id": "elf_ranger",
-   "name": "Elf ranger",
-   "race": "elf",
-   "avatar": {
-    "body": {
-     "height": 0.85,
-     "width": 0.3,
-     "headSize": 0.4,
-     "skin": "#f1c27d"
-    },
-    "headShape": "oval",
-    "hair": {
-     "id": "ponytail",
-     "color": "#d9c27a"
-    },
-    "eyes": {
-     "id": "almond",
-     "color": "#3a8a5a",
-     "x": 0.1,
-     "rot": 6
-    },
-    "brows": {
-     "id": "arched"
-    },
-    "nose": {
-     "id": "small"
-    },
-    "mouth": {
-     "id": "smirk",
-     "color": "#b5484d"
-    },
-    "ears": {
-     "id": "pointed"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "leather",
-     "color": "#2a6a4a",
-     "color2": "#6b4a2a"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#4a3a2a"
-    },
-    "shoes": {
-     "id": "pointed",
-     "color": "#6b4a2a"
-    },
-    "accessory": {
-     "id": "none"
-    },
-    "hat": {
-     "id": "hood",
-     "color": "#2a6a4a"
-    },
-    "extras": {
-     "id": "tattoo",
-     "color": "#2a7a5a"
-    }
-   }
-  },
-  {
-   "id": "orc_warrior",
-   "name": "Orc warrior",
-   "race": "orc",
-   "avatar": {
-    "body": {
-     "height": 0.8,
-     "width": 0.95,
-     "headSize": 0.5,
-     "skin": "#9db38a"
-    },
-    "headShape": "wide",
-    "hair": {
-     "id": "mohawk",
-     "color": "#111111"
-    },
-    "eyes": {
-     "id": "angry",
-     "color": "#c33333"
-    },
-    "brows": {
-     "id": "angry"
-    },
-    "nose": {
-     "id": "wide"
-    },
-    "mouth": {
-     "id": "tusks",
-     "color": "#5a2a2a"
-    },
-    "ears": {
-     "id": "pointed"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "leather",
-     "color": "#6b4a2a",
-     "color2": "#c9a227"
-    },
-    "bottom": {
-     "id": "ragged",
-     "color": "#4a3a2a"
-    },
-    "shoes": {
-     "id": "barefoot"
-    },
-    "accessory": {
-     "id": "none"
-    },
-    "hat": {
-     "id": "none"
-    },
-    "extras": {
-     "id": "warpaint",
-     "color": "#c33333"
-    }
-   }
-  },
-  {
-   "id": "lich",
-   "name": "Lich",
-   "race": "undead",
-   "avatar": {
-    "body": {
-     "height": 0.75,
-     "width": 0.25,
-     "headSize": 0.55,
-     "skin": "#c9cfc3"
-    },
-    "headShape": "long",
-    "hair": {
-     "id": "bald",
-     "color": "#eeeeee"
-    },
-    "eyes": {
-     "id": "hollow",
-     "color": "#7fe0ee"
-    },
-    "brows": {
-     "id": "none"
-    },
-    "nose": {
-     "id": "none"
-    },
-    "mouth": {
-     "id": "stitched",
-     "color": "#333333"
-    },
-    "ears": {
-     "id": "none"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "robe",
-     "color": "#1a1a2a",
-     "color2": "#7fe0ee"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#1a1a2a"
-    },
-    "shoes": {
-     "id": "barefoot"
-    },
-    "accessory": {
-     "id": "none"
-    },
-    "hat": {
-     "id": "crown",
-     "color": "#5a5f66"
-    },
-    "extras": {
-     "id": "undead_skin"
-    }
-   }
-  },
-  {
-   "id": "goblin_tinker",
-   "name": "Goblin tinker",
-   "race": "goblin",
-   "avatar": {
-    "body": {
-     "height": 0.1,
-     "width": 0.4,
-     "headSize": 0.9,
-     "skin": "#7fa86a"
-    },
-    "headShape": "heart",
-    "hair": {
-     "id": "bald",
-     "color": "#111111"
-    },
-    "eyes": {
-     "id": "wide",
-     "color": "#e0c040"
-    },
-    "brows": {
-     "id": "raised"
-    },
-    "nose": {
-     "id": "long"
-    },
-    "mouth": {
-     "id": "grin",
-     "color": "#5a2a2a"
-    },
-    "ears": {
-     "id": "big"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "vest",
-     "color": "#6b4a2a",
-     "color2": "#e8e8e8"
-    },
-    "bottom": {
-     "id": "shorts",
-     "color": "#4a3a2a"
-    },
-    "shoes": {
-     "id": "barefoot"
-    },
-    "accessory": {
-     "id": "goggles",
-     "color": "#b5651d"
-    },
-    "hat": {
-     "id": "none"
-    },
-    "extras": {
-     "id": "dirt"
-    }
-   }
-  },
-  {
-   "id": "dwarf_smith",
-   "name": "Dwarf smith",
-   "race": "dwarf",
-   "avatar": {
-    "body": {
-     "height": 0.15,
-     "width": 0.9,
-     "headSize": 0.6,
-     "skin": "#e0ac69"
-    },
-    "headShape": "square",
-    "hair": {
-     "id": "braids",
-     "color": "#d94a2a"
-    },
-    "eyes": {
-     "id": "narrow",
-     "color": "#6b4a2a"
-    },
-    "brows": {
-     "id": "thick"
-    },
-    "nose": {
-     "id": "button"
-    },
-    "mouth": {
-     "id": "neutral",
-     "color": "#a04040"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "long"
-    },
-    "top": {
-     "id": "apron",
-     "color": "#6b4a2a",
-     "color2": "#8a2e2e"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#2a2a3a"
-    },
-    "shoes": {
-     "id": "heavy",
-     "color": "#3b2a1a"
-    },
-    "accessory": {
-     "id": "none"
-    },
-    "hat": {
-     "id": "none"
-    },
-    "extras": {
-     "id": "dirt"
-    }
-   }
-  },
-  {
-   "id": "sea_healer",
-   "name": "Sea healer",
-   "race": "vessari",
-   "avatar": {
-    "body": {
-     "height": 0.6,
-     "width": 0.4,
-     "headSize": 0.5,
-     "skin": "#6e8fb3"
-    },
-    "headShape": "oval",
-    "hair": {
-     "id": "wavy",
-     "color": "#2a7a5a"
-    },
-    "eyes": {
-     "id": "almond",
-     "color": "#7fe0ee"
-    },
-    "brows": {
-     "id": "thin"
-    },
-    "nose": {
-     "id": "upturned"
-    },
-    "mouth": {
-     "id": "smile",
-     "color": "#7a4a8a"
-    },
-    "ears": {
-     "id": "fins"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "dress",
-     "color": "#2a6a6a",
-     "color2": "#e8e8e8"
-    },
-    "bottom": {
-     "id": "skirt",
-     "color": "#2a6a6a"
-    },
-    "shoes": {
-     "id": "barefoot"
-    },
-    "accessory": {
-     "id": "earrings",
-     "color": "#c9a227"
-    },
-    "hat": {
-     "id": "circlet",
-     "color": "#c9a227"
-    },
-    "extras": {
-     "id": "tattoo",
-     "color": "#7fe0ee"
-    }
-   }
-  },
-  {
-   "id": "sellsword",
-   "name": "Sellsword",
-   "race": "ashkin",
-   "avatar": {
-    "body": {
-     "height": 0.6,
-     "width": 0.55,
-     "headSize": 0.45,
-     "skin": "#c68642"
-    },
-    "headShape": "chiseled",
-    "hair": {
-     "id": "pixie",
-     "color": "#d94a2a"
-    },
-    "eyes": {
-     "id": "tired",
-     "color": "#e0c040"
-    },
-    "brows": {
-     "id": "worried"
-    },
-    "nose": {
-     "id": "small"
-    },
-    "mouth": {
-     "id": "smirk",
-     "color": "#a04040"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "chainmail",
-     "color": "#5a5f66",
-     "color2": "#8a2e2e"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#2a2a3a"
-    },
-    "shoes": {
-     "id": "boots",
-     "color": "#3b2a1a"
-    },
-    "accessory": {
-     "id": "eyepatch",
-     "color": "#222222"
-    },
-    "hat": {
-     "id": "bandana",
-     "color": "#8a2e2e"
-    },
-    "extras": {
-     "id": "scar",
-     "color": "#8a2e2e"
-    }
-   }
-  },
-  {
-   "id": "child",
-   "name": "Child",
-   "race": "human",
-   "avatar": {
-    "body": {
-     "height": 0.05,
-     "width": 0.3,
-     "headSize": 1,
-     "skin": "#ffdbb4"
-    },
-    "headShape": "round",
-    "hair": {
-     "id": "buns",
-     "color": "#8a1a1a"
-    },
-    "eyes": {
-     "id": "anime",
-     "color": "#4a6b8a"
-    },
-    "brows": {
-     "id": "thin"
-    },
-    "nose": {
-     "id": "dot"
-    },
-    "mouth": {
-     "id": "open",
-     "color": "#b5484d"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "tshirt",
-     "color": "#e66aa8",
-     "color2": "#ffffff"
-    },
-    "bottom": {
-     "id": "shorts",
-     "color": "#2f4f7f"
-    },
-    "shoes": {
-     "id": "sneakers",
-     "color": "#e8e8e8"
-    },
-    "accessory": {
-     "id": "none"
-    },
-    "hat": {
-     "id": "none"
-    },
-    "extras": {
-     "id": "freckles"
-    }
-   }
-  },
-  {
-   "id": "elder",
-   "name": "Elder",
-   "race": "human",
-   "avatar": {
-    "body": {
-     "height": 0.35,
-     "width": 0.4,
-     "headSize": 0.5,
-     "skin": "#e0ac69"
-    },
-    "headShape": "long",
-    "hair": {
-     "id": "tonsure",
-     "color": "#888888"
-    },
-    "eyes": {
-     "id": "tired",
-     "color": "#6b4a2a"
-    },
-    "brows": {
-     "id": "thick"
-    },
-    "nose": {
-     "id": "hook"
-    },
-    "mouth": {
-     "id": "frown",
-     "color": "#a04040"
-    },
-    "ears": {
-     "id": "big"
-    },
-    "facialHair": {
-     "id": "goatee"
-    },
-    "top": {
-     "id": "coat",
-     "color": "#4a3a2a",
-     "color2": "#6b4a2a"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#2a2a3a"
-    },
-    "shoes": {
-     "id": "slippers",
-     "color": "#6b4a2a"
-    },
-    "accessory": {
-     "id": "monocle",
-     "color": "#c9a227"
-    },
-    "hat": {
-     "id": "none"
-    },
-    "extras": {
-     "id": "wrinkles"
-    }
-   }
-  },
-  {
-   "id": "noble",
-   "name": "Noble",
-   "race": "human",
-   "avatar": {
-    "body": {
-     "height": 0.7,
-     "width": 0.35,
-     "headSize": 0.45,
-     "skin": "#ffdbb4"
-    },
-    "headShape": "oval",
-    "hair": {
-     "id": "slicked",
-     "color": "#111111"
-    },
-    "eyes": {
-     "id": "narrow",
-     "color": "#222222"
-    },
-    "brows": {
-     "id": "arched"
-    },
-    "nose": {
-     "id": "long"
-    },
-    "mouth": {
-     "id": "smirk",
-     "color": "#a04040"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "mustache"
-    },
-    "top": {
-     "id": "coat",
-     "color": "#7a2a6a",
-     "color2": "#c9a227"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#1a1a2a"
-    },
-    "shoes": {
-     "id": "boots",
-     "color": "#111111"
-    },
-    "accessory": {
-     "id": "monocle",
-     "color": "#c9a227"
-    },
-    "hat": {
-     "id": "top_hat",
-     "color": "#1a1a2a"
-    },
-    "extras": {
-     "id": "none"
-    }
-   }
-  },
-  {
-   "id": "cultist",
-   "name": "Cultist",
-   "race": "human",
-   "avatar": {
-    "body": {
-     "height": 0.55,
-     "width": 0.4,
-     "headSize": 0.5,
-     "skin": "#c9cfc3"
-    },
-    "headShape": "long",
-    "hair": {
-     "id": "bald",
-     "color": "#111111"
-    },
-    "eyes": {
-     "id": "wide",
-     "color": "#c33333"
-    },
-    "brows": {
-     "id": "worried"
-    },
-    "nose": {
-     "id": "small"
-    },
-    "mouth": {
-     "id": "o",
-     "color": "#5a2a2a"
-    },
-    "ears": {
-     "id": "normal"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "robe",
-     "color": "#4a1a1a",
-     "color2": "#c33333"
-    },
-    "bottom": {
-     "id": "pants",
-     "color": "#1a1a2a"
-    },
-    "shoes": {
-     "id": "sandals",
-     "color": "#3b2a1a"
-    },
-    "accessory": {
-     "id": "mask",
-     "color": "#e8e8e8"
-    },
-    "hat": {
-     "id": "hood",
-     "color": "#4a1a1a"
-    },
-    "extras": {
-     "id": "third_eye"
-    }
-   }
-  },
-  {
-   "id": "beastkin",
-   "name": "Beastkin",
-   "race": "beast",
-   "avatar": {
-    "body": {
-     "height": 0.7,
-     "width": 0.8,
-     "headSize": 0.5,
-     "skin": "#8d5524"
-    },
-    "headShape": "wide",
-    "hair": {
-     "id": "horns_hair",
-     "color": "#3b2a1a"
-    },
-    "eyes": {
-     "id": "slit",
-     "color": "#e0c040"
-    },
-    "brows": {
-     "id": "angry"
-    },
-    "nose": {
-     "id": "snout"
-    },
-    "mouth": {
-     "id": "fangs",
-     "color": "#5a2a2a"
-    },
-    "ears": {
-     "id": "pointed"
-    },
-    "facialHair": {
-     "id": "none"
-    },
-    "top": {
-     "id": "tank",
-     "color": "#4a3a2a"
-    },
-    "bottom": {
-     "id": "kilt",
-     "color": "#8a2e2e"
-    },
-    "shoes": {
-     "id": "hooves",
-     "color": "#3b2a1a"
-    },
-    "accessory": {
-     "id": "nose_ring",
-     "color": "#c9a227"
-    },
-    "hat": {
-     "id": "none"
-    },
-    "extras": {
-     "id": "warpaint",
-     "color": "#e8e8e8"
-    }
-   }
-  },
-  {
-   "id": "ev_warrior",
-   "name": "Warrior — Brannoc Redmane",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+ "_doc": "One look per Emberveil class, built by tools/build-emberveil-classes.mjs from the art direction. Keys are class ids; each has the full avatar (2D/3D), voice and speech sections of the shared character JSON.",
+ "classes": {
+  "warrior": {
+   "name": "Brannoc Redmane",
+   "gender": "m",
+   "className": "Warrior",
+   "role": "Frontline Tank",
+   "hook": "Shield Bash stuns enemies. Whirlwind hits all adjacent foes. Unbreakable when outnumbered.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1470,15 +72,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.32,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "brave",
+     "gruff",
+     "bloodlust"
+    ],
+    "formality": 0.2,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.8,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "brave",
+    "gruff",
+    "bloodlust"
+   ]
   },
-  {
-   "id": "ev_fighter",
-   "name": "Fighter — Corvin Hale",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "fighter": {
+   "name": "Corvin Hale",
+   "gender": "m",
+   "className": "Fighter",
+   "role": "Disciplined Duelist",
+   "hook": "Riposte counters parries. Tactical stances swap between offense and defense. Precise Strike never misses.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1544,15 +178,45 @@
      "id": "heater_shield",
      "color": "#8a8a90"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.42,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "honorable",
+     "loyal"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "honorable",
+    "loyal"
+   ]
   },
-  {
-   "id": "ev_paladin",
-   "name": "Paladin — Aurel Dawnward",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "paladin": {
+   "name": "Aurel Dawnward",
+   "gender": "m",
+   "className": "Paladin",
+   "role": "Holy Warrior",
+   "hook": "Holy Strike crits vs demons. Lay on Hands keeps allies alive. Consecration sustains long fights.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1617,15 +281,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.4,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "pious",
+     "honorable",
+     "kind"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.15,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "pious",
+    "honorable",
+    "kind"
+   ]
   },
-  {
-   "id": "ev_ranger",
-   "name": "Ranger — Wren Ashvale",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "ranger": {
+   "name": "Wren Ashvale",
+   "gender": "f",
+   "className": "Ranger",
+   "role": "Precision Ranged",
+   "hook": "Aimed Shot ignores armor. Rain of Arrows blankets the entire enemy field for 3 rounds.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1691,15 +387,47 @@
      "id": "quiver",
      "color": "#5a3a1a"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.6,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "kind",
+     "loyal",
+     "shy"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.25,
+    "cheer": 0.5,
+    "aggression": 0.15,
+    "confidence": 0.3,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "kind",
+    "loyal",
+    "shy"
+   ]
   },
-  {
-   "id": "ev_rogue",
-   "name": "Rogue — Sable Quick",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "rogue": {
+   "name": "Sable Quick",
+   "gender": "f",
+   "className": "Rogue",
+   "role": "Burst Assassin",
+   "hook": "200% Backstab on stunned targets. Death Mark makes enemies take 50% more damage from all sources.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1765,15 +493,45 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.58,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "cynical",
+     "sarcastic"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.2,
+    "aggression": 0.4,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "cynical",
+    "sarcastic"
+   ]
   },
-  {
-   "id": "ev_cleric",
-   "name": "Cleric — Mirelle Sanct",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "cleric": {
+   "name": "Mirelle Sanct",
+   "gender": "f",
+   "className": "Cleric",
+   "role": "Primary Healer",
+   "hook": "Mass Resurrection can auto-trigger on wipe. Sanctuary makes an ally temporarily untargetable.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1841,15 +599,45 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.62,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "pious",
+     "kind"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.15,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "pious",
+    "kind"
+   ]
   },
-  {
-   "id": "ev_bard",
-   "name": "Bard — Tamsin Lark",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "bard": {
+   "name": "Tamsin Lark",
+   "gender": "m",
+   "className": "Bard",
+   "role": "Support Maestro",
+   "hook": "Ballad of Valor gives one hero two turns per round. Song of Ruin strips all enemy buffs at once.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1915,15 +703,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.5,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "jolly",
+     "romantic",
+     "pompous"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.75,
+    "cheer": 0.85,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "jolly",
+    "romantic",
+    "pompous"
+   ]
   },
-  {
-   "id": "ev_mage",
-   "name": "Mage — Edric Vane",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "mage": {
+   "name": "Edric Vane",
+   "gender": "m",
+   "className": "Mage",
+   "role": "AoE Glass Cannon",
+   "hook": "Fireball torches entire enemy packs. Blizzard hits all enemies for 3 rounds. Arcane Surge: 400% INT.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -1989,15 +809,45 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.45,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "scholar",
+     "pompous"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.75,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "scholar",
+    "pompous"
+   ]
   },
-  {
-   "id": "ev_necromancer",
-   "name": "Necromancer — Osric Mourne",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "necromancer": {
+   "name": "Osric Mourne",
+   "gender": "m",
+   "className": "Necromancer",
+   "role": "Army Builder",
+   "hook": "Raise Dead turns corpses into skeleton allies. Death Coil applies Poison AND Bleed to all enemies.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2063,15 +913,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.38,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "cynical",
+     "archaic",
+     "cruel"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.5,
+    "cheer": 0.2,
+    "aggression": 0.8,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "cynical",
+    "archaic",
+    "cruel"
+   ]
   },
-  {
-   "id": "ev_warlock",
-   "name": "Warlock — Vesna Duskwell",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "warlock": {
+   "name": "Vesna Duskwell",
+   "gender": "f",
+   "className": "Warlock",
+   "role": "Chaos Dealer",
+   "hook": "Corruption spreads on enemy death. Soul Pact doubles all DoT at cost of own HP.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2138,15 +1020,45 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.55,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "paranoid",
+     "cynical"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.2,
+    "aggression": 0.4,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "paranoid",
+    "cynical"
+   ]
   },
-  {
-   "id": "ev_demon_hunter",
-   "name": "Demon Hunter — Kael Sorrowend",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "demon_hunter": {
+   "name": "Kael Sorrowend",
+   "gender": "m",
+   "className": "Demon Hunter",
+   "role": "Specialist Killer",
+   "hook": "+50% damage vs demons. Vengeance stacks from fallen allies then unleashes devastating burst.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2214,15 +1126,47 @@
      "id": "dagger",
      "color": "#c0c0c8"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.38,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "gruff",
+     "brave",
+     "grieving"
+    ],
+    "formality": 0.2,
+    "verbosity": 0.5,
+    "cheer": 0.2,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "gruff",
+    "brave",
+    "grieving"
+   ]
   },
-  {
-   "id": "ev_scavenger",
-   "name": "Scavenger — Grit Pennyworth",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "scavenger": {
+   "name": "Grit Pennyworth",
+   "gender": "m",
+   "className": "Scavenger",
+   "role": "Resource Specialist",
+   "hook": "Lucky Strike inflicts random statuses. Big Score is a high-variance gambling strike — crit huge or whiff.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2287,15 +1231,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.48,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "greedy",
+     "hungry",
+     "sarcastic"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "greedy",
+    "hungry",
+    "sarcastic"
+   ]
   },
-  {
-   "id": "ev_swashbuckler",
-   "name": "Swashbuckler — Lucan Farrow",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "swashbuckler": {
+   "name": "Lucan Farrow",
+   "gender": "m",
+   "className": "Swashbuckler",
+   "role": "Flashy Duelist",
+   "hook": "Build Flair stacks with Flourish. Grandeur releases all stacks in one legendary strike.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2360,15 +1336,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.46,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "pompous",
+     "romantic",
+     "brave"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.75,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "pompous",
+    "romantic",
+    "brave"
+   ]
   },
-  {
-   "id": "ev_dragon_knight",
-   "name": "Dragon Knight — Sera Emberscale",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "dragon_knight": {
+   "name": "Sera Emberscale",
+   "gender": "f",
+   "className": "Dragon Knight",
+   "role": "Draconic Warrior",
+   "hook": "Choose fire/ice/lightning. Draconic Fury turns all attacks into group AoE for 2 rounds.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2434,15 +1442,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.55,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "brave",
+     "honorable",
+     "gruff"
+    ],
+    "formality": 0.2,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "brave",
+    "honorable",
+    "gruff"
+   ]
   },
-  {
-   "id": "ev_pyromancer",
-   "name": "Pyromancer — Ilsa Cinder",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "pyromancer": {
+   "name": "Ilsa Cinder",
+   "gender": "f",
+   "className": "Pyromancer",
+   "role": "Fire Specialist",
+   "hook": "Stack Burn on multiple groups. Meteor ignites every enemy group simultaneously.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2508,15 +1548,45 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.6,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "brave",
+     "sarcastic"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "brave",
+    "sarcastic"
+   ]
   },
-  {
-   "id": "ev_stormcaller",
-   "name": "Stormcaller — Torvald Gale",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "stormcaller": {
+   "name": "Torvald Gale",
+   "gender": "m",
+   "className": "Stormcaller",
+   "role": "Chain Lightning Mage",
+   "hook": "Chain Lightning jumps between enemies. Thunder Ring zones the battlefield.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2583,15 +1653,45 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.42,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "bloodlust",
+     "brave"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.8,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "bloodlust",
+    "brave"
+   ]
   },
-  {
-   "id": "ev_druid",
-   "name": "Druid — Aveline Thorne",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "druid": {
+   "name": "Aveline Thorne",
+   "gender": "f",
+   "className": "Druid",
+   "role": "Shapeshifting Healer",
+   "hook": "Rejuvenation HoTs. Wild Shape for raw damage. Nature’s Wrath in the late game.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2658,15 +1758,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.6,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "kind",
+     "pious",
+     "shy"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.25,
+    "cheer": 0.5,
+    "aggression": 0.15,
+    "confidence": 0.3,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "kind",
+    "pious",
+    "shy"
+   ]
   },
-  {
-   "id": "ev_oracle",
-   "name": "Oracle — Nysa Farsight",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "oracle": {
+   "name": "Nysa Farsight",
+   "gender": "f",
+   "className": "Oracle",
+   "role": "Predictive Protector",
+   "hook": "Foresight pre-shields allies against incoming damage. Prophecy reveals enemy intents.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2732,15 +1864,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.66,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "archaic",
+     "shy",
+     "pious"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.25,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.3,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "archaic",
+    "shy",
+    "pious"
+   ]
   },
-  {
-   "id": "ev_tactician",
-   "name": "Tactician — Marcus Ostwald",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "tactician": {
+   "name": "Marcus Ostwald",
+   "gender": "m",
+   "className": "Tactician",
+   "role": "Turn-Order Manipulator",
+   "hook": "Grants extra actions, repositions allies, reshuffles enemy turn order.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2806,15 +1970,47 @@
      "id": "map",
      "color": "#d8c8a0"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.4,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "scholar",
+     "honorable",
+     "abrasive"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.75,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "scholar",
+    "honorable",
+    "abrasive"
+   ]
   },
-  {
-   "id": "ev_chronomancer",
-   "name": "Chronomancer — Benedict Hourne",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "chronomancer": {
+   "name": "Benedict Hourne",
+   "gender": "m",
+   "className": "Chronomancer",
+   "role": "Time Mage",
+   "hook": "Haste allies, slow enemies, rewind HP, freeze the battlefield in Time Stop.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2880,15 +2076,45 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.44,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "scholar",
+     "archaic"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.75,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "scholar",
+    "archaic"
+   ]
   },
-  {
-   "id": "ev_monk",
-   "name": "Monk — Jiro Stillwater",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "monk": {
+   "name": "Jiro Stillwater",
+   "gender": "m",
+   "className": "Monk",
+   "role": "Martial Artist",
+   "hook": "Unarmed flurries stack chi. Inner Focus self-heals. Shadow Step dashes into crit range.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -2954,15 +2180,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.47,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "kind",
+     "pious",
+     "shy"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.25,
+    "cheer": 0.5,
+    "aggression": 0.15,
+    "confidence": 0.3,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "kind",
+    "pious",
+    "shy"
+   ]
   },
-  {
-   "id": "ev_shaman",
-   "name": "Shaman — Zuri Bonechant",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "shaman": {
+   "name": "Zuri Bonechant",
+   "gender": "f",
+   "className": "Shaman",
+   "role": "Spirit Caster",
+   "hook": "Totems heal over time. Spirit bolts chain to nearby foes. Ancestral Shield wards the party.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3030,15 +2288,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.56,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "archaic",
+     "pious",
+     "brave"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "archaic",
+    "pious",
+    "brave"
+   ]
   },
-  {
-   "id": "ev_witch_hunter",
-   "name": "Witch Hunter — Solomon Kreel",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "witch_hunter": {
+   "name": "Solomon Kreel",
+   "gender": "m",
+   "className": "Witch Hunter",
+   "role": "Anti-Magic Skirmisher",
+   "hook": "Silver bolts purge curses. Bonus damage vs demons and undead. Marks targets for the party.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3104,15 +2394,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.36,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "paranoid",
+     "pious",
+     "cruel"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.8,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "paranoid",
+    "pious",
+    "cruel"
+   ]
   },
-  {
-   "id": "ev_knight",
-   "name": "Knight — Isolde Vaunt",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "knight": {
+   "name": "Isolde Vaunt",
+   "gender": "f",
+   "className": "Knight",
+   "role": "Sworn Tank",
+   "hook": "Shield Bash stuns, Taunt locks aggro, Holy Strike sears evil, Rally bolsters the party.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3179,15 +2501,47 @@
      "id": "kite_shield",
      "color": "#2a4a9a"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.55,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "honorable",
+     "loyal",
+     "brave"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "honorable",
+    "loyal",
+    "brave"
+   ]
   },
-  {
-   "id": "ev_sorcerer",
-   "name": "Sorcerer — Cassius Vell",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "sorcerer": {
+   "name": "Cassius Vell",
+   "gender": "m",
+   "className": "Sorcerer",
+   "role": "Chaos Caster",
+   "hook": "Wild Bolt rolls a random element. Arcane Surge doubles spell power. Mana Burn punishes casters.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3253,15 +2607,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.44,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "pompous",
+     "scholar",
+     "cynical"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.75,
+    "cheer": 0.2,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "pompous",
+    "scholar",
+    "cynical"
+   ]
   },
-  {
-   "id": "ev_runesmith",
-   "name": "Runesmith — Dagan Forgehand",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "runesmith": {
+   "name": "Dagan Forgehand",
+   "gender": "m",
+   "className": "Runesmith",
+   "role": "Rune-Forged Bulwark",
+   "hook": "Rune Hammer hits with imbued force. Wards protect allies. Forge Flame ignites weapons.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3327,15 +2713,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.34,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "gruff",
+     "honorable",
+     "loyal"
+    ],
+    "formality": 0.2,
+    "verbosity": 0.5,
+    "cheer": 0.5,
+    "aggression": 0.4,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "gruff",
+    "honorable",
+    "loyal"
+   ]
   },
-  {
-   "id": "ev_shadow_dancer",
-   "name": "Shadow Dancer — Nyx Veilstep",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "shadow_dancer": {
+   "name": "Nyx Veilstep",
+   "gender": "f",
+   "className": "Shadow Dancer",
+   "role": "Stealth Duelist",
+   "hook": "Smoke Veil grants evasion. Assassinate executes low-HP foes. Dance of Blades chains strikes.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3401,15 +2819,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.58,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "cynical",
+     "sarcastic",
+     "brave"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.5,
+    "cheer": 0.2,
+    "aggression": 0.4,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "cynical",
+    "sarcastic",
+    "brave"
+   ]
   },
-  {
-   "id": "ev_tinker",
-   "name": "Tinker — Fenwick Cogsby",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "tinker": {
+   "name": "Fenwick Cogsby",
+   "gender": "m",
+   "className": "Tinker",
+   "role": "Clockwork Mechanist",
+   "hook": "Clockwork bolts, alchemical grenades, and a pocket-watch that patches wounds mid-fight. Overcharge the whole party with an arcane spring-wound battery.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3477,15 +2927,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.5,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "scholar",
+     "nervous",
+     "jolly"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.75,
+    "cheer": 0.85,
+    "aggression": 0.4,
+    "confidence": 0.3,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "scholar",
+    "nervous",
+    "jolly"
+   ]
   },
-  {
-   "id": "ev_priest",
-   "name": "Priest — Selene Duskmoon",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "priest": {
+   "name": "Selene Duskmoon",
+   "gender": "f",
+   "className": "Priest",
+   "role": "Holy/Shadow Caster",
+   "hook": "Heals the living, calls back the fallen, and answers their killers with shadow. The party's reviver and second-line damage dealer.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3552,15 +3034,47 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.6,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.55,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.1,
+    "intonation": 3,
+    "gender": "f"
+   },
+   "speech": {
+    "traits": [
+     "pious",
+     "kind",
+     "grieving"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.5,
+    "cheer": 0.2,
+    "aggression": 0.15,
+    "confidence": 0.55,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "pious",
+    "kind",
+    "grieving"
+   ]
   },
-  {
-   "id": "ev_enchanter",
-   "name": "Enchanter — Auren Whisperlight",
-   "race": "human",
-   "tags": [
-    "emberveil"
-   ],
+  "enchanter": {
+   "name": "Auren Whisperlight",
+   "gender": "m",
+   "className": "Enchanter",
+   "role": "Mind-Magic Controller",
+   "hook": "Lulls foes to sleep so the party can pick its fights. Drowse opens packs without alerting them. Arcane Jolt wakes targets only when you decide they should die.",
    "avatar": {
     "body": {
      "height": 0.5,
@@ -3626,7 +3140,40 @@
     "offhand": {
      "id": "none"
     }
-   }
+   },
+   "voice": {
+    "engine": "formant",
+    "pitch": 0.48,
+    "speed": 0.3,
+    "depth": 0.5,
+    "tone": 0.5,
+    "breath": 0.1,
+    "rough": 0.1,
+    "flutter": 0.1,
+    "intonation": 2,
+    "gender": "m"
+   },
+   "speech": {
+    "traits": [
+     "scholar",
+     "shy",
+     "kind"
+    ],
+    "formality": 0.5,
+    "verbosity": 0.75,
+    "cheer": 0.5,
+    "aggression": 0.15,
+    "confidence": 0.3,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "traits": [
+    "scholar",
+    "shy",
+    "kind"
+   ]
   }
- ]
+ }
 }

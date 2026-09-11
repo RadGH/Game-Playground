@@ -1,0 +1,7318 @@
+{
+ "version": 1,
+ "source": "src/game/skills.js SKILLS const (canonical-data migration M497)",
+ "skills": {
+  "cleave": {
+   "name": "Cleave",
+   "class": "warrior",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "adjacent2",
+   "damageStat": "damage",
+   "damageMult": 1.1,
+   "mpCost": 0,
+   "stackingMode": "per_source",
+   "maxStacks": 5,
+   "description": "Sweeping strike hitting up to 3 adjacent enemies for 110% Heavy damage.",
+   "talents": [
+    {
+     "id": "cl_wide",
+     "name": "Wide Swing",
+     "desc": "Cleave hits one extra target.",
+     "effect": {
+      "targets": 4
+     }
+    },
+    {
+     "id": "cl_bleed",
+     "name": "Gashing Edge",
+     "desc": "Cleave applies Bleed for 2 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.8,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Whirling Cleave",
+     "description": "Damage increases to 150% Heavy and always hits 3 adjacent enemies.",
+     "bonus": {
+      "damageMult": 1.5,
+      "aoe": "adjacent2"
+     }
+    },
+    {
+     "level": 10,
+     "name": "Executioner’s Arc",
+     "description": "Damage increases to 200% Heavy and applies Bleed (2 rounds) to all struck targets.",
+     "bonus": {
+      "damageMult": 2,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "id": "cleave"
+  },
+  "battle_cry": {
+   "name": "Battle Cry",
+   "class": "warrior",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgBuff": 0.2,
+    "duration": 3
+   },
+   "mpCost": 15,
+   "description": "Rally the party, granting +20% damage for 3 rounds.",
+   "talents": [
+    {
+     "id": "bc_hp",
+     "name": "Inspiring Shout",
+     "desc": "Also grants 20 temporary HP to each party member.",
+     "effect": {
+      "tempHp": 20
+     }
+    },
+    {
+     "id": "bc_def",
+     "name": "Rallying Cry",
+     "desc": "Also reduces incoming damage by 10%.",
+     "effect": {
+      "dmgReduct": 0.1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "War Anthem",
+     "description": "Party damage bonus increases to +35% and lasts 4 rounds.",
+     "bonus": {
+      "dmgBuff": 0.35,
+      "duration": 4
+     }
+    },
+    {
+     "level": 15,
+     "name": "Berserker's Roar",
+     "description": "Party damage bonus increases to +50%, lasts 5 rounds, and also grants +15% attack speed.",
+     "bonus": {
+      "dmgBuff": 0.5,
+      "duration": 5,
+      "attackSpeed": 0.15
+     }
+    }
+   ],
+   "id": "battle_cry"
+  },
+  "whirlwind": {
+   "name": "Whirlwind",
+   "class": "warrior",
+   "unlockLevel": 10,
+   "type": "melee",
+   "aoe": "row",
+   "damageStat": "damage",
+   "damageMult": 0.9,
+   "statusEffects": [],
+   "mpCost": 20,
+   "description": "Spin attack hitting all adjacent enemies (up to 3).",
+   "talents": [
+    {
+     "id": "ww_bleed",
+     "name": "Serrated Blade",
+     "desc": "Applies Bleed to all hit enemies.",
+     "effect": {
+      "bleed": {
+       "duration": 3
+      }
+     }
+    },
+    {
+     "id": "ww_extra",
+     "name": "Wider Spin",
+     "desc": "Hits one additional enemy row.",
+     "effect": {
+      "aoe": "row2"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Cyclone Strike",
+     "description": "Damage increases to 120% Heavy and applies Bleed to all struck enemies for 3 rounds.",
+     "bonus": {
+      "damageMult": 1.2,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 18,
+     "name": "Endless Vortex",
+     "description": "Damage increases to 150% Heavy, hits all enemies, and MP cost reduced to 12.",
+     "bonus": {
+      "damageMult": 1.5,
+      "aoe": "all",
+      "mpCost": -8
+     }
+    }
+   ],
+   "id": "whirlwind"
+  },
+  "unbreakable": {
+   "name": "Unbreakable",
+   "class": "warrior",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "dmgReduct": 0.5,
+    "reflect": 0.1,
+    "duration": 2
+   },
+   "mpCost": 25,
+   "description": "Enter defensive stance for 2 rounds: take 50% less damage, reflect 10% back.",
+   "talents": [
+    {
+     "id": "ub_reflect",
+     "name": "Thorns",
+     "desc": "Reflect increases to 25%.",
+     "effect": {
+      "reflect": 0.25
+     }
+    },
+    {
+     "id": "ub_dur",
+     "name": "Iron Will",
+     "desc": "Duration extends to 3 rounds.",
+     "effect": {
+      "duration": 3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Fortified Stance",
+     "description": "Damage reduction increases to 65%, reflect to 20%, and duration to 3 rounds.",
+     "bonus": {
+      "dmgReduct": 0.65,
+      "reflect": 0.2,
+      "duration": 3
+     }
+    },
+    {
+     "level": 20,
+     "name": "Invincible Titan",
+     "description": "Damage reduction increases to 80%, reflect 35% back, lasts 4 rounds, and grants immunity to Stun and Bleed.",
+     "bonus": {
+      "dmgReduct": 0.8,
+      "reflect": 0.35,
+      "duration": 4,
+      "immuneStun": true,
+      "immuneBleed": true
+     }
+    }
+   ],
+   "id": "unbreakable"
+  },
+  "precise_strike": {
+   "name": "Precise Strike",
+   "class": "fighter",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.6,
+   "mpCost": 0,
+   "description": "A meticulously aimed blow dealing 160% Heavy damage.",
+   "talents": [
+    {
+     "id": "ps_crit",
+     "name": "Weak Point",
+     "desc": "Precise Strike crits on stunned or bleeding targets.",
+     "effect": {
+      "critBonus": 0.5
+     }
+    },
+    {
+     "id": "ps_bleed",
+     "name": "Bloodletter",
+     "desc": "Applies Bleed for 3 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Surgical Cut",
+     "description": "Damage increases to 180% Heavy.",
+     "bonus": {
+      "damageMult": 1.8
+     }
+    },
+    {
+     "level": 10,
+     "name": "Killing Blow",
+     "description": "Damage increases to 220% Heavy and ignores 50% armor.",
+     "bonus": {
+      "damageMult": 2.2,
+      "armorPen": 0.5
+     }
+    }
+   ],
+   "id": "precise_strike"
+  },
+  "defensive_stance": {
+   "name": "Defensive Stance",
+   "class": "fighter",
+   "unlockLevel": 3,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "dmgReduct": 0.35,
+    "duration": 4
+   },
+   "mpCost": 10,
+   "description": "Adopt a defensive posture: take 35% less damage for 4 rounds.",
+   "talents": [
+    {
+     "id": "ds_thorns",
+     "name": "Bulwark",
+     "desc": "Reflect 15% of damage taken.",
+     "effect": {
+      "reflect": 0.15
+     }
+    },
+    {
+     "id": "ds_dur",
+     "name": "Vigilant",
+     "desc": "Duration extends to 6 rounds.",
+     "effect": {
+      "duration": 6
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 8,
+     "name": "Iron Guard",
+     "description": "Damage reduction increases to 50%.",
+     "bonus": {
+      "dmgReduct": 0.5
+     }
+    },
+    {
+     "level": 13,
+     "name": "Aegis Stance",
+     "description": "Damage reduction 60% and immune to Stun.",
+     "bonus": {
+      "dmgReduct": 0.6,
+      "immuneStun": true
+     }
+    }
+   ],
+   "id": "defensive_stance"
+  },
+  "offensive_stance": {
+   "name": "Offensive Stance",
+   "class": "fighter",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "dmgBuff": 0.3,
+    "duration": 4
+   },
+   "mpCost": 12,
+   "description": "Shift to an aggressive posture: deal 30% more damage for 4 rounds.",
+   "talents": [
+    {
+     "id": "os_speed",
+     "name": "Quick Footwork",
+     "desc": "Also grants +15% attack speed.",
+     "effect": {
+      "attackSpeed": 0.15
+     }
+    },
+    {
+     "id": "os_crit",
+     "name": "Killing Edge",
+     "desc": "Also grants +15% crit chance.",
+     "effect": {
+      "critBonus": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 8,
+     "name": "Berserker Grip",
+     "description": "Damage bonus increases to 45%.",
+     "bonus": {
+      "dmgBuff": 0.45
+     }
+    },
+    {
+     "level": 13,
+     "name": "Warmaster",
+     "description": "Damage bonus 60% and lasts 5 rounds.",
+     "bonus": {
+      "dmgBuff": 0.6,
+      "duration": 5
+     }
+    }
+   ],
+   "id": "offensive_stance"
+  },
+  "riposte": {
+   "name": "Riposte",
+   "class": "swashbuckler",
+   "unlockLevel": 1,
+   "type": "counter",
+   "mpCost": 0,
+   "description": "Enter parry stance: counter next melee hit for 200% Light damage.",
+   "talents": [
+    {
+     "id": "rp_count",
+     "name": "Double Parry",
+     "desc": "Parry stance blocks 1 extra hit.",
+     "effect": {
+      "parryCount": 1
+     }
+    },
+    {
+     "id": "rp_disarm",
+     "name": "Disarming Riposte",
+     "desc": "Counter disarms the attacker for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "disarm",
+        "chance": 0.8,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Perfect Riposte",
+     "description": "Counter damage increases to 300% Light. Parry stance blocks 2 hits.",
+     "bonus": {
+      "damageMult": 3,
+      "parryCount": 2
+     }
+    },
+    {
+     "level": 10,
+     "name": "Grand Riposte",
+     "description": "Counter damage increases to 450% Light. Blocks 3 hits. Each counter stuns attacker for 1 round.",
+     "bonus": {
+      "damageMult": 4.5,
+      "parryCount": 3,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.9,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "riposte"
+  },
+  "second_wind": {
+   "name": "Second Wind",
+   "class": "fighter",
+   "unlockLevel": 10,
+   "type": "heal",
+   "target": "self",
+   "healAmount": 80,
+   "mpCost": 15,
+   "description": "Catch your breath, instantly restoring 80 HP.",
+   "talents": [
+    {
+     "id": "sw_more",
+     "name": "Iron Lungs",
+     "desc": "Healing increased by 50%.",
+     "effect": {
+      "healMult": 1.5
+     }
+    },
+    {
+     "id": "sw_buff",
+     "name": "Renewed Resolve",
+     "desc": "Also grants +20% damage for 2 rounds.",
+     "effect": {
+      "dmgBuff": 0.2,
+      "duration": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Veteran’s Grit",
+     "description": "Heals 140 HP.",
+     "bonus": {
+      "healAmount": 140
+     }
+    },
+    {
+     "level": 20,
+     "name": "Indomitable",
+     "description": "Heals 220 HP and cleanses Bleed and Poison.",
+     "bonus": {
+      "healAmount": 220,
+      "immuneBleed": true
+     }
+    }
+   ],
+   "id": "second_wind"
+  },
+  "sunder_armor": {
+   "name": "Sunder Armor",
+   "class": "fighter",
+   "unlockLevel": 13,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.9,
+   "mpCost": 14,
+   "effect": {
+    "armorReduce": 5,
+    "armorReduceDuration": 3
+   },
+   "statusEffects": [
+    {
+     "type": "sunder",
+     "chance": 1,
+     "duration": 4
+    }
+   ],
+   "description": "A targeted blow that deals 90% Heavy damage and shreds the target’s armor for 4 rounds.",
+   "talents": [
+    {
+     "id": "sa_aoe",
+     "name": "Sweeping Sunder",
+     "desc": "Hits up to 3 adjacent enemies.",
+     "effect": {
+      "aoe": "adjacent2"
+     }
+    },
+    {
+     "id": "sa_long",
+     "name": "Lasting Wound",
+     "desc": "Sunder lasts 6 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "sunder",
+        "chance": 1,
+        "duration": 6
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 18,
+     "name": "Crushing Blow",
+     "description": "Damage increases to 130% Heavy and applies Bleed for 2 rounds.",
+     "bonus": {
+      "damageMult": 1.3,
+      "statusEffects": [
+       {
+        "type": "sunder",
+        "chance": 1,
+        "duration": 4
+       },
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 23,
+     "name": "Armor Breaker",
+     "description": "Damage 170% Heavy; sundered enemies take 30% more damage from all sources.",
+     "bonus": {
+      "damageMult": 1.7,
+      "sunderAmp": 0.3
+     }
+    }
+   ],
+   "id": "sunder_armor"
+  },
+  "holy_strike": {
+   "name": "Holy Strike",
+   "class": "paladin",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.5,
+   "bonusVsUndead": 2,
+   "bonusVsDemon": 2,
+   "effect": {
+    "bonusVsUndead": 0.5,
+    "bonusVsDemon": 0.5
+   },
+   "mpCost": 5,
+   "description": "Blessed melee blow for 150% weapon damage. Hybrid scaling (heavy with sword/hammer; magic with scepter/staff). Double vs undead/demons.",
+   "talents": [
+    {
+     "id": "hs_burn",
+     "name": "Holy Fire",
+     "desc": "Applies Burn to undead targets.",
+     "effect": {
+      "burnVsUndead": true
+     }
+    },
+    {
+     "id": "hs_splash",
+     "name": "Divine Splash",
+     "desc": "Small AoE splash to adjacent target.",
+     "effect": {
+      "aoe": "adjacent"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Radiant Strike",
+     "description": "Damage increases to 150% weapon. Applies Holy Burn to all enemy types for 2 rounds.",
+     "bonus": {
+      "damageMult": 2,
+      "statusEffects": [
+       {
+        "type": "holy_burn",
+        "chance": 0.7,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 10,
+     "name": "Divine Judgment",
+     "description": "Damage increases to 200% weapon. Bonus vs undead/demons increases to 3×. Hits adjacent target.",
+     "bonus": {
+      "damageMult": 2.6,
+      "bonusVsUndead": 3,
+      "bonusVsDemon": 3,
+      "aoe": "adjacent"
+     }
+    }
+   ],
+   "id": "holy_strike"
+  },
+  "lay_on_hands": {
+   "name": "Lay on Hands",
+   "class": "paladin",
+   "unlockLevel": 5,
+   "type": "heal",
+   "target": "ally",
+   "healStat": "damage",
+   "healMult": 2,
+   "mpCost": 20,
+   "description": "Instantly restore HP to one ally equal to 2× Damage.",
+   "talents": [
+    {
+     "id": "loh_cleanse",
+     "name": "Purify",
+     "desc": "Also removes one status effect.",
+     "effect": {
+      "cleanse": 1
+     }
+    },
+    {
+     "id": "loh_free",
+     "name": "Free Action",
+     "desc": "Can target self without consuming turn.",
+     "effect": {
+      "selfFree": true
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Greater Restoration",
+     "description": "Healing increases to 3× Damage and removes all negative status effects from target.",
+     "bonus": {
+      "healMult": 3,
+      "cleanse": "all"
+     }
+    },
+    {
+     "level": 15,
+     "name": "Holy Mending",
+     "description": "Healing increases to 4× Damage, removes all negative effects, and grants the target a 1× Damage shield for 2 rounds.",
+     "bonus": {
+      "healMult": 4,
+      "cleanse": "all",
+      "shieldMult": 1,
+      "shieldDur": 2
+     }
+    }
+   ],
+   "id": "lay_on_hands"
+  },
+  "divine_shield": {
+   "name": "Divine Shield",
+   "class": "paladin",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "ally",
+   "effect": {
+    "shield": {
+     "conMult": 3,
+     "duration": 2
+    }
+   },
+   "mpCost": 25,
+   "description": "Surround one ally with a barrier absorbing 3× Damage for 2 rounds.",
+   "talents": [
+    {
+     "id": "ds_reflect",
+     "name": "Holy Aegis",
+     "desc": "Reflect absorbed damage.",
+     "effect": {
+      "reflect": 0.3
+     }
+    },
+    {
+     "id": "ds_double",
+     "name": "Twin Shield",
+     "desc": "Extend to 2 targets.",
+     "effect": {
+      "targets": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Blessed Aegis",
+     "description": "Shield absorbs 5× Damage, lasts 3 rounds, and reflects 20% of absorbed damage.",
+     "bonus": {
+      "shield": {
+       "conMult": 5,
+       "duration": 3
+      },
+      "reflect": 0.2
+     }
+    },
+    {
+     "level": 18,
+     "name": "Fortress of Faith",
+     "description": "Shield absorbs 7× Damage, lasts 4 rounds, reflects 40%, and extends to the entire party.",
+     "bonus": {
+      "shield": {
+       "conMult": 7,
+       "duration": 4
+      },
+      "reflect": 0.4,
+      "target": "party"
+     }
+    }
+   ],
+   "id": "divine_shield"
+  },
+  "consecration": {
+   "name": "Consecration",
+   "class": "paladin",
+   "unlockLevel": 15,
+   "type": "zone",
+   "target": "all_enemies",
+   "damageStat": "damage",
+   "damageMult": 1,
+   "healStat": "damage",
+   "healMult": 0.4,
+   "duration": 3,
+   "mpCost": 35,
+   "description": "Sanctify the ground: damages all enemies (100% Damage) and heals party for 3 rounds.",
+   "talents": [
+    {
+     "id": "con_slow",
+     "name": "Sacred Ground",
+     "desc": "Also slows all enemies.",
+     "effect": {
+      "slow": {
+       "duration": 2
+      }
+     }
+    },
+    {
+     "id": "con_heal",
+     "name": "Holy Renewal",
+     "desc": "Increases heal amount by 50%.",
+     "effect": {
+      "healMult": 0.6
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Holy Sanctum",
+     "description": "Damage increases to 90% Damage per round, healing to 60% Damage per round, duration to 4 rounds.",
+     "bonus": {
+      "damageMult": 1.4,
+      "healMult": 0.6,
+      "duration": 4
+     }
+    },
+    {
+     "level": 20,
+     "name": "Divine Dominion",
+     "description": "Damage increases to 120% Damage, healing to 80% Damage, lasts 5 rounds, and applies Slow to all enemies.",
+     "bonus": {
+      "damageMult": 1.8,
+      "healMult": 0.8,
+      "duration": 5,
+      "slow": {
+       "duration": 3
+      }
+     }
+    }
+   ],
+   "id": "consecration"
+  },
+  "magic_missile": {
+   "name": "Magic Missile",
+   "class": "mage",
+   "unlockLevel": 1,
+   "type": "magic",
+   "aoe": "random3",
+   "damageStat": "damage",
+   "damageMult": 0.5,
+   "mpCost": 8,
+   "description": "Launch 3 arcane bolts, each hitting a random enemy for Damage.",
+   "talents": [
+    {
+     "id": "mm_5bolts",
+     "name": "Missile Barrage",
+     "desc": "5 bolts instead of 3.",
+     "effect": {
+      "bolts": 5
+     }
+    },
+    {
+     "id": "mm_stun",
+     "name": "Concussive Bolts",
+     "desc": "Chance to Stun target.",
+     "effect": {
+      "stunChance": 0.2
+     }
+    },
+    {
+     "id": "mg_familiar",
+     "name": "Arcane Familiar",
+     "desc": "Summon an Arcane Familiar companion.",
+     "effect": {
+      "unlocksCompanion": "pet_familiar"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Force Missiles",
+     "description": "Each bolt's damage increases to 75% Damage and fires 4 bolts.",
+     "bonus": {
+      "damageMult": 0.75,
+      "bolts": 4
+     }
+    },
+    {
+     "level": 10,
+     "name": "Arcane Fusillade",
+     "description": "Each bolt deals 80% Damage, fires 5 bolts, and has a 25% chance to Stun each target hit.",
+     "bonus": {
+      "damageMult": 0.8,
+      "bolts": 5,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.25,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "magic_missile"
+  },
+  "fireball": {
+   "name": "Fireball",
+   "class": "mage",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "group",
+   "damageStat": "damage",
+   "damageMult": 1.4,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "chance": 0.8,
+     "duration": 3
+    }
+   ],
+   "mpCost": 18,
+   "description": "Explosive fireball hitting one enemy group with fire damage and Burn.",
+   "talents": [
+    {
+     "id": "fb_wider",
+     "name": "Inferno",
+     "desc": "Blast radius includes adjacent group.",
+     "effect": {
+      "aoe": "group2"
+     }
+    },
+    {
+     "id": "fb_burn",
+     "name": "Scorching",
+     "desc": "Burn damage increased by 50%.",
+     "effect": {
+      "burnMult": 1.5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Greater Fireball",
+     "description": "Damage increases to 190% Damage. Burn chance rises to 100% and lasts 4 rounds.",
+     "bonus": {
+      "damageMult": 1.9,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 4
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Conflagration",
+     "description": "Damage increases to 200% Damage, hits all enemy groups, Burn lasts 5 rounds, and reduces fire resistance by 30%.",
+     "bonus": {
+      "damageMult": 2,
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 5
+       }
+      ],
+      "fireResistDebuff": 0.3
+     }
+    }
+   ],
+   "id": "fireball"
+  },
+  "blizzard": {
+   "name": "Blizzard",
+   "class": "mage",
+   "unlockLevel": 10,
+   "type": "magic",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 0.7,
+   "duration": 3,
+   "statusEffects": [
+    {
+     "type": "slow",
+     "chance": 1,
+     "duration": 2,
+     "power": 0.5
+    }
+   ],
+   "mpCost": 30,
+   "description": "Ice storm blanketing all enemies for 3 rounds, dealing cold damage and Slow.",
+   "talents": [
+    {
+     "id": "bz_freeze",
+     "name": "Deep Freeze",
+     "desc": "Chance to Freeze (Stun) targets.",
+     "effect": {
+      "freezeChance": 0.25
+     }
+    },
+    {
+     "id": "bz_dmg",
+     "name": "Arctic Gale",
+     "desc": "Damage increases each round.",
+     "effect": {
+      "dmgScaling": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Arctic Tempest",
+     "description": "Damage increases to 100% Damage per round, lasts 4 rounds, and Slow applies for 3 rounds.",
+     "bonus": {
+      "damageMult": 1,
+      "duration": 4,
+      "statusEffects": [
+       {
+        "type": "slow",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 18,
+     "name": "Eternal Winter",
+     "description": "Damage increases to 130% Damage, lasts 5 rounds, Slow upgraded to Freeze (Stun) with 40% chance each round.",
+     "bonus": {
+      "damageMult": 1.3,
+      "duration": 5,
+      "statusEffects": [
+       {
+        "type": "slow",
+        "chance": 1,
+        "duration": 3
+       },
+       {
+        "type": "stun",
+        "chance": 0.4,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "blizzard"
+  },
+  "arcane_surge": {
+   "name": "Arcane Surge",
+   "class": "mage",
+   "unlockLevel": 15,
+   "type": "magic",
+   "aoe": "single_overflow",
+   "damageStat": "damage",
+   "damageMult": 2.5,
+   "mpCost": 40,
+   "description": "250% Damage to single target with overflow to adjacent enemies.",
+   "talents": [
+    {
+     "id": "as_cd",
+     "name": "Wild Surge",
+     "desc": "Reduce mana cost by 15.",
+     "effect": {
+      "mpCost": -15
+     }
+    },
+    {
+     "id": "as_pen",
+     "name": "Arcane Pierce",
+     "desc": "Ignore magic resistance.",
+     "effect": {
+      "ignoreMR": true
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Void Surge",
+     "description": "Damage increases to 350% Damage. MP cost reduced by 10.",
+     "bonus": {
+      "damageMult": 3.5,
+      "mpCost": -10
+     }
+    },
+    {
+     "level": 20,
+     "name": "Reality Shatter",
+     "description": "Damage increases to 250% Damage, hits all enemies, ignores magic resistance, and reduces target INT by 30% for 2 rounds.",
+     "bonus": {
+      "damageMult": 2.5,
+      "aoe": "all",
+      "ignoreMR": true,
+      "intDebuff": 0.3,
+      "intDebuffDur": 2
+     }
+    }
+   ],
+   "id": "arcane_surge"
+  },
+  "bone_spike": {
+   "name": "Bone Spike",
+   "class": "necromancer",
+   "unlockLevel": 1,
+   "type": "magic",
+   "aoe": "pierce_row",
+   "damageStat": "damage",
+   "damageMult": 0.9,
+   "statusEffects": [
+    {
+     "type": "bleed",
+     "chance": 0.5,
+     "duration": 3
+    }
+   ],
+   "mpCost": 8,
+   "description": "Bone projectile dealing Damage and applying Bleed, pierces target row.",
+   "talents": [
+    {
+     "id": "bs_pierce",
+     "name": "Ossified Lance",
+     "desc": "Pierces entire enemy row.",
+     "effect": {
+      "aoe": "row"
+     }
+    },
+    {
+     "id": "bs_extra",
+     "name": "Double Spike",
+     "desc": "Extra spike on crit.",
+     "effect": {
+      "critExtra": true
+     }
+    },
+    {
+     "id": "nr_skeletal",
+     "name": "Skeletal Servant",
+     "desc": "Summon a Skeletal Warrior companion.",
+     "effect": {
+      "unlocksCompanion": "pet_skeletal_warrior"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Sharpened Spike",
+     "description": "Damage increases to 130% Damage. Bleed chance rises to 80% and lasts 4 rounds.",
+     "bonus": {
+      "damageMult": 1.3,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.8,
+        "duration": 4
+       }
+      ]
+     }
+    },
+    {
+     "level": 10,
+     "name": "Bone Volley",
+     "description": "Fires 3 spikes at different targets, each at 110% Damage with guaranteed Bleed for 4 rounds.",
+     "bonus": {
+      "damageMult": 1.1,
+      "bolts": 3,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 4
+       }
+      ]
+     }
+    }
+   ],
+   "id": "bone_spike"
+  },
+  "bone_spear": {
+   "name": "Bone Spear",
+   "class": "necromancer",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "row",
+   "damageStat": "damage",
+   "damageMult": 1.6,
+   "mpCost": 18,
+   "description": "Hurl a bone spear that pierces a row of enemies for 160% Damage.",
+   "talents": [
+    {
+     "id": "bs_pierce",
+     "name": "Shattering Pierce",
+     "desc": "Reduces target armor by 15% for 2 rounds.",
+     "effect": {
+      "armorDebuff": 0.15,
+      "armorDebuffDur": 2
+     }
+    },
+    {
+     "id": "bs_bleed",
+     "name": "Jagged Shards",
+     "desc": "Applies Bleed (2 rounds) to all pierced targets.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Greater Bone Spear",
+     "description": "Damage increases to 220% Damage; always applies Bleed for 2 rounds.",
+     "bonus": {
+      "damageMult": 2.2,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Calcified Lance",
+     "description": "Damage increases to 280% Damage; hits all enemies on the row and stuns the first target.",
+     "bonus": {
+      "damageMult": 2.8,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.5,
+        "duration": 1
+       },
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "id": "bone_spear"
+  },
+  "life_drain": {
+   "name": "Life Drain",
+   "class": "necromancer",
+   "unlockLevel": 10,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.2,
+   "lifesteal": 0.5,
+   "effect": {
+    "lifesteal": 0.5
+   },
+   "mpCost": 20,
+   "description": "Drain life from target dealing Damage, healing Necromancer for 50%.",
+   "talents": [
+    {
+     "id": "ld_chain",
+     "name": "Chain Drain",
+     "desc": "Also chains to a second nearby target.",
+     "effect": {
+      "chainCount": 2
+     }
+    },
+    {
+     "id": "ld_buff",
+     "name": "Soul Siphon",
+     "desc": "Also drains one buff from target.",
+     "effect": {
+      "drainBuff": true
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Void Drain",
+     "description": "Damage increases to 160% Damage. Lifesteal increases to 70%.",
+     "bonus": {
+      "damageMult": 1.6,
+      "lifesteal": 0.7
+     }
+    },
+    {
+     "level": 18,
+     "name": "Soul Harvest",
+     "description": "Damage increases to 220% Damage, lifesteal 100%, chains to 2 additional targets at 60% power, and drains one buff per target.",
+     "bonus": {
+      "damageMult": 2.2,
+      "lifesteal": 1,
+      "chainCount": 3,
+      "chainMult": 0.6,
+      "drainBuff": true
+     }
+    }
+   ],
+   "id": "life_drain"
+  },
+  "corpse_explosion": {
+   "id": "corpse_explosion",
+   "name": "Corpse Explosion",
+   "class": "necromancer",
+   "unlockLevel": 15,
+   "type": "damage",
+   "target": "corpse",
+   "aoe": "adjacent",
+   "mpCost": 18,
+   "cooldown": 3,
+   "damageStat": "damage",
+   "damageMult": 1.6,
+   "requiresDeadEnemy": true,
+   "description": "Detonate a fallen enemy. Damage to adjacent foes scales with the corpse's max HP.",
+   "effect": {
+    "dmg": 0,
+    "requiresDeadEnemy": true,
+    "corpseHpScale": 0.5
+   },
+   "talents": [
+    {
+     "id": "ce_radius",
+     "name": "Wider Burst",
+     "desc": "Affects group instead of adjacent.",
+     "effect": {
+      "aoe": "group"
+     }
+    },
+    {
+     "id": "ce_pierce",
+     "name": "Necrotic Pierce",
+     "desc": "Bypasses 50% of armor.",
+     "effect": {
+      "armorPenPct": 0.5
+     }
+    },
+    {
+     "id": "nr_golem",
+     "name": "Bone Golem",
+     "desc": "Summon a Bone Golem companion.",
+     "effect": {
+      "unlocksCompanion": "pet_bone_golem"
+     }
+    }
+   ],
+   "upgrades": []
+  },
+  "flame_lance": {
+   "name": "Flame Lance",
+   "class": "pyromancer",
+   "unlockLevel": 1,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.92,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "chance": 0.9,
+     "duration": 3
+    }
+   ],
+   "mpCost": 8,
+   "description": "Fire bolt dealing Damage and applying Burn (3-round DoT).",
+   "talents": [
+    {
+     "id": "fl_dur",
+     "name": "Sustained Flame",
+     "desc": "Burn lasts 5 rounds.",
+     "effect": {
+      "burnDuration": 5
+     }
+    },
+    {
+     "id": "fl_spread",
+     "name": "Spreading Fire",
+     "desc": "Burn spreads to adjacent enemy.",
+     "effect": {
+      "burnSpread": true
+     }
+    },
+    {
+     "id": "py_elemental",
+     "name": "Fire Elemental",
+     "desc": "Summon a Fire Elemental companion.",
+     "effect": {
+      "unlocksCompanion": "pet_fire_elemental"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Searing Lance",
+     "description": "Damage increases to 150% Damage. Burn chance becomes 100% and lasts 4 rounds.",
+     "bonus": {
+      "damageMult": 1.38,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 4
+       }
+      ]
+     }
+    },
+    {
+     "level": 10,
+     "name": "Infernal Beam",
+     "description": "Damage increases to 220% Damage, pierces the entire enemy row, Burn guaranteed for 5 rounds.",
+     "bonus": {
+      "damageMult": 2.02,
+      "aoe": "pierce_row",
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 5
+       }
+      ]
+     }
+    }
+   ],
+   "id": "flame_lance"
+  },
+  "ignite": {
+   "name": "Ignite",
+   "class": "pyromancer",
+   "unlockLevel": 5,
+   "type": "zone",
+   "aoe": "group",
+   "damageStat": "damage",
+   "damageMult": 0.55,
+   "duration": 3,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "chance": 1,
+     "duration": 3,
+     "stacksEachRound": true
+    }
+   ],
+   "mpCost": 18,
+   "description": "Set ground ablaze under one group, persisting 3 rounds with stacking Burn.",
+   "talents": [
+    {
+     "id": "ig_spread",
+     "name": "Wildfire",
+     "desc": "Fire spreads to adjacent group.",
+     "effect": {
+      "spreadToAdjacentGroup": true
+     }
+    },
+    {
+     "id": "ig_stack",
+     "name": "Inferno Stack",
+     "desc": "Faster Burn stacking rate.",
+     "effect": {
+      "burnStackRate": 1.5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Blazing Ground",
+     "description": "Damage per round increases to 90% Damage, zone lasts 4 rounds, and spreads to adjacent group.",
+     "bonus": {
+      "damageMult": 0.83,
+      "duration": 4,
+      "spreadToAdjacentGroup": true
+     }
+    },
+    {
+     "level": 15,
+     "name": "Scorched Earth",
+     "description": "Damage per round increases to 130% Damage, covers all enemies, lasts 5 rounds, and reduces enemy fire resistance by 40%.",
+     "bonus": {
+      "damageMult": 1.19,
+      "aoe": "all",
+      "duration": 5,
+      "fireResistDebuff": 0.4
+     }
+    }
+   ],
+   "id": "ignite"
+  },
+  "pyroclasm": {
+   "name": "Pyroclasm",
+   "class": "pyromancer",
+   "unlockLevel": 10,
+   "type": "magic",
+   "aoe": "chain3",
+   "damageStat": "damage",
+   "damageMult": 0.83,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "chance": 0.8,
+     "duration": 3
+    }
+   ],
+   "mpCost": 25,
+   "description": "Chain fire explosion: each target triggers a secondary blast on nearest enemy, up to 3.",
+   "talents": [
+    {
+     "id": "py_chain4",
+     "name": "Pyroclastic Wave",
+     "desc": "Chain length increases to 4.",
+     "effect": {
+      "chainCount": 4
+     }
+    },
+    {
+     "id": "py_scale",
+     "name": "Amplify",
+     "desc": "Each chain explosion is larger.",
+     "effect": {
+      "chainDmgScale": 1.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Volcanic Chain",
+     "description": "Damage increases to 130% Damage per explosion. Chain length increases to 5. Burn guaranteed.",
+     "bonus": {
+      "damageMult": 1.2,
+      "chainCount": 5,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 18,
+     "name": "Cataclysm",
+     "description": "Damage increases to 180% Damage, chains to all enemies, Burn lasts 5 rounds, and each explosion deals 20% more damage than the last.",
+     "bonus": {
+      "damageMult": 1.65,
+      "chainCount": 99,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 5
+       }
+      ],
+      "chainDmgScale": 1.2
+     }
+    }
+   ],
+   "id": "pyroclasm"
+  },
+  "meteor": {
+   "name": "Meteor",
+   "class": "pyromancer",
+   "unlockLevel": 15,
+   "type": "magic",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 2.3,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "chance": 1,
+     "duration": 5,
+     "maxStacks": true
+    }
+   ],
+   "mpCost": 45,
+   "description": "Devastating meteor hitting all enemies with maximum Burn stacks and Ignite zones.",
+   "talents": [
+    {
+     "id": "me_split",
+     "name": "Twin Meteor",
+     "desc": "Meteor splits into two on impact.",
+     "effect": {
+      "split": 2
+     }
+    },
+    {
+     "id": "me_resist",
+     "name": "Smelting Fire",
+     "desc": "Enemy fire resistance reduced 50% for 3 rounds.",
+     "effect": {
+      "fireResistDebuff": 0.5,
+      "duration": 3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Extinction Event",
+     "description": "Damage increases to 350% Damage. Burn lasts 7 rounds. Also Stuns all enemies for 1 round on impact.",
+     "bonus": {
+      "damageMult": 3.5,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 7,
+        "maxStacks": true
+       },
+       {
+        "type": "stun",
+        "chance": 1,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "level": 20,
+     "name": "World Ender",
+     "description": "Damage increases to 500% Damage, fires twice, Burn lasts 10 rounds with max stacks, and leaves a 3-round Ignite zone on all enemies.",
+     "bonus": {
+      "damageMult": 5,
+      "split": 2,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 10,
+        "maxStacks": true
+       }
+      ],
+      "igniteZone": {
+       "duration": 3
+      }
+     }
+    }
+   ],
+   "id": "meteor"
+  },
+  "aimed_shot": {
+   "name": "Aimed Shot",
+   "class": "ranger",
+   "unlockLevel": 1,
+   "type": "ranged",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.4,
+   "armorPen": 1,
+   "effect": {
+    "armorPen": 8
+   },
+   "mpCost": 5,
+   "description": "Focused ranged attack dealing 140% Light damage. Can pierce armor via talent.",
+   "talents": [
+    {
+     "id": "as_pen",
+     "name": "Armor Pierce",
+     "desc": "Ignores target armor.",
+     "effect": {
+      "armorPen": 1
+     }
+    },
+    {
+     "id": "as_bleed",
+     "name": "Barbed Arrow",
+     "desc": "Chance to Bleed.",
+     "effect": {
+      "bleedChance": 0.4
+     }
+    },
+    {
+     "id": "rg_hound",
+     "name": "Trained War Hound",
+     "desc": "Summon a Trained War Hound companion.",
+     "effect": {
+      "unlocksCompanion": "pet_war_hound"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Headshot",
+     "description": "Damage increases to 220% Light. Ignores 50% of armor and applies Bleed (3 rounds) on hit.",
+     "bonus": {
+      "damageMult": 1.9,
+      "armorPen": 0.5,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.7,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 10,
+     "name": "Kill Shot",
+     "description": "Damage increases to 300% Light. Fully ignores armor. Guaranteed Bleed for 4 rounds. 30% instant kill chance vs bleeding targets.",
+     "bonus": {
+      "damageMult": 2.4,
+      "armorPen": 1,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 4
+       }
+      ],
+      "executeChance": 0.15
+     }
+    }
+   ],
+   "id": "aimed_shot"
+  },
+  "multi_shot": {
+   "name": "Multi-Shot",
+   "class": "ranger",
+   "unlockLevel": 5,
+   "type": "ranged",
+   "aoe": "random3",
+   "damageStat": "damage",
+   "damageMult": 0.8,
+   "mpCost": 15,
+   "description": "Fire at 3 separate targets simultaneously, each at 80% Light damage.",
+   "talents": [
+    {
+     "id": "ms_4",
+     "name": "Quiver Mastery",
+     "desc": "Fourth target added.",
+     "effect": {
+      "targets": 4
+     }
+    },
+    {
+     "id": "ms_b",
+     "name": "Bleeding Volley",
+     "desc": "Applies Bleed to all targets.",
+     "effect": {
+      "bleedChance": 0.5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Rapid Volley",
+     "description": "Hits 5 targets at 110% Light each. All arrows apply Bleed (3 rounds) with 60% chance.",
+     "bonus": {
+      "targets": 5,
+      "damageMult": 1.1,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.6,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Arrow Storm",
+     "description": "Hits all enemies at 130% Light each. Guaranteed Bleed for 4 rounds and reduces enemy dodge by 20% for 2 rounds.",
+     "bonus": {
+      "aoe": "all",
+      "damageMult": 1.3,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 4
+       }
+      ],
+      "dodgeDebuff": 0.2,
+      "dodgeDebuffDur": 2
+     }
+    }
+   ],
+   "id": "multi_shot"
+  },
+  "smoke_trap": {
+   "name": "Smoke Trap",
+   "class": "ranger",
+   "unlockLevel": 10,
+   "type": "trap",
+   "aoe": "group",
+   "statusEffects": [
+    {
+     "type": "blind",
+     "chance": 1,
+     "duration": 2
+    }
+   ],
+   "mpCost": 20,
+   "description": "Plant a trap that Blinds (−50% hit chance) one enemy group for 2 rounds.",
+   "talents": [
+    {
+     "id": "st_slow",
+     "name": "Choking Smoke",
+     "desc": "Also applies Slow.",
+     "effect": {
+      "slow": {
+       "duration": 2
+      }
+     }
+    },
+    {
+     "id": "st_2",
+     "name": "Double Trap",
+     "desc": "Place 2 traps simultaneously.",
+     "effect": {
+      "trapCount": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Noxious Cloud",
+     "description": "Blind extends to 3 rounds, also applies Poison for 3 rounds, and covers all enemies.",
+     "bonus": {
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "blind",
+        "chance": 1,
+        "duration": 3
+       },
+       {
+        "type": "poison",
+        "chance": 0.8,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 18,
+     "name": "Choking Miasma",
+     "description": "Blind lasts 4 rounds on all enemies, Poison guaranteed for 5 rounds, and enemies cannot use special abilities while blinded.",
+     "bonus": {
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "blind",
+        "chance": 1,
+        "duration": 4
+       },
+       {
+        "type": "poison",
+        "chance": 1,
+        "duration": 5
+       }
+      ],
+      "suppressAbilities": true
+     }
+    }
+   ],
+   "id": "smoke_trap"
+  },
+  "rain_of_arrows": {
+   "name": "Rain of Arrows",
+   "class": "ranger",
+   "unlockLevel": 15,
+   "type": "ranged",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 0.5,
+   "duration": 3,
+   "mpCost": 30,
+   "description": "Volley descending on all enemies for 3 rounds, each dealing Light damage.",
+   "talents": [
+    {
+     "id": "roa_bleed",
+     "name": "Serrated Arrows",
+     "desc": "Applies stacking Bleed.",
+     "effect": {
+      "bleedStack": true
+     }
+    },
+    {
+     "id": "roa_dur",
+     "name": "Endless Rain",
+     "desc": "Duration extends to 4 rounds.",
+     "effect": {
+      "duration": 4
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Tempest of Arrows",
+     "description": "Damage per round increases to 80% Light, lasts 4 rounds, and applies stacking Bleed.",
+     "bonus": {
+      "damageMult": 0.8,
+      "duration": 4,
+      "bleedStack": true
+     }
+    },
+    {
+     "level": 20,
+     "name": "Eternal Barrage",
+     "description": "Damage per round increases to 120% Light, lasts 5 rounds, guaranteed Bleed stacking, and reduces enemy armor by 30% for the duration.",
+     "bonus": {
+      "damageMult": 1.2,
+      "duration": 5,
+      "bleedStack": true,
+      "armorDebuff": 0.3
+     }
+    }
+   ],
+   "id": "rain_of_arrows"
+  },
+  "backstab": {
+   "name": "Backstab",
+   "class": "rogue",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.69,
+   "effect": {
+    "conditionBonus": 1.5
+   },
+   "mpCost": 5,
+   "description": "169% Light damage. Bonus if target is Stunned or Bleeding.",
+   "talents": [
+    {
+     "id": "bs_crit",
+     "name": "Exposed Vitals",
+     "desc": "Backstab has +30% critical hit chance.",
+     "effect": {
+      "critChance": 0.3
+     }
+    },
+    {
+     "id": "bs_refund",
+     "name": "Silent Retreat",
+     "desc": "Killing a target with Backstab refunds its MP cost and grants stealth for 1 round.",
+     "effect": {
+      "refundOnKill": true,
+      "stealthDur": 1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Vital Strike",
+     "description": "Damage increases to 250% Light. Bonus vs Stunned/Bleeding targets increases to +70% extra damage.",
+     "bonus": {
+      "damageMult": 2.1,
+      "conditionBonus": 0.7
+     }
+    },
+    {
+     "level": 10,
+     "name": "Assassinate",
+     "description": "Damage increases to 300% Light. Bonus vs Stunned/Bleeding targets +120%. Applies Bleed on hit.",
+     "bonus": {
+      "damageMult": 1.5,
+      "conditionBonus": 0.5,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.9,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "id": "backstab"
+  },
+  "poison_blade": {
+   "name": "Poison Blade",
+   "class": "rogue",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "self",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.5,
+   "effect": {
+    "onHitStatus": {
+     "type": "poison",
+     "power": 6,
+     "duration": 3
+    },
+    "rounds": 5,
+    "duration": 5
+   },
+   "mpCost": 10,
+   "stackingMode": "per_source",
+   "maxStacks": 5,
+   "description": "Next 3 attacks apply Poison DoT (up to 5 stacks per source).",
+   "talents": [
+    {
+     "id": "pb_deep",
+     "name": "Deep Venom",
+     "desc": "Poison damage per tick increases by 50%.",
+     "effect": {
+      "poisonDmgMult": 1.5
+     }
+    },
+    {
+     "id": "pb_extra",
+     "name": "Coated Edge",
+     "desc": "Poison Blade empowers 2 additional attacks.",
+     "effect": {
+      "attackCount": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Venom Coating",
+     "description": "Next 5 attacks apply Poison DoT. Poison damage increased by 50%.",
+     "bonus": {
+      "attackCount": 5,
+      "poisonDmgMult": 1.5
+     }
+    },
+    {
+     "level": 15,
+     "name": "Virulent Toxin",
+     "description": "Next 7 attacks apply lethal Poison at double damage. Poison stacks up to 5 times.",
+     "bonus": {
+      "attackCount": 7,
+      "poisonDmgMult": 2,
+      "poisonMaxStacks": 5
+     }
+    }
+   ],
+   "id": "poison_blade"
+  },
+  "shadow_step": {
+   "name": "Shadow Step",
+   "class": "rogue",
+   "unlockLevel": 10,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.1,
+   "mpCost": 20,
+   "description": "Teleport behind target and attack for 127% Light.",
+   "talents": [
+    {
+     "id": "ss_cheap",
+     "name": "Veil Walk",
+     "desc": "Reduces MP cost by 8.",
+     "effect": {
+      "mpCost": -8
+     }
+    },
+    {
+     "id": "ss_dodge",
+     "name": "Shadow Cloak",
+     "desc": "Grants +40% dodge until end of next round after using Shadow Step.",
+     "effect": {
+      "dodgeBonus": 0.4,
+      "duration": 1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Shadowstrike",
+     "description": "Damage increases to 220% Light. Teleport applies Stun for 1 round. Reduces MP cost by 5.",
+     "bonus": {
+      "damageMult": 1.85,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.8,
+        "duration": 1
+       }
+      ],
+      "mpCost": -5
+     }
+    },
+    {
+     "level": 18,
+     "name": "Phase Walk",
+     "description": "Damage increases to 300% Light. Stun guaranteed. Can chain to a second target at 150% Light.",
+     "bonus": {
+      "damageMult": 1.9,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 1,
+        "duration": 1
+       }
+      ],
+      "chainTarget": true,
+      "chainMult": 1.5
+     }
+    }
+   ],
+   "id": "shadow_step"
+  },
+  "death_mark": {
+   "name": "Death Mark",
+   "class": "rogue",
+   "unlockLevel": 15,
+   "type": "damage",
+   "target": "enemy",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.4,
+   "statusEffects": [
+    {
+     "type": "marked",
+     "duration": 3,
+     "chance": 1
+    }
+   ],
+   "mpCost": 25,
+   "description": "Marked target takes 50% more damage from all sources for 3 rounds.",
+   "talents": [
+    {
+     "id": "dm_linger",
+     "name": "Lingering Mark",
+     "desc": "Death Mark duration increases by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "dm_exec",
+     "name": "Executioner",
+     "desc": "Killing a marked target restores 20% MP and reduces all cooldowns by 1.",
+     "effect": {
+      "mpRestoreOnKill": 0.2,
+      "cdrOnKill": 1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Execution Mark",
+     "description": "Marked target takes 80% more damage for 4 rounds. Mark spreads to adjacent target on death.",
+     "bonus": {
+      "dmgAmp": 0.8,
+      "duration": 4,
+      "spreadOnDeath": true
+     }
+    },
+    {
+     "level": 20,
+     "name": "Marked for Death",
+     "description": "Marked target takes 120% more damage for 5 rounds. Mark applies to 2 targets simultaneously. 25% instant kill chance on marked targets at low HP.",
+     "bonus": {
+      "dmgAmp": 0.7,
+      "duration": 5,
+      "targets": 2,
+      "executeChance": 0.25
+     }
+    }
+   ],
+   "id": "death_mark"
+  },
+  "pilfer_magic": {
+   "name": "Pilfer Magic",
+   "class": "rogue",
+   "unlockLevel": 8,
+   "type": "debuff",
+   "target": "enemy",
+   "aoe": "single",
+   "mpCost": 18,
+   "effect": {
+    "pilferBuff": true
+   },
+   "description": "Strip the first positive status from a target enemy and apply it to yourself for the remaining duration.",
+   "talents": [
+    {
+     "id": "pm_two",
+     "name": "Double Dip",
+     "desc": "Pilfer up to 2 statuses at once.",
+     "effect": {
+      "pilferCount": 2
+     }
+    },
+    {
+     "id": "pm_dmg",
+     "name": "Exploit Opening",
+     "desc": "Deal 80% Light damage on the same action.",
+     "effect": {
+      "damageStat": "damage",
+      "damageMult": 0.8
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 13,
+     "name": "Grand Theft Magic",
+     "description": "Steal up to 2 buffs. Stolen buffs last 1 additional round.",
+     "bonus": {
+      "pilferCount": 2,
+      "pilferBonusDuration": 1
+     }
+    },
+    {
+     "level": 18,
+     "name": "Total Plunder",
+     "description": "Steal all positive statuses. Each stolen buff deals 20 damage to the enemy.",
+     "bonus": {
+      "pilferCount": 99,
+      "pilferDamagePerBuff": 20
+     }
+    }
+   ],
+   "id": "pilfer_magic"
+  },
+  "hemorrhage": {
+   "name": "Hemorrhage",
+   "class": "rogue",
+   "unlockLevel": 13,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.5,
+   "mpCost": 22,
+   "effect": {
+    "hemorrhage": true,
+    "dmgPerBleedStack": 30
+   },
+   "description": "Consumes all Bleed stacks on target for 30 damage each, then deals a base attack. Stacks are reset after.",
+   "stackingMode": "per_source",
+   "talents": [
+    {
+     "id": "hm_spread",
+     "name": "Arterial Spray",
+     "desc": "On kill, spray splashes 50% remaining bleed damage to an adjacent enemy.",
+     "effect": {
+      "splashOnKill": 0.5
+     }
+    },
+    {
+     "id": "hm_rebleed",
+     "name": "Open Wound",
+     "desc": "After detonating, reapplies 2 stacks of Bleed to the target.",
+     "effect": {
+      "rebleedAfter": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Exsanguinate",
+     "description": "Damage per consumed bleed stack increases to 50.",
+     "bonus": {
+      "dmgPerBleedStack": 50
+     }
+    },
+    {
+     "level": 20,
+     "name": "Death by a Thousand Cuts",
+     "description": "Damage per stack increases to 80 and also poisons the target (1 stack per 2 consumed stacks).",
+     "bonus": {
+      "dmgPerBleedStack": 80,
+      "poisonPerTwoStacks": true
+     }
+    }
+   ],
+   "id": "hemorrhage"
+  },
+  "heal": {
+   "name": "Heal",
+   "class": "cleric",
+   "unlockLevel": 1,
+   "type": "heal",
+   "target": "ally",
+   "healStat": "damage",
+   "healMult": 2.5,
+   "mpCost": 15,
+   "description": "Restore HP to one ally equal to 2.5× Damage.",
+   "talents": [
+    {
+     "id": "heal_splash",
+     "name": "Radiant Splash",
+     "desc": "Heal also restores 50% of the amount to one adjacent ally.",
+     "effect": {
+      "splash": 0.5
+     }
+    },
+    {
+     "id": "heal_barrier",
+     "name": "Shielding Prayer",
+     "desc": "Heal grants a barrier equal to 25% of the heal value.",
+     "effect": {
+      "barrier": 0.25
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Greater Heal",
+     "description": "Healing increases to 4× Damage and also removes one negative status effect.",
+     "bonus": {
+      "healMult": 4,
+      "cleanse": 1
+     }
+    },
+    {
+     "level": 10,
+     "name": "Divine Renewal",
+     "description": "Healing increases to 6× Damage, removes all negative effects, and grants regeneration of 1× Damage per round for 3 rounds.",
+     "bonus": {
+      "healMult": 6,
+      "cleanse": "all",
+      "regenMult": 1,
+      "regenDur": 3
+     }
+    }
+   ],
+   "id": "heal"
+  },
+  "smite": {
+   "name": "Smite",
+   "class": "cleric",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 2.2,
+   "effect": {
+    "bonusVsUndead": 0.5
+   },
+   "mpCost": 15,
+   "description": "Holy bolt, double damage vs undead/demons.",
+   "talents": [
+    {
+     "id": "sm_pierce",
+     "name": "Radiant Pierce",
+     "desc": "Smite ignores 50% of magic resistance.",
+     "effect": {
+      "mrPen": 0.5
+     }
+    },
+    {
+     "id": "sm_heal",
+     "name": "Consecrated Strike",
+     "desc": "Heals the caster for 20% of damage dealt.",
+     "effect": {
+      "lifesteal": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Holy Bolt",
+     "description": "Damage increases to 300% Damage. Triple damage vs undead/demons. Applies Holy Burn for 2 rounds.",
+     "bonus": {
+      "damageMult": 0.8,
+      "bonusVsUndead": 1,
+      "bonusVsDemon": 1,
+      "statusEffects": [
+       {
+        "type": "holy_burn",
+        "chance": 0.8,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Wrath of the Divine",
+     "description": "Damage increases to 400% Damage. 4× vs undead/demons. Hits adjacent target. Applies Holy Burn guaranteed.",
+     "bonus": {
+      "damageMult": 1,
+      "bonusVsUndead": 1,
+      "bonusVsDemon": 1,
+      "aoe": "adjacent",
+      "statusEffects": [
+       {
+        "type": "holy_burn",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "id": "smite"
+  },
+  "sanctuary": {
+   "name": "Sanctuary",
+   "class": "cleric",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "barrier": 30,
+    "hpRegen": 8,
+    "rounds": 4,
+    "duration": 4
+   },
+   "mpCost": 25,
+   "description": "Ally regenerates HP each round and cannot be targeted for 3 rounds.",
+   "talents": [
+    {
+     "id": "sc_regen",
+     "name": "Blessed Haven",
+     "desc": "Regeneration amount increased by 50%.",
+     "effect": {
+      "regenBonus": 0.5
+     }
+    },
+    {
+     "id": "sc_party",
+     "name": "Shared Grace",
+     "desc": "Sanctuary also grants 25% of its regen to the rest of the party.",
+     "effect": {
+      "partySplash": 0.25
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Holy Sanctuary",
+     "description": "Regeneration increases by 50%. Duration extends to 4 rounds. Also removes all debuffs on activation.",
+     "bonus": {
+      "regenBonus": 0.5,
+      "duration": 4,
+      "cleanseOnActivate": "all"
+     }
+    },
+    {
+     "level": 18,
+     "name": "Divine Refuge",
+     "description": "Regeneration doubles. Duration extends to 5 rounds. Ally reflects 30% of damage taken while active.",
+     "bonus": {
+      "regenBonus": 1,
+      "duration": 5,
+      "reflect": 0.3
+     }
+    }
+   ],
+   "id": "sanctuary"
+  },
+  "mass_resurrection": {
+   "name": "Resurrect",
+   "class": "cleric",
+   "unlockLevel": 15,
+   "type": "revive",
+   "target": "ally",
+   "mpCost": 60,
+   "cooldown": 10,
+   "effect": {
+    "reviveHp": 0.25,
+    "immune": true
+   },
+   "description": "Revive a single fallen ally at 25% max HP. They gain damage immunity until their next action. 10-round cooldown per combat.",
+   "talents": [
+    {
+     "id": "mr_hp",
+     "name": "Renewed Vigor",
+     "desc": "Revive heal increased to 40% max HP.",
+     "effect": {
+      "reviveHp": 0.4
+     }
+    },
+    {
+     "id": "mr_immune",
+     "name": "Divine Bulwark",
+     "desc": "Immunity extends for one full round after revive.",
+     "effect": {
+      "immuneRound": true
+     }
+    },
+    {
+     "id": "res_heal_60",
+     "name": "Greater Resurrection",
+     "desc": "Revived ally returns at 60% HP.",
+     "effect": {
+      "reviveHp": 0.35
+     }
+    },
+    {
+     "id": "res_shield",
+     "name": "Holy Shield",
+     "desc": "Revived ally is immune to all damage for 1 full round after revival.",
+     "effect": {
+      "reviveImmuneRounds": 1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Greater Resurrection",
+     "description": "Revived allies return with 40% HP.",
+     "bonus": {
+      "reviveHp": 0.4
+     }
+    },
+    {
+     "level": 20,
+     "name": "Miracle",
+     "description": "Revived allies return with 60% HP and immunity lasts one full round after revive.",
+     "bonus": {
+      "reviveHp": 0.6,
+      "immuneRound": true
+     }
+    }
+   ],
+   "id": "mass_resurrection"
+  },
+  "inspiring_tune": {
+   "name": "Inspiring Tune",
+   "class": "bard",
+   "unlockLevel": 1,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgBuff": 0.15,
+    "rounds": 4,
+    "duration": 4
+   },
+   "mpCost": 10,
+   "description": "+15% hit and +1 initiative for party for 3 rounds.",
+   "talents": [
+    {
+     "id": "it_long",
+     "name": "Enduring Refrain",
+     "desc": "Duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "it_morale",
+     "name": "Morale Surge",
+     "desc": "Also grants +10% damage to the party.",
+     "effect": {
+      "dmgBuff": 0.1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Battle Anthem",
+     "description": "+25% hit and +2 initiative for party for 4 rounds. Also grants +15% damage.",
+     "bonus": {
+      "hitBonus": 0.25,
+      "initiative": 2,
+      "dmgBuff": 0.15,
+      "duration": 4
+     }
+    },
+    {
+     "level": 10,
+     "name": "War Hymn",
+     "description": "+40% hit, +3 initiative, +25% damage for party for 5 rounds. Also grants +20% dodge.",
+     "bonus": {
+      "hitBonus": 0.4,
+      "initiative": 3,
+      "dmgBuff": 0.25,
+      "dodgeBonus": 0.2,
+      "duration": 5
+     }
+    }
+   ],
+   "id": "inspiring_tune"
+  },
+  "discordant_wail": {
+   "name": "Discordant Wail",
+   "class": "bard",
+   "unlockLevel": 5,
+   "type": "debuff",
+   "aoe": "group",
+   "effect": {
+    "dmgDebuff": 0.3,
+    "duration": 3
+   },
+   "mpCost": 15,
+   "description": "−30% damage and erratic targeting for one enemy group.",
+   "talents": [
+    {
+     "id": "dw_wider",
+     "name": "Piercing Wail",
+     "desc": "Also affects the adjacent enemy group.",
+     "effect": {
+      "aoe": "group2"
+     }
+    },
+    {
+     "id": "dw_skip",
+     "name": "Nerve-Shattering Screech",
+     "desc": "20% chance each round for affected enemies to skip their turn.",
+     "effect": {
+      "skipTurnChance": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Cacophony",
+     "description": "−50% damage and erratic targeting for one enemy group, lasting 4 rounds. Enemies have 25% chance to skip their turn.",
+     "bonus": {
+      "dmgDebuff": 0.5,
+      "duration": 4,
+      "skipTurnChance": 0.25
+     }
+    },
+    {
+     "level": 15,
+     "name": "Maddening Discord",
+     "description": "−70% damage on all enemies, 40% chance to skip turn each round, and enemies may attack each other for 4 rounds.",
+     "bonus": {
+      "aoe": "all",
+      "dmgDebuff": 0.7,
+      "skipTurnChance": 0.4,
+      "confuse": {
+       "chance": 0.3,
+       "duration": 2
+      },
+      "duration": 4
+     }
+    }
+   ],
+   "id": "discordant_wail"
+  },
+  "ballad_of_valor": {
+   "name": "Ballad of Valor",
+   "class": "bard",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgBuff": 0.1,
+    "rounds": 1,
+    "duration": 1,
+    "extraAction": true
+   },
+   "mpCost": 25,
+   "description": "One hero gets double actions for 1 round.",
+   "talents": [
+    {
+     "id": "bv_dmg",
+     "name": "Heroic Verse",
+     "desc": "Affected hero deals +25% damage during the extra actions.",
+     "effect": {
+      "dmgBuff": 0.25
+     }
+    },
+    {
+     "id": "bv_cheap",
+     "name": "Rousing Chorus",
+     "desc": "Reduces MP cost by 10.",
+     "effect": {
+      "mpCost": -10
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Epic Ballad",
+     "description": "One hero gets double actions for 2 rounds and +30% damage during that time.",
+     "bonus": {
+      "duration": 2,
+      "dmgBuff": 0.3
+     }
+    },
+    {
+     "level": 18,
+     "name": "Legendary Verse",
+     "description": "Two heroes get double actions for 2 rounds with +50% damage and +25% dodge.",
+     "bonus": {
+      "targets": 2,
+      "duration": 2,
+      "dmgBuff": 0.5,
+      "dodgeBonus": 0.25
+     }
+    }
+   ],
+   "id": "ballad_of_valor"
+  },
+  "song_of_ruin": {
+   "name": "Song of Ruin",
+   "class": "bard",
+   "unlockLevel": 15,
+   "type": "magic",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 1.47,
+   "mpCost": 35,
+   "description": "147% Damage sonic damage to all enemies, removes all their buffs.",
+   "talents": [
+    {
+     "id": "sr_power",
+     "name": "Thunderous Dirge",
+     "desc": "Damage increased by 40%.",
+     "effect": {
+      "damageMult": 0.4
+     }
+    },
+    {
+     "id": "sr_silence",
+     "name": "Silencing Note",
+     "desc": "Affected enemies are Silenced for 2 rounds (cannot cast spells).",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "silence",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Requiem",
+     "description": "Damage increases by 50%. Removes all buffs and applies Slow to all enemies for 2 rounds.",
+     "bonus": {
+      "damageMult": 1.5,
+      "slow": {
+       "chance": 1,
+       "duration": 2
+      }
+     }
+    },
+    {
+     "level": 20,
+     "name": "Dirge of Annihilation",
+     "description": "Damage doubles. Removes all buffs, stuns all enemies for 1 round, and applies Bleed for 3 rounds.",
+     "bonus": {
+      "damageMult": 2,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 1,
+        "duration": 1
+       },
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "id": "song_of_ruin"
+  },
+  "corruption": {
+   "name": "Corruption",
+   "class": "warlock",
+   "unlockLevel": 1,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.8,
+   "mpCost": 8,
+   "statusEffects": [
+    {
+     "type": "poison",
+     "power": 6,
+     "duration": 4,
+     "chance": 1
+    }
+   ],
+   "effect": {
+    "corruptionDetonate": true,
+    "dotDuration": 4,
+    "dotPower": 6
+   },
+   "description": "Initial 80% Damage hit. Target takes Damage per round for 4 rounds. Re-casting instantly detonates all remaining DoT damage, then refreshes the status.",
+   "talents": [
+    {
+     "id": "cr_long",
+     "name": "Lingering Blight",
+     "desc": "Corruption duration extended by 2 rounds.",
+     "effect": {
+      "dotDuration": 2,
+      "statusEffects": [
+       {
+        "type": "poison",
+        "duration": 2,
+        "chance": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "cr_power",
+     "name": "Virulent Blight",
+     "desc": "DoT tick damage increases by 4.",
+     "effect": {
+      "dotPower": 4,
+      "statusEffects": [
+       {
+        "type": "poison",
+        "power": 4,
+        "chance": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "wl_imp",
+     "name": "Bound Imp",
+     "desc": "Summon a Bound Imp companion.",
+     "effect": {
+      "unlocksCompanion": "pet_imp"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Festering Corruption",
+     "description": "DoT tick damage increases to 10 and lasts 6 rounds. Detonation now hits 25% harder.",
+     "bonus": {
+      "dotDuration": 6,
+      "dotPower": 10,
+      "detonateMult": 1.25,
+      "statusEffects": [
+       {
+        "type": "poison",
+        "power": 10,
+        "duration": 6,
+        "chance": 1
+       }
+      ]
+     }
+    },
+    {
+     "level": 10,
+     "name": "Void Corruption",
+     "description": "DoT tick damage 14 / 8 rounds. Detonation deals double damage and reduces target healing by 50%.",
+     "bonus": {
+      "dotDuration": 8,
+      "dotPower": 14,
+      "detonateMult": 2,
+      "healingReduction": 0.5,
+      "statusEffects": [
+       {
+        "type": "poison",
+        "power": 14,
+        "duration": 8,
+        "chance": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "corruption"
+  },
+  "hellfire": {
+   "name": "Hellfire",
+   "class": "warlock",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "group",
+   "damageStat": "damage",
+   "damageMult": 1.6,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "power": 8,
+     "duration": 3,
+     "chance": 1
+    }
+   ],
+   "mpCost": 18,
+   "description": "Hellfire hits enemy group, applies Burn. Bypasses fire resistance.",
+   "talents": [
+    {
+     "id": "hf_burn",
+     "name": "Searing Flames",
+     "desc": "Burn deals 40% more damage per tick.",
+     "effect": {
+      "burnDmgMult": 1.4
+     }
+    },
+    {
+     "id": "hf_aoe",
+     "name": "Expanding Inferno",
+     "desc": "Hellfire hits 2 enemy groups.",
+     "effect": {
+      "aoe": "group2"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Infernal Hellfire",
+     "description": "Damage increases to 190% Damage. Hits all enemies. Burn deals 50% more damage.",
+     "bonus": {
+      "damageMult": 1.9,
+      "aoe": "all",
+      "burnDmgMult": 1.5
+     }
+    },
+    {
+     "level": 15,
+     "name": "Demonfire",
+     "description": "Damage increases to 260% Damage. All enemies. Burn deals double damage. Also applies a Curse reducing enemy damage by 30% for 3 rounds.",
+     "bonus": {
+      "damageMult": 2.6,
+      "aoe": "all",
+      "burnDmgMult": 2,
+      "dmgCurse": 0.3,
+      "curseDur": 3
+     }
+    }
+   ],
+   "id": "hellfire"
+  },
+  "soul_pact": {
+   "name": "Soul Pact",
+   "class": "warlock",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "selfDamagePct": 0.2,
+    "dmgBuff": 0.3,
+    "rounds": 3,
+    "duration": 3
+   },
+   "mpCost": 0,
+   "description": "Sacrifice 20% own HP to double all active DoT duration and damage.",
+   "talents": [
+    {
+     "id": "sp_cheap",
+     "name": "Hardened Pact",
+     "desc": "HP sacrifice reduced to 10%.",
+     "effect": {
+      "hpSacrifice": 0.1
+     }
+    },
+    {
+     "id": "sp_heal",
+     "name": "Feast on Pain",
+     "desc": "Caster heals for 50% of DoT damage dealt while pact is active.",
+     "effect": {
+      "dotLifesteal": 0.5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Blood Covenant",
+     "description": "HP sacrifice reduced to 10%. DoT duration and damage triple instead of double.",
+     "bonus": {
+      "hpSacrifice": 0.1,
+      "dotDurationMult": 3,
+      "dotDmgMult": 3
+     }
+    },
+    {
+     "level": 18,
+     "name": "Abyssal Pact",
+     "description": "No HP cost. All DoTs quadruple in damage and duration. Also adds a new stack of Corruption to each afflicted enemy.",
+     "bonus": {
+      "hpSacrifice": 0,
+      "dotDurationMult": 4,
+      "dotDmgMult": 4,
+      "addCorruptionStack": true
+     }
+    }
+   ],
+   "id": "soul_pact"
+  },
+  "void_rift": {
+   "name": "Void Rift",
+   "class": "warlock",
+   "unlockLevel": 15,
+   "type": "zone",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 0.7,
+   "effect": {
+    "stunChance": 0.2
+   },
+   "duration": 3,
+   "mpCost": 35,
+   "description": "Void rift under enemies for 3 rounds: damage + 20% stun chance each round.",
+   "talents": [
+    {
+     "id": "vr_long",
+     "name": "Widening Rift",
+     "desc": "Rift duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "vr_stun",
+     "name": "Collapsing Reality",
+     "desc": "Stun chance per round increases to 40%.",
+     "effect": {
+      "stunChance": 0.4
+     }
+    },
+    {
+     "id": "wl_demon",
+     "name": "Infernal Hound",
+     "desc": "Summon an Infernal Hound companion.",
+     "effect": {
+      "unlocksCompanion": "pet_demon"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Dimensional Rift",
+     "description": "Damage increases to 110% Damage per round. Lasts 4 rounds. Stun chance increases to 35%.",
+     "bonus": {
+      "damageMult": 1.1,
+      "duration": 4,
+      "stunChance": 0.35
+     }
+    },
+    {
+     "level": 20,
+     "name": "Tear in Reality",
+     "description": "Damage increases to 160% Damage per round, lasts 5 rounds, 50% stun chance, and pulls all enemies into a single group.",
+     "bonus": {
+      "damageMult": 1.6,
+      "duration": 5,
+      "stunChance": 0.5,
+      "pullToGroup": true
+     }
+    }
+   ],
+   "id": "void_rift"
+  },
+  "soul_curse": {
+   "name": "Soul Curse",
+   "class": "warlock",
+   "unlockLevel": 8,
+   "type": "debuff",
+   "target": "enemy",
+   "aoe": "single",
+   "mpCost": 20,
+   "statusEffects": [
+    {
+     "type": "curse",
+     "duration": 4,
+     "chance": 1,
+     "power": 10
+    }
+   ],
+   "effect": {
+    "applyCurse": true,
+    "curseDuration": 4,
+    "cursePower": 10
+   },
+   "description": "Apply a Curse to the target: reduces its damage output by 10%. When the cursed enemy dies the curse spreads to a random adjacent living enemy.",
+   "stackingMode": "global",
+   "talents": [
+    {
+     "id": "sc_strong",
+     "name": "Deepened Curse",
+     "desc": "Curse reduces damage by 20%.",
+     "effect": {
+      "cursePower": 20
+     }
+    },
+    {
+     "id": "sc_chain",
+     "name": "Chain Hex",
+     "desc": "Curse spreads to 2 enemies on death instead of 1.",
+     "effect": {
+      "curseSpreadCount": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 13,
+     "name": "Wither",
+     "description": "Curse now reduces damage by 20% and also applies Slow for 2 rounds.",
+     "bonus": {
+      "cursePower": 20,
+      "statusEffects": [
+       {
+        "type": "curse",
+        "duration": 4,
+        "chance": 1,
+        "power": 20
+       },
+       {
+        "type": "slow",
+        "duration": 2,
+        "chance": 1
+       }
+      ]
+     }
+    },
+    {
+     "level": 18,
+     "name": "Abyssal Blight",
+     "description": "Curse reduces damage by 30%, lasts 6 rounds, and spreads to 2 enemies on death.",
+     "bonus": {
+      "cursePower": 30,
+      "curseDuration": 6,
+      "curseSpreadCount": 2,
+      "statusEffects": [
+       {
+        "type": "curse",
+        "duration": 6,
+        "chance": 1,
+        "power": 30
+       }
+      ]
+     }
+    }
+   ],
+   "id": "soul_curse"
+  },
+  "demon_bolt": {
+   "name": "Demon Bolt",
+   "class": "demon_hunter",
+   "unlockLevel": 1,
+   "type": "ranged",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.4,
+   "bonusVsDemon": 1.5,
+   "effect": {
+    "bonusVsDemon": 0.5
+   },
+   "mpCost": 8,
+   "description": "Hybrid bolt for 140% weapon damage — weapon scaling (light with bow or dagger; magic with wand or orb). +50% vs demons.",
+   "talents": [
+    {
+     "id": "db_demon",
+     "name": "Demonbane",
+     "desc": "Bonus vs demons increases by +40%.",
+     "effect": {
+      "bonusVsDemon": 0.4
+     }
+    },
+    {
+     "id": "db_pierce",
+     "name": "Piercing Shot",
+     "desc": "Demon Bolt ignores 30% armor and MR.",
+     "effect": {
+      "armorPen": 0.3,
+      "mrPen": 0.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Fel Bolt",
+     "description": "Damage increases to 150% weapon. Bonus vs demons increases to +100%. Applies Burn for 2 rounds.",
+     "bonus": {
+      "damageMult": 1.32,
+      "bonusVsDemon": 2,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 0.8,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 10,
+     "name": "Void Bolt",
+     "description": "Damage increases to 220% weapon. +150% vs demons. Guaranteed Burn 3 rounds. Reduces target magic resistance by 25% for 2 rounds.",
+     "bonus": {
+      "damageMult": 1.94,
+      "bonusVsDemon": 2.5,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 3
+       }
+      ],
+      "mrDebuff": 0.25,
+      "mrDebuffDur": 2
+     }
+    }
+   ],
+   "id": "demon_bolt"
+  },
+  "glaive_toss": {
+   "name": "Glaive Toss",
+   "class": "demon_hunter",
+   "unlockLevel": 5,
+   "type": "ranged",
+   "aoe": "row",
+   "damageStat": "damage",
+   "damageMult": 0.79,
+   "statusEffects": [
+    {
+     "type": "bleed",
+     "power": 6,
+     "duration": 3,
+     "chance": 0.7
+    }
+   ],
+   "mpCost": 15,
+   "description": "Spinning glaive hits all enemies in a row, applying Bleed.",
+   "talents": [
+    {
+     "id": "gt_return",
+     "name": "Return Throw",
+     "desc": "Glaive returns and hits the row a second time at 60% damage.",
+     "effect": {
+      "hits": 2,
+      "returnMult": 0.6
+     }
+    },
+    {
+     "id": "gt_bleed",
+     "name": "Jagged Edge",
+     "desc": "Bleed duration extended by 2 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Serrated Glaive",
+     "description": "Damage increases to 130% Light. Glaive bounces back hitting the row twice. Bleed duration increases to 4 rounds.",
+     "bonus": {
+      "damageMult": 1.14,
+      "hits": 2,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 4
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Twin Glaives",
+     "description": "Fires two glaives simultaneously at 160% Light each, covering two rows. Bleed guaranteed for 5 rounds.",
+     "bonus": {
+      "damageMult": 1.41,
+      "glaiveCount": 2,
+      "aoe": "row2",
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 5
+       }
+      ]
+     }
+    }
+   ],
+   "id": "glaive_toss"
+  },
+  "fel_sight": {
+   "name": "Fel Sight",
+   "class": "demon_hunter",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "critBonus": 0.25,
+    "hitBonus": 15,
+    "rounds": 4,
+    "duration": 4
+   },
+   "mpCost": 20,
+   "description": "+25% hit/dodge, immune to Blind/Confuse for 3 rounds.",
+   "talents": [
+    {
+     "id": "fs_long",
+     "name": "Eternal Sight",
+     "desc": "Duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "fs_crit",
+     "name": "Weakpoint Seer",
+     "desc": "Also grants +20% critical chance.",
+     "effect": {
+      "critChance": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "True Sight",
+     "description": "+40% hit/dodge, immune to all negative vision effects, lasts 4 rounds. Also grants +20% damage.",
+     "bonus": {
+      "hitBonus": 0.4,
+      "dodgeBonus": 0.4,
+      "dmgBuff": 0.2,
+      "duration": 4,
+      "immuneBlind": true,
+      "immuneConfuse": true
+     }
+    },
+    {
+     "level": 18,
+     "name": "Demonic Vision",
+     "description": "+60% hit/dodge, +35% damage, immune to Blind/Confuse/Stun, lasts 5 rounds. Attacks reveal hidden weaknesses reducing enemy armor by 20%.",
+     "bonus": {
+      "hitBonus": 0.6,
+      "dodgeBonus": 0.6,
+      "dmgBuff": 0.35,
+      "duration": 5,
+      "immuneBlind": true,
+      "immuneConfuse": true,
+      "immuneStun": true,
+      "armorDebuffOnHit": 0.2
+     }
+    }
+   ],
+   "id": "fel_sight"
+  },
+  "vengeance": {
+   "name": "Vengeance",
+   "class": "demon_hunter",
+   "unlockLevel": 15,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.88,
+   "stackBonusPerDeath": 0.15,
+   "effect": {
+    "dmgBuff": 0.15
+   },
+   "mpCost": 20,
+   "description": "Stacks 15% damage per fallen ally. Release all stacks in one strike.",
+   "talents": [
+    {
+     "id": "vg_stack",
+     "name": "Unbroken Rage",
+     "desc": "Stack bonus per fallen ally increases to 25%.",
+     "effect": {
+      "stackBonusPerDeath": 0.1
+     }
+    },
+    {
+     "id": "vg_heal",
+     "name": "Blood for Blood",
+     "desc": "Vengeance heals the caster for 30% of damage dealt.",
+     "effect": {
+      "lifesteal": 0.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Burning Vengeance",
+     "description": "Stack bonus increases to 25% per fallen ally. Strike also applies Burn for 3 rounds and stuns for 1 round.",
+     "bonus": {
+      "stackBonusPerDeath": 0.25,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 3
+       },
+       {
+        "type": "stun",
+        "chance": 0.7,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "level": 20,
+     "name": "Absolute Vengeance",
+     "description": "Stack bonus increases to 40% per fallen ally. Strike hits all enemies. Applies Burn, Bleed, and Daze. Stacks are never lost between battles.",
+     "bonus": {
+      "stackBonusPerDeath": 0.4,
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 4
+       },
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 4
+       },
+       {
+        "type": "dazed",
+        "chance": 0.8,
+        "duration": 2
+       }
+      ],
+      "persistStacks": true
+     }
+    }
+   ],
+   "id": "vengeance"
+  },
+  "scrounge": {
+   "name": "Lucky Strike",
+   "class": "scavenger",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.9,
+   "mpCost": 0,
+   "statusEffects": [],
+   "effect": {
+    "randomStatus": [
+     "poison",
+     "bleed",
+     "stun"
+    ],
+    "randomStatusChance": 0.5,
+    "randomStatusDuration": 2
+   },
+   "description": "Improvised strike — 50% chance to inflict a random status (poison, bleed, or stun) for 2 rounds.",
+   "talents": [
+    {
+     "id": "sg_chance",
+     "name": "Keen Eye",
+     "desc": "Random-status chance increases by 25%.",
+     "effect": {
+      "randomStatusChance": 0.25
+     }
+    },
+    {
+     "id": "sg_double",
+     "name": "Double Dip",
+     "desc": "20% chance to roll two statuses instead of one.",
+     "effect": {
+      "randomStatusRolls": 2,
+      "randomStatusRollChance": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Expert Scrounge",
+     "description": "Damage increases to 130% Light. Status chance rises to 85%.",
+     "bonus": {
+      "damageMult": 1.3,
+      "randomStatusChance": 0.85
+     }
+    },
+    {
+     "level": 10,
+     "name": "Treasure Hunter",
+     "description": "Damage increases to 220% Light. Guaranteed random status for 3 rounds.",
+     "bonus": {
+      "damageMult": 2.2,
+      "randomStatusChance": 1,
+      "randomStatusDuration": 3
+     }
+    }
+   ],
+   "id": "scrounge"
+  },
+  "thrown_junk": {
+   "name": "Thrown Junk",
+   "class": "scavenger",
+   "unlockLevel": 5,
+   "type": "ranged",
+   "aoe": "group",
+   "damageStat": "damage",
+   "damageMult": 0.7,
+   "statusEffects": [
+    {
+     "type": "stun",
+     "power": 1,
+     "duration": 1,
+     "chance": 0.3
+    }
+   ],
+   "mpCost": 5,
+   "description": "Hurl debris at an enemy group; 30% stun chance.",
+   "talents": [
+    {
+     "id": "tj_stun",
+     "name": "Heavy Scrap",
+     "desc": "Stun chance increases to 55%.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.25,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "tj_wide",
+     "name": "Wild Throw",
+     "desc": "Hits all enemies instead of one group.",
+     "effect": {
+      "aoe": "all"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Barrage of Debris",
+     "description": "Damage increases to 110% Light hitting all enemies. 50% chance to Daze (-25% hit) for 2 rounds.",
+     "bonus": {
+      "damageMult": 1.1,
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "dazed",
+        "chance": 0.5,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Junk Avalanche",
+     "description": "Damage increases to 160% Light on all enemies. 70% chance to Daze. Also applies Bleed for 2 rounds.",
+     "bonus": {
+      "damageMult": 1.6,
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "dazed",
+        "chance": 0.7,
+        "duration": 2
+       },
+       {
+        "type": "bleed",
+        "chance": 0.6,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "id": "thrown_junk"
+  },
+  "makeshift_bomb": {
+   "name": "Makeshift Bomb",
+   "class": "scavenger",
+   "unlockLevel": 10,
+   "type": "ranged",
+   "aoe": "group",
+   "damageStat": "damage",
+   "damageMult": 1,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "power": 5,
+     "duration": 2,
+     "chance": 1
+    }
+   ],
+   "mpCost": 15,
+   "description": "Improvised explosive: weapon damage with Burn to a group.",
+   "talents": [
+    {
+     "id": "mb_boom",
+     "name": "Bigger Boom",
+     "desc": "Damage increased by 35%.",
+     "effect": {
+      "damageMult": 0.35
+     }
+    },
+    {
+     "id": "mb_shrap",
+     "name": "Shrapnel Load",
+     "desc": "Also applies Bleed for 3 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.9,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Improved Explosive",
+     "description": "Damage increases to 150% weapon, hits all enemies, Burn duration increases to 4 rounds.",
+     "bonus": {
+      "damageMult": 1.5,
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 4
+       }
+      ]
+     }
+    },
+    {
+     "level": 18,
+     "name": "Doomsday Device",
+     "description": "Damage increases to 220% weapon on all enemies. Burn guaranteed for 5 rounds. Also applies Poison for 3 rounds.",
+     "bonus": {
+      "damageMult": 2.2,
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 5
+       },
+       {
+        "type": "poison",
+        "chance": 0.8,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "id": "makeshift_bomb"
+  },
+  "jackpot": {
+   "name": "Big Score",
+   "class": "scavenger",
+   "unlockLevel": 15,
+   "type": "ranged",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 3,
+   "mpCost": 20,
+   "effect": {
+    "variance": 0.8
+   },
+   "description": "A wild gambling strike: 300% Light with ±80% variance — could crit for 5.4× or whiff for 0.6×.",
+   "talents": [
+    {
+     "id": "jp_chance",
+     "name": "Fortune Favors",
+     "desc": "Floor raised — minimum outcome +25%.",
+     "effect": {
+      "varianceFloor": 0.25
+     }
+    },
+    {
+     "id": "jp_gold",
+     "name": "Coin Purse",
+     "desc": "Base damage increases by 40%.",
+     "effect": {
+      "damageMult": 0.4
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Loaded Dice",
+     "description": "Damage increases to 320% Light. Variance floor raised to 0.75× (no more total whiffs).",
+     "bonus": {
+      "damageMult": 3.2,
+      "varianceFloor": 0.75
+     }
+    },
+    {
+     "level": 20,
+     "name": "Windfall",
+     "description": "Damage increases to 420% Light. Variance ceiling raised to 2.0× (up to 840% Light on a hot roll).",
+     "bonus": {
+      "damageMult": 4.2,
+      "varianceCeiling": 2
+     }
+    }
+   ],
+   "id": "jackpot"
+  },
+  "flourish": {
+   "name": "Flourish",
+   "class": "swashbuckler",
+   "unlockLevel": 5,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1,
+   "buildsFlairStacks": 3,
+   "mpCost": 8,
+   "description": "3 rapid strikes, each building Flair stacks for Grandeur.",
+   "talents": [
+    {
+     "id": "fl_extra",
+     "name": "Quick Hands",
+     "desc": "Adds 1 extra strike.",
+     "effect": {
+      "strikeCount": 1
+     }
+    },
+    {
+     "id": "fl_flair",
+     "name": "Flashy Style",
+     "desc": "Each strike builds +1 additional Flair stack.",
+     "effect": {
+      "buildsFlairStacks": 1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Dazzling Flourish",
+     "description": "Strikes increase to 5 and each deals 120% Light. Builds 5 Flair stacks. Applies Bleed on each hit.",
+     "bonus": {
+      "strikeCount": 5,
+      "damageMult": 1.2,
+      "buildsFlairStacks": 5,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.5,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Blinding Flourish",
+     "description": "Strikes increase to 7 at 150% Light each. Builds 7 Flair stacks. Applies Bleed and Stun chance on each hit.",
+     "bonus": {
+      "strikeCount": 7,
+      "damageMult": 1.5,
+      "buildsFlairStacks": 7,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.7,
+        "duration": 3
+       },
+       {
+        "type": "stun",
+        "chance": 0.25,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "flourish"
+  },
+  "taunt": {
+   "name": "Taunt",
+   "class": "swashbuckler",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "enemy",
+   "effect": {
+    "tauntedBy": "caster",
+    "rounds": 2,
+    "duration": 2
+   },
+   "mpCost": 15,
+   "description": "Force one enemy to target only you for 2 rounds; +30% dodge vs them.",
+   "talents": [
+    {
+     "id": "tn_long",
+     "name": "Enduring Mockery",
+     "desc": "Taunt duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "tn_thorns",
+     "name": "Thorned Pride",
+     "desc": "Taunted enemies take 20% of their own damage back on each attack.",
+     "effect": {
+      "thorns": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Mocking Taunt",
+     "description": "Taunts 2 enemies for 3 rounds. Dodge bonus increases to 50% vs taunted enemies. Also reduces their attack by 20%.",
+     "bonus": {
+      "targets": 2,
+      "duration": 3,
+      "dodgeBonus": 0.5,
+      "atkDebuff": 0.2
+     }
+    },
+    {
+     "level": 18,
+     "name": "Grand Mockery",
+     "description": "Taunts all enemies for 3 rounds. Dodge bonus 70% vs all taunted. Taunted enemies deal 30% less damage.",
+     "bonus": {
+      "aoe": "all",
+      "duration": 3,
+      "dodgeBonus": 0.7,
+      "dmgDebuff": 0.3
+     }
+    }
+   ],
+   "id": "taunt"
+  },
+  "grandeur": {
+   "name": "Grandeur",
+   "class": "swashbuckler",
+   "unlockLevel": 15,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "consumesFlairStacks": true,
+   "mpCost": 0,
+   "description": "Consume all Flair stacks for weapon × stacks damage + random debuffs per stack.",
+   "talents": [
+    {
+     "id": "gr_keep",
+     "name": "Showman's Reserve",
+     "desc": "1 Flair stack is retained after Grandeur is used.",
+     "effect": {
+      "keepStacks": 1
+     }
+    },
+    {
+     "id": "gr_power",
+     "name": "Theatrical Finish",
+     "desc": "Damage per stack increased by 30%.",
+     "effect": {
+      "stackDmgMult": 1.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Spectacular Grandeur",
+     "description": "Damage per stack increases by 50%. Hits adjacent target at 75% power. Each stack applies a guaranteed debuff.",
+     "bonus": {
+      "stackDmgMult": 1.5,
+      "aoe": "adjacent",
+      "guaranteedDebuffPerStack": true
+     }
+    },
+    {
+     "level": 20,
+     "name": "Legendary Grandeur",
+     "description": "Damage per stack doubles. Hits all enemies at 80% power. Minimum 3 guaranteed debuffs regardless of stacks. Cannot miss.",
+     "bonus": {
+      "stackDmgMult": 2,
+      "aoe": "all",
+      "aoeReduction": 0.8,
+      "minDebuffs": 3,
+      "neverMiss": true
+     }
+    }
+   ],
+   "id": "grandeur"
+  },
+  "dragon_claw": {
+   "name": "Dragon Claw",
+   "class": "dragon_knight",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "adjacent",
+   "damageStat": "damage",
+   "damageMult": 1.1,
+   "armorPen": 0.2,
+   "effect": {
+    "armorPen": 6
+   },
+   "mpCost": 0,
+   "description": "Savage hybrid strike — weapon scaling (heavy with axe or hammer; light with sword or dagger). Ignores 20% armor; hits adjacent enemies.",
+   "talents": [
+    {
+     "id": "dc_pen",
+     "name": "Sundering Claw",
+     "desc": "Armor penetration increased to 40%.",
+     "effect": {
+      "armorPen": 0.2
+     }
+    },
+    {
+     "id": "dc_bleed",
+     "name": "Rending Talons",
+     "desc": "Applies Bleed for 2 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.8,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Rending Claw",
+     "description": "Damage increases to 160% weapon. Armor penetration increases to 40%. Applies Bleed for 3 rounds.",
+     "bonus": {
+      "damageMult": 0.5,
+      "armorPen": 0.4,
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.8,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 10,
+     "name": "Dragon's Fury",
+     "description": "Damage increases to 220% weapon. Ignores 60% armor. Hits all enemies in row. Guaranteed Bleed for 4 rounds.",
+     "bonus": {
+      "damageMult": 0.6,
+      "armorPen": 0.6,
+      "aoe": "row",
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 4
+       }
+      ]
+     }
+    }
+   ],
+   "id": "dragon_claw"
+  },
+  "breath_weapon": {
+   "name": "Breath Weapon",
+   "class": "dragon_knight",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "group",
+   "damageStat": "damage",
+   "damageMult": 1.3,
+   "mpCost": 20,
+   "description": "Hybrid breath — weapon scaling (heavy with axe or hammer; magic with staff or orb). Cone of fire/ice/lightning hitting one group; element chosen at class creation.",
+   "talents": [
+    {
+     "id": "bw_wider",
+     "name": "Expansive Maw",
+     "desc": "Breath hits 2 enemy groups.",
+     "effect": {
+      "aoe": "group2"
+     }
+    },
+    {
+     "id": "bw_status",
+     "name": "Elemental Surge",
+     "desc": "Doubles the chance of element-specific status effects.",
+     "effect": {
+      "elementStatusMult": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Devastating Breath",
+     "description": "Damage increases to 190% weapon. Covers two enemy groups. Element-specific status effect chance doubles.",
+     "bonus": {
+      "damageMult": 0.6,
+      "aoe": "group2",
+      "elementStatusMult": 2
+     }
+    },
+    {
+     "level": 15,
+     "name": "Cataclysmic Breath",
+     "description": "Damage increases to 270% weapon. Hits all enemies. Element-specific effect guaranteed. MP cost reduced by 8.",
+     "bonus": {
+      "damageMult": 0.8,
+      "aoe": "all",
+      "elementStatusGuaranteed": true,
+      "mpCost": -8
+     }
+    }
+   ],
+   "id": "breath_weapon"
+  },
+  "dragon_scales": {
+   "name": "Dragon Scales",
+   "class": "dragon_knight",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "armorBonus": 25,
+    "magicResistBonus": 15,
+    "rounds": 5,
+    "duration": 5
+   },
+   "mpCost": 20,
+   "description": "30% damage reduction + element immunity for 3 rounds.",
+   "talents": [
+    {
+     "id": "ds_long",
+     "name": "Enduring Scales",
+     "desc": "Duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "ds_reflect",
+     "name": "Reflective Hide",
+     "desc": "Reflects 15% of damage taken back to attacker.",
+     "effect": {
+      "reflect": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Hardened Scales",
+     "description": "Damage reduction increases to 50%. Duration extends to 4 rounds. Also reflects 20% of physical damage.",
+     "bonus": {
+      "dmgReduct": 0.5,
+      "duration": 4,
+      "reflect": 0.2
+     }
+    },
+    {
+     "level": 18,
+     "name": "Draconic Aegis",
+     "description": "Damage reduction increases to 70%. Duration extends to 5 rounds. Reflects 35% of all damage. Extends element immunity to the entire party.",
+     "bonus": {
+      "dmgReduct": 0.7,
+      "duration": 5,
+      "reflect": 0.35,
+      "elementImmunityParty": true
+     }
+    }
+   ],
+   "id": "dragon_scales"
+  },
+  "draconic_fury": {
+   "name": "Draconic Fury",
+   "class": "dragon_knight",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "dmgBuff": 0.3,
+    "rounds": 1,
+    "duration": 1,
+    "extraAction": true
+   },
+   "mpCost": 35,
+   "description": "All attacks become group AoE, +50% damage for 2 rounds. Cannot be Stunned.",
+   "talents": [
+    {
+     "id": "df_long",
+     "name": "Primal Endurance",
+     "desc": "Duration extended by 1 round.",
+     "effect": {
+      "duration": 1
+     }
+    },
+    {
+     "id": "df_power",
+     "name": "Ancient Wrath",
+     "desc": "Damage bonus increased by 25%.",
+     "effect": {
+      "dmgBuff": 0.25
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 17,
+     "name": "Primal Fury",
+     "description": "+80% damage and all attacks become group AoE for 3 rounds. Immune to Stun and Slow.",
+     "bonus": {
+      "dmgBuff": 0.8,
+      "duration": 3,
+      "immuneStun": true,
+      "immuneSlow": true
+     }
+    },
+    {
+     "level": 20,
+     "name": "Ascended Dragon",
+     "description": "+120% damage and all attacks hit all enemies for 4 rounds. Immune to all crowd control. Breath Weapon MP cost reduced to 0.",
+     "bonus": {
+      "dmgBuff": 1.2,
+      "aoe": "all",
+      "duration": 4,
+      "immuneCC": true,
+      "breathWeaponFree": true
+     }
+    }
+   ],
+   "id": "draconic_fury"
+  },
+  "chain_lightning": {
+   "name": "Chain Lightning",
+   "class": "stormcaller",
+   "unlockLevel": 1,
+   "type": "magic",
+   "aoe": "chain",
+   "damageStat": "damage",
+   "damageMult": 1.3,
+   "mpCost": 15,
+   "description": "Bolt leaps to 3 targets for 130% Damage.",
+   "talents": [
+    {
+     "id": "cl_chain",
+     "name": "Conductive Arc",
+     "desc": "Chain Lightning jumps to 2 additional targets.",
+     "effect": {
+      "chainTargets": 2
+     }
+    },
+    {
+     "id": "cl_shock",
+     "name": "Shocking Finish",
+     "desc": "Final chain target is Stunned for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.8,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "sc_elemental",
+     "name": "Lightning Elemental",
+     "desc": "Summon a Lightning Elemental companion.",
+     "effect": {
+      "unlocksCompanion": "pet_lightning_elemental"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Forked Bolt",
+     "description": "Chains to 5 targets.",
+     "bonus": {
+      "targets": 5
+     }
+    },
+    {
+     "level": 10,
+     "name": "Storm Surge",
+     "description": "200% Damage and applies Shock (stun 1 round).",
+     "bonus": {
+      "damageMult": 2,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.5,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "chain_lightning"
+  },
+  "static_field": {
+   "name": "Static Field",
+   "class": "stormcaller",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 0.4,
+   "mpCost": 20,
+   "statusEffects": [
+    {
+     "type": "slow",
+     "power": 0.5,
+     "duration": 2,
+     "chance": 1
+    }
+   ],
+   "description": "Current arcs across all enemies dealing 40% Damage and reducing their speed.",
+   "talents": [
+    {
+     "id": "sf_power",
+     "name": "Overcharged Field",
+     "desc": "Damage increased by 30%.",
+     "effect": {
+      "damageMult": 0.3
+     }
+    },
+    {
+     "id": "sf_slow",
+     "name": "Deep Slow",
+     "desc": "Speed reduction amount doubled.",
+     "effect": {
+      "slowMult": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Magnetic Pulse",
+     "description": "Double damage; pulls enemies closer (adjacent retarget).",
+     "bonus": {
+      "damageMult": 1
+     }
+    },
+    {
+     "level": 15,
+     "name": "Overcharge",
+     "description": "Also applies Shock to all hit enemies.",
+     "bonus": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.3,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "static_field"
+  },
+  "thunder_ring": {
+   "name": "Thunder Ring",
+   "class": "stormcaller",
+   "unlockLevel": 10,
+   "type": "magic",
+   "aoe": "adjacent2",
+   "damageStat": "damage",
+   "damageMult": 1.4,
+   "mpCost": 30,
+   "description": "Ring of thunder centered on self hits adjacent enemies for 140% Damage.",
+   "talents": [
+    {
+     "id": "tr_stun",
+     "name": "Thunderclap",
+     "desc": "40% chance to stun hit enemies for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.4,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "tr_wide",
+     "name": "Rolling Thunder",
+     "desc": "Ring extends to cover all enemies.",
+     "effect": {
+      "aoe": "all"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Expanding Ring",
+     "description": "Radius grows; hits whole enemy row.",
+     "bonus": {
+      "aoe": "row"
+     }
+    },
+    {
+     "level": 20,
+     "name": "Cataclysm",
+     "description": "260% Damage and applies Burn 2 rounds.",
+     "bonus": {
+      "damageMult": 2.6,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "id": "thunder_ring"
+  },
+  "tempest": {
+   "name": "Tempest",
+   "class": "stormcaller",
+   "unlockLevel": 15,
+   "type": "magic",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 1.6,
+   "mpCost": 50,
+   "description": "Unleash a storm that strikes every enemy for 160% Damage.",
+   "talents": [
+    {
+     "id": "tp_power",
+     "name": "Howling Gale",
+     "desc": "Tempest damage increased by 40%.",
+     "effect": {
+      "damageMult": 0.4
+     }
+    },
+    {
+     "id": "tp_cheap",
+     "name": "Eye of the Storm",
+     "desc": "Reduces MP cost by 15.",
+     "effect": {
+      "mpCost": -15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Eye of the Storm",
+     "description": "300% Damage, applies Shock to 3 random enemies.",
+     "bonus": {
+      "damageMult": 3
+     }
+    }
+   ],
+   "id": "tempest"
+  },
+  "rejuvenation": {
+   "name": "Rejuvenation",
+   "class": "druid",
+   "unlockLevel": 1,
+   "type": "heal",
+   "target": "ally",
+   "healStat": "damage",
+   "healMult": 1.2,
+   "mpCost": 12,
+   "effect": {
+    "hpRegen": 6,
+    "regenRounds": 3
+   },
+   "description": "Instant heal + Regen 1× Damage / round for 3 rounds.",
+   "talents": [
+    {
+     "id": "rj_party",
+     "name": "Blooming Grove",
+     "desc": "Regen applies to the whole party.",
+     "effect": {
+      "partyRegen": true
+     }
+    },
+    {
+     "id": "rj_long",
+     "name": "Everbloom",
+     "desc": "Regen duration extended by 20%.",
+     "effect": {
+      "durationMult": 1.2
+     }
+    },
+    {
+     "id": "dr_wolf",
+     "name": "Forest Wolf",
+     "desc": "Summon a Forest Wolf companion.",
+     "effect": {
+      "unlocksCompanion": "pet_wolf"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Wild Growth",
+     "description": "2× Damage regen for 4 rounds.",
+     "bonus": {
+      "regenMult": 2,
+      "regenDur": 4
+     }
+    },
+    {
+     "level": 10,
+     "name": "Eternal Spring",
+     "description": "Heals whole party and extends regen to 5 rounds.",
+     "bonus": {
+      "target": "party",
+      "regenDur": 5
+     }
+    }
+   ],
+   "id": "rejuvenation"
+  },
+  "entangle": {
+   "name": "Entangle",
+   "class": "druid",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "row",
+   "damageStat": "damage",
+   "damageMult": 0.8,
+   "mpCost": 18,
+   "statusEffects": [
+    {
+     "type": "stun",
+     "power": 1,
+     "duration": 1,
+     "chance": 0.6
+    }
+   ],
+   "description": "Vines root a row, 80% Damage and Stun 1 round.",
+   "talents": [
+    {
+     "id": "en_long",
+     "name": "Deep Roots",
+     "desc": "Stun duration extended by 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 1,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "en_thorn",
+     "name": "Thorned Vines",
+     "desc": "Also applies Bleed for 3 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.9,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Thorn Wall",
+     "description": "Root for 1 round; vines deal Bleed for 3 rounds (extended bleed compensates for shorter root).",
+     "bonus": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 1,
+        "duration": 1
+       },
+       {
+        "type": "bleed",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    },
+    {
+     "level": 15,
+     "name": "Primal Grove",
+     "description": "Hits all enemies.",
+     "bonus": {
+      "aoe": "all"
+     }
+    }
+   ],
+   "id": "entangle"
+  },
+  "wild_shape": {
+   "name": "Wild Shape",
+   "class": "druid",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "dmgBuff": 0.5,
+    "dmgReduct": 0.2,
+    "duration": 4
+   },
+   "mpCost": 25,
+   "description": "Shapeshift: +50% damage and −20% incoming for 4 rounds.",
+   "talents": [
+    {
+     "id": "ws_long",
+     "name": "Feral Stamina",
+     "desc": "Duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "ws_regen",
+     "name": "Bestial Vigor",
+     "desc": "Regenerates 10% max HP per round while active.",
+     "effect": {
+      "regenPct": 0.1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Dire Beast",
+     "description": "+80% damage, −30% incoming.",
+     "bonus": {
+      "dmgBuff": 0.8,
+      "dmgReduct": 0.3
+     }
+    }
+   ],
+   "id": "wild_shape"
+  },
+  "natures_wrath": {
+   "name": "Nature's Wrath",
+   "class": "druid",
+   "unlockLevel": 15,
+   "type": "magic",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 2,
+   "mpCost": 45,
+   "statusEffects": [
+    {
+     "type": "bleed",
+     "power": 5,
+     "duration": 3,
+     "chance": 0.8
+    }
+   ],
+   "description": "The wilds strike back — 200% Damage to all enemies, Bleed 3 rounds.",
+   "talents": [
+    {
+     "id": "nw_power",
+     "name": "Primal Fury",
+     "desc": "Damage increased by 30%.",
+     "effect": {
+      "damageMult": 0.3
+     }
+    },
+    {
+     "id": "nw_root",
+     "name": "Entangling Growth",
+     "desc": "Also roots affected enemies for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "root",
+        "chance": 0.8,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "dr_bear",
+     "name": "Cave Bear",
+     "desc": "Summon a Cave Bear companion.",
+     "effect": {
+      "unlocksCompanion": "pet_bear"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "World-Tree Judgment",
+     "description": "280% Damage, heals party for 20% max HP.",
+     "bonus": {
+      "damageMult": 2.8,
+      "partyHealPct": 0.2
+     }
+    }
+   ],
+   "id": "natures_wrath"
+  },
+  "foresight": {
+   "name": "Foresight",
+   "class": "oracle",
+   "unlockLevel": 1,
+   "type": "buff",
+   "target": "ally",
+   "effect": {
+    "barrier": 40,
+    "duration": 2
+   },
+   "mpCost": 12,
+   "description": "Grant an ally a 40 HP barrier for 2 rounds.",
+   "talents": [
+    {
+     "id": "fs_party",
+     "name": "Shared Vision",
+     "desc": "Barrier affects whole party (20 HP each).",
+     "effect": {
+      "target": "party",
+      "barrier": 20
+     }
+    },
+    {
+     "id": "fs_long",
+     "name": "Lingering Ward",
+     "desc": "Barrier duration extended by 20%.",
+     "effect": {
+      "durationMult": 1.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Greater Barrier",
+     "description": "Barrier value 70 HP.",
+     "bonus": {
+      "barrier": 70
+     }
+    },
+    {
+     "level": 10,
+     "name": "Providence",
+     "description": "Party-wide 40 HP barrier.",
+     "bonus": {
+      "target": "party",
+      "barrier": 40
+     }
+    }
+   ],
+   "id": "foresight"
+  },
+  "prophecy": {
+   "name": "Prophecy",
+   "class": "oracle",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dodgeBuff": 25,
+    "duration": 3
+   },
+   "mpCost": 18,
+   "description": "Party gains +25 Dodge for 3 rounds.",
+   "talents": [
+    {
+     "id": "pr_more",
+     "name": "Greater Prophecy",
+     "desc": "Dodge bonus increased by 15.",
+     "effect": {
+      "dodgeBuff": 15
+     }
+    },
+    {
+     "id": "pr_long",
+     "name": "Lasting Vision",
+     "desc": "Duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Perfect Sight",
+     "description": "+40 Dodge and +10 Hit.",
+     "bonus": {
+      "dodgeBuff": 40,
+      "hitBuff": 10
+     }
+    }
+   ],
+   "id": "prophecy"
+  },
+  "fate_weave": {
+   "name": "Fate Weave",
+   "class": "oracle",
+   "unlockLevel": 10,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 2.51,
+   "mpCost": 22,
+   "description": "Rewrite a target’s fate: 251% Damage and converts to heal for weakest ally.",
+   "talents": [
+    {
+     "id": "fw_power",
+     "name": "Threaded Destiny",
+     "desc": "Damage increased by 40%.",
+     "effect": {
+      "damageMult": 0.4
+     }
+    },
+    {
+     "id": "fw_split",
+     "name": "Shared Fate",
+     "desc": "Heal is split across all party members.",
+     "effect": {
+      "splitHeal": true
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Twin Fates",
+     "description": "Affects 2 targets.",
+     "bonus": {
+      "targets": 2
+     }
+    }
+   ],
+   "id": "fate_weave"
+  },
+  "ascendance": {
+   "name": "Ascendance",
+   "class": "oracle",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgBuff": 0.3,
+    "dmgReduct": 0.3,
+    "duration": 4
+   },
+   "mpCost": 50,
+   "description": "Party transcends for 4 rounds: +30% damage, −30% incoming.",
+   "talents": [
+    {
+     "id": "as_long",
+     "name": "Eternal Ascension",
+     "desc": "Duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "as_heal",
+     "name": "Blessed Transcendence",
+     "desc": "Party also regenerates 15% max HP per round.",
+     "effect": {
+      "regenPct": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Eternal Grace",
+     "description": "+50% damage, −40% incoming, full mana regen.",
+     "bonus": {
+      "dmgBuff": 0.5,
+      "dmgReduct": 0.4
+     }
+    }
+   ],
+   "id": "ascendance"
+  },
+  "rally_action": {
+   "name": "Rally Action",
+   "class": "tactician",
+   "unlockLevel": 1,
+   "type": "buff",
+   "target": "ally",
+   "effect": {
+    "extraAction": 1
+   },
+   "mpCost": 15,
+   "description": "Grant an ally an immediate extra action.",
+   "talents": [
+    {
+     "id": "ra_cheap",
+     "name": "Tactical Precision",
+     "desc": "Reduces MP cost by 6.",
+     "effect": {
+      "mpCost": -6
+     }
+    },
+    {
+     "id": "ra_dmg",
+     "name": "Inspired Action",
+     "desc": "The granted extra action deals +25% damage.",
+     "effect": {
+      "dmgBuff": 0.25
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Inspired Charge",
+     "description": "Ally also gains +30% damage on the extra action.",
+     "bonus": {
+      "dmgBuff": 0.3
+     }
+    },
+    {
+     "level": 10,
+     "name": "Tactical Onslaught",
+     "description": "Grants extra actions to 2 allies.",
+     "bonus": {
+      "targets": 2
+     }
+    }
+   ],
+   "id": "rally_action"
+  },
+  "feint": {
+   "name": "Feint",
+   "class": "tactician",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.2,
+   "mpCost": 12,
+   "description": "120% Light damage and forces target to the back of turn order.",
+   "talents": [
+    {
+     "id": "ft_power",
+     "name": "Precise Feint",
+     "desc": "Damage increased by 30%.",
+     "effect": {
+      "damageMult": 0.3
+     }
+    },
+    {
+     "id": "ft_conf",
+     "name": "Misdirection",
+     "desc": "Target is Confused for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "confuse",
+        "chance": 0.8,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Expose Weakness",
+     "description": "Target also takes +25% damage for 2 rounds.",
+     "bonus": {
+      "dmgAmp": 0.25,
+      "duration": 2
+     }
+    }
+   ],
+   "id": "feint"
+  },
+  "reposition": {
+   "name": "Reposition",
+   "class": "tactician",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dodgeBuff": 15,
+    "dmgReduct": 0.15,
+    "duration": 2
+   },
+   "mpCost": 20,
+   "description": "Shift the formation: party gains +15 Dodge and −15% damage taken for 2 rounds.",
+   "talents": [
+    {
+     "id": "rp_long",
+     "name": "Practiced Drill",
+     "desc": "Duration extended by 2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "rp_dodge",
+     "name": "Evasive Formation",
+     "desc": "Dodge bonus increased by 10.",
+     "effect": {
+      "dodgeBuff": 10
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Battle Formation",
+     "description": "Also grants first strike next round.",
+     "bonus": {
+      "firstStrike": true
+     }
+    }
+   ],
+   "id": "reposition"
+  },
+  "masterstroke": {
+   "name": "Masterstroke",
+   "class": "tactician",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "extraAction": 1,
+    "dmgBuff": 0.5,
+    "duration": 1
+   },
+   "mpCost": 60,
+   "description": "Whole party acts again at +50% damage.",
+   "talents": [
+    {
+     "id": "ms_cheap",
+     "name": "Flawless Plan",
+     "desc": "Reduces MP cost by 20.",
+     "effect": {
+      "mpCost": -20
+     }
+    },
+    {
+     "id": "ms_crit",
+     "name": "Decisive Blow",
+     "desc": "Extra actions gain +30% critical hit chance.",
+     "effect": {
+      "critChance": 0.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Grand Strategy",
+     "description": "+80% damage on the extra actions.",
+     "bonus": {
+      "dmgBuff": 0.8
+     }
+    }
+   ],
+   "id": "masterstroke"
+  },
+  "haste": {
+   "name": "Haste",
+   "class": "chronomancer",
+   "unlockLevel": 1,
+   "type": "buff",
+   "target": "ally",
+   "effect": {
+    "extraAction": 1,
+    "duration": 1,
+    "excludeSelf": true
+   },
+   "mpCost": 14,
+   "description": "Speed another ally — they act again this round. Cannot target self.",
+   "talents": [
+    {
+     "id": "ha_dmg",
+     "name": "Temporal Edge",
+     "desc": "The hasted action deals +30% damage.",
+     "effect": {
+      "dmgBuff": 0.3
+     }
+    },
+    {
+     "id": "ha_duration",
+     "name": "Sustained Tempo",
+     "desc": "Haste lasts 2 rounds instead of 1 (extra action triggers again next round).",
+     "effect": {
+      "extraActionDuration": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Accelerate",
+     "description": "Ally also gains +25% damage.",
+     "bonus": {
+      "dmgBuff": 0.25
+     }
+    },
+    {
+     "level": 10,
+     "name": "Time Surge",
+     "description": "Affects 2 allies.",
+     "bonus": {
+      "targets": 2
+     }
+    }
+   ],
+   "id": "haste"
+  },
+  "slow_time": {
+   "name": "Slow Time",
+   "class": "chronomancer",
+   "unlockLevel": 5,
+   "type": "magic",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 0.4,
+   "effect": {
+    "actionsLost": 1
+   },
+   "mpCost": 20,
+   "description": "All enemies lose 1 action next round and take 40% Damage.",
+   "talents": [
+    {
+     "id": "st_more",
+     "name": "Temporal Drag",
+     "desc": "Enemies lose 1 additional action.",
+     "effect": {
+      "actionsLost": 1
+     }
+    },
+    {
+     "id": "st_power",
+     "name": "Crushing Time",
+     "desc": "Damage increased by 50%.",
+     "effect": {
+      "damageMult": 0.5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Temporal Mire",
+     "description": "Enemies lose 2 actions.",
+     "bonus": {
+      "actionsLost": 2
+     }
+    }
+   ],
+   "id": "slow_time"
+  },
+  "rewind": {
+   "name": "Rewind",
+   "class": "chronomancer",
+   "unlockLevel": 10,
+   "type": "heal",
+   "target": "ally",
+   "healStat": "damage",
+   "healMult": 3,
+   "mpCost": 25,
+   "effect": {
+    "cleanse": [
+     "burn",
+     "bleed",
+     "poison",
+     "stun"
+    ]
+   },
+   "description": "Rewind an ally’s wounds for 3× Damage HP and clear one status effect.",
+   "talents": [
+    {
+     "id": "rw_heal",
+     "name": "Deep Rewind",
+     "desc": "Healing amount increased by 50%.",
+     "effect": {
+      "healMult": 1.5
+     }
+    },
+    {
+     "id": "rw_cleanse",
+     "name": "Full Restoration",
+     "desc": "Clears all negative status effects instead of one.",
+     "effect": {
+      "cleanse": "all"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Deep Rewind",
+     "description": "5× Damage and removes all status effects.",
+     "bonus": {
+      "healMult": 5,
+      "cleanse": "all"
+     }
+    }
+   ],
+   "id": "rewind"
+  },
+  "time_stop": {
+   "name": "Time Stop",
+   "class": "chronomancer",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "extraAction": 1,
+    "enemySkipRound": true,
+    "duration": 1
+   },
+   "mpCost": 70,
+   "description": "Freeze time: enemies skip next round; party gets an extra action.",
+   "talents": [
+    {
+     "id": "ts_long",
+     "name": "Frozen Moment",
+     "desc": "Enemies also skip the round after.",
+     "effect": {
+      "enemySkipExtra": 1
+     }
+    },
+    {
+     "id": "ts_cheap",
+     "name": "Temporal Mastery",
+     "desc": "Reduces MP cost by 20.",
+     "effect": {
+      "mpCost": -20
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Eternity",
+     "description": "Enemies skip 2 rounds.",
+     "bonus": {
+      "enemySkipRounds": 2
+     }
+    }
+   ],
+   "id": "time_stop"
+  },
+  "palm_strike": {
+   "name": "Palm Strike",
+   "class": "monk",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 2,
+   "mpCost": 0,
+   "description": "A focused palm strike for 200% Light damage.",
+   "talents": [
+    {
+     "id": "ps_chi",
+     "name": "Focused Chi",
+     "desc": "Restores 5 MP on hit.",
+     "effect": {
+      "mpOnHit": 5
+     }
+    },
+    {
+     "id": "ps_stun",
+     "name": "Stunning Palm",
+     "desc": "30% chance to Stun for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.3,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Iron Palm",
+     "description": "Damage increases to 170% Light.",
+     "bonus": {
+      "damageMult": 1.7
+     }
+    },
+    {
+     "level": 10,
+     "name": "Thunder Palm",
+     "description": "Damage increases to 220% Light and always Stuns for 1 round.",
+     "bonus": {
+      "damageMult": 2.2,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 1,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "palm_strike"
+  },
+  "flurry": {
+   "name": "Flurry",
+   "class": "monk",
+   "unlockLevel": 5,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.2,
+   "hits": 3,
+   "mpCost": 12,
+   "description": "Three rapid strikes, each 120% Light damage.",
+   "talents": [
+    {
+     "id": "fl_extra",
+     "name": "Fourth Strike",
+     "desc": "Adds a fourth strike.",
+     "effect": {
+      "hits": 1
+     }
+    },
+    {
+     "id": "fl_bleed",
+     "name": "Cutting Flurry",
+     "desc": "Each hit applies Bleed (2 rounds).",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.6,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Torrent",
+     "description": "Four strikes at 70% Light each.",
+     "bonus": {
+      "hits": 4,
+      "damageMult": 0.7
+     }
+    }
+   ],
+   "id": "flurry"
+  },
+  "inner_focus": {
+   "name": "Inner Focus",
+   "class": "monk",
+   "unlockLevel": 10,
+   "type": "heal",
+   "target": "self",
+   "healStat": "damage",
+   "healMult": 2.5,
+   "effect": {
+    "mpRestore": 15
+   },
+   "mpCost": 0,
+   "description": "Meditate briefly: heal self for 2.5× Damage and restore 15 MP.",
+   "talents": [
+    {
+     "id": "if_cleanse",
+     "name": "Clarity",
+     "desc": "Also removes one negative status.",
+     "effect": {
+      "cleanse": 1
+     }
+    },
+    {
+     "id": "if_dmg",
+     "name": "Focused Fury",
+     "desc": "Gain +20% damage for 2 rounds.",
+     "effect": {
+      "dmgBuff": 0.2,
+      "duration": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Deep Meditation",
+     "description": "Heal 4× Damage and restore 30 MP.",
+     "bonus": {
+      "healMult": 4,
+      "mpRestore": 30
+     }
+    }
+   ],
+   "id": "inner_focus"
+  },
+  "monk_shadow_step": {
+   "name": "Shadow Step",
+   "class": "monk",
+   "unlockLevel": 15,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 2.8,
+   "effect": {
+    "critBonus": 0.4
+   },
+   "mpCost": 25,
+   "description": "Dash behind target and strike for 280% Light with +40% crit.",
+   "talents": [
+    {
+     "id": "mss_dodge",
+     "name": "Phantom Step",
+     "desc": "+30% dodge for 1 round after.",
+     "effect": {
+      "dodgeBonus": 0.3,
+      "duration": 1
+     }
+    },
+    {
+     "id": "mss_cheap",
+     "name": "Silent Tread",
+     "desc": "Reduces MP cost by 10.",
+     "effect": {
+      "mpCost": -10
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Void Step",
+     "description": "260% Light damage and always crits.",
+     "bonus": {
+      "damageMult": 0.6,
+      "critBonus": 1
+     }
+    }
+   ],
+   "id": "monk_shadow_step"
+  },
+  "spirit_bolt": {
+   "name": "Spirit Bolt",
+   "class": "shaman",
+   "unlockLevel": 1,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1,
+   "mpCost": 8,
+   "description": "A bolt of spirit energy dealing 100% Damage.",
+   "talents": [
+    {
+     "id": "sb_cheap",
+     "name": "Ancestral Flow",
+     "desc": "Reduces MP cost by 4.",
+     "effect": {
+      "mpCost": -4
+     }
+    },
+    {
+     "id": "sb_power",
+     "name": "Raging Spirit",
+     "desc": "Damage increased by 30%.",
+     "effect": {
+      "damageMult": 0.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Wrathful Spirit",
+     "description": "200% Damage.",
+     "bonus": {
+      "damageMult": 2
+     }
+    },
+    {
+     "level": 10,
+     "name": "Ancestor’s Fury",
+     "description": "260% Damage and ignores 30% magic resist.",
+     "bonus": {
+      "damageMult": 2.6,
+      "magicPen": 0.3
+     }
+    }
+   ],
+   "id": "spirit_bolt"
+  },
+  "healing_totem": {
+   "name": "Healing Totem",
+   "class": "shaman",
+   "unlockLevel": 5,
+   "type": "heal",
+   "target": "party",
+   "healStat": "damage",
+   "healMult": 1,
+   "effect": {
+    "duration": 3
+   },
+   "mpCost": 20,
+   "description": "Summon a totem that heals the party for 1× Damage each round for 3 rounds.",
+   "talents": [
+    {
+     "id": "ht_long",
+     "name": "Enduring Totem",
+     "desc": "Duration +2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "ht_big",
+     "name": "Vital Totem",
+     "desc": "Healing per tick +50%.",
+     "effect": {
+      "healMult": 0.5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Greater Totem",
+     "description": "Heals 1.8× Damage per round for 4 rounds.",
+     "bonus": {
+      "healMult": 1.8,
+      "duration": 4
+     }
+    }
+   ],
+   "id": "healing_totem"
+  },
+  "chain_lightning_spirit": {
+   "name": "Spirit Chain",
+   "class": "shaman",
+   "unlockLevel": 10,
+   "type": "magic",
+   "aoe": "row",
+   "damageStat": "damage",
+   "damageMult": 1.2,
+   "mpCost": 22,
+   "description": "Lightning leaps between up to 3 enemies at 120% Damage each.",
+   "talents": [
+    {
+     "id": "cls_more",
+     "name": "Forked Spirit",
+     "desc": "Hits one additional enemy.",
+     "effect": {
+      "targets": 1
+     }
+    },
+    {
+     "id": "cls_stun",
+     "name": "Stunning Arc",
+     "desc": "25% chance to Stun each hit.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.25,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Storm of Spirits",
+     "description": "160% Damage, hits all enemies.",
+     "bonus": {
+      "damageMult": 1.6,
+      "aoe": "all"
+     }
+    }
+   ],
+   "id": "chain_lightning_spirit"
+  },
+  "ancestral_shield": {
+   "name": "Ancestral Shield",
+   "class": "shaman",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgReduct": 0.3,
+    "barrier": 0.5,
+    "duration": 3
+   },
+   "mpCost": 30,
+   "description": "Party gains −30% damage taken and a barrier equal to 50% of caster Damage for 3 rounds.",
+   "talents": [
+    {
+     "id": "as_long",
+     "name": "Unending Ward",
+     "desc": "Duration +1 round.",
+     "effect": {
+      "duration": 1
+     }
+    },
+    {
+     "id": "as_reflect",
+     "name": "Spirit Thorns",
+     "desc": "Reflect 15% of damage taken.",
+     "effect": {
+      "reflect": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Aegis of Ancestors",
+     "description": "−45% damage taken, barrier 1× Damage, 4 rounds.",
+     "bonus": {
+      "dmgReduct": 0.45,
+      "barrier": 1,
+      "duration": 4
+     }
+    }
+   ],
+   "id": "ancestral_shield"
+  },
+  "silver_bolt": {
+   "name": "Silver Bolt",
+   "class": "witch_hunter",
+   "unlockLevel": 1,
+   "type": "ranged",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.8,
+   "mpCost": 0,
+   "description": "Silver-tipped bolt dealing 180% Light damage. +50% vs demons and undead.",
+   "talents": [
+    {
+     "id": "sv_demon",
+     "name": "Blessed Tip",
+     "desc": "+30% extra vs demons/undead.",
+     "effect": {
+      "dmgBuffVsDemon": 0.3
+     }
+    },
+    {
+     "id": "sv_bleed",
+     "name": "Barbed Bolt",
+     "desc": "Applies Bleed for 2 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.8,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Consecrated Bolt",
+     "description": "180% Light damage.",
+     "bonus": {
+      "damageMult": 1.8
+     }
+    },
+    {
+     "level": 10,
+     "name": "Inquisitor’s Bolt",
+     "description": "230% Light damage, +75% vs demons/undead.",
+     "bonus": {
+      "damageMult": 2.3,
+      "dmgBuffVsDemon": 0.25
+     }
+    }
+   ],
+   "id": "silver_bolt"
+  },
+  "dispel_curse": {
+   "name": "Dispel Curse",
+   "class": "witch_hunter",
+   "unlockLevel": 5,
+   "type": "heal",
+   "target": "ally",
+   "healStat": "damage",
+   "healMult": 0.2,
+   "effect": {
+    "cleanse": "all"
+   },
+   "mpCost": 18,
+   "description": "Remove all negative status effects from an ally and heal 0.20× Damage. Utility cleanse — primary healing should come from a dedicated healer.",
+   "talents": [
+    {
+     "id": "dc_party",
+     "name": "Purging Wave",
+     "desc": "Also cleanses one status from each other party member.",
+     "effect": {
+      "cleanseParty": 1
+     }
+    },
+    {
+     "id": "dc_heal",
+     "name": "Restorative Purge",
+     "desc": "Healing increased to 0.50× Damage.",
+     "effect": {
+      "healMult": 0.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Holy Purge",
+     "description": "Cleanse entire party.",
+     "bonus": {
+      "target": "party",
+      "cleanse": "all"
+     }
+    }
+   ],
+   "id": "dispel_curse"
+  },
+  "purge_strike": {
+   "name": "Purge Strike",
+   "class": "witch_hunter",
+   "unlockLevel": 10,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 2.3,
+   "effect": {
+    "dmgBuffVsDemon": 0.5,
+    "dmgBuffVsUndead": 0.5
+   },
+   "mpCost": 20,
+   "description": "230% Light damage; +50% vs demons and undead.",
+   "talents": [
+    {
+     "id": "pu_stun",
+     "name": "Condemning Blow",
+     "desc": "Stuns demons/undead for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.6,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "pu_aoe",
+     "name": "Radiant Arc",
+     "desc": "Hits adjacent enemies for 50% damage.",
+     "effect": {
+      "aoe": "adjacent2",
+      "splash": 0.5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Hallowed Strike",
+     "description": "220% Light, +80% vs demons/undead.",
+     "bonus": {
+      "damageMult": 2.2,
+      "dmgBuffVsDemon": 0.3,
+      "dmgBuffVsUndead": 0.3
+     }
+    }
+   ],
+   "id": "purge_strike"
+  },
+  "inquisitor_mark": {
+   "name": "Inquisitor’s Mark",
+   "class": "witch_hunter",
+   "unlockLevel": 15,
+   "type": "magic",
+   "target": "enemy",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 0.3,
+   "statusEffects": [
+    {
+     "type": "marked",
+     "duration": 3,
+     "chance": 1
+    }
+   ],
+   "mpCost": 22,
+   "description": "Mark a target — it takes 40% more damage from the party for 3 rounds.",
+   "talents": [
+    {
+     "id": "im_linger",
+     "name": "Lasting Mark",
+     "desc": "Duration +2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "im_exec",
+     "name": "Heretic’s End",
+     "desc": "Killing a marked target restores 15% MP.",
+     "effect": {
+      "mpRestoreOnKill": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Condemning Mark",
+     "description": "Marked targets take 60% more damage.",
+     "bonus": {
+      "dmgAmp": 0.6
+     }
+    }
+   ],
+   "id": "inquisitor_mark"
+  },
+  "knight_shield_bash": {
+   "name": "Shield Bash",
+   "class": "knight",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.1,
+   "statusEffects": [
+    {
+     "type": "stun",
+     "chance": 0.6,
+     "duration": 1
+    }
+   ],
+   "mpCost": 0,
+   "description": "Bash with shield for 110% Heavy damage; 60% chance to Stun.",
+   "talents": [
+    {
+     "id": "ksb_stun",
+     "name": "Iron Crash",
+     "desc": "Stun chance increased to 90%.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.3,
+        "duration": 1
+       }
+      ]
+     }
+    },
+    {
+     "id": "ksb_pow",
+     "name": "Mighty Bash",
+     "desc": "Damage increased by 30%.",
+     "effect": {
+      "damageMult": 0.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Crushing Bash",
+     "description": "150% Heavy damage.",
+     "bonus": {
+      "damageMult": 1.5
+     }
+    },
+    {
+     "level": 10,
+     "name": "Bulwark Strike",
+     "description": "240% Heavy, always Stuns 1 round (heavier hit replaces the M341-removed extended-stun bonus).",
+     "bonus": {
+      "damageMult": 2.4,
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 1,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "knight_shield_bash"
+  },
+  "knight_taunt": {
+   "name": "Taunt",
+   "class": "knight",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "taunt": true,
+    "dmgReduct": 0.25,
+    "duration": 2
+   },
+   "mpCost": 10,
+   "description": "Force enemies to target you for 2 rounds; −25% damage taken.",
+   "talents": [
+    {
+     "id": "kt_long",
+     "name": "Defiant Stand",
+     "desc": "Duration +1 round.",
+     "effect": {
+      "duration": 1
+     }
+    },
+    {
+     "id": "kt_reflect",
+     "name": "Retaliation",
+     "desc": "Reflect 15% damage.",
+     "effect": {
+      "reflect": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Unyielding Taunt",
+     "description": "−40% damage taken, 3 rounds.",
+     "bonus": {
+      "dmgReduct": 0.4,
+      "duration": 3
+     }
+    }
+   ],
+   "id": "knight_taunt"
+  },
+  "knight_holy_strike": {
+   "name": "Holy Strike",
+   "class": "knight",
+   "unlockLevel": 10,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.8,
+   "effect": {
+    "dmgBuffVsDemon": 0.5,
+    "dmgBuffVsUndead": 0.5
+   },
+   "mpCost": 20,
+   "description": "180% Heavy damage; +50% vs demons and undead.",
+   "talents": [
+    {
+     "id": "khs_heal",
+     "name": "Zealous Blow",
+     "desc": "Heal self for 20% of damage dealt.",
+     "effect": {
+      "lifesteal": 0.2
+     }
+    },
+    {
+     "id": "khs_aoe",
+     "name": "Radiant Arc",
+     "desc": "Splashes 40% to adjacent enemies.",
+     "effect": {
+      "aoe": "adjacent2",
+      "splash": 0.4
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Divine Strike",
+     "description": "240% Heavy, +75% vs demons/undead.",
+     "bonus": {
+      "damageMult": 0.6,
+      "dmgBuffVsDemon": 0.25,
+      "dmgBuffVsUndead": 0.25
+     }
+    }
+   ],
+   "id": "knight_holy_strike"
+  },
+  "rally": {
+   "name": "Rally",
+   "class": "knight",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgBuff": 0.25,
+    "dmgReduct": 0.15,
+    "duration": 3
+   },
+   "mpCost": 25,
+   "description": "Rally the party: +25% damage and −15% damage taken for 3 rounds.",
+   "talents": [
+    {
+     "id": "rl_long",
+     "name": "Steadfast Banner",
+     "desc": "Duration +2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "rl_heal",
+     "name": "Inspiring Rally",
+     "desc": "Also heals party for 20% max HP.",
+     "effect": {
+      "healPct": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Heroic Rally",
+     "description": "+40% damage, −25% taken, 4 rounds.",
+     "bonus": {
+      "dmgBuff": 0.4,
+      "dmgReduct": 0.25,
+      "duration": 4
+     }
+    }
+   ],
+   "id": "rally"
+  },
+  "wild_bolt": {
+   "name": "Wild Bolt",
+   "class": "sorcerer",
+   "unlockLevel": 1,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.6,
+   "effect": {
+    "randomElement": true
+   },
+   "mpCost": 8,
+   "description": "A chaotic bolt dealing 160% Damage of a random element (fire/cold/lightning).",
+   "talents": [
+    {
+     "id": "wb_big",
+     "name": "Surging Chaos",
+     "desc": "Damage +40%.",
+     "effect": {
+      "damageMult": 0.4
+     }
+    },
+    {
+     "id": "wb_stat",
+     "name": "Elemental Spike",
+     "desc": "Applies matching element status (Burn/Freeze/Shock) for 2 rounds.",
+     "effect": {
+      "elementalStatus": true,
+      "duration": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Greater Wild Bolt",
+     "description": "210% Damage.",
+     "bonus": {
+      "damageMult": 2.1
+     }
+    },
+    {
+     "level": 10,
+     "name": "Chaos Lance",
+     "description": "280% Damage, always applies element status for 2 rounds.",
+     "bonus": {
+      "damageMult": 2.8,
+      "elementalStatus": true,
+      "duration": 2
+     }
+    }
+   ],
+   "id": "wild_bolt"
+  },
+  "sorc_arcane_surge": {
+   "name": "Arcane Surge",
+   "class": "sorcerer",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "spellDmgBuff": 1,
+    "duration": 2
+   },
+   "mpCost": 25,
+   "description": "Double spell damage for 2 rounds.",
+   "talents": [
+    {
+     "id": "sas_long",
+     "name": "Prolonged Surge",
+     "desc": "Duration +1 round.",
+     "effect": {
+      "duration": 1
+     }
+    },
+    {
+     "id": "sas_crit",
+     "name": "Focused Surge",
+     "desc": "Spells gain +25% crit.",
+     "effect": {
+      "critBonus": 0.25
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Empowered Surge",
+     "description": "+150% spell damage, 3 rounds.",
+     "bonus": {
+      "spellDmgBuff": 1.5,
+      "duration": 3
+     }
+    }
+   ],
+   "id": "sorc_arcane_surge"
+  },
+  "mana_burn": {
+   "name": "Mana Burn",
+   "class": "sorcerer",
+   "unlockLevel": 10,
+   "type": "magic",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.2,
+   "effect": {
+    "mpDrain": 20,
+    "mpDrainDamage": 1
+   },
+   "mpCost": 18,
+   "description": "120% Damage and drains 20 MP; each MP drained adds 1 damage.",
+   "talents": [
+    {
+     "id": "mb_drain",
+     "name": "Soul Leech",
+     "desc": "Drained MP is returned to you (50%).",
+     "effect": {
+      "mpReturn": 0.5
+     }
+    },
+    {
+     "id": "mb_stun",
+     "name": "Mind Shock",
+     "desc": "Stuns casters (INT > 10) for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.5,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Soul Burn",
+     "description": "170% Damage, drains 40 MP.",
+     "bonus": {
+      "damageMult": 1.7,
+      "mpDrain": 40
+     }
+    }
+   ],
+   "id": "mana_burn"
+  },
+  "chaos_ward": {
+   "name": "Chaos Ward",
+   "class": "sorcerer",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "barrier": 2,
+    "reflect": 0.3,
+    "duration": 3
+   },
+   "mpCost": 30,
+   "description": "Barrier equal to 2× Damage for 3 rounds; reflects 30% of damage taken.",
+   "talents": [
+    {
+     "id": "cw_reflect",
+     "name": "Mirror Chaos",
+     "desc": "Reflect increased to 50%.",
+     "effect": {
+      "reflect": 0.2
+     }
+    },
+    {
+     "id": "cw_mp",
+     "name": "Wild Aegis",
+     "desc": "Restores 10 MP each round the ward is active.",
+     "effect": {
+      "mpRegen": 10
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Eternal Ward",
+     "description": "Barrier 3× Damage, reflect 50%, 4 rounds.",
+     "bonus": {
+      "barrier": 3,
+      "reflect": 0.5,
+      "duration": 4
+     }
+    }
+   ],
+   "id": "chaos_ward"
+  },
+  "rune_hammer": {
+   "name": "Rune Hammer",
+   "class": "runesmith",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.6,
+   "mpCost": 0,
+   "description": "A rune-imbued hammer blow dealing 160% Heavy damage.",
+   "talents": [
+    {
+     "id": "rh_arcane",
+     "name": "Arcane Rune",
+     "desc": "Scales with Damage bonus (20%).",
+     "effect": {
+      "damageMultInt": 0.2
+     }
+    },
+    {
+     "id": "rh_stun",
+     "name": "Quake Rune",
+     "desc": "30% chance to Stun for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "stun",
+        "chance": 0.3,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Thunder Rune",
+     "description": "180% Heavy damage.",
+     "bonus": {
+      "damageMult": 1.8
+     }
+    },
+    {
+     "level": 10,
+     "name": "Sovereign Rune",
+     "description": "200% Heavy, ignores 30% armor.",
+     "bonus": {
+      "damageMult": 2,
+      "armorPen": 0.3
+     }
+    }
+   ],
+   "id": "rune_hammer"
+  },
+  "rune_of_warding": {
+   "name": "Rune of Warding",
+   "class": "runesmith",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "ally",
+   "effect": {
+    "barrier": 1.5,
+    "duration": 3
+   },
+   "mpCost": 18,
+   "description": "Inscribe a rune on an ally granting a barrier equal to 1.5× Damage for 3 rounds.",
+   "talents": [
+    {
+     "id": "row_dur",
+     "name": "Lasting Rune",
+     "desc": "Duration +2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    },
+    {
+     "id": "row_big",
+     "name": "Deep Rune",
+     "desc": "Barrier increased to 2.5× Damage.",
+     "effect": {
+      "barrier": 1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Greater Ward",
+     "description": "Barrier 2.5× Damage, 4 rounds.",
+     "bonus": {
+      "barrier": 2.5,
+      "duration": 4
+     }
+    }
+   ],
+   "id": "rune_of_warding"
+  },
+  "rune_of_might": {
+   "name": "Rune of Might",
+   "class": "runesmith",
+   "unlockLevel": 10,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgBuff": 0.2,
+    "duration": 3
+   },
+   "mpCost": 25,
+   "description": "Party gains +20% damage for 3 rounds.",
+   "talents": [
+    {
+     "id": "rom_long",
+     "name": "Enduring Might",
+     "desc": "Duration +1 round.",
+     "effect": {
+      "duration": 1
+     }
+    },
+    {
+     "id": "rom_crit",
+     "name": "Keen Rune",
+     "desc": "Also grants +15% crit chance.",
+     "effect": {
+      "critBonus": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Rune of Glory",
+     "description": "+30% damage, 4 rounds.",
+     "bonus": {
+      "dmgBuff": 0.3,
+      "duration": 4
+     }
+    }
+   ],
+   "id": "rune_of_might"
+  },
+  "forge_flame": {
+   "name": "Forge Flame",
+   "class": "runesmith",
+   "unlockLevel": 15,
+   "type": "magic",
+   "aoe": "row",
+   "damageStat": "damage",
+   "damageMult": 1.3,
+   "statusEffects": [
+    {
+     "type": "burn",
+     "chance": 0.9,
+     "duration": 3
+    }
+   ],
+   "mpCost": 28,
+   "description": "Unleash forge-flame on a row: 130% Heavy damage and Burns for 3 rounds.",
+   "talents": [
+    {
+     "id": "ff_all",
+     "name": "Smith’s Furnace",
+     "desc": "Hits all enemies instead of one row.",
+     "effect": {
+      "aoe": "all"
+     }
+    },
+    {
+     "id": "ff_burn",
+     "name": "Eternal Ember",
+     "desc": "Burn duration +2 rounds.",
+     "effect": {
+      "duration": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Sovereign Flame",
+     "description": "180% Heavy, hits all enemies, Burn 4 rounds.",
+     "bonus": {
+      "damageMult": 1.8,
+      "aoe": "all",
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 4
+       }
+      ]
+     }
+    }
+   ],
+   "id": "forge_flame"
+  },
+  "sd_shadow_strike": {
+   "name": "Shadow Strike",
+   "class": "shadow_dancer",
+   "unlockLevel": 1,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.9,
+   "effect": {
+    "critBonus": 0.2
+   },
+   "mpCost": 0,
+   "description": "190% Light damage with +20% crit.",
+   "talents": [
+    {
+     "id": "sss_bleed",
+     "name": "Twin Blade",
+     "desc": "Applies Bleed for 2 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.8,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "id": "sss_crit",
+     "name": "Cruel Edge",
+     "desc": "Crit bonus +25%.",
+     "effect": {
+      "critBonus": 0.25
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Umbral Strike",
+     "description": "200% Light damage.",
+     "bonus": {
+      "damageMult": 2
+     }
+    },
+    {
+     "level": 10,
+     "name": "Night’s Edge",
+     "description": "260% Light, always crits bleeding targets.",
+     "bonus": {
+      "damageMult": 2.6,
+      "critVsBleed": 1
+     }
+    }
+   ],
+   "id": "sd_shadow_strike"
+  },
+  "smoke_veil": {
+   "name": "Smoke Veil",
+   "class": "shadow_dancer",
+   "unlockLevel": 5,
+   "type": "buff",
+   "target": "self",
+   "effect": {
+    "dodgeBuff": 40,
+    "stealth": true,
+    "duration": 2
+   },
+   "mpCost": 15,
+   "description": "Vanish in smoke: +40 Dodge and Stealth for 2 rounds.",
+   "talents": [
+    {
+     "id": "sv_long",
+     "name": "Thick Smoke",
+     "desc": "Duration +1 round.",
+     "effect": {
+      "duration": 1
+     }
+    },
+    {
+     "id": "sv_party",
+     "name": "Shared Veil",
+     "desc": "Also applies to one adjacent ally.",
+     "effect": {
+      "targets": 2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Obscuring Veil",
+     "description": "+60 Dodge, 3 rounds.",
+     "bonus": {
+      "dodgeBuff": 60,
+      "duration": 3
+     }
+    }
+   ],
+   "id": "smoke_veil"
+  },
+  "assassinate": {
+   "name": "Assassinate",
+   "class": "shadow_dancer",
+   "unlockLevel": 10,
+   "type": "melee",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 2.6,
+   "effect": {
+    "executeThreshold": 0.25,
+    "executeMult": 3
+   },
+   "mpCost": 25,
+   "description": "260% Light damage. If target is below 25% HP, triple damage.",
+   "talents": [
+    {
+     "id": "asn_thresh",
+     "name": "Final Blow",
+     "desc": "Execute threshold raised to 35%.",
+     "effect": {
+      "executeThreshold": 0.1
+     }
+    },
+    {
+     "id": "asn_refund",
+     "name": "Reaper’s Return",
+     "desc": "Killing blow refunds 15 MP.",
+     "effect": {
+      "mpRestoreOnKill": 0.15
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Death Kiss",
+     "description": "280% Light, execute threshold 40%.",
+     "bonus": {
+      "damageMult": 2.8,
+      "executeThreshold": 0.15
+     }
+    }
+   ],
+   "id": "assassinate"
+  },
+  "dance_of_blades": {
+   "name": "Dance of Blades",
+   "class": "shadow_dancer",
+   "unlockLevel": 15,
+   "type": "melee",
+   "aoe": "all",
+   "damageStat": "damage",
+   "damageMult": 0.8,
+   "hits": 2,
+   "mpCost": 30,
+   "description": "Whirl through all enemies twice, each strike 80% Light damage.",
+   "talents": [
+    {
+     "id": "dob_extra",
+     "name": "Third Pass",
+     "desc": "Adds a third pass.",
+     "effect": {
+      "hits": 1
+     }
+    },
+    {
+     "id": "dob_bleed",
+     "name": "Crimson Dance",
+     "desc": "Each hit applies Bleed (2 rounds).",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.5,
+        "duration": 2
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Endless Waltz",
+     "description": "Three passes at 90% Light each.",
+     "bonus": {
+      "hits": 3,
+      "damageMult": 0.9
+     }
+    }
+   ],
+   "id": "dance_of_blades"
+  },
+  "tinker_bolt": {
+   "name": "Clockwork Bolt",
+   "class": "tinker",
+   "unlockLevel": 1,
+   "type": "ranged",
+   "aoe": "single",
+   "damageStat": "damage",
+   "damageMult": 1.2,
+   "mpCost": 4,
+   "description": "Fire a rune-etched brass bolt. 120% Damage. Cheap reliable opener.",
+   "talents": [
+    {
+     "id": "tb_spark",
+     "name": "Spark Coil",
+     "desc": "Applies Burn (2 rounds) on hit.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 0.4,
+        "duration": 2,
+        "power": 8
+       }
+      ]
+     }
+    },
+    {
+     "id": "tb_pierce",
+     "name": "Armor-Piercer",
+     "desc": "+25% armor penetration.",
+     "effect": {
+      "armorPen": 5
+     }
+    },
+    {
+     "id": "tb_turret",
+     "name": "Deploy Turret",
+     "desc": "Summon a Clockwork Turret companion.",
+     "effect": {
+      "unlocksCompanion": "pet_clockwork_turret"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 5,
+     "name": "Engraved Bolt",
+     "description": "150% Damage.",
+     "bonus": {
+      "damageMult": 0.3
+     }
+    },
+    {
+     "level": 10,
+     "name": "Harmonic Bolt",
+     "description": "200% Damage; chains to one adjacent target for 50%.",
+     "bonus": {
+      "damageMult": 0.5,
+      "aoe": "adjacent"
+     }
+    }
+   ],
+   "id": "tinker_bolt"
+  },
+  "tinker_grenade": {
+   "name": "Alchemical Grenade",
+   "class": "tinker",
+   "unlockLevel": 5,
+   "type": "ranged",
+   "aoe": "adjacent",
+   "damageStat": "damage",
+   "damageMult": 0.9,
+   "mpCost": 14,
+   "description": "Lob a hissing brass grenade. 90% Damage to three adjacent targets; 40% chance to Burn.",
+   "statusEffects": [
+    {
+     "type": "burn",
+     "chance": 0.4,
+     "duration": 2,
+     "power": 10
+    }
+   ],
+   "talents": [
+    {
+     "id": "gr_shrap",
+     "name": "Shrapnel",
+     "desc": "Also applies Bleed.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "bleed",
+        "chance": 0.5,
+        "duration": 2,
+        "power": 8
+       }
+      ]
+     }
+    },
+    {
+     "id": "gr_big",
+     "name": "Bigger Charge",
+     "desc": "Hits a full group (all enemies).",
+     "effect": {
+      "aoe": "group"
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Pressurized Grenade",
+     "description": "120% Damage; full-group AoE.",
+     "bonus": {
+      "damageMult": 1.2,
+      "aoe": "group"
+     }
+    },
+    {
+     "level": 15,
+     "name": "Cataclysm Charge",
+     "description": "160% Damage; guaranteed Burn (4 rounds).",
+     "bonus": {
+      "damageMult": 1.6,
+      "statusEffects": [
+       {
+        "type": "burn",
+        "chance": 1,
+        "duration": 4,
+        "power": 14
+       }
+      ]
+     }
+    }
+   ],
+   "id": "tinker_grenade"
+  },
+  "tinker_quick_fix": {
+   "name": "Quick-Fix",
+   "class": "tinker",
+   "unlockLevel": 10,
+   "type": "heal",
+   "target": "ally",
+   "healStat": "damage",
+   "healMult": 1.6,
+   "mpCost": 16,
+   "description": "Apply a brass clockwork patch — restores HP equal to 160% Damage to one ally.",
+   "talents": [
+    {
+     "id": "qf_cleanse",
+     "name": "Purge Valve",
+     "desc": "Also removes one negative status effect.",
+     "effect": {
+      "cleanse": 1
+     }
+    },
+    {
+     "id": "qf_bonus",
+     "name": "Tinker's Touch",
+     "desc": "+30% healing.",
+     "effect": {
+      "healMult": 0.3
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Greater Repair",
+     "description": "220% Damage heal; removes one negative status.",
+     "bonus": {
+      "healMult": 2.2,
+      "cleanse": 1
+     }
+    },
+    {
+     "level": 20,
+     "name": "Masterwork Mending",
+     "description": "300% Damage heal; cleanses all negative effects; grants a small regen (10% Damage/round, 2 rounds).",
+     "bonus": {
+      "healMult": 3,
+      "cleanse": "all",
+      "statusEffects": [
+       {
+        "type": "regen",
+        "chance": 1,
+        "duration": 2,
+        "power": 0.1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "tinker_quick_fix"
+  },
+  "tinker_overcharge": {
+   "name": "Overcharge",
+   "class": "tinker",
+   "unlockLevel": 15,
+   "type": "buff",
+   "target": "party",
+   "effect": {
+    "dmgBuff": 0.25,
+    "critBuff": 10,
+    "duration": 3
+   },
+   "mpCost": 28,
+   "description": "Wind the arcane battery — entire party gains +25% damage and +10% crit chance for 3 rounds.",
+   "talents": [
+    {
+     "id": "oc_long",
+     "name": "Deep Mainspring",
+     "desc": "Duration +1 round.",
+     "effect": {
+      "duration": 1
+     }
+    },
+    {
+     "id": "oc_spark",
+     "name": "Arc Relay",
+     "desc": "+5% crit chance on top.",
+     "effect": {
+      "critBuff": 5
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 20,
+     "name": "Overdrive",
+     "description": "+35% damage, +15% crit, 4 rounds.",
+     "bonus": {
+      "dmgBuff": 0.35,
+      "critBuff": 15,
+      "duration": 4
+     }
+    },
+    {
+     "level": 25,
+     "name": "Perpetual Motion",
+     "description": "+50% damage, +20% crit, 5 rounds.",
+     "bonus": {
+      "dmgBuff": 0.5,
+      "critBuff": 20,
+      "duration": 5
+     }
+    }
+   ],
+   "id": "tinker_overcharge"
+  },
+  "priest_mend": {
+   "name": "Mend",
+   "class": "priest",
+   "unlockLevel": 1,
+   "type": "heal",
+   "healMult": 3.5,
+   "mpCost": 12,
+   "cooldown": 1,
+   "target": "lowestHp",
+   "description": "Heal one ally for 350% Damage.",
+   "talents": [
+    {
+     "id": "pm_more",
+     "name": "Steady Hand",
+     "desc": "Healing 350% → 410% Damage.",
+     "effect": {
+      "healMult": 0.6
+     }
+    },
+    {
+     "id": "pm_regen",
+     "name": "Lingering Light",
+     "desc": "Adds Regen for 2 rounds.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "regen",
+        "chance": 1,
+        "duration": 2,
+        "power": 0.05
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 12,
+     "name": "Greater Mend",
+     "description": "Healing 430% Damage, also cleanses 1 negative effect.",
+     "bonus": {
+      "healMult": 0.8,
+      "cleanse": 1
+     }
+    },
+    {
+     "level": 22,
+     "name": "Sanctuary Mend",
+     "description": "Healing 590% Damage, cleanses all negative effects.",
+     "bonus": {
+      "healMult": 1.6,
+      "cleanse": "all"
+     }
+    }
+   ],
+   "id": "priest_mend"
+  },
+  "priest_call_back": {
+   "name": "Call Back",
+   "class": "priest",
+   "unlockLevel": 5,
+   "type": "revive",
+   "target": "ally",
+   "mpCost": 32,
+   "cooldown": 6,
+   "effect": {
+    "reviveHp": 0.5,
+    "immune": true
+   },
+   "description": "Call a fallen ally back to consciousness at 50% HP. Brief immunity until their next action.",
+   "talents": [
+    {
+     "id": "cb_strong",
+     "name": "Full Vigil",
+     "desc": "Revive HP 50% → 75%.",
+     "effect": {
+      "reviveHp": 0.25
+     }
+    },
+    {
+     "id": "cb_immune",
+     "name": "Sanctuary",
+     "desc": "Revived ally is immune for 1 round.",
+     "effect": {
+      "reviveImmuneRounds": 1
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 15,
+     "name": "Greater Call",
+     "description": "Revives at 75% HP, immune for 1 round.",
+     "bonus": {
+      "reviveHp": 0.25,
+      "reviveImmuneRounds": 1
+     }
+    },
+    {
+     "level": 25,
+     "name": "Mass Vigil",
+     "description": "Revives every fallen ally at 50% HP, immune 1 round.",
+     "bonus": {
+      "reviveAll": true,
+      "reviveImmuneRounds": 1
+     }
+    }
+   ],
+   "id": "priest_call_back"
+  },
+  "shadow_bolt": {
+   "name": "Shadow Bolt",
+   "class": "priest",
+   "unlockLevel": 1,
+   "type": "magic",
+   "damageStat": "damage",
+   "damageMult": 1.3,
+   "damageCategory": "magic",
+   "damageType": "shadow",
+   "aoe": "single",
+   "mpCost": 8,
+   "cooldown": 1,
+   "description": "Hurl a tendril of shadow at one enemy. Pure shadow damage; benefits from spell power.",
+   "talents": [
+    {
+     "id": "sb_focus",
+     "name": "Focused Bolt",
+     "desc": "Damage ×1.0 → ×1.2.",
+     "effect": {
+      "damageMult": 0.2
+     }
+    },
+    {
+     "id": "sb_drain",
+     "name": "Drain",
+     "desc": "Heal caster for 25% of damage dealt.",
+     "effect": {
+      "lifesteal": 0.25
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 10,
+     "name": "Black Bolt",
+     "description": "Damage ×1.3.",
+     "bonus": {
+      "damageMult": 0.3
+     }
+    },
+    {
+     "level": 20,
+     "name": "Void Bolt",
+     "description": "Damage ×1.6, heals caster for 25% of damage dealt.",
+     "bonus": {
+      "damageMult": 0.6,
+      "lifesteal": 0.25
+     }
+    }
+   ],
+   "id": "shadow_bolt"
+  },
+  "shadow_veil": {
+   "name": "Shadow Veil",
+   "class": "priest",
+   "unlockLevel": 9,
+   "type": "magic",
+   "damageStat": "damage",
+   "damageMult": 0.7,
+   "damageCategory": "magic",
+   "damageType": "shadow",
+   "aoe": "all",
+   "statusEffects": [
+    {
+     "type": "blind",
+     "chance": 0.6,
+     "duration": 2
+    }
+   ],
+   "mpCost": 24,
+   "cooldown": 4,
+   "description": "A drifting shadow veil rolls across the enemy field — moderate shadow damage to all foes; 60% chance to Blind for 2 rounds.",
+   "talents": [
+    {
+     "id": "sv_thick",
+     "name": "Thicker Veil",
+     "desc": "Blind chance 60% → 85%.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "blind",
+        "chance": 0.85,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "id": "sv_potent",
+     "name": "Potent Veil",
+     "desc": "Damage ×0.7 → ×0.9.",
+     "effect": {
+      "damageMult": 0.2
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 16,
+     "name": "Heavy Veil",
+     "description": "Damage ×0.9, blind 85% × 2.",
+     "bonus": {
+      "damageMult": 0.2,
+      "statusEffects": [
+       {
+        "type": "blind",
+        "chance": 0.85,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 24,
+     "name": "Deep Veil",
+     "description": "Damage ×1.1, blind 100% × 3.",
+     "bonus": {
+      "damageMult": 0.4,
+      "statusEffects": [
+       {
+        "type": "blind",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "id": "shadow_veil"
+  },
+  "lullaby": {
+   "name": "Lullaby",
+   "class": "enchanter",
+   "unlockLevel": 1,
+   "type": "magic",
+   "damageStat": "damage",
+   "damageMult": 0,
+   "aoe": "single",
+   "mpCost": 8,
+   "cooldown": 2,
+   "statusEffects": [
+    {
+     "type": "sleep",
+     "chance": 0.85,
+     "duration": 2
+    }
+   ],
+   "description": "Sing a soft melody at one foe — 85% chance to put them to Sleep for 2 rounds. Any damage wakes them.",
+   "talents": [
+    {
+     "id": "lb_sure",
+     "name": "Steady Tune",
+     "desc": "Sleep chance 85% → 100%.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "id": "lb_long",
+     "name": "Drowsy Refrain",
+     "desc": "Sleep duration +1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 0.85,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 8,
+     "name": "Soothing Hymn",
+     "description": "100% sleep chance, 2 rounds.",
+     "bonus": {
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 1,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 18,
+     "name": "Endless Lullaby",
+     "description": "100% sleep chance, 3 rounds.",
+     "bonus": {
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 1,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "id": "lullaby"
+  },
+  "mind_charm": {
+   "name": "Mind Charm",
+   "class": "enchanter",
+   "unlockLevel": 4,
+   "type": "magic",
+   "damageStat": "damage",
+   "damageMult": 0.6,
+   "aoe": "single",
+   "mpCost": 14,
+   "cooldown": 3,
+   "statusEffects": [
+    {
+     "type": "confused",
+     "chance": 0.7,
+     "duration": 2
+    }
+   ],
+   "description": "Whisper a charm into a foe — modest psychic damage and a 70% chance to Confuse them for 2 rounds.",
+   "talents": [
+    {
+     "id": "mc_strong",
+     "name": "Insistent Voice",
+     "desc": "Confuse chance 70% → 90%.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "confused",
+        "chance": 0.9,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "id": "mc_silent",
+     "name": "Hush",
+     "desc": "Also Silences for 1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "silence",
+        "chance": 1,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 12,
+     "name": "Bewildering Charm",
+     "description": "90% confuse chance, 3 rounds, +1 silence.",
+     "bonus": {
+      "statusEffects": [
+       {
+        "type": "confused",
+        "chance": 0.9,
+        "duration": 3
+       },
+       {
+        "type": "silence",
+        "chance": 1,
+        "duration": 1
+       }
+      ]
+     }
+    }
+   ],
+   "id": "mind_charm"
+  },
+  "mass_drowse": {
+   "name": "Mass Drowse",
+   "class": "enchanter",
+   "unlockLevel": 8,
+   "type": "magic",
+   "damageStat": "damage",
+   "damageMult": 0,
+   "aoe": "all",
+   "mpCost": 26,
+   "cooldown": 5,
+   "statusEffects": [
+    {
+     "type": "sleep",
+     "chance": 0.55,
+     "duration": 2
+    }
+   ],
+   "description": "A drifting violet mist rolls across the enemy field — every foe rolls 55% to fall asleep for 2 rounds.",
+   "talents": [
+    {
+     "id": "md_potent",
+     "name": "Potent Mist",
+     "desc": "Sleep chance 55% → 75%.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 0.75,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "id": "md_lasting",
+     "name": "Slow Wake",
+     "desc": "Duration +1 round.",
+     "effect": {
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 0.55,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 14,
+     "name": "Heavy Drowse",
+     "description": "70% sleep chance, 2 rounds.",
+     "bonus": {
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 0.7,
+        "duration": 2
+       }
+      ]
+     }
+    },
+    {
+     "level": 22,
+     "name": "Twilight Veil",
+     "description": "85% sleep chance, 3 rounds. Costs 32 MP.",
+     "bonus": {
+      "mpCost": 6,
+      "statusEffects": [
+       {
+        "type": "sleep",
+        "chance": 0.85,
+        "duration": 3
+       }
+      ]
+     }
+    }
+   ],
+   "id": "mass_drowse"
+  },
+  "arcane_jolt": {
+   "name": "Arcane Jolt",
+   "class": "enchanter",
+   "unlockLevel": 12,
+   "type": "magic",
+   "damageStat": "damage",
+   "damageMult": 1.4,
+   "aoe": "single",
+   "mpCost": 18,
+   "cooldown": 2,
+   "description": "A controlled lance of violet psychic force. Deals heavy single-target damage — keep this for finishing the targets you've already put to sleep.",
+   "talents": [
+    {
+     "id": "aj_focus",
+     "name": "Sharpened Focus",
+     "desc": "Damage ×1.4 → ×1.7.",
+     "effect": {
+      "damageMult": 0.3
+     }
+    },
+    {
+     "id": "aj_dreamend",
+     "name": "Dream-End",
+     "desc": "+50% damage to sleeping or confused targets.",
+     "effect": {
+      "damageVsStatus": {
+       "sleep": 0.5,
+       "confused": 0.5
+      }
+     }
+    }
+   ],
+   "upgrades": [
+    {
+     "level": 18,
+     "name": "Rending Jolt",
+     "description": "Damage ×1.7. Costs 22 MP.",
+     "bonus": {
+      "damageMult": 0.3,
+      "mpCost": 4
+     }
+    },
+    {
+     "level": 26,
+     "name": "Mind Shatter",
+     "description": "Damage ×2.0; +50% bonus damage to sleeping or confused targets.",
+     "bonus": {
+      "damageMult": 0.6,
+      "damageVsStatus": {
+       "sleep": 0.5,
+       "confused": 0.5
+      }
+     }
+    }
+   ],
+   "id": "arcane_jolt"
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "NODE_TYPES": {
+  "COMBAT": "combat",
+  "DIALOG": "dialog",
+  "TOWN": "town",
+  "TREASURE": "treasure",
+  "AMBUSH": "ambush",
+  "BOSS": "boss",
+  "LORE": "lore",
+  "SHRINE": "shrine",
+  "CHALLENGE": "challenge",
+  "DUNGEON": "dungeon",
+  "SKILL_CHECK": "skillCheck"
+ }
+}

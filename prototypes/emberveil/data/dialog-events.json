@@ -1,0 +1,5033 @@
+{
+ "DIALOG_EVENTS": {
+  "shady_wanderer": {
+   "id": "shady_wanderer",
+   "bg": "dark_alley",
+   "npcName": "Shady Wanderer",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Oi, hold it right there. Road toll's been raised to ten gold. Goblins broke the bridge further north, y'see..."
+    },
+    {
+     "speaker": "hero",
+     "text": "(He's clearly lying — the bridge is visible behind him, intact.)"
+    }
+   ],
+   "choices": [
+    {
+     "text": "Pay 10 gold.",
+     "effect": {
+      "gold": -10
+     },
+     "outcome": "pay"
+    },
+    {
+     "text": "Refuse. Prepare to fight.",
+     "effect": {
+      "startCombat": "bandit_ambush"
+     },
+     "outcome": "fight"
+    },
+    {
+     "text": "[DEX 14] Slip past unseen.",
+     "skillCheck": {
+      "stat": "DEX",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "sneak_past",
+      "fail": "fight"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "pay": {
+     "text": "He takes your coin with a sneer and steps aside."
+    },
+    "fight": {
+     "text": "He raises his blade. \"Should've paid up!\"",
+     "startCombat": "bandit_ambush"
+    },
+    "sneak_past": {
+     "text": "You melt into the shadows and pass by unseen. He never knew you were there."
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "forest_enter": {
+   "id": "forest_enter",
+   "bg": "forest",
+   "npcName": "Forest Warden",
+   "npcPortrait": "images/spritecook/druid_male_portrait.png",
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The Thornwood has changed. The wolves don't flee from torchlight anymore. Something corrupted them — the same wrongness that's taken the goblins."
+      },
+      {
+       "speaker": "npc",
+       "text": "If you enter, watch the tree lines. And whatever you hear at night... don't follow it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Press on — show no fear.",
+       "next": "brave",
+       "reward": {
+        "xp": 15
+       }
+      },
+      {
+       "text": "Offer your time and aid.",
+       "next": "ally",
+       "reward": {
+        "xp": 20
+       }
+      },
+      {
+       "text": "Turn back; this is too dangerous.",
+       "next": "coward",
+       "reward": {
+        "gold": -5
+       }
+      }
+     ]
+    },
+    "brave": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Courage — real or foolish, I can never tell. Take this warning instead of a blade: the corruption feeds on doubt."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Continue into the Thornwood.",
+       "outcome": "enter"
+      }
+     ],
+     "outcomes": {
+      "enter": {
+       "text": "He steps aside. The woods swallow the path behind you.",
+       "setFlag": "thornwood_brave"
+      }
+     }
+    },
+    "ally": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You'd lend an old warden your ear? Then I'll share what I know."
+      },
+      {
+       "speaker": "npc",
+       "text": "There's a rift — deep in Thornwood. Something tore a hole between here and somewhere else. That's where it's pouring in."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Thank him and move out.",
+       "outcome": "learned"
+      }
+     ],
+     "outcomes": {
+      "learned": {
+       "text": "He presses a warden's charm into your palm.",
+       "setFlag": "knows_rift_origin",
+       "reward": {
+        "item": "warden_charm",
+        "itemName": "Warden's Charm",
+        "itemDesc": "A gift from the Forest Warden — quietly warm to the touch."
+       }
+      }
+     }
+    },
+    "coward": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Wise, perhaps. Or just tired. Either way — the road will still be here when you find your nerve."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "You turn back, the forest watching you go.",
+       "setFlag": "thornwood_refused"
+      }
+     }
+    }
+   }
+  },
+  "seer_hut": {
+   "id": "seer_hut",
+   "bg": "library",
+   "npcName": "Mira the Seer",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I have watched the Emberveil spread for thirty years. What you see is merely the symptom. The wound is somewhere else. Somewhere darker."
+      },
+      {
+       "speaker": "npc",
+       "text": "The goblins did not choose to be what they are now. Something reached into their minds and gave them purpose. A will from beyond."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept her reading of the future.",
+       "next": "accept",
+       "reward": {
+        "xp": 25
+       }
+      },
+      {
+       "text": "Demand proof — her words feel practiced.",
+       "next": "challenge"
+      },
+      {
+       "text": "Offer 20 gold for a deeper vision.",
+       "next": "pay",
+       "requires": {
+        "gold": 20
+       }
+      }
+     ]
+    },
+    "accept": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Then go with open eyes. Carry this — a lens for the Veil."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Take the lens.",
+       "outcome": "take"
+      }
+     ],
+     "outcomes": {
+      "take": {
+       "text": "She presses a cold glass into your hand.",
+       "setFlag": "seer_met",
+       "reward": {
+        "item": "veil_lens",
+        "itemName": "Veil Lens",
+        "itemDesc": "A sliver of smoked glass. The Veil cannot hide from it."
+       }
+      }
+     }
+    },
+    "challenge": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Proof? Proof is a story the blind tell each other. Very well — I'll keep my gifts."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "She turns away. You feel you've lost something you cannot name.",
+       "setFlag": "seer_challenged",
+       "reward": {
+        "gold": -5
+       }
+      }
+     }
+    },
+    "pay": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Gold opens some doors even to the wise."
+      },
+      {
+       "speaker": "npc",
+       "text": "I see a rift in the south — ancient, patient. And I see three hands on a single blade at the very end."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Thank her.",
+       "outcome": "thank"
+      }
+     ],
+     "outcomes": {
+      "thank": {
+       "text": "She smiles thinly. The coins vanish into her sleeve.",
+       "setFlag": "seer_paid",
+       "reward": {
+        "gold": -20,
+        "xp": 60
+       }
+      }
+     }
+    }
+   }
+  },
+  "ash_gate": {
+   "id": "ash_gate",
+   "bg": "mountain_pass",
+   "npcName": "Ashen Sentinel",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Beyond this gate lie the Dust Roads. The air itself burns here — the Emberveil's corruption runs deep in this land."
+      },
+      {
+       "speaker": "npc",
+       "text": "Steel your nerves. The creatures here are not what they once were."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Stand with the sentinel in prayer.",
+       "next": "pray",
+       "reward": {
+        "xp": 10
+       }
+      },
+      {
+       "text": "Bribe him for safe passage (15g).",
+       "next": "bribe",
+       "requires": {
+        "gold": 15
+       }
+      },
+      {
+       "text": "Push past without a word.",
+       "next": "push"
+      }
+     ]
+    },
+    "pray": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Few travelers still remember the old rites. The ancestors will watch you down the Dust Roads."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move out.",
+       "outcome": "enter"
+      }
+     ],
+     "outcomes": {
+      "enter": {
+       "text": "He steps aside. A faint warmth lingers at your back.",
+       "setFlag": "ash_gate_blessed",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "bribe": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I... see nothing. I hear nothing. Go quickly, before I remember my orders."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Hand over the coin.",
+       "outcome": "paid"
+      }
+     ],
+     "outcomes": {
+      "paid": {
+       "text": "The coins disappear into his glove. He will not meet your eye.",
+       "reward": {
+        "gold": -15
+       }
+      }
+     }
+    },
+    "push": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Rude. Unwise. But your funeral, stranger."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Keep walking.",
+       "outcome": "rude"
+      }
+     ],
+     "outcomes": {
+      "rude": {
+       "text": "You cross the gate with his glare burning into your back.",
+       "setFlag": "ash_gate_rude",
+       "reward": {
+        "xp": -5
+       }
+      }
+     }
+    }
+   }
+  },
+  "plateau_enter": {
+   "id": "plateau_enter",
+   "bg": "mountain_pass",
+   "npcName": "Scorched Hermit",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The Molten Plateau is no place for the living. Lava flows shift without warning, and the golems... they guard something ancient."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We'll find a way through.",
+     "outcome": "enter"
+    },
+    {
+     "text": "What do they guard?",
+     "outcome": "ask"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "He shakes his head slowly but does not stop you."
+    },
+    "ask": {
+     "text": "A rift — older than the kingdom itself. It pulses with heat that no natural flame could produce."
+    }
+   }
+  },
+  "rift_access": {
+   "id": "rift_access",
+   "bg": "ruins",
+   "npcName": "Dying Warden",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The rift... is just ahead. I tried to seal it, but the power was too great. You must succeed where I failed."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We will end this.",
+     "outcome": "enter"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "He slumps against the wall. \"Go... quickly...\""
+    }
+   }
+  },
+  "breach_gate": {
+   "id": "breach_gate",
+   "bg": "cave",
+   "npcName": "Veil Watcher",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The Breach widens with every passing hour. Demons pour through — endless, relentless. This is the front line."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We'll hold the line.",
+     "outcome": "enter"
+    },
+    {
+     "text": "How do we close it?",
+     "outcome": "ask"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "She grips her blade tighter. \"Then fight well.\""
+    },
+    "ask": {
+     "text": "Find the Void Altar deep within. Destroy it, and the breach should collapse."
+    }
+   }
+  },
+  "void_altar": {
+   "id": "void_altar",
+   "bg": "temple",
+   "npcName": "Echoing Voice",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You stand before the Void Altar. Reality warps around it — colors bleed, sound distorts. Power radiates from its core."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Destroy the altar.",
+     "outcome": "destroy"
+    },
+    {
+     "text": "Study it first.",
+     "outcome": "study"
+    }
+   ],
+   "outcomes": {
+    "destroy": {
+     "text": "You raise your weapon. The altar screams as the first blow lands."
+    },
+    "study": {
+     "text": "Ancient runes cover its surface. This altar is a conduit — it channels power from somewhere far deeper."
+    }
+   }
+  },
+  "core_enter": {
+   "id": "core_enter",
+   "bg": "cave",
+   "npcName": "Spirit of the Veil",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You have reached the Core. Beyond this point, the veil between worlds is thinnest. The Sovereign waits within."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We end this now.",
+     "outcome": "enter"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "The spirit fades. The path ahead glows with terrible light."
+    }
+   }
+  },
+  "ancient_seal": {
+   "id": "ancient_seal",
+   "bg": "temple",
+   "npcName": "Ancient Seal",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The seal pulses weakly. Whatever power held this barrier is nearly spent. Beyond it, you sense an immense presence."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Break the seal.",
+     "outcome": "break"
+    }
+   ],
+   "outcomes": {
+    "break": {
+     "text": "The seal shatters with a sound like thunder. The way to the Sovereign is open."
+    }
+   }
+  },
+  "rift_entry": {
+   "id": "rift_entry",
+   "bg": "ruins",
+   "npcName": "Void Echo",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Reality itself unravels here. The stars are wrong. The ground shifts beneath your feet. This is the edge of everything."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We've come too far to turn back.",
+     "outcome": "enter"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "The echo fades into silence. Only the void remains."
+    }
+   }
+  },
+  "prophet_sanctum": {
+   "id": "prophet_sanctum",
+   "bg": "throne_room",
+   "npcName": "Void Prophet",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You dare enter my sanctum? I have seen the end of all things. I have walked between stars. You are nothing."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Your reign ends here.",
+     "outcome": "fight"
+    },
+    {
+     "text": "[INT 16] Challenge his prophecy.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 16
+     },
+     "outcomes": {
+      "pass": "doubt",
+      "fail": "fight"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "fight": {
+     "text": "He laughs — a sound like breaking glass. \"Then come.\"",
+     "startCombat": true
+    },
+    "doubt": {
+     "text": "His eyes widen. \"You... you see it too. The flaw in the pattern.\" His power wavers momentarily."
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "void_gates": {
+   "id": "void_gates",
+   "bg": "ruins",
+   "npcName": "Gate Guardian",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The Gates of the Void stand open. Beyond them lies the true darkness — the source of everything that has plagued your world."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We enter the void.",
+     "outcome": "enter"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "The gates swing wide. Cold, absolute darkness swallows you whole."
+    }
+   }
+  },
+  "abyss_gate": {
+   "id": "abyss_gate",
+   "bg": "dungeon",
+   "npcName": "Guardian Shade",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Beyond lies the Abyss — where reality was born and where it ends. The Architect waits in the Primordial Nexus."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We press on.",
+     "outcome": "enter"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "The shade dissolves, granting passage to the depths below."
+    }
+   }
+  },
+  "nexus_gates": {
+   "id": "nexus_gates",
+   "bg": "temple",
+   "npcName": "Echo of Creation",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You stand at the threshold of all creation. The Architect shaped this reality — and now seeks to unmake it."
+    }
+   ],
+   "choices": [
+    {
+     "text": "End this.",
+     "outcome": "enter"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "The echo fades, and the gates of creation swing open before you."
+    }
+   }
+  },
+  "reach_gate": {
+   "id": "reach_gate",
+   "bg": "mountain_pass",
+   "npcName": "Dragon-Sworn Watcher",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Beyond this gate lies the Dragon's Reach — an ancient dragon kingdom carved into living mountain. Dragons rule the sky here, and their dragon-flame can melt steel from leagues away."
+    },
+    {
+     "speaker": "npc",
+     "text": "The Dragon King, Bahamorth, has awakened. If you seek to slay a dragon, slay ALL the dragons, or die to dragon-fire — this is your road."
+    }
+   ],
+   "choices": [
+    {
+     "text": "We hunt dragons. Let us pass.",
+     "outcome": "enter"
+    },
+    {
+     "text": "[INT 14] What do you know of the Dragon King?",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "learn",
+      "fail": "enter"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "She steps aside. A dragon roars somewhere far above."
+    },
+    "learn": {
+     "text": "Bahamorth is older than kingdoms. His dragon-hoard contains weapons forged of dragonsteel — dragon-fang blades, dragon-scale armor. You'll need every dragon-killing trick you know."
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "dragon_cult_altar": {
+   "id": "dragon_cult_altar",
+   "bg": "temple",
+   "npcName": "Dragon Cultist Priest",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The altar glows with dragon-blood. Dragon bones hang from every pillar. The cult of the Dragon King has been waiting for you."
+    },
+    {
+     "speaker": "hero",
+     "text": "\"How long has this altar been bleeding?\""
+    },
+    {
+     "speaker": "npc",
+     "text": "\"Since before your grandmother's grandmother walked. The Dragon King's heart beats in time with it. Quiet it, and you quiet him.\""
+    }
+   ],
+   "choices": [
+    {
+     "text": "Destroy the dragon altar.",
+     "outcome": "destroy"
+    },
+    {
+     "text": "[STR 15] Pry free the dragon-tooth amulet.",
+     "skillCheck": {
+      "stat": "STR",
+      "dc": 15
+     },
+     "outcomes": {
+      "pass": "loot",
+      "fail": "destroy"
+     }
+    },
+    {
+     "text": "[INT 14] Read the altar-script for a weakness.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "weakness",
+      "fail": "destroy"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "destroy": {
+     "text": "The altar cracks, and a dragon-howl echoes from deep within the mountain."
+    },
+    "loot": {
+     "text": "The dragon-tooth amulet is yours. Power radiates from it like heat from a dragon.",
+     "reward": {
+      "item": "dragontooth_amulet",
+      "itemName": "Dragontooth Amulet",
+      "itemDesc": "Carved from an ancient dragon fang. Hums with dragon-fire."
+     }
+    },
+    "weakness": {
+     "text": "The script names the third dragon-scale over the heart as the soft one. You commit it to memory.",
+     "setFlag": "dragon_weak_scale",
+     "reward": {
+      "xp": 90
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "throne_gate": {
+   "id": "throne_gate",
+   "bg": "throne_room",
+   "npcName": "Last Dragon Knight",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You reached the Dragon Throne. Bahamorth, the Dragon King, waits within his dragon-hall. No mortal has survived his dragon-fire in a thousand years."
+    },
+    {
+     "speaker": "hero",
+     "text": "\"And you held this door alone all that time?\""
+    },
+    {
+     "speaker": "npc",
+     "text": "\"I held it because no one came. You came. That is its own dragon-fire — burning the old story off the door.\""
+    }
+   ],
+   "choices": [
+    {
+     "text": "Then we will be the first.",
+     "outcome": "enter"
+    },
+    {
+     "text": "[CHA 15] Ask him to charge the dragon at your side.",
+     "skillCheck": {
+      "stat": "CHA",
+      "dc": 15
+     },
+     "outcomes": {
+      "pass": "allied",
+      "fail": "enter"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "The Dragon Knight bows once. \"Slay the dragon. End the dragon age.\""
+    },
+    "allied": {
+     "text": "\"Aye. I will hold the throne-room door until you take the Dragon King's head. Strike true.\"",
+     "setFlag": "dragon_knight_ally",
+     "reward": {
+      "xp": 120,
+      "gold": 60
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "dragon_oracle": {
+   "id": "dragon_oracle",
+   "bg": "library",
+   "npcName": "Dragon Oracle",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "I have seen every dragon that has lived and every dragon yet to hatch. Bahamorth's dragon-heart is his weakness — it beats beneath three dragon-scales of pure dragon-steel."
+    },
+    {
+     "speaker": "npc",
+     "text": "Strike the dragon-heart, and the Dragon King will fall. Fail, and dragon-fire will consume your bones."
+    },
+    {
+     "speaker": "hero",
+     "text": "\"Which of the three scales gives?\""
+    },
+    {
+     "speaker": "npc",
+     "text": "\"The third. Always the third. The first two are lies. Remember that when the fire is on you.\""
+    }
+   ],
+   "choices": [
+    {
+     "text": "Thank you, dragon oracle.",
+     "outcome": "enter",
+     "reward": {
+      "xp": 120
+     }
+    },
+    {
+     "text": "[INT 16] Ask for the exact rhythm of his heartbeat.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 16
+     },
+     "outcomes": {
+      "pass": "rhythm",
+      "fail": "enter"
+     }
+    },
+    {
+     "text": "[WIS 15] Ask what the dragon-king fears most.",
+     "skillCheck": {
+      "stat": "WIS",
+      "dc": 15
+     },
+     "outcomes": {
+      "pass": "fear",
+      "fail": "enter"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "enter": {
+     "text": "She sinks back into dragon-shaped silence."
+    },
+    "rhythm": {
+     "text": "\"One-two-three. One-two-three. He breathes between the threes. Strike on the breath.\"",
+     "setFlag": "dragon_rhythm_known",
+     "reward": {
+      "xp": 160
+     }
+    },
+    "fear": {
+     "text": "\"His own reflection. He has not seen it in a thousand years and he does not want to.\"",
+     "setFlag": "dragon_fear_known",
+     "reward": {
+      "xp": 140
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "act1_dying_soldier": {
+   "id": "act1_dying_soldier",
+   "bg": "dungeon",
+   "npcName": "Mortally Wounded Soldier",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Please. Is there a healer among you? A priest, even a novice?"
+      },
+      {
+       "speaker": "npc",
+       "text": "The goblins overran our post at dawn. I'm the last."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Healer in party] Tend to his wounds.",
+       "next": "cleric_heals",
+       "requires": {
+        "partyTag": "healer"
+       },
+       "reward": {
+        "xp": 50
+       }
+      },
+      {
+       "text": "We have no healer. I'm sorry.",
+       "next": "no_healer"
+      },
+      {
+       "text": "[STR 12] Carry him to the road.",
+       "next": "carry",
+       "requires": {
+        "stat": {
+         "stat": "STR",
+         "min": 12
+        }
+       }
+      }
+     ]
+    },
+    "cleric_heals": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The healing light... thank you. I thought I'd die in the mud."
+      },
+      {
+       "speaker": "npc",
+       "text": "Take my lieutenant's seal. If you reach Emberglen, show it to the garrison commander."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept the seal.",
+       "outcome": "healed"
+      }
+     ],
+     "outcomes": {
+      "healed": {
+       "text": "He clasps your hand once, fiercely. Then he sleeps.",
+       "setFlag": "saved_soldier",
+       "reward": {
+        "xp": 80,
+        "gold": 60,
+        "item": "lieutenant_seal",
+        "itemName": "Lieutenant's Seal",
+        "itemDesc": "A cracked brass disc — still warm."
+       }
+      }
+     }
+    },
+    "no_healer": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I understand. Then sit with me, just for a moment."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Stay until he fades.",
+       "outcome": "stayed"
+      },
+      {
+       "text": "Press on — time is short.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "stayed": {
+       "text": "He does not die alone. A small mercy.",
+       "setFlag": "stayed_with_soldier",
+       "reward": {
+        "xp": 30
+       }
+      },
+      "left": {
+       "text": "You walk away. You don't look back.",
+       "setFlag": "left_soldier"
+      }
+     }
+    },
+    "carry": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "His weight is considerable, but you manage."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Bring him to the road.",
+       "outcome": "carried"
+      }
+     ],
+     "outcomes": {
+      "carried": {
+       "text": "You set him under a tree where a passing cart will find him. It's the best you can do.",
+       "setFlag": "carried_soldier",
+       "reward": {
+        "xp": 60,
+        "gold": 40
+       }
+      }
+     }
+    }
+   }
+  },
+  "act1_warden_reward": {
+   "id": "act1_warden_reward",
+   "bg": "forest",
+   "npcName": "Forest Warden",
+   "npcPortrait": "images/spritecook/druid_male_portrait.png",
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Word travels in these woods. They say you entered Thornwood without flinching."
+      },
+      {
+       "speaker": "npc",
+       "text": "Courage is not common. I'd like to ask something of you."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Hear him out.",
+       "next": "request",
+       "requires": {
+        "flag": "thornwood_brave"
+       }
+      },
+      {
+       "text": "We are busy.",
+       "next": "dismiss"
+      }
+     ]
+    },
+    "request": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "My apprentice went north three days ago and has not returned. If you find any sign of him — bring it back."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Agree to look.",
+       "outcome": "agree"
+      },
+      {
+       "text": "Name a price first.",
+       "outcome": "price"
+      }
+     ],
+     "outcomes": {
+      "agree": {
+       "text": "He presses a warden's token into your hand. \"Show this to the northern posts — they'll let you through.\"",
+       "setFlag": "seek_apprentice",
+       "reward": {
+        "xp": 40,
+        "item": "warden_token",
+        "itemName": "Warden's Token",
+        "itemDesc": "Opens doors in the northern forest."
+       }
+      },
+      "price": {
+       "text": "He names two hundred gold. You argue him to one-fifty. A deal.",
+       "setFlag": "seek_apprentice_paid",
+       "reward": {
+        "gold": 150
+       }
+      }
+     }
+    },
+    "dismiss": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Fair enough. You owe this wood nothing."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "leave"
+      }
+     ],
+     "outcomes": {
+      "leave": {
+       "text": "He steps aside. The path is clear."
+      }
+     }
+    }
+   }
+  },
+  "act1_hedge_mage": {
+   "id": "act1_hedge_mage",
+   "bg": "dark_alley",
+   "npcName": "Hedge-Mage",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Enchantments! Very legal enchantments! The realest kind! Only fifty gold, barely cursed at all!"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Buy an enchantment (50g).",
+       "next": "buy",
+       "requires": {
+        "gold": 50
+       }
+      },
+      {
+       "text": "[INT 12] Inspect his merchandise first.",
+       "next": "inspect",
+       "requires": {
+        "stat": {
+         "stat": "INT",
+         "min": 12
+        }
+       }
+      },
+      {
+       "text": "Walk away quickly.",
+       "next": "leave"
+      }
+     ]
+    },
+    "buy": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Excellent choice! You'll feel the power any moment now. Any. Moment."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Wait for the power.",
+       "outcome": "wait"
+      },
+      {
+       "text": "Demand a refund.",
+       "outcome": "refund"
+      }
+     ],
+     "outcomes": {
+      "wait": {
+       "text": "Nothing happens. Then something small crackles in your chest. You feel oddly alert.",
+       "reward": {
+        "gold": -50,
+        "xp": 70
+       },
+       "setFlag": "bought_enchantment"
+      },
+      "refund": {
+       "text": "He gives back forty gold with enormous reluctance.",
+       "reward": {
+        "gold": -10
+       }
+      }
+     }
+    },
+    "inspect": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Oh, you see through me. Good. Real price: twenty gold. Actual benefit: minor and temporary."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Still buy (20g).",
+       "outcome": "smart_buy"
+      },
+      {
+       "text": "Decline honestly.",
+       "outcome": "pass"
+      }
+     ],
+     "outcomes": {
+      "smart_buy": {
+       "text": "You hand him twenty gold and feel a genuine flicker of something in your blood.",
+       "reward": {
+        "gold": -20,
+        "xp": 50
+       },
+       "setFlag": "smart_enchantment"
+      },
+      "pass": {
+       "text": "He shrugs with professional equanimity."
+      }
+     }
+    },
+    "leave": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You're making a mistake! A very safe mistake!"
+      }
+     ],
+     "choices": [
+      {
+       "text": "Keep walking.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "His voice fades behind you."
+      }
+     }
+    }
+   }
+  },
+  "act1_charm_cache": {
+   "id": "act1_charm_cache",
+   "bg": "forest",
+   "npcName": "Mossy Cairn",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "Stones stacked by careful hands. The warden's charm in your pack hums faintly in response."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Press the charm against the cairn.",
+     "outcome": "open",
+     "requires": {
+      "inventoryItem": "warden_charm"
+     }
+    },
+    {
+     "text": "Leave it undisturbed.",
+     "outcome": "leave"
+    }
+   ],
+   "outcomes": {
+    "open": {
+     "text": "The stones shift. Inside: a sealed pouch of silver and a rune-scratched ring. A warden's cache, left for emergencies.",
+     "setFlag": "charm_cache_opened",
+     "reward": {
+      "gold": 120,
+      "xp": 40,
+      "item": "rune_ring",
+      "itemName": "Rune Ring",
+      "itemDesc": "A ring with a single carved rune. It feels old."
+     }
+    },
+    "leave": {
+     "text": "The cairn sits undisturbed. The charm hums and then quiets."
+    }
+   }
+  },
+  "act1_ghost_pact": {
+   "id": "act1_ghost_pact",
+   "bg": "dungeon",
+   "npcName": "Faded Shade",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You see me. So few can. The Veil is thinning here — or you are unusually hard to kill."
+      },
+      {
+       "speaker": "npc",
+       "text": "I am what remains of a hedge-knight who met the Veil fifty years before its time. A pact went wrong. I could use your strength."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[CON 14] Accept the pact.",
+       "next": "pact",
+       "requires": {
+        "stat": {
+         "stat": "CON",
+         "min": 14
+        }
+       }
+      },
+      {
+       "text": "Ask what the pact costs.",
+       "next": "ask"
+      },
+      {
+       "text": "Refuse.",
+       "next": "refuse"
+      }
+     ]
+    },
+    "pact": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "You feel a cold settling in your chest — not painful, merely permanent. You carry a little of me now."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept the weight.",
+       "outcome": "accepted"
+      }
+     ],
+     "outcomes": {
+      "accepted": {
+       "text": "The shade fades. Your skin is slightly cooler than before.",
+       "setFlag": "ghost_pact",
+       "reward": {
+        "xp": 90,
+        "item": "shade_band",
+        "itemName": "Shade Band",
+        "itemDesc": "A ring of cold iron. You feel watched."
+       }
+      }
+     }
+    },
+    "ask": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "A small fraction of your vitality. You will not notice. The benefit — I will warn you before certain dangers."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Accept the pact.",
+       "outcome": "accepted_informed"
+      },
+      {
+       "text": "Decline.",
+       "outcome": "declined"
+      }
+     ],
+     "outcomes": {
+      "accepted_informed": {
+       "text": "Fair deal. The shade nods once and fades.",
+       "setFlag": "ghost_pact_informed",
+       "reward": {
+        "xp": 70,
+        "gold": 30
+       }
+      },
+      "declined": {
+       "text": "It shrugs — or tries to, without solid shoulders. \"Wise.\""
+      }
+     }
+    },
+    "refuse": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Understandable. I would not trust me either."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "The shade wavers and dissipates. You feel the road is slightly less crowded."
+      }
+     }
+    }
+   }
+  },
+  "act1_merchant_resurfaces": {
+   "id": "act1_merchant_resurfaces",
+   "bg": "dark_alley",
+   "npcName": "Recovered Merchant",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "I'll be damned! You made it past the herald. I've been telling everyone in Emberglen about you."
+    },
+    {
+     "speaker": "npc",
+     "text": "Well — I told two people. But still."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Ask if he's rebuilt his business.",
+     "outcome": "ask",
+     "requires": {
+      "flag": "prologue_warned"
+     }
+    },
+    {
+     "text": "Accept his thanks.",
+     "outcome": "thanks"
+    }
+   ],
+   "outcomes": {
+    "ask": {
+     "text": "He pulled in a favour, salvaged some stock. A crate of supplies now rides on a borrowed cart. \"You have my thanks and ten percent off anything I carry.\"",
+     "setFlag": "merchant_friend",
+     "reward": {
+      "gold": 80,
+      "xp": 25
+     }
+    },
+    "thanks": {
+     "text": "He pumps your hand vigorously. You feel it in your wrist for an hour.",
+     "reward": {
+      "xp": 20
+     }
+    }
+   }
+  },
+  "act1_lieutenant": {
+   "id": "act1_lieutenant",
+   "bg": "mountain_pass",
+   "npcName": "Garrison Lieutenant",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "A word. My man sent a runner — the one you carried off the road. He wants you to have this."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Accept the reward.",
+     "outcome": "accept",
+     "requires": {
+      "flag": "saved_soldier"
+     }
+    },
+    {
+     "text": "Refuse — it was nothing.",
+     "outcome": "refuse"
+    }
+   ],
+   "outcomes": {
+    "accept": {
+     "text": "He hands you a garrison token and a purse. \"You're a friend of the post. That means something out here.\"",
+     "setFlag": "garrison_friend",
+     "reward": {
+      "gold": 140,
+      "xp": 50,
+      "item": "garrison_token",
+      "itemName": "Garrison Token",
+      "itemDesc": "Admits one to any garrison storehouse."
+     }
+    },
+    "refuse": {
+     "text": "He insists. You compromise and take only the token. He respects this.",
+     "setFlag": "garrison_friend",
+     "reward": {
+      "item": "garrison_token",
+      "itemName": "Garrison Token",
+      "itemDesc": "Admits one to any garrison storehouse."
+     }
+    }
+   }
+  },
+  "act1_spell_seeker": {
+   "id": "act1_spell_seeker",
+   "bg": "dark_alley",
+   "npcName": "Eager Apprentice",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Please! Are any of you mages? Real mages? I've been trying to find one for weeks."
+      },
+      {
+       "speaker": "npc",
+       "text": "My master died before teaching me the third form of Arcane Bolt. I've been stuck at the second form for months."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Arcane caster] Show him the third form.",
+       "next": "teach",
+       "requires": {
+        "partyTag": "arcane"
+       }
+      },
+      {
+       "text": "We can't help.",
+       "next": "cant"
+      },
+      {
+       "text": "[INT 14] Sketch the form from memory.",
+       "next": "sketch",
+       "requires": {
+        "stat": {
+         "stat": "INT",
+         "min": 14
+        }
+       }
+      }
+     ]
+    },
+    "teach": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Yes! Yes, that's it — I can feel the current. Thank you, thank you, THANK—"
+      },
+      {
+       "speaker": "hero",
+       "text": "He accidentally fires the third form into a passing cart. The cart is fine. The wheel is not."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave before anyone asks questions.",
+       "outcome": "fled"
+      }
+     ],
+     "outcomes": {
+      "fled": {
+       "text": "You walk very quickly away. He shouts his thanks from behind a cloud of smoke.",
+       "setFlag": "taught_apprentice",
+       "reward": {
+        "xp": 60,
+        "gold": 40
+       }
+      }
+     }
+    },
+    "cant": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Oh. Right. Of course. Sorry to bother you."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Continue.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "He slumps against the wall with the specific posture of someone practising disappointment."
+      }
+     }
+    },
+    "sketch": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "This is... not quite right. But it's closer than I've ever been. I can work from this."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Wish him luck.",
+       "outcome": "sketched"
+      }
+     ],
+     "outcomes": {
+      "sketched": {
+       "text": "He takes the sketch with trembling hands. You feel you've done a small but genuine good.",
+       "setFlag": "sketched_form",
+       "reward": {
+        "xp": 45,
+        "gold": 25
+       }
+      }
+     }
+    }
+   }
+  },
+  "act2_shrine_desecrated": {
+   "id": "act2_shrine_desecrated",
+   "bg": "mountain_pass",
+   "npcName": "Shattered Shrine",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "A roadside shrine — smashed. The idol inside has been replaced with a lump of scorched coal."
+      },
+      {
+       "speaker": "hero",
+       "text": "Something in the coal stirs. A wrongness, small but deliberate."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Holy ally] Purify the shrine.",
+       "next": "purify",
+       "requires": {
+        "partyTag": "holy"
+       }
+      },
+      {
+       "text": "[INT 14] Study the coal's markings.",
+       "next": "study",
+       "requires": {
+        "stat": {
+         "stat": "INT",
+         "min": 14
+        }
+       }
+      },
+      {
+       "text": "Smash the coal and move on.",
+       "next": "smash"
+      },
+      {
+       "text": "Leave it. Not your shrine.",
+       "next": "leave"
+      }
+     ]
+    },
+    "purify": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Light floods the alcove. The coal crumbles to ordinary ash."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Complete the rite.",
+       "outcome": "purified"
+      }
+     ],
+     "outcomes": {
+      "purified": {
+       "text": "The shrine hums quietly with restored purpose. You feel it acknowledged you.",
+       "setFlag": "purified_shrine",
+       "reward": {
+        "xp": 80,
+        "item": "holy_band",
+        "itemName": "Holy Band",
+        "itemDesc": "A ring the shrine pressed to your hand while you worked."
+       }
+      }
+     }
+    },
+    "study": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Veil-cult script. A binding, meant to anchor a minor haunt to the road and delay travelers."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Unravel the binding.",
+       "outcome": "unraveled"
+      },
+      {
+       "text": "Leave it documented.",
+       "outcome": "documented"
+      }
+     ],
+     "outcomes": {
+      "unraveled": {
+       "text": "You work the binding loose in five minutes. The coal cracks. The haunt dissolves.",
+       "setFlag": "unraveled_binding",
+       "reward": {
+        "xp": 70,
+        "gold": 50
+       }
+      },
+      "documented": {
+       "text": "A sketch for the warden. Knowledge is its own weapon.",
+       "setFlag": "documented_binding",
+       "reward": {
+        "xp": 40
+       }
+      }
+     }
+    },
+    "smash": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The coal shatters. Something small and angry disperses."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Continue.",
+       "outcome": "smashed"
+      }
+     ],
+     "outcomes": {
+      "smashed": {
+       "text": "It worked. The road feels less watched.",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "leave": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Someone else's problem. The road is long."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk past.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "You feel the wrongness at your back for the next mile."
+      }
+     }
+    }
+   }
+  },
+  "act2_sentinel_comrade": {
+   "id": "act2_sentinel_comrade",
+   "bg": "mountain_pass",
+   "npcName": "Off-Duty Sentinel",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Ah — you're the ones who stood with Darven at the gate. He told me. Old rites, still observed. That's rarer than it should be."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Accept his thanks.",
+     "outcome": "thanks",
+     "requires": {
+      "flag": "ash_gate_blessed"
+     }
+    },
+    {
+     "text": "We don't know what you mean.",
+     "outcome": "unknown"
+    }
+   ],
+   "outcomes": {
+    "thanks": {
+     "text": "He clasps both hands over yours and presses a soldier's ring into your palm. \"May the road return it someday.\"",
+     "setFlag": "sentinel_thanks",
+     "reward": {
+      "gold": 100,
+      "xp": 50,
+      "item": "soldier_band",
+      "itemName": "Soldier's Band",
+      "itemDesc": "Worn by those who still know the old words."
+     }
+    },
+    "unknown": {
+     "text": "He studies your face. \"You were there. I'm sure of it.\" He lets it go."
+    }
+   }
+  },
+  "act2_bard_crowd": {
+   "id": "act2_bard_crowd",
+   "bg": "dark_alley",
+   "npcName": "Desperate Refugee",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Forty of us in that barn, cold and too tired to sleep. We've been walking for six days."
+      },
+      {
+       "speaker": "npc",
+       "text": "If you have anything — a song, a story, anything — I'll give what little I have left."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Bard in party] Perform.",
+       "next": "bard",
+       "requires": {
+        "partyClass": "bard"
+       }
+      },
+      {
+       "text": "[CHA 12] Tell a story.",
+       "next": "story",
+       "requires": {
+        "stat": {
+         "stat": "CHA",
+         "min": 12
+        }
+       }
+      },
+      {
+       "text": "Give them 20 gold.",
+       "next": "gold",
+       "requires": {
+        "gold": 20
+       }
+      },
+      {
+       "text": "You have nothing to give.",
+       "next": "nothing"
+      }
+     ]
+    },
+    "bard": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The barn goes quiet. Then — singing. Forty voices joining yours one by one."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Finish the song.",
+       "outcome": "sang"
+      }
+     ],
+     "outcomes": {
+      "sang": {
+       "text": "They sleep well that night. You don't need coin for that. But they give what they have anyway.",
+       "setFlag": "sang_for_refugees",
+       "reward": {
+        "xp": 100,
+        "gold": 60
+       }
+      }
+     }
+    },
+    "story": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "They lean in. Children, elders, everyone. You make something up. It doesn't matter — they believe it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Finish the story.",
+       "outcome": "told"
+      }
+     ],
+     "outcomes": {
+      "told": {
+       "text": "The night passes warmer.",
+       "setFlag": "told_story_refugees",
+       "reward": {
+        "xp": 60,
+        "gold": 30
+       }
+      }
+     }
+    },
+    "gold": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "He stares at the coins like he's forgotten what they're for. Then memory returns."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave them to it.",
+       "outcome": "gave"
+      }
+     ],
+     "outcomes": {
+      "gave": {
+       "text": "\"Bless you.\" Simple. Insufficient. True.",
+       "reward": {
+        "gold": -20,
+        "xp": 50
+       }
+      }
+     }
+    },
+    "nothing": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "He nods. He expected nothing. He is past disappointment."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "You carry the weight of that for a while."
+      }
+     }
+    }
+   }
+  },
+  "act2_thief_encounter": {
+   "id": "act2_thief_encounter",
+   "bg": "dark_alley",
+   "npcName": "Caught Thief",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Oh. Ah. This — this is not what it looks like. Unless it looks like I'm stealing from a warlord's supply cache. In which case it is exactly what it looks like."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Help him finish the job.",
+       "next": "help",
+       "requires": {
+        "stat": {
+         "stat": "DEX",
+         "min": 16
+        }
+       }
+      },
+      {
+       "text": "Turn him in for a reward.",
+       "next": "turnin"
+      },
+      {
+       "text": "Leave him to it.",
+       "next": "leave"
+      }
+     ]
+    },
+    "help": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Your hands are steadier than mine. The lock barely whispered."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Split the take.",
+       "outcome": "split"
+      }
+     ],
+     "outcomes": {
+      "split": {
+       "text": "The cache yields coin, rations, and one small curiosity — a ring with a lock-pick engraved on the band.",
+       "setFlag": "helped_thief",
+       "reward": {
+        "gold": 180,
+        "xp": 60,
+        "item": "lockpick_ring",
+        "itemName": "Lock-Pick Ring",
+        "itemDesc": "A ring worn by the warlord's own quartermaster."
+       }
+      }
+     }
+    },
+    "turnin": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "He looks resigned. \"Fair enough. I expected this end.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Report him.",
+       "outcome": "turned"
+      }
+     ],
+     "outcomes": {
+      "turned": {
+       "text": "The garrison gives you thirty gold and a formal thanks. The thief gives you a look that costs more.",
+       "reward": {
+        "gold": 30,
+        "xp": 20
+       }
+      }
+     }
+    },
+    "leave": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "\"You're an interesting kind of person.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk away.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "Behind you, a soft click. He got in. Well done, you suppose."
+      }
+     }
+    }
+   }
+  },
+  "act2_veil_lens_activates": {
+   "id": "act2_veil_lens_activates",
+   "bg": "ruins",
+   "npcName": "Veil Crack",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "The Veil Lens in your pack hums — loud, insistent. Through the crack in the rock, you can see beyond the Dust Roads into somewhere else."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Look through the lens.",
+     "outcome": "look",
+     "requires": {
+      "inventoryItem": "veil_lens"
+     }
+    },
+    {
+     "text": "Back away from the crack.",
+     "outcome": "back"
+    }
+   ],
+   "outcomes": {
+    "look": {
+     "text": "For three seconds you see the other side: a vast burning plain, something vast and patient moving across it. Then the lens cools and the vision fades. You understand now that this is not a border. It is a wound.",
+     "setFlag": "saw_through_veil",
+     "reward": {
+      "xp": 120
+     }
+    },
+    "back": {
+     "text": "You feel it even with your eyes closed. The wrongness is directional."
+    }
+   }
+  },
+  "act2_mass_grave": {
+   "id": "act2_mass_grave",
+   "bg": "dungeon",
+   "npcName": "Mass Grave",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Forty-odd graves, unmarked. The Veil-corruption in the soil is thin but present."
+      },
+      {
+       "speaker": "hero",
+       "text": "Left unaddressed, the bodies will turn by the next new moon."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Dark caster] Seal the graves against turning.",
+       "next": "necro",
+       "requires": {
+        "partyTag": "dark"
+       }
+      },
+      {
+       "text": "Mark them and move on.",
+       "next": "mark"
+      },
+      {
+       "text": "Nothing to be done here.",
+       "next": "nothing"
+      }
+     ]
+    },
+    "necro": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The air around the graves settles — resistant, then resigned. The corruption is bound."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Complete the binding.",
+       "outcome": "sealed"
+      }
+     ],
+     "outcomes": {
+      "sealed": {
+       "text": "The graves go quiet. Whatever was stirring rests again. This is what necromancers are actually for.",
+       "setFlag": "sealed_mass_grave",
+       "reward": {
+        "xp": 100,
+        "gold": 50
+       }
+      }
+     }
+    },
+    "mark": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "You drive a notched stick into the earth at the head of the field. Someone else may deal with this."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Continue.",
+       "outcome": "marked"
+      }
+     ],
+     "outcomes": {
+      "marked": {
+       "text": "It is insufficient. But you did something.",
+       "reward": {
+        "xp": 20
+       }
+      }
+     }
+    },
+    "nothing": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "You look at the graves for a moment that feels longer than it is."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "The graves stay quiet — for now."
+      }
+     }
+    }
+   }
+  },
+  "act2_mira_vision_paid": {
+   "id": "act2_mira_vision_paid",
+   "bg": "library",
+   "npcName": "Memory of Mira",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "Mira's vision returns without warning. The rift in the south. Three hands on a blade. Then: a name, scratched into stone just ahead."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Search for the name.",
+     "outcome": "search",
+     "requires": {
+      "flag": "seer_paid"
+     }
+    },
+    {
+     "text": "Shake off the vision.",
+     "outcome": "shake"
+    }
+   ],
+   "outcomes": {
+    "search": {
+     "text": "You find it in ten minutes. Scratched into a waystone, half-buried: \"Ember — not a place. A plan.\" Below that, a sealed iron capsule with a ring inside.",
+     "setFlag": "found_mira_clue",
+     "reward": {
+      "xp": 80,
+      "gold": 60,
+      "item": "ember_band",
+      "itemName": "Ember Band",
+      "itemDesc": "A ring with a single word etched inside: Patience."
+     }
+    },
+    "shake": {
+     "text": "The vision scatters. You keep moving. You remember the rift in the south."
+    }
+   }
+  },
+  "act2_forgemaster": {
+   "id": "act2_forgemaster",
+   "bg": "dungeon",
+   "npcName": "Ashen Forge-Master",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Ah — travelers. I have a proposition. My wagon is buried axle-deep in the ash. Thirty gold says you'll either help or have no cash."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[STR 15] Heave it free (30g deposit).",
+       "next": "heave",
+       "requires": {
+        "stat": {
+         "stat": "STR",
+         "min": 15
+        },
+        "gold": 30
+       }
+      },
+      {
+       "text": "Negotiate a smaller fee.",
+       "next": "negotiate"
+      },
+      {
+       "text": "Keep walking.",
+       "next": "walk"
+      }
+     ]
+    },
+    "heave": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The wagon groans, then surrenders. The forge-master applauds with the enthusiasm of a man who did no work."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Collect the deposit refund and bonus.",
+       "outcome": "heaved"
+      }
+     ],
+     "outcomes": {
+      "heaved": {
+       "text": "\"As promised — plus a little extra for the quality of the heave.\" He hands you a forged ring, still warm from the wagon furnace.",
+       "reward": {
+        "gold": 70,
+        "xp": 60,
+        "item": "forge_ring",
+        "itemName": "Forge Ring",
+        "itemDesc": "Made by an ashen forge-master in the back of a stuck wagon."
+       }
+      }
+     }
+    },
+    "negotiate": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Ten gold. A fair counter for an unfair situation."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Push at ten gold — no muscle needed.",
+       "outcome": "pushed"
+      },
+      {
+       "text": "Decline.",
+       "outcome": "dec"
+      }
+     ],
+     "outcomes": {
+      "pushed": {
+       "text": "He finds three travelers willing to do it for fifteen. You save fifteen gold and find this outcome morally neutral.",
+       "reward": {
+        "xp": 15
+       }
+      },
+      "dec": {
+       "text": "He shrugs and returns to waiting."
+      }
+     }
+    },
+    "walk": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "\"Next time, then!\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Keep walking.",
+       "outcome": "walked"
+      }
+     ],
+     "outcomes": {
+      "walked": {
+       "text": "His voice fades behind a drift of ash."
+      }
+     }
+    }
+   }
+  },
+  "act3_shade_warning": {
+   "id": "act3_shade_warning",
+   "bg": "dungeon",
+   "npcName": "Faded Shade",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The cold in your chest stirs. The shade you bound in Act 1 speaks — just for a moment, just enough."
+    },
+    {
+     "speaker": "npc",
+     "text": "\"The Archfiend reads fire. Lead with frost. He hates things that can't be burned.\""
+    }
+   ],
+   "choices": [
+    {
+     "text": "Acknowledge the warning.",
+     "outcome": "heard",
+     "requires": {
+      "flag": "ghost_pact"
+     }
+    },
+    {
+     "text": "You feel nothing — wrong person.",
+     "outcome": "wrong"
+    }
+   ],
+   "outcomes": {
+    "heard": {
+     "text": "The cold quiets. The warning costs the shade nothing. It was the minimum it could do.",
+     "setFlag": "shade_warned_malgrath",
+     "reward": {
+      "xp": 60
+     }
+    },
+    "wrong": {
+     "text": "A draft in the tunnel. Nothing more."
+    }
+   }
+  },
+  "act3_demon_recognises": {
+   "id": "act3_demon_recognises",
+   "bg": "dungeon",
+   "npcName": "Chained Imp",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "A Demon Hunter. I can smell the burning purpose on you."
+      },
+      {
+       "speaker": "npc",
+       "text": "Kill me and I scream. Every imp in a mile radius will hear. Spare me and I tell you where the Archfiend keeps his heart."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Demon Hunter] Listen to the deal.",
+       "next": "deal",
+       "requires": {
+        "partyClass": "demon_hunter"
+       }
+      },
+      {
+       "text": "Kill it.",
+       "next": "kill"
+      },
+      {
+       "text": "Walk away.",
+       "next": "leave"
+      }
+     ]
+    },
+    "deal": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "His left gauntlet. A scar in the shape of a lock. Strike it — and he cannot heal. You're welcome."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Let it go.",
+       "outcome": "deal_done"
+      },
+      {
+       "text": "Kill it anyway.",
+       "outcome": "betrayed"
+      }
+     ],
+     "outcomes": {
+      "deal_done": {
+       "text": "It scurries off. You will probably regret this. Or you won't.",
+       "setFlag": "malgrath_weakness_known",
+       "reward": {
+        "xp": 80
+       }
+      },
+      "betrayed": {
+       "text": "It screams. Very loudly. Several imps arrive. This is now a problem of your own making.",
+       "reward": {
+        "xp": 30
+       }
+      }
+     }
+    },
+    "kill": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "It was right about the screaming."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Fight the response.",
+       "outcome": "killed"
+      }
+     ],
+     "outcomes": {
+      "killed": {
+       "text": "You win the skirmish. The information dies with it.",
+       "reward": {
+        "xp": 40,
+        "gold": 20
+       }
+      }
+     }
+    },
+    "leave": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "That's fine. I'll find someone else to betray my master to."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Keep walking.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "Its laughter echoes in the tunnel."
+      }
+     }
+    }
+   }
+  },
+  "act3_veil_sight_bleed": {
+   "id": "act3_veil_sight_bleed",
+   "bg": "dungeon",
+   "npcName": "Inner Voice",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "The thing you saw through Mira's lens — the vast patient shape — you see its shadow again, briefly, overlaid on the hellfire of the breach."
+    },
+    {
+     "speaker": "hero",
+     "text": "It is further away than it should be. It is closer than it was. It noticed you noticing it."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Record what you see.",
+     "outcome": "record",
+     "requires": {
+      "flag": "saw_through_veil"
+     }
+    },
+    {
+     "text": "Push the vision away.",
+     "outcome": "push"
+    }
+   ],
+   "outcomes": {
+    "record": {
+     "text": "You write in the margin of whatever you're carrying: \"Patient. Directional. Aware.\" Then you close the book and keep walking.",
+     "setFlag": "veil_sight_recurring",
+     "reward": {
+      "xp": 90
+     }
+    },
+    "push": {
+     "text": "The shadow retreats. You don't think you pushed it. You think it stepped back."
+    }
+   }
+  },
+  "act3_blackmarket_fence": {
+   "id": "act3_blackmarket_fence",
+   "bg": "dark_alley",
+   "npcName": "Black-Market Fence",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "I acquire things. Things from behind doors that shouldn't be opened, from ruins that shouldn't be entered."
+      },
+      {
+       "speaker": "npc",
+       "text": "I have one item today. A ring, recovered from the Pit Tyrant's own treasury. Asking price: a hundred gold."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Buy it (100g).",
+       "next": "buy",
+       "requires": {
+        "gold": 100
+       }
+      },
+      {
+       "text": "[CHA 14] Haggle aggressively.",
+       "next": "haggle",
+       "requires": {
+        "stat": {
+         "stat": "CHA",
+         "min": 14
+        }
+       }
+      },
+      {
+       "text": "Decline.",
+       "next": "decline"
+      }
+     ]
+    },
+    "buy": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "No questions. No receipt. You understand."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Complete the transaction.",
+       "outcome": "bought"
+      }
+     ],
+     "outcomes": {
+      "bought": {
+       "text": "The ring is cold and heavy. It feels like something that should not leave the place it came from.",
+       "reward": {
+        "gold": -100,
+        "xp": 40,
+        "item": "pit_ring",
+        "itemName": "Pit Ring",
+        "itemDesc": "The coldest ring you've ever held. Does not warm."
+       }
+      }
+     }
+    },
+    "haggle": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Sixty gold. You have a talent for this that borders on aggressive."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Sixty gold it is.",
+       "outcome": "haggled"
+      },
+      {
+       "text": "Walk.",
+       "outcome": "walked"
+      }
+     ],
+     "outcomes": {
+      "haggled": {
+       "text": "You get the ring for sixty. It is still very cold.",
+       "reward": {
+        "gold": -60,
+        "xp": 55,
+        "item": "pit_ring",
+        "itemName": "Pit Ring",
+        "itemDesc": "The coldest ring you've ever held. Does not warm."
+       }
+      },
+      "walked": {
+       "text": "He doesn't call after you. He knows you'll think about it."
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Someone else will want it. They always do."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Leave.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "You wonder about the ring for the rest of the day."
+      }
+     }
+    }
+   }
+  },
+  "act3_hellhound_track": {
+   "id": "act3_hellhound_track",
+   "bg": "dungeon",
+   "npcName": "Garrison Sergeant",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "A hellhound took two of my men into the ruins. I've got their tracks, but no woodsman to follow them."
+      },
+      {
+       "speaker": "npc",
+       "text": "You have a ranger, from the looks of you. I'll pay. Just tell me if there's anything left to find."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Tracker] Track the hound.",
+       "next": "track",
+       "requires": {
+        "partyTag": "tracker"
+       }
+      },
+      {
+       "text": "Decline — too risky.",
+       "next": "decline"
+      }
+     ]
+    },
+    "track": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The tracks go straight to a collapsed cellar. The hound is gone — moved on. The two soldiers are dead but intact."
+      },
+      {
+       "speaker": "hero",
+       "text": "You find a locked box in the cellar beside them. They must have stumbled on it."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Report to the sergeant.",
+       "outcome": "reported"
+      },
+      {
+       "text": "Keep the box.",
+       "outcome": "kept"
+      }
+     ],
+     "outcomes": {
+      "reported": {
+       "text": "He thanks you quietly. The box belongs to the garrison now. He gives you fifty gold and means it.",
+       "setFlag": "tracked_hellhound",
+       "reward": {
+        "gold": 120,
+        "xp": 80
+       }
+      },
+      "kept": {
+       "text": "You tell him the soldiers are dead and the hound is gone. You say nothing about the box. It opens later: coin and a sealed letter you probably shouldn't have.",
+       "setFlag": "kept_garrison_box",
+       "reward": {
+        "gold": 140,
+        "xp": 50
+       }
+      }
+     }
+    },
+    "decline": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Fair. I wouldn't send my own family."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "He returns to staring at the ruins."
+      }
+     }
+    }
+   }
+  },
+  "act3_apprentice_danger": {
+   "id": "act3_apprentice_danger",
+   "bg": "dungeon",
+   "npcName": "Former Apprentice",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "I've been practising since you showed me the third form. I've... been practising a lot. The fourth form came to me in a dream."
+    },
+    {
+     "speaker": "npc",
+     "text": "Would you like to see it? Most of the fire has gone out now."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Watch the demonstration.",
+     "outcome": "watch",
+     "requires": {
+      "flag": "taught_apprentice"
+     }
+    },
+    {
+     "text": "Gently decline.",
+     "outcome": "decline"
+    }
+   ],
+   "outcomes": {
+    "watch": {
+     "text": "The fourth form is genuinely impressive and only marginally catastrophic. He gives you a ring from the rubble of what used to be a wall.",
+     "setFlag": "saw_fourth_form",
+     "reward": {
+      "xp": 80,
+      "item": "blasted_ring",
+      "itemName": "Blasted Ring",
+      "itemDesc": "Recovered from a minor magical incident. Barely singed."
+     }
+    },
+    "decline": {
+     "text": "\"Probably wise.\" He looks disappointed but safe."
+    }
+   }
+  },
+  "act3_malgrath_forge": {
+   "id": "act3_malgrath_forge",
+   "bg": "dungeon",
+   "npcName": "Hellfire Forge",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A forge burning with Malgrath's own fire — pure demonic heat, older than the breach itself. Every smith's nightmare and every warrior's dream."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[CON 16] Plunge your weapon into the forge.",
+     "outcome": "forge",
+     "requires": {
+      "stat": {
+       "stat": "CON",
+       "min": 16
+      }
+     }
+    },
+    {
+     "text": "Don't touch it.",
+     "outcome": "leave"
+    }
+   ],
+   "outcomes": {
+    "forge": {
+     "text": "The metal shrieks. When you pull it free it glows red and will not cool. The next fight it fights harder than you do.",
+     "setFlag": "hellfire_forged",
+     "reward": {
+      "xp": 120,
+      "gold": 80
+     }
+    },
+    "leave": {
+     "text": "The forge stares back. You stare back harder. A draw."
+    }
+   }
+  },
+  "act3_garrison_reward": {
+   "id": "act3_garrison_reward",
+   "bg": "mountain_pass",
+   "npcName": "Garrison Commander",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Word travels. You have friends at the post. That means you have friends here."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Accept the garrison's aid.",
+     "outcome": "accept",
+     "requires": {
+      "flag": "garrison_friend"
+     }
+    },
+    {
+     "text": "You don't know this commander.",
+     "outcome": "unknown"
+    }
+   ],
+   "outcomes": {
+    "accept": {
+     "text": "They resupply you, sharpen your weapons, and press a sealed letter into your hand — addressed to the garrison at the Breach. Insurance, the commander calls it.",
+     "setFlag": "breach_garrison_letter",
+     "reward": {
+      "gold": 120,
+      "xp": 60,
+      "item": "garrison_letter",
+      "itemName": "Garrison Letter",
+      "itemDesc": "Sealed with wax. Insurance, you were told."
+     }
+    },
+    "unknown": {
+     "text": "He shrugs. \"Shame. Let us know when you change your mind.\""
+    }
+   }
+  },
+  "act4_void_contact": {
+   "id": "act4_void_contact",
+   "bg": "dungeon",
+   "npcName": "The Watcher",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You looked through the lens. You recorded what you saw. Few do both."
+    },
+    {
+     "speaker": "npc",
+     "text": "I have no name you could pronounce. I am patient. I am directional. And I am — provisionally — not your enemy."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Ask what it wants.",
+     "outcome": "ask",
+     "requires": {
+      "flag": "veil_sight_recurring"
+     }
+    },
+    {
+     "text": "Reject the contact.",
+     "outcome": "reject"
+    }
+   ],
+   "outcomes": {
+    "ask": {
+     "text": "It is silent for a long moment. \"Nothing yet. When I do, I will say so clearly.\" Then it is gone and the void feels ordinary again.",
+     "setFlag": "watcher_contacted",
+     "reward": {
+      "xp": 150
+     }
+    },
+    "reject": {
+     "text": "\"Noted.\" It leaves. You feel it hasn't gone far."
+    }
+   }
+  },
+  "act4_void_pact": {
+   "id": "act4_void_pact",
+   "bg": "dungeon",
+   "npcName": "Void Entity",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Warlock. I know the shape of your agreements. I have one to propose."
+      },
+      {
+       "speaker": "npc",
+       "text": "Power, now. A favour, later. Unspecified. That is the honest version."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Dark caster] Accept the pact.",
+       "next": "pact",
+       "requires": {
+        "partyTag": "dark"
+       }
+      },
+      {
+       "text": "Reject it outright.",
+       "next": "reject"
+      },
+      {
+       "text": "[INT 18] Try to bind it instead.",
+       "next": "bind",
+       "requires": {
+        "stat": {
+         "stat": "INT",
+         "min": 18
+        }
+       }
+      }
+     ]
+    },
+    "pact": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Done. The power is yours. The favour is mine to name. I am not in a hurry."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Seal the deal.",
+       "outcome": "sealed"
+      }
+     ],
+     "outcomes": {
+      "sealed": {
+       "text": "Something shifts behind your eyes. The void feels closer and less hostile. This is possibly not better.",
+       "setFlag": "void_pact_made",
+       "reward": {
+        "xp": 180,
+        "item": "void_band",
+        "itemName": "Void Band",
+        "itemDesc": "A ring of compressed nothingness. It is heavy."
+       }
+      }
+     }
+    },
+    "reject": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "\"I will remember this. Not with malice. With patience.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Walk away.",
+       "outcome": "rejected"
+      }
+     ],
+     "outcomes": {
+      "rejected": {
+       "text": "The entity dissolves. You have the sense of an appointment cancelled rather than an enemy made."
+      }
+     }
+    },
+    "bind": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "Silence. Then: \"Interesting. No. But — interesting.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Release it anyway.",
+       "outcome": "released"
+      }
+     ],
+     "outcomes": {
+      "released": {
+       "text": "You had it, briefly. It let you release it. A gift disguised as a failure.",
+       "setFlag": "bound_void_entity",
+       "reward": {
+        "xp": 200,
+        "gold": 100
+       }
+      }
+     }
+    }
+   }
+  },
+  "act4_watcher_memory": {
+   "id": "act4_watcher_memory",
+   "bg": "library",
+   "npcName": "Memory Fragment",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The Watcher leaves a memory in your mind — not words exactly, more like a shape of knowledge."
+    },
+    {
+     "speaker": "npc",
+     "text": "The Unraveler was not always the Unraveler. There was a name, before. The name was taken from it as a punishment."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Hold the memory.",
+     "outcome": "hold",
+     "requires": {
+      "flag": "watcher_contacted"
+     }
+    },
+    {
+     "text": "Dismiss the intrusion.",
+     "outcome": "dismiss"
+    }
+   ],
+   "outcomes": {
+    "hold": {
+     "text": "You will not forget. The Unraveler is a prisoner as much as a threat. This changes nothing tactical. It changes something else.",
+     "setFlag": "knows_unraveler_origin",
+     "reward": {
+      "xp": 120
+     }
+    },
+    "dismiss": {
+     "text": "The memory fades. You feel it was important."
+    }
+   }
+  },
+  "act4_temporal_rift": {
+   "id": "act4_temporal_rift",
+   "bg": "dungeon",
+   "npcName": "Temporal Rift",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "A tear in time — not space. Through it you can see this same corridor, six hours ago, empty."
+      },
+      {
+       "speaker": "hero",
+       "text": "Someone with sufficient temporal training could walk through it safely. Or unsafely. The distinction is training-dependent."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Chronomancer] Step through.",
+       "next": "step",
+       "requires": {
+        "partyClass": "chronomancer"
+       }
+      },
+      {
+       "text": "Back away slowly.",
+       "next": "back"
+      }
+     ]
+    },
+    "step": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "Six hours ago, this corridor was a library. A Veil-cult library, abandoned in haste. Books everywhere. You take three that look useful and step back."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Return to the present.",
+       "outcome": "returned"
+      }
+     ],
+     "outcomes": {
+      "returned": {
+       "text": "The rift seals. The books exist in the present now.",
+       "setFlag": "temporal_shortcut",
+       "reward": {
+        "xp": 160,
+        "gold": 120
+       }
+      }
+     }
+    },
+    "back": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The rift closes on its own after a minute."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Continue.",
+       "outcome": "passed"
+      }
+     ],
+     "outcomes": {
+      "passed": {
+       "text": "You have a headache that takes until camp to fade."
+      }
+     }
+    }
+   }
+  },
+  "act4_pact_price": {
+   "id": "act4_pact_price",
+   "bg": "dungeon",
+   "npcName": "Void Entity",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The favour. I am ready to name it. You will carry a message for me, written in a language you cannot read, to someone you will meet in Act 5. You will not open it."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Agree.",
+     "outcome": "agree",
+     "requires": {
+      "flag": "void_pact_made"
+     }
+    },
+    {
+     "text": "Open the message now, on principle.",
+     "outcome": "open"
+    },
+    {
+     "text": "Refuse the favour.",
+     "outcome": "refuse"
+    }
+   ],
+   "outcomes": {
+    "agree": {
+     "text": "The message appears in your pack, sealed with a substance that is not wax.",
+     "setFlag": "carries_void_message",
+     "reward": {
+      "xp": 100
+     }
+    },
+    "open": {
+     "text": "Inside: a circle with a single dot inside it. You understand nothing. The entity says: \"Good. Now deliver it anyway.\"",
+     "setFlag": "opened_void_message",
+     "reward": {
+      "xp": 50
+     }
+    },
+    "refuse": {
+     "text": "\"I accept your refusal. I withdraw the earlier power.\"",
+     "setFlag": "void_pact_broken",
+     "reward": {
+      "xp": 30
+     }
+    }
+   }
+  },
+  "act4_star_prophet": {
+   "id": "act4_star_prophet",
+   "bg": "dungeon",
+   "npcName": "Dying Star-Prophet",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The stars speak to those with sense to listen. I have listened too long. I cannot unknow what I know."
+    },
+    {
+     "speaker": "npc",
+     "text": "I will tell you the shape of the rift. Not to help you — I cannot anymore. But so someone living knows it."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 20] Listen and comprehend.",
+     "outcome": "listen",
+     "requires": {
+      "stat": {
+       "stat": "INT",
+       "min": 20
+      }
+     }
+    },
+    {
+     "text": "You're not equipped to hear this.",
+     "outcome": "leave"
+    }
+   ],
+   "outcomes": {
+    "listen": {
+     "text": "He speaks for three minutes in a language that shouldn't be possible. You understand every word. You immediately forget the words but retain the shape of what they meant. The Emberveil is a door, not a wound. Someone built it.",
+     "setFlag": "knows_veil_is_door",
+     "reward": {
+      "xp": 200
+     }
+    },
+    "leave": {
+     "text": "He nods. \"Wiser than I was.\" He goes back to watching stars that have moved since he last checked."
+    }
+   }
+  },
+  "act4_veil_convergence": {
+   "id": "act4_veil_convergence",
+   "bg": "dungeon",
+   "npcName": "Veil Analyst",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You've seen through the lens. You know where the rift origin began. You are one of perhaps four people alive with both pieces."
+    },
+    {
+     "speaker": "npc",
+     "text": "I study the Veil academically. I would very much like to compare notes."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Share what you know.",
+     "outcome": "share",
+     "requires": {
+      "flag": "knows_rift_origin",
+      "flag2": "saw_through_veil"
+     }
+    },
+    {
+     "text": "What do you offer in return?",
+     "outcome": "barter"
+    }
+   ],
+   "outcomes": {
+    "share": {
+     "text": "Two hours later, you understand twice as much and cannot explain why either of you feels better. You do anyway.",
+     "setFlag": "veil_analysis_done",
+     "reward": {
+      "xp": 180,
+      "gold": 80
+     }
+    },
+    "barter": {
+     "text": "She offers seventy gold and a detailed diagram. You accept. The diagram becomes one of the most useful things you own.",
+     "reward": {
+      "gold": 70,
+      "xp": 100
+     }
+    }
+   }
+  },
+  "act4_grave_gratitude": {
+   "id": "act4_grave_gratitude",
+   "bg": "dungeon",
+   "npcName": "Former Revenant",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "I was days from turning — the Veil had almost taken me. Then the corruption in the graves was bound. I woke up still myself."
+    },
+    {
+     "speaker": "npc",
+     "text": "I have been looking for you since."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Accept thanks.",
+     "outcome": "thanks",
+     "requires": {
+      "flag": "sealed_mass_grave"
+     }
+    },
+    {
+     "text": "It wasn't us.",
+     "outcome": "deny"
+    }
+   ],
+   "outcomes": {
+    "thanks": {
+     "text": "She gives you a ring she would have been buried in. \"I don't need it now.\"",
+     "setFlag": "grave_gratitude",
+     "reward": {
+      "xp": 140,
+      "item": "revenant_band",
+      "itemName": "Revenant Band",
+      "itemDesc": "A ring worn by someone who almost didn't come back."
+     }
+    },
+    "deny": {
+     "text": "She knows it was. She leaves the ring on the wall anyway."
+    }
+   }
+  },
+  "act5_deliver_message": {
+   "id": "act5_deliver_message",
+   "bg": "dungeon",
+   "npcName": "Abyssal Archivist",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "I have been waiting for a delivery. Sealed with something that isn't wax. Is that from you or have you merely carried it?"
+    }
+   ],
+   "choices": [
+    {
+     "text": "Deliver the message.",
+     "outcome": "deliver",
+     "requires": {
+      "flag": "carries_void_message"
+     }
+    },
+    {
+     "text": "Ask what it is first.",
+     "outcome": "ask"
+    }
+   ],
+   "outcomes": {
+    "deliver": {
+     "text": "She reads it in two seconds. \"Good. This was necessary.\" She gives you something in return — she calls it \"reciprocal consideration.\"",
+     "setFlag": "message_delivered",
+     "reward": {
+      "xp": 200,
+      "gold": 150,
+      "item": "abyssal_loop",
+      "itemName": "Abyssal Loop",
+      "itemDesc": "A ring of reciprocal consideration. Its terms are unclear."
+     }
+    },
+    "ask": {
+     "text": "\"A circle with a dot. The punctuation of a very old language. It means: I see you. Deliver it — or don't. The message has already been read.\"",
+     "reward": {
+      "xp": 50
+     }
+    }
+   }
+  },
+  "act5_name_leverage": {
+   "id": "act5_name_leverage",
+   "bg": "dungeon",
+   "npcName": "The Unraveler",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "You stand before the Unraveler. You know something it did not expect: the shape of what its name once was."
+    },
+    {
+     "speaker": "hero",
+     "text": "This is not power over it. But it is the kind of knowledge that makes an entity of this age pause."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Speak the shape of its name.",
+     "outcome": "speak",
+     "requires": {
+      "flag": "knows_unraveler_origin"
+     }
+    },
+    {
+     "text": "Say nothing — fight.",
+     "outcome": "fight"
+    }
+   ],
+   "outcomes": {
+    "speak": {
+     "text": "The Unraveler stills for exactly three seconds. In those three seconds it does not attack. Your first round is free.",
+     "setFlag": "spoke_unraveler_name",
+     "reward": {
+      "xp": 150
+     }
+    },
+    "fight": {
+     "text": "Straightforward. Honest. It almost seems to respect it."
+    }
+   }
+  },
+  "act5_veil_door": {
+   "id": "act5_veil_door",
+   "bg": "dungeon",
+   "npcName": "Ancient Inscription",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "An inscription on the abyss wall — very old, in a language that has not been spoken since before the Veil."
+    },
+    {
+     "speaker": "hero",
+     "text": "You understand it. You shouldn't. The star-prophet must have left more behind than you knew."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Read it fully.",
+     "outcome": "read",
+     "requires": {
+      "flag": "knows_veil_is_door"
+     }
+    },
+    {
+     "text": "Move on.",
+     "outcome": "leave"
+    }
+   ],
+   "outcomes": {
+    "read": {
+     "text": "The door was built by the Architect — not this Architect, an earlier one. The lock was broken deliberately. The builder regretted it. The inscription is an apology, not a boast.",
+     "setFlag": "knows_architect_regret",
+     "reward": {
+      "xp": 180
+     }
+    },
+    "leave": {
+     "text": "The inscription watches you go. It has been waiting to be read for a very long time."
+    }
+   }
+  },
+  "act5_oracle_pool": {
+   "id": "act5_oracle_pool",
+   "bg": "dungeon",
+   "npcName": "Pool of Memories",
+   "npcPortrait": null,
+   "start": "start",
+   "nodes": {
+    "start": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The pool shows only strangers. Unless you have someone capable of reading whose memories these are."
+      }
+     ],
+     "choices": [
+      {
+       "text": "[Oracle] Read the pool.",
+       "next": "oracle",
+       "requires": {
+        "partyClass": "oracle"
+       }
+      },
+      {
+       "text": "The pool is beyond you.",
+       "next": "pass"
+      }
+     ]
+    },
+    "oracle": {
+     "lines": [
+      {
+       "speaker": "npc",
+       "text": "The Oracle kneels. Places one hand in the pool. The water goes absolutely still."
+      },
+      {
+       "speaker": "npc",
+       "text": "\"These are the memories of the dead Architect. Not the one below — the first one. The builder. These are the things they could not carry into death.\""
+      }
+     ],
+     "choices": [
+      {
+       "text": "Ask what they saw.",
+       "outcome": "saw"
+      },
+      {
+       "text": "Tell the oracle to stop.",
+       "outcome": "stop"
+      }
+     ],
+     "outcomes": {
+      "saw": {
+       "text": "The Oracle is silent for a long time. \"They were sorry. Very sorry. For all of it. That's all that's left.\"",
+       "setFlag": "oracle_read_pool",
+       "reward": {
+        "xp": 200,
+        "gold": 100
+       }
+      },
+      "stop": {
+       "text": "\"Good.\" The oracle withdraws their hand. \"Some memories should stay where they are.\"",
+       "reward": {
+        "xp": 80
+       }
+      }
+     }
+    },
+    "pass": {
+     "lines": [
+      {
+       "speaker": "hero",
+       "text": "The pool reflects your face and keeps its secrets."
+      }
+     ],
+     "choices": [
+      {
+       "text": "Move on.",
+       "outcome": "left"
+      }
+     ],
+     "outcomes": {
+      "left": {
+       "text": "You keep moving."
+      }
+     }
+    }
+   }
+  },
+  "act5_analysis_weapon": {
+   "id": "act5_analysis_weapon",
+   "bg": "library",
+   "npcName": "Abyssal Researcher",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "I heard about your notes. The combined data — yours and the analyst from Act 4 — points at a specific resonance in the Architect's defenses."
+    },
+    {
+     "speaker": "npc",
+     "text": "I've built something from that data. It is not elegant. But it may work."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Accept the device.",
+     "outcome": "accept",
+     "requires": {
+      "flag": "veil_analysis_done"
+     }
+    },
+    {
+     "text": "What does it cost?",
+     "outcome": "cost"
+    }
+   ],
+   "outcomes": {
+    "accept": {
+     "text": "She hands you a ring set with a chip of broken resonator. It hums at a frequency your teeth notice.",
+     "setFlag": "resonator_ring",
+     "reward": {
+      "xp": 160,
+      "item": "resonator_ring",
+      "itemName": "Resonator Ring",
+      "itemDesc": "Made from converging data. Annoying frequency. Effective."
+     }
+    },
+    "cost": {
+     "text": "Nothing. She wants the Architect to die. \"That's sufficient payment.\"",
+     "setFlag": "resonator_ring",
+     "reward": {
+      "xp": 100,
+      "item": "resonator_ring",
+      "itemName": "Resonator Ring",
+      "itemDesc": "Made from converging data. Annoying frequency. Effective."
+     }
+    }
+   }
+  },
+  "act5_forge_sings": {
+   "id": "act5_forge_sings",
+   "bg": "dungeon",
+   "npcName": "The Forged Weapon",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "The weapon forged in Malgrath's hellfire vibrates when you cross into the Primordial Nexus. It recognises something here."
+    },
+    {
+     "speaker": "hero",
+     "text": "The primordial fire and the hellfire have the same source. Older than both Malgrath and the Nexus."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Let the weapon lead.",
+     "outcome": "lead",
+     "requires": {
+      "flag": "hellfire_forged"
+     }
+    },
+    {
+     "text": "Ignore it.",
+     "outcome": "ignore"
+    }
+   ],
+   "outcomes": {
+    "lead": {
+     "text": "It leads you to a sealed door three minutes off the main path. Inside: a cache left by a pre-Architect explorer who felt the same pull and followed it.",
+     "setFlag": "forge_door_opened",
+     "reward": {
+      "xp": 180,
+      "gold": 200
+     }
+    },
+    "ignore": {
+     "text": "The weapon subsides. You reach your destination slightly faster."
+    }
+   }
+  },
+  "act5_architect_pause": {
+   "id": "act5_architect_pause",
+   "bg": "dungeon",
+   "npcName": "The Architect",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "You know about the builder. The first Architect."
+    },
+    {
+     "speaker": "npc",
+     "text": "I did not know that was still... in the pool. I assumed it had decayed."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Tell it what the oracle saw.",
+     "outcome": "tell",
+     "requires": {
+      "flag": "oracle_read_pool"
+     }
+    },
+    {
+     "text": "Say nothing — fight.",
+     "outcome": "fight"
+    }
+   ],
+   "outcomes": {
+    "tell": {
+     "text": "\"Sorry.\" It considers this. \"That changes nothing. But it is... better than not knowing.\" The fight begins. But it begins differently.",
+     "setFlag": "told_architect_pool",
+     "reward": {
+      "xp": 200
+     }
+    },
+    "fight": {
+     "text": "The Architect fights with the clean efficiency of something that has never been surprised."
+    }
+   }
+  },
+  "act5_final_convergence": {
+   "id": "act5_final_convergence",
+   "bg": "dungeon",
+   "npcName": "Abyssal Archivist",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "The message I received — and the inscription you read — are from the same hand. The builder left breadcrumbs."
+    },
+    {
+     "speaker": "npc",
+     "text": "The breadcrumbs lead to one conclusion: the Architect below is not the enemy. The door is the enemy. The Architect is the lock."
+    }
+   ],
+   "choices": [
+    {
+     "text": "Process the implication.",
+     "outcome": "process",
+     "requires": {
+      "flag": "message_delivered",
+      "flag2": "knows_architect_regret"
+     }
+    },
+    {
+     "text": "Kill the Architect either way.",
+     "outcome": "pragmatic"
+    }
+   ],
+   "outcomes": {
+    "process": {
+     "text": "You understand something most people who fight the Architect never do: winning is correct. The how is the hard part. You go in knowing this.",
+     "setFlag": "final_convergence_known",
+     "reward": {
+      "xp": 250
+     }
+    },
+    "pragmatic": {
+     "text": "\"Fair.\" She respects this. \"Good luck.\""
+    }
+   }
+  },
+  "prologue_start": {
+   "id": "prologue_start",
+   "bg": "forest",
+   "npcName": "Silas Veilward",
+   "npcPortrait": "images/spritecook/silas_veilward_portrait.png",
+   "npcAppearance": "silas_veilward",
+   "showPartyOnGrid": true,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Stand still, traveler — I've watched you crest the rise three times today. The Veil bends around you. Are you the one Mira spoke of?"
+    },
+    {
+     "speaker": "hero",
+     "text": "Mira? The seer in Emberglen?"
+    },
+    {
+     "speaker": "npc",
+     "text": "She named you in her last reading before her tongue went silver. The Border Roads east of here are crawling with Veilspawn — twisted goblins, then a herald that wears them like a mantle."
+    },
+    {
+     "speaker": "hero",
+     "text": "And you waited here to warn me?"
+    },
+    {
+     "speaker": "npc",
+     "text": "I waited to give you something. A debt I owe to the road. You'll need it before sundown — pick what suits your hand."
+    }
+   ],
+   "choices": [
+    {
+     "text": "A purse of coin to barter my way through.",
+     "outcome": "gift_gold"
+    },
+    {
+     "text": "A magic-touched ring or amulet from your pack.",
+     "outcome": "gift_jewelry"
+    },
+    {
+     "text": "A weapon befitting the way I fight.",
+     "outcome": "gift_weapon"
+    }
+   ],
+   "outcomes": {
+    "gift_gold": {
+     "text": "Silas presses a heavy coin purse into your palm. \"Buy your way out of the first mistake. The second one is on you.\"",
+     "setFlag": "prologue_started",
+     "reward": {
+      "gold": 100
+     }
+    },
+    "gift_jewelry": {
+     "text": "He unwraps a bone-white ring etched with a sigil that hums when you slip it on. \"Worn by a scout who didn't come back. Wear it better than she did.\"",
+     "setFlag": "prologue_started",
+     "reward": {
+      "buildLoot": "jewelry"
+     }
+    },
+    "gift_weapon": {
+     "text": "He sets a bundle at your feet — steel and oak in shapes you know. \"Picked from the chapel reliquary. The Watchers won't miss it.\" You shoulder the gift.",
+     "setFlag": "prologue_started",
+     "reward": {
+      "buildLoot": "weapon"
+     }
+    }
+   }
+  },
+  "prologue_warning": {
+   "id": "prologue_warning",
+   "bg": "forest",
+   "npcName": "Silas Veilward",
+   "npcPortrait": "images/spritecook/silas_veilward_portrait.png",
+   "npcAppearance": "silas_veilward",
+   "showPartyOnGrid": true,
+   "lines": [
+    {
+     "speaker": "npc",
+     "text": "Stand still, traveler — I've watched you crest the rise three times today. The Veil bends around you. Are you the one Mira spoke of?"
+    },
+    {
+     "speaker": "hero",
+     "text": "Mira? The seer in Emberglen?"
+    },
+    {
+     "speaker": "npc",
+     "text": "She named you in her last reading before her tongue went silver. The Border Roads east of here are crawling with Veilspawn — twisted goblins, then a herald that wears them like a mantle."
+    },
+    {
+     "speaker": "hero",
+     "text": "And you waited here to warn me?"
+    },
+    {
+     "speaker": "npc",
+     "text": "I waited to give you something. A debt I owe to the road. You'll need it before sundown — pick what suits your hand."
+    }
+   ],
+   "choices": [
+    {
+     "text": "A purse of coin to barter my way through.",
+     "outcome": "gift_gold"
+    },
+    {
+     "text": "A magic-touched ring or amulet from your pack.",
+     "outcome": "gift_jewelry"
+    },
+    {
+     "text": "A weapon befitting the way I fight.",
+     "outcome": "gift_weapon"
+    }
+   ],
+   "outcomes": {
+    "gift_gold": {
+     "text": "Silas presses a heavy coin purse into your palm. \"Buy your way out of the first mistake. The second one is on you.\"",
+     "setFlag": "prologue_warned",
+     "reward": {
+      "gold": 100,
+      "xp": 15
+     }
+    },
+    "gift_jewelry": {
+     "text": "He unwraps a bone-white ring etched with a sigil that hums when you slip it on. \"Worn by a scout who didn't come back. Wear it better than she did.\"",
+     "setFlag": "prologue_warned",
+     "reward": {
+      "buildLoot": "jewelry",
+      "xp": 15
+     }
+    },
+    "gift_weapon": {
+     "text": "He sets a bundle at your feet — steel and oak in shapes you know. \"Picked from the chapel reliquary. The Watchers won't miss it.\" You shoulder the gift.",
+     "setFlag": "prologue_warned",
+     "reward": {
+      "buildLoot": "weapon",
+      "xp": 15
+     }
+    }
+   }
+  },
+  "hidden_path": {
+   "id": "hidden_path",
+   "bg": "forest",
+   "npcName": "Ancient Runestone",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "Half-buried in moss, a runestone pulses with sickly light. The same phrase repeats in desperate strokes: \"The veil does not hold.\""
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 10] Decipher the older glyphs beneath.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 10
+     },
+     "outcomes": {
+      "pass": "decode",
+      "fail": "graze"
+     }
+    },
+    {
+     "text": "[STR 10] Pry the stone from the earth.",
+     "skillCheck": {
+      "stat": "STR",
+      "dc": 10
+     },
+     "outcomes": {
+      "pass": "pry",
+      "fail": "strain"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "decode": {
+     "text": "You read a name carved deeper than the rest — a warden's true-name. Power hums in your chest.",
+     "setFlag": "cleared_hidden_path",
+     "reward": {
+      "xp": 40,
+      "gold": 50,
+      "item": "warden_sigil",
+      "itemName": "Warden Sigil Ring",
+      "itemDesc": "A name etched in old stone, now bound to your hand."
+     }
+    },
+    "graze": {
+     "text": "The runes blur and resist you. You memorize a fragment for later.",
+     "setFlag": "cleared_hidden_path",
+     "reward": {
+      "gold": 8
+     }
+    },
+    "pry": {
+     "text": "The stone cracks free. A small cache of silver coins spills from beneath.",
+     "setFlag": "cleared_hidden_path",
+     "reward": {
+      "gold": 90,
+      "xp": 25
+     }
+    },
+    "strain": {
+     "text": "You pull a muscle for nothing — the stone won't budge.",
+     "setFlag": "cleared_hidden_path",
+     "reward": {
+      "gold": 5
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "ash_lore": {
+   "id": "ash_lore",
+   "bg": "dungeon",
+   "npcName": "Ruined Outpost",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A collapsed watchtower, the timbers blackened. A traveler's corpse leans against the wall, fingers curled around a sealed letter."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[DEX 12] Slip the letter free without disturbing the body.",
+     "skillCheck": {
+      "stat": "DEX",
+      "dc": 12
+     },
+     "outcomes": {
+      "pass": "letter",
+      "fail": "crumble"
+     }
+    },
+    {
+     "text": "[CON 12] Sift through the ash for an hour.",
+     "skillCheck": {
+      "stat": "CON",
+      "dc": 12
+     },
+     "outcomes": {
+      "pass": "sift",
+      "fail": "choke"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "letter": {
+     "text": "The letter names a buried paymaster's chest two days east. You pocket the map and a loose coin purse.",
+     "setFlag": "cleared_ash_lore",
+     "reward": {
+      "gold": 110,
+      "xp": 50,
+      "item": "courier_seal",
+      "itemName": "Courier's Seal",
+      "itemDesc": "A wax-stamped ring once worn by an outpost runner."
+     }
+    },
+    "crumble": {
+     "text": "The parchment turns to dust between your fingers. You salvage a few coins.",
+     "setFlag": "cleared_ash_lore",
+     "reward": {
+      "gold": 20
+     }
+    },
+    "sift": {
+     "text": "Your patience pays — a melted strongbox yields a still-keen blade-shard.",
+     "setFlag": "cleared_ash_lore",
+     "reward": {
+      "gold": 60,
+      "item": "cinder_band",
+      "itemName": "Cinder Band",
+      "itemDesc": "Hot to the touch even in the cold dawn."
+     }
+    },
+    "choke": {
+     "text": "You inhale a lungful of old ash and stagger back, eyes streaming.",
+     "setFlag": "cleared_ash_lore",
+     "reward": {
+      "gold": 10
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "black_spire": {
+   "id": "black_spire",
+   "bg": "dungeon",
+   "npcName": "The Black Spire",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A needle of obsidian rises from the ash plain. Sigils crawl across its surface — some still wet."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 12] Read the wet sigils before they fade.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 12
+     },
+     "outcomes": {
+      "pass": "read",
+      "fail": "scramble"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "read": {
+     "text": "The sigils name a Veil cult cipher. You learn it. Knowledge is its own reward — and so is the silver hidden at the spire's base.",
+     "setFlag": "cleared_black_spire",
+     "reward": {
+      "xp": 60,
+      "gold": 80,
+      "item": "cipher_loop",
+      "itemName": "Cipher Loop",
+      "itemDesc": "A ring etched with a cult's broken alphabet."
+     }
+    },
+    "scramble": {
+     "text": "The sigils squirm away from your gaze. You catch only a flash of meaning.",
+     "setFlag": "cleared_black_spire",
+     "reward": {
+      "gold": 12
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "obsidian_vein": {
+   "id": "obsidian_vein",
+   "bg": "dungeon",
+   "npcName": "The Obsidian Vein",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A vein of black glass runs through the cliffside. Veins of warm light pulse beneath the surface."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[STR 12] Hammer loose a chunk of the live glass.",
+     "skillCheck": {
+      "stat": "STR",
+      "dc": 12
+     },
+     "outcomes": {
+      "pass": "hammer",
+      "fail": "shatter"
+     }
+    },
+    {
+     "text": "[DEX 12] Carefully chisel a clean shard.",
+     "skillCheck": {
+      "stat": "DEX",
+      "dc": 12
+     },
+     "outcomes": {
+      "pass": "chisel",
+      "fail": "cut"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "hammer": {
+     "text": "A fist-sized chunk of obsidian glass tumbles loose, still warm.",
+     "setFlag": "cleared_obsidian_vein",
+     "reward": {
+      "gold": 70,
+      "item": "volcanic_band",
+      "itemName": "Volcanic Band",
+      "itemDesc": "A loop of obsidian that never cools."
+     }
+    },
+    "shatter": {
+     "text": "The glass cracks into useless fragments under your hammer.",
+     "setFlag": "cleared_obsidian_vein",
+     "reward": {
+      "gold": 8
+     }
+    },
+    "chisel": {
+     "text": "A flawless shard slides free — sharp enough to cut a name into stone.",
+     "setFlag": "cleared_obsidian_vein",
+     "reward": {
+      "xp": 45,
+      "gold": 60,
+      "item": "glass_thorn",
+      "itemName": "Glass Thorn Ring",
+      "itemDesc": "Edge so fine the wind whistles past it."
+     }
+    },
+    "cut": {
+     "text": "Your chisel slips and opens a thin red line across your knuckles.",
+     "setFlag": "cleared_obsidian_vein",
+     "reward": {
+      "gold": 5
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "lore_monolith": {
+   "id": "lore_monolith",
+   "bg": "dungeon",
+   "npcName": "Veil Monolith",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A black monolith hums at a frequency just below hearing. Touching it makes your teeth ache."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[CHA 12] Sing back the resonance the stone wants.",
+     "skillCheck": {
+      "stat": "CHA",
+      "dc": 12
+     },
+     "outcomes": {
+      "pass": "sing",
+      "fail": "silence"
+     }
+    },
+    {
+     "text": "[CON 12] Press your forehead to the stone and endure the vision.",
+     "skillCheck": {
+      "stat": "CON",
+      "dc": 12
+     },
+     "outcomes": {
+      "pass": "endure",
+      "fail": "reel"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "sing": {
+     "text": "The monolith answers in chorus. A sliver of its surface peels away as a gift.",
+     "setFlag": "cleared_lore_monolith",
+     "reward": {
+      "xp": 55,
+      "gold": 75,
+      "item": "monolith_shard",
+      "itemName": "Monolith Shard Ring",
+      "itemDesc": "It hums when held to the ear."
+     }
+    },
+    "silence": {
+     "text": "The stone refuses your voice. You leave with a ringing in both ears.",
+     "setFlag": "cleared_lore_monolith",
+     "reward": {
+      "gold": 10
+     }
+    },
+    "endure": {
+     "text": "You see the Veil from the inside. The vision stays with you — and so does the small fortune left by the last pilgrim.",
+     "setFlag": "cleared_lore_monolith",
+     "reward": {
+      "gold": 100,
+      "xp": 40
+     }
+    },
+    "reel": {
+     "text": "You pull back gasping, the stone's hum still in your bones.",
+     "setFlag": "cleared_lore_monolith",
+     "reward": {
+      "gold": 5
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "fell_ruins": {
+   "id": "fell_ruins",
+   "bg": "dungeon",
+   "npcName": "The Fell Ruins",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A toppled chapel, half swallowed by brimstone. A wounded stranger lies pinned beneath a fallen beam, still breathing."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[STR 14] Lift the beam from the stranger.",
+     "skillCheck": {
+      "stat": "STR",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "lift",
+      "fail": "fail_lift"
+     }
+    },
+    {
+     "text": "[CHA 14] Promise him safe passage in return for what he knows.",
+     "skillCheck": {
+      "stat": "CHA",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "promise",
+      "fail": "mistrust"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "lift": {
+     "text": "He gasps, presses a relic into your hand, and crawls toward daylight. \"May it remember kinder hands.\"",
+     "setFlag": "cleared_fell_ruins",
+     "reward": {
+      "gold": 120,
+      "xp": 70,
+      "item": "kinder_hand",
+      "itemName": "Kinder Hand",
+      "itemDesc": "A relic ring warm with another's gratitude."
+     }
+    },
+    "fail_lift": {
+     "text": "The beam shifts an inch and grinds back down. You leave him a waterskin and a prayer.",
+     "setFlag": "cleared_fell_ruins",
+     "reward": {
+      "gold": 12
+     }
+    },
+    "promise": {
+     "text": "He believes you. He whispers the location of a coin-purse hidden in the rafters.",
+     "setFlag": "cleared_fell_ruins",
+     "reward": {
+      "gold": 95,
+      "item": "oath_band",
+      "itemName": "Oath Band",
+      "itemDesc": "Worn by those who keep their word."
+     }
+    },
+    "mistrust": {
+     "text": "His eyes harden. You get nothing but the silence of his refusal.",
+     "setFlag": "cleared_fell_ruins",
+     "reward": {
+      "gold": 6
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "memory_crypt": {
+   "id": "memory_crypt",
+   "bg": "dungeon",
+   "npcName": "The Memory Crypt",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "Stone coffins line the walls, each carved with a forgotten name. One lid is slightly ajar — you hear faint whispering inside."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 14] Recite the right name to quiet the dead.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "name",
+      "fail": "wrong_name"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "name": {
+     "text": "The whispering stops. The lid slides aside on its own. Inside: a bone-circlet and a small mound of grave-coin.",
+     "setFlag": "cleared_memory_crypt",
+     "reward": {
+      "xp": 80,
+      "gold": 100,
+      "item": "crypt_band",
+      "itemName": "Crypt Band",
+      "itemDesc": "A ring carved from an unnamed knight's knuckle."
+     }
+    },
+    "wrong_name": {
+     "text": "A cold hand brushes the back of your neck. You leave quickly. A few loose coins were on the floor.",
+     "setFlag": "cleared_memory_crypt",
+     "reward": {
+      "gold": 18
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "the_wound": {
+   "id": "the_wound",
+   "bg": "dungeon",
+   "npcName": "The Wound",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A long red gash in the air itself, weeping a slow trickle of light onto the rocks below."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[CON 14] Stand in the light-rain until your skin remembers.",
+     "skillCheck": {
+      "stat": "CON",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "stand",
+      "fail": "burn"
+     }
+    },
+    {
+     "text": "[DEX 14] Catch a single drop in a vial without touching it.",
+     "skillCheck": {
+      "stat": "DEX",
+      "dc": 14
+     },
+     "outcomes": {
+      "pass": "catch",
+      "fail": "spill"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "stand": {
+     "text": "You leave glowing faintly from within. The wound thanks you in a language without sound.",
+     "setFlag": "cleared_the_wound",
+     "reward": {
+      "xp": 90,
+      "gold": 60,
+      "item": "wound_loop",
+      "itemName": "Wound Loop",
+      "itemDesc": "A ring that drips slow, painless light."
+     }
+    },
+    "burn": {
+     "text": "The light scalds your shoulders. You stagger out before it does worse.",
+     "setFlag": "cleared_the_wound",
+     "reward": {
+      "gold": 14
+     }
+    },
+    "catch": {
+     "text": "A single drop pools in the vial. It hums.",
+     "setFlag": "cleared_the_wound",
+     "reward": {
+      "gold": 80,
+      "item": "wound_vial",
+      "itemName": "Vial of Wound-Light",
+      "itemDesc": "Sealed glass; the light inside still moves."
+     }
+    },
+    "spill": {
+     "text": "The drop slips past your vial and burns a mark into the rock.",
+     "setFlag": "cleared_the_wound",
+     "reward": {
+      "gold": 8
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "star_tomb": {
+   "id": "star_tomb",
+   "bg": "dungeon",
+   "npcName": "Tomb of Stars",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A tomb hangs in the void, lit only by its own embedded constellations. The lid is sealed with a riddle of light."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 16] Solve the constellation-riddle.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 16
+     },
+     "outcomes": {
+      "pass": "solve",
+      "fail": "misalign"
+     }
+    },
+    {
+     "text": "[STR 16] Force the lid open with your bare hands.",
+     "skillCheck": {
+      "stat": "STR",
+      "dc": 16
+     },
+     "outcomes": {
+      "pass": "force",
+      "fail": "jam"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "solve": {
+     "text": "The lid floats aside. Inside rests a circlet of compressed starlight.",
+     "setFlag": "cleared_star_tomb",
+     "reward": {
+      "xp": 120,
+      "gold": 140,
+      "item": "starlight_circlet",
+      "itemName": "Starlight Circlet",
+      "itemDesc": "A ring of compressed dawn."
+     }
+    },
+    "misalign": {
+     "text": "The constellations dim and reset. You feel briefly very small.",
+     "setFlag": "cleared_star_tomb",
+     "reward": {
+      "gold": 22
+     }
+    },
+    "force": {
+     "text": "Stone and starlight tear apart in your grip. You take a fistful of cold gold from inside.",
+     "setFlag": "cleared_star_tomb",
+     "reward": {
+      "gold": 180,
+      "item": "tomb_loop",
+      "itemName": "Tomb Loop",
+      "itemDesc": "A ring of polished tomb-stone."
+     }
+    },
+    "jam": {
+     "text": "The lid grinds an inch and refuses further. Your shoulders ache.",
+     "setFlag": "cleared_star_tomb",
+     "reward": {
+      "gold": 16
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "void_library": {
+   "id": "void_library",
+   "bg": "library",
+   "npcName": "The Void Library",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "Books drift in slow circles between shelves with no walls. A single tome turns its pages without a hand to guide it."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 16] Read the self-turning tome before it closes.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 16
+     },
+     "outcomes": {
+      "pass": "read",
+      "fail": "forget"
+     }
+    },
+    {
+     "text": "[CHA 16] Politely ask a drifting book if it remembers anything useful.",
+     "skillCheck": {
+      "stat": "CHA",
+      "dc": 16
+     },
+     "outcomes": {
+      "pass": "ask",
+      "fail": "mute"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "read": {
+     "text": "You learn the true name of an unmaking. The library gifts you a bookmark made of moon.",
+     "setFlag": "cleared_void_library",
+     "reward": {
+      "xp": 130,
+      "gold": 110,
+      "item": "moon_bookmark",
+      "itemName": "Moon Bookmark",
+      "itemDesc": "A ring shaped from a sliver of moon."
+     }
+    },
+    "forget": {
+     "text": "The page closes. You forget what you were reading even as you walk away.",
+     "setFlag": "cleared_void_library",
+     "reward": {
+      "gold": 20
+     }
+    },
+    "ask": {
+     "text": "A book opens to your hand of its own accord. Inside is a folded note containing a small sum of pre-void coin.",
+     "setFlag": "cleared_void_library",
+     "reward": {
+      "gold": 160,
+      "item": "librarian_band",
+      "itemName": "Librarian's Band",
+      "itemDesc": "Worn by a clerk who outlived her library."
+     }
+    },
+    "mute": {
+     "text": "The books drift away from you in unison. You've been judged uninteresting.",
+     "setFlag": "cleared_void_library",
+     "reward": {
+      "gold": 12
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "memory_pool": {
+   "id": "memory_pool",
+   "bg": "dungeon",
+   "npcName": "Pool of Memories",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A still pool, mirror-flat. Looking down, you don't see your face — you see someone else's."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 18] Trace the stranger's memory back to its source.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 18
+     },
+     "outcomes": {
+      "pass": "trace",
+      "fail": "lost"
+     }
+    },
+    {
+     "text": "[CON 18] Drink from the pool.",
+     "skillCheck": {
+      "stat": "CON",
+      "dc": 18
+     },
+     "outcomes": {
+      "pass": "drink",
+      "fail": "drown"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "trace": {
+     "text": "You feel a stranger's entire life pass through you in a heartbeat. You wake holding their wedding ring.",
+     "setFlag": "cleared_memory_pool",
+     "reward": {
+      "xp": 160,
+      "gold": 130,
+      "item": "stranger_band",
+      "itemName": "Stranger's Wedding Band",
+      "itemDesc": "You did not know them, but you remember them."
+     }
+    },
+    "lost": {
+     "text": "You spend an hour staring before realizing you cannot remember why you came.",
+     "setFlag": "cleared_memory_pool",
+     "reward": {
+      "gold": 24
+     }
+    },
+    "drink": {
+     "text": "Cold strength settles in your chest. The pool offers a coin from its bed in return.",
+     "setFlag": "cleared_memory_pool",
+     "reward": {
+      "gold": 150,
+      "xp": 80
+     }
+    },
+    "drown": {
+     "text": "You inhale a mouthful and come up choking on someone else's last breath.",
+     "setFlag": "cleared_memory_pool",
+     "reward": {
+      "gold": 14
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "abyssal_archive": {
+   "id": "abyssal_archive",
+   "bg": "library",
+   "npcName": "Abyssal Archive",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A library beneath the sea, the books waterlogged but somehow still legible. One chained tome glows brighter than the rest."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[DEX 18] Pick the rusted lock on the chained tome.",
+     "skillCheck": {
+      "stat": "DEX",
+      "dc": 18
+     },
+     "outcomes": {
+      "pass": "pick",
+      "fail": "snap"
+     }
+    },
+    {
+     "text": "[STR 18] Tear the chain loose by force.",
+     "skillCheck": {
+      "stat": "STR",
+      "dc": 18
+     },
+     "outcomes": {
+      "pass": "tear",
+      "fail": "strain"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "pick": {
+     "text": "The lock springs open without a sound. The book reveals a chart of the abyss's buried vaults.",
+     "setFlag": "cleared_abyssal_archive",
+     "reward": {
+      "xp": 170,
+      "gold": 150,
+      "item": "abyssal_seal",
+      "itemName": "Abyssal Sealring",
+      "itemDesc": "A ring that always points down."
+     }
+    },
+    "snap": {
+     "text": "Your pick snaps inside the lock. You leave with damp hands and nothing else of note.",
+     "setFlag": "cleared_abyssal_archive",
+     "reward": {
+      "gold": 22
+     }
+    },
+    "tear": {
+     "text": "The chain parts. The tome is ruined by water but a salt-pickled ring tumbles from inside.",
+     "setFlag": "cleared_abyssal_archive",
+     "reward": {
+      "gold": 130,
+      "item": "salt_band",
+      "itemName": "Salt-Pickled Band",
+      "itemDesc": "Tastes of the deep when held to the lip."
+     }
+    },
+    "strain": {
+     "text": "The chain holds and your back protests.",
+     "setFlag": "cleared_abyssal_archive",
+     "reward": {
+      "gold": 16
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "unmade_gallery": {
+   "id": "unmade_gallery",
+   "bg": "dungeon",
+   "npcName": "Gallery of the Unmade",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "Empty plinths line a vast hall. Each plaque names a thing that almost existed."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[CHA 18] Speak one of the unmade names aloud, gently.",
+     "skillCheck": {
+      "stat": "CHA",
+      "dc": 18
+     },
+     "outcomes": {
+      "pass": "speak",
+      "fail": "fumble"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "speak": {
+     "text": "For one breath, the plinth holds a small unmade thing — and then leaves you the gift of its almost-being.",
+     "setFlag": "cleared_unmade_gallery",
+     "reward": {
+      "xp": 180,
+      "gold": 140,
+      "item": "almost_ring",
+      "itemName": "The Almost-Ring",
+      "itemDesc": "It exists only when you remember it."
+     }
+    },
+    "fumble": {
+     "text": "You mispronounce the name. A faint sigh goes through the hall.",
+     "setFlag": "cleared_unmade_gallery",
+     "reward": {
+      "gold": 18
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "echo_chamber": {
+   "id": "echo_chamber",
+   "bg": "dungeon",
+   "npcName": "Echo Chamber",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A perfectly round room. Every footstep returns three times — once normal, once delayed, once from a voice that isn't yours."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[CHA 18] Sing the dirge until the third echo answers in tune.",
+     "skillCheck": {
+      "stat": "CHA",
+      "dc": 18
+     },
+     "outcomes": {
+      "pass": "tune",
+      "fail": "discord"
+     }
+    },
+    {
+     "text": "[CON 18] Stand silent until the third voice gives up.",
+     "skillCheck": {
+      "stat": "CON",
+      "dc": 18
+     },
+     "outcomes": {
+      "pass": "silence",
+      "fail": "panic"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "tune": {
+     "text": "The third echo joins your dirge and leaves a small token of its agreement on the floor.",
+     "setFlag": "cleared_echo_chamber",
+     "reward": {
+      "xp": 170,
+      "gold": 150,
+      "item": "echo_ring",
+      "itemName": "Echo Ring",
+      "itemDesc": "It speaks back, sometimes."
+     }
+    },
+    "discord": {
+     "text": "The chamber rejects your song with a pressure wave. You cover your ears and retreat.",
+     "setFlag": "cleared_echo_chamber",
+     "reward": {
+      "gold": 18
+     }
+    },
+    "silence": {
+     "text": "You outlast it. The third voice goes quiet, and a small heap of coin appears where it stood.",
+     "setFlag": "cleared_echo_chamber",
+     "reward": {
+      "gold": 170
+     }
+    },
+    "panic": {
+     "text": "The third voice speaks your own thoughts back to you and you flee.",
+     "setFlag": "cleared_echo_chamber",
+     "reward": {
+      "gold": 12
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  },
+  "dragon_archive": {
+   "id": "dragon_archive",
+   "bg": "library",
+   "npcName": "Archive of Dragons",
+   "npcPortrait": null,
+   "lines": [
+    {
+     "speaker": "hero",
+     "text": "A vault carved into a dragon's skull. Scrolls written on stretched dragon-hide line the walls — and one is still smoldering."
+    }
+   ],
+   "choices": [
+    {
+     "text": "[INT 20] Decipher the smoldering scroll before it burns away.",
+     "skillCheck": {
+      "stat": "INT",
+      "dc": 20
+     },
+     "outcomes": {
+      "pass": "decipher",
+      "fail": "ash"
+     }
+    },
+    {
+     "text": "[DEX 20] Snatch the scroll from the flame and douse it.",
+     "skillCheck": {
+      "stat": "DEX",
+      "dc": 20
+     },
+     "outcomes": {
+      "pass": "snatch",
+      "fail": "sear"
+     }
+    },
+    {
+     "text": "Leave quietly.",
+     "outcome": "_leave_quietly"
+    }
+   ],
+   "outcomes": {
+    "decipher": {
+     "text": "You read the dragon-tongue prayer hidden in the smoke. A circlet of dragon-scale settles into your palm as the scroll consumes itself.",
+     "setFlag": "cleared_dragon_archive",
+     "reward": {
+      "xp": 220,
+      "gold": 200,
+      "item": "wyrmscale_circlet",
+      "itemName": "Wyrmscale Circlet",
+      "itemDesc": "A ring of woven dragon-scale, still warm."
+     }
+    },
+    "ash": {
+     "text": "The scroll crumbles to ash before you can read more than a single rune.",
+     "setFlag": "cleared_dragon_archive",
+     "reward": {
+      "gold": 30
+     }
+    },
+    "snatch": {
+     "text": "You catch it intact and stamp out the flame. Hidden inside the rolled hide is a dragon-tooth ring.",
+     "setFlag": "cleared_dragon_archive",
+     "reward": {
+      "gold": 220,
+      "item": "dragontooth_ring",
+      "itemName": "Dragontooth Ring",
+      "itemDesc": "A ring carved from an old wyrm's incisor."
+     }
+    },
+    "sear": {
+     "text": "You burn your fingers and lose the scroll to the flames.",
+     "setFlag": "cleared_dragon_archive",
+     "reward": {
+      "gold": 18
+     }
+    },
+    "_leave_quietly": {
+     "text": "You step back and continue on your way."
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,707 @@
+{
+ "entities": [
+  {
+   "classDefault": "warrior",
+   "gender": "male",
+   "id": "warrior",
+   "name": "Warrior",
+   "sprite": "warrior",
+   "tags": [
+    "heavy",
+    "male"
+   ]
+  },
+  {
+   "classDefault": "fighter",
+   "gender": "male",
+   "id": "fighter",
+   "name": "Fighter",
+   "sprite": "fighter",
+   "tags": [
+    "heavy",
+    "male"
+   ]
+  },
+  {
+   "classDefault": "paladin",
+   "gender": "male",
+   "id": "paladin",
+   "name": "Paladin",
+   "sprite": "paladin",
+   "tags": [
+    "holy",
+    "male"
+   ]
+  },
+  {
+   "classDefault": "ranger",
+   "gender": "female",
+   "id": "ranger",
+   "name": "Ranger",
+   "sprite": "ranger",
+   "tags": [
+    "light",
+    "female"
+   ]
+  },
+  {
+   "classDefault": "rogue",
+   "gender": "female",
+   "id": "rogue",
+   "name": "Rogue",
+   "sprite": "rogue",
+   "tags": [
+    "light",
+    "stealth"
+   ]
+  },
+  {
+   "classDefault": "mage",
+   "gender": "male",
+   "id": "mage",
+   "name": "Mage",
+   "sprite": "mage",
+   "tags": [
+    "robes",
+    "male"
+   ]
+  },
+  {
+   "classDefault": "cleric",
+   "gender": "female",
+   "id": "cleric",
+   "name": "Cleric",
+   "sprite": "cleric",
+   "tags": [
+    "robes",
+    "holy"
+   ]
+  },
+  {
+   "classDefault": "bard",
+   "gender": "male",
+   "id": "bard",
+   "name": "Bard",
+   "sprite": "bard",
+   "tags": [
+    "light"
+   ]
+  },
+  {
+   "classDefault": "druid",
+   "gender": "female",
+   "id": "druid",
+   "name": "Druid",
+   "sprite": "druid",
+   "tags": [
+    "nature"
+   ]
+  },
+  {
+   "classDefault": "necromancer",
+   "gender": "male",
+   "id": "necromancer",
+   "name": "Necromancer",
+   "sprite": "necromancer",
+   "tags": [
+    "dark",
+    "robes"
+   ]
+  },
+  {
+   "classDefault": "warlock",
+   "gender": "female",
+   "id": "warlock",
+   "name": "Warlock",
+   "sprite": "warlock",
+   "tags": [
+    "dark",
+    "robes"
+   ]
+  },
+  {
+   "classDefault": "demon_hunter",
+   "gender": "male",
+   "id": "demon_hunter",
+   "name": "Demon Hunter",
+   "sprite": "demon_hunter",
+   "tags": [
+    "light",
+    "female"
+   ]
+  },
+  {
+   "classDefault": "dragon_knight",
+   "gender": "female",
+   "id": "dragon_knight",
+   "name": "Dragon Knight",
+   "sprite": "dragon_knight",
+   "tags": [
+    "heavy",
+    "draconic"
+   ]
+  },
+  {
+   "classDefault": "pyromancer",
+   "gender": "female",
+   "id": "pyromancer",
+   "name": "Pyromancer",
+   "sprite": "pyromancer",
+   "tags": [
+    "fire",
+    "robes"
+   ]
+  },
+  {
+   "classDefault": "stormcaller",
+   "gender": "male",
+   "id": "stormcaller",
+   "name": "Stormcaller",
+   "sprite": "stormcaller",
+   "tags": [
+    "storm",
+    "robes"
+   ]
+  },
+  {
+   "classDefault": "oracle",
+   "gender": "female",
+   "id": "oracle",
+   "name": "Oracle",
+   "sprite": "oracle",
+   "tags": [
+    "prophetic",
+    "robes"
+   ]
+  },
+  {
+   "classDefault": "oracle",
+   "deprecated": true,
+   "gender": "female",
+   "id": "oracle_old",
+   "name": "Oracle (Classic)",
+   "sprite": "oracle_old",
+   "tags": [
+    "prophetic",
+    "robes",
+    "deprecated"
+   ]
+  },
+  {
+   "classDefault": "swashbuckler",
+   "gender": "male",
+   "id": "swashbuckler",
+   "name": "Swashbuckler",
+   "sprite": "swashbuckler",
+   "tags": [
+    "light",
+    "flair"
+   ]
+  },
+  {
+   "classDefault": "scavenger",
+   "gender": "male",
+   "id": "scavenger",
+   "name": "Scavenger",
+   "sprite": "scavenger",
+   "tags": [
+    "light",
+    "ragtag"
+   ]
+  },
+  {
+   "classDefault": "tactician",
+   "gender": "male",
+   "id": "tactician",
+   "name": "Tactician",
+   "sprite": "tactician",
+   "tags": [
+    "medium",
+    "leader"
+   ]
+  },
+  {
+   "classDefault": "chronomancer",
+   "gender": "male",
+   "id": "chronomancer",
+   "name": "Chronomancer",
+   "sprite": "chronomancer",
+   "tags": [
+    "arcane",
+    "robes"
+   ]
+  },
+  {
+   "classDefault": "monk",
+   "gender": "male",
+   "id": "monk",
+   "name": "Monk",
+   "sprite": "monk",
+   "tags": [
+    "light",
+    "martial"
+   ]
+  },
+  {
+   "classDefault": "knight",
+   "gender": "female",
+   "id": "knight",
+   "name": "Knight",
+   "sprite": "knight",
+   "tags": [
+    "heavy",
+    "male"
+   ]
+  },
+  {
+   "classDefault": "sorcerer",
+   "gender": "male",
+   "id": "sorcerer",
+   "name": "Sorcerer",
+   "sprite": "sorcerer",
+   "tags": [
+    "arcane",
+    "robes",
+    "male"
+   ]
+  },
+  {
+   "classDefault": "shaman",
+   "gender": "female",
+   "id": "shaman",
+   "name": "Shaman",
+   "sprite": "shaman",
+   "tags": [
+    "nature",
+    "tribal"
+   ]
+  },
+  {
+   "classDefault": "witch_hunter",
+   "gender": "male",
+   "id": "witch_hunter",
+   "name": "Witch Hunter",
+   "sprite": "witch_hunter",
+   "tags": [
+    "dark",
+    "light",
+    "male"
+   ]
+  },
+  {
+   "classDefault": "runesmith",
+   "gender": "male",
+   "id": "runesmith",
+   "name": "Runesmith",
+   "sprite": "runesmith",
+   "tags": [
+    "heavy",
+    "craft"
+   ]
+  },
+  {
+   "classDefault": "shadow_dancer",
+   "gender": "female",
+   "id": "shadow_dancer",
+   "name": "Shadow Dancer",
+   "sprite": "shadow_dancer",
+   "tags": [
+    "light",
+    "stealth",
+    "dark"
+   ]
+  },
+  {
+   "classDefault": "tinker",
+   "gender": "male",
+   "id": "tinker",
+   "name": "Tinker",
+   "sprite": "tinker",
+   "tags": [
+    "medium",
+    "clockwork"
+   ]
+  },
+  {
+   "classDefault": "tinker",
+   "gender": "female",
+   "id": "tinker_female",
+   "name": "Tinker (Female)",
+   "sprite": "tinker_female",
+   "tags": [
+    "female",
+    "variant",
+    "clockwork"
+   ]
+  },
+  {
+   "classDefault": "companion",
+   "gender": "companion",
+   "id": "clockwork_turret",
+   "name": "Clockwork Turret",
+   "sprite": "clockwork_turret",
+   "tags": [
+    "companion",
+    "clockwork",
+    "construct"
+   ]
+  },
+  {
+   "classDefault": "bard",
+   "gender": "female",
+   "id": "bard_female",
+   "name": "Bard (Female)",
+   "sprite": "bard_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "chronomancer",
+   "gender": "female",
+   "id": "chronomancer_female",
+   "name": "Chronomancer (Female)",
+   "sprite": "chronomancer_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "cleric",
+   "gender": "male",
+   "id": "cleric_male",
+   "name": "Cleric (Male)",
+   "sprite": "cleric_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "demon_hunter",
+   "gender": "female",
+   "id": "demon_hunter_female",
+   "name": "Demon Hunter (Female)",
+   "sprite": "demon_hunter_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "dragon_knight",
+   "gender": "male",
+   "id": "dragon_knight_male",
+   "name": "Dragon Knight (Male)",
+   "sprite": "dragon_knight_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "druid",
+   "gender": "male",
+   "id": "druid_male",
+   "name": "Druid (Male)",
+   "sprite": "druid_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "fighter",
+   "gender": "female",
+   "id": "fighter_female",
+   "name": "Fighter (Female)",
+   "sprite": "fighter_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "knight",
+   "gender": "male",
+   "id": "knight_male",
+   "name": "Knight (Male)",
+   "sprite": "knight_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "mage",
+   "gender": "female",
+   "id": "mage_female",
+   "name": "Mage (Female)",
+   "sprite": "mage_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "monk",
+   "gender": "female",
+   "id": "monk_female",
+   "name": "Monk (Female)",
+   "sprite": "monk_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "necromancer",
+   "gender": "female",
+   "id": "necromancer_female",
+   "name": "Necromancer (Female)",
+   "sprite": "necromancer_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "oracle",
+   "gender": "male",
+   "id": "oracle_male",
+   "name": "Oracle (Male)",
+   "sprite": "oracle_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "paladin",
+   "gender": "female",
+   "id": "paladin_female",
+   "name": "Paladin (Female)",
+   "sprite": "paladin_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "pyromancer",
+   "gender": "male",
+   "id": "pyromancer_male",
+   "name": "Pyromancer (Male)",
+   "sprite": "pyromancer_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "ranger",
+   "gender": "male",
+   "id": "ranger_male",
+   "name": "Ranger (Male)",
+   "sprite": "ranger_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "rogue",
+   "gender": "male",
+   "id": "rogue_male",
+   "name": "Rogue (Male)",
+   "sprite": "rogue_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "runesmith",
+   "gender": "female",
+   "id": "runesmith_female",
+   "name": "Runesmith (Female)",
+   "sprite": "runesmith_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "scavenger",
+   "gender": "female",
+   "id": "scavenger_female",
+   "name": "Scavenger (Female)",
+   "sprite": "scavenger_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "shadow_dancer",
+   "gender": "male",
+   "id": "shadow_dancer_male",
+   "name": "Shadow Dancer (Male)",
+   "sprite": "shadow_dancer_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "shaman",
+   "gender": "male",
+   "id": "shaman_male",
+   "name": "Shaman (Male)",
+   "sprite": "shaman_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "sorcerer",
+   "gender": "female",
+   "id": "sorcerer_female",
+   "name": "Sorcerer (Female)",
+   "sprite": "sorcerer_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "stormcaller",
+   "gender": "female",
+   "id": "stormcaller_female",
+   "name": "Stormcaller (Female)",
+   "sprite": "stormcaller_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "swashbuckler",
+   "gender": "female",
+   "id": "swashbuckler_female",
+   "name": "Swashbuckler (Female)",
+   "sprite": "swashbuckler_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "tactician",
+   "gender": "female",
+   "id": "tactician_female",
+   "name": "Tactician (Female)",
+   "sprite": "tactician_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "warlock",
+   "gender": "male",
+   "id": "warlock_male",
+   "name": "Warlock (Male)",
+   "sprite": "warlock_male",
+   "tags": [
+    "male",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "warrior",
+   "gender": "female",
+   "id": "warrior_female",
+   "name": "Warrior (Female)",
+   "sprite": "warrior_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "witch_hunter",
+   "gender": "female",
+   "id": "witch_hunter_female",
+   "name": "Witch Hunter (Female)",
+   "sprite": "witch_hunter_female",
+   "tags": [
+    "female",
+    "variant"
+   ]
+  },
+  {
+   "classDefault": "enchanter",
+   "gender": "male",
+   "id": "enchanter_male",
+   "name": "Enchanter (Male)",
+   "pendingReview": true,
+   "sprite": "enchanter_male",
+   "tags": [
+    "male",
+    "robes",
+    "arcane",
+    "enchant"
+   ]
+  },
+  {
+   "classDefault": "priest",
+   "gender": "female",
+   "id": "priest_female",
+   "name": "Priest (Female)",
+   "pendingReview": true,
+   "sprite": "priest_female",
+   "tags": [
+    "female",
+    "robes",
+    "holy",
+    "shadow",
+    "healer"
+   ]
+  },
+  {
+   "classDefault": "enchanter",
+   "gender": "female",
+   "id": "enchanter_female",
+   "name": "Enchanter (Female)",
+   "pendingReview": true,
+   "sprite": "enchanter_female",
+   "tags": [
+    "female",
+    "robes",
+    "arcane",
+    "enchant"
+   ]
+  },
+  {
+   "classDefault": "priest",
+   "gender": "male",
+   "id": "priest_male",
+   "name": "Priest (Male)",
+   "pendingReview": true,
+   "sprite": "priest_male",
+   "tags": [
+    "male",
+    "robes",
+    "holy",
+    "shadow",
+    "healer"
+   ]
+  }
+ ],
+ "source": "appearances.js APPEARANCES (playable !== false)",
+ "version": 1
+}

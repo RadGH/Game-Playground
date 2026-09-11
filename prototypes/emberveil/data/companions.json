@@ -1,0 +1,610 @@
+{
+ "classPets": {
+  "pet_bear": {
+   "attrs": {
+    "CON": 16,
+    "DEX": 6,
+    "INT": 4,
+    "STR": 14
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A massive bear called from the deep woods. Absorbs punishment.",
+   "id": "pet_bear",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Cave Bear",
+   "ownerClass": "druid"
+  },
+  "pet_bone_golem": {
+   "attrs": {
+    "CON": 18,
+    "DEX": 4,
+    "INT": 2,
+    "STR": 16
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "Massive construct of fused bones. Slow but devastating.",
+   "id": "pet_bone_golem",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Bone Golem",
+   "ownerClass": "necromancer"
+  },
+  "pet_clockwork_turret": {
+   "attrs": {
+    "CON": 14,
+    "DEX": 8,
+    "INT": 10,
+    "STR": 12
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A brass tripod turret with a single arcane-blue eye. Springs wound tight, barrel loaded with rune-etched bolts.",
+   "id": "pet_clockwork_turret",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Clockwork Turret",
+   "ownerClass": "tinker",
+   "sprite": "clockwork_turret"
+  },
+  "pet_demon": {
+   "attrs": {
+    "CON": 12,
+    "DEX": 10,
+    "INT": 8,
+    "STR": 14
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A summoned demon beast from the lower planes.",
+   "id": "pet_demon",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Infernal Hound",
+   "ownerClass": "warlock"
+  },
+  "pet_familiar": {
+   "attrs": {
+    "CON": 8,
+    "DEX": 10,
+    "INT": 16,
+    "STR": 4
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A mystical black cat wreathed in arcane runes, bound to its mage by ancient pact.",
+   "id": "pet_familiar",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Arcane Familiar",
+   "ownerClass": "mage"
+  },
+  "pet_fire_elemental": {
+   "attrs": {
+    "CON": 8,
+    "DEX": 8,
+    "INT": 16,
+    "STR": 8
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A living flame summoned from the ember planes.",
+   "id": "pet_fire_elemental",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Fire Elemental",
+   "ownerClass": "pyromancer"
+  },
+  "pet_imp": {
+   "attrs": {
+    "CON": 6,
+    "DEX": 12,
+    "INT": 12,
+    "STR": 6
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A mischievous lesser demon. Small but cunning.",
+   "id": "pet_imp",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Bound Imp",
+   "ownerClass": "warlock"
+  },
+  "pet_lightning_elemental": {
+   "attrs": {
+    "CON": 6,
+    "DEX": 14,
+    "INT": 14,
+    "STR": 6
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A crackling bolt given form and purpose.",
+   "id": "pet_lightning_elemental",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Lightning Elemental",
+   "ownerClass": "stormcaller"
+  },
+  "pet_skeletal_warrior": {
+   "attrs": {
+    "CON": 14,
+    "DEX": 8,
+    "INT": 4,
+    "STR": 12
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "Undead soldier bound by dark magic. Fights with hollow determination.",
+   "id": "pet_skeletal_warrior",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Skeletal Warrior",
+   "ownerClass": "necromancer"
+  },
+  "pet_war_hound": {
+   "attrs": {
+    "CON": 10,
+    "DEX": 14,
+    "INT": 6,
+    "STR": 10
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "An armored hunting dog trained for battle.",
+   "id": "pet_war_hound",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Trained War Hound",
+   "ownerClass": "ranger"
+  },
+  "pet_wolf": {
+   "attrs": {
+    "CON": 10,
+    "DEX": 14,
+    "INT": 4,
+    "STR": 10
+   },
+   "class": "companion",
+   "className": "Companion",
+   "description": "A wild wolf bonded through nature magic. Swift and loyal.",
+   "id": "pet_wolf",
+   "isCompanion": true,
+   "isPet": true,
+   "level": 1,
+   "name": "Forest Wolf",
+   "ownerClass": "druid"
+  }
+ },
+ "companionPower": {
+  "bone_hound": 2,
+  "crystal_golem": 4,
+  "dire_wolf": 3,
+  "dragon_hatchling": 5,
+  "ember_drake": 4,
+  "forest_owl": 1,
+  "frost_wyrmling": 5,
+  "ice_sprite": 2,
+  "shadow_cat": 2,
+  "shadow_wyrm": 5,
+  "spirit_wisp": 3,
+  "storm_drake": 5,
+  "swamp_frog": 1,
+  "void_moth": 3,
+  "war_dog": 1
+ },
+ "companions": [
+  {
+   "attrs": {
+    "CON": 10,
+    "DEX": 12,
+    "INT": 2,
+    "STR": 10
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 50,
+   "description": "Loyal, fierce, and surprisingly effective against goblins. Bites hard.",
+   "id": "war_dog",
+   "isCompanion": true,
+   "level": 1,
+   "name": "War Dog"
+  },
+  {
+   "attrs": {
+    "CON": 8,
+    "DEX": 15,
+    "INT": 4,
+    "STR": 8
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 80,
+   "description": "A black-furred predator with eyes like coals. Slips between shadows; strikes from behind.",
+   "id": "shadow_cat",
+   "isCompanion": true,
+   "level": 2,
+   "name": "Shadow Cat",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 11,
+    "DEX": 13,
+    "INT": 3,
+    "STR": 13
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 110,
+   "description": "A wolf the size of a horse. Pack instinct, brutal jaws, brutal endurance.",
+   "id": "dire_wolf",
+   "isCompanion": true,
+   "level": 3,
+   "name": "Dire Wolf",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 7,
+    "DEX": 14,
+    "INT": 8,
+    "STR": 6
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 60,
+   "description": "A silent hunter from the Thornwood. Spots ambushes before they trigger.",
+   "id": "forest_owl",
+   "isCompanion": true,
+   "level": 2,
+   "name": "Forest Owl",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 11,
+    "DEX": 11,
+    "INT": 10,
+    "STR": 12
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 220,
+   "description": "A small fire-tongued drake. Not quite a dragon — but the breath still burns.",
+   "id": "ember_drake",
+   "isCompanion": true,
+   "level": 4,
+   "name": "Ember Drake",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 16,
+    "DEX": 5,
+    "INT": 2,
+    "STR": 15
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 320,
+   "description": "A construct of living crystal. Slow, heavy, almost unkillable.",
+   "id": "crystal_golem",
+   "isCompanion": true,
+   "level": 5,
+   "name": "Crystal Golem",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 8,
+    "DEX": 12,
+    "INT": 14,
+    "STR": 4
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 240,
+   "description": "A floating mote of pale light. Heals nearby allies just by drifting close.",
+   "id": "spirit_wisp",
+   "isCompanion": true,
+   "level": 4,
+   "name": "Spirit Wisp",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 10,
+    "DEX": 13,
+    "INT": 3,
+    "STR": 11
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 180,
+   "description": "A skeletal mastiff bound by old necromantic threads. Tireless. Unafraid.",
+   "id": "bone_hound",
+   "isCompanion": true,
+   "level": 4,
+   "name": "Bone Hound",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 7,
+    "DEX": 13,
+    "INT": 13,
+    "STR": 5
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 160,
+   "description": "A flickering mote of frost. Hits feel cold long after the fight ends.",
+   "id": "ice_sprite",
+   "isCompanion": true,
+   "level": 3,
+   "name": "Ice Sprite",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 12,
+    "DEX": 10,
+    "INT": 4,
+    "STR": 11
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 90,
+   "description": "A boulder-sized amphibian. Sticky tongue. Tougher than it looks.",
+   "id": "swamp_frog",
+   "isCompanion": true,
+   "level": 3,
+   "name": "Swamp Frog",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 9,
+    "DEX": 14,
+    "INT": 11,
+    "STR": 7
+   },
+   "class": "companion",
+   "className": "Companion",
+   "cost": 280,
+   "description": "Wings of starless black. Drifts between the lines of reality.",
+   "id": "void_moth",
+   "isCompanion": true,
+   "level": 5,
+   "name": "Void Moth",
+   "wild": true
+  },
+  {
+   "attrs": {
+    "CON": 12,
+    "DEX": 11,
+    "INT": 14,
+    "STR": 12
+   },
+   "class": "companion",
+   "className": "Dragon Hatchling",
+   "cost": 500,
+   "description": "A tiny crimson dragon. Breathes dragon-fire that grows hotter as it matures. One day it will be a true dragon.",
+   "id": "dragon_hatchling",
+   "isCompanion": true,
+   "level": 5,
+   "name": "Crimson Dragon Hatchling"
+  },
+  {
+   "attrs": {
+    "CON": 13,
+    "DEX": 12,
+    "INT": 13,
+    "STR": 11
+   },
+   "class": "companion",
+   "className": "Frost Wyrmling",
+   "cost": 550,
+   "description": "A young frost dragon. Its dragon-breath freezes foes in place. Dragon-scales shimmer blue.",
+   "id": "frost_wyrmling",
+   "isCompanion": true,
+   "level": 5,
+   "name": "Frost Wyrmling"
+  },
+  {
+   "attrs": {
+    "CON": 12,
+    "DEX": 14,
+    "INT": 13,
+    "STR": 12
+   },
+   "class": "companion",
+   "className": "Storm Drake",
+   "cost": 700,
+   "description": "A lightning-winged dragon. Dragon-thunder crackles in its wake. Fast as a dragon on the hunt.",
+   "id": "storm_drake",
+   "isCompanion": true,
+   "level": 6,
+   "name": "Storm Drake"
+  },
+  {
+   "attrs": {
+    "CON": 12,
+    "DEX": 13,
+    "INT": 15,
+    "STR": 13
+   },
+   "class": "companion",
+   "className": "Shadow Wyrm",
+   "cost": 850,
+   "description": "A dragon born of eclipse-fire. Dragon-shadow clings to it, and dragon-whispers answer its call.",
+   "id": "shadow_wyrm",
+   "isCompanion": true,
+   "level": 7,
+   "name": "Shadow Wyrm"
+  }
+ ],
+ "hires": [
+  {
+   "attrs": {
+    "CON": 10,
+    "DEX": 14,
+    "INT": 8,
+    "STR": 8
+   },
+   "class": "ranger",
+   "className": "Ranger",
+   "description": "A quiet ranger from the eastern border. Waits for the perfect shot.",
+   "id": "aela",
+   "level": 1,
+   "name": "Aela",
+   "personality": "patient",
+   "personalityNote": "Patient — prefers precise strikes over rushing in."
+  },
+  {
+   "attrs": {
+    "CON": 9,
+    "DEX": 8,
+    "INT": 8,
+    "STR": 15
+   },
+   "class": "warrior",
+   "className": "Warrior",
+   "description": "Retired soldier. Bored. Wants one last fight.",
+   "id": "borin",
+   "level": 1,
+   "name": "Borin",
+   "personality": "aggressive",
+   "personalityNote": "Aggressive — always targets the strongest enemy first."
+  },
+  {
+   "attrs": {
+    "CON": 11,
+    "DEX": 8,
+    "INT": 15,
+    "STR": 8
+   },
+   "class": "cleric",
+   "className": "Cleric",
+   "description": "Young cleric of the Light. Eager to prove herself outside the temple.",
+   "id": "lysa",
+   "level": 2,
+   "name": "Lysa",
+   "personality": "protective",
+   "personalityNote": "Protective — prioritizes healing injured allies."
+  },
+  {
+   "attrs": {
+    "CON": 9,
+    "DEX": 14,
+    "INT": 9,
+    "STR": 8
+   },
+   "class": "rogue",
+   "className": "Rogue",
+   "description": "Says he's not a thief. Has three knives.",
+   "id": "rekk",
+   "level": 1,
+   "name": "Rekk",
+   "personality": "opportunist",
+   "personalityNote": "Opportunist — strikes weakened enemies to finish them."
+  },
+  {
+   "attrs": {
+    "CON": 12,
+    "DEX": 10,
+    "INT": 12,
+    "STR": 16
+   },
+   "class": "dragon_knight",
+   "className": "Dragon Knight",
+   "description": "A dragon-blooded warrior clad in dragon-scale plate. His dragon-fang greatsword has slain three dragons.",
+   "id": "kaldrek",
+   "level": 6,
+   "name": "Kaldrek the Dragonborn",
+   "personality": "aggressive",
+   "personalityNote": "Aggressive — channels dragon-fury against the strongest foe."
+  },
+  {
+   "attrs": {
+    "CON": 12,
+    "DEX": 12,
+    "INT": 13,
+    "STR": 15
+   },
+   "class": "dragon_knight",
+   "className": "Dragon Knight",
+   "description": "Sworn to the dragon oaths of old. Her dragon-breath melts armor and her dragon-scales turn blades.",
+   "id": "syra_wyrmsworn",
+   "level": 7,
+   "name": "Syra Wyrmsworn",
+   "personality": "protective",
+   "personalityNote": "Protective — uses dragon-scales to shield allies from dragon-fire."
+  },
+  {
+   "attrs": {
+    "CON": 15,
+    "DEX": 11,
+    "INT": 12,
+    "STR": 16
+   },
+   "class": "dragon_knight",
+   "className": "Dragon Knight",
+   "description": "Raised inside a dragon-hoard by a red dragon that mistook him for a hatchling. Believes he IS a dragon.",
+   "id": "vorin_emberjaw",
+   "level": 8,
+   "name": "Vorin Emberjaw",
+   "personality": "patient",
+   "personalityNote": "Patient — waits for the dragon-moment, then unleashes dragon-fury."
+  },
+  {
+   "attrs": {
+    "CON": 12,
+    "DEX": 14,
+    "INT": 15,
+    "STR": 15
+   },
+   "class": "dragon_knight",
+   "className": "Dragon Knight",
+   "description": "A dragon-cult defector. Her dragon-tattoos glow when dragons are near. Carries dragon-tooth daggers as backup.",
+   "id": "maelis_drakeblood",
+   "level": 9,
+   "name": "Maelis Drakeblood",
+   "personality": "opportunist",
+   "personalityNote": "Opportunist — strikes when the dragon-heat is at its peak."
+  },
+  {
+   "appearance": "tinker_female",
+   "attrs": {
+    "CON": 11,
+    "DEX": 10,
+    "INT": 15,
+    "STR": 8
+   },
+   "class": "tinker",
+   "className": "Tinker",
+   "description": "Workshop-trained mechanist with brass goggles and more pockets than fingers. Can fix a clockwork or fix a wound in the same minute.",
+   "id": "ysolde_cogwright",
+   "level": 3,
+   "name": "Ysolde Cogwright",
+   "personality": "opportunist",
+   "personalityNote": "Opportunist — grenades the clumped, bolts the stragglers."
+  }
+ ],
+ "source": "TownScreen.js COMPANIONS_ACT1/HIREABLES_ACT1 + companions.js CLASS_PETS/COMPANION_POWER",
+ "version": 1
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emberveil · Playground prototype</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/", "onnxruntime-web": "../../vendor/onnxruntime-web/ort.min.mjs" } }</script>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="../../index.html">← Playground</a>
+  <h1>Emberveil <span class="tiny">rebuilt</span></h1>
+  <div class="hud" id="hud" hidden>
+    <span id="hud-act"></span>
+    <span id="hud-place"></span>
+    <span>🪙 <b id="hud-gold"></b></span>
+    <span title="fame">★ <b id="hud-fame"></b></span>
+    <label class="mute"><input type="checkbox" id="mute"> mute</label>
+    <select id="engine" title="voice engine"><option value="">voice: own</option><option value="formant">voice: ours</option><option value="espeak">espeak</option><option value="babble">babble</option><option value="webspeech">browser</option></select>
+    <button id="btn-save" class="small">Save</button>
+    <button id="btn-menu" class="small">Menu</button>
+  </div>
+</header>
+<main id="app">
+  <section class="screen" id="screen-title">
+    <div class="title-card">
+      <h2>Emberveil</h2>
+      <p class="lead">A dark-fantasy party RPG: hire heroes from thirty classes, walk a branching world map, fight turn-based auto-battles, and chase loot with affixes through six acts. Rebuilt from the original game's data on the playground pieces.</p>
+      <div class="row"><button id="btn-new" class="primary">New game</button><button id="btn-continue">Continue</button></div>
+      <p class="tiny">Every class is a Mii-style character with its own gear parts. Beasts use the creature bodies. Talk comes from the Lingo engine, voices from the Formant synth. Save any hero to the character library.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-hire" hidden>
+    <div class="hire-layout">
+      <div class="panel">
+        <h3>Build your party <span class="tiny" id="hire-count"></span></h3>
+        <p class="tiny">Pick a class (all thirty are open here; the original's unlock rule is shown on each card). Each hero starts with the class kit, its first skill, and attributes spent by its build preset.</p>
+        <div class="row"><input id="hire-name" placeholder="Hero name (blank = class default)"><select id="hire-blueprint"></select><button id="btn-suggest" class="small">Suggested four</button></div>
+        <div id="class-grid" class="class-grid"></div>
+      </div>
+      <div class="panel chosen">
+        <h3>Party</h3>
+        <div id="hire-party" class="cards"></div>
+        <button id="btn-start" class="primary" disabled>Set out</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-world" hidden>
+    <div class="world-layout">
+      <div class="left">
+        <div class="stage-wrap"><div id="stage" class="stage"></div><div id="bubbles" class="bubbles"></div><div id="stage-caption" class="caption"></div></div>
+        <div class="panel map-panel">
+          <div class="row map-head"><b id="map-zone"></b><span class="tiny" id="map-hint">Click a lit node to travel. Visited nodes can always be revisited.</span><select id="zone-select" class="small"></select></div>
+          <svg id="map" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div class="right">
+        <div class="panel narrative"><div id="narrative" class="narrative-log" aria-live="polite"></div><div id="actions" class="actions"></div></div>
+        <aside class="panel side">
+          <div class="tabs"><button data-tab="party" class="on">Party</button><button data-tab="bag">Bag</button><button data-tab="skills">Skills</button><button data-tab="quests">Quests</button></div>
+          <div id="tab-party" class="tab"></div><div id="tab-bag" class="tab" hidden></div><div id="tab-skills" class="tab" hidden></div><div id="tab-quests" class="tab" hidden></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>
+<dialog id="item-dialog"></dialog>
+<div id="toast" class="toast" hidden></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

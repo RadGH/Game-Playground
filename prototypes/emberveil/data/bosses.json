@@ -1,0 +1,447 @@
+{
+ "entities": {
+  "ancient_dragon": {
+   "armor": 28,
+   "dmg": [
+    120,
+    200
+   ],
+   "dodge": 12,
+   "gold": [
+    160,
+    260
+   ],
+   "hit": 88,
+   "hp": 3640,
+   "id": "ancient_dragon",
+   "loot": [
+    "dragonsteel_chest",
+    "dragonheart_ring",
+    "dragonfang_greatsword"
+   ],
+   "magicResist": 0,
+   "maxHp": 3640,
+   "name": "Ancient Dragon",
+   "statusOnHit": [
+    {
+     "chance": 0.7,
+     "duration": 3,
+     "power": 18,
+     "type": "burn"
+    },
+    {
+     "chance": 0.4,
+     "duration": 3,
+     "power": 14,
+     "type": "bleed"
+    }
+   ],
+   "xpValue": 600
+  },
+  "archfiend_malgrath": {
+   "armor": 32,
+   "blockChance": 0.25,
+   "dmg": [
+    92,
+    144
+   ],
+   "dodge": 10,
+   "gold": [
+    180,
+    300
+   ],
+   "hit": 76,
+   "hp": 6300,
+   "id": "archfiend_malgrath",
+   "loot": [
+    "heavy_chest",
+    "ring",
+    "necklace"
+   ],
+   "magicResist": 0,
+   "maxHp": 6300,
+   "name": "Archfiend Malgrath",
+   "spellChance": 0.5,
+   "spellList": [
+    "imp_fireball",
+    "acolyte_curse",
+    "titan_magma_wave",
+    "infernal_brand",
+    "demon_disarm"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.6,
+     "duration": 3,
+     "power": 15,
+     "type": "burn"
+    },
+    {
+     "chance": 0.4,
+     "duration": 2,
+     "power": 12,
+     "type": "bleed"
+    }
+   ],
+   "stealableBuffs": [],
+   "xpValue": 680
+  },
+  "dragon_king": {
+   "armor": 34,
+   "dmg": [
+    140,
+    240
+   ],
+   "dodge": 14,
+   "gold": [
+    400,
+    700
+   ],
+   "hit": 92,
+   "hp": 8400,
+   "id": "dragon_king",
+   "loot": [
+    "dragonfang_greatsword",
+    "dragonheart_ring",
+    "dragonscale_cloth",
+    "dragontooth_amulet"
+   ],
+   "magicResist": 0,
+   "maxHp": 8400,
+   "name": "Bahamorth, the Dragon King",
+   "statusOnHit": [
+    {
+     "chance": 0.8,
+     "duration": 3,
+     "power": 22,
+     "type": "burn"
+    },
+    {
+     "chance": 0.3,
+     "duration": 1,
+     "type": "stun"
+    },
+    {
+     "chance": 0.5,
+     "duration": 3,
+     "power": 16,
+     "type": "bleed"
+    }
+   ],
+   "xpValue": 1600
+  },
+  "echo_sovereign": {
+   "armor": 32,
+   "dmg": [
+    96,
+    152
+   ],
+   "dodge": 14,
+   "gold": [
+    250,
+    400
+   ],
+   "hit": 90,
+   "hp": 6650,
+   "id": "echo_sovereign",
+   "isBoss": true,
+   "magicResist": 0,
+   "maxHp": 6650,
+   "name": "Echo of the Sovereign",
+   "spellChance": 0.55,
+   "spellList": [
+    "sovereign_voidstorm",
+    "lich_drain_life",
+    "acolyte_curse",
+    "wraith_chill"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.6,
+     "duration": 3,
+     "power": 12,
+     "type": "burn"
+    },
+    {
+     "chance": 0.5,
+     "duration": 3,
+     "power": 10,
+     "type": "poison"
+    }
+   ],
+   "xpValue": 1000
+  },
+  "emberveil_sovereign": {
+   "armor": 36,
+   "dmg": [
+    112,
+    176
+   ],
+   "dodge": 12,
+   "gold": [
+    300,
+    520
+   ],
+   "hit": 80,
+   "hp": 9800,
+   "id": "emberveil_sovereign",
+   "loot": [
+    "heavy_chest",
+    "ring",
+    "necklace",
+    "staff"
+   ],
+   "magicResist": 0,
+   "maxHp": 9800,
+   "name": "The Emberveil Sovereign",
+   "spellChance": 0.55,
+   "spellList": [
+    "sovereign_voidstorm",
+    "lich_drain_life",
+    "acolyte_curse",
+    "void_silence",
+    "nightmare_hex"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.7,
+     "duration": 3,
+     "power": 18,
+     "type": "burn"
+    },
+    {
+     "chance": 0.5,
+     "duration": 3,
+     "power": 15,
+     "type": "poison"
+    },
+    {
+     "chance": 0.2,
+     "duration": 1,
+     "power": 0,
+     "type": "stun"
+    }
+   ],
+   "stealableBuffs": [],
+   "xpValue": 1200
+  },
+  "grax_veil_touched": {
+   "armor": 12,
+   "blockChance": 0.18,
+   "dmg": [
+    58,
+    88
+   ],
+   "dodge": 8,
+   "gold": [
+    85,
+    140
+   ],
+   "hit": 82,
+   "hp": 1890,
+   "id": "grax_veil_touched",
+   "loot": [
+    "sword",
+    "heavy_chest",
+    "ring"
+   ],
+   "magicResist": 0,
+   "maxHp": 1890,
+   "name": "Grax the Veil-Touched",
+   "spellChance": 0.45,
+   "spellList": [
+    "lich_soul_shatter",
+    "lich_drain_life",
+    "void_silence",
+    "bone_grasp"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.3,
+     "duration": 3,
+     "power": 7,
+     "type": "poison"
+    }
+   ],
+   "stealableBuffs": [],
+   "xpValue": 340
+  },
+  "lava_titan": {
+   "armor": 24,
+   "blockChance": 0.3,
+   "dmg": [
+    72,
+    112
+   ],
+   "dodge": 4,
+   "gold": [
+    120,
+    200
+   ],
+   "hit": 85,
+   "hp": 3640,
+   "id": "lava_titan",
+   "loot": [
+    "heavy_chest",
+    "heavy_legs",
+    "ring"
+   ],
+   "magicResist": 0,
+   "maxHp": 3640,
+   "name": "The Lava Titan",
+   "spellChance": 0.5,
+   "spellList": [
+    "titan_magma_wave",
+    "imp_fireball",
+    "molten_shatter",
+    "infernal_brand"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.7,
+     "duration": 3,
+     "power": 12,
+     "type": "burn"
+    }
+   ],
+   "stealableBuffs": [],
+   "xpValue": 520
+  },
+  "the_architect": {
+   "armor": 44,
+   "blockChance": 0.3,
+   "dmg": [
+    160,
+    260
+   ],
+   "dodge": 15,
+   "gold": [
+    450,
+    800
+   ],
+   "hit": 90,
+   "hp": 12600,
+   "id": "the_architect",
+   "magicResist": 18,
+   "maxHp": 12600,
+   "name": "The Architect",
+   "spellChance": 0.55,
+   "spellList": [
+    "sovereign_voidstorm",
+    "void_silence",
+    "cosmic_rupture",
+    "nightmare_hex",
+    "void_lance"
+   ],
+   "stealableBuffs": [],
+   "xpValue": 1800
+  },
+  "the_first_ember": {
+   "armor": 40,
+   "dmg": [
+    124,
+    192
+   ],
+   "dodge": 16,
+   "gold": [
+    400,
+    650
+   ],
+   "hit": 92,
+   "hp": 9800,
+   "id": "the_first_ember",
+   "isBoss": true,
+   "magicResist": 0,
+   "maxHp": 9800,
+   "name": "The First Ember",
+   "spellChance": 0.6,
+   "spellList": [
+    "titan_magma_wave",
+    "imp_fireball",
+    "sovereign_voidstorm",
+    "lich_soul_shatter"
+   ],
+   "statusOnHit": [
+    {
+     "chance": 0.8,
+     "duration": 4,
+     "power": 18,
+     "type": "burn"
+    }
+   ],
+   "xpValue": 1800
+  },
+  "the_unraveler": {
+   "armor": 42,
+   "dmg": [
+    152,
+    248
+   ],
+   "dodge": 12,
+   "gold": [
+    280,
+    560
+   ],
+   "hit": 88,
+   "hp": 11200,
+   "id": "the_unraveler",
+   "magicResist": 12,
+   "maxHp": 11200,
+   "name": "The Unraveler",
+   "xpValue": 1200
+  },
+  "vault_guardian": {
+   "armor": 24,
+   "dmg": [
+    56,
+    88
+   ],
+   "dodge": 10,
+   "gold": [
+    90,
+    160
+   ],
+   "hit": 84,
+   "hp": 2240,
+   "id": "vault_guardian",
+   "isBoss": true,
+   "magicResist": 0,
+   "maxHp": 2240,
+   "name": "The Vault Guardian",
+   "spellChance": 0.45,
+   "spellList": [
+    "acolyte_curse",
+    "wraith_chill"
+   ],
+   "xpValue": 400
+  },
+  "void_scholar": {
+   "armor": 14,
+   "dmg": [
+    48,
+    76
+   ],
+   "dodge": 18,
+   "gold": [
+    130,
+    220
+   ],
+   "hit": 88,
+   "hp": 3360,
+   "id": "void_scholar",
+   "isBoss": true,
+   "magicResist": 0,
+   "maxHp": 3360,
+   "name": "The Void Scholar",
+   "spellChance": 0.6,
+   "spellList": [
+    "sovereign_voidstorm",
+    "lich_drain_life",
+    "acolyte_curse"
+   ],
+   "xpValue": 600
+  }
+ },
+ "source": "mapData.js boss creatures + HIDDEN_BOSS_ENCOUNTERS",
+ "version": 1
+}

@@ -1,0 +1,354 @@
+{
+ "DUNGEON_SKILL_CHECKS": {
+  "warrens_pit": {
+   "stat": "DEX",
+   "dc": 12,
+   "flavor": "A pit trap yawns ahead — trip wires everywhere. Pick a path before the sentries return.",
+   "passText": "You thread the wires flawlessly. The guards ahead never hear you coming — they will start stunned.",
+   "failText": "A wire snaps. The alarm is up. The party scrambles and takes a beating before regrouping.",
+   "passBuff": {
+    "type": "stun_round1",
+    "desc": "Enemies begin the next fight stunned."
+   },
+   "failDamagePct": 0.12
+  },
+  "catacombs_ward": {
+   "stat": "INT",
+   "dc": 14,
+   "flavor": "Arcane wards seal the next vault. Decipher the glyph sequence or brute-force them.",
+   "passText": "The wards fall silent. Beyond, the cultists stand frozen — your party strikes first.",
+   "failText": "The ward discharges. Crackling energy scorches the party before the door gives.",
+   "passBuff": {
+    "type": "stun_round1",
+    "desc": "Enemies begin the next fight stunned."
+   },
+   "failDamagePct": 0.14
+  },
+  "oubliette_chains": {
+   "stat": "STR",
+   "dc": 15,
+   "flavor": "Rusted chains barricade a chokepoint. Snap them — or get flanked coming through.",
+   "passText": "The chains give with a thunderclap. The demons on the other side are caught mid-formation.",
+   "failText": "The chains hold. You squeeze through one at a time and take blows from both sides.",
+   "passBuff": {
+    "type": "stun_round1",
+    "desc": "Enemies begin the next fight stunned."
+   },
+   "failDamagePct": 0.15
+  },
+  "star_well_light": {
+   "stat": "CON",
+   "dc": 16,
+   "flavor": "The light here pulls inward, draining vitality from anyone who hesitates. Press through fast.",
+   "passText": "You move like shadows. The Void entities ahead react too slowly — first blood is yours.",
+   "failText": "The light bleeds into you. The party emerges pale and shaking, HP sapped.",
+   "passBuff": {
+    "type": "stun_round1",
+    "desc": "Enemies begin the next fight stunned."
+   },
+   "failDamagePct": 0.16
+  },
+  "spiracle_current": {
+   "stat": "CON",
+   "dc": 17,
+   "flavor": "Abyssal pressure crushes inward. Resist it or be slowed when you face what waits ahead.",
+   "passText": "You endure the pressure and emerge clear-headed. The abyssal garrison is still forming ranks.",
+   "failText": "The current batters you. Bruised and breathless, the party staggers into the next chamber.",
+   "passBuff": {
+    "type": "stun_round1",
+    "desc": "Enemies begin the next fight stunned."
+   },
+   "failDamagePct": 0.17
+  },
+  "atrium_ascent": {
+   "stat": "STR",
+   "dc": 18,
+   "flavor": "A collapsed bridge spans the inner atrium. Climb the wreckage or be bottlenecked at the crossing.",
+   "passText": "You crest the rubble before the wyrms notice. The Storm Roost defenders scramble to react.",
+   "failText": "The crossing collapses under you. The fall costs everyone before the fight even starts.",
+   "passBuff": {
+    "type": "stun_round1",
+    "desc": "Enemies begin the next fight stunned."
+   },
+   "failDamagePct": 0.18
+  }
+ },
+ "DUNGEONS": {
+  "goblin_warrens": {
+   "id": "goblin_warrens",
+   "name": "Goblin Warrens",
+   "parentZone": "thornwood",
+   "anchorNodeId": "goblin_camp",
+   "x": 0.55,
+   "y": 0.95,
+   "minLevel": 3,
+   "stages": [
+    {
+     "type": "combat",
+     "encounter": "goblin_patrol",
+     "name": "Sentries"
+    },
+    {
+     "type": "combat",
+     "encounter": "spider_nest",
+     "name": "Brood Tunnel"
+    },
+    {
+     "type": "combat",
+     "encounter": "goblin_camp",
+     "name": "Warband"
+    },
+    {
+     "type": "skill_check",
+     "checkId": "warrens_pit",
+     "name": "Pit Trap"
+    },
+    {
+     "type": "combat",
+     "encounter": "goblin_camp",
+     "name": "Ambush Pack"
+    },
+    {
+     "type": "boss",
+     "encounter": "border_boss",
+     "name": "Warren Hetman"
+    }
+   ],
+   "reward": {
+    "gold": 220,
+    "xp": 180,
+    "item": "medium_chest"
+   }
+  },
+  "ash_catacombs": {
+   "id": "ash_catacombs",
+   "name": "Ash Catacombs",
+   "parentZone": "dust_roads",
+   "anchorNodeId": "obsidian_fort",
+   "x": 0.46,
+   "y": 0.95,
+   "minLevel": 6,
+   "stages": [
+    {
+     "type": "combat",
+     "encounter": "ash_patrol",
+     "name": "Sealed Door"
+    },
+    {
+     "type": "combat",
+     "encounter": "obsidian_garrison",
+     "name": "Vault Wardens"
+    },
+    {
+     "type": "skill_check",
+     "checkId": "catacombs_ward",
+     "name": "Arcane Ward"
+    },
+    {
+     "type": "combat",
+     "encounter": "veil_cult_camp",
+     "name": "Cult Cloister"
+    },
+    {
+     "type": "combat",
+     "encounter": "obsidian_garrison",
+     "name": "Rear Guard"
+    },
+    {
+     "type": "boss",
+     "encounter": "lava_titan",
+     "name": "The Smouldering King"
+    }
+   ],
+   "reward": {
+    "gold": 360,
+    "xp": 280,
+    "item": "heavy_chest"
+   }
+  },
+  "rift_oubliette": {
+   "id": "rift_oubliette",
+   "name": "Rift Oubliette",
+   "parentZone": "hell_breach",
+   "anchorNodeId": "inferno_keep",
+   "x": 0.5,
+   "y": 0.95,
+   "minLevel": 9,
+   "stages": [
+    {
+     "type": "combat",
+     "encounter": "demon_patrol",
+     "name": "Outer Cells"
+    },
+    {
+     "type": "combat",
+     "encounter": "rift_assault",
+     "name": "Pitfall"
+    },
+    {
+     "type": "skill_check",
+     "checkId": "oubliette_chains",
+     "name": "Iron Barricade"
+    },
+    {
+     "type": "combat",
+     "encounter": "hell_garrison",
+     "name": "Throne Anteroom"
+    },
+    {
+     "type": "combat",
+     "encounter": "rift_assault",
+     "name": "Rift Breach"
+    },
+    {
+     "type": "boss",
+     "encounter": "archfiend_malgrath",
+     "name": "The Pit Tyrant"
+    }
+   ],
+   "reward": {
+    "gold": 540,
+    "xp": 420,
+    "item": "heavy_chest"
+   }
+  },
+  "star_well": {
+   "id": "star_well",
+   "name": "The Star Well",
+   "parentZone": "cosmic_rift",
+   "anchorNodeId": "cosmic_bastion",
+   "x": 0.48,
+   "y": 0.95,
+   "minLevel": 12,
+   "stages": [
+    {
+     "type": "combat",
+     "encounter": "void_horde",
+     "name": "Wandering Wraiths"
+    },
+    {
+     "type": "combat",
+     "encounter": "cosmic_assault",
+     "name": "Falling Stars"
+    },
+    {
+     "type": "skill_check",
+     "checkId": "star_well_light",
+     "name": "Collapsing Light"
+    },
+    {
+     "type": "combat",
+     "encounter": "void_horde",
+     "name": "Inner Ring"
+    },
+    {
+     "type": "combat",
+     "encounter": "cosmic_assault",
+     "name": "Outer Tide"
+    },
+    {
+     "type": "boss",
+     "encounter": "cosmic_assault",
+     "name": "Star Warden"
+    }
+   ],
+   "reward": {
+    "gold": 760,
+    "xp": 620,
+    "item": "heavy_chest"
+   }
+  },
+  "abyssal_spiracle": {
+   "id": "abyssal_spiracle",
+   "name": "Abyssal Spiracle",
+   "parentZone": "abyssal_depths",
+   "anchorNodeId": "nexus_core",
+   "x": 0.48,
+   "y": 0.95,
+   "minLevel": 14,
+   "stages": [
+    {
+     "type": "combat",
+     "encounter": "primordial_patrol",
+     "name": "Drowned Approach"
+    },
+    {
+     "type": "combat",
+     "encounter": "abyssal_garrison",
+     "name": "Salt-Crusted Hall"
+    },
+    {
+     "type": "skill_check",
+     "checkId": "spiracle_current",
+     "name": "Abyssal Current"
+    },
+    {
+     "type": "combat",
+     "encounter": "genesis_nest",
+     "name": "Worm Brood"
+    },
+    {
+     "type": "combat",
+     "encounter": "primordial_patrol",
+     "name": "Deep Tide"
+    },
+    {
+     "type": "boss",
+     "encounter": "abyssal_garrison",
+     "name": "Spiracle Warden"
+    }
+   ],
+   "reward": {
+    "gold": 980,
+    "xp": 820,
+    "item": "heavy_chest"
+   }
+  },
+  "dragon_atrium": {
+   "id": "dragon_atrium",
+   "name": "Dragon Atrium",
+   "parentZone": "dragons_reach",
+   "anchorNodeId": "wyrm_citadel",
+   "x": 0.5,
+   "y": 0.95,
+   "minLevel": 16,
+   "stages": [
+    {
+     "type": "combat",
+     "encounter": "dragon_patrol",
+     "name": "Wyrm Sentries"
+    },
+    {
+     "type": "combat",
+     "encounter": "wyrm_citadel",
+     "name": "Atrium Guard"
+    },
+    {
+     "type": "skill_check",
+     "checkId": "atrium_ascent",
+     "name": "Ruined Bridge"
+    },
+    {
+     "type": "combat",
+     "encounter": "storm_dragon_nest",
+     "name": "Storm Roost"
+    },
+    {
+     "type": "combat",
+     "encounter": "wyrm_citadel",
+     "name": "Inner Guard"
+    },
+    {
+     "type": "boss",
+     "encounter": "frost_wyrm_pack",
+     "name": "The Atrium Wyrm"
+    }
+   ],
+   "reward": {
+    "gold": 1200,
+    "xp": 1100,
+    "item": "heavy_chest"
+   }
+  }
+ }
+}

@@ -23,6 +23,7 @@ export const DEFAULT_AVATAR = {
   accessory: { id: 'none', color: '#333333' },
   hat: { id: 'none', color: '#5a3d8a' },
   extras: { id: 'none', color: '#8a2e2e' },
+  cape: { id: 'none', color: '#3a4a8a' }, held: { id: 'none', color: '#9a9aa8' }, offhand: { id: 'none', color: '#8a7a5a' },
 };
 
 /** Deep-merge missing fields from DEFAULT_AVATAR and drop unknown part ids (fallback to defaults). */
@@ -57,7 +58,7 @@ function layerOf(slot, p) { return p.layer || slot; }
  */
 export function renderSVG(avatar, opts = {}) {
   const a = normalizeAvatar(avatar), m = bodyMetrics(a.body);
-  const vars = `--skin:${a.body.skin};--hair:${a.hair.color};--eye:${a.eyes.color};--mouth:${a.mouth.color};--top:${a.top.color};--top2:${a.top.color2 || '#ffffff'};--bottom:${a.bottom.color};--shoes:${a.shoes.color};--acc:${a.accessory.color};--hat:${a.hat.color};--extra:${a.extras.color};--skin-dark:${shade(a.body.skin, -0.18)};--hair-dark:${shade(a.hair.color, -0.2)};--top-dark:${shade(a.top.color, -0.18)};--bottom-dark:${shade(a.bottom.color, -0.18)};--shoes-dark:${shade(a.shoes.color, -0.25)}`;
+  const vars = `--skin:${a.body.skin};--hair:${a.hair.color};--eye:${a.eyes.color};--mouth:${a.mouth.color};--top:${a.top.color};--top2:${a.top.color2 || '#ffffff'};--bottom:${a.bottom.color};--shoes:${a.shoes.color};--acc:${a.accessory.color};--hat:${a.hat.color};--extra:${a.extras.color};--cape:${a.cape.color};--cape-dark:${shade(a.cape.color, -0.25)};--held:${a.held.color};--held-dark:${shade(a.held.color, -0.3)};--offhand:${a.offhand.color};--offhand-dark:${shade(a.offhand.color, -0.3)};--skin-dark:${shade(a.body.skin, -0.18)};--hair-dark:${shade(a.hair.color, -0.2)};--top-dark:${shade(a.top.color, -0.18)};--bottom-dark:${shade(a.bottom.color, -0.18)};--shoes-dark:${shade(a.shoes.color, -0.25)}`;
   // collect drawable layers: { layer, svg }
   const items = [];
   const T = { legs: `translate(150 ${ANCHORS.feet}) scale(${m.widthScale} ${m.legScale}) translate(-150 -${ANCHORS.feet})`,
@@ -65,7 +66,7 @@ export function renderSVG(avatar, opts = {}) {
     head: `translate(${ANCHORS.headCx} ${m.headCy}) scale(${m.headScale}) translate(-${ANCHORS.headCx} -${ANCHORS.headCy})` };
   const add = (slot, sel, extraTransform = '') => { const p = part(slot, sel?.id ?? sel); if (!p) return; for (const piece of p.pieces || [{ layer: layerOf(slot, p), svg: p.svg }]) items.push({ layer: piece.layer, svg: piece.svg, transform: piece.group ? T[piece.group] : extraTransform, slot }); };
   add('bottom', a.bottom, T.legs); add('shoes', a.shoes, T.legs);
-  add('top', a.top, T.torso);
+  add('top', a.top, T.torso); add('cape', a.cape, T.torso); add('held', a.held, T.torso); add('offhand', a.offhand, T.torso);
   add('headShape', a.headShape, T.head); add('ears', a.ears, T.head); add('hair', a.hair, T.head); add('hat', a.hat, T.head); add('extras', a.extras, T.head); add('facialHair', a.facialHair, T.head); add('accessory', a.accessory, T.head);
   // face parts with Mii offsets, inside the head transform
   const face = (slot, sel, inner) => { const p = part(slot, sel.id); if (!p) return; items.push({ layer: p.layer || slot, slot, transform: T.head, svg: inner(p) }); };

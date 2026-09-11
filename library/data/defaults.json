@@ -1038,6 +1038,3638 @@
    "createdAt": 1789000000000,
    "updatedAt": 1789000000000,
    "notes": "Four-member starter party for the party-quest prototype."
+  },
+  {
+   "id": "ev_warrior",
+   "kind": "character",
+   "name": "Brannoc Redmane (Warrior)",
+   "tags": [
+    "emberveil",
+    "warrior",
+    "heavy",
+    "str"
+   ],
+   "notes": "Frontline Tank. Shield Bash stuns enemies. Whirlwind hits all adjacent foes. Unbreakable when outnumbered.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_warrior",
+    "name": "Brannoc Redmane",
+    "short": "Brannoc",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Warrior",
+    "class": "warrior",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.8,
+      "headSize": 0.5,
+      "skin": "#d9a77a"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "long",
+      "color": "#b03020"
+     },
+     "eyes": {
+      "id": "angry",
+      "color": "#4a6b8a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "full"
+     },
+     "top": {
+      "id": "fur_tunic",
+      "color": "#8a7a3a",
+      "color2": "#6a5a4a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#4a3a2a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "horned_helm",
+      "color": "#777780"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "greataxe",
+      "color": "#9a9aa8"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.32,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "brave",
+      "gruff",
+      "bloodlust"
+     ],
+     "formality": 0.2,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.8,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_fighter",
+   "kind": "character",
+   "name": "Corvin Hale (Fighter)",
+   "tags": [
+    "emberveil",
+    "fighter",
+    "heavy",
+    "str"
+   ],
+   "notes": "Disciplined Duelist. Riposte counters parries. Tactical stances swap between offense and defense. Precise Strike never misses.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_fighter",
+    "name": "Corvin Hale",
+    "short": "Corvin",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Fighter",
+    "class": "fighter",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.65,
+      "headSize": 0.5,
+      "skin": "#e0ac69"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "curly",
+      "color": "#3b2a1a"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "plate",
+      "color": "#c0c4cc",
+      "color2": "#a0a4ac"
+     },
+     "bottom": {
+      "id": "greaves",
+      "color": "#999"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#888"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "sword",
+      "color": "#d0d0d8"
+     },
+     "offhand": {
+      "id": "heater_shield",
+      "color": "#8a8a90"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.42,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "honorable",
+      "loyal"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_paladin",
+   "kind": "character",
+   "name": "Aurel Dawnward (Paladin)",
+   "tags": [
+    "emberveil",
+    "paladin",
+    "medium",
+    "str"
+   ],
+   "notes": "Holy Warrior. Holy Strike crits vs demons. Lay on Hands keeps allies alive. Consecration sustains long fights.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_paladin",
+    "name": "Aurel Dawnward",
+    "short": "Aurel",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Paladin",
+    "class": "paladin",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.7,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "side_part",
+      "color": "#d9c27a"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#4a8ad0"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "plate",
+      "color": "#c8ccd4",
+      "color2": "#8fa3c0"
+     },
+     "bottom": {
+      "id": "greaves",
+      "color": "#a0a4ac"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#888"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "sword",
+      "color": "#d0d0d8"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.4,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "pious",
+      "honorable",
+      "kind"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.15,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_ranger",
+   "kind": "character",
+   "name": "Wren Ashvale (Ranger)",
+   "tags": [
+    "emberveil",
+    "ranger",
+    "light",
+    "dex"
+   ],
+   "notes": "Precision Ranged. Aimed Shot ignores armor. Rain of Arrows blankets the entire enemy field for 3 rounds.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_ranger",
+    "name": "Wren Ashvale",
+    "short": "Wren",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Ranger",
+    "class": "ranger",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "wavy",
+      "color": "#a86a3a"
+     },
+     "eyes": {
+      "id": "almond",
+      "color": "#6b8aa0"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "tunic",
+      "color": "#2f5a2a",
+      "color2": "#5a3a1a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#2a4a2a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#5a3a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "bow",
+      "color": "#8a6a3a"
+     },
+     "offhand": {
+      "id": "quiver",
+      "color": "#5a3a1a"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.6,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "kind",
+      "loyal",
+      "shy"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.25,
+     "cheer": 0.5,
+     "aggression": 0.15,
+     "confidence": 0.3,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_rogue",
+   "kind": "character",
+   "name": "Sable Quick (Rogue)",
+   "tags": [
+    "emberveil",
+    "rogue",
+    "light",
+    "dex"
+   ],
+   "notes": "Burst Assassin. 200% Backstab on stunned targets. Death Mark makes enemies take 50% more damage from all sources.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_rogue",
+    "name": "Sable Quick",
+    "short": "Sable",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Rogue",
+    "class": "rogue",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "bob",
+      "color": "#d94a2a"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "strapped_leather",
+      "color": "#1a1a1a",
+      "color2": "#6a4a2a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#1a1a1a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#222"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#111"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "daggers",
+      "color": "#b0b0b8"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.58,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "cynical",
+      "sarcastic"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.2,
+     "aggression": 0.4,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_cleric",
+   "kind": "character",
+   "name": "Mirelle Sanct (Cleric)",
+   "tags": [
+    "emberveil",
+    "cleric",
+    "light",
+    "int"
+   ],
+   "notes": "Primary Healer. Mass Resurrection can auto-trigger on wipe. Sanctuary makes an ally temporarily untargetable.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_cleric",
+    "name": "Mirelle Sanct",
+    "short": "Mirelle",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Cleric",
+    "class": "cleric",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "long",
+      "color": "#6b4a2a"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#f4f4f0",
+      "color2": "#e0b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#e8e4d8"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#8a6a3a"
+     },
+     "accessory": {
+      "id": "pendant",
+      "color": "#8a6a3a"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#f4f4f0"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "shoulder_cape",
+      "color": "#ffffff"
+     },
+     "held": {
+      "id": "mace",
+      "color": "#777"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.62,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "pious",
+      "kind"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.15,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_bard",
+   "kind": "character",
+   "name": "Tamsin Lark (Bard)",
+   "tags": [
+    "emberveil",
+    "bard",
+    "light",
+    "int"
+   ],
+   "notes": "Support Maestro. Ballad of Valor gives one hero two turns per round. Song of Ruin strips all enemy buffs at once.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_bard",
+    "name": "Tamsin Lark",
+    "short": "Tamsin",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Bard",
+    "class": "bard",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "curly",
+      "color": "#6b4a2a"
+     },
+     "eyes": {
+      "id": "happy",
+      "color": "#3a8a5a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "doublet",
+      "color": "#b02020",
+      "color2": "#2a8a8a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#3a2a4a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "feather_cap",
+      "color": "#b02020"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "lute",
+      "color": "#8a5a2a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.5,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "jolly",
+      "romantic",
+      "pompous"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.75,
+     "cheer": 0.85,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_mage",
+   "kind": "character",
+   "name": "Edric Vane (Mage)",
+   "tags": [
+    "emberveil",
+    "mage",
+    "cloth",
+    "int"
+   ],
+   "notes": "AoE Glass Cannon. Fireball torches entire enemy packs. Blizzard hits all enemies for 3 rounds. Arcane Surge: 400% INT.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_mage",
+    "name": "Edric Vane",
+    "short": "Edric",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Mage",
+    "class": "mage",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "short",
+      "color": "#8a3a1a"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "goatee"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#1a2a7a",
+      "color2": "#e0b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#1a2a5a"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#1a2a7a"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "staff_orb",
+      "color": "#5a3a1a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.45,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "scholar",
+      "pompous"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.75,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_necromancer",
+   "kind": "character",
+   "name": "Osric Mourne (Necromancer)",
+   "tags": [
+    "emberveil",
+    "necromancer",
+    "cloth",
+    "int"
+   ],
+   "notes": "Army Builder. Raise Dead turns corpses into skeleton allies. Death Coil applies Poison AND Bleed to all enemies.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_necromancer",
+    "name": "Osric Mourne",
+    "short": "Osric",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Necromancer",
+    "class": "necromancer",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.42,
+      "headSize": 0.5,
+      "skin": "#e8dcc8"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "short",
+      "color": "#3b2a1a"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#3b2a1a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#151515",
+      "color2": "#d8b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#111"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#111"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#111"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "staff_skull",
+      "color": "#5a3a1a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.38,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "cynical",
+      "archaic",
+      "cruel"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.5,
+     "cheer": 0.2,
+     "aggression": 0.8,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_warlock",
+   "kind": "character",
+   "name": "Vesna Duskwell (Warlock)",
+   "tags": [
+    "emberveil",
+    "warlock",
+    "cloth",
+    "int"
+   ],
+   "notes": "Chaos Dealer. Corruption spreads on enemy death. Soul Pact doubles all DoT at cost of own HP.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_warlock",
+    "name": "Vesna Duskwell",
+    "short": "Vesna",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Warlock",
+    "class": "warlock",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "long",
+      "color": "#3b2a1a"
+     },
+     "eyes": {
+      "id": "sleepy",
+      "color": "#3b2a1a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "robe",
+      "color": "#2a1a3a",
+      "color2": "#d8b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#1a1020"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#1a1020"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#4a1a6a"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#4a1a6a"
+     },
+     "held": {
+      "id": "book",
+      "color": "#3a1a4a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.55,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "paranoid",
+      "cynical"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.2,
+     "aggression": 0.4,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_demon_hunter",
+   "kind": "character",
+   "name": "Kael Sorrowend (Demon Hunter)",
+   "tags": [
+    "emberveil",
+    "demon_hunter",
+    "light",
+    "dex"
+   ],
+   "notes": "Specialist Killer. +50% damage vs demons. Vengeance stacks from fallen allies then unleashes devastating burst.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_demon_hunter",
+    "name": "Kael Sorrowend",
+    "short": "Kael",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Demon Hunter",
+    "class": "demon_hunter",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.55,
+      "headSize": 0.5,
+      "skin": "#c68642"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "buzz",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "glow",
+      "color": "#ff3030"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "strapped_leather",
+      "color": "#4a2a1a",
+      "color2": "#5a3a1a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#2a1a1a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#222"
+     },
+     "accessory": {
+      "id": "scarf",
+      "color": "#c83a2a"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "scar",
+      "color": "#e8c8b0"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "saber",
+      "color": "#c0c0c8"
+     },
+     "offhand": {
+      "id": "dagger",
+      "color": "#c0c0c8"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.38,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "gruff",
+      "brave",
+      "grieving"
+     ],
+     "formality": 0.2,
+     "verbosity": 0.5,
+     "cheer": 0.2,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_scavenger",
+   "kind": "character",
+   "name": "Grit Pennyworth (Scavenger)",
+   "tags": [
+    "emberveil",
+    "scavenger",
+    "light",
+    "dex"
+   ],
+   "notes": "Resource Specialist. Lucky Strike inflicts random statuses. Big Score is a high-variance gambling strike — crit huge or whiff.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_scavenger",
+    "name": "Grit Pennyworth",
+    "short": "Grit",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Scavenger",
+    "class": "scavenger",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#c68642"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "spiky",
+      "color": "#3b2a1a"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "stubble"
+     },
+     "top": {
+      "id": "wraps",
+      "color": "#6a4a2a",
+      "color2": "#8a6a4a"
+     },
+     "bottom": {
+      "id": "ragged",
+      "color": "#4a3a2a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "cleaver",
+      "color": "#8a8a80"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.48,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "greedy",
+      "hungry",
+      "sarcastic"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_swashbuckler",
+   "kind": "character",
+   "name": "Lucan Farrow (Swashbuckler)",
+   "tags": [
+    "emberveil",
+    "swashbuckler",
+    "light",
+    "dex"
+   ],
+   "notes": "Flashy Duelist. Build Flair stacks with Flourish. Grandeur releases all stacks in one legendary strike.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_swashbuckler",
+    "name": "Lucan Farrow",
+    "short": "Lucan",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Swashbuckler",
+    "class": "swashbuckler",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#e0ac69"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "wavy",
+      "color": "#a86a3a"
+     },
+     "eyes": {
+      "id": "happy",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "goatee"
+     },
+     "top": {
+      "id": "open_coat",
+      "color": "#b02020",
+      "color2": "#f0e0c0"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#2a2a3a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "rapier",
+      "color": "#d0d0d8"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.46,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "pompous",
+      "romantic",
+      "brave"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.75,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_dragon_knight",
+   "kind": "character",
+   "name": "Sera Emberscale (Dragon Knight)",
+   "tags": [
+    "emberveil",
+    "dragon_knight",
+    "heavy",
+    "str"
+   ],
+   "notes": "Draconic Warrior. Choose fire/ice/lightning. Draconic Fury turns all attacks into group AoE for 2 rounds.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_dragon_knight",
+    "name": "Sera Emberscale",
+    "short": "Sera",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Dragon Knight",
+    "class": "dragon_knight",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.7,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "bob",
+      "color": "#e08a2a"
+     },
+     "eyes": {
+      "id": "almond",
+      "color": "#6b8aa0"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "scale_plate",
+      "color": "#2a5a2a",
+      "color2": "#777"
+     },
+     "bottom": {
+      "id": "greaves",
+      "color": "#555"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#444"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "dragon_helm",
+      "color": "#2a5a2a"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "warhammer",
+      "color": "#888"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.55,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "brave",
+      "honorable",
+      "gruff"
+     ],
+     "formality": 0.2,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_pyromancer",
+   "kind": "character",
+   "name": "Ilsa Cinder (Pyromancer)",
+   "tags": [
+    "emberveil",
+    "pyromancer",
+    "cloth",
+    "int"
+   ],
+   "notes": "Fire Specialist. Stack Burn on multiple groups. Meteor ignites every enemy group simultaneously.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_pyromancer",
+    "name": "Ilsa Cinder",
+    "short": "Ilsa",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Pyromancer",
+    "class": "pyromancer",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "wavy",
+      "color": "#a03020"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#8a1a1a",
+      "color2": "#e0b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#5a1010"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#8a1a1a"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "flame",
+      "color": "#ff8c2a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.6,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "brave",
+      "sarcastic"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_stormcaller",
+   "kind": "character",
+   "name": "Torvald Gale (Stormcaller)",
+   "tags": [
+    "emberveil",
+    "stormcaller",
+    "cloth",
+    "int"
+   ],
+   "notes": "Chain Lightning Mage. Chain Lightning jumps between enemies. Thunder Ring zones the battlefield.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_stormcaller",
+    "name": "Torvald Gale",
+    "short": "Torvald",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Stormcaller",
+    "class": "stormcaller",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "spiky",
+      "color": "#3b2a1a"
+     },
+     "eyes": {
+      "id": "angry",
+      "color": "#3b2a1a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "coat",
+      "color": "#1a2a7a",
+      "color2": "#e08a2a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#444"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#5a3a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood_down",
+      "color": "#1a2a7a"
+     },
+     "extras": {
+      "id": "lightning_arcs",
+      "color": "#4ad0ff"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "lightning",
+      "color": "#4ad0ff"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.42,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "bloodlust",
+      "brave"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.8,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_druid",
+   "kind": "character",
+   "name": "Aveline Thorne (Druid)",
+   "tags": [
+    "emberveil",
+    "druid",
+    "medium",
+    "int"
+   ],
+   "notes": "Shapeshifting Healer. Rejuvenation HoTs. Wild Shape for raw damage. Nature’s Wrath in the late game.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_druid",
+    "name": "Aveline Thorne",
+    "short": "Aveline",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Druid",
+    "class": "druid",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "wavy",
+      "color": "#d9c27a"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "tunic",
+      "color": "#6a4a2a",
+      "color2": "#8a6a4a"
+     },
+     "bottom": {
+      "id": "skirt",
+      "color": "#6a4a2a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#2a6a2a"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#2a6a2a"
+     },
+     "held": {
+      "id": "staff_crook",
+      "color": "#5a3a1a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.6,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "kind",
+      "pious",
+      "shy"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.25,
+     "cheer": 0.5,
+     "aggression": 0.15,
+     "confidence": 0.3,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_oracle",
+   "kind": "character",
+   "name": "Nysa Farsight (Oracle)",
+   "tags": [
+    "emberveil",
+    "oracle",
+    "cloth",
+    "int"
+   ],
+   "notes": "Predictive Protector. Foresight pre-shields allies against incoming damage. Prophecy reveals enemy intents.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_oracle",
+    "name": "Nysa Farsight",
+    "short": "Nysa",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Oracle",
+    "class": "oracle",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.4,
+      "headSize": 0.5,
+      "skin": "#ffe8d8"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "long",
+      "color": "#d98a3a"
+     },
+     "eyes": {
+      "id": "glow_tear",
+      "color": "#40e0ff"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#f4f0e0",
+      "color2": "#e0b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#f4f0e0"
+     },
+     "shoes": {
+      "id": "barefoot",
+      "color": "#ffe8d8"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#f4f0e0"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "ring_rune",
+      "color": "#40e0ff"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.66,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "archaic",
+      "shy",
+      "pious"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.25,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.3,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_tactician",
+   "kind": "character",
+   "name": "Marcus Ostwald (Tactician)",
+   "tags": [
+    "emberveil",
+    "tactician",
+    "medium",
+    "int"
+   ],
+   "notes": "Turn-Order Manipulator. Grants extra actions, repositions allies, reshuffles enemy turn order.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_tactician",
+    "name": "Marcus Ostwald",
+    "short": "Marcus",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Tactician",
+    "class": "tactician",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "slicked",
+      "color": "#3b2a1a"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "open_coat",
+      "color": "#6a4a2a",
+      "color2": "#111"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#2a2a2a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "sword",
+      "color": "#c8c8d0"
+     },
+     "offhand": {
+      "id": "map",
+      "color": "#d8c8a0"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.4,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "scholar",
+      "honorable",
+      "abrasive"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.75,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_chronomancer",
+   "kind": "character",
+   "name": "Benedict Hourne (Chronomancer)",
+   "tags": [
+    "emberveil",
+    "chronomancer",
+    "cloth",
+    "int"
+   ],
+   "notes": "Time Mage. Haste allies, slow enemies, rewind HP, freeze the battlefield in Time Stop.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_chronomancer",
+    "name": "Benedict Hourne",
+    "short": "Benedict",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Chronomancer",
+    "class": "chronomancer",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "short",
+      "color": "#3b2a1a"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "goatee"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#4a1a6a",
+      "color2": "#d8b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#2a1040"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#2a1040"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#4a1a6a"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "hourglass",
+      "color": "#d8b040"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.44,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "scholar",
+      "archaic"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.75,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_monk",
+   "kind": "character",
+   "name": "Jiro Stillwater (Monk)",
+   "tags": [
+    "emberveil",
+    "monk",
+    "cloth",
+    "dex"
+   ],
+   "notes": "Martial Artist. Unarmed flurries stack chi. Inner Focus self-heals. Shadow Step dashes into crit range.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_monk",
+    "name": "Jiro Stillwater",
+    "short": "Jiro",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Monk",
+    "class": "monk",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.55,
+      "headSize": 0.5,
+      "skin": "#d9a77a"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "bald",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "sleepy",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "sash_robe",
+      "color": "#e08a2a",
+      "color2": "#f0e0c0"
+     },
+     "bottom": {
+      "id": "baggy",
+      "color": "#c86a2a"
+     },
+     "shoes": {
+      "id": "barefoot",
+      "color": "#d9a77a"
+     },
+     "accessory": {
+      "id": "prayer_beads",
+      "color": "#6a4a2a"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "shoulder_cape",
+      "color": "#e0b040"
+     },
+     "held": {
+      "id": "none"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.47,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "kind",
+      "pious",
+      "shy"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.25,
+     "cheer": 0.5,
+     "aggression": 0.15,
+     "confidence": 0.3,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_shaman",
+   "kind": "character",
+   "name": "Zuri Bonechant (Shaman)",
+   "tags": [
+    "emberveil",
+    "shaman",
+    "medium",
+    "int"
+   ],
+   "notes": "Spirit Caster. Totems heal over time. Spirit bolts chain to nearby foes. Ancestral Shield wards the party.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_shaman",
+    "name": "Zuri Bonechant",
+    "short": "Zuri",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Shaman",
+    "class": "shaman",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#6a4a3a"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "braids",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "almond",
+      "color": "#e0a020"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "tunic",
+      "color": "#8a6a3a",
+      "color2": "#5a3a1a"
+     },
+     "bottom": {
+      "id": "skirt",
+      "color": "#8a6a3a"
+     },
+     "shoes": {
+      "id": "sandals",
+      "color": "#5a3a1a"
+     },
+     "accessory": {
+      "id": "pendant",
+      "color": "#40c8c8"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "war_stripe",
+      "color": "#c83a2a"
+     },
+     "cape": {
+      "id": "feather_mantle",
+      "color": "#6a4a2a"
+     },
+     "held": {
+      "id": "staff_totem",
+      "color": "#5a3a1a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.56,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "archaic",
+      "pious",
+      "brave"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_witch_hunter",
+   "kind": "character",
+   "name": "Solomon Kreel (Witch Hunter)",
+   "tags": [
+    "emberveil",
+    "witch_hunter",
+    "medium",
+    "dex"
+   ],
+   "notes": "Anti-Magic Skirmisher. Silver bolts purge curses. Bonus damage vs demons and undead. Marks targets for the party.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_witch_hunter",
+    "name": "Solomon Kreel",
+    "short": "Solomon",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Witch Hunter",
+    "class": "witch_hunter",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#e8d8c8"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "buzz",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#7fa8c0"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "trench",
+      "color": "#151515",
+      "color2": "#5a3a1a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#222"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#111"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "wide_brim",
+      "color": "#111"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "saber",
+      "color": "#d8d8e0"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.36,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "paranoid",
+      "pious",
+      "cruel"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.8,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_knight",
+   "kind": "character",
+   "name": "Isolde Vaunt (Knight)",
+   "tags": [
+    "emberveil",
+    "knight",
+    "heavy",
+    "str"
+   ],
+   "notes": "Sworn Tank. Shield Bash stuns, Taunt locks aggro, Holy Strike sears evil, Rally bolsters the party.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_knight",
+    "name": "Isolde Vaunt",
+    "short": "Isolde",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Knight",
+    "class": "knight",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.65,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "ponytail",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#4a6b8a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "surcoat",
+      "color": "#2a4a9a",
+      "color2": "#c0c4cc"
+     },
+     "bottom": {
+      "id": "greaves",
+      "color": "#999"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#888"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "cape",
+      "color": "#1a2a7a"
+     },
+     "held": {
+      "id": "sword",
+      "color": "#d0d0d8"
+     },
+     "offhand": {
+      "id": "kite_shield",
+      "color": "#2a4a9a"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.55,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "honorable",
+      "loyal",
+      "brave"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_sorcerer",
+   "kind": "character",
+   "name": "Cassius Vell (Sorcerer)",
+   "tags": [
+    "emberveil",
+    "sorcerer",
+    "cloth",
+    "int"
+   ],
+   "notes": "Chaos Caster. Wild Bolt rolls a random element. Arcane Surge doubles spell power. Mana Burn punishes casters.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_sorcerer",
+    "name": "Cassius Vell",
+    "short": "Cassius",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Sorcerer",
+    "class": "sorcerer",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.42,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "slicked",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "glow",
+      "color": "#a040e0"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "high_collar_robe",
+      "color": "#151515",
+      "color2": "#e0b040"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#111"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#111"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "shoulder_cape",
+      "color": "#5a1a8a"
+     },
+     "held": {
+      "id": "orb",
+      "color": "#a040e0"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.44,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "pompous",
+      "scholar",
+      "cynical"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.75,
+     "cheer": 0.2,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_runesmith",
+   "kind": "character",
+   "name": "Dagan Forgehand (Runesmith)",
+   "tags": [
+    "emberveil",
+    "runesmith",
+    "heavy",
+    "str"
+   ],
+   "notes": "Rune-Forged Bulwark. Rune Hammer hits with imbued force. Wards protect allies. Forge Flame ignites weapons.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_runesmith",
+    "name": "Dagan Forgehand",
+    "short": "Dagan",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Runesmith",
+    "class": "runesmith",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.75,
+      "headSize": 0.5,
+      "skin": "#e0ac69"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "buzz",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#e0a020"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "full"
+     },
+     "top": {
+      "id": "smith_apron",
+      "color": "#4a3a2a",
+      "color2": "#777"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#3a3a3a"
+     },
+     "shoes": {
+      "id": "heavy",
+      "color": "#444"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "soot",
+      "color": "#333"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "hammer",
+      "color": "#888"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.34,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "gruff",
+      "honorable",
+      "loyal"
+     ],
+     "formality": 0.2,
+     "verbosity": 0.5,
+     "cheer": 0.5,
+     "aggression": 0.4,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_shadow_dancer",
+   "kind": "character",
+   "name": "Nyx Veilstep (Shadow Dancer)",
+   "tags": [
+    "emberveil",
+    "shadow_dancer",
+    "light",
+    "dex"
+   ],
+   "notes": "Stealth Duelist. Smoke Veil grants evasion. Assassinate executes low-HP foes. Dance of Blades chains strikes.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_shadow_dancer",
+    "name": "Nyx Veilstep",
+    "short": "Nyx",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Shadow Dancer",
+    "class": "shadow_dancer",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.4,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "bob",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "narrow",
+      "color": "#222"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "silks",
+      "color": "#111",
+      "color2": "#5a1a6a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#111"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#111"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "none"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "half_cape",
+      "color": "#111"
+     },
+     "held": {
+      "id": "daggers",
+      "color": "#222"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.58,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "cynical",
+      "sarcastic",
+      "brave"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.5,
+     "cheer": 0.2,
+     "aggression": 0.4,
+     "confidence": 0.85,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_tinker",
+   "kind": "character",
+   "name": "Fenwick Cogsby (Tinker)",
+   "tags": [
+    "emberveil",
+    "tinker",
+    "medium",
+    "int"
+   ],
+   "notes": "Clockwork Mechanist. Clockwork bolts, alchemical grenades, and a pocket-watch that patches wounds mid-fight. Overcharge the whole party with an arcane spring-wound battery.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_tinker",
+    "name": "Fenwick Cogsby",
+    "short": "Fenwick",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Tinker",
+    "class": "tinker",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.5,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "short",
+      "color": "#a86a3a"
+     },
+     "eyes": {
+      "id": "round",
+      "color": "#6b4a2a"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "stubble"
+     },
+     "top": {
+      "id": "smith_apron",
+      "color": "#5a3a1a",
+      "color2": "#8a7a5a"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#4a3a2a"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#3b2a1a"
+     },
+     "accessory": {
+      "id": "pocketwatch",
+      "color": "#d8b040"
+     },
+     "hat": {
+      "id": "goggles_up",
+      "color": "#b08a3a"
+     },
+     "extras": {
+      "id": "chest_glow",
+      "color": "#40c8ff"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "crossbow",
+      "color": "#b08a3a"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.5,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "scholar",
+      "nervous",
+      "jolly"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.75,
+     "cheer": 0.85,
+     "aggression": 0.4,
+     "confidence": 0.3,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_priest",
+   "kind": "character",
+   "name": "Selene Duskmoon (Priest)",
+   "tags": [
+    "emberveil",
+    "priest",
+    "light",
+    "int"
+   ],
+   "notes": "Holy/Shadow Caster. Heals the living, calls back the fallen, and answers their killers with shadow. The party's reviver and second-line damage dealer.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_priest",
+    "name": "Selene Duskmoon",
+    "short": "Selene",
+    "race": "human",
+    "gender": "f",
+    "pronouns": "she",
+    "title": "Priest",
+    "class": "priest",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#e8d8d0"
+     },
+     "headShape": "oval",
+     "hair": {
+      "id": "long",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "sleepy",
+      "color": "#3b2e6b"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#211a3a",
+      "color2": "#a8b0d0"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#0d0a1f"
+     },
+     "shoes": {
+      "id": "slippers",
+      "color": "#0d0a1f"
+     },
+     "accessory": {
+      "id": "crescent",
+      "color": "#cdc5e8"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#211a3a"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "mace",
+      "color": "#3b2e6b"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.6,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.55,
+     "breath": 0.15,
+     "rough": 0.05,
+     "flutter": 0.1,
+     "intonation": 3,
+     "gender": "f"
+    },
+    "speech": {
+     "traits": [
+      "pious",
+      "kind",
+      "grieving"
+     ],
+     "formality": 0.75,
+     "verbosity": 0.5,
+     "cheer": 0.2,
+     "aggression": 0.15,
+     "confidence": 0.55,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
+  },
+  {
+   "id": "ev_enchanter",
+   "kind": "character",
+   "name": "Auren Whisperlight (Enchanter)",
+   "tags": [
+    "emberveil",
+    "enchanter",
+    "light",
+    "int"
+   ],
+   "notes": "Mind-Magic Controller. Lulls foes to sleep so the party can pick its fights. Drowse opens packs without alerting them. Arcane Jolt wakes targets only when you decide they should die.",
+   "source": "default",
+   "data": {
+    "schema": 1,
+    "id": "ev_enchanter",
+    "name": "Auren Whisperlight",
+    "short": "Auren",
+    "race": "human",
+    "gender": "m",
+    "pronouns": "he",
+    "title": "Enchanter",
+    "class": "enchanter",
+    "entry": null,
+    "avatar": {
+     "body": {
+      "height": 0.5,
+      "width": 0.45,
+      "headSize": 0.5,
+      "skin": "#f1c27d"
+     },
+     "headShape": "round",
+     "hair": {
+      "id": "short",
+      "color": "#111"
+     },
+     "eyes": {
+      "id": "glow",
+      "color": "#a880ff"
+     },
+     "brows": {
+      "id": "straight"
+     },
+     "nose": {
+      "id": "small"
+     },
+     "mouth": {
+      "id": "neutral",
+      "color": "#b5484d"
+     },
+     "ears": {
+      "id": "normal"
+     },
+     "facialHair": {
+      "id": "none"
+     },
+     "top": {
+      "id": "trim_robe",
+      "color": "#2e1f5e",
+      "color2": "#c8c8e8"
+     },
+     "bottom": {
+      "id": "pants",
+      "color": "#1a1235"
+     },
+     "shoes": {
+      "id": "boots",
+      "color": "#1a1235"
+     },
+     "accessory": {
+      "id": "none"
+     },
+     "hat": {
+      "id": "hood",
+      "color": "#1a1235"
+     },
+     "extras": {
+      "id": "none"
+     },
+     "cape": {
+      "id": "none"
+     },
+     "held": {
+      "id": "staff_crystal",
+      "color": "#5b3aaa"
+     },
+     "offhand": {
+      "id": "none"
+     }
+    },
+    "voice": {
+     "engine": "formant",
+     "pitch": 0.48,
+     "speed": 0.3,
+     "depth": 0.5,
+     "tone": 0.5,
+     "breath": 0.1,
+     "rough": 0.1,
+     "flutter": 0.1,
+     "intonation": 2,
+     "gender": "m"
+    },
+    "speech": {
+     "traits": [
+      "scholar",
+      "shy",
+      "kind"
+     ],
+     "formality": 0.5,
+     "verbosity": 0.75,
+     "cheer": 0.5,
+     "aggression": 0.15,
+     "confidence": 0.3,
+     "custom": {},
+     "customRate": {},
+     "tics": [],
+     "mood": 0
+    },
+    "kind": "character",
+    "source": "emberveil"
+   }
   }
  ]
 }

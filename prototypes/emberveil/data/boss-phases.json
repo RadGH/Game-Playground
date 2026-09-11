@@ -1,0 +1,291 @@
+{
+ "deathDialog": {
+  "archfiend_malgrath": {
+   "bossLine": "\"Hell does not forget. Hell will send another.\"",
+   "heroLine": "\"Let hell try.\"",
+   "narratorLine": "The breach seals with a sound like a door slamming in the void."
+  },
+  "dragon_king": {
+   "bossLine": "\"A thousand years... and this is how... it ends?\"",
+   "heroLine": "\"Every king falls. Even the last one.\"",
+   "narratorLine": "The mountain goes quiet. The dragon's fire fades from the sky."
+  },
+  "emberveil_sovereign": {
+   "bossLine": "\"I am the Veil. The Veil... is everywhere...\"",
+   "heroLine": "\"Then we will fight it everywhere.\"",
+   "narratorLine": "The Veil shudders. A door opens."
+  },
+  "grax_veil_touched": {
+   "bossLine": "\"The Veil... will not... be held back forever...\"",
+   "heroLine": "\"Rest now, Grax. The Breach dies with you.\"",
+   "narratorLine": "A tremor runs through the air. The Veil holds — for now."
+  },
+  "lava_titan": {
+   "bossLine": "\"You... quench what cannot be quenched...\"",
+   "heroLine": "\"Then let the wastes cool.\"",
+   "narratorLine": "Magma hardens around the titan's husk. Steam fills the caldera."
+  },
+  "the_architect": {
+   "bossLine": "\"I drew every outcome. In none of them... did I fall.\"",
+   "heroLine": "\"Then you missed one.\"",
+   "narratorLine": "Creation breathes. The blueprint crumbles to ash. It is over."
+  },
+  "the_unraveler": {
+   "bossLine": "\"You cannot destroy what was never whole.\"",
+   "heroLine": "\"We didn't. We just put it back in the dark.\"",
+   "narratorLine": "Threads of reality knit themselves closed. Something recedes."
+  },
+  "veil_stalker": {
+   "bossLine": "\"You should not be here...\"",
+   "heroLine": "\"Neither should you.\"",
+   "narratorLine": "The prologue ends. The real journey begins."
+  }
+ },
+ "phases": {
+  "archfiend_malgrath": {
+   "phases": [
+    {
+     "addSpells": [
+      "imp_fireball",
+      "titan_magma_wave"
+     ],
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 8,
+       "type": "burn"
+      }
+     ],
+     "hpThreshold": 0.65,
+     "name": "Hellfire Unleashed",
+     "onEnter": "Malgrath throws back his head and laughs — then his form ignites. True demonic fire."
+    },
+    {
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 30,
+       "type": "fury"
+      },
+      {
+       "duration": 3,
+       "power": 12,
+       "type": "bleed"
+      }
+     ],
+     "hpThreshold": 0.3,
+     "name": "Demonic Ascendance",
+     "onEnter": "Wings of pure hellfire tear from Malgrath's back. \"None of you leave this pit alive.\"",
+     "swapSpells": [
+      "imp_fireball",
+      "titan_magma_wave",
+      "acolyte_curse",
+      "lich_drain_life"
+     ]
+    }
+   ]
+  },
+  "dragon_king": {
+   "phases": [
+    {
+     "addSpells": [
+      "imp_fireball",
+      "titan_magma_wave"
+     ],
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 10,
+       "type": "burn"
+      }
+     ],
+     "hpThreshold": 0.66,
+     "name": "First Flame Rising",
+     "onEnter": "Bahamorth's scales ignite. Every breath now is an inferno. \"You still breathe. Remarkable.\""
+    },
+    {
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 50,
+       "type": "fury"
+      },
+      {
+       "duration": 99,
+       "power": 18,
+       "type": "burn"
+      }
+     ],
+     "hpThreshold": 0.33,
+     "name": "The World Ends With Me",
+     "onEnter": "Bahamorth rears back and the mountain trembles. The sky outside goes dark with ash.",
+     "swapSpells": [
+      "titan_magma_wave",
+      "imp_fireball",
+      "titan_magma_wave",
+      "sovereign_voidstorm"
+     ]
+    }
+   ]
+  },
+  "emberveil_sovereign": {
+   "phases": [
+    {
+     "addSpells": [
+      "sovereign_voidstorm"
+     ],
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 15,
+       "type": "fury"
+      }
+     ],
+     "hpThreshold": 0.66,
+     "name": "Veil Ascendant",
+     "onEnter": "The Sovereign spreads arms wide — the Emberveil itself floods through the chamber."
+    },
+    {
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 35,
+       "type": "fury"
+      },
+      {
+       "duration": 3,
+       "power": 14,
+       "type": "poison"
+      }
+     ],
+     "hpThreshold": 0.33,
+     "name": "Sovereign Unbound",
+     "onEnter": "Flesh burns away, leaving a silhouette of pure Emberveil. \"I am the Veil. The Veil does not fall.\"",
+     "swapSpells": [
+      "sovereign_voidstorm",
+      "lich_drain_life",
+      "acolyte_curse",
+      "sovereign_voidstorm"
+     ]
+    }
+   ]
+  },
+  "grax_veil_touched": {
+   "phases": [
+    {
+     "addSpells": [
+      "acolyte_curse"
+     ],
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 12,
+       "type": "fury"
+      }
+     ],
+     "hpThreshold": 0.6,
+     "name": "Veil-Rent",
+     "onEnter": "Grax tears the Veil open around himself — the air tastes like copper and rot."
+    },
+    {
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 24,
+       "type": "fury"
+      }
+     ],
+     "hpThreshold": 0.25,
+     "name": "Last Breath",
+     "onEnter": "Grax howls with borrowed power — something inside him tears free!",
+     "swapSpells": [
+      "lich_soul_shatter",
+      "lich_drain_life",
+      "acolyte_curse"
+     ]
+    }
+   ]
+  },
+  "lava_titan": {
+   "phases": [
+    {
+     "addSpells": [
+      "titan_magma_wave"
+     ],
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 6,
+       "type": "burn"
+      }
+     ],
+     "hpThreshold": 0.65,
+     "name": "Molten Core",
+     "onEnter": "Cracks split the Titan's hide — magma pours from within. The ground beneath blisters."
+    },
+    {
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 20,
+       "type": "fury"
+      }
+     ],
+     "hpThreshold": 0.3,
+     "name": "Pyroclastic Fury",
+     "onEnter": "The Titan erupts — superheated shards of stone scatter across the field!",
+     "swapSpells": [
+      "titan_magma_wave",
+      "imp_fireball",
+      "titan_magma_wave"
+     ]
+    }
+   ]
+  },
+  "the_unraveler": {
+   "phases": [
+    {
+     "addSpells": [
+      "wraith_chill",
+      "lich_drain_life"
+     ],
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 10,
+       "type": "poison"
+      }
+     ],
+     "hpThreshold": 0.65,
+     "name": "Reality Fraying",
+     "onEnter": "The Unraveler laughs without a mouth. Threads of reality unravel around it."
+    },
+    {
+     "addStatuses": [
+      {
+       "duration": 99,
+       "power": 40,
+       "type": "fury"
+      },
+      {
+       "duration": 99,
+       "power": 25,
+       "type": "weaken"
+      }
+     ],
+     "hpThreshold": 0.3,
+     "name": "The Hunger Made Manifest",
+     "onEnter": "IT SEES YOU. Not your face — your entire existence, threadbare and ready to dissolve.",
+     "swapSpells": [
+      "sovereign_voidstorm",
+      "lich_soul_shatter",
+      "lich_drain_life",
+      "wraith_chill"
+     ]
+    }
+   ]
+  }
+ },
+ "source": "bossPhases.js BOSS_PHASES + bossDeathDialog.js BOSS_DEATH_DIALOG",
+ "version": 1
+}

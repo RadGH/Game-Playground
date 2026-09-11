@@ -1,0 +1,217 @@
+// Emberveil prototype controller. Screens: title → hire → world (map + node flows: town / combat / events / shrines /
+// treasure / skill checks / dungeons). Data comes from data/*.json (built from the original game), rules from js/rules.js,
+// loot from js/loot.js, fights from js/combat.js, the world from js/game.js. Bodies: Mii + creatures on the 3D stage.
+import { Lingo, Entity } from '../../../lingo/js/lingo.js';
+import { Library } from '../../../library/js/library.js';
+import { loadDeps } from '../../../library/js/make.js';
+import { renderSVG } from '../../../avatar-2d/js/render.js';
+import { randomAvatar } from '../../../avatar-2d/js/random.js';
+import { randomCreature } from '../../../avatar-3d/js/creatures.js';
+import * as voice from '../../../voice-lab/js/voice.js';
+import { Game, ACT_NAMES, MAIN_QUESTS, equip, unequip, refresh, derive, hireCost } from './game.js';
+import { Combat, fleeCheck } from './combat.js';
+import { mergeSkill, classSkills, passiveTree, PASSIVE_NODES, UNLOCKS, TALENT_LEVELS, xpForLevel, canUse } from './rules.js';
+import { Stage } from './stage.js';
+import { Talk } from './talk.js';
+import { makeRng } from './rng.js';
+
+const $ = id => document.getElementById(id);
+const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); } for (const k of kids) if (k != null) e.append(k); return e; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const toast = t => { const e = $('toast'); e.textContent = t; e.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => e.hidden = true, 2200); };
+
+// ------------------------------------------------------------------ load
+const base = '../../'; const j = async p => (await fetch(base + p)).json(); const D = p => j('prototypes/emberveil/data/' + p);
+const [items, classes, skills, builds, enemies, bosses, encounters, spells, zones, zoneTables, dialogs, randomEvents, dungeons, companions, statuses, bossPhases, classLooks, lexData, grammarData, traitsData] = await Promise.all([D('items.json'), D('classes.json'), D('skills.json'), D('build-presets.json'), D('enemies.json'), D('bosses.json'), D('encounters.json'), D('enemy-spells.json'), D('zones.json'), D('zone-tables.json'), D('dialog-events.json'), D('random-events.json'), D('dungeons.json'), D('companions.json'), D('status-effects.json'), D('boss-phases.json'), D('class-looks.json'), j('lingo/data/lexicon.json'), j('lingo/data/grammar.json'), j('lingo/data/traits.json')]);
+const DATA = { items, classes, skills, builds, enemies, bosses, encounters, spells, zones, zoneTables, dialogs, randomEvents, dungeons, companions, statuses };
+const [deps, library] = await Promise.all([loadDeps(base), Library.open(base + 'library/')]);
+const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData });
+for (const [id, e] of Object.entries({ ...enemies.entities, ...bosses.entities })) if (!lingo.lexicon.has(id)) lingo.lexicon.add({ id, type: 'creature', forms: { sg: e.name.toLowerCase(), pl: e.name.toLowerCase() + 's' }, tags: [] });
+lingo.invalidatePronunciations();
+const LOOKS = classLooks.classes; const SK = skills.skills; const SP = spells.spells;
+let game = null, talk = null, stage = null, busy = false, selectedHero = 0;
+function showScreen(id) { for (const s of document.querySelectorAll('.screen')) s.hidden = s.id !== 'screen-' + id; $('hud').hidden = id !== 'world'; }
+
+// ------------------------------------------------------------------ title
+$('btn-new').onclick = () => { game = new Game(DATA); setupHire(); showScreen('hire'); };
+$('btn-continue').onclick = () => { const g = Game.load(DATA); if (!g) return toast('No save'); game = g; startWorld(true); };
+$('btn-continue').disabled = !Game.hasSave();
+
+// ------------------------------------------------------------------ hire
+let chosen = [];
+function blueprintOptions() { const list = library.list('character'); $('hire-blueprint').replaceChildren(el('option', { value: '', text: 'Look: class default' }), ...list.map(e => el('option', { value: e.id, text: 'Look: ' + e.name }))); }
+function setupHire() { chosen = []; blueprintOptions(); $('class-grid').replaceChildren(...classes.classes.map(c => { const look = LOOKS[c.id]; return el('div', { class: 'class-card', onclick: () => addChosen(c) }, el('div', { class: 'portrait', html: renderSVG(look.avatar, { width: 90, height: 120 }) }), el('b', { text: c.name }), el('div', { class: 'role', text: c.role }), el('div', { class: 'tiny', text: c.armorType }), UNLOCKS[c.id] ? el('div', { class: 'lock', text: 'original unlock: ' + UNLOCKS[c.id] }) : el('div', { class: 'lock', text: 'starter class' })); })); renderChosen(); }
+function addChosen(c) { if (chosen.length >= 4) return toast('Four heroes max (more go to the bench later)'); const bpId = $('hire-blueprint').value; const bp = bpId ? library.stamp(bpId) : null; const look = LOOKS[c.id]; const name = $('hire-name').value.trim() || bp?.name || look.name; const blueprint = bp ? { ...bp } : { ...look, name, short: name.split(' ')[0], pronouns: look.gender === 'f' ? 'she' : 'he' }; if (!bp) blueprint.avatar = look.avatar; const h = game.makeHero(c.id, name, 1, blueprint); chosen.push(h); $('hire-name').value = ''; renderChosen(); }
+function renderChosen() { $('hire-party').replaceChildren(...chosen.map(h => el('div', { class: 'card' }, el('div', { class: 'portrait', html: renderSVG(h.avatar, { width: 56, height: 72 }) }), el('div', { class: 'info' }, el('b', { text: h.name }), el('div', { class: 'tiny', text: `${h.className} · ${h.role}` }), el('div', { class: 'tiny', text: `HP ${h.maxHp} · MP ${h.maxMp} · STR ${h.attrs.STR} DEX ${h.attrs.DEX} INT ${h.attrs.INT} CON ${h.attrs.CON}` }), el('div', { class: 'tiny', text: 'Kit: ' + Object.values(h.equipment).map(i => i.name).join(', ') }), el('button', { class: 'small', text: 'Remove', onclick: () => { chosen = chosen.filter(x => x !== h); renderChosen(); } }))))); $('hire-count').textContent = `${chosen.length} / 4`; $('btn-start').disabled = chosen.length === 0; }
+$('btn-suggest').onclick = () => { chosen = []; for (const id of ['warrior', 'ranger', 'mage', 'cleric']) addChosen(classes.classes.find(c => c.id === id)); };
+$('btn-start').onclick = () => { for (const h of chosen) game.addHero(h); game.startQuests(); startWorld(false); };
+
+// ------------------------------------------------------------------ world
+async function startWorld(resumed) {
+  showScreen('world'); if (!stage) stage = new Stage($('stage')); talk = new Talk({ lingo, game, voice }); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value; for (const h of game.party) talk.speaker(h);
+  $('narrative').replaceChildren(); renderHud(); renderSide(); renderMap();
+  if (!resumed) narrate(`<h4>${ACT_NAMES[0]}</h4><p>A wanderer on a road that used to lead somewhere. The Veil bends around you. Somebody named you.</p>`); else narrate(`<p class="sys">Game loaded. ${game.zone().name}.</p>`);
+  await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.setBackdrop(game.zoneId); await enterNode();
+}
+$('mute').onchange = () => { if (talk) talk.muted = $('mute').checked; if ($('mute').checked) voice.stopAll(); };
+$('engine').onchange = () => { if (talk) talk.engineOverride = $('engine').value; };
+$('btn-save').onclick = () => { game.save(); toast('Saved'); }; $('btn-menu').onclick = () => { if (busy) return toast('Wait for the scene to finish'); game.save(); showScreen('title'); $('btn-continue').disabled = false; };
+for (const b of document.querySelectorAll('.tabs button')) b.onclick = () => { for (const x of document.querySelectorAll('.tabs button')) x.classList.toggle('on', x === b); for (const t of document.querySelectorAll('.tab')) t.hidden = t.id !== 'tab-' + b.dataset.tab; };
+function renderHud() { $('hud-act').textContent = ACT_NAMES[game.zone().act] || ''; $('hud-place').textContent = `${game.zone().name} · ${game.node()?.name || ''}`; $('hud-gold').textContent = game.gold; $('hud-fame').textContent = game.fame; }
+function narrate(html, cls = '') { const p = el('div', { class: cls, html }); $('narrative').append(p); $('narrative').scrollTop = 1e9; return p; }
+function setActions(list) { $('actions').replaceChildren(...list.map(a => el('button', { class: a.cls || '', text: a.text, onclick: async () => { if (busy) return; busy = true; try { await a.run(); } catch (e) { console.error(e); narrate(`<p class="bad">Something broke: ${e.message}</p>`); } busy = false; } }))); }
+function waitForChoice(list) { const was = busy; busy = false; return new Promise(res => setActions(list.map(a => ({ ...a, run: async () => { const r = await a.run?.(); if (!a.stay) { busy = was; res(r); } } })))); }
+
+// ---- bodies on the stage
+function bodyOf(h) { return { id: h.id, name: h.name, short: h.short, hp: h.hp, avatar: h.avatar || LOOKS[h.class]?.avatar || randomAvatar(deps.avatarPresets, { seed: 1 }), creature: h.isCompanion ? creatureFor(h.templateId) : null }; }
+function creatureFor(id = '') { const m = [[/wolf|hound|dog|warg/, 'wolf'], [/bear/, 'bear'], [/spider|widow/, 'spider'], [/dragon|wyrm|drake/, 'dragon'], [/bat|moth/, 'bat'], [/snake|serpent|worm/, 'snake'], [/rat/, 'rat'], [/boar/, 'boar'], [/horse|steed/, 'horse'], [/deer|stag|owl|cat|frog|sprite|wisp/, 'wolf']].find(([re]) => re.test(id)); return m ? { ...randomCreature(m[1], hashSeed(id)), size: /dire|giant|ancient|king|elder/.test(id) ? 1.5 : /dragon|wyrm|bear|titan/.test(id) ? 1.2 : 1 } : null; }
+function hashSeed(s) { let h = 7; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function enemyLook(e) { const id = e.templateId; const cr = creatureFor(id) || (/golem|elemental|horror|titan|shard|worm|colossus|abomination/.test(id) ? { ...randomCreature('drake', hashSeed(id)), size: 1.3 } : null); if (cr) return { id: e.id, name: e.name, short: e.name, hp: e.hp, creature: cr, beast: true }; const race = /goblin|gremlin|kobold/.test(id) ? 'goblin' : /skeleton|ghoul|wraith|lich|undead|bone|shade|zombie|wight/.test(id) ? 'undead' : /orc|ogre|troll|brute/.test(id) ? 'orc' : /demon|imp|fiend|hell|fel|abyss|void|primordial/.test(id) ? 'orc' : /elf|veil|cult|sorcerer|prophet|scholar/.test(id) ? 'elf' : 'human'; const av = randomAvatar(deps.avatarPresets, { race, seed: hashSeed(id + e.id) }); if (/demon|imp|fiend|hell|fel/.test(id)) av.body.skin = '#8a2a2a'; if (/void|abyss|primordial|shade/.test(id)) av.body.skin = '#3a2a5a'; if (e.boss) av.body.height = 0.9; return { id: e.id, name: e.name, short: e.name, hp: e.hp, avatar: av, race }; }
+function bubbleAt(id, text, who, cls = '') { const c = stage.chars.get(id); const b = el('div', { class: 'bubble ' + cls }, el('b', { text: who }), document.createTextNode(text)); if (c) { const v = c.group.position.clone(); v.y += 1.95; v.project(stage.scene.camera); b.style.left = `${(v.x + 1) / 2 * 100}%`; b.style.top = `${(1 - v.y) / 2 * 100}%`; } else { b.style.left = '50%'; b.style.top = '20%'; } $('bubbles').append(b); return b; }
+function floatAt(id, text, cls = '') { const c = stage.chars.get(id); const d = el('div', { class: 'dmg ' + cls, text }); if (c) { const v = c.group.position.clone(); v.y += 1.3; v.project(stage.scene.camera); d.style.left = `${(v.x + 1) / 2 * 100}%`; d.style.top = `${(1 - v.y) / 2 * 100}%`; } else { d.style.left = '50%'; d.style.top = '50%'; } $('bubbles').append(d); setTimeout(() => d.remove(), 1000); }
+async function sayLine(ch, line, { cls = '', wait = true } = {}) { if (!line?.text) return; const who = ch.short || ch.name; const b = bubbleAt(ch.id, line.text, who, cls); stage.talk(ch.id, true); narrate(`<p class="say ${cls}"><b>${who}:</b> ${line.text}</p>`); const min = 700 + line.text.length * 24; const t0 = Date.now(); if (wait) { await talk.say(ch, line); const left = min - (Date.now() - t0); if (left > 0) await sleep(Math.min(left, 2200)); b.remove(); } else setTimeout(() => b.remove(), min); stage.talk(ch.id, false); }
+const speak = (ch, intent, opts) => talk.line(ch, intent, opts);
+const randomAlive = () => { const a = game.alive(); return a[Math.floor(Math.random() * a.length)]; };
+
+// ---- map
+function renderMap() {
+  const z = game.zone(); const svg = $('map'); svg.replaceChildren(); $('map-zone').textContent = `${z.name} (${ACT_NAMES[z.act]})`; const reach = game.reachable();
+  const pos = n => [4 + n.x * 92, 8 + n.y * 84];
+  for (const n of z.nodes) for (const ex of n.exits || []) { const m = z.nodes.find(x => x.id === ex); if (!m) continue; const [x1, y1] = pos(n), [x2, y2] = pos(m); const L = document.createElementNS('http://www.w3.org/2000/svg', 'line'); L.setAttribute('x1', x1); L.setAttribute('y1', y1); L.setAttribute('x2', x2); L.setAttribute('y2', y2); L.setAttribute('class', 'edge' + (n.id === game.nodeId && reach.includes(ex) ? ' open' : '')); svg.append(L); }
+  for (const n of z.nodes) { const [x, y] = pos(n); const g = document.createElementNS('http://www.w3.org/2000/svg', 'g'); const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', n.type === 'boss' ? 3.6 : n.type === 'town' ? 3.2 : 2.6); const cls = ['node', n.type]; if (game.isVisited(n.id)) cls.push('visited'); if (game.isCleared(n.id)) cls.push('cleared'); if (n.id === game.nodeId) cls.push('here'); if (reach.includes(n.id)) cls.push('open'); c.setAttribute('class', cls.join(' ')); if (reach.includes(n.id)) c.addEventListener('click', () => { if (busy) return toast('Finish the scene first'); game.travel(n.id); renderMap(); renderHud(); enterNode(); }); g.append(c); const t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); t.setAttribute('x', x); t.setAttribute('y', y + 6.5); t.setAttribute('text-anchor', 'middle'); t.textContent = game.isVisited(n.id) || reach.includes(n.id) ? n.name : '?'; g.append(t); const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text'); t2.setAttribute('x', x); t2.setAttribute('y', y - 4.2); t2.setAttribute('text-anchor', 'middle'); t2.setAttribute('class', 'lbl'); t2.textContent = n.type === 'skillCheck' ? 'check' : n.type; g.append(t2); svg.append(g); }
+  const sel = $('zone-select'); sel.replaceChildren(...game.zoneOrder.filter(id => game.unlockedZones.includes(id)).map(id => el('option', { value: id, text: game.zones[id].name + (id === game.zoneId ? ' (here)' : '') }))); sel.value = game.zoneId; sel.onchange = () => { if (busy) { toast('Finish the scene first'); sel.value = game.zoneId; return; } game.enterZone(sel.value); stage.setBackdrop(game.zoneId); renderMap(); renderHud(); enterNode(); };
+}
+// ---- node flows
+async function enterNode() {
+  if (busy) return; busy = true; try { await enterNodeInner(); } catch (e) { console.error(e); narrate(`<p class="bad">Something broke: ${e.message}</p>`); mapActions(); } busy = false;
+}
+async function enterNodeInner() {
+  const n = game.node(); renderHud(); renderMap(); const res = game.enter(n); stage.clearSide('right'); stage.setBackdrop(game.zoneId);
+  if (res.kind === 'town') return town(res.town);
+  if (res.kind === 'combat') { narrate(`<h4>${n.name}</h4><p class="bad">${res.encounter.name}.</p>`); const won = await fight(res.encounter, { node: n, boss: res.boss }); if (won) await afterCombat(n, res.encounter, res.boss); return mapActions(); }
+  if (res.kind === 'event') return runEvent(res.event, n);
+  if (res.kind === 'skillCheck') { narrate(`<h4>${n.name}</h4><p>${res.check.flavor}</p><p class="sys">${res.check.stat} check, difficulty ${res.check.dc}. Your best ${res.check.stat} plus a d20.</p>`); return setActions([{ text: `Attempt (${res.check.stat})`, cls: 'primary', run: async () => { const r = game.resolveSkillCheck(n); narrate(`<p class="${r.ok ? 'good' : 'bad'}">Rolled ${r.roll} + ${r.best} vs ${r.dc}: ${r.ok ? 'success' : 'failure'}. ${r.text || ''}</p>`); renderHud(); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, r.ok ? 'brag' : 'complain')); mapActions(); } }, { text: 'Leave it', run: async () => mapActions() }]); }
+  if (res.kind === 'shrine') { narrate(`<h4>${n.name}</h4><p class="good">${res.text}</p>`); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'relief')); return mapActions(); }
+  if (res.kind === 'treasure') { narrate(`<h4>${n.name}</h4><p class="good">+${res.gold} gold${res.item ? `, and <b class="${res.item.rarity}">${res.item.name}</b>` : ''}.</p>`); renderHud(); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'happy')); return mapActions(); }
+  if (res.kind === 'lore') { narrate(`<h4>${n.name}</h4><p class="lore">${res.text}</p>`); const m = game.party.find(h => h.speech?.traits?.includes('scholar')) || randomAlive(); if (m) await sayLine(m, speak(m, 'lore')); return mapActions(); }
+  if (res.kind === 'dungeon') return dungeon(res.dungeon, res.done);
+  if (res.kind === 'cleared') { narrate(`<p class="sys">${n.name}: cleared. Nothing stirs.</p>`); return mapActions(); }
+  narrate(`<p class="sys">${res.text || n.name}</p>`); mapActions();
+}
+function mapActions() { const n = game.node(); const acts = []; if (n.type === 'town') acts.push({ text: '🏘 Town', cls: 'primary', run: async () => town(game.townFor()) }); acts.push({ text: 'Pick a node on the map', run: async () => toast('Click a lit node') }); const nz = game.nextZoneId(); if (nz && game.unlockedZones.includes(nz) && nz !== game.zoneId) acts.push({ text: `→ ${game.zones[nz].name}`, cls: 'primary', run: async () => { game.enterZone(nz); stage.setBackdrop(game.zoneId); renderMap(); renderHud(); narrate(`<h4>${game.zones[nz].name}</h4><p class="sys">${ACT_NAMES[game.zones[nz].act]}</p>`); await enterNode(); } }); setActions(acts); }
+
+// ---- events
+async function runEvent(ev, n) {
+  narrate(`<h4>${ev.npcName || n.name}</h4>`); const npc = { id: 'npc_' + ev.id, name: ev.npcName || 'Stranger', short: ev.npcName || 'Stranger', hp: 1, avatar: randomAvatar(deps.avatarPresets, { race: 'human', seed: hashSeed(ev.id) }), speech: { traits: [] }, voice: deps.voicePresets.presets.find(p => p.id === 'ours_male')?.voice };
+  if (ev.npcName) { await stage.setSide([npc], 'right', -0.5); talk.speaker(npc); }
+  for (const line of ev.lines || []) { const who = line.speaker === 'npc' ? npc : game.party[0]; if (line.speaker === 'npc' && ev.npcName) await sayLine(npc, { text: line.text }, { cls: 'npc' }); else narrate(`<p class="say"><b>${line.speaker === 'hero' ? who.short : 'Narrator'}:</b> ${line.text}</p>`); }
+  const choices = (ev.choices || []).filter(c => game.choiceAllowed(c));
+  const res = await waitForChoice(choices.map(c => ({ text: c.text, run: async () => game.choose(ev, c) })));
+  if (res.check) narrate(`<p class="${res.check.ok ? 'good' : 'bad'}">${res.check.stat} ${res.check.best} + d20 ${res.check.roll} vs ${res.check.dc}: ${res.check.ok ? 'pass' : 'fail'}.</p>`);
+  if (res.text) { if (ev.npcName) await sayLine(npc, { text: res.text.replace(/^\(.*\)$/, '') }, { cls: 'npc' }); else narrate(`<p>${res.text}</p>`); }
+  for (const r of res.rewards) narrate(`<p class="good">${r}</p>`); renderHud(); renderSide();
+  if (res.startCombat) { const enc = game.encounter(res.startCombat); if (enc) { const won = await fight(enc, { node: n }); if (won) await afterCombat(n, enc, false); } }
+  stage.clearSide('right'); mapActions();
+}
+// ---- combat
+async function fight(enc, { node = null, boss = false } = {}) {
+  const heroes = game.fighters(); const foes = enc.enemies; await stage.setSide(heroes.map(bodyOf), 'left'); await stage.setSide(foes.map(enemyLook), 'right');
+  const looks = Object.fromEntries(foes.map(e => [e.id, enemyLook(e)])); const combat = new Combat(heroes, foes, { skills: SK, spells: SP, loot: game.loot, rng: makeRng(game.seed + game.kills * 13 + game.day), act: game.act });
+  const talker = foes.find(e => !looks[e.id].beast); if (talker && Math.random() < 0.6) { talk.speaker({ ...talker, speech: { traits: ['gruff'], aggression: 0.9 } }); await sayLine(talker, speak(talker, 'combat_taunt', { to: heroes[0], bindings: { foe: talk.speaker(heroes[0]).entity } }), { cls: 'enemy' }); } else if (foes[0] && looks[foes[0].id].beast) narrate(`<p class="sys"><i>The ${foes[0].name} snarls.</i></p>`);
+  const bloodied = new Set();
+  while (!combat.over) {
+    const events = combat.round(); narrate(`<p class="sys">— round ${combat.round_} —</p>`);
+    for (const ev of events) {
+      if (ev.type === 'attack') { await stage.attack(ev.source.id, ev.target.id); }
+      else if (ev.type === 'damage') { stage.hit(ev.target.id); floatAt(ev.target.id, ev.amount + (ev.crit ? '!' : ''), ev.crit ? 'crit' : ''); narrate(`<p class="${ev.source?.isEnemy ? 'bad' : ''}">${ev.source ? (ev.source.short || ev.source.name) : 'Something'} ${ev.label ? `(${ev.label}) ` : ''}hits ${ev.target.short || ev.target.name} for ${ev.amount}${ev.crit ? ' (crit)' : ''}${ev.tags?.length ? ' · ' + ev.tags.join(', ') : ''}.</p>`); if (!ev.target.isEnemy && ev.target.hp > 0 && ev.target.hp <= ev.target.maxHp / 2 && !bloodied.has(ev.target.id)) { bloodied.add(ev.target.id); if (ev.target.isHero) await sayLine(ev.target, speak(ev.target, 'combat_hurt')); } await sleep(160); }
+      else if (ev.type === 'miss') { floatAt(ev.target.id, 'miss', 'miss'); narrate(`<p class="sys">${ev.source.short || ev.source.name} misses ${ev.target.short || ev.target.name}.</p>`); }
+      else if (ev.type === 'skill') { narrate(`<p class="good">${ev.source.short || ev.source.name} uses <b>${ev.name}</b>.</p>`); if (!ev.source.isEnemy && Math.random() < 0.25) await sayLine(ev.source, speak(ev.source, 'combat_bark'), { wait: false }); await sleep(200); }
+      else if (ev.type === 'heal') { if (ev.amount > 0) { floatAt(ev.target.id, '+' + ev.amount, 'heal'); narrate(`<p class="good">${ev.target.short || ev.target.name} recovers ${ev.amount}${ev.label ? ' (' + ev.label + ')' : ''}.</p>`); } }
+      else if (ev.type === 'dot') { floatAt(ev.target.id, ev.amount, ''); narrate(`<p class="sys">${ev.target.short || ev.target.name} takes ${ev.amount} from ${ev.status}.</p>`); }
+      else if (ev.type === 'skip') narrate(`<p class="sys">${ev.target.short || ev.target.name} is ${ev.why}.</p>`);
+      else if (ev.type === 'down') { stage.down(ev.target.id); narrate(`<p class="bad"><b>${ev.target.short || ev.target.name} goes down.</b></p>`); const w = game.party.find(h => h.alive && h !== ev.target); if (w && ev.target.isHero) await sayLine(w, speak(w, 'ally_down', { bindings: { fallen: talk.speaker(ev.target).entity } })); }
+      else if (ev.type === 'kill') { stage.down(ev.target.id); narrate(`<p class="good">${ev.target.name} is dead.</p>`); if (ev.source?.isHero && Math.random() < 0.5) await sayLine(ev.source, speak(ev.source, 'combat_kill', { bindings: { foe: new Entity(lingo.lexicon.get(ev.target.templateId) || { id: ev.target.templateId, type: 'creature', forms: { sg: ev.target.name.toLowerCase() } }, { lexicon: lingo.lexicon }) } })); }
+      else if (ev.type === 'revive') { stage.revive(ev.target.id); narrate(`<p class="good">${ev.target.short} is back on their feet.</p>`); }
+      else if (ev.type === 'taunt') narrate(`<p class="sys">${ev.source.short} taunts ${ev.target.name}.</p>`);
+      renderPartyTab();
+    }
+  }
+  for (const h of heroes) { h.statuses = []; h.buffs = []; h.dmgBuff = 0; h.dmgReduct = 0; }
+  if (combat.result === 'win') { const m = randomAlive(); if (m) await sayLine(m, speak(m, Math.random() < 0.5 ? 'brag' : 'relief')); return true; }
+  if (combat.result === 'lose') { const d = game.defeat(); narrate(`<p class="bad"><b>The party falls.</b> ${d.text} You lose ${d.lost}.</p>`); for (const h of game.party) stage.revive(h.id); renderHud(); renderSide(); renderMap(); await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.clearSide('right'); return false; }
+  narrate('<p class="sys">The fight drags on until both sides give up.</p>'); return false;
+}
+async function afterCombat(node, enc, boss) {
+  const v = game.victory(node, enc); narrate(`<p class="good"><b>Victory.</b> +${v.xp} xp each, +${v.gold} gold, +${v.fame} fame.</p>`);
+  for (const it of [...v.drops, ...v.bossDrops]) narrate(`<p class="good">Loot: <span class="${it.rarity}">${it.name}</span>${it.isUnique ? ' (unique)' : it.setId ? ' (set piece)' : ''}</p>`);
+  for (const { hero, ups } of v.levelUps) { narrate(`<p class="good">${hero.short} reaches level ${hero.level}. Points to spend in the Skills tab.</p>`); }
+  if (boss) { const enemyId = enc.enemies.find(e => e.boss)?.templateId; const dd = bossPhases.deathDialog?.[enemyId]; if (dd) { narrate(`<p class="say enemy"><b>${enc.enemies.find(e => e.boss)?.name}:</b> ${dd.bossLine}</p>`); await sayLine(game.party[0], { text: dd.heroLine.replace(/^"|"$/g, '') }); narrate(`<p class="lore">${dd.narratorLine}</p>`); } if (v.questDone) narrate(`<p class="good"><b>Quest complete: ${v.questDone.title}.</b></p>`); if (v.unlockedZone) narrate(`<p class="good">The way to <b>${game.zones[v.unlockedZone].name}</b> is open.</p>`); }
+  for (const h of game.party) stage.revive(h.id); await sleep(300); stage.clearSide('right'); await stage.setSide(game.fighters().map(bodyOf), 'left'); renderHud(); renderSide(); renderMap();
+}
+// ---- dungeon
+async function dungeon(dg, done) {
+  narrate(`<h4>${dg.name}</h4>`); if (done) { narrate('<p class="sys">Sealed. You already cleared it.</p>'); return mapActions(); } if (game.avgLevel() < dg.minLevel) narrate(`<p class="sys">Recommended level ${dg.minLevel}.</p>`);
+  const go = await waitForChoice([{ text: `Enter (${dg.stages.length} stages)`, cls: 'primary', run: async () => true }, { text: 'Not now', run: async () => false }]); if (!go) return mapActions();
+  let stunFirst = false;
+  for (const st of dg.stages) { narrate(`<h4>${st.name}</h4>`); if (st.type === 'skill_check') { const c = dungeons.DUNGEON_SKILL_CHECKS[st.checkId]; narrate(`<p>${c.flavor}</p>`); const best = Math.max(...game.alive().map(h => derive(h, game.loot)[c.stat] || 8)); const roll = 1 + Math.floor(Math.random() * 20); const ok = best + roll >= c.dc; narrate(`<p class="${ok ? 'good' : 'bad'}">${c.stat} ${best} + ${roll} vs ${c.dc}: ${ok ? c.passText : c.failText}</p>`); if (ok) stunFirst = true; else for (const h of game.alive()) h.hp = Math.max(1, Math.round(h.hp - h.maxHp * (c.failDamagePct || 0.12))); renderSide(); continue; }
+    const enc = game.encounter(st.encounter, st.type === 'boss'); if (!enc) continue; if (stunFirst) { for (const e of enc.enemies) e.statuses.push({ type: 'stun', duration: 1, power: 0 }); stunFirst = false; } const won = await fight(enc, { node: null, boss: st.type === 'boss' }); if (!won) return mapActions(); game.victory(null, enc); renderSide(); }
+  game.completedDungeons.push(dg.id); game.gold += dg.reward.gold; const it = game.loot.generate(dg.reward.item, 'rare', 'high', { rng: game.rng }); if (it) game.inventory.push(it); for (const h of game.party) { const { gainXp } = await import('./rules.js'); gainXp(h, Math.round(dg.reward.xp / game.party.length)); refresh(h, game.loot); }
+  narrate(`<p class="good"><b>${dg.name} cleared.</b> +${dg.reward.gold} gold, +${dg.reward.xp} xp, ${it ? `<span class="${it.rarity}">${it.name}</span>` : ''}.</p>`); renderHud(); renderSide(); mapActions();
+}
+// ---- town
+async function town(t) {
+  narrate(`<h4>${t.name}</h4><p class="sys">${t.services.map(s => s.replace('blackmarket', 'black market')).join(' · ')}${game.fame >= 500 ? ' · guild hall' : ''}</p>`); stage.clearSide('right');
+  const acts = [{ text: '🛒 Merchant', run: async () => shop(t) }, { text: '🍺 Tavern (hire)', run: async () => tavern(t) }, { text: '⛪ Cleric (rest, free)', run: async () => { game.rest(t); renderSide(); narrate('<p class="good">Everyone is healed and rested. A new day.</p>'); town(t); } }];
+  if (t.services.includes('blacksmith')) acts.push({ text: '⚒ Blacksmith', run: async () => smith(t, 'blacksmith') }); if (t.services.includes('enchanter')) acts.push({ text: '✨ Enchanter', run: async () => smith(t, 'enchanter') }); if (t.services.includes('trainer')) acts.push({ text: '📜 Trainer (respec 50g/level)', run: async () => { const h = game.party[selectedHero]; const cost = h.level * 50; if (game.gold < cost) return toast('Not enough gold'); game.gold -= cost; h.pendingTalent += Object.keys(h.talents).length; h.talents = {}; h.pendingPassive += Object.values(h.passiveRanks).reduce((a, b) => a + b, 0); h.passiveRanks = {}; refresh(h, game.loot); renderHud(); renderSide(); toast(`${h.short} respecced`); town(t); } });
+  acts.push({ text: 'Back to the map', run: async () => mapActions() }); setActions(acts);
+}
+function itemRow(it, actions = []) { const s = game.loot.score(it); return el('div', { class: 'item' }, el('span', { class: 'n', onclick: () => itemDialog(it), html: `<span class="${it.rarity}">${it.name}</span> <small>${it.slot}${it.dmg ? ` · ${it.dmg[0]}–${it.dmg[1]}` : ''}${it.armor ? ` · armor ${it.armor}` : ''} · score ${s.total}</small>` }), ...actions); }
+async function shop(t) {
+  const stock = game.merchantStock(t); const box = narrate(`<h4>Merchant of ${t.name}</h4>`); const wrap = el('div', { class: 'shop' });
+  const refreshUI = () => { wrap.replaceChildren(el('div', { class: 'tiny', text: `You have ${game.gold} gold. Prices scale with quality and rarity.` }), el('b', { text: 'For sale' }), ...stock.map(it => itemRow(it, [el('button', { class: 'small', text: `Buy ${it.price}g`, onclick: () => { if (!game.buy(it, it.price, stock)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); } })])), el('b', { text: 'Potions' }), ...Object.entries(items.potions).map(([id, p]) => el('div', { class: 'item' }, el('span', { class: 'n', text: `${p.icon} ${p.name} — ${p.desc}` }), el('button', { class: 'small', text: `Buy ${p.cost}g`, onclick: () => { if (game.gold < p.cost) return toast('Not enough gold'); game.gold -= p.cost; game.inventory.push({ id: 'p_' + Math.random().toString(36).slice(2, 7), potionId: id, name: p.name, type: 'consumable', slot: 'potion', rarity: 'normal', quality: 'medium', effect: p.effect, target: p.target, affixes: [], icon: p.icon }); renderHud(); renderSide(); refreshUI(); } }))), el('b', { text: 'Sell' }), ...game.inventory.filter(i => i.type !== 'consumable').map(it => itemRow(it, [el('button', { class: 'small', text: `Sell ${game.loot.sellPrice(it)}g`, onclick: () => { game.sell(it); renderHud(); renderSide(); refreshUI(); } })]))); };
+  refreshUI(); box.append(wrap); town(t);
+}
+async function tavern(t) {
+  const box = narrate(`<h4>Tavern</h4><p class="tiny">Party ${game.party.length}/4 (extra hires wait on the bench), companions ${game.companions.length}/4.</p>`); const wrap = el('div', { class: 'shop' });
+  const hires = game.hires(t); const rows = hires.map(h => { const cd = game.classDef(h.class); const name = h.name || `${LOOKS[h.class]?.name || cd.name}`; return el('div', { class: 'item' }, el('span', { class: 'n', html: `<b>${name}</b> <small>${cd.name} L${h.level}${h.description ? ' · ' + h.description : ''}</small>` }), el('button', { class: 'small', text: `Hire ${h.cost}g`, onclick: () => { if (game.gold < h.cost) return toast('Not enough gold'); game.gold -= h.cost; const hero = game.makeHero(h.class, name, h.level, { ...LOOKS[h.class], name }); if (h.attrs) { hero.attrs = { ...h.attrs }; refresh(hero, game.loot); hero.hp = hero.maxHp; hero.mp = hero.maxMp; } game.addHero(hero); talk.speaker(hero); hires.splice(hires.indexOf(h), 1); renderHud(); renderSide(); toast(`${name} joins ${game.party.includes(hero) ? 'the party' : 'the bench'}`); tavern(t); } })); });
+  const comps = game.kennel().map(c => el('div', { class: 'item' }, el('span', { class: 'n', html: `<b>${c.name}</b> <small>power ${c.power} · ${c.description}</small>` }), el('button', { class: 'small', text: `Buy ${c.price}g`, onclick: () => { if (game.gold < c.price) return toast('Not enough gold'); if (game.companions.length >= 4) return toast('Four companions max'); game.gold -= c.price; game.addCompanion(game.makeCompanion(c)); renderHud(); renderSide(); toast(`${c.name} joins you`); tavern(t); } })));
+  const benchRows = game.bench.map(h => el('div', { class: 'item' }, el('span', { class: 'n', text: `${h.name} (${h.className} L${h.level}) — on the bench` }), el('button', { class: 'small', text: 'Swap in', onclick: () => { if (game.party.length >= 4) { const out = game.party.pop(); game.bench.push(out); } game.party.push(h); game.bench = game.bench.filter(x => x !== h); renderSide(); tavern(t); } })));
+  wrap.replaceChildren(el('b', { text: 'Heroes for hire' }), ...rows, el('b', { text: 'Companions' }), ...comps, ...(benchRows.length ? [el('b', { text: 'Bench' }), ...benchRows] : [])); box.append(wrap); town(t);
+}
+async function smith(t, kind) {
+  const box = narrate(`<h4>${kind === 'blacksmith' ? 'Blacksmith' : 'Enchanter'}</h4><p class="tiny">Materials: ${Object.entries(game.materials).map(([k, v]) => `${v} ${k.replace('_', ' ')}`).join(' · ')}. Salvage unwanted items for materials, then add affixes (2 materials) or promote rarity (3 materials).</p>`); const wrap = el('div', { class: 'shop' });
+  const refreshUI = () => { wrap.replaceChildren(...game.inventory.filter(i => i.type !== 'consumable').map(it => itemRow(it, [el('button', { class: 'small', text: 'Salvage', onclick: () => { const y = game.salvage(it); toast('Got ' + Object.entries(y).map(([k, v]) => v + ' ' + k.replace('_', ' ')).join(', ')); renderSide(); refreshUI(); } }), el('select', { onchange: e => { const mat = e.target.value; if (!mat) return; const r = game.loot.addAffix(it, mat, game.materials, game.rng); toast(r.ok ? `Added ${r.affix.name}` : r.why); e.target.value = ''; renderSide(); refreshUI(); } }, el('option', { value: '', text: 'add affix…' }), ...items.affixTiers.map(tier => el('option', { value: tier.mat, text: `${tier.label} (${tier.cost} ${tier.mat.replace('_', ' ')}, ×${tier.mult})` }))), el('button', { class: 'small', text: 'Promote', onclick: () => { const r = game.loot.promote(it, game.materials); toast(r.ok ? `${it.name} is now ${it.rarity}` : r.why); renderSide(); refreshUI(); } })])), ...game.party.flatMap(h => Object.values(h.equipment).map(it => itemRow(it, [el('span', { class: 'tiny', text: `equipped by ${h.short}` })])))); };
+  refreshUI(); box.append(wrap); town(t);
+}
+// ---- side panels
+function renderSide() { renderPartyTab(); renderBag(); renderSkills(); renderQuests(); }
+function bar(v, max, cls = '') { const pct = Math.max(0, Math.round(100 * v / Math.max(1, max))); return el('div', { class: 'bar ' + cls }, el('i', { style: `width:${pct}%`, class: pct <= 50 && !cls ? 'low' : '' })); }
+function renderPartyTab() {
+  const rows = [...game.party, ...game.companions].map(h => { const d = h.isCompanion ? null : derive(h, game.loot); const gear = h.isCompanion ? '' : ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'ring1', 'ring2', 'necklace'].map(s => `<span><b>${s}</b> ${h.equipment[s] ? `<span class="${h.equipment[s].rarity}">${h.equipment[s].name}</span>` : '—'}</span>`).join('');
+    return el('div', { class: 'member' + (game.party[selectedHero] === h ? ' sel' : ''), onclick: () => { const i = game.party.indexOf(h); if (i >= 0) { selectedHero = i; renderSkills(); } } }, el('div', { class: 'portrait', html: h.avatar ? renderSVG(h.avatar) : '' }), el('div', {}, el('div', {}, el('b', { text: h.name }), el('span', { class: 'tiny', text: ` ${h.className} L${h.level}${h.isCompanion ? '' : ` · ${d.dmgMin}–${d.dmgMax} dmg · armor ${d.armor} · hit ${d.hit} · dodge ${d.dodge} · crit ${Math.round(d.critChance)}%`}` })), bar(h.hp, h.maxHp), h.isCompanion ? null : bar(h.mp, h.maxMp, 'mp'), el('div', { class: 'tiny', text: `${h.hp}/${h.maxHp} hp${h.isCompanion ? '' : ` · ${h.mp}/${h.maxMp} mp · xp ${h.xp}/${xpForLevel(h.level + 1)}`}${h.pendingAttr || h.pendingTalent || h.pendingPassive ? ' · points to spend!' : ''}` }), h.isCompanion ? null : el('div', { class: 'slots', html: gear }), h.isCompanion ? null : el('div', { class: 'row' }, el('button', { class: 'small', text: 'Save to library', onclick: () => { library.putCharacter({ ...(h.blueprint || {}), name: h.name, short: h.short, race: 'human', avatar: h.avatar, voice: h.voice, speech: h.speech, title: h.className, class: h.class, kind: 'character' }, { source: 'emberveil', tags: ['emberveil', h.class] }); toast(`${h.short} saved to the library`); } })))); });
+  $('tab-party').replaceChildren(...rows);
+}
+function renderBag() {
+  const rows = game.inventory.map(it => it.type === 'consumable' ? el('div', { class: 'item' }, el('span', { class: 'n', text: `${it.icon || ''} ${it.name}` }), el('select', { onchange: e => { const h = game.party.find(x => x.id === e.target.value); if (!h) return; usePotion(it, h); } }, el('option', { value: '', text: 'use on…' }), ...game.party.map(h => el('option', { value: h.id, text: h.short })))) : itemRow(it));
+  $('tab-bag').replaceChildren(el('div', { class: 'tiny', text: `${game.gold} gold · ${game.inventory.length} items · click an item to inspect, compare and equip` }), ...(rows.length ? rows : [el('p', { class: 'tiny', text: 'Empty.' })]));
+}
+function usePotion(it, h) { const e = it.effect; if (e.type === 'heal') { if (it.target === 'group') for (const x of game.party) x.hp = Math.min(x.maxHp, x.hp + e.amount); else h.hp = Math.min(h.maxHp, h.hp + e.amount); } if (e.type === 'mana') h.mp = Math.min(h.maxMp, h.mp + e.amount); if (e.type === 'revive') { h.alive = true; h.hp = Math.max(1, Math.floor(h.maxHp * e.pct)); } if (e.type === 'cleanse') h.statuses = []; game.inventory = game.inventory.filter(x => x !== it); renderSide(); toast(`${h.short} uses ${it.name}`); }
+function itemDialog(it) {
+  const dlg = $('item-dialog'); const hero = game.party[selectedHero]; const slot = it.slot === 'ring' ? (hero.equipment.ring1 ? 'ring1' : 'ring1') : it.slot; const cur = hero?.equipment[slot]; const s = game.loot.score(it, hero), cs = cur ? game.loot.score(cur, hero) : null;
+  const affixes = (it.affixes || []).map(a => el('div', { class: 'affix ' + (a.baseIntrinsic ? '' : 'good'), text: game.loot.describe(a) }));
+  dlg.replaceChildren(el('h3', { html: `<span class="${it.rarity}">${it.name}</span>` }), el('div', { class: 'tiny', text: `${it.rarity} · ${it.quality} quality · ${it.slot}${it.weaponCategory ? ' · ' + it.weaponCategory : ''}${it.twoHanded ? ' · two-handed' : ''}${it.attackSpeed && it.attackSpeed !== 'normal' ? ' · ' + it.attackSpeed : ''}` }), it.dmg ? el('div', { text: `Damage ${it.dmg[0]}–${it.dmg[1]}` }) : null, it.armor != null ? el('div', { text: `Armor ${it.armor}` }) : null, ...affixes, it.lore ? el('p', { class: 'lore', text: it.lore }) : null, it.desc ? el('p', { class: 'tiny', text: it.desc }) : null,
+    el('div', { class: 'cmp', html: `Score: offense ${s.offense} · defense ${s.defense} · utility ${s.utility} = <b>${s.total}</b>${cs ? ` &nbsp; vs ${hero.short}'s ${cur.name}: ${cs.total} (${s.total - cs.total >= 0 ? '+' : ''}${s.total - cs.total})` : ''}` }),
+    el('div', { class: 'row' }, el('select', { id: 'equip-to' }, ...game.party.map((h, i) => el('option', { value: i, text: 'Equip on ' + h.short, selected: i === selectedHero ? '' : undefined }))), el('button', { class: 'primary', text: 'Equip', onclick: () => { const h = game.party[+dlg.querySelector('#equip-to').value]; if (it.type === 'weapon' && !canUse(h, it)) return toast(`${h.short} can't use ${it.subtype}s (${h.weapons.join(', ')})`); if (game.inventory.includes(it)) { game.inventory = game.inventory.filter(x => x !== it); const out = equip(h, it, game.loot); game.inventory.push(...out); } dlg.close(); renderSide(); toast(`${h.short} equips ${it.name}`); } }), el('button', { text: 'Close', onclick: () => dlg.close() })));
+  dlg.showModal();
+}
+function renderSkills() {
+  const h = game.party[selectedHero]; if (!h) return $('tab-skills').replaceChildren();
+  const attr = el('div', { class: 'row' }, el('b', { text: `${h.name} · ${h.pendingAttr} attribute points` }), ...['STR', 'DEX', 'INT', 'CON'].map(k => el('button', { class: 'small', text: `+${k} (${h.attrs[k]})`, disabled: h.pendingAttr ? undefined : '', onclick: () => { h.attrs[k]++; h.pendingAttr--; refresh(h, game.loot); renderSide(); } })));
+  const sk = classSkills(SK, h.class).map(s => { const m = mergeSkill(s, h); const known = s.unlockLevel <= h.level; return el('div', { class: 'skill', style: known ? '' : 'opacity:.5' }, el('div', {}, el('b', { text: s.name || s.id }), el('span', { class: 'tiny', text: ` L${s.unlockLevel} · ${m.type}${m.aoe ? ' · ' + m.aoe : ''}${m.damageMult ? ' · ×' + m.damageMult.toFixed(2) : ''}${m.healMult ? ' · heal ×' + m.healMult : ''} · ${m.mpCost || 0} mp · cd ${m.cooldown || 2}` })), el('div', { class: 'tiny', text: s.description || '' }), el('div', {}, ...(s.talents || []).map(t => el('span', { class: 'talent' + (h.talents[t.id] ? ' on' : ''), title: t.desc || JSON.stringify(t.effect), text: t.name, onclick: () => { if (h.talents[t.id]) return; if (!h.pendingTalent) return toast('No talent points (levels ' + TALENT_LEVELS.join('/') + ')'); h.talents[t.id] = true; h.pendingTalent--; refresh(h, game.loot); renderSide(); toast(`Learned ${t.name}`); } })), ...(s.upgrades || []).map(u => el('span', { class: 'talent' + (h.level >= u.level ? ' on' : ''), title: JSON.stringify(u.bonus), text: `L${u.level} ${u.name}` })))); });
+  const pass = passiveTree(h.class).map(n => { const r = h.passiveRanks[n.id] || 0; return el('div', { class: 'passive' }, el('span', { html: `<b>${n.name}</b> ${r}/3 <span class="tiny">${n.desc}</span>` }), el('button', { class: 'small', text: '+', disabled: h.pendingPassive && r < 3 ? undefined : '', onclick: () => { h.passiveRanks[n.id] = r + 1; h.pendingPassive--; refresh(h, game.loot); renderSide(); } })); });
+  $('tab-skills').replaceChildren(attr, el('div', { class: 'tiny', text: `Talent points: ${h.pendingTalent} · passive points: ${h.pendingPassive}. Talents add to a skill; upgrades come free with levels.` }), ...sk, el('b', { text: 'Passives' }), ...pass, el('div', { class: 'tiny', text: 'Select another hero by clicking them in the Party tab.' }));
+}
+function renderQuests() { const act = game.quests.active.map(id => MAIN_QUESTS.find(q => q.id === id)).filter(Boolean).map(q => el('div', { class: 'quest' }, el('b', { text: q.title }), el('div', { class: 'tiny', text: q.text }))); const done = game.quests.done.map(id => MAIN_QUESTS.find(q => q.id === id)).filter(Boolean).map(q => el('div', { class: 'quest done', text: q.title })); $('tab-quests').replaceChildren(...act, ...done, el('div', { class: 'tiny', text: `Zones open: ${game.unlockedZones.map(z => game.zones[z]?.name).join(', ')}. Kills ${game.kills}, rare items found ${game.rareFound}, bosses ${game.completedBosses.length / 2 | 0}.` })); }
+
+window.emberveil = { get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, library, lingo, DATA, LOOKS, get busy() { return busy; }, fight, enterNode, startWorld, addChosen, renderSide, classes: classes.classes };
+document.body.dataset.ready = '1';

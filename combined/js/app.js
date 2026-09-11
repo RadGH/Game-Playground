@@ -11,6 +11,8 @@ import { Scene } from '../../lingo/js/context.js';
 import { NameGen } from '../../namegen/js/namegen.js';
 import { RelationGraph } from '../../lingo/js/relations.js';
 import { ENGINE_ORDER, ENGINES } from '../../voice-lab/js/engines/index.js';
+import { Library } from '../../library/js/library.js';
+const LIB = await Library.open('../library/');
 
 const status = document.getElementById('status'); const setStatus = t => status.textContent = t;
 const load = async p => (await fetch(p)).json();
@@ -114,7 +116,7 @@ function card(key) {
       el('div', { class: 'charcard' }, el('div', { class: 'portrait', html: renderSVG(ch.avatar) }), el('div', { class: 'info' }, el('div', { class: 'name', text: ch.name }), el('div', { class: 'muted', text: `${sp.entity.ref('race')?.sg || ch.race || '?'} · ${sp.entity.pronounSet.they}/${sp.entity.pronounSet.them}` }), el('div', { text: 'traits: ' + (ch.speech.traits.join(', ') || 'none') }), el('div', { text: `voice: ${ch.voice.engine} · pitch ${ch.voice.pitch} · depth ${ch.voice.depth}` }), el('div', { class: 'muted', text: ch.speech.custom.catchphrase ? '“' + ch.speech.custom.catchphrase + '”' : '' }))),
       knob('mood', { min: -1, max: 1, step: 0.05, value: ch.speech.mood }, v => { ch.speech.mood = v; sp.mood = v; renderJson(); }),
       relationBlock(key),
-      el('div', { class: 'row' }, button('▶ Test voice', async () => { try { getContext(); const { done } = await say(ch.speech.custom.catchphrase || `I am ${ch.name}.`, ch.voice); await done; } catch (e) { toast(e.message); } }, 'small'), button('Wave', () => { bodies[key]?.setAnim('wave'); setTimeout(() => bodies[key]?.setAnim('idle'), 2000); }, 'small'), button('Walk', () => { bodies[key]?.setAnim(bodies[key]?.anim === 'walk' ? 'idle' : 'walk'); }, 'small'), button('Die', () => { bodies[key]?.setAnim('dead'); }, 'small')),
+      el('div', { class: 'row' }, button('💾 Save to library', () => { const e = LIB.putCharacter({ ...ch, race: sp.entity.ref('race')?.id || ch.race, pronouns: ch.pronouns || sp.entry.pronouns || 'they', short: ch.short || sp.name, kind: 'character' }, { source: 'combined' }); toast(`${ch.name} saved to the library (${e.id})`); }, 'small'), button('▶ Test voice', async () => { try { getContext(); const { done } = await say(ch.speech.custom.catchphrase || `I am ${ch.name}.`, ch.voice); await done; } catch (e) { toast(e.message); } }, 'small'), button('Wave', () => { bodies[key]?.setAnim('wave'); setTimeout(() => bodies[key]?.setAnim('idle'), 2000); }, 'small'), button('Walk', () => { bodies[key]?.setAnim(bodies[key]?.anim === 'walk' ? 'idle' : 'walk'); }, 'small'), button('Die', () => { bodies[key]?.setAnim('dead'); }, 'small')),
     );
   };
   render(); wrap.render = render; return wrap;

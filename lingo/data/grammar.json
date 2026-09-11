@@ -67,7 +67,8 @@
       "recall_lineage",
       "recall_reply",
       "observe_person",
-      "reveal"
+      "reveal",
+      "recall_deed"
     ],
     "intentDoc": {
       "greet": "opening line to listener",
@@ -135,7 +136,8 @@
       "recall_lineage": "family history",
       "recall_reply": "listener answers a memory",
       "observe_person": "say what the speaker thinks of the listener (relationship factors)",
-      "reveal": "mention something the speaker has learned about the listener (knowledge)"
+      "reveal": "mention something the speaker has learned about the listener (knowledge)",
+      "recall_deed": "an NPC acknowledges a deed of the hero (memory type deed)"
     },
     "memoryIntents": [
       "recall_combat",
@@ -154,7 +156,8 @@
       "recall_omen",
       "recall_lore",
       "recall_lineage",
-      "recall_generic"
+      "recall_generic",
+      "recall_deed"
     ],
     "sceneIntents": [
       "observe",
@@ -1579,7 +1582,7 @@
         ]
       },
       {
-        "t": "Have you ever killed a {listener.race.sg}? Your own kind?",
+        "t": "Have you ever killed {listener.race.a}? Your own kind?",
         "tags": [
           "violent",
           "blunt"
@@ -5270,6 +5273,50 @@
         "tags": [
           "suspicious",
           "short"
+        ]
+      }
+    ],
+    "recall_deed": [
+      {
+        "t": "You're {hero.name}, aren't you? The one who {memory.what}. {~Drinks are on me.|About time somebody did.|Half the village doesn't believe it.}",
+        "w": 3
+      },
+      {
+        "t": "They say {hero.name} {memory.what}{memory.place, select, undefined{} other{ out by {place.the}}}. I say good riddance.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "{hero.name}. {memory.when.cap} you {memory.what}. People talk. Some of it is even true.",
+        "tags": [
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "My cousin saw {hero.name} the day {hero.they} {memory.what}. Won't shut up about it.",
+        "tags": [
+          "joke",
+          "long"
+        ]
+      },
+      {
+        "t": "If you {memory.what}, you'll do for what's bothering us now.",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "I heard about the {~cave|hill|bridge|camp}. I heard you {memory.what}. I heard a lot of things about you, {hero.name}.",
+        "tags": [
+          "suspicious"
+        ]
+      },
+      {
+        "t": "{hero.name}! The one who {memory.what}! Sit, sit. Tell it again, the way it really happened.",
+        "tags": [
+          "joyful",
+          "friendly"
         ]
       }
     ]

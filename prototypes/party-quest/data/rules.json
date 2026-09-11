@@ -1,0 +1,45 @@
+{
+  "_doc": "Party Quest rules. No dice: flat numbers. hp = hit points; damage subtracts armour reduction (min 1). Classes give a starting kit and a role for the auto-battler. Spells have a cooldown in rounds. Items map Item Vault entries to numbers by sub/tags.",
+  "classes": {
+    "warrior": { "name": "Warrior", "desc": "Hits hard, takes hits. Front of the line.", "hp": 14, "role": "melee", "kit": { "weapon": "longsword", "armour": "chainmail" }, "traitsHint": ["brave", "gruff", "bloodlust", "honorable"], "races": ["human", "dwarf", "orc", "giant"] },
+    "ranger":  { "name": "Ranger",  "desc": "Bow first, knife second. Knows the wilds.", "hp": 11, "role": "ranged", "kit": { "weapon": "longbow", "armour": "leather_armour" }, "traitsHint": ["shy", "cynical", "loyal", "scholar"], "races": ["elf", "human", "halfling"] },
+    "rogue":   { "name": "Rogue",   "desc": "Quick, sneaky, first to the loot.", "hp": 10, "role": "melee", "kit": { "weapon": "dagger", "armour": "leather_armour" }, "traitsHint": ["greedy", "sarcastic", "cunning", "coward"], "races": ["halfling", "goblin", "human", "gnome"] },
+    "mage":    { "name": "Mage",    "desc": "Fragile. Sets things on fire.", "hp": 8, "role": "caster", "kit": { "weapon": "dagger", "armour": "robes", "implement": "wizard_staff" }, "spell": "fireball", "traitsHint": ["scholar", "pompous", "nervous", "archaic"], "races": ["human", "elf", "gnome", "undead"] },
+    "cleric":  { "name": "Cleric",  "desc": "Keeps everyone standing. Prays loudly.", "hp": 11, "role": "healer", "kit": { "weapon": "mace", "armour": "chainmail", "implement": "holy_symbol" }, "spell": "mendflesh", "traitsHint": ["pious", "kind", "honorable", "grieving"], "races": ["human", "dwarf", "halfling", "fey"] },
+    "bard":    { "name": "Bard",    "desc": "Talks, sings, stabs when it must.", "hp": 9, "role": "support", "kit": { "weapon": "rapier", "armour": "gambeson", "implement": "lute" }, "spell": "rally_song", "traitsHint": ["jolly", "romantic", "sarcastic", "drunkard"], "races": ["human", "halfling", "elf", "fey"] }
+  },
+  "spells": {
+    "fireball":   { "name": "fireball",   "kind": "attack_all", "power": 2, "cooldown": 3, "desc": "Burns every enemy for 2.", "line": "Fireball!" },
+    "frostbind":  { "name": "frostbind",  "kind": "attack_one", "power": 3, "cooldown": 2, "desc": "Freezes one enemy for 3 and skips its next turn.", "stun": true, "line": "Hold still." },
+    "soulreave":  { "name": "soulreave",  "kind": "drain",      "power": 2, "cooldown": 3, "desc": "Takes 2 from one enemy and gives it to the caster.", "line": "Your warmth. Mine now." },
+    "mendflesh":  { "name": "mendflesh",  "kind": "heal_one",   "power": 4, "cooldown": 2, "desc": "Heals the most wounded ally for 4.", "line": "Stand. You are not done." },
+    "wardstone":  { "name": "wardstone",  "kind": "shield_all", "power": 1, "cooldown": 4, "desc": "Every ally takes 1 less damage for 2 rounds.", "line": "Stone hold you." },
+    "rally_song": { "name": "rallying song", "kind": "buff_all", "power": 1, "cooldown": 3, "desc": "Allies deal +1 damage for 2 rounds.", "line": "Sing with me, you bastards!" },
+    "umbral_veil":{ "name": "umbral veil","kind": "dodge_all",  "power": 1, "cooldown": 4, "desc": "Enemies miss their next attack.", "line": "Now you don't." },
+    "smite":      { "name": "smite",      "kind": "attack_one", "power": 4, "cooldown": 3, "desc": "Holy blow for 4.", "line": "By the Pale Lady!" }
+  },
+  "weaponDamage": { "dagger": 1, "sword": 2, "axe": 2, "blunt": 2, "polearm": 2, "ranged": 2, "staff": 1 },
+  "weaponTagBonus": { "two-handed": 1, "heavy": 1, "huge": 2, "magic": 1, "crude": -1, "small": 0, "kitchen": -1, "humble": -1 },
+  "armourReduction": { "cloth": 0, "light": 1, "medium": 2, "heavy": 3, "shield": 1 },
+  "implementSpells": { "wizard_staff": "fireball", "wand": "frostbind", "orb": "frostbind", "bone_staff": "soulreave", "living_staff": "mendflesh", "holy_symbol": "mendflesh", "rod": "wardstone", "lute": "rally_song", "harp": "rally_song", "calibrated_rod": "umbral_veil", "witch_broom": "umbral_veil", "prayer_beads": "smite", "war_totem": "rally_song", "tome": "fireball", "scroll": "frostbind" },
+  "enemies": {
+    "goblin_scrapper": { "name": "goblin scrapper", "race": "goblin", "hp": 4, "damage": 1, "armour": 0, "xp": 2, "gold": [1, 4], "tags": ["goblin", "small"] },
+    "goblin_archer":   { "name": "goblin archer",   "race": "goblin", "hp": 3, "damage": 2, "armour": 0, "xp": 2, "gold": [1, 4], "tags": ["goblin", "ranged"] },
+    "goblin_boss":     { "name": "goblin chieftain","race": "goblin", "hp": 9, "damage": 2, "armour": 1, "xp": 6, "gold": [8, 15], "tags": ["goblin", "boss"], "avatar": { "hat": "iron_crown" } },
+    "wolf":            { "name": "wolf",            "race": "beast",  "hp": 5, "damage": 2, "armour": 0, "xp": 2, "gold": [0, 0], "tags": ["beast"] },
+    "dire_wolf":       { "name": "dire wolf",       "race": "beast",  "hp": 9, "damage": 3, "armour": 0, "xp": 5, "gold": [0, 0], "tags": ["beast", "boss"] },
+    "bandit":          { "name": "bandit",          "race": "human",  "hp": 6, "damage": 2, "armour": 1, "xp": 3, "gold": [3, 8], "tags": ["bandit"] },
+    "bandit_captain":  { "name": "bandit captain",  "race": "human",  "hp": 11, "damage": 3, "armour": 2, "xp": 7, "gold": [10, 20], "tags": ["bandit", "boss"] },
+    "orc_raider":      { "name": "orc raider",      "race": "orc",    "hp": 8, "damage": 3, "armour": 1, "xp": 4, "gold": [2, 6], "tags": ["orc"] },
+    "orc_warlord":     { "name": "orc warlord",     "race": "orc",    "hp": 14, "damage": 4, "armour": 2, "xp": 9, "gold": [12, 25], "tags": ["orc", "boss"] },
+    "ghoul":           { "name": "ghoul",           "race": "undead", "hp": 6, "damage": 2, "armour": 0, "xp": 3, "gold": [0, 3], "tags": ["undead"] },
+    "skeleton":        { "name": "skeleton",        "race": "undead", "hp": 5, "damage": 2, "armour": 1, "xp": 3, "gold": [0, 2], "tags": ["undead"] },
+    "lich_acolyte":    { "name": "lich's acolyte",  "race": "undead", "hp": 7, "damage": 2, "armour": 0, "xp": 4, "gold": [3, 9], "tags": ["undead", "caster"], "spell": "soulreave" },
+    "barrow_wight":    { "name": "barrow wight",    "race": "undead", "hp": 13, "damage": 3, "armour": 2, "xp": 9, "gold": [10, 30], "tags": ["undead", "boss"] },
+    "giant_spider":    { "name": "cave spider",     "race": "beast",  "hp": 6, "damage": 2, "armour": 1, "xp": 3, "gold": [0, 0], "tags": ["beast", "cave"] },
+    "troll":           { "name": "bridge troll",    "race": "troll",  "hp": 16, "damage": 4, "armour": 1, "xp": 10, "gold": [15, 30], "tags": ["troll", "boss"], "regen": 2 }
+  },
+  "levels": { "xpPer": [0, 10, 25, 45, 70, 100, 140], "hpPerLevel": 2 },
+  "time": { "slots": ["dawn", "morning", "midday", "afternoon", "dusk", "night"], "travelSlots": 3 },
+  "prices": { "sellFactor": 0.5 }
+}

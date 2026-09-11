@@ -9,3 +9,6 @@ vendor/piper/*.onnx
 vendor/piper/*.onnx.json
 .scratch/
 voice-lab/samples/*.wav
+library/synced/
+!library/synced/.gitkeep
+tools/scratch/

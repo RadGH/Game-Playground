@@ -1,0 +1,25 @@
+import { el, select, button, panel, toast, downloadJSON, copyText, readJSONFile, textInput } from '../../shared/ui.js';
+import { Library, KINDS } from './library.js';
+import { renderSVG } from '../../avatar-2d/js/render.js';
+const lib = await Library.open('./'); const status = document.getElementById('status');
+const state = { kind: '', selected: null };
+const left = document.getElementById('left'), main = document.getElementById('main'), right = document.getElementById('right');
+const kindChips = el('div', { class: 'chips kind-chips' });
+function renderKinds() { kindChips.replaceChildren(el('span', { class: 'chip' + (!state.kind ? ' on' : ''), text: 'all', onclick: () => { state.kind = ''; renderAll(); } }), ...KINDS.map(k => el('span', { class: 'chip' + (state.kind === k ? ' on' : ''), text: k, onclick: () => { state.kind = k; renderAll(); } }))); }
+const syncLog = el('div', { class: 'sync-log', text: 'Nothing synced yet this session.' });
+left.append(panel('Show', kindChips), panel('Sync with Claude', el('p', { class: 'small muted', text: 'Sync posts the whole library to the dev server, which writes library/synced/library.json on the VM. Claude reads that file. Export gives you a JSON file to drop into the chat instead. Pull merges what the server last saw.' }),
+  el('div', { class: 'row' }, button('⬆ Sync to Claude', async () => { try { const r = await lib.syncToClaude(); syncLog.textContent = `Synced ${r.entries} entries at ${r.at} → ${r.saved}. Tell Claude: "read library/synced/library.json".`; toast('Synced'); } catch (e) { syncLog.textContent = 'Sync failed: ' + e.message + ' (is ./serve.sh running tools/serve.py?)'; } }, 'primary'), button('⬇ Pull from server', async () => { const n = await lib.pullFromServer(); toast(`Merged ${n} entries`); renderAll(); }, 'small')),
+  el('div', { class: 'row' }, button('Export all (JSON)', () => downloadJSON(lib.export(), 'library.json'), 'small'), button('Export mine only', () => downloadJSON(lib.exportUser(), 'library-mine.json'), 'small'), button('Import JSON', async () => { try { const n = lib.import(await readJSONFile()); toast(`Imported ${n}`); renderAll(); } catch { toast('Import failed'); } }, 'small')), syncLog));
+const grid = el('div', { class: 'cards' });
+function card(e) {
+  const portrait = e.kind === 'character' || e.kind === 'npc' ? el('div', { class: 'portrait', html: e.data?.avatar ? renderSVG(e.data.avatar) : '' }) : null;
+  const meta = e.kind === 'party' ? `${(e.data.members || []).length} members` : e.kind === 'item' ? (e.data.fullName || e.data.name || '') : `${e.data.race || '?'} · ${e.data.speech?.traits?.slice(0, 3).join(', ') || ''} · voice ${e.data.voice?.engine || '?'}`;
+  return el('div', { class: 'card' + (state.selected === e.id ? ' on' : ''), onclick: () => { state.selected = e.id; renderAll(); } }, portrait, el('div', {}, el('div', { class: 'src', text: `${e.kind} · ${e.source}` }), el('div', { class: 'n', text: e.name }), el('div', { class: 'm', text: meta }), el('div', { class: 'm', text: (e.tags || []).join(' ') })));
+}
+main.append(panel('Blueprints', grid));
+const jsonArea = el('textarea', { id: 'json' }); const nameIn = textInput('Name', '', null); const notesIn = textInput('Notes', '', null, { placeholder: 'why this one matters' });
+right.append(panel('Selected entry', nameIn, notesIn, jsonArea, el('div', { class: 'row' }, button('Save as mine', () => { try { const e = JSON.parse(jsonArea.value); e.name = nameIn.value || e.name; e.notes = notesIn.value; if (e.source === 'default') delete e.id; lib.put(e); toast('Saved'); renderAll(); } catch (err) { toast('Bad JSON: ' + err.message); } }, 'primary'), button('Duplicate', () => { const e = lib.get(state.selected); if (!e) return; const c = JSON.parse(JSON.stringify(e)); delete c.id; c.name += ' (copy)'; lib.put(c); renderAll(); }, 'small'), button('Delete (mine only)', () => { const e = lib.get(state.selected); if (!e || e.source === 'default') return toast('Defaults cannot be deleted; save a copy and edit that'); lib.remove(e.id); state.selected = null; renderAll(); }, 'small'), button('Copy JSON', () => copyText(jsonArea.value), 'small'))),
+  panel('How games use this', el('p', { class: 'small', html: '<code>const lib = await Library.open("/library/")</code> → <code>lib.list("character")</code> → <code>lib.stamp(id)</code> gives a deep copy to play with. <code>lib.putCharacter(gameChar)</code> saves an NPC met in a game back as a blueprint (game-only fields like hp and inventory are stripped). Every page on this origin sees the same library (localStorage), plus the defaults file.' })));
+function renderAll() { renderKinds(); const list = lib.list(state.kind); grid.replaceChildren(...list.map(card)); if (!list.length) grid.append(el('p', { class: 'muted', text: 'Nothing here yet.' })); const e = state.selected ? lib.get(state.selected) : null; jsonArea.value = e ? JSON.stringify(e, null, 2) : ''; nameIn.set(e?.name || ''); notesIn.set(e?.notes || ''); status.textContent = `${lib.all().length} blueprints · ${lib.user.length} yours · ${lib.defaults.length} defaults`; }
+renderAll();
+window.libraryPage = { lib, state, renderAll };

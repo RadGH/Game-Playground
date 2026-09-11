@@ -2,6 +2,9 @@
 import { el, select, button, panel, toast, downloadJSON, copyText, textInput, knob, checkbox } from '../../shared/ui.js';
 import { makeStore } from '../../shared/store.js';
 import { NameGen } from './namegen.js';
+import { Library } from '../../library/js/library.js';
+import { loadDeps, makeCharacter } from '../../library/js/make.js';
+const LIB = await Library.open('../library/'); let DEPS = null;
 
 const store = makeStore('namegen', 1);
 const gen = await NameGen.load('data/');
@@ -32,7 +35,7 @@ const main = document.getElementById('main');
 const results = el('div', { class: 'names' }); let last = [];
 function card(r, fav = false) {
   const forms = Object.entries(r.forms).filter(([k]) => k !== 'sg').map(([k, v]) => `${k}: ${v}`).join(' · ');
-  return el('div', { class: 'name', title: 'click to favourite / copy', onclick: () => { toggleFav(r); copyText(r.text); } }, el('div', { class: 't', text: r.text }), r.gloss.length ? el('div', { class: 'g', text: '“' + r.gloss.join(' + ') + '”' }) : null, el('div', { class: 'g', text: r.respell }), forms ? el('div', { class: 'f', text: forms }) : null);
+  return el('div', { class: 'name', title: 'click to favourite / copy', onclick: () => { toggleFav(r); copyText(r.text); } }, el('div', { class: 't', text: r.text }), r.forms?.short && state.category === 'person.full' ? button('+ library', async (ev) => { ev.stopPropagation(); DEPS = DEPS || await loadDeps('../'); const ch = makeCharacter({ name: r.text, race: r.race || state.race, gender: r.gender === 'm' || r.gender === 'f' ? r.gender : undefined, seed: r.seed }, DEPS); ch.respell = r.respell; ch.short = r.forms.short; ch.nameGloss = r.gloss?.join(' + '); LIB.putCharacter(ch, { source: 'namegen' }); toast(`${r.text} added to the library as a full character`); }, 'small') : null, r.gloss.length ? el('div', { class: 'g', text: '“' + r.gloss.join(' + ') + '”' }) : null, el('div', { class: 'g', text: r.respell }), forms ? el('div', { class: 'f', text: forms }) : null);
 }
 function go() {
   const seed = state.seed.trim() ? [...state.seed.trim()].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) : undefined;

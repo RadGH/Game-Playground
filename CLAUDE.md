@@ -1,15 +1,20 @@
 # Playground — experiments for future games
 
-This directory holds standalone experiments and prototypes. Future games built with Claude Code will read this directory, so every experiment must have a thorough `README.md` explaining its mechanisms, data formats, and how to reuse the code.
+This directory holds standalone **experiments** (reusable libraries + brainstorm dumps, top-level folders) and **prototypes** (throwaway games that test ideas before branching into their own project, under `prototypes/`). A shared **library** of character/item/party blueprints (`library/`) is readable by every page on this origin. Future games built with Claude Code will read this directory, so every experiment must have a thorough `README.md` explaining its mechanisms, data formats, and how to reuse the code.
 
 Owner: Radley Sustaire (independent project). Sandbox: auto-commit freely, no remote yet.
 
-## Conventions (follow these when adding an experiment)
+## Layout
+- `<experiment>/` — a library other code imports (voice-lab, lingo, avatar-2d, avatar-3d, namegen, items, combined). Stable APIs, READMEs, tests.
+- `prototypes/<name>/` — a small game built from the experiments. Throwaway: it may hard-code things and break when experiments change; when one graduates, copy it out to its own repo. Each has `index.html`, `README.md` (what it tests, what worked, what didn't), `js/`, `data/`, `tests/`.
+- `library/` — blueprints (characters, npcs, items, parties) shared across pages via localStorage + defaults JSON; "Sync to Claude" posts them to `tools/serve.py`, which writes `library/synced/library.json` (git-ignored) that Claude reads with the Read tool.
+
+## Conventions (follow these when adding an experiment or prototype)
 
 1. **One folder per experiment**, kebab-case name, with `index.html` as the entry point and a `README.md` for Claude + humans.
 2. **No build step.** Plain HTML, standalone `.css` files, ES modules (`type="module"`). Third-party libs are vendored under `vendor/` (see `vendor/README.md` for licenses).
 3. **Shared helpers** live in `shared/`: `style.css` (dark minimal UI), `ui.js` (knobs, selects, panels, JSON export/import, seeded rng), `store.js` (namespaced localStorage), `character-schema.md` + `character.example.json` (the shared character JSON that experiments can read/write).
-4. **Serve** with `./serve.sh --bg` → `http://<LAN-IP>:8400/` (LAN IP via `hostname -I | awk '{print $1}'`). The user cannot open localhost links; always give the LAN URL.
+4. **Serve** with `./serve.sh --bg` (runs `tools/serve.py`: static files + the `/api/library/sync` and `/api/inbox/<name>` JSON endpoints) → `http://<LAN-IP>:8400/` (LAN IP via `hostname -I | awk '{print $1}'`). The user cannot open localhost links; always give the LAN URL.
 5. **Tests**: Playwright specs in `tests/` (root) or `<experiment>/tests/`, run with `npm test`. Node unit tests (`node --test`) for pure logic.
 6. **When adding an experiment**: create the folder, add a card to `index.html`, add a section to the table below, add a line to `~/claude/docs/playground.md`, and write the README. Keep this file's table current.
 7. **Data first**: anything a game would reuse (presets, phrase libraries, part catalogs) goes in JSON or a plain data module, separate from UI code.
@@ -25,7 +30,14 @@ Owner: Radley Sustaire (independent project). Sandbox: auto-commit freely, no re
 | `avatar-3d/` | Three.js builder reading the same JSON: Mii-style procedural body with the 2D face rasterized onto a face patch + procedural hair/hats/clothes + idle/walk/run/wave/talk/dead; Quaternius CC0 mode (2 bodies, 6 hairstyles, 2 outfit sets, 43 animation clips) with bone-scaled proportions | done 2026-09-09 | `avatar-3d/README.md`, `js/mii.js`, `js/quaternius.js`, `js/face-texture.js`, `js/scene.js`, `assets/quaternius/` |
 | `namegen/` | Name Forge: per-race languages (phonology + concept dictionary, 12 races, 268 tagged concepts), pattern grammar for people/factions/regions/settlements/landmarks/artifacts/mottos, glosses, forms (member/members/adj/people/short/possessive), respell pronunciation, Lingo lexicon export | done 2026-09-10 | `namegen/README.md`, `js/namegen.js`, `data/{languages,concepts,patterns}.json` |
 | `items/` | Item Vault: ~340-item tagged catalog with race affinity weights + exclusives, materials/qualities/enchants, loot roller with Name Forge artifact names and lore, Lingo export | done 2026-09-10 | `items/README.md`, `js/items.js`, `data/{items,materials}.json`, `tools/build-items.py` |
+| `library/` | Blueprint library: characters/npcs/items/parties as JSON, defaults seeded from the demos, localStorage for user entries, export/import, sync to Claude via the dev server | done 2026-09-10 | `library/README.md`, `js/library.js`, `data/defaults.json`, `tools/serve.py` |
 | `combined/` | Character sheet: two full characters (avatar+voice+speech) in one 3D scene, talking with generated lines, their own voices and talk animation; scene picker + memory roller/clock feeding the conversation; random full characters; JSON round-trip | done 2026-09-10 | `combined/README.md`, `js/app.js`, `data/characters.json` |
+
+## Prototypes
+
+| Folder | What it tests | Status |
+|---|---|---|
+| `prototypes/party-quest/` | Party of 4 (library/defaults/custom), race + class without stats, auto-battle with reactive dialog, text-adventure travel with events and a minigame, town NPCs with disposition + deeds + quests + shop, day/night with campfire conversations from memories/relations, Mii 3D cinematic stage, save NPCs to the library | done 2026-09-10 |
 
 ## Tests
 `npm test` (Playwright, serial: specs across all experiments incl. headless WebGL + audio synthesis) and `npm run test:unit` (25 node tests: lingo engine + data validation, avatar-2d renderer/random). Screenshots land in `test-results/`.

@@ -63,3 +63,8 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 
 ## 4. Where the docs are
 `CLAUDE.md` (conventions + table), each experiment's `README.md`, `voice-lab/FORMANT.md` (the TTS engine), `lingo/MEMORY.md`, `lingo/RELATIONS.md`, `shared/character-schema.md`, `vendor/README.md` (licenses), `docs/research-*.md` (why these choices), `tools/build-items.py` (regenerate the item catalog).
+
+
+## Worked example: Party Quest
+
+`prototypes/party-quest/` is a complete small game made only from the pieces above: party from the library, Lingo talk with memories and relationships for combat barks, town gossip and camp conversations, Name Forge NPCs, Item Vault loot and shops, Mii bodies on a cinematic stage, Formant voices. Its `README.md` maps each feature to the experiment it came from. Read `js/main.js` top to bottom for the glue.

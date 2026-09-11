@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Party Quest · Playground prototype</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/", "onnxruntime-web": "../../vendor/onnxruntime-web/ort.min.mjs" } }</script>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="../../index.html">← Playground</a>
+  <h1>Party Quest</h1>
+  <div class="hud" id="hud" hidden>
+    <span id="hud-place"></span>
+    <span class="clock" id="hud-time"><i id="hud-sun"></i><b id="hud-slot"></b> · day <b id="hud-day"></b></span>
+    <span>🪙 <b id="hud-gold"></b></span>
+    <span title="reputation">★ <b id="hud-rep"></b></span>
+    <label class="mute"><input type="checkbox" id="mute"> mute</label>
+    <select id="engine" title="voice engine"><option value="">voice: character's own</option><option value="formant">voice: ours (formant)</option><option value="espeak">voice: espeak</option><option value="babble">voice: babble</option><option value="webspeech">voice: browser</option></select>
+    <button id="btn-save" class="small">Save</button>
+    <button id="btn-menu" class="small">Menu</button>
+  </div>
+</header>
+
+<main id="app">
+  <!-- title -->
+  <section class="screen" id="screen-title">
+    <div class="title-card">
+      <h2>Party Quest</h2>
+      <p class="lead">Four wanderers, a village with problems, and roads that are worse at night. Assemble a party from the library or make your own, then go and earn a reputation.</p>
+      <div class="row">
+        <button id="btn-new" class="primary">New game</button>
+        <button id="btn-continue">Continue</button>
+      </div>
+      <p class="tiny">Uses the Lingo talk engine, memories and relationships, the Name Forge, the Item Vault, Mii-style 3D bodies and the Formant voice from the experiments. Everything you meet can be saved to the character library.</p>
+    </div>
+  </section>
+
+  <!-- party assembly -->
+  <section class="screen" id="screen-party" hidden>
+    <div class="assembly">
+      <div class="pool">
+        <h3>Pick four <span class="tiny">(library blueprints, the default party, or make your own)</span></h3>
+        <div class="row">
+          <button id="btn-default-party" class="small">Use the default party</button>
+          <button id="btn-random-party" class="small">Random four</button>
+          <button id="btn-custom" class="small">Make a custom member</button>
+        </div>
+        <div id="pool-list" class="cards"></div>
+      </div>
+      <div class="chosen">
+        <h3>Your party <span id="chosen-count" class="tiny"></span></h3>
+        <div id="chosen-list" class="cards"></div>
+        <button id="btn-start" class="primary" disabled>Set out</button>
+      </div>
+    </div>
+    <dialog id="custom-dialog">
+      <form method="dialog" id="custom-form">
+        <h3>Custom member</h3>
+        <label>Name <input name="name" placeholder="(random)"></label>
+        <label>Race <select name="race"></select></label>
+        <label>Gender <select name="gender"><option value="">random</option><option value="m">he</option><option value="f">she</option><option value="n">they</option></select></label>
+        <label>Class <select name="class"></select></label>
+        <label>Traits <select name="traits" multiple size="6"></select></label>
+        <div class="row"><button value="ok" class="primary">Add</button><button value="cancel" type="button" id="custom-cancel">Cancel</button></div>
+      </form>
+    </dialog>
+  </section>
+
+  <!-- world: stage + panels -->
+  <section class="screen" id="screen-world" hidden>
+    <div class="stage-wrap">
+      <div id="stage" class="stage"></div>
+      <div id="bubbles" class="bubbles"></div>
+      <div id="stage-caption" class="caption"></div>
+    </div>
+    <div class="panels">
+      <div class="panel narrative">
+        <div id="narrative" class="narrative-log" aria-live="polite"></div>
+        <div id="actions" class="actions"></div>
+        <div id="minigame" class="minigame" hidden><div class="bar"><div class="green" id="mg-green"></div><div class="marker" id="mg-marker"></div></div><button id="mg-stop" class="primary">Stop!</button></div>
+      </div>
+      <aside class="panel side">
+        <div class="tabs"><button data-tab="party" class="on">Party</button><button data-tab="bag">Bag</button><button data-tab="quests">Quests</button><button data-tab="log">Journal</button></div>
+        <div id="tab-party" class="tab"></div>
+        <div id="tab-bag" class="tab" hidden></div>
+        <div id="tab-quests" class="tab" hidden></div>
+        <div id="tab-log" class="tab" hidden></div>
+      </aside>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast" hidden></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

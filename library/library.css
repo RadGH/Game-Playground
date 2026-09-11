@@ -1,0 +1,9 @@
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; cursor: pointer; display: flex; gap: 8px; }
+.card.on { border-color: var(--accent); }
+.card .portrait { width: 64px; flex: none; } .card .portrait svg { width: 100%; height: auto; }
+.card .n { font-weight: 600; } .card .m { font-size: 11px; color: var(--fg2); }
+.card .src { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--accent2); }
+#json { font-family: var(--mono); font-size: 11px; min-height: 320px; }
+.kind-chips .chip { text-transform: capitalize; }
+.sync-log { font-family: var(--mono); font-size: 11px; color: var(--fg2); white-space: pre-wrap; }

@@ -65,7 +65,9 @@
       "recall_omen",
       "recall_lore",
       "recall_lineage",
-      "recall_reply"
+      "recall_reply",
+      "observe_person",
+      "reveal"
     ],
     "intentDoc": {
       "greet": "opening line to listener",
@@ -131,7 +133,9 @@
       "recall_omen": "memory of a bad sign",
       "recall_lore": "knowledge of a historical figure",
       "recall_lineage": "family history",
-      "recall_reply": "listener answers a memory"
+      "recall_reply": "listener answers a memory",
+      "observe_person": "say what the speaker thinks of the listener (relationship factors)",
+      "reveal": "mention something the speaker has learned about the listener (knowledge)"
     },
     "memoryIntents": [
       "recall_combat",
@@ -157,6 +161,10 @@
       "fear",
       "plan",
       "relief"
+    ],
+    "relationIntents": [
+      "observe_person",
+      "reveal"
     ]
   },
   "symbols": {
@@ -992,6 +1000,38 @@
           "sarcastic",
           "long"
         ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. I haven't forgotten what you did for me.",
+        "cond": "appreciation > 0.3",
+        "tags": [
+          "grateful",
+          "friendly"
+        ]
+      },
+      {
+        "t": "{#greetword}. {listener.name}. I'd say more, but I'd want to mean it.",
+        "cond": "warmth < -0.2 && respect > 0.2",
+        "tags": [
+          "rival",
+          "blunt"
+        ]
+      },
+      {
+        "t": "{#greetword}, {listener.name}. Please. Sit. Anything you need.",
+        "cond": "fear > 0.4",
+        "tags": [
+          "fearful",
+          "polite"
+        ]
+      },
+      {
+        "t": "{#greetword}. Do I know you? No. Should I?",
+        "cond": "familiarity < 0.15",
+        "tags": [
+          "stranger",
+          "blunt"
+        ]
       }
     ],
     "greet_reply": [
@@ -1733,6 +1773,15 @@
           "flirt",
           "joke"
         ]
+      },
+      {
+        "t": "I trust you. I don't say that. I don't say it to anyone.",
+        "cond": "trust > 0.5",
+        "tags": [
+          "trusting",
+          "earnest",
+          "compliment"
+        ]
       }
     ],
     "thanks": [
@@ -1792,6 +1841,14 @@
         "tags": [
           "generous",
           "friendly"
+        ]
+      },
+      {
+        "t": "{#thanksword}. That's twice now. I keep count, {listener.name}.",
+        "cond": "appreciation > 0.4",
+        "tags": [
+          "grateful",
+          "earnest"
         ]
       }
     ],
@@ -1917,6 +1974,23 @@
         "tags": [
           "insult",
           "casual"
+        ]
+      },
+      {
+        "t": "You're good with that {$item}, I'll give you that. Shame about everything else.",
+        "cond": "respect > 0.3",
+        "tags": [
+          "rival",
+          "insult"
+        ]
+      },
+      {
+        "t": "I'd insult you, but you'd have to understand it first.",
+        "cond": "respect < -0.3",
+        "tags": [
+          "contemptuous",
+          "insult",
+          "sarcastic"
         ]
       }
     ],
@@ -2135,6 +2209,14 @@
         "t": "...Sorry.",
         "tags": [
           "short"
+        ]
+      },
+      {
+        "t": "I was wrong to doubt you. You've earned better from me.",
+        "cond": "trust > 0.3 && appreciation > 0.2",
+        "tags": [
+          "grateful",
+          "honor"
         ]
       }
     ],
@@ -4897,6 +4979,297 @@
         "cond": "scene.sound",
         "tags": [
           "joyful"
+        ]
+      }
+    ],
+    "observe_person": [
+      {
+        "t": "You fight well, {listener.name}. I still don't like you.",
+        "cond": "respect > 0.3 && warmth < 0",
+        "tags": [
+          "rival"
+        ]
+      },
+      {
+        "t": "I'd not turn my back on you. But I'd want you at the front.",
+        "cond": "respect > 0.3 && trust < 0",
+        "tags": [
+          "rival",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "You're better than I gave you credit for.",
+        "cond": "respect > 0.3",
+        "tags": [
+          "respectful"
+        ]
+      },
+      {
+        "t": "You're soft, {listener.name}. Soft gets people killed.",
+        "cond": "respect < -0.3",
+        "tags": [
+          "contemptuous",
+          "blunt"
+        ]
+      },
+      {
+        "t": "I don't know what I'd do without you. I mean that.",
+        "cond": "warmth > 0.5 && trust > 0.3",
+        "tags": [
+          "fond",
+          "intimate",
+          "earnest"
+        ]
+      },
+      {
+        "t": "I owe you, {listener.name}. I pay my debts.",
+        "cond": "appreciation > 0.3",
+        "tags": [
+          "grateful",
+          "honor"
+        ]
+      },
+      {
+        "t": "You still owe me for {$place}. Don't think I forgot.",
+        "cond": "appreciation < -0.3",
+        "tags": [
+          "resentful"
+        ]
+      },
+      {
+        "t": "Whatever you want, {listener.name}. Just... whatever you want.",
+        "cond": "fear > 0.4",
+        "tags": [
+          "fearful",
+          "timid"
+        ]
+      },
+      {
+        "t": "I've seen what you do to people who cross you. I'm not crossing you.",
+        "cond": "fear > 0.4",
+        "tags": [
+          "fearful"
+        ]
+      },
+      {
+        "t": "I don't know you. I don't know anyone here.",
+        "cond": "familiarity < 0.15",
+        "tags": [
+          "stranger",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "So. {listener.name}. What is it you actually do?",
+        "cond": "familiarity < 0.2",
+        "tags": [
+          "stranger",
+          "question"
+        ]
+      },
+      {
+        "t": "You'd tell me if something was wrong. Wouldn't you?",
+        "cond": "trust > 0.4",
+        "tags": [
+          "trusting",
+          "worried"
+        ]
+      },
+      {
+        "t": "Say what you like, I'll believe {$person} before I believe you.",
+        "cond": "trust < -0.3",
+        "tags": [
+          "suspicious",
+          "hostile"
+        ]
+      },
+      {
+        "t": "You look... well. You look well, is what I meant.",
+        "cond": "attraction > 0.4",
+        "tags": [
+          "attracted",
+          "timid"
+        ]
+      },
+      {
+        "t": "Sit with me. No reason. Just sit.",
+        "cond": "warmth > 0.3 && attraction > 0.3",
+        "tags": [
+          "attracted",
+          "fond"
+        ]
+      },
+      {
+        "t": "You're an idiot, {listener.name}, but you're my idiot.",
+        "cond": "warmth > 0.4 && respect < 0.1",
+        "tags": [
+          "protective",
+          "joke"
+        ]
+      },
+      {
+        "t": "I've known you {~three winters|too long|since the Maw}. You haven't changed. That's the problem.",
+        "cond": "familiarity > 0.7",
+        "tags": [
+          "intimate",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "You and I are the same kind of bad. That's why we get on.",
+        "cond": "warmth > 0.2 && respect > 0.2 && opinion > 0.2",
+        "tags": [
+          "fond",
+          "joke"
+        ]
+      },
+      {
+        "t": "I'd follow you into {$place}. I wouldn't enjoy it.",
+        "cond": "respect > 0.4 && trust > 0.2",
+        "tags": [
+          "respectful",
+          "loyal"
+        ]
+      },
+      {
+        "t": "Keep your distance, {listener.name}. I mean it kindly. Mostly.",
+        "cond": "warmth < -0.2 && fear > 0.1",
+        "tags": [
+          "cold"
+        ]
+      },
+      {
+        "t": "I haven't made up my mind about you, {listener.name}.",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "You're... fine. That's the most I'll say.",
+        "tags": [
+          "blunt",
+          "short"
+        ]
+      }
+    ],
+    "reveal": [
+      {
+        "t": "Everyone says you're a coward. I've seen it. I'm not everyone; I'm worse.",
+        "cond": "knows('coward')",
+        "tags": [
+          "contemptuous",
+          "cruel"
+        ]
+      },
+      {
+        "t": "You're kind. It's not an insult. It's a warning: they'll use it.",
+        "cond": "knows('kind')",
+        "tags": [
+          "gentle",
+          "earnest"
+        ]
+      },
+      {
+        "t": "I know what you did with {$faction}'s coin. I haven't told anyone. Yet.",
+        "cond": "knows('greedy')",
+        "tags": [
+          "suspicious",
+          "threat"
+        ]
+      },
+      {
+        "t": "You'd rather bleed than lie. I noticed. It's rarer than you think.",
+        "cond": "knows('honorable')",
+        "tags": [
+          "respectful"
+        ]
+      },
+      {
+        "t": "You like the blood. I've seen your face when it starts.",
+        "cond": "knows('bloodlust')",
+        "tags": [
+          "fearful",
+          "blunt"
+        ]
+      },
+      {
+        "t": "You drink like a man trying to drown something.",
+        "cond": "knows('drunkard')",
+        "tags": [
+          "blunt",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "You check the door twice. Every night. What happened to you?",
+        "cond": "knows('paranoid')",
+        "tags": [
+          "question",
+          "gentle"
+        ]
+      },
+      {
+        "t": "You're cruel when you think no one is looking. I'm looking.",
+        "cond": "knows('cruel')",
+        "tags": [
+          "cold",
+          "threat"
+        ]
+      },
+      {
+        "t": "You'd die for {$person}. I don't know if that's brave or stupid.",
+        "cond": "knows('loyal')",
+        "tags": [
+          "respectful",
+          "joke"
+        ]
+      },
+      {
+        "t": "You talk like a book. A long one.",
+        "cond": "knows('scholar') || knows('pompous')",
+        "tags": [
+          "sarcastic",
+          "joke"
+        ]
+      },
+      {
+        "t": "You laugh at everything. I used to think it was stupid. Now I think it's the only sane thing here.",
+        "cond": "knows('jolly')",
+        "tags": [
+          "fond",
+          "earnest"
+        ]
+      },
+      {
+        "t": "You're still grieving. It's in how you hold your {$item}.",
+        "cond": "knows('grieving')",
+        "tags": [
+          "gentle",
+          "grief"
+        ]
+      },
+      {
+        "t": "I don't know you well enough to say anything true about you.",
+        "cond": "knownTraits.length === 0",
+        "tags": [
+          "stranger",
+          "earnest"
+        ]
+      },
+      {
+        "t": "I know one thing about you, {listener.name}, and it's enough.",
+        "cond": "knownTraits.length === 1",
+        "tags": [
+          "short",
+          "blunt"
+        ]
+      },
+      {
+        "t": "I've watched you. I'm still deciding what I saw.",
+        "tags": [
+          "suspicious",
+          "short"
         ]
       }
     ]

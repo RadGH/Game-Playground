@@ -66,7 +66,7 @@ The DSP is pure JS on `Float32Array` (`js/dsp.js`) so it can run in a worker: `r
 | `formant` | **Ours**: rule-based formant synthesizer (CMUdict + letter-to-sound rules → Klatt-style resonators). See `FORMANT.md`. | ours (MIT-style) + CMUdict BSD | **yes** | yes | ARPAbet `[[HH AH0 L OW1]]` or espeak `[[h@l'oU]]` | very cheap |
 | `espeak` | meSpeak.js (espeak 1.47, asm.js). Custom voice-variant file generated from knobs. | **GPL-3.0** | yes | `[[h@l'oU]]` espeak ASCII | very cheap |
 | `babble` | Our own Animalese/Simlish gibberish synth (formant filters on a pulse) | ours | yes | n/a (letters) | near zero; hundreds at once |
-| `piper` | Piper VITS neural via ONNX Runtime Web (vits-web; `onnxruntime-web` resolved through an importmap to `vendor/onnxruntime-web/ort.min.mjs`) | MIT + per-voice | yes | no | seconds per line; not real-time |
+| `piper` | Piper VITS neural via ONNX Runtime Web (vits-web; `onnxruntime-web` resolved through an importmap to `vendor/onnxruntime-web/ort.min.mjs`; model cache patched to IndexedDB because the original OPFS cache only works on https/localhost, so over LAN http it re-downloaded every time) | MIT + per-voice | yes | no | seconds per line; not real-time |
 | `webspeech` | Browser/OS voices | built-in | **no** | no | one at a time, no mixing |
 
 Each module exports `meta` (license, pros/cons, knob support), `load()`, and `synth(text, voice) → { samples, sampleRate, info }` (or `speakDirect` for Web Speech). Add an engine by dropping a module in `engines/` and registering it in `engines/index.js`.
@@ -86,7 +86,7 @@ Each module exports `meta` (license, pros/cons, knob support), `load()`, and `sy
 - Knobs, gender/accent/variant, babble mode, Piper voice download with progress.
 - Waveform, synthesis time, effect summary, generated espeak variant file.
 - **Compare engines**: same line on every engine with synthesis time.
-- **Crowd stress test**: N random NPC lines with random presets, CPU time per line, all played overlapping with random pan. This answers "how many characters can talk at once": espeak/babble handle dozens; Piper cannot.
+- **Crowd stress test**: N random NPC lines with random presets (or a chosen engine: formant, espeak, babble, piper), CPU time per line, all played overlapping with random pan. Playback cost is the same for every engine; synthesis cost differs: formant/babble ≈ 10–80 ms per line, espeak ≈ 300 ms, piper ≈ 2–8 s. So formant and babble are fine for live crowds, espeak for a few, and Piper only if lines are pre-rendered ahead of time.
 - Phoneme cheat sheet; comparison table.
 - Voice JSON panel: apply / copy / export / import / save to browser (localStorage, namespace `playground:voice-lab:v1`).
 

@@ -12,7 +12,8 @@ Open: `http://<LAN-IP>:8400/combined/`. Data: `data/characters.json` (5 full cha
 - Pick A and B from the roster or roll a random character (random avatar within race rules, random espeak voice preset, random traits/sliders/tic).
 - Set each one's mood and opinion of the other.
 - "A says it to B" for any intent, or run a whole conversation: each line is generated, shown as a subtitle over the 3D stage, spoken with the character's voice while their body plays the `talk` animation, and logged with the phrase id and tags.
-- Mute, or switch everyone to the babble engine to hear what a crowd-safe engine sounds like on real lines.
+- Choose the voice engine for everyone (each character's own JSON, or formant / espeak / babble / piper / Web Speech), mute, or force babble.
+- Each card shows how that character feels about the other (warmth, respect, trust, fear knobs, tags such as rival or grateful) with relationship events to apply; memory rolls update feelings automatically (`lingo/RELATIONS.md`).
 - Test voice / wave / walk / die buttons per character. Full JSON copy/export/import/apply for A.
 
 ## Integration pattern for a game

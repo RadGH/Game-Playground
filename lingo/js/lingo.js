@@ -195,7 +195,9 @@ export class Lingo {
     mul('aggressive', lin(s.aggression, 0.1, 2.5) * (s.mood < 0 ? 1 - s.mood : 1)); mul('gentle', lin(1 - s.aggression, 0.1, 2.5));
     mul('confident', lin(s.confidence, 0.2, 2)); mul('timid', lin(1 - s.confidence, 0.2, 2));
     mul('angry', s.mood < -0.3 ? 1 + (-s.mood) * 2 : 0.3); mul('sad', s.mood < -0.3 ? 1 + (-s.mood) : 0.3); mul('joyful', s.mood > 0.3 ? 1 + s.mood * 2 : 0.3);
-    if (ctx.opinion != null) { mul('friendly', lin((ctx.opinion + 1) / 2, 0.1, 2.5)); mul('hostile', lin((1 - ctx.opinion) / 2, 0.1, 2.5)); }
+    const opinion = ctx.opinion ?? (ctx.relation ? ctx.relation.opinion() : null);
+    if (opinion != null) { mul('friendly', lin((opinion + 1) / 2, 0.1, 2.5)); mul('hostile', lin((1 - opinion) / 2, 0.1, 2.5)); }
+    if (ctx.relation) { for (const t of ctx.relation.tags()) mul(t, 3); for (const t of ['fond', 'cold', 'respectful', 'contemptuous', 'trusting', 'suspicious', 'grateful', 'resentful', 'fearful', 'attracted', 'rival', 'protective', 'stranger', 'intimate']) if (w[t] == null) w[t] = 0.6; }
     for (const [tag, f] of Object.entries(s.tagWeights || {})) mul(tag, f);
     if (ctx.scene?.tagWeights) for (const [tag, f] of Object.entries(ctx.scene.tagWeights())) mul(tag, f);
     return w;
@@ -208,8 +210,8 @@ export class Lingo {
   }
   condScope(ctx) {
     const s = ctx.speaker, l = ctx.listener;
-    const sc = ctx.scene;
-    return { ...ctx, has: t => !!s?.has(t), listenerHas: t => !!l?.has?.(t), mood: s?.mood ?? 0, opinion: ctx.opinion ?? 0, sceneHas: t => !!sc?.has?.(t), danger: sc?.danger ?? 0, comfort: sc?.comfort ?? 0.5, timeOfDay: sc?.timeOfDay ?? 'day', speakerType: s?.entity?.type, listenerType: l?.entity?.type ?? l?.type, sameRace: !!(s?.entity?.ref('race')?.id && s.entity.ref('race').id === (l?.entity?.ref?.('race')?.id ?? l?.ref?.('race')?.id)), chance: p => this.rng.chance(p) };
+    const sc = ctx.scene, rel = ctx.relation;
+    return { ...ctx, has: t => !!s?.has(t), listenerHas: t => !!l?.has?.(t), mood: s?.mood ?? 0, opinion: ctx.opinion ?? (rel ? rel.opinion() : 0), warmth: rel?.get('warmth') ?? 0, respect: rel?.get('respect') ?? 0, trust: rel?.get('trust') ?? 0, appreciation: rel?.get('appreciation') ?? 0, fear: rel?.get('fear') ?? 0, attraction: rel?.get('attraction') ?? 0, familiarity: rel?.familiarity ?? 0.5, knows: t => !!rel?.knows(t), knownTraits: rel ? [...rel.knowledge] : [], sceneHas: t => !!sc?.has?.(t), danger: sc?.danger ?? 0, comfort: sc?.comfort ?? 0.5, timeOfDay: sc?.timeOfDay ?? 'day', speakerType: s?.entity?.type, listenerType: l?.entity?.type ?? l?.type, sameRace: !!(s?.entity?.ref('race')?.id && s.entity.ref('race').id === (l?.entity?.ref?.('race')?.id ?? l?.ref?.('race')?.id)), chance: p => this.rng.chance(p) };
   }
 
   /** Pick one entry from a symbol using weights × tags × conditions, avoiding recent repeats. */
@@ -374,21 +376,23 @@ export class Lingo {
   }
 
   /** Two speakers take turns. Returns an array of { speaker, listener, intent, text, speech }. */
-  converse(a, b, { turns = 6, opinionAB = 0, opinionBA = 0, topics = null, banks = null, now = 0, scene = null, ...extra } = {}) {
-    const lines = []; let cur = a, other = b, opinion = opinionAB, opinionOther = opinionBA; let lastMemory = null;
-    const plan = topics || this.planConversation(a, b, opinionAB, opinionBA, turns, { banks, now, scene });
+  converse(a, b, { turns = 6, opinionAB = 0, opinionBA = 0, topics = null, banks = null, now = 0, scene = null, relations = null, ...extra } = {}) {
+    const relAB = relations?.get(a.id, b.id) || null, relBA = relations?.get(b.id, a.id) || null;
+    if (relAB) opinionAB = relAB.opinion(); if (relBA) opinionBA = relBA.opinion();
+    const lines = []; let cur = a, other = b, opinion = opinionAB, opinionOther = opinionBA, rel = relAB, relOther = relBA; let lastMemory = null;
+    const plan = topics || this.planConversation(a, b, opinionAB, opinionBA, turns, { banks, now, scene, relations });
     for (let i = 0; i < plan.length; i++) {
-      const intent = plan[i]; const ctx = { speaker: cur, listener: other, opinion, scene, ...extra }; let out;
+      const intent = plan[i]; const ctx = { speaker: cur, listener: other, opinion, scene, relation: rel, ...extra }; let out;
       if (intent === 'recall') { const bank = banks?.[cur.id]; out = bank ? this.speakMemory(bank, now, ctx) : null; if (!out) out = this.speak('smalltalk', ctx); else lastMemory = out.memory; }
       else if (intent === 'recall_reply' && lastMemory) { out = this.replyToMemory(lastMemory, now, ctx); lastMemory = null; }
       else out = this.speak(intent, ctx);
       lines.push({ speaker: cur, listener: other, intent: out.intent || intent, text: out.text, speech: out.speech, tags: out.tags, memory: out.memory || null });
-      [cur, other] = [other, cur]; [opinion, opinionOther] = [opinionOther, opinion];
+      [cur, other] = [other, cur]; [opinion, opinionOther] = [opinionOther, opinion]; [rel, relOther] = [relOther, rel];
     }
     return lines;
   }
   /** Simple topic planner: greet → middle beats chosen by opinion/traits → farewell. */
-  planConversation(a, b, opAB, opBA, turns, { banks = null, now = 0, scene = null } = {}) {
+  planConversation(a, b, opAB, opBA, turns, { banks = null, now = 0, scene = null, relations = null } = {}) {
     const plan = ['greet', 'greet_reply'];
     const beats = [];
     const hostile = (op, sp) => op < -0.3 || (sp.speech.aggression > 0.7 && op < 0.2);
@@ -397,6 +401,14 @@ export class Lingo {
     let sp = a, op = opAB, opO = opBA;
     for (let i = 2; i < turns - 1; i++) {
       let pool = hostile(op, sp) ? ['insult', 'threat', 'complain', 'gossip', 'disagree'] : friendly(op) ? ['compliment', 'smalltalk', 'gossip', 'lore', 'brag', 'agree', 'thanks', 'flirt'] : ['smalltalk', 'gossip', 'complain', 'lore', 'question', 'brag', 'work'];
+      const relTags = (sp === a ? relations?.get(a.id, b.id) : relations?.get(b.id, a.id))?.tags() || [];
+      if (relTags.includes('rival')) pool = ['observe_person', 'brag', 'disagree', 'compliment', 'insult', 'question'];
+      else if (relTags.includes('fearful')) pool = ['agree', 'apology', 'observe_person', 'smalltalk', 'question'];
+      else if (relTags.includes('grateful')) pool = ['thanks', 'compliment', 'observe_person', 'smalltalk', 'gossip'];
+      else if (relTags.includes('resentful') || relTags.includes('suspicious')) pool = ['reveal', 'disagree', 'complain', 'question', 'insult', 'observe_person'];
+      else if (relTags.includes('attracted')) pool = ['flirt', 'compliment', 'observe_person', 'smalltalk', 'question'];
+      else if (relTags.includes('stranger')) pool = ['question', 'smalltalk', 'observe_person', 'lore'];
+      else if (relTags.length && this.rng.chance(0.3)) pool = ['observe_person', 'reveal', ...pool];
       // scene awareness: in danger or comfort, most beats are about the surroundings
       if (sceneMix && this.rng.chance(sceneMix.weight)) pool = sceneMix.pool;
       let intent = this.rng.pick(pool.filter(p => this.grammar.has(p)));

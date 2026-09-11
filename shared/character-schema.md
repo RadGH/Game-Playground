@@ -19,4 +19,4 @@ Rules:
 - Colors are `#rrggbb`. Numeric knobs are documented with their range in the owning README; most are 0–1 or -1..1 so games can map them to their own scales.
 - Part ids reference catalogs shipped with the experiment (`avatar-2d/js/parts/`, `voice-lab/data/presets.json`, `lingo/data/`). Unknown ids should fall back to defaults, not crash.
 
-See `shared/character.example.json` for a full example once all three experiments exist.
+See `shared/character.example.json` for a full example. Things that are *not* per-character sections but live alongside characters in a game: memories (`lingo/js/memory.js`, one bank per character, serializable), relationships (`lingo/js/relations.js`, one graph per world), scenes (`lingo/js/context.js`), the lexicon (names/items from `namegen/` and `items/` exported as entries). `GAME-GUIDE.md` shows how they fit.

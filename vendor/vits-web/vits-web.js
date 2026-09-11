@@ -119,35 +119,23 @@ const u = "https://huggingface.co/diffusionstudio/piper-voices/resolve/main", B 
   "zh_CN-huayan-medium": "zh/zh_CN/huayan/medium/zh_CN-huayan-medium.onnx",
   "zh_CN-huayan-x_low": "zh/zh_CN/huayan/x_low/zh_CN-huayan-x_low.onnx"
 };
+// [playground patch] Piper model cache: the original used the Origin Private File System, which browsers only allow on
+// secure origins (https or localhost). This playground is viewed over plain http on the LAN, so every synthesis re-downloaded
+// the 60 MB model. IndexedDB works on http, so files are cached there instead (same names, same behaviour).
+const __pdb = { open() { return new Promise((res, rej) => { const r = indexedDB.open('piper-cache', 1); r.onupgradeneeded = () => r.result.createObjectStore('files'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  async put(k, blob) { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').put(blob, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); },
+  async get(k) { const db = await this.open(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  async del(k) { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').delete(k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); },
+  async keys() { const db = await this.open(); return new Promise((res, rej) => { const r = db.transaction('files').objectStore('files').getAllKeys(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  async clear() { const db = await this.open(); return new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').clear(); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); } };
 async function p(e, m) {
-  if (e.match("https://huggingface.co"))
-    try {
-      const o = await (await navigator.storage.getDirectory()).getDirectoryHandle("piper", {
-        create: !0
-      }), a = e.split("/").at(-1), t = await (await o.getFileHandle(a, { create: !0 })).createWritable();
-      await t.write(m), await t.close();
-    } catch (n) {
-      console.error(n);
-    }
+  if (e.match("https://huggingface.co")) try { await __pdb.put(e.split("/").at(-1), m instanceof Blob ? m : new Blob([m])); } catch (n) { console.error(n); }
 }
 async function R(e) {
-  try {
-    const n = await (await navigator.storage.getDirectory()).getDirectoryHandle("piper"), o = e.split("/").at(-1);
-    await (await n.getFileHandle(o)).remove();
-  } catch (m) {
-    console.error(m);
-  }
+  try { await __pdb.del(e.split("/").at(-1)); } catch (m) { console.error(m); }
 }
 async function D(e) {
-  if (e.match("https://huggingface.co"))
-    try {
-      const n = await (await navigator.storage.getDirectory()).getDirectoryHandle("piper", {
-        create: !0
-      }), o = e.split("/").at(-1);
-      return await (await n.getFileHandle(o)).getFile();
-    } catch {
-      return;
-    }
+  if (e.match("https://huggingface.co")) try { const f = await __pdb.get(e.split("/").at(-1)); return f || void 0; } catch { return; }
 }
 async function S(e, m) {
   var r;
@@ -225,21 +213,10 @@ async function F(e) {
   await Promise.all(n.map((o) => R(o)));
 }
 async function L() {
-  const m = await (await navigator.storage.getDirectory()).getDirectoryHandle("piper", {
-    create: !0
-  }), n = [];
-  for await (const o of m.keys()) {
-    const a = o.split(".")[0];
-    o.endsWith(".onnx") && a in c && n.push(a);
-  }
-  return n;
+  const n = []; try { for (const o of await __pdb.keys()) { const a = String(o).split(".")[0]; String(o).endsWith(".onnx") && a in c && n.push(a); } } catch {} return n;
 }
 async function j() {
-  try {
-    await (await (await navigator.storage.getDirectory()).getDirectoryHandle("piper")).remove({ recursive: !0 });
-  } catch (e) {
-    console.error(e);
-  }
+  try { await __pdb.clear(); } catch (e) { console.error(e); }
 }
 async function P() {
   const e = await fetch(`${u}/voices.json`);

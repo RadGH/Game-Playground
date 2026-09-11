@@ -112,21 +112,22 @@ const crowdLog = el('div', { class: 'crowd-log' });
 const crowdBtn = button('Run crowd test', async () => {
   stopAll(); crowdLog.replaceChildren();
   const n = crowdN.value, r = rng(Date.now() & 0xffff), presets = PRESETS.presets.filter(p => p.voice.engine !== 'piper' && p.voice.engine !== 'webspeech');
+  if (crowdEngine.value === 'piper' && n > 6 && !confirm(`Piper takes several seconds per line on CPU; ${n} lines may take a few minutes. Continue?`)) return;
   const lines = SAMPLE_LINES.filter(l => !l.startsWith('[['));
   const t0 = performance.now(); let synthMs = 0; const results = [];
   for (let i = 0; i < n; i++) {
-    const p = r.pick(presets), v = { ...p.voice, engine: crowdEngine.value === 'preset' ? p.voice.engine : crowdEngine.value, pitch: Math.min(1, Math.max(0, (p.voice.pitch ?? 0.5) + r.range(-0.1, 0.1))) };
+    const p = r.pick(presets), v = { ...p.voice, engine: crowdEngine.value === 'preset' ? p.voice.engine : crowdEngine.value, variant: crowdEngine.value === 'piper' ? r.pick(['en_US-hfc_female-medium', 'en_US-hfc_male-medium', 'en_US-amy-low', 'en_US-danny-low']) : (crowdEngine.value === 'preset' ? p.voice.variant : 'custom'), pitch: Math.min(1, Math.max(0, (p.voice.pitch ?? 0.5) + r.range(-0.1, 0.1))) };
     const line = r.pick(lines);
     const ts = performance.now(); const res = await synthesize(line, v, { noCache: true }); const ms = performance.now() - ts; synthMs += ms;
     results.push({ res, v, line, p, ms });
     crowdLog.append(el('div', { text: `#${i + 1} ${p.name} [${v.engine}] ${ms.toFixed(0)} ms — "${line.slice(0, 40)}"` }));
   }
   const wall = performance.now() - t0;
-  crowdLog.append(el('div', { style: { color: 'var(--accent2)' }, text: `Synthesized ${n} lines in ${wall.toFixed(0)} ms wall (${(synthMs / n).toFixed(0)} ms avg). Playing all with random pan and start offsets…` }));
+  crowdLog.append(el('div', { style: { color: 'var(--accent2)' }, text: `Synthesized ${n} lines in ${wall.toFixed(0)} ms wall (${(synthMs / n).toFixed(0)} ms avg). Playing all with random pan and start offsets… Playback cost is the same for every engine; synthesis cost is what differs (formant/babble ≈ 10–80 ms, espeak ≈ 300 ms, piper ≈ seconds).` }));
   for (const { res } of results) play(res, { when: r.range(0, crowdSpread.value), pan: r.range(-1, 1), volume: 0.6 });
   setStatus(`crowd: ${n} talkers`);
 });
-const crowdEngine = select('Engine', [{ value: 'preset', label: "each preset's own engine" }, 'espeak', 'babble'], 'preset');
+const crowdEngine = select('Engine', [{ value: 'preset', label: "each preset's own engine (formant/espeak/babble)" }, 'formant', 'espeak', 'babble', { value: 'piper', label: 'piper (slow: seconds per line, pre-rendered)' }], 'preset');
 const crowdPanel = panel('Crowd stress test', el('p', { class: 'small muted', text: 'Synthesizes N random NPC lines with random presets, reports CPU time, then plays them all overlapping. This is the real answer to "how many characters can talk at once".' }), crowdEngine, crowdN, crowdSpread, crowdBtn, crowdLog);
 
 // engine comparison table (static, from meta)

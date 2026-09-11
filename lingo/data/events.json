@@ -592,6 +592,76 @@
           "broke the orc war-camp"
         ]
       }
+    },
+    "nemesis": {
+      "importance": 0.7,
+      "halfLifeDays": 40,
+      "valence": -0.5,
+      "intent": "recall_nemesis",
+      "tags": [
+        "grudge",
+        "combat"
+      ],
+      "mergeKeys": [
+        "foe"
+      ],
+      "traitWeights": {
+        "paranoid": 1.4,
+        "bloodlust": 1.3,
+        "coward": 1.3
+      },
+      "bindings": {
+        "foe": {
+          "type": "creature"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "name": [
+          "Rakinishu",
+          "Bishibosh the Loud"
+        ],
+        "outcome": [
+          "beat_us",
+          "escaped",
+          "slain"
+        ]
+      }
+    },
+    "conversation": {
+      "importance": 0.25,
+      "halfLifeDays": 4,
+      "valence": 0.1,
+      "intent": "recall_conversation",
+      "tags": [
+        "talk"
+      ],
+      "mergeKeys": [
+        "with"
+      ],
+      "traitWeights": {
+        "romantic": 1.3,
+        "shy": 1.2
+      },
+      "bindings": {
+        "with": {
+          "type": "person"
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "topic": [
+          "fight_recap",
+          "new_gear_worse"
+        ],
+        "said": [
+          "I'll swap it before the next fight."
+        ]
+      }
     }
   }
 }

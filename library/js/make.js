@@ -4,6 +4,7 @@
 //   const ch = makeCharacter({ race: 'dwarf', gender: 'f', traits: ['gruff', 'loyal'] }, deps);
 import { randomAvatar, makeRng } from '../../avatar-2d/js/random.js';
 import { NameGen } from '../../namegen/js/namegen.js';
+import { voiceFor } from '../../shared/voices.js';
 
 export async function loadDeps(base = new URL('../../', import.meta.url).href) {
   const j = async p => (await fetch(base + p)).json();
@@ -32,3 +33,15 @@ export function makeCharacter(opts, deps) {
 }
 /** Lingo lexicon entry for a made character (so {listener.name}, pronouns, race and pronunciation work). */
 export function lexiconEntryFor(ch) { return { id: ch.id, type: 'person', proper: true, pronouns: ch.pronouns || 'they', race: ch.race, title: ch.title, forms: { sg: ch.name, short: ch.short || ch.name.split(' ')[0] }, tags: ['npc'], pron: ch.respell ? { respell: ch.respell } : undefined }; }
+
+/**
+ * Random NPC for towns, roads and enemy captains: a generic look (no class-specific parts unless `allowBespoke`), a decal
+ * for variety, a role voice from shared/voices.js and Name Forge name. opts: { race, gender, role ('villager'|'merchant'|'elder'|'child'|'goblin'|'cultist'|…), seed, title, decal (extras id | 'random' | null), allowBespoke, name }
+ */
+export function makeNpc(opts, deps) {
+  const seed = opts.seed ?? Math.floor(Math.random() * 1e9); const rng = makeRng(seed); const role = opts.role || 'villager';
+  const ch = makeCharacter({ ...opts, seed, kind: 'npc', title: opts.title || role, avatar: opts.avatar || randomAvatar(deps.avatarPresets, { race: AVATAR_RACE[opts.race] || opts.race || 'human', seed, allowBespoke: !!opts.allowBespoke }) }, deps);
+  const decals = ['none', 'none', 'freckles', 'scar', 'scar_cheek', 'dirt', 'soot', 'mud', 'paint_dots', 'blood', 'brand', 'pale', 'cheek_stripes', 'eye_black', 'burn_scar', 'nose_scar', 'freckles_heavy', 'war_stripe', 'warpaint'];
+  const decal = opts.decal === 'random' || opts.decal == null ? rng.pick(decals) : opts.decal; ch.avatar.extras = { id: decal, color: rng.pick(['#c83a2a', '#333', '#8a6a3a', '#e0e0e0', '#5a3a8a']) };
+  ch.voice = voiceFor({ role, gender: ch.gender, seed }); ch.role = role; return ch;
+}

@@ -1,0 +1,398 @@
+{
+ "_doc": "Static named enemies (Diablo-style super-uniques): one or two per zone, fixed name/title/base/modifiers/look. They guard challenge nodes and can show up as random encounter leaders. Random named enemies are generated in game.js (namedEnemy). Modifiers: tough (+armor), fast (extra action), regen, thorns, fiery (burn on hit), vampiric (life steal), cursed (curse on hit), summoner (+2 adds), colossal (+hp +dmg).",
+ "modifiers": {
+  "tough": "+8 armor",
+  "fast": "acts twice",
+  "regen": "regenerates 5% each round",
+  "thorns": "reflects 20%",
+  "fiery": "burns on hit",
+  "vampiric": "heals 30% of damage dealt",
+  "cursed": "curses on hit",
+  "summoner": "brings two extra followers",
+  "colossal": "half again as big"
+ },
+ "titles": [
+  "the Cruel",
+  "the Unblinking",
+  "Skinner",
+  "the Hollow",
+  "Ninefingers",
+  "the Loud",
+  "Bonechewer",
+  "of the Long Knife",
+  "the Patient",
+  "Ashmouth",
+  "the Twice-Hanged",
+  "Widowmaker",
+  "Rotwarden",
+  "the Quiet",
+  "Firetongue",
+  "the Unforgiven"
+ ],
+ "syllables": {
+  "goblin": [
+   "Rak",
+   "Gri",
+   "Snag",
+   "Bish",
+   "Zog",
+   "Kri",
+   "Nib",
+   "Ug"
+  ],
+  "human": [
+   "Mor",
+   "Vel",
+   "Har",
+   "Bren",
+   "Cas",
+   "Dor",
+   "Ash",
+   "Tor"
+  ],
+  "demon": [
+   "Mal",
+   "Xar",
+   "Bel",
+   "Zur",
+   "Kha",
+   "Ne",
+   "Vor",
+   "Ig"
+  ],
+  "undead": [
+   "Os",
+   "Mor",
+   "Grave",
+   "Wyn",
+   "Sel",
+   "Dur",
+   "Hal",
+   "Ny"
+  ],
+  "beast": [
+   "Old",
+   "Grey",
+   "Red",
+   "One-eye",
+   "Scar",
+   "Black",
+   "Long",
+   "Broken"
+  ],
+  "void": [
+   "Ix",
+   "Null",
+   "Oth",
+   "Vae",
+   "Kel",
+   "Mu",
+   "Sar",
+   "Thren"
+  ]
+ },
+ "suffixes": {
+  "goblin": [
+   "ishu",
+   "gash",
+   "nak",
+   "bosh",
+   "zik",
+   "rok"
+  ],
+  "human": [
+   "wick",
+   "gan",
+   "ric",
+   "ley",
+   "mund",
+   "vane"
+  ],
+  "demon": [
+   "grath",
+   "goth",
+   "zeth",
+   "khar",
+   "mon",
+   "thys"
+  ],
+  "undead": [
+   "ric",
+   "wyn",
+   "dus",
+   "mere",
+   "tharn",
+   "ost"
+  ],
+  "beast": [
+   " Tooth",
+   " Claw",
+   " Fang",
+   " Hide",
+   " Jaw",
+   " Paw"
+  ],
+  "void": [
+   "oth",
+   "ael",
+   "un",
+   "ith",
+   "aar",
+   "esk"
+  ]
+ },
+ "static": [
+  {
+   "id": "rakinishu",
+   "name": "Rakinishu",
+   "title": "the Fallen Shaman",
+   "base": "goblin_shaman",
+   "zone": "border_roads",
+   "mods": [
+    "fast",
+    "fiery"
+   ],
+   "look": {
+    "race": "goblin",
+    "extras": "war_stripe",
+    "hat": "feather_band"
+   },
+   "lore": "Cast out for lighting the wrong fire. Lights every fire now."
+  },
+  {
+   "id": "bishibosh",
+   "name": "Bishibosh",
+   "title": "the Warlord's Voice",
+   "base": "goblin_warrior",
+   "zone": "thornwood",
+   "mods": [
+    "summoner",
+    "tough"
+   ],
+   "look": {
+    "race": "goblin",
+    "hat": "horned_helm",
+    "extras": "scar"
+   },
+   "lore": "He carries the warlord's orders and a bigger axe than his rank allows."
+  },
+  {
+   "id": "corpsefire",
+   "name": "Corpsefire",
+   "title": "",
+   "base": "corrupted_wolf",
+   "zone": "thornwood",
+   "mods": [
+    "fiery",
+    "regen"
+   ],
+   "look": {
+    "creature": "wolf",
+    "colors": {
+     "body": "#3a1a1a",
+     "eyes": "#ff6a1a"
+    }
+   },
+   "lore": "A wolf that walked into the Veil and walked out still burning."
+  },
+  {
+   "id": "griswold_ash",
+   "name": "Griswold Ashmouth",
+   "title": "",
+   "base": "bandit_captain",
+   "zone": "dust_roads",
+   "mods": [
+    "vampiric",
+    "tough"
+   ],
+   "look": {
+    "race": "human",
+    "extras": "soot",
+    "hat": "wide_brim"
+   },
+   "lore": "Sells the water. Charges in blood."
+  },
+  {
+   "id": "the_smouldering_bride",
+   "name": "The Smouldering Bride",
+   "title": "",
+   "base": "ash_wraith",
+   "zone": "ember_plateau",
+   "mods": [
+    "cursed",
+    "fiery"
+   ],
+   "look": {
+    "race": "undead",
+    "extras": "soot",
+    "hat": "hood"
+   },
+   "lore": "Married into the Cinderborn. Never left the altar."
+  },
+  {
+   "id": "brother_calx",
+   "name": "Brother Calx",
+   "title": "the Unblinking",
+   "base": "veil_sorcerer",
+   "zone": "ember_plateau",
+   "mods": [
+    "summoner",
+    "cursed"
+   ],
+   "look": {
+    "race": "elf",
+    "hat": "hood",
+    "eyes": "glow"
+   },
+   "lore": "Watched the ritual so long his eyes forgot how to close."
+  },
+  {
+   "id": "maggor_the_gate",
+   "name": "Maggor",
+   "title": "the Gate",
+   "base": "hell_knight",
+   "zone": "hell_breach",
+   "mods": [
+    "colossal",
+    "thorns"
+   ],
+   "look": {
+    "race": "orc",
+    "hat": "great_helm",
+    "top": "scale_plate"
+   },
+   "lore": "A door that fights back."
+  },
+  {
+   "id": "ysgrith",
+   "name": "Ysgrith",
+   "title": "the Hollow",
+   "base": "void_shade",
+   "zone": "shattered_core",
+   "mods": [
+    "fast",
+    "vampiric"
+   ],
+   "look": {
+    "race": "undead",
+    "eyes": "glow",
+    "extras": "face_glyphs"
+   },
+   "lore": "There was a Ysgrith once. This is what stands in her place."
+  },
+  {
+   "id": "null_the_choir",
+   "name": "Null",
+   "title": "the Choir",
+   "base": "void_prophet",
+   "zone": "cosmic_rift",
+   "mods": [
+    "summoner",
+    "cursed"
+   ],
+   "look": {
+    "race": "elf",
+    "hat": "hood",
+    "extras": "chest_glow"
+   },
+   "lore": "Speaks with several voices. Only one of them is lying."
+  },
+  {
+   "id": "the_grieving_star",
+   "name": "The Grieving Star",
+   "title": "",
+   "base": "star_horror",
+   "zone": "eternal_void",
+   "mods": [
+    "colossal",
+    "regen"
+   ],
+   "look": {
+    "creature": "drake",
+    "colors": {
+     "body": "#2a1a5a",
+     "eyes": "#c0a0ff"
+    }
+   },
+   "lore": "It fell a long way. It wants company."
+  },
+  {
+   "id": "saltmother",
+   "name": "Saltmother",
+   "title": "",
+   "base": "genesis_worm",
+   "zone": "abyssal_depths",
+   "mods": [
+    "colossal",
+    "vampiric"
+   ],
+   "look": {
+    "creature": "snake",
+    "colors": {
+     "body": "#a0b0a0",
+     "eyes": "#40e0ff"
+    }
+   },
+   "lore": "Older than the tide. Hungrier."
+  },
+  {
+   "id": "the_first_knight",
+   "name": "The First Knight",
+   "title": "",
+   "base": "abyssal_knight",
+   "zone": "primordial_nexus",
+   "mods": [
+    "tough",
+    "thorns",
+    "fast"
+   ],
+   "look": {
+    "race": "human",
+    "hat": "great_helm",
+    "top": "surcoat",
+    "offhand": "tower_shield",
+    "held": "greatsword"
+   },
+   "lore": "Whatever oath he swore, the world he swore it to is gone."
+  },
+  {
+   "id": "scald",
+   "name": "Scald",
+   "title": "Firetongue",
+   "base": "frost_wyrm",
+   "zone": "dragons_reach",
+   "mods": [
+    "fiery",
+    "fast"
+   ],
+   "look": {
+    "creature": "dragon",
+    "colors": {
+     "body": "#c04020",
+     "eyes": "#ffe040"
+    }
+   },
+   "lore": "A frost wyrm that swallowed an ember and never forgave the cold."
+  },
+  {
+   "id": "the_dragon_kings_shadow",
+   "name": "The Dragon King's Shadow",
+   "title": "",
+   "base": "storm_dragon",
+   "zone": "dragon_throne",
+   "mods": [
+    "colossal",
+    "cursed",
+    "regen"
+   ],
+   "look": {
+    "creature": "dragon",
+    "colors": {
+     "body": "#1a1a2a",
+     "eyes": "#ff3030"
+    }
+   },
+   "lore": "Bahamorth's shadow learned to bite."
+  }
+ ]
+}

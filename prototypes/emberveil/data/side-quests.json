@@ -1,0 +1,104 @@
+{
+ "_doc": "Side quests (bounties) from the original quests.js: target = node id or encounter id in a zone; done when that node is cleared / encounter beaten. Reward gold (+fame). Offered on the town's board (Quests tab) once the act is reached.",
+ "quests": [
+  {
+   "id": "sq_thornwood_spider",
+   "title": "The Brood Mother",
+   "act": 1,
+   "zone": "thornwood",
+   "targetNode": "thornwood_boss",
+   "text": "Something in Thornwood lays eggs in the caravans. Burn out the nest.",
+   "gold": 120
+  },
+  {
+   "id": "sq_dust_obsidian",
+   "title": "Obsidian Garrison",
+   "act": 2,
+   "zone": "dust_roads",
+   "targetNode": "obsidian_fort",
+   "text": "The Ashen Veil holds the old fort on the Dust Roads. Take it back.",
+   "gold": 200
+  },
+  {
+   "id": "sq_dust_priest",
+   "title": "The High Priest",
+   "act": 2,
+   "zone": "ember_plateau",
+   "targetNode": "plateau_boss",
+   "text": "Kill the Veil High Priest before the ritual completes.",
+   "gold": 280
+  },
+  {
+   "id": "sq_ember_keep",
+   "title": "Inferno Keep",
+   "act": 3,
+   "zone": "hell_breach",
+   "targetNode": "inferno_keep",
+   "text": "Clear the keep at the mouth of the breach.",
+   "gold": 360
+  },
+  {
+   "id": "sq_hell_reliquary",
+   "title": "The Demon Reliquary",
+   "act": 3,
+   "zone": "hell_breach",
+   "targetNode": "demon_reliquary",
+   "text": "Recover what the demons keep in their reliquary.",
+   "gold": 420
+  },
+  {
+   "id": "sq_core_crypt",
+   "title": "Memory Crypt",
+   "act": 4,
+   "zone": "shattered_core",
+   "targetNode": "memory_crypt",
+   "text": "The crypt remembers everyone who died here. Silence it.",
+   "gold": 500
+  },
+  {
+   "id": "sq_core_fortress",
+   "title": "Shard Fortress",
+   "act": 4,
+   "zone": "cosmic_rift",
+   "targetNode": "shard_fortress",
+   "text": "Break the fortress the void built out of pieces of the sky.",
+   "gold": 600
+  },
+  {
+   "id": "sq_rift_patrol",
+   "title": "The Nexus Ambush",
+   "act": 5,
+   "zone": "shattered_core",
+   "targetNode": "void_nexus",
+   "text": "Spring the trap at the nexus before it springs on someone else.",
+   "gold": 700
+  },
+  {
+   "id": "sq_rift_camp",
+   "title": "Abyssal Garrison",
+   "act": 5,
+   "zone": "abyssal_depths",
+   "targetNode": "leviathan_nest",
+   "text": "The abyss keeps soldiers. Fewer, please.",
+   "gold": 820
+  },
+  {
+   "id": "sq_act6_dragons",
+   "title": "Dragon Patrol",
+   "act": 6,
+   "zone": "dragons_reach",
+   "targetNode": "dragon_skyroad",
+   "text": "Thin the patrols on the Dragon's Reach.",
+   "gold": 950
+  },
+  {
+   "id": "sq_named_hunt",
+   "title": "Heads on Pikes",
+   "act": 1,
+   "zone": "any",
+   "targetNamed": 3,
+   "text": "Bring down three named foes. The board pays per head.",
+   "gold": 300
+  }
+ ]
+}

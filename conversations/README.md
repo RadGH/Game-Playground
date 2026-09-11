@@ -20,11 +20,11 @@ party actually has the facts it talks about.
 - `conv.talk(speakers, facts, { tags, rng })` picks an eligible topic (weighted; topics with more requirements are preferred because they are more specific; the last 8 topics are avoided) and performs it. `conv.eligible()` lists what could run.
 
 ## Content
-26 topics with 2–4 variants per line (recaps of a fight, the worst moment, weapon kill-count brag, top-damage ribbing, going down, new gear better/worse than the replaced piece, items left in the bag, loot found, level ups, the road, low rations, exhaustion, the wagon, last night's attack, opinions warm/cold, Silas doubts, what the Veil is, the boss ahead, the companion, the sky, grief, a jolly song, scholar lore, the healer's tally). Emberveil 2 uses them at every rest; Party Quest could use them at camp by supplying the same facts.
+63 topics with 2–4 variants per line (recaps of a fight, the worst moment, weapon kill-count brag, top-damage ribbing, going down, new gear better/worse than the replaced piece, items left in the bag, loot found, level ups, the road, low rations, exhaustion, the wagon, last night's attack, opinions warm/cold, Silas doubts, what the Veil is, the boss ahead, the companion, the sky, grief, a jolly song, scholar lore, the healer's tally). Round 10 added callbacks (the engine's host records a `conversation` memory of what was said; `callback_*` topics require one and quote it), nemesis/named-enemy topics, companion topics (kills, hurt, new), quest topics, story-cast topics (Kaela, Marek, Yssira, Emberglen), supplies/weather/gold/torches, gear (armour, legendary items), healer thanks, kill streaks, watch order, dreams, romance, tales and bets. Emberveil 2 and Party Quest both use the engine at camp.
 
 ## Demo
 `index.html`: toggle facts and watch the eligible topic list change, then generate conversations.
 
 ## Limits / next
 - Lines are English templates; a topic is 3–5 turns. Longer arcs (a topic that continues the next night) need a "thread" field — not built.
-- No memory of what was said: the engine avoids repeating a topic, but a game should also record a `conversation` memory if it wants callbacks ("you said that last night").
+- Callbacks need the host to call `rememberConversation()` (Emberveil 2 does) so a `conversation` memory exists; Party Quest does not record them yet.

@@ -27,6 +27,12 @@ Serialises with `JSON.stringify(meter)` / `Meter.fromJSON()` (last 2000 records 
 ## Demo
 `index.html`: simulate fights, drill down, see weapon stats. Emberveil 2 (`prototypes/emberveil/`) uses the same component in its Meter tab.
 
+## v2 detail (2026-09-11)
+- Record kinds: `damage` (with `blocked`, `mitigated` by armour, `absorbed` by barriers, `overkill`), `heal` (with `overheal`), `absorb` (a barrier soaked a hit), `miss` (dodged/missed, tags say which), `status` (a status applied: `status`, `duration`), `death`.
+- Modes: Damage done · Healing · Damage taken (dodged / blocked / absorbed / mitigated split per fighter and per attacker source) · Absorbs · Statuses (who applied what) · Deaths.
+- Per-target breakdown under each fighter ("On: Goblin 1 84 (2 kills) · …"), a 20-bucket damage-over-time sparkline per bar, and the summary line (misses, blocked, absorbed, overheal, statuses, deaths) in the header.
+- Emberveil 2 feeds all of it from `js/combat.js` (`applyDamage` records blocked/absorbed/mitigated; misses, statuses and downs are recorded by the UI hook).
+
 ## Ideas / limits
-- No timeline chart yet (DPS over time); records carry `t`, so a sparkline is a small addition.
-- "Damage taken" groups by attacker + source; there is no per-target breakdown on the done side (easy: group `hitsList` by target).
+- No per-round table yet; the sparkline is the only time view.
+- "Damage taken" attributes DoT ticks to the status source, so a dead caster's burn still credits them.

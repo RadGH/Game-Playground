@@ -68,7 +68,9 @@
       "recall_reply",
       "observe_person",
       "reveal",
-      "recall_deed"
+      "recall_deed",
+      "recall_nemesis",
+      "recall_conversation"
     ],
     "intentDoc": {
       "greet": "opening line to listener",
@@ -137,7 +139,9 @@
       "recall_reply": "listener answers a memory",
       "observe_person": "say what the speaker thinks of the listener (relationship factors)",
       "reveal": "mention something the speaker has learned about the listener (knowledge)",
-      "recall_deed": "an NPC acknowledges a deed of the hero (memory type deed)"
+      "recall_deed": "an NPC acknowledges a deed of the hero (memory type deed)",
+      "recall_nemesis": "a named enemy that beat, escaped or fell to the party (memory type nemesis)",
+      "recall_conversation": "callback to something the listener said at a previous camp (memory type conversation)"
     },
     "memoryIntents": [
       "recall_combat",
@@ -157,7 +161,9 @@
       "recall_lore",
       "recall_lineage",
       "recall_generic",
-      "recall_deed"
+      "recall_deed",
+      "recall_nemesis",
+      "recall_conversation"
     ],
     "sceneIntents": [
       "observe",
@@ -5317,6 +5323,57 @@
         "tags": [
           "joyful",
           "friendly"
+        ]
+      }
+    ],
+    "recall_nemesis": [
+      {
+        "t": "{memory.name} is still out there. {~I dream about it.|Don't tell me I'm wrong.|That one's mine.}",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "{memory.when.cap}, {memory.name} put us in the dirt at {place.the}. I have not forgotten the face.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "{memory.outcome, select, slain{We finally killed {memory.name}. I'd do it again slower.} escaped{{memory.name} ran. They always run. They always come back.} other{{memory.name}. Say the name and watch my hand shake.}}"
+      },
+      {
+        "t": "If I see {memory.name} again I go first. {~Don't argue.|That's the deal.}",
+        "tags": [
+          "brave",
+          "bloodlust"
+        ]
+      },
+      {
+        "t": "{memory.name}. Twice now. {~Third time somebody dies.|Third time I stay home.}",
+        "tags": [
+          "cynical",
+          "coward"
+        ]
+      }
+    ],
+    "recall_conversation": [
+      {
+        "t": "You said something {memory.when} — \"{memory.said}\" — I've been thinking about it.",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "{memory.when.cap} you told me \"{memory.said}\". {~Still true?|You meant it?}",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "We talked about this {memory.when}. You said \"{memory.said}\". {~Well?|And?}",
+        "tags": [
+          "sarcastic"
         ]
       }
     ]

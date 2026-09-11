@@ -1,13 +1,13 @@
 // Town: random NPCs with roles, dispositions toward the party (relationship graph), deeds they have heard of,
 // quests on offer, a shop stocked from the Item Vault, and selling treasures.
-import { makeCharacter } from '../../../library/js/make.js';
+import { makeCharacter, makeNpc } from '../../../library/js/make.js';
 import { makeRng } from './rng.js';
 
 export function generateTown(game, deps, locId) {
   const rng = makeRng(deps.seedBase + locId.length * 131); const roles = [...game.data.world.npcRoles].sort(() => rng() - 0.5);
   const questGivers = game.data.world.quests.map(q => q.giverTitle); const chosen = [...new Set([...questGivers.filter(() => rng() < 0.8), ...roles])].slice(0, 6);
   const races = locId === 'greyharbor_gate' ? ['human', 'human', 'halfling', 'dwarf', 'elf', 'gnome'] : ['human', 'human', 'human', 'halfling', 'dwarf'];
-  const npcs = chosen.map((role, i) => { const ch = makeCharacter({ race: races[i % races.length], seed: rng.int(1, 1e9), kind: 'npc', title: role }, deps); ch.role = role; ch.side = 'npc'; ch.hp = 1; ch.location = locId; ch.disposition = +(rng.range(-0.3, 0.5)).toFixed(2); return ch; });
+  const npcs = chosen.map((role, i) => { const ch = makeNpc({ race: races[i % races.length], seed: rng.int(1, 1e9), title: role, role: ['merchant', 'innkeeper'].includes(role) ? 'merchant' : role === 'child' ? 'child' : ['reeve', 'priest', 'healer'].includes(role) ? 'elder' : 'villager' }, deps); ch.role = role; ch.side = 'npc'; ch.hp = 1; ch.location = locId; ch.disposition = +(rng.range(-0.3, 0.5)).toFixed(2); return ch; });
   // initial feelings toward the party leader from disposition; reputation shifts them
   const leader = game.party[0]; for (const n of npcs) { const rel = game.relations.get(n.id, leader.id); rel.set('warmth', n.disposition); rel.set('familiarity', 0.05); }
   game.npcs[locId] = npcs; return npcs;

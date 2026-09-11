@@ -67,7 +67,7 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 
 ## Conversations and meters
 
-`conversations/js/conversations.js` turns memories, gear (with kill counts from `meters/js/meter.js`), loot deltas and party facts into structured back-and-forth talk: build `factsFrom({...})` from your game state and call `talk(speakers, facts)`. `meters/` records every hit from any combat system and renders a Skada-style drill-down. Our voice: import `voice-lab/js/formant-voice.js` (versioned; see its CHANGELOG).
+`conversations/js/conversations.js` turns memories, gear (with kill counts from `meters/js/meter.js`), loot deltas and party facts into structured back-and-forth talk: build `factsFrom({...})` from your game state and call `talk(speakers, facts)`. `meters/` records every hit from any combat system and renders a Skada-style drill-down. Our voice: import `voice-lab/js/formant-voice.js` (versioned; see its CHANGELOG); give characters a voice with `shared/voices.js` `voiceFor({ role, gender, seed })` so a class sounds like itself and each member differs. Random NPCs: `library/js/make.js` `makeNpc()` (generic parts, a decal, a role voice, a Name Forge name).
 
 ## Animals and monsters
 

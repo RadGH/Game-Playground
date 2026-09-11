@@ -1,7 +1,7 @@
 import { test } from 'node:test'; import assert from 'node:assert/strict'; import fs from 'node:fs';
 import { Game } from '../js/game.js'; import { Combat } from '../js/combat.js'; import { makeRng } from '../js/rng.js';
 const J = f => JSON.parse(fs.readFileSync(new URL('../data/' + f, import.meta.url)));
-const data = { items: J('items.json'), classes: J('classes.json'), skills: J('skills.json'), builds: J('build-presets.json'), enemies: J('enemies.json'), bosses: J('bosses.json'), encounters: J('encounters.json'), spells: J('enemy-spells.json'), zones: J('zones.json'), zoneTables: J('zone-tables.json'), dialogs: J('dialog-events.json'), randomEvents: J('random-events.json'), dungeons: J('dungeons.json'), companions: J('companions.json'), statuses: J('status-effects.json') };
+const data = { items: J('items.json'), classes: J('classes.json'), skills: J('skills.json'), builds: J('build-presets.json'), enemies: J('enemies.json'), bosses: J('bosses.json'), encounters: J('encounters.json'), spells: J('enemy-spells.json'), zones: J('zones.json'), zoneTables: J('zone-tables.json'), dialogs: J('dialog-events.json'), randomEvents: J('random-events.json'), dungeons: J('dungeons.json'), companions: J('companions.json'), statuses: J('status-effects.json'), named: J('named-enemies.json'), sideQuests: J('side-quests.json') };
 function newGame() { const g = new Game(data); g.rng = makeRng(3); for (const [c, n] of [['warrior', 'A'], ['ranger', 'B'], ['mage', 'C'], ['cleric', 'D']]) g.addHero(g.makeHero(c, n)); g.startQuests(); return g; }
 test('map: start at prologue, reachable exits, travel, every node type resolves without throwing', () => {
   const g = newGame(); assert.equal(g.zoneId, 'prologue'); const r = g.reachable(); assert.ok(r.length >= 1); const n = g.travel(r[0]); assert.ok(n); assert.ok(!g.canTravel('nope'));
@@ -35,4 +35,14 @@ test('travel days: three moves then rest; rations, exhaustion, vehicles and nigh
   g.gold = 1000; assert.ok(g.buySupply('ration', 5)); assert.ok(g.buyVehicle('wagon')); assert.equal(g.legsPerDay(), 4); assert.ok(g.nightAttack().chance < g.nightAttack().base); g.rest(); assert.equal(g.exhaustion, 2);
   const enc = g.nightEncounter(); assert.ok(enc && enc.night && enc.enemies.length >= 1);
   const banks = Object.keys(g.banks); assert.ok(banks.length >= 4, 'meal memories recorded'); const json = JSON.parse(JSON.stringify(g)); assert.ok(json.banks && json.meter && json.relations);
+});
+
+test('named enemies: static super-unique on a challenge node, random named leaders, nemesis on defeat, bounty quest', () => {
+  const g = newGame(); g.zoneId = 'border_roads'; g.unlockedZones.push('border_roads'); g.act = 1;
+  const enc = g.namedEncounter({ staticDef: g.staticNamed('border_roads')[0] }); assert.ok(enc.named); assert.equal(enc.named.short, 'Rakinishu'); assert.ok(enc.named.maxHp > 0); assert.ok(enc.enemies.length >= 2);
+  const rnd = g.namedEncounter({ templateId: 'bandit' }); assert.ok(rnd.named.name.length > 3); assert.ok(rnd.named.mods.length >= 1);
+  g.resolveNamed(rnd, false); assert.equal(g.nemeses.length, 1); const back = g.nemesisEncounter(); assert.ok(back && back.nemesis); assert.ok(back.named.name.includes(g.nemeses[0].name));
+  g.acceptSideQuest('sq_named_hunt'); g.resolveNamed(back, true); assert.equal(g.nemeses.length, 0); g.namedSlain.push('x', 'y'); const done = g.checkSideQuests(); assert.ok(done.some(q => q.id === 'sq_named_hunt'));
+  assert.ok(Object.values(g.banks).some(b => b.memories.some(m => m.type === 'nemesis')));
+  g.rememberConversation(g.party[0].id, g.party[1].id, 'new_gear_worse', "I'll swap it."); assert.ok(g.banks[g.party[0].id].memories.some(m => m.type === 'conversation'));
 });

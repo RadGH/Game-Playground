@@ -17,10 +17,10 @@ const OUTFIT_SLOTS = ['top', 'bottom', 'shoes', 'accessory', 'hat'];
  * randomAvatar({ palettes, raceRules }, { race, seed, base, only: 'face'|'outfit'|'body'|null })
  * race: key of raceRules (unknown → generic). base: start from this avatar and only re-roll `only`.
  */
-export function randomAvatar(data, { race = null, seed, base = null, only = null } = {}) {
+export function randomAvatar(data, { race = null, seed, base = null, only = null, allowBespoke = false } = {}) {
   const rng = makeRng(seed); const rules = (race && data.raceRules?.[race]) || {}; const pal = data.palettes;
   const a = normalizeAvatar(base || DEFAULT_AVATAR);
-  const allowed = slot => rules[slot]?.filter(id => PARTS[slot][id]) || partIds(slot);
+  const allowed = slot => (rules[slot]?.filter(id => PARTS[slot][id]) || partIds(slot)).filter(id => allowBespoke || !PARTS[slot][id]?.bespoke);
   const pickPart = slot => rng.pick(allowed(slot));
   const doFace = !only || only === 'face', doOutfit = !only || only === 'outfit', doBody = !only || only === 'body';
   if (doBody) {

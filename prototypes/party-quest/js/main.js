@@ -2,7 +2,7 @@
 // Everything below glues the experiments together; the rules live in data/*.json and the logic modules beside this file.
 import { Lingo, Entity } from '../../../lingo/js/lingo.js';
 import { Library } from '../../../library/js/library.js';
-import { loadDeps, makeCharacter } from '../../../library/js/make.js';
+import { loadDeps, makeCharacter, makeNpc } from '../../../library/js/make.js';
 import { ItemCatalog } from '../../../items/js/items.js';
 import { renderSVG } from '../../../avatar-2d/js/render.js';
 import { randomAvatar } from '../../../avatar-2d/js/random.js';
@@ -15,10 +15,13 @@ import { Combat, EV, itemStats } from './combat.js';
 import { generateTown, spreadDeeds, questsAvailable, acceptQuest, shopStock } from './town.js';
 import { planLeg, Minigame } from './travel.js';
 import { makeRng } from './rng.js';
+import { Conversations, factsFrom } from '../../../conversations/js/conversations.js';
+import { voiceFor } from '../../../shared/voices.js';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); } for (const k of kids) if (k != null) e.append(k); return e; };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+function hashSeed(str) { let h = 7; for (const c of String(str)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
 const AVATAR_RACE = { human: 'human', elf: 'elf', dwarf: 'dwarf', halfling: 'human', gnome: 'human', giant: 'human', troll: 'orc', orc: 'orc', goblin: 'goblin', dragon: 'beast', undead: 'undead', fey: 'elf', beast: 'beast' };
 const BEAST_BODY = { wolf: { type: 'wolf' }, dire_wolf: { type: 'dire_wolf' }, giant_spider: { type: 'spider', size: 1.3 }, bat: { type: 'bat' }, boar: { type: 'boar' }, bear: { type: 'bear' }, rat: { type: 'rat' }, mire_drake: { type: 'drake' }, dragon: { type: 'dragon' }, snake: { type: 'snake' } };
 const BEAST_NOISES = { wolf: ['snarls', 'growls low', 'bares its teeth', 'howls'], dire_wolf: ['snarls', 'growls, deep in its chest', 'howls'], giant_spider: ['clicks its fangs', 'hisses', 'rears up'], default: ['snarls', 'hisses', 'growls'] };
@@ -27,10 +30,10 @@ const ENEMY_VOICE = { goblin: 'ours_child', orc: 'ours_giant', troll: 'ours_gian
 // ------------------------------------------------------------------ load everything
 const base = '../../';
 const j = async p => (await fetch(base + p)).json();
-const [rules, world, lexData, grammarData, traitsData, eventsData, relationsData] = await Promise.all([j('prototypes/party-quest/data/rules.json'), j('prototypes/party-quest/data/world.json'), j('lingo/data/lexicon.json'), j('lingo/data/grammar.json'), j('lingo/data/traits.json'), j('lingo/data/events.json'), j('lingo/data/relations.json')]);
+const [rules, world, lexData, grammarData, traitsData, eventsData, relationsData, topicsData] = await Promise.all([j('prototypes/party-quest/data/rules.json'), j('prototypes/party-quest/data/world.json'), j('lingo/data/lexicon.json'), j('lingo/data/grammar.json'), j('lingo/data/traits.json'), j('lingo/data/events.json'), j('lingo/data/relations.json'), j('conversations/data/topics.json')]);
 const [items, deps, library] = await Promise.all([ItemCatalog.load(base + 'items/data/'), loadDeps(base), Library.open(base + 'library/')]);
 deps.seedBase = 1000 + Math.floor(Math.random() * 1e6);
-const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData });
+const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData }); const conversations = new Conversations({ lingo, topics: topicsData });
 // places, enemies and class spells get lexicon entries so memories and lines can name them
 for (const [id, L] of Object.entries(world.locations)) { L.place = id; if (!lingo.lexicon.has(id)) lingo.lexicon.add({ id, type: 'place', proper: true, forms: { sg: L.name }, tags: L.tags }); }
 for (const [id, e] of Object.entries(rules.enemies)) if (!lingo.lexicon.has(id)) lingo.lexicon.add({ id, type: 'creature', forms: { sg: e.name, pl: e.name.replace(/y$/, 'ie').replace(/f$/, 've') + 's' }, tags: e.tags, race: e.race });
@@ -69,7 +72,7 @@ $('btn-random-party').onclick = () => { chosen = []; const rng = makeRng(); cons
 $('btn-custom').onclick = () => $('custom-dialog').showModal();
 $('custom-cancel').onclick = () => $('custom-dialog').close();
 $('custom-form').onsubmit = (e) => { const f = e.target; const traits = [...f.traits.selectedOptions].map(o => o.value); const bp = makeCharacter({ name: f.name.value.trim() || undefined, race: f.race.value, gender: f.gender.value || undefined, traits: traits.length ? traits : undefined }, deps); bp.class = f.class.value; pool.unshift(bp); addChosen(bp); f.reset(); };
-$('btn-start').onclick = () => { game.party = chosen.map(bp => game.makeMember(bp, bp.class || 'warrior')); const ids = game.partyIds(); for (const m of game.party) for (const o of game.party) if (m !== o) { const r = game.relations.get(m.id, o.id); r.set('familiarity', 0.3); r.set('warmth', 0.15); } game.remember({ type: 'join', participants: ids, bindings: { newcomer: { id: ids[1] }, place: { id: game.location } }, details: { impression: 'seemed all right' } }); startWorld(false); };
+$('btn-start').onclick = () => { game.party = chosen.map(bp => { const m = game.makeMember(bp, bp.class || 'warrior'); if (!bp.voice) m.voice = voiceFor({ role: roleOfClass(m.class), gender: m.gender || 'n', seed: hashSeed(m.id) }); return m; }); const ids = game.partyIds(); for (const m of game.party) for (const o of game.party) if (m !== o) { const r = game.relations.get(m.id, o.id); r.set('familiarity', 0.3); r.set('warmth', 0.15); } game.remember({ type: 'join', participants: ids, bindings: { newcomer: { id: ids[1] }, place: { id: game.location } }, details: { impression: 'seemed all right' } }); startWorld(false); };
 
 // ------------------------------------------------------------------ world
 async function startWorld(resumed) {
@@ -227,7 +230,7 @@ async function travel(dir, to) {
   await next();
 }
 async function wanderer(ev) {
-  const n = makeCharacter({ seed: Math.floor(Math.random() * 1e9), kind: 'npc', title: ev.role, race: Math.random() < 0.7 ? 'human' : 'halfling' }, deps); n.role = ev.role; n.hp = 1; talk.speaker(n); await stage.setSide([n], 'right', -0.5);
+  const n = makeNpc({ seed: Math.floor(Math.random() * 1e9), title: ev.role, role: ev.role === 'pedlar' || ev.role === 'tinker' ? 'merchant' : 'villager', race: Math.random() < 0.7 ? 'human' : 'halfling' }, deps); n.role = ev.role; n.hp = 1; talk.speaker(n); await stage.setSide([n], 'right', -0.5);
   narrate(`<p>A ${ev.role} on the road${ev.mood === 'drunk' ? ', singing' : ev.mood === 'grieving' ? ', in black' : ''}. ${n.name}.</p>`);
   const m = randomAlive(); const rel = game.relations.get(n.id, m.id); rel.set('warmth', ev.mood === 'friendly' ? 0.4 : ev.mood === 'wary' ? -0.2 : 0.1);
   const lines = lingo.converse(talk.speaker(n), talk.speaker(m), { turns: 4, banks: game.banks, now: game.now, scene: talk.scene(game.location), relations: game.relations, topics: ev.mood === 'drunk' ? ['greet', 'greet_reply', 'drunk', 'farewell'] : ev.mood === 'grieving' ? ['greet', 'greet_reply', 'sad', 'farewell'] : null });
@@ -246,6 +249,7 @@ async function minigame(g) {
 }
 
 // ------------------------------------------------------------------ combat
+function roleOfClass(c) { return c || 'villager'; }
 function makeEnemy(templateId, i) {
   const t = rules.enemies[templateId]; const seed = Math.floor(Math.random() * 1e9);
   if (t.race === 'beast') { const b = BEAST_BODY[templateId] || { type: 'wolf' }; const creature = { ...randomCreature(b.type, seed), size: (b.size || 1) * (0.9 + Math.random() * 0.2) }; return { id: `e_${templateId}_${i}_${seed.toString(36).slice(0, 4)}`, templateId, name: t.name, short: t.name, side: 'enemy', hp: t.hp, maxHp: t.hp, damage: t.damage, armour: t.armour, role: t.role || 'melee', spell: null, tags: t.tags, regen: t.regen, xp: t.xp, gold: t.gold, race: t.race, beast: true, creature }; }
@@ -314,15 +318,10 @@ async function camp() {
   narrate(`<h4>Camp, night of day ${game.day}</h4><p class="sys">The fire takes. Someone finds the bad cheese.</p>`);
   game.remember({ type: 'meal', participants: game.partyIds(), bindings: { food: { id: lingo.lexicon.byType('food')[Math.floor(Math.random() * 4)]?.id }, place: { id: L.place } }, details: { quality: ['good', 'terrible', 'cold', 'burnt'][Math.floor(Math.random() * 4)] } });
   const alive = game.alive(); const sceneCamp = talk.scene(L.place); sceneCamp.def.timeOfDay = 'night'; sceneCamp.def.comfort = 0.6; sceneCamp.def.tags = [...new Set([...sceneCamp.def.tags, 'quiet'])];
-  // two or three conversations around the fire, about the day: memories first, then feelings
-  const pairs = []; const shuffled = makeRng().shuffle(alive); for (let i = 0; i + 1 < shuffled.length; i += 2) pairs.push([shuffled[i], shuffled[i + 1]]); if (alive.length >= 3 && Math.random() < 0.7) pairs.push([shuffled[0], shuffled[shuffled.length - 1]]);
-  for (const [a, b] of pairs) {
-    const topics = ['recall', 'recall_reply', Math.random() < 0.5 ? 'observe_person' : 'smalltalk', Math.random() < 0.4 ? 'reveal' : 'agree']; if (Math.random() < 0.3) topics.push('question', 'answer');
-    const lines = lingo.converse(talk.speaker(a), talk.speaker(b), { turns: topics.length, banks: game.banks, now: game.now, scene: sceneCamp, relations: game.relations, topics });
-    for (const l of lines) { const who = l.speaker.id === a.id ? a : b; await sayLine(who, l); }
-    game.relations.applyMutual(a.id, b.id, 'shared_meal', { now: game.now, traitsA: a.speech?.traits || [], traitsB: b.speech?.traits || [] });
-    const ra = game.relations.get(a.id, b.id), rb = game.relations.get(b.id, a.id); for (const [r, other] of [[ra, b], [rb, a]]) { const unknown = (other.speech?.traits || []).filter(t => !r.knows(t)); if (unknown.length && Math.random() < 0.6) r.learn(unknown[0]); }
-  }
+  // structured conversations (conversations/ experiment) from real memories, gear and feelings; then one free memory exchange
+  const speakers = alive.map(h => talk.speaker(h)); const facts = factsFrom({ now: game.now, day: game.day, banks: game.banks, heroes: alive.map(h => ({ ...h, equipment: { weapon: h.weapon, armour: h.armour, implement: h.implement } })), meter: null, lootLog: [], relations: game.relations, party: { rations: 9, act: 1, exhaustion: 0 } });
+  for (let i = 0; i < 2; i++) { const lines = conversations.talk(speakers, facts, { tags: ['camp'], scene: sceneCamp }); for (const l of lines) { const who = alive.find(h => h.id === l.speaker.id); if (who) await sayLine(who, l); } if (lines.length >= 2) game.relations.applyMutual(lines[0].speaker.id, lines[1].speaker.id, 'shared_meal', { now: game.now }); }
+  if (alive.length >= 2 && Math.random() < 0.7) { const [a, b] = makeRng().shuffle(alive); const lines = lingo.converse(talk.speaker(a), talk.speaker(b), { turns: 2, banks: game.banks, now: game.now, scene: sceneCamp, relations: game.relations, topics: ['recall', 'recall_reply'] }); for (const l of lines) { const who = l.speaker.id === a.id ? a : b; await sayLine(who, l); } const ra = game.relations.get(a.id, b.id), rb = game.relations.get(b.id, a.id); for (const [r, other] of [[ra, b], [rb, a]]) { const unknown = (other.speech?.traits || []).filter(t => !r.knows(t)); if (unknown.length && Math.random() < 0.6) r.learn(unknown[0]); } }
   await waitForChoice([{ text: 'Sleep till dawn', cls: 'primary', run: async () => {} }]);
   for (const m of game.party) m.hp = Math.min(m.maxHp, m.hp + Math.ceil(m.maxHp / 2)); game.newDay(); renderHud(); renderSide(); game.save();
   narrate(`<h4>Day ${game.day}</h4><p class="sys">Cold ash, stiff backs, and a road.</p>`); stage.clearCamp();

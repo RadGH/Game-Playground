@@ -6,6 +6,7 @@ import { loadDeps, makeCharacter } from '../../../library/js/make.js';
 import { ItemCatalog } from '../../../items/js/items.js';
 import { renderSVG } from '../../../avatar-2d/js/render.js';
 import { randomAvatar } from '../../../avatar-2d/js/random.js';
+import { randomCreature } from '../../../avatar-3d/js/creatures.js';
 import * as voice from '../../../voice-lab/js/voice.js';
 import { Game } from './state.js';
 import { Talk } from './talk.js';
@@ -19,6 +20,8 @@ const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); } for (const k of kids) if (k != null) e.append(k); return e; };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const AVATAR_RACE = { human: 'human', elf: 'elf', dwarf: 'dwarf', halfling: 'human', gnome: 'human', giant: 'human', troll: 'orc', orc: 'orc', goblin: 'goblin', dragon: 'beast', undead: 'undead', fey: 'elf', beast: 'beast' };
+const BEAST_BODY = { wolf: { type: 'wolf' }, dire_wolf: { type: 'dire_wolf' }, giant_spider: { type: 'spider', size: 1.3 }, bat: { type: 'bat' }, boar: { type: 'boar' }, bear: { type: 'bear' }, rat: { type: 'rat' }, mire_drake: { type: 'drake' }, dragon: { type: 'dragon' }, snake: { type: 'snake' } };
+const BEAST_NOISES = { wolf: ['snarls', 'growls low', 'bares its teeth', 'howls'], dire_wolf: ['snarls', 'growls, deep in its chest', 'howls'], giant_spider: ['clicks its fangs', 'hisses', 'rears up'], default: ['snarls', 'hisses', 'growls'] };
 const ENEMY_VOICE = { goblin: 'ours_child', orc: 'ours_giant', troll: 'ours_giant', undead: 'ours_whisper', beast: null, human: 'ours_male' };
 
 // ------------------------------------------------------------------ load everything
@@ -70,7 +73,7 @@ $('btn-start').onclick = () => { game.party = chosen.map(bp => game.makeMember(b
 
 // ------------------------------------------------------------------ world
 async function startWorld(resumed) {
-  showScreen('world'); if (!stage) stage = new Stage($('stage')); talk = new Talk({ lingo, game, voice }); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value;
+  showScreen('world'); if (!stage) stage = new Stage($('stage')); talk = new Talk({ lingo, game, voice }); for (const m of game.party) talk.speaker(m); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value;
   $('narrative').replaceChildren(); renderHud(); renderSide();
   if (!resumed) narrate(`<h4>Day 1</h4><p>The four of you meet at the well in ${world.locations[game.location].name}. Nobody has any money. Somebody has a map.</p>`);
   else narrate(`<p class="sys">Game loaded. Day ${game.day}, ${game.slotName}, ${world.locations[game.location].name}.</p>`);
@@ -243,7 +246,10 @@ async function minigame(g) {
 }
 
 // ------------------------------------------------------------------ combat
-function makeEnemy(templateId, i) { const t = rules.enemies[templateId]; const avatar = randomAvatar(presets, { race: AVATAR_RACE[t.race] || 'human', seed: Math.floor(Math.random() * 1e9) }); const vp = ENEMY_VOICE[t.race] ? deps.voicePresets.presets.find(p => p.id === ENEMY_VOICE[t.race])?.voice : { engine: 'babble', pitch: 0.3 }; return { id: `e_${templateId}_${i}_${Math.random().toString(36).slice(2, 5)}`, templateId, name: t.name, short: t.name, side: 'enemy', hp: t.hp, maxHp: t.hp, damage: t.damage, armour: t.armour, role: t.role || 'melee', spell: t.spell || null, tags: t.tags, regen: t.regen, xp: t.xp, gold: t.gold, race: t.race, avatar, voice: { ...(vp || { engine: 'babble' }), pitch: (vp?.pitch ?? 0.5) + (Math.random() - 0.5) * 0.2 }, speech: { traits: ['gruff'], aggression: 0.9, formality: 0.1 } }; }
+function makeEnemy(templateId, i) {
+  const t = rules.enemies[templateId]; const seed = Math.floor(Math.random() * 1e9);
+  if (t.race === 'beast') { const b = BEAST_BODY[templateId] || { type: 'wolf' }; const creature = { ...randomCreature(b.type, seed), size: (b.size || 1) * (0.9 + Math.random() * 0.2) }; return { id: `e_${templateId}_${i}_${seed.toString(36).slice(0, 4)}`, templateId, name: t.name, short: t.name, side: 'enemy', hp: t.hp, maxHp: t.hp, damage: t.damage, armour: t.armour, role: t.role || 'melee', spell: null, tags: t.tags, regen: t.regen, xp: t.xp, gold: t.gold, race: t.race, beast: true, creature }; }
+  const avatar = randomAvatar(presets, { race: AVATAR_RACE[t.race] || 'human', seed }); const vp = ENEMY_VOICE[t.race] ? deps.voicePresets.presets.find(p => p.id === ENEMY_VOICE[t.race])?.voice : { engine: 'babble', pitch: 0.3 }; return { id: `e_${templateId}_${i}_${Math.random().toString(36).slice(2, 5)}`, templateId, name: t.name, short: t.name, side: 'enemy', hp: t.hp, maxHp: t.hp, damage: t.damage, armour: t.armour, role: t.role || 'melee', spell: t.spell || null, tags: t.tags, regen: t.regen, xp: t.xp, gold: t.gold, race: t.race, avatar, voice: { ...(vp || { engine: 'babble' }), pitch: (vp?.pitch ?? 0.5) + (Math.random() - 0.5) * 0.2 }, speech: { traits: ['gruff'], aggression: 0.9, formality: 0.1 } }; }
 async function fight(enemyIds, { place, boss = false } = {}) {
   mode = 'combat'; const enemies = enemyIds.map(makeEnemy); await stage.setSide(enemies, 'right'); for (const m of game.alive()) stage.anim(m.id, 'idle');
   const partyForCombat = game.party.map(m => ({ id: m.id, name: m.name, short: m.short, side: 'party', hp: m.hp, maxHp: m.maxHp, damage: m.damage, armour: m.armourValue, role: m.role, spell: m.spell, tags: m.speech?.traits || [] }));
@@ -251,7 +257,7 @@ async function fight(enemyIds, { place, boss = false } = {}) {
   narrate(`<p class="bad"><b>Fight:</b> ${enemies.map(e => e.name).join(', ')}.</p>`);
   const sync = () => { for (const p of partyForCombat) { const m = memberOf(p); m.hp = p.hp; } renderPartyTab(); };
   const react = async (ev) => { const r = talk.combatReaction(ev, partyForCombat, enemies); if (!r) return; const who = memberOf(r.who); const line = r.text ? { text: r.text } : speak(who, r.intent, { bindings: r.bindings }); await sayLine(who, line, { wait: true }); };
-  const taunt = async () => { const e = enemies.find(x => x.hp > 0); if (e && Math.random() < 0.6) { const tgt = randomAlive(); await sayLine(e, speak(e, 'combat_taunt', { to: tgt, bindings: { foe: talk.speaker(tgt).entity } }), { cls: 'enemy' }); } };
+  const taunt = async () => { const e = enemies.find(x => x.hp > 0); if (!e || Math.random() >= 0.6) return; if (e.beast) { await beastNoise(e); return; } const tgt = randomAlive(); await sayLine(e, speak(e, 'combat_taunt', { to: tgt, bindings: { foe: talk.speaker(tgt).entity } }), { cls: 'enemy' }); };
   await taunt();
   while (!combat.over) {
     const events = combat.round(); narrate(`<p class="sys">— round ${combat.round_} —</p>`);
@@ -284,6 +290,8 @@ async function afterWin(enemies, partyForCombat, place, boss) {
   async function react(ev) { const r = talk.combatReaction(ev, partyForCombat, enemies); if (r) { const who = game.party.find(m => m.id === r.who.id); await sayLine(who, speak(who, r.intent)); } }
   await sleep(400); for (const e of enemies) await stage.remove(e.id);
 }
+/** Beasts don't talk: a short animal action in the log and a jaw/attack animation, no bubble, no voice. */
+async function beastNoise(e) { const list = BEAST_NOISES[e.templateId] || BEAST_NOISES.default; const what = list[Math.floor(Math.random() * list.length)]; narrate(`<p class="sys"><i>The ${e.name} ${what}.</i></p>`); stage.talk(e.id, true); await sleep(700); stage.talk(e.id, false); }
 function lexId(item) { const e = items.toLexiconEntry(item); if (!lingo.lexicon.has(e.id)) { lingo.lexicon.add(e); lingo.invalidatePronunciations(); } return e.id; }
 async function afterLose(enemies, place) {
   narrate('<p class="bad"><b>Everyone is down.</b> You wake at dawn, stripped of coin, dragged to the roadside by someone kinder than your enemies.</p>');

@@ -22,7 +22,7 @@ export class Game {
   /** Turn a library character blueprint + class into a party member (game state only; blueprint untouched). */
   makeMember(blueprint, classId) {
     const cls = this.data.rules.classes[classId]; const bp = JSON.parse(JSON.stringify(blueprint));
-    const m = { id: bp.id || ('m_' + Math.random().toString(36).slice(2, 7)), name: bp.name, short: bp.short || bp.name.split(' ')[0], race: bp.race || 'human', pronouns: bp.pronouns || 'they', gender: bp.gender, class: classId, className: cls.name, role: cls.role, side: 'party', level: 1, xp: 0, hp: cls.hp, maxHp: cls.hp, weapon: null, armour: null, implement: null, spell: cls.spell || null, damage: 1, armourValue: 0, blueprint: bp, avatar: bp.avatar, voice: bp.voice, speech: bp.speech, entry: bp.entry, respell: bp.respell, libraryId: bp.libraryId };
+    const m = { id: bp.id || bp.entry || ('m_' + Math.random().toString(36).slice(2, 7)), name: bp.name, short: bp.short || bp.name.split(' ')[0], race: bp.race || 'human', pronouns: bp.pronouns || 'they', gender: bp.gender, class: classId, className: cls.name, role: cls.role, side: 'party', level: 1, xp: 0, hp: cls.hp, maxHp: cls.hp, weapon: null, armour: null, implement: null, spell: cls.spell || null, damage: 1, armourValue: 0, blueprint: bp, avatar: bp.avatar, voice: bp.voice, speech: bp.speech, entry: bp.entry, respell: bp.respell, libraryId: bp.libraryId };
     for (const [slot, itemId] of Object.entries(cls.kit)) { const item = this.data.items.byId[itemId]; if (item) this.equip(m, { ...item, base: item, name: item.name, fullName: item.name, tags: item.tags, rarity: item.rarity }, slot); }
     return m;
   }

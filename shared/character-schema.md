@@ -9,9 +9,12 @@ One document describes a character for all experiments. **Every section is optio
   "name": "Thalen",
   "avatar": { "...": "see avatar-2d/README.md — same shape for avatar-3d" },
   "voice":  { "...": "see voice-lab/README.md" },
-  "speech": { "...": "see lingo/README.md" }
+  "speech": { "...": "see lingo/README.md" },
+  "creature": { "...": "optional, non-humanoids only — see avatar-3d/README.md (Creatures)" }
 }
 ```
+
+`creature` is for animals and monsters (wolf, boar, bear, rat, horse, deer, bat, spider, snake, drake, dragon): `{ type, size, colors: { body, belly, accent, eyes }, features: { fangs, tusks, horns, antlers, wings, spikes, mane, whiskers, claws, hooves }, seed }`. When a document has `creature`, 3D scenes build it with `createCreature()` (`avatar-3d/js/creatures.js`) instead of the humanoid body, and `avatar` may be absent. Creatures normally have no `speech` (they should not talk) but may have a `voice` for growls.
 
 Rules:
 - `schema` is an integer; bump it when a section's shape changes incompatibly and add a migration note in that experiment's README.

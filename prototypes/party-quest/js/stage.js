@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { createScene } from '../../../avatar-3d/js/scene.js';
 import { createMiiCharacter } from '../../../avatar-3d/js/mii.js';
 import { randomAvatar } from '../../../avatar-2d/js/random.js';
+import { createCreature } from '../../../avatar-3d/js/creatures.js';
 
 const BACKDROPS = {
   village: `<rect width="100%" height="100%" fill="#7fb0d8"/><path d="M0 70 Q25 60 50 68 T100 66 V100 H0Z" fill="#5b8f4a"/><g fill="#b58a5a"><rect x="12" y="52" width="14" height="14"/><rect x="60" y="50" width="18" height="16"/></g><g fill="#6b3b2a"><path d="M10 52 L19 44 L28 52Z"/><path d="M58 50 L69 41 L80 50Z"/></g><circle cx="80" cy="18" r="6" fill="#ffe9a8"/>`,
@@ -33,11 +34,11 @@ export class Stage {
   setBackdrop(id, night = false) { const svg = BACKDROPS[id] || BACKDROPS.road; this.backdrop.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="100%">${svg}${night ? '<rect width="100%" height="100%" fill="#060a18" opacity=".62"/>' : ''}</svg>`; this.ground.material.color.set(night ? 0x141a18 : 0x2a2f2a); }
   async add(ch, { side = 'left', index = 0, count = 1, facing = null } = {}) {
     await this.remove(ch.id);
-    const ctrl = await createMiiCharacter(ch.avatar || randomAvatar(this.presets || { palettes: { skin: ['#c68642'], hair: ['#222'], eye: ['#222'], cloth: ['#555'] }, raceRules: {} }, { seed: 1 }));
+    const ctrl = ch.creature ? await createCreature(ch.creature) : await createMiiCharacter(ch.avatar || randomAvatar(this.presets || { palettes: { skin: ['#c68642'], hair: ['#222'], eye: ['#222'], cloth: ['#555'] }, raceRules: {} }, { seed: 1 }));
     const g = ctrl.group; g.userData.character = false;
     const x = side === 'left' ? -1.2 - index * 0.9 : 1.2 + index * 0.9; g.position.set(x, 0, (index % 2) * 0.35 - 0.2);
     g.rotation.y = facing != null ? facing : (side === 'left' ? 0.9 : -0.9);
-    this.scene.scene.add(g); this.chars.set(ch.id, { ctrl, group: g, side, home: g.position.clone(), rot: g.rotation.y, ch });
+    if (ch.creature) ctrl.isCreature = true; this.scene.scene.add(g); this.chars.set(ch.id, { ctrl, group: g, side, home: g.position.clone(), rot: g.rotation.y, ch });
     if (ch.hp !== undefined && ch.hp <= 0) this.down(ch.id); return ctrl;
   }
   async setSide(list, side, facing) { for (const c of [...this.chars.values()]) if (c.side === side) await this.remove(c.ch.id); for (let i = 0; i < list.length; i++) await this.add(list[i], { side, index: i, count: list.length, facing }); }
@@ -46,7 +47,7 @@ export class Stage {
   anim(id, name) { this.chars.get(id)?.ctrl.setAnim(name); }
   /** Thrust toward the target and back. */
   attack(id, targetId) {
-    return new Promise(res => { const c = this.chars.get(id), t = this.chars.get(targetId); if (!c) return res(); const from = c.home.clone(), to = t ? t.group.position.clone().lerp(from, 0.45) : from.clone().add(new THREE.Vector3(c.side === 'left' ? 1 : -1, 0, 0)); let k = 0; this.anims.push((dt) => { k += dt * 3.2; const p = k < 0.5 ? k * 2 : 2 - k * 2; c.group.position.lerpVectors(from, to, Math.min(1, Math.max(0, p))); if (k >= 1) { c.group.position.copy(from); res(); return true; } return false; }); });
+    return new Promise(res => { const c = this.chars.get(id), t = this.chars.get(targetId); if (!c) return res(); if (c.ctrl.isCreature) { c.ctrl.setAnim('attack'); setTimeout(() => { if (c.ctrl.anim === 'attack') c.ctrl.setAnim('idle'); }, 650); } const from = c.home.clone(), to = t ? t.group.position.clone().lerp(from, 0.45) : from.clone().add(new THREE.Vector3(c.side === 'left' ? 1 : -1, 0, 0)); let k = 0; this.anims.push((dt) => { k += dt * 3.2; const p = k < 0.5 ? k * 2 : 2 - k * 2; c.group.position.lerpVectors(from, to, Math.min(1, Math.max(0, p))); if (k >= 1) { c.group.position.copy(from); res(); return true; } return false; }); });
   }
   hit(id) { const c = this.chars.get(id); if (!c) return; let k = 0; const base = c.group.position.clone(); this.anims.push(dt => { k += dt * 8; c.group.position.x = base.x + Math.sin(k * 12) * 0.06 * (1 - k); if (k >= 1) { c.group.position.copy(base); return true; } return false; }); }
   down(id) { const c = this.chars.get(id); if (!c) return; c.ctrl.setAnim('dead'); }

@@ -39,3 +39,14 @@ test('a fight runs to the end with reactions, then camp talk, then save/load', a
   await page.click('#btn-continue'); await expect(page.locator('#hud-day')).toHaveText('2');
   expect(errors.filter(e => !/AudioContext|WebGL/i.test(e))).toEqual([]);
 });
+test('wolves are creature bodies and never talk back', async ({ page }) => {
+  test.setTimeout(180000);
+  const errors = await boot(page);
+  await page.click('#btn-new'); await page.click('#btn-default-party'); await page.click('#btn-start'); await page.check('#mute');
+  await page.waitForFunction(() => document.querySelectorAll('#actions button').length > 0, null, { timeout: 30000 });
+  await page.evaluate(() => { document.getElementById('narrative').replaceChildren(); });
+  await page.evaluate(async () => { const pq = window.partyQuest; pq.game.location = 'thalen_wood_edge'; await pq.fight(['wolf', 'wolf', 'giant_spider'], { place: 'thalen_wood_edge' }); });
+  expect(await page.locator('#narrative .say.enemy').count()).toBe(0);
+  const log = await page.locator('#narrative').innerText(); expect(log).toMatch(/Victory|Everyone is down/);
+  expect(errors.filter(e => !/AudioContext|WebGL/i.test(e))).toEqual([]);
+});

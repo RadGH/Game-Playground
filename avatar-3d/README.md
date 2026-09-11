@@ -7,6 +7,19 @@ Two renderers for the **same avatar JSON** that Avatar 2D produces:
 
 Open: `http://<LAN-IP>:8400/avatar-3d/`. Presets, random generation and the slot catalog are shared with `../avatar-2d/`.
 
+## Creatures (non-humanoids) — `js/creatures.js`, demo `creatures.html`
+
+Mii-style procedural bodies for things that are not people: **wolf, dire wolf, boar, bear, rat, horse, deer, bat, spider, snake, mire drake, dragon**. Four body plans (quadruped, spider, bat, snake) parameterised per type in `CREATURE_TYPES` (lengths/radii in metres, ear style, default colours, feature flags). Same interface as the humanoid builder:
+
+```js
+import { createCreature, randomCreature, CREATURE_TYPES, CREATURE_ANIMS } from './avatar-3d/js/creatures.js';
+const wolf = await createCreature({ type: 'wolf', size: 1.2, colors: { body: '#444' } });   // { group, update(dt,t), setAnim(name), setSpec(spec), metrics(), dispose() }
+scene.add(wolf.group); wolf.setAnim('walk');            // idle · walk · run · attack (lunge + open jaw) · talk (jaw only, for growls) · dead · fly (bat/dragon)
+const spec = randomCreature('dragon', seed);             // colour variation inside the type's family; a creature JSON you can store under character.creature
+```
+
+Features can be toggled on any plan (`features: { wings: true }` on a wolf works). Bodies face +z like the humanoids, so the same side/facing code places them. Sizes before the multiplier: rat ≈ 0.3 m, wolf ≈ 0.9 m, dragon ≈ 2.5 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`).
+
 ## Quick use from a game
 
 ```html

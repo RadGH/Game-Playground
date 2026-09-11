@@ -44,6 +44,6 @@ or pick another engine from the dropdown.
 
 ## Known limits
 
-- Beasts (wolves, spiders) are drawn as Mii bodies with the "beast" avatar preset; there are no animal models.
+- Beasts (wolves, dire wolves, giant spiders) use the procedural creature bodies from `avatar-3d/js/creatures.js` (`BEAST_BODY` in `main.js`). They never speak: instead of taunts the log shows an action ("The wolf snarls.") and the jaw animates.
 - Combat is fully automatic. There are no player choices inside a fight (by design for this prototype).
 - Losing a fight costs half your gold and a day; nobody dies permanently.

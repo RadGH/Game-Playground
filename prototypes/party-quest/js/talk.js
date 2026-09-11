@@ -9,7 +9,9 @@ export class Talk {
   speaker(ch) {
     if (this.speakers.has(ch.id)) return this.speakers.get(ch.id);
     let entry = ch.entry ? this.lingo.lexicon.get(ch.entry) : null;
-    if (!entry) { entry = lexiconEntryFor({ ...ch, id: ch.id, name: ch.name, short: ch.short, race: ch.race, pronouns: ch.pronouns, respell: ch.respell }); this.lingo.lexicon.add(entry); this.lingo.invalidatePronunciations(); }
+    if (!entry) entry = lexiconEntryFor({ ...ch, id: ch.id, name: ch.name, short: ch.short, race: ch.race, pronouns: ch.pronouns, respell: ch.respell });
+    // memories and relationship lines refer to people by game id, so the lexicon must know this id (even when the entry came from a named lexicon character)
+    if (!this.lingo.lexicon.has(ch.id) || this.lingo.lexicon.get(ch.id) !== entry) { entry = { ...entry, id: ch.id, forms: { ...entry.forms } }; this.lingo.lexicon.add(entry); this.lingo.invalidatePronunciations(); }
     const sp = new Speaker({ id: ch.id, name: ch.short || ch.name, entry, lexicon: this.lingo.lexicon, speech: ch.speech || { traits: [] } }); this.speakers.set(ch.id, sp); return sp;
   }
   ctx(from, to, extra = {}) { const ctx = { speaker: this.speaker(from), listener: to ? this.speaker(to) : undefined, ...extra }; if (to) ctx.relation = this.game.relations.get(from.id, to.id); return ctx; }

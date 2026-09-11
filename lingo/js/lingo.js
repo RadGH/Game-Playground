@@ -291,7 +291,7 @@ export class Lingo {
     while (i < path.length) {
       const seg = path[i].name;
       if (value instanceof Entity) { const r = value.get(seg); if (r !== undefined) { value = r instanceof Speaker ? r.entity : r; i++; continue; } break; }
-      if (value && typeof value === 'object' && !(value instanceof Entity) && seg in value && !MODS[seg]) { value = value[seg]; if (value instanceof Speaker) value = value.entity; i++; continue; }
+      if (value && typeof value === 'object' && !(value instanceof Entity) && seg in value && (!MODS[seg] || typeof value[seg] !== 'function')) { value = value[seg]; if (value instanceof Speaker) value = value.entity; i++; continue; }
       break;
     }
     return { value, mods: path.slice(i) };

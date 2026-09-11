@@ -8,3 +8,4 @@ playwright-report/
 vendor/piper/*.onnx
 vendor/piper/*.onnx.json
 .scratch/
+voice-lab/samples/*.wav

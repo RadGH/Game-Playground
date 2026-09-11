@@ -479,35 +479,53 @@ materials={
  "enchant_prefix":["Flaming","Frost","Venomous","Shadowed","Blessed","Cursed","Thundering","Vampiric","Keen","Warding","Whispering","Mending","Hungering","Sunlit","Moonlit","Runed"],
  "enchant_tags":{"Flaming":["fire"],"Frost":["ice","cold"],"Venomous":["poison"],"Shadowed":["dark","stealth"],"Blessed":["holy"],"Cursed":["cursed","dark"],"Thundering":["storm"],"Vampiric":["dark","blood"],"Keen":["sharp"],"Warding":["protect"],"Whispering":["fey","secret"],"Mending":["heal"],"Hungering":["dark","cursed"],"Sunlit":["holy","light"],"Moonlit":["elf","magic"],"Runed":["dwarf","runes"]}
 }
-# ---- materials narrowed by tags (a cloth apron is never dragonscale); affinity bumps for under-served races
+# ---- materials narrowed by category + tags (a cloth apron is never dragonscale, tongs are never cloth); affinity bumps
 METALS=["steel","iron","bronze","mithril"]
+MAT_WORDS=("iron","steel","bronze","mithril","silver","gold","gilt","copper","brass","pewter","wood","wooden","yew","livingwood","bone","horn","stone","obsidian","crystal","leather","hide","cloth","clay","glass","dragonscale","vellum","paper","bark","silk","wool","tooth","teeth","fang","skull","scale","fey wing","moss","straw","wax","bread","reed")
 for d in items:
-    t=set(d["tags"]); cat=d["category"]; sub=d["sub"]
-    if cat=="armour":
-        if "cloth" in t or "mage" in t: d["materials"]=["cloth"]
+    t=set(d["tags"]); cat=d["category"]; sub=d["sub"]; name=d["name"].lower()
+    if any(w in name for w in MAT_WORDS) or "consumable" in t: d["materials"]=[]; continue
+    if cat=="weapon":
+        if sub=="ranged":
+            if "crossbow" in t: d["materials"]=["wood","steel","iron","brass"]
+            elif "bow" in t: d["materials"]=["wood","yew","horn","livingwood"]
+            elif "ammo" in t or "container" in t or "humble" in t or "entangling" in t or "leather" in t: d["materials"]=[]
+            elif "blade" in t: d["materials"]=METALS
+            else: d["materials"]=["wood"]
+        elif sub=="staff": d["materials"]=["wood","bone","crystal","brass","silver","livingwood"] if "focus" in t else ["wood"]
+        elif "crude" in t or "kitchen" in t or "humble" in t: d["materials"]=["iron","wood"] if "kitchen" in t else ["stone","bone","wood"]
+        else: d["materials"]=METALS
+    elif cat=="armour":
+        if "cloth" in t or "mage" in t or sub=="clothing": d["materials"]=["cloth"] if "leather" not in t and "hide" not in t else ["leather","hide"]
         elif "leather" in t: d["materials"]=["leather","hide"]
-        elif "hide" in t: d["materials"]=["hide","leather"]
-        elif "bone" in t: d["materials"]=["bone"]
+        elif "hide" in t: d["materials"]=["hide"]
         elif "wood" in t: d["materials"]=["wood","livingwood"]
         elif "scales" in t: d["materials"]=["steel","bronze","dragonscale"]
         elif sub=="shield": d["materials"]=["wood","steel","iron","hide","bone","mithril"]
         elif "junk" in t or "crude" in t: d["materials"]=["iron","bone","wood"]
         elif "gadget" in t: d["materials"]=["brass","steel","copper"]
         else: d["materials"]=METALS+(["dragonscale"] if d["rarity"] in("epic","legendary") else [])
-    if cat=="weapon" and sub=="ranged":
-        if "bow" in t: d["materials"]=["wood","yew","horn","livingwood"] if "crossbow" not in t else ["wood","steel","iron","brass"]
-        elif "crossbow" in t: d["materials"]=["wood","steel","iron","brass"]
-        elif "sling" in d["id"] or "humble" in t: d["materials"]=["leather","cloth"]
-        elif "ammo" in t: d["materials"]=["wood","steel","stone"]
-        elif "container" in t: d["materials"]=["leather","wood"]
-        elif "entangling" in t or "whip" in d["id"]: d["materials"]=["leather","hemp"] if False else ["leather"]
-        elif "blade" in t: d["materials"]=METALS
-        else: d["materials"]=["wood","leather"]
-    if cat=="weapon" and sub=="staff": d["materials"]=["wood","bone","crystal","brass","silver","livingwood"]
-    if cat in("vessel","regalia","tool","household","container","instrument","religious","lore") and ("wood" in t or "humble" in t) and "metal" not in t: d["materials"]=[m for m in d["materials"] if m in("wood","clay","leather","cloth","bone","horn","pewter","copper","iron","bark","paper","vellum")] or d["materials"]
-    if cat in("food","material","alchemy","trophy"): d["materials"]=[]
+    elif cat=="vessel":
+        if "cooking" in t: d["materials"]=["iron","copper","clay"]
+        elif "storage" in t: d["materials"]=["wood","clay"]
+        elif "religious" in t: d["materials"]=["brass","silver","gold"]
+        elif "humble" in t: d["materials"]=["clay","wood","pewter"]
+        elif "gadget" in t: d["materials"]=["brass","copper"]
+        else: d["materials"]=["pewter","silver","gold","copper","wood","horn","glass","crystal","mithril"]
+    elif cat=="regalia":
+        if "personal" in t: d["materials"]=["wood","bone","silver","leather"]
+        elif "gore" in t or "trophy" in t: d["materials"]=[]
+        else: d["materials"]=["gold","silver","bronze","copper","iron","mithril"]
+    elif cat=="lore":
+        d["materials"]=[m for m in ("clay","stone","vellum","paper","bark","bone") if m in t] or (["vellum","paper"] if ("book" in t or "paper" in t or "writing" in t) else [])
+    elif cat=="tool": d["materials"]=[] if ("set" in t or "gadget" in t or "game" in t) else ["iron","steel","wood","brass"]
+    elif cat=="household": d["materials"]=["wood","clay","iron","glass"] if "cloth" not in t else ["cloth"]
+    elif cat=="container": d["materials"]=["wood","leather","iron"] if "cloth" not in t else ["cloth"]
+    elif cat=="instrument": d["materials"]=["wood","bone","brass","horn","silver"] if "gadget" not in t else ["brass"]
+    elif cat=="religious": d["materials"]=["wood","brass","silver","gold","bone","stone"]
+    else: d["materials"]=[]
     if ("crude" in t or "stone" in t or "gore" in t) and "troll" not in d["affinity"]: d["affinity"]["troll"]=2
-    if ("gold" in t or "precious" in t or "fire" in t or "hoard" in t or "royal" in t) and "dragon" not in d["affinity"]: d["affinity"]["dragon"]=2
+    if ("gold" in t or "precious" in t or "fire" in t or "hoard" in t or "royal" in t or "jewelled" in t or "gem" in t) and "dragon" not in d["affinity"]: d["affinity"]["dragon"]=2
 ids=[i["id"] for i in items]; assert len(ids)==len(set(ids)), [x for x in ids if ids.count(x)>1]
 json.dump({"_doc":"Item catalog. Fields: id, name (singular), category, sub, tags (blade, one-handed, kitchen, gore, magic…), affinity {race: 0..3; missing = rare for that race}, exclusive (only that race), rarity common|uncommon|rare|epic|legendary, value [min,max] silver marks, materials (allowed material ids from materials.json; empty = none), desc, damage (weapons). Built by tools/build-items.py; games extend this file or load their own.","items":items},open('items/data/items.json','w'),indent=1,ensure_ascii=False)
 json.dump(materials,open('items/data/materials.json','w'),indent=1,ensure_ascii=False)

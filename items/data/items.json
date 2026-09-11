@@ -25,10 +25,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "A plain double-edged blade a forearm long.",
    "damage": "slash"
@@ -55,10 +52,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "The knight's straight sword, cruciform hilt.",
    "damage": "slash"
@@ -86,10 +80,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Hand-and-a-half blade for cut and thrust.",
    "damage": "slash"
@@ -118,10 +109,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Man-tall two-hander swung from the shoulder.",
    "damage": "slash"
@@ -149,10 +137,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Broad, heavy-tipped chopper.",
    "damage": "slash"
@@ -181,10 +166,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Curved single-edged blade, quick in the draw.",
    "damage": "slash"
@@ -212,10 +194,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Cavalry sword with a knuckle-bow.",
    "damage": "slash"
@@ -244,10 +223,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Slender thrusting blade for the duelling floor.",
    "damage": "slash"
@@ -275,10 +251,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Short stabbing sword of the old legions.",
    "damage": "slash"
@@ -302,15 +275,7 @@
     90,
     260
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
-   ],
+   "materials": [],
    "desc": "Great sword with down-sloping quillons.",
    "damage": "slash"
   },
@@ -337,10 +302,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Edgeless armour-piercing spike of a sword.",
    "damage": "slash"
@@ -369,10 +331,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Short, thick sailor's sword.",
    "damage": "slash"
@@ -400,10 +359,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Wide single-edged cleaver of a sword.",
    "damage": "slash"
@@ -431,10 +387,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Leaf-shaped elven blade, balanced for grace.",
    "damage": "slash"
@@ -463,10 +416,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Slender curved elven sword that glows faintly at night.",
    "exclusive": "elf",
@@ -496,10 +446,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "More slab than sword; orcs like the weight.",
    "exclusive": "orc",
@@ -519,23 +466,14 @@
    "affinity": {
     "orc": 2,
     "goblin": 2,
-    "undead": 2,
-    "troll": 2
+    "undead": 2
    },
    "rarity": "common",
    "value": [
     5,
     25
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
-   ],
+   "materials": [],
    "desc": "Sharpened femur of something large.",
    "damage": "slash"
   },
@@ -560,15 +498,7 @@
     30,
     90
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
-   ],
+   "materials": [],
    "desc": "Volcanic glass edge; terrifyingly sharp, breaks easily.",
    "damage": "slash"
   },
@@ -595,10 +525,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Black iron sword that drinks warmth.",
    "exclusive": "undead",
@@ -624,13 +551,8 @@
     30
    ],
    "materials": [
-    "steel",
     "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "wood"
    ],
    "desc": "Halfling 'sword': an overgrown carving knife with a good handle.",
    "damage": "slash"
@@ -658,10 +580,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Sabre with a spring-loaded pommel that extends the reach a hand's width.",
    "exclusive": "gnome",
@@ -689,10 +608,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "A sword scaled for a giant; humans use it as a bridge.",
    "exclusive": "giant",
@@ -718,15 +634,7 @@
     2000,
     8000
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
-   ],
+   "materials": [],
    "desc": "A tooth of a great wyrm, hafted and edged.",
    "damage": "slash"
   },
@@ -755,10 +663,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Hooked tip for catching blades and ankles.",
    "damage": "slash"
@@ -788,10 +693,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Bronze-age crescent blade.",
    "damage": "slash"
@@ -816,15 +718,7 @@
     200,
     800
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
-   ],
+   "materials": [],
    "desc": "Grown, not forged; still has leaves at the hilt.",
    "exclusive": "fey",
    "damage": "slash"
@@ -853,10 +747,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Double-edged fighting knife.",
    "damage": "pierce"
@@ -884,10 +775,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Long, narrow dagger.",
    "damage": "pierce"
@@ -916,10 +804,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Needle-pointed; finds gaps in mail.",
    "damage": "pierce"
@@ -948,10 +833,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Wavy blade for ceremony and spite.",
    "damage": "pierce"
@@ -981,10 +863,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Curved blade for hides.",
    "damage": "pierce"
@@ -1010,13 +889,9 @@
     3
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
+    "stone",
     "bone",
-    "obsidian"
+    "wood"
    ],
    "desc": "Bit of metal, bit of rag. Goblin standard issue.",
    "exclusive": "goblin",
@@ -1041,15 +916,7 @@
     2,
     8
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
-   ],
+   "materials": [],
    "desc": "Serrated; also excellent against burglars.",
    "damage": "pierce"
   },
@@ -1076,10 +943,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Lives in the boot until needed.",
    "damage": "pierce"
@@ -1108,10 +972,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Obsidian or black iron; stained.",
    "damage": "pierce"
@@ -1137,13 +998,8 @@
     30
    ],
    "materials": [
-    "steel",
     "iron",
-    "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "wood"
    ],
    "desc": "Matched knives in a leather roll.",
    "damage": "pierce"
@@ -1172,10 +1028,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Broad guard for catching a rapier.",
    "damage": "pierce"
@@ -1203,10 +1056,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril",
-    "silver",
-    "bone",
-    "obsidian"
+    "mithril"
    ],
    "desc": "Boar tusk, edged; every orc child gets one.",
    "exclusive": "orc",
@@ -1233,13 +1083,9 @@
     5
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril",
-    "silver",
+    "stone",
     "bone",
-    "obsidian"
+    "wood"
    ],
    "desc": "Dull enough to be polite, sharp enough to be rude.",
    "damage": "pierce"
@@ -1268,7 +1114,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Fells trees or foes.",
@@ -1298,7 +1143,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Bearded head on a stout haft.",
@@ -1328,7 +1172,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Double-bitted two-hander.",
@@ -1358,7 +1201,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Balanced for a spin and a thud.",
@@ -1386,7 +1228,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "The beard hooks shields aside.",
@@ -1416,7 +1257,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Dwarven axe with a grudge carved into the head.",
@@ -1446,7 +1286,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Pick on one side, adze on the other; deep-delvers' weapon of habit.",
@@ -1474,11 +1313,8 @@
     15
    ],
    "materials": [
-    "steel",
     "iron",
-    "bronze",
-    "stone",
-    "mithril"
+    "wood"
    ],
    "desc": "Kitchen tool that keeps turning up on battlefields.",
    "damage": "slash"
@@ -1504,13 +1340,7 @@
     2,
     8
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "stone",
-    "mithril"
-   ],
+   "materials": [],
    "desc": "Flint head bound to a branch.",
    "damage": "slash"
   },
@@ -1538,7 +1368,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Crescent blade, black haft, one purpose.",
@@ -1569,7 +1398,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Long haft, heavy head, for trees.",
@@ -1599,7 +1427,6 @@
     "steel",
     "iron",
     "bronze",
-    "stone",
     "mithril"
    ],
    "desc": "Thin crescent head; elves who must use axes use this.",
@@ -1628,9 +1455,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Flat face, back spike.",
@@ -1660,9 +1484,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Sledge for the battlefield.",
@@ -1691,9 +1512,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Flanged head on a steel haft.",
@@ -1722,9 +1540,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Spiked ball on a haft.",
@@ -1754,9 +1569,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Ball on a chain; hits the wielder as often as the enemy.",
@@ -1784,13 +1596,9 @@
     4
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "wood",
     "stone",
     "bone",
-    "mithril"
+    "wood"
    ],
    "desc": "Heavy stick.",
    "damage": "blunt"
@@ -1816,13 +1624,9 @@
     15
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "wood",
     "stone",
     "bone",
-    "mithril"
+    "wood"
    ],
    "desc": "Uprooted sapling, bark still on.",
    "damage": "blunt"
@@ -1852,9 +1656,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Forge hammer; dents skulls if it must.",
@@ -1884,9 +1685,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Said to have been quenched in a mountain's heart.",
@@ -1916,13 +1714,9 @@
     5
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "wood",
     "stone",
     "bone",
-    "mithril"
+    "wood"
    ],
    "desc": "Hedge-cut and knotted; a shepherd's argument.",
    "damage": "blunt"
@@ -1948,15 +1742,7 @@
     2,
     8
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "wood",
-    "stone",
-    "bone",
-    "mithril"
-   ],
+   "materials": [],
    "desc": "Thighbone of something that lost.",
    "damage": "blunt"
   },
@@ -1983,9 +1769,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Gnomish tool that is somehow also a weapon.",
@@ -2016,9 +1799,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Gilded and jewelled; carried before the throne.",
@@ -2048,9 +1828,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "stone",
-    "bone",
     "mithril"
    ],
    "desc": "Single curved spike for punching plate.",
@@ -2076,13 +1853,8 @@
     3
    ],
    "materials": [
-    "steel",
     "iron",
-    "bronze",
-    "wood",
-    "stone",
-    "bone",
-    "mithril"
+    "wood"
    ],
    "desc": "Oak. Has ended arguments.",
    "exclusive": "halfling",
@@ -2114,8 +1886,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Point on a pole; the oldest weapon.",
@@ -2145,8 +1915,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Light throwing spear.",
@@ -2176,8 +1944,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Fifteen feet of ash and a point.",
@@ -2207,8 +1973,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Axe, spike and hook on a pole.",
@@ -2237,8 +2001,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Single-edged blade on a pole.",
@@ -2268,8 +2030,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Fish-spear grown up.",
@@ -2300,8 +2060,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Crossbar keeps the boar from running up the shaft.",
@@ -2330,8 +2088,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Curved elven glaive, light as a reed.",
@@ -2359,12 +2115,9 @@
     3
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "wood",
+    "stone",
     "bone",
-    "mithril"
+    "wood"
    ],
    "desc": "A stick with a nail in it. Possibly several nails.",
    "exclusive": "goblin",
@@ -2391,14 +2144,7 @@
     3,
     12
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "wood",
-    "bone",
-    "mithril"
-   ],
+   "materials": [],
    "desc": "Splintered bone lashed to a shaft.",
    "damage": "pierce"
   },
@@ -2424,8 +2170,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Couched under the arm at the charge.",
@@ -2452,8 +2196,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "A ship's mast with a plough-blade tip.",
@@ -2485,8 +2227,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Farm scythe re-hafted straight; the dead favour it.",
@@ -2516,8 +2256,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "For hay. And for mobs.",
@@ -2547,8 +2285,6 @@
     "steel",
     "iron",
     "bronze",
-    "wood",
-    "bone",
     "mithril"
    ],
    "desc": "Pulls riders down and fruit off trees.",
@@ -2724,12 +2460,7 @@
     500,
     2000
    ],
-   "materials": [
-    "wood",
-    "yew",
-    "horn",
-    "livingwood"
-   ],
+   "materials": [],
    "desc": "Elven bow cut from a tree that agreed to it; still green.",
    "exclusive": "elf",
    "damage": "pierce"
@@ -2785,12 +2516,7 @@
     60,
     180
    ],
-   "materials": [
-    "wood",
-    "yew",
-    "horn",
-    "livingwood"
-   ],
+   "materials": [],
    "desc": "Orcish bow of stacked auroch horn; pulls like a mule.",
    "exclusive": "orc",
    "damage": "pierce"
@@ -2939,10 +2665,7 @@
     1,
     5
    ],
-   "materials": [
-    "leather",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Leather cup and two cords; halflings are deadly with it.",
    "damage": "pierce"
   },
@@ -2967,10 +2690,7 @@
     3,
     10
    ],
-   "materials": [
-    "leather",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Sling on a staff for heavier stones.",
    "damage": "pierce"
   },
@@ -3026,8 +2746,7 @@
     12
    ],
    "materials": [
-    "wood",
-    "leather"
+    "wood"
    ],
    "desc": "Reed and darts; the darts are the point.",
    "damage": "pierce"
@@ -3052,9 +2771,7 @@
     3,
     10
    ],
-   "materials": [
-    "leather"
-   ],
+   "materials": [],
    "desc": "Three weights on cords.",
    "damage": "pierce"
   },
@@ -3078,8 +2795,7 @@
     80
    ],
    "materials": [
-    "leather",
-    "cloth"
+    "wood"
    ],
    "desc": "Throws boulders. Do not stand downrange.",
    "exclusive": "giant",
@@ -3107,12 +2823,7 @@
     3000,
     9000
    ],
-   "materials": [
-    "wood",
-    "yew",
-    "horn",
-    "livingwood"
-   ],
+   "materials": [],
    "desc": "Rib of a wyrm, strung with its sinew.",
    "damage": "pierce"
   },
@@ -3136,9 +2847,7 @@
     2,
     8
    ],
-   "materials": [
-    "leather"
-   ],
+   "materials": [],
    "desc": "Fishing net with lead weights; catches men too.",
    "damage": "pierce"
   },
@@ -3163,9 +2872,7 @@
     3,
     15
    ],
-   "materials": [
-    "leather"
-   ],
+   "materials": [],
    "desc": "Braided leather; loud, and reaches.",
    "damage": "pierce"
   },
@@ -3189,10 +2896,7 @@
     2,
     15
    ],
-   "materials": [
-    "leather",
-    "wood"
-   ],
+   "materials": [],
    "desc": "Holds twenty arrows.",
    "damage": "pierce"
   },
@@ -3217,11 +2921,7 @@
     1,
     5
    ],
-   "materials": [
-    "wood",
-    "steel",
-    "stone"
-   ],
+   "materials": [],
    "desc": "Twenty, fletched with goose.",
    "damage": "pierce"
   },
@@ -3246,11 +2946,7 @@
     1,
     6
    ],
-   "materials": [
-    "wood",
-    "steel",
-    "stone"
-   ],
+   "materials": [],
    "desc": "Twenty crossbow bolts.",
    "damage": "pierce"
   },
@@ -3267,18 +2963,14 @@
    ],
    "affinity": {
     "halfling": 3,
-    "goblin": 1,
-    "troll": 2
+    "goblin": 1
    },
    "rarity": "common",
    "value": [
     0,
     1
    ],
-   "materials": [
-    "leather",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "River-smoothed, all the same weight.",
    "damage": "pierce"
   },
@@ -3304,12 +2996,7 @@
     6
    ],
    "materials": [
-    "wood",
-    "bone",
-    "crystal",
-    "brass",
-    "silver",
-    "livingwood"
+    "wood"
    ],
    "desc": "Six feet of oak.",
    "damage": "blunt"
@@ -3430,14 +3117,7 @@
     200,
     1000
    ],
-   "materials": [
-    "wood",
-    "bone",
-    "crystal",
-    "brass",
-    "silver",
-    "livingwood"
-   ],
+   "materials": [],
    "desc": "Fist-sized crystal sphere that clouds when watched.",
    "damage": "blunt"
   },
@@ -3461,14 +3141,7 @@
     150,
     600
    ],
-   "materials": [
-    "wood",
-    "bone",
-    "crystal",
-    "brass",
-    "silver",
-    "livingwood"
-   ],
+   "materials": [],
    "desc": "Spine of something, topped with its skull.",
    "exclusive": "undead",
    "damage": "blunt"
@@ -3591,12 +3264,7 @@
     5
    ],
    "materials": [
-    "wood",
-    "bone",
-    "crystal",
-    "brass",
-    "silver",
-    "livingwood"
+    "wood"
    ],
    "desc": "Hook for sheep, also for ankles.",
    "damage": "blunt"
@@ -3623,12 +3291,7 @@
     400
    ],
    "materials": [
-    "wood",
-    "bone",
-    "crystal",
-    "brass",
-    "silver",
-    "livingwood"
+    "wood"
    ],
    "desc": "Birch twigs, ash handle, opinions.",
    "damage": "blunt"
@@ -3680,10 +3343,7 @@
     15,
     50
    ],
-   "materials": [
-    "leather",
-    "hide"
-   ],
+   "materials": [],
    "desc": "Hardened hide over a shirt."
   },
   {
@@ -3706,10 +3366,7 @@
     25,
     70
    ],
-   "materials": [
-    "leather",
-    "hide"
-   ],
+   "materials": [],
    "desc": "Leather with iron studs."
   },
   {
@@ -3790,11 +3447,7 @@
     70,
     200
    ],
-   "materials": [
-    "steel",
-    "bronze",
-    "dragonscale"
-   ],
+   "materials": [],
    "desc": "Overlapping metal scales on leather."
   },
   {
@@ -3934,10 +3587,7 @@
     10,
     40
    ],
-   "materials": [
-    "hide",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Thick beast hide, fur out."
   },
   {
@@ -3955,17 +3605,14 @@
    "affinity": {
     "orc": 2,
     "undead": 2,
-    "goblin": 1,
-    "troll": 2
+    "goblin": 1
    },
    "rarity": "uncommon",
    "value": [
     20,
     80
    ],
-   "materials": [
-    "bone"
-   ],
+   "materials": [],
    "desc": "Ribs and plates of bone lashed together."
   },
   {
@@ -4125,11 +3772,7 @@
     4000,
     12000
    ],
-   "materials": [
-    "steel",
-    "bronze",
-    "dragonscale"
-   ],
+   "materials": [],
    "desc": "Scales of a slain wyrm; warm to the touch."
   },
   {
@@ -4155,10 +3798,7 @@
     20,
     80
    ],
-   "materials": [
-    "wood",
-    "livingwood"
-   ],
+   "materials": [],
    "desc": "Plates of living bark; itches in spring.",
    "exclusive": "fey"
   },
@@ -4182,10 +3822,7 @@
     40,
     150
    ],
-   "materials": [
-    "hide",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Mammoth hide; a tent for anyone smaller.",
    "exclusive": "giant"
   },
@@ -4265,12 +3902,7 @@
     30,
     100
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril"
-   ],
+   "materials": [],
    "desc": "Impractical and beloved."
   },
   {
@@ -4294,10 +3926,7 @@
     3,
     10
    ],
-   "materials": [
-    "leather",
-    "hide"
-   ],
+   "materials": [],
    "desc": "Boiled leather skullcap."
   },
   {
@@ -4376,9 +4005,7 @@
     15,
     60
    ],
-   "materials": [
-    "bone"
-   ],
+   "materials": [],
    "desc": "A skull, hollowed and worn."
   },
   {
@@ -4428,12 +4055,7 @@
     0,
     2
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril"
-   ],
+   "materials": [],
    "desc": "Wide brim for the fields."
   },
   {
@@ -4458,10 +4080,7 @@
     5
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril"
+    "cloth"
    ],
    "desc": "Deep cowl; hides a face or a wound."
   },
@@ -4651,10 +4270,7 @@
     3,
     12
    ],
-   "materials": [
-    "hide",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Stretched hide on a frame."
   },
   {
@@ -4873,10 +4489,7 @@
     20
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril"
+    "cloth"
    ],
    "desc": "Wool, oiled against rain."
   },
@@ -4901,10 +4514,7 @@
     800
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril"
+    "cloth"
    ],
    "desc": "Elven weave that takes the colour of the woods.",
    "exclusive": "elf"
@@ -4931,8 +4541,8 @@
     40
    ],
    "materials": [
-    "hide",
-    "leather"
+    "leather",
+    "hide"
    ],
    "desc": "Wolf or bear; smells of both."
   },
@@ -4956,10 +4566,7 @@
     15
    ],
    "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril"
+    "cloth"
    ],
    "desc": "Sleeveless coat with a crest."
   },
@@ -4984,12 +4591,7 @@
     2,
     10
    ],
-   "materials": [
-    "steel",
-    "iron",
-    "bronze",
-    "mithril"
-   ],
+   "materials": [],
    "desc": "Scorched in a hundred places."
   },
   {
@@ -5090,19 +4692,15 @@
     40
    ],
    "materials": [
-    "clay",
-    "wood",
     "pewter",
     "silver",
     "gold",
     "copper",
-    "brass",
+    "wood",
     "horn",
-    "bone",
+    "glass",
     "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "mithril"
    ],
    "desc": "Stemmed cup; the dwarven ones are the heaviest."
   },
@@ -5128,19 +4726,9 @@
     300
    ],
    "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
     "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "silver",
+    "gold"
    ],
    "desc": "Sacred cup for rites."
   },
@@ -5166,19 +4754,15 @@
     15
    ],
    "materials": [
-    "clay",
-    "wood",
     "pewter",
     "silver",
     "gold",
     "copper",
-    "brass",
+    "wood",
     "horn",
-    "bone",
+    "glass",
     "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "mithril"
    ],
    "desc": "Lidded ale mug; dwarves engrave their grudges on the lid."
   },
@@ -5202,15 +4786,7 @@
     1,
     3
    ],
-   "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "copper",
-    "horn",
-    "bone",
-    "iron"
-   ],
+   "materials": [],
    "desc": "Fired clay with a thumb-worn handle."
   },
   {
@@ -5234,21 +4810,7 @@
     3,
     20
    ],
-   "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
-    "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
-   ],
+   "materials": [],
    "desc": "Auroch horn, rimmed in metal."
   },
   {
@@ -5273,19 +4835,15 @@
     12
    ],
    "materials": [
-    "clay",
-    "wood",
     "pewter",
     "silver",
     "gold",
     "copper",
-    "brass",
+    "wood",
     "horn",
-    "bone",
+    "glass",
     "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "mithril"
    ],
    "desc": "Pocket flask, dented."
   },
@@ -5312,11 +4870,7 @@
    "materials": [
     "clay",
     "wood",
-    "pewter",
-    "copper",
-    "horn",
-    "bone",
-    "iron"
+    "pewter"
    ],
    "desc": "Goat bladder; tastes of goat."
   },
@@ -5341,19 +4895,15 @@
     60
    ],
    "materials": [
-    "clay",
-    "wood",
     "pewter",
     "silver",
     "gold",
     "copper",
-    "brass",
+    "wood",
     "horn",
-    "bone",
+    "glass",
     "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "mithril"
    ],
    "desc": "Tall pouring jug."
   },
@@ -5380,19 +4930,9 @@
     40
    ],
    "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
-    "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
     "iron",
-    "glass"
+    "copper",
+    "clay"
    ],
    "desc": "Three-legged iron pot."
   },
@@ -5417,13 +4957,9 @@
     12
    ],
    "materials": [
-    "clay",
-    "wood",
-    "pewter",
+    "iron",
     "copper",
-    "horn",
-    "bone",
-    "iron"
+    "clay"
    ],
    "desc": "Copper kettle, sings when ready."
   },
@@ -5449,11 +4985,7 @@
    "materials": [
     "clay",
     "wood",
-    "pewter",
-    "copper",
-    "horn",
-    "bone",
-    "iron"
+    "pewter"
    ],
    "desc": "Chipped, loved, refilled hourly.",
    "exclusive": "halfling"
@@ -5480,19 +5012,8 @@
     30
    ],
    "materials": [
-    "clay",
     "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
-    "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "clay"
    ],
    "desc": "Two-handled clay jar."
   },
@@ -5518,13 +5039,8 @@
     25
    ],
    "materials": [
-    "clay",
     "wood",
-    "pewter",
-    "copper",
-    "horn",
-    "bone",
-    "iron"
+    "clay"
    ],
    "desc": "Oak barrel, banded."
   },
@@ -5550,21 +5066,7 @@
     5,
     60
    ],
-   "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
-    "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
-   ],
+   "materials": [],
    "desc": "Enemy's skull, sawn and silvered."
   },
   {
@@ -5588,21 +5090,7 @@
     30,
     200
    ],
-   "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
-    "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
-   ],
+   "materials": [],
    "desc": "Cut crystal; catches every candle."
   },
   {
@@ -5626,21 +5114,7 @@
     300,
     1200
    ],
-   "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
-    "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
-   ],
+   "materials": [],
    "desc": "Never tarnishes; poison beads on it, they say.",
    "exclusive": "dwarf"
   },
@@ -5666,19 +5140,9 @@
     120
    ],
    "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
     "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "silver",
+    "gold"
    ],
    "desc": "Pierced brass ball on chains, smoking."
   },
@@ -5703,19 +5167,9 @@
     1500
    ],
    "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
     "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "silver",
+    "gold"
    ],
    "desc": "Gilded box holding a saint's knuckle."
   },
@@ -5743,11 +5197,7 @@
    "materials": [
     "clay",
     "wood",
-    "pewter",
-    "copper",
-    "horn",
-    "bone",
-    "iron"
+    "pewter"
    ],
    "desc": "Dried gourd, stoppered with a cork."
   },
@@ -5772,19 +5222,8 @@
     400
    ],
    "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
     "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "copper"
    ],
    "desc": "Gnomish device that turns anything into something drinkable. Anything.",
    "exclusive": "gnome"
@@ -5810,15 +5249,7 @@
     0,
     2
    ],
-   "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "copper",
-    "horn",
-    "bone",
-    "iron"
-   ],
+   "materials": [],
    "desc": "Turned ash; a dent for every year."
   },
   {
@@ -5843,19 +5274,15 @@
     30
    ],
    "materials": [
-    "clay",
-    "wood",
     "pewter",
     "silver",
     "gold",
     "copper",
-    "brass",
+    "wood",
     "horn",
-    "bone",
+    "glass",
     "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "mithril"
    ],
    "desc": "Pewter or wood, big enough for a goose."
   },
@@ -5880,19 +5307,15 @@
     4
    ],
    "materials": [
-    "clay",
-    "wood",
     "pewter",
     "silver",
     "gold",
     "copper",
-    "brass",
+    "wood",
     "horn",
-    "bone",
+    "glass",
     "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "mithril"
    ],
    "desc": "Green glass, wax-sealed."
   },
@@ -5920,11 +5343,7 @@
    "materials": [
     "clay",
     "wood",
-    "pewter",
-    "copper",
-    "horn",
-    "bone",
-    "iron"
+    "pewter"
    ],
    "desc": "Oak staves, rope handle."
   },
@@ -5951,19 +5370,9 @@
     100
    ],
    "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
     "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "silver",
+    "gold"
    ],
    "desc": "Holds someone."
   },
@@ -5987,21 +5396,7 @@
     30,
     150
    ],
-   "materials": [
-    "clay",
-    "wood",
-    "pewter",
-    "silver",
-    "gold",
-    "copper",
-    "brass",
-    "horn",
-    "bone",
-    "crystal",
-    "mithril",
-    "iron",
-    "glass"
-   ],
+   "materials": [],
    "desc": "A whole cask fits in it.",
    "exclusive": "giant"
   },
@@ -6026,19 +5421,15 @@
     80
    ],
    "materials": [
-    "clay",
-    "wood",
     "pewter",
     "silver",
     "gold",
     "copper",
-    "brass",
+    "wood",
     "horn",
-    "bone",
+    "glass",
     "crystal",
-    "mithril",
-    "iron",
-    "glass"
+    "mithril"
    ],
    "desc": "An acorn cap, silvered; holds one dewdrop.",
    "exclusive": "fey"
@@ -6068,14 +5459,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Gold circlet with points; heavier every year."
   },
@@ -6103,14 +5490,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Slim band of silver or living wood."
   },
@@ -6138,14 +5521,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Jewelled band for a queen."
   },
@@ -6170,18 +5549,7 @@
     30,
     200
    ],
-   "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
-    "wood",
-    "copper",
-    "mithril",
-    "crystal",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Black iron, spiked; a warlord's."
   },
   {
@@ -6204,18 +5572,7 @@
     100,
     800
    ],
-   "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
-    "wood",
-    "copper",
-    "mithril",
-    "crystal",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Finger bones set in a ring of jaw.",
    "exclusive": "undead"
   },
@@ -6242,14 +5599,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Gold rod topped with an orb."
   },
@@ -6277,14 +5630,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Carved seal ring; the family's word."
   },
@@ -6311,14 +5660,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Plain band."
   },
@@ -6345,14 +5690,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Stone in a claw setting."
   },
@@ -6381,14 +5722,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Pendant with a purpose."
   },
@@ -6417,14 +5754,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Twisted metal neck-ring, open at the front."
   },
@@ -6451,14 +5784,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Cloak pin, often the family crest."
   },
@@ -6485,14 +5814,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Hoop or stud; goblins prefer bone."
   },
@@ -6518,14 +5843,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Metal or beads."
   },
@@ -6550,18 +5871,7 @@
     1,
     15
    ],
-   "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
-    "wood",
-    "copper",
-    "mithril",
-    "crystal",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Teeth on a cord; each one a story."
   },
   {
@@ -6586,14 +5896,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Tiny moving gears; hypnotic at dinner.",
    "exclusive": "gnome"
@@ -6620,15 +5926,9 @@
     40
    ],
    "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
     "wood",
-    "copper",
-    "mithril",
-    "crystal",
+    "bone",
+    "silver",
     "leather"
    ],
    "desc": "Churchwarden pipe, well cured."
@@ -6653,15 +5953,9 @@
     60
    ],
    "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
     "wood",
-    "copper",
-    "mithril",
-    "crystal",
+    "bone",
+    "silver",
     "leather"
    ],
    "desc": "Rings and beads braided into the beard; rank in metal.",
@@ -6688,15 +5982,9 @@
     300
    ],
    "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
     "wood",
-    "copper",
-    "mithril",
-    "crystal",
+    "bone",
+    "silver",
     "leather"
    ],
    "desc": "Feathered half-mask; the Courts never show a whole face."
@@ -6721,15 +6009,9 @@
     500
    ],
    "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
     "wood",
-    "copper",
-    "mithril",
-    "crystal",
+    "bone",
+    "silver",
     "leather"
    ],
    "desc": "Plaster cast of a face at the end.",
@@ -6758,14 +6040,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Disc of office on a chain."
   },
@@ -6792,14 +6070,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Coin from a dragon's bed, warm and slightly melted.",
    "exclusive": "dragon"
@@ -6826,15 +6100,9 @@
     5
    ],
    "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
     "wood",
-    "copper",
-    "mithril",
-    "crystal",
+    "bone",
+    "silver",
     "leather"
    ],
    "desc": "Drawstring pouch; lighter than it should be."
@@ -6862,14 +6130,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Opens on a face or a lock of hair."
   },
@@ -6894,15 +6158,9 @@
     5
    ],
    "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
     "wood",
-    "copper",
-    "mithril",
-    "crystal",
+    "bone",
+    "silver",
     "leather"
    ],
    "desc": "Red ochre and fat.",
@@ -6929,18 +6187,7 @@
     3,
     40
    ],
-   "materials": [
-    "gold",
-    "silver",
-    "iron",
-    "bronze",
-    "bone",
-    "wood",
-    "copper",
-    "mithril",
-    "crystal",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Also a fine stiletto."
   },
   {
@@ -6966,14 +6213,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Iron or gold; rank by weight."
   },
@@ -6999,14 +6242,10 @@
    "materials": [
     "gold",
     "silver",
-    "iron",
     "bronze",
-    "bone",
-    "wood",
     "copper",
-    "mithril",
-    "crystal",
-    "leather"
+    "iron",
+    "mithril"
    ],
    "desc": "Tiny bells; the fey put them on cats and prisoners.",
    "exclusive": "fey"
@@ -7032,16 +6271,7 @@
     1,
     20
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Baked clay pressed with script."
   },
   {
@@ -7059,24 +6289,14 @@
    "affinity": {
     "dwarf": 3,
     "giant": 2,
-    "human": 1,
-    "troll": 2
+    "human": 1
    },
    "rarity": "uncommon",
    "value": [
     20,
     200
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Law or lineage cut in stone."
   },
   {
@@ -7094,24 +6314,14 @@
    "affinity": {
     "dwarf": 3,
     "giant": 2,
-    "human": 1,
-    "troll": 2
+    "human": 1
    },
    "rarity": "uncommon",
    "value": [
     30,
     400
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Standing stone or hand-sized, runes cut deep."
   },
   {
@@ -7136,14 +6346,7 @@
     100
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Rolled vellum, sealed."
   },
@@ -7170,14 +6373,8 @@
     600
    ],
    "materials": [
-    "clay",
-    "stone",
     "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Leather-bound and chained shut for good reason."
   },
@@ -7203,14 +6400,8 @@
     50
    ],
    "materials": [
-    "clay",
-    "stone",
     "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Columns of debts and names."
   },
@@ -7236,14 +6427,7 @@
     80
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Inked and annotated; some of it true."
   },
@@ -7265,16 +6449,7 @@
     1,
     10
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Stamped wax; a promise or a threat."
   },
   {
@@ -7298,14 +6473,7 @@
     30
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Unopened. Maybe keep it that way."
   },
@@ -7330,14 +6498,8 @@
     60
    ],
    "materials": [
-    "clay",
-    "stone",
     "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Elven verse, or halfling drinking songs; both dangerous."
   },
@@ -7362,14 +6524,8 @@
     1000
    ],
    "materials": [
-    "clay",
-    "stone",
     "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Every slight against the clan, in order, with interest.",
    "exclusive": "dwarf"
@@ -7394,14 +6550,8 @@
     40
    ],
    "materials": [
-    "clay",
-    "stone",
     "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Family recipes, stains included.",
    "exclusive": "halfling"
@@ -7427,14 +6577,7 @@
     200
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Blueprint for something that will probably explode.",
    "exclusive": "gnome"
@@ -7460,16 +6603,7 @@
     2,
     30
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Birch bark, written in sap."
   },
   {
@@ -7493,16 +6627,7 @@
     1,
     5
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Notched bone: kills, debts, days."
   },
   {
@@ -7525,16 +6650,7 @@
     100,
     800
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "A skull that remembers what it heard.",
    "exclusive": "undead"
   },
@@ -7561,14 +6677,7 @@
     200
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Elven chart of the wheeling stars."
   },
@@ -7594,14 +6703,7 @@
     900
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Vague enough to always come true."
   },
@@ -7625,14 +6727,8 @@
     2000
    ],
    "materials": [
-    "clay",
-    "stone",
     "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "A dragon's inventory of its hoard, every coin.",
    "exclusive": "dragon"
@@ -7657,14 +6753,7 @@
     1
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Bad likeness, good reward."
   },
@@ -7689,14 +6778,7 @@
     500
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Title to a field, a mill, or a lie."
   },
@@ -7722,14 +6804,8 @@
     30
    ],
    "materials": [
-    "clay",
-    "stone",
     "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Someone's days, in their hand."
   },
@@ -7755,14 +6831,7 @@
     800
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Signed by two kings; kept by neither."
   },
@@ -7786,16 +6855,7 @@
     20,
     150
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Two brass discs; turn to read the message.",
    "exclusive": "gnome"
   },
@@ -7812,24 +6872,14 @@
     "huge"
    ],
    "affinity": {
-    "giant": 3,
-    "troll": 2
+    "giant": 3
    },
    "rarity": "rare",
    "value": [
     50,
     600
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "A boulder carved with a giant's whole life.",
    "exclusive": "giant"
   },
@@ -7852,16 +6902,7 @@
     1,
     40
    ],
-   "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
-   ],
+   "materials": [],
    "desc": "Words grown in moss on a stone; gone by summer.",
    "exclusive": "fey"
   },
@@ -7886,14 +6927,7 @@
     60
    ],
    "materials": [
-    "clay",
-    "stone",
-    "vellum",
-    "paper",
-    "bone",
-    "bark",
-    "wood",
-    "leather"
+    "paper"
    ],
    "desc": "Hide scroll of the clan's warriors and their kills.",
    "exclusive": "orc"
@@ -7921,15 +6955,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Shuttered oil lantern."
   },
@@ -7955,15 +6983,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Pitch-soaked rag on a stick."
   },
@@ -7989,15 +7011,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Fifty feet of hemp."
   },
@@ -8023,15 +7039,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Three-pronged iron hook."
   },
@@ -8055,18 +7065,7 @@
     10,
     60
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Roll of picks and tension bars."
   },
   {
@@ -8091,15 +7090,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Iron pick on an ash haft."
   },
@@ -8125,11 +7118,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "bone",
-    "leather",
-    "clay",
-    "cloth"
+    "brass"
    ],
    "desc": "Digs graves as well as gardens."
   },
@@ -8154,15 +7145,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Small anvil for field repairs; still heavy."
   },
@@ -8187,15 +7172,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Long-handled forge tongs."
   },
@@ -8220,18 +7199,7 @@
     1,
     3
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Keeps the edge honest."
   },
   {
@@ -8254,18 +7222,7 @@
     80,
     400
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Brass tube with ground lenses."
   },
   {
@@ -8289,15 +7246,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Needle in a brass case."
   },
@@ -8321,18 +7272,7 @@
     100,
     600
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Gnomish timepiece; loses an hour a day, gains it back at night.",
    "exclusive": "gnome"
   },
@@ -8357,11 +7297,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "bone",
-    "leather",
-    "clay",
-    "cloth"
+    "brass"
    ],
    "desc": "Willow rod and horsehair line."
   },
@@ -8386,16 +7324,10 @@
     10
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
-    "leather",
     "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Blackened iron pot."
   },
@@ -8422,15 +7354,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Stone bowl for grinding herbs or bones."
   },
@@ -8456,15 +7382,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Polished wood shuttle for the loom."
   },
@@ -8490,15 +7410,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Bone tube of needles."
   },
@@ -8525,15 +7439,6 @@
     40
    ],
    "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
     "cloth"
    ],
    "desc": "Turns wool to thread; fey tales attach to it."
@@ -8561,15 +7466,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Leather bellows for the forge."
   },
@@ -8596,15 +7495,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Curved blade for hay; or for whoever comes."
   },
@@ -8629,11 +7522,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "bone",
-    "leather",
-    "clay",
-    "cloth"
+    "brass"
    ],
    "desc": "Turns soil and, at need, ankles."
   },
@@ -8659,11 +7550,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "bone",
-    "leather",
-    "clay",
-    "cloth"
+    "brass"
    ],
    "desc": "Toothed blade; screams through oak."
   },
@@ -8688,18 +7577,7 @@
     5,
     30
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "For runes and joints."
   },
   {
@@ -8724,15 +7602,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Opens doors that disagree."
   },
@@ -8759,15 +7631,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Iron cuffs on a chain; a key somewhere."
   },
@@ -8792,18 +7658,7 @@
     15,
     80
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Bandages, needle, salves, and a small saw nobody wants used."
   },
   {
@@ -8827,18 +7682,7 @@
     0,
     3
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Two dice; one of them honest."
   },
   {
@@ -8862,18 +7706,7 @@
     1,
     5
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Fifty-two cards, or thereabouts."
   },
   {
@@ -8895,18 +7728,7 @@
     30,
     150
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Knife, saw, spoon, tiny anvil. Springs open unasked.",
    "exclusive": "gnome"
   },
@@ -8933,15 +7755,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Jaws of iron; hungry for anything."
   },
@@ -8966,16 +7782,11 @@
     150
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
     "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass",
+    "horn",
+    "silver"
    ],
    "desc": "Pear-bodied, six courses."
   },
@@ -9001,16 +7812,11 @@
     600
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
     "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass",
+    "horn",
+    "silver"
    ],
    "desc": "Elven harp; tuned to the wind."
   },
@@ -9036,16 +7842,11 @@
     40
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
     "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass",
+    "horn",
+    "silver"
    ],
    "desc": "Hide over a hollowed log; hearts follow it."
   },
@@ -9071,18 +7872,7 @@
     20,
     120
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Auroch horn, bound in bronze."
   },
   {
@@ -9106,16 +7896,11 @@
     30
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
     "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass",
+    "horn",
+    "silver"
    ],
    "desc": "Bone or reed; halflings play it at supper."
   },
@@ -9140,16 +7925,11 @@
     100
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
     "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass",
+    "horn",
+    "silver"
    ],
    "desc": "Four strings and a bow; feet cannot resist it."
   },
@@ -9174,16 +7954,11 @@
     120
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
     "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass",
+    "horn",
+    "silver"
    ],
    "desc": "Goatskin bag and drones; a weapon in the wrong hands."
   },
@@ -9207,16 +7982,7 @@
     400
    ],
    "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Wind it and it plays a tune nobody remembers writing.",
    "exclusive": "gnome"
@@ -9243,16 +8009,11 @@
     25
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
     "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass",
+    "horn",
+    "silver"
    ],
    "desc": "Bronze bell; rings the hours or the dead."
   },
@@ -9278,18 +8039,7 @@
     1,
     10
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Carved from a shin; the tune is thin."
   },
   {
@@ -9311,18 +8061,7 @@
     20,
     100
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Hollow boulder; heard three valleys away.",
    "exclusive": "giant"
   },
@@ -9347,18 +8086,7 @@
     1,
     10
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Seven reeds bound with grass; dangerous to dance to."
   },
   {
@@ -9382,16 +8110,10 @@
     1
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
-    "leather",
     "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Tallow or beeswax."
   },
@@ -9415,18 +8137,7 @@
     1,
     6
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Scratchy, warm, smells of sheep."
   },
   {
@@ -9451,16 +8162,10 @@
     100
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
-    "leather",
     "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Silvered glass; the fey use them as doors."
   },
@@ -9484,18 +8189,7 @@
     10,
     80
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Sand for an hour."
   },
   {
@@ -9518,18 +8212,7 @@
     1,
     10
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Opens something. Somewhere."
   },
   {
@@ -9553,18 +8236,7 @@
     10,
     60
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Oak chest with iron bands and a lock."
   },
   {
@@ -9590,16 +8262,9 @@
     100
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
     "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron"
    ],
    "desc": "Small strongbox for coin."
   },
@@ -9624,15 +8289,6 @@
     500
    ],
    "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
     "cloth"
    ],
    "desc": "Woven scene of a battle nobody won."
@@ -9660,16 +8316,12 @@
     200
    ],
    "materials": [
-    "iron",
     "wood",
     "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
     "silver",
-    "cloth"
+    "gold",
+    "bone",
+    "stone"
    ],
    "desc": "Squat carved god with too many teeth."
   },
@@ -9694,16 +8346,12 @@
     200
    ],
    "materials": [
-    "iron",
     "wood",
     "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
     "silver",
-    "cloth"
+    "gold",
+    "bone",
+    "stone"
    ],
    "desc": "Folding altar with a painted saint."
   },
@@ -9727,16 +8375,12 @@
     20
    ],
    "materials": [
-    "iron",
     "wood",
     "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
     "silver",
-    "cloth"
+    "gold",
+    "bone",
+    "stone"
    ],
    "desc": "Wooden beads worn smooth."
   },
@@ -9760,16 +8404,12 @@
     60
    ],
    "materials": [
-    "iron",
     "wood",
     "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
     "silver",
-    "cloth"
+    "gold",
+    "bone",
+    "stone"
    ],
    "desc": "Emblem of a god on a cord."
   },
@@ -9795,16 +8435,12 @@
     600
    ],
    "materials": [
-    "iron",
     "wood",
     "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
     "silver",
-    "cloth"
+    "gold",
+    "bone",
+    "stone"
    ],
    "desc": "Stone figure that is damp every morning."
   },
@@ -9829,16 +8465,9 @@
     10
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
     "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron"
    ],
    "desc": "Leather pack with straps; everything smells of it."
   },
@@ -9864,16 +8493,9 @@
     6
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
     "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron"
    ],
    "desc": "Shoulder bag for maps and bread."
   },
@@ -9898,16 +8520,9 @@
     20
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
     "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron"
    ],
    "desc": "Wood and leather sheath."
   },
@@ -9932,11 +8547,6 @@
     1
    ],
    "materials": [
-    "iron",
-    "wood",
-    "bone",
-    "leather",
-    "clay",
     "cloth"
    ],
    "desc": "Holds loot, turnips, or a small halfling."
@@ -9963,12 +8573,9 @@
     10
    ],
    "materials": [
-    "iron",
     "wood",
-    "bone",
     "leather",
-    "clay",
-    "cloth"
+    "iron"
    ],
    "desc": "Oak, banded; a hiding place in a pinch."
   },
@@ -9993,18 +8600,7 @@
     10,
     60
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "For birds, prisoners, or halflings."
   },
   {
@@ -10028,16 +8624,10 @@
     15
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
-    "leather",
     "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Wicker; the bird is extra."
   },
@@ -10062,15 +8652,6 @@
     60
    ],
    "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
     "cloth"
    ],
    "desc": "Warm underfoot; hides the stain."
@@ -10097,16 +8678,10 @@
     5
    ],
    "materials": [
-    "iron",
     "wood",
-    "brass",
-    "bone",
-    "leather",
     "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Canvas and wool, rolled tight."
   },
@@ -10130,12 +8705,10 @@
     2
    ],
    "materials": [
-    "iron",
     "wood",
-    "bone",
-    "leather",
     "clay",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Necessary."
   },
@@ -10159,12 +8732,10 @@
     1
    ],
    "materials": [
-    "iron",
     "wood",
-    "bone",
-    "leather",
     "clay",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Birch twigs; sweeps, occasionally flies."
   },
@@ -10189,12 +8760,10 @@
     20
    ],
    "materials": [
-    "iron",
     "wood",
-    "bone",
-    "leather",
     "clay",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Rocks with a foot."
   },
@@ -10211,26 +8780,14 @@
    ],
    "affinity": {
     "dwarf": 3,
-    "halfling": 1,
-    "troll": 2
+    "halfling": 1
    },
    "rarity": "uncommon",
    "value": [
     5,
     50
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Carved flat stone from the family hearth; carried when the family moves.",
    "exclusive": "dwarf"
   },
@@ -10256,15 +8813,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Gilt spurs; the whole point of the ceremony.",
    "exclusive": "human"
@@ -10292,15 +8843,9 @@
    ],
    "materials": [
     "iron",
+    "steel",
     "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
+    "brass"
    ],
    "desc": "Sealed permission to do what everyone was doing anyway.",
    "exclusive": "human"
@@ -10326,18 +8871,7 @@
     1,
     6
    ],
-   "materials": [
-    "iron",
-    "wood",
-    "brass",
-    "bone",
-    "leather",
-    "clay",
-    "glass",
-    "stone",
-    "silver",
-    "cloth"
-   ],
+   "materials": [],
    "desc": "Troll remedy: bog moss and spit. Works on trolls.",
    "exclusive": "troll"
   },
@@ -10362,12 +8896,10 @@
     2
    ],
    "materials": [
-    "iron",
     "wood",
-    "bone",
-    "leather",
     "clay",
-    "cloth"
+    "iron",
+    "glass"
    ],
    "desc": "Board reading TOLL in an unsteady hand; the troll is the sign.",
    "exclusive": "troll"
@@ -10714,8 +9246,7 @@
    ],
    "affinity": {
     "dwarf": 3,
-    "elf": 2,
-    "dragon": 2
+    "elf": 2
    },
    "rarity": "epic",
    "value": [
@@ -10855,7 +9386,8 @@
    ],
    "affinity": {
     "human": 2,
-    "fey": 2
+    "fey": 2,
+    "dragon": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -10879,7 +9411,8 @@
    "affinity": {
     "elf": 2,
     "fey": 2,
-    "gnome": 1
+    "gnome": 1,
+    "dragon": 2
    },
    "rarity": "uncommon",
    "value": [
@@ -10903,8 +9436,7 @@
    "affinity": {
     "orc": 2,
     "goblin": 2,
-    "dragon": 1,
-    "troll": 2
+    "dragon": 1
    },
    "rarity": "common",
    "value": [
@@ -11137,8 +9669,7 @@
    "affinity": {
     "orc": 2,
     "human": 2,
-    "dragon": 1,
-    "troll": 2
+    "dragon": 1
    },
    "rarity": "uncommon",
    "value": [

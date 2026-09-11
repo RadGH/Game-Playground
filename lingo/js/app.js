@@ -43,7 +43,7 @@ function speakerEditor(key) {
   wrap.append(el('div', { class: 'speaker-head' }, sel), nameIn, raceSel, pronSel,
     panel('Traits (RimWorld-style; weight phrase tags)', traitChips),
     panel('Sliders', sliders),
-    panel('Custom slots (Tomodachi-style)', el('p', { class: 'small muted', text: 'Used instead of the generic word/phrase most of the time. prefix/suffix wrap whole lines; catchphrase is appended sometimes; mood slots replace mood lines.' }), slots),
+    panel('Custom slots', el('p', { class: 'small muted', text: 'Used instead of the generic word/phrase most of the time. prefix/suffix wrap whole lines; catchphrase is appended sometimes; mood slots replace mood lines.' }), slots),
     panel('Verbal tics (post-filters)', ticChips));
   return wrap;
 }

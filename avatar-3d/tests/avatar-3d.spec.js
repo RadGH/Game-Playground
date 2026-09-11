@@ -8,7 +8,7 @@ test.describe('avatar-3d', () => {
   }
   test('mii mode renders a character with skin-coloured pixels and animates', async ({ page }) => {
     const errors = []; page.on('pageerror', e => errors.push(e.message));
-    await page.goto('avatar-3d/'); await page.waitForFunction(() => !!window.avatar3d, null, { timeout: 60_000 }); await page.evaluate(() => window.avatar3d.setMode('mii')); await waitBuilt(page, 'Mii-style');
+    await page.goto('avatar-3d/'); await page.waitForFunction(() => !!window.avatar3d, null, { timeout: 60_000 }); await page.evaluate(() => window.avatar3d.setMode('mii')); await waitBuilt(page, 'Chibi');
     const px = await drawnPixels(page); expect(px.w).toBeGreaterThan(100); expect(px.skin).toBeGreaterThan(50);
     await page.screenshot({ path: 'test-results/avatar-3d-mii.png' });
     const moved = await page.evaluate(async () => { const c = window.avatar3d.character; c.setAnim('walk'); const g = c.group; const before = g.children[0].children[0].rotation.x; await new Promise(r => setTimeout(r, 400)); return g.children[0].children[0].rotation.x !== before; });

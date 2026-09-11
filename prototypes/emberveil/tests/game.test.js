@@ -39,7 +39,7 @@ test('travel days: three moves then rest; rations, exhaustion, vehicles and nigh
 
 test('named enemies: static super-unique on a challenge node, random named leaders, nemesis on defeat, bounty quest', () => {
   const g = newGame(); g.zoneId = 'border_roads'; g.unlockedZones.push('border_roads'); g.act = 1;
-  const enc = g.namedEncounter({ staticDef: g.staticNamed('border_roads')[0] }); assert.ok(enc.named); assert.equal(enc.named.short, 'Rakinishu'); assert.ok(enc.named.maxHp > 0); assert.ok(enc.enemies.length >= 2);
+  const enc = g.namedEncounter({ staticDef: g.staticNamed('border_roads')[0] }); assert.ok(enc.named); assert.equal(enc.named.short, 'Vekkash'); assert.ok(enc.named.maxHp > 0); assert.ok(enc.enemies.length >= 2);
   const rnd = g.namedEncounter({ templateId: 'bandit' }); assert.ok(rnd.named.name.length > 3); assert.ok(rnd.named.mods.length >= 1);
   g.resolveNamed(rnd, false); assert.equal(g.nemeses.length, 1); const back = g.nemesisEncounter(); assert.ok(back && back.nemesis); assert.ok(back.named.name.includes(g.nemeses[0].name));
   g.acceptSideQuest('sq_named_hunt'); g.resolveNamed(back, true); assert.equal(g.nemeses.length, 0); g.namedSlain.push('x', 'y'); const done = g.checkSideQuests(); assert.ok(done.some(q => q.id === 'sq_named_hunt'));

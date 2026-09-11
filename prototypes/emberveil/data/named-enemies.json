@@ -1,5 +1,5 @@
 {
- "_doc": "Static named enemies (Diablo-style super-uniques): one or two per zone, fixed name/title/base/modifiers/look. They guard challenge nodes and can show up as random encounter leaders. Random named enemies are generated in game.js (namedEnemy). Modifiers: tough (+armor), fast (extra action), regen, thorns, fiery (burn on hit), vampiric (life steal), cursed (curse on hit), summoner (+2 adds), colossal (+hp +dmg).",
+ "_doc": "Static named enemies (super-uniques): one or two per zone, fixed name/title/base/modifiers/look. They guard challenge nodes and can show up as random encounter leaders. Random named enemies are generated in game.js (namedEnemy). Modifiers: tough (+armor), fast (extra action), regen, thorns, fiery (burn on hit), vampiric (life steal), cursed (curse on hit), summoner (+2 adds), colossal (+hp +dmg). All names are original to Emberveil.",
  "modifiers": {
   "tough": "+8 armor",
   "fast": "acts twice",
@@ -31,14 +31,14 @@
  ],
  "syllables": {
   "goblin": [
-   "Rak",
-   "Gri",
+   "Vek",
+   "Gru",
    "Snag",
-   "Bish",
+   "Krizz",
    "Zog",
-   "Kri",
    "Nib",
-   "Ug"
+   "Ug",
+   "Tash"
   ],
   "human": [
    "Mor",
@@ -93,12 +93,12 @@
  },
  "suffixes": {
   "goblin": [
-   "ishu",
-   "gash",
+   "kash",
    "nak",
-   "bosh",
    "zik",
-   "rok"
+   "rok",
+   "gut",
+   "bash"
   ],
   "human": [
    "wick",
@@ -143,9 +143,9 @@
  },
  "static": [
   {
-   "id": "rakinishu",
-   "name": "Rakinishu",
-   "title": "the Fallen Shaman",
+   "id": "vekkash",
+   "name": "Vekkash",
+   "title": "the Ember-Tongued",
    "base": "goblin_shaman",
    "zone": "border_roads",
    "mods": [
@@ -160,8 +160,8 @@
    "lore": "Cast out for lighting the wrong fire. Lights every fire now."
   },
   {
-   "id": "bishibosh",
-   "name": "Bishibosh",
+   "id": "grulnak",
+   "name": "Grulnak",
    "title": "the Warlord's Voice",
    "base": "goblin_warrior",
    "zone": "thornwood",
@@ -177,8 +177,8 @@
    "lore": "He carries the warlord's orders and a bigger axe than his rank allows."
   },
   {
-   "id": "corpsefire",
-   "name": "Corpsefire",
+   "id": "cinderjaw",
+   "name": "Cinderjaw",
    "title": "",
    "base": "corrupted_wolf",
    "zone": "thornwood",
@@ -196,8 +196,8 @@
    "lore": "A wolf that walked into the Veil and walked out still burning."
   },
   {
-   "id": "griswold_ash",
-   "name": "Griswold Ashmouth",
+   "id": "harrow_ashmouth",
+   "name": "Harrow Ashmouth",
    "title": "",
    "base": "bandit_captain",
    "zone": "dust_roads",
@@ -247,8 +247,8 @@
    "lore": "Watched the ritual so long his eyes forgot how to close."
   },
   {
-   "id": "maggor_the_gate",
-   "name": "Maggor",
+   "id": "morrgath",
+   "name": "Morrgath",
    "title": "the Gate",
    "base": "hell_knight",
    "zone": "hell_breach",
@@ -281,8 +281,8 @@
    "lore": "There was a Ysgrith once. This is what stands in her place."
   },
   {
-   "id": "null_the_choir",
-   "name": "Null",
+   "id": "oth_the_choir",
+   "name": "Oth",
    "title": "the Choir",
    "base": "void_prophet",
    "zone": "cosmic_rift",

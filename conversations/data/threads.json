@@ -1,0 +1,710 @@
+{
+ "_doc": "Long-running conversations. stages[0] starts at a rest when requires pass; each later stage waits for `after` (days since previous stage, nodes travelled since, or an objective the host marks done). reward is applied by the host when the stage plays. Bindings as topics; {answerer} is the same person through the thread.",
+ "threads": [
+  {
+   "id": "th_bow_promise",
+   "tags": [
+    "camp"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "delta": "worse",
+      "maxDaysAgo": 6,
+      "replaced": true
+     }
+    }
+   ],
+   "stages": [
+    {
+     "id": "ask",
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "That {weapon}. You keep saying you'll swap it. Promise me: by the next town."
+        },
+        {
+         "t": "Promise me something, {answerer.name}. Better gear before the next town, or you carry the mule."
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Fine. Next town. {~Promised.|Hold me to it.}"
+        },
+        {
+         "t": "I promise. {~Write it down.|Witnesses, please.}"
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "Witnessed."
+        }
+       ],
+       "optional": true
+      }
+     ]
+    },
+    {
+     "id": "check",
+     "after": {
+      "days": 2
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Two days. Still the same {weapon}."
+        },
+        {
+         "t": "Well? The promise?"
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Town first. You said town."
+        },
+        {
+         "t": "No town yet. {~I keep my word, eventually.|Ask me in a town.}"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "pay",
+     "after": {
+      "objective": {
+       "type": "town",
+       "n": 1
+      }
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "We were in town. Did you keep your word?"
+        },
+        {
+         "t": "Town's behind us. Show me."
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "I did. Better {weapon}, better me. Happy?",
+         "cond": "gear.delta>0"
+        },
+        {
+         "t": "I… did not. The prices were criminal.",
+         "cond": "gear.delta<=0"
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "Told you. Pay up.",
+         "cond": "gear.delta<=0"
+        },
+        {
+         "t": "Well done. Genuinely.",
+         "cond": "gear.delta>0"
+        }
+       ],
+       "optional": true
+      }
+     ],
+     "reward": {
+      "relationIf": {
+       "cond": "gear.delta>0",
+       "value": 0.2,
+       "else": -0.15
+      },
+      "text": "a promise, kept or broken"
+     }
+    }
+   ]
+  },
+  {
+   "id": "th_grudge_named",
+   "tags": [
+    "camp"
+   ],
+   "requires": [
+    {
+     "memory": "nemesis",
+     "maxAgeHours": 240,
+     "details": {
+      "outcome": "beat_us"
+     }
+    }
+   ],
+   "stages": [
+    {
+     "id": "vow",
+     "lines": [
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "{memory.name}. I'm going to find that one. Not for the bounty. For me."
+        },
+        {
+         "t": "Every night I see {memory.name} walking away. Not again."
+        }
+       ]
+      },
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Then we hunt it together. Say when."
+        },
+        {
+         "t": "Don't do it alone. That's how it ends badly."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "I'll sharpen the spare blades."
+        }
+       ],
+       "optional": true
+      }
+     ]
+    },
+    {
+     "id": "track",
+     "after": {
+      "nodes": 4
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Any sign of {memory.name}?"
+        },
+        {
+         "t": "Still hunting?"
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Tracks two days old. It's ahead of us. Always ahead."
+        },
+        {
+         "t": "Nothing. It'll come to us. They always do."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "Named things come back. Patience."
+        }
+       ],
+       "optional": true
+      }
+     ]
+    },
+    {
+     "id": "settle",
+     "after": {
+      "objective": {
+       "type": "named",
+       "n": 1
+      }
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "A named one fell today. Was that the one?"
+        },
+        {
+         "t": "You got a name today."
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Close enough. {~The next name will be the one.|It bled the same.}"
+        },
+        {
+         "t": "Not the same one. But it counts. Everything counts now."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "You looked different swinging today. Meaner."
+        }
+       ],
+       "optional": true
+      }
+     ],
+     "reward": {
+      "xp": 60,
+      "who": "answerer",
+      "text": "{answerer} finds some peace: +60 xp"
+     }
+    }
+   ]
+  },
+  {
+   "id": "th_scholar_lore",
+   "tags": [
+    "camp"
+   ],
+   "requires": [
+    {
+     "trait": "scholar",
+     "who": "answerer"
+    }
+   ],
+   "stages": [
+    {
+     "id": "open",
+     "lines": [
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "I've been mapping the rot-rings. If I'm right, they follow the old roads. Three more nights of readings and I'll know."
+        },
+        {
+         "t": "Give me three quiet nights and I'll tell you where the Veil is thinnest."
+        }
+       ]
+      },
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Three nights of you muttering at rocks. Fine."
+        },
+        {
+         "t": "What do you need?"
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Quiet. And a shrine, if we pass one."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "mid",
+     "after": {
+      "days": 2
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "How's the map?"
+        },
+        {
+         "t": "Rocks talking yet?"
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Two readings in. The rings are shrinking toward {~the plateau|the breach|the throne}. Something's pulling them."
+        },
+        {
+         "t": "Nearly there. One more night."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "reveal",
+     "after": {
+      "days": 1
+     },
+     "lines": [
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Done. The rings point at the boss ahead. I can tell you where it's weakest: {~its left side|the third round|when it roars}."
+        },
+        {
+         "t": "The reading's complete. Next fight, wait for the second round. That's when the Veil blinks."
+        }
+       ]
+      },
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "That's actually useful. Don't let it go to your head."
+        },
+        {
+         "t": "Good. Now sleep."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "I understood one word in five. Enough to be scared."
+        }
+       ],
+       "optional": true
+      }
+     ],
+     "reward": {
+      "xp": 50,
+      "buff": "scholar_insight",
+      "text": "a scholar's reading: +50 xp each and the next fight starts with a blessing"
+     }
+    }
+   ]
+  },
+  {
+   "id": "th_homesick",
+   "tags": [
+    "camp"
+   ],
+   "requires": [
+    {
+     "trait": "shy",
+     "who": "answerer"
+    }
+   ],
+   "stages": [
+    {
+     "id": "quiet",
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "You're quiet tonight, {answerer.name}. Quieter than usual."
+        },
+        {
+         "t": "Something wrong?"
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Home. {~It's been a while.|I don't know if it's still there.}"
+        },
+        {
+         "t": "Nothing. …Someone's birthday. Back home."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "We'll get you back. Eventually."
+        }
+       ],
+       "optional": true
+      }
+     ]
+    },
+    {
+     "id": "letter",
+     "after": {
+      "objective": {
+       "type": "town",
+       "n": 1
+      }
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Did you send the letter in town?"
+        },
+        {
+         "t": "Town's done. Post a letter?"
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "I did. {~Two lines.|Said I was fine. Lied.}"
+        },
+        {
+         "t": "No. I started three. Burnt three."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "Next town, I'll write it for you."
+        }
+       ],
+       "optional": true
+      }
+     ]
+    },
+    {
+     "id": "reply",
+     "after": {
+      "days": 3
+     },
+     "lines": [
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "A rider found us with a reply. They're alive. All of them."
+        },
+        {
+         "t": "News from home. Good news, for once."
+        }
+       ]
+      },
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Then you fight lighter tomorrow."
+        },
+        {
+         "t": "I'm glad. Truly."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "Read it to us. The good bits."
+        }
+       ],
+       "optional": true
+      }
+     ],
+     "reward": {
+      "relation": 0.2,
+      "xp": 20,
+      "text": "good news from home"
+     }
+    }
+   ]
+  },
+  {
+   "id": "th_watch_debt",
+   "tags": [
+    "camp"
+   ],
+   "requires": [],
+   "stages": [
+    {
+     "id": "deal",
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "I'll take your watch tonight, {answerer.name}. You owe me one."
+        },
+        {
+         "t": "Sleep. I've got the watch. You owe me."
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Owed. {~I pay my debts.|Don't let me forget.}"
+        },
+        {
+         "t": "Fine. One watch. Not a kidney."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "collect",
+     "after": {
+      "nodes": 3
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "About that watch you owe me."
+        },
+        {
+         "t": "Debt time. I'm sleeping early."
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "Tonight. {~Go on, sleep.|I remember.}"
+        },
+        {
+         "t": "I was hoping you'd forget."
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "Nobody forgets a debt out here."
+        }
+       ],
+       "optional": true
+      }
+     ],
+     "reward": {
+      "relation": 0.1,
+      "text": "a debt repaid"
+     }
+    }
+   ]
+  },
+  {
+   "id": "th_rival_kills",
+   "tags": [
+    "camp"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "kills": 1
+     },
+     "who": "answerer"
+    },
+    {
+     "stats": {
+      "kills": 1
+     },
+     "who": "asker"
+    }
+   ],
+   "stages": [
+    {
+     "id": "bet",
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Bet. Three days. Most kills wins. Loser cooks."
+        },
+        {
+         "t": "You and me, {answerer.name}. Kill count. Three days."
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "You'll lose. {~I've already started.|Cook something good.}"
+        },
+        {
+         "t": "Done. Nothing with turnips."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "result",
+     "after": {
+      "days": 3
+     },
+     "lines": [
+      {
+       "role": "asker",
+       "variants": [
+        {
+         "t": "Three days. Count.",
+         "cond": "true"
+        }
+       ]
+      },
+      {
+       "role": "answerer",
+       "variants": [
+        {
+         "t": "I'm ahead. Apron's yours.",
+         "cond": "stats.kills>=1"
+        }
+       ]
+      },
+      {
+       "role": "third",
+       "variants": [
+        {
+         "t": "I'll judge the cooking. Harshly."
+        }
+       ],
+       "optional": true
+      }
+     ],
+     "reward": {
+      "xp": 30,
+      "text": "the wager ends; +30 xp each"
+     }
+    }
+   ]
+  }
+ ]
+}

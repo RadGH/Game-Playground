@@ -17,7 +17,7 @@ const status = document.getElementById('status'); const setStatus = t => status.
 // ---------- middle: viewport ----------
 const main = document.getElementById('main');
 const viewport = el('div', { id: 'viewport' }); const overlay = el('div', { class: 'overlay', text: 'drag to orbit · wheel to zoom' }); viewport.append(overlay);
-const modeBtns = el('div', { class: 'row mode-btns' }, button('Mii-style (procedural)', () => setMode('mii')), button('Quaternius (CC0 meshes)', () => setMode('quaternius')));
+const modeBtns = el('div', { class: 'row mode-btns' }, button('Chibi (procedural)', () => setMode('mii')), button('Quaternius (CC0 meshes)', () => setMode('quaternius')));
 const animChips = el('div', { class: 'chips anim-chips' });
 const turntableCb = checkbox('Turntable', false, v => scene.setTurntable(v ? 0.6 : 0));
 const anchorsInfo = el('span', { class: 'small muted' });
@@ -34,12 +34,12 @@ async function rebuild() {
     character = mode === 'mii' ? await createMiiCharacter(avatar) : await createQuaterniusCharacter(avatar);
     scene.scene.add(character.group); character.setAnim(mode === 'mii' ? 'idle' : 'Idle_Loop'); renderAnims();
     const h = mode === 'mii' ? character.metrics().totalHeight : null; anchorsInfo.textContent = h ? `height ≈ ${h.toFixed(2)} m` : '';
-    setStatus(mode === 'mii' ? 'Mii-style: primitives + face texture' : 'Quaternius: ' + character.group.children.length + ' mesh parts');
+    setStatus(mode === 'mii' ? 'Chibi: primitives + face texture' : 'Quaternius: ' + character.group.children.length + ' mesh parts');
   } catch (e) { console.error(e); setStatus('error: ' + e.message); toast(e.message); }
   building = false; if (pending) { pending = false; rebuild(); }
 }
 scene.addTicker((dt, t) => character?.update(dt, t));
-function setMode(m) { mode = m; store.set('mode', m); for (const b of modeBtns.children) b.classList.toggle('on', (b.textContent.startsWith('Mii') ? 'mii' : 'quaternius') === m); frameSel.style.display = m === 'quaternius' ? '' : 'none'; rebuild(); }
+function setMode(m) { mode = m; store.set('mode', m); for (const b of modeBtns.children) b.classList.toggle('on', (b.textContent.startsWith('Chibi') ? 'mii' : 'quaternius') === m); frameSel.style.display = m === 'quaternius' ? '' : 'none'; rebuild(); }
 
 // presets + 2D compare
 const presetGrid = el('div', { class: 'presets' });
@@ -64,7 +64,7 @@ const faceKnobs = {}; const faceKnob = (slot, key, label, min, max, step) => { c
 left.append(
   panel('Body', bodyKnobs.height, bodyKnobs.width, bodyKnobs.headSize, el('div', { class: 'row' }, el('label', { text: 'Skin' }), skinSw), frameSel),
   panel('Head', slotRow('headShape'), slotRow('hair'), slotRow('ears'), slotRow('facialHair'), slotRow('extras'), slotRow('hat')),
-  panel('Face (Mii mode)', slotRow('eyes'), faceKnob('eyes', 'x', 'eye spacing', -1, 1, 0.05), faceKnob('eyes', 'y', 'eye height', -1, 1, 0.05), faceKnob('eyes', 'scale', 'eye size', 0.5, 1.6, 0.05), faceKnob('eyes', 'rot', 'eye tilt', -30, 30, 1), slotRow('brows'), slotRow('nose'), slotRow('mouth'), faceKnob('mouth', 'y', 'mouth height', -1, 1, 0.05), faceKnob('mouth', 'scale', 'mouth size', 0.5, 1.8, 0.05)),
+  panel('Face (chibi mode)', slotRow('eyes'), faceKnob('eyes', 'x', 'eye spacing', -1, 1, 0.05), faceKnob('eyes', 'y', 'eye height', -1, 1, 0.05), faceKnob('eyes', 'scale', 'eye size', 0.5, 1.6, 0.05), faceKnob('eyes', 'rot', 'eye tilt', -30, 30, 1), slotRow('brows'), slotRow('nose'), slotRow('mouth'), faceKnob('mouth', 'y', 'mouth height', -1, 1, 0.05), faceKnob('mouth', 'scale', 'mouth size', 0.5, 1.8, 0.05)),
   panel('Outfit', slotRow('top'), el('div', { class: 'row' }, el('label', { text: 'Top 2nd colour' }), colorSwatch(() => avatar.top.color2, v => { avatar.top.color2 = v; changed(); })), slotRow('bottom'), slotRow('shoes'), slotRow('accessory')),
 );
 

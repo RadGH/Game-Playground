@@ -50,7 +50,7 @@ const skinSw = colorSwatch(() => avatar.body.skin, v => { avatar.body.skin = v; 
 left.append(
   panel('Body', bodyKnobs.height, bodyKnobs.width, bodyKnobs.headSize, el('div', { class: 'row' }, el('label', { text: 'Skin' }), skinSw), paletteRow(DATA.palettes.skin, c => { avatar.body.skin = c; changed(); syncUI(); })),
   panel('Head', slotRow('headShape'), slotRow('hair'), paletteRow(DATA.palettes.hair, c => { avatar.hair.color = c; changed(); syncUI(); }), slotRow('ears'), slotRow('facialHair'), slotRow('extras')),
-  panel('Face (Mii-style sliders)', slotRow('eyes'), paletteRow(DATA.palettes.eye, c => { avatar.eyes.color = c; changed(); syncUI(); }),
+  panel('Face sliders', slotRow('eyes'), paletteRow(DATA.palettes.eye, c => { avatar.eyes.color = c; changed(); syncUI(); }),
     el('div', { class: 'face-knobs' }, faceKnob('eyes', 'x', 'eye spacing', -1, 1, 0.05), faceKnob('eyes', 'y', 'eye height', -1, 1, 0.05), faceKnob('eyes', 'scale', 'eye size', 0.5, 1.6, 0.05), faceKnob('eyes', 'rot', 'eye tilt', -30, 30, 1)),
     slotRow('brows'), el('div', { class: 'face-knobs' }, faceKnob('brows', 'y', 'brow height', -1, 1, 0.05), faceKnob('brows', 'rot', 'brow tilt', -30, 30, 1), faceKnob('brows', 'x', 'brow spacing', -1, 1, 0.05)),
     slotRow('nose'), el('div', { class: 'face-knobs' }, faceKnob('nose', 'y', 'nose height', -1, 1, 0.05), faceKnob('nose', 'scale', 'nose size', 0.5, 1.8, 0.05)),

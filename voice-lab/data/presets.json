@@ -458,7 +458,7 @@
       "id": "animalese",
       "name": "Animalese",
       "group": "Babble",
-      "desc": "Animal Crossing-style: one blip per letter, quick and high.",
+      "desc": "One blip per letter, quick and high.",
       "voice": {
         "engine": "babble",
         "pitch": 0.7,

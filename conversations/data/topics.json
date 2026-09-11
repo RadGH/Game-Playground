@@ -3417,6 +3417,625 @@
     }
    ],
    "weight": 1
+  },
+  {
+   "id": "rare_coin_boot",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Ha. There's a gold piece in my boot. How long has that been there?"
+      },
+      {
+       "t": "Something's been stabbing my heel for three days. It's a coin. It's a coin!"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Then you're buying the next round."
+      },
+      {
+       "t": "Give it here. Party funds."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "Check the other boot."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.25,
+   "reward": {
+    "gold": 15,
+    "text": "+15 gold from a boot"
+   }
+  },
+  {
+   "id": "rare_shooting_star",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Did you see that? A star fell. Right over the ridge."
+      },
+      {
+       "t": "Look up. Now. A falling star."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "An omen. Good or bad, I couldn't say.",
+       "cond": "has('pious')||has('archaic')"
+      },
+      {
+       "t": "Make a wish. {~I wished for bread.|I wished for a wagon.|I wished for you to stop talking.}"
+      },
+      {
+       "t": "Stars fall. Rocks, mostly. Still pretty."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I felt something. Like a hand on the shoulder."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.25,
+   "reward": {
+    "xp": 25,
+    "text": "+25 xp each, a good omen"
+   }
+  },
+  {
+   "id": "rare_wandering_bard",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "There's a bard on the road, asking to share our fire. Let him?"
+      },
+      {
+       "t": "Someone's singing out there. Badly."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Let him. Bad singing is still company.",
+       "cond": "has('jolly')||has('kind')"
+      },
+      {
+       "t": "Search him first. Then let him."
+      },
+      {
+       "t": "One song. Then he sleeps by the horses."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "He knew a verse about the Border Wars I'd never heard. I'll remember that one."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.2,
+   "reward": {
+    "xp": 40,
+    "text": "a bard's tale: +40 xp each"
+   }
+  },
+  {
+   "id": "rare_ghost_story",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Ghost story. Somebody. The scary kind."
+      },
+      {
+       "t": "Who's got a story? A real one, with teeth."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "There was a village near Cinderhold where the well answered questions. Then one night it asked one back."
+      },
+      {
+       "t": "A soldier in the Border Guard swore his shadow started walking a step ahead of him. Then two. Then it went into Thornwood and he followed it. Nobody saw either again."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I am not sleeping tonight. Thanks for that.",
+       "cond": "has('nervous')||has('coward')"
+      },
+      {
+       "t": "Good one. Mine's worse, but it's true."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.3,
+   "reward": {
+    "relation": 0.1,
+    "text": "the party huddles closer"
+   }
+  },
+  {
+   "id": "rare_stray_pup",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "party": {
+      "companions": {
+       "max": 3
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Something's whining under the wagon. A pup. Skin and bones."
+      },
+      {
+       "t": "Don't move. There's a wolf pup by your pack. It's eating our rations."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Absolutely not. We can barely feed ourselves.",
+       "cond": "has('cynical')||has('greedy')"
+      },
+      {
+       "t": "It's coming with us. That's decided."
+      },
+      {
+       "t": "Give it a crust. If it follows, it follows."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "It has your eyes, {answerer.name}."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "companion": "pet_wolf",
+    "text": "a stray wolf pup follows the party"
+   }
+  },
+  {
+   "id": "rare_dream_talent",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I dreamt the fight again. Every step. I know what I did wrong now."
+      },
+      {
+       "t": "Strange dream. I was watching myself from above. I saw the opening I keep missing."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Dreams don't win fights."
+      },
+      {
+       "t": "Then use it tomorrow."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I dreamt of soup."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "talent": 1,
+    "who": "answerer",
+    "text": "{answerer} gains a talent point"
+   }
+  },
+  {
+   "id": "rare_lost_merchant",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "A merchant just walked into camp, lost, half-frozen. He's offering a discount for a place by the fire."
+      },
+      {
+       "t": "We have a guest. Says his caravan left without him."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Feed him. Then rob him. Politely."
+      },
+      {
+       "t": "Sit him down. Coin for kindness."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "He sold me a ring for two rations. Fair trade."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "item": {
+     "base": "ring",
+     "rarity": "magic"
+    },
+    "text": "the lost merchant leaves a ring"
+   }
+  },
+  {
+   "id": "rare_veil_whisper",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "party": {
+      "act": {
+       "min": 2
+      }
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Did anyone else hear that? Under the fire. Like someone saying my name backwards."
+      },
+      {
+       "t": "The Veil talked to me just now. It offered something."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Don't answer it. Whatever it offers, the price is you.",
+       "cond": "has('pious')||has('scholar')"
+      },
+      {
+       "t": "What did it offer?"
+      },
+      {
+       "t": "Throw more wood on. Loud fires drown quiet voices."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "It offered me a nap. I said yes."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "xp": 30,
+    "text": "a whisper from the Veil: +30 xp, and a chill"
+   }
+  },
+  {
+   "id": "rare_old_map",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Look what fell out of that book we took. A map. Old one."
+      },
+      {
+       "t": "There's a map sewn into the lining of this cloak."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Let me see. That's a survey mark. Someone paid for this.",
+       "cond": "has('scholar')"
+      },
+      {
+       "t": "X marks nothing. Never does."
+      },
+      {
+       "t": "Keep it. Maps are money to the right buyer."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "That's a shrine, there. Near the road."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "gold": 40,
+    "text": "the map sells for 40 gold at the next town"
+   }
+  },
+  {
+   "id": "rare_arm_wrestle",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Arm wrestle. You and me, {answerer.name}. Loser carries the pot."
+      },
+      {
+       "t": "Settle it now. Arm on the log."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Done. Try not to cry.",
+       "cond": "has('brave')||has('gruff')||has('bloodlust')"
+      },
+      {
+       "t": "Fine. But I'm using the good arm."
+      },
+      {
+       "t": "This is beneath me. {~Which is why I'll win.|Fine, once.}"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I have two rations on {answerer.name}."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.25,
+   "reward": {
+    "relation": 0.15,
+    "text": "the party laughs; bonds tighten"
+   }
+  },
+  {
+   "id": "rare_healers_lesson",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "stats": {
+      "healing": 20
+     },
+     "who": "answerer"
+    }
+   ],
+   "lines": [
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Come here. I'll show you where to press so a cut stops. Everyone should know this."
+      },
+      {
+       "t": "Lesson. Bandage on. Bandage off. Again."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "I know how to bleed. That's the part I'm good at."
+      },
+      {
+       "t": "Show me. Slowly."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "I tied it wrong three times. Fourth time held."
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.15,
+   "reward": {
+    "supply": {
+     "bandages": 2
+    },
+    "text": "+2 bandages made from spare cloth"
+   }
+  },
+  {
+   "id": "rare_singing_contest",
+   "tags": [
+    "camp",
+    "rare"
+   ],
+   "requires": [
+    {
+     "trait": "jolly",
+     "who": "asker"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Singing contest! Loser does dishes for a week."
+      },
+      {
+       "t": "Right. Everyone sings one verse. I judge."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I would rather fight the dragon.",
+       "cond": "has('gruff')||has('shy')"
+      },
+      {
+       "t": "Fine. But it's a sad one."
+      },
+      {
+       "t": "Only if you go first."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "variants": [
+      {
+       "t": "That was… actually good. Who taught you that?"
+      }
+     ],
+     "optional": true
+    }
+   ],
+   "weight": 0.2,
+   "reward": {
+    "relation": 0.1,
+    "xp": 10,
+    "text": "the singing is bad; the mood is good"
+   }
   }
  ]
 }

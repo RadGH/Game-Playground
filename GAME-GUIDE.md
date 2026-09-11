@@ -69,6 +69,10 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 
 `conversations/js/conversations.js` turns memories, gear (with kill counts from `meters/js/meter.js`), loot deltas and party facts into structured back-and-forth talk: build `factsFrom({...})` from your game state and call `talk(speakers, facts)`. `meters/` records every hit from any combat system and renders a Skada-style drill-down. Our voice: import `voice-lab/js/formant-voice.js` (versioned; see its CHANGELOG); give characters a voice with `shared/voices.js` `voiceFor({ role, gender, seed })` so a class sounds like itself and each member differs. Random NPCs: `library/js/make.js` `makeNpc()` (generic parts, a decal, a role voice, a Name Forge name).
 
+## Debugging language
+
+`shared/langdebug.js`: mount the toggle in your HUD and call `decorate(paragraph)` on every spoken line; players/devs can click words, see the pronunciation and lexicon entry, and override respellings or words on the fly (stored locally, exportable, submittable to the dev server inbox).
+
 ## Animals and monsters
 
 `avatar-3d/js/creatures.js` gives you wolves, boars, bears, rats, horses, deer, bats, spiders, snakes, drakes and dragons as procedural 3D bodies with the same `{ group, update, setAnim }` interface as people. Store the spec under `character.creature`; creatures have no `speech`, so give them narrated actions ("the wolf snarls") instead of lines. See `avatar-3d/README.md` (Creatures).

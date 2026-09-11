@@ -110,7 +110,7 @@
      "custom": {
       "greeting": "Well met",
       "farewell": "Walk with the Root",
-      "catchphrase": "The roots remember.",
+      "catchphrase": "{~The roots remember.|The Root keeps count.|Ask the old trees; they saw it.|Rootwarden's word on it.|The forest has a long memory, and so do I.|Every leaf remembers a hand.}",
       "oath": "by the Root",
       "curse": "rot and ruin"
      },
@@ -244,7 +244,7 @@
      "custom": {
       "greeting": "Oi",
       "farewell": "Don't die stupid",
-      "catchphrase": "Blood pays for blood.",
+      "catchphrase": "{~Blood pays for blood.|Steel settles it.|One debt, one blade.|They started it. I'll end it.|Iron remembers what flesh forgets.|Pay me in blood or stay out of my way.}",
       "curse": "Forge take it",
       "yes": "Aye",
       "no": "Piss off"
@@ -376,7 +376,7 @@
      "custom": {
       "greeting": "Morning",
       "farewell": "Mind the mud",
-      "prefix": "Lost the game.",
+      "prefix": "{~Lost the game.|Well. That's a thing that happened.|Right. Anyway.|Not my best day.|Hm. Noted.|Let's pretend I meant that.}",
       "worried": "The turnips won't come in. I can feel it.",
       "happy": "Good soil today. Good soil."
      },
@@ -516,8 +516,8 @@
      "custom": {
       "greeting": "Be brief",
       "farewell": "Return to the dust",
-      "catchphrase": "Death is merely a door I hold the key to.",
-      "suffix": "mortal",
+      "catchphrase": "{~Death is merely a door I hold the key to.|The grave is a rumour I started.|I have buried better men than you, and dug them up again.|Dying is for people without a plan.|Every corpse is a conversation waiting to happen.|The dead are excellent listeners.}",
+      "suffix": "{~mortal|little one|child of dust|breather|fleeting thing|my dear soon-to-be}",
       "curse": "Pale Lady's teeth",
       "oath": "by the silent throne"
      },
@@ -653,7 +653,7 @@
      "custom": {
       "greeting": "Heyo heyo",
       "farewell": "Pip goes now, yes yes",
-      "catchphrase": "Shiny shiny.",
+      "catchphrase": "{~Shiny shiny.|Ooh, that's mine now.|Pockets, meet friend.|Is that gold? That's gold.|Finders keepers, losers weepers.|Don't mind me, just counting.}",
       "yes": "Yes yes",
       "no": "No no no"
      },
@@ -997,7 +997,7 @@
      "custom": {
       "greeting": "Great, it's you",
       "farewell": "Try not to get stabbed",
-      "catchphrase": "Everyone's a liar. Some are just better at it.",
+      "catchphrase": "{~Everyone's a liar. Some are just better at it.|Trust is a coin you can only spend once.|I believed someone once. Once.|Smile all you like; I've seen the knife.|Honest men die young. I plan to be old.|Everyone wants something. What's yours?}",
       "no": "Not a chance"
      },
      "customRate": {
@@ -1151,8 +1151,12 @@
      "cheer": 0.5,
      "aggression": 0.8,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Stay down.|Next.|Is that all?|Come on, then.|I said stay down.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -1271,8 +1275,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Form over fury.|Watch the feet.|Again. Properly this time.|Discipline wins.|Measure twice, cut once.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -1391,8 +1399,12 @@
      "cheer": 0.5,
      "aggression": 0.15,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~The Light holds.|Stand in the Light.|Not while I stand.|Mercy later.|By the Light, enough.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -1512,8 +1524,12 @@
      "cheer": 0.5,
      "aggression": 0.15,
      "confidence": 0.3,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~One arrow, one answer.|Quiet now.|Wind's wrong. Wait.|Mark it. Loose.|The trail knows.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -1632,8 +1648,12 @@
      "cheer": 0.2,
      "aggression": 0.4,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Didn't see me. Nobody does.|Blink and it's done.|That was the easy part.|Pockets. Always the pockets.|Quiet feet, quick hands.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -1754,8 +1774,12 @@
      "cheer": 0.5,
      "aggression": 0.15,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Breathe. I have you.|The Light mends.|Hold still, hero.|Not today. Not on my watch.|Wounds close. Grudges don't.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -1875,8 +1899,12 @@
      "cheer": 0.85,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Somebody write that down!|And the crowd goes wild.|A verse for that later.|Tragic. Marvellous.|Encore, encore.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -1995,8 +2023,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~As the theory predicts.|Stand clear.|Elegant, no?|Knowledge is a weapon.|Observe.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2116,8 +2148,12 @@
      "cheer": 0.2,
      "aggression": 0.8,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~The dead have opinions.|Rest is optional.|Waste not.|Quiet, all of you.|I could use that body.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2237,8 +2273,12 @@
      "cheer": 0.2,
      "aggression": 0.4,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Everything has a price.|The pact holds.|Louder, please, I want it to hear.|Bargain struck.|You feel that? Good.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2360,8 +2400,12 @@
      "cheer": 0.2,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~I smell brimstone.|Send more.|Hell owes me.|Marked. Finished.|Burn it out.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2480,8 +2524,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Is that worth anything?|Waste of good boots.|Mine now.|Everything's scrap eventually.|Don't throw that away.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2600,8 +2648,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Ha! Did you see that?|Elegance, darling.|Was that all?|Hold my hat.|I make it look easy because it is.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2721,8 +2773,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Scale and fire.|The old blood wakes.|Kneel.|I have burned worse.|Roar with me.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2841,8 +2897,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Warmer.|Everything burns.|Stand back, friends.|Ash and ember.|Feel that? That's mine.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -2962,8 +3022,12 @@
      "cheer": 0.5,
      "aggression": 0.8,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Hear the thunder?|Lightning picks its own.|Static. Good.|Skies with me.|Crackle.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3084,8 +3148,12 @@
      "cheer": 0.5,
      "aggression": 0.15,
      "confidence": 0.3,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~The wild answers.|Roots and thorns.|Grow. Now.|Nature keeps score.|Hush. Listen.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3205,8 +3273,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.3,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~I saw this.|Fate turns.|Not yet. Soon.|The thread holds.|You were always going to say that.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3326,8 +3398,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~As planned.|Hold the line.|Positions.|Predictable.|Adapt.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3446,8 +3522,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Tick. Tock.|Time is a suggestion.|We have a moment. I made it.|Again, from the top.|Later. Or earlier.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3567,8 +3647,12 @@
      "cheer": 0.5,
      "aggression": 0.15,
      "confidence": 0.3,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Breathe.|The body knows.|Still water.|Strike. Release.|Enough.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3690,8 +3774,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~The spirits watch.|Ancestors, guide the hand.|Old ways, old power.|The bones say yes.|Wind and bone.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3811,8 +3899,12 @@
      "cheer": 0.5,
      "aggression": 0.8,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Purge it.|Silver settles it.|No mercy for the marked.|Confess.|The hunt ends here.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -3933,8 +4025,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~For the oath.|Shield up.|Hold fast.|Honour before comfort.|I stand.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -4054,8 +4150,12 @@
      "cheer": 0.2,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Chaos, kindly.|Ooh, that was new.|Power is a mood.|Let's see what this does.|Marvellous mess.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -4175,8 +4275,12 @@
      "cheer": 0.5,
      "aggression": 0.4,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Forge-marked.|Iron holds.|Struck true.|Runes don't lie.|Hammer says no.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -4296,8 +4400,12 @@
      "cheer": 0.2,
      "aggression": 0.4,
      "confidence": 0.85,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Shadow, take me.|Gone.|Last dance.|Quiet as ash.|You never heard me.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -4419,8 +4527,12 @@
      "cheer": 0.85,
      "aggression": 0.4,
      "confidence": 0.3,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Cogs and gears!|One more adjustment.|Springs wound, bolts loaded.|That should hold. Should.|Science, mostly.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -4541,8 +4653,12 @@
      "cheer": 0.2,
      "aggression": 0.15,
      "confidence": 0.55,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Light and shadow both.|Come back to us.|Rest is not the end.|Shadow answers.|Be still.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },
@@ -4662,8 +4778,12 @@
      "cheer": 0.5,
      "aggression": 0.15,
      "confidence": 0.3,
-     "custom": {},
-     "customRate": {},
+     "custom": {
+      "catchphrase": "{~Sleep now.|Mind over might.|Hush, and dream.|A thought, placed just so.|Wake when I say.}"
+     },
+     "customRate": {
+      "catchphrase": 0.25
+     },
      "tics": [],
      "mood": 0
     },

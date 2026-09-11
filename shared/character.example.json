@@ -104,7 +104,7 @@
     "custom": {
       "greeting": "Well met",
       "farewell": "Walk with the Root",
-      "catchphrase": "The roots remember.",
+      "catchphrase": "{~The roots remember.|The Root keeps count.|Ask the old trees; they saw it.|Rootwarden's word on it.|The forest has a long memory, and so do I.|Every leaf remembers a hand.}",
       "oath": "by the Root",
       "curse": "rot and ruin"
     },

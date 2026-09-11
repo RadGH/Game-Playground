@@ -130,3 +130,8 @@ See **`MEMORY.md`** for the full design. In short: `js/memory.js` gives each cha
 ## Vocabulary packs
 
 `data/packs/<world>.json` holds extra lexicon entries for one game world (places, factions, people, creatures, items, deities, spells, food, titles, weather). Load one with `for (const e of pack.entries) lingo.lexicon.add(e); lingo.invalidatePronunciations();`. `packs/emberveil.json` (151 entries) is what Emberveil 2 loads; add a pack per game rather than growing the core lexicon.
+
+
+## Variety
+
+Custom slots (catchphrase/prefix/suffix) accept Lingo templates, so `{~a|b|c}` gives a character several sayings. The default speakers and the Emberveil classes each carry 5–6 variations; add more rather than repeating one line.

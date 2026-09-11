@@ -63,3 +63,37 @@ export function factsFrom({ now = 0, day = 1, banks = {}, heroes = [], meter = n
     bagOf: id => lootLog.filter(l => l.holder === id && !l.equipped).map(l => ({ item: l.item, daysAgo: day - l.day })),
     statsOf: id => { const s = { kills: 0, damage: 0, fights: 0, downs: 0, healing: 0 }; if (!meter) return s; for (const f of meter.fights) { let took = false; for (const r of f.records) { if (r.source === id && r.kind === 'damage') { s.damage += r.amount; took = true; if (r.killingBlow) s.kills++; } if (r.source === id && r.kind === 'heal') s.healing += r.amount; } if (took) s.fights++; } s.downs = (banks[id]?.memories || []).filter(m => m.type === 'wounded' && m.details?.down).length; return s; } };
 }
+
+// ---------------------------------------------------------------------------------------------- threads (multi-day)
+/**
+ * A thread is a conversation that continues over several rests. data/threads.json: { id, tags, requires (as topics), stages: [ { id, lines, after: { days?, nodes?, objective? }, reward? } ] }
+ * `after` gates the NEXT stage: days since the previous stage, nodes travelled since it, and/or an objective the host reports as done
+ * (objective: { type: 'kills'|'rest'|'shrine'|'town'|'equip'|'named'|'fight_unhurt'|'level'|'spend'|'gold', n }). Host keeps `state.threads` = { [id]: { stage, day, nodes, objectiveDone } }.
+ */
+export class Threads {
+  constructor({ conv, threads }) { this.conv = conv; this.threads = threads.threads || threads; }
+  /** Which threads can start (stage 0) or continue now. */
+  due(speakers, facts, state = {}) {
+    const out = []; for (const th of this.threads) { const st = state[th.id]; if (st?.done) continue; const stageIdx = st ? st.stage + 1 : 0; const stage = th.stages[stageIdx]; if (!stage) continue;
+      if (st) { const a = stage.after || {}; if (a.days != null && (facts.party?.day ?? 0) - st.day < a.days) continue; if (a.nodes != null && (facts.party?.nodesTravelled ?? 0) - st.nodes < a.nodes) continue; if (a.objective && !st.objectiveDone) continue; }
+      const cast = this.conv.cast({ ...th, lines: stage.lines, requires: stageIdx === 0 ? th.requires || [] : [] }, speakers, facts); if (!cast) continue; if (st && cast.answerer.id !== st.answerer) { const sp = speakers.find(s => s.id === st.answerer); const ask = speakers.find(s => s.id === st.asker) || speakers.find(s => s !== sp); if (!sp || !ask) continue; const b = this.conv.bindingsFor({ ...th, requires: [] }, { asker: ask, answerer: sp, third: speakers.find(s => s !== sp && s !== ask) || null }, facts); if (!b) continue; Object.assign(cast, { asker: ask, answerer: sp, third: speakers.find(s => s !== sp && s !== ask) || null, bindings: b }); }
+      out.push({ thread: th, stage, stageIdx, ...cast }); }
+    return out;
+  }
+  /** Play one due thread stage (if any) and update state. Returns { lines, thread, stage, reward, objective } or null. */
+  play(speakers, facts, state = {}, { rng = Math.random, scene = null } = {}) {
+    const due = this.due(speakers, facts, state); if (!due.length) return null; const pick = due[Math.floor(rng() * due.length)]; const lines = this.conv.perform({ topic: { ...pick.thread, id: pick.thread.id + '_' + pick.stage.id, lines: pick.stage.lines }, asker: pick.asker, answerer: pick.answerer, third: pick.third, bindings: pick.bindings }, { rng, scene, turns: 8 });
+    const next = pick.thread.stages[pick.stageIdx + 1]; state[pick.thread.id] = { stage: pick.stageIdx, day: facts.party?.day ?? 0, nodes: facts.party?.nodesTravelled ?? 0, asker: pick.asker.id, answerer: pick.answerer.id, objective: next?.after?.objective || null, objectiveDone: false, done: !next };
+    return { lines, thread: pick.thread, stage: pick.stage, reward: pick.stage.reward || null, objective: next?.after?.objective || null, answerer: pick.answerer, asker: pick.asker, done: !next };
+  }
+}
+// ---------------------------------------------------------------------------------------------- variety generator
+/** Multiply a topic set's variants with trait-conditioned openers and closers so the same line rarely repeats verbatim. */
+export const OPENERS = { any: ['', '', '', 'Listen. ', 'Look, ', 'Honestly? ', 'Right. ', 'So. '], gruff: ['Hn. ', 'Bah. ', 'Listen here. '], jolly: ['Ha! ', 'Oh, this is good. ', 'Friends, friends. '], scholar: ['Consider: ', 'Observe. ', 'By my reckoning, '], cynical: ['Of course. ', 'Naturally. ', 'Here we go. '], pious: ['Light keep us. ', 'Gods willing, ', 'Bless it, '], nervous: ['Um. ', 'Right, so, ', 'Don\'t laugh, but '], pompous: ['As I said, ', 'Obviously, ', 'For the record: '], shy: ['…', 'Well… ', 'If you want my view, '] };
+export const CLOSERS = { any: ['', '', '', ' That\'s all.', ' Anyway.', ' Make of it what you will.'], gruff: [' Enough talk.', ' Done.'], jolly: [' Ha!', ' Cheers to that.'], scholar: [' Note it down.', ' Quod erat.'], cynical: [' Not that it matters.', ' As if anyone listens.'], pious: [' Light willing.', ' Amen to it.'], nervous: [' Sorry.', ' Was that too much?'], pompous: [' Naturally.', ' You may thank me later.'], shy: [' …sorry.', ' Forget I said it.'] };
+export function expandVariants(topics, { perLine = 2, seed = 1 } = {}) {
+  let a = seed >>> 0; const rng = () => { a += 0x6D2B79F5; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; const pick = arr => arr[Math.floor(rng() * arr.length)];
+  const list = topics.topics || topics; let added = 0;
+  for (const t of list) for (const line of t.lines || []) { const base = [...(line.variants || [])]; for (const v of base) { if (v.generated || !/^[A-Z{]/.test(v.t)) continue; for (let i = 0; i < perLine; i++) { const trait = pick(Object.keys(OPENERS).filter(k => k !== 'any')); const op = rng() < 0.5 ? pick(OPENERS[trait]) : pick(OPENERS.any); const cl = rng() < 0.4 ? pick(CLOSERS[trait]) : pick(CLOSERS.any); if (!op && !cl) continue; const text = (op ? op + v.t[0].toLowerCase() + v.t.slice(1) : v.t) + cl; const cond = [v.cond, op && OPENERS[trait].includes(op) ? `has('${trait}')` : null, cl && CLOSERS[trait].includes(cl) ? `has('${trait}')` : null].filter(Boolean).join(' && '); line.variants.push({ t: text, cond: cond || undefined, generated: true }); added++; } } }
+  return added;
+}

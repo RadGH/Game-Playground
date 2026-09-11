@@ -19,7 +19,7 @@
         "custom": {
           "greeting": "Well met",
           "farewell": "Walk with the Root",
-          "catchphrase": "The roots remember.",
+          "catchphrase": "{~The roots remember.|The Root keeps count.|Ask the old trees; they saw it.|Rootwarden's word on it.|The forest has a long memory, and so do I.|Every leaf remembers a hand.}",
           "oath": "by the Root",
           "curse": "rot and ruin"
         },
@@ -48,7 +48,7 @@
         "custom": {
           "greeting": "Oi",
           "farewell": "Don't die stupid",
-          "catchphrase": "Blood pays for blood.",
+          "catchphrase": "{~Blood pays for blood.|Steel settles it.|One debt, one blade.|They started it. I'll end it.|Iron remembers what flesh forgets.|Pay me in blood or stay out of my way.}",
           "curse": "Forge take it",
           "yes": "Aye",
           "no": "Piss off"
@@ -78,7 +78,7 @@
         "custom": {
           "greeting": "Morning",
           "farewell": "Mind the mud",
-          "prefix": "Lost the game.",
+          "prefix": "{~Lost the game.|Well. That's a thing that happened.|Right. Anyway.|Not my best day.|Hm. Noted.|Let's pretend I meant that.}",
           "worried": "The turnips won't come in. I can feel it.",
           "happy": "Good soil today. Good soil."
         },
@@ -108,8 +108,8 @@
         "custom": {
           "greeting": "Be brief",
           "farewell": "Return to the dust",
-          "catchphrase": "Death is merely a door I hold the key to.",
-          "suffix": "mortal",
+          "catchphrase": "{~Death is merely a door I hold the key to.|The grave is a rumour I started.|I have buried better men than you, and dug them up again.|Dying is for people without a plan.|Every corpse is a conversation waiting to happen.|The dead are excellent listeners.}",
+          "suffix": "{~mortal|little one|child of dust|breather|fleeting thing|my dear soon-to-be}",
           "curse": "Pale Lady's teeth",
           "oath": "by the silent throne"
         },
@@ -140,7 +140,7 @@
         "custom": {
           "greeting": "Heyo heyo",
           "farewell": "Pip goes now, yes yes",
-          "catchphrase": "Shiny shiny.",
+          "catchphrase": "{~Shiny shiny.|Ooh, that's mine now.|Pockets, meet friend.|Is that gold? That's gold.|Finders keepers, losers weepers.|Don't mind me, just counting.}",
           "yes": "Yes yes",
           "no": "No no no"
         },
@@ -223,7 +223,7 @@
         "custom": {
           "greeting": "Great, it's you",
           "farewell": "Try not to get stabbed",
-          "catchphrase": "Everyone's a liar. Some are just better at it.",
+          "catchphrase": "{~Everyone's a liar. Some are just better at it.|Trust is a coin you can only spend once.|I believed someone once. Once.|Smile all you like; I've seen the knife.|Honest men die young. I plan to be old.|Everyone wants something. What's yours?}",
           "no": "Not a chance"
         },
         "customRate": {

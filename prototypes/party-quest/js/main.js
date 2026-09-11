@@ -17,6 +17,7 @@ import { planLeg, Minigame } from './travel.js';
 import { makeRng } from './rng.js';
 import { Conversations, factsFrom } from '../../../conversations/js/conversations.js';
 import { voiceFor } from '../../../shared/voices.js';
+import { LangDebug, LANGDEBUG_CSS } from '../../../shared/langdebug.js';
 
 const $ = id => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else if (k === 'html') e.innerHTML = v; else if (k === 'text') e.textContent = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); } for (const k of kids) if (k != null) e.append(k); return e; };
@@ -33,7 +34,7 @@ const j = async p => (await fetch(base + p)).json();
 const [rules, world, lexData, grammarData, traitsData, eventsData, relationsData, topicsData] = await Promise.all([j('prototypes/party-quest/data/rules.json'), j('prototypes/party-quest/data/world.json'), j('lingo/data/lexicon.json'), j('lingo/data/grammar.json'), j('lingo/data/traits.json'), j('lingo/data/events.json'), j('lingo/data/relations.json'), j('conversations/data/topics.json')]);
 const [items, deps, library] = await Promise.all([ItemCatalog.load(base + 'items/data/'), loadDeps(base), Library.open(base + 'library/')]);
 deps.seedBase = 1000 + Math.floor(Math.random() * 1e6);
-const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData }); const conversations = new Conversations({ lingo, topics: topicsData });
+const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData }); const conversations = new Conversations({ lingo, topics: topicsData }); const langdbg = new LangDebug({ lingo, base: '../../' }); document.head.append(Object.assign(document.createElement('style'), { textContent: LANGDEBUG_CSS })); langdbg.mountSettings(document.querySelector('#hud'), { onToggle: on => { if (on) for (const p of document.querySelectorAll('#narrative .say')) langdbg.decorate(p); } });
 // places, enemies and class spells get lexicon entries so memories and lines can name them
 for (const [id, L] of Object.entries(world.locations)) { L.place = id; if (!lingo.lexicon.has(id)) lingo.lexicon.add({ id, type: 'place', proper: true, forms: { sg: L.name }, tags: L.tags }); }
 for (const [id, e] of Object.entries(rules.enemies)) if (!lingo.lexicon.has(id)) lingo.lexicon.add({ id, type: 'creature', forms: { sg: e.name, pl: e.name.replace(/y$/, 'ie').replace(/f$/, 've') + 's' }, tags: e.tags, race: e.race });
@@ -128,7 +129,7 @@ function bubbleAt(id, text, who, cls = '') {
 /** Show a line in a bubble + the log, say it aloud, keep the bubble up for a while. */
 async function sayLine(ch, line, { cls = '', wait = true } = {}) {
   if (!line || !line.text) return; const who = ch.short || ch.name; const b = bubbleAt(ch.id, line.text, who, cls); stage.talk(ch.id, true);
-  narrate(`<p class="say ${cls}"><b>${who}:</b> ${line.text}</p>`);
+  const shown = langdbg.rewrite(line.text); const para = narrate(`<p class="say ${cls}"><b>${who}:</b> ${shown}</p>`); langdbg.decorate(para.querySelector('p'));
   const minMs = 900 + line.text.length * 28; const t0 = Date.now();
   if (wait) { await talk.say(ch, line); const left = minMs - (Date.now() - t0); if (left > 0) await sleep(Math.min(left, 2600)); } else setTimeout(() => b.remove(), minMs);
   if (wait) b.remove(); stage.talk(ch.id, false);

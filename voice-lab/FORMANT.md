@@ -57,3 +57,14 @@ Most intelligibility problems come from (a) a wrong phoneme string (check the re
 - A second language: swap dictionary + rules + phoneme table.
 - Emotion presets: map anger/sadness to f0 range, speed, tilt and breath.
 - Singing mode: give each syllable a note and duration.
+
+
+## As a module (for other projects)
+
+The engine is versioned separately from the playground so a game can pin it: `voice-lab/js/engines/formant/module.json` (version, knobs, data, licence) and `engines/formant/CHANGELOG.md` (what changed, when a bump breaks old voice JSON). The stable entry is `voice-lab/js/formant-voice.js`:
+
+```js
+import { VERSION, load, synthesize, say } from './voice-lab/js/formant-voice.js';
+await load(); const { samples, sampleRate } = await synthesize('Stay down.', { pitch: 0.3, gender: 'm' });
+```
+To copy it into another repo take `voice-lab/js/formant-voice.js`, `voice-lab/js/engines/formant/`, `voice-lab/data/cmudict/` and (for `say`) `voice-lab/js/voice.js` + `js/engines/index.js` + `js/dsp.js` + `js/fx.js`. Bump the version in both `module.json` and `formant-voice.js` when you change the sound.

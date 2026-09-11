@@ -26,3 +26,13 @@ test('town: seeded stock, buy/sell/salvage, hires, companions; save round-trips 
   const comp = g.makeCompanion({ id: 'war_dog', name: 'War Dog', power: 1 }); assert.ok(g.addCompanion(comp)); assert.ok(comp.maxHp >= 38);
   const json = JSON.parse(JSON.stringify(g)); assert.equal(json.party.length, 4); assert.ok(!json.d);
 });
+test('travel days: three moves then rest; rations, exhaustion, vehicles and night attack odds', () => {
+  const g = newGame(); g.zoneId = 'border_roads'; g.unlockedZones.push('border_roads'); g.nodeId = 'start'; g.visited.border_roads = ['start']; g.act = 1;
+  assert.equal(g.legsPerDay(), 3); let moved = 0; for (let i = 0; i < 5; i++) { const r = g.reachable()[0]; if (r && g.travel(r)) moved++; } assert.equal(moved, 3); assert.ok(!g.canMove());
+  const na = g.nightAttack(); assert.ok(na.chance > 0.05 && na.chance < 0.4); g.supplies.torch = 0; assert.ok(g.nightAttack().chance > na.chance);
+  g.supplies.ration = 1; const h = g.party[0]; h.hp = 10; const r1 = g.rest(); assert.equal(g.day, 2); assert.ok(r1.ate); assert.equal(g.supplies.ration, 0); assert.equal(h.hp, 10, 'rest does not heal'); assert.ok(g.canMove());
+  for (let i = 0; i < 3; i++) g.rest(); assert.equal(g.exhaustion, 3); assert.ok(g.exhaustionMult() < 1);
+  g.gold = 1000; assert.ok(g.buySupply('ration', 5)); assert.ok(g.buyVehicle('wagon')); assert.equal(g.legsPerDay(), 4); assert.ok(g.nightAttack().chance < g.nightAttack().base); g.rest(); assert.equal(g.exhaustion, 2);
+  const enc = g.nightEncounter(); assert.ok(enc && enc.night && enc.enemies.length >= 1);
+  const banks = Object.keys(g.banks); assert.ok(banks.length >= 4, 'meal memories recorded'); const json = JSON.parse(JSON.stringify(g)); assert.ok(json.banks && json.meter && json.relations);
+});

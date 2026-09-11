@@ -125,3 +125,8 @@ See **`MEMORY.md`** for the full design. In short: `js/memory.js` gives each cha
 - New intent: add a symbol to `grammar.json` and list it in `meta.intents`.
 - New language: `morph.js` is English-only; the lexicon forms model (explicit forms per entry) is language-neutral. A second language needs its own morph module and grammar file.
 - Mood/relationship come from the game each call (`speech.mood`, `ctx.opinion`); nothing here simulates them.
+
+
+## Vocabulary packs
+
+`data/packs/<world>.json` holds extra lexicon entries for one game world (places, factions, people, creatures, items, deities, spells, food, titles, weather). Load one with `for (const e of pack.entries) lingo.lexicon.add(e); lingo.invalidatePronunciations();`. `packs/emberveil.json` (151 entries) is what Emberveil 2 loads; add a pack per game rather than growing the core lexicon.

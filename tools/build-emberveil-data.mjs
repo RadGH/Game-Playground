@@ -13,7 +13,8 @@ async function dumpModule(file, names) {
   let mod; try { mod = await import('data:text/javascript;base64,' + Buffer.from(code).toString('base64')); } catch (e) { console.error('FAILED', file, e.message.slice(0, 300)); return {}; }
   const out = {}; for (const n of names) out[n] = JSON.parse(JSON.stringify(mod[n] ?? null)); return out;
 }
-const zones = await dumpModule('src/maps/zones.js', ['PROLOGUE_ZONES', 'ACT1_ZONES', 'ACT2_ZONES', 'ACT3_ZONES', 'ACT4_ZONES', 'ACT5_ZONES', 'ACT6_ZONES', 'ZONE_ENCOUNTER_POOLS']); write('zones.json', zones);
+const zones = await dumpModule('src/maps/zones.js', ['PROLOGUE_ZONES', 'ACT1_ZONES', 'ACT2_ZONES', 'ACT3_ZONES', 'ACT4_ZONES', 'ACT5_ZONES', 'ACT6_ZONES', 'ZONE_ENCOUNTER_POOLS']);
+const { expandZones } = await import('./expand-emberveil-map.mjs'); console.log('map expansion: +' + expandZones(zones) + ' nodes (≈50% longer zones, mostly combat)'); write('zones.json', zones);
 write('random-events.json', await dumpModule('src/maps/randomEvents.js', ['RANDOM_EVENTS']));
 write('dungeons.json', await dumpModule('src/maps/dungeons.js', ['DUNGEON_SKILL_CHECKS', 'DUNGEONS']));
 write('node-types.json', await dumpModule('src/maps/nodeTypes.js', ['NODE_TYPES']));

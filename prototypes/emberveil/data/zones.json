@@ -13,7 +13,7 @@
      "x": 0.06,
      "y": 0.5,
      "exits": [
-      "first_combat"
+      "start__first_combat_x0"
      ],
      "noEvent": true
     },
@@ -24,7 +24,7 @@
      "x": 0.28,
      "y": 0.5,
      "exits": [
-      "second_combat"
+      "first_combat__second_combat_x1"
      ],
      "encounter": "prologue_scout"
     },
@@ -35,7 +35,7 @@
      "x": 0.5,
      "y": 0.5,
      "exits": [
-      "warning"
+      "second_combat__warning_x2"
      ],
      "encounter": "prologue_pair"
     },
@@ -58,6 +58,39 @@
      "y": 0.5,
      "exits": [],
      "encounter": "prologue_miniboss"
+    },
+    {
+     "id": "start__first_combat_x0",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.157,
+     "y": 0.497,
+     "exits": [
+      "first_combat"
+     ],
+     "added": true
+    },
+    {
+     "id": "first_combat__second_combat_x1",
+     "type": "treasure",
+     "name": "Abandoned Wagon",
+     "x": 0.378,
+     "y": 0.481,
+     "exits": [
+      "second_combat"
+     ],
+     "added": true
+    },
+    {
+     "id": "second_combat__warning_x2",
+     "type": "treasure",
+     "name": "Collapsed Vault",
+     "x": 0.612,
+     "y": 0.537,
+     "exits": [
+      "warning"
+     ],
+     "added": true
     }
    ]
   }
@@ -76,7 +109,7 @@
      "x": 0.08,
      "y": 0.5,
      "exits": [
-      "road_ambush",
+      "start__road_ambush_x2",
       "crossroads_b",
       "iris_corruption_notes"
      ]
@@ -91,7 +124,7 @@
       "crossroads_a",
       "crossroads_b",
       "garrick_redemption",
-      "recruit_dorn"
+      "road_ambush__recruit_dorn_x0"
      ]
     },
     {
@@ -101,7 +134,7 @@
      "x": 0.2,
      "y": 0.18,
      "exits": [
-      "crossroads_a"
+      "iris_corruption_notes__crossroads_a_x1"
      ]
     },
     {
@@ -112,7 +145,7 @@
      "y": 0.55,
      "exits": [
       "crossroads_a",
-      "crossroads_b"
+      "garrick_redemption__crossroads_b_x4"
      ]
     },
     {
@@ -143,7 +176,7 @@
      "x": 0.5,
      "y": 0.7,
      "exits": [
-      "ruined_watch",
+      "crossroads_b__ruined_watch_x3",
       "border_skill"
      ],
      "shrineType": "heal"
@@ -190,6 +223,66 @@
      "y": 0.5,
      "exits": [],
      "encounter": "border_boss"
+    },
+    {
+     "id": "road_ambush__recruit_dorn_x0",
+     "type": "combat",
+     "name": "Black Stair",
+     "x": 0.352,
+     "y": 0.314,
+     "exits": [
+      "recruit_dorn"
+     ],
+     "added": true,
+     "encounter": "goblin_patrol"
+    },
+    {
+     "id": "iris_corruption_notes__crossroads_a_x1",
+     "type": "combat",
+     "name": "Burned Farmstead",
+     "x": 0.358,
+     "y": 0.19,
+     "exits": [
+      "crossroads_a"
+     ],
+     "added": true,
+     "encounter": "goblin_patrol"
+    },
+    {
+     "id": "start__road_ambush_x2",
+     "type": "combat",
+     "name": "Ambush at the Ford",
+     "x": 0.167,
+     "y": 0.43,
+     "exits": [
+      "road_ambush"
+     ],
+     "added": true,
+     "encounter": "bandit_ambush"
+    },
+    {
+     "id": "crossroads_b__ruined_watch_x3",
+     "type": "ambush",
+     "name": "Ambush!",
+     "x": 0.613,
+     "y": 0.581,
+     "exits": [
+      "ruined_watch"
+     ],
+     "added": true,
+     "encounter": "bandit_ambush"
+    },
+    {
+     "id": "garrick_redemption__crossroads_b_x4",
+     "type": "combat",
+     "name": "Wyrm Trail",
+     "x": 0.474,
+     "y": 0.644,
+     "exits": [
+      "crossroads_b"
+     ],
+     "added": true,
+     "encounter": "corrupted_outpost"
     }
    ]
   },
@@ -207,9 +300,9 @@
      "y": 0.5,
      "exits": [
       "spider_hollow",
-      "hidden_path",
-      "tomek_caravan_burn",
-      "krix_offering",
+      "forest_enter__hidden_path_x6",
+      "forest_enter__tomek_caravan_burn_x5",
+      "forest_enter__krix_offering_x3",
       "recruit_kessa"
      ]
     },
@@ -220,7 +313,7 @@
      "x": 0.18,
      "y": 0.18,
      "exits": [
-      "spider_hollow"
+      "tomek_caravan_burn__spider_hollow_x1"
      ]
     },
     {
@@ -261,7 +354,7 @@
      "x": 0.3,
      "y": 0.72,
      "exits": [
-      "goblin_camp",
+      "hidden_path__goblin_camp_x4",
       "wood_test"
      ]
     },
@@ -310,7 +403,7 @@
      "x": 0.7,
      "y": 0.22,
      "exits": [
-      "thornwood_boss"
+      "seer_hut__thornwood_boss_x0"
      ]
     },
     {
@@ -341,7 +434,7 @@
      "x": 0.85,
      "y": 0.85,
      "exits": [
-      "thornwood_boss"
+      "silk_cache__thornwood_boss_x2"
      ]
     },
     {
@@ -352,6 +445,90 @@
      "y": 0.5,
      "exits": [],
      "encounter": "thornwood_boss"
+    },
+    {
+     "id": "seer_hut__thornwood_boss_x0",
+     "type": "combat",
+     "name": "Drowned Hall",
+     "x": 0.812,
+     "y": 0.347,
+     "exits": [
+      "thornwood_boss"
+     ],
+     "added": true,
+     "encounter": "bear_ambush"
+    },
+    {
+     "id": "tomek_caravan_burn__spider_hollow_x1",
+     "type": "combat",
+     "name": "Scouts in the Brush",
+     "x": 0.25,
+     "y": 0.194,
+     "exits": [
+      "spider_hollow"
+     ],
+     "added": true,
+     "encounter": "wolf_pack"
+    },
+    {
+     "id": "silk_cache__thornwood_boss_x2",
+     "type": "combat",
+     "name": "Gate of Teeth",
+     "x": 0.894,
+     "y": 0.677,
+     "exits": [
+      "thornwood_boss"
+     ],
+     "added": true,
+     "encounter": "wolf_pack"
+    },
+    {
+     "id": "forest_enter__krix_offering_x3",
+     "type": "combat",
+     "name": "Crossing",
+     "x": 0.123,
+     "y": 0.68,
+     "exits": [
+      "krix_offering"
+     ],
+     "added": true,
+     "encounter": "spider_nest"
+    },
+    {
+     "id": "hidden_path__goblin_camp_x4",
+     "type": "combat",
+     "name": "Cinder Ford",
+     "x": 0.391,
+     "y": 0.623,
+     "exits": [
+      "goblin_camp"
+     ],
+     "added": true,
+     "encounter": "spider_nest"
+    },
+    {
+     "id": "forest_enter__tomek_caravan_burn_x5",
+     "type": "shrine",
+     "name": "Wayside Shrine",
+     "x": 0.135,
+     "y": 0.373,
+     "exits": [
+      "tomek_caravan_burn"
+     ],
+     "added": true,
+     "shrineType": "heal"
+    },
+    {
+     "id": "forest_enter__hidden_path_x6",
+     "type": "combat",
+     "name": "Ash Road",
+     "x": 0.19,
+     "y": 0.597,
+     "exits": [
+      "hidden_path"
+     ],
+     "added": true,
+     "encounter": "wolf_pack"
     }
    ]
   }
@@ -370,7 +547,7 @@
      "x": 0.06,
      "y": 0.5,
      "exits": [
-      "dust_patrol",
+      "ash_gate__dust_patrol_x4",
       "ash_lore",
       "salt_wastes",
       "garrick_old_oath",
@@ -396,7 +573,7 @@
      "x": 0.3,
      "y": 0.12,
      "exits": [
-      "obsidian_fort"
+      "recruit_veya__obsidian_fort_x2"
      ]
     },
     {
@@ -458,7 +635,7 @@
      "x": 0.4,
      "y": 0.88,
      "exits": [
-      "buried_cache"
+      "salt_tunnels__buried_cache_x5"
      ],
      "encounter": "obsidian_garrison"
     },
@@ -469,7 +646,7 @@
      "x": 0.58,
      "y": 0.88,
      "exits": [
-      "veil_camp"
+      "buried_cache__veil_camp_x6"
      ]
     },
     {
@@ -481,7 +658,7 @@
      "exits": [
       "ember_path",
       "veil_camp",
-      "black_spire"
+      "obsidian_fort__black_spire_x0"
      ],
      "encounter": "obsidian_garrison"
     },
@@ -502,7 +679,7 @@
      "x": 0.72,
      "y": 0.28,
      "exits": [
-      "dust_boss"
+      "ember_path__dust_boss_x7"
      ],
      "encounter": "ember_ambush"
     },
@@ -514,7 +691,7 @@
      "y": 0.62,
      "exits": [
       "dust_boss",
-      "dust_int_check"
+      "veil_camp__dust_int_check_x1"
      ],
      "encounter": "veil_cult_camp"
     },
@@ -525,7 +702,7 @@
      "x": 0.82,
      "y": 0.78,
      "exits": [
-      "dust_boss"
+      "dust_int_check__dust_boss_x3"
      ],
      "skillCheck": {
       "stat": "INT",
@@ -551,6 +728,102 @@
      "y": 0.5,
      "exits": [],
      "encounter": "lava_titan"
+    },
+    {
+     "id": "obsidian_fort__black_spire_x0",
+     "type": "ambush",
+     "name": "Ambush!",
+     "x": 0.512,
+     "y": 0.259,
+     "exits": [
+      "black_spire"
+     ],
+     "added": true,
+     "encounter": "obsidian_garrison"
+    },
+    {
+     "id": "veil_camp__dust_int_check_x1",
+     "type": "shrine",
+     "name": "Wayside Shrine",
+     "x": 0.765,
+     "y": 0.724,
+     "exits": [
+      "dust_int_check"
+     ],
+     "added": true,
+     "shrineType": "empower"
+    },
+    {
+     "id": "recruit_veya__obsidian_fort_x2",
+     "type": "combat",
+     "name": "Wyrm Trail",
+     "x": 0.371,
+     "y": 0.288,
+     "exits": [
+      "obsidian_fort"
+     ],
+     "added": true,
+     "encounter": "ember_ambush"
+    },
+    {
+     "id": "dust_int_check__dust_boss_x3",
+     "type": "combat",
+     "name": "Sentry Post",
+     "x": 0.884,
+     "y": 0.677,
+     "exits": [
+      "dust_boss"
+     ],
+     "added": true,
+     "encounter": "ash_patrol"
+    },
+    {
+     "id": "ash_gate__dust_patrol_x4",
+     "type": "combat",
+     "name": "Raiders' Camp",
+     "x": 0.142,
+     "y": 0.322,
+     "exits": [
+      "dust_patrol"
+     ],
+     "added": true,
+     "encounter": "ember_ambush"
+    },
+    {
+     "id": "salt_tunnels__buried_cache_x5",
+     "type": "shrine",
+     "name": "Old Idol",
+     "x": 0.487,
+     "y": 0.84,
+     "exits": [
+      "buried_cache"
+     ],
+     "added": true,
+     "shrineType": "empower"
+    },
+    {
+     "id": "buried_cache__veil_camp_x6",
+     "type": "combat",
+     "name": "Hollow Way",
+     "x": 0.649,
+     "y": 0.743,
+     "exits": [
+      "veil_camp"
+     ],
+     "added": true,
+     "encounter": "ember_ambush"
+    },
+    {
+     "id": "ember_path__dust_boss_x7",
+     "type": "combat",
+     "name": "Cinder Ford",
+     "x": 0.829,
+     "y": 0.38,
+     "exits": [
+      "dust_boss"
+     ],
+     "added": true,
+     "encounter": "obsidian_garrison"
     }
    ]
   },
@@ -568,8 +841,8 @@
      "y": 0.5,
      "exits": [
       "lava_fields",
-      "ancient_shrine",
-      "cinder_gorge",
+      "plateau_enter__ancient_shrine_x2",
+      "plateau_enter__cinder_gorge_x0",
       "iris_ember_field",
       "yssira_first_vision",
       "recruit_magnus"
@@ -602,7 +875,7 @@
      "x": 0.18,
      "y": 0.82,
      "exits": [
-      "cinder_gorge"
+      "yssira_first_vision__cinder_gorge_x1"
      ]
     },
     {
@@ -613,7 +886,7 @@
      "y": 0.22,
      "exits": [
       "veil_stronghold",
-      "obsidian_vein"
+      "lava_fields__obsidian_vein_x4"
      ],
      "encounter": "ash_patrol"
     },
@@ -624,7 +897,7 @@
      "x": 0.22,
      "y": 0.5,
      "exits": [
-      "veil_stronghold"
+      "ancient_shrine__veil_stronghold_x3"
      ]
     },
     {
@@ -645,7 +918,7 @@
      "x": 0.4,
      "y": 0.88,
      "exits": [
-      "ember_hoard"
+      "magma_vault__ember_hoard_x5"
      ],
      "encounter": "veil_cult_camp"
     },
@@ -666,7 +939,7 @@
      "x": 0.38,
      "y": 0.1,
      "exits": [
-      "veil_stronghold"
+      "obsidian_vein__veil_stronghold_x6"
      ]
     },
     {
@@ -688,7 +961,7 @@
      "x": 0.75,
      "y": 0.22,
      "exits": [
-      "plateau_boss"
+      "rift_access__plateau_boss_x7"
      ]
     },
     {
@@ -734,6 +1007,99 @@
      "y": 0.5,
      "exits": [],
      "encounter": "veil_high_priest"
+    },
+    {
+     "id": "plateau_enter__cinder_gorge_x0",
+     "type": "combat",
+     "name": "Black Stair",
+     "x": 0.141,
+     "y": 0.674,
+     "exits": [
+      "cinder_gorge"
+     ],
+     "added": true,
+     "encounter": "veil_cult_camp"
+    },
+    {
+     "id": "yssira_first_vision__cinder_gorge_x1",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.186,
+     "y": 0.839,
+     "exits": [
+      "cinder_gorge"
+     ],
+     "added": true
+    },
+    {
+     "id": "plateau_enter__ancient_shrine_x2",
+     "type": "shrine",
+     "name": "Wayside Shrine",
+     "x": 0.146,
+     "y": 0.537,
+     "exits": [
+      "ancient_shrine"
+     ],
+     "added": true,
+     "shrineType": "heal"
+    },
+    {
+     "id": "ancient_shrine__veil_stronghold_x3",
+     "type": "treasure",
+     "name": "Abandoned Wagon",
+     "x": 0.355,
+     "y": 0.469,
+     "exits": [
+      "veil_stronghold"
+     ],
+     "added": true
+    },
+    {
+     "id": "lava_fields__obsidian_vein_x4",
+     "type": "combat",
+     "name": "Ash Road",
+     "x": 0.286,
+     "y": 0.137,
+     "exits": [
+      "obsidian_vein"
+     ],
+     "added": true,
+     "encounter": "veil_cult_camp"
+    },
+    {
+     "id": "magma_vault__ember_hoard_x5",
+     "type": "combat",
+     "name": "Cinder Ford",
+     "x": 0.497,
+     "y": 0.874,
+     "exits": [
+      "ember_hoard"
+     ],
+     "added": true,
+     "encounter": "obsidian_garrison"
+    },
+    {
+     "id": "obsidian_vein__veil_stronghold_x6",
+     "type": "treasure",
+     "name": "Collapsed Vault",
+     "x": 0.455,
+     "y": 0.241,
+     "exits": [
+      "veil_stronghold"
+     ],
+     "added": true
+    },
+    {
+     "id": "rift_access__plateau_boss_x7",
+     "type": "combat",
+     "name": "Burned Farmstead",
+     "x": 0.845,
+     "y": 0.331,
+     "exits": [
+      "plateau_boss"
+     ],
+     "added": true,
+     "encounter": "ash_patrol"
     }
    ]
   }
@@ -752,10 +1118,10 @@
      "x": 0.06,
      "y": 0.5,
      "exits": [
-      "demon_patrol",
-      "fell_ruins",
-      "bone_pit",
-      "garrick_hell_stand",
+      "breach_gate__demon_patrol_x1",
+      "breach_gate__fell_ruins_x2",
+      "breach_gate__bone_pit_x3",
+      "breach_gate__garrick_hell_stand_x6",
       "tomek_last_deal",
       "krix_redemption"
      ]
@@ -809,7 +1175,7 @@
      "x": 0.38,
      "y": 0.08,
      "exits": [
-      "inferno_keep"
+      "brimstone_shrine__inferno_keep_x0"
      ],
      "shrineType": "heal"
     },
@@ -863,7 +1229,7 @@
      "y": 0.38,
      "exits": [
       "void_altar",
-      "soul_prison"
+      "inferno_keep__soul_prison_x5"
      ],
      "encounter": "hell_garrison"
     },
@@ -874,7 +1240,7 @@
      "x": 0.75,
      "y": 0.22,
      "exits": [
-      "breach_boss"
+      "void_altar__breach_boss_x4"
      ]
     },
     {
@@ -895,6 +1261,89 @@
      "y": 0.5,
      "exits": [],
      "encounter": "archfiend_malgrath"
+    },
+    {
+     "id": "brimstone_shrine__inferno_keep_x0",
+     "type": "combat",
+     "name": "Warband on the Road",
+     "x": 0.425,
+     "y": 0.267,
+     "exits": [
+      "inferno_keep"
+     ],
+     "added": true,
+     "encounter": "rift_assault"
+    },
+    {
+     "id": "breach_gate__demon_patrol_x1",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.151,
+     "y": 0.358,
+     "exits": [
+      "demon_patrol"
+     ],
+     "added": true
+    },
+    {
+     "id": "breach_gate__fell_ruins_x2",
+     "type": "combat",
+     "name": "Cairn Field",
+     "x": 0.151,
+     "y": 0.495,
+     "exits": [
+      "fell_ruins"
+     ],
+     "added": true,
+     "encounter": "rift_assault"
+    },
+    {
+     "id": "breach_gate__bone_pit_x3",
+     "type": "combat",
+     "name": "Raiders' Camp",
+     "x": 0.139,
+     "y": 0.682,
+     "exits": [
+      "bone_pit"
+     ],
+     "added": true,
+     "encounter": "hell_garrison"
+    },
+    {
+     "id": "void_altar__breach_boss_x4",
+     "type": "combat",
+     "name": "Ambush at the Ford",
+     "x": 0.823,
+     "y": 0.354,
+     "exits": [
+      "breach_boss"
+     ],
+     "added": true,
+     "encounter": "rift_assault"
+    },
+    {
+     "id": "inferno_keep__soul_prison_x5",
+     "type": "combat",
+     "name": "Ruined Watch",
+     "x": 0.628,
+     "y": 0.48,
+     "exits": [
+      "soul_prison"
+     ],
+     "added": true,
+     "encounter": "hell_garrison"
+    },
+    {
+     "id": "breach_gate__garrick_hell_stand_x6",
+     "type": "combat",
+     "name": "Burned Farmstead",
+     "x": 0.105,
+     "y": 0.3,
+     "exits": [
+      "garrick_hell_stand"
+     ],
+     "added": true,
+     "encounter": "demon_patrol"
     }
    ]
   },
@@ -911,10 +1360,10 @@
      "x": 0.05,
      "y": 0.5,
      "exits": [
-      "rift_demons",
-      "void_nexus",
-      "shattered_path",
-      "iris_shard_archive",
+      "core_enter__rift_demons_x1",
+      "core_enter__void_nexus_x2",
+      "core_enter__shattered_path_x3",
+      "core_enter__iris_shard_archive_x6",
       "yssira_breaking"
      ]
     },
@@ -978,7 +1427,7 @@
      "x": 0.2,
      "y": 0.85,
      "exits": [
-      "rift_cache"
+      "shattered_path__rift_cache_x0"
      ],
      "encounter": "rift_assault"
     },
@@ -1023,7 +1472,7 @@
      "x": 0.66,
      "y": 0.1,
      "exits": [
-      "the_wound"
+      "oblivion_spire__the_wound_x5"
      ],
      "shrineType": "empower"
     },
@@ -1034,7 +1483,7 @@
      "x": 0.78,
      "y": 0.22,
      "exits": [
-      "core_boss"
+      "the_wound__core_boss_x4"
      ]
     },
     {
@@ -1055,6 +1504,89 @@
      "y": 0.5,
      "exits": [],
      "encounter": "emberveil_sovereign"
+    },
+    {
+     "id": "shattered_path__rift_cache_x0",
+     "type": "combat",
+     "name": "Warband on the Road",
+     "x": 0.265,
+     "y": 0.912,
+     "exits": [
+      "rift_cache"
+     ],
+     "added": true,
+     "encounter": "void_nexus_ambush"
+    },
+    {
+     "id": "core_enter__rift_demons_x1",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.136,
+     "y": 0.358,
+     "exits": [
+      "rift_demons"
+     ],
+     "added": true
+    },
+    {
+     "id": "core_enter__void_nexus_x2",
+     "type": "combat",
+     "name": "Cairn Field",
+     "x": 0.136,
+     "y": 0.485,
+     "exits": [
+      "void_nexus"
+     ],
+     "added": true,
+     "encounter": "void_nexus_ambush"
+    },
+    {
+     "id": "core_enter__shattered_path_x3",
+     "type": "combat",
+     "name": "Raiders' Camp",
+     "x": 0.124,
+     "y": 0.687,
+     "exits": [
+      "shattered_path"
+     ],
+     "added": true,
+     "encounter": "rift_assault"
+    },
+    {
+     "id": "the_wound__core_boss_x4",
+     "type": "combat",
+     "name": "Ambush at the Ford",
+     "x": 0.848,
+     "y": 0.354,
+     "exits": [
+      "core_boss"
+     ],
+     "added": true,
+     "encounter": "void_nexus_ambush"
+    },
+    {
+     "id": "oblivion_spire__the_wound_x5",
+     "type": "combat",
+     "name": "Ruined Watch",
+     "x": 0.723,
+     "y": 0.14,
+     "exits": [
+      "the_wound"
+     ],
+     "added": true,
+     "encounter": "rift_assault"
+    },
+    {
+     "id": "core_enter__iris_shard_archive_x6",
+     "type": "combat",
+     "name": "Burned Farmstead",
+     "x": 0.1,
+     "y": 0.3,
+     "exits": [
+      "iris_shard_archive"
+     ],
+     "added": true,
+     "encounter": "hell_garrison"
     }
    ]
   }
@@ -1074,9 +1606,9 @@
      "y": 0.5,
      "exits": [
       "star_fields",
-      "void_expanse",
-      "nebula_drift",
-      "garrick_final_charge"
+      "rift_entry__void_expanse_x5",
+      "rift_entry__nebula_drift_x4",
+      "rift_entry__garrick_final_charge_x2"
      ]
     },
     {
@@ -1096,8 +1628,8 @@
      "x": 0.2,
      "y": 0.2,
      "exits": [
-      "cosmic_bastion",
-      "star_tomb"
+      "star_fields__cosmic_bastion_x1",
+      "star_fields__star_tomb_x6"
      ],
      "encounter": "void_horde"
     },
@@ -1129,7 +1661,7 @@
      "x": 0.2,
      "y": 0.84,
      "exits": [
-      "event_horizon"
+      "nebula_drift__event_horizon_x3"
      ],
      "encounter": "cosmic_assault"
     },
@@ -1174,7 +1706,7 @@
      "x": 0.6,
      "y": 0.15,
      "exits": [
-      "prophet_sanctum"
+      "collapse_rift__prophet_sanctum_x0"
      ],
      "encounter": "cosmic_assault"
     },
@@ -1207,6 +1739,89 @@
      "y": 0.5,
      "exits": [],
      "encounter": "void_horde"
+    },
+    {
+     "id": "collapse_rift__prophet_sanctum_x0",
+     "type": "combat",
+     "name": "Old Battlefield",
+     "x": 0.667,
+     "y": 0.216,
+     "exits": [
+      "prophet_sanctum"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "star_fields__cosmic_bastion_x1",
+     "type": "combat",
+     "name": "Black Stair",
+     "x": 0.335,
+     "y": 0.312,
+     "exits": [
+      "cosmic_bastion"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "rift_entry__garrick_final_charge_x2",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.102,
+     "y": 0.341,
+     "exits": [
+      "garrick_final_charge"
+     ],
+     "added": true
+    },
+    {
+     "id": "nebula_drift__event_horizon_x3",
+     "type": "combat",
+     "name": "Wyrm Trail",
+     "x": 0.289,
+     "y": 0.872,
+     "exits": [
+      "event_horizon"
+     ],
+     "added": true,
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "rift_entry__nebula_drift_x4",
+     "type": "combat",
+     "name": "Wardstone Circle",
+     "x": 0.118,
+     "y": 0.69,
+     "exits": [
+      "nebula_drift"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "rift_entry__void_expanse_x5",
+     "type": "combat",
+     "name": "Gate of Teeth",
+     "x": 0.116,
+     "y": 0.513,
+     "exits": [
+      "void_expanse"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "star_fields__star_tomb_x6",
+     "type": "shrine",
+     "name": "Wayside Shrine",
+     "x": 0.275,
+     "y": 0.173,
+     "exits": [
+      "star_tomb"
+     ],
+     "added": true,
+     "shrineType": "heal"
     }
    ]
   },
@@ -1224,9 +1839,9 @@
      "y": 0.5,
      "exits": [
       "star_horror_swarm",
-      "void_library",
-      "echo_wastes",
-      "yssira_last_song"
+      "void_gates__void_library_x5",
+      "void_gates__echo_wastes_x4",
+      "void_gates__yssira_last_song_x2"
      ]
     },
     {
@@ -1246,8 +1861,8 @@
      "x": 0.2,
      "y": 0.22,
      "exits": [
-      "unraveler_ante",
-      "forgotten_altar"
+      "star_horror_swarm__unraveler_ante_x1",
+      "star_horror_swarm__forgotten_altar_x6"
      ],
      "encounter": "cosmic_assault"
     },
@@ -1279,7 +1894,7 @@
      "x": 0.2,
      "y": 0.86,
      "exits": [
-      "oblivion_warden"
+      "echo_wastes__oblivion_warden_x3"
      ],
      "encounter": "void_horde"
     },
@@ -1324,7 +1939,7 @@
      "x": 0.6,
      "y": 0.12,
      "exits": [
-      "last_shrine"
+      "rift_spiral__last_shrine_x0"
      ],
      "encounter": "cosmic_assault"
     },
@@ -1358,6 +1973,89 @@
      "y": 0.5,
      "exits": [],
      "encounter": "unraveler"
+    },
+    {
+     "id": "rift_spiral__last_shrine_x0",
+     "type": "combat",
+     "name": "Old Battlefield",
+     "x": 0.667,
+     "y": 0.201,
+     "exits": [
+      "last_shrine"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "star_horror_swarm__unraveler_ante_x1",
+     "type": "combat",
+     "name": "Black Stair",
+     "x": 0.335,
+     "y": 0.322,
+     "exits": [
+      "unraveler_ante"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "void_gates__yssira_last_song_x2",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.102,
+     "y": 0.341,
+     "exits": [
+      "yssira_last_song"
+     ],
+     "added": true
+    },
+    {
+     "id": "echo_wastes__oblivion_warden_x3",
+     "type": "combat",
+     "name": "Wyrm Trail",
+     "x": 0.289,
+     "y": 0.882,
+     "exits": [
+      "oblivion_warden"
+     ],
+     "added": true,
+     "encounter": "cosmic_assault"
+    },
+    {
+     "id": "void_gates__echo_wastes_x4",
+     "type": "combat",
+     "name": "Wardstone Circle",
+     "x": 0.118,
+     "y": 0.7,
+     "exits": [
+      "echo_wastes"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "void_gates__void_library_x5",
+     "type": "combat",
+     "name": "Gate of Teeth",
+     "x": 0.116,
+     "y": 0.513,
+     "exits": [
+      "void_library"
+     ],
+     "added": true,
+     "encounter": "void_horde"
+    },
+    {
+     "id": "star_horror_swarm__forgotten_altar_x6",
+     "type": "shrine",
+     "name": "Wayside Shrine",
+     "x": 0.275,
+     "y": 0.183,
+     "exits": [
+      "forgotten_altar"
+     ],
+     "added": true,
+     "shrineType": "heal"
     }
    ]
   }
@@ -1376,10 +2074,10 @@
      "x": 0.04,
      "y": 0.5,
      "exits": [
-      "drowned_halls",
-      "memory_pool",
-      "deep_trench",
-      "tidekeeper_lament"
+      "abyss_gate__drowned_halls_x1",
+      "abyss_gate__memory_pool_x2",
+      "abyss_gate__deep_trench_x3",
+      "abyss_gate__tidekeeper_lament_x6"
      ]
     },
     {
@@ -1444,7 +2142,7 @@
      "x": 0.18,
      "y": 0.84,
      "exits": [
-      "leviathan_nest"
+      "deep_trench__leviathan_nest_x0"
      ],
      "encounter": "primordial_patrol"
     },
@@ -1489,7 +2187,7 @@
      "x": 0.62,
      "y": 0.1,
      "exits": [
-      "origin_shrine"
+      "abyssal_archive__origin_shrine_x5"
      ]
     },
     {
@@ -1499,7 +2197,7 @@
      "x": 0.76,
      "y": 0.22,
      "exits": [
-      "abyss_boss"
+      "origin_shrine__abyss_boss_x4"
      ],
      "shrineType": "empower"
     },
@@ -1522,6 +2220,89 @@
      "y": 0.5,
      "exits": [],
      "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "deep_trench__leviathan_nest_x0",
+     "type": "combat",
+     "name": "Warband on the Road",
+     "x": 0.245,
+     "y": 0.907,
+     "exits": [
+      "leviathan_nest"
+     ],
+     "added": true,
+     "encounter": "genesis_nest"
+    },
+    {
+     "id": "abyss_gate__drowned_halls_x1",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.121,
+     "y": 0.348,
+     "exits": [
+      "drowned_halls"
+     ],
+     "added": true
+    },
+    {
+     "id": "abyss_gate__memory_pool_x2",
+     "type": "combat",
+     "name": "Cairn Field",
+     "x": 0.121,
+     "y": 0.485,
+     "exits": [
+      "memory_pool"
+     ],
+     "added": true,
+     "encounter": "genesis_nest"
+    },
+    {
+     "id": "abyss_gate__deep_trench_x3",
+     "type": "combat",
+     "name": "Raiders' Camp",
+     "x": 0.109,
+     "y": 0.682,
+     "exits": [
+      "deep_trench"
+     ],
+     "added": true,
+     "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "origin_shrine__abyss_boss_x4",
+     "type": "combat",
+     "name": "Ambush at the Ford",
+     "x": 0.838,
+     "y": 0.354,
+     "exits": [
+      "abyss_boss"
+     ],
+     "added": true,
+     "encounter": "genesis_nest"
+    },
+    {
+     "id": "abyssal_archive__origin_shrine_x5",
+     "type": "combat",
+     "name": "Ruined Watch",
+     "x": 0.693,
+     "y": 0.14,
+     "exits": [
+      "origin_shrine"
+     ],
+     "added": true,
+     "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "abyss_gate__tidekeeper_lament_x6",
+     "type": "combat",
+     "name": "Burned Farmstead",
+     "x": 0.095,
+     "y": 0.31,
+     "exits": [
+      "tidekeeper_lament"
+     ],
+     "added": true,
+     "encounter": "primordial_patrol"
     }
    ]
   },
@@ -1539,9 +2320,9 @@
      "y": 0.5,
      "exits": [
       "shard_storm",
-      "echo_chamber",
-      "creation_loom",
-      "yssira_final_rite"
+      "nexus_gates__echo_chamber_x5",
+      "nexus_gates__creation_loom_x4",
+      "nexus_gates__yssira_final_rite_x2"
      ]
     },
     {
@@ -1561,8 +2342,8 @@
      "x": 0.18,
      "y": 0.2,
      "exits": [
-      "architect_bridge",
-      "unmade_gallery"
+      "shard_storm__architect_bridge_x1",
+      "shard_storm__unmade_gallery_x6"
      ],
      "encounter": "primordial_patrol"
     },
@@ -1593,7 +2374,7 @@
      "x": 0.18,
      "y": 0.86,
      "exits": [
-      "shattered_spire"
+      "creation_loom__shattered_spire_x3"
      ],
      "encounter": "genesis_nest"
     },
@@ -1638,7 +2419,7 @@
      "x": 0.6,
      "y": 0.1,
      "exits": [
-      "last_prayer"
+      "primal_vein__last_prayer_x0"
      ],
      "encounter": "primordial_patrol"
     },
@@ -1672,6 +2453,89 @@
      "y": 0.5,
      "exits": [],
      "encounter": "the_architect_final"
+    },
+    {
+     "id": "primal_vein__last_prayer_x0",
+     "type": "combat",
+     "name": "Old Battlefield",
+     "x": 0.667,
+     "y": 0.191,
+     "exits": [
+      "last_prayer"
+     ],
+     "added": true,
+     "encounter": "abyssal_garrison"
+    },
+    {
+     "id": "shard_storm__architect_bridge_x1",
+     "type": "combat",
+     "name": "Black Stair",
+     "x": 0.325,
+     "y": 0.312,
+     "exits": [
+      "architect_bridge"
+     ],
+     "added": true,
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "nexus_gates__yssira_final_rite_x2",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.087,
+     "y": 0.341,
+     "exits": [
+      "yssira_final_rite"
+     ],
+     "added": true
+    },
+    {
+     "id": "creation_loom__shattered_spire_x3",
+     "type": "combat",
+     "name": "Wyrm Trail",
+     "x": 0.269,
+     "y": 0.882,
+     "exits": [
+      "shattered_spire"
+     ],
+     "added": true,
+     "encounter": "genesis_nest"
+    },
+    {
+     "id": "nexus_gates__creation_loom_x4",
+     "type": "combat",
+     "name": "Wardstone Circle",
+     "x": 0.103,
+     "y": 0.7,
+     "exits": [
+      "creation_loom"
+     ],
+     "added": true,
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "nexus_gates__echo_chamber_x5",
+     "type": "combat",
+     "name": "Gate of Teeth",
+     "x": 0.101,
+     "y": 0.513,
+     "exits": [
+      "echo_chamber"
+     ],
+     "added": true,
+     "encounter": "primordial_patrol"
+    },
+    {
+     "id": "shard_storm__unmade_gallery_x6",
+     "type": "shrine",
+     "name": "Wayside Shrine",
+     "x": 0.255,
+     "y": 0.163,
+     "exits": [
+      "unmade_gallery"
+     ],
+     "added": true,
+     "shrineType": "heal"
     }
    ]
   }
@@ -1702,7 +2566,7 @@
      "x": 0.2,
      "y": 0.22,
      "exits": [
-      "wyrm_citadel",
+      "dragon_skyroad__wyrm_citadel_x1",
       "dragon_hoard_a"
      ],
      "encounter": "dragon_patrol"
@@ -1714,7 +2578,7 @@
      "x": 0.2,
      "y": 0.5,
      "exits": [
-      "wyrm_citadel"
+      "wyrm_shrine__wyrm_citadel_x5"
      ],
      "shrineType": "heal"
     },
@@ -1736,7 +2600,7 @@
      "x": 0.36,
      "y": 0.9,
      "exits": [
-      "dragon_hoard_b"
+      "frost_wyrm_lair__dragon_hoard_b_x0"
      ],
      "encounter": "frost_wyrm_pack"
     },
@@ -1747,7 +2611,7 @@
      "x": 0.36,
      "y": 0.08,
      "exits": [
-      "wyrm_citadel"
+      "dragon_hoard_a__wyrm_citadel_x4"
      ]
     },
     {
@@ -1768,7 +2632,7 @@
      "y": 0.38,
      "exits": [
       "storm_rookery",
-      "dragon_cult_altar",
+      "wyrm_citadel__dragon_cult_altar_x3",
       "dragon_boss"
      ],
      "encounter": "wyrm_citadel"
@@ -1790,7 +2654,7 @@
      "x": 0.72,
      "y": 0.62,
      "exits": [
-      "dragon_boss"
+      "storm_rookery__dragon_boss_x2"
      ],
      "encounter": "storm_dragon_nest"
     },
@@ -1802,6 +2666,78 @@
      "y": 0.5,
      "exits": [],
      "encounter": "ancient_dragon_fight"
+    },
+    {
+     "id": "frost_wyrm_lair__dragon_hoard_b_x0",
+     "type": "combat",
+     "name": "Bone Gully",
+     "x": 0.448,
+     "y": 0.876,
+     "exits": [
+      "dragon_hoard_b"
+     ],
+     "added": true,
+     "encounter": "dragon_patrol"
+    },
+    {
+     "id": "dragon_skyroad__wyrm_citadel_x1",
+     "type": "combat",
+     "name": "Ruined Watch",
+     "x": 0.355,
+     "y": 0.273,
+     "exits": [
+      "wyrm_citadel"
+     ],
+     "added": true,
+     "encounter": "frost_wyrm_pack"
+    },
+    {
+     "id": "storm_rookery__dragon_boss_x2",
+     "type": "ambush",
+     "name": "Ambush!",
+     "x": 0.835,
+     "y": 0.6,
+     "exits": [
+      "dragon_boss"
+     ],
+     "added": true,
+     "encounter": "wyrm_citadel"
+    },
+    {
+     "id": "wyrm_citadel__dragon_cult_altar_x3",
+     "type": "combat",
+     "name": "Cairn Field",
+     "x": 0.583,
+     "y": 0.25,
+     "exits": [
+      "dragon_cult_altar"
+     ],
+     "added": true,
+     "encounter": "dragon_patrol"
+    },
+    {
+     "id": "dragon_hoard_a__wyrm_citadel_x4",
+     "type": "combat",
+     "name": "Toll Bridge",
+     "x": 0.437,
+     "y": 0.216,
+     "exits": [
+      "wyrm_citadel"
+     ],
+     "added": true,
+     "encounter": "storm_dragon_nest"
+    },
+    {
+     "id": "wyrm_shrine__wyrm_citadel_x5",
+     "type": "combat",
+     "name": "Broken Caravan",
+     "x": 0.363,
+     "y": 0.44,
+     "exits": [
+      "wyrm_citadel"
+     ],
+     "added": true,
+     "encounter": "frost_wyrm_pack"
     }
    ]
   },
@@ -1818,7 +2754,7 @@
      "x": 0.05,
      "y": 0.5,
      "exits": [
-      "dragon_spine",
+      "throne_gate__dragon_spine_x2",
       "dragon_archive",
       "burning_spires"
      ]
@@ -1852,7 +2788,7 @@
      "x": 0.2,
      "y": 0.84,
      "exits": [
-      "dragon_trial"
+      "burning_spires__dragon_trial_x0"
      ],
      "encounter": "dragon_elite"
     },
@@ -1863,7 +2799,7 @@
      "x": 0.36,
      "y": 0.9,
      "exits": [
-      "dragonking_shrine"
+      "dragon_trial__dragonking_shrine_x1"
      ],
      "encounter": "storm_dragon_nest"
     },
@@ -1884,7 +2820,7 @@
      "x": 0.54,
      "y": 0.88,
      "exits": [
-      "dragonking_boss"
+      "dragonking_shrine__dragonking_boss_x4"
      ],
      "shrineType": "fullrestore"
     },
@@ -1907,7 +2843,7 @@
      "x": 0.72,
      "y": 0.22,
      "exits": [
-      "dragonking_boss"
+      "dragon_oracle__dragonking_boss_x3"
      ]
     },
     {
@@ -1918,6 +2854,64 @@
      "y": 0.5,
      "exits": [],
      "encounter": "dragon_king_fight"
+    },
+    {
+     "id": "burning_spires__dragon_trial_x0",
+     "type": "combat",
+     "name": "Ambush at the Ford",
+     "x": 0.266,
+     "y": 0.858,
+     "exits": [
+      "dragon_trial"
+     ],
+     "added": true,
+     "encounter": "dragon_elite"
+    },
+    {
+     "id": "dragon_trial__dragonking_shrine_x1",
+     "type": "treasure",
+     "name": "Hidden Cache",
+     "x": 0.463,
+     "y": 0.89,
+     "exits": [
+      "dragonking_shrine"
+     ],
+     "added": true
+    },
+    {
+     "id": "throne_gate__dragon_spine_x2",
+     "type": "treasure",
+     "name": "Abandoned Wagon",
+     "x": 0.122,
+     "y": 0.349,
+     "exits": [
+      "dragon_spine"
+     ],
+     "added": true
+    },
+    {
+     "id": "dragon_oracle__dragonking_boss_x3",
+     "type": "combat",
+     "name": "Drowned Hall",
+     "x": 0.832,
+     "y": 0.373,
+     "exits": [
+      "dragonking_boss"
+     ],
+     "added": true,
+     "encounter": "dragon_elite"
+    },
+    {
+     "id": "dragonking_shrine__dragonking_boss_x4",
+     "type": "shrine",
+     "name": "Wayside Shrine",
+     "x": 0.753,
+     "y": 0.672,
+     "exits": [
+      "dragonking_boss"
+     ],
+     "added": true,
+     "shrineType": "heal"
     }
    ]
   }

@@ -3,21 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Emberveil · Playground prototype</title>
+<title>Emberveil 2 · Playground prototype</title>
 <link rel="stylesheet" href="style.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/", "onnxruntime-web": "../../vendor/onnxruntime-web/ort.min.mjs" } }</script>
 </head>
 <body>
 <header class="top">
   <a class="back" href="../../index.html">← Playground</a>
-  <h1>Emberveil <span class="tiny">rebuilt</span></h1>
+  <h1>Emberveil 2 <span class="tiny">rebuilt on the playground</span></h1>
   <div class="hud" id="hud" hidden>
     <span id="hud-act"></span>
     <span id="hud-place"></span>
     <span>🪙 <b id="hud-gold"></b></span>
     <span title="fame">★ <b id="hud-fame"></b></span>
+    <span id="hud-day" class="tiny"></span>
     <label class="mute"><input type="checkbox" id="mute"> mute</label>
-    <select id="engine" title="voice engine"><option value="">voice: own</option><option value="formant">voice: ours</option><option value="espeak">espeak</option><option value="babble">babble</option><option value="webspeech">browser</option></select>
+    <select id="engine" title="voice engine"><option value="">voice: ours (formant 1.1)</option><option value="espeak">espeak</option><option value="babble">babble</option><option value="webspeech">browser</option></select>
     <button id="btn-save" class="small">Save</button>
     <button id="btn-menu" class="small">Menu</button>
   </div>
@@ -25,8 +26,8 @@
 <main id="app">
   <section class="screen" id="screen-title">
     <div class="title-card">
-      <h2>Emberveil</h2>
-      <p class="lead">A dark-fantasy party RPG: hire heroes from thirty classes, walk a branching world map, fight turn-based auto-battles, and chase loot with affixes through six acts. Rebuilt from the original game's data on the playground pieces.</p>
+      <h2>Emberveil 2</h2>
+      <p class="lead">A dark-fantasy party RPG: hire heroes from thirty classes, walk a branching world map three nodes a day, keep the party fed, fight turn-based auto-battles, rest by a fire where the party talks about the day, and chase loot with affixes through six acts.</p>
       <div class="row"><button id="btn-new" class="primary">New game</button><button id="btn-continue">Continue</button></div>
       <p class="tiny">Every class is a Mii-style character with its own gear parts. Beasts use the creature bodies. Talk comes from the Lingo engine, voices from the Formant synth. Save any hero to the character library.</p>
     </div>
@@ -60,8 +61,8 @@
       <div class="right">
         <div class="panel narrative"><div id="narrative" class="narrative-log" aria-live="polite"></div><div id="actions" class="actions"></div></div>
         <aside class="panel side">
-          <div class="tabs"><button data-tab="party" class="on">Party</button><button data-tab="bag">Bag</button><button data-tab="skills">Skills</button><button data-tab="quests">Quests</button></div>
-          <div id="tab-party" class="tab"></div><div id="tab-bag" class="tab" hidden></div><div id="tab-skills" class="tab" hidden></div><div id="tab-quests" class="tab" hidden></div>
+          <div class="tabs"><button data-tab="party" class="on">Party</button><button data-tab="bag">Bag</button><button data-tab="skills">Skills</button><button data-tab="quests">Quests</button><button data-tab="meter">Meter</button></div>
+          <div id="tab-party" class="tab"></div><div id="tab-bag" class="tab" hidden></div><div id="tab-skills" class="tab" hidden></div><div id="tab-quests" class="tab" hidden></div><div id="tab-meter" class="tab" hidden></div>
         </aside>
       </div>
     </div>

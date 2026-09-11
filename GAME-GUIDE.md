@@ -65,6 +65,10 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 `CLAUDE.md` (conventions + table), each experiment's `README.md`, `voice-lab/FORMANT.md` (the TTS engine), `lingo/MEMORY.md`, `lingo/RELATIONS.md`, `shared/character-schema.md`, `vendor/README.md` (licenses), `docs/research-*.md` (why these choices), `tools/build-items.py` (regenerate the item catalog).
 
 
+## Conversations and meters
+
+`conversations/js/conversations.js` turns memories, gear (with kill counts from `meters/js/meter.js`), loot deltas and party facts into structured back-and-forth talk: build `factsFrom({...})` from your game state and call `talk(speakers, facts)`. `meters/` records every hit from any combat system and renders a Skada-style drill-down. Our voice: import `voice-lab/js/formant-voice.js` (versioned; see its CHANGELOG).
+
 ## Animals and monsters
 
 `avatar-3d/js/creatures.js` gives you wolves, boars, bears, rats, horses, deer, bats, spiders, snakes, drakes and dragons as procedural 3D bodies with the same `{ group, update, setAnim }` interface as people. Store the spec under `character.creature`; creatures have no `speech`, so give them narrated actions ("the wolf snarls") instead of lines. See `avatar-3d/README.md` (Creatures).

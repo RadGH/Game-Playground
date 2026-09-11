@@ -1,0 +1,1941 @@
+{
+ "_doc": "Emberveil vocabulary for the Lingo talk engine: places, factions, story people, the enemy roster, loot and supply words, deities, spells, food, titles and weather. Load with `for (const e of pack.entries) lingo.lexicon.add(e); lingo.invalidatePronunciations();` (the Emberveil 2 prototype does this). Entries with the same id as a core entry replace it.",
+ "entries": [
+  {
+   "id": "emberglen",
+   "type": "place",
+   "forms": {
+    "sg": "Emberglen",
+    "adj": "Emberglen"
+   },
+   "proper": true,
+   "tags": [
+    "town",
+    "act1"
+   ]
+  },
+  {
+   "id": "border_roads",
+   "type": "place",
+   "forms": {
+    "sg": "the Border Roads",
+    "adj": "Border Roads"
+   },
+   "proper": true,
+   "tags": [
+    "road",
+    "act1"
+   ]
+  },
+  {
+   "id": "thornwood",
+   "type": "place",
+   "forms": {
+    "sg": "Thornwood Forest",
+    "adj": "Thornwood Forest"
+   },
+   "proper": true,
+   "tags": [
+    "forest",
+    "act1",
+    "dark"
+   ]
+  },
+  {
+   "id": "ashfort",
+   "type": "place",
+   "forms": {
+    "sg": "Ashfort",
+    "adj": "Ashfort"
+   },
+   "proper": true,
+   "tags": [
+    "town",
+    "act2"
+   ]
+  },
+  {
+   "id": "dust_roads",
+   "type": "place",
+   "forms": {
+    "sg": "the Dust Roads",
+    "adj": "Dust Roads"
+   },
+   "proper": true,
+   "tags": [
+    "desert",
+    "act2"
+   ]
+  },
+  {
+   "id": "ember_plateau",
+   "type": "place",
+   "forms": {
+    "sg": "the Ember Plateau",
+    "adj": "Ember Plateau"
+   },
+   "proper": true,
+   "tags": [
+    "volcanic",
+    "act2",
+    "hot"
+   ]
+  },
+  {
+   "id": "veil_stronghold",
+   "type": "place",
+   "forms": {
+    "sg": "the Veil Stronghold",
+    "adj": "Veil Stronghold"
+   },
+   "proper": true,
+   "tags": [
+    "ruin",
+    "act2"
+   ]
+  },
+  {
+   "id": "ironhold_bastion",
+   "type": "place",
+   "forms": {
+    "sg": "Ironhold Bastion",
+    "adj": "Ironhold Bastion"
+   },
+   "proper": true,
+   "tags": [
+    "town",
+    "act3"
+   ]
+  },
+  {
+   "id": "hell_breach",
+   "type": "place",
+   "forms": {
+    "sg": "the Hell Breach",
+    "adj": "Hell Breach"
+   },
+   "proper": true,
+   "tags": [
+    "hell",
+    "act3",
+    "hot"
+   ]
+  },
+  {
+   "id": "shattered_core",
+   "type": "place",
+   "forms": {
+    "sg": "the Shattered Core",
+    "adj": "Shattered Core"
+   },
+   "proper": true,
+   "tags": [
+    "hell",
+    "act3"
+   ]
+  },
+  {
+   "id": "dreadhearth",
+   "type": "place",
+   "forms": {
+    "sg": "Dreadhearth",
+    "adj": "Dreadhearth"
+   },
+   "proper": true,
+   "tags": [
+    "hell",
+    "act3"
+   ]
+  },
+  {
+   "id": "starfall_haven",
+   "type": "place",
+   "forms": {
+    "sg": "Starfall Haven",
+    "adj": "Starfall Haven"
+   },
+   "proper": true,
+   "tags": [
+    "town",
+    "act4"
+   ]
+  },
+  {
+   "id": "cosmic_rift",
+   "type": "place",
+   "forms": {
+    "sg": "the Cosmic Rift",
+    "adj": "Cosmic Rift"
+   },
+   "proper": true,
+   "tags": [
+    "void",
+    "act4",
+    "cold"
+   ]
+  },
+  {
+   "id": "eternal_void",
+   "type": "place",
+   "forms": {
+    "sg": "the Eternal Void",
+    "adj": "Eternal Void"
+   },
+   "proper": true,
+   "tags": [
+    "void",
+    "act4"
+   ]
+  },
+  {
+   "id": "last_bastion",
+   "type": "place",
+   "forms": {
+    "sg": "the Last Bastion",
+    "adj": "Last Bastion"
+   },
+   "proper": true,
+   "tags": [
+    "town",
+    "act5"
+   ]
+  },
+  {
+   "id": "abyssal_depths",
+   "type": "place",
+   "forms": {
+    "sg": "the Abyssal Depths",
+    "adj": "Abyssal Depths"
+   },
+   "proper": true,
+   "tags": [
+    "abyss",
+    "act5",
+    "damp"
+   ]
+  },
+  {
+   "id": "primordial_nexus",
+   "type": "place",
+   "forms": {
+    "sg": "the Primordial Nexus",
+    "adj": "Primordial Nexus"
+   },
+   "proper": true,
+   "tags": [
+    "abyss",
+    "act5"
+   ]
+  },
+  {
+   "id": "drakehold",
+   "type": "place",
+   "forms": {
+    "sg": "Drakehold",
+    "adj": "Drakehold"
+   },
+   "proper": true,
+   "tags": [
+    "town",
+    "act6"
+   ]
+  },
+  {
+   "id": "dragons_reach",
+   "type": "place",
+   "forms": {
+    "sg": "the Dragon's Reach",
+    "adj": "Dragon's Reach"
+   },
+   "proper": true,
+   "tags": [
+    "mountain",
+    "act6",
+    "cold"
+   ]
+  },
+  {
+   "id": "dragon_throne",
+   "type": "place",
+   "forms": {
+    "sg": "the Dragon Throne",
+    "adj": "Dragon Throne"
+   },
+   "proper": true,
+   "tags": [
+    "mountain",
+    "act6"
+   ]
+  },
+  {
+   "id": "cinderhold",
+   "type": "place",
+   "forms": {
+    "sg": "Cinderhold",
+    "adj": "Cinderhold"
+   },
+   "proper": true,
+   "tags": [
+    "ruin",
+    "act2"
+   ]
+  },
+  {
+   "id": "the_lonely_road",
+   "type": "place",
+   "forms": {
+    "sg": "the Lonely Road",
+    "adj": "Lonely Road"
+   },
+   "proper": true,
+   "tags": [
+    "road",
+    "prologue"
+   ]
+  },
+  {
+   "id": "ashen_veil",
+   "type": "faction",
+   "forms": {
+    "sg": "the Ashen Veil",
+    "pl": "Veil cultists",
+    "adj": "Veil",
+    "people": "the Veil"
+   },
+   "proper": true,
+   "tags": [
+    "cult",
+    "enemy"
+   ]
+  },
+  {
+   "id": "veil_cult",
+   "type": "faction",
+   "forms": {
+    "sg": "the Veil Cult",
+    "pl": "cultists",
+    "adj": "Veil",
+    "people": "the cult"
+   },
+   "proper": true,
+   "tags": [
+    "cult",
+    "enemy"
+   ]
+  },
+  {
+   "id": "cinderborn",
+   "type": "faction",
+   "forms": {
+    "sg": "the Cinderborn",
+    "pl": "Cinderborn",
+    "adj": "Cinderborn",
+    "people": "the Cinderborn"
+   },
+   "proper": true,
+   "tags": [
+    "cult",
+    "fire"
+   ]
+  },
+  {
+   "id": "guild_of_embers",
+   "type": "faction",
+   "forms": {
+    "sg": "the Guild of Embers",
+    "pl": "Guild swords",
+    "adj": "Guild",
+    "people": "the Guild"
+   },
+   "proper": true,
+   "tags": [
+    "guild"
+   ]
+  },
+  {
+   "id": "cleric_orders",
+   "type": "faction",
+   "forms": {
+    "sg": "the Cleric Orders",
+    "pl": "clerics",
+    "adj": "Order",
+    "people": "the Orders"
+   },
+   "proper": true,
+   "tags": [
+    "holy"
+   ]
+  },
+  {
+   "id": "dragon_court",
+   "type": "faction",
+   "forms": {
+    "sg": "the Dragon Court",
+    "pl": "dragons",
+    "adj": "Court",
+    "people": "the Court"
+   },
+   "proper": true,
+   "tags": [
+    "dragon"
+   ]
+  },
+  {
+   "id": "border_guard",
+   "type": "faction",
+   "forms": {
+    "sg": "the Border Guard",
+    "pl": "guardsmen",
+    "adj": "Guard",
+    "people": "the Guard"
+   },
+   "proper": true,
+   "tags": [
+    "soldiers"
+   ]
+  },
+  {
+   "id": "silas_veilward",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "human",
+   "title": "sage",
+   "forms": {
+    "sg": "Silas Veilward",
+    "short": "Silas"
+   },
+   "tags": [
+    "mentor",
+    "story"
+   ],
+   "pron": {
+    "respell": "SY-lus VAYL-ward"
+   }
+  },
+  {
+   "id": "kaela_thorne",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "race": "human",
+   "title": "tracker",
+   "forms": {
+    "sg": "Kaela Thorne",
+    "short": "Kaela"
+   },
+   "tags": [
+    "rival",
+    "story"
+   ],
+   "pron": {
+    "respell": "KAY-la THORN"
+   }
+  },
+  {
+   "id": "marek_greel",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "human",
+   "title": "scholar",
+   "forms": {
+    "sg": "Marek Greel",
+    "short": "Marek"
+   },
+   "tags": [
+    "villain",
+    "story"
+   ],
+   "pron": {
+    "respell": "MAR-ek GREEL"
+   }
+  },
+  {
+   "id": "mira_seer",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "race": "human",
+   "title": "seer",
+   "forms": {
+    "sg": "Mira the Seer",
+    "short": "Mira"
+   },
+   "tags": [
+    "story"
+   ],
+   "pron": {
+    "respell": "MEER-a"
+   }
+  },
+  {
+   "id": "iris_vael",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "race": "human",
+   "title": "scholar",
+   "forms": {
+    "sg": "Iris Vael",
+    "short": "Iris"
+   },
+   "tags": [
+    "story"
+   ],
+   "pron": {
+    "respell": "EYE-ris VAYL"
+   }
+  },
+  {
+   "id": "garrick_ostmere",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "human",
+   "title": "knight",
+   "forms": {
+    "sg": "Sir Garrick Ostmere",
+    "short": "Garrick"
+   },
+   "tags": [
+    "story",
+    "historical"
+   ],
+   "pron": {
+    "respell": "GAR-ik OST-meer"
+   }
+  },
+  {
+   "id": "krix_bonechewer",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "human",
+   "title": "goblin",
+   "forms": {
+    "sg": "Krix Bonechewer",
+    "short": "Krix"
+   },
+   "tags": [
+    "story"
+   ],
+   "pron": {
+    "respell": "KRIKS"
+   }
+  },
+  {
+   "id": "tomek_halverin",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "human",
+   "title": "merchant",
+   "forms": {
+    "sg": "Tomek Halverin",
+    "short": "Tomek"
+   },
+   "tags": [
+    "story"
+   ],
+   "pron": {
+    "respell": "TOH-mek HAL-ver-in"
+   }
+  },
+  {
+   "id": "mother_yssira",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "race": "human",
+   "title": "seer",
+   "forms": {
+    "sg": "Mother Yssira",
+    "short": "Yssira"
+   },
+   "tags": [
+    "story",
+    "historical"
+   ],
+   "pron": {
+    "respell": "ih-SEER-a"
+   }
+  },
+  {
+   "id": "lysa_veilward",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "race": "human",
+   "title": "cleric",
+   "forms": {
+    "sg": "Lysa Veilward",
+    "short": "Lysa"
+   },
+   "tags": [
+    "story",
+    "historical"
+   ],
+   "pron": {
+    "respell": "LEE-sa"
+   }
+  },
+  {
+   "id": "bahamorth",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "dragon",
+   "title": "king",
+   "forms": {
+    "sg": "Bahamorth the Dragon King",
+    "short": "Bahamorth"
+   },
+   "tags": [
+    "boss",
+    "dragon",
+    "historical"
+   ],
+   "pron": {
+    "respell": "ba-ha-MORTH"
+   }
+  },
+  {
+   "id": "the_architect",
+   "type": "person",
+   "proper": true,
+   "pronouns": "it",
+   "race": "human",
+   "title": "architect",
+   "forms": {
+    "sg": "the Architect",
+    "short": "the Architect"
+   },
+   "tags": [
+    "boss",
+    "historical"
+   ]
+  },
+  {
+   "id": "the_unraveler",
+   "type": "person",
+   "proper": true,
+   "pronouns": "it",
+   "race": "human",
+   "title": "horror",
+   "forms": {
+    "sg": "the Unraveler",
+    "short": "the Unraveler"
+   },
+   "tags": [
+    "boss"
+   ]
+  },
+  {
+   "id": "archfiend_malgrath",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "human",
+   "title": "archfiend",
+   "forms": {
+    "sg": "Archfiend Malgrath",
+    "short": "Malgrath"
+   },
+   "tags": [
+    "boss"
+   ],
+   "pron": {
+    "respell": "MAL-grath"
+   }
+  },
+  {
+   "id": "grax",
+   "type": "person",
+   "proper": true,
+   "pronouns": "he",
+   "race": "goblin",
+   "title": "warlord",
+   "forms": {
+    "sg": "Grax the Veil-Touched",
+    "short": "Grax"
+   },
+   "tags": [
+    "boss",
+    "goblin"
+   ],
+   "pron": {
+    "respell": "GRAKS"
+   }
+  },
+  {
+   "id": "queen_maren",
+   "type": "person",
+   "proper": true,
+   "pronouns": "she",
+   "race": "human",
+   "title": "queen",
+   "forms": {
+    "sg": "Queen Maren",
+    "short": "Maren"
+   },
+   "tags": [
+    "historical"
+   ],
+   "pron": {
+    "respell": "MAR-en"
+   }
+  },
+  {
+   "id": "goblin_scout",
+   "type": "creature",
+   "forms": {
+    "sg": "goblin scout",
+    "pl": "goblin scouts"
+   },
+   "tags": [
+    "goblin",
+    "small"
+   ]
+  },
+  {
+   "id": "goblin_warrior",
+   "type": "creature",
+   "forms": {
+    "sg": "goblin warrior",
+    "pl": "goblin warriors"
+   },
+   "tags": [
+    "goblin"
+   ]
+  },
+  {
+   "id": "goblin_shaman",
+   "type": "creature",
+   "forms": {
+    "sg": "goblin shaman",
+    "pl": "goblin shamans"
+   },
+   "tags": [
+    "goblin",
+    "caster"
+   ]
+  },
+  {
+   "id": "goblin_warlord",
+   "type": "creature",
+   "forms": {
+    "sg": "goblin warlord",
+    "pl": "goblin warlords"
+   },
+   "tags": [
+    "goblin",
+    "boss"
+   ]
+  },
+  {
+   "id": "corrupted_wolf",
+   "type": "creature",
+   "forms": {
+    "sg": "corrupted wolf",
+    "pl": "corrupted wolves"
+   },
+   "tags": [
+    "beast",
+    "veil"
+   ]
+  },
+  {
+   "id": "corrupted_bear",
+   "type": "creature",
+   "forms": {
+    "sg": "corrupted bear",
+    "pl": "corrupted bears"
+   },
+   "tags": [
+    "beast",
+    "veil",
+    "big"
+   ]
+  },
+  {
+   "id": "giant_spider",
+   "type": "creature",
+   "forms": {
+    "sg": "giant spider",
+    "pl": "giant spiders"
+   },
+   "tags": [
+    "beast",
+    "cave"
+   ]
+  },
+  {
+   "id": "bandit",
+   "type": "creature",
+   "forms": {
+    "sg": "bandit",
+    "pl": "bandits"
+   },
+   "tags": [
+    "humanoid"
+   ]
+  },
+  {
+   "id": "bandit_captain",
+   "type": "creature",
+   "forms": {
+    "sg": "bandit captain",
+    "pl": "bandit captains"
+   },
+   "tags": [
+    "humanoid"
+   ]
+  },
+  {
+   "id": "veil_cultist",
+   "type": "creature",
+   "forms": {
+    "sg": "Veil cultist",
+    "pl": "Veil cultists"
+   },
+   "tags": [
+    "cult",
+    "humanoid"
+   ]
+  },
+  {
+   "id": "veil_sorcerer",
+   "type": "creature",
+   "forms": {
+    "sg": "Veil sorcerer",
+    "pl": "Veil sorcerers"
+   },
+   "tags": [
+    "cult",
+    "caster"
+   ]
+  },
+  {
+   "id": "veil_warden",
+   "type": "creature",
+   "forms": {
+    "sg": "Veil warden",
+    "pl": "Veil wardens"
+   },
+   "tags": [
+    "cult",
+    "boss"
+   ]
+  },
+  {
+   "id": "ash_wraith",
+   "type": "creature",
+   "forms": {
+    "sg": "ash wraith",
+    "pl": "ash wraiths"
+   },
+   "tags": [
+    "undead",
+    "fire"
+   ]
+  },
+  {
+   "id": "cinder_hound",
+   "type": "creature",
+   "forms": {
+    "sg": "cinder hound",
+    "pl": "cinder hounds"
+   },
+   "tags": [
+    "beast",
+    "fire"
+   ]
+  },
+  {
+   "id": "molten_golem",
+   "type": "creature",
+   "forms": {
+    "sg": "molten golem",
+    "pl": "molten golems"
+   },
+   "tags": [
+    "construct",
+    "fire",
+    "big"
+   ]
+  },
+  {
+   "id": "lava_titan",
+   "type": "creature",
+   "forms": {
+    "sg": "lava titan",
+    "pl": "lava titans"
+   },
+   "tags": [
+    "boss",
+    "fire",
+    "big"
+   ]
+  },
+  {
+   "id": "imp",
+   "type": "creature",
+   "forms": {
+    "sg": "imp",
+    "pl": "imps"
+   },
+   "tags": [
+    "demon",
+    "small"
+   ]
+  },
+  {
+   "id": "hell_knight",
+   "type": "creature",
+   "forms": {
+    "sg": "hell knight",
+    "pl": "hell knights"
+   },
+   "tags": [
+    "demon"
+   ]
+  },
+  {
+   "id": "demon_brute",
+   "type": "creature",
+   "forms": {
+    "sg": "demon brute",
+    "pl": "demon brutes"
+   },
+   "tags": [
+    "demon",
+    "big"
+   ]
+  },
+  {
+   "id": "void_shade",
+   "type": "creature",
+   "forms": {
+    "sg": "void shade",
+    "pl": "void shades"
+   },
+   "tags": [
+    "void"
+   ]
+  },
+  {
+   "id": "void_wraith",
+   "type": "creature",
+   "forms": {
+    "sg": "void wraith",
+    "pl": "void wraiths"
+   },
+   "tags": [
+    "void",
+    "undead"
+   ]
+  },
+  {
+   "id": "void_prophet",
+   "type": "creature",
+   "forms": {
+    "sg": "void prophet",
+    "pl": "void prophets"
+   },
+   "tags": [
+    "void",
+    "caster"
+   ]
+  },
+  {
+   "id": "star_horror",
+   "type": "creature",
+   "forms": {
+    "sg": "star horror",
+    "pl": "star horrors"
+   },
+   "tags": [
+    "void",
+    "big"
+   ]
+  },
+  {
+   "id": "cosmic_titan",
+   "type": "creature",
+   "forms": {
+    "sg": "cosmic titan",
+    "pl": "cosmic titans"
+   },
+   "tags": [
+    "void",
+    "boss",
+    "big"
+   ]
+  },
+  {
+   "id": "primordial_elemental",
+   "type": "creature",
+   "forms": {
+    "sg": "primordial elemental",
+    "pl": "primordial elementals"
+   },
+   "tags": [
+    "abyss"
+   ]
+  },
+  {
+   "id": "abyssal_knight",
+   "type": "creature",
+   "forms": {
+    "sg": "abyssal knight",
+    "pl": "abyssal knights"
+   },
+   "tags": [
+    "abyss"
+   ]
+  },
+  {
+   "id": "reality_shard",
+   "type": "creature",
+   "forms": {
+    "sg": "reality shard",
+    "pl": "reality shards"
+   },
+   "tags": [
+    "abyss"
+   ]
+  },
+  {
+   "id": "genesis_worm",
+   "type": "creature",
+   "forms": {
+    "sg": "genesis worm",
+    "pl": "genesis worms"
+   },
+   "tags": [
+    "abyss",
+    "big"
+   ]
+  },
+  {
+   "id": "veilspawn_herald",
+   "type": "creature",
+   "forms": {
+    "sg": "veilspawn herald",
+    "pl": "veilspawn heralds"
+   },
+   "tags": [
+    "veil",
+    "boss"
+   ]
+  },
+  {
+   "id": "dragon",
+   "type": "creature",
+   "forms": {
+    "sg": "dragon",
+    "pl": "dragons"
+   },
+   "tags": [
+    "dragon",
+    "big"
+   ]
+  },
+  {
+   "id": "frost_wyrm",
+   "type": "creature",
+   "forms": {
+    "sg": "frost wyrm",
+    "pl": "frost wyrms"
+   },
+   "tags": [
+    "dragon",
+    "cold"
+   ]
+  },
+  {
+   "id": "storm_dragon",
+   "type": "creature",
+   "forms": {
+    "sg": "storm dragon",
+    "pl": "storm dragons"
+   },
+   "tags": [
+    "dragon",
+    "storm"
+   ]
+  },
+  {
+   "id": "dragon_king",
+   "type": "creature",
+   "forms": {
+    "sg": "dragon king",
+    "pl": "dragon kings"
+   },
+   "tags": [
+    "dragon",
+    "boss"
+   ]
+  },
+  {
+   "id": "war_dog",
+   "type": "creature",
+   "forms": {
+    "sg": "war dog",
+    "pl": "war dogs"
+   },
+   "tags": [
+    "beast",
+    "companion"
+   ]
+  },
+  {
+   "id": "bone_hound",
+   "type": "creature",
+   "forms": {
+    "sg": "bone hound",
+    "pl": "bone hounds"
+   },
+   "tags": [
+    "undead",
+    "companion"
+   ]
+  },
+  {
+   "id": "longsword",
+   "type": "item",
+   "forms": {
+    "sg": "longsword",
+    "pl": "longswords"
+   },
+   "tags": [
+    "weapon",
+    "sword"
+   ]
+  },
+  {
+   "id": "greatsword",
+   "type": "item",
+   "forms": {
+    "sg": "greatsword",
+    "pl": "greatswords"
+   },
+   "tags": [
+    "weapon",
+    "sword",
+    "two_handed"
+   ]
+  },
+  {
+   "id": "greataxe",
+   "type": "item",
+   "forms": {
+    "sg": "greataxe",
+    "pl": "greataxes"
+   },
+   "tags": [
+    "weapon",
+    "axe",
+    "two_handed"
+   ]
+  },
+  {
+   "id": "warhammer",
+   "type": "item",
+   "forms": {
+    "sg": "warhammer",
+    "pl": "warhammers"
+   },
+   "tags": [
+    "weapon",
+    "hammer"
+   ]
+  },
+  {
+   "id": "rapier",
+   "type": "item",
+   "forms": {
+    "sg": "rapier",
+    "pl": "rapiers"
+   },
+   "tags": [
+    "weapon",
+    "sword"
+   ]
+  },
+  {
+   "id": "shortbow",
+   "type": "item",
+   "forms": {
+    "sg": "shortbow",
+    "pl": "shortbows"
+   },
+   "tags": [
+    "weapon",
+    "bow"
+   ]
+  },
+  {
+   "id": "crossbow",
+   "type": "item",
+   "forms": {
+    "sg": "crossbow",
+    "pl": "crossbows"
+   },
+   "tags": [
+    "weapon",
+    "bow"
+   ]
+  },
+  {
+   "id": "wand",
+   "type": "item",
+   "forms": {
+    "sg": "wand",
+    "pl": "wands"
+   },
+   "tags": [
+    "weapon",
+    "magic"
+   ]
+  },
+  {
+   "id": "scepter",
+   "type": "item",
+   "forms": {
+    "sg": "scepter",
+    "pl": "scepters"
+   },
+   "tags": [
+    "weapon",
+    "magic"
+   ]
+  },
+  {
+   "id": "orb",
+   "type": "item",
+   "forms": {
+    "sg": "orb",
+    "pl": "orbs"
+   },
+   "tags": [
+    "weapon",
+    "magic"
+   ]
+  },
+  {
+   "id": "tome",
+   "type": "item",
+   "forms": {
+    "sg": "tome",
+    "pl": "tomes"
+   },
+   "tags": [
+    "weapon",
+    "magic"
+   ]
+  },
+  {
+   "id": "quarterstaff",
+   "type": "item",
+   "forms": {
+    "sg": "quarterstaff",
+    "pl": "quarterstaffs"
+   },
+   "tags": [
+    "weapon",
+    "staff"
+   ]
+  },
+  {
+   "id": "plate_armor",
+   "type": "item",
+   "forms": {
+    "sg": "plate armor",
+    "pl": "suits of plate"
+   },
+   "tags": [
+    "armour",
+    "heavy"
+   ]
+  },
+  {
+   "id": "chain_shirt",
+   "type": "item",
+   "forms": {
+    "sg": "chain shirt",
+    "pl": "chain shirts"
+   },
+   "tags": [
+    "armour",
+    "medium"
+   ]
+  },
+  {
+   "id": "leather_armor",
+   "type": "item",
+   "forms": {
+    "sg": "leather armor",
+    "pl": "leather jerkins"
+   },
+   "tags": [
+    "armour",
+    "light"
+   ]
+  },
+  {
+   "id": "robes",
+   "type": "item",
+   "forms": {
+    "sg": "robes",
+    "pl": "robes"
+   },
+   "tags": [
+    "armour",
+    "cloth"
+   ]
+  },
+  {
+   "id": "war_helm",
+   "type": "item",
+   "forms": {
+    "sg": "war helm",
+    "pl": "war helms"
+   },
+   "tags": [
+    "armour",
+    "head"
+   ]
+  },
+  {
+   "id": "kite_shield",
+   "type": "item",
+   "forms": {
+    "sg": "kite shield",
+    "pl": "kite shields"
+   },
+   "tags": [
+    "armour",
+    "shield"
+   ]
+  },
+  {
+   "id": "tower_shield",
+   "type": "item",
+   "forms": {
+    "sg": "tower shield",
+    "pl": "tower shields"
+   },
+   "tags": [
+    "armour",
+    "shield"
+   ]
+  },
+  {
+   "id": "ration",
+   "type": "item",
+   "forms": {
+    "sg": "ration",
+    "pl": "rations"
+   },
+   "tags": [
+    "supply",
+    "food"
+   ]
+  },
+  {
+   "id": "healing_potion",
+   "type": "item",
+   "forms": {
+    "sg": "healing potion",
+    "pl": "healing potions"
+   },
+   "tags": [
+    "potion",
+    "supply"
+   ]
+  },
+  {
+   "id": "mana_potion",
+   "type": "item",
+   "forms": {
+    "sg": "mana potion",
+    "pl": "mana potions"
+   },
+   "tags": [
+    "potion",
+    "supply"
+   ]
+  },
+  {
+   "id": "revival_flask",
+   "type": "item",
+   "forms": {
+    "sg": "revival flask",
+    "pl": "revival flasks"
+   },
+   "tags": [
+    "potion",
+    "supply"
+   ]
+  },
+  {
+   "id": "wagon",
+   "type": "item",
+   "forms": {
+    "sg": "wagon",
+    "pl": "wagons"
+   },
+   "tags": [
+    "vehicle"
+   ]
+  },
+  {
+   "id": "ox_cart",
+   "type": "item",
+   "forms": {
+    "sg": "ox cart",
+    "pl": "ox carts"
+   },
+   "tags": [
+    "vehicle"
+   ]
+  },
+  {
+   "id": "war_wagon",
+   "type": "item",
+   "forms": {
+    "sg": "war wagon",
+    "pl": "war wagons"
+   },
+   "tags": [
+    "vehicle"
+   ]
+  },
+  {
+   "id": "coach",
+   "type": "item",
+   "forms": {
+    "sg": "fast coach",
+    "pl": "fast coaches"
+   },
+   "tags": [
+    "vehicle"
+   ]
+  },
+  {
+   "id": "mule",
+   "type": "item",
+   "forms": {
+    "sg": "pack mule",
+    "pl": "pack mules"
+   },
+   "tags": [
+    "vehicle",
+    "animal"
+   ]
+  },
+  {
+   "id": "dragon_sled",
+   "type": "item",
+   "forms": {
+    "sg": "dragon sled",
+    "pl": "dragon sleds"
+   },
+   "tags": [
+    "vehicle",
+    "dragon"
+   ]
+  },
+  {
+   "id": "void_shard",
+   "type": "item",
+   "forms": {
+    "sg": "void shard",
+    "pl": "void shards"
+   },
+   "tags": [
+    "material",
+    "void"
+   ]
+  },
+  {
+   "id": "iron_scrap",
+   "type": "item",
+   "forms": {
+    "sg": "iron scrap",
+    "pl": "iron scrap"
+   },
+   "tags": [
+    "material"
+   ],
+   "mass": true
+  },
+  {
+   "id": "magic_essence",
+   "type": "item",
+   "forms": {
+    "sg": "magic essence",
+    "pl": "magic essence"
+   },
+   "tags": [
+    "material"
+   ],
+   "mass": true
+  },
+  {
+   "id": "legend_core",
+   "type": "item",
+   "forms": {
+    "sg": "legendary core",
+    "pl": "legendary cores"
+   },
+   "tags": [
+    "material"
+   ]
+  },
+  {
+   "id": "veil_lens",
+   "type": "item",
+   "forms": {
+    "sg": "the Veil Lens",
+    "pl": "Veil Lenses"
+   },
+   "tags": [
+    "artifact"
+   ],
+   "proper": true
+  },
+  {
+   "id": "emberheart_pendant",
+   "type": "item",
+   "forms": {
+    "sg": "the Emberheart Pendant",
+    "pl": "Emberheart Pendants"
+   },
+   "tags": [
+    "artifact",
+    "unique"
+   ],
+   "proper": true
+  },
+  {
+   "id": "thornblade",
+   "type": "item",
+   "forms": {
+    "sg": "Thornblade",
+    "pl": "Thornblades"
+   },
+   "tags": [
+    "artifact",
+    "unique",
+    "weapon"
+   ],
+   "proper": true
+  },
+  {
+   "id": "the_light",
+   "type": "deity",
+   "forms": {
+    "sg": "the Light",
+    "adj": "Light"
+   },
+   "proper": true,
+   "tags": [
+    "holy"
+   ]
+  },
+  {
+   "id": "the_ember_flame",
+   "type": "deity",
+   "forms": {
+    "sg": "the Ember Flame",
+    "adj": "Ember"
+   },
+   "proper": true,
+   "tags": [
+    "fire",
+    "holy"
+   ]
+  },
+  {
+   "id": "the_veil",
+   "type": "deity",
+   "forms": {
+    "sg": "the Veil",
+    "adj": "Veil"
+   },
+   "proper": true,
+   "tags": [
+    "cosmic"
+   ]
+  },
+  {
+   "id": "the_forge_eternal",
+   "type": "deity",
+   "forms": {
+    "sg": "the Forge Eternal",
+    "adj": "Forge"
+   },
+   "proper": true,
+   "tags": [
+    "dwarf",
+    "craft"
+   ]
+  },
+  {
+   "id": "the_old_dragons",
+   "type": "deity",
+   "forms": {
+    "sg": "the Old Dragons",
+    "adj": "Dragon"
+   },
+   "proper": true,
+   "tags": [
+    "dragon"
+   ]
+  },
+  {
+   "id": "corruption",
+   "type": "concept",
+   "forms": {
+    "sg": "the Corruption"
+   },
+   "tags": [
+    "veil"
+   ],
+   "proper": true
+  },
+  {
+   "id": "the_breach",
+   "type": "concept",
+   "forms": {
+    "sg": "the Breach"
+   },
+   "tags": [
+    "hell"
+   ],
+   "proper": true
+  },
+  {
+   "id": "the_unraveling",
+   "type": "concept",
+   "forms": {
+    "sg": "the Unraveling"
+   },
+   "tags": [
+    "void"
+   ],
+   "proper": true
+  },
+  {
+   "id": "fame",
+   "type": "concept",
+   "forms": {
+    "sg": "fame"
+   },
+   "tags": [
+    "social"
+   ],
+   "proper": false
+  },
+  {
+   "id": "exhaustion",
+   "type": "concept",
+   "forms": {
+    "sg": "exhaustion"
+   },
+   "tags": [
+    "travel"
+   ],
+   "proper": false
+  },
+  {
+   "id": "trail_ration",
+   "type": "food",
+   "forms": {
+    "sg": "trail ration",
+    "pl": "trail rations"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "hardtack",
+   "type": "food",
+   "forms": {
+    "sg": "hardtack",
+    "pl": "hardtack"
+   },
+   "tags": [
+    "emberveil"
+   ],
+   "mass": true
+  },
+  {
+   "id": "ash_wine",
+   "type": "food",
+   "forms": {
+    "sg": "ash wine",
+    "pl": "ash wine"
+   },
+   "tags": [
+    "emberveil"
+   ],
+   "mass": true
+  },
+  {
+   "id": "moonpetal_tea",
+   "type": "food",
+   "forms": {
+    "sg": "moonpetal tea",
+    "pl": "moonpetal tea"
+   },
+   "tags": [
+    "emberveil"
+   ],
+   "mass": true
+  },
+  {
+   "id": "goblin_stew",
+   "type": "food",
+   "forms": {
+    "sg": "goblin stew",
+    "pl": "goblin stew"
+   },
+   "tags": [
+    "emberveil"
+   ],
+   "mass": true
+  },
+  {
+   "id": "fen_root",
+   "type": "food",
+   "forms": {
+    "sg": "fen-root",
+    "pl": "fen-roots"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "fireball",
+   "type": "spell",
+   "forms": {
+    "sg": "Fireball",
+    "pl": "Fireball"
+   },
+   "proper": true,
+   "tags": [
+    "fire"
+   ]
+  },
+  {
+   "id": "blizzard",
+   "type": "spell",
+   "forms": {
+    "sg": "Blizzard",
+    "pl": "Blizzard"
+   },
+   "proper": true,
+   "tags": [
+    "cold"
+   ]
+  },
+  {
+   "id": "chain_lightning",
+   "type": "spell",
+   "forms": {
+    "sg": "Chain Lightning",
+    "pl": "Chain Lightning"
+   },
+   "proper": true,
+   "tags": [
+    "storm"
+   ]
+  },
+  {
+   "id": "holy_strike",
+   "type": "spell",
+   "forms": {
+    "sg": "Holy Strike",
+    "pl": "Holy Strike"
+   },
+   "proper": true,
+   "tags": [
+    "holy"
+   ]
+  },
+  {
+   "id": "life_drain",
+   "type": "spell",
+   "forms": {
+    "sg": "Life Drain",
+    "pl": "Life Drain"
+   },
+   "proper": true,
+   "tags": [
+    "shadow"
+   ]
+  },
+  {
+   "id": "whirlwind",
+   "type": "spell",
+   "forms": {
+    "sg": "Whirlwind",
+    "pl": "Whirlwind"
+   },
+   "proper": true,
+   "tags": [
+    "melee"
+   ]
+  },
+  {
+   "id": "shadow_bolt",
+   "type": "spell",
+   "forms": {
+    "sg": "Shadow Bolt",
+    "pl": "Shadow Bolt"
+   },
+   "proper": true,
+   "tags": [
+    "shadow"
+   ]
+  },
+  {
+   "id": "rejuvenation",
+   "type": "spell",
+   "forms": {
+    "sg": "Rejuvenation",
+    "pl": "Rejuvenation"
+   },
+   "proper": true,
+   "tags": [
+    "nature"
+   ]
+  },
+  {
+   "id": "time_stop",
+   "type": "spell",
+   "forms": {
+    "sg": "Time Stop",
+    "pl": "Time Stop"
+   },
+   "proper": true,
+   "tags": [
+    "time"
+   ]
+  },
+  {
+   "id": "lullaby",
+   "type": "spell",
+   "forms": {
+    "sg": "Lullaby",
+    "pl": "Lullaby"
+   },
+   "proper": true,
+   "tags": [
+    "mind"
+   ]
+  },
+  {
+   "id": "reeve",
+   "type": "title",
+   "forms": {
+    "sg": "reeve",
+    "pl": "reeves"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "warden",
+   "type": "title",
+   "forms": {
+    "sg": "warden",
+    "pl": "wardens"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "inquisitor",
+   "type": "title",
+   "forms": {
+    "sg": "inquisitor",
+    "pl": "inquisitors"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "drover",
+   "type": "title",
+   "forms": {
+    "sg": "drover",
+    "pl": "drovers"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "quartermaster",
+   "type": "title",
+   "forms": {
+    "sg": "quartermaster",
+    "pl": "quartermasters"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "cultist",
+   "type": "title",
+   "forms": {
+    "sg": "cultist",
+    "pl": "cultists"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "ashfall",
+   "type": "weather",
+   "forms": {
+    "sg": "ashfall"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "void_wind",
+   "type": "weather",
+   "forms": {
+    "sg": "void-wind"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  },
+  {
+   "id": "ember_haze",
+   "type": "weather",
+   "forms": {
+    "sg": "ember haze"
+   },
+   "tags": [
+    "emberveil"
+   ]
+  }
+ ]
+}

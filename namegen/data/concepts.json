@@ -1,0 +1,3290 @@
+{
+ "_doc": "Shared concept dictionary for the name generator. Each language translates these ids into native words (curated or generated deterministically). tags select concepts in patterns ({concept:animal}); races = affinity weights (how likely a race uses this concept in names). en = English noun, adj = adjective form, agent = -er form.",
+ "concepts": [
+  {
+   "id": "iron",
+   "en": "iron",
+   "tags": [
+    "metal",
+    "craft",
+    "hard"
+   ],
+   "adj": "iron",
+   "races": {
+    "dwarf": 3,
+    "orc": 2
+   }
+  },
+  {
+   "id": "steel",
+   "en": "steel",
+   "tags": [
+    "metal",
+    "craft",
+    "hard"
+   ],
+   "adj": "steel",
+   "races": {
+    "dwarf": 2,
+    "human": 2
+   }
+  },
+  {
+   "id": "gold",
+   "en": "gold",
+   "tags": [
+    "metal",
+    "craft",
+    "hard"
+   ],
+   "adj": "golden",
+   "races": {
+    "dwarf": 3,
+    "dragon": 3
+   }
+  },
+  {
+   "id": "silver",
+   "en": "silver",
+   "tags": [
+    "metal",
+    "craft",
+    "hard"
+   ],
+   "adj": "silver",
+   "races": {
+    "elf": 3,
+    "human": 1
+   }
+  },
+  {
+   "id": "copper",
+   "en": "copper",
+   "tags": [
+    "metal",
+    "craft",
+    "hard"
+   ],
+   "adj": "copper",
+   "races": {
+    "gnome": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "bronze",
+   "en": "bronze",
+   "tags": [
+    "metal",
+    "craft",
+    "hard"
+   ],
+   "adj": "bronze",
+   "races": {
+    "giant": 2
+   }
+  },
+  {
+   "id": "mithril",
+   "en": "mithril",
+   "tags": [
+    "metal",
+    "craft",
+    "hard"
+   ],
+   "adj": "mithril",
+   "races": {
+    "elf": 2,
+    "dwarf": 2
+   }
+  },
+  {
+   "id": "stone",
+   "en": "stone",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "stone",
+   "races": {
+    "dwarf": 3,
+    "giant": 3,
+    "troll": 2
+   }
+  },
+  {
+   "id": "granite",
+   "en": "granite",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "granite",
+   "races": {
+    "dwarf": 2
+   }
+  },
+  {
+   "id": "obsidian",
+   "en": "obsidian",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "obsidian",
+   "races": {
+    "orc": 2,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "amber",
+   "en": "amber",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "amber",
+   "races": {
+    "elf": 1,
+    "fey": 2
+   }
+  },
+  {
+   "id": "crystal",
+   "en": "crystal",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "crystal",
+   "races": {
+    "gnome": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "salt",
+   "en": "salt",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "salt",
+   "races": {
+    "human": 1
+   }
+  },
+  {
+   "id": "coal",
+   "en": "coal",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "coal",
+   "races": {
+    "dwarf": 2,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "ash",
+   "en": "ash",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "ashen",
+   "races": {
+    "elf": 2,
+    "undead": 3,
+    "dragon": 2
+   }
+  },
+  {
+   "id": "slate",
+   "en": "slate",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "slate",
+   "races": {
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "flint",
+   "en": "flint",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "flint",
+   "races": {
+    "goblin": 2,
+    "orc": 1
+   }
+  },
+  {
+   "id": "rust",
+   "en": "rust",
+   "tags": [
+    "stone",
+    "craft",
+    "hard"
+   ],
+   "adj": "rusted",
+   "races": {
+    "goblin": 3,
+    "undead": 2
+   }
+  },
+  {
+   "id": "oak",
+   "en": "oak",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "adj": "oaken",
+   "races": {
+    "human": 2,
+    "elf": 2
+   }
+  },
+  {
+   "id": "ash_tree",
+   "en": "ash",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "adj": "ashwood",
+   "races": {
+    "elf": 2
+   }
+  },
+  {
+   "id": "willow",
+   "en": "willow",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "birch",
+   "en": "birch",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 2
+   }
+  },
+  {
+   "id": "pine",
+   "en": "pine",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "human": 1,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "yew",
+   "en": "yew",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 3
+   }
+  },
+  {
+   "id": "elm",
+   "en": "elm",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "human": 1
+   }
+  },
+  {
+   "id": "thorn",
+   "en": "thorn",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "adj": "thorny",
+   "races": {
+    "fey": 2,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "bramble",
+   "en": "bramble",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "fey": 2,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "root",
+   "en": "root",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 2,
+    "halfling": 2
+   }
+  },
+  {
+   "id": "leaf",
+   "en": "leaf",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 3
+   }
+  },
+  {
+   "id": "vine",
+   "en": "vine",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 2
+   }
+  },
+  {
+   "id": "moss",
+   "en": "moss",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "adj": "mossy",
+   "races": {
+    "troll": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "fern",
+   "en": "fern",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "rose",
+   "en": "rose",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "human": 1,
+    "fey": 2
+   }
+  },
+  {
+   "id": "lily",
+   "en": "lily",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 2
+   }
+  },
+  {
+   "id": "ivy",
+   "en": "ivy",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "reed",
+   "en": "reed",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "halfling": 1
+   }
+  },
+  {
+   "id": "barley",
+   "en": "barley",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "halfling": 3
+   }
+  },
+  {
+   "id": "honey",
+   "en": "honey",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "halfling": 3
+   }
+  },
+  {
+   "id": "apple",
+   "en": "apple",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "halfling": 3
+   }
+  },
+  {
+   "id": "clover",
+   "en": "clover",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "halfling": 2,
+    "fey": 1
+   }
+  },
+  {
+   "id": "mushroom",
+   "en": "mushroom",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "goblin": 2,
+    "gnome": 1,
+    "troll": 1
+   }
+  },
+  {
+   "id": "bark",
+   "en": "bark",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "troll": 2
+   }
+  },
+  {
+   "id": "acorn",
+   "en": "acorn",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "halfling": 2,
+    "fey": 1
+   }
+  },
+  {
+   "id": "blossom",
+   "en": "blossom",
+   "tags": [
+    "nature",
+    "plant"
+   ],
+   "races": {
+    "elf": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "wolf",
+   "en": "wolf",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "orc": 2,
+    "human": 2
+   }
+  },
+  {
+   "id": "bear",
+   "en": "bear",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "human": 2,
+    "giant": 2
+   }
+  },
+  {
+   "id": "raven",
+   "en": "raven",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "undead": 2,
+    "elf": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "crow",
+   "en": "crow",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "goblin": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "hawk",
+   "en": "hawk",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "elf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "owl",
+   "en": "owl",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "elf": 2,
+    "fey": 1,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "stag",
+   "en": "stag",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "elf": 3
+   }
+  },
+  {
+   "id": "boar",
+   "en": "boar",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "orc": 2,
+    "dwarf": 1,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "serpent",
+   "en": "serpent",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "dragon": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "drake",
+   "en": "drake",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "dragon": 3
+   }
+  },
+  {
+   "id": "wyrm",
+   "en": "wyrm",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "dragon": 3
+   }
+  },
+  {
+   "id": "spider",
+   "en": "spider",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "goblin": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "rat",
+   "en": "rat",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "goblin": 3
+   }
+  },
+  {
+   "id": "toad",
+   "en": "toad",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "goblin": 2,
+    "troll": 2
+   }
+  },
+  {
+   "id": "fox",
+   "en": "fox",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "halfling": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "hare",
+   "en": "hare",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "halfling": 2,
+    "fey": 1
+   }
+  },
+  {
+   "id": "ox",
+   "en": "ox",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "human": 1,
+    "giant": 1
+   }
+  },
+  {
+   "id": "ram",
+   "en": "ram",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "dwarf": 2,
+    "giant": 1
+   }
+  },
+  {
+   "id": "eagle",
+   "en": "eagle",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "human": 2,
+    "giant": 1
+   }
+  },
+  {
+   "id": "lion",
+   "en": "lion",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "moth",
+   "en": "moth",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "fey": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "badger",
+   "en": "badger",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "dwarf": 2,
+    "halfling": 2
+   }
+  },
+  {
+   "id": "worm",
+   "en": "worm",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "goblin": 1,
+    "undead": 2
+   }
+  },
+  {
+   "id": "hound",
+   "en": "hound",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "human": 2,
+    "orc": 1
+   }
+  },
+  {
+   "id": "bat",
+   "en": "bat",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "goblin": 1,
+    "undead": 2
+   }
+  },
+  {
+   "id": "salmon",
+   "en": "salmon",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "halfling": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "beetle",
+   "en": "beetle",
+   "tags": [
+    "animal",
+    "nature"
+   ],
+   "races": {
+    "gnome": 2,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "storm",
+   "en": "storm",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "adj": "storm",
+   "races": {
+    "giant": 3,
+    "orc": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "thunder",
+   "en": "thunder",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "races": {
+    "giant": 3,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "frost",
+   "en": "frost",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "adj": "frozen",
+   "races": {
+    "giant": 2,
+    "elf": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "snow",
+   "en": "snow",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "races": {
+    "giant": 2
+   }
+  },
+  {
+   "id": "rain",
+   "en": "rain",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "races": {
+    "elf": 1,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "wind",
+   "en": "wind",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "races": {
+    "elf": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "mist",
+   "en": "mist",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "adj": "misty",
+   "races": {
+    "fey": 3,
+    "elf": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "fog",
+   "en": "fog",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "races": {
+    "undead": 2,
+    "fey": 1
+   }
+  },
+  {
+   "id": "sun",
+   "en": "sun",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "adj": "sunlit",
+   "races": {
+    "human": 2,
+    "elf": 1,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "moon",
+   "en": "moon",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "adj": "moonlit",
+   "races": {
+    "elf": 3,
+    "fey": 2
+   }
+  },
+  {
+   "id": "star",
+   "en": "star",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "adj": "starry",
+   "races": {
+    "elf": 3,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "dawn",
+   "en": "dawn",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "elf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "dusk",
+   "en": "dusk",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "elf": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "night",
+   "en": "night",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "undead": 2,
+    "elf": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "sky",
+   "en": "sky",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "giant": 1,
+    "elf": 1
+   }
+  },
+  {
+   "id": "cloud",
+   "en": "cloud",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "races": {
+    "giant": 2,
+    "fey": 1
+   }
+  },
+  {
+   "id": "fire",
+   "en": "fire",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "adj": "fiery",
+   "races": {
+    "dragon": 3,
+    "orc": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "ember",
+   "en": "ember",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "dragon": 3,
+    "dwarf": 2
+   }
+  },
+  {
+   "id": "flame",
+   "en": "flame",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "dragon": 3,
+    "orc": 1
+   }
+  },
+  {
+   "id": "smoke",
+   "en": "smoke",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "orc": 2,
+    "goblin": 1,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "ice",
+   "en": "ice",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "adj": "icy",
+   "races": {
+    "giant": 2
+   }
+  },
+  {
+   "id": "shadow",
+   "en": "shadow",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "adj": "shadowed",
+   "races": {
+    "undead": 3,
+    "elf": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "light",
+   "en": "light",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "adj": "bright",
+   "races": {
+    "elf": 2,
+    "human": 2
+   }
+  },
+  {
+   "id": "dark",
+   "en": "dark",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "adj": "dark",
+   "races": {
+    "undead": 3,
+    "orc": 1,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "lightning",
+   "en": "lightning",
+   "tags": [
+    "weather",
+    "nature"
+   ],
+   "races": {
+    "giant": 2,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "tide",
+   "en": "tide",
+   "tags": [
+    "water",
+    "nature"
+   ],
+   "races": {
+    "human": 2,
+    "fey": 1
+   }
+  },
+  {
+   "id": "river",
+   "en": "river",
+   "tags": [
+    "water",
+    "nature"
+   ],
+   "races": {
+    "human": 2,
+    "elf": 1
+   }
+  },
+  {
+   "id": "sea",
+   "en": "sea",
+   "tags": [
+    "water",
+    "nature"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "lake",
+   "en": "lake",
+   "tags": [
+    "water",
+    "nature"
+   ],
+   "races": {
+    "human": 1,
+    "elf": 1
+   }
+  },
+  {
+   "id": "spring",
+   "en": "spring",
+   "tags": [
+    "water",
+    "nature"
+   ],
+   "races": {
+    "elf": 1,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "brook",
+   "en": "brook",
+   "tags": [
+    "water",
+    "nature"
+   ],
+   "races": {
+    "halfling": 3,
+    "elf": 1
+   }
+  },
+  {
+   "id": "dust",
+   "en": "dust",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "undead": 2,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "mud",
+   "en": "mud",
+   "tags": [
+    "element",
+    "nature"
+   ],
+   "races": {
+    "goblin": 2,
+    "troll": 2
+   }
+  },
+  {
+   "id": "mountain",
+   "en": "mountain",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "dwarf": 3,
+    "giant": 3
+   }
+  },
+  {
+   "id": "hill",
+   "en": "hill",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "halfling": 3,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "valley",
+   "en": "valley",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 1,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "cliff",
+   "en": "cliff",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "giant": 1,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "cave",
+   "en": "cave",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "goblin": 2,
+    "troll": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "peak",
+   "en": "peak",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "dwarf": 2,
+    "giant": 2,
+    "dragon": 2
+   }
+  },
+  {
+   "id": "wood",
+   "en": "wood",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "elf": 3,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "glen",
+   "en": "glen",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "elf": 2,
+    "halfling": 2
+   }
+  },
+  {
+   "id": "marsh",
+   "en": "marsh",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "goblin": 2,
+    "troll": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "moor",
+   "en": "moor",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 1,
+    "undead": 2
+   }
+  },
+  {
+   "id": "hollow",
+   "en": "hollow",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "halfling": 2,
+    "fey": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "ridge",
+   "en": "ridge",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "dwarf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "deep",
+   "en": "deep",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "dwarf": 3,
+    "undead": 1
+   }
+  },
+  {
+   "id": "reach",
+   "en": "reach",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "shore",
+   "en": "shore",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "isle",
+   "en": "isle",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 1,
+    "fey": 2
+   }
+  },
+  {
+   "id": "barrow",
+   "en": "barrow",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "undead": 3,
+    "human": 1
+   }
+  },
+  {
+   "id": "pit",
+   "en": "pit",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "goblin": 2,
+    "orc": 1
+   }
+  },
+  {
+   "id": "crag",
+   "en": "crag",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "giant": 2,
+    "dragon": 2,
+    "troll": 1
+   }
+  },
+  {
+   "id": "vale",
+   "en": "vale",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "elf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "field",
+   "en": "field",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "halfling": 2,
+    "human": 2
+   }
+  },
+  {
+   "id": "meadow",
+   "en": "meadow",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "halfling": 3,
+    "fey": 1
+   }
+  },
+  {
+   "id": "ford",
+   "en": "ford",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "bridge",
+   "en": "bridge",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 1,
+    "dwarf": 1,
+    "troll": 2
+   }
+  },
+  {
+   "id": "gate",
+   "en": "gate",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "dwarf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "hall",
+   "en": "hall",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "dwarf": 3,
+    "giant": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "tower",
+   "en": "tower",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "human": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "well",
+   "en": "well",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "halfling": 1,
+    "human": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "mire",
+   "en": "mire",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "goblin": 2,
+    "troll": 3
+   }
+  },
+  {
+   "id": "waste",
+   "en": "waste",
+   "tags": [
+    "landform",
+    "place"
+   ],
+   "races": {
+    "undead": 2,
+    "orc": 1,
+    "giant": 1
+   }
+  },
+  {
+   "id": "blood",
+   "en": "blood",
+   "tags": [
+    "war"
+   ],
+   "adj": "bloody",
+   "races": {
+    "orc": 3,
+    "undead": 1
+   }
+  },
+  {
+   "id": "bone",
+   "en": "bone",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "undead": 3,
+    "orc": 1,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "skull",
+   "en": "skull",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "orc": 3,
+    "undead": 2,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "fang",
+   "en": "fang",
+   "tags": [
+    "body"
+   ],
+   "races": {
+    "orc": 3,
+    "goblin": 2,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "claw",
+   "en": "claw",
+   "tags": [
+    "body"
+   ],
+   "races": {
+    "dragon": 2,
+    "orc": 1,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "tooth",
+   "en": "tooth",
+   "tags": [
+    "body"
+   ],
+   "races": {
+    "goblin": 3,
+    "troll": 2
+   }
+  },
+  {
+   "id": "fist",
+   "en": "fist",
+   "tags": [
+    "body"
+   ],
+   "races": {
+    "dwarf": 2,
+    "orc": 2,
+    "giant": 2
+   }
+  },
+  {
+   "id": "hand",
+   "en": "hand",
+   "tags": [
+    "body"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "eye",
+   "en": "eye",
+   "tags": [
+    "body"
+   ],
+   "races": {
+    "human": 1,
+    "undead": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "heart",
+   "en": "heart",
+   "tags": [
+    "body"
+   ],
+   "races": {
+    "human": 2,
+    "elf": 1
+   }
+  },
+  {
+   "id": "blade",
+   "en": "blade",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "human": 2,
+    "elf": 1,
+    "orc": 1
+   }
+  },
+  {
+   "id": "sword",
+   "en": "sword",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "axe",
+   "en": "axe",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "dwarf": 3,
+    "orc": 2
+   }
+  },
+  {
+   "id": "hammer",
+   "en": "hammer",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "dwarf": 3,
+    "giant": 1
+   }
+  },
+  {
+   "id": "shield",
+   "en": "shield",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "dwarf": 2,
+    "human": 2
+   }
+  },
+  {
+   "id": "spear",
+   "en": "spear",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "orc": 1,
+    "human": 1,
+    "elf": 1
+   }
+  },
+  {
+   "id": "arrow",
+   "en": "arrow",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "elf": 3
+   }
+  },
+  {
+   "id": "bow",
+   "en": "bow",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "elf": 3
+   }
+  },
+  {
+   "id": "helm",
+   "en": "helm",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "dwarf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "crown",
+   "en": "crown",
+   "tags": [
+    "craft"
+   ],
+   "races": {
+    "human": 2,
+    "dragon": 1,
+    "undead": 1
+   }
+  },
+  {
+   "id": "anvil",
+   "en": "anvil",
+   "tags": [
+    "craft"
+   ],
+   "races": {
+    "dwarf": 3
+   }
+  },
+  {
+   "id": "forge",
+   "en": "forge",
+   "tags": [
+    "craft"
+   ],
+   "races": {
+    "dwarf": 3,
+    "orc": 1,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "chain",
+   "en": "chain",
+   "tags": [
+    "craft"
+   ],
+   "races": {
+    "undead": 1,
+    "human": 1,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "wound",
+   "en": "wound",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "orc": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "scar",
+   "en": "scar",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "orc": 3,
+    "human": 1
+   }
+  },
+  {
+   "id": "rage",
+   "en": "rage",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "orc": 3,
+    "giant": 1
+   }
+  },
+  {
+   "id": "doom",
+   "en": "doom",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "undead": 2,
+    "orc": 1,
+    "giant": 1
+   }
+  },
+  {
+   "id": "dread",
+   "en": "dread",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "undead": 3
+   }
+  },
+  {
+   "id": "grave",
+   "en": "grave",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "undead": 3
+   }
+  },
+  {
+   "id": "rot",
+   "en": "rot",
+   "tags": [
+    "dark"
+   ],
+   "adj": "rotten",
+   "races": {
+    "undead": 3,
+    "goblin": 1,
+    "troll": 1
+   }
+  },
+  {
+   "id": "plague",
+   "en": "plague",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "undead": 2,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "venom",
+   "en": "venom",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "goblin": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "war",
+   "en": "war",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "orc": 3,
+    "human": 1
+   }
+  },
+  {
+   "id": "victory",
+   "en": "victory",
+   "tags": [
+    "war"
+   ],
+   "races": {
+    "human": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "oath",
+   "en": "oath",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "dwarf": 3,
+    "human": 2
+   }
+  },
+  {
+   "id": "grudge",
+   "en": "grudge",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "dwarf": 3
+   }
+  },
+  {
+   "id": "silence",
+   "en": "silence",
+   "tags": [
+    "dark"
+   ],
+   "races": {
+    "elf": 1,
+    "undead": 2
+   }
+  },
+  {
+   "id": "whisper",
+   "en": "whisper",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "elf": 2,
+    "fey": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "song",
+   "en": "song",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "elf": 3,
+    "halfling": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "dream",
+   "en": "dream",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "fey": 3,
+    "elf": 2
+   }
+  },
+  {
+   "id": "truth",
+   "en": "truth",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "elf": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "splitter",
+   "en": "splitter",
+   "tags": [
+    "war",
+    "agent"
+   ],
+   "agent": "splitter",
+   "races": {
+    "orc": 3,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "breaker",
+   "en": "breaker",
+   "tags": [
+    "war",
+    "agent"
+   ],
+   "agent": "breaker",
+   "races": {
+    "orc": 2,
+    "giant": 3,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "crusher",
+   "en": "crusher",
+   "tags": [
+    "war",
+    "agent"
+   ],
+   "agent": "crusher",
+   "races": {
+    "troll": 3,
+    "giant": 2,
+    "orc": 1
+   }
+  },
+  {
+   "id": "slayer",
+   "en": "slayer",
+   "tags": [
+    "war",
+    "agent"
+   ],
+   "agent": "slayer",
+   "races": {
+    "human": 2,
+    "orc": 1,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "eater",
+   "en": "eater",
+   "tags": [
+    "abstract",
+    "agent"
+   ],
+   "agent": "eater",
+   "races": {
+    "troll": 3,
+    "goblin": 2
+   }
+  },
+  {
+   "id": "biter",
+   "en": "biter",
+   "tags": [
+    "abstract",
+    "agent"
+   ],
+   "agent": "biter",
+   "races": {
+    "goblin": 3
+   }
+  },
+  {
+   "id": "keeper",
+   "en": "keeper",
+   "tags": [
+    "abstract",
+    "agent"
+   ],
+   "agent": "keeper",
+   "races": {
+    "human": 1,
+    "elf": 1,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "singer",
+   "en": "singer",
+   "tags": [
+    "abstract",
+    "agent"
+   ],
+   "agent": "singer",
+   "races": {
+    "elf": 2,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "walker",
+   "en": "walker",
+   "tags": [
+    "abstract",
+    "agent"
+   ],
+   "agent": "walker",
+   "races": {
+    "human": 1,
+    "elf": 1,
+    "undead": 1
+   }
+  },
+  {
+   "id": "stealer",
+   "en": "stealer",
+   "tags": [
+    "abstract",
+    "agent"
+   ],
+   "agent": "stealer",
+   "races": {
+    "goblin": 3
+   }
+  },
+  {
+   "id": "watcher",
+   "en": "watcher",
+   "tags": [
+    "abstract",
+    "agent"
+   ],
+   "agent": "watcher",
+   "races": {
+    "elf": 1,
+    "undead": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "red",
+   "en": "red",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "red",
+   "races": {
+    "orc": 2,
+    "dragon": 2
+   }
+  },
+  {
+   "id": "black",
+   "en": "black",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "black",
+   "races": {
+    "undead": 3,
+    "orc": 1,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "white",
+   "en": "white",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "white",
+   "races": {
+    "elf": 2,
+    "giant": 1
+   }
+  },
+  {
+   "id": "grey",
+   "en": "grey",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "grey",
+   "races": {
+    "human": 2,
+    "undead": 1,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "green",
+   "en": "green",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "green",
+   "races": {
+    "halfling": 2,
+    "goblin": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "gold_c",
+   "en": "gold",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "gold",
+   "races": {
+    "dragon": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "silver_c",
+   "en": "silver",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "silver",
+   "races": {
+    "elf": 2
+   }
+  },
+  {
+   "id": "pale",
+   "en": "pale",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "pale",
+   "races": {
+    "undead": 3,
+    "elf": 1
+   }
+  },
+  {
+   "id": "bright",
+   "en": "bright",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "bright",
+   "races": {
+    "elf": 2,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "old",
+   "en": "old",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "old",
+   "races": {
+    "dwarf": 2,
+    "giant": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "high",
+   "en": "high",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "high",
+   "races": {
+    "elf": 2,
+    "giant": 1
+   }
+  },
+  {
+   "id": "low",
+   "en": "low",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "low",
+   "races": {
+    "halfling": 1,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "wild",
+   "en": "wild",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "wild",
+   "races": {
+    "orc": 2,
+    "fey": 2,
+    "elf": 1
+   }
+  },
+  {
+   "id": "still",
+   "en": "still",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "still",
+   "races": {
+    "elf": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "broken",
+   "en": "broken",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "broken",
+   "races": {
+    "undead": 2,
+    "orc": 1,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "hollow_a",
+   "en": "hollow",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "hollow",
+   "races": {
+    "undead": 3,
+    "fey": 1
+   }
+  },
+  {
+   "id": "iron_a",
+   "en": "iron",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "iron",
+   "races": {
+    "dwarf": 2,
+    "orc": 1
+   }
+  },
+  {
+   "id": "crooked",
+   "en": "crooked",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "crooked",
+   "races": {
+    "goblin": 3,
+    "fey": 1
+   }
+  },
+  {
+   "id": "silent",
+   "en": "silent",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "silent",
+   "races": {
+    "elf": 2,
+    "undead": 2
+   }
+  },
+  {
+   "id": "burning",
+   "en": "burning",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "burning",
+   "races": {
+    "dragon": 3,
+    "orc": 1
+   }
+  },
+  {
+   "id": "frozen",
+   "en": "frozen",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "frozen",
+   "races": {
+    "giant": 3
+   }
+  },
+  {
+   "id": "hidden",
+   "en": "hidden",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "hidden",
+   "races": {
+    "gnome": 2,
+    "fey": 2,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "bitter",
+   "en": "bitter",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "bitter",
+   "races": {
+    "dwarf": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "merry",
+   "en": "merry",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "merry",
+   "races": {
+    "halfling": 3
+   }
+  },
+  {
+   "id": "golden_a",
+   "en": "golden",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "golden",
+   "races": {
+    "halfling": 1,
+    "dragon": 2
+   }
+  },
+  {
+   "id": "long",
+   "en": "long",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "long",
+   "races": {
+    "halfling": 1,
+    "giant": 1
+   }
+  },
+  {
+   "id": "deep_a",
+   "en": "deep",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "deep",
+   "races": {
+    "dwarf": 3
+   }
+  },
+  {
+   "id": "last",
+   "en": "last",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "last",
+   "races": {
+    "undead": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "first",
+   "en": "first",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "first",
+   "races": {
+    "dragon": 1,
+    "giant": 1,
+    "elf": 1
+   }
+  },
+  {
+   "id": "far",
+   "en": "far",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "far",
+   "races": {
+    "elf": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "lost",
+   "en": "lost",
+   "tags": [
+    "quality",
+    "adjective"
+   ],
+   "adj": "lost",
+   "races": {
+    "undead": 2,
+    "fey": 1
+   }
+  },
+  {
+   "id": "honor",
+   "en": "honor",
+   "tags": [
+    "virtue"
+   ],
+   "races": {
+    "dwarf": 2,
+    "human": 2
+   }
+  },
+  {
+   "id": "courage",
+   "en": "courage",
+   "tags": [
+    "virtue"
+   ],
+   "races": {
+    "human": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "mercy",
+   "en": "mercy",
+   "tags": [
+    "virtue"
+   ],
+   "races": {
+    "human": 1,
+    "elf": 1
+   }
+  },
+  {
+   "id": "wrath",
+   "en": "wrath",
+   "tags": [
+    "vice"
+   ],
+   "races": {
+    "orc": 2,
+    "giant": 1,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "hunger",
+   "en": "hunger",
+   "tags": [
+    "vice"
+   ],
+   "races": {
+    "troll": 3,
+    "goblin": 2
+   }
+  },
+  {
+   "id": "greed",
+   "en": "greed",
+   "tags": [
+    "vice"
+   ],
+   "races": {
+    "goblin": 2,
+    "dragon": 3
+   }
+  },
+  {
+   "id": "pride",
+   "en": "pride",
+   "tags": [
+    "vice"
+   ],
+   "races": {
+    "dragon": 3,
+    "elf": 1
+   }
+  },
+  {
+   "id": "patience",
+   "en": "patience",
+   "tags": [
+    "virtue"
+   ],
+   "races": {
+    "elf": 2,
+    "giant": 1
+   }
+  },
+  {
+   "id": "cunning",
+   "en": "cunning",
+   "tags": [
+    "vice"
+   ],
+   "races": {
+    "goblin": 3,
+    "gnome": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "strength",
+   "en": "strength",
+   "tags": [
+    "virtue"
+   ],
+   "races": {
+    "orc": 2,
+    "giant": 3
+   }
+  },
+  {
+   "id": "memory",
+   "en": "memory",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "elf": 3,
+    "undead": 2
+   }
+  },
+  {
+   "id": "sorrow",
+   "en": "sorrow",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "elf": 2,
+    "undead": 2
+   }
+  },
+  {
+   "id": "joy",
+   "en": "joy",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "halfling": 3,
+    "fey": 2
+   }
+  },
+  {
+   "id": "fear",
+   "en": "fear",
+   "tags": [
+    "vice"
+   ],
+   "races": {
+    "undead": 2,
+    "goblin": 1
+   }
+  },
+  {
+   "id": "hope",
+   "en": "hope",
+   "tags": [
+    "virtue"
+   ],
+   "races": {
+    "human": 2
+   }
+  },
+  {
+   "id": "ruin",
+   "en": "ruin",
+   "tags": [
+    "vice"
+   ],
+   "races": {
+    "undead": 3,
+    "orc": 1
+   }
+  },
+  {
+   "id": "glory",
+   "en": "glory",
+   "tags": [
+    "virtue"
+   ],
+   "races": {
+    "human": 2,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "secret",
+   "en": "secret",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "gnome": 2,
+    "fey": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "fortune",
+   "en": "fortune",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "halfling": 1,
+    "gnome": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "hearth",
+   "en": "hearth",
+   "tags": [
+    "home",
+    "comfort"
+   ],
+   "races": {
+    "halfling": 3,
+    "dwarf": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "home",
+   "en": "home",
+   "tags": [
+    "home",
+    "comfort"
+   ],
+   "races": {
+    "halfling": 3
+   }
+  },
+  {
+   "id": "bread",
+   "en": "bread",
+   "tags": [
+    "home",
+    "comfort"
+   ],
+   "races": {
+    "halfling": 3
+   }
+  },
+  {
+   "id": "ale",
+   "en": "ale",
+   "tags": [
+    "home",
+    "comfort"
+   ],
+   "races": {
+    "dwarf": 3,
+    "halfling": 2
+   }
+  },
+  {
+   "id": "pipe",
+   "en": "pipe",
+   "tags": [
+    "home",
+    "comfort"
+   ],
+   "races": {
+    "halfling": 2,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "gear",
+   "en": "gear",
+   "tags": [
+    "tinker",
+    "craft"
+   ],
+   "races": {
+    "gnome": 3
+   }
+  },
+  {
+   "id": "spark",
+   "en": "spark",
+   "tags": [
+    "tinker",
+    "craft"
+   ],
+   "races": {
+    "gnome": 3,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "clock",
+   "en": "clock",
+   "tags": [
+    "tinker",
+    "craft"
+   ],
+   "races": {
+    "gnome": 3
+   }
+  },
+  {
+   "id": "lantern",
+   "en": "lantern",
+   "tags": [
+    "tinker",
+    "craft"
+   ],
+   "races": {
+    "gnome": 2,
+    "dwarf": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "key",
+   "en": "key",
+   "tags": [
+    "tinker",
+    "craft"
+   ],
+   "races": {
+    "gnome": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "mask",
+   "en": "mask",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "fey": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "mirror",
+   "en": "mirror",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "fey": 2,
+    "elf": 1
+   }
+  },
+  {
+   "id": "thread",
+   "en": "thread",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "fey": 2,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "bell",
+   "en": "bell",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "human": 1,
+    "gnome": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "ash_death",
+   "en": "ashes",
+   "tags": [
+    "abstract",
+    "lore"
+   ],
+   "races": {
+    "undead": 3
+   }
+  },
+  {
+   "id": "kin",
+   "en": "kin",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "dwarf": 2,
+    "halfling": 2,
+    "orc": 1
+   }
+  },
+  {
+   "id": "son",
+   "en": "son",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "dwarf": 2,
+    "giant": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "daughter",
+   "en": "daughter",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "elf": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "mother",
+   "en": "mother",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "giant": 1,
+    "fey": 1,
+    "human": 1
+   }
+  },
+  {
+   "id": "father",
+   "en": "father",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "dwarf": 2,
+    "giant": 1
+   }
+  },
+  {
+   "id": "king",
+   "en": "king",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "human": 2,
+    "dwarf": 2,
+    "dragon": 1
+   }
+  },
+  {
+   "id": "queen",
+   "en": "queen",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "human": 2,
+    "elf": 2,
+    "fey": 2
+   }
+  },
+  {
+   "id": "lord",
+   "en": "lord",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "human": 2,
+    "undead": 2
+   }
+  },
+  {
+   "id": "lady",
+   "en": "lady",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "human": 1,
+    "elf": 1,
+    "fey": 1
+   }
+  },
+  {
+   "id": "wanderer",
+   "en": "wanderer",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "elf": 1,
+    "human": 1,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "hunter",
+   "en": "hunter",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "elf": 2,
+    "orc": 2,
+    "human": 1
+   }
+  },
+  {
+   "id": "smith",
+   "en": "smith",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "dwarf": 3,
+    "gnome": 1
+   }
+  },
+  {
+   "id": "witch",
+   "en": "witch",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "fey": 2,
+    "human": 1,
+    "undead": 1
+   }
+  },
+  {
+   "id": "priest",
+   "en": "priest",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "human": 2,
+    "undead": 1
+   }
+  },
+  {
+   "id": "thief",
+   "en": "thief",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "goblin": 3,
+    "halfling": 1
+   }
+  },
+  {
+   "id": "warden",
+   "en": "warden",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "elf": 2,
+    "human": 1,
+    "dwarf": 1
+   }
+  },
+  {
+   "id": "child",
+   "en": "child",
+   "tags": [
+    "role",
+    "person"
+   ],
+   "races": {
+    "fey": 1,
+    "halfling": 1
+   }
+  }
+ ]
+}

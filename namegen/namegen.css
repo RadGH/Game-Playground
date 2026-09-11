@@ -1,0 +1,12 @@
+.names { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.name { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 8px; cursor: pointer; }
+.name:hover { border-color: var(--accent); }
+.name .t { font-size: 15px; font-weight: 600; }
+.name .g { font-size: 11px; color: var(--fg2); font-family: var(--mono); }
+.name .f { font-size: 11px; color: var(--fg2); }
+.fav .name { border-color: var(--accent2); }
+.race-chips .chip { text-transform: capitalize; }
+#json { font-family: var(--mono); font-size: 11px; min-height: 260px; }
+.lang-info td { font-size: 12px; font-family: var(--mono); }
+.grid-all td { font-size: 12px; vertical-align: top; }
+.grid-all th { text-transform: capitalize; }

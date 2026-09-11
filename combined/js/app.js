@@ -8,24 +8,27 @@ import { say, synthesize, play, stopAll, normalizeVoice, getContext } from '../.
 import { Lingo, Speaker, SLIDERS } from '../../lingo/js/lingo.js';
 import { MemoryBank, generateEvent, ageWords, DAY, HOUR } from '../../lingo/js/memory.js';
 import { Scene } from '../../lingo/js/context.js';
+import { NameGen } from '../../namegen/js/namegen.js';
 
 const status = document.getElementById('status'); const setStatus = t => status.textContent = t;
 const load = async p => (await fetch(p)).json();
 const [CHARS, lexData, grammarData, traitsData, avatarPresets, voicePresets, eventsData, scenesData] = await Promise.all([load('data/characters.json'), load('../lingo/data/lexicon.json'), load('../lingo/data/grammar.json'), load('../lingo/data/traits.json'), load('../avatar-2d/data/presets.json'), load('../voice-lab/data/presets.json'), load('../lingo/data/events.json'), load('../lingo/data/scenes.json')]);
 const EV = eventsData.types;
 const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData });
+const nameGen = await NameGen.load('../namegen/data/');
 const intents = lingo.grammar.intents();
 
 // ---------- characters ----------
-function toSpeaker(ch) { const entry = lingo.lexicon.get(ch.entry) || { id: ch.id, type: 'person', proper: true, pronouns: ch.pronouns || 'they', race: ch.race || 'human', forms: { sg: ch.name, short: ch.name.split(' ')[0] } }; return new Speaker({ id: ch.id, name: entry.forms?.short || ch.name, entry, lexicon: lingo.lexicon, speech: JSON.parse(JSON.stringify(ch.speech)) }); }
+function toSpeaker(ch) { const entry = lingo.lexicon.get(ch.entry) || { id: ch.id, type: 'person', proper: true, pronouns: ch.pronouns || 'they', race: ch.race || 'human', forms: { sg: ch.name, short: ch.short || ch.name.split(' ')[0] }, pron: ch.respell ? { respell: ch.respell } : undefined }; if (!lingo.lexicon.has(entry.id)) { lingo.lexicon.add(entry); lingo.invalidatePronunciations(); } return new Speaker({ id: ch.id, name: entry.forms?.short || ch.name, entry, lexicon: lingo.lexicon, speech: JSON.parse(JSON.stringify(ch.speech)) }); }
 function randomCharacter(seedName) {
   const races = Object.keys(avatarPresets.raceRules); const race = races[Math.floor(Math.random() * races.length)];
   const raceEntry = lingo.lexicon.byType('race').find(r => r.id === race) ? race : 'human';
-  const name = seedName || (['Ash', 'Bryn', 'Cael', 'Dara', 'Eira', 'Fenn', 'Garrick', 'Hesper', 'Ilya', 'Jory'][Math.floor(Math.random() * 10)] + ' ' + ['Blackwood', 'Mire', 'Stone', 'Vell', 'Thorne', 'Kestrel'][Math.floor(Math.random() * 6)]);
   const pronouns = ['he', 'she', 'they'][Math.floor(Math.random() * 3)];
+  const generated = nameGen.generate('person.full', { race: nameGen.languages[race] ? race : 'human', gender: pronouns === 'he' ? 'm' : pronouns === 'she' ? 'f' : 'n' });
+  const name = seedName || generated.text;
   const traitIds = traitsData.traits.map(t => t.id).sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 2));
   const vp = voicePresets.presets.filter(p => p.voice.engine === 'espeak'); const voice = { ...vp[Math.floor(Math.random() * vp.length)].voice, gender: pronouns === 'he' ? 'm' : pronouns === 'she' ? 'f' : 'n' };
-  return { schema: 1, id: 'rnd_' + Date.now(), name, race: raceEntry, pronouns, avatar: randomAvatar(avatarPresets, { race }), voice, speech: { ...SLIDERS, formality: Math.random(), verbosity: Math.random(), cheer: Math.random(), aggression: Math.random(), confidence: Math.random(), traits: traitIds, custom: {}, customRate: {}, tics: Math.random() < 0.3 ? [['um', 'drawl', 'clipped', 'flowery', 'hesitant'][Math.floor(Math.random() * 5)]] : [], mood: +(Math.random() * 2 - 1).toFixed(2) } };
+  return { schema: 1, id: 'rnd_' + Date.now(), name, race: raceEntry, pronouns, short: generated.forms.short, respell: generated.respell, nameGloss: generated.gloss.join(' + ') || undefined, avatar: randomAvatar(avatarPresets, { race }), voice, speech: { ...SLIDERS, formality: Math.random(), verbosity: Math.random(), cheer: Math.random(), aggression: Math.random(), confidence: Math.random(), traits: traitIds, custom: {}, customRate: {}, tics: Math.random() < 0.3 ? [['um', 'drawl', 'clipped', 'flowery', 'hesitant'][Math.floor(Math.random() * 5)]] : [], mood: +(Math.random() * 2 - 1).toFixed(2) } };
 }
 const state = { A: JSON.parse(JSON.stringify(CHARS.characters[0])), B: JSON.parse(JSON.stringify(CHARS.characters[1])), spA: null, spB: null, opinionAB: -0.3, opinionBA: 0.1, speaking: false, mute: false, useBabble: false, now: 20, scene: null, banks: {} };
 function bankFor(sp) { if (!state.banks[sp.id]) state.banks[sp.id] = new MemoryBank({ ownerId: sp.id, traits: sp.traits, eventTypes: EV, lexicon: lingo.lexicon }); state.banks[sp.id].traits = sp.traits; return state.banks[sp.id]; }

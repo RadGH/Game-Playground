@@ -1,0 +1,9 @@
+.loot { background: var(--bg3); border: 1px solid var(--border); border-left: 4px solid var(--border); border-radius: var(--radius); padding: 8px 10px; margin-bottom: 6px; }
+.loot.common { border-left-color: #8a8f99; } .loot.uncommon { border-left-color: #5ad48a; } .loot.rare { border-left-color: #5ab0ff; } .loot.epic { border-left-color: #b57bee; } .loot.legendary { border-left-color: #ffb35a; }
+.loot .n { font-size: 15px; font-weight: 600; } .loot .m { font-size: 11px; color: var(--fg2); font-family: var(--mono); } .loot .l { font-size: 12px; margin-top: 3px; }
+.catalog { max-height: 520px; overflow: auto; }
+.catalog table td { font-size: 12px; } .catalog .aff { font-family: var(--mono); font-size: 11px; color: var(--fg2); }
+.race-chips .chip { text-transform: capitalize; }
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 3px; max-height: 180px; overflow: auto; } .tag-cloud .chip { font-size: 11px; }
+#json { font-family: var(--mono); font-size: 11px; min-height: 240px; }
+.counts td { font-size: 12px; }

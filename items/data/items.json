@@ -1,0 +1,11676 @@
+{
+ "_doc": "Item catalog. Fields: id, name (singular), category, sub, tags (blade, one-handed, kitchen, gore, magic…), affinity {race: 0..3; missing = rare for that race}, exclusive (only that race), rarity common|uncommon|rare|epic|legendary, value [min,max] silver marks, materials (allowed material ids from materials.json; empty = none), desc, damage (weapons). Built by tools/build-items.py; games extend this file or load their own.",
+ "items": [
+  {
+   "id": "shortsword",
+   "name": "shortsword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "common-arms"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    40
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "A plain double-edged blade a forearm long.",
+   "damage": "slash"
+  },
+  {
+   "id": "arming_sword",
+   "name": "arming sword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "knightly"
+   ],
+   "affinity": {
+    "human": 3
+   },
+   "rarity": "common",
+   "value": [
+    30,
+    80
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "The knight's straight sword, cruciform hilt.",
+   "damage": "slash"
+  },
+  {
+   "id": "longsword",
+   "name": "longsword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "two-handed",
+    "versatile"
+   ],
+   "affinity": {
+    "human": 3,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    40,
+    120
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Hand-and-a-half blade for cut and thrust.",
+   "damage": "slash"
+  },
+  {
+   "id": "greatsword",
+   "name": "greatsword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "two-handed",
+    "heavy"
+   ],
+   "affinity": {
+    "human": 2,
+    "giant": 1,
+    "orc": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    80,
+    250
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Man-tall two-hander swung from the shoulder.",
+   "damage": "slash"
+  },
+  {
+   "id": "falchion",
+   "name": "falchion",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "chopping"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2
+   },
+   "rarity": "common",
+   "value": [
+    20,
+    60
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Broad, heavy-tipped chopper.",
+   "damage": "slash"
+  },
+  {
+   "id": "scimitar",
+   "name": "scimitar",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "curved",
+    "slashing"
+   ],
+   "affinity": {
+    "human": 2,
+    "fey": 1
+   },
+   "rarity": "common",
+   "value": [
+    25,
+    70
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Curved single-edged blade, quick in the draw.",
+   "damage": "slash"
+  },
+  {
+   "id": "sabre",
+   "name": "sabre",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "curved",
+    "cavalry"
+   ],
+   "affinity": {
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Cavalry sword with a knuckle-bow.",
+   "damage": "slash"
+  },
+  {
+   "id": "rapier",
+   "name": "rapier",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "thrusting",
+    "duelling"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    140
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Slender thrusting blade for the duelling floor.",
+   "damage": "slash"
+  },
+  {
+   "id": "gladius",
+   "name": "gladius",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "short",
+    "legion"
+   ],
+   "affinity": {
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    20,
+    50
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Short stabbing sword of the old legions.",
+   "damage": "slash"
+  },
+  {
+   "id": "claymore",
+   "name": "claymore",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "two-handed",
+    "highland"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    90,
+    260
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Great sword with down-sloping quillons.",
+   "damage": "slash"
+  },
+  {
+   "id": "estoc",
+   "name": "estoc",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "two-handed",
+    "thrusting",
+    "anti-armour"
+   ],
+   "affinity": {
+    "human": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    180
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Edgeless armour-piercing spike of a sword.",
+   "damage": "slash"
+  },
+  {
+   "id": "cutlass",
+   "name": "cutlass",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "curved",
+    "naval"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    20,
+    60
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Short, thick sailor's sword.",
+   "damage": "slash"
+  },
+  {
+   "id": "dao",
+   "name": "broad chopper",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "chopping"
+   ],
+   "affinity": {
+    "orc": 2,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    20,
+    55
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Wide single-edged cleaver of a sword.",
+   "damage": "slash"
+  },
+  {
+   "id": "leafblade",
+   "name": "leaf blade",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "elegant",
+    "ancient"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    200
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Leaf-shaped elven blade, balanced for grace.",
+   "damage": "slash"
+  },
+  {
+   "id": "moonblade",
+   "name": "moonblade",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "elegant",
+    "magic",
+    "heirloom"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    400,
+    1500
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Slender curved elven sword that glows faintly at night.",
+   "exclusive": "elf",
+   "damage": "slash"
+  },
+  {
+   "id": "cleaver_sword",
+   "name": "war cleaver",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "two-handed",
+    "brutal",
+    "chopping"
+   ],
+   "affinity": {
+    "orc": 3,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "More slab than sword; orcs like the weight.",
+   "exclusive": "orc",
+   "damage": "slash"
+  },
+  {
+   "id": "bonesword",
+   "name": "bone sword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "crude",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 2,
+    "goblin": 2,
+    "undead": 2,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    25
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Sharpened femur of something large.",
+   "damage": "slash"
+  },
+  {
+   "id": "shard_blade",
+   "name": "obsidian shard blade",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "brittle",
+    "sharp"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "orc": 1,
+    "dragon": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Volcanic glass edge; terrifyingly sharp, breaks easily.",
+   "damage": "slash"
+  },
+  {
+   "id": "grave_blade",
+   "name": "grave blade",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "cursed",
+    "cold"
+   ],
+   "affinity": {
+    "undead": 3
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    900
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Black iron sword that drinks warmth.",
+   "exclusive": "undead",
+   "damage": "slash"
+  },
+  {
+   "id": "carving_sword",
+   "name": "carving sword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "kitchen",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    30
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Halfling 'sword': an overgrown carving knife with a good handle.",
+   "damage": "slash"
+  },
+  {
+   "id": "spring_sabre",
+   "name": "spring-sabre",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "tinker",
+    "gadget"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "rare",
+   "value": [
+    150,
+    500
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Sabre with a spring-loaded pommel that extends the reach a hand's width.",
+   "exclusive": "gnome",
+   "damage": "slash"
+  },
+  {
+   "id": "giant_sword",
+   "name": "giant's sword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "huge",
+    "two-handed"
+   ],
+   "affinity": {
+    "giant": 3
+   },
+   "rarity": "rare",
+   "value": [
+    300,
+    900
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "A sword scaled for a giant; humans use it as a bridge.",
+   "exclusive": "giant",
+   "damage": "slash"
+  },
+  {
+   "id": "dragonfang_sword",
+   "name": "dragonfang sword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "fang",
+    "magic"
+   ],
+   "affinity": {
+    "dragon": 2,
+    "human": 1
+   },
+   "rarity": "epic",
+   "value": [
+    2000,
+    8000
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "A tooth of a great wyrm, hafted and edged.",
+   "damage": "slash"
+  },
+  {
+   "id": "hook_sword",
+   "name": "hook sword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "hook",
+    "exotic"
+   ],
+   "affinity": {
+    "human": 1,
+    "goblin": 1,
+    "fey": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    120
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Hooked tip for catching blades and ankles.",
+   "damage": "slash"
+  },
+  {
+   "id": "sickle_sword",
+   "name": "sickle sword",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "curved",
+    "ancient"
+   ],
+   "affinity": {
+    "human": 1,
+    "undead": 2,
+    "giant": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    100
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Bronze-age crescent blade.",
+   "damage": "slash"
+  },
+  {
+   "id": "thorn_blade",
+   "name": "thornblade",
+   "category": "weapon",
+   "sub": "sword",
+   "tags": [
+    "blade",
+    "one-handed",
+    "fey",
+    "living",
+    "magic"
+   ],
+   "affinity": {
+    "fey": 3
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    800
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Grown, not forged; still has leaves at the hilt.",
+   "exclusive": "fey",
+   "damage": "slash"
+  },
+  {
+   "id": "dagger",
+   "name": "dagger",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "concealable"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    25
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Double-edged fighting knife.",
+   "damage": "pierce"
+  },
+  {
+   "id": "dirk",
+   "name": "dirk",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "long"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    8,
+    30
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Long, narrow dagger.",
+   "damage": "pierce"
+  },
+  {
+   "id": "stiletto",
+   "name": "stiletto",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "thrusting",
+    "assassin"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    15,
+    50
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Needle-pointed; finds gaps in mail.",
+   "damage": "pierce"
+  },
+  {
+   "id": "kris",
+   "name": "wave-bladed dagger",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "ritual",
+    "curved"
+   ],
+   "affinity": {
+    "fey": 2,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    80
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Wavy blade for ceremony and spite.",
+   "damage": "pierce"
+  },
+  {
+   "id": "skinning_knife",
+   "name": "skinning knife",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "tool",
+    "hunting"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    12
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Curved blade for hides.",
+   "damage": "pierce"
+  },
+  {
+   "id": "rusty_shiv",
+   "name": "rusty shiv",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "crude",
+    "filthy"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Bit of metal, bit of rag. Goblin standard issue.",
+   "exclusive": "goblin",
+   "damage": "pierce"
+  },
+  {
+   "id": "bread_knife",
+   "name": "bread knife",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "kitchen",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 3
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Serrated; also excellent against burglars.",
+   "damage": "pierce"
+  },
+  {
+   "id": "boot_knife",
+   "name": "boot knife",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "concealable"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    15
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Lives in the boot until needed.",
+   "damage": "pierce"
+  },
+  {
+   "id": "sacrificial_knife",
+   "name": "sacrificial knife",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "ritual",
+    "dark"
+   ],
+   "affinity": {
+    "undead": 2,
+    "orc": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Obsidian or black iron; stained.",
+   "damage": "pierce"
+  },
+  {
+   "id": "carving_set",
+   "name": "carving set",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "kitchen",
+    "set"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    30
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Matched knives in a leather roll.",
+   "damage": "pierce"
+  },
+  {
+   "id": "main_gauche",
+   "name": "parrying dagger",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "duelling",
+    "off-hand"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    70
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Broad guard for catching a rapier.",
+   "damage": "pierce"
+  },
+  {
+   "id": "tusk_knife",
+   "name": "tusk knife",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "orc",
+    "bone"
+   ],
+   "affinity": {
+    "orc": 3
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    15
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Boar tusk, edged; every orc child gets one.",
+   "exclusive": "orc",
+   "damage": "pierce"
+  },
+  {
+   "id": "letter_opener",
+   "name": "letter opener",
+   "category": "weapon",
+   "sub": "dagger",
+   "tags": [
+    "blade",
+    "small",
+    "office",
+    "humble"
+   ],
+   "affinity": {
+    "human": 2,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril",
+    "silver",
+    "bone",
+    "obsidian"
+   ],
+   "desc": "Dull enough to be polite, sharp enough to be rude.",
+   "damage": "pierce"
+  },
+  {
+   "id": "hand_axe",
+   "name": "hand axe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "one-handed",
+    "tool"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "human": 2,
+    "orc": 2
+   },
+   "rarity": "common",
+   "value": [
+    8,
+    30
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Fells trees or foes.",
+   "damage": "slash"
+  },
+  {
+   "id": "battleaxe",
+   "name": "battleaxe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "one-handed",
+    "war"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "orc": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Bearded head on a stout haft.",
+   "damage": "slash"
+  },
+  {
+   "id": "greataxe",
+   "name": "greataxe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "two-handed",
+    "heavy"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "orc": 3,
+    "giant": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    200
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Double-bitted two-hander.",
+   "damage": "slash"
+  },
+  {
+   "id": "throwing_axe",
+   "name": "throwing axe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "thrown",
+    "light"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "human": 1,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    6,
+    20
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Balanced for a spin and a thud.",
+   "damage": "slash"
+  },
+  {
+   "id": "bearded_axe",
+   "name": "bearded axe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "one-handed",
+    "hooking"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "common",
+   "value": [
+    25,
+    80
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "The beard hooks shields aside.",
+   "damage": "slash"
+  },
+  {
+   "id": "runeaxe",
+   "name": "runeaxe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "one-handed",
+    "magic",
+    "runes",
+    "heirloom"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    500,
+    2000
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Dwarven axe with a grudge carved into the head.",
+   "exclusive": "dwarf",
+   "damage": "slash"
+  },
+  {
+   "id": "mattock",
+   "name": "war mattock",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "two-handed",
+    "mining",
+    "tool"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "common",
+   "value": [
+    20,
+    60
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Pick on one side, adze on the other; deep-delvers' weapon of habit.",
+   "damage": "slash"
+  },
+  {
+   "id": "cleaver",
+   "name": "butcher's cleaver",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "one-handed",
+    "kitchen",
+    "chopping"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "orc": 1,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    4,
+    15
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Kitchen tool that keeps turning up on battlefields.",
+   "damage": "slash"
+  },
+  {
+   "id": "stone_axe",
+   "name": "stone axe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "one-handed",
+    "crude",
+    "stone"
+   ],
+   "affinity": {
+    "troll": 3,
+    "giant": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Flint head bound to a branch.",
+   "damage": "slash"
+  },
+  {
+   "id": "executioner_axe",
+   "name": "headsman's axe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "two-handed",
+    "grim",
+    "ceremonial"
+   ],
+   "affinity": {
+    "human": 2,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    80,
+    300
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Crescent blade, black haft, one purpose.",
+   "damage": "slash"
+  },
+  {
+   "id": "woodcutter_axe",
+   "name": "felling axe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "two-handed",
+    "tool",
+    "wood"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 1,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    20
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Long haft, heavy head, for trees.",
+   "damage": "slash"
+  },
+  {
+   "id": "crescent_axe",
+   "name": "crescent axe",
+   "category": "weapon",
+   "sub": "axe",
+   "tags": [
+    "axe",
+    "one-handed",
+    "elf",
+    "elegant"
+   ],
+   "affinity": {
+    "elf": 2,
+    "fey": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    50,
+    160
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "stone",
+    "mithril"
+   ],
+   "desc": "Thin crescent head; elves who must use axes use this.",
+   "damage": "slash"
+  },
+  {
+   "id": "warhammer",
+   "name": "warhammer",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "hammer",
+    "one-handed",
+    "armour-breaking"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Flat face, back spike.",
+   "damage": "blunt"
+  },
+  {
+   "id": "maul",
+   "name": "maul",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "hammer",
+    "two-handed",
+    "heavy"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "giant": 2,
+    "orc": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    50,
+    160
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Sledge for the battlefield.",
+   "damage": "blunt"
+  },
+  {
+   "id": "mace",
+   "name": "mace",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "mace",
+    "one-handed",
+    "blunt"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    20,
+    60
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Flanged head on a steel haft.",
+   "damage": "blunt"
+  },
+  {
+   "id": "morningstar",
+   "name": "morningstar",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "mace",
+    "one-handed",
+    "spiked"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2
+   },
+   "rarity": "common",
+   "value": [
+    30,
+    80
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Spiked ball on a haft.",
+   "damage": "blunt"
+  },
+  {
+   "id": "flail",
+   "name": "flail",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "mace",
+    "one-handed",
+    "chain",
+    "awkward"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Ball on a chain; hits the wielder as often as the enemy.",
+   "damage": "blunt"
+  },
+  {
+   "id": "club",
+   "name": "club",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "club",
+    "one-handed",
+    "crude",
+    "wood"
+   ],
+   "affinity": {
+    "troll": 3,
+    "goblin": 2,
+    "giant": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    4
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Heavy stick.",
+   "damage": "blunt"
+  },
+  {
+   "id": "great_club",
+   "name": "great club",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "club",
+    "two-handed",
+    "crude",
+    "huge"
+   ],
+   "affinity": {
+    "troll": 3,
+    "giant": 3
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    15
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Uprooted sapling, bark still on.",
+   "damage": "blunt"
+  },
+  {
+   "id": "smiths_hammer",
+   "name": "smith's hammer",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "hammer",
+    "one-handed",
+    "tool",
+    "craft"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "gnome": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    20
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Forge hammer; dents skulls if it must.",
+   "damage": "blunt"
+  },
+  {
+   "id": "forge_hammer",
+   "name": "forgefather's hammer",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "hammer",
+    "two-handed",
+    "magic",
+    "runes",
+    "heirloom"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "epic",
+   "value": [
+    3000,
+    9000
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Said to have been quenched in a mountain's heart.",
+   "exclusive": "dwarf",
+   "damage": "blunt"
+  },
+  {
+   "id": "cudgel",
+   "name": "knotted cudgel",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "club",
+    "one-handed",
+    "crude",
+    "wood"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 1,
+    "goblin": 1,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Hedge-cut and knotted; a shepherd's argument.",
+   "damage": "blunt"
+  },
+  {
+   "id": "bone_club",
+   "name": "bone club",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "club",
+    "one-handed",
+    "crude",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 2,
+    "troll": 2,
+    "undead": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Thighbone of something that lost.",
+   "damage": "blunt"
+  },
+  {
+   "id": "wrench_hammer",
+   "name": "wrench-hammer",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "hammer",
+    "one-handed",
+    "tinker",
+    "tool"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    40
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Gnomish tool that is somehow also a weapon.",
+   "exclusive": "gnome",
+   "damage": "blunt"
+  },
+  {
+   "id": "ceremonial_mace",
+   "name": "ceremonial mace",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "mace",
+    "ceremonial",
+    "regalia",
+    "gilded"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "rare",
+   "value": [
+    300,
+    1200
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Gilded and jewelled; carried before the throne.",
+   "damage": "blunt"
+  },
+  {
+   "id": "war_pick",
+   "name": "war pick",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "hammer",
+    "one-handed",
+    "armour-breaking",
+    "spike"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    25,
+    70
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Single curved spike for punching plate.",
+   "damage": "blunt"
+  },
+  {
+   "id": "rolling_pin",
+   "name": "rolling pin",
+   "category": "weapon",
+   "sub": "blunt",
+   "tags": [
+    "club",
+    "one-handed",
+    "kitchen",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 3
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "stone",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Oak. Has ended arguments.",
+   "exclusive": "halfling",
+   "damage": "blunt"
+  },
+  {
+   "id": "spear",
+   "name": "spear",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "reach",
+    "common-arms"
+   ],
+   "affinity": {
+    "human": 3,
+    "orc": 2,
+    "elf": 1,
+    "goblin": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    25
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Point on a pole; the oldest weapon.",
+   "damage": "pierce"
+  },
+  {
+   "id": "javelin",
+   "name": "javelin",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "thrown",
+    "light"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 1,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    4,
+    15
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Light throwing spear.",
+   "damage": "pierce"
+  },
+  {
+   "id": "pike",
+   "name": "pike",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "very-long",
+    "formation"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    40
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Fifteen feet of ash and a point.",
+   "damage": "pierce"
+  },
+  {
+   "id": "halberd",
+   "name": "halberd",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "axe",
+    "hook"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    120
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Axe, spike and hook on a pole.",
+   "damage": "pierce"
+  },
+  {
+   "id": "glaive",
+   "name": "glaive",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "blade"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    110
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Single-edged blade on a pole.",
+   "damage": "pierce"
+  },
+  {
+   "id": "trident",
+   "name": "trident",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "three-pronged",
+    "sea"
+   ],
+   "affinity": {
+    "human": 1,
+    "fey": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Fish-spear grown up.",
+   "damage": "pierce"
+  },
+  {
+   "id": "boar_spear",
+   "name": "boar spear",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "hunting",
+    "crossbar"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    45
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Crossbar keeps the boar from running up the shaft.",
+   "damage": "pierce"
+  },
+  {
+   "id": "moonglaive",
+   "name": "moonglaive",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "elegant",
+    "elf"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    300,
+    1000
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Curved elven glaive, light as a reed.",
+   "exclusive": "elf",
+   "damage": "pierce"
+  },
+  {
+   "id": "pokey_stick",
+   "name": "pokey stick",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "crude",
+    "goblin"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "A stick with a nail in it. Possibly several nails.",
+   "exclusive": "goblin",
+   "damage": "pierce"
+  },
+  {
+   "id": "bone_spear",
+   "name": "bone spear",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "crude",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 2,
+    "troll": 1,
+    "undead": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    12
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Splintered bone lashed to a shaft.",
+   "damage": "pierce"
+  },
+  {
+   "id": "lance",
+   "name": "lance",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "mounted",
+    "knightly"
+   ],
+   "affinity": {
+    "human": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    100
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Couched under the arm at the charge.",
+   "damage": "pierce"
+  },
+  {
+   "id": "giant_spear",
+   "name": "giant's spear",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "huge"
+   ],
+   "affinity": {
+    "giant": 3
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    700
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "A ship's mast with a plough-blade tip.",
+   "exclusive": "giant",
+   "damage": "pierce"
+  },
+  {
+   "id": "war_scythe",
+   "name": "war scythe",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "blade",
+    "peasant"
+   ],
+   "affinity": {
+    "human": 2,
+    "undead": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    40
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Farm scythe re-hafted straight; the dead favour it.",
+   "damage": "pierce"
+  },
+  {
+   "id": "pitchfork",
+   "name": "pitchfork",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "tool",
+    "peasant"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "For hay. And for mobs.",
+   "damage": "pierce"
+  },
+  {
+   "id": "hooked_pole",
+   "name": "hooked pole",
+   "category": "weapon",
+   "sub": "polearm",
+   "tags": [
+    "polearm",
+    "two-handed",
+    "hook",
+    "tool"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "wood",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Pulls riders down and fruit off trees.",
+   "damage": "pierce"
+  },
+  {
+   "id": "shortbow",
+   "name": "shortbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "common-arms"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "halfling": 2,
+    "goblin": 2
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    35
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Handy bow for hunting and skirmish.",
+   "damage": "pierce"
+  },
+  {
+   "id": "longbow",
+   "name": "longbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "powerful"
+   ],
+   "affinity": {
+    "human": 3,
+    "elf": 2
+   },
+   "rarity": "common",
+   "value": [
+    25,
+    80
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Man-tall yew stave; takes a lifetime of practice.",
+   "damage": "pierce"
+  },
+  {
+   "id": "recurve_bow",
+   "name": "recurve bow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "horn"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "elf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    120
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Horn and sinew laminate; short and strong.",
+   "damage": "pierce"
+  },
+  {
+   "id": "composite_bow",
+   "name": "composite bow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "horn",
+    "mounted"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    50,
+    150
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Layered bow for the saddle.",
+   "damage": "pierce"
+  },
+  {
+   "id": "flatbow",
+   "name": "flatbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "simple"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    12,
+    40
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Wide, flat limbs; forgiving to make.",
+   "damage": "pierce"
+  },
+  {
+   "id": "livingwood_bow",
+   "name": "livingwood bow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "elf",
+    "magic",
+    "living"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    500,
+    2000
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Elven bow cut from a tree that agreed to it; still green.",
+   "exclusive": "elf",
+   "damage": "pierce"
+  },
+  {
+   "id": "moonbow",
+   "name": "moonbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "elf",
+    "magic",
+    "heirloom"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "epic",
+   "value": [
+    2000,
+    7000
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Silver-limbed elven bow; the string sings.",
+   "exclusive": "elf",
+   "damage": "pierce"
+  },
+  {
+   "id": "hornbow",
+   "name": "great hornbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "horn",
+    "orc"
+   ],
+   "affinity": {
+    "orc": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    180
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Orcish bow of stacked auroch horn; pulls like a mule.",
+   "exclusive": "orc",
+   "damage": "pierce"
+  },
+  {
+   "id": "light_crossbow",
+   "name": "light crossbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "crossbow",
+    "ranged",
+    "two-handed",
+    "mechanical"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "gnome": 2
+   },
+   "rarity": "common",
+   "value": [
+    30,
+    90
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "brass"
+   ],
+   "desc": "Stirrup-spanned; easy to learn.",
+   "damage": "pierce"
+  },
+  {
+   "id": "heavy_crossbow",
+   "name": "heavy crossbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "crossbow",
+    "ranged",
+    "two-handed",
+    "mechanical",
+    "armour-piercing"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    80,
+    240
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "brass"
+   ],
+   "desc": "Windlass-spanned; punches plate.",
+   "damage": "pierce"
+  },
+  {
+   "id": "hand_crossbow",
+   "name": "hand crossbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "crossbow",
+    "ranged",
+    "one-handed",
+    "concealable"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "gnome": 2,
+    "human": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    180
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "brass"
+   ],
+   "desc": "One-handed; poisoners' favourite.",
+   "damage": "pierce"
+  },
+  {
+   "id": "repeating_crossbow",
+   "name": "repeating crossbow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "crossbow",
+    "ranged",
+    "two-handed",
+    "mechanical",
+    "gnome",
+    "gadget"
+   ],
+   "affinity": {
+    "gnome": 3,
+    "dwarf": 1
+   },
+   "rarity": "rare",
+   "value": [
+    300,
+    1000
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "brass"
+   ],
+   "desc": "Gnomish magazine crossbow; jams when it matters.",
+   "exclusive": "gnome",
+   "damage": "pierce"
+  },
+  {
+   "id": "sling",
+   "name": "sling",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "one-handed",
+    "humble",
+    "stone"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "goblin": 2,
+    "human": 1,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "leather",
+    "cloth"
+   ],
+   "desc": "Leather cup and two cords; halflings are deadly with it.",
+   "damage": "pierce"
+  },
+  {
+   "id": "staff_sling",
+   "name": "staff sling",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "two-handed",
+    "humble",
+    "stone"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 1,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    10
+   ],
+   "materials": [
+    "leather",
+    "cloth"
+   ],
+   "desc": "Sling on a staff for heavier stones.",
+   "damage": "pierce"
+  },
+  {
+   "id": "throwing_knives",
+   "name": "throwing knives",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "thrown",
+    "set",
+    "blade"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    30
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Set of six, balanced.",
+   "damage": "pierce"
+  },
+  {
+   "id": "blowpipe",
+   "name": "blowpipe",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "two-handed",
+    "dart",
+    "poison",
+    "quiet"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    12
+   ],
+   "materials": [
+    "wood",
+    "leather"
+   ],
+   "desc": "Reed and darts; the darts are the point.",
+   "damage": "pierce"
+  },
+  {
+   "id": "bolas",
+   "name": "bolas",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "thrown",
+    "entangling"
+   ],
+   "affinity": {
+    "human": 1,
+    "halfling": 1,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    10
+   ],
+   "materials": [
+    "leather"
+   ],
+   "desc": "Three weights on cords.",
+   "damage": "pierce"
+  },
+  {
+   "id": "giant_sling",
+   "name": "giant's sling",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "huge",
+    "stone"
+   ],
+   "affinity": {
+    "giant": 3,
+    "troll": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    80
+   ],
+   "materials": [
+    "leather",
+    "cloth"
+   ],
+   "desc": "Throws boulders. Do not stand downrange.",
+   "exclusive": "giant",
+   "damage": "pierce"
+  },
+  {
+   "id": "dragonbone_bow",
+   "name": "dragonbone bow",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "bow",
+    "ranged",
+    "two-handed",
+    "dragon",
+    "magic"
+   ],
+   "affinity": {
+    "human": 1,
+    "elf": 1,
+    "orc": 1
+   },
+   "rarity": "epic",
+   "value": [
+    3000,
+    9000
+   ],
+   "materials": [
+    "wood",
+    "yew",
+    "horn",
+    "livingwood"
+   ],
+   "desc": "Rib of a wyrm, strung with its sinew.",
+   "damage": "pierce"
+  },
+  {
+   "id": "net",
+   "name": "weighted net",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "thrown",
+    "entangling",
+    "sea"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [
+    "leather"
+   ],
+   "desc": "Fishing net with lead weights; catches men too.",
+   "damage": "pierce"
+  },
+  {
+   "id": "whip",
+   "name": "whip",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ranged",
+    "one-handed",
+    "reach",
+    "leather"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 1,
+    "fey": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    15
+   ],
+   "materials": [
+    "leather"
+   ],
+   "desc": "Braided leather; loud, and reaches.",
+   "damage": "pierce"
+  },
+  {
+   "id": "quiver",
+   "name": "quiver",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "container",
+    "ranged",
+    "arrows"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    15
+   ],
+   "materials": [
+    "leather",
+    "wood"
+   ],
+   "desc": "Holds twenty arrows.",
+   "damage": "pierce"
+  },
+  {
+   "id": "arrows",
+   "name": "bundle of arrows",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ammo",
+    "ranged",
+    "consumable"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 2,
+    "orc": 1,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "stone"
+   ],
+   "desc": "Twenty, fletched with goose.",
+   "damage": "pierce"
+  },
+  {
+   "id": "bolts",
+   "name": "bundle of bolts",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ammo",
+    "ranged",
+    "consumable",
+    "mechanical"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "human": 2,
+    "gnome": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "stone"
+   ],
+   "desc": "Twenty crossbow bolts.",
+   "damage": "pierce"
+  },
+  {
+   "id": "sling_stones",
+   "name": "pouch of sling stones",
+   "category": "weapon",
+   "sub": "ranged",
+   "tags": [
+    "ammo",
+    "ranged",
+    "consumable",
+    "stone"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "goblin": 1,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [
+    "leather",
+    "cloth"
+   ],
+   "desc": "River-smoothed, all the same weight.",
+   "damage": "pierce"
+  },
+  {
+   "id": "quarterstaff",
+   "name": "quarterstaff",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "staff",
+    "two-handed",
+    "wood",
+    "humble"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Six feet of oak.",
+   "damage": "blunt"
+  },
+  {
+   "id": "wizard_staff",
+   "name": "wizard's staff",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "staff",
+    "two-handed",
+    "focus",
+    "magic"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    80,
+    400
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Carved, capped, and humming faintly.",
+   "damage": "blunt"
+  },
+  {
+   "id": "wand",
+   "name": "wand",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "wand",
+    "one-handed",
+    "focus",
+    "magic"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "fey": 2,
+    "gnome": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    50,
+    300
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "A foot of chosen wood with a core of something.",
+   "damage": "blunt"
+  },
+  {
+   "id": "rod",
+   "name": "rod of office",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "rod",
+    "one-handed",
+    "focus",
+    "regalia"
+   ],
+   "affinity": {
+    "human": 2,
+    "undead": 1
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    900
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Metal rod, jewelled head; command made solid.",
+   "damage": "blunt"
+  },
+  {
+   "id": "orb",
+   "name": "crystal orb",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "focus",
+    "magic",
+    "crystal"
+   ],
+   "affinity": {
+    "gnome": 2,
+    "human": 1,
+    "undead": 1
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    1000
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Fist-sized crystal sphere that clouds when watched.",
+   "damage": "blunt"
+  },
+  {
+   "id": "bone_staff",
+   "name": "bone staff",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "staff",
+    "two-handed",
+    "focus",
+    "necromancy",
+    "dark"
+   ],
+   "affinity": {
+    "undead": 3
+   },
+   "rarity": "rare",
+   "value": [
+    150,
+    600
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Spine of something, topped with its skull.",
+   "exclusive": "undead",
+   "damage": "blunt"
+  },
+  {
+   "id": "living_staff",
+   "name": "living staff",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "staff",
+    "two-handed",
+    "focus",
+    "nature",
+    "living"
+   ],
+   "affinity": {
+    "elf": 3,
+    "fey": 2
+   },
+   "rarity": "rare",
+   "value": [
+    150,
+    600
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Still buds in spring.",
+   "damage": "blunt"
+  },
+  {
+   "id": "calibrated_rod",
+   "name": "calibrated rod",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "rod",
+    "one-handed",
+    "tinker",
+    "gadget",
+    "focus"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    80,
+    300
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Brass rod with dials; nobody but the maker knows what they do.",
+   "exclusive": "gnome",
+   "damage": "blunt"
+  },
+  {
+   "id": "war_totem",
+   "name": "war totem",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "staff",
+    "two-handed",
+    "tribal",
+    "orc",
+    "focus"
+   ],
+   "affinity": {
+    "orc": 3,
+    "troll": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    150
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Pole hung with skulls and feathers; the clan follows it.",
+   "exclusive": "orc",
+   "damage": "blunt"
+  },
+  {
+   "id": "shepherds_crook",
+   "name": "shepherd's crook",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "staff",
+    "two-handed",
+    "humble",
+    "tool"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Hook for sheep, also for ankles.",
+   "damage": "blunt"
+  },
+  {
+   "id": "witch_broom",
+   "name": "witch's broom",
+   "category": "weapon",
+   "sub": "staff",
+   "tags": [
+    "staff",
+    "two-handed",
+    "fey",
+    "magic",
+    "household"
+   ],
+   "affinity": {
+    "fey": 2,
+    "human": 1
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    400
+   ],
+   "materials": [
+    "wood",
+    "bone",
+    "crystal",
+    "brass",
+    "silver",
+    "livingwood"
+   ],
+   "desc": "Birch twigs, ash handle, opinions.",
+   "damage": "blunt"
+  },
+  {
+   "id": "gambeson",
+   "name": "gambeson",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "cloth",
+    "light"
+   ],
+   "affinity": {
+    "human": 3,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    30
+   ],
+   "materials": [
+    "cloth"
+   ],
+   "desc": "Quilted linen; more protection than it looks."
+  },
+  {
+   "id": "leather_armour",
+   "name": "leather armour",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "leather",
+    "light"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "halfling": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    50
+   ],
+   "materials": [
+    "leather",
+    "hide"
+   ],
+   "desc": "Hardened hide over a shirt."
+  },
+  {
+   "id": "studded_leather",
+   "name": "studded leather",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "leather",
+    "light"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    25,
+    70
+   ],
+   "materials": [
+    "leather",
+    "hide"
+   ],
+   "desc": "Leather with iron studs."
+  },
+  {
+   "id": "brigandine",
+   "name": "brigandine",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "plates",
+    "medium"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    180
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Small plates riveted inside a cloth coat."
+  },
+  {
+   "id": "chainmail",
+   "name": "chainmail hauberk",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "mail",
+    "medium"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 3,
+    "orc": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    80,
+    250
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Thousands of riveted rings."
+  },
+  {
+   "id": "scale_mail",
+   "name": "scale mail",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "scales",
+    "medium"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "dragon": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    70,
+    200
+   ],
+   "materials": [
+    "steel",
+    "bronze",
+    "dragonscale"
+   ],
+   "desc": "Overlapping metal scales on leather."
+  },
+  {
+   "id": "plate_armour",
+   "name": "plate armour",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "plate",
+    "heavy"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 2
+   },
+   "rarity": "rare",
+   "value": [
+    400,
+    1500
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Full harness, fitted to the wearer."
+  },
+  {
+   "id": "half_plate",
+   "name": "half plate",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "plate",
+    "heavy"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    200,
+    600
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Breastplate, pauldrons and greaves over mail."
+  },
+  {
+   "id": "dwarven_plate",
+   "name": "dwarven forge-plate",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "plate",
+    "heavy",
+    "dwarf",
+    "runes"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    800,
+    3000
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Dwarven plate, rune-stamped, heavier than it should be and lighter than it looks.",
+   "exclusive": "dwarf"
+  },
+  {
+   "id": "elven_mail",
+   "name": "elven leafmail",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "mail",
+    "light",
+    "elf",
+    "elegant"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    500,
+    2000
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Rings fine as scale, quiet as cloth.",
+   "exclusive": "elf"
+  },
+  {
+   "id": "hide_armour",
+   "name": "hide armour",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "hide",
+    "crude"
+   ],
+   "affinity": {
+    "orc": 3,
+    "troll": 2,
+    "giant": 1
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    40
+   ],
+   "materials": [
+    "hide",
+    "leather"
+   ],
+   "desc": "Thick beast hide, fur out."
+  },
+  {
+   "id": "bone_armour",
+   "name": "bone armour",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "bone",
+    "crude",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 2,
+    "undead": 2,
+    "goblin": 1,
+    "troll": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    80
+   ],
+   "materials": [
+    "bone"
+   ],
+   "desc": "Ribs and plates of bone lashed together."
+  },
+  {
+   "id": "scrap_armour",
+   "name": "scrap armour",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "crude",
+    "goblin",
+    "junk"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    15
+   ],
+   "materials": [
+    "iron",
+    "bone",
+    "wood"
+   ],
+   "desc": "Pot lids, buckles, a horseshoe. Rattles.",
+   "exclusive": "goblin"
+  },
+  {
+   "id": "robes",
+   "name": "robes",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "cloth",
+    "mage"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "undead": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    40
+   ],
+   "materials": [
+    "cloth"
+   ],
+   "desc": "Layered cloth; protection is not the point."
+  },
+  {
+   "id": "padded_vest",
+   "name": "padded waistcoat",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "cloth",
+    "light",
+    "halfling"
+   ],
+   "affinity": {
+    "halfling": 3
+   },
+   "rarity": "common",
+   "value": [
+    8,
+    25
+   ],
+   "materials": [
+    "cloth"
+   ],
+   "desc": "Quilted, with pockets. Many pockets.",
+   "exclusive": "halfling"
+  },
+  {
+   "id": "clockwork_harness",
+   "name": "clockwork harness",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "gnome",
+    "gadget",
+    "medium"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "rare",
+   "value": [
+    400,
+    1500
+   ],
+   "materials": [
+    "brass",
+    "steel",
+    "copper"
+   ],
+   "desc": "Brass plates that adjust themselves, mostly.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "shroud",
+   "name": "burial shroud",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "cloth",
+    "undead",
+    "dark"
+   ],
+   "affinity": {
+    "undead": 3
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "cloth"
+   ],
+   "desc": "Grave linen worn as a robe.",
+   "exclusive": "undead"
+  },
+  {
+   "id": "dragonscale_armour",
+   "name": "dragonscale armour",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "scales",
+    "dragon",
+    "magic",
+    "heavy"
+   ],
+   "affinity": {
+    "human": 1,
+    "dwarf": 1
+   },
+   "rarity": "epic",
+   "value": [
+    4000,
+    12000
+   ],
+   "materials": [
+    "steel",
+    "bronze",
+    "dragonscale"
+   ],
+   "desc": "Scales of a slain wyrm; warm to the touch."
+  },
+  {
+   "id": "bark_armour",
+   "name": "bark armour",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "wood",
+    "fey",
+    "nature",
+    "light"
+   ],
+   "affinity": {
+    "fey": 3,
+    "elf": 1,
+    "troll": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    80
+   ],
+   "materials": [
+    "wood",
+    "livingwood"
+   ],
+   "desc": "Plates of living bark; itches in spring.",
+   "exclusive": "fey"
+  },
+  {
+   "id": "giant_hide",
+   "name": "giant's hide coat",
+   "category": "armour",
+   "sub": "body",
+   "tags": [
+    "armour",
+    "body",
+    "hide",
+    "giant",
+    "heavy"
+   ],
+   "affinity": {
+    "giant": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    150
+   ],
+   "materials": [
+    "hide",
+    "leather"
+   ],
+   "desc": "Mammoth hide; a tent for anyone smaller.",
+   "exclusive": "giant"
+  },
+  {
+   "id": "helm",
+   "name": "open helm",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "metal"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    50
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Steel cap with cheek guards."
+  },
+  {
+   "id": "great_helm",
+   "name": "great helm",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "metal",
+    "heavy"
+   ],
+   "affinity": {
+    "human": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    120
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Bucket helm with eye slits."
+  },
+  {
+   "id": "horned_helm",
+   "name": "horned helm",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "metal",
+    "horns"
+   ],
+   "affinity": {
+    "orc": 2,
+    "giant": 1,
+    "dwarf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    100
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Impractical and beloved."
+  },
+  {
+   "id": "leather_cap",
+   "name": "leather cap",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "leather",
+    "light"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "halfling": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    10
+   ],
+   "materials": [
+    "leather",
+    "hide"
+   ],
+   "desc": "Boiled leather skullcap."
+  },
+  {
+   "id": "coif",
+   "name": "mail coif",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "mail"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    20,
+    60
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Hood of rings."
+  },
+  {
+   "id": "war_circlet",
+   "name": "war circlet",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "elf",
+    "elegant",
+    "metal"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    200
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Silvered band with a nasal; elves refuse full helms.",
+   "exclusive": "elf"
+  },
+  {
+   "id": "skull_helm",
+   "name": "skull helm",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "bone",
+    "dark"
+   ],
+   "affinity": {
+    "orc": 2,
+    "undead": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    15,
+    60
+   ],
+   "materials": [
+    "bone"
+   ],
+   "desc": "A skull, hollowed and worn."
+  },
+  {
+   "id": "goggled_helm",
+   "name": "goggled helm",
+   "category": "armour",
+   "sub": "head",
+   "tags": [
+    "armour",
+    "head",
+    "gnome",
+    "gadget"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    150
+   ],
+   "materials": [
+    "brass",
+    "steel",
+    "copper"
+   ],
+   "desc": "Leather cap with six lenses on arms.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "straw_hat",
+   "name": "straw hat",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "head",
+    "humble",
+    "halfling"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    2
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Wide brim for the fields."
+  },
+  {
+   "id": "hood",
+   "name": "hood",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "head",
+    "stealth"
+   ],
+   "affinity": {
+    "elf": 2,
+    "human": 2,
+    "goblin": 2,
+    "undead": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Deep cowl; hides a face or a wound."
+  },
+  {
+   "id": "wizard_hat",
+   "name": "pointed hat",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "head",
+    "mage"
+   ],
+   "affinity": {
+    "human": 2,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [
+    "cloth"
+   ],
+   "desc": "Tall, floppy, undeniably magical."
+  },
+  {
+   "id": "shield_round",
+   "name": "round shield",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "wood",
+    "light"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "orc": 2
+   },
+   "rarity": "common",
+   "value": [
+    8,
+    30
+   ],
+   "materials": [
+    "wood",
+    "livingwood"
+   ],
+   "desc": "Linden boards, iron boss."
+  },
+  {
+   "id": "shield_kite",
+   "name": "kite shield",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "wood",
+    "mounted"
+   ],
+   "affinity": {
+    "human": 3
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    50
+   ],
+   "materials": [
+    "wood",
+    "livingwood"
+   ],
+   "desc": "Tapered for the saddle."
+  },
+  {
+   "id": "shield_tower",
+   "name": "tower shield",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "heavy",
+    "wall"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "giant": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    120
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "hide",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Door-sized; a wall you carry."
+  },
+  {
+   "id": "buckler",
+   "name": "buckler",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "small",
+    "metal",
+    "duelling"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    8,
+    25
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "hide",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Hand-sized steel disc."
+  },
+  {
+   "id": "oathshield",
+   "name": "dwarven oathshield",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "heavy",
+    "dwarf",
+    "runes",
+    "metal"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    800
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "hide",
+    "bone",
+    "mithril"
+   ],
+   "desc": "Steel-faced, rune-bordered; a clan's oaths are on it.",
+   "exclusive": "dwarf"
+  },
+  {
+   "id": "hide_shield",
+   "name": "hide shield",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "hide",
+    "crude"
+   ],
+   "affinity": {
+    "orc": 2,
+    "troll": 2,
+    "goblin": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    12
+   ],
+   "materials": [
+    "hide",
+    "leather"
+   ],
+   "desc": "Stretched hide on a frame."
+  },
+  {
+   "id": "pot_lid",
+   "name": "pot lid",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "small",
+    "crude",
+    "junk",
+    "goblin"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "halfling": 1,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    2
+   ],
+   "materials": [
+    "wood",
+    "steel",
+    "iron",
+    "hide",
+    "bone",
+    "mithril"
+   ],
+   "desc": "A pot lid. A big one.",
+   "exclusive": "goblin"
+  },
+  {
+   "id": "leaf_shield",
+   "name": "leaf shield",
+   "category": "armour",
+   "sub": "shield",
+   "tags": [
+    "shield",
+    "light",
+    "elf",
+    "elegant",
+    "wood"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    150
+   ],
+   "materials": [
+    "wood",
+    "livingwood"
+   ],
+   "desc": "Leaf-shaped, lacquered; more art than wall.",
+   "exclusive": "elf"
+  },
+  {
+   "id": "gauntlets",
+   "name": "gauntlets",
+   "category": "armour",
+   "sub": "hands",
+   "tags": [
+    "armour",
+    "hands",
+    "metal"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    60
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Articulated steel hands."
+  },
+  {
+   "id": "bracers",
+   "name": "bracers",
+   "category": "armour",
+   "sub": "hands",
+   "tags": [
+    "armour",
+    "hands",
+    "leather"
+   ],
+   "affinity": {
+    "elf": 2,
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [
+    "leather",
+    "hide"
+   ],
+   "desc": "Leather forearm guards; archers' friend."
+  },
+  {
+   "id": "greaves",
+   "name": "greaves",
+   "category": "armour",
+   "sub": "legs",
+   "tags": [
+    "armour",
+    "legs",
+    "metal"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    15,
+    50
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Shin plates."
+  },
+  {
+   "id": "hobnailed_boots",
+   "name": "hobnailed boots",
+   "category": "armour",
+   "sub": "feet",
+   "tags": [
+    "armour",
+    "feet",
+    "leather",
+    "heavy"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 3,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    20
+   ],
+   "materials": [
+    "leather",
+    "hide"
+   ],
+   "desc": "Nails in the soles for grip and kicking."
+  },
+  {
+   "id": "soft_boots",
+   "name": "soft boots",
+   "category": "armour",
+   "sub": "feet",
+   "tags": [
+    "armour",
+    "feet",
+    "leather",
+    "light",
+    "quiet"
+   ],
+   "affinity": {
+    "elf": 3,
+    "halfling": 1,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    25
+   ],
+   "materials": [
+    "leather",
+    "hide"
+   ],
+   "desc": "Silent on leaves."
+  },
+  {
+   "id": "cloak",
+   "name": "travelling cloak",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "cloak",
+    "weather"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Wool, oiled against rain."
+  },
+  {
+   "id": "elven_cloak",
+   "name": "grey-green cloak",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "cloak",
+    "elf",
+    "stealth",
+    "magic"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    800
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Elven weave that takes the colour of the woods.",
+   "exclusive": "elf"
+  },
+  {
+   "id": "fur_cloak",
+   "name": "fur cloak",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "cloak",
+    "hide",
+    "cold"
+   ],
+   "affinity": {
+    "orc": 2,
+    "human": 2,
+    "giant": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    40
+   ],
+   "materials": [
+    "hide",
+    "leather"
+   ],
+   "desc": "Wolf or bear; smells of both."
+  },
+  {
+   "id": "tabard",
+   "name": "tabard",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "body",
+    "faction",
+    "heraldry"
+   ],
+   "affinity": {
+    "human": 3
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    15
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Sleeveless coat with a crest."
+  },
+  {
+   "id": "apron_leather",
+   "name": "leather apron",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "body",
+    "craft",
+    "smith"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "gnome": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    10
+   ],
+   "materials": [
+    "steel",
+    "iron",
+    "bronze",
+    "mithril"
+   ],
+   "desc": "Scorched in a hundred places."
+  },
+  {
+   "id": "belt",
+   "name": "belt",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "waist",
+    "leather"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    8
+   ],
+   "materials": [
+    "leather",
+    "hide"
+   ],
+   "desc": "Holds up trousers and hopes."
+  },
+  {
+   "id": "gloves_fine",
+   "name": "fine gloves",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "hands",
+    "cloth",
+    "noble"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    25
+   ],
+   "materials": [
+    "cloth"
+   ],
+   "desc": "Kid leather, embroidered."
+  },
+  {
+   "id": "sash",
+   "name": "sash",
+   "category": "armour",
+   "sub": "clothing",
+   "tags": [
+    "clothing",
+    "waist",
+    "cloth",
+    "office"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "cloth"
+   ],
+   "desc": "Coloured band of rank."
+  },
+  {
+   "id": "goblet",
+   "name": "goblet",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "stemmed",
+    "feast"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "human": 2,
+    "dragon": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    40
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Stemmed cup; the dwarven ones are the heaviest."
+  },
+  {
+   "id": "chalice",
+   "name": "chalice",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "ceremonial",
+    "religious"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    300
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Sacred cup for rites."
+  },
+  {
+   "id": "tankard",
+   "name": "tankard",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "ale",
+    "lidded"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    15
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Lidded ale mug; dwarves engrave their grudges on the lid."
+  },
+  {
+   "id": "mug",
+   "name": "clay mug",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Fired clay with a thumb-worn handle."
+  },
+  {
+   "id": "drinking_horn",
+   "name": "drinking horn",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "horn",
+    "feast"
+   ],
+   "affinity": {
+    "orc": 3,
+    "giant": 2,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Auroch horn, rimmed in metal."
+  },
+  {
+   "id": "flask",
+   "name": "flask",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "travel",
+    "spirits"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    12
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Pocket flask, dented."
+  },
+  {
+   "id": "waterskin",
+   "name": "waterskin",
+   "category": "vessel",
+   "sub": "travel",
+   "tags": [
+    "vessel",
+    "travel",
+    "humble"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Goat bladder; tastes of goat."
+  },
+  {
+   "id": "ewer",
+   "name": "ewer",
+   "category": "vessel",
+   "sub": "pouring",
+   "tags": [
+    "vessel",
+    "pouring",
+    "table",
+    "fine"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2
+   },
+   "rarity": "common",
+   "value": [
+    8,
+    60
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Tall pouring jug."
+  },
+  {
+   "id": "cauldron",
+   "name": "cauldron",
+   "category": "vessel",
+   "sub": "cooking",
+   "tags": [
+    "vessel",
+    "cooking",
+    "iron",
+    "large"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2,
+    "fey": 2,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    40
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Three-legged iron pot."
+  },
+  {
+   "id": "kettle",
+   "name": "kettle",
+   "category": "vessel",
+   "sub": "cooking",
+   "tags": [
+    "vessel",
+    "cooking",
+    "tea",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    12
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Copper kettle, sings when ready."
+  },
+  {
+   "id": "teapot",
+   "name": "teapot",
+   "category": "vessel",
+   "sub": "tea",
+   "tags": [
+    "vessel",
+    "tea",
+    "humble",
+    "halfling"
+   ],
+   "affinity": {
+    "halfling": 3
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    15
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Chipped, loved, refilled hourly.",
+   "exclusive": "halfling"
+  },
+  {
+   "id": "amphora",
+   "name": "amphora",
+   "category": "vessel",
+   "sub": "storage",
+   "tags": [
+    "vessel",
+    "storage",
+    "wine",
+    "clay",
+    "ancient"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    30
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Two-handled clay jar."
+  },
+  {
+   "id": "cask",
+   "name": "ale cask",
+   "category": "vessel",
+   "sub": "storage",
+   "tags": [
+    "vessel",
+    "storage",
+    "ale",
+    "wood",
+    "large"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    25
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Oak barrel, banded."
+  },
+  {
+   "id": "skull_cup",
+   "name": "skull cup",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "gore",
+    "trophy",
+    "dark"
+   ],
+   "affinity": {
+    "orc": 3,
+    "undead": 2,
+    "troll": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    60
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Enemy's skull, sawn and silvered."
+  },
+  {
+   "id": "crystal_decanter",
+   "name": "crystal decanter",
+   "category": "vessel",
+   "sub": "pouring",
+   "tags": [
+    "vessel",
+    "pouring",
+    "fine",
+    "crystal"
+   ],
+   "affinity": {
+    "gnome": 2,
+    "elf": 2,
+    "human": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    200
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Cut crystal; catches every candle."
+  },
+  {
+   "id": "mithril_goblet",
+   "name": "mithril goblet",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "mithril",
+    "fine",
+    "dwarf"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "elf": 1
+   },
+   "rarity": "rare",
+   "value": [
+    300,
+    1200
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Never tarnishes; poison beads on it, they say.",
+   "exclusive": "dwarf"
+  },
+  {
+   "id": "censer",
+   "name": "censer",
+   "category": "vessel",
+   "sub": "religious",
+   "tags": [
+    "vessel",
+    "religious",
+    "incense",
+    "chain"
+   ],
+   "affinity": {
+    "human": 2,
+    "undead": 2,
+    "elf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    120
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Pierced brass ball on chains, smoking."
+  },
+  {
+   "id": "reliquary",
+   "name": "reliquary",
+   "category": "vessel",
+   "sub": "religious",
+   "tags": [
+    "vessel",
+    "religious",
+    "relic",
+    "gilded"
+   ],
+   "affinity": {
+    "human": 2,
+    "undead": 1
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    1500
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Gilded box holding a saint's knuckle."
+  },
+  {
+   "id": "gourd",
+   "name": "gourd bottle",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "humble",
+    "nature"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "halfling": 1,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    2
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Dried gourd, stoppered with a cork."
+  },
+  {
+   "id": "pocket_still",
+   "name": "pocket still",
+   "category": "vessel",
+   "sub": "gadget",
+   "tags": [
+    "vessel",
+    "gadget",
+    "gnome",
+    "spirits"
+   ],
+   "affinity": {
+    "dwarf": 1,
+    "gnome": 3
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    400
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Gnomish device that turns anything into something drinkable. Anything.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "bowl_wood",
+   "name": "wooden bowl",
+   "category": "vessel",
+   "sub": "eating",
+   "tags": [
+    "vessel",
+    "eating",
+    "humble",
+    "wood"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    2
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Turned ash; a dent for every year."
+  },
+  {
+   "id": "platter",
+   "name": "serving platter",
+   "category": "vessel",
+   "sub": "eating",
+   "tags": [
+    "vessel",
+    "eating",
+    "table",
+    "feast"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    30
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Pewter or wood, big enough for a goose."
+  },
+  {
+   "id": "wine_bottle",
+   "name": "wine bottle",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "wine",
+    "glass"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    4
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Green glass, wax-sealed."
+  },
+  {
+   "id": "bucket",
+   "name": "bucket",
+   "category": "vessel",
+   "sub": "household",
+   "tags": [
+    "vessel",
+    "household",
+    "humble",
+    "wood"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    2
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "copper",
+    "horn",
+    "bone",
+    "iron"
+   ],
+   "desc": "Oak staves, rope handle."
+  },
+  {
+   "id": "urn",
+   "name": "funeral urn",
+   "category": "vessel",
+   "sub": "religious",
+   "tags": [
+    "vessel",
+    "religious",
+    "ashes",
+    "dark",
+    "clay"
+   ],
+   "affinity": {
+    "undead": 2,
+    "human": 2,
+    "elf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    100
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "Holds someone."
+  },
+  {
+   "id": "ale_horn_giant",
+   "name": "giant's drinking horn",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "horn",
+    "giant",
+    "huge"
+   ],
+   "affinity": {
+    "giant": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    150
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "A whole cask fits in it.",
+   "exclusive": "giant"
+  },
+  {
+   "id": "dew_cup",
+   "name": "dew cup",
+   "category": "vessel",
+   "sub": "drinking",
+   "tags": [
+    "vessel",
+    "drinking",
+    "fey",
+    "nature",
+    "tiny"
+   ],
+   "affinity": {
+    "fey": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    80
+   ],
+   "materials": [
+    "clay",
+    "wood",
+    "pewter",
+    "silver",
+    "gold",
+    "copper",
+    "brass",
+    "horn",
+    "bone",
+    "crystal",
+    "mithril",
+    "iron",
+    "glass"
+   ],
+   "desc": "An acorn cap, silvered; holds one dewdrop.",
+   "exclusive": "fey"
+  },
+  {
+   "id": "crown",
+   "name": "crown",
+   "category": "regalia",
+   "sub": "regalia",
+   "tags": [
+    "regalia",
+    "head",
+    "gold",
+    "royal"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 2,
+    "dragon": 2,
+    "undead": 1
+   },
+   "rarity": "rare",
+   "value": [
+    500,
+    5000
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Gold circlet with points; heavier every year."
+  },
+  {
+   "id": "circlet",
+   "name": "circlet",
+   "category": "regalia",
+   "sub": "regalia",
+   "tags": [
+    "regalia",
+    "head",
+    "silver",
+    "elegant"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 1,
+    "fey": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    60,
+    400
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Slim band of silver or living wood."
+  },
+  {
+   "id": "diadem",
+   "name": "diadem",
+   "category": "regalia",
+   "sub": "regalia",
+   "tags": [
+    "regalia",
+    "head",
+    "jewelled",
+    "royal"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1,
+    "dragon": 1
+   },
+   "rarity": "rare",
+   "value": [
+    400,
+    3000
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Jewelled band for a queen."
+  },
+  {
+   "id": "iron_crown",
+   "name": "iron crown",
+   "category": "regalia",
+   "sub": "regalia",
+   "tags": [
+    "regalia",
+    "head",
+    "iron",
+    "grim",
+    "orc"
+   ],
+   "affinity": {
+    "orc": 3,
+    "undead": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    200
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Black iron, spiked; a warlord's."
+  },
+  {
+   "id": "bone_crown",
+   "name": "crown of bone",
+   "category": "regalia",
+   "sub": "regalia",
+   "tags": [
+    "regalia",
+    "head",
+    "bone",
+    "dark",
+    "undead"
+   ],
+   "affinity": {
+    "undead": 3
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    800
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Finger bones set in a ring of jaw.",
+   "exclusive": "undead"
+  },
+  {
+   "id": "scepter",
+   "name": "scepter",
+   "category": "regalia",
+   "sub": "regalia",
+   "tags": [
+    "regalia",
+    "hand",
+    "gold",
+    "royal"
+   ],
+   "affinity": {
+    "human": 3,
+    "dragon": 1
+   },
+   "rarity": "rare",
+   "value": [
+    300,
+    2500
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Gold rod topped with an orb."
+  },
+  {
+   "id": "signet",
+   "name": "signet ring",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "ring",
+    "seal",
+    "office"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 2,
+    "elf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    300
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Carved seal ring; the family's word."
+  },
+  {
+   "id": "ring_plain",
+   "name": "ring",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "ring"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "dwarf": 2,
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    40
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Plain band."
+  },
+  {
+   "id": "ring_gem",
+   "name": "gem ring",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "ring",
+    "jewelled"
+   ],
+   "affinity": {
+    "human": 2,
+    "dragon": 2,
+    "dwarf": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    600
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Stone in a claw setting."
+  },
+  {
+   "id": "amulet",
+   "name": "amulet",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "neck",
+    "charm",
+    "magic"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "fey": 2,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    400
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Pendant with a purpose."
+  },
+  {
+   "id": "torc",
+   "name": "torc",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "neck",
+    "metal",
+    "tribal"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "giant": 2,
+    "orc": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    300
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Twisted metal neck-ring, open at the front."
+  },
+  {
+   "id": "brooch",
+   "name": "brooch",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "cloak",
+    "pin"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    80
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Cloak pin, often the family crest."
+  },
+  {
+   "id": "earring",
+   "name": "earring",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "ear"
+   ],
+   "affinity": {
+    "human": 1,
+    "orc": 2,
+    "goblin": 2,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    30
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Hoop or stud; goblins prefer bone."
+  },
+  {
+   "id": "bracelet",
+   "name": "bracelet",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "wrist"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    60
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Metal or beads."
+  },
+  {
+   "id": "tooth_necklace",
+   "name": "necklace of teeth",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "neck",
+    "trophy",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 3,
+    "goblin": 3,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    15
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Teeth on a cord; each one a story."
+  },
+  {
+   "id": "gear_brooch",
+   "name": "gear brooch",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "cloak",
+    "gnome",
+    "tinker"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    50
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Tiny moving gears; hypnotic at dinner.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "long_pipe",
+   "name": "long pipe",
+   "category": "regalia",
+   "sub": "personal",
+   "tags": [
+    "personal",
+    "pipe",
+    "halfling",
+    "comfort"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "dwarf": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    40
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Churchwarden pipe, well cured."
+  },
+  {
+   "id": "beard_beads",
+   "name": "beard beads",
+   "category": "regalia",
+   "sub": "personal",
+   "tags": [
+    "personal",
+    "hair",
+    "dwarf",
+    "metal"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    60
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Rings and beads braided into the beard; rank in metal.",
+   "exclusive": "dwarf"
+  },
+  {
+   "id": "court_mask",
+   "name": "court mask",
+   "category": "regalia",
+   "sub": "personal",
+   "tags": [
+    "personal",
+    "mask",
+    "fey",
+    "ceremonial"
+   ],
+   "affinity": {
+    "fey": 3,
+    "human": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    300
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Feathered half-mask; the Courts never show a whole face."
+  },
+  {
+   "id": "death_mask",
+   "name": "death mask",
+   "category": "regalia",
+   "sub": "personal",
+   "tags": [
+    "personal",
+    "mask",
+    "undead",
+    "dark"
+   ],
+   "affinity": {
+    "undead": 3
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    500
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Plaster cast of a face at the end.",
+   "exclusive": "undead"
+  },
+  {
+   "id": "medallion",
+   "name": "medallion",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "neck",
+    "office",
+    "order"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    200
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Disc of office on a chain."
+  },
+  {
+   "id": "hoard_coin",
+   "name": "hoard coin",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "coin",
+    "dragon",
+    "gold",
+    "ancient"
+   ],
+   "affinity": {
+    "dragon": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    100
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Coin from a dragon's bed, warm and slightly melted.",
+   "exclusive": "dragon"
+  },
+  {
+   "id": "purse",
+   "name": "coin purse",
+   "category": "regalia",
+   "sub": "personal",
+   "tags": [
+    "personal",
+    "container",
+    "coin",
+    "leather"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "goblin": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Drawstring pouch; lighter than it should be."
+  },
+  {
+   "id": "locket",
+   "name": "locket",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "neck",
+    "memory",
+    "keepsake"
+   ],
+   "affinity": {
+    "human": 3,
+    "elf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    150
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Opens on a face or a lock of hair."
+  },
+  {
+   "id": "war_paint",
+   "name": "pot of war paint",
+   "category": "regalia",
+   "sub": "personal",
+   "tags": [
+    "personal",
+    "paint",
+    "orc",
+    "ritual"
+   ],
+   "affinity": {
+    "orc": 3,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Red ochre and fat.",
+   "exclusive": "orc"
+  },
+  {
+   "id": "hairpin",
+   "name": "silver hairpin",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "hair",
+    "elf",
+    "concealable"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 1,
+    "fey": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    40
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Also a fine stiletto."
+  },
+  {
+   "id": "nose_ring",
+   "name": "nose ring",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "nose",
+    "orc",
+    "metal"
+   ],
+   "affinity": {
+    "orc": 3,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Iron or gold; rank by weight."
+  },
+  {
+   "id": "bell_collar",
+   "name": "bell collar",
+   "category": "regalia",
+   "sub": "jewelry",
+   "tags": [
+    "jewelry",
+    "neck",
+    "fey",
+    "bell"
+   ],
+   "affinity": {
+    "fey": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    60
+   ],
+   "materials": [
+    "gold",
+    "silver",
+    "iron",
+    "bronze",
+    "bone",
+    "wood",
+    "copper",
+    "mithril",
+    "crystal",
+    "leather"
+   ],
+   "desc": "Tiny bells; the fey put them on cats and prisoners.",
+   "exclusive": "fey"
+  },
+  {
+   "id": "tablet",
+   "name": "clay tablet",
+   "category": "lore",
+   "sub": "writing",
+   "tags": [
+    "lore",
+    "writing",
+    "clay",
+    "ancient"
+   ],
+   "affinity": {
+    "human": 2,
+    "giant": 1,
+    "undead": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    20
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Baked clay pressed with script."
+  },
+  {
+   "id": "stone_tablet",
+   "name": "stone tablet",
+   "category": "lore",
+   "sub": "writing",
+   "tags": [
+    "lore",
+    "writing",
+    "stone",
+    "law",
+    "ancient"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "giant": 2,
+    "human": 1,
+    "troll": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    200
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Law or lineage cut in stone."
+  },
+  {
+   "id": "runestone",
+   "name": "runestone",
+   "category": "lore",
+   "sub": "writing",
+   "tags": [
+    "lore",
+    "writing",
+    "stone",
+    "runes",
+    "magic"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "giant": 2,
+    "human": 1,
+    "troll": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    400
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Standing stone or hand-sized, runes cut deep."
+  },
+  {
+   "id": "scroll",
+   "name": "scroll",
+   "category": "lore",
+   "sub": "writing",
+   "tags": [
+    "lore",
+    "writing",
+    "paper",
+    "spell"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "undead": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    100
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Rolled vellum, sealed."
+  },
+  {
+   "id": "tome",
+   "name": "tome",
+   "category": "lore",
+   "sub": "book",
+   "tags": [
+    "lore",
+    "book",
+    "heavy",
+    "spell"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "undead": 2,
+    "gnome": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    600
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Leather-bound and chained shut for good reason."
+  },
+  {
+   "id": "ledger",
+   "name": "ledger",
+   "category": "lore",
+   "sub": "book",
+   "tags": [
+    "lore",
+    "book",
+    "trade",
+    "record"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    50
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Columns of debts and names."
+  },
+  {
+   "id": "map",
+   "name": "map",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "travel",
+    "navigation"
+   ],
+   "affinity": {
+    "human": 3,
+    "halfling": 1,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    80
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Inked and annotated; some of it true."
+  },
+  {
+   "id": "wax_seal",
+   "name": "wax seal",
+   "category": "lore",
+   "sub": "office",
+   "tags": [
+    "lore",
+    "office",
+    "seal"
+   ],
+   "affinity": {
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Stamped wax; a promise or a threat."
+  },
+  {
+   "id": "sealed_letter",
+   "name": "sealed letter",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "secret"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    30
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Unopened. Maybe keep it that way."
+  },
+  {
+   "id": "songbook",
+   "name": "songbook",
+   "category": "lore",
+   "sub": "book",
+   "tags": [
+    "lore",
+    "book",
+    "music",
+    "elf"
+   ],
+   "affinity": {
+    "elf": 3,
+    "halfling": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    60
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Elven verse, or halfling drinking songs; both dangerous."
+  },
+  {
+   "id": "grudge_book",
+   "name": "book of grudges",
+   "category": "lore",
+   "sub": "book",
+   "tags": [
+    "lore",
+    "book",
+    "dwarf",
+    "record",
+    "grim"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    1000
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Every slight against the clan, in order, with interest.",
+   "exclusive": "dwarf"
+  },
+  {
+   "id": "recipe_book",
+   "name": "recipe book",
+   "category": "lore",
+   "sub": "book",
+   "tags": [
+    "lore",
+    "book",
+    "food",
+    "halfling"
+   ],
+   "affinity": {
+    "halfling": 3
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    40
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Family recipes, stains included.",
+   "exclusive": "halfling"
+  },
+  {
+   "id": "schematic",
+   "name": "schematic",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "gnome",
+    "tinker"
+   ],
+   "affinity": {
+    "gnome": 3,
+    "dwarf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    200
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Blueprint for something that will probably explode.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "bark_scroll",
+   "name": "bark scroll",
+   "category": "lore",
+   "sub": "writing",
+   "tags": [
+    "lore",
+    "writing",
+    "bark",
+    "elf",
+    "nature"
+   ],
+   "affinity": {
+    "elf": 3,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    30
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Birch bark, written in sap."
+  },
+  {
+   "id": "bone_tally",
+   "name": "bone tally",
+   "category": "lore",
+   "sub": "writing",
+   "tags": [
+    "lore",
+    "writing",
+    "bone",
+    "count"
+   ],
+   "affinity": {
+    "orc": 2,
+    "goblin": 2,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Notched bone: kills, debts, days."
+  },
+  {
+   "id": "speaking_skull",
+   "name": "speaking skull",
+   "category": "lore",
+   "sub": "bone",
+   "tags": [
+    "lore",
+    "bone",
+    "undead",
+    "magic",
+    "dark"
+   ],
+   "affinity": {
+    "undead": 3
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    800
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "A skull that remembers what it heard.",
+   "exclusive": "undead"
+  },
+  {
+   "id": "star_chart",
+   "name": "star chart",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "elf",
+    "navigation",
+    "sky"
+   ],
+   "affinity": {
+    "elf": 3,
+    "gnome": 1,
+    "human": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    200
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Elven chart of the wheeling stars."
+  },
+  {
+   "id": "prophecy",
+   "name": "prophecy scroll",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "religious",
+    "fate"
+   ],
+   "affinity": {
+    "human": 2,
+    "fey": 2,
+    "undead": 1
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    900
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Vague enough to always come true."
+  },
+  {
+   "id": "hoard_ledger",
+   "name": "hoard-ledger",
+   "category": "lore",
+   "sub": "book",
+   "tags": [
+    "lore",
+    "book",
+    "dragon",
+    "record"
+   ],
+   "affinity": {
+    "dragon": 3
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    2000
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "A dragon's inventory of its hoard, every coin.",
+   "exclusive": "dragon"
+  },
+  {
+   "id": "wanted_poster",
+   "name": "wanted poster",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "crime"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Bad likeness, good reward."
+  },
+  {
+   "id": "deed",
+   "name": "land deed",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "law",
+    "property"
+   ],
+   "affinity": {
+    "human": 3,
+    "halfling": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    500
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Title to a field, a mill, or a lie."
+  },
+  {
+   "id": "journal",
+   "name": "journal",
+   "category": "lore",
+   "sub": "book",
+   "tags": [
+    "lore",
+    "book",
+    "personal",
+    "memory"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    30
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Someone's days, in their hand."
+  },
+  {
+   "id": "treaty",
+   "name": "treaty",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "law",
+    "faction"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "dwarf": 2
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    800
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Signed by two kings; kept by neither."
+  },
+  {
+   "id": "cipher_wheel",
+   "name": "cipher wheel",
+   "category": "lore",
+   "sub": "gnome",
+   "tags": [
+    "lore",
+    "gnome",
+    "secret",
+    "gadget"
+   ],
+   "affinity": {
+    "gnome": 3,
+    "human": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    150
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Two brass discs; turn to read the message.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "saga_stone",
+   "name": "saga stone",
+   "category": "lore",
+   "sub": "stone",
+   "tags": [
+    "lore",
+    "stone",
+    "giant",
+    "memory",
+    "huge"
+   ],
+   "affinity": {
+    "giant": 3,
+    "troll": 2
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    600
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "A boulder carved with a giant's whole life.",
+   "exclusive": "giant"
+  },
+  {
+   "id": "moss_letter",
+   "name": "moss letter",
+   "category": "lore",
+   "sub": "nature",
+   "tags": [
+    "lore",
+    "nature",
+    "fey",
+    "secret"
+   ],
+   "affinity": {
+    "fey": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    1,
+    40
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Words grown in moss on a stone; gone by summer.",
+   "exclusive": "fey"
+  },
+  {
+   "id": "clan_roll",
+   "name": "clan roll",
+   "category": "lore",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "orc",
+    "record",
+    "war"
+   ],
+   "affinity": {
+    "orc": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    60
+   ],
+   "materials": [
+    "clay",
+    "stone",
+    "vellum",
+    "paper",
+    "bone",
+    "bark",
+    "wood",
+    "leather"
+   ],
+   "desc": "Hide scroll of the clan's warriors and their kills.",
+   "exclusive": "orc"
+  },
+  {
+   "id": "lantern",
+   "name": "lantern",
+   "category": "tool",
+   "sub": "light",
+   "tags": [
+    "tool",
+    "light",
+    "travel"
+   ],
+   "affinity": {
+    "human": 2,
+    "gnome": 2,
+    "dwarf": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Shuttered oil lantern."
+  },
+  {
+   "id": "torch",
+   "name": "torch",
+   "category": "tool",
+   "sub": "light",
+   "tags": [
+    "tool",
+    "light",
+    "cheap"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "goblin": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Pitch-soaked rag on a stick."
+  },
+  {
+   "id": "rope",
+   "name": "rope",
+   "category": "tool",
+   "sub": "travel",
+   "tags": [
+    "tool",
+    "travel",
+    "hemp"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 1,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Fifty feet of hemp."
+  },
+  {
+   "id": "grappling_hook",
+   "name": "grappling hook",
+   "category": "tool",
+   "sub": "climbing",
+   "tags": [
+    "tool",
+    "climbing",
+    "thief"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "human": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    12
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Three-pronged iron hook."
+  },
+  {
+   "id": "lockpicks",
+   "name": "lockpicks",
+   "category": "tool",
+   "sub": "thief",
+   "tags": [
+    "tool",
+    "thief",
+    "set"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "halfling": 2,
+    "gnome": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    60
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Roll of picks and tension bars."
+  },
+  {
+   "id": "pickaxe",
+   "name": "pickaxe",
+   "category": "tool",
+   "sub": "mining",
+   "tags": [
+    "tool",
+    "mining",
+    "dwarf"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "gnome": 1,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    15
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Iron pick on an ash haft."
+  },
+  {
+   "id": "shovel",
+   "name": "shovel",
+   "category": "tool",
+   "sub": "digging",
+   "tags": [
+    "tool",
+    "digging",
+    "humble"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "undead": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Digs graves as well as gardens."
+  },
+  {
+   "id": "travel_anvil",
+   "name": "travelling anvil",
+   "category": "tool",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "smith",
+    "heavy"
+   ],
+   "affinity": {
+    "dwarf": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    120
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Small anvil for field repairs; still heavy."
+  },
+  {
+   "id": "tongs",
+   "name": "tongs",
+   "category": "tool",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "smith"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Long-handled forge tongs."
+  },
+  {
+   "id": "whetstone",
+   "name": "whetstone",
+   "category": "tool",
+   "sub": "blade",
+   "tags": [
+    "tool",
+    "blade",
+    "maintenance"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "orc": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Keeps the edge honest."
+  },
+  {
+   "id": "spyglass",
+   "name": "spyglass",
+   "category": "tool",
+   "sub": "gnome",
+   "tags": [
+    "tool",
+    "gnome",
+    "optics",
+    "navigation"
+   ],
+   "affinity": {
+    "gnome": 3,
+    "human": 2
+   },
+   "rarity": "rare",
+   "value": [
+    80,
+    400
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Brass tube with ground lenses."
+  },
+  {
+   "id": "compass",
+   "name": "compass",
+   "category": "tool",
+   "sub": "navigation",
+   "tags": [
+    "tool",
+    "navigation",
+    "gnome"
+   ],
+   "affinity": {
+    "gnome": 2,
+    "human": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    150
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Needle in a brass case."
+  },
+  {
+   "id": "pocket_clock",
+   "name": "pocket clock",
+   "category": "tool",
+   "sub": "gnome",
+   "tags": [
+    "tool",
+    "gnome",
+    "clock",
+    "gadget"
+   ],
+   "affinity": {
+    "gnome": 3,
+    "human": 1
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    600
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Gnomish timepiece; loses an hour a day, gains it back at night.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "fishing_rod",
+   "name": "fishing rod",
+   "category": "tool",
+   "sub": "fishing",
+   "tags": [
+    "tool",
+    "fishing",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Willow rod and horsehair line."
+  },
+  {
+   "id": "cooking_pot",
+   "name": "cooking pot",
+   "category": "household",
+   "sub": "cooking",
+   "tags": [
+    "tool",
+    "cooking",
+    "household"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Blackened iron pot."
+  },
+  {
+   "id": "mortar_pestle",
+   "name": "mortar and pestle",
+   "category": "tool",
+   "sub": "alchemy",
+   "tags": [
+    "tool",
+    "alchemy",
+    "cooking"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2,
+    "fey": 2,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    12
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Stone bowl for grinding herbs or bones."
+  },
+  {
+   "id": "loom_shuttle",
+   "name": "weaver's shuttle",
+   "category": "tool",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "cloth"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Polished wood shuttle for the loom."
+  },
+  {
+   "id": "needle_case",
+   "name": "needle case",
+   "category": "tool",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "sewing",
+    "small"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    4
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Bone tube of needles."
+  },
+  {
+   "id": "spinning_wheel",
+   "name": "spinning wheel",
+   "category": "household",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "cloth",
+    "household",
+    "large"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    40
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Turns wool to thread; fey tales attach to it."
+  },
+  {
+   "id": "bellows",
+   "name": "bellows",
+   "category": "tool",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "smith",
+    "fire"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "gnome": 1,
+    "dragon": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    15
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Leather bellows for the forge."
+  },
+  {
+   "id": "scythe",
+   "name": "scythe",
+   "category": "tool",
+   "sub": "farm",
+   "tags": [
+    "tool",
+    "farm",
+    "blade",
+    "peasant"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2,
+    "undead": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    12
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Curved blade for hay; or for whoever comes."
+  },
+  {
+   "id": "hoe",
+   "name": "hoe",
+   "category": "tool",
+   "sub": "farm",
+   "tags": [
+    "tool",
+    "farm",
+    "humble"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    4
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Turns soil and, at need, ankles."
+  },
+  {
+   "id": "saw",
+   "name": "saw",
+   "category": "tool",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "wood"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Toothed blade; screams through oak."
+  },
+  {
+   "id": "chisel_set",
+   "name": "chisel set",
+   "category": "tool",
+   "sub": "craft",
+   "tags": [
+    "tool",
+    "craft",
+    "stone",
+    "set"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "gnome": 2,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    30
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "For runes and joints."
+  },
+  {
+   "id": "crowbar",
+   "name": "crowbar",
+   "category": "tool",
+   "sub": "thief",
+   "tags": [
+    "tool",
+    "thief",
+    "iron"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Opens doors that disagree."
+  },
+  {
+   "id": "manacles",
+   "name": "manacles",
+   "category": "tool",
+   "sub": "iron",
+   "tags": [
+    "tool",
+    "iron",
+    "law",
+    "chain"
+   ],
+   "affinity": {
+    "human": 2,
+    "undead": 1,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    25
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Iron cuffs on a chain; a key somewhere."
+  },
+  {
+   "id": "healers_kit",
+   "name": "healer's kit",
+   "category": "tool",
+   "sub": "healing",
+   "tags": [
+    "tool",
+    "healing",
+    "set",
+    "travel"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "halfling": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    15,
+    80
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Bandages, needle, salves, and a small saw nobody wants used."
+  },
+  {
+   "id": "dice",
+   "name": "bone dice",
+   "category": "tool",
+   "sub": "game",
+   "tags": [
+    "tool",
+    "game",
+    "bone",
+    "gambling"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 2,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    3
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Two dice; one of them honest."
+  },
+  {
+   "id": "cards",
+   "name": "deck of cards",
+   "category": "tool",
+   "sub": "game",
+   "tags": [
+    "tool",
+    "game",
+    "paper",
+    "gambling"
+   ],
+   "affinity": {
+    "human": 3,
+    "halfling": 1,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Fifty-two cards, or thereabouts."
+  },
+  {
+   "id": "gnome_multitool",
+   "name": "folding multitool",
+   "category": "tool",
+   "sub": "gnome",
+   "tags": [
+    "tool",
+    "gnome",
+    "gadget",
+    "set"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    150
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Knife, saw, spoon, tiny anvil. Springs open unasked.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "trap_bear",
+   "name": "bear trap",
+   "category": "tool",
+   "sub": "hunting",
+   "tags": [
+    "tool",
+    "hunting",
+    "iron",
+    "cruel"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "goblin": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    40
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Jaws of iron; hungry for anything."
+  },
+  {
+   "id": "lute",
+   "name": "lute",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "string"
+   ],
+   "affinity": {
+    "human": 3,
+    "elf": 2,
+    "halfling": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    150
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Pear-bodied, six courses."
+  },
+  {
+   "id": "harp",
+   "name": "harp",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "string",
+    "elf"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 1,
+    "fey": 2
+   },
+   "rarity": "rare",
+   "value": [
+    80,
+    600
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Elven harp; tuned to the wind."
+  },
+  {
+   "id": "war_drum",
+   "name": "war drum",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "drum",
+    "war"
+   ],
+   "affinity": {
+    "orc": 3,
+    "giant": 2,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    40
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Hide over a hollowed log; hearts follow it."
+  },
+  {
+   "id": "war_horn",
+   "name": "war horn",
+   "category": "instrument",
+   "sub": "horn",
+   "tags": [
+    "instrument",
+    "horn",
+    "war",
+    "signal"
+   ],
+   "affinity": {
+    "orc": 2,
+    "dwarf": 2,
+    "human": 2,
+    "giant": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    120
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Auroch horn, bound in bronze."
+  },
+  {
+   "id": "flute",
+   "name": "flute",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "wind"
+   ],
+   "affinity": {
+    "elf": 2,
+    "halfling": 2,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    30
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Bone or reed; halflings play it at supper."
+  },
+  {
+   "id": "fiddle",
+   "name": "fiddle",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "string",
+    "halfling"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    15,
+    100
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Four strings and a bow; feet cannot resist it."
+  },
+  {
+   "id": "bagpipes",
+   "name": "bagpipes",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "wind",
+    "loud"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "human": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    120
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Goatskin bag and drones; a weapon in the wrong hands."
+  },
+  {
+   "id": "music_box",
+   "name": "music box",
+   "category": "instrument",
+   "sub": "gnome",
+   "tags": [
+    "instrument",
+    "gnome",
+    "gadget",
+    "clock"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "rare",
+   "value": [
+    60,
+    400
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Wind it and it plays a tune nobody remembers writing.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "hand_bell",
+   "name": "hand bell",
+   "category": "instrument",
+   "sub": "bell",
+   "tags": [
+    "instrument",
+    "bell",
+    "religious",
+    "signal"
+   ],
+   "affinity": {
+    "human": 2,
+    "undead": 1,
+    "fey": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    25
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Bronze bell; rings the hours or the dead."
+  },
+  {
+   "id": "bone_flute",
+   "name": "bone flute",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "wind",
+    "bone",
+    "dark"
+   ],
+   "affinity": {
+    "undead": 2,
+    "goblin": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Carved from a shin; the tune is thin."
+  },
+  {
+   "id": "stone_drum",
+   "name": "stone drum",
+   "category": "instrument",
+   "sub": "drum",
+   "tags": [
+    "instrument",
+    "drum",
+    "giant",
+    "huge"
+   ],
+   "affinity": {
+    "giant": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    100
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Hollow boulder; heard three valleys away.",
+   "exclusive": "giant"
+  },
+  {
+   "id": "reed_pipes",
+   "name": "reed pipes",
+   "category": "instrument",
+   "sub": "music",
+   "tags": [
+    "instrument",
+    "music",
+    "wind",
+    "fey",
+    "nature"
+   ],
+   "affinity": {
+    "fey": 3,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Seven reeds bound with grass; dangerous to dance to."
+  },
+  {
+   "id": "candle",
+   "name": "candle",
+   "category": "household",
+   "sub": "light",
+   "tags": [
+    "household",
+    "light",
+    "wax"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "undead": 1
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Tallow or beeswax."
+  },
+  {
+   "id": "blanket",
+   "name": "wool blanket",
+   "category": "household",
+   "sub": "bedding",
+   "tags": [
+    "household",
+    "bedding",
+    "travel"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Scratchy, warm, smells of sheep."
+  },
+  {
+   "id": "hand_mirror",
+   "name": "hand mirror",
+   "category": "household",
+   "sub": "mirror",
+   "tags": [
+    "household",
+    "mirror",
+    "fey",
+    "vanity"
+   ],
+   "affinity": {
+    "fey": 3,
+    "elf": 2,
+    "human": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    100
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Silvered glass; the fey use them as doors."
+  },
+  {
+   "id": "hourglass",
+   "name": "hourglass",
+   "category": "household",
+   "sub": "time",
+   "tags": [
+    "household",
+    "time",
+    "glass"
+   ],
+   "affinity": {
+    "human": 2,
+    "gnome": 2,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    80
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Sand for an hour."
+  },
+  {
+   "id": "iron_key",
+   "name": "iron key",
+   "category": "household",
+   "sub": "key",
+   "tags": [
+    "household",
+    "key",
+    "lock"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "gnome": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Opens something. Somewhere."
+  },
+  {
+   "id": "chest",
+   "name": "iron-bound chest",
+   "category": "container",
+   "sub": "storage",
+   "tags": [
+    "container",
+    "storage",
+    "lock",
+    "large"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 2,
+    "dragon": 1
+   },
+   "rarity": "common",
+   "value": [
+    10,
+    60
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Oak chest with iron bands and a lock."
+  },
+  {
+   "id": "coffer",
+   "name": "coffer",
+   "category": "container",
+   "sub": "storage",
+   "tags": [
+    "container",
+    "storage",
+    "lock",
+    "small",
+    "coin"
+   ],
+   "affinity": {
+    "human": 2,
+    "goblin": 1,
+    "dragon": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    15,
+    100
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Small strongbox for coin."
+  },
+  {
+   "id": "tapestry",
+   "name": "tapestry",
+   "category": "household",
+   "sub": "art",
+   "tags": [
+    "household",
+    "art",
+    "cloth",
+    "wall"
+   ],
+   "affinity": {
+    "human": 3,
+    "elf": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    500
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Woven scene of a battle nobody won."
+  },
+  {
+   "id": "idol",
+   "name": "idol",
+   "category": "religious",
+   "sub": "statue",
+   "tags": [
+    "religious",
+    "statue",
+    "stone",
+    "dark"
+   ],
+   "affinity": {
+    "orc": 2,
+    "troll": 2,
+    "goblin": 2,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    200
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Squat carved god with too many teeth."
+  },
+  {
+   "id": "travel_shrine",
+   "name": "travelling shrine",
+   "category": "religious",
+   "sub": "box",
+   "tags": [
+    "religious",
+    "box",
+    "holy"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 1,
+    "elf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    200
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Folding altar with a painted saint."
+  },
+  {
+   "id": "prayer_beads",
+   "name": "prayer beads",
+   "category": "religious",
+   "sub": "beads",
+   "tags": [
+    "religious",
+    "beads",
+    "holy"
+   ],
+   "affinity": {
+    "human": 3,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    20
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Wooden beads worn smooth."
+  },
+  {
+   "id": "holy_symbol",
+   "name": "holy symbol",
+   "category": "religious",
+   "sub": "holy",
+   "tags": [
+    "religious",
+    "holy",
+    "pendant"
+   ],
+   "affinity": {
+    "human": 3,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    60
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Emblem of a god on a cord."
+  },
+  {
+   "id": "weeping_idol",
+   "name": "weeping idol",
+   "category": "religious",
+   "sub": "statue",
+   "tags": [
+    "religious",
+    "statue",
+    "cursed",
+    "dark",
+    "fey"
+   ],
+   "affinity": {
+    "fey": 2,
+    "undead": 2
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    600
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Stone figure that is damp every morning."
+  },
+  {
+   "id": "backpack",
+   "name": "backpack",
+   "category": "container",
+   "sub": "travel",
+   "tags": [
+    "container",
+    "travel",
+    "leather"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Leather pack with straps; everything smells of it."
+  },
+  {
+   "id": "satchel",
+   "name": "satchel",
+   "category": "container",
+   "sub": "travel",
+   "tags": [
+    "container",
+    "travel",
+    "leather",
+    "small"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "gnome": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Shoulder bag for maps and bread."
+  },
+  {
+   "id": "scabbard",
+   "name": "scabbard",
+   "category": "container",
+   "sub": "blade",
+   "tags": [
+    "container",
+    "blade",
+    "leather"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    20
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Wood and leather sheath."
+  },
+  {
+   "id": "sack",
+   "name": "sack",
+   "category": "container",
+   "sub": "humble",
+   "tags": [
+    "container",
+    "humble",
+    "cloth"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Holds loot, turnips, or a small halfling."
+  },
+  {
+   "id": "barrel",
+   "name": "barrel",
+   "category": "container",
+   "sub": "storage",
+   "tags": [
+    "container",
+    "storage",
+    "wood",
+    "large"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    10
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Oak, banded; a hiding place in a pinch."
+  },
+  {
+   "id": "cage",
+   "name": "iron cage",
+   "category": "container",
+   "sub": "iron",
+   "tags": [
+    "container",
+    "iron",
+    "cruel",
+    "large"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "orc": 2,
+    "human": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    60
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "For birds, prisoners, or halflings."
+  },
+  {
+   "id": "bird_cage",
+   "name": "bird cage",
+   "category": "household",
+   "sub": "household",
+   "tags": [
+    "container",
+    "household",
+    "bird"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 1,
+    "gnome": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    15
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Wicker; the bird is extra."
+  },
+  {
+   "id": "rug",
+   "name": "woven rug",
+   "category": "household",
+   "sub": "cloth",
+   "tags": [
+    "household",
+    "cloth",
+    "floor"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    60
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Warm underfoot; hides the stain."
+  },
+  {
+   "id": "bed_roll",
+   "name": "bedroll",
+   "category": "household",
+   "sub": "bedding",
+   "tags": [
+    "household",
+    "bedding",
+    "travel"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "elf": 2,
+    "halfling": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Canvas and wool, rolled tight."
+  },
+  {
+   "id": "chamber_pot",
+   "name": "chamber pot",
+   "category": "household",
+   "sub": "humble",
+   "tags": [
+    "household",
+    "humble",
+    "clay"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    2
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Necessary."
+  },
+  {
+   "id": "broom",
+   "name": "broom",
+   "category": "household",
+   "sub": "humble",
+   "tags": [
+    "household",
+    "humble",
+    "wood"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Birch twigs; sweeps, occasionally flies."
+  },
+  {
+   "id": "cradle",
+   "name": "cradle",
+   "category": "household",
+   "sub": "wood",
+   "tags": [
+    "household",
+    "wood",
+    "child"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Rocks with a foot."
+  },
+  {
+   "id": "hearthstone",
+   "name": "hearthstone",
+   "category": "household",
+   "sub": "stone",
+   "tags": [
+    "household",
+    "stone",
+    "dwarf",
+    "home"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "halfling": 1,
+    "troll": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    50
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Carved flat stone from the family hearth; carried when the family moves.",
+   "exclusive": "dwarf"
+  },
+  {
+   "id": "knight_spurs",
+   "name": "knight's spurs",
+   "category": "tool",
+   "sub": "feet",
+   "tags": [
+    "clothing",
+    "feet",
+    "human",
+    "knightly",
+    "office"
+   ],
+   "affinity": {
+    "human": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    120
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Gilt spurs; the whole point of the ceremony.",
+   "exclusive": "human"
+  },
+  {
+   "id": "guild_charter",
+   "name": "guild charter",
+   "category": "tool",
+   "sub": "paper",
+   "tags": [
+    "lore",
+    "paper",
+    "law",
+    "human",
+    "faction",
+    "office"
+   ],
+   "affinity": {
+    "human": 3
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    600
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Sealed permission to do what everyone was doing anyway.",
+   "exclusive": "human"
+  },
+  {
+   "id": "moss_poultice",
+   "name": "moss poultice",
+   "category": "tool",
+   "sub": "healing",
+   "tags": [
+    "alchemy",
+    "healing",
+    "troll",
+    "nature",
+    "consumable"
+   ],
+   "affinity": {
+    "troll": 3,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "brass",
+    "bone",
+    "leather",
+    "clay",
+    "glass",
+    "stone",
+    "silver",
+    "cloth"
+   ],
+   "desc": "Troll remedy: bog moss and spit. Works on trolls.",
+   "exclusive": "troll"
+  },
+  {
+   "id": "toll_sign",
+   "name": "bridge toll sign",
+   "category": "household",
+   "sub": "wood",
+   "tags": [
+    "household",
+    "wood",
+    "troll",
+    "crude",
+    "sign"
+   ],
+   "affinity": {
+    "troll": 3
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    2
+   ],
+   "materials": [
+    "iron",
+    "wood",
+    "bone",
+    "leather",
+    "clay",
+    "cloth"
+   ],
+   "desc": "Board reading TOLL in an unsteady hand; the troll is the sign.",
+   "exclusive": "troll"
+  },
+  {
+   "id": "vial",
+   "name": "glass vial",
+   "category": "alchemy",
+   "sub": "glass",
+   "tags": [
+    "alchemy",
+    "glass",
+    "container"
+   ],
+   "affinity": {
+    "human": 2,
+    "gnome": 2,
+    "fey": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [],
+   "desc": "Stoppered glass."
+  },
+  {
+   "id": "potion_healing",
+   "name": "healing draught",
+   "category": "alchemy",
+   "sub": "potion",
+   "tags": [
+    "alchemy",
+    "potion",
+    "healing",
+    "consumable"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "halfling": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    120
+   ],
+   "materials": [],
+   "desc": "Red, bitter, works."
+  },
+  {
+   "id": "potion_unknown",
+   "name": "unlabelled potion",
+   "category": "alchemy",
+   "sub": "potion",
+   "tags": [
+    "alchemy",
+    "potion",
+    "mystery",
+    "consumable"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "gnome": 2,
+    "fey": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    100
+   ],
+   "materials": [],
+   "desc": "Could be anything. Goblins drink it to find out."
+  },
+  {
+   "id": "poison_vial",
+   "name": "vial of poison",
+   "category": "alchemy",
+   "sub": "poison",
+   "tags": [
+    "alchemy",
+    "poison",
+    "consumable",
+    "assassin"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "fey": 1,
+    "undead": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    150
+   ],
+   "materials": [],
+   "desc": "Green, viscous, quiet."
+  },
+  {
+   "id": "antidote",
+   "name": "antidote",
+   "category": "alchemy",
+   "sub": "potion",
+   "tags": [
+    "alchemy",
+    "potion",
+    "consumable"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "gnome": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    100
+   ],
+   "materials": [],
+   "desc": "Milky; drink fast."
+  },
+  {
+   "id": "alchemists_fire",
+   "name": "alchemist's fire",
+   "category": "alchemy",
+   "sub": "explosive",
+   "tags": [
+    "alchemy",
+    "explosive",
+    "consumable",
+    "gnome"
+   ],
+   "affinity": {
+    "gnome": 3,
+    "goblin": 2
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    200
+   ],
+   "materials": [],
+   "desc": "Clay pot of something that hates air."
+  },
+  {
+   "id": "herb_bundle",
+   "name": "herb bundle",
+   "category": "alchemy",
+   "sub": "herb",
+   "tags": [
+    "alchemy",
+    "herb",
+    "nature",
+    "consumable"
+   ],
+   "affinity": {
+    "elf": 2,
+    "halfling": 2,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    8
+   ],
+   "materials": [],
+   "desc": "Dried herbs tied with twine."
+  },
+  {
+   "id": "gloomcap",
+   "name": "gloomcap",
+   "category": "alchemy",
+   "sub": "fungus",
+   "tags": [
+    "alchemy",
+    "fungus",
+    "cave",
+    "consumable"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "troll": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [],
+   "desc": "Glows faintly; eat only if desperate or goblin."
+  },
+  {
+   "id": "smoke_bomb",
+   "name": "smoke pellet",
+   "category": "alchemy",
+   "sub": "consumable",
+   "tags": [
+    "alchemy",
+    "consumable",
+    "stealth",
+    "gnome"
+   ],
+   "affinity": {
+    "gnome": 2,
+    "goblin": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    40
+   ],
+   "materials": [],
+   "desc": "Crush and vanish, coughing."
+  },
+  {
+   "id": "ink_pot",
+   "name": "ink pot",
+   "category": "alchemy",
+   "sub": "writing",
+   "tags": [
+    "alchemy",
+    "writing",
+    "glass"
+   ],
+   "affinity": {
+    "human": 2,
+    "elf": 2,
+    "gnome": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [],
+   "desc": "Oak-gall ink."
+  },
+  {
+   "id": "salve",
+   "name": "healing salve",
+   "category": "alchemy",
+   "sub": "healing",
+   "tags": [
+    "alchemy",
+    "healing",
+    "consumable",
+    "herb"
+   ],
+   "affinity": {
+    "elf": 2,
+    "halfling": 2,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [],
+   "desc": "Green paste; smells of mint and worse."
+  },
+  {
+   "id": "troll_blood",
+   "name": "vial of troll blood",
+   "category": "alchemy",
+   "sub": "gore",
+   "tags": [
+    "alchemy",
+    "gore",
+    "troll",
+    "healing",
+    "dark"
+   ],
+   "affinity": {
+    "troll": 1,
+    "goblin": 2,
+    "undead": 1
+   },
+   "rarity": "rare",
+   "value": [
+    30,
+    300
+   ],
+   "materials": [],
+   "desc": "Regrows things. Not always the right things."
+  },
+  {
+   "id": "iron_ingot",
+   "name": "iron ingot",
+   "category": "material",
+   "sub": "metal",
+   "tags": [
+    "material",
+    "metal",
+    "iron"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    8
+   ],
+   "materials": [],
+   "desc": "Bar of pig iron."
+  },
+  {
+   "id": "steel_ingot",
+   "name": "steel ingot",
+   "category": "material",
+   "sub": "metal",
+   "tags": [
+    "material",
+    "metal",
+    "steel"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "human": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    30
+   ],
+   "materials": [],
+   "desc": "Folded and quenched."
+  },
+  {
+   "id": "mithril_ingot",
+   "name": "mithril ingot",
+   "category": "material",
+   "sub": "metal",
+   "tags": [
+    "material",
+    "metal",
+    "mithril",
+    "precious"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "elf": 2,
+    "dragon": 2
+   },
+   "rarity": "epic",
+   "value": [
+    500,
+    3000
+   ],
+   "materials": [],
+   "desc": "Light as wood, hard as steel, rarer than either."
+  },
+  {
+   "id": "gold_bar",
+   "name": "gold bar",
+   "category": "material",
+   "sub": "metal",
+   "tags": [
+    "material",
+    "metal",
+    "gold",
+    "precious"
+   ],
+   "affinity": {
+    "dragon": 3,
+    "dwarf": 2,
+    "human": 2
+   },
+   "rarity": "rare",
+   "value": [
+    200,
+    1000
+   ],
+   "materials": [],
+   "desc": "Stamped bar."
+  },
+  {
+   "id": "ruby",
+   "name": "ruby",
+   "category": "material",
+   "sub": "gem",
+   "tags": [
+    "material",
+    "gem",
+    "red",
+    "precious"
+   ],
+   "affinity": {
+    "dragon": 3,
+    "dwarf": 2
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    1500
+   ],
+   "materials": [],
+   "desc": "Blood-red stone."
+  },
+  {
+   "id": "sapphire",
+   "name": "sapphire",
+   "category": "material",
+   "sub": "gem",
+   "tags": [
+    "material",
+    "gem",
+    "blue",
+    "precious"
+   ],
+   "affinity": {
+    "elf": 2,
+    "human": 2,
+    "dragon": 2
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    1500
+   ],
+   "materials": [],
+   "desc": "Deep blue stone."
+  },
+  {
+   "id": "emerald",
+   "name": "emerald",
+   "category": "material",
+   "sub": "gem",
+   "tags": [
+    "material",
+    "gem",
+    "green",
+    "precious"
+   ],
+   "affinity": {
+    "elf": 3,
+    "fey": 2,
+    "dragon": 1
+   },
+   "rarity": "rare",
+   "value": [
+    100,
+    1500
+   ],
+   "materials": [],
+   "desc": "Green as new leaves."
+  },
+  {
+   "id": "uncut_gem",
+   "name": "uncut gemstone",
+   "category": "material",
+   "sub": "gem",
+   "tags": [
+    "material",
+    "gem",
+    "raw"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "goblin": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    300
+   ],
+   "materials": [],
+   "desc": "Rough stone; a cutter would know."
+  },
+  {
+   "id": "pearl",
+   "name": "pearl",
+   "category": "material",
+   "sub": "gem",
+   "tags": [
+    "material",
+    "gem",
+    "sea",
+    "white"
+   ],
+   "affinity": {
+    "human": 2,
+    "fey": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    30,
+    400
+   ],
+   "materials": [],
+   "desc": "From the deep; fey trade in them."
+  },
+  {
+   "id": "amber_insect",
+   "name": "amber with an insect",
+   "category": "material",
+   "sub": "gem",
+   "tags": [
+    "material",
+    "gem",
+    "amber",
+    "nature"
+   ],
+   "affinity": {
+    "elf": 2,
+    "fey": 2,
+    "gnome": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    120
+   ],
+   "materials": [],
+   "desc": "Something small is trapped forever."
+  },
+  {
+   "id": "obsidian_shard",
+   "name": "obsidian shard",
+   "category": "material",
+   "sub": "stone",
+   "tags": [
+    "material",
+    "stone",
+    "black",
+    "sharp"
+   ],
+   "affinity": {
+    "orc": 2,
+    "goblin": 2,
+    "dragon": 1,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [],
+   "desc": "Volcanic glass."
+  },
+  {
+   "id": "silk_bolt",
+   "name": "bolt of silk",
+   "category": "material",
+   "sub": "cloth",
+   "tags": [
+    "material",
+    "cloth",
+    "fine"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 2,
+    "fey": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    40,
+    300
+   ],
+   "materials": [],
+   "desc": "Twenty yards of the good stuff."
+  },
+  {
+   "id": "wool_bolt",
+   "name": "bolt of wool",
+   "category": "material",
+   "sub": "cloth",
+   "tags": [
+    "material",
+    "cloth",
+    "humble"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    25
+   ],
+   "materials": [],
+   "desc": "Twenty yards of the warm stuff."
+  },
+  {
+   "id": "wolf_pelt",
+   "name": "wolf pelt",
+   "category": "material",
+   "sub": "hide",
+   "tags": [
+    "material",
+    "hide",
+    "trophy",
+    "animal"
+   ],
+   "affinity": {
+    "orc": 2,
+    "human": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    3,
+    20
+   ],
+   "materials": [],
+   "desc": "Grey, thick, one hole."
+  },
+  {
+   "id": "bear_pelt",
+   "name": "bear pelt",
+   "category": "material",
+   "sub": "hide",
+   "tags": [
+    "material",
+    "hide",
+    "trophy",
+    "animal"
+   ],
+   "affinity": {
+    "human": 2,
+    "giant": 2,
+    "orc": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    80
+   ],
+   "materials": [],
+   "desc": "Enough to carpet a hall."
+  },
+  {
+   "id": "dragon_scale",
+   "name": "dragon scale",
+   "category": "material",
+   "sub": "scale",
+   "tags": [
+    "material",
+    "scale",
+    "dragon",
+    "precious",
+    "fire"
+   ],
+   "affinity": {
+    "dragon": 3,
+    "dwarf": 1
+   },
+   "rarity": "epic",
+   "value": [
+    300,
+    2000
+   ],
+   "materials": [],
+   "desc": "One scale, dinner-plate sized, warm."
+  },
+  {
+   "id": "timber",
+   "name": "seasoned timber",
+   "category": "material",
+   "sub": "wood",
+   "tags": [
+    "material",
+    "wood"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "elf": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    6
+   ],
+   "materials": [],
+   "desc": "Oak planks, dry."
+  },
+  {
+   "id": "coal_sack",
+   "name": "sack of coal",
+   "category": "material",
+   "sub": "fuel",
+   "tags": [
+    "material",
+    "fuel",
+    "dwarf"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "gnome": 2,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    4
+   ],
+   "materials": [],
+   "desc": "Burns hot and dirty."
+  },
+  {
+   "id": "salt_block",
+   "name": "block of salt",
+   "category": "material",
+   "sub": "food",
+   "tags": [
+    "material",
+    "food",
+    "trade"
+   ],
+   "affinity": {
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    10
+   ],
+   "materials": [],
+   "desc": "Worth more than it looks, far from the sea."
+  },
+  {
+   "id": "enemy_skull",
+   "name": "enemy skull",
+   "category": "trophy",
+   "sub": "bone",
+   "tags": [
+    "trophy",
+    "bone",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 3,
+    "goblin": 2,
+    "troll": 2,
+    "undead": 1
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    5
+   ],
+   "materials": [],
+   "desc": "Grinning still."
+  },
+  {
+   "id": "drake_fang",
+   "name": "drake fang",
+   "category": "trophy",
+   "sub": "fang",
+   "tags": [
+    "trophy",
+    "fang",
+    "dragon",
+    "gore"
+   ],
+   "affinity": {
+    "orc": 2,
+    "human": 2,
+    "dragon": 1,
+    "troll": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    200
+   ],
+   "materials": [],
+   "desc": "As long as a forearm."
+  },
+  {
+   "id": "antlers",
+   "name": "stag antlers",
+   "category": "trophy",
+   "sub": "horn",
+   "tags": [
+    "trophy",
+    "horn",
+    "nature",
+    "elf"
+   ],
+   "affinity": {
+    "elf": 3,
+    "human": 2,
+    "fey": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    40
+   ],
+   "materials": [],
+   "desc": "Twelve points; hung over the door."
+  },
+  {
+   "id": "captured_banner",
+   "name": "captured banner",
+   "category": "trophy",
+   "sub": "cloth",
+   "tags": [
+    "trophy",
+    "cloth",
+    "war",
+    "faction"
+   ],
+   "affinity": {
+    "human": 2,
+    "orc": 2,
+    "dwarf": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    200
+   ],
+   "materials": [],
+   "desc": "Someone else's colours, torn."
+  },
+  {
+   "id": "giant_toenail",
+   "name": "giant's toenail",
+   "category": "trophy",
+   "sub": "gore",
+   "tags": [
+    "trophy",
+    "gore",
+    "giant",
+    "huge"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "halfling": 1,
+    "troll": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    50
+   ],
+   "materials": [],
+   "desc": "Used as a shield by goblins."
+  },
+  {
+   "id": "pressed_wing",
+   "name": "pressed fey wing",
+   "category": "trophy",
+   "sub": "fey",
+   "tags": [
+    "trophy",
+    "fey",
+    "dark",
+    "cruel"
+   ],
+   "affinity": {
+    "goblin": 2,
+    "undead": 1
+   },
+   "rarity": "rare",
+   "value": [
+    20,
+    300
+   ],
+   "materials": [],
+   "desc": "Kept between the pages of a book. The fey remember who."
+  },
+  {
+   "id": "scalp_string",
+   "name": "string of scalps",
+   "category": "trophy",
+   "sub": "gore",
+   "tags": [
+    "trophy",
+    "gore",
+    "cruel",
+    "orc"
+   ],
+   "affinity": {
+    "orc": 3,
+    "goblin": 1,
+    "troll": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    10
+   ],
+   "materials": [],
+   "desc": "Braided; counts more than fingers do."
+  },
+  {
+   "id": "broken_crown",
+   "name": "broken crown",
+   "category": "trophy",
+   "sub": "regalia",
+   "tags": [
+    "trophy",
+    "regalia",
+    "ruin",
+    "gold"
+   ],
+   "affinity": {
+    "undead": 2,
+    "orc": 2,
+    "dragon": 2
+   },
+   "rarity": "rare",
+   "value": [
+    50,
+    800
+   ],
+   "materials": [],
+   "desc": "Cut in two; the halves argue."
+  },
+  {
+   "id": "loaf",
+   "name": "loaf of bread",
+   "category": "food",
+   "sub": "staple",
+   "tags": [
+    "food",
+    "staple",
+    "consumable"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [],
+   "desc": "Crusty."
+  },
+  {
+   "id": "cheese_wheel",
+   "name": "wheel of cheese",
+   "category": "food",
+   "sub": "consumable",
+   "tags": [
+    "food",
+    "consumable",
+    "halfling"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    10
+   ],
+   "materials": [],
+   "desc": "Waxed; rolls well downhill."
+  },
+  {
+   "id": "honeycake",
+   "name": "honeycake",
+   "category": "food",
+   "sub": "sweet",
+   "tags": [
+    "food",
+    "sweet",
+    "consumable",
+    "halfling"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "fey": 2
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    2
+   ],
+   "materials": [],
+   "desc": "Sticky. Worth it."
+  },
+  {
+   "id": "smoked_eel",
+   "name": "smoked eel",
+   "category": "food",
+   "sub": "fish",
+   "tags": [
+    "food",
+    "fish",
+    "consumable"
+   ],
+   "affinity": {
+    "human": 2,
+    "halfling": 2,
+    "goblin": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [],
+   "desc": "Chewy and strong."
+  },
+  {
+   "id": "ale_keg",
+   "name": "keg of ale",
+   "category": "food",
+   "sub": "drink",
+   "tags": [
+    "food",
+    "drink",
+    "ale",
+    "consumable"
+   ],
+   "affinity": {
+    "dwarf": 3,
+    "halfling": 2,
+    "human": 2,
+    "orc": 1
+   },
+   "rarity": "common",
+   "value": [
+    5,
+    20
+   ],
+   "materials": [],
+   "desc": "Dark and heavy, the way the dwarves brew."
+  },
+  {
+   "id": "cinderwine",
+   "name": "cinderwine",
+   "category": "food",
+   "sub": "drink",
+   "tags": [
+    "food",
+    "drink",
+    "spirits",
+    "consumable",
+    "fire"
+   ],
+   "affinity": {
+    "orc": 2,
+    "dragon": 1,
+    "dwarf": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    10,
+    60
+   ],
+   "materials": [],
+   "desc": "Burns twice."
+  },
+  {
+   "id": "waybread",
+   "name": "waybread",
+   "category": "food",
+   "sub": "travel",
+   "tags": [
+    "food",
+    "travel",
+    "consumable",
+    "elf",
+    "magic"
+   ],
+   "affinity": {
+    "elf": 3
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    40
+   ],
+   "materials": [],
+   "desc": "One thin cake keeps a traveller a day.",
+   "exclusive": "elf"
+  },
+  {
+   "id": "dried_meat",
+   "name": "dried meat",
+   "category": "food",
+   "sub": "travel",
+   "tags": [
+    "food",
+    "travel",
+    "consumable"
+   ],
+   "affinity": {
+    "orc": 3,
+    "human": 2,
+    "dwarf": 2
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [],
+   "desc": "Salt and leather; ask not the animal."
+  },
+  {
+   "id": "rat_kebab",
+   "name": "rat on a stick",
+   "category": "food",
+   "sub": "consumable",
+   "tags": [
+    "food",
+    "consumable",
+    "goblin",
+    "crude"
+   ],
+   "affinity": {
+    "goblin": 3,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    1
+   ],
+   "materials": [],
+   "desc": "Goblin street food.",
+   "exclusive": "goblin"
+  },
+  {
+   "id": "grave_dirt",
+   "name": "jar of grave dirt",
+   "category": "alchemy",
+   "sub": "dark",
+   "tags": [
+    "alchemy",
+    "dark",
+    "undead",
+    "component"
+   ],
+   "affinity": {
+    "undead": 3,
+    "fey": 1
+   },
+   "rarity": "uncommon",
+   "value": [
+    5,
+    60
+   ],
+   "materials": [],
+   "desc": "For those who need to sleep in it.",
+   "exclusive": "undead"
+  },
+  {
+   "id": "clockwork_nut",
+   "name": "clockwork nut",
+   "category": "food",
+   "sub": "consumable",
+   "tags": [
+    "food",
+    "consumable",
+    "gnome",
+    "gadget"
+   ],
+   "affinity": {
+    "gnome": 3
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    5
+   ],
+   "materials": [],
+   "desc": "A nut. With a spring in it. Do not ask.",
+   "exclusive": "gnome"
+  },
+  {
+   "id": "apple_pie",
+   "name": "apple pie",
+   "category": "food",
+   "sub": "sweet",
+   "tags": [
+    "food",
+    "sweet",
+    "consumable",
+    "halfling",
+    "home"
+   ],
+   "affinity": {
+    "halfling": 3,
+    "human": 1
+   },
+   "rarity": "common",
+   "value": [
+    1,
+    3
+   ],
+   "materials": [],
+   "desc": "Cooling on a sill somewhere, briefly."
+  },
+  {
+   "id": "mead",
+   "name": "jug of mead",
+   "category": "food",
+   "sub": "drink",
+   "tags": [
+    "food",
+    "drink",
+    "honey",
+    "consumable"
+   ],
+   "affinity": {
+    "halfling": 2,
+    "human": 2,
+    "giant": 2,
+    "dwarf": 1
+   },
+   "rarity": "common",
+   "value": [
+    2,
+    8
+   ],
+   "materials": [],
+   "desc": "Honey wine; giants drink it by the barrel."
+  },
+  {
+   "id": "moon_dew",
+   "name": "vial of moon dew",
+   "category": "food",
+   "sub": "drink",
+   "tags": [
+    "food",
+    "drink",
+    "fey",
+    "magic",
+    "consumable"
+   ],
+   "affinity": {
+    "fey": 3,
+    "elf": 1
+   },
+   "rarity": "rare",
+   "value": [
+    20,
+    200
+   ],
+   "materials": [],
+   "desc": "Tastes of a night you have forgotten.",
+   "exclusive": "fey"
+  },
+  {
+   "id": "whole_ox",
+   "name": "roast ox",
+   "category": "food",
+   "sub": "consumable",
+   "tags": [
+    "food",
+    "consumable",
+    "feast",
+    "giant",
+    "huge"
+   ],
+   "affinity": {
+    "giant": 3,
+    "orc": 2
+   },
+   "rarity": "uncommon",
+   "value": [
+    20,
+    60
+   ],
+   "materials": [],
+   "desc": "A giant's snack; a village's feast."
+  },
+  {
+   "id": "mushroom_stew",
+   "name": "mushroom stew",
+   "category": "food",
+   "sub": "consumable",
+   "tags": [
+    "food",
+    "consumable",
+    "cave",
+    "dwarf"
+   ],
+   "affinity": {
+    "dwarf": 2,
+    "goblin": 2,
+    "troll": 1
+   },
+   "rarity": "common",
+   "value": [
+    0,
+    2
+   ],
+   "materials": [],
+   "desc": "Cave mushrooms, salt, patience."
+  }
+ ]
+}

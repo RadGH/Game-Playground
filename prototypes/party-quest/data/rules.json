@@ -9,14 +9,14 @@
     "bard":    { "name": "Bard",    "desc": "Talks, sings, stabs when it must.", "hp": 9, "role": "support", "kit": { "weapon": "rapier", "armour": "gambeson", "implement": "lute" }, "spell": "rally_song", "traitsHint": ["jolly", "romantic", "sarcastic", "drunkard"], "races": ["human", "halfling", "elf", "fey"] }
   },
   "spells": {
-    "fireball":   { "name": "fireball",   "kind": "attack_all", "power": 2, "cooldown": 3, "desc": "Burns every enemy for 2.", "line": "Fireball!" },
-    "frostbind":  { "name": "frostbind",  "kind": "attack_one", "power": 3, "cooldown": 2, "desc": "Freezes one enemy for 3 and skips its next turn.", "stun": true, "line": "Hold still." },
-    "soulreave":  { "name": "soulreave",  "kind": "drain",      "power": 2, "cooldown": 3, "desc": "Takes 2 from one enemy and gives it to the caster.", "line": "Your warmth. Mine now." },
-    "mendflesh":  { "name": "mendflesh",  "kind": "heal_one",   "power": 4, "cooldown": 2, "desc": "Heals the most wounded ally for 4.", "line": "Stand. You are not done." },
-    "wardstone":  { "name": "wardstone",  "kind": "shield_all", "power": 1, "cooldown": 4, "desc": "Every ally takes 1 less damage for 2 rounds.", "line": "Stone hold you." },
-    "rally_song": { "name": "rallying song", "kind": "buff_all", "power": 1, "cooldown": 3, "desc": "Allies deal +1 damage for 2 rounds.", "line": "Sing with me, you bastards!" },
-    "umbral_veil":{ "name": "umbral veil","kind": "dodge_all",  "power": 1, "cooldown": 4, "desc": "Enemies miss their next attack.", "line": "Now you don't." },
-    "smite":      { "name": "smite",      "kind": "attack_one", "power": 4, "cooldown": 3, "desc": "Holy blow for 4.", "line": "By the Pale Lady!" }
+    "fireball":   { "element": "fire", "name": "fireball",   "kind": "attack_all", "power": 2, "cooldown": 3, "desc": "Burns every enemy for 2.", "line": "Fireball!" },
+    "frostbind":  { "element": "ice", "name": "frostbind",  "kind": "attack_one", "power": 3, "cooldown": 2, "desc": "Freezes one enemy for 3 and skips its next turn.", "stun": true, "line": "Hold still." },
+    "soulreave":  { "element": "shadow", "name": "soulreave",  "kind": "drain",      "power": 2, "cooldown": 3, "desc": "Takes 2 from one enemy and gives it to the caster.", "line": "Your warmth. Mine now." },
+    "mendflesh":  { "element": "nature", "name": "mendflesh",  "kind": "heal_one",   "power": 4, "cooldown": 2, "desc": "Heals the most wounded ally for 4.", "line": "Stand. You are not done." },
+    "wardstone":  { "element": "arcane", "name": "wardstone",  "kind": "shield_all", "power": 1, "cooldown": 4, "desc": "Every ally takes 1 less damage for 2 rounds.", "line": "Stone hold you." },
+    "rally_song": { "element": "holy", "name": "rallying song", "kind": "buff_all", "power": 1, "cooldown": 3, "desc": "Allies deal +1 damage for 2 rounds.", "line": "Sing with me, you bastards!" },
+    "umbral_veil":{ "element": "shadow", "name": "umbral veil","kind": "dodge_all",  "power": 1, "cooldown": 4, "desc": "Enemies miss their next attack.", "line": "Now you don't." },
+    "smite":      { "element": "holy", "name": "smite",      "kind": "attack_one", "power": 4, "cooldown": 3, "desc": "Holy blow for 4.", "line": "By the Pale Lady!" }
   },
   "weaponDamage": { "dagger": 1, "sword": 2, "axe": 2, "blunt": 2, "polearm": 2, "ranged": 2, "staff": 1 },
   "weaponTagBonus": { "two-handed": 1, "heavy": 1, "huge": 2, "magic": 1, "crude": -1, "small": 0, "kitchen": -1, "humble": -1 },

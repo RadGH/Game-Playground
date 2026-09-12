@@ -71,8 +71,84 @@ Every enemy, boss, class pet, kennel companion and named hire has a **designed**
 ## Not rebuilt (on purpose, listed so nothing is silently missing)
 - Tap weapons/utilities (the real-time layer), achievements, codex, telemetry, cloud saves, NG+ UI (scaling constants are in `rules.js`), hardcore mode, infinite dungeon, guild hall/black market stock (formulas noted in `research/`), champion modifiers beyond hp/dmg, recruitable story heroes from dialog (`recruitHero` outcomes show text only), fame rewards beyond shop tier bumps, class unlock gating (all thirty classes are open; the original rule is shown on each card).
 
+## Spell effects
+
+Fights are drawn with `avatar-3d/js/spellfx.js` (see its README). The stage owns a `SpellFx` and steps it in
+the frame loop; the playback loop in `js/main.js` maps combat events onto it:
+
+- a `skill` event flashes a rune at the caster and remembers the element — from the enemy spell's `fxKind`
+  (`data/enemy-spells.json`), or from the hero skill's `damageType` via `skillType()` in `js/combat.js`,
+  falling back to arcane for magic and physical otherwise;
+- the caster's **first** `damage` event throws the projectile (later hits of the same skill only burst, so a
+  multi-target skill stays quick);
+- an `attack` from a magic-weapon hero throws a bolt and from a bow/crossbow/javelin hero an arrow; everyone
+  else keeps the old thrust animation;
+- `damage` bursts with `ev.dtype` (`crit` makes it bigger and adds a second shockwave);
+- `status` turns a looping aura on, and after every event the auras are re-synced against the unit's real
+  `statuses` list, so an expiry clears itself; `dot` ticks pulse the aura and add a small burst;
+- `heal` and `revive` play their own effects; `down`, `kill` and the end of the fight clear every aura.
+
+Flight time is capped at 450 ms so the round loop is no slower than the sleeps that were already there.
+
+## Themed interface (round 12)
+
+The prototype used to look like a form. It now reads as a game: near-black leather panels, burnished
+gold trim, ember accents, parchment lore text, **Cinzel** for headings and **Spectral** for body copy
+(Google Fonts, with system serif fallbacks).
+
+- **Art** — every ornament and icon comes from `assets/data/ui/` (listed in `assets/data/manifest.json`
+  under `ui`): `emblem`, `frame_corner` (rotated into four corners by `ui.js`), `divider` (section rules),
+  `button_end` (bracket ends on ornate buttons), `title_banner`, `panel_tile` (leather texture),
+  `ember_particle`, HUD icons (gold, fame, day/night, ration, torch, tent, boot, wagon, hp, mp, xp),
+  tab icons, equipment-slot icons, attribute icons and rarity gems. The `tab_*`, `slot_*` and `stat_*`
+  files are drawn in `currentColor` and are used as CSS masks, so they take the colour of the text
+  around them. No emoji are left in the interface.
+- **Title screen** — banner skyline, glowing sigil, gold-gradient wordmark, drifting embers (a dozen
+  CSS-animated sprites) and a collapsible **How to play** panel that explains the loop in plain words.
+- **Hire screen** — class cards are framed portraits with a role-coloured ribbon; hovering lifts the card
+  and shows a tooltip with the class blurb, its starting kit and its first skill; picked classes glow.
+  The party is four framed sockets that fill as you hire.
+- **World screen** — the top bar is a status bar of icon chips (gold, fame, day + moves left with a
+  sun/moon icon, rations that turn warning-red at one day left, vehicle), each with a tooltip; the zone
+  and act sit under it as a breadcrumb that never repeats itself (the act label usually already carries
+  the zone name). On a phone the chips become one horizontally scrolling row with Save and Menu pinned,
+  and the "← Playground" link folds into the menu. Every panel gets corner flourishes, headings get the divider
+  rule. Log lines fade in; lore is serif italic, speakers get a coloured left rule (hero / npc / enemy),
+  system lines are muted. Action buttons carry an icon and a tooltip that says what will happen (rest:
+  night-attack chance and what heals; travel: moves left). Tabs are icon + label with an ember underline
+  that flickers on the active one.
+- **Tabs** — party cards have portrait frames, hp/mp/xp bars (red / blue / violet) with the numbers in
+  the tooltip, stat chips that explain STR/DEX/INT/CON, armor, hit, dodge and crit, and an equipment grid
+  of slot icons + rarity gems where hovering a piece shows its full card. Bag rows show a rarity gem and,
+  on hover, the item card with the compare-to-equipped difference. Skill rows show type / mana / cooldown
+  chips and explain every talent and upgrade.
+- **Map** — drawn as an aged chart: warm parchment ground over the leather tile, a faint survey grid,
+  dashed `#c8a870` trails (the one you can walk today glows ember and its dashes march), visited nodes
+  as wax-seal discs with a pressed inner ring, the current node pulsing, nodes you know nothing about
+  dimmed, and a small compass (the `tab_map` icon) in the corner. The svg viewBox is rebuilt to match
+  the panel's shape on every render (and on window resize), so circles stay round and labels are not
+  smeared sideways. Nodes have a hover halo and a tooltip naming the node type with a plain-language
+  line (`js/ui.js` → `NODE_INFO`); labels alternate above and below the trail and are truncated to the
+  space between columns, with the full name in the tooltip.
+- **Quests / Meter / Journal** — the same treatment as Party and Bag: `sectionHead()` headings with the
+  divider rule (The story, Hero errands, Bounty board, Finished; The party, Companions, Grudges, Days on
+  the road; Damage meter), rows with an icon and a body, finished work struck through, and empty states
+  written in the serif italic instead of a blank panel. The damage-meter library keeps its own markup —
+  only its colours are restated warm, per damage type, under `#tab-meter`.
+- **Menu** — `Menu` (or the button in the top bar) opens an overlay: Resume, Save, Load last save,
+  New game (asks first), How to play, Back to playground, plus Settings — voice engine, mute, text speed
+  and the language-debug controls, which used to clutter the top bar. Escape or a click on the backdrop
+  closes it.
+- **Feedback** — buttons press down, cards lift, focus rings are gold, disabled controls are greyed and
+  say why (a disabled button gets no hover events, so those use the browser's own `title`), and the toast
+  is a parchment strip.
+
+Files: `style.css` (all of the theme), `js/ui.js` (icon helpers, rarity gems, slot icons, stat and node
+text, frame flourishes, embers, how-to-play, the menu overlay, tooltip cards) and
+`shared/tooltip.js` + `shared/tooltip.css` (the tooltip engine, shared with the rest of the playground).
+
 ## Files
-- `index.html`, `style.css`, `js/main.js` (screens + flows), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/rng.js`.
+- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/rng.js`.
 - `data/`: everything the game reads; `data/class-looks.json` = the 30 class blueprints (also in `library/data/defaults.json` as `ev_<class>` and in the 2D presets); `data/enemy-looks.json` = the 80 enemy/boss/pet/companion/hire looks (also in the library as `enemy_<id>` / `companion_<id>`).
 - `research/`: condensed notes from the original code (`rules-notes.md`, `world-notes.md`).
 - `tests/`: `loot.test.js`, `rules-combat.test.js`, `game.test.js`, `looks.test.js` (node), `emberveil.spec.js` (Playwright).

@@ -53,6 +53,34 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 
 **Portraits and bodies**: `renderSVG(character.avatar)` for the UI; `createMiiCharacter(character.avatar)` in the 3D scene; `randomAvatar(presets, { race, seed })` for crowds. The same `avatar` object drives both.
 
+**Spell effects on a stage** (`avatar-3d/js/spellfx.js` — projectiles, impacts, cast flashes, status auras; built from shaped geometry + the `assets/data/fx/` sprites, never a glowing ball)
+```js
+import * as THREE from 'three';
+import { SpellFx, elementName } from '/avatar-3d/js/spellfx.js';
+const fx = new SpellFx(scene.scene, { textures: await assets.fxTextures(THREE), camera: scene.camera, scale: 1.4 });
+// scale 1 suits a close-up viewer; a fight camera that is further back wants ~1.4 or the effects vanish
+scene.addTicker(dt => fx.update(dt));                       // one call per frame drives everything
+
+// a caster throws something at a target and it lands
+const from = chestOf(caster), to = chestOf(target);         // world Vector3s: group position + height * 0.62
+fx.cast({ at: feetOf(caster), element: 'fire' });           // rune flash while the spell is spoken
+await fx.projectile({ from, to, element: 'fire' });         // resolves on arrival (flight capped at 450 ms)
+fx.impact({ at: to, element: 'fire', crit: true });         // the burst
+
+fx.status(targetBody, 'burn', true);                        // looping aura, parented to the body
+fx.pulseStatus(targetBody, 'burn');                         // one swell, for a damage-over-time tick
+fx.clearStatuses(targetBody);                               // on death, or when the fight ends
+fx.heal({ at: feetOf(x) }); fx.revive({ at: feetOf(x) }); fx.aoe({ points, element: 'arcane' });
+```
+Both prototype stages already wrap this: `stage.cast(srcId, tgtId, { element, kind })` (a `melee` kind keeps the
+old thrust and skips the projectile), `stage.impact(id, element, crit)`, `stage.status(id, type, on)`,
+`stage.clearStatuses(id)`, `stage.heal(id)`, `stage.reviveFx(id)`, `stage.pointOf(id)` / `stage.footOf(id)`.
+Map your combat log onto it with `elementName(ev.dtype)` (handles `cold`→ice, `magic`→arcane, `melee`→physical…),
+remember the caster's element on a `skill` event and throw it on that caster's first `damage` event, and keep the
+auras in step with the unit's real status list after every event so expiries clear themselves. Set
+`group.userData.fxHeight` from `ctrl.metrics()` and auras size themselves to the body — a rat and a dragon both
+look right. Cost: a projectile is one small group plus ~20 pooled-free billboards; an aura is 3–8 sprites.
+
 **Crowds of talking NPCs**: pre-render lines with `synthesize()` (formant/babble/espeak) and `play()` them with pan/volume; never call Piper in a hot loop. Babble plus subtitles is the cheapest option for dozens of simultaneous talkers.
 
 ## 3. Data conventions to keep
@@ -87,6 +115,18 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 plain gradient instead of throwing — you can build the game before the art exists. `Stage` in both
 prototypes takes `{ assets }` so a game shares one loader. See `assets/README.md` for the file rules
 (viewBox `0 0 100 100`, `preserveAspectRatio="none"`, keep the bottom third simple).
+
+## Themed UI (making it look like a game)
+
+A prototype stops looking like a form when three cheap things land together: **art**, **type** and
+**tooltips**. `assets/data/ui/` holds the reusable interface art (frames, ornaments, HUD/tab/slot/stat
+icons, rarity gems — see the `ui` section of the manifest); a display serif for headings plus a body
+serif from Google Fonts does the rest of the mood; and `shared/tooltip.js`
+(`installTooltips()`, then `data-tip="…"` or `data-tip-html="…"` on anything) explains every number
+without a manual. `prototypes/emberveil/style.css` + `js/ui.js` are the worked example: leather panel
+tiles, gold corner flourishes dropped into any `.framed` box, divider rules under headings, ember
+accents, a menu overlay for settings, and plain-language text for stats and map nodes. Copy `ui.js`'s
+shape — presentation helpers in their own module, no game rules — when theming the next one.
 
 ## Worked example: Emberveil (a full RPG on the pieces)
 

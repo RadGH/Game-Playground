@@ -11,6 +11,7 @@ import * as voice from '../../../voice-lab/js/voice.js';
 import { Game } from './state.js';
 import { Talk } from './talk.js';
 import { Stage } from './stage.js';
+import { elementName } from '../../../avatar-3d/js/spellfx.js';
 import { Combat, EV, itemStats } from './combat.js';
 import { generateTown, spreadDeeds, questsAvailable, acceptQuest, shopStock } from './town.js';
 import { planLeg, Minigame } from './travel.js';
@@ -255,6 +256,13 @@ function makeEnemy(templateId, i) {
   const t = rules.enemies[templateId]; const seed = Math.floor(Math.random() * 1e9);
   if (t.race === 'beast') { const b = BEAST_BODY[templateId] || { type: 'wolf' }; const creature = { ...randomCreature(b.type, seed), size: (b.size || 1) * (0.9 + Math.random() * 0.2) }; return { id: `e_${templateId}_${i}_${seed.toString(36).slice(0, 4)}`, templateId, name: t.name, short: t.name, side: 'enemy', hp: t.hp, maxHp: t.hp, damage: t.damage, armour: t.armour, role: t.role || 'melee', spell: null, tags: t.tags, regen: t.regen, xp: t.xp, gold: t.gold, race: t.race, beast: true, creature }; }
   const avatar = randomAvatar(presets, { race: AVATAR_RACE[t.race] || 'human', seed }); const vp = ENEMY_VOICE[t.race] ? deps.voicePresets.presets.find(p => p.id === ENEMY_VOICE[t.race])?.voice : { engine: 'babble', pitch: 0.3 }; return { id: `e_${templateId}_${i}_${Math.random().toString(36).slice(2, 5)}`, templateId, name: t.name, short: t.name, side: 'enemy', hp: t.hp, maxHp: t.hp, damage: t.damage, armour: t.armour, role: t.role || 'melee', spell: t.spell || null, tags: t.tags, regen: t.regen, xp: t.xp, gold: t.gold, race: t.race, avatar, voice: { ...(vp || { engine: 'babble' }), pitch: (vp?.pitch ?? 0.5) + (Math.random() - 0.5) * 0.2 }, speech: { traits: ['gruff'], aggression: 0.9, formality: 0.1 } }; }
+// ---- spell effects -----------------------------------------------------------------------------
+// Ranged and caster fighters throw something instead of walking up and hitting; every spell carries an
+// `element` in data/rules.json, so the projectile and the burst are coloured to match.
+const RANGED_ROLES = ['ranged', 'caster', 'healer', 'support'];
+function attackElement(c) { return RANGED_ROLES.includes(c?.role) ? (c.role === 'ranged' ? 'physical' : 'arcane') : 'physical'; }
+function isRangedFighter(c) { return RANGED_ROLES.includes(c?.role); }
+
 async function fight(enemyIds, { place, boss = false } = {}) {
   mode = 'combat'; const enemies = enemyIds.map(makeEnemy); await stage.setSide(enemies, 'right'); for (const m of game.alive()) stage.anim(m.id, 'idle');
   const partyForCombat = game.party.map(m => ({ id: m.id, name: m.name, short: m.short, side: 'party', hp: m.hp, maxHp: m.maxHp, damage: m.damage, armour: m.armourValue, role: m.role, spell: m.spell, tags: m.speech?.traits || [] }));
@@ -268,19 +276,51 @@ async function fight(enemyIds, { place, boss = false } = {}) {
     const events = combat.round(); narrate(`<p class="sys">— round ${combat.round_} —</p>`);
     for (const ev of events) {
       if (ev.type === EV.START) { await react(ev); continue; }
-      if (ev.type === EV.ATTACK) { await stage.attack(ev.source.id, ev.target.id); stage.hit(ev.target.id); narrate(`<p class="${ev.source.side === 'party' ? '' : 'bad'}">${ev.source.short || ev.source.name} hits ${ev.target.short || ev.target.name} for ${ev.amount}.</p>`); sync(); await sleep(220); }
-      else if (ev.type === EV.SPELL) { narrate(ev.target ? `<p class="good">${ev.spell.name} ${ev.spell.kind === 'drain' ? 'drains' : 'burns'} ${ev.target.short || ev.target.name} for ${ev.amount}.</p>` : `<p class="good">${ev.source.short || ev.source.name} casts <b>${ev.spell.name}</b>.</p>`); if (ev.target) stage.hit(ev.target.id); if (!ev.target) await react(ev); sync(); await sleep(300); }
-      else if (ev.type === EV.HEAL) { narrate(`<p class="good">${ev.target.short || ev.target.name} recovers ${ev.amount}.</p>`); sync(); }
-      else if (ev.type === EV.MISS) { narrate(`<p class="sys">${ev.source.short || ev.source.name} ${ev.reason === 'stunned' ? 'is frozen' : 'swings at shadows'}.</p>`); }
+      if (ev.type === EV.ATTACK) { const el = attackElement(ev.source); if (isRangedFighter(ev.source)) await stage.cast(ev.source.id, ev.target.id, { element: el, kind: 'magic', flash: el === 'arcane', flashMs: 90 }); else await stage.attack(ev.source.id, ev.target.id); stage.hit(ev.target.id); stage.impact(ev.target.id, el); narrate(`<p class="${ev.source.side === 'party' ? '' : 'bad'}">${ev.source.short || ev.source.name} hits ${ev.target.short || ev.target.name} for ${ev.amount}.</p>`); sync(); await sleep(220); }
+      else if (ev.type === EV.SPELL) { await playSpell(ev); narrate(ev.target ? `<p class="good">${ev.spell.name} ${ev.spell.kind === 'drain' ? 'drains' : 'burns'} ${ev.target.short || ev.target.name} for ${ev.amount}.</p>` : `<p class="good">${ev.source.short || ev.source.name} casts <b>${ev.spell.name}</b>.</p>`); if (ev.target) stage.hit(ev.target.id); if (!ev.target) await react(ev); sync(); await sleep(300); }
+      else if (ev.type === EV.HEAL) { stage.heal(ev.target.id); narrate(`<p class="good">${ev.target.short || ev.target.name} recovers ${ev.amount}.</p>`); sync(); }
+      else if (ev.type === EV.MISS) { if (ev.reason === 'stunned' && ev.source) stage.status(ev.source.id, 'freeze', false); narrate(`<p class="sys">${ev.source.short || ev.source.name} ${ev.reason === 'stunned' ? 'is frozen' : 'swings at shadows'}.</p>`); }
       else if (ev.type === EV.REGEN) { narrate(`<p class="bad">${ev.source.name} knits back together (+${ev.amount}).</p>`); }
       else if (ev.type === EV.BLOODIED) { narrate(`<p class="bad">${ev.target.short} is bloodied.</p>`); await react(ev); }
-      else if (ev.type === EV.DOWN) { stage.down(ev.target.id); narrate(`<p class="bad"><b>${ev.target.short} goes down.</b></p>`); sync(); await react(ev); }
-      else if (ev.type === EV.KILL) { stage.down(ev.target.id); narrate(`<p class="good">${ev.target.name} is dead.</p>`); await react(ev); if (Math.random() < 0.3) await taunt(); }
+      else if (ev.type === EV.DOWN) { stage.down(ev.target.id); stage.clearStatuses(ev.target.id); narrate(`<p class="bad"><b>${ev.target.short} goes down.</b></p>`); sync(); await react(ev); }
+      else if (ev.type === EV.KILL) { stage.down(ev.target.id); stage.clearStatuses(ev.target.id); narrate(`<p class="good">${ev.target.name} is dead.</p>`); await react(ev); if (Math.random() < 0.3) await taunt(); }
       else if (ev.type === EV.WIN) { await afterWin(enemies, partyForCombat, place, boss); }
       else if (ev.type === EV.LOSE) { await afterLose(enemies, place); return false; }
     }
   }
+  spellInFlight = null; for (const id of [...stage.chars.keys()]) stage.clearStatuses(id);
   sync(); currentCombat = null; mode = 'wild'; return combat.result === 'win';
+}
+
+/**
+ * Draw a spell. The combat engine emits one SPELL event announcing the cast (no target) and one per
+ * hit (with a target), so the flash goes on the announcement, the projectile on the first hit, and
+ * later hits of the same cast only get a burst — a spell that hits three enemies stays quick.
+ * Party-wide buffs put a looping aura on every ally instead.
+ */
+let spellInFlight = null;
+async function playSpell(ev) {
+  const sp = ev.spell || {};
+  const element = elementName(sp.element || (sp.kind === 'heal_one' ? 'nature' : 'arcane'));
+  if (!stage.chars.get(ev.source?.id)) return;
+  if (!ev.target) {                                          // the cast itself
+    if (sp.kind === 'shield_all' || sp.kind === 'buff_all' || sp.kind === 'dodge_all') {
+      stage.fx.cast({ at: stage.footOf(ev.source.id), element, ms: 420 });
+      const aura = sp.kind === 'shield_all' ? 'barrier' : sp.kind === 'buff_all' ? 'rally' : 'deflect';
+      for (const m of game.party) if (m.hp > 0) stage.status(m.id, aura, true);
+      return;
+    }
+    stage.fx.cast({ at: stage.footOf(ev.source.id), element, ms: 340 });
+    if (sp.kind !== 'heal_one') spellInFlight = { source: ev.source.id, element };
+    return;
+  }
+  if (!stage.chars.get(ev.target.id)) return;                // the hits
+  if (spellInFlight && spellInFlight.source === ev.source?.id) {
+    spellInFlight = null;
+    await stage.cast(ev.source.id, ev.target.id, { element, kind: 'magic', flash: false });
+  }
+  stage.impact(ev.target.id, element, false);
+  if (sp.stun) stage.status(ev.target.id, 'freeze', true);
 }
 async function afterWin(enemies, partyForCombat, place, boss) {
   const alive = game.alive(); const ids = game.partyIds(); const xp = enemies.reduce((s, e) => s + e.xp, 0); const gold = enemies.reduce((s, e) => s + Math.floor(e.gold[0] + Math.random() * (e.gold[1] - e.gold[0] + 1)), 0);

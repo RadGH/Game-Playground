@@ -1,8 +1,9 @@
 # Assets — shared art library
 
 One place for the drawn art that more than one game in this playground needs: **scenery** (full-bleed SVG
-backdrops that sit behind the 3D characters) and **map icons** (node markers for a world map). Everything
-is a plain `.svg` file on disk, listed in `data/manifest.json`, loaded by `js/assets.js`.
+backdrops that sit behind the 3D characters), **map icons** (node markers for a world map) and **fx sprites**
+(64×64 particles a 3D effects layer draws as billboards). Everything is a plain `.svg` file on disk, listed
+in `data/manifest.json`, loaded by `js/assets.js`.
 
 Before this existed, each prototype kept its backdrops as one long inline SVG string inside `stage.js`, so
 two games could not share a scene and nobody could look at the art without running the game. Now the art is
@@ -21,7 +22,9 @@ assets/
   data/manifest.json  the index: every scene and icon with its file and tags
   data/scenery/*.svg  one file per scene
   data/icons/*.svg    one file per map node type
+  data/fx/*.svg       one file per particle sprite (spell effects, status glyphs)
   data/props/*.svg    reserved: standalone props to place in a scene (empty for now)
+  data/ui/*.svg       interface art: frames, ornaments, HUD/tab/slot/stat icons, rarity gems
   tests/assets.test.js  node: manifest + files on disk + pure helpers
   tests/assets.spec.js  Playwright: the gallery renders, night switch, missing ids
 ```
@@ -48,6 +51,26 @@ assets/
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 8 8" width="16" height="16">…</svg>
 ```
 
+## Interface art (`data/ui/`)
+
+The themed-interface set, indexed under `ui` in the manifest and used by `prototypes/emberveil`:
+
+- **Ornaments** — `emblem` (128×128 sigil), `frame_corner` (64×64 gold flourish drawn for the top-left;
+  rotate 90/180/270 for the others), `divider` (400×24, `preserveAspectRatio="none"` so it stretches to
+  any heading width), `button_end` (32×64 bracket for the ends of a button), `title_banner` (800×300
+  ember skyline, meant to be sliced/covered), `panel_tile` (64×64 seamless dark leather, tiled),
+  `ember_particle`.
+- **Icons** — HUD/status (`gold fame day night ration torch tent boot wagon hp mp xp`) in full colour;
+  tabs (`tab_party tab_bag tab_skills tab_quests tab_meter tab_journal tab_map tab_settings`),
+  equipment slots (`slot_weapon slot_offhand slot_head slot_chest slot_hands slot_legs slot_feet
+  slot_ring slot_necklace`) and attributes (`stat_str stat_dex stat_int stat_con`) drawn in
+  `currentColor`; rarity gems (`rarity_common uncommon rare epic legendary unique set`).
+- **How to use them** — full-colour art as a background: `background-image: url(../../assets/data/ui/gold.svg)`.
+  `currentColor` art as a mask so it takes the surrounding text colour:
+  `background-color: currentColor; mask-image: url(…/tab_party.svg); mask-size: contain;`.
+  A game maps its own rarity ladder onto the gems by colour, not by name (Emberveil's magic → the blue
+  `rarity_rare` gem, its rare → the gold `rarity_unique` one).
+
 ## Manifest
 
 ```json
@@ -55,6 +78,7 @@ assets/
   "scenery": { "village": { "file": "scenery/village.svg", "tags": ["outdoor", "settlement", "day"] },
                "camp":    { "file": "scenery/camp.svg",    "tags": ["outdoor", "camp"], "night": true } },
   "icons":   { "combat":  { "file": "icons/combat.svg",    "tags": ["node", "fight"] } },
+  "fx":      { "flame":   { "file": "fx/flame.svg",       "tags": ["fire", "burn", "particle", "projectile"] } },
   "props":   {}
 }
 ```
@@ -98,6 +122,41 @@ fallbackScene('id')                 // the plain gradient used when art is missi
 drawn yet, falls back to the `fallback` scene you name and then to a plain sky-to-ground gradient; the
 returned scene carries `missing: true` and the element gets `data-missing="1"` so a gallery can flag it.
 Files are fetched once and cached per loader, so re-showing a scene costs nothing.
+
+## Particle sprites (`data/fx/`)
+
+35 small sprites for combat effects, drawn on a transparent `0 0 64 64` canvas so they can be rasterized
+to a texture and drawn with additive blending. They are the art half of
+[`avatar-3d/js/spellfx.js`](../avatar-3d/README.md#spell-effects--jsspellfxjs-demo-spellfxhtml) — the
+projectile trails, impact bursts and looping status auras in Emberveil and Party Quest.
+
+| Group | Sprites |
+|---|---|
+| fire | `flame`, `ember`, `smoke` |
+| ice | `ice_shard`, `snowflake`, `frost_ring` |
+| shadow / arcane | `skull`, `wisp`, `shadow_claw`, `arcane_rune`, `arcane_shard` |
+| holy / nature | `holy_rune`, `holy_mote`, `feather`, `leaf`, `thorn`, `root_vine` |
+| physical / lightning | `slash`, `spark`, `bolt`, `crack`, `chain` |
+| fluids | `bubble`, `drop` |
+| status glyphs | `star_daze`, `zzz`, `question`, `eye_closed`, `arrow_down`, `arrow_up`, `target`, `mute`, `shield_ring` |
+| neutral | `ring`, `glow` |
+
+Rules for a new one: transparent background (no backing rect), `viewBox="0 0 64 64"`, the shape roughly
+centred and filling most of the box, its own colour baked in (the effects layer tints with white by
+default), and no text. Dark sprites (`smoke`, `shadow_claw`, `skull`) are drawn with normal blending by the
+effects layer, since additive would make them invisible.
+
+Reading them:
+
+```js
+const tex    = await assets.fxTexture('flame', THREE);        // cached THREE.CanvasTexture, 128×128
+const all    = await assets.fxTextures(THREE);                // { flame: CanvasTexture, … } for the whole set
+const canvas = await assets.fxCanvas('flame', { size: 256 }); // the raw canvas, no Three.js needed
+assets.fxIds(); assets.fxInfo('flame'); assets.listByTag('status', 'fx');
+```
+
+Three.js is passed in as an argument so `js/assets.js` stays free of a 3D dependency. Nothing throws: an
+unknown id or an unreadable file gives a soft white diamond (`fallbackSprite`) instead of a blank texture.
 
 ## Using it in a game
 

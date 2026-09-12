@@ -24,10 +24,36 @@ test('every entry names a file and tags', () => {
   for (const kind of ['scenery', 'icons', 'props']) {
     for (const [id, spec] of Object.entries(manifest[kind])) {
       assert.match(spec.file, /\.svg$/, `${kind}.${id} has an svg file`);
-      assert.ok(spec.file.startsWith(kind === 'icons' ? 'icons/' : kind === 'props' ? 'props/' : 'scenery/'), `${kind}.${id} sits in the right folder`);
+      assert.ok(spec.file.startsWith(kind === 'scenery' ? 'scenery/' : kind + '/'), `${kind}.${id} sits in the right folder`);
       assert.ok(Array.isArray(spec.tags), `${kind}.${id} has tags`);
     }
   }
+});
+
+test('fx sprites are listed, on disk, 64x64 and transparent', () => {
+  assert.equal(typeof manifest.fx, 'object', 'the manifest has an fx section');
+  assert.ok(Object.keys(manifest.fx).length >= 30, 'at least 30 particle sprites listed');
+  for (const [id, spec] of Object.entries(manifest.fx)) {
+    assert.match(spec.file, /^fx\/.+\.svg$/, `fx.${id} sits in fx/`);
+    assert.ok(Array.isArray(spec.tags) && spec.tags.length, `fx.${id} has tags`);
+    const p = join(dataDir, spec.file);
+    assert.ok(existsSync(p), `${spec.file} exists`);
+    const text = readFileSync(p, 'utf8');
+    assert.equal(svgRootAttrs(text).viewBox, '0 0 64 64', `${id} uses the sprite viewBox`);
+    assert.ok(svgInner(text).length > 0, `${id} has markup`);
+    // a backing rect would make the sprite a square block once it is drawn additively
+    assert.ok(!/<rect[^>]*width="(100%|64)"[^>]*height="(100%|64)"/.test(text), `${id} has no opaque backing rect`);
+  }
+});
+
+test('every element and status the effects layer names has a sprite in the manifest', () => {
+  // ids referenced by avatar-3d/js/spellfx.js (ELEMENTS trails + STATUS_FX auras)
+  const needed = ['flame', 'ember', 'smoke', 'ice_shard', 'snowflake', 'frost_ring', 'skull', 'wisp', 'shadow_claw',
+    'holy_rune', 'holy_mote', 'feather', 'leaf', 'thorn', 'bubble', 'drop', 'slash', 'spark', 'bolt',
+    'arcane_rune', 'arcane_shard', 'shield_ring', 'star_daze', 'zzz', 'question', 'chain', 'eye_closed',
+    'arrow_down', 'arrow_up', 'crack', 'target', 'mute', 'root_vine', 'ring', 'glow'];
+  const missing = needed.filter(id => !manifest.fx?.[id]);
+  assert.deepEqual(missing, [], 'no sprite the effects layer asks for is missing');
 });
 
 test('icon files exist and are standalone svgs in a -4 -4 8 8 box', () => {
@@ -88,4 +114,24 @@ test('fallbackScene is a self-contained gradient with a unique id', () => {
   const a = fallbackScene('village'), b = fallbackScene('village');
   assert.match(a, /<linearGradient id="fb_village_/);
   assert.notEqual(a, b, 'two calls do not collide on one gradient id');
+});
+
+test('ui art: every manifest entry exists in ui/, and the sets a themed interface needs are all there', () => {
+  assert.equal(typeof manifest.ui, 'object', 'the manifest has a ui section');
+  for (const [id, spec] of Object.entries(manifest.ui)) {
+    assert.match(spec.file, /^ui\/.+\.svg$/, `${id} sits in ui/`);
+    assert.ok(Array.isArray(spec.tags), `${id} has tags`);
+    assert.ok(existsSync(join(dataDir, spec.file)), `${spec.file} exists`);
+  }
+  const ids = Object.keys(manifest.ui);
+  for (const need of ['emblem', 'frame_corner', 'divider', 'button_end', 'title_banner', 'panel_tile', 'ember_particle']) assert.ok(ids.includes(need), `ornament ${need} is listed`);
+  for (const need of ['gold', 'fame', 'day', 'night', 'ration', 'torch', 'tent', 'boot', 'wagon', 'hp', 'mp', 'xp']) assert.ok(ids.includes(need), `hud icon ${need} is listed`);
+  assert.equal(ids.filter(i => i.startsWith('tab_')).length, 8, 'eight tab icons');
+  assert.equal(ids.filter(i => i.startsWith('slot_')).length, 9, 'nine equipment slot icons');
+  assert.equal(ids.filter(i => i.startsWith('stat_')).length, 4, 'four attribute icons');
+  assert.equal(ids.filter(i => i.startsWith('rarity_')).length, 7, 'seven rarity gems');
+  // the currentColor art is what a page masks to take the surrounding text colour
+  for (const id of ids.filter(i => /^(tab_|slot_|stat_)/.test(i))) {
+    assert.match(readFileSync(join(dataDir, manifest.ui[id].file), 'utf8'), /currentColor/, `${id} is drawn with currentColor`);
+  }
 });

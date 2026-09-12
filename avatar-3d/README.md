@@ -31,6 +31,98 @@ const spec = randomCreature('dragon', seed);             // colour variation ins
 
 Features can be toggled on any plan (`features: { wings: true }` on a wolf works): fangs, tusks, horns, antlers, wings, spikes, mane, whiskers, claws, hooves, tail, core, glow, bulgeEyes, beak, antennae, maw, plates. Bodies face +z like the humanoids, so the same side/facing code places them. Heights before the size multiplier: wisp/moth ≈ 0.5 m, wolf ≈ 0.9 m, golem ≈ 1.4 m, horror ≈ 1.6 m, dragon ≈ 1.9 m, titan ≈ 2.6 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`); Emberveil uses them for its whole bestiary (`prototypes/emberveil/data/enemy-looks.json`).
 
+## Spell effects — `js/spellfx.js`, demo `spellfx.html`
+
+Combat effects for a 3D stage: **projectiles** that fly between two points, **impacts** that burst where they land, **cast** flashes, **heal**/**revive**, and looping **status auras** stuck to a body. Everything is built from shaped geometry (cones, spinning shard clusters, expanding torus rings, ground rune discs, tumbling planes, jagged lines) and the 35 particle sprites in `assets/data/fx/` drawn as additive billboards — deliberately **no glowing spheres**.
+
+The module knows nothing about any game. It needs a `THREE.Scene`, a way to fetch a sprite texture, and one `update(dt)` call per frame.
+
+```js
+import * as THREE from 'three';
+import { SpellFx, ELEMENTS, STATUS_FX, elementName } from '/avatar-3d/js/spellfx.js';
+import { Assets } from '/assets/js/assets.js';
+
+const assets = await Assets.open('/assets/');
+const textures = await assets.fxTextures(THREE);        // { flame: CanvasTexture, ember: …, 35 of them }
+const fx = new SpellFx(scene.scene, { textures, camera: scene.camera });
+scene.addTicker(dt => fx.update(dt));                   // drive it from the frame loop
+
+await fx.projectile({ from: casterChest, to: targetChest, element: 'fire' });   // resolves on arrival
+fx.impact({ at: targetChest, element: 'fire', crit: true });
+fx.status(targetGroup, 'burn', true);                   // aura parented to the body, follows it
+fx.clearStatus(targetGroup);                            // or clearStatuses(target)
+fx.heal({ at: feet }); fx.revive({ at: feet }); fx.cast({ at: feet, element: 'holy' });
+fx.aoe({ points: [a, b, c], element: 'arcane' });
+fx.dispose();
+```
+
+**`scale`** is a global size multiplier: `1` is tuned for the effects gallery, where the camera is close. Both prototype stages pass **`scale: 1.4`** because the fight camera sits further back and the bodies fill about a third of the frame — at `1` the effects vanish against the backdrop. It multiplies sprite and geometry sizes, ring radii and burst spread, but never the world positions an effect is given. `impact()` also takes `height` (the target body's height, which the stages pass from `heightOf(id)`) so a physical slash is drawn at body scale rather than a fixed size.
+
+`textures` may be a plain object, a `Map`, or a function `(id) => THREE.Texture|null`; a missing sprite is skipped, so an effect degrades to its geometry instead of throwing. `new SpellFx(scene, { textures: null })` is legal — call `fx.setTextures(t)` when an async load finishes (that is what the stages do). `createSpellFx(scene, { assets, camera })` does the load for you.
+
+### Elements (`ELEMENTS`)
+
+`elementName(x)` maps a game's damage type or skill type onto one of these (`cold`/`frost` → ice, `magic` → arcane, `melee`/`ranged` → physical, and so on — see `ELEMENT_ALIASES`); unknown names fall back to arcane.
+
+| Element | Projectile | Impact |
+|---|---|---|
+| `fire` | flame cone (hollow outer + bright inner) with a flame/ember trail and smoke puffs | camera-facing shockwave ring, flame/ember burst, smoke, scorch ring on the floor |
+| `ice` | 3–5 tumbling octahedral shards with a snowflake trail | frost-ring flash, shard spray with a hex plate, shockwave ring |
+| `shadow` | a soul-wisp head with two claws sweeping round it, undulating off the straight line, claw trail | claws converging inward, a skull rising, a ring collapsing |
+| `holy` | a spinning sigil with a halo and a spearpoint of light, high arc, mote trail | rune disc on the floor, motes and feathers rising, shockwave ring |
+| `nature` | leaves and thorns wound into a drilling helix | leaf/thorn burst, ground ring and a small shockwave |
+| `arcane` | two counter-wound strands of shards around a rune | shockwave ring, rune disc on the floor, shard scatter |
+| `lightning` | instant jagged polyline (3 lines re-randomised 8 times) with bolt motes — no travel time | spark burst, crack decal on the floor, fast ground ring |
+| `physical` | an arrow (shaft + tip + three fletchings); `shape: 'axe'` gives tumbling blades instead | 2–3 crossing slashes sized to the body, sparks, a dust puff at the feet |
+| `poison` | a big bubble with three smaller ones orbiting, rising as it flies | a green splash disc, a thick burst of bubbles, a shockwave and a ground ring |
+| `bleed` | a heavy drop with three trailing, falling arc | falling drops and two red slashes |
+| `true` | white shard cluster | the arcane burst in white |
+
+`projectile()` takes `{ from, to, element, shape?, speed?, arc?, ms?, crit? }`. Flight is clamped to **160–450 ms** so a fight stays readable (pass `ms` to override, e.g. for screenshots). `shape` overrides the element's default: `cone`, `shards`, `ribbon`, `rune`, `spiral`, `helix`, `bolt`, `arrow`, `axe`, `bubbles`, `drops`.
+
+### Status auras (`STATUS_FX`)
+
+`fx.status(bodyGroup, type, on)` parents an aura to the body so it follows it around the stage. Sizes and orbit radii scale with the body's height (`userData.fxHeight`, else a `Box3`), so a rat and a dragon both look right; orbits at chest height sit wider than ones at the head so a robe or a thick body does not swallow them. Colours follow Emberveil's `data/status-effects.json` where one exists. Unknown names get a plain circling mote rather than nothing.
+
+| Aura | What it looks like |
+|---|---|
+| `burn` | flames licking upward around the body |
+| `poison` | bubbles rising out of it |
+| `bleed` | drops running down |
+| `freeze` | a shell of ice shards plus a frost ring at the feet |
+| `stun` | stars orbiting the head |
+| `sleep` | zzz drifting up and away |
+| `confused` | question marks orbiting the head |
+| `dazed` | a tilted halo (hoop + disc) above the head with motes riding it |
+| `blind` | a dark blindfold band across the eyes plus a closed-eye glyph |
+| `slow` | arrows sliding down beside the body |
+| `marked` | a reticle bobbing overhead |
+| `barrier` / `block` | a shield plate facing the viewer and a torus sliding up and down |
+| `regen` | motes and leaves rising |
+| `sunder` | crack sprites stuck on the body, flickering |
+| `curse` | skulls and a wisp circling the feet over a dark ring |
+| `silence` | a muted-speaker glyph overhead |
+| `disarm` | a chain across the chest |
+| `root` | vines and a ring gripping the feet |
+| `rally` | arrows shooting up out of the body |
+| `haste` | speed lines streaming off both flanks plus sparks kicked up at the feet |
+| `enchant` | three shards orbiting the chest inside a faint hoop |
+| `deflect` | a tilted halo above the head with motes riding it |
+
+Other helpers: `statusesOn(target)`, `pulseStatus(target, type)` (one swell, for a damage-over-time tick), `liveCount` (running effects, handy in tests).
+
+### Adding an element
+
+1. Add a row to `ELEMENTS` in `js/spellfx.js`: `color`, `accent`, `shape` (one of the shapes above or a new one), `impact` (a branch name in `impact()`), `trail` (sprite ids), `speed`, `arc`, `label`.
+2. If it needs a new projectile body, add a branch to `_head(kind, E, crit)` — build it pointing along **+Y**; the caller rotates +Y onto the flight path.
+3. If it needs a new burst, add a branch to `impact()` out of the building blocks: `_expandRing`, `_burst`, `_converge`, `_riser`, `_discFlash`, `_crossSlashes`, `_puff`, `_shardSpray`. Rings and discs at the hit point should use `axis: 'camera'` / `ground: false`; only floor decals lie flat at `y ≈ 0.02`.
+4. Add any new sprite to `assets/data/fx/` and to the `fx` section of `assets/data/manifest.json`.
+5. Add a row to the table above and to the gallery's element chips (they read `ELEMENTS`, so they update themselves).
+
+### Gallery — `spellfx.html`
+
+Two chibi bodies on a stage, element chips, cast/projectile/impact/heal/revive/zone buttons, a status checkbox per body, and **Play everything** which fires all 11 elements then all 23 auras in order. `window.spellfxDemo` exposes the same API for tests, plus `freeze()` / `unfreeze()` / `step(sec, n)` — the effects layer stops advancing while the scene keeps rendering, which is how the screenshot tools catch a burst at its peak.
+
 ## Quick use from a game
 
 ```html
@@ -86,7 +178,7 @@ Skeleton bone names (shared by every file): root, pelvis, spine_01..03, neck_01,
 Mode switch, orbit camera, animation chips (procedural or clip list), turntable, PNG snapshot, random (with race rules) / random face / random outfit, presets (shared), slot editor + body sliders + Mii face sliders, body frame select, side-by-side 2D render of the same JSON, JSON copy/export/import.
 
 ## Tests
-`npm test -- avatar-3d` (Playwright, headless WebGL): Mii mode draws skin-coloured pixels, walk animation moves the leg pivots, all 15 presets build; Quaternius mode loads skinned meshes, plays `Walk_Loop`, bone scaling raises the root; screenshots saved in `test-results/avatar-3d-*.png`.
+`npm test -- avatar-3d` (Playwright, headless WebGL): Mii mode draws skin-coloured pixels, walk animation moves the leg pivots, all 15 presets build; Quaternius mode loads skinned meshes, plays `Walk_Loop`, bone scaling raises the root; screenshots saved in `test-results/avatar-3d-*.png`. `creatures.spec.js` builds every creature type. `spellfx.spec.js` loads the gallery, throws and bursts every element (checking a projectile resolves under the flight cap), runs every status aura at once and checks the effects layer returns to zero children afterwards, and drives the page's buttons; screenshots in `test-results/spellfx-*.png`.
 
 ## Ideas / limits
 - Accessories (glasses, eyepatch) are not built in 3D yet; `mask`/`scarf` etc. would be simple meshes.

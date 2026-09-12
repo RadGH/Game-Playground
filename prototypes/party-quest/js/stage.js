@@ -7,6 +7,7 @@ import { createMiiCharacter } from '../../../avatar-3d/js/mii.js';
 import { randomAvatar } from '../../../avatar-2d/js/random.js';
 import { createCreature } from '../../../avatar-3d/js/creatures.js';
 import { Assets } from '../../../assets/js/assets.js';
+import { SpellFx } from '../../../avatar-3d/js/spellfx.js';
 
 export class Stage {
   /** @param {HTMLElement} container  @param {{assets?: Assets}} opts  Pass an Assets instance to share one loader; otherwise the stage opens its own. */
@@ -18,7 +19,13 @@ export class Stage {
     this.scene.camera.position.set(0, 1.2, 6.2); this.scene.controls.target.set(0, 0.9, 0); this.scene.controls.enabled = false; this.scene.camera.fov = 28; this.scene.camera.updateProjectionMatrix();
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(14, 6), new THREE.MeshStandardMaterial({ color: 0x2a2f2a, roughness: 1, transparent: true, opacity: 0.55 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; this.scene.scene.add(ground); this.ground = ground;
     this.chars = new Map(); this.anims = []; this.fire = null;
-    this.scene.addTicker((dt, t) => { for (const c of this.chars.values()) c.ctrl.update(dt, t); for (const a of [...this.anims]) if (a(dt, t)) this.anims.splice(this.anims.indexOf(a), 1); if (this.fire) { this.fire.scale.y = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 23) * 0.05; this.fireLight.intensity = 2.2 + Math.sin(t * 13) * 0.4; } });
+    // Spell effects (avatar-3d/js/spellfx.js). The sprite textures are fetched in the background;
+    // until they land the effects draw their geometry only, so nothing waits on the network.
+    // scale 1.4: the fight camera sits further back than the effects gallery, so everything is
+    // drawn larger here or it disappears against the backdrop.
+    this.fx = new SpellFx(this.scene.scene, { camera: this.scene.camera, scale: 1.4 });
+    this.fxReady = this.assets.then(a => a.fxTextures(THREE, { size: 128 })).then(t => { this.fx.setTextures(t); return t; }).catch(() => null);
+    this.scene.addTicker((dt, t) => { for (const c of this.chars.values()) c.ctrl.update(dt, t); for (const a of [...this.anims]) if (a(dt, t)) this.anims.splice(this.anims.indexOf(a), 1); this.fx.update(dt); if (this.fire) { this.fire.scale.y = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 23) * 0.05; this.fireLight.intensity = 2.2 + Math.sin(t * 13) * 0.4; } });
     this.setBackdrop('village');
   }
   /**
@@ -40,11 +47,11 @@ export class Stage {
     const g = ctrl.group; g.userData.character = false;
     const x = side === 'left' ? -1.2 - index * 0.9 : 1.2 + index * 0.9; g.position.set(x, 0, (index % 2) * 0.35 - 0.2);
     g.rotation.y = facing != null ? facing : (side === 'left' ? 0.9 : -0.9);
-    if (ch.creature) ctrl.isCreature = true; this.scene.scene.add(g); this.chars.set(ch.id, { ctrl, group: g, side, home: g.position.clone(), rot: g.rotation.y, ch });
+    if (ch.creature) ctrl.isCreature = true; const mm = ctrl.metrics?.(); g.userData.fxHeight = mm?.totalHeight || mm?.height || 1.5; this.scene.scene.add(g); this.chars.set(ch.id, { ctrl, group: g, side, home: g.position.clone(), rot: g.rotation.y, ch });
     if (ch.hp !== undefined && ch.hp <= 0) this.down(ch.id); return ctrl;
   }
   async setSide(list, side, facing) { for (const c of [...this.chars.values()]) if (c.side === side) await this.remove(c.ch.id); for (let i = 0; i < list.length; i++) await this.add(list[i], { side, index: i, count: list.length, facing }); }
-  async remove(id) { const c = this.chars.get(id); if (!c) return; this.scene.scene.remove(c.group); c.ctrl.dispose(); this.chars.delete(id); }
+  async remove(id) { const c = this.chars.get(id); if (!c) return; this.fx.clearStatuses(c.group); this.scene.scene.remove(c.group); c.ctrl.dispose(); this.chars.delete(id); }
   clearSide(side) { for (const c of [...this.chars.values()]) if (c.side === side) this.remove(c.ch.id); }
   anim(id, name) { this.chars.get(id)?.ctrl.setAnim(name); }
   /** Thrust toward the target and back. */
@@ -55,6 +62,45 @@ export class Stage {
   down(id) { const c = this.chars.get(id); if (!c) return; c.ctrl.setAnim('dead'); }
   revive(id) { const c = this.chars.get(id); if (!c) return; c.ctrl.setAnim('idle'); c.group.rotation.x = 0; c.group.position.copy(c.home); }
   talk(id, on) { const c = this.chars.get(id); if (c && c.ch.hp !== 0) c.ctrl.setAnim(on ? 'talk' : 'idle'); }
+  // ---- spell effects -------------------------------------------------------------------------
+  // Positions come from the character group plus a height (ctrl.metrics(), cached on the group).
+
+  /** Height of a body on the stage, in world units. */
+  heightOf(id) { const c = this.chars.get(id); return c ? (c.group.userData.fxHeight || 1.5) : 1.5; }
+  /** Chest height of a body, in world space — where spells come from and land. */
+  pointOf(id, frac = 0.62) { const c = this.chars.get(id); if (!c) return new THREE.Vector3(0, 1, 0); const v = new THREE.Vector3(); c.group.getWorldPosition(v); v.y += this.heightOf(id) * frac; return v; }
+  /** Ground under a body, in world space — where cast runes and heal rings sit. */
+  footOf(id) { const c = this.chars.get(id); if (!c) return new THREE.Vector3(); const v = new THREE.Vector3(); c.group.getWorldPosition(v); v.y = 0; return v; }
+
+  /**
+   * Play a spell from one fighter at another: a flash at the caster, then something in flight.
+   * `kind` 'melee' (or 'attack') keeps the old thrust animation and skips the projectile.
+   * Resolves when the spell arrives, so the caller can follow it with impact().
+   */
+  async cast(sourceId, targetId, { element = 'arcane', kind = 'magic', crit = false, flash = true, flashMs = 150 } = {}) {
+    const c = this.chars.get(sourceId); if (!c) return;
+    if (kind === 'melee' || kind === 'attack') return this.attack(sourceId, targetId);
+    if (flash) { this.fx.cast({ at: this.footOf(sourceId), element, ms: 340 }); await new Promise(r => setTimeout(r, flashMs)); }
+    if (!targetId || !this.chars.get(targetId)) return;
+    await this.fx.projectile({ from: this.pointOf(sourceId), to: this.pointOf(targetId), element, crit });
+  }
+  /** A burst on a fighter. */
+  impact(targetId, element = 'physical', crit = false) { if (!this.chars.get(targetId)) return; this.fx.impact({ at: this.pointOf(targetId), element, crit, height: this.heightOf(targetId) }); }
+  /** Turn a looping status aura on or off. */
+  status(id, type, on = true) { const c = this.chars.get(id); if (!c) return; this.fx.status(c.group, type, on); }
+  /** Which auras are showing on a fighter. */
+  statusesOn(id) { const c = this.chars.get(id); return c ? this.fx.statusesOn(c.group) : []; }
+  /** Drop every aura on a fighter (on death, or when a fight ends). */
+  clearStatuses(id) { const c = this.chars.get(id); if (c) this.fx.clearStatuses(c.group); }
+  /** One pulse of an existing aura, for a damage-over-time tick. */
+  pulseStatus(id, type) { const c = this.chars.get(id); if (c) this.fx.pulseStatus(c.group, type); }
+  /** Green motes rising out of the ground. */
+  heal(id) { if (this.chars.get(id)) this.fx.heal({ at: this.footOf(id) }); }
+  /** A pillar of light where someone gets back up. */
+  reviveFx(id) { if (this.chars.get(id)) this.fx.revive({ at: this.footOf(id) }); }
+  /** Bursts on several fighters at once (a zone skill). */
+  aoe(ids, element = 'arcane', crit = false) { this.fx.aoe({ points: ids.map(i => this.pointOf(i)).filter(Boolean), element, crit }); }
+
   /** Camp: members in an arc around a fire, facing it. */
   async camp(members) {
     for (const c of [...this.chars.values()]) await this.remove(c.ch.id);

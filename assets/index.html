@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asset Library</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="assets.css">
+</head>
+<body>
+<div class="topbar">
+  <a href="../" class="muted">← Playground</a>
+  <h1>Asset Library</h1>
+  <span class="muted small">Scenery backdrops and map icons, in files, shared by every game here.</span>
+  <span class="spacer"></span>
+  <label class="small"><input type="checkbox" id="night"> night</label>
+  <span id="status" class="small muted">loading…</span>
+</div>
+
+<div class="main">
+  <div class="panel">
+    <h3>Scenery</h3>
+    <p class="small muted">Each scene is one standalone <code>.svg</code> file with <code>viewBox="0 0 100 100"</code> and <code>preserveAspectRatio="none"</code>, so it stretches to any box. The bottom third is kept simple: that is where the 3D characters stand. The <b>night</b> switch lays a dark wash over day scenes (scenes already drawn dark are left alone). Click a scene to enlarge it.</p>
+    <div class="row">
+      <input type="text" id="search" placeholder="filter by name…" style="width:180px">
+      <span class="chips" id="tags"></span>
+    </div>
+    <div class="scene-grid" id="scene-grid"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Map icons</h3>
+    <p class="small muted">Node markers for a world map, each a small <code>.svg</code> drawn in a <code>-4 -4 8 8</code> box so it can be dropped into a map at any scale.</p>
+    <div class="icon-row" id="icon-row"></div>
+  </div>
+
+  <div class="panel">
+    <h3>How to use</h3>
+<pre class="small">import { Assets } from '../assets/js/assets.js';
+
+const assets = await Assets.open('../assets/');      // fetches data/manifest.json
+
+// a backdrop element, ready to insert (adds the night wash for you)
+backdropDiv.replaceChildren(await assets.sceneryElement('village', { night: false }));
+
+// just the markup, if you build your own &lt;svg&gt;
+const { inner, attrs, missing } = await assets.scenery('thornwood', { fallback: 'forest' });
+
+// map icons
+const icons = await assets.icons();                  // { combat: '&lt;path …&gt;', … }
+node.innerHTML = icons[nodeType] || '';
+
+// find scenes by tag
+assets.listByTag('forest');                          // ['thornwood', 'forest', 'deepforest']
+assets.sceneryIds(); assets.tags(); assets.sceneryInfo('cave');</pre>
+    <p class="small muted">Nothing throws. An id that is not in the manifest, or a file that has not been drawn yet, falls back to the scene you name in <code>fallback</code> and then to a plain gradient, so a game keeps running while art is still being made.</p>
+  </div>
+</div>
+
+<dialog id="big">
+  <div class="big-head"><b id="big-name"></b><span id="big-tags" class="small muted"></span><span class="spacer"></span><label class="small"><input type="checkbox" id="big-night"> night</label><button class="small" id="big-close">Close</button></div>
+  <div class="big-box" id="big-box"></div>
+  <div class="small muted" id="big-file"></div>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

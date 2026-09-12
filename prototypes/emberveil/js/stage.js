@@ -1,42 +1,19 @@
 // Cinematic 3D stage: party on the left facing right, others on the right facing left, Mii-style bodies,
-// thrust attack animation, camp circle, SVG backdrops per location, day/night lighting.
+// thrust attack animation, camp circle, day/night lighting. Backdrops come from the shared asset
+// library (assets/data/scenery/*.svg, indexed by assets/data/manifest.json) through assets/js/assets.js.
 import * as THREE from 'three';
 import { createScene } from '../../../avatar-3d/js/scene.js';
 import { createMiiCharacter } from '../../../avatar-3d/js/mii.js';
 import { randomAvatar } from '../../../avatar-2d/js/random.js';
 import { createCreature } from '../../../avatar-3d/js/creatures.js';
+import { Assets } from '../../../assets/js/assets.js';
 
-const BACKDROPS = {
-  border_roads: `<rect width="100%" height="100%" fill="#9fb9d4"/><path d="M0 68 Q30 58 60 66 T100 64 V100 H0Z" fill="#7a9a5a"/><path d="M42 100 L48 68 L52 68 L58 100Z" fill="#a89a80"/><rect x="8" y="50" width="14" height="14" fill="#b58a5a"/><path d="M6 50 L15 42 L24 50Z" fill="#6b3b2a"/><g fill="#5a3a2a"><rect x="70" y="52" width="3" height="14"/><rect x="76" y="48" width="3" height="18"/></g>`,
-  thornwood: `<rect width="100%" height="100%" fill="#4a6a5a"/><g fill="#243d2e">${[4, 16, 28, 40, 52, 64, 76, 88].map(x => `<path d="M${x} 78 L${x + 6} 30 L${x + 12} 78Z"/>`).join('')}</g><g fill="#1a2d22">${[10, 22, 34, 46, 58, 70, 82, 94].map(x => `<path d="M${x} 82 L${x + 6} 42 L${x + 12} 82Z"/>`).join('')}</g><path d="M0 80 H100 V100 H0Z" fill="#2d3f2a"/><g stroke="#7a4a2a" stroke-width="1.5"><path d="M20 84 Q30 76 42 86"/><path d="M60 88 Q72 78 84 90"/></g>`,
-  dust_roads: `<rect width="100%" height="100%" fill="#d8b890"/><path d="M0 70 Q50 62 100 70 V100 H0Z" fill="#b08a5a"/><g fill="#a07a4a"><ellipse cx="20" cy="72" rx="18" ry="8"/><ellipse cx="80" cy="74" rx="24" ry="9"/></g><circle cx="76" cy="18" r="7" fill="#fff0c0"/><path d="M0 40 Q50 30 100 44" stroke="#c8a070" stroke-width="3" fill="none" opacity=".6"/>`,
-  ember_plateau: `<rect width="100%" height="100%" fill="#3a1a12"/><path d="M0 76 L20 46 L38 66 L56 36 L74 60 L100 40 V100 H0Z" fill="#241010"/><path d="M0 84 H100 V100 H0Z" fill="#5a1a0a"/><g fill="#ff6a1a"><path d="M10 84 Q30 78 50 84 T100 84 V90 H0Z" opacity=".8"/></g><g fill="#ffb060"><circle cx="30" cy="30" r="1"/><circle cx="60" cy="22" r="1.2"/><circle cx="82" cy="34" r=".8"/></g>`,
-  hell_breach: `<rect width="100%" height="100%" fill="#1a0808"/><path d="M0 80 H100 V100 H0Z" fill="#3a0a0a"/><g fill="#2a0c0c">${[8, 30, 54, 76].map(x => `<path d="M${x} 80 L${x + 6} 24 L${x + 12} 80Z"/>`).join('')}</g><path d="M0 86 Q50 80 100 86" stroke="#ff3a1a" stroke-width="2" fill="none"/><circle cx="50" cy="30" r="12" fill="#5a0a0a"/><circle cx="50" cy="30" r="8" fill="#ff5a2a" opacity=".5"/>`,
-  shattered_core: `<rect width="100%" height="100%" fill="#0a0a1a"/><g fill="#22224a"><path d="M10 80 L22 40 L34 80Z"/><path d="M60 80 L78 30 L92 80Z"/><path d="M40 80 L48 56 L56 80Z"/></g><path d="M0 80 H100 V100 H0Z" fill="#14142a"/><g fill="#a070ff" opacity=".7"><circle cx="22" cy="40" r="1.5"/><circle cx="78" cy="30" r="1.5"/><circle cx="48" cy="56" r="1"/></g>`,
-  cosmic_rift: `<rect width="100%" height="100%" fill="#050514"/><g fill="#fff">${[5, 15, 25, 35, 45, 55, 65, 75, 85, 95, 20, 40, 60, 80].map((x, i) => `<circle cx="${x}" cy="${6 + (i * 9) % 50}" r=".5"/>`).join('')}</g><path d="M0 78 H100 V100 H0Z" fill="#1a1030"/><path d="M30 78 L50 20 L70 78Z" fill="#2a1a4a" opacity=".7"/><path d="M50 20 L50 78" stroke="#c080ff" stroke-width="1"/>`,
-  eternal_void: `<rect width="100%" height="100%" fill="#000008"/><path d="M0 80 H100 V100 H0Z" fill="#0a0818"/><g fill="none" stroke="#6040c0" stroke-width=".8" opacity=".6"><circle cx="50" cy="40" r="10"/><circle cx="50" cy="40" r="20"/><circle cx="50" cy="40" r="30"/></g><circle cx="50" cy="40" r="4" fill="#000"/>`,
-  abyssal_depths: `<rect width="100%" height="100%" fill="#04101a"/><path d="M0 80 H100 V100 H0Z" fill="#082030"/><g fill="#0c2a3a"><path d="M0 80 Q20 50 40 80Z"/><path d="M60 80 Q80 44 100 80Z"/></g><g stroke="#20a0a0" stroke-width="1" fill="none" opacity=".5"><path d="M20 78 Q24 60 20 44"/><path d="M76 78 Q80 62 76 46"/></g>`,
-  primordial_nexus: `<rect width="100%" height="100%" fill="#101418"/><path d="M0 80 H100 V100 H0Z" fill="#1c2228"/><path d="M50 80 L36 30 L64 30Z" fill="#2a3040"/><circle cx="50" cy="52" r="6" fill="#ffd060"/><circle cx="50" cy="52" r="10" fill="#ffd060" opacity=".25"/>`,
-  dragons_reach: `<rect width="100%" height="100%" fill="#a8b8c8"/><path d="M0 80 L18 34 L34 62 L52 20 L72 58 L88 30 L100 48 V100 H0Z" fill="#5a5a6a"/><path d="M52 20 L46 32 L58 32Z M18 34 L13 44 L23 44Z" fill="#eef3f8"/><path d="M0 84 H100 V100 H0Z" fill="#3a3a4a"/>`,
-  dragon_throne: `<rect width="100%" height="100%" fill="#2a1a10"/><path d="M0 80 H100 V100 H0Z" fill="#3a2a18"/><path d="M30 80 L34 30 H66 L70 80Z" fill="#4a3a20"/><rect x="42" y="56" width="16" height="24" fill="#1a1008"/><g fill="#ffb040"><circle cx="24" cy="50" r="2"/><circle cx="76" cy="50" r="2"/></g><path d="M20 30 L50 14 L80 30" stroke="#c8a040" stroke-width="2" fill="none"/>`,
-  prologue: `<rect width="100%" height="100%" fill="#8fa8c0"/><path d="M0 70 Q50 64 100 70 V100 H0Z" fill="#6a8a5a"/><path d="M38 100 L48 70 L52 70 L62 100Z" fill="#9a8f7a"/><g fill="#3a5a3a"><path d="M6 70 L12 44 L18 70Z"/><path d="M84 70 L90 40 L96 70Z"/></g>`,
-  village: `<rect width="100%" height="100%" fill="#7fb0d8"/><path d="M0 70 Q25 60 50 68 T100 66 V100 H0Z" fill="#5b8f4a"/><g fill="#b58a5a"><rect x="12" y="52" width="14" height="14"/><rect x="60" y="50" width="18" height="16"/></g><g fill="#6b3b2a"><path d="M10 52 L19 44 L28 52Z"/><path d="M58 50 L69 41 L80 50Z"/></g><circle cx="80" cy="18" r="6" fill="#ffe9a8"/>`,
-  forest: `<rect width="100%" height="100%" fill="#8fc0e0"/><path d="M0 72 Q50 62 100 70 V100 H0Z" fill="#4e7f3a"/><g fill="#2f5e2a">${[8, 22, 38, 55, 70, 86].map(x => `<path d="M${x} 70 L${x + 7} 40 L${x + 14} 70Z"/>`).join('')}</g><g fill="#3f7a35">${[15, 30, 47, 63, 78, 93].map(x => `<path d="M${x} 74 L${x + 6} 48 L${x + 12} 74Z"/>`).join('')}</g>`,
-  deepforest: `<rect width="100%" height="100%" fill="#3a5a4a"/><g fill="#1f3a2a">${[2, 14, 26, 38, 50, 62, 74, 86].map(x => `<rect x="${x}" y="20" width="5" height="60"/><ellipse cx="${x + 2.5}" cy="24" rx="10" ry="12"/>`).join('')}</g><path d="M0 76 H100 V100 H0Z" fill="#2c4a34"/>`,
-  cave: `<rect width="100%" height="100%" fill="#1a1c22"/><path d="M0 0 Q20 30 0 60 V100 H100 V60 Q80 30 100 0Z" fill="#2b2f38"/><g fill="#3a3f4a">${[10, 30, 55, 75].map(x => `<path d="M${x} 0 L${x + 4} 22 L${x + 8} 0Z"/>`).join('')}</g><path d="M0 80 H100 V100 H0Z" fill="#23262e"/>`,
-  road: `<rect width="100%" height="100%" fill="#a9c8e2"/><path d="M0 70 Q50 64 100 70 V100 H0Z" fill="#7a9a5a"/><path d="M40 100 L48 70 L52 70 L60 100Z" fill="#9a8f7a"/><g fill="#6b6b6b"><rect x="30" y="66" width="2" height="6"/><rect x="66" y="66" width="2" height="6"/></g>`,
-  downs: `<rect width="100%" height="100%" fill="#9aa5b0"/><g fill="#6f8a5a"><ellipse cx="15" cy="78" rx="22" ry="10"/><ellipse cx="55" cy="80" rx="26" ry="11"/><ellipse cx="90" cy="78" rx="20" ry="9"/></g><rect y="70" width="100" height="30" fill="#c9d3d9" opacity=".5"/>`,
-  barrow: `<rect width="100%" height="100%" fill="#101418"/><path d="M0 80 H100 V100 H0Z" fill="#1c2228"/><path d="M35 80 L40 30 H60 L65 80Z" fill="#0a0c10"/><g stroke="#2e3a44" stroke-width="2" fill="none"><path d="M30 80 L36 26 H64 L70 80"/></g>`,
-  marsh: `<rect width="100%" height="100%" fill="#8aa090"/><path d="M0 72 H100 V100 H0Z" fill="#2f4a3a"/><g stroke="#5a7a4a" stroke-width="1.5">${[5, 12, 20, 33, 41, 58, 66, 80, 91].map(x => `<line x1="${x}" y1="74" x2="${x + 1}" y2="46"/>`).join('')}</g><ellipse cx="50" cy="86" rx="30" ry="5" fill="#1f3a2f"/>`,
-  bridge: `<rect width="100%" height="100%" fill="#9fb8cc"/><path d="M0 60 H30 V100 H0Z M70 60 H100 V100 H70Z" fill="#6b6f78"/><path d="M28 62 Q50 44 72 62 V70 Q50 56 28 70Z" fill="#8a8e96"/><path d="M30 100 Q50 70 70 100Z" fill="#3a4a5a"/>`,
-  mountain: `<rect width="100%" height="100%" fill="#b8cfe6"/><path d="M0 80 L25 30 L45 65 L60 20 L80 60 L100 40 V100 H0Z" fill="#6e7a8a"/><path d="M25 30 L20 40 L30 40Z M60 20 L54 32 L66 32Z" fill="#eef3f8"/>`,
-  camp_orc: `<rect width="100%" height="100%" fill="#5a3a3a"/><path d="M0 78 H100 V100 H0Z" fill="#3a2a22"/><g fill="#4a3226"><path d="M10 78 L22 52 L34 78Z"/><path d="M60 78 L74 50 L88 78Z"/></g><g stroke="#e6e0c8" stroke-width="1.2">${[40, 46, 52].map(x => `<line x1="${x}" y1="78" x2="${x}" y2="62"/><circle cx="${x}" cy="60" r="2" fill="#e6e0c8"/>`).join('')}</g>`,
-  city: `<rect width="100%" height="100%" fill="#a8b8c8"/><g fill="#7a7f88"><rect x="0" y="40" width="100" height="40"/><rect x="20" y="30" width="10" height="12"/><rect x="70" y="28" width="12" height="14"/></g><path d="M44 80 V52 Q50 44 56 52 V80Z" fill="#2e3440"/><path d="M0 80 H100 V100 H0Z" fill="#8a8f99"/>`,
-  camp: `<rect width="100%" height="100%" fill="#0f1420"/><g fill="#fff3c4">${[10, 25, 40, 58, 71, 88, 33, 80].map((x, i) => `<circle cx="${x}" cy="${8 + (i * 7) % 30}" r=".6"/>`).join('')}</g><path d="M0 76 H100 V100 H0Z" fill="#1a2418"/><g fill="#12201a"><path d="M0 76 L14 52 L28 76Z"/><path d="M74 76 L88 48 L100 76Z"/></g>`,
-};
 export class Stage {
-  constructor(container) {
-    this.container = container; this.backdrop = document.createElement('div'); this.backdrop.className = 'backdrop'; container.append(this.backdrop);
+  /** @param {HTMLElement} container  @param {{assets?: Assets}} opts  Pass an Assets instance to share one loader; otherwise the stage opens its own. */
+  constructor(container, { assets = null } = {}) {
+    this.container = container;
+    this.assets = assets ? Promise.resolve(assets) : Assets.open(new URL('../../../assets/', import.meta.url).href);
+    this._backdropToken = 0; this.backdrop = document.createElement('div'); this.backdrop.className = 'backdrop'; container.append(this.backdrop);
     this.scene = createScene(container, { background: 0x1e2128, ground: false }); this.scene.renderer.setClearColor(0x000000, 0); this.scene.scene.background = null;
     this.scene.camera.position.set(0, 1.2, 6.2); this.scene.controls.target.set(0, 0.9, 0); this.scene.controls.enabled = false; this.scene.camera.fov = 28; this.scene.camera.updateProjectionMatrix();
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(14, 6), new THREE.MeshStandardMaterial({ color: 0x2a2f2a, roughness: 1, transparent: true, opacity: 0.55 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; this.scene.scene.add(ground); this.ground = ground;
@@ -44,7 +21,19 @@ export class Stage {
     this.scene.addTicker((dt, t) => { for (const c of this.chars.values()) c.ctrl.update(dt, t); for (const a of [...this.anims]) if (a(dt, t)) this.anims.splice(this.anims.indexOf(a), 1); if (this.fire) { this.fire.scale.y = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 23) * 0.05; this.fireLight.intensity = 2.2 + Math.sin(t * 13) * 0.4; } });
     this.setBackdrop('village');
   }
-  setBackdrop(id, night = false) { const svg = BACKDROPS[id] || BACKDROPS.road; this.backdrop.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="100%">${svg}${night ? '<rect width="100%" height="100%" fill="#060a18" opacity=".62"/>' : ''}</svg>`; this.ground.material.color.set(night ? 0x141a18 : 0x2a2f2a); }
+  /**
+   * Show a scene behind the characters. Async because the art is fetched, but callers do not need to
+   * await it: the ground tint changes right away and the art swaps in when it arrives. If two calls
+   * overlap, only the newest one paints.
+   */
+  async setBackdrop(id, night = false) {
+    const token = ++this._backdropToken;
+    this.ground.material.color.set(night ? 0x141a18 : 0x2a2f2a);
+    const assets = await this.assets;
+    const svg = await assets.sceneryElement(id, { night, fallback: 'road' });
+    if (token !== this._backdropToken) return; // a newer setBackdrop won
+    this.backdrop.replaceChildren(svg);
+  }
   async add(ch, { side = 'left', index = 0, count = 1, facing = null } = {}) {
     await this.remove(ch.id);
     const ctrl = ch.creature ? await createCreature(ch.creature) : await createMiiCharacter(ch.avatar || randomAvatar(this.presets || { palettes: { skin: ['#c68642'], hair: ['#222'], eye: ['#222'], cloth: ['#555'] }, raceRules: {} }, { seed: 1 }));

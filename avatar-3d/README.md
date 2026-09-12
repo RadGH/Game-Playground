@@ -9,7 +9,18 @@ Open: `http://<LAN-IP>:8400/avatar-3d/`. Presets, random generation and the slot
 
 ## Creatures (non-humanoids) — `js/creatures.js`, demo `creatures.html`
 
-Mii-style procedural bodies for things that are not people: **wolf, dire wolf, boar, bear, rat, horse, deer, bat, spider, snake, mire drake, dragon**. Four body plans (quadruped, spider, bat, snake) parameterised per type in `CREATURE_TYPES` (lengths/radii in metres, ear style, default colours, feature flags). Same interface as the humanoid builder:
+Mii-style procedural bodies for things that are not people — **26 types over six body plans**, parameterised in `CREATURE_TYPES` (lengths/radii in metres, ear style, default colours, feature flags). The table itself lives in `js/creature-types.js`, which is free of Three.js so data tools and node tests can read it; `js/creatures.js` re-exports it and does the building.
+
+| Plan | Types |
+|---|---|
+| `quad` | wolf, dire wolf, boar, bear, rat, horse, deer, hound, cat, frog, mire drake, dragon |
+| `spider` | giant spider |
+| `bat` (fliers) | bat, owl, moth |
+| `snake` (serpents) | snake, worm (thick, segmented, head reared off the ground) |
+| `biped` | golem, titan, imp (`body.blocky` swaps capsules for boxes; `features.core` adds a glowing chest heart) |
+| `float` (no legs, hovers) | elemental, wisp, shard, wraith, horror — `body.shape` picks `sphere` (glowing ball + flame licks), `crystal` (octahedron cluster), `hood` (robe with an empty face and trailing rags) or `mass` (lumpy body covered in eyes, with tentacles) |
+
+Same interface as the humanoid builder:
 
 ```js
 import { createCreature, randomCreature, CREATURE_TYPES, CREATURE_ANIMS } from './avatar-3d/js/creatures.js';
@@ -18,7 +29,7 @@ scene.add(wolf.group); wolf.setAnim('walk');            // idle · walk · run �
 const spec = randomCreature('dragon', seed);             // colour variation inside the type's family; a creature JSON you can store under character.creature
 ```
 
-Features can be toggled on any plan (`features: { wings: true }` on a wolf works). Bodies face +z like the humanoids, so the same side/facing code places them. Sizes before the multiplier: rat ≈ 0.3 m, wolf ≈ 0.9 m, dragon ≈ 2.5 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`).
+Features can be toggled on any plan (`features: { wings: true }` on a wolf works): fangs, tusks, horns, antlers, wings, spikes, mane, whiskers, claws, hooves, tail, core, glow, bulgeEyes, beak, antennae, maw, plates. Bodies face +z like the humanoids, so the same side/facing code places them. Heights before the size multiplier: wisp/moth ≈ 0.5 m, wolf ≈ 0.9 m, golem ≈ 1.4 m, horror ≈ 1.6 m, dragon ≈ 1.9 m, titan ≈ 2.6 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`); Emberveil uses them for its whole bestiary (`prototypes/emberveil/data/enemy-looks.json`).
 
 ## Quick use from a game
 

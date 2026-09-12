@@ -11,9 +11,11 @@ left.append(panel('Show', kindChips), panel('Sync with Claude', el('p', { class:
   el('div', { class: 'row' }, button('⬆ Sync to Claude', async () => { try { const r = await lib.syncToClaude(); syncLog.textContent = `Synced ${r.entries} entries at ${r.at} → ${r.saved}. Tell Claude: "read library/synced/library.json".`; toast('Synced'); } catch (e) { syncLog.textContent = 'Sync failed: ' + e.message + ' (is ./serve.sh running tools/serve.py?)'; } }, 'primary'), button('⬇ Pull from server', async () => { const n = await lib.pullFromServer(); toast(`Merged ${n} entries`); renderAll(); }, 'small')),
   el('div', { class: 'row' }, button('Export all (JSON)', () => downloadJSON(lib.export(), 'library.json'), 'small'), button('Export mine only', () => downloadJSON(lib.exportUser(), 'library-mine.json'), 'small'), button('Import JSON', async () => { try { const n = lib.import(await readJSONFile()); toast(`Imported ${n}`); renderAll(); } catch { toast('Import failed'); } }, 'small')), syncLog));
 const grid = el('div', { class: 'cards' });
+const BODIED = ['character', 'npc', 'enemy'];
 function card(e) {
-  const portrait = e.kind === 'character' || e.kind === 'npc' ? el('div', { class: 'portrait', html: e.data?.avatar ? renderSVG(e.data.avatar) : '' }) : null;
-  const meta = e.kind === 'party' ? `${(e.data.members || []).length} members` : e.kind === 'item' ? (e.data.fullName || e.data.name || '') : `${e.data.race || '?'} · ${e.data.speech?.traits?.slice(0, 3).join(', ') || ''} · voice ${e.data.voice?.engine || '?'}`;
+  // characters/npcs/enemies get a portrait: the 2D avatar when there is one, otherwise the creature type (3D-only bodies).
+  const portrait = BODIED.includes(e.kind) ? el('div', { class: 'portrait', html: e.data?.avatar ? renderSVG(e.data.avatar) : '' }, e.data?.avatar ? null : el('span', { class: 'small muted', text: e.data?.creature?.type || '?' })) : null;
+  const meta = e.kind === 'party' ? `${(e.data.members || []).length} members` : e.kind === 'item' ? (e.data.fullName || e.data.name || '') : `${e.data.creature ? 'creature: ' + e.data.creature.type : e.data.race || '?'} · ${e.data.speech?.traits?.slice(0, 3).join(', ') || ''} · voice ${e.data.voice?.engine || '?'}`;
   return el('div', { class: 'card' + (state.selected === e.id ? ' on' : ''), onclick: () => { state.selected = e.id; renderAll(); } }, portrait, el('div', {}, el('div', { class: 'src', text: `${e.kind} · ${e.source}` }), el('div', { class: 'n', text: e.name }), el('div', { class: 'm', text: meta }), el('div', { class: 'm', text: (e.tags || []).join(' ') })));
 }
 main.append(panel('Blueprints', grid));

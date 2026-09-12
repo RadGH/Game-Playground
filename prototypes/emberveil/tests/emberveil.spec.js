@@ -7,6 +7,16 @@ test('Emberveil 2: hire four, map, fight, meter drill-down, town, rest with camp
   await page.click('#btn-new'); await expect(page.locator('.class-card')).toHaveCount(30); await page.click('#btn-suggest'); await expect(page.locator('#hire-count')).toHaveText('4 / 4'); await page.click('#btn-start'); await page.check('#mute');
   await page.waitForFunction(() => document.querySelectorAll('#actions button').length > 0 && !window.emberveil.busy, null, { timeout: 60000 });
   expect(await page.locator('#map circle.node').count()).toBeGreaterThan(3); expect(await page.evaluate(() => window.emberveil.stage.chars.size)).toBeGreaterThanOrEqual(4);
+  // designed looks (data/enemy-looks.json) drive every enemy and companion body — no regex guessing left
+  const looks = await page.evaluate(() => { const E = window.emberveil; const out = { missing: [], wrong: [] };
+    for (const [group, table] of [['enemies', E.DATA.enemies.entities], ['bosses', E.DATA.bosses.entities]]) for (const id of Object.keys(table)) {
+      const L = E.ELOOKS[group][id]; const got = E.enemyLook({ id: 'x_' + id, templateId: id, name: table[id].name, hp: 10 });
+      if (!L) { out.missing.push(group + '/' + id); continue; }
+      if (L.creature) { if (got.creature?.type !== L.creature.type) out.wrong.push(id + ' creature'); }
+      else if (got.avatar?.top?.id !== L.avatar.top.id || got.avatar?.body?.skin !== L.avatar.body.skin) out.wrong.push(id + ' avatar'); }
+    const dog = E.bodyOf({ id: 'c1', name: 'War Dog', isCompanion: true, templateId: 'war_dog', hp: 10 });
+    return { ...out, dogType: dog.creature?.type, dogSize: dog.creature?.size }; });
+  expect(looks.missing).toEqual([]); expect(looks.wrong).toEqual([]); expect(looks.dogType).toBe('hound'); expect(looks.dogSize).toBe(0.95);
   // scripted fight against a goblin patrol
   const won = await page.evaluate(async () => { const g = window.emberveil.game; const enc = g.encounter('goblin_patrol'); for (const e of enc.enemies) e.hp = Math.min(e.hp, 6); return window.emberveil.fight(enc, { node: null }); });
   expect(typeof won).toBe('boolean'); const log = await page.locator('#narrative').innerText(); expect(log).toMatch(/round 1/); expect(log).toMatch(/hits|misses/);

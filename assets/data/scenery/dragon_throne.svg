@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1008"/><stop offset="1" stop-color="#3a2410"/></linearGradient></defs><rect width="100" height="100" fill="url(#bg)"/>
+<g fill="#2a1a0c"><path d="M0 74 V20 L16 12 L20 74Z"/><path d="M80 74 L84 12 L100 20 V74Z"/></g><g fill="#3a2a14"><path d="M28 74 L32 24 H68 L72 74Z"/></g><g fill="#0e0804"><rect x="44" y="52" width="12" height="22"/><path d="M44 52 Q50 44 56 52Z"/></g>
+<g stroke="#c8a040" stroke-width="1.2" fill="none"><path d="M24 26 L50 12 L76 26"/><path d="M50 12 L50 20"/></g><g fill="#c8a040"><path d="M50 8 l2 3 l-2 3 l-2 -3Z"/></g>
+<g fill="#ffb040"><circle cx="30" cy="48" r="2"/><circle cx="70" cy="48" r="2"/></g><g fill="#ffb040" opacity=".2"><circle cx="30" cy="48" r="6"/><circle cx="70" cy="48" r="6"/></g><g stroke="#5a3a18" stroke-width=".8"><path d="M30 50 V74 M70 50 V74"/></g>
+<g fill="#5a4a30" opacity=".8"><path d="M10 64 l3 -1 l3 1 l-3 1.5Z"/><path d="M86 66 l3 -1 l3 1 l-3 1.5Z"/><path d="M20 68 l3 -1 l3 1 l-3 1.5Z"/></g>
+<path d="M0 74 H100 V100 H0Z" fill="#2c1c0e"/><g fill="#c8a040" opacity=".3"><rect x="40" y="76" width="20" height="24"/></g><g stroke="#4a3418" stroke-width=".5" fill="none"><path d="M0 84 H100 M0 92 H100"/></g>
+<g fill="#ffd060" opacity=".7"><circle cx="14" cy="80" r=".7"/><circle cx="22" cy="90" r=".7"/><circle cx="78" cy="82" r=".7"/><circle cx="88" cy="92" r=".7"/><circle cx="60" cy="96" r=".7"/></g></svg>

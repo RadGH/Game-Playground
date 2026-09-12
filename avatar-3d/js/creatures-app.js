@@ -35,7 +35,7 @@ const featureBox = el('div');
 left.append(panel('Creature', sizeKnob, colors), panel('Features', el('p', { class: 'small muted', text: 'Toggle parts on any body plan (wings on a wolf, horns on a boar…).' }), featureBox));
 function syncUI() {
   colors.replaceChildren(...Object.keys(spec.colors).map(colorRow)); sizeKnob.querySelector('input').value = spec.size;
-  const feats = ['fangs', 'tusks', 'horns', 'antlers', 'wings', 'spikes', 'mane', 'whiskers', 'claws', 'hooves'];
+  const feats = ['fangs', 'tusks', 'horns', 'antlers', 'wings', 'spikes', 'mane', 'whiskers', 'claws', 'hooves', 'tail', 'core', 'glow', 'bulgeEyes', 'beak', 'antennae', 'maw', 'plates'];
   featureBox.replaceChildren(...feats.map(f => checkbox(f, !!spec.features[f], v => { spec.features[f] = v; changed(); })));
 }
 

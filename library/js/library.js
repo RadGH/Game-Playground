@@ -4,10 +4,12 @@
 //   lib.list('character'); lib.get(id); lib.put({ kind: 'character', name, data, tags }); lib.remove(id)
 //   const hero = lib.stamp(id);                        // deep copy for a game: leveling up in the game never touches the library
 //   lib.export(); lib.import(json); await lib.syncToClaude();   // POST to /api/library/sync (tools/serve.py) → library/synced/library.json
-// Entry: { id, kind: 'character'|'item'|'party'|'npc', name, data, tags: [], source: 'default'|'user'|'game', createdAt, updatedAt, notes }
+// Entry: { id, kind: 'character'|'item'|'party'|'npc'|'enemy', name, data, tags: [], source: 'default'|'user'|'game', createdAt, updatedAt, notes }
+// 'enemy' entries are the Emberveil bestiary (enemy_<id>, built by tools/build-emberveil-enemies.mjs); their data carries
+// either `avatar` (humanoid) or `creature` (a procedural 3D body), same as any other character document.
 // 'data' for characters is the shared character JSON ({ schema, name, avatar, voice, speech, entry, race, pronouns }).
 const KEY = 'playground:library:v1';
-export const KINDS = ['character', 'item', 'party', 'npc'];
+export const KINDS = ['character', 'item', 'party', 'npc', 'enemy'];
 
 export class Library {
   constructor(defaults = []) { this.defaults = defaults.map(e => ({ ...e, source: 'default' })); this.user = []; this.load(); }

@@ -19,6 +19,7 @@ Every experiment here is standalone. A game can take one piece or all of them. T
 | **Relationships** (`lingo/js/relations.js`) | `RelationGraph, Relationship` | Multi-factor feelings (warmth, respect, trust, appreciation, fear, attraction, familiarity, knowledge), events scaled by traits, memory hook, tone tags | `lingo/data/relations.json` | trivial |
 | **Names** (`namegen/js/namegen.js`) | `NameGen` | People/faction/place/artifact/motto names per race with meanings, forms and pronunciations; Lingo lexicon export | `namegen/data/{languages,concepts,patterns}.json` | trivial |
 | **Items** (`items/js/items.js`) | `ItemCatalog` | 379 tagged items with race affinity; loot roller (material, quality, enchant, artifact name, value, lore); Lingo export | `items/data/{items,materials}.json` (+ namegen for artifact names) | trivial |
+| **Assets** (`assets/js/assets.js`) | `Assets, svgInner` | Scenery backdrops (32 full-bleed SVG scenes, tagged, day/night) and map node icons as files, not code; tag lookup, caching, gradient fallback when art is missing | `assets/data/manifest.json` + `data/scenery/*.svg`, `data/icons/*.svg` | one fetch per file, then cached |
 | **Avatar 2D** (`avatar-2d/js/render.js`, `random.js`) | `renderSVG, renderInto, normalizeAvatar, randomAvatar` | SVG portraits/paper-dolls from the `avatar` JSON; race-rule random | `avatar-2d/data/presets.json` | microseconds; DOM-free string |
 | **Avatar 3D** (`avatar-3d/js/mii.js`, `quaternius.js`, `scene.js`) | `createMiiCharacter, createQuaterniusCharacter, createScene` | Three.js characters from the same `avatar` JSON; procedural (Mii) or CC0 meshes with 43 animation clips | importmap for `three`; `avatar-3d/assets/quaternius/` (~32 MB) for the mesh mode | Mii ~60 draw calls/character; Quaternius ~6 skinned meshes |
 
@@ -76,6 +77,16 @@ await say(line.speech, character.voice);       // formant engine reads the [[pho
 ## Animals and monsters
 
 `avatar-3d/js/creatures.js` gives you wolves, boars, bears, rats, horses, deer, bats, spiders, snakes, drakes and dragons as procedural 3D bodies with the same `{ group, update, setAnim }` interface as people. Store the spec under `character.creature`; creatures have no `speech`, so give them narrated actions ("the wolf snarls") instead of lines. See `avatar-3d/README.md` (Creatures).
+
+## Scenery and icons
+
+`assets/` holds the art both prototypes share. `const assets = await Assets.open('../assets/')`, then
+`container.replaceChildren(await assets.sceneryElement(placeId, { night }))` for a backdrop, or
+`await assets.icons()` for the map node markers. Scenes are tagged (`outdoor`, `forest`, `settlement`,
+`act3`…) so `listByTag()` can pick one for a place you have no art for, and a missing id falls back to a
+plain gradient instead of throwing — you can build the game before the art exists. `Stage` in both
+prototypes takes `{ assets }` so a game shares one loader. See `assets/README.md` for the file rules
+(viewBox `0 0 100 100`, `preserveAspectRatio="none"`, keep the bottom third simple).
 
 ## Worked example: Emberveil (a full RPG on the pieces)
 

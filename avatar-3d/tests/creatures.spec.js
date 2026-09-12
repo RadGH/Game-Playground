@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('creatures page builds all body plans', async ({ page }) => {
   test.setTimeout(120_000); const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('avatar-3d/creatures.html'); await page.waitForFunction(() => !!window.creatures3d, null, { timeout: 60_000 });
-  const types = await page.evaluate(() => window.creatures3d.types); expect(types.length).toBeGreaterThanOrEqual(12);
+  const types = await page.evaluate(() => window.creatures3d.types); expect(types.length).toBeGreaterThanOrEqual(26);
   for (const t of types) {
     await page.evaluate(t => window.creatures3d.set({ type: t }), t); await page.waitForFunction(() => !window.creatures3d.isBuilding());
     const m = await page.evaluate(() => { const c = window.creatures3d.character; c.setAnim('walk'); c.update(0.1, 0.1); return c.metrics(); });

@@ -39,7 +39,7 @@ export class ItemCatalog {
     }
     return out.sort((a, b) => b.weight - a.weight);
   }
-  /** Precious materials (value ≥ 3: silver, gold, mithril, crystal, livingwood, dragonscale) are gated by rarity: rare for commons, likely for epics. */
+  /** Precious materials (value ≥ 3: silver, gold, veilsilver, crystal, livingwood, dragonscale) are gated by rarity: rare for commons, likely for epics. */
   pickMaterial(item, race, rng, rarity = item.rarity) { const allowed = this.materials.filter(m => item.materials.length && item.materials.includes(m.id)); if (!allowed.length) return null; const ri = RARITY.indexOf(rarity); return rng.weighted(allowed, m => (m.affinity?.[race] ?? 0.4) * (m.value >= 3 ? [0.03, 0.15, 0.7, 2, 4][ri] : m.value >= 1.5 ? [0.5, 1, 1.5, 1.5, 1][ri] : 1)); }
   pickQuality(race, rng, rarity) { const bias = RARITY.indexOf(rarity); return rng.weighted(this.qualities, q => q.weight * (q.affinity?.[race] ?? 1) * (['fine', 'masterwork', 'ancient'].includes(q.id) ? 1 + bias : ['crude', 'worn'].includes(q.id) ? Math.max(0.2, 1 - bias * 0.5) : 1)); }
 

@@ -7,7 +7,7 @@
   "scripts": {
     "serve": "./serve.sh",
     "test": "npx playwright test",
-    "test:unit": "node --test assets/tests/*.test.js lingo/tests/*.test.js avatar-2d/tests/*.test.js voice-lab/tests/*.test.js namegen/tests/*.test.js items/tests/*.test.js prototypes/party-quest/tests/*.test.js prototypes/emberveil/tests/*.test.js meters/tests/*.test.js conversations/tests/*.test.js"
+    "test:unit": "node --test assets/tests/*.test.js lingo/tests/*.test.js avatar-2d/tests/*.test.js voice-lab/tests/*.test.js namegen/tests/*.test.js items/tests/*.test.js prototypes/party-quest/tests/*.test.js prototypes/emberveil/tests/*.test.js meters/tests/*.test.js conversations/tests/*.test.js worldgen/tests/*.test.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0"

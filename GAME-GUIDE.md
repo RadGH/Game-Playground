@@ -23,6 +23,8 @@ Every experiment here is standalone. A game can take one piece or all of them. T
 | **Avatar 2D** (`avatar-2d/js/render.js`, `random.js`) | `renderSVG, renderInto, normalizeAvatar, randomAvatar` | SVG portraits/paper-dolls from the `avatar` JSON; race-rule random | `avatar-2d/data/presets.json` | microseconds; DOM-free string |
 | **Avatar 3D** (`avatar-3d/js/mii.js`, `quaternius.js`, `scene.js`) | `createMiiCharacter, createQuaterniusCharacter, createScene` | Three.js characters from the same `avatar` JSON; procedural (Mii) or CC0 meshes with 43 animation clips | importmap for `three`; `avatar-3d/assets/quaternius/` (~32 MB) for the mesh mode | Mii ~60 draw calls/character; Quaternius ~6 skinned meshes |
 
+- **`worldgen/`** — a whole world map in one call: continents, climate, rivers, biomes, named regions, towns, dungeons, roads, plus region and local-tile zoom. Pure data, seeded, exports JSON/PNG. See its README.
+
 ## 2. Recipes
 
 **A talking NPC (text + voice + memory + feelings)**
@@ -82,6 +84,35 @@ auras in step with the unit's real status list after every event so expiries cle
 look right. Cost: a projectile is one small group plus ~20 pooled-free billboards; an aura is 3–8 sprites.
 
 **Crowds of talking NPCs**: pre-render lines with `synthesize()` (formant/babble/espeak) and `play()` them with pan/volume; never call Piper in a hot loop. Babble plus subtitles is the cheapest option for dozens of simultaneous talkers.
+
+### Recipe: generate a world and pick a starting region
+
+```js
+import { generateWorld, cellInfo } from '/worldgen/js/world.js';
+import { generateLocalDetail } from '/worldgen/js/local.js';
+import { renderWorld } from '/worldgen/js/render.js';
+import { roadGraph } from '/worldgen/js/roads.js';
+import { NameGen } from '/namegen/js/namegen.js';
+
+const namegen = await NameGen.load('/namegen/data/');
+const world = generateWorld({ seed: 20260912, method: 'plates', width: 256, height: 128, namegen });
+
+// a sensible home: coastal, mild, not cursed, and it already has a town
+const start = world.regions
+  .filter(r => r.coastal && r.danger < 0.4 && r.temperature > 0.35 && r.seat != null)
+  .sort((a, b) => b.cells - a.cells)[0];
+const home = world.nodes[start.seat];
+
+renderWorld(canvas.getContext('2d'), world, { layers: { biomes: true, rivers: true, roads: true, nodes: true, labels: true } });
+const tile = generateLocalDetail(world, home.x, home.y, { node: home });   // the map a fight happens on
+```
+
+`start.descriptor` is a ready-made plain-language line for the intro ("a wide stretch of mild, green
+mixed woodland, open to the sea, well watered"), `start.history` is three or four dated events you can
+feed straight into Lingo memories, and `roadGraph(world)` gives you the travel graph between every
+town and port. `region.danger`, `node.tags` and `BIOMES[id].move` are the hooks for encounter tables,
+quest matching and travel time. Generation takes about half a second at 256×128 — run it in
+`worldgen/js/worker.js` if you want the UI to stay live. Full details in `worldgen/README.md`.
 
 ## 3. Data conventions to keep
 - Lexicon entries: `{ id, type, forms: { sg, pl, adj, people, lang, short }, proper, mass, pronouns, race, tags, pron: { respell } }`. Explicit forms always win over rules.

@@ -20,7 +20,7 @@ A rolled item: `{ id, name: 'fine steel bearded axe', fullName: 'Frostbite, keen
 { "id": "livingwood_bow", "name": "livingwood bow", "category": "weapon", "sub": "ranged",
   "tags": ["bow", "ranged", "two-handed", "elf", "magic", "living"],
   "affinity": { "elf": 3 }, "exclusive": "elf", "rarity": "rare", "value": [500, 2000],
-  "materials": ["wood", "yew", "horn", "steel", "bone", "mithril", "leather"],
+  "materials": ["wood", "yew", "horn", "steel", "bone", "veilsilver", "leather"],
   "desc": "Elven bow cut from a tree that agreed to it; still green.", "damage": "pierce" }
 ```
 - **affinity** 0..3 per race: 3 = signature (dwarves and goblets, elves and bows, orcs and skull cups). A race not listed gets weight 0.2 (rare but possible). `exclusive` limits an item to one race.

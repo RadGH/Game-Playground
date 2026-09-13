@@ -85,14 +85,14 @@
    }
   },
   {
-   "id": "mithril",
-   "en": "mithril",
+   "id": "veilsilver",
+   "en": "veilsilver",
    "tags": [
     "metal",
     "craft",
     "hard"
    ],
-   "adj": "mithril",
+   "adj": "veilsilver",
    "races": {
     "elf": 2,
     "dwarf": 2

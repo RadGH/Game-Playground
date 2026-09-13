@@ -1,0 +1,55 @@
+/* World Forge — viewer styles. Sits on top of ../shared/style.css. */
+
+.map-main { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; min-width: 0; }
+
+.crumbs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 24px; }
+.crumbs a { cursor: pointer; text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.crumbs .sep { color: var(--fg2); }
+.crumbs .here { color: var(--fg); font-weight: 600; }
+
+.canvas-wrap { position: relative; width: 100%; max-height: calc(100vh - 190px); margin: 0 auto; min-height: 300px; background: #0a0d13; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.canvas-wrap canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+.canvas-wrap.busy canvas { opacity: .45; }
+
+.progress { position: absolute; inset: auto 0 0 0; padding: 10px 12px; background: linear-gradient(transparent, rgba(10,13,19,.92)); }
+.progress .bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+.progress .bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .15s linear; }
+
+.readout { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; min-height: 22px; font-size: 12px; font-family: var(--mono); color: var(--fg2); }
+.readout b { color: var(--fg); font-weight: 600; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 3px 10px; font-size: 11px; color: var(--fg2); }
+.legend .sw { display: inline-flex; align-items: center; gap: 4px; }
+.legend .sw i { width: 11px; height: 11px; border-radius: 2px; border: 1px solid rgba(0,0,0,.5); display: inline-block; }
+
+.chips.layers .chip { text-transform: capitalize; }
+
+.list { max-height: 260px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.list .item { padding: 4px 7px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 12px; display: flex; gap: 6px; align-items: baseline; }
+.list .item:last-child { border-bottom: 0; }
+.list .item:hover { background: var(--bg3); }
+.list .item.on { background: var(--bg3); border-left: 2px solid var(--accent); }
+.list .item .nm { flex: 1; color: var(--fg); }
+.list .item .sub { color: var(--fg2); font-size: 11px; white-space: nowrap; }
+.list .item .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+
+.filterbar { display: flex; gap: 6px; margin-bottom: 6px; }
+.filterbar input { flex: 1; }
+
+.history { font-size: 12px; }
+.history li { margin-bottom: 5px; color: var(--fg2); }
+.history li b { color: var(--fg); font-weight: 600; }
+.history ul { padding-left: 16px; margin: 0; }
+
+.blurb { font-size: 12px; color: var(--fg2); margin: 0 0 6px; }
+.stat-grid { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; font-size: 12px; }
+.stat-grid dt { color: var(--fg2); }
+.stat-grid dd { margin: 0; font-family: var(--mono); }
+
+.knob.tight { margin-bottom: 3px; }
+.preset-row { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.mini { font-size: 11px; color: var(--fg2); margin: -2px 0 6px; }
+#generate { width: 100%; margin-top: 4px; }
+.seed-row input { width: 100%; font-family: var(--mono); }
+
+@media (max-width: 1100px) { .canvas-wrap { min-height: 300px; } }

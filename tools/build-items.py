@@ -12,7 +12,7 @@ def rows(lst, cat, sub, mats, dmg=None):
     for row in lst:
         id,name,tags,aff,rar,val,desc=row[:7]; excl=row[7] if len(row)>7 else None
         it(id,name,cat,sub(tags) if callable(sub) else sub,tags,aff,rar,val,mats,desc,excl=excl,dmg=dmg)
-M_WEAPON=["steel","iron","bronze","mithril","silver","bone","obsidian"]
+M_WEAPON=["steel","iron","bronze","veilsilver","silver","bone","obsidian"]
 # ---------- WEAPONS
 rows([
  ("shortsword","shortsword",["blade","one-handed","common-arms"],{"human":2,"halfling":2,"goblin":1},"common",(15,40),"A plain double-edged blade a forearm long."),
@@ -70,7 +70,7 @@ rows([
  ("executioner_axe","headsman's axe",["axe","two-handed","grim","ceremonial"],{"human":2,"undead":1},"uncommon",(80,300),"Crescent blade, black haft, one purpose."),
  ("woodcutter_axe","felling axe",["axe","two-handed","tool","wood"],{"human":2,"halfling":1,"dwarf":1},"common",(5,20),"Long haft, heavy head, for trees."),
  ("crescent_axe","crescent axe",["axe","one-handed","elf","elegant"],{"elf":2,"fey":1},"uncommon",(50,160),"Thin crescent head; elves who must use axes use this."),
-], "weapon","axe",["steel","iron","bronze","stone","mithril"],"slash")
+], "weapon","axe",["steel","iron","bronze","stone","veilsilver"],"slash")
 rows([
  ("warhammer","warhammer",["hammer","one-handed","armour-breaking"],{"dwarf":3,"human":2},"common",(30,90),"Flat face, back spike."),
  ("maul","maul",["hammer","two-handed","heavy"],{"dwarf":2,"giant":2,"orc":1},"uncommon",(50,160),"Sledge for the battlefield."),
@@ -87,7 +87,7 @@ rows([
  ("ceremonial_mace","ceremonial mace",["mace","ceremonial","regalia","gilded"],{"human":2,"dwarf":1},"rare",(300,1200),"Gilded and jewelled; carried before the throne."),
  ("war_pick","war pick",["hammer","one-handed","armour-breaking","spike"],{"dwarf":2,"human":2},"common",(25,70),"Single curved spike for punching plate."),
  ("rolling_pin","rolling pin",["club","one-handed","kitchen","humble"],{"halfling":3},"common",(1,3),"Oak. Has ended arguments.","halfling"),
-], "weapon","blunt",["steel","iron","bronze","wood","stone","bone","mithril"],"blunt")
+], "weapon","blunt",["steel","iron","bronze","wood","stone","bone","veilsilver"],"blunt")
 rows([
  ("spear","spear",["polearm","two-handed","reach","common-arms"],{"human":3,"orc":2,"elf":1,"goblin":2},"common",(5,25),"Point on a pole; the oldest weapon."),
  ("javelin","javelin",["polearm","thrown","light"],{"human":2,"orc":1,"elf":1},"common",(4,15),"Light throwing spear."),
@@ -104,7 +104,7 @@ rows([
  ("war_scythe","war scythe",["polearm","two-handed","blade","peasant"],{"human":2,"undead":2,"halfling":1},"common",(10,40),"Farm scythe re-hafted straight; the dead favour it."),
  ("pitchfork","pitchfork",["polearm","two-handed","tool","peasant"],{"halfling":2,"human":2},"common",(1,5),"For hay. And for mobs."),
  ("hooked_pole","hooked pole",["polearm","two-handed","hook","tool"],{"goblin":2,"human":1},"common",(2,8),"Pulls riders down and fruit off trees."),
-], "weapon","polearm",["steel","iron","bronze","wood","bone","mithril"],"pierce")
+], "weapon","polearm",["steel","iron","bronze","wood","bone","veilsilver"],"pierce")
 rows([
  ("shortbow","shortbow",["bow","ranged","two-handed","common-arms"],{"human":2,"elf":2,"halfling":2,"goblin":2},"common",(10,35),"Handy bow for hunting and skirmish."),
  ("longbow","longbow",["bow","ranged","two-handed","powerful"],{"human":3,"elf":2},"common",(25,80),"Man-tall yew stave; takes a lifetime of practice."),
@@ -131,7 +131,7 @@ rows([
  ("arrows","bundle of arrows",["ammo","ranged","consumable"],{"elf":3,"human":2,"orc":1,"goblin":1},"common",(1,5),"Twenty, fletched with goose."),
  ("bolts","bundle of bolts",["ammo","ranged","consumable","mechanical"],{"dwarf":3,"human":2,"gnome":2},"common",(1,6),"Twenty crossbow bolts."),
  ("sling_stones","pouch of sling stones",["ammo","ranged","consumable","stone"],{"halfling":3,"goblin":1},"common",(0,1),"River-smoothed, all the same weight."),
-], "weapon",lambda t: "ranged",["wood","yew","horn","steel","bone","mithril","leather"],"pierce")
+], "weapon",lambda t: "ranged",["wood","yew","horn","steel","bone","veilsilver","leather"],"pierce")
 rows([
  ("quarterstaff","quarterstaff",["staff","two-handed","wood","humble"],{"human":2,"halfling":2,"elf":1},"common",(1,6),"Six feet of oak."),
  ("wizard_staff","wizard's staff",["staff","two-handed","focus","magic"],{"human":2,"elf":2,"undead":1},"uncommon",(80,400),"Carved, capped, and humming faintly."),
@@ -200,7 +200,7 @@ rows([
  ("belt","belt",["clothing","waist","leather"],{"human":2,"dwarf":2,"halfling":2},"common",(1,8),"Holds up trousers and hopes."),
  ("gloves_fine","fine gloves",["clothing","hands","cloth","noble"],{"human":2,"elf":2},"common",(3,25),"Kid leather, embroidered."),
  ("sash","sash",["clothing","waist","cloth","office"],{"human":2,"orc":1},"common",(1,10),"Coloured band of rank."),
-], "armour",armsub,["steel","iron","leather","hide","bone","cloth","wood","mithril","dragonscale"])
+], "armour",armsub,["steel","iron","leather","hide","bone","cloth","wood","veilsilver","dragonscale"])
 # ---------- VESSELS
 rows([
  ("goblet","goblet",["vessel","drinking","stemmed","feast"],{"dwarf":3,"human":2,"dragon":1},"common",(5,40),"Stemmed cup; the dwarven ones are the heaviest."),
@@ -218,7 +218,7 @@ rows([
  ("cask","ale cask",["vessel","storage","ale","wood","large"],{"dwarf":3,"halfling":2},"common",(5,25),"Oak barrel, banded."),
  ("skull_cup","skull cup",["vessel","drinking","gore","trophy","dark"],{"orc":3,"undead":2,"troll":1},"uncommon",(5,60),"Enemy's skull, sawn and silvered."),
  ("crystal_decanter","crystal decanter",["vessel","pouring","fine","crystal"],{"gnome":2,"elf":2,"human":1},"uncommon",(30,200),"Cut crystal; catches every candle."),
- ("mithril_goblet","mithril goblet",["vessel","drinking","mithril","fine","dwarf"],{"dwarf":3,"elf":1},"rare",(300,1200),"Never tarnishes; poison beads on it, they say.","dwarf"),
+ ("veilsilver_goblet","veilsilver goblet",["vessel","drinking","veilsilver","fine","dwarf"],{"dwarf":3,"elf":1},"rare",(300,1200),"Never tarnishes; poison beads on it, they say.","dwarf"),
  ("censer","censer",["vessel","religious","incense","chain"],{"human":2,"undead":2,"elf":1},"uncommon",(20,120),"Pierced brass ball on chains, smoking."),
  ("reliquary","reliquary",["vessel","religious","relic","gilded"],{"human":2,"undead":1},"rare",(200,1500),"Gilded box holding a saint's knuckle."),
  ("gourd","gourd bottle",["vessel","drinking","humble","nature"],{"goblin":2,"halfling":1,"fey":2},"common",(1,2),"Dried gourd, stoppered with a cork."),
@@ -230,7 +230,7 @@ rows([
  ("urn","funeral urn",["vessel","religious","ashes","dark","clay"],{"undead":2,"human":2,"elf":1},"uncommon",(10,100),"Holds someone."),
  ("ale_horn_giant","giant's drinking horn",["vessel","drinking","horn","giant","huge"],{"giant":3},"uncommon",(30,150),"A whole cask fits in it.","giant"),
  ("dew_cup","dew cup",["vessel","drinking","fey","nature","tiny"],{"fey":3},"uncommon",(5,80),"An acorn cap, silvered; holds one dewdrop.","fey"),
-], "vessel",lambda t: t[1],["clay","wood","pewter","silver","gold","copper","brass","horn","bone","crystal","mithril","iron","glass"])
+], "vessel",lambda t: t[1],["clay","wood","pewter","silver","gold","copper","brass","horn","bone","crystal","veilsilver","iron","glass"])
 # ---------- REGALIA & JEWELRY & PERSONAL
 rows([
  ("crown","crown",["regalia","head","gold","royal"],{"human":3,"dwarf":2,"dragon":2,"undead":1},"rare",(500,5000),"Gold circlet with points; heavier every year."),
@@ -261,7 +261,7 @@ rows([
  ("hairpin","silver hairpin",["jewelry","hair","elf","concealable"],{"elf":3,"human":1,"fey":1},"common",(3,40),"Also a fine stiletto."),
  ("nose_ring","nose ring",["jewelry","nose","orc","metal"],{"orc":3,"troll":1},"common",(1,10),"Iron or gold; rank by weight."),
  ("bell_collar","bell collar",["jewelry","neck","fey","bell"],{"fey":3},"uncommon",(5,60),"Tiny bells; the fey put them on cats and prisoners.","fey"),
-], "regalia",lambda t: t[0],["gold","silver","iron","bronze","bone","wood","copper","mithril","crystal","leather"])
+], "regalia",lambda t: t[0],["gold","silver","iron","bronze","bone","wood","copper","veilsilver","crystal","leather"])
 # ---------- LORE & WRITING
 rows([
  ("tablet","clay tablet",["lore","writing","clay","ancient"],{"human":2,"giant":1,"undead":1},"common",(1,20),"Baked clay pressed with script."),
@@ -394,7 +394,7 @@ rows([
  ("troll_blood","vial of troll blood",["alchemy","gore","troll","healing","dark"],{"troll":1,"goblin":2,"undead":1},"rare",(30,300),"Regrows things. Not always the right things."),
  ("iron_ingot","iron ingot",["material","metal","iron"],{"dwarf":3,"human":2,"orc":1},"common",(3,8),"Bar of pig iron."),
  ("steel_ingot","steel ingot",["material","metal","steel"],{"dwarf":3,"human":2},"uncommon",(10,30),"Folded and quenched."),
- ("mithril_ingot","mithril ingot",["material","metal","mithril","precious"],{"dwarf":3,"elf":2},"epic",(500,3000),"Light as wood, hard as steel, rarer than either."),
+ ("veilsilver_ingot","veilsilver ingot",["material","metal","veilsilver","precious"],{"dwarf":3,"elf":2},"epic",(500,3000),"Light as wood, hard as steel, rarer than either."),
  ("gold_bar","gold bar",["material","metal","gold","precious"],{"dragon":3,"dwarf":2,"human":2},"rare",(200,1000),"Stamped bar."),
  ("ruby","ruby",["material","gem","red","precious"],{"dragon":3,"dwarf":2},"rare",(100,1500),"Blood-red stone."),
  ("sapphire","sapphire",["material","gem","blue","precious"],{"elf":2,"human":2,"dragon":2},"rare",(100,1500),"Deep blue stone."),
@@ -446,7 +446,7 @@ materials={
   {"id":"bronze","adj":"bronze","value":0.9,"tags":["metal","ancient"],"affinity":{"giant":2,"human":1}},
   {"id":"silver","adj":"silvered","value":2.5,"tags":["metal","precious","holy"],"affinity":{"elf":3,"human":1,"fey":1}},
   {"id":"gold","adj":"gilded","value":4.0,"tags":["metal","precious"],"affinity":{"dragon":3,"dwarf":2,"human":1}},
-  {"id":"mithril","adj":"mithril","value":12.0,"tags":["metal","precious","light","magic"],"affinity":{"dwarf":3,"elf":3}},
+  {"id":"veilsilver","adj":"veilsilver","value":12.0,"tags":["metal","precious","light","magic"],"affinity":{"dwarf":3,"elf":3}},
   {"id":"copper","adj":"copper","value":0.8,"tags":["metal"],"affinity":{"gnome":3}},
   {"id":"brass","adj":"brass","value":1.1,"tags":["metal","tinker"],"affinity":{"gnome":3}},
   {"id":"pewter","adj":"pewter","value":0.7,"tags":["metal","humble"],"affinity":{"halfling":2,"human":1}},
@@ -480,8 +480,8 @@ materials={
  "enchant_tags":{"Flaming":["fire"],"Frost":["ice","cold"],"Venomous":["poison"],"Shadowed":["dark","stealth"],"Blessed":["holy"],"Cursed":["cursed","dark"],"Thundering":["storm"],"Vampiric":["dark","blood"],"Keen":["sharp"],"Warding":["protect"],"Whispering":["fey","secret"],"Mending":["heal"],"Hungering":["dark","cursed"],"Sunlit":["holy","light"],"Moonlit":["elf","magic"],"Runed":["dwarf","runes"]}
 }
 # ---- materials narrowed by category + tags (a cloth apron is never dragonscale, tongs are never cloth); affinity bumps
-METALS=["steel","iron","bronze","mithril"]
-MAT_WORDS=("iron","steel","bronze","mithril","silver","gold","gilt","copper","brass","pewter","wood","wooden","yew","livingwood","bone","horn","stone","obsidian","crystal","leather","hide","cloth","clay","glass","dragonscale","vellum","paper","bark","silk","wool","tooth","teeth","fang","skull","scale","fey wing","moss","straw","wax","bread","reed")
+METALS=["steel","iron","bronze","veilsilver"]
+MAT_WORDS=("iron","steel","bronze","veilsilver","silver","gold","gilt","copper","brass","pewter","wood","wooden","yew","livingwood","bone","horn","stone","obsidian","crystal","leather","hide","cloth","clay","glass","dragonscale","vellum","paper","bark","silk","wool","tooth","teeth","fang","skull","scale","fey wing","moss","straw","wax","bread","reed")
 for d in items:
     t=set(d["tags"]); cat=d["category"]; sub=d["sub"]; name=d["name"].lower()
     if ("crude" in t or "stone" in t or "gore" in t) and "troll" not in d["affinity"]: d["affinity"]["troll"]=2
@@ -503,7 +503,7 @@ for d in items:
         elif "hide" in t: d["materials"]=["hide"]
         elif "wood" in t: d["materials"]=["wood","livingwood"]
         elif "scales" in t: d["materials"]=["steel","bronze","dragonscale"]
-        elif sub=="shield": d["materials"]=["wood","steel","iron","hide","bone","mithril"]
+        elif sub=="shield": d["materials"]=["wood","steel","iron","hide","bone","veilsilver"]
         elif "junk" in t or "crude" in t: d["materials"]=["iron","bone","wood"]
         elif "gadget" in t: d["materials"]=["brass","steel","copper"]
         else: d["materials"]=METALS+(["dragonscale"] if d["rarity"] in("epic","legendary") else [])
@@ -513,11 +513,11 @@ for d in items:
         elif "religious" in t: d["materials"]=["brass","silver","gold"]
         elif "humble" in t: d["materials"]=["clay","wood","pewter"]
         elif "gadget" in t: d["materials"]=["brass","copper"]
-        else: d["materials"]=["pewter","silver","gold","copper","wood","horn","glass","crystal","mithril"]
+        else: d["materials"]=["pewter","silver","gold","copper","wood","horn","glass","crystal","veilsilver"]
     elif cat=="regalia":
         if "personal" in t: d["materials"]=["wood","bone","silver","leather"]
         elif "gore" in t or "trophy" in t: d["materials"]=[]
-        else: d["materials"]=["gold","silver","bronze","copper","iron","mithril"]
+        else: d["materials"]=["gold","silver","bronze","copper","iron","veilsilver"]
     elif cat=="lore":
         d["materials"]=[m for m in ("clay","stone","vellum","paper","bark","bone") if m in t] or (["vellum","paper"] if ("book" in t or "paper" in t or "writing" in t) else [])
     elif cat=="tool": d["materials"]=[] if ("set" in t or "gadget" in t or "game" in t) else ["iron","steel","wood","brass"]

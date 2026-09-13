@@ -25,7 +25,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "A plain double-edged blade a forearm long.",
    "damage": "slash"
@@ -52,7 +52,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "The knight's straight sword, cruciform hilt.",
    "damage": "slash"
@@ -80,7 +80,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Hand-and-a-half blade for cut and thrust.",
    "damage": "slash"
@@ -109,7 +109,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Man-tall two-hander swung from the shoulder.",
    "damage": "slash"
@@ -137,7 +137,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Broad, heavy-tipped chopper.",
    "damage": "slash"
@@ -166,7 +166,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Curved single-edged blade, quick in the draw.",
    "damage": "slash"
@@ -194,7 +194,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Cavalry sword with a knuckle-bow.",
    "damage": "slash"
@@ -223,7 +223,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Slender thrusting blade for the duelling floor.",
    "damage": "slash"
@@ -251,7 +251,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Short stabbing sword of the old legions.",
    "damage": "slash"
@@ -302,7 +302,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Edgeless armour-piercing spike of a sword.",
    "damage": "slash"
@@ -331,7 +331,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Short, thick sailor's sword.",
    "damage": "slash"
@@ -359,7 +359,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Wide single-edged cleaver of a sword.",
    "damage": "slash"
@@ -388,7 +388,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Leaf-shaped elven blade, balanced for grace.",
    "damage": "slash"
@@ -417,7 +417,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Slender curved elven sword that glows faintly at night.",
    "exclusive": "elf",
@@ -447,7 +447,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "More slab than sword; orcs like the weight.",
    "exclusive": "orc",
@@ -527,7 +527,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Black iron sword that drinks warmth.",
    "exclusive": "undead",
@@ -582,7 +582,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Sabre with a spring-loaded pommel that extends the reach a hand's width.",
    "exclusive": "gnome",
@@ -610,7 +610,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "A sword scaled for a giant; humans use it as a bridge.",
    "exclusive": "giant",
@@ -665,7 +665,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Hooked tip for catching blades and ankles.",
    "damage": "slash"
@@ -696,7 +696,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Bronze-age crescent blade.",
    "damage": "slash"
@@ -750,7 +750,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Double-edged fighting knife.",
    "damage": "pierce"
@@ -778,7 +778,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Long, narrow dagger.",
    "damage": "pierce"
@@ -807,7 +807,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Needle-pointed; finds gaps in mail.",
    "damage": "pierce"
@@ -836,7 +836,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Wavy blade for ceremony and spite.",
    "damage": "pierce"
@@ -866,7 +866,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Curved blade for hides.",
    "damage": "pierce"
@@ -946,7 +946,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Lives in the boot until needed.",
    "damage": "pierce"
@@ -975,7 +975,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Obsidian or black iron; stained.",
    "damage": "pierce"
@@ -1031,7 +1031,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Broad guard for catching a rapier.",
    "damage": "pierce"
@@ -1059,7 +1059,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Boar tusk, edged; every orc child gets one.",
    "exclusive": "orc",
@@ -1117,7 +1117,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Fells trees or foes.",
    "damage": "slash"
@@ -1146,7 +1146,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Bearded head on a stout haft.",
    "damage": "slash"
@@ -1175,7 +1175,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Double-bitted two-hander.",
    "damage": "slash"
@@ -1204,7 +1204,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Balanced for a spin and a thud.",
    "damage": "slash"
@@ -1231,7 +1231,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "The beard hooks shields aside.",
    "damage": "slash"
@@ -1260,7 +1260,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Dwarven axe with a grudge carved into the head.",
    "exclusive": "dwarf",
@@ -1289,7 +1289,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Pick on one side, adze on the other; deep-delvers' weapon of habit.",
    "damage": "slash"
@@ -1371,7 +1371,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Crescent blade, black haft, one purpose.",
    "damage": "slash"
@@ -1401,7 +1401,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Long haft, heavy head, for trees.",
    "damage": "slash"
@@ -1430,7 +1430,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Thin crescent head; elves who must use axes use this.",
    "damage": "slash"
@@ -1458,7 +1458,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Flat face, back spike.",
    "damage": "blunt"
@@ -1487,7 +1487,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Sledge for the battlefield.",
    "damage": "blunt"
@@ -1515,7 +1515,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Flanged head on a steel haft.",
    "damage": "blunt"
@@ -1543,7 +1543,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Spiked ball on a haft.",
    "damage": "blunt"
@@ -1572,7 +1572,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Ball on a chain; hits the wielder as often as the enemy.",
    "damage": "blunt"
@@ -1659,7 +1659,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Forge hammer; dents skulls if it must.",
    "damage": "blunt"
@@ -1688,7 +1688,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Said to have been quenched in a mountain's heart.",
    "exclusive": "dwarf",
@@ -1772,7 +1772,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Gnomish tool that is somehow also a weapon.",
    "exclusive": "gnome",
@@ -1802,7 +1802,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Gilded and jewelled; carried before the throne.",
    "damage": "blunt"
@@ -1831,7 +1831,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Single curved spike for punching plate.",
    "damage": "blunt"
@@ -1889,7 +1889,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Point on a pole; the oldest weapon.",
    "damage": "pierce"
@@ -1918,7 +1918,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Light throwing spear.",
    "damage": "pierce"
@@ -1947,7 +1947,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Fifteen feet of ash and a point.",
    "damage": "pierce"
@@ -1976,7 +1976,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Axe, spike and hook on a pole.",
    "damage": "pierce"
@@ -2004,7 +2004,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Single-edged blade on a pole.",
    "damage": "pierce"
@@ -2033,7 +2033,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Fish-spear grown up.",
    "damage": "pierce"
@@ -2063,7 +2063,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Crossbar keeps the boar from running up the shaft.",
    "damage": "pierce"
@@ -2091,7 +2091,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Curved elven glaive, light as a reed.",
    "exclusive": "elf",
@@ -2173,7 +2173,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Couched under the arm at the charge.",
    "damage": "pierce"
@@ -2199,7 +2199,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "A ship's mast with a plough-blade tip.",
    "exclusive": "giant",
@@ -2230,7 +2230,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Farm scythe re-hafted straight; the dead favour it.",
    "damage": "pierce"
@@ -2259,7 +2259,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "For hay. And for mobs.",
    "damage": "pierce"
@@ -2288,7 +2288,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Pulls riders down and fruit off trees.",
    "damage": "pierce"
@@ -2722,7 +2722,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Set of six, balanced.",
    "damage": "pierce"
@@ -3398,7 +3398,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Small plates riveted inside a cloth coat."
   },
@@ -3427,7 +3427,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Thousands of riveted rings."
   },
@@ -3479,7 +3479,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Full harness, fitted to the wearer."
   },
@@ -3507,7 +3507,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Breastplate, pauldrons and greaves over mail."
   },
@@ -3536,7 +3536,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Dwarven plate, rune-stamped, heavier than it should be and lighter than it looks.",
    "exclusive": "dwarf"
@@ -3566,7 +3566,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Rings fine as scale, quiet as cloth.",
    "exclusive": "elf"
@@ -3857,7 +3857,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Steel cap with cheek guards."
   },
@@ -3884,7 +3884,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Bucket helm with eye slits."
   },
@@ -3959,7 +3959,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Hood of rings."
   },
@@ -3987,7 +3987,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Silvered band with a nasal; elves refuse full helms.",
    "exclusive": "elf"
@@ -4191,7 +4191,7 @@
     "iron",
     "hide",
     "bone",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Door-sized; a wall you carry."
   },
@@ -4222,7 +4222,7 @@
     "iron",
     "hide",
     "bone",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Hand-sized steel disc."
   },
@@ -4252,7 +4252,7 @@
     "iron",
     "hide",
     "bone",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Steel-faced, rune-bordered; a clan's oaths are on it.",
    "exclusive": "dwarf"
@@ -4308,7 +4308,7 @@
     "iron",
     "hide",
     "bone",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "A pot lid. A big one.",
    "exclusive": "goblin"
@@ -4363,7 +4363,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Articulated steel hands."
   },
@@ -4416,7 +4416,7 @@
     "steel",
     "iron",
     "bronze",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Shin plates."
   },
@@ -4707,7 +4707,7 @@
     "horn",
     "glass",
     "crystal",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Stemmed cup; the dwarven ones are the heaviest."
   },
@@ -4769,7 +4769,7 @@
     "horn",
     "glass",
     "crystal",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Lidded ale mug; dwarves engrave their grudges on the lid."
   },
@@ -4850,7 +4850,7 @@
     "horn",
     "glass",
     "crystal",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Pocket flask, dented."
   },
@@ -4910,7 +4910,7 @@
     "horn",
     "glass",
     "crystal",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Tall pouring jug."
   },
@@ -5102,14 +5102,14 @@
    "desc": "Cut crystal; catches every candle."
   },
   {
-   "id": "mithril_goblet",
-   "name": "mithril goblet",
+   "id": "veilsilver_goblet",
+   "name": "veilsilver goblet",
    "category": "vessel",
    "sub": "drinking",
    "tags": [
     "vessel",
     "drinking",
-    "mithril",
+    "veilsilver",
     "fine",
     "dwarf"
    ],
@@ -5290,7 +5290,7 @@
     "horn",
     "glass",
     "crystal",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Pewter or wood, big enough for a goose."
   },
@@ -5323,7 +5323,7 @@
     "horn",
     "glass",
     "crystal",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Green glass, wax-sealed."
   },
@@ -5437,7 +5437,7 @@
     "horn",
     "glass",
     "crystal",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "An acorn cap, silvered; holds one dewdrop.",
    "exclusive": "fey"
@@ -5470,7 +5470,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Gold circlet with points; heavier every year."
   },
@@ -5501,7 +5501,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Slim band of silver or living wood."
   },
@@ -5532,7 +5532,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Jewelled band for a queen."
   },
@@ -5610,7 +5610,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Gold rod topped with an orb."
   },
@@ -5641,7 +5641,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Carved seal ring; the family's word."
   },
@@ -5671,7 +5671,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Plain band."
   },
@@ -5701,7 +5701,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Stone in a claw setting."
   },
@@ -5733,7 +5733,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Pendant with a purpose."
   },
@@ -5765,7 +5765,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Twisted metal neck-ring, open at the front."
   },
@@ -5795,7 +5795,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Cloak pin, often the family crest."
   },
@@ -5825,7 +5825,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Hoop or stud; goblins prefer bone."
   },
@@ -5854,7 +5854,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Metal or beads."
   },
@@ -5907,7 +5907,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Tiny moving gears; hypnotic at dinner.",
    "exclusive": "gnome"
@@ -6051,7 +6051,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Disc of office on a chain."
   },
@@ -6081,7 +6081,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Coin from a dragon's bed, warm and slightly melted.",
    "exclusive": "dragon"
@@ -6141,7 +6141,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Opens on a face or a lock of hair."
   },
@@ -6224,7 +6224,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Iron or gold; rank by weight."
   },
@@ -6253,7 +6253,7 @@
     "bronze",
     "copper",
     "iron",
-    "mithril"
+    "veilsilver"
    ],
    "desc": "Tiny bells; the fey put them on cats and prisoners.",
    "exclusive": "fey"
@@ -9248,14 +9248,14 @@
    "desc": "Folded and quenched."
   },
   {
-   "id": "mithril_ingot",
-   "name": "mithril ingot",
+   "id": "veilsilver_ingot",
+   "name": "veilsilver ingot",
    "category": "material",
    "sub": "metal",
    "tags": [
     "material",
     "metal",
-    "mithril",
+    "veilsilver",
     "precious"
    ],
    "affinity": {

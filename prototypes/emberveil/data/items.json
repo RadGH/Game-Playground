@@ -1,5 +1,5 @@
 {
- "_doc": "Rebuilt from Emberveil (~/claude/emberveil data/items.json, uniques.json, src/game/{items,sets,legendaryEffects,recipes}.js, drop-tables.json). Dead base keys in the original drop tables were remapped (axe→battleaxe, mace→iron_mace, gloves→light_gauntlets, boots→light_boots, amulet→necklace, helmet→heavy_helm). The 40 extended affixes (dormant in the original) are wired in here behind `extended:true`. Uniques with no boss source drop through the set/unique roll in generateLoot.",
+ "_doc": "Rebuilt from Emberveil (~/claude/emberveil data/items.json, uniques.json, src/game/{items,sets,legendaryEffects,recipes}.js, drop-tables.json). Dead base keys in the original drop tables were remapped (axe\u2192battleaxe, mace\u2192iron_mace, gloves\u2192light_gauntlets, boots\u2192light_boots, amulet\u2192necklace, helmet\u2192heavy_helm). The 40 extended affixes (dormant in the original) are wired in here behind `extended:true`. Uniques with no boss source drop through the set/unique roll in generateLoot.",
  "rarities": [
   "normal",
   "magic",
@@ -2209,7 +2209,7 @@
    ],
    "legendaryEffect": "mage_missile_aoe",
    "bossSource": null,
-   "lore": "\"Every question is already answered — you need only cast the right spell.\""
+   "lore": "\"Every question is already answered \u2014 you need only cast the right spell.\""
   },
   {
    "id": "lava_titans_mantle",
@@ -3268,7 +3268,7 @@
   "curse_spreads": "A kill spills the curse over every enemy still standing.",
   "free_move": "One extra node move every day.",
   "nemesis_hunter": "Double damage to nemeses and named enemies; killing one heals the whole party.",
-  "no_night_raids": "No night attacks at all while it is planted — the watch holds even when the food runs out."
+  "no_night_raids": "No night attacks at all while it is planted \u2014 the watch holds even when the food runs out."
  },
  "sets": [
   {
@@ -5144,7 +5144,7 @@
  "potions": {
   "healing_potion": {
    "name": "Healing Potion",
-   "icon": "🧪",
+   "icon": "\ud83e\uddea",
    "effect": {
     "type": "heal",
     "amount": 40
@@ -5155,7 +5155,7 @@
   },
   "greater_healing": {
    "name": "Greater Healing Potion",
-   "icon": "💊",
+   "icon": "\ud83d\udc8a",
    "effect": {
     "type": "heal",
     "amount": 80
@@ -5166,7 +5166,7 @@
   },
   "mana_potion": {
    "name": "Mana Potion",
-   "icon": "🔵",
+   "icon": "\ud83d\udd35",
    "effect": {
     "type": "mana",
     "amount": 40
@@ -5177,7 +5177,7 @@
   },
   "revival_flask": {
    "name": "Revival Flask",
-   "icon": "⚗️",
+   "icon": "\u2697\ufe0f",
    "effect": {
     "type": "revive",
     "pct": 0.25,
@@ -5189,7 +5189,7 @@
   },
   "group_tonic": {
    "name": "Group Tonic",
-   "icon": "🫙",
+   "icon": "\ud83e\uded9",
    "effect": {
     "type": "heal",
     "amount": 25
@@ -5200,7 +5200,7 @@
   },
   "antidote": {
    "name": "Antidote",
-   "icon": "🟢",
+   "icon": "\ud83d\udfe2",
    "effect": {
     "type": "cleanse",
     "statuses": [
@@ -5350,10 +5350,11 @@
     "roadwarden_bow",
     "emberbrand_wand",
     "houndmasters_lash"
-   ]
+   ],
+   "downshift": 0.3
   },
   "ember_plateau": {
-   "drop": 0.2,
+   "drop": 0.19,
    "rarity": "rare",
    "quality": "high",
    "fame": 2.5,
@@ -5365,10 +5366,11 @@
     "pilgrims_staff",
     "rimecut_sabre",
     "bramble_staff"
-   ]
+   ],
+   "downshift": 0.3
   },
   "hell_breach": {
-   "drop": 0.22,
+   "drop": 0.2,
    "rarity": "rare",
    "quality": "high",
    "fame": 3,
@@ -5382,10 +5384,11 @@
     "axle_club",
     "hunters_edge",
     "stormpin_crossbow"
-   ]
+   ],
+   "downshift": 0.35
   },
   "shattered_core": {
-   "drop": 0.23,
+   "drop": 0.21,
    "rarity": "rare",
    "quality": "elite",
    "fame": 4,
@@ -5398,10 +5401,11 @@
     "breakers_pick",
     "hunters_edge",
     "warhorn_maul"
-   ]
+   ],
+   "downshift": 0.35
   },
   "cosmic_rift": {
-   "drop": 0.24,
+   "drop": 0.21,
    "rarity": "legendary",
    "quality": "elite",
    "fame": 5,
@@ -5414,10 +5418,11 @@
     "gravebound_scepter",
     "dawnwarden_hammer",
     "bloodledger_blade"
-   ]
+   ],
+   "downshift": 0.55
   },
   "eternal_void": {
-   "drop": 0.25,
+   "drop": 0.22,
    "rarity": "legendary",
    "quality": "exotic",
    "fame": 6,
@@ -5430,10 +5435,11 @@
     "bloodledger_blade",
     "covenant_hammer",
     "grudgebrand"
-   ]
+   ],
+   "downshift": 0.5
   },
   "abyssal_depths": {
-   "drop": 0.26,
+   "drop": 0.22,
    "rarity": "legendary",
    "quality": "exotic",
    "fame": 7,
@@ -5445,10 +5451,11 @@
     "heavy_chest",
     "ring",
     "necklace"
-   ]
+   ],
+   "downshift": 0.5
   },
   "primordial_nexus": {
-   "drop": 0.26,
+   "drop": 0.22,
    "rarity": "legendary",
    "quality": "exotic",
    "fame": 8,
@@ -5460,10 +5467,11 @@
     "heavy_chest",
     "ring",
     "necklace"
-   ]
+   ],
+   "downshift": 0.45
   },
   "dragons_reach": {
-   "drop": 0.27,
+   "drop": 0.23,
    "rarity": "legendary",
    "quality": "exotic",
    "fame": 9,
@@ -5475,10 +5483,11 @@
     "dragonbone_staff",
     "ring",
     "necklace"
-   ]
+   ],
+   "downshift": 0.45
   },
   "dragon_throne": {
-   "drop": 0.28,
+   "drop": 0.24,
    "rarity": "legendary",
    "quality": "exotic",
    "fame": 10,
@@ -5490,7 +5499,8 @@
     "dragontooth_wand",
     "ring",
     "necklace"
-   ]
+   ],
+   "downshift": 0.4
   }
  },
  "bossLoot": {
@@ -5530,7 +5540,7 @@
   "archfiend_malgrath": {
    "rarity": "rare",
    "quality": "high",
-   "rolls": 3,
+   "rolls": 2,
    "uniqueChance": 0.2,
    "uniques": [
     "malgraths_soulbrand",
@@ -5599,7 +5609,7 @@
   "ancient_dragon": {
    "rarity": "legendary",
    "quality": "elite",
-   "rolls": 2,
+   "rolls": 3,
    "uniqueChance": 0.3,
    "uniques": [
     "ancient_dragon_scale"
@@ -5615,7 +5625,7 @@
   "dragon_king": {
    "rarity": "legendary",
    "quality": "exotic",
-   "rolls": 4,
+   "rolls": 3,
    "uniqueChance": 0.35,
    "uniques": [
     "dragon_kings_headguard",

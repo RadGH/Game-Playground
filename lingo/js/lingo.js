@@ -180,7 +180,17 @@ export class Lingo {
     this.filters = { ...DEFAULT_FILTERS };
     this.plurals = typeof Intl !== 'undefined' && Intl.PluralRules ? new Intl.PluralRules('en') : { select: n => (n === 1 ? 'one' : 'other') };
     this.maxDepth = 24; this.recentSize = 6;
+    // Session anti-repeat: the last ids used for each symbol by ANYONE this session. A speaker-level
+    // "recent" list is not enough when four heroes each open a fight — they would all reach for the
+    // same high-weight line. Symbols listed in grammar meta.noRepeat (or a call with ctx.noRepeat)
+    // skip anything inside the window outright, and fall back to the plain weighted pick only when
+    // the window has eaten the pool. Other symbols keep the old soft behaviour, so tag weighting
+    // still concentrates lines the way the scene/relation tests expect.
+    this.sessionRecentSize = 20; this.sessionRecent = new Map();
+    this.noRepeat = new Set(this.grammar.meta?.noRepeat || []);
   }
+  /** Forget the session anti-repeat history (new game, new run, tests). */
+  resetSession(symbol = null) { if (symbol) this.sessionRecent.delete(symbol); else this.sessionRecent.clear(); }
 
   /** Tag weights for a speaker in a context: traits × sliders × mood × opinion. Weight 0 = never pick. */
   tagWeights(speaker, ctx = {}) {
@@ -214,7 +224,11 @@ export class Lingo {
     return { ...ctx, has: t => !!s?.has(t), listenerHas: t => !!l?.has?.(t), mood: s?.mood ?? 0, opinion: ctx.opinion ?? (rel ? rel.opinion() : 0), warmth: rel?.get('warmth') ?? 0, respect: rel?.get('respect') ?? 0, trust: rel?.get('trust') ?? 0, appreciation: rel?.get('appreciation') ?? 0, fear: rel?.get('fear') ?? 0, attraction: rel?.get('attraction') ?? 0, familiarity: rel?.familiarity ?? 0.5, knows: t => !!rel?.knows(t), knownTraits: rel ? [...rel.knowledge] : [], sceneHas: t => !!sc?.has?.(t), danger: sc?.danger ?? 0, comfort: sc?.comfort ?? 0.5, timeOfDay: sc?.timeOfDay ?? 'day', speakerType: s?.entity?.type, listenerType: l?.entity?.type ?? l?.type, sameRace: !!(s?.entity?.ref('race')?.id && s.entity.ref('race').id === (l?.entity?.ref?.('race')?.id ?? l?.ref?.('race')?.id)), chance: p => this.rng.chance(p) };
   }
 
-  /** Pick one entry from a symbol using weights × tags × conditions, avoiding recent repeats. */
+  /**
+   * Pick one entry from a symbol using weights × tags × conditions, avoiding recent repeats.
+   * ctx.exclude (array or Set of entry ids) bans entries for this one call — the emberveil prototype
+   * uses it so two enemies in the same fight never open with the same line.
+   */
   pick(symbol, ctx, weights) {
     const list = this.grammar.symbols[symbol]; if (!list || !list.length) return null;
     const recent = ctx.speaker?.recent || [];
@@ -228,7 +242,15 @@ export class Lingo {
       scored.push({ e, w });
     }
     if (!scored.length) return null;
-    const chosen = this.rng.weighted(scored, x => x.w).e;
+    const banned = ctx.exclude ? (ctx.exclude instanceof Set ? ctx.exclude : new Set(ctx.exclude)) : null;
+    const hist = this.sessionRecent.get(symbol) || [];
+    const strict = ctx.noRepeat === true || this.noRepeat.has(symbol);
+    const window = strict ? hist.slice(-Math.max(0, Math.min(this.sessionRecentSize, scored.length - 1))) : []; // never ban the whole pool
+    let pool = scored.filter(x => !window.includes(x.e.id) && !(banned && banned.has(x.e.id)));
+    if (!pool.length) pool = scored.filter(x => !(banned && banned.has(x.e.id)));
+    if (!pool.length) pool = scored;
+    const chosen = this.rng.weighted(pool, x => x.w).e;
+    hist.push(chosen.id); if (hist.length > 64) hist.shift(); this.sessionRecent.set(symbol, hist);
     if (ctx.speaker) { ctx.speaker.recent.push(chosen.id); if (ctx.speaker.recent.length > this.recentSize) ctx.speaker.recent.shift(); }
     return chosen;
   }

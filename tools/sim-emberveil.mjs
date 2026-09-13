@@ -19,7 +19,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Game, MAIN_QUESTS, VEHICLES } from '../prototypes/emberveil/js/game.js';
 import { Combat, fleeCheck, recordEvent } from '../prototypes/emberveil/js/combat.js';
-import { equip, refresh, derive, canUse, passiveTree, classSkills, mergeSkill } from '../prototypes/emberveil/js/rules.js';
+import { equip, refresh, derive, canUse, passiveTree, classSkills, mergeSkill, XP_TABLE, xpForLevel } from '../prototypes/emberveil/js/rules.js';
+import { resolveCrossing, crossingChoices } from '../prototypes/emberveil/js/explore.js';
 import { makeRng } from '../prototypes/emberveil/js/rng.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -33,6 +34,7 @@ const DATA = {
   randomEvents: J('random-events.json'), dungeons: J('dungeons.json'), companions: J('companions.json'),
   statuses: J('status-effects.json'), bossPhases: J('boss-phases.json'), named: J('named-enemies.json'),
   sideQuests: J('side-quests.json'), classQuests: J('class-quests.json'), balance: J('balance.json'),
+  crossings: J('crossings.json'),
   relations: LJ('relations.json'), events: LJ('events.json'),
 };
 const CLASSES = DATA.classes.classes.map(c => c.id);
@@ -142,9 +144,77 @@ function doTown(g, stats) {
   if (partyHpFrac(g) < 0.8) g.clericRest(town);
 }
 
+
+/** Average score of everything the party has equipped — the "how good is our gear" number. */
+function gearScore(g) {
+  let n = 0, t = 0;
+  for (const h of g.party) for (const it of Object.values(h.equipment || {})) { if (!it) continue; t += g.loot.score(it, h).total; n++; }
+  return n ? t / n : 0;
+}
+/** Everything the party is wearing right now, by affix stat / unique / legendary power. */
+function wornTally(g, stats) {
+  for (const h of g.party) for (const it of Object.values(h.equipment || {})) {
+    if (!it) continue;
+    if (it.isUnique) stats.wornUnique[it.uniqueId || it.baseKey] = (stats.wornUnique[it.uniqueId || it.baseKey] || 0) + 1;
+    if (it.setId) stats.wornSet[it.setId] = (stats.wornSet[it.setId] || 0) + 1;
+    if (it.rarity) stats.wornRarity[it.rarity] = (stats.wornRarity[it.rarity] || 0) + 1;
+    for (const a of it.affixes || []) if (a.stat && !a.baseIntrinsic) stats.wornAffix[a.stat] = (stats.wornAffix[a.stat] || 0) + 1;
+    if (it.legendaryEffectId) stats.wornLegendary[it.legendaryEffectId] = (stats.wornLegendary[it.legendaryEffectId] || 0) + 1;
+  }
+}
+/** Snapshot of where the party stands, filed under the act it just walked into. */
+function snapAct(g, stats, act = g.act) {
+  if (act < 1 || stats.actSnap[act]) return;
+  const lv = g.party.map(h => h.level);
+  stats.actSnap[act] = {
+    day: g.day, level: lv.reduce((a, b) => a + b, 0) / Math.max(1, lv.length), gold: g.gold,
+    xp: g.party.reduce((s, h) => s + h.xp, 0) / Math.max(1, g.party.length),
+    gear: gearScore(g), fights: stats.fights, wipes: stats.deaths,
+  };
+}
+/** A damage record's broad source: what the player would call it. */
+function sourceKind(via) {
+  const v = String(via || 'attack');
+  if (v.startsWith('skill:')) return 'skill';
+  if (v.startsWith('dot:') || v.startsWith('status:')) return 'status';
+  if (v.startsWith('proc:') || v.startsWith('affix') || v.startsWith('legendary') || v.startsWith('champion') || v === 'thorns') return 'proc';
+  if (v.startsWith('spell:')) return 'enemy spell';
+  return 'weapon';
+}
+/** The bot at a crossing: take the surest way past that does not cost a day, else the surest way at all. */
+function doCrossing(g, res, stats) {
+  const cr = res.crossing; const states = crossingChoices(g, cr);
+  const scored = states.map((st, i) => {
+    const raw = cr.choices[i]; const mult = raw.reward?.mult ?? 1;
+    const odds = st.odds == null ? 96 : st.odds;                     // auto / no-check choices just work
+    const value = odds + mult * 12 - (st.days || 0) * 22 - st.goldCost / 40 - (st.fight ? 18 : 0);
+    return { st, raw, value };
+  }).filter(x => x.st.available).sort((a, b) => b.value - a.value);
+  const pick = scored[0];
+  if (!pick) { stats.crossings.blocked++; return true; }
+  const out = resolveCrossing(g, cr, pick.st.id, g.rng);
+  stats.crossings.tried++;
+  stats.crossings[out.ok ? 'passed' : 'failed']++;
+  stats.crossings.byId[cr.id] = stats.crossings.byId[cr.id] || { tried: 0, passed: 0 };
+  stats.crossings.byId[cr.id].tried++; if (out.ok) stats.crossings.byId[cr.id].passed++;
+  stats.crossings.days += out.days || 0;
+  if (out.ok && !out.fight) g.clearCrossing(res.node);
+  if (out.fight) {
+    const enc = g.encounter(out.fight);
+    if (enc) { stats.crossings.fights++; if (!runFight(g, enc, null, stats)) return false; g.clearCrossing(res.node); }
+  }
+  return true;
+}
+
 /** One headless fight. Feeds the damage meter exactly the way the live game does. */
 function runFight(g, enc, node, stats) {
   const heroes = g.fighters(); const foes = enc.enemies;
+  const act = Math.max(1, g.act);
+  const hpBefore = g.party.reduce((s, h) => s + Math.max(0, h.hp), 0);
+  const hpPool = g.party.reduce((s, h) => s + h.maxHp, 0) || 1;
+  const foePower = foes.reduce((s, e) => s + e.maxHp, 0);
+  const foeDps = foes.reduce((s, e) => s + (e.dmg[0] + e.dmg[1]) / 2, 0);
+  const meterMark = g.meter.fights.length;
   const C = new Combat(heroes, foes, {
     skills: DATA.skills.skills, spells: DATA.spells.spells, loot: g.loot,
     rng: makeRng(g.seed + g.kills * 13 + g.day + stats.fights), act: g.act, bossPhases: DATA.bossPhases.phases,
@@ -155,17 +225,34 @@ function runFight(g, enc, node, stats) {
   let tick = 0;
   while (!C.over) { for (const ev of C.round()) { tick += 0.5; recordEvent(g.meter, ev, tick); } }
   g.meter.endFight(); enc.killsBy = C.killsBy;
-  stats.fights++; stats.rounds += C.round_; stats.roundsByAct[g.act] = (stats.roundsByAct[g.act] || []);
-  stats.roundsByAct[g.act].push(C.round_);
+  stats.fights++; stats.rounds += C.round_; stats.roundsByAct[act] = (stats.roundsByAct[act] || []);
+  stats.roundsByAct[act].push(C.round_);
+  // the difficulty curve: what one fight costs the party, and what it was worth facing
+  const A = (stats.byAct[act] ||= { fights: 0, rounds: 0, hpLostFrac: 0, foeHp: 0, foeDps: 0, gearScore: 0, statusRounds: 0, heroStatusRounds: 0, dmgDealt: 0, dmgTaken: 0, wipes: 0, gold: 0, xp: 0, drops: 0, rarity: {} });
+  const hpAfter = g.party.reduce((s, h) => s + Math.max(0, h.alive ? h.hp : 0), 0);
+  A.fights++; A.rounds += C.round_; A.hpLostFrac += Math.max(0, hpBefore - hpAfter) / hpPool;
+  A.foeHp += foePower; A.foeDps += foeDps; A.gearScore += gearScore(g);
+  // damage share by source, status uptime — read straight off the meter records this fight added
+  for (const f of g.meter.fights.slice(meterMark)) for (const r of f.records) {
+    const mine = g.party.some(h => h.id === r.source);
+    if (r.kind === 'damage') { if (mine) { A.dmgDealt += r.amount; stats.dmgBySource[sourceKind(r.via)] = (stats.dmgBySource[sourceKind(r.via)] || 0) + r.amount; } else A.dmgTaken += r.amount; }
+    if (r.kind === 'status') { const d = r.duration || 2; if (g.party.some(h => h.id === r.target)) A.heroStatusRounds += d; else A.statusRounds += d; stats.statusRoundsBy[r.status] = (stats.statusRoundsBy[r.status] || 0) + d; }
+  }
   for (const [id, sk] of Object.entries(C.skillUses || {})) stats.skillUses[id] = (stats.skillUses[id] || 0) + sk;
   const won = C.result === 'win';
-  if (won) { g.trackFight(C, enc, true); g.victory(node, enc); for (const h of g.party) spendPoints(g, h); }
+  if (won) {
+    g.trackFight(C, enc, true); const before = g.act; const v = g.victory(node, enc); for (const h of g.party) spendPoints(g, h);
+    // the act advances inside victory() when the act boss goes down — that is what "cleared an act" means
+    if (g.act > before) { stats.actsCleared = Math.max(stats.actsCleared, before); stats.clearedActs[before] = 1; snapAct(g, stats); }
+    A.gold += v?.gold || 0; A.xp += v?.xp || 0;
+    for (const it of [...(v?.drops || []), ...(v?.bossDrops || [])]) { A.drops++; A.rarity[it.rarity] = (A.rarity[it.rarity] || 0) + 1; if (it.isUnique) stats.uniquesFound[it.uniqueId || it.baseKey] = (stats.uniquesFound[it.uniqueId || it.baseKey] || 0) + 1; }
+  }
   else {
     stats.deaths++; const killer = foes.find(e => e.alive) || foes[0];
     const kind = enc.named ? 'named' : node?.type === 'boss' ? 'boss' : enc.night ? 'night raid' : 'ordinary';
     stats.deathBy[kind] = (stats.deathBy[kind] || 0) + 1;
     stats.deathByEnemy[killer?.templateId || '?'] = (stats.deathByEnemy[killer?.templateId || '?'] || 0) + 1;
-    stats.deathDays.push(g.day); stats.deathActs[g.act] = (stats.deathActs[g.act] || 0) + 1;
+    stats.deathDays.push(g.day); stats.deathActs[act] = (stats.deathActs[act] || 0) + 1; A.wipes++;
     g.defeat(enc);
   }
   for (const h of heroes) { h.statuses = []; h.buffs = []; h.dmgBuff = 0; h.dmgReduct = 0; }
@@ -199,6 +286,10 @@ function runOnce(seed, { startAct = 0, forceClass = null, forceWeapon = null, da
     deathDays: [], deathActs: {}, nightFights: 0, nightDeaths: 0, starvedNights: 0, rests: 0, bought: {},
     goldSpent: 0, itemPicks: {}, affixPicks: {}, gearFired: {}, skillUses: {}, dmgByClass: {}, killsByClass: {}, statuses: {}, dtypes: {},
     actReached: 0, won: false, days: 0, levels: [], gold: 0, xpCurve: [],
+    byAct: {}, actSnap: {}, actsCleared: 0, clearedActs: {}, dmgBySource: {}, statusRoundsBy: {},
+    wornAffix: {}, wornUnique: {}, wornSet: {}, wornRarity: {}, wornLegendary: {}, uniquesFound: {},
+    crossings: { tried: 0, passed: 0, failed: 0, blocked: 0, fights: 0, days: 0, byId: {} },
+    rationsBought: 0, hungryDays: 0, starveWipes: 0,
   };
   if (startAct) {
     const z = ACT_ZONES[startAct]; g.unlockedZones.push(z); g.enterZone(z); g.act = startAct;
@@ -213,8 +304,10 @@ function runOnce(seed, { startAct = 0, forceClass = null, forceWeapon = null, da
   }
 
   let guard = 0, wipes = 0;
+  snapAct(g, stats, Math.max(1, g.act));
   while (g.day <= days && guard++ < 4000) {
     stats.actReached = Math.max(stats.actReached, g.act);
+    snapAct(g, stats);
     const node = g.node(); const key = `${g.zoneId}:${node.id}`;
     // resolve where we stand
     const res = g.enter(node);
@@ -226,10 +319,15 @@ function runOnce(seed, { startAct = 0, forceClass = null, forceWeapon = null, da
       if (res.kind === 'event') {
         const ev = res.event; const choice = (ev.choices || []).filter(c => g.choiceAllowed(c))[0];
         if (choice) { const out = g.choose(ev, choice); if (out.startCombat) { const enc = g.encounter(out.startCombat); if (enc && !runFight(g, enc, null, stats)) { wipes++; if (wipes >= maxWipes) break; } } }
+      } else if (res.kind === 'crossing') {
+        if (!doCrossing(g, res, stats)) { wipes++; if (wipes >= maxWipes) break; }
+        equipUpgrades(g, stats);
       } else if (res.kind === 'skillCheck') g.resolveSkillCheck(node);
       // everything else (lore, shrines, caches, dungeons, quiet nodes) is already applied by enter();
-      // mark it done so the bot stops walking back to it
-      if (!g.usedNodes.includes(key)) g.usedNodes.push(key);
+      // mark it done so the bot stops walking back to it. A crossing it failed stays walkable so it
+      // can come back to it, exactly as a player would.
+      if (res.kind !== 'crossing' || g.isCleared(node.id)) { if (!g.usedNodes.includes(key)) g.usedNodes.push(key); }
+      else if (!g.usedNodes.includes(key)) g.usedNodes.push(key);
     }
     for (const f of g.winGear || []) stats.gearFired[f.id] = (stats.gearFired[f.id] || 0) + 1;
     g.winGear = [];
@@ -239,14 +337,14 @@ function runOnce(seed, { startAct = 0, forceClass = null, forceWeapon = null, da
     const nz = g.zone().nodes.find(n => n.type === 'boss');
     if (nz && g.isCleared(nz.id)) {
       const next = g.nextZoneId();
-      if (!next) { stats.won = true; break; }
-      if (g.unlockedZones.includes(next)) { g.enterZone(next); stats.actReached = Math.max(stats.actReached, g.act); continue; }
+      if (!next) { stats.won = true; stats.actsCleared = 6; stats.clearedActs[6] = 1; break; }
+      if (g.unlockedZones.includes(next)) { g.enterZone(next); stats.actReached = Math.max(stats.actReached, g.act); snapAct(g, stats); continue; }
     }
     // hurt and poor? go and see a cleric before the next fight
     const town = g.zone().nodes.find(n => n.type === 'town');
     const wantTown = town && town.id !== g.nodeId && (partyHpFrac(g) < 0.45 || g.supplies.ration <= 1 || g.inventory.length > 14);
     const target = wantTown ? town.id : nextTarget(g);
-    if (target == null) { const next = g.nextZoneId(); if (next && g.unlockedZones.includes(next)) { g.enterZone(next); continue; } break; }
+    if (target == null) { const next = g.nextZoneId(); if (next && g.unlockedZones.includes(next)) { g.enterZone(next); stats.actReached = Math.max(stats.actReached, g.act); snapAct(g, stats); continue; } break; }
     const step = pathTo(g.zone(), g.nodeId, target)?.[0];
     if (!step) { if (!g.usedNodes.includes(key)) g.usedNodes.push(key); if (target === g.nodeId) continue; break; }
     if (!g.canMove()) { if (!doRest(g, stats)) { wipes++; if (wipes >= maxWipes) break; } continue; }
@@ -254,6 +352,7 @@ function runOnce(seed, { startAct = 0, forceClass = null, forceWeapon = null, da
     if (!g.travel(step)) { if (!doRest(g, stats)) break; continue; }
     for (const fx of g.legGear || []) stats.gearFired[fx.id] = (stats.gearFired[fx.id] || 0) + 1;
   }
+  wornTally(g, stats);
   stats.days = g.day; stats.levels = g.party.map(h => h.level); stats.gold = g.gold; stats.wipes = wipes;
   stats.actReached = Math.max(stats.actReached, g.act);
   // damage share by class, from the meter
@@ -302,8 +401,52 @@ function summarise(rows, label) {
     affixPicks: mergeCounts(rows, 'affixPicks'), gearFired: mergeCounts(rows, 'gearFired'),
     statuses: mergeCounts(rows, 'statuses'), dtypes: mergeCounts(rows, 'dtypes'),
     skillUses: mergeCounts(rows, 'skillUses'), dmgByClass: mergeCounts(rows, 'dmgByClass'),
+    dmgBySource: mergeCounts(rows, 'dmgBySource'), statusRoundsBy: mergeCounts(rows, 'statusRoundsBy'),
+    wornAffix: mergeCounts(rows, 'wornAffix'), wornUnique: mergeCounts(rows, 'wornUnique'),
+    wornSet: mergeCounts(rows, 'wornSet'), wornRarity: mergeCounts(rows, 'wornRarity'),
+    wornLegendary: mergeCounts(rows, 'wornLegendary'), uniquesFound: mergeCounts(rows, 'uniquesFound'),
+    actsCleared: avg(rows.map(r => r.actsCleared || 0)),
+    clearedAct: Object.fromEntries([1, 2, 3, 4, 5, 6].map(a => [a, rows.filter(r => r.clearedActs?.[a] || r.won && a === 6).length])),
+    curve: actCurve(rows), snap: actSnaps(rows), crossings: crossingTotals(rows),
     byAct,
   };
+}
+/** Per-act difficulty curve: fight length, what a fight costs the party, and what it is worth. */
+function actCurve(rows) {
+  const out = {};
+  for (let a = 1; a <= 6; a++) {
+    const parts = rows.map(r => r.byAct[a]).filter(Boolean);
+    if (!parts.length) continue;
+    const S = k => sum(parts.map(p => p[k] || 0));
+    const fights = S('fights') || 1;
+    out[a] = {
+      runs: parts.length, fights: S('fights'), rounds: S('rounds') / fights,
+      hpLost: 100 * S('hpLostFrac') / fights, foeHp: S('foeHp') / fights, foeDps: S('foeDps') / fights,
+      gear: S('gearScore') / fights, dmgDealt: S('dmgDealt') / fights, dmgTaken: S('dmgTaken') / fights,
+      statusRounds: S('statusRounds') / fights, heroStatusRounds: S('heroStatusRounds') / fights,
+      gold: S('gold') / fights, xp: S('xp') / fights, drops: S('drops') / fights, wipes: S('wipes'),
+      wipeRate: 100 * S('wipes') / fights,
+      rarity: parts.reduce((o, p) => { for (const [k, v] of Object.entries(p.rarity || {})) o[k] = (o[k] || 0) + v; return o; }, {}),
+    };
+  }
+  return out;
+}
+/** Where the party stood the day it walked into each act. */
+function actSnaps(rows) {
+  const out = {};
+  for (let a = 1; a <= 6; a++) {
+    const parts = rows.map(r => r.actSnap[a]).filter(Boolean);
+    if (!parts.length) continue;
+    out[a] = { runs: parts.length, day: avg(parts.map(p => p.day)), level: avg(parts.map(p => p.level)),
+      gold: avg(parts.map(p => p.gold)), xp: avg(parts.map(p => p.xp)), gear: avg(parts.map(p => p.gear)) };
+  }
+  return out;
+}
+function crossingTotals(rows) {
+  const t = { tried: 0, passed: 0, failed: 0, blocked: 0, fights: 0, days: 0, byId: {} };
+  for (const r of rows) { const c = r.crossings || {}; for (const k of ['tried', 'passed', 'failed', 'blocked', 'fights', 'days']) t[k] += c[k] || 0;
+    for (const [id, v] of Object.entries(c.byId || {})) { const b = t.byId[id] ||= { tried: 0, passed: 0 }; b.tried += v.tried; b.passed += v.passed; } }
+  return t;
 }
 
 function md(s, f, extra = {}) {
@@ -329,6 +472,62 @@ function md(s, f, extra = {}) {
   L.push(`| gold in hand at the end | ${Math.round(s.gold)} |`);
   L.push(`| nights with no food | ${f1(s.starve)}% of rests |`);
   L.push(`| night raids that wiped the party | ${f1(s.nightDeath)}% |`);
+  L.push(`| acts cleared per run | ${f1(s.actsCleared)} |`);
+  L.push(`| crossings passed | ${pct(s.crossings.passed, s.crossings.tried)} of ${s.crossings.tried} |`);
+  L.push('');
+  L.push('## Per act: cleared, stalled, wiped');
+  L.push('');
+  L.push('"Cleared" means the act boss went down and the party walked on. "Stalled" is a run that ended in that act.');
+  L.push('');
+  L.push('| act | runs that got there | cleared it | stalled there | wipes in that act | wipes per 100 fights |');
+  L.push('|---|---|---|---|---|---|');
+  for (let a = 1; a <= 6; a++) {
+    const got = (s.curve[a]?.runs) || 0; const cl = s.clearedAct[a] || 0;
+    L.push(`| ${a} | ${got} | ${cl} (${pct(cl, s.runs)}) | ${(s.byAct[a] || []).length} | ${s.deathActs[a] || 0} | ${f1(s.curve[a]?.wipeRate || 0)} |`);
+  }
+  L.push('');
+  L.push('## The difficulty curve');
+  L.push('');
+  L.push('One line per act: how long a fight runs, what share of the party\'s health bar it costs, how much enemy');
+  L.push('HP and how much enemy damage-per-round the party is facing, and how good the gear on their backs is.');
+  L.push('');
+  L.push('| act | rounds per fight | party HP lost per fight | enemy HP per fight | enemy dmg/round | avg equipped item score | damage dealt | damage taken |');
+  L.push('|---|---|---|---|---|---|---|---|');
+  for (const a of Object.keys(s.curve).sort()) { const c = s.curve[a];
+    L.push(`| ${a} | ${f1(c.rounds)} | ${f1(c.hpLost)}% | ${Math.round(c.foeHp)} | ${Math.round(c.foeDps)} | ${Math.round(c.gear)} | ${Math.round(c.dmgDealt)} | ${Math.round(c.dmgTaken)} |`); }
+  L.push('');
+  L.push('## Level and purse at each act boundary');
+  L.push('');
+  L.push('`xp table` is the XP the party actually holds against the XP the table wants for the level it is on —');
+  L.push('over 100% means they are ahead of the curve and will level again soon.');
+  L.push('');
+  L.push('| act | runs | day it started | party level | xp held | xp for that level | gold | avg equipped item score |');
+  L.push('|---|---|---|---|---|---|---|---|');
+  for (const a of Object.keys(s.snap).sort()) { const n = s.snap[a]; const want = xpForLevel(Math.max(1, Math.round(n.level)));
+    L.push(`| ${a} | ${n.runs} | ${f1(n.day)} | ${f1(n.level)} | ${Math.round(n.xp)} | ${want} | ${Math.round(n.gold)} | ${Math.round(n.gear)} |`); }
+  L.push('');
+  L.push('## Loot per act');
+  L.push('');
+  L.push('| act | gold per fight | xp per fight | drops per fight | normal | magic | rare | legendary |');
+  L.push('|---|---|---|---|---|---|---|---|');
+  for (const a of Object.keys(s.curve).sort()) { const c = s.curve[a]; const r = c.rarity || {};
+    L.push(`| ${a} | ${f1(c.gold)} | ${f1(c.xp)} | ${(c.drops).toFixed(2)} | ${r.normal || 0} | ${r.magic || 0} | ${r.rare || 0} | ${r.legendary || 0} |`); }
+  L.push('');
+  L.push('## Crossings');
+  L.push('');
+  const cx = s.crossings;
+  L.push(`${cx.tried} crossings attempted · **${pct(cx.passed, cx.tried)} passed** · ${cx.failed} failed · ${cx.blocked} with no way through · ${cx.fights} ended in a fight · ${cx.days} days spent.`);
+  L.push('');
+  L.push('| crossing | attempts | passed |');
+  L.push('|---|---|---|');
+  for (const [id, v] of Object.entries(cx.byId).sort((a, b) => b[1].tried - a[1].tried)) L.push(`| ${id} | ${v.tried} | ${pct(v.passed, v.tried)} |`);
+  L.push('');
+  L.push('## Damage by source');
+  L.push('');
+  const srcTot = sum(Object.values(s.dmgBySource));
+  L.push('| source | share of hero damage |');
+  L.push('|---|---|');
+  for (const [k, v] of topN(s.dmgBySource, 8)) L.push(`| ${k} | ${pct(v, srcTot)} |`);
   L.push('');
   L.push('## Where runs end');
   L.push('');
@@ -374,6 +573,16 @@ function md(s, f, extra = {}) {
   L.push('| status applied | times |');
   L.push('|---|---|');
   for (const [k, v] of topN(s.statuses, 30)) L.push(`| ${k} | ${v} |`);
+  L.push('');
+  L.push('| status | rounds of uptime it bought | per fight |');
+  L.push('|---|---|---|');
+  const fightsAll = sum(Object.values(s.curve).map(c => c.fights)) || 1;
+  for (const [k, v] of topN(s.statusRoundsBy, 12)) L.push(`| ${k} | ${v} | ${f1(v / fightsAll)} |`);
+  L.push('');
+  L.push('| act | status rounds on enemies per fight | on the party per fight |');
+  L.push('|---|---|---|');
+  for (const a of Object.keys(s.curve).sort()) L.push(`| ${a} | ${f1(s.curve[a].statusRounds)} | ${f1(s.curve[a].heroStatusRounds)} |`);
+  L.push('');
   const never = [...STATUS_NAMES].filter(k => !s.statuses[k]);
   if (never.length) { L.push(''); L.push(`Never applied in these runs: ${never.join(', ')}.`); }
   L.push('');
@@ -392,6 +601,20 @@ function md(s, f, extra = {}) {
   L.push('|---|---|');
   const road = Object.fromEntries(Object.entries(s.affixPicks).filter(([k]) => ROAD_STATS.has(k)));
   for (const [k, v] of topN(road, 30)) L.push(`| ${k} | ${v} |`);
+  L.push('');
+  L.push('| affix on worn gear at the end of the run | runs |');
+  L.push('|---|---|');
+  for (const [k, v] of topN(s.wornAffix, 14)) L.push(`| ${k} | ${v} |`);
+  L.push('');
+  L.push('| rarity of worn gear at the end | pieces |');
+  L.push('|---|---|');
+  for (const [k, v] of topN(s.wornRarity, 5)) L.push(`| ${k} | ${v} (${pct(v, sum(Object.values(s.wornRarity)))}) |`);
+  if (Object.keys(s.wornUnique).length) { L.push(''); L.push('| unique worn at the end | runs |'); L.push('|---|---|');
+    for (const [k, v] of topN(s.wornUnique, 12)) L.push(`| ${k} | ${v} |`); }
+  if (Object.keys(s.wornLegendary).length) { L.push(''); L.push('| legendary power carried at the end | runs |'); L.push('|---|---|');
+    for (const [k, v] of topN(s.wornLegendary, 12)) L.push(`| ${k} | ${v} |`); }
+  if (Object.keys(s.wornSet).length) { L.push(''); L.push('| set piece worn at the end | pieces |'); L.push('|---|---|');
+    for (const [k, v] of topN(s.wornSet, 8)) L.push(`| ${k} | ${v} |`); }
   L.push('');
   L.push('| older conditional affix equipped | times |');
   L.push('|---|---|');

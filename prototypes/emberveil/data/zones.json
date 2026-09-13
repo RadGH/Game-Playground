@@ -24,7 +24,7 @@
      "x": 0.28,
      "y": 0.5,
      "exits": [
-      "first_combat__second_combat_x1"
+      "first_combat__first_combat__second_combat_x1_c1"
      ],
      "encounter": "prologue_scout"
     },
@@ -35,7 +35,7 @@
      "x": 0.5,
      "y": 0.5,
      "exits": [
-      "second_combat__warning_x2"
+      "second_combat__second_combat__warning_x2_c0"
      ],
      "encounter": "prologue_pair"
     },
@@ -91,6 +91,32 @@
       "warning"
      ],
      "added": true
+    },
+    {
+     "id": "second_combat__second_combat__warning_x2_c0",
+     "type": "crossing",
+     "name": "The Cold Ford",
+     "crossingId": "cold_ford",
+     "x": 0.565,
+     "y": 0.524,
+     "exits": [
+      "second_combat__warning_x2"
+     ],
+     "added": true,
+     "crossing": true
+    },
+    {
+     "id": "first_combat__first_combat__second_combat_x1_c1",
+     "type": "crossing",
+     "name": "The Scree Gate",
+     "crossingId": "scree_gate",
+     "x": 0.333,
+     "y": 0.508,
+     "exits": [
+      "first_combat__second_combat_x1"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   }
@@ -231,7 +257,7 @@
      "x": 0.352,
      "y": 0.314,
      "exits": [
-      "recruit_dorn"
+      "road_ambush__recruit_dorn_x0__recruit_dorn_c0"
      ],
      "added": true,
      "encounter": "goblin_patrol"
@@ -283,6 +309,19 @@
      ],
      "added": true,
      "encounter": "corrupted_outpost"
+    },
+    {
+     "id": "road_ambush__recruit_dorn_x0__recruit_dorn_c0",
+     "type": "crossing",
+     "name": "Fever Row",
+     "crossingId": "fever_row",
+     "x": 0.374,
+     "y": 0.226,
+     "exits": [
+      "recruit_dorn"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   },
@@ -501,7 +540,7 @@
      "x": 0.391,
      "y": 0.623,
      "exits": [
-      "goblin_camp"
+      "hidden_path__goblin_camp_x4__goblin_camp_c0"
      ],
      "added": true,
      "encounter": "spider_nest"
@@ -529,6 +568,19 @@
      ],
      "added": true,
      "encounter": "wolf_pack"
+    },
+    {
+     "id": "hidden_path__goblin_camp_x4__goblin_camp_c0",
+     "type": "crossing",
+     "name": "The Broken Span",
+     "crossingId": "broken_span",
+     "x": 0.441,
+     "y": 0.564,
+     "exits": [
+      "goblin_camp"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   }
@@ -549,7 +601,7 @@
      "exits": [
       "ash_gate__dust_patrol_x4",
       "ash_lore",
-      "salt_wastes",
+      "ash_gate__salt_wastes_c0",
       "garrick_old_oath",
       "tomek_recovery",
       "krix_trap",
@@ -702,7 +754,7 @@
      "x": 0.82,
      "y": 0.78,
      "exits": [
-      "dust_int_check__dust_boss_x3"
+      "dust_int_check__dust_int_check__dust_boss_x3_c1"
      ],
      "skillCheck": {
       "stat": "INT",
@@ -824,6 +876,32 @@
      ],
      "added": true,
      "encounter": "obsidian_garrison"
+    },
+    {
+     "id": "ash_gate__salt_wastes_c0",
+     "type": "crossing",
+     "name": "The Toll Stone",
+     "crossingId": "toll_stone",
+     "x": 0.126,
+     "y": 0.677,
+     "exits": [
+      "salt_wastes"
+     ],
+     "added": true,
+     "crossing": true
+    },
+    {
+     "id": "dust_int_check__dust_int_check__dust_boss_x3_c1",
+     "type": "crossing",
+     "name": "The Grey Fen",
+     "crossingId": "grey_fen",
+     "x": 0.837,
+     "y": 0.689,
+     "exits": [
+      "dust_int_check__dust_boss_x3"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   },
@@ -840,7 +918,7 @@
      "x": 0.06,
      "y": 0.5,
      "exits": [
-      "lava_fields",
+      "plateau_enter__lava_fields_c0",
       "plateau_enter__ancient_shrine_x2",
       "plateau_enter__cinder_gorge_x0",
       "iris_ember_field",
@@ -1100,6 +1178,19 @@
      ],
      "added": true,
      "encounter": "ash_patrol"
+    },
+    {
+     "id": "plateau_enter__lava_fields_c0",
+     "type": "crossing",
+     "name": "Windbite Ridge",
+     "crossingId": "windbite_ridge",
+     "x": 0.129,
+     "y": 0.39,
+     "exits": [
+      "lava_fields"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   }
@@ -1304,7 +1395,7 @@
      "x": 0.139,
      "y": 0.682,
      "exits": [
-      "bone_pit"
+      "breach_gate__bone_pit_x3__bone_pit_c0"
      ],
      "added": true,
      "encounter": "hell_garrison"
@@ -1344,6 +1435,19 @@
      ],
      "added": true,
      "encounter": "demon_patrol"
+    },
+    {
+     "id": "breach_gate__bone_pit_x3__bone_pit_c0",
+     "type": "crossing",
+     "name": "The Warden's Gate",
+     "crossingId": "wardens_gate",
+     "x": 0.169,
+     "y": 0.782,
+     "exits": [
+      "bone_pit"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   },
@@ -1360,7 +1464,7 @@
      "x": 0.05,
      "y": 0.5,
      "exits": [
-      "core_enter__rift_demons_x1",
+      "core_enter__core_enter__rift_demons_x1_c1",
       "core_enter__void_nexus_x2",
       "core_enter__shattered_path_x3",
       "core_enter__iris_shard_archive_x6",
@@ -1449,7 +1553,7 @@
      "x": 0.54,
      "y": 0.88,
      "exits": [
-      "ancient_seal"
+      "shard_vault__ancient_seal_c0"
      ]
     },
     {
@@ -1587,6 +1691,32 @@
      ],
      "added": true,
      "encounter": "hell_garrison"
+    },
+    {
+     "id": "shard_vault__ancient_seal_c0",
+     "type": "crossing",
+     "name": "The Cold Ford",
+     "crossingId": "cold_ford",
+     "x": 0.671,
+     "y": 0.738,
+     "exits": [
+      "ancient_seal"
+     ],
+     "added": true,
+     "crossing": true
+    },
+    {
+     "id": "core_enter__core_enter__rift_demons_x1_c1",
+     "type": "crossing",
+     "name": "The Scree Gate",
+     "crossingId": "scree_gate",
+     "x": 0.079,
+     "y": 0.397,
+     "exits": [
+      "core_enter__rift_demons_x1"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   }
@@ -1771,7 +1901,7 @@
      "x": 0.102,
      "y": 0.341,
      "exits": [
-      "garrick_final_charge"
+      "rift_entry__garrick_final_charge_x2__garrick_final_charge_c0"
      ],
      "added": true
     },
@@ -1822,6 +1952,19 @@
      ],
      "added": true,
      "shrineType": "heal"
+    },
+    {
+     "id": "rift_entry__garrick_final_charge_x2__garrick_final_charge_c0",
+     "type": "crossing",
+     "name": "Fever Row",
+     "crossingId": "fever_row",
+     "x": 0.136,
+     "y": 0.285,
+     "exits": [
+      "garrick_final_charge"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   },
@@ -1851,7 +1994,7 @@
      "x": 0.18,
      "y": 0.18,
      "exits": [
-      "star_horror_swarm"
+      "yssira_last_song__star_horror_swarm_c0"
      ]
     },
     {
@@ -1927,7 +2070,7 @@
      "y": 0.38,
      "exits": [
       "last_shrine",
-      "final_trial",
+      "unraveler_ante__final_trial_c1",
       "rift_spiral"
      ],
      "encounter": "void_horde"
@@ -2056,6 +2199,32 @@
      ],
      "added": true,
      "shrineType": "heal"
+    },
+    {
+     "id": "yssira_last_song__star_horror_swarm_c0",
+     "type": "crossing",
+     "name": "The Broken Span",
+     "crossingId": "broken_span",
+     "x": 0.204,
+     "y": 0.218,
+     "exits": [
+      "star_horror_swarm"
+     ],
+     "added": true,
+     "crossing": true
+    },
+    {
+     "id": "unraveler_ante__final_trial_c1",
+     "type": "crossing",
+     "name": "The Toll Stone",
+     "crossingId": "toll_stone",
+     "x": 0.624,
+     "y": 0.463,
+     "exits": [
+      "final_trial"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   }
@@ -2074,7 +2243,7 @@
      "x": 0.04,
      "y": 0.5,
      "exits": [
-      "abyss_gate__drowned_halls_x1",
+      "abyss_gate__abyss_gate__drowned_halls_x1_c1",
       "abyss_gate__memory_pool_x2",
       "abyss_gate__deep_trench_x3",
       "abyss_gate__tidekeeper_lament_x6"
@@ -2164,7 +2333,7 @@
      "x": 0.52,
      "y": 0.88,
      "exits": [
-      "worm_den"
+      "sunken_vault__worm_den_c0"
      ]
     },
     {
@@ -2303,6 +2472,32 @@
      ],
      "added": true,
      "encounter": "primordial_patrol"
+    },
+    {
+     "id": "sunken_vault__worm_den_c0",
+     "type": "crossing",
+     "name": "The Grey Fen",
+     "crossingId": "grey_fen",
+     "x": 0.651,
+     "y": 0.738,
+     "exits": [
+      "worm_den"
+     ],
+     "added": true,
+     "crossing": true
+    },
+    {
+     "id": "abyss_gate__abyss_gate__drowned_halls_x1_c1",
+     "type": "crossing",
+     "name": "Windbite Ridge",
+     "crossingId": "windbite_ridge",
+     "x": 0.067,
+     "y": 0.392,
+     "exits": [
+      "abyss_gate__drowned_halls_x1"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   },
@@ -2396,7 +2591,7 @@
      "x": 0.52,
      "y": 0.88,
      "exits": [
-      "crucible"
+      "final_reliquary__crucible_c1"
      ]
     },
     {
@@ -2407,7 +2602,7 @@
      "y": 0.38,
      "exits": [
       "last_prayer",
-      "crucible",
+      "architect_bridge__crucible_c0",
       "primal_vein"
      ],
      "encounter": "genesis_nest"
@@ -2536,6 +2731,32 @@
      ],
      "added": true,
      "shrineType": "heal"
+    },
+    {
+     "id": "architect_bridge__crucible_c0",
+     "type": "crossing",
+     "name": "The Warden's Gate",
+     "crossingId": "wardens_gate",
+     "x": 0.631,
+     "y": 0.516,
+     "exits": [
+      "crucible"
+     ],
+     "added": true,
+     "crossing": true
+    },
+    {
+     "id": "final_reliquary__crucible_c1",
+     "type": "crossing",
+     "name": "The Cold Ford",
+     "crossingId": "cold_ford",
+     "x": 0.654,
+     "y": 0.763,
+     "exits": [
+      "crucible"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   }
@@ -2566,7 +2787,7 @@
      "x": 0.2,
      "y": 0.22,
      "exits": [
-      "dragon_skyroad__wyrm_citadel_x1",
+      "dragon_skyroad__dragon_skyroad__wyrm_citadel_x1_c0",
       "dragon_hoard_a"
      ],
      "encounter": "dragon_patrol"
@@ -2738,6 +2959,19 @@
      ],
      "added": true,
      "encounter": "frost_wyrm_pack"
+    },
+    {
+     "id": "dragon_skyroad__dragon_skyroad__wyrm_citadel_x1_c0",
+     "type": "crossing",
+     "name": "The Scree Gate",
+     "crossingId": "scree_gate",
+     "x": 0.267,
+     "y": 0.234,
+     "exits": [
+      "dragon_skyroad__wyrm_citadel_x1"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   },
@@ -2799,7 +3033,7 @@
      "x": 0.36,
      "y": 0.9,
      "exits": [
-      "dragon_trial__dragonking_shrine_x1"
+      "dragon_trial__dragon_trial__dragonking_shrine_x1_c0"
      ],
      "encounter": "storm_dragon_nest"
     },
@@ -2912,6 +3146,19 @@
      ],
      "added": true,
      "shrineType": "heal"
+    },
+    {
+     "id": "dragon_trial__dragon_trial__dragonking_shrine_x1_c0",
+     "type": "crossing",
+     "name": "Fever Row",
+     "crossingId": "fever_row",
+     "x": 0.412,
+     "y": 0.866,
+     "exits": [
+      "dragon_trial__dragonking_shrine_x1"
+     ],
+     "added": true,
+     "crossing": true
     }
    ]
   }

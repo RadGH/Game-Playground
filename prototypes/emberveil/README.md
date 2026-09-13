@@ -52,6 +52,27 @@ instruction). Open `http://<lan-ip>:8400/prototypes/emberveil/`.
 | Variety generator triples conversation lines with personality openers/closers | `expandVariants` |
 | Language debug mode (HUD toggle): click any word in a spoken line → pronunciation (phonemes from our engine), lexicon entry + forms, type a respelling or a replacement word applied on the fly, export/import JSON, submit to the dev server inbox (`library/synced/inbox/lang-overrides-*.json`) | `shared/langdebug.js` |
 
+## Combat speech variety (round 15)
+
+A prologue playthrough heard "Is that all, \<hero\>?" three times, because that taunt had double weight in
+`combat_taunt` and Lingo's anti-repeat only remembered what *each speaker* had just said — four heroes meant four
+chances at the same favourite. Fixed on both ends:
+
+| Change | Where |
+|---|---|
+| Every fight opener now comes from Lingo. Talking enemies use `enemy_opener` (96 lines: 16 generic + 10 each for goblins, bandits, cultists, undead, demons, void things, dragons and knights); bosses use `boss_opener` (14); wordless beasts get narration from `beast_snarl` (16) instead of "The wolf snarls."; camp raids use `night_attack` (14) and ambush nodes `ambush_opener` (14) | `js/talk.js` `enemyOpener/beastOpener/raidOpener`, `lingo/data/grammar.json` |
+| Enemy families and hero roles are grammar **tags**, switched on per speaker: `enemyKind()` maps a template id to goblin/bandit/cultist/undead/demon/void/dragon/knight, `heroRole()` maps a class role to tank/healer/caster/rogue/ranger, and `speechFor()` sets every other tag in the family to 0. Each family also gets its own traits and sliders (`KIND_SPEECH`), so a goblin and a dragon read differently out of the same pool | `js/talk.js` |
+| Named enemies and nemeses open on their history: `named_first` (12), `named_rematch` (12, with `defeats` and `days` since it got away), `named_avenge` (13, names the hero it put down), `named_beaten` (12, for one the party already beat). The hard-coded "You again. I told you I would come back." is gone | `js/talk.js` `namedOpener()`, `js/main.js` `fight()` |
+| Nothing repeats: Lingo keeps a session-wide history per phrase pool (20 deep, `meta.noRepeat`), and `ctx.exclude` stops two enemies in the same fight opening with the same line (`talk.beginFight(enc)` clears it) | `lingo/js/lingo.js` `pick()`, `js/talk.js` `fightLines` |
+| Hero pools grew and got role flavour: `combat_taunt` 33, `combat_bark` 42, `combat_kill` 26, `combat_hurt` 23, `ally_down` 20, `brag` 22, `relief` 20, `warning` 15 | `lingo/data/grammar.json` |
+
+Tests: `node --test prototypes/emberveil/tests/talk-variety.test.js` (family/role routing, no repeat in a fight, named
+situations, 30-fight run stays wide) and `lingo/tests/combat-variety.test.js`.
+
+Known gap: `combat.js` emits a `phase` event when a boss flips phase, but `main.js`'s event loop has no branch for it,
+so neither the hand-written `onEnter` text in `data/boss-phases.json` nor the new `boss_phase` pool (14 lines,
+`talk.bossPhaseLine(boss)`) is shown yet. One `else if (ev.type === 'phase')` in the fight loop turns it on.
+
 ## Enemy looks
 
 Every enemy, boss, class pet, kennel companion and named hire has a **designed** look in `data/enemy-looks.json` — nothing is guessed from the id any more. Built by `tools/build-emberveil-enemies.mjs` (edit the tables there, then re-run it); the same looks are filed in the character library as `enemy_<id>` (kind `enemy`) and `companion_<id>` (kind `npc`), so any page on the origin can stamp one.
@@ -187,33 +208,49 @@ anything with a better score. A run ends when the party has been wiped three tim
 is reached.
 
 ```bash
-node tools/sim-emberveil.mjs --runs 200 --seed 1              # ~55 s, prints a markdown report
+node tools/sim-emberveil.mjs --runs 300 --seed 1              # ~3.5 min, prints a markdown report
 node tools/sim-emberveil.mjs --runs 60 --act 3                # start every run at the head of act 3
 node tools/sim-emberveil.mjs --runs 40 --class necromancer    # every party carries one
-node tools/sim-emberveil.mjs --runs 200 --matrix --quiet \
-  --report prototypes/emberveil/research/sim-latest.md        # + class and weapon matrices (~7 min)
+node tools/sim-emberveil.mjs --runs 300 --matrix --quiet \
+  --report prototypes/emberveil/research/sim-latest.md        # + class and weapon matrices (~12 min)
 ```
 
 Flags: `--runs N` `--seed N` `--act N` `--class ID` `--matrix` `--quiet` `--days N` `--report PATH`.
-Runs are seeded and repeatable. The report covers win rate, where runs end, what kills the party,
-fight length by act, damage share by class, most and least used skills, item and affix pick rates,
-starvation, night-raid deaths, levels, gold, and which road-weapon properties actually fired.
+Runs are seeded and repeatable. The report covers the per-act funnel (how many runs reached each
+act, cleared it, stalled there and wiped there), a difficulty curve (rounds per fight, the share of
+the party's health bar one fight costs, enemy HP and damage faced, gear score), where the party
+stands at each act boundary (day, level, XP held against the XP table, gold, gear), loot and gold
+per fight per act with the rarity mix, crossings pass/fail per hazard, damage share by source
+(weapon/skill/status/proc) and by class, status uptime per act, what kills the party, most and least
+used skills, starvation, night-raid deaths, and the affixes, uniques, set pieces and legendary
+powers actually worn at the end.
 
-The write-up of the latest run and the balance pass that came out of it is
-**`research/sim-report.md`** (hand-written, with the full generated tables from before and after
-appended). Point `--report` at `research/sim-latest.md` so a fresh run does not overwrite it.
+The current write-up is **`research/sim-report-2.md`** (round 19); the round-14 pass before it is
+`research/sim-report.md`. Point `--report` at `research/sim-latest.md` so neither is overwritten —
+`research/sim-before-r19.md` is the same report taken before the round-19 pass.
 
-The round-14 pass moved full clears from 16.5% to 23.0%, the average act reached from 3.6 to 4.4,
-and runs that stalled in act 2 from 88 of 200 down to 38 — fourteen numbers in `balance.json`,
-`enemies.json`, `encounters.json` and `items.json`, plus three one-line class repairs (the tactician
-was handed a STR-scaled longsword despite being an INT class, the priest's only attack had a
-cooldown, and the stormcaller's only level-1 skill cost more mana than it could regenerate).
+The round-19 pass was a difficulty pass: the game had drifted easy (28% of runs cleared all six
+acts, act 1 never failed in 300 runs, an act-4 fight cost 2% of the party's health bar). The cause
+was the XP curve — the party hit the level cap in act 5 holding three times the XP the table asked
+for, so it outgrew every enemy multiplier. Stretching the XP table, trimming the XP and gold
+multipliers, lifting acts 1/4/6, giving enemies a per-act armour ramp and some magic resist, making
+bosses scale closer to the trash beside them, handing spell lists to nine silent late-game enemies
+and three silent bosses (including the Dragon King), and taking the shine off loot and crossings
+brought it to **11.3% full clears with act 1 at 91.3%** and a smooth funnel down through the acts.
+Starting heroes were not touched.
 
-**`data/balance.json` is now the knob file it always claimed to be.** `rules.js` used to carry its
-own copies of the enemy multipliers; `applyBalance(data.balance)` (called from the `Game`
-constructor) now loads `enemies.globalMultipliers`, `enemies.actMultipliers`,
-`partySize.enemyDmgMult` and `combat.skill` over the defaults, and `combat.js` reads the skill
-multipliers from the same place. Edit the JSON, re-run the sim, read the difference.
+**`data/balance.json` is the knob file.** `applyBalance(data.balance)` (called from the `Game`
+constructor) loads `enemies.globalMultipliers`, `enemies.actMultipliers` (including the per-act
+`armor` multiplier and flat `magicResist`), `enemies.boss`, `enemies.champion`, `enemies.named`,
+`economy.globalMultipliers`, `progression.xpTable`, `progression.talentPointLevels`,
+`partySize.enemyDmgMult` and `combat.skill` over the defaults; `loot.js` takes the `loot` block
+(affix magnitude, drop rate, set and unique odds, shop markup) and `combat.js` reads the skill
+multipliers. `data/crossings.json`'s `difficulty` block is read by `explore.js`. Edit the JSON,
+re-run the sim, read the difference.
+
+Two things in `balance.json` are **not** live yet: `progression.statPointsPerLevel` and
+`progression.passivePointEveryNLevels`. `js/main.js` hardcodes +2 attributes and every fifth level,
+so changing them would split the live game from the simulator.
 
 ## Not rebuilt (on purpose, listed so nothing is silently missing)
 - Tap weapons/utilities (the real-time layer), achievements, codex, telemetry, cloud saves, NG+ UI (scaling constants are in `rules.js`), hardcore mode, infinite dungeon, guild hall/black market stock (formulas noted in `research/`), recruitable story heroes from dialog (`recruitHero` outcomes show text only), crafting recipes and fame cosmetic unlocks (both explained in `EFFECTS.md`), class unlock gating (all thirty classes are open; the original rule is shown on each card).
@@ -236,6 +273,31 @@ the frame loop; the playback loop in `js/main.js` maps combat events onto it:
 - `heal` and `revive` play their own effects; `down`, `kill` and the end of the fight clear every aura.
 
 Flight time is capped at 450 ms so the round loop is no slower than the sleeps that were already there.
+
+## Sound (round 16)
+
+Sound comes from the shared `sfx/` library (`sfx/README.md`) and is bolted on from the outside:
+`js/sfx-bridge.js` wraps the stage's own methods at runtime, so **`js/stage.js` is not touched at
+all** and `main.js` gains exactly one import and one `installSfx({ stage, game })` call.
+
+- **Fights** — `attack` swings, `cast` fires the element's launch sound, `impact` (and `fx.impact`,
+  which is where damage-over-time ticks go) lands it, `status` plays the apply sting the first time a
+  status appears and `pulseStatus` its per-round tick, `heal` and `reviveFx` play their own, and
+  `down` picks a death sound from the body: construct, beast or humanoid. Everything is panned by the
+  character's x position on the stage, so the enemy line is audibly on the right.
+- **The world** — `setBackdrop` swaps the ambience bed (forest / cave / town / marsh / mountain /
+  void / fire / wind, chosen from the scenery tags in `assets/data/manifest.json`), `camp` starts the
+  campfire loop and `clearCamp` stops it, and `game.travel` puts a footstep on the road.
+- **Text** — loot by rarity, gold, level-ups, quest and bounty completions, misses and night ambushes
+  are picked up by watching what the game writes into the narrative panel (`NARRATIVE_RULES` in the
+  bridge), so none of those call sites had to change.
+- **Interface** — clicks, hovers and dialog open/close come from delegated listeners.
+- **Settings** — the in-game menu has a **Sound effects** dropdown (hybrid / synth / CC0 samples /
+  chiptune), effects, interface and ambience volume sliders, and a **Mute sound effects** checkbox
+  that is separate from **Mute voices**. All of it is remembered in `localStorage`.
+
+Volume is not per-sound guesswork: every clip is measured when it is built and levelled to its
+category's target, so a recorded punch and a synthesized fireball arrive at the same loudness.
 
 ## Themed interface (round 12)
 
@@ -264,9 +326,11 @@ gold trim, ember accents, parchment lore text, **Cinzel** for headings and **Spe
   system lines are muted. Action buttons carry an icon and a tooltip that says what will happen (rest:
   night-attack chance and what heals; travel: moves left). Tabs are icon + label with an ember underline
   that flickers on the active one.
-- **Tabs** — party cards have portrait frames, hp/mp/xp bars (red / blue / violet) with the numbers in
-  the tooltip, stat chips that explain STR/DEX/INT/CON, armor, hit, dodge and crit, and an equipment grid
-  of slot icons + rarity gems where hovering a piece shows its full card. Bag rows show a rarity gem and,
+- **Tabs** — party cards are compact so all four heroes fit in the tab at once: portrait frame, name +
+  class + level, hp/mp/xp bars (red / blue / violet) with the numbers in the tooltip, and one line of stat
+  chips (damage, armor, crit, STR/DEX/INT/CON). The **Gear** button on a card opens a drawer with hit and
+  dodge, the ten equipment slots (slot icons + rarity gems, hover for the full card) and the Feelings /
+  Save to library buttons; each card remembers whether its drawer was open. Bag rows show a rarity gem and,
   on hover, the item card with the compare-to-equipped difference. Skill rows show type / mana / cooldown
   chips and explain every talent and upgrade.
 - **Map** — drawn as an aged chart: warm parchment ground over the leather tile, a faint survey grid,
@@ -275,8 +339,9 @@ gold trim, ember accents, parchment lore text, **Cinzel** for headings and **Spe
   dimmed, and a small compass (the `tab_map` icon) in the corner. The svg viewBox is rebuilt to match
   the panel's shape on every render (and on window resize), so circles stay round and labels are not
   smeared sideways. Nodes have a hover halo and a tooltip naming the node type with a plain-language
-  line (`js/ui.js` → `NODE_INFO`); labels alternate above and below the trail and are truncated to the
-  space between columns, with the full name in the tooltip.
+  line (`js/ui.js` → `NODE_INFO`). Labels are never cut short: a long name wraps onto two lines, and each
+  label is placed in the first free spot out of under / over / beside the node and two tiers further out,
+  measured against everything already drawn, so labels never sit on one another or on a node.
 - **Quests / Meter / Journal** — the same treatment as Party and Bag: `sectionHead()` headings with the
   divider rule (The story, Hero errands, Bounty board, Finished; The party, Companions, Grudges, Days on
   the road; Damage meter), rows with an icon and a body, finished work struck through, and empty states
@@ -294,8 +359,40 @@ Files: `style.css` (all of the theme), `js/ui.js` (icon helpers, rarity gems, sl
 text, frame flourishes, embers, how-to-play, the menu overlay, tooltip cards) and
 `shared/tooltip.js` + `shared/tooltip.css` (the tooltip engine, shared with the rest of the playground).
 
+## Interface round 17
+
+- **The party tab fits.** Four heroes, four cards, no scrollbar at 1400×900 — every health bar is visible
+  without hunting for it. Equipment, hit/dodge and the Feelings / Save buttons moved into a per-card
+  **Gear** drawer that starts closed and remembers its state in `localStorage`
+  (`playground:emberveil:ui:v1` → `gearOpen`). `renderPartyTab()` in `js/main.js`, `.member*` in `style.css`.
+- **Map labels read.** The label font is 1.2 map units (was 1.7), long names wrap onto two lines with
+  `<tspan>` instead of being cut with "…", and `renderMap()` measures every label and drops it into the
+  first spot that is clear — under the node, over it, beside it (what saves a column whose discs almost
+  touch), then further tiers. The hover card still carries the full name.
+- **Your choices are in the log.** Clicking a choice empties the button row straight away, so the buttons
+  can't sit there while the answer is being read, and writes the pick into the narrative as a gold
+  `▸ You: …` line. This happens centrally in `waitForChoice()`, so every caller gets it — dialogue events,
+  shop and NPC picks, dungeons, rest. Pass `{ silent: true }` (or `silent: true` on one action) to skip the
+  log line, and `log: '…'` on an action to log different words than the button's label.
+- **The damage meter follows the fight you are in.** `fight()` points the meter tab at the new fight the
+  moment it starts (dropping any drill-down left over from the last one), redraws it at most every 250 ms
+  while the rounds run, and once more at the end; opening the Meter tab always redraws it too.
+- **Every line is spoken.** All spoken lines go through one queue (`enqueueSpeech()`), so a hero's reply
+  waits for the enemy's taunt to finish and nothing is dropped. The old `wait: false` path (combat barks)
+  showed a bubble and never played it; it now queues the audio and simply doesn't hold up the scene. A
+  boss's dying line and a hero's scripted line in a dialogue event are spoken too, instead of being
+  printed silently. Proof: `tools/scratch/ev-voice-audit.mjs` stubs the synthesizer and counts lines
+  handed to it against bubbles shown.
+- **Boss phases show.** The fight loop has an `ev.type === 'phase'` branch: the phase name and its written
+  line go into the log, the boss flashes on the stage, and it speaks a `boss_phase` line
+  (`talk.bossPhaseLine()`). Beasts get narration instead.
+- **Rewards popup.** `shared/rewards.js` is wired into every payout: a won fight (`afterCombat()` via
+  `specFromVictory`), chests and caches, crossings, hero errands, dialogue-event rewards and the bigger
+  conversation rewards. The narrative log lines stay exactly as they were — the popup is a flourish, never
+  the only record. `window.emberveil.rewardPopups = false` turns it off.
+
 ## Files
-- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/effects.js` (the effect registry — see `EFFECTS.md`), `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/rng.js`.
+- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/effects.js` (the effect registry — see `EFFECTS.md`), `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/sfx-bridge.js` (sound, wraps the stage from outside), `js/rng.js`.
 - `data/`: everything the game reads; `data/class-looks.json` = the 30 class blueprints (also in `library/data/defaults.json` as `ev_<class>` and in the 2D presets); `data/enemy-looks.json` = the 80 enemy/boss/pet/companion/hire looks (also in the library as `enemy_<id>` / `companion_<id>`).
 - `research/`: condensed notes from the original code (`rules-notes.md`, `world-notes.md`).
 - `tests/`: `loot.test.js`, `rules-combat.test.js`, `game.test.js`, `looks.test.js`, `effects.test.js` (node), `emberveil.spec.js` (Playwright).
@@ -303,4 +400,110 @@ text, frame flourishes, embers, how-to-play, the menu overlay, tooltip cards) an
 - Builders: `tools/build-emberveil-data.mjs`, `tools/build-emberveil-classes.mjs` (edit `LOOKS` there to change a class's look), `tools/build-emberveil-enemies.mjs` (edit `ENEMIES`/`BOSSES`/`PETS`/`COMPANIONS`/`HIRES` there to change a monster's look).
 
 ## Debug handle
-`window.emberveil` → `game`, `stage`, `talk`, `library`, `lingo`, `DATA`, `LOOKS` (classes), `ELOOKS` (enemy looks), `enemyLook(e)`, `bodyOf(h)`, `companionLook(id)`, `fight(encounter, {node, boss})`, `enterNode()`.
+`window.emberveil` → `game`, `stage`, `talk`, `library`, `lingo`, `DATA`, `LOOKS` (classes), `ELOOKS` (enemy looks), `enemyLook(e)`, `bodyOf(h)`, `companionLook(id)`, `fight(encounter, {node, boss})`, `afterCombat(node, enc, boss)`, `enterNode()`, `renderMeterTab()`, `renderPartyTab()`, `renderMap()`, `waitForChoice(list, opts)`, `showRewardsFor(spec)`, `rewardPopups` (set false to silence the rewards popup), `speakCount`.
+
+## Stage framing and speech bubbles (round 18)
+
+The fight camera used to be fixed (`position (0, 1.2, 6.2)`, fov 28), which was too close: a full party
+of four against four enemies ran off both sides of the stage panel and the speech bubbles were cut off
+by the top of the box.
+
+`Stage.frame(mode)` in `js/stage.js` now works the camera out from the panel's real shape instead.
+`FRAMES` says how much world each view has to show:
+
+| mode | width (world units) | tallest head | headroom |
+|---|---|---|---|
+| `fight` | 7.8 | 2.4 | 25% of the frame |
+| `camp` | 7.6 | 2.2 | 25% |
+| `travel` | 9.0 | 2.4 | 22% |
+
+The panel is short and wide, so the *width* usually decides how far back the camera sits; on a squarer
+window the height does. Either way a quarter of the frame is left empty above the tallest head, which
+is where the bubbles go. It runs again on every resize (a `ResizeObserver` on the stage container), and
+`camp()`/`clearCamp()` switch modes on their own. Bodies also line up tighter when there are more of
+them (`lineUp(count)`: 0.78 apart for four, 0.95 for one or two).
+
+`placeBubble()` in `js/main.js` positions a bubble over `stage.headOf(id)` (the body's real height, not
+a hard-coded 1.95), then **measures what the browser drew** and pulls the whole thing back inside the
+stage box: it slides sideways near an edge, and if there is no room above the head — a very tall body,
+or a short window — it flips underneath (`.bubble.below` in `style.css`). Nothing clips, ever.
+
+## The party's vehicle on the stage (round 18)
+
+The vehicle you bought is now a thing you can see. Models come from **`avatar-3d/js/vehicles.js`**
+(see that README): hand cart, pack mule, covered wagon, ox cart, iron-plated war wagon, closed coach
+and the dragon sled, each with real creature bodies in the shafts.
+
+- `stage.setVehicle(gameId, { x, z, rot, scale, anim })` — `gameId` is a `VEHICLES` key from `js/game.js`;
+  `none` means the party walks and nothing is drawn. The last id is kept on `stage.vehicleId`.
+- `stage.parkVehicle(id)` — angled back and to the left, out of the way of a fight. Called from
+  `enterNodeInner()`, `startWorld()` and after a rest, so it is there whenever the world stage is up.
+- `stage.camp(members, { vehicle })` — the rig stands at the edge of the camp circle with the firelight
+  on it; the draft animal comes with it. `restScene()` sets `stage.vehicleId` first so the camp still
+  shows it even when `camp()` is reached through a wrapper that only passes `members` along.
+
+Two supplies were added for the crossings below and sold by every merchant: **Rope** (18g) and
+**Timber** (26g).
+
+## Crossings — travel hazards (round 18)
+
+A new node type, `crossing`, 1–2 per zone, spliced into the road by `tools/expand-emberveil-map.mjs`
+(`addCrossings()`, run by `tools/build-emberveil-data.mjs`). Icon: `assets/data/icons/crossing.svg`
+(stepping stones over water), registered in the shared manifest.
+
+Entering one plays a **travel scene**: the party walks from one edge of the stage to the other across
+the crossing's own scenery while the camera pans with them, riding the vehicle if they own one
+(`stage.travelAcross({ vehicle, ms })`). Then something is in the way.
+
+The table is `data/crossings.json` — eight hazards, each with its own ways past:
+
+| id | what blocks the road | ways past |
+|---|---|---|
+| `cold_ford` | a river in spate | rope · STR wade · CON swim the deep channel · a day upstream |
+| `scree_gate` | a pass still shedding stone | DEX dash · shore it with timber · wait a day |
+| `fever_row` | a village full of sickness | spend bandages · INT work out what it is · CON push through |
+| `broken_span` | a bridge with the middle gone | build with timber · DEX climb the gorge · detour a day |
+| `toll_stone` | six bored people and a price | pay · talk them down (trait) · fight |
+| `grey_fen` | causeway into fog | burn a torch · a light-bearing weapon · INT take a bearing |
+| `windbite_ridge` | four exposed miles in a blizzard | tent · eat hard and push (CON) · wait a day |
+| `wardens_gate` | a gate and a warden who walks out to meet you | a quest flag · 60 fame · bribe · bluff (trait) · force it |
+
+Rules live in **`js/explore.js`**, kept free of DOM and 3D so `node --test` can drive them:
+
+```js
+resolveCrossing(game, crossing, choiceId, rng)
+// → { ok, blocked, why, roll, best, bonus, dc, stat, text, rewards, costs, fight, days, memory, journal }
+```
+
+- **Checks** are the party's best living value for the stat + a d20 against `dc + 2 per act` (capped at
+  26). A hero with the right speech trait adds the choice's `traitBonus`; `crossingChoices()` reports
+  the odds so the buttons can show them.
+- **Rewards** come back in the same shape `victory()` returns — `{ xp, gold, fame, drops }` (plus
+  `levelUps`) — so the rewards popup shows a crossing exactly like a won fight. They scale with the act
+  and with how hard the choice was; the hard ones can drop something rare.
+- **Failure** costs blood, food, exhaustion or a day, and some choices drop you straight into a fight
+  with whatever haunts the zone. The node stays on the map: a retry costs a day and a ration
+  (`payRetry()`), or you walk away and come back better equipped.
+- Every attempt is **remembered** (a `travel` memory, so it turns up in the Journal) and logged in
+  `game.crossings`.
+- The guarded gate puts a real NPC on the stage: `stage.walkIn(id, from, to)` walks the warden in from
+  the right and they talk through the normal Lingo/bubble path.
+
+Tests: `tests/crossings.test.js` (every choice of every crossing in every act, difficulty and reward
+scaling, failure costs, blocked choices changing nothing, map placement) and `tests/crossings.spec.js`
+(framing + bubbles + the vehicle at camp + a crossing played through in the page).
+
+## Node labels never lie (round 18)
+
+A "Goblin Pair" node fought three goblins. Cause: entering a combat node has a ~28% chance of promoting
+the encounter to a **named leader with followers** (`namedEncounter()` prepends the leader to the
+existing enemies), which makes the fight bigger while the map label stays as authored.
+
+`js/game.js` now knows what a name promises — `countWordIn()` (lone/pair/trio/four…: an exact number),
+`groupWordIn()` (band/patrol/swarm…: three or more) and `labelFits(name, n)`. A node whose name carries
+an exact number word is never upgraded to a named or nemesis encounter, night raids that grow or shrink
+with the vehicle rename themselves, and `encounterLabel(enc)` builds an honest name from the enemies
+actually standing there ("Lone goblin", "Goblin pair", "Goblin trio", "Goblin band (5)", "Goblin Scout
+and 2 Goblin Warriors", "Vraak the Patient and followers"). `enter()` returns that label alongside the
+encounter. `tests/labels.test.js` audits every encounter and every map node with a number word in it,
+and walks every node 25 times with different luck to prove the promise is kept.

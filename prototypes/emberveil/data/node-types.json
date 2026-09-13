@@ -10,6 +10,7 @@
   "SHRINE": "shrine",
   "CHALLENGE": "challenge",
   "DUNGEON": "dungeon",
-  "SKILL_CHECK": "skillCheck"
+  "SKILL_CHECK": "skillCheck",
+  "CROSSING": "crossing"
  }
 }

@@ -1,0 +1,66 @@
+/* Sound Lab gallery. Dark, dense, built for scanning 118 rows — not for looking pretty. */
+
+.sfx-wrap { padding: 12px; display: grid; grid-template-columns: 300px 1fr; gap: 12px; align-items: start; }
+@media (max-width: 900px) { .sfx-wrap { grid-template-columns: 1fr; } }
+
+.sfx-side { position: sticky; top: 8px; }
+.sfx-side .panel + .panel { margin-top: 10px; }
+
+.method-pick { display: flex; flex-direction: column; gap: 6px; }
+.method-pick select { width: 100%; }
+.method-card { font-size: 12px; line-height: 1.5; }
+.method-card ul { margin: 4px 0 8px 16px; padding: 0; }
+.method-card li { margin: 1px 0; }
+.method-card .good::marker { color: #6fbf73; }
+.method-card .bad::marker { color: #c9736b; }
+
+.badge.cc0 { background: #1f3d2b; border-color: #35734c; color: #9fe0b5; }
+.badge.ours { background: #26314a; border-color: #46598a; color: #aac2ff; }
+.badge.mixed { background: #3a3320; border-color: #7a6a34; color: #e8d59a; }
+
+.vol-row { display: grid; grid-template-columns: 68px 1fr 44px; gap: 6px; align-items: center; font-size: 12px; margin: 4px 0; }
+.vol-row input[type=range] { width: 100%; }
+.vol-row .v { text-align: right; color: #9aa; font-variant-numeric: tabular-nums; }
+
+.cat-block { margin-bottom: 14px; }
+.cat-head { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px; }
+.cat-head h3 { margin: 0; font-size: 14px; }
+.cat-head .target { font-size: 11px; color: #8a94a6; }
+
+.sound-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px; }
+.sound {
+  display: grid; grid-template-columns: 30px 1fr; gap: 6px; align-items: center;
+  background: #1b1e25; border: 1px solid #2c313c; border-radius: 6px; padding: 5px 7px;
+}
+.sound:hover { border-color: #49546b; }
+.sound.playing { border-color: var(--accent, #7aa2f7); }
+.sound button.go { width: 28px; height: 28px; border-radius: 50%; padding: 0; line-height: 1; font-size: 12px; }
+.sound .name { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sound .sub { font-size: 10px; color: #7e879a; display: flex; gap: 5px; align-items: center; }
+.sound .sub .src { text-transform: uppercase; letter-spacing: .04em; }
+.sound .sub .src.library { color: #8fd6a6; }
+.sound .sub .src.synth { color: #9db5ff; }
+.sound .sub .src.retro { color: #e8c07a; }
+.sound.loopish .name::after { content: ' ⟲'; color: #6e7a90; }
+
+/* level meter: a bar that fills to the measured loudness, with a tick at the target */
+.meterbar { position: relative; height: 5px; background: #12151b; border-radius: 3px; overflow: hidden; margin-top: 3px; }
+.meterbar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #3c6, #cc4); border-radius: 3px; transition: width .12s linear; }
+.meterbar u { position: absolute; top: -1px; bottom: -1px; width: 1px; background: #fff6; }
+.meterbar.hot i { background: linear-gradient(90deg, #3c6, #c44); }
+
+.sfx-toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+.sfx-toolbar input[type=search] { width: 160px; }
+
+table.levels { width: 100%; border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; }
+table.levels th, table.levels td { padding: 2px 6px; border-bottom: 1px solid #262b34; text-align: right; white-space: nowrap; }
+table.levels th:first-child, table.levels td:first-child { text-align: left; }
+table.levels th { color: #8a94a6; font-weight: 600; position: sticky; top: 0; background: #1b1e25; }
+table.levels td.ok { color: #7fd39a; }
+table.levels td.off { color: #e0b060; }
+.levels-wrap { max-height: 320px; overflow: auto; border: 1px solid #2c313c; border-radius: 6px; }
+
+.ab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.ab-cell { background: #1b1e25; border: 1px solid #2c313c; border-radius: 6px; padding: 6px; font-size: 11px; }
+.ab-cell h4 { margin: 0 0 4px; font-size: 12px; }
+.ab-cell .lvl { color: #8a94a6; }

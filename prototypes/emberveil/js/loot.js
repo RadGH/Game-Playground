@@ -4,7 +4,8 @@ import { makeRng } from './rng.js';
 import { describeAffixStat, describeLegendary } from './effects.js';
 const RARITY = ['normal', 'magic', 'rare', 'legendary'];
 export class Loot {
-  constructor(data) { this.d = data; this.bases = { ...data.weaponBases, ...data.armorBases }; this.ngPlus = 0; }
+  /** `tuning` is data/balance.json's `loot` + `economy.globalMultipliers` block — drop rate, affix size, shop price. */
+  constructor(data, tuning = {}) { this.d = data; this.bases = { ...data.weaponBases, ...data.armorBases }; this.ngPlus = 0; this.T = { affixMult: 1, dropRate: 1, setChance: 0.03, uniqueChance: 1, shopPrice: 1, ...tuning }; }
   base(key) { return this.bases[key]; }
   /** Affix restriction filter (mirrors the original `filt`). */
   allowed(a, base, rarity) {
@@ -14,7 +15,7 @@ export class Loot {
     if (a.slots && !a.slots.includes(base.slot)) return false; if (a.armorTiers && !a.armorTiers.includes(base.tier)) return false; if (a.critSlots && !(isWeapon || isNecklace || isGloves)) return false; return true;
   }
   pool(base, rarity, { extended = true } = {}) { const A = this.d.affixes; return [...A.prefixes, ...A.suffixes, ...A.shield, ...(extended ? A.extended : [])].filter(a => this.allowed(a, base, rarity)); }
-  rollValue(a, rng, mult = 1) { return +((a.min + rng() * (a.max - a.min)) * mult).toFixed(2); }
+  rollValue(a, rng, mult = 1) { return +((a.min + rng() * (a.max - a.min)) * mult * (this.T?.affixMult ?? 1)).toFixed(2); }
   /** generateItem(baseKey, rarity, quality, { rng, extended }) */
   generate(baseKey, rarity = 'normal', quality = 'medium', opts = {}) {
     const rng = opts.rng || makeRng(); const base = this.base(baseKey); if (!base) return null;
@@ -66,9 +67,9 @@ export class Loot {
     return item;
   }
   /** 3% by default; tier by act. Wired into drops (the original never called it). */
-  maybeSetItem(act, rng = makeRng(), chance = 0.03) { if (rng() > chance) return null; const tier = act <= 2 ? 'low' : act <= 4 ? 'mid' : 'endgame'; const sets = this.d.sets.filter(s => s.tier === tier); if (!sets.length) return null; const set = rng.pick(sets); return this.generateSetItem(set.id, rng.int(0, set.items.length - 1), act <= 2 ? 'medium' : act <= 4 ? 'high' : 'elite', rng); }
-  price(item) { return Math.round(this.d.basePrice * (this.d.priceQualityMult[item.quality] || 1) * (this.d.priceRarityMult[item.rarity] || 1) * (item.isUnique ? 2 : 1)); }
-  sellPrice(item) { return Math.floor(this.price(item) * this.d.sellFactor); }
+  maybeSetItem(act, rng = makeRng(), chance = this.T?.setChance ?? 0.03) { if (rng() > chance) return null; const tier = act <= 2 ? 'low' : act <= 4 ? 'mid' : 'endgame'; const sets = this.d.sets.filter(s => s.tier === tier); if (!sets.length) return null; const set = rng.pick(sets); return this.generateSetItem(set.id, rng.int(0, set.items.length - 1), act <= 2 ? 'medium' : act <= 4 ? 'high' : 'elite', rng); }
+  price(item) { return Math.round(this.d.basePrice * (this.T?.shopPrice ?? 1) * (this.d.priceQualityMult[item.quality] || 1) * (this.d.priceRarityMult[item.rarity] || 1) * (item.isUnique ? 2 : 1)); }
+  sellPrice(item) { return Math.floor(this.price(item) / (this.T?.shopPrice ?? 1) * this.d.sellFactor); }
   salvage(item, rng = makeRng()) { const y = this.d.salvageYield[item.rarity] || this.d.salvageYield.normal; const out = {}; for (const [m, [lo, hi]] of Object.entries(y)) { const n = rng.int(lo, hi); if (n > 0) out[m] = n; } return out; }
   /** Blacksmith / enchanter: add one affix (random or chosen id) at a material tier; respects the cap per rarity. */
   addAffix(item, tierMat, materials, rng = makeRng(), chosenId = null) {
@@ -81,11 +82,13 @@ export class Loot {
   /** Per slain enemy in a zone. */
   zoneDrop(zoneId, rng, { revisit = false, magicFind = 0, act = 1, difficulty = 'normal' } = {}) {
     const z = this.d.zoneDrops[zoneId] || { drop: 0.15, rarity: 'magic', quality: 'medium', bases: ['sword', 'dagger', 'light_chest', 'ring'] };
-    const chance = z.drop * (revisit ? 0.5 : 1) * (difficulty === 'hard' ? 1.2 : 1); if (rng() >= chance) return null;
+    const chance = z.drop * (this.T?.dropRate ?? 1) * (revisit ? 0.5 : 1) * (difficulty === 'hard' ? 1.2 : 1); if (rng() >= chance) return null;
     let rarity = z.rarity; if (z.normalChance != null && rng() < z.normalChance - magicFind) rarity = 'normal';
+    // `downshift` drops a roll one rarity step: a legendary zone should not hand out a legendary every time.
+    else if (z.downshift && rng() < z.downshift - magicFind) rarity = RARITY[Math.max(0, RARITY.indexOf(rarity) - 1)];
     return this.maybeSetItem(act, rng) || this.generate(rng.pick(this.basesForAct(z.bases, act)), rarity, z.quality, { rng });
   }
-  bossLoot(bossId, rng) { const t = this.d.bossLoot[bossId]; if (!t) return []; const out = []; if (t.uniques?.length && rng() < (t.uniqueChance ?? 0.15)) { const u = this.generateUnique(rng.pick(t.uniques), rng); if (u) out.push(u); } for (let i = 0; i < t.rolls; i++) { const it = this.generate(rng.pick(t.bases), t.rarity, t.quality, { rng }); if (it) out.push(it); } return out; }
+  bossLoot(bossId, rng) { const t = this.d.bossLoot[bossId]; if (!t) return []; const out = []; if (t.uniques?.length && rng() < (t.uniqueChance ?? 0.15) * (this.T?.uniqueChance ?? 1)) { const u = this.generateUnique(rng.pick(t.uniques), rng); if (u) out.push(u); } for (let i = 0; i < t.rolls; i++) { const it = this.generate(rng.pick(t.bases), t.rarity, t.quality, { rng }); if (it) out.push(it); } return out; }
   /** Seeded merchant stock for a town (10 items + potions). */
   merchantStock(townId, act, { seed = 0, ngPlus = 0, fame = 0, heroLvl = 1 } = {}) {
     const m = this.d.merchant; const rng = makeRng((hashStrLocal(`${townId}|ng${ngPlus}|merch`) ^ seed) >>> 0); const bump = (ngPlus > 0 ? 1 : 0) + fameBonus(fame, heroLvl);

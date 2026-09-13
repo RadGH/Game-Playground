@@ -18,7 +18,7 @@
   "grax_veil_touched": {
    "bossLine": "\"The Veil... will not... be held back forever...\"",
    "heroLine": "\"Rest now, Grax. The Breach dies with you.\"",
-   "narratorLine": "A tremor runs through the air. The Veil holds — for now."
+   "narratorLine": "A tremor runs through the air. The Veil holds \u2014 for now."
   },
   "lava_titan": {
    "bossLine": "\"You... quench what cannot be quenched...\"",
@@ -56,9 +56,9 @@
        "type": "burn"
       }
      ],
-     "hpThreshold": 0.65,
+     "hpThreshold": 0.73,
      "name": "Hellfire Unleashed",
-     "onEnter": "Malgrath throws back his head and laughs — then his form ignites. True demonic fire."
+     "onEnter": "Malgrath throws back his head and laughs \u2014 then his form ignites. True demonic fire."
     },
     {
      "addStatuses": [
@@ -73,7 +73,7 @@
        "type": "bleed"
       }
      ],
-     "hpThreshold": 0.3,
+     "hpThreshold": 0.38,
      "name": "Demonic Ascendance",
      "onEnter": "Wings of pure hellfire tear from Malgrath's back. \"None of you leave this pit alive.\"",
      "swapSpells": [
@@ -99,7 +99,7 @@
        "type": "burn"
       }
      ],
-     "hpThreshold": 0.66,
+     "hpThreshold": 0.74,
      "name": "First Flame Rising",
      "onEnter": "Bahamorth's scales ignite. Every breath now is an inferno. \"You still breathe. Remarkable.\""
     },
@@ -116,7 +116,7 @@
        "type": "burn"
       }
      ],
-     "hpThreshold": 0.33,
+     "hpThreshold": 0.41,
      "name": "The World Ends With Me",
      "onEnter": "Bahamorth rears back and the mountain trembles. The sky outside goes dark with ash.",
      "swapSpells": [
@@ -141,9 +141,9 @@
        "type": "fury"
       }
      ],
-     "hpThreshold": 0.66,
+     "hpThreshold": 0.74,
      "name": "Veil Ascendant",
-     "onEnter": "The Sovereign spreads arms wide — the Emberveil itself floods through the chamber."
+     "onEnter": "The Sovereign spreads arms wide \u2014 the Emberveil itself floods through the chamber."
     },
     {
      "addStatuses": [
@@ -158,7 +158,7 @@
        "type": "poison"
       }
      ],
-     "hpThreshold": 0.33,
+     "hpThreshold": 0.41,
      "name": "Sovereign Unbound",
      "onEnter": "Flesh burns away, leaving a silhouette of pure Emberveil. \"I am the Veil. The Veil does not fall.\"",
      "swapSpells": [
@@ -183,9 +183,9 @@
        "type": "fury"
       }
      ],
-     "hpThreshold": 0.6,
+     "hpThreshold": 0.68,
      "name": "Veil-Rent",
-     "onEnter": "Grax tears the Veil open around himself — the air tastes like copper and rot."
+     "onEnter": "Grax tears the Veil open around himself \u2014 the air tastes like copper and rot."
     },
     {
      "addStatuses": [
@@ -195,9 +195,9 @@
        "type": "fury"
       }
      ],
-     "hpThreshold": 0.25,
+     "hpThreshold": 0.33,
      "name": "Last Breath",
-     "onEnter": "Grax howls with borrowed power — something inside him tears free!",
+     "onEnter": "Grax howls with borrowed power \u2014 something inside him tears free!",
      "swapSpells": [
       "lich_soul_shatter",
       "lich_drain_life",
@@ -219,9 +219,9 @@
        "type": "burn"
       }
      ],
-     "hpThreshold": 0.65,
+     "hpThreshold": 0.73,
      "name": "Molten Core",
-     "onEnter": "Cracks split the Titan's hide — magma pours from within. The ground beneath blisters."
+     "onEnter": "Cracks split the Titan's hide \u2014 magma pours from within. The ground beneath blisters."
     },
     {
      "addStatuses": [
@@ -231,9 +231,9 @@
        "type": "fury"
       }
      ],
-     "hpThreshold": 0.3,
+     "hpThreshold": 0.38,
      "name": "Pyroclastic Fury",
-     "onEnter": "The Titan erupts — superheated shards of stone scatter across the field!",
+     "onEnter": "The Titan erupts \u2014 superheated shards of stone scatter across the field!",
      "swapSpells": [
       "titan_magma_wave",
       "imp_fireball",
@@ -256,7 +256,7 @@
        "type": "poison"
       }
      ],
-     "hpThreshold": 0.65,
+     "hpThreshold": 0.73,
      "name": "Reality Fraying",
      "onEnter": "The Unraveler laughs without a mouth. Threads of reality unravel around it."
     },
@@ -273,9 +273,9 @@
        "type": "weaken"
       }
      ],
-     "hpThreshold": 0.3,
+     "hpThreshold": 0.38,
      "name": "The Hunger Made Manifest",
-     "onEnter": "IT SEES YOU. Not your face — your entire existence, threadbare and ready to dissolve.",
+     "onEnter": "IT SEES YOU. Not your face \u2014 your entire existence, threadbare and ready to dissolve.",
      "swapSpells": [
       "sovereign_voidstorm",
       "lich_soul_shatter",

@@ -1,5 +1,5 @@
 {
-  "_doc": "Phrase library. symbols = { name: [entry] }. entry = string | { t: template, tags: [...], w: weight, cond: 'js expression', bind: { key: { type, tags } } }. Symbols starting with _ are helpers, never intents. Tone: dark fantasy, RimWorld-style colonists who can die.",
+  "_doc": "Phrase library. symbols = { name: [entry] }. entry = string | { t: template, tags: [...], w: weight, cond: 'js expression', bind: { key: { type, tags } } }. Symbols starting with _ are helpers, never intents. Tone: dark fantasy, RimWorld-style colonists who can die. Combat lines carry two extra tag families so one pool serves everybody: enemy kind (goblin, bandit, cultist, undead, demon, void, dragon, knight) and hero role (tank, healer, caster, rogue, ranger). A speaker's speech.tagWeights turns the ones that don't apply to 0 (see prototypes/emberveil/js/talk.js). Anti-repeat: Lingo keeps a per-symbol session history, so a pool of 12+ never repeats inside one session.",
   "meta": {
     "intents": [
       "greet",
@@ -70,7 +70,18 @@
       "reveal",
       "recall_deed",
       "recall_nemesis",
-      "recall_conversation"
+      "recall_conversation",
+      "enemy_opener",
+      "boss_opener",
+      "boss_phase",
+      "named_first",
+      "named_rematch",
+      "named_avenge",
+      "named_beaten",
+      "named_beast",
+      "beast_snarl",
+      "night_attack",
+      "ambush_opener"
     ],
     "intentDoc": {
       "greet": "opening line to listener",
@@ -141,7 +152,18 @@
       "reveal": "mention something the speaker has learned about the listener (knowledge)",
       "recall_deed": "an NPC acknowledges a deed of the hero (memory type deed)",
       "recall_nemesis": "a named enemy that beat, escaped or fell to the party (memory type nemesis)",
-      "recall_conversation": "callback to something the listener said at a previous camp (memory type conversation)"
+      "recall_conversation": "callback to something the listener said at a previous camp (memory type conversation)",
+      "enemy_opener": "enemy's first line of a fight (tag by kind: goblin/bandit/cultist/undead/demon/void/dragon/knight)",
+      "boss_opener": "boss's first line of a fight",
+      "boss_phase": "boss line when it changes phase mid-fight",
+      "named_first": "named enemy meeting the party for the first time",
+      "named_rematch": "named enemy that has met the party before (bindings: defeats, days)",
+      "named_avenge": "named enemy that has already put one of the party down (binding: fallen)",
+      "named_beaten": "named enemy the party has beaten before (binding: defeats)",
+      "named_beast": "narration for a named beast that cannot speak (binding: foe)",
+      "beast_snarl": "narration when a wordless beast opens a fight (binding: foe)",
+      "night_attack": "narration when something hits the camp at night (binding: foe)",
+      "ambush_opener": "narration when the party is ambushed on the road"
     },
     "memoryIntents": [
       "recall_combat",
@@ -174,7 +196,32 @@
     "relationIntents": [
       "observe_person",
       "reveal"
-    ]
+    ],
+    "noRepeat": [
+      "enemy_opener",
+      "boss_opener",
+      "boss_phase",
+      "named_first",
+      "named_rematch",
+      "named_avenge",
+      "named_beaten",
+      "named_beast",
+      "beast_snarl",
+      "night_attack",
+      "ambush_opener",
+      "combat_taunt",
+      "combat_bark",
+      "combat_hurt",
+      "combat_kill",
+      "combat_flee",
+      "ally_down",
+      "brag",
+      "relief",
+      "warning",
+      "rally",
+      "threat"
+    ],
+    "noRepeatDoc": "Symbols with a hard session anti-repeat: Lingo will not reuse an entry while it is inside the last sessionRecentSize (20) picks for that symbol, across every speaker. Combat lines live here because a party of four opening 30 fights used to reach for the same high-weight taunt over and over."
   },
   "symbols": {
     "greetword": [
@@ -2505,6 +2552,101 @@
           "brag",
           "money"
         ]
+      },
+      {
+        "t": "Did you see it? Tell me somebody saw it.",
+        "tags": [
+          "joyful",
+          "brag"
+        ]
+      },
+      {
+        "t": "That is why I go first.",
+        "tags": [
+          "tank",
+          "brag"
+        ]
+      },
+      {
+        "t": "Not one of them got past me. Not one.",
+        "tags": [
+          "tank",
+          "brag"
+        ]
+      },
+      {
+        "t": "Nobody died. That was me, by the way.",
+        "tags": [
+          "healer",
+          "brag",
+          "joke"
+        ]
+      },
+      {
+        "t": "Textbook. Absolutely textbook.",
+        "tags": [
+          "caster",
+          "brag",
+          "formal"
+        ]
+      },
+      {
+        "t": "Three of them, if anyone's counting. I'm counting.",
+        "tags": [
+          "rogue",
+          "brag"
+        ]
+      },
+      {
+        "t": "They never saw me. They never do.",
+        "tags": [
+          "rogue",
+          "brag"
+        ]
+      },
+      {
+        "t": "Two arrows. Two.",
+        "tags": [
+          "ranger",
+          "brag",
+          "short"
+        ]
+      },
+      {
+        "t": "Write this down. Somebody write this down.",
+        "tags": [
+          "brag",
+          "joke"
+        ]
+      },
+      {
+        "t": "I'd love to tell you that was hard.",
+        "tags": [
+          "brag",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "That's the third fight I've carried this week.",
+        "tags": [
+          "brag",
+          "long"
+        ]
+      },
+      {
+        "t": "Bury them facing the road. Let the next lot read it.",
+        "tags": [
+          "cruel",
+          "brag",
+          "long"
+        ]
+      },
+      {
+        "t": "My {$item} hasn't even got warm.",
+        "tags": [
+          "brag",
+          "money"
+        ]
       }
     ],
     "work": [
@@ -2852,6 +2994,191 @@
           "pacifist",
           "timid"
         ]
+      },
+      {
+        "t": "Left! LEFT!",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "Down! Get down!",
+        "tags": [
+          "short",
+          "worried"
+        ]
+      },
+      {
+        "t": "Shield up!",
+        "tags": [
+          "tank",
+          "short"
+        ]
+      },
+      {
+        "t": "On me! All of you, on me!",
+        "tags": [
+          "tank",
+          "short"
+        ]
+      },
+      {
+        "t": "Stay out of the fire!",
+        "tags": [
+          "caster",
+          "short"
+        ]
+      },
+      {
+        "t": "I'm casting — cover me!",
+        "tags": [
+          "caster"
+        ]
+      },
+      {
+        "t": "Hold still, I'm mending you!",
+        "tags": [
+          "healer"
+        ]
+      },
+      {
+        "t": "Don't you dare die on me!",
+        "tags": [
+          "healer",
+          "worried"
+        ]
+      },
+      {
+        "t": "Behind you!",
+        "tags": [
+          "rogue",
+          "short"
+        ]
+      },
+      {
+        "t": "Nock and loose!",
+        "tags": [
+          "ranger",
+          "short"
+        ]
+      },
+      {
+        "t": "Take the small ones first!",
+        "tags": [
+          "ranger"
+        ]
+      },
+      {
+        "t": "Push! Push them back!",
+        "tags": [
+          "heroic"
+        ]
+      },
+      {
+        "t": "I'm out of {$item.pl}!",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "Keep the line! Keep the line!",
+        "tags": [
+          "tank",
+          "heroic"
+        ]
+      },
+      {
+        "t": "No more talking! Blades!",
+        "tags": [
+          "aggressive"
+        ]
+      },
+      {
+        "t": "Somebody get the caster!",
+        "tags": [
+          "alert"
+        ]
+      },
+      {
+        "t": "For everyone they took!",
+        "tags": [
+          "grief",
+          "violent"
+        ]
+      },
+      {
+        "t": "Feet! Watch your feet!",
+        "tags": [
+          "alert",
+          "short"
+        ]
+      },
+      {
+        "t": "Get behind the shield! Now!",
+        "tags": [
+          "tank",
+          "short"
+        ]
+      },
+      {
+        "t": "They want past me. Let them try.",
+        "tags": [
+          "tank"
+        ]
+      },
+      {
+        "t": "Out of the smoke — I can't see you!",
+        "tags": [
+          "healer",
+          "worried"
+        ]
+      },
+      {
+        "t": "Stop bleeding and start fighting!",
+        "tags": [
+          "healer",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Hold them ten seconds! Ten!",
+        "tags": [
+          "caster"
+        ]
+      },
+      {
+        "t": "Don't crowd me, I need the room!",
+        "tags": [
+          "caster",
+          "worried"
+        ]
+      },
+      {
+        "t": "Flank! Go wide!",
+        "tags": [
+          "rogue",
+          "short"
+        ]
+      },
+      {
+        "t": "Don't look at me. Look at him.",
+        "tags": [
+          "rogue",
+          "joke"
+        ]
+      },
+      {
+        "t": "Clear line! Move left!",
+        "tags": [
+          "ranger",
+          "short"
+        ]
+      },
+      {
+        "t": "I've got the back rank.",
+        "tags": [
+          "ranger"
+        ]
       }
     ],
     "combat_taunt": [
@@ -2864,8 +3191,7 @@
           "foe": {
             "type": "creature"
           }
-        },
-        "w": 2
+        }
       },
       {
         "t": "I've killed prettier {foe.pl} than you!",
@@ -2948,6 +3274,182 @@
             "type": "creature"
           }
         }
+      },
+      {
+        "t": "Everything that wants you comes through me first.",
+        "tags": [
+          "tank",
+          "heroic"
+        ]
+      },
+      {
+        "t": "Hit me again. I'll wait.",
+        "tags": [
+          "tank",
+          "confident"
+        ]
+      },
+      {
+        "t": "You'll break on this shield like the last lot did.",
+        "tags": [
+          "tank",
+          "confident"
+        ]
+      },
+      {
+        "t": "Come on then, {foe.sg}. I'm the wall.",
+        "tags": [
+          "tank"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "I mend what you break. You won't outlast that.",
+        "tags": [
+          "healer",
+          "confident"
+        ]
+      },
+      {
+        "t": "Every wound you open I close. Get tired.",
+        "tags": [
+          "healer",
+          "long"
+        ]
+      },
+      {
+        "t": "{$deity.cap} is watching this. Behave accordingly.",
+        "tags": [
+          "healer",
+          "religious"
+        ]
+      },
+      {
+        "t": "I've read what happens to things like you. It's thorough.",
+        "tags": [
+          "caster",
+          "lore"
+        ]
+      },
+      {
+        "t": "You can't parry what I'm about to say.",
+        "tags": [
+          "caster",
+          "joke"
+        ]
+      },
+      {
+        "t": "{$spell.cap}. Learn the word — it's the last one you get.",
+        "tags": [
+          "caster",
+          "lore"
+        ]
+      },
+      {
+        "t": "You won't see the one that does it.",
+        "tags": [
+          "rogue",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Keep shouting. It tells me exactly where you are.",
+        "tags": [
+          "rogue",
+          "joke"
+        ]
+      },
+      {
+        "t": "I've already found the gap in that armour.",
+        "tags": [
+          "rogue",
+          "confident"
+        ]
+      },
+      {
+        "t": "You're a long way inside my range.",
+        "tags": [
+          "ranger",
+          "confident"
+        ]
+      },
+      {
+        "t": "Third from the left. That's you.",
+        "tags": [
+          "ranger",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Come closer. Or don't. It's the same to me.",
+        "tags": [
+          "ranger",
+          "casual"
+        ]
+      },
+      {
+        "t": "Your friends left. Ask yourself why.",
+        "tags": [
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "I've buried my own. Burying you costs me nothing.",
+        "tags": [
+          "gloomy",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Wrong day, wrong road, wrong party.",
+        "tags": [
+          "confident",
+          "long"
+        ]
+      },
+      {
+        "t": "Talk less. Bleed more.",
+        "tags": [
+          "short",
+          "blunt"
+        ]
+      },
+      {
+        "t": "One of us walks away from this. It's usually me.",
+        "tags": [
+          "joke",
+          "confident"
+        ]
+      },
+      {
+        "t": "Put it down and live. ... No? Thought not.",
+        "tags": [
+          "gentle",
+          "long"
+        ]
+      },
+      {
+        "t": "You should have stayed in whatever hole this is.",
+        "tags": [
+          "rude",
+          "aggressive"
+        ]
+      },
+      {
+        "t": "I have killed {foe.pl} in worse weather than this.",
+        "tags": [
+          "brag",
+          "confident"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
       }
     ],
     "combat_hurt": [
@@ -3010,6 +3512,100 @@
         "tags": [
           "short",
           "gloomy"
+        ]
+      },
+      {
+        "t": "That's deep. That's— that's deep.",
+        "tags": [
+          "gore",
+          "worried"
+        ]
+      },
+      {
+        "t": "Still standing. Still standing!",
+        "tags": [
+          "confident"
+        ]
+      },
+      {
+        "t": "{#curse.cap}! Who taught you that?",
+        "tags": [
+          "joke"
+        ]
+      },
+      {
+        "t": "I can't feel my {$bodypart}.",
+        "tags": [
+          "gore",
+          "worried"
+        ]
+      },
+      {
+        "t": "Patch me after. Not now.",
+        "tags": [
+          "blunt",
+          "tank"
+        ]
+      },
+      {
+        "t": "It's nothing. Keep going.",
+        "tags": [
+          "short",
+          "tank"
+        ]
+      },
+      {
+        "t": "That was my good side.",
+        "tags": [
+          "joke"
+        ]
+      },
+      {
+        "t": "Cold. Why is it cold?",
+        "tags": [
+          "gloomy",
+          "worried"
+        ]
+      },
+      {
+        "t": "Do that again and I'll take the arm off.",
+        "tags": [
+          "aggressive",
+          "threat"
+        ]
+      },
+      {
+        "t": "I've had worse off {$creature.a}.",
+        "tags": [
+          "brag",
+          "joke"
+        ]
+      },
+      {
+        "t": "Don't look at it. Don't look at it.",
+        "tags": [
+          "worried",
+          "gore"
+        ]
+      },
+      {
+        "t": "One of you, over here, now!",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "The blood's mine, then. Fine.",
+        "tags": [
+          "gloomy",
+          "blunt"
+        ]
+      },
+      {
+        "t": "I'm going to remember that.",
+        "tags": [
+          "threat",
+          "short"
         ]
       }
     ],
@@ -3087,6 +3683,119 @@
         "tags": [
           "money",
           "cruel"
+        ]
+      },
+      {
+        "t": "Down. Next.",
+        "tags": [
+          "short",
+          "blunt"
+        ]
+      },
+      {
+        "t": "That's one that won't follow us home.",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Off the road. Off my road.",
+        "tags": [
+          "gruff"
+        ]
+      },
+      {
+        "t": "It's not getting up. Check it anyway.",
+        "tags": [
+          "suspicious"
+        ]
+      },
+      {
+        "t": "Quiet now. Good.",
+        "tags": [
+          "cruel",
+          "short"
+        ]
+      },
+      {
+        "t": "Sorry. You picked this.",
+        "tags": [
+          "gentle",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "{foe.sg.cap} down! Who's on the next one?",
+        "tags": [
+          "short"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "I counted. That's {~four|six|nine} today.",
+        "tags": [
+          "brag"
+        ]
+      },
+      {
+        "t": "Bleeds like anything else.",
+        "tags": [
+          "blunt",
+          "gore"
+        ]
+      },
+      {
+        "t": "Heavier than they look, these.",
+        "tags": [
+          "joke",
+          "crude"
+        ]
+      },
+      {
+        "t": "Don't step in it.",
+        "tags": [
+          "joke",
+          "gore"
+        ]
+      },
+      {
+        "t": "That one had a name, probably.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "{$deity.cap} can have the rest of it.",
+        "tags": [
+          "religious"
+        ]
+      },
+      {
+        "t": "Clean. That's how it's done.",
+        "tags": [
+          "rogue",
+          "confident",
+          "brag"
+        ]
+      },
+      {
+        "t": "Through the eye. I'll take that one.",
+        "tags": [
+          "ranger",
+          "brag",
+          "gore"
+        ]
+      },
+      {
+        "t": "Nobody had to bleed for that. Except it.",
+        "tags": [
+          "healer",
+          "gloomy"
         ]
       }
     ],
@@ -3218,6 +3927,146 @@
         "tags": [
           "grief",
           "earnest"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "{fallen.name} is down — cover {fallen.them}!",
+        "tags": [
+          "worried",
+          "tank"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "I'm going to {fallen.them}! Hold them off me!",
+        "tags": [
+          "healer",
+          "worried"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Get {fallen.them} up! I can't reach!",
+        "tags": [
+          "healer"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "They dropped {fallen.name}. Kill every one of them.",
+        "tags": [
+          "violent",
+          "angry"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Stay with us, {fallen.name}. That's an order.",
+        "tags": [
+          "tank",
+          "blunt"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "No, no — {fallen.name}, look at me. Look at me.",
+        "tags": [
+          "worried",
+          "gentle"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "{fallen.name} is breathing. Barely. Buy me a moment.",
+        "tags": [
+          "healer",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "I saw who did it. That one's mine.",
+        "tags": [
+          "rogue",
+          "threat"
+        ]
+      },
+      {
+        "t": "Step over {fallen.them}. Nothing gets past.",
+        "tags": [
+          "tank",
+          "heroic"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Not again. Not another one.",
+        "tags": [
+          "gloomy",
+          "grief"
+        ]
+      },
+      {
+        "t": "Somebody hold the line while I work!",
+        "tags": [
+          "healer"
+        ]
+      },
+      {
+        "t": "{fallen.name} went down doing it right. Finish it for {fallen.them}.",
+        "tags": [
+          "honor",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "If {fallen.they} dies here I am burning this whole place down.",
+        "tags": [
+          "angry",
+          "threat",
+          "long"
         ],
         "bind": {
           "fallen": {
@@ -3692,6 +4541,64 @@
         "t": "The {$weather}'s hiding something. Listen. Listen!",
         "tags": [
           "suspicious"
+        ]
+      },
+      {
+        "t": "Up! Up! They're in the camp!",
+        "tags": [
+          "worried",
+          "short"
+        ]
+      },
+      {
+        "t": "Something's past the fire — move!",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "{foe.pl.cap} in the dark! Weapons!",
+        "tags": [
+          "worried"
+        ],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Don't stare at the fire, you'll be blind out there!",
+        "tags": [
+          "alert",
+          "long"
+        ]
+      },
+      {
+        "t": "The watch is down. The watch is down!",
+        "tags": [
+          "alert",
+          "worried"
+        ]
+      },
+      {
+        "t": "They're between us and the packs!",
+        "tags": [
+          "alert"
+        ]
+      },
+      {
+        "t": "Circle up! Backs together!",
+        "tags": [
+          "tank",
+          "heroic"
+        ]
+      },
+      {
+        "t": "That is not the wind. Arm yourselves.",
+        "tags": [
+          "suspicious",
+          "gruff"
         ]
       }
     ],
@@ -4989,6 +5896,98 @@
         "tags": [
           "joyful"
         ]
+      },
+      {
+        "t": "Everyone up? Everyone up. Good.",
+        "tags": [
+          "worried"
+        ]
+      },
+      {
+        "t": "Closer than I'll admit to later.",
+        "tags": [
+          "joke",
+          "long"
+        ]
+      },
+      {
+        "t": "Check the bodies, then let's be gone.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "My hands have only just stopped.",
+        "tags": [
+          "worried",
+          "long"
+        ]
+      },
+      {
+        "t": "We're alive. That's the whole of it.",
+        "tags": [
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Sit down before you fall down.",
+        "tags": [
+          "gentle"
+        ]
+      },
+      {
+        "t": "Hold still. You're bleeding and pretending you aren't.",
+        "tags": [
+          "healer",
+          "gentle"
+        ]
+      },
+      {
+        "t": "Nobody's dying today. I'll take the small win.",
+        "tags": [
+          "healer"
+        ]
+      },
+      {
+        "t": "I want a fire and no more surprises.",
+        "tags": [
+          "relaxed"
+        ]
+      },
+      {
+        "t": "Breathe. In. Out. Again.",
+        "tags": [
+          "gentle",
+          "short"
+        ]
+      },
+      {
+        "t": "Count heads. Then count them again.",
+        "tags": [
+          "worried",
+          "tank"
+        ]
+      },
+      {
+        "t": "We won. Say it back to me, it helps.",
+        "tags": [
+          "earnest",
+          "long"
+        ]
+      },
+      {
+        "t": "The quiet afterwards is the best part of this work.",
+        "tags": [
+          "relaxed",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Right. Loot, water, move.",
+        "tags": [
+          "blunt",
+          "short"
+        ]
       }
     ],
     "observe_person": [
@@ -5375,6 +6374,1708 @@
         "tags": [
           "sarcastic"
         ]
+      }
+    ],
+    "enemy_opener": [
+      {
+        "t": "You walked a long way to bleed.",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "Drop the {$item} and it's quick. Keep it and it isn't.",
+        "tags": [
+          "threat"
+        ]
+      },
+      {
+        "t": "More bodies for the road, then.",
+        "tags": [
+          "blunt",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Stand still. It's easier for both of us.",
+        "tags": [
+          "cruel",
+          "short"
+        ]
+      },
+      {
+        "t": "I smelled you before I saw you.",
+        "tags": [
+          "crude",
+          "short"
+        ]
+      },
+      {
+        "t": "Nobody walks back out of {here.the}. Nobody.",
+        "tags": [
+          "gloomy"
+        ],
+        "cond": "here"
+      },
+      {
+        "t": "{listener.name.cap}, is it? It won't matter in a moment.",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "You're late. I've been hungry.",
+        "tags": [
+          "cruel",
+          "joke"
+        ]
+      },
+      {
+        "t": "Kill them. Take the boots first — the boots are always the best part.",
+        "tags": [
+          "crude",
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "I was told to leave no witnesses. That's the part I like.",
+        "tags": [
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "Last chance to turn around. ... No? Good.",
+        "tags": [
+          "threat"
+        ]
+      },
+      {
+        "t": "You've got the look of people who think they're the heroes here.",
+        "tags": [
+          "sarcastic",
+          "long"
+        ]
+      },
+      {
+        "t": "{#curse.cap}. More of them.",
+        "tags": [
+          "short",
+          "gruff"
+        ]
+      },
+      {
+        "t": "Blood on the stones before dark. Fine by me.",
+        "tags": [
+          "violent",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Try to scream. It carries nicely out here.",
+        "tags": [
+          "cruel",
+          "gore"
+        ]
+      },
+      {
+        "t": "Weapons down, or weapons up. I get paid the same.",
+        "tags": [
+          "casual",
+          "money"
+        ]
+      },
+      {
+        "t": "Shiny! Shiny things and soft {$bodypart.pl}!",
+        "tags": [
+          "goblin",
+          "crude",
+          "gore"
+        ]
+      },
+      {
+        "t": "We got more! We always got more!",
+        "tags": [
+          "goblin",
+          "short"
+        ]
+      },
+      {
+        "t": "Big ones fall same as little ones. Faster, even.",
+        "tags": [
+          "goblin",
+          "joke"
+        ]
+      },
+      {
+        "t": "You got teeth? We collect teeth.",
+        "tags": [
+          "goblin",
+          "cruel",
+          "gore"
+        ]
+      },
+      {
+        "t": "Chief says kill. Chief eats first. Chief is always right!",
+        "tags": [
+          "goblin",
+          "crude",
+          "long"
+        ]
+      },
+      {
+        "t": "Eeee! Meat that walks!",
+        "tags": [
+          "goblin",
+          "short",
+          "crude"
+        ]
+      },
+      {
+        "t": "Stab the tall one! Stab the tall one first!",
+        "tags": [
+          "goblin",
+          "aggressive"
+        ]
+      },
+      {
+        "t": "Our road. Our road has a toll. The toll is you.",
+        "tags": [
+          "goblin",
+          "long",
+          "joke"
+        ]
+      },
+      {
+        "t": "I get the {$item}! I called it! I CALLED IT!",
+        "tags": [
+          "goblin",
+          "money",
+          "joke"
+        ]
+      },
+      {
+        "t": "Don't run. Running makes us excited.",
+        "tags": [
+          "goblin",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Coin, {$item.pl}, boots. Then you can keep the rest.",
+        "tags": [
+          "bandit",
+          "money"
+        ]
+      },
+      {
+        "t": "This road's mine. Been mine since the war.",
+        "tags": [
+          "bandit",
+          "gruff",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Nothing personal. We're just hungrier than you are.",
+        "tags": [
+          "bandit",
+          "casual",
+          "long"
+        ]
+      },
+      {
+        "t": "Hands where I can see them. Good. Now the purse.",
+        "tags": [
+          "bandit",
+          "blunt"
+        ]
+      },
+      {
+        "t": "We only kill the ones who argue. Most of them argue.",
+        "tags": [
+          "bandit",
+          "joke",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Pretty {$item}. Be a shame to pull it off a corpse.",
+        "tags": [
+          "bandit",
+          "threat",
+          "money"
+        ]
+      },
+      {
+        "t": "You look fed. I hate people who look fed.",
+        "tags": [
+          "bandit",
+          "resentful",
+          "hunger"
+        ]
+      },
+      {
+        "t": "Count us. Now count you. Now be sensible.",
+        "tags": [
+          "bandit",
+          "confident",
+          "long"
+        ]
+      },
+      {
+        "t": "Put it down. There's two more of us you haven't seen yet.",
+        "tags": [
+          "bandit",
+          "suspicious"
+        ]
+      },
+      {
+        "t": "The last lot begged. Didn't help them either.",
+        "tags": [
+          "bandit",
+          "cruel",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "The door is opening. You're only noise on the wrong side of it.",
+        "tags": [
+          "cultist",
+          "lore",
+          "religious"
+        ]
+      },
+      {
+        "t": "You were always going to be here. It was written on the inside of my eyes.",
+        "tags": [
+          "cultist",
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "Hold still. The offering is supposed to be whole.",
+        "tags": [
+          "cultist",
+          "religious",
+          "cruel"
+        ]
+      },
+      {
+        "t": "{$deity.cap} does not want your prayers. {$deity.they.cap} wants what's under your skin.",
+        "tags": [
+          "cultist",
+          "religious",
+          "blasphemy"
+        ]
+      },
+      {
+        "t": "Do you hear it? No? You will, in a moment.",
+        "tags": [
+          "cultist",
+          "lore"
+        ]
+      },
+      {
+        "t": "We are not killing you. We are finishing you.",
+        "tags": [
+          "cultist",
+          "formal",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Everything ends. We simply keep the schedule.",
+        "tags": [
+          "cultist",
+          "formal",
+          "long"
+        ]
+      },
+      {
+        "t": "Your names are already crossed out.",
+        "tags": [
+          "cultist",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Kneel, and the knife is kind.",
+        "tags": [
+          "cultist",
+          "religious",
+          "threat"
+        ]
+      },
+      {
+        "t": "The ones who run make the better screams. Please run.",
+        "tags": [
+          "cultist",
+          "cruel",
+          "gore"
+        ]
+      },
+      {
+        "t": "Warm. You are so very warm.",
+        "tags": [
+          "undead",
+          "gloomy",
+          "gore"
+        ]
+      },
+      {
+        "t": "I remember a name. It might have been mine.",
+        "tags": [
+          "undead",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "Stop moving. It hurts to watch you move.",
+        "tags": [
+          "undead",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Come down here with us. It's quiet down here.",
+        "tags": [
+          "undead",
+          "gloomy",
+          "threat"
+        ]
+      },
+      {
+        "t": "You have breath. Give it back.",
+        "tags": [
+          "undead",
+          "short",
+          "cruel"
+        ]
+      },
+      {
+        "t": "We were the garrison. We never left our post.",
+        "tags": [
+          "undead",
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "Flesh. I had that, once.",
+        "tags": [
+          "undead",
+          "short",
+          "gore"
+        ]
+      },
+      {
+        "t": "The grave is not full. The grave is never full.",
+        "tags": [
+          "undead",
+          "gloomy",
+          "religious"
+        ]
+      },
+      {
+        "t": "Don't be afraid. It only hurts until it doesn't.",
+        "tags": [
+          "undead",
+          "cruel",
+          "gentle"
+        ]
+      },
+      {
+        "t": "Everyone joins the watch. Everyone.",
+        "tags": [
+          "undead",
+          "lore"
+        ]
+      },
+      {
+        "t": "Little souls. All of you, walking about unburned.",
+        "tags": [
+          "demon",
+          "cruel"
+        ]
+      },
+      {
+        "t": "I have eaten {$race.people}. You won't taste new.",
+        "tags": [
+          "demon",
+          "gore",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Do you know what the screaming sounds like from my side of it?",
+        "tags": [
+          "demon",
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "Your gods are a rumour here.",
+        "tags": [
+          "demon",
+          "blasphemy",
+          "religious"
+        ]
+      },
+      {
+        "t": "I was called up for worse than you. You'll do for now.",
+        "tags": [
+          "demon",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "Bleed, and I'll know your name. Names are useful.",
+        "tags": [
+          "demon",
+          "lore",
+          "threat"
+        ]
+      },
+      {
+        "t": "Come on, then. Bring the little sharp things.",
+        "tags": [
+          "demon",
+          "cruel",
+          "joke"
+        ]
+      },
+      {
+        "t": "There's a contract with your name at the bottom. I'm collecting.",
+        "tags": [
+          "demon",
+          "formal",
+          "long"
+        ]
+      },
+      {
+        "t": "Fire is honest. Everything else lies.",
+        "tags": [
+          "demon",
+          "lore"
+        ]
+      },
+      {
+        "t": "You'll burn slowly. I do good work.",
+        "tags": [
+          "demon",
+          "gore",
+          "cruel"
+        ]
+      },
+      {
+        "t": "You are a shape that won't be a shape much longer.",
+        "tags": [
+          "void",
+          "lore"
+        ]
+      },
+      {
+        "t": "Don't look up. It is already looking back.",
+        "tags": [
+          "void",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "Wrong. All of you. Wrong, wrong, wrong.",
+        "tags": [
+          "void",
+          "short"
+        ]
+      },
+      {
+        "t": "I was a thought once. I got bigger.",
+        "tags": [
+          "void",
+          "lore",
+          "joke"
+        ]
+      },
+      {
+        "t": "There is no floor under this. There never was.",
+        "tags": [
+          "void",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "You count in ones. That is your whole problem.",
+        "tags": [
+          "void",
+          "formal"
+        ]
+      },
+      {
+        "t": "Stand still and unhappen.",
+        "tags": [
+          "void",
+          "short",
+          "cruel"
+        ]
+      },
+      {
+        "t": "The stars stopped. Nobody told you.",
+        "tags": [
+          "void",
+          "lore",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Between your heartbeats there is a very long room.",
+        "tags": [
+          "void",
+          "long",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "I'll take the parts of you that matter. There are fewer than you think.",
+        "tags": [
+          "void",
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "You smell like the last ones. They weren't enough either.",
+        "tags": [
+          "dragon",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Speak, if you can. Few of you can.",
+        "tags": [
+          "dragon",
+          "formal"
+        ]
+      },
+      {
+        "t": "I have slept on better armour than that.",
+        "tags": [
+          "dragon",
+          "sarcastic",
+          "brag"
+        ]
+      },
+      {
+        "t": "Small. Fast. Loud. Still small.",
+        "tags": [
+          "dragon",
+          "blunt"
+        ]
+      },
+      {
+        "t": "The hoard is counted. You are not on the list.",
+        "tags": [
+          "dragon",
+          "money",
+          "formal"
+        ]
+      },
+      {
+        "t": "I remember your grandfather. He ran, too.",
+        "tags": [
+          "dragon",
+          "cruel",
+          "lore"
+        ]
+      },
+      {
+        "t": "There is no cave deep enough today.",
+        "tags": [
+          "dragon",
+          "threat"
+        ]
+      },
+      {
+        "t": "Burn, or be useful. Choose quickly.",
+        "tags": [
+          "dragon",
+          "threat",
+          "formal"
+        ]
+      },
+      {
+        "t": "Your kind builds. Mine unbuilds. That is the arrangement.",
+        "tags": [
+          "dragon",
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "I'll be eating shortly. Do try to be interesting.",
+        "tags": [
+          "dragon",
+          "cruel",
+          "joke"
+        ]
+      },
+      {
+        "t": "Draw. I won't strike an unarmed fool.",
+        "tags": [
+          "knight",
+          "honor",
+          "formal"
+        ]
+      },
+      {
+        "t": "The order takes no prisoners. Neither do I.",
+        "tags": [
+          "knight",
+          "formal",
+          "cruel"
+        ]
+      },
+      {
+        "t": "You stand in a sworn place. Sworn to me.",
+        "tags": [
+          "knight",
+          "formal",
+          "honor"
+        ]
+      },
+      {
+        "t": "I have killed better dressed than you.",
+        "tags": [
+          "knight",
+          "sarcastic",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Name yourself. I like to know what I'm cleaning off the blade.",
+        "tags": [
+          "knight",
+          "cruel",
+          "formal"
+        ]
+      },
+      {
+        "t": "My oath was to hold this ground. I've held worse.",
+        "tags": [
+          "knight",
+          "honor",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "This isn't courage. This is trespass.",
+        "tags": [
+          "knight",
+          "formal",
+          "blunt"
+        ]
+      },
+      {
+        "t": "Armour up or bleed out. I don't much care which.",
+        "tags": [
+          "knight",
+          "blunt"
+        ]
+      },
+      {
+        "t": "I gave up mercy at the gate. It weighed too much.",
+        "tags": [
+          "knight",
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "One of us kneels today, and it won't be me.",
+        "tags": [
+          "knight",
+          "confident",
+          "honor"
+        ]
+      }
+    ],
+    "boss_opener": [
+      {
+        "t": "So. The noise in the corridors was you.",
+        "tags": [
+          "formal",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "Come in. Shut the door behind you — you won't be using it.",
+        "tags": [
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "I let you get this far. I wanted to see your faces.",
+        "tags": [
+          "confident",
+          "cruel"
+        ]
+      },
+      {
+        "t": "Every one of my dead is worth ten of you. Come and prove otherwise.",
+        "tags": [
+          "formal",
+          "brag"
+        ]
+      },
+      {
+        "t": "You've killed my people all the way up the stair. Sit. Let's finish it.",
+        "tags": [
+          "long",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "I have been waiting here since before your grandmother screamed her first.",
+        "tags": [
+          "brag",
+          "lore",
+          "long"
+        ]
+      },
+      {
+        "t": "There is nothing behind me. This is where it stops.",
+        "tags": [
+          "gloomy",
+          "confident"
+        ]
+      },
+      {
+        "t": "You brought weapons into my house. That's almost polite.",
+        "tags": [
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "Do it properly. I'd hate to be disappointed twice in one day.",
+        "tags": [
+          "cruel",
+          "formal"
+        ]
+      },
+      {
+        "t": "Kneel, and I'll make the end quick enough to be called kind.",
+        "tags": [
+          "threat",
+          "cruel"
+        ]
+      },
+      {
+        "t": "They'll find pieces of you and blame an animal.",
+        "tags": [
+          "gore",
+          "cruel"
+        ]
+      },
+      {
+        "t": "I have a name. You won't be using it long enough to wear it out.",
+        "tags": [
+          "formal",
+          "brag"
+        ]
+      },
+      {
+        "t": "Everything you killed to get here was mine, and none of it mattered.",
+        "tags": [
+          "long",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Set down the {$item} or don't. It changes the noise, not the ending.",
+        "tags": [
+          "formal",
+          "cruel"
+        ]
+      }
+    ],
+    "boss_phase": [
+      {
+        "t": "Enough playing.",
+        "tags": [
+          "short"
+        ]
+      },
+      {
+        "t": "Now you have my attention.",
+        "tags": [
+          "confident"
+        ]
+      },
+      {
+        "t": "I had hoped to keep this clean.",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "You've made me work. Nobody has made me work in years.",
+        "tags": [
+          "brag",
+          "long"
+        ]
+      },
+      {
+        "t": "Let's stop pretending this was ever close.",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "That hurt. Do you understand what you've just done?",
+        "tags": [
+          "threat"
+        ]
+      },
+      {
+        "t": "Fine. The careful part is over.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "I was holding something back. I'm done holding.",
+        "tags": [
+          "threat"
+        ]
+      },
+      {
+        "t": "You should have run while running was cheap.",
+        "tags": [
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "Bleed for me properly now.",
+        "tags": [
+          "gore",
+          "cruel"
+        ]
+      },
+      {
+        "t": "There's a second half to this, and you won't like the shape of it.",
+        "tags": [
+          "gloomy",
+          "long"
+        ]
+      },
+      {
+        "t": "Watch the floor. That's all the warning you get.",
+        "tags": [
+          "threat",
+          "short"
+        ]
+      },
+      {
+        "t": "Every one of you dies in this room. I've stopped negotiating.",
+        "tags": [
+          "cruel",
+          "formal"
+        ]
+      },
+      {
+        "t": "Good. Good! Now show me the rest of it!",
+        "tags": [
+          "joyful",
+          "cruel"
+        ]
+      }
+    ],
+    "named_first": [
+      {
+        "t": "They'll tell you my name afterwards. Save the trouble and learn it now.",
+        "tags": [
+          "brag"
+        ]
+      },
+      {
+        "t": "You don't know me yet. That's about to be fixed.",
+        "tags": [
+          "confident"
+        ]
+      },
+      {
+        "t": "I've been killing on this road since before you could lift {$item.a}.",
+        "tags": [
+          "brag",
+          "long"
+        ]
+      },
+      {
+        "t": "I heard there were sellswords on the road. I came to see for myself.",
+        "tags": [
+          "sarcastic",
+          "long"
+        ]
+      },
+      {
+        "t": "{speaker.name}. Say it back, so you know who did it.",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "New faces. Good. The old ones stopped screaming.",
+        "tags": [
+          "cruel",
+          "gore"
+        ]
+      },
+      {
+        "t": "I don't take contracts on nobodies. Somebody paid for you.",
+        "tags": [
+          "suspicious",
+          "money",
+          "long"
+        ]
+      },
+      {
+        "t": "Stand where you are and I'll only take the loud one.",
+        "tags": [
+          "threat"
+        ]
+      },
+      {
+        "t": "You're the ones out of {here.the}? Smaller than the story.",
+        "tags": [
+          "sarcastic"
+        ],
+        "cond": "here"
+      },
+      {
+        "t": "I've been given a list. You're on it, near the bottom.",
+        "tags": [
+          "formal",
+          "cruel"
+        ]
+      },
+      {
+        "t": "First time? Try to make it interesting. I get so little.",
+        "tags": [
+          "cruel",
+          "joke"
+        ]
+      },
+      {
+        "t": "I take something off everyone I kill. What have you got?",
+        "tags": [
+          "cruel",
+          "money",
+          "long"
+        ]
+      }
+    ],
+    "named_rematch": [
+      {
+        "t": "You again. I was starting to think you'd died somewhere useful.",
+        "tags": [
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "Back for the rest of it, then.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "I knew you'd follow. People like you always follow.",
+        "tags": [
+          "confident",
+          "long"
+        ]
+      },
+      {
+        "t": "Still breathing. You've disappointed me {defeats, plural, one{once} other{# times}} now.",
+        "tags": [
+          "cruel"
+        ],
+        "cond": "defeats >= 1"
+      },
+      {
+        "t": "{days} days, and you've learned nothing.",
+        "tags": [
+          "cruel"
+        ],
+        "cond": "days > 0"
+      },
+      {
+        "t": "I've had {days} days to think about how to do this properly.",
+        "tags": [
+          "threat",
+          "long"
+        ],
+        "cond": "days > 2"
+      },
+      {
+        "t": "We keep meeting. I'm going to fix that.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "You ran. I let you. That was a gift, and you've spent it.",
+        "tags": [
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "The last time was a conversation. This isn't.",
+        "tags": [
+          "formal"
+        ]
+      },
+      {
+        "t": "New {$item.pl}, I see. They won't help.",
+        "tags": [
+          "sarcastic",
+          "money"
+        ]
+      },
+      {
+        "t": "Every time I see you there are fewer of you.",
+        "tags": [
+          "cruel",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Hello again, {listener.name}. Still the loud one.",
+        "tags": [
+          "sarcastic"
+        ]
+      }
+    ],
+    "named_avenge": [
+      {
+        "t": "{fallen.name} screamed less than I expected. Let's see about you.",
+        "tags": [
+          "cruel",
+          "gore"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "I still have {fallen.name}'s {$item}. Want it back?",
+        "tags": [
+          "cruel",
+          "money"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "You buried {fallen.name} badly. I went and checked.",
+        "tags": [
+          "cruel",
+          "gloomy",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "One of you is already mine. The rest is paperwork.",
+        "tags": [
+          "formal",
+          "sarcastic"
+        ]
+      },
+      {
+        "t": "I think about {fallen.name} sometimes. Fondly.",
+        "tags": [
+          "cruel"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "Say {fallen.name}'s name. Go on. It changes nothing.",
+        "tags": [
+          "cruel"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "{fallen.name} came at me standing exactly where you're standing.",
+        "tags": [
+          "threat",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "You're angry. Good. Angry people forget their footing.",
+        "tags": [
+          "confident",
+          "long"
+        ]
+      },
+      {
+        "t": "I took {fallen.name} apart in the time it takes to tell it.",
+        "tags": [
+          "gore",
+          "brag"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "How many more of you do I have to bury before you stop coming?",
+        "tags": [
+          "gruff",
+          "gloomy"
+        ]
+      },
+      {
+        "t": "Your healer couldn't keep {fallen.name} breathing. Let's see about the rest of you.",
+        "tags": [
+          "cruel",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "I kept the {$item} {fallen.name} was holding. It's better than yours.",
+        "tags": [
+          "cruel",
+          "money"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      },
+      {
+        "t": "You should have stopped after I took {fallen.name}. Now I take another.",
+        "tags": [
+          "threat",
+          "long"
+        ],
+        "bind": {
+          "fallen": {
+            "type": "person"
+          }
+        }
+      }
+    ],
+    "named_beaten": [
+      {
+        "t": "You put me down once. I got up. Try to look impressed.",
+        "tags": [
+          "brag"
+        ]
+      },
+      {
+        "t": "I've had time to heal, and nothing to do with it but plan.",
+        "tags": [
+          "threat",
+          "long"
+        ]
+      },
+      {
+        "t": "Last time you were lucky. Luck is a thing that runs out.",
+        "tags": [
+          "confident"
+        ]
+      },
+      {
+        "t": "You've beaten me {defeats, plural, one{once} other{# times}}. It stops today.",
+        "tags": [
+          "formal"
+        ],
+        "cond": "defeats >= 1"
+      },
+      {
+        "t": "You left me alive. Everyone does that exactly once.",
+        "tags": [
+          "cruel",
+          "long"
+        ]
+      },
+      {
+        "t": "You beat a version of me that doesn't exist any more.",
+        "tags": [
+          "lore"
+        ]
+      },
+      {
+        "t": "I bled for a week because of you. You'll bleed longer.",
+        "tags": [
+          "threat",
+          "gore"
+        ]
+      },
+      {
+        "t": "Same road. Same faces. Different ending.",
+        "tags": [
+          "blunt"
+        ]
+      },
+      {
+        "t": "You should have finished it. That was the whole job.",
+        "tags": [
+          "cruel"
+        ]
+      },
+      {
+        "t": "I've been practising. On people who looked like you.",
+        "tags": [
+          "cruel",
+          "gore",
+          "long"
+        ]
+      },
+      {
+        "t": "I know what you did to the others with names. I'm not the others.",
+        "tags": [
+          "confident",
+          "long"
+        ]
+      },
+      {
+        "t": "Word travels. You kill the ones the songs are about. Sing about this.",
+        "tags": [
+          "sarcastic",
+          "long"
+        ]
+      }
+    ],
+    "named_beast": [
+      {
+        "t": "{foe.sg.cap} doesn't hurry. It has the whole night.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} takes the party in, one at a time, and is unimpressed.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Old scars, badly healed. {foe.sg.cap} has survived worse than you.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} remembers the smell of you.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Something taught {foe.sg} that people are slow.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} stands over a kill that is neither fresh nor finished.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The rest of them hang back. {foe.sg.cap} eats first.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} has no interest in your weapons. Only your throats.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} waited here for you. That's the part that frightens you.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} has learned to move when the healer looks away.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} has eaten better armed than you, and left the armour.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The ground around {foe.sg} is picked clean for twenty paces.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "{foe.sg.cap} came when it heard you coming, not the other way round.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      }
+    ],
+    "beast_snarl": [
+      {
+        "t": "The {foe.sg} snarls and doesn't blink.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} lowers its head. Something in its throat clicks.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} circles wide, cutting off the way back.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Hackles up. The {foe.sg} has done this before.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} screams — not a hunting sound. A feeding one.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} drags a foreleg and is still faster than any of you.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Nothing in the {foe.sg}'s eyes takes you for a person.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} bares teeth stained brown at the roots.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} sniffs the air and settles on the smallest of you.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} doesn't roar. It simply comes.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Flies lift off the {foe.sg} in a sheet. It has fed today already.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} plants itself between the party and the open ground.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "A low sound starts up in the {foe.sg} and gets into your teeth.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} shakes off the rain and picks a target.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} looks at the {$item} in your hand and is not impressed.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The {foe.sg} opens its mouth wider than a mouth should open.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      }
+    ],
+    "night_attack": [
+      {
+        "t": "The fire gutters. Something is standing just past the light.",
+        "tags": []
+      },
+      {
+        "t": "The watch never calls out. That's how you know.",
+        "tags": []
+      },
+      {
+        "t": "{foe.pl.cap} come in low and quiet, from the side without a fire.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "Someone's bedroll is empty. Then the screaming starts.",
+        "tags": []
+      },
+      {
+        "t": "A branch cracks where nobody is walking.",
+        "tags": []
+      },
+      {
+        "t": "They came for the packs, and they'll take the rest while they're here.",
+        "tags": []
+      },
+      {
+        "t": "Whatever was circling the camp has stopped circling.",
+        "tags": []
+      },
+      {
+        "t": "Rain covers the sound of them until they're close enough to touch.",
+        "tags": []
+      },
+      {
+        "t": "The dark past the fire moves all at once.",
+        "tags": []
+      },
+      {
+        "t": "You wake with a hand already on your {$item}. Good instincts. Barely enough.",
+        "tags": []
+      },
+      {
+        "t": "No shouting. Just weight landing on the ground all around you.",
+        "tags": []
+      },
+      {
+        "t": "The night gives up {foe.a}, then another, then more than you can count.",
+        "tags": [],
+        "bind": {
+          "foe": {
+            "type": "creature"
+          }
+        }
+      },
+      {
+        "t": "The last one on watch is face down and still warm.",
+        "tags": []
+      },
+      {
+        "t": "They waited for the fire to burn low. They're patient, out here.",
+        "tags": []
+      }
+    ],
+    "ambush_opener": [
+      {
+        "t": "The trap closes before anyone gets a word out.",
+        "tags": []
+      },
+      {
+        "t": "They were lying in the ditch on both sides of the road. Of course they were.",
+        "tags": []
+      },
+      {
+        "t": "The first arrow answers the question of whether anyone is out here.",
+        "tags": []
+      },
+      {
+        "t": "Something drops out of the branches behind the last of you.",
+        "tags": []
+      },
+      {
+        "t": "The road ahead is blocked. So is the road behind.",
+        "tags": []
+      },
+      {
+        "t": "No warning, no demand. They simply come up out of the rocks.",
+        "tags": []
+      },
+      {
+        "t": "A rope goes taut across the path at knee height.",
+        "tags": []
+      },
+      {
+        "t": "You're surrounded before anyone thinks to draw.",
+        "tags": []
+      },
+      {
+        "t": "The quiet was the warning, and nobody read it.",
+        "tags": []
+      },
+      {
+        "t": "They let the party walk all the way in before standing up.",
+        "tags": []
+      },
+      {
+        "t": "Whistles from three directions. Then the rush.",
+        "tags": []
+      },
+      {
+        "t": "Whoever picked this stretch of ground knew exactly what they were doing.",
+        "tags": []
+      },
+      {
+        "t": "The first you know of it is the sound of a bowstring.",
+        "tags": []
+      },
+      {
+        "t": "Something heavy lands in the middle of the party and starts swinging.",
+        "tags": []
       }
     ]
   }

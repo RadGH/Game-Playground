@@ -49,7 +49,8 @@
     "challenge": { "file": "icons/challenge.svg", "tags": ["node", "trial"] },
     "skillCheck": { "file": "icons/skillCheck.svg", "tags": ["node", "roll"] },
     "named": { "file": "icons/named.svg", "tags": ["node", "fight", "rare"] },
-    "heroquest": { "file": "icons/heroquest.svg", "tags": ["node", "quest", "personal"] }
+    "heroquest": { "file": "icons/heroquest.svg", "tags": ["node", "quest", "personal"] },
+    "crossing": { "file": "icons/crossing.svg", "tags": ["node", "travel", "hazard"] }
   },
   "fx": {
     "flame": { "file": "fx/flame.svg", "tags": ["fire", "burn", "particle", "projectile"] },
@@ -137,6 +138,13 @@
     "title_banner": { "file": "ui/title_banner.svg", "tags": ["banner", "title", "ember", "skyline", "background"] },
     "torch": { "file": "ui/torch.svg", "tags": ["hud", "status", "icon"] },
     "wagon": { "file": "ui/wagon.svg", "tags": ["hud", "status", "icon"] },
-    "xp": { "file": "ui/xp.svg", "tags": ["hud", "status", "icon"] }
+    "xp": { "file": "ui/xp.svg", "tags": ["hud", "status", "icon"] },
+    "chest_closed": { "file": "ui/chest_closed.svg", "tags": ["reward", "chest"] },
+    "chest_open": { "file": "ui/chest_open.svg", "tags": ["reward", "chest", "glow"] },
+    "rays": { "file": "ui/rays.svg", "tags": ["reward", "burst", "legendary"] },
+    "coin_pile": { "file": "ui/coin_pile.svg", "tags": ["reward", "gold"] },
+    "xp_burst": { "file": "ui/xp_burst.svg", "tags": ["reward", "xp"] },
+    "ribbon": { "file": "ui/ribbon.svg", "tags": ["reward", "banner"] },
+    "level_up": { "file": "ui/level_up.svg", "tags": ["reward", "level"] }
   }
 }

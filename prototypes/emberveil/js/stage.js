@@ -8,6 +8,21 @@ import { randomAvatar } from '../../../avatar-2d/js/random.js';
 import { createCreature } from '../../../avatar-3d/js/creatures.js';
 import { Assets } from '../../../assets/js/assets.js';
 import { SpellFx } from '../../../avatar-3d/js/spellfx.js';
+import { createVehicle, vehicleModelFor } from '../../../avatar-3d/js/vehicles.js';
+
+/**
+ * How much of the world each view has to show, in world units. `width` is the widest the scene ever
+ * gets (four heroes against four enemies), `top` is the tallest head we expect, and `headroom` is the
+ * share of the frame kept empty above that head so speech bubbles always have somewhere to sit.
+ * frame() turns these into a camera distance for whatever shape the stage panel actually is.
+ */
+export const FRAMES = {
+  fight: { width: 7.8, top: 2.4, bottom: -0.15, headroom: 0.25 },
+  camp: { width: 7.6, top: 2.2, bottom: -0.15, headroom: 0.25 },
+  travel: { width: 9.0, top: 2.4, bottom: -0.2, headroom: 0.22 },
+};
+/** Where the bodies on one side stand: the more of them there are, the tighter they line up. */
+function lineUp(count = 1) { return count >= 4 ? { base: 0.95, step: 0.78 } : count === 3 ? { base: 1.05, step: 0.88 } : { base: 1.15, step: 0.95 }; }
 
 export class Stage {
   /** @param {HTMLElement} container  @param {{assets?: Assets}} opts  Pass an Assets instance to share one loader; otherwise the stage opens its own. */
@@ -16,18 +31,45 @@ export class Stage {
     this.assets = assets ? Promise.resolve(assets) : Assets.open(new URL('../../../assets/', import.meta.url).href);
     this._backdropToken = 0; this.backdrop = document.createElement('div'); this.backdrop.className = 'backdrop'; container.append(this.backdrop);
     this.scene = createScene(container, { background: 0x1e2128, ground: false }); this.scene.renderer.setClearColor(0x000000, 0); this.scene.scene.background = null;
-    this.scene.camera.position.set(0, 1.2, 6.2); this.scene.controls.target.set(0, 0.9, 0); this.scene.controls.enabled = false; this.scene.camera.fov = 28; this.scene.camera.updateProjectionMatrix();
+    this.scene.controls.enabled = false;
+    // Camera framing is worked out from the panel's real shape (see frame()), not hard-coded, so a
+    // full party of four against four enemies fits with room above the tallest head for speech bubbles.
+    this.frameMode = 'fight'; this.frame('fight');
+    this._ro = new ResizeObserver(() => this.frame()); this._ro.observe(container);
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(14, 6), new THREE.MeshStandardMaterial({ color: 0x2a2f2a, roughness: 1, transparent: true, opacity: 0.55 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; this.scene.scene.add(ground); this.ground = ground;
-    this.chars = new Map(); this.anims = []; this.fire = null;
+    this.chars = new Map(); this.anims = []; this.fire = null; this.vehicle = null; this._vehToken = 0;
     // Spell effects (avatar-3d/js/spellfx.js). The sprite textures are fetched in the background;
     // until they land the effects draw their geometry only, so nothing waits on the network.
     // scale 1.4: the fight camera sits further back than the effects gallery, so everything is
     // drawn larger here or it disappears against the backdrop.
     this.fx = new SpellFx(this.scene.scene, { camera: this.scene.camera, scale: 1.4 });
     this.fxReady = this.assets.then(a => a.fxTextures(THREE, { size: 128 })).then(t => { this.fx.setTextures(t); return t; }).catch(() => null);
-    this.scene.addTicker((dt, t) => { for (const c of this.chars.values()) c.ctrl.update(dt, t); for (const a of [...this.anims]) if (a(dt, t)) this.anims.splice(this.anims.indexOf(a), 1); this.fx.update(dt); if (this.fire) { this.fire.scale.y = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 23) * 0.05; this.fireLight.intensity = 2.2 + Math.sin(t * 13) * 0.4; } });
+    this.scene.addTicker((dt, t) => { for (const c of this.chars.values()) c.ctrl.update(dt, t); if (this.vehicle) this.vehicle.update(dt, t); for (const a of [...this.anims]) if (a(dt, t)) this.anims.splice(this.anims.indexOf(a), 1); this.fx.update(dt); if (this.fire) { this.fire.scale.y = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 23) * 0.05; this.fireLight.intensity = 2.2 + Math.sin(t * 13) * 0.4; } });
     this.setBackdrop('village');
   }
+  /**
+   * Point the camera so a whole scene fits the stage panel, whatever shape the panel is.
+   *
+   * The panel is short and wide, so the width of the scene is usually what decides how far back the
+   * camera has to sit; when the panel is squarer, the height decides. Either way we keep a slice of
+   * empty frame (FRAMES[mode].headroom) above the tallest head, which is where the speech bubbles go.
+   * Called on every resize, so the framing follows the window.
+   */
+  frame(mode = this.frameMode) {
+    this.frameMode = mode; const F = FRAMES[mode] || FRAMES.fight;
+    const cam = this.scene.camera, aspect = Math.max(0.5, cam.aspect || 1.78);
+    const contentH = F.top - F.bottom;
+    const worldH = Math.max(contentH / (1 - F.headroom), F.width / aspect);   // tall enough for the heads, wide enough for the line-up
+    const fov = 30; cam.fov = fov;
+    const dist = (worldH / 2) / Math.tan(fov * Math.PI / 360);
+    const midY = F.bottom + worldH / 2;
+    cam.position.set(0, midY + 0.35, dist); this.scene.controls.target.set(0, midY, 0);   // a touch above, looking slightly down
+    cam.updateProjectionMatrix(); this.scene.controls.update?.();
+    this.worldFrame = { width: worldH * aspect, height: worldH, bottom: F.bottom, top: F.bottom + worldH, dist };
+    return this.worldFrame;
+  }
+  /** Where a body's speech bubble should point, in world space: just above the head. */
+  headOf(id) { const c = this.chars.get(id); if (!c) return null; const v = new THREE.Vector3(); c.group.getWorldPosition(v); v.y += this.heightOf(id) + 0.22; return v; }
   /**
    * Show a scene behind the characters. Async because the art is fetched, but callers do not need to
    * await it: the ground tint changes right away and the art swaps in when it arrives. If two calls
@@ -45,7 +87,7 @@ export class Stage {
     await this.remove(ch.id);
     const ctrl = ch.creature ? await createCreature(ch.creature) : await createMiiCharacter(ch.avatar || randomAvatar(this.presets || { palettes: { skin: ['#c68642'], hair: ['#222'], eye: ['#222'], cloth: ['#555'] }, raceRules: {} }, { seed: 1 }));
     const g = ctrl.group; g.userData.character = false;
-    const x = side === 'left' ? -1.2 - index * 0.9 : 1.2 + index * 0.9; g.position.set(x, 0, (index % 2) * 0.35 - 0.2);
+    const { base, step } = lineUp(count); const x = side === 'left' ? -base - index * step : base + index * step; g.position.set(x, 0, (index % 2) * 0.35 - 0.2);
     g.rotation.y = facing != null ? facing : (side === 'left' ? 0.9 : -0.9);
     if (ch.creature) ctrl.isCreature = true; const mm = ctrl.metrics?.(); g.userData.fxHeight = mm?.totalHeight || mm?.height || 1.5; this.scene.scene.add(g); this.chars.set(ch.id, { ctrl, group: g, side, home: g.position.clone(), rot: g.rotation.y, ch });
     if (ch.hp !== undefined && ch.hp <= 0) this.down(ch.id); return ctrl;
@@ -101,14 +143,102 @@ export class Stage {
   /** Bursts on several fighters at once (a zone skill). */
   aoe(ids, element = 'arcane', crit = false) { this.fx.aoe({ points: ids.map(i => this.pointOf(i)).filter(Boolean), element, crit }); }
 
+  // ---- the party's vehicle ---------------------------------------------------------------------
+  // One model at a time (avatar-3d/js/vehicles.js). The game stores a vehicle id; vehicleModelFor()
+  // turns 'none' into null, which means the party walks and nothing is drawn.
+
+  /**
+   * Park the party's vehicle somewhere on the stage.
+   * @param {string|null} gameId  a js/game.js VEHICLES key ('wagon', 'none', …)
+   * @returns the vehicle controller, or null when the party is on foot
+   */
+  async setVehicle(gameId, { x = 0, z = 0, rot = 0, scale = 1, anim = 'idle' } = {}) {
+    this.vehicleId = gameId; const model = vehicleModelFor(gameId); const token = ++this._vehToken;
+    if (!model) { this.clearVehicle(); return null; }
+    if (this.vehicle?.spec?.type !== model) {
+      const v = await createVehicle(model);
+      if (token !== this._vehToken) { v.dispose(); return this.vehicle; }   // a newer setVehicle won
+      this.clearVehicle(); this.vehicle = v; this.scene.scene.add(v.group);
+    }
+    const g = this.vehicle.group; g.position.set(x, 0, z); g.rotation.y = rot; g.scale.setScalar(scale); this.vehicle.setAnim(anim);
+    return this.vehicle;
+  }
+  clearVehicle() { if (this.vehicle) { this.scene.scene.remove(this.vehicle.group); this.vehicle.dispose(); this.vehicle = null; } }
+  /** Park the vehicle behind and to the left of the party, out of the way of a fight. */
+  // angled back and away: the cart's origin is the bed and the animal stands ~3 units in front of it,
+  // so pointing it into the distance keeps the whole rig out of the party's half of the stage
+  async parkVehicle(gameId) { return this.setVehicle(gameId, { x: -3.2, z: -1.0, rot: Math.PI * 0.38, scale: 0.72, anim: 'idle' }); }
+
+  // ---- travel scenes ---------------------------------------------------------------------------
+
+  /** Put everyone back where setSide/camp left them (after a travel scene has walked them around). */
+  resetPositions() { for (const c of this.chars.values()) { c.group.position.copy(c.home); c.group.rotation.y = c.rot; if (c.ch.hp === undefined || c.ch.hp > 0) c.ctrl.setAnim('idle'); } }
+
+  /**
+   * The party crosses the stage from the left edge to the right, walking (or riding, when a vehicle
+   * is owned) while the camera pans with them. Used by crossing nodes. Resolves at the far side;
+   * call resetPositions() afterwards to put the line-up back.
+   * @param {{vehicle?: string|null, ms?: number}} opts
+   */
+  async travelAcross({ vehicle = null, ms = 4200 } = {}) {
+    this.frame('travel');
+    const W = this.worldFrame.width, startX = -W / 2 - 1.4, endX = W / 2 + 1.4, dist = endX - startX;
+    const walkers = [...this.chars.values()].filter(c => c.side !== 'right');
+    walkers.forEach((c, i) => { c.group.position.set(startX - i * 0.85, 0, (i % 2) * 0.55 - 0.3); c.group.rotation.y = Math.PI / 2; c.ctrl.setAnim('walk'); });
+    const veh = vehicle ? await this.setVehicle(vehicle, { x: startX - walkers.length * 0.85 - 4.4, z: 1.15, rot: 0, scale: 0.8, anim: 'roll' }) : null;
+    const vehX0 = veh ? veh.group.position.x : 0;
+    const cam = this.scene.camera, camX0 = cam.position.x, tgtX0 = this.scene.controls.target.x;
+    await new Promise(res => {
+      let k = 0;
+      this.anims.push(dt => {
+        k = Math.min(1, k + dt * 1000 / Math.max(400, ms));
+        walkers.forEach((c, i) => { c.group.position.x = startX - i * 0.85 + dist * k; });
+        if (veh) veh.group.position.x = vehX0 + dist * k;
+        const pan = (k - 0.5) * W * 0.22;                 // the camera drifts with them instead of holding still
+        cam.position.x = camX0 + pan; this.scene.controls.target.x = tgtX0 + pan;
+        if (k >= 1) { res(); return true; }
+        return false;
+      });
+    });
+    cam.position.x = camX0; this.scene.controls.target.x = tgtX0;
+    for (const c of walkers) c.ctrl.setAnim('idle'); if (veh) veh.setAnim('idle');
+    return true;
+  }
+
+  /**
+   * Walk one body on from an edge to a spot on the stage — a guard coming out to meet the party.
+   * `from` and `to` are world x positions; the body turns to face the way it is going and then faces
+   * back toward the party when it stops.
+   */
+  walkIn(id, from, to, { ms = 1800, z = 0, faceAtEnd = null } = {}) {
+    const c = this.chars.get(id); if (!c) return Promise.resolve();
+    c.group.position.set(from, 0, z); c.group.rotation.y = to < from ? -Math.PI / 2 : Math.PI / 2; c.ctrl.setAnim('walk');
+    return new Promise(res => {
+      let k = 0;
+      this.anims.push(dt => {
+        k = Math.min(1, k + dt * 1000 / Math.max(200, ms));
+        c.group.position.x = from + (to - from) * k;
+        if (k >= 1) { c.ctrl.setAnim('idle'); c.group.rotation.y = faceAtEnd != null ? faceAtEnd : (to < from ? -0.9 : 0.9); c.home.copy(c.group.position); c.rot = c.group.rotation.y; res(); return true; }
+        return false;
+      });
+    });
+  }
+
   /** Camp: members in an arc around a fire, facing it. */
-  async camp(members) {
+  // `vehicle` falls back to the last id setVehicle/parkVehicle was given, so the camp still shows the
+  // party's wagon even when camp() is called through a wrapper that only passes `members` along.
+  async camp(members, { vehicle = undefined } = {}) {
+    const vehicleId = vehicle === undefined ? this.vehicleId : vehicle;
+    if (this.fireGroup) { this.scene.scene.remove(this.fireGroup); this.fireGroup = null; this.fire = null; }   // a second camp must not leave the first fire burning
+    this.frame('camp');
     for (const c of [...this.chars.values()]) await this.remove(c.ch.id);
     const n = members.length; for (let i = 0; i < n; i++) { const a = Math.PI * 0.15 + (i / Math.max(1, n - 1)) * Math.PI * 0.7; const x = Math.cos(a) * 2.1, z = Math.sin(a) * 1.1 + 0.2; await this.add(members[i], { side: 'camp', index: i, facing: Math.atan2(-x, -(z - 0.1)) + Math.PI }); const c = this.chars.get(members[i].id); c.group.position.set(x, 0, z); c.home.copy(c.group.position); c.group.rotation.y = Math.atan2(0 - x, 0 - z); }
     const fire = new THREE.Group(); const logs = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.7, 6), new THREE.MeshStandardMaterial({ color: 0x4a2f1a })); logs.rotation.z = Math.PI / 2; logs.position.y = 0.06; fire.add(logs); const logs2 = logs.clone(); logs2.rotation.y = Math.PI / 3; fire.add(logs2);
     const flame = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.6, 8), new THREE.MeshBasicMaterial({ color: 0xff9a2a, transparent: true, opacity: 0.9 })); flame.position.y = 0.4; fire.add(flame); const flame2 = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.42, 8), new THREE.MeshBasicMaterial({ color: 0xfff1a0 })); flame2.position.y = 0.36; fire.add(flame2);
     const light = new THREE.PointLight(0xff9a3a, 2.2, 6, 1.5); light.position.y = 0.6; fire.add(light); fire.position.set(0, 0, 0.1); this.scene.scene.add(fire); this.fire = flame; this.fireLight = light; this.fireGroup = fire;
+    // the vehicle stands at the edge of the circle, broadside to the fire so the light catches it
+    if (vehicleId) await this.setVehicle(vehicleId, { x: -2.6, z: -0.85, rot: Math.PI * 0.18, scale: 0.78, anim: 'idle' }); else this.clearVehicle();
   }
-  clearCamp() { if (this.fireGroup) { this.scene.scene.remove(this.fireGroup); this.fireGroup = null; this.fire = null; } }
+  clearCamp() { if (this.fireGroup) { this.scene.scene.remove(this.fireGroup); this.fireGroup = null; this.fire = null; } this.frame('fight'); }
   setNight(night) { const hemi = this.scene.scene.children.find(o => o.isHemisphereLight), key = this.scene.scene.children.find(o => o.isDirectionalLight && o.castShadow); if (hemi) hemi.intensity = night ? 0.25 : 1.1; if (key) key.intensity = night ? 0.3 : 2.2; }
 }

@@ -1,5 +1,5 @@
 {
- "_doc": "Emberveil vocabulary for the Lingo talk engine: places, factions, story people, the enemy roster, loot and supply words, deities, spells, food, titles and weather. Load with `for (const e of pack.entries) lingo.lexicon.add(e); lingo.invalidatePronunciations();` (the Emberveil 2 prototype does this). Entries with the same id as a core entry replace it.",
+ "_doc": "Emberveil vocabulary for the Lingo talk engine: places, factions, story people, the enemy roster, loot and supply words, deities, spells, food, titles and weather. Load with `for (const e of pack.entries) lingo.lexicon.add(e); lingo.invalidatePronunciations();` (the Emberveil 2 prototype does this). Entries with the same id as a core entry replace it. Combat speech: the openers/taunts/barks live in lingo/data/grammar.json, not here — this pack only supplies the words they point at (every enemy template and boss has a creature entry so {foe.sg} reads naturally). Enemy families (goblin/bandit/cultist/undead/demon/void/dragon/knight) and hero roles (tank/healer/caster/rogue/ranger) are grammar tags switched on per speaker by prototypes/emberveil/js/talk.js.",
  "entries": [
   {
    "id": "emberglen",
@@ -1935,6 +1935,125 @@
    },
    "tags": [
     "emberveil"
+   ]
+  },
+  {
+   "id": "dragon_cultist",
+   "type": "creature",
+   "forms": {
+    "sg": "dragon cultist",
+    "pl": "dragon cultists"
+   },
+   "tags": [
+    "cultist",
+    "human"
+   ]
+  },
+  {
+   "id": "dragon_whelp",
+   "type": "creature",
+   "forms": {
+    "sg": "dragon whelp",
+    "pl": "dragon whelps"
+   },
+   "tags": [
+    "dragon",
+    "beast"
+   ]
+  },
+  {
+   "id": "wyrm_warrior",
+   "type": "creature",
+   "forms": {
+    "sg": "wyrm warrior",
+    "pl": "wyrm warriors"
+   },
+   "tags": [
+    "dragon"
+   ]
+  },
+  {
+   "id": "ancient_dragon",
+   "type": "creature",
+   "forms": {
+    "sg": "ancient dragon",
+    "pl": "ancient dragons"
+   },
+   "tags": [
+    "dragon",
+    "boss"
+   ]
+  },
+  {
+   "id": "echo_sovereign",
+   "type": "creature",
+   "forms": {
+    "sg": "echo sovereign",
+    "pl": "echo sovereigns"
+   },
+   "tags": [
+    "void",
+    "boss"
+   ]
+  },
+  {
+   "id": "emberveil_sovereign",
+   "type": "creature",
+   "forms": {
+    "sg": "Emberveil sovereign",
+    "pl": "Emberveil sovereigns"
+   },
+   "tags": [
+    "void",
+    "boss"
+   ]
+  },
+  {
+   "id": "grax_veil_touched",
+   "type": "creature",
+   "forms": {
+    "sg": "Grax the Veil-Touched"
+   },
+   "proper": true,
+   "tags": [
+    "demon",
+    "boss"
+   ]
+  },
+  {
+   "id": "the_first_ember",
+   "type": "creature",
+   "forms": {
+    "sg": "the First Ember"
+   },
+   "proper": true,
+   "tags": [
+    "void",
+    "boss"
+   ]
+  },
+  {
+   "id": "vault_guardian",
+   "type": "creature",
+   "forms": {
+    "sg": "vault guardian",
+    "pl": "vault guardians"
+   },
+   "tags": [
+    "void",
+    "boss"
+   ]
+  },
+  {
+   "id": "void_scholar",
+   "type": "creature",
+   "forms": {
+    "sg": "void scholar",
+    "pl": "void scholars"
+   },
+   "tags": [
+    "cultist",
+    "void"
    ]
   }
  ]

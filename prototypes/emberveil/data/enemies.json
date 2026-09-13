@@ -132,7 +132,7 @@
    "magicResist": 0,
    "maxHp": 288,
    "name": "Cinder Hound",
-   "spellChance": 0.2,
+   "spellChance": 0.22,
    "spellList": [
     "serpent_venom"
    ],
@@ -197,7 +197,7 @@
    "magicResist": 0,
    "maxHp": 160,
    "name": "Corrupted Wolf",
-   "spellChance": 0.2,
+   "spellChance": 0.22,
    "spellList": [
     "bone_grasp"
    ],
@@ -228,7 +228,12 @@
    "magicResist": 0,
    "maxHp": 1920,
    "name": "Cosmic Titan",
-   "xpValue": 270
+   "xpValue": 270,
+   "spellChance": 0.28,
+   "spellList": [
+    "cosmic_rupture",
+    "brute_slam"
+   ]
   },
   "demon_brute": {
    "armor": 20,
@@ -295,7 +300,12 @@
      "type": "burn"
     }
    ],
-   "xpValue": 230
+   "xpValue": 230,
+   "spellChance": 0.3,
+   "spellList": [
+    "acolyte_curse",
+    "ritual_silence"
+   ]
   },
   "dragon_whelp": {
    "armor": 14,
@@ -326,7 +336,12 @@
      "type": "burn"
     }
    ],
-   "xpValue": 220
+   "xpValue": 220,
+   "spellChance": 0.25,
+   "spellList": [
+    "imp_fireball",
+    "infernal_brand"
+   ]
   },
   "frost_wyrm": {
    "armor": 18,
@@ -356,7 +371,12 @@
      "type": "stun"
     }
    ],
-   "xpValue": 300
+   "xpValue": 300,
+   "spellChance": 0.3,
+   "spellList": [
+    "frost_lance",
+    "wraith_chill"
+   ]
   },
   "genesis_worm": {
    "armor": 25,
@@ -432,7 +452,7 @@
    "magicResist": 0,
    "maxHp": 120,
    "name": "Goblin Scout",
-   "spellChance": 0.15,
+   "spellChance": 0.18,
    "spellList": [
     "bandit_flashbomb"
    ],
@@ -496,7 +516,7 @@
    "magicResist": 0,
    "maxHp": 630,
    "name": "Goblin Warlord",
-   "spellChance": 0.2,
+   "spellChance": 0.25,
    "spellList": [
     "bandit_flashbomb"
    ],
@@ -708,7 +728,12 @@
    "magicResist": 0,
    "maxHp": 1080,
    "name": "Star Horror",
-   "xpValue": 175
+   "xpValue": 175,
+   "spellChance": 0.3,
+   "spellList": [
+    "nightmare_hex",
+    "void_lance"
+   ]
   },
   "storm_dragon": {
    "armor": 16,
@@ -744,7 +769,12 @@
      "type": "burn"
     }
    ],
-   "xpValue": 340
+   "xpValue": 340,
+   "spellChance": 0.3,
+   "spellList": [
+    "cosmic_rupture",
+    "harpy_screech"
+   ]
   },
   "veil_cultist": {
    "armor": 5,
@@ -884,7 +914,7 @@
    "magicResist": 0,
    "maxHp": 560,
    "name": "Veilspawn Herald",
-   "spellChance": 0.25,
+   "spellChance": 0.3,
    "spellList": [
     "wraith_chill"
    ],
@@ -913,7 +943,13 @@
     "power": 16,
     "type": "burn"
    },
-   "xpValue": 215
+   "xpValue": 215,
+   "spellChance": 0.35,
+   "spellList": [
+    "void_silence",
+    "nightmare_hex",
+    "lich_drain_life"
+   ]
   },
   "void_shade": {
    "armor": 7,
@@ -980,7 +1016,12 @@
     "duration": 1,
     "type": "stun"
    },
-   "xpValue": 165
+   "xpValue": 165,
+   "spellChance": 0.3,
+   "spellList": [
+    "wraith_chill",
+    "bone_grasp"
+   ]
   },
   "wyrm_warrior": {
    "armor": 22,
@@ -1011,7 +1052,12 @@
      "type": "bleed"
     }
    ],
-   "xpValue": 260
+   "xpValue": 260,
+   "spellChance": 0.25,
+   "spellList": [
+    "brute_slam",
+    "demon_disarm"
+   ]
   }
  },
  "source": "mapData.js ENEMIES/ENEMIES_ACT4/5/6 + inline ENCOUNTERS",

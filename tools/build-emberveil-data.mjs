@@ -14,10 +14,16 @@ async function dumpModule(file, names) {
   const out = {}; for (const n of names) out[n] = JSON.parse(JSON.stringify(mod[n] ?? null)); return out;
 }
 const zones = await dumpModule('src/maps/zones.js', ['PROLOGUE_ZONES', 'ACT1_ZONES', 'ACT2_ZONES', 'ACT3_ZONES', 'ACT4_ZONES', 'ACT5_ZONES', 'ACT6_ZONES', 'ZONE_ENCOUNTER_POOLS']);
-const { expandZones } = await import('./expand-emberveil-map.mjs'); console.log('map expansion: +' + expandZones(zones) + ' nodes (≈50% longer zones, mostly combat)'); write('zones.json', zones);
+const { expandZones, addCrossings } = await import('./expand-emberveil-map.mjs');
+console.log('map expansion: +' + expandZones(zones) + ' nodes (≈50% longer zones, mostly combat)');
+// crossings are ours, not the original game's: travel hazards spliced into the road (data/crossings.json)
+const crossingData = JSON.parse(fs.readFileSync(new URL('../prototypes/emberveil/data/crossings.json', import.meta.url).pathname, 'utf8'));
+console.log('crossings: +' + addCrossings(zones, crossingData) + ' nodes');
+write('zones.json', zones);
 write('random-events.json', await dumpModule('src/maps/randomEvents.js', ['RANDOM_EVENTS']));
 write('dungeons.json', await dumpModule('src/maps/dungeons.js', ['DUNGEON_SKILL_CHECKS', 'DUNGEONS']));
-write('node-types.json', await dumpModule('src/maps/nodeTypes.js', ['NODE_TYPES']));
+// node types come from the original game; `crossing` is ours, so add it back after the dump
+const nodeTypes = await dumpModule('src/maps/nodeTypes.js', ['NODE_TYPES']); nodeTypes.NODE_TYPES.CROSSING = 'crossing'; write('node-types.json', nodeTypes);
 write('npc-events.json', await dumpModule('src/maps/recurringNpcEvents.js', ['RECURRING_NPC_EVENTS']));
 write('dialog-events.json', await dumpModule('src/maps/dialogEvents.js', ['DIALOG_EVENTS']));
 write('zone-tables.json', await dumpModule('src/maps/zoneTables.js', ['ZONE_DROP_CHANCE', 'ZONE_FAME_MULT', 'ZONE_UNLOCK_MAP', 'ZONE_NAMES', 'ACT_BOSS_ZONES']));

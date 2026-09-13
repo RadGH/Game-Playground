@@ -9,4 +9,4 @@
 | `onnxruntime-web/` | ONNX Runtime Web ESM bundle (needed by vits-web; the `.wasm` backends are still fetched from cdnjs at runtime) | 1.18.0 | MIT | yes | Mapped via importmap `onnxruntime-web` in `voice-lab/index.html`. |
 | `pluralize/` | pluralize | 8.x | MIT | yes | English plural/singular rules, used by lingo as a fallback when a lexicon entry has no explicit plural. |
 
-The CMU Pronouncing Dictionary (BSD) lives in `voice-lab/data/cmudict/` with its license. Asset packs (models/textures) are documented next to the assets, e.g. `avatar-3d/assets/quaternius/` (CC0).
+The CMU Pronouncing Dictionary (BSD) lives in `voice-lab/data/cmudict/` with its license. Asset packs (models/textures/audio) are documented next to the assets, e.g. `avatar-3d/assets/quaternius/` (CC0) and `sfx/assets/kenney/` (three Kenney audio packs — RPG Audio, Impact Sounds, Interface Sounds — **CC0 1.0**, commercial use fine, credit optional; see `sfx/assets/kenney/README.md` for the download commands and the per-pack license files).

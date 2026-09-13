@@ -227,7 +227,9 @@ h3.ruled, h4.ruled {
 .stage { position: absolute; inset: 0; } .stage canvas { display: block; width: 100% !important; height: 100% !important; position: relative; z-index: 1; }
 .backdrop { position: absolute; inset: 0; z-index: 0; } .backdrop svg { display: block; }
 .bubbles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
-.bubble { position: absolute; max-width: 240px; background: linear-gradient(#f3e7cd, #ddcba6); color: #20180f; padding: 6px 11px; border: 1px solid #8a6a35; border-radius: 4px; font-size: 13px; transform: translate(-50%, -100%); box-shadow: 0 4px 14px rgba(0, 0, 0, .6); }
+.bubble { position: absolute; max-width: min(240px, 62%); background: linear-gradient(#f3e7cd, #ddcba6); color: #20180f; padding: 6px 11px; border: 1px solid #8a6a35; border-radius: 4px; font-size: 13px; transform: translate(-50%, -100%); box-shadow: 0 4px 14px rgba(0, 0, 0, .6); }
+/* No room above the head (a tall body, or a short stage): the bubble sits under the chin instead. */
+.bubble.below { transform: translate(-50%, 0); }
 .bubble b { display: block; font-size: 11px; color: #6b5228; font-family: var(--display); letter-spacing: .05em; }
 .bubble.enemy { background: linear-gradient(#f0d5cd, #d8b3a6); border-color: #8a4535; }
 .dmg { position: absolute; z-index: 3; font-weight: 700; font-size: 19px; color: #fff; text-shadow: 0 1px 4px #000; transform: translate(-50%, -50%); animation: float 1s ease-out forwards; pointer-events: none; font-family: var(--display); }
@@ -256,6 +258,7 @@ h3.ruled, h4.ruled {
 #map .node.open { fill: #7a4d12; stroke: var(--gold-bright); cursor: pointer; filter: drop-shadow(0 0 1.2px var(--ember)); }
 #map .node.town { fill: #1f3a52; stroke: #6d9ec4; }
 #map .node.boss { fill: #5c1616; stroke: #c05050; }
+#map .node.crossing { fill: #1e3b3a; stroke: #4fb3a8; }
 #map .node.heroquest { fill: #3f2360; stroke: #b884ff; }
 #map .node.challenge { fill: #52281f; stroke: #a8683f; }
 #map .node.here { stroke: #ffe6b0; stroke-width: .45; animation: nodePulse 2.4s ease-in-out infinite; }
@@ -263,7 +266,7 @@ h3.ruled, h4.ruled {
 #map .seal { fill: none; stroke: rgba(255, 220, 170, .3); stroke-width: .16; pointer-events: none; }
 #map g.mapnode:hover .node { filter: drop-shadow(0 0 1.8px var(--gold-bright)); }
 #map g.mapnode.clickable:hover .node { filter: drop-shadow(0 0 2.8px var(--ember)); }
-#map text { font-size: 1.7px; fill: #e0cfa8; pointer-events: none; paint-order: stroke; stroke: #0b0705; stroke-width: .3px; font-family: var(--display); }
+#map text { font-size: 1.2px; fill: #e0cfa8; pointer-events: none; paint-order: stroke; stroke: #0b0705; stroke-width: .26px; font-family: var(--display); }
 #map text.here { fill: var(--gold-bright); }
 #map .icon { pointer-events: none; }
 .map-compass { position: absolute; right: 18px; bottom: 16px; width: 22px; height: 22px; color: rgba(217, 166, 65, .4); }
@@ -287,6 +290,9 @@ h3.ruled, h4.ruled {
 .narrative-log .say.enemy { border-color: var(--bad); background: linear-gradient(90deg, rgba(224, 112, 112, .08), transparent 60%); }
 .narrative-log .say.enemy b { color: #f09a9a; }
 .narrative-log .lore { color: var(--parch); font-style: italic; }
+/* the choice the player clicked, echoed into the log */
+.narrative-log .you { color: var(--gold-bright); font-style: italic; padding: 2px 0 2px 12px;
+  border-left: 3px solid var(--gold); background: linear-gradient(90deg, rgba(214, 168, 74, .12), transparent 60%); }
 .actions { display: flex; gap: 9px; flex-wrap: wrap; padding-top: 12px; margin-top: 10px;
   background: url(../../assets/data/ui/divider.svg) top left/100% 12px no-repeat; }
 .actions button { display: inline-flex; align-items: center; gap: 7px; }
@@ -310,25 +316,34 @@ h3.ruled, h4.ruled {
 @keyframes flicker { 0%, 100% { opacity: .75; } 40% { opacity: 1; box-shadow: 0 0 8px var(--ember); } 70% { opacity: .6; } }
 .tab { overflow: auto; flex: 1; font-size: 13.5px; }
 
-/* party tab */
-.member { display: grid; grid-template-columns: 52px 1fr; gap: 10px; padding: 9px 6px; border-radius: 4px; border: 1px solid transparent; cursor: pointer; transition: background .15s, border-color .15s; }
+/* party tab — compact cards so all four heroes fit without a scrollbar; gear hides in a drawer */
+.member { display: grid; grid-template-columns: 42px 1fr; gap: 8px; padding: 3px 5px 4px; border-radius: 4px; border: 1px solid transparent; cursor: pointer; transition: background .15s, border-color .15s; }
 .member + .member { border-top: 1px solid var(--line); }
 .member:hover { background: rgba(255, 122, 26, .05); border-color: var(--line2); }
 .member.sel { background: linear-gradient(rgba(255, 122, 26, .1), transparent); border-color: var(--gold-dim); }
-.member .portrait { width: 52px; height: 66px; border: 1px solid var(--line2); border-radius: 3px; background: radial-gradient(circle at 50% 35%, #2b2117, #0c0908 70%); }
+.member .portrait { width: 42px; height: 52px; border: 1px solid var(--line2); border-radius: 3px; background: radial-gradient(circle at 50% 35%, #2b2117, #0c0908 70%); }
 .member .portrait svg { width: 100%; height: 100%; }
-.member .who b { font-family: var(--display); color: var(--gold-bright); letter-spacing: .03em; }
-.member .who .tiny { color: var(--muted); }
-.statline { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 4px 0 2px; }
-.stat-chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; font-size: 11.5px; border: 1px solid var(--line); border-radius: 10px; background: rgba(0, 0, 0, .35); color: var(--text); cursor: help; }
+.member-body { min-width: 0; }
+.member .who { display: flex; align-items: center; gap: 6px; min-width: 0; line-height: 1.2; }
+.member .who b { font-family: var(--display); color: var(--gold-bright); letter-spacing: .03em; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.member .who .tiny { color: var(--muted); white-space: nowrap; }
+.member .who .gap { flex: 1 1 auto; min-width: 4px; }
+.member .pip { flex: none; font-size: 10px; color: var(--gold-bright); border: 1px solid var(--gold-dim); border-radius: 8px; padding: 0 6px; cursor: help; }
+button.gear-toggle { flex: none; align-self: center; padding: 0 6px; font: 600 10px/1.6 var(--display); letter-spacing: .04em; box-shadow: none; }
+button.gear-toggle.on { color: var(--gold-bright); border-color: var(--gold); }
+.member-more { margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--line); }
+.member-more .more-row { gap: 6px; margin-top: 6px; }
+.statline { display: flex; flex-wrap: nowrap; gap: 4px; margin: 2px 0 0; overflow: hidden; }
+.member-more .statline { flex-wrap: wrap; margin: 0 0 4px; }
+.stat-chip { display: inline-flex; align-items: center; gap: 3px; flex: none; padding: 0 6px; font-size: 10.5px; line-height: 1.3; border: 1px solid var(--line); border-radius: 10px; background: rgba(0, 0, 0, .35); color: var(--text); cursor: help; white-space: nowrap; }
 .stat-chip:hover { border-color: var(--gold-dim); color: var(--gold-bright); }
-.stat-chip .ic { width: 13px; height: 13px; opacity: .85; }
-.bar { position: relative; height: 9px; background: #241b15; border: 1px solid #120d0a; border-radius: 2px; overflow: hidden; margin: 4px 0; cursor: help; }
+.stat-chip .ic { width: 12px; height: 12px; opacity: .85; }
+.bar { position: relative; height: 8px; background: #241b15; border: 1px solid #120d0a; border-radius: 2px; overflow: hidden; margin: 2px 0; cursor: help; }
 .bar i { display: block; height: 100%; background: linear-gradient(#e05a4a, #7d1f18); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18); transition: width .35s ease; }
 .bar i.low { background: linear-gradient(#ff8a3a, #8a2a08); }
-.bar.mp i { background: linear-gradient(#6fa8e8, #204a7d); }
-.bar.xp { height: 5px; } .bar.xp i { background: linear-gradient(#b083f0, #4a2a80); }
-.slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px 10px; font-size: 11.5px; margin-top: 5px; }
+.bar.mp { height: 5px; } .bar.mp i { background: linear-gradient(#6fa8e8, #204a7d); }
+.bar.xp { height: 3px; } .bar.xp i { background: linear-gradient(#b083f0, #4a2a80); }
+.slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px 10px; font-size: 11.5px; margin-top: 2px; }
 .slot { display: flex; align-items: center; gap: 5px; min-width: 0; cursor: help; }
 .slot .ic { width: 13px; height: 13px; opacity: .6; color: var(--muted); }
 .slot:hover .ic { opacity: 1; color: var(--gold); }
@@ -453,7 +468,7 @@ dialog::backdrop { background: rgba(6, 4, 3, .78); backdrop-filter: blur(2px); }
   .hud-stat { flex: none; }
   body[data-screen="world"] .top .back, body[data-screen="hire"] .top .back { display: none; }
   .map-compass { right: 12px; bottom: 12px; width: 18px; height: 18px; }
-  #map text { font-size: 2.3px; }   /* the map is narrower here, so the labels need to be bigger in map units */
+  #map text { font-size: 1.9px; }   /* the map is narrower here, so the labels need to be bigger in map units */
   .hud-gap { display: none; }
   .screen { padding: 10px; } .world-layout { padding: 8px 10px 12px; gap: 10px; }
   .breadcrumb { padding: 6px 12px 0; } .breadcrumb .crumb { font-size: 12px; }

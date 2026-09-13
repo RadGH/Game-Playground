@@ -13,6 +13,14 @@ export const UNLOCKS = { warrior: null, fighter: null, ranger: null, rogue: null
 // them with whatever data/balance.json says, so balance.json is the one file to edit when tuning.
 export const ENEMY_GLOBAL = { hp: 0.58, dmg: 0.30, armor: 0.85 };
 export const ACT_MULT = { 0: [0.5, 0.75], 1: [0.85, 0.92], 2: [1.15, 1.1], 3: [1.85, 1.3], 4: [2.15, 1.45], 5: [2.45, 1.6], 6: [2.6, 1.65], 7: [3.2, 1.78], 8: [3.9, 1.9], 9: [4.7, 2.0], 10: [5.6, 2.1] };
+/** Per-act armour multiplier and flat magic-resist top-up (balance.json enemies.actMultipliers[act].armor / .magicResist). */
+export const ACT_DEFENCE = {};
+/** How a boss scales next to the trash in the same act (balance.json enemies.boss). */
+export const BOSS_MULT = { hpShare: 0.35, hp: 1, damage: 1, armor: 1 };
+/** Champion and named-leader frequency and strength (balance.json enemies.champion / .named). */
+export const CHAMPION = { chance: 0.05, hp: 1.5, damage: 1.3, perAct: 0 };
+export const NAMED = { chance: 0.28, nemesisChance: 0.2, hp: 1.5, damage: 1.25, xp: 2, gold: 3 };
+export const ECONOMY = { gold: 1.2, xp: 3, shopPrice: 1, dropRate: 1 };
 export const PARTY_SIZE_DMG = { 1: 0.4, 2: 0.65, 3: 0.85, 4: 1 };
 export const SKILL_MULT = { hero: 0.95, magic: 0.78, heavy: 1, light: 1 };
 /** Load data/balance.json over the defaults above. Safe to call more than once. */
@@ -22,7 +30,16 @@ export function applyBalance(b) {
   for (const [act, m] of Object.entries(b.enemies?.actMultipliers || {})) ACT_MULT[act] = [m.hp, m.damage];
   for (const [n, m] of Object.entries(b.partySize?.enemyDmgMult || {})) PARTY_SIZE_DMG[n] = m;
   const sk = b.combat?.skill; if (sk) { SKILL_MULT.hero = sk.heroDamageMult ?? SKILL_MULT.hero; SKILL_MULT.magic = sk.magicMult ?? SKILL_MULT.magic; SKILL_MULT.heavy = sk.heavyMult ?? SKILL_MULT.heavy; SKILL_MULT.light = sk.lightMult ?? SKILL_MULT.light; }
-  return { ENEMY_GLOBAL, ACT_MULT, PARTY_SIZE_DMG, SKILL_MULT };
+  for (const [act, m] of Object.entries(b.enemies?.actMultipliers || {})) ACT_DEFENCE[act] = { armor: m.armor ?? 1, magicResist: m.magicResist ?? 0 };
+  Object.assign(BOSS_MULT, b.enemies?.boss || {});
+  Object.assign(CHAMPION, b.enemies?.champion || {});
+  Object.assign(NAMED, b.enemies?.named || {});
+  Object.assign(ECONOMY, b.economy?.globalMultipliers || {});
+  // The XP curve is a knob too: a longer table means slower levelling without touching any hero stat.
+  const pr = b.progression || {};
+  if (Array.isArray(pr.xpTable) && pr.xpTable.length) { XP_TABLE.length = 0; XP_TABLE.push(...pr.xpTable); }
+  if (Array.isArray(pr.talentPointLevels) && pr.talentPointLevels.length) { TALENT_LEVELS.length = 0; TALENT_LEVELS.push(...pr.talentPointLevels); }
+  return { ENEMY_GLOBAL, ACT_MULT, ACT_DEFENCE, BOSS_MULT, CHAMPION, NAMED, ECONOMY, PARTY_SIZE_DMG, SKILL_MULT };
 }
 
 export function levelFromXp(xp) { let l = 1; for (let i = 0; i < XP_TABLE.length; i++) if (xp >= XP_TABLE[i]) l = i + 1; return Math.min(MAX_LEVEL, l); }
@@ -88,11 +105,13 @@ export function catchUp(memberLvl, partyAvg) { return memberLvl >= partyAvg ? 1 
 export function hireCost(level) { return Math.round(100 * level * (1 + 0.1 * (level - 1))); }
 /** Enemy instance from a template, scaled for act / party size / NG+ (rules-notes.md). */
 export function makeEnemy(tpl, { act = 1, heroes = 4, ngPlus = 0, boss = false, overrides = {}, index = 0 } = {}) {
-  const t = { ...tpl, ...overrides }; const am = ACT_MULT[Math.min(10, ngPlus ? act + 4 * ngPlus : act)] || [1, 1];
-  let hpMul = ENEMY_GLOBAL.hp * (boss ? 1 + (am[0] - 1) * 0.35 : am[0]), dmgMul = ENEMY_GLOBAL.dmg * am[1] * (PARTY_SIZE_DMG[Math.min(4, Math.max(1, heroes))] || 1), armorMul = ENEMY_GLOBAL.armor;
+  const t = { ...tpl, ...overrides }; const eAct = Math.min(10, ngPlus ? act + 4 * ngPlus : act); const am = ACT_MULT[eAct] || [1, 1]; const ad = ACT_DEFENCE[eAct] || { armor: 1, magicResist: 0 };
+  let hpMul = ENEMY_GLOBAL.hp * (boss ? (1 + (am[0] - 1) * BOSS_MULT.hpShare) * BOSS_MULT.hp : am[0]),
+      dmgMul = ENEMY_GLOBAL.dmg * am[1] * (boss ? BOSS_MULT.damage : 1) * (PARTY_SIZE_DMG[Math.min(4, Math.max(1, heroes))] || 1),
+      armorMul = ENEMY_GLOBAL.armor * (ad.armor ?? 1) * (boss ? BOSS_MULT.armor : 1);
   if (ngPlus) { hpMul *= Math.pow(4.5, ngPlus) * (boss ? 1.35 : 1); dmgMul *= Math.pow(2.8, ngPlus) * (boss ? 1.2 : 1); armorMul *= 1 + ngPlus * 0.55; }
   const hp = Math.max(1, Math.round((t.maxHp || t.hp) * hpMul));
-  return { id: `${t.id}_${index}`, templateId: t.id, name: t.name, isEnemy: true, boss, hp, maxHp: hp, dmg: [Math.max(1, Math.round(t.dmg[0] * dmgMul)), Math.max(1, Math.round(t.dmg[1] * dmgMul))], armor: Math.round((t.armor || 0) * armorMul), hit: Math.min(95, (t.hit || 70) + ngPlus * 5), dodge: Math.min(45, (t.dodge || 5) + ngPlus * 3), magicResist: t.magicResist || 0, blockChance: t.blockChance || 0, xpValue: Math.round((t.xpValue || 10) * (1 + 0.8 * ngPlus + (boss && ngPlus ? 1 : 0))), gold: t.gold || [1, 5], spellList: t.spellList || [], spellChance: t.spellChance || 0, statusOnHit: Array.isArray(t.statusOnHit) ? t.statusOnHit : t.statusOnHit ? [t.statusOnHit] : null, role: t.role || 'melee', race: t.race || t.tags?.[0] || 'monster', tags: t.tags || [], alive: true, statuses: [], cooldowns: {}, level: Math.max(1, Math.round((t.xpValue || 10) / 8)) };
+  return { id: `${t.id}_${index}`, templateId: t.id, name: t.name, isEnemy: true, boss, hp, maxHp: hp, dmg: [Math.max(1, Math.round(t.dmg[0] * dmgMul)), Math.max(1, Math.round(t.dmg[1] * dmgMul))], armor: Math.round((t.armor || 0) * armorMul), hit: Math.min(95, (t.hit || 70) + ngPlus * 5), dodge: Math.min(45, (t.dodge || 5) + ngPlus * 3), magicResist: (t.magicResist || 0) + Math.round(ad.magicResist || 0), blockChance: t.blockChance || 0, xpValue: Math.round((t.xpValue || 10) * (1 + 0.8 * ngPlus + (boss && ngPlus ? 1 : 0))), gold: t.gold || [1, 5], spellList: t.spellList || [], spellChance: t.spellChance || 0, statusOnHit: Array.isArray(t.statusOnHit) ? t.statusOnHit : t.statusOnHit ? [t.statusOnHit] : null, role: t.role || 'melee', race: t.race || t.tags?.[0] || 'monster', tags: t.tags || [], alive: true, statuses: [], cooldowns: {}, level: Math.max(1, Math.round((t.xpValue || 10) / 8)) };
 }
 
 /** Plain-language description of a talent/upgrade effect object (skills.json), e.g. { damageMult: 0.5, statusEffects: [...] }. */

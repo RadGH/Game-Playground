@@ -16,4 +16,44 @@ export function expandZones(zonesJson, { factor = 0.5, seed = 11 } = {}) {
   } }
   return added;
 }
-if (import.meta.url === `file://${process.argv[1]}`) { const p = new URL('../prototypes/emberveil/data/zones.json', import.meta.url).pathname; const j = JSON.parse(fs.readFileSync(p, 'utf8')); const added = expandZones(j); fs.writeFileSync(p, JSON.stringify(j, null, 1)); console.log('added', added, 'nodes'); }
+
+/**
+ * Drop 1–2 `crossing` nodes into every zone: travel hazards on the way between two places (a ford, a
+ * rockslide, a toll, a gate). Same trick as expandZones — a new node is spliced into an existing edge
+ * so the graph stays connected. Deterministic, and safe to run more than once: a zone that already has
+ * a crossing is left alone.
+ *
+ * @param zonesJson       data/zones.json
+ * @param crossingsJson   data/crossings.json (used for the ids and the names on the map)
+ */
+export function addCrossings(zonesJson, crossingsJson, { seed = 23, perZone = 2 } = {}) {
+  const list = crossingsJson?.crossings || []; if (!list.length) return 0;
+  let added = 0, pick = 0;
+  for (const key of Object.keys(zonesJson)) { if (!Array.isArray(zonesJson[key])) continue; for (const z of zonesJson[key]) {
+    if (!z?.nodes || z.nodes.some(n => n.type === 'crossing')) continue;
+    const r = rng(seed + z.id.length * 97 + z.nodes.length); const byId = Object.fromEntries(z.nodes.map(n => [n.id, n]));
+    // never in front of the boss, and never off the very first node: a crossing should sit on the road
+    const edges = z.nodes.flatMap(n => (n.exits || []).filter(e => byId[e]).map(e => [n, byId[e]])).filter(([a, b]) => a.type !== 'boss' && b.type !== 'boss' && b.type !== 'town');
+    if (!edges.length) continue;
+    const want = 1 + (r() < 0.5 ? 1 : 0); const order = [...edges].sort(() => r() - 0.5); const used = new Set();
+    for (let k = 0; k < Math.min(want, perZone, order.length); k++) {
+      const [a, b] = order[k]; if (used.has(a.id)) continue; used.add(a.id);
+      const c = list[pick++ % list.length];
+      const node = { id: `${a.id}__${b.id}_c${k}`, type: 'crossing', name: c.name, crossingId: c.id,
+        x: +((a.x + b.x) / 2 + (r() - 0.5) * 0.03).toFixed(3), y: +((a.y + b.y) / 2 + (r() - 0.5) * 0.08).toFixed(3),
+        exits: [b.id], added: true, crossing: true };
+      a.exits = a.exits.map(e => e === b.id ? node.id : e); z.nodes.push(node); byId[node.id] = node; added++;
+    }
+  } }
+  return added;
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const p = new URL('../prototypes/emberveil/data/zones.json', import.meta.url).pathname;
+  const cp = new URL('../prototypes/emberveil/data/crossings.json', import.meta.url).pathname;
+  const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+  const added = expandZones(j);
+  const crossings = addCrossings(j, JSON.parse(fs.readFileSync(cp, 'utf8')));
+  fs.writeFileSync(p, JSON.stringify(j, null, 1));
+  console.log('added', added, 'nodes and', crossings, 'crossings');
+}

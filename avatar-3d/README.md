@@ -31,6 +31,41 @@ const spec = randomCreature('dragon', seed);             // colour variation ins
 
 Features can be toggled on any plan (`features: { wings: true }` on a wolf works): fangs, tusks, horns, antlers, wings, spikes, mane, whiskers, claws, hooves, tail, core, glow, bulgeEyes, beak, antennae, maw, plates. Bodies face +z like the humanoids, so the same side/facing code places them. Heights before the size multiplier: wisp/moth ≈ 0.5 m, wolf ≈ 0.9 m, golem ≈ 1.4 m, horror ≈ 1.6 m, dragon ≈ 1.9 m, titan ≈ 2.6 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`); Emberveil uses them for its whole bestiary (`prototypes/emberveil/data/enemy-looks.json`).
 
+## Vehicles — `js/vehicles.js`, demo `vehicles.html`
+
+Procedural travel vehicles in the same chunky primitive style, for games with a road in them. Seven
+types in `VEHICLE_TYPES`, over five build plans:
+
+| Type | Plan | What it is |
+|---|---|---|
+| `hand_cart` | `cart` | two spoked wheels, an open bed and shafts — somebody in the party pulls it |
+| `pack_mule` | `pack` | no cart at all: panniers, crates and a bedroll roped over a mule's back |
+| `wagon` | `wagon` | four wheels, canvas over four hoops, one horse in the shafts |
+| `ox_cart` | `cart` | heavy solid wheels, a deep bed, an ox (a scaled boar with horns and hooves) |
+| `war_wagon` | `wagon` | iron plates bolted over the sides, rivets, spiked hubs, a rack of shields, two horses |
+| `coach` | `coach` | a closed cabin with windows, gold trim, lanterns that glow, two horses |
+| `dragon_sled` | `sled` | steel runners instead of wheels, glowing runes, harnessed to a drake |
+
+Draft animals are **real creature bodies** (`createCreature`), so the horse pulling a wagon is the same
+horse the bestiary uses, and it walks when the vehicle rolls.
+
+```js
+import { createVehicle, VEHICLE_TYPES, vehicleModelFor } from './avatar-3d/js/vehicles.js';
+const v = await createVehicle('wagon');          // or a spec: { type, size, colors: { wood, trim, metal, cloth }, animal }
+scene.add(v.group); v.setAnim('roll');            // idle · roll (wheels turn, the animal walks) · dead (parked)
+v.metrics();                                      // { length, width, height, center, wheelR, hitch, seat, animals }
+```
+
+Everything is built **facing +x** (the cart rolls forward along +x, the animal is at the front, the
+axles run along z), so a scene rotates the group to aim it. `metrics().hitch` is where the animal
+stands and `.seat` is where a driver would sit, if a game wants to put a hero on the bench.
+`vehicleModelFor(id)` maps a game's own vehicle ids onto the catalog — Emberveil's `VEHICLES` keys
+(`none` → nothing drawn, `mule` → `pack_mule`, and the rest one to one).
+
+Emberveil 2 parks the party's vehicle behind them on the world stage, stands it at the edge of the camp
+circle in the firelight, and rolls it across the stage during a crossing
+(`prototypes/emberveil/js/stage.js`: `setVehicle`, `parkVehicle`, `camp`, `travelAcross`).
+
 ## Spell effects — `js/spellfx.js`, demo `spellfx.html`
 
 Combat effects for a 3D stage: **projectiles** that fly between two points, **impacts** that burst where they land, **cast** flashes, **heal**/**revive**, and looping **status auras** stuck to a body. Everything is built from shaped geometry (cones, spinning shard clusters, expanding torus rings, ground rune discs, tumbling planes, jagged lines) and the 35 particle sprites in `assets/data/fx/` drawn as additive billboards — deliberately **no glowing spheres**.
@@ -178,7 +213,7 @@ Skeleton bone names (shared by every file): root, pelvis, spine_01..03, neck_01,
 Mode switch, orbit camera, animation chips (procedural or clip list), turntable, PNG snapshot, random (with race rules) / random face / random outfit, presets (shared), slot editor + body sliders + Mii face sliders, body frame select, side-by-side 2D render of the same JSON, JSON copy/export/import.
 
 ## Tests
-`npm test -- avatar-3d` (Playwright, headless WebGL): Mii mode draws skin-coloured pixels, walk animation moves the leg pivots, all 15 presets build; Quaternius mode loads skinned meshes, plays `Walk_Loop`, bone scaling raises the root; screenshots saved in `test-results/avatar-3d-*.png`. `creatures.spec.js` builds every creature type. `spellfx.spec.js` loads the gallery, throws and bursts every element (checking a projectile resolves under the flight cap), runs every status aura at once and checks the effects layer returns to zero children afterwards, and drives the page's buttons; screenshots in `test-results/spellfx-*.png`.
+`npm test -- avatar-3d` (Playwright, headless WebGL): Mii mode draws skin-coloured pixels, walk animation moves the leg pivots, all 15 presets build; Quaternius mode loads skinned meshes, plays `Walk_Loop`, bone scaling raises the root; screenshots saved in `test-results/avatar-3d-*.png`. `creatures.spec.js` builds every creature type. `vehicles.spec.js` builds every vehicle type, checks the measurements and the draft-animal counts, rolls them and reads pixels back off the canvas. `spellfx.spec.js` loads the gallery, throws and bursts every element (checking a projectile resolves under the flight cap), runs every status aura at once and checks the effects layer returns to zero children afterwards, and drives the page's buttons; screenshots in `test-results/spellfx-*.png`.
 
 ## Ideas / limits
 - Accessories (glasses, eyepatch) are not built in 3D yet; `mask`/`scarf` etc. would be simple meshes.

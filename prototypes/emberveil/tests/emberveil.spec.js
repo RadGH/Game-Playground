@@ -76,3 +76,101 @@ test('Emberveil 2: themed title screen — art, tooltips, how to play and the cl
   await expect(page.locator('.class-card.picked')).toHaveCount(1);
   expect(errors.filter(e => !/AudioContext|WebGL/i.test(e))).toEqual([]);
 });
+
+// The interface round: the party tab has to fit four heroes at once, map labels have to stay readable,
+// a clicked choice has to leave the log and take its buttons away, and the meter tab has to follow the
+// fight that is happening rather than the one before it.
+test('Emberveil 2: compact party tab, readable map labels, logged choices, live damage meter', async ({ page }) => {
+  test.setTimeout(240000);
+  await page.setViewportSize({ width: 1400, height: 900 });
+  const errors = await boot(page);
+  await page.click('#btn-new'); await page.click('#btn-suggest'); await page.click('#btn-start');
+  await page.waitForFunction(() => document.querySelectorAll('#actions button').length > 0 && !window.emberveil.busy, null, { timeout: 120000 });
+  await openMenu(page); await page.check('#mute'); await closeMenu(page);
+
+  // --- all four heroes fit in the party tab, gear hidden behind a toggle that remembers itself ---
+  await expect(page.locator('#tab-party .member')).toHaveCount(4);
+  const over = await page.evaluate(() => { const t = document.getElementById('tab-party'); return t.scrollHeight - t.clientHeight; });
+  expect(over).toBeLessThanOrEqual(0);                                   // no scrollbar: every health bar is visible
+  expect(await page.locator('#tab-party .bar').count()).toBe(12);        // hp + mp + xp for each of the four
+  const first = page.locator('#tab-party .member').first();
+  await expect(first.locator('.slots')).toBeHidden();                    // gear starts collapsed
+  await first.locator('.gear-toggle').click();
+  await expect(first.locator('.slots')).toBeVisible();
+  await expect(first.locator('button:has-text("Feelings")')).toBeVisible();
+  await expect(first.locator('button:has-text("Save to library")')).toBeVisible();
+  expect(await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('playground:emberveil:ui:v1') || '{}').gearOpen || {}).length)).toBe(1);
+  await first.locator('.gear-toggle').click();
+  await expect(first.locator('.slots')).toBeHidden();
+  expect(await page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('playground:emberveil:ui:v1') || '{}').gearOpen || {}).length)).toBe(0);
+
+  // --- map labels: two lines instead of "…", and no label sitting on another label or on a node ---
+  await page.evaluate(() => { const g = window.emberveil.game; if (!g.unlockedZones.includes('dust_roads')) g.unlockedZones.push('dust_roads'); g.enterZone('dust_roads'); window.emberveil.renderMap(); });
+  const map = await page.evaluate(() => {
+    const svg = document.getElementById('map');
+    const box = t => { const m = t.closest('g').getAttribute('transform').match(/translate\(([-\d.]+) ([-\d.]+)\)/); const b = t.getBBox(); return { x1: +m[1] + b.x, x2: +m[1] + b.x + b.width, y1: +m[2] + b.y, y2: +m[2] + b.y + b.height, s: [...t.children].map(c => c.textContent).join(' ') }; };
+    const boxes = [...svg.querySelectorAll('text')].map(box); const bad = [];
+    for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) { const a = boxes[i], c = boxes[j]; if (Math.min(a.x2, c.x2) > Math.max(a.x1, c.x1) && Math.min(a.y2, c.y2) > Math.max(a.y1, c.y1)) bad.push(a.s + ' / ' + c.s); }
+    return { labels: boxes.length, overlaps: bad, ellipsis: boxes.filter(b => b.s.includes('…')).length, wrapped: [...svg.querySelectorAll('text')].filter(t => t.children.length > 1).length, fontSize: parseFloat(getComputedStyle(svg.querySelector('text')).fontSize), tipHasFullName: [...svg.querySelectorAll('g.mapnode')].some(g => (g.dataset.tipHtml || '').includes('Tomek')) };
+  });
+  expect(map.labels).toBeGreaterThan(4);
+  expect(map.ellipsis).toBe(0);            // names wrap, they are never cut short
+  expect(map.wrapped).toBeGreaterThan(0);  // at least one name on two lines
+  expect(map.overlaps).toEqual([]);
+  expect(map.fontSize).toBeLessThanOrEqual(1.3);
+  expect(map.tipHasFullName).toBe(true);   // the hover card still carries the full name
+
+  // --- a clicked choice hides its buttons straight away and writes a "you" line into the log ---
+  await page.evaluate(() => { window.__choice = window.emberveil.waitForChoice([
+    { text: 'Take the veilsilver ring', run: async () => { window.__actionsWhileRunning = document.querySelectorAll('#actions button').length; await new Promise(r => setTimeout(r, 250)); return 'took'; } },
+    { text: 'Walk away', run: async () => 'left' }]); });
+  await page.click('#actions button:has-text("Take the veilsilver ring")');
+  const choice = await page.evaluate(async () => ({ result: await window.__choice, whileRunning: window.__actionsWhileRunning, you: [...document.querySelectorAll('#narrative .you')].map(p => p.textContent) }));
+  expect(choice.result).toBe('took');
+  expect(choice.whileRunning).toBe(0);     // the buttons were gone before the answer was read
+  expect(choice.you.at(-1)).toContain('You: Take the veilsilver ring');
+  // a silent choice stays out of the log
+  await page.evaluate(() => { window.__quiet = window.emberveil.waitForChoice([{ text: 'Say nothing', run: async () => 1 }], { silent: true }); });
+  await page.click('#actions button:has-text("Say nothing")');
+  const youLines = await page.evaluate(async () => { await window.__quiet; return document.querySelectorAll('#narrative .you').length; });
+  expect(youLines).toBe(choice.you.length);
+
+  // --- the meter tab follows the fight in progress, not the one before ---
+  await page.click('.tabs button[data-tab="meter"]');
+  await page.evaluate(async () => { const g = window.emberveil.game; const enc = g.encounter('goblin_patrol'); for (const e of enc.enemies) e.hp = Math.min(e.hp, 6); await window.emberveil.fight(enc, { node: null }); });
+  expect(await page.locator('#tab-meter .meter-row').count()).toBeGreaterThan(0);      // the finished fight is on screen
+  const second = page.evaluate(async () => { const g = window.emberveil.game; const enc = g.encounter('goblin_patrol'); enc.name = 'Second fight'; for (const e of enc.enemies) e.hp = 80; window.__enc = enc; await window.emberveil.fight(enc, { node: null }); });
+  // it is wiped and pointed at the new fight the moment that fight starts…
+  await page.waitForFunction(() => window.emberveil.game.meter.current?.label === 'Second fight' && document.querySelectorAll('#tab-meter .meter-row').length === 0, null, { timeout: 60000 });
+  expect(await page.evaluate(() => document.querySelector('#tab-meter select').value)).toBe('current');
+  // …and fills in while that fight is still running
+  await page.waitForFunction(() => window.emberveil.game.meter.current && document.querySelectorAll('#tab-meter .meter-row').length > 0, null, { timeout: 60000 });
+  await page.evaluate(() => { for (const e of window.__enc.enemies) e.hp = 1; });      // let it finish
+  await second;
+
+  // --- the rewards popup shows up after a won fight and can be dismissed ---
+  await page.evaluate(async () => { const g = window.emberveil.game; const enc = g.encounter('goblin_patrol'); for (const e of enc.enemies) e.hp = 1; window.__enc2 = enc; await window.emberveil.fight(enc, { node: null }); });
+  await page.evaluate(() => { window.__after = window.emberveil.afterCombat(null, window.__enc2, false); });
+  await expect(page.locator('.rw-overlay')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.rw-ribbon')).toHaveText('Victory');
+  await page.locator('.rw-skip').click();          // skip to the fully revealed state…
+  await page.locator('.rw-btn').click();           // …then dismiss
+  await expect(page.locator('.rw-overlay')).toHaveCount(0);
+  await page.evaluate(() => window.__after);
+
+  // --- a boss crossing an hp threshold names the phase in the log and says something about it ---
+  const phase = await page.evaluate(async () => {
+    const E = window.emberveil, g = E.game; E.rewardPopups = false;
+    for (const h of g.party) { h.alive = true; h.level = 30; h.attrs.STR = 200; h.attrs.DEX = 200; h.hp = h.maxHp = 9000; }
+    const id = 'archfiend_malgrath'; const t = E.DATA.bosses.entities[id];
+    const enc = { id: 'phase_test', name: 'Malgrath', enemies: [{ ...JSON.parse(JSON.stringify(t)), id: 'b_' + id, templateId: id, boss: true, isEnemy: true, statuses: [], cooldowns: [], hp: 3000, maxHp: 3000, short: t.name }] };
+    const before = document.querySelectorAll('#narrative p.say.enemy').length;
+    await E.fight(enc, { node: null, boss: true });
+    return { named: [...document.querySelectorAll('#narrative p')].filter(p => /Hellfire Unleashed|Demonic Ascendance/.test(p.textContent)).length,
+             saidAfter: document.querySelectorAll('#narrative p.say.enemy').length - before };
+  });
+  expect(phase.named).toBeGreaterThanOrEqual(1);    // the phase name + its written line reached the log
+  expect(phase.saidAfter).toBeGreaterThanOrEqual(1); // and the boss spoke
+
+  expect(errors.filter(e => !/AudioContext|WebGL/i.test(e))).toEqual([]);
+});

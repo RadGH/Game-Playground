@@ -14,13 +14,17 @@ import { Combat, fleeCheck, skillType, recordEvent } from './combat.js';
 import { elementName } from '../../../avatar-3d/js/spellfx.js';
 import { mergeSkill, classSkills, passiveTree, PASSIVE_NODES, UNLOCKS, TALENT_LEVELS, xpForLevel, canUse, describeEffect } from './rules.js';
 import { Stage } from './stage.js';
+import { installSfx } from './sfx-bridge.js';
 import { Talk } from './talk.js';
 import { Conversations, factsFrom, Threads, expandVariants } from '../../../conversations/js/conversations.js';
 import { LangDebug, LANGDEBUG_CSS } from '../../../shared/langdebug.js';
+import { showRewards, specFromVictory, itemToReward } from '../../../shared/rewards.js';
 import { renderMeter, METER_CSS } from '../../../meters/js/meter-ui.js';
 import { Assets } from '../../../assets/js/assets.js';
 import { VEHICLES, SUPPLY_KINDS } from './game.js';
 import { makeRng } from './rng.js';
+import { resolveCrossing, crossingChoices, payRetry, RETRY_COST } from './explore.js';
+import { NODE_INFO } from './ui.js';
 import { setupUI, initMenu, decorateFrames, iconHtml, gemHtml, gemFor, slotIcon, SLOT_NAME, STAT_TIPS, nodeInfo, itemTipHtml, registerTip, hideTip, esc } from './ui.js';
 
 const $ = id => document.getElementById(id);
@@ -32,8 +36,8 @@ const toast = t => { const e = $('toast'); e.textContent = t; e.hidden = false; 
 
 // ------------------------------------------------------------------ load
 const base = '../../'; const j = async p => (await fetch(base + p)).json(); const D = p => j('prototypes/emberveil/data/' + p);
-const [items, classes, skills, builds, enemies, bosses, encounters, spells, zones, zoneTables, dialogs, randomEvents, dungeons, companions, statuses, bossPhases, classLooks, enemyLooks, lexData, grammarData, traitsData, eventsData, relationsData, packData, topicsData, namedData, sideQuestData, classQuestData, threadsData, balanceData] = await Promise.all([D('items.json'), D('classes.json'), D('skills.json'), D('build-presets.json'), D('enemies.json'), D('bosses.json'), D('encounters.json'), D('enemy-spells.json'), D('zones.json'), D('zone-tables.json'), D('dialog-events.json'), D('random-events.json'), D('dungeons.json'), D('companions.json'), D('status-effects.json'), D('boss-phases.json'), D('class-looks.json'), D('enemy-looks.json'), j('lingo/data/lexicon.json'), j('lingo/data/grammar.json'), j('lingo/data/traits.json'), j('lingo/data/events.json'), j('lingo/data/relations.json'), j('lingo/data/packs/emberveil.json'), j('conversations/data/topics.json'), D('named-enemies.json'), D('side-quests.json'), D('class-quests.json'), j('conversations/data/threads.json'), D('balance.json')]);
-const DATA = { items, classes, skills, builds, enemies, bosses, encounters, spells, zones, zoneTables, dialogs, randomEvents, dungeons, companions, statuses, bossPhases, events: eventsData, relations: relationsData, named: namedData, sideQuests: sideQuestData, classQuests: classQuestData, balance: balanceData };
+const [items, classes, skills, builds, enemies, bosses, encounters, spells, zones, zoneTables, dialogs, randomEvents, dungeons, companions, statuses, bossPhases, classLooks, enemyLooks, lexData, grammarData, traitsData, eventsData, relationsData, packData, topicsData, namedData, sideQuestData, classQuestData, threadsData, balanceData, crossingData] = await Promise.all([D('items.json'), D('classes.json'), D('skills.json'), D('build-presets.json'), D('enemies.json'), D('bosses.json'), D('encounters.json'), D('enemy-spells.json'), D('zones.json'), D('zone-tables.json'), D('dialog-events.json'), D('random-events.json'), D('dungeons.json'), D('companions.json'), D('status-effects.json'), D('boss-phases.json'), D('class-looks.json'), D('enemy-looks.json'), j('lingo/data/lexicon.json'), j('lingo/data/grammar.json'), j('lingo/data/traits.json'), j('lingo/data/events.json'), j('lingo/data/relations.json'), j('lingo/data/packs/emberveil.json'), j('conversations/data/topics.json'), D('named-enemies.json'), D('side-quests.json'), D('class-quests.json'), j('conversations/data/threads.json'), D('balance.json'), D('crossings.json')]);
+const DATA = { items, classes, skills, builds, enemies, bosses, encounters, spells, zones, zoneTables, dialogs, randomEvents, dungeons, companions, statuses, bossPhases, events: eventsData, relations: relationsData, named: namedData, sideQuests: sideQuestData, classQuests: classQuestData, balance: balanceData, crossings: crossingData };
 const [deps, library, assets] = await Promise.all([loadDeps(base), Library.open(base + 'library/'), Assets.open(base + 'assets/')]);
 const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traitsData }); for (const e of packData.entries) lingo.lexicon.add(e); DATA.lexicon = lingo.lexicon;
 expandVariants(topicsData, { perLine: 2, seed: 11 }); const conversations = new Conversations({ lingo, topics: topicsData }); const threads = new Threads({ conv: conversations, threads: threadsData }); const langdbg = new LangDebug({ lingo, base: base }); document.head.append(Object.assign(document.createElement('style'), { textContent: LANGDEBUG_CSS })); langdbg.mountSettings($('menu-langdbg') || $('hud'), { onToggle: on => { if (on) for (const p of document.querySelectorAll('#narrative .say')) langdbg.decorate(p); } }); document.head.append(Object.assign(document.createElement('style'), { textContent: METER_CSS }));
@@ -89,10 +93,11 @@ $('btn-start').onclick = () => { for (const h of chosen) game.addHero(h); game.s
 
 // ------------------------------------------------------------------ world
 async function startWorld(resumed) {
-  showScreen('world'); if (!stage) stage = new Stage($('stage'), { assets }); talk = new Talk({ lingo, game, voice }); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value || 'formant'; for (const h of game.party) talk.speaker(h);
+  // sound wraps the stage from outside, see js/sfx-bridge.js
+  showScreen('world'); if (!stage) { stage = new Stage($('stage'), { assets }); window.emberveilSfx = await installSfx({ stage, game }); } talk = new Talk({ lingo, game, voice }); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value || 'formant'; for (const h of game.party) talk.speaker(h);
   $('narrative').replaceChildren(); renderHud(); renderSide(); renderMap();
   if (!resumed) narrate(`<h4>${ACT_NAMES[0]}</h4><p>A wanderer on a road that used to lead somewhere. The Veil bends around you. Somebody named you.</p>`); else narrate(`<p class="sys">Game loaded. ${game.zone().name}.</p>`);
-  await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.setBackdrop(game.zoneId); await enterNode();
+  await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.setBackdrop(game.zoneId); stage.parkVehicle(game.vehicle); await enterNode();
 }
 $('mute').onchange = () => { if (talk) talk.muted = $('mute').checked; if ($('mute').checked) voice.stopAll(); };
 $('engine').onchange = () => { if (talk) talk.engineOverride = $('engine').value || 'formant'; };
@@ -106,7 +111,7 @@ const menu = initMenu($('menu-dialog'), {
 });
 $('btn-menu').onclick = () => menu.open();
 $('text-speed').onchange = () => { textSpeed = +$('text-speed').value || 1; };
-for (const b of document.querySelectorAll('.tabs button')) b.onclick = () => { hideTip(); for (const x of document.querySelectorAll('.tabs button')) x.classList.toggle('on', x === b); for (const t of document.querySelectorAll('.tab')) t.hidden = t.id !== 'tab-' + b.dataset.tab; };
+for (const b of document.querySelectorAll('.tabs button')) b.onclick = () => { hideTip(); for (const x of document.querySelectorAll('.tabs button')) x.classList.toggle('on', x === b); for (const t of document.querySelectorAll('.tab')) t.hidden = t.id !== 'tab-' + b.dataset.tab; if (b.dataset.tab === 'meter' && game) renderMeterTab(); };
 function renderHud() {
   const z = game.zone();
   const act = ACT_NAMES[z.act] || '';
@@ -142,7 +147,20 @@ function setActions(list) {
     return b;
   }));
 }
-function waitForChoice(list) { const was = busy; busy = false; return new Promise(res => setActions(list.map(a => ({ ...a, run: async () => { const r = await a.run?.(); if (!a.stay) { busy = was; res(r); } } })))); }
+// A player choice. Two things happen the moment a button is clicked, for every caller:
+// the choice row is emptied (so the buttons can't sit there being clickable while the answer is read)
+// and the pick is written into the log as a gold "you" line. Pass { silent: true } as the second
+// argument (or `silent: true` on one action) for the rare choice that shouldn't be logged, and
+// `log: '...'` on an action to log different words than the button's label.
+function waitForChoice(list, opts = {}) {
+  const was = busy; busy = false;
+  return new Promise(res => setActions(list.map(a => ({ ...a, run: async () => {
+    if (!a.stay) $('actions').replaceChildren();
+    if (!opts.silent && !a.silent) narrate(`<p class="you">\u25b8 You: ${esc(a.log || a.text || '')}</p>`);
+    const r = await a.run?.();
+    if (!a.stay) { busy = was; res(r); }
+  } }))));
+}
 
 // ---- bodies on the stage
 // Designed looks (data/enemy-looks.json, built by tools/build-emberveil-enemies.mjs): one per enemy, boss, pet,
@@ -182,7 +200,27 @@ function enemyLook(e) { const id = e.templateId; if (e.named && e.look) { const 
   if (D?.creature) return { id: e.id, name: e.name, short: e.short || e.name, hp: e.hp, creature: D.creature, beast: true, desc: D.desc, voiceRole: D.voiceRole };
   if (D?.avatar) { if (e.boss) D.avatar.body.height = Math.max(D.avatar.body.height, 0.9); return { id: e.id, name: e.name, short: e.short || e.name, hp: e.hp, avatar: D.avatar, race: D.race, desc: D.desc, voiceRole: D.voiceRole }; }
   const cr = creatureFor(id) || (/golem|elemental|horror|titan|shard|worm|colossus|abomination/.test(id) ? { ...randomCreature('drake', hashSeed(id)), size: 1.3 } : null); if (cr) return { id: e.id, name: e.name, short: e.name, hp: e.hp, creature: cr, beast: true }; const race = /goblin|gremlin|kobold/.test(id) ? 'goblin' : /skeleton|ghoul|wraith|lich|undead|bone|shade|zombie|wight/.test(id) ? 'undead' : /orc|ogre|troll|brute/.test(id) ? 'orc' : /demon|imp|fiend|hell|fel|abyss|void|primordial/.test(id) ? 'orc' : /elf|veil|cult|sorcerer|prophet|scholar/.test(id) ? 'elf' : 'human'; const av = randomAvatar(deps.avatarPresets, { race, seed: hashSeed(id + e.id) }); if (/demon|imp|fiend|hell|fel/.test(id)) av.body.skin = '#8a2a2a'; if (/void|abyss|primordial|shade/.test(id)) av.body.skin = '#3a2a5a'; if (e.boss) av.body.height = 0.9; return { id: e.id, name: e.name, short: e.name, hp: e.hp, avatar: av, race }; }
-function bubbleAt(id, text, who, cls = '') { const c = stage.chars.get(id); const b = el('div', { class: 'bubble ' + cls }, el('b', { text: who }), document.createTextNode(text)); if (c) { const v = c.group.position.clone(); v.y += 1.95; v.project(stage.scene.camera); b.style.left = `${(v.x + 1) / 2 * 100}%`; b.style.top = `${(1 - v.y) / 2 * 100}%`; } else { b.style.left = '50%'; b.style.top = '20%'; } $('bubbles').append(b); return b; }
+function bubbleAt(id, text, who, cls = '') { const b = el('div', { class: 'bubble ' + cls }, el('b', { text: who }), document.createTextNode(text)); $('bubbles').append(b); placeBubble(b, id); return b; }
+/**
+ * Put a speech bubble over someone's head and keep the whole thing inside the stage box: if there is
+ * no room above the head the bubble flips underneath it, and near an edge it slides sideways instead
+ * of hanging off. Measured in pixels after the bubble is in the page, so the real size is known.
+ */
+function placeBubble(b, id) {
+  const box = $('bubbles'); const W = box.clientWidth || 640, H = box.clientHeight || 300, PAD = 6;
+  const head = stage.headOf?.(id);
+  let x = W / 2, yHead = H * 0.22;
+  if (head) { const v = head.clone().project(stage.scene.camera); x = (v.x + 1) / 2 * W; yHead = (1 - v.y) / 2 * H; }
+  // put it over the head first, then measure what the browser actually drew (wrapping depends on the
+  // text and the font, so guessing the size before it is laid out gets it wrong by a line)
+  b.classList.remove('below'); b.style.left = x + 'px'; b.style.top = yHead + 'px';
+  const r = b.getBoundingClientRect(); const bw = r.width || 170, bh = r.height || 44;
+  const below = yHead - bh - PAD < 0;                 // nothing above the head to hang it from
+  b.classList.toggle('below', below);
+  const top = below ? Math.min(H - bh - PAD, Math.max(PAD, yHead + 8)) : Math.min(H - PAD, Math.max(bh + PAD, yHead));
+  b.style.left = Math.min(W - bw / 2 - PAD, Math.max(bw / 2 + PAD, x)) + 'px';
+  b.style.top = top + 'px';
+}
 // ---- spell effects on the stage ---------------------------------------------------------------
 // A skill event says who is casting but not at whom, so we remember the caster's element and fire the
 // projectile on their first damage event. Later hits of the same skill only get an impact burst.
@@ -227,7 +265,33 @@ function syncStatuses(unit) {
 }
 
 function floatAt(id, text, cls = '') { const c = stage.chars.get(id); const d = el('div', { class: 'dmg ' + cls, text }); if (c) { const v = c.group.position.clone(); v.y += 1.3; v.project(stage.scene.camera); d.style.left = `${(v.x + 1) / 2 * 100}%`; d.style.top = `${(1 - v.y) / 2 * 100}%`; } else { d.style.left = '50%'; d.style.top = '50%'; } $('bubbles').append(d); setTimeout(() => d.remove(), 1000); }
-async function sayLine(ch, line, { cls = '', wait = true } = {}) { if (!line?.text) return; const who = ch.short || ch.name; const b = bubbleAt(ch.id, line.text, who, cls); stage.talk(ch.id, true); const shown = langdbg.rewrite(line.text); const para = narrate(`<p class="say ${cls}"><b>${who}:</b> ${shown}</p>`); langdbg.decorate(para.querySelector('p')); const min = (700 + line.text.length * 24) * textSpeed; const t0 = Date.now(); if (wait) { await talk.say(ch, line); const left = min - (Date.now() - t0); if (left > 0) await sleep(Math.min(left, 2200)); b.remove(); } else setTimeout(() => b.remove(), min); stage.talk(ch.id, false); }
+// Every spoken line goes through one queue, so two lines never talk over each other and none is ever
+// dropped: a hero's reply waits for the enemy's taunt to finish playing. speakCount is here for the
+// tests — it counts the lines actually handed to the voice engine.
+let voiceQueue = Promise.resolve(); let speakCount = 0;
+function enqueueSpeech(ch, line, onStart) {
+  const p = voiceQueue.then(async () => { speakCount++; onStart?.(); try { await talk.say(ch, line); } catch (e) { console.warn('voice', e); } });
+  voiceQueue = p.catch(() => {});
+  return p;
+}
+/**
+ * Show a line as a bubble over the speaker + a line in the log, and speak it.
+ * `wait: false` still speaks the line (queued) — it just doesn't hold up the scene while it plays.
+ */
+async function sayLine(ch, line, { cls = '', wait = true } = {}) {
+  if (!line?.text) return;
+  const who = ch.short || ch.name;
+  const b = bubbleAt(ch.id, line.text, who, cls);
+  const shown = langdbg.rewrite(line.text);
+  const para = narrate(`<p class="say ${cls}"><b>${who}:</b> ${shown}</p>`);
+  langdbg.decorate(para.querySelector('p'));
+  const min = (700 + line.text.length * 24) * textSpeed;
+  const t0 = Date.now();
+  let ended = false; const end = () => { if (ended) return; ended = true; b.remove(); stage.talk(ch.id, false); };
+  const spoken = enqueueSpeech(ch, line, () => stage.talk(ch.id, true));
+  if (wait) { await spoken; const left = min - (Date.now() - t0); if (left > 0) await sleep(Math.min(left, 2200)); end(); }
+  else { Promise.all([spoken, sleep(min)]).then(end); setTimeout(end, min + 12000); }   // the timer is a safety net, not the normal path
+}
 const speak = (ch, intent, opts) => talk.line(ch, intent, opts);
 const randomAlive = () => { const a = game.alive(); return a[Math.floor(Math.random() * a.length)]; };
 
@@ -239,6 +303,23 @@ const NODE_ICONS = await assets.icons();
 const iconMarkup = type => NODE_ICONS[type] || (assets.iconSpecs[type] ? ICON_FALLBACK : '');
 /** Column = graph depth from start, row = spread within the column. Replaces the authored x/y so inserted nodes never overlap. */
 function layoutZone(z) { const byId = Object.fromEntries(z.nodes.map(n => [n.id, n])); const depth = {}; const start = z.nodes.find(n => n.id === 'start') || z.nodes[0]; const q = [[start.id, 0]]; while (q.length) { const [id, d] = q.shift(); if (depth[id] != null && depth[id] >= d) continue; depth[id] = d; for (const e of byId[id]?.exits || []) if (byId[e]) q.push([e, d + 1]); } for (const n of z.nodes) if (depth[n.id] == null) depth[n.id] = 0; const cols = {}; for (const n of z.nodes) (cols[depth[n.id]] ||= []).push(n); const maxD = Math.max(...Object.keys(cols).map(Number)); const pos = {}; for (const [d, list] of Object.entries(cols)) { list.sort((a, b) => (a.y ?? 0.5) - (b.y ?? 0.5)); list.forEach((n, i) => { pos[n.id] = [7 + (maxD ? d / maxD : 0.5) * 82, list.length === 1 ? 50 : 12 + (i / (list.length - 1)) * 74]; }); } return pos; }
+/**
+ * Split a node name onto at most two lines of roughly `maxChars` each, breaking at the word gap that
+ * leaves the two lines most even. Nothing is ever dropped — a name too long for one line wraps
+ * instead of being cut with "…", and the hover card carries the full name either way.
+ */
+function wrapLabel(name, maxChars) {
+  if (name.length <= maxChars) return [name];
+  const words = name.split(/\s+/);
+  if (words.length < 2) return [name];
+  let best = 1, bestScore = Infinity;
+  for (let i = 1; i < words.length; i++) {
+    const a = words.slice(0, i).join(' ').length, b = words.slice(i).join(' ').length;
+    const score = Math.abs(a - b) + Math.max(0, Math.max(a, b) - maxChars) * 3;
+    if (score < bestScore) { bestScore = score; best = i; }
+  }
+  return [words.slice(0, best).join(' '), words.slice(best).join(' ')];
+}
 function renderMap() {
   const z = game.zone(); const svg = $('map'); svg.replaceChildren();
   const act = ACT_NAMES[z.act] || ''; const dupe = act.toLowerCase().includes((z.name || '').toLowerCase());
@@ -267,8 +348,14 @@ function renderMap() {
   // how much room a label has before it runs into its neighbour
   const xs = [...new Set(Object.values(pos).map(p => p[0]))].sort((a, b) => a - b);
   const gap = xs.length > 1 ? Math.min(...xs.slice(1).map((v, i) => v - xs[i])) : 30;
-  const maxChars = Math.max(6, Math.min(20, Math.floor(gap / 0.95)));
-  z.nodes.forEach((n, idx) => {
+  const maxChars = Math.max(9, Math.min(15, Math.round(gap / 0.75)));
+  // Labels are collected here and laid out after the loop, once they can be measured. Nodes are walked
+  // left to right (and top to bottom inside a column) so a label only ever has to dodge labels to its left.
+  const labels = []; const colRow = {}; const byCol = {};
+  for (const n of z.nodes) (byCol[pos[n.id][0]] ||= []).push(n.id);
+  for (const list of Object.values(byCol)) list.sort((a, b) => pos[a][1] - pos[b][1]).forEach((id, i) => colRow[id] = i);
+  const ordered = [...z.nodes].sort((a, b) => pos[a.id][0] - pos[b.id][0] || pos[a.id][1] - pos[b.id][1]);
+  ordered.forEach((n, idx) => {
     const [x, y] = P(n.id); const open = reach.includes(n.id); const here = n.id === game.nodeId;
     const g = mk('g', { transform: `translate(${x} ${y})`, class: 'mapnode' + (open ? ' clickable' : '') });
     const cls = ['node', n.type]; if (game.isVisited(n.id)) cls.push('visited'); if (game.isCleared(n.id)) cls.push('cleared'); if (here) cls.push('here'); if (open) cls.push('open');
@@ -282,10 +369,50 @@ function renderMap() {
     if (game.isVisited(n.id)) g.append(mk('circle', { r: r * 0.62, class: 'seal' }));    // pressed wax seal
     if (known) { const ic = mk('g', { class: 'icon', transform: `scale(${n.type === 'boss' ? 0.32 : 0.26})` }); ic.innerHTML = iconMarkup(n.named ? 'named' : n.type); g.append(ic); }
     if (open) c.addEventListener('click', () => { if (busy) return toast('Finish the scene first'); if (!game.canMove()) return toast('No moves left today. Rest first.'); hideTip(); game.travel(n.id); narrateGear(game.legGear); renderMap(); renderHud(); enterNode(); });
-    const label = !known ? '' : n.name.length > maxChars ? n.name.slice(0, maxChars - 1).trimEnd() + '…' : n.name;
-    const t = mk('text', { y: idx % 2 ? -(r + 1.6) : r + 3.1, 'text-anchor': 'middle', class: here ? 'here' : '' }); t.textContent = label; g.append(t);
+    if (known) {
+      const lines = wrapLabel(n.name, maxChars);
+      const t = mk('text', { 'text-anchor': 'middle', class: here ? 'here' : '' });
+      lines.forEach((ln, i) => { const ts = mk('tspan', { x: 0, dy: i ? 1 : 0 }); ts.textContent = ln; t.append(ts); });
+      g.append(t); labels.push({ t, lines, x, y, r, row: colRow[n.id] || 0 });
+    }
     svg.append(g);
   });
+  // Place the labels last, once they exist and can be measured. Each one tries a few spots in order —
+  // under the node, over it, out to one side (what saves a crowded column, where the discs sit almost
+  // touching), then a second and third tier further out — and takes the first that lands on nothing
+  // already drawn. If a zone is so tight that nothing is clear, it takes the least crowded spot.
+  // Names are never cut short: long ones wrap onto two lines and the hover card repeats them in full.
+  if (labels.length) {
+    const fs = parseFloat(getComputedStyle(labels[0].t).fontSize) || 1.2;
+    const LH = fs * 1.15;
+    for (const L of labels) [...L.t.children].forEach((ts, i) => { if (i) ts.setAttribute('dy', LH); });
+    const boxes = labels.map(L => ({ x1: L.x - L.r, x2: L.x + L.r, y1: L.y - L.r, y2: L.y + L.r }));   // the node discs
+    const hits = (a, b) => !(a.x2 < b.x1 - .4 || a.x1 > b.x2 + .4 || a.y2 < b.y1 - .2 || a.y1 > b.y2 + .2);
+    const boxOf = (L, dx, dy, w, h) => { const x1 = dx > 0 ? L.x + dx : dx < 0 ? L.x + dx - w : L.x - w / 2; return { x1, x2: x1 + w, y1: L.y + dy, y2: L.y + dy + h }; };
+    for (const L of labels) {
+      let w = 0;
+      try { w = Math.max(...[...L.t.children].map(ts => ts.getComputedTextLength())); } catch {}
+      if (!w || !isFinite(w)) w = Math.max(...L.lines.map(t => t.length)) * fs * 0.58;
+      const h = L.lines.length * LH, step = h + 0.9;
+      const under = L.r + 0.9, over = -(L.r + 0.7) - h, side = L.r + 0.6, mid = -h / 2;
+      const near = L.row % 2 ? [[0, over], [0, under]] : [[0, under], [0, over]];
+      const cands = [...near, [side, mid], [-side, mid], [0, under + step], [0, over - step],
+        [side, over], [-side, over], [side, under], [-side, under], [0, under + 2 * step], [0, over - 2 * step]];
+      let best = cands[0], bestCost = Infinity;
+      for (const [dx, dy] of cands) {
+        const box = boxOf(L, dx, dy, w, h);
+        const off = Math.max(0, 0.4 - box.y1) + Math.max(0, box.y2 - (vh - 0.4)) + Math.max(0, 0.4 - box.x1) + Math.max(0, box.x2 - 99.6);
+        const cost = boxes.reduce((n, b) => n + (hits(box, b) ? 1 : 0), 0) * 10 + off * 3 + (dx ? 0.35 : 0) + Math.abs(dy) * 0.04;
+        if (cost < bestCost) { bestCost = cost; best = [dx, dy]; }
+        if (cost < 0.5) break;
+      }
+      const [dx, dy] = best;
+      L.t.setAttribute('text-anchor', dx > 0 ? 'start' : dx < 0 ? 'end' : 'middle');
+      for (const ts of L.t.children) ts.setAttribute('x', dx);
+      L.t.setAttribute('y', dy + fs * 0.92);
+      boxes.push(boxOf(L, dx, dy, w, h));
+    }
+  }
   const sel = $('zone-select'); sel.replaceChildren(...game.zoneOrder.filter(id => game.unlockedZones.includes(id)).map(id => el('option', { value: id, text: game.zones[id].name + (id === game.zoneId ? ' (here)' : '') }))); sel.value = game.zoneId; sel.onchange = () => { if (busy) { toast('Finish the scene first'); sel.value = game.zoneId; return; } game.enterZone(sel.value); stage.setBackdrop(game.zoneId); renderMap(); renderHud(); enterNode(); };
 }
 // ---- node flows
@@ -294,12 +421,14 @@ async function enterNode() {
 }
 async function enterNodeInner() {
   const n = game.node(); renderHud(); renderMap(); const res = game.enter(n); stage.clearSide('right'); stage.setBackdrop(game.zoneId);
+  stage.parkVehicle(game.vehicle);   // whatever the party bought stands behind them on the road
+  if (res.kind === 'crossing') return crossingNode(res, n);
   if (res.kind === 'town') return town(res.town);
   if (res.kind === 'combat') { narrate(`<h4>${n.name}</h4><p class="bad">${res.encounter.name}.</p>`); const won = await fight(res.encounter, { node: n, boss: res.boss }); if (won) await afterCombat(n, res.encounter, res.boss); return mapActions(); }
   if (res.kind === 'event') return runEvent(res.event, n);
   if (res.kind === 'skillCheck') { narrate(`<h4>${n.name}</h4><p>${res.check.flavor}</p><p class="sys">${res.check.stat} check, difficulty ${res.check.dc}. Your best ${res.check.stat} plus a d20.</p>`); return setActions([{ text: `Attempt (${res.check.stat})`, cls: 'primary', run: async () => { const r = game.resolveSkillCheck(n); narrate(`<p class="${r.ok ? 'good' : 'bad'}">Rolled ${r.roll} + ${r.best} vs ${r.dc}: ${r.ok ? 'success' : 'failure'}. ${r.text || ''}</p>`); renderHud(); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, r.ok ? 'brag' : 'complain')); mapActions(); } }, { text: 'Leave it', run: async () => mapActions() }]); }
   if (res.kind === 'shrine') { narrate(`<h4>${n.name}</h4><p class="good">${res.text}</p>`); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'relief')); return mapActions(); }
-  if (res.kind === 'treasure') { narrate(`<h4>${n.name}</h4><p class="good">+${res.gold} gold${res.item ? `, and <b class="${res.item.rarity}">${res.item.name}</b>` : ''}.</p>`); renderHud(); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'happy')); return mapActions(); }
+  if (res.kind === 'treasure') { narrate(`<h4>${n.name}</h4><p class="good">+${res.gold} gold${res.item ? `, and <b class="${res.item.rarity}">${res.item.name}</b>` : ''}.</p>`); renderHud(); renderSide(); await showRewardsFor({ title: 'Treasure', subtitle: n.name, gold: res.gold, items: [itemToReward(res.item)].filter(Boolean) }); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'happy')); return mapActions(); }
   if (res.kind === 'lore') { narrate(`<h4>${n.name}</h4><p class="lore">${res.text}</p>`); const m = game.party.find(h => h.speech?.traits?.includes('scholar')) || randomAlive(); if (m) await sayLine(m, speak(m, 'lore')); return mapActions(); }
   if (res.kind === 'dungeon') return dungeon(res.dungeon, res.done);
   if (res.kind === 'cleared') { narrate(`<p class="sys">${n.name}: cleared. Nothing stirs.</p>`); return mapActions(); }
@@ -323,21 +452,138 @@ function mapActions() {
 async function runEvent(ev, n) {
   narrate(`<h4>${ev.npcName || n.name}</h4>`); const gen = makeNpc({ seed: hashSeed(ev.id), role: /merchant|trader|seller|peddler|fence|collector/.test(ev.id) ? 'merchant' : /child|orphan/.test(ev.id) ? 'child' : /elder|old|hermit|seer|mother/.test(ev.id) ? 'elder' : /cult|veil/.test(ev.id) ? 'cultist' : 'villager', race: /goblin/.test(ev.id) ? 'goblin' : 'human' }, deps); const npc = { ...gen, id: 'npc_' + ev.id, name: ev.npcName || gen.name, short: ev.npcName || gen.short, hp: 1 };
   if (ev.npcName) { await stage.setSide([npc], 'right', -0.5); talk.speaker(npc); }
-  for (const line of ev.lines || []) { const who = line.speaker === 'npc' ? npc : game.party[0]; if (line.speaker === 'npc' && ev.npcName) await sayLine(npc, { text: line.text }, { cls: 'npc' }); else narrate(`<p class="say"><b>${line.speaker === 'hero' ? who.short : 'Narrator'}:</b> ${line.text}</p>`); }
+  for (const line of ev.lines || []) { const who = line.speaker === 'npc' ? npc : (game.party.find(h => h.alive) || game.party[0]); if (line.speaker === 'npc' && ev.npcName) await sayLine(npc, { text: line.text }, { cls: 'npc' }); else if (line.speaker === 'hero' && who) await sayLine(who, { text: line.text }); else narrate(`<p class="say"><b>Narrator:</b> ${line.text}</p>`); }
   const choices = (ev.choices || []).filter(c => game.choiceAllowed(c));
   const res = await waitForChoice(choices.map(c => ({ text: c.text, run: async () => game.choose(ev, c) })));
   if (res.check) narrate(`<p class="${res.check.ok ? 'good' : 'bad'}">${res.check.stat} ${res.check.best} + d20 ${res.check.roll} vs ${res.check.dc}: ${res.check.ok ? 'pass' : 'fail'}.</p>`);
   if (res.text) { if (ev.npcName) await sayLine(npc, { text: res.text.replace(/^\(.*\)$/, '') }, { cls: 'npc' }); else narrate(`<p>${res.text}</p>`); }
   for (const r of res.rewards) narrate(`<p class="good">${r}</p>`); renderHud(); renderSide();
+  await showRewardsFor(specFromRewardLines(res.rewards, { title: 'Reward', subtitle: ev.npcName || n.name }));
   if (res.startCombat) { const enc = game.encounter(res.startCombat); if (enc) { const won = await fight(enc, { node: n }); if (won) await afterCombat(n, enc, false); } }
   stage.clearSide('right'); mapActions();
 }
+// ---- crossings (travel hazards on the road between two places)
+// The node plays a travel scene on the stage — the party walks, or rides if they own a vehicle —
+// and then one thing is in the way: a ford, a slide, a sick village, a toll, a gate with a warden.
+// The rules are in js/explore.js; this is only the show. Rewards come back in the same shape a won
+// fight returns, so showRewards() (when the game has one) can present them identically.
+NODE_INFO.crossing = ['Crossing', 'Something on the road has to be got past. Pick how, and roll for it.'];
+
+/** The icon on a crossing button: what kind of answer it is. */
+function crossingIcon(st) { return st.fight ? 'node-combat' : st.goldCost ? 'gold' : st.days ? 'day' : st.stat ? 'stat_' + st.stat.toLowerCase() : 'ration'; }
+
+async function crossingNode(res, n) {
+  const C = res.crossing;
+  narrate(`<h4>${C.name}</h4>`);
+  // the travel scene: the whole party crosses the stage, riding if there is anything to ride
+  await stage.setSide(game.fighters().map(bodyOf), 'left');
+  stage.setBackdrop(C.scenery || game.zoneId);
+  await stage.travelAcross({ vehicle: game.vehicle, ms: 3400 });
+  stage.resetPositions(); stage.frame('fight'); stage.parkVehicle(game.vehicle);
+  narrate(`<p>${C.intro}</p>`);
+  if (res.failed) narrate('<p class="sys">You have been turned back here before.</p>');
+  // a gate has somebody standing at it: walk them on and let them talk
+  let guard = null;
+  if (C.guard) {
+    const g = makeNpc({ seed: hashSeed(C.id), role: C.guard.role || 'guard', race: C.guard.race || 'human' }, deps);
+    guard = { ...g, id: 'npc_' + C.id, name: C.guard.name || g.name, short: C.guard.name || g.short, hp: 1, speech: { ...(g.speech || {}), traits: C.guard.traits || ['dutiful'] } };
+    await stage.add(guard, { side: 'right', index: 0, count: 1 });
+    talk.speaker(guard);
+    await stage.walkIn(guard.id, stage.worldFrame.width / 2 + 1.2, 1.5, { ms: 1600, faceAtEnd: -0.9 });
+    await sayLine(guard, { text: C.guard.greeting }, { cls: 'npc' });
+  } else {
+    const scout = randomAlive(); if (scout) await sayLine(scout, speak(scout, 'warning'));
+  }
+  return crossingActions(res, n, C, guard);
+}
+
+/** The list of ways past, with what each one needs and how likely it is. */
+function crossingActions(res, n, C, guard) {
+  const states = crossingChoices(game, C);
+  const acts = states.map(st => ({
+    text: st.text + (st.dc ? ` — ${st.stat} ${st.best}${st.traitBonus ? '+' + st.traitBonus : ''} vs ${st.dc}` : st.goldCost ? ` — ${st.goldCost} gold` : st.days ? ` — costs ${st.days} day` : ''),
+    icon: crossingIcon(st),
+    cls: st.available ? (st.odds != null && st.odds >= 70 ? 'primary' : '') : '',
+    tip: st.available
+      ? (st.odds != null ? `Roughly ${st.odds}% to pass. ${st.hero ? st.hero.short + ' leads it.' : ''}` : st.fight ? 'This one ends in a fight.' : 'No roll — this simply works, at the price shown.')
+      : `Not possible: ${st.why}.`,
+    run: async () => { if (!st.available) return toast(st.why); await doCrossing(res, n, C, st.id, guard); },
+  }));
+  acts.push({ text: 'Turn back for now', icon: 'boot', tip: 'Leave it and go somewhere else. The crossing will still be here.', run: async () => { stage.clearSide('right'); mapActions(); } });
+  setActions(acts);
+}
+
+/** A crossing payout: the lines go in the log and the chest pops. Returns the popup's promise. */
+function crossingRewards(C, rw) {
+  if (!rw) return;
+  narrate(`<p class="good"><b>${C.name} is behind you.</b> +${rw.xp} xp each, +${rw.gold} gold, +${rw.fame} fame.</p>`);
+  for (const it of rw.drops || []) narrate(`<p class="good">Loot: <span class="${it.rarity}">${it.name}</span>${it.isUnique ? ' (unique)' : ''}</p>`);
+  for (const { hero } of rw.levelUps || []) narrate(`<p class="good">${hero.short} reaches level ${hero.level}.</p>`);
+  return showRewardsFor(specFromVictory({ xp: rw.xp, gold: rw.gold, fame: rw.fame, drops: rw.drops || [], bossDrops: [], levelUps: rw.levelUps || [] }, { title: 'Crossing passed', subtitle: C.name }));
+}
+
+async function doCrossing(res, n, C, choiceId, guard) {
+  const r = resolveCrossing(game, C, choiceId, game.rng);
+  if (r.blocked) { toast(r.why); return crossingActions(res, n, C, guard); }
+  if (r.roll != null) narrate(`<p class="sys">${r.stat} ${r.best}${r.bonus ? ` +${r.bonus} (the right words)` : ''} + d20 ${r.roll} vs ${r.dc}: <b>${r.ok ? 'pass' : 'fail'}</b>.</p>`);
+  narrate(`<p class="${r.ok ? 'good' : 'bad'}">${r.text}</p>`);
+  if (r.costs.length) narrate(`<p class="sys">${r.costs.join(' · ')}.</p>`);
+  if (r.days) narrate(`<p class="sys">That cost ${r.days} day${r.days === 1 ? '' : 's'}. It is day ${game.day} now.</p>`);
+  if (guard) await sayLine(guard, { text: r.ok ? (C.guard.relent || 'Go on, then.') : (C.guard.refuse || 'Turn around.') }, { cls: 'npc' });
+  renderHud(); renderSide();
+
+  // a choice that ends in a fight: win it and the road is open, lose it and you are back where you started
+  if (r.fight) {
+    const enc = game.encounter(r.fight);
+    if (enc) {
+      enc.name = game.encounterLabel(enc); narrate(`<p class="bad">${enc.name}.</p>`);
+      const won = await fight(enc, { node: null });
+      if (!won) { renderHud(); renderSide(); renderMap(); return crossingFailed(res, n, C, guard); }
+      const v = game.victory(null, enc);
+      await crossingRewards(C, { xp: v.xp, gold: v.gold, fame: v.fame, drops: [...v.drops, ...v.bossDrops], levelUps: v.levelUps });
+      return crossingPassed(n, C);
+    }
+  }
+  if (!r.ok) return crossingFailed(res, n, C, guard);
+  await crossingRewards(C, r.rewards);
+  return crossingPassed(n, C);
+}
+
+/** The crossing is beaten: the node stays open from now on and the party has something to remember. */
+async function crossingPassed(n, C) {
+  game.clearCrossing(n);
+  stage.clearSide('right'); stage.setBackdrop(game.zoneId);
+  await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.parkVehicle(game.vehicle);
+  const m = randomAlive(); if (m) await sayLine(m, speak(m, Math.random() < 0.5 ? 'brag' : 'relief'));
+  renderHud(); renderSide(); renderMap(); renderJournal();
+  mapActions();
+}
+
+/** Turned back: try again for a day and a ration, or walk away and come back later. */
+function crossingFailed(res, n, C, guard) {
+  narrate(`<p class="bad">${C.name} is still in the way.</p>`);
+  setActions([
+    { text: `Try again (costs a day and a ration)`, icon: 'day', cls: 'primary',
+      tip: `Another attempt: the party loses a day and eats a ration first. ${game.supplies.ration ? '' : 'No rations left — they will go hungry.'}`,
+      run: async () => { const paid = payRetry(game); narrate(`<p class="sys">A day goes by and a ration with it. Day ${game.day}.</p>`); renderHud(); renderSide(); renderMap(); return crossingActions(res, n, C, guard); } },
+    { text: 'Leave it and go another way', icon: 'boot', tip: 'The crossing stays on the map. Come back stronger, or better equipped.', run: async () => { stage.clearSide('right'); mapActions(); } },
+  ]);
+}
+
 // ---- combat
 async function fight(enc, { node = null, boss = false } = {}) {
   const heroes = game.fighters(); const foes = enc.enemies; await stage.setSide(heroes.map(bodyOf), 'left'); await stage.setSide(foes.map(enemyLook), 'right');
-  const looks = Object.fromEntries(foes.map(e => [e.id, enemyLook(e)])); const combat = new Combat(heroes, foes, { skills: SK, spells: SP, loot: game.loot, rng: makeRng(game.seed + game.kills * 13 + game.day), act: game.act, bossPhases: bossPhases.phases, exhaustionMult: game.exhaustionMult(), vehicle: game.vehicle, meter: game.meter, startBarrier: enc.night && game.vehicle === 'war_wagon' ? 25 : 0 }); game.meter.startFight(enc.name || 'fight', { zone: game.zoneId, day: game.day }); let tick = 0; const rec = ev => { tick += 0.5; recordEvent(game.meter, ev, tick); };
-  for (const e of foes) e.voice = e.voice || voiceFor({ role: roleForEnemy(e.templateId), gender: 'n', seed: hashSeed(e.id) }); if (enc.named) { const L = enc.named; narrate(`<p class="bad"><b>${L.name}</b> — ${L.baseName}${L.mods?.length ? ' · ' + L.mods.map(m => namedData.modifiers[m] || m).join(', ') : ''}.${L.lore ? ` <span class="lore">${L.lore}</span>` : ''}</p>`); if (!looks[L.id].beast) { talk.speaker({ ...L, speech: { traits: ['cruel', 'pompous'], aggression: 0.95, confidence: 0.9 } }); await sayLine(L, enc.nemesis ? { text: `You again. ${L.nemesis?.defeats >= 2 ? 'I have beaten you twice. Kneel and it stops.' : 'I told you I would come back.'}` } : speak(L, 'threat', { to: heroes[0] }), { cls: 'enemy' }); } else narrate(`<p class="sys"><i>${L.name} ${enc.nemesis ? 'remembers you. It does not hurry.' : 'watches the party with more patience than its kind should have.'}</i></p>`); if (enc.nemesis) { const m = randomAlive(); const bank = game.banks[m?.id]; const mem = bank?.memories.find(x => x.type === 'nemesis'); if (m && mem) { try { await sayLine(m, lingo.speakAbout(mem, bank, game.now, { speaker: talk.speaker(m), scene: talk.scene(game.zoneId) })); } catch {} } } }
-  const talker = foes.find(e => !looks[e.id].beast && !e.named); if (talker && Math.random() < 0.6) { talk.speaker({ ...talker, speech: { traits: ['gruff'], aggression: 0.9 } }); await sayLine(talker, speak(talker, 'combat_taunt', { to: heroes[0], bindings: { foe: talk.speaker(heroes[0]).entity } }), { cls: 'enemy' }); } else if (foes[0] && looks[foes[0].id].beast) narrate(`<p class="sys"><i>The ${foes[0].name} snarls.</i></p>`);
+  const looks = Object.fromEntries(foes.map(e => [e.id, enemyLook(e)])); const combat = new Combat(heroes, foes, { skills: SK, spells: SP, loot: game.loot, rng: makeRng(game.seed + game.kills * 13 + game.day), act: game.act, bossPhases: bossPhases.phases, exhaustionMult: game.exhaustionMult(), vehicle: game.vehicle, meter: game.meter, startBarrier: enc.night && game.vehicle === 'war_wagon' ? 25 : 0 }); game.meter.startFight(enc.name || 'fight', { zone: game.zoneId, day: game.day });
+  // Point the meter tab at the fight that just started (dropping any drill-down left over from the last
+  // one), draw it empty right away, then refresh it at most every 250ms while the rounds run.
+  meterState.scope = 'current'; meterState.actor = null; meterState.source = null; renderMeterTab();
+  let tick = 0, meterDrawn = 0;
+  const rec = ev => { tick += 0.5; recordEvent(game.meter, ev, tick); const now = Date.now(); if (now - meterDrawn >= 250) { meterDrawn = now; renderMeterTab(); } };
+  for (const e of foes) e.voice = e.voice || voiceFor({ role: roleForEnemy(e.templateId), gender: 'n', seed: hashSeed(e.id) }); if (enc.named) { const L = enc.named; narrate(`<p class="bad"><b>${L.name}</b> — ${L.baseName}${L.mods?.length ? ' · ' + L.mods.map(m => namedData.modifiers[m] || m).join(', ') : ''}.${L.lore ? ` <span class="lore">${L.lore}</span>` : ''}</p>`); if (!looks[L.id].beast) { await sayLine(L, talk ? (talk.namedOpener(L, heroes[0], { enc, nemesis: enc.nemesis }) || speak(L, 'threat', { to: heroes[0] })) : null, { cls: 'enemy' }); } else { const nb = talk?.beastOpener(L, { enc, named: true }); narrate(`<p class="sys"><i>${nb?.text || `${L.name} watches the party with more patience than its kind should have.`}</i></p>`); } if (enc.nemesis) { const m = randomAlive(); const bank = game.banks[m?.id]; const mem = bank?.memories.find(x => x.type === 'nemesis'); if (m && mem) { try { await sayLine(m, lingo.speakAbout(mem, bank, game.now, { speaker: talk.speaker(m), scene: talk.scene(game.zoneId) })); } catch {} } } }
+  if (talk) { talk.beginFight(enc); if (node?.type === 'ambush') { const am = talk.raidOpener(enc); if (am) narrate(`<p class="sys"><i>${am.text}</i></p>`); }
+    const talkers = foes.filter(e => !looks[e.id].beast && !e.named); let spoke = 0;
+    for (const t of talkers) { if (spoke >= 2) break; if (Math.random() < (spoke === 0 ? 0.75 : 0.3)) { await sayLine(t, talk.enemyOpener(t, heroes[0], { boss: boss && !spoke, enc }), { cls: 'enemy' }); spoke++; } }
+    if (!spoke && foes[0] && looks[foes[0].id].beast) { const bs = talk.beastOpener(foes[0], { enc }); narrate(`<p class="sys"><i>${bs?.text || `The ${foes[0].name} snarls.`}</i></p>`); } }
   const bloodied = new Set();
   while (!combat.over) {
     const events = combat.round(); narrate(`<p class="sys">— round ${combat.round_} —</p>`);
@@ -353,6 +599,15 @@ async function fight(enc, { node = null, boss = false } = {}) {
       else if (ev.type === 'kill') { stage.down(ev.target.id); stage.clearStatuses(ev.target.id); pendingCast.delete(ev.target.id); narrate(`<p class="good">${ev.target.name} is dead.</p>`); if (ev.source?.isHero && Math.random() < 0.5) await sayLine(ev.source, speak(ev.source, 'combat_kill', { bindings: { foe: new Entity(lingo.lexicon.get(ev.target.templateId) || { id: ev.target.templateId, type: 'creature', forms: { sg: ev.target.name.toLowerCase() } }, { lexicon: lingo.lexicon }) } })); }
       else if (ev.type === 'revive') { stage.revive(ev.target.id); stage.reviveFx(ev.target.id); narrate(`<p class="good">${ev.target.short} is back on their feet.</p>`); }
       else if (ev.type === 'taunt') narrate(`<p class="sys">${ev.source.short} taunts ${ev.target.name}.</p>`);
+      else if (ev.type === 'phase') {
+        // A boss crossing an hp threshold: name the phase in the log, flash the boss so the change is
+        // visible, and let it say something about it (beasts get narration instead — they don't talk).
+        narrate(`<p class="bad"><b>${ev.target.name}: ${ev.name}.</b>${ev.text ? ` <span class="lore">${ev.text}</span>` : ''}</p>`);
+        stage.impact(ev.target.id, elementName(ev.dtype || 'arcane'), true); stage.pulseStatus(ev.target.id, 'enrage');
+        if (talk && !looks[ev.target.id]?.beast) { try { const l = talk.bossPhaseLine?.(ev.target, heroes.find(h => h.alive) || heroes[0]); if (l) await sayLine(ev.target, l, { cls: 'enemy' }); } catch (e) { console.warn('boss phase line', e); } }
+        else narrate(`<p class="sys"><i>${ev.target.name} changes how it fights.</i></p>`);
+        await sleep(220);
+      }
       if (ev.type === 'status' && ev.target?.alive) stage.status(ev.target.id, ev.status, true);
       if (ev.target) syncStatuses(ev.target); if (ev.source && ev.source !== ev.target) syncStatuses(ev.source);
       renderPartyTab();
@@ -369,7 +624,8 @@ async function afterCombat(node, enc, boss) {
   for (const it of [...v.drops, ...v.bossDrops]) narrate(`<p class="good">Loot: <span class="${it.rarity}">${it.name}</span>${it.isUnique ? ' (unique)' : it.setId ? ' (set piece)' : ''}</p>`);
   for (const { hero, ups } of v.levelUps) { narrate(`<p class="good">${hero.short} reaches level ${hero.level}. Points to spend in the Skills tab.</p>`); }
   if (v.namedSlain) narrate(`<p class="good"><b>${v.namedSlain.name} is dead.</b> The name goes on the board.</p>`); for (const q of v.sideDone || []) narrate(`<p class="good"><b>Bounty complete: ${q.title}</b> — +${q.gold} gold.</p>`);
-  if (boss) { const enemyId = enc.enemies.find(e => e.boss)?.templateId; const dd = bossPhases.deathDialog?.[enemyId]; if (dd) { narrate(`<p class="say enemy"><b>${enc.enemies.find(e => e.boss)?.name}:</b> ${dd.bossLine}</p>`); await sayLine(game.party[0], { text: dd.heroLine.replace(/^"|"$/g, '') }); narrate(`<p class="lore">${dd.narratorLine}</p>`); } if (v.questDone) narrate(`<p class="good"><b>Quest complete: ${v.questDone.title}.</b></p>`); if (v.unlockedZone) narrate(`<p class="good">The way to <b>${game.zones[v.unlockedZone].name}</b> is open.</p>`); }
+  if (boss) { const enemyId = enc.enemies.find(e => e.boss)?.templateId; const dd = bossPhases.deathDialog?.[enemyId]; if (dd) { const bossUnit = enc.enemies.find(e => e.boss); await sayLine(bossUnit, { text: dd.bossLine.replace(/^"|"$/g, '') }, { cls: 'enemy' }); await sayLine(game.party.find(h => h.alive) || game.party[0], { text: dd.heroLine.replace(/^"|"$/g, '') }); narrate(`<p class="lore">${dd.narratorLine}</p>`); } if (v.questDone) narrate(`<p class="good"><b>Quest complete: ${v.questDone.title}.</b></p>`); if (v.unlockedZone) narrate(`<p class="good">The way to <b>${game.zones[v.unlockedZone].name}</b> is open.</p>`); }
+  await showRewardsFor(specFromVictory({ ...v, unlockedZoneName: v.unlockedZone ? game.zones[v.unlockedZone].name : null }, { title: boss ? 'Boss defeated' : 'Victory', subtitle: enc.name || node?.name || '' }));
   for (const h of game.party) stage.revive(h.id); await sleep(300); stage.clearSide('right'); await stage.setSide(game.fighters().map(bodyOf), 'left'); renderHud(); renderSide(); renderMap();
 }
 // ---- dungeon
@@ -416,9 +672,33 @@ async function smith(t, kind) {
 }
 // ---- side panels
 function renderSide() { renderPartyTab(); renderBag(); renderSkills(); renderQuests(); renderMeterTab(); renderJournal(); }
-async function heroQuestDone(q) { const hero = game.party.find(h => h.id === q.heroId); narrate(`<p class="good"><b>${q.heroName} finished the errand: ${q.title}.</b> ${q.rewardItem ? `Reward: <span class="${q.rewardItem.rarity}">${q.rewardItem.name}</span>.` : ''}</p>`); if (hero) { await sayLine(hero, speak(hero, 'brag')); for (const { who, intent } of game.reactionsTo(hero)) { if (Math.random() < 0.7) await sayLine(who, speak(who, intent, { to: hero })); } } renderMap(); renderSide(); }
-function applyTopicReward(r, answerer, asker, lines, { after = false } = {}) { const who = r.who === 'asker' ? asker : answerer; const parts = []; if (r.xp) { for (const h of game.party) if (h.alive && (!r.who || h === who)) { const ups = gainXpSafe(h, r.xp); if (ups) parts.push(`${h.short} levels up`); } parts.push(`+${r.xp} xp${r.who ? ' for ' + who?.short : ''}`); } if (r.gold) { game.gold += r.gold; parts.push(`+${r.gold} gold`); } if (r.talent && who) { who.pendingTalent += r.talent; parts.push(`${who.short} gains a talent point`); } if (r.relation) { for (const a of game.party) for (const b of game.party) if (a !== b) game.relations.get(a.id, b.id).set('warmth', Math.min(1, game.relations.get(a.id, b.id).get('warmth') + r.relation)); parts.push('the party grows closer'); } if (r.relationIf) { const ok = (() => { try { return !!new Function('gear', 'return (' + r.relationIf.cond + ')')(lines?.gear || {}); } catch { return false; } })(); const v = ok ? r.relationIf.value : r.relationIf.else; if (asker && answerer) { const rel = game.relations.get(asker.id, answerer.id); rel.set('trust', Math.max(-1, Math.min(1, rel.get('trust') + v))); parts.push(v > 0 ? `${asker.short} trusts ${answerer.short} more` : `${asker.short} trusts ${answerer.short} less`); } } if (r.item) { const it = game.loot.generate(r.item.base || 'ring', r.item.rarity || 'magic', 'medium', { rng: game.rng }); if (it) { game.inventory.push(it); game.logLoot(it, { holder: who?.id }); parts.push(`found ${it.name}`); } } if (r.supply) for (const [k, n] of Object.entries(r.supply)) { game.supplies[k] = (game.supplies[k] || 0) + n; parts.push(`+${n} ${k}`); } if (r.companion) { const def = (companions.classPets || []).find(c => c.id === r.companion) || { id: r.companion, name: 'Wolf pup', power: 1, attrs: { STR: 6, DEX: 10, INT: 2, CON: 6 } }; if (game.addCompanion(game.makeCompanion({ ...def, name: def.name || 'Wolf pup', power: 1 }))) parts.push(`${def.name || 'a wolf pup'} joins the party`); } if (r.buff) { game.flags.empowered = 1; parts.push('the next fight starts blessed'); } narrate(`<p class="good">${(r.text || '').replace('{answerer}', who?.short || '')}${parts.length ? ' — ' + parts.join(', ') : ''}</p>`); renderHud(); renderSide(); }
+async function heroQuestDone(q) { const hero = game.party.find(h => h.id === q.heroId); narrate(`<p class="good"><b>${q.heroName} finished the errand: ${q.title}.</b> ${q.rewardItem ? `Reward: <span class="${q.rewardItem.rarity}">${q.rewardItem.name}</span>.` : ''}</p>`);
+  await showRewardsFor({ title: 'Errand done', subtitle: `${q.heroName} — ${q.title}`, gold: q.reward?.gold || 0, xp: q.reward?.xp || 0, items: [itemToReward(q.rewardItem)].filter(Boolean), extras: q.reward?.talent ? [{ kind: 'level', text: `${q.heroName} gains a talent point` }] : [] });
+  if (hero) { await sayLine(hero, speak(hero, 'brag')); for (const { who, intent } of game.reactionsTo(hero)) { if (Math.random() < 0.7) await sayLine(who, speak(who, intent, { to: hero })); } } renderMap(); renderSide(); }
+function applyTopicReward(r, answerer, asker, lines, { after = false } = {}) { const who = r.who === 'asker' ? asker : answerer; const parts = []; if (r.xp) { for (const h of game.party) if (h.alive && (!r.who || h === who)) { const ups = gainXpSafe(h, r.xp); if (ups) parts.push(`${h.short} levels up`); } parts.push(`+${r.xp} xp${r.who ? ' for ' + who?.short : ''}`); } if (r.gold) { game.gold += r.gold; parts.push(`+${r.gold} gold`); } if (r.talent && who) { who.pendingTalent += r.talent; parts.push(`${who.short} gains a talent point`); } if (r.relation) { for (const a of game.party) for (const b of game.party) if (a !== b) game.relations.get(a.id, b.id).set('warmth', Math.min(1, game.relations.get(a.id, b.id).get('warmth') + r.relation)); parts.push('the party grows closer'); } if (r.relationIf) { const ok = (() => { try { return !!new Function('gear', 'return (' + r.relationIf.cond + ')')(lines?.gear || {}); } catch { return false; } })(); const v = ok ? r.relationIf.value : r.relationIf.else; if (asker && answerer) { const rel = game.relations.get(asker.id, answerer.id); rel.set('trust', Math.max(-1, Math.min(1, rel.get('trust') + v))); parts.push(v > 0 ? `${asker.short} trusts ${answerer.short} more` : `${asker.short} trusts ${answerer.short} less`); } } if (r.item) { const it = game.loot.generate(r.item.base || 'ring', r.item.rarity || 'magic', 'medium', { rng: game.rng }); if (it) { game.inventory.push(it); game.logLoot(it, { holder: who?.id }); parts.push(`found ${it.name}`); } } if (r.supply) for (const [k, n] of Object.entries(r.supply)) { game.supplies[k] = (game.supplies[k] || 0) + n; parts.push(`+${n} ${k}`); } if (r.companion) { const def = (companions.classPets || []).find(c => c.id === r.companion) || { id: r.companion, name: 'Wolf pup', power: 1, attrs: { STR: 6, DEX: 10, INT: 2, CON: 6 } }; if (game.addCompanion(game.makeCompanion({ ...def, name: def.name || 'Wolf pup', power: 1 }))) parts.push(`${def.name || 'a wolf pup'} joins the party`); } if (r.buff) { game.flags.empowered = 1; parts.push('the next fight starts blessed'); } narrate(`<p class="good">${(r.text || '').replace('{answerer}', who?.short || '')}${parts.length ? ' — ' + parts.join(', ') : ''}</p>`); renderHud(); renderSide(); if (r.item || r.talent || r.companion || (r.gold || 0) >= 50) showRewardsFor({ title: 'A good talk', subtitle: (r.text || '').replace('{answerer}', who?.short || ''), gold: r.gold || 0, xp: r.xp || 0, extras: parts.map(t => ({ kind: 'memory', text: t })) }); }
 function gainXpSafe(h, xp) { const before = h.level; h.xp += xp; let ups = 0; while (h.xp >= xpForLevel(h.level + 1) && h.level < 30) { h.level++; h.pendingAttr += 2; if (TALENT_LEVELS.includes(h.level)) h.pendingTalent++; if (h.level % 5 === 0) h.pendingPassive++; ups++; } if (ups) refresh(h, game.loot); return ups; }
+// ------------------------------------------------------------------ rewards popup
+// shared/rewards.js: a chest lands, opens, the numbers count up and the loot flies out. Every call
+// still writes its lines into the narrative log, so the popup is a flourish and never the only record.
+// Set window.emberveil.rewardPopups = false to turn it off (the tests that drive fights use this).
+let rewardPopups = true;
+async function showRewardsFor(spec) {
+  if (!rewardPopups || !spec) return;
+  const worth = (spec.gold > 0) || (spec.xp > 0) || (spec.fame > 0) || spec.items?.length || spec.extras?.length;
+  if (!worth) return;
+  try { await showRewards(spec, { base: '../../assets/data/ui', speed: textSpeed >= 1 ? 1 : 1 / textSpeed }); } catch (e) { console.warn('rewards popup', e); }
+}
+/** Reward strings from game.applyReward ("+40 gold", "+15 xp", "found X") → a popup spec. */
+function specFromRewardLines(lines, { title = 'Reward', subtitle = '' } = {}) {
+  const spec = { title, subtitle, gold: 0, xp: 0, extras: [] };
+  for (const t of lines || []) {
+    const g = /^([+-]?\d+) gold$/.exec(t), x = /^\+(\d+) xp$/.exec(t);
+    if (g && +g[1] > 0) spec.gold += +g[1];
+    else if (x) spec.xp += +x[1];
+    else spec.extras.push({ kind: /found|obtained/.test(t) ? 'item' : /join/.test(t) ? 'memory' : 'quest', text: t });
+  }
+  return spec;
+}
 const meterState = {};
 function renderMeterTab() {
   if (!$('tab-meter')) return;
@@ -430,14 +710,14 @@ async function restScene() {
   const na = game.nightAttack(); const v = VEHICLES[game.vehicle];
   narrate(`<h4>Camp, day ${game.day}</h4><p class="sys">Rations: ${game.supplies.ration} (${v.name.toLowerCase()}: one every ${v.rationEvery} day${v.rationEvery > 1 ? 's' : ''}). Night attack chance here: <b>${Math.round(na.chance * 100)}%</b> (base ${Math.round(na.base * 100)}%${na.vehicle ? `, vehicle ${na.vehicle > 0 ? '+' : ''}${Math.round(na.vehicle * 100)}%` : ''}${na.torch ? ', torch −10%' : ''}). Resting does not heal; eat an extra ration for 30% HP${game.supplies.tent ? ', the tent gives 15%' : ''}.</p>`);
   const choice = await waitForChoice([{ text: 'Rest', cls: 'primary', run: async () => ({ eatExtra: false }) }, ...(game.supplies.ration >= 2 ? [{ text: 'Rest + eat an extra ration (+30% HP)', run: async () => ({ eatExtra: true }) }] : []), { text: 'Not yet', run: async () => null }]); if (!choice) return mapActions();
-  stage.setBackdrop(game.zoneId, true); stage.setNight(true); await stage.camp(game.party.filter(h => h.alive).map(bodyOf)); narrate('<p class="sys">The fire takes. Somebody finds the bad cheese.</p>');
+  stage.setBackdrop(game.zoneId, true); stage.setNight(true); stage.vehicleId = game.vehicle; await stage.camp(game.party.filter(h => h.alive).map(bodyOf), { vehicle: game.vehicle }); narrate('<p class="sys">The fire takes. Somebody finds the bad cheese.</p>');
   const speakers = game.party.filter(h => h.alive).map(h => talk.speaker(h)); const nextBossNode = game.zone().nodes.find(n => n.type === 'boss'); const facts = factsFrom({ now: game.now, day: game.day, banks: game.banks, heroes: game.party, meter: game.meter, lootLog: game.lootLog, relations: game.relations, party: { rations: game.supplies.ration, exhaustion: game.exhaustion, act: game.act, gold: game.gold, torches: game.supplies.torch, bandages: game.supplies.bandages, vehicle: game.vehicle === 'none' ? null : game.vehicle, vehicleName: v.name.toLowerCase(), nextBoss: nextBossNode && !game.isCleared(nextBossNode.id) ? nextBossNode.name : null, companion: game.companions[0]?.name?.toLowerCase() || null, companionKills: game.companions[0] ? (game.meter.fights.flatMap(f => f.records).filter(r => r.source === game.companions[0].id && r.killingBlow).length) : 0, companionHurt: !!game.companions[0] && game.companions[0].hp < game.companions[0].maxHp * 0.5, namedSeen: game.namedSeen.length, lastNamed: game.namedSeen[game.namedSeen.length - 1] || null, activeQuest: (() => { const q = game.quests.active.map(id => sideQuestData.quests.find(x => x.id === id) || MAIN_QUESTS.find(x => x.id === id)).filter(Boolean)[0]; return q?.title || null; })(), questGold: (() => { const q = game.quests.active.map(id => sideQuestData.quests.find(x => x.id === id)).filter(Boolean)[0]; return q?.gold || 0; })(), lastQuestDone: (() => { const id = game.quests.done[game.quests.done.length - 1]; const q = sideQuestData.quests.find(x => x.id === id) || MAIN_QUESTS.find(x => x.id === id); return q?.title || null; })(), shrineToday: (game.usedNodes || []).some(k => k.startsWith(game.zoneId + ':') && game.zone().nodes.find(n => `${game.zoneId}:${n.id}` === k)?.type === 'shrine' && game.legsUsed > 0) } });
   const facts2 = facts; facts2.party.nodesTravelled = game.nodesTravelled; facts2.party.companions = game.companions.length;
   const th = threads.play(speakers, facts2, game.threads, { scene: talk.scene(game.zoneId) }); if (th) { narrate(`<p class="sys"><i>${th.thread.id.replace('th_', '').replace(/_/g, ' ')}${th.done ? ' — settled' : ''}</i></p>`); for (const l of th.lines) { const who = game.party.find(h => h.id === l.speaker.id); if (who) await sayLine(who, l); } if (th.reward) applyTopicReward(th.reward, th.answerer, th.asker, th.lines); if (th.objective) narrate(`<p class="sys">(this continues after: ${th.objective.type === 'town' ? 'the next town' : th.objective.type === 'named' ? 'a named enemy falls' : th.objective.type + ' ×' + th.objective.n})</p>`); }
   if (Math.random() < 0.35) { const asker = game.party.filter(h => h.alive && !game.activeHeroQuest(h)); if (asker.length) { const h = asker[Math.floor(Math.random() * asker.length)]; const q = game.startHeroQuest(h); if (q) { await sayLine(h, { text: q.ask }); narrate(`<p class="good"><b>${h.short}'s errand: ${q.title}.</b> ${q.task} A violet star marks it on the map. Reward: ${Object.entries(q.reward).map(([k, v]) => k === 'item' ? 'a ' + v.rarity + ' ' + v.category : k === 'talent' ? 'a talent point' : v + ' ' + k).join(', ')}.</p>`); const o = game.party.find(x => x !== h && x.alive); if (o) await sayLine(o, speak(o, game.relations.get(o.id, h.id).opinion() >= 0 ? 'agree' : 'complain', { to: h })); renderMap(); renderQuests(); } } }
   for (let i = 0; i < 2; i++) { const lines = conversations.talk(speakers, facts, { tags: ['camp', 'rare'], scene: talk.scene(game.zoneId) }); for (const l of lines) { const who = game.party.find(h => h.id === l.speaker.id); if (who) await sayLine(who, l); } const topicDef = topicsData.topics.find(t => t.id === lines[0]?.topic); if (topicDef?.reward) { const ans = game.party.find(h => h.id === lines.find(l => l.role === 'answerer')?.speaker.id) || game.party[0]; applyTopicReward(topicDef.reward, ans, game.party.find(h => h.id === lines[0].speaker.id), lines); } const key = lines.find(l => l.role === 'answerer'); if (key && lines[0]) game.rememberConversation(key.speaker.id, key.listener?.id || lines[0].speaker.id, key.topic, key.text); }
-  let attacked = false; if (Math.random() < na.chance) { attacked = true; const enc = game.nightEncounter(); if (enc) { narrate(`<p class="bad"><b>Something comes out of the dark.</b> ${enc.name}.</p>`); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'warning', { bindings: { foe: new Entity(lingo.lexicon.get(enc.enemies[0].templateId) || { id: 'x', type: 'creature', forms: { sg: enc.enemies[0].name } }, { lexicon: lingo.lexicon, count: enc.enemies.length }) } })); stage.clearCamp(); const won = await fight(enc, { node: null }); if (won) { const vic = game.victory(null, enc); narrate(`<p class="good">The raiders are dead. +${vic.xp} xp, +${vic.gold} gold.</p>`); } else { stage.setNight(false); return mapActions(); } } }
-  const r = game.rest(choice); narrateGear(r.gear); for (const q of r.questsDone || []) await heroQuestDone(q); stage.clearCamp(); stage.setNight(false); stage.setBackdrop(game.zoneId); await stage.setSide(game.fighters().map(bodyOf), 'left');
+  let attacked = false; if (Math.random() < na.chance) { attacked = true; const enc = game.nightEncounter(); if (enc) { const nr = talk?.raidOpener(enc, { night: true }); narrate(`<p class="bad"><b>${nr?.text || 'Something comes out of the dark.'}</b> ${enc.name}.</p>`); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'warning', { bindings: { foe: new Entity(lingo.lexicon.get(enc.enemies[0].templateId) || { id: 'x', type: 'creature', forms: { sg: enc.enemies[0].name } }, { lexicon: lingo.lexicon, count: enc.enemies.length }) } })); stage.clearCamp(); const won = await fight(enc, { node: null }); if (won) { const vic = game.victory(null, enc); narrate(`<p class="good">The raiders are dead. +${vic.xp} xp, +${vic.gold} gold.</p>`); } else { stage.setNight(false); return mapActions(); } } }
+  const r = game.rest(choice); narrateGear(r.gear); for (const q of r.questsDone || []) await heroQuestDone(q); stage.clearCamp(); stage.setNight(false); stage.setBackdrop(game.zoneId); await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.parkVehicle(game.vehicle);
   narrate(`<h4>Day ${game.day}</h4><p class="${r.ate ? 'sys' : 'bad'}">${r.ate ? (r.extra ? 'Everyone ate well.' : 'A cold ration each.') : 'No food. Everyone is hungrier and slower.'}${r.exhaustion ? ` Exhaustion ×${r.exhaustion}.` : ''}${r.healed ? ` Healed ${r.healed} in total.` : ''}${attacked ? '' : ' The night passed quietly.'}</p>`); renderHud(); renderSide(); renderMap(); game.save(); mapActions();
 }
 /** A tab section heading: icon + name + the gold divider rule. */
@@ -458,28 +738,56 @@ function slotRow(h, s) {
   }
   return row;
 }
+// Small interface preferences that should survive a reload but are not part of the save file
+// (right now: which hero cards have their gear drawer open).
+const UI_PREFS_KEY = 'playground:emberveil:ui:v1';
+const uiPrefs = (() => { try { return JSON.parse(localStorage.getItem(UI_PREFS_KEY)) || {}; } catch { return {}; } })();
+function saveUiPrefs() { try { localStorage.setItem(UI_PREFS_KEY, JSON.stringify(uiPrefs)); } catch {} }
+const gearOpen = id => !!(uiPrefs.gearOpen || {})[id];                       // default: every drawer closed
+function setGearOpen(id, on) { const m = (uiPrefs.gearOpen ||= {}); if (on) m[id] = 1; else delete m[id]; saveUiPrefs(); }
+
+/**
+ * Party tab. One compact card per hero so all four fit on screen without scrolling: portrait,
+ * name/class/level, the hp/mp/xp bars and a single line of numbers. Everything else — the ten
+ * equipment slots, hit/dodge, the Feelings and Save buttons — lives in a drawer behind the card's
+ * "Gear" button, which remembers whether it was open.
+ */
 function renderPartyTab() {
   const GEAR = ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'ring1', 'ring2', 'necklace'];
   const rows = [...game.party, ...game.companions].map(h => {
     const d = h.isCompanion ? null : derive(h, game.loot);
     const points = h.pendingAttr || h.pendingTalent || h.pendingPassive;
+    const open = !h.isCompanion && gearOpen(h.id);
     const stats = d ? el('div', { class: 'statline' },
       statChip('', `${d.dmgMin}–${d.dmgMax}`, STAT_TIPS.dmg, 'slot_weapon'),
       statChip('', d.armor, STAT_TIPS.armor, 'slot_chest'),
-      statChip('hit', d.hit, STAT_TIPS.hit), statChip('dodge', d.dodge, STAT_TIPS.dodge), statChip('crit', Math.round(d.critChance) + '%', STAT_TIPS.crit),
+      statChip('crit', Math.round(d.critChance) + '%', STAT_TIPS.crit),
       ...['STR', 'DEX', 'INT', 'CON'].map(k => statChip('', h.attrs[k], STAT_TIPS[k], 'stat_' + k.toLowerCase()))) : null;
-    return el('div', { class: 'member' + (game.party[selectedHero] === h ? ' sel' : ''), 'data-tip': h.isCompanion ? `${h.name} follows the party and fights on its own.` : 'Click to point the Skills tab at this hero', onclick: () => { const i = game.party.indexOf(h); if (i >= 0) { selectedHero = i; renderSkills(); renderPartyTab(); } } },
+    const drawer = h.isCompanion ? null : el('div', { class: 'member-more', hidden: open ? null : '' },
+      d ? el('div', { class: 'statline' }, statChip('hit', d.hit, STAT_TIPS.hit), statChip('dodge', d.dodge, STAT_TIPS.dodge)) : null,
+      el('div', { class: 'slots' }, ...GEAR.map(s => slotRow(h, s))),
+      el('div', { class: 'row more-row' },
+        el('button', { class: 'small', text: 'Feelings', 'data-tip': `What ${h.short} thinks of the others, and the memories weighing on them`, onclick: e => { e.stopPropagation(); const lines = game.party.filter(o => o !== h).map(o => `${h.short} → ${o.short}: ${game.relations.get(h.id, o.id).summary()}`); const mem = (game.banks[h.id]?.list(game.now) || []).slice(0, 5).map(x => `· ${x.memory.type} ${JSON.stringify(x.memory.details)} (${Math.round(x.salience * 100)}%)`); narrate(`<h4>${h.name}</h4>` + lines.map(l => `<p class="sys">${l}</p>`).join('') + (mem.length ? `<p class="sys">Strongest memories:<br>${mem.join('<br>')}</p>` : '<p class="sys">No memories yet.</p>')); } }),
+        el('button', { class: 'small', text: 'Save to library', 'data-tip': 'Keep this hero (look, voice, speech) in the shared character library', onclick: e => { e.stopPropagation(); library.putCharacter({ ...(h.blueprint || {}), name: h.name, short: h.short, race: 'human', avatar: h.avatar, voice: h.voice, speech: h.speech, title: h.className, class: h.class, kind: 'character' }, { source: 'emberveil', tags: ['emberveil', h.class] }); toast(`${h.short} saved to the library`); } })));
+    const gearBtn = h.isCompanion ? null : el('button', {
+      class: 'small ghost gear-toggle' + (open ? ' on' : ''), text: `Gear ${open ? '▴' : '▾'}`,
+      'data-tip': `Show or hide ${h.short}'s ten equipment slots, hit and dodge, and the Feelings / Save buttons`,
+      onclick: e => { e.stopPropagation(); setGearOpen(h.id, !gearOpen(h.id)); renderPartyTab(); },
+    });
+    return el('div', { class: 'member' + (game.party[selectedHero] === h ? ' sel' : '') + (open ? ' open' : ''), 'data-tip': h.isCompanion ? `${h.name} follows the party and fights on its own.` : 'Click to point the Skills tab at this hero', onclick: () => { const i = game.party.indexOf(h); if (i >= 0) { selectedHero = i; renderSkills(); renderPartyTab(); } } },
       el('div', { class: 'portrait', html: h.avatar ? renderSVG(h.avatar) : '' }),
-      el('div', {},
-        el('div', { class: 'who' }, el('b', { text: h.name }), el('span', { class: 'tiny', text: ` ${h.className} L${h.level}${points ? ' · points to spend!' : ''}` })),
+      el('div', { class: 'member-body' },
+        el('div', { class: 'who' },
+          el('b', { text: h.name }),
+          el('span', { class: 'tiny', text: `${h.className} L${h.level}` }),
+          points ? el('span', { class: 'pip', text: 'points', 'data-tip': 'Unspent attribute, talent or passive points — spend them in the Skills tab' }) : null,
+          el('span', { class: 'gap' }),
+          gearBtn),
         bar(h.hp, h.maxHp, '', `Health ${h.hp} / ${h.maxHp}. ${STAT_TIPS.hp}`),
         h.isCompanion ? null : bar(h.mp, h.maxMp, 'mp', `Mana ${h.mp} / ${h.maxMp}. ${STAT_TIPS.mp}`),
         h.isCompanion ? null : bar(h.xp, xpForLevel(h.level + 1), 'xp', `Experience ${h.xp} / ${xpForLevel(h.level + 1)} towards level ${h.level + 1}. ${STAT_TIPS.xp}`),
         stats,
-        h.isCompanion ? null : el('div', { class: 'slots' }, ...GEAR.map(s => slotRow(h, s))),
-        h.isCompanion ? null : el('div', { class: 'row' },
-          el('button', { class: 'small', text: 'Feelings', 'data-tip': `What ${h.short} thinks of the others, and the memories weighing on them`, onclick: e => { e.stopPropagation(); const lines = game.party.filter(o => o !== h).map(o => `${h.short} → ${o.short}: ${game.relations.get(h.id, o.id).summary()}`); const mem = (game.banks[h.id]?.list(game.now) || []).slice(0, 5).map(x => `· ${x.memory.type} ${JSON.stringify(x.memory.details)} (${Math.round(x.salience * 100)}%)`); narrate(`<h4>${h.name}</h4>` + lines.map(l => `<p class="sys">${l}</p>`).join('') + (mem.length ? `<p class="sys">Strongest memories:<br>${mem.join('<br>')}</p>` : '<p class="sys">No memories yet.</p>')); } }),
-          el('button', { class: 'small', text: 'Save to library', 'data-tip': 'Keep this hero (look, voice, speech) in the shared character library', onclick: e => { e.stopPropagation(); library.putCharacter({ ...(h.blueprint || {}), name: h.name, short: h.short, race: 'human', avatar: h.avatar, voice: h.voice, speech: h.speech, title: h.className, class: h.class, kind: 'character' }, { source: 'emberveil', tags: ['emberveil', h.class] }); toast(`${h.short} saved to the library`); } }))));
+        drawer));
   });
   $('tab-party').replaceChildren(...rows);
 }
@@ -579,5 +887,5 @@ addEventListener('resize', () => { clearTimeout(mapResizeT); mapResizeT = setTim
 
 setupUI();   // tooltips everywhere, gold corner flourishes on every .framed box, title-screen embers, how-to-play text
 
-window.emberveil = { menu, conversations, assets, restScene, get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, library, lingo, DATA, LOOKS, ELOOKS, enemyLook, bodyOf, companionLook, get busy() { return busy; }, fight, enterNode, startWorld, addChosen, renderSide, classes: classes.classes };
+window.emberveil = { menu, conversations, assets, restScene, crossingNode, doCrossing, resolveCrossing, crossingChoices, NODE_INFO, placeBubble, get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, library, lingo, DATA, LOOKS, ELOOKS, enemyLook, bodyOf, companionLook, get busy() { return busy; }, get speakCount() { return speakCount; }, get rewardPopups() { return rewardPopups; }, set rewardPopups(v) { rewardPopups = !!v; }, showRewardsFor, fight, afterCombat, enterNode, startWorld, addChosen, renderSide, renderMeterTab, renderPartyTab, renderMap, waitForChoice, classes: classes.classes };
 document.body.dataset.ready = '1';

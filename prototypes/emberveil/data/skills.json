@@ -4145,7 +4145,7 @@
    "aoe": "chain",
    "damageStat": "damage",
    "damageMult": 1.3,
-   "mpCost": 15,
+   "mpCost": 10,
    "description": "Bolt leaps to 3 targets for 130% Damage.",
    "talents": [
     {
@@ -6906,7 +6906,7 @@
    "damageType": "shadow",
    "aoe": "single",
    "mpCost": 8,
-   "cooldown": 1,
+   "cooldown": 0,
    "description": "Hurl a tendril of shadow at one enemy. Pure shadow damage; benefits from spell power.",
    "talents": [
     {

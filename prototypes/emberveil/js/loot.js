@@ -1,6 +1,7 @@
 // Loot: Emberveil's item generator rebuilt from items.json — bases, rarities, qualities, affixes with restrictions,
 // names ("Sharp Longsword of Vitality"), uniques, set pieces, prices, salvage, blacksmith/enchanter, zone + boss drops.
 import { makeRng } from './rng.js';
+import { describeAffixStat, describeLegendary } from './effects.js';
 const RARITY = ['normal', 'magic', 'rare', 'legendary'];
 export class Loot {
   constructor(data) { this.d = data; this.bases = { ...data.weaponBases, ...data.armorBases }; this.ngPlus = 0; }
@@ -29,17 +30,28 @@ export class Loot {
     if (base.isShield) item.affixes.push({ id: 'base_block_chance', name: 'Base Block', stat: 'block_chance', value: +base.blockChance.toFixed(2), baseIntrinsic: true }, { id: 'base_block_power', name: 'Base Block Power', stat: 'block_power', value: Math.round(base.blockPower * q), baseIntrinsic: true });
     if (base.isMagicShield) item.affixes.push({ id: 'base_barrier', name: 'Barrier', stat: 'barrier', value: Math.round(base.barrier * q), baseIntrinsic: true }, { id: 'base_barrier_regen', name: 'Barrier Regen', stat: 'barrierRegen', value: Math.round(base.barrierRegen * q), baseIntrinsic: true });
     if (['orb', 'tome'].includes(base.subtype) || base.slot === 'necklace') item.affixes.push({ id: 'base_spell_power', name: 'Base Spell Power', stat: 'spellPower', value: +((['orb', 'tome'].includes(base.subtype) ? 0.15 : 0.08) * q).toFixed(2), baseIntrinsic: true });
+    this.addIntrinsics(item, base);
     return item;
   }
   /** "<Prefix> <Base> <suffix>" from the first prefix-list and first suffix-list affix. */
   rename(item) { const A = this.d.affixes; const pre = item.affixes.find(a => A.prefixes.some(p => p.id === a.id) || (a.extended && !a.name.startsWith('of '))); const suf = item.affixes.find(a => A.suffixes.some(s => s.id === a.id) || (a.extended && a.name.startsWith('of '))); let n = item.baseName; if (pre) n = `${pre.name} ${n}`; if (suf) n = `${n} ${suf.name}`; item.name = n; return n; }
+  /** A base's built-in properties (the road weapons): pushed as affixes so every system already reads them. */
+  addIntrinsics(item, base) {
+    for (const f of base.intrinsic || []) item.affixes.push({ id: 'base_' + f.stat, name: f.name || statName(f.stat), stat: f.stat, value: f.value, baseIntrinsic: true, intrinsic: true });
+    if (base.look) item.look = { ...base.look };
+    if (base.minAct) item.minAct = base.minAct;
+    return item;
+  }
+  /** The keys in `list` a party in this act can find (bases carry `minAct`). */
+  basesForAct(list, act = 99) { const out = (list || []).filter(k => (this.base(k)?.minAct || 0) <= act); return out.length ? out : (list || []); }
   generateUnique(id, rng = makeRng()) {
     const u = this.d.uniques.find(x => x.id === id); if (!u) return null; const base = this.base(u.baseItemId); const q = this.d.qualityMult[u.quality] ?? 1.2;
     const item = { id: 'u_' + Math.floor(rng() * 1e9).toString(36), baseKey: u.baseItemId, name: u.name, baseName: u.name, type: base.type, subtype: base.subtype || base.slot, slot: u.slot === 'ring1' ? 'ring' : (u.slot || base.slot || 'weapon'), weaponCategory: base.weaponCategory || null, twoHanded: !!base.twoHanded, offHandOk: !!base.offHandOk, isShield: !!base.isShield, isMagicShield: !!base.isMagicShield, rarity: 'legendary', quality: u.quality, uniqueId: u.id, isUnique: true, legendaryEffectId: u.legendaryEffect, lore: u.lore, statScaling: base.statScaling, attackSpeed: base.attackSpeed || 'normal', armorPen: base.armorPen || 0, ranged: !!base.ranged, affixes: [] };
     if (base.dmg) item.dmg = [Math.round(base.dmg[0] * q), Math.round(base.dmg[1] * q)]; if (base.armor !== undefined) item.armor = Math.round(base.armor * q);
     for (const f of u.fixedAffixes) item.affixes.push({ id: 'fixed_' + f.stat, name: statName(f.stat), stat: f.stat, value: f.value });
     for (const r of u.randomAffixes) item.affixes.push({ id: 'rand_' + r.stat, name: statName(r.stat), stat: r.stat, value: +(r.min + rng() * (r.max - r.min)).toFixed(2) });
-    item.affixes.push({ id: 'legendary_effect', name: 'Legendary', stat: 'cond_legendaryEffect', value: 1, descriptor: this.d.legendaryEffects[u.legendaryEffect] });
+    item.affixes.push({ id: 'legendary_effect', name: 'Legendary', stat: 'cond_legendaryEffect', value: 1, legendaryId: u.legendaryEffect, descriptor: this.d.legendaryEffects[u.legendaryEffect] });
+    this.addIntrinsics(item, base); if (u.look) item.look = { ...u.look }; item.act = u.act;
     if (base.isShield) item.affixes.push({ id: 'base_block_chance', name: 'Base Block', stat: 'block_chance', value: base.blockChance, baseIntrinsic: true }, { id: 'base_block_power', name: 'Base Block Power', stat: 'block_power', value: Math.round(base.blockPower * q), baseIntrinsic: true });
     return item;
   }
@@ -49,6 +61,7 @@ export class Loot {
     if (base.dmg) item.dmg = [Math.round(base.dmg[0] * q), Math.round(base.dmg[1] * q)]; if (base.armor !== undefined) item.armor = Math.round(base.armor * q);
     for (const f of piece.fixedAffixes) item.affixes.push({ id: 'set_fixed_' + f.stat, name: statName(f.stat), stat: f.stat, value: f.value, setFixed: true });
     for (const r of piece.randomAffixes) item.affixes.push({ id: 'set_rand_' + r.stat, name: statName(r.stat), stat: r.stat, value: +(r.min + rng() * (r.max - r.min)).toFixed(2) });
+    this.addIntrinsics(item, base);
     if (base.isShield) item.affixes.push({ id: 'base_block_chance', name: 'Base Block', stat: 'block_chance', value: base.blockChance, baseIntrinsic: true }, { id: 'base_block_power', name: 'Base Block Power', stat: 'block_power', value: Math.round(base.blockPower * q), baseIntrinsic: true });
     return item;
   }
@@ -70,7 +83,7 @@ export class Loot {
     const z = this.d.zoneDrops[zoneId] || { drop: 0.15, rarity: 'magic', quality: 'medium', bases: ['sword', 'dagger', 'light_chest', 'ring'] };
     const chance = z.drop * (revisit ? 0.5 : 1) * (difficulty === 'hard' ? 1.2 : 1); if (rng() >= chance) return null;
     let rarity = z.rarity; if (z.normalChance != null && rng() < z.normalChance - magicFind) rarity = 'normal';
-    return this.maybeSetItem(act, rng) || this.generate(rng.pick(z.bases), rarity, z.quality, { rng });
+    return this.maybeSetItem(act, rng) || this.generate(rng.pick(this.basesForAct(z.bases, act)), rarity, z.quality, { rng });
   }
   bossLoot(bossId, rng) { const t = this.d.bossLoot[bossId]; if (!t) return []; const out = []; if (t.uniques?.length && rng() < (t.uniqueChance ?? 0.15)) { const u = this.generateUnique(rng.pick(t.uniques), rng); if (u) out.push(u); } for (let i = 0; i < t.rolls; i++) { const it = this.generate(rng.pick(t.bases), t.rarity, t.quality, { rng }); if (it) out.push(it); } return out; }
   /** Seeded merchant stock for a town (10 items + potions). */
@@ -78,10 +91,11 @@ export class Loot {
     const m = this.d.merchant; const rng = makeRng((hashStrLocal(`${townId}|ng${ngPlus}|merch`) ^ seed) >>> 0); const bump = (ngPlus > 0 ? 1 : 0) + fameBonus(fame, heroLvl);
     const R = ['normal', 'magic', 'rare', 'legendary'], Q = ['low', 'medium', 'high', 'elite', 'exotic']; const ra = m.rarityByAct[String(Math.min(6, act))], qa = m.qualityByAct[String(Math.min(6, act))];
     const roll = base => { const r = R[Math.min(3, rng.pick(ra) + bump)], q = Q[Math.min(4, rng.pick(qa) + bump)]; const it = this.generate(base, r, q, { rng }); if (it) it.price = this.price(it); return it; };
-    const bySlot = slot => Object.keys(this.d.armorBases).filter(k => this.d.armorBases[k].slot === slot && m.bases.includes(k)); const weapons = Object.keys(this.d.weaponBases).filter(k => m.bases.includes(k));
+    const stock = this.basesForAct(m.bases, act);
+    const bySlot = slot => Object.keys(this.d.armorBases).filter(k => this.d.armorBases[k].slot === slot && stock.includes(k)); const weapons = Object.keys(this.d.weaponBases).filter(k => stock.includes(k));
     const out = []; for (const slot of ['chest', 'head', 'feet', 'hands', 'legs']) { const b = bySlot(slot); if (b.length) out.push(roll(rng.pick(b))); }
     if (rng() < 0.5) out.push(roll('ring')); if (rng() < 0.5) out.push(roll('necklace')); if (rng() < 0.7) out.push(roll(rng.pick(weapons))); if (rng() < 0.4) out.push(roll(rng.pick(bySlot('offhand'))));
-    while (out.length < 10) out.push(roll(rng.pick(m.bases))); return out.filter(Boolean);
+    while (out.length < 10) out.push(roll(rng.pick(stock))); return out.filter(Boolean);
   }
   /** Score an item for comparisons: { offense, defense, utility, total } */
   score(item, hero = null) {
@@ -99,11 +113,20 @@ export class Loot {
   }
   activeSets(equipment) {
     const items = Object.values(equipment || {}).filter(Boolean); const out = [];
-    for (const set of this.d.sets) { let count = items.filter(i => i.setId === set.id).length; if (!count) continue; if (items.some(i => i.affixes?.some(a => a.stat === 'cond_extraSetPiece'))) count = Math.min(set.pieces, count + 1); const bonuses = Object.entries(set.partialBonuses).filter(([t]) => count >= +t).map(([, b]) => b); out.push({ set, count, bonuses, legendaryActive: count >= set.activationPieces }); }
+    const extraPiece = items.some(i => i.affixes?.some(a => a.stat === 'cond_extraSetPiece'));
+    const cut = items.some(i => i.affixes?.some(a => a.stat === 'cond_setThresholdReduce')) ? 1 : 0;
+    for (const set of this.d.sets) { let count = items.filter(i => i.setId === set.id).length; if (!count) continue; if (extraPiece) count = Math.min(set.pieces, count + 1); const eff = count + cut; const bonuses = Object.entries(set.partialBonuses).filter(([t]) => eff >= +t).map(([, b]) => b); out.push({ set, count, bonuses, legendaryActive: eff >= set.activationPieces }); }
     return out;
   }
   legendaryEffects(equipment) { const ids = new Set(); for (const it of Object.values(equipment || {})) if (it?.legendaryEffectId) ids.add(it.legendaryEffectId); for (const s of this.activeSets(equipment)) if (s.legendaryActive) ids.add(s.set.legendaryEffect); return [...ids]; }
-  describe(a) { const pct = ['critChance', 'critDamage', 'spellPower', 'goldFind', 'magicFind', 'xpFind', 'cooldownReduction', 'block_chance'].includes(a.stat) || String(a.stat).startsWith('cond_') && a.value < 1; const v = pct ? `${Math.round(a.value * 100)}%` : (Number.isInteger(a.value) ? a.value : a.value.toFixed(1)); return a.descriptor && a.id === 'legendary_effect' ? a.descriptor : `+${v} ${statName(a.stat)}`; }
+  /** Plain-language line for one affix — the effects registry first, then a generic "+N Stat". */
+  describe(a) {
+    if (a.id === 'legendary_effect') return a.legendaryId && describeLegendary(a.legendaryId) || a.descriptor || 'carries a legendary power';
+    const fromRegistry = describeAffixStat(a.stat, a.value); if (fromRegistry) return fromRegistry;
+    const pct = ['critChance', 'critDamage', 'spellPower', 'goldFind', 'magicFind', 'xpFind', 'cooldownReduction', 'block_chance'].includes(a.stat) || String(a.stat).startsWith('cond_') && a.value < 1;
+    const v = pct ? `${Math.round(a.value * 100)}%` : (Number.isInteger(a.value) ? a.value : a.value.toFixed(1));
+    return `+${v} ${statName(a.stat)}`;
+  }
 }
 function norm(k) { return ({ gold_find: 'goldFind', mana_regen: 'manaRegen', magic_resist: 'magicResist', crit_chance: 'critChance', crit_damage: 'critDamage', spell_power: 'spellPower', magic_find: 'magicFind', barrier_regen: 'barrierRegen', hp_regen: 'hpRegen' })[k] || k; }
 function scalingMult(item, hero) { if (!hero || !item.statScaling || item.type !== 'weapon') return 1; const p = (hero.primaryAttr || 'STR').toLowerCase(); const parts = item.statScaling.split('_'); if (parts[0] === p) return 1.5; if (parts.includes(p)) return 1.15; return 0.55; }

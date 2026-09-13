@@ -68,8 +68,155 @@ Every enemy, boss, class pet, kennel companion and named hire has a **designed**
 - `main.js` `enemyLook()` reads the designed look first and only falls back to the old regex guess for an id with no entry; named (super-unique) enemies start from the designed look and paint their fixed overrides and scars on top. `bodyOf()` does the same for companions and pets, and the tavern gives each named hire their own face instead of the class default.
 - Coverage is enforced: `tests/looks.test.js` fails if a roster id has no look, if an avatar uses a part id that does not exist (which would silently fall back to the default part), or if a creature type is unknown.
 
+## Every effect works (round 13)
+
+`js/effects.js` is one registry of **359 effect ids** — every legendary power, item affix, skill /
+talent / upgrade key, status effect, champion and named-enemy modifier, enemy-spell key and boss-phase
+key from the original game. Each entry carries a plain-language description (used by item tooltips and
+the skills tab) plus the hook functions the engine calls: `derive`, `combatStart`, `roundStart`,
+`dmgOut` / `dmgIn` / `dmgFlat`, `onAttack` / `onHit` / `onCrit` / `onKill` / `onDamaged` / `preLethal`,
+and for skills `merge`, `gate`, `pickTargets`, `onCast`, `onBuff`, `dmgMult`, `onHit`, `onEnd`.
+`combat.js`, `rules.js`, `loot.js` and `game.js` only dispatch — adding an effect later is one entry.
+
+176 of those ids were **data only in the original**: 99 of the 214 `skills.json` keys were never read,
+38 of the 40 `cond_*` affixes did nothing, and 10 of the 26 status types were a glyph with no mechanic.
+They all change the game now. Anything a player can see emits a combat event (`via: 'proc:<id>'`,
+`'legendary:<id>'`, `'affix:<id>'`, `'champion:<id>'`, with a `label` and a `dtype`), so the damage
+meter and the 3D stage pick up the procs.
+
+`tests/effects.test.js` is table-driven with **one row per id** — it runs the same seeded fight twice,
+with and without the effect, and fails if nothing changed. It also checks that no id in `items.json`,
+`skills.json`, `enemy-spells.json` or `boss-phases.json` is an orphan, and that every `statusMeta` type
+has a mechanic rather than just an icon.
+
+Full table, and the two systems deliberately not ported (crafting recipes, fame cosmetic unlocks):
+**`EFFECTS.md`**.
+
+## New weapons: the road weapons (round 14)
+
+Twenty-two new weapon bases and twelve new uniques, each with at least one property that touches a
+system **Emberveil 2 added on top of the original** — travel legs, rations and exhaustion, the
+night-attack roll, rest, the damage meter's per-item kill counts, memories and feelings, named
+enemies and nemeses, companions or vehicles.
+
+Everything is a registry entry in `js/effects.js`, so a weapon property is data plus one entry:
+the combat ones use the hooks that were already there (`dmgOut`, `onHit`, `onKill`, `combatStart`,
+`critBonus`), and the out-of-combat ones use a new set of **world hooks** dispatched from `js/game.js`:
+
+| hook | called from | what it changes |
+|---|---|---|
+| `legs(v, game, hero)` | `legsPerDay()` | extra node moves today |
+| `nightChance(v, game, hero)` | `nightAttack()` | the odds of a raid on the camp |
+| `exhaustionEase(v, game, hero)` | `exhaustionMult()` | how much going hungry costs you |
+| `nemesisChance(v, game, hero)` | `enter()` | how often a beaten leader comes back |
+| `onLeg(v, game, hero)` | `travel()` | after every move (foraged loot, coin) |
+| `onRest(v, game, hero, out)` | `rest()` | the night (healing, standing watch, rations) |
+| `onWin(v, game, hero, ctx)` | `victory()` | after a won fight (food, memories, feelings) |
+
+`worldFx()` collects them off whatever the living heroes are carrying; `fireWorld` / `worldSum` /
+`worldMax` dispatch. New bases carry their property as an `intrinsic` entry in `data/items.json`
+(pushed as an affix by `Loot.addIntrinsics`, so tooltips, the score, the meter and the effect
+registry all already understand it), a `minAct` gate and a `look` (a held part from
+`avatar-2d/js/parts/gear.js` plus a colour, drawn on the hero's body by `withHeldGear` in `main.js`).
+
+Every proc emits a combat event with `via: 'proc:…'` / `'affix:cond_…'` / `'legendary:…'` and a
+`dtype` the 3D stage can draw, so the damage meter and the spell effects pick them up for free.
+
+### Bases
+
+| weapon | act | property |
+|---|---|---|
+| Forager's Blade | 1 | after a won fight, a 25% chance of finding a day's food |
+| Lantern Mace | 1 | night attacks are 12% less likely |
+| Pathfinder Javelin | 1 | one extra node move every other day |
+| Tithe Dagger | 1 | killing blows are remembered by name, and told again at camp |
+| Roadwarden Bow | 2 | 12% chance of turning up loot on each move |
+| Pilgrim's Staff | 2 | the exhaustion penalty is halved |
+| Houndmaster's Lash | 2 | your companion gets a second go every round |
+| Emberbrand Wand | 2 | hits strike again as fire and can set the target alight |
+| Rimecut Sabre | 2 | hits strike again as ice and can slow |
+| Bramble Staff | 2 | hits strike again as nature damage and can poison |
+| Warhorn Maul | 3 | your companion starts every fight furious |
+| Wagon-Axle Club | 3 | +15% damage while the party is travelling with a vehicle |
+| Breaker's Pick | 3 | 30% chance to sunder armour |
+| Hunter's Edge | 3 | +25% damage against champions, named enemies and bosses |
+| Stormpin Crossbow | 3 | hits strike again as lightning and can daze |
+| Gravebound Scepter | 4 | hits strike again as shadow and can curse |
+| Dawnwarden Hammer | 4 | hits strike again as holy fire |
+| Blood Ledger | 4 | +1% damage for every ten kills the meter has recorded on it (cap +25%) |
+| Covenant Hammer | 4 | you take 8% more, and the party thinks better of you for it |
+| Grudgebrand | 4 | +18% damage, and survivors come back as nemeses far more often |
+| Starwake Bow | 5 | crit chance climbs with the health you have already spent; arcane brand |
+| Watchfire Glaive | 5 | stands the night watch (no ambush at all) for one extra ration |
+
+### Uniques
+
+| unique | act | base | power |
+|---|---|---|---|
+| Emberwatch | 1 | Lantern Mace | a night beside it mends the party 15% |
+| Thistlewarden | 1 | Forager's Blade | a won fight yields two days of food, and the party remembers eating well |
+| The Namesake | 2 | Tithe Dagger | at fifty kills it earns a name and the party never stops telling the story |
+| Roadsong | 2 | Roadwarden Bow | every move turns up a cache of coin |
+| Kennelbreaker | 3 | Warhorn Maul | the companion hits 40% harder, carries a quarter more health, starts furious |
+| Champion's Bane | 3 | Hunter's Edge | at fight start the biggest champion or named enemy loses one modifier |
+| The Ingrate | 3 | Greatsword | +25% damage, and the party resents every swing |
+| Ledger of Ash | 4 | Blood Ledger | +1% damage per five kills, up to +60% |
+| Veilspiller | 4 | Gravebound Scepter | a kill spills the curse over everything still standing |
+| Wayfarer's Pike | 5 | Pathfinder Javelin | one extra move every day |
+| Grudge-Crown | 5 | Breaker's Pick | double damage to nemeses and named enemies; a kill mends the party |
+| The Long Watch | 6 | Watchfire Glaive | no night attacks at all, even on an empty larder |
+
+Four camp topics ride on them (`conversations/data/topics.json`): `road_weapon_forager`,
+`road_weapon_watch`, `road_weapon_named_blade` and `road_weapon_hated`. They use a new gear
+requirement key — `requires: [{ gear: { effect: 'cond_forageRation' } }]` matches an affix stat, a
+legendary id or a list of either, alongside the existing `baseKey` / `unique` filters.
+
+`tests/weapons.test.js` has one row per weapon proving its property does something (combat rows run
+the same seeded fight with and without it; world rows run a real `Game` through travel, rest and
+victory), plus a test that every base drops in its act and not before, and that every unique is
+reachable from a boss table.
+
+## Simulation and balance
+
+`tools/sim-emberveil.mjs` plays whole runs headlessly with the game's own modules — the same `Game`
+(map, travel legs, rations, night attacks, rest, towns, named enemies, nemeses), the same `Combat`,
+the same `Loot`, the same damage meter. A small bot does what a player does: spends attribute,
+talent and passive points on level-up, walks toward the boss, fights what is in the way, bandages
+between fights, goes back to town when it is hurt or hungry, buys food and bandages, and equips
+anything with a better score. A run ends when the party has been wiped three times or the day cap
+is reached.
+
+```bash
+node tools/sim-emberveil.mjs --runs 200 --seed 1              # ~55 s, prints a markdown report
+node tools/sim-emberveil.mjs --runs 60 --act 3                # start every run at the head of act 3
+node tools/sim-emberveil.mjs --runs 40 --class necromancer    # every party carries one
+node tools/sim-emberveil.mjs --runs 200 --matrix --quiet \
+  --report prototypes/emberveil/research/sim-latest.md        # + class and weapon matrices (~7 min)
+```
+
+Flags: `--runs N` `--seed N` `--act N` `--class ID` `--matrix` `--quiet` `--days N` `--report PATH`.
+Runs are seeded and repeatable. The report covers win rate, where runs end, what kills the party,
+fight length by act, damage share by class, most and least used skills, item and affix pick rates,
+starvation, night-raid deaths, levels, gold, and which road-weapon properties actually fired.
+
+The write-up of the latest run and the balance pass that came out of it is
+**`research/sim-report.md`** (hand-written, with the full generated tables from before and after
+appended). Point `--report` at `research/sim-latest.md` so a fresh run does not overwrite it.
+
+The round-14 pass moved full clears from 16.5% to 23.0%, the average act reached from 3.6 to 4.4,
+and runs that stalled in act 2 from 88 of 200 down to 38 — fourteen numbers in `balance.json`,
+`enemies.json`, `encounters.json` and `items.json`, plus three one-line class repairs (the tactician
+was handed a STR-scaled longsword despite being an INT class, the priest's only attack had a
+cooldown, and the stormcaller's only level-1 skill cost more mana than it could regenerate).
+
+**`data/balance.json` is now the knob file it always claimed to be.** `rules.js` used to carry its
+own copies of the enemy multipliers; `applyBalance(data.balance)` (called from the `Game`
+constructor) now loads `enemies.globalMultipliers`, `enemies.actMultipliers`,
+`partySize.enemyDmgMult` and `combat.skill` over the defaults, and `combat.js` reads the skill
+multipliers from the same place. Edit the JSON, re-run the sim, read the difference.
+
 ## Not rebuilt (on purpose, listed so nothing is silently missing)
-- Tap weapons/utilities (the real-time layer), achievements, codex, telemetry, cloud saves, NG+ UI (scaling constants are in `rules.js`), hardcore mode, infinite dungeon, guild hall/black market stock (formulas noted in `research/`), champion modifiers beyond hp/dmg, recruitable story heroes from dialog (`recruitHero` outcomes show text only), fame rewards beyond shop tier bumps, class unlock gating (all thirty classes are open; the original rule is shown on each card).
+- Tap weapons/utilities (the real-time layer), achievements, codex, telemetry, cloud saves, NG+ UI (scaling constants are in `rules.js`), hardcore mode, infinite dungeon, guild hall/black market stock (formulas noted in `research/`), recruitable story heroes from dialog (`recruitHero` outcomes show text only), crafting recipes and fame cosmetic unlocks (both explained in `EFFECTS.md`), class unlock gating (all thirty classes are open; the original rule is shown on each card).
 
 ## Spell effects
 
@@ -148,10 +295,11 @@ text, frame flourishes, embers, how-to-play, the menu overlay, tooltip cards) an
 `shared/tooltip.js` + `shared/tooltip.css` (the tooltip engine, shared with the rest of the playground).
 
 ## Files
-- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/rng.js`.
+- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/effects.js` (the effect registry — see `EFFECTS.md`), `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/rng.js`.
 - `data/`: everything the game reads; `data/class-looks.json` = the 30 class blueprints (also in `library/data/defaults.json` as `ev_<class>` and in the 2D presets); `data/enemy-looks.json` = the 80 enemy/boss/pet/companion/hire looks (also in the library as `enemy_<id>` / `companion_<id>`).
 - `research/`: condensed notes from the original code (`rules-notes.md`, `world-notes.md`).
-- `tests/`: `loot.test.js`, `rules-combat.test.js`, `game.test.js`, `looks.test.js` (node), `emberveil.spec.js` (Playwright).
+- `tests/`: `loot.test.js`, `rules-combat.test.js`, `game.test.js`, `looks.test.js`, `effects.test.js` (node), `emberveil.spec.js` (Playwright).
+- `EFFECTS.md`: the effect audit — every id, what it does, where it lives, and what the original did or didn't do.
 - Builders: `tools/build-emberveil-data.mjs`, `tools/build-emberveil-classes.mjs` (edit `LOOKS` there to change a class's look), `tools/build-emberveil-enemies.mjs` (edit `ENEMIES`/`BOSSES`/`PETS`/`COMPANIONS`/`HIRES` there to change a monster's look).
 
 ## Debug handle

@@ -4036,6 +4036,362 @@
     "xp": 10,
     "text": "the singing is bad; the mood is good"
    }
+  },
+  {
+   "id": "road_weapon_forager",
+   "tags": [
+    "camp",
+    "loot",
+    "travel"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "cond_forageRation",
+       "legendary:forage_feast",
+       "forage_feast"
+      ]
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Where did tonight's food come from, {answerer.name}?"
+      },
+      {
+       "t": "We had nothing this morning. Now there's supper. Explain the {weapon}."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "The {weapon}. {~It cuts as well as it forages.|Half blade, half billhook.|You'd be surprised what grows near a battlefield.} I go through the field after, that's all."
+      },
+      {
+       "t": "I strip the field when the shouting stops. Roots, birds, whatever the {weapon} can reach. Nobody starves on my watch."
+      },
+      {
+       "t": "I do not discuss my methods. Eat.",
+       "cond": "has('pompous')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You go through the dead for turnips."
+      },
+      {
+       "t": "Rations we didn't pay for. {~I'll take it.|That's the best kind.}"
+      },
+      {
+       "t": "{party.rations, plural, =0{We still have nothing left for tomorrow.} one{One day left after this.} other{# days of food, then. Better.}}"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Turnips keep you walking. Glory doesn't."
+      },
+      {
+       "t": "Someone has to think past tonight."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "I'd rather not know which field it came out of."
+      },
+      {
+       "t": "Pass it here before {asker.name} gets ideas."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "road_weapon_watch",
+   "tags": [
+    "camp",
+    "travel",
+    "fear"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "cond_watch",
+       "cond_nightWard",
+       "no_night_raids",
+       "camp_mend"
+      ]
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You've planted the {weapon} at the edge of the fire again."
+      },
+      {
+       "t": "Is that thing standing watch, or are you?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It stands the watch. {~I sleep.|I still don't sleep, but I could.|Nothing has come at us since I started doing it.}"
+      },
+      {
+       "t": "Light and iron where they can see it. Most things in the dark are looking for an easier camp."
+      },
+      {
+       "t": "I'd rather burn a ration than bury one of you.",
+       "cond": "!has('cynical')"
+      },
+      {
+       "t": "It costs us a ration a night. I have decided that is cheaper than a funeral.",
+       "cond": "has('cynical')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "And when the food runs out?"
+      },
+      {
+       "t": "{party.rations, plural, =0{We have nothing to feed it with.} one{We can feed it one more night.} other{# days of that, then we're guessing again.}}"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Then we sleep the old way. Badly, in shifts."
+      },
+      {
+       "t": "Then I stand there myself and you owe me."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "I woke twice anyway. Habit."
+      },
+      {
+       "t": "Put it nearer my side tonight."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "road_weapon_named_blade",
+   "tags": [
+    "camp",
+    "combat",
+    "loot"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "cond_killMemory",
+       "naming_kills",
+       "cond_killGrowth",
+       "kill_ledger"
+      ],
+      "minKills": 5
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "You keep count on that {weapon}, don't you."
+      },
+      {
+       "t": "{gear.kills} and rising. Does it feel heavier?"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "{gear.kills} now. {~It gets easier to swing, not harder.|The count is the point.|I'll stop counting when it stops working.}"
+      },
+      {
+       "t": "{gear.kills}. {gear.damage} damage on the tally. A blade that has done that much knows the work."
+      },
+      {
+       "t": "I would rather carry a thing with a history than a clean one.",
+       "cond": "has('scholar')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Blades don't remember. People do.",
+       "cond": "!has('pious')"
+      },
+      {
+       "t": "Careful. Things that are counted start expecting to be fed.",
+       "cond": "has('pious')"
+      },
+      {
+       "t": "Name it, then. Everything else in this party has one."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It'll name itself. They always do."
+      },
+      {
+       "t": "Fifty. Then it gets a name and you all have to learn it."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "{gear.kills, plural, one{One more than mine.} other{# more than mine. I noticed.}}"
+      },
+      {
+       "t": "I've stopped listening to this conversation."
+      }
+     ]
+    }
+   ],
+   "weight": 1
+  },
+  {
+   "id": "road_weapon_hated",
+   "tags": [
+    "camp",
+    "combat",
+    "conflict"
+   ],
+   "requires": [
+    {
+     "gear": {
+      "effect": [
+       "hated_blade",
+       "cond_nemesisMark"
+      ]
+     }
+    },
+    {
+     "who": "asker",
+     "relation": {
+      "to": "answerer",
+      "max": 0.15
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Put the {weapon} down while we eat, {answerer.name}."
+      },
+      {
+       "t": "Nobody wants to watch you clean that thing."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "It wins fights. {~You liked winning this morning.|Say the part where you'd rather lose.}"
+      },
+      {
+       "t": "You want the thing that works or the thing that's polite? I brought the one that works."
+      },
+      {
+       "t": "I know what it costs. I carry it anyway.",
+       "cond": "!has('jolly')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "It costs you something every swing. We can see it from here."
+      },
+      {
+       "t": "The ones that get away from it don't forget you. They come back with friends."
+      },
+      {
+       "t": "One day it'll be pointed at one of us."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "Then stand behind me and stop talking."
+      },
+      {
+       "t": "If it ever is, you'll have earned it."
+      },
+      {
+       "t": "…I'll wrap it tonight. That's all you get.",
+       "cond": "has('shy') || has('nervous')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "Both of you. Eat."
+      },
+      {
+       "t": "I'm sleeping on the far side of the fire."
+      }
+     ]
+    }
+   ],
+   "weight": 1
   }
  ]
 }

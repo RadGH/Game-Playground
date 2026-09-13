@@ -1,6 +1,6 @@
 {
- "version": "2026-04-30-solo-and-ngplus-M382",
- "note": "M382 follow-up to M381. Solo Act 1 was wiping (paladin couldn't beat goblin pair) — softened global enemy damage 0.36→0.30 and Act 1 dmg mult 1.0→0.92. Hero skill mult 0.70→0.78 so low-level skills feel meaningful again. Compensated by raising Act 4-5 dmg mults so end-game fights stay tense. NG+ Act 1 now uses the highest-act enemy multipliers (handled in code: enemyScalingForNgPlus shifts effectiveAct = min(6, act + 4*ng)).",
+ "version": "2026-09-13-road-weapons-R14",
+ "note": "R14 balance pass off tools/sim-emberveil.mjs (200 seeded runs). Act 2 was the wall: 54% of runs ended there and the Molten Golem held the field in more wipes than the next five enemies together. Softened act 2, smoothed the act-2→3 HP step (1.15→1.85 was the steepest in the table), lifted hero skill damage a little to shorten 17-round late fights, and made going hungry and going without a torch matter slightly less and slightly more. Previous note: M382 follow-up to M381. Solo Act 1 was wiping (paladin couldn't beat goblin pair) — softened global enemy damage 0.36→0.30 and Act 1 dmg mult 1.0→0.92. Hero skill mult 0.70→0.78 so low-level skills feel meaningful again. Compensated by raising Act 4-5 dmg mults so end-game fights stay tense. NG+ Act 1 now uses the highest-act enemy multipliers (handled in code: enemyScalingForNgPlus shifts effectiveAct = min(6, act + 4*ng)).",
  "heroes": {
   "hireCost": {
    "base": 100,
@@ -105,7 +105,7 @@
    "healBaseMult": 1.5
   },
   "skill": {
-   "heroDamageMult": 0.95,
+   "heroDamageMult": 1.0,
    "heavyMult": 1,
    "lightMult": 1,
    "magicMult": 0.78,
@@ -145,15 +145,15 @@
     "damage": 0.92
    },
    "2": {
-    "hp": 1.15,
-    "damage": 1.1
+    "hp": 1.05,
+    "damage": 1.02
    },
    "3": {
-    "hp": 1.85,
+    "hp": 1.55,
     "damage": 1.3
    },
    "4": {
-    "hp": 2.15,
+    "hp": 1.95,
     "damage": 1.45
    },
    "5": {
@@ -291,6 +291,28 @@
     "tapUtilityMagnitude",
     "tapUtilityDuration"
    ]
+  }
+ },
+ "world": {
+  "note": "Round 14: the travel layer that Emberveil 2 added is tunable from here too (js/game.js reads it).",
+  "nightAttack": {
+   "base": 0.15,
+   "perAct": 0.06,
+   "torch": -0.12,
+   "cap": 0.95
+  },
+  "exhaustion": {
+   "perStack": 0.08,
+   "floor": 0.5
+  },
+  "rest": {
+   "tentHeal": 0.15,
+   "extraRationHeal": 0.3,
+   "bandageHeal": 0.3
+  },
+  "defeat": {
+   "goldKept": 0.85,
+   "hpAfter": 0.5
   }
  }
 }

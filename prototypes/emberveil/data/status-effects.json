@@ -1,6 +1,6 @@
 {
  "version": 1,
- "source": "src/game/statusEffects.js STATUS_META const (canonical-data migration M497)",
+ "source": "src/game/statusEffects.js STATUS_META const (canonical-data migration M497) + sunder/fury/weaken added for Emberveil 2 (used by skills and boss phases)",
  "statusMeta": {
   "bleed": {
    "glyph": "B",
@@ -157,6 +157,24 @@
    "color": "#b070ff",
    "name": "Asleep",
    "plain": "Cannot act for up to 2 rounds. Any damage instantly wakes the target. Allies will avoid attacking sleeping enemies."
+  },
+  "sunder": {
+   "glyph": "⌁",
+   "color": "#b08050",
+   "name": "Sundered",
+   "plain": "Its armour is split open, so every weapon hit bites deeper."
+  },
+  "fury": {
+   "glyph": "!",
+   "color": "#e06030",
+   "name": "Furious",
+   "plain": "Lashing out much harder than normal."
+  },
+  "weaken": {
+   "glyph": "v",
+   "color": "#7080a0",
+   "name": "Weakened",
+   "plain": "Its blows have lost their strength."
   }
  }
 }

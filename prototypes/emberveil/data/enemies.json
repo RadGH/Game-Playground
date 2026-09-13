@@ -117,8 +117,8 @@
   "cinder_hound": {
    "armor": 5,
    "dmg": [
-    42,
-    60
+    38,
+    54
    ],
    "dodge": 16,
    "gold": [
@@ -598,7 +598,7 @@
    "xpValue": 40
   },
   "molten_golem": {
-   "armor": 20,
+   "armor": 16,
    "blockChance": 0.2,
    "dmg": [
     52,
@@ -610,13 +610,13 @@
     40
    ],
    "hit": 78,
-   "hp": 740,
+   "hp": 620,
    "id": "molten_golem",
    "loot": [
     "heavy_chest"
    ],
    "magicResist": 0,
-   "maxHp": 740,
+   "maxHp": 620,
    "name": "Molten Golem",
    "spellChance": 0.3,
    "spellList": [

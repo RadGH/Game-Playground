@@ -568,6 +568,583 @@
    "twoHanded": true,
    "statScaling": "int",
    "intMult": 1.55
+  },
+  "forager_blade": {
+   "name": "Forager's Blade",
+   "type": "weapon",
+   "subtype": "sword",
+   "weaponCategory": "light",
+   "dmg": [
+    5,
+    12
+   ],
+   "speed": 1.05,
+   "twoHanded": false,
+   "statScaling": "str_dex",
+   "minAct": 1,
+   "look": {
+    "held": "saber",
+    "color": "#9fb06a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_forageRation",
+     "value": 0.25,
+     "name": "Forager"
+    }
+   ]
+  },
+  "lantern_mace": {
+   "name": "Lantern Mace",
+   "type": "weapon",
+   "subtype": "hammer",
+   "weaponCategory": "heavy",
+   "dmg": [
+    7,
+    14
+   ],
+   "speed": 0.85,
+   "twoHanded": false,
+   "statScaling": "str",
+   "stunChance": 0.08,
+   "minAct": 1,
+   "look": {
+    "held": "mace",
+    "color": "#e0a848"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_nightWard",
+     "value": 0.12,
+     "name": "Nightward"
+    }
+   ]
+  },
+  "pathfinder_javelin": {
+   "name": "Pathfinder Javelin",
+   "type": "weapon",
+   "subtype": "javelin",
+   "weaponCategory": "light",
+   "dmg": [
+    8,
+    16
+   ],
+   "speed": 0.95,
+   "twoHanded": false,
+   "statScaling": "str_dex",
+   "ranged": true,
+   "throwable": true,
+   "minAct": 1,
+   "look": {
+    "held": "quarterstaff",
+    "color": "#c8a870"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_extraLeg",
+     "value": 2,
+     "name": "Shortcut"
+    }
+   ]
+  },
+  "tithe_dagger": {
+   "name": "Tithe Dagger",
+   "type": "weapon",
+   "subtype": "dagger",
+   "weaponCategory": "light",
+   "dmg": [
+    3,
+    8
+   ],
+   "speed": 1.2,
+   "twoHanded": false,
+   "statScaling": "dex",
+   "attackSpeed": "fast",
+   "armorPen": 0.1,
+   "minAct": 1,
+   "look": {
+    "held": "daggers",
+    "color": "#b0b8c8"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_killMemory",
+     "value": 1,
+     "name": "Tally"
+    }
+   ]
+  },
+  "roadwarden_bow": {
+   "name": "Roadwarden Bow",
+   "type": "weapon",
+   "subtype": "bow",
+   "weaponCategory": "light",
+   "dmg": [
+    9,
+    18
+   ],
+   "speed": 1.0,
+   "twoHanded": true,
+   "statScaling": "dex",
+   "ranged": true,
+   "dexMult": 1.25,
+   "minAct": 2,
+   "look": {
+    "held": "bow",
+    "color": "#8a6a3a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_roadFind",
+     "value": 0.12,
+     "name": "Scavenger"
+    }
+   ]
+  },
+  "pilgrims_staff": {
+   "name": "Pilgrim's Staff",
+   "type": "weapon",
+   "subtype": "staff",
+   "weaponCategory": "magic",
+   "dmg": [
+    7,
+    18
+   ],
+   "speed": 0.9,
+   "twoHanded": true,
+   "statScaling": "int",
+   "intMult": 1.4,
+   "minAct": 2,
+   "look": {
+    "held": "staff_crook",
+    "color": "#d8c8a0"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_easeExhaustion",
+     "value": 0.5,
+     "name": "Steadying"
+    }
+   ]
+  },
+  "houndmasters_lash": {
+   "name": "Houndmaster's Lash",
+   "type": "weapon",
+   "subtype": "dagger",
+   "weaponCategory": "light",
+   "dmg": [
+    4,
+    11
+   ],
+   "speed": 1.15,
+   "twoHanded": false,
+   "statScaling": "dex",
+   "attackSpeed": "fast",
+   "minAct": 2,
+   "look": {
+    "held": "cleaver",
+    "color": "#7a4a2a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_companionExtra",
+     "value": 1,
+     "name": "Houndmaster"
+    }
+   ]
+  },
+  "emberbrand_wand": {
+   "name": "Emberbrand Wand",
+   "type": "weapon",
+   "subtype": "wand",
+   "weaponCategory": "magic",
+   "dmg": [
+    4,
+    10
+   ],
+   "speed": 1.1,
+   "twoHanded": false,
+   "statScaling": "int",
+   "offHandOk": true,
+   "minAct": 2,
+   "look": {
+    "held": "flame",
+    "color": "#ff7a1a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_brandFire",
+     "value": 0.3,
+     "name": "Ember Brand"
+    }
+   ]
+  },
+  "rimecut_sabre": {
+   "name": "Rimecut Sabre",
+   "type": "weapon",
+   "subtype": "sword",
+   "weaponCategory": "light",
+   "dmg": [
+    6,
+    13
+   ],
+   "speed": 1.1,
+   "twoHanded": false,
+   "statScaling": "dex",
+   "critBonus": 0.04,
+   "minAct": 2,
+   "look": {
+    "held": "saber",
+    "color": "#9ad8ff"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_brandIce",
+     "value": 0.3,
+     "name": "Rime Brand"
+    }
+   ]
+  },
+  "bramble_staff": {
+   "name": "Bramble Staff",
+   "type": "weapon",
+   "subtype": "staff",
+   "weaponCategory": "magic",
+   "dmg": [
+    7,
+    17
+   ],
+   "speed": 0.95,
+   "twoHanded": true,
+   "statScaling": "int",
+   "intMult": 1.35,
+   "minAct": 2,
+   "look": {
+    "held": "staff_crook",
+    "color": "#5ab04a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_brandNature",
+     "value": 0.3,
+     "name": "Bramble Brand"
+    }
+   ]
+  },
+  "warhorn_maul": {
+   "name": "Warhorn Maul",
+   "type": "weapon",
+   "subtype": "hammer",
+   "weaponCategory": "heavy",
+   "dmg": [
+    13,
+    23
+   ],
+   "speed": 0.78,
+   "twoHanded": false,
+   "statScaling": "str",
+   "stunChance": 0.1,
+   "minAct": 3,
+   "look": {
+    "held": "warhammer",
+    "color": "#c05a2a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_companionFury",
+     "value": 0.2,
+     "name": "Warhorn"
+    }
+   ]
+  },
+  "axle_club": {
+   "name": "Wagon-Axle Club",
+   "type": "weapon",
+   "subtype": "hammer",
+   "weaponCategory": "heavy",
+   "dmg": [
+    12,
+    21
+   ],
+   "speed": 0.8,
+   "twoHanded": false,
+   "statScaling": "str",
+   "stunChance": 0.14,
+   "minAct": 3,
+   "look": {
+    "held": "hammer",
+    "color": "#8a6a3a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_vehicleDmg",
+     "value": 0.15,
+     "name": "Teamster"
+    }
+   ]
+  },
+  "breakers_pick": {
+   "name": "Breaker's Pick",
+   "type": "weapon",
+   "subtype": "axe2h",
+   "weaponCategory": "heavy",
+   "dmg": [
+    15,
+    27
+   ],
+   "speed": 0.68,
+   "twoHanded": true,
+   "statScaling": "str",
+   "armorPen": 0.15,
+   "minAct": 3,
+   "look": {
+    "held": "greataxe",
+    "color": "#a0a8b0"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_sunderOnHit",
+     "value": 0.3,
+     "name": "Breaker"
+    }
+   ]
+  },
+  "hunters_edge": {
+   "name": "Hunter's Edge",
+   "type": "weapon",
+   "subtype": "sword",
+   "weaponCategory": "heavy",
+   "dmg": [
+    13,
+    24
+   ],
+   "speed": 0.95,
+   "twoHanded": false,
+   "statScaling": "str_dex",
+   "minAct": 3,
+   "look": {
+    "held": "sword",
+    "color": "#d8b040"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_dmgVsNamed",
+     "value": 0.25,
+     "name": "Hunter"
+    }
+   ]
+  },
+  "stormpin_crossbow": {
+   "name": "Stormpin Crossbow",
+   "type": "weapon",
+   "subtype": "crossbow",
+   "weaponCategory": "light",
+   "dmg": [
+    11,
+    21
+   ],
+   "speed": 0.72,
+   "twoHanded": true,
+   "statScaling": "dex_str",
+   "ranged": true,
+   "minAct": 3,
+   "look": {
+    "held": "crossbow",
+    "color": "#ffe860"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_brandLightning",
+     "value": 0.3,
+     "name": "Storm Brand"
+    }
+   ]
+  },
+  "gravebound_scepter": {
+   "name": "Gravebound Scepter",
+   "type": "weapon",
+   "subtype": "scepter",
+   "weaponCategory": "magic",
+   "dmg": [
+    10,
+    20
+   ],
+   "speed": 1.0,
+   "twoHanded": false,
+   "statScaling": "int",
+   "offHandOk": true,
+   "minAct": 4,
+   "look": {
+    "held": "mace",
+    "color": "#8a60c0"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_brandShadow",
+     "value": 0.3,
+     "name": "Veil Brand"
+    }
+   ]
+  },
+  "dawnwarden_hammer": {
+   "name": "Dawnwarden Hammer",
+   "type": "weapon",
+   "subtype": "hammer",
+   "weaponCategory": "heavy",
+   "dmg": [
+    16,
+    28
+   ],
+   "speed": 0.78,
+   "twoHanded": false,
+   "statScaling": "str",
+   "minAct": 4,
+   "look": {
+    "held": "warhammer",
+    "color": "#ffe6a0"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_brandHoly",
+     "value": 0.3,
+     "name": "Dawn Brand"
+    }
+   ]
+  },
+  "bloodledger_blade": {
+   "name": "Blood Ledger",
+   "type": "weapon",
+   "subtype": "sword2h",
+   "weaponCategory": "heavy",
+   "dmg": [
+    22,
+    38
+   ],
+   "speed": 0.7,
+   "twoHanded": true,
+   "statScaling": "str",
+   "strMult": 1.45,
+   "minAct": 4,
+   "look": {
+    "held": "greatsword",
+    "color": "#a02020"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_killGrowth",
+     "value": 0.01,
+     "name": "Ledger"
+    }
+   ]
+  },
+  "covenant_hammer": {
+   "name": "Covenant Hammer",
+   "type": "weapon",
+   "subtype": "hammer",
+   "weaponCategory": "heavy",
+   "dmg": [
+    15,
+    26
+   ],
+   "speed": 0.8,
+   "twoHanded": false,
+   "statScaling": "str",
+   "minAct": 4,
+   "look": {
+    "held": "hammer",
+    "color": "#c8c8d8"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_guardBond",
+     "value": 1,
+     "name": "Covenant"
+    }
+   ]
+  },
+  "grudgebrand": {
+   "name": "Grudgebrand",
+   "type": "weapon",
+   "subtype": "sword2h",
+   "weaponCategory": "heavy",
+   "dmg": [
+    24,
+    40
+   ],
+   "speed": 0.7,
+   "twoHanded": true,
+   "statScaling": "str",
+   "strMult": 1.5,
+   "minAct": 4,
+   "look": {
+    "held": "greatsword",
+    "color": "#603060"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_nemesisMark",
+     "value": 0.18,
+     "name": "Grudge"
+    }
+   ]
+  },
+  "starwake_bow": {
+   "name": "Starwake Bow",
+   "type": "weapon",
+   "subtype": "bow",
+   "weaponCategory": "light",
+   "dmg": [
+    17,
+    30
+   ],
+   "speed": 1.0,
+   "twoHanded": true,
+   "statScaling": "dex",
+   "ranged": true,
+   "dexMult": 1.3,
+   "minAct": 5,
+   "look": {
+    "held": "bow",
+    "color": "#a060e0"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_critFromWounds",
+     "value": 2,
+     "name": "Starwake"
+    },
+    {
+     "stat": "cond_brandArcane",
+     "value": 0.2,
+     "name": "Star Brand"
+    }
+   ]
+  },
+  "watchfire_glaive": {
+   "name": "Watchfire Glaive",
+   "type": "weapon",
+   "subtype": "javelin",
+   "weaponCategory": "light",
+   "dmg": [
+    18,
+    32
+   ],
+   "speed": 0.9,
+   "twoHanded": false,
+   "statScaling": "str_dex",
+   "ranged": true,
+   "minAct": 5,
+   "look": {
+    "held": "quarterstaff",
+    "color": "#ff9a3a"
+   },
+   "intrinsic": [
+    {
+     "stat": "cond_watch",
+     "value": 1,
+     "name": "Long Watch"
+    }
+   ]
   }
  },
  "armorBases": {
@@ -2285,6 +2862,386 @@
    "legendaryEffect": "cheat_death_once",
    "bossSource": "ancient_dragon",
    "lore": "Scales shed only once, at the end of an Age. You hold the last one."
+  },
+  {
+   "id": "emberwatch",
+   "name": "Emberwatch",
+   "slot": "weapon",
+   "baseItemId": "lantern_mace",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 5
+    },
+    {
+     "stat": "hp",
+     "value": 15
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "armor",
+     "min": 4.0,
+     "max": 9.0
+    }
+   ],
+   "legendaryEffect": "camp_mend",
+   "bossSource": "grax_veil_touched",
+   "lore": "A road-warden's mace with a lamp cage for a head. It has stood more watches than most soldiers.",
+   "look": {
+    "held": "mace",
+    "color": "#ffc060"
+   }
+  },
+  {
+   "id": "thistlewarden",
+   "name": "Thistlewarden",
+   "slot": "weapon",
+   "baseItemId": "forager_blade",
+   "act": 1,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 6
+    },
+    {
+     "stat": "hit",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "lifeSteal",
+     "min": 3.0,
+     "max": 7.0
+    }
+   ],
+   "legendaryEffect": "forage_feast",
+   "bossSource": null,
+   "lore": "Half blade, half billhook. Whoever carried it first fed a village through a bad winter.",
+   "look": {
+    "held": "saber",
+    "color": "#8fbf5a"
+   }
+  },
+  {
+   "id": "the_namesake",
+   "name": "The Namesake",
+   "slot": "weapon",
+   "baseItemId": "tithe_dagger",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 8
+    },
+    {
+     "stat": "critChance",
+     "value": 0.06
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 0.1,
+     "max": 0.25
+    }
+   ],
+   "legendaryEffect": "naming_kills",
+   "bossSource": null,
+   "lore": "Blank down one side, waiting. Blades are named by what they do, not by who made them.",
+   "look": {
+    "held": "daggers",
+    "color": "#e0e8f0"
+   }
+  },
+  {
+   "id": "roadsong",
+   "name": "Roadsong",
+   "slot": "weapon",
+   "baseItemId": "roadwarden_bow",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 8
+    },
+    {
+     "stat": "goldFind",
+     "value": 0.15
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "initiative",
+     "min": 2.0,
+     "max": 6.0
+    }
+   ],
+   "legendaryEffect": "road_cache",
+   "bossSource": "lava_titan",
+   "lore": "The stave hums on a long march. Toll-takers hear it coming and find somewhere else to be.",
+   "look": {
+    "held": "bow",
+    "color": "#c8a870"
+   }
+  },
+  {
+   "id": "kennelbreaker",
+   "name": "Kennelbreaker",
+   "slot": "weapon",
+   "baseItemId": "warhorn_maul",
+   "act": 3,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 10
+    },
+    {
+     "stat": "hp",
+     "value": 25
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 3.0,
+     "max": 8.0
+    }
+   ],
+   "legendaryEffect": "companion_might",
+   "bossSource": null,
+   "lore": "The horn in the haft was cut from something that hunted in packs. Dogs answer it.",
+   "look": {
+    "held": "warhammer",
+    "color": "#d06a2a"
+   }
+  },
+  {
+   "id": "champions_bane",
+   "name": "Champion's Bane",
+   "slot": "weapon",
+   "baseItemId": "hunters_edge",
+   "act": 3,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 8
+    },
+    {
+     "stat": "dex",
+     "value": 6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 0.04,
+     "max": 0.09
+    }
+   ],
+   "legendaryEffect": "strip_modifier",
+   "bossSource": "archfiend_malgrath",
+   "lore": "Notched once for every big name it has cut down to size. There is no room left on the guard.",
+   "look": {
+    "held": "sword",
+    "color": "#f0e0a0"
+   }
+  },
+  {
+   "id": "the_ingrate",
+   "name": "The Ingrate",
+   "slot": "weapon",
+   "baseItemId": "greatsword",
+   "act": 3,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 12
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 0.15,
+     "max": 0.35
+    }
+   ],
+   "legendaryEffect": "hated_blade",
+   "bossSource": null,
+   "lore": "It fights beautifully and it costs the person holding it something every time.",
+   "look": {
+    "held": "greatsword",
+    "color": "#7a2020"
+   }
+  },
+  {
+   "id": "ledger_of_ash",
+   "name": "Ledger of Ash",
+   "slot": "weapon",
+   "baseItemId": "bloodledger_blade",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 12
+    },
+    {
+     "stat": "hp",
+     "value": 30
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "lifeSteal",
+     "min": 4.0,
+     "max": 9.0
+    }
+   ],
+   "legendaryEffect": "kill_ledger",
+   "bossSource": "emberveil_sovereign",
+   "lore": "The fuller fills with fine grey ash, one mark at a time. Nobody has found a way to empty it.",
+   "look": {
+    "held": "greatsword",
+    "color": "#c04040"
+   }
+  },
+  {
+   "id": "veilspiller",
+   "name": "Veilspiller",
+   "slot": "weapon",
+   "baseItemId": "gravebound_scepter",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 12
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.1
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "mp",
+     "min": 15.0,
+     "max": 35.0
+    }
+   ],
+   "legendaryEffect": "curse_spreads",
+   "bossSource": "the_unraveler",
+   "lore": "A cracked rod of grave-marble. What leaks out of it looks for company.",
+   "look": {
+    "held": "mace",
+    "color": "#a070e0"
+   }
+  },
+  {
+   "id": "wayfarers_pike",
+   "name": "Wayfarer's Pike",
+   "slot": "weapon",
+   "baseItemId": "pathfinder_javelin",
+   "act": 5,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 12
+    },
+    {
+     "stat": "initiative",
+     "value": 6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dodge",
+     "min": 3.0,
+     "max": 8.0
+    }
+   ],
+   "legendaryEffect": "free_move",
+   "bossSource": null,
+   "lore": "Shaft worn smooth by a hundred hands. Roads seem shorter with it over your shoulder.",
+   "look": {
+    "held": "quarterstaff",
+    "color": "#e0d0a0"
+   }
+  },
+  {
+   "id": "grudge_crown",
+   "name": "Grudge-Crown",
+   "slot": "weapon",
+   "baseItemId": "breakers_pick",
+   "act": 5,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "critDamage",
+     "value": 0.25
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 20.0,
+     "max": 50.0
+    }
+   ],
+   "legendaryEffect": "nemesis_hunter",
+   "bossSource": "the_architect",
+   "lore": "A headsman's pick with a circlet welded to the poll. It only ever settles old business.",
+   "look": {
+    "held": "greataxe",
+    "color": "#c0c8d0"
+   }
+  },
+  {
+   "id": "the_long_watch",
+   "name": "The Long Watch",
+   "slot": "weapon",
+   "baseItemId": "watchfire_glaive",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "con",
+     "value": 12
+    },
+    {
+     "stat": "armor",
+     "value": 10
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2.0,
+     "max": 6.0
+    }
+   ],
+   "legendaryEffect": "no_night_raids",
+   "bossSource": "dragon_king",
+   "lore": "Plant it, light it, and nothing with sense comes closer. It keeps the watch whether or not there is supper.",
+   "look": {
+    "held": "quarterstaff",
+    "color": "#ffb050"
+   }
   }
  ],
  "legendaryEffects": {
@@ -2299,7 +3256,19 @@
   "critical_armorpen": "Critical hits ignore 30% of the target's armor next round.",
   "rally_on_kill": "Killing blows Rally the whole party.",
   "echo_cast": "25% chance a spell echoes for 50% damage.",
-  "dragon_fury_breath": "Killing blows breathe fire on all other enemies (20 + STR) and Burn them."
+  "dragon_fury_breath": "Killing blows breathe fire on all other enemies (20 + STR) and Burn them.",
+  "camp_mend": "A night beside it mends the party for 15% of their health.",
+  "forage_feast": "A won fight yields two days of food, and the party remembers eating well.",
+  "naming_kills": "At fifty kills the blade earns a name, and the party never stops telling the story.",
+  "road_cache": "Every move turns up a small cache of coin.",
+  "companion_might": "Your companion hits 40% harder, carries a quarter more health and starts every fight furious.",
+  "strip_modifier": "At the start of a fight the biggest champion or named enemy loses one of its tricks.",
+  "hated_blade": "+25% damage, and the party resents every swing.",
+  "kill_ledger": "+1% damage for every five kills it has taken, up to +60%.",
+  "curse_spreads": "A kill spills the curse over every enemy still standing.",
+  "free_move": "One extra node move every day.",
+  "nemesis_hunter": "Double damage to nemeses and named enemies; killing one heals the whole party.",
+  "no_night_raids": "No night attacks at all while it is planted — the watch holds even when the food runs out."
  },
  "sets": [
   {
@@ -4344,7 +5313,9 @@
     "sword",
     "dagger",
     "light_chest",
-    "ring"
+    "ring",
+    "forager_blade",
+    "tithe_dagger"
    ],
    "normalChance": 0.5
   },
@@ -4358,7 +5329,10 @@
     "battleaxe",
     "medium_chest",
     "light_gauntlets",
-    "ring"
+    "ring",
+    "forager_blade",
+    "lantern_mace",
+    "pathfinder_javelin"
    ],
    "normalChance": 0.35
   },
@@ -4372,7 +5346,10 @@
     "iron_mace",
     "medium_chest",
     "light_boots",
-    "necklace"
+    "necklace",
+    "roadwarden_bow",
+    "emberbrand_wand",
+    "houndmasters_lash"
    ]
   },
   "ember_plateau": {
@@ -4384,7 +5361,10 @@
     "greatsword",
     "heavy_chest",
     "heavy_helm",
-    "necklace"
+    "necklace",
+    "pilgrims_staff",
+    "rimecut_sabre",
+    "bramble_staff"
    ]
   },
   "hell_breach": {
@@ -4397,7 +5377,11 @@
     "heavy_chest",
     "heavy_helm",
     "necklace",
-    "staff"
+    "staff",
+    "warhorn_maul",
+    "axle_club",
+    "hunters_edge",
+    "stormpin_crossbow"
    ]
   },
   "shattered_core": {
@@ -4410,7 +5394,10 @@
     "wand",
     "heavy_chest",
     "necklace",
-    "ring"
+    "ring",
+    "breakers_pick",
+    "hunters_edge",
+    "warhorn_maul"
    ]
   },
   "cosmic_rift": {
@@ -4423,7 +5410,10 @@
     "wand",
     "heavy_chest",
     "necklace",
-    "ring"
+    "ring",
+    "gravebound_scepter",
+    "dawnwarden_hammer",
+    "bloodledger_blade"
    ]
   },
   "eternal_void": {
@@ -4436,7 +5426,70 @@
     "wand",
     "heavy_chest",
     "necklace",
-    "ring"
+    "ring",
+    "bloodledger_blade",
+    "covenant_hammer",
+    "grudgebrand"
+   ]
+  },
+  "abyssal_depths": {
+   "drop": 0.26,
+   "rarity": "legendary",
+   "quality": "exotic",
+   "fame": 7,
+   "bases": [
+    "grudgebrand",
+    "covenant_hammer",
+    "starwake_bow",
+    "watchfire_glaive",
+    "heavy_chest",
+    "ring",
+    "necklace"
+   ]
+  },
+  "primordial_nexus": {
+   "drop": 0.26,
+   "rarity": "legendary",
+   "quality": "exotic",
+   "fame": 8,
+   "bases": [
+    "starwake_bow",
+    "watchfire_glaive",
+    "bloodledger_blade",
+    "abyssal_rod",
+    "heavy_chest",
+    "ring",
+    "necklace"
+   ]
+  },
+  "dragons_reach": {
+   "drop": 0.27,
+   "rarity": "legendary",
+   "quality": "exotic",
+   "fame": 9,
+   "bases": [
+    "watchfire_glaive",
+    "starwake_bow",
+    "drakehammer",
+    "wyrmscale_bow",
+    "dragonbone_staff",
+    "ring",
+    "necklace"
+   ]
+  },
+  "dragon_throne": {
+   "drop": 0.28,
+   "rarity": "legendary",
+   "quality": "exotic",
+   "fame": 10,
+   "bases": [
+    "watchfire_glaive",
+    "dragonfang_greatsword",
+    "drakehammer",
+    "dragonbone_staff",
+    "dragontooth_wand",
+    "ring",
+    "necklace"
    ]
   }
  },
@@ -4447,7 +5500,8 @@
    "rolls": 2,
    "uniqueChance": 0.2,
    "uniques": [
-    "emberheart_pendant"
+    "emberheart_pendant",
+    "emberwatch"
    ],
    "bases": [
     "ring",
@@ -4462,7 +5516,8 @@
    "rolls": 2,
    "uniqueChance": 0.2,
    "uniques": [
-    "lava_titans_mantle"
+    "lava_titans_mantle",
+    "roadsong"
    ],
    "bases": [
     "heavy_chest",
@@ -4478,7 +5533,8 @@
    "rolls": 3,
    "uniqueChance": 0.2,
    "uniques": [
-    "malgraths_soulbrand"
+    "malgraths_soulbrand",
+    "champions_bane"
    ],
    "bases": [
     "heavy_chest",
@@ -4494,7 +5550,8 @@
    "rolls": 3,
    "uniqueChance": 0.25,
    "uniques": [
-    "sovereigns_eye"
+    "sovereigns_eye",
+    "ledger_of_ash"
    ],
    "bases": [
     "heavy_chest",
@@ -4510,7 +5567,8 @@
    "uniqueChance": 0.25,
    "uniques": [
     "voidbinder",
-    "unravelers_sigil"
+    "unravelers_sigil",
+    "veilspiller"
    ],
    "bases": [
     "ring",
@@ -4528,7 +5586,8 @@
    "uniques": [
     "architects_blueprint",
     "staff_of_primordial",
-    "plate_of_creation"
+    "plate_of_creation",
+    "grudge_crown"
    ],
    "bases": [
     "ring",
@@ -4559,7 +5618,8 @@
    "rolls": 4,
    "uniqueChance": 0.35,
    "uniques": [
-    "dragon_kings_headguard"
+    "dragon_kings_headguard",
+    "the_long_watch"
    ],
    "bases": [
     "heavy_chest",
@@ -4615,7 +5675,29 @@
    "medium_gauntlets",
    "runed_gauntlets",
    "medium_boots",
-   "runed_boots"
+   "runed_boots",
+   "forager_blade",
+   "lantern_mace",
+   "pathfinder_javelin",
+   "tithe_dagger",
+   "roadwarden_bow",
+   "pilgrims_staff",
+   "houndmasters_lash",
+   "emberbrand_wand",
+   "rimecut_sabre",
+   "bramble_staff",
+   "warhorn_maul",
+   "axle_club",
+   "breakers_pick",
+   "hunters_edge",
+   "stormpin_crossbow",
+   "gravebound_scepter",
+   "dawnwarden_hammer",
+   "bloodledger_blade",
+   "covenant_hammer",
+   "grudgebrand",
+   "starwake_bow",
+   "watchfire_glaive"
   ],
   "rarityByAct": {
    "1": [
@@ -4934,6 +6016,121 @@
    "utility",
    2,
    1
+  ],
+  "cond_forageRation": [
+   "utility",
+   1.6,
+   1
+  ],
+  "cond_nightWard": [
+   "utility",
+   3,
+   1
+  ],
+  "cond_extraLeg": [
+   "utility",
+   15,
+   0
+  ],
+  "cond_killMemory": [
+   "utility",
+   10,
+   0
+  ],
+  "cond_roadFind": [
+   "utility",
+   3.3,
+   1
+  ],
+  "cond_easeExhaustion": [
+   "utility",
+   0.6,
+   1
+  ],
+  "cond_watch": [
+   "utility",
+   50,
+   0
+  ],
+  "cond_killGrowth": [
+   "offense",
+   50,
+   1
+  ],
+  "cond_critFromWounds": [
+   "offense",
+   15,
+   0
+  ],
+  "cond_brandFire": [
+   "offense",
+   2,
+   1
+  ],
+  "cond_brandIce": [
+   "offense",
+   2,
+   1
+  ],
+  "cond_brandShadow": [
+   "offense",
+   2,
+   1
+  ],
+  "cond_brandHoly": [
+   "offense",
+   2,
+   1
+  ],
+  "cond_brandLightning": [
+   "offense",
+   2,
+   1
+  ],
+  "cond_brandNature": [
+   "offense",
+   2,
+   1
+  ],
+  "cond_brandArcane": [
+   "offense",
+   2,
+   1
+  ],
+  "cond_sunderOnHit": [
+   "offense",
+   1,
+   1
+  ],
+  "cond_dmgVsNamed": [
+   "offense",
+   1.4,
+   1
+  ],
+  "cond_nemesisMark": [
+   "offense",
+   2.2,
+   1
+  ],
+  "cond_companionExtra": [
+   "utility",
+   40,
+   0
+  ],
+  "cond_companionFury": [
+   "utility",
+   1.5,
+   1
+  ],
+  "cond_vehicleDmg": [
+   "offense",
+   1.7,
+   1
+  ],
+  "cond_guardBond": [
+   "defense",
+   15,
+   0
   ]
  }
 }

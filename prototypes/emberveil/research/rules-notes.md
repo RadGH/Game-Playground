@@ -38,3 +38,27 @@ Turn order each round: initiative + rand*10 (slow ×0.5). Round cap 50. Flee DC 
 Out-of-combat auto-revive at 50% hp if any survivor has a revive skill.
 
 ## The original's real-time weapon layer is gone from this rebuild (round 20). Nothing in the data, the rewards, the balance file or the UI refers to it any more: the four road events that used to hand one out now roll a real item (`buildLoot`), and `tools/build-emberveil-data.mjs` strips it again on every rebuild.
+
+## Where the rebuild's numbers have moved away from the original, by round
+Everything above is the **original** game's rules. The rebuild keeps the formulas and moves the knobs
+in `data/balance.json`; each difficulty pass has its own write-up in this folder.
+
+- **round 14** (`sim-report.md`) — act 2 was a wall. Act 2 softened, the act-2→3 HP step smoothed,
+  hero skill damage lifted, hunger and torches tuned.
+- **round 19** (`sim-report-2.md`) — the game had drifted easy (28% full clears). The XP table was
+  stretched to level 30 and moved out of `rules.js` into `progression.xpTable`, XP ×3 → ×2.85 and
+  gold ×1.2 → ×1.1, acts 1/4/6 lifted, a per-act armour ramp and flat magic resist added, boss HP
+  damping raised from the hardcoded 0.35 to `enemies.boss.hpShare`, champion and named frequency
+  raised. Landed at 11.3% full clears, act 1 at 91.3%.
+- **round 20 — travel layer** (`sim-round20.md`) — a settlement (merchant + cleric revive) in every
+  zone, no fast travel, one node per move, night attacks 15% → 40% base with a real `world.nightRaid`
+  block (+1 body from act 2, ×1.1 HP, ×1.05 damage, 35% named leader, ×1.25 XP / ×1.7 gold, +50%
+  drop roll). XP cut ×2.85 → ×2.2. Fights per run ~55 → ~88 and full clears rose to 38.3%.
+  The original's real-time weapon layer was removed outright in this round (see the section above).
+- **round 20 — difficulty** (`sim-report-3.md`, this pass) — `balance.json` only. Enemy act
+  multipliers rebuilt from act 2 up, with **damage climbing faster than HP** from act 3 (act 2
+  1.34/1.27, act 3 1.75/1.78, act 4 3.30/3.35, act 5 4.20/3.80, act 6 5.00/4.45 against the
+  original's flat 1.15/1.10 … 2.60/1.65): the same lethality in a shorter fight. The last five steps
+  of the XP table stretched (26–30 now 60k/74k/92k/118k/150k) so the level cap is not reached until
+  act 6. Gold ×1.1 → ×1.0. Boss, champion, named and night-raid knobs left alone. 12.8% full clears
+  averaged over five seeds, act 1 at 86–88%, per-act pass rates 87/80/74/69/63/57%.

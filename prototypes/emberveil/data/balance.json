@@ -1,6 +1,6 @@
 {
- "version": "2026-09-13-R19-difficulty",
- "note": "R19 balance pass off tools/sim-emberveil.mjs (300 seeded runs, seed 1). The game had become easy: 28% of runs cleared all six acts, act 1 never failed once, and by act 4 an ordinary fight cost the party 2% of its health bar. The root cause was the XP curve — the party hit the level cap in act 5 and finished act 6 holding three times the XP the table asks for, so heroes outgrew every enemy multiplier. This pass stretches the XP table (progression.xpTable is now read by rules.js), trims the XP and gold multipliers, lifts the acts that had gone soft (1, 4, 6), gives enemies a per-act armour ramp and a little magic resist, makes bosses scale more like the trash around them, raises champion and named frequency with the act, and takes some of the shine off loot and crossings. Previous note (R14): act 2 was the wall — softened act 2, smoothed the act-2->3 HP step, lifted hero skill damage, and tuned hunger and torches. NG+ Act 1 uses the highest-act enemy multipliers (enemyScalingForNgPlus shifts effectiveAct = min(10, act + 4*ng)).",
+ "version": "2026-09-14-R20-difficulty",
+ "note": "R20 difficulty pass off tools/sim-emberveil.mjs (300 seeded runs, seed 1, cross-checked on seeds 2-5). Round 20 gave every zone a settlement (shop + cleric revive) and took fast travel away, so a party can always walk back to a healer: fights per run went from ~55 to ~88 and full six-act clears rose to 38.3% against the user's target of 10-15%. This pass rebuilt enemies.actMultipliers from act 2 up, trading enemy HP for enemy damage so late fights hit harder without dragging (act 6 is 17.7 rounds instead of 19.6), stretched the top of the XP table so the level cap is not reached until act 6, and trimmed the gold multiplier. Result: 12.3% clears on average over five seeds, act 1 at 86-88%, and a funnel that loses roughly 13/20/25/29/39/44 percent of the runs still standing in each act. Previous note (R19): the XP curve was the fault - the party hit the level cap in act 5 and finished act 6 holding three times the XP the table asks for, so heroes outgrew every enemy multiplier; that pass stretched the XP table, trimmed XP and gold, lifted acts 1/4/6, added a per-act armour ramp and magic resist, and made bosses scale with the trash around them. Previous note (R14): act 2 was the wall - softened act 2, smoothed the act-2->3 HP step, lifted hero skill damage, and tuned hunger and torches. NG+ Act 1 uses the highest-act enemy multipliers (enemyScalingForNgPlus shifts effectiveAct = min(10, act + 4*ng)).",
  "heroes": {
   "hireCost": {
    "base": 100,
@@ -40,11 +40,11 @@
    36400,
    42500,
    49600,
-   58000,
-   68000,
-   80000,
-   94000,
-   110000
+   60000,
+   74000,
+   92000,
+   118000,
+   150000
   ],
   "maxLevel": 30,
   "statPointsPerLevel": 2,
@@ -57,7 +57,7 @@
    28
   ],
   "passivePointEveryNLevels": 5,
-  "note": "R19: the table now runs to level 30 (it stopped at 20 here and rules.js carried its own copy ending at 38,160) and climbs much faster after level 10 — level 30 is 110,000 XP. Before the pass a party held 117k XP at the head of act 6 against a 38k cap, so it was level 30 with two acts still to play and enemies scaled for a much smaller party. statPointsPerLevel and passivePointEveryNLevels are NOT read from here yet — js/main.js hardcodes +2 attributes and every 5th level — so changing them would split the live game from the simulator. xpTable and talentPointLevels are live."
+  "note": "R20: the last five steps were stretched (level 26-30 now cost 60k/74k/92k/118k/150k, up from 58k/68k/80k/94k/110k). With a settlement in every zone the party banks far more XP than it used to: at the head of act 6 it holds ~183,000 XP, which was 170% of the old level-30 cost - it hit max level in act 5 and coasted through two acts with nothing left to earn. At the new numbers it is level 27.5 entering act 5 and 29.8 entering act 6, so levelling (and the full heal that comes with it) is still a live reward in the last third of the game. R19: the table runs to level 30 and climbs much faster after level 10. statPointsPerLevel and passivePointEveryNLevels are NOT read from here yet - js/main.js hardcodes +2 attributes and every 5th level - so changing them would split the live game from the simulator. xpTable and talentPointLevels are live."
  },
  "combat": {
   "maxHp": {
@@ -160,32 +160,32 @@
     "magicResist": 0
    },
    "2": {
-    "hp": 1.42,
-    "damage": 1.34,
+    "hp": 1.34,
+    "damage": 1.27,
     "armor": 0.95,
     "magicResist": 0
    },
    "3": {
-    "hp": 2.3,
-    "damage": 1.95,
+    "hp": 1.75,
+    "damage": 1.78,
     "armor": 1,
     "magicResist": 4
    },
    "4": {
-    "hp": 4.1,
-    "damage": 3.5,
+    "hp": 3.3,
+    "damage": 3.35,
     "armor": 1.05,
     "magicResist": 8
    },
    "5": {
-    "hp": 4.7,
-    "damage": 3.45,
+    "hp": 4.2,
+    "damage": 3.8,
     "armor": 1.1,
     "magicResist": 12
    },
    "6": {
-    "hp": 5.6,
-    "damage": 3.95,
+    "hp": 5.0,
+    "damage": 4.45,
     "armor": 1.15,
     "magicResist": 16
    },
@@ -213,7 +213,7 @@
     "armor": 1.2,
     "magicResist": 20
    },
-   "note": "Per act: HP and damage multipliers, an armour multiplier applied on top of globalMultipliers.armor, and a flat magic-resist top-up (almost every enemy template has 0 magic resist and two thirds of hero damage is skills). Act 1's HP multiplier being higher than act 2's is not a mistake — these scale each act's own templates, and act-1 monsters have a fraction of the base HP act-2 monsters do."
+   "note": "Per act: HP and damage multipliers, an armour multiplier applied on top of globalMultipliers.armor, and a flat magic-resist top-up (almost every enemy template has 0 magic resist and two thirds of hero damage is skills). R20: acts 2-6 were rebuilt against the settlement-in-every-zone map. Damage climbs faster than HP from act 3 on - the same lethality in a shorter fight, which kept the funnel where we wanted it and cut act 6 from 19.6 rounds a fight to 17.7. Act 1's HP multiplier being higher than act 2's is not a mistake - these scale each act's own templates, and act-1 monsters have a fraction of the base HP act-2 monsters do."
   },
   "ngPlus": {
    "hpBase": 4.5,
@@ -273,11 +273,11 @@
  },
  "economy": {
   "globalMultipliers": {
-   "gold": 1.1,
+   "gold": 1.0,
    "xp": 2.2,
    "shopPrice": 1.15,
    "dropRate": 0.97,
-   "note": "R20: xp 2.85 -> 2.2 — every zone gained a settlement this round (there is no fast travel any more, so the party has to be able to walk to a cleric), which keeps runs alive far longer and pushed fights per run from ~55 to ~95; at 2.85 the party held 237% of the XP its level asks for by act 6 and hit the level cap in act 5, the exact fault round 19 fixed. R19: xp 3 -> 2.85 and gold 1.2 -> 1.1 (both were hardcoded in game.js victory()). shopPrice marks up what a merchant asks without changing what he pays you for your leftovers (loot.sellPrice divides it back out); dropRate scales every zone drop."
+   "note": "R20: gold 1.1 -> 1.0. A party reaches act 6 with more gold than it can spend (~24,000, against a best-in-shop item well under 5,000); the trim costs nothing measurable in clear rate (12.0/14.0/13.3% on seeds 1-3 with it, 11.7/13.0/13.7% without) and takes the act-6 purse down to ~21,000. It is a dent, not a fix - the surplus mostly comes from selling loot, so a real economy pass would have to look at dropRate and loot.sellPrice. xp stays at 2.2 (round 20 cut it from 2.85 when the settlements went in). shopPrice marks up what a merchant asks without changing what he pays you for your leftovers (loot.sellPrice divides it back out); dropRate scales every zone drop."
   }
  },
  "loot": {

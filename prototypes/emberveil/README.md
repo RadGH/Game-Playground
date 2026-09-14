@@ -225,19 +225,31 @@ per fight per act with the rarity mix, crossings pass/fail per hazard, damage sh
 used skills, starvation, night-raid deaths, and the affixes, uniques, set pieces and legendary
 powers actually worn at the end.
 
-The current write-up is **`research/sim-report-2.md`** (round 19); the round-14 pass before it is
-`research/sim-report.md`. Point `--report` at `research/sim-latest.md` so neither is overwritten —
-`research/sim-before-r19.md` is the same report taken before the round-19 pass.
+The current write-up is **`research/sim-report-3.md`** (round 20); `research/sim-report-2.md` is the
+round-19 pass and `research/sim-report.md` the round-14 one. `research/sim-round20.md` is the raw
+report taken before this pass and `research/sim-latest.md` the one taken after — point `--report` at
+`sim-latest.md` so none of the write-ups is overwritten.
 
-The round-19 pass was a difficulty pass: the game had drifted easy (28% of runs cleared all six
-acts, act 1 never failed in 300 runs, an act-4 fight cost 2% of the party's health bar). The cause
-was the XP curve — the party hit the level cap in act 5 holding three times the XP the table asked
-for, so it outgrew every enemy multiplier. Stretching the XP table, trimming the XP and gold
-multipliers, lifting acts 1/4/6, giving enemies a per-act armour ramp and some magic resist, making
-bosses scale closer to the trash beside them, handing spell lists to nine silent late-game enemies
-and three silent bosses (including the Dragon King), and taking the shine off loot and crossings
-brought it to **11.3% full clears with act 1 at 91.3%** and a smooth funnel down through the acts.
-Starting heroes were not touched.
+The **round-20 pass** was a difficulty pass. Round 20 put a settlement (merchant + cleric who picks
+the fallen back up) in every zone and took fast travel away, so a party can always walk back to a
+healer: fights per run went from ~55 to ~88 and **38.3% of runs cleared all six acts** against the
+10–15% the game is aimed at. The fix was `data/balance.json` alone — acts 2–6 rebuilt with enemy
+damage climbing faster than enemy HP (the same lethality in a shorter fight: act 6 is 17.6 rounds
+instead of a projected 19.6), the last five steps of the XP table stretched so the level cap is not
+reached until act 6 (the party used to finish holding 173% of the XP the cap costs, so the last two
+acts paid nothing), and the gold multiplier trimmed 1.1 → 1.0. That gives **12.8% full clears
+averaged over five seeds of 300 runs (10.3–14.3%), act 1 at 86–88%**, and a funnel where each act
+passes a smaller share of the survivors than the one before it (87 / 80 / 74 / 69 / 63 / 57%). Wipes
+per 100 fights sit in a 3.4–5.6 band in every act, so no act is a wall; bosses fell from 32% of all
+wipes to 20% as the load spread out over named leaders, road fights and night raids. Starting heroes,
+boss/champion/named multipliers and the night-raid block were not touched.
+
+The round-19 pass before it fixed the same drift from the other end: the party used to hit the level
+cap in act 5 holding three times the XP the table asked for, so it outgrew every enemy multiplier.
+Stretching the XP table, trimming the XP and gold multipliers, lifting acts 1/4/6, giving enemies a
+per-act armour ramp and some magic resist, making bosses scale closer to the trash beside them and
+handing spell lists to nine silent late-game enemies and three silent bosses brought it to 11.3%
+full clears with act 1 at 91.3%.
 
 **`data/balance.json` is the knob file.** `applyBalance(data.balance)` (called from the `Game`
 constructor) loads `enemies.globalMultipliers`, `enemies.actMultipliers` (including the per-act
@@ -741,27 +753,33 @@ and the same build step now keeps the blocks this rebuild added by hand (the `wo
 
 ### Balance
 
-300 seeded runs, `node tools/sim-emberveil.mjs --runs 300`, report in `research/sim-round20.md`.
+300 seeded runs, `node tools/sim-emberveil.mjs --runs 300`. The travel layer's own report is
+`research/sim-round20.md`; the difficulty pass that followed it is `research/sim-report-3.md`.
 
-| reading | round 19 | round 20 | round 19's target |
-|---|---|---|---|
-| act 1 cleared | 91.3% | **84.7%** | 85–90% |
-| act 2 cleared | 62.7% | 81.0% | pressure starts here |
-| act 3 cleared | 36.3% | 67.7% | |
-| full clears (all six acts) | 11.3% | **38.3%** | 10–15% |
-| fights per run | ~55 | 88 | |
-| wipes per run | — | 2.1 | |
-| night raids that wiped the party | 4.2% | 4.2% (12.3% of all wipes) | |
-| XP held at act 4 vs the table | — | 113% | near 100% |
+| reading | round 19 | round 20: travel layer | round 20: after the difficulty pass | target |
+|---|---|---|---|---|
+| act 1 cleared | 91.3% | **84.7%** | 86.7% (86–88% over 5 seeds) | 85–90% |
+| act 2 cleared (of those that got there) | — | 95.7% | 79.6% | pressure starts here |
+| act 3 cleared (of those that got there) | — | 83.5% | 67.1% | |
+| full clears (all six acts) | 11.3% | **38.3%** | **12.0%** (12.8% over 5 seeds) | 10–15% |
+| fights per run | ~55 | 88 | 64 | |
+| wipes per run | — | 2.1 | 2.8 (of 3 allowed) | |
+| night raids that wiped the party | 4.2% | 4.2% (12.3% of all wipes) | 9.3% (17.3% of all wipes) | |
+| XP held at act 6 vs the table | — | 173% | 121% | near 100% |
+| rounds per act-6 fight | — | 15.7 | 17.6 | |
 
-Act 1 landed where round 19 wanted it. **The full-clear rate did not**, and the cause is this round's
+Act 1 landed where round 19 wanted it. **The full-clear rate did not**, and the cause was this round's
 own doing rather than the night raids: a settlement in every zone (which travelling one node at a time
 made necessary) keeps runs alive far longer, so fights per run went from about 55 to 88 and the party
-gets 60% more chances to level and loot. The XP multiplier came down from 2.85 to 2.2 and the night
-raid's XP bonus was kept deliberately small (×1.25) to hold the level curve near the table, which
-worked — but bringing clears back to 10–15% means turning the enemies up, i.e. `balance.json`
-`enemies.actMultipliers`, and that is a difficulty pass of its own with its own 300-run report. It is
-**not done here**, on purpose.
+got 60% more chances to level and loot.
+
+The difficulty pass that followed put it back, through `balance.json` alone: acts 2–6 rebuilt with
+enemy **damage climbing faster than enemy HP** (the same lethality in a shorter fight), the last five
+steps of the XP table stretched so the level cap is not reached until act 6, and gold trimmed
+1.1 → 1.0. Each act now passes a smaller share of the survivors than the one before it
+(87 / 80 / 74 / 69 / 63 / 57% over five seeds) at 3.4–5.6 wipes per 100 fights in every act, so no act
+is a wall, and bosses fell from 32% of all wipes to 20% as the load spread over named leaders, road
+fights and night raids. Full working: `research/sim-report-3.md`.
 
 ### Tests added this round
 

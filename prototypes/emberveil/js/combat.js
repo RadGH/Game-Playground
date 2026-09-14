@@ -2,7 +2,7 @@
 // skills with mp/cooldown/talents/upgrades, hit → block → armour curve → resistAll → dmgReduct → marked → barrier → HP,
 // statuses, passives, item affixes, legendary powers, champion and named modifiers, boss phases, attack speed, revive.
 // Every effect id lives in js/effects.js; this file only calls the hooks. Pure logic: `round()` returns an event list.
-import { derive, mergeSkill, HEALER_CLASSES, SKILL_MULT } from './rules.js';
+import { derive, mergeSkill, HEALER_CLASSES, SKILL_MULT, checkBonus } from './rules.js';
 import { EFFECTS, STATUS_ALIAS, refreshFx, fireTrait, traitMult, traitSum, skillFx, runSkill, skillMult, skillSum, skillGate, skillTargetOverride, statusDef } from './effects.js';
 const DOT = ['burn', 'poison', 'bleed', 'holy_burn'];
 const CC = ['stun', 'freeze', 'sleep', 'confused', 'dazed', 'blind', 'slow', 'marked', 'sunder', 'curse', 'silence', 'disarm', 'root', 'weaken'];
@@ -52,11 +52,28 @@ export class Combat {
   removeStatus(c, type) { c.statuses = c.statuses.filter(s => s.type !== type); }
   cleanse(c, what) { c.statuses = c.statuses.filter(s => !(what === 'all' || what === 1 ? CC.includes(s.type) || DOT.includes(s.type) : (Array.isArray(what) ? what : [what]).includes(s.type))); }
   emit(ev) { this.log.push(ev); this.events.push(ev); return ev; }
-  /** One place for every heal, so healing-reduction and the meter both see it. */
+  /**
+   * One place for every heal, so healing-reduction, whole-number health and the meter all agree.
+   * `label` is what the player is told brought it back ("Mend", "life steal", "on kill") — the log
+   * line reads "<name> recovers <n> health (<label>)", so keep it a plain reason, not a number.
+   */
   healUnit(t, amount, label = 'heal', source = null, via = 'effect:heal') {
     if (!t?.alive || amount <= 0) return 0;
-    const amt = Math.min(t.maxHp - t.hp, Math.round(amount * (1 - Math.min(0.9, t._healReduce || 0))));
-    if (amt <= 0) return 0; t.hp += amt; this.emit({ type: 'heal', source, target: t, amount: amt, label, via, overheal: 0, dtype: 'holy' }); return amt;
+    const room = Math.max(0, Math.round(t.maxHp) - Math.round(t.hp));
+    const want = Math.round(amount * (1 - Math.min(0.9, t._healReduce || 0)));
+    const amt = Math.min(room, want);
+    if (amt <= 0) return 0; t.hp = Math.min(t.maxHp, Math.round(t.hp) + amt);
+    this.emit({ type: 'heal', source, target: t, amount: amt, label, via, overheal: Math.max(0, want - amt), resource: 'health', dtype: 'holy' }); return amt;
+  }
+  /**
+   * The same thing for mana, so "X recovers 8 mana (on kill)" can be shown instead of the bar
+   * quietly moving. Returns what actually went in.
+   */
+  gainMana(t, amount, label = 'mana', source = null, via = 'effect:mana') {
+    if (!t?.alive || !(amount > 0) || t.maxMp == null) return 0;
+    const amt = Math.min(Math.max(0, Math.round(t.maxMp) - Math.round(t.mp || 0)), Math.round(amount));
+    if (amt <= 0) return 0; t.mp = Math.min(t.maxMp, Math.round(t.mp || 0) + amt);
+    this.emit({ type: 'mana', source, target: t, amount: amt, label, via, resource: 'mana' }); return amt;
   }
   // ---------- damage pipeline
   /** Sum a status field across everything on a unit (multiplicative for mults). */
@@ -113,7 +130,7 @@ export class Combat {
       const d = src.derived;
       if (d) {
         if (d.lifeSteal) this.healUnit(src, Math.floor(dealt * d.lifeSteal), 'life steal', src, 'effect:lifesteal');
-        if (d.manaSteal) src.mp = Math.min(src.maxMp, src.mp + Math.floor(dealt * d.manaSteal));
+        if (d.manaSteal) this.gainMana(src, Math.floor(dealt * d.manaSteal), 'mana steal', src, 'effect:manasteal');
         if (d.burnOnHit && this.rng() < d.burnOnHit) this.addStatus(tgt, 'burn', 3, Math.max(3, Math.floor(d.INT * 0.15)), src);
         if (crit && d.poisonOnCrit && this.rng() < d.poisonOnCrit) this.addStatus(tgt, 'poison', 3, Math.max(3, Math.floor(d.INT * 0.2)), src);
       }
@@ -144,7 +161,7 @@ export class Combat {
     tgt._lastStatuses = tgt.statuses.map(s => ({ ...s })); tgt.alive = false; tgt.statuses = [];
     if (src && !src.isEnemy && tgt.isEnemy) this.killsBy[src.id] = (this.killsBy[src.id] || 0) + 1;
     this.emit({ type: tgt.isEnemy ? 'kill' : 'down', source: src, target: tgt });
-    if (src?.alive && src.derived) { const d = src.derived; if (d.hpOnKill) this.healUnit(src, d.hpOnKill, 'kill', src, 'passive:killing_blow'); if (d.manaOnKill) src.mp = Math.min(src.maxMp, src.mp + d.manaOnKill); }
+    if (src?.alive && src.derived) { const d = src.derived; if (d.hpOnKill) this.healUnit(src, d.hpOnKill, 'on kill', src, 'passive:killing_blow'); if (d.manaOnKill) this.gainMana(src, d.manaOnKill, 'on kill', src, 'passive:soul_harvest'); }
     if (src?.alive) fireTrait('onKill', this, src, tgt);
     if (tgt.isEnemy && tgt._lastStatuses.some(s => s.type === 'curse')) { const o = this.alive(this.enemies)[0]; if (o) this.addStatus(o, 'curse', 2, 20); }
   }
@@ -171,10 +188,10 @@ export class Combat {
   // ---------- skills
   skillTargets(skill, caster, foes, allies) {
     const a = this.alive(foes); const primary = this.pickFoe(caster, a); if (!primary) return []; const aoe = skill.aoe || 'single';
-    if (aoe === 'all' || aoe === 'row' || aoe === 'row2' || aoe === 'pierce_row') return a; if (aoe === 'group') return a.filter(e => e.group === primary.group); if (aoe === 'adjacent') return [primary, ...a.filter(e => e !== primary && e.group === primary.group)].slice(0, 2); if (aoe === 'adjacent2' || aoe === 'group2') return [primary, ...a.filter(e => e !== primary && e.group === primary.group)].slice(0, 4);
-    if (aoe === 'chain' || aoe === 'chain3') return [primary, ...a.filter(e => e !== primary)].slice(0, skill.effect?.chainTargets || skill.effect?.targets || 3); if (aoe === 'random3' || aoe === 'random4') { const k = skill.effect?.targets || (aoe === 'random3' ? 3 : 4); const out = []; for (let i = 0; i < k; i++) out.push(a[Math.floor(this.rng() * a.length)]); return out; } if (aoe === 'multi3' || aoe === 'multi4') return Array(skill.effect?.bolts || (aoe === 'multi3' ? 3 : 4)).fill(primary); return [primary];
+    if (aoe === 'all' || aoe === 'row' || aoe === 'row2' || aoe === 'pierce_row') return a; if (aoe === 'group') return a.filter(e => e.group === primary.group); if (aoe === 'adjacent') return [primary, ...a.filter(e => e !== primary && e.group === primary.group)].slice(0, shotCount(skill, 2)); if (aoe === 'adjacent2' || aoe === 'group2') return [primary, ...a.filter(e => e !== primary && e.group === primary.group)].slice(0, shotCount(skill, 3));
+    if (aoe === 'chain' || aoe === 'chain3') return [primary, ...a.filter(e => e !== primary)].slice(0, shotCount(skill, 3)); if (aoe === 'random3' || aoe === 'random4') { const k = shotCount(skill, aoe === 'random3' ? 3 : 4); const out = []; for (let i = 0; i < k; i++) out.push(a[Math.floor(this.rng() * a.length)]); return out; } if (aoe === 'multi3' || aoe === 'multi4') return Array(shotCount(skill, aoe === 'multi3' ? 3 : 4)).fill(primary); return [primary];
   }
-  expectedTargets(skill, n) { const aoe = skill.aoe || 'single'; if (aoe === 'all' || aoe === 'row' || aoe === 'row2' || aoe === 'pierce_row') return n; if (['group2', 'random4', 'multi4', 'adjacent2'].includes(aoe)) return Math.min(n, 4); if (['group', 'chain', 'chain3', 'random3', 'multi3'].includes(aoe)) return Math.min(n, 3); if (aoe === 'adjacent') return Math.min(n, 2); return 1; }
+  expectedTargets(skill, n) { const aoe = skill.aoe || 'single'; if (aoe === 'all' || aoe === 'row' || aoe === 'row2' || aoe === 'pierce_row') return n; if (['random3', 'random4', 'multi3', 'multi4', 'chain', 'chain3'].includes(aoe)) return Math.min(n, shotCount(skill, { random4: 4, multi4: 4 }[aoe] || 3)); if (['group2', 'adjacent2'].includes(aoe)) return Math.min(n, shotCount(skill, 3)); if (aoe === 'group') return Math.min(n, 3); if (aoe === 'adjacent') return Math.min(n, shotCount(skill, 2)); return 1; }
   skillDamage(caster, skill) {
     const w = caster.equipment?.weapon; const mid = w?.dmg ? (w.dmg[0] + w.dmg[1]) / 2 : 1.5; const d = caster.derived;
     const magic = skill.type === 'magic' || skill.type === 'heal' || skill.damageCategory === 'magic';
@@ -198,7 +215,7 @@ export class Combat {
       for (const t of tgts) { const amount = this.skillHeal(caster, skill); const h = this.healUnit(t, amount, skill.name, caster, 'skill:' + skill.id);
         if (eff.cleanse) this.cleanse(t, eff.cleanse); if (eff.hpRegen || eff.regenRounds) this.addStatus(t, 'regen', eff.regenRounds || eff.regenDur || 3, (eff.hpRegen || 3) * (eff.regenMult || 1), caster);
         c.target = t; c.dur = eff.duration || eff.rounds || 2; c.healAmount = amount; runSkill(fx, 'onBuff', c); }
-      if (eff.mpRestore) caster.mp = Math.min(caster.maxMp, caster.mp + eff.mpRestore); if (eff.dmgBuff) this.buff(caster, { dmgBuff: eff.dmgBuff, duration: eff.duration || 2 });
+      if (eff.mpRestore) this.gainMana(caster, eff.mpRestore, skill.name, caster, 'skill:' + skill.id); if (eff.dmgBuff) this.buff(caster, { dmgBuff: eff.dmgBuff, duration: eff.duration || 2 });
       c.totalDealt = 0; runSkill(fx, 'onEnd', c); return ev;
     }
     if (skill.type === 'revive') { const fallen = allies.filter(a => !a.alive); const tgts = eff.reviveAll ? fallen : fallen.slice(0, 1); for (const t of tgts) { t.alive = true; t.hp = Math.max(1, Math.floor(t.maxHp * (eff.reviveHp || 0.25))); t.statuses = []; if (eff.immune !== false) { t.reviveImmune = true; t.reviveImmuneRounds = eff.reviveImmuneRounds || 0; } this.emit({ type: 'revive', source: caster, target: t }); c.target = t; c.dur = 2; runSkill(fx, 'onBuff', c); } return ev; }
@@ -215,7 +232,7 @@ export class Combat {
         if (eff.armorBonus) this.buff(t, { armorBonus: eff.armorBonus, duration: dur }); if (eff.extraAction) t.extraActions = (t.extraActions || 0) + eff.extraAction;
         if (eff.healPct) this.healUnit(t, Math.round(t.maxHp * eff.healPct), skill.name, caster, 'skill:' + skill.id);
         if (eff.regenPct) this.addStatus(t, 'regen', dur, Math.round(t.maxHp * eff.regenPct), caster);
-        if (eff.mpRegen) t.mp = Math.min(t.maxMp, t.mp + eff.mpRegen);
+        if (eff.mpRegen) this.gainMana(t, eff.mpRegen, skill.name, caster, 'skill:' + skill.id);
         if (eff.parryCount || skill.type === 'counter') t.parry = (t.parry || 0) + (eff.parryCount || 1);
         if (eff.thorns) this.buff(t, { reflect: eff.thorns, duration: dur });
         if (eff.cleanseParty || eff.cleanse) this.cleanse(t, 'all');
@@ -227,7 +244,7 @@ export class Combat {
     // damage skills (melee / ranged / magic / zone / damage / debuff / trap)
     let tgts = skillTargetOverride(fx, c) || this.skillTargets(skill, caster, foes, allies); if (skill.type === 'zone') tgts = this.alive(foes); if (!tgts.length) { c.totalDealt = 0; runSkill(fx, 'onEnd', c); return ev; }
     c.targets = tgts;
-    const hits = skill.hits || skill.effect?.hits || 1; const falloff = { 1: 1, 2: 0.8, 3: 0.6 }[Math.min(3, new Set(tgts).size)] ?? 0.5;
+    const hits = hitCount(skill); const falloff = { 1: 1, 2: 0.8, 3: 0.6 }[Math.min(3, new Set(tgts).size)] ?? 0.5;
     const consumes = eff.consumesFlairStacks ?? skill.consumesFlairStacks; const builds = eff.buildsFlairStacks ?? skill.buildsFlairStacks;
     const stacks = consumes ? (caster.flair || 0) : 0; if (consumes) caster.flair = eff.keepStacks || 0;
     let baseDmg = this.skillDamage(caster, skill) * this.dmgBuffMult(caster) * falloff * (stacks ? Math.max(1, stacks) * (eff.stackDmgMult || 1) : 1);
@@ -260,7 +277,7 @@ export class Combat {
     } });
     if (skill.type === 'zone' && skill.healMult) for (const a of aliveAllies) this.healUnit(a, this.skillHeal(caster, skill), skill.name, caster, 'skill:' + skill.id);
     if (skill.id === 'fate_weave' && totalDealt) { const t = this.mostHurt(aliveAllies); if (t) this.healUnit(t, totalDealt, 'Fate Weave', caster, 'skill:fate_weave'); }
-    if (eff.mpOnHit) caster.mp = Math.min(caster.maxMp, caster.mp + eff.mpOnHit);
+    if (eff.mpOnHit) this.gainMana(caster, eff.mpOnHit, skill.name, caster, 'skill:' + skill.id);
     c.totalDealt = totalDealt; c.target = tgts[0]; runSkill(fx, 'onEnd', c);
     const legendary = caster.derived?.legendary || [];
     if (magic && legendary.includes('low_mana_shockwave') && caster.mp <= caster.maxMp * 0.25) for (const e of this.alive(foes)) this.applyDamage(caster, e, Math.round(15 + caster.derived.INT * 0.5), { magic: true, label: 'Shockwave', via: 'legendary:low_mana_shockwave', dtype: 'arcane' });
@@ -298,7 +315,7 @@ export class Combat {
     if (heals.length && (frac < 0.25 || (isHealer && frac < 0.65))) return this.cast(h, heals[0], foes, allies);
     const self = sk.find(s => s.type === 'heal' && s.target === 'self'); if (self && h.hp / h.maxHp < 0.4) return this.cast(h, self, foes, allies);
     const shield = sk.find(s => s.type === 'buff' && (s.effect?.barrier || s.effect?.shield || s.effect?.dmgReduct) && s.target !== 'enemy'); if (isHealer && shield && frac < 0.6 && !aliveA.some(a => a.statuses.some(s => s.type === 'barrier'))) return this.cast(h, shield, foes, allies);
-    const dmg = sk.filter(s => ['melee', 'ranged', 'magic', 'damage', 'zone', 'trap', 'debuff'].includes(s.type) && (s.damageMult ?? 1) > 0 || (s.statusEffects?.length && s.type === 'magic')); if (dmg.length) { const n = this.alive(foes).length; dmg.sort((a, b) => (b.damageMult || 0.5) * (b.hits || 1) * this.expectedTargets(b, n) - (a.damageMult || 0.5) * (a.hits || 1) * this.expectedTargets(a, n)); if ((dmg[0].mpCost || 0) === 0 || this.rng() < 0.8) return this.cast(h, dmg[0], foes, allies); }
+    const dmg = sk.filter(s => ['melee', 'ranged', 'magic', 'damage', 'zone', 'trap', 'debuff'].includes(s.type) && (s.damageMult ?? 1) > 0 || (s.statusEffects?.length && s.type === 'magic')); if (dmg.length) { const n = this.alive(foes).length; dmg.sort((a, b) => (b.damageMult || 0.5) * hitCount(b) * this.expectedTargets(b, n) - (a.damageMult || 0.5) * hitCount(a) * this.expectedTargets(a, n)); if ((dmg[0].mpCost || 0) === 0 || this.rng() < 0.8) return this.cast(h, dmg[0], foes, allies); }
     const buff = sk.find(s => s.type === 'buff' && s.target !== 'enemy' && !h.buffs.length); if (buff && this.round_ <= 2) return this.cast(h, buff, foes, allies);
     const any = sk.find(s => s.type !== 'buff' || s.target === 'enemy'); if (any && this.rng() < 0.5) return this.cast(h, any, foes, allies);
     return this.attack(h, this.pickFoe(h, this.alive(foes)));
@@ -319,7 +336,7 @@ export class Combat {
   resolveSpell(e, sp, targets, allies) {
     // A spell that is not explicitly locked down can be snatched out of the air by anyone
     // who has a pilfer effect running (skills.json `pilferBuff` / `pilferCount`).
-    if (sp.stealable !== false) { const thief = this.alive(e.isEnemy ? this.heroes : this.enemies).find(x => x._pilfering > 0); if (thief) { thief._pilfering--; thief.mp = Math.min(thief.maxMp, (thief.mp || 0) + Math.round((sp.effect?.damage || 10) / 2)); this.emit({ type: 'steal', source: thief, target: e, skill: sp.id, name: sp.name }); return; } }
+    if (sp.stealable !== false) { const thief = this.alive(e.isEnemy ? this.heroes : this.enemies).find(x => x._pilfering > 0); if (thief) { thief._pilfering--; this.gainMana(thief, Math.round((sp.effect?.damage || 10) / 2), 'snatched ' + sp.name, thief, 'effect:pilfer'); this.emit({ type: 'steal', source: thief, target: e, skill: sp.id, name: sp.name }); return; } }
     this.emit({ type: 'skill', source: e, skill: sp.id, name: sp.name, skillType: 'magic' });
     const ef = sp.effect || {}; const tgts = sp.target === 'aoe' ? targets : sp.target === 'self' ? [e] : sp.target === 'ally_lowest_hp' ? [this.mostHurt(this.alive(allies))] : [this.pickFoe(e, targets)];
     if (ef.selfHeal) this.healUnit(e, ef.selfHeal, sp.name, e, 'skill:' + sp.id);
@@ -367,7 +384,7 @@ export class Combat {
       if (c.onHitStatusRounds > 0 && --c.onHitStatusRounds === 0) c.onHitStatus = null;
       if (c.extraActionRounds > 0 && --c.extraActionRounds === 0) c.extraActionsEachRound = Math.max(0, (c.extraActionsEachRound || 1) - 1);
       if (c.reviveImmuneRounds > 0) c.reviveImmuneRounds--; else if (c.reviveImmune && c.actedSinceRevive) c.reviveImmune = false;
-      if (!c.isEnemy) { const d = c.derived; c.mp = Math.min(c.maxMp, c.mp + Math.round((d.manaRegen || 1) * traitMult('manaRegenMult', this, c))); if (d.hpRegen) c.hp = Math.min(c.maxHp, c.hp + d.hpRegen); }
+      if (!c.isEnemy) { const d = c.derived; c.mp = Math.min(c.maxMp, Math.round(c.mp) + Math.round((d.manaRegen || 1) * traitMult('manaRegenMult', this, c))); if (d.hpRegen) c.hp = Math.min(c.maxHp, Math.round(c.hp) + Math.max(1, Math.round(d.hpRegen))); }
       else if (c.regenPct && c.hp < c.maxHp) this.healUnit(c, Math.max(1, Math.round(c.maxHp * c.regenPct)), 'regeneration', c, 'effect:regen');
       for (const k of Object.keys(c.cooldowns)) { c.cooldowns[k]--; if (c.cooldowns[k] <= 0) delete c.cooldowns[k]; }
     }
@@ -393,9 +410,29 @@ export class Combat {
   checkEnd() { if (this.over) return true; if (!this.alive(this.enemies).length) { this.over = true; this.result = 'win'; this.emit({ type: 'end', result: 'win' }); return true; } if (!this.alive(this.heroes).length) { this.over = true; this.result = 'lose'; this.emit({ type: 'end', result: 'lose' }); return true; } return false; }
   runAll() { const all = []; while (!this.over) all.push(...this.round()); return { result: this.result, rounds: this.round_, events: all }; }
 }
+/**
+ * How many shots a multi-shot skill fires (E23).
+ *
+ * `aoe: 'random3'` / `'multi3'` / `'chain'` only say the *shape*; a talent or level upgrade that
+ * says "5 bolts instead of 3" writes `bolts` (or `targets`, or `chainTargets`) into the merged
+ * skill, and that has to win over the number baked into the shape's name. Before this existed,
+ * Magic Missile's "Missile Barrage" talent still fired three bolts.
+ */
+/**
+ * How many times a skill strikes each target it picks. The merged skill's `effect.hits` is the
+ * authority (mergeSkill seeds it from the skill's own `hits` so a talent has something to add to);
+ * the top-level `hits` is only the fallback for a skill that was never merged.
+ */
+export function hitCount(skill) { const v = skill?.effect?.hits ?? skill?.hits ?? 1; const n = Math.round(Number(v)); return Number.isFinite(n) && n > 0 ? Math.min(12, n) : 1; }
+export function shotCount(skill, fallback = 3) {
+  const e = skill?.effect || {};
+  const v = e.bolts ?? skill?.bolts ?? e.targets ?? skill?.targets ?? e.chainTargets ?? e.chainCount ?? e.glaiveCount ?? fallback;
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n > 0 ? Math.min(12, n) : fallback;
+}
 const isUndeadT = t => /skeleton|ghoul|wraith|lich|undead|bone|shade|wight|zombie|revenant/i.test(t?.templateId || t?.id || '');
 const isDemonT = t => /demon|imp|fiend|hell|fel|archfiend|devil/i.test(t?.templateId || t?.id || '');
-export function fleeCheck(heroes, enemies, rng = Math.random) { const avgE = enemies.reduce((s, e) => s + Math.max(1, Math.round(e.xpValue / 8)), 0) / enemies.length; const avgP = heroes.reduce((s, h) => s + h.level, 0) / heroes.length; const dc = Math.round(Math.max(8, Math.min(28, 12 + avgE - avgP))); const best = Math.max(...heroes.filter(h => h.alive).map(h => h.derived?.DEX ?? h.attrs?.DEX ?? 8)); const roll = 1 + Math.floor(rng() * 20); return { ok: best + roll >= dc, dc, roll, best }; }
+export function fleeCheck(heroes, enemies, rng = Math.random) { const avgE = enemies.reduce((s, e) => s + Math.max(1, Math.round(e.xpValue / 8)), 0) / enemies.length; const avgP = heroes.reduce((s, h) => s + h.level, 0) / heroes.length; const dc = Math.round(Math.max(8, Math.min(28, 12 + avgE - avgP))); const best = checkBonus(Math.max(...heroes.filter(h => h.alive).map(h => h.derived?.DEX ?? h.attrs?.DEX ?? 8))); const roll = 1 + Math.floor(rng() * 20); return { ok: best + roll >= dc, dc, roll, best }; }
 
 /** Feed one combat event into a damage meter. Shared by the live UI (js/main.js) and the
  *  headless simulator (tools/sim-emberveil.mjs) so both fill `meter.itemStats` the same way. */

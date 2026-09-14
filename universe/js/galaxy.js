@@ -157,6 +157,7 @@ export function generateGalaxy(userOpts = {}) {
 
   const stars = [];
   const taken = new Set();
+  const usedNames = new Set();
   const gridKey = (x, y) => `${Math.round(x * 90)},${Math.round(y * 90)}`;   // keeps dots from stacking
   for (let i = 0; i < o.stars; i++) {
     let p = place(), tries = 0;
@@ -164,6 +165,19 @@ export function generateGalaxy(userOpts = {}) {
     taken.add(gridKey(p.x, p.y));
     const seed = subSeed(o.seed, 'star' + i);
     const star = makeStar({ seed, id: i, namegen: o.namegen, nameRace: o.nameRace, mix: o.mix, x: +clamp(p.x, -1, 1).toFixed(4), y: +clamp(p.y, -1, 1).toFixed(4) });
+    // two stars in one galaxy must not answer to the same name — the name generator does repeat
+    // itself over a few hundred rolls, and a duplicate makes the star list and any save ambiguous
+    if (usedNames.has(star.name)) {
+      let fixed = null;
+      for (let t = 1; t < 6 && !fixed; t++) {
+        const roll = starName(subSeed(seed, 'name' + t), o.namegen, o.nameRace);
+        if (!usedNames.has(roll)) fixed = roll;
+      }
+      let k = 2;
+      while (!fixed || usedNames.has(fixed)) { fixed = `${star.name} ${k++}`; }
+      star.name = fixed;
+    }
+    usedNames.add(star.name);
     star.z = +p.z.toFixed(4);
     star.distFromCore = +Math.hypot(star.x, star.y).toFixed(4);
     stars.push(star);

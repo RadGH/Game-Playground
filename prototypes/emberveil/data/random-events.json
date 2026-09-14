@@ -9709,7 +9709,7 @@
    }
   },
   {
-   "id": "tap_hermit_healer",
+   "id": "road_hermit_healer",
    "minLevel": 2,
    "zone": "any",
    "npcName": "The Wandering Hermit",
@@ -9740,7 +9740,8 @@
     "pass": {
      "text": "She smiles and presses a charm into your palm. It hums with the power to heal a whole party.",
      "reward": {
-      "tapItem": "heal"
+      "buildLoot": "jewelry",
+      "buildLootRarity": "rare"
      }
     },
     "fail": {
@@ -9752,7 +9753,7 @@
    }
   },
   {
-   "id": "tap_runestone_circle",
+   "id": "road_runestone_circle",
    "minLevel": 4,
    "zone": "any",
    "npcName": "Ancient Runestones",
@@ -9794,13 +9795,15 @@
     "pass": {
      "text": "A ring of silver light washes the glyph clean. You feel the rite settle into your hands.",
      "reward": {
-      "tapItem": "cleanse"
+      "buildLoot": "jewelry",
+      "buildLootRarity": "rare"
      }
     },
     "smash": {
      "text": "The stone cracks; a single feather-shaped charm tumbles out. It is warm to the touch.",
      "reward": {
-      "tapItem": "phoenix_feather"
+      "buildLoot": "jewelry",
+      "buildLootRarity": "rare"
      }
     },
     "fail": {
@@ -9812,7 +9815,7 @@
    }
   },
   {
-   "id": "tap_wind_dancer",
+   "id": "road_wind_dancer",
    "minLevel": 5,
    "zone": "any",
    "npcName": "Sarahel, Wind-Dancer",
@@ -9852,15 +9855,17 @@
    ],
    "outcomes": {
     "pass": {
-     "text": "She laughs and pins a wind-charm to your cloak. \"When you need extra quickness, just tap.\"",
+     "text": "She laughs and pins a wind-charm to your cloak. \"Wear it when the road turns mean.\"",
      "reward": {
-      "tapItem": "haste"
+      "buildLoot": "jewelry",
+      "buildLootRarity": "rare"
      }
     },
     "talk": {
      "text": "\"A thinker! Fine — I was bored anyway.\" She hands you a totem of raucous flair.",
      "reward": {
-      "tapItem": "rally"
+      "buildLoot": "jewelry",
+      "buildLootRarity": "rare"
      }
     },
     "fail": {
@@ -9872,7 +9877,7 @@
    }
   },
   {
-   "id": "tap_shield_bearer",
+   "id": "road_shield_bearer",
    "minLevel": 3,
    "zone": "any",
    "npcName": "The Silent Shield",
@@ -9914,13 +9919,15 @@
     "sit": {
      "text": "After a long hour, they nod once and hand you the painted totem.",
      "reward": {
-      "tapItem": "taunt_totem"
+      "buildLoot": "armor",
+      "buildLootRarity": "rare"
      }
     },
     "arm": {
      "text": "They grunt approval, then clap a silver ward onto your bracer — it will turn one blow away.",
      "reward": {
-      "tapItem": "deflect"
+      "buildLoot": "jewelry",
+      "buildLootRarity": "rare"
      }
     },
     "fail": {

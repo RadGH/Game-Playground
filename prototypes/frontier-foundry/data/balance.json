@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "version": "2026-09-13 pass 1",
-  "note": "Every number a designer is likely to want to change. js/rules.js applyBalance() folds this onto the other data files at load time, so the engine keeps reading def.cost, recipe.time and so on. Values here are absolute overrides; the *ByCategory / *ByTier tables are multipliers against the shipped numbers. Rules of thumb this file follows: early buildings are cheap and fast so the first twenty minutes are decisions rather than saving up, late buildings are expensive so the endgame is a real project, and there is never less than six minutes of quiet between attacks so there is time to explore and build.",
+  "version": "2026-09-14 pass 2",
+  "note": "Every number a designer is likely to want to change. js/rules.js applyBalance() folds this onto the other data files at load time, so the engine keeps reading def.cost, recipe.time and so on. Values here are absolute overrides; the *ByCategory / *ByTier tables are multipliers against the shipped numbers. Rules of thumb this file follows: early buildings are cheap and fast so the first twenty minutes are decisions rather than saving up, late buildings are expensive so the endgame is a real project, and there is never less than six minutes of quiet between attacks so there is time to explore and build. Pass 2 (2026-09-14) widened the raw end - drills, pumps and labs - because the balance sim showed ore extraction, not machine count, was what every chain above steel was waiting on, and softened the wave curve so a six-hour run to a rocket is a slope not a cliff.",
   "map": {
-    "note": "Road speed per tier: 0 none, 1 dirt path, 2 gravel, 3 paved, 4 hover lane. Paved is 2.2x dirt on purpose - roads have to be worth the concrete.",
+    "note": "Road speed per tier: 0 none, 1 dirt path, 2 gravel, 3 paved, 4 hover lane. Paved is 2.2x dirt on purpose - roads have to be worth the concrete. Patch sizes are sized so a base that keeps expanding has ore for a full run: at 26000 the coal ran dry around hour five of a six-hour sim and the generators took the factory down with them.",
     "roadSpeed": [
       1,
       1.2,
@@ -11,12 +11,13 @@
       2.65,
       3.4
     ],
-    "oreNodeSize": 26000,
-    "fluidNodeSize": 60000,
-    "rareNodeSize": 12000,
+    "oreNodeSize": 40000,
+    "fluidNodeSize": 84000,
+    "rareNodeSize": 16000,
     "nodeAmount": 1.0,
-    "scarceNodeAmount": 0.5,
-    "scarceNodeWeight": 0.35
+    "scarceNodeAmount": 0.8,
+    "scarceNodeWeight": 0.5,
+    "scarceNodeCount": 2
   },
   "costByCategory": {
     "base": 0.85,
@@ -66,36 +67,36 @@
   "researchWorkByTier": {
     "0": 1.0,
     "1": 0.8,
-    "2": 0.85,
-    "3": 0.9,
-    "4": 0.95,
-    "5": 0.95,
-    "6": 1.0
+    "2": 0.8,
+    "3": 0.8,
+    "4": 0.8,
+    "5": 0.8,
+    "6": 0.9
   },
   "structures": {
     "drill_mk1": {
-      "extractRate": 1.0
+      "extractRate": 1.3
     },
     "drill_mk2": {
-      "extractRate": 2.2
+      "extractRate": 2.9
     },
     "drill_mk3": {
-      "extractRate": 4.2
+      "extractRate": 5.4
     },
     "deep_bore": {
-      "extractRate": 1.8
+      "extractRate": 2.6
     },
     "quarry": {
-      "extractRate": 1.0
+      "extractRate": 1.3
     },
     "fluid_pump": {
-      "extractRate": 7
+      "extractRate": 9
     },
     "gas_extractor": {
-      "extractRate": 5
+      "extractRate": 6.5
     },
     "biomass_harvester": {
-      "extractRate": 1.0
+      "extractRate": 1.4
     },
     "storage_crate": {
       "storage": 1000,
@@ -129,10 +130,10 @@
       "powerGen": 650
     },
     "lab": {
-      "researchRate": 1.2
+      "researchRate": 1.6
     },
     "research_station": {
-      "researchRate": 3.6
+      "researchRate": 4.6
     },
     "watchtower": {
       "dps": 22,
@@ -263,7 +264,7 @@
     }
   },
   "waves": {
-    "note": "Pacing pass: a longer grace, a slower ramp and a seven-minute floor between attacks, so the middle of a run is build-and-explore time punctuated by a fight rather than a constant siege.",
+    "note": "Pacing pass 3. A run to a rocket is six to eight hours and forty-odd attacks, so the curve has to be a slope rather than a cliff: the old 1.14 growth put wave 40 through the 700 cap and nothing short of artillery and shields held it. A seven-and-a-half minute floor between attacks keeps the middle of a run build-and-explore time punctuated by a fight.",
     "grace": {
       "easy": 1500,
       "normal": 900,
@@ -276,30 +277,32 @@
     },
     "interval": {
       "base": 600,
-      "min": 420,
-      "shrinkPerWave": 8,
+      "min": 450,
+      "shrinkPerWave": 6,
       "jitter": 0.15
     },
     "threat": {
       "decayPerSecond": 0.6,
       "perPollutionUnit": 0.8,
       "perNoiseUnit": 0.5,
-      "perNestPerSecond": 0.05
+      "perNestPerSecond": 0.05,
+      "waveCleared": -90,
+      "nestKilled": -120
     },
     "budget": {
       "base": 5,
-      "growth": 1.14,
-      "threatShare": 0.004,
-      "cap": 700
+      "growth": 1.075,
+      "threatShare": 0.003,
+      "cap": 520
     },
     "escalation": {
       "surgeEvery": 5,
-      "surgeMultiplier": 1.5,
+      "surgeMultiplier": 1.35,
       "surgeFronts": 2,
       "bossEvery": 10,
-      "armorPerWave": 0.1,
-      "hpPerWave": 0.045,
-      "speedPerWave": 0.008
+      "armorPerWave": 0.08,
+      "hpPerWave": 0.04,
+      "speedPerWave": 0.007
     },
     "nests": {
       "note": "Nests are a slow bleed between waves: every so often one lets a couple of wanderers out on their own clock. Clearing one pays a bounty and drops the threat.",
@@ -510,15 +513,24 @@
     }
   },
   "bot": {
-    "note": "Knobs for the simulator bot in js/ai.js: how far from the pod it will build, how much of a thing it stockpiles before throttling the machine making it, and when it starts spending on defence.",
+    "note": "Knobs for the simulator bot in js/ai.js. How far it will spread from the pod (compactRadius to maxReach, on a latticeStride pitch), how many stores, scanners, generators, harvesters and turrets it is allowed before it is only filling the map, how many machines it will put on one recipe, how much science pack it plans for per second, how much headroom it leaves on generator fuel, and how hard it spends on defence per wave. maxReach and the scanner count are worked out from the map size when they are not set here.",
     "compactRadius": 26,
     "outpostChainStep": 11,
     "turretsPerWave": 2.2,
-    "maxTurrets": 42,
+    "maxTurrets": 36,
     "powerHeadroom": 1.25,
-    "maxRoadTiles": 60,
-    "maxGenerators": 40,
-    "maxPerGenerator": 20,
-    "maxScanners": 16
+    "maxRoadTiles": 40,
+    "maxGenerators": 44,
+    "maxPerGenerator": 18,
+    "maxScanners": 48,
+    "maxWarehouses": 24,
+    "maxCrates": 36,
+    "fuelHeadroom": 1.2,
+    "maxHarvesters": 14,
+    "maxPerRecipe": 20,
+    "maxPackRate": 0.6,
+    "latticeStride": 4,
+    "poleSpacing": 8,
+    "tilesPerScanner": 2000
   }
 }

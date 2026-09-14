@@ -2,6 +2,75 @@
 import { Speaker, Entity } from '../../../lingo/js/lingo.js';
 import { Scene } from '../../../lingo/js/context.js';
 import { lexiconEntryFor } from '../../../library/js/make.js';
+import { voiceFor } from '../../../shared/voices.js';
+
+// ---------------------------------------------------------------- what is in the hand
+// A line that talks about a weapon has to mean the weapon the hero is actually holding. Before this
+// existed, the ammunition bark picked a random word out of the lexicon and archers shouted "I'm out
+// of bows!". Now every line a character speaks carries three extra bindings —
+//   weapon      the equipped weapon as an Entity, so {weapon} reads "longsword"
+//   weaponType  the family below, so a phrase can say cond: "weaponType==='bow'"
+//   ammo        what that weapon runs out of, or nothing at all
+// — and a phrase that mentions ammunition is written with cond: "ammo", so a sword or a staff is
+// never offered it. See lingo/data/grammar.json (combat_bark, brag).
+
+/** Weapon subtype (data/items.json weaponBases) → the family spoken lines care about. */
+export const WEAPON_KINDS = {
+  bow: 'bow', crossbow: 'crossbow', sling: 'sling',
+  javelin: 'thrown', dart: 'thrown', throwing: 'thrown', knife: 'thrown',
+  staff: 'caster', wand: 'caster', scepter: 'caster', orb: 'caster', tome: 'caster',
+  sword: 'blade', sword2h: 'blade', dagger: 'blade', axe: 'blade', axe2h: 'blade',
+  polearm: 'polearm', spear: 'polearm',
+  hammer: 'blunt', mace: 'blunt', club: 'blunt',
+};
+/** What each of those runs out of. A family that is not here has no ammunition and never says so. */
+export const WEAPON_AMMO = {
+  bow: ['arrow', 'arrows'],
+  crossbow: ['bolt', 'bolts'],
+  sling: ['stone', 'stones'],
+  thrown: ['throwing knife', 'throwing knives'],
+};
+/** The families that shoot or throw something. */
+export const RANGED_KINDS = Object.keys(WEAPON_AMMO);
+/** Which family is this weapon? An unknown subtype counts as melee, which is the quiet answer. */
+export function weaponKind(it) {
+  if (!it) return '';
+  const sub = String(it.subtype || it.baseKey || '').toLowerCase();
+  if (WEAPON_KINDS[sub]) return WEAPON_KINDS[sub];
+  for (const [k, kind] of Object.entries(WEAPON_KINDS)) if (sub.includes(k)) return kind;
+  return 'blade';
+}
+/** `{ sg, pl }` for what this weapon runs out of, or null when it runs out of nothing. */
+export function ammoFor(it) {
+  const kind = weaponKind(it);
+  // a javelin IS its own ammunition, so it keeps its own name rather than borrowing a knife's
+  const sub = String(it?.subtype || '').toLowerCase();
+  if (sub === 'javelin') return { sg: 'javelin', pl: 'javelins' };
+  const a = WEAPON_AMMO[kind];
+  return a ? { sg: a[0], pl: a[1] } : null;
+}
+
+// ---------------------------------------------------------------- the Narrator
+/** The id the Narrator speaks under. Nothing on the stage ever has it, so it draws no bubble. */
+export const NARRATOR_ID = 'narrator';
+// Anything inside quotation marks is somebody talking, even in the middle of a description, so the
+// test looks at the words outside the quotes only.
+const QUOTED = /"[^"]*"|“[^”]*”|'(?:[^']{6,})'/g;
+const FIRST_PERSON = /\b(i|i'm|i'll|i've|i'd|my|me|we|we're|we've|we'll|our|us|let's)\b/i;
+/**
+ * Is this line the scene describing itself, rather than a person speaking?
+ *
+ * Event data in data/random-events.json labels its scene-setting paragraphs `speaker: "hero"` —
+ * "A massive wolf is caught in a rusted trap, too exhausted to snarl." A hero must never read those
+ * out. The test is simple and holds on the real data (102 of the 104 hero-labelled lines are scene
+ * text): a line with no first-person words outside its quotation marks is the scene talking.
+ */
+export function isSceneText(text) {
+  const t = String(text ?? '').trim();
+  if (!t) return false;
+  if (/^["'“‘]/.test(t)) return false;                 // the whole line is a quote: somebody said it
+  return !FIRST_PERSON.test(t.replace(QUOTED, ' '));
+}
 
 // ---------------------------------------------------------------- speaker typing
 // Combat phrases in lingo/data/grammar.json carry two extra tag families: enemy kind and hero role.
@@ -66,10 +135,59 @@ export class Talk {
     base.tagWeights = { ...only(ENEMY_KINDS, ch.kindTag || null), ...only(HERO_ROLES, role), ...(base.tagWeights || {}) };
     return base;
   }
-  ctx(from, to, extra = {}) { const ctx = { speaker: this.speaker(from), listener: to ? this.speaker(to) : undefined, ...extra }; return ctx; }
+  /**
+   * The bindings that come from what this character is holding. Every line they speak gets them, so
+   * a phrase can both name the weapon ({weapon}) and be gated on what kind it is (cond: "ammo").
+   * A character with an empty hand gets nothing, and the gated phrases are simply never offered.
+   */
+  gearBindings(ch) {
+    const it = ch?.equipment?.weapon; if (!it) return {};
+    const lex = this.lingo.lexicon;
+    const name = String(it.name || 'weapon');
+    const base = it.baseKey && lex.has(it.baseKey) ? lex.get(it.baseKey) : null;
+    const entry = base && !it.isUnique ? base
+      : { id: it.id || it.baseKey || 'weapon', type: 'item', proper: !!it.isUnique, forms: { sg: it.isUnique ? name : name.toLowerCase(), pl: name.toLowerCase() + 's' } };
+    const out = { weapon: new Entity(entry, { lexicon: lex }), weaponType: weaponKind(it), weaponSubtype: String(it.subtype || '') };
+    const ammo = ammoFor(it);
+    if (ammo) out.ammo = new Entity({ id: 'ammo_' + ammo.sg.replace(/\s+/g, '_'), type: 'item', forms: ammo }, { lexicon: lex });
+    return out;
+  }
+  ctx(from, to, extra = {}) { const ctx = { speaker: this.speaker(from), listener: to ? this.speaker(to) : undefined, ...this.gearBindings(from), ...extra }; return ctx; }
   scene(zoneId) { const Z = this.game.zone(zoneId); const act = Z?.act || 0; const tags = { 0: ['quiet', 'wild'], 1: ['wild', 'crowded'], 2: ['hot', 'ruined', 'dark'], 3: ['hot', 'dark', 'loud'], 4: ['dark', 'cold', 'quiet'], 5: ['dark', 'enclosed', 'damp'], 6: ['high', 'cold', 'ruined'] }[act] || ['wild']; return new Scene({ id: zoneId, name: Z?.name || zoneId, place: { id: zoneId, type: 'place', proper: true, forms: { sg: Z?.name || zoneId } }, tags, danger: Math.min(0.9, 0.2 + act * 0.12), comfort: 0.4, timeOfDay: 'day' }, this.lingo.lexicon); }
   /** Generate a line. Returns { text, speech, intent, tags } or null. */
   line(from, intent, { to = null, scene = null, bindings = {} } = {}) { try { const out = this.lingo.speak(intent, this.ctx(from, to, { scene: scene || this.scene(this.game.zoneId), ...bindings })); return out && out.text ? out : null; } catch (e) { console.warn('line failed', intent, e); return null; } }
+
+  // ------------------------------------------------------------ the Narrator
+  /**
+   * The Narrator. Scene text — "A massive wolf is caught in a rusted trap", "Your companions:
+   * silence", the wind coming down off the ridge — is not something a hero or an NPC says out loud,
+   * so it never goes to one of their mouths. It gets its own voice (shared/voices.js role
+   * `narrator`: slow, low, unhurried) and its own look in the log: italics, no portrait, no bubble
+   * over anyone's head.
+   *
+   * Always the same object, so the voice is the same from the first road to the last.
+   */
+  narrator() {
+    if (!this._narrator) {
+      this._narrator = {
+        id: NARRATOR_ID, name: 'Narrator', short: 'Narrator', isNarrator: true,
+        voice: voiceFor({ role: 'narrator', gender: 'n', seed: 20260913 }),
+        speech: { traits: [], formality: 0.7, verbosity: 0.6, cheer: 0.3, aggression: 0.1, confidence: 0.9, mood: -0.1, tics: [], custom: {} },
+      };
+    }
+    return this._narrator;
+  }
+  /**
+   * Wrap a piece of scene text as a Narrator line.
+   * @returns {{ who: object, line: { text, speech, narration: true } }|null} null for empty text.
+   */
+  narrate(text) {
+    const t = String(text ?? '').trim();
+    if (!t) return null;
+    return { who: this.narrator(), line: { text: t, speech: t, narration: true } };
+  }
+  /** The same for a generated line: hand it the { text } a lingo call returned. */
+  narrateLine(out) { return this.narrate(out?.text); }
 
   // ------------------------------------------------------------ combat openers
   /** Narration (no speaker, so no voice/tics): beast snarls, night raids, ambushes. */

@@ -54,7 +54,9 @@ export function canPlace(game, typeId, x, y, { ignoreCost = false, ignoreUnlock 
     if (!map.buildable[i] && !def.roadTier) return { ok: false, reason: 'ground is too steep' };
   }
   if (def.requiresNode) {
-    const node = nodeUnderFootprint(map, x, y, w, h);
+    // a bore follows the seam under the patch, so a patch the drills have emptied is exactly where
+    // one belongs - anything else and a world's chains end when its last patch of something does
+    const node = nodeUnderFootprint(map, x, y, w, h, { includeDepleted: !!def.infinite });
     if (!node) return { ok: false, reason: 'no resource node under it' };
     if (!node.scanned) return { ok: false, reason: 'nothing scanned there yet' };
     const kinds = def.requiresNode;
@@ -85,7 +87,7 @@ export function place(game, typeId, x, y, { free = false, instant = false, recip
     shield: def.shieldPool || 0, starvedFor: null, blocked: false, idleFor: 0,
   };
   if (def.requiresNode) {
-    const node = nodeUnderFootprint(game.map, x, y, fp.w, fp.h);
+    const node = nodeUnderFootprint(game.map, x, y, fp.w, fp.h, { includeDepleted: !!def.infinite });
     if (node) { s.nodeId = node.id; node.claimedBy = s.id; }
   }
   if (!s.recipe) {

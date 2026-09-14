@@ -2,9 +2,10 @@
  "schema": 1,
  "note": "Travel hazards for `crossing` nodes. The party walks the stage from one side to the other, then one of these blocks the way. Resolved by js/explore.js; every choice must end in a result, so each crossing needs at least one choice with no requirement. `dc` is a base difficulty: js/explore.js adds 2 per act. Rewards come back in the same shape a won fight returns ({ xp, gold, fame, drops }). R19: js/explore.js now reads this `difficulty` block off the game data (it used to be dead data \u2014 the defaults baked into explore.js were what ran).",
  "difficulty": {
-  "perAct": 3,
-  "cap": 30,
-  "rewardPerAct": 0.32
+  "perAct": 2,
+  "cap": 20,
+  "rewardPerAct": 0.32,
+  "note": "A skill check is d20 + one point per three attribute points (js/explore.js checkBonus, rules.js owns the divisor) against the choice's dc plus perAct per act, capped."
  },
  "crossings": [
   {
@@ -248,6 +249,7 @@
   },
   {
    "id": "toll_stone",
+   "enemyFamily": "humanoid",
    "name": "The Toll Stone",
    "scenery": "forest",
    "hazard": "people",
@@ -413,6 +415,7 @@
   },
   {
    "id": "wardens_gate",
+   "enemyFamily": "humanoid",
    "name": "The Warden's Gate",
    "scenery": "town",
    "hazard": "people",

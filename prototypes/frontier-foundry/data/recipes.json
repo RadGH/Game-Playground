@@ -361,6 +361,27 @@
       "unlock": "t_polymers"
     },
     {
+      "id": "sweeten_crude",
+      "name": "Sweeten Crude",
+      "category": "chemistry",
+      "machines": [
+        "chemical_plant",
+        "cracking_tower"
+      ],
+      "time": 9,
+      "power": 90,
+      "inputs": {
+        "crude_oil": 15,
+        "water": 6
+      },
+      "outputs": {
+        "sulfur": 5,
+        "fuel": 3
+      },
+      "unlock": "t_chemistry",
+      "desc": "Pulls the sour out of crude oil. Slower than digging sulfur, but oil is everywhere and sulfur is not - and a world with one small sulfur patch used to be a world where the chemistry pack ran out for good."
+    },
+    {
       "id": "make_acid",
       "name": "Cook Acid",
       "category": "chemistry",

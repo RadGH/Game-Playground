@@ -128,7 +128,9 @@ Every clip goes through `js/loudness.js` once, when it is first built:
    relative (−10 LU) gates. A 200 ms sound effect is shorter than one block, so short clips get a
    single ungated block instead. It is an estimate, not a certified meter — but it lines 118 sounds
    up by ear far better than plain RMS does, because it weights the frequencies people actually hear.
-2. **Aim.** The target is the sound's category target plus its `trim`:
+2. **Aim.** The target is the sound's category target plus its `trim`. `js/loudness.js`
+   (`CATEGORY_TARGETS`) owns this table; `data/catalog.json` carries the same numbers so the data
+   reads on its own, and a node test fails if the two ever drift apart:
 
    | Category | Target | Bus |
    |---|---|---|
@@ -139,7 +141,16 @@ Every clip goes through `js/loudness.js` once, when it is first built:
    | world | −21 | sfx |
    | statuses | −22 | sfx |
    | interface | −26 | ui |
-   | ambience | −30 | ambience |
+   | ambience | −40 | ambience |
+
+   Ambience sits far below everything else on purpose. A one-off impact is over in 200 ms; a bed
+   plays for a whole act, and a level that is comfortable for two seconds is exhausting after ten
+   minutes. It used to aim at −30 and drowned the game it was in.
+
+   **Loops get two extra rules** (`optionsFor({ loop: true })`): a loop is never *boosted*
+   (`LOOP_MAX_BOOST_DB = 0`) — multiplying a quiet bed up only raises its hiss, and the player hears
+   that hiss for minutes at a time — but it may be cut a long way (`LOOP_MAX_CUT_DB = −44`) so a loud
+   bed really does come down to the target.
 
 3. **Apply, then bend the peaks.** Gain is clamped to ±24 dB (boosting a near-silent clip 40 dB only
    amplifies its noise floor). Peaks above −7 dBFS are bent along a `tanh` curve that asymptotes at
@@ -160,13 +171,15 @@ levelup           -10.6 → -18.0    (-7.4 dB)
 melee.crit        -21.1 → -16.2    (+6.8 dB)
 spell.holy.impact -27.7 → -16.7   (+12.1 dB)
 status.burn.apply -42.8 → -22.1   (+20.8 dB)
-ambience.forest   -20.6 → -30.0    (-9.4 dB)
+ambience.forest   -20.6 → -40.0   (-19.4 dB)
 ```
 
 A 32 dB spread going in, everything on its target coming out.
 
 **At play time** there is still a mixer: `source → panner → category bus (sfx / ui / ambience) →
-master → limiter → speakers`. The master limiter is a `DynamicsCompressorNode` at −3 dBFS with a
+master → limiter → speakers`. The **ambience bus is capped** at 0.6 linear (`busCap('ambience')`),
+whatever a volume slider asks for — the same reasoning as its loudness target, applied at the mixer
+so it also holds for a game that sets the bus itself. The other buses are uncapped. The master limiter is a `DynamicsCompressorNode` at −3 dBFS with a
 20:1 ratio. Nothing should reach it on its own; it is there for the moment six spells land in the
 same frame.
 

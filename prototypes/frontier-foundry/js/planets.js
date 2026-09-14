@@ -86,8 +86,11 @@ export function makePlanet({ id, seed, archetype, name, resourceTable = [], tier
     resources.push(must);
     scarce.push(must);
   }
-  const pool = RARE_BY_ARCHETYPE[archetype] || [];
-  const rareElements = pool.filter(() => true).slice(0, 1 + (rng() < 0.35 ? 1 : 0)).filter(r => resourceTable.some(x => x.id === r));
+  // Shuffle before taking one or two. Slicing the pool in order meant anything listed third or
+  // later - emberlace on arid, brinepearl on frozen and verdant, nullstone on barren and shattered -
+  // could never turn up on any seed, which is a building and a research node nobody would ever see.
+  const pool = rng.shuffle([...(RARE_BY_ARCHETYPE[archetype] || [])]);
+  const rareElements = pool.slice(0, 1 + (rng() < 0.45 ? 1 : 0)).filter(r => resourceTable.some(x => x.id === r));
   return {
     id: id ?? 'p_' + (seed ?? 1),
     name: name || planetName(subSeed(seed ?? 1, 'name:' + (id ?? ''))),
@@ -174,6 +177,7 @@ export function fromUniversePlanet(up, resourceTable = [], { dayScale = 12 } = {
     .map(r => UNIVERSE_RARE[r.key || r])
     .filter(id => id && resourceTable.some(x => x.id === id));
   const hazards = [...new Set((up.hazards || []).map(h => UNIVERSE_HAZARDS[h] || h))];
+  const isMoon = !!up.moon;
   return {
     ...base,
     archetype,
@@ -185,7 +189,15 @@ export function fromUniversePlanet(up, resourceTable = [], { dayScale = 12 } = {
     gravity: up.gravity ?? base.gravity,
     dayLength: Math.max(300, Math.round((up.dayLengthHours ?? 24) * dayScale)),
     tier: 1 + Math.round((up.difficulty ?? 0.5) * 4),
-    universe: { starId: up.star?.id ?? null, planetId: up.id, archetype: up.archetype },
+    // a moon is a landing target in its own right; these two fields are the only difference
+    moon: isMoon,
+    parentId: isMoon ? 'u' + (up.star?.id ?? 0) + '_' + up.parentId : null,
+    universe: {
+      starId: up.star?.id ?? null,
+      planetId: isMoon ? up.parentId : up.id,
+      moonId: isMoon ? up.id : null,
+      archetype: up.archetype,
+    },
   };
 }
 
@@ -195,16 +207,24 @@ export function fromUniversePlanet(up, resourceTable = [], { dayScale = 12 } = {
  * universe's own planetmap.generatePlanetMap where you have it - it is handed the ORIGINAL universe
  * planet, not the adapted one - and falls back to ours otherwise.
  */
-export function universePlanets(systems, resourceTable = [], { generateMap = null, landable = null } = {}) {
+export function universePlanets(systems, resourceTable = [], { generateMap = null, landable = null, moons = true } = {}) {
   const list = [], originals = new Map();
+  const ok = up => {
+    if (up.giant) return false;
+    if (landable) return !!landable(up);
+    return up.landable !== false;
+  };
+  const take = up => {
+    const p = fromUniversePlanet(up, resourceTable);
+    originals.set(p.id, up);
+    list.push(p);
+  };
   for (const sys of [].concat(systems || [])) {
     for (const up of sys.planets || []) {
-      if (up.giant) continue;
-      if (landable && !landable(up)) continue;
-      if (!landable && up.landable === false) continue;
-      const p = fromUniversePlanet(up, resourceTable);
-      originals.set(p.id, up);
-      list.push(p);
+      if (ok(up)) take(up);
+      // the moons come along even when the planet itself cannot be landed on — the moons of a gas
+      // giant are usually the reason to go there at all
+      if (moons) for (const um of up.moons || []) if (ok(um)) take(um);
     }
   }
   list.sort((a, b) => a.tier - b.tier);

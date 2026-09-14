@@ -662,6 +662,54 @@
           "I'll swap it before the next fight."
         ]
       }
+    },
+    "revive": {
+      "importance": 0.95,
+      "halfLifeDays": 150,
+      "valence": 0.9,
+      "core": true,
+      "intent": "recall_revive",
+      "tags": [
+        "gratitude",
+        "death",
+        "social"
+      ],
+      "mergeKeys": [
+        "by"
+      ],
+      "traitWeights": {
+        "loyal": 1.5,
+        "kind": 1.4,
+        "grieving": 1.3,
+        "proud": 0.8,
+        "cynical": 0.9,
+        "coward": 1.3
+      },
+      "bindings": {
+        "by": {
+          "type": "person"
+        },
+        "foe": {
+          "type": "creature",
+          "count": [
+            1,
+            4
+          ]
+        },
+        "place": {
+          "type": "place"
+        }
+      },
+      "details": {
+        "how": [
+          "hands on my chest until I breathed again",
+          "a prayer and a hard slap",
+          "a flask forced between my teeth",
+          "cold shrine water",
+          "a cleric's fee and no questions",
+          "sheer stubbornness"
+        ]
+      }
     }
   }
 }

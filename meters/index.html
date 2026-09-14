@@ -8,7 +8,7 @@
 <style>.layout.two{display:grid;grid-template-columns:1fr 1.4fr;gap:12px;padding:12px}@media(max-width:900px){.layout.two{grid-template-columns:1fr}}.panel h3{margin:4px 0 8px}.log{font-size:12px;max-height:40vh;overflow:auto;color:#bbb}</style>
 </head>
 <body>
-<div class="topbar"><a href="../" class="muted">← Playground</a><h1>Damage Meter</h1><span class="muted small">Skada-style: bars per fighter → click for sources (weapon, skill, dot, proc) → click for every hit with crit, overkill and damage type.</span><span class="spacer"></span><span id="status" class="small muted">loading…</span></div>
+<div class="topbar"><a href="../" class="muted">← Playground</a><h1>Damage Meter</h1><span class="muted small">Bars per fighter → click for sources (weapon, skill, dot, proc) → click for every hit with crit, overkill and damage type.</span><span class="spacer"></span><span id="status" class="small muted">loading…</span></div>
 <div class="layout two">
   <div class="panel"><h3>Simulated fights</h3><p class="small muted">The meter is a plain record log. Any game feeds it one record per hit or heal: who, whom, how much, through what (weapon, skill, effect), damage type, crit, overkill, killing blow. The Emberveil 2 prototype feeds it from its combat simulator.</p>
     <div class="row"><button id="btn-fight" class="primary">Simulate a fight</button><button id="btn-clear" class="small">Clear</button><label class="small">seed <input id="seed" type="number" value="1" style="width:70px"></label></div>

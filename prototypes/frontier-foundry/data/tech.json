@@ -343,9 +343,10 @@
         "chemical_plant",
         "make_acid",
         "leach_tailings",
-        "pack_chem"
+        "pack_chem",
+        "sweeten_crude"
       ],
-      "desc": "Acid and controlled reactions. Opens the chemistry pack, which is the gate on most of the mid tree."
+      "desc": "Acid and controlled reactions, and a way to pull sulfur out of sour crude. Opens the chemistry pack, which is the gate on most of the mid tree."
     },
     {
       "id": "t_polymers",

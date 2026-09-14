@@ -590,6 +590,9 @@
     },
     "conversation": {
       "with": "shared_meal"
+    },
+    "revive": {
+      "by": "saved_life"
     }
   }
 }

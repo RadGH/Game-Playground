@@ -31,6 +31,22 @@ export function accepts(game, store, res) {
   return list.includes(r.phase === 'liquid' ? 'liquid' : r.phase === 'gas' ? 'gas' : 'solid');
 }
 
+/**
+ * Will this building take a delivery of that resource?
+ *
+ * A store holds whatever its accepts list allows. A machine is not a store, but a truck can still
+ * drop a load straight into its own input buffer when the recipe it is running - or one it could
+ * run - eats that resource. That is the case the route tool kept refusing: a biomass harvester an
+ * awkward walk from a kiln, with nowhere sensible to put a depot in between.
+ */
+export function acceptsDelivery(game, s, res) {
+  if (accepts(game, s, res)) return true;
+  if (!s.def.storage) return false;
+  const ids = new Set([s.recipe, ...(game.data.recipesFor[s.type] || [])].filter(Boolean));
+  for (const id of ids) if (game.data.recipe[id]?.inputs?.[res] != null) return true;
+  return false;
+}
+
 /** How much is in a structure right now. */
 export const load = s => Object.values(s.inv).reduce((a, b) => a + b, 0);
 export const space = s => Math.max(0, (s.cap || 0) - load(s));
@@ -354,7 +370,7 @@ export function tickExtraction(game, dt) {
       continue;
     }
     const node = s.nodeId ? game.nodeById(s.nodeId) : null;
-    if (!node || node.depleted) { s.busy = false; continue; }
+    if (!node || (node.depleted && !def.infinite)) { s.busy = false; continue; }
     const rate = def.extractRate * node.richness * power * techBonus * game.diff.extract * dt;
     const got = def.infinite ? rate : Math.min(rate, node.amount);
     if (got <= 0) { s.busy = false; continue; }

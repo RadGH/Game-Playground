@@ -4,7 +4,7 @@
 
 import { findPath, costField } from './map.js';
 import { pathTime, cycleTime, routeThroughput } from './rules.js';
-import { accepts, space, load, isStore, roomFor } from './production.js';
+import { accepts, acceptsDelivery, space, load, isStore, roomFor } from './production.js';
 import { available, takeCost } from './build.js';
 
 const centreTile = (map, s) => Math.min(map.width * map.height - 1, (s.y + (s.h >> 1)) * map.width + (s.x + (s.w >> 1)));
@@ -49,7 +49,11 @@ export function addRoute(game, spec) {
   if (from.state !== 'done' || to.state !== 'done') return { ok: false, reason: 'both ends must be finished' };
   const res = spec.resource;
   if (!game.data.resource[res]) return { ok: false, reason: 'no such resource' };
-  if (!accepts(game, to, res)) return { ok: false, reason: `${to.def.name} will not hold ${game.data.resource[res].name}` };
+  if (!acceptsDelivery(game, to, res)) {
+    return { ok: false, reason: to.def.storage
+      ? `${to.def.name} has no use for ${game.data.resource[res].name} — it neither stores it nor eats it`
+      : `${to.def.name} has nowhere to put ${game.data.resource[res].name}` };
+  }
   let vdef = spec.vehicle ? game.data.vehicle[spec.vehicle] : vehiclesFor(game, res)[0];
   if (!vdef) return { ok: false, reason: 'no truck that can carry that' };
   if (!vdef.carries.includes(phaseOf(game, res))) return { ok: false, reason: `a ${vdef.name} cannot carry that` };
@@ -203,10 +207,8 @@ export function tickLogistics(game, dt) {
       case 'loading': {
         r.progress += dt * dock;
         if (r.progress >= v.def.loadTime) {
-          const want = Math.min(capacityOf(v), from.inv[r.resource] || 0);
+          const want = takeFromPool(game, from, r.resource, capacityOf(v));
           if (want <= 0) { r.progress = v.def.loadTime; break; }        // wait at the source
-          from.inv[r.resource] -= want;
-          if (from.inv[r.resource] <= 1e-9) delete from.inv[r.resource];
           v.cargo = want; v.cargoRes = r.resource;
           r.progress = 0; r.state = 'toDest';
         }
@@ -238,6 +240,28 @@ export function tickLogistics(game, dt) {
       }
     }
   }
+}
+
+/**
+ * Take up to n of a resource out of a building, and then out of anything sharing its store pool.
+ *
+ * Everything in one pool is shared for free, so a run leaving one can load from any of it. Without
+ * that, "route from this drill" never moves a thing: the drill pushes what it digs into the pool
+ * the moment it comes out of the ground, so its own buffer is empty every time the truck looks.
+ */
+function takeFromPool(game, from, res, n) {
+  let got = 0;
+  const pool = [from, ...(from.links || []).map(id => game.byId(id))].filter(s => s && s.inv);
+  for (const s of pool) {
+    if (got >= n) break;
+    const have = s.inv[res] || 0;
+    if (have <= 0) continue;
+    const k = Math.min(n - got, have);
+    s.inv[res] -= k;
+    if (s.inv[res] <= 1e-9) delete s.inv[res];
+    got += k;
+  }
+  return got;
 }
 
 function takeFuel(game, ...stores) {

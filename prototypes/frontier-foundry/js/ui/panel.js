@@ -4,7 +4,7 @@
 // powered (the grid is short), starvedFor (an input is missing), blocked (the output has nowhere to
 // go). Between them they cover almost every jam in the game, so they are the first thing you read.
 
-import { $, el, fill, num, kw, clamp, countdown, titleCase } from './dom.js';
+import { $, el, fill, patch, num, kw, clamp, countdown, titleCase } from './dom.js';
 import { icon, rawIcon } from './icons.js';
 import { openDialog, closeDialog } from './hud.js';
 import { routeList } from './route-tool.js';
@@ -25,7 +25,7 @@ export class Panel {
     this.selection = selection;
     if (!selection.length) { this.node.hidden = true; return; }
     this.node.hidden = false;
-    this.render();
+    this.render(true);
   }
 
   /** Called every frame while something is selected, so the numbers stay live. */
@@ -40,7 +40,12 @@ export class Panel {
     this.render();
   }
 
-  render() {
+  /**
+   * `fresh` is a new selection, so the old panel is thrown away outright; a refresh of the same
+   * selection is patched in place instead. That is what keeps an open recipe dropdown open — the
+   * panel redraws four times a second and the old code replaced the <select> element every time.
+   */
+  render(fresh = false) {
     const sel = this.selection;
     const s = sel[0];
     const body = sel.length > 1 ? this._multi(sel) :
@@ -51,7 +56,9 @@ export class Panel {
               : s.kind === 'nest' ? this._nest(s.nest)
                 : s.kind === 'node' ? this._node(s.node)
                   : el('p.tiny', { text: 'Nothing here.' });
-    fill(this.node, body, el('button.small.ghost', { text: 'close', onClick: () => this.surface.select([]) }));
+    const close = el('button.small.ghost', { text: 'close', onClick: () => this.surface.select([]) });
+    if (fresh) fill(this.node, body, close);
+    else patch(this.node, body, close);
   }
 
   _head(iconEl, title, sub) {
@@ -104,15 +111,18 @@ export class Panel {
       box.append(this._row('Store', `${Math.round(load)} / ${s.cap}`,
         'One resource may take at most a quarter of a store, and raw materials half of it together — otherwise ore fills every crate and the factory deadlocks.'));
     }
+    const pool = el('div.sp-pool');            // always present: a pool can appear and vanish as you build
     if (s.pool != null && s.pool >= 0) {
       const mates = (s.links || []).length;
-      box.append(this._row('Store pool', mates ? `${mates + 1} buildings` : 'on its own',
+      pool.append(this._row('Store pool', mates ? `${mates + 1} buildings` : 'on its own',
         'Everything in one pool shares its contents for free. Anything outside it needs a delivery run.'));
     } else if (s.def.storage || s.recipe) {
-      box.append(el('div.status-line', null, el('i.dot.warn'), el('span', { text: 'Out of reach of any store — it can only use its own buffer.' })));
+      pool.append(el('div.status-line', null, el('i.dot.warn'), el('span', { text: 'Out of reach of any store — it can only use its own buffer.' })));
     }
+    box.append(pool);
 
-    // inventory
+    // inventory - in its own slot, because a machine empties and fills while you are looking at it
+    const hold = el('div.sp-hold');
     const inv = Object.entries(s.inv).filter(([, n]) => n > 0.01);
     if (inv.length) {
       const grid = el('div.inv-grid');
@@ -120,14 +130,18 @@ export class Panel {
         const d = g.data.resource[r];
         grid.append(el('span.iv', { tip: d?.name || r }, icon('res', d, { size: 14 }), String(Math.round(n * 10) / 10)));
       }
-      box.append(this._section('Holding', grid));
+      hold.append(this._section('Holding', grid));
     }
+    box.append(hold);
 
     // recipe
+    // The <select> carries a key, so a refresh updates this element instead of building a new one.
+    // The key has the building's id in it: point at a different building and you get a new control,
+    // because the change handler below is wired to this one.
     const recipes = [...(g.data.recipesFor[s.type] || [])].filter(r => g.isUnlocked(r));
     if (recipes.length) {
       const cur = s.recipe ? g.data.recipe[s.recipe] : null;
-      const sel = el('select.small');
+      const sel = el('select.small', { key: 'recipe:' + s.id });
       sel.append(el('option', { value: '', text: '— nothing —' }));
       for (const r of recipes) {
         const rd = g.data.recipe[r];
@@ -146,8 +160,8 @@ export class Panel {
         bits.push(b);
         bits.push(el('div.tiny', { text: `${s.crafted} made` }));
       }
-      box.append(this._section('Recipe', sel, ...bits));
-    }
+      box.append(el('div.sp-recipe', null, this._section('Recipe', sel, ...bits)));
+    } else box.append(el('div.sp-recipe'));      // always present, so the recipe control never moves
 
     // routes touching this building
     const mine = g.routes.filter(r => r.from === s.id || r.to === s.id);

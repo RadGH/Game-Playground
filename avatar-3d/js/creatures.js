@@ -120,8 +120,13 @@ function animQuad(st, dt) {
 }
 
 // ------------------------------------------------------------------ spider
+// The spider stands ON its legs: each leg goes UP from the body to a knee above the abdomen and then
+// straight back DOWN to the floor, which is what makes a spider read as a spider. It used to be built
+// the other way round (knee down, foot up) with legs too short to reach the ground, so the body sat in
+// the dirt and the whole thing looked upside down (E17). LEG_* are the proportions of one leg.
+const SPIDER_LEG = { up: 0.52, upper: 0.6, lower: 1.0, body: 0.76, knee: -1.72 };  // radians / multiples of legLen
 function buildSpider(root, T, s) {
-  const B = T.body, C = s.colors, F = s.features; const P = { legs: [] }; const y = B.legLen * 0.55; P.bodyY = y;
+  const B = T.body, C = s.colors, F = s.features; const P = { legs: [] }; const L = SPIDER_LEG; const y = B.legLen * L.body; P.bodyY = y;
   const body = new THREE.Group(); body.position.y = y; root.add(body); P.hip = body;
   const abdomen = sphere(B.abdomenR, C.body); abdomen.position.z = -B.abdomenR * 0.9; abdomen.scale.set(1, 0.9, 1.2); body.add(abdomen);
   const mark = sphere(B.abdomenR * 0.35, C.accent, 10); mark.position.set(0, B.abdomenR * 0.8, -B.abdomenR * 0.9); mark.scale.set(1, 0.3, 1.6); body.add(mark);
@@ -131,14 +136,27 @@ function buildSpider(root, T, s) {
   for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; const big = i < 2; const e = sphere(B.headR * (big ? 0.28 : 0.14), C.eyes, 8); e.position.set(Math.sin(a) * B.headR * 0.55 * (big ? 0.6 : 1), B.headR * 0.35 + Math.cos(a) * B.headR * 0.25, B.headR * 0.85); head.add(e); }
   const jaw = new THREE.Group(); jaw.position.set(0, -B.headR * 0.4, B.headR * 0.6); head.add(jaw); P.jaw = jaw;
   if (F.fangs) for (const x of [-1, 1]) { const f = cone(B.headR * 0.18, B.headR * 0.7, C.accent, 6); f.rotation.x = Math.PI + 0.4; f.position.set(x * B.headR * 0.35, -B.headR * 0.1, B.headR * 0.1); jaw.add(f); }
-  for (let i = 0; i < 8; i++) { const side = i < 4 ? -1 : 1; const k = i % 4; const z = B.thoraxR * (0.9 - k * 0.55); const pivot = new THREE.Group(); pivot.position.set(side * B.thoraxR * 0.8, 0, z); pivot.rotation.y = side * (0.9 - k * 0.55); body.add(pivot); const upper = capsule(B.legR, B.legLen * 0.5, C.body); upper.rotation.z = side * -Math.PI / 2; upper.position.x = side * B.legLen * 0.27; pivot.add(upper); const elbow = new THREE.Group(); elbow.position.x = side * B.legLen * 0.52; pivot.add(elbow); const lower = capsule(B.legR * 0.8, B.legLen * 0.55, shade(C.body, -0.15)); lower.rotation.z = side * -Math.PI / 2; lower.position.x = side * B.legLen * 0.28; elbow.add(lower); pivot.rotation.z = side * -0.55; elbow.rotation.z = side * 1.35; P.legs.push({ pivot, elbow, side, k, base: pivot.rotation.z, baseE: elbow.rotation.z }); }
+  for (let i = 0; i < 8; i++) {
+    const side = i < 4 ? -1 : 1; const k = i % 4; const z = B.thoraxR * (0.9 - k * 0.55);
+    const pivot = new THREE.Group(); pivot.position.set(side * B.thoraxR * 0.8, 0, z); pivot.rotation.y = side * (0.9 - k * 0.55); body.add(pivot);
+    // upper segment: lies along the arm's local +x (side), so a positive side*angle lifts it
+    const upper = capsule(B.legR, B.legLen * L.upper, C.body); upper.rotation.z = side * -Math.PI / 2; upper.position.x = side * B.legLen * L.upper * 0.5; pivot.add(upper);
+    const elbow = new THREE.Group(); elbow.position.x = side * B.legLen * L.upper; pivot.add(elbow);
+    const lower = capsule(B.legR * 0.75, B.legLen * L.lower, shade(C.body, -0.15)); lower.rotation.z = side * -Math.PI / 2; lower.position.x = side * B.legLen * L.lower * 0.5; elbow.add(lower);
+    const foot = cone(B.legR * 1.3, B.legLen * 0.12, shade(C.body, -0.3), 6); foot.rotation.z = side * Math.PI / 2; foot.position.x = side * B.legLen * (L.lower + 0.06); elbow.add(foot);
+    pivot.rotation.z = side * L.up;          // knee up, above the abdomen
+    elbow.rotation.z = side * L.knee;        // then straight back down to the floor
+    P.legs.push({ pivot, elbow, side, k, base: pivot.rotation.z, baseE: elbow.rotation.z });
+  }
   return P;
 }
 function animSpider(st) {
   const P = st.parts, t = st.t, an = st.anim; const S = st.root;
-  if (an === 'dead') { S.rotation.x = Math.PI; S.position.y = P.bodyY * 1.6 * st.spec.size; for (const l of P.legs) { l.pivot.rotation.z = l.side * 0.9; l.elbow.rotation.z = l.side * 1.9; } return; }
+  // dead: rolled onto its back with the legs curled in over it
+  if (an === 'dead') { S.rotation.x = Math.PI; S.position.y = P.bodyY * 1.7 * st.spec.size; for (const l of P.legs) { l.pivot.rotation.z = l.side * 0.35; l.elbow.rotation.z = l.side * 2.3; } return; }
   S.rotation.x = 0; S.position.y = 0; const moving = an === 'walk' || an === 'run'; const speed = an === 'run' ? 16 : 9;
-  for (const l of P.legs) { const ph = (l.k % 2 === 0 ? 0 : Math.PI) + (l.side < 0 ? Math.PI : 0); const lift = moving ? Math.max(0, Math.sin(t * speed + ph)) * 0.35 : Math.sin(t * 1.3 + l.k) * 0.03; l.pivot.rotation.z = l.base - l.side * lift; l.elbow.rotation.z = l.baseE + l.side * lift * 0.8; l.pivot.rotation.y += moving ? Math.cos(t * speed + ph) * 0.004 : 0; }
+  // walking lifts the foot by straightening the knee a little, never by dropping the body
+  for (const l of P.legs) { const ph = (l.k % 2 === 0 ? 0 : Math.PI) + (l.side < 0 ? Math.PI : 0); const lift = moving ? Math.max(0, Math.sin(t * speed + ph)) * 0.3 : Math.sin(t * 1.3 + l.k) * 0.03; l.pivot.rotation.z = l.base + l.side * lift * 0.35; l.elbow.rotation.z = l.baseE + l.side * lift; l.pivot.rotation.y += moving ? Math.cos(t * speed + ph) * 0.004 : 0; }
   P.hip.position.y = P.bodyY + (an === 'attack' ? Math.abs(Math.sin(t * 6)) * 0.1 : moving ? Math.abs(Math.sin(t * speed * 0.5)) * 0.02 : Math.sin(t * 2) * 0.01);
   P.hip.rotation.x = an === 'attack' ? -0.3 : 0; P.jaw.rotation.x = an === 'attack' ? Math.sin(t * 12) * 0.3 : an === 'talk' ? Math.sin(t * 8) * 0.2 : 0;
   P.head.rotation.y = an === 'idle' ? Math.sin(t * 0.6) * 0.2 : 0;

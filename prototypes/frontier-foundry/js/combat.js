@@ -13,13 +13,21 @@ import { grantResearch } from './research.js';
 const IDX = (map, x, y) => (y | 0) * map.width + (x | 0);
 const centre = s => ({ x: s.x + s.w / 2, y: s.y + s.h / 2 });
 
-/** Put a few nests on the map when a planet is first landed on. */
+/**
+ * Put a few nests on the map when a planet is first landed on.
+ *
+ * The count is per world cell, not per grid: a streamed map is many cells wide, and scaling the
+ * nests with the whole grid would multiply the threat clock by the number of chunks. They go in the
+ * neighbourhood you landed in, which is the part of the map you will actually walk through.
+ */
 export function seedNests(game, count = null) {
   const table = game.data.nestTables[game.planet.archetype] || ['crawler_nest'];
-  const n = count ?? Math.max(2, Math.round(game.map.width * game.map.height / 2600));
+  const cell = game.map.size || game.map.width;
+  const n = count ?? Math.max(2, Math.round(cell * cell / 2600));
   const hq = game.hq();
-  for (let k = 0; k < n * 4 && game.nests.length < n; k++) {
-    const x = game.rng.int(4, game.map.width - 6), y = game.rng.int(4, game.map.height - 6);
+  const b = nestBox(game);
+  for (let k = 0; k < n * 8 && game.nests.length < n; k++) {
+    const x = game.rng.int(b.x0, b.x1), y = game.rng.int(b.y0, b.y1);
     const i = IDX(game.map, x, y);
     if (!game.map.buildable[i]) continue;
     if (hq && Math.hypot(x - hq.x, y - hq.y) < 26) continue;
@@ -27,6 +35,17 @@ export function seedNests(game, count = null) {
     const def = game.data.unit[game.rng.pick(table)];
     game.nests.push({ id: game.nextId++, type: def.id, def, x, y, hp: def.hp, maxHp: def.hp, alive: true, cd: def.spawns?.every || 60 });
   }
+}
+
+/** The box nests are scattered in: the generated part of the grid, clipped to a walk of the base. */
+function nestBox(game) {
+  const m = game.map;
+  const b = m.chunk ? m.chunk.bounds : { x0: 0, y0: 0, x1: m.width - 1, y1: m.height - 1 };
+  const hq = game.hq();
+  const reach = (m.size || m.width) * 0.75;
+  const x0 = Math.max(4, b.x0 + 2, hq ? hq.x - reach : 0), x1 = Math.min(m.width - 6, b.x1 - 2, hq ? hq.x + reach : m.width);
+  const y0 = Math.max(4, b.y0 + 2, hq ? hq.y - reach : 0), y1 = Math.min(m.height - 6, b.y1 - 2, hq ? hq.y + reach : m.height);
+  return { x0: Math.round(x0), y0: Math.round(y0), x1: Math.round(Math.max(x0 + 1, x1)), y1: Math.round(Math.max(y0 + 1, y1)) };
 }
 
 /** Threat accounting, and deciding when the next wave leaves. */
@@ -85,11 +104,18 @@ function pickEdge(game, offset = 0) {
   const cx = done.length ? done.reduce((a, s) => a + s.x, 0) / done.length : (hq?.x ?? game.map.width / 2);
   const cy = done.length ? done.reduce((a, s) => a + s.y, 0) / done.length : (hq?.y ?? game.map.height / 2);
   const m = game.data.waves.spawning.edgeMargin;
+  // The edge of the world you have loaded, never further than one world cell from the base - on a
+  // streamed map the far corner of the grid is a twenty minute walk and the wave would never land.
+  const map = game.map;
+  const b = map.chunk ? map.chunk.bounds : { x0: 0, y0: 0, x1: map.width - 1, y1: map.height - 1 };
+  const reach = game.data.waves.spawning.spawnDistance ?? (map.size || map.width) * 0.6;
+  const north = Math.max(b.y0 + m, cy - reach), south = Math.min(b.y1 - m, cy + reach);
+  const west = Math.max(b.x0 + m, cx - reach), east = Math.min(b.x1 - m, cx + reach);
   const sides = [
-    { name: 'north', x: Math.round(cx), y: m, d: cy },
-    { name: 'south', x: Math.round(cx), y: game.map.height - 1 - m, d: game.map.height - cy },
-    { name: 'west', x: m, y: Math.round(cy), d: cx },
-    { name: 'east', x: game.map.width - 1 - m, y: Math.round(cy), d: game.map.width - cx },
+    { name: 'north', x: Math.round(cx), y: Math.round(north), d: cy - north },
+    { name: 'south', x: Math.round(cx), y: Math.round(south), d: south - cy },
+    { name: 'west', x: Math.round(west), y: Math.round(cy), d: cx - west },
+    { name: 'east', x: Math.round(east), y: Math.round(cy), d: east - cx },
   ].sort((a, b) => a.d - b.d);
   return sides[offset % sides.length];
 }

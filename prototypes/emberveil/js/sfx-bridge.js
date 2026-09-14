@@ -23,7 +23,7 @@
 // audibly on the right. Loudness is handled entirely by sfx/js/sfx.js — every clip is measured and
 // levelled when it is built, which is why a recorded punch and a synthesized fireball sit at the
 // same volume here.
-import { Sfx } from '../../../sfx/js/sfx.js';
+import { Sfx, busCap } from '../../../sfx/js/sfx.js';
 import { makeStore } from '../../../shared/store.js';
 import { elementName } from '../../../avatar-3d/js/spellfx.js';
 
@@ -301,6 +301,9 @@ export async function installSfx({ stage, game = null, store = null, root = docu
   };
   slider(settings.master, v => sfx.setVolume(v), () => sfx.volume);
   slider(settings.ui, v => sfx.setBusVolume('ui', v), () => sfx.busVolume('ui'));
+  // The ambience bus is capped in sfx.js (a bed plays for a whole act, so it is mixed under the rest).
+  // Move the slider's top end down to the cap as well, so it never offers a level it cannot give.
+  if (settings.amb) settings.amb.max = String(busCap('ambience'));
   slider(settings.amb, v => sfx.setBusVolume('ambience', v), () => sfx.busVolume('ambience'));
   if (settings.mute) {
     settings.mute.checked = sfx.muted;

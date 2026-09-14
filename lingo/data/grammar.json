@@ -2610,7 +2610,8 @@
           "ranger",
           "brag",
           "short"
-        ]
+        ],
+        "cond": "weaponType==='bow'"
       },
       {
         "t": "Write this down. Somebody write this down.",
@@ -2647,6 +2648,21 @@
           "brag",
           "money"
         ]
+      },
+      {
+        "t": "One bolt each. I counted them out beforehand.",
+        "tags": [
+          "ranger",
+          "brag"
+        ],
+        "cond": "weaponType==='crossbow'"
+      },
+      {
+        "t": "This {weapon} has never once let me down. Say that about a person.",
+        "tags": [
+          "brag"
+        ],
+        "cond": "weapon"
       }
     ],
     "work": [
@@ -3060,7 +3076,8 @@
         "tags": [
           "ranger",
           "short"
-        ]
+        ],
+        "cond": "weaponType==='bow'"
       },
       {
         "t": "Take the small ones first!",
@@ -3075,10 +3092,26 @@
         ]
       },
       {
-        "t": "I'm out of {$item.pl}!",
+        "t": "I'm out of {ammo.pl}!",
         "tags": [
           "worried"
-        ]
+        ],
+        "cond": "ammo"
+      },
+      {
+        "t": "Last {ammo.sg}! Make it count!",
+        "tags": [
+          "worried",
+          "short"
+        ],
+        "cond": "ammo"
+      },
+      {
+        "t": "Somebody find me {ammo.pl}!",
+        "tags": [
+          "worried"
+        ],
+        "cond": "ammo"
       },
       {
         "t": "Keep the line! Keep the line!",
@@ -3179,6 +3212,36 @@
         "tags": [
           "ranger"
         ]
+      },
+      {
+        "t": "Cranking! Cover me!",
+        "tags": [
+          "ranger",
+          "short"
+        ],
+        "cond": "weaponType==='crossbow'"
+      },
+      {
+        "t": "Keep them off me while I reload.",
+        "tags": [
+          "ranger"
+        ],
+        "cond": "weaponType==='crossbow'"
+      },
+      {
+        "t": "One good throw and this is over.",
+        "tags": [
+          "ranger",
+          "confident"
+        ],
+        "cond": "weaponType==='thrown'"
+      },
+      {
+        "t": "Too close for shooting — blades, then.",
+        "tags": [
+          "ranger"
+        ],
+        "cond": "weaponType==='blade'"
       }
     ],
     "combat_taunt": [
@@ -5193,26 +5256,53 @@
     "recall_wounded": [
       {
         "t": "My {bodypart} still aches from {memory.when}. {foe.cap.a} got a hand in.",
-        "w": 2
+        "w": 2,
+        "bind": {
+          "bodypart": {
+            "type": "bodypart"
+          }
+        }
       },
       {
         "t": "{memory.when.cap}, {foe.a} took a piece of my {bodypart} at {place.the}. I took more from it.",
         "tags": [
           "violent"
-        ]
+        ],
+        "bind": {
+          "bodypart": {
+            "type": "bodypart"
+          }
+        }
       },
       {
         "t": "See this {bodypart}? {memory.when.cap}. {foe.cap.pl}. Don't touch it.",
         "tags": [
           "short",
           "gruff"
-        ]
+        ],
+        "bind": {
+          "bodypart": {
+            "type": "bodypart"
+          }
+        }
       },
       {
         "t": "I nearly lost the {bodypart} {memory.when}. I still dream about the {foe.pl}.",
         "tags": [
           "worried",
           "timid"
+        ],
+        "bind": {
+          "bodypart": {
+            "type": "bodypart"
+          }
+        }
+      },
+      {
+        "t": "{memory.when.cap} I went down. {foe.cap.pl}. I do not want to talk about it.",
+        "tags": [
+          "short",
+          "gloomy"
         ]
       }
     ],
@@ -5439,7 +5529,12 @@
         "tags": [
           "religious"
         ],
-        "w": 2
+        "w": 2,
+        "bind": {
+          "deity": {
+            "type": "deity"
+          }
+        }
       },
       {
         "t": "{memory.sign.cap}, {memory.when}. You can laugh. I'm not laughing.",
@@ -5458,47 +5553,82 @@
     "recall_lore": [
       {
         "t": "{figure.name} held {place.the} once. Before your time. Before mine.",
-        "w": 2
+        "w": 2,
+        "bind": {
+          "figure": {
+            "type": "person"
+          }
+        }
       },
       {
         "t": "They say {figure.name} could {~outdrink a {$race.sg}|talk down a {$creature}|cast {$spell} with a word|make a {$race.sg} weep}. They say a lot.",
         "tags": [
           "lore",
           "long"
-        ]
+        ],
+        "bind": {
+          "figure": {
+            "type": "person"
+          }
+        }
       },
       {
         "t": "Ask the {$race.pl} about {figure.name}. Then ask the {$race2.pl}. Two different people.",
         "tags": [
           "lore",
           "scholar"
-        ]
+        ],
+        "bind": {
+          "figure": {
+            "type": "person"
+          }
+        }
       },
       {
         "t": "{figure.name} is buried under {place.the}, or so the {$title.pl} claim.",
         "tags": [
           "lore"
-        ]
+        ],
+        "bind": {
+          "figure": {
+            "type": "person"
+          }
+        }
       }
     ],
     "recall_lineage": [
       {
         "t": "My {memory.relation} served {figure.name}. We don't talk about how it ended.",
-        "w": 2
+        "w": 2,
+        "bind": {
+          "figure": {
+            "type": "person"
+          }
+        }
       },
       {
         "t": "{figure.name}'s blood is in my line, through my {memory.relation}. It shows, some days.",
         "tags": [
           "brag",
           "pompous"
-        ]
+        ],
+        "bind": {
+          "figure": {
+            "type": "person"
+          }
+        }
       },
       {
         "t": "My {memory.relation} knew {figure.name}. Said {figure.they} {figure.verb(was)} shorter than the songs.",
         "tags": [
           "joke",
           "lore"
-        ]
+        ],
+        "bind": {
+          "figure": {
+            "type": "person"
+          }
+        }
       }
     ],
     "recall_generic": [
@@ -6284,44 +6414,81 @@
     "recall_deed": [
       {
         "t": "You're {hero.name}, aren't you? The one who {memory.what}. {~Drinks are on me.|About time somebody did.|Half the village doesn't believe it.}",
-        "w": 3
+        "w": 3,
+        "cond": "memory.hero && memory.what"
       },
       {
         "t": "They say {hero.name} {memory.what}{memory.place, select, undefined{} other{ out by {place.the}}}. I say good riddance.",
         "tags": [
           "blunt"
-        ]
+        ],
+        "cond": "memory.hero && memory.what"
       },
       {
         "t": "{hero.name}. {memory.when.cap} you {memory.what}. People talk. Some of it is even true.",
         "tags": [
           "sarcastic"
-        ]
+        ],
+        "cond": "memory.hero && memory.what"
       },
       {
         "t": "My cousin saw {hero.name} the day {hero.they} {memory.what}. Won't shut up about it.",
         "tags": [
           "joke",
           "long"
-        ]
+        ],
+        "cond": "memory.hero && memory.what"
       },
       {
         "t": "If you {memory.what}, you'll do for what's bothering us now.",
         "tags": [
           "earnest"
-        ]
+        ],
+        "cond": "memory.what"
       },
       {
         "t": "I heard about the {~cave|hill|bridge|camp}. I heard you {memory.what}. I heard a lot of things about you, {hero.name}.",
         "tags": [
           "suspicious"
-        ]
+        ],
+        "cond": "memory.hero && memory.what"
       },
       {
         "t": "{hero.name}! The one who {memory.what}! Sit, sit. Tell it again, the way it really happened.",
         "tags": [
           "joyful",
           "friendly"
+        ],
+        "cond": "memory.hero && memory.what"
+      },
+      {
+        "t": "{memory.deed.cap}. {~It answers to it now.|It has not missed since.|Laugh if you like.}",
+        "cond": "memory.deed",
+        "w": 2
+      },
+      {
+        "t": "This is the one I {memory.deed} {memory.when}. {item.cap.a} earns a name or it earns nothing.",
+        "cond": "memory.deed && memory.item",
+        "tags": [
+          "gruff"
+        ]
+      },
+      {
+        "t": "{memory.when.cap} I {memory.deed}, at {place.the}. Ask me why when you have an evening free.",
+        "cond": "memory.deed && memory.place",
+        "tags": [
+          "long"
+        ]
+      },
+      {
+        "t": "There was a day people still bring up. {~I was there.|Ask somebody else to tell it.|It went better than it deserved to.}",
+        "w": 2
+      },
+      {
+        "t": "You will have heard a version of it by now. The version with me in it is shorter.",
+        "tags": [
+          "sarcastic",
+          "short"
         ]
       }
     ],
@@ -8076,6 +8243,71 @@
       {
         "t": "Something heavy lands in the middle of the party and starts swinging.",
         "tags": []
+      }
+    ],
+    "recall_revive": [
+      {
+        "t": "I was gone. {by.name} brought me back {memory.when} — {memory.how}.",
+        "w": 2
+      },
+      {
+        "t": "{memory.when.cap} I stopped. {by.name} did not let that stand.",
+        "w": 2
+      },
+      {
+        "t": "There is a debt on me. {by.name} paid for my breath at {place.the}.",
+        "tags": [
+          "earnest"
+        ]
+      },
+      {
+        "t": "{by.name} knelt in the mud at {place.the} and argued me out of dying. {~I remember the weight of it.|I have not thanked {by.them} properly.}",
+        "tags": [
+          "long",
+          "gentle"
+        ]
+      },
+      {
+        "t": "Dead {memory.when}. Not dead now. Ask {by.name} why.",
+        "tags": [
+          "short",
+          "gruff"
+        ]
+      },
+      {
+        "t": "The {foe.pl} had me. {by.name} took me off the ground anyway.",
+        "tags": [
+          "violent",
+          "brave"
+        ],
+        "cond": "memory.foe"
+      },
+      {
+        "t": "{memory.when.cap} I saw the other side of it. {by.name} shut the door again.",
+        "tags": [
+          "worried",
+          "timid"
+        ]
+      },
+      {
+        "t": "{by.name} owes me nothing for the rest of this road. That is how it works now.",
+        "tags": [
+          "loyal",
+          "blunt"
+        ]
+      },
+      {
+        "t": "I woke up owing somebody. {~That is a strange feeling.|I am not used to it.}",
+        "tags": [
+          "cynical"
+        ]
+      },
+      {
+        "t": "Whatever {by.name} did — {memory.how} — it worked. I would rather not need it twice.",
+        "tags": [
+          "jolly",
+          "wry"
+        ]
       }
     ]
   }

@@ -34,8 +34,23 @@ const RECIPES = {
   tidalLocked: { method: 'plates', seaLevel: 0.55, rainfall: 0.45, temperature: 0.5, latitudeBands: 0, lapseRate: 0.35, mountainScale: 0.6, riverDensity: 0.4, biomeVariety: 0.7 },
 };
 
-/** False for the two giants — there is nothing down there to map. */
+/** False for the two giants — there is nothing down there to map. Moons always have a surface. */
 export function hasSurfaceMap(planet) { return !!planet && !planet.giant; }
+
+/**
+ * How big a moon's map should be. A moon is a small world: half the grid of the planet it orbits,
+ * which is a quarter of the cells, so it comes back in about a quarter of the time.
+ * Pass the planet's map size; get the moon's back, never smaller than 64×32.
+ */
+export function moonMapSize({ width = 256, height = 128 } = {}, scale = 0.5) {
+  return {
+    width: Math.max(64, Math.round(width * scale / 2) * 2),
+    height: Math.max(32, Math.round(height * scale / 2) * 2),
+  };
+}
+
+/** The map size to use for a body: a moon gets the smaller grid, a planet the full one. */
+export function mapSizeFor(body, size) { return body?.moon ? moonMapSize(size) : { ...size }; }
 
 /**
  * World Forge knobs for a planet. Deterministic: the same planet always gives the same knob set.
@@ -65,8 +80,8 @@ export function planetWorldOpts(planet, extra = {}) {
     atmosphereTint: planet.atmosphere.density > 0.08
       ? { color: planet.atmosphere.color, strength: clamp(0.05 + planet.atmosphere.density * 0.1, 0, 0.32) }
       : null,
-    // smaller worlds get fewer, smaller provinces
-    regionCount: Math.round(clamp(10 + planet.radius * 14, 6, 40)),
+    // smaller worlds get fewer, smaller provinces (a moon fewer again)
+    regionCount: Math.round(clamp((10 + planet.radius * 14) * (planet.moon ? 0.45 : 1), planet.moon ? 4 : 6, 40)),
     settlementDensity: planet.archetype === 'living' ? 0.6 : planet.archetype === 'jungle' || planet.archetype === 'ocean' || planet.archetype === 'tundra' ? 0.3 : 0.08,
     landmarkDensity: 0.45, dungeonDensity: planet.difficulty * 0.8,
     history: false,
@@ -75,6 +90,19 @@ export function planetWorldOpts(planet, extra = {}) {
   // gravity nudges relief: a low-gravity world holds taller mountains
   opts.mountainScale = clamp((recipe.mountainScale ?? 0.55) * (1.35 - planet.gravity * 0.3), 0.1, 1.2);
   if (planet.tidalLocked) { opts.latitudeBands = 0; opts.polarCaps = 0; }
+  // a moon is smaller ground: fewer, chunkier landmasses and almost nobody living on it
+  if (planet.moon) {
+    opts.landmasses = Math.max(2, Math.round((opts.landmasses ?? 4) * 0.6));
+    opts.continentScale = (recipe.continentScale ?? 1) * 1.35;
+    opts.settlementDensity = planet.archetype === 'living' ? 0.25 : 0.04;
+    opts.dungeonDensity = (planet.difficulty ?? 0.4) * 0.5;
+    // nothing stays liquid on an airless moon: dry basins, no rivers, no lakes
+    if ((planet.atmosphere?.density ?? 0) < 0.02 && planet.archetype !== 'ice') {
+      opts.seaLevel = Math.min(opts.seaLevel, 0.06);
+      opts.riverDensity = 0;
+      opts.lakeAmount = 0;
+    }
+  }
   return { ...opts, ...stripSize(extra) };
 }
 
@@ -83,30 +111,83 @@ function stripSize(extra) { const o = { ...extra }; delete o.namegen; return o; 
 /**
  * A tidally locked world has one hot face and one frozen one, so its climate runs east–west instead
  * of north–south. Worldgen thinks in latitude, so we redo the temperature by longitude afterwards
- * and reclassify. The substellar point sits at the middle of the map.
+ * and reclassify. The substellar point sits at the middle of the map, which puts the dark face on
+ * the left and right edges, where the map's two sides meet on a sphere.
+ *
+ * The profile across the map is a raised cosine of the longitude distance from the substellar point:
+ *
+ *   substellar (map centre)  →  `hot`   — burning, and bone dry
+ *   a quarter of the way out →  the twilight ring, which is where anything lives
+ *   antistellar (map edges)  →  `cold`  — frozen, ice sheet and sea ice
+ *
+ * A raised cosine is flat at both ends, so the far face is a whole frozen hemisphere rather than a
+ * thin band at the edges, and — because its slope is zero exactly where the map wraps — the seam
+ * carries no step at all. That is what used to show up as a white stripe down the 3D sphere.
  */
 export function applyTidalLock(world, planet) {
   const w = world.width, h = world.height;
-  const warm = clamp((planet.temperature.K - 160) / 260, 0.15, 0.95);
+  const K = planet.temperature?.K ?? 280;
+  const hot = clamp(0.58 + (K - 240) / 300, 0.62, 0.99);       // the substellar point
+  const cold = 0.02;                                           // the far face, always frozen
+
+  // one column of climate, worked out once: the map only changes east to west
+  const colTemp = new Float32Array(w), colDry = new Float32Array(w);
+  for (let x = 0; x < w; x++) {
+    const d = Math.abs((x + 0.5) / w - 0.5) * 2;               // 0 at the substellar point, 1 at the dark face
+    const s = 0.5 - 0.5 * Math.cos(Math.PI * clamp(d, 0, 1));  // raised cosine: flat at both ends
+    colTemp[x] = hot + (cold - hot) * s;
+    colDry[x] = clamp(0.28 + d * 1.7, 0.28, 1);                // the burning face keeps no water
+  }
+
   for (let y = 0; y < h; y++) {
+    // even on a locked world the poles catch the light at a slant, so they run colder. It also keeps
+    // the freezing line a curve rather than a straight column, which is what stops the ice from
+    // switching on across a whole column at once.
+    const lat = Math.abs((y + 0.5) / h - 0.5) * 2;
+    const polar = lat * lat * 0.2;
     for (let x = 0; x < w; x++) {
       const i = y * w + x;
-      const d = Math.abs((x + 0.5) / w - 0.5) * 2;             // 0 at the substellar point, 1 at the dark face
-      let t = warm * (1 - Math.pow(d, 1.5)) + 0.02;
-      if (world.elevation[i] > 0.5) t -= (world.elevation[i] - 0.5) * 2 * 0.35;
+      let t = colTemp[x] - polar;
+      if (world.elevation[i] > 0.5) t -= (world.elevation[i] - 0.5) * 2 * 0.3;   // high ground is colder
+      // a touch of the ground's own dampness, so the freezing line is ragged instead of ruled
+      t -= (world.moisture[i] - 0.5) * 0.04;
       t = clamp(t, 0, 1);
       world.temperature[i] = t;
+      const moist = clamp(world.moisture[i] * colDry[x], 0, 1);
+      world.moisture[i] = moist;
       const depth = world.water[i] ? (0.5 - world.elevation[i]) / 0.5 : 0;
-      if (world.water[i] !== 0 && t < 0.1) { world.biome[i] = 25; continue; }   // the night side ocean freezes
+      if (world.water[i] !== 0 && t < 0.12) { world.biome[i] = 25; continue; }   // the night side ocean freezes
       world.biome[i] = classify({
-        elev: world.elevation[i], temp: t, moist: world.moisture[i], slope: world.slope[i],
+        elev: world.elevation[i], temp: t, moist, slope: world.slope[i],
         aura: world.aura[i], magic: world.magic[i], water: world.water[i], depth,
         nearOcean: false, volcanic: world.volcanic[i] === 1,
       }, world.opts.biomeVariety ?? 0.6);
     }
   }
   world.tidalLocked = true;
+  world.lockProfile = { hot, cold, substellarX: w / 2 };
   return world;
+}
+
+/**
+ * The temperature and the share of frozen ground in each column of a map, west to east — the check
+ * that a locked world really is hot in the middle and frozen at both edges, with no column stepping
+ * away from its neighbours.
+ */
+export function columnClimate(world) {
+  const w = world.width, h = world.height;
+  const temp = new Float32Array(w), ice = new Float32Array(w);
+  for (let x = 0; x < w; x++) {
+    let t = 0, n = 0;
+    for (let y = 0; y < h; y++) {
+      const i = y * w + x;
+      t += world.temperature[i];
+      if (world.biome[i] === 12 || world.biome[i] === 25) n++;
+    }
+    temp[x] = t / h;
+    ice[x] = n / h;
+  }
+  return { temp, ice };
 }
 
 // ---------------------------------------------------------------------------- cache
@@ -127,8 +208,13 @@ export function generatePlanetMap(planet, opts = {}) {
   if (!opts.force && cache.has(key)) return cache.get(key);
 
   const world = generateWorld(planetWorldOpts(planet, { ...opts, width, height }));
-  if (planet.tidalLocked) applyTidalLock(world, planet);
-  world.planet = { id: planet.id, name: planet.name, archetype: planet.archetype, seed: planet.seed };
+  // a tidally locked *planet* keeps one face to its star; a locked moon keeps one face to its
+  // planet and still turns under the star, so the hot-face pass is for planets only
+  if (planet.tidalLocked && !planet.moon) applyTidalLock(world, planet);
+  world.planet = {
+    id: planet.id, name: planet.name, archetype: planet.archetype, seed: planet.seed,
+    moon: !!planet.moon, parentId: planet.parentId ?? null,
+  };
 
   cache.set(key, world);
   while (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value);

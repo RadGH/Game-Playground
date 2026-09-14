@@ -170,6 +170,56 @@ test.describe('sound lab', () => {
     expect(errors).toEqual([]);
   });
 
+  // The Act 1 wind bed was constant and far too loud. Three things hold it down now: the ambience
+  // category target (10 dB under everything else, in sfx/js/loudness.js), a loop that may only ever
+  // be cut, and a hard cap on the ambience bus. All three have to hold for all four methods.
+  test('ambience is held down: quiet target, never boosted, bus under the cap — every method', async ({ page }) => {
+    test.setTimeout(120_000);
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.goto('sfx/');
+    await page.waitForFunction(() => !!window.sfxDemo);
+
+    const cap = await page.evaluate(async () => (await import('/sfx/js/sfx.js')).busCap('ambience'));
+    expect(cap).toBeLessThanOrEqual(0.6);
+
+    const BEDS = ['ambience.wind', 'ambience.forest', 'ambience.cave', 'camp.fire'];
+    // The target belongs to the catalog entry, so it is the same whichever method builds the sound.
+    const targets = await page.evaluate(ids => ids.map(id => [id, window.sfxDemo.sfx.targetFor(id)]), BEDS);
+    for (const [id, t] of targets) expect(t, `${id} is not on the ambience target`).toBe(-40);
+    // The sample pack ships no ambience at all, so a "library" player hears the synthesized bed —
+    // which is why only three methods actually render one.
+    const libraryHasBeds = await page.evaluate(ids => ids.some(id => window.sfxDemo.sfx.sourceOf(id, 'library')), BEDS);
+    expect(libraryHasBeds, 'if the pack ever gains ambience samples, measure them here too').toBe(false);
+
+    for (const method of ['synth', 'hybrid', 'retro']) {
+      const rows = await page.evaluate(({ m, ids }) => window.sfxDemo.measure(ids, m), { m: method, ids: BEDS });
+      for (const r of rows) {
+        expect(r.target, `${method}/${r.id} is not on the ambience target`).toBe(-40);
+        expect(r.gainDb, `${method}/${r.id} was boosted by ${r.gainDb?.toFixed?.(1)} dB`).toBeLessThanOrEqual(0.001);
+        expect(Math.abs(r.afterLufs - r.aim),
+          `${method}/${r.id} landed at ${r.afterLufs.toFixed(1)} LUFS, aiming for ${r.aim}`).toBeLessThanOrEqual(3);
+      }
+    }
+
+    // the bus gain itself can never be pushed over the cap, however hard the slider is dragged
+    const bus = await page.evaluate(cap => {
+      const sfx = window.sfxDemo.sfx;
+      sfx.setBusVolume('ambience', 1);
+      const wide = { asked: 1, stored: sfx.busVolume('ambience'), node: sfx.bus.ambience.gain.value };
+      sfx.setBusVolume('ambience', 0.25);
+      const low = { asked: 0.25, stored: sfx.busVolume('ambience'), node: sfx.bus.ambience.gain.value };
+      sfx.setBusVolume('ambience', cap);
+      return { wide, low, sfxBus: sfx.bus.sfx.gain.value };
+    }, cap);
+    expect(bus.wide.stored).toBeLessThanOrEqual(cap);
+    expect(bus.wide.node).toBeLessThanOrEqual(cap + 1e-6);   // the gain node stores a float32
+    expect(bus.low.node).toBeCloseTo(0.25, 5);      // under the cap the slider still works normally
+    expect(bus.sfxBus).toBe(1);                      // and only ambience is capped
+
+    expect(errors).toEqual([]);
+  });
+
   test('A/B compare builds the same sound through every method', async ({ page }) => {
     test.setTimeout(90_000);
     const errors = [];

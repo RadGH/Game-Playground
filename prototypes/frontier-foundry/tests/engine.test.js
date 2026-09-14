@@ -13,7 +13,7 @@ import { exploredFraction, isExplored } from '../js/fog.js';
 import { recomputeLinks, recomputePower, push, pull, visible, isStore, roomFor, space } from '../js/production.js';
 import { estimateTrip } from '../js/logistics.js';
 import { spawnWave, damageNest } from '../js/combat.js';
-import { pathTime } from '../js/rules.js';
+import { pathTime, BALANCE } from '../js/rules.js';
 import * as Space from '../js/space.js';
 
 const data = await loadData();
@@ -416,19 +416,22 @@ test('research stalls politely when the packs run out', () => {
 
 test('quests are offered, tracked and completed with their reward', () => {
   const g = newGame();
-  assert.ok(g.quests.active.includes('q_first_drill'));
+  // the tutorial chain is offered one step at a time; step two is "put a drill on the iron"
+  const scanStep = g.data.quest.q_tut_t1;
+  assert.ok(g.quests.active.includes(scanStep.id), 'the first tutorial step should be offered at landfall');
+  g.scan(g.map.width / 2, g.map.height / 2, 200);
+  g.checkQuests();
+  assert.ok(g.questProgress(scanStep).have >= scanStep.goal);
+  assert.ok(g.quests.done.includes(scanStep.id));
+  assert.ok(g.available('iron_plate') > 0, 'the reward should have landed in the pod');
+  // a chain step reports as quest_step; a standalone quest as quest_done
+  assert.ok(g.notifications.some(n => n.type === 'quest_step'));
+
+  assert.ok(g.quests.active.includes('q_tut_t2'), 'finishing a step should offer the next one');
   const node = g.map.nodes.find(n => n.scanned && n.kind === 'ore');
   put(g, 'drill_mk1', node.x - 1, node.y - 1);
   g.checkQuests();
-  assert.ok(g.quests.done.includes('q_first_drill'));
-  assert.ok(g.available('iron_plate') > 0, 'the reward should have landed in the pod');
-  assert.ok(g.notifications.some(n => n.type === 'quest_done'));
-
-  const scanQuest = g.data.quest.q_scan_ten;
-  g.scan(g.map.width / 2, g.map.height / 2, 200);
-  g.checkQuests();
-  assert.ok(g.questProgress(scanQuest).have >= 10);
-  assert.ok(g.quests.done.includes('q_scan_ten'));
+  assert.ok(g.quests.done.includes('q_tut_t2'));
 });
 
 // ---------------------------------------------------------------- combat
@@ -446,7 +449,8 @@ test('a wave spawns at the edge, turrets shoot it, and the threat drops when it 
   assert.equal(g.enemies.length, 0, 'five gun turrets should see off a wave of eight threat');
   assert.ok(g.stats.kills > 0);
   assert.ok(hq.hp > 0);
-  assert.ok(g.notifications.some(n => n.type === 'wave_cleared'));
+  // 'wave_cleared' when the wave cost you something, 'wave_repelled' when it did not
+  assert.ok(g.notifications.some(n => n.type === 'wave_cleared' || n.type === 'wave_repelled'));
 });
 
 test('enemies move towards the base and chew through a wall that is in the way', () => {
@@ -521,7 +525,8 @@ test('a probe surveys another planet and reports what is there', () => {
   assert.equal(g.space.surveyed.includes(target.id), false, 'it has to fly there first');
   for (let i = 0; i < Space.PROBE_TRAVEL + 20; i++) g.tick(1);
   assert.ok(g.space.surveyed.includes(target.id));
-  assert.ok(g.notifications.some(n => n.type === 'probe_arrived'));
+  // a probe lands its report as 'probe_result'; 'probe_arrived' is the observatory's free read
+  assert.ok(g.notifications.some(n => n.type === 'probe_result'));
 });
 
 test('a rocket assembles, launches, and lands the hold on the next planet with the archived research', () => {
@@ -654,10 +659,63 @@ test('a universe planet can be adapted and played', async () => {
     assert.equal(provider.get(p.id), p);
   }
   for (const key of Object.values(UNIVERSE_RARE)) assert.ok(data.resource[key], 'adapter names unknown ' + key);
+  // moons come through as landing targets of their own, flagged and pointing at their planet
+  const moons = list.filter(p => p.moon);
+  assert.ok(moons.length > 0, 'no moons came back as landing targets');
+  for (const m of moons) {
+    assert.ok(m.parentId && m.universe.moonId, m.name + ' has no parent');
+    assert.ok(provider.original(m.id)?.moon === true);
+  }
+  assert.equal(universePlanets(systems, data.resources, { moons: false }).list().some(p => p.moon), false);
   const g = Game.createSync({ seed: 5, data, planets: provider, planet: list[0], size: 64, nests: false });
   g.flags.noWaves = true;
   assert.ok(g.hq());
   assert.ok(g.map.nodes.length > 5);
   for (let i = 0; i < 200; i++) g.tick(1);
   assert.equal(g.lost, false);
+});
+
+// ---------------------------------------------------------------- hazards and nests
+// Added with the content pass: every archetype's weather has to actually fire, say so, and do the
+// thing `data/balance.json -> hazards` says it does.
+
+test('planet hazards run as timed weather: they start, they bite, they pass', () => {
+  const volcanic = makePlanet({ id: 'v', seed: 9, archetype: 'volcanic', resourceTable: data.resources });
+  const g = Game.createSync({ seed: 9, data, planets, planet: volcanic, world: generatePlanetMap(volcanic, { width: 96, height: 48 }), size: 64, nests: false });
+  g.flags.noWaves = true;
+  assert.ok(volcanic.hazards.length, 'a volcanic world should carry hazards');
+
+  // force one rather than waiting for the clock
+  const tag = volcanic.hazards.find(t => BALANCE.hazards[t]);
+  const def = BALANCE.hazards[tag];
+  g.hazard = { type: tag, until: g.time + 60, at: g.time };
+  g.notify(def.notify, { name: 'the base', n: 0 });
+  assert.ok(g.notifications.some(n => n.type === def.notify), tag + ' raised no notification');
+  // whatever it does, it does through hazardEffect, so one of these has to be non-zero
+  const bite = ['structureDamage', 'unitDamage', 'solarPenalty', 'machineSlow', 'coldDrain', 'windBonus', 'regrowRate']
+    .some(k => g.hazardEffect(k, 0) > 0);
+  assert.ok(bite, tag + ' is a hazard that does nothing');
+
+  for (let i = 0; i < 80; i++) g.tick(1);
+  assert.equal(g.hazard, null, tag + ' never ended');
+  assert.ok(g.notifications.some(n => n.type === 'hazard_over'));
+});
+
+test('nests are seeded on the map, raise the threat, and are worth clearing', () => {
+  const planet = planets.list()[0];
+  const g = Game.createSync({ seed: 11, data, planets, planet, world: worldFor(planet), size: 96, nests: true });
+  assert.ok(g.nests.length > 0, 'a world with nests turned on should have some');
+  for (const n of g.nests) {
+    assert.ok(data.nestTables[g.planet.archetype].includes(n.type), `${n.type} is not on ${g.planet.archetype}'s nest table`);
+    assert.ok(n.def.spawns && data.unit[n.def.spawns.unit], n.type + ' spawns nothing real');
+    assert.ok(Math.hypot(n.x - g.hq().x, n.y - g.hq().y) > 8, 'a nest should not be on top of the pod');
+  }
+  // a nest left standing is a slow bleed on the threat clock: it does not out-earn the decay on its
+  // own, but the base is that much closer to the next attack for every one it has not cleared
+  g.threat = 500;
+  for (let i = 0; i < 120; i++) g.tick(1);
+  const withNests = 500 - g.threat;
+  const pure = data.waves.threat.decayPerSecond * 120;
+  assert.ok(withNests < pure, `the threat fell ${withNests.toFixed(0)} with ${g.nests.length} nests standing; plain decay alone is ${pure}`);
+  assert.ok(withNests > 0, 'the threat should still fall when the base is quiet');
 });

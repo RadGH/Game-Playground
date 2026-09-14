@@ -7,6 +7,7 @@
 import { $, el, fill, num, countdown } from './dom.js';
 import { icon, rawIcon } from './icons.js';
 import { openDialog, closeDialog } from './hud.js';
+import { acceptsDelivery } from '../production.js';
 
 export class RouteTool {
   constructor({ game, surface, sound, onMessage }) {
@@ -63,14 +64,15 @@ export class RouteTool {
     body.append(el('h3.ruled', { text: `${from.def.name} → ${to.def.name}` }));
     if (samePool) body.append(el('p.tiny.warn', { text: 'These two are already in the same store pool — they share everything for free. A truck between them would do nothing.' }));
 
-    // what could sensibly move: whatever the source has, plus whatever it makes
-    const candidates = new Set(Object.keys(from.inv));
-    const recipe = from.recipe ? g.data.recipe[from.recipe] : null;
-    for (const r of Object.keys(recipe?.outputs || {})) candidates.add(r);
-    if (from.nodeId) { const n = g.nodeById(from.nodeId); if (n) candidates.add(n.resource); }
-    if (!candidates.size) for (const r of Object.keys(g.inventory())) candidates.add(r);
+    // What could sensibly move, read off the engine rather than guessed: see sourceResources.
+    const candidates = sourceResources(g, from);
+    const takes = r => acceptsDelivery(g, to, r);
+    // the ones the far end will actually take come first, and one of those is picked for you
+    const order = [...candidates.keys()].sort((a, b) => (takes(b) ? 1 : 0) - (takes(a) ? 1 : 0)
+      || (from.inv[b] || 0) - (from.inv[a] || 0)
+      || String(g.data.resource[a]?.name || a).localeCompare(g.data.resource[b]?.name || b));
 
-    let resource = [...candidates][0] || null;
+    let resource = order.find(takes) || order[0] || null;
     let vehicle = null;
 
     const resBox = el('div.picker');
@@ -97,20 +99,29 @@ export class RouteTool {
       const rough = dist / Math.max(0.2, vdef.baseSpeed * 0.7);
       const cycle = rough * 2 + vdef.loadTime + vdef.unloadTime;
       const dry = vdef.fuelUse > 0 && g.available('fuel') <= 0;
-      note.className = 'tiny' + (garage && !dry ? '' : ' warn');
+      // the two things that stop a brand new run are a full garage and no fuel; the third is a
+      // destination machine nothing has wired up yet, which looks like the run is broken
+      const offGrid = !!to.def.powerUse && to.net < 0;
+      note.className = 'tiny' + (garage && !dry && !offGrid ? '' : ' warn');
       note.textContent = `${vdef.name}: about ${countdown(cycle)} a round trip, roughly ${(vdef.capacity / cycle).toFixed(2)} a second.`
         + (garage ? '' : `  No free ${vdef.class === 'air' ? 'pad' : 'garage'} slot — build a ${vdef.garages?.[0]?.replace(/_/g, ' ') || 'garage'} first.`)
-        + (dry ? '  This truck burns refined fuel and the base has none: it will sit at the bay until a refinery makes some. A hover truck runs on grid power instead.' : '');
+        + (dry ? '  This truck burns refined fuel and the base has none: it will sit at the bay until a refinery makes some. A hover truck runs on grid power instead.' : '')
+        + (offGrid ? `  ${to.def.name} is not on any power grid, so the load will pile up in it and nothing will be made. Run a pole out to it or give it its own generator.` : '');
     };
 
     const refreshRes = () => {
-      fill(resBox, [...candidates].map(r => {
+      fill(resBox, order.length ? order.map(r => {
         const def = g.data.resource[r];
-        const b = el('button' + (r === resource ? '.on' : ''), { tip: def?.desc || '' });
-        b.append(icon('res', def, { size: 18 }), el('span', { text: `${def?.name || r} ${Math.round(from.inv[r] || 0)}` }));
+        const ok = takes(r);
+        const held = Math.round(from.inv[r] || 0);
+        const b = el('button' + (r === resource ? '.on' : '') + (ok ? '' : '.poor'), {
+          tip: `${def?.name || r} — ${candidates.get(r)}, ${held} here right now.`
+            + (ok ? '' : `  ${to.def.name} neither stores this nor uses it in a recipe, so a run carrying it would have nowhere to tip.`),
+        });
+        b.append(icon('res', def, { size: 18 }), el('span', { text: `${def?.name || r} ${held}` }));
         b.addEventListener('click', () => { resource = r; refreshRes(); refreshVehicles(); });
         return b;
-      }));
+      }) : el('p.tiny.bad', { text: `${from.def.name} neither holds nor makes anything. Pick a store, a drill, a harvester or a machine as the source.` }));
     };
 
     refreshRes(); refreshVehicles();
@@ -141,6 +152,45 @@ export class RouteTool {
     }
     g.restore();
   }
+}
+
+/**
+ * Everything a building could sensibly send, and why — straight out of the engine's own stores,
+ * patches and recipe table, never a hand-written list.
+ *
+ * The case that used to fall through the cracks is a biomass harvester: it has no patch and no
+ * recipe, it cuts the ground under it, and it pushes what it cuts straight into the store pool, so
+ * for most of a tick its own inventory is empty and the old "whatever it is holding" rule found
+ * nothing. The terrain harvesters, the quarry's fixed mix, and every recipe a machine could be
+ * switched to are all read here.
+ *
+ * Returns a Map of resource id → a short phrase saying where it comes from.
+ */
+export function sourceResources(g, from) {
+  const out = new Map();
+  const add = (r, why) => { if (r && g.data.resource[r] && !out.has(r)) out.set(r, why); };
+
+  for (const [r, n] of Object.entries(from.inv || {})) if (n > 0.001) add(r, 'in its own store');
+  // a drill or a pump works one patch
+  if (from.nodeId) { const n = g.nodeById(from.nodeId); if (n) add(n.resource, 'out of the patch under it'); }
+  // a quarry has no patch, it has a fixed mix
+  for (const r of Object.keys(from.def.yields || {})) add(r, 'dug straight out of the ground');
+  // a harvester cuts the ground inside its reach instead of working a patch
+  if (from.def.harvestsTerrain) add(from.def.harvestYield || 'biomass', 'cut from the ground around it');
+  // what it makes: the recipe it is set to first, then anything else it could be switched to
+  const recipes = [from.recipe, ...(g.data.recipesFor[from.type] || [])].filter(Boolean);
+  for (const id of recipes) {
+    if (id !== from.recipe && !g.isUnlocked(id)) continue;
+    const r = g.data.recipe[id];
+    for (const res of Object.keys(r?.outputs || {})) add(res, id === from.recipe ? 'made here now' : `made here if you set it to ${r?.name || id}`);
+  }
+  // a store shares its pool for free, so anything in the pool can leave from here
+  for (const id of from.links || []) {
+    const mate = g.byId(id);
+    if (!mate) continue;
+    for (const [r, n] of Object.entries(mate.inv || {})) if (n > 0.001) add(r, 'in the store pool this is part of');
+  }
+  return out;
 }
 
 const phase = (g, res) => {

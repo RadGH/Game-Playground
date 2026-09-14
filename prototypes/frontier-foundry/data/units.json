@@ -386,7 +386,7 @@
       "hp": 4200,
       "dps": 260,
       "speed": 0.8,
-      "armor": 26,
+      "armor": 20,
       "range": 3,
       "vision": 12,
       "threat": 45,
@@ -552,14 +552,14 @@
       },
       {
         "unit": "rift_maw",
-        "from": 18,
+        "from": 30,
         "weight": 1
       }
     ],
     "arid": [
       {
         "unit": "dune_lurker",
-        "from": 1,
+        "from": 3,
         "weight": 5
       },
       {
@@ -594,7 +594,7 @@
       },
       {
         "unit": "rift_maw",
-        "from": 19,
+        "from": 30,
         "weight": 1
       }
     ],
@@ -631,14 +631,14 @@
       },
       {
         "unit": "rift_maw",
-        "from": 18,
+        "from": 30,
         "weight": 1
       }
     ],
     "volcanic": [
       {
         "unit": "ash_stalker",
-        "from": 1,
+        "from": 3,
         "weight": 5
       },
       {
@@ -668,7 +668,7 @@
       },
       {
         "unit": "rift_maw",
-        "from": 16,
+        "from": 30,
         "weight": 1
       }
     ],
@@ -705,7 +705,7 @@
       },
       {
         "unit": "rift_maw",
-        "from": 17,
+        "from": 30,
         "weight": 1
       }
     ],
@@ -747,7 +747,7 @@
       },
       {
         "unit": "rift_maw",
-        "from": 19,
+        "from": 30,
         "weight": 1
       }
     ],
@@ -784,7 +784,7 @@
       },
       {
         "unit": "rift_maw",
-        "from": 17,
+        "from": 30,
         "weight": 1
       }
     ],
@@ -821,14 +821,14 @@
       },
       {
         "unit": "rift_maw",
-        "from": 15,
+        "from": 30,
         "weight": 1
       }
     ],
     "oceanic": [
       {
         "unit": "tide_crawler",
-        "from": 1,
+        "from": 3,
         "weight": 5
       },
       {
@@ -858,19 +858,19 @@
       },
       {
         "unit": "rift_maw",
-        "from": 19,
+        "from": 30,
         "weight": 1
       }
     ],
     "gas_shrouded": [
       {
         "unit": "sky_leech",
-        "from": 1,
+        "from": 3,
         "weight": 5
       },
       {
         "unit": "spore_drifter",
-        "from": 2,
+        "from": 1,
         "weight": 3
       },
       {
@@ -895,7 +895,7 @@
       },
       {
         "unit": "rift_maw",
-        "from": 18,
+        "from": 30,
         "weight": 1
       }
     ]

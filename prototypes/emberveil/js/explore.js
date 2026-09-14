@@ -13,10 +13,16 @@
 //   auto:   true — carrying the thing is the whole test; no roll
 //   reward: { mult, rare, fameBonus }   scaled by act, returned in a won-fight shape
 //   fail:   { damage: 0.15, exhaustion: 1, day: 1, supply: {...}, fight: true }
-import { derive, gainXp, refresh } from './rules.js';
+import { derive, gainXp, refresh, checkBonus } from './rules.js';
+
+// What an attribute is worth on a d20 skill check — one point of bonus per three attribute points —
+// comes from rules.js so travel checks and combat can never drift apart. It is re-exported here
+// because the crossing UI shows the number. The DCs that go with it live in data/crossings.json
+// `difficulty` (the choice's dc, plus `perAct` per act, capped).
+export { checkBonus };
 
 /** The knobs, from data/crossings.json's `difficulty` block, with an override for tests. */
-export function tuningFor(game, tuning = {}) { return { perAct: 2, cap: 26, rewardPerAct: 0.45, ...(game?.d?.crossings?.difficulty || {}), ...tuning }; }
+export function tuningFor(game, tuning = {}) { return { perAct: 2, cap: 20, rewardPerAct: 0.45, ...(game?.d?.crossings?.difficulty || {}), ...tuning }; }
 /** Difficulty for a crossing check: the authored dc plus `perAct` per act, capped. */
 export function dcFor(game, base = 12, tuning = {}) { const T = tuningFor(game, tuning); return Math.min(T.cap, Math.round(base + (game.act || 0) * T.perAct)); }
 /** The party's best living value for an attribute (equipment counts). */
@@ -55,9 +61,10 @@ export function choiceState(game, crossing, choice, tuning = {}) {
   return {
     id: choice.id, text: choice.text, available: missing.length === 0, why: missing.join('; '),
     stat, dc, goldCost, item, fight: !!choice.fight, days: choice.cost?.day || 0,
-    best: stat ? bestStat(game, stat) : null, hero: stat ? bestHero(game, stat) : null,
+    best: stat ? bestStat(game, stat) : null, bonus: stat ? checkBonus(bestStat(game, stat)) : null,
+    hero: stat ? bestHero(game, stat) : null,
     traitHolders: holders, traitBonus: holders.length ? (choice.check.traitBonus || 0) : 0,
-    odds: stat ? Math.max(0, Math.min(100, Math.round((21 - (dc - bestStat(game, stat) - (holders.length ? (choice.check.traitBonus || 0) : 0))) / 20 * 100))) : null,
+    odds: stat ? Math.max(0, Math.min(100, Math.round((21 - (dc - checkBonus(bestStat(game, stat)) - (holders.length ? (choice.check.traitBonus || 0) : 0))) / 20 * 100))) : null,
   };
 }
 /** Every choice on a crossing, annotated. */
@@ -107,7 +114,7 @@ export function resolveCrossing(game, crossing, choiceId, rng = game.rng, tuning
   // ---- did it work?
   let ok = true, roll = null;
   if (choice.fight) ok = true;                                    // the fight itself decides; the caller runs it
-  else if (choice.check && !choice.auto) { roll = 1 + rng.int(0, 19); ok = st.best + st.traitBonus + roll >= st.dc; }
+  else if (choice.check && !choice.auto) { roll = 1 + rng.int(0, 19); ok = checkBonus(st.best) + st.traitBonus + roll >= st.dc; }
 
   // ---- consequences of failing
   let fight = null;
@@ -117,10 +124,10 @@ export function resolveCrossing(game, crossing, choiceId, rng = game.rng, tuning
     if (F.exhaustion) { game.exhaustion = (game.exhaustion || 0) + F.exhaustion; costs.push(`exhausted ×${game.exhaustion}`); }
     for (const [k, d] of Object.entries(F.supply || {})) { game.supplies[k] = Math.max(0, (game.supplies[k] || 0) + d); costs.push(`${d} ${k}`); }
     if (F.day) days += F.day;
-    if (F.fight) fight = pickCrossingFight(game, rng);
+    if (F.fight) fight = pickCrossingFight(game, rng, crossing);
     if (F.damage) costs.push('the party is hurt');
   } else if (choice.fight) {
-    fight = pickCrossingFight(game, rng);
+    fight = pickCrossingFight(game, rng, crossing);
   }
 
   // ---- the day cost
@@ -145,14 +152,21 @@ export function resolveCrossing(game, crossing, choiceId, rng = game.rng, tuning
   if (game.crossings.length > 40) game.crossings.shift();
 
   return {
-    ok, blocked: false, why: '', choice, roll, best: st.best, bonus: st.traitBonus, dc: st.dc, stat: st.stat,
+    ok, blocked: false, why: '', choice, roll, best: st.best, statBonus: checkBonus(st.best), bonus: st.traitBonus, dc: st.dc, stat: st.stat,
     hero: st.hero, text: ok ? choice.success : (choice.failure || 'It does not work.'),
     rewards, levelUps, costs, fight, days, memory, journal: line,
   };
 }
 
-/** The fight a crossing falls into: whatever haunts this zone. */
-export function pickCrossingFight(game, rng = game.rng) {
+/**
+ * The fight a crossing falls into. Usually whatever haunts this zone — but a crossing that is a toll
+ * post or a manned gate says `enemyFamily: "humanoid"` in data/crossings.json, and then the people
+ * who wanted the money are the people you fight. (Before this, refusing to pay a bandit on the Dust
+ * Roads could produce four cinder hounds.)
+ */
+export function pickCrossingFight(game, rng = game.rng, crossing = null) {
+  const family = crossing?.enemyFamily || null;
+  if (family && game.encountersOfFamily) { const ids = game.encountersOfFamily(family); if (ids.length) return rng.pick(ids); }
   const pool = game.d?.zones?.ZONE_ENCOUNTER_POOLS?.[game.zoneId] || [];
   return pool.length ? rng.pick(pool) : null;
 }

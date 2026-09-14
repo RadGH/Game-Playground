@@ -179,3 +179,137 @@ test('quests and notifications are wired up', () => {
     'station_module', 'station_complete', 'beacon_lit', 'victory', 'defeat'];
   for (const t of used) assert.ok(data.notifications[t], 'engine raises ' + t + ' with no template');
 });
+
+// ---------------------------------------------------------------- art, rare elements, quests
+// Added with the rare-element pass: every id the interface has to draw needs a file to draw, and a
+// rare element is only content if a run can actually reach it.
+
+import { readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ICONS = new Set(readdirSync(join(HERE, '../../../assets/data/icons/foundry'))
+  .filter(f => f.endsWith('.svg')).map(f => f.slice(0, -4)));
+/** The file the interface would draw for one data entry (mirrors js/ui/icons.js `iconFor`). */
+const artFor = (kind, def) => {
+  for (const id of [def.icon, def.id]) if (id && ICONS.has(`${kind}_${id}`)) return `${kind}_${id}`;
+  return null;
+};
+
+test('every structure, resource, unit and vehicle has art of its own or names one that exists', () => {
+  const missing = [];
+  for (const [kind, list] of [['bld', data.structures], ['res', data.resources], ['unit', data.units], ['veh', data.vehicles]]) {
+    for (const def of list) {
+      if (def.icon) assert.ok(ICONS.has(`${kind}_${def.icon}`), `${def.id} points at missing art ${kind}_${def.icon}`);
+      if (!artFor(kind, def)) missing.push(`${kind}_${def.id}`);
+    }
+  }
+  assert.deepEqual(missing, [], 'no icon for: ' + missing.join(', '));
+});
+
+test('the four late rare elements are complete content, not just a resource row', () => {
+  // resource -> a building that needs it -> a recipe that building runs -> a tech that unlocks both
+  for (const element of ['helion_gas', 'nullstone', 'emberlace', 'brinepearl']) {
+    const res = data.resource[element];
+    assert.ok(res, element + ' is not a resource');
+    assert.equal(res.kind, 'rare', element + ' should be a rare element');
+    assert.ok(res.found?.archetypes?.length, element + ' is not found on any archetype');
+
+    const buildings = data.structures.filter(s => s.planetRequirement === element);
+    assert.ok(buildings.length, element + ' has no building of its own');
+    const recipes = data.recipes.filter(r => Object.keys(r.inputs || {}).includes(element));
+    assert.ok(recipes.length, element + ' is an input to nothing');
+    for (const r of recipes) assert.ok(r.machines.some(m => data.structure[m]), r.id + ' names no real machine');
+
+    const techs = data.techs.filter(t => t.planetRequirement === element);
+    assert.ok(techs.length, element + ' has no research node');
+    for (const t of techs) for (const u of t.unlocks || []) {
+      assert.ok(data.structure[u] || data.recipe[u] || data.vehicle[u] || data.unit[u], `${t.id} unlocks unknown ${u}`);
+    }
+    // and something that tech unlocks must be one of the element's own buildings or recipes
+    const opened = new Set(techs.flatMap(t => t.unlocks || []));
+    assert.ok(buildings.some(b => opened.has(b.id)) || recipes.some(r => opened.has(r.id)),
+      element + "'s research does not open its own building or recipe");
+  }
+});
+
+test('every rare element is carried by at least one archetype the planet generator can roll', async () => {
+  const { ARCHETYPES, makePlanet } = await import('../js/planets.js');
+  const rare = data.resources.filter(r => r.kind === 'rare');
+  for (const r of rare) {
+    const homes = (r.found?.archetypes || []).filter(a => ARCHETYPES[a]);
+    assert.ok(homes.length, `${r.id} is found on no archetype this game generates`);
+  }
+  // and every archetype's rare pool names real resources
+  for (const a of Object.keys(ARCHETYPES)) {
+    const p = makePlanet({ id: 'x', seed: 3, archetype: a, resourceTable: data.resources });
+    for (const el of p.rareElements) assert.ok(data.resource[el], `${a} rolls unknown rare element ${el}`);
+    assert.ok(p.resources.includes('iron_ore') && p.resources.includes('coal'), a + ' is not landable');
+  }
+});
+
+test('every archetype has a wave table, a nest table and hazards that the balance file knows', async () => {
+  const { ARCHETYPES } = await import('../js/planets.js');
+  const { BALANCE } = await import('../js/rules.js');
+  for (const a of Object.keys(ARCHETYPES)) {
+    assert.ok(data.waveTables[a]?.length, a + ' has no wave table');
+    assert.ok(data.nestTables[a]?.length, a + ' has no nest table');
+    for (const tag of ARCHETYPES[a].hazards) {
+      assert.ok(BALANCE.hazards[tag], `${a} carries hazard ${tag} with no entry in balance.json`);
+      assert.ok(data.notifications[BALANCE.hazards[tag].notify], `hazard ${tag} has no notification template`);
+    }
+  }
+  for (const n of Object.values(data.nestTables).flat()) {
+    const def = data.unit[n];
+    assert.ok(def?.spawns, n + ' is used as a nest but spawns nothing');
+    assert.ok(data.unit[def.spawns.unit], `${n} spawns unknown ${def.spawns.unit}`);
+  }
+});
+
+test('the quest book has a tutorial chain and enough side objectives', () => {
+  const tutorial = data.quests.filter(q => q.chain === 'tutorial');
+  assert.ok(tutorial.length >= 8, `only ${tutorial.length} tutorial steps`);
+  const side = data.quests.filter(q => !q.chain);
+  assert.ok(side.length >= 15, `only ${side.length} side quests`);
+  // every chain is a straight line: numbered steps, 1..n, no gaps and no repeats, because the engine
+  // only ever offers the lowest unfinished step of a chain
+  const chains = new Map();
+  for (const q of data.quests) if (q.chain) (chains.get(q.chain) ?? chains.set(q.chain, []).get(q.chain)).push(q);
+  assert.ok(chains.has('tutorial'), 'there is no tutorial chain');
+  for (const [name, steps] of chains) {
+    assert.ok(steps.length >= 2, name + ' is a chain of one');
+    const numbers = steps.map(q => q.step).sort((a, b) => a - b);
+    for (let i = 0; i < numbers.length; i++) {
+      assert.equal(numbers[i], i + 1, `${name} step numbers are ${numbers.join(',')} - they have to run 1..${numbers.length}`);
+    }
+    for (const q of steps) assert.ok(q.text && q.done && q.goal > 0, q.id + ' is missing its text or its goal');
+  }
+});
+
+test('every quest can actually be finished: its type is one the engine checks', async () => {
+  const src = await import('node:fs').then(fs => fs.readFileSync(new URL('../js/game.js', import.meta.url), 'utf8'));
+  for (const q of data.quests) {
+    assert.ok(src.includes(`'${q.type}'`), `nothing in game.js measures quest type ${q.type} (${q.id})`);
+  }
+});
+
+test('the wave tables ramp: cheap things early, bosses late, and nothing that cannot be answered', () => {
+  const BOSS_FROM = 25;                       // the first boss wave the player meets is 10 and 20
+  for (const [arch, table] of Object.entries(data.waveTables)) {
+    const wave1 = table.filter(e => e.from <= 1);
+    assert.ok(wave1.length, arch + ' has nothing that can turn up in wave 1');
+    // wave 1's budget is five threat points; anything dearer than that just gets swapped for
+    // whatever is cheap, so a table whose only wave-1 entry is expensive opens with nothing
+    for (const e of wave1) assert.ok(data.unit[e.unit].threat <= 5, `${arch} opens with ${e.unit}, which costs ${data.unit[e.unit].threat} threat and the first wave can only spend five`);
+    for (const e of table) {
+      const def = data.unit[e.unit];
+      if (def.boss) assert.ok(e.from >= BOSS_FROM, `${arch} lets the boss ${e.unit} in at wave ${e.from}; a wave-20 boss is unanswerable with tier-two guns`);
+      // anything that flies has to be reachable by a turret the player can have by then
+      if (def.air) {
+        const answers = data.structures.filter(s => s.hitsAir && s.category === 'defence');
+        assert.ok(answers.length >= 2, `${arch} sends ${e.unit} at wave ${e.from} and only ${answers.length} turret answers air`);
+      }
+    }
+  }
+});

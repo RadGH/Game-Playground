@@ -120,6 +120,9 @@ export async function createMiiCharacter(avatar) {
   await build(avatar);
   const ctrl = {
     group, metrics: () => metrics(state.avatar.body),
+    /** The named body groups (legs, torso, armL, armR, head…) — handy for tests and for anything
+     *  that wants to hang something off a limb. Read only; rebuilding the avatar replaces them. */
+    get parts() { return state.parts; },
     async setAvatar(av) { await build(av); },
     setAnim(name) { state.anim = name; },
     get anim() { return state.anim; },
@@ -134,6 +137,14 @@ export async function createMiiCharacter(avatar) {
       if (an === 'idle') { P.armL.rotation.z = -0.12 + Math.sin(tt * 1.6) * 0.03; P.armR.rotation.z = 0.12 - Math.sin(tt * 1.6) * 0.03; P.head.rotation.set(0, Math.sin(tt * 0.5) * 0.08, 0); }
       else if (an === 'wave') { P.armR.rotation.z = 2.6 + Math.sin(tt * 8) * 0.35; P.armR.rotation.x = 0; P.armL.rotation.z = -0.12; P.head.rotation.set(0, 0, Math.sin(tt * 2) * 0.05); }
       else if (an === 'talk') { P.head.rotation.set(Math.sin(tt * 7) * 0.04, Math.sin(tt * 1.3) * 0.15, 0); P.armL.rotation.set(Math.sin(tt * 3) * 0.3 - 0.2, 0, -0.35); P.armR.rotation.set(Math.cos(tt * 2.5) * 0.3 - 0.2, 0, 0.35); }
+      else if (an === 'attack') {
+        // Wind the right arm back, then swing it through: whatever is held (mii-gear buildHeld puts
+        // it in the hand, pointing up the arm) travels with it instead of hanging there still (E18).
+        const k = Math.min(1, tt / 0.55);
+        const x = k < 0.35 ? 0.9 * (k / 0.35) : 0.9 - 2.9 * ((k - 0.35) / 0.65);
+        P.armR.rotation.set(x, 0, 0.1); P.armL.rotation.set(-x * 0.25, 0, -0.15);
+        P.head.rotation.set(Math.min(0, x) * 0.05, 0, 0);
+      }
       else if (an === 'dead') { group.rotation.x = -Math.PI / 2; group.position.y = 0.3; return; }
       else { P.head.rotation.set(0, 0, Math.sin(tt * s) * 0.03); P.armL.rotation.z = -0.12; P.armR.rotation.z = 0.12; }
       group.rotation.x = 0;

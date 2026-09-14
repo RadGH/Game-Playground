@@ -58,7 +58,12 @@ export function buildCape(torso, a, tl, H) {
 /** Held (right hand pivot) and off-hand (left hand pivot) props. Hands sit at y=-0.5 in the arm pivot; +y is up the arm. */
 export function buildHeld(armR, armL, a, H) {
   const { mat, box, sphere, cyl, cone, torus, shade } = H; const hy = -0.5; const glow = (m, color, k = 1) => { m.material.emissive = new THREE.Color(color); m.material.emissiveIntensity = k; return m; };
-  const at = (parent, m, x, y, z, rx = 0, rz = 0) => { m.position.set(x, hy + y, z + 0.16); m.rotation.x = rx; m.rotation.z = rz; parent.add(m); return m; }; // +0.16: in front of the body (torso depth 0.28)
+  // Held things hang off the ARM pivot, and the hand is at (0, hy, 0) in that frame — so the grip
+  // belongs a couple of centimetres in front of the fingers, not a fifth of a metre in front of the
+  // chest. The old +0.16 was measured for the torso and left every weapon floating in mid-air with
+  // the hand nowhere near it (E18). HELD_Z is that small "just clear of the knuckles" offset.
+  const HELD_Z = 0.03;
+  const at = (parent, m, x, y, z, rx = 0, rz = 0) => { m.position.set(x, hy + y, z + HELD_Z); m.rotation.x = rx; m.rotation.z = rz; parent.add(m); return m; };
   const held = a.held?.id || 'none', hc = a.held?.color || '#9a9aa8', hd = shade(hc, -0.3); const metal = { metalness: 0.6, roughness: 0.35 };
   const blade = (parent, len, w = 0.035, color = hc, guard = true) => { const b = box(w, len, 0.008, color, 0.002); b.material.metalness = 0.6; b.material.roughness = 0.35; at(parent, b, 0, len / 2 + 0.06, 0.05); if (guard) at(parent, box(0.12, 0.02, 0.02, '#d8b040'), 0, 0.06, 0.05); at(parent, cyl(0.014, 0.014, 0.12, '#5a3a1a', 8), 0, 0, 0.05); };
   const staff = (parent, len = 1.3) => { at(parent, cyl(0.014, 0.018, len, hc, 8), 0, len * 0.35, 0.05); return len; };
@@ -70,7 +75,7 @@ export function buildHeld(armR, armL, a, H) {
   if (held === 'cleaver') { const b = box(0.09, 0.4, 0.01, hc); at(armR, b, 0.03, 0.3, 0.05); at(armR, cyl(0.014, 0.014, 0.14, '#8a6a3a', 8), 0, 0, 0.05); }
   if (held === 'greataxe') { at(armR, cyl(0.016, 0.02, 1.1, '#5a3a1a', 8), 0, 0.3, 0.05); for (const s of [-1, 1]) { const head = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.02, 16, 1, false, s < 0 ? Math.PI : 0, Math.PI), mat(hc, { metalness: 0.6, roughness: 0.35 })); head.castShadow = true; at(armR, head, 0, 0.75, 0.05, Math.PI / 2, 0); } }
   if (held === 'hammer' || held === 'warhammer') { const len = held === 'hammer' ? 0.6 : 0.95; at(armR, cyl(0.016, 0.02, len, '#5a3a1a', 8), 0, len * 0.35, 0.05); const head = box(held === 'hammer' ? 0.22 : 0.3, 0.12, 0.12, hc, 0.02); head.material.metalness = 0.6; at(armR, head, 0, len * 0.85, 0.05); if (held === 'warhammer') { const spike = cone(0.05, 0.14, hc, 8); at(armR, spike, 0, len * 0.85 + 0.13, 0.05); for (const s of [-1, 1]) at(armR, glow(sphere(0.02, '#ff8c2a', 6), '#ff6a1a'), s * 0.16, len * 0.85, 0.11); } }
-  if (held === 'mace') { at(armR, cyl(0.014, 0.016, 0.5, '#5a3a1a', 8), 0, 0.2, 0.05); const head = sphere(0.08, hc, 10); head.material.metalness = 0.6; at(armR, head, 0, 0.5, 0.05); for (let i = 0; i < 8; i++) { const sp = cone(0.02, 0.06, hc, 5); const ang = (i / 8) * Math.PI * 2; sp.position.set(Math.sin(ang) * 0.09, hy + 0.5 + Math.cos(ang) * 0.09, 0.05); sp.lookAt(new THREE.Vector3(Math.sin(ang) * 2, hy + 0.5 + Math.cos(ang) * 2, 0.05)); sp.rotateX(Math.PI / 2); armR.add(sp); } }
+  if (held === 'mace') { at(armR, cyl(0.014, 0.016, 0.5, '#5a3a1a', 8), 0, 0.2, 0.05); const head = sphere(0.08, hc, 10); head.material.metalness = 0.6; at(armR, head, 0, 0.5, 0.05); for (let i = 0; i < 8; i++) { const sp = cone(0.02, 0.06, hc, 5); const ang = (i / 8) * Math.PI * 2; sp.position.set(Math.sin(ang) * 0.09, hy + 0.5 + Math.cos(ang) * 0.09, 0.05 + HELD_Z); sp.lookAt(new THREE.Vector3(Math.sin(ang) * 2, hy + 0.5 + Math.cos(ang) * 2, 0.05 + HELD_Z)); sp.rotateX(Math.PI / 2); armR.add(sp); } }
   if (held === 'bow') { const arc = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.012, 8, 24, 2.2), mat(hc)); at(armR, arc, 0.3, 0.02, 0.05, 0, Math.PI - 1.1); const string = box(0.004, 0.7, 0.004, '#e8e0c0'); at(armR, string, -0.05, 0.02, 0.05); }
   if (held === 'crossbow') { at(armR, box(0.04, 0.32, 0.05, '#5a3a1a', 0.01), 0, 0.12, 0.05); const arm = box(0.34, 0.02, 0.02, hc); at(armR, arm, 0, 0.26, 0.05); at(armR, box(0.32, 0.004, 0.004, '#e8e0c0'), 0, 0.2, 0.05); }
   if (held === 'quarterstaff') staff(armR, 1.4);

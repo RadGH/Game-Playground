@@ -367,12 +367,23 @@ inl('damageCategory', v => `counts as ${v} damage`);
 inl('damageType', v => `${v} damage`);
 inl('healStat', v => `healing scales with ${v}`);
 S('damageStat', v => `damage scales with ${v}`, { inline: true });
-S('strikeCount', v => `${v} strikes`, { merge: (v, s) => { s.hits = Math.max(s.hits || 1, v); } });
-S('attackCount', v => `${v} attacks`, { merge: (v, s) => { s.hits = Math.max(s.hits || 1, v); } });
-S('glaiveCount', v => `the glaive bounces between ${v} enemies`, { pickTargets: (v, c) => c.C.alive(c.foes).slice(0, v) });
-S('chainCount', v => `chains to ${v} enemies`, { pickTargets: (v, c) => c.C.alive(c.foes).slice(0, v) });
-S('chainTargets', v => `chains to ${v} enemies`, { pickTargets: (v, c) => c.C.alive(c.foes).slice(0, v) });
-S('chainTarget', v => `chains to ${v} more`, { pickTargets: (v, c) => c.C.alive(c.foes).slice(0, 1 + v) });
+// How many things a count key means (E23). skills.json mixes two habits: a talent usually says
+// "adds one more" (a small number on top of what the skill already does) while a level upgrade
+// states the new total. `countUp` reads a value the generous way — it is the new total when it is
+// bigger than the skill already does, and an addition when it is not — so neither habit can end up
+// making a skill hit FEWER things than it did before the player bought the talent.
+const countUp = (v, base) => (v > base ? v : base + v);
+/** Raise a merged skill's hit count. combat.js reads `effect.hits` (mergeSkill seeds it). */
+const setHits = (s, v) => { s.effect = s.effect || {}; s.effect.hits = countUp(v, s.effect.hits ?? s.hits ?? 1); };
+/** The number of enemies a chaining shape already reaches before any talent. */
+const chainBase = skill => (/chain/.test(skill?.aoe || '') ? 3 : 1);
+const chainPick = (v, c, extra = 0) => c.C.alive(c.foes).slice(0, extra + countUp(v, chainBase(c.skill)));
+S('strikeCount', v => `${v} strikes`, { merge: (v, s) => setHits(s, v) });
+S('attackCount', v => `${v} attacks`, { merge: (v, s) => setHits(s, v) });
+S('glaiveCount', v => `${v} glaives, so everything it passes is hit ${v} times`, { merge: (v, s) => setHits(s, v) });
+S('chainCount', v => `chains to ${v} enemies`, { pickTargets: (v, c) => chainPick(v, c) });
+S('chainTargets', v => `chains to ${v} enemies`, { pickTargets: (v, c) => chainPick(v, c) });
+S('chainTarget', v => `chains to ${v} more`, { pickTargets: (v, c) => chainPick(v, c, 1) });
 S('pullToGroup', () => 'drags the target into the middle of its group, so the whole group is hit', { pickTargets: (v, c) => { const p = c.C.alive(c.foes)[0]; return p ? c.C.alive(c.foes).filter(e => e.group === p.group) : []; } });
 S('split', v => `the damage is split ${v} ways`, { dmgMult: (v, c) => 1 / Math.max(1, v) });
 S('chainDmgScale', v => `each link of the chain keeps ${pct(v)} of the damage`, { dmgMult: (v, c) => Math.pow(v, c.targetIndex || 0) });
@@ -614,10 +625,10 @@ def('affix', 'cond_forageRation', v => `after a won fight there is a ${pct(v)} c
 def('affix', 'cond_nightWard', v => `a lit head keeps raiders off: night attacks are ${pct(v)} less likely`, {
   nightChance: v => -v,
 });
-def('affix', 'cond_extraLeg', v => `every ${ni(v)} days it finds a shortcut — one extra move that day`, {
+def('affix', 'cond_extraLeg', v => `every ${ni(v)} days it finds a shortcut — one extra map node that day`, {
   legs: (v, game) => (game.day % Math.max(1, Math.round(v)) === 0 ? 1 : 0),
 });
-def('affix', 'cond_roadFind', v => `${pct(v)} chance of turning up something worth taking on each move`, {
+def('affix', 'cond_roadFind', v => `${pct(v)} chance of turning up something worth taking on each map node you travel to`, {
   onLeg: (v, game, hero) => {
     if (game.rng() >= v) return; const it = game.loot.generate(game.rng.pick(['dagger', 'ring', 'necklace', 'light_chest', 'sword']), 'magic', 'medium', { rng: game.rng });
     if (!it) return; game.inventory.push(it); game.logLoot(it, { holder: hero.id }); return { item: it };
@@ -712,7 +723,7 @@ def('legendary', 'naming_kills', 'At fifty kills the blade earns a name, and the
     return { named: w.earnedName };
   },
 });
-def('legendary', 'road_cache', 'Every move turns up a small cache of coin.', {
+def('legendary', 'road_cache', 'Every map node you travel to turns up a small cache of coin.', {
   onLeg: (v, game) => { const g = 8 + Math.round(game.rng() * 14 * Math.max(1, game.act)); game.gold += g; return { gold: g }; },
 });
 def('legendary', 'companion_might', 'Your companion hits 40% harder, carries a quarter more health and starts every fight furious.', {
@@ -741,7 +752,7 @@ def('legendary', 'kill_ledger', 'It keeps its own count: +1% damage every five k
 def('legendary', 'curse_spreads', 'A kill spills the curse over everything still standing.', {
   onKill: (v, C, self, t) => { for (const e of foesOf(C, self)) if (e !== t) { C.addStatus(e, 'curse', 2, 20, self); C.applyDamage(self, e, Math.round(8 + (self.derived?.INT || 10) * 0.4), { magic: true, label: 'Veil Spill', via: 'legendary:curse_spreads', dtype: 'shadow' }); } },
 });
-def('legendary', 'free_move', 'The road opens: one extra move every day.', { legs: () => 1 });
+def('legendary', 'free_move', 'The road opens: one extra map node every day.', { legs: () => 1 });
 def('legendary', 'nemesis_hunter', 'Double damage to anything with a grudge, and killing one mends the whole party.', {
   dmgOut: (v, C, self, t) => (t?.nemesis || t?.named ? 2 : 1),
   onKill: (v, C, self, t) => { if (!(t.nemesis || t.named)) return; for (const a of alliesOf(C, self)) C.healUnit(a, a.maxHp, 'grudge settled', self, 'legendary:nemesis_hunter'); },
@@ -822,6 +833,47 @@ export function applySpawnMods(unit, group, ids = []) {
   if (group === 'champion') unit.championMods = kept; else unit.mods = kept;
   return kept;
 }
+// ───────────────────────────── talent-granted companions ─────────────────────────────
+// `skill:unlocksCompanion` (the Mage's "Arcane Familiar", the Necromancer's skeleton, the
+// Druid's bear…) used to be a line of tooltip text and nothing else: buying the talent unlocked
+// a pet that was never summoned. These two functions are the whole path — game.js/main.js call
+// syncCompanions() after a talent is bought and after a save is loaded, and the pet turns up in
+// the party tab and on the stage like any kennel companion.
+
+/** Companion ids the talents a hero has bought grant them (skills.json `unlocksCompanion`). */
+export function companionIdsFor(hero, skillData = {}) {
+  const out = new Set(); const e = EFFECTS['skill:unlocksCompanion'];
+  for (const id of hero?.skills || []) {
+    const sk = skillData[id]; if (!sk) continue;
+    for (const t of sk.talents || []) { const v = t.effect?.unlocksCompanion; if (v && hero.talents?.[t.id]) out.add(e?.unlock ? e.unlock(v) : v); }
+    for (const u of sk.upgrades || []) { const v = u.bonus?.unlocksCompanion; if (v && (hero.level || 1) >= (u.level || 99)) out.add(e?.unlock ? e.unlock(v) : v); }
+  }
+  return [...out];
+}
+/**
+ * Give the party every pet its talents have unlocked. Safe to call as often as you like — a pet
+ * that is already out is left alone, and a full kennel just means the pet waits.
+ *
+ * @param {object} game  needs: party[], companions[], d.skills.skills, d.companions.classPets,
+ *                       makeCompanion(def, level), addCompanion(c)
+ * @returns {Array} the companions that were actually summoned this call
+ */
+export function syncCompanions(game) {
+  if (!game?.party) return [];
+  const defs = game.d?.companions?.classPets || {}; const skills = game.d?.skills?.skills || {};
+  const added = [];
+  for (const hero of game.party) {
+    for (const petId of companionIdsFor(hero, skills)) {
+      if (game.companions.some(c => c.templateId === petId && c.ownerId === hero.id)) continue;
+      const def = defs[petId] || { id: petId, name: petId.replace('pet_', '').replace(/_/g, ' ').replace(/^\w/, s => s.toUpperCase()), power: 1 };
+      const c = game.makeCompanion({ power: 1, ...def, id: petId });
+      c.ownerId = hero.id; c.ownerShort = hero.short || hero.name; c.fromTalent = true;
+      if (game.addCompanion(c)) added.push(c);
+    }
+  }
+  return added;
+}
+
 export const CHAMPION_MODS = Object.keys(EFFECTS).filter(k => k.startsWith('champion:')).map(k => k.slice(9));
 export const NAMED_MODS = Object.keys(EFFECTS).filter(k => k.startsWith('named:')).map(k => k.slice(6));
 

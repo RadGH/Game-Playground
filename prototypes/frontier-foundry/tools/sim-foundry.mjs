@@ -9,10 +9,12 @@
 //   --hours N           in-game hours to play (default 8)
 //   --planet <name>     archetype: temperate arid frozen volcanic toxic verdant barren shattered oceanic gas_shrouded
 //   --difficulty <d>    easy | normal | hard
-//   --size N            local map edge in tiles (default 96)
+//   --size N            chunk edge in tiles (default 96)
+//   --chunks N          chunks per side (default 3, so a 288x288 grid - the interface runs 5)
 //   --no-waves          turn attacks off, to look at the economy on its own
 //   --quiet             only the summary
 //   --why               after the run, print what every machine is waiting for
+//   --json              print one JSON line of milestones instead (what tools/sim-matrix.mjs reads)
 
 import { loadData } from '../js/data.js';
 import { Game } from '../js/game.js';
@@ -31,15 +33,20 @@ const num = (name, def) => { const v = flag(name, null); return v == null ? def 
 const seed = num('seed', 7);
 const hours = num('hours', 8);
 const size = num('size', 96);
+// The interface runs a 5x5 block of chunks. One 96x96 chunk is not a map a four-hundred-building
+// base fits on - the bot filled every legal 4x4 by hour three and the chemistry line was never
+// built - so the sim plays on the same kind of grid the game does.
+const chunks = num('chunks', 3);
 const difficulty = String(flag('difficulty', 'normal'));
 const archetype = flag('planet', null);
 const quiet = !!flag('quiet', false);
 const why = !!flag('why', false);
 const noWaves = !!flag('no-waves', false);
+const asJson = !!flag('json', false);
 
 const data = await loadData();
 const planet = archetype ? makePlanet({ id: 'p1', seed, archetype: String(archetype), resourceTable: data.resources }) : null;
-const game = Game.createSync({ seed, difficulty, data, size, planet: planet || undefined });
+const game = Game.createSync({ seed, difficulty, data, size, chunks, planet: planet || undefined });
 if (noWaves) game.flags.noWaves = true;
 const bot = new Bot(game);
 
@@ -48,6 +55,9 @@ const seconds = Math.round(hours * 3600);
 const rows = [];
 const t0 = Date.now();
 let firstWave = null, firstRocketPart = null, rocketReady = null;
+// The funnel the balance report is written from. Each one is the game time it first happened.
+const mark = {};
+const at = (k, cond) => { if (mark[k] == null && cond) mark[k] = game.time; };
 
 for (let t = 0; t < seconds; t++) {
   game.tick(1);
@@ -55,10 +65,52 @@ for (let t = 0; t < seconds; t++) {
   if (firstWave == null && game.waveNumber >= 1) firstWave = game.time;
   if (firstRocketPart == null && (game.stats.produced.rocket_part || 0) > 0) firstRocketPart = game.time;
   if (rocketReady == null && game.space.rocketReady) rocketReady = game.time;
+  if (t % 30 === 0) {
+    at('drill', game.structures.some(s => s.state === 'done' && s.nodeId));
+    at('smelter', (game.stats.produced.iron_ingot || 0) > 0);
+    at('lab', game.research.done.length > 1);
+    at('steel', (game.stats.produced.steel_plate || 0) > 0);
+    at('refinery', game.structures.some(s => s.state === 'done' && s.type === 'refinery'));
+    at('chem', (game.stats.produced.pack_chem || 0) > 0);
+    at('waveSurvived', game.stats.wavesCleared >= 1);
+    at('satellite', game.space.satellites > 0);
+    at('probe', game.space.surveyed.length > 0);
+    at('rocketReady', game.space.rocketReady);
+    at('launch', game.space.launched);
+  }
   if (t % 1800 === 0) rows.push(snapshot());
   if (game.lost) break;
 }
 rows.push(snapshot());
+
+if (asJson) {
+  const inv = game.inventory();
+  console.log(JSON.stringify({
+    seed, difficulty, hours, size: game.map.width, chunks,
+    name: game.planet.name, archetype: game.planet.archetype,
+    rare: game.planet.rareElements, hazards: game.planet.hazards,
+    marks: mark,
+    lost: game.lost, lostAt: game.lost ? game.time : null, won: game.won,
+    waves: game.waveNumber, wavesCleared: game.stats.wavesCleared,
+    kills: game.stats.kills, crewLost: game.stats.crewLost, structuresLost: game.stats.lost,
+    built: game.structures.filter(s => s.state === 'done').length,
+    tech: game.research.done.length, quests: game.quests.done.length,
+    threat: Math.round(game.threat),
+    power: { gen: Math.round(game.stats.power.gen), use: Math.round(game.stats.power.use) },
+    rocketParts: game.rocketStatus().parts,
+    stalledOnPacks: !!game.flags.researchStalled,
+    // the thing the run is most short of, which is what a stall reads as in the report
+    worst: (() => {
+      bot.recipeCache = new Map(); bot.refreshInventory();
+      const { need } = bot.plan(); const cap = bot.capacityTable();
+      return [...need.keys()].map(r => [r, (cap.get(r) || 0) / Math.max(1e-6, need.get(r))])
+        .sort((a, b) => a[1] - b[1]).slice(0, 4).map(([r, v]) => `${r} ${v.toFixed(2)}`);
+    })(),
+    stock: Object.fromEntries(['iron_plate', 'steel_plate', 'circuit', 'alloy_plate', 'rocket_fuel']
+      .map(r => [r, Math.round(inv[r] || 0)])),
+  }));
+  process.exit(0);
+}
 
 function snapshot() {
   const inv = game.inventory();
@@ -83,7 +135,7 @@ const hms = s => `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math
 const pad = (v, n) => String(v).padStart(n);
 
 if (!quiet) {
-  console.log(`\nFrontier Foundry - seed ${seed}, ${game.planet.name} (${game.planet.archetype}), ${difficulty}, ${hours}h, ${size}x${size}`);
+  console.log(`\nFrontier Foundry - seed ${seed}, ${game.planet.name} (${game.planet.archetype}), ${difficulty}, ${hours}h, ${game.map.width}x${game.map.height}`);
   console.log(`rare elements: ${(game.planet.rareElements || []).join(', ') || 'none'} | hazards: ${(game.planet.hazards || []).join(', ') || 'none'}`);
   console.log('\n time  built  power      tech wave threat kills lostS  plate  steel circ packs');
   for (const r of rows) {
@@ -119,6 +171,21 @@ if (why) {
   for (const [k, v] of Object.entries(by).sort((a, b) => b[1].n - a[1].n)) {
     console.log(` ${k.padEnd(22)} x${pad(v.n, 3)}  running ${pad(v.busy, 3)}  output full ${pad(v.blocked, 3)}  throttled ${pad(v.off, 3)}  short of ${[...v.starved].join(', ') || '-'}`);
   }
+  // What the bot thinks it needs against what it can actually manage. The worst ratio at the top is
+  // almost always the thing the whole run is stuck behind.
+  console.log('\n--- supply against demand (units a second) ---');
+  bot.recipeCache = new Map();
+  bot.refreshInventory();
+  const { need, depth } = bot.plan();
+  const capT = bot.capacityTable();
+  const inv = game.inventory();
+  const rows2 = [...need.keys()].map(r => [r, need.get(r), capT.get(r) || 0, depth.get(r) || 0, inv[r] || 0]);
+  rows2.sort((a, b) => (a[2] / Math.max(1e-6, a[1])) - (b[2] / Math.max(1e-6, b[1])));
+  console.log(' resource              need     have   ratio  depth   in store');
+  for (const [r, nd, cp, d, stock] of rows2) {
+    console.log(` ${r.padEnd(20)} ${nd.toFixed(2).padStart(6)} ${cp.toFixed(2).padStart(8)} ${(cp / Math.max(1e-6, nd)).toFixed(2).padStart(7)} ${pad(d, 6)} ${pad(Math.round(stock), 10)}`);
+  }
+
   console.log('\n--- next things the bot wants ---');
   let shown = 0;
   for (const step of PLAN) {

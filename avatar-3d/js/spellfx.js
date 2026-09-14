@@ -104,6 +104,7 @@ export function statusFxOf(type) {
 
 function disposeObj(obj) {
   obj.traverse(o => {
+    if (o.userData?.poolKey) return;     // a pooled trail sprite: its material is reused, not thrown away
     if (o.geometry) o.geometry.dispose();
     const mats = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : [];
     for (const m of mats) m.dispose();   // textures are shared: never disposed here
@@ -131,14 +132,19 @@ class Trail {
   }
   emit(pos, dt) {
     if (!this.emitting) return;
-    this._acc += dt * this.rate;
+    // Budget (E31): when the stage is already drowning in particles the trail thins out instead of
+    // adding to the pile — a busy 4v6 round looks the same and costs a fraction of the frame.
+    const budget = this.fx.budgetScale();
+    if (budget <= 0) { this._acc = 0; return; }
+    this._acc += dt * this.rate * budget;
     while (this._acc >= 1) {
       this._acc -= 1;
-      const s = this.fx._sprite(pick(this.ids), { size: this.size * rnd(0.7, 1.25), color: this.color, blending: this.blending, opacity: this.opacity });
+      const s = this.fx._sprite(pick(this.ids), { size: this.size * rnd(0.7, 1.25), color: this.color, blending: this.blending, opacity: this.opacity, pooled: true });
       if (!s) { this._acc = 0; return; }
       s.position.copy(pos).add(new THREE.Vector3(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).multiplyScalar(this.spread));
       s.material.rotation = rnd(0, Math.PI * 2);
       this.group.add(s);
+      this.fx._particles++;
       this.parts.push({ s, age: 0, life: this.life * rnd(0.75, 1.2), size: s.scale.x, spin: rnd(-4, 4), vel: new THREE.Vector3(rnd(-0.1, 0.1), this.rise + rnd(-0.05, 0.05), rnd(-0.1, 0.1)) });
     }
   }
@@ -146,7 +152,7 @@ class Trail {
     for (let i = this.parts.length - 1; i >= 0; i--) {
       const p = this.parts[i]; p.age += dt;
       const k = p.age / p.life;
-      if (k >= 1) { this.group.remove(p.s); p.s.material.dispose(); this.parts.splice(i, 1); continue; }
+      if (k >= 1) { this.group.remove(p.s); this.fx._freeSprite(p.s); this.parts.splice(i, 1); continue; }
       p.s.position.addScaledVector(p.vel, dt);
       p.s.material.rotation += p.spin * dt;
       p.s.material.opacity = this.opacity * (1 - k) * (1 - k);
@@ -155,7 +161,7 @@ class Trail {
     }
   }
   get count() { return this.parts.length; }
-  dispose() { for (const p of this.parts) p.s.material.dispose(); this.parts.length = 0; disposeObj(this.group); }
+  dispose() { for (const p of this.parts) { this.group.remove(p.s); this.fx._freeSprite(p.s); } this.parts.length = 0; disposeObj(this.group); }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -167,8 +173,10 @@ export class SpellFx {
    * @param {object|Map|Function} opts.textures  fx sprite textures by id (see assets.fxTextures)
    * @param {THREE.Camera} [opts.camera]         used to face flat discs at the viewer
    * @param {number} [opts.scale]                global size multiplier (1 = tuned for ~1.2 m chibi bodies)
+   * @param {number} [opts.maxParticles]         hard cap on live trail sprites (see budgetScale)
+   * @param {number} [opts.maxLive]              hard cap on one-shot effects running at once
    */
-  constructor(scene, { textures = null, camera = null, scale = 1 } = {}) {
+  constructor(scene, { textures = null, camera = null, scale = 1, maxParticles = 320, maxLive = 48 } = {}) {
     this.scene = scene; this.camera = camera; this.scale = scale;
     this.root = new THREE.Group(); this.root.name = 'spellfx'; this.root.frustumCulled = false;
     scene.add(this.root);
@@ -177,7 +185,45 @@ export class SpellFx {
     this._statuses = new Map();     // object uuid -> Map(type -> handle)
     this._t = 0;
     this._spriteGeo = null;         // three makes its own sprite geometry; kept for API symmetry
+    // ---- budget + pooling (E31) ---------------------------------------------------------------
+    // A four-on-six round with everything casting used to build and throw away a SpriteMaterial per
+    // trail particle — sixty a second per projectile. Sprites now come from a pool keyed by texture
+    // and blend mode, and both particles and one-shot effects have a ceiling.
+    this.maxParticles = maxParticles; this.maxLive = maxLive;
+    this._particles = 0;            // live trail sprites right now
+    this._pool = new Map();         // "id|blending" -> [Sprite]
+    this._pooled = 0;
+    this._dropped = 0;              // effects skipped because the stage was already full
   }
+  /**
+   * How much of its normal output a trail should emit right now: 1 while there is room, tapering to
+   * 0 at the cap. This is the cheap level-of-detail switch — nothing disappears, the streams just
+   * get thinner when ten things are in the air at once.
+   */
+  budgetScale() {
+    const k = this._particles / Math.max(1, this.maxParticles);
+    if (k < 0.6) return 1;
+    if (k < 0.85) return 0.5;
+    if (k < 1) return 0.25;
+    return 0;
+  }
+  /** Counts for a perf overlay or a test: { live, particles, statuses, pooled, dropped }. */
+  stats() {
+    let statuses = 0; for (const m of this._statuses.values()) statuses += m.size;
+    return { live: this.live.length, particles: this._particles, statuses, pooled: this._pooled, dropped: this._dropped, budget: this.budgetScale() };
+  }
+  /** Put a finished sprite back in the pool instead of throwing its material away. */
+  _freeSprite(s) {
+    if (!s) return;
+    this._particles = Math.max(0, this._particles - 1);
+    if (s.parent) s.parent.remove(s);
+    const key = s.userData.poolKey;
+    if (!key || this._pooled >= 400) { s.material?.dispose?.(); return; }
+    const list = this._pool.get(key) || (this._pool.set(key, []), this._pool.get(key));
+    list.push(s); this._pooled++;
+  }
+  /** Drop every pooled sprite (call when the stage is torn down). */
+  clearPool() { for (const list of this._pool.values()) for (const s of list) s.material?.dispose?.(); this._pool.clear(); this._pooled = 0; }
 
   /** Swap the sprite set at any time (for example once the async texture load finishes). */
   setTextures(textures) {
@@ -193,11 +239,21 @@ export class SpellFx {
 
   // ---- small builders -------------------------------------------------------------------------
 
-  /** A billboard sprite, or null when the texture is missing. */
-  _sprite(id, { size = 0.2, color = 0xffffff, opacity = 1, blending = THREE.AdditiveBlending } = {}) {
+  /** A billboard sprite, or null when the texture is missing. Reused from the pool where possible. */
+  _sprite(id, { size = 0.2, color = 0xffffff, opacity = 1, blending = THREE.AdditiveBlending, pooled = false } = {}) {
     const map = this.texture(id); if (!map) return null;
-    const m = new THREE.SpriteMaterial({ map, color, transparent: true, opacity, blending, depthWrite: false, depthTest: true, toneMapped: false });
-    const s = new THREE.Sprite(m);
+    if (!pooled) {   // one-off sprites (impacts, auras) are owned by their effect and disposed with it
+      const m = new THREE.SpriteMaterial({ map, color, transparent: true, opacity, blending, depthWrite: false, depthTest: true, toneMapped: false });
+      const one = new THREE.Sprite(m); const p0 = size * this.scale; one.scale.set(p0, p0, p0); return one;
+    }
+    const key = id + '|' + blending;
+    const list = this._pool.get(key);
+    let s = list && list.length ? list.pop() : null;
+    if (s) { this._pooled--; s.material.color.set(color); s.material.opacity = opacity; s.material.rotation = 0; s.visible = true; }
+    else {
+      const m = new THREE.SpriteMaterial({ map, color, transparent: true, opacity, blending, depthWrite: false, depthTest: true, toneMapped: false });
+      s = new THREE.Sprite(m); s.userData.poolKey = key;
+    }
     const px = size * this.scale; s.scale.set(px, px, px);
     return s;
   }
@@ -220,11 +276,16 @@ export class SpellFx {
     return g;
   }
 
-  /** Register a one-shot effect. `step(dt, k, e)` runs each frame; return true to end it early. */
+  /**
+   * Register a one-shot effect. `step(dt, k, e)` runs each frame; return true to end it early.
+   * Over `maxLive` the oldest effect is retired early rather than letting the list grow without
+   * bound — its onDone still runs, so anything awaiting it (a projectile's promise) still resolves.
+   */
   _add(obj, life, step, onDone = null) {
     if (obj && !obj.parent) this.root.add(obj);
     const e = { obj, life, step, onDone, age: 0 };
     this.live.push(e);
+    while (this.live.length > this.maxLive) { this._dropped++; this._end(this.live[0]); }
     return e;
   }
   _end(e) {

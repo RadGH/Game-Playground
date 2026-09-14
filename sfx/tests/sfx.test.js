@@ -6,12 +6,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { analyze, normalizeGain, normalize, applyGain, softLimit, loopify, dbToGain, gainToDb } from '../js/loudness.js';
+import { analyze, normalizeGain, normalize, applyGain, softLimit, loopify, dbToGain, gainToDb,
+  CATEGORY_TARGETS, DEFAULT_TARGET, LOOP_MAX_BOOST_DB, LOOP_MAX_CUT_DB, AMBIENCE_BUS_CAP, optionsFor } from '../js/loudness.js';
 import * as synth from '../js/methods/synth.js';
 import * as library from '../js/methods/library.js';
 import * as hybrid from '../js/methods/hybrid.js';
 import * as retro from '../js/methods/retro.js';
-import { METHODS, METHOD_ORDER, methodList } from '../js/sfx.js';
+import { METHODS, METHOD_ORDER, methodList, busCap } from '../js/sfx.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..', '..');
@@ -302,4 +303,58 @@ test('analyze and normalize also take an AudioBuffer straight from Web Audio', (
   const r = normalize(fakeBuffer, -18);
   assert.equal(r.aim, -18);
   assert.ok(Math.abs(analyze(r.samples, 44100).lufs - -18) < 0.6);
+});
+
+// ---- per-category targets and the ambience cap ------------------------------------------------
+// loudness.js owns the target table. Act 1's wind loop was the reason it exists: the ambience bed
+// was levelled like a one-off sound and drowned the game, so ambience now aims 10 dB lower, a loop
+// may only ever be cut (never boosted up out of its own hiss), and the ambience bus has a hard cap.
+
+test('the category target table is the authority, and ambience sits 10 dB under the rest', () => {
+  for (const [name, cat] of Object.entries(catalog.categories)) {
+    assert.ok(Number.isFinite(CATEGORY_TARGETS[name]), 'loudness.js has no target for category ' + name);
+    assert.equal(CATEGORY_TARGETS[name], cat.target, `catalog.json and loudness.js disagree about ${name}`);
+  }
+  for (const [name, t] of Object.entries(CATEGORY_TARGETS)) {
+    assert.ok(catalog.categories[name], 'loudness.js has a target for a category the catalog does not have: ' + name);
+    assert.ok(t < 0 && t > -60, name + ' target out of range: ' + t);
+  }
+  assert.equal(CATEGORY_TARGETS.ambience, -40, 'the ambience target is the fix for the Act 1 wind');
+  const others = Object.entries(CATEGORY_TARGETS).filter(([k]) => k !== 'ambience').map(([, v]) => v);
+  assert.ok(CATEGORY_TARGETS.ambience <= Math.min(...others) - 10,
+    'ambience should be at least 10 dB under every other category');
+  assert.ok(DEFAULT_TARGET < 0);
+});
+
+test('a loop is only ever cut, and the ambience bus is capped', () => {
+  assert.equal(LOOP_MAX_BOOST_DB, 0, 'a loop must never be boosted');
+  assert.ok(LOOP_MAX_CUT_DB <= -40, 'a loud loop has to be able to come all the way down to the target');
+  assert.ok(AMBIENCE_BUS_CAP > 0 && AMBIENCE_BUS_CAP <= 0.6);
+  assert.equal(busCap('ambience'), AMBIENCE_BUS_CAP);
+  assert.equal(busCap('sfx'), 1);
+
+  const loopOpts = optionsFor({ category: 'ambience', loop: true });
+  assert.equal(loopOpts.target, -40);
+  assert.equal(loopOpts.maxBoostDb, 0);
+  assert.equal(loopOpts.maxCutDb, LOOP_MAX_CUT_DB);
+  const oneShot = optionsFor({ category: 'impact', loop: false });
+  assert.equal(oneShot.target, -16);
+  assert.equal(oneShot.maxBoostDb, undefined, 'a one-off sound keeps the normal boost range');
+});
+
+test('a quiet loop is left quiet instead of being amplified up to the target', () => {
+  // -55 LUFS of hiss: without the loop cap the normalizer would lift it ~15 dB and the player would
+  // hear nothing but noise floor for the whole act.
+  const quiet = sine(0.0016, 2.0, 200);
+  const free = normalize(quiet, 48000, { target: -40, ceiling: -1 });
+  assert.ok(free.gainDb > 6, 'sanity: without the cap this clip would be boosted (' + free.gainDb.toFixed(1) + ' dB)');
+  const capped = normalize(quiet, 48000, optionsFor({ category: 'ambience', loop: true }));
+  assert.ok(capped.gainDb <= 0.001, 'a loop was boosted by ' + capped.gainDb.toFixed(1) + ' dB');
+  assert.ok(analyze(capped.samples, 48000).lufs <= analyze(quiet, 48000).lufs + 0.1);
+
+  // a loud loop still comes all the way down to the ambience target
+  const loud = sine(0.9, 2.0, 200);
+  const cut = normalize(loud, 48000, optionsFor({ category: 'ambience', loop: true }));
+  assert.ok(Math.abs(analyze(cut.samples, 48000).lufs - -40) < 1.0,
+    'a loud loop landed at ' + analyze(cut.samples, 48000).lufs.toFixed(1) + ' instead of -40');
 });

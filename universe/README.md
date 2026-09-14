@@ -5,6 +5,7 @@ only one consumer of it. Four levels, each one a zoom into the last:
 
 ```
 galaxy  →  system  →  planet  →  world map  →  region  →  local tile
+                          ↘  moon  →  world map (half size)  →  region  →  local tile
 ```
 
 The last three of those are World Forge's, so a planet you pick out of a star chart ends up as a
@@ -30,6 +31,10 @@ const system = generateSystem(star, { seed: star.seed });
 const planet = system.planets.find(p => p.archetype === 'living');
 const world  = generatePlanetMap(planet);              // a World Forge world
 const tex    = planetTexture(planet, world);           // canvases for the 3D sphere (browser only)
+
+// a moon is a small planet: same calls, a smaller grid
+const moon      = planet.moons[0];
+const moonWorld = generatePlanetMap(moon, moonMapSize({ width: 192, height: 96 }));   // 96×48
 ```
 
 Everything except `texture.js` runs in node and in a worker.
@@ -89,10 +94,43 @@ planet = {
   resources:     [ { key, name, color, tags[], abundance } ],   // always the baseline four
   rareElements:  [ { key, name, color, tags[], value, blurb, abundance } ],   // one or two
   hazards: [ 'heat' | 'cold' | 'toxic' | 'radiation' | 'storms' ],
-  moons: [ { name, kind, radius, distance, periodDays, color, tidalLocked, seed } ],
+  moons: [ moon ],                       // see below — each one is a planet record in miniature
   rings: { inner, outer, color, opacity, gaps, tilt } | null,
 }
 ```
+
+### Moon
+
+A moon carries every field `planetmap.js` and `texture.js` read, so anything that works on a planet
+works on a moon. It also keeps the four old fields (`kind`, `distance`, `periodDays`, `color`) that
+the 3D models read.
+
+```
+moon = {
+  id,            // "<planetId>m<index>" — stable, so a link or a save can point at one
+  seed,          // its own, from the planet's: the same moon always builds the same map
+  moon: true, parentId, parentName, index,
+  name, archetype, archetypeName, blurb, kind,
+  star: { … },   // the same small star reference a planet carries
+  orbit: { au, aroundPlanet, periodDays, inZone, beyondFrost },   // au is its planet's
+  radius, gravity, mass, dayLengthHours, tidalLocked, axialTilt, tidalHeat,
+  atmosphere, temperature, biomeMode, biomeFamily, palette, poles, skyColor, seaColor,
+  giant: false, landable: true, difficulty, hazards[], tags[],
+  resources[], rareElements[],   // the baseline four and one rare, scaled down by its size
+  moons: [], rings: null,
+}
+```
+
+`moonsOf(system)` gives every moon with its parent, `moonById(system, id)` finds one.
+
+### Names
+
+Nothing inside one system shares a name: the star's name is taken first, then every planet, moon,
+belt and comet name is re-rolled (up to five times) if it collides, falling back to the numbered form
+(`Wyrmcrag IV`), which is unique by construction. Star names are deduped the same way across a whole
+galaxy — Name Forge does repeat itself over a few hundred rolls, and a repeat makes the star list and
+any save ambiguous. A moon is always `<planet name> a`, `b`, `c`…, so *Elm Barrow* and *Elm Barrow a*
+are a planet and its moon, not a collision.
 
 ---
 
@@ -101,12 +139,12 @@ planet = {
 | File | What it does |
 |---|---|
 | `js/stars.js` | The stellar class table (11 kinds), habitable zone, frost line, orbit temperature, colour by temperature, the star namer, `makeStar()`. |
-| `js/galaxy.js` | `generateGalaxy(opts)` — five layouts, star placement, class mix, travel lanes, `nearestStar`, `route`, `GALAXY_PRESETS`. |
-| `js/system.js` | The archetype table (14 kinds) and `generateSystem(star, opts)` — orbits, planets, moons, rings, belts, comets, resources and hazards. |
+| `js/galaxy.js` | `generateGalaxy(opts)` — five layouts, star placement, class mix, unique star names, travel lanes, `nearestStar`, `route`, `GALAXY_PRESETS`. |
+| `js/system.js` | The archetype table (14 kinds) and `generateSystem(star, opts)` — orbits, planets, moons, rings, belts, comets, resources and hazards. Also the orbit spacing: `nextOrbitAu`, `MIN_ORBIT_RATIO`, `orbitRatios`, and `orbitLayout()` for drawing them. |
 | `js/elements.js` | Loads `data/elements.json` in a page or in node, and answers `rareFor(archetype)`. |
-| `js/planetmap.js` | `planetWorldOpts(planet)` → World Forge knobs, `generatePlanetMap(planet)` → a world (cached), the tidal-lock pass, `familyShare` / `mapMix`. |
+| `js/planetmap.js` | `planetWorldOpts(body)` → World Forge knobs, `generatePlanetMap(body)` → a world (cached), the tidal-lock pass (`applyTidalLock`, `columnClimate`), `moonMapSize` / `mapSizeFor`, `familyShare` / `mapMix`. Takes a moon anywhere it takes a planet. |
 | `js/texture.js` | The canvases a 3D planet needs: surface, clouds, night lights, self-glow, bump, and the banded texture for gas giants. Browser only. |
-| `js/export.js` | `toJSON` / `fromJSON` for a galaxy, a system, a planet or all three; `regenerate()` rebuilds everything from the seed alone. |
+| `js/export.js` | `toJSON` / `fromJSON` for a galaxy, a system, a planet, a moon or all of them; `moonIndex(system)` lists every moon and the seed its map comes from; `regenerate({ moonId })` rebuilds everything from the seed alone. |
 | `js/app.js` | The viewer: knobs, four views, breadcrumb, lists, export. Exposes `window.universeDemo`. |
 | `data/elements.json` | The mining table: four baseline resources and twelve rare elements, with colours, tags, values and which worlds carry them. |
 
@@ -163,7 +201,84 @@ the work. `multi` means a real climate with several biomes, and `poles` adds ice
 
 A tidally locked world is generated with the latitude gradient switched off, then its temperature is
 redone **by longitude** and the biomes reclassified, so one face bakes, the far face freezes, and
-everything worth having sits in the ring of twilight between them.
+everything worth having sits in the ring of twilight between them (`applyTidalLock`):
+
+```
+map column:   0 ──────────── w/4 ──────── w/2 ──────── 3w/4 ──────────── w
+              antistellar    twilight     substellar   twilight          antistellar
+temperature   cold 0.02      ~0.5         hot          ~0.5              cold 0.02
+              └── the same longitude: the two edges meet on the sphere ──┘
+```
+
+The profile is a **raised cosine** of the longitude distance from the substellar point, so the
+gradient is flat at both ends: the far face is a whole frozen hemisphere rather than a thin band at
+the edges, and — because the slope is zero exactly where the map wraps — the seam carries no step,
+which is what used to show as a white stripe down one longitude of the 3D sphere. On top of that the
+poles run a little colder and the burning face is dried out (`0.28×` its moisture at the substellar
+point), so the freezing line comes out as a curve rather than a ruled column.
+
+`columnClimate(world)` returns the mean temperature and the share of frozen ground in every column,
+west to east — the check that a locked world really is hot in the middle, frozen at both edges, and
+free of any single column that steps away from its neighbours.
+
+## Moons
+
+Every moon is a small planet with its own archetype, temperature, resources, id and seed, so it gets
+its own surface map, its own texture and its own card in the viewer. There are only four kinds,
+which is about what the real ones look like:
+
+| Kind | When it happens | Notes |
+|---|---|---|
+| **Barren Moon** | the default | airless rock, mining and nothing else |
+| **Ice Moon** | anything below about 230 K, and most of what orbits a giant | water ice, the easiest fuel in the system |
+| **Volcanic Moon** | close in around a giant, where tidal squeezing never lets the inside cool | `tidalHeat` 0…1 records how hard it is being kneaded |
+| **Living Moon** | *rare* — a big moon (≥ 0.25× Earth, so it can hold air) where the sunlight is right for water | about 1% of moons; in practice a large moon of a gas giant sitting in the star's water zone |
+
+The rules, in order: a dead star (neutron star, black hole) leaves only ice and rock; a hard tidal
+squeeze makes it volcanic; then the size-and-warmth roll for a living moon; then temperature decides
+between ice and barren. `moonArchetype()` is exported if you want to run the same rules yourself.
+
+What a moon gets less of than a planet:
+
+- **map**: half the grid (`moonMapSize()` — a 192×96 planet gives a 96×48 moon), fewer and chunkier
+  landmasses, roughly half the provinces, almost no settlements.
+- **resources**: the baseline four and usually one rare element, all scaled by the moon's size
+  (`0.35 + radius × 0.7`, capped at 0.9 of a planet's abundance). A second rare element is a third as
+  likely as it is on a planet.
+- **air**: scaled by radius, so most moons come out at "none". Only a living moon keeps real air, and
+  only it can be breathable. An airless moon's map is dry — no rivers, no lakes, low sea level.
+
+A locked moon keeps one face to **its planet**, not to the star, so the tidally locked day/night pass
+that a locked planet gets does not run on a moon.
+
+### Orbit spacing
+
+Orbits step outwards on a ratio ladder, never a fixed distance:
+
+| Constant | Value | What it means |
+|---|---|---|
+| `MIN_ORBIT_RATIO` | 1.5 | inside the frost line, each orbit is at least 1.5× the one before it |
+| `MIN_ORBIT_RATIO_OUTER` | 1.7 | past the frost line, where the real gaps are wider |
+
+`nextOrbitAu(au, rng, beyondFrost)` is the ladder itself; it rounds **up** to four decimals so the
+stored numbers keep the invariant too. `orbitRatios(system)` hands back every ratio for a check.
+
+Drawing them is a second problem: real orbits run from 0.03 AU to 150 AU, and squashing that onto a
+log scale is what used to push two rings almost on top of each other. `orbitLayout(system, opts)`
+does it properly and has no DOM or Three.js in it, so a test can check it:
+
+```js
+const L = orbitLayout(system, { starRadius: 0.6, minGap: 1.05 });
+L.radii[i]            // where planet i's ring is drawn, in scene units
+L.radiusFor(au)       // the same ladder for a belt or a comet (monotone, interpolated in log space)
+L.gapAt(i)            // the narrower of the two gaps around planet i
+L.sizeFor(i, wanted)  // `wanted`, capped at a third of that gap — a planet never fills its lane
+L.max                 // the outermost ring, for the camera
+```
+
+Each ring's place is a blend of where it sits by distance (log) and where it sits in the queue
+(`even`, 0.55 by default), then a pass outwards opens up anything still closer than `minGap`. The
+even part is what stops one far-out giant from squashing the inner planets together.
 
 ### Resources
 
@@ -225,7 +340,7 @@ The table lives in `data/elements.json` — colour, tags, a rough value and a on
 | Knob | Range | Default | What it does |
 |---|---|---|---|
 | `planets` | 0…1 | 0.55 | How full the system is, inside the star class's own range. |
-| `moonChance` | 0…1 | 0.55 | How readily a planet keeps moons. |
+| `moonChance` | 0…1 | 0.55 | How readily a planet keeps moons. Giants keep 2–7, a big rocky world 0–2. |
 | `ringChance` | 0…1 | 0.28 | Rings, weighted up for giants and down for small worlds. |
 | `beltChance` | 0…1 | 0.55 | An asteroid belt in one of the gaps. |
 | `cometChance` | 0…1 | 0.5 | A few long-period comets. |
@@ -236,7 +351,7 @@ The table lives in `data/elements.json` — colour, tags, a rough value and a on
 ### Map size (viewer only)
 
 `small` 128×64 · `medium` 192×96 (default) · `large` 288×144. Bigger means a slower first look at a
-planet and a deeper zoom once you are there.
+planet and a deeper zoom once you are there. A moon uses half of whichever size is picked.
 
 ---
 
@@ -268,14 +383,20 @@ selected, the planet list, a filterable star list and the export buttons.
 - **system** — Three.js: the star (with its own model for binary pairs, pulsars and black holes),
   orbit rings on a log scale so the inner planets do not pile up, planets, belts. Click a planet.
 - **planet** — Three.js close-up: the real surface texture, an atmosphere rim, a cloud deck, rings,
-  moons, and the star off to one side so there is a day side and a night side.
-- **map** — the planet's World Forge map, with the usual world → region → local zooms.
+  moons, and the star off to one side so there is a day side and a night side. **Click one of the
+  moons** going round it, or click it in the "Moons of …" list on the right, to land on it.
+- **moon** — the same close-up for a moon, with the world it circles hanging behind it — drawn from
+  the parent's own cached surface texture, not a stand-in — its own card (what it orbits, how far,
+  tidal heat, resources, hazards) and its own surface map.
+- **map** — the body's World Forge map, with the usual world → region → local zooms.
 
 Escape, or the breadcrumb, walks back out. **JSON** saves the knobs and the records; **PNG** saves
 whatever view is on screen; **Copy link** puts the knobs in the URL hash.
 
-`window.universeDemo` exposes `{ state, generate, openStar, openPlanet, showMap, openRegion,
-openLocal, showView, back, setOpt, pixelStats, toJSON, ready }` for the tests and the console.
+`window.universeDemo` exposes `{ state, generate, openStar, openPlanet, openMoon, currentBody,
+orbitLayout, parentDrawn, showMap, openRegion, openLocal, showView, back, setOpt, pixelStats, toJSON,
+ready }` for the tests and the console. `pixelStats({ x, y, w, h })` takes an optional box in
+fractions of the view and counts cool (blue/green) against brown pixels. `state.moon` is the moon being looked at, or null.
 
 ---
 
@@ -333,24 +454,37 @@ the seed faster than they would load. A whole galaxy of 300 stars saves as about
 ## Tests
 
 ```
-node --test universe/tests/universe.test.js        # 19 tests, part of npm run test:unit
+node --test universe/tests/universe.test.js        # 26 tests, part of npm run test:unit
 npx playwright test universe/tests/universe.spec.js
 npx playwright test assets/tests/models.spec.js    # the 3D models
 ```
 
-The node tests cover the star table's arithmetic, per-seed determinism for stars, galaxies, systems
+The node tests cover the orbit ladder (no two orbits closer than `MIN_ORBIT_RATIO` over 200 seeds,
+and the drawn rings keeping their gap with every planet narrower than its own lane), moons (stable
+ids and seeds, only the four kinds, temperatures inside their band, living moons rare/big/warm, less
+of everything than a planet, a half-size map that is the same on every visit, and moons surviving a
+save and a `regenerate({ moonId })`), the star table's arithmetic, per-seed determinism for stars, galaxies, systems
 and maps, every layout being one connected graph, every star class and every archetype turning up,
 living worlds staying between 3% and 8%, orbits stepping outwards with temperatures inside their
 archetype's band, giants forming past the frost line, every planet carrying the baseline four and at
 least one rare element that belongs on it, single-biome planets coming out ≥85% one family,
 living worlds coming out with six or more land biomes and ice at the poles (and not in the tropics),
-a tidally locked world being warm in the middle and cold at the edges, and the JSON round trip.
+a tidally locked world being hot in the middle and a frozen hemisphere at both edges with no column
+stepping away from its neighbours (and a locked *moon* getting no hot face at all), no two names
+colliding inside a system or between the stars of a galaxy, and the JSON round trip.
 
 ## Known rough edges
 
 - The galaxy is 2D. Stars carry a `z`, but nothing uses it yet — no 3D star chart.
 - Planets do not move. Orbits are drawn as rings and each planet is parked at a fixed angle; nothing
   animates round the star, and moons orbit only for show.
+- The drawn orbits are spaced for readability, not to scale: the ladder blends distance with the
+  planet's place in the queue, so you cannot read the AU off the picture. The number on the card is
+  the real one.
+- A moon's map is a framed island world like a planet's, so an airless moon still has a rim of
+  "ocean" around the edge of its map — the water is gone from the middle, not from the frame.
+- Two planets in *different* systems can still share a name. Only names inside one system, and the
+  star names across a galaxy, are deduped.
 - The surface map is a framed island world, not a globe (World Forge does not wrap), so the texture
   hides the seam in ocean rather than being seamless by construction. It shows on a planet with very
   little water if you look for it.

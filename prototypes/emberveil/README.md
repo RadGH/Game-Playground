@@ -11,7 +11,7 @@ instruction). Open `http://<lan-ip>:8400/prototypes/emberveil/`.
 | Items | `src/game/items.js` etc. | `data/items.json` (35 weapon + 47 armour bases, 19 base affixes + 5 shield + 40 extended, 24 uniques with legendary effects, 24 sets, potions, salvage, prices, zone + boss drop tables) built from the research brief; `js/loot.js` generates, names, scores, prices, salvages, adds affixes, promotes rarity, rolls shops/boss loot/zone drops. Dead base keys in the original drop tables were fixed; the dormant 40 extended affixes and the never-called set drops are wired in. |
 | Stats / progression | `formulas.js`, `xp.js`, `passives.js`, `skills.js` | `js/rules.js`: derived stats (HP/MP/hit/dodge/crit/initiative/spell power…), basic damage range, level 30 xp curve, 2 attribute points per level, talent points at 3/8/13/18/23/28, passive points every 5 levels, 5-node passive trees per class, talent (additive) + upgrade (replace) merging, hero creation from build presets with the class kit, equip rules (two-handers clear the off-hand, rings, off-hand-ok weapons), enemy scaling (global × act × party-size × NG+), champions |
 | Combat | `simulator.js`, `CombatScreen.js` | `js/combat.js`: initiative each round (+d10, slow halves), stun/freeze/sleep/confused gates, hero AI (revive → heal thresholds → shield → best expected-damage skill → buff → attack), enemy AI (healer role, spell chance, taunt/taunting/companion-first targeting), pipeline hit → block → armour curve `a/(a+100)` → resistAll → dmgReduct → marked ×1.3 → barrier → HP, crits, DoTs, sunder/curse/silence, attack-speed extra actions, legendary effects (cheat death, crit bleed, dragon breath, echo cast…), flee check |
-| World | `mapData.js`, node screens | `js/game.js`: zone graph with fast travel to visited nodes, node memory (cleared fights, one-shot shrines/treasure/checks), dialog + random events with `requires`, skill checks (best attribute + d20), rewards (gold/xp/heal/damage/items/companions/flags), boss kills unlock the next zone + main quests, dungeons (stages, skill check stun/damage, reward), towns per act (merchant seeded stock, tavern hires named + walk-ins + companion kennel + bench, cleric rest, blacksmith salvage/affix, enchanter promote, trainer respec), defeat (wake in town, lose 15% gold), save/load |
+| World | `mapData.js`, node screens | `js/game.js`: zone graph walked one node at a time (round 20 — no fast travel), node memory (cleared fights, one-shot shrines/treasure/checks), dialog + random events with `requires`, skill checks (best attribute + d20), rewards (gold/xp/heal/damage/items/companions/flags), boss kills unlock the next zone + main quests, dungeons (stages, skill check stun/damage, reward), towns per act (merchant seeded stock, tavern hires named + walk-ins + companion kennel + bench, cleric rest, blacksmith salvage/affix, enchanter promote, trainer respec), defeat (wake in town, lose 15% gold), save/load |
 | Presentation | pixel sprites, canvas | Mii bodies for every class with new gear parts (`avatar-2d/js/parts/gear.js`, `avatar-3d/js/mii-gear.js`), creature bodies for beasts, act-themed SVG backdrops on the 3D stage, Lingo barks (taunts, hurt, ally down, kills, event NPC lines spoken aloud with the Formant voice) |
 
 ## Added on top of the original (round 9)
@@ -64,7 +64,7 @@ chances at the same favourite. Fixed on both ends:
 | Enemy families and hero roles are grammar **tags**, switched on per speaker: `enemyKind()` maps a template id to goblin/bandit/cultist/undead/demon/void/dragon/knight, `heroRole()` maps a class role to tank/healer/caster/rogue/ranger, and `speechFor()` sets every other tag in the family to 0. Each family also gets its own traits and sliders (`KIND_SPEECH`), so a goblin and a dragon read differently out of the same pool | `js/talk.js` |
 | Named enemies and nemeses open on their history: `named_first` (12), `named_rematch` (12, with `defeats` and `days` since it got away), `named_avenge` (13, names the hero it put down), `named_beaten` (12, for one the party already beat). The hard-coded "You again. I told you I would come back." is gone | `js/talk.js` `namedOpener()`, `js/main.js` `fight()` |
 | Nothing repeats: Lingo keeps a session-wide history per phrase pool (20 deep, `meta.noRepeat`), and `ctx.exclude` stops two enemies in the same fight opening with the same line (`talk.beginFight(enc)` clears it) | `lingo/js/lingo.js` `pick()`, `js/talk.js` `fightLines` |
-| Hero pools grew and got role flavour: `combat_taunt` 33, `combat_bark` 42, `combat_kill` 26, `combat_hurt` 23, `ally_down` 20, `brag` 22, `relief` 20, `warning` 15 | `lingo/data/grammar.json` |
+| Hero pools grew and got role flavour: `combat_taunt` 33, `combat_bark` 48, `combat_kill` 26, `combat_hurt` 23, `ally_down` 20, `brag` 24, `relief` 20, `warning` 15 (round 19 added the weapon-aware barks — see below) | `lingo/data/grammar.json` |
 
 Tests: `node --test prototypes/emberveil/tests/talk-variety.test.js` (family/role routing, no repeat in a fight, named
 situations, 30-fight run stays wide) and `lingo/tests/combat-variety.test.js`.
@@ -253,7 +253,7 @@ Two things in `balance.json` are **not** live yet: `progression.statPointsPerLev
 so changing them would split the live game from the simulator.
 
 ## Not rebuilt (on purpose, listed so nothing is silently missing)
-- Tap weapons/utilities (the real-time layer), achievements, codex, telemetry, cloud saves, NG+ UI (scaling constants are in `rules.js`), hardcore mode, infinite dungeon, guild hall/black market stock (formulas noted in `research/`), recruitable story heroes from dialog (`recruitHero` outcomes show text only), crafting recipes and fame cosmetic unlocks (both explained in `EFFECTS.md`), class unlock gating (all thirty classes are open; the original rule is shown on each card).
+- The original's real-time weapon layer (removed outright in round 20 — see `research/rules-notes.md`), achievements, codex, telemetry, cloud saves, NG+ UI (scaling constants are in `rules.js`), hardcore mode, infinite dungeon, guild hall/black market stock (formulas noted in `research/`), recruitable story heroes from dialog (`recruitHero` outcomes show text only), crafting recipes and fame cosmetic unlocks (both explained in `EFFECTS.md`), class unlock gating (all thirty classes are open; the original rule is shown on each card).
 
 ## Spell effects
 
@@ -392,15 +392,15 @@ text, frame flourishes, embers, how-to-play, the menu overlay, tooltip cards) an
   the only record. `window.emberveil.rewardPopups = false` turns it off.
 
 ## Files
-- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/effects.js` (the effect registry — see `EFFECTS.md`), `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/sfx-bridge.js` (sound, wraps the stage from outside), `js/rng.js`.
+- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/effects.js` (the effect registry — see `EFFECTS.md`), `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/sfx-bridge.js` (sound, wraps the stage from outside), `js/rng.js`, `skillcheck.css` (the skill-check popup).
 - `data/`: everything the game reads; `data/class-looks.json` = the 30 class blueprints (also in `library/data/defaults.json` as `ev_<class>` and in the 2D presets); `data/enemy-looks.json` = the 80 enemy/boss/pet/companion/hire looks (also in the library as `enemy_<id>` / `companion_<id>`).
 - `research/`: condensed notes from the original code (`rules-notes.md`, `world-notes.md`).
-- `tests/`: `loot.test.js`, `rules-combat.test.js`, `game.test.js`, `looks.test.js`, `effects.test.js` (node), `emberveil.spec.js` (Playwright).
+- `tests/`: `loot.test.js`, `rules-combat.test.js`, `game.test.js`, `looks.test.js`, `effects.test.js`, `weapon-lines.test.js`, `bindings.test.js`, `narrator.test.js`, `revive-thanks.test.js` (node), `emberveil.spec.js`, `crossings.spec.js`, `journal-checks.spec.js` (Playwright).
 - `EFFECTS.md`: the effect audit — every id, what it does, where it lives, and what the original did or didn't do.
 - Builders: `tools/build-emberveil-data.mjs`, `tools/build-emberveil-classes.mjs` (edit `LOOKS` there to change a class's look), `tools/build-emberveil-enemies.mjs` (edit `ENEMIES`/`BOSSES`/`PETS`/`COMPANIONS`/`HIRES` there to change a monster's look).
 
 ## Debug handle
-`window.emberveil` → `game`, `stage`, `talk`, `library`, `lingo`, `DATA`, `LOOKS` (classes), `ELOOKS` (enemy looks), `enemyLook(e)`, `bodyOf(h)`, `companionLook(id)`, `fight(encounter, {node, boss})`, `afterCombat(node, enc, boss)`, `enterNode()`, `renderMeterTab()`, `renderPartyTab()`, `renderMap()`, `waitForChoice(list, opts)`, `showRewardsFor(spec)`, `rewardPopups` (set false to silence the rewards popup), `speakCount`.
+`window.emberveil` → `game`, `stage`, `talk`, `library`, `lingo`, `DATA`, `LOOKS` (classes), `ELOOKS` (enemy looks), `enemyLook(e)`, `bodyOf(h)`, `companionLook(id)`, `fight(encounter, {node, boss})`, `afterCombat(node, enc, boss)`, `enterNode()`, `renderMeterTab()`, `renderPartyTab()`, `renderMap()`, `waitForChoice(list, opts)`, `showRewardsFor(spec)`, `rewardPopups` (set false to silence the rewards **and** skill-check popups), `speakCount`, `sayScene(text)` (say something as the Narrator), `showCheck(result, opts)` (the d20 popup + the log line), `recordNamedKill(named, enc)` (write a name on the Named Foes board), `renderJournal()`, `isSceneText(text)`.
 
 ## Stage framing and speech bubbles (round 18)
 
@@ -507,3 +507,438 @@ actually standing there ("Lone goblin", "Goblin pair", "Goblin trio", "Goblin ba
 and 2 Goblin Warriors", "Vraak the Patient and followers"). `enter()` returns that label alongside the
 encounter. `tests/labels.test.js` audits every encounter and every map node with a number word in it,
 and walks every node 25 times with different luck to prove the promise is kept.
+
+## Round 19: the Narrator, the board, and one wording for a roll
+
+Six small things the player actually noticed, each fixed at the source rather than at the place it showed up.
+
+### The Act 1 wind was deafening (E1)
+
+Ambience was levelled like a one-off sound effect. An impact is over in 200 ms; a wind bed plays for a whole act,
+and anything comfortable for two seconds is exhausting after ten minutes.
+
+| Change | Where |
+|---|---|
+| Per-category loudness targets moved into a table that owns them — `CATEGORY_TARGETS`. Ambience dropped from −30 to **−40 LUFS**; every other category is unchanged. `data/catalog.json` carries the same numbers and a node test fails if the two ever disagree | `sfx/js/loudness.js`, `sfx/data/catalog.json`, `sfx/tools/build-catalog.py` |
+| A **loop is never boosted** (`LOOP_MAX_BOOST_DB = 0`): measuring a quiet bed and multiplying it up only raises its hiss, which the player then hears for ten minutes. It may cut a long way (`LOOP_MAX_CUT_DB = −44`) so a loud bed really does come down to the target | `sfx/js/loudness.js` `optionsFor()`, `sfx/js/sfx.js` `load()` |
+| The **ambience bus is capped** at 0.6 linear however hard the slider is dragged, and the slider's top end moves down to the cap so it never offers a level it cannot give | `sfx/js/sfx.js` `busCap()`, `prototypes/emberveil/js/sfx-bridge.js` |
+
+All of it sits above the method layer, so synth, library, hybrid and retro get it identically.
+Tests: `sfx/tests/sfx.test.js` (the target table, the loop caps, a quiet loop left quiet and a loud one brought down)
+and `sfx/tests/sfx.spec.js` ("ambience is held down" — every bed on target through every method, and the bus gain
+under the cap).
+
+### "I'm out of bows!" (E6)
+
+The ammunition bark was `I'm out of {$item.pl}!` — `$item` picks a random word out of the lexicon, so archers
+shouted about bows and swordsmen about potions. Weapons are a real binding now: every line a character speaks
+carries `weapon` (the item as an Entity), `weaponType` (bow / crossbow / thrown / sling / caster / blade / blunt /
+polearm) and `ammo` (`arrows`, `bolts`, `javelins`, `throwing knives` — or nothing at all).
+
+- `js/talk.js`: `WEAPON_KINDS`, `WEAPON_AMMO`, `weaponKind()`, `ammoFor()`, `gearBindings()`, folded into `ctx()`.
+- `lingo/data/grammar.json`: the ammunition lines carry `cond: "ammo"`, so a sword, a staff or an empty hand is
+  never offered one; "Nock and loose!" is `cond: "weaponType==='bow'"`, and crossbows, thrown weapons and a ranger
+  caught with a blade got their own barks.
+- Test: `tests/weapon-lines.test.js` runs **every weapon in `data/items.json`** past the pools.
+
+### "The name goes on the board" — so there is a board (E10)
+
+The Journal has a **Named Foes** section: one row per named enemy and nemesis the party has killed, with where,
+which day, whether it was a nemesis and how many times it had beaten them, and **who landed the killing blow** —
+read straight out of the damage meter's record for that fight, so the board and the meter can never disagree.
+It lives on `game.namedBoard`, so it goes into the save with everything else.
+`js/main.js`: `killingBlowOn()`, `recordNamedKill()`, the `Named Foes` block in `renderJournal()`.
+
+### The Narrator (E13)
+
+Scene text is not something a person says. The event data labels its scene-setting paragraphs `speaker: "hero"`
+("A massive wolf is caught in a rusted trap, too exhausted to snarl") and a member of the party used to read them
+out. `js/talk.js` now has:
+
+- `isSceneText(text)` — a line with no first-person words outside its quotation marks is the scene talking. It gets
+  102 of the 104 hero-labelled lines in `data/random-events.json` right.
+- `talk.narrator()` / `talk.narrate(text)` — the Narrator, one object for the whole run, with its own voice
+  (`shared/voices.js` role `narrator`: low, slow, almost no seed jitter).
+- `js/main.js` `sayScene(text)` routes event lines, lore stones, beast openers, ambush and night-raid openers and a
+  boss's closing narration through it. In the log it is italic with no portrait (`.say.narration` in `style.css`),
+  and nothing draws a bubble over anybody's head.
+
+### "{weapon?}" leaked into a line (E14)
+
+Lingo writes `{name?}` when a template asks for a binding nobody supplied. `tests/bindings.test.js` now renders a
+large sample of everything the game can say — every grammar pool with the bindings a spoken line really gets, every
+memory type the game records with the exact bindings `game.js`/`effects.js` write, every conversation topic and
+thread line with the full binding set, and 400 live camp conversations — and fails on a single brace. It found five
+real holes, all fixed in the data: a body part in `recall_wounded` and a figure in `recall_lore`/`recall_lineage`
+(now rolled the way `rally` rolls a foe), a foe in `recall_revive` and the weapon-naming shape of `recall_deed`
+(now guarded by `cond`), and `{foe}`/`{place}` in two camp topics with no memory requirement.
+
+### One skill check, one wording, one popup (E15, E28)
+
+Every roll in the game — node tests, dialog choices, dungeon stages, crossings — reads the same:
+
+```
+CON 18 + d20 (rolled 2) = 20 vs 20: pass
+```
+
+`js/ui.js` `checkText()` / `checkHtml()` build it (with `STR 18 (+6)` when the rules convert the attribute into a
+smaller bonus, and `+4 (the right words)` for a trait bonus). `js/main.js` `showCheck()` is the one path: a d20
+tumbles in a popup for about 0.8 s, lands on the number, and the sum appears under a PASS/FAIL stamp — then exactly
+one line goes in the log. A click, Enter, Space or Escape during the tumble skips to the result; the same keys then
+close it. `skillCheckPopup(result, opts)` in `js/ui.js` is the reusable component (`skillcheck.css`), and passing
+`{ enabled: false }` turns it off without losing the log line.
+
+### The reward text was written twice (E16)
+
+"a scholar's reading: +50 xp each and the next fight starts with a blessing — +50 xp, the next fight starts blessed".
+The topic's own `text` spelled the reward out **and** `applyTopicReward()` generated it from the reward object. The
+generated half is the one that is always right, so it is the only half that carries numbers now; every `text` in
+`conversations/data/topics.json` and `conversations/data/threads.json` is flavour and nothing else.
+
+### Saying thank you for a revive (with E3)
+
+`game.revive()` writes `hero.revivedBy` and files a `revive` memory with a `by` binding. Three camp topics read it:
+`revive_thanks` (the next day or two), `revive_thanks_awkward` (the same, for a hero too proud to say it straight)
+and `revive_callback` (days later, unprompted). Getting the thanks to the right person needed two small options on
+a conversation requirement, both in `conversations/js/conversations.js`: `bindingIs: { by: 'answerer' }` casts the
+person named in the memory, and `minAgeHours` is the other half of `maxAgeHours` so the callback can wait.
+Test: `tests/revive-thanks.test.js`.
+
+### Tests added this round
+
+`tests/weapon-lines.test.js`, `tests/bindings.test.js`, `tests/narrator.test.js`, `tests/revive-thanks.test.js`
+(node) and `tests/journal-checks.spec.js` (the popup, the board and the Narrator in the page).
+
+## Round 20: the road, the fallen, and who is actually collecting the toll
+
+### The map is a road again
+
+Every zone is now a layered road instead of a fan. `tools/expand-emberveil-map.mjs` gained
+`normalizeZones()`, which rewires the trails (nothing is added or removed — only `exits`, `x` and `y`
+change) so that:
+
+- the entrance is alone in the first column and the boss alone in the last;
+- **no more than four branches are ever open at once**, and no node offers more than three ways on;
+- **every trail joins one column to the very next one** — there is no longer an edge that jumps from
+  the first node most of the way to the boss, which is how the Ashen Wastes let a party skip half of
+  act 2;
+- every route from the entrance to the boss is the same number of moves, so the branches are real
+  choices rather than one short cut and one long slog.
+
+The prologue is left exactly as authored (a single lonely line already satisfies all of that).
+`tests/zone-graph.test.js` checks all thirteen zones against those rules, plus the drawn length of
+every trail on the map.
+
+`dust_roads` before and after: 26 nodes, columns `1,7,5,5,4,2,2` with four backward edges and a
+three-column shortcut → 27 nodes, columns `1,3,4,4,4,4,3,2,1`, every trail exactly one column long.
+
+### Travel is one node at a time
+
+`game.reachable()` used to return "every exit **plus every node you have already visited**", which
+was a free teleport to anywhere behind you. It now returns exactly the neighbours of the node you are
+standing on, **in both directions**: you can turn round and walk back, and doing so costs a move (and
+therefore food and a share of the day) exactly like walking on. The map only accepts clicks on those
+lit neighbours.
+
+That made settlements a problem: only the Border Roads had a `town` node, so from act 2 on there was
+nowhere to buy food or see a cleric without the teleport. `addTowns()` in the map tool now gives every
+act zone its settlement (the names come from `TOWNS` in `js/game.js`), placed one move from the
+entrance. The prologue keeps none — the Lonely Road has nobody on it.
+
+### Revives — the rules, written down
+
+A hero who is knocked out **stays down after the fight**. The four ways back up (all of them in the
+`REVIVE` block at the top of `js/game.js`, and quoted to the player by `game.reviveHelp()` in the
+Party tab and the camp tooltip):
+
+| way | who | how much health |
+|---|---|---|
+| a living healer in the party — a class whose role heals, or anyone who knows a heal or revive skill — picks the fallen up after every fight **and** at camp | `victory()`, `rest()` | 50% |
+| a revive item from a merchant: the Revival Flask (80g) or the **Emberheart Draught** (420g, new) | Bag tab | 25% / 70% |
+| a shrine node on the map | `enter()` | full |
+| a settlement cleric (free) | `clericRest()` | full |
+
+Losing a fight is still not a dead end: `defeat()` wakes the whole party in the nearest settlement at
+half health, minus 15% of the purse.
+
+Every revive is written on the hero as `hero.revivedBy = { by, byName, how, source, day, where }` and
+filed as a **`revive` memory** — a new Lingo event type with importance 0.95 and a 150-day half-life,
+so it is never forgotten, with `recall_revive` lines in `lingo/data/grammar.json` and a `saved_life`
+relationship swing in `lingo/data/relations.json`. That is what camp conversations read when somebody
+thanks the person who pulled them off the ground. `game.revives` keeps the last 40 for the journal.
+
+### Night on the road is dangerous now
+
+`balance.json` `world.nightAttack` went from a 15% base (about 6% once a torch was lit in the
+prologue) to **40%** — roughly a one-in-three chance of being woken up with a torch burning, rising
+two points an act. A raid is deliberately worse than the same fight by daylight and pays for it, all
+from `world.nightRaid`:
+
+| knob | value | what it does |
+|---|---|---|
+| `extra` / `extraFromAct` | 1, from act 2 | an extra body on top of the vehicle's own modifier (the prologue and act 1 are left alone) |
+| `hp` / `damage` | ×1.1 / ×1.05 | tougher raiders |
+| `namedChance` | 0.35 | how often a named leader is at the head of it |
+| `xp` / `gold` | ×1.25 / ×1.7 | what winning one is worth |
+| `dropChance` | 0.5 | an extra roll on the zone drop table |
+
+A war wagon still cancels most of it, a fast coach still makes it worse, and a torch still helps.
+
+### Quests
+
+- **Markers on the map.** `game.questMarkers()` lists every accepted job that names a place — the main
+  story, a town-board bounty, a job taken from somebody on the road, or a hero's own errand — and the
+  map draws a coloured pin over the node with the title in the hover card.
+- **Strangers on the road.** A `dialog` node has a 22% chance of turning up somebody with paying work
+  instead of the usual scene (`data/road-quests.json`, six offers gated by act). The job points at a
+  real uncleared node in an open zone and pays `90 + 130 × act` times the offer's multiplier — better
+  than the board, because you have to be out there to be offered one. Taking it files it as an
+  ordinary side quest: it shows in the Quests tab, it gets a map pin, and `checkSideQuests()` pays it
+  out when the node is cleared. At most two open at a time.
+- **Two bounties per act.** `sq_throne_trial` fills the act-6 gap, and `sq_core_fortress` pointed at
+  `shard_fortress`, which is not a node in the Cosmic Rift — it now points at `cosmic_bastion`.
+  `tests/world-rules.test.js` checks both rules for every act.
+
+### A toll is collected by somebody with hands
+
+Refusing to pay the toll on the Dust Roads used to produce four cinder hounds, because the fight came
+straight from the zone's encounter pool. `data/enemy-families.json` (ours — the build tool never
+touches it) files every enemy as humanoid / beast / undead / construct / horror, lists the road bands
+to fall back on when a zone's own pool has nobody suitable, and names the events whose fight has to be
+against people. Then:
+
+- a crossing can declare `enemyFamily: "humanoid"` (the Toll Stone and the Warden's Gate do) and
+  `pickCrossingFight()` honours it;
+- `game.combatFor()` turns the original data's `startCombat: true` — which used to resolve to no
+  encounter at all, so the fight simply never happened — into a real encounter, humanoid for anything
+  about a toll, a bandit, a robber or a warden.
+
+Six new road bands cover acts 0–6 (`road_toll_band`, `veil_toll_watch`, `hell_toll_gate`,
+`void_toll_choir`, `abyssal_toll_watch`, `dragon_toll_watch`).
+
+### Interface
+
+- **Skills tab hero switcher**: back arrow, a tab per hero, forward arrow, and a ⚙ button.
+- **Item card**: pick the hero *first*. A row of hero tabs across the card, greyed out and struck
+  through for anyone whose class cannot use the weapon, with the reason on hover. Everything below is
+  about the hero you picked — the slot it would actually fill, what it would replace, and the
+  damage / armour / offense / defense / utility / score deltas against *that* hero's gear. The weapon
+  type and the list of classes that can use it are on the card, above the Equip button, so nobody has
+  to press Equip to find out it will not work.
+- **Per-hero settings** (⚙ next to Gear, on companions too): rename the hero or the pet, roll them a
+  new voice, hear it. Names are saved with the game and flow into speech, memories and the journal —
+  the cached Lingo speaker is dropped so the new name is used from the next line on.
+- **"Move" is spelled out.** The road affixes now read "each map node you travel to" instead of "each
+  move", which nobody could tell from a travel day or a combat turn.
+
+### Gone: the original's real-time weapon layer
+
+Removed outright — the balance knobs, the `m3Preview` block, and the four road events that handed one
+out (their ids lost the `tap_` prefix and their rewards became real loot rolls,
+`{ buildLoot, buildLootRarity }`). `tools/build-emberveil-data.mjs` strips it again on every rebuild,
+and the same build step now keeps the blocks this rebuild added by hand (the `world` block in
+`balance.json`), which a rebuild used to wipe.
+
+### Balance
+
+300 seeded runs, `node tools/sim-emberveil.mjs --runs 300`, report in `research/sim-round20.md`.
+
+| reading | round 19 | round 20 | round 19's target |
+|---|---|---|---|
+| act 1 cleared | 91.3% | **84.7%** | 85–90% |
+| act 2 cleared | 62.7% | 81.0% | pressure starts here |
+| act 3 cleared | 36.3% | 67.7% | |
+| full clears (all six acts) | 11.3% | **38.3%** | 10–15% |
+| fights per run | ~55 | 88 | |
+| wipes per run | — | 2.1 | |
+| night raids that wiped the party | 4.2% | 4.2% (12.3% of all wipes) | |
+| XP held at act 4 vs the table | — | 113% | near 100% |
+
+Act 1 landed where round 19 wanted it. **The full-clear rate did not**, and the cause is this round's
+own doing rather than the night raids: a settlement in every zone (which travelling one node at a time
+made necessary) keeps runs alive far longer, so fights per run went from about 55 to 88 and the party
+gets 60% more chances to level and loot. The XP multiplier came down from 2.85 to 2.2 and the night
+raid's XP bonus was kept deliberately small (×1.25) to hold the level curve near the table, which
+worked — but bringing clears back to 10–15% means turning the enemies up, i.e. `balance.json`
+`enemies.actMultipliers`, and that is a difficulty pass of its own with its own 300-run report. It is
+**not done here**, on purpose.
+
+### Tests added this round
+
+`tests/zone-graph.test.js` (the shape of all thirteen maps) and `tests/world-rules.test.js`
+(travel, revives, quests, humanoid fights, night raids, and that the real-time weapon layer is gone).
+
+## Round 20: what the numbers say, what the stage shows, and one honest die roll
+
+Eleven fixes from a play session, all in one place.
+
+### Numbers on screen (E5, E7)
+
+Every number the player reads now goes through **`shared/format.js`** — one module, re-exported from
+`js/rules.js` as `fmt` / `fmtHp` / `fmtPct` / `fmtSign` so any file in the game can import it:
+
+| Call | Gives |
+|---|---|
+| `fmt(25.02000000000001)` | `25.02` — at most two decimals, trailing zeros trimmed, thousands grouped |
+| `fmtHp(14.68)` | `15` — health, mana and damage are always whole |
+| `fmtPct(0.1234)` | `12%` |
+| `fmtSign(9)` | `+9` (and a real minus sign for negatives) |
+
+The decimals were not only a formatting problem. Affixes roll fractional values (`+2.37 HP regen`),
+so health itself drifted off the integers and `dealt − hpBefore` produced `5.84999999964 overkill`.
+Health is now kept whole at the source: `rules.derive` rounds `maxHp`/`maxMp`/`armor`/`magicResist`
+and the attributes, `combat.healUnit` rounds before and after, per-turn regen rounds, and the new
+`combat.gainMana()` does the same for mana.
+
+Recover lines say what came back and why: **"Corvin recovers 15 health (on kill)"**, not
+"Corvin recovers 14.68 (kill)". Mana and shields got the same treatment — `gainMana()` emits a `mana`
+event so the log can say "Corvin recovers 8 mana (on kill)", and a barrier landing writes
+"Corvin gains a 40 shield (Mirelle)".
+
+`tests/format.test.js` proves it: it rolls every item base at every rarity, runs a seeded fight with
+deliberately messy gear, and fails if any rendered string matches `/\d+\.\d{3,}/`. The Playwright
+spec does the same over the real page after a real fight — log, party tab, meter, bag and every
+tooltip.
+
+### Skill checks are a roll again (E22)
+
+`9 + 28 vs 15` is not a check. **One point of bonus per three attribute points** —
+`rules.checkBonus(28) === 9` — and every check in the game reads it:
+
+| Where | Function |
+|---|---|
+| Map nodes | `game.resolveSkillCheck` → `bestCheckBonus` |
+| Dialog events | `game.choose` → `bestCheckBonus` |
+| Crossings | `explore.choiceState` / `resolveCrossing` → `checkBonus` |
+| Dungeon stages | `main.js` dungeon loop → `bestCheckBonus` |
+| Fleeing a fight | `combat.fleeCheck` → `checkBonus` |
+
+Each of those returns the raw attribute as `best` **and** the converted `statBonus`, so the round 19
+check popup can show "STR 28 (+9) + d20 (rolled 6) = 15 vs 15: pass" — the sheet number the player
+recognises and the number that actually rolled.
+
+### Multi-shot skills fire what they say (E23)
+
+"5 bolts instead of 3" fired three bolts. `combat.skillTargets` read `effect.targets` for a
+`random3` skill and never looked at `bolts`. Now one function, `combat.shotCount(skill, fallback)`,
+reads `bolts → targets → chainTargets/chainCount/glaiveCount → the shape's own default`, and every
+multi-target shape (`random3/4`, `multi3/4`, `chain`, `adjacent`, `adjacent2`, `group2`) goes through
+it. Two more habits in `skills.json` had to be reconciled: a talent usually says "adds one more"
+while a level upgrade states the new total, so `effects.js` `countUp()` treats a value as a total
+when it is bigger than the skill already does and as an addition when it is not — a talent can never
+make a skill hit *fewer* things. `mergeSkill` seeds `effect.hits` so "adds one extra strike" has
+something to add to, and `combat.hitCount()` is the single reader.
+
+`tests/multishot.test.js` counts the shots that actually resolve, and walks **every** talent in
+`skills.json` that changes a count: casting with it must land more shots than casting without.
+(Talents on shapes that already sweep every enemy — one exists, `chain_lightning_spirit`'s Forked
+Spirit on an `aoe: row` skill — are skipped: the shape, not the talent, decides there.)
+
+### The familiar is real (E19)
+
+`unlocksCompanion` was a tooltip. `effects.syncCompanions(game)` turns every bought talent that
+grants a pet into a companion in the party — it is safe to call as often as you like, so `main.js`
+calls it when a talent is learned and when a save is loaded. The pet uses the designed look in
+`data/enemy-looks.json` (`pets.pet_familiar`…), so it stands on the stage and appears in the Party
+tab like any kennel companion, and its owner is recorded on `companion.ownerId`.
+
+### The stage (E9, E17, E18, E25, E30, E32)
+
+| Item | What changed |
+|---|---|
+| E9 | `Stage.marchIn(side)` walks a whole side on from off screen before the first round; `fight()` awaits it, so a fight opens with something arriving (~1 s) |
+| E25 | `Stage.syncBars(units)` floats a health bar over every fighter, read straight off the live unit objects each frame; `Stage.shieldOf()` adds a pale blue **shield segment** for barrier / temporary hit points |
+| E32 | The party tab's hp bar draws the same segment (`bar(v, max, cls, tip, shield)` in `main.js`) and its tooltip says "… + 40 shield" |
+| E30 | `Stage.contentBounds()` measures what is actually standing there, so `frame()` widens for six bodies (four heroes + two summoned pets) instead of pushing the last one off screen; `lineUp()` keeps tightening past four |
+| E17 | The spider was built knee-down/foot-up with legs too short to reach the floor, so it sat in the dirt looking upside down. `SPIDER_LEG` in `avatar-3d/js/creatures.js` now puts the knee **above** the body and the shin straight down to y≈0, with a longer leg (`legLen` 0.55 → 0.62) and a proper foot |
+| E18 | Held weapons were drawn 0.21 world units in front of the **chest** (an offset measured for the torso) while hanging off the **arm**, so every sword floated in mid-air beside the hand. `HELD_Z` in `avatar-3d/js/mii-gear.js` is 0.03 — just clear of the knuckles — and `mii.js` gained an `attack` animation so the weapon swings with the arm |
+
+`avatar-3d/tests/geometry.spec.js` measures both in world space: the spider's feet on the floor with
+its knees above its body, and every held weapon within arm's reach of the hand, pointing up, moving
+when the arm swings.
+
+### The victory dialog skips (E24)
+
+Clicking the popup did nothing — only the small "skip ▸" label in the corner worked, because the
+overlay's click handler ignored anything that was not the dark surround. A click **anywhere** now
+skips straight to the finished result (chest open, counters at their final values, every item and
+extra visible, Continue focused); a second click closes. Enter/Space do the same, Escape closes
+outright. The hint under the button says so.
+
+### Item sets (E29)
+
+Four new sets on top of the 24 ported from the original, each built around a system this rebuild
+added — and each with a `cond_*` property on a piece, so the world hooks fire:
+
+| Set | Tier | Pieces | Power |
+|---|---|---|---|
+| Roadwarden's Vigil | low | 3 | `no_night_raids` — night ward and a standing watch |
+| Forager's Covenant | low | 4 | `forage_feast` — rations off the field, an extra move, exhaustion eased |
+| Grudgekeeper's Ledger | mid | 4 | `nemesis_hunter` — the meter's kill counts, bonus against named foes |
+| Pilgrim's Choir | endgame | 5 | `echo_cast` — and the necklace carries `cond_extraSetPiece`, so it counts as six |
+
+`tests/sets.test.js` checks every set in the game (real bases, real slots, thresholds turning on one
+at a time, bonuses reaching `derive()`) and runs 20 000 kills per tier to prove the new ones drop.
+
+### Combat lag: where it actually goes (E31)
+
+Profiling a 4 v 6 fight with everything casting, the particles were **not** the main cost:
+
+| | draw calls | triangles | live trail sprites |
+|---|---|---|---|
+| 4 heroes, 6 enemies, idle | ~545 | ~269 000 | 0 |
+| the same, 12 casts a second | ~890 | ~283 000 | 37–55 |
+
+The bodies dominate: ten Mii/creature bodies are hundreds of separate meshes, and the shadow pass
+draws all of them a second time. What the effects *were* costing was allocation churn — a new
+`SpriteMaterial` per trail particle, sixty a second per projectile, thrown away on death. Three fixes
+in `avatar-3d/js/spellfx.js`:
+
+- **Pooling.** Trail sprites come from a pool keyed by texture + blend mode (`_sprite({ pooled: true })`,
+  `_freeSprite()`), so a long fight reuses a few dozen materials instead of creating thousands.
+- **Caps.** `maxParticles` (320) and `maxLive` (48). Over the particle cap `budgetScale()` thins the
+  streams to a half, then a quarter, then nothing; over the effect cap the oldest one-shot is retired
+  early (its `onDone` still runs, so nothing awaiting it hangs).
+- **Quality drop.** `Stage.setQuality('low')` turns off shadow mapping, pins the pixel ratio to 1 and
+  tightens the particle budget — worth about 45% of the draw calls. `Stage.autoQuality()` switches to
+  it on its own after ~1.5 s below 24 fps and climbs back when the frame rate recovers.
+
+### How to capture a perf log
+
+If a fight feels slow, there are two ways to see why.
+
+**On the page.** Add `?perf=1` to the game's address (`…/prototypes/emberveil/?perf=1`) or press
+**shift+P** at any time. A small readout appears in the corner of the stage:
+
+```
+fps 58  draw 612  tris 271004  [high]
+fx sprites 41 (pool 88, x1)
+effects 6  auras 9  dropped 0
+bodies 10  float text 3  bubbles 1
+```
+
+`fps` is the frame rate, `draw`/`tris` how much the card is being asked to do, `fx sprites` the live
+particles (with how many are waiting in the pool and the current budget multiplier), `dropped` the
+effects retired early because the stage was full, and `[high]`/`[low]` the quality the stage picked
+for itself. Copy that block into a bug report along with what was happening at the time. You can
+force the quality with `?quality=low` or `?quality=high`.
+
+**As numbers.** With the dev server running (`./serve.sh --bg`):
+
+```
+node tools/bench-emberveil-stage.mjs                    # 6 s, 8 casts a second
+node tools/bench-emberveil-stage.mjs --ms 12000 --rate 14
+node tools/bench-emberveil-stage.mjs --compare          # with the particle cap, then without
+```
+
+It drives `tests/bench-stage.html` (a 4 v 6 line-up casting, bursting, healing and wearing status
+auras) in a real browser and prints average / p50 / p95 / worst frame times, the share of frames that
+missed 60fps, and the sprite, effect and draw-call counts. Run it before and after a change to see
+what the change cost. The same page opens by hand — `…/prototypes/emberveil/tests/bench-stage.html?perf=1`
+— if you would rather watch it.
+
+### Tests added this round
+
+`tests/format.test.js`, `tests/multishot.test.js`, `tests/sets.test.js`, `tests/skillcheck.test.js`,
+`tests/companions.test.js` (node) and `tests/round20.spec.js` + `avatar-3d/tests/geometry.spec.js`
+(Playwright).

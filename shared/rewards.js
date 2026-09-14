@@ -67,18 +67,22 @@ export function showRewards(spec = {}, opts = {}) {
   const itemsBox = el('div', { class: 'rw-items' }); card.append(itemsBox);
   const extrasBox = el('ul', { class: 'rw-extras' }); card.append(extrasBox);
   const btn = el('button', { class: 'rw-btn', type: 'button', text: spec.button || 'Continue' });
-  const hint = el('span', { class: 'rw-hint', text: 'Enter · Space · click outside' });
+  const hint = el('span', { class: 'rw-hint', text: 'click anywhere to skip · Enter · Space · Esc' });
   card.append(el('div', { class: 'rw-foot' }, btn, hint));
   (opts.container || document.body).append(overlay);
 
   let revealed = false; let finished = false; let resolveP; const done = new Promise(r => { resolveP = r; });
   const cleanup = () => { document.removeEventListener('keydown', onKey); overlay.classList.add('rw-closing'); setTimeout(() => overlay.remove(), 200); current = null; sounds.close?.(); resolveP(); };
+  // First press/click: skip every animation and show the finished result. Second: close.
+  // `force` (Escape, or being replaced by another popup) closes straight away.
   const dismiss = (force) => { if (finished) return; if (!revealed && !force) { revealAll(); return; } finished = true; cleanup(); };
   const onKey = (e) => { if (['Enter', ' ', 'Escape'].includes(e.key)) { e.preventDefault(); dismiss(e.key === 'Escape'); } };
   document.addEventListener('keydown', onKey);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) dismiss(); });
-  btn.addEventListener('click', () => dismiss());
-  skip.addEventListener('click', () => dismiss());
+  // A click ANYWHERE — the card, the chest, the dark surround — skips (E24). Clicking the popup
+  // itself used to do nothing, so the only way to skip was the small "skip ▸" label in the corner.
+  overlay.addEventListener('click', () => dismiss());
+  btn.addEventListener('click', (e) => { e.stopPropagation(); dismiss(); });
+  skip.addEventListener('click', (e) => { e.stopPropagation(); dismiss(); });
   current = { dismiss, overlay };
 
   // Build item cards (hidden until their turn) and extras up front so a skip can show everything at once.
@@ -101,7 +105,17 @@ export function showRewards(spec = {}, opts = {}) {
   const showButton = () => { btn.style.visibility = ''; btn.style.animationPlayState = 'running'; btn.focus({ preventScroll: true }); };
   const sparks = () => { for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2 + Math.random() * .3; const r = 50 + Math.random() * 60; const s = el('i', { class: 'rw-spark', style: `--dx:${Math.cos(a) * r}px; --dy:${Math.sin(a) * r - 30}px; --d:${(Math.random() * .15).toFixed(2)}s` }); stage.append(s); setTimeout(() => s.remove(), T(1000)); } };
   const openChest = () => { if (stage.classList.contains('open')) return; stage.classList.remove('landing', 'shake'); stage.classList.add('open'); sounds.open?.(); sparks(); };
-  const revealAll = () => { if (revealed) return; revealed = true; openChest(); for (const k of Object.keys(counterNodes)) showCounter(k, true); itemNodes.forEach((_, i) => showItem(i)); extraNodes.forEach((_, i) => showExtra(i)); showButton(); };
+  // Everything at once, with no animation left running: the chest open, the counters at their final
+  // values, every item and extra visible and the Continue button focused.
+  const revealAll = () => {
+    if (revealed) return; revealed = true;
+    openChest(); stage.classList.remove('landing', 'shake');
+    for (const k of Object.keys(counterNodes)) showCounter(k, true);
+    itemNodes.forEach(({ n }, i) => { showItem(i); n.style.animationPlayState = 'running'; n.style.animationDelay = '0s'; });
+    extraNodes.forEach((li, i) => { showExtra(i); li.style.animationDelay = '0s'; });
+    skip.style.visibility = 'hidden';
+    showButton();
+  };
 
   (async () => {
     await wait(T(550)); if (revealed) return;

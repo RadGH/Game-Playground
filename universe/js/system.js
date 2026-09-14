@@ -126,6 +126,33 @@ export const SYSTEM_DEFAULTS = {
 const NUMERAL = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 const MOON_LETTER = 'abcdefgh';
 
+// ---------------------------------------------------------------------------- orbit spacing
+//
+// Orbits step outwards on a Titius–Bode style ladder: each one is a fixed *ratio* wider than the
+// last, never a fixed distance. These are the floors on that ratio, so two planets can never come
+// out on rings that nearly touch — 1.5× inside the frost line is roughly Venus → Earth → Mars, and
+// past the frost line the real gaps are wider still (Jupiter → Saturn is 1.83×).
+
+export const MIN_ORBIT_RATIO = 1.5;         // inside the frost line
+export const MIN_ORBIT_RATIO_OUTER = 1.7;   // past it
+
+/**
+ * The next rung on the ladder. Never closer than the floor above, whatever the roll says.
+ * Rounded *up* to four decimals so the stored numbers keep the invariant too — rounding an orbit
+ * down is what used to let two rings drift a percent or two closer than the floor.
+ */
+export function nextOrbitAu(au, rng, beyondFrost = false) {
+  const min = beyondFrost ? MIN_ORBIT_RATIO_OUTER : MIN_ORBIT_RATIO;
+  const step = rng.range(min, beyondFrost ? 2.4 : 2.0);
+  return Math.ceil(au * Math.max(min, step) * 1e4) / 1e4;
+}
+
+/** The ratio between each orbit and the one inside it — the check that the ladder held. */
+export function orbitRatios(system) {
+  const aus = (system.planets || []).map(p => p.orbit.au);
+  return aus.slice(1).map((au, i) => au / aus[i]);
+}
+
 // ---------------------------------------------------------------------------- helpers
 
 /** Which archetype a rocky planet of this temperature should be, before the rare rolls. */
@@ -156,19 +183,23 @@ function rockyArchetype(rng, tempK, o, ctx) {
   return rng() < 0.7 ? 'ice' : 'barren';
 }
 
-/** Baseline four + one or two rare elements, with abundances. */
-function resourcesFor(rng, arch, o) {
+/**
+ * Baseline four + one or two rare elements, with abundances.
+ * extra: { scale } multiplies every abundance (a moon holds less of everything than a planet),
+ *        { twoChance } scales the odds of a second rare element.
+ */
+function resourcesFor(rng, arch, o, { scale = 1, twoChance = 1 } = {}) {
   const bias = arch.resourceBias;
   const resources = BASELINE.map(b => ({
     key: b.key, name: b.name, color: b.color, tags: b.tags,
-    abundance: +clamp((0.15 + rng() * 0.6) * (bias[b.key] ?? 1), 0.01, 1).toFixed(2),
+    abundance: +clamp((0.15 + rng() * 0.6) * (bias[b.key] ?? 1) * scale, 0.01, 1).toFixed(2),
   }));
   const pool = rareFor(arch.key);
   const rares = [];
   if (pool.length) {
     const first = rng.weighted(pool, e => e.weight);
     rares.push(first);
-    const wantTwo = rng() < 0.18 + clamp(o.rareDensity, 0, 1) * 0.5;
+    const wantTwo = rng() < (0.18 + clamp(o.rareDensity, 0, 1) * 0.5) * twoChance;
     if (wantTwo && pool.length > 1) {
       const rest = pool.filter(e => e !== first);
       rares.push(rng.weighted(rest, e => e.weight));
@@ -176,33 +207,136 @@ function resourcesFor(rng, arch, o) {
   }
   const rareElements = rares.map(e => ({
     key: e.key, name: e.name, color: e.color, tags: e.tags, value: e.value, blurb: e.blurb,
-    abundance: +clamp(0.05 + rng() * 0.45 * (0.6 + clamp(o.rareDensity, 0, 1)), 0.02, 1).toFixed(2),
+    abundance: +clamp((0.05 + rng() * 0.45 * (0.6 + clamp(o.rareDensity, 0, 1))) * scale, 0.02, 1).toFixed(2),
   }));
   return { resources, rareElements };
 }
 
+// ---------------------------------------------------------------------------- moons
+//
+// A moon is a small planet, not a decoration: it gets an archetype, a temperature, resources, a
+// stable id and its own seed, so planetmap.js will build it a (smaller) surface map and texture.js
+// will skin it, exactly as they do for a planet.
+//
+// Only four kinds of moon exist, which is about what the real ones look like:
+//   barren  — airless rock, the default
+//   ice     — anything cold, and most of what orbits a giant
+//   lava    — squeezed by a giant it orbits close in; volcanic, never cold
+//   living  — rare, and only a big moon of a giant inside the star's water zone
+
+const MOON_ARCHETYPES = ['barren', 'ice', 'lava', 'living'];
+
+const MOON_NAMES = { barren: 'Barren Moon', ice: 'Ice Moon', lava: 'Volcanic Moon', living: 'Living Moon' };
+
+const MOON_BLURB = {
+  barren: 'a dead rock locked to the world it circles. Dust, craters, and a sky with no air in it.',
+  ice: 'ice the whole way round, hard as rock at this temperature, with the parent world filling half the sky.',
+  lava: 'kneaded by the world it orbits until the inside never cools. Sulphur plains and standing fountains of rock.',
+  living: 'a moon big enough to hold its own air, in the one band where that air stays warm. Vanishingly rare.',
+};
+
+/** Which of the four kinds a moon of this size, at this temperature, ends up being. */
+export function moonArchetype(rng, { radius, tempK, inZone, tidal = 0, dead = false, rareWorlds = 0.5 }) {
+  if (dead) return rng() < 0.6 ? 'ice' : 'barren';
+  if (tidal > 0.55 && rng() < 0.55) return 'lava';
+  // the rare one: a big moon (so it can hold air), where the sunlight is right for water. In
+  // practice that means a large moon of a giant that sits in or near the star's water zone.
+  const warm = tempK >= 250 && tempK <= 330;
+  if (radius >= 0.25 && (inZone || warm) && warm && rng() < 0.12 + clamp(rareWorlds, 0, 1) * 0.2) return 'living';
+  if (tempK > 500) return rng() < 0.6 ? 'lava' : 'barren';
+  if (tempK < 230) return rng() < 0.7 ? 'ice' : 'barren';
+  return rng() < 0.22 ? 'ice' : 'barren';
+}
+
 /** Moons for a planet. Big planets keep more of them; the giants keep a lot. */
-function moonsFor(rng, planet, o, systemName) {
-  const arch = ARCH_BY_KEY[planet.archetype];
-  const base = arch.giant ? rng.int(2, 7) : planet.radius > 0.9 ? rng.int(0, 2) : rng.int(0, 1);
-  const count = rng() < clamp(o.moonChance, 0, 1) ? base : Math.min(base, arch.giant ? 2 : 0);
+function moonsFor(rng, planet, o, star) {
+  const parentArch = ARCH_BY_KEY[planet.archetype];
+  const base = parentArch.giant ? rng.int(2, 7) : planet.radius > 0.9 ? rng.int(0, 2) : rng.int(0, 1);
+  const count = rng() < clamp(o.moonChance, 0, 1) ? base : Math.min(base, parentArch.giant ? 2 : 0);
   const moons = [];
+  let distance = 2.2;
   for (let i = 0; i < count; i++) {
-    const kinds = arch.giant || planet.temperature.K < 260 ? ['ice', 'barren', 'barren'] : ['barren', 'barren', 'lava'];
-    const kind = rng.pick(kinds);
-    const radius = +(planet.radius * rng.range(0.06, 0.28)).toFixed(3);
-    const distance = +(2.2 + i * rng.range(1.3, 2.6) + rng()).toFixed(2);     // in planet radii
+    // its own seed, from the planet's, so a moon's map is the same every time it is opened
+    const mseed = subSeed(planet.seed, 'moon' + i);
+    const mrng = makeRng(mseed);
+    // never smaller than about 300 km across: below that there is no ground worth mapping
+    const radius = +Math.max(0.05, planet.radius * mrng.range(0.06, 0.28)).toFixed(3);
+    distance = +(distance + mrng.range(1.3, 2.6) + mrng()).toFixed(2);       // in planet radii
+    const periodDays = +(distance * mrng.range(0.4, 1.6)).toFixed(2);
+
+    // a giant squeezes the moons that orbit it close in, and that heat is all their own
+    const tidal = parentArch.giant && distance < 6 ? +clamp((6 - distance) / 5 * mrng.range(0.4, 1.2), 0, 1).toFixed(2) : 0;
+    const sunK = orbitTempK(star.lum, planet.orbit.au, 0.2, 0) + tidal * 320;
+    const key = moonArchetype(mrng, {
+      radius, tempK: star.radiation ? 80 : sunK, inZone: planet.orbit.inZone, tidal,
+      dead: !!star.radiation, rareWorlds: o.rareWorlds,
+    });
+    const arch = ARCH_BY_KEY[key];
+
+    let K = orbitTempK(star.lum, planet.orbit.au, arch.albedo, 0) + tidal * 320;
+    if (star.radiation) K = Math.min(K, 90);
+    K = clamp(K, arch.tempK[0], arch.tempK[1]);
+
+    // small worlds hold almost nothing above them; only the rare living moon keeps real air
+    const dens = arch.atmosphere.density;
+    const thin = key === 'living' ? 1 : clamp(radius * 1.1, 0.03, 0.7);
+    const atmDensity = +clamp(mrng.range(dens[0], dens[1]) * thin, 0, 4).toFixed(2);
+    const density = key === 'ice' ? mrng.range(0.4, 0.7) : mrng.range(0.7, 1.15);
+    const gravity = +clamp(radius * density, 0.01, 4.5).toFixed(2);
+
+    const { resources, rareElements } = resourcesFor(mrng, arch, o, {
+      scale: +clamp(0.35 + radius * 0.7, 0.3, 0.9).toFixed(2), twoChance: 0.35,
+    });
+    const hazards = [...arch.hazards];
+    if (star.radiation) hazards.push('radiation');
+    if (atmDensity < 0.05) hazards.push('radiation');
+    if (K > 420 && !hazards.includes('heat')) hazards.push('heat');
+    if (K < 200 && !hazards.includes('cold')) hazards.push('cold');
+    if (clamp(o.hazardLevel, 0, 1) < 0.25) hazards.length = Math.min(hazards.length, 1);
+
+    const tidalLocked = mrng() < 0.85;
     moons.push({
+      // a small planet, with the fields planetmap.js and texture.js read
+      id: `${planet.id}m${i}`, seed: mseed, index: i, moon: true,
+      parentId: planet.id, parentName: planet.name,
       name: `${planet.name} ${MOON_LETTER[i] || i}`,
-      kind, radius,
-      distance,
-      periodDays: +(distance * rng.range(0.4, 1.6)).toFixed(2),
-      color: kind === 'ice' ? '#cfe0ea' : kind === 'lava' ? '#8a4630' : '#8f8a82',
-      tidalLocked: rng() < 0.8,
-      seed: subSeed(planet.seed, 'moon' + i),
+      archetype: key, archetypeName: MOON_NAMES[key] || `${arch.name} Moon`, blurb: MOON_BLURB[key] || arch.blurb,
+      kind: key === 'living' ? 'living' : key,       // the old field, still read by the 3D models
+      star: { id: star.id, name: star.name, classKey: star.classKey, color: star.color, lum: star.lum, frostLine: star.frostLine, habitable: star.habitable },
+      orbit: {
+        au: planet.orbit.au, aroundPlanet: distance, periodDays,
+        inZone: planet.orbit.inZone, beyondFrost: planet.orbit.beyondFrost,
+      },
+      distance, periodDays,                          // the old fields, still read by the 3D models
+      radius, gravity, mass: +(Math.pow(radius, 3) * density).toFixed(6),
+      dayLengthHours: tidalLocked ? +(periodDays * 24).toFixed(1) : +mrng.range(9, 60).toFixed(1),
+      tidalLocked, axialTilt: +mrng.range(0, 8).toFixed(1),
+      atmosphere: { type: atmDensity < 0.02 ? 'none' : arch.atmosphere.type, density: atmDensity, color: arch.atmosphere.color, breathable: key === 'living' && atmDensity > 0.5 },
+      temperature: { K: Math.round(K), C: Math.round(K - 273.15), label: tempLabel(K) },
+      biomeMode: arch.biomeMode, biomeFamily: arch.family, palette: arch.palette,
+      poles: arch.poles === true && K < 320,
+      skyColor: arch.sky, seaColor: arch.sea,
+      color: key === 'ice' ? '#cfe0ea' : key === 'lava' ? '#8a4630' : key === 'living' ? '#7fa06a' : '#8f8a82',
+      giant: false, landable: true,
+      tidalHeat: tidal,
+      resources, rareElements, hazards: [...new Set(hazards)],
+      difficulty: +clamp(arch.difficulty * (0.6 + clamp(o.hazardLevel, 0, 1) * 0.8) * 0.9 + (star.radiation ? 0.15 : 0), 0.05, 1).toFixed(2),
+      tags: ['moon', ...arch.tags, ...(planet.orbit.inZone ? ['habitable zone'] : [])],
+      moons: [], rings: null,
     });
   }
   return moons;
+}
+
+/** Every moon in a system, flat, with its parent — for a travel list or a test. */
+export function moonsOf(system) {
+  return (system?.planets || []).flatMap(p => (p.moons || []).map(m => ({ moon: m, parent: p })));
+}
+
+/** Find one moon by its id (`"<planetId>m<index>"`). */
+export function moonById(system, id) {
+  for (const p of system?.planets || []) for (const m of p.moons || []) if (m.id === id) return m;
+  return null;
 }
 
 /** Rings: gas giants most often, a big rocky world occasionally. */
@@ -218,6 +352,22 @@ function ringsFor(rng, planet, o) {
     gaps: rng.int(0, 3),
     tilt: +rng.range(-0.5, 0.5).toFixed(2),
   };
+}
+
+/**
+ * Roll a name until it is one nothing else in this system answers to.
+ * `roll(t)` is tried for t = 0…4; `fallback` is used if they all collide (a number is appended if
+ * even that is taken, so the result is unique whatever happens).
+ */
+function uniqueName(used, roll, fallback) {
+  for (let t = 0; t < 5; t++) {
+    const n = roll(t);
+    if (!used.has(n)) { used.add(n); return n; }
+  }
+  let n = fallback, k = 2;
+  while (used.has(n)) n = `${fallback} ${k++}`;
+  used.add(n);
+  return n;
 }
 
 /** A readable temperature label, so a UI does not have to do the sums. */
@@ -248,8 +398,11 @@ export function generateSystem(star, userOpts = {}) {
   const count = Math.max(0, Math.round(lerp(lo, hi, clamp(o.planets, 0, 1)) + (rng() < 0.5 ? 0 : 1) - (rng() < 0.25 ? 1 : 0)));
 
   const systemName = star.name;
+  // no two things in one system may share a name: the star is already taken, and a rolled planet
+  // name that collides is re-rolled (up to five times) before falling back to the numbered form
+  const usedNames = new Set([systemName]);
   const planets = [];
-  let au = Math.max(0.035, Math.sqrt(Math.max(1e-5, star.lum)) * rng.range(0.22, 0.45));
+  let au = Math.ceil(Math.max(0.035, Math.sqrt(Math.max(1e-5, star.lum)) * rng.range(0.22, 0.45)) * 1e4) / 1e4;
 
   for (let i = 0; i < count; i++) {
     const pseed = subSeed(seed, 'planet' + i);
@@ -296,15 +449,22 @@ export function generateSystem(star, userOpts = {}) {
     if (clamp(o.hazardLevel, 0, 1) > 0.75 && prng() < 0.35) hazards.push(prng.pick(['radiation', 'toxic', 'storms']));
     if (clamp(o.hazardLevel, 0, 1) < 0.25) hazards.length = Math.min(hazards.length, 1);
 
-    const named = prng() < 0.42;
-    const name = named ? starName(subSeed(pseed, 'pname'), o.namegen, o.nameRace) : `${systemName} ${NUMERAL[i] || i + 1}`;
+    let name = null;
+    if (prng() < 0.42) {
+      for (let t = 0; t < 5 && !name; t++) {
+        const roll = starName(subSeed(pseed, t ? 'pname' + t : 'pname'), o.namegen, o.nameRace);
+        if (!usedNames.has(roll)) name = roll;
+      }
+    }
+    if (!name) name = `${systemName} ${NUMERAL[i] || i + 1}`;   // always unique: one per index
+    usedNames.add(name);
 
     const planet = {
       id: i, seed: pseed, name, index: i,
       archetype: key, archetypeName: arch.name, blurb: arch.blurb,
       star: { id: star.id, name: star.name, classKey: star.classKey, color: star.color, lum: star.lum, frostLine: star.frostLine, habitable: star.habitable },
       orbit: {
-        au: +au.toFixed(3),
+        au,
         periodDays: +(365.25 * Math.sqrt(Math.pow(au, 3) / Math.max(0.05, star.mass || 1))).toFixed(1),
         eccentricity: +prng.range(0, 0.18).toFixed(3),
         inclination: +prng.range(-0.06, 0.06).toFixed(3),
@@ -324,27 +484,31 @@ export function generateSystem(star, userOpts = {}) {
       tags: [...arch.tags, ...(inZone ? ['habitable zone'] : []), ...(locked ? ['locked'] : [])],
       moons: [], rings: null,
     };
-    planet.moons = moonsFor(prng, planet, o, systemName);
+    planet.moons = moonsFor(prng, planet, o, star);
     planet.rings = ringsFor(prng, planet, o);
     planets.push(planet);
 
     // next orbit — a Titius–Bode style ladder, wider once you are past the frost line
-    au *= rng.range(beyondFrost ? 1.5 : 1.35, beyondFrost ? 2.2 : 1.85);
+    au = nextOrbitAu(au, rng, beyondFrost);
   }
 
   // ------------------------------------------------------------------ belts and comets
   const belts = [];
   if (planets.length >= 2 && rng() < clamp(o.beltChance, 0, 1)) {
     const gap = rng.int(0, planets.length - 2);
-    const inner = planets[gap].orbit.au * rng.range(1.15, 1.4);
-    const outer = Math.min(planets[gap + 1].orbit.au * rng.range(0.65, 0.85), inner * rng.range(1.3, 2.2));
-    if (outer > inner) {
+    // sit the belt in the middle of the gap (geometric middle, because the ladder is a ratio) and
+    // keep a clear lane either side of it
+    const lo = planets[gap].orbit.au, hi = planets[gap + 1].orbit.au;
+    const mid = Math.sqrt(lo * hi), wide = rng.range(1.06, 1.28);
+    const inner = Math.max(mid / wide, lo * 1.1);
+    const outer = Math.min(mid * wide, hi * 0.9);
+    if (outer > inner * 1.04) {
       const bseed = subSeed(seed, 'belt' + gap);
       const brng = makeRng(bseed);
       const pool = rareFor('barren');
       belts.push({
         id: belts.length, seed: bseed, kind: 'belt',
-        name: `the ${starName(subSeed(bseed, 'bname'), o.namegen, o.nameRace)} Belt`,
+        name: uniqueName(usedNames, t => `the ${starName(subSeed(bseed, t ? 'bname' + t : 'bname'), o.namegen, o.nameRace)} Belt`, `the ${systemName} Belt`),
         inner: +inner.toFixed(3), outer: +outer.toFixed(3),
         density: +brng.range(0.25, 1).toFixed(2),
         rocks: brng.int(200, 2400),
@@ -364,7 +528,8 @@ export function generateSystem(star, userOpts = {}) {
       const peri = +crng.range(0.2, 1.6).toFixed(2);
       const aph = +(peri * crng.range(6, 45)).toFixed(1);
       comets.push({
-        id: i, seed: cseed, name: `${starName(subSeed(cseed, 'cname'), o.namegen, o.nameRace)} Comet`,
+        id: i, seed: cseed,
+        name: uniqueName(usedNames, t => `${starName(subSeed(cseed, t ? 'cname' + t : 'cname'), o.namegen, o.nameRace)} Comet`, `${systemName} Comet ${i + 1}`),
         perihelion: peri, aphelion: aph,
         periodYears: +Math.pow((peri + aph) / 2, 1.5).toFixed(1),
         tail: +crng.range(0.3, 1).toFixed(2),
@@ -397,6 +562,94 @@ export function planetSummary(planet) {
       : `${planet.atmosphere.type} at ${planet.atmosphere.density.toFixed(2)} bar`;
   const rare = planet.rareElements.map(r => r.name).join(' and ');
   return `${planet.archetypeName} at ${planet.orbit.au} AU — ${t.label}, ${t.C}°C, ${planet.gravity}g, ${air}. Worth mining for ${rare || 'nothing unusual'}.`;
+}
+
+// ---------------------------------------------------------------------------- drawing the orbits
+//
+// Real orbits run from 0.03 AU to 150 AU, so a viewer has to squash them onto a log scale or the
+// inner planets pile up on the star. That squashing is what used to push two rings almost on top of
+// each other. `orbitLayout` does the log scale first, then walks outwards pushing any ring that
+// landed too close to its neighbour, and hands back a size cap so a planet is never drawn wider than
+// its own lane. No DOM and no Three.js in here, so the node tests can check the invariant.
+
+export const ORBIT_LAYOUT_DEFAULTS = {
+  inner: 2.2,         // where the innermost ring sits, in scene units
+  outer: 11.5,        // where the outermost one sits, before the minimum-gap pass
+  minGap: 1.0,        // the smallest allowed distance between two rings (and star → first ring)
+  starRadius: 0.6,    // how big the star is drawn, so the first ring clears it
+  even: 0.55,         // 0 = true log spacing, 1 = every ring the same distance apart
+  sizeCap: 0.34,      // a planet's drawn radius, at most, as a share of its narrowest gap
+};
+
+/**
+ * Where to draw every orbit in a system.
+ * Returns { radii, radiusFor(au), gapAt(i), sizeFor(i, wanted), minGap, max }.
+ *   radii[i]        — the drawn radius of planet i, in scene units
+ *   radiusFor(au)   — the same mapping for anything that is not a planet (belts, comets)
+ *   gapAt(i)        — the narrower of the two gaps around planet i
+ *   sizeFor(i, r)   — `r`, capped so the planet cannot fill its lane
+ */
+export function orbitLayout(system, userOpts = {}) {
+  const o = { ...ORBIT_LAYOUT_DEFAULTS, ...userOpts };
+  const planets = system?.planets || [];
+  const aus = planets.map(p => p.orbit.au);
+  const n = aus.length;
+  const L = au => Math.log(Math.max(1e-4, au));
+  const first = Math.max(o.inner, o.starRadius + o.minGap);
+  const lo = n ? L(aus[0]) : 0, hi = n ? L(aus[n - 1]) : 1;
+
+  // where a planet sits between the innermost and the outermost, two ways: by its distance (log,
+  // because orbits are a ratio ladder) and by its place in the queue. Blending the two is what
+  // stops a far-out giant from squashing the inner planets into one another.
+  const place = (au, i) => {
+    if (n < 2) return 0;
+    const byLog = clamp((L(au) - lo) / Math.max(1e-6, hi - lo), 0, 1);
+    const byIndex = i / (n - 1);
+    return clamp(o.even, 0, 1) * byIndex + (1 - clamp(o.even, 0, 1)) * byLog;
+  };
+  // with no planets (or only one) there is no ladder to interpolate along, so fall back to a plain
+  // fourth-root scale — still monotone, which is all a belt or a comet needs
+  const bare = au => Math.max(o.starRadius * 1.1, first * Math.pow(Math.max(1e-4, au), 0.25));
+
+  // the blended scale, then a pass outwards that opens up anything still too tight
+  const radii = [];
+  let prev = o.starRadius;
+  for (let i = 0; i < n; i++) {
+    const r = Math.max(first + (o.outer - first) * place(aus[i], i), prev + o.minGap);
+    radii.push(r);
+    prev = r;
+  }
+
+  // a monotone mapping for everything else: straight-line interpolation between the planet rings,
+  // in log space, so a belt still lands between the two planets it was rolled between
+  function radiusFor(au) {
+    if (!radii.length) return bare(au);
+    if (n === 1) return Math.max(o.starRadius * 1.1, radii[0] * Math.pow(Math.max(1e-4, au) / aus[0], 0.25));
+    if (au <= aus[0]) {
+      const slope = (radii[1] - radii[0]) / Math.max(1e-6, L(aus[1]) - L(aus[0]));
+      return Math.max(o.starRadius * 1.1, radii[0] - (L(aus[0]) - L(au)) * slope);
+    }
+    if (au >= aus[n - 1]) {
+      const slope = (radii[n - 1] - radii[n - 2]) / Math.max(1e-6, L(aus[n - 1]) - L(aus[n - 2]));
+      return radii[n - 1] + (L(au) - L(aus[n - 1])) * slope;
+    }
+    let i = 0;
+    while (i < n - 2 && aus[i + 1] < au) i++;
+    const t = (L(au) - L(aus[i])) / Math.max(1e-6, L(aus[i + 1]) - L(aus[i]));
+    return radii[i] + t * (radii[i + 1] - radii[i]);
+  }
+
+  const gapAt = i => Math.min(
+    radii[i] - (i > 0 ? radii[i - 1] : o.starRadius),
+    i + 1 < radii.length ? radii[i + 1] - radii[i] : Infinity,
+  );
+
+  return {
+    opts: o, radii, radiusFor, gapAt,
+    sizeFor: (i, wanted) => Math.min(wanted, o.sizeCap * gapAt(i)),
+    minGap: radii.length ? Math.min(...radii.map((_, i) => gapAt(i))) : Infinity,
+    max: radii.length ? radii[radii.length - 1] : o.inner,
+  };
 }
 
 /** Every planet + moon + belt in one flat list, for a travel or scan UI. */

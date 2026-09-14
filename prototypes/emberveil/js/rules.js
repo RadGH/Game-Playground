@@ -2,6 +2,27 @@
 // Every named effect (affix, legendary, skill key, status…) is registered in js/effects.js; this file
 // calls its derive hooks from derive(), its merge hooks from mergeSkill() and its wording from describeEffect().
 import { EFFECTS, applyDeriveEffects, applySkillMerge, describeSkillKey, describeId } from './effects.js';
+// One number formatter for the whole game (E5): health is always whole, everything else gets at
+// most two decimals. Re-exported here so game code can `import { fmt, fmtHp } from './rules.js'`.
+export { fmt, hp as fmtHp, hpRaw as fmtHpRaw, pct as fmtPct, pctOf as fmtPctOf, sign as fmtSign, range as fmtRange, secs as fmtSecs, hasLongDecimal } from '../../../shared/format.js';
+
+// ---------------------------------------------------------------------------------------------
+// Skill checks (crossings, map nodes, dialog events, dungeon stages, fleeing)
+//
+// An attribute is NOT the bonus. A hero with 28 STR used to add all 28 to a d20 against a
+// difficulty of 15, which meant every check passed. One point of bonus per ATTR_PER_BONUS points
+// of the attribute keeps the d20 in charge: 28 STR is +9, so a difficulty of 15 wants a 6 or
+// better. Every check in the game goes through checkBonus()/bestCheckBonus().
+/** Attribute points per point of skill-check bonus. */
+export const ATTR_PER_BONUS = 3;
+/** The check bonus an attribute value is worth (1 per 3 points, rounded down). */
+export function checkBonus(value) { const v = Number(value); return isFinite(v) ? Math.floor(Math.max(0, v) / ATTR_PER_BONUS) : 0; }
+/** The best check bonus in a group: the highest value of `stat` among them, turned into a bonus. */
+export function bestCheckBonus(units, stat, read = null) {
+  const list = (units || []).filter(Boolean); if (!list.length) return 0;
+  const get = read || (u => u?.derived?.[stat] ?? u?.attrs?.[stat] ?? 8);
+  return checkBonus(Math.max(...list.map(u => { const v = Number(get(u)); return isFinite(v) ? v : 8; })));
+}
 export const XP_TABLE = [0, 120, 320, 600, 960, 1400, 1920, 2520, 3200, 3960, 4800, 5720, 6720, 7800, 8960, 10200, 11520, 12920, 14400, 15960, 17640, 19440, 21360, 23400, 25560, 27840, 30240, 32760, 35400, 38160];
 export const MAX_LEVEL = 30, TALENT_LEVELS = [3, 8, 13, 18, 23, 28], PASSIVE_EVERY = 5, ATTR_PER_LEVEL = 2;
 export const HEALER_CLASSES = ['cleric', 'druid', 'priest', 'oracle', 'paladin', 'bard', 'shaman'];
@@ -50,18 +71,21 @@ export function weaponCategory(hero) { const w = hero.equipment?.weapon; if (w?.
 /** Derived combat stats for a hero (attrs + equipment affixes + passives). `loot` supplies equipmentBonuses(). */
 export function derive(hero, loot) {
   const eq = loot.equipmentBonuses(hero.equipment); const pv = passiveBonuses(hero); const A = hero.attrs;
-  const STR = A.STR + (eq.str || 0), DEX = A.DEX + (eq.dex || 0), INT = A.INT + (eq.int || 0), CON = A.CON + (eq.con || 0);
-  const armor = Object.values(hero.equipment || {}).reduce((s, it) => s + (it?.armor || 0), 0) + (eq.armor || 0);
+  // attributes stay whole: an affix that rolls "+3.4 STR" is worth 3 points, not 3.4
+  const STR = Math.round(A.STR + (eq.str || 0)), DEX = Math.round(A.DEX + (eq.dex || 0)), INT = Math.round(A.INT + (eq.int || 0)), CON = Math.round(A.CON + (eq.con || 0));
+  const armor = Math.round(Object.values(hero.equipment || {}).reduce((s, it) => s + (it?.armor || 0), 0) + (eq.armor || 0));
   const equipDmg = Object.values(hero.equipment || {}).reduce((s, it) => s + (Array.isArray(it?.dmg) ? Math.floor((it.dmg[0] + it.dmg[1]) / 2 * 0.3) : 0), 0) + (eq.dmg || 0);
   const cat = weaponCategory(hero); const primary = cat === 'light' ? DEX : cat === 'magic' ? INT : STR; const spellBonus = cat === 'magic' ? Math.floor(INT * 0.25) : 0;
   const isCompanion = !!hero.isCompanion; const dodgeBonusItems = Object.values(hero.equipment || {}).reduce((s, it) => s + (it?.dodgeBonus || 0), 0);
   const out = {
     STR, DEX, INT, CON, armor, cat,
-    maxHp: 50 + CON * 10 + (pv.maxHp || 0) + (eq.hp || 0), maxMp: 30 + INT * 8 + (pv.maxMp || 0) + (eq.mp || 0),
+    // health and mana are whole numbers (E5): affix values roll with decimals, so round here once
+    // rather than letting "247.37 max HP" leak into every bar, tooltip and log line.
+    maxHp: Math.round(50 + CON * 10 + (pv.maxHp || 0) + (eq.hp || 0)), maxMp: Math.round(30 + INT * 8 + (pv.maxMp || 0) + (eq.mp || 0)),
     hit: Math.min(95, 70 + Math.round(DEX * 1.2) + (eq.hit || 0)), dodge: Math.max(0, (isCompanion ? Math.min(15, 3 + Math.round(DEX * 0.35)) : Math.min(40, 5 + Math.round(DEX * 0.8))) + (eq.dodge || 0) + (pv.dodgePct || 0) + dodgeBonusItems),
     initiative: DEX + hero.level + (eq.initiative || 0), critChance: Math.min(75, 5 + (pv.critPct || 0) + (eq.critChance || 0) * 100), critDamage: 1.5 + (eq.critDamage || 0),
     spellPower: INT * 0.025 + (eq.spellPower || 0), manaRegen: Math.max(1, Math.round(INT * 0.3)) + (eq.manaRegen || 0) + (pv.mpRegen || 0), hpRegen: (pv.hpRegen || 0) + (eq.hpRegen || 0),
-    lifeSteal: (eq.lifeSteal || 0) / 100 + (pv.lifesteal || 0), manaSteal: (eq.manaSteal || 0) / 100, magicResist: eq.magicResist || 0, blockChance: Math.min(1, (eq.block_chance || 0) + (pv.blockChance || 0) / 100), blockPower: eq.block_power || 0, thorns: pv.thorns || 0, resistAll: pv.resistAll || 0,
+    lifeSteal: (eq.lifeSteal || 0) / 100 + (pv.lifesteal || 0), manaSteal: (eq.manaSteal || 0) / 100, magicResist: Math.round(eq.magicResist || 0), blockChance: Math.min(1, (eq.block_chance || 0) + (pv.blockChance || 0) / 100), blockPower: eq.block_power || 0, thorns: pv.thorns || 0, resistAll: pv.resistAll || 0,
     hpOnKill: pv.hpOnKill || 0, manaOnKill: pv.manaOnKill || 0, burnOnHit: pv.burnOnHit || 0, poisonOnCrit: pv.poisonOnCrit || 0, chainOnHit: pv.chainOnHit || 0, goldFind: eq.goldFind || 0, xpFind: eq.xpFind || 0, magicFind: eq.magicFind || 0,
     dmgMin: Math.max(1, Math.round(primary * 0.4 + equipDmg)) + spellBonus, dmgMax: Math.max(3, Math.round(primary + equipDmg * 1.5)) + spellBonus,
     attackSpeed: hero.equipment?.weapon?.attackSpeed || 'normal', armorPen: hero.equipment?.weapon?.armorPen || 0, legendary: loot.legendaryEffects(hero.equipment),
@@ -73,6 +97,9 @@ export function derive(hero, loot) {
 export function mergeSkill(skill, hero) {
   const TOP = ['aoe', 'damageMult', 'damageStat', 'mpCost', 'statusEffects', 'healMult', 'healStat', 'cooldown', 'target', 'type'];
   const out = JSON.parse(JSON.stringify(skill)); out.effect = out.effect || {};
+  // Seed the hit count so a talent that "adds one extra strike" has something to add to (E23):
+  // without this, `hits: 1` on a skill that never wrote a hit count merged to 1 and changed nothing.
+  if (out.effect.hits == null) out.effect.hits = out.hits ?? 1;
   const apply = (obj, add) => { for (const [k, v] of Object.entries(obj)) { const dst = TOP.includes(k) ? out : out.effect; if (Array.isArray(v)) dst[k] = [...(dst[k] || []), ...v]; else if (typeof v === 'number') dst[k] = add && typeof dst[k] === 'number' ? dst[k] + v : v; else if (typeof v === 'boolean') dst[k] = dst[k] || v; else if (v && typeof v === 'object') dst[k] = { ...(dst[k] || {}), ...v }; else dst[k] = v; } };
   for (const t of skill.talents || []) if (hero.talents?.[t.id]) apply(t.effect || {}, true);
   for (const u of (skill.upgrades || []).filter(u => hero.level >= u.level).sort((a, b) => a.level - b.level)) apply(u.bonus || {}, false);

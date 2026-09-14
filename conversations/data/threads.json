@@ -275,7 +275,7 @@
      "reward": {
       "xp": 60,
       "who": "answerer",
-      "text": "{answerer} finds some peace: +60 xp"
+      "text": "{answerer} finds some peace"
      }
     }
    ]
@@ -398,7 +398,7 @@
      "reward": {
       "xp": 50,
       "buff": "scholar_insight",
-      "text": "a scholar's reading: +50 xp each and the next fight starts with a blessing"
+      "text": "a scholar reads the old stone aloud"
      }
     }
    ]
@@ -701,7 +701,7 @@
      ],
      "reward": {
       "xp": 30,
-      "text": "the wager ends; +30 xp each"
+      "text": "the wager is settled at the fire"
      }
     }
    ]

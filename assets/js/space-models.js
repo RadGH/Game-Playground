@@ -333,14 +333,18 @@ export function createPlanet(planet = {}, opts = {}) {
     for (const [i, m] of (planet.moons || []).entries()) {
       const pivot = new THREE.Group();
       pivot.rotation.x = (m.tilt ?? 0.12) * (i % 2 ? -1 : 1) + (i * 0.13);
+      const moonArch = m.archetype || m.kind;
       const body = new THREE.Mesh(
         new THREE.SphereGeometry(Math.max(radius * 0.035, radius * (m.radius ?? 0.15) / Math.max(0.3, planet.radius ?? 1) * 0.4), 24, 12),
-        new THREE.MeshStandardMaterial({ map: canvasTexture(opts.moonTextures?.[i] || proceduralPlanetTexture(m.seed ?? i, m.kind === 'ice' ? ARCH_COLORS.ice : m.kind === 'lava' ? ARCH_COLORS.lava : ARCH_COLORS.barren, 128)), roughness: 1 }),
+        new THREE.MeshStandardMaterial({ map: canvasTexture(opts.moonTextures?.[i] || proceduralPlanetTexture(m.seed ?? i, ARCH_COLORS[moonArch] || ARCH_COLORS.barren, 128)), roughness: 1 }),
       );
       const dist = radius * (m.distance ?? (2.5 + i));
       body.position.x = dist;
+      // tagged so a viewer can raycast a moon and open it (universe/js/app.js does)
+      body.userData.moonIndex = i;
+      body.userData.moonId = m.id ?? null;
       pivot.add(body);
-      pivot.userData = { speed: 0.5 / Math.max(0.3, m.periodDays ?? (1 + i)), phase: i * 1.3 };
+      pivot.userData = { speed: 0.5 / Math.max(0.3, m.periodDays ?? (1 + i)), phase: i * 1.3, moonIndex: i };
       pivot.rotation.y = pivot.userData.phase;
       group.add(pivot);
       moons.push({ pivot, body, spec: m });
@@ -491,7 +495,7 @@ function accretionTexture(spec, seed) {
  * opts: { inner, outer, count, thickness, seed, color, tilt }
  */
 export function createAsteroidBelt(opts = {}) {
-  const { inner = 2, outer = 3.2, count = 500, thickness = 0.12, seed = 1, color = '#7a7168', tilt = 0 } = opts;
+  const { inner = 2, outer = 3.2, count = 500, thickness = 0.12, seed = 1, color = '#7a7168', tilt = 0, rockScale = 1 } = opts;
   const group = new THREE.Group();
   const geo = new THREE.IcosahedronGeometry(1, 0);
   const material = mat(color, { roughness: 1, metalness: 0.08, flatShading: true });
@@ -504,7 +508,9 @@ export function createAsteroidBelt(opts = {}) {
     const r = lerp(inner, outer, Math.pow(rng(), 0.7));
     dummy.position.set(Math.cos(a) * r, (rng() - 0.5) * thickness * (outer - inner), Math.sin(a) * r);
     dummy.rotation.set(rng() * 6.28, rng() * 6.28, rng() * 6.28);
-    const s = (0.008 + Math.pow(rng(), 3) * 0.05) * outer;
+    // rocks scale with the belt, not with how far out it is drawn — a belt pushed out to keep clear
+    // of the planets should not grow boulders the size of one (pass rockScale to tune it)
+    const s = (0.008 + Math.pow(rng(), 3) * 0.05) * outer * rockScale;
     dummy.scale.set(s, s * rng.range(0.6, 1.2), s * rng.range(0.6, 1.2));
     dummy.updateMatrix();
     rocks.setMatrixAt(i, dummy.matrix);

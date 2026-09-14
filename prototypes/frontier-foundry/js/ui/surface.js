@@ -7,11 +7,16 @@
 // Everything here is presentation. The only writes it makes to the engine are through the public
 // methods (place, removeStructure, addRoute) and they all come from the tool modules, not from here.
 //
+// The grid is bigger than one world cell and streams: the camera asks the engine for the chunks
+// around it (Game.ensureChunks), at most one a frame because generating a worldgen tile costs about
+// twenty milliseconds, and the terrain layer is re-baked only for the chunks that just arrived.
+//
 // Layers, bottom to top: terrain (baked once) → roads (baked, rebuilt when a road changes) → node
 // patches → structures → movers → tracers → fog (baked, refreshed a few times a second) → the tool's
 // own overlay (ghost, route line, selection, range rings) → off-screen markers.
 
 import { BIOMES } from '../../../../worldgen/js/biomes.js';
+import { takeFreshChunks } from '../map.js';
 import { spriteFor, sprite } from './icons.js';
 import { clamp } from './dom.js';
 
@@ -61,6 +66,7 @@ export class Surface {
     this.selection = [];
     this.dirty = { terrain: true, roads: true, fog: 0 };
     this.terrainCanvas = null; this.roadCanvas = null; this.fogCanvas = null;
+    this._fogImg = null; this._fogInit = false; this._streamAt = 0;
     const hq = game.hq();
     if (hq) { this.cam.x = hq.x + hq.w / 2; this.cam.y = hq.y + hq.h / 2; }
     game.on('structure:done', () => { this.dirty.roads = true; });
@@ -79,8 +85,8 @@ export class Surface {
     if (this.minimap) {
       const jump = e => {
         const r = this.minimap.getBoundingClientRect();
-        const m = this.game.map;
-        this.centreOn((e.clientX - r.left) / r.width * m.width, (e.clientY - r.top) / r.height * m.height);
+        const box = this.miniBox();
+        this.centreOn(box.x + (e.clientX - r.left) / r.width * box.w, box.y + (e.clientY - r.top) / r.height * box.h);
       };
       this.minimap.addEventListener('pointerdown', e => { this.minimapDrag = true; jump(e); });
       this.minimap.addEventListener('pointermove', e => { if (this.minimapDrag) jump(e); });
@@ -248,11 +254,28 @@ export class Surface {
   _bakeTerrain() {
     const m = this.game.map;
     const c = this.terrainCanvas ||= document.createElement('canvas');
-    c.width = m.width; c.height = m.height;
+    if (c.width !== m.width || c.height !== m.height) { c.width = m.width; c.height = m.height; }
     const g = c.getContext('2d');
-    const img = g.createImageData(m.width, m.height);
+    g.fillStyle = '#05070b';
+    g.fillRect(0, 0, m.width, m.height);                 // ground that has not been generated stays black
+    const C = m.chunk;
+    if (C) {
+      for (let cy = 0; cy < C.rows; cy++) for (let cx = 0; cx < C.cols; cx++) {
+        if (C.ready[cy * C.cols + cx]) this._bakeTerrainChunk({ x: cx * C.size, y: cy * C.size, w: C.size, h: C.size });
+      }
+      takeFreshChunks(m);                                // everything is painted; nothing is pending
+    } else this._bakeTerrainChunk({ x: 0, y: 0, w: m.width, h: m.height });
+    this.dirty.terrain = false;
+  }
+
+  /** Paint one box of the grid into the terrain layer. A streamed chunk only costs its own tiles. */
+  _bakeTerrainChunk(box) {
+    const m = this.game.map;
+    const g = this.terrainCanvas.getContext('2d');
+    const img = g.createImageData(box.w, box.h);
     const d = img.data;
-    for (let i = 0; i < m.width * m.height; i++) {
+    for (let y = 0; y < box.h; y++) for (let x = 0; x < box.w; x++) {
+      const i = (box.y + y) * m.width + (box.x + x);
       let [r, gg, b] = hexToRgb(terrainColour(m, i));
       const slope = m.slope ? m.slope[i] : 0;
       // relief: light the uphill side, darken the steep side, so cliffs read at a glance
@@ -260,17 +283,44 @@ export class Surface {
       const k = clamp(shade, 0.6, 1.2);
       if (m.forest[i]) { r = r * 0.72 + 30 * 0.28; gg = gg * 0.72 + 74 * 0.28; b = b * 0.72 + 40 * 0.28; }
       if (!m.buildable[i] && !m.water[i]) { r = r * 0.6 + 120 * 0.4; gg = gg * 0.6 + 112 * 0.4; b = b * 0.6 + 104 * 0.4; }
-      const o = i * 4;
+      const o = (y * box.w + x) * 4;
       d[o] = clamp(r * k, 0, 255); d[o + 1] = clamp(gg * k, 0, 255); d[o + 2] = clamp(b * k, 0, 255); d[o + 3] = 255;
     }
-    g.putImageData(img, 0, 0);
-    this.dirty.terrain = false;
+    g.putImageData(img, box.x, box.y);
+  }
+
+  /**
+   * Keep the ring of chunks around the camera loaded.
+   *
+   * One chunk at a time: a worldgen tile is about twenty milliseconds and two in a frame is a
+   * visible stutter. Because the ring is a chunk ahead of where you are looking, the ground is
+   * there before the camera reaches it.
+   */
+  _streamChunks() {
+    const m = this.game.map, C = m.chunk;
+    if (!C || C.generated >= C.cols * C.rows) return;
+    const now = performance.now();
+    if (now - (this._streamAt || 0) < 90) return;
+    this._streamAt = now;
+    const S = C.size;
+    const cx = clamp(Math.floor(this.cam.x / S), 0, C.cols - 1), cy = clamp(Math.floor(this.cam.y / S), 0, C.rows - 1);
+    let want = null, best = Infinity;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+      const x = cx + dx, y = cy + dy;
+      if (x < 0 || y < 0 || x >= C.cols || y >= C.rows || C.ready[y * C.cols + x]) continue;
+      const d = dx * dx + dy * dy;
+      if (d < best) { best = d; want = { x, y }; }
+    }
+    if (want) this.game.ensureChunks(want.x * S + S / 2, want.y * S + S / 2, 0);
+    // before the first draw there is no terrain layer yet; let the full bake pick the new chunk up
+    if (!this.terrainCanvas) { if (C.fresh.length) this.dirty.terrain = true; return; }
+    for (const box of takeFreshChunks(m)) this._bakeTerrainChunk(box);
   }
 
   _bakeRoads() {
     const m = this.game.map;
     const c = this.roadCanvas ||= document.createElement('canvas');
-    c.width = m.width; c.height = m.height;
+    if (c.width !== m.width || c.height !== m.height) { c.width = m.width; c.height = m.height; }
     const g = c.getContext('2d');
     g.clearRect(0, 0, m.width, m.height);
     const img = g.createImageData(m.width, m.height);
@@ -293,16 +343,17 @@ export class Surface {
   _bakeFog() {
     const m = this.game.map, fog = this.game.fog;
     const c = this.fogCanvas ||= document.createElement('canvas');
-    c.width = m.width; c.height = m.height;
+    if (c.width !== m.width || c.height !== m.height) { c.width = m.width; c.height = m.height; this._fogImg = null; }
     const g = c.getContext('2d');
-    const img = g.createImageData(m.width, m.height);
-    const d = img.data;
-    for (let i = 0; i < fog.explored.length; i++) {
-      const o = i * 4;
-      d[o] = 5; d[o + 1] = 7; d[o + 2] = 11;
-      d[o + 3] = fog.explored[i] ? (fog.visible[i] ? 0 : 112) : 246;
+    // the buffer is grid-sized, so it is made once and only the alpha channel is rewritten
+    if (!this._fogImg) {
+      this._fogImg = g.createImageData(m.width, m.height);
+      const d0 = this._fogImg.data;
+      for (let i = 0; i < d0.length; i += 4) { d0[i] = 5; d0[i + 1] = 7; d0[i + 2] = 11; }
     }
-    g.putImageData(img, 0, 0);
+    const d = this._fogImg.data;
+    for (let i = 0; i < fog.explored.length; i++) d[i * 4 + 3] = fog.explored[i] ? (fog.visible[i] ? 0 : 112) : 246;
+    g.putImageData(this._fogImg, 0, 0);
     this.dirty.fog = performance.now() + 180;
   }
 
@@ -312,6 +363,7 @@ export class Surface {
     const dt = Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
     this._pan(dt);
+    this._streamChunks();
     this.draw();
     if (now - (this._miniAt || 0) > 240) { this._miniAt = now; this.drawMinimap(); }
   }
@@ -727,17 +779,50 @@ export class Surface {
   }
 
   // ------------------------------------------------------------------ minimap
+  /**
+   * The box the minimap shows.
+   *
+   * Not the whole grid: on a streamed map that is 480 tiles of mostly unexplored black with your
+   * base a speck in the middle of it. A minimap is for reading your base, so the box is what you
+   * have built plus a margin, with a floor so it never zooms in absurdly close, clipped to the
+   * ground that has been generated. It grows as the base spreads. The camera rectangle is drawn
+   * wherever it is and simply clips at the edge when you go off looking at something.
+   */
+  miniBox() {
+    const m = this.game.map, C = m.chunk;
+    if (!C) return { x: 0, y: 0, w: m.width, h: m.height };
+    const b = C.bounds;
+    const hq = this.game.hq();
+    let x0 = hq ? hq.x : this.cam.x, x1 = x0, y0 = hq ? hq.y : this.cam.y, y1 = y0;
+    for (const s of this.game.structures) {
+      x0 = Math.min(x0, s.x); x1 = Math.max(x1, s.x + s.w);
+      y0 = Math.min(y0, s.y); y1 = Math.max(y1, s.y + s.h);
+    }
+    const pad = 40;
+    const want = Math.max(170, x1 - x0 + pad * 2, y1 - y0 + pad * 2);
+    const side = Math.round(Math.min(want, b.x1 - b.x0 + 1, b.y1 - b.y0 + 1));
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    return {
+      x: Math.round(clamp(cx - side / 2, b.x0, Math.max(b.x0, b.x1 - side + 1))),
+      y: Math.round(clamp(cy - side / 2, b.y0, Math.max(b.y0, b.y1 - side + 1))),
+      w: side, h: side,
+    };
+  }
+
   drawMinimap() {
     if (!this.mctx || !this.game) return;
     const c = this.minimap, g = this.mctx, m = this.game.map;
     const size = c.width;
-    const k = size / m.width;
+    const box = this.miniBox();
+    const k = size / box.w;
+    const ox = -box.x * k, oy = -box.y * k;
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.fillStyle = '#05070b'; g.fillRect(0, 0, size, c.height);
     if (this.dirty.terrain) this._bakeTerrain();
     g.imageSmoothingEnabled = false;
-    g.drawImage(this.terrainCanvas, 0, 0, size, size);
-    if (this.fogCanvas) g.drawImage(this.fogCanvas, 0, 0, size, size);
+    g.drawImage(this.terrainCanvas, box.x, box.y, box.w, box.h, 0, 0, size, size);
+    if (this.fogCanvas) g.drawImage(this.fogCanvas, box.x, box.y, box.w, box.h, 0, 0, size, size);
+    g.setTransform(1, 0, 0, 1, ox, oy);
     for (const s of this.game.structures) {
       if (s.def.roadTier) continue;
       g.fillStyle = s === this.game.hq() ? '#ffc85a' : s.state === 'done' ? '#6fe0ff' : 'rgba(110,220,255,0.5)';
@@ -755,5 +840,6 @@ export class Surface {
     const vw = v.w / v.z * k, vh = v.h / v.z * k;
     g.strokeStyle = 'rgba(240,250,255,0.85)'; g.lineWidth = 1.5;
     g.strokeRect(this.cam.x * k - vw / 2, this.cam.y * k - vh / 2, vw, vh);
+    g.setTransform(1, 0, 0, 1, 0, 0);
   }
 }

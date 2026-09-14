@@ -1,5 +1,5 @@
 {
- "_doc": "Side quests (bounties) from the original quests.js: target = node id or encounter id in a zone; done when that node is cleared / encounter beaten. Reward gold (+fame). Offered on the town's board (Quests tab) once the act is reached.",
+ "_doc": "Side quests (bounties) from the original quests.js: target = node id or encounter id in a zone; done when that node is cleared / encounter beaten. Reward gold (+fame). Offered on the town's board (Quests tab) once the act is reached. Every act carries at least two of its own (tests/quests.test.js checks that, and that every targetNode is a real node), and an accepted one with a targetNode puts a marker on the map.",
  "quests": [
   {
    "id": "sq_thornwood_spider",
@@ -60,7 +60,7 @@
    "title": "Shard Fortress",
    "act": 4,
    "zone": "cosmic_rift",
-   "targetNode": "shard_fortress",
+   "targetNode": "cosmic_bastion",
    "text": "Break the fortress the void built out of pieces of the sky.",
    "gold": 600
   },
@@ -90,6 +90,15 @@
    "targetNode": "dragon_skyroad",
    "text": "Thin the patrols on the Dragon's Reach.",
    "gold": 950
+  },
+  {
+   "id": "sq_throne_trial",
+   "title": "The King's Trial",
+   "act": 6,
+   "zone": "dragon_throne",
+   "targetNode": "dragon_trial",
+   "text": "Whatever the Dragon King keeps for a doorman, put it down before the throne room.",
+   "gold": 1100
   },
   {
    "id": "sq_named_hunt",

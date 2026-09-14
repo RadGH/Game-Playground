@@ -3260,13 +3260,13 @@
   "camp_mend": "A night beside it mends the party for 15% of their health.",
   "forage_feast": "A won fight yields two days of food, and the party remembers eating well.",
   "naming_kills": "At fifty kills the blade earns a name, and the party never stops telling the story.",
-  "road_cache": "Every move turns up a small cache of coin.",
+  "road_cache": "Every map node you travel to turns up a small cache of coin.",
   "companion_might": "Your companion hits 40% harder, carries a quarter more health and starts every fight furious.",
   "strip_modifier": "At the start of a fight the biggest champion or named enemy loses one of its tricks.",
   "hated_blade": "+25% damage, and the party resents every swing.",
   "kill_ledger": "+1% damage for every five kills it has taken, up to +60%.",
   "curse_spreads": "A kill spills the curse over every enemy still standing.",
-  "free_move": "One extra node move every day.",
+  "free_move": "One extra map node of travel every day.",
   "nemesis_hunter": "Double damage to nemeses and named enemies; killing one heals the whole party.",
   "no_night_raids": "No night attacks at all while it is planted \u2014 the watch holds even when the food runs out."
  },
@@ -5139,6 +5139,456 @@
      "critDamage": 0.3
     }
    }
+  },
+  {
+   "id": "roadwardens_vigil",
+   "name": "Roadwarden's Vigil",
+   "tier": "low",
+   "pieces": 3,
+   "items": [
+    {
+     "slot": "head",
+     "baseItemId": "medium_helm",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "medium_chest",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 7.0
+      },
+      {
+       "stat": "cond_nightWard",
+       "value": 0.12
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 15.0,
+       "max": 28.0
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "medium_boots",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_watch",
+       "value": 1.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "dodge",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "no_night_raids",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "con": 4.0,
+     "armor": 6.0
+    },
+    "3": {
+     "con": 8.0,
+     "armor": 10.0,
+     "hp": 35.0,
+     "hpRegen": 2.0
+    }
+   }
+  },
+  {
+   "id": "foragers_covenant",
+   "name": "Forager's Covenant",
+   "tier": "low",
+   "pieces": 4,
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "forager_blade",
+     "fixedAffixes": [
+      {
+       "stat": "dmg",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_forageRation",
+       "value": 0.25
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "str",
+       "min": 2.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "light_gauntlets",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.05
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "light_boots",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_extraLeg",
+       "value": 1.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "dodge",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    },
+    {
+     "slot": "necklace",
+     "baseItemId": "necklace",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_easeExhaustion",
+       "value": 0.25
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "forage_feast",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "dex": 5.0,
+     "dmg": 4.0
+    },
+    "3": {
+     "dex": 8.0,
+     "dmg": 6.0,
+     "goldFind": 0.1
+    },
+    "4": {
+     "dex": 12.0,
+     "dmg": 10.0,
+     "goldFind": 0.2,
+     "xpFind": 0.1
+    }
+   }
+  },
+  {
+   "id": "grudgekeepers_ledger",
+   "name": "Grudgekeeper's Ledger",
+   "tier": "mid",
+   "pieces": 4,
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "bloodledger_blade",
+     "fixedAffixes": [
+      {
+       "stat": "dmg",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_killGrowth",
+       "value": 1.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "str",
+       "min": 3.0,
+       "max": 7.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "heavy_helm",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 7.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 20.0,
+       "max": 35.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "heavy_gauntlets",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_dmgVsNamed",
+       "value": 0.12
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hit",
+       "min": 2.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "ring",
+     "fixedAffixes": [
+      {
+       "stat": "cond_nemesisMark",
+       "value": 0.15
+      },
+      {
+       "stat": "critChance",
+       "value": 0.03
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critDamage",
+       "min": 0.08,
+       "max": 0.18
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "nemesis_hunter",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "str": 6.0,
+     "dmg": 5.0
+    },
+    "3": {
+     "str": 10.0,
+     "dmg": 8.0,
+     "critChance": 0.04
+    },
+    "4": {
+     "str": 15.0,
+     "dmg": 12.0,
+     "critChance": 0.07,
+     "critDamage": 0.25
+    }
+   }
+  },
+  {
+   "id": "pilgrims_choir",
+   "name": "Pilgrim's Choir",
+   "tier": "endgame",
+   "pieces": 5,
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "pilgrims_staff",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 8.0
+      },
+      {
+       "stat": "spellPower",
+       "value": 0.1
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 20.0,
+       "max": 40.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "cloth_helm",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "mp",
+       "value": 20.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "manaRegen",
+       "min": 2.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "runed_chest",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 8.0
+      },
+      {
+       "stat": "armor",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 5.0,
+       "max": 12.0
+      }
+     ]
+    },
+    {
+     "slot": "offhand",
+     "baseItemId": "warded_focus",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "magicResist",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.04,
+       "max": 0.1
+      }
+     ]
+    },
+    {
+     "slot": "necklace",
+     "baseItemId": "necklace",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "manaRegen",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_extraSetPiece",
+       "value": 1.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "cooldownReduction",
+       "min": 0.05,
+       "max": 0.12
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "echo_cast",
+   "activationPieces": 5,
+   "partialBonuses": {
+    "2": {
+     "int": 8.0,
+     "spellPower": 0.07
+    },
+    "3": {
+     "int": 13.0,
+     "spellPower": 0.13,
+     "mp": 35.0
+    },
+    "4": {
+     "int": 18.0,
+     "spellPower": 0.2,
+     "mp": 55.0,
+     "magicResist": 12.0
+    },
+    "5": {
+     "int": 24.0,
+     "spellPower": 0.3,
+     "mp": 80.0,
+     "magicResist": 18.0,
+     "cooldownReduction": 0.1
+    }
+   }
   }
  ],
  "potions": {
@@ -5185,7 +5635,19 @@
    },
    "target": "single",
    "cost": 80,
-   "desc": "Revives a fallen ally at 25% max HP with damage immunity until their next action."
+   "desc": "Wakes a fallen ally at 25% max HP with damage immunity until their next action."
+  },
+  "emberheart_draught": {
+   "name": "Emberheart Draught",
+   "icon": "🔥",
+   "effect": {
+    "type": "revive",
+    "pct": 0.7,
+    "immune": true
+   },
+   "target": "single",
+   "cost": 420,
+   "desc": "Expensive. Wakes a fallen ally at 70% max HP, immune until their next action — the revive a party with no healer has to carry."
   },
   "group_tonic": {
    "name": "Group Tonic",

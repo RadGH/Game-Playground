@@ -31,6 +31,8 @@ land ──▶ scan ──▶ mine ──▶ haul ──▶ refine ──▶ bui
    decision rather than a queue: you are choosing where to look.
 3. **Mine.** A drill must sit on a scanned patch and claims it. Patches are finite, so a base that
    stands still dies; a **deep bore** follows the seam and never empties, but it is slow and late.
+   A bore can also be sunk on a patch the drills have already emptied, which is what stops a world's
+   chains ending when its last seam of something does.
 4. **Haul.** Machines and stores form **store networks** (see §3). Inside one network everything is
    shared for free; outside it you need a **delivery route** — source store, destination store, a
    resource and a truck, which then drives the cheapest path forever. Roads make the trip shorter,
@@ -74,15 +76,19 @@ land ──▶ scan ──▶ mine ──▶ haul ──▶ refine ──▶ bui
 | Thing | Value | Why |
 |---|---|---|
 | Tick | 1 game second, fixed | `tick(dt)` breaks any dt into one-second steps, so the sim is repeatable |
-| Local map | 96 × 96 tiles (configurable) | one worldgen cell, ~10 m per tile |
+| Local map | a `chunks × chunks` block of 96-tile worldgen cells | the interface runs 5 (480 × 480), the balance sim 3, the engine tests 1 |
+| Buildable ground | slope averaged over a tile and its four neighbours ≤ 0.82, no cliff over 1.15 | judging each tile alone left 190 legal 4 × 4 spots on a whole 96-tile chunk |
 | Landing pod | 8000 hp, 120 kW, 1500 store, link radius 34, 22 dps | the hub; it can defend itself a little but not survive a wave alone |
-| Drill mk1 / mk2 / mk3 | 0.8 / 1.8 / 3.4 per second, 20 / 95 / 210 kW | each tier roughly doubles output and more than doubles the power bill |
-| Ore patch | ~26 000 × richness (0.6–1.5) | a mk1 drill empties an average patch in about 8 hours |
-| Starter patches | iron, coal, copper, stone at 5–10 tiles | placed by `ensureStarterNodes` so no seed is a dead run |
+| Drill mk1 / mk2 / mk3 | 1.3 / 2.9 / 5.4 per second, 20 / 95 / 210 kW | each tier roughly doubles output and more than doubles the power bill |
+| Deep bore | 2.6 per second, 320 kW, never empties | the answer to a seam running dry, which on a six-hour run it will |
+| Ore patch | ~40 000 × richness (0.6–1.5) | a mk1 drill empties an average patch in about 8 hours |
+| Starter patches | iron, coal, copper, stone at 5–10 tiles | placed by `ensureStarterNodes`, which will never take the last patch of anything else to make one |
 | Smelter | 1 ingot per 2.4 s from 2 ore + 1 coal | one drill feeds roughly one smelter |
-| Grace period | easy 1200 s · normal 720 s · hard 420 s | or the threat threshold (700 / 420 / 260), whichever comes first |
-| Wave interval | 420 s, −8 s per wave, floor 180 s | every 5th is a surge (×1.6 budget, two fronts); every 10th can carry a boss |
-| Wave budget | `4 × 1.22^(n−1) + threat × 0.005`, capped at 900 | a swarmer costs 1 threat point, a hull breaker 14, a rift maw 45 |
+| Grace period | easy 1500 s · normal 900 s · hard 540 s | or the threat threshold (900 / 620 / 400), whichever comes first |
+| Wave interval | 600 s, −6 s per wave, floor 450 s | every 5th is a surge (×1.35 budget, two fronts); every 10th can carry a boss |
+| Wave budget | `5 × 1.075^(n−1) + threat × 0.003`, capped at 520 | a swarmer costs 1 threat point, a hull breaker 14, a rift maw 45 |
+| Boss waves | every 10th, and the rift maw only enters the tables at wave 30 | a 26-armour boss at wave 20 is unanswerable with the guns a base has by then |
+| Armour | flat: damage per second minus armour, floor 10 % | a watchtower is nearly useless against a hull breaker, which is the point — but it *can* shoot at something flying, and so can a gun turret |
 | Store share | one resource ≤ 25 % of a store, raw materials ≤ 50 % together | stops three drills silting the whole base up |
 | Rocket | 6 sections + 40 rocket fuel + 30 oxidizer | a section is 10 alloy plate, 4 superalloy, 2 control units, a heat shield and 10 fuel |
 | Victory | beacons on 3 planets **and** a 6-module orbital station | `beaconsToWin` is a constructor option |
@@ -164,6 +170,11 @@ enemy in the wave — far cheaper than an A* each. Walls are expensive to walk t
 impossible, so enemies head for gaps and only chew through a wall when it is genuinely in the way.
 Flyers ignore all of it and go straight for whatever they prefer; void motes phase through walls.
 
+Flyers are the one thing a gun line cannot ignore, so the two ballistic turrets — the watchtower and
+the gun turret — can be pointed upwards; flame turrets and tesla coils are ground-only, and the
+missile battery stays the specialist with 28 tiles of reach. Before this, nothing below a missile
+battery could touch a pyre moth, and pyre moths arrive at wave 8.
+
 Turrets pick the nearest target in range (respecting minimum range for artillery, and `hitsAir`),
 apply dps × dt × power satisfaction, chain or splash where the definition says so, and add noise.
 Shield generators soak damage for everything under the bubble and refill between waves; repair bays
@@ -209,23 +220,30 @@ camelCase keys, its day length is in hours, and it has fourteen archetypes to ou
 `fromUniversePlanet(up, resourceTable)` maps one onto the other and `universePlanets(systems,
 resourceTable, { generateMap })` builds a provider from universe systems — the universe decides the
 archetype, the rare elements, the hazards, the gravity and the day, and we roll what is actually in
-the ground. Eight of its twelve rare elements match ours exactly; `helionGas`, `nullstone`,
-`emberlace` and `brinepearl` have no buildings here yet and are dropped.
+the ground. All twelve of its rare elements map onto ours: the last four — helion gas, nullstone,
+emberlace and brinepearl — got their own resource, building, recipe and research node in the
+2026-09-14 pass, so nothing is dropped any more.
 
 Ten archetypes, each with its own worldgen knobs, hazards, enemies and rare element:
 
 | Archetype | Feels like | Rare element | Its building |
 |---|---|---|---|
 | Temperate | the tutorial | ferrovine | Ferrovine Loom — ten wire from two vine, no copper |
-| Arid | water and growth are the problem | glimmer salt, voltaic ore | Glimmer Still — three lenses a pass |
-| Frozen | no liquid water at all; ice harvesters | cryonite | Cryo Forge — alloy plate for a third of the titanium |
-| Volcanic | heat, ash fall, magma power | pyrocrystal | Plasma Refinery — smelts at twice the speed |
-| Toxic | corrosion, spores, things that hurt after the fight | xenoplasm | Bio Vat — grows plate, heals itself |
-| Verdant | everything grows back, including the enemies | ferrovine, xenoplasm | both of the above |
-| Barren | almost nothing in the ground; atmosphere instead | umbral shale, aetherite | Void Condenser — helium-3 from nothing |
-| Shattered | storms, flyers, broken terrain | aetherite, voltaic ore, umbral shale | Resonance Mill — four logic cores a pass |
-| Oceanic | islands, bridges, things coming out of the water | glimmer salt | Glimmer Still |
-| Gas-shrouded | low light, high pressure, sky leeches | voltaic ore | Storm Anchor — 260 kW, ×2.5 in a storm |
+| Arid | water and growth are the problem | glimmer salt, voltaic ore, emberlace | Glimmer Still — three lenses a pass |
+| Frozen | no liquid water at all; ice harvesters | cryonite, nullstone, brinepearl | Cryo Forge — alloy plate for a third of the titanium |
+| Volcanic | heat, ash fall, magma power | pyrocrystal, emberlace, helion gas | Plasma Refinery — smelts at twice the speed |
+| Toxic | corrosion, spores, things that hurt after the fight | xenoplasm, helion gas | Bio Vat — grows plate, heals itself |
+| Verdant | everything grows back, including the enemies | ferrovine, xenoplasm, brinepearl | both of the above |
+| Barren | almost nothing in the ground; atmosphere instead | umbral shale, aetherite, nullstone, emberlace | Void Condenser — helium-3 from nothing |
+| Shattered | storms, flyers, broken terrain | aetherite, voltaic ore, umbral shale, nullstone | Resonance Mill — four logic cores a pass |
+| Oceanic | islands, bridges, things coming out of the water | glimmer salt, brinepearl | Glimmer Still |
+| Gas-shrouded | low light, high pressure, sky leeches | voltaic ore, helion gas | Storm Anchor — 260 kW, ×2.5 in a storm |
+
+The four late elements each carry a building of their own: a **Helion Still** burns helion gas
+straight into rocket fuel, a **Null Forge** cold-works alloys inside the dead field nullstone makes,
+an **Emberlace Loom** weaves heat shielding, and a **Pearl Press** turns brinepearl into a tonic that
+shelters the crew from radiation and filters spores. A **Voltaic Coil Works** does the same job for
+voltaic ore. Each is gated behind a research node that only appears on a world carrying the element.
 
 Every planet is guaranteed iron, copper, stone and coal, so no landing is a dead run. Everything
 else is rolled from the resource table's `found.archetypes` and `found.rarity`.
@@ -260,15 +278,16 @@ All original names. `data/*.json`, loaded and indexed by `js/data.js`.
 
 | File | Holds | Count |
 |---|---|---|
-| `resources.json` | every material: kind, phase, colour, tags, value, stack, transport, where it is found | 77 |
-| `structures.json` | everything buildable: size, cost, build time, hp, power, recipes, ranges, storage, unlock, variant gating | 101 |
-| `recipes.json` | inputs, outputs, time, power, which machines can run it | 67 |
+| `resources.json` | every material: kind, phase, colour, tags, value, stack, transport, where it is found | 81 |
+| `structures.json` | everything buildable: size, cost, build time, hp, power, recipes, ranges, storage, unlock, variant gating | 105 |
+| `recipes.json` | inputs, outputs, time, power, which machines can run it | 71 |
 | `vehicles.json` | capacity, speed, off-road penalty, fuel, garages, upgrade tiers, per-element upgrades | 10 |
-| `units.json` | crew and enemies, plus `waveTables` and `nestTables` per archetype | 22 |
-| `tech.json` | the research tree: work, pack cost, requirements, unlocks, effects | 82 |
-| `quests.json` | side objectives with rewards and their notification text | 25 |
+| `units.json` | crew and enemies, plus `waveTables` and `nestTables` for all ten archetypes | 25 |
+| `tech.json` | the research tree: work, pack cost, requirements, unlocks, effects | 86 |
+| `quests.json` | a 9-step tutorial chain, a 4-step side chain and 31 standalone objectives, with rewards and text | 44 |
 | `waves.json` | grace, threat rates, intervals, budget, escalation, spawning, targeting | — |
-| `notifications.json` | every message the engine can raise, with importance and template | 43 |
+| `balance.json` | every number a designer changes: patch sizes, costs, build and craft times, research work, the wave clock, the hazard table, the bot's knobs | — |
+| `notifications.json` | every message the engine can raise, with importance and template | 70 |
 
 Ids match the icon set (`assets/data/icons/foundry/`); where a data id has no icon of its own it
 carries an `icon` field naming the one to use.
@@ -417,9 +436,15 @@ node prototypes/frontier-foundry/tools/sim-foundry.mjs --hours 8
 node prototypes/frontier-foundry/tools/sim-foundry.mjs --seed 12 --hours 12 --planet volcanic --difficulty hard --why
 ```
 
-`--why` is the useful one: it prints what every machine is waiting for, which programme step the bot
-is stuck on, how full each patch is, and the last important notifications. Nearly every balance bug
-in this prototype was found by reading that table.
+`--why` is the useful one: it prints what every machine is waiting for, **supply against demand for
+every resource in the bot's plan** (worst ratio first — that row is nearly always the thing the whole
+run is stuck behind), which programme step the bot is stuck on, how full each patch is, and the last
+important notifications. Nearly every balance bug in this prototype was found by reading those two
+tables.
+
+`--chunks N` sets how much map there is (default 3, so 288 × 288). It matters: on a single 96-tile
+chunk a four-hundred-building base fills every legal 4 × 4 by hour three and the run simply stops,
+which is a property of the sim's map size and not of the game.
 
 ---
 
@@ -429,10 +454,25 @@ in this prototype was found by reading that table.
 - `DIFFICULTY` in `js/rules.js` — five multipliers per level.
 - `SHARE_PER_RESOURCE` / `RAW_SHARE_TOTAL` in `js/production.js` — how mixed a store stays.
 - `PRIORITY` in `js/production.js` — which categories survive a brownout.
-- `PLAN` and `STOCK_TARGET` in `js/ai.js` — what the bot builds and how much it stockpiles.
-- Node richness and patch size in `js/map.js` (`placeNodes`, `ensureStarterNodes`).
+- `PLAN`, `DEMANDS`, `RESEARCH_ORDER` and `STOCK_TARGET` in `js/ai.js` — what the bot builds, the
+  throughput it aims at, the line it researches, and how much it stockpiles.
+- `data/balance.json -> bot` — how far it spreads (`compactRadius`, `maxReach`, `latticeStride`), how
+  many stores, scanners, generators, harvesters and turrets it is allowed, `maxPerRecipe`,
+  `maxPackRate`, `fuelHeadroom` and `turretsPerWave`.
+- `data/balance.json -> map` — node sizes and how scarce a "scarce" patch is.
+- `data/balance.json -> hazards` — what every weather tag does while it runs.
 
-## 11. Known scope lines
+## 11. Balance and the bot
+
+`research/sim-report.md` is the standing record: what the balance sim found, what moved in
+`data/balance.json` because of it, and — set out plainly — what the bot still cannot do. Read it
+before changing a number in `balance.json`, because most of those numbers are there to fix something
+the sim caught.
+
+`tools/sim-matrix.mjs` regenerates it: three worlds crossed with three difficulties, each a real
+headless game in its own process.
+
+## 12. Known scope lines
 
 - **One buildable local map per planet.** Regions are explored for intel and a supply cache rather
   than becoming second build sites. A UI that wants two bases can create a second `Game` on another

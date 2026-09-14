@@ -4,7 +4,7 @@
 // Scope line from the design note: a region is surveyed for intel and a supply cache, not to become a
 // second build site. So this screen is a map, a scout dispatcher and a quest board.
 
-import { $, el, fill, num, clamp, countdown } from './dom.js';
+import { $, el, fill, patch, num, clamp, countdown } from './dom.js';
 import { icon, rawIcon } from './icons.js';
 import { renderWorld, cellAt, regionColor } from '../../../../worldgen/js/render.js';
 
@@ -123,7 +123,8 @@ export class MapScreen {
     const options = g.knownRegions().filter(r => !g.exploredRegions.includes(r.id) && !g.pendingSurveys.some(s => s.regionId === r.id));
     if (!options.length) kids.push(el('p.tiny', { text: 'Nothing left in reach to survey.' }));
     else {
-      const sel = el('select.small');
+      // keyed, so the survey screen redrawing under the player does not shut this list
+      const sel = el('select.small', { key: 'survey-region' });
       for (const r of options) sel.append(el('option', { value: r.id, text: r.name, selected: preferred && r.id === preferred.id }));
       const problem = el('p.tiny.bad');
       const go = el('button.small.primary', { text: 'Send scouts' });
@@ -149,7 +150,7 @@ export class MapScreen {
         kids.push(el('div.stat-row', null, el('span', { text: 'Probe to ' + (target?.name || pr.planetId) }), el('b', { text: countdown(pr.arrivesAt - g.time) })));
       }
     } else kids.push(el('p.tiny', { text: g.space.satellites ? 'A satellite is up: every patch on this world is on the map.' : 'No satellite yet. Until one goes up, a scanner tower or a radar is the only way to find what is under the ground.' }));
-    fill(box, ...kids);
+    patch(box, ...kids);
   }
 
   _quests() {

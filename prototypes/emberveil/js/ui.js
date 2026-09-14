@@ -180,3 +180,118 @@ export function setupUI() {
   fillHowTo();
   initEmbers(document.getElementById('embers'));
 }
+
+// ------------------------------------------------------------------ skill checks
+// One wording for every roll in the game, and one popup that shows it happening.
+//
+//   CON 18 + d20 (rolled 2) = 20 vs 20: pass
+//
+// Node tests, dialog choices, dungeon stages and crossings all used to print this differently
+// ("Rolled 7 + 14 vs 18: success", "STR 14 + d20 9 vs 16: pass"). They all call checkText() now, so
+// the log reads the same wherever the roll came from.
+
+/**
+ * The one line a skill check writes into the log.
+ * @param {object} r
+ * @param {string} r.stat        'CON', 'STR'…
+ * @param {number} [r.best]      the party's best raw attribute score — what the player sees on the sheet
+ * @param {number} [r.value]     the same thing, if the caller doesn't use `best`
+ * @param {number} [r.statBonus] what that attribute is actually worth on the roll, when the rules
+ *                               convert it (js/rules.js checkBonus). Shown in brackets when it differs.
+ * @param {number} [r.bonus]     any extra on top (traits, the right words…)
+ * @param {string} [r.bonusLabel] what that extra was, in plain words
+ * @param {number} r.roll        the d20
+ * @param {number} r.dc          what it had to beat
+ * @param {boolean} r.ok
+ * @returns {string} plain text, no markup
+ */
+export function checkText({ stat = '', best = null, value = null, statBonus = null, bonus = 0, bonusLabel = '', roll = 0, dc = 0, ok = false } = {}) {
+  const attr = best ?? value ?? 0;
+  const add = statBonus == null ? attr : statBonus;
+  const total = add + (bonus || 0) + roll;
+  const head = (statBonus != null && statBonus !== attr) ? `${stat} ${attr} (+${statBonus})` : `${stat} ${attr}`;
+  const extra = bonus ? ` +${bonus}${bonusLabel ? ` (${bonusLabel})` : ''}` : '';
+  return `${head}${extra} + d20 (rolled ${roll}) = ${total} vs ${dc}: ${ok ? 'pass' : 'fail'}`;
+}
+/** The same line as a coloured paragraph for the narrative panel. */
+export function checkHtml(r) { return `<p class="sys check ${r.ok ? 'good' : 'bad'}">${esc(checkText(r))}</p>`; }
+
+/** Is a skill-check popup on screen right now? */
+let scOpen = null;
+export function skillCheckOpen() { return !!scOpen; }
+
+/**
+ * Show a roll happening: a d20 tumbles for about 0.8 s, lands on the number, then the sum and a
+ * PASS / FAIL stamp. A click, Enter, Space or Escape at any point jumps straight to the result;
+ * after that the same keys close it. Resolves when it closes, so a caller can `await` it and keep
+ * the scene in order.
+ *
+ * Every caller still writes checkText() into the log, so turning the popup off loses nothing.
+ *
+ *   await skillCheckPopup({ stat: 'CON', best: 18, roll: 2, dc: 20, ok: true, subtitle: 'The Ford' });
+ *
+ * @param {object} r     the same fields checkText() takes, plus { title, subtitle }
+ * @param {object} opts  { container, speed (2 = twice as fast), enabled: false to do nothing }
+ * @returns {Promise<void>}
+ */
+export function skillCheckPopup(r = {}, opts = {}) {
+  if (opts.enabled === false || !r || typeof document === 'undefined') return Promise.resolve();
+  if (scOpen) scOpen.close(true);
+  const speed = Math.max(0.25, opts.speed || 1);
+  const T = ms => ms / speed;
+  const roll = Math.max(1, Math.min(20, Math.round(r.roll || 1)));
+
+  const mk = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const overlay = mk('div', 'sc-overlay'); overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-label', r.title || 'Skill check');
+  const card = mk('div', 'sc-card'); overlay.append(card);
+  const skip = mk('span', 'sc-skip', 'skip ▸'); card.append(skip);
+  card.append(mk('div', 'sc-ribbon', r.title || `${r.stat || ''} check`.trim()));
+  card.append(mk('p', 'sc-sub', r.subtitle || (r.dc ? `difficulty ${r.dc}` : '')));
+  const die = mk('div', 'sc-die rolling', '20'); card.append(die);
+  const sum = mk('div', 'sc-sum'); card.append(sum);
+  const stamp = mk('div', 'sc-stamp ' + (r.ok ? 'pass' : 'fail'), r.ok ? 'Pass' : 'Fail'); card.append(stamp);
+  const btn = mk('button', 'sc-btn', 'Continue'); btn.type = 'button';
+  const foot = mk('div', 'sc-foot'); foot.append(btn, mk('span', 'sc-hint', 'Enter · click')); card.append(foot);
+  btn.style.visibility = 'hidden';
+  (opts.container || document.body).append(overlay);
+
+  let settled = false, closed = false, resolveP;
+  const done = new Promise(res => { resolveP = res; });
+  let spin = null;
+
+  const settle = () => {
+    if (settled) return; settled = true;
+    if (spin) { clearInterval(spin); spin = null; }
+    die.textContent = String(roll);
+    die.classList.remove('rolling'); die.classList.add('settled');
+    if (roll === 20) die.classList.add('nat20'); else if (roll === 1) die.classList.add('nat1');
+    // "CON 18 + d20 (rolled 2) = 20 vs 20" — the verdict is the stamp underneath, not repeated here
+    sum.innerHTML = `<b>${esc(checkText(r).replace(/: (pass|fail)$/, ''))}</b>`;
+    sum.classList.add('show');
+    stamp.classList.add('show');
+    btn.style.visibility = '';
+    btn.focus({ preventScroll: true });
+  };
+  const close = force => {
+    if (closed) return;
+    if (!settled && !force) return settle();              // the first click only skips the animation
+    closed = true;
+    document.removeEventListener('keydown', onKey);
+    overlay.classList.add('sc-closing');
+    setTimeout(() => overlay.remove(), 200);
+    scOpen = null;
+    resolveP();
+  };
+  const onKey = e => { if (['Enter', ' ', 'Escape'].includes(e.key)) { e.preventDefault(); close(e.key === 'Escape'); } };
+  document.addEventListener('keydown', onKey);
+  overlay.addEventListener('click', () => close());
+  btn.addEventListener('click', e => { e.stopPropagation(); close(true); });
+  skip.addEventListener('click', e => { e.stopPropagation(); close(); });
+  scOpen = { close, settle, overlay };
+
+  // the tumble: a new face every 70 ms for about eight tenths of a second
+  let face = 0;
+  spin = setInterval(() => { face = 1 + ((face + 6) % 20); die.textContent = String(face); }, Math.max(20, T(70)));
+  setTimeout(settle, T(800));
+  return done;
+}

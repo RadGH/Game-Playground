@@ -171,7 +171,7 @@ npx playwright test prototypes/emberveil              # 2 pass
 | `skill:aoe` | hits the whole group | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
 | `skill:damageMult` | deals 100% weapon damage | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
 | `skill:hits` | 1 hit | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
-| `skill:bolts` | 1 bolts | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
+| `skill:bolts` | 1 bolts | `combat.js` shotCount() | `skills.js` + CombatScreen — working | done |
 | `skill:targets` | 1 targets | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
 | `skill:target` | aimed at party | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
 | `skill:duration` | lasts 1 round | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
@@ -182,11 +182,11 @@ npx playwright test prototypes/emberveil              # 2 pass
 | `skill:damageType` | fire damage | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
 | `skill:healStat` | healing scales with INT | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
 | `skill:damageStat` | damage scales with INT | `combat.js` cast() | `skills.js` + CombatScreen — working | done |
-| `skill:strikeCount` | 1 strikes | `effects.js` merge | `skills.js` + CombatScreen — working | done |
+| `skill:strikeCount` | 1 strikes | `effects.js` merge → `effect.hits` | `skills.js` + CombatScreen — working | done |
 | `skill:attackCount` | 1 attacks | `effects.js` merge | `skills.json` data only — **no mechanic existed** | done |
-| `skill:glaiveCount` | the glaive bounces between 1 enemies | `effects.js` pickTargets | `skills.json` data only — **no mechanic existed** | done |
+| `skill:glaiveCount` | 1 glaives, so everything it passes is hit 1 times | `effects.js` merge → `effect.hits` | `skills.json` data only — **no mechanic existed** | done |
 | `skill:chainCount` | chains to 1 enemies | `effects.js` pickTargets | `skills.json` data only — **no mechanic existed** | done |
-| `skill:chainTargets` | chains to 1 enemies | `effects.js` pickTargets | `skills.js` + CombatScreen — working | done |
+| `skill:chainTargets` | chains to 1 enemies | `effects.js` pickTargets (never below the shape's own reach) | `skills.js` + CombatScreen — working | done |
 | `skill:chainTarget` | chains to 1 more | `effects.js` pickTargets | `skills.js` + CombatScreen — working | done |
 | `skill:pullToGroup` | drags the target into the middle of its group, so the whole group is hit | `effects.js` pickTargets | `skills.json` data only — **no mechanic existed** | done |
 | `skill:split` | the damage is split 1 ways | `effects.js` dmgMult | `skills.js` + CombatScreen — working | done |
@@ -488,7 +488,10 @@ Two more things worth noting, which were already done before this pass and were 
   `poisonOnCrit`, `chainOnHit`, `hpOnKill`, `manaOnKill`) is read in `derive()` and used in combat.
 * **Companion power tiers** — `companions.json` carries `companionPower`, and `game.js`
   `makeCompanion()` scales HP and damage by it. Class pets unlocked through skill talents
-  (`unlocksCompanion`) are read by `game.unlockedPets(hero)`.
+  (`unlocksCompanion`) are summoned for real by `effects.js` `syncCompanions(game)` (round 20): it
+  reads every hero's bought talents with `companionIdsFor()` and hands the party any pet it does not
+  already have, so the Mage's Arcane Familiar turns up on the stage and in the Party tab. `main.js`
+  calls it when a talent is learned and when a save is loaded; it is safe to call repeatedly.
 
 ## Things the original got wrong that Emberveil 2 fixes
 
@@ -564,3 +567,23 @@ Combat-side rows live in `tests/effects.test.js` like everything else. World-sid
 `world: true` there — the harness cannot prove them in a fight, so it checks instead that each one
 has a row in `tests/weapons.test.js`, where it is run against a real `Game` through travel, rest
 and victory.
+
+## Round 20: how many things a skill hits
+
+`skills.json` writes hit counts two ways and the engine used to honour neither reliably:
+
+* a **talent** usually means "one more" — `{ "bolts": 5 }` on a `random3` skill, `{ "strikeCount": 1 }`
+  on a single-strike one, `{ "chainTargets": 2 }` on a chain;
+* a **level upgrade** states the new total — `{ "bolts": 4 }`, `{ "strikeCount": 5 }`.
+
+Three pieces settle it, and nothing else in the engine reads a count directly:
+
+| Piece | Where | What it does |
+|---|---|---|
+| `shotCount(skill, fallback)` | `js/combat.js` | how many enemies a multi-target shape picks: `bolts` → `targets` → `chainTargets`/`chainCount`/`glaiveCount` → the shape's default. Used by `random3/4`, `multi3/4`, `chain`, `adjacent`, `adjacent2`, `group2` |
+| `hitCount(skill)` | `js/combat.js` | how many times each picked target is struck. Reads the merged `effect.hits`, which `rules.mergeSkill` seeds from the skill's own `hits` so a talent has something to add to |
+| `countUp(v, base)` | `js/effects.js` | a value is the new total when it is bigger than the skill already does, and an addition when it is not — so a talent can never make a skill hit **fewer** things |
+
+Known data oddity, deliberately left alone: `chain_lightning_spirit`'s "Forked Spirit" adds a target
+to a skill whose `aoe` is `row`, which already hits every enemy on the field. The shape wins;
+`tests/multishot.test.js` skips sweep shapes for that reason and says so.

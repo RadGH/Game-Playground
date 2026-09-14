@@ -1675,8 +1675,9 @@
       "range": 13,
       "dps": 18,
       "damageType": "physical",
+      "hitsAir": true,
       "unlock": "t_landfall",
-      "desc": "Mostly eyes, a little rifle fire. Sees twice as far as anything else this cheap, and it is the only gun you have until steel."
+      "desc": "Mostly eyes, a little rifle fire. Sees twice as far as anything else this cheap, it will take a shot at something flying, and it is the only gun you have until steel."
     },
     {
       "id": "gun_turret",
@@ -1699,9 +1700,10 @@
       "dps": 48,
       "damageType": "physical",
       "armorPierce": 3,
+      "hitsAir": true,
       "noise": 2,
       "unlock": "t_ballistics",
-      "desc": "The default answer. Good against anything that comes in a straight line."
+      "desc": "The default answer. Good against anything that comes in a straight line, and it can be pointed upwards."
     },
     {
       "id": "flame_turret",

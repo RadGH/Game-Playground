@@ -897,7 +897,7 @@
        "t": "Be honest, {answerer.name}. Am I any good at this?"
       },
       {
-       "t": "{answerer.name}. Would you follow me into {place.the}? Wherever that is."
+       "t": "{answerer.name}. Would you follow me into whatever is waiting up the road?"
       }
      ]
     },
@@ -1314,7 +1314,7 @@
        "t": "Right, who wants a song? {~No? Tough.|Silence means yes.}"
       },
       {
-       "t": "A toast! To {~not being dead|the {foe.pl} we haven't met|small mercies and big swords}!"
+       "t": "A toast! To {~not being dead|the ones we haven't met yet|small mercies and big swords}!"
       }
      ]
     },
@@ -3461,7 +3461,7 @@
    "weight": 0.25,
    "reward": {
     "gold": 15,
-    "text": "+15 gold from a boot"
+    "text": "there was something in the old boot after all"
    }
   },
   {
@@ -3511,7 +3511,7 @@
    "weight": 0.25,
    "reward": {
     "xp": 25,
-    "text": "+25 xp each, a good omen"
+    "text": "a good omen crosses the sky"
    }
   },
   {
@@ -3561,7 +3561,7 @@
    "weight": 0.2,
    "reward": {
     "xp": 40,
-    "text": "a bard's tale: +40 xp each"
+    "text": "a bard stops at the fire and sings for supper"
    }
   },
   {
@@ -3611,7 +3611,7 @@
    "weight": 0.3,
    "reward": {
     "relation": 0.1,
-    "text": "the party huddles closer"
+    "text": "nobody wants to sleep on the outside of the fire tonight"
    }
   },
   {
@@ -3669,7 +3669,7 @@
    "weight": 0.15,
    "reward": {
     "companion": "pet_wolf",
-    "text": "a stray wolf pup follows the party"
+    "text": "something small has been following the party for two days"
    }
   },
   {
@@ -3716,7 +3716,7 @@
    "reward": {
     "talent": 1,
     "who": "answerer",
-    "text": "{answerer} gains a talent point"
+    "text": "{answerer} wakes up knowing something they did not know"
    }
   },
   {
@@ -3765,7 +3765,7 @@
      "base": "ring",
      "rarity": "magic"
     },
-    "text": "the lost merchant leaves a ring"
+    "text": "the lost merchant pays in kind"
    }
   },
   {
@@ -3823,7 +3823,7 @@
    "weight": 0.15,
    "reward": {
     "xp": 30,
-    "text": "a whisper from the Veil: +30 xp, and a chill"
+    "text": "a whisper out of the Veil, and a chill after it"
    }
   },
   {
@@ -3873,7 +3873,7 @@
    "weight": 0.15,
    "reward": {
     "gold": 40,
-    "text": "the map sells for 40 gold at the next town"
+    "text": "the old map is worth something to the right buyer"
    }
   },
   {
@@ -3923,7 +3923,7 @@
    "weight": 0.25,
    "reward": {
     "relation": 0.15,
-    "text": "the party laughs; bonds tighten"
+    "text": "somebody's elbow is going to hurt tomorrow"
    }
   },
   {
@@ -3978,7 +3978,7 @@
     "supply": {
      "bandages": 2
     },
-    "text": "+2 bandages made from spare cloth"
+    "text": "spare cloth, torn and rolled by the fire"
    }
   },
   {
@@ -4392,6 +4392,269 @@
     }
    ],
    "weight": 1
+  },
+  {
+   "id": "revive_thanks",
+   "tags": [
+    "camp",
+    "people",
+    "gratitude"
+   ],
+   "requires": [
+    {
+     "who": "asker",
+     "memory": "revive",
+     "maxAgeHours": 72,
+     "bindingIs": {
+      "by": "answerer"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{answerer.name}. I was on the ground and you came and got me. I have not said thank you."
+      },
+      {
+       "t": "You brought me back, {answerer.name}. {memory.how.cap}, apparently. I remember none of it."
+      },
+      {
+       "t": "I owe you one, {answerer.name}. That's not a figure of speech any more."
+      },
+      {
+       "t": "Thank you. {~That's the whole speech.|I practised it and it still came out short.|Don't make me say it twice.}",
+       "cond": "has('gruff')||has('blunt')"
+      },
+      {
+       "t": "I keep thinking about it. {memory.when.cap}. You did not have to come back for me.",
+       "cond": "has('nervous')||has('grieving')"
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "You'd have done it for me. {~Don't make it strange.|Eat something.}"
+      },
+      {
+       "t": "You were heavy. That's all I'll say about it.",
+       "cond": "has('sarcastic')||has('jolly')"
+      },
+      {
+       "t": "It is what I am for, {asker.name}. Sit down before you fall down.",
+       "cond": "has('kind')||has('pious')"
+      },
+      {
+       "t": "Thank me by not doing it again."
+      },
+      {
+       "t": "I was closest. Anyone would have.",
+       "cond": "has('modest')||has('timid')"
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "Somebody write the day down. {asker.name} said thank you."
+      },
+      {
+       "t": "We all saw it. Nobody's going to let either of you forget it."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "All the same. It stands."
+      },
+      {
+       "t": "Fine. It's said. {~Pass the bread.|Now stop looking at me.}"
+      }
+     ]
+    }
+   ],
+   "reward": {
+    "relation": 0.2,
+    "text": "the debt is spoken aloud"
+   },
+   "weight": 3
+  },
+  {
+   "id": "revive_thanks_awkward",
+   "tags": [
+    "camp",
+    "people",
+    "gratitude"
+   ],
+   "requires": [
+    {
+     "who": "asker",
+     "memory": "revive",
+     "maxAgeHours": 72,
+     "bindingIs": {
+      "by": "answerer"
+     }
+    },
+    {
+     "who": "asker",
+     "trait": "proud"
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "About the other day. {answerer.name}. The… ground business."
+      },
+      {
+       "t": "{answerer.name}. I am told you did something. {~I'm told I should mind.|I'd rather not have needed it.}"
+      },
+      {
+       "t": "{answerer.name}. I have been putting this off. The ground. You. Thank you."
+      },
+      {
+       "t": "Nobody needs to make a thing of it, but {answerer.name} — I know what you did."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "You don't have to say it."
+      },
+      {
+       "t": "Say it or don't. The fire doesn't care."
+      },
+      {
+       "t": "I know what you mean. That's enough.",
+       "cond": "has('kind')"
+      },
+      {
+       "t": "You look like a man passing a stone. Sit down."
+      },
+      {
+       "t": "Whatever it costs you to say, keep it. I'll take the look on your face."
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "Good. Then it's said."
+      },
+      {
+       "t": "…Thank you. There. It cost me nothing and it felt like a tooth coming out."
+      },
+      {
+       "t": "Right. Don't repeat any of this."
+      },
+      {
+       "t": "There. It's out. {~I feel worse.|I feel lighter. Don't tell anyone.}"
+      }
+     ]
+    }
+   ],
+   "reward": {
+    "relation": 0.15,
+    "text": "something goes unsaid, and lands anyway"
+   },
+   "weight": 2
+  },
+  {
+   "id": "revive_callback",
+   "tags": [
+    "camp",
+    "people",
+    "gratitude",
+    "callback"
+   ],
+   "requires": [
+    {
+     "who": "asker",
+     "memory": "revive",
+     "minAgeHours": 96,
+     "bindingIs": {
+      "by": "answerer"
+     }
+    }
+   ],
+   "lines": [
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "{memory.when.cap} you picked me up off the ground, {answerer.name}. I still think about it on the quiet stretches."
+      },
+      {
+       "t": "I never paid you back for {memory.when}. I have not forgotten that I haven't."
+      },
+      {
+       "t": "Do you remember pulling me back? {memory.when.cap}. I remember the ceiling and then your face."
+      },
+      {
+       "t": "{answerer.name}. That thing you did {memory.when}. It's still doing the rounds in my head."
+      }
+     ]
+    },
+    {
+     "role": "answerer",
+     "variants": [
+      {
+       "t": "I remember. I don't need it brought up at every fire."
+      },
+      {
+       "t": "Long time ago now. {~You've been upright since.|You've earned it back twice over.}"
+      },
+      {
+       "t": "Every time you say it I have to think about it again. Let it be old.",
+       "cond": "has('gruff')||has('cynical')"
+      },
+      {
+       "t": "I'd do it again tomorrow. Try not to make me.",
+       "cond": "has('kind')||has('loyal')"
+      }
+     ]
+    },
+    {
+     "role": "asker",
+     "variants": [
+      {
+       "t": "It stays said. That's the point of saying it."
+      },
+      {
+       "t": "Then I'll stop bringing it up. Once more, though: thank you."
+      }
+     ]
+    },
+    {
+     "role": "third",
+     "optional": true,
+     "variants": [
+      {
+       "t": "The pair of you. Every camp."
+      },
+      {
+       "t": "One day somebody will do it for me and I'll be just as bad."
+      }
+     ]
+    }
+   ],
+   "reward": {
+    "relation": 0.15,
+    "xp": 15,
+    "text": "an old debt, still standing"
+   },
+   "weight": 2
   }
  ]
 }

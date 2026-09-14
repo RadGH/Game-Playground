@@ -49,7 +49,7 @@
    "label": "Interface"
   },
   "ambience": {
-   "target": -30,
+   "target": -40,
    "bus": "ambience",
    "label": "Ambience loops"
   }

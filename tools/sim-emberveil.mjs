@@ -59,10 +59,13 @@ function flags(argv) {
 // ── the bot ───────────────────────────────────────────────────────────────────────────────
 /** Shortest path of node ids from `from` to `to` inside one zone. */
 function pathTo(zone, from, to) {
+  // Trails are walked in both directions (game.reachable()), so the search has to be undirected too —
+  // otherwise the bot can never turn round and go back to the settlement behind it.
+  const nb = id => { const n = zone.nodes.find(x => x.id === id); const back = zone.nodes.filter(x => (x.exits || []).includes(id)).map(x => x.id); return [...new Set([...(n?.exits || []), ...back])]; };
   const q = [[from]]; const seen = new Set([from]);
   while (q.length) {
     const p = q.shift(); const last = p[p.length - 1]; if (last === to) return p.slice(1);
-    for (const e of zone.nodes.find(n => n.id === last)?.exits || []) if (!seen.has(e)) { seen.add(e); q.push([...p, e]); }
+    for (const e of nb(last)) if (!seen.has(e)) { seen.add(e); q.push([...p, e]); }
   }
   return null;
 }
@@ -101,7 +104,10 @@ function spendPoints(g, h) {
   return touched;
 }
 function spendAll(g) { for (const h of g.party) spendPoints(g, h); }
-function partyHpFrac(g) { const a = g.party.filter(h => h.alive); return a.length ? a.reduce((s, h) => s + h.hp / h.maxHp, 0) / a.length : 0; }
+// A hero who is down counts as zero, not as "not in the party": since round 20 the fallen stay down
+// until a healer, a flask, a shrine or a settlement picks them up, so a party of one at full health
+// is in trouble, not in good shape.
+function partyHpFrac(g) { return g.party.length ? g.party.reduce((s, h) => s + (h.alive && h.hp > 0 ? h.hp / h.maxHp : 0), 0) / g.party.length : 0; }
 
 /** Equip anything in the bag that scores better for someone who can use it. Returns how many swaps. */
 function equipUpgrades(g, stats) {
@@ -129,7 +135,7 @@ function equipUpgrades(g, stats) {
 function doTown(g, stats) {
   const town = g.townFor();
   for (const it of [...g.inventory]) if (g.loot.score(it).total < 40 && !it.isUnique) g.sell(it);
-  const want = { ration: 20, bandages: 4, torch: 8 };
+  const want = { ration: 30, bandages: 4, torch: 10 };
   for (const [kind, target] of Object.entries(want)) while ((g.supplies[kind] || 0) < target && g.buySupply(kind, 1)) stats.bought[kind] = (stats.bought[kind] || 0) + 1;
   if (!g.supplies.tent && g.gold > 400) { g.buySupply('tent', 1); stats.bought.tent = (stats.bought.tent || 0) + 1; }
   if (g.vehicle === 'none' && g.gold > 600) { g.buyVehicle('wagon'); stats.bought.wagon = (stats.bought.wagon || 0) + 1; }
@@ -141,6 +147,11 @@ function doTown(g, stats) {
     if (gain > 30) { g.buy(it, it.price, stock); stats.goldSpent += it.price; }
   }
   equipUpgrades(g, stats);
+  // Clear the bag out properly before leaving. Without this the bot keeps 15+ items it will never
+  // wear, `wantTown` stays true because of them, and it walks back and forth to the settlement for
+  // the rest of the run instead of playing the act.
+  const junk = () => g.inventory.filter(i => i.type !== 'consumable');
+  while (junk().length > 8) { const worst = junk().sort((a, b) => g.loot.score(a).total - g.loot.score(b).total)[0]; if (!worst) break; g.sell(worst); }
   if (partyHpFrac(g) < 0.8) g.clericRest(town);
 }
 
@@ -342,7 +353,7 @@ function runOnce(seed, { startAct = 0, forceClass = null, forceWeapon = null, da
     }
     // hurt and poor? go and see a cleric before the next fight
     const town = g.zone().nodes.find(n => n.type === 'town');
-    const wantTown = town && town.id !== g.nodeId && (partyHpFrac(g) < 0.45 || g.supplies.ration <= 1 || g.inventory.length > 14);
+    const wantTown = town && town.id !== g.nodeId && (partyHpFrac(g) < 0.45 || g.fallen().length >= 2 || g.supplies.ration <= 1 || g.inventory.length > 14);
     const target = wantTown ? town.id : nextTarget(g);
     if (target == null) { const next = g.nextZoneId(); if (next && g.unlockedZones.includes(next)) { g.enterZone(next); stats.actReached = Math.max(stats.actReached, g.act); snapAct(g, stats); continue; } break; }
     const step = pathTo(g.zone(), g.nodeId, target)?.[0];

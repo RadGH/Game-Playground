@@ -9,9 +9,9 @@
 
 import { el, knob, select, button, textInput, panel, toast } from '../../shared/ui.js';
 import { generateGalaxy, GALAXY_DEFAULTS, GALAXY_PRESETS, LAYOUTS, nearestStar } from './galaxy.js';
-import { generateSystem, SYSTEM_DEFAULTS, ARCH_BY_KEY, planetSummary } from './system.js';
+import { generateSystem, SYSTEM_DEFAULTS, ARCH_BY_KEY, planetSummary, orbitLayout, moonById } from './system.js';
 import { STAR_CLASSES, starSummary, mixColor } from './stars.js';
-import { generatePlanetMap, hasSurfaceMap, clearMapCache, familyShare, mapMix } from './planetmap.js';
+import { generatePlanetMap, hasSurfaceMap, clearMapCache, familyShare, mapMix, mapSizeFor } from './planetmap.js';
 import { planetTexture } from './texture.js';
 import { toJSON, download, jsonSizeKB } from './export.js';
 import { BASELINE, RARE } from './elements.js';
@@ -33,7 +33,8 @@ const state = {
     seed: 20260913, stars: 240, mix: { ...GALAXY_DEFAULTS.mix },
     mapSize: 'medium', nameRace: null, namegen: null,
   },
-  galaxy: null, star: null, system: null, planet: null,
+  galaxy: null, star: null, system: null, planet: null, moon: null,
+  orbit: null,                       // the drawn orbit ladder for the system on screen
   world: null, detail: null, tile: null,
   view: 'galaxy', mapLevel: 'world', mapLayer: 'biomes',
   layers: { ...DEFAULT_LAYERS },
@@ -44,6 +45,7 @@ delete state.opts.namegen;
 
 let namegen = null;
 let view3d = null, backdrop = null, sceneObjects = [];
+let parentDrawn = null;            // what the moon view drew behind the moon, for the tests
 
 // ---------------------------------------------------------------------------- 3D plumbing
 
@@ -74,23 +76,29 @@ function on3dUp(e) {
   if (!downAt) return;
   const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y);
   downAt = null;
-  if (moved > 5 || state.view !== 'system') return;      // a drag is a camera move, not a click
-  const hit = pick3d(e);
-  if (hit != null) openPlanet(hit);
+  if (moved > 5) return;                                 // a drag is a camera move, not a click
+  if (state.view === 'system') {
+    const hit = pick3d(e, 'planetId', sceneObjects.filter(o => o.planetId != null));
+    if (hit != null) openPlanet(hit);
+  } else if (state.view === 'planet') {
+    // in the planet view the little spheres going round it are its moons — click one to land there
+    const i = pick3d(e, 'moonIndex', sceneObjects.filter(o => o.body));
+    const moon = i != null ? (state.planet?.moons || [])[i] : null;
+    if (moon) openMoon(moon.id);
+  }
 }
 
-function pick3d(e) {
+function pick3d(e, key, objects) {
   const THREE = view3d.THREE;
   const rect = view3d.renderer.domElement.getBoundingClientRect();
   const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
   const ray = new THREE.Raycaster();
   ray.setFromCamera(ndc, view3d.camera);
-  const targets = sceneObjects.filter(o => o.planetId != null).map(o => o.model.group);
-  const hits = ray.intersectObjects(targets, true);
+  const hits = ray.intersectObjects(objects.map(o => o.model.group), true);
   if (!hits.length) return null;
   let node = hits[0].object;
-  while (node && node.userData.planetId == null) node = node.parent;
-  return node?.userData.planetId ?? null;
+  while (node && node.userData[key] == null) node = node.parent;
+  return node?.userData[key] ?? null;
 }
 
 // ---------------------------------------------------------------------------- generation
@@ -111,7 +119,8 @@ function generate() {
     coreDensity: o.coreDensity, clusters: o.clusters, lanes: o.lanes, laneRange: o.laneRange,
     mix: o.mix, namegen, nameRace: o.nameRace,
   });
-  state.star = null; state.system = null; state.planet = null;
+  state.star = null; state.system = null; state.planet = null; state.moon = null;
+  state.orbit = null;
   state.world = null; state.detail = null; state.tile = null;
   state.textures.clear();
   clearMapCache();
@@ -138,7 +147,7 @@ function openStar(id) {
   setBusy(true, 'scanning the system');
   state.star = star;
   state.system = systemOf(star);
-  state.planet = null; state.world = null; state.detail = null; state.tile = null;
+  state.planet = null; state.moon = null; state.world = null; state.detail = null; state.tile = null;
   buildSystemScene();
   showView('system');
   renderRight();
@@ -151,7 +160,7 @@ function openPlanet(id) {
   const planet = state.system.planets[id];
   if (!planet) return null;
   setBusy(true, 'mapping the surface');
-  state.planet = planet;
+  state.planet = planet; state.moon = null;
   state.world = null; state.detail = null; state.tile = null;
   buildPlanetScene(planet);
   showView('planet');
@@ -160,13 +169,37 @@ function openPlanet(id) {
   return planet;
 }
 
-/** The planet's map + texture set, generated once and kept. */
-function texturesFor(planet) {
-  if (state.textures.has(planet.seed)) return state.textures.get(planet.seed);
-  const world = hasSurfaceMap(planet) ? generatePlanetMap(planet, { ...MAP_SIZES[state.opts.mapSize], namegen }) : null;
-  const texture = planetTexture(planet, world, { size: 1024 });
+/**
+ * Land on a moon. A moon is a small planet — same scene, same surface map, half the grid — so this
+ * is the planet path with the parent kept in `state.planet` so the breadcrumb still works.
+ * `id` is the moon's stable id, "<planetId>m<index>".
+ */
+function openMoon(id) {
+  if (!state.system) return null;
+  const moon = moonById(state.system, id);
+  if (!moon) return null;
+  setBusy(true, 'mapping the moon');
+  state.planet = state.system.planets[moon.parentId] || state.planet;
+  state.moon = moon;
+  state.world = null; state.detail = null; state.tile = null;
+  buildPlanetScene(moon, state.planet);
+  showView('moon');
+  renderRight();
+  setBusy(false);
+  return moon;
+}
+
+/** Whatever is being looked at up close — a moon if one is open, otherwise the planet. */
+function currentBody() { return state.moon || state.planet; }
+
+/** The body's map + texture set, generated once and kept. A moon gets the smaller grid. */
+function texturesFor(body) {
+  if (state.textures.has(body.seed)) return state.textures.get(body.seed);
+  const size = mapSizeFor(body, MAP_SIZES[state.opts.mapSize]);
+  const world = hasSurfaceMap(body) ? generatePlanetMap(body, { ...size, namegen }) : null;
+  const texture = planetTexture(body, world, { size: body.moon ? 512 : 1024 });
   const set = { world, texture };
-  state.textures.set(planet.seed, set);
+  state.textures.set(body.seed, set);
   return set;
 }
 
@@ -185,12 +218,14 @@ function buildSystemScene() {
   sceneObjects.push({ model: starModel });
   view3d.ambient.intensity = star.classKey === 'blackHole' ? 0.34 : 0.22;
 
-  const maxAu = Math.max(...sys.planets.map(p => p.orbit.au), ...sys.belts.map(b => b.outer), 1);
-  // a log scale, so the inner planets do not pile up on the star and the outer ones stay on screen
-  const ringFor = au => 1.8 + 9.5 * (Math.log10(1 + au / 0.05) / Math.log10(1 + maxAu / 0.05));
+  // the orbit ladder: a log scale first, then a pass that pushes any two rings that came out too
+  // close apart, so no two orbits are ever drawn nearly touching (system.js owns the maths)
+  const layout = orbitLayout(sys, { starRadius, minGap: 1.05 });
+  state.orbit = layout;
+  const ringFor = au => layout.radiusFor(au);
 
   for (const p of sys.planets) {
-    const r = ringFor(p.orbit.au);
+    const r = layout.radii[p.index] ?? ringFor(p.orbit.au);
     const orbit = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(new THREE.Path().absarc(0, 0, r, 0, Math.PI * 2).getSpacedPoints(128).map(v => new THREE.Vector3(v.x, 0, v.y))),
       new THREE.LineBasicMaterial({ color: p.orbit.inZone ? 0x4a8a5a : 0x2c3444, transparent: true, opacity: 0.7 }),
@@ -198,7 +233,9 @@ function buildSystemScene() {
     view3d.scene.add(orbit);
     sceneObjects.push({ model: { group: orbit, update: () => {}, dispose: () => { orbit.geometry.dispose(); orbit.material.dispose(); } } });
 
-    const size = Math.max(0.12, Math.min(0.55, (p.giant ? 0.3 : 0.17) * Math.pow(p.radius, 0.4)));
+    // never wider than its own lane: a third of the narrower gap either side of it
+    const want = Math.max(0.12, Math.min(0.55, (p.giant ? 0.3 : 0.17) * Math.pow(p.radius, 0.4)));
+    const size = Math.max(0.08, layout.sizeFor(p.index, want));
     const model = createPlanet(p, { radius: size, detail: 32, textureSize: 256, moons: false });
     const angle = (p.id * 2.399) % (Math.PI * 2);            // golden angle, so they never line up
     model.group.position.set(Math.cos(angle) * r, 0, Math.sin(angle) * r);
@@ -210,29 +247,47 @@ function buildSystemScene() {
   }
 
   for (const b of sys.belts) {
-    const belt = createAsteroidBelt({ inner: ringFor(b.inner), outer: ringFor(b.outer), count: Math.round(220 + b.density * 700), seed: b.seed, tilt: 0.02 });
+    const bi = ringFor(b.inner), bo = ringFor(b.outer);
+    // keep the rocks small against the orbit rings around them
+    const belt = createAsteroidBelt({ inner: bi, outer: bo, count: Math.round(220 + b.density * 700), seed: b.seed, tilt: 0.02, rockScale: Math.min(0.35, Math.max(0.06, 0.5 * (bo - bi) / Math.max(0.6, bo))) });
     view3d.scene.add(belt.group);
     view3d.addTicker(belt.update);
     sceneObjects.push({ model: belt });
   }
 
   view3d.setStarLight(star.classKey === 'blackHole' ? '#ffb46a' : mixColor(star.color, '#ffffff', 0.55), 0.5, [0, 0.6, 0]);
-  view3d.camera.position.set(0, 7.5, 13);
+  // pull the camera back far enough for the outermost ring, which now sits wherever the gap pass put it
+  const far = Math.max(6, layout.max + 1.2);
+  view3d.camera.position.set(0, far * 0.6, far * 1.3);
   view3d.controls.target.set(0, 0, 0);
   view3d.controls.update();
 }
 
 // ---------------------------------------------------------------------------- the planet scene
 
-function buildPlanetScene(planet) {
+function buildPlanetScene(body, parent = null) {
   ensure3d();
   clear3d();
-  const { texture } = texturesFor(planet);
+  parentDrawn = null;
+  const { texture } = texturesFor(body);
   const sunAt = [26, 6, 14];
-  const model = createPlanet(planet, { texture, radius: 1, detail: 96, sunDirection: sunAt });
+  const model = createPlanet(body, { texture, radius: 1, detail: 96, sunDirection: sunAt });
   view3d.scene.add(model.group);
   view3d.addTicker(model.update);
-  sceneObjects.push({ model, planetId: planet.id });
+  sceneObjects.push({ model, planetId: body.id, body });
+
+  // a moon gets the world it circles hanging behind it, which is most of what standing on one looks
+  // like. It uses the parent's real surface texture — the same cached set the planet view draws with
+  // — not the generic procedural one, or the planet turns brown the moment you land on its moon.
+  if (parent) {
+    const parentTex = texturesFor(parent).texture;
+    const big = createPlanet(parent, { texture: parentTex, radius: 2.6, detail: 64, moons: false, sunDirection: sunAt });
+    parentDrawn = { id: parent.id, name: parent.name, textured: big.material.map?.image === parentTex.map };
+    big.group.position.set(-6.4, 1.1, -7.5);
+    view3d.scene.add(big.group);
+    view3d.addTicker(big.update);
+    sceneObjects.push({ model: big });
+  }
 
   // the star, far off to one side, so the planet has a day side and a night side
   const star = state.star;
@@ -245,7 +300,7 @@ function buildPlanetScene(planet) {
   view3d.ambient.intensity = 0.2;
   // a star's own colour is far too saturated to light a whole planet with — pull it toward white
   view3d.setStarLight(star.classKey === 'blackHole' ? '#ffb46a' : mixColor(star.color, '#ffffff', 0.6), 3.3, sunAt);
-  const maxMoon = Math.max(1, ...(planet.moons || []).map(m => m.distance || 1));
+  const maxMoon = Math.max(1, ...(body.moons || []).map(m => m.distance || 1));
   view3d.camera.position.set(0, 0.9, Math.min(9, 3.1 + maxMoon * 0.35));
   view3d.controls.target.set(0, 0, 0);
   view3d.controls.update();
@@ -256,7 +311,7 @@ function buildPlanetScene(planet) {
 function showView(name) {
   state.view = name;
   $('galaxy').hidden = name !== 'galaxy';
-  $('three').hidden = !(name === 'system' || name === 'planet');
+  $('three').hidden = !(name === 'system' || name === 'planet' || name === 'moon');
   $('map').hidden = name !== 'map';
   if (name === 'galaxy') drawGalaxy();
   if (name === 'map') drawMap();
@@ -266,14 +321,16 @@ function showView(name) {
   $('readout').innerHTML = '';
   if (name === 'galaxy') $('readout').append(el('span', { class: 'muted small', text: 'Hover a star for its class, click it to fly in.' }));
   if (name === 'system') $('readout').append(el('span', { class: 'muted small', text: 'Drag to orbit, scroll to zoom, click a planet to land on it.' }));
-  if (name === 'planet') $('readout').append(el('span', { class: 'muted small', text: 'Drag to spin the planet. Open the Map view for its surface.' }));
+  if (name === 'planet') $('readout').append(el('span', { class: 'muted small', text: 'Drag to spin the planet, click one of its moons to land there. Open the Map view for its surface.' }));
+  if (name === 'moon') $('readout').append(el('span', { class: 'muted small', text: 'A moon of ' + (state.planet?.name || 'the planet') + '. Open the Map view for its surface.' }));
 }
 
 function showMap() {
-  if (!state.planet) return null;
-  if (!hasSurfaceMap(state.planet)) { toast('A gas giant has no surface to map.'); return null; }
+  const body = currentBody();
+  if (!body) return null;
+  if (!hasSurfaceMap(body)) { toast('A gas giant has no surface to map.'); return null; }
   setBusy(true, 'generating the surface');
-  const { world } = texturesFor(state.planet);
+  const { world } = texturesFor(body);
   state.world = world;
   state.mapLevel = 'world'; state.detail = null; state.tile = null;
   showView('map');
@@ -465,7 +522,8 @@ function openLocal(x, y) {
 function back() {
   if (state.view === 'map' && state.mapLevel === 'local') { state.mapLevel = 'region'; drawMap(); renderCrumbs(); return; }
   if (state.view === 'map' && state.mapLevel === 'region') { state.mapLevel = 'world'; state.detail = null; drawMap(); renderCrumbs(); return; }
-  if (state.view === 'map') { showView('planet'); return; }
+  if (state.view === 'map') { showView(state.moon ? 'moon' : 'planet'); return; }
+  if (state.view === 'moon') { state.moon = null; state.world = null; buildPlanetScene(state.planet); showView('planet'); renderRight(); return; }
   if (state.view === 'planet') { buildSystemScene(); showView('system'); return; }
   if (state.view === 'system') { showView('galaxy'); return; }
 }
@@ -479,7 +537,8 @@ function renderCrumbs() {
   };
   push(state.galaxy?.name || 'galaxy', () => showView('galaxy'), state.view === 'galaxy');
   if (state.star) push(state.star.name, () => { buildSystemScene(); showView('system'); }, state.view === 'system');
-  if (state.planet) push(state.planet.name, () => { buildPlanetScene(state.planet); showView('planet'); }, state.view === 'planet');
+  if (state.planet) push(state.planet.name, () => { state.moon = null; state.world = null; buildPlanetScene(state.planet); showView('planet'); renderRight(); }, state.view === 'planet');
+  if (state.moon) push(state.moon.name, () => { buildPlanetScene(state.moon, state.planet); showView('moon'); }, state.view === 'moon');
   if (state.view === 'map') {
     push('surface', () => { state.mapLevel = 'world'; drawMap(); renderCrumbs(); }, state.mapLevel === 'world');
     if (state.mapLevel !== 'world') push(state.world.regions[state.regionId]?.name || 'region', () => { state.mapLevel = 'region'; drawMap(); renderCrumbs(); }, state.mapLevel === 'region');
@@ -583,11 +642,13 @@ function renderRight() {
   if (!state.galaxy) return;
 
   // --- what is selected
-  if (state.planet) right.append(planetCard(state.planet));
+  if (state.moon) right.append(moonCard(state.moon));
+  else if (state.planet) right.append(planetCard(state.planet));
   else if (state.star) right.append(starCard(state.star));
   else right.append(galaxyCard());
 
   // --- lists
+  if (state.planet?.moons?.length) right.append(moonList(state.planet));
   if (state.system) right.append(planetList());
   right.append(starList());
   right.append(exportPanel());
@@ -655,21 +716,75 @@ function planetCard(p) {
     button('Back to system', () => { buildSystemScene(); showView('system'); }, 'small'),
   );
 
-  const extra = [];
-  if (state.view === 'map' && state.world) {
-    const mix = mapMix(state.world);
-    const share = p.biomeFamily ? familyShare(state.world, p.biomeFamily) : null;
-    extra.push(el('p', { class: 'mini', text: `map: ${mix.distinct} land biomes, ${(100 * mix.ice / (state.world.width * state.world.height)).toFixed(0)}% ice${share ? `, ${(share.share * 100).toFixed(0)}% of the land is ${p.biomeFamily}` : ''}` }));
-  }
-
   return panel('Planet',
     el('p', { class: 'blurb', text: planetSummary(p) }),
     rows,
     el('h3', { text: 'Resources' }), res,
     el('h3', { text: 'Hazards' }), haz,
     el('h3', { text: 'Difficulty' }), diff,
-    actions, ...extra,
+    actions, ...mapNote(p),
   );
+}
+
+/** The line under the card that says how the surface map came out. */
+function mapNote(body) {
+  if (state.view !== 'map' || !state.world) return [];
+  const mix = mapMix(state.world);
+  const share = body.biomeFamily ? familyShare(state.world, body.biomeFamily) : null;
+  return [el('p', { class: 'mini', text: `map: ${state.world.width}×${state.world.height}, ${mix.distinct} land biomes, ${(100 * mix.ice / (state.world.width * state.world.height)).toFixed(0)}% ice${share ? `, ${(share.share * 100).toFixed(0)}% of the land is ${body.biomeFamily}` : ''}` })];
+}
+
+/** A moon's card. Same shape as a planet's — a moon is a small planet. */
+function moonCard(m) {
+  const parent = state.planet;
+  const rows = el('dl', { class: 'stat-grid' });
+  const add = (k, v) => rows.append(el('dt', { text: k }), el('dd', { text: v }));
+  add('kind', m.archetypeName);
+  add('orbits', `${m.parentName} · ${m.orbit.aroundPlanet} radii · ${m.periodDays} d`);
+  add('from the star', `${m.orbit.au} AU`);
+  add('temperature', `${m.temperature.C} °C (${m.temperature.label})`);
+  add('radius', m.radius + '× Earth');
+  add('gravity', m.gravity + ' g');
+  add('day', m.tidalLocked ? 'locked to its planet' : m.dayLengthHours + ' h');
+  add('air', m.atmosphere.density < 0.02 ? 'none' : `${m.atmosphere.type} · ${m.atmosphere.density} bar${m.atmosphere.breathable ? ' · breathable' : ''}`);
+  if (m.tidalHeat > 0) add('tidal heat', (m.tidalHeat * 100).toFixed(0) + '%');
+
+  const res = el('div', { class: 'res-row' });
+  for (const r of m.resources) res.append(el('span', { class: 'res', title: BASELINE.find(b => b.key === r.key)?.blurb || '' }, el('i', { style: { background: r.color } }), r.name, el('span', { class: 'amt', text: r.abundance.toFixed(2) })));
+  for (const r of m.rareElements) res.append(el('span', { class: 'res rare', title: r.blurb }, el('i', { style: { background: r.color } }), r.name, el('span', { class: 'amt', text: r.abundance.toFixed(2) })));
+
+  const haz = el('div', { class: 'hazards' });
+  for (const h of m.hazards) haz.append(el('span', { class: 'hazard ' + h, text: h }));
+  if (!m.hazards.length) haz.append(el('span', { class: 'muted small', text: 'nothing worse than the weather' }));
+
+  const actions = el('div', { class: 'row' },
+    button('Surface map', () => showMap(), 'small'),
+    button(`Back to ${m.parentName}`, () => { state.moon = null; state.world = null; buildPlanetScene(parent); showView('planet'); renderRight(); }, 'small'),
+  );
+
+  return panel('Moon',
+    el('p', { class: 'blurb', text: m.blurb }),
+    rows,
+    el('h3', { text: 'Resources' }), res,
+    el('h3', { text: 'Hazards' }), haz,
+    actions, ...mapNote(m),
+  );
+}
+
+/** The planet's moons, as a clickable list — the other way in besides clicking one in the 3D view. */
+function moonList(planet) {
+  const list = el('div', { class: 'list' });
+  for (const m of planet.moons) {
+    list.append(el('div', {
+      class: 'item moon-item' + (state.moon?.id === m.id ? ' on' : ''),
+      'data-moon': m.id,
+      onclick: () => openMoon(m.id),
+    },
+    el('span', { class: 'dot', style: { background: m.color } }),
+    el('span', { class: 'nm', text: m.name }),
+    el('span', { class: 'sub', text: `${m.archetypeName} · ${m.radius}× Earth` })));
+  }
+  return panel(`Moons of ${planet.name}`, list);
 }
 
 function planetList() {
@@ -714,7 +829,7 @@ function starList() {
 }
 
 function exportPanel() {
-  const save = () => toJSON({ galaxy: state.galaxy, system: state.system, planet: state.planet });
+  const save = () => toJSON({ galaxy: state.galaxy, system: state.system, planet: state.planet, moon: state.moon });
   return panel('Export',
     el('div', { class: 'row' },
       button('JSON', () => { const j = save(); download(j, `starforge-${state.opts.seed}.json`); toast(`saved ${jsonSizeKB(j)} KB`); }, 'small'),
@@ -756,24 +871,37 @@ function readHash() {
 // ---------------------------------------------------------------------------- pixels (tests)
 
 /** Rough statistics about whatever is on screen — used by the Playwright spec. */
-function pixelStats() {
+/**
+ * What is on screen, as numbers. `region` is a box in fractions of the view ({ x, y, w, h }) — the
+ * moon view test uses it to look only at where the parent planet is drawn.
+ * `cool` counts pixels that are clearly blue or green rather than brown, which is how a real surface
+ * texture is told apart from the generic procedural one.
+ */
+function pixelStats(region = null) {
   let src = null;
   if (state.view === 'galaxy') src = $('galaxy');
   else if (state.view === 'map') src = $('map');
   else if (view3d) src = view3d.renderer.domElement;
-  if (!src) return { nonBlack: 0, distinct: 0 };
+  if (!src) return { nonBlack: 0, distinct: 0, cool: 0, brown: 0, pixels: 0 };
+  const r = region ? {
+    x: Math.round(region.x * src.width), y: Math.round(region.y * src.height),
+    w: Math.max(1, Math.round(region.w * src.width)), h: Math.max(1, Math.round(region.h * src.height)),
+  } : { x: 0, y: 0, w: src.width, h: src.height };
   const c = document.createElement('canvas');
-  c.width = Math.min(320, src.width); c.height = Math.min(160, src.height);
+  c.width = Math.min(320, r.w); c.height = Math.min(160, r.h);
   const ctx = c.getContext('2d');
-  ctx.drawImage(src, 0, 0, c.width, c.height);
+  ctx.drawImage(src, r.x, r.y, r.w, r.h, 0, 0, c.width, c.height);
   const d = ctx.getImageData(0, 0, c.width, c.height).data;
   const seen = new Set();
-  let nonBlack = 0;
+  let nonBlack = 0, cool = 0, brown = 0;
   for (let i = 0; i < d.length; i += 4) {
-    if (d[i] + d[i + 1] + d[i + 2] > 40) nonBlack++;
-    seen.add(`${d[i] >> 3},${d[i + 1] >> 3},${d[i + 2] >> 3}`);
+    const R = d[i], G = d[i + 1], B = d[i + 2];
+    if (R + G + B > 40) nonBlack++;
+    if (R + G + B > 60 && (B > R + 12 || G > R + 12)) cool++;
+    if (R + G + B > 60 && R > G + 8 && G > B + 8) brown++;
+    seen.add(`${R >> 3},${G >> 3},${B >> 3}`);
   }
-  return { nonBlack, distinct: seen.size, pixels: d.length / 4 };
+  return { nonBlack, distinct: seen.size, cool, brown, pixels: d.length / 4 };
 }
 
 // ---------------------------------------------------------------------------- boot
@@ -792,11 +920,12 @@ buildLeft();
 generate();
 
 window.universeDemo = {
-  state, generate, openStar, openPlanet, showMap, openRegion, openLocal, showView, back,
+  state, generate, openStar, openPlanet, openMoon, showMap, openRegion, openLocal, showView, back,
+  currentBody, orbitLayout: () => state.orbit, parentDrawn: () => parentDrawn,
   setOpt: (k, v) => { state.opts[k] = v; },
   pixelStats, texturesFor,
   elements: { baseline: BASELINE, rare: RARE },
   ready: () => state.ready && !state.busy,
-  toJSON: () => toJSON({ galaxy: state.galaxy, system: state.system, planet: state.planet }),
+  toJSON: () => toJSON({ galaxy: state.galaxy, system: state.system, planet: state.planet, moon: state.moon }),
 };
 document.body.dataset.ready = '1';

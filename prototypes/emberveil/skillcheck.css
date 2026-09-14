@@ -1,0 +1,92 @@
+/* Skill-check popup (js/ui.js → skillCheckPopup): a d20 tumbles, settles, and the sum is shown with
+   a PASS / FAIL stamp. Same leather-and-gold furniture as the rewards popup in shared/rewards.css,
+   deliberately smaller — this interrupts the game for about a second and a half, not a whole scene. */
+
+.sc-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  background: radial-gradient(ellipse at center, rgba(8, 5, 3, .55), rgba(4, 3, 2, .82));
+  animation: sc-fade .18s ease-out both;
+}
+.sc-overlay.sc-closing { animation: sc-fade .18s ease-in both reverse; }
+@keyframes sc-fade { from { opacity: 0 } to { opacity: 1 } }
+
+.sc-card {
+  position: relative;
+  width: min(92vw, 380px);
+  padding: 18px 20px 16px;
+  text-align: center;
+  color: #e8dcc4;
+  background:
+    linear-gradient(rgba(38, 26, 18, .96), rgba(24, 17, 12, .98)),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, .02) 0 2px, transparent 2px 5px);
+  border: 1px solid #6b5220;
+  border-radius: 6px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(0, 0, 0, .5);
+  animation: sc-in .22s cubic-bezier(.2, 1.3, .5, 1) both;
+}
+@keyframes sc-in { from { opacity: 0; transform: translateY(14px) scale(.94) } to { opacity: 1; transform: none } }
+
+.sc-card .sc-ribbon {
+  font-family: Cinzel, Georgia, serif; font-weight: 600; letter-spacing: .06em;
+  font-size: 15px; color: #f0c860; text-transform: uppercase;
+}
+.sc-card .sc-sub { margin: 2px 0 10px; font-size: 12px; opacity: .72; font-style: italic; }
+.sc-card .sc-skip { position: absolute; top: 6px; right: 10px; font-size: 11px; opacity: .5; cursor: pointer; }
+.sc-card .sc-skip:hover { opacity: .9; }
+
+/* ---- the die ---------------------------------------------------------------------------- */
+.sc-die {
+  width: 84px; height: 84px; margin: 4px auto 10px;
+  display: grid; place-items: center;
+  font-family: Cinzel, Georgia, serif; font-size: 30px; font-weight: 700; color: #1b1208;
+  /* a d20 silhouette, drawn with a clip-path so no art file is needed */
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  background: linear-gradient(160deg, #f4d98c, #c99a33 45%, #8a6418);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+}
+.sc-die.rolling { animation: sc-tumble .26s linear infinite; }
+@keyframes sc-tumble {
+  0%   { transform: rotate(0deg)    scale(1);    }
+  25%  { transform: rotate(-16deg)  scale(1.07); }
+  50%  { transform: rotate(9deg)    scale(.95);  }
+  75%  { transform: rotate(18deg)   scale(1.05); }
+  100% { transform: rotate(0deg)    scale(1);    }
+}
+.sc-die.settled { animation: sc-land .32s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes sc-land { from { transform: scale(1.22) } to { transform: scale(1) } }
+.sc-die.nat20 { background: linear-gradient(160deg, #fff0bd, #f0c860 45%, #b8862a); }
+.sc-die.nat1  { background: linear-gradient(160deg, #e7b0a2, #b6503c 45%, #6d2a1d); color: #2a0f09; }
+
+/* ---- the sum and the stamp -------------------------------------------------------------- */
+.sc-sum {
+  font-family: Spectral, Georgia, serif; font-size: 14px; line-height: 1.5;
+  min-height: 2.4em; opacity: 0; transition: opacity .2s ease-out;
+}
+.sc-sum.show { opacity: 1; }
+.sc-sum b { color: #f0c860; }
+
+.sc-stamp {
+  margin-top: 8px;
+  font-family: Cinzel, Georgia, serif; font-weight: 700; letter-spacing: .22em;
+  font-size: 20px; text-transform: uppercase;
+  opacity: 0;
+}
+.sc-stamp.show { animation: sc-stamp .34s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes sc-stamp { from { opacity: 0; transform: scale(2.1) rotate(-9deg) } to { opacity: 1; transform: none } }
+.sc-stamp.pass { color: #7fbf6a; text-shadow: 0 0 14px rgba(127, 191, 106, .35); }
+.sc-stamp.fail { color: #c9584a; text-shadow: 0 0 14px rgba(201, 88, 74, .35); }
+
+.sc-foot { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.sc-foot .sc-hint { font-size: 11px; opacity: .5; }
+.sc-btn {
+  font-family: Cinzel, Georgia, serif; letter-spacing: .05em;
+  padding: 5px 16px; color: #f0e2c0; cursor: pointer;
+  background: linear-gradient(#4a3520, #32220f); border: 1px solid #7a5c24; border-radius: 4px;
+}
+.sc-btn:hover { background: linear-gradient(#5b4227, #3d2a13); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-overlay, .sc-card, .sc-die, .sc-stamp { animation: none !important; }
+}

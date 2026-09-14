@@ -44,7 +44,8 @@ elements, hazards and a difficulty tier. The lander has fuel for exactly one of 
 The first ten minutes, in order:
 
 1. **Look at the ground.** The pod's landing sweep has already found the patches within 30 tiles.
-   Everything outside that ring is invisible until something scans it.
+   Everything outside that ring is invisible until something scans it. Keep panning: the ground
+   carries on for a long way past the first screen (see *The map streams* below).
 2. **Put a rock drill on an iron patch.** Press <kbd>B</kbd> (or click the build bar), pick *Rock
    Drill I*, and the ghost tints green over any patch it can legally work. Click to drop an outline —
    the four builders walk over and put it up.
@@ -78,6 +79,7 @@ coloured dot: **the grid is short**, **an input is missing**, **the output has n
 | drag with a road or wall | lay a line of them |
 | right-click | send the selected crew there, or put them on an outline |
 | drag a box | select every builder inside it |
+| pan to the edge of the ground | the next block of world generates on its own |
 
 ### The six screens
 
@@ -92,6 +94,45 @@ coloured dot: **the grid is short**, **an input is missing**, **the output has n
 
 Saving is automatic every in-game hour, into this browser's storage. The menu also exports and
 imports a save as a `.json` file.
+
+### The map streams
+
+The playable grid is **a 5 × 5 block of worldgen cells at 96 tiles each — 480 × 480 tiles**, not the
+single cell the engine defaults to. It is one flat set of typed arrays, so a tile index is a plain
+`y * width + x` for the whole run and nothing in the engine had to learn about chunks. What is lazy
+is the *filling in*:
+
+- A chunk is one worldgen local tile. `createLocalMap({ size, chunks })` lays out the grid and
+  generates the centre cell and its ring (**288 × 288 tiles, live at landfall**).
+- A chunk that has not been generated is blank — not buildable, impassable, no patches — and sits
+  under full fog, so nothing can walk into it or build on it by accident.
+- `Surface._streamChunks()` asks the engine for the ring of chunks around the camera, **one a frame
+  at most**, because generating a worldgen tile costs about twenty milliseconds and two in one frame
+  is a visible stutter. Because the ring is a chunk ahead of where you are looking, the ground is
+  already there when the camera arrives.
+- The terrain layer is re-baked for the chunk that just arrived, not for the whole grid.
+- Where two cells with different parent biomes meet, the boundary is dithered over about sixteen
+  tiles (`blendEdges` in `js/map.js`), so scrubland gives way to forest instead of stopping dead on a
+  straight line.
+- Fog, scanning, pathing, building and patches all work on any generated chunk, and the save records
+  which chunks a run had streamed in so a base built two cells out comes back standing on real ground.
+
+The engine side is three things: a `chunks` option on `Game.createSync` / `Game.land`, the public
+`game.ensureChunks(x, y, ring)`, and a `map:chunks` event. **`chunks` defaults to 1**, so the node
+tests and the balance sim still get exactly the one 96-tile cell they always had — only the
+interface asks for more.
+
+```js
+const game = Game.createSync({ data, planets, size: 96, chunks: 5 });   // 480 x 480, centre 3x3 warm
+game.ensureChunks(camX, camY, 1);                                        // fill the ring round here
+game.map.chunk;        // { size, cols, rows, centre, ready, bounds, generated, fresh, version }
+```
+
+Two engine rules had to become chunk-aware so the bigger grid did not change the game: nests are
+seeded per *world cell* in the neighbourhood you landed in rather than per grid (or a 25-cell map
+would carry twenty-five times the threat), and a wave walks in from the edge of the **loaded** world
+no more than about one cell from your base, rather than from the far corner of a grid that would take
+twenty minutes to cross.
 
 ## Running the engine on its own
 
@@ -129,13 +170,13 @@ console.log(game.inventory(), game.unread(3));
 | Path | What it is |
 |---|---|
 | `DESIGN.md` | the design note: the loop, the numbers, every system, planet progression, the endgame, and **the full API the UI codes against** |
-| `data/*.json` | 77 resources, 101 structures, 67 recipes, 82 research nodes, 10 vehicles, 22 unit types, 25 quests, the wave pacing, 43 notification templates |
+| `data/*.json` | 81 resources, 105 structures, 71 recipes, 86 research nodes, 10 vehicles, 25 unit types, 44 quests (a 9-step tutorial chain, a 4-step side chain and 31 standalone), per-archetype wave and nest tables for all ten worlds, the wave pacing, 70 notification templates |
 | `index.html` + `style.css` | the page and its theme: a dark operations console, cyan and amber, mono for every number |
 | `js/*.js` | the engine: `game` `data` `rules` `map` `fog` `build` `production` `logistics` `research` `combat` `space` `planets` `ai` |
 | `js/ui/*.js` | the interface: `main` (clock, screens, keys, saves) `surface` (map + camera) `build-tool` `route-tool` `panel` `hud` `research-screen` `map-screen` `orbit-screen` `codex-screen` `title` `icons` `sound` `save` `dom` |
 | `tools/sim-foundry.mjs` | the headless balance run |
 | `tests/*.test.js` | node tests: data validation, map and scanning, fog, the build flow, hauling, power, production, waves, walls and gates, research, quests, space, save/load, the bot's milestones, and (`ui-engine.test.js`) the four hooks the interface added |
-| `tests/foundry.spec.js` | Playwright, against the real page: land, draw, build, haul, research, jump to a message, force a wave, save and reload |
+| `tests/foundry.spec.js` | Playwright, against the real page: land, draw, build, haul, research, jump to a message, force a wave, save and reload, plus one test per bug report below |
 
 ## Data formats
 
@@ -170,7 +211,7 @@ A structure is planet-gated with `planetRequirement` (the rare element it needs)
 
 ## Where the sim gets to
 
-On the default seed and planet, 96 × 96 tiles:
+On the default seed and planet, one 96 × 96 cell (`chunks: 1`, which is what the sim uses):
 
 - **First attack at 12 minutes** on normal, exactly what `waves.json` promises (20 minutes on easy,
   7 on hard).
@@ -229,6 +270,14 @@ additive piece of engine. There were four, and they are pinned by `tests/ui-engi
   immediately. That is an engine balance question rather than an interface one, but it is the first
   thing a new player will do.
 
+## Three bug reports, and what was actually wrong
+
+| | Report | Cause | Fix |
+|---|---|---|---|
+| **FF1** | Dropdowns would not stay open | The side panel redraws four times a second and rebuilt its children with `fill()` every time. A `<select>` whose element is thrown away closes its open list — nothing was stealing focus, the control simply stopped existing. | `patch()` in `js/ui/dom.js`: a small keyed morph. The recipe control carries `key: 'recipe:<id>'` and is updated in place; the panel keeps a fixed shape (`.sp-pool`, `.sp-hold`, `.sp-recipe` slots are always present) so it cannot shift under the player either. |
+| **FF2** | The route tool would not offer *biomass* from a harvester to a kiln; a drill to a smelter said *"smelter does not accept iron ore"* | Two separate things. The picker's candidate list was "whatever the source is holding, plus its current recipe's outputs" — a biomass harvester has no patch and no recipe and pushes what it cuts straight into the store pool, so its own buffer is empty and the list came back with nothing. And `accepts()` is a *store* rule, so no route could ever end at a machine. | `sourceResources()` in `js/ui/route-tool.js` reads the engine: what it holds, its patch, a quarry's `yields`, a harvester's `harvestsTerrain`, the outputs of every recipe it could run, and the contents of its store pool. `acceptsDelivery()` in `js/production.js` lets a run end at a machine that eats the resource in a recipe it runs *or could run*. Loading was fixed to draw from the source's store pool too, otherwise a route out of a drill still never moves a thing. |
+| **FF3** | The play area is one tiny square | The local map was one worldgen cell, 96 × 96, and that was the whole world. | The streamed grid above: 5 × 5 cells, generated around the camera. |
+
 ## Known rough edges
 
 - **The bot stalls in the mid-game.** It plateaus around 22 research nodes, short of rocketry. It
@@ -241,9 +290,17 @@ additive piece of engine. There were four, and they are pinned by `tests/ui-engi
   rocket".
 - **On normal difficulty the bot loses, about an hour in.** Same root cause: a stalled economy means
   no steel, and no steel means no gun turrets.
-- **One buildable local map per planet.** Regions are surveyed for intel and a supply cache rather
-  than becoming second build sites. Nothing in the engine assumes there is only one map — a UI can
-  create a second `Game` on another world cell.
+- **One buildable local map per planet, but it is 480 tiles across.** Regions are surveyed for intel
+  and a supply cache rather than becoming second build sites. Nothing in the engine assumes there is
+  only one map — a UI can create a second `Game` on another world cell.
+- **The streamed grid has an outer edge.** Five cells a side is a deliberate stopping point, not a
+  technical one: the whole-map algorithms (the enemies' flow field, the trucks' cost field) walk the
+  grid, and they only stay cheap because ungenerated ground is impassable and so is never expanded
+  into. `CHUNKS` in `js/ui/main.js` is the one constant to change, but a much larger number wants
+  those two algorithms bounded to a region first.
+- **Streamed chunks get no nests of their own.** They carry terrain and resource patches, so panning
+  out is worth doing, but the threat clock is still seeded once at landfall. Seeding a few nests into
+  a chunk as it arrives would make exploring properly dangerous.
 - **Enemy pathing is one shared flow field per wave.** Cheap and good enough, but every enemy in a
   wave walks the same way in. Per-enemy targeting would look better on screen.
 - **No pipes or belts, by design.** See `DESIGN.md` §11.
@@ -267,6 +324,10 @@ const game    = Game.createSync({ data, planets, planet: planets.list()[0] });
 
 The universe decides the archetype, the rare elements, the hazards, the gravity and the day length;
 this side rolls what is actually in the ground and hands back a playable planet sorted by difficulty.
+**Moons come through as landing targets of their own** (a universe moon is a small planet record), so
+the moons of a gas giant are in the list even though the giant itself is not: they carry `moon: true`
+and `parentId`, and `universe.moonId` says which moon of which planet it is. Pass `{ moons: false }`
+to leave them out.
 Eight of the universe's twelve rare elements are ones we have buildings for; the other four
 (`helionGas`, `nullstone`, `emberlace`, `brinepearl`) are dropped until someone designs structures
 for them.
@@ -282,8 +343,16 @@ for them.
   own loop with however much game time has passed.
 - `window.foundry` is the handle the tests use: `{ game, app, surface, hud, show(screen), jump(x, y),
   save(), debug }`. `debug` has `run(seconds)`, `forceWave()`, `revealAll()`, `give(res, n)`,
-  `instant(type, x, y)`, `finishBuilds()`, `unlock(techId)`, `unlockAll()`, `setSpeed(n)` and
-  `pick(structureId)` — every one of them drives the real engine, they only skip the wall clock.
+  `instant(type, x, y)`, `finishBuilds()`, `unlock(techId)`, `unlockAll()`, `setSpeed(n)`,
+  `pick(structureId)`, `chunks()` and `loadAllChunks()` — every one of them drives the real engine,
+  they only skip the wall clock.
+- **Do not rebuild DOM that the player is using.** `fill()` is for a screen you have just opened;
+  `patch()` in `js/ui/dom.js` is for anything that redraws while it is on screen. `patch` reuses an
+  element only when its subtree carries the same set of `key`s, so a keyed control is updated in
+  place and everything else is still replaced outright — which matters, because a reused element
+  keeps the handlers it was built with and those close over the entities of the render that made
+  them. Mark a control with `el('select', { key: 'recipe:' + s.id })` and put the identity in the
+  key.
 - Icons come from `assets/data/icons/foundry/`. `js/ui/icon-list.js` is generated from that folder by
   `tools/build-icon-list.mjs`; regenerate it after adding art so the page never asks for a file that
   is not there.

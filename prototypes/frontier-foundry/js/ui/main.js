@@ -34,6 +34,11 @@ import { Title } from './title.js';
 import * as Save from './save.js';
 
 const SPEEDS = [0, 1, 2, 4];
+// The local grid is CHUNKS x CHUNKS worldgen cells of CHUNK tiles each. The engine only generates
+// the ones near the camera (see Surface._streamChunks), so this is how far you can walk, not how
+// much gets built up front: 5 x 96 is a 480-tile world against the single 96-tile cell the engine
+// defaults to for the tests and the balance sim.
+const CHUNK = 96, CHUNKS = 5;
 const AUTOSAVE_EVERY = 3600;          // one in-game hour
 
 class App {
@@ -219,7 +224,7 @@ class App {
   newGame({ planet, planets, seed, difficulty, galaxySeed, starIndex }) {
     this.galaxySeed = galaxySeed ?? seed;
     this.starIndex = starIndex ?? 0;
-    const game = Game.createSync({ data: this.data, planets, planet, seed, difficulty, size: 96 });
+    const game = Game.createSync({ data: this.data, planets, planet, seed, difficulty, size: CHUNK, chunks: CHUNKS });
     this.attach(game);
     this.hint('The pod is down. Scan around it, put a drill on a patch, and get a smelter running before the first wave.');
   }
@@ -260,7 +265,7 @@ class App {
   /** Land on the next world from a launched rocket's transfer. */
   landOn(transfer) {
     const planets = this.game.planets;
-    const game = Game.land(transfer, { data: this.data, planets, size: 96 });
+    const game = Game.land(transfer, { data: this.data, planets, size: CHUNK, chunks: CHUNKS });
     this.attach(game);
     this.show('surface');
     this.hint(`Down on ${game.planet.name}. ${Object.keys(transfer.cargo || {}).length} kinds of cargo made the trip.`);
@@ -438,6 +443,19 @@ class App {
         run(seconds = 60) { app.game.tick(seconds); return app.game.time; },
         /** Send a wave right now, whatever the threat clock says. */
         forceWave(opts = {}) { const w = spawnWave(app.game, opts); app.hud.update(); return w; },
+        /** Generate every chunk of the grid at once, so a test can pan anywhere without waiting. */
+        loadAllChunks() {
+          const m = app.game.map, C = m.chunk;
+          if (!C) return 0;
+          for (let cy = 0; cy < C.rows; cy++) for (let cx = 0; cx < C.cols; cx++) app.game.ensureChunks(cx * C.size + 1, cy * C.size + 1, 0);
+          app.surface.dirty.terrain = true;
+          return C.generated;
+        },
+        /** What the streamed map looks like right now. */
+        chunks() {
+          const C = app.game.map.chunk;
+          return C ? { cols: C.cols, size: C.size, generated: C.generated, of: C.cols * C.rows, bounds: { ...C.bounds } } : null;
+        },
         /** Reveal everything, for looking at the map in a test. */
         revealAll() { app.game.fog.explored.fill(1); app.game.fog.visible.fill(1); for (const n of app.game.map.nodes) n.scanned = true; app.surface.dirty.fog = 0; },
         /** Finish one research node outright (tests and screenshots, not a cheat the player can reach). */

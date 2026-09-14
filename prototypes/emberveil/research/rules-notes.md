@@ -37,4 +37,4 @@ Enemy: healer role heals ally <60%; spell if rand<spellChance; targeting: taunte
 Turn order each round: initiative + rand*10 (slow ×0.5). Round cap 50. Flee DC = clamp(12 + avgEnemyLvl - partyAvg, 8, 28) vs bestDEX + d20.
 Out-of-combat auto-revive at 50% hp if any survivor has a revive skill.
 
-## Tap weapons (real-time layer; cut from the prototype except as data): blade, bow, catapult, star_caller, ninja_stars, fireball, dragon_call, chain_lightning, spirit_hammer, void_lance; utilities rejuvenate, heal, shield, deflect, enchant, cleanse, rally, haste, taunt_totem, phoenix_feather.
+## The original's real-time weapon layer is gone from this rebuild (round 20). Nothing in the data, the rewards, the balance file or the UI refers to it any more: the four road events that used to hand one out now roll a real item (`buildLoot`), and `tools/build-emberveil-data.mjs` strips it again on every rebuild.

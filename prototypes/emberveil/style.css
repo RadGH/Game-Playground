@@ -289,6 +289,11 @@ h3.ruled, h4.ruled {
 .narrative-log .say.npc b { color: var(--blue); }
 .narrative-log .say.enemy { border-color: var(--bad); background: linear-gradient(90deg, rgba(224, 112, 112, .08), transparent 60%); }
 .narrative-log .say.enemy b { color: #f09a9a; }
+/* The Narrator: scene text, not a person talking. No portrait, no bubble on the stage, a muted rule
+   instead of the ember one, and the words themselves in italics (js/talk.js narrate()). */
+.narrative-log .say.narration { border-left-color: #6b5f4d; background: none; font-style: italic; color: var(--ink-dim, #b9ad96); }
+.narrative-log .say.narration b { color: #8d8272; font-style: normal; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.narrative-log .say.narration i { font-style: italic; }
 .narrative-log .lore { color: var(--parch); font-style: italic; }
 /* the choice the player clicked, echoed into the log */
 .narrative-log .you { color: var(--gold-bright); font-style: italic; padding: 2px 0 2px 12px;
@@ -544,3 +549,36 @@ dialog::backdrop { background: rgba(6, 4, 3, .78); backdrop-filter: blur(2px); }
 .ic-node-skillCheck { background-image: url(../../assets/data/icons/skillCheck.svg); }
 .ic-node-town { background-image: url(../../assets/data/icons/town.svg); }
 .ic-node-treasure { background-image: url(../../assets/data/icons/treasure.svg); }
+
+/* ---- item card: pick the hero first (round 20) -------------------------------------------------
+   A row of hero tabs across the middle of the item card. The hero you pick decides which equipped
+   item the numbers below are compared against; a class that cannot use the weapon is greyed out and
+   says so on hover, so nobody has to press Equip to find out. */
+#item-dialog .restrict { color: var(--parch); margin: 2px 0 6px; }
+#item-dialog .restrict b { color: var(--gold-dim); }
+.hero-picker { gap: 6px; flex-wrap: wrap; margin: 10px 0 2px; }
+.hero-tab { font-size: 12px; opacity: .72; }
+.hero-tab.on { opacity: 1; border-color: var(--gold); color: var(--gold-bright); box-shadow: 0 0 0 1px var(--gold-dim) inset; }
+.hero-tab.cant { opacity: .38; text-decoration: line-through; }
+.cmp-row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: baseline; padding: 1px 0; }
+.cmp-row .tiny { color: var(--muted); }
+.cmp-row .up { color: var(--good); } .cmp-row .down { color: var(--bad); }
+.cmp-row.total { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 4px; }
+.cmp .bad { color: var(--bad); }
+
+/* ---- per-hero settings (round 20): rename, reroll the voice ---- */
+.hero-settings { display: grid; gap: 8px; min-width: 260px; }
+.hero-settings .row { gap: 6px; align-items: center; }
+.hero-settings input[type="text"] { flex: 1; min-width: 120px; }
+.skill-heroes { gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.skill-heroes .arrow { padding: 2px 9px; }
+
+/* ---- quest markers on the map (round 20) ----
+   A pin over any node an accepted job points at: gold for the main story, amber for a bounty from a
+   town board, green for a job taken from somebody on the road, violet for a hero's own errand. */
+#map .questpin { stroke: rgba(0, 0, 0, .75); stroke-width: .35; }
+#map .questpin.story { fill: #f0c368; }
+#map .questpin.bounty { fill: #d8a23c; }
+#map .questpin.road { fill: #7fbf7a; }
+#map .questpin.errand { fill: #a487d8; }
+.tip-quest { color: #e6c98a; font-size: 12px; margin-top: 3px; }

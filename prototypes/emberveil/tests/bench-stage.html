@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Emberveil — stage benchmark</title>
+<!--
+  A 4 v 6 fight with everything casting at once, driven as hard as the stage will go, so the cost of
+  the spell effects can be measured without playing the game. Open it directly to watch it
+  (?perf=1 turns on the overlay), or let tools/bench-emberveil-stage.mjs drive it and print numbers.
+
+  Query string:
+    ?ms=6000    how long to run for (default 6000)
+    ?rate=8     spell casts started per second (default 8)
+    ?cap=320    SpellFx maxParticles (0 = uncapped, for a before/after comparison)
+    ?perf=1     show the on-screen overlay
+-->
+<style>
+  html, body { margin: 0; background: #14110d; color: #e8ddc4; font: 13px/1.4 system-ui, sans-serif; }
+  #stage { position: relative; width: 100vw; height: 62vh; overflow: hidden; }
+  #out { padding: 10px 14px; white-space: pre; font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; }
+  .backdrop { position: absolute; inset: 0; }
+  .backdrop svg { width: 100%; height: 100%; }
+</style>
+<script type="importmap">{ "imports": { "three": "../../../vendor/three/three.module.js", "three/addons/": "../../../vendor/three/addons/" } }</script>
+<div id="stage"></div>
+<pre id="out">starting…</pre>
+<script type="module">
+import { Stage } from '../js/stage.js';
+import { randomAvatar } from '../../../avatar-2d/js/random.js';
+import { randomCreature } from '../../../avatar-3d/js/creatures.js';
+import { ELEMENTS } from '../../../avatar-3d/js/spellfx.js';
+
+const Q = new URLSearchParams(location.search);
+const MS = +Q.get('ms') || 6000, RATE = +Q.get('rate') || 8, CAP = Q.has('cap') ? +Q.get('cap') : null;
+const PRESETS = { palettes: { skin: ['#c68642', '#8d5524', '#e0ac69'], hair: ['#222', '#6a4a2a'], eye: ['#3a5', '#35a'], cloth: ['#555', '#744', '#447'] }, raceRules: {} };
+const ELEMS = Object.keys(ELEMENTS);
+const STATUSES = ['burn', 'poison', 'bleed', 'freeze', 'stun', 'barrier', 'regen', 'marked'];
+
+const stage = new Stage(document.getElementById('stage'));
+if (CAP !== null) stage.fx.maxParticles = CAP || 1e9;
+if (Q.get('perf')) stage.showPerf(true);
+await stage.fxReady;
+
+const party = Array.from({ length: 4 }, (_, i) => ({ id: 'h' + i, name: 'Hero ' + i, short: 'H' + i, hp: 100, maxHp: 100, statuses: [], avatar: randomAvatar(PRESETS, { seed: 10 + i }) }));
+const foes = Array.from({ length: 6 }, (_, i) => (i % 2
+  ? { id: 'e' + i, name: 'Beast ' + i, short: 'B' + i, hp: 80, maxHp: 80, statuses: [], creature: randomCreature(['wolf', 'spider', 'drake'][i % 3], 100 + i) }
+  : { id: 'e' + i, name: 'Goblin ' + i, short: 'G' + i, hp: 80, maxHp: 80, statuses: [], avatar: randomAvatar(PRESETS, { seed: 40 + i }) }));
+await stage.setSide(party, 'left');
+await stage.setSide(foes, 'right');
+stage.syncBars([...party, ...foes]);
+
+const all = [...party, ...foes];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+// Frame times, measured with the clock rather than the scene's dt — createScene clamps dt to 50 ms
+// so the animation stays sane when a tab is backgrounded, which would hide every slow frame here.
+const frames = [];
+let last = performance.now();
+stage.scene.addTicker(() => { const now = performance.now(); frames.push(now - last); last = now; });
+
+let casts = 0;
+const caster = () => { const src = pick(all), dst = pick(all.filter(u => u !== src)); return [src, dst]; };
+const timer = setInterval(async () => {
+  const [src, dst] = caster(); const el = pick(ELEMS);
+  casts++;
+  stage.status(pick(all).id, pick(STATUSES), true);
+  await stage.cast(src.id, dst.id, { element: el, kind: 'magic', crit: Math.random() < 0.25 });
+  stage.impact(dst.id, el, Math.random() < 0.25);
+  if (Math.random() < 0.3) stage.aoe(foes.map(f => f.id), el, false);
+  if (Math.random() < 0.2) stage.heal(pick(party).id);
+  // health bars move, which is what the real fight does to them
+  for (const u of all) { u.hp = Math.max(1, u.hp - Math.random() * 3); if (u.hp < 20) u.hp = u.maxHp; u.statuses = Math.random() < 0.5 ? [{ type: 'barrier', power: Math.round(Math.random() * 25) }] : []; }
+}, 1000 / RATE);
+
+setTimeout(() => {
+  clearInterval(timer);
+  const sorted = frames.slice(frames.length > 60 ? 30 : 0).sort((a, b) => a - b);   // drop the warm-up when there is enough to drop
+  const at = p => sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))] || 0;
+  const avg = sorted.reduce((s, v) => s + v, 0) / Math.max(1, sorted.length);
+  const s = stage.perfStats();
+  window.benchResult = {
+    ms: MS, casts, frames: sorted.length, cap: stage.fx.maxParticles,
+    avgFrameMs: +avg.toFixed(2), p50: +at(0.5).toFixed(2), p95: +at(0.95).toFixed(2), worst: +at(0.999).toFixed(2),
+    fps: +(1000 / avg).toFixed(1), over16ms: +(100 * sorted.filter(v => v > 16.7).length / Math.max(1, sorted.length)).toFixed(1),
+    liveSprites: s.sprites, pooled: s.pooled, effects: s.effects, auras: s.auras, dropped: s.dropped, drawCalls: s.calls, triangles: s.tris,
+  };
+  document.getElementById('out').textContent = Object.entries(window.benchResult).map(([k, v]) => `${k.padEnd(12)} ${v}`).join('\n');
+  document.body.dataset.done = '1';
+}, MS);
+</script>

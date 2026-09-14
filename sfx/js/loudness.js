@@ -20,6 +20,47 @@ export const SILENCE_DB = -70;
 export const dbToGain = db => Math.pow(10, db / 20);
 export const gainToDb = g => 20 * Math.log10(Math.max(1e-12, g));
 
+// ---------------------------------------------------------------- per-category targets
+/**
+ * How loud each category of sound is allowed to be, in LUFS-ish dB. **This table is the authority** —
+ * sfx.js reads it first and only falls back to the number in data/catalog.json for a category it does
+ * not know. Both files carry the same numbers so the data stays readable on its own.
+ *
+ * Ambience sits far below everything else on purpose. A one-off impact is over in 200 ms; an ambience
+ * bed plays for the whole act, and anything that is comfortable for two seconds is exhausting after
+ * ten minutes. Act 1's wind loop was the complaint that set this number: it was levelled to −30 like a
+ * short sound and drowned the game, so it now aims 10 dB lower, at −40.
+ */
+export const CATEGORY_TARGETS = {
+  spell: -19, impact: -16, melee: -17, status: -22, death: -17,
+  sting: -18, loot: -19, world: -21, ui: -26, ambience: -40,
+};
+/** Used for a category nobody has a target for. */
+export const DEFAULT_TARGET = -19;
+/** The target for a category name, whichever table it comes from. */
+export function targetFor(category, fallback = DEFAULT_TARGET) {
+  const t = CATEGORY_TARGETS[category];
+  return Number.isFinite(t) ? t : fallback;
+}
+
+// ---------------------------------------------------------------- loop caps
+/**
+ * A looping sound is never made louder than it was recorded or synthesized. Quiet is fine for a bed;
+ * boosting one only lifts its noise floor and hiss into a sound the player hears for ten minutes.
+ * So a loop's gain may only ever cut.
+ */
+export const LOOP_MAX_BOOST_DB = 0;
+/** …and it may cut a long way, so a loud loop really does come down to the ambience target. */
+export const LOOP_MAX_CUT_DB = -44;
+/** Hard ceiling on the ambience bus's gain, whatever the player's slider says (linear, 0..1). */
+export const AMBIENCE_BUS_CAP = 0.6;
+/** Normalization options for one catalog entry: loops get the loop caps, one-off sounds the defaults. */
+export function optionsFor({ category, loop = false, trim = 0, ceiling = -1, fallbackTarget = DEFAULT_TARGET } = {}) {
+  const opts = { target: targetFor(category, fallbackTarget), ceiling, trim };
+  if (loop) { opts.maxBoostDb = LOOP_MAX_BOOST_DB; opts.maxCutDb = LOOP_MAX_CUT_DB; }
+  return opts;
+}
+
 /**
  * One biquad section, applied in place over a copy of the samples.
  * Coefficients follow the Audio EQ Cookbook so any sample rate works.

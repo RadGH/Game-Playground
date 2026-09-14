@@ -13,7 +13,7 @@
 
 import { loadData } from './data.js';
 import { DIFFICULTY, daylight, isNight, BALANCE } from './rules.js';
-import { createLocalMap, scanArea, findLandingSite, ensureStarterNodes, tickRegrow, findPath, costField } from './map.js';
+import { createLocalMap, scanArea, findLandingSite, ensureStarterNodes, tickRegrow, findPath, costField, ensureChunksAround, ensureChunk } from './map.js';
 import { createFog, recomputeVisible, reveal, exploredFraction, packFog, unpackFog } from './fog.js';
 import { place, canPlace, demolish, cancel, tickBuilders, tickOrders, available, takeCost, pendingBuilds, stamp, footprint } from './build.js';
 import { recomputeLinks, recomputePower, rebuildPoolTotals, tickPower, tickExtraction, tickProduction, tickRepair, push, pull, visible, load, space } from './production.js';
@@ -87,7 +87,7 @@ export class Game {
     this.world = opts.world || this.planets.generateMap(this.planet);
     const site = opts.site || pickWorldCell(this.world, this.rng);
     this.worldCell = site;
-    this.map = createLocalMap({ world: this.world, wx: site.x, wy: site.y, planet: this.planet, data: this.data, size: opts.size ?? 128, nodeDensity: opts.nodeDensity ?? 1 });
+    this.map = createLocalMap({ world: this.world, wx: site.x, wy: site.y, planet: this.planet, data: this.data, size: opts.size ?? 128, chunks: opts.chunks ?? 1, nodeDensity: opts.nodeDensity ?? 1 });
     this.map.blocking = this.blocking;
     this.fog = createFog(this.map);
 
@@ -240,6 +240,20 @@ export class Game {
   markSeen(id = null) { for (const n of this.notifications) if (id == null || n.id === id) n.seen = true; }
 
   // ------------------------------------------------------------ player actions
+  /**
+   * Make sure the ground around a spot exists.
+   *
+   * The local grid is a block of worldgen cells and only the ones near you are generated; this is
+   * how the interface says "the camera is here, fill this in". Everything that lands in a new chunk
+   * - terrain, nodes, pathing - is live the moment it returns. Returns how many chunks were new.
+   */
+  ensureChunks(x, y, ring = 1) {
+    if (!this.map.chunk) return 0;
+    const made = ensureChunksAround(this.map, x, y, ring);
+    if (made) this.emit('map:chunks', { made, at: { x, y } });
+    return made;
+  }
+
   /** Sweep an area for hidden nodes. Returns the nodes it found. */
   scan(x, y, r = 20) {
     const found = scanArea(this.map, x, y, r);
@@ -657,6 +671,8 @@ export class Game {
     return {
       schema: 1, seed: this.seed, difficulty: this.difficulty, time: this.time, ticks: this.ticks, nextId: this.nextId,
       planet: this.planet, worldCell: this.worldCell, mapSize: this.map.size,
+      mapChunks: this.map.chunk?.cols ?? 1,
+      mapReady: this.map.chunk ? [...this.map.chunk.ready] : null,       // which chunks had been streamed in
       hqId: this.hqId, beaconsToWin: this.beaconsToWin,
       structures: this.structures.map(s => ({ id: s.id, type: s.type, x: s.x, y: s.y, rot: s.rot || 0, state: s.state, progress: s.progress, hp: s.hp, inv: s.inv, recipe: s.recipe, craft: s.craft, crafting: !!s.crafting, crafted: s.crafted, enabled: s.enabled, nodeId: s.nodeId, charge: s.charge || 0, shield: s.shield || 0, lastScan: s.lastScan })),
       units: this.units.map(u => ({ id: u.id, type: u.type, x: u.x, y: u.y, hp: u.hp, target: u.target })),
@@ -680,11 +696,20 @@ export class Game {
     g.planet = json.planet;
     g.world = world || generatePlanetMap(g.planet);
     g.worldCell = json.worldCell;
-    g.map = createLocalMap({ world: g.world, wx: json.worldCell.x, wy: json.worldCell.y, planet: g.planet, data, size: json.mapSize });
+    g.map = createLocalMap({ world: g.world, wx: json.worldCell.x, wy: json.worldCell.y, planet: g.planet, data, size: json.mapSize, chunks: json.mapChunks ?? 1, warm: 0 });
+    // put back every chunk the run had streamed in, so a base two cells out is standing on ground
+    if (json.mapReady && g.map.chunk) {
+      const C = g.map.chunk;
+      for (let k = 0; k < Math.min(json.mapReady.length, C.ready.length); k++) {
+        if (json.mapReady[k]) ensureChunk(g.map, k % C.cols, (k / C.cols) | 0);
+      }
+      if (!C.generated) ensureChunk(g.map, C.centre, C.centre);
+    }
     g.map.blocking = g.blocking;
     g.fog = createFog(g.map);
     unpackFog(g.fog, json.fog);
     g.map.nodes = json.nodes.map(n => ({ ...n }));
+    g.map.nodeSeq = Math.max(g.map.nodeSeq, ...g.map.nodes.map(n => (+String(n.id).slice(1) || 0) + 1), 0);
     g.map.nodeAt.fill(-1);
     for (let k = 0; k < g.map.nodes.length; k++) {
       const n = g.map.nodes[k];

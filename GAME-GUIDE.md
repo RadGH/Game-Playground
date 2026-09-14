@@ -227,6 +227,23 @@ resize, which is what stops a party of four plus four enemies falling off the si
 speech bubble after the browser has drawn it**, then clamp it inside the stage box and flip it under the
 head when there is no room above.
 
+## A world map that reads as a road
+
+A node graph that grows by insertion turns into a fan: one Emberveil zone ended up opening seven
+branches at once, with a trail that jumped from the entrance most of the way to the boss.
+`tools/expand-emberveil-map.mjs` `normalizeZones()` is the fix, and it is generic — it only rewrites
+`exits` (and the row/column hints), never the nodes themselves, so ids that quests and save files point
+at survive. The invariants are worth copying whole: the entrance alone in the first column and the boss
+alone in the last, a width cap so only three or four branches are ever open, every trail joining one
+column to the very next one (which is what kills shortcuts and makes every route the same length), and
+every node with a way in and a way out. `prototypes/emberveil/tests/zone-graph.test.js` is the test that
+states those rules in one place.
+
+Two rules that go with it. **Walk one node at a time**: let the party move to the neighbours of where
+they stand, in *both* directions, and charge a move for the walk back — "fast travel to anywhere you
+have visited" quietly deletes the map. And then **put a settlement in every zone**, one move from the
+entrance, or the party has nowhere to buy food or heal.
+
 ## Travel hazards between places
 
 `prototypes/emberveil/js/explore.js` + `data/crossings.json` are a small, copyable pattern for a world

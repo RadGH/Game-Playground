@@ -111,7 +111,18 @@ test('Emberveil 2: compact party tab, readable map labels, logged choices, live 
     const box = t => { const m = t.closest('g').getAttribute('transform').match(/translate\(([-\d.]+) ([-\d.]+)\)/); const b = t.getBBox(); return { x1: +m[1] + b.x, x2: +m[1] + b.x + b.width, y1: +m[2] + b.y, y2: +m[2] + b.y + b.height, s: [...t.children].map(c => c.textContent).join(' ') }; };
     const boxes = [...svg.querySelectorAll('text')].map(box); const bad = [];
     for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) { const a = boxes[i], c = boxes[j]; if (Math.min(a.x2, c.x2) > Math.max(a.x1, c.x1) && Math.min(a.y2, c.y2) > Math.max(a.y1, c.y1)) bad.push(a.s + ' / ' + c.s); }
-    return { labels: boxes.length, overlaps: bad, ellipsis: boxes.filter(b => b.s.includes('…')).length, wrapped: [...svg.querySelectorAll('text')].filter(t => t.children.length > 1).length, fontSize: parseFloat(getComputedStyle(svg.querySelector('text')).fontSize), tipHasFullName: [...svg.querySelectorAll('g.mapnode')].some(g => (g.dataset.tipHtml || '').includes('Tomek')) };
+    return { labels: boxes.length, overlaps: bad, ellipsis: boxes.filter(b => b.s.includes('…')).length, wrapped: [...svg.querySelectorAll('text')].filter(t => t.children.length > 1).length, fontSize: parseFloat(getComputedStyle(svg.querySelector('text')).fontSize), tipHasFullName: (() => {
+      // Round 20 rewired the maps, so this can no longer name one node and hope it is still next to
+      // the entrance. The rule it is really checking: any name the map had to wrap onto two lines is
+      // carried in full by the hover card.
+      const wrapped = [...svg.querySelectorAll('g.mapnode')].filter(gn => (gn.querySelector('text')?.children.length || 0) > 1);
+      if (!wrapped.length) return false;
+      return wrapped.every(gn => {
+        const label = [...gn.querySelector('text').children].map(c => c.textContent).join(' ');
+        const d = document.createElement('div'); d.innerHTML = gn.dataset.tipHtml || '';
+        return (d.querySelector('.tip-title')?.textContent || '') === label;
+      });
+    })() };
   });
   expect(map.labels).toBeGreaterThan(4);
   expect(map.ellipsis).toBe(0);            // names wrap, they are never cut short

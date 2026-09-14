@@ -473,7 +473,8 @@ def main():
             'loot':     {'target': -19, 'bus': 'sfx', 'label': 'Loot and coins'},
             'world':    {'target': -21, 'bus': 'sfx', 'label': 'World (steps, equip)'},
             'ui':       {'target': -26, 'bus': 'ui',  'label': 'Interface'},
-            'ambience': {'target': -30, 'bus': 'ambience', 'label': 'Ambience loops'},
+            # ambience sits 10 dB under everything else: a bed plays for a whole act (sfx/js/loudness.js owns this table)
+            'ambience': {'target': -40, 'bus': 'ambience', 'label': 'Ambience loops'},
         },
         'peakCeilingDb': -1.0,
         'elements': ELEMENTS,

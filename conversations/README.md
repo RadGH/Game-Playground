@@ -8,7 +8,8 @@ party actually has the facts it talks about.
 - `data/topics.json` holds topics: `{ id, tags, weight, requires: [...], lines: [{ role, to?, optional?, variants: [{ t, cond? }] }] }`.
 - Roles: `asker` opens, `answerer` is the one who has the memory/gear the topic is about, `third` chimes in (optional lines are dropped if there is no third speaker).
 - Requirements are checked against a `facts` object and, when satisfied, produce bindings for the templates:
-  - `memory: 'combat'` (+ `maxAgeHours`, `details: { wounded: true }`) → `memory.*`, `foe`, `place`, `item` entities from the memory bindings.
+  - `memory: 'combat'` (+ `maxAgeHours`, `minAgeHours`, `details: { wounded: true }`, `detailsNot`) → `memory.*`, `foe`, `place`, `item` entities from the memory bindings. `minAgeHours` is what makes a **callback** possible: the same memory, brought up again days later, as its own topic.
+  - `bindingIs: { by: 'answerer' }` on a memory requirement casts the other side of it. "The hero who was revived thanks the one who revived them" needs the person named in the memory's `by` binding to *be* the answerer, not just anybody at the fire — casting keeps trying orderings until that holds. See the `revive_thanks` / `revive_thanks_awkward` / `revive_callback` topics.
   - `gear: { minKills, delta: 'better'|'worse', maxDaysAgo, replaced, slot }` → `weapon`, `gear.{kills,damage,delta,deltaAbs,replaced,daysAgo}` (kill counts come from the damage meter's per-item stats; deltas from the game's loot log which records the score difference against the item it replaced).
   - `bag: { minDaysAgo }` → items found but never equipped (`bagItem`, `bag.daysAgo`).
   - `stats: { damage: 'top' | number, fights, kills, healing, downs }` from the meter.

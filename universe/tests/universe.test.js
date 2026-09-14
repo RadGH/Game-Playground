@@ -9,10 +9,13 @@ import { readFileSync } from 'node:fs';
 
 import { STAR_CLASSES, STAR_BY_KEY, makeStar, habitableZone, frostLine, orbitTempK, colorForTempK, starName, fallbackStarName } from '../js/stars.js';
 import { generateGalaxy, GALAXY_PRESETS, LAYOUTS, nearestStar, route } from '../js/galaxy.js';
-import { generateSystem, ARCHETYPES, ARCHETYPE_KEYS, ARCH_BY_KEY, planetSummary, bodies } from '../js/system.js';
-import { planetWorldOpts, generatePlanetMap, hasSurfaceMap, familyShare, mapMix, clearMapCache } from '../js/planetmap.js';
+import {
+  generateSystem, ARCHETYPES, ARCHETYPE_KEYS, ARCH_BY_KEY, planetSummary, bodies,
+  MIN_ORBIT_RATIO, MIN_ORBIT_RATIO_OUTER, orbitRatios, orbitLayout, moonsOf, moonById,
+} from '../js/system.js';
+import { planetWorldOpts, generatePlanetMap, hasSurfaceMap, familyShare, mapMix, clearMapCache, moonMapSize, mapSizeFor, columnClimate } from '../js/planetmap.js';
 import { BASELINE, RARE, rareFor } from '../js/elements.js';
-import { toJSON, fromJSON, galaxyToJSON, galaxyFromJSON, systemToJSON, systemFromJSON, regenerate, jsonSizeKB } from '../js/export.js';
+import { toJSON, fromJSON, galaxyToJSON, galaxyFromJSON, systemToJSON, systemFromJSON, regenerate, jsonSizeKB, moonIndex, moonToJSON, moonFromJSON } from '../js/export.js';
 import { BIOME_FAMILIES, inFamily, BIOMES } from '../../worldgen/js/biomes.js';
 import { NameGen } from '../../namegen/js/namegen.js';
 
@@ -342,4 +345,258 @@ test('a planet map survives the trip through a save', () => {
   clearMapCache();
   const after = generatePlanetMap(planet, MAP);
   assert.deepEqual(Array.from(after.biome), Array.from(before.biome));
+});
+
+
+// ---------------------------------------------------------------------------- orbit spacing (SF1)
+
+test('no two orbits are closer than the floor, over 200 seeds', () => {
+  let systems = 0, worst = Infinity, worstName = '';
+  for (let seed = 1; seed <= 200; seed++) {
+    const star = makeStar(seed * 7919, {});
+    const sys = generateSystem(star, { seed: star.seed, planets: 1 });       // as full as it goes
+    if (sys.planets.length < 2) continue;
+    systems++;
+    const ratios = orbitRatios(sys);
+    for (const [i, r] of ratios.entries()) {
+      const floor = sys.planets[i].orbit.beyondFrost ? MIN_ORBIT_RATIO_OUTER : MIN_ORBIT_RATIO;
+      // the ladder never promises the *outer* floor when the inner planet is still inside the frost
+      // line, so the inner floor is the one that has to hold everywhere
+      assert.ok(r >= MIN_ORBIT_RATIO - 1e-9,
+        `${sys.name}: ${sys.planets[i].orbit.au} → ${sys.planets[i + 1].orbit.au} is only ${r.toFixed(3)}× (floor ${floor})`);
+      if (r < worst) { worst = r; worstName = sys.name; }
+    }
+  }
+  assert.ok(systems > 120, 'only ' + systems + ' systems with two or more planets');
+  assert.ok(worst >= MIN_ORBIT_RATIO - 1e-9, `tightest pair ${worst.toFixed(3)}× in ${worstName}`);
+});
+
+test('the drawn orbits keep their gap, and no planet is drawn wider than its lane', () => {
+  for (let seed = 1; seed <= 200; seed++) {
+    const star = makeStar(seed * 104729, {});
+    const sys = generateSystem(star, { seed: star.seed, planets: 1 });
+    if (!sys.planets.length) continue;
+    const L = orbitLayout(sys, { minGap: 1.05, starRadius: 0.6 });
+    assert.equal(L.radii.length, sys.planets.length);
+    for (let i = 0; i < L.radii.length; i++) {
+      const prev = i > 0 ? L.radii[i - 1] : 0.6;
+      assert.ok(L.radii[i] - prev >= 1.05 - 1e-9,
+        `${sys.name}: rings ${i - 1}→${i} are ${(L.radii[i] - prev).toFixed(3)} apart`);
+      assert.ok(L.radii[i] > prev, 'rings must step outwards');
+      // the size cap: a planet's drawn radius is at most a third of its narrowest gap, so two
+      // neighbouring planets can never touch however big they are
+      const size = L.sizeFor(i, 99);
+      assert.ok(size <= L.gapAt(i) * 0.34 + 1e-9, `${sys.name}: planet ${i} would be drawn too big`);
+      assert.ok(size * 2 < L.gapAt(i), 'a planet must be narrower than its own lane');
+    }
+    // belts land between the planets they were rolled between, on the same ladder
+    for (const b of sys.belts) {
+      const inner = L.radiusFor(b.inner), outer = L.radiusFor(b.outer);
+      assert.ok(outer > inner, `${sys.name}: belt drawn inside out`);
+    }
+    // and the mapping is monotone: further out in AU is always further out on screen
+    const aus = [0.02, 0.3, 1, 4, 20, 90, 300];
+    for (let i = 1; i < aus.length; i++) assert.ok(L.radiusFor(aus[i]) > L.radiusFor(aus[i - 1]));
+  }
+});
+
+// ---------------------------------------------------------------------------- moons (SF2)
+
+const moonSample = (() => {
+  const galaxy = generateGalaxy({ seed: 4242, stars: 250 });
+  const systems = galaxy.stars.map(s => generateSystem(s, { seed: s.seed }));
+  return { systems, moons: systems.flatMap(s => moonsOf(s)) };
+})();
+
+test('a moon is a small planet: stable id, own seed, one of four kinds', () => {
+  const moons = moonSample.moons;
+  assert.ok(moons.length > 300, 'only ' + moons.length + ' moons');
+  const kinds = new Set();
+  const ids = new Set();
+  for (const { moon: m, parent } of moons) {
+    kinds.add(m.archetype);
+    assert.ok(['barren', 'ice', 'lava', 'living'].includes(m.archetype), 'odd moon kind: ' + m.archetype);
+    assert.equal(m.id, `${parent.id}m${m.index}`);
+    assert.ok(!ids.has(`${parent.seed}:${m.id}`), 'moon ids must be unique inside a planet');
+    ids.add(`${parent.seed}:${m.id}`);
+    assert.ok(Number.isFinite(m.seed) && m.seed !== parent.seed, 'a moon needs its own seed');
+    assert.equal(m.moon, true);
+    assert.equal(m.parentId, parent.id);
+    assert.equal(m.giant, false);
+    assert.ok(m.radius > 0 && m.gravity > 0 && m.mass > 0);
+    assert.ok(m.resources.length === 4, 'the baseline four');
+    assert.ok(m.rareElements.length >= 1);
+    assert.ok(m.temperature.K >= ARCH_BY_KEY[m.archetype].tempK[0] - 1 && m.temperature.K <= ARCH_BY_KEY[m.archetype].tempK[1] + 1,
+      `${m.name} is ${m.temperature.K} K, outside its band`);
+    assert.ok(m.orbit.aroundPlanet > 1.5, 'a moon orbits outside its planet');
+    assert.ok(hasSurfaceMap(m), 'every moon has ground');
+  }
+  assert.ok(kinds.has('barren') && kinds.has('ice') && kinds.has('lava'), [...kinds].join(','));
+});
+
+test('a living moon is rare, big and warm; moons hold less than planets', () => {
+  const moons = moonSample.moons.map(x => x.moon);
+  const living = moons.filter(m => m.archetype === 'living');
+  const share = living.length / moons.length;
+  assert.ok(share > 0 && share < 0.06, `living moons are ${(share * 100).toFixed(1)}% of moons`);
+  for (const m of living) {
+    assert.ok(m.radius >= 0.25, `${m.name} is only ${m.radius}× Earth`);
+    assert.ok(m.temperature.K >= 260 && m.temperature.K <= 310);
+    assert.ok(m.atmosphere.density > 0.4, 'a living moon keeps real air');
+  }
+  // a moon carries less of everything than the average planet does
+  const avg = xs => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+  const moonAb = avg(moons.flatMap(m => m.resources.map(r => r.abundance)));
+  const planetAb = avg(moonSample.systems.flatMap(s => s.planets).flatMap(p => p.resources.map(r => r.abundance)));
+  assert.ok(moonAb < planetAb, `moons ${moonAb.toFixed(2)} vs planets ${planetAb.toFixed(2)}`);
+  assert.ok(avg(moons.map(m => m.rareElements.length)) < 1.35, 'moons rarely carry two rare elements');
+});
+
+test('a moon map is smaller than its planet, simpler, and the same on every visit', () => {
+  clearMapCache();
+  const size = { width: 128, height: 64 };
+  assert.deepEqual(moonMapSize(size), { width: 64, height: 32 });
+  assert.deepEqual(mapSizeFor({ moon: false }, size), size);
+
+  let checked = 0;
+  for (const { moon: m, parent } of moonSample.moons) {
+    if (checked >= 4) break;
+    if (parent.giant) { /* a giant has no map of its own, its moons still do */ }
+    const ms = mapSizeFor(m, size);
+    const world = generatePlanetMap(m, { ...ms, force: true });
+    assert.equal(world.width, 64);
+    assert.equal(world.height, 32);
+    assert.equal(world.planet.moon, true);
+    assert.equal(world.planet.parentId, parent.id);
+    assert.ok(world.regions.length >= 3 && world.regions.length <= 14, m.name + ': ' + world.regions.length + ' regions');
+    assert.ok(world.biome.length === 64 * 32);
+    if (!parent.giant) {
+      const pw = generatePlanetMap(parent, { ...size, force: true });
+      assert.ok(world.regions.length < pw.regions.length + 1, 'a moon has no more provinces than its planet');
+    }
+    // the same moon, from the saved record, comes back identical
+    const copy = JSON.parse(JSON.stringify(m));
+    clearMapCache();
+    const again = generatePlanetMap(copy, { ...ms });
+    assert.deepEqual(Array.from(again.biome), Array.from(world.biome), m.name + ' is not stable');
+    checked++;
+  }
+  assert.equal(checked, 4);
+});
+
+test('a moon knob set follows the moon, not its planet', () => {
+  const { moon: m } = moonSample.moons.find(x => x.moon.archetype === 'ice');
+  const o = planetWorldOpts(m, { width: 64, height: 32 });
+  assert.equal(o.seed, m.seed >>> 0);
+  assert.equal(o.biomeLock, 'ice');
+  assert.ok(o.regionCount <= 14 && o.regionCount >= 4);
+  assert.ok(o.settlementDensity <= 0.25);
+});
+
+test('moons travel in a save and rebuild from the seed alone', () => {
+  const galaxy = generateGalaxy({ seed: 4242, stars: 40 });
+  let starId = -1, system = null;
+  for (const s of galaxy.stars) {
+    const sys = generateSystem(s, { seed: s.seed });
+    if (sys.planets.some(p => p.moons.length)) { starId = s.id; system = sys; break; }
+  }
+  assert.ok(system, 'no system with a moon in 40 stars');
+  const planet = system.planets.find(p => p.moons.length);
+  const moon = planet.moons[0];
+
+  const index = moonIndex(system);
+  assert.ok(index.length >= 1);
+  assert.ok(index.every(r => r.id && Number.isFinite(r.seed) && r.parentId != null));
+
+  const save = JSON.parse(JSON.stringify(toJSON({ galaxy, system, planet, moon })));
+  assert.equal(save.system.moons.length, index.length);
+  const back = fromJSON(save);
+  assert.deepEqual(back.moon, moon);
+  assert.deepEqual(moonFromJSON(JSON.parse(JSON.stringify(moonToJSON(moon)))), moon);
+  assert.deepEqual(moonById(back.system, moon.id), moon);
+
+  // and from nothing but the seed
+  const again = regenerate({ galaxyOpts: { seed: 4242, stars: 40 }, starId, planetId: planet.id, moonId: moon.id });
+  assert.deepEqual(again.moon, moon);
+  const byIndex = regenerate({ galaxyOpts: { seed: 4242, stars: 40 }, starId, planetId: planet.id, moonId: 0 });
+  assert.deepEqual(byIndex.moon, moon);
+});
+
+
+// ---------------------------------------------------------------------------- tidally locked
+
+test('a locked world burns in the middle and freezes on the far side, with no stripe anywhere', () => {
+  clearMapCache();
+  const locked = [];
+  for (const sys of big.systems) {
+    for (const p of sys.planets) if (p.tidalLocked && !p.giant) locked.push(p);
+    if (locked.length >= 6) break;
+  }
+  assert.ok(locked.length >= 4, 'only ' + locked.length + ' locked planets found');
+
+  for (const p of locked.slice(0, 6)) {
+    const world = generatePlanetMap(p, { width: 128, height: 64, force: true });
+    assert.equal(world.tidalLocked, true, p.name + ' did not get the locked pass');
+    const { temp, ice } = columnClimate(world);
+    const w = world.width, mid = w >> 1;
+
+    // the substellar face is hot, the far face — which is the two edges, meeting at the seam — frozen
+    assert.ok(temp[mid] - temp[0] > 0.35, `${p.name}: centre ${temp[mid].toFixed(2)} vs edge ${temp[0].toFixed(2)}`);
+    assert.ok(temp[mid] - temp[w - 1] > 0.35, `${p.name}: centre vs the other edge`);
+    assert.ok(temp[0] < 0.2 && temp[w - 1] < 0.2, `${p.name}: the far face is not cold`);
+    assert.ok(ice[0] > 0.5 && ice[w - 1] > 0.5, `${p.name}: the far face is not frozen (${ice[0].toFixed(2)})`);
+    assert.ok(ice[mid] < 0.12, `${p.name}: the burning face has ice on it (${ice[mid].toFixed(2)})`);
+
+    // the frozen part is a whole hemisphere, not a band at the edges: a quarter of the way in from
+    // the edge (halfway round to the twilight ring) it is still cold
+    const q = Math.round(w * 0.06);
+    assert.ok(temp[q] < 0.25, `${p.name}: only the very edge is cold`);
+
+    // and no column steps away from its neighbours — that is what a stripe down the sphere is
+    for (let x = 0; x < w; x++) {
+      const l = (x - 1 + w) % w, r = (x + 1) % w;
+      assert.ok(Math.abs(temp[x] - (temp[l] + temp[r]) / 2) < 0.03,
+        `${p.name}: temperature stripe at column ${x}`);
+      assert.ok(Math.abs(ice[x] - (ice[l] + ice[r]) / 2) < 0.25,
+        `${p.name}: ice stripe at column ${x} (${ice[l].toFixed(2)} ${ice[x].toFixed(2)} ${ice[r].toFixed(2)})`);
+      assert.ok(Math.abs(temp[x] - temp[r]) < 0.06, `${p.name}: temperature step at column ${x}`);
+    }
+    // the map wraps: the first and last columns are the two halves of the same longitude
+    assert.ok(Math.abs(temp[0] - temp[w - 1]) < 0.03, p.name + ': the seam does not line up');
+  }
+});
+
+test('a locked moon keeps its face to its planet, not to the star, so it gets no hot face', () => {
+  clearMapCache();
+  const found = moonSample.moons.find(x => x.moon.tidalLocked);
+  assert.ok(found, 'no locked moon');
+  const world = generatePlanetMap(found.moon, { width: 64, height: 32, force: true });
+  assert.notEqual(world.tidalLocked, true);
+  const { temp } = columnClimate(world);
+  const mid = world.width >> 1;
+  assert.ok(Math.abs(temp[mid] - temp[0]) < 0.35, 'a moon should not have a burning face');
+});
+
+// ---------------------------------------------------------------------------- names
+
+test('nothing in a system shares a name, and no two stars in a galaxy do either', () => {
+  // both namers: the built-in one, and Name Forge, which is the one that repeats itself
+  for (const namer of [null, namegen]) {
+    const galaxy = generateGalaxy({ seed: 777, stars: 300, namegen: namer });
+    const starNames = galaxy.stars.map(s => s.name);
+    assert.equal(new Set(starNames).size, starNames.length, 'two stars share a name');
+
+    for (const star of galaxy.stars.slice(0, 120)) {
+      const sys = generateSystem(star, { seed: star.seed, namegen: namer });
+      const names = [
+        star.name,
+        ...sys.planets.map(p => p.name),
+        ...sys.planets.flatMap(p => p.moons.map(m => m.name)),
+        ...sys.belts.map(b => b.name),
+        ...sys.comets.map(c => c.name),
+      ];
+      assert.equal(new Set(names).size, names.length,
+        `${star.name}: a name is used twice — ${names.filter((n, i) => names.indexOf(n) !== i).join(', ')}`);
+    }
+  }
 });

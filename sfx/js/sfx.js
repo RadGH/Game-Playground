@@ -20,13 +20,13 @@
 //
 // The mixer is: source -> normalizing gain -> play gain -> panner -> category bus -> master ->
 // limiter -> speakers. Category buses (sfx / ui / ambience) have their own volume and mute.
-import { analyze, normalize, normalizeGain, applyGain, softLimit, loopify, dbToGain, gainToDb } from './loudness.js';
+import { analyze, normalize, normalizeGain, applyGain, softLimit, loopify, dbToGain, gainToDb, CATEGORY_TARGETS, DEFAULT_TARGET, AMBIENCE_BUS_CAP, optionsFor } from './loudness.js';
 import * as synth from './methods/synth.js';
 import * as library from './methods/library.js';
 import * as hybrid from './methods/hybrid.js';
 import * as retro from './methods/retro.js';
 
-export { analyze, normalize, normalizeGain, softLimit, loopify, dbToGain, gainToDb };
+export { analyze, normalize, normalizeGain, softLimit, loopify, dbToGain, gainToDb, CATEGORY_TARGETS, AMBIENCE_BUS_CAP };
 
 export const METHODS = { synth, library, hybrid, retro };
 export const METHOD_ORDER = ['hybrid', 'synth', 'library', 'retro'];
@@ -37,6 +37,14 @@ export function methodList() {
 }
 
 const BUSES = ['sfx', 'ui', 'ambience'];
+/**
+ * The most a bus's gain may ever be, whatever the player's slider says. Only ambience is capped: it is
+ * the one bus that plays continuously, so it is mixed under everything else by design (see
+ * loudness.js — the same reason its loudness target is 10 dB below the others).
+ */
+const BUS_CAP = { sfx: 1, ui: 1, ambience: AMBIENCE_BUS_CAP };
+/** The cap on one bus, for a settings slider that should not offer what it cannot deliver. */
+export function busCap(bus) { return BUS_CAP[bus] ?? 1; }
 
 /** Where this catalog file lives, so assets and the catalog resolve no matter who imports us. */
 const BASE = new URL('../', import.meta.url).href;
@@ -79,7 +87,7 @@ export class Sfx {
     this._loops = new Map();        // id -> { src, gain }
     this._ctx = context || null;
     this._volume = volume;
-    this._busVolume = { sfx: 1, ui: 1, ambience: 0.8 };
+    this._busVolume = { sfx: 1, ui: 1, ambience: Math.min(0.8, BUS_CAP.ambience) };
     this._busMuted = { sfx: false, ui: false, ambience: false };
     this.lastError = null;
     if (this._ctx) this._buildGraph();
@@ -127,7 +135,7 @@ export class Sfx {
   /** Volume of one bus: 'sfx', 'ui' or 'ambience'. */
   setBusVolume(bus, v) {
     if (!BUSES.includes(bus)) return this;
-    this._busVolume[bus] = Math.max(0, Math.min(1, v));
+    this._busVolume[bus] = Math.max(0, Math.min(busCap(bus), v));
     if (this.bus) this.bus[bus].gain.value = this._busMuted[bus] ? 0 : this._busVolume[bus];
     return this;
   }
@@ -184,10 +192,14 @@ export class Sfx {
     if (methodId === 'hybrid') return hybrid.sourceFor(e);
     return METHODS[methodId].has(e) ? methodId : null;
   }
-  /** The loudness target this id is normalized to, in dBFS-ish LUFS. */
+  /**
+   * The loudness target this id is normalized to, in dBFS-ish LUFS. loudness.js owns the table; the
+   * number in data/catalog.json is only a fallback for a category that table has never heard of.
+   */
   targetFor(id) {
     const e = this.entry(id); if (!e) return null;
-    return (this.categories[e.category] || {}).target ?? -19;
+    const fromCatalog = (this.categories[e.category] || {}).target;
+    return CATEGORY_TARGETS[e.category] ?? fromCatalog ?? DEFAULT_TARGET;
   }
   busFor(id) {
     const e = this.entry(id); if (!e) return 'sfx';
@@ -226,7 +238,9 @@ export class Sfx {
       const target = this.targetFor(id);
       // Normalization is baked into the buffer, not applied at play time: measure once, write the
       // levelled samples, and every later play is a plain buffer source at gain 1.
-      const res = normalize(samples, out.sampleRate, { target, ceiling: this.ceiling, trim: e.trim || 0 });
+      // A loop may only ever be cut, never boosted (see loudness.js): measuring a quiet bed and
+      // multiplying it up just raises its hiss, and the player hears a bed for minutes at a time.
+      const res = normalize(samples, out.sampleRate, optionsFor({ category: e.category, loop: !!e.loop, trim: e.trim || 0, ceiling: this.ceiling, fallbackTarget: target }));
       const buffer = ctx.createBuffer(1, res.samples.length, out.sampleRate);
       buffer.copyToChannel(res.samples, 0);
       const rec = {

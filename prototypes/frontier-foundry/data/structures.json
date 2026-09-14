@@ -1,0 +1,2709 @@
+{
+  "schema": 1,
+  "note": "Everything you can build. size is tiles (w x h). cost is resources consumed when the outline is placed. buildTime is builder-seconds of work. powerUse/powerGen are in kW. supplyRadius (tiles) is how far a pole/substation/generator carries the grid. vision is sight radius, scanRadius is how far a scanner reveals hidden nodes. requiresNode lists the resource kinds the footprint must sit on. variantOf + planetRequirement mark a planet-themed structure that only unlocks where that element exists.",
+  "structures": [
+    {
+      "id": "landing_pod",
+      "name": "Landing Pod",
+      "category": "base",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {},
+      "buildTime": 0,
+      "hp": 8000,
+      "powerUse": 0,
+      "powerGen": 120,
+      "supplyRadius": 10,
+      "vision": 22,
+      "range": 10,
+      "dps": 22,
+      "damageType": "physical",
+      "storage": 1500,
+      "linkRadius": 34,
+      "speed": 0.5,
+      "recipes": [
+        "make_iron_plate",
+        "make_gear",
+        "make_wire"
+      ],
+      "unlock": "t_landfall",
+      "unique": true,
+      "desc": "The pod you came down in: headquarters, first store, first power, and the drone hub every machine within 34 tiles hands its output to. Lose it and the run is over."
+    },
+    {
+      "id": "builder_yard",
+      "name": "Builder Yard",
+      "category": "base",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 16,
+        "stone": 20
+      },
+      "buildTime": 14,
+      "hp": 900,
+      "powerUse": 15,
+      "vision": 8,
+      "storage": 400,
+      "linkRadius": 6,
+      "spawns": {
+        "unit": "builder",
+        "count": 2
+      },
+      "unlock": "t_landfall",
+      "desc": "Houses two builders. More yards means outlines get finished in parallel instead of one at a time."
+    },
+    {
+      "id": "dormitory",
+      "name": "Dormitory",
+      "category": "base",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 18,
+        "concrete": 12,
+        "polymer": 6
+      },
+      "buildTime": 20,
+      "hp": 1100,
+      "powerUse": 25,
+      "vision": 7,
+      "linkRadius": 5,
+      "crew": 6,
+      "unlock": "t_settlement",
+      "desc": "Beds for six. Crew capacity caps how many builders, scouts and guards you can field at once."
+    },
+    {
+      "id": "medbay",
+      "name": "Medbay",
+      "category": "base",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 14,
+        "glass": 8,
+        "polymer": 8,
+        "circuit": 4
+      },
+      "buildTime": 22,
+      "hp": 900,
+      "powerUse": 40,
+      "vision": 6,
+      "linkRadius": 5,
+      "healRate": 6,
+      "unlock": "t_settlement",
+      "desc": "Hurt crew walk here and get patched up instead of dying in the dirt."
+    },
+    {
+      "id": "workshop",
+      "name": "Workshop",
+      "category": "base",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 20,
+        "gear": 12,
+        "stone": 16
+      },
+      "buildTime": 18,
+      "hp": 1000,
+      "powerUse": 30,
+      "vision": 6,
+      "linkRadius": 6,
+      "buildSpeedBonus": 0.25,
+      "unlock": "t_landfall",
+      "desc": "Tools and spares. Builders working within its reach put up outlines a quarter faster."
+    },
+    {
+      "id": "garage",
+      "name": "Garage",
+      "category": "base",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 16,
+        "gear": 16,
+        "concrete": 12
+      },
+      "buildTime": 26,
+      "hp": 1400,
+      "powerUse": 35,
+      "vision": 7,
+      "linkRadius": 6,
+      "vehicleSlots": 4,
+      "unlock": "t_haulage",
+      "desc": "Parks and repairs four vehicles. Trucks that start a route here come out fully fuelled."
+    },
+    {
+      "id": "drill_mk1",
+      "name": "Rock Drill I",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 14,
+        "gear": 8
+      },
+      "buildTime": 12,
+      "hp": 420,
+      "powerUse": 20,
+      "vision": 5,
+      "storage": 120,
+      "requiresNode": [
+        "ore",
+        "mineral",
+        "rare"
+      ],
+      "extractRate": 0.8,
+      "unlock": "t_landfall",
+      "desc": "Bites into an ore patch and coughs up half a unit a second. Slow, cheap, and the first thing you place."
+    },
+    {
+      "id": "drill_mk2",
+      "name": "Rock Drill II",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 10,
+        "gear": 12,
+        "circuit": 4,
+        "lubricant": 6
+      },
+      "buildTime": 20,
+      "hp": 700,
+      "powerUse": 95,
+      "vision": 6,
+      "storage": 200,
+      "requiresNode": [
+        "ore",
+        "mineral",
+        "rare"
+      ],
+      "extractRate": 1.8,
+      "upgradeOf": "drill_mk1",
+      "unlock": "t_drilling2",
+      "desc": "Twice the bite for twice the power. Also chews a patch out twice as fast, so plan the next one."
+    },
+    {
+      "id": "drill_mk3",
+      "name": "Rock Drill III",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "alloy_plate": 8,
+        "advanced_circuit": 6,
+        "machine_frame": 2,
+        "lubricant": 10
+      },
+      "buildTime": 34,
+      "hp": 1100,
+      "powerUse": 210,
+      "vision": 7,
+      "storage": 320,
+      "requiresNode": [
+        "ore",
+        "mineral",
+        "rare"
+      ],
+      "extractRate": 3.4,
+      "upgradeOf": "drill_mk2",
+      "unlock": "t_drilling3",
+      "desc": "A drill head that does not care what the rock is made of. Hungry for power."
+    },
+    {
+      "id": "quarry",
+      "name": "Open Quarry",
+      "category": "extraction",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "iron_plate": 20,
+        "concrete": 10,
+        "gear": 6
+      },
+      "buildTime": 18,
+      "hp": 800,
+      "powerUse": 55,
+      "vision": 5,
+      "storage": 400,
+      "extractRate": 0.85,
+      "yields": {
+        "stone": 0.7,
+        "sand": 0.3
+      },
+      "unlock": "t_masonry",
+      "desc": "Does not need a node - it just eats the ground. Endless stone and sand, nothing else."
+    },
+    {
+      "id": "deep_bore",
+      "name": "Deep Bore",
+      "category": "extraction",
+      "size": {
+        "w": 5,
+        "h": 5
+      },
+      "cost": {
+        "steel_plate": 30,
+        "machine_frame": 4,
+        "advanced_circuit": 8,
+        "concrete": 20
+      },
+      "buildTime": 55,
+      "hp": 1800,
+      "powerUse": 320,
+      "vision": 7,
+      "storage": 500,
+      "requiresNode": [
+        "ore",
+        "mineral",
+        "rare"
+      ],
+      "extractRate": 1.4,
+      "infinite": true,
+      "unlock": "t_deep_boring",
+      "desc": "Drills past the patch into the seam under it. Slower than a mk3 but the node never runs out."
+    },
+    {
+      "id": "fluid_pump",
+      "name": "Fluid Pump",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 18,
+        "gear": 10,
+        "copper_wire": 8
+      },
+      "buildTime": 16,
+      "hp": 450,
+      "powerUse": 60,
+      "vision": 5,
+      "storage": 600,
+      "requiresNode": [
+        "fluid"
+      ],
+      "extractRate": 6,
+      "unlock": "t_fluids",
+      "desc": "Sinks a pipe into a vent or a pool. Whatever comes up needs a tanker to move it."
+    },
+    {
+      "id": "gas_extractor",
+      "name": "Gas Extractor",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 12,
+        "polymer": 10,
+        "circuit": 3
+      },
+      "buildTime": 20,
+      "hp": 520,
+      "powerUse": 80,
+      "vision": 5,
+      "storage": 500,
+      "requiresNode": [
+        "gas"
+      ],
+      "extractRate": 4,
+      "unlock": "t_gasworks",
+      "desc": "Caps a seep and holds the pressure. Only a gas hauler can take it away."
+    },
+    {
+      "id": "ice_harvester",
+      "name": "Ice Harvester",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 12,
+        "gear": 6,
+        "steel_plate": 4
+      },
+      "buildTime": 14,
+      "hp": 480,
+      "powerUse": 50,
+      "vision": 5,
+      "storage": 250,
+      "requiresNode": [
+        "ice"
+      ],
+      "extractRate": 1.5,
+      "unlock": "t_cold_ops",
+      "desc": "Chips a glacier into blocks. On a frozen world this is where all your water comes from."
+    },
+    {
+      "id": "atmospheric_condenser",
+      "name": "Atmospheric Condenser",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 14,
+        "polymer": 12,
+        "circuit": 4,
+        "glass": 6
+      },
+      "buildTime": 24,
+      "hp": 600,
+      "powerUse": 0,
+      "vision": 5,
+      "storage": 400,
+      "recipes": [
+        "condense_nitrogen",
+        "condense_hydrogen",
+        "condense_water",
+        "sift_helium"
+      ],
+      "unlock": "t_atmospherics",
+      "desc": "Pulls gases straight out of the air. No node needed - the whole sky is the node."
+    },
+    {
+      "id": "geothermal_tap",
+      "name": "Geothermal Tap",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 18,
+        "tungsten_bar": 2,
+        "concrete": 14
+      },
+      "buildTime": 30,
+      "hp": 900,
+      "powerUse": 30,
+      "vision": 5,
+      "storage": 400,
+      "requiresNode": [
+        "fluid"
+      ],
+      "nodeResource": "magma",
+      "extractRate": 3,
+      "unlock": "t_geothermal",
+      "desc": "Sinks a lined shaft into a magma fissure. Feeds a geothermal plant, or a plasma refinery."
+    },
+    {
+      "id": "biomass_harvester",
+      "name": "Biomass Harvester",
+      "category": "extraction",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 10,
+        "gear": 6,
+        "copper_wire": 6
+      },
+      "buildTime": 12,
+      "hp": 400,
+      "powerUse": 35,
+      "vision": 6,
+      "storage": 250,
+      "harvestsTerrain": [
+        "forest"
+      ],
+      "harvestRadius": 9,
+      "extractRate": 0.8,
+      "renewable": true,
+      "unlock": "t_landfall",
+      "desc": "Cuts growth inside its reach and lets it grow back. Slower on bare ground, useless on rock."
+    },
+    {
+      "id": "smelter",
+      "name": "Smelter",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "stone": 20,
+        "iron_plate": 8
+      },
+      "buildTime": 10,
+      "hp": 500,
+      "powerUse": 10,
+      "vision": 4,
+      "storage": 200,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "smelt_iron",
+        "smelt_copper",
+        "smelt_bronze"
+      ],
+      "unlock": "t_landfall",
+      "desc": "A brick box with a fire in it. Turns ore and coal into bars."
+    },
+    {
+      "id": "arc_furnace",
+      "name": "Arc Furnace",
+      "category": "processing",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "iron_plate": 24,
+        "gear": 10,
+        "circuit": 4,
+        "concrete": 10
+      },
+      "buildTime": 26,
+      "hp": 1100,
+      "powerUse": 50,
+      "vision": 4,
+      "storage": 320,
+      "linkRadius": 5,
+      "speed": 1.5,
+      "recipes": [
+        "smelt_iron",
+        "smelt_copper",
+        "smelt_bronze",
+        "make_steel",
+        "smelt_titanium",
+        "smelt_tungsten"
+      ],
+      "unlock": "t_steel",
+      "desc": "Melts with electricity instead of fire, so it reaches temperatures a smelter cannot. Steel and up."
+    },
+    {
+      "id": "crusher",
+      "name": "Crusher",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 12,
+        "gear": 8,
+        "stone": 8
+      },
+      "buildTime": 12,
+      "hp": 550,
+      "powerUse": 25,
+      "vision": 4,
+      "storage": 250,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "crush_stone",
+        "sort_rubble",
+        "leach_tailings"
+      ],
+      "unlock": "t_landfall",
+      "desc": "Two jaws and a motor. Stone into sand, rubble into salvage."
+    },
+    {
+      "id": "kiln",
+      "name": "Kiln",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "stone": 26,
+        "iron_plate": 6
+      },
+      "buildTime": 12,
+      "hp": 520,
+      "powerUse": 15,
+      "vision": 4,
+      "storage": 200,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "char_biomass",
+        "calcine_lime",
+        "melt_ice"
+      ],
+      "unlock": "t_landfall",
+      "desc": "Bakes rather than melts. Charcoal from growth, lime from stone, water from ice."
+    },
+    {
+      "id": "refinery",
+      "name": "Refinery",
+      "category": "processing",
+      "size": {
+        "w": 5,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 20,
+        "iron_plate": 16,
+        "gear": 14,
+        "concrete": 16
+      },
+      "buildTime": 34,
+      "hp": 1300,
+      "powerUse": 60,
+      "vision": 4,
+      "storage": 800,
+      "linkRadius": 6,
+      "speed": 1.0,
+      "recipes": [
+        "refine_oil"
+      ],
+      "unlock": "t_oil",
+      "desc": "Boils crude into fractions. Fuel for the trucks, lubricant for the machines."
+    },
+    {
+      "id": "cracking_tower",
+      "name": "Cracking Tower",
+      "category": "processing",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 24,
+        "polymer": 14,
+        "circuit": 6,
+        "concrete": 18
+      },
+      "buildTime": 40,
+      "hp": 1400,
+      "powerUse": 70,
+      "vision": 5,
+      "storage": 800,
+      "linkRadius": 6,
+      "speed": 1.0,
+      "recipes": [
+        "crack_heavy",
+        "crack_methane"
+      ],
+      "unlock": "t_cracking",
+      "desc": "Breaks long molecules into short ones under heat and pressure. The road to hydrogen."
+    },
+    {
+      "id": "chemical_plant",
+      "name": "Chemical Plant",
+      "category": "processing",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 16,
+        "iron_plate": 14,
+        "glass": 8,
+        "circuit": 4
+      },
+      "buildTime": 30,
+      "hp": 1000,
+      "powerUse": 45,
+      "vision": 4,
+      "storage": 700,
+      "linkRadius": 6,
+      "speed": 1.0,
+      "recipes": [
+        "make_acid",
+        "make_resin",
+        "make_oxidizer",
+        "make_fertiliser",
+        "melt_ice",
+        "leach_tailings"
+      ],
+      "unlock": "t_chemistry",
+      "desc": "Whatever needs mixing, heating and not exploding. Acid, resin, oxidizer, slurry."
+    },
+    {
+      "id": "electrolyzer",
+      "name": "Electrolyzer",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 14,
+        "copper_wire": 20,
+        "polymer": 8,
+        "circuit": 6
+      },
+      "buildTime": 28,
+      "hp": 900,
+      "powerUse": 40,
+      "vision": 4,
+      "storage": 700,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "split_water",
+        "split_brine"
+      ],
+      "unlock": "t_electrolysis",
+      "desc": "Shoves current through a fluid until it comes apart. Water becomes rocket fuel this way."
+    },
+    {
+      "id": "centrifuge",
+      "name": "Centrifuge",
+      "category": "processing",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 18,
+        "gear": 16,
+        "advanced_circuit": 2,
+        "concrete": 12
+      },
+      "buildTime": 36,
+      "hp": 1100,
+      "powerUse": 65,
+      "vision": 4,
+      "storage": 600,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "spin_brine",
+        "enrich_uranium"
+      ],
+      "unlock": "t_centrifuge",
+      "desc": "Spins mixtures until the heavy bits separate. Also the only way to enrich uranium."
+    },
+    {
+      "id": "polymer_press",
+      "name": "Polymer Press",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 14,
+        "gear": 12,
+        "circuit": 3
+      },
+      "buildTime": 24,
+      "hp": 900,
+      "powerUse": 45,
+      "vision": 4,
+      "storage": 500,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "make_polymer",
+        "make_resin"
+      ],
+      "unlock": "t_polymers",
+      "desc": "Squeezes oil into sheet and pellet. Half the modern parts list needs polymer."
+    },
+    {
+      "id": "glassworks",
+      "name": "Glassworks",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "stone": 24,
+        "iron_plate": 10,
+        "gear": 4
+      },
+      "buildTime": 18,
+      "hp": 700,
+      "powerUse": 35,
+      "vision": 4,
+      "storage": 300,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "make_glass",
+        "grind_lens"
+      ],
+      "unlock": "t_glass",
+      "desc": "Sand in, sheet and lenses out. Optics start here."
+    },
+    {
+      "id": "concrete_mixer",
+      "name": "Concrete Mixer",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 12,
+        "gear": 8,
+        "stone": 14
+      },
+      "buildTime": 14,
+      "hp": 650,
+      "powerUse": 30,
+      "vision": 4,
+      "storage": 400,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "make_concrete"
+      ],
+      "unlock": "t_masonry",
+      "desc": "Stone, sand and water into the stuff you pour roads and foundations from."
+    },
+    {
+      "id": "alloy_foundry",
+      "name": "Alloy Foundry",
+      "category": "processing",
+      "size": {
+        "w": 5,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 26,
+        "tungsten_bar": 3,
+        "machine_frame": 2,
+        "concrete": 20
+      },
+      "buildTime": 48,
+      "hp": 1600,
+      "powerUse": 90,
+      "vision": 4,
+      "storage": 500,
+      "linkRadius": 6,
+      "speed": 1.0,
+      "recipes": [
+        "make_alloy_plate",
+        "make_superalloy"
+      ],
+      "unlock": "t_titanium",
+      "desc": "Where the exotic metals get married. Alloy plate and superalloy billets."
+    },
+    {
+      "id": "assembler_mk1",
+      "name": "Assembler I",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 16,
+        "copper_wire": 10
+      },
+      "buildTime": 16,
+      "hp": 600,
+      "powerUse": 30,
+      "vision": 4,
+      "storage": 250,
+      "linkRadius": 5,
+      "speed": 1.0,
+      "recipes": [
+        "make_iron_plate",
+        "make_steel_plate",
+        "make_wire",
+        "make_gear",
+        "make_machine_frame",
+        "pack_basic",
+        "pack_logistics"
+      ],
+      "unlock": "t_landfall",
+      "desc": "A bench with arms. Plates, wire, gears, frames and the first two science packs."
+    },
+    {
+      "id": "assembler_mk2",
+      "name": "Assembler II",
+      "category": "processing",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 12,
+        "gear": 14,
+        "circuit": 6,
+        "lubricant": 4
+      },
+      "buildTime": 26,
+      "hp": 900,
+      "powerUse": 70,
+      "vision": 4,
+      "storage": 400,
+      "linkRadius": 5,
+      "speed": 1.6,
+      "upgradeOf": "assembler_mk1",
+      "recipes": [
+        "make_iron_plate",
+        "make_steel_plate",
+        "make_wire",
+        "make_gear",
+        "make_machine_frame",
+        "make_circuit",
+        "make_control_unit",
+        "make_battery",
+        "make_solar_cell",
+        "make_advanced_part",
+        "pack_basic",
+        "pack_logistics",
+        "pack_chem",
+        "pack_military",
+        "pack_energy"
+      ],
+      "unlock": "t_assembly2",
+      "desc": "Faster arms, more recipes. The workhorse of the mid game."
+    },
+    {
+      "id": "assembler_mk3",
+      "name": "Assembler III",
+      "category": "processing",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "alloy_plate": 10,
+        "advanced_circuit": 8,
+        "machine_frame": 3,
+        "lubricant": 10
+      },
+      "buildTime": 44,
+      "hp": 1400,
+      "powerUse": 170,
+      "vision": 4,
+      "storage": 600,
+      "linkRadius": 6,
+      "speed": 2.5,
+      "upgradeOf": "assembler_mk2",
+      "recipes": [
+        "make_iron_plate",
+        "make_steel_plate",
+        "make_wire",
+        "make_gear",
+        "make_machine_frame",
+        "make_circuit",
+        "make_control_unit",
+        "make_battery",
+        "make_solar_cell",
+        "make_advanced_part",
+        "make_heat_shield",
+        "make_satellite",
+        "make_probe",
+        "pack_basic",
+        "pack_logistics",
+        "pack_chem",
+        "pack_military",
+        "pack_energy"
+      ],
+      "unlock": "t_assembly3",
+      "desc": "Two and a half times a mk1 and it can build satellites. Power bill to match."
+    },
+    {
+      "id": "circuit_printer",
+      "name": "Circuit Printer",
+      "category": "processing",
+      "size": {
+        "w": 4,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 20,
+        "copper_wire": 30,
+        "glass": 8,
+        "gear": 10
+      },
+      "buildTime": 30,
+      "hp": 850,
+      "powerUse": 80,
+      "vision": 4,
+      "storage": 350,
+      "linkRadius": 5,
+      "speed": 1.4,
+      "recipes": [
+        "make_circuit",
+        "make_advanced_circuit"
+      ],
+      "unlock": "t_electronics",
+      "desc": "Etches boards properly instead of an assembler's hand-soldering. Much faster per board."
+    },
+    {
+      "id": "nano_forge",
+      "name": "Nano Forge",
+      "category": "processing",
+      "size": {
+        "w": 5,
+        "h": 5
+      },
+      "cost": {
+        "superalloy": 4,
+        "advanced_part": 3,
+        "control_unit": 2,
+        "alloy_plate": 16
+      },
+      "buildTime": 80,
+      "hp": 2200,
+      "powerUse": 420,
+      "vision": 5,
+      "storage": 800,
+      "linkRadius": 7,
+      "speed": 4.0,
+      "recipes": [
+        "make_advanced_circuit",
+        "make_control_unit",
+        "make_advanced_part",
+        "make_superalloy",
+        "make_solar_cell",
+        "make_heat_shield",
+        "grind_lens",
+        "make_beacon_core",
+        "pack_energy"
+      ],
+      "unlock": "t_nanofabrication",
+      "desc": "Builds things atom by atom. Four times the speed of a mk1 and it never needs a second pass."
+    },
+    {
+      "id": "fuel_plant",
+      "name": "Fuel Plant",
+      "category": "processing",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 20,
+        "polymer": 14,
+        "circuit": 6,
+        "concrete": 14
+      },
+      "buildTime": 34,
+      "hp": 1200,
+      "powerUse": 60,
+      "vision": 4,
+      "storage": 900,
+      "linkRadius": 6,
+      "speed": 1.0,
+      "recipes": [
+        "make_fuel_bio",
+        "make_rocket_fuel"
+      ],
+      "unlock": "t_biofuel",
+      "desc": "Ferments growth into fuel and chills hydrogen into the stuff that actually lifts a rocket."
+    },
+    {
+      "id": "solar_array",
+      "name": "Solar Array",
+      "category": "power",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "solar_cell": 6,
+        "steel_plate": 4,
+        "copper_wire": 8
+      },
+      "buildTime": 16,
+      "hp": 350,
+      "powerGen": 90,
+      "dayOnly": true,
+      "supplyRadius": 4,
+      "vision": 3,
+      "unlock": "t_solar",
+      "desc": "Free power while the sun is up, nothing at night. Pair it with batteries or you brown out every evening."
+    },
+    {
+      "id": "wind_turbine",
+      "name": "Wind Turbine",
+      "category": "power",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "iron_plate": 12,
+        "gear": 8,
+        "copper_wire": 10
+      },
+      "buildTime": 14,
+      "hp": 300,
+      "powerGen": 60,
+      "weatherVaries": true,
+      "supplyRadius": 4,
+      "vision": 4,
+      "unlock": "t_wind",
+      "desc": "Cheap and honest, but it only gives what the weather gives. Storms actually help."
+    },
+    {
+      "id": "combustion_generator",
+      "name": "Combustion Generator",
+      "category": "power",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 16,
+        "gear": 10,
+        "stone": 12
+      },
+      "buildTime": 14,
+      "hp": 600,
+      "powerGen": 180,
+      "fuelInput": {
+        "fuel": 0.18
+      },
+      "altFuel": {
+        "coal": 0.25,
+        "biomass": 0.4
+      },
+      "supplyRadius": 6,
+      "vision": 4,
+      "storage": 200,
+      "linkRadius": 4,
+      "pollution": 3,
+      "unlock": "t_landfall",
+      "desc": "Burns whatever you feed it. Reliable, loud, and the smoke is what brings the swarms."
+    },
+    {
+      "id": "gas_turbine",
+      "name": "Gas Turbine",
+      "category": "power",
+      "size": {
+        "w": 4,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 18,
+        "gear": 14,
+        "circuit": 4,
+        "concrete": 10
+      },
+      "buildTime": 26,
+      "hp": 900,
+      "powerGen": 420,
+      "fuelInput": {
+        "natural_gas": 0.5
+      },
+      "altFuel": {
+        "methane": 0.55,
+        "hydrogen": 0.4
+      },
+      "supplyRadius": 7,
+      "vision": 4,
+      "storage": 400,
+      "linkRadius": 5,
+      "pollution": 2,
+      "unlock": "t_gasworks",
+      "desc": "Burns gas cleanly and hard. Twice the output of a combustion generator for less noise."
+    },
+    {
+      "id": "geothermal_plant",
+      "name": "Geothermal Plant",
+      "category": "power",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 24,
+        "tungsten_bar": 3,
+        "concrete": 24,
+        "circuit": 6
+      },
+      "buildTime": 44,
+      "hp": 1500,
+      "powerGen": 600,
+      "fuelInput": {
+        "magma": 0.6
+      },
+      "supplyRadius": 8,
+      "vision": 4,
+      "storage": 500,
+      "linkRadius": 5,
+      "unlock": "t_geothermal",
+      "desc": "Takes magma from a tap and turns the heat into steady power that never cares about the weather."
+    },
+    {
+      "id": "fission_reactor",
+      "name": "Fission Reactor",
+      "category": "power",
+      "size": {
+        "w": 5,
+        "h": 5
+      },
+      "cost": {
+        "alloy_plate": 20,
+        "tungsten_bar": 8,
+        "concrete": 50,
+        "advanced_circuit": 10,
+        "control_unit": 2
+      },
+      "buildTime": 100,
+      "hp": 3000,
+      "powerGen": 2000,
+      "fuelInput": {
+        "fuel_rod": 0.005
+      },
+      "coolant": {
+        "water": 2
+      },
+      "supplyRadius": 10,
+      "vision": 5,
+      "storage": 600,
+      "linkRadius": 6,
+      "meltdownRisk": true,
+      "unlock": "t_fission",
+      "desc": "One rod runs it for over three minutes. Needs constant water or it cooks itself and everything nearby."
+    },
+    {
+      "id": "battery_bank",
+      "name": "Battery Bank",
+      "category": "power",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "battery_cell": 6,
+        "steel_plate": 6,
+        "copper_wire": 10
+      },
+      "buildTime": 18,
+      "hp": 400,
+      "powerStore": 6000,
+      "supplyRadius": 5,
+      "vision": 3,
+      "unlock": "t_batteries",
+      "desc": "Stores 6000 kJ. Charges when you have spare power and carries the base through the night."
+    },
+    {
+      "id": "substation",
+      "name": "Substation",
+      "category": "power",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "steel_plate": 8,
+        "copper_wire": 16,
+        "circuit": 2
+      },
+      "buildTime": 12,
+      "hp": 400,
+      "powerUse": 4,
+      "supplyRadius": 15,
+      "vision": 6,
+      "unlock": "t_highvoltage",
+      "desc": "Carries the grid fifteen tiles instead of seven. Two of these replace a line of poles."
+    },
+    {
+      "id": "power_pole",
+      "name": "Power Pole",
+      "category": "power",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "iron_plate": 1,
+        "copper_wire": 2
+      },
+      "buildTime": 2,
+      "hp": 90,
+      "supplyRadius": 9,
+      "vision": 3,
+      "unlock": "t_landfall",
+      "desc": "Nine tiles of grid for almost nothing. Chain them to reach an outlying drill."
+    },
+    {
+      "id": "storage_crate",
+      "name": "Storage Crate",
+      "category": "logistics",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "iron_plate": 6
+      },
+      "buildTime": 6,
+      "hp": 300,
+      "storage": 1200,
+      "accepts": [
+        "solid"
+      ],
+      "linkRadius": 10,
+      "vision": 3,
+      "unlock": "t_landfall",
+      "desc": "Twelve hundred units of anything solid. Every machine whose store network it joins can draw from it without a truck."
+    },
+    {
+      "id": "warehouse",
+      "name": "Warehouse",
+      "category": "logistics",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 18,
+        "concrete": 16,
+        "gear": 6
+      },
+      "buildTime": 26,
+      "hp": 1400,
+      "storage": 6000,
+      "accepts": [
+        "solid"
+      ],
+      "linkRadius": 20,
+      "vision": 5,
+      "unlock": "t_haulage",
+      "desc": "The hub every truck route wants to end at. Big reach, big shelf."
+    },
+    {
+      "id": "silo",
+      "name": "Bulk Silo",
+      "category": "logistics",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 10,
+        "concrete": 20
+      },
+      "buildTime": 20,
+      "hp": 1000,
+      "storage": 5000,
+      "accepts": [
+        "bulk"
+      ],
+      "linkRadius": 8,
+      "vision": 4,
+      "unlock": "t_masonry",
+      "desc": "Only takes bulk - ore, stone, sand, coal, ice - but takes a lot of it, cheaply."
+    },
+    {
+      "id": "fluid_tank",
+      "name": "Fluid Tank",
+      "category": "logistics",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 12,
+        "iron_plate": 10
+      },
+      "buildTime": 18,
+      "hp": 800,
+      "storage": 6000,
+      "accepts": [
+        "liquid"
+      ],
+      "linkRadius": 8,
+      "vision": 3,
+      "unlock": "t_fluids",
+      "desc": "Liquids only. Rupturing one in a raid makes a mess that catches fire."
+    },
+    {
+      "id": "gas_tank",
+      "name": "Pressure Tank",
+      "category": "logistics",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 16,
+        "polymer": 10,
+        "circuit": 2
+      },
+      "buildTime": 22,
+      "hp": 700,
+      "storage": 5000,
+      "accepts": [
+        "gas"
+      ],
+      "linkRadius": 8,
+      "vision": 3,
+      "explosive": true,
+      "unlock": "t_gasworks",
+      "desc": "Holds pressurised gas. Do not put it next to the flame turrets."
+    },
+    {
+      "id": "depot",
+      "name": "Haulage Depot",
+      "category": "logistics",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 14,
+        "concrete": 10,
+        "circuit": 3
+      },
+      "buildTime": 18,
+      "hp": 900,
+      "storage": 2500,
+      "accepts": [
+        "solid",
+        "liquid",
+        "gas"
+      ],
+      "linkRadius": 26,
+      "vision": 6,
+      "routeSlots": 6,
+      "unlock": "t_haulage",
+      "desc": "Takes anything and reaches ten tiles. Six route slots, so it is the natural centre of an outpost."
+    },
+    {
+      "id": "loading_dock",
+      "name": "Loading Dock",
+      "category": "logistics",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "iron_plate": 8,
+        "gear": 6,
+        "concrete": 6
+      },
+      "buildTime": 10,
+      "hp": 500,
+      "powerUse": 15,
+      "loadSpeed": 3.0,
+      "linkRadius": 4,
+      "vision": 3,
+      "unlock": "t_haulage",
+      "desc": "Attach it to a store and trucks load three times faster. Cheapest throughput upgrade there is."
+    },
+    {
+      "id": "dirt_path",
+      "name": "Dirt Path",
+      "category": "logistics",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "stone": 1
+      },
+      "buildTime": 0.6,
+      "hp": 60,
+      "roadTier": 1,
+      "speedMult": 1.25,
+      "unlock": "t_landfall",
+      "desc": "Trodden ground. A quarter faster than raw terrain and it costs one stone."
+    },
+    {
+      "id": "gravel_road",
+      "name": "Gravel Road",
+      "category": "logistics",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "stone": 1,
+        "sand": 1
+      },
+      "buildTime": 1.0,
+      "hp": 110,
+      "roadTier": 2,
+      "speedMult": 1.7,
+      "unlock": "t_roads",
+      "desc": "Levelled and packed. Seventy per cent faster, and mud stops mattering."
+    },
+    {
+      "id": "paved_road",
+      "name": "Paved Road",
+      "category": "logistics",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "concrete": 2
+      },
+      "buildTime": 1.6,
+      "hp": 220,
+      "roadTier": 3,
+      "speedMult": 2.4,
+      "unlock": "t_paving",
+      "desc": "Poured slab. Trucks run at better than double cross-country speed on it."
+    },
+    {
+      "id": "bridge",
+      "name": "Bridge Span",
+      "category": "logistics",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "steel_plate": 3,
+        "concrete": 3
+      },
+      "buildTime": 4,
+      "hp": 400,
+      "roadTier": 2,
+      "speedMult": 1.7,
+      "onWater": true,
+      "unlock": "t_roads",
+      "desc": "The only way a wheeled vehicle crosses water. Costs more than road per tile, obviously."
+    },
+    {
+      "id": "truck_garage",
+      "name": "Truck Garage",
+      "category": "logistics",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 18,
+        "gear": 14,
+        "concrete": 8
+      },
+      "buildTime": 20,
+      "hp": 1000,
+      "powerUse": 25,
+      "vehicleTypes": [
+        "ground"
+      ],
+      "vehicleSlots": 3,
+      "linkRadius": 5,
+      "vision": 5,
+      "unlock": "t_haulage",
+      "desc": "Builds and keeps ground haulers. You need one before you can run any route."
+    },
+    {
+      "id": "tanker_bay",
+      "name": "Tanker Bay",
+      "category": "logistics",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 14,
+        "iron_plate": 12,
+        "concrete": 8
+      },
+      "buildTime": 22,
+      "hp": 1000,
+      "powerUse": 30,
+      "vehicleTypes": [
+        "fluid",
+        "gas"
+      ],
+      "vehicleSlots": 3,
+      "linkRadius": 5,
+      "vision": 5,
+      "unlock": "t_fluids",
+      "desc": "Same idea for tankers and gas haulers. Liquids will not ride in a crate truck."
+    },
+    {
+      "id": "drone_pad",
+      "name": "Drone Pad",
+      "category": "logistics",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "steel_plate": 10,
+        "advanced_circuit": 4,
+        "battery_cell": 4
+      },
+      "buildTime": 26,
+      "hp": 600,
+      "powerUse": 60,
+      "vehicleTypes": [
+        "air"
+      ],
+      "vehicleSlots": 4,
+      "linkRadius": 6,
+      "vision": 7,
+      "unlock": "t_drones",
+      "desc": "Drones ignore terrain entirely - no roads, no water, no cliffs - but they carry very little."
+    },
+    {
+      "id": "hover_lane",
+      "name": "Hover Lane",
+      "category": "logistics",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "alloy_plate": 1,
+        "advanced_circuit": 1
+      },
+      "buildTime": 3,
+      "hp": 200,
+      "roadTier": 4,
+      "speedMult": 3.2,
+      "powerUse": 3,
+      "unlock": "t_hover",
+      "desc": "A powered strip that lifts a hover truck off the ground. Three times cross-country speed, and it draws power every tile."
+    },
+    {
+      "id": "wooden_wall",
+      "name": "Timber Barricade",
+      "category": "defence",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "biomass": 4
+      },
+      "buildTime": 1.5,
+      "hp": 220,
+      "blocks": true,
+      "vision": 2,
+      "unlock": "t_landfall",
+      "desc": "Stops a swarmer for a few seconds. That is often exactly long enough."
+    },
+    {
+      "id": "steel_wall",
+      "name": "Steel Wall",
+      "category": "defence",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "steel_plate": 2
+      },
+      "buildTime": 3,
+      "hp": 900,
+      "blocks": true,
+      "vision": 2,
+      "unlock": "t_fortification",
+      "desc": "Four times the wooden wall and it does not burn."
+    },
+    {
+      "id": "reinforced_wall",
+      "name": "Reinforced Wall",
+      "category": "defence",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "steel_plate": 2,
+        "concrete": 4
+      },
+      "buildTime": 5,
+      "hp": 2400,
+      "blocks": true,
+      "armor": 8,
+      "vision": 2,
+      "unlock": "t_hardened_defence",
+      "desc": "Concrete over steel, with armour that shrugs off small bites entirely."
+    },
+    {
+      "id": "gate",
+      "name": "Gate",
+      "category": "defence",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "steel_plate": 3,
+        "gear": 2,
+        "circuit": 1
+      },
+      "buildTime": 5,
+      "hp": 800,
+      "blocks": true,
+      "passableToOwn": true,
+      "vision": 3,
+      "unlock": "t_fortification",
+      "desc": "Opens for your own trucks and builders, stays shut for everything else."
+    },
+    {
+      "id": "watchtower",
+      "name": "Watchtower",
+      "category": "defence",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "iron_plate": 10,
+        "stone": 12
+      },
+      "buildTime": 12,
+      "hp": 600,
+      "powerUse": 5,
+      "vision": 20,
+      "range": 13,
+      "dps": 18,
+      "damageType": "physical",
+      "unlock": "t_landfall",
+      "desc": "Mostly eyes, a little rifle fire. Sees twice as far as anything else this cheap, and it is the only gun you have until steel."
+    },
+    {
+      "id": "gun_turret",
+      "name": "Gun Turret",
+      "category": "defence",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "iron_plate": 16,
+        "gear": 10,
+        "steel_plate": 4
+      },
+      "buildTime": 14,
+      "hp": 900,
+      "powerUse": 10,
+      "vision": 12,
+      "range": 13,
+      "dps": 48,
+      "damageType": "physical",
+      "armorPierce": 3,
+      "noise": 2,
+      "unlock": "t_ballistics",
+      "desc": "The default answer. Good against anything that comes in a straight line."
+    },
+    {
+      "id": "flame_turret",
+      "name": "Flame Turret",
+      "category": "defence",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "steel_plate": 10,
+        "polymer": 8,
+        "gear": 6
+      },
+      "buildTime": 18,
+      "hp": 800,
+      "powerUse": 12,
+      "fuelInput": {
+        "fuel": 0.1
+      },
+      "vision": 10,
+      "range": 8,
+      "dps": 110,
+      "splash": 2.5,
+      "damageType": "fire",
+      "unlock": "t_incendiary",
+      "desc": "Short reach, huge damage, and it hits the whole crowd. Made for chokepoints."
+    },
+    {
+      "id": "laser_turret",
+      "name": "Laser Turret",
+      "category": "defence",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "steel_plate": 12,
+        "lens": 2,
+        "advanced_circuit": 4,
+        "battery_cell": 2
+      },
+      "buildTime": 26,
+      "hp": 900,
+      "powerUse": 140,
+      "vision": 15,
+      "range": 16,
+      "dps": 130,
+      "damageType": "energy",
+      "armorPierce": 10,
+      "unlock": "t_lasers",
+      "desc": "No ammunition ever, but it eats power and goes quiet the moment the grid browns out."
+    },
+    {
+      "id": "tesla_coil",
+      "name": "Tesla Coil",
+      "category": "defence",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "copper_wire": 40,
+        "battery_cell": 4,
+        "advanced_circuit": 3
+      },
+      "buildTime": 28,
+      "hp": 700,
+      "powerUse": 110,
+      "vision": 10,
+      "range": 10,
+      "dps": 80,
+      "chain": 4,
+      "damageType": "energy",
+      "unlock": "t_electrics",
+      "desc": "Arcs to four targets at once. Against a swarm it out-damages anything else its size."
+    },
+    {
+      "id": "artillery",
+      "name": "Artillery Piece",
+      "category": "defence",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 30,
+        "tungsten_bar": 4,
+        "control_unit": 1,
+        "concrete": 20
+      },
+      "buildTime": 55,
+      "hp": 1800,
+      "powerUse": 40,
+      "vision": 14,
+      "range": 42,
+      "minRange": 9,
+      "dps": 280,
+      "splash": 5,
+      "damageType": "physical",
+      "noise": 6,
+      "unlock": "t_artillery",
+      "desc": "Shells nests before they hatch a wave. Cannot hit anything standing on top of it."
+    },
+    {
+      "id": "missile_battery",
+      "name": "Missile Battery",
+      "category": "defence",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 22,
+        "advanced_circuit": 6,
+        "control_unit": 1,
+        "polymer": 12
+      },
+      "buildTime": 46,
+      "hp": 1500,
+      "powerUse": 60,
+      "vision": 16,
+      "range": 28,
+      "dps": 190,
+      "splash": 3,
+      "damageType": "explosive",
+      "hitsAir": true,
+      "unlock": "t_missiles",
+      "desc": "The only ground gun that reliably hits flyers. Expensive per shot, worth it."
+    },
+    {
+      "id": "slow_field_emitter",
+      "name": "Slow-Field Emitter",
+      "category": "defence",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "advanced_circuit": 5,
+        "battery_cell": 3,
+        "copper_wire": 20
+      },
+      "buildTime": 24,
+      "hp": 600,
+      "powerUse": 90,
+      "vision": 8,
+      "range": 11,
+      "slow": 0.45,
+      "unlock": "t_field_tech",
+      "desc": "Everything hostile inside the field moves at just over half speed. Multiplies every turret you own."
+    },
+    {
+      "id": "mine_field",
+      "name": "Mine Field",
+      "category": "defence",
+      "size": {
+        "w": 1,
+        "h": 1
+      },
+      "cost": {
+        "sulfur": 6,
+        "iron_plate": 2
+      },
+      "buildTime": 3,
+      "hp": 40,
+      "oneShot": true,
+      "damage": 420,
+      "splash": 3,
+      "damageType": "explosive",
+      "unlock": "t_explosives",
+      "desc": "One big bang, then it is gone. Cheap enough to carpet an approach."
+    },
+    {
+      "id": "shield_generator",
+      "name": "Shield Generator",
+      "category": "defence",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "advanced_circuit": 10,
+        "battery_cell": 8,
+        "alloy_plate": 6
+      },
+      "buildTime": 50,
+      "hp": 1200,
+      "powerUse": 220,
+      "vision": 8,
+      "shieldPool": 3000,
+      "shieldRadius": 14,
+      "shieldRegen": 25,
+      "unlock": "t_shields",
+      "desc": "A bubble that soaks damage for everything under it and refills between waves. Dies fast if the grid does."
+    },
+    {
+      "id": "repair_bay",
+      "name": "Repair Bay",
+      "category": "defence",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 14,
+        "gear": 12,
+        "circuit": 6
+      },
+      "buildTime": 26,
+      "hp": 900,
+      "powerUse": 70,
+      "vision": 6,
+      "repairRate": 30,
+      "repairRadius": 13,
+      "linkRadius": 5,
+      "unlock": "t_field_repair",
+      "desc": "Patches walls and turrets inside its reach between waves, using iron plate from the nearest store."
+    },
+    {
+      "id": "short_radar",
+      "name": "Short Radar",
+      "category": "scan",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "iron_plate": 12,
+        "circuit": 4,
+        "copper_wire": 10
+      },
+      "buildTime": 16,
+      "hp": 500,
+      "powerUse": 45,
+      "vision": 24,
+      "scanRadius": 26,
+      "scanPeriod": 20,
+      "unlock": "t_radar",
+      "desc": "Sees twenty-four tiles and slowly sweeps twenty-six for buried nodes. The first thing that makes the map stop being dark."
+    },
+    {
+      "id": "long_radar",
+      "name": "Long Radar",
+      "category": "scan",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 16,
+        "advanced_circuit": 4,
+        "lens": 2,
+        "copper_wire": 24
+      },
+      "buildTime": 32,
+      "hp": 800,
+      "powerUse": 130,
+      "vision": 44,
+      "scanRadius": 64,
+      "scanPeriod": 40,
+      "unlock": "t_long_range_scan",
+      "desc": "Covers most of a local map from one mast. Also spots waves forming at the edge."
+    },
+    {
+      "id": "scanner_tower",
+      "name": "Scanner Tower",
+      "category": "scan",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "iron_plate": 10,
+        "gear": 4,
+        "copper_wire": 6
+      },
+      "buildTime": 14,
+      "hp": 450,
+      "powerUse": 35,
+      "vision": 12,
+      "scanRadius": 34,
+      "scanPeriod": 12,
+      "nodeOnly": true,
+      "unlock": "t_landfall",
+      "desc": "Does not see the ground, only what is under it. Reveals resource nodes fast and cheap."
+    },
+    {
+      "id": "survey_station",
+      "name": "Survey Station",
+      "category": "scan",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 14,
+        "circuit": 6,
+        "lens": 1,
+        "concrete": 10
+      },
+      "buildTime": 30,
+      "hp": 900,
+      "powerUse": 70,
+      "vision": 16,
+      "regionScan": true,
+      "scanPeriod": 90,
+      "unlock": "t_survey",
+      "desc": "Reads the region map instead of the local one: tells you which neighbouring tiles are worth landing a second outpost on."
+    },
+    {
+      "id": "satellite_uplink",
+      "name": "Satellite Uplink",
+      "category": "scan",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "alloy_plate": 8,
+        "advanced_circuit": 10,
+        "lens": 4,
+        "control_unit": 1
+      },
+      "buildTime": 55,
+      "hp": 1400,
+      "powerUse": 200,
+      "vision": 20,
+      "recipes": [
+        "pack_space"
+      ],
+      "linkRadius": 6,
+      "storage": 400,
+      "unlock": "t_satellites",
+      "desc": "Talks to anything you have in orbit. Without one, a launched satellite is just an expensive rock."
+    },
+    {
+      "id": "probe_launcher",
+      "name": "Probe Launcher",
+      "category": "scan",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 26,
+        "alloy_plate": 6,
+        "control_unit": 1,
+        "concrete": 24
+      },
+      "buildTime": 60,
+      "hp": 1600,
+      "powerUse": 90,
+      "vision": 10,
+      "linkRadius": 5,
+      "storage": 300,
+      "unlock": "t_probes",
+      "desc": "Throws a probe at another planet. When it arrives you learn what that world is made of before you commit a rocket."
+    },
+    {
+      "id": "beacon",
+      "name": "Frontier Beacon",
+      "category": "scan",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "beacon_core": 1,
+        "alloy_plate": 20,
+        "control_unit": 2,
+        "concrete": 40
+      },
+      "buildTime": 150,
+      "hp": 3000,
+      "powerUse": 300,
+      "vision": 30,
+      "victoryPoint": true,
+      "unlock": "t_beacon",
+      "desc": "Lights a claim that can be seen from orbit. Light one on enough worlds and you have won."
+    },
+    {
+      "id": "lab",
+      "name": "Laboratory",
+      "category": "science",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 16,
+        "gear": 10,
+        "copper_wire": 12
+      },
+      "buildTime": 18,
+      "hp": 700,
+      "powerUse": 60,
+      "vision": 5,
+      "linkRadius": 6,
+      "storage": 300,
+      "researchRate": 1.0,
+      "unlock": "t_landfall",
+      "desc": "Eats science packs and turns them into research. Build more to research faster - they stack directly."
+    },
+    {
+      "id": "research_station",
+      "name": "Research Station",
+      "category": "science",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 20,
+        "advanced_circuit": 6,
+        "glass": 12,
+        "concrete": 14
+      },
+      "buildTime": 40,
+      "hp": 1200,
+      "powerUse": 170,
+      "vision": 6,
+      "linkRadius": 7,
+      "storage": 600,
+      "researchRate": 3.2,
+      "unlock": "t_research_methods",
+      "desc": "Three labs' worth in one footprint, and it can hold the higher packs."
+    },
+    {
+      "id": "observatory",
+      "name": "Observatory",
+      "category": "science",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 18,
+        "lens": 4,
+        "advanced_circuit": 4,
+        "concrete": 16
+      },
+      "buildTime": 44,
+      "hp": 1100,
+      "powerUse": 110,
+      "vision": 26,
+      "researchRate": 1.2,
+      "planetIntel": true,
+      "unlock": "t_astronomy",
+      "desc": "Watches the sky. Reveals the rough make-up of nearby planets without spending a probe, and helps research."
+    },
+    {
+      "id": "archive",
+      "name": "Archive",
+      "category": "science",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "concrete": 20,
+        "polymer": 10,
+        "circuit": 6
+      },
+      "buildTime": 30,
+      "hp": 1300,
+      "powerUse": 25,
+      "vision": 4,
+      "carryResearch": true,
+      "unlock": "t_research_methods",
+      "desc": "Everything researched here survives the journey. Without one, a new planet starts you back at basic tools."
+    },
+    {
+      "id": "launch_pad",
+      "name": "Launch Pad",
+      "category": "space",
+      "size": {
+        "w": 6,
+        "h": 6
+      },
+      "cost": {
+        "concrete": 80,
+        "steel_plate": 40,
+        "tungsten_bar": 6,
+        "control_unit": 2
+      },
+      "buildTime": 120,
+      "hp": 3000,
+      "powerUse": 150,
+      "vision": 8,
+      "linkRadius": 8,
+      "storage": 3000,
+      "unlock": "t_rocketry",
+      "desc": "A poured slab with a flame trench and a hold. Everything you want to take to the next world is loaded here."
+    },
+    {
+      "id": "rocket_assembly",
+      "name": "Rocket Assembly",
+      "category": "space",
+      "size": {
+        "w": 6,
+        "h": 6
+      },
+      "cost": {
+        "alloy_plate": 30,
+        "machine_frame": 8,
+        "advanced_part": 4,
+        "control_unit": 2,
+        "concrete": 60
+      },
+      "buildTime": 140,
+      "hp": 3200,
+      "powerUse": 380,
+      "vision": 7,
+      "linkRadius": 8,
+      "storage": 2500,
+      "speed": 1.0,
+      "recipes": [
+        "make_rocket_part",
+        "make_satellite",
+        "make_probe",
+        "make_station_module",
+        "make_beacon_core"
+      ],
+      "unlock": "t_rocketry",
+      "desc": "The gantry that builds sections, satellites and probes. The single most expensive machine on the planet."
+    },
+    {
+      "id": "satellite_launcher",
+      "name": "Satellite Launcher",
+      "category": "space",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 30,
+        "alloy_plate": 8,
+        "control_unit": 1,
+        "concrete": 30
+      },
+      "buildTime": 70,
+      "hp": 1800,
+      "powerUse": 120,
+      "vision": 8,
+      "linkRadius": 6,
+      "storage": 600,
+      "unlock": "t_satellites",
+      "desc": "A small rail for small payloads. Cheaper than using the main pad every time you want eyes in orbit."
+    },
+    {
+      "id": "orbital_lift",
+      "name": "Orbital Lift",
+      "category": "space",
+      "size": {
+        "w": 5,
+        "h": 5
+      },
+      "cost": {
+        "superalloy": 10,
+        "alloy_plate": 24,
+        "control_unit": 4,
+        "advanced_part": 6,
+        "concrete": 60
+      },
+      "buildTime": 180,
+      "hp": 3600,
+      "powerUse": 600,
+      "vision": 10,
+      "linkRadius": 8,
+      "storage": 4000,
+      "unlock": "t_orbital_station",
+      "desc": "Once it stands, cargo goes up without a rocket. It is what makes an orbital station affordable."
+    },
+    {
+      "id": "landing_beacon",
+      "name": "Landing Beacon",
+      "category": "space",
+      "size": {
+        "w": 2,
+        "h": 2
+      },
+      "cost": {
+        "steel_plate": 8,
+        "circuit": 4,
+        "battery_cell": 2
+      },
+      "buildTime": 14,
+      "hp": 500,
+      "powerUse": 20,
+      "vision": 12,
+      "unlock": "t_rocketry",
+      "desc": "Marks a safe drop point. A rocket arriving at a planet with one of these lands right on your base instead of wherever it likes."
+    },
+    {
+      "id": "cryo_forge",
+      "name": "Cryo Forge",
+      "category": "variant",
+      "variantOf": "alloy_foundry",
+      "planetRequirement": "cryonite",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 20,
+        "cryonite": 6,
+        "concrete": 16
+      },
+      "buildTime": 40,
+      "hp": 1500,
+      "powerUse": 120,
+      "vision": 4,
+      "storage": 500,
+      "linkRadius": 6,
+      "speed": 1.4,
+      "recipes": [
+        "make_alloy_plate",
+        "quench_alloy"
+      ],
+      "unlock": "t_cryo_metallurgy",
+      "desc": "Quenching steel in cryonite gives alloy plate for a third of the titanium. Only works on a world cold enough to keep cryonite stable."
+    },
+    {
+      "id": "plasma_refinery",
+      "name": "Plasma Refinery",
+      "category": "variant",
+      "variantOf": "arc_furnace",
+      "planetRequirement": "pyrocrystal",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 22,
+        "pyrocrystal": 6,
+        "tungsten_bar": 2,
+        "concrete": 18
+      },
+      "buildTime": 46,
+      "hp": 1600,
+      "powerUse": 90,
+      "vision": 4,
+      "storage": 400,
+      "linkRadius": 6,
+      "speed": 2.2,
+      "recipes": [
+        "smelt_iron",
+        "smelt_copper",
+        "make_steel",
+        "smelt_titanium",
+        "smelt_tungsten",
+        "plasma_smelt"
+      ],
+      "unlock": "t_plasma_smelting",
+      "desc": "A pyrocrystal core holds an arc hotter than any furnace. Smelts at better than twice the speed and skips the ingot step for steel."
+    },
+    {
+      "id": "void_condenser",
+      "name": "Void Condenser",
+      "category": "variant",
+      "variantOf": "atmospheric_condenser",
+      "planetRequirement": "umbral_shale",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 18,
+        "umbral_shale": 8,
+        "advanced_circuit": 4
+      },
+      "buildTime": 44,
+      "hp": 1200,
+      "powerUse": 160,
+      "vision": 5,
+      "storage": 500,
+      "linkRadius": 6,
+      "speed": 1.0,
+      "recipes": [
+        "condense_nitrogen",
+        "condense_hydrogen",
+        "sift_helium",
+        "condense_void"
+      ],
+      "unlock": "t_void_condensing",
+      "desc": "Umbral shale pulls thin gas out of nothing. The only practical source of helium-3 on a world without a gas giant overhead."
+    },
+    {
+      "id": "resonance_mill",
+      "name": "Resonance Mill",
+      "category": "variant",
+      "variantOf": "circuit_printer",
+      "planetRequirement": "aetherite",
+      "size": {
+        "w": 4,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 16,
+        "aetherite": 6,
+        "copper_wire": 30
+      },
+      "buildTime": 38,
+      "hp": 1000,
+      "powerUse": 150,
+      "vision": 4,
+      "storage": 400,
+      "linkRadius": 5,
+      "speed": 1.8,
+      "recipes": [
+        "make_circuit",
+        "make_advanced_circuit",
+        "mill_aether"
+      ],
+      "unlock": "t_resonance",
+      "desc": "Aetherite hums at exactly the right frequency to lay circuit traces without etching. Four logic cores a pass."
+    },
+    {
+      "id": "bio_vat",
+      "name": "Bio Vat",
+      "category": "variant",
+      "variantOf": "chemical_plant",
+      "planetRequirement": "xenoplasm",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 14,
+        "glass": 16,
+        "xenoplasm": 6,
+        "polymer": 10
+      },
+      "buildTime": 40,
+      "hp": 1300,
+      "powerUse": 110,
+      "vision": 4,
+      "storage": 700,
+      "linkRadius": 6,
+      "speed": 1.3,
+      "selfRepair": 2,
+      "recipes": [
+        "culture_plate",
+        "make_fertiliser",
+        "make_fuel_bio",
+        "make_steel_plate"
+      ],
+      "unlock": "t_xenobiology",
+      "desc": "Grows plate instead of rolling it, and the vat heals its own damage. Needs a world where xenoplasm still lives."
+    },
+    {
+      "id": "umbral_kiln",
+      "name": "Umbral Kiln",
+      "category": "variant",
+      "variantOf": "kiln",
+      "planetRequirement": "umbral_shale",
+      "size": {
+        "w": 3,
+        "h": 4
+      },
+      "cost": {
+        "stone": 30,
+        "umbral_shale": 6,
+        "steel_plate": 8
+      },
+      "buildTime": 34,
+      "hp": 1100,
+      "powerUse": 80,
+      "vision": 4,
+      "storage": 350,
+      "linkRadius": 5,
+      "speed": 1.5,
+      "recipes": [
+        "char_biomass",
+        "calcine_lime",
+        "bake_shield"
+      ],
+      "unlock": "t_umbral_shielding",
+      "desc": "Bakes shale into shielding that eats heat and hides what is under it. Cheap heat shields, and enemy scouts walk past your base."
+    },
+    {
+      "id": "glimmer_still",
+      "name": "Glimmer Still",
+      "category": "variant",
+      "variantOf": "glassworks",
+      "planetRequirement": "glimmer_salt",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "glass": 18,
+        "glimmer_salt": 6,
+        "copper_wire": 14
+      },
+      "buildTime": 32,
+      "hp": 800,
+      "powerUse": 100,
+      "vision": 4,
+      "storage": 300,
+      "linkRadius": 5,
+      "speed": 1.6,
+      "recipes": [
+        "make_glass",
+        "grind_lens",
+        "distil_lens"
+      ],
+      "unlock": "t_glimmer_optics",
+      "desc": "Distils glimmer salt into lenses three at a time. On a glimmer world, lasers and long optics stop being a bottleneck."
+    },
+    {
+      "id": "ferrovine_loom",
+      "name": "Ferrovine Loom",
+      "category": "variant",
+      "variantOf": "assembler_mk1",
+      "planetRequirement": "ferrovine",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 16,
+        "ferrovine": 6,
+        "gear": 10
+      },
+      "buildTime": 28,
+      "hp": 850,
+      "powerUse": 70,
+      "vision": 4,
+      "storage": 300,
+      "linkRadius": 5,
+      "speed": 1.4,
+      "recipes": [
+        "weave_cable",
+        "make_wire",
+        "make_gear"
+      ],
+      "unlock": "t_ferrovine",
+      "desc": "Ferrovine grows metal as cable, so the loom just has to spool it. Ten wire from two vine, no copper at all."
+    },
+    {
+      "id": "voltaic_coil_works",
+      "name": "Voltaic Coil Works",
+      "category": "variant",
+      "variantOf": "assembler_mk2",
+      "planetRequirement": "voltaic_ore",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 14,
+        "voltaic_ore": 6,
+        "copper_wire": 24
+      },
+      "buildTime": 34,
+      "hp": 950,
+      "powerUse": 130,
+      "vision": 4,
+      "storage": 350,
+      "linkRadius": 5,
+      "speed": 1.5,
+      "recipes": [
+        "wind_coil",
+        "make_battery"
+      ],
+      "unlock": "t_voltaics",
+      "desc": "Voltaic ore holds a charge before you even connect it. Six battery cells a pass instead of two."
+    },
+    {
+      "id": "storm_anchor",
+      "name": "Storm Tap",
+      "category": "variant",
+      "variantOf": "wind_turbine",
+      "planetRequirement": "voltaic_ore",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 12,
+        "voltaic_ore": 4,
+        "copper_wire": 20,
+        "circuit": 4
+      },
+      "buildTime": 30,
+      "hp": 700,
+      "powerGen": 260,
+      "stormBonus": 2.5,
+      "weatherVaries": true,
+      "supplyRadius": 7,
+      "vision": 5,
+      "unlock": "t_voltaics",
+      "desc": "Draws charge out of the air, and out of a storm two and a half times harder. On a storm world this is your base load."
+    },
+    {
+      "id": "helion_still",
+      "name": "Helion Still",
+      "category": "variant",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 20,
+        "helion_gas": 6,
+        "polymer": 14,
+        "circuit": 6
+      },
+      "buildTime": 42,
+      "hp": 1300,
+      "powerUse": 80,
+      "powerGen": 180,
+      "vision": 5,
+      "storage": 900,
+      "linkRadius": 6,
+      "speed": 1.6,
+      "unlock": "t_helion_fusion",
+      "variantOf": "fuel_plant",
+      "planetRequirement": "helion_gas",
+      "desc": "Cracks helion gas straight into rocket fuel and runs a fusion tap off the waste, so it pays its own power bill and then some. Only on a world that vents helion."
+    },
+    {
+      "id": "null_forge",
+      "name": "Null Forge",
+      "category": "variant",
+      "size": {
+        "w": 4,
+        "h": 4
+      },
+      "cost": {
+        "steel_plate": 24,
+        "nullstone": 8,
+        "tungsten_bar": 2,
+        "concrete": 18
+      },
+      "buildTime": 48,
+      "hp": 1700,
+      "powerUse": 110,
+      "vision": 4,
+      "storage": 600,
+      "linkRadius": 6,
+      "speed": 1.5,
+      "unlock": "t_null_forging",
+      "variantOf": "alloy_foundry",
+      "planetRequirement": "nullstone",
+      "desc": "Inside a nullstone shell every field goes flat, so superalloy can be cold-worked with no platinum in the mix at all. Half again the speed of an alloy foundry."
+    },
+    {
+      "id": "emberlace_loom",
+      "name": "Emberlace Loom",
+      "category": "variant",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "steel_plate": 16,
+        "emberlace": 6,
+        "gear": 12,
+        "glass": 8
+      },
+      "buildTime": 36,
+      "hp": 1000,
+      "powerUse": 90,
+      "vision": 4,
+      "storage": 400,
+      "linkRadius": 5,
+      "speed": 2.0,
+      "unlock": "t_emberlace_weaving",
+      "variantOf": "assembler_mk2",
+      "planetRequirement": "emberlace",
+      "desc": "Weaves emberlace threads into heat shielding three at a time, for a third of what an assembler spends on one. Twice the speed of the assembler it replaces."
+    },
+    {
+      "id": "pearl_press",
+      "name": "Pearl Press",
+      "category": "variant",
+      "size": {
+        "w": 3,
+        "h": 3
+      },
+      "cost": {
+        "iron_plate": 16,
+        "brinepearl": 6,
+        "glass": 10,
+        "polymer": 8
+      },
+      "buildTime": 34,
+      "hp": 1100,
+      "powerUse": 60,
+      "vision": 6,
+      "storage": 400,
+      "linkRadius": 5,
+      "speed": 1.4,
+      "crew": 14,
+      "selfRepair": 2,
+      "unlock": "t_pearl_medicine",
+      "variantOf": "dormitory",
+      "planetRequirement": "brinepearl",
+      "desc": "Bunks for fourteen and a press that grinds brinepearl into a tonic the labs will take instead of acid glassware. A dormitory houses six; this one houses a shift."
+    }
+  ]
+}

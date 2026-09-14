@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frontier Foundry · Playground prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body data-ready="0">
+
+<!-- ============================================================ title / new game -->
+<section class="screen title" id="screen-title">
+  <div class="title-grid">
+    <div class="title-left">
+      <a class="back" href="../../index.html">← Playground</a>
+      <h1 class="wordmark">FRONTIER <b>FOUNDRY</b></h1>
+      <p class="tagline">Land. Scan. Mine. Haul. Refine. Build. Hold the line. Leave on a rocket.</p>
+      <p class="lead">A colony lands on one tile of one planet with four builders and a crate of plate.
+        Everything under the ground is hidden until you scan for it. Machines share a store pool if they
+        can reach one; anything further needs a truck. The smoke you make is the clock the wildlife runs on.</p>
+
+      <div class="title-actions">
+        <button id="btn-quick" class="primary big">Quick start</button>
+        <button id="btn-continue" class="big">Continue</button>
+        <button id="btn-settings" class="big ghost">Settings</button>
+      </div>
+      <p class="tiny" id="continue-note"></p>
+
+      <div class="panel seedbox">
+        <h3>Galaxy</h3>
+        <div class="row">
+          <label class="field"><span>Seed</span><input id="seed" type="number" value="7" min="1" max="999999"></label>
+          <label class="field"><span>Difficulty</span>
+            <select id="difficulty"><option value="easy">Easy</option><option value="normal" selected>Normal</option><option value="hard">Hard</option></select>
+          </label>
+          <button id="btn-roll" class="small">Roll</button>
+          <button id="btn-scan-system" class="small primary">Survey system</button>
+        </div>
+        <p class="tiny" id="system-note">Roll a seed, then survey the system to see which worlds the lander can reach.</p>
+      </div>
+    </div>
+
+    <div class="title-right">
+      <div class="panel candidates">
+        <h3 class="ruled">Reachable worlds <span class="tiny" id="system-name"></span></h3>
+        <div id="candidate-list" class="candidate-list"></div>
+      </div>
+      <div class="panel howto">
+        <h3 class="ruled">Controls</h3>
+        <ul class="keys">
+          <li><kbd>B</kbd> build menu</li><li><kbd>R</kbd> route tool</li><li><kbd>Esc</kbd> cancel / menu</li>
+          <li><kbd>Space</kbd> pause</li><li><kbd>N</kbd> next message</li><li><kbd>M</kbd> planet map</li>
+          <li><kbd>WASD</kbd> / drag pan</li><li><kbd>wheel</kbd> zoom</li><li><kbd>Shift</kbd>+place repeats</li>
+          <li><kbd>Q</kbd> research</li><li><kbd>G</kbd> grid</li><li><kbd>Del</kbd> demolish</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ the game -->
+<div id="game">
+  <header id="topbar">
+    <div class="tb-left">
+      <button class="navtab on" data-screen="surface" data-tip="The base you are building (1)"><img class="ic" src="../../assets/data/icons/foundry/ui_build.svg" alt=""><span>Surface</span></button>
+      <button class="navtab" data-screen="research" data-tip="The research tree (Q)"><img class="ic" src="../../assets/data/icons/foundry/ui_research.svg" alt=""><span>Research</span></button>
+      <button class="navtab" data-screen="map" data-tip="The planet's world map and the regions you can survey (M)"><img class="ic" src="../../assets/data/icons/foundry/ui_planet.svg" alt=""><span>Planet</span></button>
+      <button class="navtab" data-screen="orbit" data-tip="Orbit: satellites, probes and the rocket"><img class="ic" src="../../assets/data/icons/foundry/ui_rocket.svg" alt=""><span>Orbit</span></button>
+      <button class="navtab" data-screen="codex" data-tip="Quests and the codex of everything you have found"><img class="ic" src="../../assets/data/icons/foundry/ui_quest.svg" alt=""><span>Quests</span></button>
+    </div>
+
+    <div class="tb-mid">
+      <button id="res-strip" class="res-strip" data-tip="Everything in every store. Click for the full inventory."></button>
+      <div class="gauge" id="power-gauge" data-tip="Generation against demand. Amber means a brownout: the factory is being shed to keep the drills and the guns running.">
+        <img class="ic" src="../../assets/data/icons/foundry/ui_power.svg" alt="">
+        <div class="gauge-bar"><i id="power-fill"></i></div>
+        <b id="power-text">0 / 0</b>
+      </div>
+      <button class="gauge" id="research-gauge" data-screen="research" data-tip="Current research. Click to open the tree.">
+        <img class="ic" src="../../assets/data/icons/foundry/ui_research.svg" alt="">
+        <div class="gauge-bar"><i id="research-fill"></i></div>
+        <b id="research-text">idle</b>
+      </button>
+      <div class="gauge threat" id="threat-gauge" data-tip="Threat: what the smoke and the noise have earned you, and how long until the next attack.">
+        <img class="ic" src="../../assets/data/icons/foundry/ui_attack.svg" alt="">
+        <div class="gauge-bar"><i id="threat-fill"></i></div>
+        <b id="threat-text">quiet</b>
+      </div>
+    </div>
+
+    <div class="tb-right">
+      <div class="planet-tag" id="planet-tag"><b id="planet-name">—</b><span class="tiny" id="planet-sub"></span></div>
+      <div class="speeds" role="group" aria-label="Game speed">
+        <button class="spd" data-speed="0" data-tip="Pause (Space)"><img class="ic" src="../../assets/data/icons/foundry/ui_pause.svg" alt=""></button>
+        <button class="spd on" data-speed="1" data-tip="Normal speed">1×</button>
+        <button class="spd" data-speed="2" data-tip="Double speed">2×</button>
+        <button class="spd" data-speed="4" data-tip="Four times speed"><img class="ic" src="../../assets/data/icons/foundry/ui_fast.svg" alt=""></button>
+      </div>
+      <div class="clock" id="clock" data-tip="Local day and time of day. Solar output follows it."><b id="clock-day">day 1</b><span id="clock-time">06:00</span></div>
+      <button id="btn-menu" class="small ghost" data-tip="Save, load, settings (Esc)">Menu</button>
+    </div>
+  </header>
+
+  <div id="screens">
+    <!-- ---------------------------------------------------------- surface -->
+    <section class="screen play on" id="screen-surface">
+      <div class="surface-wrap">
+        <canvas id="map"></canvas>
+
+        <div id="wave-banner" class="wave-banner" hidden></div>
+        <div id="hazard-banner" class="hazard-banner" hidden></div>
+        <div id="map-hint" class="map-hint" hidden></div>
+
+        <aside id="sidepanel" class="sidepanel" hidden></aside>
+
+        <div class="minimap-wrap">
+          <canvas id="minimap" width="196" height="196"></canvas>
+          <div class="mini-legend tiny">click to look</div>
+        </div>
+
+        <aside id="feed" class="feed">
+          <div class="feed-head">
+            <b>Log</b>
+            <span class="pill" id="feed-unread">0</span>
+            <select id="feed-filter" class="small" data-tip="How much noise the log makes">
+              <option value="1">everything</option>
+              <option value="2" selected>routine and up</option>
+              <option value="3">important</option>
+              <option value="4">urgent only</option>
+            </select>
+            <select id="feed-kind" class="small" data-tip="Only one kind of message">
+              <option value="all" selected>all kinds</option>
+              <option value="build">building</option>
+              <option value="economy">factory</option>
+              <option value="combat">attacks</option>
+              <option value="science">science</option>
+              <option value="quests">objectives</option>
+              <option value="space">space</option>
+            </select>
+            <button id="feed-clear" class="small ghost" data-tip="Mark everything read">clear</button>
+          </div>
+          <div class="feed-list" id="feed-list"></div>
+        </aside>
+      </div>
+
+      <div id="buildbar" class="buildbar">
+        <div class="bb-tabs" id="bb-tabs"></div>
+        <div class="bb-items" id="bb-items"></div>
+        <div class="bb-foot">
+          <button id="btn-route" class="small" data-tip="Route tool (R): pick a source store, then a destination">Route</button>
+          <button id="btn-routes" class="small ghost" data-tip="Every delivery run you have going, with what each one is worth">Runs</button>
+          <button id="btn-grid" class="small ghost" data-tip="Tile grid (G)">Grid</button>
+          <span class="tiny" id="bb-hint">Pick a building, then click the map. Right-click or Esc cancels.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------- research -->
+    <section class="screen" id="screen-research" hidden>
+      <div class="res-layout">
+        <div class="panel tree-panel">
+          <div class="row tree-head">
+            <h3 class="ruled">Research</h3>
+            <span class="tiny" id="tree-note"></span>
+            <span class="spacer"></span>
+            <label class="field inline"><span>Show</span><select id="tree-filter" class="small">
+              <option value="all">everything</option><option value="open" selected>available + done</option><option value="todo">not done</option>
+            </select></label>
+            <button class="small ghost" id="tree-zoom-out">−</button><button class="small ghost" id="tree-zoom-in">+</button>
+          </div>
+          <div class="tree-scroll" id="tree-scroll"><div class="tree-canvas" id="tree-canvas"></div></div>
+        </div>
+        <aside class="panel tech-side">
+          <div id="tech-detail" class="tech-detail"><p class="tiny">Pick a node to read it.</p></div>
+          <h4 class="ruled">Queue</h4>
+          <div id="tech-queue" class="tech-queue"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------- planet map -->
+    <section class="screen" id="screen-map" hidden>
+      <div class="map-layout">
+        <div class="panel world-panel">
+          <div class="row"><h3 class="ruled">Planet map</h3><span class="tiny" id="world-note"></span></div>
+          <canvas id="world-canvas" width="900" height="460"></canvas>
+          <p class="tiny" id="world-legend"></p>
+        </div>
+        <aside class="panel regions-panel">
+          <h3 class="ruled">Regions</h3>
+          <div id="region-list" class="region-list"></div>
+          <h4 class="ruled">Survey</h4>
+          <div id="survey-box" class="survey-box"></div>
+          <h4 class="ruled">Field objectives</h4>
+          <div id="map-quests" class="quest-mini"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------- orbit -->
+    <section class="screen" id="screen-orbit" hidden>
+      <div class="orbit-layout">
+        <div class="panel orbit-stage-panel">
+          <div id="orbit-stage" class="orbit-stage"></div>
+          <div class="orbit-caption tiny" id="orbit-caption"></div>
+        </div>
+        <aside class="panel orbit-side">
+          <h3 class="ruled">Orbit</h3>
+          <div id="orbit-status" class="orbit-status"></div>
+          <h4 class="ruled">Rocket</h4>
+          <div id="rocket-status" class="rocket-status"></div>
+          <h4 class="ruled">Destinations</h4>
+          <div id="destination-list" class="destination-list"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------- quests + codex -->
+    <section class="screen" id="screen-codex" hidden>
+      <div class="codex-layout">
+        <div class="panel">
+          <h3 class="ruled">Objectives</h3>
+          <div id="quest-list" class="quest-list"></div>
+        </div>
+        <div class="panel">
+          <div class="row"><h3 class="ruled">Codex</h3>
+            <div class="codex-tabs" id="codex-tabs"></div>
+          </div>
+          <div id="codex-body" class="codex-body"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ============================================================ dialogs -->
+<dialog id="dlg" class="panel"></dialog>
+<dialog id="menu-dialog" class="panel menu">
+  <h3 class="ruled">Frontier Foundry</h3>
+  <div class="menu-buttons">
+    <button data-menu="resume">Resume</button>
+    <button data-menu="save">Save game</button>
+    <button data-menu="load">Load last save</button>
+    <button data-menu="export">Export save</button>
+    <button data-menu="import">Import save</button>
+    <button data-menu="new">Abandon run</button>
+    <button data-menu="quit">Back to playground</button>
+  </div>
+  <details class="menu-section" open>
+    <summary>Settings</summary>
+    <div class="settings-body" id="settings-body"></div>
+  </details>
+</dialog>
+<div id="toasts" class="toasts"></div>
+<div id="boot" class="boot"><span>loading the frontier…</span></div>
+
+<script type="module" src="js/ui/main.js"></script>
+</body>
+</html>

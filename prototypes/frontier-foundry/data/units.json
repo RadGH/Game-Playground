@@ -1,0 +1,947 @@
+{
+  "schema": 1,
+  "note": "Walking things. Your crew are built at a yard/dormitory and cost crew capacity. Enemies spawn at map edges or from nests; threat is the budget cost a wave pays for one of them. waveTables say which enemies a planet archetype can field and from which wave number - every archetype fields six or seven kinds so no two worlds attack you the same way. nestTables say which nests sit on the ground there; a nest lets wanderers out on its own clock between waves, and clearing one pays a bounty (data/balance.json -> waves.nests).",
+  "units": [
+    {
+      "id": "builder",
+      "name": "Builder",
+      "side": "player",
+      "hp": 120,
+      "dps": 4,
+      "speed": 1.6,
+      "armor": 1,
+      "range": 1,
+      "vision": 7,
+      "buildRate": 1.0,
+      "crew": 1,
+      "cost": {
+        "iron_plate": 4
+      },
+      "buildTime": 6,
+      "unlock": "t_landfall",
+      "desc": "Walks to an outline and works on it. Two come free with every builder yard."
+    },
+    {
+      "id": "scout",
+      "name": "Scout",
+      "side": "player",
+      "hp": 140,
+      "dps": 10,
+      "speed": 2.6,
+      "armor": 1,
+      "range": 5,
+      "vision": 16,
+      "crew": 1,
+      "cost": {
+        "iron_plate": 4,
+        "circuit": 1
+      },
+      "buildTime": 8,
+      "unlock": "t_settlement",
+      "desc": "Sees sixteen tiles and runs. Sent out, it is how you explore a region without losing a truck."
+    },
+    {
+      "id": "guard",
+      "name": "Guard",
+      "side": "player",
+      "hp": 320,
+      "dps": 26,
+      "speed": 1.7,
+      "armor": 4,
+      "range": 7,
+      "vision": 10,
+      "crew": 1,
+      "cost": {
+        "steel_plate": 4,
+        "gear": 2
+      },
+      "buildTime": 12,
+      "unlock": "t_settlement",
+      "desc": "Stands where you put them and shoots what comes. Mobile cover for the gap the turrets do not reach."
+    },
+    {
+      "id": "sentinel",
+      "name": "Sentinel",
+      "side": "player",
+      "hp": 800,
+      "dps": 70,
+      "speed": 1.4,
+      "armor": 12,
+      "range": 9,
+      "vision": 12,
+      "crew": 2,
+      "cost": {
+        "alloy_plate": 4,
+        "advanced_circuit": 2,
+        "battery_cell": 1
+      },
+      "buildTime": 26,
+      "unlock": "t_shields",
+      "desc": "Powered armour on legs. Costs two crew and is worth four guards.",
+      "icon": "engineer"
+    },
+    {
+      "id": "swarmer",
+      "name": "Swarmer",
+      "side": "enemy",
+      "hp": 70,
+      "dps": 12,
+      "speed": 2.4,
+      "armor": 0,
+      "range": 1,
+      "vision": 12,
+      "threat": 1,
+      "tags": [
+        "swarm",
+        "melee"
+      ],
+      "targetPref": "nearest",
+      "desc": "Small, fast, and never alone. Dies to anything that hits more than one target."
+    },
+    {
+      "id": "burrower",
+      "name": "Burrower",
+      "side": "enemy",
+      "hp": 240,
+      "dps": 30,
+      "speed": 1.5,
+      "armor": 4,
+      "range": 1,
+      "vision": 10,
+      "threat": 3,
+      "tags": [
+        "melee",
+        "tunnel"
+      ],
+      "targetPref": "structure",
+      "ignoresWallsChance": 0.25,
+      "desc": "Comes up under the wall about a quarter of the time. A perimeter is not a promise against these."
+    },
+    {
+      "id": "thornback",
+      "name": "Thornback",
+      "side": "enemy",
+      "hp": 420,
+      "dps": 45,
+      "speed": 1.3,
+      "armor": 8,
+      "range": 2,
+      "vision": 10,
+      "threat": 5,
+      "tags": [
+        "melee",
+        "armoured"
+      ],
+      "targetPref": "wall",
+      "desc": "Armour plates that shrug off small-arms fire. Bring something that pierces."
+    },
+    {
+      "id": "hull_breaker",
+      "name": "Hull Breaker",
+      "side": "enemy",
+      "hp": 1400,
+      "dps": 120,
+      "speed": 0.9,
+      "armor": 18,
+      "range": 2,
+      "vision": 9,
+      "threat": 14,
+      "tags": [
+        "melee",
+        "siege",
+        "armoured"
+      ],
+      "targetPref": "wall",
+      "structureBonus": 2.5,
+      "desc": "Exists to take walls down. Slow enough to shell, hard enough that you had better.",
+      "icon": "raider_walker"
+    },
+    {
+      "id": "scrap_raider",
+      "name": "Scrap Raider",
+      "side": "enemy",
+      "hp": 300,
+      "dps": 34,
+      "speed": 1.9,
+      "armor": 5,
+      "range": 8,
+      "vision": 14,
+      "threat": 5,
+      "tags": [
+        "ranged",
+        "raider",
+        "intelligent"
+      ],
+      "targetPref": "storage",
+      "stealsCargo": true,
+      "desc": "People, not fauna. They shoot from range and go for the stores rather than the walls.",
+      "icon": "raider"
+    },
+    {
+      "id": "dune_lurker",
+      "name": "Dune Lurker",
+      "side": "enemy",
+      "hp": 520,
+      "dps": 60,
+      "speed": 2.0,
+      "armor": 6,
+      "range": 1,
+      "vision": 11,
+      "threat": 7,
+      "tags": [
+        "melee",
+        "ambush"
+      ],
+      "targetPref": "vehicle",
+      "ambush": true,
+      "desc": "Waits under the sand for a truck. Routes through open desert are a gamble until you pave them."
+    },
+    {
+      "id": "rime_hound",
+      "name": "Rime Hound",
+      "side": "enemy",
+      "hp": 260,
+      "dps": 36,
+      "speed": 2.7,
+      "armor": 3,
+      "range": 1,
+      "vision": 13,
+      "threat": 4,
+      "tags": [
+        "melee",
+        "pack",
+        "cold"
+      ],
+      "targetPref": "unit",
+      "slowsTarget": 0.3,
+      "desc": "Hunts in packs and bleeds heat out of whatever it bites. Goes for your crew first.",
+      "icon": "frost_stalker"
+    },
+    {
+      "id": "ash_stalker",
+      "name": "Ash Stalker",
+      "side": "enemy",
+      "hp": 480,
+      "dps": 70,
+      "speed": 1.8,
+      "armor": 7,
+      "range": 3,
+      "vision": 12,
+      "threat": 8,
+      "tags": [
+        "melee",
+        "fire"
+      ],
+      "targetPref": "nearest",
+      "damageType": "fire",
+      "desc": "Burns what it touches, and fire turrets barely scratch it. Volcanic worlds only.",
+      "icon": "magma_hound"
+    },
+    {
+      "id": "pyre_moth",
+      "name": "Pyre Moth",
+      "side": "enemy",
+      "hp": 190,
+      "dps": 40,
+      "speed": 3.2,
+      "armor": 2,
+      "range": 2,
+      "vision": 14,
+      "threat": 6,
+      "tags": [
+        "air",
+        "fire"
+      ],
+      "air": true,
+      "targetPref": "power",
+      "desc": "Flies straight over the wall and goes for generators. If you have no missile battery, this is the problem."
+    },
+    {
+      "id": "spore_drifter",
+      "name": "Spore Drifter",
+      "side": "enemy",
+      "hp": 340,
+      "dps": 28,
+      "speed": 1.4,
+      "armor": 2,
+      "range": 4,
+      "vision": 11,
+      "threat": 5,
+      "tags": [
+        "ranged",
+        "toxic"
+      ],
+      "targetPref": "unit",
+      "damageType": "toxic",
+      "dotDamage": 8,
+      "desc": "Coughs spores that keep hurting after the fight. Crew die to these days later."
+    },
+    {
+      "id": "bile_crawler",
+      "name": "Bile Crawler",
+      "side": "enemy",
+      "hp": 620,
+      "dps": 55,
+      "speed": 1.5,
+      "armor": 4,
+      "range": 5,
+      "vision": 11,
+      "threat": 9,
+      "tags": [
+        "ranged",
+        "toxic",
+        "acid"
+      ],
+      "targetPref": "turret",
+      "armorStrip": 4,
+      "desc": "Spits acid that eats armour off walls and turrets. Aims for whatever is shooting it."
+    },
+    {
+      "id": "tide_crawler",
+      "name": "Tide Crawler",
+      "side": "enemy",
+      "hp": 560,
+      "dps": 50,
+      "speed": 1.6,
+      "armor": 9,
+      "range": 1,
+      "vision": 10,
+      "threat": 8,
+      "tags": [
+        "melee",
+        "amphibious",
+        "armoured"
+      ],
+      "targetPref": "structure",
+      "crossesWater": true,
+      "desc": "Comes out of the water, so a shoreline is not a flank. Heavily shelled."
+    },
+    {
+      "id": "sky_leech",
+      "name": "Sky Leech",
+      "side": "enemy",
+      "hp": 260,
+      "dps": 34,
+      "speed": 3.0,
+      "armor": 1,
+      "range": 2,
+      "vision": 15,
+      "threat": 5,
+      "tags": [
+        "air",
+        "drain"
+      ],
+      "air": true,
+      "targetPref": "vehicle",
+      "drainsFuel": true,
+      "desc": "Latches onto a truck and drinks the tank. Routes stop mid-map for no visible reason."
+    },
+    {
+      "id": "storm_wraith",
+      "name": "Storm Wraith",
+      "side": "enemy",
+      "hp": 700,
+      "dps": 85,
+      "speed": 2.6,
+      "armor": 6,
+      "range": 6,
+      "vision": 16,
+      "threat": 12,
+      "tags": [
+        "air",
+        "energy",
+        "storm"
+      ],
+      "air": true,
+      "targetPref": "power",
+      "damageType": "energy",
+      "stormBonus": 1.6,
+      "desc": "Rides the weather in and empties your grid. During a storm it hits half again as hard."
+    },
+    {
+      "id": "void_mote",
+      "name": "Void Mote",
+      "side": "enemy",
+      "hp": 150,
+      "dps": 22,
+      "speed": 3.4,
+      "armor": 0,
+      "range": 3,
+      "vision": 18,
+      "threat": 3,
+      "tags": [
+        "air",
+        "swarm",
+        "exotic"
+      ],
+      "air": true,
+      "targetPref": "nearest",
+      "phasesWalls": true,
+      "desc": "Drifts straight through a wall as if it were not there. Tiny, but they arrive in hundreds."
+    },
+    {
+      "id": "rift_maw",
+      "name": "Rift Maw",
+      "side": "enemy",
+      "hp": 4200,
+      "dps": 260,
+      "speed": 0.8,
+      "armor": 26,
+      "range": 3,
+      "vision": 12,
+      "threat": 45,
+      "tags": [
+        "melee",
+        "boss",
+        "siege"
+      ],
+      "targetPref": "hq",
+      "structureBonus": 3,
+      "boss": true,
+      "desc": "A wave leader that walks for your landing pod and ignores everything on the way. Late waves only."
+    },
+    {
+      "id": "crawler_nest",
+      "name": "Crawler Nest",
+      "side": "enemy",
+      "structure": true,
+      "hp": 1600,
+      "dps": 0,
+      "speed": 0,
+      "armor": 10,
+      "vision": 14,
+      "threat": 0,
+      "spawns": {
+        "unit": "swarmer",
+        "every": 200,
+        "count": 3
+      },
+      "growsThreat": 0.2,
+      "tags": [
+        "nest"
+      ],
+      "desc": "Sits on the map and breeds. Left alone it raises the wave size for the whole planet; artillery exists for this."
+    },
+    {
+      "id": "burrow_mound",
+      "name": "Burrow Mound",
+      "side": "enemy",
+      "structure": true,
+      "hp": 2600,
+      "dps": 0,
+      "speed": 0,
+      "armor": 16,
+      "vision": 12,
+      "threat": 0,
+      "spawns": {
+        "unit": "burrower",
+        "every": 300,
+        "count": 2
+      },
+      "growsThreat": 0.35,
+      "tags": [
+        "nest"
+      ],
+      "desc": "A harder nest that makes the things that go under your walls.",
+      "icon": "crawler_nest"
+    },
+    {
+      "id": "spore_bloom",
+      "name": "Spore Bloom",
+      "side": "enemy",
+      "structure": true,
+      "hp": 1900,
+      "dps": 0,
+      "speed": 0,
+      "armor": 8,
+      "vision": 14,
+      "threat": 0,
+      "spawns": {
+        "unit": "spore_drifter",
+        "every": 240,
+        "count": 2
+      },
+      "growsThreat": 0.28,
+      "tags": [
+        "nest",
+        "toxic"
+      ],
+      "icon": "crawler_nest",
+      "desc": "A fruiting body that puffs drifters out on its own clock. Toxic and overgrown worlds are full of them."
+    },
+    {
+      "id": "ash_vent",
+      "name": "Ash Vent",
+      "side": "enemy",
+      "structure": true,
+      "hp": 2200,
+      "dps": 0,
+      "speed": 0,
+      "armor": 14,
+      "vision": 12,
+      "threat": 0,
+      "spawns": {
+        "unit": "ash_stalker",
+        "every": 280,
+        "count": 2
+      },
+      "growsThreat": 0.32,
+      "tags": [
+        "nest",
+        "fire"
+      ],
+      "icon": "crawler_nest",
+      "desc": "A crack in the crust that things crawl out of, burning. Shelling it is the only conversation available."
+    },
+    {
+      "id": "rift_scar",
+      "name": "Rift Scar",
+      "side": "enemy",
+      "structure": true,
+      "hp": 2000,
+      "dps": 0,
+      "speed": 0,
+      "armor": 12,
+      "vision": 16,
+      "threat": 0,
+      "spawns": {
+        "unit": "void_mote",
+        "every": 200,
+        "count": 4
+      },
+      "growsThreat": 0.34,
+      "tags": [
+        "nest",
+        "exotic"
+      ],
+      "icon": "crawler_nest",
+      "desc": "A tear in the ground that motes drift out of. They go through walls, so this one has to be closed rather than contained."
+    }
+  ],
+  "waveTables": {
+    "temperate": [
+      {
+        "unit": "swarmer",
+        "from": 1,
+        "weight": 6
+      },
+      {
+        "unit": "burrower",
+        "from": 3,
+        "weight": 3
+      },
+      {
+        "unit": "scrap_raider",
+        "from": 5,
+        "weight": 2
+      },
+      {
+        "unit": "thornback",
+        "from": 6,
+        "weight": 3
+      },
+      {
+        "unit": "pyre_moth",
+        "from": 8,
+        "weight": 1
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 10,
+        "weight": 1
+      },
+      {
+        "unit": "rift_maw",
+        "from": 18,
+        "weight": 1
+      }
+    ],
+    "arid": [
+      {
+        "unit": "dune_lurker",
+        "from": 1,
+        "weight": 5
+      },
+      {
+        "unit": "swarmer",
+        "from": 1,
+        "weight": 4
+      },
+      {
+        "unit": "burrower",
+        "from": 4,
+        "weight": 3
+      },
+      {
+        "unit": "scrap_raider",
+        "from": 4,
+        "weight": 3
+      },
+      {
+        "unit": "sky_leech",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "thornback",
+        "from": 8,
+        "weight": 2
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 11,
+        "weight": 1
+      },
+      {
+        "unit": "rift_maw",
+        "from": 19,
+        "weight": 1
+      }
+    ],
+    "frozen": [
+      {
+        "unit": "rime_hound",
+        "from": 1,
+        "weight": 6
+      },
+      {
+        "unit": "swarmer",
+        "from": 2,
+        "weight": 3
+      },
+      {
+        "unit": "thornback",
+        "from": 5,
+        "weight": 3
+      },
+      {
+        "unit": "burrower",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "sky_leech",
+        "from": 9,
+        "weight": 1
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 9,
+        "weight": 2
+      },
+      {
+        "unit": "rift_maw",
+        "from": 18,
+        "weight": 1
+      }
+    ],
+    "volcanic": [
+      {
+        "unit": "ash_stalker",
+        "from": 1,
+        "weight": 5
+      },
+      {
+        "unit": "swarmer",
+        "from": 1,
+        "weight": 3
+      },
+      {
+        "unit": "pyre_moth",
+        "from": 3,
+        "weight": 4
+      },
+      {
+        "unit": "thornback",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "bile_crawler",
+        "from": 8,
+        "weight": 2
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 8,
+        "weight": 2
+      },
+      {
+        "unit": "rift_maw",
+        "from": 16,
+        "weight": 1
+      }
+    ],
+    "toxic": [
+      {
+        "unit": "spore_drifter",
+        "from": 1,
+        "weight": 5
+      },
+      {
+        "unit": "swarmer",
+        "from": 1,
+        "weight": 4
+      },
+      {
+        "unit": "bile_crawler",
+        "from": 4,
+        "weight": 4
+      },
+      {
+        "unit": "thornback",
+        "from": 7,
+        "weight": 2
+      },
+      {
+        "unit": "burrower",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "sky_leech",
+        "from": 9,
+        "weight": 1
+      },
+      {
+        "unit": "rift_maw",
+        "from": 17,
+        "weight": 1
+      }
+    ],
+    "verdant": [
+      {
+        "unit": "swarmer",
+        "from": 1,
+        "weight": 6
+      },
+      {
+        "unit": "thornback",
+        "from": 3,
+        "weight": 3
+      },
+      {
+        "unit": "burrower",
+        "from": 4,
+        "weight": 2
+      },
+      {
+        "unit": "spore_drifter",
+        "from": 5,
+        "weight": 3
+      },
+      {
+        "unit": "bile_crawler",
+        "from": 8,
+        "weight": 2
+      },
+      {
+        "unit": "pyre_moth",
+        "from": 10,
+        "weight": 1
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 12,
+        "weight": 1
+      },
+      {
+        "unit": "rift_maw",
+        "from": 19,
+        "weight": 1
+      }
+    ],
+    "barren": [
+      {
+        "unit": "void_mote",
+        "from": 1,
+        "weight": 5
+      },
+      {
+        "unit": "burrower",
+        "from": 2,
+        "weight": 4
+      },
+      {
+        "unit": "scrap_raider",
+        "from": 3,
+        "weight": 3
+      },
+      {
+        "unit": "thornback",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "dune_lurker",
+        "from": 8,
+        "weight": 2
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 10,
+        "weight": 2
+      },
+      {
+        "unit": "rift_maw",
+        "from": 17,
+        "weight": 1
+      }
+    ],
+    "shattered": [
+      {
+        "unit": "void_mote",
+        "from": 1,
+        "weight": 5
+      },
+      {
+        "unit": "storm_wraith",
+        "from": 3,
+        "weight": 3
+      },
+      {
+        "unit": "thornback",
+        "from": 4,
+        "weight": 2
+      },
+      {
+        "unit": "pyre_moth",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 7,
+        "weight": 2
+      },
+      {
+        "unit": "bile_crawler",
+        "from": 9,
+        "weight": 2
+      },
+      {
+        "unit": "rift_maw",
+        "from": 15,
+        "weight": 1
+      }
+    ],
+    "oceanic": [
+      {
+        "unit": "tide_crawler",
+        "from": 1,
+        "weight": 5
+      },
+      {
+        "unit": "swarmer",
+        "from": 1,
+        "weight": 4
+      },
+      {
+        "unit": "sky_leech",
+        "from": 4,
+        "weight": 3
+      },
+      {
+        "unit": "spore_drifter",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "thornback",
+        "from": 8,
+        "weight": 2
+      },
+      {
+        "unit": "hull_breaker",
+        "from": 11,
+        "weight": 1
+      },
+      {
+        "unit": "rift_maw",
+        "from": 19,
+        "weight": 1
+      }
+    ],
+    "gas_shrouded": [
+      {
+        "unit": "sky_leech",
+        "from": 1,
+        "weight": 5
+      },
+      {
+        "unit": "spore_drifter",
+        "from": 2,
+        "weight": 3
+      },
+      {
+        "unit": "storm_wraith",
+        "from": 3,
+        "weight": 3
+      },
+      {
+        "unit": "void_mote",
+        "from": 5,
+        "weight": 3
+      },
+      {
+        "unit": "pyre_moth",
+        "from": 6,
+        "weight": 2
+      },
+      {
+        "unit": "tide_crawler",
+        "from": 8,
+        "weight": 2
+      },
+      {
+        "unit": "rift_maw",
+        "from": 18,
+        "weight": 1
+      }
+    ]
+  },
+  "nestTables": {
+    "temperate": [
+      "crawler_nest",
+      "burrow_mound"
+    ],
+    "arid": [
+      "burrow_mound",
+      "crawler_nest"
+    ],
+    "frozen": [
+      "crawler_nest",
+      "burrow_mound"
+    ],
+    "volcanic": [
+      "ash_vent",
+      "crawler_nest"
+    ],
+    "toxic": [
+      "spore_bloom",
+      "crawler_nest",
+      "burrow_mound"
+    ],
+    "verdant": [
+      "spore_bloom",
+      "crawler_nest",
+      "burrow_mound"
+    ],
+    "barren": [
+      "burrow_mound",
+      "rift_scar"
+    ],
+    "shattered": [
+      "rift_scar",
+      "crawler_nest"
+    ],
+    "oceanic": [
+      "crawler_nest",
+      "spore_bloom"
+    ],
+    "gas_shrouded": [
+      "spore_bloom",
+      "rift_scar"
+    ]
+  }
+}

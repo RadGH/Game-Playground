@@ -1,0 +1,524 @@
+{
+  "schema": 1,
+  "version": "2026-09-13 pass 1",
+  "note": "Every number a designer is likely to want to change. js/rules.js applyBalance() folds this onto the other data files at load time, so the engine keeps reading def.cost, recipe.time and so on. Values here are absolute overrides; the *ByCategory / *ByTier tables are multipliers against the shipped numbers. Rules of thumb this file follows: early buildings are cheap and fast so the first twenty minutes are decisions rather than saving up, late buildings are expensive so the endgame is a real project, and there is never less than six minutes of quiet between attacks so there is time to explore and build.",
+  "map": {
+    "note": "Road speed per tier: 0 none, 1 dirt path, 2 gravel, 3 paved, 4 hover lane. Paved is 2.2x dirt on purpose - roads have to be worth the concrete.",
+    "roadSpeed": [
+      1,
+      1.2,
+      1.65,
+      2.65,
+      3.4
+    ],
+    "oreNodeSize": 26000,
+    "fluidNodeSize": 60000,
+    "rareNodeSize": 12000,
+    "nodeAmount": 1.0,
+    "scarceNodeAmount": 0.5,
+    "scarceNodeWeight": 0.35
+  },
+  "costByCategory": {
+    "base": 0.85,
+    "extraction": 0.8,
+    "processing": 0.8,
+    "power": 0.85,
+    "logistics": 0.85,
+    "defence": 0.8,
+    "scan": 0.75,
+    "science": 0.75,
+    "space": 1.2,
+    "variant": 1.0
+  },
+  "buildTimeByCategory": {
+    "base": 0.85,
+    "extraction": 0.85,
+    "processing": 0.85,
+    "power": 0.85,
+    "logistics": 0.9,
+    "defence": 0.8,
+    "scan": 0.8,
+    "science": 0.8,
+    "space": 1.15,
+    "variant": 1.0
+  },
+  "recipeTimeByCategory": {
+    "smelting": 0.9,
+    "assembly": 0.9,
+    "science": 0.85,
+    "crushing": 0.9,
+    "kiln": 0.9,
+    "glass": 0.9,
+    "electronics": 0.9,
+    "chemistry": 0.95,
+    "fluids": 0.95,
+    "metallurgy": 0.95,
+    "alloy": 0.95,
+    "parts": 0.95,
+    "rocket": 1.0,
+    "power": 1.0,
+    "fuel": 0.95,
+    "atmosphere": 0.95,
+    "nuclear": 1.0,
+    "building": 0.9,
+    "variant": 1.0
+  },
+  "researchWorkByTier": {
+    "0": 1.0,
+    "1": 0.8,
+    "2": 0.85,
+    "3": 0.9,
+    "4": 0.95,
+    "5": 0.95,
+    "6": 1.0
+  },
+  "structures": {
+    "drill_mk1": {
+      "extractRate": 1.0
+    },
+    "drill_mk2": {
+      "extractRate": 2.2
+    },
+    "drill_mk3": {
+      "extractRate": 4.2
+    },
+    "deep_bore": {
+      "extractRate": 1.8
+    },
+    "quarry": {
+      "extractRate": 1.0
+    },
+    "fluid_pump": {
+      "extractRate": 7
+    },
+    "gas_extractor": {
+      "extractRate": 5
+    },
+    "biomass_harvester": {
+      "extractRate": 1.0
+    },
+    "storage_crate": {
+      "storage": 1000,
+      "cost": {
+        "iron_plate": 5
+      }
+    },
+    "warehouse": {
+      "storage": 8000
+    },
+    "silo": {
+      "storage": 6000
+    },
+    "depot": {
+      "storage": 3000,
+      "linkRadius": 22
+    },
+    "combustion_generator": {
+      "powerGen": 200
+    },
+    "wind_turbine": {
+      "powerGen": 70
+    },
+    "solar_array": {
+      "powerGen": 100
+    },
+    "gas_turbine": {
+      "powerGen": 460
+    },
+    "geothermal_plant": {
+      "powerGen": 650
+    },
+    "lab": {
+      "researchRate": 1.2
+    },
+    "research_station": {
+      "researchRate": 3.6
+    },
+    "watchtower": {
+      "dps": 22,
+      "range": 13
+    },
+    "gun_turret": {
+      "dps": 55,
+      "range": 14,
+      "cost": {
+        "iron_plate": 12,
+        "gear": 8,
+        "steel_plate": 3
+      }
+    },
+    "flame_turret": {
+      "dps": 120,
+      "range": 9
+    },
+    "laser_turret": {
+      "dps": 150,
+      "range": 17
+    },
+    "tesla_coil": {
+      "dps": 90,
+      "range": 11
+    },
+    "missile_battery": {
+      "dps": 210,
+      "range": 28
+    },
+    "artillery": {
+      "dps": 300,
+      "range": 44
+    },
+    "nano_forge": {
+      "cost": {
+        "superalloy": 6,
+        "advanced_part": 4,
+        "control_unit": 3,
+        "alloy_plate": 20
+      }
+    },
+    "orbital_lift": {
+      "cost": {
+        "superalloy": 14,
+        "alloy_plate": 30,
+        "control_unit": 5,
+        "advanced_part": 8,
+        "concrete": 80
+      }
+    },
+    "beacon": {
+      "cost": {
+        "beacon_core": 1,
+        "alloy_plate": 24,
+        "control_unit": 3,
+        "concrete": 50
+      }
+    }
+  },
+  "recipes": {
+    "pack_basic": {
+      "time": 6,
+      "inputs": {
+        "gear": 2,
+        "copper_wire": 2
+      }
+    },
+    "pack_logistics": {
+      "time": 10
+    },
+    "pack_chem": {
+      "time": 13
+    },
+    "pack_military": {
+      "time": 13
+    },
+    "pack_energy": {
+      "time": 18
+    },
+    "pack_space": {
+      "time": 26
+    },
+    "smelt_iron": {
+      "time": 4.0
+    },
+    "smelt_copper": {
+      "time": 4.0
+    },
+    "make_iron_plate": {
+      "time": 2.6
+    },
+    "make_rocket_part": {
+      "inputs": {
+        "alloy_plate": 10,
+        "superalloy": 3,
+        "control_unit": 2,
+        "heat_shield": 1,
+        "rocket_fuel": 10
+      }
+    }
+  },
+  "techs": {
+    "t_rocketry": {
+      "work": 1050
+    }
+  },
+  "vehicles": {
+    "rover": {
+      "baseSpeed": 3.4,
+      "offroad": 0.55
+    },
+    "hauler": {
+      "baseSpeed": 2.8,
+      "offroad": 0.8
+    },
+    "heavy_hauler": {
+      "baseSpeed": 2.0,
+      "offroad": 1.15
+    },
+    "tanker": {
+      "baseSpeed": 2.4,
+      "offroad": 0.95
+    },
+    "gas_hauler": {
+      "baseSpeed": 2.2,
+      "offroad": 1.0
+    }
+  },
+  "waves": {
+    "note": "Pacing pass: a longer grace, a slower ramp and a seven-minute floor between attacks, so the middle of a run is build-and-explore time punctuated by a fight rather than a constant siege.",
+    "grace": {
+      "easy": 1500,
+      "normal": 900,
+      "hard": 540
+    },
+    "firstThreatThreshold": {
+      "easy": 900,
+      "normal": 620,
+      "hard": 400
+    },
+    "interval": {
+      "base": 600,
+      "min": 420,
+      "shrinkPerWave": 8,
+      "jitter": 0.15
+    },
+    "threat": {
+      "decayPerSecond": 0.6,
+      "perPollutionUnit": 0.8,
+      "perNoiseUnit": 0.5,
+      "perNestPerSecond": 0.05
+    },
+    "budget": {
+      "base": 5,
+      "growth": 1.14,
+      "threatShare": 0.004,
+      "cap": 700
+    },
+    "escalation": {
+      "surgeEvery": 5,
+      "surgeMultiplier": 1.5,
+      "surgeFronts": 2,
+      "bossEvery": 10,
+      "armorPerWave": 0.1,
+      "hpPerWave": 0.045,
+      "speedPerWave": 0.008
+    },
+    "nests": {
+      "note": "Nests are a slow bleed between waves: every so often one lets a couple of wanderers out on their own clock. Clearing one pays a bounty and drops the threat.",
+      "wanderEvery": 220,
+      "wanderCount": 2,
+      "wanderChance": 0.45,
+      "bounty": {
+        "iron_plate": 40,
+        "steel_plate": 10,
+        "sulfur": 20
+      },
+      "research": 60
+    }
+  },
+  "hazards": {
+    "note": "Planet hazard tags, and what each one actually does while it is running. duration is [min,max] seconds; weight is how often this tag is picked when a planet carries several. Every one of them raises a notification when it starts and hazard_over when it passes.",
+    "clock": {
+      "chancePer10s": 0.014,
+      "quietAfter": 260
+    },
+    "storm": {
+      "notify": "hazard_storm",
+      "duration": [
+        140,
+        300
+      ],
+      "weight": 1.0,
+      "structureDamage": 0.4,
+      "shieldedBy": "shield",
+      "windBonus": 2.0,
+      "waveChance": 0.3
+    },
+    "blizzard": {
+      "notify": "hazard_storm",
+      "duration": [
+        160,
+        320
+      ],
+      "weight": 1.0,
+      "structureDamage": 0.3,
+      "shieldedBy": "shield",
+      "windBonus": 2.0,
+      "coldDrain": 4,
+      "waveChance": 0.25
+    },
+    "duststorm": {
+      "notify": "hazard_storm",
+      "duration": [
+        140,
+        280
+      ],
+      "weight": 1.0,
+      "structureDamage": 0.25,
+      "shieldedBy": "shield",
+      "solarPenalty": 0.55,
+      "windBonus": 1.7,
+      "waveChance": 0.2
+    },
+    "squall": {
+      "notify": "hazard_storm",
+      "duration": [
+        120,
+        240
+      ],
+      "weight": 1.0,
+      "structureDamage": 0.3,
+      "shieldedBy": "shield",
+      "windBonus": 1.8,
+      "waveChance": 0.2
+    },
+    "cold": {
+      "notify": "hazard_cold",
+      "duration": [
+        200,
+        380
+      ],
+      "weight": 1.0,
+      "coldDrain": 8,
+      "unpoweredDamage": 0.6
+    },
+    "heat": {
+      "notify": "hazard_heat",
+      "duration": [
+        180,
+        340
+      ],
+      "weight": 0.9,
+      "machineSlow": 0.25,
+      "unitDamage": 0.25
+    },
+    "radiation": {
+      "notify": "hazard_radiation",
+      "duration": [
+        150,
+        300
+      ],
+      "weight": 0.9,
+      "unitDamage": 1.0,
+      "shelterTypes": [
+        "dormitory",
+        "medbay",
+        "pearl_press",
+        "landing_pod"
+      ],
+      "shelterRadius": 12
+    },
+    "corrosion": {
+      "notify": "hazard_toxic",
+      "duration": [
+        180,
+        340
+      ],
+      "weight": 1.0,
+      "structureDamage": 0.35,
+      "filterTypes": [
+        "chemical_plant",
+        "bio_vat",
+        "medbay",
+        "pearl_press"
+      ],
+      "filterRadius": 16
+    },
+    "spores": {
+      "notify": "hazard_toxic",
+      "duration": [
+        160,
+        300
+      ],
+      "weight": 1.0,
+      "unitDamage": 0.7,
+      "structureDamage": 0.1,
+      "filterTypes": [
+        "chemical_plant",
+        "bio_vat",
+        "medbay",
+        "pearl_press"
+      ],
+      "filterRadius": 16
+    },
+    "ashfall": {
+      "notify": "hazard_ashfall",
+      "duration": [
+        200,
+        400
+      ],
+      "weight": 1.0,
+      "solarPenalty": 0.5,
+      "structureDamage": 0.12
+    },
+    "quake": {
+      "notify": "hazard_quake",
+      "duration": [
+        40,
+        90
+      ],
+      "weight": 0.7,
+      "structureDamage": 0.9,
+      "breaksRoads": true
+    },
+    "overgrowth": {
+      "notify": "hazard_overgrowth",
+      "duration": [
+        240,
+        420
+      ],
+      "weight": 1.0,
+      "regrowRate": 3.0,
+      "structureDamage": 0.08
+    },
+    "lowlight": {
+      "notify": "hazard_lowlight",
+      "duration": [
+        240,
+        480
+      ],
+      "weight": 1.0,
+      "solarPenalty": 0.65
+    },
+    "pressure": {
+      "notify": "hazard_pressure",
+      "duration": [
+        180,
+        340
+      ],
+      "weight": 1.0,
+      "machineSlow": 0.2,
+      "structureDamage": 0.08
+    },
+    "tide": {
+      "notify": "hazard_tide",
+      "duration": [
+        140,
+        260
+      ],
+      "weight": 1.0,
+      "structureDamage": 0.25,
+      "waveChance": 0.25
+    },
+    "vacuumdust": {
+      "notify": "hazard_dust",
+      "duration": [
+        200,
+        360
+      ],
+      "weight": 1.0,
+      "solarPenalty": 0.45,
+      "structureDamage": 0.15
+    }
+  },
+  "bot": {
+    "note": "Knobs for the simulator bot in js/ai.js: how far from the pod it will build, how much of a thing it stockpiles before throttling the machine making it, and when it starts spending on defence.",
+    "compactRadius": 26,
+    "outpostChainStep": 11,
+    "turretsPerWave": 2.2,
+    "maxTurrets": 42,
+    "powerHeadroom": 1.25,
+    "maxRoadTiles": 60,
+    "maxGenerators": 40,
+    "maxPerGenerator": 20,
+    "maxScanners": 16
+  }
+}

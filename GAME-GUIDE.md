@@ -25,6 +25,7 @@ Every experiment here is standalone. A game can take one piece or all of them. T
 | **Avatar 3D** (`avatar-3d/js/mii.js`, `quaternius.js`, `scene.js`) | `createMiiCharacter, createQuaterniusCharacter, createScene` | Three.js characters from the same `avatar` JSON; procedural (Mii) or CC0 meshes with 43 animation clips | importmap for `three`; `avatar-3d/assets/quaternius/` (~32 MB) for the mesh mode | Mii ~60 draw calls/character; Quaternius ~6 skinned meshes |
 
 - **`worldgen/`** — a whole world map in one call: continents, climate, rivers, biomes, named regions, towns, dungeons, roads, plus region and local-tile zoom. Pure data, seeded, exports JSON/PNG. See its README.
+- **`universe/`** — a whole galaxy in one call: stars by class, systems of planets with moons, rings, belts and comets, resources and hazards per planet, and a planet's surface handed straight to `worldgen/`. Pure data, seeded. 3D models for all of it in `assets/js/space-models.js`. See its README.
 
 ## 2. Recipes
 
@@ -116,6 +117,53 @@ feed straight into Lingo memories, and `roadGraph(world)` gives you the travel g
 town and port. `region.danger`, `node.tags` and `BIOMES[id].move` are the hooks for encounter tables,
 quest matching and travel time. Generation takes about half a second at 256×128 — run it in
 `worldgen/js/worker.js` if you want the UI to stay live. Full details in `worldgen/README.md`.
+
+### Recipe: from galaxy to a landing site
+
+Star Forge and World Forge are the same idea at two scales, and they join at the planet: a planet
+record is a set of World Forge knobs, so a star you picked off a chart becomes ground you can walk on.
+
+```js
+import { generateGalaxy, route } from '/universe/js/galaxy.js';
+import { generateSystem } from '/universe/js/system.js';
+import { generatePlanetMap } from '/universe/js/planetmap.js';
+import { generateLocalDetail } from '/worldgen/js/local.js';
+import { NameGen } from '/namegen/js/namegen.js';
+
+const namegen = await NameGen.load('/namegen/data/');
+const galaxy = generateGalaxy({ seed: 20260913, stars: 300, layout: 'spiral', arms: 4, namegen });
+
+// somewhere worth flying to: a living world that also has something rare under it
+let target = null;
+for (const star of galaxy.stars) {
+  const system = generateSystem(star, { seed: star.seed, namegen });
+  const planet = system.planets.find(p => p.archetype === 'living' && p.rareElements.length);
+  if (planet) { target = { star, system, planet }; break; }
+}
+
+const jumps = route(galaxy, 0, target.star.id);              // the flight plan, star by star
+const world = generatePlanetMap(target.planet);              // a full World Forge world, ~0.5 s
+const port  = world.nodes.find(n => n.type === 'port') || world.nodes[0];
+const tile  = generateLocalDetail(world, port.x, port.y, { node: port });   // the 64×64 tile you land on
+```
+
+From there everything is the World Forge recipe above — regions, roads, danger, local tiles. What the
+universe layer adds on top:
+
+- `planet.gravity`, `planet.atmosphere.breathable`, `planet.dayLengthHours`, `planet.temperature.C` —
+  rules the player feels the moment they step out.
+- `planet.hazards[]` (`heat` · `cold` · `toxic` · `radiation` · `storms`) and `planet.difficulty`
+  (0…1) — straight into an encounter or survival table.
+- `planet.resources[]` (the baseline four, always there) and `planet.rareElements[]` (one or two,
+  with a `value` each) — mining and trade. The full table is `universe/data/elements.json`.
+- `planet.biomeMode` — `'single'` worlds are one kind of ground all the way round (an ice world is
+  ice), `'multi'` worlds have a real climate with ice caps. That is the difference between a mining
+  stop and a place worth settling.
+- `star.habitable` and `star.frostLine` — what a scanner would report before you commit to the jump.
+
+To draw any of it, `assets/js/space-models.js` has `createSpaceScene`, `createPlanet` (hand it
+`planetTexture(planet, world)` and it wears its own map), `createStar`, `createAsteroidBelt`,
+`createShip`, `createStation` and `createSpaceBackdrop`.
 
 **Sound for a whole game, without touching the game**
 

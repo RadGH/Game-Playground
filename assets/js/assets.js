@@ -69,6 +69,8 @@ export class Assets {
     this.iconSpecs = manifest.icons || {};
     this.propSpecs = manifest.props || {};
     this.fxSpecs = manifest.fx || {};
+    // 3D model builders (space-models.js) — entries are code, not files, so the _doc note is dropped
+    this.modelSpecs = Object.fromEntries(Object.entries(manifest.models || {}).filter(([k]) => !k.startsWith('_')));
     this._files = new Map();   // file path -> Promise<string|null>
     this._scenes = new Map();  // id -> Promise<{ id, inner, attrs, missing }>
     this._icons = new Map();   // type -> Promise<string>
@@ -110,7 +112,12 @@ export class Assets {
   isNightScene(id) { return !!this.scenerySpecs[id]?.night; }
 
   /** The manifest section for a kind: 'scenery' (default), 'icons', 'props' or 'fx'. */
-  _specs(kind = 'scenery') { return kind === 'icons' ? this.iconSpecs : kind === 'props' ? this.propSpecs : kind === 'fx' ? this.fxSpecs : this.scenerySpecs; }
+  _specs(kind = 'scenery') { return kind === 'icons' ? this.iconSpecs : kind === 'props' ? this.propSpecs : kind === 'fx' ? this.fxSpecs : kind === 'models' ? this.modelSpecs : this.scenerySpecs; }
+
+  /** Ids of every 3D model builder in the manifest (build them with assets/js/space-models.js). */
+  modelIds() { return Object.keys(this.modelSpecs); }
+  /** Manifest entry for a model: { builder, needs, tags }. */
+  modelInfo(id) { return this.modelSpecs[id] || null; }
 
   /** Scene ids carrying a tag, e.g. listByTag('forest'). */
   listByTag(tag, kind = 'scenery') {

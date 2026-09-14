@@ -21,3 +21,18 @@
 .big-head .spacer { flex: 1; }
 .big-box { aspect-ratio: 16 / 9; background: #0c0e12; border-radius: var(--radius); overflow: hidden; line-height: 0; }
 .big-box svg { display: block; width: 100%; height: 100%; }
+
+/* Space model gallery (models.html) — tiles drawn by one shared WebGL canvas behind the page. */
+.model-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-top: 8px; }
+/* the cards sit under the shared GL canvas (z-index 4): the canvas is transparent everywhere
+   except the tile it is currently drawing, so the card supplies the dark backdrop */
+.model-card { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: #070910; position: relative; z-index: 2; }
+.model-card:hover { border-color: var(--accent); }
+.model-card .model-box { aspect-ratio: 1 / 1; display: block; cursor: grab; background: transparent; }
+.model-card .model-box:active { cursor: grabbing; }
+.model-card .meta { padding: 5px 7px; display: flex; flex-direction: column; gap: 2px; background: var(--bg2); position: relative; z-index: 2; }
+.model-card .meta b { font-size: 13px; font-family: var(--mono); }
+.model-card .meta .tags { font-size: 11px; color: var(--fg2); line-height: 1.3; }
+/* the shared canvas floats over the page, transparent except where a tile is drawn */
+#gl { z-index: 4; }
+.topbar { z-index: 6; }

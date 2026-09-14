@@ -191,9 +191,61 @@ iconGroup.innerHTML = NODE_ICONS[type] || (assets.iconSpecs[type] ? ICON_FALLBAC
 
 Adding an icon is the same with `data/icons/<id>.svg` and the `icons` block.
 
+## Space models (`js/space-models.js`)
+
+The one part of this library that is **code, not files**: procedural Three.js objects for everything
+that happens off a planet's surface. Nothing to download, no licences to track — it is all primitives
+and canvas textures built at runtime. Gallery at **`assets/models.html`**.
+
+Every builder returns the same shape as the creature models in `avatar-3d/`:
+
+```js
+{ group, update(dt, t), dispose(), ...extras }
+```
+
+| Id (manifest) | Builder | What it makes |
+|---|---|---|
+| `planet` | `createPlanet(planet, opts)` | Textured sphere, atmosphere rim (a fresnel shell), a cloud deck turning faster than the ground, rings as a textured annulus, moons on tilted orbits, and night lights that only show on the dark side. |
+| `star` | `createStar(star, opts)` | Emissive core, soft shell, corona sprite and a `PointLight`, coloured by class. Binary pairs get a companion on an orbit, neutron stars a pulse and jets, black holes a black core with an accretion disc. |
+| `asteroid_belt` | `createAsteroidBelt(opts)` | A few hundred instanced rocks in a flat annulus (`inner`, `outer`, `count`, `seed`). |
+| `satellite` | `createSatellite()` | Box bus, gold foil, two solar wings, a dish and a blinking light. |
+| `probe` | `createProbe()` | Octahedral core, dish on a mast, three legs with pods, a thruster plume. |
+| `rocket` | `createRocket()` | Stages, bands, fins, an engine bell and a flame that flickers. |
+| `ship_lander` | `createShip('lander')` | Squat hull, glass cockpit, four legs, a landing thruster. |
+| `ship_hauler` | `createShip('hauler')` | A spine with containers clamped to it and twin engines. |
+| `ship_explorer` | `createShip('explorer')` | Capsule fuselage, swept wings, canopy, two engine glows. |
+| `station` | `createStation()` | A spinning habitat ring with lit windows, a hub, docking clamps and solar wings. |
+| `space_backdrop` | `createSpaceBackdrop(opts)` | A sphere of coloured star points plus soft nebula sprites. |
+
+Plus `createSpaceScene(container, opts)` — the same interface as `avatar-3d/js/scene.js` but set up
+for space (black background, one star-coloured key light, no ground) — and `glowSprite()` and
+`proceduralPlanetTexture()` if you want to build your own.
+
+```js
+import { createSpaceScene, createPlanet, createStar } from '../assets/js/space-models.js';
+
+const view = createSpaceScene(container);
+const star = createStar(starRecord, { radius: 1.2 });
+view.scene.add(star.group); view.addTicker(star.update);
+
+// with a real surface map (needs the universe library)
+import { generatePlanetMap } from '../universe/js/planetmap.js';
+import { planetTexture } from '../universe/js/texture.js';
+const world = generatePlanetMap(planet);
+const globe = createPlanet(planet, { texture: planetTexture(planet, world, { size: 1024 }), radius: 1 });
+view.scene.add(globe.group); view.addTicker(globe.update);
+globe.setSunDirection(26, 6, 14);     // which half is night
+```
+
+Hand `createPlanet` no texture and it builds a blotchy one from the archetype's colours, so the
+library still works on its own. The `models` block in `data/manifest.json` lists every builder with
+its tags; `assets.modelIds()` and `assets.modelInfo(id)` read it, and `listByTag(tag, 'models')`
+searches it like any other section.
+
 ## Who uses it
 
 * `prototypes/emberveil/` — 13 zone backdrops and all 13 map node icons.
 * `prototypes/party-quest/` — 13 location backdrops (village, forest, cave, marsh, camp…).
+* `universe/` — every space model: planets, stars, belts and the backdrop.
 
-Built by Claude for Radley Sustaire, 2026-09-11.
+Built by Claude for Radley Sustaire, 2026-09-11 (space models 2026-09-13).

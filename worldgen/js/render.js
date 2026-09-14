@@ -7,11 +7,19 @@
 //   import { renderWorld, worldPixels, legend } from './render.js';
 //   renderWorld(ctx, world, { layers: { biomes: true, rivers: true, roads: true, nodes: true, labels: true } });
 
-import { BIOMES, RAMPS, rampColor, hexToRgb, mixHex } from './biomes.js';
+import { BIOMES, RAMPS, rampColor, hexToRgb, mixHex, palettedColors } from './biomes.js';
 
 export const DEFAULT_LAYERS = { biomes: true, hillshade: true, rivers: true, roads: true, nodes: true, labels: true, regions: false, borders: true, aura: false, elevation: false, temperature: false, moisture: false, drainage: false };
 
-const BIOME_RGB = BIOMES.map(b => hexToRgb(b.color));
+const BASE_BIOME_RGB = BIOMES.map(b => hexToRgb(b.color));
+
+/** A tint knob as { rgb, strength }. Accepts '#rrggbb' or { color, strength }. */
+function normTint(spec) {
+  const color = typeof spec === 'string' ? spec : spec.color;
+  if (!color) return null;
+  const strength = typeof spec === 'string' ? 0.18 : (spec.strength ?? 0.18);
+  return { rgb: hexToRgb(color), strength: Math.max(0, Math.min(1, strength)) };
+}
 
 /** A stable colour per region id, for the political view. */
 export function regionColor(id) {
@@ -26,12 +34,18 @@ function hslToRgb(h, s, l) {
 /**
  * The base map as raw pixels, one pixel per world cell.
  * opts: { layer: 'biomes'|'elevation'|'temperature'|'moisture'|'drainage'|'aura'|'magic'|'regions',
- *         hillshade: true, regionTint: 0..1, auraOverlay: bool }
+ *         hillshade: true, regionTint: 0..1, auraOverlay: bool,
+ *         palette: a PALETTES key (biomes.js) that swaps the biome colours — defaults to world.opts.palette,
+ *         atmosphereTint: '#rrggbb' or { color, strength } laid over the whole map — defaults to world.opts.atmosphereTint }
  */
 export function worldPixels(world, opts = {}) {
   const { layer = 'biomes', hillshade = true, regionTint = 0, auraOverlay = false, shade: shadeScale = 5.5 } = opts;
   const w = world.width, h = world.height, N = w * h;
   const out = new Uint8ClampedArray(N * 4);
+  const palette = opts.palette !== undefined ? opts.palette : world.opts?.palette;
+  const BIOME_RGB = palette ? palettedColors(palette).map(b => hexToRgb(b.color)) : BASE_BIOME_RGB;
+  const tintSpec = opts.atmosphereTint !== undefined ? opts.atmosphereTint : world.opts?.atmosphereTint;
+  const tint = tintSpec ? normTint(tintSpec) : null;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const i = y * w + x;
     let r, g, b;
@@ -75,6 +89,11 @@ export function worldPixels(world, opts = {}) {
       else if (a < -0.25) { const k = (-a - 0.25) * 0.45; r = r * (1 - k) + 120 * k; g = g * (1 - k) + 230 * k; b = b * (1 - k) + 160 * k; }
       const m = world.magic[i];
       if (m > 0.6) { const k = (m - 0.6) * 0.5; r = r * (1 - k) + 170 * k; g = g * (1 - k) + 140 * k; b = b * (1 - k) + 250 * k; }
+    }
+
+    if (tint) {
+      const k = tint.strength;
+      r = r * (1 - k) + tint.rgb[0] * k; g = g * (1 - k) + tint.rgb[1] * k; b = b * (1 - k) + tint.rgb[2] * k;
     }
 
     const o = i * 4;
@@ -388,7 +407,8 @@ export function legend(world, layerName = 'biomes') {
   if (layerName === 'biomes') {
     const seen = new Map();
     for (let i = 0; i < world.biome.length; i++) seen.set(world.biome[i], (seen.get(world.biome[i]) || 0) + 1);
-    return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([id, n]) => ({ color: BIOMES[id].color, label: BIOMES[id].name, share: n / world.biome.length }));
+    const table = world.opts?.palette ? palettedColors(world.opts.palette) : BIOMES;
+    return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([id, n]) => ({ color: table[id].color, label: table[id].name, share: n / world.biome.length }));
   }
   const ramp = RAMPS[layerName] || RAMPS.elevation;
   const ends = { elevation: ['deep', 'peak'], temperature: ['frozen', 'baking'], moisture: ['parched', 'sodden'], drainage: ['dry', 'river'], aura: ['blessed', 'cursed'], magic: ['none', 'raw magic'] }[layerName] || ['low', 'high'];

@@ -146,5 +146,19 @@
     "xp_burst": { "file": "ui/xp_burst.svg", "tags": ["reward", "xp"] },
     "ribbon": { "file": "ui/ribbon.svg", "tags": ["reward", "banner"] },
     "level_up": { "file": "ui/level_up.svg", "tags": ["reward", "level"] }
+  },
+  "models": {
+    "_doc": "3D models, not files: each entry names a builder exported by ../js/space-models.js. Call it (or createSpaceModel(id, opts)) and you get { group, update(dt, t), dispose() } — a Three.js group ready to add to a scene. Everything is built from primitives and canvas textures at runtime, so there is nothing to download and no licence to track. 'needs' lists what a builder reads from the options object. See models.html for the gallery.",
+    "planet": { "builder": "createPlanet", "needs": ["planet record", "texture (optional)"], "tags": ["space", "planet", "sphere", "atmosphere", "clouds", "rings", "moons"] },
+    "star": { "builder": "createStar", "needs": ["star record"], "tags": ["space", "star", "emissive", "corona", "binary", "neutron", "black hole", "accretion disc", "light"] },
+    "asteroid_belt": { "builder": "createAsteroidBelt", "needs": ["inner", "outer", "count", "seed"], "tags": ["space", "belt", "asteroid", "instanced", "rocks"] },
+    "satellite": { "builder": "createSatellite", "needs": [], "tags": ["space", "craft", "orbit", "solar", "dish", "small"] },
+    "probe": { "builder": "createProbe", "needs": [], "tags": ["space", "craft", "probe", "dish", "thruster", "small"] },
+    "rocket": { "builder": "createRocket", "needs": [], "tags": ["space", "craft", "rocket", "launch", "flame"] },
+    "ship_lander": { "builder": "createShip('lander')", "needs": [], "tags": ["space", "craft", "ship", "lander", "legs"] },
+    "ship_hauler": { "builder": "createShip('hauler')", "needs": [], "tags": ["space", "craft", "ship", "hauler", "cargo"] },
+    "ship_explorer": { "builder": "createShip('explorer')", "needs": [], "tags": ["space", "craft", "ship", "explorer", "wings"] },
+    "station": { "builder": "createStation", "needs": [], "tags": ["space", "station", "habitat", "ring", "docking", "solar"] },
+    "space_backdrop": { "builder": "createSpaceBackdrop", "needs": ["stars", "nebula", "radius", "seed"], "tags": ["space", "backdrop", "starfield", "nebula", "points", "sprite"] }
   }
 }

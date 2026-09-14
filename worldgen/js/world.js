@@ -11,7 +11,7 @@
 // Everything is seeded: the same seed + the same knobs always gives the same world, in any browser.
 
 import { makeRng, makeNoise2D, fbm, ridged, warp2, subSeed, clamp, lerp, smoothstep, normalize, quantile, blur } from './noise.js';
-import { classify, BIOMES, isWater, isOcean, LAND_START } from './biomes.js';
+import { classify, BIOMES, isWater, isOcean, LAND_START, lockBiome, BIOME_FAMILIES } from './biomes.js';
 import { buildRegions } from './regions.js';
 import { placeNodes } from './nodes.js';
 import { buildRoads } from './roads.js';
@@ -39,6 +39,10 @@ export const DEFAULTS = {
   rainfall: 0.5,
   rainShadow: 0.6,
   biomeVariety: 0.6,
+  biomeLock: null,               // null | a key of BIOME_FAMILIES — forces every land cell into one family (single-biome planets)
+  polarCaps: 0,                  // 0 … 1 — how far ice caps reach down from the top and bottom rows (0 = off)
+  atmosphereTint: null,          // null | '#rrggbb' or { color, strength 0..1 } — a colour wash laid over the drawn map
+  palette: null,                 // null | a key of PALETTES in biomes.js — swaps the biome colours (lava, crystal, toxic, void, ember, rust)
   auraStrength: 0.35,            // evil/good influence field
   auraBalance: 0.55,             // 0 = all blessed, 1 = all cursed
   magicStrength: 0.3,
@@ -569,6 +573,28 @@ export function generateWorld(userOpts = {}) {
       aura: aura[i], magic: magic[i], water: water[i], depth: water[i] ? (0.5 - elevation[i]) / 0.5 : 0,
       nearOcean, volcanic: volcanic[i] === 1,
     }, opts.biomeVariety);
+  }
+
+  // 10b — optional planet knobs: lock every land cell into one biome family, then freeze the poles.
+  // Both are off by default, so a normal world is unaffected.
+  if (opts.biomeLock && BIOME_FAMILIES[opts.biomeLock]) {
+    for (let i = 0; i < N; i++) {
+      biome[i] = lockBiome(biome[i], opts.biomeLock, { elev: elevation[i], slope: slope[i], moist: moisture[i] });
+    }
+  }
+  if (opts.polarCaps > 0) {
+    const reach = clamp(opts.polarCaps, 0, 1) * 0.42;             // at 1 the caps come a bit past the tropics
+    const ragged = makeNoise2D(subSeed(opts.seed, 'caps'));
+    for (let y = 0; y < h; y++) {
+      const lat = Math.abs(((y + 0.5) / h) * 2 - 1);               // 0 equator … 1 pole
+      for (let x = 0; x < w; x++) {
+        const i = IDX(w, x, y);
+        const edge = 1 - reach + (fbm(ragged, x * 7 / w, y * 7 / h, { octaves: 3 }) - 0.5) * 0.16;
+        if (lat < edge) continue;
+        biome[i] = water[i] === 0 ? 12 : 25;                       // ice sheet on land, sea ice on water
+        if (water[i] === 0) temperature[i] = Math.min(temperature[i], 0.1);
+      }
+    }
   }
 
   // 11 — continents ---------------------------------------------------------

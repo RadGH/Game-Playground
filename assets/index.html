@@ -10,7 +10,7 @@
 <div class="topbar">
   <a href="../" class="muted">← Playground</a>
   <h1>Asset Library</h1>
-  <span class="muted small">Scenery backdrops and map icons, in files, shared by every game here.</span>
+  <span class="muted small">Scenery backdrops and map icons, in files, shared by every game here. <a href="models.html">Space models</a></span>
   <span class="spacer"></span>
   <label class="small"><input type="checkbox" id="night"> night</label>
   <span id="status" class="small muted">loading…</span>
@@ -31,6 +31,11 @@
     <h3>Map icons</h3>
     <p class="small muted">Node markers for a world map, each a small <code>.svg</code> drawn in a <code>-4 -4 8 8</code> box so it can be dropped into a map at any scale.</p>
     <div class="icon-row" id="icon-row"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Space models</h3>
+    <p class="small muted">The one part of this library that is code rather than files: procedural Three.js objects for planets, stars, asteroid belts, probes, ships and stations, built from primitives and canvas textures at runtime. See the <a href="models.html">model gallery</a>, and <code>js/space-models.js</code>.</p>
   </div>
 
   <div class="panel">

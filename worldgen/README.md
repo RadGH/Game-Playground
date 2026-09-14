@@ -66,7 +66,7 @@ ancientwood/battlefield`, `dungeon/lair`, `bridge/ford`).
 | File | What it does |
 |---|---|
 | `js/noise.js` | Our own simplex 2D/3D, fBm, ridged, billow, domain warp, seeded rng, normalise/quantile/blur helpers. No libraries. |
-| `js/biomes.js` | The biome table (25 entries incl. the aura ones) and `classify()` — temperature × moisture × elevation → biome id. Also the debug colour ramps. |
+| `js/biomes.js` | The biome table (26 entries: the aura ones, plus Sea Ice for frozen water) and `classify()` — temperature × moisture × elevation → biome id. Also the debug colour ramps, the `BIOME_FAMILIES` table with `familiesOf`/`inFamily`/`lockBiome` (the `biomeLock` knob), and `PALETTES`/`palettedColors` for whole-map colour swaps. |
 | `js/names.js` | `Namer`: wraps Name Forge (`/namegen/`) when a game has it, falls back to a built-in syllable namer so `worldgen/` also works alone. Names regions, settlements, ranges, rivers, lakes, seas, forests, landmarks and people. |
 | `js/world.js` | `generateWorld(opts)` — the whole macro pipeline. Also `DEFAULTS`, `METHODS`, `PRESETS`, `cellInfo`, `nearestNode`. |
 | `js/regions.js` | Cuts the land into named provinces, then names the big natural features. |
@@ -155,6 +155,10 @@ All of them live in `DEFAULTS` (`js/world.js`) and every one is on the viewer's 
 | `rainfall` | 0…1 | 0.5 | Overall wetness. |
 | `rainShadow` | 0…1 | 0.6 | How hard mountains wring the air out. |
 | `biomeVariety` | 0…1 | 0.6 | 0 = a handful of coarse biomes, 1 = every band shows up. |
+| `biomeLock` | family key or null | null | Forces every land cell into one `BIOME_FAMILIES` family (`ice`, `lava`, `desert`, `rock`, `jungle`, `tundra`, `ocean`, `toxic`, `crystal`, `void`, `grass`), picked by height and slope. This is how `universe/` makes a single-biome planet. |
+| `polarCaps` | 0…1 | 0 | How far ice reaches down from the top and bottom rows. Land becomes Ice Sheet, water becomes Sea Ice (biome 25). |
+| `atmosphereTint` | hex or `{color, strength}` | null | A colour wash laid over the drawn map — a yellow sky yellows its own map. Read by `worldPixels`. |
+| `palette` | `PALETTES` key or null | null | Swaps the biome colours without touching the biome table: `lava`, `crystal`, `toxic`, `void`, `ember`, `rust`. |
 | `auraStrength` | 0…1 | 0.35 | Size of the good/evil influence field. |
 | `auraBalance` | 0…1 | 0.55 | 0 = all blessed, 1 = all cursed. |
 | `magicStrength` | 0…1 | 0.3 | Raw magic — glimmer waste, towers, volcanoes. |

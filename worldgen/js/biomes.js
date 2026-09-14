@@ -36,14 +36,18 @@ export const BIOMES = [
   { id: 22, key: 'veiledHills', name: 'Veiled Hills', color: '#68597a', tags: ['land', 'relief', 'evil', 'aura'], move: 1.9, habit: 0.2 },
   { id: 23, key: 'hallowed',  name: 'Hallowed Glade', color: '#8fd0a0', tags: ['land', 'forest', 'good', 'aura'], move: 1.2, habit: 0.8 },
   { id: 24, key: 'glimmerwaste', name: 'Glimmer Waste', color: '#a99ada', tags: ['land', 'open', 'magic', 'aura'], move: 1.8, habit: 0.25 },
+  // water — frozen. Only produced by the optional polarCaps knob (and by a locked ice world), never by classify().
+  { id: 25, key: 'seaIce',    name: 'Sea Ice',    color: '#cfe2ec', tags: ['water', 'ocean', 'cold', 'frozen'], travel: 'sea', move: 3.0, habit: 0.02 },
 ];
 
 export const BY_KEY = Object.fromEntries(BIOMES.map(b => [b.key, b]));
 export const biomeId = key => BY_KEY[key].id;
 /** First land id — anything below is water. */
 export const LAND_START = 4;
-export const isWater = id => id < LAND_START;
-export const isOcean = id => id < 3;
+export const isWater = id => id < LAND_START || id === 25;
+export const isOcean = id => id < 3 || id === 25;
+/** Ids that are water of any kind (the frozen one sits past the land block, so keep this in sync). */
+export const WATER_IDS = [0, 1, 2, 3, 25];
 
 /** Colour ramps for the debug layers. */
 export const RAMPS = {
@@ -146,3 +150,73 @@ export const BIOME_BLURB = {
   ashPlain: 'grey ash over dead ground', veiledHills: 'hills under a permanent haze', hallowed: 'bright, calm, unnaturally green',
   glimmerwaste: 'raw magic crusted over the ground',
 };
+
+// ---------------------------------------------------------------------------- biome families
+// A family is a small set of biomes that belong to the same kind of world. The `biomeLock` knob
+// (see world.js) forces every land cell into one family, which is what a single-biome planet needs:
+// an ice world is ice, tundra and snowy peaks and nothing else. Order matters — the members are
+// listed lowest ground first, and `lockBiome` picks along that list by height and slope.
+
+export const BIOME_FAMILIES = {
+  grass:   { name: 'Green world',   members: ['grassland', 'shrubland', 'temperateForest', 'hills', 'mountains'], water: 'liquid' },
+  jungle:  { name: 'Jungle world',  members: ['marsh', 'rainforest', 'rainforest', 'hills', 'mountains'], water: 'liquid' },
+  desert:  { name: 'Desert world',  members: ['desert', 'desert', 'badlands', 'badlands', 'mountains'], water: 'liquid' },
+  ice:     { name: 'Ice world',     members: ['ice', 'ice', 'tundra', 'snowyPeaks', 'snowyPeaks'], water: 'frozen' },
+  tundra:  { name: 'Tundra world',  members: ['tundra', 'tundra', 'borealForest', 'hills', 'snowyPeaks'], water: 'liquid' },
+  ocean:   { name: 'Ocean world',   members: ['beach', 'marsh', 'grassland', 'hills', 'mountains'], water: 'liquid' },
+  rock:    { name: 'Barren world',  members: ['badlands', 'badlands', 'shrubland', 'hills', 'mountains'], water: 'none' },
+  lava:    { name: 'Lava world',    members: ['volcanic', 'volcanic', 'ashPlain', 'badlands', 'mountains'], water: 'lava' },
+  toxic:   { name: 'Toxic world',   members: ['marsh', 'blighted', 'ashPlain', 'veiledHills', 'mountains'], water: 'liquid' },
+  crystal: { name: 'Crystal world', members: ['glimmerwaste', 'glimmerwaste', 'veiledHills', 'snowyPeaks', 'snowyPeaks'], water: 'liquid' },
+  void:    { name: 'Void-touched',  members: ['ashPlain', 'blighted', 'veiledHills', 'veiledHills', 'mountains'], water: 'liquid' },
+};
+
+/**
+ * Every family a biome id belongs to. Families overlap on purpose — mountains and badlands turn up
+ * in several — so this returns a list, and `inFamily` is the question you usually want to ask.
+ * Water is its own answer: ['water'].
+ */
+export function familiesOf(id) {
+  if (isWater(id)) return ['water'];
+  const key = BIOMES[id]?.key;
+  return Object.entries(BIOME_FAMILIES).filter(([, spec]) => spec.members.includes(key)).map(([fam]) => fam);
+}
+
+/** Is this biome one of the family's members? (Water counts as in every family — it is not ground.) */
+export function inFamily(id, family) {
+  if (isWater(id)) return true;
+  const spec = BIOME_FAMILIES[family];
+  return !!spec && spec.members.includes(BIOMES[id]?.key);
+}
+
+/**
+ * Force one cell into a family. `lock` is a family key from BIOME_FAMILIES.
+ * Land picks a member by height + slope; water stays water unless the family freezes it.
+ */
+export function lockBiome(id, lock, c) {
+  const fam = BIOME_FAMILIES[lock];
+  if (!fam) return id;
+  if (isWater(id)) return fam.water === 'frozen' ? 25 : id;
+  const high = Math.max(0, (c.elev - 0.5) * 2);
+  const step = high > 0.66 ? 4 : high > 0.44 ? 3 : high > 0.24 ? 2 : c.slope > 0.35 ? 2 : c.moist > 0.62 ? 1 : 0;
+  return BY_KEY[fam.members[Math.min(step, fam.members.length - 1)]].id;
+}
+
+/**
+ * Colour swaps for a whole map, so the same biome table can look like a different planet.
+ * Used by render.js: pass `palette: 'lava'` (or set it in the world's opts) to worldPixels.
+ */
+export const PALETTES = {
+  lava:    { deepOcean: '#8a2408', ocean: '#c4400c', lake: '#ffb02a', coast: '#ff6a18', volcanic: '#3a2620', ashPlain: '#4a423d', badlands: '#7a3c22', mountains: '#5c4a42', hills: '#6b4a34', shrubland: '#6a4a2e', beach: '#6b4030' },
+  crystal: { deepOcean: '#141b3a', ocean: '#20306a', coast: '#3a5aa8', lake: '#6f7ce0', glimmerwaste: '#b9a8f2', veiledHills: '#7e6fb4', snowyPeaks: '#e4e0ff', mountains: '#6a6390', badlands: '#6f6796' },
+  toxic:   { deepOcean: '#16220e', ocean: '#263a12', coast: '#41601c', lake: '#6f9a22', marsh: '#4d6b24', blighted: '#5a5030', ashPlain: '#5c5a42', veiledHills: '#6a6440', mountains: '#5e5c4c' },
+  void:    { deepOcean: '#0a0810', ocean: '#140f22', coast: '#241a3a', lake: '#3a2a5c', ashPlain: '#2e2a38', blighted: '#3a2f4c', veiledHills: '#4a3c62', mountains: '#3e3a48', badlands: '#463c52' },
+  ember:   { deepOcean: '#1a0f14', ocean: '#33202a', coast: '#5c3c3a', badlands: '#8a4a2e', desert: '#c08a54', mountains: '#6e5a50' },
+  rust:    { deepOcean: '#1b1310', ocean: '#3a2a20', coast: '#6a4a34', desert: '#c08a58', badlands: '#8f5330', shrubland: '#8a7346', hills: '#8a6a44', mountains: '#7a6252' },
+};
+
+/** BIOMES with a palette's colours swapped in (the table itself is never mutated). */
+export function palettedColors(palette) {
+  const swap = PALETTES[palette] || null;
+  return BIOMES.map(b => (swap && swap[b.key] ? { ...b, color: swap[b.key] } : b));
+}

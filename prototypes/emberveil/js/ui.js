@@ -5,6 +5,8 @@
 // text that explains stats, node types and the game loop. main.js imports what it needs; nothing
 // in here touches game rules.
 import { installTooltips, registerTip, hideTip } from '../../../shared/tooltip.js';
+import { rarityClass } from '../../../shared/rewards.js';
+import { statName } from './loot.js';
 
 export { installTooltips, registerTip, hideTip };
 
@@ -17,14 +19,40 @@ export function icon(name, cls = '') { const i = document.createElement('i'); i.
 
 // ------------------------------------------------------------------ rarity
 /**
- * Item rarity → the gem art that stands for it. The pick is by COLOUR, not by name: Emberveil's
- * rarities are normal (grey), magic (blue), rare (yellow) and legendary (orange), so they take the
- * grey, blue, gold and orange gems. The unused gems (uncommon green, epic purple) are there for
- * games with a different ladder.
+ * THE rarity table (round 22, E48). Every item has one display key — `set` if it has a setId, else `unique`
+ * if isUnique, else its rarity (the same rule as shared/rewards.js rarityClass, which the loot popup uses) —
+ * and each key has one colour and one gem. The name and the icon use them everywhere: loot popup, bag,
+ * merchant, smith, enchanter, item card, tooltips, party tab and the log. The colours live in
+ * data/items.json `rarityColors` (setRarityTable() writes them onto the page as --normal … --set); the
+ * defaults below are the same values, for pages that never load the data.
+ *
+ * Why: before round 22 the bag coloured a name by `it.rarity` while the gem and the loot popup looked at
+ * `setId` first, so a set piece (rarity "legendary" underneath) had a teal gem and an orange name. The gem
+ * is picked by colour, not by file name: rare (yellow) takes the gold "unique" gem, unique and legendary
+ * share the orange gem.
  */
-export const RARITY_GEM = { normal: 'common', magic: 'rare', rare: 'unique', epic: 'epic', legendary: 'legendary', unique: 'legendary', set: 'set' };
-export function gemFor(it) { if (!it) return 'common'; if (it.setId) return 'set'; if (it.isUnique) return 'unique'; return RARITY_GEM[it.rarity] || 'common'; }
-export function gemHtml(it) { return `<i class="gem gem-${gemFor(it)}"></i>`; }
+export const RARITY_STYLE = {
+  normal: { color: '#c9c2b6', gem: 'common', label: 'normal' },
+  magic: { color: '#7f95ff', gem: 'rare', label: 'magic' },
+  rare: { color: '#e8d020', gem: 'unique', label: 'rare' },
+  legendary: { color: '#ff8020', gem: 'legendary', label: 'legendary' },
+  unique: { color: '#ff5a3c', gem: 'legendary', label: 'unique' },
+  set: { color: '#2fc4b2', gem: 'set', label: 'set piece' },
+};
+export const RARITY_GEM = { ...Object.fromEntries(Object.entries(RARITY_STYLE).map(([k, v]) => [k, v.gem])), epic: 'epic' };
+/** The display key for an item: 'set' | 'unique' | 'legendary' | 'rare' | 'magic' | 'normal'. */
+export function rarityKey(it) { return rarityClass(it); }
+/** What the card says: "set piece · legendary", "unique · legendary", "rare". */
+export function rarityLabel(it) { const k = rarityKey(it); return k === 'set' || k === 'unique' ? `${RARITY_STYLE[k].label} · ${it.rarity || 'legendary'}` : (it?.rarity || 'normal'); }
+/** Load the table from data (items.json rarityColors / rarityGems) and write the colours onto the page. */
+export function setRarityTable(colors = {}, gems = {}, root = typeof document !== 'undefined' ? document.documentElement : null) {
+  for (const [k, c] of Object.entries(colors || {})) RARITY_STYLE[k] = { ...(RARITY_STYLE[k] || { label: k, gem: 'common' }), color: c };
+  for (const [k, g] of Object.entries(gems || {})) { RARITY_STYLE[k] = { ...(RARITY_STYLE[k] || { label: k }), gem: g }; RARITY_GEM[k] = g; }
+  if (root) for (const [k, v] of Object.entries(RARITY_STYLE)) root.style.setProperty('--' + k, v.color);
+  return RARITY_STYLE;
+}
+export function gemFor(it) { if (!it) return 'common'; return RARITY_STYLE[rarityKey(it)]?.gem || 'common'; }
+export function gemHtml(it) { return `<i class="gem gem-${gemFor(it)}" data-rarity="${rarityKey(it)}"></i>`; }
 
 // ------------------------------------------------------------------ equipment slots
 export const SLOT_ICON = { weapon: 'slot_weapon', offhand: 'slot_offhand', head: 'slot_head', chest: 'slot_chest', hands: 'slot_hands', legs: 'slot_legs', feet: 'slot_feet', ring: 'slot_ring', ring1: 'slot_ring', ring2: 'slot_ring', necklace: 'slot_necklace', amulet: 'slot_necklace' };
@@ -128,11 +156,110 @@ export function fillHowTo(root = document) { for (const box of root.querySelecto
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export { esc };
 
-/** Rich item card: name + gem, slot, stats, affixes and the diff against what the hero wears. */
-export function itemTipHtml({ it, score = null, cur = null, curScore = null, heroShort = '', describe = a => a.text || '' }) {
+/** An item's name, coloured by the one rarity table, with a live hover card (main.js registers the `item` renderer). */
+export function itemNameHtml(it, { cls = '', tip = true } = {}) {
   if (!it) return '';
-  const bits = [`<div class="tip-title"><i class="gem gem-${gemFor(it)}"></i> <span class="${it.rarity}">${esc(it.name)}</span></div>`];
-  bits.push(`<div class="tip-sub">${esc(it.rarity)}${it.quality ? ' · ' + esc(it.quality) + ' quality' : ''} · ${esc(SLOT_NAME[it.slot] || it.slot)}${it.twoHanded ? ' · two-handed' : ''}</div>`);
+  const k = rarityKey(it);
+  return `<span class="iname ${k}${cls ? ' ' + cls : ''}" data-rarity="${k}"${tip && it.id ? ` data-tip-render="item" data-tip-class="tip-compare" data-item-id="${esc(it.id)}"` : ''}>${esc(it.name)}</span>`;
+}
+
+// ------------------------------------------------------------------ comparing an item with what a hero wears
+// One comparison, used by the hover card on every item row (E46) and by the item dialog (E4), so the two can
+// never disagree.
+const PCT_STATS = new Set(['critChance', 'critDamage', 'spellPower', 'goldFind', 'magicFind', 'xpFind', 'cooldownReduction', 'block_chance', 'dmgPct']);
+/** A stat value the way people read it: 0.05 crit chance is "5%", 12 armour is "12". */
+export function fmtStat(stat, v) {
+  const pct = PCT_STATS.has(stat) || (String(stat).startsWith('cond_') && Math.abs(v) < 1);
+  return pct ? `${Math.round(v * 1000) / 10}%` : String(Math.round(v * 10) / 10);
+}
+/** Everything an item's properties add, summed by stat ({ str: 5, critChance: 0.04 }). */
+export function itemStatTotals(it) {
+  const out = {}; if (!it) return out;
+  for (const a of it.affixes || []) { if (typeof a.value !== 'number' || !a.stat || a.stat === 'cond_legendaryEffect') continue; out[a.stat] = (out[a.stat] || 0) + a.value; }
+  return out;
+}
+/** Every slot worth comparing an item against for this hero: both rings; both hands for a one-hander that fits the off hand. */
+export function compareSlots(hero, it) {
+  if (it.slot === 'ring') return ['ring1', 'ring2'];
+  if (it.type === 'weapon' && it.offHandOk && !it.twoHanded && hero?.equipment?.weapon && !hero.equipment.weapon.twoHanded) return ['weapon', 'offhand'];
+  return [it.slot];
+}
+/**
+ * Compare an item with what `hero` wears.
+ *   compareItem(it, hero, { loot, canUse, slotFor })
+ *   → { hero, usable, why, into, targets: [{ slot, cur, same, score, curScore, diff, rows: [{ key, label, mine, theirs, d, fmt }] }], set }
+ * `into` is the slot equipping would really use (slotFor, the same rule as rules.equip); `targets` lists
+ * every slot worth comparing against, `into` first. `set` is loot.setInfo(): pieces worn now and with it.
+ */
+export function compareItem(it, hero, { loot, canUse = () => true, slotFor = null } = {}) {
+  if (!it || !hero || !loot) return null;
+  const usable = it.type !== 'weapon' || canUse(hero, it);
+  const into = slotFor ? slotFor(hero, it) : (it.slot === 'ring' ? 'ring1' : it.slot);
+  const slots = compareSlots(hero, it); if (!slots.includes(into)) slots.unshift(into); else slots.sort((a, b) => (a === into ? -1 : b === into ? 1 : 0));
+  const s = loot.score(it, hero); const mine = itemStatTotals(it);
+  const targets = slots.map(slot => {
+    const cur = hero.equipment?.[slot] || null; const same = !!cur && (cur === it || cur.id === it.id);
+    const cs = cur ? loot.score(cur, hero) : null; const theirs = itemStatTotals(cur);
+    const rows = [];
+    const row = (key, label, a, b, fmt = v => String(Math.round(v * 10) / 10)) => { if (a == null && b == null) return; rows.push({ key, label, mine: a, theirs: b, d: (a ?? 0) - (b ?? 0), fmt }); };
+    row('dmgLow', 'Damage (low)', it.dmg?.[0] ?? null, cur?.dmg?.[0] ?? null);
+    row('dmgHigh', 'Damage (high)', it.dmg?.[1] ?? null, cur?.dmg?.[1] ?? null);
+    row('armor', 'Armor', it.armor ?? null, cur?.armor ?? null);
+    for (const stat of new Set([...Object.keys(mine), ...Object.keys(theirs)])) row('stat:' + stat, statName(stat), mine[stat] ?? null, theirs[stat] ?? null, v => fmtStat(stat, v));
+    row('offense', 'Offense', s.offense, cs?.offense ?? 0); row('defense', 'Defense', s.defense, cs?.defense ?? 0); row('utility', 'Utility', s.utility, cs?.utility ?? 0);
+    return { slot, cur, same, score: s, curScore: cs, diff: s.total - (cs?.total ?? 0), rows };
+  });
+  const why = usable ? '' : `${hero.short || hero.name} is a ${hero.className || 'hero'} and cannot use ${it.subtype || 'this'}s — ${(hero.weapons || []).join(', ') || 'no weapons'} only.`;
+  return { hero, usable, why, into, targets, set: loot.setInfo ? loot.setInfo(it, hero.equipment, { slot: into }) : null };
+}
+/** A signed difference with a colour class: better (green), worse (red) or the same. */
+function deltaHtml(d, fmt) { if (!d || Math.abs(d) < 1e-9) return '<span class="even">=</span>'; return `<span class="${d > 0 ? 'good' : 'bad'}">${d > 0 ? '+' : ''}${esc(fmt(d))}</span>`; }
+/**
+ * The set block: set name, pieces worn now and with this item, every piece (ticked when worn), and each
+ * threshold with its bonus and power — lit when it is on, marked "with this" when this item would switch it on.
+ */
+export function setInfoHtml(info, { describe = null, legendaryText = id => id, heroShort = '', className = id => id } = {}) {
+  if (!info) return '';
+  const bonusText = b => Object.entries(b || {}).filter(([, v]) => typeof v === 'number').map(([k, v]) => describe ? describe({ stat: k, value: v }) : `+${fmtStat(k, v)} ${statName(k)}`).join(', ');
+  const steps = info.steps.map(st => {
+    const parts = []; const bt = bonusText(st.bonus); if (bt) parts.push(bt);
+    if (st.power) parts.push(legendaryText(st.power)); if (st.legendary) parts.push(legendaryText(st.legendary));
+    const cls = st.on ? 'on' : st.onWith ? 'next' : 'off';
+    return `<div class="set-step ${cls}"><b>${st.at}</b> ${esc(parts.join(' · ') || '—')}${!st.on && st.onWith ? ' <i>(with this)</i>' : ''}</div>`;
+  }).join('');
+  const count = `${heroShort ? esc(heroShort) + ' wears ' : ''}${info.worn}/${info.pieces}${!info.wearing && info.withItem !== info.worn ? ` → ${info.withItem}/${info.pieces} with this` : ''}`;
+  return `<div class="set-block"><div class="tip-row"><span class="set">◆ ${esc(info.set.name)}</span><b class="set-count">${count}</b></div>`
+    + (info.classes?.length ? `<div class="tip-sub">Made for: ${esc(info.classes.map(className).join(', '))}</div>` : '')
+    + `<div class="set-pieces">${info.pieceList.map(p => `<span class="${p.on ? 'on' : ''}">${p.on ? '✓' : '·'} ${esc(p.name)}</span>`).join('')}</div>${steps}</div>`;
+}
+/**
+ * The compare hover card (E46): the hovered item and what the hero wears side by side (both rings / both
+ * hands where relevant), a stat-by-stat table marked better or worse, whether the hero can use it, and set
+ * progress. `note` is a line from the caller (price, "click for the full card").
+ */
+export function compareTipHtml(cmp, { it, describe, legendaryText, className, note = '' } = {}) {
+  if (!cmp) return itemTipHtml({ it, describe, setHtml: '' }) + note;
+  const hero = cmp.hero, multi = cmp.targets.length > 1;
+  const newCard = itemTipHtml({ it, score: cmp.targets[0]?.score, describe });
+  const curCards = cmp.targets.map(t => `<div class="tipcmp-label">${esc(hero.short)} · ${esc(SLOT_NAME[t.slot] || t.slot)}${t.same ? ' · this one' : ''}</div>`
+    + (t.cur ? itemTipHtml({ it: t.cur, score: t.curScore, describe }) : '<div class="tip-sub">Nothing equipped.</div>')).join('<hr>');
+  const keys = []; const byKey = {};
+  for (const [ti, t] of cmp.targets.entries()) for (const r of t.rows) { if (!byKey[r.key]) { byKey[r.key] = { label: r.label, mine: r.mine, fmt: r.fmt, d: [] }; keys.push(r.key); } byKey[r.key].d[ti] = r; }
+  const body = keys.filter(k => !['offense', 'defense', 'utility'].includes(k)).map(k => { const r = byKey[k];
+    return `<tr><td>${esc(r.label)}</td><td>${r.mine == null ? '—' : esc(r.fmt(r.mine))}</td>${cmp.targets.map((t, ti) => `<td>${t.same ? '<span class="even">=</span>' : deltaHtml(r.d[ti]?.d ?? (r.mine ?? 0), r.fmt)}</td>`).join('')}</tr>`; }).join('');
+  const total = `<tr class="total"><td>Score</td><td>${cmp.targets[0]?.score.total ?? 0}</td>${cmp.targets.map(t => `<td>${t.same ? '<span class="even">=</span>' : deltaHtml(t.diff, v => String(v))}</td>`).join('')}</tr>`;
+  const head = `<tr><th></th><th>this</th>${cmp.targets.map(t => `<th>${multi ? esc(SLOT_NAME[t.slot] || t.slot) : 'vs worn'}</th>`).join('')}</tr>`;
+  const use = cmp.usable ? `<div class="tip-sub use-ok">${esc(hero.short)} can use this${cmp.targets.some(t => t.same) ? ' — and is wearing it' : ''}.</div>` : `<div class="bad use-no">${esc(cmp.why)}</div>`;
+  const set = cmp.set ? '<hr>' + setInfoHtml(cmp.set, { describe, legendaryText, heroShort: hero.short, className }) : '';
+  return `<div class="tipcmp" data-hero="${esc(hero.id)}"><div class="tipcmp-cols"><div class="tipcmp-col new"><div class="tipcmp-label">Looking at</div>${newCard}</div><div class="tipcmp-col cur">${curCards}</div></div>`
+    + `<hr><table class="tipcmp-diff">${head}${body}${total}</table>${use}${set}${note}</div>`;
+}
+
+/** Rich item card: name + gem, rarity (a set piece says "set piece · legendary"), slot, stats, affixes, optional set block. */
+export function itemTipHtml({ it, score = null, cur = null, curScore = null, heroShort = '', describe = a => a.text || '', setHtml = '' }) {
+  if (!it) return '';
+  const bits = [`<div class="tip-title">${gemHtml(it)} ${itemNameHtml(it, { tip: false })}</div>`];
+  bits.push(`<div class="tip-sub">${esc(rarityLabel(it))}${it.quality ? ' · ' + esc(it.quality) + ' quality' : ''} · ${esc(SLOT_NAME[it.slot] || it.slot)}${it.twoHanded ? ' · two-handed' : ''}</div>`);
   if (it.dmg) bits.push(`<div class="tip-row"><span>Damage</span><b>${it.dmg[0]}–${it.dmg[1]}</b></div>`);
   if (it.armor != null) bits.push(`<div class="tip-row"><span>Armor</span><b>${it.armor}</b></div>`);
   const aff = (it.affixes || []).map(a => `<div class="${a.baseIntrinsic ? '' : 'good'}">${esc(describe(a))}</div>`).join('');

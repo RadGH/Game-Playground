@@ -7,11 +7,22 @@
   "legendary"
  ],
  "rarityColors": {
-  "normal": "#c8c8c8",
-  "magic": "#6080ff",
+  "normal": "#c9c2b6",
+  "magic": "#7f95ff",
   "rare": "#e8d020",
-  "legendary": "#ff8020"
+  "legendary": "#ff8020",
+  "unique": "#ff5a3c",
+  "set": "#2fc4b2"
  },
+ "rarityGems": {
+  "normal": "common",
+  "magic": "rare",
+  "rare": "unique",
+  "legendary": "legendary",
+  "unique": "legendary",
+  "set": "set"
+ },
+ "rarityDoc": "R22 (E48): the one rarity table. An item shows as `set` if it has a setId, else `unique` if isUnique, else its rarity (shared/rewards.js rarityClass, js/ui.js rarityKey). The colour is the item's name everywhere (loot popup, bag, shop, cards, tooltips, log) and main.js writes these onto the page as --normal/--magic/--rare/--legendary/--unique/--set; the gem is assets/data/ui/rarity_<gem>.svg. A set piece is still legendary underneath: its card says 'Set piece - legendary'.",
  "rarityAffixCount": {
   "normal": [
    0,
@@ -3386,7 +3397,10 @@
      "mp": 20.0,
      "spellPower": 0.08
     }
-   }
+   },
+   "classes": [
+    "mage"
+   ]
   },
   {
    "id": "shadow_adept",
@@ -3445,7 +3459,10 @@
      "dodge": 5.0,
      "critChance": 0.05
     }
-   }
+   },
+   "classes": [
+    "rogue"
+   ]
   },
   {
    "id": "verdant_warden",
@@ -3564,7 +3581,10 @@
      "hp": 15.0,
      "mp": 12.0
     }
-   }
+   },
+   "classes": [
+    "cleric"
+   ]
   },
   {
    "id": "paladins_oath",
@@ -3623,7 +3643,10 @@
      "armor": 8.0,
      "block_power": 12.0
     }
-   }
+   },
+   "classes": [
+    "paladin"
+   ]
   },
   {
    "id": "savage_berserker",
@@ -5589,6 +5612,3030 @@
      "cooldownReduction": 0.1
     }
    }
+  },
+  {
+   "id": "vanguard_bloodforged",
+   "name": "Bloodforged Vanguard",
+   "tier": "mid",
+   "pieces": 4,
+   "classes": [
+    "warrior"
+   ],
+   "classSet": true,
+   "lore": "Worn by the first rank, the ones who are still standing when the line breaks.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "greatsword",
+     "name": "Vanguard Greatblade",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 6.0
+      },
+      {
+       "stat": "cond_dmgBelowHpThresh",
+       "value": 0.15
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 20.0,
+       "max": 40.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "heavy_helm",
+     "name": "Vanguard Warhelm",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "con",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "heavy_chest",
+     "name": "Vanguard Hauberk",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 10.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 25.0,
+       "max": 45.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "heavy_legs",
+     "name": "Vanguard Greaves",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "initiative",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "rally_on_kill",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "str": 6.0,
+     "armor": 6.0
+    },
+    "3": {
+     "str": 9.0,
+     "hp": 30.0
+    },
+    "4": {
+     "str": 13.0,
+     "hp": 50.0,
+     "critDamage": 0.15
+    }
+   }
+  },
+  {
+   "id": "drillmasters_discipline",
+   "name": "Drillmaster's Discipline",
+   "tier": "low",
+   "pieces": 3,
+   "classes": [
+    "fighter"
+   ],
+   "classSet": true,
+   "lore": "The same cut a thousand times, until the thousand-and-first is not a decision.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "longsword",
+     "name": "Drillmaster's Blade",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 4.0
+      },
+      {
+       "stat": "hit",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "dex",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "heavy_gauntlets",
+     "name": "Drillmaster's Grips",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_consecutiveHitDmg",
+       "value": 0.04
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "heavy_boots",
+     "name": "Drillmaster's Treads",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 3.0
+      },
+      {
+       "stat": "armor",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "initiative",
+       "min": 1.0,
+       "max": 3.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "speed_combat_init",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "str": 4.0,
+     "hit": 5.0
+    },
+    "3": {
+     "str": 7.0,
+     "hit": 8.0,
+     "initiative": 3.0
+    }
+   }
+  },
+  {
+   "id": "longwatch_stalker",
+   "name": "Longwatch Stalker",
+   "tier": "mid",
+   "pieces": 4,
+   "classes": [
+    "ranger"
+   ],
+   "classSet": true,
+   "lore": "A watcher on the high road sees the ambush a day before it happens.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "bow",
+     "name": "Longwatch Recurve",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 6.0
+      },
+      {
+       "stat": "cond_firstHitCritBonus",
+       "value": 0.2
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hit",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "light_helm",
+     "name": "Longwatch Hood",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 4.0
+      },
+      {
+       "stat": "hit",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "dodge",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "light_chest",
+     "name": "Longwatch Jerkin",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 15.0,
+       "max": 30.0
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "light_boots",
+     "name": "Longwatch Striders",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 4.0
+      },
+      {
+       "stat": "dodge",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "initiative",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "critical_armorpen",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "dex": 6.0,
+     "hit": 5.0
+    },
+    "3": {
+     "dex": 9.0,
+     "critChance": 0.04
+    },
+    "4": {
+     "dex": 13.0,
+     "critChance": 0.07,
+     "critDamage": 0.2
+    }
+   }
+  },
+  {
+   "id": "tavern_choir",
+   "name": "Tavern Choir",
+   "tier": "low",
+   "pieces": 2,
+   "classes": [
+    "bard"
+   ],
+   "classSet": true,
+   "lore": "Every road house has a song about the party. Most of them are rude.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "dagger",
+     "name": "Chorister's Knife",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "int",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.04
+      }
+     ]
+    },
+    {
+     "slot": "necklace",
+     "baseItemId": "silver_amulet",
+     "name": "Chorister's Pitch-Pipe",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "cond_partyHpOnKill",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "rally_on_kill",
+   "activationPieces": 2,
+   "partialBonuses": {
+    "2": {
+     "int": 5.0,
+     "mp": 20.0,
+     "cooldownReduction": 0.05
+    }
+   }
+  },
+  {
+   "id": "gravewrights_shroud",
+   "name": "Gravewright's Shroud",
+   "tier": "mid",
+   "pieces": 5,
+   "classes": [
+    "necromancer"
+   ],
+   "classSet": true,
+   "lore": "What is buried keeps a ledger. The shroud reads it aloud.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "staff",
+     "name": "Gravewright's Crook",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "cond_hpOnKill",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.04,
+       "max": 0.08
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "cloth_helm",
+     "name": "Gravewright's Cowl",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "mp",
+       "value": 15.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 4.0,
+       "max": 8.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "cloth_chest",
+     "name": "Gravewright's Winding",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 15.0,
+       "max": 30.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "cloth_legs",
+     "name": "Gravewright's Wraps",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "mp",
+       "value": 10.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "manaRegen",
+       "min": 1.0,
+       "max": 3.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "ring",
+     "name": "Gravewright's Knucklebone",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_dmgVsUndead",
+       "value": 15.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "curse_spreads",
+   "activationPieces": 5,
+   "partialBonuses": {
+    "2": {
+     "int": 6.0,
+     "mp": 20.0
+    },
+    "3": {
+     "int": 9.0,
+     "spellPower": 0.08
+    },
+    "4": {
+     "int": 13.0,
+     "spellPower": 0.14,
+     "hp": 30.0
+    },
+    "5": {
+     "int": 18.0,
+     "spellPower": 0.2,
+     "barrier": 20.0
+    }
+   },
+   "thresholdPowers": {
+    "4": "kill_party_heal"
+   }
+  },
+  {
+   "id": "pactbinders_regalia",
+   "name": "Pactbinder's Regalia",
+   "tier": "mid",
+   "pieces": 3,
+   "classes": [
+    "warlock"
+   ],
+   "classSet": true,
+   "lore": "Signed in something that was not ink, by someone who read the small print.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "wand",
+     "name": "Pactbinder's Rod",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "spellPower",
+       "value": 0.05
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.04
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "cloth_chest",
+     "name": "Pactbinder's Vestment",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "hp",
+       "value": 20.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 15.0,
+       "max": 25.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "gold_signet",
+     "name": "Pactbinder's Seal",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_magicDmgVsAnyStatus",
+       "value": 0.1
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "lifeSteal",
+       "min": 1.0,
+       "max": 3.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "low_mana_shockwave",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "int": 6.0,
+     "spellPower": 0.06
+    },
+    "3": {
+     "int": 9.0,
+     "spellPower": 0.12,
+     "lifeSteal": 3.0
+    }
+   }
+  },
+  {
+   "id": "hellwardens_mark",
+   "name": "Hellwarden's Mark",
+   "tier": "mid",
+   "pieces": 4,
+   "classes": [
+    "demon_hunter"
+   ],
+   "classSet": true,
+   "lore": "Each notch on the gloves is a name something from below will not be using again.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "crossbow",
+     "name": "Hellwarden's Arbalest",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_dmgVsDemon",
+       "value": 20.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hit",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "light_helm",
+     "name": "Hellwarden's Blindfold",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_dmgVsUndead",
+       "value": 15.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 4.0,
+       "max": 8.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "light_chest",
+     "name": "Hellwarden's Coat",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 5.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 15.0,
+       "max": 30.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "light_gauntlets",
+     "name": "Hellwarden's Tally Gloves",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "critChance",
+       "value": 0.03
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "initiative",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "strip_modifier",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "dex": 6.0,
+     "hit": 4.0
+    },
+    "3": {
+     "dex": 9.0,
+     "critChance": 0.04
+    },
+    "4": {
+     "dex": 12.0,
+     "critDamage": 0.2,
+     "magicResist": 10.0
+    }
+   }
+  },
+  {
+   "id": "ragpickers_fortune",
+   "name": "Ragpicker's Fortune",
+   "tier": "low",
+   "pieces": 3,
+   "classes": [
+    "scavenger"
+   ],
+   "classSet": true,
+   "lore": "Nothing on the road is lost. It is just waiting for the right pockets.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "dagger",
+     "name": "Ragpicker's Shiv",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "goldFind",
+       "value": 0.05
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.03
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "light_gauntlets",
+     "name": "Ragpicker's Mitts",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_goldOnEliteKill",
+       "value": 0.25
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 1.0,
+       "max": 3.0
+      }
+     ]
+    },
+    {
+     "slot": "necklace",
+     "baseItemId": "necklace",
+     "name": "Ragpicker's Lucky Tooth",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 3.0
+      },
+      {
+       "stat": "goldFind",
+       "value": 0.05
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "xpFind",
+       "min": 0.03,
+       "max": 0.06
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "road_cache",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "dex": 4.0,
+     "goldFind": 0.1
+    },
+    "3": {
+     "dex": 6.0,
+     "goldFind": 0.2,
+     "xpFind": 0.05
+    }
+   }
+  },
+  {
+   "id": "corsairs_flourish",
+   "name": "Corsair's Flourish",
+   "tier": "low",
+   "pieces": 3,
+   "classes": [
+    "swashbuckler"
+   ],
+   "classSet": true,
+   "lore": "Half the fight is the bow before it. The other half is the bow after.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "rapier",
+     "name": "Corsair's Needle",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 4.0
+      },
+      {
+       "stat": "cond_speedOnFirstHit",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.04
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "light_chest",
+     "name": "Corsair's Frock Coat",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "dodge",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 10.0,
+       "max": 25.0
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "light_boots",
+     "name": "Corsair's Deck Boots",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "initiative",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "dodge",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "crit_bleed_5",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "dex": 5.0,
+     "dodge": 4.0
+    },
+    "3": {
+     "dex": 8.0,
+     "dodge": 6.0,
+     "critChance": 0.04
+    }
+   }
+  },
+  {
+   "id": "wyrmsworn_panoply",
+   "name": "Wyrmsworn Panoply",
+   "tier": "endgame",
+   "pieces": 6,
+   "classes": [
+    "dragon_knight"
+   ],
+   "classSet": true,
+   "lore": "Sworn to a dragon that is still alive, and still keeping count.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "dragonfang_greatsword",
+     "name": "Wyrmsworn Fang",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 8.0
+      },
+      {
+       "stat": "cond_executeDmgPct",
+       "value": 0.2
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critDamage",
+       "min": 0.1,
+       "max": 0.2
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "wyrmscale_helm",
+     "name": "Wyrmsworn Crest",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 6.0,
+       "max": 12.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "wyrmscale_chest",
+     "name": "Wyrmsworn Scaleplate",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 7.0
+      },
+      {
+       "stat": "armor",
+       "value": 14.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 40.0,
+       "max": 70.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "dragonhide_legs",
+     "name": "Wyrmsworn Tassets",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "con",
+       "min": 4.0,
+       "max": 7.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "dragonclaw_gauntlets",
+     "name": "Wyrmsworn Talons",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 5.0
+      },
+      {
+       "stat": "critChance",
+       "value": 0.03
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 4.0,
+       "max": 8.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "dragonheart_ring",
+     "name": "Wyrmsworn Heartstone",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 4.0
+      },
+      {
+       "stat": "hp",
+       "value": 30.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 5.0,
+       "max": 10.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "dragon_fury_breath",
+   "activationPieces": 6,
+   "partialBonuses": {
+    "2": {
+     "str": 8.0,
+     "armor": 8.0
+    },
+    "3": {
+     "str": 12.0,
+     "hp": 40.0,
+     "magicResist": 8.0
+    },
+    "4": {
+     "str": 16.0,
+     "hp": 70.0,
+     "armor": 16.0
+    },
+    "6": {
+     "str": 24.0,
+     "hp": 110.0,
+     "critDamage": 0.3,
+     "armor": 24.0
+    }
+   },
+   "thresholdPowers": {
+    "4": "burn_extend"
+   }
+  },
+  {
+   "id": "cinderheart_vestments",
+   "name": "Cinderheart Vestments",
+   "tier": "mid",
+   "pieces": 4,
+   "classes": [
+    "pyromancer"
+   ],
+   "classSet": true,
+   "lore": "Scorched at the hem and never once on fire. The wearer is less lucky.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "ember_focus",
+     "name": "Cinderheart Brand",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "cond_burnExtend",
+       "value": 1.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.04,
+       "max": 0.08
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "cloth_helm",
+     "name": "Cinderheart Hood",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "mp",
+       "value": 15.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.04
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "cloth_chest",
+     "name": "Cinderheart Robe",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "hp",
+       "value": 20.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 4.0,
+       "max": 8.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "cloth_legs",
+     "name": "Cinderheart Leggings",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "burn_extend",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "int": 6.0,
+     "spellPower": 0.06
+    },
+    "3": {
+     "int": 9.0,
+     "spellPower": 0.1,
+     "mp": 25.0
+    },
+    "4": {
+     "int": 13.0,
+     "spellPower": 0.16,
+     "cond_dotDmgReduce": 0.2
+    }
+   }
+  },
+  {
+   "id": "tempest_crown",
+   "name": "Tempest Crown",
+   "tier": "endgame",
+   "pieces": 5,
+   "classes": [
+    "stormcaller"
+   ],
+   "classSet": true,
+   "lore": "The storm does not answer. It repeats itself, louder.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "dragontooth_wand",
+     "name": "Tempest Rod",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 7.0
+      },
+      {
+       "stat": "spellPower",
+       "value": 0.08
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.03,
+       "max": 0.05
+      }
+     ]
+    },
+    {
+     "slot": "offhand",
+     "baseItemId": "spellguard_orb",
+     "name": "Tempest Eye",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "magicResist",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 20.0,
+       "max": 35.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "cloth_helm",
+     "name": "Tempest Crown",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "initiative",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.03,
+       "max": 0.07
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "dragonscale_cloth",
+     "name": "Tempest Mantle",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "hp",
+       "value": 35.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 6.0,
+       "max": 12.0
+      }
+     ]
+    },
+    {
+     "slot": "necklace",
+     "baseItemId": "silver_amulet",
+     "name": "Tempest Lodestone",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_manaOnCrit",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critDamage",
+       "min": 0.1,
+       "max": 0.2
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "echo_cast",
+   "activationPieces": 5,
+   "partialBonuses": {
+    "2": {
+     "int": 7.0,
+     "critChance": 0.03
+    },
+    "3": {
+     "int": 11.0,
+     "spellPower": 0.1
+    },
+    "4": {
+     "int": 15.0,
+     "spellPower": 0.16,
+     "initiative": 5.0
+    },
+    "5": {
+     "int": 20.0,
+     "spellPower": 0.24,
+     "critDamage": 0.25
+    }
+   },
+   "thresholdPowers": {
+    "4": "mage_missile_aoe"
+   }
+  },
+  {
+   "id": "grovekeepers_bark",
+   "name": "Grovekeeper's Bark",
+   "tier": "mid",
+   "pieces": 3,
+   "classes": [
+    "druid"
+   ],
+   "classSet": true,
+   "lore": "Grown, not forged. It still sheds in the autumn.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "quarterstaff",
+     "name": "Grovekeeper's Staff",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "hpRegen",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "con",
+       "min": 3.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "medium_helm",
+     "name": "Grovekeeper's Antlers",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 5.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "medium_chest",
+     "name": "Grovekeeper's Barkmail",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_physDmgReducePct",
+       "value": 0.06
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 20.0,
+       "max": 40.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "camp_mend",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "int": 5.0,
+     "con": 5.0,
+     "hpRegen": 3.0
+    },
+    "3": {
+     "int": 8.0,
+     "con": 8.0,
+     "hp": 35.0,
+     "hpRegen": 5.0
+    }
+   }
+  },
+  {
+   "id": "seers_veiled_sight",
+   "name": "Seer's Veiled Sight",
+   "tier": "low",
+   "pieces": 4,
+   "classes": [
+    "oracle"
+   ],
+   "classSet": true,
+   "lore": "She saw the blow coming. She saw where she would be standing instead.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "scepter",
+     "name": "Seer's Rod",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "spellPower",
+       "value": 0.04
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "cloth_helm",
+     "name": "Seer's Veil",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_combatStartBarrier",
+       "value": 12.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "dodge",
+       "min": 1.0,
+       "max": 3.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "cloth_chest",
+     "name": "Seer's Stole",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "magicResist",
+       "value": 5.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    },
+    {
+     "slot": "necklace",
+     "baseItemId": "necklace",
+     "name": "Seer's Scrying Bead",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "dodge",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "manaRegen",
+       "min": 1.0,
+       "max": 2.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "cheat_death_once",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "int": 4.0,
+     "dodge": 3.0
+    },
+    "3": {
+     "int": 7.0,
+     "magicResist": 8.0
+    },
+    "4": {
+     "int": 10.0,
+     "magicResist": 12.0,
+     "barrier": 15.0
+    }
+   }
+  },
+  {
+   "id": "marshals_campaign",
+   "name": "Marshal's Campaign",
+   "tier": "mid",
+   "pieces": 5,
+   "classes": [
+    "tactician"
+   ],
+   "classSet": true,
+   "lore": "Every order was written the night before. Most of them were right.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "longsword",
+     "name": "Marshal's Baton-Blade",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "str",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "initiative",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "offhand",
+     "baseItemId": "kite_shield",
+     "name": "Marshal's Standard",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "block_power",
+       "value": 10.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "medium_helm",
+     "name": "Marshal's Plumed Helm",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "initiative",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 2.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "medium_chest",
+     "name": "Marshal's Field Coat",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 20.0,
+       "max": 35.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "gold_signet",
+     "name": "Marshal's Seal of Orders",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_killInitBonus",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "cooldownReduction",
+       "min": 0.03,
+       "max": 0.06
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "rally_on_kill",
+   "activationPieces": 5,
+   "partialBonuses": {
+    "2": {
+     "int": 5.0,
+     "initiative": 4.0
+    },
+    "3": {
+     "int": 8.0,
+     "initiative": 6.0,
+     "armor": 8.0
+    },
+    "4": {
+     "int": 11.0,
+     "initiative": 8.0,
+     "armor": 12.0
+    },
+    "5": {
+     "int": 15.0,
+     "initiative": 12.0,
+     "cooldownReduction": 0.1,
+     "armor": 16.0
+    }
+   },
+   "thresholdPowers": {
+    "4": "speed_combat_init"
+   }
+  },
+  {
+   "id": "hourglass_reliquary",
+   "name": "Hourglass Reliquary",
+   "tier": "endgame",
+   "pieces": 4,
+   "classes": [
+    "chronomancer"
+   ],
+   "classSet": true,
+   "lore": "The glass runs both ways if you hold it right. Nobody holds it right twice.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "wand",
+     "name": "Reliquary Hand",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 7.0
+      },
+      {
+       "stat": "cooldownReduction",
+       "value": 0.04
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.05,
+       "max": 0.1
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "cloth_helm",
+     "name": "Reliquary Circlet",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "initiative",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 20.0,
+       "max": 35.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "dragonscale_cloth",
+     "name": "Reliquary Robe of Hours",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 6.0
+      },
+      {
+       "stat": "hp",
+       "value": 35.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 6.0,
+       "max": 12.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "gold_signet",
+     "name": "Reliquary Sand-Ring",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_afterSkillSpellPow",
+       "value": 0.12
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "cooldownReduction",
+       "min": 0.03,
+       "max": 0.06
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "echo_cast",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "int": 7.0,
+     "cooldownReduction": 0.05
+    },
+    "3": {
+     "int": 11.0,
+     "initiative": 6.0,
+     "cooldownReduction": 0.08
+    },
+    "4": {
+     "int": 15.0,
+     "cooldownReduction": 0.12,
+     "cond_skillMpCostReduce": 3.0
+    }
+   }
+  },
+  {
+   "id": "stillwater_wraps",
+   "name": "Stillwater Wraps",
+   "tier": "low",
+   "pieces": 3,
+   "classes": [
+    "monk"
+   ],
+   "classSet": true,
+   "lore": "Be the pond. Let the stone sink. Then hit the stone.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "quarterstaff",
+     "name": "Stillwater Staff",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 4.0
+      },
+      {
+       "stat": "dodge",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "str",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "light_gauntlets",
+     "name": "Stillwater Hand Wraps",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_consecutiveHitDmg",
+       "value": 0.05
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.03
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "light_boots",
+     "name": "Stillwater Sandals",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "dodge",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hpRegen",
+       "min": 1.0,
+       "max": 2.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "speed_combat_init",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "dex": 5.0,
+     "dodge": 5.0
+    },
+    "3": {
+     "dex": 8.0,
+     "dodge": 7.0,
+     "hpRegen": 3.0
+    }
+   }
+  },
+  {
+   "id": "spiritcallers_totems",
+   "name": "Spiritcaller's Totems",
+   "tier": "mid",
+   "pieces": 4,
+   "classes": [
+    "shaman"
+   ],
+   "classSet": true,
+   "lore": "The ancestors are always listening. They are not always on your side.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "scepter",
+     "name": "Spiritcaller's Totem Rod",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "manaRegen",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.03,
+       "max": 0.07
+      }
+     ]
+    },
+    {
+     "slot": "offhand",
+     "baseItemId": "warded_focus",
+     "name": "Spiritcaller's Fetish",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "cond_lowManaRegenBonus",
+       "value": 0.3
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 15.0,
+       "max": 25.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "medium_helm",
+     "name": "Spiritcaller's Mask",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 5.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 4.0,
+       "max": 8.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "medium_legs",
+     "name": "Spiritcaller's Leggings",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 5.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 15.0,
+       "max": 30.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "kill_party_heal",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "int": 6.0,
+     "mp": 20.0
+    },
+    "3": {
+     "int": 9.0,
+     "hpRegen": 4.0,
+     "manaRegen": 3.0
+    },
+    "4": {
+     "int": 12.0,
+     "spellPower": 0.12,
+     "hp": 30.0
+    }
+   }
+  },
+  {
+   "id": "inquisitors_brand",
+   "name": "Inquisitor's Brand",
+   "tier": "mid",
+   "pieces": 3,
+   "classes": [
+    "witch_hunter"
+   ],
+   "classSet": true,
+   "lore": "Every spell leaves a mark. The coat is stitched from what the marks remember.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "crossbow",
+     "name": "Inquisitor's Crossbow",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 5.0
+      },
+      {
+       "stat": "hit",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.04
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "medium_helm",
+     "name": "Inquisitor's Capotain",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "magicResist",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 2.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "medium_chest",
+     "name": "Inquisitor's Longcoat",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "cond_magicDmgReducePct",
+       "value": 0.1
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 20.0,
+       "max": 35.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "strip_modifier",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "dex": 6.0,
+     "magicResist": 8.0
+    },
+    "3": {
+     "dex": 9.0,
+     "magicResist": 14.0,
+     "hit": 6.0
+    }
+   }
+  },
+  {
+   "id": "oathbound_bulwark",
+   "name": "Oathbound Bulwark",
+   "tier": "endgame",
+   "pieces": 6,
+   "classes": [
+    "knight"
+   ],
+   "classSet": true,
+   "lore": "The oath was to stand. It never said anything about winning.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "longsword",
+     "name": "Oathbound Sword",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 6.0
+      },
+      {
+       "stat": "hit",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "con",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    },
+    {
+     "slot": "offhand",
+     "baseItemId": "tower_shield",
+     "name": "Oathbound Wall",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 6.0
+      },
+      {
+       "stat": "cond_physDmgReducePct",
+       "value": 0.08
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "block_power",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "plate_helm",
+     "name": "Oathbound Greathelm",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 5.0,
+       "max": 10.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "runed_chest",
+     "name": "Oathbound Cuirass",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 6.0
+      },
+      {
+       "stat": "armor",
+       "value": 12.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 40.0,
+       "max": 70.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "runed_legs",
+     "name": "Oathbound Legplates",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "con",
+       "min": 3.0,
+       "max": 6.0
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "runed_boots",
+     "name": "Oathbound Sabatons",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "initiative",
+       "min": 1.0,
+       "max": 3.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "cheat_death_once",
+   "activationPieces": 6,
+   "partialBonuses": {
+    "2": {
+     "str": 6.0,
+     "armor": 10.0
+    },
+    "3": {
+     "con": 8.0,
+     "armor": 16.0,
+     "block_power": 12.0
+    },
+    "4": {
+     "str": 10.0,
+     "con": 12.0,
+     "armor": 24.0
+    },
+    "6": {
+     "str": 16.0,
+     "con": 18.0,
+     "armor": 36.0,
+     "hp": 90.0,
+     "cond_thornsFlat": 10.0
+    }
+   },
+   "thresholdPowers": {
+    "4": "kill_party_heal"
+   }
+  },
+  {
+   "id": "wildblood_mantle",
+   "name": "Wildblood Mantle",
+   "tier": "low",
+   "pieces": 2,
+   "classes": [
+    "sorcerer"
+   ],
+   "classSet": true,
+   "lore": "Talent that came in the blood, and wants to go back out the same way.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "wand",
+     "name": "Wildblood Wand",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "cond_manaOnCrit",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.04
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "cloth_legs",
+     "name": "Wildblood Skirts",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "mp",
+       "value": 15.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.03,
+       "max": 0.05
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "low_mana_shockwave",
+   "activationPieces": 2,
+   "partialBonuses": {
+    "2": {
+     "int": 6.0,
+     "critChance": 0.04,
+     "spellPower": 0.06
+    }
+   }
+  },
+  {
+   "id": "anvilsong_runes",
+   "name": "Anvilsong Runes",
+   "tier": "mid",
+   "pieces": 5,
+   "classes": [
+    "runesmith"
+   ],
+   "classSet": true,
+   "lore": "Each rune was struck on the beat. Wear it long enough and you hear the song.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "warhammer",
+     "name": "Anvilsong Maul",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_sunderOnHit",
+       "value": 0.15
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 2.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "offhand",
+     "baseItemId": "kite_shield",
+     "name": "Anvilsong Rune-Shield",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 4.0
+      },
+      {
+       "stat": "block_power",
+       "value": 10.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "barrier",
+       "min": 8.0,
+       "max": 15.0
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "heavy_helm",
+     "name": "Anvilsong Helm",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "con",
+       "min": 2.0,
+       "max": 5.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "heavy_chest",
+     "name": "Anvilsong Forgeplate",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 5.0
+      },
+      {
+       "stat": "armor",
+       "value": 10.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 25.0,
+       "max": 45.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "heavy_gauntlets",
+     "name": "Anvilsong Tongs",
+     "fixedAffixes": [
+      {
+       "stat": "str",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 4.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "barrierRegen",
+       "min": 1.0,
+       "max": 3.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "critical_armorpen",
+   "activationPieces": 5,
+   "partialBonuses": {
+    "2": {
+     "str": 6.0,
+     "armor": 8.0
+    },
+    "3": {
+     "str": 9.0,
+     "barrier": 15.0
+    },
+    "4": {
+     "str": 12.0,
+     "armor": 14.0,
+     "barrier": 25.0
+    },
+    "5": {
+     "str": 16.0,
+     "armor": 20.0,
+     "barrier": 35.0,
+     "barrierRegen": 4.0
+    }
+   },
+   "thresholdPowers": {
+    "4": "rally_on_kill"
+   }
+  },
+  {
+   "id": "duskveil_silks",
+   "name": "Duskveil Silks",
+   "tier": "mid",
+   "pieces": 4,
+   "classes": [
+    "shadow_dancer"
+   ],
+   "classSet": true,
+   "lore": "The steps are the same as a dance. The partner does not get up after.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "dagger",
+     "name": "Duskveil Kiss",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_bleedOnCrit",
+       "value": 0.25
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critChance",
+       "min": 0.02,
+       "max": 0.05
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "light_helm",
+     "name": "Duskveil Mask",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "dodge",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "initiative",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "light_legs",
+     "name": "Duskveil Trousers",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 4.0
+      },
+      {
+       "stat": "armor",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 15.0,
+       "max": 25.0
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "light_boots",
+     "name": "Duskveil Slippers",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "dodge",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "critDamage",
+       "min": 0.05,
+       "max": 0.12
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "crit_bleed_5",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "dex": 6.0,
+     "dodge": 5.0
+    },
+    "3": {
+     "dex": 9.0,
+     "critChance": 0.05
+    },
+    "4": {
+     "dex": 12.0,
+     "dodge": 8.0,
+     "critDamage": 0.25
+    }
+   }
+  },
+  {
+   "id": "cogwrights_harness",
+   "name": "Cogwright's Harness",
+   "tier": "low",
+   "pieces": 4,
+   "classes": [
+    "tinker"
+   ],
+   "classSet": true,
+   "lore": "Every buckle does two things. One of them is usually on purpose.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "crossbow",
+     "name": "Cogwright's Repeater",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "int",
+       "value": 3.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hit",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "hands",
+     "baseItemId": "medium_gauntlets",
+     "name": "Cogwright's Work Gloves",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_companionFury",
+       "value": 0.2
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "feet",
+     "baseItemId": "medium_boots",
+     "name": "Cogwright's Spring-Boots",
+     "fixedAffixes": [
+      {
+       "stat": "dex",
+       "value": 3.0
+      },
+      {
+       "stat": "initiative",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "gold_signet",
+     "name": "Cogwright's Winding Key",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "dex",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "cooldownReduction",
+       "min": 0.02,
+       "max": 0.05
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "companion_might",
+   "activationPieces": 4,
+   "partialBonuses": {
+    "2": {
+     "int": 4.0,
+     "dex": 4.0
+    },
+    "3": {
+     "int": 6.0,
+     "dex": 6.0,
+     "initiative": 4.0
+    },
+    "4": {
+     "int": 9.0,
+     "dex": 9.0,
+     "cond_thornsFlat": 6.0
+    }
+   }
+  },
+  {
+   "id": "lightbearers_cassock",
+   "name": "Lightbearer's Cassock",
+   "tier": "endgame",
+   "pieces": 5,
+   "classes": [
+    "priest"
+   ],
+   "classSet": true,
+   "lore": "It glows faintly in the dark. That is not always a comfort to the ones in the dark.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "scepter",
+     "name": "Lightbearer's Censer",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 7.0
+      },
+      {
+       "stat": "cond_dmgVsUndead",
+       "value": 20.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.05,
+       "max": 0.1
+      }
+     ]
+    },
+    {
+     "slot": "head",
+     "baseItemId": "light_helm",
+     "name": "Lightbearer's Mitre",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "magicResist",
+       "value": 8.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 20.0,
+       "max": 35.0
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "light_chest",
+     "name": "Lightbearer's Cassock",
+     "fixedAffixes": [
+      {
+       "stat": "con",
+       "value": 6.0
+      },
+      {
+       "stat": "hp",
+       "value": 35.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "armor",
+       "min": 4.0,
+       "max": 8.0
+      }
+     ]
+    },
+    {
+     "slot": "legs",
+     "baseItemId": "light_legs",
+     "name": "Lightbearer's Vestments",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "hpRegen",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "magicResist",
+       "min": 5.0,
+       "max": 10.0
+      }
+     ]
+    },
+    {
+     "slot": "necklace",
+     "baseItemId": "silver_amulet",
+     "name": "Lightbearer's Sunmedal",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 5.0
+      },
+      {
+       "stat": "cond_partyHpOnKill",
+       "value": 6.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "manaRegen",
+       "min": 2.0,
+       "max": 4.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "cheat_death_once",
+   "activationPieces": 5,
+   "partialBonuses": {
+    "2": {
+     "int": 7.0,
+     "hp": 25.0
+    },
+    "3": {
+     "int": 11.0,
+     "hpRegen": 5.0
+    },
+    "4": {
+     "int": 15.0,
+     "hp": 50.0,
+     "magicResist": 12.0
+    },
+    "5": {
+     "int": 20.0,
+     "hp": 80.0,
+     "cond_dotDmgReduce": 0.25
+    }
+   },
+   "thresholdPowers": {
+    "4": "kill_party_heal"
+   }
+  },
+  {
+   "id": "mesmers_silkwork",
+   "name": "Mesmer's Silkwork",
+   "tier": "low",
+   "pieces": 3,
+   "classes": [
+    "enchanter"
+   ],
+   "classSet": true,
+   "lore": "Look at the spiral. No, keep looking. There. Now you are on our side.",
+   "items": [
+    {
+     "slot": "weapon",
+     "baseItemId": "wand",
+     "name": "Mesmer's Baton",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 4.0
+      },
+      {
+       "stat": "mp",
+       "value": 10.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "spellPower",
+       "min": 0.03,
+       "max": 0.05
+      }
+     ]
+    },
+    {
+     "slot": "chest",
+     "baseItemId": "light_chest",
+     "name": "Mesmer's Silk Coat",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "dodge",
+       "value": 2.0
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "hp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    },
+    {
+     "slot": "ring",
+     "baseItemId": "ring",
+     "name": "Mesmer's Spiral Ring",
+     "fixedAffixes": [
+      {
+       "stat": "int",
+       "value": 3.0
+      },
+      {
+       "stat": "cond_manaShieldOnHit",
+       "value": 0.15
+      }
+     ],
+     "randomAffixes": [
+      {
+       "stat": "mp",
+       "min": 10.0,
+       "max": 20.0
+      }
+     ]
+    }
+   ],
+   "legendaryEffect": "mana_on_attack",
+   "activationPieces": 3,
+   "partialBonuses": {
+    "2": {
+     "int": 5.0,
+     "mp": 15.0
+    },
+    "3": {
+     "int": 8.0,
+     "spellPower": 0.08,
+     "cooldownReduction": 0.05
+    }
+   }
   }
  ],
  "potions": {
@@ -5639,7 +8686,7 @@
   },
   "emberheart_draught": {
    "name": "Emberheart Draught",
-   "icon": "🔥",
+   "icon": "\ud83d\udd25",
    "effect": {
     "type": "revive",
     "pct": 0.7,
@@ -5647,7 +8694,7 @@
    },
    "target": "single",
    "cost": 420,
-   "desc": "Expensive. Wakes a fallen ally at 70% max HP, immune until their next action — the revive a party with no healer has to carry."
+   "desc": "Expensive. Wakes a fallen ally at 70% max HP, immune until their next action \u2014 the revive a party with no healer has to carry."
   },
   "group_tonic": {
    "name": "Group Tonic",

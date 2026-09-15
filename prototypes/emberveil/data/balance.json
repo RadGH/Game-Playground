@@ -310,9 +310,29 @@
   },
   "accessoryAffixBonus": 1,
   "affixMult": 0.96,
-  "setChance": 0.025,
+  "setChance": 0.18,
   "uniqueChance": 0.85,
-  "note": "R19: affixMult scales every rolled affix value (items.json keeps the ranges); setChance is the per-kill chance of a set piece (was hardcoded 0.03 in loot.js); uniqueChance scales the per-boss unique odds in items.json bossLoot."
+  "classSetShare": 0.6,
+  "note": "R19: affixMult scales every rolled affix value (items.json keeps the ranges); uniqueChance scales the per-boss unique odds in items.json bossLoot. R22 (E49): setChance is the share of ZONE DROPS that come out as a set piece - it is rolled only after a kill already dropped something (loot.zoneDrop), so the R19 value of 0.025 meant about 0.4% per kill: 0.18 set pieces in all of act 1 over 100 simulated runs, which is why nobody ever saw a set. 0.18 gives roughly two to three pieces per act. classSetShare is how often a set drop is picked from the sets of the classes in the party (loot.partyClasses) instead of any set of the act's tier."
+ },
+ "services": {
+  "note": "R22 (E47): town services. Every action costs gold (times the item's rarity factor), is capped, and shows its result before the gold is spent. Blacksmith: raise an item's quality one step (damage, armour, block and barrier scale with qualityMult), up to maxQualityByAct for the act you are in. Enchanter: add a property to a free affix slot (slots per rarity: normal 0, magic 2, rare 4, legendary 6), reroll one property into a different one (cost grows by rerollGrowth each time the same item is rerolled, up to maxRerolls), or raise rarity one step (gold + the listed material). The result of add and reroll is fixed by the item's own enchant seed, so the preview is exactly what you get.",
+  "rarityCostMult": { "normal": 1, "magic": 1.5, "rare": 2.5, "legendary": 4 },
+  "blacksmith": {
+   "qualityOrder": ["low", "medium", "high", "elite", "exotic"],
+   "upgradeGold": { "medium": 30, "high": 70, "elite": 160, "exotic": 360 },
+   "maxQualityByAct": { "0": "medium", "1": "high", "2": "high", "3": "elite", "4": "elite", "5": "exotic", "6": "exotic" }
+  },
+  "enchanter": {
+   "addGold": 60,
+   "addPerAffix": 0.4,
+   "rerollGold": 40,
+   "rerollGrowth": 1.35,
+   "maxRerolls": 10,
+   "promoteGold": { "magic": 90, "rare": 260, "legendary": 700 },
+   "promoteMaterial": { "magic": null, "rare": ["rare_dust", 1], "legendary": ["legend_core", 1] },
+   "affixCap": { "normal": 0, "magic": 2, "rare": 4, "legendary": 6 }
+  }
  },
  "affixes": {
   "note": "existing affix ranges are in src/game/items.js per-act tables (AFFIXES_ACT1..AFFIXES_ACT5). Baseline leaves these in code; tuning knobs in economy/enemies sections cover the target range for M4."

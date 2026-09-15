@@ -31,6 +31,7 @@ import { StickyScroll } from './scroll.js';
 import { woundedReport, woundedLine, woundedFallback, registerTownTalk } from './talk.js';
 import { setupUI, initMenu, decorateFrames, iconHtml, gemHtml, gemFor, slotIcon, SLOT_NAME, STAT_TIPS, nodeInfo, itemTipHtml, registerTip, hideTip, esc, checkText, checkHtml, skillCheckPopup } from './ui.js';
 
+import { itemNameHtml, compareItem, compareTipHtml, setInfoHtml, rarityKey, rarityLabel, setRarityTable } from './ui.js';   // round 22: one rarity table, compare cards, sets
 const $ = id => document.getElementById(id);
 // An attribute whose value is null/undefined is skipped, so `disabled: cond ? '' : undefined` means
 // "only set it when cond" instead of setting the literal string "undefined" (which would still apply).
@@ -48,6 +49,7 @@ expandVariants(topicsData, { perLine: 2, seed: 11 }); const conversations = new 
 for (const [id, e] of Object.entries({ ...enemies.entities, ...bosses.entities })) if (!lingo.lexicon.has(id)) lingo.lexicon.add({ id, type: 'creature', forms: { sg: e.name.toLowerCase(), pl: e.name.toLowerCase() + 's' }, tags: [] });
 lingo.invalidatePronunciations();
 registerTownTalk(lingo, await D('town-talk.json'));   // round 21 (E39): "We should take a rest, Corvin is wounded."
+setRarityTable(items.rarityColors, items.rarityGems);   // round 22 (E48): the one rarity table, onto the page as --normal … --set
 const LOOKS = classLooks.classes; const SK = skills.skills; const SP = spells.spells;
 let game = null, talk = null, stage = null, busy = false, selectedHero = 0;
 let textSpeed = 1;   // menu setting: multiplies how long a spoken line stays on screen
@@ -100,6 +102,7 @@ $('btn-start').onclick = () => { for (const h of chosen) game.addHero(h); game.s
 async function startWorld(resumed) {
   // sound wraps the stage from outside, see js/sfx-bridge.js
   showScreen('world');
+  game.loot.partyClasses = () => game.party.map(h => h.class);   // round 22 (E49): set drops lean towards sets the party can wear
   if (!stage) {
     const options = { assets };
     const rendererParam = new URLSearchParams(location.search).get('renderer');
@@ -486,7 +489,7 @@ async function enterNodeInner() {
   if (res.kind === 'event') return runEvent(res.event, n);
   if (res.kind === 'skillCheck') { narrate(`<h4>${n.name}</h4><p>${res.check.flavor}</p><p class="sys">${res.check.stat} check, difficulty ${res.check.dc}. A d20 plus the party's best ${res.check.stat} bonus (+${bestCheckBonus(game.alive(), res.check.stat, h => derive(h, game.loot)[res.check.stat] ?? h.attrs?.[res.check.stat] ?? 8)}).</p>`); return setActions([{ text: `Attempt (${res.check.stat})`, cls: 'primary', run: async () => { const r = game.resolveSkillCheck(n); await showCheck({ stat: res.check.stat, best: r.best, statBonus: r.statBonus, roll: r.roll, dc: r.dc, ok: r.ok }, { subtitle: n.name }); if (r.text) narrate(`<p class="${r.ok ? 'good' : 'bad'}">${r.text}</p>`); renderHud(); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, r.ok ? 'brag' : 'complain')); mapActions(); } }, { text: 'Leave it', run: async () => mapActions() }]); }
   if (res.kind === 'shrine') { narrate(`<h4>${n.name}</h4><p class="good">${res.text}</p>`); narrateRevives(res.revived, []); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'relief')); return mapActions(); }
-  if (res.kind === 'treasure') { narrate(`<h4>${n.name}</h4><p class="good">+${res.gold} gold${res.item ? `, and <b class="${res.item.rarity}">${res.item.name}</b>` : ''}.</p>`); renderHud(); renderSide(); await showRewardsFor({ title: 'Treasure', subtitle: n.name, gold: res.gold, items: [itemToReward(res.item)].filter(Boolean) }); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'happy')); return mapActions(); }
+  if (res.kind === 'treasure') { narrate(`<h4>${n.name}</h4><p class="good">+${res.gold} gold${res.item ? `, and <b>${itemNameHtml(res.item)}</b>` : ''}.</p>`); renderHud(); renderSide(); await showRewardsFor({ title: 'Treasure', subtitle: n.name, gold: res.gold, items: [itemToReward(res.item)].filter(Boolean) }); const m = randomAlive(); if (m) await sayLine(m, speak(m, 'happy')); return mapActions(); }
   if (res.kind === 'lore') { narrate(`<h4>${n.name}</h4>`); await sayScene(res.text); const m = game.party.find(h => h.speech?.traits?.includes('scholar')) || randomAlive(); if (m) await sayLine(m, speak(m, 'lore')); return mapActions(); }
   if (res.kind === 'dungeon') return dungeon(res.dungeon, res.done);
   if (res.kind === 'cleared') { narrate(`<p class="sys">${n.name}: cleared. Nothing stirs.</p>`); return mapActions(); }
@@ -586,7 +589,7 @@ function crossingActions(res, n, C, guard) {
 function crossingRewards(C, rw) {
   if (!rw) return;
   narrate(`<p class="good"><b>${C.name} is behind you.</b> +${rw.xp} xp each, +${rw.gold} gold, +${rw.fame} fame.</p>`);
-  for (const it of rw.drops || []) narrate(`<p class="good">Loot: <span class="${it.rarity}">${it.name}</span>${it.isUnique ? ' (unique)' : ''}</p>`);
+  for (const it of rw.drops || []) narrate(`<p class="good">Loot: ${itemNameHtml(it)}${lootTag(it)}</p>`);
   for (const { hero } of rw.levelUps || []) narrate(`<p class="good">${hero.short} reaches level ${hero.level}.</p>`);
   return showRewardsFor(specFromVictory({ xp: rw.xp, gold: rw.gold, fame: rw.fame, drops: rw.drops || [], bossDrops: [], levelUps: rw.levelUps || [] }, { title: 'Crossing passed', subtitle: C.name }));
 }
@@ -640,6 +643,8 @@ function crossingFailed(res, n, C, guard) {
 }
 
 // ---- combat
+/** E42: `?aiwhy=1` (or localStorage ev2.aiwhy = '1') also writes the reason behind every basic attack into the log; skill reasons always show. */
+const AI_WHY = (() => { try { return new URLSearchParams(location.search).has('aiwhy') || localStorage.getItem('ev2.aiwhy') === '1'; } catch { return false; } })();
 async function fight(enc, { node = null, boss = false } = {}) {
   if (typeof closeTownPanel === 'function') closeTownPanel(); setInFight(true);   // E34: the chosen combat speed paces everything from the walk-in on
   const heroes = game.fighters(); const foes = enc.enemies; await stage.setSide(heroes.map(bodyOf), 'left'); await stage.setSide(foes.map(enemyLook), 'right');
@@ -664,10 +669,13 @@ async function fight(enc, { node = null, boss = false } = {}) {
     if (combat.round_ > 0) await sleep(extraGap(PACE.roundGap, fightPace()));   // E34: a breath between rounds at 1x/2x, none at 4x
     const events = combat.round(); narrate(`<p class="sys">— round ${combat.round_} —</p>`);
     for (const ev of events) { rec(ev);
-      if (ev.type === 'attack') { const st = attackStyle(ev.source); if (st.kind === 'melee') await stage.attack(ev.source.id, ev.target.id); else await stage.cast(ev.source.id, ev.target.id, { element: st.element, kind: st.kind, crit: !!ev.crit, flash: st.kind === 'magic', flashMs: paceMs(PACE.attackFlash, fightPace()) }); }
-      else if (ev.type === 'damage') { const dEl = elementName(ev.dtype); await flyIfPending(ev, dEl); stage.hit(ev.target.id); stage.impact(ev.target.id, dEl, ev.crit); floatAt(ev.target.id, fmtHp(ev.amount) + (ev.crit ? '!' : ''), ev.crit ? 'crit' : ''); narrate(`<p class="${ev.source?.isEnemy ? 'bad' : ''}">${ev.source ? (ev.source.short || ev.source.name) : 'Something'} ${ev.label ? `(${ev.label}) ` : ''}hits ${ev.target.short || ev.target.name} for ${fmtHp(ev.amount)} damage${ev.crit ? ' (crit)' : ''}${ev.tags?.length ? ' · ' + ev.tags.join(', ') : ''}.</p>`); if (!ev.target.isEnemy && ev.target.hp > 0 && ev.target.hp <= ev.target.maxHp / 2 && !bloodied.has(ev.target.id)) { bloodied.add(ev.target.id); if (ev.target.isHero) await sayLine(ev.target, speak(ev.target, 'combat_hurt')); } await sleep(paceMs(PACE.afterDamage, fightPace())); }
-      else if (ev.type === 'miss') { floatAt(ev.target.id, 'miss', 'miss'); narrate(`<p class="sys">${ev.source.short || ev.source.name} misses ${ev.target.short || ev.target.name}.</p>`); }
-      else if (ev.type === 'skill') { noteCast(ev); narrate(`<p class="good">${ev.source.short || ev.source.name} uses <b>${ev.name}</b>.</p>`); if (!ev.source.isEnemy && Math.random() < 0.25) await sayLine(ev.source, speak(ev.source, 'combat_bark'), { wait: false }); await sleep(paceMs(PACE.afterSkill, fightPace())); }
+      // E44: bars show each event's snapshot, not the live units (already at the end of the round).
+      if (ev.type === 'sync') { stage.showSnap(ev.snap); if (ev.at === 'upkeep') renderPartyTab(); continue; }
+      if (ev.type !== 'damage') stage.showSnap(ev.snap);   // damage waits until the projectile lands
+      if (ev.type === 'attack') { if (AI_WHY && ev.why) narrate(`<p class="sys why">${esc(ev.source.short || ev.source.name)}: ${esc(ev.why)}</p>`); const st = attackStyle(ev.source); if (st.kind === 'melee') await stage.attack(ev.source.id, ev.target.id); else await stage.cast(ev.source.id, ev.target.id, { element: st.element, kind: st.kind, crit: !!ev.crit, flash: st.kind === 'magic', flashMs: paceMs(PACE.attackFlash, fightPace()) }); }
+      else if (ev.type === 'damage') { const dEl = elementName(ev.dtype); await flyIfPending(ev, dEl); stage.showSnap(ev.snap); stage.hit(ev.target.id); stage.impact(ev.target.id, dEl, ev.crit); floatAt(ev.target.id, fmtHp(ev.amount) + (ev.crit ? '!' : ''), ev.crit ? 'crit' : ''); narrate(`<p class="${ev.source?.isEnemy ? 'bad' : ''}">${ev.source ? (ev.source.short || ev.source.name) : 'Something'} ${ev.label ? `(${ev.label}) ` : ''}hits ${ev.target.short || ev.target.name} for ${fmtHp(ev.amount)} damage${ev.crit ? ' (crit)' : ''}${ev.tags?.length ? ' · ' + ev.tags.join(', ') : ''}.</p>`); if (!ev.target.isEnemy && ev.target.hp > 0 && ev.target.hp <= ev.target.maxHp / 2 && !bloodied.has(ev.target.id)) { bloodied.add(ev.target.id); if (ev.target.isHero) await sayLine(ev.target, speak(ev.target, 'combat_hurt')); } await sleep(paceMs(PACE.afterDamage, fightPace())); }
+      else if (ev.type === 'miss') { floatAt(ev.target.id, 'miss', 'miss'); narrate(`<p class="sys">${ev.source.short || ev.source.name} misses ${ev.target.short || ev.target.name}.${AI_WHY && ev.why ? ` <span class="why">(${esc(ev.why)})</span>` : ''}</p>`); }
+      else if (ev.type === 'skill') { noteCast(ev); narrate(`<p class="good">${ev.source.short || ev.source.name} uses <b>${ev.name}</b>${ev.why ? `<span class="why"> — ${esc(ev.why)}</span>` : ''}.</p>`);   /* E42: why they chose it */ if (!ev.source.isEnemy && Math.random() < 0.25) await sayLine(ev.source, speak(ev.source, 'combat_bark'), { wait: false }); await sleep(paceMs(PACE.afterSkill, fightPace())); }
       else if (ev.type === 'heal') { if (ev.amount > 0) { stage.heal(ev.target.id); floatAt(ev.target.id, '+' + fmtHp(ev.amount), 'heal'); narrate(`<p class="good">${ev.target.short || ev.target.name} recovers ${fmtHp(ev.amount)} health${recoverWhy(ev)}.</p>`); } }
       else if (ev.type === 'mana') { if (ev.amount > 0) { floatAt(ev.target.id, '+' + fmtHp(ev.amount) + ' mp', 'mana'); narrate(`<p class="sys">${ev.target.short || ev.target.name} recovers ${fmtHp(ev.amount)} mana${recoverWhy(ev)}.</p>`); } }
       else if (ev.type === 'dot') { stage.pulseStatus(ev.target.id, ev.status); if (stage.chars.get(ev.target.id)) stage.fx.impact({ at: stage.pointOf(ev.target.id), element: elementName(ev.dtype || ev.status), scale: 0.55, height: stage.heightOf(ev.target.id) }); floatAt(ev.target.id, fmtHp(ev.amount), ''); narrate(`<p class="sys">${ev.target.short || ev.target.name} takes ${fmtHp(ev.amount)} damage from ${ev.status}.</p>`); }
@@ -700,7 +708,7 @@ async function fight(enc, { node = null, boss = false } = {}) {
 }
 async function afterCombat(node, enc, boss) {
   const v = game.victory(node, enc); narrate(`<p class="good"><b>Victory.</b> +${v.xp} xp each, +${v.gold} gold, +${v.fame} fame.</p>`); narrateGear(game.winGear);
-  for (const it of [...v.drops, ...v.bossDrops]) narrate(`<p class="good">Loot: <span class="${it.rarity}">${it.name}</span>${it.isUnique ? ' (unique)' : it.setId ? ' (set piece)' : ''}</p>`);
+  for (const it of [...v.drops, ...v.bossDrops]) narrate(`<p class="good">Loot: ${itemNameHtml(it)}${lootTag(it)}</p>`);
   for (const { hero, ups } of v.levelUps) { narrate(`<p class="good">${hero.short} reaches level ${hero.level}. Points to spend in the Skills tab.</p>`); }
   if (v.namedSlain) { recordNamedKill(v.namedSlain, enc); narrate(`<p class="good"><b>${v.namedSlain.name} is dead.</b> The name goes on the board — see the Journal.</p>`); } for (const q of v.sideDone || []) narrate(`<p class="good"><b>Bounty complete: ${q.title}</b> — +${q.gold} gold.</p>`);
   narrateRevives(v.revived, v.stillDown);
@@ -725,7 +733,7 @@ async function dungeon(dg, done) {
   for (const st of dg.stages) { narrate(`<h4>${st.name}</h4>`); if (st.type === 'skill_check') { const c = dungeons.DUNGEON_SKILL_CHECKS[st.checkId]; narrate(`<p>${c.flavor}</p>`); const attr = Math.max(...game.alive().map(h => derive(h, game.loot)[c.stat] || 8)); const best = bestCheckBonus(game.alive(), c.stat, h => derive(h, game.loot)[c.stat] || 8); const roll = 1 + Math.floor(Math.random() * 20); const ok = best + roll >= c.dc; await showCheck({ stat: c.stat, best: attr, statBonus: best, roll, dc: c.dc, ok }, { subtitle: st.name }); narrate(`<p class="${ok ? 'good' : 'bad'}">${ok ? c.passText : c.failText}</p>`); if (ok) stunFirst = true; else for (const h of game.alive()) h.hp = Math.max(1, Math.round(h.hp - h.maxHp * (c.failDamagePct || 0.12))); renderSide(); continue; }
     const enc = game.encounter(st.encounter, st.type === 'boss'); if (!enc) continue; if (stunFirst) { for (const e of enc.enemies) e.statuses.push({ type: 'stun', duration: 1, power: 0 }); stunFirst = false; } const won = await fight(enc, { node: null, boss: st.type === 'boss' }); if (!won) return mapActions(); game.victory(null, enc); renderSide(); }
   game.completedDungeons.push(dg.id); game.gold += dg.reward.gold; const it = game.loot.generate(dg.reward.item, 'rare', 'high', { rng: game.rng }); if (it) game.inventory.push(it); for (const h of game.party) { const { gainXp } = await import('./rules.js'); gainXp(h, Math.round(dg.reward.xp / game.party.length)); refresh(h, game.loot); }
-  narrate(`<p class="good"><b>${dg.name} cleared.</b> +${dg.reward.gold} gold, +${dg.reward.xp} xp, ${it ? `<span class="${it.rarity}">${it.name}</span>` : ''}.</p>`); renderHud(); renderSide(); mapActions();
+  narrate(`<p class="good"><b>${dg.name} cleared.</b> +${dg.reward.gold} gold, +${dg.reward.xp} xp, ${it ? itemNameHtml(it) : ''}.</p>`); renderHud(); renderSide(); mapActions();
 }
 // ---- town
 async function town(t) { game.threadEvent('town'); closeTownPanel();
@@ -739,7 +747,7 @@ async function town(t) { game.threadEvent('town'); closeTownPanel();
 function townActions(t) {
   const acts = [{ text: 'Merchant', icon: 'gold', tip: 'Buy gear, food, potions and vehicles — and sell what you are done with.', run: async () => shop(t) }, { text: 'Tavern (hire)', icon: 'tab_party', tip: 'Drink, listen, and hire extra heroes for the party or the bench.', run: async () => tavern(t) }, { text: 'Cleric (heal, free)', icon: 'hp', tip: 'A free full heal, a fresh day, and the fallen back on their feet — settlements are safe ground. This and a shrine are the only revives that cost nothing.', run: async () => { const r = game.clericRest(t); narrate('<p class="good">The cleric sees to everyone. Healed, fed, a new day — and anybody who was down is up again.</p>'); narrateRevives(r?.revived || [], []); renderSide(); renderHud(); closeTownPanel(); townActions(t); } },
     { text: 'Manage party', icon: 'tab_party', tip: `Swap heroes between the party and the bench${game.bench.length ? ` (${game.bench.length} waiting)` : ''}. The party only changes in a settlement.`, run: async () => manageParty() }];
-  if (t.services.includes('blacksmith')) acts.push({ text: 'Blacksmith', icon: 'slot_weapon', tip: 'Upgrade the quality of a piece of gear for gold.', run: async () => smith(t, 'blacksmith') }); if (t.services.includes('enchanter')) acts.push({ text: 'Enchanter', icon: 'tab_skills', tip: 'Reroll the magic properties on a piece of gear.', run: async () => smith(t, 'enchanter') }); if (t.services.includes('trainer')) acts.push({ text: 'Trainer (respec 50g/level)', icon: 'xp', tip: 'Take back every talent and passive point the selected hero has spent.', run: async () => { const h = game.party[selectedHero]; const cost = h.level * 50; if (game.gold < cost) return toast('Not enough gold'); game.gold -= cost; h.pendingTalent += Object.keys(h.talents).length; h.talents = {}; h.pendingPassive += Object.values(h.passiveRanks).reduce((a, b) => a + b, 0); h.passiveRanks = {}; refresh(h, game.loot); renderHud(); renderSide(); toast(`${h.short} respecced`); townActions(t); } });
+  if (t.services.includes('blacksmith')) acts.push({ text: 'Blacksmith', icon: 'slot_weapon', tip: 'Raise the quality of a piece of gear for gold — more damage and armour. Salvage what you do not want.', run: async () => blacksmith(t) }); if (t.services.includes('enchanter')) acts.push({ text: 'Enchanter', icon: 'tab_skills', tip: 'Add a property to a piece of gear, reroll one into another, or raise its rarity — for gold.', run: async () => enchanter(t) }); if (t.services.includes('trainer')) acts.push({ text: 'Trainer (respec 50g/level)', icon: 'xp', tip: 'Take back every talent and passive point the selected hero has spent.', run: async () => { const h = game.party[selectedHero]; const cost = h.level * 50; if (game.gold < cost) return toast('Not enough gold'); game.gold -= cost; h.pendingTalent += Object.keys(h.talents).length; h.talents = {}; h.pendingPassive += Object.values(h.passiveRanks).reduce((a, b) => a + b, 0); h.passiveRanks = {}; refresh(h, game.loot); renderHud(); renderSide(); toast(`${h.short} respecced`); townActions(t); } });
   acts.push({ text: 'Back to the map', icon: 'tab_map', tip: 'Leave the settlement and go back to travelling.', run: async () => mapActions() }); setActions(acts);
 }
 // ---- town screens (round 21, E37) ------------------------------------------------------------
@@ -747,8 +755,11 @@ function townActions(t) {
 // a scroll of its own. The shop used to be written INTO the log, so scrolling it ran straight into old
 // fight lines. The log keeps receiving lines underneath and comes back intact (and scrolled the way
 // the reader left it) when the panel closes.
+let townPanelRedraw = null;   // E43: the open town screen's own redraw. renderSide() calls it, so buying, equipping or selling anywhere updates the screen
 function openTownPanel(title, ...nodes) {
   hideTip();
+  townPanelRedraw = typeof nodes[nodes.length - 1] === 'function' ? nodes.pop() : null;
+  openShop = null;   // shop() sets it again after opening
   $('town-panel-title').textContent = title;
   const body = $('town-panel-body'); body.replaceChildren(...nodes.filter(Boolean)); body.scrollTop = 0;
   $('narrative').hidden = true; $('town-panel').hidden = false; logScroll.paint();
@@ -756,6 +767,7 @@ function openTownPanel(title, ...nodes) {
 }
 /** Close the town screen and show the log again. Returns true if one was open. */
 function closeTownPanel() {
+  townPanelRedraw = null; openShop = null;
   const panel = $('town-panel'); if (!panel || panel.hidden) return false;
   hideTip(); panel.hidden = true; $('town-panel-body').replaceChildren();
   $('narrative').hidden = false; logScroll.reveal();
@@ -844,18 +856,60 @@ function manageParty() {
   if (!dlg.dataset.wired) { dlg.dataset.wired = '1'; dlg.addEventListener('close', () => hideTip()); }
   if (!dlg.open) dlg.showModal();
 }
+// ---- items: where they are, live hover cards, rows (round 22) ---------------------------------------------
+// E43: every screen used to hold on to the item objects and lists it was drawn with. Rows and cards now look
+// the item up where it really is (worn, bag, the open merchant's table) each time they are drawn or hovered,
+// and the open town screen is redrawn by renderSide() whenever anything changes.
+let openShop = null;                 // { town, stock } while the merchant screen is open
+const itemSeen = new Map();          // id -> last object drawn under that id (loot popup cards), a fallback for hover cards
+function rememberItem(it) { if (!it?.id) return; itemSeen.set(it.id, it); if (itemSeen.size > 400) itemSeen.delete(itemSeen.keys().next().value); }
+/** Where an item is right now: { where: 'worn', hero, slot } | { where: 'bag' } | { where: 'shop', price } | { where: 'gone' }. */
+function whereIs(it) {
+  if (!it || !game) return { where: 'gone' };
+  for (const h of [...game.party, ...game.bench]) for (const [slot, x] of Object.entries(h.equipment || {})) if (x && (x === it || x.id === it.id)) return { where: 'worn', hero: h, slot, item: x };
+  const bag = game.inventory.find(x => x === it || x.id === it.id); if (bag) return { where: 'bag', item: bag };
+  const st = openShop?.stock.find(x => x === it || x.id === it.id); if (st) return { where: 'shop', item: st, price: st.price };
+  return { where: 'gone', item: it };
+}
+/** The live object for an item id. */
+function findItem(id) {
+  if (!id || !game) return null;
+  for (const h of [...game.party, ...game.bench]) for (const x of Object.values(h.equipment || {})) if (x?.id === id) return x;
+  return game.inventory.find(x => x.id === id) || openShop?.stock.find(x => x.id === id) || itemSeen.get(id) || null;
+}
+const heroNow = () => game?.party[selectedHero] || game?.party[0] || null;
+const legendaryText = id => game.loot.describe({ id: 'legendary_effect', legendaryId: id });
+const className = id => classes.classes.find(c => c.id === id)?.name || id;
+/** The compare card (E46): this item against what the selected hero wears, stat by stat, with set progress. */
+function compareCardHtml(it, note = '') {
+  if (!it || !game) return '';
+  const describe = a => game.loot.describe(a);
+  const w = whereIs(it);
+  const state = w.where === 'worn' ? `<div class="tip-sub">Worn by ${esc(w.hero.short)} (${esc(SLOT_NAME[w.slot] || w.slot)}).</div>` : w.where === 'shop' ? `<div class="tip-sub">For sale: ${w.price} gold.</div>` : w.where === 'bag' ? '<div class="tip-sub">In the bag.</div>' : '';
+  if (it.type === 'consumable') return itemTipHtml({ it, describe }) + state + note;
+  const hero = heroNow();
+  const cmp = hero ? compareItem(it, hero, { loot: game.loot, canUse, slotFor }) : null;
+  return compareTipHtml(cmp, { it, describe, legendaryText, className, note: state + note });
+}
+registerTip('item', node => { const it = findItem(node.dataset.itemId); return it ? compareCardHtml(it, node.closest('.item') ? '<div class="tip-sub">Click for the full card, compare and equip.</div>' : '') : null; });
+/** " (set piece — Longwatch Stalker, 4 pieces)" or " (unique)" after a loot line. */
+function lootTag(it) {
+  if (it?.setId) { const set = game?.loot?.d.sets.find(x => x.id === it.setId); return ` <span class="setmark">(set piece — ${esc(set?.name || it.setName || '')}, ${set?.items.length || '?'} pieces)</span>`; }
+  return it?.isUnique ? ' (unique)' : '';
+}
 function itemRow(it, actions = []) {
-  const hero = game.party[selectedHero] || game.party[0];
-  const s = game.loot.score(it, hero);
-  const cur = hero?.equipment?.[it.slot === 'ring' ? 'ring1' : it.slot] || null;
-  const name = el('span', { class: 'n', onclick: () => itemDialog(it), html: `${gemHtml(it)}<span class="${it.rarity}">${esc(it.name)}</span> <small>${esc(SLOT_NAME[it.slot] || it.slot)}${it.dmg ? ` · ${it.dmg[0]}–${it.dmg[1]}` : ''}${it.armor ? ` · armor ${it.armor}` : ''} · score ${s.total}</small>` });
-  name.dataset.tipHtml = itemTipHtml({ it, score: s, cur, curScore: cur ? game.loot.score(cur, hero) : null, heroShort: hero?.short || '', describe: a => game.loot.describe(a) }) + '<div class="tip-sub">Click for the full card, compare and equip.</div>';
-  return el('div', { class: 'item' }, name, ...actions);
+  rememberItem(it);
+  const hero = heroNow(); const s = game.loot.score(it, hero);
+  const info = it.setId ? game.loot.setInfo(it, hero?.equipment) : null;
+  const w = whereIs(it);
+  const name = el('span', { class: 'n', 'data-tip-render': 'item', 'data-tip-class': 'tip-compare', 'data-item-id': it.id, onclick: () => itemDialog(it),
+    html: `${gemHtml(it)}${itemNameHtml(it, { tip: false })} <small>${esc(SLOT_NAME[it.slot] || it.slot)}${it.dmg ? ` · ${it.dmg[0]}–${it.dmg[1]}` : ''}${it.armor ? ` · armor ${it.armor}` : ''} · score ${s.total}${info ? ` · <span class="setmark">◆ ${esc(info.set.name)} ${info.worn}/${info.pieces}</span>` : ''}${w.where === 'worn' ? ` · <span class="worn">worn by ${esc(w.hero.short)}</span>` : ''}</small>` });
+  return el('div', { class: 'item', 'data-item-id': it.id }, name, ...actions);
 }
 async function shop(t) {
   const stock = game.merchantStock(t); const wrap = el('div', { class: 'shop' });
-  const refreshUI = () => { wrap.replaceChildren(el('div', { class: 'tiny', text: `You have ${game.gold} gold. Prices scale with quality and rarity.` }), el('b', { text: 'For sale' }), ...stock.map(it => itemRow(it, [el('button', { class: 'small', text: `Buy ${it.price}g`, onclick: () => { if (!game.buy(it, it.price, stock)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); } })])), el('b', { text: 'Supplies' }), ...Object.entries(SUPPLY_KINDS).map(([k, d]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml({ ration: 'ration', bandages: 'hp', torch: 'torch', tent: 'tent' }[k] || 'ration')}${d.name} <small>${d.desc}</small> · have ${game.supplies[k] || 0}` }), el('button', { class: 'small', text: `Buy ${d.price}g`, onclick: () => { if (!game.buySupply(k, 1)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); } }), k === 'ration' ? el('button', { class: 'small', text: `×5 ${d.price * 5}g`, onclick: () => { if (!game.buySupply(k, 5)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); } }) : null)), el('b', { text: 'Stable (vehicle)' }), ...Object.entries(VEHICLES).filter(([id, v]) => id !== 'none' && (!v.act || game.act >= v.act)).map(([id, v]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml('wagon')}<b>${v.name}</b> <small>${v.desc}</small>${game.vehicle === id ? ' <b>(yours)</b>' : ''}` }), game.vehicle === id ? null : el('button', { class: 'small', text: `Buy ${v.price}g`, onclick: () => { if (!game.buyVehicle(id)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); toast(`You now travel by ${v.name.toLowerCase()}`); } }))), el('b', { text: 'Potions' }), ...Object.entries(items.potions).map(([id, p]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml('hp')}<b>${p.name}</b> <small>${p.desc}</small>` }), el('button', { class: 'small', text: `Buy ${p.cost}g`, onclick: () => { if (game.gold < p.cost) return toast('Not enough gold'); game.gold -= p.cost; game.inventory.push({ id: 'p_' + Math.random().toString(36).slice(2, 7), potionId: id, name: p.name, type: 'consumable', slot: 'potion', rarity: 'normal', quality: 'medium', effect: p.effect, target: p.target, affixes: [], icon: p.icon }); renderHud(); renderSide(); refreshUI(); } }))), el('b', { text: 'Sell' }), ...game.inventory.filter(i => i.type !== 'consumable').map(it => itemRow(it, [el('button', { class: 'small', text: `Sell ${game.loot.sellPrice(it)}g`, onclick: () => { game.sell(it); renderHud(); renderSide(); refreshUI(); } })]))); };
-  refreshUI(); openTownPanel(`Merchant of ${t.name}`, wrap); townActions(t);
+  const refreshUI = () => { wrap.replaceChildren(el('div', { class: 'tiny', text: `You have ${game.gold} gold. Prices scale with quality and rarity.` }), el('b', { text: 'For sale' }), ...(stock.length ? stock.map(it => itemRow(it, [el('button', { class: 'small', text: `Buy ${it.price}g`, 'data-shop-buy': it.id, onclick: () => { if (!game.buy(it, it.price, stock)) return toast('Not enough gold'); narrate(`<p class="sys">Bought ${itemNameHtml(it)} for ${it.price} gold.</p>`); renderHud(); renderSide(); } })])) : [el('p', { class: 'tiny', text: 'Sold out until tomorrow.' })]), el('b', { text: 'Supplies' }), ...Object.entries(SUPPLY_KINDS).map(([k, d]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml({ ration: 'ration', bandages: 'hp', torch: 'torch', tent: 'tent' }[k] || 'ration')}${d.name} <small>${d.desc}</small> · have ${game.supplies[k] || 0}` }), el('button', { class: 'small', text: `Buy ${d.price}g`, onclick: () => { if (!game.buySupply(k, 1)) return toast('Not enough gold'); renderHud(); renderSide(); } }), k === 'ration' ? el('button', { class: 'small', text: `×5 ${d.price * 5}g`, onclick: () => { if (!game.buySupply(k, 5)) return toast('Not enough gold'); renderHud(); renderSide(); } }) : null)), el('b', { text: 'Stable (vehicle)' }), ...Object.entries(VEHICLES).filter(([id, v]) => id !== 'none' && (!v.act || game.act >= v.act)).map(([id, v]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml('wagon')}<b>${v.name}</b> <small>${v.desc}</small>${game.vehicle === id ? ' <b>(yours)</b>' : ''}` }), game.vehicle === id ? null : el('button', { class: 'small', text: `Buy ${v.price}g`, onclick: () => { if (!game.buyVehicle(id)) return toast('Not enough gold'); renderHud(); renderSide(); toast(`You now travel by ${v.name.toLowerCase()}`); } }))), el('b', { text: 'Potions' }), ...Object.entries(items.potions).map(([id, p]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml('hp')}<b>${p.name}</b> <small>${p.desc}</small>` }), el('button', { class: 'small', text: `Buy ${p.cost}g`, onclick: () => { if (game.gold < p.cost) return toast('Not enough gold'); game.gold -= p.cost; game.inventory.push({ id: 'p_' + Math.random().toString(36).slice(2, 7), potionId: id, name: p.name, type: 'consumable', slot: 'potion', rarity: 'normal', quality: 'medium', effect: p.effect, target: p.target, affixes: [], icon: p.icon }); renderHud(); renderSide(); } }))), el('b', { text: 'Sell' }), ...game.inventory.filter(i => i.type !== 'consumable').map(it => itemRow(it, [el('button', { class: 'small', text: `Sell ${game.loot.sellPrice(it)}g`, 'data-shop-sell': it.id, onclick: () => { const g = game.sell(it); narrate(`<p class="sys">Sold ${itemNameHtml(it, { tip: false })} for ${g} gold.</p>`); renderHud(); renderSide(); } })]))); };
+  openTownPanel(`Merchant of ${t.name}`, wrap, refreshUI); openShop = { town: t, stock }; refreshUI(); townActions(t);
 }
 async function tavern(t) {
   const intro = el('p', { class: 'tiny', text: `Party ${game.party.length}/${game.partyLimit()} (extra hires wait on the bench; Manage party swaps them), companions ${game.companions.length}/4.` }); const wrap = el('div', { class: 'shop' });
@@ -867,15 +921,124 @@ async function tavern(t) {
   const manage = el('button', { class: 'small', text: 'Manage party', 'data-tip': 'Open the party and the bench side by side and swap heroes between them.', onclick: () => manageParty() });
   wrap.replaceChildren(el('b', { text: 'Heroes for hire' }), ...rows, el('b', { text: 'Companions' }), ...comps, el('b', { text: `Bench (${game.bench.length})` }), ...benchRows, el('div', { class: 'row' }, manage)); openTownPanel('Tavern', intro, wrap); townActions(t);
 }
-async function smith(t, kind) {
-  const title = kind === 'blacksmith' ? 'Blacksmith' : 'Enchanter';
-  const intro = el('p', { class: 'tiny', text: `Materials: ${Object.entries(game.materials).map(([k, v]) => `${v} ${k.replace('_', ' ')}`).join(' · ')}. Salvage unwanted items for materials, then add affixes (2 materials) or promote rarity (3 materials).` }); const wrap = el('div', { class: 'shop' });
-  const refreshUI = () => { wrap.replaceChildren(...game.inventory.filter(i => i.type !== 'consumable').map(it => itemRow(it, [el('button', { class: 'small', text: 'Salvage', onclick: () => { const y = game.salvage(it); toast('Got ' + Object.entries(y).map(([k, v]) => v + ' ' + k.replace('_', ' ')).join(', ')); renderSide(); refreshUI(); } }), el('select', { onchange: e => { const mat = e.target.value; if (!mat) return; const r = game.loot.addAffix(it, mat, game.materials, game.rng); toast(r.ok ? `Added ${r.affix.name}` : r.why); e.target.value = ''; renderSide(); refreshUI(); } }, el('option', { value: '', text: 'add affix…' }), ...items.affixTiers.map(tier => el('option', { value: tier.mat, text: `${tier.label} (${tier.cost} ${tier.mat.replace('_', ' ')}, ×${tier.mult})` }))), el('button', { class: 'small', text: 'Promote', onclick: () => { const r = game.loot.promote(it, game.materials); toast(r.ok ? `${it.name} is now ${it.rarity}` : r.why); renderSide(); refreshUI(); } })])), ...game.party.flatMap(h => Object.values(h.equipment).map(it => itemRow(it, [el('span', { class: 'tiny', text: `equipped by ${h.short}` })])))); };
-  refreshUI(); openTownPanel(title, intro, wrap); townActions(t);
+// ---- blacksmith and enchanter (round 22, E47) ----------------------------------------------------------
+// The rules and costs are in js/loot.js (upgradeQuote / addQuote / rerollQuote / promoteQuote) with the numbers in
+// data/balance.json `services`. Pick an item (the bag first, then what the party wears) and the panel shows exactly
+// what the work does and costs before any gold is spent. The item is changed in place, so the bag, the party tab,
+// the stage and every hover card show the new one; its wearer is refreshed, the game saved, and the log gets a line.
+const SERVICES = () => DATA.balance?.services || {};
+const svcPick = { blacksmith: null, enchanter: null };   // the item id picked on each screen
+/** Everything the party could have worked on: the bag, then what each hero wears. */
+function workableItems() { return [...game.inventory.filter(i => i.type !== 'consumable').map(it => ({ it, hero: null })), ...game.party.flatMap(h => Object.entries(h.equipment || {}).filter(([, x]) => x).map(([slot, it]) => ({ it, hero: h, slot })))]; }
+/** After a service changed an item: refresh its wearer, redraw everything (the open screen too), save, restage. */
+async function afterItemWork(it) {
+  const w = whereIs(it); if (w.hero) refresh(w.hero, game.loot);
+  renderHud(); renderSide(); try { game.save(); $('btn-continue').disabled = false; } catch { /* a full storage never blocks the smith */ }
+  if (w.hero && stage) { try { await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.parkVehicle(game.vehicle); } catch (e) { console.warn('restage after item work', e); } }
+}
+/** Before → after, one row per thing that changes: damage, armour, quality, rarity, score, sell price. */
+function previewRows(before, after, hero) {
+  const kids = [];
+  const add = (label, a, b, fmtv = v => String(v), num = null) => {
+    if (a == null && b == null) return;
+    const changed = JSON.stringify(a) !== JSON.stringify(b);
+    const dir = num ? Math.sign(num[1] - num[0]) : (changed ? 1 : 0);
+    kids.push(el('span', { text: label }), el('span', { class: 'muted', text: a == null ? '—' : fmtv(a) }), el('span', { class: 'muted', text: '→' }), el('b', { class: dir > 0 ? 'up' : dir < 0 ? 'down' : '', text: b == null ? '—' : fmtv(b) }));
+  };
+  if (before.dmg || after.dmg) add('Damage', before.dmg, after.dmg, d => `${d[0]}–${d[1]}`, before.dmg && after.dmg ? [before.dmg[0] + before.dmg[1], after.dmg[0] + after.dmg[1]] : null);
+  if (before.armor != null || after.armor != null) add('Armor', before.armor, after.armor, String, [before.armor || 0, after.armor || 0]);
+  if (before.quality !== after.quality) add('Quality', before.quality, after.quality);
+  if (before.rarity !== after.rarity) add('Rarity', before.rarity, after.rarity);
+  if (before.name !== after.name) add('Name', before.name, after.name);
+  const sb = game.loot.score(before, hero).total, sa = game.loot.score(after, hero).total; add('Score', sb, sa, String, [sb, sa]);
+  const pb = game.loot.sellPrice(before), pa = game.loot.sellPrice(after); add('Sells for', pb, pa, v => v + 'g', [pb, pa]);
+  return el('div', { class: 'svc-cmp' }, ...kids);
+}
+const ownerOf = it => { const w = whereIs(it); return w.hero ? `${esc(w.hero.short)}'s ` : ''; };
+async function blacksmith(t) {
+  const S = SERVICES(); const wrap = el('div', { class: 'shop svc svc-blacksmith' });
+  const draw = () => {
+    const list = workableItems(); const picked = list.find(x => x.it.id === svcPick.blacksmith)?.it || null;
+    const capQ = S.blacksmith?.maxQualityByAct?.[String(Math.max(0, Math.min(6, game.act)))] || 'exotic';
+    const head = el('p', { class: 'tiny svc-intro', text: `You have ${game.gold} gold. The smith raises an item's quality one step — more damage, armour, block and barrier. The finest work anyone manages this far along the road: ${capQ}. Salvage breaks an unwanted item into materials for the enchanter.` });
+    let preview = el('div', { class: 'svc-preview', 'data-svc': 'none', text: 'Pick an item below to see what the smith can do with it.' });
+    if (picked) {
+      const w = whereIs(picked); const q = game.loot.upgradeQuote(picked, S, game.act); const afford = q.ok && game.gold >= q.gold;
+      preview = el('div', { class: 'svc-preview', 'data-svc': 'upgrade', 'data-item-id': picked.id },
+        el('h5', { html: `${gemHtml(picked)}${itemNameHtml(picked)} <small class="tiny">${esc(picked.quality)} quality · ${w.hero ? `worn by ${esc(w.hero.short)}` : 'in the bag'}</small>` }),
+        q.ok ? previewRows(picked, q.preview, w.hero || heroNow()) : el('div', { class: 'svc-why', text: `Cannot upgrade: ${q.why}.` }),
+        el('div', { class: 'row' },
+          el('button', { class: 'primary', text: q.ok ? `Upgrade to ${q.to} — ${q.gold}g` : 'Upgrade', disabled: afford ? undefined : '', 'data-svc-action': 'upgrade', title: afford ? null : (q.ok ? `Needs ${q.gold} gold` : q.why),
+            'data-tip': q.ok ? (afford ? `Spend ${q.gold} gold: ${q.from} → ${q.to} quality.` : `Needs ${q.gold} gold — you have ${game.gold}.`) : `Cannot: ${q.why}.`, onclick: () => doUpgrade(picked) }),
+          w.where === 'bag' ? el('button', { class: 'small ghost', text: 'Salvage', 'data-svc-action': 'salvage', 'data-tip': 'Break it down into materials for the enchanter. The item is gone afterwards.', onclick: () => doSalvage(picked) }) : null,
+          el('button', { class: 'small ghost', text: 'Pick another', onclick: () => { svcPick.blacksmith = null; draw(); } })));
+    }
+    const rows = list.map(({ it }) => { const q = game.loot.upgradeQuote(it, S, game.act); const r = itemRow(it, [el('button', { class: 'small' + (it.id === svcPick.blacksmith ? ' primary' : ''), text: q.ok ? `→ ${q.to} · ${q.gold}g` : (q.capped ? 'at the cap' : '—'), 'data-svc-pick': it.id, 'data-tip': q.ok ? `Pick it: ${q.from} → ${q.to} quality for ${q.gold} gold. You see the result before paying.` : `Cannot: ${q.why}.`, onclick: () => { svcPick.blacksmith = it.id; draw(); $('town-panel-body').scrollTop = 0; } })]); if (it.id === svcPick.blacksmith) r.classList.add('picked'); return r; });
+    wrap.replaceChildren(head, preview, el('b', { text: 'Your gear' }), ...(rows.length ? rows : [el('p', { class: 'tiny', text: 'Nothing to work on.' })]));
+  };
+  const doUpgrade = async it => {
+    const before = { quality: it.quality, dmg: it.dmg ? [...it.dmg] : null, armor: it.armor }; const owner = ownerOf(it);
+    const r = game.loot.upgradeQuality(it, game, S, game.act); if (!r.ok) return toast(r.why);
+    narrate(`<p class="good">The smith works ${owner}${itemNameHtml(it)} up from ${esc(before.quality)} to <b>${esc(it.quality)}</b> quality (−${r.gold} gold)${before.dmg ? `: damage ${before.dmg[0]}–${before.dmg[1]} → ${it.dmg[0]}–${it.dmg[1]}` : before.armor != null ? `: armor ${before.armor} → ${it.armor}` : ''}.</p>`);
+    toast(`${it.name}: ${it.quality} quality`); await afterItemWork(it);
+  };
+  const doSalvage = it => { const y = game.salvage(it); svcPick.blacksmith = null; narrate(`<p class="sys">Salvaged ${itemNameHtml(it, { tip: false })}: ${Object.entries(y).map(([k, v]) => v + ' ' + k.replace('_', ' ')).join(', ') || 'nothing usable'}.</p>`); toast('Salvaged'); renderSide(); };
+  openTownPanel('Blacksmith', wrap, draw); draw(); townActions(t);
+}
+async function enchanter(t) {
+  const S = SERVICES(); const wrap = el('div', { class: 'shop svc svc-enchanter' });
+  let reroll = null;   // index (into item.affixes) of the property whose reroll is being previewed
+  const mats = () => Object.entries(game.materials).map(([k, v]) => `${v} ${k.replace('_', ' ')}`).join(' · ');
+  const draw = () => {
+    const list = workableItems(); const picked = list.find(x => x.it.id === svcPick.enchanter)?.it || null;
+    const head = el('p', { class: 'tiny svc-intro', text: `You have ${game.gold} gold · ${mats()}. The enchanter adds a property to a free slot (magic items have 2, rare 4, legendary 6), rerolls one property into a different one, or raises an item's rarity for more slots. What the preview shows is exactly what you get.` });
+    let preview = el('div', { class: 'svc-preview', 'data-svc': 'none', text: 'Pick an item below.' });
+    if (picked) {
+      const w = whereIs(picked); const hero = w.hero || heroNow();
+      const add = game.loot.addQuote(picked, S), pro = game.loot.promoteQuote(picked, S);
+      const cap = game.loot.affixCap(picked, S), have = game.loot.ownAffixes(picked).length;
+      const rq = reroll != null ? game.loot.rerollQuote(picked, reroll, S) : null;
+      const props = picked.affixes.map((a, i) => ({ a, i })).filter(({ a }) => !a.baseIntrinsic);
+      const proAfford = pro.ok && game.gold >= pro.gold && (!pro.material || (game.materials[pro.material.id] || 0) >= pro.material.n);
+      preview = el('div', { class: 'svc-preview', 'data-svc': 'enchant', 'data-item-id': picked.id },
+        el('h5', { html: `${gemHtml(picked)}${itemNameHtml(picked)} <small class="tiny">${esc(rarityLabel(picked))} · ${have}/${cap} property slots · rerolled ${picked.rerolls || 0}/${S.enchanter?.maxRerolls ?? 10}${w.hero ? ' · worn by ' + esc(w.hero.short) : ''}</small>` }),
+        el('div', { class: 'svc-props' }, ...(props.length ? props.map(({ a, i }) => { const q = game.loot.rerollQuote(picked, i, S);
+          return el('div', { class: 'svc-prop' + (reroll === i ? ' picked' : '') }, el('span', { text: game.loot.describe(a) }),
+            q.ok ? el('button', { class: 'small', text: `Reroll · ${q.gold}g`, 'data-svc-action': 'reroll-pick', 'data-tip': `See what this becomes, for ${q.gold} gold.`, onclick: () => { reroll = i; draw(); } })
+              : el('span', { class: 'tiny', 'data-tip': q.why, text: q.capped ? 'no more rerolls' : 'fixed' })); }) : [el('div', { class: 'tiny', text: 'No properties yet.' })])),
+        rq ? (rq.ok ? el('div', { class: 'svc-reroll' },
+          el('div', { class: 'svc-prop new', html: `${esc(game.loot.describe(rq.from))} → <b>${esc(game.loot.describe(rq.affix))}</b>` }),
+          previewRows(picked, rq.preview, hero),
+          el('div', { class: 'row' }, el('button', { class: 'primary', text: `Reroll — ${rq.gold}g`, 'data-svc-action': 'reroll', disabled: game.gold >= rq.gold ? undefined : '', 'data-tip': game.gold >= rq.gold ? `Spend ${rq.gold} gold on it.` : `Needs ${rq.gold} gold — you have ${game.gold}.`, onclick: () => doReroll(picked, rq.index) }),
+            el('button', { class: 'small ghost', text: 'Keep it as it is', onclick: () => { reroll = null; draw(); } })))
+          : el('div', { class: 'svc-why', text: `Cannot reroll: ${rq.why}.` })) : null,
+        add.ok ? el('div', { class: 'svc-add' },
+          el('div', { class: 'svc-prop new', html: `New property: <b>${esc(game.loot.describe(add.affix))}</b>` }),
+          previewRows(picked, add.preview, hero),
+          el('div', { class: 'row' }, el('button', { class: 'primary', text: `Add property — ${add.gold}g`, 'data-svc-action': 'add', disabled: game.gold >= add.gold ? undefined : '', 'data-tip': game.gold >= add.gold ? `Spend ${add.gold} gold: ${have + 1} of ${cap} slots used afterwards.` : `Needs ${add.gold} gold — you have ${game.gold}.`, onclick: () => doAdd(picked) })))
+          : el('div', { class: 'tiny svc-why', text: `Add a property: ${add.why}.` }),
+        pro.ok ? el('div', { class: 'row' }, el('button', { text: `Raise to ${pro.to} — ${pro.gold}g${pro.material ? ` + ${pro.material.n} ${pro.material.id.replace('_', ' ')}` : ''}`, 'data-svc-action': 'promote', disabled: proAfford ? undefined : '',
+            'data-tip': `${pro.from} → ${pro.to}: property slots ${pro.slotsFrom} → ${pro.slotsTo}.${pro.material ? ` Needs ${pro.material.n} ${pro.material.id.replace('_', ' ')} — you have ${game.materials[pro.material.id] || 0} (salvage rare and legendary items at the blacksmith).` : ''}`, onclick: () => doPromote(picked) }))
+          : el('div', { class: 'tiny', text: `Raise rarity: ${pro.why}.` }),
+        el('div', { class: 'row' }, el('button', { class: 'small ghost', text: 'Pick another', onclick: () => { svcPick.enchanter = null; reroll = null; draw(); } })));
+    }
+    const rows = list.map(({ it }) => { const a = game.loot.addQuote(it, S); const cap = game.loot.affixCap(it, S), have = game.loot.ownAffixes(it).length;
+      const r = itemRow(it, [el('button', { class: 'small' + (it.id === svcPick.enchanter ? ' primary' : ''), text: `${have}/${cap} slots`, 'data-svc-pick': it.id, 'data-tip': a.ok ? `Pick it: add a property for ${a.gold} gold, reroll one, or raise its rarity.` : `Pick it — ${a.why}.`, onclick: () => { svcPick.enchanter = it.id; reroll = null; draw(); $('town-panel-body').scrollTop = 0; } })]);
+      if (it.id === svcPick.enchanter) r.classList.add('picked'); return r; });
+    wrap.replaceChildren(head, preview, el('b', { text: 'Your gear' }), ...(rows.length ? rows : [el('p', { class: 'tiny', text: 'Nothing to enchant.' })]));
+  };
+  const doAdd = async it => { const owner = ownerOf(it); const r = game.loot.enchantAdd(it, game, S); if (!r.ok) return toast(r.why); narrate(`<p class="good">The enchanter binds a new property into ${owner}${itemNameHtml(it)}: <b>${esc(game.loot.describe(r.affix))}</b> (−${r.gold} gold).</p>`); toast('Property added'); await afterItemWork(it); };
+  const doReroll = async (it, i) => { const owner = ownerOf(it); const r = game.loot.enchantReroll(it, i, game, S); if (!r.ok) return toast(r.why); reroll = null; narrate(`<p class="good">The enchanter reweaves ${owner}${itemNameHtml(it)}: ${esc(game.loot.describe(r.from))} becomes <b>${esc(game.loot.describe(r.affix))}</b> (−${r.gold} gold).</p>`); toast('Property rerolled'); await afterItemWork(it); };
+  const doPromote = async it => { const owner = ownerOf(it); const r = game.loot.enchantPromote(it, game, game.materials, S); if (!r.ok) return toast(r.why); narrate(`<p class="good">${owner}${itemNameHtml(it)} is <b>${esc(r.to)}</b> now (−${r.gold} gold${r.material ? `, −${r.material.n} ${r.material.id.replace('_', ' ')}` : ''}): ${r.slotsTo} property slots.</p>`); toast(`Now ${r.to}`); await afterItemWork(it); };
+  openTownPanel('Enchanter', wrap, draw); draw(); townActions(t);
 }
 // ---- side panels
-function renderSide() { renderPartyTab(); renderBag(); renderSkills(); renderQuests(); renderMeterTab(); renderJournal(); }
-async function heroQuestDone(q) { const hero = game.party.find(h => h.id === q.heroId); narrate(`<p class="good"><b>${q.heroName} finished the errand: ${q.title}.</b> ${q.rewardItem ? `Reward: <span class="${q.rewardItem.rarity}">${q.rewardItem.name}</span>.` : ''}</p>`);
+function renderSide() {
+  renderPartyTab(); renderBag(); renderSkills(); renderQuests(); renderMeterTab(); renderJournal();
+  // E43: the open merchant / smith / enchanter screen follows the same change (a buy, an equip, a sale, an upgrade)
+  if (townPanelRedraw && !$('town-panel').hidden) { try { townPanelRedraw(); } catch (e) { console.warn('town panel redraw', e); } }
+}
+async function heroQuestDone(q) { const hero = game.party.find(h => h.id === q.heroId); narrate(`<p class="good"><b>${q.heroName} finished the errand: ${q.title}.</b> ${q.rewardItem ? `Reward: ${itemNameHtml(q.rewardItem)}.` : ''}</p>`);
   await showRewardsFor({ title: 'Errand done', subtitle: `${q.heroName} — ${q.title}`, gold: q.reward?.gold || 0, xp: q.reward?.xp || 0, items: [itemToReward(q.rewardItem)].filter(Boolean), extras: q.reward?.talent ? [{ kind: 'level', text: `${q.heroName} gains a talent point` }] : [] });
   if (hero) { await sayLine(hero, speak(hero, 'brag')); for (const { who, intent } of game.reactionsTo(hero)) { if (Math.random() < 0.7) await sayLine(who, speak(who, intent, { to: hero })); } } renderMap(); renderSide(); }
 /**
@@ -927,6 +1090,7 @@ async function showRewardsFor(spec) {
   if (!rewardPopups || !spec) return;
   const worth = (spec.gold > 0) || (spec.xp > 0) || (spec.fame > 0) || spec.items?.length || spec.extras?.length;
   if (!worth) return;
+  spec = { ...spec, items: (spec.items || []).map(x => x?.itemId ? { ...x, tipRender: 'item', tipClass: 'tip-compare' } : x) };   // E46: hover a card to compare
   try { await showRewards(spec, { base: '../../assets/data/ui', speed: textSpeed >= 1 ? 1 : 1 / textSpeed }); } catch (e) { console.warn('rewards popup', e); }
 }
 /** Reward strings from game.applyReward ("+40 gold", "+15 xp", "found X") → a popup spec. */
@@ -969,8 +1133,9 @@ function sectionHead(text, iconName) { return el('div', { class: 'bag-head' }, e
  */
 function bar(v, max, cls = '', tip = '', shield = 0) {
   const pct = Math.max(0, Math.min(100, Math.round(100 * v / Math.max(1, max))));
-  const shPct = shield > 0 ? Math.max(0, Math.min(100 - pct, Math.round(100 * shield / Math.max(1, max)))) : 0;
-  const b = el('div', { class: 'bar ' + cls }, el('i', { style: `width:${pct}%`, class: pct <= 50 && !cls ? 'low' : '' }), shPct ? el('i', { class: 'shield', style: `width:${shPct}%` }) : null);
+  // E44: the shield sits after the fill and slides back over its end when the bar is full, instead of being clipped to nothing
+  const shPct = shield > 0 ? Math.max(0, Math.min(100, Math.round(100 * shield / Math.max(1, max)))) : 0;
+  const b = el('div', { class: 'bar ' + cls }, el('i', { style: `width:${pct}%`, class: pct <= 50 && !cls ? 'low' : '' }), shPct ? el('i', { class: 'shield', style: `left:${Math.max(0, Math.min(pct, 100 - shPct))}%;width:${shPct}%` }) : null);
   if (tip) b.dataset.tip = tip; return b;
 }
 /** Temporary hit points on a hero right now (barrier / shield statuses). */
@@ -982,8 +1147,9 @@ function slotRow(h, s) {
   const it = h.equipment[s];
   const row = el('span', { class: 'slot' + (it ? '' : ' empty') }, el('i', { class: 'ic ic-' + slotIcon(s) }));
   if (it) {
-    row.append(el('i', { class: 'gem gem-' + gemFor(it) }), el('span', { class: 'nm ' + it.rarity, text: it.name }));
-    row.dataset.tipHtml = itemTipHtml({ it, score: game.loot.score(it, h), describe: a => game.loot.describe(a) });
+    rememberItem(it); const rk = rarityKey(it);
+    row.append(el('i', { class: 'gem gem-' + gemFor(it), 'data-rarity': rk }), el('span', { class: 'nm iname ' + rk, 'data-rarity': rk, text: it.name }));
+    row.dataset.tipRender = 'item'; row.dataset.tipClass = 'tip-compare'; row.dataset.itemId = it.id;
   } else {
     row.append(el('span', { class: 'nm', text: '—' }));
     row.dataset.tip = `${SLOT_NAME[s] || s}: nothing equipped.`;
@@ -1043,6 +1209,10 @@ function renderPartyTab() {
       statChip('', d.armor, STAT_TIPS.armor, 'slot_chest'),
       statChip('crit', Math.round(d.critChance) + '%', STAT_TIPS.crit),
       ...['STR', 'DEX', 'INT', 'CON'].map(k => statChip('', h.attrs[k], STAT_TIPS[k], 'stat_' + k.toLowerCase()))) : null;
+    // E49: one chip per set the hero wears — pieces on, and the hover card lists every bonus step, lit when it is on
+    const sets = h.isCompanion ? [] : game.loot.activeSets(h.equipment);
+    const setLine = sets.length ? el('div', { class: 'statline sets' }, ...sets.map(st => { const piece = Object.values(h.equipment).find(x => x?.setId === st.set.id); const info = game.loot.setInfo(piece, h.equipment);
+      return el('span', { class: 'stat-chip set-chip', 'data-set': st.set.id, 'data-tip-html': `<div class="tip-title">${esc(h.short)}'s set bonuses</div>` + setInfoHtml(info, { describe: a => game.loot.describe(a), legendaryText, heroShort: h.short, className }) + `<div class="tip-sub">${st.bonuses.length ? `${st.bonuses.length} bonus step${st.bonuses.length === 1 ? '' : 's'} on${st.legendaryActive ? ', and the full-set power' : ''}.` : 'No bonus yet.'}${st.next ? ` Next at ${st.next} pieces.` : ''}</div>`, text: `◆ ${st.set.name} ${st.count}/${st.set.items.length}` }); })) : null;
     const drawer = h.isCompanion ? null : el('div', { class: 'member-more', hidden: open ? null : '' },
       d ? el('div', { class: 'statline' }, statChip('hit', d.hit, STAT_TIPS.hit), statChip('dodge', d.dodge, STAT_TIPS.dodge)) : null,
       el('div', { class: 'slots' }, ...GEAR.map(s => slotRow(h, s))),
@@ -1070,10 +1240,13 @@ function renderPartyTab() {
           points ? el('span', { class: 'pip', text: 'points', 'data-tip': 'Unspent attribute, talent or passive points — spend them in the Skills tab' }) : null,
           el('span', { class: 'gap' }),
           gearBtn, cogBtn),
-        bar(h.hp, h.maxHp, '', h.alive && h.hp > 0 ? `Health ${fmtHp(h.hp)} / ${fmtHp(h.maxHp)}${shieldOn(h) ? ` + ${fmtHp(shieldOn(h))} shield` : ''}. ${STAT_TIPS.hp}` : `${h.short} is down. ${game.reviveHelp()}`, shieldOn(h)),
+        // E44: during a fight, the health the stage is showing for the event on screen (the live number is already at the end of the round)
+        ...(() => { const s = stage?.shownOf?.(h.id); const hp = s ? s.hp : h.hp, max = s ? s.maxHp : h.maxHp, sh = s ? s.shield : shieldOn(h); const up = s ? hp > 0 : h.alive && h.hp > 0;
+          return [bar(hp, max, '', up ? `Health ${fmtHp(hp)} / ${fmtHp(max)}${sh ? ` + ${fmtHp(sh)} shield` : ''}. ${STAT_TIPS.hp}` : `${h.short} is down. ${game.reviveHelp()}`, sh)]; })(),
         h.isCompanion ? null : bar(h.mp, h.maxMp, 'mp', `Mana ${fmtHp(h.mp)} / ${fmtHp(h.maxMp)}. ${STAT_TIPS.mp}`),
         h.isCompanion ? null : bar(h.xp, xpForLevel(h.level + 1), 'xp', `Experience ${fmtHp(h.xp)} / ${fmtHp(xpForLevel(h.level + 1))} towards level ${h.level + 1}. ${STAT_TIPS.xp}`),
         stats,
+        setLine,
         drawer));
   });
   // The revive rules live in the tooltip on a fallen hero's health bar. The line only takes up room in
@@ -1169,35 +1342,49 @@ function slotFor(h, it) {
 }
 /** The classes whose kit includes this weapon type — what "class restriction" means on the item card. */
 function classesForWeapon(subtype) { return classes.classes.filter(c => (c.weapons || []).includes(subtype)).map(c => c.name); }
+/** Redraw the party on the stage after gear changed (a held weapon has its own look). Not during a fight. */
+function restageParty() { if (!stage || inFight) return; stage.setSide(game.fighters().map(bodyOf), 'left').then(() => stage.parkVehicle(game.vehicle)).catch(e => console.warn('restage', e)); }
 /**
  * The item card. Pick which hero you are thinking about first (a row of tabs across the top, greyed
  * out for anyone whose class cannot use the thing), and everything below — the slot it would fill,
- * what it would replace, the damage/armour/score deltas — is about that hero. Nobody has to click
- * Equip to find out it will not work: the restriction is on the card.
+ * what it would replace, the stat-by-stat deltas and the set — is about that hero (js/ui.js compareItem,
+ * the same comparison the hover card uses). Round 22 (E43): the card always works on the live item and
+ * says where it is; Equip buys it first when it is still on the merchant's table, and moves it when
+ * another hero wears it.
  */
 function itemDialog(it) {
   const dlg = $('item-dialog');
   const usable = h => it.type !== 'weapon' || canUse(h, it);
   let pick = game.party[selectedHero] && usable(game.party[selectedHero]) ? selectedHero : Math.max(0, game.party.findIndex(usable));
   const users = it.type === 'weapon' && it.subtype ? classesForWeapon(it.subtype) : [];
+  const describe = a => game.loot.describe(a);
+  const ROW_TIPS = { dmgLow: STAT_TIPS.dmg, dmgHigh: STAT_TIPS.dmg, armor: STAT_TIPS.armor, offense: 'The damage half of the score.', defense: 'The survival half of the score.', utility: 'Finding, speed, regeneration and the odd trick.' };
 
+  const doEquip = () => {
+    const h = game.party[pick]; if (!h) return;
+    it = findItem(it.id) || it; const now = whereIs(it);
+    if (!usable(h)) return toast(`${h.short} can't use ${it.subtype}s (${(h.weapons || []).join(', ')})`);
+    if (now.where === 'shop') { if (!game.buy(it, now.price, openShop.stock)) return toast('Not enough gold'); narrate(`<p class="sys">Bought ${itemNameHtml(it)} for ${now.price} gold.</p>`); }
+    else if (now.where === 'worn') { if (now.hero === h) return toast(`${h.short} is already wearing it`); unequip(now.hero, now.slot, game.loot); game.inventory.push(it); }
+    else if (now.where !== 'bag') return toast('That is not yours any more');
+    const target = slotFor(h, it); const oldItem = h.equipment[target] || null;
+    const d = game.loot.score(it, h).total - (oldItem ? game.loot.score(oldItem, h).total : 0);
+    game.inventory = game.inventory.filter(x => x !== it); const out = equip(h, it, game.loot); game.inventory.push(...out);
+    game.logLoot(it, { holder: h.id, equipped: true, replaced: oldItem?.name || null, delta: d });
+    hideTip(); dlg.close(); renderHud(); renderSide(); restageParty(); toast(`${h.short} equips ${it.name}`);
+  };
   const draw = () => {
-    const hero = game.party[pick] || null;
-    const slot = hero ? slotFor(hero, it) : (it.slot === 'ring' ? 'ring1' : it.slot);
-    const cur = hero?.equipment?.[slot] || null;
-    const s = game.loot.score(it, hero), cs = cur ? game.loot.score(cur, hero) : null;
-    const affixes = (it.affixes || []).map(a => el('div', { class: 'affix ' + (a.baseIntrinsic ? '' : 'good'), text: game.loot.describe(a) }));
-    const diff = cs ? s.total - cs.total : null;
+    it = findItem(it.id) || it;
+    const hero = game.party[pick] || null; const w = whereIs(it);
+    const cmp = hero ? compareItem(it, hero, { loot: game.loot, canUse, slotFor }) : null;
+    const tgt = cmp?.targets[0] || null; const slot = cmp?.into || (it.slot === 'ring' ? 'ring1' : it.slot); const cur = tgt?.cur || null;
     const canWear = hero ? usable(hero) : false;
-    const delta = (label, mine, theirs, tip) => {
-      if (mine == null && theirs == null) return null;
-      const a = mine ?? 0, b = theirs ?? 0, d = a - b;
-      return el('div', { class: 'cmp-row', 'data-tip': tip },
-        el('span', { text: label }),
-        el('b', { text: String(mine ?? '—') }),
-        el('span', { class: 'tiny', text: cur ? `was ${theirs ?? '—'}` : 'slot empty' }),
-        el('span', { class: d >= 0 ? 'up' : 'down', text: `${d >= 0 ? '+' : ''}${Math.round(d * 10) / 10}` }));
-    };
+    const wornByHero = w.where === 'worn' && w.hero === hero;
+    const affixes = (it.affixes || []).map(a => el('div', { class: 'affix ' + (a.baseIntrinsic ? '' : 'good'), text: describe(a) }));
+    const rowEl = r => el('div', { class: 'cmp-row', 'data-tip': ROW_TIPS[r.key] || `${r.label}: what this item gives, against what ${hero.short} wears there.` },
+      el('span', { text: r.label }), el('b', { text: r.mine == null ? '—' : r.fmt(r.mine) }),
+      el('span', { class: 'tiny', text: cur ? `was ${r.theirs == null ? '—' : r.fmt(r.theirs)}` : 'slot empty' }),
+      el('span', { class: r.d >= 0 ? 'up' : 'down', text: `${r.d >= 0 ? '+' : ''}${r.fmt(r.d)}` }));
     const heroTabs = el('div', { class: 'row hero-picker' }, ...game.party.map((h, i) => el('button', {
       class: 'small hero-tab' + (i === pick ? ' on' : '') + (usable(h) ? '' : ' cant'),
       text: `${h.short} ${h.className}`,
@@ -1205,42 +1392,33 @@ function itemDialog(it) {
         : `${esc(h.short)} is a ${esc(h.className)} and cannot use ${esc(it.subtype || 'this')}s — ${esc((h.weapons || []).join(', ') || 'no weapons')} only.`,
       onclick: () => { pick = i; if (usable(h)) { selectedHero = i; renderSkills(); renderPartyTab(); } draw(); },
     })));
+    const state = w.where === 'worn' ? `Worn by <b>${esc(w.hero.short)}</b> (${esc(SLOT_NAME[w.slot] || w.slot)}).` : w.where === 'bag' ? 'In the bag.' : w.where === 'shop' ? `For sale at the merchant: <b>${w.price} gold</b>.` : 'Not yours any more.';
+    const equipText = !hero ? 'Equip' : wornByHero ? `Worn by ${hero.short}` : w.where === 'shop' ? `Buy & equip on ${hero.short} — ${w.price}g` : w.where === 'worn' ? `Move to ${hero.short}` : `Equip on ${hero.short}`;
+    const equipOk = hero && canWear && !wornByHero && w.where !== 'gone' && (w.where !== 'shop' || game.gold >= w.price);
     const kids = [
-      el('h3', { html: `${gemHtml(it)}<span class="${it.rarity}">${esc(it.name)}</span>` }),
-      el('div', { class: 'subline', html: `${iconHtml(slotIcon(it.slot))}${esc(it.rarity)} · ${esc(it.quality)} quality · ${esc(SLOT_NAME[it.slot] || it.slot)}${it.subtype ? ' · ' + esc(it.subtype) : ''}${it.weaponCategory ? ' · ' + esc(it.weaponCategory) : ''}${it.twoHanded ? ' · two-handed' : ''}${it.attackSpeed && it.attackSpeed !== 'normal' ? ' · ' + esc(it.attackSpeed) : ''}` }),
+      el('h3', { html: `${gemHtml(it)}${itemNameHtml(it, { tip: false })}` }),
+      el('div', { class: 'subline', html: `${iconHtml(slotIcon(it.slot))}${esc(rarityLabel(it))} · ${esc(it.quality)} quality · ${esc(SLOT_NAME[it.slot] || it.slot)}${it.subtype ? ' · ' + esc(it.subtype) : ''}${it.weaponCategory ? ' · ' + esc(it.weaponCategory) : ''}${it.twoHanded ? ' · two-handed' : ''}${it.attackSpeed && it.attackSpeed !== 'normal' ? ' · ' + esc(it.attackSpeed) : ''}` }),
+      el('div', { class: 'item-state', 'data-where': w.where, html: state }),
       users.length ? el('div', { class: 'tiny restrict', 'data-tip': 'Only these classes have this weapon in their kit. Everyone else is greyed out above.', html: `<b>Who can use it:</b> ${esc(users.join(', '))}` }) : null,
       it.dmg ? el('div', { html: `<b>Damage</b> ${it.dmg[0]}–${it.dmg[1]}`, 'data-tip': STAT_TIPS.dmg }) : null,
       it.armor != null ? el('div', { html: `<b>Armor</b> ${it.armor}`, 'data-tip': STAT_TIPS.armor }) : null,
       ...affixes, it.lore ? el('p', { class: 'lore', text: it.lore }) : null, it.desc ? el('p', { class: 'tiny', text: it.desc }) : null,
+      cmp?.set ? el('div', { class: 'set-wrap', html: setInfoHtml(cmp.set, { describe, legendaryText, heroShort: hero.short, className }) }) : null,
       heroTabs,
-      hero ? el('div', { class: 'cmp' },
-        el('div', { class: 'tiny', html: `Against <b>${esc(hero.short)}</b>'s ${esc(SLOT_NAME[slot] || slot)}: ${cur ? `<span class="${cur.rarity}">${esc(cur.name)}</span>` : '<i>nothing equipped</i>'}` }),
-        delta('Damage (low)', it.dmg?.[0] ?? null, cur?.dmg?.[0] ?? null, STAT_TIPS.dmg),
-        delta('Damage (high)', it.dmg?.[1] ?? null, cur?.dmg?.[1] ?? null, STAT_TIPS.dmg),
-        delta('Armor', it.armor ?? null, cur?.armor ?? null, STAT_TIPS.armor),
-        delta('Offense', s.offense, cs?.offense ?? 0, 'The damage half of the score.'),
-        delta('Defense', s.defense, cs?.defense ?? 0, 'The survival half of the score.'),
-        delta('Utility', s.utility, cs?.utility ?? 0, 'Finding, speed, regeneration and the odd trick.'),
+      hero && tgt ? el('div', { class: 'cmp' },
+        el('div', { class: 'tiny', html: `Against <b>${esc(hero.short)}</b>'s ${esc(SLOT_NAME[slot] || slot)}: ${cur ? itemNameHtml(cur) : '<i>nothing equipped</i>'}${cmp.targets.length > 1 ? ` · ${cmp.targets.slice(1).map(t => `${esc(SLOT_NAME[t.slot] || t.slot)}: ${t.cur ? itemNameHtml(t.cur) : '<i>empty</i>'}`).join(', ')} (hover the item to see both)` : ''}` }),
+        wornByHero ? el('div', { class: 'tiny', text: `${hero.short} is wearing this one.` }) : null,
+        ...tgt.rows.map(rowEl),
         el('div', { class: 'cmp-row total', 'data-tip': 'Score weighs damage, defence and utility for this hero — a rough "is it better?" number.' },
-          el('span', { text: 'Score' }), el('b', { text: String(s.total) }),
-          el('span', { class: 'tiny', text: cur ? `was ${cs.total}` : 'slot empty' }),
-          el('span', { class: (diff ?? s.total) >= 0 ? 'up' : 'down', text: `${(diff ?? s.total) >= 0 ? '+' : ''}${diff ?? s.total}` })),
+          el('span', { text: 'Score' }), el('b', { text: String(tgt.score.total) }),
+          el('span', { class: 'tiny', text: cur ? `was ${tgt.curScore.total}` : 'slot empty' }),
+          el('span', { class: tgt.diff >= 0 ? 'up' : 'down', text: `${tgt.diff >= 0 ? '+' : ''}${tgt.diff}` })),
         canWear ? null : el('div', { class: 'tiny bad', text: `${hero.short} cannot use ${it.subtype || 'this'}s. Pick another hero above.` })) : null,
       el('div', { class: 'row' },
-        el('button', {
-          class: 'primary', text: hero ? `Equip on ${hero.short}` : 'Equip', disabled: hero && canWear ? undefined : '',
-          'data-tip': hero && canWear ? `Wear it now — whatever it replaces goes back in the bag` : 'Pick a hero who can use it',
-          onclick: () => {
-            const h = game.party[pick]; if (!h) return;
-            if (!usable(h)) return toast(`${h.short} can't use ${it.subtype}s (${(h.weapons || []).join(', ')})`);
-            const target = slotFor(h, it); const oldItem = h.equipment[target] || null;
-            const d = game.loot.score(it, h).total - (oldItem ? game.loot.score(oldItem, h).total : 0);
-            if (game.inventory.includes(it)) { game.inventory = game.inventory.filter(x => x !== it); const out = equip(h, it, game.loot); game.inventory.push(...out); }
-            game.logLoot(it, { holder: h.id, equipped: true, replaced: oldItem?.name || null, delta: d });
-            hideTip(); dlg.close(); renderSide(); toast(`${h.short} equips ${it.name}`);
-          },
-        }),
-        game.inventory.includes(it) ? el('button', { text: `Sell ${game.loot.sellPrice(it)}g`, 'data-tip': 'Turn it into gold on the spot. There is no buying it back.', onclick: () => { const p = game.sell(it); hideTip(); dlg.close(); renderHud(); renderSide(); toast(`Sold for ${p} gold`); } }) : null,
+        el('button', { class: 'primary', text: equipText, disabled: equipOk ? undefined : '', 'data-action': 'equip',
+          'data-tip': equipOk ? (w.where === 'shop' ? `Pay ${w.price} gold and wear it now — whatever it replaces goes in the bag` : `Wear it now — whatever it replaces goes back in the bag`) : (!canWear ? 'Pick a hero who can use it' : wornByHero ? 'Already worn by this hero' : w.where === 'shop' ? `Needs ${w.price} gold` : 'Not yours to equip'),
+          onclick: doEquip }),
+        w.where === 'bag' ? el('button', { text: `Sell ${game.loot.sellPrice(it)}g`, 'data-tip': 'Turn it into gold on the spot. There is no buying it back.', onclick: () => { const p = game.sell(it); narrate(`<p class="sys">Sold ${itemNameHtml(it, { tip: false })} for ${p} gold.</p>`); hideTip(); dlg.close(); renderHud(); renderSide(); toast(`Sold for ${p} gold`); } }) : null,
         el('button', { text: 'Close', onclick: () => { hideTip(); dlg.close(); } })),
     ];
     dlg.replaceChildren(...kids.filter(Boolean));   // replaceChildren turns a null into the text "null"
@@ -1355,5 +1533,7 @@ setupUI();   // tooltips everywhere, gold corner flourishes on every .framed box
 
 window.emberveil = { menu, conversations, assets, restScene, crossingNode, doCrossing, resolveCrossing, crossingChoices, NODE_INFO, placeBubble, get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, get effectsRenderer() { return stage?.fx?.constructor?.name || null; }, library, lingo, DATA, LOOKS, ELOOKS, enemyLook, bodyOf, companionLook, get busy() { return busy; }, get speakCount() { return speakCount; }, get rewardPopups() { return rewardPopups; }, set rewardPopups(v) { rewardPopups = !!v; }, showRewardsFor, fight, afterCombat, enterNode, addChosen, renderSide, renderMeterTab, renderPartyTab, renderMap, renderJournal, waitForChoice, sayScene, showCheck, recordNamedKill, isSceneText, classes: classes.classes,
   // round 21
-  narrate, logScroll, setCombatSpeed, get combatSpeed() { return combatSpeed; }, get inFight() { return inFight; }, openTownPanel, closeTownPanel, town, townActions, manageParty, woundedReminder };
+  narrate, logScroll, setCombatSpeed, get combatSpeed() { return combatSpeed; }, get inFight() { return inFight; }, openTownPanel, closeTownPanel, town, townActions, manageParty, woundedReminder,
+  // round 22
+  shop, blacksmith, enchanter, itemDialog, whereIs, findItem, compareCardHtml, itemNameHtml, selectHero, get selectedHero() { return selectedHero; }, SERVICES };
 document.body.dataset.ready = '1';

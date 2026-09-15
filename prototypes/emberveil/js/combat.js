@@ -4,6 +4,14 @@
 // Every effect id lives in js/effects.js; this file only calls the hooks. Pure logic: `round()` returns an event list.
 import { derive, mergeSkill, HEALER_CLASSES, SKILL_MULT, checkBonus } from './rules.js';
 import { EFFECTS, STATUS_ALIAS, refreshFx, fireTrait, traitMult, traitSum, skillFx, runSkill, skillMult, skillSum, skillGate, skillTargetOverride, statusDef } from './effects.js';
+// E42: who does what is decided in js/ai.js (knobs in data/ai.json); this file carries the plan out.
+import { decideHero, decideEnemy } from './ai.js';
+// E44: every event carries a snapshot of the health bars it touches (see js/bars.js for why).
+import { snapUnit, snapAll } from './bars.js';
+/** Events that a decision's reason is written onto: the first one the acting unit emits. */
+const WHY_EVENTS = ['skill', 'attack', 'miss', 'heal', 'windup'];
+/** Set a property that JSON.stringify skips (for fields that point at other units). */
+const hideProp = (o, key, value) => Object.defineProperty(o, key, { value, writable: true, configurable: true, enumerable: false });
 const DOT = ['burn', 'poison', 'bleed', 'holy_burn'];
 const CC = ['stun', 'freeze', 'sleep', 'confused', 'dazed', 'blind', 'slow', 'marked', 'sunder', 'curse', 'silence', 'disarm', 'root', 'weaken'];
 export class Combat {
@@ -15,6 +23,8 @@ export class Combat {
     const ex = ctx.exhaustionMult ?? 1; if (ex < 1) for (const h of heroes) { h.derived.hit = Math.round(h.derived.hit * ex); h.derived.dodge = Math.round(h.derived.dodge * ex); h.derived.dmgMin = Math.max(1, Math.round(h.derived.dmgMin * ex)); h.derived.dmgMax = Math.max(1, Math.round(h.derived.dmgMax * ex)); }
     if (ctx.startBarrier) for (const h of heroes) h.statuses.push({ type: 'barrier', duration: 3, power: ctx.startBarrier });
     this.killsBy = {}; this.bonusGold = 0;
+    // E42: the last few hundred AI decisions with their reasons (debugging, tests); E44: ctx.snapshots:false skips bar snapshots
+    this.decisions = []; this._why = null; this.snapshots = ctx.snapshots !== false;
     for (const c of [...heroes, ...enemies]) fireTrait('combatStart', this, c);
   }
   /** Clear everything a previous fight left behind and rebuild the unit's effect list. */
@@ -24,6 +34,9 @@ export class Combat {
     c._spellPowBonus = 0; c._spellPowRounds = 0; c._healReduce = 0; c._mrDebuff = 0; c._fireVuln = 0; c._intDebuff = 0; c._corruption = 0; c._rebleed = null;
     c.extraActions = 0; if (!c.isEnemy) c.extraActionsEachRound = 0; c.taunting = 0; c.stealth = 0; c.parry = 0; c._tempArmorPen = 0; c._tempArmorPenRounds = 0; c.onHitStatus = null; c.onHitStatusRounds = 0;
     if (!c._persistStacks) c.flair = 0; c._freeSkills = null; c._dotLifesteal = 0; c.burnExtend = 0;
+    // AI memory (js/ai.js). _lastHit/_lastTarget point at other units (a hero at an enemy that points back at the
+    // hero), so they are hidden from JSON.stringify — otherwise Game.save() hits a circle and the save silently fails.
+    hideProp(c, '_lastHit', null); hideProp(c, '_lastTarget', null); c._buffedBy = null; c._healReserve = null;
     refreshFx(c); return c;
   }
   alive(list) { return list.filter(c => c.alive); }
@@ -51,7 +64,21 @@ export class Combat {
   }
   removeStatus(c, type) { c.statuses = c.statuses.filter(s => s.type !== type); }
   cleanse(c, what) { c.statuses = c.statuses.filter(s => !(what === 'all' || what === 1 ? CC.includes(s.type) || DOT.includes(s.type) : (Array.isArray(what) ? what : [what]).includes(s.type))); }
-  emit(ev) { this.log.push(ev); this.events.push(ev); return ev; }
+  /**
+   * Record an event. Two things ride along:
+   * - `ev.snap`: { unitId: {hp, maxHp, shield} } for the target and source as they are at this moment
+   *   (E44). The round is worked out all at once and replayed slowly, so the stage draws these instead
+   *   of the live numbers, which are already at the end of the round.
+   * - `ev.why` / `ev.whyRule`: the reason from the AI decision that led to this action (E42), on the
+   *   first skill/attack/miss/heal/windup event the deciding unit emits.
+   */
+  emit(ev) {
+    if (this.snapshots && !ev.snap) { const s = {}; for (const u of [ev.target, ev.source]) if (u && u.id != null && u.maxHp != null) s[u.id] = snapUnit(u); ev.snap = s; }
+    const w = this._why; if (w && ev.source === w.unit && WHY_EVENTS.includes(ev.type)) { ev.why = w.reason; ev.whyRule = w.rule; this._why = null; }
+    this.log.push(ev); this.events.push(ev); return ev;
+  }
+  /** A `sync` event with every unit's bar, for health that changed without an event of its own (regen ticks, temporary health). */
+  sync(at) { if (this.snapshots) this.emit({ type: 'sync', at, snap: snapAll([...this.heroes, ...this.enemies]) }); }
   /**
    * One place for every heal, so healing-reduction, whole-number health and the meter all agree.
    * `label` is what the player is told brought it back ("Mend", "life steal", "on kill") — the log
@@ -117,11 +144,13 @@ export class Combat {
     const o = { dealt: left, tags, magic, dtype: kind, crit };
     if (o.dealt > 0 && tgt.hp - o.dealt <= 0) fireTrait('preLethal', this, tgt, o);
     let dealt = o.dealt;
-    const share = this.statusSum(tgt, 'share'); const bound = share && !noShare ? [...this.heroes, ...this.enemies].filter(x => x !== tgt && x.alive && this.has(x, 'soulbind')) : [];
+    // soulbind writes `share: 0.5` as a number; statusSum() only adds hook functions, so it read 0 and Soul Link never moved a wound
+    const share = tgt.statuses.reduce((n, s) => { const f = statusDef(s.type)?.share; return n + (typeof f === 'function' ? (Number(f(s)) || 0) : typeof f === 'number' ? f : 0); }, 0); const bound = share && !noShare ? [...this.heroes, ...this.enemies].filter(x => x !== tgt && x.alive && this.has(x, 'soulbind')) : [];
     if (bound.length) { const moved = Math.round(dealt * share / bound.length) || 0; if (moved > 0) { dealt = Math.max(0, dealt - moved * bound.length); for (const b of bound) this.applyDamage(src, b, moved, { trueDmg: true, label: 'Soul Link', noReflect: true, noShare: true, via: 'status:soulbind', dtype: 'shadow' }); } }
     const hpBefore = tgt.hp; const absorbed = dmg - o.dealt; tgt.hp = Math.max(0, tgt.hp - dealt);
     if (dealt > 0) for (const s of tgt.statuses.slice()) if (statusDef(s.type)?.wakesOnDamage) this.removeStatus(tgt, s.type);
     if (tgt._windUp) tgt._windUp.taken += dealt;
+    if (!isDot) this.markHit(src, tgt, dealt + absorbed);
     const overkill = Math.max(0, dealt - hpBefore);
     const record = { type: 'damage', source: src, target: tgt, amount: Math.min(dealt, hpBefore), rawAmount: amount, overkill, absorbed, crit, magic, tags, label, via: via || (label ? 'skill:' + label : 'attack'), viaName: label || (src?.equipment?.weapon?.name || (src?.isEnemy ? 'Attack' : 'Unarmed')), dtype: kind, itemId: itemId || (!label ? src?.equipment?.weapon?.id || null : null), killingBlow: hpBefore > 0 && tgt.hp === 0 };
     this.emit(record);
@@ -173,7 +202,7 @@ export class Combat {
   }
   /** Basic attack. */
   attack(att, tgt) {
-    if (!tgt?.alive) return; fireTrait('onAttack', this, att, tgt);
+    if (!tgt?.alive) return; fireTrait('onAttack', this, att, tgt); this.markHit(att, tgt, 0);
     const chance = this.hitChance(att, tgt); if (this.rng() * 100 >= chance) { this.emit({ type: 'miss', source: att, target: tgt }); return; }
     let raw = this.rollDamage(att) * this.dmgBuffMult(att); let crit = false;
     const cc = (att.derived?.critChance ?? 5) + traitSum('critBonus', this, att, tgt);
@@ -186,8 +215,9 @@ export class Combat {
     if (att.derived?.chainOnHit && this.rng() < att.derived.chainOnHit) { const o = this.alive(this.enemies).find(e => e !== tgt); if (o) this.applyDamage(att, o, Math.round(raw * 0.5), { magic: true, label: 'Chain', via: 'proc:stormcharged', dtype: 'lightning' }); }
   }
   // ---------- skills
-  skillTargets(skill, caster, foes, allies) {
-    const a = this.alive(foes); const primary = this.pickFoe(caster, a); if (!primary) return []; const aoe = skill.aoe || 'single';
+  /** `want`: the primary target the AI picked (js/ai.js); without one, pickFoe chooses. */
+  skillTargets(skill, caster, foes, allies, want = null) {
+    const a = this.alive(foes); const primary = want?.alive && a.includes(want) ? want : this.pickFoe(caster, a); if (!primary) return []; const aoe = skill.aoe || 'single';
     if (aoe === 'all' || aoe === 'row' || aoe === 'row2' || aoe === 'pierce_row') return a; if (aoe === 'group') return a.filter(e => e.group === primary.group); if (aoe === 'adjacent') return [primary, ...a.filter(e => e !== primary && e.group === primary.group)].slice(0, shotCount(skill, 2)); if (aoe === 'adjacent2' || aoe === 'group2') return [primary, ...a.filter(e => e !== primary && e.group === primary.group)].slice(0, shotCount(skill, 3));
     if (aoe === 'chain' || aoe === 'chain3') return [primary, ...a.filter(e => e !== primary)].slice(0, shotCount(skill, 3)); if (aoe === 'random3' || aoe === 'random4') { const k = shotCount(skill, aoe === 'random3' ? 3 : 4); const out = []; for (let i = 0; i < k; i++) out.push(a[Math.floor(this.rng() * a.length)]); return out; } if (aoe === 'multi3' || aoe === 'multi4') return Array(shotCount(skill, aoe === 'multi3' ? 3 : 4)).fill(primary); return [primary];
   }
@@ -202,7 +232,9 @@ export class Combat {
     return Math.round(mult * mid * (1 + power)) + (magic ? 0 : Math.round(mid * 0.1));
   }
   skillHeal(caster, skill) { const w = caster.equipment?.weapon; const mid = w?.dmg ? (w.dmg[0] + w.dmg[1]) / 2 : 1.5; const base = skill.healStat && skill.healStat !== 'damage' ? caster.derived[skill.healStat.toUpperCase()] || 8 : mid; return Math.max(skill.healAmount || 0, Math.round((skill.healMult || 0) * base * (1 + caster.derived.spellPower) * (this.healMult || 1))); }
-  cast(caster, skill, foes, allies) {
+  /** `plan`: an AI decision ({ target, ally }) saying whom to aim at; without one the old defaults apply. */
+  cast(caster, skill, foes, allies, plan = null) {
+    const planAlly = list => (plan?.ally && list.includes(plan.ally) ? plan.ally : null);
     const ev = this.emit({ type: 'skill', source: caster, skill: skill.id, name: skill.name, skillType: skill.type });
     const cost = Math.max(0, (skill.mpCost || 0) - (caster.derived?.mpCostReduce || 0)); caster.mp -= caster._freeSkills?.[skill.id] ? 0 : cost;
     caster.cooldowns[skill.id] = Math.max(1, Math.round(((skill.cooldown || 2) + 1) * (1 - (caster.derived?.cooldownReduction || 0))));
@@ -211,20 +243,20 @@ export class Combat {
     const c = { C: this, caster, skill, eff, foes, allies, magic, dtype, targets: [], target: null, targetIndex: 0, dealt: 0, crit: false };
     runSkill(fx, 'onCast', c); fireTrait('onCastDone', this, caster, skill);
     if (skill.type === 'heal') {
-      const tgts = skill.target === 'party' ? aliveAllies.filter(a => !(eff.excludeSelf && a === caster)) : skill.target === 'self' ? [caster] : [this.mostHurt(aliveAllies) || caster];
+      const tgts = skill.target === 'party' ? aliveAllies.filter(a => !(eff.excludeSelf && a === caster)) : skill.target === 'self' ? [caster] : [planAlly(aliveAllies) || this.mostHurt(aliveAllies) || caster];
       for (const t of tgts) { const amount = this.skillHeal(caster, skill); const h = this.healUnit(t, amount, skill.name, caster, 'skill:' + skill.id);
         if (eff.cleanse) this.cleanse(t, eff.cleanse); if (eff.hpRegen || eff.regenRounds) this.addStatus(t, 'regen', eff.regenRounds || eff.regenDur || 3, (eff.hpRegen || 3) * (eff.regenMult || 1), caster);
         c.target = t; c.dur = eff.duration || eff.rounds || 2; c.healAmount = amount; runSkill(fx, 'onBuff', c); }
       if (eff.mpRestore) this.gainMana(caster, eff.mpRestore, skill.name, caster, 'skill:' + skill.id); if (eff.dmgBuff) this.buff(caster, { dmgBuff: eff.dmgBuff, duration: eff.duration || 2 });
       c.totalDealt = 0; runSkill(fx, 'onEnd', c); return ev;
     }
-    if (skill.type === 'revive') { const fallen = allies.filter(a => !a.alive); const tgts = eff.reviveAll ? fallen : fallen.slice(0, 1); for (const t of tgts) { t.alive = true; t.hp = Math.max(1, Math.floor(t.maxHp * (eff.reviveHp || 0.25))); t.statuses = []; if (eff.immune !== false) { t.reviveImmune = true; t.reviveImmuneRounds = eff.reviveImmuneRounds || 0; } this.emit({ type: 'revive', source: caster, target: t }); c.target = t; c.dur = 2; runSkill(fx, 'onBuff', c); } return ev; }
+    if (skill.type === 'revive') { const fallen = allies.filter(a => !a.alive); const tgts = eff.reviveAll ? fallen : planAlly(fallen) ? [plan.ally] : fallen.slice(0, 1); for (const t of tgts) { t.alive = true; t.hp = Math.max(1, Math.floor(t.maxHp * (eff.reviveHp || 0.25))); t.statuses = []; if (eff.immune !== false) { t.reviveImmune = true; t.reviveImmuneRounds = eff.reviveImmuneRounds || 0; } this.emit({ type: 'revive', source: caster, target: t }); c.target = t; c.dur = 2; runSkill(fx, 'onBuff', c); } return ev; }
     if (skill.type === 'buff' || skill.type === 'counter') {
-      if (skill.target === 'enemy') { const t = this.pickFoe(caster, this.alive(foes)); if (t) { if (eff.tauntedBy) t.tauntedBy = caster; this.buff(t, { dodgeDebuff: (eff.atkDebuff || 0) + (eff.dodgeDebuff || 0), dmgBuff: -(eff.dmgDebuff || 0), duration: eff.duration || eff.rounds || eff.dodgeDebuffDur || 2 }); this.emit({ type: 'taunt', source: caster, target: t }); c.target = t; c.dur = eff.duration || eff.rounds || 2; runSkill(fx, 'onBuff', c); } return ev; }
-      let tgts = skill.target === 'party' ? aliveAllies : skill.target === 'self' || skill.type === 'counter' ? [caster] : [this.mostHurt(aliveAllies) || caster];
+      if (skill.target === 'enemy') { const t = plan?.target?.alive && foes.includes(plan.target) ? plan.target : this.pickFoe(caster, this.alive(foes)); if (t) { if (eff.tauntedBy) t.tauntedBy = caster; this.buff(t, { dodgeDebuff: (eff.atkDebuff || 0) + (eff.dodgeDebuff || 0), dmgBuff: -(eff.dmgDebuff || 0), duration: eff.duration || eff.rounds || eff.dodgeDebuffDur || 2 }); this.emit({ type: 'taunt', source: caster, target: t }); c.target = t; c.dur = eff.duration || eff.rounds || 2; runSkill(fx, 'onBuff', c); } return ev; }
+      let tgts = skill.target === 'party' ? aliveAllies : skill.target === 'self' || skill.type === 'counter' ? [caster] : [planAlly(aliveAllies) || this.mostHurt(aliveAllies) || caster];
       if (eff.excludeSelf) tgts = tgts.filter(t => t !== caster).length ? tgts.filter(t => t !== caster) : tgts;
       if (eff.targets > 1 && skill.target !== 'party') tgts.push(...aliveAllies.filter(a => !tgts.includes(a)).slice(0, eff.targets - 1));
-      for (const t of tgts) { const dur = eff.duration || eff.rounds || 2;
+      for (const t of tgts) { const dur = eff.duration || eff.rounds || 2; (t._buffedBy ||= {})[skill.id] = this.round_ + dur;   // js/ai.js will not recast it while it runs
         if (eff.dmgBuff) this.buff(t, { dmgBuff: eff.dmgBuff, duration: dur }); if (eff.dmgReduct) this.buff(t, { dmgReduct: eff.dmgReduct, duration: dur }); if (eff.reflect) this.buff(t, { reflect: eff.reflect, duration: dur }); if (eff.dodgeBuff) this.buff(t, { dodgeBuff: eff.dodgeBuff, duration: dur }); if (eff.critBuff) this.buff(t, { critBuff: eff.critBuff, duration: dur }); if (eff.critChance) this.buff(t, { critBuff: eff.critChance * 100, duration: dur }); if (eff.spellDmgBuff) this.buff(t, { spellDmgBuff: eff.spellDmgBuff, duration: dur }); if (eff.initiative) this.buff(t, { initiative: eff.initiative, duration: dur });
         if (eff.tempHp) t.hp = Math.min(t.maxHp + eff.tempHp, t.hp + eff.tempHp); if (eff.taunt) t.taunting = dur; if (eff.stealth) t.stealth = dur;
         const barrier = eff.barrier != null ? (eff.barrier < 5 ? Math.round(eff.barrier * (caster.derived?.INT || 10) * 2) : eff.barrier) : eff.shield ? Math.round((eff.shield.conMult || 3) * (caster.derived?.CON || 10)) : 0;
@@ -242,7 +274,7 @@ export class Combat {
       c.totalDealt = 0; runSkill(fx, 'onEnd', c); return ev;
     }
     // damage skills (melee / ranged / magic / zone / damage / debuff / trap)
-    let tgts = skillTargetOverride(fx, c) || this.skillTargets(skill, caster, foes, allies); if (skill.type === 'zone') tgts = this.alive(foes); if (!tgts.length) { c.totalDealt = 0; runSkill(fx, 'onEnd', c); return ev; }
+    let tgts = skillTargetOverride(fx, c) || this.skillTargets(skill, caster, foes, allies, plan?.target); if (skill.type === 'zone') tgts = this.alive(foes); if (!tgts.length) { c.totalDealt = 0; runSkill(fx, 'onEnd', c); return ev; }
     c.targets = tgts;
     const hits = hitCount(skill); const falloff = { 1: 1, 2: 0.8, 3: 0.6 }[Math.min(3, new Set(tgts).size)] ?? 0.5;
     const consumes = eff.consumesFlairStacks ?? skill.consumesFlairStacks; const builds = eff.buildsFlairStacks ?? skill.buildsFlairStacks;
@@ -308,40 +340,58 @@ export class Combat {
   }
   /** True when any status on `c` sets the given behaviour switch. */
   statusSum2(c, flag) { return c.statuses.some(s => statusDef(s.type)?.[flag]); }
+  // Small readers js/ai.js uses, so it never has to import this file.
+  hitsOf(skill) { return hitCount(skill); }
+  shotsOf(skill, fallback) { return shotCount(skill, fallback); }
+  dtypeOf(skill) { return skillType(skill); }
+  /** Mana a skill really costs this unit (free-skill effects and cost reduction included). */
+  skillCost(h, s) { return h._freeSkills?.[s.id] ? 0 : Math.max(0, (s.mpCost || 0) - (h.derived?.mpCostReduce || 0)); }
+  /** Remember who went for whom this round (taunts protect allies that are being attacked; heals favour them). */
+  markHit(src, tgt, amount = 0) {
+    if (!src || !tgt || src === tgt || !!src.isEnemy === !!tgt.isEnemy) return;
+    const h = tgt._lastHit; if (h && h.round === this.round_) { h.amount += amount; h.by = src; } else hideProp(tgt, '_lastHit', { round: this.round_, by: src, amount });
+    hideProp(src, '_lastTarget', tgt);
+  }
+  /** Keep a decision: its reason goes onto the next event the unit emits, and into `this.decisions`. */
+  note(unit, d) {
+    if (!d) return; this._why = { unit, reason: d.reason, rule: d.rule };
+    this.decisions.push({ round: this.round_, unit: unit.id, name: unit.short || unit.name, kind: d.kind, skill: d.skill?.id || d.spell?.id || null, target: (d.target || d.ally)?.id || null, rule: d.rule, reason: d.reason, value: Math.round((d.value || 0) * 10) / 10 });
+    if (this.decisions.length > 400) this.decisions.splice(0, this.decisions.length - 400);
+  }
+  /** A hero's or companion's turn: js/ai.js picks, this carries it out. */
   heroAI(h) {
-    const allies = this.heroes, foes = this.enemies; const sk = this.usableSkills(h); const aliveA = this.alive(allies); const isHealer = HEALER_CLASSES.includes(h.class);
-    const rev = sk.find(s => s.type === 'revive'); if (rev && allies.some(a => !a.alive)) return this.cast(h, rev, foes, allies);
-    const heals = sk.filter(s => s.type === 'heal' && s.target !== 'self').sort((a, b) => (b.healMult || 0) - (a.healMult || 0)); const hurt = this.mostHurt(aliveA); const frac = hurt ? hurt.hp / hurt.maxHp : 1;
-    if (heals.length && (frac < 0.25 || (isHealer && frac < 0.65))) return this.cast(h, heals[0], foes, allies);
-    const self = sk.find(s => s.type === 'heal' && s.target === 'self'); if (self && h.hp / h.maxHp < 0.4) return this.cast(h, self, foes, allies);
-    const shield = sk.find(s => s.type === 'buff' && (s.effect?.barrier || s.effect?.shield || s.effect?.dmgReduct) && s.target !== 'enemy'); if (isHealer && shield && frac < 0.6 && !aliveA.some(a => a.statuses.some(s => s.type === 'barrier'))) return this.cast(h, shield, foes, allies);
-    const dmg = sk.filter(s => ['melee', 'ranged', 'magic', 'damage', 'zone', 'trap', 'debuff'].includes(s.type) && (s.damageMult ?? 1) > 0 || (s.statusEffects?.length && s.type === 'magic')); if (dmg.length) { const n = this.alive(foes).length; dmg.sort((a, b) => (b.damageMult || 0.5) * hitCount(b) * this.expectedTargets(b, n) - (a.damageMult || 0.5) * hitCount(a) * this.expectedTargets(a, n)); if ((dmg[0].mpCost || 0) === 0 || this.rng() < 0.8) return this.cast(h, dmg[0], foes, allies); }
-    const buff = sk.find(s => s.type === 'buff' && s.target !== 'enemy' && !h.buffs.length); if (buff && this.round_ <= 2) return this.cast(h, buff, foes, allies);
-    const any = sk.find(s => s.type !== 'buff' || s.target === 'enemy'); if (any && this.rng() < 0.5) return this.cast(h, any, foes, allies);
-    return this.attack(h, this.pickFoe(h, this.alive(foes)));
+    const d = decideHero(this, h); this.note(h, d);
+    if (d.kind === 'skill' && d.skill) return this.cast(h, d.skill, this.enemies, this.heroes, d);
+    return this.attack(h, d.target?.alive ? d.target : this.pickFoe(h, this.alive(this.enemies)));
   }
   enemyAI(e) {
     const foes = this.heroes, allies = this.enemies; const targets = this.alive(foes); if (!targets.length) return;
     if (e._windUp) { const w = e._windUp; if (w.taken >= (w.interruptThreshold || 1e9)) { this.emit({ type: 'interrupt', source: e, skill: w.spell.id, name: w.spell.name }); e._windUp = null; } else if (--w.rounds > 0) { this.emit({ type: 'windup', source: e, skill: w.spell.id, name: w.spell.name, rounds: w.rounds }); return; } else { e._windUp = null; return this.resolveSpell(e, w.spell, targets, allies); } }
-    if (e.role === 'healer' && !this.statusSum2(e, 'noSpells')) { const w = this.mostHurt(this.alive(allies)); if (w && w.hp / w.maxHp < 0.6) { this.healUnit(w, Math.max(8, Math.round(e.dmg[1] * 0.8)), 'mend', e, 'effect:mend'); return; } }
-    const spells = (e.spellList || []).map(id => this.ctx.spells[id]).filter(s => s && !(e.cooldowns[s.id] > 0));
-    if (spells.length && !this.statusSum2(e, 'noSpells') && this.rng() < (e.spellChance || 0)) {
-      const sp = spells[Math.floor(this.rng() * spells.length)]; e.cooldowns[sp.id] = (sp.cooldown || 2) + 1;
+    // The spell chance is rolled as before; when it passes, js/ai.js picks the spell and target worth
+    // the most (a random spell used to be cast even when it did nothing) or falls back to a swing.
+    const silenced = this.statusSum2(e, 'noSpells');
+    const spells = silenced ? [] : (e.spellList || []).map(id => this.ctx.spells[id]).filter(s => s && !(e.cooldowns[s.id] > 0));
+    const rolled = spells.length > 0 && this.rng() < (e.spellChance || 0);
+    const d = decideEnemy(this, e, { spells: rolled ? spells : [] }); this.note(e, d);
+    if (d.kind === 'mend') { this.healUnit(d.ally, d.amount, 'mend', e, 'effect:mend'); return; }
+    if (d.kind === 'spell' && d.spell) {
+      const sp = d.spell; e.cooldowns[sp.id] = (sp.cooldown || 2) + 1;
       if (sp.windUp?.rounds) { e._windUp = { spell: sp, rounds: sp.windUp.rounds, interruptThreshold: sp.windUp.interruptThreshold, taken: 0 }; this.emit({ type: 'windup', source: e, skill: sp.id, name: sp.name, rounds: sp.windUp.rounds }); return; }
-      return this.resolveSpell(e, sp, targets, allies);
+      return this.resolveSpell(e, sp, targets, allies, d);
     }
-    this.attack(e, this.pickFoe(e, targets));
+    this.attack(e, d.target?.alive ? d.target : this.pickFoe(e, targets));
   }
   /** Resolve one enemy spell: damage, statuses (single or a list), healing and self-healing. */
-  resolveSpell(e, sp, targets, allies) {
+  resolveSpell(e, sp, targets, allies, plan = null) {
     // A spell that is not explicitly locked down can be snatched out of the air by anyone
     // who has a pilfer effect running (skills.json `pilferBuff` / `pilferCount`).
     if (sp.stealable !== false) { const thief = this.alive(e.isEnemy ? this.heroes : this.enemies).find(x => x._pilfering > 0); if (thief) { thief._pilfering--; this.gainMana(thief, Math.round((sp.effect?.damage || 10) / 2), 'snatched ' + sp.name, thief, 'effect:pilfer'); this.emit({ type: 'steal', source: thief, target: e, skill: sp.id, name: sp.name }); return; } }
     this.emit({ type: 'skill', source: e, skill: sp.id, name: sp.name, skillType: 'magic' });
-    const ef = sp.effect || {}; const tgts = sp.target === 'aoe' ? targets : sp.target === 'self' ? [e] : sp.target === 'ally_lowest_hp' ? [this.mostHurt(this.alive(allies))] : [this.pickFoe(e, targets)];
+    const ef = sp.effect || {}; const tgts = sp.target === 'aoe' ? targets : sp.target === 'self' ? [e] : sp.target === 'ally_lowest_hp' ? [plan?.ally?.alive ? plan.ally : this.mostHurt(this.alive(allies))] : [plan?.target?.alive && targets.includes(plan.target) ? plan.target : this.pickFoe(e, targets)];
     if (ef.selfHeal) this.healUnit(e, ef.selfHeal, sp.name, e, 'skill:' + sp.id);
     for (const t of tgts) {
       if (!t) continue;
+      if (!ef.heal) this.markHit(e, t, 0);
       if (ef.heal) { this.healUnit(t, ef.heal, sp.name, e, 'skill:' + sp.id); continue; }
       if (ef.damage) this.applyDamage(e, t, Math.max(1, Math.round(ef.damage * this.spellScale(e) * (1 - (e._intDebuff || 0)))), { magic: sp.fxKind !== 'physical', label: sp.name, via: 'skill:' + sp.id, dtype: sp.fxKind === 'ice' ? 'cold' : sp.fxKind === 'nature' ? 'poison' : sp.fxKind || 'arcane' });
       const list = [...(ef.statuses || []), ...(ef.status ? [ef.status] : []), ...(ef.statusEffect ? [ef.statusEffect] : []), ...(ef.debuff ? [{ type: ef.debuff }] : [])];
@@ -398,11 +448,13 @@ export class Combat {
     const extra = rooted ? 0 : (c.extraActions || 0) + ({ fast: 1, very_fast: 2 }[c.derived?.attackSpeed] || 0) + (c.extraActionsEachRound || 0) + hasteN;
     c.extraActions = 0;
     for (let i = 0; i < extra && c.alive && this.alive(c.isEnemy ? this.heroes : this.enemies).length; i++) { this.emit({ type: 'extra', target: c }); if (c.isEnemy) this.enemyAI(c); else this.heroAI(c); }
+    this.sync('turn');   // E44: bars catch anything this turn changed without an event (temporary health)
   }
   /** One full round. Returns the events. */
   round() {
-    this.events = []; if (this.over) return []; this.round_++; this.emit({ type: 'round', n: this.round_ });
-    if (this.round_ > 1) this.tickStatuses(); if (this.checkEnd()) return this.events;
+    this.events = []; if (this.over) return []; this.round_++; this.emit({ type: 'round', n: this.round_, snap: this.snapshots ? snapAll([...this.heroes, ...this.enemies]) : undefined });
+    // E44: the upkeep sync carries regen and mana ticks, which move health without events of their own
+    if (this.round_ > 1) { this.tickStatuses(); this.sync('upkeep'); } if (this.checkEnd()) return this.events;
     for (const c of this.buildOrder()) { if (this.over) break; if (!c.alive) continue; this.takeTurn(c); if (this.checkEnd()) break; }
     if (this.round_ >= 50 && !this.over) { this.over = true; this.result = 'timeout'; this.emit({ type: 'end', result: 'timeout' }); }
     return this.events;

@@ -1,0 +1,93 @@
+{
+  "_doc": "Combat AI knobs for js/ai.js (E42). Every decision a hero or an enemy makes is scored in 'health points': damage it will really deal (after misses, armour and overkill), healing that actually lands (overheal does not count), damage a buff or taunt will prevent, or the output a status takes away from its target. The highest score wins and the unit's reason is written onto the combat event. The rules came from the original game's AI (research/ai-rules.md); the numbers below are the knobs. js/ai.js keeps an identical copy as a fallback and tests/ai.test.js checks the two match.",
+  "schema": 1,
+  "roles": {
+    "_doc": "Who counts as a tank or a healer when deciding whom to protect. Healers also use the looser heal threshold and keep mana back for an emergency heal. Any unit currently taunting also counts as a tank.",
+    "tank": ["warrior", "knight", "runesmith", "dragon_knight", "paladin"],
+    "healer": ["cleric", "druid", "priest", "oracle", "paladin", "bard", "shaman"],
+    "weight": { "tank": 1.25, "healer": 1.35, "self": 1.1, "companion": 0.7, "default": 1 }
+  },
+  "heal": {
+    "_doc": "threshold: a healer tops up anyone under this share of health. emergency: anyone with a heal uses it below this. never: nobody is healed at or above this share. selfThreshold: a self-only heal (Second Wind) waits until the caster is under this. A heal that would waste more than maxOverheal of itself is skipped unless the target is in an emergency. group: a party heal gets a bonus once minHurt allies are under its threshold.",
+    "threshold": 0.65,
+    "emergency": 0.35,
+    "never": 0.85,
+    "selfThreshold": 0.45,
+    "woundedMult": 1.6,
+    "emergencyMult": 4,
+    "maxOverheal": 0.5,
+    "overhealPenalty": 0.5,
+    "recentlyHitMult": 1.25,
+    "group": { "minHurt": 3, "threshold": 0.6, "bonus": 1.5 }
+  },
+  "revive": {
+    "_doc": "A fallen ally is worth the health they come back with times mult, plus their output for `rounds` rounds.",
+    "mult": 3,
+    "rounds": 2
+  },
+  "cleanse": {
+    "_doc": "How many rounds of a unit's output each status on it costs per round it lasts. Damage over time is counted as its remaining damage.",
+    "danger": { "stun": 1, "freeze": 1, "sleep": 1, "confused": 0.5, "silence": 0.6, "disarm": 0.5, "blind": 0.5, "curse": 0.3, "weaken": 0.3, "marked": 0.3, "dazed": 0.25, "slow": 0.15, "root": 0.1, "sunder": 0.1 }
+  },
+  "focus": {
+    "_doc": "killRounds: finishing a target is worth its output for this many rounds. lowHealth: extra weight on already-hurt targets. threat multiplies the value of hitting special targets; bossWithAdds lowers a boss while its adds still stand, so the adds go first. sleepingMult keeps attacks off something asleep while anything else is awake. thornsSelfHp: under this share of health a unit avoids hitting thorns.",
+    "killRounds": 2,
+    "lowHealth": 0.5,
+    "sleepingMult": 0.1,
+    "thornsSelfHp": 0.35,
+    "thornsMult": 0.6,
+    "threat": { "healer": 1.5, "caster": 1.25, "windUp": 1.4, "champion": 1.2, "named": 1.3, "bossWithAdds": 0.75, "marked": 1.15 },
+    "interruptBonus": 1
+  },
+  "aoe": {
+    "_doc": "An area skill has to beat the best single-target option by minGain, and must actually reach minTargets living enemies, or it is not used.",
+    "minTargets": 2,
+    "minGain": 1.1
+  },
+  "taunt": {
+    "_doc": "A unit with a taunt uses it when an ally that is not a tank (a healer, a caster, or anyone under squishyHp) was attacked within recentRounds rounds, as long as the taunter is above minSelfHp.",
+    "squishyHp": 0.6,
+    "minSelfHp": 0.35,
+    "recentRounds": 1,
+    "weight": 1.5
+  },
+  "buffs": {
+    "_doc": "horizon: rounds of a buff that count. earlyRounds/earlyMult: buffs are worth more in the opening rounds, before the fight turns. bigFightMult: worth more against a boss, champion or named enemy. nearlyWonRounds: when the party would finish every enemy within this many rounds of its own output, buffs are worth only nearlyWonMult. braceMult: shields and damage reduction are worth more while an enemy winds up a big spell. unknownValue: a buff key the scorer does not understand, as a share of the caster's own output.",
+    "horizon": 3,
+    "earlyRounds": 2,
+    "earlyMult": 1.4,
+    "bigFightMult": 1.25,
+    "nearlyWonRounds": 1.5,
+    "nearlyWonMult": 0.25,
+    "braceMult": 1.5,
+    "unknownValue": 0.25
+  },
+  "statuses": {
+    "_doc": "How much of a target's output a status takes away per round (a share). curse, weaken and marked read the status power instead. sleepWithDamage: a skill that deals damage wakes what it puts to sleep. bossCc: bosses shrug off half of all stuns, freezes and sleeps.",
+    "skip": { "stun": 1, "freeze": 1, "sleep": 0.9, "confused": 0.5 },
+    "share": { "blind": 0.5, "dazed": 0.25, "disarm": 0.5, "slow": 0.1, "root": 0.05, "silence": 0.6 },
+    "sunderPerPoint": 0.02,
+    "sleepWithDamage": 0.15,
+    "bossCc": 0.5
+  },
+  "mana": {
+    "_doc": "healerReserveCasts: a healer never spends below the cost of this many of its cheapest heal on anything that is not a heal. costWeight: a skill loses this share of its score per full mana bar it costs, more when mana is low. lowManaShare: under this share of mana, restoring mana is worth manaValue per point (as a share of output per 10 mana).",
+    "healerReserveCasts": 1,
+    "costWeight": 0.5,
+    "lowManaShare": 0.3,
+    "manaValue": 0.5
+  },
+  "cooldown": {
+    "_doc": "A skill with a cooldown of at least big rounds, or costing at least bigCostShare of the mana bar, is worth saveMult on an ordinary target with fewer than three enemies about.",
+    "big": 5,
+    "bigCostShare": 0.45,
+    "saveMult": 0.6
+  },
+  "enemy": {
+    "_doc": "Enemies roll their spell chance as before; when the roll passes they pick the best spell and target instead of a random one, and skip spells worth nothing (a curse on someone already cursed, a heal with nobody hurt). healThreshold: enemy healers mend allies under this share. Basic attacks keep the original formation order (taunts, then companions, then the front of the party) unless focusAttacks is on. windUpMult: a spell that has to be channelled is worth this share of its value.",
+    "healThreshold": 0.6,
+    "focusAttacks": false,
+    "windUpMult": 0.8,
+    "minSpellValue": 1
+  }
+}

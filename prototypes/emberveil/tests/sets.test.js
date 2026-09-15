@@ -119,3 +119,83 @@ test('zoneDrop can return a set piece', () => {
   assert.ok(drops > 100, 'the zone drops things at all');
   assert.ok(sets > 0, 'and some of them are set pieces');
 });
+
+// ---------------------------------------------------------------- round 22 (E49): a set for every class
+const classes = JSON.parse(fs.readFileSync(new URL('../data/classes.json', import.meta.url))).classes;
+const balance = JSON.parse(fs.readFileSync(new URL('../data/balance.json', import.meta.url)));
+const bases = { ...items.weaponBases, ...items.armorBases };
+
+test('every class has a set made for it, and can wear every piece of it', () => {
+  for (const c of classes) {
+    const mine = items.sets.filter(s => (s.classes || []).includes(c.id));
+    assert.ok(mine.length >= 1, `${c.id} has no set`);
+    for (const s of mine) for (const p of s.items) {
+      const b = bases[p.baseItemId];
+      if (b.type === 'weapon') assert.ok(c.weapons.includes(b.subtype) || c.weapons.includes(p.baseItemId), `${c.name} cannot use ${s.name}'s ${p.baseItemId}`);
+    }
+  }
+  const classSets = items.sets.filter(s => s.classSet);
+  assert.ok(classSets.length >= 26, `${classSets.length} class sets`);
+  const sizes = new Set(classSets.map(s => s.items.length));
+  assert.ok(Math.min(...sizes) === 2 && Math.max(...sizes) === 6 && sizes.size >= 4, `varied sizes: ${[...sizes]}`);
+  const names = items.sets.map(s => s.name); assert.equal(new Set(names).size, names.length, 'no two sets share a name');
+});
+
+test('class sets: thresholds 2/3/4/6, bonuses that really reach the hero, powers that are registered', () => {
+  for (const s of items.sets.filter(x => x.classSet)) {
+    const n = s.items.length;
+    const want = { 2: [2], 3: [2, 3], 4: [2, 3, 4], 5: [2, 3, 4, 5], 6: [2, 3, 4, 6] }[n];
+    assert.deepEqual(Object.keys(s.partialBonuses).map(Number), want, `${s.id} thresholds`);
+    assert.equal(s.activationPieces, n); assert.equal(s.pieces, n);
+    for (const b of Object.values(s.partialBonuses)) for (const k of Object.keys(b)) {
+      const e = EFFECTS['affix:' + k]; assert.ok(e, `${s.id}: ${k} is not an effect`);
+      // set bonuses reach rules.derive (applyDeriveEffects), never the combat hooks: a cond_* bonus needs a derive hook
+      if (k.startsWith('cond_') || k.startsWith('barrier')) assert.ok(typeof e.derive === 'function', `${s.id}: bonus ${k} has no derive hook, so it would do nothing`);
+    }
+    for (const id of [s.legendaryEffect, ...Object.values(s.thresholdPowers || {})]) assert.ok(EFFECTS['legendary:' + id], `${s.id}: power ${id}`);
+    for (const p of s.items) { assert.ok(p.name, `${s.id}: every class-set piece has its own name`); for (const f of [...p.fixedAffixes, ...p.randomAffixes]) assert.ok(EFFECTS['affix:' + f.stat], `${s.id}: ${f.stat}`); }
+  }
+});
+
+test('a threshold power turns on at its step and shows in derive()', () => {
+  const rng = makeRng(41);
+  const set = items.sets.find(s => s.id === 'oathbound_bulwark');
+  const hero = { id: 'k', level: 20, attrs: { STR: 20, DEX: 10, INT: 8, CON: 18 }, passiveRanks: {}, talents: {}, skills: [], equipment: {} };
+  const slotOf = p => p.slot === 'ring' ? 'ring1' : p.slot;
+  for (let i = 0; i < 3; i++) hero.equipment[slotOf(set.items[i])] = loot.generateSetItem(set.id, i, 'elite', rng);
+  assert.ok(!derive(hero, loot).legendary.includes('kill_party_heal'), 'not at 3 pieces');
+  hero.equipment[slotOf(set.items[3])] = loot.generateSetItem(set.id, 3, 'elite', rng);
+  const four = derive(hero, loot);
+  assert.ok(four.legendary.includes('kill_party_heal'), 'the 4-piece power is on');
+  assert.ok(!four.legendary.includes('cheat_death_once'), 'the full-set power waits for 6');
+  for (let i = 4; i < 6; i++) hero.equipment[slotOf(set.items[i])] = loot.generateSetItem(set.id, i, 'elite', rng);
+  const six = derive(hero, loot);
+  assert.ok(six.legendary.includes('cheat_death_once')); assert.ok(six.thornsFlat >= 10, 'the derive-hook bonus (cond_thornsFlat) arrived');
+  const info = loot.setInfo(hero.equipment.head, hero.equipment);
+  assert.equal(info.worn, 6); assert.ok(info.steps.every(s => s.on));
+});
+
+test('set drops lean towards the party\'s classes', () => {
+  const l = new Loot(items, { setChance: 1, classSetShare: 0.6 });
+  l.partyClasses = () => ['warrior', 'ranger', 'mage', 'cleric'];
+  const rng = makeRng(77); let mine = 0; const N = 4000;
+  for (let i = 0; i < N; i++) { const it = l.maybeSetItem(1, rng); const s = items.sets.find(x => x.id === it.setId); if ((s.classes || []).some(c => l.partyClasses().includes(c))) mine++; }
+  assert.ok(mine / N > 0.55 && mine / N < 0.8, `${(100 * mine / N).toFixed(0)}% of set drops were for the party`);
+});
+
+test('drop frequency: an average run finds a few set pieces per act (kills per act from the simulator)', () => {
+  // Average kills per act for a run that reaches it, read off tools/sim-emberveil.mjs (100 runs, seed 1, round 22):
+  // 66 / 48 / 74 / 63 / 62 / 52. Each kill rolls loot.zoneDrop in that act's zones.
+  const KILLS = { 1: 66, 2: 48, 3: 74, 4: 63, 5: 62, 6: 52 };
+  const ZONES = { 1: ['border_roads', 'thornwood'], 2: ['dust_roads', 'ember_plateau'], 3: ['hell_breach', 'shattered_core'], 4: ['cosmic_rift', 'eternal_void'], 5: ['abyssal_depths', 'primordial_nexus'], 6: ['dragons_reach', 'dragon_throne'] };
+  const l = new Loot(items, { ...balance.loot, dropRate: balance.economy.globalMultipliers.dropRate });
+  const rng = makeRng(2026); const RUNS = 400; const perAct = {};
+  for (let act = 1; act <= 6; act++) {
+    let sets = 0;
+    for (let r = 0; r < RUNS; r++) for (let k = 0; k < KILLS[act]; k++) { const it = l.zoneDrop(ZONES[act][k % 2], rng, { act }); if (it?.setId) sets++; }
+    perAct[act] = sets / RUNS;
+  }
+  const line = Object.entries(perAct).map(([a, v]) => `act ${a}: ${v.toFixed(1)}`).join(', ');
+  for (const [a, v] of Object.entries(perAct)) assert.ok(v >= 1 && v <= 6, `set pieces per run in act ${a} = ${v.toFixed(2)} (${line})`);
+  console.log(`# set pieces per run, per act — ${line}`);
+});

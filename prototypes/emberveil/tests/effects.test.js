@@ -121,7 +121,7 @@ const P = {
   'legendary:cheat_death_once': { enemyDmg: [400, 500], enemyHit: 100, nEnemies: 3, rounds: 4 },
   'legendary:burn_extend': { skill: { ...MAG, statusEffects: [{ type: 'burn', chance: 1, duration: 2, power: 6 }] }, casts: 2, rounds: 4 },
   'legendary:mana_on_attack': { heroMpNow: 0, rounds: 4 },
-  'legendary:critical_armorpen': { ...CRIT, enemyArmor: 60, rounds: 3 },
+  'legendary:critical_armorpen': { ...CRIT, enemyArmor: 60, rounds: 3, casts: 4 },   // a 4th cast always lands on a target a crit already stripped (the AI's own swings may not)
   'legendary:rally_on_kill': { ...KILL, ally: true },
   'legendary:echo_cast': { skill: MAG, casts: 6, rounds: 1, seed: 3 },
   'legendary:dragon_fury_breath': KILL,

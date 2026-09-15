@@ -587,3 +587,41 @@ Three pieces settle it, and nothing else in the engine reads a count directly:
 Known data oddity, deliberately left alone: `chain_lightning_spirit`'s "Forked Spirit" adds a target
 to a skill whose `aoe` is `row`, which already hits every enemy on the field. The shape wins;
 `tests/multishot.test.js` skips sweep shapes for that reason and says so.
+
+## Round 22: the AI reads the registry (E42), and Soul Link finally shares (E44)
+
+`js/ai.js` (combat decisions, knobs in `data/ai.json`, rules inventory in `research/ai-rules.md`)
+prices every option with the same hooks the fight runs, so an effect that changes the fight also
+changes what the AI thinks an option is worth:
+
+| What the AI reads | From |
+|---|---|
+| skill damage | `combat.skillDamage()`, the skill's `dmgMult` / `dmgFlat` / `critBonus` / `armorPen` hooks (`skillFx`, `skillMult`, `skillSum`), `executeThreshold`, `bonusVsUndead` / `bonusVsDemon` (`isUndead` / `isDemon`, now exported from `effects.js`), `damageVsStatus` |
+| what gets through | `traitMult('dmgIn')`, `traitSum('critBonus')`, status `takenMult`, `blockBonus`, `armorReduce`, `absorbNext`, parry |
+| status value | `statusDef(type)` — `stacks`, `dot`, `holy`, `reflect` — plus `_immune` and stun immunity |
+| healing | `combat.skillHeal()`, `_healReduce`, regen and cleanse keys |
+
+Hooks that roll dice (`variance`, `varianceFloor`, `varianceCeiling`) are called through a view of the
+fight whose `rng()` always returns 0.5, so a decision never uses up the fight's random numbers.
+
+Buff keys the AI prices directly are listed in `BUFF_KEYS` in `js/ai.js`; any other key on a buff (a
+talent hook such as `pilferBuff`) is worth `buffs.unknownValue` of the caster's output per round, so a
+buff whose only effect is a hook still gets cast.
+
+New per-fight bookkeeping on each unit, cleared in `Combat.resetUnit()`: `_lastHit` (who attacked it
+this round and for how much, from `combat.markHit()`), `_lastTarget`, `_buffedBy[skillId]` (the round
+a buff from that skill runs out, so it is not recast) and `_healReserve` (a healer's cheapest heal).
+
+New on combat events: `snap` (health bars at that moment, `js/bars.js`), `why` / `whyRule` (the
+decision behind the action) and a `sync` event type (`at: 'turn' | 'upkeep'`) carrying every unit's
+bar. `recordEvent()` ignores `sync`, so the meter is unchanged.
+
+**Fixed: `status:soulbind`.** Its `share: 0.5` is a plain number and `statusSum()` only adds hook
+functions, so Soul Link shared nothing. `applyDamage()` now reads a numeric `share` as well as a
+function. The probe row passed before only because the status event itself changed the signature;
+`tests/hp-bars.test.js` now proves the wound is split.
+
+**Probe change:** `legendary:critical_armorpen` casts its probe skill four times instead of three.
+With a random target for every hero swing, the old probe usually hit an armour-stripped enemy by
+chance in the rounds after the casts; with scored targeting it can miss that window, so the fourth
+cast makes the probe land on a stripped enemy every time.

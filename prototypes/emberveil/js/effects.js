@@ -56,8 +56,9 @@ function def(group, key, desc, spec = {}) {
 const alive = (C, side) => C.alive(side === 'enemy' ? C.enemies : C.heroes);
 const foesOf = (C, self) => C.alive(self.isEnemy ? C.heroes : C.enemies);
 const alliesOf = (C, self) => C.alive(self.isEnemy ? C.enemies : C.heroes);
-const isUndead = t => /skeleton|ghoul|wraith|lich|undead|bone|shade|wight|zombie|revenant/i.test(t?.templateId || t?.id || '');
-const isDemon = t => /demon|imp|fiend|hell|fel|archfiend|devil/i.test(t?.templateId || t?.id || '');
+// exported for js/ai.js, which scores "+50% against demons" the same way the hooks apply it
+export const isUndead = t => /skeleton|ghoul|wraith|lich|undead|bone|shade|wight|zombie|revenant/i.test(t?.templateId || t?.id || '');
+export const isDemon = t => /demon|imp|fiend|hell|fel|archfiend|devil/i.test(t?.templateId || t?.id || '');
 /** Bump a status-modifier bag on an actor. Read by Combat.addStatus. */
 export function statusMod(actor, key, value, mode = 'add') {
   actor._sm = actor._sm || {};

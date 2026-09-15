@@ -19,7 +19,7 @@
   --text: #ded3c4; --muted: #9a8d7c; --parch: #e7dcc2;
   --good: #8fd08a; --bad: #e07070; --blue: #8fb6e8;
 
-  --normal: #c9c2b6; --magic: #7f95ff; --rare: #e8d020; --legendary: #ff8020; --unique: #ff5a3c; --set: #45d07a;
+  --normal: #c9c2b6; --magic: #7f95ff; --rare: #e8d020; --legendary: #ff8020; --unique: #ff5a3c; --set: #2fc4b2;   /* the one rarity table: data/items.json rarityColors (main.js re-applies it), round 22 E48 */
   --accent: var(--ember); --panel-bg: var(--panel);
 
   --tip-bg: #16110d; --tip-fg: #ece3d2; --tip-line: #6d5326; --tip-strong: #f0c46a; --tip-muted: #a99a83;
@@ -652,4 +652,66 @@ dialog::backdrop { background: rgba(6, 4, 3, .78); backdrop-filter: blur(2px); }
 ::-webkit-scrollbar-corner { background-color: var(--scroll-track); }
 @supports not selector(::-webkit-scrollbar) {
   * { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) var(--scroll-track); }
+}
+
+/* ---- the page never scrolls on the world screen (round 22, E45) ----
+   .world-layout used to be `height: calc(100vh - 92px)`, but the chrome around it is 105px: the 44px
+   top bar, the screen's 16px padding top and bottom, and the 29px breadcrumb. So the document was
+   always 13px taller than the window. Now the body is exactly one window tall and each box takes
+   what is left, whatever the top bar's real height is; the panels inside keep their own scrollbars. */
+@media (min-width: 1001px) {
+  body[data-screen="world"] { height: 100vh; height: 100dvh; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+  body[data-screen="world"] > .top { flex: none; }
+  body[data-screen="world"] > #app { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  #screen-world:not([hidden]) { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-block: 0; }
+  #screen-world > .breadcrumb { flex: none; }
+  #screen-world > .world-layout { flex: 1; min-height: 0; height: auto; }
+  /* the columns may be shorter than their content on a short window: they shrink, the panels scroll */
+  #screen-world .right > .narrative { min-height: 0; }
+  #screen-world .log-wrap, #screen-world .narrative-log, #screen-world .town-panel-body { min-height: 60px; }
+  #screen-world .side { min-height: 120px; }
+  #screen-world .tab { min-height: 0; }
+}
+
+/* ---- round 22: item names, compare cards (E46), town services (E47), sets (E49) ---- */
+.iname { font-weight: 600; }
+.tipbox.tip-compare { max-width: min(660px, 96vw); }
+.tipcmp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tipcmp-col { min-width: 0; }
+.tipcmp-col.cur { border-left: 1px solid var(--tip-line); padding-left: 12px; }
+.tipcmp-label { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--tip-muted); margin-bottom: 3px; }
+.tipcmp-diff { width: 100%; border-collapse: collapse; font-size: 12px; margin: 2px 0 4px; }
+.tipcmp-diff th { font-weight: normal; color: var(--tip-muted); text-align: right; padding: 0 5px; font-size: 11px; }
+.tipcmp-diff td { text-align: right; padding: 0 5px; white-space: nowrap; }
+.tipcmp-diff td:first-child, .tipcmp-diff th:first-child { text-align: left; white-space: normal; }
+.tipcmp-diff .even { color: var(--tip-muted); }
+.tipcmp-diff tr.total td { border-top: 1px solid var(--tip-line); font-weight: 700; padding-top: 2px; }
+.tipbox .use-ok { color: #8fd08a; }
+.set-block .tip-row .set { font-weight: 700; }
+.set-step { font-size: 12px; line-height: 1.35; }
+.set-step b { display: inline-block; min-width: 1.3em; color: var(--set); }
+.set-step.off { color: var(--tip-muted, var(--muted)); } .set-step.off b { color: var(--tip-muted, var(--muted)); }
+.set-step.on { color: #bdeee6; } .set-step.next { color: #e6d6a8; }
+.set-pieces { display: flex; flex-wrap: wrap; gap: 1px 10px; margin: 2px 0 4px; font-size: 11.5px; color: var(--tip-muted, var(--muted)); }
+.set-pieces .on { color: var(--set); }
+.item .setmark { color: var(--set); }
+.stat-chip.set-chip { border-color: color-mix(in srgb, var(--set) 55%, var(--line)); color: var(--set); cursor: help; }
+.item-state { font-size: 12.5px; color: var(--parch); margin: 2px 0 8px; }
+.item-state b { color: var(--gold-bright); }
+#item-dialog .set-block { margin: 8px 0; padding: 6px 10px; border: 1px solid color-mix(in srgb, var(--set) 40%, var(--line)); border-radius: 3px; background: rgba(0, 0, 0, .3); }
+.svc-intro { margin: 0 0 6px; }
+.svc-preview { border: 1px solid var(--line2); background: rgba(0, 0, 0, .35); border-radius: 4px; padding: 8px 10px; margin: 6px 0 12px; }
+.svc-preview h5 { margin: 0 0 4px; font-family: var(--display); color: var(--gold-bright); font-size: 13.5px; letter-spacing: .05em; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.svc-preview .svc-why { color: var(--bad); }
+.svc-preview .row { margin-top: 6px; }
+.svc-cmp { display: grid; grid-template-columns: 1fr auto auto auto; gap: 2px 12px; font-size: 13px; margin: 4px 0; }
+.svc-cmp .up { color: var(--good); } .svc-cmp .down { color: var(--bad); } .svc-cmp .muted { color: var(--muted); }
+.svc-props { margin: 4px 0; }
+.svc-prop { display: flex; align-items: center; gap: 8px; justify-content: space-between; padding: 2px 0; border-bottom: 1px dashed rgba(84, 64, 31, .35); font-size: 13px; }
+.svc-prop.new { color: var(--good); }
+.item.picked { background: rgba(255, 122, 26, .08); box-shadow: inset 0 0 0 1px var(--gold-dim); }
+.item .worn { color: var(--muted); font-size: 11.5px; }
+@media (max-width: 620px) {
+  .tipcmp-cols { grid-template-columns: 1fr; } .tipcmp-col.cur { border-left: 0; padding-left: 0; border-top: 1px solid var(--tip-line); padding-top: 6px; }
+  .svc-cmp { grid-template-columns: 1fr auto auto; }
 }

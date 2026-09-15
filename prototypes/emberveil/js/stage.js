@@ -9,6 +9,7 @@ import { createCreature } from '../../../avatar-3d/js/creatures.js';
 import { Assets } from '../../../assets/js/assets.js';
 import { SpellFx } from '../../../avatar-3d/js/spellfx.js';
 import { createVehicle, vehicleModelFor } from '../../../avatar-3d/js/vehicles.js';
+import { snapUnit, barState, shieldOf as shieldOfUnit } from './bars.js';
 
 /**
  * How much of the world each view has to show, in world units. `width` is the widest the scene ever
@@ -43,13 +44,15 @@ function lineUp(count = 1) {
 export const STAGE_CSS = `
 .stage-bars{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
 .stage-bars .sb{position:absolute;transform:translate(-50%,-100%);width:56px}
-.stage-bars .sb .track{position:relative;height:6px;border-radius:3px;background:#1a1208cc;border:1px solid #00000080;box-shadow:0 1px 2px #0008;overflow:hidden;display:flex}
-.stage-bars .sb .hpfill{height:100%;background:linear-gradient(#e0603a,#a82c20);transition:width calc(.18s * var(--pace, 1)) linear}
+.stage-bars .sb .track{position:relative;height:6px;border-radius:3px;background:#1a1208cc;border:1px solid #00000080;box-shadow:0 1px 2px #0008;overflow:hidden}
+.stage-bars .sb .hpfill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#e0603a,#a82c20);transition:width .15s linear}
+.stage-bars .sb .hpfill.alive{min-width:2px}
 .stage-bars .sb.party .hpfill{background:linear-gradient(#6fc26a,#3d8a3a)}
-.stage-bars .sb .shfill{height:100%;background:linear-gradient(#bcd8ff,#5f8fd8);opacity:.95}
+.stage-bars .sb .shfill{position:absolute;top:0;bottom:0;background:linear-gradient(#bcd8ff,#5f8fd8);opacity:.95}
+.stage-bars .sb .shfill.over{opacity:.8;box-shadow:inset 1px 0 0 #ffffffb0}
 .stage-bars .sb .nm{font:600 9px/1.2 system-ui,sans-serif;color:#e8ddc4;text-shadow:0 1px 2px #000,0 0 3px #000;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
 .stage-bars .sb.dead{opacity:.35;filter:grayscale(1)}
-.bar i.shield{background:linear-gradient(#bcd8ff,#5f8fd8)}
+.bar i.shield{position:absolute;top:0;bottom:0;background:linear-gradient(#bcd8ff,#5f8fd8)}
 .stage-perf{position:absolute;left:6px;top:6px;z-index:9;font:11px/1.35 ui-monospace,Menlo,Consolas,monospace;color:#cfe;background:#000a;border:1px solid #ffffff22;border-radius:4px;padding:4px 6px;pointer-events:none;white-space:pre}
 `;
 let cssInjected = false;
@@ -79,6 +82,7 @@ export class Stage {
     // floating health bars (E25) live in their own overlay above the canvas
     this.barsBox = document.createElement('div'); this.barsBox.className = 'stage-bars'; container.append(this.barsBox);
     this.bars = new Map();             // unit id -> { unit, el, hp, sh, name }
+    this.shown = new Map();            // unit id -> { hp, maxHp, shield } as of the event being replayed (E44)
     this._perf = null; this._fps = 0; this._frames = 0; this._fpsT = 0; this.quality = 'high'; this._slow = 0;
     // Spell effects (avatar-3d/js/spellfx.js). The sprite textures are fetched in the background;
     // until they land the effects draw their geometry only, so nothing waits on the network.
@@ -129,9 +133,17 @@ export class Stage {
     return this.bars.size;
   }
   /** Take every bar away (the fight is over). */
-  clearBars() { for (const b of this.bars.values()) b.el.remove(); this.bars.clear(); }
+  clearBars() { for (const b of this.bars.values()) b.el.remove(); this.bars.clear(); this.shown.clear(); }
   /** Total temporary hit points on a unit — barrier statuses plus anything marked as a shield. */
-  shieldOf(unit) { return (unit?.statuses || []).reduce((n, s) => n + (s.type === 'barrier' || s.type === 'shield' ? Math.max(0, s.power || 0) : 0), 0); }
+  shieldOf(unit) { return shieldOfUnit(unit); }
+  /**
+   * E44: draw the bars as they were when this event happened. Combat.round() resolves the whole round
+   * before main.js replays it, so the live unit is already at the end of the round; every event carries
+   * `snap` ({ id: {hp, maxHp, shield} }) and main.js hands it here as it shows the event.
+   */
+  showSnap(snap) { if (snap) for (const [id, s] of Object.entries(snap)) this.shown.set(id, s); }
+  /** The health the bars are currently showing for a unit (null outside a fight). */
+  shownOf(id) { return this.shown.get(id) || null; }
   /** Move and refill the bars. Runs every frame; there are never more than about a dozen. */
   updateBars() {
     if (!this.bars.size) return;
@@ -147,13 +159,14 @@ export class Stage {
       b.el.style.display = onScreen ? '' : 'none';
       if (!onScreen) continue;
       b.el.style.left = x + 'px'; b.el.style.top = y + 'px';
-      const max = Math.max(1, Math.round(b.unit.maxHp || 1));
-      const hp = Math.max(0, Math.min(max, Math.round(b.unit.hp || 0)));
-      const sh = Math.min(max, Math.round(this.shieldOf(b.unit)));
-      const hpPct = 100 * hp / max, shPct = Math.min(100 - hpPct, 100 * sh / max);
-      b.hp.style.width = hpPct.toFixed(1) + '%';
-      b.sh.style.width = shPct.toFixed(1) + '%';
-      b.el.classList.toggle('dead', hp <= 0);
+      // the snapshot of the event on screen, or the live unit before the first event of a fight
+      const st = barState(this.shown.get(b.unit.id) || snapUnit(b.unit));
+      b.hp.style.width = st.hpPct.toFixed(2) + '%';
+      b.hp.classList.toggle('alive', !st.dead);        // a sliver of health never draws as an empty bar
+      b.sh.style.left = st.shLeftPct.toFixed(2) + '%';
+      b.sh.style.width = st.shPct.toFixed(2) + '%';
+      b.sh.classList.toggle('over', st.overlap);       // shield on a full bar overlaps the end instead of vanishing
+      b.el.classList.toggle('dead', st.dead);
     }
   }
 

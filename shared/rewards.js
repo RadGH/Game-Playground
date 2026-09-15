@@ -89,6 +89,7 @@ export function showRewards(spec = {}, opts = {}) {
   const itemNodes = items.map((it) => {
     const rc = rarityClass(it);
     const n = el('div', { class: 'rw-item ' + rc, style: 'animation-play-state: paused' });
+    if (it.tipRender) { n.dataset.tipRender = it.tipRender; if (it.itemId) n.dataset.itemId = it.itemId; if (it.tipClass) n.dataset.tipClass = it.tipClass; }   // optional: the game's own hover card (shared/tooltip.js registerTip)
     if (TAG[rc]) n.append(el('span', { class: 'tag', text: TAG[rc] }));
     n.append(el('div', { class: 'gem', style: `background-image:url("${base}/${it.icon ? it.icon : GEM[rc] || 'rarity_common'}.svg")` }));
     n.append(el('div', { class: 'name', text: it.name || 'Item' }));
@@ -148,5 +149,5 @@ export function itemToReward(it) {
   if (it.armor) lines.push(`${it.armor} armor`);
   for (const a of it.affixes || []) { const t = typeof a === 'string' ? a : a.text || a.desc || a.name; if (t) lines.push(t); }
   if (it.legendaryEffect || it.legendaryEffectId) lines.push(it.legendaryText || 'Legendary power');
-  return { name: it.name, rarity: it.rarity, unique: !!it.isUnique, set: !!it.setId, slot: it.slotName || it.slot || it.type, lines: lines.slice(0, 3) };
+  return { name: it.name, rarity: it.rarity, unique: !!it.isUnique, set: !!it.setId, slot: it.slotName || it.slot || it.type, lines: lines.slice(0, 3), itemId: it.id || null };
 }

@@ -413,7 +413,7 @@ text, frame flourishes, embers, how-to-play, the menu overlay, tooltip cards) an
   the only record. `window.emberveil.rewardPopups = false` turns it off.
 
 ## Files
-- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/effects.js` (the effect registry — see `EFFECTS.md`), `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/talk.js`, `js/sfx-bridge.js` (sound, wraps the stage from outside), `js/rng.js`, `skillcheck.css` (the skill-check popup).
+- `index.html`, `style.css` (dark-fantasy theme), `js/main.js` (screens + flows), `js/ui.js` (themed interface helpers), `js/game.js`, `js/rules.js`, `js/combat.js`, `js/ai.js` (every combat decision, heroes and enemies — knobs in `data/ai.json`, rules in `research/ai-rules.md`), `js/effects.js` (the effect registry — see `EFFECTS.md`), `js/loot.js`, `js/stage.js` (3D stage from Party Quest + zone backdrops), `js/bars.js` (health bar maths and snapshots), `js/talk.js`, `js/sfx-bridge.js` (sound, wraps the stage from outside), `js/rng.js`, `skillcheck.css` (the skill-check popup).
 - `data/`: everything the game reads; `data/class-looks.json` = the 30 class blueprints (also in `library/data/defaults.json` as `ev_<class>` and in the 2D presets); `data/enemy-looks.json` = the 80 enemy/boss/pet/companion/hire looks (also in the library as `enemy_<id>` / `companion_<id>`).
 - `research/`: condensed notes from the original code (`rules-notes.md`, `world-notes.md`).
 - `tests/`: `loot.test.js`, `rules-combat.test.js`, `game.test.js`, `looks.test.js`, `effects.test.js`, `weapon-lines.test.js`, `bindings.test.js`, `narrator.test.js`, `revive-thanks.test.js` (node), `emberveil.spec.js`, `crossings.spec.js`, `journal-checks.spec.js` (Playwright).
@@ -1044,3 +1044,298 @@ and coming back to the town buttons does not repeat it. `woundedReport()` / `wou
 `tests/pace.test.js`, `tests/scroll-lock.test.js`, `tests/bench.test.js`, `tests/wounded.test.js`
 (node; the wounded test checks every situation over 25 seeds for braces, names and verb agreement)
 and `tests/round21.spec.js` (Playwright).
+
+## Round 22: the merchant tells the truth, one rarity colour, a working smith and enchanter, a set for every class
+
+### The merchant stayed out of date (E43)
+
+**Cause, plainly:** the merchant screen was drawn once, when you clicked Merchant, and only its own
+Buy/Sell buttons redrew it. Equipping happens in the item card, which redrew the side tabs and closed —
+nobody told the open merchant screen, so it kept the rows it was drawn with, and a card opened from
+one of those old rows read old state. Clicking Merchant again drew everything fresh, which is why
+that "fixed" it. A second bug sat next to it: pressing Equip on an item still on the merchant's
+table said "Corvin equips …" without buying or equipping anything.
+
+**Fix, at the source:** `openTownPanel(title, …nodes, redraw)` keeps the open screen's redraw and
+`renderSide()` calls it, so a buy, an equip, a sale or an upgrade anywhere redraws the merchant,
+blacksmith or enchanter screen too. Rows and cards find items where they really are each time
+(`whereIs(it)` → worn by a hero / in the bag / on the merchant's table / gone; `findItem(id)`), the
+item card shows that state, **Buy & equip** pays first when the item is still for sale, **Move to X**
+takes it off another hero, and equipping restages the party so a new held weapon shows on the stage.
+
+### The page scrollbar (E45)
+
+`.world-layout` was `height: calc(100vh - 92px)`, but the chrome around it is 105px (44px top bar,
+16px screen padding top and bottom, 29px breadcrumb): the page was always 13px taller than the
+window. Now, above 1000px wide, the body is exactly one window tall and each box is a flex child that
+takes what is left (end of `style.css`); the log, shop, tabs and map keep their own scrollbars. Checked
+at 1280×720, 1366×768 and 1920×1080 on the world screen, in town with a panel open and mid-fight. Under
+1000px the layout stacks into one column and scrolls on purpose (never sideways).
+
+### Compare cards on every item (E46)
+
+Hover any item — bag, merchant (for sale and sell lists), blacksmith, enchanter, the party tab's gear
+slots, loot names in the log, and the cards in the loot popup — and the card shows the item next to
+what the **selected hero** wears in that slot: both rings for a ring, main and off hand for a
+one-hander that fits there. A table marks every stat better (green) or worse (red), with the score;
+it says whether that hero's class can use it; and a set piece shows its set block (below). Switching
+the hero (Skills tab, Party tab, item card tabs) changes every card.
+
+One comparison serves both the hover card and the item dialog: `compareItem(it, hero, { loot, canUse,
+slotFor })` in `js/ui.js` (E4's rows moved there), rendered by `compareTipHtml()` for the tooltip and
+by `itemDialog()` for the card. The tooltip is the shared engine's `data-tip-render="item"` with
+`data-item-id`, so it is built when you hover and never shows a stale item. The loot popup
+(`shared/rewards.js`) takes an optional `tipRender` / `itemId` per card for this. There is no stash in
+this game, so there was no stash screen to add it to.
+
+### Blacksmith and enchanter (E47)
+
+In the original the blacksmith salvaged and crafted from materials and the enchanter added a property
+(three steps: item, property, material tier) or raised rarity. Here both are gold services with a
+preview; the numbers are in `data/balance.json` → `services`; the rules are in `js/loot.js`.
+
+| Service | What it does | Cost | Limit |
+|---|---|---|---|
+| Blacksmith · upgrade | quality one step (low → medium → high → elite → exotic); damage, armour, block power, barrier and an orb's spell power are recomputed from the base × `qualityMult` | `upgradeGold[to]` × `rarityCostMult[rarity]` (30/70/160/360 × 1/1.5/2.5/4) | `maxQualityByAct`: high in acts 1–2, elite in 3–4, exotic in 5–6 |
+| Blacksmith · salvage | breaks a bag item into materials (unchanged) | free | bag items only |
+| Enchanter · add property | one property from the item's affix pool into a free slot (no stat twice) | `addGold` × (1 + `addPerAffix` × slots used) × rarity | slots: normal 0, magic 2, rare 4, legendary 6 |
+| Enchanter · reroll | one property becomes a different one | `rerollGold` × `rerollGrowth`^(times this item was rerolled) × rarity | `maxRerolls` (10) per item; a unique's or set piece's fixed powers and the base item's own block/barrier cannot be rerolled |
+| Enchanter · raise rarity | normal → magic → rare → legendary, more slots | `promoteGold` (90/260/700) + 1 rare dust (to rare) or 1 legendary core (to legendary) | uniques and set pieces are already at the top |
+
+Every quote (`upgradeQuote`, `addQuote`, `rerollQuote`, `promoteQuote`) returns the cost, the item as
+it will be (`preview`) or why it cannot be done; the apply re-quotes, spends and changes the item **in
+place**, so the bag, the party tab, the stage and every card show the new one. Add and reroll roll from
+a seed made of the item id and how often it was worked on (`enchantRng`), so the preview is exactly the
+result and reopening the screen cannot fish for a better roll. Generated names follow the work
+("Sharp Longsword" → "Sharp Longsword of Vitality"); uniques, set pieces and named items keep theirs.
+The screens: pick an item from the list (the bag, then what the party wears) → the preview shows
+before → after (damage, armour, quality, rarity, name, score, sell price) → confirm. Each action is
+written in the log, refreshes the wearer's stats and saves the game.
+
+### One rarity colour (E48)
+
+**Cause, plainly:** there were two rules for "what colour is this item". The loot popup and every gem
+icon asked "is it a set piece?" first and used the teal set colour; the bag, merchant, tooltips, item
+card and log coloured the name by `it.rarity` — and a set piece's rarity is `legendary`, so its name
+came out orange next to a teal gem. Uniques had the same split (gold gem in the bag, orange gem in the
+popup, orange name, red-orange in the popup). On top of that the set colour in `style.css` was green
+(`#45d07a`) while the set gem is teal.
+
+**Fix:** one table, `data/items.json` → `rarityColors` + `rarityGems`, applied to the page at start
+(`setRarityTable()` in `js/ui.js` writes `--normal … --set`; `style.css` holds the same values as
+fallbacks). One key per item: `set` if it has a set, else `unique`, else its rarity — the same
+`rarityClass()` the loot popup uses. Every name goes through `itemNameHtml(it)` and every gem through
+`gemHtml(it)`. A set piece shows the teal set colour for its name, with "set piece · legendary" as its
+label.
+
+| key | colour | gem |
+|---|---|---|
+| normal | `#c9c2b6` grey | common |
+| magic | `#7f95ff` blue | rare (blue) |
+| rare | `#e8d020` yellow | unique (gold) |
+| legendary | `#ff8020` orange | legendary |
+| unique | `#ff5a3c` red-orange | legendary |
+| set | `#2fc4b2` teal | set (teal) |
+
+### A set for every class (E49)
+
+54 sets now (28 before). 26 new class sets, built by `tools/build-emberveil-sets.py` (safe to run more
+than once; it replaces the sets marked `classSet` and keeps the rest), plus the four ported sets that
+already fitted a class tagged with it (Paladin's Oath, Cleric's Vigil, Apprentice's Initiation, Shadow
+Adept). Every set has `classes`; every weapon piece is one its class can use; every class-set piece has
+its own name ("Longwatch Hood").
+
+| Class | Set | Tier | Pieces | Full-set power (+ earlier power) |
+|---|---|---|---|---|
+| Warrior | Bloodforged Vanguard | mid | 4 | rally_on_kill |
+| Fighter | Drillmaster's Discipline | low | 3 | speed_combat_init |
+| Ranger | Longwatch Stalker | mid | 4 | critical_armorpen |
+| Bard | Tavern Choir | low | 2 | rally_on_kill |
+| Necromancer | Gravewright's Shroud | mid | 5 | curse_spreads (4: kill_party_heal) |
+| Warlock | Pactbinder's Regalia | mid | 3 | low_mana_shockwave |
+| Demon Hunter | Hellwarden's Mark | mid | 4 | strip_modifier |
+| Scavenger | Ragpicker's Fortune | low | 3 | road_cache |
+| Swashbuckler | Corsair's Flourish | low | 3 | crit_bleed_5 |
+| Dragon Knight | Wyrmsworn Panoply | endgame | 6 | dragon_fury_breath (4: burn_extend) |
+| Pyromancer | Cinderheart Vestments | mid | 4 | burn_extend |
+| Stormcaller | Tempest Crown | endgame | 5 | echo_cast (4: mage_missile_aoe) |
+| Druid | Grovekeeper's Bark | mid | 3 | camp_mend |
+| Oracle | Seer's Veiled Sight | low | 4 | cheat_death_once |
+| Tactician | Marshal's Campaign | mid | 5 | rally_on_kill (4: speed_combat_init) |
+| Chronomancer | Hourglass Reliquary | endgame | 4 | echo_cast |
+| Monk | Stillwater Wraps | low | 3 | speed_combat_init |
+| Shaman | Spiritcaller's Totems | mid | 4 | kill_party_heal |
+| Witch Hunter | Inquisitor's Brand | mid | 3 | strip_modifier |
+| Knight | Oathbound Bulwark | endgame | 6 | cheat_death_once (4: kill_party_heal) |
+| Sorcerer | Wildblood Mantle | low | 2 | low_mana_shockwave |
+| Runesmith | Anvilsong Runes | mid | 5 | critical_armorpen (4: rally_on_kill) |
+| Shadow Dancer | Duskveil Silks | mid | 4 | crit_bleed_5 |
+| Tinker | Cogwright's Harness | low | 4 | companion_might |
+| Priest | Lightbearer's Cassock | endgame | 5 | cheat_death_once (4: kill_party_heal) |
+| Enchanter | Mesmer's Silkwork | low | 3 | mana_on_attack |
+
+**Bonuses that actually work.** Thresholds are 2/3/4/6 pieces (a 5-piece set tops out at 5). A set
+bonus reaches the hero through `loot.equipmentBonuses()` → `rules.derive()`, which handles plain stats
+and only those `cond_*` / barrier keys that have a `derive` hook in `js/effects.js` (barrier,
+barrierRegen, cond_dotDmgReduce, cond_thornsFlat, cond_skillMpCostReduce). Combat hooks such as
+`cond_hpOnKill` are only read from item properties, so the new sets put those on a piece's fixed
+properties instead. A mid-set power is `thresholdPowers: { "4": "<legendary id>" }`, switched on by
+`loot.legendaryEffects()`; the full-set power is `legendaryEffect` as before. `tests/sets.test.js`
+checks all of that for every class set.
+
+**They drop now.** The per-drop set chance was 0.025, but it is only rolled after a kill already
+dropped something (`loot.zoneDrop`), so it was about 0.4% per kill: in 100 simulated runs, 0.18 set
+pieces in the whole of act 1. `data/balance.json` → `loot.setChance` is now **0.18** of zone drops.
+`loot.classSetShare` (0.6) of set drops come from the sets made for a class in the party, from this
+act's tier or an easier one (`loot.partyClasses`, set by `startWorld()`); the rest are any set of the
+act's tier (low: acts 1–2, mid: 3–4, endgame: 5–6). Set pieces per run, per act (kills per act from
+the simulator, rolled 400 times in `tests/sets.test.js`): **act 1 ≈ 1.9, act 2 ≈ 1.6, act 3 ≈ 2.6,
+act 4 ≈ 2.3, act 5 ≈ 2.5, act 6 ≈ 2.2.**
+
+**Where you see them.** Loot lines say "(set piece — Longwatch Stalker, 4 pieces)"; item rows show
+"◆ Longwatch Stalker 1/4" (pieces the selected hero wears); every card has the set block — pieces
+(ticked when worn), each threshold with its bonus and power, lit when on and marked "with this" when
+this item would switch it on; the Party tab has a chip per worn set with the same block on hover.
+
+### Tests added this round
+
+Node: `tests/services.test.js` (every service: preview = result, gold, caps, fixed powers, names),
+`tests/rarity.test.js` (items.json, style.css, ui.js and the loot popup agree; set colour matches the
+set gem; one key per item; compareItem rows, rings and set progress) and new cases in
+`tests/sets.test.js` (a set per class and wearable, thresholds and working bonuses, threshold powers
+in derive, class-weighted drops, drops per act). Playwright: `tests/round22.spec.js` (E43 buy + equip
++ reopen + Buy & equip + sell; E45 page height at three sizes in world / town / fight; E46 compare
+cards in bag, loot popup, merchant and blacksmith, both rings, set block, class use, hero switch; E47
+blacksmith upgrade + enchanter add / reroll / raise rarity with exact costs and previews; E48 the same
+colour and gem for a set piece, a unique and a rare in bag, tooltip, card, log, shop, loot popup and
+party tab).
+
+## Round 22: the party fights like it means it (E42), and the health bars stop running ahead (E44)
+
+### Combat AI (E42)
+
+The user: a cleric left a dying ally alone and swung a mace. The old picker was a short chain of ifs
+with two dice rolls in it (80% "use the best damage skill", 50% "use any skill"), a random target for
+every hero swing, and random spells for enemies. The original game had far more rules — every one of
+them, with its source line and where it lives now, is in **`research/ai-rules.md`**.
+
+Every decision now goes through **`js/ai.js`**, with its knobs in **`data/ai.json`**. Each option a
+unit has (every usable skill at every sensible target, and a basic attack at every foe) is scored in
+health points, and the highest score wins:
+
+- **Damage** is what would really land: the game's own skill formula, hit chance, armour or magic
+  resist, block, the 1 / 0.8 / 0.6 spread across targets, execute and "vs undead" bonuses, skill hooks —
+  capped at what the target has left, so overkill is thrown away.
+- **Finishing** a target is worth its output for `focus.killRounds` rounds; healers, casters, a
+  channelling enemy, champions and named enemies are worth more; a boss is worth less while its adds
+  stand; a sleeping enemy is left alone while anything else is awake; a hit that would interrupt a
+  channelled spell gets a bonus.
+- **Healing** only counts what lands. Healers heal under `heal.threshold` (65%), anyone with a heal
+  under `heal.emergency` (35%), nobody at `heal.never` (85%) or above. Lower health is more urgent;
+  tanks and healers are worth protecting more, companions less; the heal that fits the missing amount
+  wins; a heal that would mostly overheal is skipped; a party heal gets a bonus once three allies are
+  under 60%. Revives come first, weighted by who is down. Cleanses are priced by what the statuses cost.
+- **Healers keep mana** for their cheapest heal and never spend below it on anything else.
+- **Area skills** that cost mana must reach at least two enemies and beat the best single-target
+  option by 10%; the group or row that scores highest is the one aimed at.
+- **Tanks taunt** when a healer, caster or hurt ally was attacked last round.
+- **Buffs** are priced by the damage they add or prevent over three rounds, worth more in the first two
+  rounds and against bosses, champions and named enemies, worth little when the fight is nearly won,
+  and never recast while they run. Shields are worth more while an enemy channels.
+- **Statuses** are priced by the share of the target's output they take away, so crowd control goes to
+  the biggest threat; nothing is reapplied to a target that already has it.
+- **Enemies** roll their spell chance as before, but then pick the spell and target worth most, and
+  swing instead of casting a spell that would do nothing. Their basic attacks keep the original
+  formation (taunts, then companions, then the front of the party); `enemy.focusAttacks` turns on
+  scored targeting for them too.
+
+Every decision carries a short reason. It is written onto the event (`ev.why`, `ev.whyRule`), kept in
+`combat.decisions`, and shown in the log after the skill name — "Mirelle uses Heal — heals Corvin (32%
+health)." Add `?aiwhy=1` to the address (or set `localStorage['ev2.aiwhy'] = '1'`) to see the reason
+behind every basic attack as well.
+
+`decideHero(C, unit)` / `decideEnemy(C, unit, { spells })` are pure: they read the fight and return a
+plan (`{ kind, skill, target, ally, value, rule, reason, skipped }`); `combat.js` carries it out
+(`cast(caster, skill, foes, allies, plan)` and `resolveSpell(..., plan)` aim where the plan says).
+Skill hooks that roll dice are read at their average through a copy of the fight whose dice always
+land on 0.5, so asking for a decision never changes how a fight turns out.
+
+### Health bars (E44)
+
+**The cause.** `Combat.round()` works out a whole round in one go, and `main.js` then spends a few
+seconds replaying its events: walking, swinging, projectiles, floating numbers. The floating bars read
+the live unit every frame, and the live unit was already at the *end* of the round. So an enemy that
+was going to die at the end of the round showed an empty bar while the two or three hits before its
+death were still being played. Nothing was actually protecting it — the bar was just ahead of the
+animation. Every health multiplier (act, party size, boss, champion, named, night raid, NG+) scales
+health and max health together, so that was not it.
+
+**The fix.** Every combat event now carries a snapshot of the bars it touches (`ev.snap` =
+`{ unitId: { hp, maxHp, shield } }`, taken the moment the event happens); a new `sync` event carries
+every unit after each turn and after the start-of-round ticks, for health that moves without an event
+of its own (hero regeneration, temporary health). `main.js` hands each snapshot to
+`stage.showSnap()` as it shows the event — a damage number's snapshot only when its projectile lands —
+and `stage.updateBars()` draws that instead of the live number. The bar maths live in **`js/bars.js`**
+(no three.js, so node tests use it).
+
+Smaller things fixed along the way:
+- A shield on a full-health unit was clipped to nothing on the floating bar; it now slides back over the
+  end of the health fill. Health above max (a battle cry's temporary health) shows as shield instead of
+  hiding behind a full bar.
+- The Party tab's health bar also read the live unit mid-replay; it now shows the stage's snapshot
+  during a fight. Its shield segment never showed at all (`.bar i` is a block, so the segment sat on a
+  second line inside an 8px bar); it is positioned over the bar now.
+- A living unit's bar keeps a 2px sliver, so 1 health out of 1520 never looks empty.
+- The bar slides over a fixed 0.15s instead of 0.18s × the combat-speed factor (up to 0.72s at 1x,
+  long enough to still be moving when the next hit landed).
+- **Soul Link never shared anything:** the status writes `share: 0.5` as a number, and `statusSum()` only
+  adds hook functions, so the share was always 0. `applyDamage()` now reads the number. Nothing in the
+  current data applies Soul Link, so balance is unaffected.
+
+### Simulator before and after
+
+Old AI (`js/combat.js` as committed) and new AI on **the same current tree** — same data, including
+round 22's `loot.setChance` 0.18 and the 26 class sets — 100 runs per seed, run side by side:
+
+| | old AI, seed 1 | new AI, seed 1 | old AI, seed 2 | new AI, seed 2 |
+|---|---|---|---|---|
+| act 1 cleared | 88% | **98%** | 86% | **98%** |
+| act 2 cleared | 71% | **94%** | 71% | **90%** |
+| act 3 cleared | 53% | **75%** | 56% | **70%** |
+| act 4 cleared | 39% | **53%** | 47% | **54%** |
+| act 5 cleared | 22% | **36%** | 31% | **44%** |
+| full clears (all six acts) | 12% | **19%** | 18% | **29%** |
+| party wipes per run | 2.8 | 2.6 | 2.5 | 2.3 |
+| night raids that wiped the party | 7.6% | 4.9% | 6.8% | 3.7% |
+| rounds per fight | 11.8 | 11.4 | 12.0 | 10.9 |
+
+The better AI makes the party clearly stronger: full clears roughly 1.6× (19% and 29% against a
+10–15% target) and act 1 at 98% against an 85–90% target. **balance.json was not retuned in this
+task** — that is the next balance pass. Note the old-AI numbers on seed 2 already sit above the target
+with the round 22 set drops, before the AI change. The simulator is also slower with the new AI
+(~160s against ~80s for 100 runs): every option is scored every turn. Passing `snapshots: false` in
+the Combat context skips the health-bar snapshots, which is about a quarter of the extra time.
+
+Two bugs found while testing this round, both in code added for E42/E44 and fixed before the numbers
+above: hit memory (`_lastHit` / `_lastTarget`) made a hero and an enemy point at each other, so
+`Game.save()` hit a circle and the save silently failed (the fields are now hidden from JSON); and a
+trailing comment had swallowed `round()`'s end-of-fight check after the start-of-round ticks, so a
+party wiped by poison would have sat through empty rounds to the 50-round timeout.
+
+### Tests added this round (E42, E44)
+
+`tests/ai.test.js` (18 tests): data/ai.json matches the fallback; a cleric heals a 25% ally instead of
+attacking, with the reason on the event; the lowest ally first and a tank before a companion; a party
+heal with three allies under 60% (a single heal with one); no heal on a full or 90% party; an area skill
+on four clumped enemies but not on one; no mana spent finishing a dying lone enemy; finishing, focusing
+an enemy healer, interrupting a channelled spell; leaving a sleeping enemy alone; a tank taunting when
+the healer is attacked (and the enemy then attacking the tank); a healer keeping heal mana; revive
+first; cleanse the stunned ally; a party buff early and not recast; enemies not recasting a curse,
+healing only the hurt, respecting a taunt, silencing the caster; a real fight where every hero skill
+has a reason. `tests/hp-bars.test.js` (5 tests): the bar maths; an enemy scaled through every
+multiplier starts on an exactly full bar; every damage path (attack, skill, damage over time, thorns,
+chain, Soul Link, barrier, heal, regeneration, enemy spell, kill, temporary health) moves the bar by
+exactly the number the event reports at the moment it reports it; replaying real rounds shows the start
+of the round before the replay and the true end after it. `tests/effects.test.js`: the
+`legendary:critical_armorpen` probe casts four times instead of three — heroes no longer swing at a
+random target, so the probe's own casts have to land on an armour-stripped enemy.

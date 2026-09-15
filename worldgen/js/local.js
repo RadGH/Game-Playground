@@ -51,6 +51,9 @@ export function generateRegionDetail(world, regionId, opts = {}) {
   const w = cw * factor, h = ch * factor, N = w * h;
 
   const seed = subSeed(world.seed, 'region-detail-' + regionId);
+  // a dry world stays dry at every zoom, and an uninhabited one grows no camps, shrines or paths
+  const dry = world.opts?.liquid === 'none';
+  const settled = world.opts?.inhabited !== false;
   const rng = makeRng(seed);
   const n1 = makeNoise2D(subSeed(seed, 'd1')), n2 = makeNoise2D(subSeed(seed, 'd2')), n3 = makeNoise2D(subSeed(seed, 'd3'));
 
@@ -78,13 +81,13 @@ export function generateRegionDetail(world, regionId, opts = {}) {
     magic[i] = sampleLayer(world, world.magic, fx, fy);
     regionArr[i] = sampleNearest(world, world.region, fx, fy);
     const parentWater = world.water[parentCell[i]];
-    water[i] = elevation[i] < 0.5 ? (parentWater === 2 ? 2 : 1) : 0;
+    water[i] = dry ? 0 : elevation[i] < 0.5 ? (parentWater === 2 ? 2 : 1) : 0;
   }
 
   // streams: the same drainage model at the finer scale, plus the world's own rivers carved in
   const flow = new Float32Array(N);
   const streams = [];
-  if (opts.streams !== false) {
+  if (opts.streams !== false && !dry) {
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const i = IDX(w, x, y);
       if (water[i] === 0 && world.river[parentCell[i]]) elevation[i] = Math.min(elevation[i], 0.5 + (elevation[i] - 0.5) * 0.55);
@@ -161,7 +164,7 @@ export function generateRegionDetail(world, regionId, opts = {}) {
 
   // a handful of small places that only exist at this zoom
   if (opts.extras !== false) {
-    const namer = new Namer({ namegen: opts.namegen, seed });
+    const namer = new Namer({ namegen: opts.namegen, seed, theme: world.opts?.nameTheme ?? null });
     const small = [
       { kind: 'camp', tags: ['camp'], test: c => c.open && c.habit > 0.4 },
       { kind: 'shrine', tags: ['shrine'], test: c => c.magic > 0.35 || c.aura < -0.2 },
@@ -176,7 +179,7 @@ export function generateRegionDetail(world, regionId, opts = {}) {
       if (water[i] !== 0) continue;
       const b = BIOMES[biome[i]];
       const c = { open: b.tags.includes('open'), forest: b.tags.includes('forest'), habit: b.habit ?? 0.3, slope: slope[i], aura: aura[i], magic: magic[i] };
-      const kinds = small.filter(s => s.test(c));
+      const kinds = small.filter(s => (settled || s.kind === 'cave' || s.kind === 'ruin') && s.test(c));
       if (!kinds.length) continue;
       const pick = rng.pick(kinds);
       const x = i % w, y = (i / w) | 0;
@@ -191,7 +194,7 @@ export function generateRegionDetail(world, regionId, opts = {}) {
   }
 
   // paths between the places in view
-  if (opts.paths !== false && detail.nodes.length > 1) {
+  if (opts.paths !== false && settled && detail.nodes.length > 1) {
     const cost = new Float32Array(N);
     for (let i = 0; i < N; i++) cost[i] = water[i] !== 0 ? Infinity : (BIOMES[biome[i]].move ?? 1.5) * (1 + slope[i] * 3) + (detail.river[i] ? 5 : 0);
     const hubs = detail.nodes.filter(n => n.type === 'settlement' || n.type === 'port' || n.local);
@@ -222,6 +225,7 @@ const FEATURE_SETS = {
   cold: [['rock', 8], ['pine', 3]],
   cursed: [['deadtree', 18], ['bones', 8], ['rock', 6], ['ruinblock', 3]],
   magic: [['crystal', 14], ['rock', 6], ['bush', 4]],
+  bare: [['rock', 14], ['boulder', 6]],          // a dry, dead world: nothing grows and nothing died here
 };
 function featureSetFor(biomeKey) {
   const b = BIOMES.find(x => x.key === biomeKey) || BIOMES[5];
@@ -252,6 +256,7 @@ export function generateLocalDetail(world, wx, wy, opts = {}) {
   const aura = new Float32Array(N), magic = new Float32Array(N), water = new Uint8Array(N), biome = new Uint8Array(N);
   const slope = new Float32Array(N), flow = new Float32Array(N), river = new Uint8Array(N);
   const parentBiome = BIOMES[world.biome[wi]];
+  const tileDry = world.opts?.liquid === 'none';
 
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const i = IDX(size, x, y);
@@ -265,10 +270,10 @@ export function generateLocalDetail(world, wx, wy, opts = {}) {
     moisture[i] = clamp(sampleLayer(world, world.moisture, fx, fy) + (fbm(n2, x * 0.09 + 9, y * 0.09 + 4, { octaves: 3 }) - 0.5) * 0.2, 0, 1);
     aura[i] = sampleLayer(world, world.aura, fx, fy);
     magic[i] = sampleLayer(world, world.magic, fx, fy);
-    water[i] = elevation[i] < 0.5 ? (world.water[wi] === 2 ? 2 : 1) : 0;
+    water[i] = tileDry ? 0 : elevation[i] < 0.5 ? (world.water[wi] === 2 ? 2 : 1) : 0;
   }
   // a stream crosses the tile if the world cell carries a river
-  if (world.river[wi]) {
+  if (world.river[wi] && !tileDry) {
     const amp = size * 0.18, mid = size / 2;
     const horizontal = rng() < 0.5;
     for (let t = 0; t < size; t++) {
@@ -296,7 +301,7 @@ export function generateLocalDetail(world, wx, wy, opts = {}) {
   }
 
   // scatter props suited to the biome
-  const set = featureSetFor(parentBiome.key);
+  const set = tileDry && !parentBiome.tags.includes('magic') ? FEATURE_SETS.bare : featureSetFor(parentBiome.key);
   const total = set.reduce((s, [, n]) => s + n, 0);
   const density = (opts.density ?? 1) * (world.water[wi] === 0 ? 1 : 0.2);
   const count = Math.round(total * 4.5 * density * (size / 64) ** 2);

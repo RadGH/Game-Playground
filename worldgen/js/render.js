@@ -8,6 +8,7 @@
 //   renderWorld(ctx, world, { layers: { biomes: true, rivers: true, roads: true, nodes: true, labels: true } });
 
 import { BIOMES, RAMPS, rampColor, hexToRgb, mixHex, palettedColors } from './biomes.js';
+import { DEFAULT_RELIEF, elevationToMetres, formatMetres, hasSea } from './relief.js';
 
 export const DEFAULT_LAYERS = { biomes: true, hillshade: true, rivers: true, roads: true, nodes: true, labels: true, regions: false, borders: true, aura: false, elevation: false, temperature: false, moisture: false, drainage: false };
 
@@ -46,6 +47,8 @@ export function worldPixels(world, opts = {}) {
   const BIOME_RGB = palette ? palettedColors(palette).map(b => hexToRgb(b.color)) : BASE_BIOME_RGB;
   const tintSpec = opts.atmosphereTint !== undefined ? opts.atmosphereTint : world.opts?.atmosphereTint;
   const tint = tintSpec ? normTint(tintSpec) : null;
+  // a world with no sea (a dry moon, a lava plain) should not paint its low ground ocean blue
+  const elevRamp = hasSea(world) ? RAMPS.elevation : (RAMPS.elevationDry || RAMPS.elevation);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const i = y * w + x;
     let r, g, b;
@@ -60,7 +63,7 @@ export function worldPixels(world, opts = {}) {
       }
     } else {
       let t, ramp;
-      if (layer === 'elevation') { t = world.elevation[i]; ramp = RAMPS.elevation; }
+      if (layer === 'elevation') { t = world.elevation[i]; ramp = elevRamp; }
       else if (layer === 'temperature') { t = world.temperature[i]; ramp = RAMPS.temperature; }
       else if (layer === 'moisture') { t = world.moisture[i]; ramp = RAMPS.moisture; }
       else if (layer === 'drainage') { t = Math.min(1, Math.log10(1 + world.flow[i]) / 3.2); ramp = RAMPS.drainage; }
@@ -136,6 +139,8 @@ const NODE_STYLE = {
   pass: { r: 2.4, fill: '#d8d2c4', stroke: '#2a2a2a', shape: 'cross' },
   bridge: { r: 2.2, fill: '#cbbfa6', stroke: '#2a2a2a', shape: 'cross' },
   ford: { r: 2.0, fill: '#bcd4dd', stroke: '#2a2a2a', shape: 'cross' },
+  crater: { r: 3.0, fill: '#a09a90', stroke: '#2a2622', shape: 'circle' },
+  vent: { r: 2.8, fill: '#ffb06a', stroke: '#3a1e0e', shape: 'diamond' },
 };
 export function nodeStyle(kind) { return NODE_STYLE[kind] || { r: 2.4, fill: '#ddd', stroke: '#222', shape: 'circle' }; }
 
@@ -197,7 +202,7 @@ export function renderWorld(ctx, world, opts = {}) {
   const X = x => ox + (x + 0.5) * scale, Y = y => oy + (y + 0.5) * scale;
 
   // region borders
-  if (layers.borders && world.region) {
+  if (layers.borders && world.region && world.opts?.inhabited !== false) {
     const mask = borderMask(world);
     ctx.fillStyle = 'rgba(12,14,20,0.45)';
     for (let y = 0; y < world.height; y++) for (let x = 0; x < world.width; x++) {
@@ -402,8 +407,44 @@ export function renderLocal(ctx, tile, opts = {}) {
   return { scale, ox, oy };
 }
 
+/**
+ * The elevation legend as real height bands, in metres on the world's own relief scale.
+ * Each row: { color, label, share, from, to, depth }. Bands with no cells in them are left out.
+ * Depth bands ("0–2,100 m deep") only appear on a world with a sea; a dry world measures its low
+ * ground from its datum instead ("−2,100 to 0 m").
+ */
+export function elevationLegend(world) {
+  const relief = world.relief || DEFAULT_RELIEF;
+  const sea = hasSea(world);
+  const ramp = sea ? RAMPS.elevation : (RAMPS.elevationDry || RAMPS.elevation);
+  const cuts = [0, 0.25, 0.5, 0.625, 0.75, 0.875, 1];
+  const counts = new Array(cuts.length - 1).fill(0);
+  const N = world.elevation.length;
+  for (let i = 0; i < N; i++) {
+    const e = world.elevation[i];
+    let k = 0;
+    while (k < counts.length - 1 && e >= cuts[k + 1]) k++;
+    counts[k]++;
+  }
+  const plain = n => Math.abs(Math.round(n)).toLocaleString('en-US');
+  const rows = [];
+  for (let k = 0; k < counts.length; k++) {
+    if (!counts[k]) continue;
+    const lo = cuts[k], hi = cuts[k + 1];
+    const from = elevationToMetres(lo, relief), to = elevationToMetres(hi, relief);
+    const depth = sea && hi <= 0.5;
+    let label;
+    if (depth) label = `${plain(-to)}–${plain(-from)} m deep`;
+    else if (from >= 0) label = `${plain(from)}–${plain(to)} m`;
+    else label = `${formatMetres(from)} to ${formatMetres(to)} m`;
+    rows.push({ color: rampColor(ramp, (lo + hi) / 2), label, share: counts[k] / N, from, to, depth });
+  }
+  return rows;
+}
+
 /** Legend rows for whatever layer is showing — the viewer renders these as swatches. */
 export function legend(world, layerName = 'biomes') {
+  if (layerName === 'elevation') return elevationLegend(world);
   if (layerName === 'biomes') {
     const seen = new Map();
     for (let i = 0; i < world.biome.length; i++) seen.set(world.biome[i], (seen.get(world.biome[i]) || 0) + 1);

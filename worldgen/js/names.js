@@ -74,7 +74,92 @@ const LANDMARK_SHAPES = {
   port:        ['{W} {~Harbour|Quay|Landing|Anchorage}'],
   bridge:      ['{W} {~Bridge|Span|Crossing|Ford}'],
   camp:        ['the {W} {~Camp|Muster|Staging}'],
+  crater:      ['the {W} Crater', '{W} Basin', 'the {W} Pit'],
+  vent:        ['the {W} {~Vents|Fumaroles|Smokers}'],
 };
+
+// ---------------------------------------------------------------- body themes
+// A dead moon should not have a "Silver Fen". A theme gives a world a vocabulary: the landform words
+// its regions are named with, the concept tags its plain words come from, and the words it must never
+// use. Themes are off by default (`nameTheme: null`), so World Forge's own worlds name exactly as before.
+
+/** Words that mean liquid water, or ground that only exists beside it. */
+export const WATER_WORDS = ['fen', 'fens', 'marsh', 'marshes', 'mire', 'mires', 'mere', 'meres', 'lake', 'lakes', 'loch', 'tarn', 'tarns', 'pool', 'pools', 'pond', 'ponds', 'river', 'rivers', 'brook', 'brooks', 'stream', 'streams', 'creek', 'water', 'waters', 'wet', 'rain', 'rains', 'tide', 'tides', 'sea', 'seas', 'ocean', 'oceans', 'bay', 'gulf', 'harbour', 'harbor', 'quay', 'anchorage', 'spring', 'springs', 'well', 'wells', 'falls', 'cascade', 'ford', 'fords', 'shallows', 'sound', 'narrows', 'bight', 'deeps', 'main', 'mainland', 'swamp', 'swamps', 'bog', 'bogs', 'isle', 'isles', 'island', 'islands', 'shore', 'shores', 'coast', 'coasts', 'mud', 'muddy', 'run', 'runs'];
+/** Wet ground only — for a world that has seas but should not have marshes (a desert). */
+export const WETLAND_WORDS = ['fen', 'fens', 'marsh', 'marshes', 'mire', 'mires', 'bog', 'bogs', 'swamp', 'swamps', 'reed', 'reeds'];
+/** Words that say somebody lives, rules or builds here. */
+export const WILD_WORDS = ['kingdom', 'principality', 'protectorate', 'dominion', 'holdfast', 'freehold', 'realm', 'throne', 'crown', 'empire', 'barony', 'duchy', 'county', 'shire', 'republic', 'league', 'march', 'marches', 'hold', 'keep', 'stead', 'haven', 'town', 'burg', 'burgh', 'gate', 'tower', 'watch', 'market', 'bridge', 'road', 'inn', 'abbey', 'temple'];
+/** Words that mean living, growing or tended things. */
+export const LIFE_WORDS = ['wood', 'woods', 'forest', 'forests', 'grove', 'groves', 'thicket', 'weald', 'moss', 'mossy', 'briar', 'briars', 'thorn', 'thorns', 'leaf', 'leaves', 'bloom', 'blossom', 'flower', 'flowers', 'meadow', 'meadows', 'garden', 'gardens', 'green', 'grass', 'reed', 'reeds', 'fern', 'ferns', 'vine', 'vines', 'oak', 'oaks', 'willow', 'birch', 'pine', 'pines', 'root', 'roots', 'farm', 'farms', 'field', 'fields', 'orchard', 'hearth', 'heartwood', 'wolf', 'wolves', 'raven', 'ravens', 'boar', 'deer', 'fish', 'bird', 'birds', 'herd', 'herds', 'nest', 'den', 'warren', 'lair', 'rose', 'roses', 'ivy', 'elm', 'fox', 'bat', 'bats', 'bear', 'bears', 'hound', 'hounds', 'stag', 'lion', 'ox', 'eagle', 'hawk', 'owl', 'crow', 'serpent', 'snake', 'horse', 'bull', 'goat', 'hart', 'hare', 'lamb', 'sheep', 'cat'];
+/** Stems also caught inside compounds ("Silvermere", "Mistwood") — only when they are in the forbidden set. */
+const COMPOUND_STEMS = ['mere', 'water', 'wood', 'brook', 'fen', 'mire', 'marsh', 'moss', 'reed', 'grove', 'lake', 'river', 'tide', 'rain', 'fern', 'leaf', 'thorn', 'briar', 'vine', 'meadow', 'pool', 'pond', 'sea', 'bay', 'spring', 'field', 'farm', 'forest', 'swamp', 'bog', 'isle', 'shore', 'pine', 'ivy', 'rose', 'oak', 'elm', 'fox', 'bat', 'bear', 'stag', 'hound', 'serpent', 'hold', 'keep', 'stead', 'haven', 'town', 'burg', 'gate', 'tower', 'watch', 'shire', 'crown', 'market', 'bridge'];
+const WORD_LISTS = { water: WATER_WORDS, life: LIFE_WORDS, wetland: WETLAND_WORDS, wild: WILD_WORDS };
+
+export const NAME_THEMES = {
+  dead:    { forbid: ['water', 'life', 'wild'], tags: 'stone,metal,hard,element,dark,quality', landforms: ['Basin', 'Flats', 'Scarp', 'Plateau', 'Craters', 'Rille', 'Wastes', 'Shelf', 'Expanse', 'Scar', 'Highlands', 'Plain', 'Terraces', 'Barrens'] },
+  ice:     { forbid: ['water', 'life', 'wild'], tags: 'stone,hard,weather,element,quality,dark', landforms: ['Icefield', 'Glacier', 'Shelf', 'Plateau', 'Sheet', 'Rime', 'Expanse', 'Crevasses', 'Drifts', 'Flats', 'Highlands', 'Cap'] },
+  lava:    { forbid: ['water', 'life', 'wild'], allow: ['sea', 'seas', 'ocean', 'gulf', 'bay', 'lake', 'lakes', 'river', 'rivers', 'deeps', 'falls', 'narrows', 'main', 'isle', 'isles', 'island', 'islands', 'shore', 'shores', 'coast', 'run', 'runs'], tags: 'element,stone,metal,dark,hard,quality', landforms: ['Calderas', 'Ashfield', 'Cinders', 'Scoria', 'Flats', 'Burn', 'Scar', 'Plateau', 'Rift', 'Wastes', 'Highlands', 'Cones'] },
+  crystal: { forbid: ['water', 'life', 'wild'], tags: 'stone,hard,metal,quality,element', landforms: ['Facets', 'Spires', 'Shelf', 'Plateau', 'Lattice', 'Expanse', 'Flats', 'Highlands', 'Scar', 'Wastes', 'Prisms'] },
+  void:    { forbid: ['water', 'life', 'wild'], tags: 'dark,abstract,stone,element,quality', landforms: ['Wastes', 'Scar', 'Hollow', 'Rift', 'Expanse', 'Flats', 'Shelf', 'Barrens', 'Verge', 'Plateau'] },
+  desert:  { forbid: ['life', 'wetland', 'wild'], tags: 'stone,element,weather,quality,dark', landforms: ['Sands', 'Barrens', 'Pan', 'Mesas', 'Dunes', 'Flats', 'Scarp', 'Wastes', 'Expanse', 'Badlands'] },
+  toxic:   { forbid: ['life', 'wild'], tags: 'element,dark,quality,stone', landforms: ['Wastes', 'Flats', 'Basin', 'Scar', 'Barrens', 'Expanse', 'Lowlands', 'Highlands', 'Sinks'] },
+  // a tidally locked world: seas, rivers and something growing in the twilight ring, but nobody's kingdom
+  twilight: { forbid: ['wild'], tags: 'weather,element,landform,dark,quality', landforms: ['Verge', 'Reach', 'Flats', 'Highlands', 'Basin', 'Scarp', 'Shelf', 'Expanse', 'Lowlands', 'Downs', 'Vale', 'Moor', 'Hollow', 'Barrens'] },
+};
+
+/** Plain words that fit any theme — the last resort when rolled names keep hitting forbidden words. */
+const SAFE_PLAIN = ['ash', 'amber', 'bleak', 'cinder', 'dusk', 'ember', 'frost', 'gale', 'glim', 'grey', 'hollow', 'iron', 'north', 'quill', 'salt', 'shale', 'sable', 'stone', 'storm', 'silent', 'pale', 'black', 'copper', 'glass', 'dust', 'rust', 'shard', 'cold', 'far'];
+/** The noun a last-resort name ends in, per feature or landmark kind. */
+const SAFE_NOUN = { range: 'Ridges', pass: 'Gap', continent: 'Expanse', sea: 'Lava Sea', ocean: 'Lava Ocean', lake: 'Caldera', river: 'Lava Run', bay: 'Slag Bay', isle: 'Outcrops', marsh: 'Sinks', forest: 'Stands', desert: 'Barrens', ruin: 'Ruin', cave: 'Cave', crater: 'Crater', vent: 'Vents', volcano: 'Cone', monolith: 'Stones', dungeon: 'Vault', tower: 'Spire', shrine: 'Altar', camp: 'Camp' };
+
+/** Feature shapes for a world with no water (only a lava world has the liquid ones, and they are molten). */
+const THEMED_FEATURE = {
+  continent: ['{W}', 'the {W} {~Expanse|Shield|Plateau|Uplands}'],
+  sea:    ['the {W} {~Lava Sea|Magma Deeps|Fire Gulf}', 'the Burning {W}'],
+  ocean:  ['the {W} {~Lava Ocean|Magma Main}', 'the {~Great|Endless|Molten} {W}'],
+  lake:   ['the {W} {~Caldera|Crucible|Cauldron}', '{W} Fire Lake'],
+  river:  ['the {W} {~Lava Run|Flow|Burn}', '{w}burn'],
+  bay:    ['the {W} {~Fire Bight|Slag Bay}'],
+  isle:   ['the {W} {~Outcrops|Cinder Isles}', '{W} Outcrop'],
+  marsh:  ['the {W} {~Slag|Sinks}'],
+  forest: ['the {W} {~Spires|Pillars}'],
+};
+const THEMED_LANDMARK = {
+  cave:    ['the {W} {~Cave|Hollow|Deep|Rift}', '{w}delve'],
+  crater:  ['the {W} Crater', '{W} Basin', 'the {W} Pit', 'the {P} Crater'],
+  vent:    ['the {W} {~Vents|Fumaroles|Smokers}', 'the {P} Vents'],
+  dungeon: ['the {~Buried|Lost|Black|Silent} {W}', 'the {W} {~Vault|Undercroft|Labyrinth}'],
+  volcano: ['Mount {W}', 'the {W} {~Cone|Forge|Maw}'],
+};
+
+const _themeSets = new Map();
+function themeSets(key) {
+  if (_themeSets.has(key)) return _themeSets.get(key);
+  const t = NAME_THEMES[key];
+  let v = null;
+  if (t) {
+    const allow = new Set(t.allow || []);
+    const forbid = new Set(t.forbid.flatMap(k => WORD_LISTS[k] || []).filter(w => !allow.has(w)));
+    v = { forbid, stems: COMPOUND_STEMS.filter(st => forbid.has(st)) };
+  }
+  _themeSets.set(key, v);
+  return v;
+}
+
+/**
+ * The first word in `text` that a theme forbids, or null. A whole word counts ("the Silver Fen"), and
+ * so does a forbidden stem at either end of a longer word ("Silvermere", "Mistwood").
+ */
+export function forbiddenWordIn(text, theme) {
+  const sets = themeSets(theme);
+  if (!sets) return null;
+  for (const w of String(text).toLowerCase().split(/[^a-z]+/)) {
+    if (!w) continue;
+    if (sets.forbid.has(w)) return w;
+    for (const st of sets.stems) if (w.length > st.length && (w.startsWith(st) || w.endsWith(st))) return w;
+  }
+  return null;
+}
 
 /** Tidy a composed name: collapse triples, fix "the the", capitalise leading article words for display. */
 function tidy(s) {
@@ -103,10 +188,24 @@ export const DEFAULT_RACE_TABLE = {
 
 export class Namer {
   /** namegen: a Name Forge instance (optional). raceTable: biome name → array of race ids. */
-  constructor({ namegen = null, raceTable = DEFAULT_RACE_TABLE, seed = 1 } = {}) {
+  constructor({ namegen = null, raceTable = DEFAULT_RACE_TABLE, seed = 1, theme = null } = {}) {
     this.gen = namegen; this.raceTable = { ...DEFAULT_RACE_TABLE, ...(raceTable || {}) }; this.seed = seed >>> 0;
     this.used = new Set();
+    // a NAME_THEMES key, or null for the classic vocabulary (every themed branch below is skipped)
+    this.theme = theme && NAME_THEMES[theme] ? { key: theme, ...NAME_THEMES[theme] } : null;
   }
+  /** True when a name uses nothing the theme forbids (always true without a theme). */
+  fits(text) { return !this.theme || !forbiddenWordIn(text, this.theme.key); }
+  /** Roll `make(seed)` until it fits the theme; after ten misses use `fallback()`, which always fits. */
+  themed(make, seed, fallback) {
+    for (let t = 0; t < 10; t++) {
+      const r = make((seed + Math.imul(t, 0x9e3779b1)) >>> 0);
+      if (r && this.fits(r.text)) return r;
+    }
+    return fallback();
+  }
+  /** A plain word from the always-safe list. */
+  safePlain(seed) { return makeRng((seed ^ 0x51f15e) >>> 0).pick(SAFE_PLAIN); }
   /** Race for a biome name + temperature; deterministic from the seed passed in. */
   raceFor(biomeName, seed, temperature = 0.5) {
     const rng = makeRng((seed ^ this.seed) >>> 0);
@@ -123,6 +222,16 @@ export class Namer {
   }
   /** A plain-tongue evocative word ('ash', 'briar') — used where a compound should read in the common tongue. */
   plainWord(race, seed) {
+    if (this.theme) {
+      for (let t = 0; t < 6; t++) {
+        const rng = makeRng((seed ^ 0x1f2e3d4c ^ Math.imul(t, 0x2545f491)) >>> 0);
+        let word = null;
+        if (this.gen) { try { const c = this.gen.pickConcept(rng, this.theme.tags, race); word = (c.adj && rng() < 0.4 ? c.adj : c.en).toLowerCase(); } catch { /* fall through */ } }
+        if (!word) word = rng.pick(SAFE_PLAIN);
+        if (this.fits(word)) return word;
+      }
+      return this.safePlain(seed);
+    }
     const rng = makeRng((seed ^ 0x1f2e3d4c) >>> 0);
     if (this.gen) { try { const c = this.gen.pickConcept(rng, 'nature,element,weather,dark,quality,animal', race); return (c.adj && rng() < 0.4 ? c.adj : c.en).toLowerCase(); } catch { /* fall through */ } }
     return rng.pick(PLAIN);
@@ -143,6 +252,7 @@ export class Namer {
   }
   /** Region name. Uses Name Forge's `region` patterns when available (they already read like "The Weeping Downs"). */
   region(race, seed) {
+    if (this.theme) return this.themedRegion(race, seed);
     if (this.gen) {
       try {
         const r = this.gen.generate('region', { race, seed });
@@ -152,6 +262,21 @@ export class Namer {
     const rng = makeRng(seed >>> 0);
     const text = titleCase(rng() < 0.5 ? `the ${cap(rng.pick(PLAIN))} ${rng.pick(LANDFORM)}` : `${this.word(race, seed, 2)} ${rng.pick(LANDFORM)}`);
     return { text, adj: text.replace(/^The /, ''), people: text.replace(/^The /, '') + ' folk', race, gloss: [] };
+  }
+  /**
+   * A region name in the world's theme, built only from the theme's own vocabulary: a plain word
+   * picked by the theme's concept tags (Name Forge's pickConcept) or a native word, then one of the
+   * theme's landforms. Name Forge's general region patterns are not used here — they lean on
+   * kingdoms, animals and wetlands, which is exactly what a dead world must not be called.
+   */
+  themedRegion(race, seed) {
+    const t = this.theme;
+    const pack = text => ({ text, adj: text.replace(/^The /, ''), people: text.replace(/^The /, '') + ' folk', race, gloss: [] });
+    return this.themed(s => {
+      const rng = makeRng(s >>> 0);
+      const lf = rng.pick(t.landforms);
+      return pack(titleCase(rng() < 0.55 ? `the ${cap(this.plainWord(race, s))} ${lf}` : `${this.word(race, s, 2)} ${lf}`));
+    }, seed, () => pack(titleCase(`the ${cap(this.safePlain(seed))} ${makeRng(seed >>> 0).pick(t.landforms)}`)));
   }
   /** Settlement name, tier is 'capital'|'city'|'town'|'village'|'hamlet' (only used to pick grander shapes). */
   settlement(race, seed, tier = 'town') {
@@ -165,12 +290,26 @@ export class Namer {
   }
   /** A named geographic feature: kind is one of the FEATURE keys (range, river, lake, sea, forest, isle…). */
   feature(kind, race, seed) {
+    if (this.theme) {
+      const shapes = (this.theme.forbid.includes('water') ? THEMED_FEATURE[kind] : null) || FEATURE[kind] || FEATURE.range;
+      return this.themed(s => {
+        const rng = makeRng((s ^ hashStr(kind)) >>> 0);
+        return { text: titleCase(this.shape(rng.pick(shapes), race, s)), kind, race };
+      }, seed, () => ({ text: titleCase(`the ${cap(this.safePlain(seed))} ${SAFE_NOUN[kind] || 'Reach'}`), kind, race }));
+    }
     const shapes = FEATURE[kind] || FEATURE.range;
     const rng = makeRng((seed ^ hashStr(kind)) >>> 0);
     return { text: titleCase(this.shape(rng.pick(shapes), race, seed)), kind, race };
   }
   /** A landmark / dungeon / port name: kind is a LANDMARK_SHAPES key. */
   landmark(kind, race, seed) {
+    if (this.theme) {
+      const shapes = THEMED_LANDMARK[kind] || LANDMARK_SHAPES[kind] || LANDMARK_SHAPES.ruin;
+      return this.themed(s => {
+        const rng = makeRng((s ^ hashStr('lm' + kind)) >>> 0);
+        return { text: titleCase(this.shape(rng.pick(shapes), race, s)), kind, race };
+      }, seed, () => ({ text: titleCase(`the ${cap(this.safePlain(seed))} ${SAFE_NOUN[kind] || 'Ruin'}`), kind, race }));
+    }
     const shapes = LANDMARK_SHAPES[kind] || LANDMARK_SHAPES.ruin;
     const rng = makeRng((seed ^ hashStr('lm' + kind)) >>> 0);
     return { text: titleCase(this.shape(rng.pick(shapes), race, seed)), kind, race };

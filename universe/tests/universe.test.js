@@ -13,9 +13,10 @@ import {
   generateSystem, ARCHETYPES, ARCHETYPE_KEYS, ARCH_BY_KEY, planetSummary, bodies,
   MIN_ORBIT_RATIO, MIN_ORBIT_RATIO_OUTER, orbitRatios, orbitLayout, moonsOf, moonById,
 } from '../js/system.js';
-import { planetWorldOpts, generatePlanetMap, hasSurfaceMap, familyShare, mapMix, clearMapCache, moonMapSize, mapSizeFor, columnClimate, reliefFor } from '../js/planetmap.js';
+import { planetWorldOpts, generatePlanetMap, hasSurfaceMap, familyShare, mapMix, clearMapCache, moonMapSize, mapSizeFor, columnClimate, reliefFor, surfaceOf } from '../js/planetmap.js';
 import { cellInfo } from '../../worldgen/js/world.js';
-import { generateRegionDetail } from '../../worldgen/js/local.js';
+import { generateRegionDetail, generateLocalDetail } from '../../worldgen/js/local.js';
+import { forbiddenWordIn } from '../../worldgen/js/names.js';
 import { BASELINE, RARE, rareFor } from '../js/elements.js';
 import { toJSON, fromJSON, galaxyToJSON, galaxyFromJSON, systemToJSON, systemFromJSON, regenerate, jsonSizeKB, moonIndex, moonToJSON, moonFromJSON } from '../js/export.js';
 import { BIOME_FAMILIES, inFamily, BIOMES } from '../../worldgen/js/biomes.js';
@@ -634,7 +635,7 @@ test('hovering any cell of a planet, moon or region map reads a real height', ()
   for (const body of [planet, moon]) {
     const world = generatePlanetMap(body, { ...mapSizeFor(body, { width: 128, height: 64 }), force: true });
     assert.deepEqual(world.relief, reliefFor(body));
-    let wet = 0;
+    let low = 0;
     for (let y = 0; y < world.height; y += 3) {
       for (let x = 0; x < world.width; x += 3) {
         const info = cellInfo(world, x, y);
@@ -642,19 +643,141 @@ test('hovering any cell of a planet, moon or region map reads a real height', ()
         assert.ok(Number.isFinite(info.depthMetres) && info.depthMetres >= 0);
         assert.equal(info.elevationMetres, info.heightMetres);
         assert.ok(Math.abs(info.heightMetres) <= Math.max(world.relief.landMetres, world.relief.seaMetres));
-        if (info.water !== 'land') {
-          wet++;
+        if (info.heightMetres < 0) {
+          low++;
+          // below the datum: depth on a sea world, just low ground (never "deep") on a dry one
           if (world.relief.datum === 'sea') assert.ok(info.depthMetres >= 0);
-          else assert.equal(info.depthMetres, 0, 'a body with no sea reports no depth');
+          else { assert.equal(info.depthMetres, 0, 'a body with no sea reports no depth'); assert.equal(info.water, 'land'); }
         }
         assert.equal(info.datum, world.relief.datum);
       }
     }
-    assert.ok(wet > 0, body.name + ': expected some low ground to check');
+    assert.ok(low > 0, body.name + ': expected some low ground to check');
     // the zoomed-in region keeps the same scale
     const region = world.regions.slice().sort((a, b) => b.cells - a.cells)[0];
     const detail = generateRegionDetail(world, region.id, { factor: 5 });
     assert.deepEqual(detail.relief, world.relief);
     assert.ok(Number.isFinite(cellInfo(detail, 2, 2).heightMetres));
+  }
+});
+
+
+// ---------------------------------------------------------------------------- what is on the ground
+
+// the words a dead world must never be named with — deliberately a separate list from names.js, so this
+// checks the generator rather than repeating it. A word counts on its own or at the end of a compound.
+const WATERY = /(fen|marsh|mire|mere|lake|river|forest|wood|brook|pond|pool|swamp|bog|meadow|grove|isle|shore)\b/i;
+const SETTLED = /\b(kingdom|principality|protectorate|dominion|holdfast|freehold|realm|empire)\b/i;
+
+const namesOf = w => [
+  ...w.regions.map(r => r.name), ...w.ranges.map(r => r.name), ...w.continents.map(c => c.name),
+  ...w.seas.map(x => x.name), ...w.lakes.map(x => x.name), ...w.rivers.map(x => x.name),
+  ...w.forests.map(x => x.name), ...w.nodes.map(n => n.name),
+];
+
+test('surfaceOf: liquid, settlement and vocabulary follow the archetype and the air', () => {
+  const s = (archetype, density = 1, extra = {}) => surfaceOf({ archetype, atmosphere: { density }, ...extra });
+  for (const a of ['barren', 'ice', 'crystal', 'voidTouched']) {
+    assert.equal(s(a).liquid, 'none', a);
+    assert.equal(s(a).frame, 'land', a);
+    assert.equal(s(a).inhabited, false, a);
+  }
+  assert.deepEqual(s('lava'), { liquid: 'lava', inhabited: false, theme: 'lava', frame: 'ocean' });
+  for (const a of ['living', 'ocean', 'jungle', 'tundra']) { assert.equal(s(a).liquid, 'water'); assert.equal(s(a).inhabited, true, a); assert.equal(s(a).theme, null); }
+  for (const a of ['desert', 'toxic', 'tidalLocked']) { assert.equal(s(a).liquid, 'water'); assert.equal(s(a).inhabited, false, a); }
+  // water needs air: an airless desert is dry, and takes the dead vocabulary
+  assert.deepEqual(s('desert', 0.01), { liquid: 'none', inhabited: false, theme: 'dead', frame: 'land' });
+  assert.equal(s('living', 1, { giant: true }).inhabited, false);
+});
+
+test('a body with no liquid surface has no water, rivers, towns or roads — and names that fit', () => {
+  clearMapCache();
+  const galaxy = generateGalaxy({ seed: 90210, stars: 260 });
+  const dry = [];
+  const counts = {};
+  for (const star of galaxy.stars) {
+    const sys = generateSystem(star, { seed: star.seed, namegen });
+    for (const b of [...sys.planets.filter(p => !p.giant), ...moonsOf(sys).map(x => x.moon)]) {
+      if (surfaceOf(b).liquid !== 'none') continue;
+      const key = (b.moon ? 'moon ' : '') + b.archetype;
+      if ((counts[key] || 0) >= 4) continue;
+      counts[key] = (counts[key] || 0) + 1;
+      dry.push(b);
+    }
+    if (dry.length >= 28) break;
+  }
+  assert.ok(dry.length >= 16, 'only ' + dry.length + ' dry bodies: ' + JSON.stringify(counts));
+  assert.ok(Object.keys(counts).length >= 4, 'want several kinds of dry body: ' + JSON.stringify(counts));
+
+  for (const b of dry) {
+    const surface = surfaceOf(b);
+    const w = generatePlanetMap(b, { ...mapSizeFor(b, { width: 128, height: 64 }), namegen, force: true });
+    const tag = `${b.name} (${b.moon ? 'moon ' : ''}${b.archetype})`;
+    let water = 0, river = 0;
+    for (let i = 0; i < w.water.length; i++) { if (w.water[i] !== 0) water++; if (w.river[i] !== 0) river++; }
+    assert.equal(water, 0, tag + ': water cells');
+    assert.equal(river, 0, tag + ': river cells');
+    assert.equal(w.rivers.length + w.lakes.length + w.seas.length, 0, tag + ': rivers, lakes or seas');
+    assert.equal(w.nodes.filter(n => ['settlement', 'port', 'crossing'].includes(n.type)).length, 0, tag + ': settlements');
+    assert.equal(w.roads.length + w.seaLanes.length, 0, tag + ': roads');
+    assert.ok(w.nodes.some(n => n.type === 'landmark' || n.type === 'dungeon' || n.type === 'pass'), tag + ': no landmarks at all');
+    for (const n of w.nodes) assert.ok(['ruin', 'cave', 'monolith', 'volcano', 'crater', 'vent', 'dungeon', 'pass'].includes(n.kind), `${tag}: ${n.kind} "${n.name}"`);
+    for (const name of namesOf(w)) {
+      assert.ok(!WATERY.test(name), `${tag}: "${name}" is a water or forest name`);
+      assert.ok(!SETTLED.test(name), `${tag}: "${name}" names a realm nobody rules`);
+      assert.equal(forbiddenWordIn(name, surface.theme), null, `${tag}: "${name}" breaks the ${surface.theme} vocabulary`);
+    }
+    // the biomes are dry ground, not sea, lake or growing things
+    for (const id of new Set(w.biome)) assert.ok(![0, 1, 2, 3, 4, 8, 9, 10, 15, 25].includes(id), `${tag}: biome ${id}`);
+
+    // every zoom stays dry and empty
+    const big = w.regions.slice().sort((a, c) => c.cells - a.cells)[0];
+    const d = generateRegionDetail(w, big.id, { factor: 3, namegen });
+    assert.equal(Array.from(d.water).filter(v => v !== 0).length, 0, tag + ': water in the region view');
+    assert.equal(d.streams.length, 0, tag + ': streams in the region view');
+    assert.equal(d.paths.length, 0, tag + ': paths in the region view');
+    for (const n of d.nodes.filter(n => n.local)) assert.ok(['cave', 'ruin'].includes(n.kind), `${tag}: local ${n.kind}`);
+    const tile = generateLocalDetail(w, big.label.x, big.label.y, { size: 32 });
+    assert.equal(Array.from(tile.water).filter(v => v !== 0).length, 0, tag + ': water on the local tile');
+  }
+});
+
+test('lava, desert and twilight worlds keep their liquid but nobody lives there', () => {
+  clearMapCache();
+  const galaxy = generateGalaxy({ seed: 90210, stars: 260 });
+  const want = { lava: 2, desert: 2, tidalLocked: 2 };
+  const found = [];
+  for (const star of galaxy.stars) {
+    const sys = generateSystem(star, { seed: star.seed, namegen });
+    for (const p of sys.planets) if (want[p.archetype] > 0 && surfaceOf(p).liquid !== 'none') { want[p.archetype]--; found.push(p); }
+    if (Object.values(want).every(v => v <= 0)) break;
+  }
+  assert.ok(found.length >= 5, 'found ' + found.map(p => p.archetype).join(','));
+  for (const p of found) {
+    const surface = surfaceOf(p);
+    const w = generatePlanetMap(p, { width: 128, height: 64, namegen, force: true });
+    let water = 0; for (const v of w.water) if (v) water++;
+    assert.ok(water > 0, `${p.name} (${p.archetype}) lost its ${surface.liquid}`);
+    assert.equal(w.nodes.filter(n => ['settlement', 'port', 'crossing'].includes(n.type)).length, 0, p.name + ': settlements');
+    assert.equal(w.roads.length + w.seaLanes.length, 0, p.name + ': roads');
+    assert.equal(w.history.length, 0, p.name + ': history on an empty world');
+    for (const name of namesOf(w)) {
+      assert.equal(forbiddenWordIn(name, surface.theme), null, `${p.name}: "${name}" breaks the ${surface.theme} vocabulary`);
+      assert.ok(!SETTLED.test(name), `${p.name}: "${name}"`);
+    }
+  }
+});
+
+test('living worlds keep their seas, rivers, towns and roads', () => {
+  clearMapCache();
+  const living = big.planets.filter(p => p.archetype === 'living').slice(0, 3);
+  assert.ok(living.length >= 2);
+  for (const p of living) {
+    const w = generatePlanetMap(p, { width: 128, height: 64, namegen, force: true });
+    let water = 0; for (const v of w.water) if (v) water++;
+    assert.ok(water > w.water.length * 0.2, p.name + ': seas');
+    assert.ok(w.rivers.length > 0, p.name + ': rivers');
+    assert.ok(w.nodes.filter(n => n.type === 'settlement').length > 3, p.name + ': towns');
+    assert.ok(w.roads.length > 0, p.name + ': roads');
   }
 });

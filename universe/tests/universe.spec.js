@@ -382,7 +382,8 @@ test('surface maps read real heights, and the Layers panel follows each body', a
   await page.locator('#right [data-toggle="hillshade"] input').uncheck();
   expect(await page.evaluate(() => window.universeDemo.state.mapLayer)).toBe('elevation');
   expect(await page.evaluate(() => window.universeDemo.state.layers.hillshade)).toBe(false);
-  await expect(page.locator('#legend')).toContainText('peak');
+  // the elevation legend is height bands in metres now, not "deep … peak"
+  await expect(page.locator('#legend')).toContainText(' m');
 
   // 2 — its airless moon: heights still read, from a datum, and what does not apply is greyed out
   await page.evaluate(id => { window.universeDemo.back(); window.universeDemo.openMoon(id); window.universeDemo.showMap(); }, target.moonId);
@@ -416,6 +417,73 @@ test('surface maps read real heights, and the Layers panel follows each body', a
   await expect(page.locator('#right [data-toggle="hillshade"] input')).not.toBeChecked();
   await page.evaluate(() => window.universeDemo.back());
   await expect(page.locator('#right .chips.layers')).toHaveCount(0);
+
+  expect(errors).toEqual([]);
+});
+
+test('an airless moon\'s map is dry, empty and named like rock, with a legend in metres', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('universe/');
+  await page.waitForFunction(() => window.universeDemo && window.universeDemo.ready(), null, { timeout: 40_000 });
+
+  const found = await page.evaluate(() => {
+    const d = window.universeDemo;
+    for (const s of d.state.galaxy.stars) {
+      const sys = d.openStar(s.id);
+      for (const p of sys.planets) {
+        const m = (p.moons || []).find(x => x.atmosphere.density < 0.02 && x.archetype === 'barren');
+        if (m) return { planetId: p.id, moonId: m.id, name: m.name };
+      }
+    }
+    return null;
+  });
+  expect(found).not.toBeNull();
+
+  const map = await page.evaluate(({ planetId, moonId }) => {
+    const d = window.universeDemo;
+    d.openPlanet(planetId);
+    d.openMoon(moonId);
+    d.state.mapLayer = 'biomes';
+    const w = d.showMap();
+    let water = 0, river = 0;
+    for (let i = 0; i < w.water.length; i++) { if (w.water[i]) water++; if (w.river[i]) river++; }
+    return {
+      water, river, rivers: w.rivers.length,
+      settlements: w.nodes.filter(n => ['settlement', 'port', 'crossing'].includes(n.type)).length,
+      roads: w.roads.length + w.seaLanes.length,
+      names: [...w.regions.map(r => r.name), ...w.nodes.map(n => n.name)],
+      opts: { liquid: w.opts.liquid, inhabited: w.opts.inhabited, frame: w.opts.frame, nameTheme: w.opts.nameTheme },
+    };
+  }, found);
+  expect(map.opts).toEqual({ liquid: 'none', inhabited: false, frame: 'land', nameTheme: 'dead' });
+  expect(map.water).toBe(0);
+  expect(map.river).toBe(0);
+  expect(map.rivers).toBe(0);
+  expect(map.settlements).toBe(0);
+  expect(map.roads).toBe(0);
+  for (const n of map.names) expect(n, 'water or forest name: ' + n).not.toMatch(/(fen|marsh|mire|mere|lake|river|forest|wood|brook|pond|pool|swamp|bog|isle|shore)\b/i);
+
+  // biomes legend: no sea, shallows, lake or sea ice on it
+  await expect(page.locator('#legend')).not.toContainText(/Ocean|Shallows|Lake|Sea Ice|Coast/);
+  await page.screenshot({ path: 'test-results/universe-airless-moon.png' });
+
+  // the Layers panel: borders and settlement toggles say why they are off
+  const panel = page.locator('#right .panel', { has: page.locator('h3', { hasText: /^Layers$/ }) });
+  await expect(panel.locator('[data-toggle="rivers"] input')).toBeDisabled();
+  await expect(panel.locator('[data-toggle="roads"] input')).toBeDisabled();
+  expect(await panel.locator('[data-toggle="borders"]').getAttribute('title')).toMatch(/nobody has drawn borders/);
+
+  // elevation legend: real height bands in metres, none of them "deep", none of them a flat 20%
+  await panel.locator('.chip[data-layer="elevation"]').click();
+  const labels = await page.locator('#legend .sw').allTextContents();
+  expect(labels.length).toBeGreaterThan(1);
+  for (const l of labels) {
+    expect(l).toContain('m');
+    expect(l).not.toContain('deep');
+    expect(l).toMatch(/[0-9]/);
+  }
+  expect(new Set(labels.map(l => l.replace(/^.* ([0-9]+%)$/, '$1'))).size).toBeGreaterThan(1);
+  await page.screenshot({ path: 'test-results/universe-airless-moon-elevation.png' });
 
   expect(errors).toEqual([]);
 });

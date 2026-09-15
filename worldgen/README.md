@@ -74,6 +74,7 @@ ancientwood/battlefield`, `dungeon/lair`, `bridge/ford`).
 | `js/roads.js` | `aStar`, road cost fields, MST + extra links, bridges and fords, sea lanes, `roadGraph()`. |
 | `js/local.js` | `generateRegionDetail(world, regionId)` and `generateLocalDetail(world, x, y)` — the two zoom-ins. |
 | `js/render.js` | `worldPixels()` (pure RGBA, works in node), `renderWorld/renderRegion/renderLocal` on a canvas, `cellAt()`, `legend()`, `nodeStyle()`. |
+| `js/relief.js` | Heights in metres: `DEFAULT_RELIEF`, `elevationToMetres(e, relief)`, `formatMetres()`, `hasSea(world)`. No DOM and no generator, so the renderer and `cellInfo()` share it. |
 | `js/layers-panel.js` | `layersPanel({ layer, layers, onLayer, onToggle, unavailable })` — the Layers panel (a chip per map layer, a checkbox per overlay) as DOM only, plus `LAYER_NAMES` / `LAYER_TOGGLES`. World Forge and Star Forge both use it; `unavailable(key, kind)` greys out a layer with a reason. |
 | `js/export.js` | `toJSON` / `fromJSON` (typed arrays as base64), `toPNG`, `download`, `jsonSizeKB`. |
 | `js/history.js` | A few dated events per region from a small template table, plus `worldSummary()`. |
@@ -147,7 +148,7 @@ All of them live in `DEFAULTS` (`js/world.js`) and every one is on the viewer's 
 | `mountainSharpness` | 0…1 | 0.5 | Rounded highlands ↔ isolated spiky peaks. |
 | `thermalErosion` | 0…12 | 3 | Passes of slope slumping. Smooths cliffs. |
 | `hydraulicErosion` | 0…1 | 0.35 | Rain droplets per cell — carves valleys. The most expensive knob. |
-| `riverDensity` | 0…1 | 0.5 | Lower flow threshold = more, smaller rivers. |
+| `riverDensity` | 0…1 | 0.5 | Lower flow threshold = more, smaller rivers. **0 = no rivers at all** (it used to leave the biggest drainage lines as rivers). |
 | `lakeAmount` | 0…1 | 0.5 | How shallow a depression can be and still hold water. |
 | `temperature` | 0…1 | 0.5 | World-wide warm/cold shift. |
 | `latitudeBands` | 0…1 | 0.85 | Strength of the equator→pole gradient (0 = one climate everywhere). |
@@ -159,7 +160,11 @@ All of them live in `DEFAULTS` (`js/world.js`) and every one is on the viewer's 
 | `biomeLock` | family key or null | null | Forces every land cell into one `BIOME_FAMILIES` family (`ice`, `lava`, `desert`, `rock`, `jungle`, `tundra`, `ocean`, `toxic`, `crystal`, `void`, `grass`), picked by height and slope. This is how `universe/` makes a single-biome planet. |
 | `polarCaps` | 0…1 | 0 | How far ice reaches down from the top and bottom rows. Land becomes Ice Sheet, water becomes Sea Ice (biome 25). |
 | `atmosphereTint` | hex or `{color, strength}` | null | A colour wash laid over the drawn map — a yellow sky yellows its own map. Read by `worldPixels`. |
-| `palette` | `PALETTES` key or null | null | Swaps the biome colours without touching the biome table: `lava`, `crystal`, `toxic`, `void`, `ember`, `rust`. |
+| `palette` | `PALETTES` key or null | null | Swaps the biome colours without touching the biome table: `lava`, `crystal`, `toxic`, `void`, `ember`, `rust`, `dust` (grey-brown dead rock). |
+| `liquid` | `water` · `lava` · `none` | `water` | `none` makes a dry world: no ocean, no lakes, no rivers at any zoom — low ground is dry basin. `lava` generates like water (the palette and a name theme make it molten). |
+| `frame` | `ocean` · `land` · `rim` | `ocean` | What the map edge fades into: under the sea (the classic island framing), the map's own average ground, or a raised crater rim. |
+| `inhabited` | bool | true | `false` skips settlements, ports, roads, bridges/fords, sea lanes, history and the drawn region borders. Landmarks keep only natural kinds and old remains (ruin, cave, monolith, volcano, plus **crater** and **vent**), dungeons stay, lairs do not. |
+| `nameTheme` | `NAME_THEMES` key or null | null | A vocabulary for the world's names — see *Dry, empty and themed worlds* below. |
 | `auraStrength` | 0…1 | 0.35 | Size of the good/evil influence field. |
 | `auraBalance` | 0…1 | 0.55 | 0 = all blessed, 1 = all cursed. |
 | `magicStrength` | 0…1 | 0.3 | Raw magic — glimmer waste, towers, volcanoes. |
@@ -179,6 +184,40 @@ All of them live in `DEFAULTS` (`js/world.js`) and every one is on the viewer's 
 *Ashen world*, *One great land*. A preset is a partial knob set — it overrides only what it names.
 
 ---
+
+## Dry, empty and themed worlds
+
+Four knobs, all off by default, so a World Forge world is unchanged (a node test pins four presets to
+fingerprints taken before they existed). `universe/` uses them to make a dead moon look dead.
+
+- **`liquid: 'none'`** — the sea-flood pass, the lake pass and river tracing are skipped, so
+  `world.water` and `world.river` are all zero and `seas`, `lakes` and `rivers` are empty. Elevation
+  below 0.5 is kept as low basin ground. The region view and the local tile read it and stay dry too
+  (no streams, a bare rock-and-boulder prop set on the tile).
+- **`frame: 'land' | 'rim'`** — the edge mask eases towards the map's average ground, or lifts into
+  a ring of high ground, instead of dropping below sea level. A dry world should use one of these,
+  or its edge becomes a ring of low basin.
+- **`inhabited: false`** — `placeNodes` places no settlements or ports, `buildRoads` returns before
+  building roads, bridges or sea lanes, history is not written, `renderWorld` draws no borders, and
+  the region view grows no camps, shrines or paths. Regions stay: they are named ground and the way
+  into the region zoom.
+- **`nameTheme`** — `NAME_THEMES` in `names.js`: `dead`, `ice`, `lava`, `crystal`, `void`, `desert`,
+  `toxic`, `twilight`. A theme has its own landform words, the Name Forge concept tags its plain
+  words are picked by (`pickConcept`), and the word lists it forbids: `WATER_WORDS` (fen, mere, lake,
+  river, isle, shore…), `LIFE_WORDS` (wood, grove, meadow, fox…), `WETLAND_WORDS` and `WILD_WORDS`
+  (kingdom, holdfast, gate, town…). Themed region names are built only from that vocabulary, and every
+  feature, landmark and pass name is re-rolled until `forbiddenWordIn(name, theme)` is null — a
+  forbidden word counts on its own or at either end of a compound (*Silvermere*, *Mistwood*). The
+  lava theme allows sea, lake and river words, because its seas are molten (*the Tralnit Lava Ocean*).
+
+### Heights and the elevation legend
+
+`legend(world, 'elevation')` (also `elevationLegend(world)`) returns real height bands on the world's
+relief scale — `world.relief` if it carries one, else ±4200 m: two depth bands below sea level
+(*0–2,100 m deep*) and four land bands (*0–1,050 m* … *3,150–4,200 m*), each with the actual share
+of cells in it and empty bands dropped. A world with no sea (`liquid: 'none'`, or a relief whose
+datum is not the sea) gets no depth bands — its basins read as *−2,100 to 0 m* — and its elevation
+layer is drawn with `RAMPS.elevationDry`, so low ground is dark rock rather than ocean blue.
 
 ## Zooming in
 
@@ -279,7 +318,8 @@ region list, a filterable place list, and the history.
 - Click a region on the world map to open it; click anywhere in a region to open the local tile.
   The breadcrumb (or Escape) walks back out.
 - Layers: biomes, elevation, temperature, moisture, drainage, aura, magic, regions (political), plus
-  toggles for hillshade, rivers, roads, nodes, labels, borders and the aura wash.
+  toggles for hillshade, rivers, roads, nodes, labels, borders and the aura wash. The panel is
+  `js/layers-panel.js`, shared with Star Forge. The elevation legend reads in metres.
 - **Export JSON** saves the world; **Export PNG** saves the map as it is currently drawn.
 - **Copy link** puts the whole knob set in the URL hash, so a world can be shared as a link.
 - `window.worldgenDemo` exposes `{ state, generate, openRegion, openLocal, back, setOpt, toJSON, ready }`

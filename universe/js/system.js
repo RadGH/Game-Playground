@@ -21,7 +21,7 @@ import { BASELINE, rareFor } from './elements.js';
 //  giant      true for the two that have no surface to stand on
 
 export const ARCHETYPES = [
-  { key: 'barren', name: 'Barren Rock', biomeMode: 'single', family: 'rock', palette: null, giant: false,
+  { key: 'barren', name: 'Barren Rock', biomeMode: 'single', family: 'rock', palette: 'dust', giant: false,
     sky: '#1a1c22', sea: null, atmosphere: { type: 'none', density: [0, 0.06], color: '#7a808c' },
     hazards: ['radiation', 'cold'], difficulty: 0.35, poles: false, landable: true, tempK: [90, 620],
     radius: [0.3, 1.1], albedo: 0.13, resourceBias: { metals: 1.4, stone: 1.5, waterIce: 0.15, gas: 0.1 },

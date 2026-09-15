@@ -11,7 +11,8 @@ import { generateWorld, METHODS, PRESETS, DEFAULTS, cellInfo, nearestNode, eleva
 import { generateRegionDetail, generateLocalDetail } from '../js/local.js';
 import { roadGraph } from '../js/roads.js';
 import { toJSON, fromJSON, bytesToBase64, base64ToBytes } from '../js/export.js';
-import { worldPixels, legend } from '../js/render.js';
+import { worldPixels, legend, elevationLegend } from '../js/render.js';
+import { forbiddenWordIn } from '../js/names.js';
 import { BIOMES, classify } from '../js/biomes.js';
 import { makeNoise2D, fbm, makeRng } from '../js/noise.js';
 import { NameGen } from '../../namegen/js/namegen.js';
@@ -382,4 +383,144 @@ test('heights: the classic 4200 m scale by default, a world\'s own relief when i
   assert.ok(info.heightMetres < 0);
   assert.equal(info.depthMetres, 0);
   assert.equal(info.datum, 'datum');
+});
+
+
+// ---------------------------------------------------------------------------- planet knobs
+
+const fnv = str => { let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); };
+const fpArr = a => fnv(Array.from(a).join(','));
+const fpNamegen = new NameGen({ languages: read('languages.json'), concepts: read('concepts.json'), patterns: read('patterns.json') });
+
+test('World Forge presets generate exactly as they did before the planet knobs existed', () => {
+  // captured from the generator before liquid / frame / inhabited / nameTheme were added
+  const BEFORE = {
+    'Temperate continents': { seed: 11, ng: false, biome: '47213176', water: '34a4b536', river: '9efdb4ab', nodes: '93a54ae', regions: 'e9ffacea', features: '92980d21', roads: 23, seaLanes: 0, history: 50 },
+    'Shattered isles': { seed: 22, ng: false, biome: '8e315190', water: '8208a093', river: '1d686b31', nodes: '4ee74b12', regions: '63ffe1fb', features: '1b6c5aaa', roads: 12, seaLanes: 2, history: 43 },
+    'Ashen world': { seed: 33, ng: false, biome: 'd241e935', water: '584860a8', river: 'a168da03', nodes: '877c1e69', regions: '8607db39', features: 'a7b6a663', roads: 19, seaLanes: 2, history: 47 },
+    'Frozen north': { seed: 44, ng: true, biome: 'c6a14116', water: 'fac70f1e', river: '36764ede', nodes: 'accdda4c', regions: '55c1db9c', features: '62a1eac2', roads: 24, seaLanes: 0, history: 43 },
+  };
+  for (const [name, b] of Object.entries(BEFORE)) {
+    const w = generateWorld({ ...PRESETS[name], seed: b.seed, width: 128, height: 64, namegen: b.ng ? fpNamegen : null });
+    assert.equal(fpArr(w.biome), b.biome, name + ': biomes changed');
+    assert.equal(fpArr(w.water), b.water, name + ': water changed');
+    assert.equal(fpArr(w.river), b.river, name + ': rivers changed');
+    assert.equal(fnv(w.nodes.map(n => n.type + ':' + n.kind + ':' + n.name + ':' + n.index).join('|')), b.nodes, name + ': places changed');
+    assert.equal(fnv(w.regions.map(r => r.name).join('|')), b.regions, name + ': region names changed');
+    assert.equal(fnv([...w.seas, ...w.lakes, ...w.ranges, ...w.forests, ...w.rivers, ...w.continents].map(f => f.name).join('|')), b.features, name + ': feature names changed');
+    assert.equal(w.roads.length, b.roads, name + ': roads');
+    assert.equal(w.seaLanes.length, b.seaLanes, name + ': sea lanes');
+    assert.equal(w.history.length, b.history, name + ': history');
+  }
+  assert.equal(DEFAULTS.liquid, 'water');
+  assert.equal(DEFAULTS.frame, 'ocean');
+  assert.equal(DEFAULTS.inhabited, true);
+  assert.equal(DEFAULTS.nameTheme, null);
+});
+
+test('liquid "none": no seas, lakes or rivers for any method, at any zoom', () => {
+  for (const method of ['plates', 'noise', 'archipelago', 'pangea', 'mixed']) {
+    const w = generateWorld({ seed: 404, method, width: 128, height: 64, liquid: 'none', frame: 'land', rainfall: 0.9, riverDensity: 1, lakeAmount: 1 });
+    const wet = Array.from(w.water).filter(v => v !== 0).length;
+    const rivers = Array.from(w.river).filter(v => v !== 0).length;
+    assert.equal(wet, 0, method + ': water cells');
+    assert.equal(rivers, 0, method + ': river cells');
+    assert.equal(w.rivers.length + w.lakes.length + w.seas.length, 0, method + ': named water');
+    for (const id of new Set(w.biome)) assert.ok(!BIOMES[id].tags.includes('water') && ![0, 1, 2, 3, 25].includes(id), method + ': water biome ' + BIOMES[id].key);
+    // below 0.5 is still there, just as dry low ground
+    assert.ok(Array.from(w.elevation).some(e => e < 0.5), method + ': no low ground at all');
+    const region = w.regions.slice().sort((a, b) => b.cells - a.cells)[0];
+    const d = generateRegionDetail(w, region.id, { factor: 3 });
+    assert.equal(Array.from(d.water).filter(v => v !== 0).length, 0, method + ': region water');
+    assert.equal(d.streams.length, 0, method + ': region streams');
+    const tile = generateLocalDetail(w, region.label.x, region.label.y, { size: 32 });
+    assert.equal(Array.from(tile.water).filter(v => v !== 0).length, 0, method + ': tile water');
+  }
+});
+
+test('river density 0 means no rivers at all (the seas stay)', () => {
+  const w = generateWorld({ seed: 77, width: 128, height: 64, riverDensity: 0, rainfall: 1 });
+  assert.equal(w.rivers.length, 0);
+  assert.equal(Array.from(w.river).filter(v => v !== 0).length, 0);
+  assert.ok(Array.from(w.water).some(v => v === 1), 'the ocean should still be there');
+  const withRivers = generateWorld({ seed: 77, width: 128, height: 64, riverDensity: 0.02, rainfall: 1 });
+  assert.ok(withRivers.rivers.length > 0, 'a little river density should still make a few rivers');
+});
+
+test('inhabited false: landmarks and passes, but no towns, ports, roads, bridges, sea lanes or history', () => {
+  const w = generateWorld({ seed: 909, width: 128, height: 64, inhabited: false, seaLanes: true, history: true });
+  assert.equal(w.nodes.filter(n => ['settlement', 'port', 'crossing'].includes(n.type)).length, 0);
+  assert.equal(w.roads.length, 0);
+  assert.equal(w.seaLanes.length, 0);
+  assert.equal(w.history.length, 0);
+  assert.equal(Array.from(w.roadCells).filter(v => v).length, 0);
+  assert.ok(w.nodes.length > 3, 'landmarks, dungeons and passes should remain');
+  for (const n of w.nodes) assert.ok(['ruin', 'cave', 'monolith', 'volcano', 'crater', 'vent', 'dungeon', 'pass'].includes(n.kind), n.kind);
+  assert.ok(w.regions.every(r => r.seat === null && r.population === 0));
+  const region = w.regions.slice().sort((a, b) => b.cells - a.cells)[0];
+  const d = generateRegionDetail(w, region.id, { factor: 3 });
+  assert.equal(d.paths.length, 0, 'no paths between places nobody goes');
+  for (const n of d.nodes.filter(n => n.local)) assert.ok(['cave', 'ruin'].includes(n.kind), n.kind);
+});
+
+test('frame: ocean pushes the edge under water, land keeps it as ground, rim raises it', () => {
+  const edgeMean = w => {
+    let s = 0, n = 0;
+    for (let x = 0; x < w.width; x++) { s += w.elevation[x] + w.elevation[(w.height - 1) * w.width + x]; n += 2; }
+    for (let y = 0; y < w.height; y++) { s += w.elevation[y * w.width] + w.elevation[y * w.width + w.width - 1]; n += 2; }
+    return s / n;
+  };
+  const base = { seed: 31337, width: 128, height: 64, liquid: 'none' };
+  const land = generateWorld({ ...base, frame: 'land' });
+  const rim = generateWorld({ ...base, frame: 'rim' });
+  const ocean = generateWorld({ seed: 31337, width: 128, height: 64 });
+  assert.ok(edgeMean(rim) > edgeMean(land), `rim ${edgeMean(rim).toFixed(3)} vs land ${edgeMean(land).toFixed(3)}`);
+  assert.ok(edgeMean(land) > edgeMean(ocean), `land ${edgeMean(land).toFixed(3)} vs ocean ${edgeMean(ocean).toFixed(3)}`);
+  const oceanEdgeWater = [...Array(ocean.width).keys()].filter(x => ocean.water[x] !== 0).length / ocean.width;
+  assert.ok(oceanEdgeWater > 0.9, 'the classic frame should still be ocean along the top edge');
+});
+
+test('the elevation legend is real height bands in metres, with depth only where there is a sea', () => {
+  const w = world();
+  const rows = legend(w, 'elevation');
+  assert.ok(rows.length >= 4);
+  const total = rows.reduce((a, r) => a + r.share, 0);
+  assert.ok(Math.abs(total - 1) < 1e-6, 'bands should cover every cell');
+  assert.ok(new Set(rows.map(r => r.share.toFixed(3))).size > 1, 'shares should be real, not a flat 20%');
+  for (const r of rows) {
+    assert.match(r.label, / m( deep)?$/);
+    assert.ok(r.from < r.to);
+    assert.equal(r.depth, r.to <= 0);
+    if (r.depth) assert.match(r.label, /deep$/);
+  }
+  assert.ok(rows.some(r => r.depth) && rows.some(r => !r.depth));
+  assert.ok(rows.some(r => r.label === '0–1,050 m' || r.label.startsWith('0–')), rows.map(r => r.label).join(' | '));
+
+  // a dry world with its own scale: no depth bands, negative heights for the basins
+  const dry = generateWorld({ seed: 5, width: 128, height: 64, liquid: 'none', frame: 'land' });
+  dry.relief = { landMetres: 12000, seaMetres: 5000, datum: 'datum', label: 'datum' };
+  const dr = elevationLegend(dry);
+  assert.ok(dr.every(r => !r.depth && !/deep/.test(r.label)), dr.map(r => r.label).join(' | '));
+  assert.ok(dr.some(r => r.from < 0 && /^−/.test(r.label)), 'basin bands read as negative heights');
+  assert.ok(dr.some(r => r.to === 12000), 'the top band reaches the relief\'s own peak height');
+});
+
+test('name themes keep water, life and realm words off a dead world', () => {
+  assert.equal(forbiddenWordIn('The Silver Fen', 'dead'), 'fen');
+  assert.equal(forbiddenWordIn('Silvermere', 'dead'), 'silvermere');
+  assert.equal(forbiddenWordIn('The Kingdom of Sotsax', 'dead'), 'kingdom');
+  assert.equal(forbiddenWordIn('The Grey Basin', 'dead'), null);
+  assert.equal(forbiddenWordIn('the Tralnit Lava Sea', 'lava'), null, 'a lava world may have a molten sea');
+  assert.equal(forbiddenWordIn('the Silver Fen', null), null, 'no theme, no filter');
+  assert.equal(forbiddenWordIn('Thorn Wood', 'twilight'), null, 'a twilight world may grow things');
+  assert.equal(forbiddenWordIn('The Holdfast of Ox', 'twilight'), 'holdfast');
+
+  for (const seed of [3, 17, 58]) {
+    for (const namegen of [null, fpNamegen]) {
+      const w = generateWorld({ seed, width: 128, height: 64, liquid: 'none', frame: 'land', inhabited: false, nameTheme: 'dead', biomeLock: 'rock', namegen });
+      const names = [...w.regions.map(r => r.name), ...w.ranges.map(r => r.name), ...w.continents.map(c => c.name), ...w.nodes.map(n => n.name)];
+      assert.ok(names.length > 5);
+      for (const n of names) assert.equal(forbiddenWordIn(n, 'dead'), null, `seed ${seed}${namegen ? ' (Name Forge)' : ''}: "${n}"`);
+    }
+  }
 });

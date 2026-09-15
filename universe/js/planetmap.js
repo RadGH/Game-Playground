@@ -14,7 +14,7 @@
 // returns null. Draw those with texture.js's banded cloud deck instead.
 
 import { generateWorld } from '../../worldgen/js/world.js';
-import { classify, inFamily } from '../../worldgen/js/biomes.js';
+import { classify, inFamily, lockBiome, BIOME_FAMILIES } from '../../worldgen/js/biomes.js';
 import { makeRng, subSeed, clamp } from '../../worldgen/js/noise.js';
 import { ARCH_BY_KEY } from './system.js';
 
@@ -33,6 +33,53 @@ const RECIPES = {
   voidTouched: { method: 'noise', seaLevel: 0.4, rainfall: 0.35, temperature: 0.4, mountainScale: 0.7, auraStrength: 1, auraBalance: 1, magicStrength: 0.8, riverDensity: 0.3, biomeVariety: 0.4 },
   tidalLocked: { method: 'plates', seaLevel: 0.55, rainfall: 0.45, temperature: 0.5, latitudeBands: 0, lapseRate: 0.35, mountainScale: 0.6, riverDensity: 0.4, biomeVariety: 0.7 },
 };
+
+// ---------------------------------------------------------------------------- what is on the ground
+//
+// Which bodies have a liquid surface, which could plausibly be lived on, and what vocabulary names
+// their places. World Forge does the work through four knobs (`liquid`, `frame`, `inhabited`,
+// `nameTheme`); this table decides them per archetype.
+//
+//   liquid  'water' — seas, lakes and rivers, as World Forge always drew them
+//           'lava'  — the same shapes, but they are molten rock (the card says "rivers of rock")
+//           'none'  — no liquid at all: low ground is dry basin, the map edge is land, not ocean
+//   settled only the four archetypes with breathable air (system.js marks the same four) — every
+//           other body gets landmarks, passes and dungeons, and no towns, roads, ports or borders
+
+const SURFACE = {
+  barren: { liquid: 'none', theme: 'dead' },
+  ice: { liquid: 'none', theme: 'ice' },               // frozen from pole to pole: nothing flows
+  lava: { liquid: 'lava', theme: 'lava' },
+  desert: { liquid: 'water', theme: 'desert' },
+  ocean: { liquid: 'water', theme: null },
+  toxic: { liquid: 'water', theme: 'toxic' },
+  tundra: { liquid: 'water', theme: null },
+  jungle: { liquid: 'water', theme: null },
+  living: { liquid: 'water', theme: null },
+  crystal: { liquid: 'none', theme: 'crystal' },
+  voidTouched: { liquid: 'none', theme: 'void' },
+  tidalLocked: { liquid: 'water', theme: 'twilight' },   // seas and a living twilight ring, but nobody's kingdom
+};
+const SETTLED = new Set(['living', 'ocean', 'jungle', 'tundra']);
+
+/**
+ * What a body's surface is made of, for the map generator.
+ * Returns { liquid: 'water'|'lava'|'none', inhabited, theme, frame }.
+ * Water needs air to stay liquid: below 0.05 bar a body is dry whatever its archetype says.
+ */
+export function surfaceOf(body) {
+  const s = SURFACE[body?.archetype] || { liquid: 'none', theme: 'dead' };
+  const air = body?.atmosphere?.density ?? 0;
+  const liquid = s.liquid === 'water' && air < 0.05 ? 'none' : s.liquid;
+  // a dry body never borrows a vocabulary that allows water words
+  const theme = liquid === 'none' && !['dead', 'ice', 'crystal', 'void'].includes(s.theme) ? 'dead' : s.theme;
+  return {
+    liquid,
+    inhabited: !body?.giant && SETTLED.has(body?.archetype) && liquid === 'water',
+    theme,
+    frame: liquid === 'none' ? 'land' : 'ocean',
+  };
+}
 
 /** False for the two giants — there is nothing down there to map. Moons always have a surface. */
 export function hasSurfaceMap(planet) { return !!planet && !planet.giant; }
@@ -96,13 +143,17 @@ export function planetWorldOpts(planet, extra = {}) {
     opts.continentScale = (recipe.continentScale ?? 1) * 1.35;
     opts.settlementDensity = planet.archetype === 'living' ? 0.25 : 0.04;
     opts.dungeonDensity = (planet.difficulty ?? 0.4) * 0.5;
-    // nothing stays liquid on an airless moon: dry basins, no rivers, no lakes
-    if ((planet.atmosphere?.density ?? 0) < 0.02 && planet.archetype !== 'ice') {
-      opts.seaLevel = Math.min(opts.seaLevel, 0.06);
-      opts.riverDensity = 0;
-      opts.lakeAmount = 0;
-    }
   }
+  // what is on the ground: liquid, map frame, whether anyone lives here, and the naming vocabulary.
+  // seaLevel stays as it is — on a dry body it is the share of low basin ground below the datum.
+  const surface = surfaceOf(planet);
+  opts.liquid = surface.liquid;
+  opts.frame = surface.frame;
+  opts.inhabited = surface.inhabited;
+  opts.nameTheme = surface.theme;
+  opts.seaLanes = surface.inhabited;
+  if (surface.liquid === 'none') { opts.riverDensity = 0; opts.lakeAmount = 0; }
+  if (!surface.inhabited) opts.settlementDensity = 0;
   return { ...opts, ...stripSize(extra) };
 }
 
@@ -129,6 +180,7 @@ export function applyTidalLock(world, planet) {
   const K = planet.temperature?.K ?? 280;
   const hot = clamp(0.58 + (K - 240) / 300, 0.62, 0.99);       // the substellar point
   const cold = 0.02;                                           // the far face, always frozen
+  const lock = world.opts?.biomeLock && BIOME_FAMILIES[world.opts.biomeLock] ? world.opts.biomeLock : null;
 
   // one column of climate, worked out once: the map only changes east to west
   const colTemp = new Float32Array(w), colDry = new Float32Array(w);
@@ -162,6 +214,9 @@ export function applyTidalLock(world, planet) {
         aura: world.aura[i], magic: world.magic[i], water: world.water[i], depth,
         nearOcean: false, volcanic: world.volcanic[i] === 1,
       }, world.opts.biomeVariety ?? 0.6);
+      // a single-biome body (a crystal world that also happens to be locked) keeps its family: the
+      // reclassify above does not know about biomeLock, and would otherwise grow forest on crystal
+      if (lock) world.biome[i] = lockBiome(world.biome[i], lock, { elev: world.elevation[i], slope: world.slope[i], moist });
     }
   }
   world.tidalLocked = true;
@@ -238,8 +293,7 @@ export function reliefFor(body) {
   const rng = makeRng(subSeed((body?.seed ?? 1) >>> 0, 'relief'));
   const wobble = 0.88 + rng() * 0.24;
   const landMetres = Math.round(clamp(8800 * Math.pow(g, -0.72) * wobble, 2400, 26000) / 10) * 10;
-  const arch = ARCH_BY_KEY[body?.archetype] || ARCH_BY_KEY.barren;
-  const liquid = !!arch.sea && !['ice', 'lava'].includes(body?.archetype) && (body?.atmosphere?.density ?? 0) >= 0.05;
+  const liquid = surfaceOf(body).liquid === 'water';
   const seaMetres = Math.round(landMetres * (liquid ? 0.85 : 0.45) / 10) * 10;
   return liquid
     ? { landMetres, seaMetres, datum: 'sea', label: 'sea level' }

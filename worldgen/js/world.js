@@ -16,6 +16,8 @@ import { buildRegions } from './regions.js';
 import { placeNodes } from './nodes.js';
 import { buildRoads } from './roads.js';
 import { makeHistory } from './history.js';
+import { Namer } from './names.js';
+import { DEFAULT_RELIEF, elevationToMetres } from './relief.js';
 
 /** Every knob, with its default. Ranges and plain-language notes live in README.md. */
 export const DEFAULTS = {
@@ -43,6 +45,10 @@ export const DEFAULTS = {
   polarCaps: 0,                  // 0 … 1 — how far ice caps reach down from the top and bottom rows (0 = off)
   atmosphereTint: null,          // null | '#rrggbb' or { color, strength 0..1 } — a colour wash laid over the drawn map
   palette: null,                 // null | a key of PALETTES in biomes.js — swaps the biome colours (lava, crystal, toxic, void, ember, rust)
+  liquid: 'water',               // water | lava | none — 'none' is a dry world: no seas, lakes or rivers; low ground is dry basin
+  frame: 'ocean',                // ocean | land | rim — what the map edge fades into (ocean = the classic island framing)
+  inhabited: true,               // false skips settlements, ports, roads, bridges, sea lanes, borders and history (landmarks and passes stay)
+  nameTheme: null,               // null | a NAME_THEMES key in names.js — a vocabulary for dead, icy, molten … worlds
   auraStrength: 0.35,            // evil/good influence field
   auraBalance: 0.55,             // 0 = all blessed, 1 = all cursed
   magicStrength: 0.3,
@@ -254,16 +260,27 @@ function baseMixed(opts, rng) {
 const BASE_METHODS = { noise: baseNoise, plates: basePlates, voronoi: baseVoronoi, diamond: baseDiamond, archipelago: baseArchipelago, pangea: basePangea, mixed: baseMixed };
 
 /** Edge falloff so the map is framed by ocean instead of clipped land — noisy so it is not an oval. */
+/**
+ * Fade the map out towards its edge. `opts.frame` picks what it fades into:
+ *   'ocean' — pushed down below sea level, so every world is framed in water (the classic look)
+ *   'land'  — eased towards the map's own average ground, so the edge is just more terrain
+ *   'rim'   — raised into a ring of high ground, like standing inside a crater wall
+ */
 function applyEdgeMask(hArr, opts) {
   const { width: w, height: h } = opts;
+  const frame = opts.frame === 'land' || opts.frame === 'rim' ? opts.frame : 'ocean';
   const n = makeNoise2D(subSeed(opts.seed, 'mask'));
+  let mean = 0;
+  if (frame !== 'ocean') { for (let i = 0; i < hArr.length; i++) mean += hArr[i]; mean /= hArr.length; }
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const dx = (x / (w - 1)) * 2 - 1, dy = (y / (h - 1)) * 2 - 1;
     const wob = (fbm(n, x * 3 / w, y * 3 / w, { octaves: 3 }) - 0.5) * 0.34;
     const d = Math.max(Math.abs(dx), Math.abs(dy) * 0.94) + wob * 0.5;
     const m = 1 - smoothstep(0.68, 1.02, d);
     const i = IDX(w, x, y);
-    hArr[i] = hArr[i] * (0.25 + 0.75 * m) - (1 - m) * 0.18;
+    if (frame === 'ocean') hArr[i] = hArr[i] * (0.25 + 0.75 * m) - (1 - m) * 0.18;
+    else if (frame === 'land') hArr[i] = hArr[i] * m + mean * (1 - m);
+    else hArr[i] = hArr[i] * m + (mean + 0.35) * (1 - m);
   }
 }
 
@@ -457,7 +474,9 @@ export function generateWorld(userOpts = {}) {
   // 6 — ocean vs inland water ---------------------------------------------
   progress(0.42, 'finding the coasts');
   const water = new Uint8Array(N);        // 0 land, 1 ocean, 2 lake
-  {
+  // a dry world (liquid: 'none') keeps every cell as land: what would have been sea is low basin
+  const dry = opts.liquid === 'none';
+  if (!dry) {
     const stack = [];
     for (let x = 0; x < w; x++) { stack.push(IDX(w, x, 0), IDX(w, x, h - 1)); }
     for (let y = 0; y < h; y++) { stack.push(IDX(w, 0, y), IDX(w, w - 1, y)); }
@@ -494,7 +513,7 @@ export function generateWorld(userOpts = {}) {
   progress(0.58, 'running the rivers');
   const filled = fillDepressions(elevation, w, h, water, 1e-5);
   const lakeDepth = lerp(0.018, 0.0022, clamp(opts.lakeAmount, 0, 1));
-  for (let i = 0; i < N; i++) if (water[i] === 0 && filled[i] - elevation[i] > lakeDepth) water[i] = 2;
+  if (!dry) for (let i = 0; i < N; i++) if (water[i] === 0 && filled[i] - elevation[i] > lakeDepth) water[i] = 2;
 
   // process cells from the highest filled surface down, so accumulation only ever flows forwards
   const ordArr = new Int32Array(N); for (let i = 0; i < N; i++) ordArr[i] = i;
@@ -518,7 +537,10 @@ export function generateWorld(userOpts = {}) {
   for (const i of ordArr) { const d = down[i]; if (d >= 0 && water[i] !== 1) flow[d] += flow[i]; }
 
   const areaScale = N / (256 * 128);
-  const riverThreshold = lerp(150, 16, clamp(opts.riverDensity, 0, 1)) * Math.sqrt(areaScale);
+  // river density 0 means no rivers at all — it used to leave a threshold of 150, so the biggest
+  // drainage lines still became rivers — and a dry world has none whatever the knob says
+  const noRivers = dry || !(opts.riverDensity > 0);
+  const riverThreshold = noRivers ? Infinity : lerp(150, 16, clamp(opts.riverDensity, 0, 1)) * Math.sqrt(areaScale);
   const river = new Uint8Array(N);
   for (let i = 0; i < N; i++) {
     if (water[i] !== 0) continue;
@@ -612,12 +634,14 @@ export function generateWorld(userOpts = {}) {
 
   // 12 — regions, nodes, roads, history ------------------------------------
   progress(0.78, 'drawing borders');
+  // one namer for the whole world, carrying the naming theme (null for World Forge's own worlds)
+  world._namer = new Namer({ namegen: opts.namegen, raceTable: opts.raceTable, seed: world.seed, theme: opts.nameTheme });
   buildRegions(world, opts);
   progress(0.86, 'founding towns');
   placeNodes(world, opts);
   progress(0.92, 'laying roads');
   buildRoads(world, opts);
-  if (opts.history) { progress(0.97, 'writing history'); makeHistory(world, opts); }
+  if (opts.history && opts.inhabited !== false) { progress(0.97, 'writing history'); makeHistory(world, opts); }
 
   let land = 0, waterCells = 0;
   for (let i = 0; i < N; i++) { if (water[i] === 0) land++; else waterCells++; }
@@ -762,27 +786,9 @@ function serialisableOpts(opts) {
   return o;
 }
 
-/**
- * How elevation turns into metres. Elevation 0.5 is always the shoreline (world.js puts sea level
- * there), so height is measured up from it and depth down from it. A world may carry its own scale
- * as `world.relief` — Star Forge does, so a low-gravity moon can have taller mountains than a heavy
- * planet — and without one, the classic World Forge scale of 4200 m either way is used.
- *
- *   relief = { landMetres, seaMetres, datum: 'sea' | 'datum', label }
- *     landMetres  metres at elevation 1 (the highest peak the scale allows)
- *     seaMetres   metres below the datum at elevation 0
- *     datum       'sea' — below 0.5 is water depth; 'datum' — no sea, below 0.5 is just low ground
- */
-export const DEFAULT_RELIEF = { landMetres: 4200, seaMetres: 4200, datum: 'sea', label: 'sea level' };
-
-/** Signed metres for an elevation value: positive above the datum, negative below it. */
-export function elevationToMetres(e, relief = DEFAULT_RELIEF) {
-  const r = relief || DEFAULT_RELIEF;
-  const land = Number.isFinite(r.landMetres) ? r.landMetres : DEFAULT_RELIEF.landMetres;
-  const sea = Number.isFinite(r.seaMetres) ? r.seaMetres : DEFAULT_RELIEF.seaMetres;
-  const v = Number.isFinite(e) ? e : 0.5;
-  return Math.round(v >= 0.5 ? (v - 0.5) * 2 * land : (v - 0.5) * 2 * sea);
-}
+// Heights: DEFAULT_RELIEF and elevationToMetres live in relief.js (the renderer needs them without
+// pulling in the generator) and are re-exported from here for old callers.
+export { DEFAULT_RELIEF, elevationToMetres };
 
 /** Readable info about one cell — used by the viewer's hover readout and by games. */
 export function cellInfo(world, x, y) {

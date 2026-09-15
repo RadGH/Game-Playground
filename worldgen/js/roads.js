@@ -115,6 +115,14 @@ export function buildRoads(world, opts) {
   const w = world.width, h = world.height;
   const rng = makeRng(subSeed(world.seed, 'roads'));
   const namer = world._namer || (world._namer = new Namer({ namegen: opts.namegen, raceTable: opts.raceTable, seed: world.seed }));
+  // nobody lives here: no roads, no bridges or fords, no sea lanes — skipped, not built and hidden
+  if (opts.inhabited === false) {
+    world.roads = [];
+    world.seaLanes = [];
+    world.roadCells = new Uint8Array(world.width * world.height);
+    for (const r of world.rivers) r.navigable = false;
+    return world;
+  }
   const cost = roadCostField(world);
   const roads = [];
   const bridgeCells = new Map();

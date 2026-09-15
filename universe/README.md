@@ -184,7 +184,7 @@ the work. `multi` means a real climate with several biomes, and `poles` adds ice
 
 | Archetype | Biomes | Family / palette | Temperature | Baseline lean | Rare elements it can carry | Hazards |
 |---|---|---|---|---|---|---|
-| **Barren Rock** | single | `rock` | 90–620 K | metals, stone | aetherite · cryonite · voltaic ore · pyrocrystal · umbral shale · glimmer salt · nullstone · emberlace | radiation, cold |
+| **Barren Rock** | single | `rock` + dust palette | 90–620 K | metals, stone | aetherite · cryonite · voltaic ore · pyrocrystal · umbral shale · glimmer salt · nullstone · emberlace | radiation, cold |
 | **Ice World** | single | `ice` | 40–235 K | water ice | cryonite · aetherite · umbral shale · nullstone · brinepearl | cold |
 | **Lava World** | single | `lava` + lava palette | 700–2200 K | metals | pyrocrystal · voltaic ore · helion gas · emberlace | heat, toxic, storms |
 | **Desert World** | single | `desert` + rust palette | 250–460 K | stone, metals | voltaic ore · pyrocrystal · glimmer salt · emberlace | heat, storms |
@@ -246,7 +246,7 @@ What a moon gets less of than a planet:
   (`0.35 + radius × 0.7`, capped at 0.9 of a planet's abundance). A second rare element is a third as
   likely as it is on a planet.
 - **air**: scaled by radius, so most moons come out at "none". Only a living moon keeps real air, and
-  only it can be breathable. An airless moon's map is dry — no rivers, no lakes, low sea level.
+  only it can be breathable. An airless moon's map is dry — see *What is on the ground* below.
 
 A locked moon keeps one face to **its planet**, not to the star, so the tidally locked day/night pass
 that a locked planet gets does not run on a moon.
@@ -357,7 +357,7 @@ planet and a deeper zoom once you are there. A moon uses half of whichever size 
 
 ## What this adds to World Forge
 
-Four new knobs, all off by default, so every existing world is unchanged
+Eight new knobs, all off by default, so every existing world is unchanged
 (`worldgen/js/world.js`, `biomes.js`, `render.js`):
 
 | Knob | What it does |
@@ -365,12 +365,49 @@ Four new knobs, all off by default, so every existing world is unchanged
 | `biomeLock` | A `BIOME_FAMILIES` key. Every land cell is forced into that family, picked by height and slope — an ice world is ice, tundra and snowy peaks and nothing else. |
 | `polarCaps` | 0…1, how far ice reaches down from the top and bottom rows. Land becomes Ice Sheet, water becomes **Sea Ice** (biome 25, appended so old saves still read correctly). |
 | `atmosphereTint` | `'#rrggbb'` or `{ color, strength }` — a colour wash over the drawn map, so a toxic sky yellows its own map. |
-| `palette` | A `PALETTES` key (`lava`, `crystal`, `toxic`, `void`, `ember`, `rust`) that swaps the biome colours without touching the biome table. |
+| `palette` | A `PALETTES` key (`lava`, `crystal`, `toxic`, `void`, `ember`, `rust`, `dust`) that swaps the biome colours without touching the biome table. |
+| `liquid` | `water` · `lava` · `none` — `none` is a dry world: no seas, lakes or rivers at any zoom. |
+| `frame` | `ocean` · `land` · `rim` — what the map edge fades into; dry bodies use `land`. |
+| `inhabited` | `false` skips settlements, ports, roads, bridges, sea lanes, borders and history. |
+| `nameTheme` | A vocabulary (`dead`, `ice`, `lava`, `crystal`, `void`, `desert`, `toxic`, `twilight`) with forbidden word lists. |
 
 Plus `BIOME_FAMILIES`, `familiesOf()`, `inFamily()`, `lockBiome()` and `palettedColors()` in
 `biomes.js`.
 
 ---
+
+## What is on the ground
+
+`surfaceOf(body)` in `planetmap.js` decides, per planet or moon, four World Forge knobs that are all
+off for World Forge's own worlds (see `../worldgen/README.md`, *Dry, empty and themed worlds*):
+
+| Archetype | `liquid` | Settled | `nameTheme` |
+|---|---|---|---|
+| Barren Rock, Barren Moon | none | no | `dead` |
+| Ice World, Ice Moon | none (frozen from pole to pole) | no | `ice` |
+| Crystal World | none | no | `crystal` |
+| Void-Touched | none | no | `void` |
+| Lava World, Volcanic Moon | lava | no | `lava` |
+| Desert World | water | no | `desert` |
+| Toxic World | water | no | `toxic` |
+| Tidally Locked | water | no | `twilight` |
+| Living (planet or moon), Ocean, Jungle, Tundra | water | **yes** | none (the classic vocabulary) |
+
+- **Water needs air.** Below 0.05 bar a body is dry whatever its archetype, and a dry body always
+  takes one of the dry vocabularies (`dead` unless it is ice, crystal or void).
+- **Settled** is the four archetypes whose air is breathable (system.js marks the same four). Only
+  those get settlements, ports, roads, bridges, sea lanes, drawn borders and history. Every other body
+  gets landmarks that need nobody — craters, vents, caves, ruins, monoliths, volcanoes — plus
+  dungeons (vaults, not lairs) and mountain passes.
+- **No liquid** means no ocean rim at the edge of the map (the frame is `land`), no seas, lakes or
+  rivers at any zoom, and dry basins where the sea would have been.
+- **Names** come from the theme's own words: *Thuktir Scar*, *the Grey Basin*, *the Flint Shelf*,
+  not *the Silver Fen*. A lava world may have *the Tralnit Lava Ocean*; a twilight world may have a
+  wood in its twilight ring, but never a kingdom.
+
+The biome families that single-biome bodies are locked to were cleaned up to match: a barren world's
+slopes are hills, not shrubland, drawn in the grey-brown `dust` palette rather than green; an ice world is ice and snowy peaks, not tundra scrub; a void-touched
+world has ash plains, not blighted forest.
 
 ## Heights
 
@@ -385,7 +422,7 @@ relief = { landMetres, seaMetres, datum: 'sea' | 'datum', label }
 | Rule | Why |
 |---|---|
 | `landMetres = 8800 × gravity^−0.72`, ±12% by seed, kept inside 2 400…26 000 m | a heavy world pulls its mountains down; at 1 g the tallest peaks sit near 9 km, at a third of a g about twice that |
-| `datum: 'sea'` when the archetype has a sea, it is not ice or lava, and there is air (≥ 0.05 bar) | only then is below 0.5 really water depth; the readout says *820 m below sea level* |
+| `datum: 'sea'` when `surfaceOf(body).liquid` is `water` | only then is below 0.5 really water depth; the readout says *820 m below sea level* |
 | otherwise `datum: 'datum'` (*the lava plain* on a lava world) | an airless rock or an ice shell has no sea to measure from, so low ground reads *−340 m below datum* |
 | `seaMetres` = 0.85 × `landMetres` with a sea, 0.45 × without | deep oceans on a sea world, shallower basins elsewhere |
 
@@ -511,8 +548,11 @@ colliding inside a system or between the stars of a galaxy, and the JSON round t
 - The drawn orbits are spaced for readability, not to scale: the ladder blends distance with the
   planet's place in the queue, so you cannot read the AU off the picture. The number on the card is
   the real one.
-- A moon's map is a framed island world like a planet's, so an airless moon still has a rim of
-  "ocean" around the edge of its map — the water is gone from the middle, not from the frame.
+- A lava world's seas and rivers are still World Forge water cells underneath, drawn molten by the
+  palette and named by the lava theme — `world.water` does not tell water from lava; `world.opts.liquid`
+  does.
+- The elevation legend is on the body's own relief scale, so two maps with the same colours can mean
+  very different heights; read the metres, not the colour.
 - Two planets in *different* systems can still share a name. Only names inside one system, and the
   star names across a galaxy, are deduped.
 - The surface map is a framed island world, not a globe (World Forge does not wrap), so the texture

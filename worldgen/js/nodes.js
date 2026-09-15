@@ -34,13 +34,23 @@ const LANDMARKS = [
   { kind: 'waterfall', tags: ['water', 'scenic'], fit: c => (c.river && c.drop > 0.035 ? 1.4 : 0) },
   { kind: 'ancientwood', tags: ['forest', 'scenic'], fit: c => (c.forest ? 0.9 + c.moist * 0.4 : 0) },
   { kind: 'battlefield', tags: ['battle', 'lore'], fit: c => (c.open ? 0.6 + c.aura * 0.5 : 0.15) },
+  // the two below only appear on an uninhabited world (c.wild), so World Forge's own maps are untouched
+  { kind: 'crater', tags: ['crater', 'explore'], fit: c => (c.wild ? (c.dry && c.elev < 0.5 ? 1.0 : c.open ? 0.55 : c.relief ? 0.2 : 0.4) : 0) },
+  { kind: 'vent', tags: ['vent', 'hazard'], fit: c => (c.wild && (c.volcanic || c.biome === 'volcanic' || c.biome === 'ashPlain' || c.magic > 0.62) ? 1.1 : 0) },
 ];
+
+/** What an uninhabited world keeps: natural features and old remains, nothing anyone lives in or tends. */
+const WILD_KINDS = new Set(['ruin', 'cave', 'monolith', 'volcano', 'crater', 'vent']);
 
 /** Harsh ground that hides dungeons and lairs. */
 const LAIR_BIOMES = new Set(['badlands', 'marsh', 'mountains', 'snowyPeaks', 'volcanic', 'blighted', 'ashPlain', 'veiledHills', 'desert', 'ice', 'rainforest', 'glimmerwaste']);
 
 export function placeNodes(world, opts) {
   const w = world.width, h = world.height, N = w * h;
+  // an uninhabited world gets no settlements or ports at all — the passes that place them are skipped,
+  // not run and hidden — and only the WILD_KINDS of landmark; dungeons stay, lairs do not
+  const inhabited = opts.inhabited !== false;
+  const dry = opts.liquid === 'none';
   const rng = makeRng(subSeed(world.seed, 'nodes'));
   const namer = world._namer || (world._namer = new Namer({ namegen: opts.namegen, raceTable: opts.raceTable, seed: world.seed }));
   const areaScale = Math.sqrt(N / (256 * 128));
@@ -88,6 +98,7 @@ export function placeNodes(world, opts) {
   const cand = [];
   for (let i = 0; i < N; i++) if (habitability[i] > 0.45) cand.push(i);
   cand.sort((a, b) => habitability[b] - habitability[a]);
+  if (!inhabited) cand.length = 0;          // no capitals, towns, villages or hamlets
 
   const far = (x, y, minDist, list = placed) => {
     const m2 = minDist * minDist;
@@ -161,7 +172,7 @@ export function placeNodes(world, opts) {
   }
 
   // ---- standalone ports: a harbour where a stretch of coast has no town of its own
-  const portDensity = Math.round(totalSettlements * 0.12 * (0.3 + density));
+  const portDensity = inhabited ? Math.round(totalSettlements * 0.12 * (0.3 + density)) : 0;
   {
     const coastCand = [];
     for (let i = 0; i < N; i++) if (world.water[i] === 0 && nearOcean[i] && habitability[i] > 0.35) coastCand.push(i);
@@ -197,8 +208,10 @@ export function placeNodes(world, opts) {
         aura: world.aura[i], magic: world.magic[i], elev: world.elevation[i], slope: world.slope[i], moist: world.moisture[i],
         biome: b.key, relief: b.tags.includes('relief'), forest: b.tags.includes('forest'), open: b.tags.includes('open'),
         habit: b.habit ?? 0.3, river: world.river[i] > 0, drop, volcanic: world.volcanic[i] === 1,
+        wild: !inhabited, dry,
       };
       for (const L of LANDMARKS) {
+        if (!inhabited && !WILD_KINDS.has(L.kind)) continue;
         const f = L.fit(c);
         if (f > 0.35) scored.push({ i, kind: L.kind, tags: L.tags, score: f * (0.75 + rng() * 0.5) });
       }
@@ -235,7 +248,7 @@ export function placeNodes(world, opts) {
       const x = s.i % w, y = (s.i / w) | 0;
       if (!far(x, y, 5.5 * areaScale)) continue;
       const rid = regionAt(s.i); const race = world.regions[rid]?.race || 'orc';
-      const isLair = rng() < 0.45;
+      const isLair = inhabited && rng() < 0.45;       // a lair is something living; a dead world has vaults
       const kind = isLair ? 'lair' : 'dungeon';
       const nm = namer.unique(namer.landmark(kind, race, subSeed(world.seed, 'dg' + s.i)), race, s.i);
       const node = {

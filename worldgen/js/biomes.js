@@ -52,6 +52,8 @@ export const WATER_IDS = [0, 1, 2, 3, 25];
 /** Colour ramps for the debug layers. */
 export const RAMPS = {
   elevation: [[0, '#08111c'], [0.35, '#14486e'], [0.5, '#cbbd8a'], [0.62, '#5e8a45'], [0.75, '#8d7a4f'], [0.88, '#8d8279'], [1, '#ffffff']],
+  // a world with no sea: low basins in dark rock, not ocean blue (render.js picks it via relief.js hasSea)
+  elevationDry: [[0, '#1c1814'], [0.3, '#3a322b'], [0.5, '#6e6254'], [0.62, '#8a7a62'], [0.75, '#9a8c78'], [0.88, '#b8b0a4'], [1, '#ffffff']],
   temperature: [[0, '#2b4f9e'], [0.3, '#4aa8d8'], [0.5, '#8fd08a'], [0.7, '#e2c260'], [1, '#c4372c']],
   moisture: [[0, '#b8a06a'], [0.35, '#c9c58a'], [0.6, '#5fa86a'], [1, '#1c5f8f']],
   drainage: [[0, '#101820'], [0.25, '#1d3a4a'], [0.6, '#2f7fa8'], [1, '#9fe0ff']],
@@ -161,14 +163,14 @@ export const BIOME_FAMILIES = {
   grass:   { name: 'Green world',   members: ['grassland', 'shrubland', 'temperateForest', 'hills', 'mountains'], water: 'liquid' },
   jungle:  { name: 'Jungle world',  members: ['marsh', 'rainforest', 'rainforest', 'hills', 'mountains'], water: 'liquid' },
   desert:  { name: 'Desert world',  members: ['desert', 'desert', 'badlands', 'badlands', 'mountains'], water: 'liquid' },
-  ice:     { name: 'Ice world',     members: ['ice', 'ice', 'tundra', 'snowyPeaks', 'snowyPeaks'], water: 'frozen' },
+  ice:     { name: 'Ice world',     members: ['ice', 'ice', 'ice', 'snowyPeaks', 'snowyPeaks'], water: 'frozen' },
   tundra:  { name: 'Tundra world',  members: ['tundra', 'tundra', 'borealForest', 'hills', 'snowyPeaks'], water: 'liquid' },
   ocean:   { name: 'Ocean world',   members: ['beach', 'marsh', 'grassland', 'hills', 'mountains'], water: 'liquid' },
-  rock:    { name: 'Barren world',  members: ['badlands', 'badlands', 'shrubland', 'hills', 'mountains'], water: 'none' },
+  rock:    { name: 'Barren world',  members: ['badlands', 'badlands', 'hills', 'hills', 'mountains'], water: 'none' },
   lava:    { name: 'Lava world',    members: ['volcanic', 'volcanic', 'ashPlain', 'badlands', 'mountains'], water: 'lava' },
   toxic:   { name: 'Toxic world',   members: ['marsh', 'blighted', 'ashPlain', 'veiledHills', 'mountains'], water: 'liquid' },
-  crystal: { name: 'Crystal world', members: ['glimmerwaste', 'glimmerwaste', 'veiledHills', 'snowyPeaks', 'snowyPeaks'], water: 'liquid' },
-  void:    { name: 'Void-touched',  members: ['ashPlain', 'blighted', 'veiledHills', 'veiledHills', 'mountains'], water: 'liquid' },
+  crystal: { name: 'Crystal world', members: ['glimmerwaste', 'glimmerwaste', 'veiledHills', 'snowyPeaks', 'snowyPeaks'], water: 'none' },
+  void:    { name: 'Void-touched',  members: ['ashPlain', 'ashPlain', 'veiledHills', 'veiledHills', 'mountains'], water: 'none' },
 };
 
 /**
@@ -212,6 +214,8 @@ export const PALETTES = {
   toxic:   { deepOcean: '#16220e', ocean: '#263a12', coast: '#41601c', lake: '#6f9a22', marsh: '#4d6b24', blighted: '#5a5030', ashPlain: '#5c5a42', veiledHills: '#6a6440', mountains: '#5e5c4c' },
   void:    { deepOcean: '#0a0810', ocean: '#140f22', coast: '#241a3a', lake: '#3a2a5c', ashPlain: '#2e2a38', blighted: '#3a2f4c', veiledHills: '#4a3c62', mountains: '#3e3a48', badlands: '#463c52' },
   ember:   { deepOcean: '#1a0f14', ocean: '#33202a', coast: '#5c3c3a', badlands: '#8a4a2e', desert: '#c08a54', mountains: '#6e5a50' },
+  // dead grey-brown rock: hills and scrub without the green, for an airless world
+  dust:    { badlands: '#8c7f70', hills: '#77706a', mountains: '#5e5954', shrubland: '#857c70', desert: '#a09484', snowyPeaks: '#c9c4bd', ashPlain: '#6a655f', volcanic: '#4a4440' },
   rust:    { deepOcean: '#1b1310', ocean: '#3a2a20', coast: '#6a4a34', desert: '#c08a58', badlands: '#8f5330', shrubland: '#8a7346', hills: '#8a6a44', mountains: '#7a6252' },
 };
 

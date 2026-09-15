@@ -534,6 +534,7 @@ function layerUnavailable(key, kind) {
   }
   if (key === 'roads' && !world.roads.length && !(world.seaLanes || []).length) return `nobody has built roads on ${name}`;
   if (key === 'nodes' && !world.nodes.length) return `no settlements or sites on ${name}`;
+  if ((key === 'borders' || key === 'regions') && world.opts?.inhabited === false) return `nobody has drawn borders on ${name}`;
   if ((key === 'borders' || key === 'regions') && !world.regions.length) return `${name} has no named regions`;
   if (key === 'aura' && maxAbs(world.aura) < 0.15) return `no aura on ${name}`;
   if (key === 'magic' && kind === 'layer' && maxAbs(world.magic) < 0.15) return `no magic field on ${name}`;

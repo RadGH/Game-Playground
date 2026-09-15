@@ -74,3 +74,7 @@
 .view-tabs .chip.off { opacity: .4; cursor: default; }
 
 @media (max-width: 1100px) { .stage { min-height: 300px; } }
+
+/* the shared Layers panel (worldgen/js/layers-panel.js): a layer that does not apply to this body */
+.chips.layers .chip.off { opacity: .4; cursor: not-allowed; }
+.layer-notes { margin: 6px 0 0; font-size: 11px; line-height: 1.35; }

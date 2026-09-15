@@ -6,6 +6,7 @@ import { el, knob, select, checkbox, button, textInput, panel, toast } from '../
 import { DEFAULTS, METHODS, WINDS, PRESETS, cellInfo, nearestNode } from './world.js';
 import { BIOMES, BIOME_BLURB } from './biomes.js';
 import { renderWorld, renderRegion, renderLocal, cellAt, legend as legendRows, DEFAULT_LAYERS, nodeStyle } from './render.js';
+import { layersPanel } from './layers-panel.js';
 import { toJSON, toPNG, download, jsonSizeKB } from './export.js';
 import { worldSummary } from './history.js';
 
@@ -373,21 +374,12 @@ function buildRight() {
   const right = $('right'); right.replaceChildren();
   const w = state.world;
 
-  // layers
-  const layerChips = el('div', { class: 'chips layers' });
-  const LAYER_NAMES = ['biomes', 'elevation', 'temperature', 'moisture', 'drainage', 'aura', 'magic', 'regions'];
-  for (const name of LAYER_NAMES) {
-    const chip = el('span', {
-      class: 'chip' + (state.layer === name ? ' on' : ''), text: name,
-      onclick: () => { state.layer = name; state.layers.regions = name === 'regions'; buildRight(); draw(); },
-    });
-    layerChips.append(chip);
-  }
-  const toggles = el('div', { class: 'grid c2' });
-  for (const key of ['hillshade', 'rivers', 'roads', 'nodes', 'labels', 'borders', 'aura']) {
-    toggles.append(checkbox(key === 'aura' ? 'aura wash' : key, state.layers[key], v => { state.layers[key] = v; draw(); }));
-  }
-  right.append(panel('Layers', layerChips, toggles));
+  // layers (the panel itself lives in layers-panel.js, shared with Star Forge)
+  right.append(layersPanel({
+    layer: state.layer, layers: state.layers,
+    onLayer: name => { state.layer = name; state.layers.regions = name === 'regions'; buildRight(); draw(); },
+    onToggle: (key, on) => { state.layers[key] = on; draw(); },
+  }));
 
   if (!w) { right.append(el('p', { class: 'muted small', text: 'Generate a world to see its regions.' })); return; }
 

@@ -21,6 +21,7 @@ import {
 import { renderWorld, renderRegion, renderLocal, cellAt, legend as legendRows, DEFAULT_LAYERS } from '../../worldgen/js/render.js';
 import { generateRegionDetail, generateLocalDetail } from '../../worldgen/js/local.js';
 import { cellInfo } from '../../worldgen/js/world.js';
+import { layersPanel } from '../../worldgen/js/layers-panel.js';
 import { NameGen } from '../../namegen/js/namegen.js';
 
 const $ = id => document.getElementById(id);
@@ -451,8 +452,8 @@ function drawMap() {
   c.height = Math.max(160, Math.round(box.height * dpr));
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#05070d'; ctx.fillRect(0, 0, c.width, c.height);
-  const layers = { ...state.layers, labels: state.mapLevel !== 'local' };
-  const opts = { layer: state.mapLayer, layers };
+  const { layer, layers } = effectiveLayers();
+  const opts = { layer, layers: { ...layers, labels: layers.labels && state.mapLevel !== 'local' } };
   if (state.mapLevel === 'world' && state.world) state.mapView = renderWorld(ctx, state.world, opts);
   else if (state.mapLevel === 'region' && state.detail) state.mapView = renderRegion(ctx, state.detail, opts);
   else if (state.mapLevel === 'local' && state.tile) state.mapView = renderLocal(ctx, state.tile, opts);
@@ -472,7 +473,7 @@ $('map').addEventListener('mousemove', e => {
   out.innerHTML = '';
   out.append(
     el('span', {}, 'biome: ', el('b', { text: info.biomeName })),
-    el('span', {}, 'height: ', el('b', { text: info.metres + ' m' })),
+    el('span', { class: 'height' }, heightLabel(info) + ': ', el('b', { text: heightText(info) })),
     el('span', {}, 'temp: ', el('b', { text: info.temperatureC + ' °C' })),
     el('span', {}, 'region: ', el('b', { text: info.region?.name || '—' })),
   );
@@ -498,6 +499,68 @@ $('map').addEventListener('click', e => {
   }
 });
 
+/**
+ * The height part of the hover readout. cellInfo() reads the body's own relief scale (planetmap.js
+ * reliefFor), so a sea world reports depth below sea level, and a world with no sea reports height
+ * above or below its datum.
+ */
+function heightLabel(info) {
+  if (info.depthMetres > 0) return 'depth';
+  return 'height';
+}
+function heightText(info) {
+  const fmt = n => Math.abs(n).toLocaleString('en-US');
+  if (info.depthMetres > 0) return `${fmt(info.depthMetres)} m below ${info.datumLabel}`;
+  if (info.heightMetres < 0) return `−${fmt(info.heightMetres)} m below ${info.datumLabel}`;
+  return `${fmt(info.heightMetres)} m above ${info.datumLabel}`;
+}
+
+// ---------------------------------------------------------------------------- map layers
+//
+// The Layers panel is World Forge's own (worldgen/js/layers-panel.js). What Star Forge adds is the
+// per-body check: a layer that has nothing to show on this map is greyed out with the reason, and
+// drawing skips it — but the viewer's choice stays in state.layers / state.mapLayer, so it comes back
+// on the next body where it does apply.
+
+/** Why a layer does not apply to the map on screen, or null when it does. */
+function layerUnavailable(key, kind) {
+  const world = state.world, body = currentBody();
+  if (!world || !body) return null;
+  const name = body.name;
+  const airless = (body.atmosphere?.density ?? 0) < 0.02;
+  const maxAbs = arr => { let m = 0; for (let i = 0; i < arr.length; i++) { const v = Math.abs(arr[i]); if (v > m) m = v; } return m; };
+  if (key === 'rivers' || (key === 'drainage' && kind === 'layer')) {
+    if (!world.rivers.length) return airless ? `nothing liquid flows on ${name}` : `no rivers formed on ${name}`;
+  }
+  if (key === 'roads' && !world.roads.length && !(world.seaLanes || []).length) return `nobody has built roads on ${name}`;
+  if (key === 'nodes' && !world.nodes.length) return `no settlements or sites on ${name}`;
+  if ((key === 'borders' || key === 'regions') && !world.regions.length) return `${name} has no named regions`;
+  if (key === 'aura' && maxAbs(world.aura) < 0.15) return `no aura on ${name}`;
+  if (key === 'magic' && kind === 'layer' && maxAbs(world.magic) < 0.15) return `no magic field on ${name}`;
+  if (key === 'moisture' && kind === 'layer' && airless) return `no air, so no rain on ${name}`;
+  return null;
+}
+
+/** The layer and toggles to actually draw with: the viewer's choice, minus what does not apply. */
+function effectiveLayers() {
+  const layers = { ...state.layers };
+  for (const key of Object.keys(layers)) if (layerUnavailable(key, 'toggle')) layers[key] = false;
+  let layer = state.mapLayer || 'biomes';
+  if (layerUnavailable(layer, 'layer')) layer = 'biomes';
+  if (state.mapLevel === 'region' && layer === 'regions') layer = 'biomes';     // as World Forge does
+  layers.regions = layer === 'regions';
+  return { layer, layers };
+}
+
+function mapLayersPanel() {
+  return layersPanel({
+    layer: effectiveLayers().layer, layers: state.layers,
+    onLayer: name => { state.mapLayer = name; drawMap(); renderLegend(); renderRight(); },
+    onToggle: (key, on) => { state.layers[key] = on; drawMap(); },
+    unavailable: layerUnavailable,
+  });
+}
+
 function openRegion(id) {
   setBusy(true, 'zooming in');
   state.detail = generateRegionDetail(state.world, id, { factor: 5 });
@@ -522,7 +585,7 @@ function openLocal(x, y) {
 function back() {
   if (state.view === 'map' && state.mapLevel === 'local') { state.mapLevel = 'region'; drawMap(); renderCrumbs(); return; }
   if (state.view === 'map' && state.mapLevel === 'region') { state.mapLevel = 'world'; state.detail = null; drawMap(); renderCrumbs(); return; }
-  if (state.view === 'map') { showView(state.moon ? 'moon' : 'planet'); return; }
+  if (state.view === 'map') { showView(state.moon ? 'moon' : 'planet'); renderRight(); return; }
   if (state.view === 'moon') { state.moon = null; state.world = null; buildPlanetScene(state.planet); showView('planet'); renderRight(); return; }
   if (state.view === 'planet') { buildSystemScene(); showView('system'); return; }
   if (state.view === 'system') { showView('galaxy'); return; }
@@ -559,7 +622,7 @@ function renderLegend() {
     }
   } else if (state.view === 'map' && state.world) {
     const src = state.mapLevel === 'region' ? state.detail : state.world;
-    for (const row of legendRows(src, state.mapLayer).slice(0, 14)) {
+    for (const row of legendRows(src, effectiveLayers().layer).slice(0, 14)) {
       L.append(el('span', { class: 'sw' }, el('i', { class: 'sq', style: { background: row.color } }), `${row.label} ${(row.share * 100).toFixed(0)}%`));
     }
   }
@@ -646,6 +709,7 @@ function renderRight() {
   else if (state.planet) right.append(planetCard(state.planet));
   else if (state.star) right.append(starCard(state.star));
   else right.append(galaxyCard());
+  if (state.view === 'map' && state.world) right.append(mapLayersPanel());
 
   // --- lists
   if (state.planet?.moons?.length) right.append(moonList(state.planet));
@@ -922,6 +986,7 @@ generate();
 window.universeDemo = {
   state, generate, openStar, openPlanet, openMoon, showMap, openRegion, openLocal, showView, back,
   currentBody, orbitLayout: () => state.orbit, parentDrawn: () => parentDrawn,
+  layerUnavailable, effectiveLayers,
   setOpt: (k, v) => { state.opts[k] = v; },
   pixelStats, texturesFor,
   elements: { baseline: BASELINE, rare: RARE },

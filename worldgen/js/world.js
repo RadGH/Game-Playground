@@ -762,17 +762,47 @@ function serialisableOpts(opts) {
   return o;
 }
 
+/**
+ * How elevation turns into metres. Elevation 0.5 is always the shoreline (world.js puts sea level
+ * there), so height is measured up from it and depth down from it. A world may carry its own scale
+ * as `world.relief` — Star Forge does, so a low-gravity moon can have taller mountains than a heavy
+ * planet — and without one, the classic World Forge scale of 4200 m either way is used.
+ *
+ *   relief = { landMetres, seaMetres, datum: 'sea' | 'datum', label }
+ *     landMetres  metres at elevation 1 (the highest peak the scale allows)
+ *     seaMetres   metres below the datum at elevation 0
+ *     datum       'sea' — below 0.5 is water depth; 'datum' — no sea, below 0.5 is just low ground
+ */
+export const DEFAULT_RELIEF = { landMetres: 4200, seaMetres: 4200, datum: 'sea', label: 'sea level' };
+
+/** Signed metres for an elevation value: positive above the datum, negative below it. */
+export function elevationToMetres(e, relief = DEFAULT_RELIEF) {
+  const r = relief || DEFAULT_RELIEF;
+  const land = Number.isFinite(r.landMetres) ? r.landMetres : DEFAULT_RELIEF.landMetres;
+  const sea = Number.isFinite(r.seaMetres) ? r.seaMetres : DEFAULT_RELIEF.seaMetres;
+  const v = Number.isFinite(e) ? e : 0.5;
+  return Math.round(v >= 0.5 ? (v - 0.5) * 2 * land : (v - 0.5) * 2 * sea);
+}
+
 /** Readable info about one cell — used by the viewer's hover readout and by games. */
 export function cellInfo(world, x, y) {
   if (x < 0 || y < 0 || x >= world.width || y >= world.height) return null;
   const i = y * world.width + x;
   const b = BIOMES[world.biome[i]];
   const region = world.region ? world.regions[world.region[i]] : null;
+  const relief = world.relief || DEFAULT_RELIEF;
+  const heightMetres = elevationToMetres(world.elevation[i], relief);
+  const wet = world.water[i] !== 0;
   return {
     x, y, index: i,
     biome: b.key, biomeName: b.name,
     elevation: world.elevation[i],
-    elevationMetres: Math.round((world.elevation[i] - 0.5) * 2 * 4200),
+    elevationMetres: heightMetres,
+    // the same number, spelled out: height above the datum (negative below it), how deep the water
+    // is when there is a sea, and what the height is measured from
+    heightMetres,
+    depthMetres: wet && relief.datum !== 'datum' ? Math.max(0, -heightMetres) : 0,
+    datum: relief.datum || 'sea', datumLabel: relief.label || (relief.datum === 'datum' ? 'datum' : 'sea level'),
     temperature: world.temperature[i],
     temperatureC: Math.round(-24 + world.temperature[i] * 62),
     moisture: world.moisture[i],

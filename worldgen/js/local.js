@@ -147,6 +147,7 @@ export function generateRegionDetail(world, regionId, opts = {}) {
     volcanic: new Uint8Array(N), river: new Uint8Array(N),
     streams, nodes: [], paths: [], rivers: [], regions: world.regions, opts: world.opts,
     metresPerCell: Math.round(24000 / factor),
+    relief: world.relief || null,          // so cellInfo() measures heights on the same scale
   };
   for (const s of streams) for (const c of s.cells) detail.river[c] = s.major ? 2 : 1;
 
@@ -340,5 +341,6 @@ export function generateLocalDetail(world, wx, wy, opts = {}) {
     region: null, regions: [],
     title: node ? `${node.name} — ${parentBiome.name}` : region ? `${region.name} — ${parentBiome.name}` : parentBiome.name,
     sizeMetres: size * metres,
+    relief: world.relief || null,
   };
 }

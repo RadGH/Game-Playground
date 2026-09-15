@@ -324,3 +324,98 @@ test('the planet behind a moon keeps its own surface, and a locked world has one
 
   expect(errors).toEqual([]);
 });
+
+test('surface maps read real heights, and the Layers panel follows each body', async ({ page }) => {
+  const errors = collectErrors(page);
+  await page.goto('universe/');
+  await page.waitForFunction(() => window.universeDemo && window.universeDemo.ready(), null, { timeout: 40_000 });
+
+  // a rocky planet with an airless moon
+  const target = await page.evaluate(() => {
+    const d = window.universeDemo;
+    for (const s of d.state.galaxy.stars) {
+      const sys = d.openStar(s.id);
+      const p = sys.planets.find(x => !x.giant && x.moons.some(m => m.atmosphere.density < 0.02));
+      if (p) return { planetId: p.id, moonId: p.moons.find(m => m.atmosphere.density < 0.02).id };
+    }
+    return null;
+  });
+  expect(target).not.toBeNull();
+
+  /** Move the mouse over a grid of points on the map and return every height readout. */
+  const hoverHeights = async () => {
+    const box = await page.locator('#map').boundingBox();
+    const out = [];
+    for (const fx of [0.3, 0.42, 0.5, 0.58, 0.7]) {
+      for (const fy of [0.35, 0.5, 0.65]) {
+        await page.mouse.move(box.x + box.width * fx, box.y + box.height * fy);
+        const text = await page.locator('#readout .height').textContent().catch(() => null);
+        if (text) out.push(text);
+      }
+    }
+    return out;
+  };
+  const checkHeights = texts => {
+    expect(texts.length).toBeGreaterThan(8);
+    for (const t of texts) {
+      expect(t).not.toContain('undefined');
+      expect(t).not.toContain('NaN');
+      const m = t.replace(/,/g, '').match(/([0-9]+) m (above|below) /);
+      expect(m, 'not a height: ' + t).not.toBeNull();
+      expect(Number.isFinite(+m[1])).toBe(true);
+    }
+  };
+
+  // 1 — the planet's map
+  await page.evaluate(id => { window.universeDemo.openPlanet(id); window.universeDemo.showMap(); }, target.planetId);
+  const planetTexts = await hoverHeights();
+  checkHeights(planetTexts);
+
+  // the Layers panel is up, with World Forge's chips and toggles
+  const panel = page.locator('#right .panel', { has: page.locator('h3', { hasText: /^Layers$/ }) });
+  await expect(panel).toHaveCount(1);
+  await expect(panel.locator('.chips.layers .chip')).toHaveCount(8);
+  await expect(panel.locator('[data-toggle]')).toHaveCount(7);
+
+  // pick the elevation layer and turn hillshade off: remembered across bodies
+  await panel.locator('.chip[data-layer="elevation"]').click();
+  await page.locator('#right [data-toggle="hillshade"] input').uncheck();
+  expect(await page.evaluate(() => window.universeDemo.state.mapLayer)).toBe('elevation');
+  expect(await page.evaluate(() => window.universeDemo.state.layers.hillshade)).toBe(false);
+  await expect(page.locator('#legend')).toContainText('peak');
+
+  // 2 — its airless moon: heights still read, from a datum, and what does not apply is greyed out
+  await page.evaluate(id => { window.universeDemo.back(); window.universeDemo.openMoon(id); window.universeDemo.showMap(); }, target.moonId);
+  const moonTexts = await hoverHeights();
+  checkHeights(moonTexts);
+  expect(moonTexts.some(t => /datum/.test(t))).toBe(true);
+  expect(moonTexts.every(t => !/depth/.test(t))).toBe(true);
+
+  const moonPanel = page.locator('#right .panel', { has: page.locator('h3', { hasText: /^Layers$/ }) });
+  // moisture never applies to an airless moon; rivers only if the map somehow grew some
+  const moisture = moonPanel.locator('.chip[data-layer="moisture"]');
+  await expect(moisture).toHaveClass(/off/);
+  expect(await moisture.getAttribute('title')).toMatch(/no air/);
+  const noRivers = await page.evaluate(() => window.universeDemo.state.world.rivers.length === 0);
+  if (noRivers) {
+    const rivers = moonPanel.locator('[data-toggle="rivers"]');
+    await expect(rivers.locator('input')).toBeDisabled();
+    expect(await rivers.getAttribute('title')).toMatch(/nothing liquid flows/);
+  }
+  await expect(moonPanel.locator('.layer-notes')).toContainText('Not on this map');
+
+  // the choices made on the planet carried over
+  expect(await page.evaluate(() => window.universeDemo.state.mapLayer)).toBe('elevation');
+  await expect(moonPanel.locator('.chip[data-layer="elevation"]')).toHaveClass(/on/);
+  await expect(moonPanel.locator('[data-toggle="hillshade"] input')).not.toBeChecked();
+  await page.screenshot({ path: 'test-results/universe-moon-layers.png' });
+
+  // 3 — back on the planet, same choices, and leaving the map takes the panel away
+  await page.evaluate(id => { window.universeDemo.back(); window.universeDemo.back(); window.universeDemo.openPlanet(id); window.universeDemo.showMap(); }, target.planetId);
+  await expect(page.locator('#right .chip[data-layer="elevation"]')).toHaveClass(/on/);
+  await expect(page.locator('#right [data-toggle="hillshade"] input')).not.toBeChecked();
+  await page.evaluate(() => window.universeDemo.back());
+  await expect(page.locator('#right .chips.layers')).toHaveCount(0);
+
+  expect(errors).toEqual([]);
+});

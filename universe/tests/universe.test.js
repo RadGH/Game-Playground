@@ -13,7 +13,9 @@ import {
   generateSystem, ARCHETYPES, ARCHETYPE_KEYS, ARCH_BY_KEY, planetSummary, bodies,
   MIN_ORBIT_RATIO, MIN_ORBIT_RATIO_OUTER, orbitRatios, orbitLayout, moonsOf, moonById,
 } from '../js/system.js';
-import { planetWorldOpts, generatePlanetMap, hasSurfaceMap, familyShare, mapMix, clearMapCache, moonMapSize, mapSizeFor, columnClimate } from '../js/planetmap.js';
+import { planetWorldOpts, generatePlanetMap, hasSurfaceMap, familyShare, mapMix, clearMapCache, moonMapSize, mapSizeFor, columnClimate, reliefFor } from '../js/planetmap.js';
+import { cellInfo } from '../../worldgen/js/world.js';
+import { generateRegionDetail } from '../../worldgen/js/local.js';
 import { BASELINE, RARE, rareFor } from '../js/elements.js';
 import { toJSON, fromJSON, galaxyToJSON, galaxyFromJSON, systemToJSON, systemFromJSON, regenerate, jsonSizeKB, moonIndex, moonToJSON, moonFromJSON } from '../js/export.js';
 import { BIOME_FAMILIES, inFamily, BIOMES } from '../../worldgen/js/biomes.js';
@@ -598,5 +600,61 @@ test('nothing in a system shares a name, and no two stars in a galaxy do either'
       assert.equal(new Set(names).size, names.length,
         `${star.name}: a name is used twice — ${names.filter((n, i) => names.indexOf(n) !== i).join(', ')}`);
     }
+  }
+});
+
+
+// ---------------------------------------------------------------------------- heights (SF3)
+
+test('every body gets a height scale: lighter bodies stand taller, and it never changes', () => {
+  const bodies = [...big.planets.filter(p => !p.giant).slice(0, 150), ...moonSample.moons.slice(0, 150).map(x => x.moon)];
+  for (const b of bodies) {
+    const r = reliefFor(b);
+    assert.ok(Number.isFinite(r.landMetres) && r.landMetres >= 2400 && r.landMetres <= 26000, `${b.name}: ${r.landMetres} m`);
+    assert.ok(Number.isFinite(r.seaMetres) && r.seaMetres > 0 && r.seaMetres <= r.landMetres);
+    assert.ok(r.datum === 'sea' || r.datum === 'datum');
+    assert.ok(typeof r.label === 'string' && r.label.length > 2);
+    assert.deepEqual(reliefFor(JSON.parse(JSON.stringify(b))), r, b.name + ': the scale changed on a second look');
+  }
+  // a much lighter body of the same kind has taller relief
+  const heavy = reliefFor({ seed: 5, archetype: 'barren', gravity: 1.4, atmosphere: { density: 0 } });
+  const light = reliefFor({ seed: 5, archetype: 'barren', gravity: 0.2, atmosphere: { density: 0 } });
+  assert.ok(light.landMetres > heavy.landMetres * 1.5, `${light.landMetres} vs ${heavy.landMetres}`);
+  // a real sea measures from sea level; airless rock, ice shells and lava plains from a datum
+  assert.equal(reliefFor({ seed: 1, archetype: 'ocean', gravity: 1, atmosphere: { density: 1 } }).datum, 'sea');
+  assert.equal(reliefFor({ seed: 1, archetype: 'barren', gravity: 0.3, atmosphere: { density: 0 } }).datum, 'datum');
+  assert.equal(reliefFor({ seed: 1, archetype: 'ice', gravity: 0.3, atmosphere: { density: 0.2 } }).datum, 'datum');
+  assert.equal(reliefFor({ seed: 1, archetype: 'lava', gravity: 1, atmosphere: { density: 0.5 } }).datum, 'datum');
+});
+
+test('hovering any cell of a planet, moon or region map reads a real height', () => {
+  clearMapCache();
+  const planet = big.planets.find(p => p.archetype === 'ocean') || big.planets.find(p => !p.giant);
+  const { moon } = moonSample.moons.find(x => x.moon.atmosphere.density < 0.02);
+  for (const body of [planet, moon]) {
+    const world = generatePlanetMap(body, { ...mapSizeFor(body, { width: 128, height: 64 }), force: true });
+    assert.deepEqual(world.relief, reliefFor(body));
+    let wet = 0;
+    for (let y = 0; y < world.height; y += 3) {
+      for (let x = 0; x < world.width; x += 3) {
+        const info = cellInfo(world, x, y);
+        assert.ok(Number.isFinite(info.heightMetres), `${body.name} ${x},${y}: height ${info.heightMetres}`);
+        assert.ok(Number.isFinite(info.depthMetres) && info.depthMetres >= 0);
+        assert.equal(info.elevationMetres, info.heightMetres);
+        assert.ok(Math.abs(info.heightMetres) <= Math.max(world.relief.landMetres, world.relief.seaMetres));
+        if (info.water !== 'land') {
+          wet++;
+          if (world.relief.datum === 'sea') assert.ok(info.depthMetres >= 0);
+          else assert.equal(info.depthMetres, 0, 'a body with no sea reports no depth');
+        }
+        assert.equal(info.datum, world.relief.datum);
+      }
+    }
+    assert.ok(wet > 0, body.name + ': expected some low ground to check');
+    // the zoomed-in region keeps the same scale
+    const region = world.regions.slice().sort((a, b) => b.cells - a.cells)[0];
+    const detail = generateRegionDetail(world, region.id, { factor: 5 });
+    assert.deepEqual(detail.relief, world.relief);
+    assert.ok(Number.isFinite(cellInfo(detail, 2, 2).heightMetres));
   }
 });

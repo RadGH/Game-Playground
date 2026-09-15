@@ -68,12 +68,13 @@ ancientwood/battlefield`, `dungeon/lair`, `bridge/ford`).
 | `js/noise.js` | Our own simplex 2D/3D, fBm, ridged, billow, domain warp, seeded rng, normalise/quantile/blur helpers. No libraries. |
 | `js/biomes.js` | The biome table (26 entries: the aura ones, plus Sea Ice for frozen water) and `classify()` — temperature × moisture × elevation → biome id. Also the debug colour ramps, the `BIOME_FAMILIES` table with `familiesOf`/`inFamily`/`lockBiome` (the `biomeLock` knob), and `PALETTES`/`palettedColors` for whole-map colour swaps. |
 | `js/names.js` | `Namer`: wraps Name Forge (`/namegen/`) when a game has it, falls back to a built-in syllable namer so `worldgen/` also works alone. Names regions, settlements, ranges, rivers, lakes, seas, forests, landmarks and people. |
-| `js/world.js` | `generateWorld(opts)` — the whole macro pipeline. Also `DEFAULTS`, `METHODS`, `PRESETS`, `cellInfo`, `nearestNode`. |
+| `js/world.js` | `generateWorld(opts)` — the whole macro pipeline. Also `DEFAULTS`, `METHODS`, `PRESETS`, `cellInfo`, `nearestNode`, `elevationToMetres`, `DEFAULT_RELIEF`. |
 | `js/regions.js` | Cuts the land into named provinces, then names the big natural features. |
 | `js/nodes.js` | Places settlements, ports, landmarks, dungeons/lairs and mountain passes. |
 | `js/roads.js` | `aStar`, road cost fields, MST + extra links, bridges and fords, sea lanes, `roadGraph()`. |
 | `js/local.js` | `generateRegionDetail(world, regionId)` and `generateLocalDetail(world, x, y)` — the two zoom-ins. |
 | `js/render.js` | `worldPixels()` (pure RGBA, works in node), `renderWorld/renderRegion/renderLocal` on a canvas, `cellAt()`, `legend()`, `nodeStyle()`. |
+| `js/layers-panel.js` | `layersPanel({ layer, layers, onLayer, onToggle, unavailable })` — the Layers panel (a chip per map layer, a checkbox per overlay) as DOM only, plus `LAYER_NAMES` / `LAYER_TOGGLES`. World Forge and Star Forge both use it; `unavailable(key, kind)` greys out a layer with a reason. |
 | `js/export.js` | `toJSON` / `fromJSON` (typed arrays as base64), `toPNG`, `download`, `jsonSizeKB`. |
 | `js/history.js` | A few dated events per region from a small template table, plus `worldSummary()`. |
 | `js/worker.js` | Runs generation off the UI thread; the page falls back to inline generation if module workers are unavailable. |
@@ -236,6 +237,12 @@ const again = fromJSON(JSON.parse(localStorage.getItem('world')));
 Useful bits for game code:
 
 - `cellInfo(world, x, y)` — readable values for a cell (biome name, metres, °C, region, river class).
+  Heights: `heightMetres` (signed, above/below the datum), `depthMetres` (water depth when there is a
+  sea), `datum` and `datumLabel`; `elevationMetres` is the same number, kept for old callers.
+  Elevation 0.5 is always the shoreline. By default the scale is ±4200 m (`DEFAULT_RELIEF`); a world
+  may carry its own as `world.relief = { landMetres, seaMetres, datum: 'sea' | 'datum', label }`, and
+  the region and local grids copy it, so zooming in keeps the same metres. `elevationToMetres(e,
+  relief)` is the conversion on its own.
 - `nearestNode(world, x, y, filter)` — closest place, optionally filtered by a predicate.
 - `roadGraph(world)` — adjacency map over node ids (roads + sea lanes) for travel and pathfinding.
 - `aStar(world, startIndex, goalIndex, costField)` with `roadCostField(world)` / `seaCostField(world)`

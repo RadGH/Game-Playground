@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { generateWorld, METHODS, PRESETS, DEFAULTS, cellInfo, nearestNode } from '../js/world.js';
+import { generateWorld, METHODS, PRESETS, DEFAULTS, cellInfo, nearestNode, elevationToMetres, DEFAULT_RELIEF } from '../js/world.js';
 import { generateRegionDetail, generateLocalDetail } from '../js/local.js';
 import { roadGraph } from '../js/roads.js';
 import { toJSON, fromJSON, bytesToBase64, base64ToBytes } from '../js/export.js';
@@ -346,4 +346,40 @@ test('knob defaults are all present and the world records the knobs it used', ()
     assert.ok(key in w.opts, 'the saved knobs are missing ' + key);
   }
   assert.equal(w.opts.namegen, undefined, 'the Name Forge instance must not be saved into the world');
+});
+
+
+test('heights: the classic 4200 m scale by default, a world\'s own relief when it carries one', () => {
+  // unchanged for World Forge: ±4200 m either side of the shoreline at 0.5
+  assert.equal(elevationToMetres(1), 4200);
+  assert.equal(elevationToMetres(0.5), 0);
+  assert.equal(elevationToMetres(0), -4200);
+  assert.equal(elevationToMetres(0.75), Math.round((0.75 - 0.5) * 2 * 4200));
+  assert.deepEqual(DEFAULT_RELIEF, { landMetres: 4200, seaMetres: 4200, datum: 'sea', label: 'sea level' });
+  assert.ok(Number.isFinite(elevationToMetres(undefined)) && Number.isFinite(elevationToMetres(0.7, {})));
+
+  const w = world();
+  let checked = 0;
+  for (let y = 0; y < w.height; y += 7) {
+    for (let x = 0; x < w.width; x += 7) {
+      const info = cellInfo(w, x, y);
+      assert.equal(info.elevationMetres, Math.round((w.elevation[y * w.width + x] - 0.5) * 2 * 4200));
+      assert.equal(info.heightMetres, info.elevationMetres);
+      if (info.water !== 'land') assert.equal(info.depthMetres, Math.max(0, -info.heightMetres));
+      checked++;
+    }
+  }
+  assert.ok(checked > 20);
+
+  // a world with its own scale, and one with no sea
+  const tall = { ...w, relief: { landMetres: 12000, seaMetres: 3000, datum: 'sea', label: 'sea level' } };
+  const i = w.elevation.findIndex(e => e > 0.9);
+  const cx = i % w.width, cy = (i / w.width) | 0;
+  assert.equal(cellInfo(tall, cx, cy).heightMetres, Math.round((w.elevation[i] - 0.5) * 2 * 12000));
+  const dry = { ...w, relief: { landMetres: 9000, seaMetres: 4000, datum: 'datum', label: 'datum' } };
+  const j = w.water.findIndex(v => v === 1);
+  const info = cellInfo(dry, j % w.width, (j / w.width) | 0);
+  assert.ok(info.heightMetres < 0);
+  assert.equal(info.depthMetres, 0);
+  assert.equal(info.datum, 'datum');
 });

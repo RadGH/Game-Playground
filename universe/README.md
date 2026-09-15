@@ -142,7 +142,7 @@ are a planet and its moon, not a collision.
 | `js/galaxy.js` | `generateGalaxy(opts)` — five layouts, star placement, class mix, unique star names, travel lanes, `nearestStar`, `route`, `GALAXY_PRESETS`. |
 | `js/system.js` | The archetype table (14 kinds) and `generateSystem(star, opts)` — orbits, planets, moons, rings, belts, comets, resources and hazards. Also the orbit spacing: `nextOrbitAu`, `MIN_ORBIT_RATIO`, `orbitRatios`, and `orbitLayout()` for drawing them. |
 | `js/elements.js` | Loads `data/elements.json` in a page or in node, and answers `rareFor(archetype)`. |
-| `js/planetmap.js` | `planetWorldOpts(body)` → World Forge knobs, `generatePlanetMap(body)` → a world (cached), the tidal-lock pass (`applyTidalLock`, `columnClimate`), `moonMapSize` / `mapSizeFor`, `familyShare` / `mapMix`. Takes a moon anywhere it takes a planet. |
+| `js/planetmap.js` | `planetWorldOpts(body)` → World Forge knobs, `generatePlanetMap(body)` → a world (cached), the tidal-lock pass (`applyTidalLock`, `columnClimate`), `reliefFor` (metres per body), `moonMapSize` / `mapSizeFor`, `familyShare` / `mapMix`. Takes a moon anywhere it takes a planet. |
 | `js/texture.js` | The canvases a 3D planet needs: surface, clouds, night lights, self-glow, bump, and the banded texture for gas giants. Browser only. |
 | `js/export.js` | `toJSON` / `fromJSON` for a galaxy, a system, a planet, a moon or all of them; `moonIndex(system)` lists every moon and the seed its map comes from; `regenerate({ moonId })` rebuilds everything from the seed alone. |
 | `js/app.js` | The viewer: knobs, four views, breadcrumb, lists, export. Exposes `window.universeDemo`. |
@@ -372,6 +372,26 @@ Plus `BIOME_FAMILIES`, `familiesOf()`, `inFamily()`, `lockBiome()` and `paletted
 
 ---
 
+## Heights
+
+A World Forge map stores elevation as 0…1 with the shoreline at 0.5. `reliefFor(body)` in
+`planetmap.js` turns that into metres for one planet or moon, and `generatePlanetMap` stores it as
+`world.relief`, which World Forge's `cellInfo()` reads (and its region and local grids copy):
+
+```
+relief = { landMetres, seaMetres, datum: 'sea' | 'datum', label }
+```
+
+| Rule | Why |
+|---|---|
+| `landMetres = 8800 × gravity^−0.72`, ±12% by seed, kept inside 2 400…26 000 m | a heavy world pulls its mountains down; at 1 g the tallest peaks sit near 9 km, at a third of a g about twice that |
+| `datum: 'sea'` when the archetype has a sea, it is not ice or lava, and there is air (≥ 0.05 bar) | only then is below 0.5 really water depth; the readout says *820 m below sea level* |
+| otherwise `datum: 'datum'` (*the lava plain* on a lava world) | an airless rock or an ice shell has no sea to measure from, so low ground reads *−340 m below datum* |
+| `seaMetres` = 0.85 × `landMetres` with a sea, 0.45 × without | deep oceans on a sea world, shallower basins elsewhere |
+
+It is plain arithmetic on the body record, so a planet or moon reports the same heights every time it
+is opened, and a saved record rebuilds the same scale.
+
 ## Viewer
 
 `index.html` + `universe.css` + `js/app.js`. Left: every knob and the five presets. Middle: the
@@ -388,13 +408,20 @@ selected, the planet list, a filterable star list and the export buttons.
 - **moon** — the same close-up for a moon, with the world it circles hanging behind it — drawn from
   the parent's own cached surface texture, not a stand-in — its own card (what it orbits, how far,
   tidal heat, resources, hazards) and its own surface map.
-- **map** — the body's World Forge map, with the usual world → region → local zooms.
+- **map** — the body's World Forge map, with the usual world → region → local zooms. Hovering reads
+  the biome, the **height** in metres on that body's own scale (see *Heights* below), temperature
+  and region. While a map is up, the right-hand column carries World Forge's own **Layers** panel
+  (`worldgen/js/layers-panel.js`): a chip per map layer and a checkbox per overlay. Anything with
+  nothing to show on this body is greyed out with the reason as its tooltip and in a note under the
+  panel — rivers on an airless moon, roads where nobody built any, moisture with no air, aura or
+  magic where there is none, borders with no regions. The choice is kept in `state.mapLayer` /
+  `state.layers`, so it comes back on the next body where it does apply.
 
 Escape, or the breadcrumb, walks back out. **JSON** saves the knobs and the records; **PNG** saves
 whatever view is on screen; **Copy link** puts the knobs in the URL hash.
 
 `window.universeDemo` exposes `{ state, generate, openStar, openPlanet, openMoon, currentBody,
-orbitLayout, parentDrawn, showMap, openRegion, openLocal, showView, back, setOpt, pixelStats, toJSON,
+orbitLayout, parentDrawn, layerUnavailable, effectiveLayers, showMap, openRegion, openLocal, showView, back, setOpt, pixelStats, toJSON,
 ready }` for the tests and the console. `pixelStats({ x, y, w, h })` takes an optional box in
 fractions of the view and counts cool (blue/green) against brown pixels. `state.moon` is the moon being looked at, or null.
 
@@ -474,6 +501,9 @@ stepping away from its neighbours (and a locked *moon* getting no hot face at al
 colliding inside a system or between the stars of a galaxy, and the JSON round trip.
 
 ## Known rough edges
+
+- The Layers panel greys out a layer from what is actually on the generated map, not from the body's
+  description: a thinly settled world that still grew a few roads keeps its roads toggle.
 
 - The galaxy is 2D. Stars carry a `z`, but nothing uses it yet — no 3D star chart.
 - Planets do not move. Orbits are drawn as rings and each planet is parked at a fixed angle; nothing

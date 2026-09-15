@@ -211,6 +211,7 @@ export function generatePlanetMap(planet, opts = {}) {
   // a tidally locked *planet* keeps one face to its star; a locked moon keeps one face to its
   // planet and still turns under the star, so the hot-face pass is for planets only
   if (planet.tidalLocked && !planet.moon) applyTidalLock(world, planet);
+  world.relief = reliefFor(planet);
   world.planet = {
     id: planet.id, name: planet.name, archetype: planet.archetype, seed: planet.seed,
     moon: !!planet.moon, parentId: planet.parentId ?? null,
@@ -219,6 +220,30 @@ export function generatePlanetMap(planet, opts = {}) {
   cache.set(key, world);
   while (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value);
   return world;
+}
+
+/**
+ * The height scale for a body's map, in metres — what World Forge's cellInfo() reads as
+ * `world.relief`. Pure arithmetic on the body record, so a planet or moon reports the same heights
+ * every time it is opened.
+ *
+ * Relief goes as one over gravity: a heavy world pulls its mountains down, a light one lets them
+ * stand (our world tops out near 9 km at 1 g; a world at a third of that holds peaks twice as tall).
+ * A small seeded wobble keeps two bodies of the same gravity from being identical. Bodies with a
+ * real liquid sea measure from sea level and report depth; everything else (airless rock, ice
+ * shells, lava plains) measures up and down from a datum.
+ */
+export function reliefFor(body) {
+  const g = Math.max(0.02, body?.gravity ?? 1);
+  const rng = makeRng(subSeed((body?.seed ?? 1) >>> 0, 'relief'));
+  const wobble = 0.88 + rng() * 0.24;
+  const landMetres = Math.round(clamp(8800 * Math.pow(g, -0.72) * wobble, 2400, 26000) / 10) * 10;
+  const arch = ARCH_BY_KEY[body?.archetype] || ARCH_BY_KEY.barren;
+  const liquid = !!arch.sea && !['ice', 'lava'].includes(body?.archetype) && (body?.atmosphere?.density ?? 0) >= 0.05;
+  const seaMetres = Math.round(landMetres * (liquid ? 0.85 : 0.45) / 10) * 10;
+  return liquid
+    ? { landMetres, seaMetres, datum: 'sea', label: 'sea level' }
+    : { landMetres, seaMetres, datum: 'datum', label: body?.archetype === 'lava' ? 'the lava plain' : 'datum' };
 }
 
 /** Drop the cache (the viewer calls this when the galaxy is regenerated). */

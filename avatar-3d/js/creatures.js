@@ -58,9 +58,11 @@ export async function createCreature(spec) {
 // ------------------------------------------------------------------ quadruped (faces +z)
 function buildQuad(root, T, s) {
   const B = T.body, C = s.colors, F = s.features; const P = {};
+  const isFrog = s.type === 'frog', isDragon = s.type === 'dragon' || s.type === 'drake';
   const bodyY = B.legLen + B.r * 0.9; const hip = new THREE.Group(); hip.position.y = bodyY; root.add(hip); P.hip = hip; P.bodyY = bodyY;
-  const torso = capsule(B.r, B.len - B.r * 2, C.body); torso.rotation.x = Math.PI / 2; hip.add(torso);
+  const torso = capsule(B.r, B.len - B.r * 2, C.body); torso.rotation.x = Math.PI / 2; torso.scale.set(isFrog ? 1.18 : isDragon ? 1.08 : 1, isFrog ? 0.82 : 1, isFrog ? 1.12 : 1); hip.add(torso);
   const belly = capsule(B.r * 0.8, B.len - B.r * 2.2, C.belly); belly.rotation.x = Math.PI / 2; belly.position.y = -B.r * 0.35; hip.add(belly);
+  if (isFrog) { const throat = sphere(B.r * 0.62, C.belly, 12); throat.position.set(0, -B.r * 0.54, B.len * 0.22); throat.scale.set(1.35, 0.45, 0.65); hip.add(throat); }
   if (F.mane) { const mane = capsule(B.r * 1.05, B.len * 0.35, C.accent); mane.rotation.x = Math.PI / 2; mane.position.set(0, B.r * 0.25, B.len * 0.22); hip.add(mane); }
   if (F.spikes) for (let i = 0; i < 5; i++) { const sp = cone(B.r * 0.18, B.r * 0.5, C.accent, 6); sp.position.set(0, B.r * 0.95, B.len * 0.4 - i * B.len * 0.2); hip.add(sp); }
   // legs: pivots at the shoulder/hip, hanging down
@@ -68,10 +70,12 @@ function buildQuad(root, T, s) {
   const legX = B.r * 0.6, frontZ = B.len * 0.36, backZ = -B.len * 0.36;
   for (const [x, z, tag] of [[-legX, frontZ, 'FL'], [legX, frontZ, 'FR'], [-legX, backZ, 'BL'], [legX, backZ, 'BR']]) {
     const pivot = new THREE.Group(); pivot.position.set(x, -B.r * 0.4, z); hip.add(pivot);
-    const upper = capsule(B.legR * 1.15, B.legLen * 0.45, C.body); upper.position.y = -B.legLen * 0.25; pivot.add(upper);
+    const rearFrog = isFrog && !tag.startsWith('F');
+    const upper = capsule(B.legR * (rearFrog ? 1.7 : 1.15), B.legLen * (rearFrog ? 0.62 : 0.45), C.body); upper.position.y = -B.legLen * (rearFrog ? 0.34 : 0.25); upper.scale.z = rearFrog ? 1.35 : 1; pivot.add(upper);
     const knee = new THREE.Group(); knee.position.y = -B.legLen * 0.5; pivot.add(knee);
     const lower = capsule(B.legR, B.legLen * 0.42, shade(C.body, -0.1)); lower.position.y = -B.legLen * 0.25; knee.add(lower);
-    const paw = F.hooves ? cyl(B.legR * 1.2, B.legR * 1.4, B.legR * 1.6, C.accent, 10) : sphere(B.legR * 1.5, F.claws ? C.accent : shade(C.body, -0.2), 10); paw.position.set(0, -B.legLen * 0.5 + B.legR * 0.6, B.legR * 0.4); paw.scale.set(1, 0.7, 1.3); knee.add(paw);
+    const paw = F.hooves ? cyl(B.legR * 1.2, B.legR * 1.4, B.legR * 1.6, C.accent, 10) : sphere(B.legR * (rearFrog ? 2.1 : 1.5), F.claws ? C.accent : shade(C.body, -0.2), 10); paw.position.set(0, -B.legLen * 0.5 + B.legR * 0.6, B.legR * (rearFrog ? 0.75 : 0.4)); paw.scale.set(rearFrog ? 1.35 : 1, 0.7, rearFrog ? 1.8 : 1.3); knee.add(paw);
+    if (isFrog) for (const toe of [-1, 0, 1]) { const t = sphere(B.legR * 0.34, C.belly, 8); t.position.set(toe * B.legR * 0.8, -B.legLen * 0.5, B.legR * (rearFrog ? 1.9 : 1.2)); t.scale.set(0.8, 0.45, 1.5); knee.add(t); }
     P.legs.push({ pivot, knee, tag, front: tag[0] === 'F', left: tag[1] === 'L' });
   }
   // neck + head
@@ -79,18 +83,21 @@ function buildQuad(root, T, s) {
   const neckUp = B.neckUp ?? 0.35; const neckLen = B.neck;
   if (neckLen > 0.05) { const n = capsule(B.r * 0.55, neckLen, C.body); n.rotation.x = Math.PI / 2 - neckUp; n.position.set(0, Math.sin(neckUp) * neckLen / 2, Math.cos(neckUp) * neckLen / 2); neck.add(n); }
   const head = new THREE.Group(); head.position.set(0, Math.sin(neckUp) * neckLen + B.headR * 0.3, Math.cos(neckUp) * neckLen + B.headR * 0.4); neck.add(head); P.head = head;
-  const skull = sphere(B.headR, C.body); head.add(skull);
+  const skull = sphere(B.headR, C.body); skull.scale.set(isFrog ? 1.22 : isDragon ? 1.12 : 1, isFrog ? 0.82 : isDragon ? 1.08 : 1, isFrog ? 0.92 : isDragon ? 1.12 : 1); head.add(skull);
   const [sr, sl] = B.snout; const snout = capsule(sr, sl - sr, C.body); snout.rotation.x = Math.PI / 2; snout.position.set(0, -B.headR * 0.25, B.headR * 0.6 + sl / 2 - sr / 2); head.add(snout);
   const nose = sphere(sr * 0.45, C.accent, 8); nose.position.set(0, -B.headR * 0.12, B.headR * 0.6 + sl - sr * 0.2); head.add(nose);
+  if (isFrog) { const mouth = new THREE.Mesh(new THREE.TorusGeometry(B.headR * 0.48, B.headR * 0.035, 5, 16, Math.PI), mat(C.accent)); mouth.rotation.x = Math.PI / 2; mouth.position.set(0, -B.headR * 0.28, B.headR * 0.78); head.add(mouth); }
+  if (isDragon) { for (const x of [-1, 1]) { const nostril = glowSphere(B.headR * 0.035, C.eyes, 0.3, 6); nostril.position.set(x * sr * 0.42, -B.headR * 0.12, B.headR * 0.6 + sl * 0.8); head.add(nostril); } }
   const jaw = new THREE.Group(); jaw.position.set(0, -B.headR * 0.45, B.headR * 0.5); head.add(jaw); P.jaw = jaw;
   const jawM = capsule(sr * 0.8, sl * 0.7, shade(C.body, -0.12)); jawM.rotation.x = Math.PI / 2; jawM.position.set(0, -sr * 0.2, sl * 0.4); jaw.add(jawM);
   if (F.fangs) for (const x of [-1, 1]) { const f = cone(sr * 0.14, sr * 0.5, '#f4f0e0', 6); f.rotation.x = Math.PI; f.position.set(x * sr * 0.45, -B.headR * 0.5, B.headR * 0.6 + sl * 0.75); head.add(f); }
   if (F.tusks) for (const x of [-1, 1]) { const tk = cone(sr * 0.2, sr * 1.2, '#f0e8d0', 6); tk.position.set(x * sr * 0.7, -B.headR * 0.35, B.headR * 0.6 + sl * 0.6); tk.rotation.set(-0.6, 0, x * -0.4); head.add(tk); }
-  const eyeR = B.headR * (F.bulgeEyes ? 0.36 : 0.16), eyeY = B.headR * (F.bulgeEyes ? 0.7 : 0.2), eyeX = B.headR * (F.bulgeEyes ? 0.55 : 0.45), eyeZ = B.headR * (F.bulgeEyes ? 0.35 : 0.75);
-  for (const x of [-1, 1]) { const eye = sphere(eyeR, C.eyes, 10); eye.position.set(x * eyeX, eyeY, eyeZ); head.add(eye); const pupil = sphere(eyeR * 0.42, '#111', 8); pupil.position.set(x * eyeX, eyeY + eyeR * 0.25, eyeZ + eyeR * 0.8); head.add(pupil); }
+  const eyeR = B.headR * (F.bulgeEyes ? 0.36 : isDragon ? 0.19 : 0.16), eyeY = B.headR * (F.bulgeEyes ? 0.7 : isDragon ? 0.42 : 0.2), eyeX = B.headR * (F.bulgeEyes ? 0.55 : 0.45), eyeZ = B.headR * (F.bulgeEyes ? 0.35 : 0.75);
+  for (const x of [-1, 1]) { const eye = sphere(eyeR, C.eyes, 10); eye.position.set(x * eyeX, eyeY, eyeZ); head.add(eye); const pupil = isDragon ? new THREE.Mesh(new THREE.CapsuleGeometry(eyeR * 0.18, eyeR * 0.75, 3, 6), mat('#16100b')) : sphere(eyeR * 0.42, '#111', 8); pupil.position.set(x * eyeX, eyeY + eyeR * 0.25, eyeZ + eyeR * 0.8); head.add(pupil); }
   if (T.ears === 'pointed') for (const x of [-1, 1]) { const e = cone(B.headR * 0.28, B.headR * 0.6, C.body, 8); e.position.set(x * B.headR * 0.55, B.headR * 0.9, -B.headR * 0.1); e.rotation.z = x * -0.3; head.add(e); const inner = cone(B.headR * 0.16, B.headR * 0.4, C.belly, 8); inner.position.set(x * B.headR * 0.55, B.headR * 0.85, -B.headR * 0.02); inner.rotation.z = x * -0.3; head.add(inner); }
   else if (T.ears === 'round') for (const x of [-1, 1]) { const e = sphere(B.headR * 0.28, C.body, 10); e.position.set(x * B.headR * 0.7, B.headR * 0.7, -B.headR * 0.1); head.add(e); const inner = sphere(B.headR * 0.16, C.belly, 8); inner.position.set(x * B.headR * 0.72, B.headR * 0.72, B.headR * 0.02); head.add(inner); }
   if (F.horns) for (const x of [-1, 1]) { const h = cone(B.headR * 0.18, B.headR * 1.1, C.accent, 7); h.position.set(x * B.headR * 0.5, B.headR * 0.9, -B.headR * 0.3); h.rotation.set(-0.7, 0, x * -0.35); head.add(h); }
+  if (isDragon) for (let i = 0; i < 5; i++) { const crest = cone(B.headR * (0.10 - i * 0.01), B.headR * (0.45 - i * 0.04), C.accent, 6); crest.position.set(0, B.headR * (0.7 - i * 0.08), -B.headR * (0.34 - i * 0.18)); crest.rotation.x = -0.45; head.add(crest); }
   if (F.antlers) for (const x of [-1, 1]) { const a = new THREE.Group(); a.position.set(x * B.headR * 0.45, B.headR * 0.8, -B.headR * 0.2); a.rotation.z = x * -0.35; head.add(a); const main = cyl(0.012, 0.02, B.headR * 2.2, C.accent, 6); main.position.y = B.headR * 1.1; a.add(main); for (let i = 1; i <= 3; i++) { const tine = cyl(0.008, 0.015, B.headR * 0.8, C.accent, 6); tine.position.set(x * B.headR * 0.25, B.headR * (0.5 + i * 0.5), 0); tine.rotation.z = x * -0.9; a.add(tine); } }
   if (F.whiskers) for (const x of [-1, 1]) for (const dy of [-0.02, 0.02]) { const w = cyl(0.003, 0.003, sr * 3, '#ddd', 4); w.rotation.z = Math.PI / 2; w.rotation.y = x * 0.3; w.position.set(x * sr * 1.2, -B.headR * 0.15 + dy, B.headR * 0.6 + sl * 0.8); head.add(w); }
   // tail
@@ -100,6 +107,7 @@ function buildQuad(root, T, s) {
   if (tl.spiky && s.type === 'dragon') { const tip = cone(tl.r * 1.2, tl.r * 3, C.accent, 4); tip.rotation.x = Math.PI / 2; tip.position.z = -(tl.len / segs) - tl.r * 1.2; parent.add(tip); }
   // wings
   if (F.wings) { P.wings = []; for (const x of [-1, 1]) { const w = new THREE.Group(); w.position.set(x * B.r * 0.7, B.r * 0.7, B.len * 0.1); hip.add(w); const span = B.len * 0.9; const bone = cyl(0.03, 0.03, span, C.accent, 6); bone.rotation.z = x * -Math.PI / 2 + 0; bone.position.x = x * span / 2; w.add(bone); const membrane = mesh(new THREE.ShapeGeometry(wingShape(span, x)), C.belly); membrane.material.side = THREE.DoubleSide; membrane.material.transparent = true; membrane.material.opacity = 0.92; membrane.rotation.x = Math.PI / 2; w.add(membrane); P.wings.push({ group: w, side: x }); } }
+  if (isDragon) for (let i = 0; i < 6; i++) { const scale = new THREE.Mesh(new THREE.TorusGeometry(B.r * 0.18, B.r * 0.035, 4, 8), mat(C.accent)); scale.position.set(0, B.r * (0.72 - i * 0.08), B.len * (0.32 - i * 0.13)); scale.rotation.x = Math.PI / 2; hip.add(scale); }
   P.type = s.type; return P;
 }
 /** Bat-style membrane: leading edge along the bone, scalloped trailing edge between three finger tips. */

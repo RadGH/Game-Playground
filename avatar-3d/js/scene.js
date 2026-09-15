@@ -2,11 +2,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-export function createScene(container, { background = 0x1e2128, ground = true } = {}) {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+export function createScene(container, { background = 0x1e2128, ground = true, pixelRatio = Math.min(2, window.devicePixelRatio || 1), shadows = true, preserveDrawingBuffer = true } = {}) {
+  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer });
+  renderer.setPixelRatio(pixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.enabled = shadows; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.append(renderer.domElement);
   const scene = new THREE.Scene(); scene.background = new THREE.Color(background);
   const camera = new THREE.PerspectiveCamera(35, 1, 0.05, 100); camera.position.set(0, 1.4, 4.2);
@@ -17,9 +17,9 @@ export function createScene(container, { background = 0x1e2128, ground = true } 
   if (ground) { const g = new THREE.Mesh(new THREE.CircleGeometry(2.2, 48), new THREE.MeshStandardMaterial({ color: 0x2a2f3a, roughness: 1 })); g.rotation.x = -Math.PI / 2; g.receiveShadow = true; scene.add(g); const grid = new THREE.GridHelper(4.4, 22, 0x3a4050, 0x2e3440); grid.position.y = 0.001; scene.add(grid); }
   const clock = new THREE.Clock(); const tickers = new Set(); let turntable = 0;
   function resize() { const w = container.clientWidth || 600, h = container.clientHeight || 600; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
-  new ResizeObserver(resize).observe(container); resize();
-  let running = true;
-  function loop() { if (!running) return; requestAnimationFrame(loop); const dt = Math.min(0.05, clock.getDelta()); for (const t of tickers) t(dt, clock.elapsedTime); if (turntable) { for (const o of scene.children) if (o.userData.character) o.rotation.y += turntable * dt; } controls.update(); renderer.render(scene, camera); }
+  const observer = new ResizeObserver(resize); observer.observe(container); resize();
+  let running = true, frameId;
+  function loop() { if (!running) return; frameId = requestAnimationFrame(loop); const dt = Math.min(0.05, clock.getDelta()); for (const t of tickers) t(dt, clock.elapsedTime); if (turntable) { for (const o of scene.children) if (o.userData.character) o.rotation.y += turntable * dt; } controls.update(); renderer.render(scene, camera); }
   loop();
-  return { renderer, scene, camera, controls, addTicker: f => tickers.add(f), removeTicker: f => tickers.delete(f), setTurntable: v => { turntable = v; }, resize, dispose: () => { running = false; renderer.dispose(); }, snapshot: () => renderer.domElement.toDataURL('image/png'), THREE };
+  return { renderer, scene, camera, controls, addTicker: f => tickers.add(f), removeTicker: f => tickers.delete(f), setTurntable: v => { turntable = v; }, resize, dispose: () => { running = false; cancelAnimationFrame(frameId); observer.disconnect(); controls.dispose(); tickers.clear(); renderer.dispose(); }, snapshot: () => renderer.domElement.toDataURL('image/png'), THREE };
 }

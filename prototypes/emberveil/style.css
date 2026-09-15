@@ -582,3 +582,74 @@ dialog::backdrop { background: rgba(6, 4, 3, .78); backdrop-filter: blur(2px); }
 #map .questpin.road { fill: #7fbf7a; }
 #map .questpin.errand { fill: #a487d8; }
 .tip-quest { color: #e6c98a; font-size: 12px; margin-top: 3px; }
+
+/* ================================================================== round 21 */
+/* ---- combat speed (E34): 1x / 2x / 4x in the top bar ----
+   main.js sets --pace on the root while a fight runs (4x → 1, 2x → 2, 1x → 4, js/pace.js), so the
+   float-up damage numbers and the health bars slow with everything else. Outside a fight it is 1. */
+.speed { display: inline-flex; align-items: center; flex: none; padding: 1px; gap: 1px; border: 1px solid var(--line); border-radius: 3px; background: rgba(10, 7, 5, .6); }
+.speed button { min-width: 30px; padding: 2px 7px; font: 600 12px/1.35 var(--display); letter-spacing: .03em; color: var(--muted); background: none; border: 0; border-radius: 2px; box-shadow: none; }
+.speed button:hover:not(:disabled) { color: var(--gold-bright); background: rgba(255, 122, 26, .12); box-shadow: none; }
+.speed button[aria-pressed="true"] { color: #1b0f04; background: linear-gradient(#d1741c, #8a3d08); box-shadow: inset 0 0 0 1px var(--gold); text-shadow: 0 1px 0 rgba(255, 220, 160, .35); }
+.speed button[aria-pressed="true"]:hover:not(:disabled) { color: #1b0f04; background: linear-gradient(#ff9433, #a24a09); }
+.dmg { animation-duration: calc(1s * var(--pace, 1)); }
+.bar i { transition-duration: calc(.35s * var(--pace, 1)); }
+
+/* ---- the log keeps its place (E35) and town screens get their own panel (E37) ---- */
+/* min-height matches .narrative-log's 140px: a wrapper allowed to shrink below the log it holds let the
+   log spill over the action buttons in a short panel and swallow their clicks */
+.log-wrap { position: relative; flex: 1; min-height: 140px; display: flex; flex-direction: column; }
+.log-latest { position: absolute; right: 14px; bottom: 8px; z-index: 4; border-color: var(--gold); color: var(--gold-bright); background: linear-gradient(#3a2b1d, #221812); box-shadow: 0 4px 14px rgba(0, 0, 0, .65), 0 0 12px rgba(255, 122, 26, .25); }
+.town-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.town-panel[hidden] { display: none; }
+.town-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding-bottom: 11px; margin-bottom: 6px; background: url(../../assets/data/ui/divider.svg) bottom left/100% 12px no-repeat; }
+.town-panel-head h4 { margin: 0; color: var(--gold-bright); font-family: var(--display); font-size: 15px; letter-spacing: .07em; }
+.town-panel-body { flex: 1; min-height: 140px; overflow: auto; overscroll-behavior: contain; padding-right: 6px; }
+.town-panel-body:focus-visible { outline: 1px solid var(--gold-dim); outline-offset: 2px; }
+.town-panel-body .shop > b { display: block; margin: 10px 0 2px; font-family: var(--display); color: var(--gold); letter-spacing: .05em; }
+
+/* ---- Manage Party (E38) ---- */
+#party-dialog { width: 820px; max-width: min(820px, 94vw); }
+#party-dialog h3 { font-family: var(--display); font-size: 19px; letter-spacing: .04em; margin-bottom: 2px; }
+#party-dialog .subline { color: var(--muted); font-size: 12.5px; margin-bottom: 10px; }
+.party-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.party-col > h4 { margin: 0 0 8px; font-family: var(--display); color: var(--gold-bright); font-size: 14px; letter-spacing: .06em; padding-bottom: 10px; background: url(../../assets/data/ui/divider.svg) bottom left/100% 10px no-repeat; }
+.pm-card { display: grid; grid-template-columns: 46px 1fr; gap: 9px; padding: 7px; margin-bottom: 8px; border: 1px solid var(--line2); border-radius: 4px; background: linear-gradient(#1e1712, #120d0a); }
+.pm-card.down { border-color: #6a2a1c; }
+.pm-card .portrait { width: 46px; height: 58px; border: 1px solid var(--line2); border-radius: 3px; background: radial-gradient(circle at 50% 35%, #2b2117, #0c0908 70%); }
+.pm-card .portrait svg { width: 100%; height: 100%; }
+.pm-card .who b { font-family: var(--display); color: var(--gold-bright); font-size: 13.5px; }
+.pm-card .tiny.bad { color: var(--bad); }
+.pm-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 5px; }
+.pm-actions select { font-size: 12px; padding: 2px 6px; }
+.pm-empty { padding: 14px 8px; text-align: center; border: 1px dashed var(--line2); border-radius: 4px; color: var(--muted); font-style: italic; }
+.pm-note { margin-top: 8px; }
+.pm-msg { min-height: 1.4em; margin: 6px 0 0; }
+
+@media (max-width: 1000px) {
+  .town-panel-body { max-height: 46vh; }
+}
+@media (max-width: 620px) {
+  .party-cols { grid-template-columns: 1fr; }
+  #party-dialog { min-width: 0; width: auto; padding: 14px 12px; }
+  .speed button { min-width: 26px; padding: 2px 5px; font-size: 11px; }
+  .log-latest { right: 8px; }
+}
+
+/* ---- themed scrollbars (E36) ----
+   This stylesheet is only loaded by the Emberveil page, so these rules stay on this page.
+   The look comes from the user's own Chrome CSS (6px, rounded, dark leather track with a gold edge),
+   with a hover and pressed state on the thumb, the horizontal bar and the corner added.
+   Firefox gets the same two colours through scrollbar-width / scrollbar-color. Those two properties
+   are fenced behind @supports because Chrome 121+ also understands them, and once they are set
+   Chrome ignores the ::-webkit-scrollbar rules — which would throw away the rounded track. */
+:root { --scroll-track: #231a14; --scroll-edge: #916f30; --scroll-thumb: #916f30; --scroll-thumb-hover: var(--gold); --scroll-thumb-active: var(--gold-bright); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { border-radius: 8px; background-color: var(--scroll-track); border: 1px solid var(--scroll-edge); box-shadow: inset 0 0 6px rgba(0, 0, 0, .3); }
+::-webkit-scrollbar-thumb { border-radius: 8px; background-color: var(--scroll-thumb); }
+::-webkit-scrollbar-thumb:hover { background-color: var(--scroll-thumb-hover); }
+::-webkit-scrollbar-thumb:active { background-color: var(--scroll-thumb-active); }
+::-webkit-scrollbar-corner { background-color: var(--scroll-track); }
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: var(--scroll-thumb) var(--scroll-track); }
+}

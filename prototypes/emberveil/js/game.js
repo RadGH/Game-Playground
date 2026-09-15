@@ -4,6 +4,7 @@ import { makeRng, hashStr } from './rng.js';
 import { Loot } from './loot.js';
 import { createHero, gainXp, catchUp, refresh, hireCost, makeEnemy, equip, unequip, derive, applyBalance, bestCheckBonus, CHAMPION, NAMED, ECONOMY, HEALER_CLASSES } from './rules.js';
 import { applySpawnMods, CHAMPION_MODS, NAMED_MODS, fireWorld, worldSum, worldMax } from './effects.js';
+import { partyLimit, benchHero, joinParty, canBench, canJoin, takeGear } from './bench.js';
 import { MemoryBank } from '../../../lingo/js/memory.js';
 import { RelationGraph } from '../../../lingo/js/relations.js';
 import { Meter } from '../../../meters/js/meter.js';
@@ -56,7 +57,7 @@ export class Game {
     // collector on any road has people to call on — see familyOf()/humanoidFight().
     for (const [id, enc] of Object.entries(data.families?.extraEncounters || {})) if (!data.encounters.encounters[id]) data.encounters.encounters[id] = enc;
     this.reset(); }
-  reset() { this.party = []; this.companions = []; this.bench = []; this.inventory = []; this.materials = { iron_scrap: 0, magic_essence: 0, rare_dust: 0, legend_core: 0 }; this.gold = 150; this.fame = 0; this.act = 0; this.zoneId = 'prologue'; this.nodeId = 'start'; this.unlockedZones = ['prologue']; this.visited = { prologue: ['start'] }; this.cleared = []; this.usedNodes = []; this.flags = {}; this.seenEvents = []; this.completedBosses = []; this.completedDungeons = []; this.quests = { active: [], done: [] }; this.kills = 0; this.rareFound = 0; this.ngPlus = 0; this.seed = Math.floor(Math.random() * 1e9); this.rng = makeRng(this.seed); this.log = []; this.day = 1;
+  reset() { this.party = []; this.companions = []; this.bench = []; this.benchCompanions = []; this.inventory = []; this.materials = { iron_scrap: 0, magic_essence: 0, rare_dust: 0, legend_core: 0 }; this.gold = 150; this.fame = 0; this.act = 0; this.zoneId = 'prologue'; this.nodeId = 'start'; this.unlockedZones = ['prologue']; this.visited = { prologue: ['start'] }; this.cleared = []; this.usedNodes = []; this.flags = {}; this.seenEvents = []; this.completedBosses = []; this.completedDungeons = []; this.quests = { active: [], done: [] }; this.kills = 0; this.rareFound = 0; this.ngPlus = 0; this.seed = Math.floor(Math.random() * 1e9); this.rng = makeRng(this.seed); this.log = []; this.day = 1;
     this.nemeses = []; this.namedSlain = []; this.namedSeen = []; this.heroQuests = {}; this.threads = {}; this.nodesTravelled = 0; this.stats = { fightsUnbroken: 0, salvaged: 0, looted: 0, rests: 0, nodeTypes: [] }; this.supplies = { ration: 6, bandages: 1, torch: 2, tent: 0, rope: 0, timber: 0 }; this.vehicle = 'none'; this.legsUsed = 0; this.exhaustion = 0; this.fedToday = true; this.lootLog = []; this.foraged = 0; this.winGear = []; this.legGear = []; this.banks = {}; this.relations = new RelationGraph(this.d.relations || { dimensions: {}, opinionWeights: {}, tags: [], events: {}, memoryEvents: {} }); this.meter = new Meter({ maxFights: 60 }); this.hour = 8; this.restLog = []; this.crossings = []; this.revives = []; this.questOffers = []; }
   // ---------- memory & feelings
   get now() { return (this.day - 1) * 24 + this.hour; }
@@ -104,7 +105,22 @@ export class Game {
   classDef(id) { return this.d.classes.classes.find(c => c.id === id); }
   build(classId) { const list = this.d.builds.presets || this.d.builds.builds || (Array.isArray(this.d.builds) ? this.d.builds : Object.values(this.d.builds).flat()); return list.find?.(b => b.class === classId) || null; }
   makeHero(classId, name, level = 1, blueprint = null) { const h = createHero({ name, classId, level, classDef: this.classDef(classId), build: this.build(classId), blueprint, loot: this.loot, skills: this.d.skills.skills, rng: this.rng }); if (blueprint) { h.avatar = blueprint.avatar; h.voice = blueprint.voice; h.speech = blueprint.speech; h.short = blueprint.short || name.split(' ')[0]; h.pronouns = blueprint.pronouns; } h.short = h.short || name.split(' ')[0]; return h; }
-  addHero(h) { if (this.party.length < 4) this.party.push(h); else this.bench.push(h); return h; }
+  addHero(h) { if (this.party.length < this.partyLimit()) this.party.push(h); else this.bench.push(h); return h; }
+  // ---------- the bench (round 21, E38) — rules in js/bench.js
+  /** Most heroes the active party can hold (data/balance.json partySize.max). */
+  partyLimit() { return partyLimit(this.d.balance); }
+  /** The party only changes in a settlement. */
+  inTown() { return this.node()?.type === 'town'; }
+  /** Can this party member sit out? { ok, why } */
+  canBench(id) { return canBench(this, id, { inTown: this.inTown() }); }
+  /** Can this bench hero join (optionally in place of `swapWith`)? { ok, why, needsSwap } */
+  canJoin(id, swapWith = null) { return canJoin(this, id, { limit: this.partyLimit(), inTown: this.inTown(), swapWith }); }
+  /** Send a party member to the bench; their talent pets go with them. */
+  benchHero(id) { const r = benchHero(this, id, { inTown: this.inTown() }); if (r.ok) this.benchCompanions ||= []; return r; }
+  /** Bring a bench hero in, swapping somebody out when the party is full. */
+  joinParty(id, swapWith = null) { const r = joinParty(this, id, { limit: this.partyLimit(), inTown: this.inTown(), swapWith }); if (r.ok) { this.benchCompanions ||= []; refresh(r.hero, this.loot); } return r; }
+  /** Move everything a hero wears into the bag (for a benched hero whose kit the party needs). */
+  takeGear(hero) { return takeGear(this, hero, (h, slot) => unequip(h, slot, this.loot)); }
   addCompanion(c) { if (this.companions.length < 4) { this.companions.push(c); c.speech = c.speech || { traits: ['loyal'] }; this.remember({ type: 'join', participants: [...this.party.map(h => h.id), c.id], bindings: { newcomer: { id: c.id }, place: { id: this.zoneId } }, details: { impression: 'brought food, which helped' } }); return true; } return false; }
   makeCompanion(def, level = null) { const L = Math.max(1, Math.round(level || this.avgLevel())); const P = def.power || 1; const hp = Math.round(30 * P + 8 * P * L); const c = { id: 'c_' + def.id + '_' + Math.random().toString(36).slice(2, 6), name: def.name, templateId: def.id, className: def.className || 'Companion', isCompanion: true, isHero: false, level: L, attrs: { ...(def.attrs || { STR: 8, DEX: 8, INT: 4, CON: 8 }) }, equipment: {}, skills: [], talents: {}, passiveRanks: {}, alive: true, statuses: [], cooldowns: {}, power: P, description: def.description, maxHp: hp, hp: hp, maxMp: 10, mp: 10, dmg: [Math.max(1, Math.round(3 + P + P * L)), Math.max(2, Math.round(5 + 2 * P + 1.5 * P * L))] }; return c; }
   avgLevel() { return this.party.length ? this.party.reduce((s, h) => s + h.level, 0) / this.party.length : 1; }
@@ -447,6 +463,6 @@ export class Game {
   save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(this)); return true; } catch { return false; } }
   static hasSave() { return !!localStorage.getItem(SAVE_KEY); }
   static clearSave() { localStorage.removeItem(SAVE_KEY); }
-  static load(data) { const raw = localStorage.getItem(SAVE_KEY); if (!raw) return null; const j = JSON.parse(raw); const g = new Game(data); const { banks, relations, meter, ...rest } = j; Object.assign(g, rest); g.banks = Object.fromEntries(Object.entries(banks || {}).map(([k, b]) => [k, MemoryBank.fromJSON(b, { eventTypes: data.events?.types || {}, lexicon: data.lexicon || null })])); g.relations = RelationGraph.fromJSON(relations || {}, data.relations || g.relations.model); g.meter = Meter.fromJSON(meter || {}, { maxFights: 60 }); g.supplies ||= { ration: 6, bandages: 1, torch: 2, tent: 0 }; g.vehicle ||= 'none'; g.lootLog ||= []; g.revives ||= []; g.questOffers ||= []; g.crossings ||= []; g.rng = makeRng(g.seed + (g.day || 1) * 1000 + (g.kills || 0)); for (const h of g.party.concat(g.bench)) refresh(h, g.loot); return g; }
+  static load(data) { const raw = localStorage.getItem(SAVE_KEY); if (!raw) return null; const j = JSON.parse(raw); const g = new Game(data); const { banks, relations, meter, ...rest } = j; Object.assign(g, rest); g.banks = Object.fromEntries(Object.entries(banks || {}).map(([k, b]) => [k, MemoryBank.fromJSON(b, { eventTypes: data.events?.types || {}, lexicon: data.lexicon || null })])); g.relations = RelationGraph.fromJSON(relations || {}, data.relations || g.relations.model); g.meter = Meter.fromJSON(meter || {}, { maxFights: 60 }); g.supplies ||= { ration: 6, bandages: 1, torch: 2, tent: 0 }; g.vehicle ||= 'none'; g.lootLog ||= []; g.revives ||= []; g.questOffers ||= []; g.crossings ||= []; g.bench ||= []; g.benchCompanions ||= []; g.rng = makeRng(g.seed + (g.day || 1) * 1000 + (g.kills || 0)); for (const h of g.party.concat(g.bench)) refresh(h, g.loot); return g; }
 }
 export { equip, unequip, refresh, derive, hireCost, VEHICLES as VEHICLE_DEFS };

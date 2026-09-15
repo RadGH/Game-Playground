@@ -16,7 +16,7 @@ test('Emberveil 2: hire four, map, fight, meter drill-down, town, rest with camp
   await page.click('.tabs button[data-tab="party"]'); await expect(page.locator('#tab-party')).toBeVisible();
   expect(await page.locator('#screen-world .panel .fc').count()).toBeGreaterThan(3);
   await page.waitForFunction(() => document.querySelectorAll('#actions button').length > 0 && !window.emberveil.busy, null, { timeout: 60000 });
-  expect(await page.locator('#map circle.node').count()).toBeGreaterThan(3); expect(await page.evaluate(() => window.emberveil.stage.chars.size)).toBeGreaterThanOrEqual(4);
+  expect(await page.locator('#map circle.node').count()).toBeGreaterThan(3); expect(await page.evaluate(() => window.emberveil.stage.chars.size)).toBeGreaterThanOrEqual(4); expect(await page.evaluate(() => window.emberveil.effectsRenderer)).toBe('BatchedSpellFx'); expect(await page.evaluate(() => typeof window.emberveil.stage.fx.syncSprites)).toBe('function');
   // designed looks (data/enemy-looks.json) drive every enemy and companion body — no regex guessing left
   const looks = await page.evaluate(() => { const E = window.emberveil; const out = { missing: [], wrong: [] };
     for (const [group, table] of [['enemies', E.DATA.enemies.entities], ['bosses', E.DATA.bosses.entities]]) for (const id of Object.keys(table)) {

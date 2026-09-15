@@ -1,0 +1,640 @@
+{
+ "_doc": "Ten ready-made creature designs built on the newer creature types (hyena, turtle, beetle, griffin, phoenix, centipede, slime, mushroom, mimic, crocodile). Not wired into any game: a game can copy an entry into its own looks table. Each entry is a full creature look (creature spec for avatar-3d/js/creatures.js createCreature, plus voice and speech sections from the shared character schema) and suggested level and attributes. Moved here from Emberveil, where they had been added as tavern hires by mistake.",
+ "schema": 1,
+ "variants": {
+  "ember_fennec": {
+   "id": "ember_fennec",
+   "name": "Ember Fennec",
+   "desc": "Big ears, quick paws and a talent for finding warm stones after dusk.",
+   "level": 2,
+   "attrs": {
+    "CON": 11,
+    "DEX": 15,
+    "INT": 8,
+    "STR": 10
+   },
+   "voiceRole": "villager",
+   "traits": [
+    "jolly",
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.42,
+    "depth": 0.46,
+    "tone": 0.52,
+    "breath": 0.29,
+    "rough": 0.08,
+    "speed": 0.42,
+    "flutter": 0.11,
+    "intonation": 0.68,
+    "wordgap": 0.37,
+    "role": "villager",
+    "seed": 152742901
+   },
+   "speech": {
+    "traits": [
+     "jolly",
+     "loyal"
+    ],
+    "formality": 0.45,
+    "verbosity": 0.45,
+    "cheer": 0.8,
+    "aggression": 0.5,
+    "confidence": 0.6,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "hyena",
+    "size": 0.72,
+    "colors": {
+     "body": "#c28a4a",
+     "belly": "#f0cf9c",
+     "accent": "#6a3a22",
+     "eyes": "#8ae06a"
+    },
+    "features": {
+     "fangs": true,
+     "mane": true,
+     "claws": true
+    },
+    "seed": 1
+   }
+  },
+  "marsh_turtle": {
+   "id": "marsh_turtle",
+   "name": "Marsh Turtle",
+   "desc": "A low, patient shell that has crossed three marshes and never lost a wager.",
+   "level": 2,
+   "attrs": {
+    "CON": 16,
+    "DEX": 6,
+    "INT": 8,
+    "STR": 12
+   },
+   "voiceRole": "villager",
+   "traits": [
+    "gruff",
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.57,
+    "depth": 0.64,
+    "tone": 0.42,
+    "breath": 0.25,
+    "rough": 0.25,
+    "speed": 0.49,
+    "flutter": 0.09,
+    "intonation": 0.47,
+    "wordgap": 0.3,
+    "role": "villager",
+    "seed": 3057652424
+   },
+   "speech": {
+    "traits": [
+     "gruff",
+     "loyal"
+    ],
+    "formality": 0.2,
+    "verbosity": 0.25,
+    "cheer": 0.4,
+    "aggression": 0.5,
+    "confidence": 0.6,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "turtle",
+    "size": 1.05,
+    "colors": {
+     "body": "#3f704d",
+     "belly": "#c5b77b",
+     "accent": "#263e2b",
+     "eyes": "#e8d34b"
+    },
+    "features": {
+     "hooves": true,
+     "plates": true
+    },
+    "seed": 1
+   }
+  },
+  "cave_beetle": {
+   "id": "cave_beetle",
+   "name": "Cave Beetle",
+   "desc": "Blue-black shell, pale eyes, and a habit of carrying small things uphill.",
+   "level": 2,
+   "attrs": {
+    "CON": 10,
+    "DEX": 14,
+    "INT": 8,
+    "STR": 9
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "shy",
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.28,
+    "depth": 0.92,
+    "tone": 0.29,
+    "breath": 0.27,
+    "rough": 0.45,
+    "speed": 0.3,
+    "flutter": 0.06,
+    "intonation": 0.63,
+    "wordgap": 0.28,
+    "role": "brute",
+    "seed": 3322983965
+   },
+   "speech": {
+    "traits": [
+     "shy",
+     "loyal"
+    ],
+    "formality": 0.45,
+    "verbosity": 0.25,
+    "cheer": 0.4,
+    "aggression": 0.15,
+    "confidence": 0.25,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "beetle",
+    "size": 0.85,
+    "colors": {
+     "body": "#263c48",
+     "belly": "#496b73",
+     "accent": "#8bd0b8",
+     "eyes": "#d9ff8a"
+    },
+    "features": {
+     "wings": true,
+     "spikes": true
+    },
+    "seed": 1
+   }
+  },
+  "sky_griffin": {
+   "id": "sky_griffin",
+   "name": "Sky Griffin",
+   "desc": "Eagle head, lion paws and a very strong opinion about the best view in camp.",
+   "level": 4,
+   "attrs": {
+    "CON": 13,
+    "DEX": 14,
+    "INT": 10,
+    "STR": 14
+   },
+   "voiceRole": "dragon",
+   "traits": [
+    "brave",
+    "pompous"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.22,
+    "depth": 0.99,
+    "tone": 0.2,
+    "breath": 0.36,
+    "rough": 0.54,
+    "speed": 0.26,
+    "flutter": 0.12,
+    "intonation": 0.56,
+    "wordgap": 0.27,
+    "role": "dragon",
+    "seed": 2943913637
+   },
+   "speech": {
+    "traits": [
+     "brave",
+     "pompous"
+    ],
+    "formality": 0.45,
+    "verbosity": 0.75,
+    "cheer": 0.4,
+    "aggression": 0.5,
+    "confidence": 0.85,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "griffin",
+    "size": 1.05,
+    "colors": {
+     "body": "#a8783e",
+     "belly": "#e3cf9a",
+     "accent": "#70401e",
+     "eyes": "#63b9d6"
+    },
+    "features": {
+     "wings": true,
+     "claws": true,
+     "beak": true
+    },
+    "seed": 1
+   }
+  },
+  "ember_phoenix": {
+   "id": "ember_phoenix",
+   "name": "Ember Phoenix",
+   "desc": "A bright wingbeat that leaves sparks in the rain and comes back from every fall.",
+   "level": 5,
+   "attrs": {
+    "CON": 10,
+    "DEX": 16,
+    "INT": 12,
+    "STR": 12
+   },
+   "voiceRole": "dragon",
+   "traits": [
+    "jolly",
+    "archaic"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.15,
+    "depth": 0.99,
+    "tone": 0.24,
+    "breath": 0.39,
+    "rough": 0.59,
+    "speed": 0.31,
+    "flutter": 0.08,
+    "intonation": 0.64,
+    "wordgap": 0.34,
+    "role": "dragon",
+    "seed": 811716663
+   },
+   "speech": {
+    "traits": [
+     "jolly",
+     "archaic"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.45,
+    "cheer": 0.8,
+    "aggression": 0.5,
+    "confidence": 0.6,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "phoenix",
+    "size": 0.8,
+    "colors": {
+     "body": "#d94a25",
+     "belly": "#ffb52e",
+     "accent": "#8f1e17",
+     "eyes": "#fff3a0"
+    },
+    "features": {
+     "wings": true,
+     "glow": true,
+     "fangs": false
+    },
+    "seed": 1
+   }
+  },
+  "burrow_centipede": {
+   "id": "burrow_centipede",
+   "name": "Burrow Centipede",
+   "desc": "Too many legs to count and exactly one direction in mind: toward the nearest root.",
+   "level": 3,
+   "attrs": {
+    "CON": 12,
+    "DEX": 16,
+    "INT": 5,
+    "STR": 10
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "hungry",
+    "shy"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.32,
+    "depth": 0.88,
+    "tone": 0.29,
+    "breath": 0.23,
+    "rough": 0.49,
+    "speed": 0.3,
+    "flutter": 0.06,
+    "intonation": 0.47,
+    "wordgap": 0.35,
+    "role": "brute",
+    "seed": 1123764275
+   },
+   "speech": {
+    "traits": [
+     "hungry",
+     "shy"
+    ],
+    "formality": 0.45,
+    "verbosity": 0.25,
+    "cheer": 0.4,
+    "aggression": 0.15,
+    "confidence": 0.25,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "centipede",
+    "size": 0.9,
+    "colors": {
+     "body": "#a34b38",
+     "belly": "#d78a54",
+     "accent": "#54211e",
+     "eyes": "#ffe05a"
+    },
+    "features": {
+     "fangs": true,
+     "plates": true,
+     "claws": true
+    },
+    "seed": 1
+   }
+  },
+  "moss_slime": {
+   "id": "moss_slime",
+   "name": "Moss Slime",
+   "desc": "Wobbles after the party, absorbing moss, crumbs and occasionally a dropped key.",
+   "level": 3,
+   "attrs": {
+    "CON": 14,
+    "DEX": 9,
+    "INT": 7,
+    "STR": 10
+   },
+   "voiceRole": "child",
+   "traits": [
+    "jolly",
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.9,
+    "depth": 0.19,
+    "tone": 0.74,
+    "breath": 0.17,
+    "rough": 0.04,
+    "speed": 0.59,
+    "flutter": 0.07,
+    "intonation": 0.59,
+    "wordgap": 0.36,
+    "role": "child",
+    "seed": 1663611851
+   },
+   "speech": {
+    "traits": [
+     "jolly",
+     "loyal"
+    ],
+    "formality": 0.45,
+    "verbosity": 0.45,
+    "cheer": 0.8,
+    "aggression": 0.5,
+    "confidence": 0.6,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "slime",
+    "size": 0.9,
+    "colors": {
+     "body": "#55b884",
+     "belly": "#b8f1ad",
+     "accent": "#1d694f",
+     "eyes": "#f7f2a1"
+    },
+    "features": {
+     "glow": true
+    },
+    "seed": 1
+   }
+  },
+  "moon_mushroom": {
+   "id": "moon_mushroom",
+   "name": "Moon Mushroom",
+   "desc": "A walking cap of moonlit fungus that hums when the campfire goes low.",
+   "level": 3,
+   "attrs": {
+    "CON": 12,
+    "DEX": 8,
+    "INT": 13,
+    "STR": 8
+   },
+   "voiceRole": "child",
+   "traits": [
+    "shy",
+    "archaic"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.93,
+    "depth": 0.29,
+    "tone": 0.75,
+    "breath": 0.26,
+    "rough": 0.07,
+    "speed": 0.54,
+    "flutter": 0.12,
+    "intonation": 0.43,
+    "wordgap": 0.4,
+    "role": "child",
+    "seed": 2721272790
+   },
+   "speech": {
+    "traits": [
+     "shy",
+     "archaic"
+    ],
+    "formality": 0.75,
+    "verbosity": 0.25,
+    "cheer": 0.4,
+    "aggression": 0.15,
+    "confidence": 0.25,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "mushroom",
+    "size": 0.85,
+    "colors": {
+     "body": "#a64b62",
+     "belly": "#e3c1a0",
+     "accent": "#5d233c",
+     "eyes": "#f6dd75"
+    },
+    "features": {
+     "glow": false,
+     "fangs": false
+    },
+    "seed": 1
+   }
+  },
+  "lockjaw_mimic": {
+   "id": "lockjaw_mimic",
+   "name": "Lockjaw Mimic",
+   "desc": "Looks like a chest until it smiles. It has learned to carry the loot instead of eating it.",
+   "level": 4,
+   "attrs": {
+    "CON": 15,
+    "DEX": 8,
+    "INT": 8,
+    "STR": 14
+   },
+   "voiceRole": "merchant",
+   "traits": [
+    "sarcastic",
+    "greedy"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.64,
+    "depth": 0.54,
+    "tone": 0.7,
+    "breath": 0.22,
+    "rough": 0.04,
+    "speed": 0.5,
+    "flutter": 0.05,
+    "intonation": 0.47,
+    "wordgap": 0.39,
+    "role": "merchant",
+    "seed": 2758550401
+   },
+   "speech": {
+    "traits": [
+     "sarcastic",
+     "greedy"
+    ],
+    "formality": 0.45,
+    "verbosity": 0.45,
+    "cheer": 0.4,
+    "aggression": 0.5,
+    "confidence": 0.6,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "mimic",
+    "size": 0.9,
+    "colors": {
+     "body": "#78553b",
+     "belly": "#b67a45",
+     "accent": "#302019",
+     "eyes": "#ffcf50"
+    },
+    "features": {
+     "fangs": true,
+     "glow": false
+    },
+    "seed": 1
+   }
+  },
+  "reef_crocodile": {
+   "id": "reef_crocodile",
+   "name": "Reef Crocodile",
+   "desc": "A broad-jawed river companion with a tail like a boat hook and no fear of deep water.",
+   "level": 5,
+   "attrs": {
+    "CON": 17,
+    "DEX": 7,
+    "INT": 5,
+    "STR": 15
+   },
+   "voiceRole": "brute",
+   "traits": [
+    "gruff",
+    "loyal"
+   ],
+   "voice": {
+    "engine": "formant",
+    "variant": "custom",
+    "gender": "n",
+    "pitch": 0.29,
+    "depth": 1,
+    "tone": 0.3,
+    "breath": 0.27,
+    "rough": 0.57,
+    "speed": 0.32,
+    "flutter": 0.06,
+    "intonation": 0.67,
+    "wordgap": 0.28,
+    "role": "brute",
+    "seed": 3921111199
+   },
+   "speech": {
+    "traits": [
+     "gruff",
+     "loyal"
+    ],
+    "formality": 0.2,
+    "verbosity": 0.25,
+    "cheer": 0.4,
+    "aggression": 0.5,
+    "confidence": 0.6,
+    "custom": {},
+    "customRate": {},
+    "tics": [],
+    "mood": 0
+   },
+   "creature": {
+    "type": "crocodile",
+    "size": 1,
+    "colors": {
+     "body": "#466b4a",
+     "belly": "#a7b878",
+     "accent": "#263d2b",
+     "eyes": "#dce84b"
+    },
+    "features": {
+     "fangs": true,
+     "spikes": true,
+     "plates": true
+    },
+    "seed": 1
+   }
+  }
+ }
+}

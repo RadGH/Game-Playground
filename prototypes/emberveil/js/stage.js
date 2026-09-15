@@ -44,7 +44,7 @@ export const STAGE_CSS = `
 .stage-bars{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
 .stage-bars .sb{position:absolute;transform:translate(-50%,-100%);width:56px}
 .stage-bars .sb .track{position:relative;height:6px;border-radius:3px;background:#1a1208cc;border:1px solid #00000080;box-shadow:0 1px 2px #0008;overflow:hidden;display:flex}
-.stage-bars .sb .hpfill{height:100%;background:linear-gradient(#e0603a,#a82c20);transition:width .18s linear}
+.stage-bars .sb .hpfill{height:100%;background:linear-gradient(#e0603a,#a82c20);transition:width calc(.18s * var(--pace, 1)) linear}
 .stage-bars .sb.party .hpfill{background:linear-gradient(#6fc26a,#3d8a3a)}
 .stage-bars .sb .shfill{height:100%;background:linear-gradient(#bcd8ff,#5f8fd8);opacity:.95}
 .stage-bars .sb .nm{font:600 9px/1.2 system-ui,sans-serif;color:#e8ddc4;text-shadow:0 1px 2px #000,0 0 3px #000;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
@@ -60,10 +60,11 @@ function injectCss() {
 }
 
 export class Stage {
-  /** @param {HTMLElement} container  @param {{assets?: Assets}} opts  Pass an Assets instance to share one loader; otherwise the stage opens its own. */
-  constructor(container, { assets = null } = {}) {
+  /** Optional character/effect factories allow renderer comparisons without changing gameplay. */
+  constructor(container, { assets = null, characterFactory = createMiiCharacter, effectsClass = SpellFx } = {}) {
     injectCss();
     this.container = container;
+    this.characterFactory = characterFactory;
     this.chars = new Map();            // set up before frame(), which measures the line-up
     this.assets = assets ? Promise.resolve(assets) : Assets.open(new URL('../../../assets/', import.meta.url).href);
     this._backdropToken = 0; this.backdrop = document.createElement('div'); this.backdrop.className = 'backdrop'; container.append(this.backdrop);
@@ -83,9 +84,12 @@ export class Stage {
     // until they land the effects draw their geometry only, so nothing waits on the network.
     // scale 1.4: the fight camera sits further back than the effects gallery, so everything is
     // drawn larger here or it disappears against the backdrop.
-    this.fx = new SpellFx(this.scene.scene, { camera: this.scene.camera, scale: 1.4 });
+    this.fx = new effectsClass(this.scene.scene, { camera: this.scene.camera, scale: 1.4 });
     this.fxReady = this.assets.then(a => a.fxTextures(THREE, { size: 128 })).then(t => { this.fx.setTextures(t); return t; }).catch(() => null);
-    this.scene.addTicker((dt, t) => { for (const c of this.chars.values()) c.ctrl.update(dt, t); if (this.vehicle) this.vehicle.update(dt, t); for (const a of [...this.anims]) if (a(dt, t)) this.anims.splice(this.anims.indexOf(a), 1); this.fx.update(dt); if (this.fire) { this.fire.scale.y = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 23) * 0.05; this.fireLight.intensity = 2.2 + Math.sin(t * 13) * 0.4; } this.updateBars(); this.tickPerf(dt); });
+    // Combat speed (E34): everything that moves on frame time — body animation, walk-ins, thrusts,
+    // hit shakes, projectiles, impacts, auras — reads a scaled dt, so 1x really is slower and not
+    // just longer gaps between actions. setTimeScale() changes it; the bars and perf readout keep real time.
+    this.scene.addTicker((rawDt, t) => { const dt = rawDt * (this.timeScale ?? 1); for (const c of this.chars.values()) c.ctrl.update(dt, t); if (this.vehicle) this.vehicle.update(dt, t); for (const a of [...this.anims]) if (a(dt, t)) this.anims.splice(this.anims.indexOf(a), 1); this.fx.update(dt); if (this.fire) { this.fire.scale.y = 1 + Math.sin(t * 9) * 0.12 + Math.sin(t * 23) * 0.05; this.fireLight.intensity = 2.2 + Math.sin(t * 13) * 0.4; } this.updateBars(); this.tickPerf(dt); });
     this.setBackdrop('village');
     // ?perf=1 in the address bar, or shift+P at any time, shows the frame-cost overlay
     try { const q = new URLSearchParams(location.search);
@@ -269,7 +273,7 @@ export class Stage {
   }
   async add(ch, { side = 'left', index = 0, count = 1, facing = null } = {}) {
     await this.remove(ch.id);
-    const ctrl = ch.creature ? await createCreature(ch.creature) : await createMiiCharacter(ch.avatar || randomAvatar(this.presets || { palettes: { skin: ['#c68642'], hair: ['#222'], eye: ['#222'], cloth: ['#555'] }, raceRules: {} }, { seed: 1 }));
+    const ctrl = ch.creature ? await createCreature(ch.creature) : await this.characterFactory(ch.avatar || randomAvatar(this.presets || { palettes: { skin: ['#c68642'], hair: ['#222'], eye: ['#222'], cloth: ['#555'] }, raceRules: {} }, { seed: 1 }));
     const g = ctrl.group; g.userData.character = false;
     const { base, step } = lineUp(count); const x = side === 'left' ? -base - index * step : base + index * step; g.position.set(x, 0, (index % 2) * 0.35 - 0.2);
     g.rotation.y = facing != null ? facing : (side === 'left' ? 0.9 : -0.9);
@@ -310,9 +314,15 @@ export class Stage {
   async remove(id) { const c = this.chars.get(id); if (!c) return; this.fx.clearStatuses(c.group); this.scene.scene.remove(c.group); c.ctrl.dispose(); this.chars.delete(id); const b = this.bars.get(id); if (b) { b.el.remove(); this.bars.delete(id); } }
   clearSide(side) { for (const c of [...this.chars.values()]) if (c.side === side) this.remove(c.ch.id); }
   anim(id, name) { this.chars.get(id)?.ctrl.setAnim(name); }
+  /**
+   * Combat speed (E34, js/pace.js): 1 is normal, 0.25 is four times slower. Scales the frame clock
+   * every animation and effect runs on, and the one timer below that ends the attack pose.
+   * main.js sets it when a fight starts and puts it back to 1 when the fight ends.
+   */
+  setTimeScale(s = 1) { this.timeScale = Math.max(0.05, Math.min(4, Number(s) || 1)); return this.timeScale; }
   /** Thrust toward the target and back. Bodies swing whatever they are holding (see mii.js 'attack'). */
   attack(id, targetId) {
-    return new Promise(res => { const c = this.chars.get(id), t = this.chars.get(targetId); if (!c) return res(); c.ctrl.setAnim('attack'); setTimeout(() => { if (c.ctrl.anim === 'attack') c.ctrl.setAnim('idle'); }, 650); const from = c.home.clone(), to = t ? t.group.position.clone().lerp(from, 0.45) : from.clone().add(new THREE.Vector3(c.side === 'left' ? 1 : -1, 0, 0)); let k = 0; this.anims.push((dt) => { k += dt * 3.2; const p = k < 0.5 ? k * 2 : 2 - k * 2; c.group.position.lerpVectors(from, to, Math.min(1, Math.max(0, p))); if (k >= 1) { c.group.position.copy(from); res(); return true; } return false; }); });
+    return new Promise(res => { const c = this.chars.get(id), t = this.chars.get(targetId); if (!c) return res(); c.ctrl.setAnim('attack'); setTimeout(() => { if (c.ctrl.anim === 'attack') c.ctrl.setAnim('idle'); }, 650 / (this.timeScale ?? 1)); const from = c.home.clone(), to = t ? t.group.position.clone().lerp(from, 0.45) : from.clone().add(new THREE.Vector3(c.side === 'left' ? 1 : -1, 0, 0)); let k = 0; this.anims.push((dt) => { k += dt * 3.2; const p = k < 0.5 ? k * 2 : 2 - k * 2; c.group.position.lerpVectors(from, to, Math.min(1, Math.max(0, p))); if (k >= 1) { c.group.position.copy(from); res(); return true; } return false; }); });
   }
   hit(id) { const c = this.chars.get(id); if (!c) return; let k = 0; const base = c.group.position.clone(); this.anims.push(dt => { k += dt * 8; c.group.position.x = base.x + Math.sin(k * 12) * 0.06 * (1 - k); if (k >= 1) { c.group.position.copy(base); return true; } return false; }); }
   down(id) { const c = this.chars.get(id); if (!c) return; c.ctrl.setAnim('dead'); }
@@ -336,6 +346,7 @@ export class Stage {
   async cast(sourceId, targetId, { element = 'arcane', kind = 'magic', crit = false, flash = true, flashMs = 150 } = {}) {
     const c = this.chars.get(sourceId); if (!c) return;
     if (kind === 'melee' || kind === 'attack') return this.attack(sourceId, targetId);
+    if (c.ctrl.skeleton) { c.ctrl.setAnim('cast'); setTimeout(() => { if (c.ctrl.anim === 'cast') c.ctrl.setAnim('idle'); }, 1250); }
     if (flash) { this.fx.cast({ at: this.footOf(sourceId), element, ms: 340 }); await new Promise(r => setTimeout(r, flashMs)); }
     if (!targetId || !this.chars.get(targetId)) return;
     await this.fx.projectile({ from: this.pointOf(sourceId), to: this.pointOf(targetId), element, crit });

@@ -1,4 +1,4 @@
-// Avatar 3D viewer/builder UI. Reuses the 2D catalog + presets + random generator; renders with mii.js or quaternius.js.
+// Avatar 3D viewer/builder UI. Three renderers share the 2D catalog, presets and random generator.
 import { el, knob, select, button, panel, toast, downloadJSON, copyText, readJSONFile, textInput, checkbox } from '../../shared/ui.js';
 import { makeStore } from '../../shared/store.js';
 import { renderSVG, normalizeAvatar } from '../../avatar-2d/js/render.js';
@@ -6,6 +6,7 @@ import { PARTS, SLOTS, SLOT_LABELS, COLOR_SLOTS, partIds } from '../../avatar-2d
 import { randomAvatar } from '../../avatar-2d/js/random.js';
 import { createScene } from './scene.js';
 import { createMiiCharacter } from './mii.js';
+import { createChibi2Character, CHIBI2_ANIMS } from './chibi2.js';
 import { createQuaterniusCharacter, CLIPS, MAP } from './quaternius.js';
 
 const store = makeStore('avatar-3d', 1);
@@ -17,7 +18,9 @@ const status = document.getElementById('status'); const setStatus = t => status.
 // ---------- middle: viewport ----------
 const main = document.getElementById('main');
 const viewport = el('div', { id: 'viewport' }); const overlay = el('div', { class: 'overlay', text: 'drag to orbit · wheel to zoom' }); viewport.append(overlay);
-const modeBtns = el('div', { class: 'row mode-btns' }, button('Chibi (procedural)', () => setMode('mii')), button('Quaternius (CC0 meshes)', () => setMode('quaternius')));
+const modeBtns = el('div', { class: 'row mode-btns' }, ...[['mii', 'Chibi (procedural)'], ['chibi2', 'Chibi 2'], ['quaternius', 'Quaternius (CC0 meshes)']].map(([id, label]) => {
+  const b = button(label, () => setMode(id)); b.dataset.mode = id; return b;
+}));
 const animChips = el('div', { class: 'chips anim-chips' });
 const turntableCb = checkbox('Turntable', false, v => scene.setTurntable(v ? 0.6 : 0));
 const anchorsInfo = el('span', { class: 'small muted' });
@@ -26,26 +29,31 @@ function raceSelHolder() { window.__raceSel = select('Race', ['any', ...Object.k
 const scene = createScene(viewport);
 let character = null; let building = false, pending = null;
 const MII_ANIMS = ['idle', 'walk', 'run', 'wave', 'talk', 'dead'];
-function renderAnims() { const list = mode === 'mii' ? MII_ANIMS : CLIPS; const cur = character?.anim; animChips.replaceChildren(...list.map(a => el('span', { class: 'chip' + (a === cur ? ' on' : ''), text: a, onclick: () => { character?.setAnim(a); renderAnims(); } }))); }
+function renderAnims() { const list = mode === 'mii' ? MII_ANIMS : mode === 'chibi2' ? CHIBI2_ANIMS : CLIPS; const cur = character?.anim; animChips.replaceChildren(...list.map(a => el('span', { class: 'chip' + (a === cur ? ' on' : ''), text: a, onclick: () => { character?.setAnim(a); renderAnims(); } }))); }
 async function rebuild() {
   if (building) { pending = true; return; } building = true; setStatus('building ' + mode + '…');
+  const selectedMode = mode;
   try {
     if (character) { scene.scene.remove(character.group); character.dispose(); character = null; }
-    character = mode === 'mii' ? await createMiiCharacter(avatar) : await createQuaterniusCharacter(avatar);
-    scene.scene.add(character.group); character.setAnim(mode === 'mii' ? 'idle' : 'Idle_Loop'); renderAnims();
-    const h = mode === 'mii' ? character.metrics().totalHeight : null; anchorsInfo.textContent = h ? `height ≈ ${h.toFixed(2)} m` : '';
-    setStatus(mode === 'mii' ? 'Chibi: primitives + face texture' : 'Quaternius: ' + character.group.children.length + ' mesh parts');
+    const next = selectedMode === 'mii' ? await createMiiCharacter(avatar) : selectedMode === 'chibi2' ? await createChibi2Character(avatar) : await createQuaterniusCharacter(avatar);
+    if (mode !== selectedMode) { next.dispose(); pending = true; }
+    else {
+      character = next;
+      scene.scene.add(character.group); character.setAnim(mode === 'quaternius' ? 'Idle_Loop' : 'idle'); renderAnims();
+      const h = character.metrics?.().totalHeight; anchorsInfo.textContent = h ? `height ≈ ${h.toFixed(2)} m` : '';
+      setStatus(mode === 'mii' ? 'Chibi: primitives + face texture' : mode === 'chibi2' ? `Chibi 2: ${character.stats().triangles.toLocaleString()} triangles / ${character.stats().meshes} meshes` : 'Quaternius: ' + character.group.children.length + ' mesh parts');
+    }
   } catch (e) { console.error(e); setStatus('error: ' + e.message); toast(e.message); }
   building = false; if (pending) { pending = false; rebuild(); }
 }
 scene.addTicker((dt, t) => character?.update(dt, t));
-function setMode(m) { mode = m; store.set('mode', m); for (const b of modeBtns.children) b.classList.toggle('on', (b.textContent.startsWith('Chibi') ? 'mii' : 'quaternius') === m); frameSel.style.display = m === 'quaternius' ? '' : 'none'; rebuild(); }
+function setMode(m) { mode = ['mii', 'chibi2', 'quaternius'].includes(m) ? m : 'mii'; store.set('mode', mode); for (const b of modeBtns.children) b.classList.toggle('on', b.dataset.mode === mode); frameSel.style.display = mode === 'quaternius' ? '' : 'none'; rebuild(); }
 
 // presets + 2D compare
 const presetGrid = el('div', { class: 'presets' });
 for (const p of DATA.presets) presetGrid.append(el('div', { class: 'card', onclick: () => { avatar = normalizeAvatar(p.avatar); name = p.name; changed(); syncUI(); }, html: renderSVG(p.avatar) + `<div>${p.name}</div>` }));
 const mini2d = el('div', { class: 'mini2d' });
-main.append(panel('Presets (shared with Avatar 2D)', presetGrid), panel('Quaternius mapping notes', el('p', { class: 'small', html: 'Free-tier files: 2 bodies (male/female "Superhero"), 6 hairstyles + beard, 2 outfit sets (Peasant, Ranger) × body/arms/legs/feet, 43 animation clips. 2D ids map onto them (<code>MAP</code> in <code>quaternius.js</code>): hair → nearest of Buzzed/SimpleParted/Long/Buns/BuzzedFemale; tops robe/tunic/dress/rags… → Peasant, plate/leather/chainmail/coat → Ranger; hood/pauldrons when the JSON asks; skin = light/dark texture + tint; hair/eyes/outfit tinted from JSON colours. Face sliders and 2D face parts are <b>not</b> applied here (the Quaternius head has its own modelled face); use Mii mode for those. Height/width scale bones (thighs, spine) and the animation still plays.' })));
+main.append(panel('Presets (shared with Avatar 2D)', presetGrid), panel('Renderer comparison', el('p', { class: 'small', html: '<b>Chibi (procedural)</b> is the original lightweight builder. <b>Chibi 2</b> reads this same avatar JSON but builds a richer skinned body with modeled face features, joint bends and expanded animations. Switch the mode buttons above while editing any control to compare equivalent features. Quaternius remains the imported-mesh reference.' })), panel('Quaternius mapping notes', el('p', { class: 'small', html: 'Free-tier files: 2 bodies (male/female "Superhero"), 6 hairstyles + beard, 2 outfit sets (Peasant, Ranger) × body/arms/legs/feet, 43 animation clips. 2D ids map onto them (<code>MAP</code> in <code>quaternius.js</code>): hair → nearest of Buzzed/SimpleParted/Long/Buns/BuzzedFemale; tops robe/tunic/dress/rags… → Peasant, plate/leather/chainmail/coat → Ranger; hood/pauldrons when the JSON asks; skin = light/dark texture + tint; hair/eyes/outfit tinted from JSON colours. Face sliders and 2D face parts do not apply here because the Quaternius head is a separate model; use either Chibi mode for those. Height/width scale bones (thighs, spine) and the animation still plays.' })));
 
 // ---------- left: same slot editor as 2D (subset relevant to 3D) ----------
 const left = document.getElementById('left');
@@ -64,7 +72,7 @@ const faceKnobs = {}; const faceKnob = (slot, key, label, min, max, step) => { c
 left.append(
   panel('Body', bodyKnobs.height, bodyKnobs.width, bodyKnobs.headSize, el('div', { class: 'row' }, el('label', { text: 'Skin' }), skinSw), frameSel),
   panel('Head', slotRow('headShape'), slotRow('hair'), slotRow('ears'), slotRow('facialHair'), slotRow('extras'), slotRow('hat')),
-  panel('Face (chibi mode)', slotRow('eyes'), faceKnob('eyes', 'x', 'eye spacing', -1, 1, 0.05), faceKnob('eyes', 'y', 'eye height', -1, 1, 0.05), faceKnob('eyes', 'scale', 'eye size', 0.5, 1.6, 0.05), faceKnob('eyes', 'rot', 'eye tilt', -30, 30, 1), slotRow('brows'), slotRow('nose'), slotRow('mouth'), faceKnob('mouth', 'y', 'mouth height', -1, 1, 0.05), faceKnob('mouth', 'scale', 'mouth size', 0.5, 1.8, 0.05)),
+  panel('Face (Chibi / Chibi 2)', slotRow('eyes'), faceKnob('eyes', 'x', 'eye spacing', -1, 1, 0.05), faceKnob('eyes', 'y', 'eye height', -1, 1, 0.05), faceKnob('eyes', 'scale', 'eye size', 0.5, 1.6, 0.05), faceKnob('eyes', 'rot', 'eye tilt', -30, 30, 1), slotRow('brows'), slotRow('nose'), slotRow('mouth'), faceKnob('mouth', 'y', 'mouth height', -1, 1, 0.05), faceKnob('mouth', 'scale', 'mouth size', 0.5, 1.8, 0.05)),
   panel('Outfit', slotRow('top'), el('div', { class: 'row' }, el('label', { text: 'Top 2nd colour' }), colorSwatch(() => avatar.top.color2, v => { avatar.top.color2 = v; changed(); })), slotRow('bottom'), slotRow('shoes'), slotRow('accessory')),
 );
 

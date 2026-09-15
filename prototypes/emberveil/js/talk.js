@@ -115,6 +115,79 @@ const KIND_SPEECH = {
   knight: { traits: ['honorable', 'gruff'], formality: 0.8, aggression: 0.75, confidence: 0.85, cheer: 0.2 },
 };
 
+// ---------------------------------------------------------------- arriving hurt (round 21, E39)
+// When the party walks into a settlement with somebody wounded or down, one healthy member says so —
+// "We should take a rest, Corvin is wounded." — through the same Lingo speaker as every other line,
+// so it comes out in their voice and with their personality. The phrases live in
+// data/town-talk.json (symbol `wounded_rest`), registered into the grammar by registerTownTalk().
+
+/** Below this share of max health a hero counts as wounded. Fallen heroes always count. */
+export const WOUNDED_AT = 0.6;
+const hpShare = h => (h?.hp ?? 0) / Math.max(1, h?.maxHp || 1);
+const isDownHero = h => !h || h.alive === false || (h.hp ?? 0) <= 0;
+
+/**
+ * Who is hurt, who is down, and who should say something about it. Pure: tests call it directly.
+ * The speaker is a healthy healer when there is one (highest level first), otherwise the healthiest
+ * healthy member. When nobody is healthy the least-hurt member still speaks and `allHurt` is set, so
+ * the line can say "all of us". Nobody on their feet at all → speaker null (nobody to talk).
+ * The speaker is never named in their own line.
+ * @returns {null | { speaker, allHurt: boolean, hurt: object[], down: object[], threshold: number }}
+ *          null when everybody is at or above the threshold.
+ */
+export function woundedReport(party = [], { threshold = WOUNDED_AT, isHealer = () => false } = {}) {
+  const members = (party || []).filter(Boolean);
+  const down = members.filter(isDownHero);
+  const hurt = members.filter(h => !isDownHero(h) && hpShare(h) < threshold);
+  if (!down.length && !hurt.length) return null;
+  const healthy = members.filter(h => !isDownHero(h) && hpShare(h) >= threshold);
+  const byHealth = (a, b) => hpShare(b) - hpShare(a) || (b.level || 0) - (a.level || 0);
+  const healers = healthy.filter(h => { try { return !!isHealer(h); } catch { return false; } }).sort((a, b) => (b.level || 0) - (a.level || 0));
+  let speaker = healers[0] || [...healthy].sort(byHealth)[0] || null, allHurt = false;
+  if (!speaker) { speaker = [...hurt].sort(byHealth)[0] || null; allHurt = true; }
+  return { speaker, allHurt, hurt: hurt.filter(h => h !== speaker), down, threshold };
+}
+/** "Corvin", "Corvin and Mirelle", "Corvin, Mirelle and Tam". */
+export function nameList(names = []) {
+  const n = (names || []).filter(Boolean);
+  if (n.length <= 1) return n[0] || '';
+  return n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+}
+/** Put the Emberveil town phrases (data/town-talk.json) into a Lingo grammar. Safe to run more than once. */
+export function registerTownTalk(lingo, data) {
+  const names = Object.keys(data?.symbols || {});
+  for (const name of names) lingo.grammar.set(name, data.symbols[name]);
+  return names;
+}
+function namesEntity(list, lexicon, key) {
+  if (!list?.length) return undefined;
+  const sg = nameList(list.map(h => h.short || h.name));
+  return new Entity({ id: 'wounded_' + key, type: 'person', proper: true, forms: { sg, pl: sg } }, { lexicon, count: 1 });
+}
+/**
+ * The reminder line itself, spoken by report.speaker. Returns the Lingo output ({ text, speech, … })
+ * or null if nothing could be generated — callers fall back to woundedFallback().
+ */
+export function woundedLine(talk, report, { town = '' } = {}) {
+  if (!talk || !report?.speaker) return null;
+  const lex = talk.lingo.lexicon;
+  const bindings = {
+    hurt: namesEntity(report.hurt, lex, 'hurt'), down: namesEntity(report.down, lex, 'down'),
+    hurtCount: report.hurt.length, downCount: report.down.length, allHurt: !!report.allHurt,
+    town: new Entity({ id: 'arrival_town', type: 'place', proper: true, forms: { sg: town || 'this place' } }, { lexicon: lex }),
+  };
+  const out = talk.line(report.speaker, 'wounded_rest', { bindings });
+  return out && out.text && !/[{}]/.test(out.text) ? out : null;
+}
+/** Plain words for the same situation, used only if the grammar produced nothing. */
+export function woundedFallback(report) {
+  if (!report) return '';
+  const d = nameList(report.down.map(h => h.short || h.name)), w = nameList(report.hurt.map(h => h.short || h.name));
+  if (report.down.length) return `${d} ${report.down.length === 1 ? 'is' : 'are'} down. We need the cleric.`;
+  if (report.hurt.length) return `We should take a rest, ${w} ${report.hurt.length === 1 ? 'is' : 'are'} wounded.`;
+  return 'We should take a rest. None of us is whole.';
+}
+
 // Adapted from prototypes/party-quest/js/talk.js: lingo speakers + combat reactions, no memory/relations here.
 export class Talk {
   constructor({ lingo, game, voice = null }) { this.lingo = lingo; this.game = game; this.voice = voice; this.speakers = new Map(); this.muted = false; this.engineOverride = ''; this.fightLines = new Set(); this._fightKey = null; }

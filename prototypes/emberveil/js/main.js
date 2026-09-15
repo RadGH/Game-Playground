@@ -26,6 +26,9 @@ import { VEHICLES, SUPPLY_KINDS } from './game.js';
 import { makeRng } from './rng.js';
 import { resolveCrossing, crossingChoices, payRetry, RETRY_COST } from './explore.js';
 import { NODE_INFO } from './ui.js';
+import { SPEEDS, SPEED_TIPS, PACE, GAP_EVENTS, normalizeSpeed, paceFactor, timeScale as paceTimeScale, paceMs, extraGap } from './pace.js';
+import { StickyScroll } from './scroll.js';
+import { woundedReport, woundedLine, woundedFallback, registerTownTalk } from './talk.js';
 import { setupUI, initMenu, decorateFrames, iconHtml, gemHtml, gemFor, slotIcon, SLOT_NAME, STAT_TIPS, nodeInfo, itemTipHtml, registerTip, hideTip, esc, checkText, checkHtml, skillCheckPopup } from './ui.js';
 
 const $ = id => document.getElementById(id);
@@ -44,6 +47,7 @@ const lingo = new Lingo({ lexicon: lexData, grammar: grammarData, traits: traits
 expandVariants(topicsData, { perLine: 2, seed: 11 }); const conversations = new Conversations({ lingo, topics: topicsData }); const threads = new Threads({ conv: conversations, threads: threadsData }); const langdbg = new LangDebug({ lingo, base: base }); document.head.append(Object.assign(document.createElement('style'), { textContent: LANGDEBUG_CSS })); langdbg.mountSettings($('menu-langdbg') || $('hud'), { onToggle: on => { if (on) for (const p of document.querySelectorAll('#narrative .say')) langdbg.decorate(p); } }); document.head.append(Object.assign(document.createElement('style'), { textContent: METER_CSS }));
 for (const [id, e] of Object.entries({ ...enemies.entities, ...bosses.entities })) if (!lingo.lexicon.has(id)) lingo.lexicon.add({ id, type: 'creature', forms: { sg: e.name.toLowerCase(), pl: e.name.toLowerCase() + 's' }, tags: [] });
 lingo.invalidatePronunciations();
+registerTownTalk(lingo, await D('town-talk.json'));   // round 21 (E39): "We should take a rest, Corvin is wounded."
 const LOOKS = classLooks.classes; const SK = skills.skills; const SP = spells.spells;
 let game = null, talk = null, stage = null, busy = false, selectedHero = 0;
 let textSpeed = 1;   // menu setting: multiplies how long a spoken line stays on screen
@@ -95,9 +99,21 @@ $('btn-start').onclick = () => { for (const h of chosen) game.addHero(h); game.s
 // ------------------------------------------------------------------ world
 async function startWorld(resumed) {
   // sound wraps the stage from outside, see js/sfx-bridge.js
-  showScreen('world'); if (!stage) { stage = new Stage($('stage'), { assets }); window.emberveilSfx = await installSfx({ stage, game }); } talk = new Talk({ lingo, game, voice }); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value || 'formant'; for (const h of game.party) talk.speaker(h);
+  showScreen('world');
+  if (!stage) {
+    const options = { assets };
+    const rendererParam = new URLSearchParams(location.search).get('renderer');
+    const useChibi2 = rendererParam !== 'chibi1';
+    if (useChibi2) {
+      const { createChibi2Character } = await import('../../../avatar-3d/js/chibi2.js');
+      const { BatchedSpellFx } = await import('../../../avatar-3d/js/spellfx-batched.js');
+      options.characterFactory = createChibi2Character; options.effectsClass = BatchedSpellFx;
+    }
+    stage = new Stage($('stage'), options); window.emberveilSfx = await installSfx({ stage, game });
+  }
+  talk = new Talk({ lingo, game, voice }); talk.muted = $('mute').checked; talk.engineOverride = $('engine').value || 'formant'; for (const h of game.party) talk.speaker(h);
   summonUnlockedPets({ quiet: true, restage: false });   // a loaded save may already have the talent bought
-  $('narrative').replaceChildren(); renderHud(); renderSide(); renderMap();
+  if (typeof closeTownPanel === 'function') closeTownPanel(); logScroll.clear(); renderHud(); renderSide(); renderMap();
   if (!resumed) narrate(`<h4>${ACT_NAMES[0]}</h4><p>A wanderer on a road that used to lead somewhere. The Veil bends around you. Somebody named you.</p>`); else narrate(`<p class="sys">Game loaded. ${game.zone().name}.</p>`);
   await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.setBackdrop(game.zoneId); stage.parkVehicle(game.vehicle); await enterNode();
 }
@@ -137,12 +153,15 @@ function renderHud() {
   $('hud-vehicle-ic').className = 'ic ic-' + (!game.vehicle || game.vehicle === 'none' ? 'boot' : 'wagon');
   $('hud-vehicle').dataset.tip = `${v.name} — ${v.desc}`;
 }
-function narrate(html, cls = '') { const p = el('div', { class: cls, html }); $('narrative').append(p); $('narrative').scrollTop = 1e9; return p; }
+// E35: the log follows new lines only while the reader is at the bottom; scrolled up, it holds still
+// and the "new lines" button offers a way back down (js/scroll.js).
+const logScroll = new StickyScroll($('narrative'), { button: $('log-latest') });
+function narrate(html, cls = '') { const p = el('div', { class: cls, html }); logScroll.append(p); return p; }
 // An action button: optional icon (assets/data/ui or the map node icons) + label + a tooltip saying what it does.
 // The label stays the button's only text so tests can match it exactly.
 function setActions(list) {
   $('actions').replaceChildren(...list.map(a => {
-    const b = el('button', { class: a.cls || '', onclick: async () => { if (busy) return; busy = true; hideTip(); try { await a.run(); } catch (e) { console.error(e); narrate(`<p class="bad">Something broke: ${e.message}</p>`); } busy = false; } });
+    const b = el('button', { class: a.cls || '', onclick: async () => { if (busy) return; busy = true; hideTip(); try { await a.run(); } catch (e) { console.error(e); closeTownPanel(); narrate(`<p class="bad">Something broke: ${e.message}</p>`); } busy = false; } });   // a town screen must never hide the error
     if (a.tip) b.dataset.tip = a.tip;
     if (a.icon) b.append(el('i', { class: 'ic ic-' + a.icon }));
     b.append(document.createTextNode(a.text));
@@ -273,7 +292,7 @@ function syncStatuses(unit) {
  */
 const RECOVER_WHY = { heal: 'a mending', regen: 'regeneration', kill: 'on kill', mana: 'mana', drain: 'drained from a wound', effect: '' };
 function recoverWhy(ev) { const raw = ev.label || ''; const why = RECOVER_WHY[raw] !== undefined ? RECOVER_WHY[raw] : raw; return why ? ` (${why})` : ''; }
-function floatAt(id, text, cls = '') { const c = stage.chars.get(id); const d = el('div', { class: 'dmg ' + cls, text }); if (c) { const v = c.group.position.clone(); v.y += 1.3; v.project(stage.scene.camera); d.style.left = `${(v.x + 1) / 2 * 100}%`; d.style.top = `${(1 - v.y) / 2 * 100}%`; } else { d.style.left = '50%'; d.style.top = '50%'; } $('bubbles').append(d); setTimeout(() => d.remove(), 1000); }
+function floatAt(id, text, cls = '') { const c = stage.chars.get(id); const d = el('div', { class: 'dmg ' + cls, text }); if (c) { const v = c.group.position.clone(); v.y += 1.3; v.project(stage.scene.camera); d.style.left = `${(v.x + 1) / 2 * 100}%`; d.style.top = `${(1 - v.y) / 2 * 100}%`; } else { d.style.left = '50%'; d.style.top = '50%'; } $('bubbles').append(d); setTimeout(() => d.remove(), paceMs(PACE.floatText, fightPace())); }
 // Every spoken line goes through one queue, so two lines never talk over each other and none is ever
 // dropped: a hero's reply waits for the enemy's taunt to finish playing. speakCount is here for the
 // tests — it counts the lines actually handed to the voice engine.
@@ -462,7 +481,7 @@ async function enterNodeInner() {
   const n = game.node(); renderHud(); renderMap(); const res = game.enter(n); stage.clearSide('right'); stage.setBackdrop(game.zoneId);
   stage.parkVehicle(game.vehicle);   // whatever the party bought stands behind them on the road
   if (res.kind === 'crossing') return crossingNode(res, n);
-  if (res.kind === 'town') return town(res.town);
+  if (res.kind === 'town') { await town(res.town); await woundedReminder(); return; }   // E39: said once, on arrival
   if (res.kind === 'combat') { narrate(`<h4>${n.name}</h4><p class="bad">${res.encounter.name}.</p>`); const won = await fight(res.encounter, { node: n, boss: res.boss }); if (won) await afterCombat(n, res.encounter, res.boss); return mapActions(); }
   if (res.kind === 'event') return runEvent(res.event, n);
   if (res.kind === 'skillCheck') { narrate(`<h4>${n.name}</h4><p>${res.check.flavor}</p><p class="sys">${res.check.stat} check, difficulty ${res.check.dc}. A d20 plus the party's best ${res.check.stat} bonus (+${bestCheckBonus(game.alive(), res.check.stat, h => derive(h, game.loot)[res.check.stat] ?? h.attrs?.[res.check.stat] ?? 8)}).</p>`); return setActions([{ text: `Attempt (${res.check.stat})`, cls: 'primary', run: async () => { const r = game.resolveSkillCheck(n); await showCheck({ stat: res.check.stat, best: r.best, statBonus: r.statBonus, roll: r.roll, dc: r.dc, ok: r.ok }, { subtitle: n.name }); if (r.text) narrate(`<p class="${r.ok ? 'good' : 'bad'}">${r.text}</p>`); renderHud(); renderSide(); const m = randomAlive(); if (m) await sayLine(m, speak(m, r.ok ? 'brag' : 'complain')); mapActions(); } }, { text: 'Leave it', run: async () => mapActions() }]); }
@@ -474,6 +493,7 @@ async function enterNodeInner() {
   narrate(`<p class="sys">${res.text || n.name}</p>`); mapActions();
 }
 function mapActions() {
+  closeTownPanel(); setInFight(false);   // back on the road: no town screen over the log, no slowed stage
   const n = game.node(); const acts = []; const na = game.nightAttack(); const left = game.legsLeft();
   const rations = game.supplies.ration || 0, tent = game.supplies.tent > 0, torch = game.supplies.torch > 0;
   const down = game.fallen();
@@ -621,6 +641,7 @@ function crossingFailed(res, n, C, guard) {
 
 // ---- combat
 async function fight(enc, { node = null, boss = false } = {}) {
+  if (typeof closeTownPanel === 'function') closeTownPanel(); setInFight(true);   // E34: the chosen combat speed paces everything from the walk-in on
   const heroes = game.fighters(); const foes = enc.enemies; await stage.setSide(heroes.map(bodyOf), 'left'); await stage.setSide(foes.map(enemyLook), 'right');
   // E9: the enemies walk on before anyone swings, so a fight opens with something arriving rather
   // than a line of bodies appearing out of nowhere. About a second, and the round loop waits for it.
@@ -640,12 +661,13 @@ async function fight(enc, { node = null, boss = false } = {}) {
     if (!spoke && foes[0] && looks[foes[0].id].beast) { const bs = talk.beastOpener(foes[0], { enc }); await sayScene(bs?.text || `The ${foes[0].name} snarls.`); } }
   const bloodied = new Set();
   while (!combat.over) {
+    if (combat.round_ > 0) await sleep(extraGap(PACE.roundGap, fightPace()));   // E34: a breath between rounds at 1x/2x, none at 4x
     const events = combat.round(); narrate(`<p class="sys">— round ${combat.round_} —</p>`);
     for (const ev of events) { rec(ev);
-      if (ev.type === 'attack') { const st = attackStyle(ev.source); if (st.kind === 'melee') await stage.attack(ev.source.id, ev.target.id); else await stage.cast(ev.source.id, ev.target.id, { element: st.element, kind: st.kind, crit: !!ev.crit, flash: st.kind === 'magic', flashMs: 90 }); }
-      else if (ev.type === 'damage') { const dEl = elementName(ev.dtype); await flyIfPending(ev, dEl); stage.hit(ev.target.id); stage.impact(ev.target.id, dEl, ev.crit); floatAt(ev.target.id, fmtHp(ev.amount) + (ev.crit ? '!' : ''), ev.crit ? 'crit' : ''); narrate(`<p class="${ev.source?.isEnemy ? 'bad' : ''}">${ev.source ? (ev.source.short || ev.source.name) : 'Something'} ${ev.label ? `(${ev.label}) ` : ''}hits ${ev.target.short || ev.target.name} for ${fmtHp(ev.amount)} damage${ev.crit ? ' (crit)' : ''}${ev.tags?.length ? ' · ' + ev.tags.join(', ') : ''}.</p>`); if (!ev.target.isEnemy && ev.target.hp > 0 && ev.target.hp <= ev.target.maxHp / 2 && !bloodied.has(ev.target.id)) { bloodied.add(ev.target.id); if (ev.target.isHero) await sayLine(ev.target, speak(ev.target, 'combat_hurt')); } await sleep(160); }
+      if (ev.type === 'attack') { const st = attackStyle(ev.source); if (st.kind === 'melee') await stage.attack(ev.source.id, ev.target.id); else await stage.cast(ev.source.id, ev.target.id, { element: st.element, kind: st.kind, crit: !!ev.crit, flash: st.kind === 'magic', flashMs: paceMs(PACE.attackFlash, fightPace()) }); }
+      else if (ev.type === 'damage') { const dEl = elementName(ev.dtype); await flyIfPending(ev, dEl); stage.hit(ev.target.id); stage.impact(ev.target.id, dEl, ev.crit); floatAt(ev.target.id, fmtHp(ev.amount) + (ev.crit ? '!' : ''), ev.crit ? 'crit' : ''); narrate(`<p class="${ev.source?.isEnemy ? 'bad' : ''}">${ev.source ? (ev.source.short || ev.source.name) : 'Something'} ${ev.label ? `(${ev.label}) ` : ''}hits ${ev.target.short || ev.target.name} for ${fmtHp(ev.amount)} damage${ev.crit ? ' (crit)' : ''}${ev.tags?.length ? ' · ' + ev.tags.join(', ') : ''}.</p>`); if (!ev.target.isEnemy && ev.target.hp > 0 && ev.target.hp <= ev.target.maxHp / 2 && !bloodied.has(ev.target.id)) { bloodied.add(ev.target.id); if (ev.target.isHero) await sayLine(ev.target, speak(ev.target, 'combat_hurt')); } await sleep(paceMs(PACE.afterDamage, fightPace())); }
       else if (ev.type === 'miss') { floatAt(ev.target.id, 'miss', 'miss'); narrate(`<p class="sys">${ev.source.short || ev.source.name} misses ${ev.target.short || ev.target.name}.</p>`); }
-      else if (ev.type === 'skill') { noteCast(ev); narrate(`<p class="good">${ev.source.short || ev.source.name} uses <b>${ev.name}</b>.</p>`); if (!ev.source.isEnemy && Math.random() < 0.25) await sayLine(ev.source, speak(ev.source, 'combat_bark'), { wait: false }); await sleep(200); }
+      else if (ev.type === 'skill') { noteCast(ev); narrate(`<p class="good">${ev.source.short || ev.source.name} uses <b>${ev.name}</b>.</p>`); if (!ev.source.isEnemy && Math.random() < 0.25) await sayLine(ev.source, speak(ev.source, 'combat_bark'), { wait: false }); await sleep(paceMs(PACE.afterSkill, fightPace())); }
       else if (ev.type === 'heal') { if (ev.amount > 0) { stage.heal(ev.target.id); floatAt(ev.target.id, '+' + fmtHp(ev.amount), 'heal'); narrate(`<p class="good">${ev.target.short || ev.target.name} recovers ${fmtHp(ev.amount)} health${recoverWhy(ev)}.</p>`); } }
       else if (ev.type === 'mana') { if (ev.amount > 0) { floatAt(ev.target.id, '+' + fmtHp(ev.amount) + ' mp', 'mana'); narrate(`<p class="sys">${ev.target.short || ev.target.name} recovers ${fmtHp(ev.amount)} mana${recoverWhy(ev)}.</p>`); } }
       else if (ev.type === 'dot') { stage.pulseStatus(ev.target.id, ev.status); if (stage.chars.get(ev.target.id)) stage.fx.impact({ at: stage.pointOf(ev.target.id), element: elementName(ev.dtype || ev.status), scale: 0.55, height: stage.heightOf(ev.target.id) }); floatAt(ev.target.id, fmtHp(ev.amount), ''); narrate(`<p class="sys">${ev.target.short || ev.target.name} takes ${fmtHp(ev.amount)} damage from ${ev.status}.</p>`); }
@@ -661,13 +683,15 @@ async function fight(enc, { node = null, boss = false } = {}) {
         stage.impact(ev.target.id, elementName(ev.dtype || 'arcane'), true); stage.pulseStatus(ev.target.id, 'enrage');
         if (talk && !looks[ev.target.id]?.beast) { try { const l = talk.bossPhaseLine?.(ev.target, heroes.find(h => h.alive) || heroes[0]); if (l) await sayLine(ev.target, l, { cls: 'enemy' }); } catch (e) { console.warn('boss phase line', e); } }
         else narrate(`<p class="sys"><i>${ev.target.name} changes how it fights.</i></p>`);
-        await sleep(220);
+        await sleep(paceMs(PACE.afterPhase, fightPace()));
       }
       if (ev.type === 'status' && ev.target?.alive) { stage.status(ev.target.id, ev.status, true); if (ev.status === 'barrier' && ev.power > 0) { floatAt(ev.target.id, '+' + fmtHp(ev.power) + ' shield', 'heal'); narrate(`<p class="good">${ev.target.short || ev.target.name} gains a ${fmtHp(ev.power)} shield${ev.source && ev.source !== ev.target ? ` (${ev.source.short || ev.source.name})` : ''}.</p>`); } }
       if (ev.target) syncStatuses(ev.target); if (ev.source && ev.source !== ev.target) syncStatuses(ev.source);
       renderPartyTab();
+      if (GAP_EVENTS.includes(ev.type)) { const gap = extraGap(PACE.eventGap, fightPace()); if (gap) await sleep(gap); }   // E34: 0 at 4x
     }
   }
+  setInFight(false);
   pendingCast.clear(); stage.clearBars(); for (const c of [...stage.chars.keys()]) stage.clearStatuses(c);
   for (const h of heroes) { h.statuses = []; h.buffs = []; h.dmgBuff = 0; h.dmgReduct = 0; } game.meter.endFight(); enc.killsBy = combat.killsBy; renderMeterTab(); const hqDone = game.trackFight(combat, enc, combat.result === 'win'); for (const q of hqDone || []) await heroQuestDone(q);
   if (combat.result === 'win') { const m = randomAlive(); if (m) await sayLine(m, speak(m, Math.random() < 0.5 ? 'brag' : 'relief')); return true; }
@@ -704,11 +728,121 @@ async function dungeon(dg, done) {
   narrate(`<p class="good"><b>${dg.name} cleared.</b> +${dg.reward.gold} gold, +${dg.reward.xp} xp, ${it ? `<span class="${it.rarity}">${it.name}</span>` : ''}.</p>`); renderHud(); renderSide(); mapActions();
 }
 // ---- town
-async function town(t) { game.threadEvent('town');
+async function town(t) { game.threadEvent('town'); closeTownPanel();
   narrate(`<h4>${t.name}</h4><p class="sys">${t.services.map(s => s.replace('blackmarket', 'black market')).join(' · ')}${game.fame >= 500 ? ' · guild hall' : ''}</p>`); stage.clearSide('right');
-  const acts = [{ text: 'Merchant', icon: 'gold', tip: 'Buy gear, food, potions and vehicles — and sell what you are done with.', run: async () => shop(t) }, { text: 'Tavern (hire)', icon: 'tab_party', tip: 'Drink, listen, and hire extra heroes for the party or the bench.', run: async () => tavern(t) }, { text: 'Cleric (heal, free)', icon: 'hp', tip: 'A free full heal, a fresh day, and the fallen back on their feet — settlements are safe ground. This and a shrine are the only revives that cost nothing.', run: async () => { const r = game.clericRest(t); narrate('<p class="good">The cleric sees to everyone. Healed, fed, a new day — and anybody who was down is up again.</p>'); narrateRevives(r?.revived || [], []); renderSide(); renderHud(); town(t); } }];
-  if (t.services.includes('blacksmith')) acts.push({ text: 'Blacksmith', icon: 'slot_weapon', tip: 'Upgrade the quality of a piece of gear for gold.', run: async () => smith(t, 'blacksmith') }); if (t.services.includes('enchanter')) acts.push({ text: 'Enchanter', icon: 'tab_skills', tip: 'Reroll the magic properties on a piece of gear.', run: async () => smith(t, 'enchanter') }); if (t.services.includes('trainer')) acts.push({ text: 'Trainer (respec 50g/level)', icon: 'xp', tip: 'Take back every talent and passive point the selected hero has spent.', run: async () => { const h = game.party[selectedHero]; const cost = h.level * 50; if (game.gold < cost) return toast('Not enough gold'); game.gold -= cost; h.pendingTalent += Object.keys(h.talents).length; h.talents = {}; h.pendingPassive += Object.values(h.passiveRanks).reduce((a, b) => a + b, 0); h.passiveRanks = {}; refresh(h, game.loot); renderHud(); renderSide(); toast(`${h.short} respecced`); town(t); } });
+  townActions(t);
+}
+/**
+ * The town's buttons. Every service calls this (not town()) when it is done, so the town heading is
+ * written into the log once per visit instead of again after every purchase (round 21).
+ */
+function townActions(t) {
+  const acts = [{ text: 'Merchant', icon: 'gold', tip: 'Buy gear, food, potions and vehicles — and sell what you are done with.', run: async () => shop(t) }, { text: 'Tavern (hire)', icon: 'tab_party', tip: 'Drink, listen, and hire extra heroes for the party or the bench.', run: async () => tavern(t) }, { text: 'Cleric (heal, free)', icon: 'hp', tip: 'A free full heal, a fresh day, and the fallen back on their feet — settlements are safe ground. This and a shrine are the only revives that cost nothing.', run: async () => { const r = game.clericRest(t); narrate('<p class="good">The cleric sees to everyone. Healed, fed, a new day — and anybody who was down is up again.</p>'); narrateRevives(r?.revived || [], []); renderSide(); renderHud(); closeTownPanel(); townActions(t); } },
+    { text: 'Manage party', icon: 'tab_party', tip: `Swap heroes between the party and the bench${game.bench.length ? ` (${game.bench.length} waiting)` : ''}. The party only changes in a settlement.`, run: async () => manageParty() }];
+  if (t.services.includes('blacksmith')) acts.push({ text: 'Blacksmith', icon: 'slot_weapon', tip: 'Upgrade the quality of a piece of gear for gold.', run: async () => smith(t, 'blacksmith') }); if (t.services.includes('enchanter')) acts.push({ text: 'Enchanter', icon: 'tab_skills', tip: 'Reroll the magic properties on a piece of gear.', run: async () => smith(t, 'enchanter') }); if (t.services.includes('trainer')) acts.push({ text: 'Trainer (respec 50g/level)', icon: 'xp', tip: 'Take back every talent and passive point the selected hero has spent.', run: async () => { const h = game.party[selectedHero]; const cost = h.level * 50; if (game.gold < cost) return toast('Not enough gold'); game.gold -= cost; h.pendingTalent += Object.keys(h.talents).length; h.talents = {}; h.pendingPassive += Object.values(h.passiveRanks).reduce((a, b) => a + b, 0); h.passiveRanks = {}; refresh(h, game.loot); renderHud(); renderSide(); toast(`${h.short} respecced`); townActions(t); } });
   acts.push({ text: 'Back to the map', icon: 'tab_map', tip: 'Leave the settlement and go back to travelling.', run: async () => mapActions() }); setActions(acts);
+}
+// ---- town screens (round 21, E37) ------------------------------------------------------------
+// Merchant, Tavern, Blacksmith and Enchanter open in a panel that covers the log while it is up, with
+// a scroll of its own. The shop used to be written INTO the log, so scrolling it ran straight into old
+// fight lines. The log keeps receiving lines underneath and comes back intact (and scrolled the way
+// the reader left it) when the panel closes.
+function openTownPanel(title, ...nodes) {
+  hideTip();
+  $('town-panel-title').textContent = title;
+  const body = $('town-panel-body'); body.replaceChildren(...nodes.filter(Boolean)); body.scrollTop = 0;
+  $('narrative').hidden = true; $('town-panel').hidden = false; logScroll.paint();
+  try { body.focus({ preventScroll: true }); } catch { /* focus is a nicety for keyboard scrolling */ }
+}
+/** Close the town screen and show the log again. Returns true if one was open. */
+function closeTownPanel() {
+  const panel = $('town-panel'); if (!panel || panel.hidden) return false;
+  hideTip(); panel.hidden = true; $('town-panel-body').replaceChildren();
+  $('narrative').hidden = false; logScroll.reveal();
+  return true;
+}
+$('town-panel-back').onclick = () => closeTownPanel();
+
+// ---- "We should take a rest, Corvin is wounded." (round 21, E39) ------------------------------
+// On arrival in a settlement, if anyone is under 60% health or down, one healthy member says so —
+// a healer when one is standing. Spoken through Lingo (data/town-talk.json) so it gets their voice
+// and personality. Once per arrival: the key changes only when the party actually travels or a day
+// passes, so opening shops and coming back to the town buttons never repeats it.
+let woundedSaidFor = null;
+async function woundedReminder({ force = false } = {}) {
+  if (!game || !talk) return null;
+  const key = `${game.zoneId}:${game.nodeId}:${game.nodesTravelled}:${game.day}`;
+  if (!force && woundedSaidFor === key) return null;
+  const report = woundedReport(game.party, { isHealer: h => game.isHealer(h) });
+  if (!report?.speaker) return null;
+  woundedSaidFor = key;
+  const line = woundedLine(talk, report, { town: game.townFor()?.name || '' }) || { text: woundedFallback(report) };
+  await sayLine(report.speaker, line, { cls: 'wounded' });
+  return line.text;
+}
+
+// ---- Manage Party (round 21, E38) --------------------------------------------------------------
+// The active party and the bench side by side; rules in js/bench.js through game.benchHero /
+// game.joinParty / game.takeGear. Every change saves the game, restages the party and redraws the tabs.
+function manageParty() {
+  const dlg = $('party-dialog'); if (!dlg || !game) return;
+  let msg = '';
+  const changed = async text => {
+    msg = text || '';
+    for (const h of game.party) { try { talk?.speaker(h); } catch { /* a missing voice never blocks the swap */ } }
+    summonUnlockedPets({ quiet: true, restage: false });
+    selectedHero = Math.min(selectedHero, Math.max(0, game.party.length - 1));
+    renderSide(); renderHud(); game.save(); $('btn-continue').disabled = false;
+    draw();
+    if (stage) { await stage.setSide(game.fighters().map(bodyOf), 'left'); stage.parkVehicle(game.vehicle); }
+  };
+  const card = (h, where) => {
+    const down = !h.alive || h.hp <= 0;
+    const pets = (where === 'party' ? game.companions : (game.benchCompanions || [])).filter(c => c.ownerId === h.id);
+    const gearN = Object.keys(h.equipment || {}).length;
+    const actions = el('div', { class: 'pm-actions' });
+    if (where === 'party') {
+      const r = game.canBench(h.id);
+      actions.append(el('button', { class: 'small', text: 'To the bench', disabled: r.ok ? undefined : '', title: r.ok ? undefined : `Not possible: ${r.why}`,
+        'data-tip': r.ok ? `${h.short} sits out and waits here with their gear${pets.length ? ' — ' + pets.map(p => p.name).join(', ') + ' goes with them' : ''}.` : `Not possible: ${r.why}.`,
+        onclick: () => { const x = game.benchHero(h.id); if (!x.ok) return toast(x.why); narrate(`<p class="sys">${esc(h.short)} sits out on the bench${x.pets.length ? `, and ${esc(x.pets.map(p => p.name).join(', '))} with them` : ''}.</p>`); changed(`${h.short} is on the bench.`); } }));
+    } else {
+      const r = game.canJoin(h.id);
+      if (r.ok) actions.append(el('button', { class: 'small primary', text: 'Join the party', 'data-tip': `${h.short} takes the empty place in the party.`,
+        onclick: () => { const x = game.joinParty(h.id); if (!x.ok) return toast(x.why); narrate(`<p class="sys">${esc(h.short)} joins the party.</p>`); changed(`${h.short} joins the party.`); } }));
+      else if (r.needsSwap) actions.append(el('select', { 'aria-label': `Swap ${h.short} in for a party member`, 'data-tip': `The party is full. Pick who sits out so ${h.short} can take their place.`,
+        onchange: e => { const outId = e.target.value; if (!outId) return; const out = game.party.find(p => p.id === outId); const x = game.joinParty(h.id, outId); if (!x.ok) { e.target.value = ''; return toast(x.why); } narrate(`<p class="sys">${esc(h.short)} takes ${esc(out?.short || 'a')}'s place in the party; ${esc(out?.short || 'they')} waits on the bench.</p>`); changed(`${h.short} in, ${out?.short || 'one'} out.`); } },
+        el('option', { value: '', text: 'swap in for…' }),
+        ...game.party.map(p => { const c = game.canJoin(h.id, p.id); return el('option', { value: p.id, text: p.short + (c.ok ? '' : ' (not possible)'), disabled: c.ok ? undefined : '' }); })));
+      else actions.append(el('span', { class: 'tiny bad', text: r.why }));
+      if (gearN) actions.append(el('button', { class: 'small ghost', text: 'Take their gear', 'data-tip': `Move everything ${h.short} wears into the bag, so the party can use it. ${h.short} stays on the bench.`,
+        onclick: () => { const moved = game.takeGear(h); narrate(`<p class="sys">${esc(h.short)} hands over ${moved.length} piece${moved.length === 1 ? '' : 's'} of gear. It is in the bag.</p>`); changed(`${moved.length} piece${moved.length === 1 ? '' : 's'} of gear moved to the bag.`); } }));
+    }
+    return el('div', { class: 'pm-card' + (down ? ' down' : ''), 'data-id': h.id },
+      el('div', { class: 'portrait', html: h.avatar ? renderSVG(h.avatar) : '' }),
+      el('div', { class: 'pm-body' },
+        el('div', { class: 'who' }, el('b', { text: h.name }), ' ', el('span', { class: 'tiny', text: `${h.className} · level ${h.level}` })),
+        bar(h.hp, h.maxHp, '', down ? `${h.short} is down. ${game.reviveHelp()}` : `Health ${fmtHp(h.hp)} / ${fmtHp(h.maxHp)}. ${STAT_TIPS.hp}`),
+        el('div', { class: 'tiny' + (down ? ' bad' : ''), text: `${down ? 'Down' : `${fmtHp(h.hp)} / ${fmtHp(h.maxHp)} health`} · ${gearN} piece${gearN === 1 ? '' : 's'} of gear${pets.length ? ' · ' + pets.map(p => p.name).join(', ') : ''}` }),
+        actions));
+  };
+  const draw = () => {
+    const limit = game.partyLimit();
+    dlg.replaceChildren(
+      el('h3', { text: 'Manage party' }),
+      el('div', { class: 'subline', text: `Up to ${limit} heroes walk the road. The rest wait here in ${game.townFor()?.name || 'the settlement'}.` }),
+      el('div', { class: 'party-cols' },
+        el('div', { class: 'party-col active' }, el('h4', { text: `Party ${game.party.length} / ${limit}` }), ...game.party.map(h => card(h, 'party'))),
+        el('div', { class: 'party-col bench' }, el('h4', { text: `Bench ${game.bench.length}` }),
+          ...(game.bench.length ? game.bench.map(h => card(h, 'bench')) : [el('div', { class: 'pm-empty', text: 'Nobody is waiting. Hire at the tavern: once the party is full, new hires sit here.' })]))),
+      el('p', { class: 'tiny pm-note', text: 'Gear stays on whoever wears it; take a benched hero\'s gear to put it in the bag. A pet called by a hero\'s talent sits out with them. The party can never be left with nobody, or with nobody on their feet.' }),
+      el('p', { class: 'tiny pm-msg', role: 'status', text: msg }),
+      el('div', { class: 'row' }, el('button', { class: 'primary', text: 'Done', 'data-tip': 'Close. Changes are already saved.', onclick: () => { hideTip(); dlg.close(); } })));
+    decorateFrames(dlg);
+  };
+  draw();
+  if (!dlg.dataset.wired) { dlg.dataset.wired = '1'; dlg.addEventListener('close', () => hideTip()); }
+  if (!dlg.open) dlg.showModal();
 }
 function itemRow(it, actions = []) {
   const hero = game.party[selectedHero] || game.party[0];
@@ -719,21 +853,25 @@ function itemRow(it, actions = []) {
   return el('div', { class: 'item' }, name, ...actions);
 }
 async function shop(t) {
-  const stock = game.merchantStock(t); const box = narrate(`<h4>Merchant of ${t.name}</h4>`); const wrap = el('div', { class: 'shop' });
+  const stock = game.merchantStock(t); const wrap = el('div', { class: 'shop' });
   const refreshUI = () => { wrap.replaceChildren(el('div', { class: 'tiny', text: `You have ${game.gold} gold. Prices scale with quality and rarity.` }), el('b', { text: 'For sale' }), ...stock.map(it => itemRow(it, [el('button', { class: 'small', text: `Buy ${it.price}g`, onclick: () => { if (!game.buy(it, it.price, stock)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); } })])), el('b', { text: 'Supplies' }), ...Object.entries(SUPPLY_KINDS).map(([k, d]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml({ ration: 'ration', bandages: 'hp', torch: 'torch', tent: 'tent' }[k] || 'ration')}${d.name} <small>${d.desc}</small> · have ${game.supplies[k] || 0}` }), el('button', { class: 'small', text: `Buy ${d.price}g`, onclick: () => { if (!game.buySupply(k, 1)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); } }), k === 'ration' ? el('button', { class: 'small', text: `×5 ${d.price * 5}g`, onclick: () => { if (!game.buySupply(k, 5)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); } }) : null)), el('b', { text: 'Stable (vehicle)' }), ...Object.entries(VEHICLES).filter(([id, v]) => id !== 'none' && (!v.act || game.act >= v.act)).map(([id, v]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml('wagon')}<b>${v.name}</b> <small>${v.desc}</small>${game.vehicle === id ? ' <b>(yours)</b>' : ''}` }), game.vehicle === id ? null : el('button', { class: 'small', text: `Buy ${v.price}g`, onclick: () => { if (!game.buyVehicle(id)) return toast('Not enough gold'); renderHud(); renderSide(); refreshUI(); toast(`You now travel by ${v.name.toLowerCase()}`); } }))), el('b', { text: 'Potions' }), ...Object.entries(items.potions).map(([id, p]) => el('div', { class: 'item' }, el('span', { class: 'n', html: `${iconHtml('hp')}<b>${p.name}</b> <small>${p.desc}</small>` }), el('button', { class: 'small', text: `Buy ${p.cost}g`, onclick: () => { if (game.gold < p.cost) return toast('Not enough gold'); game.gold -= p.cost; game.inventory.push({ id: 'p_' + Math.random().toString(36).slice(2, 7), potionId: id, name: p.name, type: 'consumable', slot: 'potion', rarity: 'normal', quality: 'medium', effect: p.effect, target: p.target, affixes: [], icon: p.icon }); renderHud(); renderSide(); refreshUI(); } }))), el('b', { text: 'Sell' }), ...game.inventory.filter(i => i.type !== 'consumable').map(it => itemRow(it, [el('button', { class: 'small', text: `Sell ${game.loot.sellPrice(it)}g`, onclick: () => { game.sell(it); renderHud(); renderSide(); refreshUI(); } })]))); };
-  refreshUI(); box.append(wrap); town(t);
+  refreshUI(); openTownPanel(`Merchant of ${t.name}`, wrap); townActions(t);
 }
 async function tavern(t) {
-  const box = narrate(`<h4>Tavern</h4><p class="tiny">Party ${game.party.length}/4 (extra hires wait on the bench), companions ${game.companions.length}/4.</p>`); const wrap = el('div', { class: 'shop' });
+  const intro = el('p', { class: 'tiny', text: `Party ${game.party.length}/${game.partyLimit()} (extra hires wait on the bench; Manage party swaps them), companions ${game.companions.length}/4.` }); const wrap = el('div', { class: 'shop' });
   const hires = game.hires(t); const rows = hires.map(h => { const cd = game.classDef(h.class); const name = h.name || `${LOOKS[h.class]?.name || cd.name}`; return el('div', { class: 'item' }, el('span', { class: 'n', html: `<b>${name}</b> <small>${cd.name} L${h.level}${h.description ? ' · ' + h.description : ''}</small>` }), el('button', { class: 'small', text: `Hire ${h.cost}g`, onclick: () => { if (game.gold < h.cost) return toast('Not enough gold'); game.gold -= h.cost; const HL = hireLook(h.id); const hero = game.makeHero(h.class, name, h.level, { ...(HL || LOOKS[h.class]), name }); hero.voice = HL?.voice || voiceFor({ role: h.class, gender: hero.gender || 'n', seed: hashSeed(name + h.id) }); if (h.attrs) { hero.attrs = { ...h.attrs }; refresh(hero, game.loot); hero.hp = hero.maxHp; hero.mp = hero.maxMp; } game.addHero(hero); talk.speaker(hero); hires.splice(hires.indexOf(h), 1); renderHud(); renderSide(); toast(`${name} joins ${game.party.includes(hero) ? 'the party' : 'the bench'}`); tavern(t); } })); });
   const comps = game.kennel().map(c => el('div', { class: 'item' }, el('span', { class: 'n', html: `<b>${c.name}</b> <small>power ${c.power} · ${c.description}</small>` }), el('button', { class: 'small', text: `Buy ${c.price}g`, onclick: () => { if (game.gold < c.price) return toast('Not enough gold'); if (game.companions.length >= 4) return toast('Four companions max'); game.gold -= c.price; game.addCompanion(game.makeCompanion(c)); renderHud(); renderSide(); toast(`${c.name} joins you`); tavern(t); } })));
-  const benchRows = game.bench.map(h => el('div', { class: 'item' }, el('span', { class: 'n', text: `${h.name} (${h.className} L${h.level}) — on the bench` }), el('button', { class: 'small', text: 'Swap in', onclick: () => { if (game.party.length >= 4) { const out = game.party.pop(); game.bench.push(out); } game.party.push(h); game.bench = game.bench.filter(x => x !== h); renderSide(); tavern(t); } })));
-  wrap.replaceChildren(el('b', { text: 'Heroes for hire' }), ...rows, el('b', { text: 'Companions' }), ...comps, ...(benchRows.length ? [el('b', { text: 'Bench' }), ...benchRows] : [])); box.append(wrap); town(t);
+  // The bench is changed in its own dialog now (E38). The old "Swap in" here popped the last hero off the
+  // party without asking and ignored gear, pets and a party left with nobody standing.
+  const benchRows = game.bench.map(h => el('div', { class: 'item' }, el('span', { class: 'n', text: `${h.name} (${h.className} L${h.level}) — on the bench` })));
+  const manage = el('button', { class: 'small', text: 'Manage party', 'data-tip': 'Open the party and the bench side by side and swap heroes between them.', onclick: () => manageParty() });
+  wrap.replaceChildren(el('b', { text: 'Heroes for hire' }), ...rows, el('b', { text: 'Companions' }), ...comps, el('b', { text: `Bench (${game.bench.length})` }), ...benchRows, el('div', { class: 'row' }, manage)); openTownPanel('Tavern', intro, wrap); townActions(t);
 }
 async function smith(t, kind) {
-  const box = narrate(`<h4>${kind === 'blacksmith' ? 'Blacksmith' : 'Enchanter'}</h4><p class="tiny">Materials: ${Object.entries(game.materials).map(([k, v]) => `${v} ${k.replace('_', ' ')}`).join(' · ')}. Salvage unwanted items for materials, then add affixes (2 materials) or promote rarity (3 materials).</p>`); const wrap = el('div', { class: 'shop' });
+  const title = kind === 'blacksmith' ? 'Blacksmith' : 'Enchanter';
+  const intro = el('p', { class: 'tiny', text: `Materials: ${Object.entries(game.materials).map(([k, v]) => `${v} ${k.replace('_', ' ')}`).join(' · ')}. Salvage unwanted items for materials, then add affixes (2 materials) or promote rarity (3 materials).` }); const wrap = el('div', { class: 'shop' });
   const refreshUI = () => { wrap.replaceChildren(...game.inventory.filter(i => i.type !== 'consumable').map(it => itemRow(it, [el('button', { class: 'small', text: 'Salvage', onclick: () => { const y = game.salvage(it); toast('Got ' + Object.entries(y).map(([k, v]) => v + ' ' + k.replace('_', ' ')).join(', ')); renderSide(); refreshUI(); } }), el('select', { onchange: e => { const mat = e.target.value; if (!mat) return; const r = game.loot.addAffix(it, mat, game.materials, game.rng); toast(r.ok ? `Added ${r.affix.name}` : r.why); e.target.value = ''; renderSide(); refreshUI(); } }, el('option', { value: '', text: 'add affix…' }), ...items.affixTiers.map(tier => el('option', { value: tier.mat, text: `${tier.label} (${tier.cost} ${tier.mat.replace('_', ' ')}, ×${tier.mult})` }))), el('button', { class: 'small', text: 'Promote', onclick: () => { const r = game.loot.promote(it, game.materials); toast(r.ok ? `${it.name} is now ${it.rarity}` : r.why); renderSide(); refreshUI(); } })])), ...game.party.flatMap(h => Object.values(h.equipment).map(it => itemRow(it, [el('span', { class: 'tiny', text: `equipped by ${h.short}` })])))); };
-  refreshUI(); box.append(wrap); town(t);
+  refreshUI(); openTownPanel(title, intro, wrap); townActions(t);
 }
 // ---- side panels
 function renderSide() { renderPartyTab(); renderBag(); renderSkills(); renderQuests(); renderMeterTab(); renderJournal(); }
@@ -859,6 +997,34 @@ const uiPrefs = (() => { try { return JSON.parse(localStorage.getItem(UI_PREFS_K
 function saveUiPrefs() { try { localStorage.setItem(UI_PREFS_KEY, JSON.stringify(uiPrefs)); } catch {} }
 const gearOpen = id => !!(uiPrefs.gearOpen || {})[id];                       // default: every drawer closed
 function setGearOpen(id, on) { const m = (uiPrefs.gearOpen ||= {}); if (on) m[id] = 1; else delete m[id]; saveUiPrefs(); }
+
+// ---- combat speed (round 21, E34) ---------------------------------------------------------------
+// Three buttons in the top bar. The choice is a per-browser preference (uiPrefs.combatSpeed), shared
+// by every run. While a fight runs, fightPace() is the chosen speed and both the stage clock and the
+// CSS --pace variable follow it; outside a fight they are back at normal, so camp and travel never slow.
+let combatSpeed = normalizeSpeed(uiPrefs.combatSpeed);
+let inFight = false;
+const NORMAL_SPEED = SPEEDS[SPEEDS.length - 1];
+/** The speed pacing whatever is happening now: the chosen one during a fight, normal otherwise. */
+function fightPace() { return inFight ? combatSpeed : NORMAL_SPEED; }
+function applyPace() {
+  const s = fightPace();
+  stage?.setTimeScale?.(paceTimeScale(s));
+  document.documentElement.style.setProperty('--pace', String(paceFactor(s)));
+}
+function setInFight(on) { inFight = !!on; applyPace(); }
+/** Pick a speed (1, 2 or 4). Mid-fight it applies from the next swing, wait or animation frame. */
+function setCombatSpeed(v) {
+  combatSpeed = normalizeSpeed(v); uiPrefs.combatSpeed = combatSpeed; saveUiPrefs();
+  for (const b of document.querySelectorAll('#combat-speed button')) b.setAttribute('aria-pressed', String(+b.dataset.speed === combatSpeed));
+  applyPace();
+  return combatSpeed;
+}
+for (const b of document.querySelectorAll('#combat-speed button')) {
+  b.dataset.tip = SPEED_TIPS[b.dataset.speed] || '';
+  b.addEventListener('click', () => { hideTip(); setCombatSpeed(b.dataset.speed); });
+}
+setCombatSpeed(combatSpeed);
 
 /**
  * Party tab. One compact card per hero so all four fit on screen without scrolling: portrait,
@@ -1187,5 +1353,7 @@ addEventListener('resize', () => { clearTimeout(mapResizeT); mapResizeT = setTim
 
 setupUI();   // tooltips everywhere, gold corner flourishes on every .framed box, title-screen embers, how-to-play text
 
-window.emberveil = { menu, conversations, assets, restScene, crossingNode, doCrossing, resolveCrossing, crossingChoices, NODE_INFO, placeBubble, get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, library, lingo, DATA, LOOKS, ELOOKS, enemyLook, bodyOf, companionLook, get busy() { return busy; }, get speakCount() { return speakCount; }, get rewardPopups() { return rewardPopups; }, set rewardPopups(v) { rewardPopups = !!v; }, showRewardsFor, fight, afterCombat, enterNode, startWorld, addChosen, renderSide, renderMeterTab, renderPartyTab, renderMap, renderJournal, waitForChoice, sayScene, showCheck, recordNamedKill, isSceneText, classes: classes.classes };
+window.emberveil = { menu, conversations, assets, restScene, crossingNode, doCrossing, resolveCrossing, crossingChoices, NODE_INFO, placeBubble, get game() { return game; }, get stage() { return stage; }, get talk() { return talk; }, get effectsRenderer() { return stage?.fx?.constructor?.name || null; }, library, lingo, DATA, LOOKS, ELOOKS, enemyLook, bodyOf, companionLook, get busy() { return busy; }, get speakCount() { return speakCount; }, get rewardPopups() { return rewardPopups; }, set rewardPopups(v) { rewardPopups = !!v; }, showRewardsFor, fight, afterCombat, enterNode, addChosen, renderSide, renderMeterTab, renderPartyTab, renderMap, renderJournal, waitForChoice, sayScene, showCheck, recordNamedKill, isSceneText, classes: classes.classes,
+  // round 21
+  narrate, logScroll, setCombatSpeed, get combatSpeed() { return combatSpeed; }, get inFight() { return inFight; }, openTownPanel, closeTownPanel, town, townActions, manageParty, woundedReminder };
 document.body.dataset.ready = '1';

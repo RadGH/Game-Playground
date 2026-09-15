@@ -1,0 +1,15 @@
+{
+  "_doc": "Authored Chibi 2 accessory index. Geometry remains procedural and skinned; this file records bespoke assets independently from the shared avatar catalog.",
+  "assets": [
+    {
+      "id": "bard_red_feather_hat",
+      "slot": "hat",
+      "variant": "feather_cap",
+      "name": "Bard's red feather cap",
+      "palette": { "primary": "#b02020", "secondary": "#3aa65a", "trim": "#d9b477" },
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": ["emberveil:bard"]
+    }
+  ]
+}

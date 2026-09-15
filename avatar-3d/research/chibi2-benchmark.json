@@ -1,0 +1,71 @@
+{
+  "date": "2026-09-15T03:48:18.089Z",
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "note": "Headless browser; frame times describe this renderer and machine only. Fixed simulation steps and identical render settings. Particle variation is stochastic.",
+  "errors": [],
+  "results": [
+    {
+      "label": "Original / original",
+      "frames": 180,
+      "warmup": 90,
+      "frameAvg": 137.96666666666667,
+      "frameP95": 155.30000019073486,
+      "calls": 327.99444444444447,
+      "triangles": 172629.51111111112,
+      "actor": {
+        "triangles": 21168,
+        "meshes": 27,
+        "bones": 0
+      },
+      "settings": {
+        "shadows": "contact",
+        "resolution": 1,
+        "rate": 4,
+        "width": 1028,
+        "height": 594
+      }
+    },
+    {
+      "label": "Chibi 2 / original",
+      "frames": 180,
+      "warmup": 90,
+      "frameAvg": 100.0594444433848,
+      "frameP95": 118.5,
+      "calls": 127.77777777777777,
+      "triangles": 67105.88888888889,
+      "actor": {
+        "meshes": 2,
+        "bones": 18,
+        "triangles": 7948
+      },
+      "settings": {
+        "shadows": "contact",
+        "resolution": 1,
+        "rate": 4,
+        "width": 1028,
+        "height": 594
+      }
+    },
+    {
+      "label": "Chibi 2 / batched",
+      "frames": 180,
+      "warmup": 90,
+      "frameAvg": 96.67944444550409,
+      "frameP95": 106.69999980926514,
+      "calls": 43.71666666666667,
+      "triangles": 67102.43333333333,
+      "actor": {
+        "meshes": 2,
+        "bones": 18,
+        "triangles": 7948
+      },
+      "settings": {
+        "shadows": "contact",
+        "resolution": 1,
+        "rate": 4,
+        "width": 1028,
+        "height": 594
+      }
+    }
+  ]
+}

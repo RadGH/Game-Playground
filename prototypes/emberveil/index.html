@@ -26,6 +26,11 @@
     <span class="hud-stat" id="hud-vehicle"><i class="ic ic-boot" id="hud-vehicle-ic"></i><b id="hud-vehicle-name">On foot</b></span>
     </div>
     <span class="hud-gap"></span>
+    <div class="speed" id="combat-speed" role="group" aria-label="Combat speed">
+      <button type="button" data-speed="1" aria-pressed="false">1x</button>
+      <button type="button" data-speed="2" aria-pressed="false">2x</button>
+      <button type="button" data-speed="4" aria-pressed="true">4x</button>
+    </div>
     <button id="btn-save" class="small ghost" data-tip="Write the run to this browser's storage">Save</button>
     <button id="btn-menu" class="small ghost" data-tip="Game menu — settings, save, how to play (Esc)">Menu</button>
   </div>
@@ -82,7 +87,17 @@
         </div>
       </div>
       <div class="right">
-        <div class="panel framed narrative"><div id="narrative" class="narrative-log" aria-live="polite"></div><div id="actions" class="actions"></div></div>
+        <div class="panel framed narrative">
+          <div class="log-wrap">
+            <div id="narrative" class="narrative-log" aria-live="polite"></div>
+            <button id="log-latest" type="button" class="small log-latest" hidden data-tip="You scrolled up, so the log is holding still. Click to jump to the newest line and follow it again.">New lines ↓</button>
+            <section id="town-panel" class="town-panel" hidden aria-labelledby="town-panel-title">
+              <div class="town-panel-head"><h4 id="town-panel-title"></h4><button id="town-panel-back" type="button" class="small" data-tip="Close this screen and show the log again. Nothing you did here is lost.">← Back to the log</button></div>
+              <div id="town-panel-body" class="town-panel-body" tabindex="0"></div>
+            </section>
+          </div>
+          <div id="actions" class="actions"></div>
+        </div>
         <aside class="panel framed side">
           <div class="tabs">
             <button data-tab="party" class="on" data-tip="Your heroes: health, gear and stats"><i class="ic ic-tab_party"></i><span>Party</span></button>
@@ -100,6 +115,7 @@
 </main>
 <dialog id="item-dialog" class="framed"></dialog>
 <dialog id="hero-dialog" class="framed"></dialog>
+<dialog id="party-dialog" class="framed" aria-label="Manage party"></dialog>
 <dialog id="menu-dialog" class="menu framed">
   <h3 class="display menu-title">Emberveil <b>II</b></h3>
   <div class="ornament"></div>

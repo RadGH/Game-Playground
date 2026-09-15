@@ -3,6 +3,15 @@
 Source: `~/claude/emberveil/` (the production repo, treated as **read-only**; `~/claude/emberveil-storymode` is ignored on the user's
 instruction). Open `http://<lan-ip>:8400/prototypes/emberveil/`.
 
+## Chibi 2 preview
+
+Emberveil now uses Chibi 2 humanoids and batched spell sprites by default. Use `?renderer=chibi1`
+to compare against the original renderer. This only changes presentation: saves, combat rules and
+creature bodies are unchanged. The stage accepts optional `characterFactory` and `effectsClass`
+constructor options. The new parts catalog is broader but still approximates some existing gear.
+See [Chibi 2 milestone](../../avatar-3d/CHIBI2.md) and `/avatar-3d/chibi2.html` for the controlled
+eight-fighter comparison.
+
 ## What was rebuilt
 
 | System | Original | Here |
@@ -960,3 +969,78 @@ what the change cost. The same page opens by hand — `…/prototypes/emberveil/
 `tests/format.test.js`, `tests/multishot.test.js`, `tests/sets.test.js`, `tests/skillcheck.test.js`,
 `tests/companions.test.js` (node) and `tests/round20.spec.js` + `avatar-3d/tests/geometry.spec.js`
 (Playwright).
+
+## Round 21: combat speed, a log that holds still, town screens, the bench
+
+### Combat speed: 1x, 2x, 4x (E34)
+
+Three buttons in the top bar, between the vehicle and Save. **4x is the original pace and the
+default**; 2x takes twice as long and 1x four times as long, so a fight can be followed turn by turn.
+The choice is kept in this browser (`playground:emberveil:ui:v1` → `combatSpeed`), shared by every
+run, and a change in the middle of a fight applies from the next thing that happens.
+
+One factor paces everything (`js/pace.js`), instead of a patch per number:
+
+| What | How it slows |
+|---|---|
+| Body animation, the enemies' walk-in, the attack thrust, hit shake, projectiles, impacts, auras | `stage.setTimeScale(s)` multiplies every frame's `dt` in the stage ticker, so anything on frame time slows by the same amount |
+| The attack pose timer, the rune flash before a shot, waits after a hit / skill / boss phase, floating damage numbers | `paceMs(base, speed)` over the base numbers in `PACE` (the numbers the game used before) |
+| Pause between rounds, and after misses, heals, mana, damage over time, statuses, downs, kills | `extraGap(ms, speed)`: 0 at 4x, `ms` at 2x, 3× at 1x — slower speeds get beats that did not exist, 4x stays identical |
+| Float-up animation, stage health bars, party tab bars | the CSS variable `--pace` (1 / 2 / 4) set on the root while a fight runs |
+
+Outside a fight the time scale is always 1, so camp, travel scenes and crossings are unaffected.
+Spoken lines keep following the Text speed setting in the menu.
+
+### The log holds its place (E35)
+
+New lines only pull the log down when you are already at the bottom (within 8 px). Scroll up and it
+stays exactly where you left it while lines keep arriving; a **"N new lines ↓"** button appears, and
+clicking it (or scrolling back down yourself) follows again. `js/scroll.js` (`StickyScroll`) measures
+just before each line is added, so a scroll that lands a moment earlier is never overridden. The
+journal and the other tabs never auto-scrolled; camp talk goes through the same log, so it gets the rule.
+
+### Themed scrollbars (E36)
+
+At the end of `style.css`: 6 px rounded bars, a dark leather track (`--scroll-track #231a14`) with a
+gold edge, a gold thumb that brightens on hover and when held, the same height for horizontal bars,
+and a matching corner. Firefox gets `scrollbar-width: thin` + `scrollbar-color`, fenced behind
+`@supports not selector(::-webkit-scrollbar)` because Chrome 121+ would otherwise drop the rounded look.
+
+### Town screens in their own panel (E37)
+
+Merchant, Tavern, Blacksmith and Enchanter open in a panel that covers the log (`#town-panel`) with
+its own scroll, so scrolling the shop can never run into old log lines. **← Back to the log** closes
+it; so do leaving town, the Cleric (its result is written in the log), a fight and loading a game.
+The log keeps receiving lines underneath. Each service redraws only the town buttons now, not the
+town heading, so the log no longer repeats "Emberglen" every time you open a shop.
+
+### The bench and Manage Party (E38)
+
+A fifth hire waits on the bench. **Manage party** is a town button (so changing the party means going
+back to a settlement). The dialog shows the active party and the bench with portrait, name, class,
+level and health, and moves people between them. Rules (`js/bench.js`, used through `game.benchHero`
+/ `game.joinParty`):
+
+- only in a settlement; the party size limit is `data/balance.json` → `partySize.max` (4);
+- a full party takes a bench hero by swapping somebody out, into the same place in the line-up;
+- the party never drops to nobody, and never to only the fallen while somebody could still stand;
+- gear stays on whoever wears it; **Take their gear** moves a benched hero's kit into the bag;
+- a pet summoned by a hero's talent goes to the bench with them (`game.benchCompanions`) and comes
+  back with them; bought companions stay with the party.
+
+Every change saves the game, restages the party and redraws the side tabs.
+
+### "We should take a rest, Corvin is wounded." (E39)
+
+Arriving at a settlement with anyone under 60% health, or down, one healthy member says so — a
+healer if one is standing, otherwise the healthiest. The line goes through Lingo (`wounded_rest`,
+phrases in `data/town-talk.json`, registered by `registerTownTalk()`), so it gets that hero's voice and
+personality, with separate wording for one or several wounded, one or several fallen (pointing at the
+cleric), both at once, and a party where nobody is healthy. It is said once per arrival: opening shops
+and coming back to the town buttons does not repeat it. `woundedReport()` / `woundedLine()` in `js/talk.js`.
+
+### Tests added this round
+
+`tests/pace.test.js`, `tests/scroll-lock.test.js`, `tests/bench.test.js`, `tests/wounded.test.js`
+(node; the wounded test checks every situation over 25 seeds for braces, names and verb agreement)
+and `tests/round21.spec.js` (Playwright).

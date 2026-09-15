@@ -1,24 +1,27 @@
 # Avatar 3D — Three.js character builder
 
-Two renderers for the **same avatar JSON** that Avatar 2D produces:
+Three renderers for the **same avatar JSON** that Avatar 2D produces:
 
 1. **Mii-style (procedural)** — `js/mii.js`. Body from primitives (capsules, rounded boxes, spheres), the face drawn from the 2D face parts onto a curved patch in front of the head (the Mii technique), procedural hair/hat/ear/clothing meshes mapped from the 2D ids, body height/width/headSize as group scaling, and procedural animations (idle, walk, run, wave, talk, dead). Zero downloads, everything authored in code, so Claude can extend it.
 2. **Quaternius (CC0 meshes)** — `js/quaternius.js`. Universal Base Characters body (male/female), 6 hairstyles + beard, Modular Outfits – Fantasy (Peasant, Ranger sets) and the Universal Animation Library (43 clips), all on one skeleton. Real modelled characters with real animation; the 2D ids are mapped onto the nearest mesh; face sliders do not apply.
+3. **Chibi 2 (milestone 1)** — `js/chibi2.js`. Profiled procedural surfaces compiled into two skinned meshes, an 18-bone rig, modelled facial features (eyes, brows, noses, mouths, facial hair and marks), layered equipment and 12 animation states. The Vanguard preset is about 8,000 triangles. This is a focused humanoid foundation; existing part ids are accepted but not all have distinct models. [Architecture, supported mappings, integration and benchmark](CHIBI2.md).
 
 Open: `http://<LAN-IP>:8400/avatar-3d/`. Presets, random generation and the slot catalog are shared with `../avatar-2d/`.
 
+**Chibi 2 comparison:** `http://<LAN-IP>:8400/avatar-3d/chibi2.html`. Character, side-by-side and eight-fighter views, original/batched spell sprites, equal-settings sequential benchmarks and JSON results. Emberveil now uses Chibi 2 by default; `/prototypes/emberveil/?renderer=chibi1` selects the original renderer.
+
 ## Creatures (non-humanoids) — `js/creatures.js`, demo `creatures.html`
 
-Mii-style procedural bodies for things that are not people — **26 types over six body plans**, parameterised in `CREATURE_TYPES` (lengths/radii in metres, ear style, default colours, feature flags). The table itself lives in `js/creature-types.js`, which is free of Three.js so data tools and node tests can read it; `js/creatures.js` re-exports it and does the building.
+Mii-style procedural bodies for things that are not people — **37 types over six body plans**, parameterised in `CREATURE_TYPES` (lengths/radii in metres, ear style, default colours, feature flags). The newest set adds hyena, saber cat, crocodile, turtle, griffin, phoenix, beetle, centipede, slime, mushroom and mimic silhouettes. Ten ready-made designs built on those new types (colours, size, voice and traits) live in `data/creature-variants.json`; they are not wired into any game, so a game copies the ones it wants into its own looks table. The table itself lives in `js/creature-types.js`, which is free of Three.js so data tools and node tests can read it; `js/creatures.js` re-exports it and does the building.
 
 | Plan | Types |
 |---|---|
-| `quad` | wolf, dire wolf, boar, bear, rat, horse, deer, hound, cat, frog, mire drake, dragon |
-| `spider` | giant spider |
-| `bat` (fliers) | bat, owl, moth |
-| `snake` (serpents) | snake, worm (thick, segmented, head reared off the ground) |
+| `quad` | wolf, dire wolf, boar, bear, rat, horse, deer, hound, cat, frog, mire drake, dragon, hyena, saber cat, crocodile, turtle, griffin |
+| `spider` | giant spider, beetle |
+| `bat` (fliers) | bat, owl, moth, phoenix |
+| `snake` (serpents) | snake, worm, centipede (thick, segmented, head reared off the ground) |
 | `biped` | golem, titan, imp (`body.blocky` swaps capsules for boxes; `features.core` adds a glowing chest heart) |
-| `float` (no legs, hovers) | elemental, wisp, shard, wraith, horror — `body.shape` picks `sphere` (glowing ball + flame licks), `crystal` (octahedron cluster), `hood` (robe with an empty face and trailing rags) or `mass` (lumpy body covered in eyes, with tentacles) |
+| `float` (no legs, hovers) | elemental, wisp, shard, wraith, horror, slime, mushroom, mimic — `body.shape` picks `sphere` (glowing ball + flame licks), `crystal` (octahedron cluster), `hood` (robe with an empty face and trailing rags) or `mass` (lumpy body covered in eyes, with tentacles) |
 
 Same interface as the humanoid builder:
 
@@ -30,6 +33,10 @@ const spec = randomCreature('dragon', seed);             // colour variation ins
 ```
 
 Features can be toggled on any plan (`features: { wings: true }` on a wolf works): fangs, tusks, horns, antlers, wings, spikes, mane, whiskers, claws, hooves, tail, core, glow, bulgeEyes, beak, antennae, maw, plates. Bodies face +z like the humanoids, so the same side/facing code places them. Heights before the size multiplier: wisp/moth ≈ 0.5 m, wolf ≈ 0.9 m, golem ≈ 1.4 m, horror ≈ 1.6 m, dragon ≈ 1.9 m, titan ≈ 2.6 m. Party Quest uses them for beast enemies (`prototypes/party-quest/js/main.js` `BEAST_BODY`); Emberveil uses them for its whole bestiary (`prototypes/emberveil/data/enemy-looks.json`).
+
+The current creature visual pass gives frogs a squat, long-legged silhouette with throat, mouth and toe detail, and gives drakes/dragons a broader chest, crest, nostrils, slit pupils and back scales. These remain lightweight primitives behind the same `createCreature` JSON contract, so existing enemy definitions and animation calls continue to work.
+
+Bespoke Chibi 2 accessories are tracked in `data/chibi2-assets.json`; Emberveil's 30 class-facing records are listed in `data/emberveil-class-assets.json`. The Bard cap (`hat.id: "feather_cap"`) is a modeled red cap with brim, band and green feather, and headwear now suppresses the covered crown/fringe hair layer so it does not clip. Clothing ids now change silhouette as well as color: coats and robes have tails, doublets have panels, wraps have bands, skirts/baggy/ragged bottoms are distinct, and sandals/heavy/slipper/barefoot footwear read differently.
 
 ## Vehicles — `js/vehicles.js`, demo `vehicles.html`
 

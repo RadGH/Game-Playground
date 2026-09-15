@@ -254,6 +254,8 @@
   }
  },
  "partySize": {
+  "max": 4,
+  "maxNote": "Round 21 (E38): how many heroes walk in the active party. Extra hires wait on the bench, and Manage Party (in a settlement) swaps them within this limit. Read by js/bench.js partyLimit().",
   "enemyDmgMult": {
    "1": 0.4,
    "2": 0.65,

@@ -712,7 +712,8 @@
     },
     "hat": {
      "id": "feather_cap",
-     "color": "#b02020"
+     "color": "#b02020",
+     "color2": "#3aa65a"
     },
     "extras": {
      "id": "none"

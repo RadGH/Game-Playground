@@ -458,7 +458,14 @@ which is a property of the sim's map size and not of the game.
   throughput it aims at, the line it researches, and how much it stockpiles.
 - `data/balance.json -> bot` — how far it spreads (`compactRadius`, `maxReach`, `latticeStride`), how
   many stores, scanners, generators, harvesters and turrets it is allowed, `maxPerRecipe`,
-  `maxPackRate`, `fuelHeadroom` and `turretsPerWave`.
+  `maxPackRate`, `fuelHeadroom` and `turretsPerWave`. Several of those caps are no longer flat
+  numbers, because a cap that is right for a 300-building base is a lost run at 900: turrets grow by
+  one per `structuresPerTurret` standing, generators by one per `structuresPerGenerator` past
+  `generatorCapFrom`, the store budget scales with the map, and the scanner budget doubles from
+  `maxScanners` to `maxScannersHunting` while something the bot has planned for has no scanned patch
+  anywhere. `wantBuilders` is how much building crew it keeps alive — nothing used to replace a dead
+  builder, and on a hazardous world that is what stops a base — and `maxRoutes` the ceiling on truck
+  runs.
 - `data/balance.json -> map` — node sizes and how scarce a "scarce" patch is.
 - `data/balance.json -> hazards` — what every weather tag does while it runs.
 
@@ -478,6 +485,7 @@ headless game in its own process.
   than becoming second build sites. A UI that wants two bases can create a second `Game` on another
   world cell; nothing in the engine assumes there is only one.
 - **The bot is a test harness, not an opponent.** It plays the opening well and stalls in the
-  mid-game on its own logistics; see the README for where it gets to.
+  mid-game; see `research/sim-report.md` §4 for exactly where it gets to and what it still does not
+  do.
 - **No pipes or belts.** Short-range transfer is the storage pool and long-range is trucks. That was
   deliberate: it keeps the interesting decision (where to put things) and drops the fiddly one.

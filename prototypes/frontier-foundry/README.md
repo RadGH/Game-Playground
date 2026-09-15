@@ -170,7 +170,7 @@ console.log(game.inventory(), game.unread(3));
 | Path | What it is |
 |---|---|
 | `DESIGN.md` | the design note: the loop, the numbers, every system, planet progression, the endgame, and **the full API the UI codes against** |
-| `data/*.json` | 81 resources, 105 structures, 71 recipes, 86 research nodes, 10 vehicles, 25 unit types, 44 quests (a 9-step tutorial chain, a 4-step side chain and 31 standalone), per-archetype wave and nest tables for all ten worlds, the wave pacing, 70 notification templates |
+| `data/*.json` | 81 resources, 105 structures, 72 recipes, 86 research nodes, 10 vehicles, 25 unit types, 44 quests (a 9-step tutorial chain, a 4-step side chain and 31 standalone), per-archetype wave and nest tables for all ten worlds, the wave pacing, 70 notification templates |
 | `index.html` + `style.css` | the page and its theme: a dark operations console, cyan and amber, mono for every number |
 | `js/*.js` | the engine: `game` `data` `rules` `map` `fog` `build` `production` `logistics` `research` `combat` `space` `planets` `ai` |
 | `js/ui/*.js` | the interface: `main` (clock, screens, keys, saves) `surface` (map + camera) `build-tool` `route-tool` `panel` `hud` `research-screen` `map-screen` `orbit-screen` `codex-screen` `title` `icons` `sound` `save` `dom` |

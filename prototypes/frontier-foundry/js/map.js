@@ -291,11 +291,21 @@ export function takeFreshChunks(map) {
   return out;
 }
 
-/** Weight for putting a resource on this tile: biome match counts for most of it. */
+/**
+ * Weight for putting a resource on this tile: biome match counts for most of it.
+ *
+ * The floor for a `common` resource is the important part. Iron's biomes are hills, mountains,
+ * badlands, grassland and shrubland; a desert world has almost none of those, while copper and sand
+ * both list desert outright. At a flat 0.35x off-biome penalty, arid rolled **16 iron patches against
+ * temperate's 43** on the same size of map - 128 copper and 113 sand instead - and the run could not
+ * feed a steel line, so it defended the wave-20 boss with watchtowers and lost the pod. The backbone
+ * ores are meant to be everywhere and merely thinner off their home ground, not nearly absent.
+ */
 function affinity(resDef, biomeKey, tileWater) {
   const f = resDef.found || {};
   const listed = f.biomes && f.biomes.length ? f.biomes.includes(biomeKey) : true;
-  let w = (f.rarity ?? 0.5) * (listed ? 3 : 0.35);
+  const off = (resDef.tags || []).includes('common') ? (BALANCE.map.commonOffBiome ?? 1.2) : 0.35;
+  let w = (f.rarity ?? 0.5) * (listed ? 3 : off);
   if (resDef.kind === 'fluid' && tileWater) w *= 1.6;
   return w;
 }

@@ -28,7 +28,7 @@
 import { available } from './build.js';
 import { recomputeLinks, recomputePower, isStore } from './production.js';
 import { BALANCE } from './rules.js';
-import { nextTier } from './logistics.js';
+import { nextTier, garageFor, vehiclesFor } from './logistics.js';
 
 /**
  * One-off buildings, in the order they are worth having. `after` is a research id that has to be
@@ -46,7 +46,7 @@ export const INFRA = [
   { build: 'scanner_tower', n: 3, after: 't_masonry' },
   { build: 'lab', n: 12, after: 't_steel' },
   { build: 'warehouse', n: 2, after: 't_haulage' },
-  { build: 'truck_garage', n: 1, after: 't_haulage' },
+  { build: 'truck_garage', n: 2, after: 't_haulage' },
   { build: 'loading_dock', n: 1, after: 't_haulage' },
   { build: 'repair_bay', n: 4, after: 't_field_repair' },
   { build: 'dormitory', n: 2, after: 't_settlement' },
@@ -56,6 +56,9 @@ export const INFRA = [
   { build: 'fluid_tank', n: 3, after: 't_fluids' },
   { build: 'tanker_bay', n: 1, after: 't_fluids' },
   { build: 'warehouse', n: 4, after: 't_chemistry' },
+  // a garage is three trucks, and the outposts that gate the rocket chain are further out than a
+  // chain of stores can reach; see outposts()
+  { build: 'truck_garage', n: 4, after: 't_chemistry' },
   { build: 'archive', n: 1, after: 't_research_methods' },
   { build: 'lab', n: 18, after: 't_research_methods' },
   { build: 'research_station', n: 4, after: 't_research_methods' },
@@ -131,17 +134,34 @@ export const RESEARCH_ORDER = [
   // defence tree, then walls - all of this used to sit *after* rocketry, and the run reliably died
   // around wave fifteen with nothing but watchtowers standing.
   't_ballistics', 't_ordnance', 't_fortification',
+  // Wind is cheap (one pack, and only t_landfall behind it) and it is the only power this game has
+  // that does not eat something a drill had to dig. It used to sit near the end of this list, and on
+  // a world where coal is thin - volcanic digs fourteen small seams - the grid stopped at the three
+  // generators the starting coal could feed, every machine on it ran at a quarter speed, and the run
+  // never recovered. It is an opening move now.
+  't_wind',
   't_drilling2', 't_glass', 't_machining', 't_field_repair', 't_assembly2',
   // the middle: fluids, oil and chemistry open the third pack and everything above it
   't_settlement', 't_fluids', 't_oil', 't_chemistry', 't_polymers', 't_optics',
-  't_incendiary', 't_logic', 't_batteries', 't_research_methods', 't_hardened_defence',
+  // t_solar sits here, not down with the endgame, because an energy pack is two battery cells, one
+  // advanced circuit and one *solar cell*. It used to be researched after t_refractory - the first
+  // node that has to be paid for in energy packs - so the bot arrived at the middle of the tree
+  // holding two thirds of a pack it could never finish, and every run on every world stopped at
+  // "stalled on packs" with the whole rocket half of the tree behind it.
+  // ...and t_highvoltage with it, because that is the node that unlocks the *recipe* for an energy
+  // pack. It used to be researched after t_refractory, which is the first node that has to be paid
+  // for in energy packs - a plain deadlock in this list: the bot could not research the thing that
+  // taught it to build the thing the research needed. Every world stopped at the same place,
+  // "47 nodes, stalled on packs", with the whole rocket half of the tree behind it.
+  't_incendiary', 't_logic', 't_batteries', 't_solar', 't_highvoltage',
+  't_research_methods', 't_hardened_defence',
   // the climb to the rocket, with the two big defence upgrades taken on the way past
-  't_titanium', 't_controls', 't_refractory', 't_highvoltage', 't_lasers',
-  't_electrolysis', 't_explosives', 't_missiles', 't_solar', 't_reentry',
+  't_titanium', 't_controls', 't_refractory', 't_lasers',
+  't_electrolysis', 't_explosives', 't_missiles', 't_reentry',
   't_assembly3', 't_precision', 't_superalloy', 't_drilling3', 't_deep_boring', 't_rocketry',
   // then what makes the endgame affordable, and the detours worth taking
   't_long_range_scan', 't_satellites', 't_probes', 't_field_tech', 't_shields', 't_artillery',
-  't_roads', 't_paving', 't_wind', 't_crushing', 't_radar', 't_scouting',
+  't_roads', 't_paving', 't_crushing', 't_radar', 't_scouting',
   't_heavy_haulage', 't_gasworks', 't_atmospherics', 't_centrifuge', 't_biofuel',
   't_nanofabrication', 't_fission', 't_survey', 't_astronomy', 't_cold_ops', 't_orbital_station', 't_beacon',
 ];
@@ -240,6 +260,7 @@ export class Bot {
     this.refreshInventory();
     this.research();
     this.podWork();
+    this.crew();
     this.budget = 2; this.power();
     this.budget = 3; this.infrastructure();
     this.budget = 5; this.supply();
@@ -419,18 +440,45 @@ export class Bot {
 
   /** Every machine needs a store within reach or it jams on its own output. */
   /** The cheapest store that will actually join things up: a warehouse reaches twice as far. */
+  /**
+   * How many stores the bot will keep standing, scaled to the map. The caps are about ground and
+   * clutter around the base, so they were written for one 96-tile chunk; on the 288- and 480-tile
+   * grids the game actually runs they were spent by hour four and then *every* outpost built after
+   * that was stranded - see `storeBudgetLeft`.
+   */
+  storeCap(type) {
+    const tiles = this.g.map.width * this.g.map.height;
+    const scale = Math.max(1, tiles / (96 * 96 * 4));       // 1 at the sim's 288x288, 2.8 at the UI's 480
+    // Crates scale with the map; warehouses only with its square root. A crate is six iron plate and
+    // a warehouse is eighteen *steel* plate, and steel is the material the mid-game is actually short
+    // of - scaling both alike put most of a steel-poor world's entire steel output into storage.
+    if (type === 'warehouse') return Math.round((this.cfg.maxWarehouses ?? 24) * Math.sqrt(scale));
+    return Math.round((this.cfg.maxCrates ?? 36) * scale);
+  }
+
   storeType() {
     const g = this.g;
     // a warehouse is 8000 units and reaches twice as far for four tiles more ground - always worth
     // it over another crate once it is researched
-    if (g.isUnlocked('warehouse') && this.affordable('warehouse') && this.countBuild('warehouse') < (this.cfg.maxWarehouses ?? 24)) return 'warehouse';
+    if (g.isUnlocked('warehouse') && this.affordable('warehouse') && this.countBuild('warehouse') < this.storeCap('warehouse')) return 'warehouse';
     return 'storage_crate';
   }
 
-  /** How many stores the bot is willing to keep standing. Ground is the scarce thing, not capacity. */
-  storeBudgetLeft() {
+  /**
+   * Is there room in the store budget for another one?
+   *
+   * `connecting` is the important half. These caps stop the bot paving the base with crates it only
+   * wants for capacity, and that is a fair thing to cap - but a crate laid to join a drill back to
+   * the factory is not capacity, it is the whole reason the drill exists. On temperate the base
+   * spent the last crate at about hour four, and from then on every lithium and titanium drill it
+   * sank stood in a private pool of its own filling its hopper: 200 units mined in six hours, the
+   * battery line never ran, the energy pack never ran, and research stopped dead at 47 nodes with
+   * the planner reading 3.45 lithium a second of "capacity". Connection work gets triple the
+   * allowance, because an unconnected outpost is worse than no outpost at all.
+   */
+  storeBudgetLeft(connecting = false) {
     const crates = this.countBuild('storage_crate');
-    return crates < (this.cfg.maxCrates ?? 48);
+    return crates < this.storeCap('crate') * (connecting ? 3 : 1);
   }
 
   ensureStore(s) {
@@ -466,14 +514,20 @@ export class Bot {
       if (d < bestD) { bestD = d; anchor = t; }
     }
     if (!anchor || bestD <= 0) return;                    // nothing to join to, or already joined
-    const type = this.storeType();
-    const reach = (g.data.structure[type].linkRadius || 10) * 0.8;
+    // A warehouse reaches twice as far as a crate, so a long run wants warehouses even when the
+    // base has had its fill of them: eight crates is 64 tiles and the ore that gates the rocket
+    // chain sits 85 to 190 tiles out on a 288-tile map.
     const ax = anchor.x + anchor.w / 2, ay = anchor.y + anchor.h / 2;
+    const far = Math.hypot(sx - ax, sy - ay) > 60;
+    const type = far && g.isUnlocked('warehouse') && this.affordable('warehouse') ? 'warehouse' : this.storeType();
+    const reach = (g.data.structure[type].linkRadius || 10) * 0.8;
     const n = Math.ceil(Math.hypot(sx - ax, sy - ay) / reach);
-    if (n > 8) return;                                    // too far for crates: that one wants a truck
+    // 14 hops of warehouse is 224 tiles - the far corner of the sim's map. Past that a truck is the
+    // honest answer, and `outposts()` books one.
+    if (n > 14) return;
     for (let k = 1; k <= n; k++) {
       if (!this.affordable(type)) return;
-      if (type === 'storage_crate' && !this.storeBudgetLeft()) return;
+      if (type === 'storage_crate' && !this.storeBudgetLeft(true)) return;
       const x = Math.round(ax + (sx - ax) * k / n), y = Math.round(ay + (sy - ay) * k / n);
       // something already standing (or going up) here does the job
       if (g.structures.some(p => isStore(p.def) && Math.hypot(p.x - x, p.y - y) < reach * 0.6)) continue;
@@ -484,16 +538,56 @@ export class Bot {
   }
 
   // ------------------------------------------------------------------ counting
-  countBuild(type) { return this.g.structures.filter(s => s.type === type).length; }
+  /**
+   * A cheap stamp of "has anything been built or taken down since". A removal changes the length of
+   * the building list, a placement always burns an id, and an upgrade does both - so a swap that
+   * leaves the count where it was still changes the stamp. Everything memoised below is keyed on it,
+   * which makes the memo safe to keep across a whole cycle rather than throwing it away per phase.
+   */
+  get stamp() { return this.g.structures.length + ':' + this.g.nextId; }
+
+  /**
+   * How many of this building are standing. Tallied once per build stamp rather than per question:
+   * `infrastructure()` alone asks it thirty-five times a cycle, and on a thousand-building base
+   * that was a thousand-element scan each time.
+   */
+  countBuild(type) {
+    const key = this.stamp;
+    if (this.typeTallyAt !== key) {
+      this.typeTally = new Map();
+      this.typeTallyAt = key;
+      for (const s of this.g.structures) this.typeTally.set(s.type, (this.typeTally.get(s.type) || 0) + 1);
+    }
+    return this.typeTally.get(type) || 0;
+  }
   countRecipe(id) { return this.g.structures.filter(s => s.recipe === id && s.state !== 'dead').length; }
+  /** Every extractor standing on a live patch of this, grouped once per build stamp. */
   drillsOn(res) {
     const g = this.g;
-    return g.structures.filter(s => { const n = s.nodeId ? g.nodeById(s.nodeId) : null; return n && !n.depleted && n.resource === res; });
+    if (this.drillAt !== this.stamp) {
+      this.drillMemo = new Map();
+      this.drillAt = this.stamp;
+      for (const s of g.structures) {
+        const n = s.nodeId ? g.nodeById(s.nodeId) : null;
+        if (!n || n.depleted) continue;
+        const list = this.drillMemo.get(n.resource);
+        if (list) list.push(s); else this.drillMemo.set(n.resource, [s]);
+      }
+    }
+    return this.drillMemo.get(res) || [];
   }
 
-  /** Units a second every extractor on this resource can manage between them. */
+  /**
+   * Units a second every extractor on this resource can manage between them.
+   *
+   * Memoised on the build stamp. `plan()` walks about fifty resources and asks this for each of
+   * them, every cycle; on a fifteen-hundred-building base that was the single most expensive thing
+   * the bot did, and the answer cannot change unless something was built or taken down.
+   */
   extractionOf(res) {
     const g = this.g;
+    if (this.extractAt !== this.stamp) { this.extractMemo = new Map(); this.extractAt = this.stamp; }
+    if (this.extractMemo.has(res)) return this.extractMemo.get(res);
     let rate = 0;
     for (const s of this.drillsOn(res)) {
       const n = g.nodeById(s.nodeId);
@@ -505,6 +599,7 @@ export class Bot {
       if (s.def.yields?.[res]) rate += s.def.extractRate * s.def.yields[res] * g.diff.extract;
       else if (s.def.harvestsTerrain && res === 'biomass') rate += s.def.extractRate * g.diff.extract;
     }
+    this.extractMemo.set(res, rate);
     return rate;
   }
 
@@ -700,6 +795,14 @@ export class Bot {
 
   /** Is there a scanned patch of this we could still put a drill on (or one already running)? */
   diggable(res) {
+    if (this.digAt !== this.stamp) { this.digMemo = new Map(); this.digAt = this.stamp; }
+    if (this.digMemo.has(res)) return this.digMemo.get(res);
+    const out = this.diggableUncached(res);
+    this.digMemo.set(res, out);
+    return out;
+  }
+
+  diggableUncached(res) {
     const g = this.g;
     if (this.drillsOn(res).length) return true;
     // a patch we own no machine for is not a patch: biomass sits in "organic" nodes that no drill
@@ -772,9 +875,29 @@ export class Bot {
     // recipe while there are patches left is how the sim ended up with thirteen rock crushers
     // grinding stone into iron ore next to five iron patches nobody had put a drill on.
     if (RAW_KINDS.has(def.kind) && g.planetHas(res) && this.diggable(res)) {
-      if (this.extractionOf(res) < rate * 1.05) this.addExtractor(res);
-      return;
-    }
+      if (this.extractionOf(res) >= rate * 1.05) return;    // enough is already coming out of the ground
+      const dug = this.extractionOf(res);
+      this.addExtractor(res);                               // another patch, or a bigger drill on one
+      if (this.extractionOf(res) > dug) return;             // digging is getting somewhere; leave it to it
+      // Digging is the first answer and usually the only one. But when there is no unclaimed patch
+      // left *and* the drills are still under half of what the plan wants, a recipe that makes the
+      // same thing out of something plentiful is worth building alongside them. Two cases matter:
+      //
+      //  - sulfur, which gates sulfuric acid, which gates the chemical pack. Every world that failed
+      //    in this pass failed the same way - research stopped dead at 29 nodes, so no steel plate
+      //    and no circuits, so nothing but watchtowers, so the wave-20 boss walked in. Sulfur comes
+      //    in two or three small scarce patches; "Sweeten Crude" pulls it out of oil, which every
+      //    world has, and the bot could never reach that recipe while `diggable` was true.
+      //  - iron on an ore-poor world, where the rock crusher is the only way past the patch count.
+      //
+      // The guard is what stops this becoming the old bug of thirteen crushers grinding stone into
+      // iron ore next to five patches nobody had drilled: if `addExtractor` managed to raise the dig
+      // rate at all this cycle, digging is still the answer and we leave it alone. Asking instead
+      // whether an unclaimed patch *exists* was not enough - volcanic is rough ground, and a scanned
+      // patch that no 3x3 drill will fit on stays unclaimed for ever, so the bot waited on it for
+      // the whole run and never built the one recipe that would have unstuck the tree.
+      if (this.extractionOf(res) >= rate * 0.5) return;
+    } else
     // no patch this world can dig, but perhaps a machine that simply eats the ground
     if (RAW_KINDS.has(def.kind) && this.extractionOf(res) < rate * 1.05) {
       const ground = this.terrainExtractorFor(res);
@@ -931,6 +1054,41 @@ export class Bot {
   }
 
   /**
+   * Is the bot planning for something this world holds but nothing has ever seen? That is the only
+   * reason worth spending plate on towers past the ordinary budget - and it is a real one, because
+   * a single unfound seam closes a whole branch of the tree for the rest of the run. Cached for a
+   * minute: it walks the plan and the node list, and the answer does not change quickly.
+   */
+  wantsUnfoundOre() {
+    const g = this.g;
+    if (g.time - (this.huntAt ?? -1e9) < 60) return this.hunting;
+    this.huntAt = g.time;
+    this.hunting = false;
+    const { need } = this.plan();
+    for (const res of need.keys()) {
+      const def = g.data.resource[res];
+      if (!def || !RAW_KINDS.has(def.kind) || !g.planetHas(res)) continue;
+      // Enough already coming out of the ground is the only real answer to "should I keep looking".
+      // Asking instead whether *a* patch had ever been scanned was far too weak: on volcanic one of
+      // the four sulfur patches was scanned and drilled, which gave 0.99 sulfur a second against the
+      // 4.7 the plan wanted, the bot counted sulfur as "found" and stopped sweeping, and the acid
+      // line - and with it the chemical pack, and with it the whole middle of the research tree -
+      // never ran. The other three patches sat in the dark for the whole run.
+      //
+      // The threshold has to be low, though. At 0.6 the answer was "yes" for something almost all the
+      // time on a mid-game base, the scanner budget stayed doubled for the whole run, and ninety-odd
+      // towers at 35 kW each took arid's grid and its plate with them. A quarter of what is wanted
+      // means a chain that is genuinely closed, not one that is merely behind.
+      if (this.extractionOf(res) >= need.get(res) * (this.cfg.huntBelow ?? 0.25)) continue;
+      // something scanned and unclaimed is a patch to drill, not a reason to go looking for more
+      if (g.map.nodes.some(n => n.resource === res && n.scanned && n.claimedBy == null && !n.depleted)) continue;
+      this.hunting = true;
+      break;
+    }
+    return this.hunting;
+  }
+
+  /**
    * Sweep the map for patches, systematically rather than randomly: the next tower goes wherever
    * the existing ones do not reach. Everything underground is hidden until something looks at it,
    * so a chain that needs sulfur on a world with no sulfur in the opening ring is stuck until this
@@ -943,8 +1101,17 @@ export class Bot {
     // Scaled to the map, not a constant. Patches are hidden until something looks at them, so
     // scanning coverage is the real cap on how much ore the base can ever dig - and eight towers
     // that covered a 96-tile chunk leave two thirds of a 288-tile grid dark.
+    //
+    // There are two caps, and which one applies depends on whether the bot is actually missing
+    // something. A tower is 10 plate and 35 kW, and simply raising the cap so the far corners get
+    // covered spends the opening hour's plate on towers instead of guns: the base died at 01:42 on
+    // temperate with 96 scanners up. So the normal budget stays modest, and the bot is only allowed
+    // to keep sweeping while a resource it has planned for has no scanned patch anywhere - which on
+    // temperate is titanium, whose only two patches are 172 and 188 tiles out.
     const area = g.map.width * g.map.height;
-    const cap = Math.min(this.cfg.maxScanners ?? 40, Math.max(8, Math.round(area / (this.cfg.tilesPerScanner ?? 3000))));
+    const perTower = this.cfg.tilesPerScanner ?? 1850;
+    const soft = Math.min(this.cfg.maxScanners ?? 48, Math.max(8, Math.round(area / perTower)));
+    const cap = this.wantsUnfoundOre() ? Math.min(this.cfg.maxScannersHunting ?? 96, Math.round(soft * 2)) : soft;
     if (towers.length >= cap) return false;
     if (g.time - (this.lastScanBuild ?? -1e9) < 25) return false;
     const long = g.isUnlocked('long_radar') && this.affordable('long_radar');
@@ -988,6 +1155,31 @@ export class Bot {
   }
 
   /**
+   * Keep the building crew alive in numbers.
+   *
+   * Nothing replaced a dead builder. The bot spawned guards when it wanted them and left the four it
+   * landed with to wear out, which is invisible on a quiet world and fatal on a hazardous one: on
+   * volcanic the heat and the ashfall had killed all four by 01:15, and from that moment the base
+   * could not finish another outline. The bot went on placing them - two hundred and thirty-four
+   * placements against a hundred and thirty-five finished buildings - and the run sat at a hundred
+   * and thirty-five buildings until the pod came down. A builder is four plate.
+   */
+  crew() {
+    const g = this.g;
+    if (g.time - (this.lastCrew ?? -1e9) < 20) return;
+    this.lastCrew = g.time;
+    const hq = g.hq();
+    if (!hq) return;
+    const builders = g.units.filter(u => u.alive && u.def.buildRate).length;
+    // leave a little headroom so `defence()` can still field its guards
+    const want = Math.min(this.cfg.wantBuilders ?? 6, Math.max(2, g.crewCap() - 5));
+    if (builders >= want) return;
+    if (g.crewUsed() >= g.crewCap()) return;
+    if (this.have('iron_plate') < 30) return;               // plate this short is needed elsewhere
+    if (g.spawnUnit('builder', hq.x, hq.y)) this.mark('crew:builder');
+  }
+
+  /**
    * The pod has a workbench in it. Keeping it busy on whatever basic part is short is what stops the
    * run deadlocking on "you need plates to build the thing that makes plates".
    */
@@ -996,7 +1188,34 @@ export class Bot {
     const pod = g.hq();
     if (!pod) return;
     const inv = g.inventory();
-    for (const [res, floor, recipe] of [['iron_plate', 120, 'make_iron_plate'], ['gear', 60, 'make_gear'], ['copper_wire', 80, 'make_wire']]) {
+    // Priority order - plate, then gear, then wire - with one carefully bounded exception.
+    //
+    // Plain first-under-the-floor deadlocked the whole run on volcanic: plate sat just under its floor of
+    // 120 because the base kept spending it, so the workbench made plate and only plate - and gear,
+    // which every early generator needs ten of, stayed at one. No gear meant no generator, which
+    // meant a 480 kW grid under a 1890 kW draw, which throttled the smelters to a quarter speed,
+    // which is what kept the plate under its floor. The base stopped at 101 buildings and lost the
+    // pod at wave seven. But ranking on shortfall alone is just as bad the other way: copper wire
+    // starts at zero, so it is always the furthest below its floor, and a bot that simply serves the
+    // worst shortfall parks the workbench on wire from the first minute - with no copper ingot in
+    // the base to make it from - and stops making the plate everything else is built out of. Both
+    // worlds then died inside half an hour with three plate in the base. So the order stands, and
+    // only a job that is genuinely at zero, that the bench can run, and that has nothing unstocked
+    // above it, is allowed past it.
+    const jobs = [['iron_plate', 120, 'make_iron_plate'], ['gear', 60, 'make_gear'], ['copper_wire', 80, 'make_wire']];
+    const runnable = recipe => Object.keys(g.data.recipe[recipe]?.inputs || {}).every(i => (inv[i] || 0) > 0);
+    // One job may jump the queue: one that is all but out, when everything above it is comfortably
+    // stocked and the bench can actually run it.
+    for (let i = 0; i < jobs.length; i++) {
+      const [res, floor, recipe] = jobs[i];
+      if ((inv[res] || 0) > floor * 0.1) continue;
+      if (!runnable(recipe)) continue;
+      if (!jobs.slice(0, i).every(([r, f]) => (inv[r] || 0) >= f * 0.5)) continue;
+      if (pod.recipe !== recipe) g.setRecipe(pod.id, recipe);
+      return;
+    }
+    // otherwise the plain order: the construction material first, always
+    for (const [res, floor, recipe] of jobs) {
       if ((inv[res] || 0) >= floor) continue;
       if (pod.recipe !== recipe) g.setRecipe(pod.id, recipe);
       return;
@@ -1011,7 +1230,15 @@ export class Bot {
     const want = g.stats.power.use * head + 80;
     if (g.stats.power.gen >= want) return;
     const gens = g.structures.filter(s => s.def.powerGen && s.state !== 'dead');
-    if (gens.length > (this.cfg.maxGenerators ?? 40)) return;
+    // Same flat-cap disease as the guns and the stores: forty-four generators is a sensible ceiling
+    // for a three-hundred-building base and a brownout for a nine-hundred-building one. The real
+    // brake on generator spam is the `installed >= want` test above; this is only a backstop, so it
+    // grows with what it is powering.
+    // Only past the size the flat cap was written for, though: relaxing it from the first building
+    // let the opening hour buy generators instead of guns and the run died on the wave-10 boss.
+    const standing = g.structures.filter(s => s.state === 'done').length;
+    const extra = Math.max(0, standing - (this.cfg.generatorCapFrom ?? 500)) / (this.cfg.structuresPerGenerator ?? 30);
+    if (gens.length > Math.round((this.cfg.maxGenerators ?? 44) + extra)) return;
     // What is *installed*, not what is coming out right now. stats.power.gen is the fuel- and
     // weather-limited figure, so a coal shortage read as "not enough generators" and the bot built
     // another twenty of them - forty-nine generators on a base drawing four hundred kilowatts, and
@@ -1029,7 +1256,7 @@ export class Bot {
       if (type === 'fission_reactor' && available(g, 'fuel_rod') < 2) continue;
       if (type === 'geothermal_plant' && !g.planetHas('magma')) continue;
       // twenty wind turbines is a wind farm; eighty is a way of filling the map with buildings
-      if (gens.filter(x => x.type === type).length >= (this.cfg.maxPerGenerator ?? 20)) continue;
+      if (gens.filter(x => x.type === type).length >= Math.round((this.cfg.maxPerGenerator ?? 18) + extra)) continue;
       const s = this.build(type);
       if (s) { this.mark('power:' + type); this.budget--; return; }
     }
@@ -1055,7 +1282,13 @@ export class Bot {
     const wave = g.waveNumber;
     const soon = g.nextWaveAt != null ? g.nextWaveAt - g.time : Infinity;
     const per = this.cfg.turretsPerWave ?? 2.2;
-    const cap = this.cfg.maxTurrets ?? 42;
+    // The cap is what a base of this size can carry without the factory noticing it. Thirty-six guns
+    // is about right for the two-hundred-building base of hour two and far too few for the
+    // eight-hundred-building base of hour five: on arid the line hit the flat cap at wave 15, held
+    // fourteen more waves on upgrades alone and then lost the pod at wave 30. It scales with what is
+    // standing, so the guns grow with the thing they are guarding rather than with the clock.
+    const standing = g.structures.filter(s => s.state === 'done').length;
+    const cap = Math.round((this.cfg.maxTurrets ?? 36) + standing / (this.cfg.structuresPerTurret ?? 40));
     // spend ahead of the clock: one wave's worth extra when the next one is close
     const want = Math.min(cap, Math.round(3 + (wave + (soon < 200 ? 1.5 : 0)) * per));
     const turrets = g.structures.filter(s => s.def.dps && s.def.category === 'defence');
@@ -1065,7 +1298,11 @@ export class Bot {
     // small line, plate spent on more watchtowers is plate the steel line never gets, and forty
     // watchtowers is a base that holds wave 20 and has not researched chemistry.
     const opening = turrets.length < Math.min(6, 2 + wave * 2);
-    const floor = opening ? 50 : labs < 2 ? 120 : hasSteel ? (wave > 0 ? 60 : 100) : 240;
+    // The opening floor has to be sized to the gun, not to a round number. A watchtower is ten plate
+    // and twelve stone; a floor of fifty meant that on a world where the base spends plate as fast as
+    // it makes it - volcanic sits at about forty - the first six guns were never built at all, and
+    // the run ended at wave two with a hundred and fifty buildings and nothing shooting.
+    const floor = opening ? 24 : labs < 2 ? 120 : hasSteel ? (wave > 0 ? 60 : 100) : 240;
     if (available(g, 'iron_plate') < floor) return;
 
     // crew: guards fill the gaps a turret ring leaves
@@ -1123,8 +1360,15 @@ export class Bot {
     const turrets = g.structures.filter(s => s.state !== 'dead' && s.def.dps && s.def.category === 'defence');
     const sides = this.approachSides();
     const bias = Math.atan2(sides[0].dy, sides[0].dx);
-    // widen the ring only when the inner one is genuinely full, so the guns stay over the pod
-    for (const R1 of [Math.round(range * 0.95), Math.round(range * 1.5), Math.round(range * 2.2)]) {
+    // Widen the ring only when the inner one is genuinely full, so the guns stay over the pod - but
+    // keep widening until the base itself runs out, not until a multiple of the gun's range runs out.
+    // Stopping at 2.2x range meant that once the base had filled the ground within about thirty tiles
+    // of the pod, `turretSpot` returned null for every gun type and `defence()` quietly built nothing
+    // at all: arid reached wave 21 with fourteen hundred plate banked and **one** watchtower standing.
+    // A gun out on the perimeter is worth much more than a gun that was never built.
+    const rings = [Math.round(range * 0.95), Math.round(range * 1.5), Math.round(range * 2.2)];
+    for (const extra of [0, range, range * 2]) rings.push(Math.round(this.reach + extra));
+    for (const R1 of rings) {
       let best = null, bestScore = -Infinity;
       for (let dy = -R1; dy <= R1; dy++) for (let dx = -R1; dx <= R1; dx++) {
         const d = Math.hypot(dx, dy);
@@ -1198,6 +1442,56 @@ export class Bot {
     }
   }
 
+  /**
+   * Drills that dig into their own hopper because nothing joins them to the factory.
+   *
+   * `chainToPool` handles anything a line of stores can reach, and `upkeep` retries it. What is left
+   * is the genuinely distant patch - past fourteen warehouses of chain - and the one the chain could
+   * not be paid for. Both get a truck instead, and the resource is picked because the base is short
+   * of it rather than because the hopper happens to be full: the lithium that stalled research on
+   * temperate sat 85 and 107 tiles out with two hundred units mined in six hours.
+   */
+  outposts() {
+    const g = this.g;
+    const hub = g.hq();
+    if (!hub || hub.pool == null) return;
+    if (g.time - (this.lastOutpost ?? -1e9) < 45) return;
+    if (!g.isUnlocked('hauler')) return;
+    const max = this.cfg.maxRoutes ?? 10;
+    if (g.routes.length >= max) return;
+    // pay the clock here, not at the bottom: the walk below costs a plan() and a capacity table, and
+    // on a quiet base it would otherwise run every five seconds and find nothing every time
+    this.lastOutpost = g.time;
+    // what the factory is actually waiting on, worst first
+    const { need } = this.plan();
+    const cap = this.capacityTable();
+    const stranded = [];
+    for (const s of g.structures) {
+      if (s.state !== 'done' || !s.def.extractRate || !s.nodeId) continue;
+      if (s.pool === hub.pool) continue;                     // already joined up
+      const node = g.nodeById(s.nodeId);
+      if (!node || node.depleted) continue;
+      const res = node.resource;
+      if (!need.has(res)) continue;                          // nothing wants it
+      if ((cap.get(res) || 0) > need.get(res) * 3) continue; // plenty of it arriving elsewhere
+      // the store this drill actually fills - a route has to start from a store, not the drill
+      const from = g.structures.find(t => t.state === 'done' && isStore(t.def) && t.pool === s.pool
+        && Math.hypot(t.x - s.x, t.y - s.y) <= (t.def.linkRadius || 10));
+      if (!from || g.routes.some(r => r.from === from.id && r.resource === res)) continue;
+      stranded.push([from, res, (cap.get(res) || 0) / Math.max(1e-6, need.get(res))]);
+    }
+    if (!stranded.length) return;
+    stranded.sort((a, b) => a[2] - b[2]);
+    const [from, res] = stranded[0];
+    // a truck needs a garage slot; the plan only ever built one garage, which is three trucks
+    if (!garageFor(g, vehiclesFor(g, res)[0] || {})) {
+      if (this.affordable('truck_garage')) this.build('truck_garage');
+      return;
+    }
+    const out = g.addRoute({ from: from.id, to: hub.id, resource: res });
+    if (out.ok) this.mark('outpost-route:' + res);
+  }
+
   // ------------------------------------------------------------------ hauling and roads
   logistics() {
     const g = this.g;
@@ -1207,6 +1501,7 @@ export class Bot {
     const hub = g.hq();
     if (!hub) return;
     if (g.dirty.links) recomputeLinks(g);
+    this.outposts();
     // one crate run from the furthest outpost, so a truck is actually exercised
     if (g.isUnlocked('hauler') && g.routes.filter(r => r.resource !== 'water').length < 3) {
       const far = g.structures
@@ -1412,6 +1707,21 @@ export class Bot {
           g.removeStructure(stray.id, { refund: 1, reason: 'nothing could reach it' });
           this.refreshInventory();
         }
+      }
+    }
+    // Take the hunting towers down again. A patch stays scanned once something has looked at it, so
+    // the towers that went up to find the far seams are, the moment they have found them, 35 kW each
+    // of pure overhead - ninety-six of them is 3.4 MW, which on temperate was most of an 8 MW draw
+    // against 4 MW of generators, and everything in the base was throttled. Sold back one a pass,
+    // furthest from the pod first, down to the ordinary sweep budget.
+    if (!this.wantsUnfoundOre()) {
+      const towers = g.structures.filter(s => s.state === 'done' && s.def.scanRadius);
+      const area = g.map.width * g.map.height;
+      const soft = Math.min(this.cfg.maxScanners ?? 48, Math.max(8, Math.round(area / (this.cfg.tilesPerScanner ?? 1850))));
+      if (towers.length > soft) {
+        const c = this.hubCentre();
+        const spare = towers.sort((a, b) => Math.hypot(b.x - c.x, b.y - c.y) - Math.hypot(a.x - c.x, a.y - c.y))[0];
+        if (spare) { g.removeStructure(spare.id, { refund: 0.8, reason: 'nothing left to find' }); this.refreshInventory(); }
       }
     }
     // a machine that finished a craft with nowhere to put it needs a store, right there

@@ -17,7 +17,8 @@
     "nodeAmount": 1.0,
     "scarceNodeAmount": 0.8,
     "scarceNodeWeight": 0.5,
-    "scarceNodeCount": 2
+    "scarceNodeCount": 2,
+  "commonOffBiome": 1.2
   },
   "costByCategory": {
     "base": 0.85,
@@ -513,24 +514,31 @@
     }
   },
   "bot": {
-    "note": "Knobs for the simulator bot in js/ai.js. How far it will spread from the pod (compactRadius to maxReach, on a latticeStride pitch), how many stores, scanners, generators, harvesters and turrets it is allowed before it is only filling the map, how many machines it will put on one recipe, how much science pack it plans for per second, how much headroom it leaves on generator fuel, and how hard it spends on defence per wave. maxReach and the scanner count are worked out from the map size when they are not set here.",
+    "note": "Knobs for the simulator bot in js/ai.js. How far it will spread from the pod (compactRadius to maxReach, on a latticeStride pitch), how many stores, scanners, generators, harvesters and turrets it is allowed before it is only filling the map, how many machines it will put on one recipe, how much science pack it plans for per second, how much headroom it leaves on generator fuel, and how hard it spends on defence per wave. maxReach, the store budget and the scanner count are worked out from the map size when they are not set here. Three of the caps are no longer flat, because a number that is right for a 300-building base is a brownout or a lost pod at 900: turrets grow by one per structuresPerTurret standing, generators by one per structuresPerGenerator past generatorCapFrom, and the scanner budget doubles from maxScanners to maxScannersHunting while a resource the bot has planned for has no scanned patch anywhere - then the surplus towers are sold again, because a patch stays scanned once something has looked at it. maxRoutes is the ceiling on truck runs, which is how ore too far out for a chain of stores gets home.",
     "compactRadius": 26,
     "outpostChainStep": 11,
     "turretsPerWave": 2.2,
     "maxTurrets": 36,
+  "structuresPerTurret": 40,
     "powerHeadroom": 1.25,
     "maxRoadTiles": 40,
+  "maxRoutes": 10,
     "maxGenerators": 44,
+  "structuresPerGenerator": 30,
+  "generatorCapFrom": 500,
     "maxPerGenerator": 18,
     "maxScanners": 48,
+  "maxScannersHunting": 96,
     "maxWarehouses": 24,
-    "maxCrates": 36,
+    "maxCrates": 44,
     "fuelHeadroom": 1.2,
-    "maxHarvesters": 14,
+    "wantBuilders": 6,
+  "maxHarvesters": 14,
     "maxPerRecipe": 20,
     "maxPackRate": 0.6,
     "latticeStride": 4,
     "poleSpacing": 8,
-    "tilesPerScanner": 2000
+    "huntBelow": 0.25,
+  "tilesPerScanner": 1850
   }
 }

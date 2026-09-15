@@ -465,7 +465,9 @@ which is a property of the sim's map size and not of the game.
   `maxScanners` to `maxScannersHunting` while something the bot has planned for has no scanned patch
   anywhere. `wantBuilders` is how much building crew it keeps alive — nothing used to replace a dead
   builder, and on a hazardous world that is what stops a base — and `maxRoutes` the ceiling on truck
-  runs.
+  runs. The `reserve*` knobs, `maxReservations`, `emergencyWindow`, `shortfallHorizon`,
+  `queuePerBuilder` and `maxBuilderYards` belong to the reservation ledger and the build-queue cap —
+  see "The reservation ledger" in §11.
 - `data/balance.json -> map` — node sizes and how scarce a "scarce" patch is.
 - `data/balance.json -> hazards` — what every weather tag does while it runs.
 
@@ -479,13 +481,58 @@ the sim caught.
 `tools/sim-matrix.mjs` regenerates it: three worlds crossed with three difficulties, each a real
 headless game in its own process.
 
+### The reservation ledger — how the bot saves up
+
+Every spender in `js/ai.js` used to ask "can I afford this right now" against everything in the
+stores, and whoever asked first won. On a world that spends what it makes that is not a race but a
+deadlock: volcanic made 2.2 steel plate a second and held none, because defence bought a wall with
+each plate as it landed, so a sixteen-plate chemical plant was never affordable and research stopped
+at 29 nodes. The ledger (`Ledger` in `js/ai.js`) is the fix. The rule:
+
+- **A booking belongs to one job.** Owners are `infra:<building>` (a build-programme step),
+  `chain:<recipe>` (a machine the chain planner wants), `power` (the next generator) and `defence`
+  (the next gun). Booking again under the same owner refreshes the cost rather than stacking.
+- **It only books a real shortage.** A job has to have been unaffordable continuously for
+  `bot.reserveAfter` seconds (`reservePowerAfter` for the grid) before it may book, so a busy minute
+  never freezes stock. And it refuses to book anything the base is not making or digging at all —
+  that is a missing chain, not a savings problem.
+- **Spenders see free stock.** `have(res)` is what is in the stores minus what is booked by someone
+  else, and `affordable()` — so every placement — goes through it. The owner of a booking may spend
+  its own.
+- **Priority decides who may spend through a booking.** A spender ignores bookings below its own
+  priority: routine spending is 0, a build-programme step books at 50, the chain planner at 60,
+  putting a drill or pump on a patch spends at 62 (nothing the planner books can ever be paid for if
+  the ore under it is not being dug), the grid books at 65, the rocket buildings (`saveFor` in
+  `INFRA`) at 70, and defence at 99 **only in an emergency** — the opening guns are missing, the pod
+  has taken damage in the last 90 seconds, or a wave is close with less than half the line standing.
+  Outside an emergency defence waits its turn like everyone else.
+- **Nothing books for ever.** A booking is dropped when its job is no longer wanted (`still()`), when
+  nothing has moved towards it for `reserveStallFor` seconds, when it has been fully paid for and
+  still not built after `reservePaidFor` (the ground or the crew is what is missing, not the
+  materials), or after `reserveTtl` in any case. A dropped owner waits `reserveCoolFor` before it may
+  book again, so an unreachable target cannot pin the base's output in a loop. **The cool-off is per
+  material as well as per owner**: a booking dropped because nothing arrived puts every material it
+  was short of on the same cool-off, and no other owner may book while short of it. Per owner alone
+  was a loop — on temperate a crusher, a glassworks and a rubble sorter took turns booking the same
+  six gear for two hours, and with six gear always spoken for no drill or generator was ever
+  affordable. Emergency defence is exempt.
+- **At most `maxReservations` at once.** A new booking only displaces an open one of strictly lower
+  priority, which is how the grid or the guns take the slot from a lab.
+
+Two things sit next to it for the same reason. A blocked build's missing materials are **demand**:
+`plan()` adds them to the chain planner over `shortfallHorizon` seconds, because some materials
+(tungsten bar, control units, machine frames) are only ever a building cost and nothing else would
+ever ask for them. And the **build queue is capped** at `queuePerBuilder` outlines per builder, since
+an outline is paid for when it is placed; booked builds and guns go past the cap.
+
 ## 12. Known scope lines
 
 - **One buildable local map per planet.** Regions are explored for intel and a supply cache rather
   than becoming second build sites. A UI that wants two bases can create a second `Game` on another
   world cell; nothing in the engine assumes there is only one.
-- **The bot is a test harness, not an opponent.** It plays the opening well and stalls in the
-  mid-game; see `research/sim-report.md` §4 for exactly where it gets to and what it still does not
-  do.
+- **The bot is a test harness, not an opponent.** On seed 7, normal, it now launches a rocket on
+  temperate, arid and volcanic inside six hours without losing the pod — but with little margin
+  (volcanic launches at 05:37), and small changes to the bot move those times by an hour either way.
+  See `research/sim-report.md` §0 and §4 for where it gets to and what it still does not do.
 - **No pipes or belts.** Short-range transfer is the storage pool and long-range is trucks. That was
   deliberate: it keeps the interesting decision (where to put things) and drops the fiddly one.

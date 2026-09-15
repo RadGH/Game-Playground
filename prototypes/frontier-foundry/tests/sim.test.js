@@ -143,11 +143,19 @@ test('a scarce resource always has a patch, and the starter patches never eat th
 // ---------------------------------------------------------------- the milestone run
 // The one test that says whether the game is actually playable end to end: the bot lands on three
 // different worlds and has to get through the funnel - dig, smelt, steel, chemistry, hold a wave,
-// climb the tree - inside a six-hour budget, without losing the pod.
+// climb the tree, build a rocket and leave - inside a six-hour budget, without losing the pod.
 //
 // Each world is a real `tools/sim-foundry.mjs --json` run in its own process, three at a time, so
-// this costs one run's wall clock rather than three. It is the slowest test in the project by a
-// wide margin; it is also the only one that would catch the whole game quietly stopping.
+// this costs one run's wall clock rather than three. It is the slowest thing in the project by a
+// wide margin - three six-hour games, a few minutes of wall clock - and it is also the only test
+// that would catch the whole game quietly stopping.
+//
+// **It only runs when you ask for it**: `npm run test:sim`, which sets FOUNDRY_SIM=1. Without that
+// the two tests below are skipped and `npm run test:unit` runs the cheaper in-process bot tests at
+// the top of this file instead, which play the same engine and the same bot for three and six hours
+// on one world and cost seconds rather than minutes. Run the full thing before changing anything in
+// `js/ai.js`, `data/balance.json` or the engine's tick - it is what the numbers in
+// `research/sim-report.md` are taken from.
 
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -169,6 +177,10 @@ function play(opts) {
   });
 }
 
+/** The full three-world run is opt-in: `npm run test:sim` sets this. */
+const FULL = process.env.FOUNDRY_SIM === '1';
+const skipUnlessAsked = FULL ? false : 'three six-hour games: run `npm run test:sim` (FOUNDRY_SIM=1)';
+
 const WORLDS = ['temperate', 'arid', 'volcanic'];
 /** Every milestone the funnel is measured against, and the latest it may land. */
 const FUNNEL = [
@@ -179,9 +191,9 @@ const FUNNEL = [
 ];
 
 /** The three runs, played once and shared by the tests below. */
-const milestone = await Promise.all(WORLDS.map(planet => play({ planet, seed: 7, difficulty: 'normal', hours: 6 })));
+const milestone = FULL ? await Promise.all(WORLDS.map(planet => play({ planet, seed: 7, difficulty: 'normal', hours: 6 }))) : [];
 
-test('the milestone run: three worlds, six hours, and the pod is still standing', () => {
+test('the milestone run: three worlds, six hours, and the pod is still standing', { skip: skipUnlessAsked }, () => {
   const report = [];
   for (const r of milestone) {
     assert.ok(!r.error, `${r.planet}: the run did not finish - ${r.error}`);
@@ -198,12 +210,16 @@ test('the milestone run: three worlds, six hours, and the pod is still standing'
   console.log('    ' + report.join('\n    '));
 });
 
-// The bar this prototype is aiming at and has not reached: a launch inside six hours on normal, on
-// every one of the three worlds. It gets to the launch pad and the research behind it; the top of
-// the chain (alloy plate, superalloy, control units, heat shields, rocket fuel) is fed by single
-// scarce seams of titanium, tungsten, platinum and gold and never gets ahead of them.
-// research/sim-report.md §4 has the detail. Marked todo rather than deleted so it stays visible.
-test('the milestone run reaches a rocket launch on all three worlds', { todo: 'the bot stops at the launch pad - see research/sim-report.md' }, () => {
+// The bar the whole prototype is aimed at: a launch inside six hours on normal, on every one of the
+// three worlds. It was a todo for two rounds - the bot got to the launch pad and no further, because
+// the top of the chain (alloy plate, superalloy, control units, heat shields, rocket fuel) is fed by
+// single scarce seams and it spent every plate the moment it landed. The reservation ledger in
+// `js/ai.js` fixed the spending, and a dozen places the bot quietly gave up (pole lines and store
+// rescues dropped by the queue cap, "first N" retry lists, machines that could not run counted as
+// capacity, a full route list, a placement search that stopped at 90 tiles) are what actually got a
+// rocket off; research/sim-report.md §0 has the before and after. The margin is thin - volcanic
+// launches at 05:37 - so a failure here after a bot change is real news, not flakiness.
+test('the milestone run reaches a rocket launch on all three worlds', { skip: skipUnlessAsked }, () => {
   for (const r of milestone) {
     assert.ok(r.marks.launch != null, `${r.archetype}: no launch in six hours (short of ${(r.worst || []).join(', ')})`);
   }

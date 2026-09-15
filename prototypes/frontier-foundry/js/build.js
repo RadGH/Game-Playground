@@ -1,15 +1,17 @@
 // Placing things, and the Warcraft-style bit: you place an outline, builders walk to it, and the
 // building goes up while they work. Nothing appears instantly except the landing pod.
 
-import { nodeUnderFootprint } from './map.js';
+import { nodeUnderFootprint, bumpMap } from './map.js';
+import { invChanged, inventoryTotals } from './production.js';
 
 const IDX = (map, x, y) => y * map.width + x;
 
-/** Total of one resource across every finished store and the pod. */
+/**
+ * Total of one resource across every finished store and the pod. Read from the shared totals table
+ * (see `inventoryTotals`), which is only rebuilt after something writes an inventory.
+ */
 export function available(game, res) {
-  let n = 0;
-  for (const s of game.structures) if (s.state === 'done' && s.inv[res]) n += s.inv[res];
-  return n;
+  return inventoryTotals(game)[res] || 0;
 }
 
 /** Take a cost out of the stores, nearest to (x,y) first. Returns true if it all came out. */
@@ -22,7 +24,7 @@ export function takeCost(game, cost, x = 0, y = 0) {
     for (const s of stores) {
       if (left <= 0) break;
       const take = Math.min(left, s.inv[res] || 0);
-      if (take > 0) { s.inv[res] -= take; if (s.inv[res] <= 0) delete s.inv[res]; left -= take; }
+      if (take > 0) { s.inv[res] -= take; if (s.inv[res] <= 0) delete s.inv[res]; invChanged(s); left -= take; }
     }
   }
   return true;
@@ -78,6 +80,10 @@ export function place(game, typeId, x, y, { free = false, instant = false, recip
   const def = game.data.structure[typeId];
   if (!free) takeCost(game, def.cost || {}, x, y);
   const fp = footprint(def, rot);
+  // Every field a building can ever carry is written here, even the ones only some buildings use.
+  // Adding a property to an object later gives it a shape of its own, and once the base holds a few
+  // hundred buildings in a dozen different shapes every `s.state` in the tick loop turns into a
+  // lookup rather than a field read - it was a fifth of the whole simulator's running time.
   const s = {
     id: game.nextId++, type: typeId, def, x, y, w: fp.w, h: fp.h, rot,
     state: instant || free ? 'done' : 'ghost', progress: instant || free ? (def.buildTime || 0) : 0,
@@ -85,6 +91,11 @@ export function place(game, typeId, x, y, { free = false, instant = false, recip
     inv: {}, cap: def.storage || 0, recipe: recipe || null, craft: 0, crafted: 0,
     net: -1, powered: 1, enabled: true, nodeId: null, lastScan: -1e9, cooldown: 0,
     shield: def.shieldPool || 0, starvedFor: null, blocked: false, idleFor: 0,
+    // set as the base runs: the storage pool and power grid, what it is doing, and the two cached
+    // inventory sums (`_sum`, `_raw`) that roomFor reads
+    links: [], linkRefs: null, pool: -1, busy: false, crafting: false, warned: false, duty: 0, overheating: 0,
+    fuelChoice: null, recipePower: 0, charge: 0, target: null, walled: false, roaded: false,
+    lastConnect: -1e9, _sum: undefined, _raw: undefined,
   };
   if (def.requiresNode) {
     const node = nodeUnderFootprint(game.map, x, y, fp.w, fp.h, { includeDepleted: !!def.infinite });
@@ -113,6 +124,7 @@ export function stamp(game, s) {
   }
   if (s.def.blocks && s.state === 'done') game.blocking.add(s.id);
   map.blocking = game.blocking;
+  bumpMap(map);                 // the cached cost fields now have the wrong ground in them
 }
 
 /** Clear a structure off the grid. */
@@ -124,6 +136,7 @@ export function unstamp(game, s) {
     if (s.def.roadTier) map.road[i] = 0;
   }
   game.blocking.delete(s.id);
+  bumpMap(map);
 }
 
 /** Remove a structure. refund 0..1 of the cost comes back to the stores. */
@@ -136,7 +149,7 @@ export function demolish(game, id, { refund = 0.5, reason = 'demolished' } = {})
     const hq = game.hq();
     if (hq) for (const [res, n] of Object.entries(s.def.cost || {})) {
       const back = Math.floor(n * refund);
-      if (back > 0) hq.inv[res] = (hq.inv[res] || 0) + back;
+      if (back > 0) { hq.inv[res] = (hq.inv[res] || 0) + back; invChanged(hq); }
     }
   }
   game.structures = game.structures.filter(x => x.id !== id);
@@ -185,7 +198,7 @@ export function tickBuilders(game, dt) {
   const free = game.units.filter(u => u.alive && u.def.buildRate && !u.moveTo);
   let k = 0;
   for (const u of free) {
-    let job = u.target != null ? game.structures.find(s => s.id === u.target) : null;
+    let job = u.target != null ? game.byId(u.target) : null;
     if (!job || job.state === 'done') { job = jobs[k % jobs.length]; k++; u.target = job.id; }
     const cx = job.x + job.w / 2, cy = job.y + job.h / 2;
     const d = Math.hypot(u.x - cx, u.y - cy);
@@ -202,7 +215,7 @@ export function tickBuilders(game, dt) {
   // builder buggies work too, and faster
   for (const v of game.vehicles) {
     if (!v.alive || !v.def.buildRate || v.route != null) continue;
-    let job = v.buildTarget != null ? game.structures.find(s => s.id === v.buildTarget) : null;
+    let job = v.buildTarget != null ? game.byId(v.buildTarget) : null;
     if (!job || job.state === 'done') { job = jobs[k % jobs.length]; k++; v.buildTarget = job.id; }
     const cx = job.x + job.w / 2, cy = job.y + job.h / 2;
     const d = Math.hypot(v.x - cx, v.y - cy);

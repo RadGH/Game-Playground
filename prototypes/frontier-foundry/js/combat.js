@@ -6,6 +6,7 @@
 // every fifth one is a push from two sides, and every tenth can carry a boss.
 
 import { flowField, costField } from './map.js';
+import { invChanged } from './production.js';
 import { damageAfterArmor, waveBudget, waveInterval, enemyScale } from './rules.js';
 import { pull } from './production.js';
 import { grantResearch } from './research.js';
@@ -442,7 +443,7 @@ export function damageNest(game, nest, raw) {
     const hq = game.hq();
     const bits = [];
     if (hq) for (const [res, n] of Object.entries(bounty)) {
-      hq.inv[res] = (hq.inv[res] || 0) + n;
+      hq.inv[res] = (hq.inv[res] || 0) + n; invChanged(hq);
       bits.push(`${n} ${game.data.resource[res]?.name || res}`);
     }
     const work = game.data.waves.nests?.research || 0;

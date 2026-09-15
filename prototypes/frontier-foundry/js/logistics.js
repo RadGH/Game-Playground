@@ -3,6 +3,7 @@
 // shorter, a better truck makes it bigger, and a loading dock makes the stops quicker.
 
 import { findPath, costField } from './map.js';
+import { invChanged } from './production.js';
 import { pathTime, cycleTime, routeThroughput } from './rules.js';
 import { accepts, acceptsDelivery, space, load, isStore, roomFor } from './production.js';
 import { available, takeCost } from './build.js';
@@ -225,7 +226,7 @@ export function tickLogistics(game, dt) {
         if (r.progress >= v.def.unloadTime) {
           const room = to.cap > 0 ? roomFor(game, to, r.resource) : v.cargo;
           const put = Math.min(v.cargo, room);
-          if (put > 0) { to.inv[r.resource] = (to.inv[r.resource] || 0) + put; v.cargo -= put; r.delivered += put; game.stats.hauled += put; }
+          if (put > 0) { to.inv[r.resource] = (to.inv[r.resource] || 0) + put; invChanged(to); v.cargo -= put; r.delivered += put; game.stats.hauled += put; }
           if (v.cargo <= 0) { v.cargoRes = null; r.trips++; r.progress = 0; r.state = 'toSource'; r.fullSince = null; r.warnedFull = false; }
           else {
             r.progress = v.def.unloadTime;                                // destination full - hold
@@ -259,6 +260,7 @@ function takeFromPool(game, from, res, n) {
     const k = Math.min(n - got, have);
     s.inv[res] -= k;
     if (s.inv[res] <= 1e-9) delete s.inv[res];
+    invChanged(s);
     got += k;
   }
   return got;

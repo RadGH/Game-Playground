@@ -1,9 +1,10 @@
-# Frontier Foundry — balance pass 3 (2026-09-14)
+# Frontier Foundry — balance pass 4 (2026-09-14)
 
-*Written from `tools/sim-matrix.mjs`: three worlds × three difficulties, six in-game hours each,
+*Written from `tools/sim-foundry.mjs --json` runs and `tools/sim-matrix.mjs`: six in-game hours,
 288 × 288 map (3 × 3 chunks), seed 7, played headless by the bot in `js/ai.js`. Round 1's report was
-the `--why` dumps in the commit that built the engine; round 2 was the first proper funnel; §0 below
-is round 3, which is the pass that got the research tree unstuck.*
+the `--why` dumps in the commit that built the engine; round 2 was the first proper funnel; §0b is
+round 3, which got the research tree unstuck; §0 is round 4, the reservation ledger and everything it
+uncovered, which is the pass that got a rocket off all three worlds on normal.*
 
 Run it again with:
 
@@ -16,7 +17,141 @@ so it would replace everything written around it. Nine six-hour games take about
 
 ---
 
-## 0. Round 3: the tree could not pay for itself
+## 0. Round 4: saving up, and everything saving up uncovered
+
+Round 3 ended with `tests/sim.test.js` failing both milestone tests: arid lost the pod at 341
+minutes after 40 waves, and no world launched. The diagnosis in §4 was that the bot could not reserve
+output for a build it had decided on. That was true, and the ledger below fixes it — but the ledger
+on its own did not launch anything. Every time a booking finally held, it exposed the next reason the
+materials were not arriving, and most of those were places where the bot quietly gave up.
+
+**Seed 7, normal, six hours, 288 × 288:**
+
+| world | committed code (round 3) | as the stopped ledger work was left | after this pass |
+|---|---|---|---|
+| temperate | survived 42/42 · 69 nodes · 1424 built · no launch | survived 42/42 · 54 nodes · 1186 built · no launch | survived 42/42 · 74 nodes · 1511 built · **launch 05:05** |
+| arid | **pod lost 05:41** after 40 waves · 69 nodes · 1366 built | survived 44/44 · 69 nodes · 1119 built · no launch | survived (43 of 44 cleared, the last still on the map at 06:00) · 74 nodes · 1433 built · **launch 04:26** |
+| volcanic | **pod lost 02:44** after 17 waves · 29 nodes · 609 built | survived 42/43 · 69 nodes · 1033 built · no launch | survived 43/43 · 74 nodes · 1230 built · **launch 05:37** |
+| wall clock per run | 868 s / 1050 s / 124 s | 112 s / 287 s / 240 s | 183 s / 188 s / 143 s |
+
+Wall clock is one process per world, three at a time on a 12-core VM, often alongside other runs, so
+read it as rough. The funnel budgets in the milestone test were not changed and all are met with room:
+first drill 31 s (budget 300), first iron bar by 61 s (900), second research node by 1081 s (1800),
+first wave held by 991 s (10 800).
+
+> **Say it plainly: the margin is thin.** Volcanic launches 23 minutes inside the budget. Across the
+> thirteen rounds of three-world runs in this pass the launch flipped on and off with small bot
+> changes — temperate launched in seven of them and not in six — because one seed is one trajectory,
+> and a changed build order an hour in moves everything after it. The six-hour bar was not moved;
+> §0 records what it took to meet it, not a claim that it is comfortable.
+
+Two more seeds on the final code, normal, six hours, to show how far "green on seed 7" generalises:
+
+| seed | temperate | arid | volcanic |
+|---|---|---|---|
+| 8 | survived · 74 nodes · launch 03:34 | survived · 75 nodes · launch 03:08 | survived · 74 nodes · launch 02:38 |
+| 11 | survived · **29 nodes · no launch** (never made a chemical pack) | survived · 75 nodes · launch 04:01 | survived · 75 nodes · launch 02:55 |
+
+Six of six keep the pod, five of six launch. Seed 11 temperate is a live failure of the same family as
+round 3's volcanic — the chemistry line never starts — and has not been looked into.
+
+### The ledger (`Ledger` in `js/ai.js`, rule in `DESIGN.md` §11)
+
+Kept from the stopped work: bookings per owner, free stock through `have()`, priorities, a stall
+timer, a time-to-live, a cool-off, `maxReservations`, the `saveFor` rocket steps and the build-queue
+cap. Added or changed in this pass, each for a reason the sim showed:
+
+- **The cool-off is per material as well as per owner.** On temperate a crusher, a glassworks and a
+  rubble sorter took turns booking the same six gear for two hours; with six gear always spoken for,
+  no drill (six gear) and no generator (nine) was ever affordable, the coal ran out under six
+  generators, and the gear assemblers ran at 8 % power.
+- **The grid books** (priority 65). On arid at one hour the base had made 1800 gear and held none —
+  44 assemblers had taken them as they rolled — so 767 kW ran a 3200 kW factory for two hours.
+- **Putting a drill on a patch spends at 62**, above the chain planner, so a planner booking cannot
+  hold the materials for the drill that would feed it.
+- **Defence books the next gun, and breaks bookings only in a real emergency** — the opening six guns
+  are missing, the pod was hit in the last 90 seconds, or a wave is close with half the line missing.
+  "Pod below 98 %" was the first version, and nothing repairs the pod early, so it was an emergency for
+  the rest of the run.
+- **A rocket-priority booking holds its materials against recipes too.** The launch pad booked seven
+  tungsten bar and sat at 0 % while the superalloy furnaces ate every bar as it was made.
+- **A blocked build's missing materials are demand.** Tungsten bar, control units and machine frames
+  are only ever a building cost, so nothing in `DEMANDS` asked for them; temperate never built a
+  tungsten smelter, so never an alloy foundry, so never alloy plate.
+
+### Places the bot gave up without saying so
+
+- **Pole lines, stray-store rescues and turrets went through the build-queue cap.** The queue is full
+  for most of a mid-game run, so each was silently dropped. Arid at 03:20 had seventeen finished
+  machines on no grid, the only tungsten drill among them, fourteen tiles from a pole; the turret count
+  sat at 28 against 34 wanted with 1400 plate banked, until a double push walked through. All three
+  now go past the cap.
+- **"The first N" lists.** `upkeep` retried the first three strays and the first four unpowered
+  buildings in building order, every pass; three unreachable ones were retried for ever and the lithium
+  drill behind them never was. Both lists rotate now, extractors first, and a storeless extractor gets a
+  store of its own (`ensureStore(..., { rescue })`) so a truck can be sent.
+- **The planner counted machines that cannot run.** A drill on no grid read as capacity, so arid's dead
+  tungsten drill was "1.7× what the plan wants" and no second one was built (`cannotRun()`).
+- **Stockpile limits counted ore nobody could reach.** Temperate's two platinum drills, hoppers full at
+  200 each, read as "400 platinum, stockpile full" and switched themselves off. Limits now count the
+  main pool.
+- **The route cap was a dead end.** At ten routes `outposts()` returned, and temperate's ten were all
+  iron ore, coal and stone the base held full stockpiles of while eleven advanced-circuit printers stood
+  "short of gold". At the cap it now retires a route whose resource is fully stocked, for one a machine
+  is starving for.
+- **The placement search stopped at 90 tiles** while the bot may build out to 121 on this map. Arid's
+  launch pad was researched, affordable and had 356 legal spots between 96 and 121 tiles out, and
+  `spot()` returned null for two and a half hours.
+- **The generator cap bound on a fuelled grid.** Arid at 02:45: 62 generators against a cap of 61,
+  every one burning, 28 000 coal in store, 19.4 MW drawn on 8.3 MW. The cap now only binds while the
+  grid is actually fuel-limited.
+- **Gear had no floor.** Science packs ate all 3100 gear temperate made in its first hour. While gear
+  is under `bot.gearFloor`, machines that eat gear without making it stand down — the twin of the plate
+  rule that was already there.
+- **The opening line was four guns at wave one.** Two nests of ash stalkers is 280 damage a second into
+  the pod against 15 per watchtower; volcanic lost the pod at minute 24. Six from wave one, and
+  watchtowers are swapped for gun turrets once more than half the line is weak.
+
+### New knobs (`data/balance.json -> bot`)
+
+`maxReservations` 1, `reserveStallFor` 300, `reserveCoolFor` 600, `reserveTtl` 1800, `reserveAfter`
+120, `reservePaidFor` 180, `reservePowerAfter` 60, `emergencyWindow` 150, `shortfallHorizon` 600,
+`queuePerBuilder` 5, `maxBuilderYards` 8, `gearFloor` 40. No game-balance number (waves, structures,
+recipes, map) moved in this pass.
+
+### Test time: where it went and what the default suite runs now
+
+The brief for this pass reported the node suite at about 224 s on the committed code and about
+19 minutes once the ledger work made the bases bigger, with the engine tick about 88 % of the cost.
+Both halves of the fix were taken:
+
+- **The engine tick got faster without changing results.** Kept from the stopped work: cached cost
+  fields, a flat heap for the flow field, cached store sums (`invChanged`), cached `accepts`, link
+  references. Added: one shared inventory-totals table for `available()` and `Game.inventory()`
+  (28 % of a profile before; a six-hour temperate run went from 699 s to 195 s with a byte-identical
+  result), `techEffect()` remembered per research state (20 % of a profile), and the scan bonus lifted
+  out of `scanMore()`'s inner loop. The placement search in `spot()` is now the largest single line
+  (about a quarter of a run) and was left alone, because every cheap way to trim it changes which spot
+  it picks.
+- **The three-world milestone moved behind `npm run test:sim`** (`FOUNDRY_SIM=1`). Three six-hour games
+  are still three six-hour games; they do not belong in the suite someone runs after every edit.
+
+| what | time |
+|---|---|
+| `node --test prototypes/frontier-foundry/tests/*.test.js` (the default; milestone skipped) | **42 s** (66 pass, 2 skipped; the slowest test is the in-process six-hour bot run, 26 s) |
+| `npm run test:sim` (the full milestone: the same file with the three sim runs) | **3 min 04 s** wall, 9 min 44 s CPU (11 pass) |
+| one six-hour world, committed code → now | temperate 868 → 183 s, arid 1050 → 188 s, volcanic 124 → 143 s (volcanic used to die at 02:44) |
+| `npx playwright test prototypes/frontier-foundry` | 13/13, 48 s |
+
+### Found and not fixed
+
+- **`tickProduction()` sets `busy = false` on every building without a recipe** — drills, generators,
+  scanners — right after `tickExtraction()` set it. So `--why` always reports drills as "running 0",
+  and `tickPower()` bills every drill at a quarter of its power. Fixing it is one line, but it would
+  quadruple extraction's share of every grid and move every balance number in this file, so it is left
+  for a pass that re-runs the matrix.
+
+## 0b. Round 3: the tree could not pay for itself
 
 Round 2 ended with every world, on every difficulty, stopping at the same line in the headline:
 **"stalled on packs"** — 47 research nodes on temperate, 43 on volcanic, and no rocket anywhere. That
@@ -318,32 +453,19 @@ New bot knobs, all in `data/balance.json -> bot`: `maxReach`, `latticeStride`, `
 
 ## 4. What the bot still does not do
 
-Named here rather than left for someone to find. For scale, where each world stood on normal before
-this pass and after it: temperate survived either way but went 47 -> 69 research nodes; **arid went
-from losing the pod at 248 minutes after 29 waves to 341 minutes after 40**; **volcanic went from
-losing it at 75 minutes with 101 buildings to 164 minutes with 609**. All three improved and none of
-them is finished — `tests/sim.test.js` still fails its survival bar, which is "all three standing at
-six hours", and the launch test is still a todo.
+Named here rather than left for someone to find. Round 3's list opened with "it does not launch a
+rocket" and "it cannot save up for a building"; round 4 (§0) closed both on seed 7, normal — all three
+worlds launch inside six hours and keep the pod. What is left:
 
-- **It still does not launch a rocket inside six hours** — but it now fails much later and for a
-  different reason. Round 2 stopped at 47 research nodes with the whole rocket half of the tree
-  locked. Round 3 finishes **69 nodes on temperate and arid**, researches rocketry, and puts the
-  **launch pad up**; what it does not do is feed the top of the chain fast enough. On temperate at
-  six hours: titanium ore is arriving at 2.03 a second against 2.80 wanted, and alloy plate — two
-  titanium ingots, two steel plate and two resin apiece — is at 0.15 a second against 0.69. A rocket
-  is six sections at ten alloy plate each plus thirty for the assembly building, so the run ends
-  about ten minutes of alloy throughput short of a launch it has everything else for. The honest
-  summary is that the *tree* is unblocked and the *factory* is not yet wide enough at the top.
-  Volcanic is a tier behind both (47 nodes), because a world with fourteen thin coal seams spends
-  its first two hours on power rather than on plate.
-- **It cannot save up for a building.** This is what still loses volcanic, and it is the clearest
-  single thing to fix next. At two and a half hours volcanic is making 2.2 steel plate a second and
-  holding **zero**: `defence()` spends it on walls and gun turrets the moment it lands. A chemical
-  plant costs sixteen steel plate, so `affordable('chemical_plant')` is never true, so the run never
-  builds one — no sulfuric acid, no chemical pack, and research stops dead at 29 nodes with `t_logic`
-  half done. A base stuck at 29 nodes has no laser turrets and no missile battery, so it answers the
-  wave-18 push with watchtowers and loses the pod at about 02:45. Production is fine; what is missing
-  is any notion of reserving output for a build the plan has already decided on.
+- **The margin is thin and one seed is one trajectory.** Volcanic launches at 05:37. During the pass
+  the launch came and went with small bot changes, so treat a green milestone as "it can", not "it
+  always will". Hard is not attempted. Seed 11 temperate still stalls at 29 nodes without a chemical
+  pack (§0) and is the first thing to run `--why` on next.
+- **It builds far more rocket sections than it needs.** Every world ends with 70–90 rocket parts in
+  store: `DEMANDS` keeps asking for 0.02 a second after the launch. Harmless for the milestone, wasteful
+  for a run that continues to a station and beacons.
+- **Iron ingot is short on every world** (about 0.7 of what the plan wants at six hours): smelting is
+  pinned at `maxPerRecipe` smelters and the bot never upgrades a smelter line to arc furnaces.
 - **It does not size the top of a chain off the thing it is actually building.** `DEMANDS` asks for a
   fixed 0.2 alloy plate a second whatever is standing; a base with a launch pad up wants several
   times that, and the planner has no notion of "there is a rocket to pay for". That is the next

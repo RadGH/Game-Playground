@@ -186,6 +186,13 @@ if (why) {
     console.log(` ${r.padEnd(20)} ${nd.toFixed(2).padStart(6)} ${cp.toFixed(2).padStart(8)} ${(cp / Math.max(1e-6, nd)).toFixed(2).padStart(7)} ${pad(d, 6)} ${pad(Math.round(stock), 10)}`);
   }
 
+  console.log('\n--- materials booked for a build (the reservation ledger) ---');
+  if (!bot.ledger.book.size) console.log('  nothing booked');
+  for (const r of bot.ledger.list) {
+    console.log(`  ${r.owner.padEnd(28)} ${JSON.stringify(r.cost)}  ${(bot.ledger.fill(r) * 100).toFixed(0)}% paid, booked ${Math.round((game.time - r.madeAt) / 60)} min ago`);
+  }
+  for (const d of bot.ledger.dropped.slice(-6)) console.log(`  dropped ${d.owner} at ${hms(d.at)}: ${d.reason}`);
+
   console.log('\n--- next things the bot wants ---');
   let shown = 0;
   for (const step of PLAN) {

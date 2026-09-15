@@ -12,6 +12,7 @@
 
 import { loadData } from '../data.js';
 import { Game } from '../game.js';
+import { invChanged } from '../production.js';
 import { spawnWave } from '../combat.js';
 import { completeResearch } from '../research.js';
 import { universePlanets } from '../planets.js';
@@ -463,7 +464,7 @@ class App {
         /** Finish every research node. */
         unlockAll() { for (const t of app.data.techs) completeResearch(app.game, t.id, { silent: true }); app.buildTool.renderBar(true); app.research.built = false; },
         /** Drop resources into the pod. */
-        give(res, n = 100) { const hq = app.game.hq(); hq.inv[res] = (hq.inv[res] || 0) + n; },
+        give(res, n = 100) { const hq = app.game.hq(); hq.inv[res] = (hq.inv[res] || 0) + n; invChanged(hq); },
         /** Build something instantly, skipping the outline. */
         instant(type, x, y, opts = {}) { return app.game.place(type, x, y, { instant: true, ...opts }); },
         /** Finish every outline on the map. */

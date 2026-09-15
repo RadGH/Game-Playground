@@ -6,6 +6,7 @@
 export const ROCKET_PARTS = 6;
 export const STATION_MODULES = 6;
 export const BEACONS_TO_WIN = 3;
+import { invChanged } from './production.js';
 export const PROBE_TRAVEL = 900;          // game seconds for a probe to reach another planet
 export const ROCKET_TRAVEL = 600;
 
@@ -28,7 +29,7 @@ function takePad(game, res, n) {
   for (const p of pads) {
     for (const t of [p, ...(p.links || []).map(id => game.byId(id)).filter(Boolean)]) {
       const k = Math.min(left, t.inv[res] || 0);
-      if (k > 0) { t.inv[res] -= k; if (t.inv[res] <= 1e-9) delete t.inv[res]; left -= k; }
+      if (k > 0) { t.inv[res] -= k; if (t.inv[res] <= 1e-9) delete t.inv[res]; invChanged(t); left -= k; }
       if (left <= 0) return n;
     }
   }

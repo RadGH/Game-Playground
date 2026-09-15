@@ -69,13 +69,18 @@ export const INFRA = [
   { build: 'long_radar', n: 2, after: 't_long_range_scan' },
   { build: 'research_station', n: 8, after: 't_astronomy' },
   { build: 'shield_generator', n: 2, after: 't_shields' },
-  { build: 'launch_pad', n: 1, after: 't_rocketry' },
-  { build: 'rocket_assembly', n: 1, after: 't_rocketry' },
-  { build: 'satellite_uplink', n: 1, after: 't_satellites' },
-  { build: 'satellite_launcher', n: 1, after: 't_satellites' },
+  // `saveFor` marks the handful of buildings the whole run is for. They are the lumpiest costs in
+  // the game - a rocket assembly is thirty *alloy* plate, eight machine frames and four advanced
+  // parts - and a base that spends alloy plate on heat shields as fast as it rolls will never have
+  // thirty of it at once. They book their materials ahead of anything else (see the ledger), which
+  // is the difference between a launch pad standing next to nothing and a rocket.
+  { build: 'launch_pad', n: 1, after: 't_rocketry', saveFor: true },
+  { build: 'rocket_assembly', n: 1, after: 't_rocketry', saveFor: true },
+  { build: 'satellite_uplink', n: 1, after: 't_satellites', saveFor: true },
+  { build: 'satellite_launcher', n: 1, after: 't_satellites', saveFor: true },
   { build: 'probe_launcher', n: 1, after: 't_probes' },
   { build: 'orbital_lift', n: 1, after: 't_orbital_station' },
-  { build: 'beacon', n: 1, after: 't_beacon' },
+  { build: 'beacon', n: 1, after: 't_beacon', saveFor: true },
 ];
 export const PLAN = INFRA;
 
@@ -171,22 +176,28 @@ const RAW_KINDS = new Set(['ore', 'mineral', 'fluid', 'gas', 'organic', 'rare'])
  * Offsets around a point, nearest first, computed once. `RING_AT[r]` is the first index at radius r,
  * so a search can start at a given distance without walking the rings inside it.
  */
+// The table has to reach as far as the bot is ever allowed to build. It used to stop at 90 tiles
+// while `maxReach` is 121 on the sim's 288-tile map (and about 200 on the interface's 480): once the
+// ground inside 90 tiles was full, `spot()` could not see a single legal tile past it. On arid that
+// was the launch pad - researched, affordable, 356 legal 6x6 spots clear of patches between 96 and
+// 121 tiles out, and `spot()` returned null for the last two and a half hours of the run.
+const RING_MAX = 205;
 const RING = (() => {
   const out = [];
-  for (let dy = -90; dy <= 90; dy++) for (let dx = -90; dx <= 90; dx++) {
+  for (let dy = -RING_MAX; dy <= RING_MAX; dy++) for (let dx = -RING_MAX; dx <= RING_MAX; dx++) {
     const d = Math.sqrt(dx * dx + dy * dy);
-    if (d >= 2 && d <= 90) out.push([dx, dy, d]);
+    if (d >= 2 && d <= RING_MAX) out.push([dx, dy, d]);
   }
   return out.sort((a, b) => a[2] - b[2]);
 })();
 const RING_AT = (() => {
-  const at = new Int32Array(93).fill(RING.length);
+  const at = new Int32Array(RING_MAX + 3).fill(RING.length);
   for (let k = RING.length - 1; k >= 0; k--) at[Math.ceil(RING[k][2])] = k;
-  for (let r = 90; r >= 0; r--) if (at[r] === RING.length) at[r] = at[r + 1] ?? RING.length;
+  for (let r = RING_MAX; r >= 0; r--) if (at[r] === RING.length) at[r] = at[r + 1] ?? RING.length;
   at[0] = at[1] = at[2] = 0;
   return at;
 })();
-const ringStart = r => RING_AT[Math.max(0, Math.min(92, Math.floor(r)))] ?? 0;
+const ringStart = r => RING_AT[Math.max(0, Math.min(RING_MAX + 2, Math.floor(r)))] ?? 0;
 
 /** Footprint offsets around a patch centre, nearest first. */
 const OFFSETS = (() => {
@@ -211,6 +222,192 @@ export const STOCK_TARGET = {
 };
 const stockTarget = res => STOCK_TARGET[res] ?? 400;
 
+// ------------------------------------------------------------------ the reservation ledger
+/**
+ * **Booking materials for a build the bot has already decided on.**
+ *
+ * Every spender in this file used to ask one question - "can I afford this right now" - against
+ * everything in the stores, and whoever asked first won. On a world where the base spends what it
+ * makes that is a deadlock rather than a race: volcanic makes 2.2 steel plate a second and holds
+ * zero, because `defence()` buys a wall with each plate as it lands. A chemical plant is sixteen
+ * steel plate, so it was never affordable, so the base never made sulfuric acid, never made a
+ * chemical pack, and the research tree stopped at 29 nodes with the whole middle of the game behind
+ * it. The same shape stopped the rocket on the worlds that did survive: a rocket assembly is thirty
+ * *alloy* plate in one lump, and alloy plate was being spent on heat shields as fast as it appeared.
+ *
+ * So a job the bot has committed to books what it needs, and everyone else spends around it.
+ *
+ *  - **The ledger is keyed by owner** - one booking per job, `infra:<building>` for a step of the
+ *    build programme and `chain:<recipe>` for a machine the chain planner wants. Booking again with
+ *    the same owner refreshes it rather than stacking a second one.
+ *  - **Free stock, not stock.** `have(res)` - which is what `affordable()` and therefore every
+ *    placement in this file goes through - returns what is in the stores *minus* what is booked for
+ *    someone else. Defence, expansion, power, logistics, the crate chains and the pod's workbench
+ *    all read the same number, so a booking genuinely accumulates.
+ *  - **Priority decides who may ignore a booking.** A spender carries a priority and only sees the
+ *    bookings at or above it. Ordinary spending is 0 and so respects everything; a build-programme
+ *    step books at 50, the chain planner at 60, putting a drill on a patch spends at 62, the grid
+ *    books at 65 and the rocket buildings at 70, which also decides which booking is dropped when the
+ *    ledger is full; and defence spends at 99 -
+ *    ignoring every booking in the ledger - while the opening guns are missing, while the pod has
+ *    been hit in the last 90 seconds, or while a wave is close and the gun line is less than half
+ *    what the wave clock wants. Defence and the grid also *book*: the next gun while the line is
+ *    short in an emergency, the next generator while the grid is short. A base that saves up for a
+ *    chemical plant while the pod is being eaten has not understood the assignment.
+ *  - **Only a real shortage books.** A job has to have been unaffordable for `reserveAfter`
+ *    (`reservePowerAfter` for the grid) before it books, and nothing books a material the base is
+ *    not making or digging at all - that is a missing chain, and `plan()` turns it into demand.
+ *  - **Nothing books for ever.** A booking is dropped when its job is no longer wanted (`still()`),
+ *    when the materials have not moved towards it for `reserveStallFor` seconds - which is what
+ *    happens when the base simply cannot make the stuff - or when it has been open for
+ *    `reserveTtl`. A dropped booking cools off for `reserveCoolFor` before the same owner may book
+ *    again, so an unreachable target cannot pin the base's output in a loop - and a booking dropped
+ *    because nothing arrived puts the materials it was short of on the same cool-off for *every*
+ *    owner, or three different owners take turns holding the same six gear for ever.
+ *  - **At most `maxReservations` at once** (one, in `balance.json`), so the ledger can never hold
+ *    the whole factory still. A new booking only displaces an open one of strictly lower priority.
+ *
+ * The knobs are in `data/balance.json -> bot`; the rule is written up in `DESIGN.md` §11 under
+ * "The reservation ledger".
+ */
+// `power` sits above the chain planner and below the rocket: a grid at a quarter of its draw runs
+// every machine in the base at a quarter speed, so a generator is worth more than any one new machine
+// `extract` - putting a drill or a pump on a patch - sits just above the chain planner, because
+// nothing the planner books can ever be paid for if the ore under it is not being dug.
+export const RESERVE = { routine: 0, plan: 50, chain: 60, extract: 62, power: 65, rocket: 70, emergency: 99 };
+const EXTRACT = { owner: 'extract', priority: RESERVE.extract };
+
+class Ledger {
+  constructor(bot) {
+    this.bot = bot;
+    this.book = new Map();          // owner -> booking
+    this.cool = new Map();          // owner -> the time it may book again
+    this.shortCool = new Map();     // resource -> the time a booking short of it may be made again
+    this.dropped = [];              // for the sim's --why output
+  }
+
+  get cfg() { return this.bot.cfg; }
+  get max() { return this.cfg.maxReservations ?? 3; }
+  get list() { return [...this.book.values()]; }
+
+  /**
+   * Book (or refresh) the materials for one job. `cost` is a plain {resource: n}; `still` is asked
+   * every sweep whether the job is still wanted. Returns the booking, or null if it was refused.
+   */
+  /**
+   * Could the base ever pay this off? A line that is short, that nothing is making and that nothing
+   * is digging, is not something to save up for - it is something to go and fix. Booking it anyway
+   * is how a ledger deadlocks a base: on temperate the bot booked a battery bank for seven minutes
+   * at a time, over and over, while holding no battery cell and having nothing that made one.
+   */
+  reachable(cost) {
+    for (const [res, n] of Object.entries(cost)) {
+      if (this.bot.onHand(res) >= n) continue;
+      if (this.bot.capacityOf(res) > 0) continue;
+      return false;
+    }
+    return true;
+  }
+
+  reserve(owner, cost, { priority = RESERVE.plan, why = '', still = null } = {}) {
+    const now = this.bot.g.time;
+    if (!cost || !Object.keys(cost).length) return null;
+    let r = this.book.get(owner);
+    if (!r) {
+      if ((this.cool.get(owner) ?? -1e9) > now) return null;
+      // The cool-off is per *material* as well as per owner. Per owner alone was a loop: on temperate a
+      // crusher booking starved on gear, was dropped, and a glassworks booked the same six gear the
+      // next cycle, then a rubble sorter, round and round for two hours - and with six gear always
+      // spoken for, no drill and no generator could ever be paid for. Emergency defence is exempt.
+      if (priority < RESERVE.emergency) {
+        for (const [res, n] of Object.entries(cost)) {
+          if (this.bot.onHand(res) < n && (this.shortCool.get(res) ?? -1e9) > now) return null;
+        }
+      }
+      if (!this.reachable(cost)) return null;
+      if (this.book.size >= this.max && !this.evict(priority)) return null;
+      r = { owner, cost, priority, why, still, madeAt: now, moveAt: now, paidAt: null, best: 0 };
+      this.book.set(owner, r);
+      this.bot.mark('reserve:' + owner);
+    }
+    r.cost = cost; r.priority = priority; r.why = why || r.why;
+    if (still) r.still = still;
+    return r;
+  }
+
+  /** The job was built (or given up on by its owner): let go of the materials. */
+  release(owner, reason = 'built') {
+    const r = this.book.get(owner);
+    if (!r) return false;
+    this.book.delete(owner);
+    if (reason !== 'built') this.cool.set(owner, this.bot.g.time + (this.cfg.reserveCoolFor ?? 600));
+    // starved rather than unwanted: whatever it was waiting on is not arriving, so nobody else may
+    // start saving up for it either until the cool-off has passed
+    if (reason.startsWith('nothing arrived')) {
+      for (const [res, n] of Object.entries(r.cost)) {
+        if (this.bot.onHand(res) < n) this.shortCool.set(res, this.bot.g.time + (this.cfg.reserveCoolFor ?? 600));
+      }
+    }
+    this.dropped.push({ owner, reason, at: Math.round(this.bot.g.time) });
+    if (this.dropped.length > 20) this.dropped.shift();
+    return true;
+  }
+
+  /** Make room for a more important booking by dropping the least important open one. */
+  evict(priority) {
+    let worst = null;
+    for (const r of this.book.values()) if (!worst || r.priority < worst.priority || (r.priority === worst.priority && r.madeAt < worst.madeAt)) worst = r;
+    if (!worst || worst.priority >= priority) return false;
+    this.release(worst.owner, 'made way for something more important');
+    return true;
+  }
+
+  /** How much of a resource is booked away from a spender of this priority. */
+  held(res, priority = 0, owner = null) {
+    let n = 0;
+    for (const r of this.book.values()) {
+      if (r.owner === owner || r.priority < priority) continue;
+      n += r.cost[res] || 0;
+    }
+    return n;
+  }
+
+  /** How close a booking is to being paid for, 0..1 - the worst-served line of its cost. */
+  fill(r) {
+    let worst = 1;
+    for (const res of Object.keys(r.cost)) {
+      const need = r.cost[res];
+      if (need <= 0) continue;
+      worst = Math.min(worst, this.bot.onHand(res) / need);
+    }
+    return worst;
+  }
+
+  /** Once a cycle: drop what is finished, what is no longer wanted, and what is going nowhere. */
+  sweep() {
+    const now = this.bot.g.time;
+    const stall = this.cfg.reserveStallFor ?? 420;
+    const ttl = this.cfg.reserveTtl ?? 1800;
+    for (const r of [...this.book.values()]) {
+      if (r.still && !r.still()) { this.release(r.owner, 'no longer wanted'); continue; }
+      const f = this.fill(r);
+      if (f >= 1) {
+        // Paid for, and still not built: it is not the materials that are missing, it is the ground
+        // or the crew. Holding the stock any longer only starves the rest of the base.
+        if (r.paidAt == null) r.paidAt = now;
+        if (now - r.paidAt > (this.cfg.reservePaidFor ?? 180)) this.release(r.owner, 'paid for, but it never got built');
+        continue;
+      }
+      r.paidAt = null;
+      if (f > r.best + 0.02) { r.best = f; r.moveAt = now; continue; }
+      if (now - r.moveAt > stall) { this.release(r.owner, `nothing arrived in ${Math.round(stall / 60)} minutes`); continue; }
+      if (now - r.madeAt > ttl) this.release(r.owner, 'open too long');
+    }
+    for (const [owner, until] of this.cool) if (until < now) this.cool.delete(owner);
+    for (const [res, until] of this.shortCool) if (until < now) this.shortCool.delete(res);
+  }
+}
+
 export class Bot {
   constructor(game, { every = 5, verbose = false } = {}) {
     this.g = game;
@@ -224,6 +421,8 @@ export class Bot {
     this.builds = 0;
     this.spotHint = new Map();
     this.spotFail = new Map();
+    // materials booked for builds the bot has committed to; see the block above the class
+    this.ledger = new Ledger(this);
     const pod = game.hq();
     // A four-tile lattice leaves one lane between rows for poles, crates and roads. Five looks
     // tidier and wastes sixty per cent of the ground: at five the base had filled every legal 4x4
@@ -258,6 +457,9 @@ export class Bot {
     // leave the labs unbuilt - which is exactly what the first version of this bot did
     this.recipeCache = new Map();
     this.refreshInventory();
+    this.queuedNow = 0;
+    for (const st of g.structures) if (st.state !== 'done') this.queuedNow++;
+    this.ledger.sweep();
     this.research();
     this.podWork();
     this.crew();
@@ -275,6 +477,44 @@ export class Bot {
   // ------------------------------------------------------------------ placement
   hub() { return this.g.hq() || this.g.structures[0] || { x: 10, y: 10, w: 4, h: 4 }; }
   hubCentre() { const h = this.hub(); return { x: h.x + (h.w || 4) / 2, y: h.y + (h.h || 4) / 2 }; }
+
+  /**
+   * **How many outlines the crew can actually be working on.**
+   *
+   * An outline costs its materials the moment it is put down, not when it is finished, and the bot
+   * places from a dozen places every five seconds while four builders work through the queue one
+   * job at a time. On volcanic that ended with **597 outlines standing unbuilt** - three arc
+   * furnaces, three assemblers, 287 power poles - with every one of them holding the materials it
+   * had been paid for. That is the same disease as spending a reservation: the base had made the
+   * steel plate, and it was sitting in a rectangle on the ground that nobody would ever walk to.
+   *
+   * So the bot queues what its crew can get through and no more. The queue drains in seconds, so
+   * this throttles rather than blocks, and everything that is not placed this cycle is placed the
+   * next one - by which time the plan may have changed its mind, which is usually an improvement.
+   */
+  queueCap() {
+    const g = this.g;
+    let crew = 0;
+    for (const u of g.units) if (u.alive && u.def.buildRate) crew++;
+    for (const v of g.vehicles) if (v.alive && v.def.buildRate) crew++;
+    return Math.max(4, Math.round(crew * (this.cfg.queuePerBuilder ?? 5)));
+  }
+  mayPlace() { return this.queuedNow < this.queueCap(); }
+
+  /**
+   * Put an outline down through the queue guard. `queueFree` is for swaps - replacing a drill with
+   * a bigger one is not new work for the crew, it is the same building again.
+   */
+  place(type, x, y, { queueFree = false } = {}) {
+    if (!queueFree && !this.mayPlace()) return null;
+    const out = this.g.place(type, x, y);
+    if (!out.ok) return null;
+    this.queuedNow++;
+    // an outline is paid for the moment it is put down, so the free-stock sums are stale until the
+    // inventory is counted again - and every spender after this one is about to ask about them
+    this.refreshInventory();
+    return out;
+  }
 
   /**
    * Nearest legal spot for a structure, spiralling out from (cx,cy). Keeping this radius inside the
@@ -356,28 +596,83 @@ export class Bot {
    * things - on a 400-building base that was most of the simulator's running time.
    */
   refreshInventory() { this.inv = this.g.inventory(); return this.inv; }
-  have(res) { return (this.inv || this.refreshInventory())[res] || 0; }
+  /** Everything in the stores, whoever it is spoken for. */
+  onHand(res) { return (this.inv || this.refreshInventory())[res] || 0; }
+  /**
+   * What a spender may actually touch: what is in the stores minus what is booked for someone else.
+   * `spend` is `{ owner, priority }` - the owner of a booking may spend its own, and a spender with
+   * a high enough priority (defence with a wave inbound) ignores the ledger entirely.
+   */
+  have(res, spend = null) {
+    const n = this.onHand(res);
+    if (!this.ledger || !this.ledger.book.size) return n;
+    return n - this.ledger.held(res, spend ? spend.priority ?? 0 : 0, spend ? spend.owner ?? null : null);
+  }
 
-  affordable(type) {
+  affordable(type, spend = null) {
     const def = this.g.data.structure[type];
     if (!def) return false;
-    for (const [res, n] of Object.entries(def.cost || {})) if (this.have(res) < n) return false;
+    for (const [res, n] of Object.entries(def.cost || {})) if (this.have(res, spend) < n) return false;
     return true;
   }
 
-  /** Place one building near the hub (or a given point), wire it up and make sure it has a store. */
-  build(type, cx = null, cy = null, r = null) {
+  /**
+   * "I want that building, and I am prepared to wait for it." Books its cost, so every other
+   * spender works around the materials until it is up (or the ledger gives up on it).
+   */
+  wantToBuild(owner, type, { priority = RESERVE.plan, still = null } = {}) {
+    const def = this.g.data.structure[type];
+    if (!def || !this.g.isUnlocked(type)) return null;
+    if (def.planetRequirement && !this.g.planetHas(def.planetRequirement)) return null;
+    return this.ledger.reserve(owner, def.cost || {}, { priority, why: type, still });
+  }
+
+  /**
+   * **Is this job worth booking for, or is it just short of change this minute?**
+   *
+   * Most of the time a build the bot cannot pay for is a build it will be able to pay for in twenty
+   * seconds - the opening hour is nothing but that, and the first version of this booked three
+   * opening smelters while the base held eleven plate and then could not build the drills that would
+   * have made more. A structural shortage looks different: it does not clear. So a job has to have
+   * been unaffordable continuously for `reserveAfter` before it may book anything, which the
+   * transient ones never are and the chemical plant on volcanic always is.
+   *
+   * Call it every cycle with whether the job could be paid for; it keeps the clock.
+   */
+  wantedFor(owner, blocked, type = null) {
+    this.blockedAt ||= new Map();
+    this.shortBuilds ||= new Map();
+    if (!blocked) { this.blockedAt.delete(owner); this.shortBuilds.delete(owner); return 0; }
+    if (type) this.shortBuilds.set(owner, { type, at: this.g.time });
+    const now = this.g.time;
+    const since = this.blockedAt.get(owner);
+    if (since == null) { this.blockedAt.set(owner, now); return 0; }
+    return now - since;
+  }
+
+  /**
+   * Place one building near the hub (or a given point), wire it up and make sure it has a store.
+   *
+   * `spend` is `{ owner, priority }`: the booking this build is paying for (so it may spend its own
+   * reserved materials), and how much of the ledger it is allowed to ignore.
+   */
+  build(type, cx = null, cy = null, r = null, spend = null) {
     const g = this.g;
     if (!g.isUnlocked(type)) return null;
     const def = g.data.structure[type];
     if (def.planetRequirement && !g.planetHas(def.planetRequirement)) return null;
-    if (!this.affordable(type)) return null;
+    if (!this.affordable(type, spend)) return null;
     const c = this.hubCentre();
     const p = this.spot(type, cx ?? c.x, cy ?? c.y, r);
     if (!p) return null;
-    const out = g.place(type, p.x, p.y);
-    if (!out.ok) return null;
+    // A build the base has been saving up for goes in whether the queue is busy or not: it is the
+    // thing everything else has been working around, and on volcanic three fully-paid bookings sat
+    // open for a quarter of an hour because the queue was full of power poles.
+    const booked = !!(spend && spend.owner && this.ledger.book.has(spend.owner));
+    const out = this.place(type, p.x, p.y, { queueFree: booked });
+    if (!out) return null;
     this.builds++;
+    if (spend && spend.owner) { this.ledger.release(spend.owner); this.blockedAt?.delete(spend.owner); this.shortBuilds?.delete(spend.owner); }
     this.refreshInventory();
     this.connect(out.structure);
     this.ensureStore(out.structure);
@@ -432,7 +727,11 @@ export class Bot {
       if (g.structures.some(p => p.def.supplyRadius && Math.hypot(p.x - x, p.y - y) < 6)) continue;
       const type = this.affordable(poleType) ? poleType : 'power_pole';
       const p = this.spot(type, x, y, 5);
-      if (p) g.place(type, p.x, p.y);
+      // Past the queue guard: a pole line is part of the building it powers, and that building was
+      // already let into the queue. Through the guard, every line was dropped whenever the queue was
+      // full - which is most of a mid-game run - and on arid at 03:20 seventeen finished machines
+      // stood on no grid at all, among them the only tungsten drill, fourteen tiles from a pole.
+      if (p) this.place(type, p.x, p.y, { queueFree: true });
     }
     g.dirty.power = true;
     recomputePower(g);
@@ -481,7 +780,13 @@ export class Bot {
     return crates < this.storeCap('crate') * (connecting ? 3 : 1);
   }
 
-  ensureStore(s) {
+  /**
+   * `rescue` is for a finished extractor no store reaches at all. It gets the connection budget
+   * rather than the capacity budget and goes past the build-queue cap: the ordinary call quietly
+   * gave up when the crate budget was spent or the queue was full, and temperate's two platinum
+   * drills stood storeless for the rest of the run, so no truck could ever be sent for them.
+   */
+  ensureStore(s, { rescue = false } = {}) {
     const g = this.g;
     if (s.cap > 0 && isStore(s.def)) return;
     if (!s.def.recipes && !s.def.extractRate && !s.def.fuelInput && !s.def.researchRate && !g.data.recipesFor[s.type]?.length) return;
@@ -490,9 +795,9 @@ export class Bot {
     const hq = g.hq();
     if (hq && this.poolReaches(s, hq)) return;
     const type = this.storeType();
-    if (type === 'storage_crate' && !this.storeBudgetLeft()) return;
+    if (type === 'storage_crate' && !this.storeBudgetLeft(rescue)) return;
     const p = this.spot(type, s.x, s.y, 8);
-    if (p && this.affordable(type)) { g.place(type, p.x, p.y); g.dirty.links = true; }
+    if (p && this.affordable(type)) { this.place(type, p.x, p.y, { queueFree: rescue }); g.dirty.links = true; }
   }
 
   /**
@@ -532,7 +837,7 @@ export class Bot {
       // something already standing (or going up) here does the job
       if (g.structures.some(p => isStore(p.def) && Math.hypot(p.x - x, p.y - y) < reach * 0.6)) continue;
       const p = this.spot(type, x, y, 7);
-      if (p) { g.place(type, p.x, p.y); g.dirty.links = true; }
+      if (p) { this.place(type, p.x, p.y); g.dirty.links = true; }
     }
     recomputeLinks(g);
   }
@@ -590,6 +895,7 @@ export class Bot {
     if (this.extractMemo.has(res)) return this.extractMemo.get(res);
     let rate = 0;
     for (const s of this.drillsOn(res)) {
+      if (this.cannotRun(s)) continue;
       const n = g.nodeById(s.nodeId);
       rate += (s.def.extractRate || 0) * (n?.richness ?? 1) * g.diff.extract * g.techEffect('extractRate', 1);
     }
@@ -684,6 +990,10 @@ export class Bot {
     const techBonus = g.techEffect('extractRate', 1);
     for (const s of g.structures) {
       if (s.state === 'dead') continue;
+      // A finished machine that cannot run is not capacity. Counting it was how arid's only tungsten
+      // drill - no power, never dug a unit - read as 1.7x the tungsten the plan wanted, so the planner
+      // never built another one and the launch pad never got its seven bars.
+      if (this.cannotRun(s)) continue;
       if (s.def.extractRate) {
         if (s.nodeId) { const n = g.nodeById(s.nodeId); if (n && !n.depleted) add(n.resource, s.def.extractRate * (n.richness ?? 1) * g.diff.extract * techBonus); }
         else if (s.def.yields) for (const [r, share] of Object.entries(s.def.yields)) add(r, s.def.extractRate * share * g.diff.extract);
@@ -698,6 +1008,19 @@ export class Bot {
     return cap;
   }
   capacityOf(res) { return (this.cap || this.capacityTable()).get(res) || 0; }
+
+  /**
+   * A finished building that will produce nothing however long it stands: it needs power and is on
+   * no grid, or it makes or digs things and no store at all can take them. Outlines are not counted
+   * here - they are on their way - and neither is a machine in an outpost pool of its own, which is
+   * what a truck route is for.
+   */
+  cannotRun(s) {
+    if (s.state !== 'done') return false;
+    if (s.def.powerUse && (s.net == null || s.net < 0)) return true;
+    if ((s.def.extractRate || s.recipe) && !isStore(s.def) && (s.pool == null || s.pool < 0)) return true;
+    return false;
+  }
 
   /**
    * Demands are what a finished base wants. Asking for all of it in the first ten minutes just
@@ -733,6 +1056,21 @@ export class Bot {
     for (const [res, rate] of this.fuelDemand()) visit(res, rate, 0, new Set());
     // and so are the labs
     for (const [res, rate] of this.packDemand()) visit(res, rate, 0, new Set());
+    // And so is a building the bot has decided on and cannot pay for. Recipes are the only thing
+    // DEMANDS walks, and a handful of materials are only ever a *building* cost: tungsten bar (the
+    // alloy foundry, the launch pad), control units and machine frames (the rocket buildings). On
+    // temperate nothing ever asked for tungsten bar, so no tungsten smelter was built, so the alloy
+    // foundry could never be paid for, so alloy plate stayed at zero and there was never a launch
+    // pad - and the ledger refused to book any of it, correctly, because nothing was making it. The
+    // shortfall of every blocked build is demand, spread over `shortfallHorizon` seconds.
+    const horizon = this.cfg.shortfallHorizon ?? 600;
+    for (const [owner, want] of this.shortBuilds || []) {
+      if (g.time - want.at > 120) { this.shortBuilds.delete(owner); continue; }
+      for (const [res, n] of Object.entries(g.data.structure[want.type]?.cost || {})) {
+        const short = n - this.onHand(res);
+        if (short > 0) visit(res, Math.max(0.02, short / horizon), 1, new Set());
+      }
+    }
     return { need, depth };
   }
 
@@ -918,8 +1256,19 @@ export class Bot {
     if (have > 0 && !Object.keys(recipe.inputs || {}).every(i => this.arriving(i))) return;
     const idle = g.structures.find(s => s.state === 'done' && !s.recipe && s.type === type);
     if (idle) { g.setRecipe(idle.id, recipe.id); this.mark('recipe:' + recipe.id); return; }
-    const built = this.build(type);
-    if (built) { g.setRecipe(built.id, recipe.id); this.mark('recipe:' + recipe.id); this.budget--; }
+    const spend = { owner: 'chain:' + recipe.id, priority: RESERVE.chain };
+    const built = this.build(type, null, null, null, spend);
+    if (built) { g.setRecipe(built.id, recipe.id); this.mark('recipe:' + recipe.id); this.budget--; return; }
+    // `supply()` walks the plan worst-served first, so the machine that cannot be paid for here is
+    // the one the whole base is waiting behind - a chemical plant on a world that spends its steel
+    // plate as fast as it rolls. Book it.
+    const blocked = !this.affordable(type, spend);
+    if (this.wantedFor(spend.owner, blocked, type) > (this.cfg.reserveAfter ?? 120)) {
+      this.wantToBuild(spend.owner, type, {
+        priority: RESERVE.chain,
+        still: () => this.countRecipe(recipe.id) < want && this.g.isUnlocked(type),
+      });
+    }
   }
 
   /**
@@ -985,7 +1334,7 @@ export class Bot {
     for (const node of nodes.slice(0, 10)) {
       const types = this.extractorTypes(node);
       for (const type of types) {
-        if (!g.isUnlocked(type) || !this.affordable(type)) continue;
+        if (!g.isUnlocked(type) || !this.affordable(type, EXTRACT)) continue;
         const def = g.data.structure[type];
         // dead centre of the patch first. Working out from a corner is how the old bot kept dropping
         // a drill meant for coal onto the stone patch next door - the footprint claims whichever
@@ -993,8 +1342,8 @@ export class Bot {
         for (const [dx, dy] of OFFSETS) {
           const x = node.x - (def.size.w >> 1) + dx, y = node.y - (def.size.h >> 1) + dy;
           if (!g.canPlace(type, x, y).ok) continue;
-          const out = g.place(type, x, y);
-          if (!out.ok) continue;
+          const out = this.place(type, x, y);
+          if (!out) continue;
           if (out.structure.nodeId !== node.id) {              // it grabbed the wrong patch
             const got = g.nodeById(out.structure.nodeId);
             if (!got || got.resource !== res) { g.removeStructure(out.structure.id, { refund: 1, reason: 'wrong patch' }); continue; }
@@ -1026,7 +1375,7 @@ export class Bot {
   }
   affordableAnyDrill() {
     return ['drill_mk1', 'drill_mk2', 'drill_mk3', 'deep_bore', 'fluid_pump', 'gas_extractor', 'ice_harvester']
-      .some(t => this.g.isUnlocked(t) && this.affordable(t));
+      .some(t => this.g.isUnlocked(t) && this.affordable(t, EXTRACT));
   }
 
   /** Every patch of this ore is taken - put a bigger drill on the richest one instead. */
@@ -1036,7 +1385,7 @@ export class Bot {
     const running = this.drillsOn(res).filter(s => s.state === 'done');
     const thin = running.every(s => (g.nodeById(s.nodeId)?.amount ?? 0) < (g.nodeById(s.nodeId)?.initial ?? 1) * 0.5);
     const order = thin && g.isUnlocked('deep_bore') ? ['deep_bore', 'drill_mk3', 'drill_mk2'] : ['drill_mk3', 'drill_mk2'];
-    const better = order.find(t => g.isUnlocked(t) && this.affordable(t));
+    const better = order.find(t => g.isUnlocked(t) && this.affordable(t, EXTRACT));
     if (!better) return false;
     const cur = running
       .filter(s => s.type !== better && ((s.def.extractRate || 0) < g.data.structure[better].extractRate || g.data.structure[better].infinite))
@@ -1045,8 +1394,8 @@ export class Bot {
     if (!target) return false;
     const { x, y } = target;
     g.removeStructure(target.id, { refund: 0.9, reason: 'upgraded' });
-    const out = g.place(better, x, y);
-    if (!out.ok) { g.place(target.type, x, y); return false; }
+    const out = this.place(better, x, y, { queueFree: true });
+    if (!out) { this.place(target.type, x, y, { queueFree: true }); return false; }
     this.connect(out.structure); this.ensureStore(out.structure); this.chainToPool(out.structure);
     this.mark('upgrade:' + res + ':' + better);
     this.budget--;
@@ -1117,13 +1466,16 @@ export class Bot {
     const long = g.isUnlocked('long_radar') && this.affordable('long_radar');
     const type = long ? 'long_radar' : 'scanner_tower';
     if (!g.isUnlocked(type) || !this.affordable(type)) return false;
-    const r = g.data.structure[type].scanRadius * g.techEffect('scanRadius', 1);
+    // asked once, not once per tower per map cell: inside the loop below this was a fifth of a whole
+    // simulator run once the tower count reached the forties
+    const scanBonus = g.techEffect('scanRadius', 1);
+    const r = g.data.structure[type].scanRadius * scanBonus;
     // the uncovered spot with the most map around it
     let best = null, bestScore = -Infinity;
     for (let y = 6; y < g.map.height - 6; y += 6) for (let x = 6; x < g.map.width - 6; x += 6) {
       let covered = false;
       for (const t of towers) {
-        const tr = t.def.scanRadius * g.techEffect('scanRadius', 1);
+        const tr = t.def.scanRadius * scanBonus;
         if (Math.hypot(t.x - x, t.y - y) < tr * 0.85) { covered = true; break; }
       }
       if (covered) continue;
@@ -1149,8 +1501,18 @@ export class Bot {
       if (step.after && !g.research.done.includes(step.after)) continue;
       if (!g.isUnlocked(step.build)) continue;
       if (this.countBuild(step.build) >= step.n) continue;
-      const s = this.build(step.build);
-      if (s) { this.mark('build:' + step.build); this.budget--; }
+      const spend = { owner: 'infra:' + step.build, priority: step.saveFor ? RESERVE.rocket : RESERVE.plan };
+      const s = this.build(step.build, null, null, null, spend);
+      if (s) { this.mark('build:' + step.build); this.budget--; continue; }
+      // Could not pay for it. The launch pad is eighty concrete and forty steel plate, and the
+      // rocket assembly thirty *alloy* plate: lumps like that never turn up in a base that spends
+      // everything it makes, so the step books its materials and the rest of the bot works around
+      // them. If it were only the ground that was missing there is nothing to save up for, so this
+      // asks about the money rather than about the build.
+      const blocked = !this.affordable(step.build, spend);
+      if (this.wantedFor(spend.owner, blocked, step.build) > (this.cfg.reserveAfter ?? 120)) {
+        this.wantToBuild(spend.owner, step.build, { priority: spend.priority, still: () => this.countBuild(step.build) < step.n });
+      }
     }
   }
 
@@ -1173,6 +1535,21 @@ export class Bot {
     const builders = g.units.filter(u => u.alive && u.def.buildRate).length;
     // leave a little headroom so `defence()` can still field its guards
     const want = Math.min(this.cfg.wantBuilders ?? 6, Math.max(2, g.crewCap() - 5));
+    // More hands when the queue is what the base is waiting on. A builder yard is sixteen plate and
+    // twenty stone, it raises the crew ceiling by two and it walks two builders out when it opens -
+    // and the crew ceiling is the real brake on a world like volcanic, where a dormitory needs
+    // polymer the base cannot make yet and the four crew it landed with have to build everything.
+    // It is placed past the queue guard on purpose: a yard is the one outline that shortens the
+    // queue it is standing in.
+    if (this.queuedNow >= this.queueCap() && g.crewUsed() >= g.crewCap() - 1) {
+      const yards = this.countBuild('builder_yard');
+      if (yards < (this.cfg.maxBuilderYards ?? 8) && this.affordable('builder_yard')) {
+        const c = this.hubCentre();
+        const p = this.spot('builder_yard', c.x, c.y);
+        const out = p ? this.place('builder_yard', p.x, p.y, { queueFree: true }) : null;
+        if (out) { this.mark('crew:yard:' + yards); this.refreshInventory(); return; }
+      }
+    }
     if (builders >= want) return;
     if (g.crewUsed() >= g.crewCap()) return;
     if (this.have('iron_plate') < 30) return;               // plate this short is needed elsewhere
@@ -1228,7 +1605,13 @@ export class Bot {
     const g = this.g;
     const head = this.cfg.powerHeadroom ?? 1.25;
     const want = g.stats.power.use * head + 80;
-    if (g.stats.power.gen >= want) return;
+    if (g.stats.power.gen >= want) { this.wantedFor('power', false); return; }
+    // The grid is a spender like any other, and it used to be the one that never booked anything.
+    // On arid at the one-hour mark the base had made 1800 gear and was holding none: forty-four
+    // assemblers had taken every one as it rolled, so no generator was ever affordable, and 767 kW
+    // under a 3200 kW draw ran the whole factory at a quarter speed for two hours. `power` books
+    // above the chain planner for as long as the grid is short.
+    const spend = { owner: 'power', priority: RESERVE.power };
     const gens = g.structures.filter(s => s.def.powerGen && s.state !== 'dead');
     // Same flat-cap disease as the guns and the stores: forty-four generators is a sensible ceiling
     // for a three-hundred-building base and a brownout for a nine-hundred-building one. The real
@@ -1238,17 +1621,23 @@ export class Bot {
     // let the opening hour buy generators instead of guns and the run died on the wave-10 boss.
     const standing = g.structures.filter(s => s.state === 'done').length;
     const extra = Math.max(0, standing - (this.cfg.generatorCapFrom ?? 500)) / (this.cfg.structuresPerGenerator ?? 30);
-    if (gens.length > Math.round((this.cfg.maxGenerators ?? 44) + extra)) return;
+    const installed = gens.reduce((a, s) => a + (s.def.powerGen || 0), 0);
+    // The cap exists to stop generators being piled up that have nothing to burn, so it only binds
+    // while the grid is fuel-limited - live output well under what is installed. On arid at 02:45
+    // every one of 29 combustion generators was fuelled, 28 000 coal sat in the stores, the draw was
+    // 19.4 MW against 8.3 MW installed - and the bot had stopped at a cap of 61 generators.
+    const fuelLimited = g.stats.power.gen < installed * 0.85;
+    if (fuelLimited && gens.length > Math.round((this.cfg.maxGenerators ?? 44) + extra)) return;
     // What is *installed*, not what is coming out right now. stats.power.gen is the fuel- and
     // weather-limited figure, so a coal shortage read as "not enough generators" and the bot built
     // another twenty of them - forty-nine generators on a base drawing four hundred kilowatts, and
     // the ground they stood on was the ground the chemistry line needed.
-    const installed = gens.reduce((a, s) => a + (s.def.powerGen || 0), 0);
     if (installed >= want) return;
     const shortOfFuel = available(g, 'coal') < 120 && available(g, 'fuel') < 60;
     const order = shortOfFuel
       ? ['fission_reactor', 'geothermal_plant', 'solar_array', 'wind_turbine', 'storm_anchor', 'gas_turbine', 'combustion_generator']
       : ['fission_reactor', 'geothermal_plant', 'gas_turbine', 'solar_array', 'combustion_generator', 'storm_anchor', 'wind_turbine'];
+    let blockedOn = null;
     for (const type of order) {
       if (!g.isUnlocked(type)) continue;
       if (type === 'gas_turbine' && available(g, 'natural_gas') < 300) continue;
@@ -1257,8 +1646,17 @@ export class Bot {
       if (type === 'geothermal_plant' && !g.planetHas('magma')) continue;
       // twenty wind turbines is a wind farm; eighty is a way of filling the map with buildings
       if (gens.filter(x => x.type === type).length >= Math.round((this.cfg.maxPerGenerator ?? 18) + extra)) continue;
-      const s = this.build(type);
+      const s = this.build(type, null, null, null, spend);
       if (s) { this.mark('power:' + type); this.budget--; return; }
+      if (!blockedOn && !this.affordable(type, spend)) blockedOn = type;
+    }
+    // the best generator this world can run that was only short of materials gets booked, once the
+    // shortage has lasted long enough to be structural rather than a busy minute
+    if (this.wantedFor('power', !!blockedOn, blockedOn) > (this.cfg.reservePowerAfter ?? 60)) {
+      this.wantToBuild('power', blockedOn, {
+        priority: RESERVE.power,
+        still: () => this.g.stats.power.gen < this.g.stats.power.use * head + 80,
+      });
     }
   }
 
@@ -1297,27 +1695,65 @@ export class Bot {
     // The opening guns are never optional - a base with none is dead by wave three - but past a
     // small line, plate spent on more watchtowers is plate the steel line never gets, and forty
     // watchtowers is a base that holds wave 20 and has not researched chemistry.
-    const opening = turrets.length < Math.min(6, 2 + wave * 2);
+    // Six from the first wave on, not four. Nests start letting wanderers out the moment wave one
+    // lands, two at a time, and on volcanic two nests' worth of ash stalkers is 280 damage a second
+    // into the pod against 15 a watchtower does through their armour. Four towers lost the pod at
+    // minute 24 with eighty plate in the stores that the opening rule had stopped spending.
+    const opening = turrets.length < Math.min(6, 2 + wave * 4);
     // The opening floor has to be sized to the gun, not to a round number. A watchtower is ten plate
     // and twelve stone; a floor of fifty meant that on a world where the base spends plate as fast as
     // it makes it - volcanic sits at about forty - the first six guns were never built at all, and
     // the run ended at wave two with a hundred and fifty buildings and nothing shooting.
     const floor = opening ? 24 : labs < 2 ? 120 : hasSteel ? (wave > 0 ? 60 : 100) : 240;
-    if (available(g, 'iron_plate') < floor) return;
+
+    // What defence is allowed to spend through. A booking is materials set aside for a build the
+    // base has decided on, and normally the gun line waits its turn like everything else - that is
+    // the whole point, and it is what lets a world that spends every plate ever afford a chemical
+    // plant. But a base that saves up while the pod is being eaten has saved up for nothing, so two
+    // cases spend straight through the ledger: the opening guns, which are never optional, and a
+    // wave that is close (or already on the ground) with less than two thirds of the line standing.
+    //
+    // "Inbound" has to mean the pod is actually in danger, not merely that the wave clock is
+    // running - on a hostile world there is nearly always something on the ground somewhere, and a
+    // defence phase that treats that as an emergency spends through the ledger for the whole run,
+    // which is the same as having no ledger. So: a wave due inside the window, or something already
+    // inside the base, or the pod taking damage.
+    const c = this.hubCentre();
+    const atTheGates = g.enemies.some(e => e.alive && Math.abs(e.x - c.x) < 40 && Math.abs(e.y - c.y) < 40);
+    const pod = g.hq();
+    // "The pod is being hit right now", not "the pod is below full": nothing repairs the pod in the
+    // opening, so a test on its hit points stays true for the rest of the run after one scratch and
+    // defence would spend through the ledger for ever.
+    if (pod && this.lastPodHp != null && pod.hp < this.lastPodHp - 1) this.podHitAt = g.time;
+    this.lastPodHp = pod?.hp ?? null;
+    const underAttack = g.time - (this.podHitAt ?? -1e9) < 90;
+    const inbound = soon < (this.cfg.emergencyWindow ?? 150) || atTheGates || underAttack;
+    const emergency = opening || underAttack || (inbound && turrets.length < want * 0.5);
+    const spend = { owner: 'defence', priority: emergency ? RESERVE.emergency : RESERVE.routine };
+    if (emergency && this.ledger.book.size) this.mark('defence-breaks-reservation');
+    // under attack the only floor is the price of a gun: a plate kept back for the steel line is no
+    // use to a base whose pod is gone
+    if (this.have('iron_plate', spend) < (underAttack ? 16 : floor)) return;
 
     // crew: guards fill the gaps a turret ring leaves
     if (g.isUnlocked('guard') && g.units.filter(u => u.alive && u.type === 'guard').length < 4 && g.crewUsed() < g.crewCap() - 1) {
       const hq = g.hq(); if (hq) g.spawnUnit('guard', hq.x, hq.y);
     }
     // things that fly go straight over a gun line, so a missile battery is not optional
-    if (g.isUnlocked('missile_battery') && this.countBuild('missile_battery') < 3 && this.affordable('missile_battery')) {
-      const s = this.build('missile_battery'); if (s) { this.mark('air-defence'); this.budget--; return; }
+    if (g.isUnlocked('missile_battery') && this.countBuild('missile_battery') < 3 && this.affordable('missile_battery', spend)) {
+      const s = this.build('missile_battery', null, null, null, spend); if (s) { this.mark('air-defence'); this.budget--; return; }
     }
     // artillery shells nests without anything having to walk out there
-    if (g.isUnlocked('artillery') && this.countBuild('artillery') < 3 && this.affordable('artillery')) {
-      const s = this.build('artillery'); if (s) { this.mark('artillery'); this.budget--; return; }
+    if (g.isUnlocked('artillery') && this.countBuild('artillery') < 3 && this.affordable('artillery', spend)) {
+      const s = this.build('artillery', null, null, null, spend); if (s) { this.mark('artillery'); this.budget--; return; }
     }
-    if (turrets.length >= want) { this.upgradeTurret(turrets); this.walls(); return; }
+    if (turrets.length >= want) { this.upgradeTurret(turrets, spend); this.walls(spend); return; }
+    // A line that is mostly watchtowers is not a line once armour turns up. Swapping only happened
+    // when the line was already at full count, and on a base that never quite reaches the count the
+    // guns were never swapped at all: arid met four hull breakers (19 armour, so 3 damage a second
+    // from a watchtower) at wave 16 with twenty-eight watchtowers and not one gun turret.
+    const weak = turrets.filter(s => s.state === 'done' && s.def.dps < 30).length;
+    if (wave >= 6 && weak > turrets.length * 0.5 && this.upgradeTurret(turrets, spend)) return;
 
     // A ring around the pod, not a gun line on one edge. The old version put every turret on the
     // two nearest map edges at 13-21 tiles out; anything that walked in from a third side reached
@@ -1326,17 +1762,39 @@ export class Bot {
     for (const type of ['laser_turret', 'gun_turret', 'flame_turret', 'watchtower']) {
       if (!g.isUnlocked(type)) continue;
       if (type === 'laser_turret' && g.stats.power.gen < 1200) continue;
-      if (!this.affordable(type)) continue;
+      if (!this.affordable(type, spend)) continue;
       const p = this.turretSpot(type);
       if (!p) continue;
-      const out = g.place(type, p.x, p.y);
-      if (!out.ok) continue;
+      // Past the queue guard, like a booked build. A gun is one outline, and on arid the queue was
+      // full of poles and crates for the last twelve minutes of the run: the turret count sat at 28
+      // against the 34 the wave clock wanted, with fourteen hundred plate in the stores, until a
+      // double push walked through the watchtowers.
+      const out = this.place(type, p.x, p.y, { queueFree: true });
+      if (!out) continue;
       this.builds++;
       this.refreshInventory();
       this.connect(out.structure);
       this.mark('turret:' + turrets.length);
       this.budget--;
+      this.ledger.release('defence');
       return;
+    }
+    // Nothing went up. If that is because the base spent the plate, and the line is still short of
+    // its opening guns (or the pod is being hit), defence books the cheapest gun it can build - the
+    // one booking in the ledger that is about survival rather than growth. On volcanic the labs and
+    // a workshop took the stores from 105 plate to 5 in two minutes while four towers were all that
+    // stood between two nests and the pod.
+    if (emergency) {
+      const gun = ['watchtower', 'gun_turret'].find(t => g.isUnlocked(t));
+      if (gun && !this.affordable(gun, spend)) {
+        this.ledger.reserve('defence', g.data.structure[gun].cost, {
+          priority: RESERVE.emergency, why: gun,
+          still: () => {
+            const n = this.g.structures.filter(s => s.def.dps && s.def.category === 'defence').length;
+            return n < Math.min(6, 2 + this.g.waveNumber * 4) || this.g.time - (this.podHitAt ?? -1e9) < 90;
+          },
+        });
+      }
     }
   }
 
@@ -1395,11 +1853,11 @@ export class Bot {
    * 18 dps against a hull breaker with 19 armour is 2 damage a shot, and the run died at wave twenty
    * with every one of them standing and firing.
    */
-  upgradeTurret(turrets) {
+  upgradeTurret(turrets, spend = null) {
     const g = this.g;
     if (g.time - (this.lastTurretSwap ?? -1e9) < 25) return false;
     const best = ['laser_turret', 'gun_turret', 'flame_turret']
-      .find(t => g.isUnlocked(t) && this.affordable(t) && !(t === 'laser_turret' && g.stats.power.gen < 1200));
+      .find(t => g.isUnlocked(t) && this.affordable(t, spend) && !(t === 'laser_turret' && g.stats.power.gen < 1200));
     if (!best) return false;
     const bdps = g.data.structure[best].dps;
     const worst = turrets
@@ -1410,10 +1868,10 @@ export class Bot {
     const { x, y } = worst;
     g.removeStructure(worst.id, { refund: 0.8, reason: 'upgraded' });
     this.refreshInventory();
-    const out = g.place(best, x, y);
-    if (!out.ok) {
+    const out = this.place(best, x, y, { queueFree: true });
+    if (!out) {
       const p = this.turretSpot(best);
-      if (p) g.place(best, p.x, p.y);
+      if (p) this.place(best, p.x, p.y, { queueFree: true });
       return true;
     }
     this.connect(out.structure);
@@ -1422,9 +1880,9 @@ export class Bot {
   }
 
   /** A short run of wall in front of the newest turrets, on the sides attacks come from. */
-  walls() {
+  walls(spend = null) {
     const g = this.g;
-    const type = ['reinforced_wall', 'steel_wall', 'wooden_wall'].find(t => g.isUnlocked(t) && this.affordable(t));
+    const type = ['reinforced_wall', 'steel_wall', 'wooden_wall'].find(t => g.isUnlocked(t) && this.affordable(t, spend));
     if (!type) return;
     const walls = g.structures.filter(s => s.def.blocks).length;
     if (walls > 10 + g.waveNumber * 2) return;
@@ -1437,8 +1895,8 @@ export class Bot {
       const ax = a + Math.PI / 2;
       const x = Math.round(turret.x + Math.cos(a) * 3 + Math.cos(ax) * k);
       const y = Math.round(turret.y + Math.sin(a) * 3 + Math.sin(ax) * k);
-      if (!this.affordable(type)) return;
-      if (g.canPlace(type, x, y).ok) g.place(type, x, y);
+      if (!this.affordable(type, spend)) return;
+      if (g.canPlace(type, x, y).ok) this.place(type, x, y);
     }
   }
 
@@ -1458,7 +1916,10 @@ export class Bot {
     if (g.time - (this.lastOutpost ?? -1e9) < 45) return;
     if (!g.isUnlocked('hauler')) return;
     const max = this.cfg.maxRoutes ?? 10;
-    if (g.routes.length >= max) return;
+    // At the cap this no longer simply gives up - see the swap at the bottom. It used to, and on
+    // temperate all ten routes were hauling iron ore and coal the base held full stockpiles of while
+    // eleven advanced-circuit printers stood idle "short of gold" with 450 gold in an outpost store.
+    const full = g.routes.length >= max;
     // pay the clock here, not at the bottom: the walk below costs a plan() and a capacity table, and
     // on a quiet base it would otherwise run every five seconds and find nothing every time
     this.lastOutpost = g.time;
@@ -1481,8 +1942,23 @@ export class Bot {
       stranded.push([from, res, (cap.get(res) || 0) / Math.max(1e-6, need.get(res))]);
     }
     if (!stranded.length) return;
-    stranded.sort((a, b) => a[2] - b[2]);
+    // what a machine in the main base is standing idle for right now - that beats any ratio
+    const starved = new Set();
+    for (const s of g.structures) if (s.state === 'done' && s.pool === hub.pool && s.starvedFor) starved.add(s.starvedFor);
+    stranded.sort((a, b) => (starved.has(b[1]) - starved.has(a[1])) || a[2] - b[2]);
     const [from, res] = stranded[0];
+    if (full) {
+      // Swap, rather than wait for a slot that never comes: retire the route hauling whatever the
+      // base already holds a full stockpile of, but only for something a machine is starving for.
+      if (!starved.has(res)) return;
+      const main = g.poolTotals?.get(hub.pool) || {};
+      const spare = g.routes
+        .filter(r => r.to === hub.id && !starved.has(r.resource) && (main[r.resource] || 0) >= stockTarget(r.resource))
+        .sort((a, b) => (main[b.resource] || 0) / stockTarget(b.resource) - (main[a.resource] || 0) / stockTarget(a.resource))[0];
+      if (!spare) return;
+      g.removeRoute(spare.id);
+      this.mark('route-swap:' + spare.resource + '->' + res);
+    }
     // a truck needs a garage slot; the plan only ever built one garage, which is three trucks
     if (!garageFor(g, vehiclesFor(g, res)[0] || {})) {
       if (this.affordable('truck_garage')) this.build('truck_garage');
@@ -1571,7 +2047,7 @@ export class Bot {
       if (Math.hypot(x - c.x, y - c.y) < 9) continue;            // not through the middle of the base
       if (!this.affordable(type)) break;
       if (!g.canPlace(type, x, y).ok) continue;
-      if (g.place(type, x, y).ok) { laid++; this.roadTiles++; }
+      if (this.place(type, x, y)) { laid++; this.roadTiles++; }
     }
     if (laid) { this.mark('road:' + type); g.dirty.routes = true; }
   }
@@ -1666,11 +2142,41 @@ export class Bot {
     // competing for the same ingots gets switched off. This is the difference between a base that
     // bootstraps and one that eats its own starting kit.
     const plateShort = (inv.iron_plate || 0) < 80 && this.capacityOf('iron_plate') < 1.6;
+    // The same rule for gear, the other thing every building is made of. Science packs eat two or
+    // three gear apiece, and on temperate the pack assemblers took all 3100 gear the base made in its
+    // first hour - so no drill (six gear) and no generator (nine) could be paid for, the coal ran out
+    // under six generators and the gear assemblers sat at 8 % power. While gear is below the floor,
+    // whatever eats gear without making it stands down.
+    const gearShort = (inv.gear || 0) < (this.cfg.gearFloor ?? 40);
+    // Stockpile limits count what the main base can actually use. The base-wide total also counts
+    // ore sitting in the hopper of a drill that no store reaches, and on temperate the two platinum
+    // drills - 107 and 188 tiles out, hoppers full at 200 each - read as "400 platinum, stockpile
+    // full" and switched *themselves* off, while three superalloy furnaces starved for platinum.
+    const hqPool = g.hq()?.pool;
+    const usable = (hqPool != null && hqPool >= 0 && g.poolTotals?.get(hqPool)) || inv;
+    // A booking stops other *builds* spending a material, but a machine eating it as an input used to
+    // walk straight past the ledger. On arid the launch pad booked seven tungsten bar and sat at 0 %
+    // for an hour while two smelters made tungsten and the superalloy line ate every bar as it landed.
+    // So while a rocket-priority booking is short of something, machines that eat it without making
+    // it stand down - the same rule as the plate and gear floors, for the things the run is for.
+    const saving = new Set();
+    for (const r of this.ledger.book.values()) {
+      if (r.priority < RESERVE.rocket) continue;
+      for (const [res, n] of Object.entries(r.cost)) if ((inv[res] || 0) < n) saving.add(res);
+    }
     for (const m of g.structures) {
       if (m.state !== 'done') continue;
       if (plateShort && m.recipe) {
         const r = g.data.recipe[m.recipe];
         if (r && r.inputs?.iron_ingot && !r.outputs?.iron_plate) { m.enabled = false; continue; }
+      }
+      if (gearShort && m.recipe) {
+        const r = g.data.recipe[m.recipe];
+        if (r && r.inputs?.gear && !r.outputs?.gear) { m.enabled = false; continue; }
+      }
+      if (saving.size && m.recipe) {
+        const r = g.data.recipe[m.recipe];
+        if (r && Object.keys(r.inputs || {}).some(i => saving.has(i)) && !Object.keys(r.outputs || {}).some(o => saving.has(o))) { m.enabled = false; continue; }
       }
       let outs = null;
       if (m.recipe) outs = Object.keys(g.data.recipe[m.recipe]?.outputs || {});
@@ -1680,17 +2186,18 @@ export class Bot {
             : m.def.harvestsTerrain ? ['biomass'] : [];
       }
       if (!outs || !outs.length) continue;
-      m.enabled = !outs.every(o => (inv[o] || 0) >= stockTarget(o));
+      m.enabled = !outs.every(o => (usable[o] || 0) >= stockTarget(o));
     }
 
     if (!housekeeping) return;
     // anything that fell off the grid gets wired back on
-    let rewired = 0;
-    for (const s of g.structures) {
-      if (s.state !== 'done' || s.net >= 0) continue;
-      if (!s.def.powerUse && !s.def.powerGen) continue;
-      this.connect(s);
-      if (++rewired >= 4) break;
+    // A few a pass, rotating through all of them - the first four in building order, every pass, is
+    // the same trap the stray list fell into: four that cannot be reached are retried for ever and
+    // the tungsten drill behind them never is.
+    const dark = g.structures.filter(s => s.state === 'done' && s.net < 0 && (s.def.powerUse || s.def.powerGen));
+    if (dark.length) {
+      const from = dark.length > 6 ? (this.darkCursor = ((this.darkCursor ?? -6) + 6) % dark.length) : 0;
+      for (const s of (dark.length > 6 ? [...dark, ...dark].slice(from, from + 6) : dark)) this.connect(s);
     }
     if (g.dirty.links) recomputeLinks(g);
     // a machine outside the main pool cannot reach its inputs; crate it back in
@@ -1698,8 +2205,18 @@ export class Bot {
     if (hq && hq.pool != null) {
       // every machine outside the main pool is a machine that cannot see the base's inputs; bridge
       // a few of them back every housekeeping pass
-      const strays = g.structures.filter(s => s.state === 'done' && (s.recipe || s.def.extractRate || s.def.researchRate) && s.pool !== hq.pool).slice(0, 3);
+      // Three a pass, but not always the *same* three. Taking the first three in building order meant
+      // three strays that could never be joined up were retried for ever and nothing behind them was
+      // ever looked at: on volcanic the only lithium drill stood 85 tiles out with no store in reach
+      // at all, its hopper full at 200 units, for four hours - no battery cell, no energy pack, and
+      // research stopped at 46 nodes. Extractors go first, and a stranded one gets a store of its own
+      // before the chain is tried, because `outposts()` can only send a truck to a store.
+      const allStrays = g.structures.filter(s => s.state === 'done' && (s.recipe || s.def.extractRate || s.def.researchRate) && s.pool !== hq.pool)
+        .sort((a, b) => (b.def.extractRate ? 1 : 0) - (a.def.extractRate ? 1 : 0));
+      const start = allStrays.length > 3 ? (this.strayCursor = ((this.strayCursor ?? -3) + 3) % allStrays.length) : 0;
+      const strays = allStrays.length > 3 ? [...allStrays, ...allStrays].slice(start, start + 3) : allStrays;
       for (const stray of strays) {
+        if (stray.def.extractRate && (stray.pool == null || stray.pool < 0)) { this.ensureStore(stray, { rescue: true }); if (g.dirty.links) recomputeLinks(g); }
         this.chainToPool(stray);
         if (g.dirty.links) recomputeLinks(g);
         // if nothing at all can reach it, it is a machine that will never run: take it back
@@ -1729,7 +2246,7 @@ export class Bot {
     if (jammed) {
       const type = this.storeType();
       const p = this.affordable(type) ? this.spot(type, jammed.x, jammed.y, 9) : null;
-      if (p) { g.place(type, p.x, p.y); g.dirty.links = true; this.mark('unjam'); }
+      if (p) { this.place(type, p.x, p.y); g.dirty.links = true; this.mark('unjam'); }
     }
     // keep store space ahead of the output
     const stores = g.structures.filter(s => s.state === 'done' && isStore(s.def));

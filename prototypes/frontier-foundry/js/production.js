@@ -8,7 +8,22 @@ import { daylight, gridSatisfaction, damageAfterArmor } from './rules.js';
 import { harvestTile } from './map.js';
 
 export const centre = s => ({ x: s.x + s.w / 2, y: s.y + s.h / 2 });
-export const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+export const dist = (a, b) => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+
+/**
+ * `Object.entries` of a recipe's inputs and outputs, remembered per recipe.
+ *
+ * Every machine in the base walks both of these every tick. The entries never change - they are
+ * loaded from JSON and never written to - so building the arrays again each time was pure waste.
+ */
+const ENTRY_CACHE = new WeakMap();
+const NO_ENTRIES = [];
+export function entriesOf(obj) {
+  if (!obj) return NO_ENTRIES;
+  let e = ENTRY_CACHE.get(obj);
+  if (e === undefined) ENTRY_CACHE.set(obj, (e = Object.entries(obj)));
+  return e;
+}
 
 /**
  * Is this building a store other machines may put things into? A machine has a buffer, but that
@@ -19,9 +34,25 @@ export function isStore(def) {
   return !!def.storage && (def.category === 'logistics' || def.category === 'base' || !!def.accepts);
 }
 
-/** Can this store hold that resource? */
+/**
+ * Can this store hold that resource?
+ *
+ * The answer depends only on the building type and the resource, so it is worked out once per pair
+ * and remembered. push() asks it for every store in the pool for every machine every tick, and on a
+ * base with two hundred stores that was tens of thousands of list walks a second.
+ */
 export function accepts(game, store, res) {
   const def = store.def;
+  let cache = def._accepts;
+  if (!cache) cache = def._accepts = new Map();
+  const hit = cache.get(res);
+  if (hit !== undefined) return hit;
+  const out = acceptsUncached(game, def, res);
+  cache.set(res, out);
+  return out;
+}
+
+function acceptsUncached(game, def, res) {
   if (!isStore(def)) return false;
   const list = def.accepts;
   if (!list) return true;
@@ -47,9 +78,53 @@ export function acceptsDelivery(game, s, res) {
   return false;
 }
 
-/** How much is in a structure right now. */
-export const load = s => Object.values(s.inv).reduce((a, b) => a + b, 0);
+/**
+ * How much is in a structure right now.
+ *
+ * A plain loop rather than `Object.values().reduce()`: this is called for every store in a pool for
+ * every machine that pushes something, every tick, and the array that `Object.values` builds each
+ * time was the single biggest thing the garbage collector had to deal with in a long run.
+ */
+export function load(s) {
+  if (s._sum !== undefined) return s._sum;
+  let n = 0;
+  const inv = s.inv;
+  for (const k in inv) n += inv[k];
+  return (s._sum = n);
+}
 export const space = s => Math.max(0, (s.cap || 0) - load(s));
+
+/**
+ * Anything that writes an inventory outside this file says so here, and the two cached sums are
+ * worked out again the next time they are asked for. Missing one only ever means a store reads as
+ * fuller or emptier than it is until the next write, so the helpers below are used everywhere
+ * rather than left to memory.
+ */
+export function invChanged(s) { s._sum = undefined; s._raw = undefined; invEpoch++; }
+
+/**
+ * Bumped by every inventory write. `available()` and `Game.inventory()` keep one table of totals per
+ * epoch (plus the building count and the tick), so the bot - which asks "how much of this is there"
+ * hundreds of times between two engine steps, and nothing writes in between but its own placements
+ * - reads a table instead of walking every building each time. It was the single biggest line in the
+ * simulator's profile: 28 % of a six-hour run.
+ */
+export let invEpoch = 0;
+
+/** Every finished building's inventory added up, remembered until something writes one. */
+export function inventoryTotals(game) {
+  const key = invEpoch + ':' + game.structures.length + ':' + game.ticks + ':' + game.nextId;
+  const c = game._invTotals;
+  if (c && c.key === key) return c.totals;
+  const totals = Object.create(null);
+  for (const s of game.structures) {
+    if (s.state !== 'done') continue;
+    const inv = s.inv;
+    for (const k in inv) totals[k] = (totals[k] || 0) + inv[k];
+  }
+  game._invTotals = { key, totals };
+  return totals;
+}
 
 /**
  * How much MORE of one resource a store will take.
@@ -67,20 +142,33 @@ const RAW_KIND = new Set(['ore', 'mineral', 'fluid', 'gas', 'organic', 'rare']);
 /** These keep their power in a brownout; everything else is shed first. */
 export const PRIORITY = new Set(['extraction', 'defence', 'scan', 'power', 'base']);
 
-export function roomFor(game, store, res) {
-  const free = space(store);
-  const a = store.def.accepts;
-  if (a && a.length === 1 && a[0] !== 'solid') return free;                // silo / fluid tank / gas tank
-  const def = game.data.resource[res];
-  if (!def || !RAW_KIND.has(def.kind)) return free;
-  let rawLoad = 0;
-  for (const [k, v] of Object.entries(store.inv)) {
-    const d = game.data.resource[k];
-    if (d && RAW_KIND.has(d.kind)) rawLoad += v;
+/** The ids of every resource that counts as raw, worked out once from the data. */
+function rawIds(game) {
+  let set = game._rawIds;
+  if (!set) {
+    set = game._rawIds = new Set();
+    for (const r of game.data.resources) if (RAW_KIND.has(r.kind)) set.add(r.id);
   }
-  return Math.max(0, Math.min(free,
-    (store.cap || 0) * RAW_SHARE_TOTAL - rawLoad,
-    (store.cap || 0) * SHARE_PER_RESOURCE - (store.inv[res] || 0)));
+  return set;
+}
+
+export function roomFor(game, store, res) {
+  const cap = store.cap || 0;
+  const inv = store.inv;
+  const a = store.def.accepts;
+  const oneKind = !!(a && a.length === 1 && a[0] !== 'solid');             // silo / fluid tank / gas tank
+  const raw = rawIds(game);
+  const capped = !oneKind && raw.has(res);
+  const free = Math.max(0, cap - load(store));
+  if (!capped) return free;
+  // how much raw material is in here, remembered with the total until something writes to it
+  let rawLoad = store._raw;
+  if (rawLoad === undefined) {
+    rawLoad = 0;
+    for (const k in inv) if (raw.has(k)) rawLoad += inv[k];
+    store._raw = rawLoad;
+  }
+  return Math.max(0, Math.min(free, cap * RAW_SHARE_TOTAL - rawLoad, cap * SHARE_PER_RESOURCE - (inv[res] || 0)));
 }
 
 /**
@@ -108,19 +196,22 @@ export function recomputeLinks(game) {
   const hoppers = new Map();                       // pool -> machines holding goods in their own buffer
   for (const s of game.structures) {
     s.links = [];
+    s.linkRefs = null;
     s.pool = -1;
     if (s.state !== 'done') continue;
-    if (isStore(s.def)) { s.pool = find(s.id); s.links = pools.get(s.pool).filter(id => id !== s.id); continue; }
+    if (isStore(s.def)) { s.pool = find(s.id); s.links = pools.get(s.pool).filter(id => id !== s.id); s.linkRefs = null; continue; }
     const mx = s.x + s.w / 2, my = s.y + s.h / 2;
     let best = null, bestD = Infinity;
     for (let k = 0; k < stores.length; k++) {
       const st = stores[k];
-      const d = Math.hypot(mx - cx[k], my - cy[k]) - reach(s, st);
+      const ddx = mx - cx[k], ddy = my - cy[k];
+      const d = Math.sqrt(ddx * ddx + ddy * ddy) - reach(s, st);
       if (d <= 0 && d < bestD) { bestD = d; best = st; }
     }
     if (best) {
       s.pool = find(best.id);
       s.links = pools.get(s.pool).slice();
+      s.linkRefs = null;
       if (s.cap > 0) { if (!hoppers.has(s.pool)) hoppers.set(s.pool, []); hoppers.get(s.pool).push(s); }
     }
   }
@@ -162,7 +253,7 @@ function bump(game, pool, res, delta) {
 export function pull(game, s, res, n) {
   let got = 0;
   const pool = s.pool;
-  const take = t => { const k = Math.min(n - got, t.inv[res] || 0); if (k > 0) { t.inv[res] -= k; if (t.inv[res] <= 1e-9) delete t.inv[res]; got += k; } };
+  const take = t => { const k = Math.min(n - got, t.inv[res] || 0); if (k > 0) { t.inv[res] -= k; if (t.inv[res] <= 1e-9) delete t.inv[res]; invChanged(t); got += k; } };
   take(s);
   if (got >= n) { bump(game, pool, res, -got); return got; }
   for (const id of s.links || []) { const t = game.byId(id); if (t) take(t); if (got >= n) break; }
@@ -181,14 +272,21 @@ export function pull(game, s, res, n) {
 /** Put n of a resource into the pool, then the machine's own buffer. Returns what fitted. */
 export function push(game, s, res, n) {
   let left = n;
-  for (const id of s.links || []) {
-    if (left <= 0) break;
-    const t = game.byId(id);
-    if (!t || t.state !== 'done' || !accepts(game, t, res)) continue;
-    const k = Math.min(left, roomFor(game, t, res));
-    if (k > 0) { t.inv[res] = (t.inv[res] || 0) + k; left -= k; }
+  // the stores this machine can reach, as buildings rather than ids: this loop runs for every
+  // machine every tick, and looking each id up in the index was a third of its cost
+  let links = s.linkRefs;
+  if (!links) {
+    links = s.linkRefs = [];
+    for (const id of s.links || []) { const t = game.byId(id); if (t) links.push(t); }
   }
-  if (left > 0 && s.cap > 0) { const k = Math.min(left, space(s)); if (k > 0) { s.inv[res] = (s.inv[res] || 0) + k; left -= k; } }
+  for (let i = 0; i < links.length; i++) {
+    if (left <= 0) break;
+    const t = links[i];
+    if (t.state !== 'done' || !accepts(game, t, res)) continue;
+    const k = Math.min(left, roomFor(game, t, res));
+    if (k > 0) { t.inv[res] = (t.inv[res] || 0) + k; invChanged(t); left -= k; }
+  }
+  if (left > 0 && s.cap > 0) { const k = Math.min(left, space(s)); if (k > 0) { s.inv[res] = (s.inv[res] || 0) + k; invChanged(s); left -= k; } }
   if (n - left > 0) bump(game, s.pool, res, n - left);
   return n - left;
 }
@@ -235,7 +333,8 @@ export function recomputePower(game) {
     const mx = s.x + s.w / 2, my = s.y + s.h / 2, half = Math.max(s.w, s.h) / 2;
     for (let k = 0; k < suppliers.length; k++) {
       const sup = suppliers[k];
-      const d = Math.hypot(mx - sx[k], my - sy[k]) - half;
+      const ddx = mx - sx[k], ddy = my - sy[k];
+      const d = Math.sqrt(ddx * ddx + ddy * ddy) - half;
       if (d <= sup.def.supplyRadius && d < bestD) { bestD = d; best = sup; }
     }
     if (best) { s.net = find(best.id); nets.get(s.net).members.push(s.id); }
@@ -364,7 +463,7 @@ export function tickExtraction(game, dt) {
     if (def.yields) {                                   // the quarry: no node, fixed mix
       const rate = def.extractRate * power * techBonus * game.diff.extract * dt;
       let made = 0;
-      for (const [res, share] of Object.entries(def.yields)) made += push(game, s, res, rate * share);
+      for (const [res, share] of entriesOf(def.yields)) made += push(game, s, res, rate * share);
       s.busy = made > 0;
       game.noise += (def.noise ?? game.data.waves.threat.drillNoise) * dt * (made > 0 ? 1 : 0);
       continue;
@@ -420,9 +519,10 @@ export function tickProduction(game, dt) {
 
     if (!s.crafting) {
       let ok = true;
-      for (const [res, n] of Object.entries(recipe.inputs || {})) if (visible(game, s, res) < n) { ok = false; s.starvedFor = res; break; }
+      const ins = entriesOf(recipe.inputs);
+      for (const [res, n] of ins) if (visible(game, s, res) < n) { ok = false; s.starvedFor = res; break; }
       if (!ok) { s.busy = false; s.idleFor += dt; if (s.idleFor > 120 && !s.warned) { s.warned = true; game.notify('machine_starved', { name: s.def.name, resource: game.data.resource[s.starvedFor]?.name || s.starvedFor, at: { x: s.x, y: s.y } }); } continue; }
-      for (const [res, n] of Object.entries(recipe.inputs || {})) pull(game, s, res, n);
+      for (const [res, n] of ins) pull(game, s, res, n);
       s.crafting = true; s.craft = 0; s.starvedFor = null; s.idleFor = 0; s.warned = false;
     }
     s.busy = true;
@@ -430,7 +530,7 @@ export function tickProduction(game, dt) {
     s.craft += dt * speed;
     if (s.craft >= recipe.time) {
       let allOut = true;
-      for (const [res, n] of Object.entries(recipe.outputs || {})) {
+      for (const [res, n] of entriesOf(recipe.outputs)) {
         const fitted = push(game, s, res, n);
         if (fitted < n - 1e-6) allOut = false;
       }
@@ -438,7 +538,7 @@ export function tickProduction(game, dt) {
       s.blocked = false;
       s.crafting = false; s.craft = 0; s.crafted++;
       game.stats.crafted++;
-      for (const res of Object.keys(recipe.outputs || {})) game.stats.produced[res] = (game.stats.produced[res] || 0) + (recipe.outputs[res] || 0);
+      for (const [res, n] of entriesOf(recipe.outputs)) game.stats.produced[res] = (game.stats.produced[res] || 0) + n;
       game.pollution += (s.def.pollution ?? 0.15) * (recipe.power ? 1 : 0.4);
       game.emit('craft', { structure: s, recipe: rid });
     }

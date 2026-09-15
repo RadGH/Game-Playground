@@ -16,7 +16,7 @@ import { DIFFICULTY, daylight, isNight, BALANCE } from './rules.js';
 import { createLocalMap, scanArea, findLandingSite, ensureStarterNodes, tickRegrow, findPath, costField, ensureChunksAround, ensureChunk } from './map.js';
 import { createFog, recomputeVisible, reveal, exploredFraction, packFog, unpackFog } from './fog.js';
 import { place, canPlace, demolish, cancel, tickBuilders, tickOrders, available, takeCost, pendingBuilds, stamp, footprint } from './build.js';
-import { recomputeLinks, recomputePower, rebuildPoolTotals, tickPower, tickExtraction, tickProduction, tickRepair, push, pull, visible, load, space } from './production.js';
+import { recomputeLinks, recomputePower, rebuildPoolTotals, tickPower, tickExtraction, tickProduction, tickRepair, push, pull, visible, load, space, invChanged, inventoryTotals } from './production.js';
 import { addRoute, removeRoute, tickLogistics, estimateTrip, replanRoutes, vehiclesFor, garageFor, upgradeVehicle, nextTier } from './logistics.js';
 import { tickResearch, startResearch, canResearch, availableTechs, completeResearch, grantResearch } from './research.js';
 import { seedNests, tickThreat, tickCombat, tickArtillery, tickShields, spawnWave, damageNest, damageEnemy } from './combat.js';
@@ -109,6 +109,7 @@ export class Game {
     this.hqId = pod.id;
     Object.assign(pod.inv, opts.startInventory || { iron_plate: 150, gear: 70, copper_wire: 80, stone: 220, coal: 150, iron_ore: 80, concrete: 40 });
     for (const [res, n] of Object.entries(opts.cargo || {})) pod.inv[res] = (pod.inv[res] || 0) + n;
+    invChanged(pod);
 
     for (const id of opts.research || ['t_landfall']) if (!this.research.done.includes(id)) this.research.done.push(id);
     if (!this.research.done.includes('t_landfall')) this.research.done.unshift('t_landfall');
@@ -157,9 +158,19 @@ export class Game {
 
   /** Multiply every researched effect of this name together. */
   techEffect(key, base = 1) {
-    let v = base;
-    for (const t of this.research.done) { const e = this.data.tech[t]?.effects; if (e && e[key] != null) v *= e[key]; }
-    return v;
+    // Remembered per research state. The answer depends only on which nodes are done, which only
+    // ever grows (or is swapped for a new list on a load), and the bot and the engine ask it inside
+    // their innermost loops - it was the largest single line in a six-hour simulator profile.
+    const done = this.research.done;
+    let c = this._techFx;
+    if (!c || c.list !== done || c.n !== done.length) c = this._techFx = { list: done, n: done.length, v: new Map() };
+    let v = c.v.get(key);
+    if (v === undefined) {
+      v = 1;
+      for (const t of done) { const e = this.data.tech[t]?.effects; if (e && e[key] != null) v *= e[key]; }
+      c.v.set(key, v);
+    }
+    return base * v;
   }
 
   /** How much faster builders work near this spot. */
@@ -294,9 +305,8 @@ export class Game {
   available(res) { return available(this, res); }
   /** Everything in every store, added up. */
   inventory() {
-    const total = {};
-    for (const s of this.structures) if (s.state === 'done') for (const [r, n] of Object.entries(s.inv)) total[r] = (total[r] || 0) + n;
-    return total;
+    // a copy of the cached table, so a caller that scribbles on the answer cannot corrupt it
+    return { ...inventoryTotals(this) };
   }
   /** What a build screen should list right now. */
   buildable() { return this.data.structures.filter(s => this.isUnlocked(s.id) && (!s.planetRequirement || this.planetHas(s.planetRequirement))); }
@@ -509,7 +519,7 @@ export class Game {
       const region = this.world.regions[s.regionId];
       const cache = { iron_ore: 120, copper_ore: 80, stone: 200 };
       const hq = this.hq();
-      if (hq) for (const [r, n] of Object.entries(cache)) hq.inv[r] = (hq.inv[r] || 0) + n;
+      if (hq) { for (const [r, n] of Object.entries(cache)) hq.inv[r] = (hq.inv[r] || 0) + n; invChanged(hq); }
       this.notify('region_explored', { name: region?.name || 'the region', text: `${region?.biomeName || 'unknown ground'}, danger ${((region?.danger ?? 0.3) * 100) | 0}%. The scouts brought back a cache.`, at: { x: hq?.x ?? 0, y: hq?.y ?? 0 } });
       this.emit('region:explored', { regionId: s.regionId, region });
     }
@@ -605,7 +615,7 @@ export class Game {
       this.quests.active = this.quests.active.filter(x => x !== id);
       this.quests.done.push(id);
       const hq = this.hq();
-      if (q.reward?.resources && hq) for (const [r, n] of Object.entries(q.reward.resources)) hq.inv[r] = (hq.inv[r] || 0) + n;
+      if (q.reward?.resources && hq) { for (const [r, n] of Object.entries(q.reward.resources)) hq.inv[r] = (hq.inv[r] || 0) + n; invChanged(hq); }
       if (q.reward?.research) grantResearch(this, q.reward.research);
       if (q.reward?.tech && completeResearch(this, q.reward.tech, { silent: true })) this.notify('tech_granted', { name: this.data.tech[q.reward.tech]?.name || q.reward.tech });
       if (q.reward?.crew) for (let i = 0; i < q.reward.crew; i++) this.spawnUnit('builder', hq?.x ?? 0, hq?.y ?? 0);

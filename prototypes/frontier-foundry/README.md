@@ -145,6 +145,7 @@ node prototypes/frontier-foundry/tools/sim-foundry.mjs --hours 6 --no-waves --wh
 # the tests
 node --test prototypes/frontier-foundry/tests/*.test.js
 npm run test:unit                                   # includes them
+npm run test:sim                                    # the full milestone: three six-hour games (FOUNDRY_SIM=1)
 ```
 
 `--why` prints what every machine is waiting for, which build step the bot is stuck on, how full

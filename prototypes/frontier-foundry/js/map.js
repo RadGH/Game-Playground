@@ -175,6 +175,7 @@ export function ensureChunk(map, cx, cy) {
 
   const rng = makeRng(subSeed(seed, `chunk:${cx}:${cy}`));
   placeNodes(map, { planet, data, rng, density: nodeDensity, x0: ox, y0: oy, x1: ox + CH - 1, y1: oy + CH - 1 });
+  map.version = (map.version | 0) + 1;                  // new ground: the cached cost fields are stale
   return true;
 }
 
@@ -440,8 +441,19 @@ export function scanArea(map, x, y, r) {
   return found;
 }
 
-/** A cost field for ground movement. blockedCost lets callers make walls expensive but not impossible. */
+/**
+ * A cost field for ground movement. blockedCost lets callers make walls expensive but not impossible.
+ *
+ * Cached per option set against `map.version`, which `stamp`/`unstamp` and chunk generation bump.
+ * Nothing that reads one ever writes to it, and on a busy map three different callers (each wave's
+ * flow field, the trucks' planner, the artillery) were each building an eighty-thousand-tile grid of
+ * their own several times a second.
+ */
 export function costField(map, { blockedCost = Infinity, waterCost = Infinity, ignoreRoads = false } = {}) {
+  const key = blockedCost + '|' + waterCost + '|' + ignoreRoads;
+  const cache = map._costCache || (map._costCache = new Map());
+  const hit = cache.get(key);
+  if (hit && hit.version === (map.version | 0)) return hit.cost;
   const N = map.width * map.height;
   const cost = new Float32Array(N);
   for (let i = 0; i < N; i++) {
@@ -451,8 +463,12 @@ export function costField(map, { blockedCost = Infinity, waterCost = Infinity, i
     if (map.occupied[i] >= 0 && map.blocking && map.blocking.has(map.occupied[i])) c = blockedCost;
     cost[i] = c;
   }
+  cache.set(key, { version: map.version | 0, cost });
   return cost;
 }
+
+/** Something on the ground changed: every cached cost field is now out of date. */
+export function bumpMap(map) { map.version = (map.version | 0) + 1; }
 
 /** A* between two tiles. Returns an array of tile indices or null. */
 export function findPath(map, from, to, opts = {}) {
@@ -464,27 +480,62 @@ export function findPath(map, from, to, opts = {}) {
  * A Dijkstra field over the whole map pointing at one goal. Enemies share one of these per wave,
  * which is much cheaper than an A* each.
  */
+// The eight steps out of a tile, flat rather than an array of arrays: this is the innermost loop in
+// the game and every `for (const [dx, dy, k] of DIRS)` was building an iterator per tile per step.
+const FF_DX = Int8Array.from([1, -1, 0, 0, 1, 1, -1, -1]);
+const FF_DY = Int8Array.from([0, 0, 1, -1, 1, -1, 1, -1]);
+const FF_K = Float64Array.from([1, 1, 1, 1, 1.414, 1.414, 1.414, 1.414]);
+// Scratch heap, grown as needed and reused between calls. A wave re-plans every eight seconds and a
+// 288x288 map is eighty thousand tiles, so this was allocating megabytes a minute.
+let HK = new Float64Array(1 << 16), HV = new Int32Array(1 << 16), HN = 0;
+function heapGrow() {
+  const k = new Float64Array(HK.length * 2), v = new Int32Array(HV.length * 2);
+  k.set(HK); v.set(HV); HK = k; HV = v;
+}
+
 export function flowField(map, goalIndex, cost) {
-  const N = map.width * map.height, w = map.width;
+  const N = map.width * map.height, w = map.width, h = map.height;
   const dist = new Float64Array(N).fill(Infinity);
   const next = new Int32Array(N).fill(-1);
   dist[goalIndex] = 0;
-  const hk = [0], hv = [goalIndex];
-  const push = (k, v) => { hk.push(k); hv.push(v); let i = hk.length - 1; while (i > 0) { const p = (i - 1) >> 1; if (hk[p] <= hk[i]) break; [hk[p], hk[i]] = [hk[i], hk[p]]; [hv[p], hv[i]] = [hv[i], hv[p]]; i = p; } };
-  const pop = () => { const top = hv[0], lk = hk.pop(), lv = hv.pop(); if (hk.length) { hk[0] = lk; hv[0] = lv; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < hk.length && hk[l] < hk[m]) m = l; if (r < hk.length && hk[r] < hk[m]) m = r; if (m === i) break; [hk[m], hk[i]] = [hk[i], hk[m]]; [hv[m], hv[i]] = [hv[i], hv[m]]; i = m; } } return top; };
-  const DIRS = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, 1.414], [1, -1, 1.414], [-1, 1, 1.414], [-1, -1, 1.414]];
-  while (hk.length) {
-    const cur = pop();
-    const d0 = dist[cur];
+  HN = 1; HK[0] = 0; HV[0] = goalIndex;
+  while (HN > 0) {
+    // pop the nearest tile: take the root, move the last leaf into it and sift it down
+    const cur = HV[0];
+    const d0 = HK[0];
+    HN--;
+    if (HN > 0) {
+      let lk = HK[HN], lv = HV[HN], i = 0;
+      for (;;) {
+        const l = 2 * i + 1, r = l + 1;
+        let m = i, mk = lk;
+        if (l < HN && HK[l] < mk) { m = l; mk = HK[l]; }
+        if (r < HN && HK[r] < mk) { m = r; mk = HK[r]; }
+        if (m === i) break;
+        HK[i] = HK[m]; HV[i] = HV[m]; i = m;
+      }
+      HK[i] = lk; HV[i] = lv;
+    }
+    if (d0 > dist[cur]) continue;                     // a stale copy of a tile we have already done
     const x = cur % w, y = (cur / w) | 0;
-    for (const [dx, dy, k] of DIRS) {
-      const xx = x + dx, yy = y + dy;
-      if (xx < 0 || yy < 0 || xx >= map.width || yy >= map.height) continue;
+    for (let d = 0; d < 8; d++) {
+      const xx = x + FF_DX[d], yy = y + FF_DY[d];
+      if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
       const j = yy * w + xx;
       const c = cost[j];
       if (!isFinite(c)) continue;
-      const nd = d0 + c * k;
-      if (nd < dist[j]) { dist[j] = nd; next[j] = cur; push(nd, j); }
+      const nd = d0 + c * FF_K[d];
+      if (nd >= dist[j]) continue;
+      dist[j] = nd; next[j] = cur;
+      // push: put it at the end and sift it up
+      if (HN >= HK.length) heapGrow();
+      let i = HN++;
+      while (i > 0) {
+        const pi = (i - 1) >> 1;
+        if (HK[pi] <= nd) break;
+        HK[i] = HK[pi]; HV[i] = HV[pi]; i = pi;
+      }
+      HK[i] = nd; HV[i] = j;
     }
   }
   return { dist, next, goal: goalIndex };

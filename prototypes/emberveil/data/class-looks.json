@@ -71,6 +71,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "pauldrons",
+     "color": "#6a6a72"
     }
    },
    "voice": {
@@ -181,6 +185,10 @@
     "offhand": {
      "id": "heater_shield",
      "color": "#8a8a90"
+    },
+    "decor": {
+     "id": "pauldrons",
+     "color": "#9aa0aa"
     }
    },
    "voice": {
@@ -288,6 +296,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "tabard",
+     "color": "#f4f0e0"
     }
    },
    "voice": {
@@ -397,6 +409,10 @@
     },
     "offhand": {
      "id": "quiver",
+     "color": "#5a3a1a"
+    },
+    "decor": {
+     "id": "herb_satchel",
      "color": "#5a3a1a"
     }
    },
@@ -508,6 +524,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "knife_rig",
+     "color": "#2a2a2a"
     }
    },
    "voice": {
@@ -618,6 +638,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "prayer_ribbons",
+     "color": "#e8d8a0"
     }
    },
    "voice": {
@@ -727,6 +751,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "chained_tome",
+     "color": "#6a3a8a"
     }
    },
    "voice": {
@@ -837,6 +865,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "scroll_case",
+     "color": "#8a6a3a"
     }
    },
    "voice": {
@@ -945,6 +977,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "bone_charms",
+     "color": "#3a3a3a"
     }
    },
    "voice": {
@@ -1056,6 +1092,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "rune_bracers",
+     "color": "#3a1a4a"
     }
    },
    "voice": {
@@ -1166,6 +1206,10 @@
     "offhand": {
      "id": "dagger",
      "color": "#c0c0c8"
+    },
+    "decor": {
+     "id": "bone_charms",
+     "color": "#2a1a1a"
     }
    },
    "voice": {
@@ -1275,6 +1319,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "belt_lantern",
+     "color": "#6a5a3a"
     }
    },
    "voice": {
@@ -1384,6 +1432,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "knife_rig",
+     "color": "#5a3a1a"
     }
    },
    "voice": {
@@ -1494,6 +1546,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "tabard",
+     "color": "#8a2a1a"
     }
    },
    "voice": {
@@ -1604,6 +1660,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "ember_censer",
+     "color": "#8a6a3a"
     }
    },
    "voice": {
@@ -1713,6 +1773,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "storm_rods",
+     "color": "#9aa0aa"
     }
    },
    "voice": {
@@ -1822,6 +1886,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "herb_satchel",
+     "color": "#6a4a2a"
     }
    },
    "voice": {
@@ -1932,6 +2000,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "prayer_ribbons",
+     "color": "#40e0ff"
     }
    },
    "voice": {
@@ -2042,6 +2114,10 @@
     "offhand": {
      "id": "map",
      "color": "#d8c8a0"
+    },
+    "decor": {
+     "id": "scroll_case",
+     "color": "#5a3a1a"
     }
    },
    "voice": {
@@ -2152,6 +2228,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "rune_halo",
+     "color": "#d8b040"
     }
    },
    "voice": {
@@ -2260,6 +2340,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "bead_necklace",
+     "color": "#6a4a2a"
     }
    },
    "voice": {
@@ -2372,6 +2456,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "bone_charms",
+     "color": "#6a4a2a"
     }
    },
    "voice": {
@@ -2482,6 +2570,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "belt_lantern",
+     "color": "#3a3a3a"
     }
    },
    "voice": {
@@ -2593,6 +2685,10 @@
     "offhand": {
      "id": "kite_shield",
      "color": "#2a4a9a"
+    },
+    "decor": {
+     "id": "pauldrons",
+     "color": "#b8bcc8"
     }
    },
    "voice": {
@@ -2703,6 +2799,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "rune_halo",
+     "color": "#a040e0"
     }
    },
    "voice": {
@@ -2813,6 +2913,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "rune_bracers",
+     "color": "#6a5a4a"
     }
    },
    "voice": {
@@ -2923,6 +3027,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "knife_rig",
+     "color": "#3a2a4a"
     }
    },
    "voice": {
@@ -3035,6 +3143,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "gear_pack",
+     "color": "#b08a3a"
     }
    },
    "voice": {
@@ -3146,6 +3258,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "chained_tome",
+     "color": "#3b2e6b"
     }
    },
    "voice": {
@@ -3256,6 +3372,10 @@
     },
     "offhand": {
      "id": "none"
+    },
+    "decor": {
+     "id": "rune_bracers",
+     "color": "#5b3aaa"
     }
    },
    "voice": {

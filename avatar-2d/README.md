@@ -32,7 +32,9 @@ renderInto(document.querySelector('#portrait'), goblin);                // brows
   "ears": { "id": "normal" }, "facialHair": { "id": "none" },
   "top": { "id": "tshirt", "color": "#2e7d32", "color2": "#ffffff" },
   "bottom": { "id": "pants", "color": "#2f4f7f" }, "shoes": { "id": "sneakers", "color": "#e8e8e8" },
-  "accessory": { "id": "none", "color": "#333333" }, "hat": { "id": "none", "color": "#5a3d8a" }, "extras": { "id": "none", "color": "#8a2e2e" }
+  "accessory": { "id": "none", "color": "#333333" }, "hat": { "id": "none", "color": "#5a3d8a" }, "extras": { "id": "none", "color": "#8a2e2e" },
+  "cape": { "id": "none", "color": "#3a4a8a" }, "held": { "id": "none", "color": "#9a9aa8" }, "offhand": { "id": "none", "color": "#8a7a5a" },
+  "decor": { "id": "none", "color": "#6a4a2a" }
 }
 ```
 `normalizeAvatar()` fills missing fields from `DEFAULT_AVATAR` and replaces unknown part ids with defaults, so old or partial JSON never crashes. The same JSON is read by **Avatar 3D** (it maps ids to its own meshes/face drawing).
@@ -53,14 +55,17 @@ renderInto(document.querySelector('#portrait'), goblin);                // brows
 | shoes | sneakers, boots, heavy, sandals, barefoot, slippers, pointed, hooves |
 | accessory | none, glasses, round_glasses, monocle, eyepatch, mask, scarf_mask, goggles, earrings, nose_ring, blindfold, sunglasses |
 | hat | none, wizard, hood, helmet, crown, cap, bandana, headband, straw, horned_helm, circlet, top_hat, flower |
-| extras | none, freckles, blush, scar, scar_cheek, warpaint, tattoo, dirt, undead_skin, third_eye, wrinkles |
+| extras | none, freckles, blush, scar, scar_cheek, warpaint, tattoo, dirt, undead_skin, third_eye, wrinkles (+ Emberveil marks in `gear.js`) |
+| cape, held, offhand | see `js/parts/gear.js` (capes, right-hand weapons and foci, left-hand shields and items) |
+| decor | none, pauldrons, tabard, knife_rig, scroll_case, belt_lantern, bone_charms, rune_bracers, chained_tome, herb_satchel, rune_halo, prayer_ribbons, ember_censer, storm_rods, gear_pack, bead_necklace |
 
 `catalogSummary()` in `js/parts/index.js` returns this list programmatically.
 
 ## How the drawing works (for adding parts)
 
 - Canvas `viewBox 0 0 300 400`. **Anchors**: feet y=380, hip y=290, neck y=215, head center (150,135) radius 72 (top y=63, sides x=78/222). Left leg x=132, right x=168, leg width 30. Arms from (104,228) to hands at (88,290)/(212,290).
-- **Layer order** (back → front, `LAYERS` in `parts/index.js`): hairBack, hatBack, arms, legs, shoes, bottom, body, top, skirtOver, sleeves, headShape, ears, extras, eyes, brows, nose, mouth, facialHair, hairFront, accessory, hat, hatFront.
+- **Layer order** (back → front, `LAYERS` in `parts/index.js`): decorBack, hairBack, hatBack, capeBack, arms, legs, shoes, bottom, body, top, skirtOver, sleeves, capeFront, decor, headShape, ears, extras, eyes, brows, nose, mouth, facialHair, hairFront, accessory, hat, hatFront, offhand, held.
+- **Decorations** (`js/parts/decor.js`, slot `decor`, colour `--decor` / `--decor-dark`): one extra piece of class gear that changes the silhouette. Pieces draw in the torso group by default; `knife_rig` and the tabard skirt use the legs group, `rune_halo` the head group on `decorBack`, and back-worn items (`scroll_case`, `storm_rods`, `gear_pack`) put their body on `capeBack` with straps on `decor`. Every id has a matching Chibi 2 model in `avatar-3d/js/chibi2-gear.js` (`buildDecor`), and each Emberveil class wears one (`prototypes/emberveil/data/class-looks.json`).
 - **Body groups**: `legs` (scaled about the feet by height and width), `torso` (translated to the hip, scaled by width and a little by height), `head` (translated to the neck, scaled by headSize only). A part piece can choose its group: long garments (robe, dress, coat) have an upper piece in the torso group and a `skirtOver` piece in the legs group so both stretch correctly.
 - **Part format**: `{ name, tags?, pieces: [{ layer, svg, group? }] }`. Face parts (eyes, brows, nose, mouth) are `{ name, svg }` drawn around (0,0); the renderer places and mirrors them (draw the LEFT eye/brow; `right` can override the mirrored copy, used by `wink`). Colours: `var(--skin) --skin-dark --hair --hair-dark --eye --mouth --top --top2 --top-dark --bottom --bottom-dark --shoes --shoes-dark --acc --hat --extra`.
 - To add a part: append to the matching catalog in `js/parts/*.js`. Run `node --test avatar-2d/tests/*.test.js`, which renders every part and checks layers. Use the demo's **Part gallery** to eyeball a whole slot at once.

@@ -1,15 +1,710 @@
 {
-  "_doc": "Authored Chibi 2 accessory index. Geometry remains procedural and skinned; this file records bespoke assets independently from the shared avatar catalog.",
+  "_doc": "Authored Chibi 2 accessory index. Geometry remains procedural and skinned; this file records bespoke assets independently from the shared avatar catalog. Decorations (slot decor) are shared with the 2D catalog in avatar-2d/js/parts/decor.js.",
   "assets": [
     {
       "id": "bard_red_feather_hat",
       "slot": "hat",
       "variant": "feather_cap",
       "name": "Bard's red feather cap",
-      "palette": { "primary": "#b02020", "secondary": "#3aa65a", "trim": "#d9b477" },
+      "palette": {
+        "primary": "#b02020",
+        "secondary": "#3aa65a",
+        "trim": "#d9b477"
+      },
       "renderer": "chibi2",
       "source": "avatar-3d/js/chibi2.js",
-      "usedBy": ["emberveil:bard"]
+      "usedBy": [
+        "emberveil:bard"
+      ]
+    },
+    {
+      "id": "decor_pauldrons",
+      "slot": "decor",
+      "variant": "pauldrons",
+      "name": "Layered shoulder plates",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:warrior",
+        "emberveil:fighter",
+        "emberveil:knight"
+      ]
+    },
+    {
+      "id": "decor_tabard",
+      "slot": "decor",
+      "variant": "tabard",
+      "name": "Crested tabard",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:paladin",
+        "emberveil:dragon_knight"
+      ]
+    },
+    {
+      "id": "decor_knife_rig",
+      "slot": "decor",
+      "variant": "knife_rig",
+      "name": "Thigh knife rig",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:rogue",
+        "emberveil:shadow_dancer",
+        "emberveil:swashbuckler"
+      ]
+    },
+    {
+      "id": "decor_scroll_case",
+      "slot": "decor",
+      "variant": "scroll_case",
+      "name": "Scroll case (back)",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:mage",
+        "emberveil:tactician"
+      ]
+    },
+    {
+      "id": "decor_belt_lantern",
+      "slot": "decor",
+      "variant": "belt_lantern",
+      "name": "Hooded belt lantern",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:witch_hunter",
+        "emberveil:scavenger"
+      ]
+    },
+    {
+      "id": "decor_bone_charms",
+      "slot": "decor",
+      "variant": "bone_charms",
+      "name": "Bone charm cord",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:necromancer",
+        "emberveil:shaman",
+        "emberveil:demon_hunter"
+      ]
+    },
+    {
+      "id": "decor_rune_bracers",
+      "slot": "decor",
+      "variant": "rune_bracers",
+      "name": "Rune bracers",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:runesmith",
+        "emberveil:enchanter",
+        "emberveil:warlock"
+      ]
+    },
+    {
+      "id": "decor_chained_tome",
+      "slot": "decor",
+      "variant": "chained_tome",
+      "name": "Chained tome (hip)",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:bard",
+        "emberveil:priest"
+      ]
+    },
+    {
+      "id": "decor_herb_satchel",
+      "slot": "decor",
+      "variant": "herb_satchel",
+      "name": "Herb satchel",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:druid",
+        "emberveil:ranger"
+      ]
+    },
+    {
+      "id": "decor_rune_halo",
+      "slot": "decor",
+      "variant": "rune_halo",
+      "name": "Rune halo",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:chronomancer",
+        "emberveil:sorcerer"
+      ]
+    },
+    {
+      "id": "decor_prayer_ribbons",
+      "slot": "decor",
+      "variant": "prayer_ribbons",
+      "name": "Prayer ribbons with seals",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:cleric",
+        "emberveil:oracle"
+      ]
+    },
+    {
+      "id": "decor_ember_censer",
+      "slot": "decor",
+      "variant": "ember_censer",
+      "name": "Ember censer (hip)",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:pyromancer"
+      ]
+    },
+    {
+      "id": "decor_storm_rods",
+      "slot": "decor",
+      "variant": "storm_rods",
+      "name": "Lightning rods (back)",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:stormcaller"
+      ]
+    },
+    {
+      "id": "decor_gear_pack",
+      "slot": "decor",
+      "variant": "gear_pack",
+      "name": "Cog backpack",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:tinker"
+      ]
+    },
+    {
+      "id": "decor_bead_necklace",
+      "slot": "decor",
+      "variant": "bead_necklace",
+      "name": "Great bead necklace",
+      "renderer": "chibi2+avatar2d",
+      "source": "avatar-3d/js/chibi2-gear.js (buildDecor); avatar-2d/js/parts/decor.js",
+      "usedBy": [
+        "emberveil:monk"
+      ]
+    },
+    {
+      "id": "held_lute",
+      "slot": "held",
+      "variant": "lute",
+      "name": "Lute with face, sound hole, neck and strings",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:bard"
+      ]
+    },
+    {
+      "id": "held_book",
+      "slot": "held",
+      "variant": "book",
+      "name": "Held grimoire with pages and clasp",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:warlock"
+      ]
+    },
+    {
+      "id": "held_hourglass",
+      "slot": "held",
+      "variant": "hourglass",
+      "name": "Golden hourglass",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:chronomancer"
+      ]
+    },
+    {
+      "id": "held_orb",
+      "slot": "held",
+      "variant": "orb",
+      "name": "Hand orb with orbit ring",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:sorcerer"
+      ]
+    },
+    {
+      "id": "held_flame",
+      "slot": "held",
+      "variant": "flame",
+      "name": "Flame in the palm",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:pyromancer"
+      ]
+    },
+    {
+      "id": "held_lightning",
+      "slot": "held",
+      "variant": "lightning",
+      "name": "Lightning at both fists",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:stormcaller"
+      ]
+    },
+    {
+      "id": "held_ring_rune",
+      "slot": "held",
+      "variant": "ring_rune",
+      "name": "Floating ring-rune",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:oracle"
+      ]
+    },
+    {
+      "id": "held_daggers",
+      "slot": "held",
+      "variant": "daggers",
+      "name": "Twin daggers",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:rogue",
+        "emberveil:shadow_dancer"
+      ]
+    },
+    {
+      "id": "held_saber",
+      "slot": "held",
+      "variant": "saber",
+      "name": "Curved saber",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:demon_hunter",
+        "emberveil:witch_hunter"
+      ]
+    },
+    {
+      "id": "held_cleaver",
+      "slot": "held",
+      "variant": "cleaver",
+      "name": "Jagged cleaver",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:scavenger"
+      ]
+    },
+    {
+      "id": "held_rapier",
+      "slot": "held",
+      "variant": "rapier",
+      "name": "Rapier with cup guard",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:swashbuckler"
+      ]
+    },
+    {
+      "id": "held_crossbow",
+      "slot": "held",
+      "variant": "crossbow",
+      "name": "Crossbow",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:tinker"
+      ]
+    },
+    {
+      "id": "held_greataxe",
+      "slot": "held",
+      "variant": "greataxe",
+      "name": "Double-bit great-axe",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:warrior"
+      ]
+    },
+    {
+      "id": "held_staff_orb",
+      "slot": "held",
+      "variant": "staff_orb",
+      "name": "Staff with cradled orb",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:mage"
+      ]
+    },
+    {
+      "id": "held_staff_skull",
+      "slot": "held",
+      "variant": "staff_skull",
+      "name": "Skull staff",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:necromancer"
+      ]
+    },
+    {
+      "id": "held_staff_crook",
+      "slot": "held",
+      "variant": "staff_crook",
+      "name": "Crook staff with vine",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:druid"
+      ]
+    },
+    {
+      "id": "held_staff_crystal",
+      "slot": "held",
+      "variant": "staff_crystal",
+      "name": "Crystal staff",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:enchanter"
+      ]
+    },
+    {
+      "id": "held_staff_totem",
+      "slot": "held",
+      "variant": "staff_totem",
+      "name": "Totem staff",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:shaman"
+      ]
+    },
+    {
+      "id": "offhand_quiver",
+      "slot": "offhand",
+      "variant": "quiver",
+      "name": "Back quiver with arrows and strap",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:ranger"
+      ]
+    },
+    {
+      "id": "offhand_map",
+      "slot": "offhand",
+      "variant": "map",
+      "name": "Folded map",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:tactician"
+      ]
+    },
+    {
+      "id": "offhand_kite_shield",
+      "slot": "offhand",
+      "variant": "kite_shield",
+      "name": "Kite shield with cross",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:knight"
+      ]
+    },
+    {
+      "id": "accessory_pendant",
+      "slot": "accessory",
+      "variant": "pendant",
+      "name": "Holy symbol pendant",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:cleric",
+        "emberveil:shaman"
+      ]
+    },
+    {
+      "id": "accessory_crescent",
+      "slot": "accessory",
+      "variant": "crescent",
+      "name": "Crescent pendant",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:priest"
+      ]
+    },
+    {
+      "id": "accessory_scarf",
+      "slot": "accessory",
+      "variant": "scarf",
+      "name": "Scarf with tail",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:demon_hunter"
+      ]
+    },
+    {
+      "id": "accessory_prayer_beads",
+      "slot": "accessory",
+      "variant": "prayer_beads",
+      "name": "Wrist prayer beads",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:monk"
+      ]
+    },
+    {
+      "id": "accessory_pocketwatch",
+      "slot": "accessory",
+      "variant": "pocketwatch",
+      "name": "Pocket watch",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:tinker"
+      ]
+    },
+    {
+      "id": "extras_soot",
+      "slot": "extras",
+      "variant": "soot",
+      "name": "Soot smudges",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:runesmith"
+      ]
+    },
+    {
+      "id": "extras_war_stripe",
+      "slot": "extras",
+      "variant": "war_stripe",
+      "name": "War stripe across the eyes",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:shaman"
+      ]
+    },
+    {
+      "id": "extras_lightning_arcs",
+      "slot": "extras",
+      "variant": "lightning_arcs",
+      "name": "Lightning arcs around the head",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:stormcaller"
+      ]
+    },
+    {
+      "id": "extras_chest_glow",
+      "slot": "extras",
+      "variant": "chest_glow",
+      "name": "Glowing chest gadget",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:tinker"
+      ]
+    },
+    {
+      "id": "cape_cape",
+      "slot": "cape",
+      "variant": "cape",
+      "name": "Full cape with collar and clasps",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:warlock",
+        "emberveil:druid",
+        "emberveil:knight"
+      ]
+    },
+    {
+      "id": "cape_shoulder_cape",
+      "slot": "cape",
+      "variant": "shoulder_cape",
+      "name": "Shoulder capelet",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:cleric",
+        "emberveil:monk",
+        "emberveil:sorcerer"
+      ]
+    },
+    {
+      "id": "cape_half_cape",
+      "slot": "cape",
+      "variant": "half_cape",
+      "name": "One-shoulder half cape",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:shadow_dancer"
+      ]
+    },
+    {
+      "id": "cape_feather_mantle",
+      "slot": "cape",
+      "variant": "feather_mantle",
+      "name": "Feathered mantle",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:shaman"
+      ]
+    },
+    {
+      "id": "bottom_greaves",
+      "slot": "bottom",
+      "variant": "greaves",
+      "name": "Shin greaves with knee cops",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2-gear.js",
+      "usedBy": [
+        "emberveil:fighter",
+        "emberveil:paladin",
+        "emberveil:dragon_knight",
+        "emberveil:knight"
+      ]
+    },
+    {
+      "id": "eyes_glow",
+      "slot": "eyes",
+      "variant": "glow",
+      "name": "Glowing eyes",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:demon_hunter",
+        "emberveil:sorcerer",
+        "emberveil:enchanter"
+      ]
+    },
+    {
+      "id": "eyes_glow_tear",
+      "slot": "eyes",
+      "variant": "glow_tear",
+      "name": "Glowing eyes with a light tear",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:oracle"
+      ]
+    },
+    {
+      "id": "hat_horned_helm",
+      "slot": "hat",
+      "variant": "horned_helm",
+      "name": "Helm with curved horns",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:warrior"
+      ]
+    },
+    {
+      "id": "hat_dragon_helm",
+      "slot": "hat",
+      "variant": "dragon_helm",
+      "name": "Dragon helm with horns, crest and cheek guards",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:dragon_knight"
+      ]
+    },
+    {
+      "id": "hat_hood",
+      "slot": "hat",
+      "variant": "hood",
+      "name": "Cowl hood",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:11 hooded classes"
+      ]
+    },
+    {
+      "id": "hat_hood_down",
+      "slot": "hat",
+      "variant": "hood_down",
+      "name": "Lowered hood",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:stormcaller"
+      ]
+    },
+    {
+      "id": "hat_wide_brim",
+      "slot": "hat",
+      "variant": "wide_brim",
+      "name": "Wide-brim hat",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:witch_hunter"
+      ]
+    },
+    {
+      "id": "hat_goggles_up",
+      "slot": "hat",
+      "variant": "goggles_up",
+      "name": "Goggles pushed up on the hairline",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:tinker"
+      ]
+    },
+    {
+      "id": "top_tunic",
+      "slot": "top",
+      "variant": "tunic",
+      "name": "Tunic with hem and laced neckline",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:ranger",
+        "emberveil:druid",
+        "emberveil:shaman"
+      ]
+    },
+    {
+      "id": "shoes_boots",
+      "slot": "shoes",
+      "variant": "boots",
+      "name": "Boots with folded cuff",
+      "renderer": "chibi2",
+      "source": "avatar-3d/js/chibi2.js",
+      "usedBy": [
+        "emberveil:14 classes"
+      ]
     }
   ]
 }

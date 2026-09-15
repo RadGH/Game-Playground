@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { normalizeAvatar, shade } from '../../avatar-2d/js/render.js';
 import { profile, taperedCurve, createRig, SkinBuilder } from './chibi2-geometry.js';
 import { createClips, CHIBI2_ANIMS, ONE_SHOTS } from './chibi2-motion.js';
+import { buildGear, CAPELETS } from './chibi2-gear.js';
 
 export { CHIBI2_ANIMS };
 const templates = new Map();
@@ -48,6 +49,12 @@ function buildTemplate(a, rig) {
   if (topId === 'hoodie' || topId === 'high_collar_robe') {
     add(profile([[0.23, 0.19, 0.15], [0.31, 0.22, 0.16], [0.38, 0.13, 0.11]], 12), 'chest', lining, { scale: [W, T, W] });
   }
+  if (topId === 'tunic') {
+    // Tunic: a short flared hem over the hips and a laced neckline.
+    add(profile([[-0.19, 0.228, 0.162], [-0.12, 0.218, 0.152], [-0.02, 0.203, 0.14]], 14), 'hips', cloth, { scale: [W, 1, W] });
+    add(profile([[-0.195, 0.23, 0.164], [-0.182, 0.23, 0.164]], 14), 'hips', lining, { scale: [W, 1, W] });
+    for (let i = 0; i < 3; i++) strip('chest', [[-0.025, (0.26 - i * 0.04) * T, 0.12 * W], [0.025, (0.24 - i * 0.04) * T, 0.13 * W]], 0.005, lining);
+  }
   if (topId === 'vest' || topId === 'leather' || topId === 'strapped_leather') {
     strip('chest', [[-0.19 * W, 0.27 * T, 0.13], [-0.12 * W, -0.08, 0.16], [-0.08 * W, -0.14, 0.14]], 0.018, trim);
     strip('chest', [[0.19 * W, 0.27 * T, 0.13], [0.12 * W, -0.08, 0.16], [0.08 * W, -0.14, 0.14]], 0.018, trim);
@@ -58,7 +65,25 @@ function buildTemplate(a, rig) {
   if (topId === 'doublet') for (const s of [-1, 1]) strip('chest', [[s * 0.19 * W, 0.28 * T, 0.15], [s * 0.19 * W, -0.08, 0.16]], 0.018, a.top.color2 || trim);
   if (topId === 'fur_tunic') for (const s of [-1, 1]) strip('chest', [[s * 0.20 * W, 0.29 * T, 0.11], [s * 0.27 * W, 0.15 * T, 0.08]], 0.035, a.top.color2 || lining);
   if (topId === 'open_coat' || topId === 'coat' || topId === 'trench') for (const s of [-1, 1]) add(profile([[s * 0.05, -0.02, 0.13], [s * 0.16, -0.18, 0.13], [s * 0.25, -0.30, 0.10]], 8), 'hips', cloth, { scale: [W, 1, W] });
-  if (topId === 'wraps' || topId === 'silks') for (let i = 0; i < 4; i++) strip('chest', [[-0.20, 0.16 - i * 0.06, 0.14], [0.20, 0.16 - i * 0.06, 0.14]], 0.009, i % 2 ? lining : cloth);
+  if (topId === 'silks') {
+    // Fitted silks: one sash across the chest and a knotted waist sash with a hanging tail.
+    strip('chest', [[-0.20 * W, 0.24 * T, 0.12 * W], [0, 0.10, 0.155 * W], [0.20 * W, -0.04, 0.14 * W]], 0.028, a.top.color2 || lining);
+    add(profile([[-0.13, 0.215, 0.145], [-0.08, 0.215, 0.145]], 14), 'chest', a.top.color2 || lining, { scale: [W, T, W] });
+    strip('hips', [[-0.14 * W, 0.0, 0.14 * W], [-0.17 * W, -0.10, 0.155 * W], [-0.15 * W, -0.20, 0.16 * W]], 0.022, a.top.color2 || lining);
+  }
+  if (topId === 'sash_robe') {
+    // Layered robe: crossed collar and a wide sash with a tail at the side.
+    for (const s of [-1, 1]) strip('chest', [[s * 0.10 * W, 0.29 * T, 0.09 * W], [-s * 0.04 * W, 0.10, 0.155 * W]], 0.022, a.top.color2 || lining);
+    add(profile([[-0.10, 0.225, 0.155], [-0.03, 0.225, 0.155]], 14), 'chest', a.top.color2 || lining, { scale: [W, T, W] });
+    strip('hips', [[0.17 * W, 0.0, 0.12 * W], [0.21 * W, -0.14, 0.13 * W], [0.19 * W, -0.26, 0.15 * W]], 0.03, a.top.color2 || lining);
+  }
+  if (topId === 'trim_robe') {
+    // Trimmed robe: a contrasting band down the front opening and around the collar.
+    strip('chest', [[0, 0.30 * T, 0.10 * W], [0, 0.12, 0.155 * W], [0, -0.10, 0.145 * W]], 0.02, a.top.color2 || trim);
+    strip('hips', [[0, 0.02, 0.15 * W], [0, -0.14, 0.195 * W], [0, -0.26, 0.20 * W]], 0.02, a.top.color2 || trim);
+    add(profile([[0.285 * T, 0.13, 0.10], [0.30 * T, 0.13, 0.10]], 12), 'chest', a.top.color2 || trim);
+  }
+  if (topId === 'wraps') for (let i = 0; i < 4; i++) strip('chest', [[-0.20, 0.16 - i * 0.06, 0.14], [0.20, 0.16 - i * 0.06, 0.14]], 0.009, i % 2 ? lining : cloth);
   if (topId === 'surcoat' || topId === 'scale_plate') add(profile([[-0.19, 0.20, 0.17], [-0.05, 0.23, 0.19], [0.16, 0.15, 0.15]], 10), 'hips', a.top.color2 || trim, { scale: [W, 1, W] });
   const bottomId = a.bottom.id;
   if (bottomId === 'skirt') add(profile([[-0.29, 0.19, 0.13], [-0.25, -0.08, 0.17], [0.24, -0.08, 0.17], [0.29, 0.19, 0.13]], 12), 'hips', a.bottom.color, { scale: [W, 1, W] });
@@ -74,7 +99,7 @@ function buildTemplate(a, rig) {
     ellipsoid(hand, skin, [0, -0.035, 0.003], [0.065, 0.082, 0.061]);
     ellipsoid(hand, shade(skin, -0.05), [-s * 0.046, -0.013, 0.025], [0.03, 0.043, 0.034]);
     for (let i = 0; i < 2; i++) strip(hand, [[-0.033, -0.043 - i * 0.018, 0.054], [0, -0.048 - i * 0.018, 0.061], [0.027, -0.043 - i * 0.018, 0.054]], 0.0026, shade(skin, -0.26));
-    if (armor) {
+    if (armor && a.decor?.id !== 'pauldrons') { // decor pauldrons replace the plate top's own shoulder caps
       ellipsoid(arm, darkSteel, [s * 0.015, 0.008, 0], [0.132, 0.074, 0.117], { metal: true });
       ellipsoid(arm, steel, [s * 0.025, 0.038, 0], [0.126, 0.066, 0.112], { metal: true });
       ellipsoid(arm, trim, [s * 0.023, 0.053, 0.102], [0.015, 0.016, 0.008], { metal: true });
@@ -92,12 +117,12 @@ function buildTemplate(a, rig) {
     for (const z of [0.02, 0.065]) strip(foot, [[-0.035, 0.049, z], [0, 0.056, z + 0.008], [0.035, 0.049, z]], 0.006, lining);
   }
 
-  const faceWidth = ['wide', 'square'].includes(a.headShape) ? 1.07 : a.headShape === 'long' ? 0.92 : 1;
+  const faceWidth = ['wide', 'square'].includes(a.headShape) ? 1.07 : a.headShape === 'long' ? 0.92 : a.headShape === 'oval' ? 0.95 : 1;
   const faceDepth = ['square', 'chiseled'].includes(a.headShape) ? 1.04 : a.headShape === 'wide' ? 0.94 : 1;
-  const jaw = a.headShape === 'heart' ? 0.86 : a.headShape === 'chiseled' ? 1.06 : 1;
+  const jaw = a.headShape === 'heart' ? 0.86 : a.headShape === 'chiseled' ? 1.06 : a.headShape === 'oval' ? 0.93 : 1;
   head(profile([[-0.035, 0.10, 0.09], [0.005, 0.22, 0.195], [0.105, 0.30, 0.249], [0.25, 0.335, 0.271], [0.39, 0.325 * jaw, 0.267], [0.50, 0.265 * jaw, 0.227], [0.57, 0.15 * jaw, 0.143], [0.60, 0.005, 0.006]], 20), skin, { scale: [faceWidth, 1, faceDepth] });
   for (const [side, s] of [['L', -1], ['R', 1]]) {
-    if (a.ears.id !== 'none') {
+    if (a.ears.id !== 'none' && a.hat.id !== 'hood') { // A raised hood covers the ears.
       head(sphere(), skin, { position: [s * 0.325 * faceWidth, 0.225, 0.0], scale: a.ears.id === 'pointed' ? [0.105, 0.10, 0.044] : [0.058, 0.091, 0.043], rotation: [0, 0, -s * 0.22] });
       head(sphere(), shade(skin, -0.18), { position: [s * 0.339 * faceWidth, 0.227, 0.036], scale: [0.022, 0.049, 0.009] });
     }
@@ -106,9 +131,17 @@ function buildTemplate(a, rig) {
     const closed = eyeId === 'happy' || (eyeId === 'wink' && side === 'R');
     const narrow = eyeId === 'narrow' || eyeId === 'sleepy' || eyeId === 'tired' || eyeId === 'angry';
     const dot = eyeId === 'dot', hollow = eyeId === 'hollow';
-    const ex = (dot ? 0.052 : narrow ? 0.078 : 0.082) * H * eyeSize, ey = (dot ? 0.052 : narrow ? 0.062 : 0.10) * H * eyeSize;
+    const almond = eyeId === 'almond';
+    const ex = (dot ? 0.052 : narrow ? 0.078 : almond ? 0.09 : 0.082) * H * eyeSize, ey = (dot ? 0.052 : narrow ? 0.062 : almond ? 0.08 : 0.10) * H * eyeSize;
     if (closed) {
       add(taperedCurve([[dx - s * ex, dy + 0.01 * H, 0.034 * H], [dx, dy - 0.03 * H, 0.038 * H], [dx + s * ex, dy + 0.01 * H, 0.034 * H]], [0.009, 0.013, 0.009], 5, 6), eye, '#443333');
+    } else if (eyeId === 'glow' || eyeId === 'glow_tear') {
+      // Glowing eyes: no iris or pupil, a lit fill in the eye colour and a small highlight; glow_tear adds a light trail.
+      const glow = '#' + new THREE.Color(a.eyes.color).lerp(new THREE.Color('#ffffff'), 0.3).getHexString();
+      ellipsoid(eye, '#' + new THREE.Color(a.eyes.color).multiplyScalar(0.35).getHexString(), [dx, dy, 0], [ex * 1.1, ey * 1.1, 0.016 * H]);
+      ellipsoid(eye, glow, [dx, dy - 0.004 * H, 0.014 * H], [ex * 0.92, ey * 0.92, 0.018 * H]);
+      ellipsoid(eye, '#ffffff', [dx - s * 0.02 * H, dy + 0.025 * H, 0.03 * H], [0.02 * H, 0.016 * H, 0.006 * H]);
+      if (eyeId === 'glow_tear') { const bx = s * 0.12 * H + dx + s * 0.02 * H, by = 0.25 * H + dy; add(taperedCurve([[bx, by - ey * 0.8, 0.268 * H], [bx + s * 0.01 * H, by - ey * 1.6, 0.27 * H], [bx, by - ey * 2.3, 0.262 * H]], [0.012, 0.01, 0.004], 4, 5), 'head', glow); }
     } else if (dot) {
       ellipsoid(eye, '#17272c', [dx, dy, 0.028 * H], [ex, ey, 0.013 * H]);
       ellipsoid(eye, '#ffffff', [dx - s * 0.012 * H, dy + 0.014 * H, 0.043 * H], [0.012 * H, 0.014 * H, 0.004 * H]);
@@ -123,7 +156,12 @@ function buildTemplate(a, rig) {
       }
     }
     if (eyeId === 'slit') add(taperedCurve([[dx, dy - ey * 0.55, 0.045 * H], [dx, dy, 0.047 * H], [dx, dy + ey * 0.55, 0.045 * H]], [0.008, 0.012, 0.008], 4, 4), eye, '#17272c');
-    if (narrow || eyeId === 'angry') add(taperedCurve([[dx - s * ex, dy - ey * 0.55, 0.045 * H], [dx, dy - ey * 0.78, 0.048 * H], [dx + s * ex, dy - ey * 0.55, 0.045 * H]], [0.006, 0.009, 0.006], 4, 4), eye, '#443333');
+    if (narrow) add(taperedCurve([[dx - s * ex, dy - ey * 0.55, 0.045 * H], [dx, dy - ey * 0.78, 0.048 * H], [dx + s * ex, dy - ey * 0.55, 0.045 * H]], [0.006, 0.009, 0.006], 4, 4), eye, '#443333');
+    // Per-style lids: angry slants down toward the nose, sleepy has a heavy skin lid, tired adds bags, almond a lash flick.
+    if (eyeId === 'angry') add(taperedCurve([[dx - s * ex * 1.05, dy + ey * 0.35, 0.05 * H], [dx, dy + ey * 0.8, 0.052 * H], [dx + s * ex * 1.1, dy + ey * 1.05, 0.05 * H]], [0.012, 0.01, 0.006], 4, 4), eye, '#443333');
+    if (eyeId === 'sleepy') ellipsoid(eye, shade(skin, -0.04), [dx, dy + ey * 0.55, 0.036 * H], [ex * 1.12, ey * 0.7, 0.022 * H]);
+    if (eyeId === 'tired') for (const k of [1.25, 1.5]) add(taperedCurve([[dx - s * ex * 0.8, dy - ey * k, 0.04 * H], [dx, dy - ey * (k + 0.2), 0.042 * H], [dx + s * ex * 0.8, dy - ey * k, 0.04 * H]], [0.003, 0.005, 0.003], 4, 4), eye, shade(skin, -0.25));
+    if (almond) add(taperedCurve([[dx + s * ex * 0.55, dy + ey * 0.75, 0.05 * H], [dx + s * ex * 1.05, dy + ey * 0.55, 0.05 * H], [dx + s * ex * 1.3, dy + ey * 0.8, 0.046 * H]], [0.009, 0.008, 0.003], 4, 4), eye, '#443333');
     // Brows are separate modeled locks, so the expression survives when the eye style changes.
     const brow = a.brows.id, browY = (a.brows.y || 0) * -0.035 * H, browX = (a.brows.x || 0) * 0.02 * H;
     if (brow !== 'none') {
@@ -152,7 +190,9 @@ function buildTemplate(a, rig) {
 
   if (a.hair.id !== 'bald') {
     const hairId = a.hair.id;
-    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'hood_down', 'wide_brim', 'goggles_up'].includes(a.hat.id);
+    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim'].includes(a.hat.id);
+    // A raised hood tucks away everything outside the face opening; only a fringe shows under its brow.
+    const hoodUp = a.hat.id === 'hood';
     const cap = new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
     const p = cap.attributes.position;
     for (let i = 0; i < p.count; i++) {
@@ -160,39 +200,65 @@ function buildTemplate(a, rig) {
       p.setXYZ(i, x * 0.348, 0.32 + y * 0.31 + Math.max(0, z) * 0.055, z * 0.28 - 0.012);
     }
     cap.computeVertexNormals();
-    if (!headwearCoversCrown && !['afro', 'curly', 'mohawk'].includes(hairId)) head(cap, hair, { scale: hairId === 'buzz' ? [0.97, 0.82, 0.98] : [1, 1, 1] });
+    if (!headwearCoversCrown && !['afro', 'mohawk'].includes(hairId)) head(cap, hair, { scale: hairId === 'buzz' ? [0.97, 0.82, 0.98] : [1, 1, 1] });
     const fringe = hairId === 'short' || hairId === 'long' || hairId === 'wavy';
-    if (fringe && !headwearCoversCrown) for (let i = 0; i < 7; i++) {
+    if (fringe && (!headwearCoversCrown || hoodUp)) for (let i = 0; i < 7; i++) {
+      if (hoodUp && (i === 0 || i === 6)) continue; // The outer locks would reach the hood's inner wall.
       const x = (i - 3) * 0.087, arc = 1 - (x / 0.31) ** 2;
       head(taperedCurve([[x - 0.035, 0.53 + arc * 0.06, 0.08], [x + 0.026, 0.49 + arc * 0.01, 0.225], [x + 0.055, 0.365 + (i % 3) * 0.027, 0.262]], [0.048, 0.068, 0.002], 6, 6), i % 3 === 1 ? shade(hair, 0.12) : hair);
     }
-    if (hairId === 'side_part' || hairId === 'slicked') {
+    if (hairId === 'slicked' && !headwearCoversCrown) for (let i = 0; i < 5; i++) {
+      // Slicked back: combed strands from the hairline over the crown toward the nape, no fringe.
+      const x = (i - 2) * 0.1;
+      head(taperedCurve([[x * 0.9, 0.47, 0.215], [x * 1.08, 0.59, 0.03], [x, 0.50, -0.25]], [0.035, 0.042, 0.015], 5, 7), i % 2 ? shade(hair, 0.14) : hair);
+    }
+    if (hairId === 'side_part') {
       for (let i = 0; i < 4; i++) head(taperedCurve([[0.02 + i * 0.055, 0.50, 0.09], [0.08 + i * 0.06, 0.46, 0.235], [0.17 + i * 0.045, 0.39, 0.264]], [0.055, 0.07, 0.006], 6, 6), i % 2 ? shade(hair, 0.12) : hair);
-      head(taperedCurve([[-0.26, 0.48, 0.06], [-0.31, 0.30, 0.04], [-0.28, 0.10, 0.03]], [0.075, 0.06, 0.015], 6, 6), shade(hair, -0.08));
+      if (!hoodUp) head(taperedCurve([[-0.26, 0.48, 0.06], [-0.31, 0.30, 0.04], [-0.28, 0.10, 0.03]], [0.075, 0.06, 0.015], 6, 6), shade(hair, -0.08));
     }
     if (hairId === 'bangs') {
       for (let i = 0; i < 7; i++) { const x = (i - 3) * 0.075; head(taperedCurve([[x, 0.49, 0.16], [x + (i - 3) * 0.008, 0.43, 0.245], [x + (i - 3) * 0.012, 0.31, 0.26]], [0.065, 0.075, 0.006], 6, 6), i % 2 ? shade(hair, 0.08) : hair); }
     }
-    if (hairId === 'spiky') {
+    if (hairId === 'spiky' && !hoodUp) {
       for (let i = 0; i < 7; i++) { const x = (i - 3) * 0.09; head(taperedCurve([[x, 0.36, 0.20], [x * 1.1, 0.50 + (i % 2) * 0.05, 0.17], [x * 1.2, 0.68 + (i % 3) * 0.06, 0.04]], [0.07, 0.05, 0.004], 5, 5), hair); }
     }
-    if (hairId === 'mohawk') {
+    if (hairId === 'mohawk' && !hoodUp) {
       for (let i = 0; i < 5; i++) head(taperedCurve([[0, 0.34 + i * 0.03, 0.18], [0, 0.54 + i * 0.02, 0.14], [0, 0.83 - i * 0.035, 0.03]], [0.08, 0.07, 0.008], 5, 5), i % 2 ? shade(hair, 0.10) : hair);
     }
-    if (hairId === 'pixie') for (const s of [-1, 1]) head(taperedCurve([[s * 0.06, 0.48, 0.12], [s * 0.18, 0.39, 0.25], [s * 0.30, 0.25, 0.12]], [0.07, 0.06, 0.008], 6, 6), hair);
-    if (hairId === 'tonsure') { head(new THREE.TorusGeometry(0.20, 0.055, 6, 14), hair, { position: [0, 0.51, 0.01], rotation: [Math.PI / 2, 0, 0], scale: [1.2, 0.8, 1] }); }
-    if (hairId === 'hood_hair') for (const s of [-1, 1]) head(taperedCurve([[s * 0.18, 0.48, 0.05], [s * 0.30, 0.28, 0.10], [s * 0.26, -0.02, 0.03]], [0.11, 0.08, 0.018], 6, 7), hair);
-    if ((hairId === 'curly' || hairId === 'afro') && !headwearCoversCrown) for (const [x, y, r] of [[-0.28, 0.40, 0.11], [-0.18, 0.50, 0.10], [0, 0.56, 0.12], [0.18, 0.50, 0.10], [0.28, 0.40, 0.11]]) head(sphere(), hair, { position: [x, y, 0.01], scale: [r, r, r * 0.85] });
-    if (hairId === 'mohawk') head(profile([[0.32, 0.09, 0.08], [0.48, 0.11, 0.09], [0.60, 0.035, 0.035]], 8), hair);
+    if (hairId === 'pixie' && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.06, 0.48, 0.12], [s * 0.18, 0.39, 0.25], [s * 0.30, 0.25, 0.12]], [0.07, 0.06, 0.008], 6, 6), hair);
+    if (hairId === 'tonsure' && !hoodUp) { head(new THREE.TorusGeometry(0.20, 0.055, 6, 14), hair, { position: [0, 0.51, 0.01], rotation: [Math.PI / 2, 0, 0], scale: [1.2, 0.8, 1] }); }
+    if (hairId === 'hood_hair' && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.18, 0.48, 0.05], [s * 0.30, 0.28, 0.10], [s * 0.26, -0.02, 0.03]], [0.11, 0.08, 0.018], 6, 7), hair);
+    // Curly: tight curls over a normal cap. Afro: one large rounded mass with curls on its rim.
+    if (hairId === 'curly' && !headwearCoversCrown) for (const [x, y, z] of [[-0.25, 0.46, 0.10], [-0.10, 0.58, 0.12], [0.06, 0.60, 0.10], [0.21, 0.50, 0.12], [-0.30, 0.34, -0.06], [0.30, 0.36, -0.06], [0, 0.56, -0.18]]) head(sphere(), hair, { position: [x, y, z], scale: [0.075, 0.075, 0.065] });
+    if (hairId === 'afro' && !headwearCoversCrown) {
+      head(new THREE.SphereGeometry(1, 14, 9), hair, { position: [0, 0.47, -0.05], scale: [0.50, 0.42, 0.44] });
+      for (const [x, y, r] of [[-0.40, 0.42, 0.11], [-0.26, 0.66, 0.10], [0, 0.72, 0.12], [0.26, 0.66, 0.10], [0.40, 0.42, 0.11]]) head(sphere(), hair, { position: [x, y, 0.08], scale: [r, r, r * 0.85] });
+    }
+    if (hairId === 'mohawk' && !hoodUp) head(profile([[0.32, 0.09, 0.08], [0.48, 0.11, 0.09], [0.60, 0.035, 0.035]], 8), hair);
     if (!headwearCoversCrown) for (const s of [-1, 1]) head(taperedCurve([[s * 0.28, 0.45, -0.02], [s * 0.335, 0.31, 0.008], [s * 0.30, 0.15, 0.052]], [0.06, 0.043, 0.002], 6, 6), shade(hair, -0.07));
-    if (/long|braids|pony|bob/.test(hairId)) for (const s of [-1, 1]) head(taperedCurve([[s * 0.23, 0.42, -0.16], [s * 0.30, 0.13, -0.12], [s * 0.27, -0.16, -0.08]], [0.10, 0.085, 0.015], 6, 7), hair);
-    if (hairId === 'ponytail') head(taperedCurve([[0.27, 0.38, -0.10], [0.38, 0.10, -0.13], [0.31, -0.20, -0.08]], [0.11, 0.09, 0.02], 7, 8), hair);
-    if (hairId === 'bun' || hairId === 'buns') for (const s of hairId === 'bun' ? [1] : [-1, 1]) head(sphere(), hair, { position: [s * (hairId === 'bun' ? 0 : 0.22), 0.47, -0.04], scale: [0.13, 0.13, 0.11] });
+    if (hairId === 'wavy' && !headwearCoversCrown) for (const s of [-1, 1]) head(taperedCurve([[s * 0.27, 0.46, -0.06], [s * 0.36, 0.33, 0.0], [s * 0.30, 0.20, 0.03], [s * 0.37, 0.06, -0.01], [s * 0.31, -0.06, -0.03]], [0.07, 0.065, 0.06, 0.05, 0.01], 6, 12), shade(hair, 0.06));
+    if (hairId === 'bob' && !headwearCoversCrown) {
+      // Bob: a rounded shell over the back and sides, open over the face and cut level at the jaw.
+      const open = 1.05, bob = new THREE.SphereGeometry(1, 14, 7, Math.PI / 2 + open, Math.PI * 2 - open * 2, 0.35, Math.PI * 0.42);
+      head(bob, hair, { position: [0, 0.33, -0.03], scale: [0.385, 0.40, 0.335] });
+      head(backface(bob.clone()), shade(hair, -0.2), { position: [0, 0.33, -0.03], scale: [0.375, 0.39, 0.325] });
+    }
+    if (hairId === 'braids' && !hoodUp) for (const s of [-1, 1]) {
+      // Braids: two plaits of stacked links falling in front of the shoulders, tied off at the ends.
+      for (let k = 0; k < 5; k++) head(new THREE.IcosahedronGeometry(1, 0), k % 2 ? shade(hair, 0.1) : hair, { position: [s * (0.31 + k * 0.005), 0.16 - k * 0.09, 0.10 + k * 0.014], scale: [0.052, 0.058, 0.046] });
+      head(new THREE.ConeGeometry(0.035, 0.07, 5), '#c83a2a', { position: [s * 0.335, -0.32, 0.17] });
+    }
+    if (/long|braids|pony/.test(hairId) && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.23, 0.42, -0.16], [s * 0.30, 0.13, -0.12], [s * 0.27, -0.16, -0.08]], [0.10, 0.085, 0.015], 6, 7), hair);
+    if (hairId === 'ponytail' && !hoodUp) head(taperedCurve([[0.27, 0.38, -0.10], [0.38, 0.10, -0.13], [0.31, -0.20, -0.08]], [0.11, 0.09, 0.02], 7, 8), hair);
+    if ((hairId === 'bun' || hairId === 'buns') && !hoodUp) for (const s of hairId === 'bun' ? [1] : [-1, 1]) head(sphere(), hair, { position: [s * (hairId === 'bun' ? 0 : 0.22), 0.47, -0.04], scale: [0.13, 0.13, 0.11] });
   }
   if (a.facialHair.id === 'stubble') head(profile([[0.12, 0.20, 0.13], [0.23, 0.25, 0.17], [0.38, 0.22, 0.15]], 12), shade(hair, -0.12), { scale: [1, 0.7, 0.35] });
   if (a.facialHair.id === 'mustache') head(taperedCurve([[-0.11, 0.17, 0.272], [0, 0.19, 0.286], [0.11, 0.17, 0.272]], [0.025, 0.032, 0.025], 6, 6), hair);
-  if (a.facialHair.id === 'goatee' || a.facialHair.id === 'soul_patch') head(taperedCurve([[0, 0.12, 0.27], [0, 0.055, 0.275], [0, -0.005, 0.235]], [0.035, 0.045, 0.012], 6, 5), hair);
-  if (/full|long|chinstrap/.test(a.facialHair.id)) head(profile([[-0.11, 0.025, 0.015, 0.13], [-0.015, 0.17, 0.067, 0.18], [0.08, 0.20, 0.075, 0.16]], 12), hair);
+  if (a.facialHair.id === 'goatee') head(taperedCurve([[0, 0.12, 0.27], [0, 0.055, 0.275], [0, -0.005, 0.235]], [0.035, 0.045, 0.012], 6, 5), hair);
+  if (a.facialHair.id === 'soul_patch') head(sphere(), hair, { position: [0, 0.05, 0.262], scale: [0.03, 0.028, 0.012] });
+  if (a.facialHair.id === 'full' || a.facialHair.id === 'long') head(profile([[-0.11, 0.025, 0.015, 0.13], [-0.015, 0.17, 0.067, 0.18], [0.08, 0.20, 0.075, 0.16]], 12), hair);
+  if (a.facialHair.id === 'long') head(taperedCurve([[0, -0.05, 0.19], [0, -0.20, 0.21], [0.01, -0.33, 0.17]], [0.11, 0.07, 0.01], 7, 6), hair);
+  if (a.facialHair.id === 'chinstrap') head(taperedCurve([[-0.31, 0.24, 0.07], [-0.25, 0.06, 0.18], [0, -0.01, 0.235], [0.25, 0.06, 0.18], [0.31, 0.24, 0.07]], [0.02, 0.026, 0.03, 0.026, 0.02], 5, 14), hair);
   if (a.extras.id === 'freckles') for (const s of [-1, 1]) for (let i = 0; i < 3; i++) ellipsoid('head', shade(skin, -0.16), [s * (0.12 + i * 0.045), 0.13 - (i % 2) * 0.03, 0.273], [0.009, 0.009, 0.004]);
   if (a.extras.id === 'blush') for (const s of [-1, 1]) ellipsoid('head', a.extras.color, [s * 0.20, 0.125, 0.267], [0.09, 0.035, 0.008]);
   if (a.extras.id === 'third_eye') { ellipsoid('head', '#fff8e8', [0, 0.36, 0.255], [0.065, 0.042, 0.012]); ellipsoid('head', a.eyes.color, [0, 0.36, 0.27], [0.028, 0.028, 0.008]); }
@@ -201,87 +267,168 @@ function buildTemplate(a, rig) {
   if (/helmet|helm/.test(a.hat.id)) {
     head(profile([[0.41, 0.353, 0.30], [0.48, 0.335, 0.286], [0.60, 0.20, 0.18], [0.66, 0.02, 0.02]], 16), a.hat.color, { metal: true });
     head(profile([[0.405, 0.357, 0.302], [0.435, 0.357, 0.302]], 16), trim, { metal: true });
+    if (a.hat.id === 'horned_helm') for (const s of [-1, 1]) head(taperedCurve([[s * 0.30, 0.50, 0.02], [s * 0.50, 0.58, 0.03], [s * 0.56, 0.80, -0.02]], [0.065, 0.042, 0.006], 6, 7), '#d9cfa8');
+    if (a.hat.id === 'dragon_helm') {
+      // Swept-back horns, a crest along the crown and cheek guards that leave the face open.
+      for (const s of [-1, 1]) {
+        head(taperedCurve([[s * 0.22, 0.58, 0.10], [s * 0.33, 0.72, -0.14], [s * 0.30, 0.78, -0.42]], [0.05, 0.032, 0.004], 6, 7), '#c8362a');
+        head(new THREE.BoxGeometry(1, 1, 1), a.hat.color, { position: [s * 0.335, 0.22, 0.09], scale: [0.03, 0.20, 0.13], rotation: [0.15, s * 0.35, 0], metal: true });
+      }
+      for (let i = 0; i < 4; i++) head(new THREE.ConeGeometry(0.035, 0.10 - i * 0.012, 5), '#e8742a', { position: [0, 0.655 - i * 0.02, 0.14 - i * 0.12], rotation: [-0.35 - i * 0.25, 0, 0] });
+    }
   } else if (a.hat.id === 'wizard') {
     head(profile([[0.51, 0.47, 0.36], [0.54, 0.46, 0.355], [0.555, 0.32, 0.25]], 16), a.hat.color);
     head(profile([[0.53, 0.30, 0.23], [0.8, 0.17, 0.145, -0.035], [1.02, 0.09, 0.06, -0.10], [1.08, 0.003, 0.004, -0.18]], 12), a.hat.color);
   } else if (a.hat.id === 'feather_cap' || a.hat.id === 'bard_red_feather') {
     // Bespoke Bard cap: low-poly felt silhouette, stitched brim, band and a head-weighted feather.
     const hat = a.hat.color || '#b02020', feather = a.hat.color2 || '#3aa65a';
-    head(new THREE.CylinderGeometry(0.36, 0.47, 0.055, 16), hat, { position: [0, 0.405, 0.025], scale: [1.15, 1, 0.88] });
-    head(new THREE.ConeGeometry(0.32, 0.24, 14), hat, { position: [0, 0.55, -0.005], scale: [1, 1, 0.86], rotation: [0.06, 0, -0.08] });
-    head(new THREE.TorusGeometry(0.335, 0.018, 5, 16), trim, { position: [0, 0.47, 0], rotation: [Math.PI / 2, 0, 0], scale: [1, 1, 0.86], metal: true });
-    head(taperedCurve([[0.05, 0.53, 0.02], [0.14, 0.68, 0.00], [0.19, 0.83, -0.015]], [0.055, 0.045, 0.008], 6, 7), feather);
-    head(taperedCurve([[0.06, 0.54, 0.025], [0.16, 0.68, 0.02], [0.22, 0.75, 0.01]], [0.018, 0.013, 0.002], 4, 5), shade(feather, 0.18));
-  } else if (a.hat.id === 'hood' || a.hat.id === 'hood_down') {
-    const hood = a.hat.color || '#4b536c';
-    head(new THREE.SphereGeometry(1, 14, 8, 0, Math.PI * 2, 0.05, Math.PI * 0.58), hood, { position: [0, 0.28, -0.18], scale: [0.43, 0.50, 0.20] });
-    head(new THREE.TorusGeometry(0.285, 0.028, 5, 16), trim, { position: [0, 0.19, 0.22], scale: [1, 0.75, 1], metal: true });
-    if (a.hat.id === 'hood_down') head(new THREE.TorusGeometry(0.25, 0.045, 5, 14), hood, { position: [0, 0.23, -0.13], rotation: [Math.PI / 2, 0, 0], scale: [1.25, 0.65, 1] });
+    // The skull is a dome (half-width 0.30 at y 0.44, 0.265 at 0.50, 0.15 at 0.57, top 0.60), so the
+    // crown is a domed profile that stays outside it all the way up; a cone narrows faster than the skull.
+    head(new THREE.CylinderGeometry(0.36, 0.47, 0.05, 16), hat, { position: [0, 0.438, 0.02], scale: [1.15, 1, 0.88] });
+    head(profile([[0.44, 0.375, 0.315, 0.012], [0.53, 0.36, 0.30, 0.0], [0.62, 0.30, 0.255, -0.015], [0.70, 0.19, 0.165, -0.035], [0.745, 0.06, 0.055, -0.055], [0.752, 0.003, 0.003, -0.06]], 14), hat);
+    head(new THREE.TorusGeometry(0.368, 0.02, 5, 16), trim, { position: [0, 0.49, 0.005], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.845, 1], metal: true });
+    // The feather is tucked under the band on the right side and sweeps up and back.
+    head(taperedCurve([[0.30, 0.47, 0.13], [0.39, 0.64, 0.04], [0.42, 0.84, -0.10]], [0.05, 0.045, 0.008], 6, 7), feather);
+    head(taperedCurve([[0.31, 0.49, 0.14], [0.40, 0.64, 0.08], [0.44, 0.74, 0.03]], [0.018, 0.013, 0.002], 4, 5), shade(feather, 0.18));
+  } else if (a.hat.id === 'hood') {
+    buildHood(a, add, H, W, T);
+  } else if (a.hat.id === 'hood_down') {
+    buildHoodDown(a, add, W, T);
   } else if (a.hat.id === 'wide_brim') {
     const hat = a.hat.color || '#40352f';
-    head(new THREE.CylinderGeometry(0.30, 0.38, 0.18, 14), hat, { position: [0, 0.48, 0], scale: [1, 1, 0.86] });
-    head(new THREE.CylinderGeometry(0.54, 0.54, 0.035, 16), hat, { position: [0, 0.40, 0.015], scale: [1, 1, 0.76] });
-    head(new THREE.TorusGeometry(0.30, 0.018, 5, 16), trim, { position: [0, 0.47, 0], rotation: [Math.PI / 2, 0, 0], scale: [1, 1, 0.86], metal: true });
+    // Crown runs from just under the brim (y 0.40) to 0.65, above the skull top (0.60); the brim sits above the brows.
+    head(new THREE.CylinderGeometry(0.31, 0.37, 0.25, 14), hat, { position: [0, 0.525, 0], scale: [1, 1, 0.86] });
+    head(new THREE.CylinderGeometry(0.54, 0.54, 0.035, 16), hat, { position: [0, 0.43, 0.015], scale: [1, 1, 0.76] });
+    // The torus lies flat after the x rotation, so its local y is the depth axis to squash.
+    head(new THREE.TorusGeometry(0.362, 0.018, 5, 16), trim, { position: [0, 0.462, 0], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.86, 1], metal: true });
   } else if (a.hat.id === 'goggles_up') {
-    for (const s of [-1, 1]) head(ring(0.095, 0.018), steel, { position: [s * 0.16, 0.43, 0.16], rotation: [Math.PI / 2, 0, 0], metal: true });
-    head(taperedCurve([[-0.16, 0.43, 0.16], [0, 0.48, 0.13], [0.16, 0.43, 0.16]], [0.014, 0.018, 0.014], 5, 5), leather);
-  }
-  if (a.cape.id !== 'none') {
-    const cape = new THREE.PlaneGeometry(0.45, 0.52, 6, 6), p = cape.attributes.position;
-    for (let i = 0; i < p.count; i++) {
-      const y = p.getY(i), f = (0.26 - y) / 0.52;
-      p.setXYZ(i, p.getX(i) * (0.65 + f * 0.55), y, -0.16 - f * 0.12 + Math.cos(p.getX(i) * 48) * 0.014);
+    // Goggles pushed up over the hairline: lenses lie back on the dome, the strap circles the head
+    // (lower at the back) just outside the hair cap, and the hair stays visible.
+    const strap = [];
+    for (let k = 0; k <= 14; k++) {
+      const t = k / 14 * Math.PI * 2, back = (1 - Math.cos(t)) / 2;
+      strap.push([Math.sin(t) * (0.24 + back * 0.055), 0.585 - back * 0.085, Math.cos(t) * (0.20 + back * 0.05)]);
     }
-    cape.computeVertexNormals();
-    const back = cape.clone(), indices = back.index.array;
-    for (let i = 0; i < indices.length; i += 3) [indices[i], indices[i + 1]] = [indices[i + 1], indices[i]];
-    back.computeVertexNormals();
-    // Both surfaces use the opaque cloth bucket, without changing its culling behavior.
-    add(cape, 'chest', a.cape.color, { position: [0, 0.005, 0] });
-    add(back, 'chest', a.cape.color, { position: [0, 0.005, 0] });
+    head(taperedCurve(strap, [0.014, 0.014, 0.014], 4, 16), leather);
+    for (const s of [-1, 1]) {
+      head(ring(0.07, 0.017), steel, { position: [s * 0.115, 0.605, 0.175], rotation: [-1.2, 0, 0], metal: true });
+      head(new THREE.CylinderGeometry(0.058, 0.058, 0.012, 10), '#6fb7c9', { position: [s * 0.115, 0.605, 0.175], rotation: [Math.PI / 2 - 1.2, 0, 0], metal: true });
+    }
+    head(taperedCurve([[-0.05, 0.612, 0.19], [0, 0.622, 0.195], [0.05, 0.612, 0.19]], [0.012, 0.012, 0.012], 4, 4), steel, { metal: true });
   }
-  buildWeapon(a, b, ellipsoid, strip, trim, leather, steel);
+  // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
+  buildGear(a, { add, head, ellipsoid, strip, H, W, T, L: rig.leg, trim, leather, steel, darkSteel, skin, faceWidth, faceDepth });
   return b.finish();
 }
 
-function buildWeapon(a, b, ellipsoid, strip, trim, leather, steel) {
-  const id = a.held.id;
-  if (id !== 'none') {
-    const staff = /staff|wand|scepter/.test(id);
-    const bow = /bow|crossbow/.test(id), twoHanded = /greatsword|greataxe|warhammer|quarterstaff/.test(id);
-    const shaft = staff || bow || twoHanded ? 0.55 : 0.11;
-    b.add(profile([[-shaft, 0.019, 0.019], [shaft, 0.019, 0.019]], 8), 'handR', leather, { position: [0, -0.025, 0.055] });
-    if (staff) {
-      const headColor = /skull/.test(id) ? '#e8e0c8' : a.held.color;
-      b.add(/skull/.test(id) ? new THREE.SphereGeometry(0.09, 8, 6) : new THREE.OctahedronGeometry(0.072), 'handR', headColor, { position: [0, 0.52, 0.055], scale: [0.7, 1.3, 0.7], metal: true });
-      b.add(ring(0.078, 0.012), 'handR', trim, { position: [0, 0.52, 0.055], metal: true });
-    } else if (bow) {
-      b.add(taperedCurve([[0, -0.42, 0.055], [id === 'crossbow' ? 0 : 0.18, 0, 0.055], [0, 0.42, 0.055]], [0.018, 0.028, 0.018], 5, 6), 'handR', a.held.color, { metal: true });
-      strip('handR', [[0, -0.42, 0.055], [0, 0.42, 0.055]], 0.004, '#e8e0c0');
-    } else if (/greataxe/.test(id)) {
-      b.add(new THREE.ConeGeometry(0.15, 0.34, 5), 'handR', a.held.color, { position: [0, 0.44, 0.055], rotation: [0, 0, Math.PI / 2], metal: true });
-    } else if (/hammer|mace/.test(id)) {
-      b.add(/mace/.test(id) ? new THREE.DodecahedronGeometry(0.14, 0) : new THREE.BoxGeometry(0.28, 0.14, 0.14), 'handR', a.held.color, { position: [0, 0.44, 0.055], metal: true });
-    } else {
-      const blade = /dagger|rapier/.test(id) ? 0.34 : /greatsword/.test(id) ? 0.72 : 0.52;
-      b.add(profile([[-blade, 0.002, 0.002], [-blade * 0.78, 0.055, 0.018], [-0.14, 0.043, 0.017]], 4), 'handR', steel, { position: [0, -0.025, 0.055], metal: true });
-      strip('handR', [[-0.10, -0.115, 0.055], [0, -0.095, 0.055], [0.10, -0.115, 0.055]], 0.021, trim, { metal: true });
-      ellipsoid('handR', trim, [0, 0.055, 0.055], [0.032, 0.035, 0.029], { metal: true });
+// Hood colours: the cloth colour, a darker lining for the inside, and a lighter rolled edge.
+// THREE.Color accepts the short '#111' form that shade() leaves untouched.
+/** Reversed-winding copy of an indexed or non-indexed geometry, for the inside of a shell. */
+function backface(g) {
+  if (!g.index) g.setIndex(Array.from({ length: g.attributes.position.count }, (_, i) => i));
+  const idx = g.index.array;
+  for (let i = 0; i < idx.length; i += 3) [idx[i], idx[i + 1]] = [idx[i + 1], idx[i]];
+  g.computeVertexNormals(); return g;
+}
+
+function hoodColors(a) {
+  const base = new THREE.Color(a.hat.color || '#4b536c');
+  const lining = base.clone().multiplyScalar(0.55), edge = base.clone().lerp(new THREE.Color('#ffffff'), 0.14);
+  return { cloth: '#' + base.getHexString(), lining: '#' + lining.getHexString(), edge: a.hat.color2 || '#' + edge.getHexString() };
+}
+
+/**
+ * Raised hood: one cowl shell built as a grid in head space (+z forward, head spans y 0..0.60).
+ * Columns run around the face opening (b: -1 at the left jaw, 0 over the brow, +1 at the right jaw);
+ * rows run from the face rim (v = 0) back over the head to the nape (v = 1), where they meet.
+ * The rim is pulled forward past the face, the crown gets a soft peak and the lower rows hang
+ * past the head onto the neck, weighted to the chest so they follow the body, not the nod.
+ * An outer shell, a darker inner shell and one piped edge along rim and hem close the cloth.
+ */
+export const HOOD_SHAPE = { center: [0, 0.30, 0.0], radii: [0.44, 0.42, 0.40], thickness: 0.035, lip: 0.07, columns: 16, rows: 9 };
+export function hoodGrid(shape = HOOD_SHAPE) {
+  const [cx, cy, cz] = shape.center, [rx, ry, rz] = shape.radii, { columns, rows } = shape;
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const nape = V(0, -0.62, -0.78).normalize(), peak = V(0, 0.72, -0.69).normalize();
+  // The face opening, as angles from the forward axis: an oval centred a little below the axis,
+  // wider than the cheeks, rounded over the brow and running under the jaw at the ends.
+  const Ax = 0.93, Y0 = -0.22, AyTop = 0.92, AyBottom = 1.05, reach = 2.55;
+  const rim = beta => {
+    const sx = Math.sin(beta), cyb = Math.cos(beta);
+    for (const Ay of [AyTop, AyBottom]) {
+      const qa = (sx / Ax) ** 2 + (cyb / Ay) ** 2, qb = -2 * Y0 * cyb / Ay ** 2, qc = (Y0 / Ay) ** 2 - 1;
+      const s = (-qb + Math.sqrt(qb * qb - 4 * qa * qc)) / (2 * qa);
+      if ((s * cyb >= Y0) === (Ay === AyTop)) return V(Math.sin(s) * sx, Math.sin(s) * cyb, Math.cos(s));
+    }
+  };
+  const outer = [], inner = [];
+  for (let j = 0; j <= columns; j++) {
+    const b = j / columns * 2 - 1, beta = b * reach;
+    const R = rim(beta);
+    // Mid control: straight out from the head in the column's direction, tipped back.
+    const M = V(Math.sin(beta) * 1.05, Math.cos(beta), -0.45).normalize();
+    const ctrl = M.clone().multiplyScalar(2).sub(R.clone().add(nape).multiplyScalar(0.5));
+    for (let i = 0; i <= rows; i++) {
+      const v = i / rows, d = R.clone().multiplyScalar((1 - v) ** 2).add(ctrl.clone().multiplyScalar(2 * (1 - v) * v)).add(nape.clone().multiplyScalar(v * v)).normalize();
+      const bump = 0.07 * Math.max(0, d.dot(peak)) ** 8;
+      const lip = shape.lip * Math.max(0, 1 - v * 3.2) ** 2;
+      for (const [list, t] of [[outer, 0], [inner, shape.thickness]]) {
+        const p = V(cx + d.x * (rx - t), cy + d.y * (ry - t) + bump * (1 - t * 10), cz + d.z * (rz - t) + lip);
+        // Below the jaw the cloth hangs rather than curling under the head.
+        if (p.y < 0.08) { const k = 0.08 - p.y; p.y = 0.08 - k * 1.9; p.x *= 1 + k * 0.5; p.z -= k * 0.45; }
+        list.push(p);
+      }
     }
   }
-  if (a.offhand.id !== 'none') {
-    if (a.offhand.id === 'dagger') { b.add(profile([[-0.22, 0.015, 0.015], [0.15, 0.015, 0.015]], 5), 'handL', steel, { position: [0, 0.01, 0.08], metal: true }); return; }
-    if (a.offhand.id === 'book') { b.add(new THREE.BoxGeometry(0.16, 0.20, 0.035), 'handL', a.offhand.color, { position: [0, 0.02, 0.10] }); return; }
-    if (a.offhand.id === 'orb') { b.add(new THREE.SphereGeometry(0.11, 10, 6), 'handL', a.offhand.color, { position: [0, 0.16, 0.12], metal: true }); return; }
-    if (a.offhand.id === 'torch') { b.add(profile([[-0.28, 0.018, 0.018], [0.18, 0.018, 0.018]], 6), 'handL', leather, { position: [0, 0.02, 0.08] }); b.add(new THREE.ConeGeometry(0.11, 0.22, 6), 'handL', '#ff8c2a', { position: [0, 0.29, 0.08], metal: true }); return; }
-    const shape = new THREE.Shape(); shape.moveTo(0, -0.27); shape.lineTo(-0.18, -0.05); shape.lineTo(-0.18, 0.17); shape.quadraticCurveTo(0, 0.24, 0.18, 0.17); shape.lineTo(0.18, -0.05); shape.closePath();
-    if (a.offhand.id === 'round_shield') { b.add(new THREE.CylinderGeometry(0.22, 0.22, 0.045, 12), 'handL', a.offhand.color, { position: [0, 0.02, 0.10], rotation: [Math.PI / 2, 0, 0], metal: true }); return; }
-    if (a.offhand.id === 'tower_shield') { b.add(new THREE.BoxGeometry(0.30, 0.50, 0.06), 'handL', a.offhand.color, { position: [0, -0.02, 0.10], metal: true }); return; }
-    const options = { depth: a.offhand.id === 'buckler' ? 0.025 : 0.035, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.014, bevelSegments: 1, steps: 1, curveSegments: 5 };
-    b.add(new THREE.ExtrudeGeometry(shape, options), 'handL', trim, { position: [0, 0.02, 0.083], metal: true });
-    b.add(new THREE.ExtrudeGeometry(shape, options), 'handL', a.offhand.color, { position: [0, 0.02, 0.13], scale: [0.84, 0.84, 0.3] });
-    b.add(new THREE.OctahedronGeometry(0.065), 'handL', steel, { position: [0, 0.025, 0.153], scale: [0.7, 1.1, 0.25], metal: true });
+  return { outer, inner, columns, rows };
+}
+
+function buildHood(a, add, H, W, T) {
+  const capelet = CAPELETS.includes(a.cape.id);
+  const { cloth, lining, edge } = hoodColors(a), { outer, inner, columns, rows } = hoodGrid();
+  const at = (j, i) => j * (rows + 1) + i;
+  const shell = (points, color, flip) => {
+    const g = new THREE.BufferGeometry(), idx = [];
+    g.setAttribute('position', new THREE.Float32BufferAttribute(points.flatMap(p => [p.x, p.y, p.z]), 3));
+    for (let j = 0; j < columns; j++) for (let i = 0; i < rows; i++) {
+      const q = [at(j, i), at(j + 1, i), at(j + 1, i + 1), at(j, i + 1)];
+      if (flip) idx.push(q[0], q[2], q[1], q[0], q[3], q[2]); else idx.push(q[0], q[1], q[2], q[0], q[2], q[3]);
+    }
+    g.setIndex(idx); g.computeVertexNormals();
+    // Neck-weighted hem: the bottom of the cowl follows the chest instead of swinging with the head.
+    add(g, 'head', color, { scale: [H, H, H], bend: { bone: 'chest', at: 0.02 * H, width: 0.09 * H } });
+  };
+  shell(outer, cloth, false);
+  shell(inner, lining, true);
+  // Piped edge: up the left hem, around the face rim, down the right hem. It sits between the shells.
+  const mid = (j, i) => outer[at(j, i)].clone().lerp(inner[at(j, i)], 0.5);
+  const path = [];
+  for (let i = rows; i > 0; i--) path.push(mid(0, i));
+  for (let j = 0; j <= columns; j++) path.push(mid(j, 0));
+  for (let i = 1; i <= rows; i++) path.push(mid(columns, i));
+  add(taperedCurve(path.map(p => p.toArray()), [0.012, 0.022, 0.026, 0.026, 0.022, 0.012], 5, 36), 'head', edge, { scale: [H, H, H], bend: { bone: 'chest', at: 0.02 * H, width: 0.09 * H } });
+  // Short mantle on the chest bone: the cowl's cloth settling over the neck and top of the shoulders.
+  // Its top tucks inside the hood's hem, so the join stays hidden when the head turns.
+  if (!capelet) add(profile([[0.285 * T, 0.255 * W, 0.17 * W, -0.012], [0.315 * T, 0.215 * W, 0.15 * W, -0.014], [0.36 * T, 0.12, 0.10, -0.02], [0.40 * T, 0.09, 0.08, -0.02]], 14), 'chest', cloth);
+  if (!capelet) add(profile([[0.282 * T, 0.258 * W, 0.173 * W, -0.012], [0.292 * T, 0.258 * W, 0.173 * W, -0.012]], 14), 'chest', edge);
+}
+
+/** Lowered hood: a rolled collar of cloth around the back of the neck and the hood's bag lying on the upper back. */
+function buildHoodDown(a, add, W, T) {
+  const { cloth, lining, edge } = hoodColors(a);
+  // Chest-bone space: the neck rises from y 0.27T; the shoulders are about 0.22W wide there.
+  const collar = [];
+  for (let k = 0; k <= 8; k++) {
+    const t = -2.2 + k / 8 * 4.4, back = Math.max(0, -Math.cos(t));
+    collar.push([Math.sin(t) * (0.15 + back * 0.03) * W, (0.285 + back * 0.02) * T, Math.cos(t) * (0.10 + back * 0.04) * W - 0.01]);
   }
+  add(taperedCurve(collar, [0.03, 0.05, 0.058, 0.05, 0.03], 7, 16), 'chest', cloth);
+  add(taperedCurve(collar.map(([x, y, z]) => [x * 1.02, y + 0.012, z * 1.02]), [0.012, 0.02, 0.022, 0.02, 0.012], 5, 16), 'chest', edge);
+  // The empty hood itself hangs flat against the upper back below the collar, following the back's curve.
+  const bag = [[0.0, 0.04, 0.012, -0.150], [0.08, 0.15, 0.034, -0.168], [0.19, 0.19, 0.042, -0.172], [0.28, 0.17, 0.036, -0.145], [0.315, 0.12, 0.024, -0.12]];
+  add(profile(bag.map(([y, rx, rz, z]) => [y * T, rx * W, rz, z * W]), 12), 'chest', cloth);
+  // A darker fold line across the bag reads as the hood's seam at game distance.
+  add(taperedCurve([[-0.12 * W, 0.215 * T, -0.212 * W], [0, 0.18 * T, -0.216 * W], [0.12 * W, 0.215 * T, -0.212 * W]], [0.006, 0.01, 0.006], 4, 6), 'chest', lining);
 }
 
 function acquire(avatar) {

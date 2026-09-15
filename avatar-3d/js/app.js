@@ -74,6 +74,7 @@ left.append(
   panel('Head', slotRow('headShape'), slotRow('hair'), slotRow('ears'), slotRow('facialHair'), slotRow('extras'), slotRow('hat')),
   panel('Face (Chibi / Chibi 2)', slotRow('eyes'), faceKnob('eyes', 'x', 'eye spacing', -1, 1, 0.05), faceKnob('eyes', 'y', 'eye height', -1, 1, 0.05), faceKnob('eyes', 'scale', 'eye size', 0.5, 1.6, 0.05), faceKnob('eyes', 'rot', 'eye tilt', -30, 30, 1), slotRow('brows'), slotRow('nose'), slotRow('mouth'), faceKnob('mouth', 'y', 'mouth height', -1, 1, 0.05), faceKnob('mouth', 'scale', 'mouth size', 0.5, 1.8, 0.05)),
   panel('Outfit', slotRow('top'), el('div', { class: 'row' }, el('label', { text: 'Top 2nd colour' }), colorSwatch(() => avatar.top.color2, v => { avatar.top.color2 = v; changed(); })), slotRow('bottom'), slotRow('shoes'), slotRow('accessory')),
+  panel('Gear', slotRow('cape'), slotRow('held'), slotRow('offhand'), slotRow('decor')),
 );
 
 // ---------- right: JSON + 2D preview ----------

@@ -56,7 +56,7 @@ left.append(
     slotRow('nose'), el('div', { class: 'face-knobs' }, faceKnob('nose', 'y', 'nose height', -1, 1, 0.05), faceKnob('nose', 'scale', 'nose size', 0.5, 1.8, 0.05)),
     slotRow('mouth'), el('div', { class: 'face-knobs' }, faceKnob('mouth', 'y', 'mouth height', -1, 1, 0.05), faceKnob('mouth', 'scale', 'mouth size', 0.5, 1.8, 0.05))),
   panel('Outfit', slotRow('top'), el('div', { class: 'row' }, el('label', { text: 'Top 2nd colour' }), colorSwatch(() => avatar.top.color2, v => { avatar.top.color2 = v; changed(); })), paletteRow(DATA.palettes.cloth, c => { avatar.top.color = c; changed(); syncUI(); }), slotRow('bottom'), slotRow('shoes'), slotRow('accessory'), slotRow('hat')),
-  panel('Gear (Emberveil additions)', el('p', { class: 'small muted', text: 'Cape, a held weapon or focus, and an off-hand item. Colour swatches recolour metal/wood.' }), slotRow('cape'), slotRow('held'), slotRow('offhand')),
+  panel('Gear (Emberveil additions)', el('p', { class: 'small muted', text: 'Cape, a held weapon or focus, an off-hand item and a decoration (shoulder plates, tabard, charms, halo…). Colour swatches recolour metal/wood.' }), slotRow('cape'), slotRow('held'), slotRow('offhand'), slotRow('decor')),
 );
 
 // ---------- right: JSON + saved + catalog ----------

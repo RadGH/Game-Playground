@@ -75,6 +75,138 @@ test('the Bard feather cap is a distinct indexed Chibi 2 asset', async ({ page }
   expect(errors).toEqual([]);
 });
 
+test('the raised hood wraps the head and frames the face; the lowered hood sits behind the neck', async ({ page }) => {
+  const errors = await openLab(page);
+  const result = await page.evaluate(async () => {
+    const THREE = await import('three');
+    const { createChibi2Character, hoodGrid, HOOD_SHAPE } = await import('/avatar-3d/js/chibi2.js');
+    const looks = await (await fetch('/prototypes/emberveil/data/class-looks.json')).json();
+    // Head-space measurements of the cowl grid (+z forward; the head spans y 0..0.60, half-width 0.335,
+    // half-depth 0.271, and the face plane is the nose/cheek front at z ~0.27).
+    const { outer, inner, columns, rows } = hoodGrid(HOOD_SHAPE);
+    const box = new THREE.Box3().setFromPoints(outer), size = box.getSize(new THREE.Vector3());
+    const rim = Array.from({ length: columns + 1 }, (_, j) => outer[j * (rows + 1)]);
+    const rimFront = rim.filter(p => p.y > 0.1 && p.y < 0.5);
+    const headInside = p => (p.x / 0.335) ** 2 + ((p.y - 0.30) / 0.30) ** 2 + (p.z / 0.271) ** 2 < 1;
+    // The built mesh: triangle cost of each hood over a hatless version of the same character.
+    const tri = async av => { const c = await createChibi2Character(av); const s = c.stats(); c.dispose(); return s.triangles; };
+    // Bald and earless on both sides of the comparison, so hair and ears the hood tucks away do not offset its cost.
+    const shorn = av => ({ ...structuredClone(av), hair: { ...av.hair, id: 'bald' }, ears: { ...av.ears, id: 'none' } });
+    const cleric = shorn(looks.classes.cleric.avatar), storm = shorn(looks.classes.stormcaller.avatar);
+    const bare = av => ({ ...structuredClone(av), hat: { id: 'none', color: av.hat.color } });
+    // The skinned hood in bind pose: the cloth mesh grows forward past the face when the hood is added.
+    const clothBox = async av => { const c = await createChibi2Character(av); const m = c.group.getObjectByName('chibi2-cloth'); m.geometry.computeBoundingBox(); const b = m.geometry.boundingBox.clone(); c.dispose(); return b; };
+    const hooded = await clothBox(cleric), plain = await clothBox(bare(cleric));
+    return {
+      width: size.x, depth: size.z, height: size.y, maxZ: box.max.z, minZ: box.min.z, maxY: box.max.y, minY: box.min.y,
+      rimMinZ: Math.min(...rimFront.map(p => p.z)), rimCount: rimFront.length,
+      innerClipsHead: inner.filter(headInside).length,
+      hoodTris: await tri(cleric) - await tri(bare(cleric)), downTris: await tri(storm) - await tri(bare(storm)),
+      hoodedTop: hooded.max.y, plainTop: plain.max.y,
+    };
+  });
+  const facePlane = 0.27;
+  expect(result.maxZ).toBeGreaterThan(facePlane + 0.03);           // the cowl reaches forward past the face
+  expect(result.depth / result.width).toBeGreaterThan(0.75);        // round, not squashed flat
+  expect(result.width).toBeGreaterThan(0.335 * 2);                  // wider than the head
+  expect(result.minZ).toBeLessThan(-0.3);                           // and wraps the back of the head
+  expect(result.maxY).toBeGreaterThan(0.62);                        // rises above the crown
+  expect(result.minY).toBeLessThan(0);                              // hangs below the jaw onto the neck
+  expect(result.rimCount).toBeGreaterThan(4);
+  expect(result.rimMinZ).toBeGreaterThan(facePlane - 0.02);         // the rim sits around the face, not behind the head
+  expect(result.innerClipsHead).toBe(0);                            // the lining never passes through the head
+  expect(result.hoodedTop).toBeGreaterThan(result.plainTop);
+  expect(result.hoodTris).toBeGreaterThan(300); expect(result.hoodTris).toBeLessThan(1400);
+  expect(result.downTris).toBeGreaterThan(100); expect(result.downTris).toBeLessThan(700);
+  expect(errors).toEqual([]);
+});
+
+test('no Emberveil headwear lets the skull show through it', async ({ page }) => {
+  const errors = await openLab(page);
+  const result = await page.evaluate(async () => {
+    const THREE = await import('three');
+    const { createChibi2Character } = await import('/avatar-3d/js/chibi2.js');
+    const looks = await (await fetch('/prototypes/emberveil/data/class-looks.json')).json();
+    const hits = {};
+    // Rays aimed at the head centre from above and all around (50-90 degrees up): the first visible
+    // (front-facing) surface must not carry the skin colour. A cap or crown whose shell sits inside
+    // the skull fails here, because the scalp is the first thing the ray meets.
+    for (const [cls, look] of Object.entries(looks.classes)) {
+      const av = look.avatar; if (!av.hat || av.hat.id === 'none') continue;
+      const c = await createChibi2Character(av); c.group.updateMatrixWorld(true);
+      const meshes = c.group.children[0].children.filter(o => o.isSkinnedMesh).map(m => new THREE.Mesh(m.geometry, new THREE.MeshBasicMaterial()));
+      const H = c.parts.eyeR.position.x / 0.12, center = new THREE.Vector3();
+      c.parts.head.getWorldPosition(center); center.y += 0.30 * H;
+      const skin = new THREE.Color(av.body.skin), ray = new THREE.Raycaster();
+      let skinHits = 0, rays = 0;
+      for (let el = 50; el <= 90; el += 8) for (let az = 0; az < 360; az += 15) {
+        const e = el * Math.PI / 180, z = az * Math.PI / 180;
+        const d = new THREE.Vector3(Math.sin(z) * Math.cos(e), Math.sin(e), Math.cos(z) * Math.cos(e));
+        ray.set(center.clone().addScaledVector(d, 3), d.negate()); rays++;
+        const hit = ray.intersectObjects(meshes, false)[0]; if (!hit) continue;
+        const col = hit.object.geometry.attributes.color, rgb = new THREE.Color(col.getX(hit.face.a), col.getY(hit.face.a), col.getZ(hit.face.a));
+        // Vertex colours carry a 0.94-1.0 vertical tint, so compare hue at matched brightness.
+        const k = (rgb.r + rgb.g + rgb.b) / (skin.r + skin.g + skin.b);
+        if (k > 0.9 && k < 1.02 && Math.abs(rgb.r - skin.r * k) + Math.abs(rgb.g - skin.g * k) + Math.abs(rgb.b - skin.b * k) < 0.02) skinHits++;
+      }
+      hits[cls + ':' + av.hat.id] = { skinHits, rays };
+      c.dispose();
+    }
+    return hits;
+  });
+  expect(Object.keys(result).length).toBeGreaterThan(10);
+  for (const [key, r] of Object.entries(result)) expect({ key, skinHits: r.skinHits }).toEqual({ key, skinHits: 0 });
+  expect(errors).toEqual([]);
+});
+
+test('every part id an Emberveil class uses builds its own Chibi 2 shape, and every class carries a decoration', async ({ page }) => {
+  test.setTimeout(120000);
+  const errors = await openLab(page);
+  const result = await page.evaluate(async () => {
+    const { createChibi2Character } = await import('/avatar-3d/js/chibi2.js');
+    const { SLOTS } = await import('/avatar-2d/js/parts/index.js');
+    const { DEFAULT_AVATAR, normalizeAvatar } = await import('/avatar-2d/js/render.js');
+    const looks = await (await fetch('/prototypes/emberveil/data/class-looks.json')).json();
+    // Geometry fingerprint: vertex count, rounded positions and triangle count of both body meshes.
+    const print = async av => {
+      const c = await createChibi2Character(av); let h = 0, n = 0;
+      for (const m of c.group.children[0].children) if (m.isSkinnedMesh) { const p = m.geometry.attributes.position.array; n += p.length; for (let i = 0; i < p.length; i += 3) h = (h * 31 + Math.round(p[i] * 1000) * 7 + Math.round(p[i + 1] * 1000) * 13 + Math.round(p[i + 2] * 1000)) % 2147483647; }
+      const r = { key: n + ':' + h, triangles: c.stats().triangles, meshes: c.stats().meshes }; c.dispose(); return r;
+    };
+    const used = {}, problems = [], budgets = {}, missingDecor = [], fallback = [];
+    for (const [cls, look] of Object.entries(looks.classes)) {
+      const n = normalizeAvatar(look.avatar);
+      if (!look.avatar.decor || look.avatar.decor.id === 'none' || n.decor.id !== look.avatar.decor.id) missingDecor.push(cls);
+      const b = await print(look.avatar); budgets[cls] = b.triangles; if (b.meshes !== 2) problems.push(cls + ': ' + b.meshes + ' meshes');
+      for (const slot of SLOTS) {
+        const id = slot === 'headShape' ? look.avatar.headShape : look.avatar[slot]?.id; if (!id) continue;
+        if ((slot === 'headShape' ? n.headShape : n[slot].id) !== id) fallback.push(cls + ' ' + slot + ':' + id);
+        (used[slot] ||= new Set()).add(id);
+      }
+    }
+    // Each used id on a plain, hatless base: it must differ from the slot's empty/default part and from every other used id.
+    for (const [slot, ids] of Object.entries(used)) {
+      const base = structuredClone(DEFAULT_AVATAR); base.hat.id = 'none';
+      const baseId = slot === 'headShape' ? base.headShape : base[slot].id, prints = {};
+      const baseline = await print(base);
+      for (const id of ids) {
+        const a = structuredClone(base); if (slot === 'headShape') a.headShape = id; else a[slot].id = id;
+        prints[id] = (await print(a)).key;
+        if (id !== baseId && id !== 'none' && prints[id] === baseline.key) problems.push(`${slot}:${id} builds nothing (same as ${baseId})`);
+      }
+      const seen = {};
+      for (const [id, key] of Object.entries(prints)) { if (seen[key]) problems.push(`${slot}:${id} has the same shape as ${seen[key]}`); else seen[key] = id; }
+    }
+    return { problems, budgets, missingDecor, fallback, decorIds: [...used.decor] };
+  });
+  expect(result.fallback).toEqual([]);
+  expect(result.missingDecor).toEqual([]);
+  expect(result.decorIds.length).toBeGreaterThanOrEqual(8);
+  expect(result.problems).toEqual([]);
+  for (const [cls, t] of Object.entries(result.budgets)) expect({ cls, under: t < 8500 }).toEqual({ cls, under: true });
+  expect(errors).toEqual([]);
+});
+
 test('eight fighters reduce draw calls and geometry under identical rendering settings', async ({ page }) => {
   const errors = await openLab(page, 'combat');
   const result = await page.evaluate(async () => {

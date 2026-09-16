@@ -17,7 +17,10 @@
 // midnight. How BIG they are drawn is not real — see `siblingScale` below.
 
 import * as THREE from 'three';
+import { clamp } from '../../../worldgen/js/noise.js';
 import { createPlanet, createStar } from '../../../assets/js/space-models.js';
+import { cloudTexture } from '../../../universe/js/texture.js';
+import { atmospherePalette } from '../../../worldgen/js/weather.js';
 
 const DOME = 1000;                 // sky-scene radius; everything sits on this shell
 const EARTH_RADII_PER_AU = 23455;  // 1 AU / Earth's radius — turns "radius in Earths" into AU
@@ -25,7 +28,7 @@ const EARTH_RADII_PER_AU = 23455;  // 1 AU / Earth's radius — turns "radius in
 /** Rotate `v` around `axis` by `angle`, in place. */
 function spin(v, axis, angle) { return v.applyAxisAngle(axis, angle); }
 
-export function createSky({ star, system, planet, balance = {} } = {}) {
+export function createSky({ star, system, planet, balance = {}, palette = {} } = {}) {
   const cfg = balance.sky || {};
   const dayLength = cfg.dayLengthSeconds ?? 900;
   const siblingScale = cfg.siblingScale ?? 160;
@@ -34,12 +37,15 @@ export function createSky({ star, system, planet, balance = {} } = {}) {
   const scene = new THREE.Scene();
   const skyCam = new THREE.PerspectiveCamera(60, 1, 0.1, DOME * 4);
 
-  // the plane the whole system orbits in, tilted by the planet's axial tilt so the sun does not
-  // simply rise due east on every world
+  // The plane the whole system orbits in, tilted by the planet's axial tilt so the sun does not
+  // simply rise due east on every world. `pole` is the horizontal axis the sky turns about, and
+  // `base` is where the sun sits at angle 0 — straight up, i.e. noon. Getting that wrong is what
+  // made every run start at midnight.
   const tilt = ((planet?.axialTilt ?? 20) * Math.PI) / 180;
   const pole = new THREE.Vector3(Math.sin(tilt), 0, Math.cos(tilt)).normalize();
-  const base = new THREE.Vector3(0, 0, -1).cross(pole).normalize();
-  if (base.lengthSq() < 1e-6) base.set(1, 0, 0);
+  const base = new THREE.Vector3(0, 1, 0);
+  // where in the day a new game begins: 0 midnight, 0.25 dawn, 0.5 noon
+  const startFraction = cfg.startFraction ?? 0.34;
 
   // ------------------------------------------------------------------ the star
   const sunGroup = new THREE.Group();
@@ -74,9 +80,21 @@ export function createSky({ star, system, planet, balance = {} } = {}) {
   const ourAu = planet?.orbit?.au ?? 1;
   const ourPeriod = planet?.orbit?.periodDays || 365;
 
+  /**
+   * A neighbour as it should look from here: its own weather on it. Every body gets its palette
+   * from the same function this planet's sky uses, so a toxic world really does hang up there with
+   * a sick yellow cloud deck, and a dead rock has none at all.
+   */
+  function skyBody(body, detail, textureSize) {
+    const pal = atmospherePalette(body);
+    const tinted = { ...body, atmosphere: { ...(body.atmosphere || {}), color: pal.cloud } };
+    const clouds = cloudTexture(tinted, { size: textureSize });
+    return createPlanet(tinted, { radius: 1, detail, textureSize, texture: clouds ? { clouds } : {} });
+  }
+
   for (const p of system?.planets || []) {
     if (p.id === planet.id) continue;
-    const model = createPlanet(p, { radius: 1, detail: 20, textureSize: 128 });
+    const model = skyBody(p, 20, 128);
     model.group.userData.body = p;
     scene.add(model.group);
     bodies.push({
@@ -88,7 +106,7 @@ export function createSky({ star, system, planet, balance = {} } = {}) {
     });
   }
   for (const m of planet?.moons || []) {
-    const model = createPlanet(m, { radius: 1, detail: 16, textureSize: 96 });
+    const model = skyBody(m, 16, 96);
     model.group.userData.body = m;
     scene.add(model.group);
     bodies.push({
@@ -105,8 +123,10 @@ export function createSky({ star, system, planet, balance = {} } = {}) {
   }
 
   // ------------------------------------------------------------------ colours
-  const dayColor = new THREE.Color(planet?.skyColor || '#7fb0d8');
-  const duskColor = new THREE.Color('#d8783c');
+  // the planet's own sky, varied per world by worldgen's palette (two lava worlds are not the
+  // same lava world)
+  const dayColor = new THREE.Color(palette.sky || planet?.skyColor || '#7fb0d8');
+  const duskColor = new THREE.Color(palette.skyHorizon || '#d8783c');
   const nightColor = new THREE.Color('#050810');
   const skyColor = new THREE.Color();
   scene.background = skyColor;
@@ -127,10 +147,17 @@ export function createSky({ star, system, planet, balance = {} } = {}) {
     return out;
   }
 
-  function update(seconds) {
+  /**
+   * seconds: the run clock. env: { gloom 0..1 how much the weather is stealing the light,
+   * flash 0..1 a lightning strike this frame }.
+   */
+  function update(seconds, env = {}) {
     elapsed = seconds;
-    const sunAngle = (elapsed / dayLength) * Math.PI * 2;
-    dayFraction = (elapsed / dayLength) % 1;
+    const gloom = Math.max(0, Math.min(1, env.gloom ?? 0));
+    const flash = Math.max(0, Math.min(1, env.flash ?? 0));
+    // angle 0 is noon (the sun on `base`, straight up), so shift by where the day starts
+    const sunAngle = ((elapsed / dayLength) + (startFraction - 0.5)) * Math.PI * 2;
+    dayFraction = (((sunAngle / (Math.PI * 2)) + 0.5) % 1 + 1) % 1;
 
     // the sun
     placeOnDome(sunDir, 0, sunAngle);
@@ -143,11 +170,15 @@ export function createSky({ star, system, planet, balance = {} } = {}) {
     const day = Math.max(0, up);
     const dusk = Math.max(0, 1 - Math.abs(up) * 4);
     skyColor.copy(nightColor).lerp(dayColor, day).lerp(duskColor, dusk * 0.55);
-    sunLight.intensity = 0.15 + day * 2.1;
-    ambient.intensity = 0.16 + day * 0.5;
+    // heavy weather steals the light and washes the colour out of the sky
+    if (gloom > 0) skyColor.lerp(new THREE.Color(0x6a7079), gloom * 0.6).multiplyScalar(1 - gloom * 0.25);
+    if (flash > 0) skyColor.lerp(new THREE.Color(0xd8e4ff), flash * 0.7);
+    sunLight.intensity = (0.15 + day * 2.1) * (1 - gloom * 0.7) + flash * 1.6;
+    ambient.intensity = (0.16 + day * 0.5) * (1 - gloom * 0.35) + flash * 0.8;
     ambient.color.copy(skyColor).lerp(new THREE.Color(0xffffff), 0.35);
     fog.color.copy(skyColor);
-    starMat.opacity = Math.max(0, 1 - day * 3);
+    // cloud cover hides the stars as surely as daylight does
+    starMat.opacity = Math.max(0, 1 - day * 3) * (1 - clamp(env.cloud ?? 0, 0, 1) * 0.95);
 
     // the neighbours
     const days = elapsed / dayLength * ((planet?.dayLengthHours ?? 24) / 24);
@@ -179,8 +210,8 @@ export function createSky({ star, system, planet, balance = {} } = {}) {
       b.model.group.lookAt(0, 0, 0);
       b.visibleSize = size;
       b.distanceAu = distanceAu;
-      // a body low in a bright sky washes out, like a daytime moon
-      const washed = Math.max(0, 1 - day * 1.6) * 0.75 + 0.25;
+      // a body low in a bright sky washes out, like a daytime moon — and cloud hides it outright
+      const washed = (Math.max(0, 1 - day * 1.6) * 0.75 + 0.25) * (1 - clamp(env.cloud ?? 0, 0, 1) * 0.92);
       b.model.group.traverse(o => {
         if (!o.material) return;
         o.material.transparent = true;

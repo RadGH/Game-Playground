@@ -539,6 +539,7 @@ function layerUnavailable(key, kind) {
   if (key === 'aura' && maxAbs(world.aura) < 0.15) return `no aura on ${name}`;
   if (key === 'magic' && kind === 'layer' && maxAbs(world.magic) < 0.15) return `no magic field on ${name}`;
   if (key === 'moisture' && kind === 'layer' && airless) return `no air, so no rain on ${name}`;
+  if (key === 'weather' && kind === 'layer' && airless) return `no atmosphere, so no weather on ${name}`;
   return null;
 }
 

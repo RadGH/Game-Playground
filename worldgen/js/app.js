@@ -9,6 +9,7 @@ import { renderWorld, renderRegion, renderLocal, cellAt, legend as legendRows, D
 import { layersPanel } from './layers-panel.js';
 import { toJSON, toPNG, download, jsonSizeKB } from './export.js';
 import { worldSummary } from './history.js';
+import { weatherAt, weatherOdds, worldWeatherProfile, WEATHER_COLOR } from './weather.js';
 
 const $ = id => document.getElementById(id);
 
@@ -227,6 +228,8 @@ function onHover(ev) {
     ['rain', `${Math.round(info.moisture * 100)}%`],
   ];
   if (info.river) bits.push(['river', ['', 'stream', 'river', 'great river'][info.river] || 'river']);
+  const odds = weatherOdds(weatherAt(grid, cell.x, cell.y));
+  if (odds.length) bits.push(['weather', `${odds[0].name} ${Math.round(odds[0].share * 100)}%`]);
   if (Math.abs(info.aura) > 0.3) bits.push(['aura', info.aura > 0 ? `cursed ${Math.round(info.aura * 100)}%` : `blessed ${Math.round(-info.aura * 100)}%`]);
   if (info.magic > 0.6) bits.push(['magic', `${Math.round(info.magic * 100)}%`]);
   if (state.level === 'world') {
@@ -392,6 +395,18 @@ function buildRight() {
     ['built in', `${w.stats.ms} ms`],
   ];
   for (const [k, v] of rows) { stats.append(el('dt', { text: k }), el('dd', { text: String(v) })); }
+  // what the skies of this world are like, over the whole map
+  const profile = worldWeatherProfile(w).slice(0, 5);
+  // same swatch markup the map legend uses, so it is already styled
+  const weatherRows = el('div', { class: 'legend' });
+  for (const row of profile) {
+    weatherRows.append(el('span', { class: 'sw' },
+      el('i', { style: { background: WEATHER_COLOR[row.key] || '#888888' } }),
+      `${row.name} ${Math.round(row.share * 100)}%`));
+  }
+  right.append(panel('Weather', weatherRows,
+    el('p', { class: 'muted small', text: 'How often each kind of sky turns up across this world. Pick the weather layer to see where.' })));
+
   right.append(panel('This world',
     el('p', { class: 'blurb', text: worldSummary(w) }),
     stats,

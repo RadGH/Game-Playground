@@ -8,6 +8,7 @@
 //   renderWorld(ctx, world, { layers: { biomes: true, rivers: true, roads: true, nodes: true, labels: true } });
 
 import { BIOMES, RAMPS, rampColor, hexToRgb, mixHex, palettedColors } from './biomes.js';
+import { weatherMap, WEATHER, WEATHER_COLOR, WEATHER_KEYS } from './weather.js';
 import { DEFAULT_RELIEF, elevationToMetres, formatMetres, hasSea } from './relief.js';
 
 export const DEFAULT_LAYERS = { biomes: true, hillshade: true, rivers: true, roads: true, nodes: true, labels: true, regions: false, borders: true, aura: false, elevation: false, temperature: false, moisture: false, drainage: false };
@@ -49,10 +50,14 @@ export function worldPixels(world, opts = {}) {
   const tint = tintSpec ? normTint(tintSpec) : null;
   // a world with no sea (a dry moon, a lava plain) should not paint its low ground ocean blue
   const elevRamp = hasSea(world) ? RAMPS.elevation : (RAMPS.elevationDry || RAMPS.elevation);
+  const wMap = layer === 'weather' ? weatherMap(world) : null;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const i = y * w + x;
     let r, g, b;
-    if (layer === 'biomes' || layer === 'regions') {
+    if (layer === 'weather') {
+      const c = hexToRgb(WEATHER_COLOR[WEATHER_KEYS[wMap[i]]] || '#888888');
+      r = c[0]; g = c[1]; b = c[2];
+    } else if (layer === 'biomes' || layer === 'regions') {
       const c = BIOME_RGB[world.biome[i]]; r = c[0]; g = c[1]; b = c[2];
       if (layer === 'regions' && world.region && world.region[i] >= 0) {
         const rc = regionColor(world.region[i]);
@@ -450,6 +455,16 @@ export function legend(world, layerName = 'biomes') {
     for (let i = 0; i < world.biome.length; i++) seen.set(world.biome[i], (seen.get(world.biome[i]) || 0) + 1);
     const table = world.opts?.palette ? palettedColors(world.opts.palette) : BIOMES;
     return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([id, n]) => ({ color: table[id].color, label: table[id].name, share: n / world.biome.length }));
+  }
+  if (layerName === 'weather') {
+    const map = weatherMap(world);
+    const seen = new Map();
+    for (let i = 0; i < map.length; i++) seen.set(map[i], (seen.get(map[i]) || 0) + 1);
+    return [...seen.entries()].sort((a, b) => b[1] - a[1]).map(([id, n]) => ({
+      color: WEATHER_COLOR[WEATHER_KEYS[id]] || '#888888',
+      label: WEATHER[id]?.name || WEATHER_KEYS[id],
+      share: n / map.length,
+    }));
   }
   const ramp = RAMPS[layerName] || RAMPS.elevation;
   const ends = { elevation: ['deep', 'peak'], temperature: ['frozen', 'baking'], moisture: ['parched', 'sodden'], drainage: ['dry', 'river'], aura: ['blessed', 'cursed'], magic: ['none', 'raw magic'] }[layerName] || ['low', 'high'];

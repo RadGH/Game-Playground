@@ -374,7 +374,8 @@ test('surface maps read real heights, and the Layers panel follows each body', a
   // the Layers panel is up, with World Forge's chips and toggles
   const panel = page.locator('#right .panel', { has: page.locator('h3', { hasText: /^Layers$/ }) });
   await expect(panel).toHaveCount(1);
-  await expect(panel.locator('.chips.layers .chip')).toHaveCount(8);
+  // nine since World Forge gained the weather layer (worldgen/js/weather.js)
+  await expect(panel.locator('.chips.layers .chip')).toHaveCount(9);
   await expect(panel.locator('[data-toggle]')).toHaveCount(7);
 
   // pick the elevation layer and turn hillshade off: remembered across bodies

@@ -53,7 +53,7 @@ export class Hud {
 
   // ---------------------------------------------------------------- bars and place
 
-  tick(player, { place, clock, target, sky }) {
+  tick(player, { place, clock, target, sky, weather }) {
     const hpPct = Math.max(0, player.hp / player.maxHp * 100);
     $('bar-hp-fill').style.width = hpPct + '%';
     $('bar-hp-text').textContent = `${Math.ceil(player.hp)} / ${player.maxHp}`;
@@ -76,6 +76,7 @@ export class Hud {
       $('target').classList.add('hidden');
     }
     if (sky) $('hud-sky').textContent = sky;
+    if (weather !== undefined) $('hud-weather').textContent = weather;
   }
 
   /** XP thresholds without importing the module twice. */

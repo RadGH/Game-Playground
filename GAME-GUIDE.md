@@ -305,6 +305,34 @@ rotation, drawn first, then `renderer.clearDepth()` and the world over it. Every
 infinitely far away for free. Sibling planets are placed by real orbital angle and drawn oversized on
 purpose - `balance.json` `sky.siblingScale`.
 
+## Weather over a generated world
+
+`worldgen/js/weather.js` turns a cell's climate into what the sky above it is doing. Pure data, no
+renderer, shared by World Forge's viewer and Farhold.
+
+```js
+import { weatherWeights, rollWeather, WeatherClock, atmospherePalette, weatherMap } from '/worldgen/js/weather.js';
+const weights = weatherWeights({ temperature, moisture, elevation, biome, water, aura, magic, volcanic, liquid, archetype });
+const clock = new WeatherClock({ weights, seed: 7 });   // holds a state for minutes, then crossfades
+clock.update(dt);
+clock.blend();   // { cloud, rain, snow, dust, fog, wind, lightning, gloom, key, name } — all 0..1
+```
+
+14 states. The climate decides which are possible: a hot dry plain blows sand but never snows, a
+freezing peak blizzards but never blows sand, a storm needs heat *and* water, volcanic ground throws
+ash and embers, raw magic throws ion storms, and a world with `liquid: 'none'` gets no precipitation
+at all. `weatherMap(world)` gives the dominant state per cell (cached) — that is the viewer's weather
+layer, and a game can read it as a climate map.
+
+`atmospherePalette(body)` gives a world its `sky`, `skyHorizon`, `sea`, `cloud`, `cloudShadow` and
+`fog`, varied by the body's own seed as far as its `extremity` allows — a temperate world barely
+shifts, a lava or void-touched one can come out any colour. Use it for the sky, the water and the
+cloud decks, including the ones on planets seen from another planet's surface.
+
+`prototypes/farhold/js/weather.js` is the matching renderer, if you want a reference: two scrolling
+cloud decks on a sky dome, rain as recycled line segments in a box that follows the camera, snow and
+dust as points, lightning that flashes the scene, and fog that closes the view to 90 m in a blizzard.
+
 ## Worked example: Emberveil (a full RPG on the pieces)
 
 `prototypes/emberveil/` rebuilds the user's Emberveil RPG: its own data (copied by `tools/build-emberveil-data.mjs`), a loot engine with affixes/uniques/sets, a stat + talent system, an auto-battle simulator and a branching world map, all presented with Mii bodies (30 class looks with new gear parts), creature bodies and Lingo barks. Read its README for what maps to what.

@@ -347,3 +347,45 @@ screenshots each level into `test-results/`.
   quietly drops some labels rather than moving them.
 - Rivers are drawn cell to cell, so at small scales they look slightly stepped.
 - The local tile is schematic (scattered shapes), not art. It is meant to hand a game a layout.
+
+## Weather (`js/weather.js`, added 2026-09-15)
+
+A map already knows a cell's temperature, moisture, height and biome, which is enough to say what the
+sky over it is usually doing. This module turns climate into weather. It is pure data and arithmetic
+— no DOM, no canvas — so the viewer, a game and the node tests all read the same model.
+
+```js
+import { weatherWeights, rollWeather, weatherOdds, WeatherClock, weatherMap, atmospherePalette } from './weather.js';
+
+const weights = weatherWeights(cellClimate(world, x, y));  // { clear: 3.2, rain: 1.1, storm: 0.4, … }
+rollWeather(weights, rng);                                 // 'rain'
+weatherOdds(weights);                                      // [{ key, name, share }, …] highest first
+
+const clock = new WeatherClock({ weights, seed: 7 });      // holds a state for minutes, then crossfades
+clock.update(dt);
+clock.blend();   // { cloud, rain, snow, dust, fog, wind, lightning, gloom, key, name } — all 0..1
+clock.set('storm', { lock: true });                        // hold it (a debug menu)
+```
+
+**14 states**: clear, fair, cloudy, overcast, drizzle, rain, thunderstorm, snowfall, blizzard, fog,
+sandstorm, ashfall, ember storm and ion storm. Each carries the eight numbers a renderer actually
+wants, so nothing has to interpret a name.
+
+**The climate decides what is possible.** A hot dry plain can blow sand but can never snow; a
+freezing peak can blizzard but never blows sand; a storm needs heat *and* water, not just water;
+marshes are foggy and hilltops are not; volcanic ground and lava worlds throw ash and embers; raw
+magic and void-touched ground throw ion storms; and a world generated with `liquid: 'none'` gets no
+rain, snow or drizzle at all — only the dry states.
+
+**In the viewer**: a `weather` map layer (with its own legend), the most likely weather for whatever
+cell you hover, and a panel listing the five kinds of sky that turn up most across the whole world.
+`weatherMap(world)` computes the dominant state per cell once and keeps it with the world.
+
+**Colours**: `atmospherePalette(body)` gives a world its `sky`, `skyHorizon`, `sea`, `cloud`,
+`cloudShadow` and `fog`. The archetype sets the family, the body's own seed moves it around inside
+that family, and how far it may move is `extremityOf(body)` — a temperate blue-sky world barely
+shifts, a lava, toxic or void-touched one can come out any colour it likes. Two toxic worlds are not
+the same toxic world.
+
+Tests: `worldgen/tests/weather.test.js` (12 tests). A renderer built on this lives in
+`prototypes/farhold/js/weather.js`.

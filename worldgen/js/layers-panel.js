@@ -17,7 +17,7 @@
 import { el, checkbox, panel } from '../../shared/ui.js';
 
 /** The whole-map layers, one at a time (render.js worldPixels `layer`). */
-export const LAYER_NAMES = ['biomes', 'elevation', 'temperature', 'moisture', 'drainage', 'aura', 'magic', 'regions'];
+export const LAYER_NAMES = ['biomes', 'elevation', 'temperature', 'moisture', 'drainage', 'aura', 'magic', 'weather', 'regions'];
 
 /** The overlays drawn on top, any number at once (render.js `layers`). */
 export const LAYER_TOGGLES = ['hillshade', 'rivers', 'roads', 'nodes', 'labels', 'borders', 'aura'];

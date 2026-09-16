@@ -144,3 +144,33 @@ body {
 .small { font-size: 12px; }
 .back { position: fixed; left: 14px; top: 14px; z-index: 30; color: #8fa0b8; font-size: 12px; text-decoration: none; }
 .back:hover { color: #cfe0ef; }
+
+/* ---------------------------------------------------------------- debug menu (the ` key) */
+
+.debug {
+  position: fixed; z-index: 50; left: 14px; top: 58px; width: 370px;
+  max-height: 82vh; overflow: auto;
+  background: #0b111ceb; border: 1px solid #2c3a52; border-radius: 10px; padding: 12px 14px;
+  box-shadow: 0 14px 44px #000a;
+}
+.debug.hidden { display: none; }
+.debug-head { display: flex; justify-content: space-between; align-items: baseline; }
+.debug h3 { margin: 0 0 4px; font-size: 15px; color: #7fd8ff; }
+.debug-hint { color: #66748a; font-size: 11px; }
+.debug-group { margin-top: 10px; }
+.debug-group h4 { margin: 0 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; }
+.debug-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.debug-btn {
+  background: #16202f; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px;
+  padding: 4px 8px; font: inherit; font-size: 12px; cursor: pointer;
+}
+.debug-btn:hover { border-color: #3f6f9a; }
+.debug-btn.on { background: #1b4a6a; border-color: #3f9fd8; color: #dff2ff; }
+.debug-btn.wide { flex: 0 0 100%; }
+.debug-slider { width: 100%; margin-top: 4px; }
+.debug-readout {
+  margin: 0; font: 11px/1.5 var(--mono, ui-monospace, Consolas, monospace);
+  color: #8fa0b8; white-space: pre-wrap;
+}
+
+#hud-weather { color: #b8d4ea; }

@@ -18,7 +18,7 @@ import { generateSystem } from '../../../universe/js/system.js';
 import { generatePlanetMap, reliefFor, surfaceOf } from '../../../universe/js/planetmap.js';
 import { elevationToMetres } from '../../../worldgen/js/relief.js';
 import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
-import { makeNoise2D, fbm, subSeed, clamp, lerp, makeRng, smoothstep } from '../../../worldgen/js/noise.js';
+import { makeNoise2D, fbm, subSeed, clamp, lerp, makeRng, smoothstep, blur } from '../../../worldgen/js/noise.js';
 
 /** Metres across one world-map cell. The one number that sets the size of the planet. */
 export const M_PER_CELL = 640;
@@ -87,6 +87,28 @@ export function makeTerrain(world, planet = null, opts = {}) {
 
   const widthM = (w - 1) * M_PER_CELL;
   const depthM = (h - 1) * M_PER_CELL;
+
+  // Rivers and roads are cut into the ground rather than painted on top of it, so a river runs
+  // along the floor of its own valley and a road sits in a shallow cutting. Both start as a mask
+  // over the map's cells, softened so the valley has sides instead of a step.
+  const riverDepth = opts.riverDepth ?? 16;
+  const N = w * h;
+  const riverField = new Float32Array(N);
+  const roadField = new Float32Array(N);
+  if (world.river) for (let i = 0; i < N; i++) riverField[i] = world.river[i] ? Math.min(1, world.river[i] / 3) : 0;
+  for (const road of world.roads || []) for (const c of road.cells || []) if (c >= 0 && c < N) roadField[c] = 1;
+  blur(riverField, w, h, 1);
+  blur(roadField, w, h, 1);
+  // blurring flattens the peaks; scale them back so the carve depth means what it says
+  const restore = arr => {
+    let max = 0;
+    for (let i = 0; i < N; i++) if (arr[i] > max) max = arr[i];
+    if (max <= 1e-6) return;
+    const k = Math.min(6, 1 / max);
+    for (let i = 0; i < N; i++) arr[i] = Math.min(1, arr[i] * k);
+  };
+  restore(riverField);
+  restore(roadField);
   // A world generated dry has no sea; its heights are measured from a datum instead.
   const hasSea = (world.opts?.liquid ?? 'water') !== 'none' && relief.datum === 'sea';
   const seaLevel = 0;
@@ -109,9 +131,14 @@ export function makeTerrain(world, planet = null, opts = {}) {
     const broken = clamp(layer(world.slope, fx, fy), 0, 1);
     // under water the detail calms down — the seabed is not a mountain range
     const damp = base < 0 ? 0.3 : 1;
-    const coarse = (fbm(n1, x * 0.0055, z * 0.0055, { octaves: 4 }) - 0.5) * (detailFlat + broken * detailRelief) * damp;
-    const fine = (fbm(n2, x * 0.016, z * 0.016, { octaves: 3 }) - 0.5) * (detailFine * (1 + broken * 3)) * damp;
-    return base + coarse + fine;
+    // a road is graded flat and a river bed is smooth, so both quieten the detail noise
+    const river = layer(riverField, fx, fy);
+    const road = layer(roadField, fx, fy);
+    const smoothed = 1 - 0.75 * road - 0.5 * river;
+    const coarse = (fbm(n1, x * 0.0055, z * 0.0055, { octaves: 4 }) - 0.5) * (detailFlat + broken * detailRelief) * damp * smoothed;
+    const fine = (fbm(n2, x * 0.016, z * 0.016, { octaves: 3 }) - 0.5) * (detailFine * (1 + broken * 3)) * damp * smoothed;
+    // and the river cuts its valley
+    return base + coarse + fine - riverDepth * smoothstep(0, 0.7, river);
   }
 
   /** How steep the ground is here: rise over run, sampled across `step` metres. */
@@ -169,9 +196,11 @@ export function makeTerrain(world, planet = null, opts = {}) {
 
   /**
    * Somewhere sensible to start: dry land, not a cliff, not the middle of an ice cap, and — when
-   * the planet has a sea — within sight of something other than ocean.
+   * the planet has a sea — within sight of something other than ocean. It also leans toward
+   * starting near a road or a town, because an empty plain is a poor first thing to see.
    */
   function spawnPoint(rng = makeRng(world.seed)) {
+    const towns = (world.nodes || []).filter(n => n.type === 'settlement' || n.type === 'port');
     let best = null, bestScore = -Infinity;
     for (let tries = 0; tries < 400; tries++) {
       const cx = 2 + Math.floor(rng() * (w - 4)), cy = 2 + Math.floor(rng() * (h - 4));
@@ -183,7 +212,13 @@ export function makeTerrain(world, planet = null, opts = {}) {
       const height = heightAt(x, z);
       if (hasSea && height < 4) continue;
       const steep = slopeAt(x, z, 6);
-      const score = (b.habit ?? 0.3) * 2 - steep * 4 - Math.abs(height - 320) / 2200 + rng() * 0.25;
+      // how close the nearest town is, in map cells
+      let townCells = Infinity;
+      for (const t of towns) townCells = Math.min(townCells, Math.hypot(t.x - cx, t.y - cy));
+      const nearTown = Number.isFinite(townCells) ? Math.max(0, 1 - townCells / 6) : 0;
+      const onRoad = roadField[i];
+      const score = (b.habit ?? 0.3) * 2 - steep * 4 - Math.abs(height - 320) / 2200
+        + nearTown * 2.2 + onRoad * 1.2 + rng() * 0.25;
       if (score > bestScore) { bestScore = score; best = { x, z, height }; }
     }
     if (!best) best = { x: widthM / 2, z: depthM / 2, height: heightAt(widthM / 2, depthM / 2) };
@@ -195,6 +230,23 @@ export function makeTerrain(world, planet = null, opts = {}) {
     width: w, height: h,
     heightAt, slopeAt, normalAt, colorAt, biomeAt, biomeIdAt, temperatureAt, underwater,
     clampToWorld, spawnPoint, layer,
+    /** 0..1 how much of a river / road runs through this point — the carve fields. */
+    riverAt: (x, z) => layer(riverField, x / M_PER_CELL, z / M_PER_CELL),
+    roadAt: (x, z) => layer(roadField, x / M_PER_CELL, z / M_PER_CELL),
+    /** The climate at a point, in the shape worldgen's weather model wants. */
+    climateAt(x, z) {
+      const fx = x / M_PER_CELL, fy = z / M_PER_CELL;
+      const i = IDX(w, cellX(x), cellY(z));
+      return {
+        temperature: layer(world.temperature, fx, fy),
+        moisture: layer(world.moisture, fx, fy),
+        elevation: layer(world.elevation, fx, fy),
+        biome: world.biome[i], water: world.water[i],
+        aura: world.aura?.[i] ?? 0, magic: world.magic?.[i] ?? 0, volcanic: world.volcanic?.[i] ?? 0,
+        liquid: world.opts?.liquid ?? 'water',
+        archetype: planet?.archetype || world.planet?.archetype || null,
+      };
+    },
     /** Map cell under a world position, for the minimap and for "where am I". */
     cellAt: (x, z) => ({ x: cellX(x), y: cellY(z) }),
     /** The region name the player is standing in, when the map named one. */

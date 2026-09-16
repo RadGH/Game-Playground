@@ -207,13 +207,31 @@
         "res": 48
       }
     ],
-    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count — near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests."
+    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count — near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests. riverDepth is how deep a river cuts its valley into the ground, in metres.",
+    "riverDepth": 16
   },
   "sky": {
     "dayLengthSeconds": 900,
     "siblingScale": 160,
     "moonScale": 1,
     "starScale": 2.2,
-    "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way."
+    "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way. startFraction is where in the day a new run begins: 0 midnight, 0.25 dawn, 0.5 noon.",
+    "startFraction": 0.34
+  },
+  "props": {
+    "density": 1,
+    "radius": 7,
+    "grassPerCell": 150,
+    "_doc": "Scatter knobs. radius is in 64 m prop cells, so 7 is props out to ~450 m. density scales every kit; the debug menu changes it live."
+  },
+  "features": {
+    "radius": 2600,
+    "_doc": "How far out rivers, roads, bridges and settlements are built, in metres."
+  },
+  "weather": {
+    "minMinutes": 1.2,
+    "maxMinutes": 4,
+    "transitionSeconds": 20,
+    "_doc": "How long a weather state holds and how long it takes to roll in. The states themselves and which ones a climate allows live in worldgen/js/weather.js."
   }
 }

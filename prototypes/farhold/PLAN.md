@@ -28,32 +28,97 @@ things, take levels and wear what drops.
 
 ---
 
-## Phase 2 — A world worth walking
+## Phase 2 — A world worth walking ✅ done 2026-09-15
 
-**You can:** walk through forests, over rocks, past ruins — and the ground stops being empty.
+**You can:** walk through forests and past ruins, follow a road to a village, stand on a bridge over
+a river in its own valley, and watch a thunderstorm roll in over it.
 
-- **Scatter system.** A deterministic prop placer over the same seed: `propsAt(chunk)` returns what
-  stands in a cell, driven by biome, slope, moisture and altitude, so the same clearing is always
-  the same clearing. Reuse the feature sets `worldgen/js/local.js` already scatters (tree, rock,
-  bush, reed, cactus, ruinblock, bones, campfire…).
-- **Instanced rendering.** One `InstancedMesh` per prop type per ring; that is the reason phase 1
-  spent almost no draw calls. Budget: stay under ~60 draw calls with full scatter.
-- **Prop kits per biome family**: broadleaf / conifer / palm / dead / crystal / fungal / none.
-  Procedural, in the style of `avatar-3d/js/creatures.js` — shaped geometry, not downloads.
-- **Grass and ground cover** on the inner two rings only, fading out with distance.
-- **Water that reads as water**: shorelines, rivers carved from `world.river`, lakes, a shader with
-  depth tint and a moving normal. Swimming.
-- **Weather and time**: rain, snow, fog banks, wind that moves the grass; a real 24-hour clock.
-- **Caves and overhangs** where the map says there is relief (stretch goal — needs geometry the
-  heightfield cannot express).
+- **Scatter** (`js/props.js`) — 16 prop kinds (broadleaf, conifer, palm, dead tree, stump, rock,
+  boulder, bush, fern, reed, cactus, crystal, mushroom, bones, plus ruins, columns and standing
+  stones) over per-biome kits, with grass in the cells you are standing among. Nothing is stored:
+  every 64 m cell is generated from a hash of the seed and its own coordinates.
+- **Instanced** — one draw call per kind, which is what phase 1's five-draw-call terrain was saving
+  room for. ~3,200 props and 2,600 grass tufts cost about 8 draw calls.
+- **Weather** — `worldgen/js/weather.js` (the model, shared with World Forge) plus `js/weather.js`
+  (cloud decks, rain, snow, dust, lightning, fog). 14 states chosen by the climate you stand in.
+- **Per-planet colours** — `atmospherePalette()` varies sky, sea and cloud by the planet's own seed,
+  as far as that world's `extremity` allows.
+- **A neighbour's weather is visible from here** — sibling planets and moons carry their own cloud
+  decks in the sky.
+- **Rivers and roads carved into the terrain** (`js/planet.js`) and drawn (`js/features.js`), with
+  **bridges** where World Forge says a road crosses water.
+- **Settlements** — the map's own villages, towns, cities and capitals, built as instanced huts,
+  houses, halls, walls and towers. No people in them yet.
+- **A debug menu** on the backtick key: weather, time of day, world density, teleports, character
+  tools and a live readout.
+- **Three bugs fixed**: runs start in daylight, the character faces the way it walks (and D is
+  right), and the camera pulls in instead of rising so you can look straight up into space.
 
-**Risk:** scatter density is where the frame budget goes. Measure before adding a third prop layer.
+**Still open from this phase's wish list**, moved on rather than dropped: swimming, seasons, caves
+and overhangs, props that sway in the wind, and grass with a real alpha texture.
 
 ---
 
-## Phase 3 — A fight worth having
+## Phase 3 — The map, the fixes, and a fight worth having
 
-**You can:** use abilities, see spells land, fight things that are actually dangerous.
+**You can:** open a real map of the world you are on, and then use abilities and fight things that
+are actually dangerous.
+
+### The map screen (asked for 2026-09-15, first job of this phase)
+- **`M` opens a full-screen map** and releases the mouse so you can interact with it.
+- **Your location and heading** drawn on it, and the ground you have actually seen.
+- **Map pins** you can drop, name and remove.
+- **Filters like World Forge's**, because they are the same layers: biomes, elevation, temperature,
+  moisture, regions, and the new weather layer. `worldgen/js/render.js` already draws all of them and
+  `layers-panel.js` is the shared control, so this is mostly wiring.
+- **Rivers, roads and city markers** — `worldgen/js/render.js` already paints these; the node icons
+  live in `assets/data/icons/`.
+- **Routes later**: the groundwork is `worldgen/js/roads.js` `aStar`, which already finds a path over
+  the same cost field the road network was built from.
+
+### Fixes and systems asked for after playing phase 2 (2026-09-15)
+
+Bugs seen in play:
+- **Roads float and clip through the ground.** The ribbon is draped on sampled heights but the
+  terrain under it is not flat. Fix properly: flatten the ground *around* a road (widen the carve and
+  grade it across the road's width), then lay the ribbon in the graded channel.
+- **Roads run straight up mountains.** `worldgen/js/roads.js` `aStar` already costs by biome and
+  slope; the cost field needs a real gradient penalty so a road switchbacks around a peak, and
+  ideally a tunnel node where it cannot. This is a World Forge change, not a Farhold one.
+- **Walls do not always connect end to end.** `js/features.js` spaces wall segments by arc length
+  on a circle; it should walk the ring and place each segment to meet the last, and follow the
+  ground height between them.
+- **Tree "leaves" are six cylinders lying sideways** — the palm frond build rotates cones about the
+  wrong axis, so it reads as an arrow. Rebuild the palm (and check fern and reed, which use the
+  same trick).
+- **Seed 9's map is white.** A desert world is washing out the minimap. The minimap draws raw biome
+  colour with no shading; it needs the same hillshade the World Forge renderer uses, and a clamp.
+- **The text under the minimap is grey on a grey shadow** and unreadable on bright ground.
+- **Enemy dots on the minimap** exist but are too subtle to notice — make them obvious.
+
+Systems:
+- **Collision.** The player can walk through walls, houses and trees. Props and buildings are
+  instanced, so the cheapest answer is a per-cell list of cylinders (position + radius + height)
+  built alongside the instances, tested against the player each frame.
+- **Swimming.** Basic and simple: float at the surface, no diving, no seabed detail. Needs new
+  Chibi 2 clips for swimming forward, sideways and backwards.
+- **Saves.** Auto-save during play, load, new game, and more than one slot, in browser storage, with
+  a character name entered at the start. Keep it simple: the seed plus what the player has done —
+  never a dump of the world, because the world is a pure function of the seed.
+- **Debug readout**: show the seed and the player's coordinates on screen, and add a debug-menu
+  button that copies a block of diagnostic text to the clipboard to paste into a chat.
+
+Sky:
+- **Planets appear to move with the sun.** They do orbit — each uses its own `periodDays` — but the
+  clock makes it invisible: one 15-minute in-game day advances the orbital clock by less than a day,
+  so a sibling with a 365-day year needs about 91 hours of real time to go round. Give orbital
+  motion its own (faster) clock, or a time-scale knob, so the neighbours visibly move against the
+  stars.
+- **Eclipses.** Once the orbital clock is visible, a moon crossing the star is computable from the
+  same angles. Solar and lunar eclipses, with the world genuinely darkening — the sun's light and
+  the sky colour already run through one place, so this is a multiplier plus a corona.
+
+### The fight
 
 - **Skills and cooldowns** from Emberveil's `data/skills.js` — a bar of 4–6, mana, cast times.
 - **Spell effects**: `avatar-3d/js/spellfx.js` + `spellfx-batched.js`, already built for 11 elements,
@@ -188,8 +253,8 @@ camera-relative origin (shift the world, not the camera) before this phase, not 
 | Phase | Size | The hard part |
 |---|---|---|
 | 1 ✅ | done | getting the terrain and the map to agree |
-| 2 | large | scatter density vs. frame budget |
-| 3 | large | making third-person combat feel good |
+| 2 ✅ | done | scatter density vs. frame budget — landed at ~8 draw calls |
+| 3 | **large** | now carries the map screen, the phase 2 play-test fixes (roads, collision, swimming, saves, eclipses) and combat — may be worth splitting |
 | 4 | large | procedural settlements that do not look generated |
 | 5 | **largest** | the scale handoff and floating-point precision |
 | 6 | medium | making other planets worth the trip |
@@ -198,6 +263,6 @@ camera-relative origin (shift the world, not the camera) before this phase, not 
 | 9 | large | content, not code |
 | 10 | medium | the simulator pays for itself |
 
-**Suggested order if time is short:** 2 → 3 → 5. Props, a real fight, and the launch are what make
+**Suggested order if time is short:** 3 → 5. Props, a real fight, and the launch are what make
 it read as the game described. Phases 4, 6 and 9 are content depth; 7, 8 and 10 are polish that can
 land late.

@@ -66,8 +66,8 @@ export function createController(terrain, balance = {}, camera) {
 
   const self = {
     x: spawn.x, z: spawn.z, y: spawn.height,
-    vy: 0, yaw: 0, pitch: -0.22, grounded: true,
-    camDistance: 7.5, moving: 0, running: false,
+    vy: 0, yaw: 0, pitch: -0.18, grounded: true,
+    camDistance: 7.5, camDistanceUsed: 7.5, moving: 0, running: false,
     attackCooldown: 0, swing: 0,
   };
 
@@ -83,7 +83,9 @@ export function createController(terrain, balance = {}, camera) {
     const out = { attacked: false, landed: false };
     if (input) {
       self.yaw -= input.look[0] * 0.0026;
-      self.pitch = Math.max(-1.15, Math.min(0.75, self.pitch - input.look[1] * 0.0022));
+      // positive pitch looks up. The old ceiling of 0.75 rad stopped you seeing the sky directly
+      // overhead, which is the point of being on a planet with a system above it.
+      self.pitch = Math.max(-1.25, Math.min(1.45, self.pitch + input.look[1] * -0.0022));
     }
     if (self.attackCooldown > 0) self.attackCooldown -= dt;
     if (self.swing > 0) self.swing -= dt;
@@ -96,7 +98,9 @@ export function createController(terrain, balance = {}, camera) {
       const steep = terrain.slopeAt(self.x, self.z, 2);
       speed *= 1 / (1 + Math.max(0, steep) * 1.6);
       forward.set(Math.sin(self.yaw), 0, Math.cos(self.yaw));
-      right.set(forward.z, 0, -forward.x);
+      // right-hand side of `forward` is forward x up, which is (-cos, 0, sin) — getting this
+      // backwards is what had A and D swapped
+      right.set(-forward.z, 0, forward.x);
       const dx = forward.x * input.forward + right.x * input.strafe;
       const dz = forward.z * input.forward + right.z * input.strafe;
       const len = Math.hypot(dx, dz) || 1;
@@ -130,16 +134,31 @@ export function createController(terrain, balance = {}, camera) {
       // face where the camera is looking when you swing
     }
 
-    // camera: behind and above, pulled in if the ground is in the way
-    const dist = self.camDistance * (1 - self.pitch * 0.25);
-    camOffset.set(-Math.sin(self.yaw), 0, -Math.cos(self.yaw)).multiplyScalar(Math.cos(self.pitch) * dist);
-    let camX = self.x + camOffset.x;
-    let camZ = self.z + camOffset.z;
-    let camY = self.y + 1.9 - Math.sin(self.pitch) * dist;
-    const clearance = terrain.heightAt(camX, camZ) + 1.1;
-    if (camY < clearance) camY = clearance;
+    // The camera sits behind the player ALONG THE VIEW RAY and looks down it. That is the whole
+    // trick for looking up: when the ground is in the way we shorten the distance instead of
+    // lifting the camera, so the direction you are looking never changes — you can put your nose
+    // against the hill behind you and still see straight up into space.
+    const cp = Math.cos(self.pitch);
+    const lookX = Math.sin(self.yaw) * cp;
+    const lookY = Math.sin(self.pitch);
+    const lookZ = Math.cos(self.yaw) * cp;
+    const headY = self.y + 1.55;
+
+    let dist = self.camDistance;
+    for (let step = 0; step < 12; step++) {
+      const cx = self.x - lookX * dist, cz = self.z - lookZ * dist, cy = headY - lookY * dist;
+      if (cy > terrain.heightAt(cx, cz) + 0.5) break;
+      dist *= 0.8;
+      if (dist < 0.35) { dist = 0.35; break; }
+    }
+    self.camDistanceUsed = dist;
+
+    const camX = self.x - lookX * dist, camZ = self.z - lookZ * dist;
+    let camY = headY - lookY * dist;
+    // a last resort so the camera can never end up inside a hill
+    camY = Math.max(camY, terrain.heightAt(camX, camZ) + 0.35);
     camera.position.set(camX, camY, camZ);
-    camera.lookAt(self.x, self.y + 1.15, self.z);
+    camera.lookAt(camX + lookX, camY + lookY, camZ + lookZ);
 
     return out;
   }

@@ -118,22 +118,38 @@ Sky:
   same angles. Solar and lunar eclipses, with the world genuinely darkening — the sun's light and
   the sky colour already run through one place, so this is a multiplier plus a corona.
 
-### Queued from the round 3 play-test (2026-09-15)
+### Queued from the round 3 play-test ✅ **all done 2026-09-15**
 
 Camera and view:
-- **Over the LEFT shoulder by default**, not the right.
-- **An options menu**, with a Controls section that switches the shoulder side.
-- **`V` toggles first person**, which needs first-person support on the Chibi 2 body (hide the head
-  and the near arm, move the camera to the eye bone).
+- ✅ **Over the LEFT shoulder by default** — `js/settings.js` `DEFAULTS.shoulder`.
+- ✅ **An options menu** on **O**, with the shoulder side under Controls.
+- ✅ **`V` toggles first person.** A skinned mesh draws from the mesh, not the bone tree, so hiding
+  the head bone does nothing — collapsing it to nothing does, and everything weighted to the head
+  (and to the eyes hanging off it) folds into a point inside the neck. The camera then sits at the
+  eye height measured off that body's own eye bones. It does **not** ride the animated bone: a walk
+  cycle bobbing the view is how you make somebody queasy, and the bone lags the controller by a
+  frame anyway.
 
 Sky:
-- **Planets in the sky should occlude one another** — they currently intersect, because each is
-  drawn on the same shell at a size that ignores its neighbours.
-- **Lens flare** during an eclipse, and **god rays / sun shafts** generally.
-- **An effect as the sun sets behind a mountain or the horizon.**
-- **Some bodies cross the sky far too fast.** `sky.orbitScale` (150) and `moonOrbitScale` (6) are one
-  knob for every body, so a close-in planet or a short-period moon whips round. Needs a per-body
-  clamp on apparent angular speed rather than one global multiplier.
+- ✅ **Planets occlude one another.** They all sat on one shell, so two in the same patch of sky cut
+  through each other. Each is now placed on its own shell in real distance order — nearest closest
+  to the eye — and scaled by the shell it lands on, so the apparent size is unchanged and the depth
+  buffer does the occluding. Their materials write depth and carry a `renderOrder` so the near ones
+  draw first.
+- ✅ **Lens flare and god rays**, in `js/sunfx.js` — screen space over the canvas, which is an honest
+  choice rather than a shortcut dressed up: real volumetric shafts want a depth pre-pass and a radial
+  blur, and this prototype is already drawing a planet. An eclipse does **not** kill the flare (it is
+  the one time a flare is worth having): the shafts die with the light, the ghosts brighten and a
+  corona ring appears on the covered star. Can be turned off under Picture in the settings.
+- ✅ **The sun going behind a mountain or the horizon.** March along the sun's direction from the
+  eye and count how much of the way is under the ground — a single ray cannot tell a ridge from a
+  valley. Fully blocked is a mountain, half blocked is a ridge across the disc. The shafts fade with
+  it, and a warm wash climbs the bottom of the sky, strongest while the star is being cut in half.
+- ✅ **Bodies crossing the sky too fast.** One multiplier for everything was the problem: at
+  `orbitScale` 150 a three-day planet (seed 31 has one) laps the sky against the sun at 13.5°/s —
+  about 27 seconds a circuit. Each body now gets its own clock, cut back until its **synodic** rate
+  (how fast it pulls away from us, which is what you actually see) is under
+  `sky.maxSkyDegPerSecond`, 1.2°/s. The median body was already at 0.42°/s and is untouched.
 
 ### The fight ✅ **done 2026-09-15**
 

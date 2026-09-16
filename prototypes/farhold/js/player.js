@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 
-export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-4 skills · E talk · H horse · J ship · M map · I sheet · O settings · ` debug';
+export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-4 skills · V first person · E talk · H horse · J ship · M map · I sheet · O settings · ` debug';
 
 /** Reads the keyboard and mouse. Pointer lock is optional — dragging works too. */
 export function createInput(dom) {
@@ -79,6 +79,7 @@ export function createController(terrain, balance = {}, camera, { obstacles = []
     vy: 0, yaw: 0, pitch: -0.18, grounded: true,
     camDistance: 7.5, camDistanceUsed: 7.5, moving: 0, running: false,
     attackCooldown: 0, swing: 0,
+    firstPerson: false, eyeHeight: 1.5,
     swimming: false, waterDepth: 0, waterSurface: 0,
     mounted: false,
     radius: b.bodyRadius ?? 0.45,
@@ -208,6 +209,22 @@ export function createController(terrain, balance = {}, camera, { obstacles = []
     const lookY = Math.sin(self.pitch);
     const lookZ = Math.cos(self.yaw) * cp;
     const headY = self.y + (self.mounted ? 2.35 : 1.55);
+
+    // FIRST PERSON: the camera sits at the eye instead of behind the body. `eyeAt` is filled in by
+    // the game from the character's own eye bone, so the view is where the model's eyes actually
+    // are rather than a guessed height; without a body yet it falls back to the head height.
+    if (self.firstPerson && !self.mounted) {
+      // `eyeHeight` is measured once off the model's own eye bone (see main.js). The camera does NOT
+      // ride the animated bone: a walk cycle bobbing the view is how you make somebody queasy, and
+      // the bone's world position is a frame behind the controller anyway.
+      const ey = self.y + (self.eyeHeight ?? 1.5);
+      // a step forward out of the face, so the nose is never in the near plane
+      const camX = self.x + lookX * 0.12, camY = ey + lookY * 0.12, camZ = self.z + lookZ * 0.12;
+      self.camDistanceUsed = 0;
+      camera.position.set(camX, camY, camZ);
+      camera.lookAt(camX + lookX, camY + lookY, camZ + lookZ);
+      return out;
+    }
 
     let dist = self.camDistance;
     for (let step = 0; step < 12; step++) {

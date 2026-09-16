@@ -330,6 +330,35 @@ an explicit `ms` (the module clamps its own flight to 0.16-0.45 s, which is an a
 fight), and make a bolt burst on **where its target is now**, not where it stood when you fired —
 anything charging you moves several metres while the bolt is in the air.
 
+## Making a star do something to the picture
+
+`prototypes/farhold/js/sunfx.js` is a small, self-contained screen-space sun layer: god rays, a lens
+flare, a corona ring during an eclipse, and the warm wash as the star drops behind a ridge. It does
+not touch WebGL at all — it projects the sun's direction to a screen position, asks the terrain
+whether anything is in the way, and moves a handful of gradient-filled divs.
+
+```js
+import { createSunFx } from '/prototypes/farhold/js/sunfx.js';
+const sunfx = createSunFx({ terrain: { heightAt } });
+sunfx.update({ camera, sunDirection, cloud, eclipse, day, dt });
+```
+
+Three things worth copying:
+
+- **The occlusion is a march, not a ray test.** Step along the sun's direction from the eye and count
+  how many samples are under the ground. One ray/plane test cannot tell a ridge from a valley;
+  twenty-two steps give you "fully behind a mountain" (1), "a ridge across the disc" (~0.5) and
+  "clear sky" (0) — which is exactly the number the shafts and the horizon wash want.
+- **An eclipse should not kill the flare.** It is the one time a flare is worth having. The shafts
+  die with the light, but the ghosts brighten and a ring appears on the covered star.
+- **Don't multiply the effect by daylight.** A low sun flares hardest and a low sun is dim, so
+  multiplying by "how bright is it" cancels the very thing you built. Gate on the sun being above
+  the horizon instead, and let a separate low-sun term do the work.
+
+The companion trick lives in `js/sky.js`: things drawn "infinitely far away" on one shell cut through
+each other. Put each on its own shell in real distance order and scale it by the shell it lands on —
+the apparent size is unchanged, and the depth buffer does the occluding for nothing.
+
 ## Weather over a generated world
 
 `worldgen/js/weather.js` turns a cell's climate into what the sky above it is doing. Pure data, no

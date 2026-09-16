@@ -383,3 +383,47 @@ body {
   font-size: 10px; padding: 1px 6px; border-radius: 9px;
   border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.45);
 }
+
+/* ---------------------------------------------------------------- the star's effect on the picture
+   God rays, lens flare and the sunset rim, all in screen space over the canvas. `#sunfx` never takes
+   a click and never scrolls; its opacity is driven per frame from js/sunfx.js. */
+.sunfx {
+  position: fixed; inset: 0; overflow: hidden; pointer-events: none;
+  mix-blend-mode: screen; z-index: 2; visibility: hidden;
+}
+.sunfx-flare { position: absolute; inset: 0; }
+.sunfx-glow {
+  position: absolute; width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,242,205,0.55) 0%, rgba(255,200,120,0.28) 26%, rgba(255,160,70,0) 68%);
+}
+/* the shafts: a fan of hard-edged wedges, turned slowly so they never read as a static decal */
+.sunfx-rays {
+  position: absolute; width: 1500px; height: 1500px; border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,232,190,0.20) 0deg, rgba(255,232,190,0) 5deg, rgba(255,232,190,0) 16deg,
+    rgba(255,232,190,0.13) 22deg, rgba(255,232,190,0) 27deg, rgba(255,232,190,0) 44deg,
+    rgba(255,232,190,0.17) 51deg, rgba(255,232,190,0) 57deg, rgba(255,232,190,0) 82deg,
+    rgba(255,232,190,0.10) 88deg, rgba(255,232,190,0) 94deg, rgba(255,232,190,0) 128deg,
+    rgba(255,232,190,0.15) 134deg, rgba(255,232,190,0) 140deg, rgba(255,232,190,0) 176deg,
+    rgba(255,232,190,0.12) 182deg, rgba(255,232,190,0) 188deg, rgba(255,232,190,0) 226deg,
+    rgba(255,232,190,0.16) 232deg, rgba(255,232,190,0) 238deg, rgba(255,232,190,0) 281deg,
+    rgba(255,232,190,0.11) 287deg, rgba(255,232,190,0) 293deg, rgba(255,232,190,0) 335deg,
+    rgba(255,232,190,0.14) 341deg, rgba(255,232,190,0) 347deg, rgba(255,232,190,0) 360deg);
+  -webkit-mask-image: radial-gradient(circle, #000 12%, rgba(0,0,0,0.55) 40%, transparent 72%);
+  mask-image: radial-gradient(circle, #000 12%, rgba(0,0,0,0.55) 40%, transparent 72%);
+}
+.sunfx-ghost { position: absolute; border-radius: 50%; }
+/* the last of the light catching the sky as the star goes behind a ridge */
+.sunfx-horizon {
+  position: absolute; inset: auto 0 0 0; height: 46%;
+  background: linear-gradient(to top, rgba(255,140,60,0.42) 0%, rgba(255,110,50,0.16) 38%, rgba(255,90,40,0) 100%);
+  opacity: 0;
+}
+/* the corona: a bright rim around a star something is sitting in front of */
+.sunfx-ring {
+  position: absolute; width: 190px; height: 190px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(255,236,200,0.55) 47%,
+    rgba(255,190,120,0.28) 53%, rgba(255,150,80,0) 74%);
+  opacity: 0;
+}
+.sunfx.eclipsed .sunfx-ghost { filter: brightness(2.1) saturate(1.4); }

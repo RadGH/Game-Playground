@@ -33,6 +33,8 @@ worth the name, graduation).
 | **Ride** | **H** puts you on a horse: faster, longer jumps, no attacking. |
 | **Combat feel** | A white arc shows exactly the area a swing damages; bows fire real arrows; every hit splashes. |
 | **Skills** | Four per class on **1–4**, with cooldowns and mana, drawn with `avatar-3d`'s spell effects — and statuses that keep working after the hit: burn, poison, chill, Might, Guard. |
+| **First person** | **V** puts the camera in your character's head — the head itself comes off the model, so you are not looking through the inside of your own face. |
+| **The star** | God rays, a lens flare that survives an eclipse with a corona ring, and a warm wash up the sky as the sun goes behind a ridge. Off under Picture in the settings if it is too much. |
 | **Map** | **M** opens a full-screen map with your position, pins and World Forge's own layer filters. |
 | **Save** | Runs save themselves to the browser and load back — several slots, with a Continue button. |
 | **Solid** | Trees, rocks, ruins, houses and walls stop you walking through them. |
@@ -47,8 +49,9 @@ worth the name, graduation).
 ## Controls
 
 **On foot:** `WASD` move · `Shift` run · `Space` jump · left click swing (click once to capture the
-mouse) · **`1`–`4` skills** · `E` talk to somebody · `H` mount a horse · `J` board the ship ·
-`M` the map · `I` or `Tab` character sheet · `O` settings · **`` ` `` debug menu** · `Esc` step back.
+mouse) · **`1`–`4` skills** · **`V` first person** · `E` talk to somebody · `H` mount a horse ·
+`J` board the ship · `M` the map · `I` or `Tab` character sheet · `O` settings ·
+**`` ` `` debug menu** · `Esc` step back.
 
 **In space:** `W` throttle · mouse steer · `Shift` boost · hold `Space` to warp · `J` land.
 
@@ -208,7 +211,8 @@ that is phase 4.
 |---|---|
 | `js/planet.js` | Star → system → planet → surface map → `heightAt`/`colorAt`/`climateAt`/`spawnPoint`, with rivers and roads carved in. **Pure, node-testable.** |
 | `js/terrain.js` | The clipmap rings, vertex colours, the water plane. |
-| `js/sky.js` | Star, sibling planets with their weather, moons, starfield, day/night, the two-pass render. |
+| `js/sky.js` | Star, sibling planets with their weather, moons, starfield, day/night, the two-pass render. Each body on its own shell (so they occlude) and its own orbital clock (so none of them whips round). |
+| `js/sunfx.js` | God rays, lens flare, the corona ring during an eclipse, and the sun going behind a ridge — screen space, with a terrain march for the occlusion. |
 | `js/weather.js` | Cloud decks, rain, snow, dust, lightning, fog. |
 | `js/props.js` | The scatter: 16 prop kinds, per-biome kits, grass, ruins. One draw call per kind. |
 | `js/features.js` | Rivers, roads, bridges and settlements from the map's own data. |
@@ -282,10 +286,10 @@ any kit.
 - **Enemies have no skills of their own.** The player has four; the enemies still walk up and swing.
   Champions, named foes, packs with a leader and casting enemies are the part of phase 3 left over.
 - **No dodge roll, block or knockback** — hits land, but the fight has no defensive input.
-- **First person (`V`) is not built.** The Chibi 2 body needs the head and near arm hidden and the
-  camera moved to the eye bone. Queued (see `PLAN.md` phase 3).
-- **Planets in the sky do not occlude one another**, there is no lens flare or god rays, and one
-  global `orbitScale` means a close-in body can cross the sky too fast — all queued.
+- **The sun effects are screen space, not volumetric.** `js/sunfx.js` projects the star, asks the
+  terrain whether anything is in the way, and paints gradients. Real shafts want a depth pre-pass and
+  a radial blur, which this prototype cannot spare. It reads correctly and costs nothing, but it is
+  a painted effect, and a very thin ridge can cut the shafts a frame before it covers the star.
 - **Props do not sway** in the wind, and grass has no alpha texture — both are cheap wins later.
 - **Collision is cylinders, not shapes.** A house is a circle to walk around, so its corners are
   softer than they look; and enemies ignore collision entirely.
@@ -298,7 +302,7 @@ any kit.
 ```sh
 node --test prototypes/farhold/tests/*.test.js     # ground + rules, no browser
 node --test worldgen/tests/weather.test.js         # the weather model
-npx playwright test prototypes/farhold             # the real page (61 tests)
+npx playwright test prototypes/farhold             # the real page (67 tests)
 ```
 
 The node tests cover terrain determinism, height sanity, agreement with the map, slopes vs normals,
@@ -315,4 +319,8 @@ save that round-trips through a reload, a minimap with relief on a single-biome 
 eclipse that takes the light away. Phase 3's fight adds: the bar drawing four slots and dimming a
 slot on cooldown, a firebolt that reaches a moving enemy and leaves it burning after the bolt is
 gone, a nova that catches and chills everything around you, key 1 spending mana and refusing when
-the pool is empty, and War Cry and Guard landing as real statuses.
+the pool is empty, and War Cry and Guard landing as real statuses. The queued round-3 items add:
+first person putting the camera at the eye and the head off the body, sky bodies at distinct depths
+in real distance order, nothing crossing the sky faster than the cap on a seed with a three-day
+planet, a flare that is on the star and survives an eclipse, ground between you and the star
+putting the rays out, and the settings switch for all of it.

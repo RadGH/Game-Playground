@@ -18,6 +18,7 @@ export const DEFAULTS = {
   viewDistance: 'full',        // full | medium | near
   density: 1,                  // how thick the scatter is
   grass: true,
+  sunfx: true,                 // god rays, lens flare and the sunset wash
   sound: true,
   voices: true,
   volume: 0.75,
@@ -30,6 +31,7 @@ const FIELDS = [
   { key: 'viewDistance', label: 'View distance', kind: 'choice', options: [['near', 'Near'], ['medium', 'Medium'], ['full', 'Full']], group: 'Picture' },
   { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 2, step: 0.25, group: 'Picture' },
   { key: 'grass', label: 'Grass', kind: 'toggle', group: 'Picture' },
+  { key: 'sunfx', label: 'Sun rays and flare', kind: 'toggle', group: 'Picture' },
   { key: 'sound', label: 'Sound', kind: 'toggle', group: 'Audio' },
   { key: 'voices', label: 'Voices', kind: 'toggle', group: 'Audio' },
   { key: 'volume', label: 'Volume', kind: 'range', min: 0, max: 1, step: 0.05, group: 'Audio' },

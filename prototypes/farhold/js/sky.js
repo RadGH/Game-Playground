@@ -37,6 +37,19 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   // of play to go round, so it looks welded to the sun — which is exactly what it looked like.
   const orbitScale = cfg.orbitScale ?? 150;
   const moonOrbitScale = cfg.moonOrbitScale ?? 6;
+  // ...but ONE multiplier for every body is why some of them whip across the sky. A close-in planet
+  // or a short-period moon has a much faster clock than a distant one, and multiplying them all by
+  // 150 makes the fast ones absurd. So each body gets its own scale, cut back until its apparent
+  // motion is no more than `maxDegPerSecond` of sky — fast enough to watch, slow enough to believe.
+  const maxRate = ((cfg.maxSkyDegPerSecond ?? 1.2) * Math.PI) / 180;
+  /** The scale this body may use, given how fast it would otherwise appear to move. */
+  function clockFor(periodDays, ourPeriodDays, wanted) {
+    // radians of sky per real second at the full scale: the SYNODIC rate, not the orbital one —
+    // what you see is how fast it pulls away from us, and a twin of our own orbit barely moves
+    const relative = Math.abs(1 / Math.max(0.01, periodDays) - (ourPeriodDays ? 1 / ourPeriodDays : 0));
+    const rate = Math.PI * 2 * (wanted / dayLength) * relative;
+    return rate > maxRate ? wanted * (maxRate / rate) : wanted;
+  }
 
   const scene = new THREE.Scene();
   const skyCam = new THREE.PerspectiveCamera(60, 1, 0.1, DOME * 4);
@@ -108,6 +121,7 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       phase: ((p.seed ?? p.id) % 360) * Math.PI / 180,
       radiusAu: (p.radius ?? 1) / EARTH_RADII_PER_AU,
       eccentricity: p.orbit?.eccentricity ?? 0,
+      clock: clockFor(p.orbit?.periodDays || 365, ourPeriod, orbitScale),
     });
   }
   for (const m of planet?.moons || []) {
@@ -124,6 +138,8 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       // own size so it lands in the same units as radiusAu. These moons orbit close (5-10 planet
       // radii, against our own Moon's 60), so at an honest scale of 1 they are already enormous.
       distanceAu: ((m.orbit?.aroundPlanet ?? m.distance ?? 6) * (planet.radius ?? 1)) / EARTH_RADII_PER_AU,
+      // a moon goes round us, so its apparent rate is its own — nothing to subtract
+      clock: clockFor(m.orbit?.periodDays || m.periodDays || 14, 0, moonOrbitScale),
     });
   }
 
@@ -191,13 +207,14 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
     starMat.opacity = Math.max(0, 1 - day * 3) * (1 - clamp(env.cloud ?? 0, 0, 1) * 0.95);
 
     // the neighbours
-    const days = (elapsed / dayLength) * orbitScale;
-    const moonDays = (elapsed / dayLength) * moonOrbitScale;
-    const ourAngle = (days / ourPeriod) * Math.PI * 2;
     for (const b of bodies) {
+      // each body runs on its own clock (see clockFor), and OUR angle is read on that same clock,
+      // so the pair stays consistent even though two bodies no longer share one
+      const days = (elapsed / dayLength) * b.clock;
+      const ourAngle = (days / ourPeriod) * Math.PI * 2;
       let delta, distanceAu, radiusAu, scale;
       if (b.kind === 'moon') {
-        delta = b.phase + (moonDays / b.period) * Math.PI * 2;
+        delta = b.phase + (days / b.period) * Math.PI * 2;
         distanceAu = b.distanceAu;
         radiusAu = b.radiusAu;
         scale = moonScale;
@@ -221,21 +238,44 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       const size = Math.max(DOME * 0.0015, Math.min(DOME * 0.26, DOME * angular));
       placeOnDome(tmp, delta, sunAngle);
       b.dir = (b.dir || new THREE.Vector3()).copy(tmp);
-      b.model.group.position.copy(tmp).multiplyScalar(DOME * 0.985);
-      b.model.group.scale.setScalar(size);
-      b.model.group.lookAt(0, 0, 0);
       b.visibleSize = size;
       b.distanceAu = distanceAu;
+      b.apparent = tmp.clone();
       // a body low in a bright sky washes out, like a daytime moon — and cloud hides it outright
       // a moon in this world's shadow goes dark and coppery (`lunarShade` is set below)
       const washed = (Math.max(0, 1 - day * 1.6) * 0.75 + 0.25)
         * (1 - clamp(env.cloud ?? 0, 0, 1) * 0.92) * (1 - (b.lunarShade || 0) * 0.85);
+      b.washed = washed;
+      b.model.update?.(0, elapsed);
+    }
+
+    // ------------------------------------------------------------ who is in front of whom
+    //
+    // Every body used to sit on the same shell, so two of them in the same patch of sky cut
+    // straight through each other. They are all at different real distances, so put them on the
+    // dome in that order — nearest closest to the eye — and scale each by the shell it lands on so
+    // the apparent size is unchanged. Then the depth buffer does the occluding for free, which is
+    // why these materials write depth instead of being blended like ordinary transparent things.
+    const order = [...bodies].sort((a, b) => a.distanceAu - b.distanceAu);
+    for (let i = 0; i < order.length; i++) {
+      const b = order[i];
+      const shell = DOME * (0.60 + 0.38 * (order.length === 1 ? 1 : i / (order.length - 1)));
+      const k = shell / (DOME * 0.985);
+      b.model.group.position.copy(b.apparent).multiplyScalar(shell);
+      b.model.group.scale.setScalar(b.visibleSize * k);
+      b.model.group.lookAt(0, 0, 0);
+      b.shell = shell;
       b.model.group.traverse(o => {
         if (!o.material) return;
-        o.material.transparent = true;
-        o.material.opacity = washed;
+        const fade = b.washed ?? 1;
+        o.material.transparent = fade < 0.999;
+        o.material.opacity = fade;
+        o.material.depthWrite = true;
+        o.material.depthTest = true;
+        // nearest first, so the depth buffer is already written when the far ones draw.
+        // renderOrder lives on the object, not the group, so it has to be set here.
+        o.renderOrder = -1000 + i;
       });
-      b.model.update?.(0, elapsed);
     }
 
     // ------------------------------------------------------------ eclipses
@@ -303,7 +343,7 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       // the biggest thing in the sky makes the best eclipse; a distant planet only transits
       const moon = [...bodies].sort((a, b) => (b.visibleSize || 0) - (a.visibleSize || 0))[0];
       if (!moon) return null;
-      const md = (elapsed / dayLength) * moonOrbitScale;
+      const md = (elapsed / dayLength) * moon.clock;   // its own clock, the same one update() uses
       const want = kind === 'lunar' ? Math.PI : 0;
       moon.phase = want - (md / moon.period) * Math.PI * 2;
       update(elapsed);

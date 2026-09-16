@@ -21,6 +21,7 @@ import { createProps } from './props.js';
 import { createFeatures } from './features.js';
 import { createWeatherView } from './weather.js';
 import { createCombatFx } from './combat-fx.js';
+import { createSunFx } from './sunfx.js';
 import { createDebugMenu } from './debug.js';
 import { createMapScreen } from './map.js';
 import { createSaves, snapshot, restore, playtimeText } from './save.js';
@@ -224,6 +225,33 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const actor = await makeActor({ avatar: JSON.parse(JSON.stringify(look?.avatar || {})), swim: true });
   scene.add(actor.group);
 
+  // ---------------------------------------------------------------- first person (V)
+  //
+  // A skinned mesh draws from the mesh, not the bone tree, so hiding the head bone does nothing —
+  // the vertices are still there. Collapsing it to nothing does work: everything weighted to the
+  // head (and to the eyes, which hang off it) folds into a point inside the neck. The camera then
+  // sits on the eye bone itself, so the view is where the model's eyes actually are.
+  const eyeWorld = new THREE.Vector3(), eyeRight = new THREE.Vector3();
+  let headScale = null;
+  function setFirstPerson(on) {
+    const head = actor.parts?.head;
+    if (!head) return false;
+    if (headScale === null) {
+      headScale = head.scale.clone();
+      // how high this particular body's eyes sit above its feet, taken from the bones themselves
+      actor.group.updateMatrixWorld(true);
+      eyeWorld.setFromMatrixPosition(actor.parts.eyeL.matrixWorld);
+      eyeRight.setFromMatrixPosition(actor.parts.eyeR.matrixWorld);
+      eyeWorld.lerp(eyeRight, 0.5);
+      control.eyeHeight = Math.max(0.6, eyeWorld.y - actor.group.position.y);
+    }
+    control.firstPerson = !!on;
+    if (on) head.scale.setScalar(0.0001);
+    else head.scale.copy(headScale);
+    hud.log(on ? 'First person. V to come back out.' : 'Back over your shoulder.');
+    return control.firstPerson;
+  }
+
   // the horse, built once and hidden until you press H
   let horse = null;
   try {
@@ -237,6 +265,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // createSettings applies what it remembered straight away, and reaching a `let` before its
   // declaration is a ReferenceError, not undefined.
   let control = null;
+  // declared here, built further down: `createSettings` applies the stored values immediately and
+  // reads this, and reading a `const` before its line throws rather than coming back undefined
+  let sunfx = null;
   const settings = createSettings({
     apply: (v, key) => {
       if (!key || key === 'sound') sound.mute(!v.sound);
@@ -246,6 +277,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         props.setGrass(v.grass, control.x, control.z);
       }
       if ((!key || key === 'viewDistance') && view && control) view.update(control.x, control.z, true);
+      if ((!key || key === 'sunfx') && sunfx) sunfx.setEnabled(v.sunfx);
     },
   });
 
@@ -275,6 +307,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     .then(t => spellfx.setTextures(t))
     .catch(() => { /* geometry only, which still reads fine */ });
   const skills = createSkillBar({ data: skillData, player, rpg });
+
+  // god rays, lens flare and the moment the star drops behind a ridge — screen space, over the
+  // canvas. `terrain` is rebound when you land on a new world, so it is read through the binding.
+  sunfx = createSunFx({ balance, terrain: { heightAt: (x, z) => terrain.heightAt(x, z) } });
+  sunfx.setEnabled(settings.get('sunfx') !== false);
 
   /** Hang a status on whatever the skill just hit, and say so once. */
   function landStatus(plan, enemy) {
@@ -887,7 +924,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (mode === 'ground') launch();
       else if (mode === 'space') land();
     }
-    if (mode !== 'ground') { hud.skills(null); stepFlight(dt, snap); renderFrame(); return; }
+    if (mode !== 'ground') { hud.skills(null); sunfx.hide(); stepFlight(dt, snap); renderFrame(); return; }
 
     // E speaks to whoever is standing in front of you
     if (snap.pressed?.has('KeyE')) {
@@ -906,6 +943,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen || settings.isOpen;
+
+    // V is first person: the head comes off the model, not just the camera
+    if (!frozen && snap.pressed?.has('KeyV')) setFirstPerson(!control.firstPerson);
 
     // skills on 1-4 — not while a panel has the keyboard
     if (!frozen && snap.pressed?.size) {
@@ -1041,6 +1081,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const daylight = Math.max(0, Math.min(1, sky.sunDirection.y * 1.4));
     sky.update(state.elapsed, { gloom: blended.gloom, flash: weatherView.state.flash, cloud: blended.cloud, longitude: control.x / terrain.widthM });
     weatherView.update(dt, blended, { camera, daylight, sunDir: sky.sunDirection, baseFogColor: sky.fog.color });
+    sunfx.update({
+      camera, sunDirection: sky.sunDirection, dt,
+      cloud: blended.cloud, eclipse: sky.eclipse.solar, day: daylight,
+    });
     scene.fog.color.copy(weatherView.fogColor);
     scene.fog.far = weatherView.fogFar;
     scene.fog.near = weatherView.fogNear;
@@ -1152,7 +1196,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     launch, land,
     get folk() { return folk; },
     questLog, talk, sound, speech, campaign, settings,
-    skills, spellfx,
+    skills, spellfx, sunfx,
+    /** First person on or off, for a test or the debug menu. */
+    firstPerson: on => setFirstPerson(on),
     /** Fire a skill slot from a test or the debug menu. */
     cast: i => castSkill(i),
     get statuses() { return { player: player.statuses || {}, enemies: field.enemies.map(e => ({ name: e.name, statuses: e.statuses || {} })) }; },

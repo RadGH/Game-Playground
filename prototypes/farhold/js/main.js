@@ -5,6 +5,8 @@
 
 import * as THREE from 'three';
 import { createWorld, makeTerrain, describePlanet, M_PER_CELL } from './planet.js';
+import { createSpace } from './space.js';
+import { generatePlanetMap } from '../../../universe/js/planetmap.js';
 import { createTerrainView } from './terrain.js';
 import { createSky } from './sky.js';
 import { createProps } from './props.js';
@@ -118,13 +120,13 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
 
   status('shaping the planet…');
   await frame();
-  const { star, system, planet, world } = createWorld({
-    seed,
-    width: balance.world?.width ?? 256,
-    height: balance.world?.height ?? 128,
-  });
-  const terrain = makeTerrain(world, planet, balance.terrain);
-  const palette = atmospherePalette(planet);
+  const mapSize = { width: balance.world?.width ?? 256, height: balance.world?.height ?? 128 };
+  const created = createWorld({ seed, ...mapSize });
+  const { star, system } = created;
+  // these are replaced wholesale when you land on a different world
+  let planet = created.planet, world = created.world;
+  let terrain = makeTerrain(world, planet, balance.terrain);
+  let palette = atmospherePalette(planet);
 
   status('finding somewhere to stand…');
   await frame();
@@ -139,27 +141,27 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(62, 1, 0.2, 24000);
 
-  const sky = createSky({ star, system, planet, balance, palette });
+  let sky = createSky({ star, system, planet, balance, palette });
   scene.add(sky.sunLight);
   scene.add(sky.sunLight.target);
   scene.add(sky.ambient);
   scene.fog = sky.fog;
 
   const ringSpec = lowQuality ? balance.terrain?.ringsLow : balance.terrain?.rings;
-  const view = createTerrainView(scene, terrain, { rings: ringSpec, waterColor: palette.sea });
+  let view = createTerrainView(scene, terrain, { rings: ringSpec, waterColor: palette.sea });
 
   status('planting the world…');
   await frame();
-  const props = createProps(scene, terrain, {
+  let props = createProps(scene, terrain, {
     seed,
     density: lowQuality ? 0.45 : (balance.props?.density ?? 1),
     radius: lowQuality ? 4 : (balance.props?.radius ?? 7),
     grassPerCell: lowQuality ? 60 : (balance.props?.grassPerCell ?? 150),
   });
-  const features = createFeatures(scene, terrain, {
+  let features = createFeatures(scene, terrain, {
     palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
   });
-  const weatherView = createWeatherView({
+  let weatherView = createWeatherView({
     scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
   });
 
@@ -188,7 +190,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     scene.add(horse.group);
   } catch { horse = null; }
 
-  const control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids] });
+  let control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids] });
   const input = createInput(renderer.domElement);
   const fx = createCombatFx(scene, {
     onArrowLand: arrow => {
@@ -199,7 +201,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   });
 
   // ---------------------------------------------------------------- weather
-  const weather = new WeatherClock({
+  let weather = new WeatherClock({
     weights: weatherWeights(terrain.climateAt(control.x, control.z)),
     seed,
     minMinutes: balance.weather?.minMinutes ?? 1.2,
@@ -229,21 +231,27 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     else hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '');
   }
 
-  const field = new EnemyField({
-    scene, terrain, rpg, defs: bestiary.enemies, balance: { ...balance, seed },
-    onLog: (t, c) => hud.log(t, c),
-    onKill: e => {
-      player.kills++;
-      const levels = rpg.gainXp(player, e.xp);
-      player.gold += e.gold;
-      hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, 'good');
-      if (levels) hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level');
-      const drop = rpg.rollDrop({ level: e.level, rng: field.rng, magicFind: player.derived.magicFind, bases: e.dropBases });
-      if (drop) { player.bag.push(drop); hud.log(`${e.name} dropped ${drop.name}.`, 'loot'); }
-      hud.setPlayer(player);
-      autoSave();
-    },
-  });
+  /** What happens when something dies. Named, because the enemy field is rebuilt on every world. */
+  function onEnemyKilled(e) {
+    player.kills++;
+    const levels = rpg.gainXp(player, e.xp);
+    player.gold += e.gold;
+    hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, 'good');
+    if (levels) hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level');
+    const drop = rpg.rollDrop({ level: e.level, rng: field.rng, magicFind: player.derived.magicFind, bases: e.dropBases });
+    if (drop) { player.bag.push(drop); hud.log(`${e.name} dropped ${drop.name}.`, 'loot'); }
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  function makeField() {
+    return new EnemyField({
+      scene, terrain, rpg, defs: bestiary.enemies, balance: { ...balance, seed },
+      onLog: (t, c) => hud.log(t, c),
+      onKill: onEnemyKilled,
+    });
+  }
+  let field = makeField();
 
   function applyGearLook() {
     const next = JSON.parse(JSON.stringify(look?.avatar || {}));
@@ -254,12 +262,186 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   applyGearLook();
 
   // ---------------------------------------------------------------- the map
-  const map = createMapScreen({
-    terrain, seed,
-    getPlayer: () => control,
-    getEnemies: () => field.enemies,
-    onTeleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); field.clear(); },
-  });
+  let map = null;
+  map = makeMap();
+
+  // ---------------------------------------------------------------- flight and other worlds
+  //
+  // Space is a separate scene in compressed units (see js/space.js). Landing on a different world
+  // means rebuilding everything that belongs to a planet — terrain, sky, scatter, features, weather,
+  // the controller, the enemies and the map — while the character, their gear and their level carry
+  // straight over.
+
+  let space = null;
+  let mode = 'ground';                 // ground | launch | space | land
+  let modeT = 0;
+  let landingTarget = null;
+
+  function disposePlanet() {
+    view.dispose(); props.dispose(); features.dispose(); weatherView.dispose();
+    field.clear();
+    map.dispose();
+    scene.remove(sky.sunLight); scene.remove(sky.sunLight.target); scene.remove(sky.ambient);
+    sky.dispose();
+  }
+
+  function makeMap() {
+    return createMapScreen({
+      terrain, seed,
+      getPlayer: () => control,
+      getEnemies: () => field.enemies,
+      onTeleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); field.clear(); },
+      pins: map ? [...map.pins] : [],
+    });
+  }
+
+  /** Build a world and put the player on it. `spot` is {u, v} across the map, from a landing. */
+  function buildPlanet(nextPlanet, spot = null) {
+    disposePlanet();
+
+    planet = nextPlanet;
+    world = generatePlanetMap(planet, mapSize);
+    terrain = makeTerrain(world, planet, balance.terrain);
+    palette = atmospherePalette(planet);
+
+    sky = createSky({ star, system, planet, balance, palette });
+    scene.add(sky.sunLight); scene.add(sky.sunLight.target); scene.add(sky.ambient);
+    scene.fog = sky.fog;
+
+    view = createTerrainView(scene, terrain, { rings: ringSpec, waterColor: palette.sea });
+    props = createProps(scene, terrain, {
+      seed,
+      density: lowQuality ? 0.45 : (balance.props?.density ?? 1),
+      radius: lowQuality ? 4 : (balance.props?.radius ?? 7),
+      grassPerCell: lowQuality ? 60 : (balance.props?.grassPerCell ?? 150),
+    });
+    features = createFeatures(scene, terrain, {
+      palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
+    });
+    weatherView = createWeatherView({
+      scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
+    });
+
+    control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids] });
+    field = makeField();
+    hud.setTerrain(terrain);
+    map = makeMap();
+
+    const start = spot
+      ? { x: spot.u * terrain.widthM, z: spot.v * terrain.depthM }
+      : { x: control.spawn.x, z: control.spawn.z };
+    control.teleport(start.x, start.z);
+    // never come down in the sea
+    if (terrain.waterAt(control.x, control.z)) control.teleport(control.spawn.x, control.spawn.z);
+
+    weather = new WeatherClock({
+      weights: weatherWeights(terrain.climateAt(control.x, control.z)),
+      seed,
+      minMinutes: balance.weather?.minMinutes ?? 1.2,
+      maxMinutes: balance.weather?.maxMinutes ?? 4,
+      transitionSeconds: balance.weather?.transitionSeconds ?? 20,
+    });
+    blended = weather.blend();
+    weatherCell = [-1, -1];
+
+    rebuildWorldAround(true);
+    $('hud-planet').textContent = describePlanet(planet, star);
+    return planet;
+  }
+
+  function ensureSpace() {
+    if (!space) {
+      space = createSpace({ star, system, homePlanet: planet, homeWorld: world, balance, seed });
+    }
+    return space;
+  }
+
+  /** Leave the ground. */
+  function launch() {
+    if (mode !== 'ground') return;
+    ensureSpace();
+    mode = 'launch';
+    modeT = 0;
+    hud.log('You board the ship and lift off.', 'level');
+  }
+
+  /** Put down on whatever the ship is close enough to. */
+  function land() {
+    if (mode !== 'space') return;
+    const target = space.canLand();
+    if (!target) { hud.log('Nothing close enough to land on. Fly nearer a world.', 'bad'); return; }
+    landingTarget = { planet: target.planet, spot: space.landingSpot(target.body) };
+    mode = 'land';
+    modeT = 0;
+    hud.log(`Descending to ${target.planet.name}.`, 'level');
+  }
+
+  /** Everything that happens when you are not standing on a planet. */
+  function stepFlight(dt, snap) {
+    modeT += dt;
+    const spaceCfg = balance.space || {};
+
+    if (mode === 'launch') {
+      // climb away from the ground. The fog closes and the light drains, and at the top the space
+      // scene takes over — the swap happens while there is nothing left to see of the ground.
+      const k = Math.min(1, modeT / (spaceCfg.ascentSeconds ?? 3.2));
+      control.y += dt * 240 * (0.3 + k * 2.4);
+      camera.position.set(control.x - Math.sin(control.yaw) * 30, control.y + 16, control.z - Math.cos(control.yaw) * 30);
+      camera.lookAt(control.x, control.y + 60, control.z);
+      scene.fog.near = 10;
+      scene.fog.far = Math.max(180, 7000 * (1 - k * 0.94));
+      if (k >= 1) {
+        ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed });
+        camera.far = 600000; camera.updateProjectionMatrix();
+        mode = 'space';
+        hud.log('W to fly · Shift to boost · hold Space to warp · J to land', 'level');
+      }
+      return;
+    }
+
+    if (mode === 'space') {
+      space.update(dt, snap, camera);
+      const r = space.readout();
+      hud.tick(player, {
+        place: `${star.name} system`,
+        clock: `${r.target} · ${r.distanceAu.toFixed(2)} AU`,
+        target: null,
+        sky: r.canLand ? 'close enough to land — press J' : 'fly to a world to land on it',
+        weather: `${r.mode}${r.warpCharge > 0.05 ? ` (warp ${Math.round(r.warpCharge * 100)}%)` : ''} · ${r.speed} u/s`,
+        where: `seed ${seed} · in flight`,
+      });
+      return;
+    }
+
+    if (mode === 'land') {
+      // dive at the target, then rebuild the ground under it
+      const body = space.bodies.find(b => b.planet.id === landingTarget.planet.id);
+      if (body) { space.aimAt(body); space.state.throttle = 1; }
+      space.update(dt, { forward: 1, strafe: 0, run: true, jump: false, attack: false, look: [0, 0], pressed: new Set() }, camera);
+      if (modeT >= (spaceCfg.descentSeconds ?? 2.6)) {
+        camera.far = 24000; camera.updateProjectionMatrix();
+        buildPlanet(landingTarget.planet, landingTarget.spot);
+        landingTarget = null;
+        mode = 'ground';
+        hud.log(`You set down on ${planet.name}. ${describePlanet(planet, star)}`);
+        autoSave();
+      }
+    }
+  }
+
+  /** Draw whichever world we are in. */
+  function renderFrame() {
+    renderer.clear();
+    if (mode === 'ground' || mode === 'launch') {
+      renderer.render(sky.scene, sky.camera(camera));
+      renderer.clearDepth();
+      renderer.render(scene, camera);
+    } else {
+      renderer.render(space.scene, camera);
+    }
+    document.body.dataset.ready = '1';
+    state.ready = true;
+  }
 
   // ---------------------------------------------------------------- place the player
   control.teleport(control.spawn.x, control.spawn.z);
@@ -425,6 +607,14 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     state.frames++;
 
     const snap = input.sample();
+
+    // J is the ship: board it on the ground, put it down in space
+    if (snap.pressed?.has('KeyJ')) {
+      if (mode === 'ground') launch();
+      else if (mode === 'space') land();
+    }
+    if (mode !== 'ground') { stepFlight(dt, snap); renderFrame(); return; }
+
     const frozen = hud.sheetOpen || debug.isOpen || map.isOpen;
     const step = control.update(dt, snap, { frozen });
 
@@ -558,12 +748,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     if (state.frames % 6 === 0) hud.drawMinimap(control, field.enemies);
     if (state.frames % 12 === 0) map.tick();
 
-    renderer.clear();
-    renderer.render(sky.scene, sky.camera(camera));
-    renderer.clearDepth();
-    renderer.render(scene, camera);
-    document.body.dataset.ready = '1';
-    state.ready = true;
+    renderFrame();
   }
 
   function respawn() {
@@ -595,7 +780,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   // ---------------------------------------------------------------- test handle
   window.farhold = {
     THREE, renderer, scene, camera, sky, view, props, features, weatherView, weather, debug, map, fx,
-    terrain, world, planet, star, system, palette, saves, horse,
+    world, star, system, saves, horse,
     rpg, player, control, field, hud, actor, balance, state,
     saveNow: () => autoSave({ quiet: false }),
     snapshot: currentSnapshot,
@@ -616,6 +801,21 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
       sky: sky.visible(),
     }),
     teleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); },
+    get mode() { return mode; },
+    get space() { return space; },
+    get planet() { return planet; },
+    get palette() { return palette; },
+    get terrain() { return terrain; },
+    launch, land,
+    /** Skip the cinematics — go straight to space, or straight down onto a world. */
+    toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },
+    landOn: (planetId, spot = null) => {
+      const p = system.planets.find(p => p.id === planetId) || planet;
+      camera.far = 24000; camera.updateProjectionMatrix();
+      buildPlanet(p, spot);
+      mode = 'ground';
+      return planet.name;
+    },
     setWeather: (key, lock = true) => { if (key === null) weather.unlock(); else weather.set(key, { lock, instant: true }); blended = weather.blend(blended); return blended; },
     setTime: t => { state.elapsed = t; sky.update(t, { gloom: blended.gloom, cloud: blended.cloud }); },
     spawn: async (defId, level = player.level) => {

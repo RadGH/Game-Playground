@@ -251,5 +251,20 @@
   "save": {
     "autoSaveSeconds": 45,
     "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did — never the world, which is a pure function of the seed."
+  },
+  "space": {
+    "auUnits": 14000,
+    "earthUnits": 700,
+    "speed": 160,
+    "boost": 3.6,
+    "warp": 26,
+    "landRange": 1.8,
+    "shipScale": 12,
+    "camBack": 90,
+    "camLift": 26,
+    "rimAu": 14,
+    "ascentSeconds": 3.2,
+    "descentSeconds": 2.6,
+    "_doc": "Space runs in its own compressed units: 1 AU is auUnits across and an Earth-sized planet is earthUnits in radius, because metres over a 163 km map and hundreds of millions of kilometres cannot share a coordinate space. speed is the cruise rate; boost and warp multiply it. landRange is how close to a world you must be, in its own radii, before you can put down."
   }
 }

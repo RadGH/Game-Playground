@@ -165,10 +165,19 @@ Sky:
 
 ---
 
-## Phase 5 — Ground to orbit, without a cut ⭐ the one the user asked for
+## Phase 5 — Ground to orbit ⭐ **flying and landing work (2026-09-15)**
 
-**You can:** walk to your ship, take off, fly up until the sky goes black and the planet curves
-away beneath you, and come back down somewhere else.
+**You can, now:** press **J** to lift off, fly the system in `js/space.js` (W throttle, Shift boost,
+hold Space to warp), pick another world, press **J** again to land on it — and your character, level,
+gold and bag come with you while the whole planet is rebuilt underneath. Orbits are real: the
+semi-major axis, period, inclination and **eccentricity** `universe/` generated, on the same clock
+the sky uses, so what you saw overhead from the ground is where you actually fly.
+
+**Still to do in this phase:** the swap is a climb-and-fade, not a true continuous descent — the
+terrain rings fall away and the space scene takes over behind the fog. Making it genuinely seamless
+needs the planet sphere and the heightfield visible at the same time, and a camera-relative origin.
+Also missing: flying *down* through atmosphere to a chosen point rather than a scripted descent, and
+an orbit view you can look at without flying.
 
 - **A ship** you own, from `assets/js/space-models.js` (three ship models are already there) or a
   new procedural builder in the `avatar-3d/js/vehicles.js` style.
@@ -190,9 +199,14 @@ camera-relative origin (shift the world, not the camera) before this phase, not 
 
 ---
 
-## Phase 6 — The rest of the system
+## Phase 6 — The rest of the system ⭐ **travel works (2026-09-15)**
 
-**You can:** fly to another planet of the same system and land on it.
+**You can, now:** fly to any landable planet of the system and land on it. Every world is rebuilt
+from its own seed, with its own weather, palette, scatter, rivers, roads and towns.
+
+**Still to do:** moons as landing targets, hazards that actually bite (temperature, atmosphere,
+radiation, gravity are all in the planet record and unused), resources worth the trip, stations and
+wrecks, and jumping to another star.
 
 - **Interplanetary travel** with a real travel time and a skip; moons as landing targets
   (`universe/` already treats a moon as a small planet with its own map).

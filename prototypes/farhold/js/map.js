@@ -220,6 +220,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     root, state, pins,
     get isOpen() { return state.open; },
     toggle, draw, addPin, removePin,
+    /** Take the screen out of the page (used when the world under it is replaced). */
+    dispose() { root.remove(); },
     /** Keep the player arrow moving while the map is open. */
     tick() { if (state.open) draw(); },
   };

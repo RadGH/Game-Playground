@@ -254,6 +254,12 @@ export class Hud {
     return bits.join('\n');
   }
 
+  /** Point the HUD at a different world — a new planet means a new minimap. */
+  setTerrain(terrain) {
+    this.terrain = terrain;
+    this.buildMinimapBase();
+  }
+
   setPlayer(player) {
     this.player = player;
     if (this.sheetOpen) this.renderSheet();

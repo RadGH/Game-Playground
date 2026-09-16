@@ -107,6 +107,7 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       period: p.orbit?.periodDays || 365,
       phase: ((p.seed ?? p.id) % 360) * Math.PI / 180,
       radiusAu: (p.radius ?? 1) / EARTH_RADII_PER_AU,
+      eccentricity: p.orbit?.eccentricity ?? 0,
     });
   }
   for (const m of planet?.moons || []) {
@@ -202,12 +203,16 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
         scale = moonScale;
       } else {
         const theirAngle = b.phase + (days / b.period) * Math.PI * 2;
-        // where they are relative to us, in the orbital plane
-        const dx = b.au * Math.cos(theirAngle) - ourAu * Math.cos(ourAngle);
-        const dy = b.au * Math.sin(theirAngle) - ourAu * Math.sin(ourAngle);
+        // where they are relative to us, on real ellipses: r = a(1 - e^2) / (1 + e cos θ)
+        const te = b.eccentricity || 0;
+        const theirR = b.au * (1 - te * te) / (1 + te * Math.cos(theirAngle));
+        const oe = planet?.orbit?.eccentricity ?? 0;
+        const ourR = ourAu * (1 - oe * oe) / (1 + oe * Math.cos(ourAngle));
+        const dx = theirR * Math.cos(theirAngle) - ourR * Math.cos(ourAngle);
+        const dy = theirR * Math.sin(theirAngle) - ourR * Math.sin(ourAngle);
         distanceAu = Math.max(0.01, Math.hypot(dx, dy));
         // angle between "toward the star" and "toward them", which is what the sky shows
-        const toStar = Math.atan2(-ourAu * Math.sin(ourAngle), -ourAu * Math.cos(ourAngle));
+        const toStar = Math.atan2(-ourR * Math.sin(ourAngle), -ourR * Math.cos(ourAngle));
         delta = Math.atan2(dy, dx) - toStar;
         radiusAu = b.radiusAu;
         scale = siblingScale;

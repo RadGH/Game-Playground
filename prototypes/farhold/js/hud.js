@@ -1,0 +1,241 @@
+// Farhold — the interface over the top of the world: bars, the log, the minimap, the character
+// sheet and the bag. Plain DOM, no framework, no build step.
+//
+// The HUD never decides anything; main.js hands it the player and it draws what is there.
+
+import { itemScore, SLOTS } from './rpg.js';
+import { BIOMES } from '../../../worldgen/js/biomes.js';
+import { M_PER_CELL } from './planet.js';
+
+const $ = id => document.getElementById(id);
+
+/** The colour class for an item's name — the same rarity words Emberveil uses. */
+export function rarityClass(item) {
+  if (!item) return 'rarity-normal';
+  if (item.setId) return 'rarity-set';
+  if (item.isUnique) return 'rarity-unique';
+  return 'rarity-' + (item.rarity || 'normal');
+}
+
+const SLOT_LABELS = {
+  weapon: 'Weapon', offhand: 'Off hand', head: 'Head', chest: 'Chest', legs: 'Legs',
+  hands: 'Hands', feet: 'Feet', ring: 'Ring', necklace: 'Necklace',
+};
+
+export class Hud {
+  constructor({ rpg, terrain, onEquip, onSpendAttr }) {
+    this.rpg = rpg;
+    this.terrain = terrain;
+    this.onEquip = onEquip;
+    this.onSpendAttr = onSpendAttr;
+    this.lines = [];
+    this.sheetOpen = false;
+    this.minimapBase = null;
+    this.lastMinimap = 0;
+
+    $('sheet-close').onclick = () => this.toggleSheet(false);
+    this.buildMinimapBase();
+  }
+
+  // ---------------------------------------------------------------- log
+
+  log(text, cls = '') {
+    this.lines.unshift({ text, cls });
+    if (this.lines.length > 9) this.lines.pop();
+    const box = $('log');
+    box.replaceChildren(...this.lines.map(l => {
+      const div = document.createElement('div');
+      div.className = l.cls;
+      div.textContent = l.text;
+      return div;
+    }));
+  }
+
+  // ---------------------------------------------------------------- bars and place
+
+  tick(player, { place, clock, target, sky }) {
+    const hpPct = Math.max(0, player.hp / player.maxHp * 100);
+    $('bar-hp-fill').style.width = hpPct + '%';
+    $('bar-hp-text').textContent = `${Math.ceil(player.hp)} / ${player.maxHp}`;
+    $('bar-mp-fill').style.width = (player.mp / player.maxMp * 100) + '%';
+    $('bar-mp-text').textContent = `${Math.round(player.mp)} / ${player.maxMp}`;
+
+    const lo = this._xpForLevel(player.level), hi = this._xpForLevel(player.level + 1);
+    const pct = hi > lo ? Math.max(0, Math.min(100, (player.xp - lo) / (hi - lo) * 100)) : 100;
+    $('bar-xp-fill').style.width = pct + '%';
+    $('hud-name').innerHTML = `${player.name} <small>level ${player.level}${player.pendingAttr ? ' · ' + player.pendingAttr + ' points to spend' : ''}</small>`;
+
+    $('hud-place-name').textContent = place || '';
+    $('hud-clock').textContent = clock || '';
+
+    if (target) {
+      $('target').classList.remove('hidden');
+      $('target-name').textContent = `${target.name} · level ${target.level}`;
+      $('target-fill').style.width = Math.max(0, target.hp / target.maxHp * 100) + '%';
+    } else {
+      $('target').classList.add('hidden');
+    }
+    if (sky) $('hud-sky').textContent = sky;
+  }
+
+  /** XP thresholds without importing the module twice. */
+  _xpForLevel(level) { return level <= 1 ? 0 : Math.round(58 * Math.pow(level - 1, 1.86)); }
+
+  // ---------------------------------------------------------------- minimap
+
+  /** Draw the whole planet map once into an offscreen canvas; the live map is a window onto it. */
+  buildMinimapBase() {
+    const world = this.terrain.world;
+    const c = document.createElement('canvas');
+    c.width = world.width; c.height = world.height;
+    const ctx = c.getContext('2d');
+    const img = ctx.createImageData(world.width, world.height);
+    for (let i = 0; i < world.width * world.height; i++) {
+      const b = BIOMES[world.biome[i]];
+      const n = parseInt((b?.color || '#444444').slice(1), 16);
+      img.data[i * 4] = (n >> 16) & 255;
+      img.data[i * 4 + 1] = (n >> 8) & 255;
+      img.data[i * 4 + 2] = n & 255;
+      img.data[i * 4 + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    this.minimapBase = c;
+  }
+
+  drawMinimap(player, enemies = []) {
+    const canvas = $('minimap');
+    const ctx = canvas.getContext('2d');
+    const world = this.terrain.world;
+    const span = 26;                     // cells across the window
+    const cx = player.x / M_PER_CELL, cy = player.z / M_PER_CELL;
+    const size = canvas.width;
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(this.minimapBase, cx - span / 2, cy - span / 2, span, span, 0, 0, size, size);
+    const toPx = (wx, wz) => [
+      ((wx / M_PER_CELL) - (cx - span / 2)) / span * size,
+      ((wz / M_PER_CELL) - (cy - span / 2)) / span * size,
+    ];
+    ctx.fillStyle = '#ff7a5a';
+    for (const e of enemies) {
+      if (e.dying != null) continue;
+      const [px, py] = toPx(e.x, e.z);
+      if (px < 0 || py < 0 || px > size || py > size) continue;
+      ctx.fillRect(px - 1.5, py - 1.5, 3, 3);
+    }
+    const [px, py] = toPx(player.x, player.z);
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(-player.yaw);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(3.5, 4); ctx.lineTo(-3.5, 4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // ---------------------------------------------------------------- character sheet
+
+  toggleSheet(open = !this.sheetOpen) {
+    this.sheetOpen = open;
+    $('sheet').classList.toggle('hidden', !open);
+    if (open) this.renderSheet();
+    return open;
+  }
+
+  renderSheet() {
+    const player = this.player;
+    if (!player) return;
+    const d = player.derived;
+
+    // equipment
+    const grid = $('sheet-slots');
+    grid.replaceChildren(...SLOTS.map(slot => {
+      const item = player.equipment[slot];
+      const div = document.createElement('div');
+      div.className = 'slot';
+      div.innerHTML = `<span class="label">${SLOT_LABELS[slot]}</span>
+        <span class="name ${item ? rarityClass(item) : 'muted'}">${item ? item.name : '—'}</span>`;
+      if (item) div.title = this.describe(item);
+      div.onclick = () => { if (item) { this.onEquip(null, slot); this.renderSheet(); } };
+      return div;
+    }));
+
+    // stats
+    const stats = $('sheet-stats');
+    const rows = [
+      ['Health', `${Math.ceil(player.hp)} / ${d.maxHp}`],
+      ['Mana', `${Math.round(player.mp)} / ${d.maxMp}`],
+      ['Damage', `${d.damage[0]}–${d.damage[1]}`],
+      ['Armour', Math.round(d.armor)],
+      ['Crit', `${d.critChance.toFixed(1)}% for +${Math.round(d.critDamage)}%`],
+      ['Dodge', `${d.dodge.toFixed(1)}%`],
+      ['Move speed', `${d.moveSpeed.toFixed(1)} m/s`],
+      ['Kills', player.kills],
+      ['Gold', player.gold],
+    ];
+    stats.replaceChildren(...rows.flatMap(([k, v]) => {
+      const dt = document.createElement('dt'); dt.textContent = k;
+      const dd = document.createElement('dd'); dd.textContent = v;
+      return [dt, dd];
+    }));
+
+    // attributes with the level-up spend buttons
+    const attrs = $('sheet-attrs');
+    attrs.replaceChildren(...Object.entries(player.attrs).map(([key, value]) => {
+      const row = document.createElement('div');
+      row.className = 'attr-row';
+      const label = document.createElement('span');
+      label.style.width = '42px';
+      label.textContent = key.toUpperCase();
+      const val = document.createElement('b');
+      val.style.width = '28px';
+      val.textContent = value;
+      const btn = document.createElement('button');
+      btn.textContent = '+';
+      btn.disabled = !player.pendingAttr;
+      btn.onclick = () => { this.onSpendAttr(key); this.renderSheet(); };
+      row.append(label, val, btn);
+      return row;
+    }));
+    $('sheet-points').textContent = player.pendingAttr ? `${player.pendingAttr} point${player.pendingAttr > 1 ? 's' : ''} to spend` : 'no points to spend';
+
+    // inert affixes are declared, not hidden
+    $('sheet-inert').textContent = d.inert?.length
+      ? `Carried but not yet wired up in this phase: ${d.inert.join(', ')}`
+      : '';
+
+    // bag
+    const bag = $('sheet-bag');
+    if (!player.bag.length) {
+      bag.innerHTML = '<div class="empty">Nothing in the bag yet. Kill something.</div>';
+    } else {
+      bag.replaceChildren(...player.bag.map((item, i) => {
+        const slot = item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot;
+        const worn = player.equipment[slot];
+        const delta = itemScore(item) - itemScore(worn);
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.title = this.describe(item);
+        row.innerHTML = `<span class="${rarityClass(item)}">${item.name}</span>
+          <span class="muted small">${SLOT_LABELS[slot] || slot}</span>
+          <span class="score ${delta > 0 ? 'up' : delta < 0 ? 'down' : ''}">${delta > 0 ? '▲ +' : delta < 0 ? '▼ ' : '– '}${Math.abs(delta)}</span>`;
+        row.onclick = () => { this.onEquip(item); this.renderSheet(); };
+        return row;
+      }));
+    }
+  }
+
+  /** The tooltip text for an item: what it is and what it does. */
+  describe(item) {
+    const bits = [item.name, `${item.rarity}${item.quality ? ' · ' + item.quality : ''}`];
+    if (item.dmg) bits.push(`Damage ${item.dmg[0]}–${item.dmg[1]}`);
+    if (item.armor) bits.push(`Armour ${item.armor}`);
+    for (const a of item.affixes || []) bits.push(`${a.name || a.stat}: ${a.value}`);
+    if (item.lore) bits.push(item.lore);
+    return bits.join('\n');
+  }
+
+  setPlayer(player) {
+    this.player = player;
+    if (this.sheetOpen) this.renderSheet();
+  }
+}

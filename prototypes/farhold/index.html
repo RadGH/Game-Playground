@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Farhold · Playground prototype</title>
+<link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body data-ready="0">
+
+<div id="stage"></div>
+
+<!-- ============================================================ title -->
+<section id="boot">
+  <div>
+    <h1>FAR<b>HOLD</b></h1>
+    <p class="tagline">Land on a world of a real star system, walk it to the horizon, kill what is out
+      there, and wear what it drops. The other planets of the system are in the sky above you.</p>
+
+    <div class="row">
+      <label for="boot-class">Wayfarer</label>
+      <select id="boot-class"></select>
+      <label for="boot-seed">Seed</label>
+      <input id="boot-seed" type="number" value="1" style="width:100px">
+    </div>
+    <div class="row">
+      <button id="boot-start">Land on a planet</button>
+    </div>
+    <div class="status" id="boot-status"></div>
+    <p class="note">Phase 1 of ten. No sound and no dialogue yet — this phase is the ground, the sky,
+      the walk and the loot. WASD to move, Shift to run, Space to jump, left click to swing,
+      I for the character sheet.</p>
+  </div>
+</section>
+
+<!-- ============================================================ hud -->
+<a class="back" href="../../index.html">← Playground</a>
+
+<div id="crosshair" class="hud"></div>
+
+<div id="hud-left" class="hud">
+  <div id="hud-name"></div>
+  <div class="bar hp"><i id="bar-hp-fill"></i><span id="bar-hp-text"></span></div>
+  <div class="bar mp"><i id="bar-mp-fill"></i><span id="bar-mp-text"></span></div>
+  <div class="bar xp"><i id="bar-xp-fill"></i></div>
+</div>
+
+<div id="hud-place" class="hud">
+  <div><b id="hud-place-name"></b></div>
+  <div class="clock" id="hud-clock"></div>
+  <div class="small muted" id="hud-sky"></div>
+  <div class="small muted" id="hud-planet"></div>
+</div>
+<canvas id="minimap" class="hud" width="180" height="180"></canvas>
+
+<div id="target" class="hud hidden">
+  <div id="target-name"></div>
+  <div class="bar hp"><i id="target-fill"></i></div>
+</div>
+
+<div id="log" class="hud"></div>
+<div id="hint" class="hud">WASD move · Shift run · Space jump · click to swing · I for the character sheet</div>
+
+<!-- ============================================================ character sheet -->
+<section id="sheet" class="sheet hidden">
+  <button class="close" id="sheet-close">×</button>
+  <h2>Character</h2>
+  <div class="cols">
+    <div>
+      <h3>Worn</h3>
+      <div class="slot-grid" id="sheet-slots"></div>
+      <h3>Attributes <span class="small muted" id="sheet-points"></span></h3>
+      <div id="sheet-attrs"></div>
+      <h3>Stats</h3>
+      <dl class="stats" id="sheet-stats"></dl>
+      <p class="small muted" id="sheet-inert"></p>
+    </div>
+    <div>
+      <h3>Bag <span class="small muted">click to wear</span></h3>
+      <div class="bag" id="sheet-bag"></div>
+    </div>
+  </div>
+</section>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

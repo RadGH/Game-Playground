@@ -276,6 +276,35 @@ tiles, gold corner flourishes dropped into any `.framed` box, divider rules unde
 accents, a menu overlay for settings, and plain-language text for stats and map nodes. Copy `ui.js`'s
 shape — presentation helpers in their own module, no game rules — when theming the next one.
 
+## Standing on a generated world (planet surface you can walk)
+
+`prototypes/farhold/` turns a `universe/` planet into ground you walk on. Two ideas carry it, and both
+are reusable on their own:
+
+**1. Sample the map, do not re-invent it.** `js/planet.js` is pure JavaScript (no Three.js, no DOM):
+it samples the world map's elevation smoothly between cells, converts to metres with the planet's own
+relief scale, and adds the same two noise octaves `worldgen/js/local.js` uses for local tiles. So the
+hill you climb is the hill the map drew, and the same seed always gives the same hill.
+
+```js
+import { createWorld, makeTerrain } from '/prototypes/farhold/js/planet.js';
+const { star, system, planet, world } = createWorld({ seed: 7 });
+const terrain = makeTerrain(world, planet);
+terrain.heightAt(x, z);    // metres; one map cell is 640 m, so 256x128 = 163 km x 82 km
+terrain.colorAt(x, z);     // [r,g,b] 0..1: biome, rock on slopes, snow up high, sand at the shore
+terrain.spawnPoint();      // dry, flat-ish, habitable
+```
+
+**2. Draw it as rings, not chunks.** `js/terrain.js` keeps concentric square rings centred on the
+player, each with the same vertex count over three times the area, each with a hole where the finer
+ring covers it. Five rings = 7.8 km of view in five draw calls. A ring only rebuilds when the player
+crosses one of its own cells, so the outer ones almost never rebuild.
+
+**The sky is a separate scene** (`js/sky.js`): a camera at the origin copying only the main camera's
+rotation, drawn first, then `renderer.clearDepth()` and the world over it. Everything in it is
+infinitely far away for free. Sibling planets are placed by real orbital angle and drawn oversized on
+purpose - `balance.json` `sky.siblingScale`.
+
 ## Worked example: Emberveil (a full RPG on the pieces)
 
 `prototypes/emberveil/` rebuilds the user's Emberveil RPG: its own data (copied by `tools/build-emberveil-data.mjs`), a loot engine with affixes/uniques/sets, a stat + talent system, an auto-battle simulator and a branching world map, all presented with Mii bodies (30 class looks with new gear parts), creature bodies and Lingo barks. Read its README for what maps to what.

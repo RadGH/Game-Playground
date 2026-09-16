@@ -1,0 +1,155 @@
+{
+  "_doc": "Farhold phase 1 bestiary. `biomes` lists the World Forge biome families (worldgen/js/biomes.js BIOME_FAMILIES) a creature turns up in; `any` means everywhere. `kind` picks the body: `beast` builds an avatar-3d creature from `look.creature`, `humanoid` builds a Chibi 2 body from `look.avatar`. Original names only — no borrowed monsters.",
+
+  "enemies": [
+    {
+      "id": "moor_hound", "name": "Moor Hound", "kind": "beast", "biomes": ["grass", "tundra"],
+      "minLevel": 1, "maxLevel": 8, "hp": 34, "dmg": [4, 7], "armor": 0, "speed": 4.2, "reach": 2.2,
+      "aggroRange": 30, "attackEvery": 1.3, "xp": 12, "gold": 4,
+      "look": { "creature": { "type": "hound", "size": 0.85, "colors": { "body": "#6a5c4a", "belly": "#8a7c64", "accent": "#3a3028", "eyes": "#d8a030" } } },
+      "dropBases": ["dagger", "light_boots", "ring"]
+    },
+    {
+      "id": "thicket_boar", "name": "Thicket Boar", "kind": "beast", "biomes": ["grass", "jungle"],
+      "minLevel": 2, "maxLevel": 10, "hp": 58, "dmg": [6, 10], "armor": 3, "speed": 3.4, "reach": 2.4,
+      "aggroRange": 22, "attackEvery": 1.8, "xp": 18, "gold": 6,
+      "look": { "creature": { "type": "boar", "size": 0.95, "colors": { "body": "#4a3a2c", "belly": "#5e4c3a", "accent": "#e8dcc0", "eyes": "#c04020" }, "features": { "tusks": true } } },
+      "dropBases": ["sword", "medium_chest", "ring"]
+    },
+    {
+      "id": "cairn_rat", "name": "Cairn Rat", "kind": "beast", "biomes": ["any"],
+      "minLevel": 1, "maxLevel": 6, "hp": 20, "dmg": [3, 5], "armor": 0, "speed": 4.6, "reach": 1.9,
+      "aggroRange": 20, "attackEvery": 1.1, "xp": 7, "gold": 2,
+      "look": { "creature": { "type": "rat", "size": 0.62, "colors": { "body": "#5a5248", "belly": "#7a7266", "accent": "#c8a888", "eyes": "#e04030" } } },
+      "dropBases": ["dagger", "cloth_helm"]
+    },
+    {
+      "id": "veil_spider", "name": "Veil Spider", "kind": "beast", "biomes": ["jungle", "toxic"],
+      "minLevel": 3, "maxLevel": 12, "hp": 44, "dmg": [7, 11], "armor": 2, "speed": 3.9, "reach": 2.2,
+      "aggroRange": 26, "attackEvery": 1.4, "xp": 22, "gold": 7,
+      "look": { "creature": { "type": "spider", "size": 0.8, "colors": { "body": "#2e2838", "belly": "#443a54", "accent": "#a060c0", "eyes": "#d0ff60" } } },
+      "dropBases": ["dagger", "wand", "light_gauntlets", "ring"]
+    },
+    {
+      "id": "dune_centipede", "name": "Dune Centipede", "kind": "beast", "biomes": ["desert", "rock"],
+      "minLevel": 4, "maxLevel": 14, "hp": 62, "dmg": [8, 13], "armor": 5, "speed": 3.6, "reach": 2.5,
+      "aggroRange": 24, "attackEvery": 1.6, "xp": 28, "gold": 9,
+      "look": { "creature": { "type": "centipede", "size": 0.9, "colors": { "body": "#8a6a3a", "belly": "#b09060", "accent": "#403020", "eyes": "#ffd040" } } },
+      "dropBases": ["scepter", "medium_helm", "medium_boots"]
+    },
+    {
+      "id": "frost_stalker", "name": "Frost Stalker", "kind": "beast", "biomes": ["ice", "tundra"],
+      "minLevel": 5, "maxLevel": 16, "hp": 78, "dmg": [10, 15], "armor": 4, "speed": 4.4, "reach": 2.4,
+      "aggroRange": 32, "attackEvery": 1.35, "xp": 34, "gold": 11,
+      "look": { "creature": { "type": "saber_cat", "size": 1.05, "colors": { "body": "#cfe0ea", "belly": "#eef5f9", "accent": "#7fa8c4", "eyes": "#4090d0" }, "features": { "fangs": true } } },
+      "dropBases": ["rimecut_sabre", "bow", "medium_chest", "necklace"]
+    },
+    {
+      "id": "ash_wisp", "name": "Ash Wisp", "kind": "beast", "biomes": ["lava", "void"],
+      "minLevel": 4, "maxLevel": 15, "hp": 40, "dmg": [11, 16], "armor": 0, "speed": 3.2, "reach": 3.4,
+      "aggroRange": 30, "attackEvery": 1.7, "xp": 30, "gold": 10,
+      "look": { "creature": { "type": "wisp", "size": 0.75, "colors": { "body": "#ff8a30", "belly": "#ffc070", "accent": "#602010", "eyes": "#fff0c0" } } },
+      "dropBases": ["wand", "orb", "cloth_chest", "ring"]
+    },
+    {
+      "id": "glass_shard", "name": "Glass Shard", "kind": "beast", "biomes": ["crystal"],
+      "minLevel": 6, "maxLevel": 18, "hp": 70, "dmg": [12, 18], "armor": 9, "speed": 2.9, "reach": 2.8,
+      "aggroRange": 26, "attackEvery": 1.8, "xp": 40, "gold": 14,
+      "look": { "creature": { "type": "shard", "size": 0.95, "colors": { "body": "#9fd8ff", "belly": "#d8f0ff", "accent": "#5080c0", "eyes": "#ffffff" } } },
+      "dropBases": ["staff", "tome", "runed_boots", "gold_signet"]
+    },
+    {
+      "id": "bog_slime", "name": "Bog Slime", "kind": "beast", "biomes": ["toxic", "jungle"],
+      "minLevel": 2, "maxLevel": 11, "hp": 66, "dmg": [5, 9], "armor": 1, "speed": 2.2, "reach": 2.2,
+      "aggroRange": 18, "attackEvery": 2, "xp": 19, "gold": 6,
+      "look": { "creature": { "type": "slime", "size": 0.8, "colors": { "body": "#5a8a4a", "belly": "#7cb060", "accent": "#2a4020", "eyes": "#e0ff80" } } },
+      "dropBases": ["cloth_legs", "light_chest", "ring"]
+    },
+    {
+      "id": "stone_sentinel", "name": "Stone Sentinel", "kind": "beast", "biomes": ["rock", "void", "crystal"],
+      "minLevel": 8, "maxLevel": 22, "hp": 150, "dmg": [15, 23], "armor": 18, "speed": 2.4, "reach": 3.1,
+      "aggroRange": 24, "attackEvery": 2.2, "xp": 70, "gold": 26,
+      "look": { "creature": { "type": "golem", "size": 1.25, "colors": { "body": "#7a7268", "belly": "#948a7e", "accent": "#d8a040", "eyes": "#ffc040" } } },
+      "dropBases": ["warhammer", "heavy_chest", "heavy_helm", "gold_signet"]
+    },
+    {
+      "id": "carrion_moth", "name": "Carrion Moth", "kind": "beast", "biomes": ["any"],
+      "minLevel": 3, "maxLevel": 13, "hp": 38, "dmg": [8, 12], "armor": 1, "speed": 4.8, "reach": 2.6,
+      "aggroRange": 34, "attackEvery": 1.3, "xp": 24, "gold": 8,
+      "look": { "creature": { "type": "moth", "size": 0.8, "colors": { "body": "#6a5a70", "belly": "#8c7c92", "accent": "#d8c060", "eyes": "#ff6040" } } },
+      "dropBases": ["shortbow", "light_helm", "necklace"]
+    },
+    {
+      "id": "mire_drake", "name": "Mire Drake", "kind": "beast", "biomes": ["jungle", "toxic", "grass"],
+      "minLevel": 12, "maxLevel": 26, "hp": 220, "dmg": [22, 33], "armor": 14, "speed": 3.8, "reach": 3.6,
+      "aggroRange": 36, "attackEvery": 1.9, "xp": 130, "gold": 48,
+      "look": { "creature": { "type": "drake", "size": 1.4, "colors": { "body": "#3a6a4a", "belly": "#8ab070", "accent": "#d8b040", "eyes": "#ffd030" }, "features": { "wings": true, "horns": true } } },
+      "dropBases": ["greatsword", "halberd", "scaled_chest", "silver_amulet"]
+    },
+    {
+      "id": "road_brigand", "name": "Road Brigand", "kind": "humanoid", "biomes": ["grass", "desert", "tundra"],
+      "minLevel": 2, "maxLevel": 14, "hp": 54, "dmg": [7, 12], "armor": 6, "speed": 3.8, "reach": 2.5,
+      "aggroRange": 28, "attackEvery": 1.5, "xp": 26, "gold": 16,
+      "look": {
+        "avatar": {
+          "body": { "skin": "#c08a62", "height": 0.35, "width": 0.5 },
+          "headShape": "oval", "hair": { "id": "slicked", "color": "#2a2420" },
+          "eyes": { "id": "angry", "color": "#6a5a3a" }, "brows": { "id": "straight" },
+          "nose": { "id": "small" }, "mouth": { "id": "neutral", "color": "#8a4a4a" },
+          "facialHair": { "id": "stubble" },
+          "top": { "id": "strapped_leather", "color": "#5a4632", "color2": "#3a2e22" },
+          "bottom": { "id": "pants", "color": "#3e3428" }, "shoes": { "id": "boots", "color": "#332a20" },
+          "hat": { "id": "hood", "color": "#4a3c2c" }, "extras": { "id": "scar", "color": "#9a5a4a" },
+          "held": { "id": "saber", "color": "#b8c0c8" }, "offhand": { "id": "dagger", "color": "#a8b0b8" }
+        }
+      },
+      "dropBases": ["rapier", "sword", "light_chest", "medium_boots", "ring"]
+    },
+    {
+      "id": "sky_cultist", "name": "Sky Cultist", "kind": "humanoid", "biomes": ["any"],
+      "minLevel": 6, "maxLevel": 20, "hp": 76, "dmg": [13, 19], "armor": 4, "speed": 3.4, "reach": 3.2,
+      "aggroRange": 30, "attackEvery": 1.8, "xp": 48, "gold": 22,
+      "look": {
+        "avatar": {
+          "body": { "skin": "#b8a08a", "height": 0.4, "width": 0.4 },
+          "headShape": "oval", "hair": { "id": "bald", "color": "#2a2a2a" },
+          "eyes": { "id": "glow", "color": "#a060e0" }, "brows": { "id": "straight" },
+          "nose": { "id": "small" }, "mouth": { "id": "neutral", "color": "#7a4a5a" },
+          "top": { "id": "high_collar_robe", "color": "#3a2e4a", "color2": "#8060b0" },
+          "bottom": { "id": "baggy", "color": "#2e2638" }, "shoes": { "id": "sandals", "color": "#4a4050" },
+          "hat": { "id": "hood", "color": "#3a2e4a" }, "extras": { "id": "chest_glow", "color": "#a060e0" },
+          "cape": { "id": "half_cape", "color": "#2e2440" },
+          "held": { "id": "staff_crystal", "color": "#b080ff" }
+        }
+      },
+      "dropBases": ["staff", "wand", "orb", "cloth_chest", "necklace"]
+    },
+    {
+      "id": "iron_marshal", "name": "Iron Marshal", "kind": "humanoid", "biomes": ["any"],
+      "minLevel": 14, "maxLevel": 30, "hp": 260, "dmg": [26, 38], "armor": 26, "speed": 3.2, "reach": 3,
+      "aggroRange": 30, "attackEvery": 1.9, "xp": 170, "gold": 70,
+      "look": {
+        "avatar": {
+          "body": { "skin": "#9a7a5a", "height": 0.6, "width": 0.7 },
+          "headShape": "round", "hair": { "id": "buzz", "color": "#3a3028" },
+          "eyes": { "id": "narrow", "color": "#8a7a4a" }, "brows": { "id": "straight" },
+          "nose": { "id": "small" }, "mouth": { "id": "neutral", "color": "#8a4a4a" },
+          "facialHair": { "id": "full" },
+          "top": { "id": "plate", "color": "#6a6e78", "color2": "#c8a850" },
+          "bottom": { "id": "greaves", "color": "#5a5e66" }, "shoes": { "id": "heavy", "color": "#4a4e56" },
+          "hat": { "id": "horned_helm", "color": "#6a6e78" }, "cape": { "id": "cape", "color": "#7a2a2a" },
+          "decor": { "id": "pauldrons", "color": "#6a6e78" },
+          "held": { "id": "warhammer", "color": "#c8ccd4" }, "offhand": { "id": "kite_shield", "color": "#7a2a2a" }
+        }
+      },
+      "dropBases": ["warhammer", "greatsword", "plate_helm", "heavy_chest", "gold_signet", "silver_amulet"]
+    },
+    {
+      "id": "hollow_wraith", "name": "Hollow Wraith", "kind": "beast", "biomes": ["void", "ice", "rock"],
+      "minLevel": 10, "maxLevel": 26, "hp": 120, "dmg": [19, 28], "armor": 6, "speed": 3.6, "reach": 3.2,
+      "aggroRange": 34, "attackEvery": 1.7, "xp": 96, "gold": 34,
+      "look": { "creature": { "type": "wraith", "size": 1.1, "colors": { "body": "#3a3448", "belly": "#5a5070", "accent": "#90a0ff", "eyes": "#c0d0ff" } } },
+      "dropBases": ["tome", "runed_chest", "runed_gauntlets", "silver_amulet"]
+    }
+  ]
+}

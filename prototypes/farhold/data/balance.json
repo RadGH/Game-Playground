@@ -1,0 +1,219 @@
+{
+  "_doc": "Farhold phase 1 knobs. Everything the game tunes lives here: the player's base numbers, how enemies scale, what drops, how far you can see and how much the sky exaggerates. js/rpg.js reads the player/enemy/loot blocks; js/main.js reads world/terrain/sky/spawn.",
+  "seed": 1,
+  "player": {
+    "baseHp": 70,
+    "hpPerLevel": 16,
+    "baseMp": 24,
+    "mpPerLevel": 4,
+    "hpPerCon": 4,
+    "mpPerInt": 2,
+    "str": 6,
+    "dex": 6,
+    "int": 6,
+    "con": 6,
+    "critChance": 5,
+    "critDamage": 50,
+    "hpRegen": 0.9,
+    "unarmed": [
+      1,
+      3
+    ],
+    "damagePerAttr": 0.03,
+    "moveSpeed": 5.4,
+    "runMultiplier": 2.1,
+    "jumpSpeed": 6.4,
+    "attackEvery": 0.62,
+    "attackReach": 2.9,
+    "attackArc": 1.5,
+    "startGold": 0
+  },
+  "progression": {
+    "attrPerLevel": 3,
+    "_doc": "XP curve lives in js/rpg.js (xpForLevel); level 2 at 58 xp, level 10 at ~3,600, level 30 at ~38,000."
+  },
+  "enemies": {
+    "perLevel": 1.17,
+    "hp": 1,
+    "dmg": 1,
+    "xp": 1,
+    "gold": 1
+  },
+  "spawn": {
+    "radius": 130,
+    "minRadius": 45,
+    "maxAlive": 14,
+    "everySeconds": 2.5,
+    "levelSpread": 2,
+    "despawnRadius": 320,
+    "_doc": "Enemies appear in a ring around the player, out of sight, and are cleaned up when you walk far enough away."
+  },
+  "loot": {
+    "dropRate": 0.45,
+    "setChance": 0.3,
+    "affixMult": 1,
+    "shopPrice": 1
+  },
+  "rarity": {
+    "normal": 0.52,
+    "magic": 0.31,
+    "rare": 0.14,
+    "legendary": 0.03
+  },
+  "lootTiers": [
+    {
+      "minLevel": 1,
+      "bases": [
+        "dagger",
+        "sword",
+        "wand",
+        "shortbow",
+        "cloth_helm",
+        "light_helm",
+        "cloth_chest",
+        "light_chest",
+        "light_legs",
+        "light_gauntlets",
+        "light_boots",
+        "ring",
+        "necklace"
+      ]
+    },
+    {
+      "minLevel": 5,
+      "bases": [
+        "sword",
+        "rapier",
+        "hammer",
+        "bow",
+        "staff",
+        "scepter",
+        "medium_helm",
+        "medium_chest",
+        "medium_legs",
+        "medium_gauntlets",
+        "medium_boots",
+        "ring",
+        "necklace",
+        "quiver",
+        "forager_blade",
+        "lantern_mace"
+      ]
+    },
+    {
+      "minLevel": 10,
+      "bases": [
+        "longsword",
+        "battleaxe",
+        "warhammer",
+        "crossbow",
+        "orb",
+        "tome",
+        "heavy_helm",
+        "heavy_chest",
+        "heavy_legs",
+        "heavy_gauntlets",
+        "heavy_boots",
+        "gold_signet",
+        "silver_amulet",
+        "pathfinder_javelin",
+        "rimecut_sabre",
+        "roadwarden_bow"
+      ]
+    },
+    {
+      "minLevel": 16,
+      "bases": [
+        "greatsword",
+        "halberd",
+        "quarterstaff",
+        "sword2h",
+        "axe2h",
+        "plate_helm",
+        "scaled_chest",
+        "runed_chest",
+        "scaled_legs",
+        "runed_gauntlets",
+        "runed_boots",
+        "gold_signet",
+        "silver_amulet",
+        "watchfire_glaive",
+        "starwake_bow",
+        "dawnwarden_hammer"
+      ]
+    },
+    {
+      "minLevel": 23,
+      "bases": [
+        "dragonfang_sword",
+        "dragonfang_greatsword",
+        "wyrmscale_bow",
+        "dragonbone_staff",
+        "drakehammer",
+        "dragontooth_wand",
+        "runed_chest",
+        "runed_legs",
+        "plate_helm",
+        "gold_signet",
+        "silver_amulet",
+        "grudgebrand",
+        "bloodledger_blade"
+      ]
+    }
+  ],
+  "world": {
+    "width": 256,
+    "height": 128,
+    "metresPerCell": 640,
+    "_doc": "256 x 128 cells at 640 m = a planet surface 163 km x 82 km."
+  },
+  "terrain": {
+    "detailFlat": 13,
+    "detailRelief": 78,
+    "detailFine": 2.4,
+    "rings": [
+      {
+        "extent": 192,
+        "res": 96
+      },
+      {
+        "extent": 576,
+        "res": 96
+      },
+      {
+        "extent": 1728,
+        "res": 96
+      },
+      {
+        "extent": 5184,
+        "res": 96
+      },
+      {
+        "extent": 15552,
+        "res": 96
+      }
+    ],
+    "ringsLow": [
+      {
+        "extent": 256,
+        "res": 48
+      },
+      {
+        "extent": 1024,
+        "res": 48
+      },
+      {
+        "extent": 6144,
+        "res": 48
+      }
+    ],
+    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count — near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests."
+  },
+  "sky": {
+    "dayLengthSeconds": 900,
+    "siblingScale": 160,
+    "moonScale": 1,
+    "starScale": 2.2,
+    "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way."
+  }
+}

@@ -1,0 +1,223 @@
+// Farhold — the sky over the planet, with the rest of the star system actually in it.
+//
+// The sky is its own scene, drawn first with a camera that shares the player camera's rotation but
+// sits at the origin. That makes everything in it infinitely far away for free: no depth-precision
+// fight between a 2 m rock and a planet, and nothing here can ever clip into the ground.
+//
+//   const sky = createSky({ star, system, planet, balance });
+//   scene.add(sky.sunLight); scene.fog = sky.fog;
+//   sky.update(elapsedSeconds);            // moves the sun, the siblings and the moons
+//   renderer.render(sky.scene, sky.camera(mainCamera));
+//   renderer.clearDepth();
+//   renderer.render(scene, mainCamera);
+//
+// Where the planets go is real: each body's heliocentric angle comes from its orbital period, and
+// the difference between its angle and ours decides where it sits relative to the star in the sky.
+// An inner planet therefore hangs near the sun at dusk; a planet at opposition rides overhead at
+// midnight. How BIG they are drawn is not real — see `siblingScale` below.
+
+import * as THREE from 'three';
+import { createPlanet, createStar } from '../../../assets/js/space-models.js';
+
+const DOME = 1000;                 // sky-scene radius; everything sits on this shell
+const EARTH_RADII_PER_AU = 23455;  // 1 AU / Earth's radius — turns "radius in Earths" into AU
+
+/** Rotate `v` around `axis` by `angle`, in place. */
+function spin(v, axis, angle) { return v.applyAxisAngle(axis, angle); }
+
+export function createSky({ star, system, planet, balance = {} } = {}) {
+  const cfg = balance.sky || {};
+  const dayLength = cfg.dayLengthSeconds ?? 900;
+  const siblingScale = cfg.siblingScale ?? 160;
+  const moonScale = cfg.moonScale ?? 1;
+
+  const scene = new THREE.Scene();
+  const skyCam = new THREE.PerspectiveCamera(60, 1, 0.1, DOME * 4);
+
+  // the plane the whole system orbits in, tilted by the planet's axial tilt so the sun does not
+  // simply rise due east on every world
+  const tilt = ((planet?.axialTilt ?? 20) * Math.PI) / 180;
+  const pole = new THREE.Vector3(Math.sin(tilt), 0, Math.cos(tilt)).normalize();
+  const base = new THREE.Vector3(0, 0, -1).cross(pole).normalize();
+  if (base.lengthSq() < 1e-6) base.set(1, 0, 0);
+
+  // ------------------------------------------------------------------ the star
+  const sunGroup = new THREE.Group();
+  const sunModel = createStar(star, { radius: DOME * 0.022 * (cfg.starScale ?? 2.2) });
+  sunGroup.add(sunModel.group);
+  scene.add(sunGroup);
+
+  // light for the sky scene itself, so the siblings show phases
+  const skySun = new THREE.DirectionalLight(0xffffff, 2.4);
+  scene.add(skySun);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.12));
+
+  // ------------------------------------------------------------------ starfield
+  const starCount = 1400;
+  const starPos = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    const u = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, r = Math.sqrt(1 - u * u);
+    starPos[i * 3] = Math.cos(a) * r * DOME * 2;
+    starPos[i * 3 + 1] = u * DOME * 2;
+    starPos[i * 3 + 2] = Math.sin(a) * r * DOME * 2;
+  }
+  const starGeom = new THREE.BufferGeometry();
+  starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const starMat = new THREE.PointsMaterial({ color: 0xdfe8ff, size: DOME * 0.004, sizeAttenuation: true, transparent: true, opacity: 1 });
+  const starField = new THREE.Points(starGeom, starMat);
+  starField.frustumCulled = false;
+  scene.add(starField);
+
+  // ------------------------------------------------------------------ the neighbours
+  /** Every body we draw in the sky: the other planets of this system, plus our own moons. */
+  const bodies = [];
+  const ourAu = planet?.orbit?.au ?? 1;
+  const ourPeriod = planet?.orbit?.periodDays || 365;
+
+  for (const p of system?.planets || []) {
+    if (p.id === planet.id) continue;
+    const model = createPlanet(p, { radius: 1, detail: 20, textureSize: 128 });
+    model.group.userData.body = p;
+    scene.add(model.group);
+    bodies.push({
+      kind: 'planet', body: p, model,
+      au: p.orbit?.au ?? 1,
+      period: p.orbit?.periodDays || 365,
+      phase: ((p.seed ?? p.id) % 360) * Math.PI / 180,
+      radiusAu: (p.radius ?? 1) / EARTH_RADII_PER_AU,
+    });
+  }
+  for (const m of planet?.moons || []) {
+    const model = createPlanet(m, { radius: 1, detail: 16, textureSize: 96 });
+    model.group.userData.body = m;
+    scene.add(model.group);
+    bodies.push({
+      kind: 'moon', body: m, model,
+      au: ourAu,
+      period: m.orbit?.periodDays || m.periodDays || 14,
+      phase: ((m.seed ?? 1) % 360) * Math.PI / 180,
+      radiusAu: (m.radius ?? 0.27) / EARTH_RADII_PER_AU,
+      // a moon's orbit is measured in PARENT PLANET RADII, not AU — convert through the parent's
+      // own size so it lands in the same units as radiusAu. These moons orbit close (5-10 planet
+      // radii, against our own Moon's 60), so at an honest scale of 1 they are already enormous.
+      distanceAu: ((m.orbit?.aroundPlanet ?? m.distance ?? 6) * (planet.radius ?? 1)) / EARTH_RADII_PER_AU,
+    });
+  }
+
+  // ------------------------------------------------------------------ colours
+  const dayColor = new THREE.Color(planet?.skyColor || '#7fb0d8');
+  const duskColor = new THREE.Color('#d8783c');
+  const nightColor = new THREE.Color('#050810');
+  const skyColor = new THREE.Color();
+  scene.background = skyColor;
+
+  const sunLight = new THREE.DirectionalLight(0xfff2d8, 2.2);
+  sunLight.name = 'farhold-sun';
+  const ambient = new THREE.HemisphereLight(0xffffff, 0x2a3040, 0.55);
+  const fog = new THREE.Fog(skyColor, 300, 7000);
+
+  const sunDir = new THREE.Vector3(1, 0.4, 0);
+  const tmp = new THREE.Vector3();
+  let elapsed = 0, dayFraction = 0;
+
+  /** Where a body sits on the sky dome, given how far round its orbit it is compared with us. */
+  function placeOnDome(out, deltaAngle, sunAngle) {
+    out.copy(base);
+    spin(out, pole, sunAngle + deltaAngle);
+    return out;
+  }
+
+  function update(seconds) {
+    elapsed = seconds;
+    const sunAngle = (elapsed / dayLength) * Math.PI * 2;
+    dayFraction = (elapsed / dayLength) % 1;
+
+    // the sun
+    placeOnDome(sunDir, 0, sunAngle);
+    sunGroup.position.copy(sunDir).multiplyScalar(DOME);
+    skySun.position.copy(sunDir).multiplyScalar(DOME);
+    sunLight.position.copy(sunDir).multiplyScalar(500);
+    sunLight.target.position.set(0, 0, 0);
+
+    const up = Math.max(-1, Math.min(1, sunDir.y));      // -1 midnight … 1 noon
+    const day = Math.max(0, up);
+    const dusk = Math.max(0, 1 - Math.abs(up) * 4);
+    skyColor.copy(nightColor).lerp(dayColor, day).lerp(duskColor, dusk * 0.55);
+    sunLight.intensity = 0.15 + day * 2.1;
+    ambient.intensity = 0.16 + day * 0.5;
+    ambient.color.copy(skyColor).lerp(new THREE.Color(0xffffff), 0.35);
+    fog.color.copy(skyColor);
+    starMat.opacity = Math.max(0, 1 - day * 3);
+
+    // the neighbours
+    const days = elapsed / dayLength * ((planet?.dayLengthHours ?? 24) / 24);
+    const ourAngle = (days / ourPeriod) * Math.PI * 2;
+    for (const b of bodies) {
+      let delta, distanceAu, radiusAu, scale;
+      if (b.kind === 'moon') {
+        delta = b.phase + (days / b.period) * Math.PI * 2;
+        distanceAu = b.distanceAu;
+        radiusAu = b.radiusAu;
+        scale = moonScale;
+      } else {
+        const theirAngle = b.phase + (days / b.period) * Math.PI * 2;
+        // where they are relative to us, in the orbital plane
+        const dx = b.au * Math.cos(theirAngle) - ourAu * Math.cos(ourAngle);
+        const dy = b.au * Math.sin(theirAngle) - ourAu * Math.sin(ourAngle);
+        distanceAu = Math.max(0.01, Math.hypot(dx, dy));
+        // angle between "toward the star" and "toward them", which is what the sky shows
+        const toStar = Math.atan2(-ourAu * Math.sin(ourAngle), -ourAu * Math.cos(ourAngle));
+        delta = Math.atan2(dy, dx) - toStar;
+        radiusAu = b.radiusAu;
+        scale = siblingScale;
+      }
+      const angular = (radiusAu / distanceAu) * scale;          // apparent radius, radians-ish
+      const size = Math.max(DOME * 0.0015, Math.min(DOME * 0.26, DOME * angular));
+      placeOnDome(tmp, delta, sunAngle);
+      b.model.group.position.copy(tmp).multiplyScalar(DOME * 0.985);
+      b.model.group.scale.setScalar(size);
+      b.model.group.lookAt(0, 0, 0);
+      b.visibleSize = size;
+      b.distanceAu = distanceAu;
+      // a body low in a bright sky washes out, like a daytime moon
+      const washed = Math.max(0, 1 - day * 1.6) * 0.75 + 0.25;
+      b.model.group.traverse(o => {
+        if (!o.material) return;
+        o.material.transparent = true;
+        o.material.opacity = washed;
+      });
+      b.model.update?.(0, elapsed);
+    }
+  }
+
+  update(0);
+
+  return {
+    scene, sunLight, ambient, fog, sunDirection: sunDir, bodies,
+    /** The camera to draw the sky with: the player's view, rotated only. */
+    camera(mainCamera) {
+      skyCam.fov = mainCamera.fov;
+      skyCam.aspect = mainCamera.aspect;
+      skyCam.quaternion.copy(mainCamera.quaternion);
+      skyCam.updateProjectionMatrix();
+      return skyCam;
+    },
+    update,
+    /** 0 = midnight, 0.25 = dawn, 0.5 = noon — for the clock in the HUD. */
+    get dayFraction() { return dayFraction; },
+    get isNight() { return sunDir.y < 0; },
+    /** What is in the sky right now, for the HUD and the tests. */
+    visible() {
+      // DOME * 0.0044 is a full-moon-sized disc; half of that still reads clearly as a body
+      return bodies
+        .filter(b => b.visibleSize > DOME * 0.002)
+        .map(b => ({ name: b.body.name, kind: b.kind, size: b.visibleSize, distanceAu: b.distanceAu }))
+        .sort((a, b) => b.size - a.size);
+    },
+    dispose() {
+      for (const b of bodies) b.model.dispose?.();
+      sunModel.dispose?.();
+      starGeom.dispose(); starMat.dispose();
+    },
+  };
+}

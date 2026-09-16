@@ -1,0 +1,34 @@
+{
+  "_doc": "Farhold's skill bar. Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a radius, a cooldown and a cast. Each class gets four, on keys 1-4. `element` picks the spell effect from avatar-3d/js/spellfx.js.",
+  "statuses": {
+    "burn":   { "name": "Burning", "kind": "damage", "element": "fire",      "perSecond": 0.18, "seconds": 5 },
+    "poison": { "name": "Poisoned", "kind": "damage", "element": "poison",   "perSecond": 0.12, "seconds": 8 },
+    "chill":  { "name": "Chilled", "kind": "slow",   "element": "ice",       "slow": 0.45,      "seconds": 4 },
+    "might":  { "name": "Might",   "kind": "buff",   "element": "physical",  "damage": 0.3,     "seconds": 12 },
+    "guard":  { "name": "Guarded", "kind": "buff",   "element": "holy",      "resist": 0.45,    "seconds": 8 }
+  },
+  "skills": {
+    "power_strike": { "name": "Power Strike", "shape": "melee",  "element": "physical", "mult": 1.9, "reach": 3.4, "arc": 1.6, "cooldown": 4,  "mp": 0,  "desc": "One heavy blow in front of you." },
+    "cleave":       { "name": "Cleave",       "shape": "around", "element": "physical", "mult": 1.15, "radius": 4.5, "cooldown": 7,  "mp": 6,  "desc": "A sweep that catches everything around you." },
+    "aimed_shot":   { "name": "Aimed Shot",   "shape": "bolt",   "element": "physical", "mult": 2.2, "range": 42, "splash": 1.2, "cooldown": 5,  "mp": 4,  "desc": "A single shot, aimed where you look." },
+    "multi_shot":   { "name": "Multi Shot",   "shape": "bolt",   "element": "physical", "mult": 1.0, "range": 34, "splash": 4.5, "cooldown": 8,  "mp": 10, "desc": "A spread that scatters over whatever it lands near." },
+    "firebolt":     { "name": "Firebolt",     "shape": "bolt",   "element": "fire",     "mult": 1.6, "range": 36, "splash": 2.6, "status": "burn",  "cooldown": 4,  "mp": 8,  "desc": "A bolt of fire that leaves them burning." },
+    "frost_nova":   { "name": "Frost Nova",   "shape": "around", "element": "ice",      "mult": 1.2, "radius": 6, "status": "chill", "cooldown": 9,  "mp": 14, "desc": "A ring of ice that slows everything it touches." },
+    "shadow_lance": { "name": "Shadow Lance", "shape": "bolt",   "element": "shadow",   "mult": 1.9, "range": 38, "splash": 2, "cooldown": 5,  "mp": 10, "desc": "A lance of shadow." },
+    "chain_bolt":   { "name": "Chain Bolt",   "shape": "bolt",   "element": "lightning","mult": 1.3, "range": 40, "splash": 5, "cooldown": 7,  "mp": 12, "desc": "Lightning that jumps to whatever stands near where it lands." },
+    "poison_dart":  { "name": "Poison Dart",  "shape": "bolt",   "element": "poison",   "mult": 1.1, "range": 34, "splash": 1.5, "status": "poison", "cooldown": 5, "mp": 6, "desc": "A dart that keeps working after it lands." },
+    "mend":         { "name": "Mend",         "shape": "self",   "element": "holy",     "heal": 0.35, "cooldown": 14, "mp": 18, "desc": "Close your own wounds." },
+    "warcry":       { "name": "War Cry",      "shape": "self",   "element": "physical", "status": "might", "cooldown": 22, "mp": 10, "desc": "Hit harder for a while." },
+    "guard_stance": { "name": "Guard",        "shape": "self",   "element": "holy",     "status": "guard", "cooldown": 18, "mp": 8,  "desc": "Take much less for a while." }
+  },
+  "classes": {
+    "warrior":       ["power_strike", "cleave", "warcry", "guard_stance"],
+    "ranger":        ["aimed_shot", "multi_shot", "poison_dart", "mend"],
+    "rogue":         ["power_strike", "poison_dart", "aimed_shot", "guard_stance"],
+    "mage":          ["firebolt", "frost_nova", "chain_bolt", "mend"],
+    "cleric":        ["mend", "guard_stance", "warcry", "firebolt"],
+    "dragon_knight": ["power_strike", "cleave", "firebolt", "guard_stance"],
+    "stormcaller":   ["chain_bolt", "frost_nova", "shadow_lance", "mend"],
+    "scavenger":     ["aimed_shot", "poison_dart", "guard_stance", "mend"]
+  }
+}

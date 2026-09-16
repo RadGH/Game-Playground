@@ -22,6 +22,11 @@ const SLOT_LABELS = {
   hands: 'Hands', feet: 'Feet', ring: 'Ring', necklace: 'Necklace',
 };
 
+/** What colour each status reads as in the chip row. */
+const STATUS_COLOR = {
+  burn: '#ff9a5c', poison: '#9ede6a', chill: '#8fd6ff', might: '#ffd27a', guard: '#dfe9ff',
+};
+
 export class Hud {
   constructor({ rpg, terrain, onEquip, onSpendAttr, onSpendPassive = null, onTakeTalent = null, journal = null, seed = 1 }) {
     this.journal = journal;
@@ -55,6 +60,44 @@ export class Hud {
     }));
   }
 
+  // ---------------------------------------------------------------- skill bar
+
+  /**
+   * Draw the four slots. `state` is `skills.state()` — name, cooldown left, whether it can be used.
+   * Rebuilt only when the shape changes; on every other frame it just moves the cooldown sweep,
+   * because this runs at 60 fps and replacing nine nodes a frame is a waste.
+   */
+  skills(state) {
+    const box = $('skillbar');
+    if (!box) return;
+    // `null` means "no bar" — in the ship, say, where 1-4 does nothing. Clear it once, not per frame.
+    if (!state || !state.length) {
+      if (this._skillSlots) { box.replaceChildren(); this._skillSlots = null; }
+      return;
+    }
+    if (!this._skillSlots || this._skillSlots.length !== state.length) {
+      this._skillSlots = state.map((s, i) => {
+        const slot = document.createElement('div');
+        slot.className = 'skill-slot';
+        slot.innerHTML = `<span class="skill-key">${i + 1}</span>`
+          + `<span class="skill-name"></span>`
+          + `<span class="skill-mp"></span>`
+          + `<i class="skill-cd"></i>`;
+        slot.title = `${s.name} — ${s.desc || ''}`;
+        return slot;
+      });
+      box.replaceChildren(...this._skillSlots);
+    }
+    for (let i = 0; i < state.length; i++) {
+      const s = state[i], slot = this._skillSlots[i];
+      slot.querySelector('.skill-name').textContent = s.name;
+      slot.querySelector('.skill-mp').textContent = s.mp ? String(s.mp) : '';
+      slot.querySelector('.skill-cd').style.height = `${Math.round((s.ready / s.cooldown) * 100)}%`;
+      slot.classList.toggle('blocked', !s.usable);
+      slot.classList.toggle('ready', s.usable);
+    }
+  }
+
   // ---------------------------------------------------------------- bars and place
 
   tick(player, { place, clock, target, sky, weather, where }) {
@@ -68,6 +111,17 @@ export class Hud {
     const pct = hi > lo ? Math.max(0, Math.min(100, (player.xp - lo) / (hi - lo) * 100)) : 100;
     $('bar-xp-fill').style.width = pct + '%';
     $('hud-name').innerHTML = `${player.name} <small>level ${player.level}${player.pendingAttr ? ' · ' + player.pendingAttr + ' points to spend' : ''}</small>`;
+
+    // statuses burning/chilling/buffing the player right now
+    const chips = Object.values(player.statuses || {});
+    const box = $('hud-statuses');
+    if (box) box.replaceChildren(...chips.map(st => {
+      const c = document.createElement('span');
+      c.className = 'status-chip';
+      c.style.color = STATUS_COLOR[st.type] || '#cfd8e3';
+      c.textContent = `${st.name || st.type} ${st.remaining.toFixed(0)}s`;
+      return c;
+    }));
 
     $('hud-place-name').textContent = place || '';
     $('hud-clock').textContent = clock || '';

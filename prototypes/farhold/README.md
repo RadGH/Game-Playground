@@ -32,6 +32,7 @@ worth the name, graduation).
 | **Swim** | Deep water makes you swim — floating at the surface, with front, back and side strokes. |
 | **Ride** | **H** puts you on a horse: faster, longer jumps, no attacking. |
 | **Combat feel** | A white arc shows exactly the area a swing damages; bows fire real arrows; every hit splashes. |
+| **Skills** | Four per class on **1–4**, with cooldowns and mana, drawn with `avatar-3d`'s spell effects — and statuses that keep working after the hit: burn, poison, chill, Might, Guard. |
 | **Map** | **M** opens a full-screen map with your position, pins and World Forge's own layer filters. |
 | **Save** | Runs save themselves to the browser and load back — several slots, with a Continue button. |
 | **Solid** | Trees, rocks, ruins, houses and walls stop you walking through them. |
@@ -46,13 +47,14 @@ worth the name, graduation).
 ## Controls
 
 **On foot:** `WASD` move · `Shift` run · `Space` jump · left click swing (click once to capture the
-mouse) · `E` talk to somebody · `H` mount a horse · `J` board the ship · `M` the map ·
-`I` or `Tab` character sheet · **`` ` `` debug menu** · `Esc` step back.
+mouse) · **`1`–`4` skills** · `E` talk to somebody · `H` mount a horse · `J` board the ship ·
+`M` the map · `I` or `Tab` character sheet · `O` settings · **`` ` `` debug menu** · `Esc` step back.
 
 **In space:** `W` throttle · mouse steer · `Shift` boost · hold `Space` to warp · `J` land.
 
-URL options: `?seed=7`, `?auto=1` (skip the title), `?quality=low` (smaller budgets — what the
-Playwright specs use), `?weather=storm` (start in a given sky and hold it).
+URL options: `?seed=7`, `?auto=1` (skip the title), `?class=mage` (pick a class without the menu),
+`?quality=low` (smaller budgets — what the Playwright specs use), `?weather=storm` (start in a given
+sky and hold it).
 
 ---
 
@@ -224,10 +226,12 @@ that is phase 4.
 | `js/player.js` | Input, the third-person controller, the follow camera. |
 | `js/actors.js` | One interface over Chibi 2 humanoids and creatures; the enemy field. |
 | `js/rpg.js` | Stats, XP, levels, equipment, damage, loot rolls. **Pure, node-testable.** |
+| `js/skills.js` | The skill bar: cooldowns, mana, what a skill does and to whom, and the statuses it leaves behind. **Pure, node-testable.** |
 | `js/hud.js` | Bars, log, minimap, character sheet, bag. |
 | `js/main.js` | Boot, wiring, the frame loop, `window.farhold`. |
 | `data/balance.json` | Every knob: player numbers, enemy scaling, drops, ring sizes, scatter density, weather timing, sky exaggeration. |
 | `data/enemies.json` | 16 enemies with the biome families they live in and the body each builds. |
+| `data/skills.json` | 12 skills, 5 statuses, and the four each class gets. |
 
 ## What it reuses
 
@@ -274,20 +278,19 @@ any kit.
 
 - **Affixes that do nothing yet are declared, not hidden.** Anything outside `LIVE_STATS` in
   `js/rpg.js` is kept on the item and listed on the character sheet as "carried but not yet wired up
-  in this phase". Phase 3 turns them on.
-- **Settlements have no people**, shops or interiors — phase 4.
-- **No sound and no dialogue** — deliberate; phase 7.
-- **Combat is still one swing.** No skills, no statuses, no spell effects — the rest of phase 3.
-- **The camera is over the RIGHT shoulder** and there is no options menu or first-person view yet;
-  all three are queued (see `PLAN.md` phase 3).
+  in this phase". Emberveil's 359-id effect registry is still not turned on here.
+- **Enemies have no skills of their own.** The player has four; the enemies still walk up and swing.
+  Champions, named foes, packs with a leader and casting enemies are the part of phase 3 left over.
+- **No dodge roll, block or knockback** — hits land, but the fight has no defensive input.
+- **First person (`V`) is not built.** The Chibi 2 body needs the head and near arm hidden and the
+  camera moved to the eye bone. Queued (see `PLAN.md` phase 3).
 - **Planets in the sky do not occlude one another**, there is no lens flare or god rays, and one
   global `orbitScale` means a close-in body can cross the sky too fast — all queued.
 - **Props do not sway** in the wind, and grass has no alpha texture — both are cheap wins later.
 - **Collision is cylinders, not shapes.** A house is a circle to walk around, so its corners are
   softer than they look; and enemies ignore collision entirely.
 - **Swimming is surface only** — no diving, no underwater anything.
-- **The rings leave small seams** where two resolutions meet, visible at a grazing angle. Proper
-  skirts are phase 10.
+- **Dungeons are markers, not places.** A "clear" job sends you to the site; there is no interior.
 - **Enemies do not path around terrain.** They walk straight at you and turn away from water.
 
 ## Tests
@@ -295,7 +298,7 @@ any kit.
 ```sh
 node --test prototypes/farhold/tests/*.test.js     # ground + rules, no browser
 node --test worldgen/tests/weather.test.js         # the weather model
-npx playwright test prototypes/farhold             # the real page (32 tests)
+npx playwright test prototypes/farhold             # the real page (61 tests)
 ```
 
 The node tests cover terrain determinism, height sanity, agreement with the map, slopes vs normals,
@@ -309,4 +312,7 @@ than a gorge, no building standing in the water, roads graded into the ground wi
 on them, roads that pay for the height they gain, things you cannot walk through, a closed city
 wall, a swipe arc that points where the damage lands, a bow that fires, a horse, the map screen, a
 save that round-trips through a reload, a minimap with relief on a single-biome world, and an
-eclipse that takes the light away.
+eclipse that takes the light away. Phase 3's fight adds: the bar drawing four slots and dimming a
+slot on cooldown, a firebolt that reaches a moving enemy and leaves it burning after the bolt is
+gone, a nova that catches and chills everything around you, key 1 spending mana and refusing when
+the pool is empty, and War Cry and Guard landing as real statuses.

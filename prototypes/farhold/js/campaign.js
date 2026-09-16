@@ -28,6 +28,46 @@ export class Campaign {
     if (state) this.load(state);
   }
 
+  /**
+   * Cut the survey to fit the system it is being run in.
+   *
+   * Some systems have nobody living in them at all — the balance harness found 29% of them — and on
+   * those, "walk into six settlements" and "finish eight jobs" can never be done. An objective you
+   * cannot finish is worse than no objective, so the ones that depend on people are scaled down to
+   * what is actually out there, and replaced entirely when the answer is none.
+   */
+  fit({ settlements = Infinity, planets = Infinity, dungeons = Infinity } = {}) {
+    for (const o of this.objectives) {
+      if (o.kind === 'settlements') o.target = Math.max(0, Math.min(o.target, settlements));
+      if (o.kind === 'planets') o.target = Math.max(1, Math.min(o.target, planets));
+      if (o.kind === 'dungeons') o.target = Math.max(0, Math.min(o.target, dungeons));
+    }
+    // With nobody to give work, the jobs objective has to become something else. Fold it into the
+    // hunting rather than adding a second kills objective that counts the same events.
+    if (settlements === 0) {
+      const jobs = this.objectives.find(o => o.kind === 'quests');
+      const hunting = this.objectives.find(o => o.kind === 'kills' && o !== jobs);
+      if (jobs) {
+        if (hunting) {
+          hunting.target += 50;
+          hunting.name = `${hunting.target} kills`;
+          hunting.desc = 'Nobody lives in this system, so there is no work but the hunting.';
+          this.objectives = this.objectives.filter(o => o !== jobs);
+          delete this.progress[jobs.id];
+        } else {
+          jobs.kind = 'kills';
+          jobs.target = 150;
+          jobs.name = '150 kills';
+          jobs.desc = 'Nobody lives in this system, so there is no work but the hunting.';
+        }
+      }
+    }
+    // drop anything that has been scaled to nothing
+    this.objectives = this.objectives.filter(o => o.target > 0);
+    this.fitted = { settlements, planets, dungeons };
+    return this;
+  }
+
   // ---------------------------------------------------------------- events
 
   /** Metres walked since the last call. */

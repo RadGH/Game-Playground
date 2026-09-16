@@ -15,6 +15,7 @@ import { createCreature } from '../../../avatar-3d/js/creatures.js';
 import { normalizeAvatar } from '../../../avatar-2d/js/render.js';
 import { familiesOf } from '../../../worldgen/js/biomes.js';
 import { makeRng } from '../../emberveil/js/rng.js';
+import { tickStatuses, slowOf } from './skills.js';
 
 /** Build a body from a look: `{ avatar }` gives a Chibi 2 humanoid, `{ creature }` gives a beast. */
 export async function makeActor(look = {}) {
@@ -138,6 +139,16 @@ export class EnemyField {
       if (e.hitFlash > 0) e.hitFlash -= dt;
       if (e.swingTimer > 0) e.swingTimer -= dt;
 
+      // burns and poisons keep working between swings; a chill takes the legs out of the chase
+      if (e.statuses) {
+        const burned = tickStatuses(e, dt);
+        if (burned > 0) {
+          e.hitFlash = Math.max(e.hitFlash, 0.08);
+          hooks.onStatusDamage?.(e, burned);
+          if (e.hp <= 0) { this.kill(e); continue; }
+        }
+      }
+
       // decide
       if (e.state !== 'chase' && dist < e.aggroRange) {
         e.state = 'chase';
@@ -166,6 +177,7 @@ export class EnemyField {
       }
 
       if (speed > 0) {
+        speed *= 1 - slowOf(e);
         const nx = e.x + Math.sin(e.facing) * speed * dt;
         const nz = e.z + Math.cos(e.facing) * speed * dt;
         const [cx, cz] = this.terrain.clampToWorld(nx, nz);
@@ -183,7 +195,7 @@ export class EnemyField {
   }
 
   /** Damage everything inside the player's swing. Returns what was hit. */
-  strike(player, playerUnit, { reach = 2.9, arc = 1.5 } = {}) {
+  strike(player, playerUnit, { reach = 2.9, arc = 1.5, power = 1, onHit = null } = {}) {
     const hits = [];
     for (const e of this.enemies) {
       if (e.dying != null) continue;
@@ -193,9 +205,10 @@ export class EnemyField {
       const toEnemy = Math.atan2(dx, dz);
       let delta = Math.abs(((toEnemy - player.yaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
       if (delta > arc / 2) continue;
-      const result = this.rpg.strike(playerUnit, e, this.rng);
+      const result = this.rpg.strike(playerUnit, e, this.rng, { multiplier: power });
       e.hitFlash = 0.18;
       if (e.state !== 'chase') e.state = 'chase';
+      onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) this.kill(e);
     }
@@ -206,7 +219,7 @@ export class EnemyField {
    * Damage everything within `radius` of a point — an arrow landing, or a heavy weapon's shockwave.
    * Every attack in the game goes through this or `strike`, so nothing is ever single-target.
    */
-  strikeArea(x, z, radius, attacker, { falloff = 0.45 } = {}) {
+  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = 1, onHit = null } = {}) {
     const hits = [];
     for (const e of this.enemies) {
       if (e.dying != null) continue;
@@ -214,9 +227,10 @@ export class EnemyField {
       if (d > radius + (e.reach || 2) * 0.25) continue;
       // full damage at the centre, `falloff` of it at the rim
       const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
-      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near });
+      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * power });
       e.hitFlash = 0.18;
       if (e.state !== 'chase') e.state = 'chase';
+      onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) this.kill(e);
     }

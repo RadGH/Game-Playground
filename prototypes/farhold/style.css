@@ -329,3 +329,57 @@ body {
 }
 .journal-row.done { border-left-color: #5ad48a; color: #9fd8b0; }
 .journal-row.nemesis { border-left-color: #d0503c; color: #ffb0a0; }
+
+/* ---------------------------------------------------------------- settings (O) */
+
+.settings {
+  position: fixed; z-index: 38; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(520px, 94vw); max-height: 84vh; overflow: auto;
+  background: #0d1320f2; border: 1px solid #2c3a52; border-radius: 10px; padding: 16px 20px;
+  box-shadow: 0 18px 60px #000a;
+}
+.settings.hidden { display: none; }
+.settings-head { display: flex; align-items: baseline; border-bottom: 1px solid #222c3c; padding-bottom: 8px; }
+.settings-head h2 { margin: 0; font-size: 19px; color: #7fd8ff; }
+.settings-close { margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 22px; cursor: pointer; }
+.settings h3 { margin: 14px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; }
+.settings-row { display: flex; align-items: center; gap: 10px; padding: 3px 0; font-size: 13px; }
+.settings-label { flex: 1; }
+.settings-choice { display: flex; gap: 4px; }
+.settings-btn {
+  background: #16202f; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px;
+  padding: 3px 12px; font: inherit; font-size: 12px; cursor: pointer; min-width: 52px;
+}
+.settings-btn:hover { border-color: #3f6f9a; }
+.settings-btn.on { background: #1b4a6a; border-color: #3f9fd8; color: #dff2ff; }
+.settings-range { width: 150px; }
+.settings-value { width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- skill bar (phase 3)
+   Four slots on 1-4. A slot dims when it is on cooldown or you cannot pay for it, and the dark
+   sweep up it is the cooldown itself, so the bar reads without reading any numbers. */
+#skillbar {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+  display: flex; gap: 8px; pointer-events: none;
+}
+.skill-slot {
+  position: relative; width: 58px; height: 58px; overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 7px;
+  background: rgba(12, 16, 22, 0.72);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; line-height: 1.15; text-align: center; color: #e8eef6;
+  text-shadow: 0 1px 2px #000;
+}
+.skill-slot .skill-key { position: absolute; top: 2px; left: 4px; font-size: 9px; color: #9fb2c6; }
+.skill-slot .skill-mp { position: absolute; bottom: 2px; right: 4px; font-size: 9px; color: #6fa8ff; }
+.skill-slot .skill-name { padding: 0 3px; font-weight: 600; z-index: 1; }
+.skill-slot .skill-cd { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.62); }
+.skill-slot.blocked { opacity: 0.45; }
+.skill-slot.ready { border-color: rgba(255, 214, 128, 0.6); box-shadow: 0 0 9px rgba(255, 190, 90, 0.18); }
+
+/* statuses on the player, under the bars */
+#hud-statuses { display: flex; gap: 6px; margin-top: 4px; }
+#hud-statuses .status-chip {
+  font-size: 10px; padding: 1px 6px; border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.45);
+}

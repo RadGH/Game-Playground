@@ -25,6 +25,8 @@ class Ring {
     this.res = res;
     this.cell = extent / res;
     this.hole = hole;
+    // how far the hole's lip drops; proportional to this ring's own resolution
+    this.skirt = this.cell * 1.2;
     this.centre = [Infinity, Infinity];
 
     const verts = (res + 1) * (res + 1);
@@ -80,7 +82,16 @@ class Ring {
       for (let x = 0; x <= res; x++) {
         const i = y * (res + 1) + x, o = i * 3;
         const wx = cx - half + x * cell, wz = cz - half + y * cell;
-        const height = h[i];
+        let height = h[i];
+        // A SKIRT around the hole. Where two rings of different resolution meet, their edges do not
+        // agree to the millimetre, and at a grazing angle you could see through the join. Dropping
+        // the vertices on the hole's edge makes the quads bordering it slope down into ground the
+        // finer ring is already covering, so any gap is behind a wall instead of open sky. It costs
+        // no extra vertices: the ones inside the hole are referenced by nothing else.
+        if (this.hole > 0) {
+          const lx = Math.abs(wx - cx), lz = Math.abs(wz - cz);
+          if (Math.max(lx, lz) <= this.hole / 2 + cell) height -= this.skirt;
+        }
         P[o] = wx - cx; P[o + 1] = height; P[o + 2] = wz - cz;
         const l = h[y * (res + 1) + Math.max(0, x - 1)], r = h[y * (res + 1) + Math.min(res, x + 1)];
         const u = h[Math.max(0, y - 1) * (res + 1) + x], d = h[Math.min(res, y + 1) * (res + 1) + x];

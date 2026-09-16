@@ -305,6 +305,31 @@ rotation, drawn first, then `renderer.clearDepth()` and the world over it. Every
 infinitely far away for free. Sibling planets are placed by real orbital angle and drawn oversized on
 purpose - `balance.json` `sky.siblingScale`.
 
+## A real-time skill bar over turn-based skill data
+
+`prototypes/farhold/js/skills.js` is the small piece that lets a real-time game use skills written
+for a turn-based one. Emberveil's `data/skills.json` describes shapes like `adjacent2`, `row` and
+`per_source` — party positions, which mean nothing to one person standing in a field. Farhold's
+`data/skills.json` keeps the same ideas but describes each skill by **shape** (`melee`, `around`,
+`bolt`, `self`), **radius**, **cooldown** and **mana**, and `js/skills.js` turns a key press into a
+plan the caller carries out:
+
+```js
+import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf } from '/prototypes/farhold/js/skills.js';
+const skills = createSkillBar({ data, player, rpg });
+const plan = skills.use(0);          // { ok, kind, element, damage, radius, status, heal, ... }
+skills.update(dt);                   // cooldowns
+skills.state();                      // what the HUD draws
+```
+
+The model is pure — it never touches Three.js — so node tests drive the whole fight with no
+renderer. Statuses are plain objects on the target (`{ type, remaining, power }`): `tickStatuses`
+returns the damage that tick, `slowOf` how much it is slowed, `buffsOf` the damage and resistance a
+unit's buffs are worth. Two things learned wiring it to `avatar-3d/js/spellfx.js`: give a projectile
+an explicit `ms` (the module clamps its own flight to 0.16-0.45 s, which is an age in a real-time
+fight), and make a bolt burst on **where its target is now**, not where it stood when you fired —
+anything charging you moves several metres while the bolt is in the air.
+
 ## Weather over a generated world
 
 `worldgen/js/weather.js` turns a cell's climate into what the sky above it is doing. Pure data, no

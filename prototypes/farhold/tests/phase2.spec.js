@@ -339,3 +339,43 @@ test('every planet gets its own sky, sea and cloud colour', async ({ page }) => 
   const skies = new Set(palettes.map(p => p.sky));
   expect(skies.size).toBeGreaterThan(palettes.length * 0.7);
 });
+
+test('the rings have a skirt around their hole, so the joins are not see-through', async ({ page }) => {
+  await land(page);
+  const rings = await page.evaluate(() => {
+    const f = window.farhold;
+    const out = [];
+    for (const ring of f.view.rings) {
+      if (!ring.hole) continue;
+      const pos = ring.geometry.attributes.position.array;
+      const res = ring.res, cell = ring.cell, half = ring.extent / 2;
+      let onLip = 0, justOutside = 0, lipY = 0, outY = 0;
+      for (let y = 0; y <= res; y++) {
+        for (let x = 0; x <= res; x++) {
+          const i = y * (res + 1) + x;
+          const lx = Math.abs(-half + x * cell), lz = Math.abs(-half + y * cell);
+          const edge = Math.max(lx, lz);
+          const ground = f.terrain.heightAt(
+            ring.centre[0] - half + x * cell,
+            ring.centre[1] - half + y * cell,
+          );
+          const drop = ground - pos[i * 3 + 1];
+          if (edge <= ring.hole / 2 + cell) { onLip++; lipY += drop; }
+          else if (edge <= ring.hole / 2 + cell * 3) { justOutside++; outY += drop; }
+        }
+      }
+      out.push({
+        extent: ring.extent, skirt: ring.skirt,
+        lipDrop: onLip ? lipY / onLip : 0,
+        outsideDrop: justOutside ? outY / justOutside : 0,
+      });
+    }
+    return out;
+  });
+  expect(rings.length).toBeGreaterThan(0);
+  for (const r of rings) {
+    // the lip really is below the ground it sits on, and the ground outside it is not
+    expect(r.lipDrop).toBeGreaterThan(r.skirt * 0.5);
+    expect(Math.abs(r.outsideDrop)).toBeLessThan(0.5);
+  }
+});

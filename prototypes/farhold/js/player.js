@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 
-export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · E talk · H horse · J ship · M map · I sheet · ` debug';
+export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-4 skills · E talk · H horse · J ship · M map · I sheet · O settings · ` debug';
 
 /** Reads the keyboard and mouse. Pointer lock is optional — dragging works too. */
 export function createInput(dom) {
@@ -67,8 +67,10 @@ export function createInput(dom) {
  * `terrain` is a planet.js terrain; `balance` is data/balance.json.
  * `obstacles` is a list of ObstacleField (props, buildings) to be pushed out of.
  */
-export function createController(terrain, balance = {}, camera, { obstacles = [] } = {}) {
+export function createController(terrain, balance = {}, camera, { obstacles = [], settings = null } = {}) {
   const b = balance.player || {};
+  // live settings: which shoulder, inverted look, how fast the mouse turns
+  const opt = (key, fallback) => (settings ? settings.get(key) : fallback);
   const gravity = 9.81 * (terrain.planet?.gravity ?? 1);
   const spawn = terrain.spawnPoint();
 
@@ -104,10 +106,12 @@ export function createController(terrain, balance = {}, camera, { obstacles = []
   function update(dt, input, { frozen = false } = {}) {
     const out = { attacked: false, landed: false, mountChanged: false, enteredWater: false };
     if (input) {
-      self.yaw -= input.look[0] * 0.0026;
+      const sens = opt('sensitivity', 1);
+      const invert = opt('invertY', false) ? 1 : -1;
+      self.yaw -= input.look[0] * 0.0026 * sens;
       // positive pitch looks up. The old ceiling of 0.75 rad stopped you seeing the sky directly
       // overhead, which is the point of being on a planet with a system above it.
-      self.pitch = Math.max(-1.25, Math.min(1.45, self.pitch + input.look[1] * -0.0022));
+      self.pitch = Math.max(-1.25, Math.min(1.45, self.pitch + input.look[1] * 0.0022 * sens * invert));
       // H mounts and dismounts — but you cannot ride while swimming
       if (!frozen && input.pressed?.has('KeyH') && !self.swimming) {
         self.mounted = !self.mounted;
@@ -217,7 +221,9 @@ export function createController(terrain, balance = {}, camera, { obstacles = []
     // over-the-shoulder: slide the camera along its own right axis, keeping the direction
     const rl = Math.hypot(lookZ, lookX) || 1;
     const rx = -lookZ / rl, rz = lookX / rl;
-    const shoulder = (b.shoulderOffset ?? 0.85) * Math.min(1, dist / 2.2);
+    // over the LEFT shoulder by default, which is what was asked for
+    const side = opt('shoulder', 'left') === 'right' ? 1 : -1;
+    const shoulder = side * (b.shoulderOffset ?? 0.85) * Math.min(1, dist / 2.2);
     const camX = self.x - lookX * dist + rx * shoulder;
     const camZ = self.z - lookZ * dist + rz * shoulder;
     let camY = headY - lookY * dist + (b.cameraLift ?? 0.25);

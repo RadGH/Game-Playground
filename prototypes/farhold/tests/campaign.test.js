@@ -122,3 +122,34 @@ test('the whole survey survives a save', () => {
   assert.equal(back.onLandOn(2), false);
   assert.equal(back.onLandOn(9), true);
 });
+
+test('the survey is cut to fit a system that has nobody in it', () => {
+  // the balance harness found 29% of systems with no inhabited world at all, where "walk into six
+  // settlements" and "finish eight jobs" can never be done
+  const dead = new Campaign(data).fit({ settlements: 0, planets: 2, dungeons: 0 });
+  const kinds = dead.list().map(o => o.kind);
+  assert.ok(!kinds.includes('settlements'), 'still asking for settlements in an empty system');
+  assert.ok(!kinds.includes('quests'), 'still asking for jobs with nobody to give them');
+  assert.ok(!kinds.includes('dungeons'), 'still asking for ruins where there are none');
+  assert.equal(kinds.filter(k => k === 'kills').length, 1, 'two objectives counting the same kills');
+  assert.ok(dead.list().find(o => o.kind === 'planets').target <= 2, 'asking for more worlds than exist');
+
+  // and what is left really can be finished
+  dead.onWalk(21000);
+  dead.onLandOn(1); dead.onLandOn(2);
+  for (let i = 0; i < 300; i++) dead.onKill('rat');
+  dead.onLoot({ rarity: 'legendary' });
+  dead.onDeath({ defId: 'w', name: 'X', level: 1 });
+  dead.onKill('w');
+  assert.equal(dead.complete, true, 'an empty system leaves an unfinishable survey');
+});
+
+test('a lived-in system keeps the whole survey', () => {
+  const full = new Campaign(data).fit({ settlements: Infinity, planets: 5, dungeons: 30 });
+  assert.equal(full.objectives.length, data.objectives.length);
+  for (const o of data.objectives) {
+    const kept = full.objectives.find(k => k.id === o.id);
+    assert.ok(kept, `${o.id} was dropped from a system that can support it`);
+    if (o.kind !== 'planets') assert.equal(kept.target, o.target);
+  }
+});

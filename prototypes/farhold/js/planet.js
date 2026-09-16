@@ -61,7 +61,16 @@ export function chooseLanding(system, { prefer = null } = {}) {
     const hit = solid.find(p => p.id === prefer || p.name === prefer);
     if (hit) return hit;
   }
-  const score = p => (p.atmosphere?.breathable ? 4 : 0) + (p.orbit?.inZone ? 2 : 0) + (p.archetype === 'living' ? 3 : 0) - p.difficulty;
+  // `surfaceOf().inhabited` is the SAME predicate worldgen uses to decide whether to found any
+  // settlements at all, and it is pure archetype + atmosphere, so it costs nothing to ask. Without
+  // it the game happily landed you on a void-touched rock where nobody lives: no towns, no people,
+  // no work, no trade, and two survey objectives that could never be finished. The balance harness
+  // found 29% of systems starting that way.
+  const score = p => (surfaceOf(p).inhabited ? 6 : 0)
+    + (p.atmosphere?.breathable ? 4 : 0)
+    + (p.orbit?.inZone ? 2 : 0)
+    + (p.archetype === 'living' ? 3 : 0)
+    - p.difficulty;
   return solid.sort((a, b) => score(b) - score(a))[0] || system.planets[0];
 }
 

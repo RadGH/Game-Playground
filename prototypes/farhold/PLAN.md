@@ -59,7 +59,7 @@ and overhangs, props that sway in the wind, and grass with a real alpha texture.
 
 ---
 
-## Phase 3 — The map, the fixes, and a fight worth having
+## Phase 3 — The map, the fixes, and a fight worth having ✅
 
 **You can:** open a real map of the world you are on, and then use abilities and fight things that
 are actually dangerous.
@@ -135,18 +135,37 @@ Sky:
   knob for every body, so a close-in planet or a short-period moon whips round. Needs a per-body
   clamp on apparent angular speed rather than one global multiplier.
 
-### The fight
+### The fight ✅ **done 2026-09-15**
 
-- **Skills and cooldowns** from Emberveil's `data/skills.js` — a bar of 4–6, mana, cast times.
-- **Spell effects**: `avatar-3d/js/spellfx.js` + `spellfx-batched.js`, already built for 11 elements,
-  23 status auras, cast/heal/revive/aoe. Wire them to the skill bar and to enemy casts.
-- **Statuses** (burn, poison, chill, stun…) from Emberveil's `status-effects.json`.
-- **The effect registry**: turn on the 359 ids in `prototypes/emberveil/js/effects.js` so the
-  `cond_*` affixes phase 1 carries but ignores start doing what they say.
-- **Enemy variety**: champions and named foes (Emberveil's modifiers), packs with a leader,
-  ranged and casting enemies, fleeing, calling for help.
-- **Dodge roll, block, hit reactions, knockback.** Make the third-person combat feel like input.
-- **Death and recovery**: a real penalty, and Emberveil's revive rule for companions.
+**You can, now:** press **1–4** for four skills your class actually owns, watch them fly as real
+spell effects, and leave things burning, poisoned or chilled after the hit lands.
+
+`data/skills.json` holds twelve skills, five statuses and a four-skill set for each of the eight
+classes. Emberveil's `skills.json` is written for a turn-based party fight — `adjacent2`, `row`,
+`per_source` — which means nothing to one person standing in a field, so these are its ideas rebuilt
+around a **shape** (`melee`, `around`, `bolt`, `self`), a **radius**, a **cooldown** and a **mana
+cost**. `js/skills.js` is the pure model: it decides what a skill does and to whom, and the node
+tests drive the whole thing with no renderer.
+
+- **The bar** (`#skillbar`) shows four slots with the key, the mana cost and a dark sweep for the
+  cooldown, so it reads without reading any numbers. A slot you cannot pay for dims.
+- **The effects are `avatar-3d/js/spellfx.js`** — the same module both other prototypes draw with,
+  so a firebolt here is the firebolt Emberveil throws: `cast` on the caster, `projectile` down the
+  line you are looking along, `impact` where it lands, `aoe` as a ring on the real ground height,
+  `heal` on a Mend. Textures load in the background; until they arrive every effect draws its
+  geometry and nothing throws.
+- **A bolt stops at whatever it reaches first** — an enemy along the shot, or the ground, walked in
+  2 m steps against `terrain.heightAt`. It bursts there and splashes.
+- **Statuses keep working after the hit.** Burn and poison tick damage every frame in the enemy
+  field's own update (and can kill, which awards the xp); chill cuts movement speed; Might raises
+  every hit the player lands, Guard cuts every hit they take. A second burn refreshes the timer
+  rather than stacking. Chips under the health bars show what is on the player.
+- `field.strike` / `field.strikeArea` gained `power` and `onHit`, so a skill hits harder than a
+  swing and hangs its status on each thing it catches, through the same one damage path.
+- **Still not done in this phase** (small, and none of it blocks a later phase): the effect registry's
+  359 `cond_*` ids, champion/named enemy modifiers, packs with a leader, casting enemies, and a
+  dodge roll with hit reactions and knockback. Death and recovery already work — you black out, wake
+  where you landed, and lose a tenth of your gold.
 
 ---
 
@@ -321,9 +340,37 @@ single settlement, new game plus, and difficulty tiers.
 
 ---
 
-## Phase 10 — Make it hold up
+## Phase 10 — Make it hold up ⭐ **done 2026-09-15**
 
-**You can:** play it for hours without it falling over, and hand it to someone else.
+**You can, now:** measure it, tune it, and set it up the way you like.
+
+- **A balance harness** (`tools/sim-farhold.mjs`, `npm run sim:farhold`): 120 seeded runs of 90
+  game-minutes in about fourteen seconds, playing the real terrain, loot, levelling, bestiary, jobs
+  and survey with no renderer. It reports where runs end up, time to each level, what kills people,
+  which survey objectives finish, which biomes nobody ever walks on, and how far people actually
+  travel — and it ends with **what the harness cannot do**, so its zeroes are not mistaken for the
+  game's.
+- **Settings** on **O**, remembered in the browser: camera shoulder (**left by default**, as asked),
+  inverted look, mouse sensitivity, view distance, scatter density, grass, sound, voices and volume.
+  Every one changes something the game reads, and a test proves it.
+- **Ring skirts**: the joins between terrain rings are no longer see-through at a grazing angle. The
+  vertices on each hole's lip drop by a little over one cell, so any gap sits behind a wall instead
+  of open sky — and it costs no extra vertices, because the ones inside the hole were referenced by
+  nothing.
+- **Test coverage**: 47 node tests and 56 browser tests for this prototype alone.
+
+**What the harness found, and what was done about it**
+- **29% of systems have nobody living in them at all.** Landing now prefers a world the map will
+  actually settle (`surfaceOf().inhabited` is the same predicate worldgen uses), and where a whole
+  system is empty, `Campaign.fit()` cuts the survey to what is achievable rather than leaving two
+  objectives that can never be finished.
+- The first harness build reported 150 deaths a run. That was the harness, not the game: it traded
+  blows one for one, when a player swings every 0.62 s against an enemy's 1.3–2.2 s. On the real
+  clock, 34% of runs never die.
+
+**Still to do:** a camera-relative origin, GPU instancing for enemies, a frame-time bench in the
+browser, key rebinding, and graduating the prototype out of the playground (copying in the pieces it
+borrows from `prototypes/emberveil/`).
 
 - **Performance**: ring skirts to kill the seams, GPU instancing for props and enemies, batched
   sprites everywhere (`spellfx-batched.js`), a camera-relative origin, a frame budget per system,
@@ -351,7 +398,7 @@ single settlement, new game plus, and difficulty tiers.
 | 7 ⭐ | done | was mostly wiring, as predicted — memories and relations still open |
 | 8 ⭐ | talents, passives and armour done | character creation and crafting still open |
 | 9 ⭐ | spine, standing and nemesis done | a home, factions and new game plus still open |
-| 10 | medium | the simulator pays for itself |
+| 10 ⭐ | done | the simulator paid for itself immediately — it found the empty-system problem |
 
 **Suggested order if time is short:** 3 → 5. Props, a real fight, and the launch are what make
 it read as the game described. Phases 4, 6 and 9 are content depth; 7, 8 and 10 are polish that can

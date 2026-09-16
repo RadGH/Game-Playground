@@ -1,0 +1,143 @@
+// node --test prototypes/farhold/tests/skills.test.js
+// Phase 3's fight. Cooldowns must actually block, mana must actually run out, a status must
+// actually kill something if you leave it burning long enough, and every class must get four
+// skills that exist.
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf } from '../js/skills.js';
+import { Rpg } from '../js/rpg.js';
+
+
+const here = dirname(fileURLToPath(import.meta.url));
+const read = p => JSON.parse(readFileSync(join(here, p), 'utf8'));
+const items = read('../../emberveil/data/items.json');
+const balance = read('../data/balance.json');
+const data = read('../data/skills.json');
+
+// spellfx.js imports three, which node cannot resolve, so the element names are read out of its
+// source instead. That is the point of the check: the two files must agree.
+const ELEMENTS = Object.fromEntries(
+  readFileSync(join(here, '../../../avatar-3d/js/spellfx.js'), 'utf8')
+    .split('export const ELEMENTS = {')[1].split('\n};')[0]
+    .split('\n').map(l => l.match(/^\s*(\w+):\s*\{/)).filter(Boolean).map(m => [m[1], true]));
+
+const bar = (classId = 'mage', level = 12) => {
+  const rpg = new Rpg(items, balance);
+  const player = rpg.createPlayer({ classId, level });
+  player.mp = player.maxMp;
+  return { rpg, player, skills: createSkillBar({ data, player, rpg }) };
+};
+
+test('every class gets four skills and every skill is real', () => {
+  const classes = Object.keys(data.classes);
+  assert.ok(classes.length >= 8, 'a skill set for each playable class');
+  for (const [id, list] of Object.entries(data.classes)) {
+    assert.equal(list.length, 4, `${id} has four`);
+    for (const key of list) assert.ok(data.skills[key], `${id} asks for ${key}, which does not exist`);
+  }
+});
+
+test('every skill names a real element and a shape the game can draw', () => {
+  const shapes = new Set(['melee', 'around', 'bolt', 'self']);
+  for (const [key, s] of Object.entries(data.skills)) {
+    assert.ok(ELEMENTS[s.element], `${key} uses ${s.element}, which SpellFx does not know`);
+    assert.ok(shapes.has(s.shape), `${key} is shaped "${s.shape}"`);
+    if (s.status) assert.ok(data.statuses[s.status], `${key} applies ${s.status}, which is not defined`);
+    assert.ok(s.cooldown > 0, `${key} has no cooldown`);
+    assert.ok(s.name && s.desc, `${key} has no name or description`);
+  }
+});
+
+test('a skill on cooldown cannot be used again until it comes back', () => {
+  const { skills } = bar('warrior');
+  const first = skills.use(0);
+  assert.equal(first.ok, true);
+  assert.equal(skills.use(0).ok, false, 'straight away is too soon');
+  skills.update(first.skill.cooldown - 0.1);
+  assert.equal(skills.check(0).ok, false, 'still a fraction short');
+  skills.update(0.2);
+  assert.equal(skills.check(0).ok, true);
+});
+
+test('mana is spent and runs out', () => {
+  const { player, skills } = bar('mage');
+  player.mp = 10;
+  const firebolt = skills.slots.findIndex(s => s.id === 'firebolt');
+  const before = player.mp;
+  assert.equal(skills.use(firebolt).ok, true);
+  assert.equal(player.mp, before - data.skills.firebolt.mp);
+  const nova = skills.slots.findIndex(s => s.id === 'frost_nova');
+  const blocked = skills.use(nova);
+  assert.equal(blocked.ok, false);
+  assert.match(blocked.why, /mana/i);
+});
+
+test('a skill hits harder than a bare swing', () => {
+  const { skills } = bar('warrior');
+  const plan = skills.use(0);
+  assert.ok(plan.mult > 1, 'Power Strike is a heavy blow, not a normal one');
+  assert.ok(plan.damage >= 1);
+});
+
+test('a burn ticks, expires, and can finish something off', () => {
+  const foe = { hp: 6, maxHp: 30 };
+  applyStatus(foe, 'burn', data.statuses.burn, 10);
+  let dealt = 0, t = 0;
+  while (t < 6) { dealt += tickStatuses(foe, 0.25); t += 0.25; }
+  assert.ok(dealt > 5, `a burn of power 10 over its life dealt only ${dealt}`);
+  assert.equal(foe.hp, 0, 'it burned to death');
+  assert.deepEqual(Object.keys(foe.statuses), [], 'and the burn ran out');
+});
+
+test('a second burn refreshes rather than stacking', () => {
+  const foe = { hp: 100, maxHp: 100 };
+  applyStatus(foe, 'burn', data.statuses.burn, 4);
+  tickStatuses(foe, 3);
+  applyStatus(foe, 'burn', data.statuses.burn, 4);
+  assert.equal(Object.keys(foe.statuses).length, 1);
+  assert.equal(foe.statuses.burn.remaining, data.statuses.burn.seconds);
+});
+
+test('a chill slows and buffs add up', () => {
+  const foe = { hp: 50, maxHp: 50 };
+  assert.equal(slowOf(foe), 0);
+  applyStatus(foe, 'chill', data.statuses.chill, 1);
+  assert.equal(slowOf(foe), data.statuses.chill.slow);
+  assert.equal(tickStatuses(foe, 0.5), 0, 'a chill does no damage');
+
+  const me = { hp: 50, maxHp: 50 };
+  applyStatus(me, 'might', data.statuses.might, 1);
+  applyStatus(me, 'guard', data.statuses.guard, 1);
+  const b = buffsOf(me);
+  assert.equal(b.damage, data.statuses.might.damage);
+  assert.equal(b.resist, data.statuses.guard.resist);
+  assert.ok(b.resist < 1, 'no amount of buffs makes you immune');
+});
+
+test('Mend heals a share of your health and War Cry buffs instead of hitting', () => {
+  const { player, skills } = bar('cleric');
+  player.hp = 1;
+  const mend = skills.slots.findIndex(s => s.id === 'mend');
+  const plan = skills.use(mend);
+  assert.equal(plan.kind, 'self');
+  assert.ok(plan.heal > 0 && plan.heal <= player.maxHp);
+
+  const cry = skills.slots.findIndex(s => s.id === 'warcry');
+  const cryPlan = skills.use(cry);
+  assert.equal(cryPlan.heal, 0);
+  assert.equal(cryPlan.status, 'might');
+});
+
+test('the bar reports what the HUD needs to draw', () => {
+  const { skills } = bar('ranger');
+  const state = skills.state();
+  assert.equal(state.length, 4);
+  assert.ok(state.every(s => s.usable), 'everything is ready at the start of a fight');
+  skills.use(0);
+  assert.equal(skills.state()[0].usable, false);
+  assert.ok(skills.state()[0].ready > 0);
+});

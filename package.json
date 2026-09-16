@@ -8,7 +8,8 @@
     "serve": "./serve.sh",
     "test": "npx playwright test",
     "test:unit": "node --test assets/tests/*.test.js lingo/tests/*.test.js avatar-2d/tests/*.test.js voice-lab/tests/*.test.js namegen/tests/*.test.js items/tests/*.test.js prototypes/party-quest/tests/*.test.js prototypes/emberveil/tests/*.test.js prototypes/frontier-foundry/tests/*.test.js prototypes/farhold/tests/*.test.js meters/tests/*.test.js conversations/tests/*.test.js worldgen/tests/*.test.js universe/tests/*.test.js sfx/tests/*.test.js",
-    "test:sim": "FOUNDRY_SIM=1 node --test prototypes/frontier-foundry/tests/sim.test.js"
+    "test:sim": "FOUNDRY_SIM=1 node --test prototypes/frontier-foundry/tests/sim.test.js",
+    "sim:farhold": "node prototypes/farhold/tools/sim-farhold.mjs --runs 120 --minutes 90 --out research/sim-report.md"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0"

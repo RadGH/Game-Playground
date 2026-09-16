@@ -12,6 +12,7 @@ import { QuestLog } from './quests.js';
 import { Campaign } from './campaign.js';
 import { createSound } from './sound.js';
 import { createSpeech } from './speech.js';
+import { createSettings } from './settings.js';
 import { NameGen } from '../../../namegen/js/namegen.js';
 import { generatePlanetMap } from '../../../universe/js/planetmap.js';
 import { createTerrainView } from './terrain.js';
@@ -27,6 +28,9 @@ import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
 import { Rpg, heldLookFor, offhandLookFor } from './rpg.js';
 import { Hud } from './hud.js';
+import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf } from './skills.js';
+import { SpellFx } from '../../../avatar-3d/js/spellfx.js';
+import { Assets } from '../../../assets/js/assets.js';
 import { atmospherePalette, weatherWeights, weatherOdds, WeatherClock, WEATHER_BY_KEY } from '../../../worldgen/js/weather.js';
 
 const $ = id => document.getElementById(id);
@@ -50,13 +54,14 @@ async function boot() {
   const status = t => { $('boot-status').textContent = t; };
   status('reading the data…');
 
-  const [items, balance, bestiary, talents, campaignData, classLooks, namegen] = await Promise.all([
+  const [items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
     loadJSON('data/talents.json'),
     loadJSON('data/campaign.json'),
     loadJSON('../emberveil/data/class-looks.json'),
+    loadJSON('data/skills.json'),
     // Name Forge, so the folk in a dwarf town have dwarf names
     NameGen.load('/namegen/data/').catch(() => null),
   ]);
@@ -69,7 +74,8 @@ async function boot() {
     o.textContent = classLooks.classes[id].className || id;
     return o;
   }));
-  select.value = 'ranger';
+  // ?class=mage picks one without touching the menu — handy for a test, and for trying a class out
+  select.value = classIds.includes(params.get('class')) ? params.get('class') : 'ranger';
   $('boot-seed').value = params.get('seed') || String(balance.seed ?? 1);
   $('boot-name').value = '';
 
@@ -93,7 +99,7 @@ async function boot() {
         <span class="muted small">level ${s.level} · seed ${s.seed} · ${playtimeText(s.playtime)}${s.place ? ' · ' + s.place : ''}</span>`;
       const load = document.createElement('button');
       load.textContent = 'Load';
-      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save: saves.read(s.id) });
+      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save: saves.read(s.id) });
       const del = document.createElement('button');
       del.className = 'ghost';
       del.textContent = '×';
@@ -106,7 +112,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -114,7 +120,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -124,7 +130,7 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save }) {
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
@@ -187,6 +193,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
   const campaign = new Campaign(campaignData, save?.campaign || null);
+  // cut the survey to what this system can actually offer
+  {
+    const solid = system.planets.filter(p => !p.giant && p.landable !== false);
+    const townCount = (world.nodes || []).filter(n => n.type === 'settlement' || n.type === 'port').length;
+    campaign.fit({
+      settlements: townCount ? Infinity : 0,
+      planets: solid.length,
+      dungeons: (world.nodes || []).filter(n => n.type === 'dungeon').length,
+    });
+  }
   const npcLooks = ['ranger', 'cleric', 'rogue', 'warrior', 'bard', 'mage']
     .map(id => classLooks.classes[id]?.avatar).filter(Boolean);
   let folk = null;
@@ -216,7 +232,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     scene.add(horse.group);
   } catch { horse = null; }
 
-  let control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids] });
+  // Settings are built before the controller, because the camera reads the shoulder side, the
+  // inverted look and the sensitivity on every frame. `control` is declared first and left null:
+  // createSettings applies what it remembered straight away, and reaching a `let` before its
+  // declaration is a ReferenceError, not undefined.
+  let control = null;
+  const settings = createSettings({
+    apply: (v, key) => {
+      if (!key || key === 'sound') sound.mute(!v.sound);
+      if (!key || key === 'voices') speech.setVoice(v.voices);
+      if ((!key || key === 'density' || key === 'grass') && props && control) {
+        props.setDensity(v.density, control.x, control.z);
+        props.setGrass(v.grass, control.x, control.z);
+      }
+      if ((!key || key === 'viewDistance') && view && control) view.update(control.x, control.z, true);
+    },
+  });
+
+  control = createController(terrain, balance, camera, {
+    obstacles: [props.solids, features.solids], settings,
+  });
   const input = createInput(renderer.domElement);
   const fx = createCombatFx(scene, {
     // `terrain` is replaced when you land on a new world, so read it through the binding
@@ -228,6 +263,109 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       for (const { enemy, result } of hits) reportHit(enemy, result);
     },
   });
+
+  // ---------------------------------------------------------------- skills (phase 3)
+  //
+  // Four of them, on 1-4. The spell effects are avatar-3d's `SpellFx`, the same module both other
+  // prototypes draw with, so a firebolt here is the firebolt Emberveil throws. Textures load in the
+  // background; until they arrive every effect draws its geometry and nothing throws.
+  const spellfx = new SpellFx(scene, { camera, scale: 1.15, maxParticles: 260, maxLive: 36 });
+  Assets.open(new URL('../../../assets/', import.meta.url).href)
+    .then(a => a.fxTextures(THREE, { size: 128 }))
+    .then(t => spellfx.setTextures(t))
+    .catch(() => { /* geometry only, which still reads fine */ });
+  const skills = createSkillBar({ data: skillData, player, rpg });
+
+  /** Hang a status on whatever the skill just hit, and say so once. */
+  function landStatus(plan, enemy) {
+    if (!plan.status || !plan.statusSpec) return;
+    const first = !enemy.statuses?.[plan.status];
+    applyStatus(enemy, plan.status, plan.statusSpec, Math.max(1, plan.damage * 0.9));
+    if (first) hud.log(`${enemy.name} is ${plan.statusSpec.name.toLowerCase()}.`, 'good');
+  }
+
+  /** Where the player is looking: an eye point and a unit direction. */
+  function aim() {
+    const cp = Math.cos(control.pitch);
+    return {
+      x: control.x, y: control.y + 1.45, z: control.z,
+      dx: Math.sin(control.yaw) * cp, dy: Math.sin(control.pitch), dz: Math.cos(control.yaw) * cp,
+    };
+  }
+
+  /** Fire skill slot `i`. Returns the plan it ran, or null if it could not. */
+  function castSkill(i) {
+    const plan = skills.use(i);
+    if (!plan.ok) { if (plan.why) hud.log(plan.why); return null; }
+    const a = aim();
+    const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.2, a.z + a.dz * 0.6);
+    // War Cry raises the damage of everything, including the skill that follows it
+    const power = plan.mult * (1 + buffsOf(player).damage);
+    const onHit = (enemy, result) => { landStatus(plan, enemy); reportHit(enemy, result); };
+
+    if (plan.kind === 'self') {
+      if (plan.heal) {
+        const before = player.hp;
+        player.hp = Math.min(player.maxHp, player.hp + plan.heal);
+        spellfx.heal({ at: new THREE.Vector3(control.x, control.y + 0.9, control.z) });
+        hud.log(`${plan.skill.name} closes ${Math.round(player.hp - before)} damage.`, 'good');
+      }
+      if (plan.status && plan.statusSpec) {
+        applyStatus(player, plan.status, plan.statusSpec, 1);
+        hud.log(`${plan.statusSpec.name}.`, 'good');
+      }
+      spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 420 });
+      sound.ui('click');
+    } else if (plan.kind === 'melee') {
+      fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: plan.reach, arc: plan.arc });
+      const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, power, onHit });
+      sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
+      for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element: plan.element, crit: h.result.crit });
+      control.swing = Math.max(control.swing, 0.35);
+    } else if (plan.kind === 'around') {
+      // a ring on the ground, drawn where the ground actually is so it does not float on a slope
+      const points = [];
+      for (let k = 0; k < 8; k++) {
+        const ang = (k / 8) * Math.PI * 2;
+        const px = control.x + Math.cos(ang) * plan.radius * 0.75, pz = control.z + Math.sin(ang) * plan.radius * 0.75;
+        points.push(new THREE.Vector3(px, terrain.heightAt(px, pz) + 0.1, pz));
+      }
+      spellfx.aoe({ points, element: plan.element, stagger: 0.04 });
+      const hits = field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, power, onHit });
+      sound.combat(hits.length ? 'hit' : 'swing');
+      control.swing = Math.max(control.swing, 0.35);
+    } else {
+      // a bolt: it flies down the line you are looking along and bursts on whatever it reaches first
+      const target = field.hitScan(a.x, a.y, a.z, a.dx, a.dy, a.dz, { range: plan.range, width: 1.4 });
+      let dist = target ? target.distance : plan.range;
+      // and stops at the ground if the ground gets in the way first
+      for (let t = 2; t < dist; t += 2) {
+        const gx = a.x + a.dx * t, gz = a.z + a.dz * t;
+        if (a.y + a.dy * t <= terrain.heightAt(gx, gz)) { dist = t; break; }
+      }
+      const to = new THREE.Vector3(a.x + a.dx * dist, a.y + a.dy * dist, a.z + a.dz * dist);
+      sound.combat('bow');
+      // BOLT_SPEED, and the bolt follows whoever it was aimed at. Both matter: at the module's own
+      // pace a bolt takes about half a second to cross 7 m, and anything charging you has moved
+      // several metres by the time it arrives, so a shot lined up on a wolf's nose burst behind it.
+      const BOLT_SPEED = 48;
+      const flight = Math.max(90, (dist / BOLT_SPEED) * 1000);
+      const chase = target?.enemy || null;
+      spellfx.projectile({ from, to, element: plan.element, ms: flight })
+        .then(() => {
+          // burst where it actually is now, not where it stood when you fired
+          const at = chase && chase.dying == null
+            ? new THREE.Vector3(chase.x, chase.y + 0.9, chase.z)
+            : to;
+          spellfx.impact({ at, element: plan.element });
+          const hits = field.strikeArea(at.x, at.z, plan.splash, player, { falloff: 0.5, power, onHit });
+          if (hits.length) sound.combat('hit', { crit: hits.some(h => h.result.crit) });
+        })
+        .catch(() => { /* the scene went away mid-flight */ });
+    }
+    hud.setPlayer(player);
+    return plan;
+  }
 
   // ---------------------------------------------------------------- weather
   let weather = new WeatherClock({
@@ -445,7 +583,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
     });
 
-    control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids] });
+    control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids], settings });
     field = makeField();
     folk = makeFolk();
     hud.setTerrain(terrain);
@@ -713,7 +851,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   window.addEventListener('keydown', e => {
     if (e.code === 'KeyI' || e.code === 'Tab') { e.preventDefault(); hud.toggleSheet(); }
     if (e.code === 'KeyM') { e.preventDefault(); map.toggle(); }
-    if (e.code === 'Escape') { if (talk.isOpen) talk.close(); else if (hud.sheetOpen) hud.toggleSheet(false); else if (map.isOpen) map.toggle(false); }
+    if (e.code === 'KeyO') { e.preventDefault(); settings.toggle(); }
+    if (e.code === 'Escape') { if (settings.isOpen) settings.toggle(false); else if (talk.isOpen) talk.close(); else if (hud.sheetOpen) hud.toggleSheet(false); else if (map.isOpen) map.toggle(false); }
   });
 
   function resize() {
@@ -748,7 +887,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (mode === 'ground') launch();
       else if (mode === 'space') land();
     }
-    if (mode !== 'ground') { stepFlight(dt, snap); renderFrame(); return; }
+    if (mode !== 'ground') { hud.skills(null); stepFlight(dt, snap); renderFrame(); return; }
 
     // E speaks to whoever is standing in front of you
     if (snap.pressed?.has('KeyE')) {
@@ -766,7 +905,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     }
 
-    const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen;
+    const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen || settings.isOpen;
+
+    // skills on 1-4 — not while a panel has the keyboard
+    if (!frozen && snap.pressed?.size) {
+      for (let i = 0; i < 4; i++) if (snap.pressed.has(`Digit${i + 1}`)) { castSkill(i); break; }
+    }
+
     const step = control.update(dt, snap, { frozen });
 
     if (step.mountChanged) {
@@ -842,8 +987,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     field.update(dt, control, player, {
+      onStatusDamage: (e, amount) => {
+        if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`);
+      },
       onEnemyStrike: e => {
-        const result = rpg.strike(e, player, field.rng);
+        const result = rpg.strike(e, player, field.rng, { multiplier: 1 - buffsOf(player).resist });
         if (result.dodged) { hud.log(`You dodge ${e.name}.`); return; }
         hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
         if (result.reflected) hud.log(`Thorns bite back for ${result.reflected}.`, 'good');
@@ -851,6 +999,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       },
     });
     fx.update(dt);
+    spellfx.update(dt);
+    skills.update(dt);
+    // whatever is burning or blessing the player keeps working while they run
+    const selfTick = tickStatuses(player, dt);
+    if (selfTick > 0 && player.hp <= 0) respawn(null);
+    hud.skills(skills.state());
 
     sinceRegen += dt;
     if (sinceRegen > 1) {
@@ -997,7 +1151,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get terrain() { return terrain; },
     launch, land,
     get folk() { return folk; },
-    questLog, talk, sound, speech, campaign,
+    questLog, talk, sound, speech, campaign, settings,
+    skills, spellfx,
+    /** Fire a skill slot from a test or the debug menu. */
+    cast: i => castSkill(i),
+    get statuses() { return { player: player.statuses || {}, enemies: field.enemies.map(e => ({ name: e.name, statuses: e.statuses || {} })) }; },
     /** Skip the cinematics — go straight to space, or straight down onto a world. */
     toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },
     landOn: (planetId, spot = null) => {

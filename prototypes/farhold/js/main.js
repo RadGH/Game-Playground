@@ -193,6 +193,8 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   let control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids] });
   const input = createInput(renderer.domElement);
   const fx = createCombatFx(scene, {
+    // `terrain` is replaced when you land on a new world, so read it through the binding
+    groundAt: (x, z) => terrain.heightAt(x, z),
     onArrowLand: arrow => {
       const splash = balance.player?.arrowSplash ?? 2.6;
       const hits = field.strikeArea(arrow.x, arrow.z, splash, player);
@@ -654,20 +656,23 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
       const reach = balance.player?.attackReach ?? 2.9;
       const arc = balance.player?.attackArc ?? 1.5;
       if (weapon?.ranged) {
-        // a bow: an arrow leaves, flies, and bursts where it lands
-        const [fx0, fz0] = control.facing();
-        fx.shoot({
-          x: control.x + fx0 * 0.7, y: control.y + 1.35, z: control.z + fz0 * 0.7,
-          dirX: fx0, dirZ: fz0,
-          range: balance.player?.arrowRange ?? 46,
-          speed: balance.player?.arrowSpeed ?? 42,
+        // A bow aims where you are LOOKING — the same ray the camera runs down — so you can shoot
+        // up a slope or down off a ledge. Using only the horizontal facing meant every arrow flew
+        // flat no matter where the crosshair was.
+        const cp = Math.cos(control.pitch);
+        const ax = Math.sin(control.yaw) * cp;
+        const ay = Math.sin(control.pitch);
+        const az = Math.cos(control.yaw) * cp;
+        const eyeY = control.y + 1.45;
+        const range = balance.player?.arrowRange ?? 46;
+        const arrow = fx.shoot({
+          x: control.x + ax * 0.7, y: eyeY + ay * 0.5, z: control.z + az * 0.7,
+          dirX: ax, dirY: ay, dirZ: az,
+          range, speed: balance.player?.arrowSpeed ?? 42,
         });
         // if something is directly in the shot, it stops there
-        const target = field.hitScan(control.x, control.z, fx0, fz0, { range: balance.player?.arrowRange ?? 46 });
-        if (target) {
-          const arrow = fx.arrows.find(a => a.live);
-          if (arrow) { arrow.range = Math.min(arrow.range, target.distance); }
-        }
+        const target = field.hitScan(control.x, eyeY, control.z, ax, ay, az, { range });
+        if (target && arrow) arrow.range = Math.min(arrow.range, target.distance);
       } else {
         // a swing: the white arc IS the hit box — same reach, same angle
         fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach, arc });

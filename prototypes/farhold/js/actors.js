@@ -223,15 +223,18 @@ export class EnemyField {
     return hits;
   }
 
-  /** The nearest live enemy along a direction, for an arrow to run into. */
-  hitScan(x, z, dirX, dirZ, { range = 40, width = 1.1 } = {}) {
+  /**
+   * The nearest live enemy along a shot, in three dimensions — a bow that can only scan the
+   * horizontal plane cannot hit anything up a slope or down a bank.
+   */
+  hitScan(x, y, z, dirX, dirY, dirZ, { range = 40, width = 1.1 } = {}) {
     let best = null, bestT = Infinity;
     for (const e of this.enemies) {
       if (e.dying != null) continue;
-      const ex = e.x - x, ez = e.z - z;
-      const t = ex * dirX + ez * dirZ;              // distance along the shot
+      const ex = e.x - x, ey = (e.y + 0.9) - y, ez = e.z - z;    // aim at the body, not the feet
+      const t = ex * dirX + ey * dirY + ez * dirZ;               // distance along the shot
       if (t < 0 || t > range) continue;
-      const off = Math.hypot(ex - dirX * t, ez - dirZ * t);
+      const off = Math.hypot(ex - dirX * t, ey - dirY * t, ez - dirZ * t);
       if (off > width + (e.reach || 2) * 0.3) continue;
       if (t < bestT) { bestT = t; best = e; }
     }

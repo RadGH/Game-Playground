@@ -88,6 +88,8 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     warping: false,
     warpCharge: 0,
     elapsed: 0,
+    lastYaw: 0,
+    bank: 0,
   };
 
   const forward = new THREE.Vector3();
@@ -160,11 +162,24 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     const rim = AU * (cfg.rimAu ?? 14);
     if (state.position.length() > rim) state.position.setLength(rim);
 
-    // point the hull along the flight path, with a little bank into the turn
-    state.quaternion.setFromEuler(new THREE.Euler(state.pitch, state.yaw, 0, 'YXZ'));
+    // Point the nose along the flight path. The hull is modelled facing +Z (the nose cone sits at
+    // z 0.65, the engines behind it), and Object3D.lookAt turns +Z toward the target, so aiming it
+    // this way works whatever Euler order the rest of the code uses.
+    //
+    // Do NOT call ship.update(): the model's own update is the gallery turntable
+    // (`group.rotation.y += 0.35 * dt`), which fought this every frame and left the hull skewed.
     ship.group.position.copy(state.position);
-    ship.group.quaternion.copy(state.quaternion);
-    ship.update?.(dt, state.elapsed);
+    ship.group.lookAt(
+      state.position.x + forward.x,
+      state.position.y + forward.y,
+      state.position.z + forward.z,
+    );
+    // bank into the turn, by how fast the nose is swinging
+    const yawRate = (state.yaw - state.lastYaw + Math.PI * 3) % (Math.PI * 2) - Math.PI;
+    state.lastYaw = state.yaw;
+    state.bank += (clamp(yawRate / Math.max(1e-4, dt) * 0.12, -0.7, 0.7) - state.bank) * Math.min(1, dt * 4);
+    ship.group.rotateZ(state.bank);
+    state.quaternion.copy(ship.group.quaternion);
 
     if (camera) {
       // third person, behind and slightly above, pulled back further the faster you go

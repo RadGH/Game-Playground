@@ -15,7 +15,7 @@ import * as THREE from 'three';
 
 const UP = new THREE.Vector3(0, 1, 0);
 
-export function createCombatFx(scene, { onArrowLand = null } = {}) {
+export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = {}) {
   // ---------------------------------------------------------------- swipe arcs
   // A ring sector lying flat on the ground. Its inner/outer radius and angle are set from the same
   // numbers the damage test uses, so what you see is what you hit.
@@ -76,7 +76,7 @@ export function createCombatFx(scene, { onArrowLand = null } = {}) {
     group.frustumCulled = false;
     group.name = 'farhold-arrow';
     scene.add(group);
-    arrows.push({ group, live: false, x: 0, y: 0, z: 0, dx: 0, dz: 0, speed: 0, travelled: 0, range: 0, payload: null });
+    arrows.push({ group, live: false, x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 0, vy: 0, speed: 0, travelled: 0, range: 0, payload: null });
   }
 
   // a short flash at the bow, and a puff where the arrow lands
@@ -102,20 +102,23 @@ export function createCombatFx(scene, { onArrowLand = null } = {}) {
     return p;
   }
 
-  /** Loose an arrow. `payload` comes back to onArrowLand when it lands. */
-  function shoot({ x, y, z, dirX, dirZ, range = 40, speed = 42, payload = null }) {
+  /**
+   * Loose an arrow. The direction is three-dimensional — pass the way the player is LOOKING, not
+   * just the way they are facing, or you can never shoot up a slope or down off a ledge.
+   */
+  function shoot({ x, y, z, dirX, dirY = 0, dirZ, range = 40, speed = 42, payload = null }) {
     const a = arrows.find(a => !a.live);
     if (!a) return null;
-    const len = Math.hypot(dirX, dirZ) || 1;
+    const len = Math.hypot(dirX, dirY, dirZ) || 1;
     a.live = true;
     a.x = x; a.y = y; a.z = z;
-    a.dx = dirX / len; a.dz = dirZ / len;
-    a.speed = speed; a.travelled = 0; a.range = range; a.payload = payload;
+    a.dx = dirX / len; a.dy = dirY / len; a.dz = dirZ / len;
+    a.speed = speed; a.vy = a.dy * speed;
+    a.travelled = 0; a.range = range; a.payload = payload;
     a.group.visible = true;
     a.group.position.set(x, y, z);
-    a.group.rotation.set(0, Math.atan2(a.dx, a.dz), 0);
-    // the release: a bright flash at the bow
-    puff(x + a.dx * 0.6, y, z + a.dz * 0.6, { size: 0.35, life: 0.13, color: 0xfff0c0 });
+    a.group.lookAt(x + a.dx, y + a.dy, z + a.dz);
+    puff(x + a.dx * 0.6, y + a.dy * 0.6, z + a.dz * 0.6, { size: 0.35, life: 0.13, color: 0xfff0c0 });
     return a;
   }
 
@@ -139,11 +142,17 @@ export function createCombatFx(scene, { onArrowLand = null } = {}) {
     for (const a of arrows) {
       if (!a.live) continue;
       const step = a.speed * dt;
-      a.x += a.dx * step; a.z += a.dz * step; a.travelled += step;
-      // a gentle drop, so a long shot arcs
-      a.y -= (a.travelled / a.range) * dt * 5.5;
+      a.x += a.dx * step;
+      a.z += a.dz * step;
+      // real gravity on the shaft, so a long shot arcs and a shot uphill still climbs
+      a.vy -= 9.4 * dt;
+      a.y += a.vy * dt;
+      a.travelled += step;
       a.group.position.set(a.x, a.y, a.z);
-      if (a.travelled >= a.range) {
+      // point the shaft along where it is actually going, arc included
+      a.group.lookAt(a.x + a.dx * a.speed, a.y + a.vy, a.z + a.dz * a.speed);
+      const hitGround = groundAt ? a.y <= groundAt(a.x, a.z) : false;
+      if (a.travelled >= a.range || hitGround) {
         a.live = false;
         a.group.visible = false;
         puff(a.x, a.y, a.z, { size: 0.5, life: 0.28 });

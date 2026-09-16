@@ -159,3 +159,28 @@ test('the sky from the ground agrees with where the ship actually flies', async 
   }
   expect(agree.closest.d).toBeGreaterThan(0);
 });
+
+test('the ship points where it is flying', async ({ page }) => {
+  await land(page);
+  const nose = await page.evaluate(async () => {
+    const f = window.farhold;
+    const THREE = await import('three');
+    f.toSpace();
+    const out = [];
+    for (const [yaw, pitch] of [[0.8, 0.6], [-2.1, -0.9], [3.0, 0]]) {
+      f.space.state.yaw = yaw; f.space.state.pitch = pitch; f.space.state.throttle = 1;
+      for (let i = 0; i < 20; i++) f.space.update(1 / 60, null, f.camera);
+      // the hull is modelled facing +Z
+      const n = new THREE.Vector3(0, 0, 1).applyQuaternion(f.space.ship.group.quaternion);
+      const cp = Math.cos(pitch);
+      const flight = new THREE.Vector3(Math.sin(yaw) * cp, Math.sin(pitch), Math.cos(yaw) * cp);
+      out.push({ dot: n.dot(flight), noseY: n.y, flightY: flight.y });
+    }
+    return out;
+  });
+  for (const n of nose) {
+    // the nose is along the flight path, not stuck level
+    expect(n.dot).toBeGreaterThan(0.93);
+    expect(Math.abs(n.noseY - n.flightY)).toBeLessThan(0.12);
+  }
+});

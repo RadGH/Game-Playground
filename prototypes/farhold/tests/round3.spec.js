@@ -510,3 +510,29 @@ test('a bridge spans its river, sits above the water, and is turned the right wa
   // and long enough to reach both banks
   expect(bridges.spanMetres).toBeGreaterThan(bridges.riverWidth + 8);
 });
+
+test('a bow shoots where you are looking, up or down', async ({ page }) => {
+  await land(page);
+  const shots = await page.evaluate(async () => {
+    const f = window.farhold;
+    const out = {};
+    for (const [name, pitch] of [['up', 1.0], ['level', 0], ['down', -0.9]]) {
+      const cp = Math.cos(pitch);
+      const a = f.fx.shoot({
+        x: f.control.x, y: f.control.y + 2, z: f.control.z,
+        dirX: 0, dirY: Math.sin(pitch), dirZ: cp, range: 40, speed: 42,
+      });
+      const y0 = a.y;
+      for (let i = 0; i < 6; i++) f.fx.update(1 / 60);
+      out[name] = a.y - y0;
+      f.fx.land(a);
+    }
+    return out;
+  });
+  // aimed up it climbs, aimed down it drops, level it only sags under gravity
+  expect(shots.up).toBeGreaterThan(1);
+  expect(shots.down).toBeLessThan(-1);
+  expect(Math.abs(shots.level)).toBeLessThan(0.5);
+  expect(shots.up).toBeGreaterThan(shots.level);
+  expect(shots.level).toBeGreaterThan(shots.down);
+});

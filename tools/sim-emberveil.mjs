@@ -5,7 +5,7 @@
 // attacks, rest, towns, named enemies, nemeses), the same Combat, the same Loot, the same damage
 // meter. A small bot makes the decisions a player would: walk toward the boss, fight what is in the
 // way, rest when the party is low or out of moves, buy food and bandages, equip anything with a
-// better score.
+// better score (against what it would really replace — see equipPlan()).
 //
 //   node tools/sim-emberveil.mjs --runs 200 --seed 1
 //   node tools/sim-emberveil.mjs --runs 60 --act 3            only start-of-act-3 runs
@@ -109,21 +109,48 @@ function spendAll(g) { for (const h of g.party) spendPoints(g, h); }
 // is in trouble, not in good shape.
 function partyHpFrac(g) { return g.party.length ? g.party.reduce((s, h) => s + (h.alive && h.hp > 0 ? h.hp / h.maxHp : 0), 0) / g.party.length : 0; }
 
+/**
+ * What wearing `it` would really change for hero `h`: the slot rules.equip() puts it in and the score of
+ * everything that comes off. Fixed in the difficulty pass after round 22 — the bot used to compare a new ring
+ * with ring2 while equip() replaces ring1 when both hands are full (so it could throw away its best ring for
+ * a worse one), and compared an off-hand-capable weapon or a two-hander with the weapon slot alone. A player
+ * puts a new ring on the weaker hand, so the bot does too (`swapRings`, applied by wearItem()).
+ */
+function equipPlan(g, h, it) {
+  const E = h.equipment || {}; const sc = x => (x ? g.loot.score(x, h).total : 0);
+  let slot = it.slot, swapRings = false;
+  if (slot === 'ring') {
+    if (!E.ring1) slot = 'ring1'; else if (!E.ring2) slot = 'ring2';
+    else if (sc(E.ring2) < sc(E.ring1)) { slot = 'ring2'; swapRings = true; } else slot = 'ring1';
+  }
+  if (it.type === 'weapon' && it.offHandOk && E.weapon && !E.weapon.twoHanded && !E.offhand) slot = 'offhand';
+  let lost = sc(E[slot]);
+  if (slot === 'weapon' && it.twoHanded && E.offhand) lost += sc(E.offhand);
+  if (slot === 'offhand' && E.weapon?.twoHanded) lost += sc(E.weapon);
+  return { slot, swapRings, gain: sc(it) - lost };
+}
+/** Put the item on the way equipPlan() priced it. equip() fills ring1 when both rings are on, so the weaker ring is moved there first. */
+function wearItem(g, h, it, plan) {
+  if (plan?.swapRings) { const E = h.equipment; [E.ring1, E.ring2] = [E.ring2, E.ring1]; }
+  return equip(h, it, g.loot);
+}
+/** Set pieces the party is wearing, and how many set bonuses are switched on (a set with 2+ pieces on one hero). */
+function setPiecesWorn(g) { return g.party.reduce((n, h) => n + Object.values(h.equipment || {}).filter(it => it?.setId).length, 0); }
+function setBonusesOn(g) { return g.party.reduce((n, h) => n + g.loot.activeSets(h.equipment).filter(x => x.bonuses.length).length, 0); }
 /** Equip anything in the bag that scores better for someone who can use it. Returns how many swaps. */
 function equipUpgrades(g, stats) {
   let swaps = 0;
   for (const it of [...g.inventory]) {
     if (it.type === 'potion') continue;
-    let bestHero = null, bestGain = 0;
+    let bestHero = null, bestGain = 0, bestPlan = null;
     for (const h of g.party) {
       if (it.type === 'weapon' && !canUse(h, it)) continue;
-      const slot = it.slot === 'ring' ? (h.equipment.ring1 ? 'ring2' : 'ring1') : it.slot;
-      const cur = h.equipment[slot]; const gain = g.loot.score(it, h).total - (cur ? g.loot.score(cur, h).total : 0);
-      if (gain > bestGain) { bestGain = gain; bestHero = h; }
+      const plan = equipPlan(g, h, it);
+      if (plan.gain > bestGain) { bestGain = plan.gain; bestHero = h; bestPlan = plan; }
     }
     if (!bestHero) continue;
     g.inventory = g.inventory.filter(x => x !== it);
-    const out = equip(bestHero, it, g.loot); g.inventory.push(...out.filter(Boolean));
+    const out = wearItem(g, bestHero, it, bestPlan); g.inventory.push(...out.filter(Boolean));
     g.logLoot(it, { holder: bestHero.id, equipped: true, replaced: out[0]?.name || null, delta: bestGain });
     for (const k of (it.affixes || [])) if (String(k.stat).startsWith('cond_')) stats.affixPicks[k.stat] = (stats.affixPicks[k.stat] || 0) + 1;
     stats.itemPicks[it.baseKey] = (stats.itemPicks[it.baseKey] || 0) + 1;
@@ -143,7 +170,7 @@ function doTown(g, stats) {
   const stock = g.merchantStock(town);
   for (const it of [...stock]) {
     if (!it || g.gold < (it.price || 0) * 1.6) continue;
-    const gain = Math.max(...g.party.map(h => (it.type === 'weapon' && !canUse(h, it)) ? -1 : g.loot.score(it, h).total - (h.equipment[it.slot === 'ring' ? 'ring1' : it.slot] ? g.loot.score(h.equipment[it.slot === 'ring' ? 'ring1' : it.slot], h).total : 0)));
+    const gain = Math.max(...g.party.map(h => (it.type === 'weapon' && !canUse(h, it)) ? -1 : equipPlan(g, h, it).gain));
     if (gain > 30) { g.buy(it, it.price, stock); stats.goldSpent += it.price; }
   }
   equipUpgrades(g, stats);
@@ -180,7 +207,7 @@ function snapAct(g, stats, act = g.act) {
   stats.actSnap[act] = {
     day: g.day, level: lv.reduce((a, b) => a + b, 0) / Math.max(1, lv.length), gold: g.gold,
     xp: g.party.reduce((s, h) => s + h.xp, 0) / Math.max(1, g.party.length),
-    gear: gearScore(g), fights: stats.fights, wipes: stats.deaths,
+    gear: gearScore(g), fights: stats.fights, wipes: stats.deaths, setPieces: setPiecesWorn(g), setBonuses: setBonusesOn(g),
   };
 }
 /** A damage record's broad source: what the player would call it. */
@@ -256,7 +283,7 @@ function runFight(g, enc, node, stats) {
     // the act advances inside victory() when the act boss goes down — that is what "cleared an act" means
     if (g.act > before) { stats.actsCleared = Math.max(stats.actsCleared, before); stats.clearedActs[before] = 1; snapAct(g, stats); }
     A.gold += v?.gold || 0; A.xp += v?.xp || 0;
-    for (const it of [...(v?.drops || []), ...(v?.bossDrops || [])]) { A.drops++; A.rarity[it.rarity] = (A.rarity[it.rarity] || 0) + 1; if (it.isUnique) stats.uniquesFound[it.uniqueId || it.baseKey] = (stats.uniquesFound[it.uniqueId || it.baseKey] || 0) + 1; }
+    for (const it of [...(v?.drops || []), ...(v?.bossDrops || [])]) { A.drops++; A.rarity[it.rarity] = (A.rarity[it.rarity] || 0) + 1; if (it.setId) A.sets = (A.sets || 0) + 1; if (it.isUnique) stats.uniquesFound[it.uniqueId || it.baseKey] = (stats.uniquesFound[it.uniqueId || it.baseKey] || 0) + 1; }
   }
   else {
     stats.deaths++; const killer = foes.find(e => e.alive) || foes[0];
@@ -291,6 +318,9 @@ function runOnce(seed, { startAct = 0, forceClass = null, forceWeapon = null, da
   const picks = []; if (forceClass) picks.push(forceClass);
   while (picks.length < 4) { const c = rng.pick(CLASSES); if (!picks.includes(c)) picks.push(c); }
   picks.forEach((c, i) => g.addHero(g.makeHero(c, `${c[0].toUpperCase()}${c.slice(1)} ${i + 1}`, startAct ? ACT_LEVEL[startAct] : 1)));
+  // js/main.js does this when a world starts (round 22, E49): set drops lean towards the party's own class sets.
+  // Without it the simulator rolled every set of the tier evenly, which the live game never does.
+  g.loot.partyClasses = () => g.party.map(h => h.class);
   g.startQuests(); spendAll(g);
   const stats = {
     seed, classes: picks, fights: 0, rounds: 0, roundsByAct: {}, deaths: 0, deathBy: {}, deathByEnemy: {},
@@ -436,7 +466,7 @@ function actCurve(rows) {
       gear: S('gearScore') / fights, dmgDealt: S('dmgDealt') / fights, dmgTaken: S('dmgTaken') / fights,
       statusRounds: S('statusRounds') / fights, heroStatusRounds: S('heroStatusRounds') / fights,
       gold: S('gold') / fights, xp: S('xp') / fights, drops: S('drops') / fights, wipes: S('wipes'),
-      wipeRate: 100 * S('wipes') / fights,
+      wipeRate: 100 * S('wipes') / fights, setsPerRun: S('sets') / parts.length,
       rarity: parts.reduce((o, p) => { for (const [k, v] of Object.entries(p.rarity || {})) o[k] = (o[k] || 0) + v; return o; }, {}),
     };
   }
@@ -449,7 +479,8 @@ function actSnaps(rows) {
     const parts = rows.map(r => r.actSnap[a]).filter(Boolean);
     if (!parts.length) continue;
     out[a] = { runs: parts.length, day: avg(parts.map(p => p.day)), level: avg(parts.map(p => p.level)),
-      gold: avg(parts.map(p => p.gold)), xp: avg(parts.map(p => p.xp)), gear: avg(parts.map(p => p.gear)) };
+      gold: avg(parts.map(p => p.gold)), xp: avg(parts.map(p => p.xp)), gear: avg(parts.map(p => p.gear)),
+      setPieces: avg(parts.map(p => p.setPieces || 0)), setBonuses: avg(parts.map(p => p.setBonuses || 0)) };
   }
   return out;
 }
@@ -512,17 +543,17 @@ function md(s, f, extra = {}) {
   L.push('`xp table` is the XP the party actually holds against the XP the table wants for the level it is on —');
   L.push('over 100% means they are ahead of the curve and will level again soon.');
   L.push('');
-  L.push('| act | runs | day it started | party level | xp held | xp for that level | gold | avg equipped item score |');
-  L.push('|---|---|---|---|---|---|---|---|');
+  L.push('| act | runs | day it started | party level | xp held | xp for that level | gold | avg equipped item score | set pieces worn (party) | set bonuses on (party) |');
+  L.push('|---|---|---|---|---|---|---|---|---|---|');
   for (const a of Object.keys(s.snap).sort()) { const n = s.snap[a]; const want = xpForLevel(Math.max(1, Math.round(n.level)));
-    L.push(`| ${a} | ${n.runs} | ${f1(n.day)} | ${f1(n.level)} | ${Math.round(n.xp)} | ${want} | ${Math.round(n.gold)} | ${Math.round(n.gear)} |`); }
+    L.push(`| ${a} | ${n.runs} | ${f1(n.day)} | ${f1(n.level)} | ${Math.round(n.xp)} | ${want} | ${Math.round(n.gold)} | ${Math.round(n.gear)} | ${f1(n.setPieces)} | ${f1(n.setBonuses)} |`); }
   L.push('');
   L.push('## Loot per act');
   L.push('');
-  L.push('| act | gold per fight | xp per fight | drops per fight | normal | magic | rare | legendary |');
-  L.push('|---|---|---|---|---|---|---|---|');
+  L.push('| act | gold per fight | xp per fight | drops per fight | normal | magic | rare | legendary | set pieces found per run |');
+  L.push('|---|---|---|---|---|---|---|---|---|');
   for (const a of Object.keys(s.curve).sort()) { const c = s.curve[a]; const r = c.rarity || {};
-    L.push(`| ${a} | ${f1(c.gold)} | ${f1(c.xp)} | ${(c.drops).toFixed(2)} | ${r.normal || 0} | ${r.magic || 0} | ${r.rare || 0} | ${r.legendary || 0} |`); }
+    L.push(`| ${a} | ${f1(c.gold)} | ${f1(c.xp)} | ${(c.drops).toFixed(2)} | ${r.normal || 0} | ${r.magic || 0} | ${r.rare || 0} | ${r.legendary || 0} | ${f1(c.setsPerRun || 0)} |`); }
   L.push('');
   L.push('## Crossings');
   L.push('');

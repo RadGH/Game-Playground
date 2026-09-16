@@ -134,7 +134,7 @@
     "k": 100,
     "cap": 0.95
    },
-   "note": "M207: both live + simulator run the WoW-style curve DR. DR = min(cap, armor/(armor+k))."
+   "note": "M207: live and simulator both use a diminishing-returns armour curve: DR = min(cap, armor/(armor+k))."
   }
  },
  "enemies": {

@@ -427,9 +427,11 @@ export function buildDecor(a, c) {
       break;
     }
     case 'rune_halo':
-      head(new THREE.TorusGeometry(0.40, 0.014, 4, 24), dc, { position: [0, 0.34, -0.46], metal: true });
-      for (let k = 0; k < 8; k++) { const t = k / 8 * Math.PI * 2; head(new THREE.OctahedronGeometry(1), k % 2 ? dc : lift(dc, 0.35), { position: [Math.sin(t) * 0.40, 0.34 + Math.cos(t) * 0.40, -0.46], scale: [0.03, 0.04, 0.012], rotation: [0, 0, -t], metal: true }); }
-      head(new THREE.TorusGeometry(0.30, 0.006, 3, 20), lift(dc, 0.3), { position: [0, 0.34, -0.47], metal: true });
+      // Matches the 2D halo: a ring about 1.3 head-radii across, centred just above the head centre and set behind
+      // the head (and behind a raised hood, whose back reaches z -0.40) so it frames the head from the front.
+      head(new THREE.TorusGeometry(0.50, 0.016, 4, 28), dc, { position: [0, 0.33, -0.44], metal: true });
+      for (let k = 0; k < 8; k++) { const t = k / 8 * Math.PI * 2; head(new THREE.OctahedronGeometry(1), k % 2 ? dc : lift(dc, 0.35), { position: [Math.sin(t) * 0.50, 0.33 + Math.cos(t) * 0.50, -0.44], scale: [0.034, 0.046, 0.014], rotation: [0, 0, -t], metal: true }); }
+      head(new THREE.TorusGeometry(0.44, 0.006, 3, 24), lift(dc, 0.3), { position: [0, 0.33, -0.45], metal: true });
       break;
     case 'prayer_ribbons':
       for (const [x, tilt, len] of [[-0.13, 0.08, 0.26], [-0.06, -0.05, 0.22], [0.06, 0.05, 0.22], [0.13, -0.08, 0.26]]) {

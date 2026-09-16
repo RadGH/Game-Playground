@@ -149,13 +149,28 @@ test('no Emberveil headwear lets the skull show through it', async ({ page }) =>
         const k = (rgb.r + rgb.g + rgb.b) / (skin.r + skin.g + skin.b);
         if (k > 0.9 && k < 1.02 && Math.abs(rgb.r - skin.r * k) + Math.abs(rgb.g - skin.g * k) + Math.abs(rgb.b - skin.b * k) < 0.02) skinHits++;
       }
-      hits[cls + ':' + av.hat.id] = { skinHits, rays };
+      // An enclosing helm also covers the face: rays from the front and sides at face height must not reach skin.
+      let faceHits = -1;
+      if (av.hat.id === 'dragon_helm') {
+        faceHits = 0; const face = center.clone(); face.y -= 0.08 * H;
+        for (let el = -15; el <= 30; el += 15) for (let az = -60; az <= 60; az += 15) {
+          const e = el * Math.PI / 180, z = az * Math.PI / 180;
+          const d = new THREE.Vector3(Math.sin(z) * Math.cos(e), Math.sin(e), Math.cos(z) * Math.cos(e));
+          ray.set(face.clone().addScaledVector(d, 3), d.negate());
+          const hit = ray.intersectObjects(meshes, false)[0]; if (!hit) continue;
+          const col = hit.object.geometry.attributes.color, rgb = new THREE.Color(col.getX(hit.face.a), col.getY(hit.face.a), col.getZ(hit.face.a));
+          const k = (rgb.r + rgb.g + rgb.b) / (skin.r + skin.g + skin.b);
+          if (k > 0.9 && k < 1.02 && Math.abs(rgb.r - skin.r * k) + Math.abs(rgb.g - skin.g * k) + Math.abs(rgb.b - skin.b * k) < 0.02) faceHits++;
+        }
+      }
+      hits[cls + ':' + av.hat.id] = { skinHits, rays, faceHits };
       c.dispose();
     }
     return hits;
   });
   expect(Object.keys(result).length).toBeGreaterThan(10);
   for (const [key, r] of Object.entries(result)) expect({ key, skinHits: r.skinHits }).toEqual({ key, skinHits: 0 });
+  expect(result['dragon_knight:dragon_helm'].faceHits).toBe(0);
   expect(errors).toEqual([]);
 });
 

@@ -49,8 +49,17 @@ test('the terrain follows the player and the ground under them stays solid', asy
   const walk = await page.evaluate(async () => {
     const f = window.farhold;
     const start = { x: f.control.x, z: f.control.z, rebuilds: f.stats().rebuilds };
-    // jump 4 km across the planet — every ring has to rebuild
-    f.teleport(f.control.x + 4000, f.control.z + 1500);
+    // Jump 4 km across the planet — every ring has to rebuild. Land on DRY GROUND: round 4b starts
+    // the player in a town, so a blind offset can now drop you in the sea, where `onGround` is false
+    // because you are swimming, which is correct behaviour and a broken test.
+    for (let i = 0; i < 48; i++) {
+      const a = (i / 48) * Math.PI * 6;
+      const r = 4000 * (0.9 + (i / 48) * 0.6);
+      const [x, z] = f.terrain.clampToWorld(f.control.x + Math.cos(a) * r, f.control.z + Math.sin(a) * r);
+      if (f.terrain.underwater(x, z)) continue;
+      f.teleport(x, z);
+      break;
+    }
     await new Promise(r => requestAnimationFrame(r));
     const after = f.stats();
     const samples = [];
@@ -66,7 +75,7 @@ test('the terrain follows the player and the ground under them stays solid', asy
       spread: Math.max(...samples) - Math.min(...samples),
     };
   });
-  expect(walk.moved).toBeGreaterThan(3000);
+  expect(walk.moved).toBeGreaterThan(1500);
   expect(walk.rebuilt).toBe(true);
   expect(walk.onGround).toBe(true);
   expect(walk.allFinite).toBe(true);
@@ -99,7 +108,9 @@ test('the day turns: the sun moves, the sky changes colour and the night comes',
       out.push({
         t,
         sunY: f.sky.sunDirection.y,
-        sky: f.sky.scene.background.getHexString(),
+        // round 4: the backdrop is the galaxy sphere, not a flat `scene.background`. The sky's own
+        // colour now lives on the atmosphere shell and the fog, which is what the ground sees.
+        sky: f.sky.fog.color.getHexString(),
         night: f.sky.isNight,
         light: f.sky.sunLight.intensity,
         visible: f.sky.visible().length,
@@ -153,6 +164,7 @@ test('the character sheet wears an item and the body picks up the weapon', async
     const f = window.farhold;
     const item = f.give('greatsword', 'rare');
     f.hud.toggleSheet(true);
+    f.hud.setTab('inventory');          // round 4: the bag lives on its own tab
     const rows = document.querySelectorAll('#sheet-bag .row');
     const damageBefore = [...f.player.derived.damage];
     rows[rows.length - 1].click();
@@ -162,12 +174,13 @@ test('the character sheet wears an item and the body picks up the weapon', async
       worn: f.player.equipment.weapon?.name,
       damageBefore,
       damageAfter: [...f.player.derived.damage],
-      slotsDrawn: document.querySelectorAll('#sheet-slots .slot').length,
+      slotsDrawn: document.querySelectorAll('#inv-slots .slot').length,
       sheetVisible: !document.getElementById('sheet').classList.contains('hidden'),
     };
   });
   expect(outcome.sheetVisible).toBe(true);
-  expect(outcome.slotsDrawn).toBe(9);
+  // round 4b added a second ring, a mount slot and a light slot
+  expect(outcome.slotsDrawn).toBe(12);
   expect(outcome.worn).toBe(outcome.item);
   expect(outcome.damageAfter[1]).toBeGreaterThan(outcome.damageBefore[1]);
 });

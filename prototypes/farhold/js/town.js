@@ -17,6 +17,44 @@ import { makeRng } from '../../emberveil/js/rng.js';
 import { makeActor, setActorAnim } from './actors.js';
 import { makeQuest } from './quests.js';
 
+/**
+ * The little badge that floats over somebody worth talking to. Drawn into a canvas once per glyph
+ * and used as a sprite, so it always faces you and costs one draw call per person.
+ */
+const badgeCache = new Map();
+function badgeSprite(glyph, colour) {
+  const key = glyph + colour;
+  if (!badgeCache.has(key)) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const ctx = c.getContext('2d');
+    // a soft dark disc behind it, so a gold "!" still reads against a bright sky
+    ctx.fillStyle = 'rgba(10,14,20,.72)';
+    ctx.beginPath(); ctx.arc(32, 32, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = colour; ctx.lineWidth = 3; ctx.stroke();
+    ctx.font = 'bold 34px system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = colour;
+    ctx.fillText(glyph, 32, 34);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    badgeCache.set(key, tex);
+  }
+  const mat = new THREE.SpriteMaterial({ map: badgeCache.get(key), transparent: true, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.9, 0.9, 1);
+  sprite.position.y = 2.5;
+  sprite.renderOrder = 4;
+  return sprite;
+}
+
+/** What badge a role wears: work to hand out, or a stall. */
+export function badgeFor(role) {
+  if (role.quests) return { glyph: '!', color: '#ffd24a', kind: 'quest' };
+  if (role.trades) return { glyph: '$', color: '#8fe0a0', kind: 'shop' };
+  return null;
+}
+
 /** Who stands in a settlement, by how big it is. */
 export const ROLES = [
   { key: 'merchant', name: 'Merchant', minSize: 1, trades: true, greeting: 'Trade? I have what the road allows.' },
@@ -24,11 +62,15 @@ export const ROLES = [
   { key: 'villager', name: 'Villager', minSize: 1, greeting: 'Mind the road after dark.' },
   { key: 'smith', name: 'Smith', minSize: 3, trades: true, greeting: 'Steel, if you have the coin.' },
   { key: 'innkeeper', name: 'Innkeeper', minSize: 3, quests: true, greeting: 'A bed, a fire, and trouble to spare.' },
-  { key: 'guard', name: 'Guard', minSize: 4, greeting: 'Move along, or do not. It is all the same to me.' },
+  { key: 'guard', name: 'Guard', minSize: 2, guards: true, greeting: 'Move along, or do not. It is all the same to me.' },
 ];
 
-/** How many people a settlement of each size holds. */
-const HEADCOUNT = [0, 3, 4, 6, 8, 9];
+/**
+ * How many people a settlement of each size holds. The first entry used to be 0, so the smallest
+ * settlements on the map were built, named, and completely empty — you walked into a village and
+ * there was nobody to talk to. Nowhere has fewer than three now, and a merchant is guaranteed.
+ */
+const HEADCOUNT = [3, 3, 4, 6, 8, 9];
 
 /** What a merchant's stock is drawn from. */
 const STOCK_BY_ROLE = {
@@ -36,10 +78,18 @@ const STOCK_BY_ROLE = {
   smith: ['sword', 'longsword', 'hammer', 'medium_chest', 'medium_helm', 'heavy_gauntlets'],
 };
 
+/**
+ * How a guard fights. Deliberately not a bestiary entry: a guard is scaled off the PLAYER's level so
+ * it is always a match for whatever is out here, and it is not something you can kill or loot.
+ */
+const GUARD = { hp: 260, dmg: [14, 22], armor: 22, speed: 5.2, reach: 3, attackEvery: 1.2, perLevel: 1.17 };
+
 export function createTownFolk(scene, terrain, opts = {}) {
   const { features, rpg, namegen = null, looks = [], seed = 1, radius = 900, balance = {} } = opts;
   const cfg = balance.town || {};
   const talkRange = cfg.talkRange ?? 3.6;
+  /** How far from the middle of a settlement a guard will go, and how far the watch reaches. */
+  const guardReach = cfg.guardReach ?? 42;
 
   const live = new Map();          // settlement id -> [npc]
   let pending = 0;
@@ -49,14 +99,24 @@ export function createTownFolk(scene, terrain, opts = {}) {
     const rng = makeRng((seed ^ (node.id * 2654435761)) >>> 0);
     const size = Math.max(1, Math.min(5, node.size || 1));
     const allowed = ROLES.filter(r => (r.minSize ?? 1) <= size);
-    const want = HEADCOUNT[size] || 3;
+    const want = Math.max(3, HEADCOUNT[size] || 3);
     const roster = [];
-    // one of each special role first, then villagers to fill
+    // A trader and somebody with work, always. "Every town should have at least two NPCs to talk
+    // to, one as a shop" — so those two are placed before anything competes for the space.
+    roster.push(ROLES.find(r => r.key === 'merchant'));
+    roster.push(ROLES.find(r => r.key === 'elder'));
+    // then one of each other special role that fits, then villagers to fill
     for (const role of allowed) {
       if (role.key === 'villager') continue;
+      if (roster.some(r => r.key === role.key)) continue;
       if (roster.length >= want) break;
       roster.push(role);
     }
+    // A settlement of any size keeps a watch, and a big one keeps more of it. Being jumped by a
+    // pack while standing in a market square was the complaint that produced all of this.
+    const guardRole = ROLES.find(r => r.key === 'guard');
+    const wantGuards = Math.max(1, Math.min(4, size - 1));
+    while (roster.filter(r => r.key === 'guard').length < wantGuards) roster.push(guardRole);
     while (roster.length < want) roster.push(ROLES.find(r => r.key === 'villager'));
     return { roster, rng, size };
   }
@@ -83,11 +143,28 @@ export function createTownFolk(scene, terrain, opts = {}) {
     for (let i = 0; i < roster.length; i++) {
       const role = roster[i];
       const { name, gender } = nameFor(node, role, rng);
-      // stand them in a ring inside the settlement, off the road and out of the water
-      const a = (i / roster.length) * Math.PI * 2 + rng() * 0.4;
-      const r = 8 + rng() * (10 + size * 4);
-      const x = node.wx + Math.cos(a) * r, z = node.wz + Math.sin(a) * r;
-      if (terrain.waterAt(x, z) || terrain.riverAt(x, z) > 0.3) continue;
+      /**
+       * Stand them in a ring inside the settlement, off the road and out of the water — and KEEP
+       * TRYING until there is somewhere to stand.
+       *
+       * This used to place one spot and `continue` if it was wet. World Forge founds towns on
+       * rivers and coasts, so a good half of the ring is water, and a settlement could come out with
+       * one person in it or none at all. Every dry ring around the centre is tried, working inward.
+       */
+      let x = null, z = null;
+      for (let attempt = 0; attempt < 40 && x === null; attempt++) {
+        const a = (i / roster.length) * Math.PI * 2 + rng() * 0.4 + attempt * 0.72;
+        // spiral OUTWARD. World Forge founds towns on rivers, and a river's valley reaches about
+        // 40 m either side of the line — so searching inward from the ring walks straight into the
+        // water. The buildings are placed beside the channel for the same reason; the people have
+        // to be too, or a riverside town comes out with nobody in it.
+        const r = (8 + rng() * (10 + size * 4)) + attempt * 3.5;
+        const px = node.wx + Math.cos(a) * r, pz = node.wz + Math.sin(a) * r;
+        if (terrain.waterAt(px, pz) || terrain.riverAt(px, pz) > 0.3) continue;
+        if (terrain.slopeAt(px, pz, 4) > 0.7) continue;
+        x = px; z = pz;
+      }
+      if (x === null) continue;                  // this settlement really is built on a lake
 
       const look = looks.length ? looks[Math.floor(rng() * looks.length)] : null;
       pending++;
@@ -101,6 +178,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
       const npc = {
         id: `${node.id}:${i}`,
         name, role: role.key, roleName: role.name, gender,
+        guards: !!role.guards, guardTimer: 0, target: null,
         greeting: role.greeting,
         trades: !!role.trades, givesQuests: !!role.quests,
         node, x, z, y: terrain.heightAt(x, z),
@@ -111,6 +189,16 @@ export function createTownFolk(scene, terrain, opts = {}) {
         stock: null,
         offered: null,
       };
+      // a badge over the head, so you can see from across the square who is worth walking up to
+      const badge = badgeFor(role);
+      if (badge) {
+        npc.badge = badge.kind;
+        const sprite = badgeSprite(badge.glyph, badge.color);
+        // sit it above the head — a Chibi 2 body is about 1.8 m
+        sprite.position.y = 2.4;
+        actor.group.add(sprite);
+        npc.badgeSprite = sprite;
+      }
       actor.group.position.set(x, npc.y, z);
       actor.group.rotation.y = npc.facing;
       scene.add(actor.group);
@@ -164,7 +252,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
     live, ROLES,
 
     /** Keep the people near the player, and let them shuffle about. */
-    update(dt, player) {
+    update(dt, player, { field = null, level = 1, onLog = null } = {}) {
       // bring settlements in range to life, and let the far ones go
       for (const s of features.settlements) {
         const d = Math.hypot(s.wx - player.x, s.wz - player.z);
@@ -176,6 +264,67 @@ export function createTownFolk(scene, terrain, opts = {}) {
         for (const npc of people) {
           const dx = player.x - npc.x, dz = player.z - npc.z;
           const dist = Math.hypot(dx, dz);
+
+          // ---- a guard does a guard's job
+          if (npc.guards && field) {
+            if (npc.guardTimer > 0) npc.guardTimer -= dt;
+            if (!npc.target || npc.target.dying != null
+                || Math.hypot(npc.target.x - npc.home[0], npc.target.z - npc.home[1]) > guardReach * 1.5) {
+              npc.target = null;
+              let best = null, bestD = guardReach;
+              for (const e of field.enemies) {
+                if (e.dying != null) continue;
+                const d = Math.hypot(e.x - npc.home[0], e.z - npc.home[1]);
+                if (d < bestD) { bestD = d; best = e; }
+              }
+              npc.target = best;
+            }
+            if (npc.target) {
+              const tx = npc.target.x - npc.x, tz = npc.target.z - npc.z;
+              const toTarget = Math.hypot(tx, tz);
+              npc.facing = Math.atan2(tx, tz);
+              if (toTarget > GUARD.reach) {
+                // never leave the settlement to chase — a guard that runs off is not a guard
+                const step = GUARD.speed * dt;
+                const nx = npc.x + Math.sin(npc.facing) * step, nz = npc.z + Math.cos(npc.facing) * step;
+                if (Math.hypot(nx - npc.home[0], nz - npc.home[1]) < guardReach && !terrain.waterAt(nx, nz)) {
+                  npc.x = nx; npc.z = nz;
+                }
+                setActorAnim(npc.actor, 'run');
+              } else if (npc.guardTimer <= 0) {
+                npc.guardTimer = GUARD.attackEvery;
+                setActorAnim(npc.actor, 'attack');
+                const scale = Math.pow(GUARD.perLevel, Math.max(0, level - 1));
+                const hit = Math.round((GUARD.dmg[0] + Math.random() * (GUARD.dmg[1] - GUARD.dmg[0])) * scale);
+                npc.target.hp = Math.max(0, npc.target.hp - hit);
+                npc.target.hitFlash = 0.18;
+                if (npc.target.state !== 'chase') npc.target.state = 'chase';
+                if (npc.target.hp <= 0) {
+                  onLog?.(`${npc.name} cuts down ${npc.target.name}.`, 'good');
+                  field.kill(npc.target);
+                  npc.target = null;
+                }
+              }
+              npc.y = terrain.heightAt(npc.x, npc.z);
+              npc.actor.group.position.set(npc.x, npc.y, npc.z);
+              npc.actor.group.rotation.y = npc.facing;
+              npc.actor.update(dt);
+              continue;
+            }
+            // nothing to do: drift back to the post
+            if (Math.hypot(npc.x - npc.home[0], npc.z - npc.home[1]) > 1.5) {
+              npc.facing = Math.atan2(npc.home[0] - npc.x, npc.home[1] - npc.z);
+              npc.x += Math.sin(npc.facing) * 2.2 * dt;
+              npc.z += Math.cos(npc.facing) * 2.2 * dt;
+              npc.y = terrain.heightAt(npc.x, npc.z);
+              npc.actor.group.position.set(npc.x, npc.y, npc.z);
+              npc.actor.group.rotation.y = npc.facing;
+              setActorAnim(npc.actor, 'walk');
+              npc.actor.update(dt);
+              continue;
+            }
+          }
+
           if (dist < talkRange * 2.4) {
             // turn to face whoever walks up
             npc.facing = Math.atan2(dx, dz);
@@ -207,6 +356,17 @@ export function createTownFolk(scene, terrain, opts = {}) {
         }
       }
     },
+
+    /**
+     * The circles a settlement's watch covers. The enemy field refuses to spawn anything inside one
+     * — being jumped by a pack while standing in a market square is not an encounter.
+     */
+    safeZones: () => features.settlements.map(s => ({ x: s.wx, z: s.wz, r: guardReach * 1.35 })),
+
+    /** Everyone worth a pip on the minimap: a stall, or somebody with work. */
+    marks: () => [...live.values()].flat()
+      .filter(n => n.badge)
+      .map(n => ({ x: n.x, z: n.z, icon: n.badge === 'quest' ? '!' : '$', color: n.badge === 'quest' ? '#ffd24a' : '#8fe0a0', kind: n.badge })),
 
     /** Whoever is close enough to talk to. */
     nearest(x, z, range = talkRange) {
@@ -245,7 +405,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
     stats() {
       let people = 0;
       for (const list of live.values()) people += list.length;
-      return { settlements: live.size, people, pending };
+      return { settlements: live.size, people, pending, guards: [...live.values()].flat().filter(n => n.guards).length };
     },
 
     dispose() {

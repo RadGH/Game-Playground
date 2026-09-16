@@ -4,8 +4,10 @@
 // frame loop. `window.farhold` is the handle the Playwright specs drive.
 
 import * as THREE from 'three';
-import { createWorld, makeTerrain, describePlanet, M_PER_CELL } from './planet.js';
+import { createWorld, makeTerrain, describePlanet, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
 import { createSpace } from './space.js';
+import { createShip } from '../../../assets/js/space-models.js';
+import { createAtmosphere } from './atmos.js';
 import { createTownFolk } from './town.js';
 import { createTalkPanel } from './talkui.js';
 import { QuestLog } from './quests.js';
@@ -27,9 +29,20 @@ import { createMapScreen } from './map.js';
 import { createSaves, snapshot, restore, playtimeText } from './save.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
-import { Rpg, heldLookFor, offhandLookFor } from './rpg.js';
+import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS } from './rpg.js';
 import { Hud } from './hud.js';
-import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf } from './skills.js';
+import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom } from './skills.js';
+// round 4: the RPG expansion
+import { buildZones } from './zones.js';
+import { createChests } from './chests.js';
+import { createDungeon, createGates, lookForBiome } from './dungeon.js';
+import { createPets } from './pets.js';
+import { createSites } from './sites.js';
+import { createEncounters } from './encounters.js';
+import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
+import { createCrafting, Materials } from './craft.js';
+import { showRewards, rewardsOpen } from '../../../shared/rewards.js';
+import { familiesOf } from '../../../worldgen/js/biomes.js';
 import { SpellFx } from '../../../avatar-3d/js/spellfx.js';
 import { Assets } from '../../../assets/js/assets.js';
 import { atmospherePalette, weatherWeights, weatherOdds, WeatherClock, WEATHER_BY_KEY } from '../../../worldgen/js/weather.js';
@@ -37,10 +50,8 @@ import { atmospherePalette, weatherWeights, weatherOdds, WeatherClock, WEATHER_B
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
-const STARTER_WEAPON = {
-  warrior: 'longsword', ranger: 'shortbow', rogue: 'dagger', mage: 'wand',
-  cleric: 'scepter', dragon_knight: 'sword', stormcaller: 'staff', scavenger: 'dagger',
-};
+// Round 4: every class in `data/classes.json` is playable — all thirty. What each one starts
+// holding lives there too, so the old eight-entry starter-weapon table is gone.
 
 const state = { ready: false, running: false, paused: false, elapsed: 0, frames: 0, playtime: 0 };
 const saves = createSaves();
@@ -55,7 +66,7 @@ async function boot() {
   const status = t => { $('boot-status').textContent = t; };
   status('reading the data…');
 
-  const [items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen] = await Promise.all([
+  const [items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
@@ -63,16 +74,21 @@ async function boot() {
     loadJSON('data/campaign.json'),
     loadJSON('../emberveil/data/class-looks.json'),
     loadJSON('data/skills.json'),
+    loadJSON('data/classes.json'),
+    loadJSON('data/crafting.json'),
+    loadJSON('data/encounters.json'),
     // Name Forge, so the folk in a dwarf town have dwarf names
     NameGen.load('/namegen/data/').catch(() => null),
   ]);
 
-  const classIds = Object.keys(STARTER_WEAPON).filter(id => classLooks.classes[id]);
+  // all thirty classes now, each labelled with what it does and whether it brings companions
+  const classes = classData.classes;
+  const classIds = classes.map(c => c.id);
   const select = $('boot-class');
-  select.replaceChildren(...classIds.map(id => {
+  select.replaceChildren(...classes.map(c => {
     const o = document.createElement('option');
-    o.value = id;
-    o.textContent = classLooks.classes[id].className || id;
+    o.value = c.id;
+    o.textContent = `${c.name} — ${c.role}${c.pet ? ' (companions)' : ''}`;
     return o;
   }));
   // ?class=mage picks one without touching the menu — handy for a test, and for trying a class out
@@ -100,7 +116,7 @@ async function boot() {
         <span class="muted small">level ${s.level} · seed ${s.seed} · ${playtimeText(s.playtime)}${s.place ? ' · ' + s.place : ''}</span>`;
       const load = document.createElement('button');
       load.textContent = 'Load';
-      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save: saves.read(s.id) });
+      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save: saves.read(s.id) });
       const del = document.createElement('button');
       del.className = 'ghost';
       del.textContent = '×';
@@ -113,7 +129,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -121,7 +137,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -131,20 +147,49 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, namegen, status, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save }) {
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
 
+  /**
+   * The world knobs from the title screen, remembered in the save so a loaded run rebuilds the same
+   * world. `regionScale` is the one that matters most: World Forge's own regions are enormous, and
+   * a region is a level band — "it would take a long time to get to the next zone" was the note.
+   */
+  const worldOpts = save?.world || {
+    regionScale: Number(params.get('regions')) || Number($('boot-regions')?.value) || 2,
+    bandWidth: Number(params.get('band')) || Number($('boot-band')?.value) || 4,
+    density: Number(params.get('density')) || Number($('boot-density')?.value) || 1,
+    planetScale: Number(params.get('scale')) || Number($('boot-scale')?.value) || 1,
+  };
+  // How big a planet feels underfoot. 640 m a cell gives 163 x 82 km, which is a lot of ground on
+  // foot; the default is smaller now, and it is a knob because the full size is the right size once
+  // you are riding. It has to be set BEFORE the world is built — every module reads the live binding.
+  setMetresPerCell(M_PER_CELL_DEFAULT * (worldOpts.planetScale ?? 1));
+  // the enemy-density knob multiplies how many are alive and how often one arrives
+  const spawnCfg = {
+    ...balance.spawn,
+    maxAlive: Math.round((balance.spawn?.maxAlive ?? 38) * worldOpts.density),
+    everySeconds: (balance.spawn?.everySeconds ?? 1.1) / Math.max(0.3, worldOpts.density),
+  };
+  balance = { ...balance, spawn: spawnCfg, zones: { ...balance.zones, bandWidth: worldOpts.bandWidth } };
+
   status('shaping the planet…');
   await frame();
-  const mapSize = { width: balance.world?.width ?? 256, height: balance.world?.height ?? 128 };
+  const mapSize = { width: balance.world?.width ?? 256, height: balance.world?.height ?? 128, regionScale: worldOpts.regionScale };
   const created = createWorld({ seed, ...mapSize });
   const { star, system } = created;
   // these are replaced wholesale when you land on a different world
   let planet = created.planet, world = created.world;
   let terrain = makeTerrain(world, planet, balance.terrain);
   let palette = atmospherePalette(planet);
+  // Round 4: how hard a fight is belongs to the PLACE. World Forge already grows named regions with
+  // borders it draws on the map, so those are the level bands — see js/zones.js.
+  let zones = buildZones(world, {
+    spawn: [terrain.spawnPoint().x, terrain.spawnPoint().z],
+    maxLevel: 30, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: balance.zones?.startLevel ?? 1,
+  });
 
   status('finding somewhere to stand…');
   await frame();
@@ -164,6 +209,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   scene.add(sky.sunLight.target);
   scene.add(sky.ambient);
   scene.fog = sky.fog;
+
+  // Round 4: torches, braziers, sconces and a floor under the night ambient.
+  const light = createLight(scene, { balance });
 
   const ringSpec = lowQuality ? balance.terrain?.ringsLow : balance.terrain?.rings;
   let view = createTerrainView(scene, terrain, { rings: ringSpec, waterColor: palette.sea });
@@ -213,12 +261,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   await frame();
 
   const rpg = new Rpg(items, { ...balance, seed }, talents);
+  const classDef = classData.classes.find(c => c.id === classId) || classData.classes[0];
   const look = classLooks.classes[classId];
   const playerName = save?.name || ($('boot-name').value || '').trim() || look?.name?.split(' ')[0] || 'Wayfarer';
   const player = rpg.createPlayer({ name: playerName, classId, avatar: look?.avatar || null });
+  player.barrier = 0;
+
+  // the materials bag: separate from the item bag, and it never fills
+  const materials = Materials.from(save?.materials || {});
+  const craft = createCrafting({ data: craftData, rpg, materials, rng: rpg.rng });
+
   if (!save) {
-    const starter = rpg.loot.generate(STARTER_WEAPON[classId] || 'sword', 'normal', 'low', { rng: rpg.rng });
+    const starter = rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: rpg.rng });
     if (starter) rpg.equip(player, starter);
+    for (const key of classDef.startingArmour || []) {
+      const piece = rpg.loot.generate(key, 'normal', 'low', { rng: rpg.rng });
+      if (piece) rpg.equip(player, piece);
+    }
+    // EVERY character starts with a torch and a horse — both in slots of their own, so a torch does
+    // not cost you your shield and a mount is a thing you own rather than a key you press.
+    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_TORCH)));
+    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_MOUNT)));
   }
 
   // only the player swims, so only the player pays for the swim clips
@@ -290,9 +353,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     groundAt: (x, z) => terrain.heightAt(x, z),
     onArrowLand: arrow => {
       const splash = balance.player?.arrowSplash ?? 2.6;
-      const hits = field.strikeArea(arrow.x, arrow.z, splash, player);
+      const bow = player.equipment.weapon;
+      const element = elementOf(bow);
+      const leaves = statusOf(bow);
+      const hits = field.strikeArea(arrow.x, arrow.z, splash, player, { element });
       sound.combat('arrow');
-      for (const { enemy, result } of hits) reportHit(enemy, result);
+      for (const { enemy, result } of hits) {
+        if (leaves && skillData.statuses[leaves] && result.amount > 0) {
+          landStatus(leaves, skillData.statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
+        }
+        reportHit(enemy, result);
+      }
     },
   });
 
@@ -313,49 +384,230 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   sunfx = createSunFx({ balance, terrain: { heightAt: (x, z) => terrain.heightAt(x, z) } });
   sunfx.setEnabled(settings.get('sunfx') !== false);
 
-  /** Hang a status on whatever the skill just hit, and say so once. */
-  function landStatus(plan, enemy) {
-    if (!plan.status || !plan.statusSpec) return;
-    const first = !enemy.statuses?.[plan.status];
-    applyStatus(enemy, plan.status, plan.statusSpec, Math.max(1, plan.damage * 0.9));
-    if (first) hud.log(`${enemy.name} is ${plan.statusSpec.name.toLowerCase()}.`, 'good');
+  /**
+   * Hang a status on whatever the skill just hit, and say so once. `cond_burnExtend` and
+   * `cond_poisonStackPower` land here — this is the one place a status the PLAYER applies is made.
+   */
+  function landStatus(type, spec, enemy, power = 1) {
+    if (!type || !spec) return;
+    const first = !enemy.statuses?.[type];
+    const longer = rpg.fx.sum(player, 'statusLonger', { type });
+    const strength = rpg.fx.product(player, 'statusPower', { type });
+    applyStatus(enemy, type, spec, power, { longer, strength });
+    if (first) hud.log(`${enemy.name} is ${(spec.name || type).toLowerCase()}.`, 'good');
   }
+  /** The callback every strike hands to the effect registry, so a crit can open a bleed. */
+  const statusHook = (target, type, spec) => { if (target && spec) landStatus(type, spec, target, 1); };
 
-  /** Where the player is looking: an eye point and a unit direction. */
+  /**
+   * Where the player is AIMING — which is not the same as where the player is standing.
+   *
+   * The camera sits over the left shoulder, so the crosshair's ray starts about 0.85 m to the left
+   * of the body. Firing from the body along the same direction gives two parallel lines 0.85 m
+   * apart, and every arrow lands that far to the right of the crosshair. (Reported in play: "arrows
+   * land to the right of where I am aiming.")
+   *
+   * The fix every third-person game uses: find the point the CROSSHAIR is actually on — march the
+   * camera's ray until it meets the ground, or stop at the first enemy under the reticle — then aim
+   * the shot from the muzzle *at that point*. The two rays converge on the target instead of staying
+   * parallel. `AIM_MIN` stops the correction going wild at point-blank range, where the angle
+   * between the two would be enormous.
+   */
+  const AIM_FAR = 260, AIM_MIN = 7;
   function aim() {
     const cp = Math.cos(control.pitch);
-    return {
-      x: control.x, y: control.y + 1.45, z: control.z,
-      dx: Math.sin(control.yaw) * cp, dy: Math.sin(control.pitch), dz: Math.cos(control.yaw) * cp,
-    };
+    const lx = Math.sin(control.yaw) * cp, ly = Math.sin(control.pitch), lz = Math.cos(control.yaw) * cp;
+    const eye = { x: control.x, y: control.y + 1.45, z: control.z };
+    // in first person the camera IS the eye, so there is nothing to correct
+    if (control.firstPerson) return { ...eye, dx: lx, dy: ly, dz: lz, focus: null, dist: AIM_FAR };
+
+    const cam = camera.position;
+    let t = AIM_FAR;
+    for (let step = 2; step < AIM_FAR; step += 2) {
+      const gx = cam.x + lx * step, gz = cam.z + lz * step;
+      if (cam.y + ly * step <= terrain.heightAt(gx, gz)) { t = step; break; }
+    }
+    // a body under the reticle wins over the hill behind it
+    const under = field.hitScan(cam.x, cam.y, cam.z, lx, ly, lz, { range: Math.min(t, AIM_FAR), width: 1.2 });
+    if (under) t = under.distance;
+    t = Math.max(AIM_MIN, t);
+
+    const px = cam.x + lx * t, py = cam.y + ly * t, pz = cam.z + lz * t;
+    const dx = px - eye.x, dy = py - eye.y, dz = pz - eye.z;
+    const len = Math.hypot(dx, dy, dz) || 1;
+    return { ...eye, dx: dx / len, dy: dy / len, dz: dz / len, focus: { x: px, y: py, z: pz }, dist: t, target: under?.enemy || null };
+  }
+
+  /** The ground point the player is looking at, for a skill that lands where you aim. */
+  function groundTarget(range) {
+    const a = aim();
+    for (let t = 2; t < range; t += 1.5) {
+      const gx = a.x + a.dx * t, gz = a.z + a.dz * t;
+      if (a.y + a.dy * t <= terrain.heightAt(gx, gz)) return { x: gx, z: gz, y: terrain.heightAt(gx, gz), dist: t };
+    }
+    const gx = a.x + a.dx * range, gz = a.z + a.dz * range;
+    return { x: gx, z: gz, y: terrain.heightAt(gx, gz), dist: range };
+  }
+
+  /** A ring of effect points on the actual ground, so an area spell does not float over a slope. */
+  function ringPoints(cx, cz, radius, count = 8) {
+    const points = [];
+    for (let k = 0; k < count; k++) {
+      const ang = (k / count) * Math.PI * 2;
+      const px = cx + Math.cos(ang) * radius * 0.75, pz = cz + Math.sin(ang) * radius * 0.75;
+      points.push(new THREE.Vector3(px, terrain.heightAt(px, pz) + 0.1, pz));
+    }
+    return points;
+  }
+
+  /**
+   * One bolt of a skill: fly down the line, stop at the first body or the ground, burst there.
+   *
+   * BOLT_SPEED, and the bolt follows whoever it was aimed at. Both matter: at the effect module's
+   * own pace a bolt takes about half a second to cross 7 m, and anything charging you has moved
+   * several metres by the time it arrives, so a shot lined up on a wolf's nose burst behind it.
+   */
+  const BOLT_SPEED = 48;
+  function fireBolt(plan, a, dx, dy, dz, strikeOpts, from, loud = true) {
+    const target = field.hitScan(a.x, a.y, a.z, dx, dy, dz, { range: plan.range, width: 1.4 });
+    let dist = target ? target.distance : plan.range;
+    for (let t = 2; t < dist; t += 2) {
+      const gx = a.x + dx * t, gz = a.z + dz * t;
+      if (a.y + dy * t <= terrain.heightAt(gx, gz)) { dist = t; break; }
+    }
+    const to = new THREE.Vector3(a.x + dx * dist, a.y + dy * dist, a.z + dz * dist);
+    const flight = Math.max(90, (dist / BOLT_SPEED) * 1000);
+    const chase = target?.enemy || null;
+    return spellfx.projectile({ from, to, element: plan.element, ms: flight })
+      .then(() => {
+        const at = chase && chase.dying == null
+          ? new THREE.Vector3(chase.x, chase.y + 0.9, chase.z)
+          : to;
+        spellfx.impact({ at, element: plan.element });
+        const splash = plan.splash * (rpg.fx.sum(player, 'boltSplash') || 1);
+        const hits = field.strikeArea(at.x, at.z, splash, player, { falloff: 0.5, ...strikeOpts });
+        if (hits.length && loud) sound.combat('hit', { crit: hits.some(h => h.result.crit) });
+      })
+      .catch(() => { /* the scene went away mid-flight */ });
+  }
+
+  /**
+   * Take the mouse back if nothing is holding it. Closing a panel used to leave the cursor loose and
+   * the player had to click the world again before they could look around — which, with a panel's
+   * click-to-close under the pointer, was easy to get wrong.
+   */
+  function regrab() {
+    const held = hud.sheetOpen || map.isOpen || talk.isOpen || settings.isOpen || debug.isOpen
+      || rewardsOpen() || pauseMenu.isOpen;
+    if (!held) input.grab();
   }
 
   /** Fire skill slot `i`. Returns the plan it ran, or null if it could not. */
-  function castSkill(i) {
-    const plan = skills.use(i);
+  function castSkill(i, { echo = false } = {}) {
+    const plan = echo ? i : skills.use(i);
     if (!plan.ok) { if (plan.why) hud.log(plan.why); return null; }
     const a = aim();
     const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.2, a.z + a.dz * 0.6);
     // War Cry raises the damage of everything, including the skill that follows it
-    const power = plan.mult * (1 + buffsOf(player).damage);
-    const onHit = (enemy, result) => { landStatus(plan, enemy); reportHit(enemy, result); };
+    const power = plan.mult * outgoingFrom(player);
+    const onHit = (enemy, result) => {
+      if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * 0.9));
+      reportHit(enemy, result);
+    };
+    const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };
 
-    if (plan.kind === 'self') {
+    // every "when you cast" affix and legendary gets its turn first
+    if (!echo) {
+      const cast = rpg.fx.onCast({ self: player, skill: plan.skill, applyStatus: statusHook });
+      if (cast.shockwave) {
+        spellfx.aoe({ points: ringPoints(control.x, control.z, 7), element: 'arcane', stagger: 0.03 });
+        field.strikeArea(control.x, control.z, 7, player, { element: 'arcane', power: 1.2, onHit });
+      }
+      // `echo_cast`: a quarter of your skills go off a second time for half
+      const chance = rpg.fx.sum(player, 'echo');
+      if (chance > 0 && rpg.rng() < chance) {
+        setTimeout(() => castSkill({ ...plan, mult: plan.mult * 0.5, damage: Math.round(plan.damage * 0.5) }, { echo: true }), 260);
+      }
+    }
+
+    if (plan.kind === 'summon') {
+      pets.summon(plan.pet, player, { count: plan.petCount, at: control }).then(made => {
+        if (made.length) hud.log(`${made[0].name} answers.`, 'good');
+      });
+      spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
+      sound.ui('click');
+    } else if (plan.kind === 'beam') {
+      // a line out from you: everything within `width` of the ray, out to `range`
+      const points = [];
+      for (let t = 2; t <= plan.range; t += 3) {
+        const bx = a.x + a.dx * t, bz = a.z + a.dz * t;
+        if (a.y + a.dy * t <= terrain.heightAt(bx, bz)) break;
+        points.push(new THREE.Vector3(bx, a.y + a.dy * t, bz));
+      }
+      if (points.length) spellfx.aoe({ points, element: plan.element, stagger: 0.015 });
+      let healed = 0;
+      for (const e of field.enemies) {
+        if (e.dying != null) continue;
+        const ex = e.x - a.x, ez = e.z - a.z;
+        const along = ex * a.dx + ez * a.dz;
+        if (along < 0 || along > plan.range) continue;
+        if (Math.hypot(ex - a.dx * along, ez - a.dz * along) > plan.width + (e.reach || 2) * 0.3) continue;
+        const result = rpg.strike(player, e, field.rng, { multiplier: power, element: plan.element, applyStatus: statusHook });
+        e.hitFlash = 0.18;
+        if (e.state !== 'chase') e.state = 'chase';
+        onHit(e, result);
+        healed += Math.round(result.amount * (plan.healFrac || 0));
+        spellfx.impact({ at: new THREE.Vector3(e.x, e.y + 0.9, e.z), element: plan.element, crit: result.crit });
+        if (result.dead) field.kill(e);
+      }
+      if (healed) { player.hp = Math.min(player.maxHp, player.hp + healed); hud.log(`Drained ${healed} back.`, 'good'); }
+      sound.combat('hit');
+    } else if (plan.kind === 'ground') {
+      // it lands where you are looking, not where you are
+      const spot = groundTarget(plan.range);
+      spellfx.aoe({ points: ringPoints(spot.x, spot.z, plan.radius), element: plan.element, stagger: 0.05 });
+      spellfx.impact({ at: new THREE.Vector3(spot.x, spot.y + 0.6, spot.z), element: plan.element });
+      const hits = field.strikeArea(spot.x, spot.z, plan.radius, player, { falloff: 0.55, ...strikeOpts });
+      sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
+    } else if (plan.kind === 'dash') {
+      // you move: everything along the line takes the hit, and you end up at the far end of it
+      const spot = groundTarget(plan.range);
+      const dist = Math.min(plan.range, spot.dist);
+      const points = [];
+      for (let t = 1; t <= dist; t += 2) {
+        const bx = control.x + a.dx * t, bz = control.z + a.dz * t;
+        points.push(new THREE.Vector3(bx, terrain.heightAt(bx, bz) + 0.3, bz));
+      }
+      spellfx.aoe({ points, element: plan.element, stagger: 0.02 });
+      const hits = [];
+      for (let t = 1; t <= dist; t += 2) {
+        hits.push(...field.strikeArea(control.x + a.dx * t, control.z + a.dz * t, plan.splash, player, { falloff: 0.8, ...strikeOpts }));
+      }
+      control.teleport(control.x + a.dx * dist, control.z + a.dz * dist);
+      control.swing = Math.max(control.swing, 0.35);
+      sound.combat(hits.length ? 'hit' : 'swing');
+    } else if (plan.kind === 'self') {
       if (plan.heal) {
         const before = player.hp;
-        player.hp = Math.min(player.maxHp, player.hp + plan.heal);
+        // `camp_mend` lifts anything that mends you
+        const lift = 1 + rpg.fx.sum(player, 'healBonus');
+        player.hp = Math.min(player.maxHp, player.hp + Math.round(plan.heal * lift));
         spellfx.heal({ at: new THREE.Vector3(control.x, control.y + 0.9, control.z) });
         hud.log(`${plan.skill.name} closes ${Math.round(player.hp - before)} damage.`, 'good');
       }
       if (plan.status && plan.statusSpec) {
         applyStatus(player, plan.status, plan.statusSpec, 1);
+        // a rallying skill puts the same buff on everything following you
+        if (plan.pets || plan.status === 'regen') {
+          for (const pet of pets.pets) if (pet.dying == null) applyStatus(pet, plan.status, plan.statusSpec, 1);
+        }
         hud.log(`${plan.statusSpec.name}.`, 'good');
       }
       spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 420 });
       sound.ui('click');
     } else if (plan.kind === 'melee') {
       fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: plan.reach, arc: plan.arc });
-      const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, power, onHit });
+      const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, ...strikeOpts });
       sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
       for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element: plan.element, crit: h.result.crit });
       control.swing = Math.max(control.swing, 0.35);
@@ -368,37 +620,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         points.push(new THREE.Vector3(px, terrain.heightAt(px, pz) + 0.1, pz));
       }
       spellfx.aoe({ points, element: plan.element, stagger: 0.04 });
-      const hits = field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, power, onHit });
+      const hits = field.strikeArea(control.x, control.z, plan.radius, player, { falloff: 0.6, ...strikeOpts });
       sound.combat(hits.length ? 'hit' : 'swing');
+      // Consecrate mends you as it burns them
+      if (plan.healFrac) {
+        const back = Math.round(player.maxHp * plan.healFrac);
+        player.hp = Math.min(player.maxHp, player.hp + back);
+        spellfx.heal({ at: new THREE.Vector3(control.x, control.y + 0.9, control.z) });
+      }
       control.swing = Math.max(control.swing, 0.35);
     } else {
-      // a bolt: it flies down the line you are looking along and bursts on whatever it reaches first
-      const target = field.hitScan(a.x, a.y, a.z, a.dx, a.dy, a.dz, { range: plan.range, width: 1.4 });
-      let dist = target ? target.distance : plan.range;
-      // and stops at the ground if the ground gets in the way first
-      for (let t = 2; t < dist; t += 2) {
-        const gx = a.x + a.dx * t, gz = a.z + a.dz * t;
-        if (a.y + a.dy * t <= terrain.heightAt(gx, gz)) { dist = t; break; }
-      }
-      const to = new THREE.Vector3(a.x + a.dx * dist, a.y + a.dy * dist, a.z + a.dz * dist);
+      // A bolt — or a FAN of them. Multi Shot, Chain Bolt and Pinning Shot fire several at once,
+      // spread across `plan.spread` radians, because a "multi shot" that fires one arrow is not one.
       sound.combat('bow');
-      // BOLT_SPEED, and the bolt follows whoever it was aimed at. Both matter: at the module's own
-      // pace a bolt takes about half a second to cross 7 m, and anything charging you has moved
-      // several metres by the time it arrives, so a shot lined up on a wolf's nose burst behind it.
-      const BOLT_SPEED = 48;
-      const flight = Math.max(90, (dist / BOLT_SPEED) * 1000);
-      const chase = target?.enemy || null;
-      spellfx.projectile({ from, to, element: plan.element, ms: flight })
-        .then(() => {
-          // burst where it actually is now, not where it stood when you fired
-          const at = chase && chase.dying == null
-            ? new THREE.Vector3(chase.x, chase.y + 0.9, chase.z)
-            : to;
-          spellfx.impact({ at, element: plan.element });
-          const hits = field.strikeArea(at.x, at.z, plan.splash, player, { falloff: 0.5, power, onHit });
-          if (hits.length) sound.combat('hit', { crit: hits.some(h => h.result.crit) });
-        })
-        .catch(() => { /* the scene went away mid-flight */ });
+      const n = plan.projectiles || 1;
+      for (let k = 0; k < n; k++) {
+        // fan them either side of where you are aiming; a single bolt keeps the exact line
+        const off = n === 1 ? 0 : (k / (n - 1) - 0.5) * plan.spread;
+        const cs = Math.cos(off), sn = Math.sin(off);
+        const dx = a.dx * cs - a.dz * sn, dz = a.dx * sn + a.dz * cs, dy = a.dy;
+        fireBolt(plan, a, dx, dy, dz, strikeOpts, from, k === 0);
+      }
     }
     hud.setPlayer(player);
     return plan;
@@ -419,7 +661,42 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // ---------------------------------------------------------------- hud + enemies
   const hud = new Hud({
-    rpg, terrain, seed,
+    rpg, terrain, seed, craft, zones,
+    pets: { roster: () => pets?.roster() || [] },
+    // Opening the sheet gives the mouse back IMMEDIATELY — this was the bug: the pointer stayed
+    // locked, so the cursor was invisible and none of the buttons could be clicked.
+    onOpen: () => { input.release(); },
+    onClose: () => { /* the next click on the canvas takes the mouse again */ },
+    onRecycle: (item, { quiet = false } = {}) => {
+      const at = player.bag.indexOf(item);
+      if (at < 0) return;
+      player.bag.splice(at, 1);
+      const got = craft.recycle(item);
+      if (!quiet) {
+        const text = Object.entries(got).map(([id, k]) => `${k} ${craft.M[id]?.name || id}`).join(', ');
+        hud.log(`Recycled ${item.name}${text ? ' → ' + text : ''}.`, 'loot');
+        sound.ui('click');
+      }
+      hud.setPlayer(player);
+      autoSave();
+    },
+    onCraft: (recipeId, item, opts) => {
+      const out = craft.apply(recipeId, item, { magicFind: player.derived?.magicFind || 0, ...opts, player });
+      if (!out.ok) { hud.log(out.why || 'That cannot be done.', 'bad'); return; }
+      // a brand put on at the bench re-attunes the weapon, so the swing carries the new element
+      if (item && out.ok) { item.castElement = null; attuneWeapon(item); }
+      if (out.made) {
+        attuneWeapon(out.made);
+        player.bag.push(out.made);
+        hud.log(`${out.text} It is in your bag.`, out.lucky ? 'level' : 'loot');
+        sound.loot(out.made);
+      }
+      else { hud.log(out.text, 'loot'); sound.equip(); }
+      rpg.refresh(player);
+      applyGearLook();
+      hud.setPlayer(player);
+      autoSave();
+    },
     onEquip: (item, unequipSlot) => {
       if (unequipSlot) { const off = rpg.unequip(player, unequipSlot); if (off) hud.log(`Took off ${off.name}.`); }
       else { rpg.equip(player, item); hud.log(`Equipped ${item.name}.`, 'loot'); sound.equip(); }
@@ -446,6 +723,49 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     else hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '');
   }
 
+  /**
+   * The reward popup, shared with Emberveil (`shared/rewards.js`): a chest lands, bursts, the gold
+   * and xp count up, and the items fly out one at a time with their rarity colour. Used for a
+   * chest, a boss, a rare and a cleared dungeon — everything with a haul worth stopping for.
+   */
+  function rewards(spec) {
+    state.paused = true;
+    input.release();
+    return showRewards(spec, {
+      base: '../../assets/data/ui',
+      sounds: {
+        open: () => sound.ui('open'),
+        item: r => sound.loot({ rarity: r }),
+        close: () => sound.ui('click'),
+      },
+    }).finally(() => { state.paused = false; });
+  }
+
+  /** One item, in the shape the reward popup wants. */
+  function rewardItem(item) {
+    return {
+      name: item.name, rarity: item.rarity, unique: !!item.isUnique, set: !!item.setId,
+      slot: item.type === 'weapon' ? 'Weapon' : (item.slot || ''),
+      lines: [
+        item.dmg ? `${item.dmg[0]}–${item.dmg[1]} damage` : null,
+        item.armor ? `${item.armor} armour` : null,
+        ...(item.affixes || []).filter(a => !a.baseIntrinsic).slice(0, 3).map(a => describeAffixText(a)),
+      ].filter(Boolean),
+    };
+  }
+  function describeAffixText(a) { try { return describeAffix(a); } catch { return `${a.name || a.stat} ${a.value}`; } }
+
+  /** Hand the player a haul: items to the bag, gold to the purse, materials to the materials bag. */
+  function takeHaul({ items = [], gold = 0, mats = {} } = {}) {
+    for (const it of items) { player.bag.push(it); campaign.onLoot(it); }
+    player.gold += gold;
+    craft.materials.addAll(mats);
+    for (const it of items) for (const q of questLog.onLoot({ baseKey: it.baseKey })) {
+      hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+    }
+    hud.setPlayer(player);
+  }
+
   /** What happens when something dies. Named, because the enemy field is rebuilt on every world. */
   function onEnemyKilled(e) {
     player.kills++;
@@ -457,31 +777,320 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     const back = rpg.onKillRestore(player);
     if (back.hp || back.mp) hud.log(`The kill returns ${[back.hp && `${back.hp} health`, back.mp && `${back.mp} mana`].filter(Boolean).join(' and ')}.`);
+
+    // every on-kill affix and legendary power gets its turn
+    const post = rpg.fx.onKill({ self: player, target: e, applyStatus: (t, type, spec) => applyStatus(t, type, spec) });
+    if (post.heal) player.hp = Math.min(player.maxHp, player.hp + post.heal);
+    if (post.petHeal) pets.heal(post.petHeal);
+    if (post.gold) player.gold += post.gold;
+    if (post.cooldownCut) skills.refresh(post.cooldownCut);
+    if (post.rally) applyStatus(player, 'rally', skillData.statuses.rally, 1);
+    if (post.breath) {
+      for (const other of field.near(e.x, e.z, post.breath.radius, e)) {
+        field.strikeArea(other.x, other.z, 1.5, player, { element: post.breath.element, power: 0.6 });
+        applyStatus(other, post.breath.status, skillData.statuses[post.breath.status], 6);
+      }
+      spellfx.impact({ at: new THREE.Vector3(e.x, e.y + 1, e.z), element: 'fire' });
+    }
+    if (post.spreadStatuses && e.statuses) {
+      for (const other of field.near(e.x, e.z, post.spreadStatuses, e)) {
+        for (const [type, st] of Object.entries(e.statuses)) applyStatus(other, type, skillData.statuses[type], st.power);
+      }
+    }
+
     const levels = rpg.gainXp(player, e.xp);
     player.gold += e.gold;
-    hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, 'good');
-    if (levels) { hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level'); sound.levelUp(); }
-    const drop = rpg.rollDrop({ level: e.level, rng: field.rng, magicFind: player.derived.magicFind, bases: e.dropBases });
-    if (drop) {
-      player.bag.push(drop);
-      hud.log(`${e.name} dropped ${drop.name}.`, 'loot');
-      sound.loot(drop);
-      campaign.onLoot(drop);
-      for (const q of questLog.onLoot({ baseKey: drop.baseKey })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+    hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, e.rank && e.rank !== 'normal' ? 'loot' : 'good');
+    if (levels) {
+      hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level');
+      sound.levelUp();
+    }
+
+    // the body itself is worth something — hide, bone, plate, and the rare components
+    const mats = craft.harvest(e);
+    // an extra roll from the `forage_feast` legendary
+    if (rpg.fx.sum(player, 'scavenge') > 0 && field.rng() < rpg.fx.sum(player, 'scavenge')) craft.materials.add('scrap', 2);
+
+    const drops = rpg.rollDrops(e, { rng: field.rng, magicFind: player.derived.magicFind });
+    if (rpg.fx.sum(player, 'extraDrop') > 0 && field.rng() < rpg.fx.sum(player, 'extraDrop')) {
+      const bonus = rpg.rollDrop({ level: e.level, rng: field.rng, magicFind: player.derived.magicFind, bases: e.dropBases, chance: 1 });
+      if (bonus) drops.push(bonus);
+    }
+
+    // A boss or a rare leaves a BAG rather than pushing five things silently into the inventory.
+    // Walking over to pick it up is the beat that makes the kill feel finished.
+    if ((e.rank === 'boss' || e.rank === 'rare') && (drops.length || Object.keys(mats).length)) {
+      chests.dropBag(e.x, e.z, {
+        items: drops, gold: Math.round(e.gold * 0.5), mats: {},
+        title: e.rank === 'boss' ? e.name + ' falls' : 'A rare kill',
+        subtitle: e.rank === 'boss' ? 'Everything it was hoarding is yours.' : `${e.name} was carrying something.`,
+      });
+      hud.log('It dropped a bag. Walk over it.', 'loot');
+    } else {
+      for (const drop of drops) {
+        player.bag.push(drop);
+        hud.log(`${e.name} dropped ${drop.name}.`, 'loot');
+        sound.loot(drop);
+        campaign.onLoot(drop);
+        for (const q of questLog.onLoot({ baseKey: drop.baseKey })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+      }
     }
     for (const q of questLog.onKill({ defId: e.defId })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+    if (e === bossUnit) { bossUnit = null; hud.boss(null); if (dungeon) onDungeonBossDown(); }
     hud.setPlayer(player);
     autoSave();
   }
 
-  function makeField() {
+  function makeField(forTerrain = terrain, forZones = zones) {
     return new EnemyField({
-      scene, terrain, rpg, defs: bestiary.enemies, balance: { ...balance, seed },
+      scene, terrain: forTerrain, rpg, defs: bestiary.enemies,
+      bosses: bestiary.bosses || [], modifiers: bestiary.modifiers || [],
+      zones: forZones, balance: { ...balance, seed },
       onLog: (t, c) => hud.log(t, c),
       onKill: onEnemyKilled,
+      // a rare gets a real name, in the language of the region it turned up in
+      nameRare: (def, rng) => {
+        if (!namegen) return null;
+        const race = zones.at(control.x, control.z)?.race || 'human';
+        return namegen.generate('person.full', { race, seed: Math.floor(rng() * 1e9) })?.text?.split(' ')[0] || null;
+      },
     });
   }
   let field = makeField();
+  // whatever stops the player stops an enemy too
+  field.solids = [props.solids, features.solids];
+
+  // ---------------------------------------------------------------- companions
+  const pets = createPets({
+    scene, terrain, rpg, defs: bestiary.pets || [], balance: { ...balance, seed },
+    field, statuses: skillData.statuses,
+  });
+  if (classDef.pet) {
+    pets.summonForClass(classId, player, classDef.pet).then(made => {
+      if (made.length) hud.log(`${player.name} ${classDef.pet.verb || 'calls'} ${made.length === 1 ? made[0].name : made.length + ' companions'}.`, 'good');
+    });
+  }
+
+  // ---------------------------------------------------------------- treasure
+  let chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+  let gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: features.solids });
+  // set-piece encounters on the road: warbands, ambushes, swarms, a rare with an escort
+  let encounters = createEncounters({
+    field, zones, terrain, balance, data: encounterData,
+    onLog: (t, c) => hud.log(t, c),
+    isNight: () => sky.isNight,
+  });
+
+  // camps with a fire in them, and the lairs the world bosses keep
+  let sites = createSites(scene, terrain, { seed, balance, zones, collide: features.solids, radius: balance.features?.radius ?? 2600 });
+
+  /** Fill a camp or a lair with what lives there. Called once per site as you come near it. */
+  async function populateSite(site) {
+    const level = site.level || player.level;
+    if (site.kind === 'lair') {
+      const bossDef = field.bossFor(level, site.x, site.z) || (bestiary.bosses || [])[0];
+      if (!bossDef) return;
+      const unit = await field.placeBoss(bossDef, level, site.x, site.z);
+      if (unit) {
+        bossUnit = unit;
+        hud.log(`${unit.name} keeps this place.`, 'bad');
+        sound.combat('death', { beast: true });
+      }
+      return;
+    }
+    // a camp: a leader if one fits the level, and four or five of whatever lives here
+    const pool = field.defsFor(site.x, site.z, level);
+    if (!pool.length) return;
+    const leaders = pool.filter(d => d.role === 'leader');
+    const rest = pool.filter(d => d.role !== 'leader');
+    if (leaders.length) {
+      await field.addRanked(field.rng.pick(leaders), level, site.x, site.z, 'champion');
+    }
+    const n = 4 + field.rng.int(0, 2);
+    for (let i = 0; i < n && rest.length; i++) {
+      const a = field.rng() * Math.PI * 2, r = 4 + field.rng() * 10;
+      const [x, z] = terrain.clampToWorld(site.x + Math.cos(a) * r, site.z + Math.sin(a) * r);
+      if (terrain.underwater(x, z)) continue;
+      await field.addRanked(field.rng.pick(rest), level, x, z, i === 0 ? field.rpg.rollRank(field.rng, { bonus: 2 }) : 'normal');
+    }
+    // and something worth the fight, in the middle of it
+    chests.place(field.rng() < 0.4 ? 'gilded' : 'iron', site.x + 2.5, site.z + 2.5, { level, facing: field.rng() * 6.28 });
+  }
+
+  // ---------------------------------------------------------------- dungeons
+  //
+  // Going inside swaps the FLOOR — the controller, the enemy field and the companions all read
+  // their terrain through a binding for exactly this — hides the surface, and turns the lights out.
+  // Coming back out puts everything where it was.
+  let dungeon = null;
+  let bossUnit = null;
+  let surfaceSpot = null;
+  let dungeonsCleared = new Set(save?.dungeonsCleared || []);
+
+  function surfaceVisible(on) {
+    view.setVisible?.(on);
+    props.setVisible?.(on);
+    features.setVisible?.(on);
+    weatherView.setVisible?.(on);
+    chests.clear();
+    gates.mesh.visible = on;
+  }
+
+  async function enterDungeon(node) {
+    if (dungeon) return;
+    const level = Math.max(1, (node.zone?.midLevel ?? player.level) + 1);
+    hud.log(`You go down into ${node.name}.`, 'level');
+    state.paused = true;
+    surfaceSpot = { x: control.x, z: control.z };
+    field.clear();
+
+    const families = familiesOf(terrain.biomeIdAt(node.x, node.z));
+    dungeon = await createDungeon(scene, {
+      seed: (seed * 31 + node.id) >>> 0, balance, node, level, rpg,
+      look: lookForBiome(families), name: node.name,
+      surface: { ...terrain, spawn: { x: node.x, z: node.z } },
+    });
+
+    surfaceVisible(false);
+    control.setTerrain(dungeon.terrain, dungeon.entryPoint());
+    control.obstacles = [dungeon.solids];
+    field.terrain = dungeon.terrain;
+    field.solids = [dungeon.solids];
+    field.rankBonus = 1.7;                     // more champions and rares than out in the open
+    pets.setTerrain(dungeon.terrain);
+    chests = dungeon.chests;
+
+    // a pack in every room but the one you came in by, and the boss at the far end
+    const packs = balance.dungeon?.packsPerRoom || [1, 3];
+    for (const room of dungeon.rooms) {
+      if (room.kind === 'entrance') continue;
+      if (room.kind === 'boss') continue;
+      const want = packs[0] + Math.floor(field.rng() * (packs[1] - packs[0] + 1));
+      for (let i = 0; i < want; i++) {
+        const pool = field.defsFor(node.x, node.z, level);
+        if (!pool.length) break;
+        const def = field.rng.pick(pool);
+        const rank = field.rpg.rollRank(field.rng, { bonus: field.rankBonus });
+        const x = room.x + (field.rng() - 0.5) * (room.w - 3);
+        const z = room.z + (field.rng() - 0.5) * (room.h - 3);
+        field.addRanked(def, level, x, z, rank);
+      }
+    }
+    if (dungeon.bossRoom !== dungeon.entrance) {
+      const bossDef = field.bossFor(level, node.x, node.z) || (bestiary.bosses || [])[0];
+      if (bossDef) {
+        bossUnit = await field.placeBoss(bossDef, level, dungeon.bossRoom.x, dungeon.bossRoom.z);
+      }
+    }
+    field.paused = true;                        // nothing wanders in from outside: this is a closed place
+    light.setTorch(true);
+    scene.fog.near = 2; scene.fog.far = 70;
+    scene.fog.color.set(dungeon.look.fog);
+    node.entered = true;
+    state.paused = false;
+    hud.log('It is very dark. Your torch is lit.', '');
+    autoSave();
+  }
+
+  function leaveDungeon() {
+    if (!dungeon) return;
+    field.clear();
+    bossUnit = null;
+    hud.boss(null);
+    dungeon.dispose();
+    dungeon = null;
+    field.terrain = terrain;
+    field.solids = [props.solids, features.solids];
+    field.rankBonus = 1;
+    field.paused = false;
+    pets.setTerrain(terrain);
+    chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+    control.setTerrain(terrain, surfaceSpot ? { ...surfaceSpot, y: null } : null);
+    control.obstacles = [props.solids, features.solids];
+    surfaceVisible(true);
+    rebuildWorldAround(true);
+    hud.log('Daylight, or what passes for it.', 'good');
+    autoSave();
+  }
+
+  /** The boss of the dungeon you are standing in went down. Pay for it. */
+  function onDungeonBossDown() {
+    if (!dungeon) return;
+    const node = gates.nodes.find(g => g.name === dungeon.name);
+    if (node) node.cleared = true;
+    dungeonsCleared.add(dungeon.name);
+    const cfg = balance.dungeon || {};
+    const goldSpan = cfg.clearRewardGold || [80, 240];
+    const gold = Math.round(goldSpan[0] + field.rng() * (goldSpan[1] - goldSpan[0]) * (1 + dungeon.level * 0.1));
+    const wantSpan = cfg.clearRewardItems || [1, 3];
+    const want = wantSpan[0] + Math.floor(field.rng() * (wantSpan[1] - wantSpan[0] + 1));
+    const items = [];
+    for (let i = 0; i < want; i++) {
+      const it = rpg.rollDrop({ level: dungeon.level, rng: rpg.rng, magicFind: player.derived.magicFind, chance: 1, rarityBoost: 2, floor: i === 0 ? 'rare' : null });
+      if (it) items.push(it);
+    }
+    const mats = { dust: 2 + Math.floor(field.rng() * 3), core: 1 };
+    takeHaul({ items, gold, mats });
+    campaign.onKill('dungeon_cleared');
+    for (const q of questLog.onClear?.({ name: dungeon.name }) || []) hud.log(`${q.title}: cleared.`, 'good');
+    sound.questDone();
+    rewards({
+      title: 'Dungeon cleared', subtitle: `${dungeon.name} is quiet now.`,
+      gold, xp: 0, items: items.map(rewardItem),
+      extras: [{ kind: 'quest', text: `${Object.entries(mats).map(([k, v]) => `${v} ${craft.M[k]?.name || k}`).join(', ')} recovered` }],
+      button: 'Take it',
+    });
+  }
+
+  /**
+   * `E` in the world: open a chest, go into a dungeon, come back out, or talk to somebody. One key,
+   * and the prompt above the hint bar always says which of those it is about to do.
+   */
+  function interactTarget() {
+    if (dungeon) {
+      const exit = dungeon.exitPoint();
+      if (Math.hypot(control.x - exit.x, control.z - exit.z) < 4) return { kind: 'leave' };
+    }
+    const chest = chests.nearest(control.x, control.z);
+    if (chest) return { kind: 'chest', chest };
+    if (!dungeon) {
+      const gate = gates.nearest(control.x, control.z);
+      if (gate) return { kind: 'dungeon', gate };
+      const who = folk.nearest(control.x, control.z);
+      if (who) return { kind: 'talk', who };
+    }
+    return null;
+  }
+
+  /** Open a chest: roll the haul, show the reward screen — or find out it was never a chest. */
+  async function openChest(chest) {
+    const level = dungeon ? dungeon.level : (zones.at(control.x, control.z)?.midLevel || player.level);
+    const haul = chests.open(chest, { level, magicFind: player.derived.magicFind });
+    if (!haul) return;
+    sound.ui('open');
+    if (haul.mimic) {
+      hud.log('The chest opens its own lid. That is not a chest.', 'bad');
+      const def = bestiary.enemies.find(d => d.id === 'hoard_mimic');
+      if (def) await field.add(def, level, chest.x, chest.z, { rank: 'rare', modifiers: rpg.pickModifiers(bestiary.modifiers, 2, field.rng), name: 'The Waiting Lid' });
+      return;
+    }
+    const mats = {};
+    for (let i = 0; i < (haul.materialCount || 0); i++) {
+      const pool = chest.kind === 'warded' ? ['dust', 'core', 'voidsalt', 'runeplate'] : chest.kind === 'gilded' ? ['dust', 'essence', 'emberglass', 'rimeshard'] : ['scrap', 'cloth', 'hide', 'essence'];
+      const id = pool[Math.floor(field.rng() * pool.length)];
+      mats[id] = (mats[id] || 0) + 1 + Math.floor(field.rng() * 2);
+    }
+    takeHaul({ items: haul.items, gold: haul.gold, mats });
+    autoSave();
+    rewards({
+      title: chest.name, subtitle: 'The lid comes up.',
+      gold: haul.gold, items: haul.items.map(rewardItem),
+      extras: Object.keys(mats).length
+        ? [{ kind: 'quest', text: Object.entries(mats).map(([k, v]) => `${v} ${craft.M[k]?.name || k}`).join(', ') }]
+        : [],
+      button: 'Take it',
+    });
+  }
 
   function applyGearLook() {
     const next = JSON.parse(JSON.stringify(look?.avatar || {}));
@@ -590,17 +1199,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       getEnemies: () => field.enemies,
       onTeleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); field.clear(); },
       pins: map ? [...map.pins] : [],
+      // round 4: the level-band overlay, and the dungeon mouths and camps to plan a route around
+      zones,
+      getLevel: () => player.level,
+      sites: { get sites() { return sites.sites; } },
+      gates: { get nodes() { return gates.nodes; } },
     });
   }
 
   /** Build a world and put the player on it. `spot` is {u, v} across the map, from a landing. */
   function buildPlanet(nextPlanet, spot = null) {
+    if (dungeon) leaveDungeon();
     disposePlanet();
 
     planet = nextPlanet;
     world = generatePlanetMap(planet, mapSize);
     terrain = makeTerrain(world, planet, balance.terrain);
     palette = atmospherePalette(planet);
+    // a new world has its own regions, so it has its own level bands
+    zones = buildZones(world, {
+      spawn: [terrain.spawnPoint().x, terrain.spawnPoint().z],
+      maxLevel: 30, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: balance.zones?.startLevel ?? 1,
+    });
+    hud.zones = zones;
 
     sky = createSky({ star, system, planet, balance, palette });
     scene.add(sky.sunLight); scene.add(sky.sunLight.target); scene.add(sky.ambient);
@@ -622,6 +1243,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids], settings });
     field = makeField();
+    field.solids = [props.solids, features.solids];
+    encounters = createEncounters({
+      field, zones, terrain, balance, data: encounterData,
+      onLog: (t, c) => hud.log(t, c), isNight: () => sky.isNight,
+    });
+    pets.setTerrain(terrain);
+    chests.clear();
+    chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+    gates.dispose();
+    gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: features.solids });
+    sites.dispose();
+    sites = createSites(scene, terrain, { seed, balance, zones, collide: features.solids, radius: balance.features?.radius ?? 2600 });
     folk = makeFolk();
     hud.setTerrain(terrain);
     map = makeMap();
@@ -630,8 +1263,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       ? { x: spot.u * terrain.widthM, z: spot.v * terrain.depthM }
       : { x: control.spawn.x, z: control.spawn.z };
     control.teleport(start.x, start.z);
-    // never come down in the sea
-    if (terrain.waterAt(control.x, control.z)) control.teleport(control.spawn.x, control.spawn.z);
+    /**
+     * NEVER come down in the sea.
+     *
+     * The old guard fell back to `control.spawn` — but `spawn` is read once when the controller is
+     * built, and on an ocean world the fallback can be wet too. This walks outward from where you
+     * aimed until it finds dry, walkable ground, and only then gives up on the spawn.
+     */
+    if (terrain.waterAt(control.x, control.z)) {
+      let landed = false;
+      for (let ring = 1; ring <= 14 && !landed; ring++) {
+        for (let k = 0; k < 12 && !landed; k++) {
+          const a = (k / 12) * Math.PI * 2 + ring;
+          const r = ring * terrain.widthM * 0.035;
+          const [x, z] = terrain.clampToWorld(start.x + Math.cos(a) * r, start.z + Math.sin(a) * r);
+          if (terrain.waterAt(x, z) || terrain.slopeAt(x, z, 6) > 0.6) continue;
+          control.teleport(x, z);
+          landed = true;
+        }
+      }
+      if (!landed) control.teleport(control.spawn.x, control.spawn.z);
+    }
 
     weather = new WeatherClock({
       weights: weatherWeights(terrain.climateAt(control.x, control.z)),
@@ -643,7 +1295,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     blended = weather.blend();
     weatherCell = [-1, -1];
 
+    state.elapsed = morningElapsed();
     rebuildWorldAround(true);
+    chests.update(control.x, control.z);
+    gates.update(control.x, control.z, true);
+    sites.update(control.x, control.z, true);
     if (campaign.onLandOn(planet.id)) hud.log(`${planet.name} charted.`, 'level');
     $('hud-planet').textContent = describePlanet(planet, star);
     return planet;
@@ -657,29 +1313,157 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   /** Leave the ground. */
+  /**
+   * Board the ship. There is no cinematic any more: you fly it, in the world, in metres, and when
+   * you are high enough the space scene takes over with the sky already black. See js/atmos.js.
+   */
   function launch() {
     if (mode !== 'ground') return;
+    if (dungeon) { hud.log('Not down here.', 'bad'); return; }
     ensureSpace();
-    mode = 'launch';
-    modeT = 0;
-    hud.log('You board the ship and lift off.', 'level');
+    ensureAir().board(control);
+    input.grab();                       // the mouse steers the ship; you cannot fly without it
+    actor.group.visible = false;
+    if (horse) horse.group.visible = false;
+    mode = 'air';
+    hud.log('W/S throttle · mouse steers · A/D roll · Space up · C down · Shift boost · J to set down', 'level');
+    hud.log('Climb high enough and you leave the atmosphere.', '');
   }
 
-  /** Put down on whatever the ship is close enough to. */
+  /** Put down on whatever the ship is close enough to — which now means flying down to it. */
   function land() {
+    if (mode === 'air') {
+      // already in the air over a world: put the ship on the ground and step out
+      const out = air.readout();
+      if (out.altitude > air.cfg.landHeight || out.speed > air.cfg.landSpeed) {
+        hud.log(`Too fast or too high to set down — under ${air.cfg.landSpeed} m/s and ${air.cfg.landHeight} m up.`, 'bad');
+        return;
+      }
+      stepOut();
+      return;
+    }
     if (mode !== 'space') return;
     const target = space.canLand();
-    if (!target) { hud.log('Nothing close enough to land on. Fly nearer a world.', 'bad'); return; }
-    landingTarget = { planet: target.planet, spot: space.landingSpot(target.body) };
-    mode = 'land';
-    modeT = 0;
-    hud.log(`Descending to ${target.planet.name}.`, 'level');
+    if (!target) {
+      // say WHY, using the same card the reticle draws
+      const under = space.targetUnder(space.heading());
+      const card = space.describe(under);
+      hud.log(card && !card.landable ? card.why : 'Nothing close enough to land on. Fly nearer a world.', 'bad');
+      return;
+    }
+    beginDescent(target);
+  }
+
+  /** Come down out of space into the air over a world, and keep flying. */
+  function beginDescent(target) {
+    const spot = space.landingSpot(target.body);
+    camera.far = 24000; camera.updateProjectionMatrix();
+    buildPlanet(target.planet, spot);
+    ensureAir();
+    air.setTerrain(terrain);
+    air.descend({ x: control.x, z: control.z }, { yaw: control.yaw });
+    actor.group.visible = false;
+    if (horse) horse.group.visible = false;
+    mode = 'air';
+    hud.log(`Coming down on ${planet.name}. ${describePlanet(planet, star)}`, 'level');
+    hud.log('Pull up and set down gently — J when you are slow and low.', '');
+  }
+
+  /** Get out of the ship where it is standing. */
+  function stepOut() {
+    // whatever the flight thinned out comes back
+    lastAirLod = -1;
+    view.setSkirtScale(1, air.state.x, air.state.z);
+    props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
+    props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
+    const st = air.state;
+    control.teleport(st.x, st.z);
+    control.yaw = st.yaw;
+    air.leave();
+    actor.group.visible = true;
+    mode = 'ground';
+    rebuildWorldAround(true);
+    hud.log(`You set down on ${planet.name}.`, 'good');
+    autoSave();
+  }
+
+  let air = null;
+  let airShip = null;
+  function ensureAir() {
+    if (!air) {
+      // Its OWN hull. Re-parenting `space.ship` into the ground scene took it OUT of the space
+      // scene — a Three object has one parent — and flight in space went first-person with no ship
+      // in front of you at all.
+      airShip = createShip('explorer');
+      airShip.group.scale.setScalar((balance.space?.shipScale ?? 12) * 0.22);
+      airShip.group.visible = false;
+      scene.add(airShip.group);
+      air = createAtmosphere({
+        scene, terrain, balance, settings,
+        ship: airShip,
+        onLog: (t, c) => hud.log(t, c),
+      });
+    }
+    return air;
   }
 
   /** Everything that happens when you are not standing on a planet. */
   function stepFlight(dt, snap) {
     modeT += dt;
     const spaceCfg = balance.space || {};
+
+    // ---------------------------------------------------------------- flying in the air
+    if (mode === 'air') {
+      const out = air.update(dt, snap, camera);
+      if (out.bumped) { sound.combat('hit'); hud.log('The hull scrapes. No harm done.', ''); }
+
+      // The world streams under the SHIP. Props and buildings are also thinned out with altitude:
+      // at 4 km you cannot make out a bush, and drawing forty thousand of them is pure waste.
+      rebuildWorldAround(false, air.state);
+      chests.update(air.state.x, air.state.z);
+      gates.update(air.state.x, air.state.z);
+      sites.update(air.state.x, air.state.z);
+      const high = Math.min(1, Math.max(0, (air.state.y - terrain.heightAt(air.state.x, air.state.z)) / 2600));
+      if (Math.abs(high - lastAirLod) > 0.2) {
+        lastAirLod = high;
+        props.setDensity((settings.get('density') ?? 1) * (1 - high * 0.92), air.state.x, air.state.z);
+        props.setGrass(high < 0.25 && settings.get('grass') !== false, air.state.x, air.state.z);
+        // and deepen the clipmap skirts, because from up here you are looking straight down the
+        // seam between two rings and a head-height skirt does not cover it
+        view.setSkirtScale(1 + high * 7, air.state.x, air.state.z);
+      }
+      const blend = air.spaceBlend();
+      // the sky drains to black on the way up and fills back in on the way down
+      sky.update(state.elapsed, { gloom: blend, cloud: blended.cloud, longitude: air.state.x / terrain.widthM });
+      sky.sunLight.intensity *= 1 - blend * 0.35;
+      scene.fog.near = 40 + blend * 4000;
+      scene.fog.far = 7000 + blend * 40000;
+
+      if (out.leftAtmosphere) {
+        // hand over: the space scene, positioned off the world we just climbed away from
+        ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed });
+        camera.far = 600000; camera.updateProjectionMatrix();
+        air.leave();
+        mode = 'space';
+        hud.log(`${planet.name} falls away below you.`, 'level');
+        hud.log('W to fly · Shift to boost · hold Space to warp · point at a world and press J to land', '');
+        autoSave();
+      }
+
+      const r = air.readout();
+      hud.prompt(out.landed ? '<b>J</b> set down' : null);
+      hud.tick(player, {
+        place: `${planet.name} · in the air`,
+        zone: null,
+        clock: `${r.altitude} m · ${r.speed} m/s`,
+        target: null,
+        sky: r.altitude > air.cfg.ceiling * 0.6 ? 'the sky is going black — keep climbing' : 'climb to leave the atmosphere',
+        weather: `throttle ${Math.round(r.throttle * 100)}%${r.boosting ? ' · boost' : ''}`
+          + `${r.lift > 0 ? ' · climbing' : r.lift < 0 ? ' · descending' : ''} · air ${Math.round(r.air * 100)}%`,
+        where: `seed ${seed} · x ${Math.round(air.state.x)} z ${Math.round(air.state.z)} · ${r.altitude} m`,
+      });
+      return;
+    }
 
     if (mode === 'launch') {
       // climb away from the ground. The fog closes and the light drains, and at the top the space
@@ -702,8 +1486,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (mode === 'space') {
       space.update(dt, snap, camera);
       const r = space.readout();
+      // the reticles: a bracket round every world in view, and a card on the one you are pointing at
+      const marks = space.marks(camera);
+      const under = space.targetUnder(space.heading());
+      hud.reticles(marks, under, camera, space.describe(under));
       hud.tick(player, {
         place: `${star.name} system`,
+        zone: null,
         clock: `${r.target} · ${r.distanceAu.toFixed(2)} AU`,
         target: null,
         sky: r.canLand ? 'close enough to land — press J' : 'fly to a world to land on it',
@@ -732,9 +1521,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   /** Draw whichever world we are in. */
   function renderFrame() {
     renderer.clear();
-    if (mode === 'ground' || mode === 'launch') {
-      renderer.render(sky.scene, sky.camera(camera));
-      renderer.clearDepth();
+    if (mode === 'ground' || mode === 'launch' || mode === 'air') {
+      // Underground there is no sky to draw — just black behind the walls, which is what a dungeon
+      // with no ceiling should look like from inside.
+      if (!dungeon) {
+        renderer.render(sky.scene, sky.camera(camera));
+        renderer.clearDepth();
+      }
       renderer.render(scene, camera);
     } else {
       renderer.render(space.scene, camera);
@@ -745,16 +1538,38 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // ---------------------------------------------------------------- place the player
   control.teleport(control.spawn.x, control.spawn.z);
+  /**
+   * Start a new run in the MORNING.
+   *
+   * The bug: `sky.js` gives every world a local time — the sun's angle is
+   * `elapsed/dayLength + startFraction + longitude`, and `longitude` is where you are on the map,
+   * 0..1. So `startFraction: 0.34` only meant "morning" at longitude 0; landing two thirds of the
+   * way across the map added 0.66 and put you at half past ten at night. Winding the clock back by
+   * the player's own longitude makes startFraction mean what it says wherever you come down.
+   */
+  function morningElapsed() {
+    const dayLength = balance.sky?.dayLengthSeconds ?? 900;
+    const longitude = control.x / terrain.widthM;
+    return (((1 - longitude) % 1) + 1) % 1 * dayLength;
+  }
+  state.elapsed = morningElapsed();
   if (save) state.elapsed = restore(save, { rpg, player, control, map }) || 0;
   rebuildWorldAround(true);
   actor.group.position.set(control.x, control.y, control.z);
   applyGearLook();
   hud.setPlayer(player);
 
-  function rebuildWorldAround(force = false) {
-    view.update(control.x, control.z, force);
-    props.update(control.x, control.z, force);
-    features.update(control.x, control.z, force);
+  /**
+   * Stream the world around a point. It used to hard-code the CHARACTER's position, so flying the
+   * ship left a square of detailed ground sitting where you took off and nothing but empty
+   * clipmap beyond it — "the map does not update".
+   */
+  function rebuildWorldAround(force = false, at = null) {
+    if (dungeon) return;                 // the surface is hidden; do not stream it while you are down there
+    const x = at ? at.x : control.x, z = at ? at.z : control.z;
+    view.update(x, z, force);
+    props.update(x, z, force);
+    features.update(x, z, force);
   }
 
   $('hud-planet').textContent = describePlanet(planet, star);
@@ -775,6 +1590,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       passiveRanks: player.passiveRanks,
       pendingPassive: player.pendingPassive,
       pendingTalent: player.pendingTalent,
+      materials: craft.materials.toJSON(),
+      dungeonsCleared,
+      world: worldOpts,
     });
   }
   function autoSave({ quiet = true } = {}) {
@@ -836,7 +1654,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     setTime: fraction => {
       const dayLength = balance.sky?.dayLengthSeconds ?? 900;
       const startFraction = balance.sky?.startFraction ?? 0.34;
-      state.elapsed = ((fraction - startFraction + 1) % 1) * dayLength;
+      // LOCAL time. The sun's angle is `elapsed/dayLength + startFraction + longitude`, so a
+      // "Midnight" button that ignored longitude gave midnight at the left edge of the map and
+      // whatever-o'clock wherever you were actually standing.
+      const longitude = control.x / terrain.widthM;
+      state.elapsed = (((fraction - startFraction - longitude) % 1) + 1) % 1 * dayLength;
       sky.update(state.elapsed, { gloom: blended.gloom, cloud: blended.cloud });
     },
     setDensity: d => { props.setDensity(d, control.x, control.z); },
@@ -884,12 +1706,44 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return Math.max(1, next - player.xp);
   }
 
+  // ---------------------------------------------------------------- the pause menu
+  //
+  // Escape used to only close whatever was open and then do nothing, which left no way out of the
+  // game except the browser's back button. Now it steps back through the panels and, when there is
+  // nothing left to close, opens a menu: resume, settings, save, main menu — and the control list,
+  // which used to sit permanently across the bottom of the screen on top of the log.
+  const pauseMenu = {
+    get isOpen() { return !$('pause').classList.contains('hidden'); },
+    toggle(open = !pauseMenu.isOpen) {
+      $('pause').classList.toggle('hidden', !open);
+      if (open) {
+        input.release();
+        $('pause-where').textContent = dungeon
+          ? `${dungeon.name} · level ${dungeon.level}`
+          : `${planet.name} · ${zones.at(control.x, control.z)?.name || ''} · ${playtimeText(state.playtime)}`;
+      }
+      return open;
+    },
+  };
+  $('pause-resume').onclick = () => pauseMenu.toggle(false);
+  $('pause-settings').onclick = () => { pauseMenu.toggle(false); settings.toggle(true); };
+  $('pause-save').onclick = () => { autoSave({ quiet: false }); pauseMenu.toggle(false); };
+  $('pause-menu').onclick = () => { autoSave(); location.href = location.pathname; };
+
   // ---------------------------------------------------------------- keys that are not movement
   window.addEventListener('keydown', e => {
-    if (e.code === 'KeyI' || e.code === 'Tab') { e.preventDefault(); hud.toggleSheet(); }
-    if (e.code === 'KeyM') { e.preventDefault(); map.toggle(); }
-    if (e.code === 'KeyO') { e.preventDefault(); settings.toggle(); }
-    if (e.code === 'Escape') { if (settings.isOpen) settings.toggle(false); else if (talk.isOpen) talk.close(); else if (hud.sheetOpen) hud.toggleSheet(false); else if (map.isOpen) map.toggle(false); }
+    if (e.code === 'KeyI' || e.code === 'Tab') { e.preventDefault(); pauseMenu.toggle(false); hud.toggleSheet(); }
+    if (e.code === 'KeyM') { e.preventDefault(); pauseMenu.toggle(false); map.toggle(); }
+    if (e.code === 'KeyO') { e.preventDefault(); pauseMenu.toggle(false); settings.toggle(); }
+    if (e.code === 'Escape') {
+      e.preventDefault();
+      if (settings.isOpen) settings.toggle(false);
+      else if (talk.isOpen) talk.close();
+      else if (hud.sheetOpen) hud.toggleSheet(false);
+      else if (map.isOpen) map.toggle(false);
+      else pauseMenu.toggle();                      // nothing left to close: the menu
+      regrab();
+    }
   });
 
   function resize() {
@@ -908,6 +1762,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const lastPos = [0, 0];
   let campaignDone = false;
   let lastEclipse = null;
+  let fighting = false;
+  let lastAirLod = -1;
+  let torchWanted = true;
+  /** Are you holding something that burns? The starting torch sits in the off hand. */
+  function carryingLight() {
+    const lamp = player.equipment.light;
+    return !!(lamp?.light || lamp?.baseKey === 'torch' || player.equipment.offhand?.light);
+  }
+  // panels own the mouse while they are open: the canvas must not grab it back on the next click
+  input.setBlocked(() => hud.sheetOpen || map.isOpen || talk.isOpen || settings.isOpen || debug.isOpen || rewardsOpen() || pauseMenu.isOpen);
 
   function tick() {
     requestAnimationFrame(tick);
@@ -921,41 +1785,68 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // J is the ship: board it on the ground, put it down in space
     if (snap.pressed?.has('KeyJ')) {
+      // ground: board. air: set down. space: come down to whatever you are pointing at.
       if (mode === 'ground') launch();
-      else if (mode === 'space') land();
+      else if (mode === 'air' || mode === 'space') land();
     }
-    if (mode !== 'ground') { hud.skills(null); sunfx.hide(); stepFlight(dt, snap); renderFrame(); return; }
+    if (mode !== 'ground') {
+      hud.skills(null);
+      sunfx.hide();
+      if (mode !== 'space') hud.reticles(null);
+      stepFlight(dt, snap);
+      renderFrame();
+      return;
+    }
 
-    // E speaks to whoever is standing in front of you
+    // E: open a chest, go down into a dungeon, come back up, or talk to somebody
     if (snap.pressed?.has('KeyE')) {
-      if (talk.isOpen) talk.close();
+      if (talk.isOpen) { talk.close(); regrab(); }
       else {
-        const who = folk.nearest(control.x, control.z);
-        if (who) {
+        const it = interactTarget();
+        if (!it) hud.log('Nothing here to do.');
+        else if (it.kind === 'chest') openChest(it.chest);
+        else if (it.kind === 'dungeon') enterDungeon(it.gate);
+        else if (it.kind === 'leave') leaveDungeon();
+        else if (it.kind === 'talk') {
           // phase 7: what they say comes from Lingo and their own personality, not a fixed string
+          const who = it.who;
           speech.attach(who);
           who.greeting = speech.line(who, 'greet', { listener: { name: player.name } });
           sound.ui('open');
           talk.show(who, talkContext(who));
           speech.say(who, who.greeting);
-        } else hud.log('Nobody close enough to talk to.');
+        }
       }
     }
+    // F lights and puts out the torch. It can only be lit while you are actually carrying one.
+    if (snap.pressed?.has('KeyF')) {
+      if (!carryingLight()) hud.log('You have nothing to light. A torch goes in the off hand.');
+      else { torchWanted = !torchWanted; hud.log(torchWanted ? 'You light your torch.' : 'You snuff the torch.'); }
+    }
+    light.setTorch(torchWanted && carryingLight());
 
-    const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen || settings.isOpen;
+    const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen || settings.isOpen || rewardsOpen() || pauseMenu.isOpen;
 
     // V is first person: the head comes off the model, not just the camera
     if (!frozen && snap.pressed?.has('KeyV')) setFirstPerson(!control.firstPerson);
 
-    // skills on 1-4 — not while a panel has the keyboard
+    // skills on 1-6 — not while a panel has the keyboard
     if (!frozen && snap.pressed?.size) {
-      for (let i = 0; i < 4; i++) if (snap.pressed.has(`Digit${i + 1}`)) { castSkill(i); break; }
+      for (let i = 0; i < 6; i++) if (snap.pressed.has(`Digit${i + 1}`)) { castSkill(i); break; }
     }
 
+    // haste is a real stat: keep the controller's swing clock in step with it
+    control.attackEvery = player.derived.attackEvery ?? (balance.player?.attackEvery ?? 0.62);
     const step = control.update(dt, snap, { frozen });
 
     if (step.mountChanged) {
-      hud.log(control.mounted ? 'You swing up onto the horse.' : 'You dismount.');
+      if (control.mounted && !player.equipment.mount) {
+        // you cannot ride what you do not have — the mount slot is the thing that makes H work
+        control.mounted = false;
+        hud.log('You have nothing to ride. A mount goes in the mount slot.');
+      } else {
+        hud.log(control.mounted ? `You swing up onto the ${(player.equipment.mount?.name || 'horse').toLowerCase()}.` : 'You dismount.');
+      }
       if (horse) horse.group.visible = control.mounted;
     }
     if (step.enteredWater) hud.log('You wade in and start swimming.');
@@ -989,15 +1880,37 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const weapon = player.equipment.weapon;
       const reach = balance.player?.attackReach ?? 2.9;
       const arc = balance.player?.attackArc ?? 1.5;
-      if (weapon?.ranged) {
-        // A bow aims where you are LOOKING — the same ray the camera runs down — so you can shoot
-        // up a slope or down off a ledge. Using only the horizontal facing meant every arrow flew
-        // flat no matter where the crosshair was.
-        const cp = Math.cos(control.pitch);
-        const ax = Math.sin(control.yaw) * cp;
-        const ay = Math.sin(control.pitch);
-        const az = Math.cos(control.yaw) * cp;
-        const eyeY = control.y + 1.45;
+      // What this weapon is made of. A wand throws its element; a branded sword carries it into the
+      // swing. Both go through `magicResist` instead of armour and leave their status behind.
+      const element = elementOf(weapon);
+      const leaves = statusOf(weapon);
+      const brandHit = (enemy, result) => {
+        if (leaves && skillData.statuses[leaves] && result?.amount > 0) {
+          landStatus(leaves, skillData.statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
+        }
+        reportHit(enemy, result);
+      };
+      const meleeOpts = { element, onHit: brandHit, applyStatus: statusHook };
+
+      if (weapon?.castElement && weapon?.ranged) {
+        // a wand: a real bolt of its own element, aimed where the crosshair is
+        const a = aim();
+        const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.15, a.z + a.dz * 0.6);
+        const plan = {
+          element, range: weapon.castRange ?? 34, splash: 2.2,
+          projectiles: 1, spread: 0,
+          status: leaves, statusSpec: leaves ? skillData.statuses[leaves] : null,
+        };
+        sound.combat('bow');
+        fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: 1 }, from, true);
+        control.swing = Math.max(control.swing, 0.3);
+      } else if (weapon?.ranged) {
+        // A bow aims where the CROSSHAIR is, not where the body is pointing — see aim(). Using the
+        // body's facing meant every arrow flew flat (fixed in round 3) and, once the camera moved
+        // over the shoulder, a shoulder's width to the right of the reticle (fixed in round 4).
+        const a = aim();
+        const ax = a.dx, ay = a.dy, az = a.dz;
+        const eyeY = a.y;
         const range = balance.player?.arrowRange ?? 46;
         const arrow = fx.shoot({
           x: control.x + ax * 0.7, y: eyeY + ay * 0.5, z: control.z + az * 0.7,
@@ -1011,16 +1924,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       } else {
         // a swing: the white arc IS the hit box — same reach, same angle
         fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach, arc });
-        const hits = field.strike(control, player, { reach, arc });
+        const hits = field.strike(control, player, { reach, arc, ...meleeOpts });
         sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
-        for (const { enemy, result } of hits) reportHit(enemy, result);
+        // a branded weapon flashes its element on every body it lands on
+        if (element !== 'physical') {
+          for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element, crit: h.result.crit });
+        }
         // and a little splash damage behind the arc, so nothing is ever purely single-target
         const splash = balance.player?.meleeSplash ?? 1;
         if (splash > 0) {
           const [dx, dz] = control.facing();
           const already = new Set(hits.map(h => h.enemy));
-          for (const { enemy, result } of field.strikeArea(control.x + dx * reach * 0.6, control.z + dz * reach * 0.6, splash, player, { falloff: 0.3 })) {
-            if (!already.has(enemy)) reportHit(enemy, result);
+          for (const { enemy, result } of field.strikeArea(control.x + dx * reach * 0.6, control.z + dz * reach * 0.6, splash, player, { falloff: 0.3, element })) {
+            if (!already.has(enemy)) brandHit(enemy, result);
           }
         }
       }
@@ -1030,19 +1946,94 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       onStatusDamage: (e, amount) => {
         if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`);
       },
+      onBossPhase: (e, phase) => {
+        hud.log(phase.say || `${e.name} changes.`, 'bad');
+        sound.combat('death', { beast: true });
+      },
       onEnemyStrike: e => {
-        const result = rpg.strike(e, player, field.rng, { multiplier: 1 - buffsOf(player).resist });
+        // it may go for a companion standing between you instead — that is what they are for
+        const pet = pets.nearest(e.x, e.z, (e.reach || 2.4) + 0.6);
+        const victim = pet && field.rng() < 0.55 ? pet : player;
+        const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
+        if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
+        if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
+        if (victim !== player) {
+          if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad'); }
+          return;
+        }
         if (result.dodged) { hud.log(`You dodge ${e.name}.`); return; }
-        hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
+        hud.log(`${e.name} hits you for ${result.amount}${result.absorbed ? ` (${result.absorbed} on the barrier)` : ''}.`, 'bad');
+        if (result.saved) hud.log('Something would not let you die.', 'level');
         if (result.reflected) hud.log(`Thorns bite back for ${result.reflected}.`, 'good');
-        if (player.hp <= 0) respawn(e);
+        if (result.defenderPost?.guard) applyStatus(player, 'guard', skillData.statuses.guard, 1);
+        if (result.dead && player.hp <= 0) respawn(e);
+      },
+      // archers and casters: a real bolt, drawn with the same spell effects the player uses
+      onEnemyShoot: e => {
+        const spec = e.ranged || { range: 24, element: 'physical' };
+        const pet = pets.nearest(control.x, control.z, 4);
+        const aimAt = pet && field.rng() < 0.4 ? pet : control;
+        const from = new THREE.Vector3(e.x, e.y + 1.1 + (e.hover || 0), e.z);
+        const to = new THREE.Vector3(aimAt.x, (aimAt.y ?? control.y) + 1, aimAt.z);
+        const flight = Math.max(110, from.distanceTo(to) / 40 * 1000);
+        spellfx.projectile({ from, to, element: spec.element, ms: flight })
+          .then(() => {
+            spellfx.impact({ at: to, element: spec.element });
+            // it lands where it was aimed: if you moved, it misses
+            const missed = Math.hypot(aimAt.x - to.x, aimAt.z - to.z) > 2.6;
+            if (missed) return;
+            const victim = aimAt === control ? player : aimAt;
+            const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element: spec.element });
+            if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
+            if (victim === player) {
+              hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
+              if (player.hp <= 0) respawn(e);
+            } else if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad'); }
+          })
+          .catch(() => { /* the scene went away mid-flight */ });
       },
     });
+
+    // companions, treasure, and everything the round-4 systems need every frame
+    pets.update(dt, control, player, {
+      onPetHit: (p, target, result) => { if (result.crit) hud.log(`${p.name} lands a critical.`, 'good'); },
+      onFallen: p => { hud.log(`${p.name} will come back.`, ''); },
+    });
+    if (!dungeon) {
+      chests.update(control.x, control.z);
+      gates.update(control.x, control.z);
+      sites.update(control.x, control.z);
+      sites.relax(control.x, control.z);
+      encounters.update(dt, control, player);
+      for (const site of sites.due(control.x, control.z)) {
+        hud.log(site.kind === 'lair' ? `Something lives at ${site.name}.` : `A camp at ${site.name}.`, 'bad');
+        populateSite(site);
+      }
+    }
+    for (const haul of chests.collect(control.x, control.z, dt)) {
+      takeHaul({ items: haul.items || [], gold: haul.gold || 0, mats: haul.mats || {} });
+      sound.loot({ rarity: 'rare' });
+      rewards({
+        title: haul.title || 'A haul', subtitle: haul.subtitle || '',
+        gold: haul.gold || 0, items: (haul.items || []).map(rewardItem), button: 'Take it',
+      });
+    }
+    // the effect registry's own clock: how long you have been fighting, hit streaks, cheat-death
+    rpg.fx.update(player, dt, { fighting: field.engaged });
+    const wasFighting = fighting;
+    fighting = field.engaged;
+    if (fighting && !wasFighting) {
+      const start = rpg.fx.combatStart({ self: player });
+      if (start.strip) {
+        const big = field.enemies.find(e => e.dying == null && e.rank !== 'normal');
+        if (big?.modifiers?.length) { big.modifiers.pop(); hud.log(`${big.name} loses one of its tricks.`, 'good'); }
+      }
+    }
     fx.update(dt);
     spellfx.update(dt);
     skills.update(dt);
     // whatever is burning or blessing the player keeps working while they run
-    const selfTick = tickStatuses(player, dt);
+    const selfTick = tickStatuses(player, dt, { resist: rpg.fx.product(player, 'statusIn') });
     if (selfTick > 0 && player.hp <= 0) respawn(null);
     hud.skills(skills.state());
 
@@ -1051,10 +2042,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       sinceRegen = 0;
       player.hp = Math.min(player.maxHp, player.hp + (player.derived.hpRegen || 0));
       player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0));
+      // barrier refills out of a fight, and faster with `barrierRegen`
+      const maxBarrier = player.derived.barrier || 0;
+      if (maxBarrier > 0) {
+        const rate = (player.derived.barrierRegen || 0) + (fighting ? 0 : maxBarrier * 0.08);
+        player.barrier = Math.min(maxBarrier, (player.barrier || 0) + rate);
+      } else player.barrier = 0;
     }
 
     rebuildWorldAround(false);
-    folk.update(dt, control);
+    // The watch: the spawner keeps out of these circles, and the guards inside them fight.
+    field.safeZones = dungeon ? [] : folk.safeZones();
+    folk.update(dt, control, { field, level: player.level, onLog: (t, c) => hud.log(t, c) });
     sound.step(dt, control);
     // the survey counts the ground you actually cover
     const stepped = Math.hypot(control.x - lastPos[0], control.z - lastPos[1]);
@@ -1069,6 +2068,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     }
 
+    // --- light. The torch fades out in daylight and comes fully up at night; braziers, sconces,
+    // warded chests and dungeon mouths hand their positions over and the nearest handful get lit.
+    light.setSources(dungeon ? dungeon.lights() : [...chests.lights(), ...gates.lights(), ...sites.lights()]);
+    light.setRange(player.equipment.light?.range || null);
+    light.update(dt, control, {
+      day: Math.max(0, Math.min(1, sky.sunDirection.y * 1.6)),
+      inside: !!dungeon,
+      ambient: sky.ambient,
+    });
+
+    // --- the "press E to…" line, and the boss bar
+    const near = interactTarget();
+    hud.prompt(near
+      ? near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`
+        : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
+        : near.kind === 'leave' ? '<b>E</b> climb back out'
+        : `<b>E</b> speak to ${near.who.name}`
+      : null);
+    if (bossUnit && bossUnit.dying == null) hud.boss(bossUnit);
+    else if (bossUnit) { bossUnit = null; hud.boss(null); }
+
     // --- weather
     const cell = terrain.cellAt(control.x, control.z);
     if (cell.x !== weatherCell[0] || cell.y !== weatherCell[1]) {
@@ -1077,6 +2097,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     weather.update(dt);
     blended = weather.blend(blended);
+    if (dungeon) { blended = { ...blended, cloud: 0, rain: 0, snow: 0, dust: 0, gloom: 1, lightning: 0 }; }
 
     const daylight = Math.max(0, Math.min(1, sky.sunDirection.y * 1.4));
     sky.update(state.elapsed, { gloom: blended.gloom, flash: weatherView.state.flash, cloud: blended.cloud, longitude: control.x / terrain.widthM });
@@ -1085,9 +2106,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       camera, sunDirection: sky.sunDirection, dt,
       cloud: blended.cloud, eclipse: sky.eclipse.solar, day: daylight,
     });
-    scene.fog.color.copy(weatherView.fogColor);
-    scene.fog.far = weatherView.fogFar;
-    scene.fog.near = weatherView.fogNear;
+    if (dungeon) {
+      // Underground the weather does not get a say. Setting this once in enterDungeon was not
+      // enough: the weather view writes the fog every frame, so it put the horizon back.
+      scene.fog.color.set(dungeon.look.fog);
+      scene.fog.near = 2;
+      scene.fog.far = 70;
+    } else {
+      scene.fog.color.copy(weatherView.fogColor);
+      scene.fog.far = weatherView.fogFar;
+      scene.fog.near = weatherView.fogNear;
+    }
 
     // --- an eclipse is worth announcing
     const kind = sky.eclipse.kind;
@@ -1116,22 +2145,37 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (state.frames % 45 === 0) {
       sound.place(terrain.biomeAt(control.x, control.z).key, { inTown: !!town, storm: blended.wind });
     }
+    const here = dungeon ? null : zones.at(control.x, control.z);
+    hud.here = here;
+    // crossing a border announces the new region on screen, with its band
+    if (here) hud.announceZone(here, player.level);
     hud.tick(player, {
-      place: town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
+      place: dungeon ? dungeon.name : town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
+      zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
       clock: clockText(sky.dayFraction, control),
       target,
       sky: skyText(sky),
       weather: blended.name + (weather.locked ? ' · held' : '') + (control.swimming ? ' · swimming' : '') + (control.mounted ? ' · riding' : ''),
-      where: hud.locationText(control),
+      where: hud.locationText(control, dungeon),
     });
-    if (state.frames % 6 === 0) hud.drawMinimap(control, field.enemies);
+    if (state.frames % 6 === 0) {
+      if (dungeon) hud.drawDungeonMap(control, dungeon.plan, field.enemies, chests.chests);
+      else hud.drawMinimap(control, field.enemies, [
+        ...chests.chests.filter(c => !c.opened).map(c => ({ x: c.x, z: c.z, color: '#ffd24a', r: 3 })),
+        ...gates.visible.map(g => ({ x: g.x, z: g.z, color: '#b090ff', r: 4 })),
+        ...sites.visible.map(v => ({ x: v.x, z: v.z, color: v.kind === 'lair' ? '#ff6a3a' : '#ffa860', r: 3.4 })),
+        ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
+        ...folk.marks(),
+      ]);
+    }
     if (state.frames % 12 === 0) map.tick();
 
     renderFrame();
   }
 
   function respawn(killer = null) {
-    hud.log('You black out, and wake where you landed.', 'bad');
+    if (dungeon) { hud.log('You wake outside, with no memory of the climb.', 'bad'); leaveDungeon(); }
+    else hud.log('You black out, and wake where you landed.', 'bad');
     player.deaths++;
     if (killer) {
       const named = campaign.onDeath({
@@ -1166,9 +2210,38 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // ---------------------------------------------------------------- test handle
   window.farhold = {
-    THREE, renderer, scene, camera, sky, view, props, features, weatherView, weather, debug, map, fx,
-    world, star, system, saves, horse,
-    rpg, player, control, field, hud, actor, balance, state,
+    THREE, renderer, scene, camera, weatherView, weather, debug, fx,
+    star, system, saves, horse,
+    rpg, player, hud, actor, balance, state,
+    // `control`, `field`, `props`, `features`, `view`, `sky` and the rest are REBUILT when you land
+    // on another world, so the handle has to read them through a getter. Captured by value they go
+    // stale the moment you fly anywhere, and a test then compares an old position against a new
+    // planet's ground — which is exactly what "you landed in the sea at 55 m" turned out to be.
+    get control() { return control; },
+    get field() { return field; },
+    get props() { return props; },
+    get features() { return features; },
+    get view() { return view; },
+    get sky() { return sky; },
+    get world() { return world; },
+    get map() { return map; },
+    zones, chests, gates, sites, pets, craft, light, encounters, skillData, classData, encounterData,
+    pauseMenu,
+    get dungeon() { return dungeon; },
+    get bossUnit() { return bossUnit; },
+    enterDungeon: (node = null) => {
+      // A world with no `dungeon` nodes on it still needs to be testable, so fall back to a mouth
+      // at the player's feet. The game itself only ever enters through a gate that is really there.
+      const g = node || gates.visible[0] || gates.nodes[0]
+        || { id: 0, name: 'Test Hollow', x: control.x, z: control.z, zone: zones.at(control.x, control.z) };
+      return enterDungeon(g);
+    },
+    leaveDungeon,
+    openChest: () => { const c = chests.nearest(control.x, control.z, 999); return c ? openChest(c) : null; },
+    placeChest: (kind = 'gilded') => chests.place(kind, control.x + 2, control.z + 2, { level: player.level }),
+    materials: () => craft.materials.toJSON(),
+    recycle: item => craft.recycle(item),
+    torch: on => light.setTorch(on),
     saveNow: () => autoSave({ quiet: false }),
     snapshot: currentSnapshot,
     stats: () => ({
@@ -1190,6 +2263,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     teleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); },
     get mode() { return mode; },
     get space() { return space; },
+    get air() { return air; },
     get planet() { return planet; },
     get palette() { return palette; },
     get terrain() { return terrain; },
@@ -1205,7 +2279,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     /** Skip the cinematics — go straight to space, or straight down onto a world. */
     toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },
     landOn: (planetId, spot = null) => {
-      const p = system.planets.find(p => p.id === planetId) || planet;
+      // moons are landable too, and they are not in `system.planets` — they hang off their parent
+      const all = [...system.planets, ...system.planets.flatMap(x => x.moons || [])];
+      const p = all.find(x => x.id === planetId) || planet;
       camera.far = 24000; camera.updateProjectionMatrix();
       buildPlanet(p, spot);
       mode = 'ground';
@@ -1219,7 +2295,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     },
     hit: () => field.strike(control, player, { reach: 9, arc: 6.3 }),
     give: (baseKey, rarity = 'rare') => {
-      const item = rpg.loot.generate(baseKey, rarity, 'high', { rng: rpg.rng });
+      const item = attuneWeapon(rpg.loot.generate(baseKey, rarity, 'high', { rng: rpg.rng }));
       if (item) player.bag.push(item);
       hud.setPlayer(player);
       return item;

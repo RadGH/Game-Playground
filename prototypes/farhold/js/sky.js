@@ -86,10 +86,85 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   }
   const starGeom = new THREE.BufferGeometry();
   starGeom.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-  const starMat = new THREE.PointsMaterial({ color: 0xdfe8ff, size: DOME * 0.004, sizeAttenuation: true, transparent: true, opacity: 1 });
+  // the loose stars stay transparent (they need to fade at dawn), but they DEPTH TEST, so a planet
+  // in front of one hides it
+  const starMat = new THREE.PointsMaterial({
+    color: 0xdfe8ff, size: DOME * 0.004, sizeAttenuation: true,
+    transparent: true, opacity: 1, depthWrite: false, depthTest: true,
+  });
   const starField = new THREE.Points(starGeom, starMat);
   starField.frustumCulled = false;
+  starField.renderOrder = -1900;
   scene.add(starField);
+
+  // ------------------------------------------------------------------ the galaxy behind everything
+  //
+  // Before round 4 the sky's backdrop was `scene.background = skyColor` — one flat colour. That is
+  // what made the sky read as a wall *behind* the planets: a disc of rock pasted onto a blue sheet.
+  // Now the backdrop is a real sky sphere carrying this system's own galaxy, drawn further out than
+  // any body and with depth writing off, so every planet and moon is genuinely in front of it.
+  // NOTE: `transparent: false`. Three renders the whole OPAQUE list before the whole TRANSPARENT
+  // list, and `renderOrder` only sorts within a list — so a transparent backdrop draws *after* every
+  // opaque planet, and with depth testing off it painted its stars straight over them. Opaque, with
+  // depth writing off and renderOrder -2000, it draws first and everything else covers it.
+  // It is faded by darkening the colour rather than by opacity, for the same reason.
+  const galaxy = new THREE.Mesh(
+    new THREE.SphereGeometry(DOME * 2.4, 32, 20),
+    new THREE.MeshBasicMaterial({
+      map: galaxyTexture(star, planet),
+      side: THREE.BackSide, depthWrite: false, depthTest: false,
+      transparent: false, fog: false,
+    }),
+  );
+  galaxy.frustumCulled = false;
+  galaxy.renderOrder = -2000;
+  // tilt the band so the galactic plane is not lying flat along the horizon
+  galaxy.rotation.set(0.55 + (planet?.orbit?.au ?? 1) * 0.1, (star?.seed ?? 1) * 0.7, 0.22);
+  scene.add(galaxy);
+
+  // ------------------------------------------------------------------ the atmosphere, IN FRONT
+  //
+  // Air is between you and the sky, not behind it. This shell sits INSIDE every body's shell
+  // (bodies live at 0.60-0.98 of the dome), so it veils them the way real air does: a planet low on
+  // the horizon goes pale and soft, and in daylight the sky washes the lot out instead of leaving
+  // crisp discs stuck on a blue sheet.
+  const airGeom = new THREE.SphereGeometry(DOME * 0.45, 32, 18);
+  {
+    // densest at the horizon, thinnest straight up — the same reason a sunset is red
+    const pos = airGeom.attributes.position;
+    const dens = new Float32Array(pos.count);
+    for (let i = 0; i < pos.count; i++) {
+      const y = pos.getY(i) / (DOME * 0.45);
+      dens[i] = Math.pow(1 - Math.min(1, Math.abs(y)), 1.6);
+    }
+    airGeom.setAttribute('density', new THREE.BufferAttribute(dens, 1));
+  }
+  const airMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(0x7fb0d8) },
+      uHorizon: { value: new THREE.Color(0xd8e4f0) },
+      uStrength: { value: 0 },
+    },
+    vertexShader: `
+      attribute float density;
+      varying float vD;
+      void main() {
+        vD = density;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      uniform vec3 uColor; uniform vec3 uHorizon; uniform float uStrength;
+      varying float vD;
+      void main() {
+        vec3 c = mix(uColor, uHorizon, vD * 0.6);
+        gl_FragColor = vec4(c, clamp(uStrength * (0.28 + vD * 0.72), 0.0, 0.97));
+      }`,
+    side: THREE.BackSide, transparent: true, depthWrite: false, depthTest: false,
+  });
+  const air = new THREE.Mesh(airGeom, airMat);
+  air.frustumCulled = false;
+  air.renderOrder = 2000;              // drawn last, so it is genuinely over the bodies
+  scene.add(air);
 
   // ------------------------------------------------------------------ the neighbours
   /** Every body we draw in the sky: the other planets of this system, plus our own moons. */
@@ -150,7 +225,9 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   const duskColor = new THREE.Color(palette.skyHorizon || '#d8783c');
   const nightColor = new THREE.Color('#050810');
   const skyColor = new THREE.Color();
-  scene.background = skyColor;
+  // NOT scene.background any more: the backdrop is the galaxy sphere, and this colour is the air in
+  // front of the bodies instead. `scene.background` would have painted over the stars.
+  scene.background = null;
 
   const sunLight = new THREE.DirectionalLight(0xfff2d8, 2.2);
   sunLight.name = 'farhold-sun';
@@ -203,8 +280,17 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
     ambient.intensity = (0.16 + day * 0.5) * (1 - gloom * 0.35) + flash * 0.8;
     ambient.color.copy(skyColor).lerp(new THREE.Color(0xffffff), 0.35);
     fog.color.copy(skyColor);
-    // cloud cover hides the stars as surely as daylight does
-    starMat.opacity = Math.max(0, 1 - day * 3) * (1 - clamp(env.cloud ?? 0, 0, 1) * 0.95);
+    // cloud cover hides the stars as surely as daylight does — and the galaxy with them
+    const starVisible = Math.max(0, 1 - day * 3) * (1 - clamp(env.cloud ?? 0, 0, 1) * 0.95);
+    starMat.opacity = starVisible;
+    // darken rather than fade — see the note where the galaxy is built
+    galaxy.material.color.setScalar(starVisible);
+    galaxy.visible = starVisible > 0.01;
+    // the air in front: thick in daylight, thin but never gone at night, thicker in bad weather
+    airMat.uniforms.uColor.value.copy(skyColor);
+    airMat.uniforms.uHorizon.value.copy(skyColor).lerp(new THREE.Color(0xffffff), 0.35 + dusk * 0.2);
+    airMat.uniforms.uStrength.value = Math.min(0.97,
+      0.045 + day * 0.90 + clamp(env.cloud ?? 0, 0, 1) * 0.08 + (gloom || 0) * 0.12);
 
     // the neighbours
     for (const b of bodies) {
@@ -375,4 +461,83 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       starGeom.dispose(); starMat.dispose();
     },
   };
+}
+
+/**
+ * The galaxy this system sits in, drawn once into a canvas and used as the sky sphere's texture.
+ *
+ * Procedural on purpose — no download, no licence, and it varies with the star, so two systems do
+ * not share a sky. Three passes: a dark base, a soft band of dust across the middle (the galactic
+ * plane, built from overlapping radial blobs), and a few thousand stars whose brightness follows a
+ * power law so most are faint and a handful are worth looking at.
+ */
+export function galaxyTexture(star = {}, planet = {}, { width = 2048, height = 1024 } = {}) {
+  const c = document.createElement('canvas');
+  c.width = width; c.height = height;
+  const ctx = c.getContext('2d');
+
+  // a deterministic little generator, so the same system always has the same sky
+  let seed = ((star?.seed ?? 1) * 2654435761 ^ (planet?.id ? String(planet.id).length * 97 : 7)) >>> 0;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+
+  ctx.fillStyle = '#04050b';
+  ctx.fillRect(0, 0, width, height);
+
+  // the band: blobs strung along a sine so the plane is not a ruler-straight stripe
+  const hueA = 200 + rnd() * 60, hueB = 280 + rnd() * 50;
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 420; i++) {
+    const t = i / 420;
+    const x = t * width;
+    const y = height * 0.5 + Math.sin(t * Math.PI * 2 + rnd() * 0.4) * height * 0.06 + (rnd() - 0.5) * height * 0.16;
+    const r = height * (0.04 + rnd() * 0.12);
+    const hue = rnd() < 0.6 ? hueA : hueB;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `hsla(${hue}, 60%, ${28 + rnd() * 22}%, ${0.05 + rnd() * 0.07})`);
+    g.addColorStop(1, 'hsla(0,0%,0%,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+  // dust lanes: darker streaks along the same line, so the band has structure rather than a smear
+  ctx.globalCompositeOperation = 'source-over';
+  for (let i = 0; i < 90; i++) {
+    const t = rnd();
+    const x = t * width;
+    const y = height * 0.5 + Math.sin(t * Math.PI * 2) * height * 0.06 + (rnd() - 0.5) * height * 0.08;
+    const w = width * (0.02 + rnd() * 0.05), h = height * (0.004 + rnd() * 0.012);
+    ctx.fillStyle = `rgba(4,5,11,${0.25 + rnd() * 0.4})`;
+    ctx.beginPath(); ctx.ellipse(x, y, w, h, (rnd() - 0.5) * 0.3, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // the stars: dense near the band, thinner away from it, and mostly faint
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 7000; i++) {
+    const x = rnd() * width;
+    // pull two thirds of them towards the plane
+    const near = rnd() < 0.62;
+    const y = near
+      ? height * 0.5 + (rnd() - 0.5) * height * 0.26 + Math.sin((x / width) * Math.PI * 2) * height * 0.06
+      : rnd() * height;
+    const bright = Math.pow(rnd(), 3.2);          // most faint, a few bright
+    const r = 0.45 + bright * 1.7;
+    const warm = rnd();
+    const col = warm < 0.12 ? [255, 190, 150] : warm < 0.22 ? [255, 230, 190] : warm < 0.34 ? [190, 210, 255] : [225, 235, 255];
+    ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.25 + bright * 0.75})`;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    // a soft halo on the few brightest. Kept small: the texture is stretched over a whole sphere,
+    // so a halo that looks tidy in the canvas becomes a saucer in the sky.
+    if (bright > 0.88) {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r * 3);
+      g.addColorStop(0, `rgba(${col[0]},${col[1]},${col[2]},0.22)`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, r * 3, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.globalCompositeOperation = 'source-over';
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  return tex;
 }

@@ -18,6 +18,24 @@ let box = null, timer = 0, current = null, installed = false;
 /** Register a rich tooltip builder. `fn(el)` returns a DOM node, an HTML string, or null for "no tooltip". */
 export function registerTip(name, fn) { renderers.set(name, fn); }
 
+/**
+ * Re-run the renderer for whatever is open right now, in place. For a tooltip whose CONTENT depends
+ * on something other than the pointer — Farhold's item cards change what they compare against while
+ * Shift is held — so the box does not have to be closed and reopened to change.
+ */
+export function refreshTip() {
+  if (!current || !box || box.hidden) return false;
+  const node = content(current);
+  if (!node) return false;
+  const left = box.style.left, top = box.style.top;
+  box.replaceChildren(node);
+  box.style.left = left; box.style.top = top;
+  return true;
+}
+
+/** Is a tooltip open at the moment? */
+export function tipOpen() { return !!current && !!box && !box.hidden; }
+
 /** Hide the tooltip right now (call it when the thing under the pointer disappears). */
 export function hideTip() { clearTimeout(timer); current = null; if (box) { box.hidden = true; box.classList.remove('show'); box.replaceChildren(); } }
 

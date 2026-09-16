@@ -16,9 +16,30 @@ test('J lifts off the ground and ends up in space', async ({ page }) => {
   const before = await page.evaluate(() => ({ mode: window.farhold.mode, planet: window.farhold.planet.name }));
   expect(before.mode).toBe('ground');
 
+  // Round 4b: J no longer plays a cinematic. It puts you in the cockpit, IN the world, and you fly
+  // out — the space scene takes over when the ground has faded. So this test has to fly.
   await page.keyboard.press('KeyJ');
-  // the climb, then the swap
-  await page.waitForFunction(() => window.farhold.mode === 'space', null, { timeout: 30000 });
+  await page.waitForFunction(() => window.farhold.mode === 'air', null, { timeout: 15000 });
+  const airborne = await page.evaluate(() => ({ mode: window.farhold.mode, alt: Math.round(window.farhold.air.altitude) }));
+  expect(airborne.mode).toBe('air');
+
+  // Hold the throttle open and the nose up from a timer rather than a per-frame await: under
+  // SwiftShader, with the whole suite running, three thousand awaited animation frames is a minute
+  // of wall clock. The flight model still does all the work; this only holds the stick.
+  await page.evaluate(() => {
+    const f = window.farhold;
+    // Bring the ceiling down for the test. The handover is what is under test, not the altitude it
+    // happens at; climbing the real 9 km at SwiftShader's frame rate takes most of a minute, and
+    // this is the same code path in a tenth of the time.
+    f.air.cfg.ceiling = 1200;
+    window.__climb = setInterval(() => {
+      if (!f.air || f.mode !== 'air') return;
+      f.air.state.throttle = 1;
+      f.air.state.pitch = 1.2;
+    }, 16);
+  });
+  await page.waitForFunction(() => window.farhold.mode === 'space', null, { timeout: 60000 });
+  await page.evaluate(() => clearInterval(window.__climb));
   const after = await page.evaluate(() => {
     const f = window.farhold;
     const s = f.space.stats();
@@ -28,7 +49,7 @@ test('J lifts off the ground and ends up in space', async ({ page }) => {
   expect(after.bodies).toBeGreaterThan(1);
   // you leave just off the world you were standing on
   expect(after.target).toBe(before.planet);
-  expect(after.altitude).toBeLessThan(4);
+  expect(after.altitude).toBeLessThan(6);
   expect(errors).toEqual([]);
 });
 

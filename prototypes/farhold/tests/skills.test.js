@@ -32,17 +32,34 @@ const bar = (classId = 'mage', level = 12) => {
   return { rpg, player, skills: createSkillBar({ data, player, rpg }) };
 };
 
-test('every class gets four skills and every skill is real', () => {
+test('every class gets six skills and every skill is real', () => {
   const classes = Object.keys(data.classes);
-  assert.ok(classes.length >= 8, 'a skill set for each playable class');
+  assert.ok(classes.length >= 30, 'a skill set for every one of the thirty classes');
   for (const [id, list] of Object.entries(data.classes)) {
-    assert.equal(list.length, 4, `${id} has four`);
+    assert.equal(list.length, 6, `${id} has six`);
+    assert.equal(new Set(list).size, 6, `${id} has the same skill twice`);
     for (const key of list) assert.ok(data.skills[key], `${id} asks for ${key}, which does not exist`);
+  }
+  assert.equal(data.unlockAt.length, 6, 'six slots need six unlock levels');
+  for (let i = 1; i < data.unlockAt.length; i++) {
+    assert.ok(data.unlockAt[i] > data.unlockAt[i - 1], 'unlock levels must climb');
+  }
+});
+
+test('every class in classes.json can actually be played', () => {
+  const classes = JSON.parse(readFileSync(join(here, '../data/classes.json'), 'utf8')).classes;
+  assert.equal(classes.length, 30);
+  const weaponBases = { ...items.weaponBases, ...items.armorBases };
+  for (const c of classes) {
+    assert.ok(data.classes[c.id], `${c.id} has no skill set`);
+    assert.ok(weaponBases[c.starter], `${c.id} starts with ${c.starter}, which is not a real base`);
+    for (const k of c.startingArmour || []) assert.ok(weaponBases[k], `${c.id} starts in ${k}, which is not real`);
+    assert.ok(c.look && c.name && c.role, `${c.id} is missing its look or its name`);
   }
 });
 
 test('every skill names a real element and a shape the game can draw', () => {
-  const shapes = new Set(['melee', 'around', 'bolt', 'self']);
+  const shapes = new Set(['melee', 'around', 'bolt', 'beam', 'ground', 'dash', 'summon', 'self']);
   for (const [key, s] of Object.entries(data.skills)) {
     assert.ok(ELEMENTS[s.element], `${key} uses ${s.element}, which SpellFx does not know`);
     assert.ok(shapes.has(s.shape), `${key} is shaped "${s.shape}"`);
@@ -126,16 +143,35 @@ test('Mend heals a share of your health and War Cry buffs instead of hitting', (
   assert.equal(plan.kind, 'self');
   assert.ok(plan.heal > 0 && plan.heal <= player.maxHp);
 
-  const cry = skills.slots.findIndex(s => s.id === 'warcry');
-  const cryPlan = skills.use(cry);
-  assert.equal(cryPlan.heal, 0);
-  assert.equal(cryPlan.status, 'might');
+  const guard = skills.slots.findIndex(s => s.id === 'guard_stance');
+  const guardPlan = skills.use(guard);
+  assert.equal(guardPlan.heal, 0);
+  assert.equal(guardPlan.status, 'guard');
+});
+
+test('a skill locked by level cannot be used, and unlocks when you reach it', () => {
+  const low = bar('mage', 1);
+  const state = low.skills.state();
+  assert.equal(state[0].locked, false, 'the first skill is available from level 1');
+  assert.ok(state[5].locked, 'the last slot should not be open at level 1');
+  assert.equal(low.skills.use(5).ok, false);
+  const high = bar('mage', 30);
+  assert.ok(high.skills.state().every(s => !s.locked), 'everything should be open at level 30');
+});
+
+test('cooldown reduction and mana-cost cuts come off the bar, not off the data', () => {
+  const { player, skills } = bar('mage', 20);
+  const raw = skills.slots[0];
+  const full = skills.cooldownFor(raw);
+  player.derived.cooldownReduction = 50;
+  assert.ok(skills.cooldownFor(raw) < full * 0.55, 'cooldown reduction did nothing');
+  assert.ok(skills.cooldownFor(raw) >= 0.5, 'a cooldown must never reach zero');
 });
 
 test('the bar reports what the HUD needs to draw', () => {
-  const { skills } = bar('ranger');
+  const { skills } = bar('ranger', 30);
   const state = skills.state();
-  assert.equal(state.length, 4);
+  assert.equal(state.length, 6);
   assert.ok(state.every(s => s.usable), 'everything is ready at the start of a fight');
   skills.use(0);
   assert.equal(skills.state()[0].usable, false);

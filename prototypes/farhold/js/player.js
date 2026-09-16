@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 
-export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-4 skills · V first person · E talk · H horse · J ship · M map · I sheet · O settings · ` debug';
+export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person · E talk/open/enter · F torch · H horse · J ship · M map · I sheet · O settings · ` debug';
 
 /** Reads the keyboard and mouse. Pointer lock is optional — dragging works too. */
 export function createInput(dom) {
@@ -28,19 +28,42 @@ export function createInput(dom) {
   window.addEventListener('blur', () => keys.clear());
 
   let dragging = false;
+  /**
+   * The largest mouse movement one event may report, in pixels.
+   *
+   * Reported in play: "sometimes when looking up or down my view suddenly skips to pointing straight
+   * up or straight down." Pointer lock occasionally delivers an enormous `movementX/Y` — right after
+   * the lock is taken, when the OS pointer is warped, or on some drivers when it crosses a screen
+   * edge. One such event is bigger than the whole pitch range, so the view slams into the clamp at
+   * the top or the bottom. A real flick of the wrist is well under this; a spike is hundreds.
+   */
+  const MAX_DELTA = 110;
   const move = e => {
     if (!state.locked && !dragging) return;
-    state.look[0] += e.movementX || 0;
-    state.look[1] += e.movementY || 0;
+    const dx = e.movementX || 0, dy = e.movementY || 0;
+    // drop the event entirely rather than clamping it: a clamped spike is still a spike, just a
+    // smaller one, and the frame it lands on is not one the player asked for
+    if (Math.abs(dx) > MAX_DELTA || Math.abs(dy) > MAX_DELTA) return;
+    state.look[0] += dx;
+    state.look[1] += dy;
   };
   dom.addEventListener('mousemove', move);
   dom.addEventListener('mousedown', e => { if (e.button === 0) { dragging = true; state.attack = true; } });
   window.addEventListener('mouseup', () => { dragging = false; });
-  dom.addEventListener('click', () => { if (!state.locked) dom.requestPointerLock?.(); });
+  // A panel being open must block the click that would grab the mouse again — otherwise clicking a
+  // button in the character sheet immediately captures the pointer and the sheet becomes unusable.
+  let blocked = () => false;
+  dom.addEventListener('click', () => { if (!state.locked && !blocked()) dom.requestPointerLock?.(); });
   document.addEventListener('pointerlockchange', () => { state.locked = document.pointerLockElement === dom; });
 
   return {
     state, keys,
+    /** Give the mouse back RIGHT NOW. Opening the character sheet calls this. */
+    release() { if (document.pointerLockElement) document.exitPointerLock?.(); state.locked = false; },
+    /** Take it again — closing every panel calls this, and it is a no-op if the user would rather drag. */
+    grab() { if (!blocked() && !document.pointerLockElement) dom.requestPointerLock?.(); },
+    /** `fn()` returning true means "a panel owns the mouse, do not capture it". */
+    setBlocked(fn) { blocked = fn || (() => false); },
     /** Was this key pressed since the last sample? Cleared by sample(). */
     tapped: code => pressed.has(code),
     sample() {
@@ -48,7 +71,8 @@ export function createInput(dom) {
       state.strafe = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0);
       state.run = keys.has('ShiftLeft') || keys.has('ShiftRight');
       state.jump = keys.has('Space');
-      const snapshot = { ...state, look: [state.look[0], state.look[1]], pressed: new Set(pressed) };
+      // `keys` rides along so a mode with its own bindings (the ship's C-to-descend) can read them
+      const snapshot = { ...state, look: [state.look[0], state.look[1]], pressed: new Set(pressed), keys };
       state.look[0] = 0; state.look[1] = 0;
       state.attack = false;
       pressed.clear();
@@ -67,7 +91,11 @@ export function createInput(dom) {
  * `terrain` is a planet.js terrain; `balance` is data/balance.json.
  * `obstacles` is a list of ObstacleField (props, buildings) to be pushed out of.
  */
-export function createController(terrain, balance = {}, camera, { obstacles = [], settings = null } = {}) {
+export function createController(terrainIn, balance = {}, camera, { obstacles: obstaclesIn = [], settings = null } = {}) {
+  let obstacles = obstaclesIn;
+  // Read through a binding, not a parameter: `setTerrain` swaps the whole floor out when the player
+  // walks into a dungeon and back out again, and every sampler below has to follow it.
+  let terrain = terrainIn;
   const b = balance.player || {};
   // live settings: which shoulder, inverted look, how fast the mouse turns
   const opt = (key, fallback) => (settings ? settings.get(key) : fallback);
@@ -79,6 +107,7 @@ export function createController(terrain, balance = {}, camera, { obstacles = []
     vy: 0, yaw: 0, pitch: -0.18, grounded: true,
     camDistance: 7.5, camDistanceUsed: 7.5, moving: 0, running: false,
     attackCooldown: 0, swing: 0,
+    attackEvery: b.attackEvery ?? 0.62,      // main.js keeps this in step with derived.attackEvery
     firstPerson: false, eyeHeight: 1.5,
     swimming: false, waterDepth: 0, waterSurface: 0,
     mounted: false,
@@ -193,7 +222,9 @@ export function createController(terrain, balance = {}, camera, { obstacles = []
 
     // --- swinging (not while riding: you have your hands full)
     if (!frozen && input?.attack && self.attackCooldown <= 0 && !self.mounted && !self.swimming) {
-      self.attackCooldown = b.attackEvery ?? 0.62;
+      // how fast you swing is a STAT — `initiative` / haste — not a constant. It was computed in
+      // rpg.js and never read, so the property did nothing at all.
+      self.attackCooldown = self.attackEvery ?? b.attackEvery ?? 0.62;
       self.swing = 0.35;
       out.attacked = true;
     }
@@ -258,9 +289,35 @@ export function createController(terrain, balance = {}, camera, { obstacles = []
     self.vy = 0; self.grounded = true; self.swimming = false;
   }
 
+  /**
+   * Swap the ground out from under the character — a dungeon has its own floor, its own bounds and
+   * no weather. `at` is where to stand on arrival.
+   */
+  function setTerrain(next, at = null) {
+    terrain = next;
+    if (at) {
+      [self.x, self.z] = terrain.clampToWorld(at.x, at.z);
+      self.y = at.y != null ? at.y : terrain.heightAt(self.x, self.z);
+      self.vy = 0; self.grounded = true; self.swimming = false; self.waterDepth = 0;
+    }
+    return terrain;
+  }
+
+  // NOTE: accessors go on with defineProperties, NOT Object.assign. Object.assign copies the
+  // *value* a getter returns at that moment, so `control.terrain` would have been frozen to the
+  // surface for the life of the run and `control.obstacles = [...]` would have written a dead plain
+  // property while `unstick` kept reading the original closure — the dungeon's walls would not have
+  // stopped anybody. (Chibi 2 has the same trap; see makeActor in actors.js.)
+  Object.defineProperties(self, {
+    obstacles: {
+      get() { return obstacles; },
+      set(list) { obstacles = list || []; },
+    },
+    terrain: { get() { return terrain; } },
+    spawn: { get() { return spawn; } },
+  });
   return Object.assign(self, {
-    update, teleport,
-    get spawn() { return spawn; },
+    update, teleport, setTerrain,
     /** The horizontal direction the player is facing, for spawning arrows and swipes. */
     facing() { return [Math.sin(self.yaw), Math.cos(self.yaw)]; },
   });

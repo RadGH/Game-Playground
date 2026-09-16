@@ -297,6 +297,11 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
   return {
     state, decks, rain, snow, dust, bolt,
     update,
+    /** Hide the sky's weather — indoors there is none. */
+    setVisible(on) {
+      for (const d of decks) d.visible = !!on;
+      for (const m of [rain, snow, dust, bolt]) if (m) m.visible = !!on;
+    },
     get fogColor() { return state.fogColor; },
     get fogFar() { return state.fogFar; },
     get fogNear() { return state.fogNear; },

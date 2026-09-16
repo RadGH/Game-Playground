@@ -13,18 +13,40 @@
 
 import { el, panel, button } from '../../../shared/ui.js';
 import { layersPanel } from '../../../worldgen/js/layers-panel.js';
+import { zoneTone } from './zones.js';
+
+/** The wash each danger step puts over a region, and the colour its number is written in. */
+const TONE_RGB = {
+  trivial: [120, 132, 150], easy: [90, 200, 130], even: [230, 200, 90],
+  hard: [235, 150, 70], deadly: [235, 70, 60],
+};
+const TONE_TEXT = {
+  trivial: '#aab6c6', easy: '#8fe0a0', even: '#ffe08a', hard: '#ffa860', deadly: '#ff6a5a',
+};
+const TONE_LABELS = [
+  ['trivial', 'far below you'], ['easy', 'easy'], ['even', 'a fair fight'],
+  ['hard', 'dangerous'], ['deadly', 'do not go here yet'],
+];
 import { renderWorld, legend as legendRows, DEFAULT_LAYERS } from '../../../worldgen/js/render.js';
 import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, pins = [] } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, pins = [], zones = null, getLevel = () => 1, sites = null, gates = null } = {}) {
   const world = terrain.world;
 
   const state = {
     open: false,
     layer: 'biomes',
     layers: { ...DEFAULT_LAYERS, labels: true, nodes: true, rivers: true, roads: true },
+    // Round 4: the level-band overlay. The user asked for it by name — "a level range overlay to
+    // the map so players can see at a glance and plan their route" — and it is on by default,
+    // because deciding where to walk next is the whole point of banding the regions.
+    levels: true,
+    // The map is a whole planet at once, which is unreadable for anything closer than "which
+    // continent". The wheel steps through five zooms, centred on the player.
+    zoom: 1,
+    centre: null,
     view: null,
     hover: null,
     selected: null,
@@ -52,11 +74,27 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   // ---------------------------------------------------------------- the side panel
   function buildSide() {
     side.replaceChildren();
-    side.append(layersPanel({
+    const layerPanel = layersPanel({
       layer: state.layer, layers: state.layers,
       onLayer: name => { state.layer = name; buildSide(); draw(); },
       onToggle: (key, on) => { state.layers[key] = on; draw(); },
-    }));
+    });
+    side.append(layerPanel);
+
+    // "levels" reads as one more layer chip, sitting with Biomes / Elevation / … / Regions, because
+    // that is where a player will look for it. It is an overlay rather than a base layer, so it
+    // stacks on whichever of those is drawn underneath.
+    if (zones) {
+      const chips = layerPanel.querySelector('.chips') || layerPanel.querySelector('div');
+      const chip = el('span', {
+        class: 'chip' + (state.levels ? ' on' : ''),
+        text: 'levels',
+        title: 'Wash every region in how dangerous it is to you right now, and write its level range on the map.',
+        dataset: { layer: 'levels' },
+      });
+      chip.onclick = () => { state.levels = !state.levels; buildSide(); draw(); };
+      if (chips) chips.append(chip); else side.append(chip);
+    }
 
     const list = el('div', { class: 'pin-list' });
     if (!pins.length) {
@@ -96,8 +134,82 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     if (!state.open) return;
     fit();
     const ctx = canvas.getContext('2d');
-    state.view = renderWorld(ctx, world, { layers: state.layers, layer: state.layer });
+    // draw the map at the zoom the wheel asked for, positioned around the player. renderWorld takes
+    // its own scale and offset, so there is no second transform to keep in step with the overlays.
     const { scale, offsetX: ox, offsetY: oy } = viewBox();
+    ctx.fillStyle = '#05070d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    state.view = renderWorld(ctx, world, {
+      layers: state.layers, layer: state.layer,
+      scale, offsetX: ox, offsetY: oy,
+    });
+
+    // ---- the level-band overlay: every region washed in how dangerous it is to YOU right now
+    if (state.levels && zones) {
+      const myLevel = getLevel();
+      const img = ctx.getImageData(ox, oy, Math.round(world.width * scale), Math.round(world.height * scale));
+      const px = img.data;
+      const w = img.width, h = img.height;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const cx = Math.min(world.width - 1, Math.floor(x / scale));
+          const cy = Math.min(world.height - 1, Math.floor(y / scale));
+          const id = world.region ? world.region[cy * world.width + cx] : -1;
+          if (id < 0) continue;
+          const zone = zones.byId(id);
+          const [r, g, b] = TONE_RGB[zoneTone(zone.midLevel, myLevel)] || TONE_RGB.even;
+          const i = (y * w + x) * 4;
+          px[i] = px[i] * 0.62 + r * 0.38;
+          px[i + 1] = px[i + 1] * 0.62 + g * 0.38;
+          px[i + 2] = px[i + 2] * 0.62 + b * 0.38;
+        }
+      }
+      ctx.putImageData(img, ox, oy);
+
+      // The band, written ON the map under the region's own name — the user asked for it to read
+      // "similar to how region names appear", and renderWorld puts those at `region.label`, which
+      // is the open middle of the region rather than its centroid.
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (const zone of zones.zones) {
+        const spot = world.regions?.[zone.id]?.label || zone.center;
+        if (!spot || zone.cells < 18) continue;
+        const lx = ox + (spot.x + 0.5) * scale;
+        // sit under the name when labels are on, and in its place when they are not
+        const ly = oy + (spot.y + 0.5) * scale + (state.layers.labels ? 15 : 0);
+        const tone = zoneTone(zone.midLevel, myLevel);
+        const label = `${zone.minLevel}\u2013${zone.maxLevel}`;
+        ctx.font = '700 14px system-ui, sans-serif';
+        ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.88)';
+        ctx.strokeText(label, lx, ly);
+        ctx.fillStyle = TONE_TEXT[tone] || '#ffe08a';
+        ctx.fillText(label, lx, ly);
+        ctx.font = '600 10px system-ui, sans-serif';
+        ctx.lineWidth = 3;
+        ctx.strokeText(zone.danger, lx, ly + 12);
+        ctx.fillText(zone.danger, lx, ly + 12);
+      }
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+    }
+
+    // ---- dungeon mouths and camps, so a route can be planned around what is on it
+    for (const g of gates?.nodes || []) {
+      const gx = ox + (g.x / M_PER_CELL + 0.5) * scale, gy = oy + (g.z / M_PER_CELL + 0.5) * scale;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy - 6); ctx.lineTo(gx + 5, gy + 4); ctx.lineTo(gx - 5, gy + 4); ctx.closePath();
+      ctx.fillStyle = g.cleared ? '#6a7a8a' : '#c090ff';
+      ctx.fill();
+      ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(8,6,14,.9)'; ctx.stroke();
+    }
+    for (const v of sites?.sites || []) {
+      const sx = ox + (v.x / M_PER_CELL + 0.5) * scale, sy = oy + (v.z / M_PER_CELL + 0.5) * scale;
+      ctx.beginPath();
+      ctx.arc(sx, sy, v.kind === 'lair' ? 4.5 : 3, 0, Math.PI * 2);
+      ctx.fillStyle = v.kind === 'lair' ? '#ff6a3a' : '#ffa860';
+      ctx.fill();
+      ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(10,6,4,.9)'; ctx.stroke();
+    }
 
     // pins
     for (const pin of pins) {
@@ -130,7 +242,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     const py = oy + (player.z / M_PER_CELL + 0.5) * scale;
     ctx.save();
     ctx.translate(px, py);
-    ctx.rotate(-player.yaw);
+    // see hud.js drawMinimap: the map draws +z downward, so the rotation that points a tip-up arrow
+    // along the player's heading is `π - yaw`, not `-yaw`. It pointed north while you walked south.
+    ctx.rotate(Math.PI - player.yaw);
     ctx.beginPath();
     ctx.moveTo(0, -9); ctx.lineTo(6, 7); ctx.lineTo(0, 4); ctx.lineTo(-6, 7); ctx.closePath();
     ctx.fillStyle = '#ffffff';
@@ -138,22 +252,66 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     ctx.fill(); ctx.stroke();
     ctx.restore();
 
-    // legend for whichever layer is up
-    legendBox.replaceChildren(...legendRows(world, state.layer).slice(0, 14).map(r =>
-      el('span', { class: 'sw' }, el('i', { style: { background: r.color } }), `${r.label}${r.share > 0.004 ? ' ' + Math.round(r.share * 100) + '%' : ''}`)));
+    /**
+     * Crosshairs through the player when the whole planet is on screen. At zoom 1 a person is four
+     * pixels on a map of a world and finding yourself is genuinely hard; two hairlines solve it
+     * without cluttering a zoomed-in view, so they fade out as you zoom in.
+     */
+    if (state.zoom <= 1.2) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(160, 220, 255, .38)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 7]);
+      ctx.beginPath();
+      ctx.moveTo(0, py); ctx.lineTo(canvas.width, py);
+      ctx.moveTo(px, 0); ctx.lineTo(px, canvas.height);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-    coords.textContent = `seed ${seed} · ${Math.round(player.x)}, ${Math.round(player.z)} m · cell ${Math.round(player.x / M_PER_CELL)},${Math.round(player.z / M_PER_CELL)}`;
+    // legend: the danger scale first when the overlay is up, then whichever layer is drawn
+    const rows = [];
+    if (state.levels && zones) {
+      for (const [tone, label] of TONE_LABELS) {
+        rows.push(el('span', { class: 'sw' }, el('i', { style: { background: TONE_TEXT[tone] } }), label));
+      }
+      rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#c090ff' } }), 'dungeon'));
+      rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#ff6a3a' } }), 'lair'));
+      rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#ffa860' } }), 'camp'));
+    }
+    rows.push(...legendRows(world, state.layer).slice(0, state.levels && zones ? 6 : 14).map(r =>
+      el('span', { class: 'sw' }, el('i', { style: { background: r.color } }), `${r.label}${r.share > 0.004 ? ' ' + Math.round(r.share * 100) + '%' : ''}`)));
+    legendBox.replaceChildren(...rows);
+
+    coords.textContent = `seed ${seed} · ${Math.round(player.x)}, ${Math.round(player.z)} m`
+      + ` · cell ${Math.round(player.x / M_PER_CELL)},${Math.round(player.z / M_PER_CELL)}`
+      + ` · zoom ${state.zoom}× (wheel)`;
   }
 
-  /** The same fit renderWorld used, so overlays land on the right pixels. */
+  /**
+   * The same fit renderWorld used, so overlays land on the right pixels — then the zoom on top.
+   *
+   * `zoom` is a whole-map multiplier and `centre` is the cell the view is built around (the player,
+   * unless the map has been dragged). At zoom 1 it is exactly what renderWorld drew.
+   */
   function viewBox() {
-    const scale = Math.min(canvas.width / world.width, canvas.height / world.height);
+    const fit = Math.min(canvas.width / world.width, canvas.height / world.height);
+    const scale = fit * state.zoom;
+    const c = state.centre || playerCell();
     return {
-      scale,
-      offsetX: Math.round((canvas.width - world.width * scale) / 2),
-      offsetY: Math.round((canvas.height - world.height * scale) / 2),
+      scale, fit,
+      offsetX: Math.round(canvas.width / 2 - c.x * scale),
+      offsetY: Math.round(canvas.height / 2 - c.y * scale),
     };
   }
+
+  /** Where the player is, in map cells. */
+  function playerCell() {
+    const p = getPlayer();
+    return { x: p.x / M_PER_CELL, y: p.z / M_PER_CELL };
+  }
+
+  const ZOOMS = [1, 1.8, 3.2, 5.6, 10];
 
   function cellFromEvent(ev) {
     const rect = canvas.getBoundingClientRect();
@@ -171,10 +329,29 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     const info = cellInfo(world, cell.x, cell.y);
     if (!info) return;
     const odds = weatherOdds(weatherAt(world, cell.x, cell.y))[0];
+    // the level band under the cursor, so hovering anywhere on the map answers "can I go there yet"
+    const zone = zones && world.region ? zones.byId(world.region[cell.y * world.width + cell.x]) : null;
     readout.textContent = `${cell.x},${cell.y} · ${info.biomeName} · ${info.water === 'land' ? info.elevationMetres + ' m' : 'water'} · ${info.temperatureC}°C`
       + (info.region ? ` · ${info.region.name}` : '')
+      + (zone && zone.id >= 0 ? ` · level ${zone.minLevel}\u2013${zone.maxLevel} (${zone.danger})` : '')
       + (odds ? ` · usually ${odds.name.toLowerCase()}` : '');
+    readout.className = 'readout' + (zone && zone.id >= 0 ? ' zone-' + zoneTone(zone.midLevel, getLevel()) : '');
   });
+
+  // the wheel zooms, in steps, around the pointer
+  canvas.addEventListener('wheel', ev => {
+    ev.preventDefault();
+    const at = cellFromEvent(ev) || playerCell();
+    const i = ZOOMS.indexOf(state.zoom);
+    const next = ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, (i < 0 ? 0 : i) + (ev.deltaY < 0 ? 1 : -1)))];
+    if (next === state.zoom) return;
+    // keep the cell under the pointer under the pointer
+    state.centre = state.zoom === 1 ? { ...at } : { ...(state.centre || playerCell()) };
+    if (next > state.zoom) state.centre = { x: at.x, y: at.y };
+    state.zoom = next;
+    if (state.zoom === 1) state.centre = null;
+    draw();
+  }, { passive: false });
 
   canvas.addEventListener('click', ev => {
     const cell = cellFromEvent(ev);
@@ -218,6 +395,10 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
 
   return {
     root, state, pins,
+    /** Step the zoom from a button or a test. */
+    setZoom(z) { state.zoom = ZOOMS.includes(z) ? z : 1; if (state.zoom === 1) state.centre = null; draw(); },
+    /** Turn the level overlay on or off (the checkbox, the debug menu and the tests). */
+    setLevels(on) { state.levels = !!on; buildSide(); draw(); },
     get isOpen() { return state.open; },
     toggle, draw, addPin, removePin,
     /** Take the screen out of the page (used when the world under it is replaced). */

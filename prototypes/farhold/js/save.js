@@ -90,7 +90,7 @@ export function createSaves() {
  * Everything worth keeping about a run. Pass the live objects; get plain JSON back.
  * Items are already plain data from Emberveil's generator, so they travel as they are.
  */
-export function snapshot({ id, name, seed, classId, player, control, elapsed, playtime, pins, place, weather }) {
+export function snapshot({ id, name, seed, classId, player, control, elapsed, playtime, pins, place, weather, materials, dungeonsCleared }) {
   return {
     id, name, seed, classId,
     version: 1,
@@ -110,6 +110,9 @@ export function snapshot({ id, name, seed, classId, player, control, elapsed, pl
     },
     position: { x: control.x, z: control.z, yaw: control.yaw, pitch: control.pitch },
     pins: (pins || []).map(p => ({ x: p.x, y: p.y, name: p.name })),
+    // round 4: the materials bag and which dungeons you have already emptied
+    materials: materials || {},
+    dungeonsCleared: [...(dungeonsCleared || [])],
   };
 }
 

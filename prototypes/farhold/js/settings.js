@@ -14,6 +14,9 @@ const KEY = 'farhold.settings.v1';
 export const DEFAULTS = {
   shoulder: 'left',            // which side the camera sits on
   invertY: false,
+  // Flight is NOT inverted by default. It used to be — pushing the mouse forward pitched the nose
+  // up, which is the aircraft convention and the opposite of what the rest of the game does.
+  invertFlight: false,
   sensitivity: 1,
   viewDistance: 'full',        // full | medium | near
   density: 1,                  // how thick the scatter is
@@ -27,6 +30,7 @@ export const DEFAULTS = {
 const FIELDS = [
   { key: 'shoulder', label: 'Camera shoulder', kind: 'choice', options: [['left', 'Left'], ['right', 'Right']], group: 'Controls' },
   { key: 'invertY', label: 'Invert look', kind: 'toggle', group: 'Controls' },
+  { key: 'invertFlight', label: 'Invert flight pitch', kind: 'toggle', group: 'Controls' },
   { key: 'sensitivity', label: 'Mouse sensitivity', kind: 'range', min: 0.3, max: 2.5, step: 0.1, group: 'Controls' },
   { key: 'viewDistance', label: 'View distance', kind: 'choice', options: [['near', 'Near'], ['medium', 'Medium'], ['full', 'Full']], group: 'Picture' },
   { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 2, step: 0.25, group: 'Picture' },

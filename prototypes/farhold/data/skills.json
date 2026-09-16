@@ -1,34 +1,794 @@
 {
-  "_doc": "Farhold's skill bar. Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a radius, a cooldown and a cast. Each class gets four, on keys 1-4. `element` picks the spell effect from avatar-3d/js/spellfx.js.",
-  "statuses": {
-    "burn":   { "name": "Burning", "kind": "damage", "element": "fire",      "perSecond": 0.18, "seconds": 5 },
-    "poison": { "name": "Poisoned", "kind": "damage", "element": "poison",   "perSecond": 0.12, "seconds": 8 },
-    "chill":  { "name": "Chilled", "kind": "slow",   "element": "ice",       "slow": 0.45,      "seconds": 4 },
-    "might":  { "name": "Might",   "kind": "buff",   "element": "physical",  "damage": 0.3,     "seconds": 12 },
-    "guard":  { "name": "Guarded", "kind": "buff",   "element": "holy",      "resist": 0.45,    "seconds": 8 }
+ "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` \u2014 so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide \u2014 a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
+ "unlockAt": [
+  1,
+  3,
+  7,
+  12,
+  18,
+  24
+ ],
+ "statuses": {
+  "burn": {
+   "name": "Burning",
+   "kind": "damage",
+   "element": "fire",
+   "perSecond": 0.18,
+   "seconds": 5
   },
-  "skills": {
-    "power_strike": { "name": "Power Strike", "shape": "melee",  "element": "physical", "mult": 1.9, "reach": 3.4, "arc": 1.6, "cooldown": 4,  "mp": 0,  "desc": "One heavy blow in front of you." },
-    "cleave":       { "name": "Cleave",       "shape": "around", "element": "physical", "mult": 1.15, "radius": 4.5, "cooldown": 7,  "mp": 6,  "desc": "A sweep that catches everything around you." },
-    "aimed_shot":   { "name": "Aimed Shot",   "shape": "bolt",   "element": "physical", "mult": 2.2, "range": 42, "splash": 1.2, "cooldown": 5,  "mp": 4,  "desc": "A single shot, aimed where you look." },
-    "multi_shot":   { "name": "Multi Shot",   "shape": "bolt",   "element": "physical", "mult": 1.0, "range": 34, "splash": 4.5, "cooldown": 8,  "mp": 10, "desc": "A spread that scatters over whatever it lands near." },
-    "firebolt":     { "name": "Firebolt",     "shape": "bolt",   "element": "fire",     "mult": 1.6, "range": 36, "splash": 2.6, "status": "burn",  "cooldown": 4,  "mp": 8,  "desc": "A bolt of fire that leaves them burning." },
-    "frost_nova":   { "name": "Frost Nova",   "shape": "around", "element": "ice",      "mult": 1.2, "radius": 6, "status": "chill", "cooldown": 9,  "mp": 14, "desc": "A ring of ice that slows everything it touches." },
-    "shadow_lance": { "name": "Shadow Lance", "shape": "bolt",   "element": "shadow",   "mult": 1.9, "range": 38, "splash": 2, "cooldown": 5,  "mp": 10, "desc": "A lance of shadow." },
-    "chain_bolt":   { "name": "Chain Bolt",   "shape": "bolt",   "element": "lightning","mult": 1.3, "range": 40, "splash": 5, "cooldown": 7,  "mp": 12, "desc": "Lightning that jumps to whatever stands near where it lands." },
-    "poison_dart":  { "name": "Poison Dart",  "shape": "bolt",   "element": "poison",   "mult": 1.1, "range": 34, "splash": 1.5, "status": "poison", "cooldown": 5, "mp": 6, "desc": "A dart that keeps working after it lands." },
-    "mend":         { "name": "Mend",         "shape": "self",   "element": "holy",     "heal": 0.35, "cooldown": 14, "mp": 18, "desc": "Close your own wounds." },
-    "warcry":       { "name": "War Cry",      "shape": "self",   "element": "physical", "status": "might", "cooldown": 22, "mp": 10, "desc": "Hit harder for a while." },
-    "guard_stance": { "name": "Guard",        "shape": "self",   "element": "holy",     "status": "guard", "cooldown": 18, "mp": 8,  "desc": "Take much less for a while." }
+  "poison": {
+   "name": "Poisoned",
+   "kind": "damage",
+   "element": "poison",
+   "perSecond": 0.12,
+   "seconds": 8
   },
-  "classes": {
-    "warrior":       ["power_strike", "cleave", "warcry", "guard_stance"],
-    "ranger":        ["aimed_shot", "multi_shot", "poison_dart", "mend"],
-    "rogue":         ["power_strike", "poison_dart", "aimed_shot", "guard_stance"],
-    "mage":          ["firebolt", "frost_nova", "chain_bolt", "mend"],
-    "cleric":        ["mend", "guard_stance", "warcry", "firebolt"],
-    "dragon_knight": ["power_strike", "cleave", "firebolt", "guard_stance"],
-    "stormcaller":   ["chain_bolt", "frost_nova", "shadow_lance", "mend"],
-    "scavenger":     ["aimed_shot", "poison_dart", "guard_stance", "mend"]
+  "bleed": {
+   "name": "Bleeding",
+   "kind": "damage",
+   "element": "physical",
+   "perSecond": 0.16,
+   "seconds": 6
+  },
+  "chill": {
+   "name": "Chilled",
+   "kind": "slow",
+   "element": "ice",
+   "slow": 0.45,
+   "seconds": 4
+  },
+  "web": {
+   "name": "Snared",
+   "kind": "slow",
+   "element": "nature",
+   "slow": 0.8,
+   "seconds": 3
+  },
+  "shock": {
+   "name": "Shocked",
+   "kind": "debuff",
+   "element": "lightning",
+   "takeMore": 0.3,
+   "seconds": 5
+  },
+  "curse": {
+   "name": "Cursed",
+   "kind": "debuff",
+   "element": "shadow",
+   "takeMore": 0.25,
+   "slow": 0.15,
+   "seconds": 8
+  },
+  "weaken": {
+   "name": "Weakened",
+   "kind": "debuff",
+   "element": "shadow",
+   "dealLess": 0.35,
+   "seconds": 7
+  },
+  "might": {
+   "name": "Might",
+   "kind": "buff",
+   "element": "physical",
+   "damage": 0.3,
+   "seconds": 12
+  },
+  "guard": {
+   "name": "Guarded",
+   "kind": "buff",
+   "element": "holy",
+   "resist": 0.45,
+   "seconds": 8
+  },
+  "haste": {
+   "name": "Hastened",
+   "kind": "buff",
+   "element": "lightning",
+   "haste": 0.45,
+   "move": 0.3,
+   "seconds": 10
+  },
+  "stoneskin": {
+   "name": "Stoneskin",
+   "kind": "buff",
+   "element": "physical",
+   "armor": 60,
+   "seconds": 14
+  },
+  "regen": {
+   "name": "Mending",
+   "kind": "buff",
+   "element": "holy",
+   "healPerSecond": 0.025,
+   "seconds": 10
+  },
+  "rally": {
+   "name": "Rallied",
+   "kind": "buff",
+   "element": "holy",
+   "damage": 0.2,
+   "resist": 0.15,
+   "seconds": 8
   }
+ },
+ "skills": {
+  "power_strike": {
+   "name": "Power Strike",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.9,
+   "reach": 3.4,
+   "arc": 1.6,
+   "cooldown": 4,
+   "mp": 0,
+   "desc": "One heavy blow in front of you."
+  },
+  "cleave": {
+   "name": "Cleave",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.15,
+   "radius": 4.5,
+   "cooldown": 7,
+   "mp": 6,
+   "desc": "A sweep that catches everything around you."
+  },
+  "sunder": {
+   "name": "Sunder",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.6,
+   "reach": 3.2,
+   "arc": 1.4,
+   "status": "weaken",
+   "cooldown": 9,
+   "mp": 8,
+   "desc": "A blow that takes the strength out of whatever it lands on."
+  },
+  "shield_bash": {
+   "name": "Shield Bash",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 1.3,
+   "reach": 2.8,
+   "arc": 2.2,
+   "status": "web",
+   "cooldown": 8,
+   "mp": 6,
+   "desc": "Knock them off their feet and hold them there."
+  },
+  "whirlwind": {
+   "name": "Whirlwind",
+   "shape": "around",
+   "element": "physical",
+   "mult": 1.6,
+   "radius": 5.5,
+   "cooldown": 12,
+   "mp": 14,
+   "desc": "Spin through everything within reach."
+  },
+  "charge": {
+   "name": "Charge",
+   "shape": "dash",
+   "element": "physical",
+   "mult": 1.7,
+   "range": 12,
+   "splash": 2.4,
+   "cooldown": 10,
+   "mp": 10,
+   "desc": "Cover the ground between you fast, hitting everything on the way."
+  },
+  "execute": {
+   "name": "Execute",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 3.2,
+   "reach": 3,
+   "arc": 1.2,
+   "cooldown": 14,
+   "mp": 12,
+   "desc": "An enormous blow. Wasted on anything healthy."
+  },
+  "aimed_shot": {
+   "name": "Aimed Shot",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 2.2,
+   "range": 42,
+   "splash": 1.2,
+   "cooldown": 5,
+   "mp": 4,
+   "desc": "A single shot, aimed where you look."
+  },
+  "multi_shot": {
+   "name": "Multi Shot",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 0.8,
+   "range": 34,
+   "splash": 1.6,
+   "cooldown": 8,
+   "mp": 10,
+   "desc": "A spread that scatters over whatever it lands near.",
+   "projectiles": 5,
+   "spread": 0.2
+  },
+  "pinning_shot": {
+   "name": "Pinning Shot",
+   "shape": "bolt",
+   "element": "physical",
+   "mult": 1.0,
+   "range": 38,
+   "splash": 1.4,
+   "status": "web",
+   "cooldown": 9,
+   "mp": 8,
+   "desc": "Pins them where they stand.",
+   "projectiles": 2,
+   "spread": 0.09
+  },
+  "rain_of_arrows": {
+   "name": "Rain of Arrows",
+   "shape": "ground",
+   "element": "physical",
+   "mult": 1.5,
+   "range": 32,
+   "radius": 6.5,
+   "cooldown": 14,
+   "mp": 16,
+   "desc": "Drops a volley on the spot you are looking at."
+  },
+  "poison_dart": {
+   "name": "Poison Dart",
+   "shape": "bolt",
+   "element": "poison",
+   "mult": 1.1,
+   "range": 34,
+   "splash": 1.5,
+   "status": "poison",
+   "cooldown": 5,
+   "mp": 6,
+   "desc": "A dart that keeps working after it lands."
+  },
+  "shadowstep": {
+   "name": "Shadow Step",
+   "shape": "dash",
+   "element": "shadow",
+   "mult": 2.1,
+   "range": 14,
+   "splash": 2,
+   "cooldown": 9,
+   "mp": 10,
+   "desc": "Cross the gap in the dark and open them up on arrival."
+  },
+  "eviscerate": {
+   "name": "Eviscerate",
+   "shape": "melee",
+   "element": "physical",
+   "mult": 2.4,
+   "reach": 2.8,
+   "arc": 1.1,
+   "status": "bleed",
+   "cooldown": 7,
+   "mp": 8,
+   "desc": "Deep, and it does not stop bleeding."
+  },
+  "smoke": {
+   "name": "Smoke",
+   "shape": "self",
+   "element": "shadow",
+   "status": "haste",
+   "cooldown": 20,
+   "mp": 12,
+   "desc": "Vanish for a moment and come out moving."
+  },
+  "firebolt": {
+   "name": "Firebolt",
+   "shape": "bolt",
+   "element": "fire",
+   "mult": 1.6,
+   "range": 36,
+   "splash": 2.6,
+   "status": "burn",
+   "cooldown": 4,
+   "mp": 8,
+   "desc": "A bolt of fire that leaves them burning."
+  },
+  "fire_wall": {
+   "name": "Ember Field",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 1.8,
+   "range": 30,
+   "radius": 6,
+   "status": "burn",
+   "cooldown": 13,
+   "mp": 18,
+   "desc": "Sets the ground alight where you are looking."
+  },
+  "frost_nova": {
+   "name": "Frost Nova",
+   "shape": "around",
+   "element": "ice",
+   "mult": 1.2,
+   "radius": 6,
+   "status": "chill",
+   "cooldown": 9,
+   "mp": 14,
+   "desc": "A ring of ice that slows everything it touches."
+  },
+  "ice_lance": {
+   "name": "Ice Lance",
+   "shape": "beam",
+   "element": "ice",
+   "mult": 1.9,
+   "range": 26,
+   "width": 1.8,
+   "status": "chill",
+   "cooldown": 7,
+   "mp": 12,
+   "desc": "A line of ice through everything in front of you."
+  },
+  "chain_bolt": {
+   "name": "Chain Bolt",
+   "shape": "bolt",
+   "element": "lightning",
+   "mult": 1.1,
+   "range": 40,
+   "splash": 3.2,
+   "status": "shock",
+   "cooldown": 7,
+   "mp": 12,
+   "desc": "Lightning that jumps to whatever stands near where it lands.",
+   "projectiles": 3,
+   "spread": 0.14
+  },
+  "thunderclap": {
+   "name": "Thunderclap",
+   "shape": "around",
+   "element": "lightning",
+   "mult": 1.7,
+   "radius": 7,
+   "status": "shock",
+   "cooldown": 12,
+   "mp": 18,
+   "desc": "The air splits around you."
+  },
+  "storm_beam": {
+   "name": "Storm Beam",
+   "shape": "beam",
+   "element": "lightning",
+   "mult": 2.2,
+   "range": 30,
+   "width": 2.4,
+   "cooldown": 11,
+   "mp": 20,
+   "desc": "A line of raw current, straight out from you."
+  },
+  "shadow_lance": {
+   "name": "Shadow Lance",
+   "shape": "bolt",
+   "element": "shadow",
+   "mult": 1.9,
+   "range": 38,
+   "splash": 2,
+   "cooldown": 5,
+   "mp": 10,
+   "desc": "A lance of shadow."
+  },
+  "curse": {
+   "name": "Curse",
+   "shape": "bolt",
+   "element": "shadow",
+   "mult": 0.8,
+   "range": 34,
+   "splash": 5,
+   "status": "curse",
+   "cooldown": 12,
+   "mp": 14,
+   "desc": "Everything near where it lands takes more of everything."
+  },
+  "drain": {
+   "name": "Drain",
+   "shape": "beam",
+   "element": "shadow",
+   "mult": 1.5,
+   "range": 22,
+   "width": 1.6,
+   "heal": 0.12,
+   "cooldown": 9,
+   "mp": 12,
+   "desc": "Takes their health and gives it to you."
+  },
+  "arcane_burst": {
+   "name": "Arcane Burst",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 2.3,
+   "range": 34,
+   "radius": 5,
+   "cooldown": 10,
+   "mp": 18,
+   "desc": "A detonation exactly where you are looking."
+  },
+  "meteor": {
+   "name": "Fallstone",
+   "shape": "ground",
+   "element": "fire",
+   "mult": 3.4,
+   "range": 36,
+   "radius": 8,
+   "status": "burn",
+   "cooldown": 22,
+   "mp": 30,
+   "desc": "Something enormous comes down where you point."
+  },
+  "mend": {
+   "name": "Mend",
+   "shape": "self",
+   "element": "holy",
+   "heal": 0.35,
+   "cooldown": 14,
+   "mp": 18,
+   "desc": "Close your own wounds."
+  },
+  "renew": {
+   "name": "Renew",
+   "shape": "self",
+   "element": "holy",
+   "status": "regen",
+   "cooldown": 16,
+   "mp": 14,
+   "desc": "Keeps mending you for a while \u2014 and your companions with you."
+  },
+  "warcry": {
+   "name": "War Cry",
+   "shape": "self",
+   "element": "physical",
+   "status": "might",
+   "cooldown": 22,
+   "mp": 10,
+   "desc": "Hit harder for a while."
+  },
+  "guard_stance": {
+   "name": "Guard",
+   "shape": "self",
+   "element": "holy",
+   "status": "guard",
+   "cooldown": 18,
+   "mp": 8,
+   "desc": "Take much less for a while."
+  },
+  "stoneskin": {
+   "name": "Stoneskin",
+   "shape": "self",
+   "element": "physical",
+   "status": "stoneskin",
+   "cooldown": 24,
+   "mp": 14,
+   "desc": "Armour that is not made of anything."
+  },
+  "quicken": {
+   "name": "Quicken",
+   "shape": "self",
+   "element": "lightning",
+   "status": "haste",
+   "cooldown": 26,
+   "mp": 16,
+   "desc": "Everything you do, faster."
+  },
+  "rally": {
+   "name": "Rally",
+   "shape": "self",
+   "element": "holy",
+   "status": "rally",
+   "pets": true,
+   "cooldown": 30,
+   "mp": 18,
+   "desc": "You and everything following you fight harder."
+  },
+  "consecrate": {
+   "name": "Consecrate",
+   "shape": "around",
+   "element": "holy",
+   "mult": 1.4,
+   "radius": 6.5,
+   "heal": 0.15,
+   "cooldown": 16,
+   "mp": 20,
+   "desc": "Burns the hostile and mends you in the same breath."
+  },
+  "raise_thrall": {
+   "name": "Raise Thrall",
+   "shape": "summon",
+   "element": "shadow",
+   "pet": "bone_thrall",
+   "count": 1,
+   "cooldown": 26,
+   "mp": 20,
+   "desc": "One more body between you and them."
+  },
+  "call_wolf": {
+   "name": "Call the Pack",
+   "shape": "summon",
+   "element": "nature",
+   "pet": "grove_wolf",
+   "count": 1,
+   "cooldown": 26,
+   "mp": 18,
+   "desc": "Another wolf answers."
+  },
+  "call_spirit": {
+   "name": "Call a Spirit",
+   "shape": "summon",
+   "element": "holy",
+   "pet": "spirit_bear",
+   "count": 1,
+   "cooldown": 40,
+   "mp": 26,
+   "desc": "Something old and heavy stands up beside you."
+  },
+  "bind_imp": {
+   "name": "Bind a Fiend",
+   "shape": "summon",
+   "element": "shadow",
+   "pet": "bound_imp",
+   "count": 1,
+   "cooldown": 32,
+   "mp": 22,
+   "desc": "It does not like you either, but it will do as it is told."
+  },
+  "deploy_sentry": {
+   "name": "Deploy Sentry",
+   "shape": "summon",
+   "element": "physical",
+   "pet": "clockwork_sentry",
+   "count": 1,
+   "cooldown": 30,
+   "mp": 20,
+   "desc": "Wind it up and let it shoot."
+  }
+ },
+ "classes": {
+  "warrior": [
+   "power_strike",
+   "cleave",
+   "warcry",
+   "shield_bash",
+   "whirlwind",
+   "execute"
+  ],
+  "fighter": [
+   "power_strike",
+   "sunder",
+   "guard_stance",
+   "charge",
+   "cleave",
+   "execute"
+  ],
+  "paladin": [
+   "power_strike",
+   "guard_stance",
+   "consecrate",
+   "shield_bash",
+   "renew",
+   "rally"
+  ],
+  "ranger": [
+   "aimed_shot",
+   "poison_dart",
+   "multi_shot",
+   "mend",
+   "pinning_shot",
+   "rain_of_arrows"
+  ],
+  "rogue": [
+   "eviscerate",
+   "poison_dart",
+   "shadowstep",
+   "smoke",
+   "power_strike",
+   "execute"
+  ],
+  "cleric": [
+   "mend",
+   "guard_stance",
+   "consecrate",
+   "renew",
+   "shadow_lance",
+   "rally"
+  ],
+  "bard": [
+   "shadow_lance",
+   "warcry",
+   "curse",
+   "mend",
+   "quicken",
+   "rally"
+  ],
+  "mage": [
+   "firebolt",
+   "frost_nova",
+   "arcane_burst",
+   "ice_lance",
+   "fire_wall",
+   "meteor"
+  ],
+  "necromancer": [
+   "shadow_lance",
+   "raise_thrall",
+   "curse",
+   "drain",
+   "poison_dart",
+   "rally"
+  ],
+  "warlock": [
+   "shadow_lance",
+   "bind_imp",
+   "curse",
+   "drain",
+   "fire_wall",
+   "meteor"
+  ],
+  "demon_hunter": [
+   "aimed_shot",
+   "shadowstep",
+   "multi_shot",
+   "curse",
+   "pinning_shot",
+   "execute"
+  ],
+  "scavenger": [
+   "aimed_shot",
+   "poison_dart",
+   "guard_stance",
+   "mend",
+   "smoke",
+   "rain_of_arrows"
+  ],
+  "swashbuckler": [
+   "eviscerate",
+   "charge",
+   "smoke",
+   "power_strike",
+   "whirlwind",
+   "execute"
+  ],
+  "dragon_knight": [
+   "power_strike",
+   "cleave",
+   "firebolt",
+   "guard_stance",
+   "fire_wall",
+   "meteor"
+  ],
+  "pyromancer": [
+   "firebolt",
+   "fire_wall",
+   "thunderclap",
+   "arcane_burst",
+   "quicken",
+   "meteor"
+  ],
+  "stormcaller": [
+   "chain_bolt",
+   "frost_nova",
+   "storm_beam",
+   "thunderclap",
+   "quicken",
+   "meteor"
+  ],
+  "druid": [
+   "poison_dart",
+   "call_wolf",
+   "renew",
+   "frost_nova",
+   "stoneskin",
+   "rally"
+  ],
+  "oracle": [
+   "arcane_burst",
+   "guard_stance",
+   "renew",
+   "curse",
+   "quicken",
+   "meteor"
+  ],
+  "tactician": [
+   "sunder",
+   "shield_bash",
+   "rally",
+   "warcry",
+   "charge",
+   "execute"
+  ],
+  "chronomancer": [
+   "arcane_burst",
+   "quicken",
+   "ice_lance",
+   "frost_nova",
+   "smoke",
+   "meteor"
+  ],
+  "monk": [
+   "power_strike",
+   "charge",
+   "quicken",
+   "whirlwind",
+   "stoneskin",
+   "execute"
+  ],
+  "shaman": [
+   "chain_bolt",
+   "call_spirit",
+   "renew",
+   "thunderclap",
+   "stoneskin",
+   "rally"
+  ],
+  "witch_hunter": [
+   "aimed_shot",
+   "sunder",
+   "curse",
+   "pinning_shot",
+   "smoke",
+   "execute"
+  ],
+  "knight": [
+   "shield_bash",
+   "guard_stance",
+   "power_strike",
+   "sunder",
+   "stoneskin",
+   "execute"
+  ],
+  "sorcerer": [
+   "firebolt",
+   "chain_bolt",
+   "arcane_burst",
+   "storm_beam",
+   "quicken",
+   "meteor"
+  ],
+  "runesmith": [
+   "power_strike",
+   "stoneskin",
+   "sunder",
+   "thunderclap",
+   "guard_stance",
+   "whirlwind"
+  ],
+  "shadow_dancer": [
+   "eviscerate",
+   "shadowstep",
+   "smoke",
+   "poison_dart",
+   "whirlwind",
+   "execute"
+  ],
+  "tinker": [
+   "aimed_shot",
+   "deploy_sentry",
+   "pinning_shot",
+   "fire_wall",
+   "quicken",
+   "rain_of_arrows"
+  ],
+  "priest": [
+   "mend",
+   "renew",
+   "consecrate",
+   "curse",
+   "guard_stance",
+   "rally"
+  ],
+  "enchanter": [
+   "arcane_burst",
+   "bind_imp",
+   "curse",
+   "ice_lance",
+   "quicken",
+   "meteor"
+  ]
+ }
 }

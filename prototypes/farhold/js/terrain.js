@@ -27,6 +27,12 @@ class Ring {
     this.hole = hole;
     // how far the hole's lip drops; proportional to this ring's own resolution
     this.skirt = this.cell * 1.2;
+    /**
+     * …and how much deeper to make it. From head height a 1.2-cell drop hides the seam between two
+     * rings; from a ship two kilometres up you are looking almost straight down at it and the gap
+     * opens into a visible trench. Flying raises this.
+     */
+    this.skirtScale = 1;
     this.centre = [Infinity, Infinity];
 
     const verts = (res + 1) * (res + 1);
@@ -90,7 +96,7 @@ class Ring {
         // no extra vertices: the ones inside the hole are referenced by nothing else.
         if (this.hole > 0) {
           const lx = Math.abs(wx - cx), lz = Math.abs(wz - cz);
-          if (Math.max(lx, lz) <= this.hole / 2 + cell) height -= this.skirt;
+          if (Math.max(lx, lz) <= this.hole / 2 + cell) height -= this.skirt * this.skirtScale;
         }
         P[o] = wx - cx; P[o + 1] = height; P[o + 2] = wz - cz;
         const l = h[y * (res + 1) + Math.max(0, x - 1)], r = h[y * (res + 1) + Math.min(res, x + 1)];
@@ -150,6 +156,26 @@ export function createTerrainView(scene, terrain, opts = {}) {
   return {
     rings,
     water,
+    /**
+     * Deepen every ring's skirt. Called when the camera climbs: looking down on the seam between two
+     * clipmap rings from altitude shows a gap that a head-height skirt never covered.
+     */
+    setSkirtScale(k, x, z) {
+      const want = Math.max(1, k);
+      let changed = false;
+      for (const r of rings) {
+        if (Math.abs(r.skirtScale - want) < 0.05) continue;
+        r.skirtScale = want;
+        changed = true;
+      }
+      if (changed) for (const r of rings) r.update(x, z, true);
+    },
+
+    /** Hide the whole planet — walking into a dungeon does this; there is no daylight down there. */
+    setVisible(on) {
+      for (const r of rings) r.mesh.visible = !!on;
+      if (water) water.visible = !!on;
+    },
     /** Follow the player. Cheap on most frames — a ring only rebuilds when it has moved a cell. */
     update(x, z, force = false) {
       for (const r of rings) if (r.update(x, z, force)) rebuilds++;

@@ -8,7 +8,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { Rpg, xpForLevel, levelFromXp, itemScore, heldLookFor, offhandLookFor, LIVE_STATS, SLOTS, MAX_LEVEL } from '../js/rpg.js';
+import { Rpg, xpForLevel, levelFromXp, itemScore, heldLookFor, offhandLookFor, LIVE_STATS, SLOTS, MAX_LEVEL, effectFor } from '../js/rpg.js';
+import { EFFECTS } from '../js/effects.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -110,18 +111,75 @@ test('health keeps its share when gear changes, and is refilled on a level', () 
   assert.equal(p.hp, p.maxHp, 'a level did not heal');
 });
 
-test('only the affixes this phase understands change a character; the rest are declared, not dropped', () => {
+// Round 4 turned every affix on. This test used to assert the opposite — that `cond_cheatDeath` was
+// carried and inert — and its whole job now is to make sure nothing ever goes back to being dead data.
+test('every affix items.json can roll is wired, and a plain one still adds its number', () => {
   const r = rpg();
   const p = r.createPlayer({});
   const ring = {
     id: 'test', name: 'Test Ring', type: 'accessory', slot: 'ring', rarity: 'rare', quality: 'high',
-    affixes: [{ stat: 'hp', value: 40 }, { stat: 'cond_cheatDeath', value: 1 }],
+    affixes: [{ stat: 'hp', value: 40 }, { stat: 'cond_cheatDeath', value: 0.2 }],
   };
   const before = p.maxHp;
   r.equip(p, ring);
-  assert.equal(p.maxHp, before + 40, 'a live affix did nothing');
-  assert.ok(p.derived.inert.includes('cond_cheatDeath'), 'an affix with no effect yet was silently swallowed');
-  assert.ok(!('cond_cheatDeath' in LIVE_STATS));
+  assert.equal(p.maxHp, before + 40, 'a plain affix did nothing');
+  assert.deepEqual(p.derived.inert, [], 'something is still being carried without an effect');
+  assert.ok(effectFor({ stat: 'cond_cheatDeath' }), 'cheat death is not in the registry');
+});
+
+test('NOTHING in items.json is dead data — every affix stat and legendary power has an effect', () => {
+  const A = items.affixes;
+  const missing = [];
+  for (const list of Object.values(A)) {
+    for (const a of list) if (!effectFor(a)) missing.push(a.stat);
+  }
+  for (const id of Object.keys(items.legendaryEffects)) {
+    if (!EFFECTS['legendary:' + id]) missing.push('legendary:' + id);
+  }
+  assert.deepEqual([...new Set(missing)], [], 'these have no entry in js/effects.js');
+});
+
+test('every effect in the registry describes itself in plain language', () => {
+  for (const [id, e] of Object.entries(EFFECTS)) {
+    const text = e.desc(0.25);
+    assert.ok(typeof text === 'string' && text.length > 3, `${id} has no description`);
+    assert.ok(!/undefined|NaN|\[object/.test(text), `${id} describes itself as "${text}"`);
+  }
+});
+
+// The bug the user hit in round 4: giving enemies a small `derived` bag made `attacker.derived`
+// truthy, and `derived.damage` is undefined on an enemy, so every number in the fight was NaN.
+test('no strike in the whole bestiary can produce a non-number, at any rank', () => {
+  const r = rpg();
+  const rng = makeRng(4242);
+  const p = r.createPlayer({ classId: 'warrior', level: 8 });
+  r.equip(p, r.loot.generate('longsword', 'rare', 'high', { rng: makeRng(3) }));
+  const bad = [];
+  for (const def of bestiary.enemies) {
+    for (const rank of ['normal', 'champion', 'rare']) {
+      const mods = r.pickModifiers(bestiary.modifiers, rank === 'rare' ? 2 : rank === 'champion' ? 1 : 0, rng);
+      const e = r.makeEnemy(def, 8, rng, { rank, modifiers: mods });
+      const out = r.strike(p, { ...e, hp: 1e6, maxHp: 1e6 }, rng);
+      const back = r.strike(e, { ...p, hp: 1e6, maxHp: 1e6, derived: p.derived }, rng);
+      if (!Number.isFinite(out.amount) || !Number.isFinite(back.amount)) bad.push(`${def.id}/${rank}`);
+    }
+  }
+  assert.deepEqual(bad, [], 'these matchups rolled NaN damage');
+});
+
+test('ranks make an enemy harder and worth more, and a rare is worth more than a champion', () => {
+  const r = rpg();
+  const rng = makeRng(7);
+  const def = bestiary.enemies[0];
+  const plain = r.makeEnemy(def, 6, makeRng(7), { rank: 'normal' });
+  const champ = r.makeEnemy(def, 6, makeRng(7), { rank: 'champion', modifiers: r.pickModifiers(bestiary.modifiers, 1, rng) });
+  const rare = r.makeEnemy(def, 6, makeRng(7), { rank: 'rare', modifiers: r.pickModifiers(bestiary.modifiers, 2, rng), name: 'Someone' });
+  assert.ok(champ.maxHp > plain.maxHp && rare.maxHp > champ.maxHp, 'ranks do not stack health');
+  assert.ok(rare.xp > champ.xp && champ.xp > plain.xp, 'ranks do not pay more');
+  assert.ok(rare.dropBonus > champ.dropBonus && champ.dropBonus > plain.dropBonus, 'ranks do not drop more');
+  assert.equal(rare.name, 'Someone', 'a rare should carry its own name');
+  assert.ok(champ.name !== plain.name, 'a champion should read differently from a plain one');
+  assert.ok(rare.auras.length >= 1, 'a rare has nothing to see it by');
 });
 
 test('a swing does damage, respects armour, and can finish an enemy', () => {
@@ -160,7 +218,7 @@ test('enemies scale with their level and every table entry builds', () => {
 test('the bestiary only points at biome families and item bases that exist', () => {
   const bases = { ...items.weaponBases, ...items.armorBases };
   const families = ['any', 'grass', 'jungle', 'desert', 'ice', 'tundra', 'ocean', 'rock', 'lava', 'toxic', 'crystal', 'void'];
-  for (const def of bestiary.enemies) {
+  for (const def of [...bestiary.enemies, ...bestiary.bosses]) {
     for (const f of def.biomes || []) assert.ok(families.includes(f), `${def.id} lists unknown biome family ${f}`);
     for (const b of def.dropBases || []) assert.ok(bases[b], `${def.id} drops unknown base ${b}`);
   }

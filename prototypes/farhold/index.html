@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Farhold · Playground prototype</title>
 <link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="../../shared/rewards.css">
+<link rel="stylesheet" href="../../shared/tooltip.css">
 <link rel="stylesheet" href="style.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
@@ -27,24 +29,67 @@
       <label for="boot-seed">Seed</label>
       <input id="boot-seed" type="number" value="1" style="width:90px">
     </div>
+    <details class="boot-knobs">
+      <summary>World settings</summary>
+      <div class="row">
+        <label for="boot-regions">Region size</label>
+        <select id="boot-regions">
+          <option value="3">Small — many short zones</option>
+          <option value="2" selected>Compact — a zone is a walk, not a trek</option>
+          <option value="1">Standard — World Forge's own</option>
+          <option value="0.6">Large — long journeys between bands</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="boot-scale">Planet scale</label>
+        <select id="boot-scale">
+          <option value="0.35">Tiny — 57 × 29 km, everything close</option>
+          <option value="0.55">Small — 90 × 45 km</option>
+          <option value="0.75">Medium — 123 × 61 km</option>
+          <option value="1" selected>Full — 163 × 82 km, as the world was designed</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="boot-band">Levels per zone</label>
+        <select id="boot-band">
+          <option value="3">Tight (3)</option>
+          <option value="4" selected>Normal (4)</option>
+          <option value="6">Wide (6)</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="boot-density">Enemy density</label>
+        <select id="boot-density">
+          <option value="0.6">Quiet</option>
+          <option value="1" selected>Normal</option>
+          <option value="1.6">Busy</option>
+          <option value="2.4">Swarming</option>
+        </select>
+      </div>
+      <p class="note small">A region is one level band. Smaller regions mean the next band is a
+        shorter walk away — the bands always tile the whole 1–30 range whichever you pick.</p>
+    </details>
+
     <div class="row">
       <button id="boot-start">New game</button>
       <button id="boot-continue" class="ghost" hidden>Continue</button>
     </div>
 
     <div id="boot-saves" class="saves"></div>
+    <a class="back boot-back" href="../../index.html">← Playground</a>
 
     <div class="status" id="boot-status"></div>
-    <p class="note">Phase 3 of ten. No sound or dialogue yet. <b>WASD</b> move · <b>Shift</b> run ·
-      <b>Space</b> jump · <b>click</b> swing · <b>H</b> horse · <b>J</b> ship · <b>M</b> map ·
-      <b>I</b> character · <b>`</b> debug. Deep water makes you swim. Press <b>J</b> to fly to
-      another planet — Shift boosts, holding Space warps. The game saves itself as you play.</p>
+    <p class="note">Round 4: the RPG expansion. Every region has its own level band, monsters come in
+      packs with champions and rares in them, dungeons are real places you go inside, chests and
+      bosses drop a haul, and everything you do not want recycles into crafting material.
+      <b>WASD</b> move · <b>Shift</b> run · <b>Space</b> jump · <b>click</b> swing ·
+      <b>1–6</b> skills · <b>E</b> talk, open a chest, enter a dungeon · <b>F</b> torch ·
+      <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>I</b> character · <b>`</b> debug.
+      The game saves itself as you play.</p>
   </div>
 </section>
 
 <!-- ============================================================ hud -->
-<a class="back" href="../../index.html">← Playground</a>
-
 <div id="crosshair" class="hud"></div>
 
 <div id="hud-left" class="hud">
@@ -55,18 +100,21 @@
   <div id="hud-statuses"></div>
 </div>
 
-<div id="hud-place" class="hud">
-  <div class="hud-card">
+<!-- the right-hand column: place card, minimap and the location line, stacked so a long
+     planet description can never slide under the map -->
+<div id="hud-right" class="hud">
+  <div class="hud-card" id="hud-place">
     <div><b id="hud-place-name"></b></div>
+    <div class="small" id="hud-zone"></div>
     <div class="clock" id="hud-clock"></div>
     <div class="small" id="hud-weather"></div>
     <div class="small dim" id="hud-sky"></div>
     <div class="small dim" id="hud-planet"></div>
   </div>
+  <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="hud-where"></div>
 </div>
 <div id="skillbar" class="hud"></div>
-<canvas id="minimap" class="hud" width="180" height="180"></canvas>
-<div id="hud-where" class="hud"></div>
 
 <div id="target" class="hud hidden">
   <div id="target-name"></div>
@@ -74,31 +122,156 @@
 </div>
 
 <div id="log" class="hud"></div>
-<div id="hint" class="hud">WASD move · Shift run · Space jump · click swing · <b>E</b> talk · H horse · <b>J</b> ship · M map · <b>O</b> options · I character · ` debug<br><span class="dim">in space: W fly · Shift boost · hold Space warp · J land</span></div>
+<!-- ============================================================ the pause menu (Esc) -->
+<section id="pause" class="hidden">
+  <div class="pause-card">
+    <h2>Farhold</h2>
+    <div class="pause-where" id="pause-where"></div>
+    <div class="pause-buttons">
+      <button id="pause-resume">Resume</button>
+      <button id="pause-settings" class="ghost">Settings</button>
+      <button id="pause-save" class="ghost">Save now</button>
+      <button id="pause-menu" class="ghost">Main menu</button>
+    </div>
+    <h3>Controls</h3>
+    <div id="hint" class="keys">WASD move · Shift run · Space jump · click swing · <b>1–6</b> skills ·
+      <b>E</b> talk / open a chest / enter a dungeon · <b>F</b> torch · <b>V</b> first person ·
+      <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>I</b> character · <b>O</b> settings ·
+      <b>`</b> debug<br><span class="dim">in space: W fly · Shift boost · hold Space warp · J land</span></div>
+    <a class="back" href="../../index.html">← Playground</a>
+  </div>
+</section>
+<div id="prompt" class="hud hidden"></div>
+<!-- the space reticles: a bracket round every world in view, and a card on the one you point at -->
+<div id="reticles" class="hud"></div>
+<div id="space-card" class="hud hidden"></div>
+<!-- the zone banner: announced on screen when you cross into a new region, the way Hack/Mine does -->
+<div id="zone-banner" class="hud hidden">
+  <div class="zb-name"></div>
+  <div class="zb-level"></div>
+  <div class="zb-danger"></div>
+</div>
+<div id="boss-bar" class="hud hidden"><div id="boss-name"></div><div class="bar hp"><i id="boss-fill"></i></div></div>
 
 <!-- ============================================================ character sheet -->
 <section id="sheet" class="sheet hidden">
   <button class="close" id="sheet-close">×</button>
-  <h2>Character</h2>
-  <div class="cols">
-    <div>
-      <h3>Worn</h3>
-      <div class="slot-grid" id="sheet-slots"></div>
-      <h3>Attributes <span class="small muted" id="sheet-points"></span></h3>
-      <div id="sheet-attrs"></div>
-      <h3>Talents <span class="small muted" id="sheet-talent-points"></span></h3>
-      <div id="sheet-talents" class="passives"></div>
-      <h3>Passives <span class="small muted" id="sheet-passive-points"></span></h3>
-      <div id="sheet-passives" class="passives"></div>
-      <h3>Stats</h3>
-      <dl class="stats" id="sheet-stats"></dl>
-      <p class="small muted" id="sheet-inert"></p>
+  <header class="sheet-head">
+    <h2 id="sheet-title">Character</h2>
+    <nav class="tabs" id="sheet-tabs">
+      <button data-tab="character" class="on">Character</button>
+      <button data-tab="inventory">Inventory</button>
+      <button data-tab="skills">Skills</button>
+      <button data-tab="crafting">Crafting</button>
+      <button data-tab="upgrade">Upgrade</button>
+      <button data-tab="journal">Journal</button>
+    </nav>
+    <div class="sheet-purse" id="sheet-purse"></div>
+  </header>
+
+  <!-- ---------------------------------------------------------- character -->
+  <div class="tab-body" data-tab="character">
+    <div class="cols">
+      <div>
+        <h3>Worn <span class="small muted">click to take off</span></h3>
+        <div class="slot-grid" id="sheet-slots"></div>
+        <h3>Attributes <span class="small muted" id="sheet-points"></span></h3>
+        <div id="sheet-attrs"></div>
+        <h3>Companions</h3>
+        <div id="sheet-pets" class="pets"></div>
+      </div>
+      <div>
+        <h3>Stats</h3>
+        <dl class="stats" id="sheet-stats"></dl>
+        <h3>Powers</h3>
+        <div id="sheet-powers" class="powers"></div>
+        <p class="small muted" id="sheet-inert"></p>
+      </div>
     </div>
-    <div>
-      <h3>Journal</h3>
-      <div id="sheet-journal" class="journal"></div>
-      <h3>Bag <span class="small muted">click to wear</span></h3>
-      <div class="bag" id="sheet-bag"></div>
+  </div>
+
+  <!-- ---------------------------------------------------------- inventory -->
+  <div class="tab-body hidden" data-tab="inventory">
+    <div class="cols">
+      <div>
+        <h3>Worn</h3>
+        <div class="slot-grid" id="inv-slots"></div>
+      </div>
+      <div>
+        <h3>Bag <span class="small muted" id="inv-count"></span></h3>
+        <div class="bagtools">
+          <span class="small muted">Recycle everything up to:</span>
+          <button id="inv-recycle-junk" class="ghost">normal</button>
+          <button id="inv-recycle-magic" class="ghost">magic</button>
+          <button id="inv-recycle-rare" class="ghost">rare</button>
+          <span class="small muted">click an item to wear it · hover it and press <b>R</b> to recycle it ·
+            uniques and set pieces are never taken in bulk</span>
+        </div>
+        <div class="bag" id="sheet-bag"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------------- skills -->
+  <div class="tab-body hidden" data-tab="skills">
+    <div class="cols">
+      <div>
+        <h3>Your skills <span class="small muted">keys 1–6</span></h3>
+        <div id="sheet-skills" class="skilllist"></div>
+      </div>
+      <div>
+        <h3>Talents <span class="small muted" id="sheet-talent-points"></span></h3>
+        <div id="sheet-talents" class="passives"></div>
+        <h3>Passives <span class="small muted" id="sheet-passive-points"></span></h3>
+        <div id="sheet-passives" class="passives"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------------- crafting -->
+  <div class="tab-body hidden" data-tab="crafting">
+    <div class="cols">
+      <div>
+        <h3>Materials <span class="small muted">no limit — these never fill up</span></h3>
+        <div id="craft-materials" class="materials"></div>
+        <h3>Recipes <span class="small muted">click one for the details</span></h3>
+        <div id="craft-list" class="recipe-list"></div>
+      </div>
+      <div>
+        <div id="craft-detail" class="recipe-detail"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------------- upgrade -->
+  <div class="tab-body hidden" data-tab="upgrade">
+    <div class="cols">
+      <div>
+        <h3>Materials</h3>
+        <div id="up-materials" class="materials"></div>
+        <h3>Pick something to work on</h3>
+        <div id="up-pick" class="bag small-bag"></div>
+      </div>
+      <div>
+        <div id="up-item" class="bench-card-wrap"></div>
+        <h3>What you can do to it <span class="small muted">click one for the details</span></h3>
+        <div id="up-list" class="recipe-list"></div>
+        <div id="up-detail" class="recipe-detail"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------------- journal -->
+  <div class="tab-body hidden" data-tab="journal">
+    <div class="cols">
+      <div>
+        <h3>Journal</h3>
+        <div id="sheet-journal" class="journal"></div>
+      </div>
+      <div>
+        <h3>The world</h3>
+        <div id="sheet-zones" class="zonelist"></div>
+      </div>
     </div>
   </div>
 </section>

@@ -167,3 +167,70 @@ Judged on payoff against work, using what is already built:
 4. **The map's towns and roads made real** (#49, #50) — the data exists and is going to waste.
 5. **NPCs that remember you** (#52, #53) — no other prototype's tech reads as strongly in a first
    ten minutes.
+
+---
+
+# Round 4 additions — the RPG expansion, and what is next
+
+Round 4 built most of section 3 (fighting) and section 4 (loot and character) out of the list above,
+plus the zone system that was never in it. `RPG.md` says what was built and why. This section is the
+*next* pile: things the round turned up that are worth doing, and the ones the user asked for that
+are not built yet.
+
+## Creatures worth adding
+
+The bestiary went from 16 to 46. It is still thin in places — a `void` world and a `crystal` world
+draw from nearly the same short list, and there is nothing at all that is **not hostile**. The next
+pass should describe each one properly (what it looks like, how it moves, what it wants) and say
+whether it is a variation of a body `avatar-3d/js/creature-types.js` already has or wants a new one.
+
+**What the catalogue already gives us free** (37 types over six body plans): quad, spider, bat,
+snake, biped, float. A "variation" means the same plan with different proportions, colours, features
+and size — which is most of a new creature, honestly. A bespoke model means a new entry in
+`CREATURE_TYPES` and a new builder branch.
+
+Three groups to fill, all currently empty or nearly so:
+
+1. **Neutral wildlife.** Nothing in the game ignores you. Herds that flee, grazers that watch you,
+   scavengers that follow a fight at a distance and move in when it is over, predators that hunt
+   *each other*. All of them are variations: `deer`, `horse`, `boar`, `turtle`, `frog`, `owl`,
+   `cat`, `rat` at ordinary sizes with ordinary colours. The hunting loop (hides, meat, materials)
+   comes free from the crafting system.
+2. **Friendly and neutral folk out of town.** Hermits, pilgrims on the road, a trader with a cart
+   (the vehicles exist in `avatar-3d/js/vehicles.js` and are unused here), prospectors, a wounded
+   soldier who wants escorting. All Chibi 2 bodies — no new geometry at all.
+3. **Per-biome hostiles.** Every biome family should have three or four of its own rather than
+   sharing `any`. The gaps are `ice`, `crystal`, `void` and `toxic`.
+
+**The description standard.** Dwarf Fortress is the model: every creature says what it *is* in plain
+sentences, not stat lines — size against a person, what it is covered in, how it moves, what it eats,
+what it does when it sees you, and what it leaves behind. That text is worth writing because it
+drives the look: "a flat, pale thing the width of a door that folds along a ridge down its back, and
+walks on the tips of eleven legs" tells you the model, the animation and the sound.
+
+## Still on the list from the round-4 play-test
+
+- **A galaxy map** on `M` while in space: the system, then adjacent stars, then the galaxy, each
+  with the player and any pins on it; travel to a neighbouring star with a warp effect and a
+  different skybox at the other end. (`universe/js/galaxy.js` already generates the galaxy with
+  travel lanes between stars — this is a wiring job plus a screen, not a new system.)
+- **Quest and pin tracking** across every scale: a marker on the map and the minimap, an edge arrow
+  when the target is off the minimap, track/untrack, and the same marker visible from orbit.
+- **A continuous approach from orbit**: slow as you near a world, raise its detail as you close, and
+  slip into the atmosphere without pressing anything. Take-off and landing are already seamless;
+  only the approach still needs a key.
+- **A "habitable start" option** guaranteeing a multi-biome first world.
+- **Water that meets its bank.** The river ribbon and the carved channel still leave a sliver you can
+  see under from the right angle.
+
+## Things round 4 turned up that are worth building
+
+- **A second dungeon shape.** The layout is rooms and corridors. A tower (one shaft, floors stacked)
+  and a cave (no right angles) would use the same machinery and feel entirely different.
+- **Enemies with skill bars.** They have roles and ranks and modifiers; they still choose between
+  exactly one thing. The player's own `skills.js` would drive them with almost no change.
+- **Dodge and block as inputs.** Blocking is on the dice. A button would change every fight.
+- **A reason to go home.** Crafting made the bag valuable and there is nowhere to put anything.
+- **Set pieces that are not fights**: a caravan to escort, a wreck to search, somebody being robbed.
+  `js/encounters.js` already places them; only the outcome is missing.
+- **The damage meter** (`meters/`) as an endgame screen. It is built, tested, and unused here.

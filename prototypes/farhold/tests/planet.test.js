@@ -64,7 +64,10 @@ test('the ground follows the map it was made from', () => {
   let worst = 0;
   for (let cy = 4; cy < world.height - 4; cy += 7) {
     for (let cx = 4; cx < world.width - 4; cx += 7) {
-      const mapMetres = elevationToMetres(world.elevation[cy * world.width + cx], world.relief);
+      // `terrain.relief` is the SCALED relief, not the planet's raw one: round 4b matched the
+      // vertical scale to how wide the map actually is (see makeTerrain), so comparing against
+      // world.relief would be comparing two different worlds.
+      const mapMetres = elevationToMetres(world.elevation[cy * world.width + cx], terrain.relief);
       const walked = terrain.heightAt(cx * M_PER_CELL, cy * M_PER_CELL);
       worst = Math.max(worst, Math.abs(walked - mapMetres));
     }
@@ -103,8 +106,18 @@ test('you start on dry land you can stand on, and cannot walk off the map', () =
   if (terrain.hasSea) assert.ok(spawn.height > 0, 'spawned below sea level');
   assert.ok(terrain.slopeAt(spawn.x, spawn.z, 6) < 0.6, 'spawned on a cliff face');
 
-  assert.deepEqual(terrain.clampToWorld(-500, -500), [0, 0]);
-  assert.deepEqual(terrain.clampToWorld(1e9, 1e9), [terrain.widthM, terrain.depthM]);
+  // Longitude WRAPS and latitude clamps — a world map is a sphere unrolled, so walking east far
+  // enough brings you round to the west. Only the poles are a wall.
+  const [wx, wz] = terrain.clampToWorld(-500, -500);
+  assert.ok(wx > terrain.widthM - 600 && wx <= terrain.widthM, `west of the map should wrap east, got ${wx}`);
+  assert.equal(wz, 0, 'north of the map is the pole, and clamps');
+  const [ex, ez] = terrain.clampToWorld(terrain.widthM + 500, 1e9);
+  assert.ok(ex < 600, `east of the map should wrap west, got ${ex}`);
+  assert.equal(ez, terrain.depthM, 'south of the map is the pole, and clamps');
+  // and the ground is continuous across the seam, not a cliff
+  const east = terrain.heightAt(terrain.widthM - 1, terrain.depthM / 2);
+  const west = terrain.heightAt(1, terrain.depthM / 2);
+  assert.ok(Math.abs(east - west) < 900, `the seam is a ${Math.round(Math.abs(east - west))} m cliff`);
 });
 
 test('landing prefers a world you can live on', () => {

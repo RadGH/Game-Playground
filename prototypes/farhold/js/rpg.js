@@ -10,16 +10,21 @@
 //   const player = rpg.createPlayer({ name: 'Wren', classId: 'ranger' });
 //   rpg.equip(player, rpg.rollDrop({ level: 3 }));
 //
-// Affixes this file does not understand are kept on the item and shown on its card, marked as
-// having no effect yet. They are not silently dropped — later phases turn them on.
+// Round 4: every affix an item can roll is wired. `js/effects.js` is the registry — 63 affix stats
+// and 24 legendary powers, each with a meaning that makes sense in real time rather than in
+// Emberveil's turn order. Anything the registry has still never heard of is declared on the sheet
+// rather than swallowed (`derived.inert`), which is the guard that found the dead ones.
 
 import { Loot } from '../../emberveil/js/loot.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 // Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
+// Round 4: every affix an item can carry now does something. `js/effects.js` is the registry.
+import { Effects, STAT_FIELDS, effectFor, describeAffix, isMagic, INITIATIVE_PER_POINT } from './effects.js';
 
 export { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY };
+export { describeAffix, effectFor };
 
 /**
  * Which passive-node fields this game actually reads. The rest are carried and declared, the same
@@ -40,16 +45,120 @@ export const ARMOUR_LOOK = {
   feet: { cloth: 'sandals', light: 'boots', medium: 'boots', scaled: 'heavy', heavy: 'heavy', plate: 'heavy', runed: 'slippers' },
 };
 
-/** Affixes that change a character here. Everything else is carried but does nothing yet. */
-export const LIVE_STATS = {
-  hp: 'maxHp', mp: 'maxMp', armor: 'armor', magicResist: 'magicResist', dmg: 'damageFlat',
-  critChance: 'critChance', critDamage: 'critDamage', dodge: 'dodge', hit: 'hit', hpRegen: 'hpRegen',
-  mana_regen: 'mpRegen', str: 'str', dex: 'dex', int: 'int', con: 'con', spellPower: 'spellPower',
-  lifeSteal: 'lifeSteal', magicFind: 'magicFind', goldFind: 'goldFind', xpFind: 'xpFind',
-  block_chance: 'blockChance', block_power: 'blockPower',
+/**
+ * Affixes that add a plain number to the sheet. Kept as an export because it is the name the tests
+ * and the character sheet already use, but the table itself now lives in the effect registry —
+ * *every* affix is live in round 4, so there is no longer a "live" list and a dead one.
+ */
+export const LIVE_STATS = STAT_FIELDS;
+
+/**
+ * The elements a magic weapon can be made of, and what each one leaves behind.
+ *
+ * A wand is not a club. Round 4b made every wand a **ranged** weapon that throws its own element,
+ * decided once from the item's own id so a given wand is always the same wand, and shown on the card.
+ * Everything here routes through `magicResist` rather than armour (see `strike`), and applies the
+ * status named below, so picking a fire wand over an ice one is a real decision.
+ */
+export const CAST_ELEMENTS = [
+  { element: 'fire', name: 'Flame', status: 'burn', color: '#ff8a40', desc: 'sets what it hits alight' },
+  { element: 'ice', name: 'Rime', status: 'chill', color: '#9fd8ff', desc: 'slows what it hits' },
+  { element: 'lightning', name: 'Storm', status: 'shock', color: '#ffe86a', desc: 'leaves the target taking more of everything' },
+  { element: 'poison', name: 'Blight', status: 'poison', color: '#9ede6a', desc: 'keeps working after it lands' },
+  { element: 'shadow', name: 'Gloom', status: 'curse', color: '#c090ff', desc: 'curses what it hits' },
+  { element: 'arcane', name: 'Arc', status: null, color: '#b8a0ff', desc: 'raw force — no status, but the hardest hitting' },
+];
+/** Which weapon subtypes cast rather than swing. */
+const CASTERS = new Set(['wand', 'scepter', 'orb', 'staff', 'tome']);
+/** Only a wand becomes a true ranged caster; a staff is still swung, but it is branded. */
+const RANGED_CASTERS = new Set(['wand']);
+
+/** A stable 0..1 from a string, so the same item always has the same element. */
+function hashOf(text) {
+  let h = 2166136261;
+  for (let i = 0; i < String(text).length; i++) { h ^= String(text).charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 100000) / 100000;
+}
+
+/**
+ * Give a magic weapon its element. Called on everything the generator hands back, so a wand out of a
+ * chest, a drop, a shop or the crafting bench all behave the same.
+ */
+export function attuneWeapon(item) {
+  if (!item || item.type !== 'weapon') return item;
+  const sub = item.subtype || item.baseKey;
+  if (!CASTERS.has(sub)) return item;
+  if (item.castElement) return item;
+  // a brand put on at the bench wins over the base's own attunement
+  const forced = item.brand;
+  const pick = forced
+    ? CAST_ELEMENTS.find(e => e.element === forced) || CAST_ELEMENTS[0]
+    : CAST_ELEMENTS[Math.floor(hashOf(item.id || item.baseKey) * CAST_ELEMENTS.length)];
+  item.castElement = pick.element;
+  item.castStatus = pick.status;
+  item.castName = pick.name;
+  if (RANGED_CASTERS.has(sub)) {
+    item.ranged = true;
+    item.castRange = 34;
+  }
+  // it reads on the card like any other property
+  if (!(item.affixes || []).some(a => a.stat === 'castElement')) {
+    (item.affixes || (item.affixes = [])).push({
+      id: 'cast_' + pick.element, name: pick.name, stat: 'castElement', value: 1,
+      element: pick.element, baseIntrinsic: true, intrinsic: true,
+    });
+  }
+  // and the name says what it is: "Flame Wand of Vitality"
+  if (!item.isUnique && !item.setId && !item.name.startsWith(pick.name)) item.name = `${pick.name} ${item.name}`;
+  return item;
+}
+
+/** What element an attack with this weapon carries. */
+export function elementOf(item) {
+  return item?.brand || item?.castElement || 'physical';
+}
+/** …and what status it leaves behind, if any. */
+export function statusOf(item) {
+  const el = elementOf(item);
+  if (el === 'physical') return null;
+  return CAST_ELEMENTS.find(e => e.element === el)?.status || null;
+}
+
+/**
+ * Every place something can be worn.
+ *
+ * Round 4b added three: a **second ring** (there was one ring slot, which made the shift-to-compare
+ * card compare against nothing), a **mount** slot so the horse is a thing you own rather than a key
+ * you press, and a **light** slot so carrying a torch does not cost you your shield.
+ */
+/**
+ * How often each property should turn up, relative to the others. The user's note: "plain damage,
+ * minimum damage, maximum damage; these are the best stats especially for a weapon" — and the weird
+ * conditionals "shouldn't be as common". Anything not listed falls back to `plainWeight` for an
+ * ordinary stat and `exoticWeight` for a `cond_*` one.
+ */
+export const AFFIX_WEIGHT = {
+  // what you actually want on a weapon
+  dmg: 16, critChance: 10, critDamage: 9, str: 9, dex: 9, int: 9, con: 9,
+  // what you actually want on armour
+  hp: 14, armor: 12, magicResist: 8, dodge: 7, hit: 6, mp: 6,
+  // good, but not every time
+  spellPower: 6, lifeSteal: 5, hpRegen: 5, mana_regen: 5, initiative: 5,
+  magicFind: 4, goldFind: 4, xpFind: 4, manaSteal: 3, cooldownReduction: 3,
+  block_chance: 4, block_power: 4, barrier: 3, barrierRegen: 3,
+  // the interesting ones: kept, but they are a find rather than the default
+  cond_hpOnKill: 2, cond_manaOnAttack: 2, cond_manaOnCrit: 2, cond_thornsFlat: 2,
+  cond_dmgVsUndead: 2, cond_dmgVsDemon: 2, cond_executeDmgPct: 2, cond_critArmorPen: 2,
+  cond_physDmgReducePct: 2, cond_magicDmgReducePct: 2, cond_skillMpCostReduce: 2,
+  cond_goldOnEliteKill: 2, cond_cheatDeath: 1,
 };
 
-export const SLOTS = ['weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet', 'ring', 'necklace'];
+export const SLOTS = [
+  'weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet',
+  'ring', 'ring2', 'necklace', 'mount', 'light',
+];
+/** Slots whose contents are gear you fight with, for the "worth wearing" arrow. */
+export const RING_SLOTS = ['ring', 'ring2'];
 export const MAX_LEVEL = 30;
 
 /** XP needed to *reach* a level. A gentle curve — this prototype is about the walk, not the grind. */
@@ -111,6 +220,39 @@ export class Rpg {
     this.talentList = talents?.talents || [];
     this.loot = new Loot(items, balance.loot || {});
     this.rng = makeRng(balance.seed ?? 1);
+    // Round 4: the one place an affix, a set bonus or a legendary power turns into an effect.
+    this.fx = new Effects();
+    this.weightAffixes();
+  }
+
+  /**
+   * Make the plain, useful properties common and the exotic ones rare.
+   *
+   * Emberveil's generator picks uniformly from `prefixes + suffixes + shield + extended`, and
+   * `extended` holds forty conditionals. Forty of the fifty-nine entries being "+8% fire damage to
+   * anything poisoned" meant a weapon almost never rolled plain damage, which is the property a
+   * weapon most wants. This wraps `pool()` so the list it picks from carries each affix as many
+   * times as `AFFIX_WEIGHT` says — a uniform pick over a weighted list is a weighted pick.
+   *
+   * Nothing is removed. A shield-at-the-start-of-a-fight roll is still in there; it is just no
+   * longer as likely as raw damage.
+   */
+  weightAffixes() {
+    const W = { ...AFFIX_WEIGHT, ...(this.b.loot?.affixWeights || {}) };
+    const plain = this.b.loot?.plainWeight ?? 5;
+    const exotic = this.b.loot?.exoticWeight ?? 1;
+    const loot = this.loot;
+    const inner = loot.pool.bind(loot);
+    loot.pool = (base, rarity, opts) => {
+      const list = inner(base, rarity, opts);
+      const out = [];
+      for (const a of list) {
+        const n = W[a.stat] ?? (String(a.stat).startsWith('cond_') ? exotic : plain);
+        for (let i = 0; i < n; i++) out.push(a);
+      }
+      return out.length ? out : list;
+    };
+    loot.weighted = true;
   }
 
   // ---------------------------------------------------------------- characters
@@ -142,23 +284,36 @@ export class Rpg {
       maxHp: (b.baseHp ?? 60) + (b.hpPerLevel ?? 14) * (lvl - 1),
       maxMp: (b.baseMp ?? 20) + (b.mpPerLevel ?? 4) * (lvl - 1),
       armor: 0, magicResist: 0, damageFlat: 0, critChance: b.critChance ?? 5, critDamage: b.critDamage ?? 50,
-      dodge: 0, hit: 75, hpRegen: b.hpRegen ?? 0.5, mpRegen: 1, spellPower: 0, lifeSteal: 0,
+      // Accuracy starts at ZERO. It used to start at 75, which — now that it cancels dodge — would
+      // have cancelled 37 points of it on every swing and made dodge worthless on everything.
+      dodge: 0, hit: 0, hpRegen: b.hpRegen ?? 0.5, mpRegen: 1, spellPower: 0, lifeSteal: 0,
       magicFind: 0, goldFind: 0, xpFind: 0, blockChance: 0, blockPower: 0,
+      // round 4: the stats that used to be carried and ignored
+      barrier: 0, barrierRegen: 0, cooldownReduction: 0, manaSteal: 0, haste: 0,
       str: unit.attrs?.str ?? 0, dex: unit.attrs?.dex ?? 0, int: unit.attrs?.int ?? 0, con: unit.attrs?.con ?? 0,
+      // passive-tree fields, zeroed here so the effect registry can add to them too
+      resistAll: 0, thorns: 0, hpOnKill: 0, manaOnKill: 0, lifeStealFrac: 0,
+      // talent fields, likewise
+      damagePct: 0, armorPct: 0, movePct: 0, jumpPct: 0, swimPct: 0,
+      mountPct: 0, floatLift: 0, arrowRangePct: 0, arrowSpeedPct: 0,
       inert: [],
     };
     for (const slot of SLOTS) {
       const item = unit.equipment?.[slot];
       if (!item) continue;
       if (item.armor) d.armor += item.armor;
-      for (const a of item.affixes || []) {
-        const field = LIVE_STATS[a.stat];
-        if (!field) { d.inert.push(a.stat); continue; }
-        d[field] += a.value || 0;
-      }
+      // Anything the registry has never heard of is still declared rather than swallowed — that
+      // guard is what caught the 41 dead affixes in the first place, so it stays.
+      for (const a of item.affixes || []) if (!effectFor(a)) d.inert.push(a.stat);
+    }
+    // set bonuses, legendary powers and every affix, from the one registry
+    unit.legendaryPowers = this.legendaryPowers(unit);
+    this.fx.refresh(unit);
+    this.fx.derive(unit, d);
+    for (const [key, value] of Object.entries(this.setBonuses(unit))) {
+      if (key in d) d[key] += value;
     }
     // the passive tree, on top of gear
-    d.resistAll = 0; d.thorns = 0; d.hpOnKill = 0; d.manaOnKill = 0; d.lifeStealFrac = 0;
     for (const [id, rank] of Object.entries(unit.passiveRanks || {})) {
       const node = PASSIVE_NODES[id];
       if (!node || !rank) continue;
@@ -172,8 +327,6 @@ export class Rpg {
     d.lifeSteal += d.lifeStealFrac * 100;      // nodes store a fraction, gear stores a percent
 
     // talents: broad masteries, taken one per talent level
-    d.damagePct = 0; d.armorPct = 0; d.movePct = 0; d.jumpPct = 0; d.swimPct = 0;
-    d.mountPct = 0; d.floatLift = 0; d.arrowRangePct = 0; d.arrowSpeedPct = 0;
     for (const id of unit.talents || []) {
       const t = this.talentList.find(x => x.id === id);
       if (!t) continue;
@@ -194,13 +347,92 @@ export class Rpg {
     const wd = weapon?.dmg || (b.unarmed ?? [2, 4]);
     const scale = 1 + attr * (b.damagePerAttr ?? 0.03);
     const talentDmg = 1 + d.damagePct / 100;
+    // A weapon's base damage does not change when you level, but an enemy's health compounds every
+    // level — so without this a level-20 character with a perfect bow did almost nothing to a
+    // level-25 anything. Training counts for something: every level is worth a flat share more.
+    const skill = 1 + (lvl - 1) * (b.damagePerLevel ?? 0.1);
     d.damage = [
-      Math.max(1, Math.round((wd[0] + d.damageFlat) * scale * talentDmg)),
-      Math.max(2, Math.round((wd[1] + d.damageFlat) * scale * talentDmg)),
+      Math.max(1, Math.round((wd[0] + d.damageFlat) * scale * talentDmg * skill)),
+      Math.max(2, Math.round((wd[1] + d.damageFlat) * scale * talentDmg * skill)),
     ];
+    d.levelScale = skill;
     d.moveSpeed = (b.moveSpeed ?? 5.2) * (1 - Math.min(0.2, (d.armor / 400))) * (1 + d.movePct / 100);
+    // how often you can swing, from `initiative`-style haste (a point of initiative is worth
+    // INITIATIVE_PER_POINT percent, because 1-3% would be beneath noticing)
+    d.haste *= INITIATIVE_PER_POINT;
+    d.attackEvery = Math.max(0.18, (b.attackEvery ?? 0.62) / (1 + Math.max(-0.5, d.haste / 100)));
+    d.maxBarrier = Math.round(d.barrier);
+
+    /**
+     * ROUND EVERYTHING. Floating point turns "+0.41 health" repeated eleven times into a max health
+     * of 513.4100000000000000001, which is what the HP bar then printed. Emberveil hit this and
+     * fixed it the same way; `shared/format.js` exists for the display side, but the numbers
+     * themselves should not be ragged in the first place.
+     */
+    for (const key of ['maxHp', 'maxMp', 'armor', 'magicResist', 'damageFlat', 'barrier']) {
+      d[key] = Math.round(d[key] || 0);
+    }
+    for (const key of ['critChance', 'critDamage', 'dodge', 'hit', 'hpRegen', 'mpRegen', 'spellPower',
+      'lifeSteal', 'magicFind', 'goldFind', 'xpFind', 'blockChance', 'blockPower', 'barrierRegen',
+      'cooldownReduction', 'manaSteal', 'haste', 'moveSpeed', 'resistAll', 'thorns',
+      'attackEvery', 'levelScale', 'damagePct', 'armorPct', 'movePct']) {
+      if (typeof d[key] === 'number') d[key] = Math.round(d[key] * 1000) / 1000;
+    }
     d.inert = [...new Set(d.inert)];
     return d;
+  }
+
+  /**
+   * Set bonuses, as flat additions to derived fields. Emberveil's sets carry stat keys in its own
+   * spelling, so this is the one place the two vocabularies meet.
+   */
+  setBonuses(unit) {
+    const out = {};
+    const bump = (k, v) => { out[k] = (out[k] || 0) + v; };
+    const extra = this.setPieceBonus(unit);
+    for (const s of this.loot.activeSets(unit.equipment || {})) {
+      const eff = s.eff + extra;
+      for (const [at, bonus] of Object.entries(s.set.partialBonuses || {})) {
+        if (eff < +at) continue;
+        for (const [k, v] of Object.entries(bonus)) {
+          if (k === 'desc' || typeof v !== 'number') continue;
+          const field = STAT_FIELDS[k] || k;
+          bump(field, v);
+        }
+      }
+    }
+    return out;
+  }
+
+  /**
+   * How many extra set pieces this character counts as wearing. Read straight off the affixes
+   * rather than through the effect cache, because the cache is being rebuilt when this is called.
+   */
+  setPieceBonus(unit) {
+    let extra = 0;
+    for (const item of Object.values(unit.equipment || {})) {
+      for (const a of item?.affixes || []) {
+        if (a.stat === 'cond_extraSetPiece' || a.stat === 'cond_setThresholdReduce') extra++;
+      }
+    }
+    return extra;
+  }
+
+  /** The legendary power ids a character's gear switches on — uniques, full sets and thresholds. */
+  legendaryPowers(unit) {
+    const extra = this.setPieceBonus(unit);
+    const ids = new Set();
+    for (const item of Object.values(unit.equipment || {})) {
+      if (item?.legendaryEffectId) ids.add('legendary:' + item.legendaryEffectId);
+    }
+    for (const s of this.loot.activeSets(unit.equipment || {})) {
+      const eff = s.eff + extra;
+      if (eff >= s.set.activationPieces && s.set.legendaryEffect) ids.add('legendary:' + s.set.legendaryEffect);
+      for (const [at, id] of Object.entries(s.set.thresholdPowers || {})) {
+        if (eff >= +at) ids.add('legendary:' + id);
+      }
+    }
+    return [...ids];
   }
 
   /** Recompute derived stats, keeping the same share of health unless `full` is asked for. */
@@ -217,9 +449,16 @@ export class Rpg {
   }
 
   /** Put an item on. The item that comes off goes back to the bag. Returns what was replaced. */
-  equip(player, item) {
+  equip(player, item, { into = null } = {}) {
     if (!item) return null;
-    const slot = item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot;
+    let slot = into || (item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot);
+    // A ring goes on whichever hand is free; with both full it replaces the WEAKER one, because
+    // throwing away your best ring for a worse one is never what you meant.
+    if (slot === 'ring' && !into) {
+      if (!player.equipment.ring) slot = 'ring';
+      else if (!player.equipment.ring2) slot = 'ring2';
+      else slot = itemScore(player.equipment.ring2) < itemScore(player.equipment.ring) ? 'ring2' : 'ring';
+    }
     if (!SLOTS.includes(slot)) return null;
     const old = player.equipment[slot] || null;
     player.equipment[slot] = item;
@@ -317,21 +556,83 @@ export class Rpg {
 
   // ---------------------------------------------------------------- enemies
 
-  /** Build a live enemy from a table entry in data/enemies.json. */
-  makeEnemy(def, level, rng = this.rng) {
+  /**
+   * Which rank a spawn comes out at. The block-world action-RPG mods this round is modelled on roll
+   * every monster's stats rather than reading them off a table; Farhold keeps the table and rolls
+   * the *rank* — normal, champion (one modifier), rare (two modifiers and a name of its own).
+   */
+  rollRank(rng = this.rng, { bonus = 1 } = {}) {
+    const R = this.b.ranks || {};
+    const roll = rng();
+    if (roll < (R.rareChance ?? 0.03) * bonus) return 'rare';
+    if (roll < ((R.rareChance ?? 0.03) + (R.championChance ?? 0.11)) * bonus) return 'champion';
+    return 'normal';
+  }
+
+  /** Pick `n` different modifiers from data/enemies.json's table. */
+  pickModifiers(table, n, rng = this.rng) {
+    const pool = [...(table || [])];
+    const out = [];
+    while (out.length < n && pool.length) out.push(...pool.splice(Math.floor(rng() * pool.length), 1));
+    return out;
+  }
+
+  /**
+   * Build a live enemy from a table entry in data/enemies.json.
+   *
+   * `rank` and `modifiers` are what make one wolf different from the next: a champion carries one
+   * modifier, a rare two and its own name, a boss is a whole hand-written entry with phases.
+   */
+  makeEnemy(def, level, rng = this.rng, { rank = 'normal', modifiers = [], name = null } = {}) {
     const e = this.b.enemies || {};
+    const R = (this.b.ranks || {})[rank] || {};
     const lvl = Math.max(1, Math.round(level));
-    const scale = Math.pow(e.perLevel ?? 1.17, lvl - 1);
-    const hp = Math.round((def.hp ?? 30) * scale * (e.hp ?? 1) * rng.range(0.9, 1.1));
-    const dmg = (def.dmg ?? [4, 7]).map(v => Math.max(1, Math.round(v * scale * (e.dmg ?? 1))));
+    // Health and damage used to compound at the SAME rate, so a five-level gap doubled an enemy's
+    // damage as well as its health and the fight became unsurvivable rather than merely hard. They
+    // are separate curves now: a higher-level enemy is much tougher and only somewhat harder hitting.
+    const scale = Math.pow(e.perLevel ?? 1.13, lvl - 1);
+    const hitScale = Math.pow(e.dmgPerLevel ?? e.perLevel ?? 1.09, lvl - 1);
+
+    // rank first, then every modifier on top of it
+    let hpMult = (R.hp ?? 1), dmgMult = (R.dmg ?? 1), armorMult = (R.armor ?? 1);
+    let speedMult = 1, swingMult = 1, goldMult = (R.gold ?? 1), dropMult = (R.drop ?? 1);
+    let thorns = 0, lifeSteal = 0, resist = 0;
+    const onHit = def.onHit ? [def.onHit] : [];
+    for (const m of modifiers) {
+      hpMult *= m.hp ?? 1; dmgMult *= m.dmg ?? 1; armorMult *= m.armor ?? 1;
+      speedMult *= m.speed ?? 1; swingMult *= m.attackEvery ?? 1;
+      goldMult *= m.gold ?? 1; dropMult *= m.drop ?? 1;
+      thorns += m.thorns ?? 0; lifeSteal += m.lifeSteal ?? 0; resist += m.resist ?? 0;
+      if (m.onHit) onHit.push(m.onHit);
+    }
+
+    const hp = Math.max(1, Math.round((def.hp ?? 30) * scale * (e.hp ?? 1) * hpMult * rng.range(0.9, 1.1)));
+    const dmg = (def.dmg ?? [4, 7]).map(v => Math.max(1, Math.round(v * hitScale * (e.dmg ?? 1) * dmgMult)));
+    const prefix = modifiers.map(m => m.prefix).filter(Boolean).join(' ');
     return {
       id: 'e' + Math.floor(rng() * 1e9).toString(36),
-      defId: def.id, name: def.name, kind: def.kind || 'beast', level: lvl,
-      hp, maxHp: hp, dmg, armor: Math.round((def.armor ?? 0) * scale), speed: def.speed ?? 3.1,
-      reach: def.reach ?? 2.2, aggroRange: def.aggroRange ?? 26, attackEvery: def.attackEvery ?? 1.5,
-      xp: Math.round((def.xp ?? 12) * scale * (e.xp ?? 1)),
-      gold: Math.round((def.gold ?? 4) * scale * (e.gold ?? 1)),
+      defId: def.id, name: name || (prefix ? `${prefix} ${def.name}` : def.name), baseName: def.name,
+      kind: def.kind || 'beast', family: def.family || 'beast', role: def.role || 'skirmisher',
+      level: lvl, rank, modifiers: modifiers.map(m => m.id),
+      auras: modifiers.map(m => m.aura).filter(Boolean),
+      hp, maxHp: hp, dmg,
+      armor: Math.round((def.armor ?? 0) * scale * armorMult),
+      magicResist: Math.round((def.armor ?? 0) * scale * 0.5),
+      derived: { resistAll: resist * 100, thorns, dodge: 0 },
+      speed: (def.speed ?? 3.1) * speedMult,
+      reach: def.reach ?? 2.2, aggroRange: def.aggroRange ?? 26,
+      attackEvery: (def.attackEvery ?? 1.5) * swingMult,
+      xp: Math.round((def.xp ?? 12) * scale * (e.xp ?? 1) * (R.xp ?? 1)),
+      gold: Math.round((def.gold ?? 4) * scale * (e.gold ?? 1) * goldMult),
+      lifeSteal,
+      onHit: onHit.length ? onHit : null,
+      ranged: def.ranged || null, flying: !!def.flying, glow: def.glow || null,
+      phases: def.phases ? def.phases.map(p => ({ ...p, fired: false })) : null,
+      spawns: def.spawns || null, arena: def.arena || 0,
+      dropBonus: (def.dropBonus || 0) + (R.dropBonus || 0), dropMult,
+      dropRarity: (def.dropRarity || 1) * (R.dropRarity ?? 1),
       look: def.look || null, dropBases: def.dropBases || null,
+      scale: rank === 'champion' ? 1.18 : rank === 'rare' ? 1.35 : 1,
     };
   }
 
@@ -341,29 +642,112 @@ export class Rpg {
    * One swing. Returns what happened so the caller can show numbers, play an animation and write
    * a line in the log. Attacker and defender are any `{ derived }` character or plain enemy.
    */
-  strike(attacker, defender, rng = this.rng, { multiplier = 1 } = {}) {
+  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null } = {}) {
     const a = attacker.derived, d = defender.derived;
-    const dmgRange = a ? a.damage : attacker.dmg || [3, 5];
-    const dodge = (d ? d.dodge : defender.dodge || 0) / 100;
+    // Read every field with a fallback, NEVER `a ? a.x : fallback`. Round 4 gave enemies and pets a
+    // small `derived` bag (resistAll / thorns / dodge) so modifiers could hang off them, which made
+    // `a` truthy for an enemy — and `a.damage` is undefined on an enemy, so the old form rolled
+    // rng.range(undefined, undefined) and every number in the fight came out NaN.
+    const dmgRange = a?.damage || attacker.dmg || [3, 5];
+    // Accuracy was carried and never read. It cancels the defender's dodge, which is the only thing
+    // dodge has ever meant — so `of Accuracy` is worth having against anything nimble.
+    const accuracy = (a?.hit ?? attacker.hit ?? 0);
+    const dodge = Math.max(0, (d?.dodge ?? defender.dodge ?? 0) - accuracy * 0.5) / 100;
     if (rng() < Math.min(0.35, dodge)) return { dodged: true, amount: 0, crit: false };
-    const crit = rng() * 100 < (a ? a.critChance : attacker.critChance || 3);
+
+    // the attacker's affixes get a say before the roll: crit chance, then the multipliers
+    const ctx = { self: attacker, target: defender, element, skill, applyStatus, baseDamage: (dmgRange[0] + dmgRange[1]) / 2 };
+    const critBonus = attacker.equipment ? this.fx.critBonus(ctx) : 0;
+    const crit = rng() * 100 < (a?.critChance ?? attacker.critChance ?? 3) + critBonus;
+    ctx.crit = crit;
+
     let amount = rng.range(dmgRange[0], dmgRange[1]) * multiplier;
-    if (crit) amount *= 1 + (a ? a.critDamage : 50) / 100;
-    const armor = d ? d.armor : defender.armor || 0;
+    if (attacker.equipment) {
+      const out = this.fx.dmgOut(ctx);
+      amount = (amount + out.flat) * out.mult;
+    }
+    if (element !== 'physical' && a?.spellPower) amount *= 1 + a.spellPower;
+    if (crit) amount *= 1 + (a?.critDamage ?? attacker.critDamage ?? 50) / 100;
+
+    // armour, less whatever the attacker's affixes let it ignore
+    let armor = d?.armor ?? defender.armor ?? 0;
+    if (attacker.equipment) armor *= 1 - this.fx.armorPen(ctx);
     amount *= 100 / (100 + Math.max(0, armor));
+    const mres = d?.magicResist ?? defender.magicResist ?? 0;
+    if (isMagic(element) && mres > 0) amount *= 100 / (100 + mres);
     // flat damage reduction from the `resistance` passive
     if (d?.resistAll) amount *= Math.max(0.25, 1 - d.resistAll / 100);
-    amount = Math.max(1, Math.round(amount));
-    defender.hp = Math.max(0, (defender.hp ?? defender.maxHp) - amount);
+    // the defender's own affixes: physical/elemental reductions, last stand
+    if (defender.equipment) amount *= this.fx.dmgIn({ self: defender, target: attacker, element, skill });
+
+    // a block eats a fixed chunk
+    let blocked = 0;
+    if (d?.blockChance && rng() * 100 < d.blockChance) {
+      blocked = Math.min(amount, d.blockPower || 0);
+      amount -= blocked;
+    }
+    amount = Math.max(blocked ? 0 : 1, Math.round(amount));
+
+    // a mana shield takes its share before health does
+    // NOTHING in this game takes the player's mana when they are hit. The old mana shield did, and
+    // it read as every enemy draining you; `cond_manaShieldOnHit` is a damage reduction now.
+    const fromMana = 0;
+    // then barrier, then health
+    let absorbed = 0;
+    if (defender.barrier > 0) {
+      absorbed = Math.min(defender.barrier, amount);
+      defender.barrier -= absorbed;
+      amount -= absorbed;
+    }
+
+    const before = defender.hp ?? defender.maxHp;
+    let hp = Math.max(0, before - amount);
+    // cheat death and last-stand style saves get one look at a killing blow
+    let saved = 0;
+    if (hp <= 0 && defender.equipment) {
+      saved = this.fx.preLethal({ self: defender, target: attacker, element });
+      if (saved) hp = saved;
+    }
+    defender.hp = hp;
+
     const healed = a?.lifeSteal ? Math.round(amount * a.lifeSteal / 100) : 0;
     if (healed && attacker.hp != null) attacker.hp = Math.min(attacker.maxHp, attacker.hp + healed);
-    // thorns: the defender bites back
+    const manaBack = a?.manaSteal ? Math.round(amount * a.manaSteal / 100) : 0;
+    if (manaBack && attacker.mp != null) attacker.mp = Math.min(attacker.maxMp, attacker.mp + manaBack);
+
+    // thorns: the defender bites back, by share and by flat
     let reflected = 0;
-    if (d?.thorns && attacker.hp != null) {
-      reflected = Math.max(1, Math.round(amount * d.thorns));
-      attacker.hp = Math.max(0, attacker.hp - reflected);
+    if (attacker.hp != null) {
+      const flat = defender.equipment ? this.fx.sum(defender, 'thornsFlat') : (defender.thorns ? 0 : 0);
+      const share = (d?.thorns || 0) + (defender.equipment ? this.fx.sum(defender, 'reflect') : 0);
+      reflected = Math.round(amount * share) + flat;
+      if (reflected > 0) attacker.hp = Math.max(0, attacker.hp - reflected);
     }
-    return { dodged: false, amount, crit, healed, reflected, dead: defender.hp <= 0 };
+
+    const result = { dodged: false, amount, crit, healed, manaBack, reflected, blocked, absorbed, fromMana, saved, element, dead: defender.hp <= 0 };
+    // A belt-and-braces guard. A NaN anywhere upstream used to walk straight into a health bar and
+    // leave it reading "NaN / 94" with no way to tell where it came from; now it is caught here.
+    if (!Number.isFinite(result.amount)) {
+      result.amount = 1;
+      defender.hp = Math.max(0, before - 1);
+      result.dead = defender.hp <= 0;
+      if (typeof console !== 'undefined') console.warn('farhold: a strike produced a non-number', { attacker: attacker.name, defender: defender.name, dmgRange });
+    }
+
+    // after the hit: streaks, bleeds, mana on hit, first-hit marks
+    if (attacker.equipment) {
+      const post = { self: attacker, target: defender, amount, crit, element, applyStatus };
+      this.fx.onHit(post);
+      if (crit) this.fx.onCrit(post);
+      if (post.mana && attacker.mp != null) attacker.mp = Math.min(attacker.maxMp, attacker.mp + post.mana);
+      result.post = post;
+    }
+    if (defender.equipment) {
+      const hurt = { self: defender, target: attacker, amount, element };
+      this.fx.onDamaged(hurt);
+      result.defenderPost = hurt;
+    }
+    return result;
   }
 
   // ---------------------------------------------------------------- loot
@@ -375,9 +759,9 @@ export class Rpg {
     return tier?.bases || ['sword', 'dagger', 'light_chest', 'ring'];
   }
 
-  rarityFor(level, rng, magicFind = 0) {
+  rarityFor(level, rng, magicFind = 0, rarityBoost = 1) {
     const table = this.b.rarity || { normal: 0.52, magic: 0.31, rare: 0.14, legendary: 0.03 };
-    const lift = 1 + magicFind / 100;
+    const lift = (1 + magicFind / 100) * rarityBoost;
     const roll = rng();
     let cut = (table.legendary ?? 0.03) * lift;
     if (roll < cut) return 'legendary';
@@ -397,20 +781,43 @@ export class Rpg {
    * Roll a drop. Returns an item or null. Uniques and set pieces come out of the same generator
    * Emberveil uses, so a legendary here is a real Emberveil legendary with its own power on it.
    */
-  rollDrop({ level = 1, rng = this.rng, magicFind = 0, chance = null, bases = null } = {}) {
+  rollDrop({ level = 1, rng = this.rng, magicFind = 0, chance = null, bases = null, rarityBoost = 1, floor = null } = {}) {
     const dropChance = chance ?? (this.b.loot?.dropRate ?? 0.42);
     if (rng() > dropChance) return null;
-    const rarity = this.rarityFor(level, rng, magicFind);
+    let rarity = this.rarityFor(level, rng, magicFind, rarityBoost);
+    // a chest or a boss can promise "magic or better"
+    const LADDER = ['normal', 'magic', 'rare', 'legendary'];
+    if (floor && LADDER.indexOf(rarity) < LADDER.indexOf(floor)) rarity = floor;
     if (rarity === 'legendary') {
       const act = Math.max(1, Math.min(6, Math.ceil(level / 5)));
       const set = this.loot.maybeSetItem(act, rng, this.b.loot?.setChance ?? 0.35);
-      if (set) return set;
+      if (set) return attuneWeapon(set);
       const uniques = (this.items.uniques || []).filter(u => (u.act ?? 1) <= act);
-      if (uniques.length && rng() < 0.5) return this.loot.generateUnique(rng.pick(uniques).id, rng);
+      if (uniques.length && rng() < 0.5) return attuneWeapon(this.loot.generateUnique(rng.pick(uniques).id, rng));
     }
     const pool = bases || this.basesFor(level);
     const baseKey = rng.pick(this.loot.basesForAct(pool, Math.ceil(level / 5)));
-    return this.loot.generate(baseKey, rarity, this.qualityFor(level), { rng });
+    return attuneWeapon(this.loot.generate(baseKey, rarity, this.qualityFor(level), { rng }));
+  }
+
+  /**
+   * Everything one kill drops. A normal enemy rolls once; a champion, a rare or a boss rolls
+   * `dropBonus` extra times and at a better rarity, which is where the whole "kill the blue one"
+   * loop comes from.
+   */
+  rollDrops(enemy, { rng = this.rng, magicFind = 0 } = {}) {
+    const out = [];
+    const rolls = 1 + (enemy.dropBonus || 0);
+    for (let i = 0; i < rolls; i++) {
+      const item = this.rollDrop({
+        level: enemy.level, rng, magicFind, bases: enemy.dropBases,
+        chance: Math.min(0.98, (this.b.loot?.dropRate ?? 0.45) * (enemy.dropMult || 1)),
+        rarityBoost: enemy.dropRarity || 1,
+        floor: enemy.rank === 'boss' && i === 0 ? 'rare' : enemy.rank === 'rare' && i === 0 ? 'magic' : null,
+      });
+      if (item) out.push(item);
+    }
+    return out;
   }
 
   /**

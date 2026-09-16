@@ -116,8 +116,10 @@ test('deep water makes you swim, and you cannot ride a horse into it', async ({ 
     return { floating, mountedInWater };
   })()`);
   expect(swim.floating.swimming).toBe(true);
-  // floating at the surface, not standing on the bed
-  expect(Math.abs(swim.floating.y - swim.floating.surface)).toBeLessThan(1.2);
+  // Floating at the surface, not standing on the bed. The tolerance is the body's own float depth
+  // plus a little: round 4b scaled the terrain's relief to the map's width, so a river bed sits
+  // closer to its surface than it used to and the old 1.2 m was cutting it fine.
+  expect(Math.abs(swim.floating.y - swim.floating.surface)).toBeLessThan(2);
   expect(swim.mountedInWater).toBe(false);
 
   // the stroke follows the keys, read through the real input path
@@ -346,9 +348,10 @@ test('M opens a map with the player, layers and pins on it', async ({ page }) =>
   await page.keyboard.press('KeyM');
   await expect(page.locator('#map-screen')).toBeVisible();
   await expect(page.locator('#map-canvas')).toBeVisible();
-  // World Forge's own layer chips, including the weather one added this round
+  // World Forge's own layer chips, the weather one from round 3, and Farhold's own `levels` overlay
   const chips = page.locator('#map-screen .chips.layers .chip');
-  await expect(chips).toHaveCount(9);
+  await expect(chips).toHaveCount(10);
+  await expect(page.locator('#map-screen .chip[data-layer="levels"]')).toBeVisible();
   await page.locator('#map-screen .chip[data-layer="elevation"]').click();
   expect(await page.evaluate(() => window.farhold.map.state.layer)).toBe('elevation');
 
@@ -458,9 +461,10 @@ test('the neighbours visibly orbit, and an eclipse darkens the world', async ({ 
     // force one and watch the light go
     f.setTime(0);
     const brightBefore = f.sky.sunLight.intensity;
-    const skyBefore = f.sky.scene.background.getHexString();
+    // round 4: the backdrop is the galaxy sphere; the sky's own colour lives on the fog now
+    const skyBefore = f.sky.fog.color.getHexString();
     const body = f.sky.forceEclipse('solar');
-    const after = { light: f.sky.sunLight.intensity, sky: f.sky.scene.background.getHexString(), ...f.sky.eclipse };
+    const after = { light: f.sky.sunLight.intensity, sky: f.sky.fog.color.getHexString(), ...f.sky.eclipse };
     return { moved, brightBefore, after, body, orbitScale: f.balance.sky.orbitScale };
   });
   expect(sky.orbitScale).toBeGreaterThan(1);

@@ -22,6 +22,21 @@ import { ObstacleField, PROP_SOLIDS } from './collide.js';
 
 const CELL = 64;                     // metres across one prop cell
 
+/**
+ * Every offset in a square of `radius` cells, sorted nearest-first. Cached per radius because it is
+ * the same list every rebuild and sorting a few hundred pairs on every cell crossing is waste.
+ */
+const spiralCache = new Map();
+function spiralOffsets(radius) {
+  const key = radius | 0;
+  if (spiralCache.has(key)) return spiralCache.get(key);
+  const out = [];
+  for (let dz = -key; dz <= key; dz++) for (let dx = -key; dx <= key; dx++) out.push([dx, dz]);
+  out.sort((a, b) => (a[0] * a[0] + a[1] * a[1]) - (b[0] * b[0] + b[1] * b[1]));
+  spiralCache.set(key, out);
+  return out;
+}
+
 /** Stable 0..1 hash for a cell, so a cell's contents never depend on how you arrived at it. */
 function cellSeed(seed, cx, cz) {
   let h = Math.imul(cx + 0x9e3779b9, 0x85ebca6b) ^ Math.imul(cz + 0x165667b1, 0xc2b2ae35);
@@ -304,8 +319,20 @@ export function createProps(scene, terrain, opts = {}) {
     solids.clear();
 
     const cx0 = Math.round(px / CELL), cz0 = Math.round(pz / CELL);
-    for (let dz = -cfg.radius; dz <= cfg.radius; dz++) {
-      for (let dx = -cfg.radius; dx <= cfg.radius; dx++) {
+    // NEAREST CELL FIRST.
+    //
+    // Reported in play: "when walking between chunks, all the trees and grass and rocks shift
+    // around; walking backwards reverts them." Each cell's contents are a pure function of its own
+    // coordinates, so nothing ever actually moved — but every prop kind has an instance CAP, and
+    // the old scan ran row by row from the top-left of the block. Whichever cells happened to come
+    // first spent the cap, so crossing a boundary changed which cells were reached before it ran
+    // out, and whole clearings of trees vanished and reappeared elsewhere.
+    //
+    // Scanning outward from the player spends the cap on the ground you can actually see, and that
+    // ordering barely changes as you walk — so the trees near you stay put and only the far ones,
+    // which you cannot make out anyway, drop off the end.
+    for (const [dx, dz] of spiralOffsets(cfg.radius)) {
+      {
         const cx = cx0 + dx, cz = cz0 + dz;
         const rng = makeRng(cellSeed(seed, cx, cz));
         const baseX = cx * CELL, baseZ = cz * CELL;

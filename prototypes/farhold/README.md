@@ -1,4 +1,4 @@
-# Farhold (prototype, phases 1–7 of ten)
+# Farhold (prototype — ten phases, plus round 4: the RPG expansion)
 
 A third-person action RPG on a whole procedural planet. You land on a real world of a real star
 system, walk it out to the horizon, fight what lives there, and wear what it drops — and the other
@@ -10,9 +10,9 @@ Working title. Independent project (Radley Sustaire). Sandbox.
 `http://192.168.1.34:8400/prototypes/farhold/` (LAN IP: `hostname -I | awk '{print $1}'`).
 
 [`PLAN.md`](PLAN.md) is the ten-phase plan; [`BRAINSTORM.md`](BRAINSTORM.md) is the idea pile behind
-it. Phases 1–7 are done. Still open: **8** (character creation, classes, talents, visible armour),
-**9** (a campaign, factions, a nemesis, a home) and **10** (performance, a balance simulator, saves
-worth the name, graduation).
+it. All ten phases and the round-3 queue are done. **Round 4 is the RPG expansion** — level-banded
+regions, a much bigger bestiary, dungeons you go inside, chests, bosses, crafting from recycled
+gear, companions, thirty classes and light you can carry. [`RPG.md`](RPG.md) documents it.
 
 ---
 
@@ -26,7 +26,13 @@ worth the name, graduation).
 | **Weather** | 14 kinds of sky — clear through thunderstorm, blizzard, sandstorm, ashfall, ion storm — chosen by the climate you are standing in, rolling in and out over minutes. |
 | **A planted world** | Trees, conifers, palms, ferns, reeds, cacti, crystals, mushrooms, boulders, bones and grass, by biome — plus ruins, columns and standing stones. |
 | **The map made real** | The rivers, roads, bridges, villages, towns and cities World Forge already placed are built on the ground you walk. |
-| **Fight** | 16 enemies over two body types — Chibi 2 humanoids and `avatar-3d` creatures — that wander, notice you, chase and swing. |
+| **Fight** | 46 enemies + 6 bosses over two body types — Chibi 2 humanoids and `avatar-3d` creatures — arriving in **packs**, with **champions** and **rares** among them. |
+| **Zones** | Every named region on the map has its own level band. The one you start in is always level 1–4; walk further and everything is stronger and worth more. |
+| **Dungeons** | Real interiors: rooms, corridors, walls you cannot pass, a pack in most rooms, a boss at the far end, chests worth the walk, and no daylight at all. |
+| **Treasure** | Chests in four grades on the ground and in every dungeon, loot bags off bosses and rares, and a reward screen that counts it up. |
+| **Craft** | Recycle anything you do not want into materials, then forge, temper, promote, inscribe, reweave, recast or brand a weapon at the bench. No mining, no woodcutting. |
+| **Companions** | Thirteen of the thirty classes bring something with them — a necromancer's skeletons, a druid's wolves, a tinker's sentry — with their own AI and their own bodies. |
+| **Light** | Every character starts with a torch, and it lights a large area. Braziers, dungeon sconces and camp fires light themselves. |
 | **Loot** | Real Emberveil items: bases, affixes, qualities, uniques and set pieces, with rarity colours and an upgrade arrow. |
 | **Grow** | XP, 30 levels, attribute points, gear that changes your damage and the weapon in your character's hand. |
 | **Swim** | Deep water makes you swim — floating at the surface, with front, back and side strokes. |
@@ -49,9 +55,9 @@ worth the name, graduation).
 ## Controls
 
 **On foot:** `WASD` move · `Shift` run · `Space` jump · left click swing (click once to capture the
-mouse) · **`1`–`4` skills** · **`V` first person** · `E` talk to somebody · `H` mount a horse ·
-`J` board the ship · `M` the map · `I` or `Tab` character sheet · `O` settings ·
-**`` ` `` debug menu** · `Esc` step back.
+mouse) · **`1`–`6` skills** · **`V` first person** · **`E` talk / open a chest / go into a dungeon /
+climb back out** · **`F` light or snuff your torch** · `H` mount a horse · `J` board the ship ·
+`M` the map · `I` or `Tab` character sheet · `O` settings · **`` ` `` debug menu** · `Esc` step back.
 
 **In space:** `W` throttle · mouse steer · `Shift` boost · hold `Space` to warp · `J` land.
 
@@ -231,11 +237,24 @@ that is phase 4.
 | `js/actors.js` | One interface over Chibi 2 humanoids and creatures; the enemy field. |
 | `js/rpg.js` | Stats, XP, levels, equipment, damage, loot rolls. **Pure, node-testable.** |
 | `js/skills.js` | The skill bar: cooldowns, mana, what a skill does and to whom, and the statuses it leaves behind. **Pure, node-testable.** |
-| `js/hud.js` | Bars, log, minimap, character sheet, bag. |
+| `js/hud.js` | Bars, log, minimap, prompts, the boss bar, and the **tabbed** character sheet. |
+| `js/zones.js` | The level band of every named region, from the region graph. **Pure, node-testable.** |
+| `js/effects.js` | Every affix and legendary power in the game, as real-time hooks. **Pure, node-testable.** |
+| `js/craft.js` | The materials bag and the bench: recycle, forge, temper, promote, reweave, recast, brand. **Pure.** |
+| `js/chests.js` | Chests, loot bags, and the brazier and sconce models. |
+| `js/dungeon.js` | The dungeon interior: geometry, lighting, a terrain stand-in, its own chests. |
+| `js/dungeon-plan.js` | The room-and-corridor layout, with no Three.js in it. **Pure, node-testable.** |
+| `js/encounters.js` | Set-piece encounters on the road: warbands, ambushes, swarms, a rare with an escort. |
+| `js/sites.js` | Camps with a fire in them, and the lairs world bosses keep. |
+| `js/pets.js` | Companions: follow, engage, return, fall, come back. |
+| `js/light.js` | The torch, the world's light sources, and the floor under the night ambient. |
 | `js/main.js` | Boot, wiring, the frame loop, `window.farhold`. |
 | `data/balance.json` | Every knob: player numbers, enemy scaling, drops, ring sizes, scatter density, weather timing, sky exaggeration. |
-| `data/enemies.json` | 16 enemies with the biome families they live in and the body each builds. |
-| `data/skills.json` | 12 skills, 5 statuses, and the four each class gets. |
+| `data/enemies.json` | 46 enemies, 6 bosses, 10 companions, 14 champion/rare modifiers. |
+| `data/skills.json` | 39 skills, 14 statuses, and the six each of the thirty classes gets. |
+| `data/classes.json` | All thirty classes: look, starting kit, skills, companions. |
+| `data/crafting.json` | 12 materials, the recycling tables, and 16 bench recipes. |
+| `data/encounters.json` | 11 set-piece encounters. |
 
 ## What it reuses
 
@@ -280,12 +299,18 @@ any kit.
 
 ## Honest limits
 
-- **Affixes that do nothing yet are declared, not hidden.** Anything outside `LIVE_STATS` in
-  `js/rpg.js` is kept on the item and listed on the character sheet as "carried but not yet wired up
-  in this phase". Emberveil's 359-id effect registry is still not turned on here.
-- **Enemies have no skills of their own.** The player has four; the enemies still walk up and swing.
-  Champions, named foes, packs with a leader and casting enemies are the part of phase 3 left over.
-- **No dodge roll, block or knockback** — hits land, but the fight has no defensive input.
+- **Affixes are all wired now.** `js/effects.js` carries every one of the 63 affix stats items.json
+  can roll and all 24 legendary powers. The `inert` list on the character sheet still exists as a
+  guard, and it is empty — a node test fails if anything ever goes back into it.
+- **Enemies have roles but not skill bars.** Archers and casters keep their distance and throw real
+  bolts, champions and rares carry modifiers, bosses have phases that turn modifiers on — but no
+  enemy chooses between several abilities the way the player does.
+- **No dodge roll, block input or knockback** — blocking happens on the dice (`block_chance`), not
+  on a button. Hits land, but the fight still has no defensive *input*.
+- **Dungeons have no ceiling.** Tall walls, black sky and close fog instead, because a third-person
+  camera inside a closed box spends its life clipped into the roof.
+- **Companions do not path around walls.** They walk at you, and snap to you if they fall a long
+  way behind.
 - **The sun effects are screen space, not volumetric.** `js/sunfx.js` projects the star, asks the
   terrain whether anything is in the way, and paints gradients. Real shafts want a depth pre-pass and
   a radial blur, which this prototype cannot spare. It reads correctly and costs nothing, but it is
@@ -306,7 +331,20 @@ npx playwright test prototypes/farhold             # the real page (67 tests)
 ```
 
 The node tests cover terrain determinism, height sanity, agreement with the map, slopes vs normals,
-levels, gear, loot and the bestiary; `worldgen/tests/weather.test.js` covers the weather model (no
+levels, gear, loot and the bestiary. Round 4 adds 32 more: zone bands (the start is always the
+softest, they climb outward, every world shape works), dungeon layouts (every room reachable, the
+boss is never in the doorway, no two rooms overlap), crafting (the materials bag has no limit,
+recycling is the only source, advanced work needs rarer components, every bench action does what it
+says, a unique cannot be reworked), the effect registry (nothing in items.json is dead data, every
+effect describes itself, conditionals only fire under their condition), the statuses, and — after
+the bug the user hit in play — **no strike anywhere in the bestiary, at any rank, can produce a
+NaN**. The browser tests add fourteen: a new run starts in daylight wherever it lands, the map's
+level overlay, a busy world, a chest that pays out, a dungeon you can stand in with walls that stop
+you, the torch, the sheet's five tabs and the mouse coming back, recycling feeding the bench,
+companions that follow, all thirty classes booting, the galaxy sitting behind the planets with the
+atmosphere in front, camps that fill when you walk up to them, and a live fight with no NaN in it.
+
+ `worldgen/tests/weather.test.js` covers the weather model (no
 snow in a desert, no rain on a dry world, a clock that crossfades, palettes that vary by seed but
 stay recognisable). The browser tests cover the three reported bugs (daylight start, facing and
 strafe, looking straight up with ground behind you), the scatter staying instanced and never standing

@@ -12,9 +12,11 @@ async function land(page, classId = 'mage') {
   return errors;
 }
 
-test('the bar shows four skills and a cast puts one on cooldown', async ({ page }) => {
+test('the bar shows six skills and a cast puts one on cooldown', async ({ page }) => {
   const errors = await land(page);
-  await expect(page.locator('#skillbar .skill-slot')).toHaveCount(4);
+  // round 4: six slots on keys 1-6, unlocked at levels 1, 3, 7, 12, 18 and 24
+  await expect(page.locator('#skillbar .skill-slot')).toHaveCount(6);
+  await expect(page.locator('#skillbar .skill-slot.locked')).toHaveCount(5);
   const names = await page.locator('#skillbar .skill-name').allTextContents();
   expect(names.every(n => n.trim().length > 0)).toBe(true);
 
@@ -41,8 +43,11 @@ test('a firebolt reaches an enemy, hurts it, and leaves it burning', async ({ pa
     const f = window.farhold;
     f.pause(false);
     f.player.mp = f.player.maxMp;
-    // stand something right in front of the player and look straight at it
-    const enemy = await f.spawn('moor_hound');
+    // Stand something right in front of the player and look straight at it. It has to SURVIVE the
+    // bolt for the burn to be observable, and round 4b made the player's damage climb with level —
+    // a moor hound now dies to the first hit, so this uses something that can take it.
+    const enemy = await f.spawn('stone_sentinel', 16);
+    enemy.maxHp = enemy.hp = 40000;
     f.control.pitch = 0;
     enemy.x = f.control.x + Math.sin(f.control.yaw) * 7;
     enemy.z = f.control.z + Math.cos(f.control.yaw) * 7;
@@ -77,6 +82,8 @@ test('Frost Nova catches everything around you and slows it', async ({ page }) =
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     f.pause(false);
+    // Frost Nova is the mage's second slot, which unlocks at level 3
+    f.rpg.gainXp(f.player, 40000);
     f.player.mp = f.player.maxMp;
     const around = [];
     for (let i = 0; i < 3; i++) {
@@ -129,19 +136,50 @@ test('pressing 1 in the world casts, and an empty pool says so instead of firing
 });
 
 test('War Cry and Guard change what the numbers do, not just the log', async ({ page }) => {
+  // Round 4 rebuilt the class skill sets, and no one class carries both of these any more:
+  // a warrior rallies itself, a fighter guards. Test each on the class that has it.
   const errors = await land(page, 'warrior');
+  const cry = await page.evaluate(async () => {
+    const f = window.farhold;
+    f.pause(false);
+    f.rpg.gainXp(f.player, 40000);
+    f.player.mp = f.player.maxMp;
+    f.cast(f.skills.slots.findIndex(s => s.id === 'warcry'));
+    await new Promise(r => setTimeout(r, 120));
+    return { statuses: Object.keys(f.statuses.player), damage: [...f.player.derived.damage] };
+  });
+  expect(cry.statuses).toContain('might');
+  expect(errors).toEqual([]);
+
+  const e2 = await land(page, 'fighter');
+  const guard = await page.evaluate(async () => {
+    const f = window.farhold;
+    f.pause(false);
+    f.rpg.gainXp(f.player, 40000);
+    f.player.mp = f.player.maxMp;
+    f.cast(f.skills.slots.findIndex(s => s.id === 'guard_stance'));
+    await new Promise(r => setTimeout(r, 120));
+    return { statuses: Object.keys(f.statuses.player) };
+  });
+  expect(guard.statuses).toContain('guard');
+  expect(e2).toEqual([]);
+});
+
+test('Multi Shot really fires several arrows, not one', async ({ page }) => {
+  const errors = await land(page, 'ranger');
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     f.pause(false);
+    f.rpg.gainXp(f.player, 40000);
     f.player.mp = f.player.maxMp;
-    const cry = f.skills.slots.findIndex(s => s.id === 'warcry');
-    const guard = f.skills.slots.findIndex(s => s.id === 'guard_stance');
-    f.cast(cry);
-    f.cast(guard);
-    await new Promise(r => setTimeout(r, 120));
-    return { statuses: Object.keys(f.statuses.player), hp: f.player.hp };
+    const slot = f.skills.slots.findIndex(s => s.id === 'multi_shot');
+    const spec = f.skillData.skills.multi_shot;
+    const before = f.spellfx.stats ? f.spellfx.stats().live : null;
+    const plan = f.cast(slot);
+    return { projectiles: plan?.projectiles, spread: plan?.spread, dataSays: spec.projectiles, before };
   });
-  expect(out.statuses).toContain('might');
-  expect(out.statuses).toContain('guard');
+  expect(out.dataSays).toBeGreaterThan(1);
+  expect(out.projectiles).toBe(out.dataSays);
+  expect(out.spread).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });

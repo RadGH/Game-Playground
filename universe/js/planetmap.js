@@ -127,8 +127,10 @@ export function planetWorldOpts(planet, extra = {}) {
     atmosphereTint: planet.atmosphere.density > 0.08
       ? { color: planet.atmosphere.color, strength: clamp(0.05 + planet.atmosphere.density * 0.1, 0, 0.32) }
       : null,
-    // smaller worlds get fewer, smaller provinces (a moon fewer again)
-    regionCount: Math.round(clamp((10 + planet.radius * 14) * (planet.moon ? 0.45 : 1), planet.moon ? 4 : 6, 40)),
+    // smaller worlds get fewer, smaller provinces (a moon fewer again). `regionScale` lets a game
+    // ask for more, smaller ones — Farhold does, because a region you cross in twenty minutes is a
+    // level band you are stuck in for twenty minutes.
+    regionCount: Math.round(clamp((10 + planet.radius * 14) * (planet.moon ? 0.45 : 1) * (extra.regionScale ?? 1), planet.moon ? 4 : 6, 90)),
     settlementDensity: planet.archetype === 'living' ? 0.6 : planet.archetype === 'jungle' || planet.archetype === 'ocean' || planet.archetype === 'tundra' ? 0.3 : 0.08,
     landmarkDensity: 0.45, dungeonDensity: planet.difficulty * 0.8,
     history: false,
@@ -259,7 +261,7 @@ const CACHE_MAX = 10;
 export function generatePlanetMap(planet, opts = {}) {
   if (!hasSurfaceMap(planet)) return null;
   const width = opts.width ?? 256, height = opts.height ?? 128;
-  const key = `${planet.seed}:${width}x${height}:${planet.archetype}`;
+  const key = `${planet.seed}:${width}x${height}:${planet.archetype}:${opts.regionScale ?? 1}`;
   if (!opts.force && cache.has(key)) return cache.get(key);
 
   const world = generateWorld(planetWorldOpts(planet, { ...opts, width, height }));

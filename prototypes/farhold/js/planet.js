@@ -27,7 +27,19 @@ import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
 import { makeNoise2D, fbm, subSeed, clamp, lerp, makeRng, smoothstep, blur } from '../../../worldgen/js/noise.js';
 
 /** Metres across one world-map cell. The one number that sets the size of the planet. */
-export const M_PER_CELL = 640;
+/**
+ * How many metres one world-map cell is across — the single number that decides how big a planet
+ * feels underfoot. 640 m is World Forge's own tile, and it gives a 163 km x 82 km surface, which is
+ * a lot of ground to walk when you have no vehicle. It is a **live binding** so the title screen can
+ * shrink it: every module imports it rather than copying it, so `setMetresPerCell` moves all of them.
+ * Call it BEFORE `createWorld`/`makeTerrain`, because they close over the derived width and depth.
+ */
+export let M_PER_CELL = 640;
+export const M_PER_CELL_DEFAULT = 640;
+export function setMetresPerCell(metres) {
+  M_PER_CELL = Math.max(40, Math.min(2000, Math.round(metres)));
+  return M_PER_CELL;
+}
 
 const IDX = (w, x, y) => y * w + x;
 
@@ -161,27 +173,108 @@ function makePathIndex(paths, bucket = 220) {
  */
 export function makeTerrain(world, planet = null, opts = {}) {
   const w = world.width, h = world.height;
-  const relief = world.relief || { landMetres: 4200, seaMetres: 4200, datum: 'sea', label: 'sea level' };
-  const detailFlat = opts.detailFlat ?? 13;
-  const detailRelief = opts.detailRelief ?? 78;
-  const detailFine = opts.detailFine ?? 2.4;
+  const raw = world.relief || { landMetres: 4200, seaMetres: 4200, datum: 'sea', label: 'sea level' };
+  /**
+   * HOW TALL THE WORLD IS, against how wide it is.
+   *
+   * `universe/` hands back a planet's true relief — 8.5 km of land on the world this was diagnosed
+   * on. That is a real number for a real planet, but this map is 90-160 km across, not 40,000, so
+   * 8.5 km of rise packed into 160 km makes every ordinary coastline a vertical cliff: a 0.45 step
+   * in the elevation field across one 640 m cell came out as a 6.8 km drop. That is what "extremely
+   * sharp spikes… thousands of feet taller than its surroundings" actually was — not noise, but the
+   * vertical scale never having been matched to the horizontal one.
+   *
+   * `reliefScale` divides it down to something a person can walk up, and it follows the planet-scale
+   * knob: a map half as wide gets hills half as tall, so the slopes stay the same.
+   */
+  const reliefScale = (opts.reliefScale ?? 0.22) * (M_PER_CELL / M_PER_CELL_DEFAULT);
+  const relief = {
+    ...raw,
+    landMetres: raw.landMetres * reliefScale,
+    seaMetres: raw.seaMetres * reliefScale,
+    scaledBy: reliefScale,
+  };
+  /**
+   * The noise between map cells has to be scaled with the relief, or it takes over.
+   *
+   * Round 4b divided the relief down so the vertical scale matched the horizontal one — and left
+   * these alone. A ±39 m wobble on top of an 8 km mountain is texture; the same wobble on top of a
+   * 90 m headland is the whole shape of the coast, and it pushed shoreline land below sea level.
+   * Seed 7 went from a beach you could walk along to open ocean, and props, rivers, roads and towns
+   * all disappeared with it.
+   */
+  const detailFlat = (opts.detailFlat ?? 13) * reliefScale / 0.22;
+  const detailRelief = (opts.detailRelief ?? 78) * reliefScale / 0.22;
+  const detailFine = (opts.detailFine ?? 2.4) * reliefScale / 0.22;
   const n1 = makeNoise2D(subSeed(world.seed, 'farhold-coarse'));
   const n2 = makeNoise2D(subSeed(world.seed, 'farhold-fine'));
   const n3 = makeNoise2D(subSeed(world.seed, 'farhold-tint'));
+
+  /**
+   * DESPIKE THE ELEVATION.
+   *
+   * Reported in play: "on many planets there are extremely sharp spikes in the terrain, like a
+   * single pixel that is thousands of feet taller than its surroundings." They are real: the world
+   * map's elevation is generated per cell and a noise field will occasionally throw one cell far
+   * above its neighbours. A cell is 640 m and the sampler is bilinear, so one bad value becomes a
+   * kilometre-wide spire.
+   *
+   * This runs once, when the terrain is built, and pulls any cell that disagrees violently with the
+   * MEDIAN of its neighbours back toward them. The median is the point: an average would be dragged
+   * up by the spike it is meant to remove, and would also flatten real ridges, where most of the
+   * neighbours genuinely are high. A ridge survives; a lone needle does not.
+   */
+  (function despike() {
+    const src = world.elevation;
+    if (!src || src.length !== w * h) return;
+    const out = src.slice();
+    const ring = new Float32Array(8);
+    let fixed = 0;
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        let k = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            if (!dx && !dy) continue;
+            ring[k++] = src[(y + dy) * w + (((x + dx) % w) + w) % w];
+          }
+        }
+        const sorted = Array.prototype.slice.call(ring).sort((a, b) => a - b);
+        const median = (sorted[3] + sorted[4]) / 2;
+        const spread = sorted[6] - sorted[1];                 // how varied the neighbourhood is
+        const gap = src[i] - median;
+        // a real ridge has a wide spread; a needle sticks out of flat ground
+        const allowed = Math.max(0.045, spread * 1.35);
+        if (Math.abs(gap) > allowed) {
+          out[i] = median + Math.sign(gap) * allowed;
+          fixed++;
+        }
+      }
+    }
+    if (fixed) world.elevation = out;
+    world.despiked = fixed;
+  })();
 
   const widthM = (w - 1) * M_PER_CELL;
   const depthM = (h - 1) * M_PER_CELL;
   const hasSea = (world.opts?.liquid ?? 'water') !== 'none' && relief.datum === 'sea';
   const seaLevel = 0;
 
-  /** Smooth sample of a world layer at fractional cell coordinates (bilinear, edge-clamped). */
+  /**
+   * Smooth sample of a world layer at fractional cell coordinates (bilinear).
+   *
+   * Longitude wraps, latitude clamps — see `clampToWorld`. Sampling past the eastern edge must give
+   * the western cells, or the ground would end in a cliff at the seam even though you can walk
+   * across it.
+   */
   function layer(arr, fx, fy) {
-    const x = clamp(fx, 0, w - 1.001), y = clamp(fy, 0, h - 1.001);
+    const x = ((fx % w) + w) % w, y = clamp(fy, 0, h - 1.001);
     const x0 = Math.floor(x), y0 = Math.floor(y), tx = x - x0, ty = y - y0;
-    const x1 = Math.min(w - 1, x0 + 1), y1 = Math.min(h - 1, y0 + 1);
+    const x1 = (x0 + 1) % w, y1 = Math.min(h - 1, y0 + 1);          // x wraps, y clamps
     return lerp(lerp(arr[IDX(w, x0, y0)], arr[IDX(w, x1, y0)], tx), lerp(arr[IDX(w, x0, y1)], arr[IDX(w, x1, y1)], tx), ty);
   }
-  const cellX = x => clamp(Math.round(x / M_PER_CELL), 0, w - 1);
+  const cellX = x => ((Math.round(x / M_PER_CELL) % w) + w) % w;    // longitude wraps
   const cellY = z => clamp(Math.round(z / M_PER_CELL), 0, h - 1);
 
   /** The ground before any river or road touched it. */
@@ -418,8 +511,18 @@ export function makeTerrain(world, planet = null, opts = {}) {
   }
 
   /** Keep a position on the map. Walk off the edge and you are stopped by the world's rim. */
+  /**
+   * Keep a position on the planet.
+   *
+   * **East-west WRAPS; north-south does not.** A world map is an equirectangular projection of a
+   * sphere: walking (or flying) far enough east brings you round to the west, exactly as it does on
+   * a real planet. It used to clamp both, so you could fly into an invisible wall and stop — which
+   * is what "I can reach the edge of the world" was. Latitude still clamps, because the top and the
+   * bottom of the map are the poles and there is nothing past them.
+   */
   function clampToWorld(x, z) {
-    return [clamp(x, 0, widthM), clamp(z, 0, depthM)];
+    const wrapped = ((x % widthM) + widthM) % widthM;
+    return [wrapped, clamp(z, 0, depthM)];
   }
 
   /**
@@ -428,6 +531,31 @@ export function makeTerrain(world, planet = null, opts = {}) {
    */
   function spawnPoint(rng = makeRng(world.seed)) {
     const towns = (world.nodes || []).filter(n => n.type === 'settlement' || n.type === 'port');
+
+    /**
+     * START IN A TOWN.
+     *
+     * Landing in an empty field with no road and nobody on it is a bad first thirty seconds — and
+     * the roads, the shops and the work all radiate out from a settlement, so starting beside one
+     * gives a new character somewhere to go. The old code only *preferred* a town (`nearTown` in
+     * the score below), which on most seeds put you a couple of kilometres away from one.
+     */
+    if (towns.length) {
+      // the biggest settlement, with a coin-toss among equals so the same world is not always
+      // the same doorstep
+      const ranked = towns.slice().sort((a, b) => (b.size ?? 1) - (a.size ?? 1));
+      const pick = ranked[Math.floor(rng() * Math.min(3, ranked.length))] || ranked[0];
+      // stand just outside the buildings, on dry land, looking in
+      for (let tries = 0; tries < 60; tries++) {
+        const angle = rng() * Math.PI * 2;
+        const out = 18 + rng() * 26;
+        let [x, z] = clampToWorld(pick.x * M_PER_CELL + Math.cos(angle) * out, pick.y * M_PER_CELL + Math.sin(angle) * out);
+        if (waterAt(x, z)) continue;
+        if (slopeAt(x, z, 6) > 0.5) continue;
+        return { x, z, height: heightAt(x, z), town: pick.name };
+      }
+    }
+
     let best = null, bestScore = -Infinity;
     for (let tries = 0; tries < 400; tries++) {
       const cx = 2 + Math.floor(rng() * (w - 4)), cy = 2 + Math.floor(rng() * (h - 4));

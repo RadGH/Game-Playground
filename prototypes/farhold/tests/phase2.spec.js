@@ -15,6 +15,31 @@ async function land(page, query = '') {
   return errors;
 }
 
+
+/**
+ * Teleport somewhere that is really dry land, `metres` away-ish.
+ *
+ * Round 4b starts the player in a town rather than wherever the score function liked, so a blind
+ * `teleport(x + 3000, z + 1200)` no longer lands where these tests assumed — on seed 7 it drops you
+ * in the sea, and then there are no props, no roads and no towns to find, which is correct
+ * behaviour and a broken test. This spirals outward until it finds ground.
+ */
+async function toLand(page, metres = 3000) {
+  return page.evaluate((d) => {
+    const f = window.farhold;
+    for (let i = 0; i < 64; i++) {
+      const a = (i / 64) * Math.PI * 2 * 3;
+      const r = d * (0.4 + (i / 64) * 1.2);
+      const [x, z] = f.terrain.clampToWorld(f.control.x + Math.cos(a) * r, f.control.z + Math.sin(a) * r);
+      if (f.terrain.underwater(x, z)) continue;
+      if (f.terrain.slopeAt(x, z, 6) > 0.6) continue;
+      f.teleport(x, z);
+      return { x: Math.round(x), z: Math.round(z), found: true };
+    }
+    return { found: false };
+  }, metres);
+}
+
 // ---------------------------------------------------------------- the three reported bugs
 
 test('a new game starts in daylight, not at midnight', async ({ page }) => {
@@ -134,11 +159,12 @@ test('the world is planted, and the scatter stays instanced', async ({ page }) =
 
 test('props follow the player and never stand in the sea', async ({ page }) => {
   await land(page);
-  const check = await page.evaluate(async () => {
+  const before = await page.evaluate(() => window.farhold.stats().props.rebuilds);
+  const spot = await toLand(page, 3000);
+  expect(spot.found, 'no dry land within a few kilometres').toBe(true);
+  const check = await page.evaluate(async (before) => {
     const THREE = await import('three');
     const f = window.farhold;
-    const before = f.stats().props.rebuilds;
-    f.teleport(f.control.x + 3000, f.control.z + 1200);
     await new Promise(r => setTimeout(r, 200));
     const after = f.stats();
 
@@ -156,7 +182,7 @@ test('props follow the player and never stand in the sea', async ({ page }) => {
       }
     }
     return { rebuilt: after.props.rebuilds > before, sampled, drowned, floating };
-  });
+  }, before);
   expect(check.rebuilt).toBe(true);
   expect(check.sampled).toBeGreaterThan(20);
   expect(check.drowned).toBe(0);

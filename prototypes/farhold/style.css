@@ -427,3 +427,353 @@ body {
   opacity: 0;
 }
 .sunfx.eclipsed .sunfx-ghost { filter: brightness(2.1) saturate(1.4); }
+
+/* ==========================================================================
+   Round 4 — the tabbed sheet, crafting, zones, prompts and the boss bar
+   ========================================================================== */
+
+.sheet-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+.sheet-head h2 { margin: 0; }
+.sheet-purse { margin-left: auto; color: #cfe0ef; font-size: 13px; }
+.sheet-purse b { color: #ffd24a; }
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tabs button {
+  background: rgba(20,30,44,.7); border: 1px solid #23344a; color: #9fb0c8;
+  padding: 5px 12px; border-radius: 6px 6px 0 0; cursor: pointer; font: inherit; font-size: 13px;
+}
+.tabs button:hover { border-color: #3f6f9a; color: #cfe0ef; }
+.tabs button.on { background: #17293c; border-color: #3f6f9a; color: #7fd8ff; }
+.tab-body.hidden { display: none; }
+
+/* ----------------------------------------------------------------- inventory */
+.bagtools { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.bag .row .scrap {
+  background: rgba(30,20,12,.8); border: 1px solid #4a3a26; color: #c8a24a;
+  border-radius: 5px; width: 24px; height: 22px; cursor: pointer; font-size: 13px; line-height: 1;
+}
+.bag .row .scrap:hover { border-color: #c8a24a; color: #ffd24a; }
+.small-bag { max-height: 190px; overflow-y: auto; }
+
+/* ----------------------------------------------------------------- skills tab */
+.skilllist { display: flex; flex-direction: column; gap: 5px; }
+.skill-row {
+  display: grid; grid-template-columns: 22px 1fr auto; gap: 6px 10px; align-items: baseline;
+  padding: 6px 8px; background: rgba(16,24,36,.6); border: 1px solid #23344a; border-radius: 6px;
+}
+.skill-row .skill-desc { grid-column: 2 / -1; }
+.skill-row .skill-title { color: #cfe0ef; }
+.skill-row.locked { opacity: .45; }
+.skill-slot.locked { opacity: .4; }
+.skill-slot.locked .skill-name { font-size: 10px; }
+
+/* ----------------------------------------------------------------- companions + powers */
+.pets, .powers { display: flex; flex-direction: column; gap: 3px; }
+.pet-row, .power-row {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 4px 8px; background: rgba(16,24,36,.6); border-left: 2px solid #3f6f9a; border-radius: 3px;
+}
+.power-row { border-left-color: #c8a24a; }
+.powers { max-height: 260px; overflow-y: auto; }
+
+/* ----------------------------------------------------------------- crafting */
+.materials { display: flex; flex-wrap: wrap; gap: 5px; }
+.material {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 9px; background: rgba(16,24,36,.7); border: 1px solid #23344a; border-radius: 14px;
+  font-size: 12px;
+}
+.material i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.material b { color: #ffd24a; font-variant-numeric: tabular-nums; }
+
+.bench-card { padding: 9px 10px; background: rgba(16,24,36,.75); border: 1px solid #3f6f9a; border-radius: 7px; }
+.bench-affixes { display: flex; flex-direction: column; gap: 3px; margin: 7px 0; }
+.bench-affix { padding: 3px 7px; border-radius: 4px; background: rgba(8,14,22,.6); font-size: 12px; color: #9fb0c8; }
+.bench-affix.pickable { cursor: pointer; border: 1px solid transparent; }
+.bench-affix.pickable:hover { border-color: #3f6f9a; color: #cfe0ef; }
+.bench-affix.picked { border-color: #ffd24a; color: #ffe8b0; }
+.bench-affix.fixed { opacity: .55; font-style: italic; }
+.bench-card button { margin-top: 4px; }
+
+.recipes { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; }
+.recipe {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center;
+  padding: 8px 10px; background: rgba(16,24,36,.6); border: 1px solid #23344a; border-radius: 7px;
+}
+.recipe > div { grid-column: 1; }
+.recipe button { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+.recipe-head { display: flex; justify-content: space-between; gap: 10px; }
+.recipe-head b { color: #cfe0ef; }
+.recipe .note { color: #8fa8c0; }
+.recipe.off { opacity: .5; }
+.recipe.off .note { color: #c08a6a; }
+
+/* ----------------------------------------------------------------- zones */
+.zonelist { display: flex; flex-direction: column; gap: 3px; }
+.zone-row {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: baseline;
+  padding: 4px 8px; background: rgba(16,24,36,.6); border-left: 2px solid #2a3a4e; border-radius: 3px;
+}
+.zone-row.here { border-left-color: #7fd8ff; background: rgba(24,40,58,.8); }
+.zone-trivial { color: #7f8ea4; }
+.zone-easy    { color: #8fe0a0; }
+.zone-even    { color: #ffe08a; }
+.zone-hard    { color: #ffa860; }
+.zone-deadly  { color: #ff6a5a; }
+
+/* ----------------------------------------------------------------- prompt + boss bar */
+#prompt {
+  position: fixed; left: 50%; bottom: 128px; transform: translateX(-50%);
+  padding: 7px 16px; background: rgba(8,14,22,.86); border: 1px solid #3f6f9a; border-radius: 7px;
+  color: #cfe0ef; font-size: 14px; pointer-events: none; text-align: center;
+}
+#prompt.hidden { display: none; }
+#prompt b { color: #ffd24a; }
+
+#boss-bar {
+  position: fixed; left: 50%; top: 18px; transform: translateX(-50%);
+  width: min(560px, 60vw); pointer-events: none; text-align: center;
+}
+#boss-bar.hidden { display: none; }
+#boss-name { color: #ffd24a; font-size: 15px; letter-spacing: 1px; margin-bottom: 3px; text-shadow: 0 2px 6px #000; }
+#boss-bar .bar { height: 14px; }
+
+/* the target nameplate takes a rarity colour when it is a champion, a rare or a boss */
+#target-name.rarity-rare { color: #6ab0ff; }
+#target-name.rarity-unique { color: #ff8adf; }
+#target-name.rarity-legendary { color: #ffd24a; }
+
+/* ==========================================================================
+   Round 4 — HUD layout. Six skill slots, a zone line and a boss bar all wanted
+   room, and the old positions had the log sitting under the hint and the
+   minimap under the place card. Everything gets its own lane.
+   ========================================================================== */
+
+/* right column: place card, then the minimap under it, then the location line */
+#minimap { top: 128px; }
+#hud-where { top: 330px; }
+#hud-planet { max-width: 300px; }
+
+/* the skill bar sits above the hint rather than on top of it */
+#skillbar { bottom: 44px; }
+#hint { bottom: 8px; }
+#prompt { bottom: 118px; }
+
+/* the log gets a panel so it reads over bright ground, and stops short of the bar */
+#log {
+  bottom: 44px; width: 340px; max-height: 168px;
+  padding: 6px 9px; border-radius: 7px;
+  background: linear-gradient(to top, rgba(8,12,20,.62), rgba(8,12,20,0));
+}
+
+/* a boss bar owns the top of the screen; the ordinary nameplate moves down under it */
+#boss-bar:not(.hidden) ~ #target { top: 78px; }
+
+/* the right-hand column is a real column now, so nothing in it can overlap anything else */
+#hud-right {
+  position: fixed; right: 14px; top: 14px; width: 300px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+#hud-place { position: static; max-width: 300px; }
+#minimap { position: static; }
+#hud-where { position: static; }
+
+/* the map's level-band toggle sits above the layer list */
+.map-toggle {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 8px; margin-bottom: 8px;
+  background: rgba(16,24,36,.7); border: 1px solid #3f6f9a; border-radius: 6px;
+  color: #cfe0ef; font-size: 13px; cursor: pointer;
+}
+.map-toggle input { accent-color: #7fd8ff; }
+
+/* ==========================================================================
+   Crafting and Upgrade, laid out like a trade skill: a list, then a detail panel
+   ========================================================================== */
+
+.recipe-list { display: flex; flex-direction: column; gap: 3px; max-height: 42vh; overflow-y: auto; }
+.recipe-group {
+  margin: 8px 0 2px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #7f8ea4;
+}
+.recipe-row {
+  display: flex; justify-content: space-between; gap: 10px; align-items: baseline; cursor: pointer;
+  padding: 6px 9px; background: rgba(16,24,36,.6); border: 1px solid #23344a; border-radius: 6px;
+}
+.recipe-row:hover { border-color: #3f6f9a; }
+.recipe-row.on { border-color: #7fd8ff; background: rgba(24,44,62,.85); }
+.recipe-row.off { opacity: .48; }
+.recipe-row .recipe-name { color: #cfe0ef; }
+.recipe-row .recipe-cost { color: #8fa8c0; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+.recipe-detail { display: flex; flex-direction: column; gap: 6px; }
+.recipe-detail h3 { margin: 0 0 2px; }
+.recipe-detail h4 {
+  margin: 10px 0 2px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #7f8ea4;
+}
+.recipe-detail p { margin: 0; }
+
+.forge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 5px; max-height: 34vh; overflow-y: auto; }
+.forge-option {
+  display: flex; flex-direction: column; gap: 2px; text-align: left; cursor: pointer;
+  padding: 6px 8px; background: rgba(16,24,36,.65); border: 1px solid #23344a; border-radius: 6px;
+  color: #cfe0ef; font: inherit; font-size: 12px;
+}
+.forge-option:hover { border-color: #3f6f9a; }
+.forge-option.on { border-color: #7fd8ff; background: rgba(24,44,62,.9); }
+.forge-option.cannot { opacity: .6; }
+.forge-option.cannot b { color: #c9a78a; }
+
+.cost-table { display: flex; flex-direction: column; gap: 3px; }
+.cost-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 9px; background: rgba(16,24,36,.6); border-radius: 5px; font-size: 13px;
+}
+.cost-row i { width: 10px; height: 10px; border-radius: 50%; }
+.cost-row b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.cost-row.ok b { color: #8fe0a0; }
+.cost-row.short b { color: #ff9a8a; }
+
+.forge-result {
+  padding: 8px 10px; background: rgba(16,24,36,.6); border-left: 2px solid #c8a24a; border-radius: 5px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.forge-btn {
+  align-self: flex-start; margin-top: 8px; padding: 7px 18px;
+  background: #1d3a52; border: 1px solid #3f6f9a; border-radius: 6px; color: #cfe0ef;
+  font: inherit; cursor: pointer;
+}
+.forge-btn:hover:not(:disabled) { border-color: #7fd8ff; color: #eaf6ff; }
+.forge-btn:disabled { opacity: .4; cursor: default; }
+.bench-card-wrap { margin-bottom: 4px; }
+.bag .row.on { border-color: #7fd8ff; background: rgba(24,44,62,.8); }
+.tip-bad { color: #ff9a8a; }
+
+/* ---------------------------------------------------------------- item hover cards */
+.tipbox .tip-dim { color: #8fa0b4; font-size: 12px; }
+.tipbox .tip-base { margin: 4px 0; color: #eaf2fa; }
+.tipbox .tip-affixes { margin: 4px 0; padding: 0 0 0 14px; list-style: none; }
+.tipbox .tip-affixes li { position: relative; margin: 2px 0; font-size: 12.5px; }
+.tipbox .tip-affixes li::before { content: '·'; position: absolute; left: -11px; color: #7f8ea4; }
+.tipbox .tip-stat { color: #8fd0ff; }
+.tipbox .tip-cond { color: #c9b3ff; }
+.tipbox .tip-set { color: #7ae06a; }
+.tipbox .tip-legend { color: #ffb040; }
+.tipbox .tip-base-affix { color: #cfd8e3; }
+.tipbox .tip-set-head { margin-top: 5px; color: #7ae06a; font-size: 12px; }
+.tipbox .tip-lore { margin-top: 5px; color: #b7a98d; font-style: italic; font-size: 12px; }
+.tipbox .tip-compare { margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(120,150,180,.22); }
+.tipbox .tip-compare .up { color: #8fe0a0; }
+.tipbox .tip-compare .down { color: #ff9a8a; }
+.tipbox .tip-foot { margin-top: 5px; color: #7f8ea4; font-size: 11px; }
+.tipbox .tip-line { margin-top: 3px; }
+
+/* ---------------------------------------------------------------- the zone banner */
+#zone-banner {
+  position: fixed; left: 50%; top: 21%; transform: translateX(-50%);
+  text-align: center; pointer-events: none; min-width: 320px;
+  animation: zb-in 5.2s ease-out forwards;
+}
+#zone-banner.hidden { display: none; }
+#zone-banner .zb-name {
+  font-size: 30px; letter-spacing: 3px; color: #f2e8d4;
+  text-shadow: 0 2px 14px #000, 0 0 30px rgba(0,0,0,.9);
+}
+#zone-banner .zb-level {
+  margin-top: 2px; font-size: 17px; letter-spacing: 2px;
+  text-shadow: 0 2px 10px #000;
+}
+#zone-banner .zb-danger {
+  margin-top: 1px; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #a8b6c6;
+  text-shadow: 0 2px 8px #000;
+}
+/* a hairline over and under, tinted by how dangerous it is */
+#zone-banner::before, #zone-banner::after {
+  content: ''; display: block; height: 1px; margin: 7px auto;
+  width: 78%; background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: .55;
+}
+#zone-banner.zb-trivial { color: #aab6c6; }
+#zone-banner.zb-easy    { color: #8fe0a0; }
+#zone-banner.zb-even    { color: #ffe08a; }
+#zone-banner.zb-hard    { color: #ffa860; }
+#zone-banner.zb-deadly  { color: #ff6a5a; }
+@keyframes zb-in {
+  0%   { opacity: 0; transform: translate(-50%, 10px); }
+  9%   { opacity: 1; transform: translate(-50%, 0); }
+  78%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.tipbox .tip-shift { margin-top: 5px; color: #7fd8ff; font-size: 11px; }
+.tipbox .tip-losing li { color: #a08a8a; }
+.tipbox .tip-losing li::before { content: '−'; }
+
+/* ---------------------------------------------------------------- the pause menu (Esc) */
+#pause {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(4, 7, 12, .72); backdrop-filter: blur(3px);
+}
+#pause.hidden { display: none; }
+.pause-card {
+  min-width: 340px; max-width: 560px; padding: 22px 26px;
+  background: rgba(12, 18, 28, .96); border: 1px solid #3f6f9a; border-radius: 11px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.6);
+  text-align: center;
+}
+.pause-card h2 { margin: 0 0 2px; font-size: 26px; letter-spacing: 4px; color: #7fd8ff; }
+.pause-card h3 {
+  margin: 18px 0 6px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #7f8ea4;
+}
+.pause-where { color: #9fb0c8; font-size: 13px; margin-bottom: 16px; }
+.pause-buttons { display: flex; flex-direction: column; gap: 7px; }
+.pause-buttons button {
+  padding: 9px 16px; font: inherit; font-size: 15px; cursor: pointer;
+  background: #1d3a52; border: 1px solid #3f6f9a; border-radius: 7px; color: #eaf2fa;
+}
+.pause-buttons button.ghost { background: rgba(20,30,44,.7); color: #cfe0ef; }
+.pause-buttons button:hover { border-color: #7fd8ff; color: #fff; }
+.pause-card .keys { color: #8fa0b8; font-size: 12px; line-height: 1.6; }
+.pause-card .back { position: static; display: inline-block; margin-top: 14px; }
+.boot-back { position: static !important; display: inline-block; margin-top: 10px; }
+
+/* ---------------------------------------------------------------- space reticles */
+#reticles { position: fixed; inset: 0; pointer-events: none; }
+.reticle {
+  position: absolute; transform: translate(-50%, -50%);
+  color: rgba(150, 200, 235, .55);
+}
+.reticle .rt { position: absolute; width: 11px; height: 11px; border: 1px solid currentColor; }
+.reticle .rt.tl { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+.reticle .rt.tr { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.reticle .rt.bl { left: 0; bottom: 0; border-right: 0; border-top: 0; }
+.reticle .rt.br { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.reticle .rt-name {
+  position: absolute; left: 50%; top: -17px; transform: translateX(-50%);
+  font-size: 11px; letter-spacing: 1px; white-space: nowrap; text-shadow: 0 1px 3px #000;
+}
+.reticle .rt-dist {
+  position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%);
+  font-size: 10px; opacity: .7; white-space: nowrap; text-shadow: 0 1px 3px #000;
+}
+.reticle.landable  { color: rgba(140, 230, 170, .6); }
+.reticle.moon      { color: rgba(190, 200, 215, .6); }
+.reticle.nolanding { color: rgba(230, 150, 110, .5); }
+.reticle.star      { color: rgba(255, 210, 120, .55); }
+.reticle.on { color: #eaf6ff; }
+.reticle.on .rt { width: 15px; height: 15px; border-width: 2px; }
+.reticle.on .rt-name { font-size: 13px; color: #fff; }
+
+#space-card {
+  position: fixed; right: 26px; top: 50%; transform: translateY(-50%);
+  width: 250px; padding: 12px 14px;
+  background: rgba(8, 14, 22, .82); border: 1px solid rgba(120, 180, 220, .4); border-radius: 8px;
+  color: #cfe0ef; font-size: 12.5px; pointer-events: none; backdrop-filter: blur(2px);
+}
+#space-card.hidden { display: none; }
+#space-card .sc-name { font-size: 17px; color: #eaf6ff; letter-spacing: 1px; }
+#space-card .sc-kind { color: #8fa8c0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+#space-card .sc-lines { margin: 0; padding-left: 15px; }
+#space-card .sc-lines li { margin: 2px 0; }
+#space-card .sc-land { margin-top: 8px; color: #8fe0a0; }
+#space-card .sc-noland { margin-top: 8px; color: #ffa860; }
+#space-card b { color: #ffd24a; }

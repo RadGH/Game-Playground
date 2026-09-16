@@ -111,11 +111,19 @@ export const BUILDINGS = {
     { geometry: CYL, color: STONE, matrix: mat4(0, 10.3, 0, 2.9, 0.7, 2.9) },
     { geometry: CONE4, color: TILE, matrix: mat4(0, 12, 0, 2.7, 3, 2.7, Math.PI / 4) },
   ]) },
+  /**
+   * A wall segment, built along **+Z** — the axis `yaw` points down, the same as the bridges.
+   *
+   * It used to be modelled along X while being rotated by a +Z yaw, so every piece came out turned
+   * ninety degrees: the segments stood parallel to each other like a row of fence panels instead of
+   * joining end to end into a wall. (Reported with a screenshot of a city that looked like it was
+   * built out of dominoes.)
+   */
   wall: { cap: 700, build: () => mergeParts([
-    { geometry: BOX, color: STONE, matrix: mat4(0, 1.9, 0, 6, 3.8, 1.1) },
-    { geometry: BOX, color: STONE, matrix: mat4(-2, 4, 0, 0.9, 0.6, 1.2) },
-    { geometry: BOX, color: STONE, matrix: mat4(0, 4, 0, 0.9, 0.6, 1.2) },
-    { geometry: BOX, color: STONE, matrix: mat4(2, 4, 0, 0.9, 0.6, 1.2) },
+    { geometry: BOX, color: STONE, matrix: mat4(0, 1.9, 0, 1.1, 3.8, 6) },
+    { geometry: BOX, color: STONE, matrix: mat4(0, 4, -2, 1.2, 0.6, 0.9) },
+    { geometry: BOX, color: STONE, matrix: mat4(0, 4, 0, 1.2, 0.6, 0.9) },
+    { geometry: BOX, color: STONE, matrix: mat4(0, 4, 2, 1.2, 0.6, 0.9) },
   ]) },
   well: { cap: 120, build: () => mergeParts([
     { geometry: CYL, color: STONE, matrix: mat4(0, 0.5, 0, 1.3, 1, 1.3) },
@@ -327,15 +335,40 @@ export function createFeatures(scene, terrain, opts = {}) {
       // placed at that chord's midpoint, stretched slightly so it overlaps its neighbour. Spacing
       // segments by arc length (and giving each its own ground height) is what left gaps.
       const wallR = ring + 14;
-      const SEG = 6;                                        // the wall mesh is 6 long
+      const SEG = 6;                                        // the wall mesh is 6 long, along +Z
       const segments = Math.max(8, Math.round((Math.PI * 2 * wallR) / SEG));
-      const gate = Math.floor(rng() * segments);
       const ringPoint = i => {
         const a = (i / segments) * Math.PI * 2;
         return [cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR];
       };
+
+      /**
+       * WHERE THE GATES GO: wherever a road meets the wall.
+       *
+       * The gate used to be a random segment, so a road ran straight up to a city and into a solid
+       * stretch of masonry. Every road that passes near this settlement is checked for the point it
+       * crosses the wall ring, and the segments either side of that bearing are left out.
+       */
+      const gateAngles = [];
+      for (const road of roads) {
+        for (const [rx, rz] of road.points || []) {
+          const d = Math.hypot(rx - cx, rz - cz);
+          if (Math.abs(d - wallR) > SEG * 1.6) continue;
+          gateAngles.push(Math.atan2(rz - cz, rx - cx));
+        }
+      }
+      // always at least one way in, even on a settlement no road reaches
+      if (!gateAngles.length) gateAngles.push(rng() * Math.PI * 2);
+      const isGate = i => {
+        const a = ((i + 0.5) / segments) * Math.PI * 2;
+        return gateAngles.some(g => {
+          const diff = Math.abs(((a - g + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+          return diff < (SEG * 1.9) / wallR;                // about two segments wide
+        });
+      };
+
       for (let i = 0; i < segments; i++) {
-        if (Math.abs(i - gate) <= 1) continue;              // leave a gap for the road
+        if (isGate(i)) continue;                            // a road comes through here
         const [ax, az] = ringPoint(i), [bx, bz] = ringPoint(i + 1);
         const mx = (ax + bx) / 2, mz = (az + bz) / 2;
         if (terrain.underwater(mx, mz)) continue;
@@ -344,10 +377,13 @@ export function createFeatures(scene, terrain, opts = {}) {
         // is hidden under the wall instead of opening a gap beneath it
         const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
         const lean = Math.abs(terrain.heightAt(ax, az) - terrain.heightAt(bx, bz));
-        place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [chord / SEG * 1.06, 1 + lean / 3.8, 1], 0.9, low);
+        // the mesh runs along +Z, so the LENGTH scale goes on Z and the yaw is the standard one
+        place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, chord / SEG * 1.06], 0.9, low);
       }
-      for (let i = 0; i < 4; i++) {
-        const a = (i / 4) * Math.PI * 2 + 0.4;
+      // towers beside every gate, and at the quarters — so a gate reads as a gate
+      const towerAngles = [...gateAngles.flatMap(g => [g - 0.22, g + 0.22]),
+        ...[0, 1, 2, 3].map(i => (i / 4) * Math.PI * 2 + 0.4)];
+      for (const a of towerAngles.slice(0, 10)) {
         place('tower', cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR, 0, 1, 1.1);
       }
     }

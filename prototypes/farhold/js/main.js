@@ -6,6 +6,10 @@
 import * as THREE from 'three';
 import { createWorld, makeTerrain, describePlanet, M_PER_CELL } from './planet.js';
 import { createSpace } from './space.js';
+import { createTownFolk } from './town.js';
+import { createTalkPanel } from './talkui.js';
+import { QuestLog } from './quests.js';
+import { NameGen } from '../../../namegen/js/namegen.js';
 import { generatePlanetMap } from '../../../universe/js/planetmap.js';
 import { createTerrainView } from './terrain.js';
 import { createSky } from './sky.js';
@@ -43,11 +47,13 @@ async function boot() {
   const status = t => { $('boot-status').textContent = t; };
   status('reading the data…');
 
-  const [items, balance, bestiary, classLooks] = await Promise.all([
+  const [items, balance, bestiary, classLooks, namegen] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
     loadJSON('../emberveil/data/class-looks.json'),
+    // Name Forge, so the folk in a dwarf town have dwarf names
+    NameGen.load('/namegen/data/').catch(() => null),
   ]);
 
   const classIds = Object.keys(STARTER_WEAPON).filter(id => classLooks.classes[id]);
@@ -95,7 +101,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, classLooks, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, classLooks, namegen, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -103,7 +109,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, classLooks, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, classLooks, namegen, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -113,7 +119,7 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, classLooks, status, save }) {
+async function begin({ items, balance, bestiary, classLooks, namegen, status, save }) {
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
@@ -164,6 +170,12 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   let weatherView = createWeatherView({
     scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
   });
+
+  // the folk who live in the settlements, and the work they hand out
+  const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
+  const npcLooks = ['ranger', 'cleric', 'rogue', 'warrior', 'bard', 'mage']
+    .map(id => classLooks.classes[id]?.avatar).filter(Boolean);
+  let folk = null;
 
   // ---------------------------------------------------------------- the player
   status('waking the wayfarer…');
@@ -241,7 +253,12 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, 'good');
     if (levels) hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level');
     const drop = rpg.rollDrop({ level: e.level, rng: field.rng, magicFind: player.derived.magicFind, bases: e.dropBases });
-    if (drop) { player.bag.push(drop); hud.log(`${e.name} dropped ${drop.name}.`, 'loot'); }
+    if (drop) {
+      player.bag.push(drop);
+      hud.log(`${e.name} dropped ${drop.name}.`, 'loot');
+      for (const q of questLog.onLoot({ baseKey: drop.baseKey })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
+    }
+    for (const q of questLog.onKill({ defId: e.defId })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
     hud.setPlayer(player);
     autoSave();
   }
@@ -266,6 +283,60 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   // ---------------------------------------------------------------- the map
   let map = null;
   map = makeMap();
+  folk = makeFolk();
+
+  // ---------------------------------------------------------------- talking to people
+  function talkContext(npc) {
+    return {
+      gold: player.gold,
+      stock: npc.trades ? folk.stockFor(npc, player.level) : [],
+      bag: player.bag,
+      offer: folk.questFrom(npc, { level: player.level, enemies: bestiary.enemies, nodes: world.nodes }),
+      active: questLog.active,
+      hasQuest: id => questLog.has(id),
+      readyToTurnIn: giverId => questLog.readyToTurnIn(giverId),
+      progressText: q => questLog.progressText(q),
+    };
+  }
+
+  const talk = createTalkPanel({
+    describe: item => hud.describe(item),
+    price: item => rpg.price(item),
+    sellPrice: item => Math.max(1, Math.round(rpg.price(item) * (items.sellFactor ?? 0.35))),
+    buy: item => {
+      const r = folk.buy(talk.npc, item, player);
+      hud.log(r.ok ? `Bought ${item.name} for ${r.price} gold.` : r.why, r.ok ? 'loot' : 'bad');
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    sell: item => {
+      const r = folk.sell(talk.npc, item, player);
+      hud.log(r.ok ? `Sold ${item.name} for ${r.price} gold.` : r.why, r.ok ? '' : 'bad');
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    accept: quest => {
+      questLog.add(quest);
+      hud.log(`Took the job: ${quest.title}.`, 'level');
+      if (quest.place) map.addPin(quest.place.cell.x, quest.place.cell.y, quest.place.name);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    turnIn: quest => {
+      const reward = questLog.turnIn(quest);
+      player.gold += reward.gold;
+      const levels = rpg.gainXp(player, reward.xp);
+      hud.log(`${quest.title} — done. ${reward.gold} gold, ${reward.xp} xp.`, 'good');
+      if (levels) hud.log(`Level ${player.level}!`, 'level');
+      // the person who gave it has new work next time
+      if (talk.npc) talk.npc.offered = null;
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+  });
 
   // ---------------------------------------------------------------- flight and other worlds
   //
@@ -280,11 +351,19 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   let landingTarget = null;
 
   function disposePlanet() {
+    folk?.dispose();
     view.dispose(); props.dispose(); features.dispose(); weatherView.dispose();
     field.clear();
     map.dispose();
     scene.remove(sky.sunLight); scene.remove(sky.sunLight.target); scene.remove(sky.ambient);
     sky.dispose();
+  }
+
+  function makeFolk() {
+    return createTownFolk(scene, terrain, {
+      features, rpg, namegen, looks: npcLooks, seed, balance,
+      radius: lowQuality ? 500 : (balance.town?.radius ?? 900),
+    });
   }
 
   function makeMap() {
@@ -326,6 +405,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
 
     control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids] });
     field = makeField();
+    folk = makeFolk();
     hud.setTerrain(terrain);
     map = makeMap();
 
@@ -472,6 +552,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
       pins: map.pins,
       place: features.settlementAt(control.x, control.z)?.name || terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name,
       weather: blended.key,
+      quests: questLog.toJSON(),
     });
   }
   function autoSave({ quiet = true } = {}) {
@@ -583,7 +664,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   window.addEventListener('keydown', e => {
     if (e.code === 'KeyI' || e.code === 'Tab') { e.preventDefault(); hud.toggleSheet(); }
     if (e.code === 'KeyM') { e.preventDefault(); map.toggle(); }
-    if (e.code === 'Escape') { if (hud.sheetOpen) hud.toggleSheet(false); else if (map.isOpen) map.toggle(false); }
+    if (e.code === 'Escape') { if (talk.isOpen) talk.close(); else if (hud.sheetOpen) hud.toggleSheet(false); else if (map.isOpen) map.toggle(false); }
   });
 
   function resize() {
@@ -598,6 +679,7 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
   // ---------------------------------------------------------------- the loop
   const clock = new THREE.Clock();
   let sinceRegen = 0;
+  let sinceArrive = 0;
   let lastEclipse = null;
 
   function tick() {
@@ -617,7 +699,17 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     }
     if (mode !== 'ground') { stepFlight(dt, snap); renderFrame(); return; }
 
-    const frozen = hud.sheetOpen || debug.isOpen || map.isOpen;
+    // E speaks to whoever is standing in front of you
+    if (snap.pressed?.has('KeyE')) {
+      if (talk.isOpen) talk.close();
+      else {
+        const who = folk.nearest(control.x, control.z);
+        if (who) talk.show(who, talkContext(who));
+        else hud.log('Nobody close enough to talk to.');
+      }
+    }
+
+    const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen;
     const step = control.update(dt, snap, { frozen });
 
     if (step.mountChanged) {
@@ -708,6 +800,14 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     }
 
     rebuildWorldAround(false);
+    folk.update(dt, control);
+    sinceArrive += dt;
+    if (sinceArrive > 1) {
+      sinceArrive = 0;
+      for (const q of questLog.onArrive({ x: control.x, z: control.z })) {
+        hud.log(`${q.title}: arrived.`, 'good');
+      }
+    }
 
     // --- weather
     const cell = terrain.cellAt(control.x, control.z);
@@ -812,6 +912,8 @@ async function begin({ items, balance, bestiary, classLooks, status, save }) {
     get palette() { return palette; },
     get terrain() { return terrain; },
     launch, land,
+    get folk() { return folk; },
+    questLog, talk,
     /** Skip the cinematics — go straight to space, or straight down onto a world. */
     toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },
     landOn: (planetId, spot = null) => {

@@ -1,0 +1,185 @@
+// Farhold — work to do.
+//
+// Four kinds of job, all of them anchored to things that genuinely exist on the map: a creature the
+// bestiary actually spawns in this biome, a settlement World Forge actually founded, a dungeon it
+// actually placed, or an item the loot tables actually drop. Nothing here invents a destination.
+//
+// Pure JavaScript — no DOM, no Three.js — so the node tests drive the same code the game does.
+//
+//   const log = new QuestLog();
+//   log.add(makeQuest('hunt', { rng, level, giver, enemies, nodes, terrain }));
+//   log.onKill({ defId: 'moor_hound' });        // progress happens through events
+//   log.readyToTurnIn(giver.id);
+
+import { M_PER_CELL } from './planet.js';
+
+export const QUEST_KINDS = ['hunt', 'visit', 'gather', 'clear'];
+
+/** How many, and what it pays. Scaled by the player's level. */
+const SHAPE = {
+  hunt:   { count: [3, 7],  gold: [35, 80],  xp: [40, 90] },
+  visit:  { count: [1, 1],  gold: [25, 60],  xp: [30, 70] },
+  gather: { count: [2, 5],  gold: [30, 70],  xp: [35, 75] },
+  clear:  { count: [4, 8],  gold: [70, 150], xp: [80, 170] },
+};
+
+const pick = (rng, list) => list[Math.floor(rng() * list.length)] ?? null;
+const between = (rng, [lo, hi]) => lo + Math.floor(rng() * (hi - lo + 1));
+
+/**
+ * Build one job.
+ * ctx: { rng, level, giver, enemies (bestiary defs), nodes (world.nodes), terrain, from (the
+ * settlement the giver stands in) }
+ */
+export function makeQuest(kind, ctx) {
+  const { rng, level = 1, giver, enemies = [], nodes = [], terrain, from = null } = ctx;
+  const shape = SHAPE[kind] || SHAPE.hunt;
+  const scale = 1 + (level - 1) * 0.12;
+  const base = {
+    id: 'q_' + Math.floor(rng() * 1e9).toString(36),
+    kind,
+    giverId: giver?.id ?? null,
+    giverName: giver?.name ?? 'a stranger',
+    fromName: from?.name ?? null,
+    progress: 0,
+    done: false,
+    turnedIn: false,
+    reward: {
+      gold: Math.round(between(rng, shape.gold) * scale),
+      xp: Math.round(between(rng, shape.xp) * scale),
+    },
+  };
+
+  if (kind === 'hunt' || kind === 'clear') {
+    // something that actually lives around here, at a level the player can face
+    const pool = enemies.filter(e => (e.minLevel ?? 1) <= level + 3 && (e.maxLevel ?? 99) >= level - 1);
+    const def = pick(rng, pool.length ? pool : enemies);
+    if (!def) return null;
+    const count = between(rng, shape.count);
+    if (kind === 'clear') {
+      const dens = nodes.filter(n => n.type === 'dungeon');
+      const site = pick(rng, dens);
+      if (!site) return null;
+      return {
+        ...base,
+        target: def.id, targetName: def.name, count,
+        place: { x: site.x * M_PER_CELL, z: site.y * M_PER_CELL, name: site.name || 'the ruin', cell: { x: site.x, y: site.y } },
+        title: `Clear ${site.name || 'the ruin'}`,
+        text: `${count} ${def.name} have made a home of ${site.name || 'the ruin'}. Put them out of it.`,
+      };
+    }
+    return {
+      ...base,
+      target: def.id, targetName: def.name, count,
+      title: `Cull the ${def.name}`,
+      text: `${def.name} have been a plague on us. Kill ${count} and there is coin in it.`,
+    };
+  }
+
+  if (kind === 'visit') {
+    // somewhere else on the map, not where you are standing
+    const places = nodes.filter(n => (n.type === 'settlement' || n.type === 'port' || n.type === 'landmark') && n.id !== from?.id);
+    const site = pick(rng, places);
+    if (!site) return null;
+    return {
+      ...base,
+      count: 1,
+      place: { x: site.x * M_PER_CELL, z: site.y * M_PER_CELL, name: site.name, cell: { x: site.x, y: site.y } },
+      title: `Carry word to ${site.name}`,
+      text: `Take word to ${site.name}. It is a walk, but the news will not carry itself.`,
+    };
+  }
+
+  if (kind === 'gather') {
+    const count = between(rng, shape.count);
+    const want = pick(rng, ['ring', 'necklace', 'dagger', 'cloth_helm', 'light_boots']);
+    return {
+      ...base,
+      target: want, targetName: want.replace(/_/g, ' '), count,
+      title: `Bring ${count} ${want.replace(/_/g, ' ')}`,
+      text: `Find me ${count} ${want.replace(/_/g, ' ')}. Whatever condition — I am not proud.`,
+    };
+  }
+  return null;
+}
+
+/** The jobs a player is carrying. Progress only ever happens through events. */
+export class QuestLog {
+  constructor() {
+    this.active = [];
+    this.finished = [];
+  }
+
+  add(quest) {
+    if (!quest) return null;
+    this.active.push(quest);
+    return quest;
+  }
+
+  has(id) { return this.active.some(q => q.id === id); }
+  byGiver(giverId) { return this.active.filter(q => q.giverId === giverId); }
+
+  /** Something died. */
+  onKill({ defId }) {
+    const advanced = [];
+    for (const q of this.active) {
+      if (q.done || (q.kind !== 'hunt' && q.kind !== 'clear')) continue;
+      if (q.target !== defId) continue;
+      // a "clear" job only counts kills at the site
+      q.progress++;
+      if (q.progress >= q.count) q.done = true;
+      advanced.push(q);
+    }
+    return advanced;
+  }
+
+  /** The player moved. `x`,`z` in metres. */
+  onArrive({ x, z }, radius = 120) {
+    const advanced = [];
+    for (const q of this.active) {
+      if (q.done || !q.place) continue;
+      if (Math.hypot(q.place.x - x, q.place.z - z) > radius) continue;
+      if (q.kind === 'visit') { q.progress = 1; q.done = true; advanced.push(q); }
+      else if (q.kind === 'clear') { q.atSite = true; }
+    }
+    return advanced;
+  }
+
+  /** Something went in the bag. */
+  onLoot({ baseKey }) {
+    const advanced = [];
+    for (const q of this.active) {
+      if (q.done || q.kind !== 'gather' || q.target !== baseKey) continue;
+      q.progress++;
+      if (q.progress >= q.count) q.done = true;
+      advanced.push(q);
+    }
+    return advanced;
+  }
+
+  /** Finished jobs this person can pay out. */
+  readyToTurnIn(giverId) {
+    return this.active.filter(q => q.done && !q.turnedIn && q.giverId === giverId);
+  }
+
+  turnIn(quest) {
+    quest.turnedIn = true;
+    const i = this.active.indexOf(quest);
+    if (i >= 0) this.active.splice(i, 1);
+    this.finished.push(quest);
+    return quest.reward;
+  }
+
+  /** "2 / 5" for the journal. */
+  progressText(q) {
+    if (q.kind === 'visit') return q.done ? 'arrived' : 'not yet there';
+    return `${Math.min(q.progress, q.count)} / ${q.count}`;
+  }
+
+  toJSON() { return { active: this.active, finished: this.finished.map(q => q.id) }; }
+  static fromJSON(data) {
+    const log = new QuestLog();
+    if (data?.active) log.active = data.active;
+    return log;
+  }
+}

@@ -260,3 +260,45 @@ body {
 .pin-dot { width: 9px; height: 9px; border-radius: 50%; background: #ffd070; border: 1px solid #2a2010; display: inline-block; }
 .pin-name { flex: 1; }
 .pin-del { background: none; border: 0; color: #c08080; cursor: pointer; font-size: 15px; }
+
+/* ---------------------------------------------------------------- talking to somebody (E) */
+
+.talk {
+  position: fixed; z-index: 35; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(760px, 94vw); max-height: 84vh; overflow: auto;
+  background: #0d1320f2; border: 1px solid #2c3a52; border-radius: 10px; padding: 16px 20px;
+  box-shadow: 0 18px 60px #000a;
+}
+.talk.hidden { display: none; }
+.talk-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid #222c3c; padding-bottom: 8px; }
+.talk-head h2 { margin: 0; font-size: 19px; color: #7fd8ff; }
+.talk-role { font-size: 12px; }
+.talk-close { margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 22px; cursor: pointer; }
+.talk-body { padding-top: 10px; }
+.talk-say { font-style: italic; color: #d8e6f2; margin: 0 0 12px; }
+.talk h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; }
+.talk-foot { margin-top: 12px; }
+.talk-gold { margin-top: 8px; }
+
+.talk-quest {
+  background: #121a29; border: 1px solid #2a3446; border-left: 3px solid #d8b040;
+  border-radius: 6px; padding: 8px 10px; margin-bottom: 7px;
+}
+.talk-quest.done { border-left-color: #5ad48a; }
+.talk-quest .q-title { font-weight: 600; }
+.talk-btn {
+  background: #16202f; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px;
+  padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; margin-top: 5px;
+}
+.talk-btn:hover { border-color: #3f6f9a; }
+.talk-btn.primary { background: #1b4a6a; border-color: #2f7ba8; color: #dff2ff; }
+
+.trade { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 680px) { .trade { grid-template-columns: 1fr; } }
+.trade-col h3 { margin-top: 4px; }
+.trade-row {
+  display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 5px;
+  border: 1px solid #222c3c; margin-bottom: 4px; font-size: 13px;
+}
+.trade-row .coin { margin-left: auto; color: #ffd070; font-variant-numeric: tabular-nums; }
+.trade-row .talk-btn { margin-top: 0; }

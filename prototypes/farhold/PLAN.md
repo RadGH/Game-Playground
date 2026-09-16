@@ -150,9 +150,21 @@ Sky:
 
 ---
 
-## Phase 4 — Places on the map
+## Phase 4 — Places on the map ⭐ **people, trade and work (2026-09-15)**
 
-**You can:** find villages, ruins and dungeons that were already on the world map, and get work.
+**You can, now:** walk into any settlement and find people standing in it — a merchant, an elder, a
+smith, an innkeeper, guards and villagers, sized by how big the place is. Press **E** to talk. Buy
+from their stock, sell out of your bag, and take work. Names come from **Name Forge** in the
+settlement's own race, so a dwarf town has dwarf names.
+
+Four kinds of job, all anchored to things that actually exist: cull a creature the bestiary really
+spawns here, carry word to a settlement World Forge really founded, clear a dungeon it really placed,
+or gather items the loot tables really drop. Taking one drops a pin on the map. They only advance
+through events — a kill, an arrival, a piece of loot — and only the person who gave it will pay.
+
+**Still to do in this phase:** dungeon interiors (a "clear" job currently sends you to the site, but
+the site is a marker, not a place you go inside), shops that restock over time, an inn that does
+anything, and NPC dialogue with real personality — that waits for Lingo in phase 7.
 
 - **The map's own nodes** (`world.nodes`: settlements, ports, dungeons, landmarks, passes) become
   real places on the ground, with the roads (`world.roads`) drawn as paths you can follow.
@@ -286,7 +298,7 @@ wrecks, and jumping to another star.
 | 1 ✅ | done | getting the terrain and the map to agree |
 | 2 ✅ | done | scatter density vs. frame budget — landed at ~8 draw calls |
 | 3 | **large** | now carries the map screen, the phase 2 play-test fixes (roads, collision, swimming, saves, eclipses) and combat — may be worth splitting |
-| 4 | large | procedural settlements that do not look generated |
+| 4 ⭐ | people, trade and work done | dungeon interiors and real dialogue still open |
 | 5 | **largest** | the scale handoff and floating-point precision |
 | 6 | medium | making other planets worth the trip |
 | 7 | medium | mostly wiring; the pieces all exist |

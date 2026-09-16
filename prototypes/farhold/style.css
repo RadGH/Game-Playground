@@ -302,3 +302,19 @@ body {
 }
 .trade-row .coin { margin-left: auto; color: #ffd070; font-variant-numeric: tabular-nums; }
 .trade-row .talk-btn { margin-top: 0; }
+
+/* ---------------------------------------------------------------- the passive tree */
+
+.passives { display: flex; flex-direction: column; gap: 3px; margin-bottom: 4px; }
+.passive-row {
+  display: flex; align-items: center; gap: 8px; font-size: 12px;
+  background: #121a29; border: 1px solid #2a3446; border-radius: 5px; padding: 3px 7px;
+}
+.passive-row.maxed { border-color: #3f6f9a; }
+.passive-name { flex: 1; }
+.passive-pips { color: #d8b040; letter-spacing: 1px; font-size: 11px; }
+.passive-row button {
+  width: 22px; height: 20px; border-radius: 4px; border: 1px solid #2f7ba8;
+  background: #1b4a6a; color: #dff2ff; cursor: pointer; font-size: 12px; line-height: 1;
+}
+.passive-row button:disabled { opacity: .25; cursor: default; }

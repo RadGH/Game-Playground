@@ -49,10 +49,11 @@ async function boot() {
   const status = t => { $('boot-status').textContent = t; };
   status('reading the data…');
 
-  const [items, balance, bestiary, classLooks, namegen] = await Promise.all([
+  const [items, balance, bestiary, talents, classLooks, namegen] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
+    loadJSON('data/talents.json'),
     loadJSON('../emberveil/data/class-looks.json'),
     // Name Forge, so the folk in a dwarf town have dwarf names
     NameGen.load('/namegen/data/').catch(() => null),
@@ -90,7 +91,7 @@ async function boot() {
         <span class="muted small">level ${s.level} · seed ${s.seed} · ${playtimeText(s.playtime)}${s.place ? ' · ' + s.place : ''}</span>`;
       const load = document.createElement('button');
       load.textContent = 'Load';
-      load.onclick = () => begin({ items, balance, bestiary, classLooks, status, save: saves.read(s.id) });
+      load.onclick = () => begin({ items, balance, bestiary, talents, classLooks, namegen, status, save: saves.read(s.id) });
       const del = document.createElement('button');
       del.className = 'ghost';
       del.textContent = '×';
@@ -103,7 +104,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, classLooks, namegen, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, talents, classLooks, namegen, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -111,7 +112,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, classLooks, namegen, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, talents, classLooks, namegen, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -121,7 +122,7 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, classLooks, namegen, status, save }) {
+async function begin({ items, balance, bestiary, talents, classLooks, namegen, status, save }) {
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
@@ -191,7 +192,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
   status('waking the wayfarer…');
   await frame();
 
-  const rpg = new Rpg(items, { ...balance, seed });
+  const rpg = new Rpg(items, { ...balance, seed }, talents);
   const look = classLooks.classes[classId];
   const playerName = save?.name || ($('boot-name').value || '').trim() || look?.name?.split(' ')[0] || 'Wayfarer';
   const player = rpg.createPlayer({ name: playerName, classId, avatar: look?.avatar || null });
@@ -248,6 +249,8 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
       hud.setPlayer(player);
     },
     onSpendAttr: key => { rpg.spendAttr(player, key); hud.setPlayer(player); },
+    onTakeTalent: id => { if (rpg.takeTalent(player, id)) { sound.ui('click'); hud.log(`Talent taken: ${rpg.talentList.find(t => t.id === id)?.name}.`, 'level'); autoSave(); } hud.setPlayer(player); },
+    onSpendPassive: id => { if (rpg.spendPassive(player, id)) { sound.ui('click'); autoSave(); } hud.setPlayer(player); },
   });
   hud.setPlayer(player);
 
@@ -260,6 +263,8 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
   function onEnemyKilled(e) {
     player.kills++;
     sound.combat('death', { beast: e.kind !== 'humanoid' });
+    const back = rpg.onKillRestore(player);
+    if (back.hp || back.mp) hud.log(`The kill returns ${[back.hp && `${back.hp} health`, back.mp && `${back.mp} mana`].filter(Boolean).join(' and ')}.`);
     const levels = rpg.gainXp(player, e.xp);
     player.gold += e.gold;
     hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, 'good');
@@ -289,6 +294,8 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     const next = JSON.parse(JSON.stringify(look?.avatar || {}));
     next.held = heldLookFor(player.equipment.weapon);
     next.offhand = offhandLookFor(player.equipment.offhand);
+    // phase 8: armour you can see — the base's tier picks the Chibi 2 part
+    Object.assign(next, rpg.gearLook(player));
     actor.setAvatar(next);        // keeps the clip set it was built with
   }
   applyGearLook();
@@ -569,6 +576,9 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
       place: features.settlementAt(control.x, control.z)?.name || terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name,
       weather: blended.key,
       quests: questLog.toJSON(),
+      passiveRanks: player.passiveRanks,
+      pendingPassive: player.pendingPassive,
+      pendingTalent: player.pendingTalent,
     });
   }
   function autoSave({ quiet = true } = {}) {
@@ -813,6 +823,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
         const result = rpg.strike(e, player, field.rng);
         if (result.dodged) { hud.log(`You dodge ${e.name}.`); return; }
         hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
+        if (result.reflected) hud.log(`Thorns bite back for ${result.reflected}.`, 'good');
         if (player.hp <= 0) respawn();
       },
     });

@@ -15,6 +15,30 @@
 
 import { Loot } from '../../emberveil/js/loot.js';
 import { makeRng } from '../../emberveil/js/rng.js';
+// Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
+// invent a second set that means the same thing.
+import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
+
+export { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY };
+
+/**
+ * Which passive-node fields this game actually reads. The rest are carried and declared, the same
+ * way unimplemented affixes are — see `derived.inert`.
+ */
+export const LIVE_PASSIVES = {
+  maxHp: 'maxHp', maxMp: 'maxMp', hpRegen: 'hpRegen', mpRegen: 'mpRegen',
+  blockChance: 'blockChance', dodgePct: 'dodge', critPct: 'critChance',
+  lifesteal: 'lifeStealFrac', resistAll: 'resistAll', thorns: 'thorns',
+  hpOnKill: 'hpOnKill', manaOnKill: 'manaOnKill',
+};
+
+/** What a suit of armour looks like on a Chibi 2 body, by the base's tier. */
+export const ARMOUR_LOOK = {
+  head: { cloth: 'hood', light: 'feather_cap', medium: 'hood', scaled: 'horned_helm', heavy: 'horned_helm', plate: 'dragon_helm', runed: 'hood' },
+  chest: { cloth: 'robe', light: 'strapped_leather', medium: 'tunic', scaled: 'scale_plate', heavy: 'plate', plate: 'plate', runed: 'trim_robe' },
+  legs: { cloth: 'baggy', light: 'pants', medium: 'pants', scaled: 'greaves', heavy: 'greaves', plate: 'greaves', runed: 'baggy' },
+  feet: { cloth: 'sandals', light: 'boots', medium: 'boots', scaled: 'heavy', heavy: 'heavy', plate: 'heavy', runed: 'slippers' },
+};
 
 /** Affixes that change a character here. Everything else is carried but does nothing yet. */
 export const LIVE_STATS = {
@@ -81,9 +105,10 @@ export function itemScore(item) {
 
 export class Rpg {
   /** `items` is Emberveil's items.json; `balance` is data/balance.json. */
-  constructor(items, balance = {}) {
+  constructor(items, balance = {}, talents = null) {
     this.items = items;
     this.b = balance;
+    this.talentList = talents?.talents || [];
     this.loot = new Loot(items, balance.loot || {});
     this.rng = makeRng(balance.seed ?? 1);
   }
@@ -95,11 +120,16 @@ export class Rpg {
     const player = {
       name, classId, avatar, level, xp: xpForLevel(level), gold: base.startGold ?? 0,
       attrs: { str: base.str ?? 6, dex: base.dex ?? 6, int: base.int ?? 6, con: base.con ?? 6 },
-      pendingAttr: 0,
+      pendingAttr: 0, pendingPassive: 0, pendingTalent: 0,
+      passiveRanks: {}, talents: [],
       equipment: {}, bag: [],
       kills: 0, deaths: 0,
     };
-    for (let l = 2; l <= level; l++) player.pendingAttr += this.b.progression?.attrPerLevel ?? 3;
+    for (let l = 2; l <= level; l++) {
+      player.pendingAttr += this.b.progression?.attrPerLevel ?? 3;
+      if (l % PASSIVE_EVERY === 0) player.pendingPassive++;
+      if (TALENT_LEVELS.includes(l)) player.pendingTalent++;
+    }
     this.refresh(player, { full: true });
     return player;
   }
@@ -127,6 +157,33 @@ export class Rpg {
         d[field] += a.value || 0;
       }
     }
+    // the passive tree, on top of gear
+    d.resistAll = 0; d.thorns = 0; d.hpOnKill = 0; d.manaOnKill = 0; d.lifeStealFrac = 0;
+    for (const [id, rank] of Object.entries(unit.passiveRanks || {})) {
+      const node = PASSIVE_NODES[id];
+      if (!node || !rank) continue;
+      for (const [key, value] of Object.entries(node)) {
+        if (typeof value !== 'number') continue;
+        const field = LIVE_PASSIVES[key];
+        if (!field) { d.inert.push('passive:' + key); continue; }
+        d[field] += value * rank;
+      }
+    }
+    d.lifeSteal += d.lifeStealFrac * 100;      // nodes store a fraction, gear stores a percent
+
+    // talents: broad masteries, taken one per talent level
+    d.damagePct = 0; d.armorPct = 0; d.movePct = 0; d.jumpPct = 0; d.swimPct = 0;
+    d.mountPct = 0; d.floatLift = 0; d.arrowRangePct = 0; d.arrowSpeedPct = 0;
+    for (const id of unit.talents || []) {
+      const t = this.talentList.find(x => x.id === id);
+      if (!t) continue;
+      for (const [key, value] of Object.entries(t.grants || {})) {
+        if (key in d) d[key] += value;
+        else d[key] = value;
+      }
+    }
+    d.armor *= 1 + d.armorPct / 100;
+
     d.maxHp += d.con * (b.hpPerCon ?? 4);
     d.maxMp += d.int * (b.mpPerInt ?? 2);
     d.critChance += d.dex * 0.2;
@@ -136,8 +193,12 @@ export class Rpg {
     const attr = cat === 'magic' ? d.int : cat === 'heavy' ? d.str : d.dex;
     const wd = weapon?.dmg || (b.unarmed ?? [2, 4]);
     const scale = 1 + attr * (b.damagePerAttr ?? 0.03);
-    d.damage = [Math.max(1, Math.round((wd[0] + d.damageFlat) * scale)), Math.max(2, Math.round((wd[1] + d.damageFlat) * scale))];
-    d.moveSpeed = (b.moveSpeed ?? 5.2) * (1 - Math.min(0.2, (d.armor / 400)));
+    const talentDmg = 1 + d.damagePct / 100;
+    d.damage = [
+      Math.max(1, Math.round((wd[0] + d.damageFlat) * scale * talentDmg)),
+      Math.max(2, Math.round((wd[1] + d.damageFlat) * scale * talentDmg)),
+    ];
+    d.moveSpeed = (b.moveSpeed ?? 5.2) * (1 - Math.min(0.2, (d.armor / 400))) * (1 + d.movePct / 100);
     d.inert = [...new Set(d.inert)];
     return d;
   }
@@ -191,8 +252,58 @@ export class Rpg {
     if (after === before) return 0;
     player.level = after;
     player.pendingAttr += (after - before) * (this.b.progression?.attrPerLevel ?? 3);
+    for (let l = before + 1; l <= after; l++) {
+      if (l % PASSIVE_EVERY === 0) player.pendingPassive++;
+      if (TALENT_LEVELS.includes(l)) player.pendingTalent++;
+    }
     this.refresh(player, { full: true });
     return after - before;
+  }
+
+  /** What a kill gives back, from the `killing_blow` and `soul_harvest` passives. */
+  onKillRestore(player) {
+    const d = player.derived || {};
+    const hp = Math.round(d.hpOnKill || 0), mp = Math.round(d.manaOnKill || 0);
+    if (hp) player.hp = Math.min(player.maxHp, player.hp + hp);
+    if (mp) player.mp = Math.min(player.maxMp, player.mp + mp);
+    return { hp, mp };
+  }
+
+  /** The passive nodes this character may take, with the rank they are at. */
+  passives(player) {
+    return passiveTree(player.classId).map(node => ({
+      ...node,
+      rank: player.passiveRanks?.[node.id] || 0,
+      live: Object.keys(node).some(k => LIVE_PASSIVES[k]),
+    }));
+  }
+
+  /** The talents this character could still take. */
+  talentChoices(player) {
+    return this.talentList.filter(t => !(player.talents || []).includes(t.id));
+  }
+
+  /** Take a talent. */
+  takeTalent(player, id) {
+    if (!player.pendingTalent) return false;
+    if (!this.talentList.some(t => t.id === id)) return false;
+    if ((player.talents || []).includes(id)) return false;
+    player.talents = [...(player.talents || []), id];
+    player.pendingTalent--;
+    this.refresh(player);
+    return true;
+  }
+
+  /** Put a point into a passive node. */
+  spendPassive(player, id) {
+    if (!player.pendingPassive) return false;
+    const node = this.passives(player).find(n => n.id === id);
+    if (!node || node.rank >= node.maxRank) return false;
+    player.passiveRanks = player.passiveRanks || {};
+    player.passiveRanks[id] = (player.passiveRanks[id] || 0) + 1;
+    player.pendingPassive--;
+    this.refresh(player);
+    return true;
   }
 
   /** Spend a level-up point. */
@@ -240,11 +351,19 @@ export class Rpg {
     if (crit) amount *= 1 + (a ? a.critDamage : 50) / 100;
     const armor = d ? d.armor : defender.armor || 0;
     amount *= 100 / (100 + Math.max(0, armor));
+    // flat damage reduction from the `resistance` passive
+    if (d?.resistAll) amount *= Math.max(0.25, 1 - d.resistAll / 100);
     amount = Math.max(1, Math.round(amount));
     defender.hp = Math.max(0, (defender.hp ?? defender.maxHp) - amount);
     const healed = a?.lifeSteal ? Math.round(amount * a.lifeSteal / 100) : 0;
     if (healed && attacker.hp != null) attacker.hp = Math.min(attacker.maxHp, attacker.hp + healed);
-    return { dodged: false, amount, crit, healed, dead: defender.hp <= 0 };
+    // thorns: the defender bites back
+    let reflected = 0;
+    if (d?.thorns && attacker.hp != null) {
+      reflected = Math.max(1, Math.round(amount * d.thorns));
+      attacker.hp = Math.max(0, attacker.hp - reflected);
+    }
+    return { dodged: false, amount, crit, healed, reflected, dead: defender.hp <= 0 };
   }
 
   // ---------------------------------------------------------------- loot
@@ -293,6 +412,29 @@ export class Rpg {
     const baseKey = rng.pick(this.loot.basesForAct(pool, Math.ceil(level / 5)));
     return this.loot.generate(baseKey, rarity, this.qualityFor(level), { rng });
   }
+
+  /**
+   * The avatar overrides for what this character is wearing. Armour is looked up by the BASE's
+   * tier — the generated item does not carry it, but `loot.base(baseKey)` does.
+   */
+  gearLook(player) {
+    const out = {};
+    for (const [slot, key] of [['head', 'head'], ['chest', 'chest'], ['legs', 'legs'], ['feet', 'feet']]) {
+      const item = player.equipment[slot];
+      if (!item) continue;
+      const tier = this.loot.base(item.baseKey)?.tier;
+      const part = ARMOUR_LOOK[key]?.[tier];
+      if (!part) continue;
+      const rare = item.setId || item.isUnique || item.rarity === 'legendary';
+      const colour = rare ? '#c8a24a' : item.rarity === 'rare' ? '#8a7a4a' : item.rarity === 'magic' ? '#4a5a7a' : null;
+      const target = key === 'head' ? 'hat' : key === 'chest' ? 'top' : key === 'legs' ? 'bottom' : 'shoes';
+      out[target] = { id: part, ...(colour ? { color: colour } : {}) };
+    }
+    return out;
+  }
+
+  /** Break an item down for materials. */
+  salvage(item, rng = this.rng) { return this.loot.salvage(item, rng); }
 
   /** What an item sells for, so the bag can have a "sell" button later. */
   price(item) { return this.loot.price(item); }

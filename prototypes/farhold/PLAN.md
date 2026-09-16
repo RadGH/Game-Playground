@@ -260,9 +260,25 @@ remembers the fight you had outside their village, and combat barks.
 
 ---
 
-## Phase 8 — Who you are
+## Phase 8 — Who you are ⭐ **talents, passives and visible armour (2026-09-15)**
 
-**You can:** make a character, build them your way, and look like it.
+**You can, now:** build a character your own way and see it on them.
+
+- **Passives** — Emberveil's own twenty nodes and per-class trees, reused rather than reinvented. A
+  point every fifth level, three ranks a node. The ones this game reads are live (health, mana,
+  regeneration, block, dodge, crit, life steal, damage reduction, thorns, health and mana back on a
+  kill); the rest are listed on the sheet as carried but not wired up, the same way unimplemented
+  affixes are.
+- **Talents** — ten broad masteries, one at levels 3, 8, 13, 18, 23 and 28. Emberveil's talents
+  modify named skills and Farhold has no skill bar, so its talent levels would have handed out
+  points with nothing to spend them on. Every one of these changes a number the game already reads,
+  and a test asserts exactly that.
+- **Armour you can see** — the base's tier picks the Chibi 2 part, so cloth is a robe, heavy is
+  plate, and a legendary piece is gilded. Looked up through `loot.base(baseKey)`, because the
+  generated item does not carry its tier.
+
+**Still to do:** character creation (you pick a class and a name; you cannot yet pick a face), dyes,
+crafting at the smith, and companions.
 
 - **Character creation** on the Chibi 2 body: the avatar builder already exists in `avatar-2d/` and
   `avatar-3d/`; put it in front of the game.
@@ -318,7 +334,7 @@ remembers the fight you had outside their village, and combat barks.
 | 5 | **largest** | the scale handoff and floating-point precision |
 | 6 | medium | making other planets worth the trip |
 | 7 ⭐ | done | was mostly wiring, as predicted — memories and relations still open |
-| 8 | medium | armour on a procedural body |
+| 8 ⭐ | talents, passives and armour done | character creation and crafting still open |
 | 9 | large | content, not code |
 | 10 | medium | the simulator pays for itself |
 

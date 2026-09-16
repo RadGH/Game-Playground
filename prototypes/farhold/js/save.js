@@ -105,6 +105,8 @@ export function snapshot({ id, name, seed, classId, player, control, elapsed, pl
       hp: player.hp, mp: player.mp,
       kills: player.kills, deaths: player.deaths,
       equipment: player.equipment, bag: player.bag,
+      passiveRanks: player.passiveRanks, pendingPassive: player.pendingPassive,
+      pendingTalent: player.pendingTalent, talents: player.talents,
     },
     position: { x: control.x, z: control.z, yaw: control.yaw, pitch: control.pitch },
     pins: (pins || []).map(p => ({ x: p.x, y: p.y, name: p.name })),
@@ -119,6 +121,10 @@ export function restore(save, { rpg, player, control, map }) {
   player.gold = p.gold ?? 0;
   player.attrs = { ...player.attrs, ...(p.attrs || {}) };
   player.pendingAttr = p.pendingAttr ?? 0;
+  player.passiveRanks = p.passiveRanks || {};
+  player.pendingPassive = p.pendingPassive ?? 0;
+  player.pendingTalent = p.pendingTalent ?? 0;
+  player.talents = p.talents || [];
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;
   player.equipment = p.equipment || {};

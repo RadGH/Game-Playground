@@ -214,3 +214,108 @@ test('the upgrade arrow points the right way', () => {
   assert.ok(itemScore(strong) > itemScore(weak));
   assert.equal(itemScore(null), 0);
 });
+
+// ---------------------------------------------------------------- phase 8: talents and passives
+
+import { readFileSync as readTalents } from 'node:fs';
+const talentData = JSON.parse(readTalents(join(here, '../data/talents.json'), 'utf8'));
+const rpgT = () => new Rpg(items, balance, talentData);
+
+test('levels hand out passive points and talent choices at the right rungs', () => {
+  const r = rpgT();
+  const p = r.createPlayer({});
+  assert.equal(p.pendingPassive, 0);
+  assert.equal(p.pendingTalent, 0);
+
+  r.gainXp(p, xpForLevel(3));
+  assert.equal(p.level, 3);
+  assert.equal(p.pendingTalent, 1, 'a talent at level 3');
+  assert.equal(p.pendingPassive, 0, 'no passive before level 5');
+
+  r.gainXp(p, xpForLevel(10) - p.xp);
+  assert.equal(p.level, 10);
+  assert.equal(p.pendingPassive, 2, 'a passive point at 5 and at 10');
+  assert.equal(p.pendingTalent, 2, 'talents at 3 and 8');
+});
+
+test('a passive point changes a real number, and cannot be spent twice', () => {
+  const r = rpgT();
+  const p = r.createPlayer({ level: 10 });
+  const tree = r.passives(p);
+  assert.ok(tree.length >= 3, 'a class has a tree');
+  for (const node of tree) assert.ok(node.name && node.maxRank >= 1);
+
+  // find one this game actually reads, and check it moves the stat it claims to
+  const health = tree.find(n => n.maxHp);
+  if (health) {
+    const before = p.maxHp;
+    const points = p.pendingPassive;
+    assert.equal(r.spendPassive(p, health.id), true);
+    assert.equal(p.pendingPassive, points - 1);
+    assert.ok(p.maxHp > before, `${health.name} did not raise health`);
+  }
+
+  // you cannot spend what you do not have
+  p.pendingPassive = 0;
+  assert.equal(r.spendPassive(p, tree[0].id), false);
+  // and nothing goes past its cap
+  p.pendingPassive = 99;
+  const node = tree[0];
+  for (let i = 0; i < node.maxRank; i++) r.spendPassive(p, node.id);
+  assert.equal(r.spendPassive(p, node.id), false, 'went past the maximum rank');
+  assert.equal(p.passiveRanks[node.id], node.maxRank);
+});
+
+test('every talent changes something the game reads', () => {
+  const FIELDS = ['damage', 'armor', 'moveSpeed', 'critChance', 'critDamage', 'magicFind', 'goldFind',
+    'hpRegen', 'lifeSteal', 'maxHp', 'swimPct', 'mountPct', 'jumpPct', 'arrowRangePct', 'arrowSpeedPct', 'floatLift'];
+  for (const t of talentData.talents) {
+    const r = rpgT();
+    const p = r.createPlayer({ level: 10 });
+    r.equip(p, r.loot.generate('longsword', 'normal', 'medium', { rng: makeRng(2) }));
+    const before = JSON.parse(JSON.stringify(p.derived));
+    p.pendingTalent = 1;
+    assert.equal(r.takeTalent(p, t.id), true, `${t.id} could not be taken`);
+    const after = p.derived;
+    const moved = FIELDS.some(f => JSON.stringify(after[f]) !== JSON.stringify(before[f]));
+    assert.ok(moved, `${t.name} changed nothing the game reads`);
+    assert.ok(t.desc && t.desc.length > 6, `${t.id} has no description`);
+    // and it cannot be taken twice
+    p.pendingTalent = 1;
+    assert.equal(r.takeTalent(p, t.id), false, `${t.id} was taken twice`);
+  }
+});
+
+test('armour is looked up by the base tier, and every tier maps to a real part', () => {
+  const r = rpgT();
+  const p = r.createPlayer({ level: 10 });
+  const parts = new Set(['hood', 'feather_cap', 'horned_helm', 'dragon_helm', 'robe', 'strapped_leather',
+    'tunic', 'scale_plate', 'plate', 'trim_robe', 'baggy', 'pants', 'greaves', 'sandals', 'boots', 'heavy', 'slippers']);
+  let seen = 0;
+  for (const key of Object.keys(items.armorBases)) {
+    const base = items.armorBases[key];
+    if (!['head', 'chest', 'legs', 'feet'].includes(base.slot)) continue;
+    const item = r.loot.generate(key, 'normal', 'medium', { rng: makeRng(1) });
+    if (!item) continue;
+    r.equip(p, item);
+    const look = r.gearLook(p);
+    for (const part of Object.values(look)) {
+      assert.ok(parts.has(part.id), `${key} (tier ${base.tier}) maps to "${part.id}", which Chibi 2 does not have`);
+      seen++;
+    }
+  }
+  assert.ok(seen > 6, `only ${seen} armour looks resolved`);
+  // nothing worn, nothing shown
+  assert.deepEqual(r.gearLook(r.createPlayer({})), {});
+});
+
+test('the passive tree and talents survive a save', () => {
+  const r = rpgT();
+  const p = r.createPlayer({ level: 15 });
+  const node = r.passives(p)[0];
+  r.spendPassive(p, node.id);
+  r.takeTalent(p, talentData.talents[0].id);
+  const json = JSON.parse(JSON.stringify({ passiveRanks: p.passiveRanks, talents: p.talents }));
+  assert.equal(json.passiveRanks[node.id], 1);
+  assert.deepEqual(json.talents, [talentData.talents[0].id]);
+});

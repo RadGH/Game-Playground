@@ -23,7 +23,9 @@ const SLOT_LABELS = {
 };
 
 export class Hud {
-  constructor({ rpg, terrain, onEquip, onSpendAttr, seed = 1 }) {
+  constructor({ rpg, terrain, onEquip, onSpendAttr, onSpendPassive = null, onTakeTalent = null, seed = 1 }) {
+    this.onSpendPassive = onSpendPassive;
+    this.onTakeTalent = onTakeTalent;
     this.rpg = rpg;
     this.terrain = terrain;
     this.seed = seed;
@@ -217,6 +219,76 @@ export class Hud {
       return row;
     }));
     $('sheet-points').textContent = player.pendingAttr ? `${player.pendingAttr} point${player.pendingAttr > 1 ? 's' : ''} to spend` : 'no points to spend';
+
+    // talents: the choices only appear when there is a point to spend
+    const talentBox = $('sheet-talents');
+    if (talentBox) {
+      const taken = (player.talents || []).map(id => this.rpg.talentList.find(t => t.id === id)).filter(Boolean);
+      const kids = taken.map(t => {
+        const row = document.createElement('div');
+        row.className = 'passive-row maxed';
+        row.title = t.desc;
+        const name = document.createElement('span');
+        name.className = 'passive-name';
+        name.textContent = t.name;
+        const note = document.createElement('span');
+        note.className = 'muted small';
+        note.textContent = t.desc;
+        row.append(name, note);
+        return row;
+      });
+      if (player.pendingTalent) {
+        for (const t of this.rpg.talentChoices(player)) {
+          const row = document.createElement('div');
+          row.className = 'passive-row';
+          row.title = t.desc;
+          const name = document.createElement('span');
+          name.className = 'passive-name';
+          name.textContent = t.name;
+          const note = document.createElement('span');
+          note.className = 'muted small';
+          note.textContent = t.desc;
+          const btn = document.createElement('button');
+          btn.textContent = '+';
+          btn.onclick = () => { this.onTakeTalent?.(t.id); this.renderSheet(); };
+          row.append(name, note, btn);
+          kids.push(row);
+        }
+      } else if (!taken.length) {
+        const p = document.createElement('p');
+        p.className = 'muted small';
+        p.textContent = 'A talent at levels 3, 8, 13, 18, 23 and 28.';
+        kids.push(p);
+      }
+      talentBox.replaceChildren(...kids);
+    }
+    const tp = $('sheet-talent-points');
+    if (tp) tp.textContent = player.pendingTalent ? `${player.pendingTalent} to choose` : '';
+
+    // the passive tree
+    const tree = $('sheet-passives');
+    if (tree) {
+      const nodes = this.rpg.passives(player);
+      tree.replaceChildren(...nodes.map(node => {
+        const row = document.createElement('div');
+        row.className = 'passive-row' + (node.rank >= node.maxRank ? ' maxed' : '');
+        row.title = node.desc + (node.live ? '' : ' — carried, but not wired up in this phase');
+        const name = document.createElement('span');
+        name.className = 'passive-name' + (node.live ? '' : ' muted');
+        name.textContent = node.name;
+        const pips = document.createElement('span');
+        pips.className = 'passive-pips';
+        pips.textContent = '●'.repeat(node.rank) + '○'.repeat(Math.max(0, node.maxRank - node.rank));
+        const btn = document.createElement('button');
+        btn.textContent = '+';
+        btn.disabled = !player.pendingPassive || node.rank >= node.maxRank;
+        btn.onclick = () => { this.onSpendPassive?.(node.id); this.renderSheet(); };
+        row.append(name, pips, btn);
+        return row;
+      }));
+    }
+    const pp = $('sheet-passive-points');
+    if (pp) pp.textContent = player.pendingPassive ? `${player.pendingPassive} to spend` : 'none to spend';
 
     // inert affixes are declared, not hidden
     $('sheet-inert').textContent = d.inert?.length

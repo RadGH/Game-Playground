@@ -9,6 +9,8 @@ import { createSpace } from './space.js';
 import { createTownFolk } from './town.js';
 import { createTalkPanel } from './talkui.js';
 import { QuestLog } from './quests.js';
+import { createSound } from './sound.js';
+import { createSpeech } from './speech.js';
 import { NameGen } from '../../../namegen/js/namegen.js';
 import { generatePlanetMap } from '../../../universe/js/planetmap.js';
 import { createTerrainView } from './terrain.js';
@@ -171,6 +173,14 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
   });
 
+  // phase 7: sound and speech. Both start silent and come up on the first click, because a
+  // browser will not give a page an audio context until somebody has interacted with it.
+  const sound = await createSound({ balance, enabled: params.get('sound') !== 'off' });
+  const speech = await createSpeech({ enabled: params.get('sound') !== 'off' });
+  const wake = () => { sound.start(); window.removeEventListener('pointerdown', wake); window.removeEventListener('keydown', wake); };
+  window.addEventListener('pointerdown', wake);
+  window.addEventListener('keydown', wake);
+
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
   const npcLooks = ['ranger', 'cleric', 'rogue', 'warrior', 'bard', 'mage']
@@ -210,6 +220,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     onArrowLand: arrow => {
       const splash = balance.player?.arrowSplash ?? 2.6;
       const hits = field.strikeArea(arrow.x, arrow.z, splash, player);
+      sound.combat('arrow');
       for (const { enemy, result } of hits) reportHit(enemy, result);
     },
   });
@@ -232,7 +243,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     rpg, terrain, seed,
     onEquip: (item, unequipSlot) => {
       if (unequipSlot) { const off = rpg.unequip(player, unequipSlot); if (off) hud.log(`Took off ${off.name}.`); }
-      else { rpg.equip(player, item); hud.log(`Equipped ${item.name}.`, 'loot'); }
+      else { rpg.equip(player, item); hud.log(`Equipped ${item.name}.`, 'loot'); sound.equip(); }
       applyGearLook();
       hud.setPlayer(player);
     },
@@ -248,14 +259,16 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
   /** What happens when something dies. Named, because the enemy field is rebuilt on every world. */
   function onEnemyKilled(e) {
     player.kills++;
+    sound.combat('death', { beast: e.kind !== 'humanoid' });
     const levels = rpg.gainXp(player, e.xp);
     player.gold += e.gold;
     hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, 'good');
-    if (levels) hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level');
+    if (levels) { hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level'); sound.levelUp(); }
     const drop = rpg.rollDrop({ level: e.level, rng: field.rng, magicFind: player.derived.magicFind, bases: e.dropBases });
     if (drop) {
       player.bag.push(drop);
       hud.log(`${e.name} dropped ${drop.name}.`, 'loot');
+      sound.loot(drop);
       for (const q of questLog.onLoot({ baseKey: drop.baseKey })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
     }
     for (const q of questLog.onKill({ defId: e.defId })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
@@ -306,6 +319,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     buy: item => {
       const r = folk.buy(talk.npc, item, player);
       hud.log(r.ok ? `Bought ${item.name} for ${r.price} gold.` : r.why, r.ok ? 'loot' : 'bad');
+      if (r.ok) sound.coin(); else sound.ui('error');
       hud.setPlayer(player);
       talk.update(talkContext(talk.npc));
       autoSave();
@@ -313,6 +327,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     sell: item => {
       const r = folk.sell(talk.npc, item, player);
       hud.log(r.ok ? `Sold ${item.name} for ${r.price} gold.` : r.why, r.ok ? '' : 'bad');
+      if (r.ok) sound.coin();
       hud.setPlayer(player);
       talk.update(talkContext(talk.npc));
       autoSave();
@@ -329,6 +344,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
       player.gold += reward.gold;
       const levels = rpg.gainXp(player, reward.xp);
       hud.log(`${quest.title} — done. ${reward.gold} gold, ${reward.xp} xp.`, 'good');
+      sound.questDone();
       if (levels) hud.log(`Level ${player.level}!`, 'level');
       // the person who gave it has new work next time
       if (talk.npc) talk.npc.offered = null;
@@ -653,6 +669,8 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     spawn: () => { field.spawnNear(control.x, control.z, player.level); },
     clearEnemies: () => field.clear(),
     save: () => autoSave({ quiet: false }),
+    sound: () => { const m = sound.mute(); hud.log(m ? 'Sound off.' : 'Sound on.'); return m; },
+    voice: () => { const v = speech.setVoice(!speech.voiceOn); hud.log(v ? 'Voices on.' : 'Voices off.'); return v; },
   });
 
   function xpToNext() {
@@ -704,8 +722,14 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
       if (talk.isOpen) talk.close();
       else {
         const who = folk.nearest(control.x, control.z);
-        if (who) talk.show(who, talkContext(who));
-        else hud.log('Nobody close enough to talk to.');
+        if (who) {
+          // phase 7: what they say comes from Lingo and their own personality, not a fixed string
+          speech.attach(who);
+          who.greeting = speech.line(who, 'greet', { listener: { name: player.name } });
+          sound.ui('open');
+          talk.show(who, talkContext(who));
+          speech.say(who, who.greeting);
+        } else hud.log('Nobody close enough to talk to.');
       }
     }
 
@@ -763,12 +787,14 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
           range, speed: balance.player?.arrowSpeed ?? 42,
         });
         // if something is directly in the shot, it stops there
+        sound.combat('bow');
         const target = field.hitScan(control.x, eyeY, control.z, ax, ay, az, { range });
         if (target && arrow) arrow.range = Math.min(arrow.range, target.distance);
       } else {
         // a swing: the white arc IS the hit box — same reach, same angle
         fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach, arc });
         const hits = field.strike(control, player, { reach, arc });
+        sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
         for (const { enemy, result } of hits) reportHit(enemy, result);
         // and a little splash damage behind the arc, so nothing is ever purely single-target
         const splash = balance.player?.meleeSplash ?? 1;
@@ -801,6 +827,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
 
     rebuildWorldAround(false);
     folk.update(dt, control);
+    sound.step(dt, control);
     sinceArrive += dt;
     if (sinceArrive > 1) {
       sinceArrive = 0;
@@ -842,6 +869,9 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
 
     const target = field.target(control);
     const town = features.settlementAt(control.x, control.z);
+    if (state.frames % 45 === 0) {
+      sound.place(terrain.biomeAt(control.x, control.z).key, { inTown: !!town, storm: blended.wind });
+    }
     hud.tick(player, {
       place: town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
       clock: clockText(sky.dayFraction, control),
@@ -913,7 +943,7 @@ async function begin({ items, balance, bestiary, classLooks, namegen, status, sa
     get terrain() { return terrain; },
     launch, land,
     get folk() { return folk; },
-    questLog, talk,
+    questLog, talk, sound, speech,
     /** Skip the cinematics — go straight to space, or straight down onto a world. */
     toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },
     landOn: (planetId, spot = null) => {

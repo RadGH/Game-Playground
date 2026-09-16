@@ -266,5 +266,15 @@
     "ascentSeconds": 3.2,
     "descentSeconds": 2.6,
     "_doc": "Space runs in its own compressed units: 1 AU is auUnits across and an Earth-sized planet is earthUnits in radius, because metres over a 163 km map and hundreds of millions of kilometres cannot share a coordinate space. speed is the cruise rate; boost and warp multiply it. landRange is how close to a world you must be, in its own radii, before you can put down."
+  },
+  "sound": {
+    "method": "hybrid",
+    "volume": 0.75,
+    "_doc": "Which Sound Lab maker to use (synth, library, hybrid, retro) and the master volume. Audio starts on the first click, because a browser will not hand a page an audio context before that. ?sound=off turns both sound and voices off."
+  },
+  "town": {
+    "talkRange": 3.6,
+    "radius": 900,
+    "_doc": "How close you must stand to talk to somebody, and how far from the player settlements keep their people."
   }
 }

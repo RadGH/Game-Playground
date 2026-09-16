@@ -135,6 +135,13 @@ export function createDebugMenu(hooks = {}) {
     }
     setTimeout(() => { copyBtn.textContent = 'Copy debug report'; }, 2200);
   }, 'wide');
+  if (hooks.sound || hooks.voice) {
+    const kids = [];
+    if (hooks.sound) kids.push(button('Sound on/off', () => { hooks.sound(); refresh(); }));
+    if (hooks.voice) kids.push(button('Voices on/off', () => { hooks.voice(); refresh(); }));
+    sections.push(group('Audio', ...kids));
+  }
+
   const reportKids = [copyBtn];
   if (hooks.save) reportKids.push(button('Save now', () => hooks.save()));
   sections.push(group('Report', ...reportKids));

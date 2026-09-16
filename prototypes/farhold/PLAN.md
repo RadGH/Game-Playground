@@ -230,9 +230,25 @@ wrecks, and jumping to another star.
 
 ---
 
-## Phase 7 — Sound and speech (the two things phase 1 left out)
+## Phase 7 — Sound and speech ⭐ **done 2026-09-15**
 
-**You can:** hear the world and talk to the people in it.
+**You can, now:** hear the world and be talked to by the people in it.
+
+- **Sound** (`js/sound.js`) over the Sound Lab: footsteps at your actual walking cadence (and not
+  while swimming or riding), swings, hits, crits, deaths by body type, bow and arrow, loot by
+  rarity, coins, equipping, levels, finished work and interface clicks.
+- **Ambience by ground**: a forest, a marsh, a mountain, a town and a gale are five different beds,
+  crossfaded as you walk from one to the next.
+- **Voices**: every NPC gets a formant voice built from their role, gender and seed
+  (`shared/voices.js`), so the smith in one town does not sound like the smith in the next.
+- **Lingo**: what they say is generated from their own personality, not a fixed string. A greedy,
+  talkative merchant says "Look who it is. Wren. Be quick."; a kind innkeeper says "Peace, Wren.
+  Have you eaten? You should eat." They know who they are talking to.
+- All of it degrades quietly: `?sound=off`, a debug toggle, or a browser that will not give the page
+  an audio context, and the game runs on in silence.
+
+**Still to do:** memories and relationships (`lingo/js/memory.js`, `relations.js`) so an NPC
+remembers the fight you had outside their village, and combat barks.
 
 - **Sound Lab** (`sfx/`): 118 catalogued ids, four interchangeable makers, loudness already
   normalised per category. Footsteps by ground material, weather beds, combat, interface.
@@ -301,7 +317,7 @@ wrecks, and jumping to another star.
 | 4 ⭐ | people, trade and work done | dungeon interiors and real dialogue still open |
 | 5 | **largest** | the scale handoff and floating-point precision |
 | 6 | medium | making other planets worth the trip |
-| 7 | medium | mostly wiring; the pieces all exist |
+| 7 ⭐ | done | was mostly wiring, as predicted — memories and relations still open |
 | 8 | medium | armour on a procedural body |
 | 9 | large | content, not code |
 | 10 | medium | the simulator pays for itself |

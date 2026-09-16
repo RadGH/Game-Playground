@@ -169,3 +169,85 @@ test('the folk come and go with the settlements around you', async ({ page }) =>
   expect(life.away.settlements).toBe(0);
   expect(life.away.people).toBe(0);
 });
+
+// ---------------------------------------------------------------- phase 9: the long game
+
+test('the survey tracks what you do, and standing makes a merchant cheaper', async ({ page }) => {
+  const errors = await land(page);
+  const town = await goToTown(page);
+  const run = await page.evaluate(async (townName) => {
+    const f = window.farhold;
+    const before = { share: f.campaign.share, objectives: f.campaign.list().length };
+
+    // walking is counted
+    const walked = f.campaign.list().find(o => o.kind === 'distance').progress;
+    f.teleport(f.control.x + 400, f.control.z);
+    await new Promise(r => setTimeout(r, 400));
+
+    // the town you are standing in gets charted
+    const townObj = f.campaign.list().find(o => o.kind === 'settlements');
+
+    // standing changes the price a merchant asks
+    const merchant = [...f.folk.live.values()].flat().find(p => p.trades);
+    const node = merchant.node.id;
+    const item = f.folk.stockFor(merchant, f.player.level)[0];
+    const basePrice = f.rpg.price(item);
+    const before100 = f.campaign.priceMultiplier(node);
+    for (let i = 0; i < 5; i++) f.campaign.onQuestDone({ kind: 'hunt' }, node);
+    const after = f.campaign.priceMultiplier(node);
+
+    f.player.gold = 9999;
+    const paid = f.folk.buy(merchant, item, f.player, after);
+
+    // a nemesis
+    const nem = f.campaign.onDeath({ defId: 'cairn_rat', name: 'Skree', level: 2 });
+    const settled = f.campaign.onKill('cairn_rat');
+
+    return {
+      before, townName,
+      chartedTowns: townObj.progress,
+      basePrice, before100, after,
+      paidPrice: paid.price,
+      standing: f.campaign.standing(node),
+      nemesis: { name: nem.name, title: nem.title, defeats: nem.defeats },
+      settled,
+      share: f.campaign.share,
+    };
+  }, town.name);
+  expect(errors).toEqual([]);
+  expect(run.before.objectives).toBeGreaterThan(5);
+  // being in a town counts it
+  expect(run.chartedTowns).toBeGreaterThan(0);
+  // five jobs buys a discount, and the merchant actually charges it
+  expect(run.before100).toBe(1);
+  expect(run.after).toBeLessThan(1);
+  expect(run.paidPrice).toBeLessThan(run.basePrice);
+  expect(run.standing).not.toBe('a stranger');
+  // the grudge
+  expect(run.nemesis.name).toBe('Skree');
+  expect(run.settled).toBe('nemesis');
+  expect(run.share).toBeGreaterThan(run.before.share);
+});
+
+test('the journal shows the survey, the work and the grudge', async ({ page }) => {
+  await land(page);
+  await page.evaluate(() => {
+    const f = window.farhold;
+    f.campaign.onDeath({ defId: 'moor_hound', name: 'Grix', level: 3 });
+    f.campaign.onKill('moor_hound');
+    f.campaign.onKill('moor_hound');
+  });
+  await page.keyboard.press('KeyI');
+  await expect(page.locator('#sheet')).toBeVisible();
+  const journal = await page.evaluate(() => ({
+    rows: document.querySelectorAll('#sheet-journal .journal-row').length,
+    text: document.getElementById('sheet-journal')?.textContent || '',
+    talents: document.querySelectorAll('#sheet-talents').length,
+    passives: document.querySelectorAll('#sheet-passives .passive-row').length,
+  }));
+  // every objective, plus the bestiary line
+  expect(journal.rows).toBeGreaterThan(6);
+  expect(journal.text).toContain('surveyed');
+  expect(journal.text.toLowerCase()).toContain('moor hound');
+  expect(journal.passives).toBeGreaterThan(2);
+});

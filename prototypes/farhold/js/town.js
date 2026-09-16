@@ -223,8 +223,8 @@ export function createTownFolk(scene, terrain, opts = {}) {
     stockFor, questFrom, populate, depopulate,
 
     /** Take an item off a merchant. */
-    buy(npc, item, player) {
-      const price = rpg.price(item);
+    buy(npc, item, player, multiplier = 1) {
+      const price = Math.max(1, Math.round(rpg.price(item) * multiplier));
       if (player.gold < price) return { ok: false, why: `That is ${price} gold and you have ${player.gold}.` };
       player.gold -= price;
       player.bag.push(item);

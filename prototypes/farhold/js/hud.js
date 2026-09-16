@@ -23,7 +23,8 @@ const SLOT_LABELS = {
 };
 
 export class Hud {
-  constructor({ rpg, terrain, onEquip, onSpendAttr, onSpendPassive = null, onTakeTalent = null, seed = 1 }) {
+  constructor({ rpg, terrain, onEquip, onSpendAttr, onSpendPassive = null, onTakeTalent = null, journal = null, seed = 1 }) {
+    this.journal = journal;
     this.onSpendPassive = onSpendPassive;
     this.onTakeTalent = onTakeTalent;
     this.rpg = rpg;
@@ -294,6 +295,56 @@ export class Hud {
     $('sheet-inert').textContent = d.inert?.length
       ? `Carried but not yet wired up in this phase: ${d.inert.join(', ')}`
       : '';
+
+    // the journal: the survey, the work in hand, the grudge, and what you have killed
+    const j = this.journal?.();
+    const jbox = $('sheet-journal');
+    if (jbox && j) {
+      const kids = [];
+      const head = document.createElement('div');
+      head.className = 'journal-head';
+      head.innerHTML = `<b>${j.title}</b> <span class="muted small">${Math.round(j.share * 100)}% surveyed</span>`;
+      kids.push(head);
+      for (const o of j.objectives) {
+        const row = document.createElement('div');
+        row.className = 'journal-row' + (o.done ? ' done' : '');
+        row.title = o.desc;
+        row.innerHTML = `<span>${o.name}</span><span class="muted">${o.text}</span>`;
+        kids.push(row);
+      }
+      if (j.nemesis) {
+        const n = document.createElement('div');
+        n.className = 'journal-row nemesis';
+        n.innerHTML = `<span>${j.nemesis.name} ${j.nemesis.title}</span><span class="muted">beat you ${j.nemesis.defeats}×</span>`;
+        kids.push(n);
+      }
+      if (j.quests?.length) {
+        const h = document.createElement('div');
+        h.className = 'journal-head';
+        h.innerHTML = '<b>Work in hand</b>';
+        kids.push(h);
+        for (const q of j.quests) {
+          const row = document.createElement('div');
+          row.className = 'journal-row' + (q.done ? ' done' : '');
+          row.innerHTML = `<span>${q.title}</span><span class="muted">${q.progress}</span>`;
+          kids.push(row);
+        }
+      }
+      const seen = Object.entries(j.bestiary || {}).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      if (seen.length) {
+        const h = document.createElement('div');
+        h.className = 'journal-head';
+        h.innerHTML = '<b>Killed</b>';
+        kids.push(h);
+        for (const [id, n] of seen) {
+          const row = document.createElement('div');
+          row.className = 'journal-row';
+          row.innerHTML = `<span>${(j.names?.[id] || id).replace(/_/g, ' ')}</span><span class="muted">${n}</span>`;
+          kids.push(row);
+        }
+      }
+      jbox.replaceChildren(...kids);
+    }
 
     // bag
     const bag = $('sheet-bag');

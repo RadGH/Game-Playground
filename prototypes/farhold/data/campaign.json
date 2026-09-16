@@ -1,0 +1,26 @@
+{
+  "_doc": "Farhold's spine. Eight objectives over one star system, each counted from an event the game already fires — no objective needs new bookkeeping. Finish them all and the survey is complete. Original names only.",
+  "title": "The Long Survey",
+  "blurb": "One system, one surveyor, and a ledger nobody else will ever read. Walk it, chart it, and come back alive.",
+  "objectives": [
+    { "id": "ground", "kind": "distance", "target": 20000, "name": "Cover ground", "desc": "Walk twenty kilometres." },
+    { "id": "worlds", "kind": "planets", "target": 3, "name": "Three worlds", "desc": "Set foot on three different planets." },
+    { "id": "towns", "kind": "settlements", "target": 6, "name": "Six settlements", "desc": "Walk into six settlements." },
+    { "id": "jobs", "kind": "quests", "target": 8, "name": "Eight jobs", "desc": "Finish eight pieces of work." },
+    { "id": "hunt", "kind": "kills", "target": 100, "name": "A hundred kills", "desc": "Put down a hundred of whatever lives out there." },
+    { "id": "depths", "kind": "dungeons", "target": 3, "name": "Three ruins", "desc": "Clear three ruins." },
+    { "id": "prize", "kind": "legendary", "target": 1, "name": "Something legendary", "desc": "Find a legendary, unique or set piece." },
+    { "id": "grudge", "kind": "nemesis", "target": 1, "name": "Settle the grudge", "desc": "Kill the thing that killed you." }
+  ],
+  "nemesisTitles": [
+    "the Unkilled", "the Patient", "the Scarred", "Twice-Risen", "the Ledger-Keeper",
+    "the Long Shadow", "the Debt", "the One That Waited"
+  ],
+  "reputation": {
+    "perJob": 12,
+    "max": 100,
+    "discountAt": 40,
+    "discount": 0.15,
+    "_doc": "Finishing work for a settlement raises your standing there. Past discountAt they knock discount off their prices."
+  }
+}

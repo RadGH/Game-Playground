@@ -318,3 +318,14 @@ body {
   background: #1b4a6a; color: #dff2ff; cursor: pointer; font-size: 12px; line-height: 1;
 }
 .passive-row button:disabled { opacity: .25; cursor: default; }
+
+/* ---------------------------------------------------------------- the journal */
+
+.journal { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.journal-head { margin: 6px 0 2px; font-size: 12px; color: #cfe0ef; }
+.journal-row {
+  display: flex; justify-content: space-between; gap: 10px; font-size: 12px;
+  padding: 2px 6px; border-left: 2px solid #2a3446;
+}
+.journal-row.done { border-left-color: #5ad48a; color: #9fd8b0; }
+.journal-row.nemesis { border-left-color: #d0503c; color: #ffb0a0; }

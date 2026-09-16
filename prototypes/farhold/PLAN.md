@@ -292,9 +292,24 @@ crafting at the smith, and companions.
 
 ---
 
-## Phase 9 — The long game
+## Phase 9 — The long game ⭐ **a spine, standing and a grudge (2026-09-15)**
 
-**You can:** have a reason to keep playing past the first hour.
+**You can, now:** see why the hours add up.
+
+- **The Long Survey** (`data/campaign.json`): eight objectives over one system — cover twenty
+  kilometres, set foot on three worlds, walk into six settlements, finish eight jobs, take a hundred
+  kills, clear three ruins, find something legendary, and settle the grudge. Every one is counted
+  from an event the game already fires, so nothing needed bookkeeping invented for it, and a test
+  asserts no objective names a kind nothing feeds.
+- **Standing**: each settlement remembers what you have done for it. Enough work and they knock 15%
+  off, and a merchant really does charge you less.
+- **A nemesis**: whatever kills you gets a name from Name Forge, a title, and a level. Die to it
+  again and it gets worse. Kill it and the grudge is settled.
+- **A journal** on the character sheet: the survey and how far through it you are, the work in hand,
+  the grudge, and what you have killed.
+
+**Still to do:** a home you build, multi-day conversation threads, factions above the level of a
+single settlement, new game plus, and difficulty tiers.
 
 - **A campaign spine**: acts, a goal, a reason this system matters.
 - **Factions and reputation**; **a nemesis** that remembers beating you (Emberveil has both).
@@ -335,7 +350,7 @@ crafting at the smith, and companions.
 | 6 | medium | making other planets worth the trip |
 | 7 ⭐ | done | was mostly wiring, as predicted — memories and relations still open |
 | 8 ⭐ | talents, passives and armour done | character creation and crafting still open |
-| 9 | large | content, not code |
+| 9 ⭐ | spine, standing and nemesis done | a home, factions and new game plus still open |
 | 10 | medium | the simulator pays for itself |
 
 **Suggested order if time is short:** 3 → 5. Props, a real fight, and the launch are what make

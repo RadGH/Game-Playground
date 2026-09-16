@@ -9,6 +9,7 @@ import { createSpace } from './space.js';
 import { createTownFolk } from './town.js';
 import { createTalkPanel } from './talkui.js';
 import { QuestLog } from './quests.js';
+import { Campaign } from './campaign.js';
 import { createSound } from './sound.js';
 import { createSpeech } from './speech.js';
 import { NameGen } from '../../../namegen/js/namegen.js';
@@ -49,11 +50,12 @@ async function boot() {
   const status = t => { $('boot-status').textContent = t; };
   status('reading the data…');
 
-  const [items, balance, bestiary, talents, classLooks, namegen] = await Promise.all([
+  const [items, balance, bestiary, talents, campaignData, classLooks, namegen] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
     loadJSON('data/talents.json'),
+    loadJSON('data/campaign.json'),
     loadJSON('../emberveil/data/class-looks.json'),
     // Name Forge, so the folk in a dwarf town have dwarf names
     NameGen.load('/namegen/data/').catch(() => null),
@@ -91,7 +93,7 @@ async function boot() {
         <span class="muted small">level ${s.level} · seed ${s.seed} · ${playtimeText(s.playtime)}${s.place ? ' · ' + s.place : ''}</span>`;
       const load = document.createElement('button');
       load.textContent = 'Load';
-      load.onclick = () => begin({ items, balance, bestiary, talents, classLooks, namegen, status, save: saves.read(s.id) });
+      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save: saves.read(s.id) });
       const del = document.createElement('button');
       del.className = 'ghost';
       del.textContent = '×';
@@ -104,7 +106,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, talents, classLooks, namegen, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -112,7 +114,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, talents, classLooks, namegen, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -122,7 +124,7 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, talents, classLooks, namegen, status, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, namegen, status, save }) {
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
@@ -184,6 +186,7 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
 
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
+  const campaign = new Campaign(campaignData, save?.campaign || null);
   const npcLooks = ['ranger', 'cleric', 'rogue', 'warrior', 'bard', 'mage']
     .map(id => classLooks.classes[id]?.avatar).filter(Boolean);
   let folk = null;
@@ -249,6 +252,15 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
       hud.setPlayer(player);
     },
     onSpendAttr: key => { rpg.spendAttr(player, key); hud.setPlayer(player); },
+    journal: () => ({
+      title: campaignData.title,
+      share: campaign.share,
+      objectives: campaign.list(),
+      nemesis: campaign.nemesis,
+      quests: questLog.active.map(q => ({ title: q.title, progress: questLog.progressText(q), done: q.done })),
+      bestiary: campaign.bestiary,
+      names: Object.fromEntries(bestiary.enemies.map(e => [e.id, e.name])),
+    }),
     onTakeTalent: id => { if (rpg.takeTalent(player, id)) { sound.ui('click'); hud.log(`Talent taken: ${rpg.talentList.find(t => t.id === id)?.name}.`, 'level'); autoSave(); } hud.setPlayer(player); },
     onSpendPassive: id => { if (rpg.spendPassive(player, id)) { sound.ui('click'); autoSave(); } hud.setPlayer(player); },
   });
@@ -263,6 +275,11 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
   function onEnemyKilled(e) {
     player.kills++;
     sound.combat('death', { beast: e.kind !== 'humanoid' });
+    const settled = campaign.onKill(e.defId);
+    if (settled === 'nemesis') {
+      hud.log('The grudge is settled.', 'level');
+      sound.questDone();
+    }
     const back = rpg.onKillRestore(player);
     if (back.hp || back.mp) hud.log(`The kill returns ${[back.hp && `${back.hp} health`, back.mp && `${back.mp} mana`].filter(Boolean).join(' and ')}.`);
     const levels = rpg.gainXp(player, e.xp);
@@ -274,6 +291,7 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
       player.bag.push(drop);
       hud.log(`${e.name} dropped ${drop.name}.`, 'loot');
       sound.loot(drop);
+      campaign.onLoot(drop);
       for (const q of questLog.onLoot({ baseKey: drop.baseKey })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
     }
     for (const q of questLog.onKill({ defId: e.defId })) hud.log(`${q.title}: ${questLog.progressText(q)}`, q.done ? 'good' : '');
@@ -321,10 +339,10 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
 
   const talk = createTalkPanel({
     describe: item => hud.describe(item),
-    price: item => rpg.price(item),
+    price: item => Math.max(1, Math.round(rpg.price(item) * campaign.priceMultiplier(talk.npc?.node?.id))),
     sellPrice: item => Math.max(1, Math.round(rpg.price(item) * (items.sellFactor ?? 0.35))),
     buy: item => {
-      const r = folk.buy(talk.npc, item, player);
+      const r = folk.buy(talk.npc, item, player, campaign.priceMultiplier(talk.npc?.node?.id));
       hud.log(r.ok ? `Bought ${item.name} for ${r.price} gold.` : r.why, r.ok ? 'loot' : 'bad');
       if (r.ok) sound.coin(); else sound.ui('error');
       hud.setPlayer(player);
@@ -348,6 +366,7 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
     },
     turnIn: quest => {
       const reward = questLog.turnIn(quest);
+      campaign.onQuestDone(quest, talk.npc?.node?.id ?? null);
       player.gold += reward.gold;
       const levels = rpg.gainXp(player, reward.xp);
       hud.log(`${quest.title} — done. ${reward.gold} gold, ${reward.xp} xp.`, 'good');
@@ -450,6 +469,7 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
     weatherCell = [-1, -1];
 
     rebuildWorldAround(true);
+    if (campaign.onLandOn(planet.id)) hud.log(`${planet.name} charted.`, 'level');
     $('hud-planet').textContent = describePlanet(planet, star);
     return planet;
   }
@@ -576,6 +596,7 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
       place: features.settlementAt(control.x, control.z)?.name || terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name,
       weather: blended.key,
       quests: questLog.toJSON(),
+      campaign: campaign.toJSON(),
       passiveRanks: player.passiveRanks,
       pendingPassive: player.pendingPassive,
       pendingTalent: player.pendingTalent,
@@ -708,6 +729,8 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
   const clock = new THREE.Clock();
   let sinceRegen = 0;
   let sinceArrive = 0;
+  const lastPos = [0, 0];
+  let campaignDone = false;
   let lastEclipse = null;
 
   function tick() {
@@ -824,7 +847,7 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
         if (result.dodged) { hud.log(`You dodge ${e.name}.`); return; }
         hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
         if (result.reflected) hud.log(`Thorns bite back for ${result.reflected}.`, 'good');
-        if (player.hp <= 0) respawn();
+        if (player.hp <= 0) respawn(e);
       },
     });
     fx.update(dt);
@@ -839,6 +862,11 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
     rebuildWorldAround(false);
     folk.update(dt, control);
     sound.step(dt, control);
+    // the survey counts the ground you actually cover
+    const stepped = Math.hypot(control.x - lastPos[0], control.z - lastPos[1]);
+    if (stepped > 0 && stepped < 200) campaign.onWalk(stepped);
+    lastPos[0] = control.x; lastPos[1] = control.z;
+
     sinceArrive += dt;
     if (sinceArrive > 1) {
       sinceArrive = 0;
@@ -880,6 +908,13 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
 
     const target = field.target(control);
     const town = features.settlementAt(control.x, control.z);
+    if (town && campaign.onEnterSettlement(town.id)) hud.log(`${town.name} charted.`, 'level');
+    if (!campaignDone && campaign.complete) {
+      campaignDone = true;
+      hud.log(`${campaignData.title} complete. The ledger is closed.`, 'level');
+      sound.questDone();
+      autoSave();
+    }
     if (state.frames % 45 === 0) {
       sound.place(terrain.biomeAt(control.x, control.z).key, { inTown: !!town, storm: blended.wind });
     }
@@ -897,9 +932,17 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
     renderFrame();
   }
 
-  function respawn() {
+  function respawn(killer = null) {
     hud.log('You black out, and wake where you landed.', 'bad');
     player.deaths++;
+    if (killer) {
+      const named = campaign.onDeath({
+        defId: killer.defId,
+        name: namegen ? (namegen.generate('person.full', { race: 'orc', seed: (killer.defId || '').length * 7919 + player.deaths })?.text || killer.name) : killer.name,
+        level: killer.level,
+      });
+      if (named) hud.log(`${named.name} ${named.title} left you for dead. It will be back.`, 'bad');
+    }
     player.hp = Math.round(player.maxHp * 0.5);
     player.gold = Math.round(player.gold * 0.9);
     control.teleport(control.spawn.x, control.spawn.z);
@@ -954,7 +997,7 @@ async function begin({ items, balance, bestiary, talents, classLooks, namegen, s
     get terrain() { return terrain; },
     launch, land,
     get folk() { return folk; },
-    questLog, talk, sound, speech,
+    questLog, talk, sound, speech, campaign,
     /** Skip the cinematics — go straight to space, or straight down onto a world. */
     toSpace: () => { ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed }); camera.far = 600000; camera.updateProjectionMatrix(); mode = 'space'; },
     landOn: (planetId, spot = null) => {

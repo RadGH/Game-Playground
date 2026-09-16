@@ -1,14 +1,23 @@
 import * as THREE from 'three';
 
 export const CHIBI2_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead'];
+
+/**
+ * Swimming, built only when a game asks for it: `createChibi2Character(avatar, { swim: true })`.
+ * Clips are generated per body template, so three more of them is work every character pays for.
+ * A game with no water should not pay it — and when they were on by default, the extra build time
+ * was enough to trip a timing race in Emberveil's rest scene.
+ */
+export const CHIBI2_SWIM_ANIMS = ['swim', 'swimBack', 'swimSide'];
+export const CHIBI2_ALL_ANIMS = [...CHIBI2_ANIMS, ...CHIBI2_SWIM_ANIMS];
 export const ONE_SHOTS = new Set(['attack', 'cast', 'hit', 'jump', 'dead']);
-const LENGTHS = { idle: 3, ready: 2, walk: 1.05, run: 0.65, attack: 0.85, cast: 1.25, hit: 0.45, guard: 2, wave: 2, talk: 2.5, jump: 1, dead: 1 };
+const LENGTHS = { idle: 3, ready: 2, walk: 1.05, run: 0.65, attack: 0.85, cast: 1.25, hit: 0.45, guard: 2, wave: 2, talk: 2.5, jump: 1, dead: 1, swim: 1.1, swimBack: 1.35, swimSide: 1.2 };
 
 // Keyframes are generated once per body template. Three.js handles interpolation and crossfades.
-export function createClips(rig) {
+export function createClips(rig, anims = CHIBI2_ANIMS) {
   const names = rig.bones.map(b => b.name).filter(n => !n.startsWith('eye'));
   const euler = new THREE.Euler(), quat = new THREE.Quaternion();
-  return CHIBI2_ANIMS.map(name => {
+  return anims.map(name => {
     const duration = LENGTHS[name], steps = Math.ceil(duration * 24), times = [];
     const rotations = Object.fromEntries(names.map(n => [n, []]));
     const hips = [], roots = [];
@@ -73,6 +82,29 @@ export function createClips(rig) {
         pose.kneeL[0] = pose.kneeR[0] = flight * 0.7;
         pose.legL[0] = pose.legR[0] = -flight * 0.3;
         pose.armL[2] = -0.15 - flight * 0.7; pose.armR[2] = 0.15 + flight * 0.7;
+      } else if (name === 'swim' || name === 'swimBack' || name === 'swimSide') {
+        // Prone at the surface: the root tips face-down and lifts, so the body floats flat instead
+        // of standing upright in the water. Legs flutter for all three; the arms say which stroke.
+        const stroke = Math.sin(cycle);
+        pose.root[0] = -1.12;
+        rootY = 0.36;
+        pose.head[0] = 0.5; pose.chest[0] = 0.12;
+        pose.legL[0] = stroke * 0.3; pose.legR[0] = -stroke * 0.3;
+        pose.kneeL[0] = Math.max(0, -stroke) * 0.5; pose.kneeR[0] = Math.max(0, stroke) * 0.5;
+        if (name === 'swim') {                       // front crawl, arms over the head
+          pose.armL[0] = -1.5 + stroke * 1.45; pose.armR[0] = -1.5 - stroke * 1.45;
+          pose.elbowL[0] = -0.45 - Math.max(0, stroke) * 0.6;
+          pose.elbowR[0] = -0.45 - Math.max(0, -stroke) * 0.6;
+        } else if (name === 'swimBack') {            // sculling backwards, arms low and pushing
+          pose.armL[0] = -0.35 + stroke * 0.75; pose.armR[0] = -0.35 - stroke * 0.75;
+          pose.elbowL[0] = pose.elbowR[0] = -1.05;
+          pose.armL[2] = -0.4; pose.armR[2] = 0.4;
+        } else {                                     // side stroke, arms sweeping across
+          pose.armL[2] = -0.95 + stroke * 0.45; pose.armR[2] = 0.95 + stroke * 0.45;
+          pose.armL[0] = -0.8; pose.armR[0] = -0.8;
+          pose.elbowL[0] = pose.elbowR[0] = -0.8;
+        }
+        bob = Math.sin(cycle * 2) * 0.02;
       } else if (name === 'dead') {
         const fall = THREE.MathUtils.smoothstep(u, 0.1, 0.85);
         pose.root[0] = -Math.PI / 2 * fall; rootY = fall * 0.13;

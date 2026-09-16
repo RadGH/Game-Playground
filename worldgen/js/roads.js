@@ -23,7 +23,10 @@ export function roadCostField(world) {
   for (let i = 0; i < N; i++) {
     if (world.water[i] !== 0) { cost[i] = Infinity; continue; }
     const b = BIOMES[world.biome[i]];
-    let c = (b.move ?? 1.5) * (1 + world.slope[i] * 2.6);
+    // Steep ground now costs superlinearly. With a linear term a road would happily climb straight
+    // over a mountain because the extra cost was small; squaring it makes a switchback cheaper.
+    const sl = world.slope[i];
+    let c = (b.move ?? 1.5) * (1 + sl * 2.6 + sl * sl * 16);
     if (world.passCells && world.passCells[i]) c *= 0.3;         // a known pass is the way through
     if (world.river[i]) c += 6 + world.river[i] * 5;             // crossings cost — this is where bridges go
     if (world.aura[i] > 0.5) c *= 1.25;                          // people route around cursed ground
@@ -45,7 +48,7 @@ export function seaCostField(world) {
  * indices. Returns an array of cell indices, or null when there is no route.
  * `endpointsFree` lets a route start or finish on a blocked cell (a port sitting on land, say).
  */
-export function aStar(world, start, goal, cost, { endpointsFree = true, maxExpand = 0 } = {}) {
+export function aStar(world, start, goal, cost, { endpointsFree = true, maxExpand = 0, climb = 0 } = {}) {
   const w = world.width, h = world.height, N = w * h;
   if (start === goal) return [start];
   const g = new Float64Array(N).fill(Infinity);
@@ -74,7 +77,10 @@ export function aStar(world, start, goal, cost, { endpointsFree = true, maxExpan
       if (closed[j]) continue;
       let c = cost[j];
       if (!isFinite(c)) { if (!(endpointsFree && j === goal)) continue; c = 1; }
-      const ng = g[cur] + c * k;
+      let step = c * k;
+      // the cost of the climb itself, which is what sends a route round a peak instead of over it
+      if (climb > 0) step += Math.abs(world.elevation[j] - world.elevation[cur]) * climb * k;
+      const ng = g[cur] + step;
       if (ng < g[j]) { g[j] = ng; came[j] = cur; push(ng + heuristic(j), j); }
     }
   }
@@ -139,7 +145,7 @@ export function buildRoads(world, opts) {
   const addRoad = (a, b) => {
     const key = a.id < b.id ? `${a.id}:${b.id}` : `${b.id}:${a.id}`;
     if (linked.has(key)) return null;
-    const path = aStar(world, a.index, b.index, cost);
+    const path = aStar(world, a.index, b.index, cost, { climb: opts.roadClimb ?? 320 });
     if (!path) return null;
     linked.add(key);
     const bridges = [];

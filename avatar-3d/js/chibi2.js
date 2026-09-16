@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { normalizeAvatar, shade } from '../../avatar-2d/js/render.js';
 import { profile, taperedCurve, createRig, SkinBuilder } from './chibi2-geometry.js';
-import { createClips, CHIBI2_ANIMS, ONE_SHOTS } from './chibi2-motion.js';
+import { createClips, CHIBI2_ANIMS, CHIBI2_ALL_ANIMS, CHIBI2_SWIM_ANIMS, ONE_SHOTS } from './chibi2-motion.js';
 import { buildGear, CAPELETS } from './chibi2-gear.js';
 
-export { CHIBI2_ANIMS };
+export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const ring = (r, tube) => new THREE.TorusGeometry(r, tube, 4, 12);
@@ -122,7 +122,7 @@ function buildTemplate(a, rig) {
   const jaw = a.headShape === 'heart' ? 0.86 : a.headShape === 'chiseled' ? 1.06 : a.headShape === 'oval' ? 0.93 : 1;
   head(profile([[-0.035, 0.10, 0.09], [0.005, 0.22, 0.195], [0.105, 0.30, 0.249], [0.25, 0.335, 0.271], [0.39, 0.325 * jaw, 0.267], [0.50, 0.265 * jaw, 0.227], [0.57, 0.15 * jaw, 0.143], [0.60, 0.005, 0.006]], 20), skin, { scale: [faceWidth, 1, faceDepth] });
   for (const [side, s] of [['L', -1], ['R', 1]]) {
-    if (a.ears.id !== 'none' && a.hat.id !== 'hood') { // A raised hood covers the ears.
+    if (a.ears.id !== 'none' && !['hood', 'dragon_helm', 'goggles_up'].includes(a.hat.id)) { // Hoods, the dragon helm and the aviator cap's flaps cover the ears.
       head(sphere(), skin, { position: [s * 0.325 * faceWidth, 0.225, 0.0], scale: a.ears.id === 'pointed' ? [0.105, 0.10, 0.044] : [0.058, 0.091, 0.043], rotation: [0, 0, -s * 0.22] });
       head(sphere(), shade(skin, -0.18), { position: [s * 0.339 * faceWidth, 0.227, 0.036], scale: [0.022, 0.049, 0.009] });
     }
@@ -190,9 +190,9 @@ function buildTemplate(a, rig) {
 
   if (a.hair.id !== 'bald') {
     const hairId = a.hair.id;
-    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim'].includes(a.hat.id);
+    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim', 'goggles_up'].includes(a.hat.id);
     // A raised hood tucks away everything outside the face opening; only a fringe shows under its brow.
-    const hoodUp = a.hat.id === 'hood';
+    const hoodUp = a.hat.id === 'hood', fringeUnder = hoodUp || a.hat.id === 'goggles_up';
     const cap = new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
     const p = cap.attributes.position;
     for (let i = 0; i < p.count; i++) {
@@ -200,17 +200,17 @@ function buildTemplate(a, rig) {
       p.setXYZ(i, x * 0.348, 0.32 + y * 0.31 + Math.max(0, z) * 0.055, z * 0.28 - 0.012);
     }
     cap.computeVertexNormals();
-    if (!headwearCoversCrown && !['afro', 'mohawk'].includes(hairId)) head(cap, hair, { scale: hairId === 'buzz' ? [0.97, 0.82, 0.98] : [1, 1, 1] });
+    if (!headwearCoversCrown && !['afro', 'mohawk'].includes(hairId)) head(cap, hairId === 'buzz' ? shade(hair, -0.12) : hair, { scale: hairId === 'buzz' ? [0.995, 0.97, 0.995] : [1, 1, 1] }); // buzz stays outside the skull top (0.60)
     const fringe = hairId === 'short' || hairId === 'long' || hairId === 'wavy';
-    if (fringe && (!headwearCoversCrown || hoodUp)) for (let i = 0; i < 7; i++) {
-      if (hoodUp && (i === 0 || i === 6)) continue; // The outer locks would reach the hood's inner wall.
+    if (fringe && (!headwearCoversCrown || fringeUnder)) for (let i = 0; i < 7; i++) {
+      if (fringeUnder && (i === 0 || i === 6)) continue; // The outer locks would reach the hood's inner wall.
       const x = (i - 3) * 0.087, arc = 1 - (x / 0.31) ** 2;
       head(taperedCurve([[x - 0.035, 0.53 + arc * 0.06, 0.08], [x + 0.026, 0.49 + arc * 0.01, 0.225], [x + 0.055, 0.365 + (i % 3) * 0.027, 0.262]], [0.048, 0.068, 0.002], 6, 6), i % 3 === 1 ? shade(hair, 0.12) : hair);
     }
     if (hairId === 'slicked' && !headwearCoversCrown) for (let i = 0; i < 5; i++) {
       // Slicked back: combed strands from the hairline over the crown toward the nape, no fringe.
       const x = (i - 2) * 0.1;
-      head(taperedCurve([[x * 0.9, 0.47, 0.215], [x * 1.08, 0.59, 0.03], [x, 0.50, -0.25]], [0.035, 0.042, 0.015], 5, 7), i % 2 ? shade(hair, 0.14) : hair);
+      head(taperedCurve([[x * 0.9, 0.46, 0.225], [x * 1.05, 0.585, 0.02], [x, 0.47, -0.262]], [0.028, 0.032, 0.012], 5, 7), i % 2 ? shade(hair, 0.14) : hair);
     }
     if (hairId === 'side_part') {
       for (let i = 0; i < 4; i++) head(taperedCurve([[0.02 + i * 0.055, 0.50, 0.09], [0.08 + i * 0.06, 0.46, 0.235], [0.17 + i * 0.045, 0.39, 0.264]], [0.055, 0.07, 0.006], 6, 6), i % 2 ? shade(hair, 0.12) : hair);
@@ -236,19 +236,19 @@ function buildTemplate(a, rig) {
     }
     if (hairId === 'mohawk' && !hoodUp) head(profile([[0.32, 0.09, 0.08], [0.48, 0.11, 0.09], [0.60, 0.035, 0.035]], 8), hair);
     if (!headwearCoversCrown) for (const s of [-1, 1]) head(taperedCurve([[s * 0.28, 0.45, -0.02], [s * 0.335, 0.31, 0.008], [s * 0.30, 0.15, 0.052]], [0.06, 0.043, 0.002], 6, 6), shade(hair, -0.07));
-    if (hairId === 'wavy' && !headwearCoversCrown) for (const s of [-1, 1]) head(taperedCurve([[s * 0.27, 0.46, -0.06], [s * 0.36, 0.33, 0.0], [s * 0.30, 0.20, 0.03], [s * 0.37, 0.06, -0.01], [s * 0.31, -0.06, -0.03]], [0.07, 0.065, 0.06, 0.05, 0.01], 6, 12), shade(hair, 0.06));
+    if (hairId === 'wavy' && !headwearCoversCrown) for (const s of [-1, 1]) head(taperedCurve([[s * 0.27, 0.46, -0.06], [s * 0.36, 0.33, 0.0], [s * 0.30, 0.20, 0.03], [s * 0.37, 0.05, -0.01], [s * 0.31, -0.08, -0.04], [s * 0.36, -0.20, -0.06]], [0.07, 0.065, 0.06, 0.055, 0.045, 0.01], 6, 14), shade(hair, 0.06));
     if (hairId === 'bob' && !headwearCoversCrown) {
       // Bob: a rounded shell over the back and sides, open over the face and cut level at the jaw.
-      const open = 1.05, bob = new THREE.SphereGeometry(1, 14, 7, Math.PI / 2 + open, Math.PI * 2 - open * 2, 0.35, Math.PI * 0.42);
-      head(bob, hair, { position: [0, 0.33, -0.03], scale: [0.385, 0.40, 0.335] });
-      head(backface(bob.clone()), shade(hair, -0.2), { position: [0, 0.33, -0.03], scale: [0.375, 0.39, 0.325] });
+      const open = 1.05, bob = new THREE.SphereGeometry(1, 14, 7, Math.PI / 2 + open, Math.PI * 2 - open * 2, 0.62, 1.72);
+      head(bob, hair, { position: [0, 0.30, -0.03], scale: [0.385, 0.40, 0.335] });
+      head(backface(bob.clone()), shade(hair, -0.2), { position: [0, 0.30, -0.03], scale: [0.375, 0.39, 0.325] });
     }
     if (hairId === 'braids' && !hoodUp) for (const s of [-1, 1]) {
       // Braids: two plaits of stacked links falling in front of the shoulders, tied off at the ends.
       for (let k = 0; k < 5; k++) head(new THREE.IcosahedronGeometry(1, 0), k % 2 ? shade(hair, 0.1) : hair, { position: [s * (0.31 + k * 0.005), 0.16 - k * 0.09, 0.10 + k * 0.014], scale: [0.052, 0.058, 0.046] });
       head(new THREE.ConeGeometry(0.035, 0.07, 5), '#c83a2a', { position: [s * 0.335, -0.32, 0.17] });
     }
-    if (/long|braids|pony/.test(hairId) && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.23, 0.42, -0.16], [s * 0.30, 0.13, -0.12], [s * 0.27, -0.16, -0.08]], [0.10, 0.085, 0.015], 6, 7), hair);
+    if (/long|braids|pony|wavy/.test(hairId) && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.23, 0.42, -0.16], [s * 0.30, 0.13, -0.12], [s * 0.27, -0.16, -0.08]], [0.10, 0.085, 0.015], 6, 7), hair);
     if (hairId === 'ponytail' && !hoodUp) head(taperedCurve([[0.27, 0.38, -0.10], [0.38, 0.10, -0.13], [0.31, -0.20, -0.08]], [0.11, 0.09, 0.02], 7, 8), hair);
     if ((hairId === 'bun' || hairId === 'buns') && !hoodUp) for (const s of hairId === 'bun' ? [1] : [-1, 1]) head(sphere(), hair, { position: [s * (hairId === 'bun' ? 0 : 0.22), 0.47, -0.04], scale: [0.13, 0.13, 0.11] });
   }
@@ -264,18 +264,12 @@ function buildTemplate(a, rig) {
   if (a.extras.id === 'third_eye') { ellipsoid('head', '#fff8e8', [0, 0.36, 0.255], [0.065, 0.042, 0.012]); ellipsoid('head', a.eyes.color, [0, 0.36, 0.27], [0.028, 0.028, 0.008]); }
   if (a.extras.id === 'scar' || a.extras.id === 'scar_cheek') strip('head', [[a.extras.id === 'scar' ? -0.18 : 0.17, 0.27, 0.27], [a.extras.id === 'scar' ? -0.10 : 0.23, 0.15, 0.274], [a.extras.id === 'scar' ? -0.04 : 0.29, 0.05, 0.27]], 0.009, a.extras.color);
   if (a.accessory.id === 'glasses' || a.accessory.id === 'round_glasses') for (const s of [-1, 1]) { const round = a.accessory.id === 'round_glasses'; add(round ? ring(0.105, 0.012) : new THREE.RingGeometry(0.075, 0.09, 12), 'head', a.accessory.color, { position: [s * 0.125, 0.27, 0.285], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.78, 1], bone: 'head' }); }
-  if (/helmet|helm/.test(a.hat.id)) {
+  if (a.hat.id === 'dragon_helm') {
+    buildDragonHelm(a, head);
+  } else if (/helmet|helm/.test(a.hat.id)) {
     head(profile([[0.41, 0.353, 0.30], [0.48, 0.335, 0.286], [0.60, 0.20, 0.18], [0.66, 0.02, 0.02]], 16), a.hat.color, { metal: true });
     head(profile([[0.405, 0.357, 0.302], [0.435, 0.357, 0.302]], 16), trim, { metal: true });
     if (a.hat.id === 'horned_helm') for (const s of [-1, 1]) head(taperedCurve([[s * 0.30, 0.50, 0.02], [s * 0.50, 0.58, 0.03], [s * 0.56, 0.80, -0.02]], [0.065, 0.042, 0.006], 6, 7), '#d9cfa8');
-    if (a.hat.id === 'dragon_helm') {
-      // Swept-back horns, a crest along the crown and cheek guards that leave the face open.
-      for (const s of [-1, 1]) {
-        head(taperedCurve([[s * 0.22, 0.58, 0.10], [s * 0.33, 0.72, -0.14], [s * 0.30, 0.78, -0.42]], [0.05, 0.032, 0.004], 6, 7), '#c8362a');
-        head(new THREE.BoxGeometry(1, 1, 1), a.hat.color, { position: [s * 0.335, 0.22, 0.09], scale: [0.03, 0.20, 0.13], rotation: [0.15, s * 0.35, 0], metal: true });
-      }
-      for (let i = 0; i < 4; i++) head(new THREE.ConeGeometry(0.035, 0.10 - i * 0.012, 5), '#e8742a', { position: [0, 0.655 - i * 0.02, 0.14 - i * 0.12], rotation: [-0.35 - i * 0.25, 0, 0] });
-    }
   } else if (a.hat.id === 'wizard') {
     head(profile([[0.51, 0.47, 0.36], [0.54, 0.46, 0.355], [0.555, 0.32, 0.25]], 16), a.hat.color);
     head(profile([[0.53, 0.30, 0.23], [0.8, 0.17, 0.145, -0.035], [1.02, 0.09, 0.06, -0.10], [1.08, 0.003, 0.004, -0.18]], 12), a.hat.color);
@@ -284,7 +278,7 @@ function buildTemplate(a, rig) {
     const hat = a.hat.color || '#b02020', feather = a.hat.color2 || '#3aa65a';
     // The skull is a dome (half-width 0.30 at y 0.44, 0.265 at 0.50, 0.15 at 0.57, top 0.60), so the
     // crown is a domed profile that stays outside it all the way up; a cone narrows faster than the skull.
-    head(new THREE.CylinderGeometry(0.36, 0.47, 0.05, 16), hat, { position: [0, 0.438, 0.02], scale: [1.15, 1, 0.88] });
+    head(new THREE.CylinderGeometry(0.385, 0.425, 0.05, 16), hat, { position: [0, 0.438, 0.012], scale: [1.02, 1, 0.9] }); // narrow turned band, as in the 2D cap
     head(profile([[0.44, 0.375, 0.315, 0.012], [0.53, 0.36, 0.30, 0.0], [0.62, 0.30, 0.255, -0.015], [0.70, 0.19, 0.165, -0.035], [0.745, 0.06, 0.055, -0.055], [0.752, 0.003, 0.003, -0.06]], 14), hat);
     head(new THREE.TorusGeometry(0.368, 0.02, 5, 16), trim, { position: [0, 0.49, 0.005], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.845, 1], metal: true });
     // The feather is tucked under the band on the right side and sweeps up and back.
@@ -302,19 +296,7 @@ function buildTemplate(a, rig) {
     // The torus lies flat after the x rotation, so its local y is the depth axis to squash.
     head(new THREE.TorusGeometry(0.362, 0.018, 5, 16), trim, { position: [0, 0.462, 0], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.86, 1], metal: true });
   } else if (a.hat.id === 'goggles_up') {
-    // Goggles pushed up over the hairline: lenses lie back on the dome, the strap circles the head
-    // (lower at the back) just outside the hair cap, and the hair stays visible.
-    const strap = [];
-    for (let k = 0; k <= 14; k++) {
-      const t = k / 14 * Math.PI * 2, back = (1 - Math.cos(t)) / 2;
-      strap.push([Math.sin(t) * (0.24 + back * 0.055), 0.585 - back * 0.085, Math.cos(t) * (0.20 + back * 0.05)]);
-    }
-    head(taperedCurve(strap, [0.014, 0.014, 0.014], 4, 16), leather);
-    for (const s of [-1, 1]) {
-      head(ring(0.07, 0.017), steel, { position: [s * 0.115, 0.605, 0.175], rotation: [-1.2, 0, 0], metal: true });
-      head(new THREE.CylinderGeometry(0.058, 0.058, 0.012, 10), '#6fb7c9', { position: [s * 0.115, 0.605, 0.175], rotation: [Math.PI / 2 - 1.2, 0, 0], metal: true });
-    }
-    head(taperedCurve([[-0.05, 0.612, 0.19], [0, 0.622, 0.195], [0.05, 0.612, 0.19]], [0.012, 0.012, 0.012], 4, 4), steel, { metal: true });
+    buildAviatorCap(a, head, leather);
   }
   // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
   buildGear(a, { add, head, ellipsoid, strip, H, W, T, L: rig.leg, trim, leather, steel, darkSteel, skin, faceWidth, faceDepth });
@@ -323,6 +305,64 @@ function buildTemplate(a, rig) {
 
 // Hood colours: the cloth colour, a darker lining for the inside, and a lighter rolled edge.
 // THREE.Color accepts the short '#111' form that shade() leaves untouched.
+const tint = (c, k) => '#' + new THREE.Color(c).multiplyScalar(k).getHexString();
+const tintUp = (c, k) => '#' + new THREE.Color(c).lerp(new THREE.Color('#ffffff'), k).getHexString();
+/** Euler angles that turn local axis `from` onto direction `to` (for lenses and rings laid on a curved surface). */
+const facing = (from, to) => new THREE.Euler().setFromQuaternion(new THREE.Quaternion().setFromUnitVectors(from, to.clone().normalize())).toArray().slice(0, 3);
+
+/**
+ * Dragon helm (dragon_knight): an enclosing helm matching the 2D part. The shell covers the crown, back and
+ * sides down to the jaw and closes over the face; a dark curved visor slit crosses it at eye level with two
+ * eye glints, cheek guards close toward the chin, an orange crest runs down the forehead and along the crown
+ * ridge, and red horns sweep up from the temples. Head space, scaled by H through head().
+ */
+function buildDragonHelm(a, head) {
+  const helm = a.hat.color || '#2a5a2a', dark = tint(helm, 0.55), crest = '#e8742a', horn = '#c8362a';
+  // Shell: wider and deeper than the skull (0.335 / 0.271) and the nose tip (z 0.327) at every height.
+  head(profile([[-0.05, 0.28, 0.29], [0.06, 0.36, 0.35], [0.22, 0.39, 0.362], [0.38, 0.382, 0.34, -0.005], [0.52, 0.338, 0.29, -0.015], [0.63, 0.24, 0.205, -0.025], [0.70, 0.11, 0.095, -0.035], [0.725, 0.003, 0.003, -0.035]], 16), helm, { metal: true });
+  // Visor: a dark band that follows the shell's curve, with a brow ridge above it.
+  const band = (y, h, grow, color) => head(new THREE.CylinderGeometry(1, 1, h, 12, 1, true, -1.05, 2.1), color, { position: [0, y, 0], scale: [0.392 + grow, 1, 0.364 + grow], metal: true });
+  band(0.262, 0.062, 0.006, '#111111');
+  band(0.312, 0.03, 0.014, dark);
+  for (const s of [-1, 1]) head(new THREE.SphereGeometry(1, 6, 4), tintUp(a.eyes.color || '#e8c040', 0.35), { position: [s * 0.12, 0.262, 0.366], scale: [0.034, 0.016, 0.006] });
+  // Cheek guards angled in toward the chin, meeting on a dark centre seam.
+  for (const s of [-1, 1]) head(new THREE.BoxGeometry(1, 1, 1), helm, { position: [s * 0.16, 0.09, 0.325], scale: [0.2, 0.2, 0.035], rotation: [-0.22, s * 0.5, s * 0.1], metal: true });
+  head(taperedCurve([[0, 0.20, 0.372], [0, 0.08, 0.37], [0, -0.03, 0.31]], [0.012, 0.012, 0.01], 4, 4), dark, { metal: true });
+  // Crest: a blade down the forehead, then spikes along the crown ridge shrinking toward the back.
+  head(new THREE.OctahedronGeometry(1), crest, { position: [0, 0.45, 0.335], scale: [0.034, 0.10, 0.03], rotation: [-0.55, 0, 0] });
+  for (let i = 0; i < 5; i++) {
+    const t = (62 + i * 24) * Math.PI / 180;
+    head(new THREE.ConeGeometry(0.036, 0.11 - i * 0.014, 4), crest, { position: [0, 0.33 + 0.39 * Math.sin(t), -0.01 + 0.34 * Math.cos(t)], rotation: [Math.PI / 2 - t, 0, 0] });
+  }
+  for (const s of [-1, 1]) head(taperedCurve([[s * 0.28, 0.56, 0.08], [s * 0.45, 0.68, 0.02], [s * 0.47, 0.90, -0.06]], [0.06, 0.04, 0.004], 6, 7), horn);
+}
+
+/**
+ * Aviator cap (goggles_up, tinker): a leather crown shell tilted so it sits high over the brow and low at the
+ * nape, a rolled rim, a centre seam, ear flaps, and brass goggles resting on the front of the cap with their
+ * strap running round the back. Cap uses hat.color; frames are a brass lift of it and the lenses the 2D glass.
+ */
+function buildAviatorCap(a, head, leather) {
+  const cap = a.hat.color || '#6a4a2a', rim = tint(cap, 0.72), brass = tintUp(cap, 0.25), glass = '#a9d3dc';
+  const C = new THREE.Vector3(0, 0.30, -0.01), R = [0.375, 0.40, 0.33], tilt = new THREE.Euler(-0.3, 0, 0), edge = Math.PI * 0.42;
+  const at = (theta, phi, k = 1) => new THREE.Vector3(Math.sin(theta) * Math.sin(phi) * R[0] * k, Math.cos(theta) * R[1] * k, Math.sin(theta) * Math.cos(phi) * R[2] * k).applyEuler(tilt).add(C);
+  // Front edge sits at y 0.49 above the brows, sides at 0.40, back edge at the nape line (0.30); clears the skull everywhere.
+  head(new THREE.SphereGeometry(1, 12, 5, 0, Math.PI * 2, 0, edge), cap, { position: C.toArray(), scale: R, rotation: [tilt.x, 0, 0] });
+  const loop = (theta, k, from = 0, to = Math.PI * 2, n = 16) => Array.from({ length: n + 1 }, (_, i) => at(theta, from + (to - from) * i / n, k).toArray());
+  head(taperedCurve(loop(edge, 1.0), [0.02, 0.02, 0.02], 4, 16), rim);
+  head(taperedCurve([...Array.from({ length: 5 }, (_, i) => at(edge * (1 - i / 5), 0, 1.012).toArray()), ...Array.from({ length: 6 }, (_, i) => at(edge * i / 5, Math.PI, 1.012).toArray())], [0.008, 0.008, 0.008], 3, 10), rim);
+  for (const s of [-1, 1]) head(new THREE.SphereGeometry(1, 8, 5), cap, { position: [s * 0.35, 0.27, 0.01], scale: [0.055, 0.14, 0.11] });
+  // Goggle strap round the back of the cap, then the goggles on its front.
+  head(taperedCurve(loop(edge * 0.72, 1.035, 0.55, Math.PI * 2 - 0.55, 12), [0.016, 0.016, 0.016], 4, 12), leather);
+  const lenses = [-1, 1].map(s => at(edge * 0.66, s * 0.42, 1.06)), out = s => at(edge * 0.66, s * 0.42, 1.3).sub(at(edge * 0.66, s * 0.42, 1.0));
+  lenses.forEach((p, i) => {
+    const n = out(i ? 1 : -1);
+    head(new THREE.TorusGeometry(0.068, 0.018, 3, 10), brass, { position: p.toArray(), rotation: facing(new THREE.Vector3(0, 0, 1), n), metal: true });
+    head(new THREE.CylinderGeometry(0.056, 0.056, 0.014, 8), glass, { position: p.toArray(), rotation: facing(new THREE.Vector3(0, 1, 0), n), metal: true });
+  });
+  head(taperedCurve([lenses[0].toArray(), lenses[1].toArray()], [0.013, 0.013], 4, 1), brass, { metal: true });
+}
+
 /** Reversed-winding copy of an indexed or non-indexed geometry, for the inside of a shell. */
 function backface(g) {
   if (!g.index) g.setIndex(Array.from({ length: g.attributes.position.count }, (_, i) => i));
@@ -431,11 +471,14 @@ function buildHoodDown(a, add, W, T) {
   add(taperedCurve([[-0.12 * W, 0.215 * T, -0.212 * W], [0, 0.18 * T, -0.216 * W], [0.12 * W, 0.215 * T, -0.212 * W]], [0.006, 0.01, 0.006], 4, 6), 'chest', lining);
 }
 
-function acquire(avatar) {
-  const a = normalizeAvatar(avatar), key = JSON.stringify(a), rig = createRig(a.body);
+function acquire(avatar, anims = CHIBI2_ANIMS) {
+  const a = normalizeAvatar(avatar), rig = createRig(a.body);
+  // the clip set is part of the cache key: two characters with different animation sets are not
+  // the same template
+  const key = JSON.stringify(a) + '|' + anims.length;
   let template = templates.get(key);
   if (!template) {
-    template = { parts: buildTemplate(a, rig), clips: createClips(rig), refs: 0 };
+    template = { parts: buildTemplate(a, rig), clips: createClips(rig, anims), refs: 0, anims };
     templates.set(key, template);
   }
   template.refs++;
@@ -459,12 +502,17 @@ function acquire(avatar) {
   } };
 }
 
-/** Chibi 2 milestone: shared avatar JSON, two skinned meshes, 18 bones and twelve animation states. */
-export async function createChibi2Character(avatar) {
+/**
+ * Chibi 2: shared avatar JSON, two skinned meshes, 18 bones and twelve animation states.
+ * `opts.swim` adds the three swimming strokes — off by default, because every character pays the
+ * build cost of every clip.
+ */
+export async function createChibi2Character(avatar, opts = {}) {
+  const anims = opts.swim ? CHIBI2_ALL_ANIMS : (opts.anims || CHIBI2_ANIMS);
   const group = new THREE.Group(); group.userData.character = true;
   let asset, action, anim = 'idle', elapsed = 0, disposed = false;
   function install(a) {
-    const next = acquire(a);
+    const next = acquire(a, anims);
     if (asset) { group.remove(asset.root); asset.release(); }
     asset = next; group.add(asset.root); action = null; elapsed = 0;
     asset.mixer.addEventListener('finished', e => { if (e.action === action && anim !== 'dead') play('idle'); });
@@ -472,7 +520,7 @@ export async function createChibi2Character(avatar) {
   }
   function play(name, fade = 0.12) {
     if (disposed) return;
-    if (!CHIBI2_ANIMS.includes(name)) name = 'idle';
+    if (!anims.includes(name)) name = 'idle';
     const next = asset.actions[name];
     if (next === action && !ONE_SHOTS.has(name)) return;
     const previous = action;

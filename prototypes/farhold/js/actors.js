@@ -18,13 +18,18 @@ import { makeRng } from '../../emberveil/js/rng.js';
 
 /** Build a body from a look: `{ avatar }` gives a Chibi 2 humanoid, `{ creature }` gives a beast. */
 export async function makeActor(look = {}) {
+  // Note: do NOT spread the controller. Chibi 2 hands back an object with GETTERS (`anim`, `parts`,
+  // `skeleton`); spreading it evaluates them once and freezes the values, so `actor.anim` would
+  // report whatever it was at creation for the rest of the run.
   if (look.creature) {
     const actor = await createCreature(look.creature);
-    return { ...actor, beast: true };
+    actor.beast = true;
+    return actor;
   }
   const avatar = normalizeAvatar ? normalizeAvatar(look.avatar || {}) : (look.avatar || {});
-  const actor = await createChibi2Character(avatar);
-  return { ...actor, beast: false };
+  const actor = await createChibi2Character(avatar, { swim: !!look.swim });
+  actor.beast = false;
+  return actor;
 }
 
 /** Animation names differ slightly between the two builders; this is the translation. */
@@ -195,6 +200,42 @@ export class EnemyField {
       if (result.dead) this.kill(e);
     }
     return hits;
+  }
+
+  /**
+   * Damage everything within `radius` of a point — an arrow landing, or a heavy weapon's shockwave.
+   * Every attack in the game goes through this or `strike`, so nothing is ever single-target.
+   */
+  strikeArea(x, z, radius, attacker, { falloff = 0.45 } = {}) {
+    const hits = [];
+    for (const e of this.enemies) {
+      if (e.dying != null) continue;
+      const d = Math.hypot(e.x - x, e.z - z);
+      if (d > radius + (e.reach || 2) * 0.25) continue;
+      // full damage at the centre, `falloff` of it at the rim
+      const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
+      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near });
+      e.hitFlash = 0.18;
+      if (e.state !== 'chase') e.state = 'chase';
+      hits.push({ enemy: e, result });
+      if (result.dead) this.kill(e);
+    }
+    return hits;
+  }
+
+  /** The nearest live enemy along a direction, for an arrow to run into. */
+  hitScan(x, z, dirX, dirZ, { range = 40, width = 1.1 } = {}) {
+    let best = null, bestT = Infinity;
+    for (const e of this.enemies) {
+      if (e.dying != null) continue;
+      const ex = e.x - x, ez = e.z - z;
+      const t = ex * dirX + ez * dirZ;              // distance along the shot
+      if (t < 0 || t > range) continue;
+      const off = Math.hypot(ex - dirX * t, ez - dirZ * t);
+      if (off > width + (e.reach || 2) * 0.3) continue;
+      if (t < bestT) { bestT = t; best = e; }
+    }
+    return best ? { enemy: best, distance: bestT } : null;
   }
 
   kill(e) {

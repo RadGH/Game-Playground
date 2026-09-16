@@ -393,12 +393,16 @@ const fpArr = a => fnv(Array.from(a).join(','));
 const fpNamegen = new NameGen({ languages: read('languages.json'), concepts: read('concepts.json'), patterns: read('patterns.json') });
 
 test('World Forge presets generate exactly as they did before the planet knobs existed', () => {
-  // captured from the generator before liquid / frame / inhabited / nameTheme were added
+  // Captured from the generator before liquid / frame / inhabited / nameTheme were added.
+  // Re-baselined 2026-09-15 for `roadClimb` (roads now pay for the height they gain, so they
+  // switchback round peaks instead of going over them). Terrain, water, rivers, regions and feature
+  // names are all unchanged; the only difference was one extra ford on 'Frozen north', where a
+  // rerouted road meets a river. Road and sea-lane counts are unchanged.
   const BEFORE = {
     'Temperate continents': { seed: 11, ng: false, biome: '47213176', water: '34a4b536', river: '9efdb4ab', nodes: '93a54ae', regions: 'e9ffacea', features: '92980d21', roads: 23, seaLanes: 0, history: 50 },
     'Shattered isles': { seed: 22, ng: false, biome: '8e315190', water: '8208a093', river: '1d686b31', nodes: '4ee74b12', regions: '63ffe1fb', features: '1b6c5aaa', roads: 12, seaLanes: 2, history: 43 },
     'Ashen world': { seed: 33, ng: false, biome: 'd241e935', water: '584860a8', river: 'a168da03', nodes: '877c1e69', regions: '8607db39', features: 'a7b6a663', roads: 19, seaLanes: 2, history: 47 },
-    'Frozen north': { seed: 44, ng: true, biome: 'c6a14116', water: 'fac70f1e', river: '36764ede', nodes: 'accdda4c', regions: '55c1db9c', features: '62a1eac2', roads: 24, seaLanes: 0, history: 43 },
+    'Frozen north': { seed: 44, ng: true, biome: 'c6a14116', water: 'fac70f1e', river: '36764ede', nodes: '6715a1ec', regions: '55c1db9c', features: '62a1eac2', roads: 24, seaLanes: 0, history: 43 },
   };
   for (const [name, b] of Object.entries(BEFORE)) {
     const w = generateWorld({ ...PRESETS[name], seed: b.seed, width: 128, height: 64, namegen: b.ng ? fpNamegen : null });

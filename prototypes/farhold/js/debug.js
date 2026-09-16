@@ -58,7 +58,13 @@ export function createDebugMenu(hooks = {}) {
       buttons.push(b);
     }
     sections.push(group('Weather', ...buttons));
-    if (hooks.strike) sections.push(group('Sky', button('Lightning strike', () => hooks.strike())));
+    const skyKids = [];
+    if (hooks.strike) skyKids.push(button('Lightning strike', () => hooks.strike()));
+    if (hooks.eclipse) {
+      skyKids.push(button('Solar eclipse', () => { hooks.eclipse('solar'); refresh(); }));
+      skyKids.push(button('Lunar eclipse', () => { hooks.eclipse('lunar'); refresh(); }));
+    }
+    if (skyKids.length) sections.push(group('Sky', ...skyKids));
   }
 
   // ---------------------------------------------------------------- time of day
@@ -115,6 +121,23 @@ export function createDebugMenu(hooks = {}) {
     }
     sections.push(group('Character', ...kids));
   }
+
+  // A block of everything worth knowing, on the clipboard, ready to paste into a chat.
+  const copyBtn = button('Copy debug report', async () => {
+    const text = hooks.report ? hooks.report() : JSON.stringify(hooks.getState?.() || {}, null, 1);
+    try {
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = 'Copied ✓';
+    } catch {
+      // clipboard blocked (no permission, or not a secure origin) — show it instead
+      readout.textContent = text;
+      copyBtn.textContent = 'Clipboard blocked — shown below';
+    }
+    setTimeout(() => { copyBtn.textContent = 'Copy debug report'; }, 2200);
+  }, 'wide');
+  const reportKids = [copyBtn];
+  if (hooks.save) reportKids.push(button('Save now', () => hooks.save()));
+  sections.push(group('Report', ...reportKids));
 
   panel.append(
     el('div', { class: 'debug-head' },

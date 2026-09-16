@@ -18,6 +18,7 @@
 import * as THREE from 'three';
 import { makeRng, clamp } from '../../../worldgen/js/noise.js';
 import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
+import { ObstacleField, PROP_SOLIDS } from './collide.js';
 
 const CELL = 64;                     // metres across one prop cell
 
@@ -94,13 +95,21 @@ export const PROP_KINDS = {
   ]) },
   palm: { tall: 8, cap: 400, build: (bark = '#6b5436', leaf = '#4f8a40') => mergeParts([
     { geometry: CYL, color: bark, matrix: at(0, 3, 0, 0.2, 6, 0.2) },
-    ...[0, 1, 2, 3, 4, 5].map(i => ({
-      geometry: CONE, color: leaf,
-      matrix: new THREE.Matrix4()
-        .compose(new THREE.Vector3(Math.cos(i * 1.05) * 1.3, 5.9, Math.sin(i * 1.05) * 1.3),
-          new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI * 0.42, i * 1.05, 0)),
-          new THREE.Vector3(0.42, 2.8, 0.42)),
-    })),
+    // Fronds are flat blades that lean out and droop. Building them as cones tipped by an Euler
+    // angle gave six narrow spikes lying on their sides — it read as an arrow, not a tree. Aiming
+    // the blade with setFromUnitVectors puts its long axis along the direction it grows.
+    ...Array.from({ length: 7 }, (_, i) => {
+      const a = (i / 7) * Math.PI * 2;
+      const dir = new THREE.Vector3(Math.sin(a), -0.5, Math.cos(a)).normalize();
+      return {
+        geometry: CONE, color: leaf,
+        matrix: new THREE.Matrix4().compose(
+          new THREE.Vector3(dir.x * 1.55, 6.1 + dir.y * 1.55, dir.z * 1.55),
+          new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir),
+          new THREE.Vector3(0.8, 3.4, 0.16),        // wide, long, thin: a blade
+        ),
+      };
+    }),
   ]) },
   deadtree: { tall: 6, cap: 400, build: (bark = '#4a4038') => mergeParts([
     { geometry: CYL, color: bark, matrix: at(0, 2.2, 0, 0.22, 4.4, 0.22) },
@@ -123,13 +132,18 @@ export const PROP_KINDS = {
     { geometry: SPH, color: leaf, matrix: at(0.5, 0.36, 0.3, 0.55, 0.42, 0.55) },
   ]) },
   fern: { tall: 1.1, cap: 700, build: (leaf = '#2f6b3c') => mergeParts(
-    [0, 1, 2, 3, 4].map(i => ({
-      geometry: CONE, color: leaf,
-      matrix: new THREE.Matrix4().compose(
-        new THREE.Vector3(Math.cos(i * 1.25) * 0.28, 0.5, Math.sin(i * 1.25) * 0.28),
-        new THREE.Quaternion().setFromEuler(new THREE.Euler(0.55, i * 1.25, 0)),
-        new THREE.Vector3(0.2, 1.1, 0.2)),
-    })),
+    Array.from({ length: 6 }, (_, i) => {
+      const a = (i / 6) * Math.PI * 2;
+      const dir = new THREE.Vector3(Math.sin(a), 1.15, Math.cos(a)).normalize();
+      return {
+        geometry: CONE, color: leaf,
+        matrix: new THREE.Matrix4().compose(
+          new THREE.Vector3(dir.x * 0.34, 0.2 + dir.y * 0.46, dir.z * 0.34),
+          new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir),
+          new THREE.Vector3(0.34, 1.1, 0.1),        // flat fronds, not spikes
+        ),
+      };
+    }),
   ) },
   reed: { tall: 1.8, cap: 800, build: (leaf = '#7d8a4a') => mergeParts(
     [0, 1, 2, 3, 4, 5].map(i => ({
@@ -267,6 +281,7 @@ export function createProps(scene, terrain, opts = {}) {
 
   const matrix = new THREE.Matrix4();
   const colour = new THREE.Color();
+  const solids = new ObstacleField();
   let centre = [Infinity, Infinity];
   let rebuilds = 0;
   let visible = true;
@@ -286,6 +301,7 @@ export function createProps(scene, terrain, opts = {}) {
     const counts = {};
     for (const key of PROP_KEYS) counts[key] = 0;
     let grass = 0;
+    solids.clear();
 
     const cx0 = Math.round(px / CELL), cz0 = Math.round(pz / CELL);
     for (let dz = -cfg.radius; dz <= cfg.radius; dz++) {
@@ -305,8 +321,9 @@ export function createProps(scene, terrain, opts = {}) {
             const x = baseX + (rng() - 0.5) * CELL;
             const z = baseZ + (rng() - 0.5) * CELL;
             if (terrain.underwater(x, z)) continue;
-            // nothing grows on a cliff face
+            // nothing grows on a cliff face, and nothing grows in the middle of a road
             if (terrain.slopeAt(x, z, 4) > 0.75) continue;
+            if (terrain.roadAt(x, z) > 0.35) continue;
             const y = terrain.heightAt(x, z);
             const scale = 0.7 + rng() * 0.75;
             matrix.compose(
@@ -321,6 +338,8 @@ export function createProps(scene, terrain, opts = {}) {
               : colour.setScalar(1);
             const v = 0.82 + rng() * 0.32;
             meshes[key].setColorAt(counts[key], colour.setRGB(tint.r * v, tint.g * v, tint.b * v));
+            const solid = PROP_SOLIDS[key];
+            if (solid) solids.add(x, z, solid[0] * scale, solid[1] * scale);
             counts[key]++;
           }
         }
@@ -334,7 +353,7 @@ export function createProps(scene, terrain, opts = {}) {
             if (counts[key] < PROP_KINDS[key].cap) {
               const x = baseX + (rng() - 0.5) * CELL * 0.6;
               const z = baseZ + (rng() - 0.5) * CELL * 0.6;
-              if (!terrain.underwater(x, z) && terrain.slopeAt(x, z, 6) < 0.35) {
+              if (!terrain.underwater(x, z) && terrain.slopeAt(x, z, 6) < 0.35 && terrain.roadAt(x, z) < 0.2) {
                 const y = terrain.heightAt(x, z);
                 const scale = 0.8 + rng() * 0.6;
                 matrix.compose(
@@ -344,6 +363,7 @@ export function createProps(scene, terrain, opts = {}) {
                 );
                 meshes[key].setMatrixAt(counts[key], matrix);
                 meshes[key].setColorAt(counts[key], colour.setScalar(0.85 + rng() * 0.3));
+                if (PROP_SOLIDS[key]) solids.add(x, z, PROP_SOLIDS[key][0] * scale, PROP_SOLIDS[key][1] * scale);
                 counts[key]++;
                 // a column usually has friends
                 if (key === 'column') {
@@ -358,6 +378,7 @@ export function createProps(scene, terrain, opts = {}) {
                     );
                     meshes.column.setMatrixAt(counts.column, matrix);
                     meshes.column.setColorAt(counts.column, colour.setScalar(0.85 + rng() * 0.3));
+                    solids.add(fx, fz, PROP_SOLIDS.column[0] * scale, PROP_SOLIDS.column[1] * scale);
                     counts.column++;
                   }
                 }
@@ -380,6 +401,7 @@ export function createProps(scene, terrain, opts = {}) {
             const z = baseZ + (rng() - 0.5) * CELL;
             if (terrain.underwater(x, z)) continue;
             if (terrain.slopeAt(x, z, 3) > 0.6) continue;
+            if (terrain.roadAt(x, z) > 0.45) continue;
             const s = 0.7 + rng() * 0.9;
             matrix.compose(
               new THREE.Vector3(x, terrain.heightAt(x, z), z),
@@ -407,7 +429,7 @@ export function createProps(scene, terrain, opts = {}) {
   }
 
   return {
-    meshes, grassMesh, cfg,
+    meshes, grassMesh, cfg, solids,
     /** Follow the player; only regenerates when you cross into a new prop cell. */
     update(x, z, force = false) {
       const cx = Math.round(x / CELL), cz = Math.round(z / CELL);
@@ -429,7 +451,7 @@ export function createProps(scene, terrain, opts = {}) {
         triangles += m.count * (m.geometry.attributes.position.count / 3);
       }
       if (grassMesh.count) { drawCalls++; instances += grassMesh.count; triangles += grassMesh.count * (grassGeom.attributes.position.count / 3); }
-      return { instances, drawCalls, triangles: Math.round(triangles), grass: grassMesh.count, rebuilds, density: cfg.density };
+      return { instances, drawCalls, triangles: Math.round(triangles), grass: grassMesh.count, rebuilds, density: cfg.density, solids: solids.count };
     },
     dispose() {
       for (const key of PROP_KEYS) {

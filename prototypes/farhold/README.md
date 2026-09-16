@@ -1,4 +1,4 @@
-# Farhold (prototype, phases 1–2)
+# Farhold (prototype, phases 1–3)
 
 A third-person action RPG on a whole procedural planet. You land on a real world of a real star
 system, walk it out to the horizon, fight what lives there, and wear what it drops — and the other
@@ -27,12 +27,20 @@ it. There is still **no sound and no dialogue** — the user asked for those to 
 | **Fight** | 16 enemies over two body types — Chibi 2 humanoids and `avatar-3d` creatures — that wander, notice you, chase and swing. |
 | **Loot** | Real Emberveil items: bases, affixes, qualities, uniques and set pieces, with rarity colours and an upgrade arrow. |
 | **Grow** | XP, 30 levels, attribute points, gear that changes your damage and the weapon in your character's hand. |
-| **Debug** | A menu on **`** (backtick) for weather, time of day, world density, teleports and character tools. |
+| **Swim** | Deep water makes you swim — floating at the surface, with front, back and side strokes. |
+| **Ride** | **H** puts you on a horse: faster, longer jumps, no attacking. |
+| **Combat feel** | A white arc shows exactly the area a swing damages; bows fire real arrows; every hit splashes. |
+| **Map** | **M** opens a full-screen map with your position, pins and World Forge's own layer filters. |
+| **Save** | Runs save themselves to the browser and load back — several slots, with a Continue button. |
+| **Solid** | Trees, rocks, ruins, houses and walls stop you walking through them. |
+| **Eclipses** | The neighbours visibly orbit, and a body crossing the star really darkens the world. |
+| **Debug** | A menu on **`** (backtick) for weather, time of day, world density, teleports, eclipses, character tools and a copy-to-clipboard report. |
 
 ## Controls
 
 `WASD` move · `Shift` run · `Space` jump · left click swing (click once to capture the mouse) ·
-`I` or `Tab` character sheet · **`` ` `` debug menu** · `Esc` release the mouse.
+`H` mount a horse · `M` the map · `I` or `Tab` character sheet · **`` ` `` debug menu** ·
+`Esc` release the mouse.
 
 URL options: `?seed=7`, `?auto=1` (skip the title), `?quality=low` (smaller budgets — what the
 Playwright specs use), `?weather=storm` (start in a given sky and hold it).
@@ -63,11 +71,27 @@ terrain.spawnPoint();              // dry, flat-ish, and near a road or a town
 Scale: **one world-map cell is 640 m** (`M_PER_CELL`). A 256 × 128 map is a surface 163 km × 82 km.
 Heights come from `reliefFor(planet)` in `universe/`, so a light world has taller mountains.
 
-**Rivers and roads are cut into the ground, not painted on it.** `makeTerrain` builds a softened mask
-from the map's river cells and road cells, then `heightAt` quietens the detail noise along a road (a
-road is graded) and subtracts a valley under a river. At a real river cell the bed sits 7–99 m below
-the ground 400 m to either side, so the water surface `js/features.js` lays down has a valley to sit
-in instead of draping over a hill.
+**Rivers and roads are cut into the ground, not painted on it — and cut from the PATH, not the cell
+grid.** A map cell is 640 m and a river is about 30 m. Carving from the cell mask gave a gorge wide
+enough to swallow a town, which is exactly what it did: World Forge founds towns on rivers (45 of 93
+on one test world), so a town in a 640 m trench was the common case, not the odd one.
+
+`makeTerrain` now builds smoothed polylines through the river and road cells, indexes their segments
+in buckets, and asks "how far is the nearest one?" for every height sample (the early-out when no
+bucket holds anything is what keeps a 47,000-sample ring rebuild at ~34 ms). From that it carves:
+
+- **a river channel** the width of its water (7 + 5 × the map's river width, so about 22 m across)
+  with a flat bed 2.4 + 1.5 × width below the surface — deep enough to swim in — and banks blending
+  back to the land over ~26 m.
+- **the water surface** itself: the natural ground along the line, forced downhill so a river never
+  flows uphill, then smoothed *and pulled back down to the ground* on each pass. Smoothing alone
+  lifted the line over steep ground and turned a mountain stream into a 56 m deep canal.
+- **a graded road**: the natural ground smoothed along the line, so a road is flat across its width
+  and gentle along its length. Nothing is planted on it, and **a road that meets a river is lifted
+  clear of the water** with its approaches ramped up, so the bridge has something to stand on.
+
+`js/features.js` then lays the water and road ribbons on *those same surfaces*, which is why neither
+can clip through the ground it was carved into.
 
 ### Drawing it: rings, not chunks
 
@@ -152,9 +176,15 @@ same toxic world. The same function colours the neighbours' cloud decks in the s
 - **Roads** — the A* network, as a ribbon in the cutting the terrain carved for it.
 - **Bridges** — World Forge already records where a road had to cross water (`road.bridges`), which
   is the list to trust. (Looking for a road cell that is also a river cell finds almost nothing:
-  those overlaps are at road *ends*, because towns are founded on rivers.)
+  those overlaps are at road *ends*, because towns are founded on rivers.) A bridge sits at the
+  road's own lifted height, is built with its deck along **+Z** — the axis `yaw` points down, like
+  every other body in the game — and is stretched along that axis to span the channel and both
+  banks. Built across +X instead, it lay *across* the river rather than spanning it.
 - **Settlements** — the map's own nodes, sized from `node.size`: a village is a well and a ring of
-  huts, a city adds a hall, a wall with a gate gap and four towers. All instanced.
+  huts, a city adds a hall, a wall with a gate gap and four towers. All instanced. Nothing is built
+  in the channel or on the bank, so a riverside town sits *beside* its river. The wall is walked
+  corner to corner, each segment spanning the chord to the next and sitting on the lower of its two
+  ends — spacing segments by arc length, each at its own ground height, is what left gaps in it.
 
 **These are buildings, not a town layer.** There are no people in them, no shops and no interiors —
 that is phase 4.
@@ -171,7 +201,11 @@ that is phase 4.
 | `js/weather.js` | Cloud decks, rain, snow, dust, lightning, fog. |
 | `js/props.js` | The scatter: 16 prop kinds, per-biome kits, grass, ruins. One draw call per kind. |
 | `js/features.js` | Rivers, roads, bridges and settlements from the map's own data. |
-| `js/debug.js` | The backtick menu. |
+| `js/debug.js` | The backtick menu, including a copy-to-clipboard debug report. |
+| `js/map.js` | The full-screen map on `M`, over World Forge's own `renderWorld()`. |
+| `js/save.js` | Browser saves: the seed plus what you did, never the world. |
+| `js/collide.js` | The obstacle field — props and buildings file cylinders as they are instanced. |
+| `js/combat-fx.js` | The swipe arc (which is the hit box), arrows and impact puffs. |
 | `js/player.js` | Input, the third-person controller, the follow camera. |
 | `js/actors.js` | One interface over Chibi 2 humanoids and creatures; the enemy field. |
 | `js/rpg.js` | Stats, XP, levels, equipment, damage, loot rolls. **Pure, node-testable.** |
@@ -228,10 +262,15 @@ any kit.
   in this phase". Phase 3 turns them on.
 - **Settlements have no people**, shops or interiors — phase 4.
 - **No sound and no dialogue** — deliberate; phase 7.
-- **No save.** Close the tab and the run is gone.
-- **Combat is one swing.** No skills, no statuses, no spell effects — phase 3.
-- **No full-screen map yet** — that is the first job of the next round (see `PLAN.md`).
+- **Combat is still one swing.** No skills, no statuses, no spell effects — the rest of phase 3.
+- **The camera is over the RIGHT shoulder** and there is no options menu or first-person view yet;
+  all three are queued (see `PLAN.md` phase 3).
+- **Planets in the sky do not occlude one another**, there is no lens flare or god rays, and one
+  global `orbitScale` means a close-in body can cross the sky too fast — all queued.
 - **Props do not sway** in the wind, and grass has no alpha texture — both are cheap wins later.
+- **Collision is cylinders, not shapes.** A house is a circle to walk around, so its corners are
+  softer than they look; and enemies ignore collision entirely.
+- **Swimming is surface only** — no diving, no underwater anything.
 - **The rings leave small seams** where two resolutions meet, visible at a grazing angle. Proper
   skirts are phase 10.
 - **Enemies do not path around terrain.** They walk straight at you and turn away from water.
@@ -241,7 +280,7 @@ any kit.
 ```sh
 node --test prototypes/farhold/tests/*.test.js     # ground + rules, no browser
 node --test worldgen/tests/weather.test.js         # the weather model
-npx playwright test prototypes/farhold             # the real page (17 tests)
+npx playwright test prototypes/farhold             # the real page (32 tests)
 ```
 
 The node tests cover terrain determinism, height sanity, agreement with the map, slopes vs normals,
@@ -250,4 +289,9 @@ snow in a desert, no rain on a dry world, a clock that crossfades, palettes that
 stay recognisable). The browser tests cover the three reported bugs (daylight start, facing and
 strafe, looking straight up with ground behind you), the scatter staying instanced and never standing
 in the sea, rivers/roads/bridges/towns built from the map, weather changing the sky, the debug menu,
-and every planet getting its own colours.
+and every planet getting its own colours. Round 3 adds: a river that is a swimmable channel rather
+than a gorge, no building standing in the water, roads graded into the ground with nothing growing
+on them, roads that pay for the height they gain, things you cannot walk through, a closed city
+wall, a swipe arc that points where the damage lands, a bow that fires, a horse, the map screen, a
+save that round-trips through a reload, a minimap with relief on a single-biome world, and an
+eclipse that takes the light away.

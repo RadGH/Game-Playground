@@ -18,27 +18,9 @@
 import * as THREE from 'three';
 import { makeRng, clamp } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
+import { ObstacleField, BUILDING_SOLIDS } from './collide.js';
 
 const IDX_XY = (i, w) => [i % w, Math.floor(i / w)];
-
-/** Catmull-Rom through the cell centres, so a chain of 640 m cells reads as a curve. */
-function smoothPolyline(points, perSegment = 4) {
-  if (points.length < 2) return points.slice();
-  const out = [];
-  const at = i => points[clamp(i, 0, points.length - 1)];
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2);
-    for (let s = 0; s < perSegment; s++) {
-      const t = s / perSegment, t2 = t * t, t3 = t2 * t;
-      out.push([
-        0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
-        0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3),
-      ]);
-    }
-  }
-  out.push(points[points.length - 1]);
-  return out;
-}
 
 /** A flat ribbon following a polyline, draped on the ground. Returns vertex/index arrays. */
 function ribbon(points, heights, width, { lift = 0.1 } = {}) {
@@ -141,14 +123,18 @@ export const BUILDINGS = {
     { geometry: BOX, color: BEAM, matrix: mat4(1.1, 1.6, 0, 0.16, 2.2, 0.16) },
     { geometry: CONE4, color: ROOF, matrix: mat4(0, 3.1, 0, 1.7, 0.9, 1.7, Math.PI / 4) },
   ]) },
-  bridge: { cap: 120, build: () => mergeParts([
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 0, 0, 7, 0.45, 5) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 0.75, 2.4, 7, 1.1, 0.25) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 0.75, -2.4, 7, 1.1, 0.25) },
-    { geometry: CYL, color: STONE, matrix: mat4(-2.6, -1.6, 2, 0.4, 3.4, 0.4) },
-    { geometry: CYL, color: STONE, matrix: mat4(2.6, -1.6, 2, 0.4, 3.4, 0.4) },
-    { geometry: CYL, color: STONE, matrix: mat4(-2.6, -1.6, -2, 0.4, 3.4, 0.4) },
-    { geometry: CYL, color: STONE, matrix: mat4(2.6, -1.6, -2, 0.4, 3.4, 0.4) },
+  // The deck runs along +Z — the same axis `yaw` points down, and the same way every other body in
+  // the game faces. Built across +X instead, a bridge placed at the road's angle lay ACROSS the
+  // river rather than spanning it, which is exactly how it looked. Scaling Z stretches the span to
+  // suit the river; the piers are boxes so a stretched one reads as a wider pier, not a smeared post.
+  bridge: { cap: 120, span: 10, build: () => mergeParts([
+    { geometry: BOX, color: BEAM, matrix: mat4(0, 0, 0, 5, 0.45, 10) },
+    { geometry: BOX, color: BEAM, matrix: mat4(2.4, 0.75, 0, 0.25, 1.1, 10) },
+    { geometry: BOX, color: BEAM, matrix: mat4(-2.4, 0.75, 0, 0.25, 1.1, 10) },
+    { geometry: BOX, color: STONE, matrix: mat4(2, -2.1, 3.2, 0.8, 4.2, 0.8) },
+    { geometry: BOX, color: STONE, matrix: mat4(-2, -2.1, 3.2, 0.8, 4.2, 0.8) },
+    { geometry: BOX, color: STONE, matrix: mat4(2, -2.1, -3.2, 0.8, 4.2, 0.8) },
+    { geometry: BOX, color: STONE, matrix: mat4(-2, -2.1, -3.2, 0.8, 4.2, 0.8) },
   ]) },
 };
 
@@ -169,20 +155,12 @@ export function createFeatures(scene, terrain, opts = {}) {
 
   const toMetres = i => { const [x, y] = IDX_XY(i, W); return [x * M_PER_CELL, y * M_PER_CELL]; };
 
-  // ---------------------------------------------------------------- what the map says is there
+  // The paths are the terrain's own — the very lines it carved the channels and cuttings from — so
+  // the water surface sits exactly on the carved bed instead of clipping through it.
+  const rivers = terrain.riverPaths;
+  const roads = terrain.roadPaths;
   const riverSet = new Set();
-  const rivers = (world.rivers || []).map(r => {
-    for (const c of r.cells) riverSet.add(c);
-    return {
-      id: r.id, name: r.name, width: r.width || 1, navigable: r.navigable,
-      points: smoothPolyline(r.cells.map(toMetres), 5),
-    };
-  });
-
-  const roads = (world.roads || []).map(r => ({
-    id: r.id, klass: r.class || 'trail', cells: r.cells, bridgeCells: r.bridges || [],
-    points: smoothPolyline(r.cells.map(toMetres), 5),
-  }));
+  for (const r of world.rivers || []) for (const c of r.cells) riverSet.add(c);
 
   // Where a road crosses water. World Forge already works this out when it lays the network — its
   // `road.bridges` are the cells where a road had to cross a river, a lake or a channel — so that
@@ -201,12 +179,11 @@ export function createFeatures(scene, terrain, opts = {}) {
     bridges.push({ x, z, angle, cell });
   };
   for (const road of roads) {
-    for (const cell of road.bridgeCells) {
-      const i = road.cells.indexOf(cell);
+    for (const cell of road.bridgeCells || []) {
+      const i = (road.cells || []).indexOf(cell);
       if (i >= 0) addBridge(road, i);
     }
-    // and any mid-road river crossing the network did not flag
-    for (let i = 1; i < road.cells.length - 1; i++) {
+    for (let i = 1; i < (road.cells || []).length - 1; i++) {
       if (riverSet.has(road.cells[i])) addBridge(road, i);
     }
   }
@@ -240,22 +217,16 @@ export function createFeatures(scene, terrain, opts = {}) {
     instanced[key] = mesh;
   }
 
+  const solids = new ObstacleField();
   let centre = [Infinity, Infinity];
   let rebuilds = 0;
   let visible = true;
   const matrix = new THREE.Matrix4();
   const colour = new THREE.Color();
 
-  /** Heights along a polyline, forced downhill so a river never flows up a hill. */
-  function riverHeights(points) {
-    const h = points.map(p => terrain.heightAt(p[0], p[1]));
-    for (let i = 1; i < h.length; i++) h[i] = Math.min(h[i], h[i - 1]);
-    return h;
-  }
 
   function buildRibbons(px, pz) {
     const near = (points) => {
-      // the run of the line that is close enough to be worth drawing
       const spans = [];
       let start = -1;
       for (let i = 0; i < points.length; i++) {
@@ -280,18 +251,18 @@ export function createFeatures(scene, terrain, opts = {}) {
       for (const [a, b] of near(r.points)) {
         if (b - a < 2) continue;
         const slice = r.points.slice(a, b + 1);
-        const heights = riverHeights(slice);
-        // a big river is wider, and every river widens as it goes
-        const w = 6 + r.width * 5;
-        push(water, ribbon(slice, heights, i => w * (0.75 + 0.5 * (i / Math.max(1, slice.length - 1))), { lift: 0.35 }));
+        // the surface the terrain carved down to, so the water can never clip through the bed
+        const heights = r.surface.slice(a, b + 1);
+        push(water, ribbon(slice, heights, r.half * 2, { lift: -0.05 }));
       }
     }
     for (const r of roads) {
       for (const [a, b] of near(r.points)) {
         if (b - a < 2) continue;
         const slice = r.points.slice(a, b + 1);
-        const heights = slice.map(p => terrain.heightAt(p[0], p[1]));
-        push(road, ribbon(slice, heights, r.klass === 'trail' ? 4 : 6.5, { lift: 0.14 }));
+        // the graded surface, which is exactly what the terrain was flattened to
+        const heights = r.surface.slice(a, b + 1);
+        push(road, ribbon(slice, heights, r.half * 2, { lift: 0.06 }));
       }
     }
 
@@ -316,16 +287,21 @@ export function createFeatures(scene, terrain, opts = {}) {
     const homes = [6, 8, 14, 26, 40, 54][clamp(size, 0, 5)] || 8;
     const cx = node.wx, cz = node.wz;
 
-    const place = (key, x, z, angle, scale = 1, sink = 0.3) => {
+    const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null) => {
       if (counts[key] >= BUILDINGS[key].cap) return false;
       if (terrain.underwater(x, z)) return false;
+      // nothing is built in the channel or on the bank — towns sit BESIDE their river
+      if (terrain.riverAt(x, z) > 0.3) return false;
+      const size = Array.isArray(scale) ? scale : [scale, scale, scale];
       matrix.compose(
-        new THREE.Vector3(x, terrain.heightAt(x, z) - sink, z),
+        new THREE.Vector3(x, (y ?? terrain.heightAt(x, z)) - sink, z),
         new THREE.Quaternion().setFromEuler(new THREE.Euler(0, angle, 0)),
-        new THREE.Vector3(scale, scale, scale),
+        new THREE.Vector3(size[0], size[1], size[2]),
       );
       instanced[key].setMatrixAt(counts[key], matrix);
       instanced[key].setColorAt(counts[key], colour.setScalar(0.82 + rng() * 0.36));
+      const solid = BUILDING_SOLIDS[key];
+      if (solid && solid[0] > 0) solids.add(x, z, solid[0] * Math.max(size[0], size[2]), solid[1] * size[1]);
       counts[key]++;
       return true;
     };
@@ -347,19 +323,32 @@ export function createFeatures(scene, terrain, opts = {}) {
 
     // a city gets a wall and towers
     if (size >= 4) {
+      // Walk the ring corner to corner: each segment spans the CHORD between two ring points and is
+      // placed at that chord's midpoint, stretched slightly so it overlaps its neighbour. Spacing
+      // segments by arc length (and giving each its own ground height) is what left gaps.
       const wallR = ring + 14;
-      const segments = Math.round((Math.PI * 2 * wallR) / 6);
+      const SEG = 6;                                        // the wall mesh is 6 long
+      const segments = Math.max(8, Math.round((Math.PI * 2 * wallR) / SEG));
       const gate = Math.floor(rng() * segments);
-      for (let i = 0; i < segments; i++) {
-        if (Math.abs(i - gate) <= 1) continue;           // leave a gap for the road
+      const ringPoint = i => {
         const a = (i / segments) * Math.PI * 2;
-        const x = cx + Math.cos(a) * wallR, z = cz + Math.sin(a) * wallR;
-        if (terrain.underwater(x, z)) continue;
-        place('wall', x, z, a + Math.PI / 2, 1, 0.6);
+        return [cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR];
+      };
+      for (let i = 0; i < segments; i++) {
+        if (Math.abs(i - gate) <= 1) continue;              // leave a gap for the road
+        const [ax, az] = ringPoint(i), [bx, bz] = ringPoint(i + 1);
+        const mx = (ax + bx) / 2, mz = (az + bz) / 2;
+        if (terrain.underwater(mx, mz)) continue;
+        const chord = Math.hypot(bx - ax, bz - az);
+        // sit the segment on the LOWER of its two ends and make it taller, so a step in the ground
+        // is hidden under the wall instead of opening a gap beneath it
+        const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
+        const lean = Math.abs(terrain.heightAt(ax, az) - terrain.heightAt(bx, bz));
+        place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [chord / SEG * 1.06, 1 + lean / 3.8, 1], 0.9, low);
       }
       for (let i = 0; i < 4; i++) {
         const a = (i / 4) * Math.PI * 2 + 0.4;
-        place('tower', cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR, 0, 1, 0.6);
+        place('tower', cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR, 0, 1, 1.1);
       }
     }
   }
@@ -367,6 +356,7 @@ export function createFeatures(scene, terrain, opts = {}) {
   function buildInstances(px, pz) {
     const counts = {};
     for (const key of BUILDING_KEYS) counts[key] = 0;
+    solids.clear();
 
     for (const node of settlements) {
       if (Math.hypot(node.wx - px, node.wz - pz) > radius) continue;
@@ -375,10 +365,16 @@ export function createFeatures(scene, terrain, opts = {}) {
     for (const b of bridges) {
       if (Math.hypot(b.x - px, b.z - pz) > radius) continue;
       if (counts.bridge >= BUILDINGS.bridge.cap) break;
+      // sit the deck on the road, which planet.js has already lifted clear of the water, and
+      // stretch the span to cover the channel and both banks
+      const river = terrain.riverInfoAt(b.x, b.z);
+      const deck = terrain.roadSurfaceAt(b.x, b.z) ?? (terrain.heightAt(b.x, b.z) + 2.4);
+      const needed = river ? river.width + 18 : 14;
+      const span = Math.max(1, needed / BUILDINGS.bridge.span);
       matrix.compose(
-        new THREE.Vector3(b.x, terrain.heightAt(b.x, b.z) + 1.4, b.z),
+        new THREE.Vector3(b.x, deck, b.z),
         new THREE.Quaternion().setFromEuler(new THREE.Euler(0, b.angle, 0)),
-        new THREE.Vector3(1.2, 1.2, 1.2),
+        new THREE.Vector3(1.15, 1.15, span),
       );
       instanced.bridge.setMatrixAt(counts.bridge, matrix);
       instanced.bridge.setColorAt(counts.bridge, colour.setScalar(1));
@@ -400,7 +396,7 @@ export function createFeatures(scene, terrain, opts = {}) {
   }
 
   return {
-    rivers, roads, bridges, settlements, instanced, riverMesh, roadMesh,
+    rivers, roads, bridges, settlements, instanced, riverMesh, roadMesh, solids,
 
     update(x, z, force = false) {
       if (!force && Math.hypot(x - centre[0], z - centre[1]) < refreshEvery) return false;
@@ -448,7 +444,7 @@ export function createFeatures(scene, terrain, opts = {}) {
       if (roadMesh.visible) drawCalls++;
       return {
         rivers: rivers.length, roads: roads.length, bridges: bridges.length,
-        settlements: settlements.length, buildings, drawCalls, rebuilds,
+        settlements: settlements.length, buildings, drawCalls, rebuilds, solids: solids.count,
       };
     },
 

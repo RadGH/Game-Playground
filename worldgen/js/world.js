@@ -58,6 +58,7 @@ export const DEFAULTS = {
   landmarkDensity: 0.5,
   dungeonDensity: 0.5,
   roadExtras: 0.3,
+  roadClimb: 320,                 // how much a road hates gaining height; 0 lets it go straight over a peak
   seaLanes: true,
   history: true,
   namegen: null,                 // a Name Forge instance; without it the built-in namer is used

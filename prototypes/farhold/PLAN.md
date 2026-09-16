@@ -118,6 +118,23 @@ Sky:
   same angles. Solar and lunar eclipses, with the world genuinely darkening — the sun's light and
   the sky colour already run through one place, so this is a multiplier plus a corona.
 
+### Queued from the round 3 play-test (2026-09-15)
+
+Camera and view:
+- **Over the LEFT shoulder by default**, not the right.
+- **An options menu**, with a Controls section that switches the shoulder side.
+- **`V` toggles first person**, which needs first-person support on the Chibi 2 body (hide the head
+  and the near arm, move the camera to the eye bone).
+
+Sky:
+- **Planets in the sky should occlude one another** — they currently intersect, because each is
+  drawn on the same shell at a size that ignores its neighbours.
+- **Lens flare** during an eclipse, and **god rays / sun shafts** generally.
+- **An effect as the sun sets behind a mountain or the horizon.**
+- **Some bodies cross the sky far too fast.** `sky.orbitScale` (150) and `moonOrbitScale` (6) are one
+  knob for every body, so a close-in planet or a short-period moon whips round. Needs a per-body
+  clamp on apparent angular speed rather than one global multiplier.
+
 ### The fight
 
 - **Skills and cooldowns** from Emberveil's `data/skills.js` — a bar of 4–6, mana, cast times.

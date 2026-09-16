@@ -26,7 +26,19 @@
     "attackEvery": 0.62,
     "attackReach": 2.9,
     "attackArc": 1.5,
-    "startGold": 0
+    "startGold": 0,
+    "swimSpeed": 2.7,
+    "swimDepth": 1.3,
+    "floatDepth": 0.55,
+    "mountSpeed": 2.1,
+    "mountJump": 1.5,
+    "shoulderOffset": 0.85,
+    "cameraLift": 0.25,
+    "bodyRadius": 0.45,
+    "arrowRange": 46,
+    "arrowSpeed": 42,
+    "arrowSplash": 2.6,
+    "meleeSplash": 1
   },
   "progression": {
     "attrPerLevel": 3,
@@ -215,8 +227,10 @@
     "siblingScale": 160,
     "moonScale": 1,
     "starScale": 2.2,
-    "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way. startFraction is where in the day a new run begins: 0 midnight, 0.25 dawn, 0.5 noon.",
-    "startFraction": 0.34
+    "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way. startFraction is where in the day a new run begins: 0 midnight, 0.25 dawn, 0.5 noon. orbitScale/moonOrbitScale run the orbits on their own clock: at real speed a 365-day sibling needs ~91 hours of play to go round, so it looks welded to the sun.",
+    "startFraction": 0.34,
+    "orbitScale": 150,
+    "moonOrbitScale": 6
   },
   "props": {
     "density": 1,
@@ -233,5 +247,9 @@
     "maxMinutes": 4,
     "transitionSeconds": 20,
     "_doc": "How long a weather state holds and how long it takes to roll in. The states themselves and which ones a climate allows live in worldgen/js/weather.js."
+  },
+  "save": {
+    "autoSaveSeconds": 45,
+    "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did — never the world, which is a pure function of the seed."
   }
 }

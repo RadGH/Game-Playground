@@ -14,24 +14,30 @@
 
 <!-- ============================================================ title -->
 <section id="boot">
-  <div>
+  <div class="boot-inner">
     <h1>FAR<b>HOLD</b></h1>
     <p class="tagline">Land on a world of a real star system, walk it to the horizon, kill what is out
       there, and wear what it drops. The other planets of the system are in the sky above you.</p>
 
     <div class="row">
-      <label for="boot-class">Wayfarer</label>
+      <label for="boot-name">Name</label>
+      <input id="boot-name" type="text" maxlength="18" placeholder="Wren" style="width:130px">
+      <label for="boot-class">Class</label>
       <select id="boot-class"></select>
       <label for="boot-seed">Seed</label>
-      <input id="boot-seed" type="number" value="1" style="width:100px">
+      <input id="boot-seed" type="number" value="1" style="width:90px">
     </div>
     <div class="row">
-      <button id="boot-start">Land on a planet</button>
+      <button id="boot-start">New game</button>
+      <button id="boot-continue" class="ghost" hidden>Continue</button>
     </div>
+
+    <div id="boot-saves" class="saves"></div>
+
     <div class="status" id="boot-status"></div>
-    <p class="note">Phase 2 of ten. No sound and no dialogue yet. WASD to move, Shift to run,
-      Space to jump, left click to swing, I for the character sheet, and <b>`</b> (backtick) for the
-      debug menu — where you can change the weather, the time of day and how thick the world is.</p>
+    <p class="note">Phase 3 of ten. No sound or dialogue yet. <b>WASD</b> move · <b>Shift</b> run ·
+      <b>Space</b> jump · <b>click</b> swing · <b>H</b> horse · <b>M</b> map · <b>I</b> character ·
+      <b>`</b> debug. Deep water makes you swim. The game saves itself as you play.</p>
   </div>
 </section>
 
@@ -48,13 +54,16 @@
 </div>
 
 <div id="hud-place" class="hud">
-  <div><b id="hud-place-name"></b></div>
-  <div class="clock" id="hud-clock"></div>
-  <div class="small" id="hud-weather"></div>
-  <div class="small muted" id="hud-sky"></div>
-  <div class="small muted" id="hud-planet"></div>
+  <div class="hud-card">
+    <div><b id="hud-place-name"></b></div>
+    <div class="clock" id="hud-clock"></div>
+    <div class="small" id="hud-weather"></div>
+    <div class="small dim" id="hud-sky"></div>
+    <div class="small dim" id="hud-planet"></div>
+  </div>
 </div>
 <canvas id="minimap" class="hud" width="180" height="180"></canvas>
+<div id="hud-where" class="hud"></div>
 
 <div id="target" class="hud hidden">
   <div id="target-name"></div>
@@ -62,7 +71,7 @@
 </div>
 
 <div id="log" class="hud"></div>
-<div id="hint" class="hud">WASD move · Shift run · Space jump · click to swing · I for the character sheet</div>
+<div id="hint" class="hud">WASD move · Shift run · Space jump · click to swing · H horse · M map · I character · ` debug</div>
 
 <!-- ============================================================ character sheet -->
 <section id="sheet" class="sheet hidden">

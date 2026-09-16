@@ -4,7 +4,7 @@
 // The HUD never decides anything; main.js hands it the player and it draws what is there.
 
 import { itemScore, SLOTS } from './rpg.js';
-import { BIOMES } from '../../../worldgen/js/biomes.js';
+import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 
 const $ = id => document.getElementById(id);
@@ -23,9 +23,10 @@ const SLOT_LABELS = {
 };
 
 export class Hud {
-  constructor({ rpg, terrain, onEquip, onSpendAttr }) {
+  constructor({ rpg, terrain, onEquip, onSpendAttr, seed = 1 }) {
     this.rpg = rpg;
     this.terrain = terrain;
+    this.seed = seed;
     this.onEquip = onEquip;
     this.onSpendAttr = onSpendAttr;
     this.lines = [];
@@ -53,7 +54,7 @@ export class Hud {
 
   // ---------------------------------------------------------------- bars and place
 
-  tick(player, { place, clock, target, sky, weather }) {
+  tick(player, { place, clock, target, sky, weather, where }) {
     const hpPct = Math.max(0, player.hp / player.maxHp * 100);
     $('bar-hp-fill').style.width = hpPct + '%';
     $('bar-hp-text').textContent = `${Math.ceil(player.hp)} / ${player.maxHp}`;
@@ -77,6 +78,15 @@ export class Hud {
     }
     if (sky) $('hud-sky').textContent = sky;
     if (weather !== undefined) $('hud-weather').textContent = weather;
+    const whereBox = $('hud-where');
+    if (whereBox && where !== undefined) whereBox.textContent = where;
+  }
+
+  /** Where the player is, in every form worth pasting into a bug report. */
+  locationText(control) {
+    const cell = this.terrain.cellAt(control.x, control.z);
+    return `seed ${this.seed} · x ${Math.round(control.x)} z ${Math.round(control.z)} · cell ${cell.x},${cell.y}`
+      + ` · altitude ${Math.round(control.y)} m · ${this.terrain.biomeAt(control.x, control.z).name}`;
   }
 
   /** XP thresholds without importing the module twice. */
@@ -84,21 +94,22 @@ export class Hud {
 
   // ---------------------------------------------------------------- minimap
 
-  /** Draw the whole planet map once into an offscreen canvas; the live map is a window onto it. */
+  /**
+   * Draw the whole planet map once into an offscreen canvas; the live map is a window onto it.
+   *
+   * This uses World Forge's own `worldPixels()` WITH HILLSHADE rather than painting raw biome
+   * colour. Raw colour is why seed 9 came out as a white sheet: it is a 100% ice world, every cell
+   * the same near-white, and `universe/` produces single-biome worlds constantly (ice, lava,
+   * crystal, barren, void). Relief shading gives those worlds something to read.
+   */
   buildMinimapBase() {
     const world = this.terrain.world;
     const c = document.createElement('canvas');
     c.width = world.width; c.height = world.height;
     const ctx = c.getContext('2d');
+    const px = worldPixels(world, { layer: 'biomes', hillshade: true, shade: 7 });
     const img = ctx.createImageData(world.width, world.height);
-    for (let i = 0; i < world.width * world.height; i++) {
-      const b = BIOMES[world.biome[i]];
-      const n = parseInt((b?.color || '#444444').slice(1), 16);
-      img.data[i * 4] = (n >> 16) & 255;
-      img.data[i * 4 + 1] = (n >> 8) & 255;
-      img.data[i * 4 + 2] = n & 255;
-      img.data[i * 4 + 3] = 255;
-    }
+    img.data.set(px.data);
     ctx.putImageData(img, 0, 0);
     this.minimapBase = c;
   }
@@ -117,19 +128,27 @@ export class Hud {
       ((wx / M_PER_CELL) - (cx - span / 2)) / span * size,
       ((wz / M_PER_CELL) - (cy - span / 2)) / span * size,
     ];
-    ctx.fillStyle = '#ff7a5a';
+    // enemies: a red pip with a dark ring, so they read over snow, sand and grass alike
     for (const e of enemies) {
       if (e.dying != null) continue;
       const [px, py] = toPx(e.x, e.z);
-      if (px < 0 || py < 0 || px > size || py > size) continue;
-      ctx.fillRect(px - 1.5, py - 1.5, 3, 3);
+      if (px < -4 || py < -4 || px > size + 4 || py > size + 4) continue;
+      ctx.beginPath();
+      ctx.arc(px, py, 3.6, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff4a2a';
+      ctx.fill();
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = 'rgba(10,8,6,.95)';
+      ctx.stroke();
     }
     const [px, py] = toPx(player.x, player.z);
     ctx.save();
     ctx.translate(px, py);
     ctx.rotate(-player.yaw);
+    ctx.beginPath(); ctx.moveTo(0, -6); ctx.lineTo(4.5, 5); ctx.lineTo(0, 2.5); ctx.lineTo(-4.5, 5); ctx.closePath();
     ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.moveTo(0, -5); ctx.lineTo(3.5, 4); ctx.lineTo(-3.5, 4); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(10,20,32,.9)'; ctx.lineWidth = 1.6;
+    ctx.fill(); ctx.stroke();
     ctx.restore();
   }
 

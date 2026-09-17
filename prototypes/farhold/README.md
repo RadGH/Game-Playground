@@ -248,6 +248,10 @@ that is phase 4.
 | `js/sites.js` | Camps with a fire in them, and the lairs world bosses keep. |
 | `js/pets.js` | Companions: follow, engage, return, fall, come back. |
 | `js/light.js` | The torch, the world's light sources, and the floor under the night ambient. |
+| `js/markers.js` | Quests, story objectives and dropped pins, each filed under the world it is on. Feeds the map, the minimap's rim arrows and the space brackets. **Pure, node-testable.** |
+| `js/starchart.js` | `M` with no ground under you: system → nearby stars → arm → galaxy, and the jump. **Projections and reach rules are pure and node-tested.** |
+| `js/warp.js` | The five-second tunnel between stars: one buffer of line segments stretched by a single intensity curve. |
+| `js/water-plan.js` | Where a river's sheet ends and where a lake's sheet goes. Split out of `features.js` so node can test that the water meets its bank. **Pure, node-testable.** |
 | `js/main.js` | Boot, wiring, the frame loop, `window.farhold`. |
 | `data/balance.json` | Every knob: player numbers, enemy scaling, drops, ring sizes, scatter density, weather timing, sky exaggeration. |
 | `data/enemies.json` | 46 enemies, 6 bosses, 10 companions, 14 champion/rare modifiers. |
@@ -255,6 +259,7 @@ that is phase 4.
 | `data/classes.json` | All thirty classes: look, starting kit, skills, companions. |
 | `data/crafting.json` | 12 materials, the recycling tables, and 16 bench recipes. |
 | `data/encounters.json` | 11 set-piece encounters. |
+| `BESTIARY-IDEAS.md` | ~40 creatures worth adding — neutral wildlife, folk on the road, and the four thin biome families — each tagged by how much work its body is. |
 
 ## What it reuses
 
@@ -327,7 +332,7 @@ any kit.
 ```sh
 node --test prototypes/farhold/tests/*.test.js     # ground + rules, no browser
 node --test worldgen/tests/weather.test.js         # the weather model
-npx playwright test prototypes/farhold             # the real page (67 tests)
+npx playwright test prototypes/farhold             # the real page
 ```
 
 The node tests cover terrain determinism, height sanity, agreement with the map, slopes vs normals,
@@ -362,3 +367,18 @@ first person putting the camera at the eye and the head off the body, sky bodies
 in real distance order, nothing crossing the sky faster than the cap on a seed with a three-day
 planet, a flare that is on the star and survives an eclipse, ground between you and the star
 putting the rays out, and the settings switch for all of it.
+
+**Round 5** adds 22 node tests over three new files — `tests/markers.test.js` (a marker belongs to
+the world it was made on; tracking sticks; quests mark and unmark themselves; a bearing takes the
+short way round the seam), `tests/starchart.test.js` (each step shows more than the last, the drive's
+reach fits inside the first star view, you are dead centre at every step, fewer than 6% of the
+galaxy's stars are dead ends, and no two stars share a seed) and `tests/water.test.js` (the sheet is
+never narrower than its channel, no vertex on any river is open to the air, the skirt hangs down and
+faces outward, and every lake is level and sits in a basin the terrain really carved) — plus two more
+in `tests/planet.test.js` for the habitable-start search. `tests/round5.spec.js` adds eleven in the
+page: the habitable start on and off, water and lakes on a real world, a quest marking itself on the
+map and the tracking list, a marker staying behind when you leave, `M` branching between the world
+map and the chart, the chart stepping out to the galaxy and back, a five-second jump that comes out
+in a different system with the old world's markers left where they were, a throttle that falls and a
+planet that sharpens as you close, falling into an atmosphere with nobody touching a key, and the
+clipmap covering ten kilometres at altitude for the same triangle count.

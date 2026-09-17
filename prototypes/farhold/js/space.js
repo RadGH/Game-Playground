@@ -28,6 +28,18 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   const boostMult = cfg.boost ?? 3.6;
   const warpMult = cfg.warp ?? 26;
   const landRange = cfg.landRange ?? 1.8;         // multiples of a planet's radius
+  // The approach. All of it in body radii above the surface.
+  const approachCfg = {
+    slowFrom: cfg.slowFrom ?? 26,        // start easing off the throttle here
+    slowTo: cfg.slowTo ?? 0.25,          // …down to this fraction of cruise at the surface
+    noWarpWithin: cfg.noWarpWithin ?? 9, // warp will not engage this close to anything
+    entry: cfg.entryAltitude ?? 0.5,     // fall below this over a landable world and you are in its air
+    tiers: cfg.detailTiers || [
+      { key: 'far', within: Infinity, detail: 32, textureSize: 256 },
+      { key: 'near', within: 14, detail: 64, textureSize: 512 },
+      { key: 'close', within: 3.5, detail: 128, textureSize: 1024 },
+    ],
+  };
   const orbitScale = balance.sky?.orbitScale ?? 150;
   const dayLength = balance.sky?.dayLengthSeconds ?? 900;
 
@@ -42,7 +54,30 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   scene.add(starLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.09));
 
-  const backdrop = createSpaceBackdrop({ seed, radius: AU * 26, stars: 2600 });
+  /**
+   * "Different systems should have different properties in the skybox."
+   *
+   * The backdrop takes a seed, so the star field already changes with the system — but the nebulae
+   * were the same four colours everywhere, which made every system read the same at a glance. The
+   * palette is now rolled from the star itself: a hot blue system gets cold clouds, a red dwarf gets
+   * rust and ember, a black hole gets almost nothing at all. It is the first thing you see when you
+   * come out of a jump, and it should tell you that you went somewhere.
+   */
+  const NEBULA_PALETTES = {
+    blueGiant: ['#4a7ad0', '#6a4ad0', '#3ad0c0'],
+    whiteDwarf: ['#8fa8d0', '#5a6a9a', '#3ad0c0'],
+    redDwarf: ['#d0563a', '#a03a5a', '#d08a3a'],
+    redGiant: ['#d04a3a', '#d0863a', '#a0405a'],
+    neutronStar: ['#9fd8ff', '#6a4ad0', '#ffffff'],
+    blackHole: ['#2a1a3a', '#6a2a4a'],
+    binaryPair: ['#d04a7a', '#4a7ad0', '#d0b03a'],
+  };
+  const backdrop = createSpaceBackdrop({
+    seed, radius: AU * 26,
+    stars: 1800 + ((seed >>> 3) % 1900),
+    nebula: star.classKey === 'blackHole' ? 1 : 2 + ((seed >>> 7) % 4),
+    colors: NEBULA_PALETTES[star.classKey] || ['#6a4ad0', '#2a6ad0', '#d04a7a', '#3ad0c0'],
+  });
   scene.add(backdrop.group);
 
   // ---------------------------------------------------------------- the worlds
@@ -68,10 +103,13 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     // a moon is genuinely smaller — that is most of what makes it feel like a moon
     const base = EARTH * (p.radius ?? 1) * (p.giant ? 0.55 : 1) * (parent ? 0.42 : 1);
     const radius = Math.max(EARTH * (parent ? 0.12 : 0.35), base);
-    const model = createPlanet(tinted, { radius, detail: parent ? 20 : 32, textureSize: parent ? 128 : 256, texture });
+    const baseDetail = parent ? 20 : 32, baseTexture = parent ? 128 : 256;
+    const model = createPlanet(tinted, { radius, detail: baseDetail, textureSize: baseTexture, texture });
     scene.add(model.group);
     bodies.push({
       planet: p, model, radius, parentId: parent?.id ?? null, moon: !!parent,
+      // kept so the model can be rebuilt at a finer detail as the ship closes on it
+      tinted, texture, baseDetail, baseTexture, tier: 'far',
       au: p.orbit?.au ?? parent?.orbit?.au ?? 1,
       // a moon's orbit is given in PLANET RADII, not AU — the same conversion sky.js makes
       moonRadii: parent ? (p.orbit?.radii ?? p.orbit?.planetRadii ?? 8) : 0,
@@ -101,6 +139,8 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     boosting: false,
     warping: false,
     warpCharge: 0,
+    approach: 1,             // how much of the throttle the ship will give you this close in
+    crowded: false,          // …and whether warp is locked out because something is nearby
     elapsed: 0,
     lastYaw: 0,
     bank: 0,
@@ -145,6 +185,91 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     }
   }
 
+  // ---------------------------------------------------------------- closing on a world
+  //
+  // *"In space, getting close to a planet should cause you to slow down and cause the planet to get
+  // more detailed. As you approach the atmosphere it should get more detailed, eventually entering
+  // the atmosphere."*
+  //
+  // Two halves. The throttle is governed by how close you are, so a world you are diving at stops
+  // being a speck that becomes a wall in one frame; and the body you are closing on is rebuilt at a
+  // finer sphere and a bigger texture in two steps, so the disc that was a smudge from an AU away is
+  // a surface with weather on it by the time you are in its air.
+
+  /** How much of cruise speed is available this close to something. 1 far out, `slowTo` at the deck. */
+  function throttleLimit() {
+    const near = nearest();
+    if (!near) return 1;
+    const t = clamp(near.altitude / approachCfg.slowFrom, 0, 1);
+    // ease in, so the brake comes on gently rather than as a wall
+    return approachCfg.slowTo + (1 - approachCfg.slowTo) * (t * t * (3 - 2 * t));
+  }
+
+  /** Which detail step a body deserves at this altitude. */
+  function tierFor(altitude) {
+    let best = approachCfg.tiers[0];
+    for (const t of approachCfg.tiers) if (altitude < t.within) best = t;
+    return best;
+  }
+
+  let refineCooldown = 0;
+
+  /**
+   * Rebuild the nearest body at a finer detail when it has earned one, and drop everything else
+   * back to `far`. Rebuilding allocates a texture, so it happens at most a few times a second and
+   * only when the step has actually changed.
+   */
+  function refineDetail(dt = 0) {
+    refineCooldown -= dt;
+    const near = nearest();
+    if (!near) return null;
+    const want = tierFor(near.altitude);
+    if (want.key !== near.body.tier && refineCooldown <= 0) {
+      refineCooldown = 0.35;
+      rebuildBody(near.body, want);
+    }
+    // anything else that got refined earlier goes back to cheap
+    if (refineCooldown <= 0) {
+      for (const b of bodies) {
+        if (b === near.body || b.tier === 'far') continue;
+        refineCooldown = 0.35;
+        rebuildBody(b, approachCfg.tiers[0]);
+        break;                                   // one a frame; there is no hurry going the other way
+      }
+    }
+    return near;
+  }
+
+  function rebuildBody(body, tier) {
+    const detail = tier.key === 'far' ? body.baseDetail : Math.round(tier.detail * (body.moon ? 0.6 : 1));
+    const textureSize = tier.key === 'far' ? body.baseTexture : Math.round(tier.textureSize * (body.moon ? 0.5 : 1));
+    const texture = { ...body.texture };
+    // the world we launched from has a REAL map; draw it bigger as we come back down to it
+    if (homeWorld && body.planet.id === homePlanet?.id && tier.key !== 'far') {
+      try { texture.map = surfaceTexture(body.planet, homeWorld, { size: Math.min(1024, textureSize * 2) }); } catch { /* keep the old one */ }
+    }
+    const next = createPlanet(body.tinted, { radius: body.radius, detail, textureSize, texture });
+    next.group.position.copy(body.model.group.position);
+    next.group.quaternion.copy(body.model.group.quaternion);
+    scene.add(next.group);
+    scene.remove(body.model.group);
+    body.model.dispose?.();
+    body.model = next;
+    body.tier = tier.key;
+    return body;
+  }
+
+  /**
+   * The world the ship has fallen into the air of, or null. `main.js` hands this straight to the
+   * descent, so you enter an atmosphere by flying into it rather than by pressing a key at it.
+   */
+  function atmosphereEntry() {
+    const near = nearest();
+    if (!near || !near.body.landable) return null;
+    if (near.altitude > approachCfg.entry) return null;
+    return { planet: near.body.planet, body: near.body, altitude: near.altitude };
+  }
+
   /** Put the ship just off the world it launched from. */
   function enter({ fromPlanet = homePlanet, elapsed = 0, offset = 2.6 } = {}) {
     state.elapsed = elapsed;
@@ -178,10 +303,16 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
       state.warping = !!input.jump;
     }
 
-    // warp takes a moment to spin up, which is what makes it feel like a warp
+    // warp takes a moment to spin up, which is what makes it feel like a warp — and it will not
+    // spin up at all with a world in your lap, which is what stops you warping into a planet
+    const room = nearest();
+    state.crowded = !!room && room.altitude < approachCfg.noWarpWithin;
+    if (state.crowded) state.warping = false;
     state.warpCharge = clamp(state.warpCharge + (state.warping ? dt * 1.6 : -dt * 3), 0, 1);
     const multiplier = 1 + (state.boosting ? boostMult - 1 : 0) + state.warpCharge * (warpMult - 1);
-    state.speed = baseSpeed * multiplier * state.throttle;
+    // …and the closer you get, the less of the throttle the ship will give you
+    state.approach = throttleLimit();
+    state.speed = baseSpeed * multiplier * state.throttle * state.approach;
 
     const cp = Math.cos(state.pitch);
     forward.set(Math.sin(state.yaw) * cp, Math.sin(state.pitch), Math.cos(state.yaw) * cp);
@@ -219,6 +350,8 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
         .add(tmp.set(0, (cfg.camLift ?? 26), 0));
       camera.lookAt(state.position.x + forward.x * 40, state.position.y + forward.y * 40, state.position.z + forward.z * 40);
     }
+
+    refineDetail(dt);
 
     starLight.position.set(0, 0, 0);
     return state;
@@ -352,6 +485,9 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
       speed: Math.round(state.speed),
       mode: speedText,
       warpCharge: state.warpCharge,
+      approach: state.approach,
+      crowded: state.crowded,
+      detail: near ? near.body.tier : 'far',
       canLand: !!canLand(),
     };
   }
@@ -359,6 +495,7 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   return {
     scene, bodies, ship, state, AU, EARTH,
     enter, update, nearest, canLand, landingSpot, readout, placeBodies,
+    atmosphereEntry, refineDetail, throttleLimit, tierFor,
     targetUnder, describe, STAR,
     /** The way the ship is pointing, for `targetUnder`. */
     heading() {

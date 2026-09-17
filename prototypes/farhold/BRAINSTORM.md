@@ -179,34 +179,15 @@ are not built yet.
 
 ## Creatures worth adding
 
-The bestiary went from 16 to 46. It is still thin in places — a `void` world and a `crystal` world
-draw from nearly the same short list, and there is nothing at all that is **not hostile**. The next
-pass should describe each one properly (what it looks like, how it moves, what it wants) and say
-whether it is a variation of a body `avatar-3d/js/creature-types.js` already has or wants a new one.
+**Done — it grew too big for this file and now lives in [`BESTIARY-IDEAS.md`](BESTIARY-IDEAS.md).**
 
-**What the catalogue already gives us free** (37 types over six body plans): quad, spider, bat,
-snake, biped, float. A "variation" means the same plan with different proportions, colours, features
-and size — which is most of a new creature, honestly. A bespoke model means a new entry in
-`CREATURE_TYPES` and a new builder branch.
-
-Three groups to fill, all currently empty or nearly so:
-
-1. **Neutral wildlife.** Nothing in the game ignores you. Herds that flee, grazers that watch you,
-   scavengers that follow a fight at a distance and move in when it is over, predators that hunt
-   *each other*. All of them are variations: `deer`, `horse`, `boar`, `turtle`, `frog`, `owl`,
-   `cat`, `rat` at ordinary sizes with ordinary colours. The hunting loop (hides, meat, materials)
-   comes free from the crafting system.
-2. **Friendly and neutral folk out of town.** Hermits, pilgrims on the road, a trader with a cart
-   (the vehicles exist in `avatar-3d/js/vehicles.js` and are unused here), prospectors, a wounded
-   soldier who wants escorting. All Chibi 2 bodies — no new geometry at all.
-3. **Per-biome hostiles.** Every biome family should have three or four of its own rather than
-   sharing `any`. The gaps are `ice`, `crystal`, `void` and `toxic`.
-
-**The description standard.** Dwarf Fortress is the model: every creature says what it *is* in plain
-sentences, not stat lines — size against a person, what it is covered in, how it moves, what it eats,
-what it does when it sees you, and what it leaves behind. That text is worth writing because it
-drives the look: "a flat, pale thing the width of a door that folds along a ridge down its back, and
-walks on the tips of eleven legs" tells you the model, the animation and the sound.
+That file holds about forty new creatures written out properly: fifteen pieces of **neutral
+wildlife** (the game currently has none — everything charges you, which makes a planet a shooting
+gallery), eight kinds of **people who are not in a town** (the roads between settlements are empty),
+and hostiles filling the four thin biome families — `ice`, `crystal`, `void` and `toxic`. Each says
+what the thing is in Dwarf-Fortress-style plain sentences, and each is tagged **variation**,
+**variation+**, **bespoke** or **chibi** so the cost of building it is visible up front. Most are
+variations, which is the whole point of having a procedural creature system.
 
 ## Still on the list from the round-4 play-test
 

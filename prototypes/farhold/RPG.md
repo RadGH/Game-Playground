@@ -414,3 +414,152 @@ missing. It is listed in the order it was reported, because the order is the sto
   attack speed and the controller's swing clock reads it. Both were carried and ignored.
 - **Every number is rounded** where it is computed as well as where it is printed — the health bar
   read `513.4100000000000000001`.
+
+---
+
+# Round 5 — the six that were flagged
+
+Six things from the round-4 play-test were called out as **not built** rather than quietly dropped.
+This is what each of them turned into.
+
+## 1. The star chart, and travel between stars — `js/starchart.js`, `js/warp.js`
+
+*"Pressing M for map while outside of a planet should instead open a galaxy map… start zoomed in all
+the way at the solar system level… zoom out several levels to view adjacent stars, or the entire
+galaxy… make it so you can travel to 'adjacent-ish' stars… enter 'warp drive' mode with star-trail
+effects for about 5 seconds until you appear in the new system."*
+
+**`M` now branches.** On the ground it is the world map it always was. In the air, in space or mid-jump
+it is the chart, and it opens on the system view every time.
+
+**Four steps**, `CHART_LEVELS`:
+
+| step | what it draws |
+|---|---|
+| `system` | the star, the habitable band, every world on its real orbit at its real angle (taken from the live space scene when there is one), moons as a ring of specks, and your ship |
+| `neighbourhood` | the current star, every lane out of it, and a dashed ring showing exactly how far the drive reaches |
+| `sector` | a slice of the arm — a few dozen stars |
+| `galaxy` | all 180, with the arms visible |
+
+The wheel steps between them; on the system view it zooms instead. Every view is centred on you and
+every view draws *you are here*, which is asserted by a test rather than eyeballed.
+
+**A star on the chart IS a system.** Star Forge gives every star its own seed, and a seed is all
+`createSystem` needs — so jumping to a star means building that seed's system. The one join is where
+you start: the habitable search picked a seed, not a place in a galaxy, so `galaxy.stars[0]` is
+rewritten to be the run's own system (same seed, name and class) and the rest of the disc is left
+exactly as the generator made it.
+
+**Reach.** `JUMP_RANGE` is 0.18 map units, which `LY_PER_UNIT` (4000) quotes as ~720 light years.
+`reachFrom()` answers with a reason either way, and a test walks all 180 stars to check that fewer
+than 6% of them are dead ends you could never leave. A fuel system has a distance to charge against
+whenever it wants one.
+
+**The jump** (`js/warp.js`) is one buffer of line segments in a tube parented to the camera, each
+stretched along the flight axis by an intensity that ramps in hard, holds, and eases out — so the
+snap into the tunnel and the settle at the far end come from one number. Five seconds, then the old
+system is disposed and the target's is built and entered. Only the *system* is built: a surface map
+is 256×128 cells of erosion and rivers and there is no reason to pay for it until somebody decides
+to land.
+
+**Different systems look different.** The space backdrop was already seeded by the system, but the
+nebulae were the same four colours everywhere. The palette now comes off the star's class — a blue
+giant gets cold clouds, a red dwarf rust and ember, a black hole almost nothing.
+
+## 2. Quests, landmarks and pins — `js/markers.js`
+
+*"These type of quests/landmarks/pins should be displayed on the map and minimap. If it's too far to
+display on the minimap, an arrow indicating its direction should show instead. You should be able to
+track or untrack… It should also work on a planet scale."*
+
+There used to be two unrelated things: a bare `pins` array owned by the map screen, and quest
+destinations copied into it once on accept and then forgotten. Nothing knew which world a pin was
+on, so flying somewhere else scattered the last planet's pins over the new one's map.
+
+One `MarkerBook` now owns all of it. Every marker carries `{ systemSeed, planetId }`, so:
+
+- `here()` is what this world shows, `elsewhere()` groups the rest by world, `inSystem()` is what
+  space mode rings, `systems()` is what the galaxy chart rings.
+- `syncQuests(active)` mirrors the quest log both ways — a job taken puts its marker down, a job
+  turned in takes it away, and running it twice does not duplicate anything.
+- `tracked()` is what the minimap draws. Untracked markers stay on the world map; they just stop
+  following you.
+- `bearing()` takes the **short way round the seam**, because the map is a sphere unrolled and a
+  marker at the far left may be a short walk west.
+
+On the minimap a marker in range is its glyph; out of range it is an arrow parked on the rim at the
+true bearing with the distance beside it, nearest-first so two arrows on top of each other do not
+print two labels over each other. On the world map a tracked marker wears a dashed ring, and the
+side panel is a **Tracking** list with a star per row. In space, a world holding markers wears their
+glyphs above its bracket and lists them on its card.
+
+## 3. Coming down out of orbit — `js/space.js`, `js/terrain.js`
+
+*"Getting close to a planet should cause you to slow down and cause the planet to get more detailed…
+eventually entering the atmosphere. At this point you should see many chunks away but at lower
+resolution. As you get lower altitude the planet should get more detailed and eventually props
+should appear."*
+
+Four pieces, all in body radii above the surface (`balance.json` `space`):
+
+- **The throttle is governed by how close you are** — full cruise past `slowFrom` (26 radii), easing
+  to `slowTo` (25%) at the deck, so a world stops going from speck to wall in one frame.
+- **Warp locks out** inside `noWarpWithin`, which is what stops you folding into a planet.
+- **The body you are closing on is rebuilt at a finer sphere and a bigger texture** in two steps
+  (`far` → `near` at 14 radii → `close` at 3.5), one rebuild every 0.35 s at most, and everything
+  else drops back to cheap. Coming home, the real surface map is drawn at double size.
+- **`atmosphereEntry()` fires below `entryAltitude`** (0.5 radii) over a landable world, and the
+  descent picks up from there. You fly into an atmosphere; you no longer press a key at it.
+
+Inside the air, `view.setViewScale(k)` **stretches every clipmap ring for the same triangle count**.
+A ring is a fixed grid over a fixed patch, so multiplying its extent, cell, hole and skirt by one
+number covers more world at a coarser step — and the ring-local shape is unchanged, so the index
+buffer is still valid and nothing is reallocated. At the ceiling the view reaches ten kilometres for
+the 13,552 triangles it always drew; on the way down it tightens back to 1× and the grass returns.
+
+## 4. The habitable start — `js/planet.js`
+
+*"Can we make it so the starting planet is always a multi-biome system, and always starts in a town
+with a few NPCs? Maybe there can be a setting when creating a new world for 'Habitable start' that
+defaults to on."*
+
+`isHabitableStart()` wants a world somebody lives on whose archetype is not locked to a single
+biome. About a quarter of seeds do not have one in their own system, so `createWorld({ habitable })`
+walks `seed + 1`, `seed + 2`… up to 24 until it finds one, and reports `systemSeed` and `movedSeed`
+so the log can say it moved. The checkbox is on the title screen, on by default; `?habitable=0` is
+the other way. Seed 1 goes from `Kitraexeath` (void-touched, no towns, 2 biomes) to `Hes-Subud IV`
+(tundra, 61 towns, 3 biomes).
+
+## 5. The creature brainstorm — `BESTIARY-IDEAS.md`
+
+About forty new creatures written out properly: fifteen pieces of **neutral wildlife** (the game had
+none — everything charged you, which makes a planet a shooting gallery), eight kinds of **people who
+are not in a town**, and hostiles filling the four thin biome families (`ice`, `crystal`, `void`,
+`toxic`). Each one is described the way Dwarf Fortress describes things — what it is covered in, how
+it moves, what it does when it sees you — and tagged **variation / variation+ / bespoke / chibi** so
+the cost of building it is on the page.
+
+## 6. Water that meets its bank — `js/water-plan.js`, `js/planet.js`
+
+*"The water layer should touch the edge of the ground, you should not be able to peek under the
+water."*
+
+The river sheet was exactly as wide as the water, and `js/planet.js` carved the channel to full depth
+across that same width — so the sheet's edge hung a couple of metres above a bed that only started
+climbing further out, and from the side you could see straight under the river.
+
+`waterRibbon()` pushes the sheet **outward, per point and per side**, until the carved ground has
+come back up to the water line; the bank then hides the extra, which is how a real shoreline works.
+Where the bank never gets that high — a river running out onto a flat delta — a short **skirt** hangs
+off the edge past the ground, so there is nothing to see under even there. Both are asserted at every
+vertex of the first eight rivers on a real world.
+
+And **lakes now have water in them.** They had a carved basin and no surface at all: a dry hole with
+a blue dot on the map. A flood fill over `water === 2` gives one entry per lake with one surface
+height, `lakeSheet()` lays a sheet of it, and the carve digs from that flat level rather than from
+each cell's own elevation — which used to leave half a lake standing above its own water line.
+
+> A trap found on the way: filling the lake level **outward** a ring, to grade the rim, dug a 240 m
+> trench right round every lake. A lake in a bowl sits well below the ground around it, so handing
+> the rim the lake's level tells the carve to cut the bank down to it. The blurred `lakeField` was
+> already fading the depth out at the rim; that is all the grading it needed.

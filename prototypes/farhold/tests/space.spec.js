@@ -61,6 +61,10 @@ test('the throttle, the boost and the warp are three different speeds', async ({
   const speeds = await page.evaluate(async () => {
     const f = window.farhold;
     f.toSpace();
+    // OUT INTO OPEN SPACE FIRST. Round 5 governs the throttle by how close you are to a world and
+    // locks warp out entirely inside nine radii of anything — which is the point — so measuring the
+    // three speeds beside the planet you just left measures the brake, not the drive.
+    f.space.state.position.set(f.space.AU * 6, f.space.AU * 3, f.space.AU * 6);
     const run = (run, jump, frames = 240) => {
       f.space.state.throttle = 0; f.space.state.warpCharge = 0;
       let top = 0;
@@ -74,6 +78,56 @@ test('the throttle, the boost and the warp are three different speeds', async ({
   });
   expect(speeds.boost).toBeGreaterThan(speeds.cruise * 2);
   expect(speeds.warp).toBeGreaterThan(speeds.boost * 3);
+});
+
+test('the drive will not warp with a world in your lap, and gives it back out in the dark', async ({ page }) => {
+  // "Getting close to a planet should cause you to slow down." Warp is locked out inside
+  // `noWarpWithin` radii of ANY body, which is what stops you folding straight into a planet.
+  await land(page);
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    f.toSpace();
+    const s = f.space;
+    const body = s.bodies.find(b => b.landable) || s.bodies[0];
+
+    /** Hold station wherever the ship is put and try to spin the drive up. */
+    const tryWarp = () => {
+      s.state.warpCharge = 0;
+      s.state.throttle = 1;
+      const held = s.state.position.clone();
+      for (let i = 0; i < 150; i++) {
+        s.update(1 / 60, { forward: 1, strafe: 0, run: false, jump: true, attack: false, look: [0, 0], pressed: new Set() }, f.camera);
+        s.state.position.copy(held);
+      }
+      return {
+        altitude: +s.nearest().altitude.toFixed(2),
+        crowded: s.state.crowded,
+        warp: +s.state.warpCharge.toFixed(2),
+        approach: +s.state.approach.toFixed(2),
+        speed: Math.round(s.state.speed),
+      };
+    };
+
+    // right on top of a world…
+    const dir = s.state.position.clone().sub(body.position).normalize();
+    s.state.position.copy(body.position).addScaledVector(dir, body.radius * 2);
+    const close = tryWarp();
+    // …and a long way out from everything
+    s.state.position.set(s.AU * 6, s.AU * 3, s.AU * 6);
+    const far = tryWarp();
+    return { close, far };
+  });
+
+  expect(out.close.altitude).toBeLessThan(9);
+  expect(out.close.crowded).toBe(true);
+  expect(out.close.warp, 'the drive spun up with a planet in the way').toBe(0);
+  expect(out.close.approach).toBeLessThan(0.6);
+
+  expect(out.far.altitude).toBeGreaterThan(26);
+  expect(out.far.crowded).toBe(false);
+  expect(out.far.warp).toBe(1);
+  expect(out.far.approach).toBe(1);
+  expect(out.far.speed).toBeGreaterThan(out.close.speed * 10);
 });
 
 test('the worlds are where their orbits put them, on real ellipses', async ({ page }) => {

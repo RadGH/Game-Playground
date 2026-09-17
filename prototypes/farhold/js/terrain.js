@@ -27,6 +27,9 @@ class Ring {
     this.hole = hole;
     // how far the hole's lip drops; proportional to this ring's own resolution
     this.skirt = this.cell * 1.2;
+    // the ring at 1x, kept so `setViewScale` can stretch it and put it back afterwards
+    this.base = { extent, cell: this.cell, hole, skirt: this.skirt };
+    this.viewScale = 1;
     /**
      * …and how much deeper to make it. From head height a 1.2-cell drop hides the seam between two
      * rings; from a ship two kilometres up you are looking almost straight down at it and the gap
@@ -160,6 +163,33 @@ export function createTerrainView(scene, terrain, opts = {}) {
      * Deepen every ring's skirt. Called when the camera climbs: looking down on the seam between two
      * clipmap rings from altitude shows a gap that a head-height skirt never covered.
      */
+    /**
+     * Stretch every ring, keeping the same number of triangles.
+     *
+     * "Once you enter a rocket you should enter a lower level of detail… you should see many chunks
+     * away but at lower resolution." A clipmap ring is a fixed grid of vertices over a fixed patch
+     * of ground, so multiplying its extent, its cell size, its hole and its skirt by the same number
+     * covers more world at a coarser step — and because the ring-local SHAPE is unchanged, the index
+     * buffer is still valid and nothing has to be reallocated. At 6x the innermost ring covers a
+     * kilometre instead of 192 m and the outermost reaches ten kilometres, for the same cost.
+     */
+    setViewScale(k, x, z) {
+      const want = Math.max(1, Math.min(opts.maxViewScale ?? 9, k));
+      if (Math.abs(want - (rings[0]?.viewScale ?? 1)) < 0.08) return false;
+      for (const r of rings) {
+        r.viewScale = want;
+        r.extent = r.base.extent * want;
+        r.cell = r.base.cell * want;
+        r.hole = r.base.hole * want;
+        r.skirt = r.base.skirt * want;
+        r.update(x, z, true);
+      }
+      if (water) {
+        water.scale.setScalar(want);
+      }
+      return true;
+    },
+
     setSkirtScale(k, x, z) {
       const want = Math.max(1, k);
       let changed = false;
@@ -185,7 +215,8 @@ export function createTerrainView(scene, terrain, opts = {}) {
     stats() {
       let triangles = 0;
       for (const r of rings) triangles += r.geometry.index.count / 3;
-      return { rings: rings.length, triangles, rebuilds, viewDistance: specs[specs.length - 1].extent / 2 };
+      const scale = rings[0]?.viewScale ?? 1;
+      return { rings: rings.length, triangles, rebuilds, viewScale: scale, viewDistance: specs[specs.length - 1].extent * scale / 2 };
     },
     dispose() {
       for (const r of rings) { scene.remove(r.mesh); r.dispose(); }

@@ -4,7 +4,7 @@
 // frame loop. `window.farhold` is the handle the Playwright specs drive.
 
 import * as THREE from 'three';
-import { createWorld, makeTerrain, describePlanet, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
+import { createWorld, makeTerrain, describePlanet, createSystem, chooseLanding, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
 import { createSpace } from './space.js';
 import { createShip } from '../../../assets/js/space-models.js';
 import { createAtmosphere } from './atmos.js';
@@ -26,6 +26,10 @@ import { createCombatFx } from './combat-fx.js';
 import { createSunFx } from './sunfx.js';
 import { createDebugMenu } from './debug.js';
 import { createMapScreen } from './map.js';
+import { MarkerBook } from './markers.js';
+import { createStarChart, reachFrom, LY_PER_UNIT } from './starchart.js';
+import { createWarp } from './warp.js';
+import { generateGalaxy } from '../../../universe/js/galaxy.js';
 import { createSaves, snapshot, restore, playtimeText } from './save.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
@@ -162,6 +166,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     bandWidth: Number(params.get('band')) || Number($('boot-band')?.value) || 4,
     density: Number(params.get('density')) || Number($('boot-density')?.value) || 1,
     planetScale: Number(params.get('scale')) || Number($('boot-scale')?.value) || 1,
+    // On by default: a first hour on a locked-biome rock with nobody on it is a poor first hour.
+    habitable: params.has('habitable')
+      ? params.get('habitable') !== '0'
+      : ($('boot-habitable')?.checked ?? true),
   };
   // How big a planet feels underfoot. 640 m a cell gives 163 x 82 km, which is a lot of ground on
   // foot; the default is smaller now, and it is a knob because the full size is the right size once
@@ -178,8 +186,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   status('shaping the planet…');
   await frame();
   const mapSize = { width: balance.world?.width ?? 256, height: balance.world?.height ?? 128, regionScale: worldOpts.regionScale };
-  const created = createWorld({ seed, ...mapSize });
-  const { star, system } = created;
+  const created = createWorld({ seed, ...mapSize, habitable: worldOpts.habitable });
+  // the search may have stepped to a neighbouring seed; everything downstream uses the one it found
+  let systemSeed = created.systemSeed ?? seed;   // `let`: a jump replaces the whole system
+  let { star, system } = created;   // `let`: a jump to another star replaces both
+
+  /**
+   * THE GALAXY THIS RUN LIVES IN.
+   *
+   * Star Forge grows a disc of stars with travel lanes between them; every one of them carries its
+   * own seed, and a seed is all `createSystem` needs. So a star on the chart IS a system — jumping
+   * there means building that seed's system and dropping the ship into it.
+   *
+   * The one join is the star you start at. The habitable search picked a seed, not a position in a
+   * galaxy, so the first star on the chart is rewritten to be that system: same seed, same name,
+   * same class. Everything else in the disc is untouched, which keeps the lanes and the layout the
+   * generator produced.
+   */
+  const galaxy = generateGalaxy({ seed, stars: 180, layout: 'spiral' });
+  {
+    const home = galaxy.stars[0];
+    home.seed = systemSeed;
+    home.name = star.name;
+    home.classKey = star.classKey;
+    home.className = star.className;
+    home.color = star.color;
+    home.habitable = star.habitable;
+  }
+  let starId = 0;
+  const starNow = () => galaxy.stars[starId];
   // these are replaced wholesale when you land on a different world
   let planet = created.planet, world = created.world;
   let terrain = makeTerrain(world, planet, balance.terrain);
@@ -241,6 +276,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
+  /**
+   * Everything the player is keeping an eye on: quest destinations, story objectives and the pins
+   * they dropped themselves. It carries the world each one is on, so flying somewhere else no
+   * longer leaves the old planet's pins scattered over the new one's map.
+   */
+  const markers = new MarkerBook(save?.markers || null);
+  markers.setWorld({
+    systemSeed, planetId: planet.id,
+    planetName: planet.name, starName: star.name,
+  });
+  markers.syncQuests(questLog.active);
   const campaign = new Campaign(campaignData, save?.campaign || null);
   // cut the survey to what this system can actually offer
   {
@@ -497,7 +543,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * click-to-close under the pointer, was easy to get wrong.
    */
   function regrab() {
-    const held = hud.sheetOpen || map.isOpen || talk.isOpen || settings.isOpen || debug.isOpen
+    const held = hud.sheetOpen || map.isOpen || chart.isOpen || talk.isOpen || settings.isOpen || debug.isOpen
       || rewardsOpen() || pauseMenu.isOpen;
     if (!held) input.grab();
   }
@@ -1144,12 +1190,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     accept: quest => {
       questLog.add(quest);
       hud.log(`Took the job: ${quest.title}.`, 'level');
-      if (quest.place) map.addPin(quest.place.cell.x, quest.place.cell.y, quest.place.name);
+      // the marker book mirrors the quest log, so the destination lands on the map, the minimap and
+      // the rim arrow all at once — and goes away again when the job is turned in
+      markers.syncQuests(questLog.active);
+      if (quest.place) hud.log(`${quest.place.name} is marked. Press M to see it, or follow the arrow.`, '');
       talk.update(talkContext(talk.npc));
       autoSave();
     },
     turnIn: quest => {
       const reward = questLog.turnIn(quest);
+      markers.syncQuests(questLog.active);
       campaign.onQuestDone(quest, talk.npc?.node?.id ?? null);
       player.gold += reward.gold;
       const levels = rpg.gainXp(player, reward.xp);
@@ -1198,7 +1248,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       getPlayer: () => control,
       getEnemies: () => field.enemies,
       onTeleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); field.clear(); },
-      pins: map ? [...map.pins] : [],
+      markers,
       // round 4: the level-band overlay, and the dungeon mouths and camps to plan a route around
       zones,
       getLevel: () => player.level,
@@ -1213,6 +1263,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     disposePlanet();
 
     planet = nextPlanet;
+    // Markers belong to a world, not to the player: landing somewhere else must not drag the last
+    // planet's pins along with you. They stay in the book, filed under the world they were made on,
+    // and space mode puts a ring round the worlds that still hold one.
+    markers.setWorld({ systemSeed, planetId: planet.id, planetName: planet.name, starName: star.name });
     world = generatePlanetMap(planet, mapSize);
     terrain = makeTerrain(world, planet, balance.terrain);
     palette = atmospherePalette(planet);
@@ -1307,9 +1361,95 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   function ensureSpace() {
     if (!space) {
-      space = createSpace({ star, system, homePlanet: planet, homeWorld: world, balance, seed });
+      // the BACKDROP is seeded by the system, not the run: "different systems should have different
+      // properties in the skybox", and a jump has to look like it took you somewhere
+      space = createSpace({ star, system, homePlanet: planet, homeWorld: world, balance, seed: systemSeed });
     }
     return space;
+  }
+
+  // ---------------------------------------------------------------- the chart, and the jump
+
+  /** The star chart. It replaces the world map whenever there is no ground under you. */
+  const chart = createStarChart({
+    getState: () => ({
+      galaxy, starId, star: starNow(), system, systemSeed,
+      bodies: space?.bodies || null,
+      // the ship's position in AU, for the "you are here" dot on the system view
+      shipAu: space ? { x: space.state.position.x / space.AU, z: space.state.position.z / space.AU } : null,
+      markers: markers.markers,
+    }),
+    onTravel: (target, reach) => beginJump(target, reach),
+    onClose: () => regrab(),
+  });
+
+  const warp = createWarp({ opts: { seconds: balance.space?.warpSeconds ?? 5 } });
+  let jump = null;          // { from, to, reach } while the drive is running
+
+  /**
+   * Fold to another star.
+   *
+   * Five seconds of tunnel, then the whole system is thrown away and rebuilt from the target star's
+   * seed — a new star, new worlds, a new backdrop — and the ship comes out of it in orbit. The
+   * character, the bag, the quests and every marker come along untouched; markers are filed under
+   * the world they were made on, so nothing from the old system follows you onto the new one's map.
+   */
+  function beginJump(target, reach = null) {
+    if (!target || target.id === starId) return false;
+    if (mode !== 'space') { hud.log('The drive only spins up in open space.', 'bad'); return false; }
+    jump = { from: starNow(), to: target, reach: reach || reachFrom(galaxy, starNow(), target) };
+    if (!jump.reach.ok) { hud.log(jump.reach.why, 'bad'); jump = null; return false; }
+    warp.attach(space.scene);
+    warp.start({ from: jump.from, to: jump.to, seconds: balance.space?.warpSeconds ?? 5 });
+    // point the nose out of the system before the drive catches, so the tunnel flies away from
+    // whatever you were parked beside instead of straight through it
+    const out = space.state.position.clone();
+    if (out.lengthSq() < 1e-6) out.set(1, 0, 0.2);
+    out.normalize();
+    space.state.yaw = Math.atan2(out.x, out.z);
+    space.state.pitch = Math.asin(Math.max(-1, Math.min(1, out.y))) + 0.25;
+    mode = 'warp';
+    modeT = 0;
+    hud.log(`Drive engaged. ${Math.round(jump.reach.ly).toLocaleString()} light years to ${target.name}.`, 'level');
+    return true;
+  }
+
+  /**
+   * Come out of the tunnel somewhere else entirely.
+   *
+   * Only the SYSTEM is built here — the star, its worlds, their orbits. A surface map is 256×128
+   * cells of erosion and rivers and costs about a second, and there is no reason to pay it for a
+   * world nobody has decided to land on yet; `buildPlanet` does that when you actually go down.
+   */
+  function arriveAt(target) {
+    const built = createSystem({ seed: target.seed });
+    star = built.star;
+    system = built.system;
+    const firstWorld = chooseLanding(system) || system.planets[0];
+    // keep the chart's idea of the star in step with the one we actually built
+    target.name = star.name;
+    target.classKey = star.classKey;
+    target.className = star.className;
+    target.color = star.color;
+    starId = target.id;
+    systemSeed = target.seed;
+    // markers are filed by system, so the new one starts with a clean map and the old one keeps its
+    markers.setWorld({ systemSeed, planetId: -1, planetName: '', starName: star.name });
+
+    // the old system's scene, models and textures all go
+    space?.dispose?.();
+    space = null;
+    // there is no "home world" out here until you land on one, so the space scene draws every world
+    // from its procedural texture rather than a real surface map
+    space = createSpace({ star, system, homePlanet: firstWorld, homeWorld: null, balance, seed: target.seed });
+    warp.attach(space.scene);
+    space.enter({ fromPlanet: firstWorld, elapsed: state.elapsed, offset: 6 });
+    camera.far = 600000; camera.updateProjectionMatrix();
+    mode = 'space';
+    jump = null;
+    hud.log(`${star.name}. ${star.className}, ${(system.planets || []).length} worlds.`, 'good');
+    hud.log('M for the chart · fly at a world to drop into its air', '');
+    autoSave();
   }
 
   /** Leave the ground. */
@@ -1374,6 +1514,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // whatever the flight thinned out comes back
     lastAirLod = -1;
     view.setSkirtScale(1, air.state.x, air.state.z);
+    view.setViewScale(1, air.state.x, air.state.z);
     props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
     props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
     const st = air.state;
@@ -1431,6 +1572,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // and deepen the clipmap skirts, because from up here you are looking straight down the
         // seam between two rings and a head-height skirt does not cover it
         view.setSkirtScale(1 + high * 7, air.state.x, air.state.z);
+        // …and STRETCH the rings, for the same triangle count. "You should see many chunks away but
+        // at lower resolution. As you get lower altitude the planet should get more detailed and
+        // eventually props should appear." At the ceiling the view reaches ten kilometres; on the
+        // way down it tightens back up and the grass comes back.
+        view.setViewScale(1 + high * 5, air.state.x, air.state.z);
       }
       const blend = air.spaceBlend();
       // the sky drains to black on the way up and fills back in on the way down
@@ -1485,19 +1631,63 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     if (mode === 'space') {
       space.update(dt, snap, camera);
+      // FLY into an atmosphere rather than pressing a key at it. `space.atmosphereEntry()` fires
+      // once the ship has dropped inside half a radius of a landable world; the descent then picks
+      // up exactly where the space flight left off, over the point the ship was actually above.
+      const entry = space.atmosphereEntry();
+      if (entry) {
+        hud.log(`You fall into ${entry.planet.name}'s air.`, 'level');
+        beginDescent(entry);
+        return;
+      }
       const r = space.readout();
       // the reticles: a bracket round every world in view, and a card on the one you are pointing at
       const marks = space.marks(camera);
       const under = space.targetUnder(space.heading());
-      hud.reticles(marks, under, camera, space.describe(under));
+      // hang each world's markers off its bracket, so a tracked quest is visible from orbit
+      const byWorld = new Map();
+      for (const m of markers.inSystem(systemSeed)) {
+        if (!byWorld.has(m.planetId)) byWorld.set(m.planetId, []);
+        byWorld.get(m.planetId).push(m);
+      }
+      for (const mk of marks) mk.markers = (byWorld.get(mk.body?.planet?.id) || []).map(m => m.kind);
+      const card = space.describe(under);
+      if (card && under?.planet) card.markers = byWorld.get(under.planet.id) || [];
+      hud.reticles(marks, under, camera, card);
       hud.tick(player, {
         place: `${star.name} system`,
         zone: null,
         clock: `${r.target} · ${r.distanceAu.toFixed(2)} AU`,
         target: null,
-        sky: r.canLand ? 'close enough to land — press J' : 'fly to a world to land on it',
-        weather: `${r.mode}${r.warpCharge > 0.05 ? ` (warp ${Math.round(r.warpCharge * 100)}%)` : ''} · ${r.speed} u/s`,
+        sky: r.canLand ? 'close enough to land — press J, or just keep going down' : 'fly to a world to land on it',
+        weather: `${r.mode}${r.warpCharge > 0.05 ? ` (warp ${Math.round(r.warpCharge * 100)}%)` : ''} · ${r.speed} u/s`
+          + (r.approach < 0.92 ? ` · slowing (${Math.round(r.approach * 100)}%)` : '')
+          + (r.crowded ? ' · warp locked' : ''),
         where: `seed ${seed} · in flight`,
+      });
+      return;
+    }
+
+    if (mode === 'warp') {
+      // The tunnel. The system is still there behind it and still being flown through, so the
+      // streaks have something to streak past; at the halfway mark the arrival is built and the
+      // second half of the ramp plays over the NEW sky.
+      const out = warp.update(dt, camera);
+      space.state.throttle = 1;
+      space.update(dt, null, camera);
+      if (out.done) {
+        if (jump) arriveAt(jump.to);
+        else mode = 'space';
+      }
+      hud.reticles(null);
+      hud.tick(player, {
+        place: jump ? `${jump.from.name} → ${jump.to.name}` : 'in transit',
+        zone: null,
+        clock: jump ? `${Math.round(jump.reach.ly).toLocaleString()} ly` : '',
+        target: null,
+        sky: 'the stars draw out into lines',
+        weather: `warp · ${Math.round(out.t * 100)}%`,
+        where: 'between stars',
       });
       return;
     }
@@ -1573,7 +1763,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   $('hud-planet').textContent = describePlanet(planet, star);
-  hud.log(save ? `Welcome back, ${player.name}.` : `You land on ${planet.name}. ${KEY_HELP}`);
+  hud.log(save ? `Welcome back, ${player.name}.` : `You land on ${planet.name}.`);
+  if (!save && created.movedSeed) {
+    hud.log(`Seed ${seed} had nowhere worth starting — this is system ${systemSeed}, the nearest that did.`, '');
+  }
 
   // ---------------------------------------------------------------- saving
   const saveId = save?.id || saves.newId();
@@ -1582,7 +1775,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return snapshot({
       id: saveId, name: player.name, seed, classId, player, control,
       elapsed: state.elapsed, playtime: state.playtime,
-      pins: map.pins,
+      markers: markers.toJSON(),
       place: features.settlementAt(control.x, control.z)?.name || terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name,
       weather: blended.key,
       quests: questLog.toJSON(),
@@ -1733,7 +1926,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // ---------------------------------------------------------------- keys that are not movement
   window.addEventListener('keydown', e => {
     if (e.code === 'KeyI' || e.code === 'Tab') { e.preventDefault(); pauseMenu.toggle(false); hud.toggleSheet(); }
-    if (e.code === 'KeyM') { e.preventDefault(); pauseMenu.toggle(false); map.toggle(); }
+    if (e.code === 'KeyM') {
+      e.preventDefault();
+      pauseMenu.toggle(false);
+      // "Pressing M for map while outside of a planet should instead open a galaxy map." A world
+      // map of a planet you are not standing on is no use; the chart is.
+      if (mode === 'ground') map.toggle();
+      else { if (map.isOpen) map.toggle(false); chart.toggle(); }
+    }
     if (e.code === 'KeyO') { e.preventDefault(); pauseMenu.toggle(false); settings.toggle(); }
     if (e.code === 'Escape') {
       e.preventDefault();
@@ -1741,6 +1941,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       else if (talk.isOpen) talk.close();
       else if (hud.sheetOpen) hud.toggleSheet(false);
       else if (map.isOpen) map.toggle(false);
+      else if (chart.isOpen) chart.toggle(false);
       else pauseMenu.toggle();                      // nothing left to close: the menu
       regrab();
     }
@@ -1794,6 +1995,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       sunfx.hide();
       if (mode !== 'space') hud.reticles(null);
       stepFlight(dt, snap);
+      if (state.frames % 12 === 0) chart.tick();   // the system view has planets moving on it
       renderFrame();
       return;
     }
@@ -2166,7 +2368,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         ...sites.visible.map(v => ({ x: v.x, z: v.z, color: v.kind === 'lair' ? '#ff6a3a' : '#ffa860', r: 3.4 })),
         ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
         ...folk.marks(),
-      ]);
+      ], markers.tracked().map(m => {
+        const b = markers.bearing(m, control, terrain);
+        return { ...m, x: b.x, z: b.z, distance: b.distance };
+      }));
     }
     if (state.frames % 12 === 0) map.tick();
 
@@ -2269,7 +2474,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get terrain() { return terrain; },
     launch, land,
     get folk() { return folk; },
-    questLog, talk, sound, speech, campaign, settings,
+    questLog, markers, talk, sound, speech, campaign, settings,
+    chart, galaxy, warp, beginJump,
+    get starId() { return starId; },
+    get starNow() { return starNow(); },
+    get systemSeed() { return systemSeed; },
     skills, spellfx, sunfx,
     /** First person on or off, for a test or the debug menu. */
     firstPerson: on => setFirstPerson(on),

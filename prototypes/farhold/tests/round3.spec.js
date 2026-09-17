@@ -410,7 +410,9 @@ test('a run saves itself and loads back', async ({ page }) => {
     return {
       id, wrote: !!read,
       gold: read?.player?.gold, kills: read?.player?.kills,
-      bag: read?.player?.bag?.length, pins: read?.pins?.length,
+      bag: read?.player?.bag?.length,
+      // round 5: pins became markers, and each one carries the world it is on
+      pins: read?.markers?.markers?.length,
       seed: read?.seed, name: read?.name,
       // a save must be small: it is the seed plus what you did, never the world
       bytes: JSON.stringify(read).length,

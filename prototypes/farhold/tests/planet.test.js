@@ -5,7 +5,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createWorld, makeTerrain, createSystem, chooseLanding, describePlanet, M_PER_CELL } from '../js/planet.js';
+import { createWorld, makeTerrain, createSystem, chooseLanding, describePlanet, isHabitableStart, M_PER_CELL } from '../js/planet.js';
 import { elevationToMetres } from '../../../worldgen/js/relief.js';
 import { isWater } from '../../../worldgen/js/biomes.js';
 
@@ -127,4 +127,31 @@ test('landing prefers a world you can live on', () => {
   const better = system.planets.find(p => p.atmosphere?.breathable && !p.giant);
   if (better) assert.ok(landing.atmosphere?.breathable, 'passed over a breathable world');
   assert.match(describePlanet(landing, system.star), /g,/);
+});
+
+test('a habitable start finds a lived-in, multi-biome world, and says when it moved the seed', () => {
+  // The user asked for the starting planet to always be a multi-biome world that starts you in a
+  // town, defaulting to on. Roughly a quarter of seeds do not have one in the first system, so
+  // createWorld walks seed+1, seed+2… until it finds one rather than failing.
+  const bad = createWorld({ seed: 1, width: 96, height: 48 });
+  const good = createWorld({ seed: 1, width: 96, height: 48, habitable: true });
+  assert.ok(isHabitableStart(good.planet), 'the habitable start landed somewhere uninhabitable');
+  assert.ok(good.world.nodes.some(n => n.kind === 'town' || n.kind === 'city'),
+    'a habitable start with no settlement on the map');
+  assert.equal(good.movedSeed, good.systemSeed !== 1);
+  if (!isHabitableStart(bad.planet)) {
+    assert.notEqual(good.systemSeed, bad.systemSeed, 'seed 1 is uninhabitable but the search stayed put');
+    assert.equal(good.movedSeed, true);
+  }
+});
+
+test('the habitable search is repeatable and always lands somewhere', () => {
+  for (const seed of [1, 2, 5, 13, 31, 1337]) {
+    const a = createWorld({ seed, width: 64, height: 32, habitable: true });
+    const b = createWorld({ seed, width: 64, height: 32, habitable: true });
+    assert.equal(a.systemSeed, b.systemSeed, `seed ${seed} chose a different system on the second run`);
+    assert.ok(a.planet, `seed ${seed} found nothing to land on`);
+    assert.ok(isHabitableStart(a.planet), `seed ${seed} settled for an uninhabitable world`);
+    assert.ok(a.systemSeed >= seed && a.systemSeed < seed + 25, 'the search ran past its own limit');
+  }
 });

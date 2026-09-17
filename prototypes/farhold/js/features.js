@@ -16,6 +16,7 @@
 // city → capital). They have no people in them: NPCs, shops and interiors are phase 4.
 
 import * as THREE from 'three';
+import { waterRibbon, lakeSheet } from './water-plan.js';
 import { makeRng, clamp } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
 import { ObstacleField, BUILDING_SOLIDS } from './collide.js';
@@ -261,8 +262,13 @@ export function createFeatures(scene, terrain, opts = {}) {
         const slice = r.points.slice(a, b + 1);
         // the surface the terrain carved down to, so the water can never clip through the bed
         const heights = r.surface.slice(a, b + 1);
-        push(water, ribbon(slice, heights, r.half * 2, { lift: -0.05 }));
+        push(water, waterRibbon(slice, heights, r.half, { terrain, reach: r.reach, skirt: r.depth }));
       }
+    }
+    // lakes are drawn from the same mesh and the same material — they are the same water
+    for (const lake of terrain.lakes || []) {
+      if (Math.hypot(lake.wx - px, lake.wz - pz) - lake.radius > radius) continue;
+      push(water, lakeSheet(lake, terrain.metresPerCell, terrain));
     }
     for (const r of roads) {
       for (const [a, b] of near(r.points)) {

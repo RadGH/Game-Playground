@@ -11,6 +11,7 @@ import { itemScore, SLOTS, describeAffix } from './rpg.js';
 import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
+import { MARKER_LOOKS, distanceText } from './markers.js';
 import { installTooltips, registerTip, hideTip, refreshTip } from '../../../shared/tooltip.js';
 // The playground's one number formatter. Nothing on screen should ever read "513.4100000000000001"
 // — Emberveil hit exactly this and `shared/format.js` is the fix it produced.
@@ -281,13 +282,16 @@ export class Hud {
     if (!box) return;
     if (!marks || !marks.length || !camera) {
       if (this._ret?.length) { box.replaceChildren(); this._ret = null; }
+      // the card hangs off the reticle, so it goes when the reticles do — otherwise it sat there
+      // through the whole warp describing a world that was several hundred light years behind you
+      $('space-card')?.classList.add('hidden');
       return;
     }
     if (!this._ret || this._ret.length !== marks.length) {
       this._ret = marks.map(() => {
         const n = el('div', 'reticle');
         n.innerHTML = '<i class="rt tl"></i><i class="rt tr"></i><i class="rt bl"></i><i class="rt br"></i>'
-          + '<span class="rt-name"></span><span class="rt-dist"></span>';
+          + '<span class="rt-name"></span><span class="rt-dist"></span><span class="rt-mark"></span>';
         return n;
       });
       box.replaceChildren(...this._ret);
@@ -311,6 +315,14 @@ export class Hud {
         + (m.star ? ' star' : m.moon ? ' moon' : m.landable ? ' landable' : ' nolanding');
       node.querySelector('.rt-name').textContent = m.name;
       node.querySelector('.rt-dist').textContent = m.distance > 0 ? `${(m.distance / 14000).toFixed(2)} AU` : '';
+      // "if you have a marker on a planet it should have an indicator in space mode" — a world with
+      // something tracked on it wears its markers' glyphs above the bracket, so you can pick it out
+      // of a system from an AU away without opening anything.
+      const badge = node.querySelector('.rt-mark');
+      const mine = m.markers || [];
+      badge.textContent = mine.map(k => (MARKER_LOOKS[k] || MARKER_LOOKS.pin).icon).join(' ');
+      badge.style.display = mine.length ? '' : 'none';
+      if (mine.length) node.classList.add('marked');
     }
 
     // the card, beside the one you are pointing at
@@ -321,6 +333,9 @@ export class Hud {
     info.innerHTML = `<div class="sc-name">${card.name}</div>`
       + `<div class="sc-kind">${card.kind}${card.distanceAu != null ? ` · ${card.distanceAu.toFixed(2)} AU` : ''}</div>`
       + `<ul class="sc-lines">${card.lines.map(l => `<li>${l}</li>`).join('')}</ul>`
+      + (card.markers?.length
+        ? `<div class="sc-marks">${card.markers.map(m => `<span style="color:${(MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).color}">${(MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).icon}</span> ${m.name}`).join('<br>')}</div>`
+        : '')
       + (card.landable
         ? `<div class="sc-land">${card.altitude != null && card.altitude < 1.8 ? '<b>J</b> to land' : 'Fly closer, then <b>J</b> to land'}</div>`
         : `<div class="sc-noland">${card.why}</div>`);
@@ -513,7 +528,7 @@ export class Hud {
     ctx.restore();
   }
 
-  drawMinimap(player, enemies = [], extras = []) {
+  drawMinimap(player, enemies = [], extras = [], markers = []) {
     const canvas = $('minimap');
     const ctx = canvas.getContext('2d');
     const size = canvas.width;
@@ -564,6 +579,53 @@ export class Hud {
       const colour = e.rank === 'boss' ? '#ffd24a' : e.rank === 'rare' ? '#ff8adf' : e.rank === 'champion' ? '#6ab0ff' : '#ff4a2a';
       pip(e.x, e.z, colour, e.rank && e.rank !== 'normal' ? 4.6 : 3.6);
     }
+    // ---- tracked markers: a pin where it is, or an arrow at the rim pointing the way there
+    // "If it's too far to display on the minimap, an arrow indicating its direction should show
+    // instead." The rim arrow sits on the edge of the circle at the marker's true bearing, with the
+    // distance written beside it, so a marker off the map still tells you which way to walk.
+    // nearest first, so when two rim arrows land on top of each other the closer one keeps its label
+    const labelled = [];
+    for (const m of [...markers].sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0))) {
+      const look = MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin;
+      const [mx, my] = toPx(m.x, m.z);
+      const inside = mx > 10 && my > 10 && mx < size - 10 && my < size - 10;
+      if (inside) {
+        ctx.font = '700 12px system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(8,10,16,.95)';
+        ctx.strokeText(look.icon, mx, my);
+        ctx.fillStyle = m.done ? '#9ae06a' : look.color;
+        ctx.fillText(look.icon, mx, my);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        continue;
+      }
+      // off the window: park an arrow on the rim, pointing the right way
+      const r = size / 2 - 11;
+      const ang = Math.atan2(my - size / 2, mx - size / 2);
+      const ax = size / 2 + Math.cos(ang) * r, ay = size / 2 + Math.sin(ang) * r;
+      ctx.save();
+      ctx.translate(ax, ay);
+      ctx.rotate(ang + Math.PI / 2);
+      ctx.beginPath(); ctx.moveTo(0, -6.5); ctx.lineTo(5, 5); ctx.lineTo(-5, 5); ctx.closePath();
+      ctx.fillStyle = m.done ? '#9ae06a' : look.color;
+      ctx.strokeStyle = 'rgba(8,10,16,.95)'; ctx.lineWidth = 1.6;
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+      // the distance, tucked inside the arrow — but only where it will not land on another one's
+      const tx = size / 2 + Math.cos(ang) * (r - 16), ty = size / 2 + Math.sin(ang) * (r - 16);
+      const clear = labelled.every(l => Math.hypot(l[0] - tx, l[1] - ty) > 26);
+      if (m.distance != null && clear) {
+        labelled.push([tx, ty]);
+        ctx.font = '600 9px system-ui, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,10,16,.95)';
+        ctx.strokeText(distanceText(m.distance), tx, ty);
+        ctx.fillStyle = '#e8dfd2';
+        ctx.fillText(distanceText(m.distance), tx, ty);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      }
+    }
+
     const [px, py] = toPx(player.x, player.z);
     ctx.save();
     ctx.translate(px, py);

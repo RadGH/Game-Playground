@@ -256,8 +256,13 @@ body {
 .legend .sw i { width: 11px; height: 11px; border-radius: 2px; border: 1px solid rgba(0,0,0,.5); display: inline-block; }
 
 .pin-list { display: flex; flex-direction: column; gap: 4px; }
-.pin-row { display: flex; align-items: center; gap: 7px; font-size: 12px; }
-.pin-dot { width: 9px; height: 9px; border-radius: 50%; background: #ffd070; border: 1px solid #2a2010; display: inline-block; }
+.pin-row { display: flex; align-items: center; gap: 7px; font-size: 12px; padding: 2px 0; }
+.pin-row.tracked .pin-name { color: #ffe6a8; }
+/* the marker icon: a glyph now rather than a bare dot, so a quest reads differently to a pin */
+.pin-dot { width: 13px; text-align: center; font-size: 12px; line-height: 1; display: inline-block; color: #ffd070; }
+.pin-track { background: none; border: 0; color: #6a6258; cursor: pointer; font-size: 13px; padding: 0 1px; line-height: 1; }
+.pin-track.on { color: #ffd24a; }
+.pin-track:hover { color: #ffe6a8; }
 .pin-name { flex: 1; }
 .pin-del { background: none; border: 0; color: #c08080; cursor: pointer; font-size: 15px; }
 
@@ -755,6 +760,12 @@ body {
   position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%);
   font-size: 10px; opacity: .7; white-space: nowrap; text-shadow: 0 1px 3px #000;
 }
+/* a world with a tracked quest or pin on it wears its glyphs above the bracket */
+.reticle .rt-mark {
+  position: absolute; left: 50%; top: -32px; transform: translateX(-50%);
+  font-size: 13px; color: #ffd24a; white-space: nowrap; text-shadow: 0 1px 4px #000;
+}
+.reticle.marked { color: rgba(255, 210, 74, .75); }
 .reticle.landable  { color: rgba(140, 230, 170, .6); }
 .reticle.moon      { color: rgba(190, 200, 215, .6); }
 .reticle.nolanding { color: rgba(230, 150, 110, .5); }
@@ -774,6 +785,57 @@ body {
 #space-card .sc-kind { color: #8fa8c0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
 #space-card .sc-lines { margin: 0; padding-left: 15px; }
 #space-card .sc-lines li { margin: 2px 0; }
+#space-card .sc-marks {
+  margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(120, 180, 220, .25);
+  color: #e8dfd2; font-size: 11.5px; line-height: 1.5;
+}
 #space-card .sc-land { margin-top: 8px; color: #8fe0a0; }
 #space-card .sc-noland { margin-top: 8px; color: #ffa860; }
 #space-card b { color: #ffd24a; }
+
+/* the new-game knobs */
+.boot-knobs { margin: 8px 0; text-align: left; }
+.boot-knobs summary { cursor: pointer; color: #9fb0c8; font-size: 13px; }
+.boot-knobs summary:hover { color: #cfe0ef; }
+.boot-knobs .row { margin-top: 7px; align-items: baseline; }
+.boot-knobs label.check { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.boot-knobs label.check input { accent-color: #7fd8ff; }
+
+/* ---------------------------------------------------------------- the star chart (M in space) */
+.chart {
+  position: fixed; inset: 0; z-index: 46; display: flex; flex-direction: column;
+  background: #04060c;
+}
+.chart.hidden { display: none; }
+.chart-top {
+  display: flex; align-items: center; gap: 14px; padding: 10px 16px;
+  border-bottom: 1px solid #16263a; flex-wrap: wrap;
+}
+.chart-title { font-size: 18px; color: #7fd8ff; letter-spacing: .5px; }
+.chart-steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.chart .screen-close {
+  margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 24px; cursor: pointer;
+}
+.chart .screen-close:hover { color: #eaf6ff; }
+.chart-body { flex: 1; display: flex; min-height: 0; }
+.chart-wrap { flex: 1; min-width: 0; padding: 10px; display: flex; }
+.chart-canvas {
+  flex: 1; min-height: 0; min-width: 0; border: 1px solid #16263a; border-radius: 6px; cursor: crosshair;
+}
+.chart-side {
+  width: 300px; overflow-y: auto; padding: 10px 12px 10px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.chart-name { font-size: 17px; color: #eaf6ff; letter-spacing: .5px; }
+.chart-list { display: flex; flex-direction: column; gap: 2px; }
+.chart-row {
+  display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 3px 4px; border-radius: 4px;
+}
+.chart-row.link { cursor: pointer; }
+.chart-row.link:hover { background: rgba(120, 180, 220, .12); }
+.chart-row.on { background: rgba(120, 180, 220, .2); }
+.chart-row.marked .chart-rowname { color: #ffe6a8; }
+.chart-rowname { flex: 1; }
+.chart-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.chart-mark { color: #ffd24a; }
+.chart .warn { color: #ffa860; }

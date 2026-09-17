@@ -1,479 +1,484 @@
 {
- "_doc": "Farhold knobs (round 4). Everything the game tunes lives here: the player's base numbers, how enemies scale and rank up, what drops, zones and their level bands, dungeons, chests, pets, light, how far you can see and how much the sky exaggerates. js/rpg.js reads player/enemies/ranks/loot; js/main.js reads world/terrain/sky/spawn/light; js/zones.js, js/dungeon.js, js/chests.js and js/pets.js read their own blocks.",
- "seed": 1,
- "player": {
-  "baseHp": 70,
-  "hpPerLevel": 16,
-  "baseMp": 24,
-  "mpPerLevel": 4,
-  "hpPerCon": 4,
-  "mpPerInt": 2,
-  "str": 6,
-  "dex": 6,
-  "int": 6,
-  "con": 6,
-  "critChance": 5,
-  "critDamage": 50,
-  "hpRegen": 0.9,
-  "unarmed": [
-   1,
-   3
+  "_doc": "Farhold knobs (round 4). Everything the game tunes lives here: the player's base numbers, how enemies scale and rank up, what drops, zones and their level bands, dungeons, chests, pets, light, how far you can see and how much the sky exaggerates. js/rpg.js reads player/enemies/ranks/loot; js/main.js reads world/terrain/sky/spawn/light; js/zones.js, js/dungeon.js, js/chests.js and js/pets.js read their own blocks.",
+  "seed": 1,
+  "player": {
+    "baseHp": 70,
+    "hpPerLevel": 16,
+    "baseMp": 24,
+    "mpPerLevel": 4,
+    "hpPerCon": 4,
+    "mpPerInt": 2,
+    "str": 6,
+    "dex": 6,
+    "int": 6,
+    "con": 6,
+    "critChance": 5,
+    "critDamage": 50,
+    "hpRegen": 0.9,
+    "unarmed": [
+      1,
+      3
+    ],
+    "damagePerAttr": 0.03,
+    "moveSpeed": 5.4,
+    "runMultiplier": 2.1,
+    "jumpSpeed": 6.4,
+    "attackEvery": 0.62,
+    "attackReach": 2.9,
+    "attackArc": 1.5,
+    "startGold": 0,
+    "swimSpeed": 2.7,
+    "swimDepth": 1.3,
+    "floatDepth": 0.55,
+    "mountSpeed": 2.1,
+    "mountJump": 1.5,
+    "shoulderOffset": 0.85,
+    "cameraLift": 0.25,
+    "bodyRadius": 0.45,
+    "arrowRange": 46,
+    "arrowSpeed": 42,
+    "arrowSplash": 2.6,
+    "meleeSplash": 1,
+    "damagePerLevel": 0.1,
+    "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything."
+  },
+  "progression": {
+    "attrPerLevel": 3,
+    "_doc": "XP curve lives in js/rpg.js (xpForLevel); level 2 at 58 xp, level 10 at ~3,600, level 30 at ~38,000."
+  },
+  "enemies": {
+    "_doc": "Health and damage are SEPARATE curves. They used to share `perLevel`, which meant a five-level gap doubled an enemy's damage as well as its health and the fight stopped being winnable. A higher-level enemy should be much tougher and only somewhat harder hitting.",
+    "perLevel": 1.13,
+    "dmgPerLevel": 1.085,
+    "hp": 1,
+    "dmg": 1,
+    "xp": 1,
+    "gold": 1
+  },
+  "spawn": {
+    "radius": 115,
+    "minRadius": 34,
+    "maxAlive": 38,
+    "everySeconds": 1.1,
+    "levelSpread": 2,
+    "despawnRadius": 300,
+    "_doc": "Enemies appear in a ring around the player, out of sight, and are cleaned up when you walk far enough away. A spawn is usually a whole PACK rather than one body, and `js/encounters.js` turns some of them into a set piece \u2014 a warband on the march, a hunt, an ambush. Round 4 raised maxAlive from 14 to 38 and shortened the ring, because the old numbers left one straggler at a time wandering a very large map."
+  },
+  "loot": {
+    "dropRate": 0.45,
+    "setChance": 0.3,
+    "affixMult": 1,
+    "shopPrice": 1,
+    "plainWeight": 5,
+    "exoticWeight": 1,
+    "_affixDoc": "How often each kind of property turns up. Emberveil's generator picks uniformly from 59 affixes, 40 of which are exotic conditionals \u2014 so a weapon almost never rolled plain damage. plainWeight/exoticWeight are the fallbacks; js/rpg.js AFFIX_WEIGHT names the ones worth steering."
+  },
+  "rarity": {
+    "normal": 0.52,
+    "magic": 0.31,
+    "rare": 0.14,
+    "legendary": 0.03
+  },
+  "lootTiers": [
+    {
+      "minLevel": 1,
+      "bases": [
+        "dagger",
+        "sword",
+        "wand",
+        "shortbow",
+        "cloth_helm",
+        "light_helm",
+        "cloth_chest",
+        "light_chest",
+        "light_legs",
+        "light_gauntlets",
+        "light_boots",
+        "ring",
+        "necklace"
+      ]
+    },
+    {
+      "minLevel": 5,
+      "bases": [
+        "sword",
+        "rapier",
+        "hammer",
+        "bow",
+        "staff",
+        "scepter",
+        "medium_helm",
+        "medium_chest",
+        "medium_legs",
+        "medium_gauntlets",
+        "medium_boots",
+        "ring",
+        "necklace",
+        "quiver",
+        "forager_blade",
+        "lantern_mace"
+      ]
+    },
+    {
+      "minLevel": 10,
+      "bases": [
+        "longsword",
+        "battleaxe",
+        "warhammer",
+        "crossbow",
+        "orb",
+        "tome",
+        "heavy_helm",
+        "heavy_chest",
+        "heavy_legs",
+        "heavy_gauntlets",
+        "heavy_boots",
+        "gold_signet",
+        "silver_amulet",
+        "pathfinder_javelin",
+        "rimecut_sabre",
+        "roadwarden_bow"
+      ]
+    },
+    {
+      "minLevel": 16,
+      "bases": [
+        "greatsword",
+        "halberd",
+        "quarterstaff",
+        "sword2h",
+        "axe2h",
+        "plate_helm",
+        "scaled_chest",
+        "runed_chest",
+        "scaled_legs",
+        "runed_gauntlets",
+        "runed_boots",
+        "gold_signet",
+        "silver_amulet",
+        "watchfire_glaive",
+        "starwake_bow",
+        "dawnwarden_hammer"
+      ]
+    },
+    {
+      "minLevel": 23,
+      "bases": [
+        "dragonfang_sword",
+        "dragonfang_greatsword",
+        "wyrmscale_bow",
+        "dragonbone_staff",
+        "drakehammer",
+        "dragontooth_wand",
+        "runed_chest",
+        "runed_legs",
+        "plate_helm",
+        "gold_signet",
+        "silver_amulet",
+        "grudgebrand",
+        "bloodledger_blade"
+      ]
+    }
   ],
-  "damagePerAttr": 0.03,
-  "moveSpeed": 5.4,
-  "runMultiplier": 2.1,
-  "jumpSpeed": 6.4,
-  "attackEvery": 0.62,
-  "attackReach": 2.9,
-  "attackArc": 1.5,
-  "startGold": 0,
-  "swimSpeed": 2.7,
-  "swimDepth": 1.3,
-  "floatDepth": 0.55,
-  "mountSpeed": 2.1,
-  "mountJump": 1.5,
-  "shoulderOffset": 0.85,
-  "cameraLift": 0.25,
-  "bodyRadius": 0.45,
-  "arrowRange": 46,
-  "arrowSpeed": 42,
-  "arrowSplash": 2.6,
-  "meleeSplash": 1,
-  "damagePerLevel": 0.1,
-  "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything."
- },
- "progression": {
-  "attrPerLevel": 3,
-  "_doc": "XP curve lives in js/rpg.js (xpForLevel); level 2 at 58 xp, level 10 at ~3,600, level 30 at ~38,000."
- },
- "enemies": {
-  "_doc": "Health and damage are SEPARATE curves. They used to share `perLevel`, which meant a five-level gap doubled an enemy's damage as well as its health and the fight stopped being winnable. A higher-level enemy should be much tougher and only somewhat harder hitting.",
-  "perLevel": 1.13,
-  "dmgPerLevel": 1.085,
-  "hp": 1,
-  "dmg": 1,
-  "xp": 1,
-  "gold": 1
- },
- "spawn": {
-  "radius": 115,
-  "minRadius": 34,
-  "maxAlive": 38,
-  "everySeconds": 1.1,
-  "levelSpread": 2,
-  "despawnRadius": 300,
-  "_doc": "Enemies appear in a ring around the player, out of sight, and are cleaned up when you walk far enough away. A spawn is usually a whole PACK rather than one body, and `js/encounters.js` turns some of them into a set piece \u2014 a warband on the march, a hunt, an ambush. Round 4 raised maxAlive from 14 to 38 and shortened the ring, because the old numbers left one straggler at a time wandering a very large map."
- },
- "loot": {
-  "dropRate": 0.45,
-  "setChance": 0.3,
-  "affixMult": 1,
-  "shopPrice": 1,
-  "plainWeight": 5,
-  "exoticWeight": 1,
-  "_affixDoc": "How often each kind of property turns up. Emberveil's generator picks uniformly from 59 affixes, 40 of which are exotic conditionals \u2014 so a weapon almost never rolled plain damage. plainWeight/exoticWeight are the fallbacks; js/rpg.js AFFIX_WEIGHT names the ones worth steering."
- },
- "rarity": {
-  "normal": 0.52,
-  "magic": 0.31,
-  "rare": 0.14,
-  "legendary": 0.03
- },
- "lootTiers": [
-  {
-   "minLevel": 1,
-   "bases": [
-    "dagger",
-    "sword",
-    "wand",
-    "shortbow",
-    "cloth_helm",
-    "light_helm",
-    "cloth_chest",
-    "light_chest",
-    "light_legs",
-    "light_gauntlets",
-    "light_boots",
-    "ring",
-    "necklace"
-   ]
+  "world": {
+    "width": 256,
+    "height": 128,
+    "metresPerCell": 640,
+    "_doc": "256 x 128 cells at 640 m = a planet surface 163 km x 82 km."
   },
-  {
-   "minLevel": 5,
-   "bases": [
-    "sword",
-    "rapier",
-    "hammer",
-    "bow",
-    "staff",
-    "scepter",
-    "medium_helm",
-    "medium_chest",
-    "medium_legs",
-    "medium_gauntlets",
-    "medium_boots",
-    "ring",
-    "necklace",
-    "quiver",
-    "forager_blade",
-    "lantern_mace"
-   ]
+  "terrain": {
+    "detailFlat": 13,
+    "detailRelief": 78,
+    "detailFine": 2.4,
+    "rings": [
+      {
+        "extent": 192,
+        "res": 96
+      },
+      {
+        "extent": 576,
+        "res": 96
+      },
+      {
+        "extent": 1728,
+        "res": 96
+      },
+      {
+        "extent": 5184,
+        "res": 96
+      },
+      {
+        "extent": 15552,
+        "res": 96
+      }
+    ],
+    "ringsLow": [
+      {
+        "extent": 256,
+        "res": 48
+      },
+      {
+        "extent": 1024,
+        "res": 48
+      },
+      {
+        "extent": 6144,
+        "res": 48
+      }
+    ],
+    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count \u2014 near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests. riverDepth is how deep a river cuts its valley into the ground, in metres.",
+    "riverDepth": 16,
+    "reliefScale": 0.22,
+    "_reliefDoc": "How tall the world is against how wide it is. universe/ gives a planet its TRUE relief \u2014 often 8 km \u2014 and this map is 90-160 km across, not 40,000, so the real number turns every coastline into a cliff. 0.22 keeps mountains that read as mountains and slopes you can walk up. It is multiplied by the planet-scale knob, so a smaller map gets proportionally smaller hills."
   },
-  {
-   "minLevel": 10,
-   "bases": [
-    "longsword",
-    "battleaxe",
-    "warhammer",
-    "crossbow",
-    "orb",
-    "tome",
-    "heavy_helm",
-    "heavy_chest",
-    "heavy_legs",
-    "heavy_gauntlets",
-    "heavy_boots",
-    "gold_signet",
-    "silver_amulet",
-    "pathfinder_javelin",
-    "rimecut_sabre",
-    "roadwarden_bow"
-   ]
+  "sky": {
+    "dayLengthSeconds": 900,
+    "siblingScale": 160,
+    "moonScale": 1,
+    "starScale": 2.2,
+    "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way. startFraction is where in the day a new run begins: 0 midnight, 0.25 dawn, 0.5 noon. orbitScale/moonOrbitScale run the orbits on their own clock: at real speed a 365-day sibling needs ~91 hours of play to go round, so it looks welded to the sun.",
+    "startFraction": 0.34,
+    "orbitScale": 150,
+    "moonOrbitScale": 6
   },
-  {
-   "minLevel": 16,
-   "bases": [
-    "greatsword",
-    "halberd",
-    "quarterstaff",
-    "sword2h",
-    "axe2h",
-    "plate_helm",
-    "scaled_chest",
-    "runed_chest",
-    "scaled_legs",
-    "runed_gauntlets",
-    "runed_boots",
-    "gold_signet",
-    "silver_amulet",
-    "watchfire_glaive",
-    "starwake_bow",
-    "dawnwarden_hammer"
-   ]
+  "props": {
+    "density": 1,
+    "radius": 7,
+    "grassPerCell": 150,
+    "_doc": "Scatter knobs. radius is in 64 m prop cells, so 7 is props out to ~450 m. density scales every kit; the debug menu changes it live."
   },
-  {
-   "minLevel": 23,
-   "bases": [
-    "dragonfang_sword",
-    "dragonfang_greatsword",
-    "wyrmscale_bow",
-    "dragonbone_staff",
-    "drakehammer",
-    "dragontooth_wand",
-    "runed_chest",
-    "runed_legs",
-    "plate_helm",
-    "gold_signet",
-    "silver_amulet",
-    "grudgebrand",
-    "bloodledger_blade"
-   ]
+  "features": {
+    "radius": 2600,
+    "_doc": "How far out rivers, roads, bridges and settlements are built, in metres."
+  },
+  "weather": {
+    "minMinutes": 1.2,
+    "maxMinutes": 4,
+    "transitionSeconds": 20,
+    "_doc": "How long a weather state holds and how long it takes to roll in. The states themselves and which ones a climate allows live in worldgen/js/weather.js."
+  },
+  "save": {
+    "autoSaveSeconds": 45,
+    "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did \u2014 never the world, which is a pure function of the seed."
+  },
+  "space": {
+    "auUnits": 14000,
+    "earthUnits": 700,
+    "speed": 160,
+    "boost": 3.6,
+    "warp": 26,
+    "landRange": 1.8,
+    "shipScale": 12,
+    "camBack": 90,
+    "camLift": 26,
+    "rimAu": 14,
+    "ascentSeconds": 3.2,
+    "descentSeconds": 2.6,
+    "slowFrom": 26,
+    "slowTo": 0.25,
+    "noWarpWithin": 9,
+    "entryAltitude": 0.5,
+    "warpSeconds": 5,
+    "_doc": "Space runs in its own compressed units: 1 AU is auUnits across and an Earth-sized planet is earthUnits in radius, because metres over a 163 km map and hundreds of millions of kilometres cannot share a coordinate space. speed is the cruise rate; boost and warp multiply it. landRange is how close to a world you must be, in its own radii, before you can put down. The approach knobs are all in body radii above the surface: slowFrom is where the throttle starts easing off toward slowTo (a fraction of cruise) so a planet stops going from speck to wall in one frame; noWarpWithin locks warp out near anything; and falling below entryAltitude over a landable world drops you into its atmosphere with no key press at all. warpSeconds is how long the jump between stars takes."
+  },
+  "sound": {
+    "method": "hybrid",
+    "volume": 0.75,
+    "_doc": "Which Sound Lab maker to use (synth, library, hybrid, retro) and the master volume. Audio starts on the first click, because a browser will not hand a page an audio context before that. ?sound=off turns both sound and voices off."
+  },
+  "town": {
+    "talkRange": 3.6,
+    "radius": 900,
+    "_doc": "How close you must stand to talk to somebody, and how far from the player settlements keep their people."
+  },
+  "ranks": {
+    "_doc": "Every spawn rolls a rank. A champion takes one modifier and a rare takes two plus a name of its own, which is where 'go and kill the glowing one' comes from. Bosses are placed, never rolled.",
+    "championChance": 0.11,
+    "rareChance": 0.03,
+    "normal": {
+      "hp": 1,
+      "dmg": 1,
+      "armor": 1,
+      "xp": 1,
+      "gold": 1,
+      "drop": 1,
+      "dropBonus": 0,
+      "dropRarity": 1
+    },
+    "champion": {
+      "hp": 2.6,
+      "dmg": 1.35,
+      "armor": 1.4,
+      "xp": 2.4,
+      "gold": 2.6,
+      "drop": 1.6,
+      "dropBonus": 1,
+      "dropRarity": 1.5
+    },
+    "rare": {
+      "hp": 4.5,
+      "dmg": 1.6,
+      "armor": 1.7,
+      "xp": 4.5,
+      "gold": 5,
+      "drop": 2,
+      "dropBonus": 2,
+      "dropRarity": 2.2
+    },
+    "boss": {
+      "hp": 1,
+      "dmg": 1,
+      "armor": 1,
+      "xp": 1,
+      "gold": 1,
+      "drop": 1,
+      "dropBonus": 0,
+      "dropRarity": 1
+    }
+  },
+  "zones": {
+    "_doc": "Level bands come from the World Forge region graph: how many region borders from the one you started in. bandWidth is how many levels a single region spans. The starting region is always band 1 whatever the graph says.",
+    "bandWidth": 4,
+    "startLevel": 1,
+    "packChance": 0.78,
+    "packRadius": 10
+  },
+  "chests": {
+    "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny \u2014 finding one should be an event. Dungeons place their own on top of this.",
+    "perCell": 0.012,
+    "radius": 5,
+    "openRange": 3.2,
+    "kinds": {
+      "wooden": {
+        "name": "Wooden Chest",
+        "weight": 52,
+        "items": [
+          1,
+          2
+        ],
+        "gold": [
+          14,
+          40
+        ],
+        "rarityBoost": 1.1,
+        "materials": 1
+      },
+      "iron": {
+        "name": "Iron-Bound Chest",
+        "weight": 30,
+        "items": [
+          2,
+          3
+        ],
+        "gold": [
+          40,
+          110
+        ],
+        "rarityBoost": 1.5,
+        "floor": "magic",
+        "materials": 2
+      },
+      "gilded": {
+        "name": "Gilded Chest",
+        "weight": 14,
+        "items": [
+          2,
+          4
+        ],
+        "gold": [
+          120,
+          300
+        ],
+        "rarityBoost": 2.2,
+        "floor": "rare",
+        "materials": 3
+      },
+      "warded": {
+        "name": "Warded Chest",
+        "weight": 4,
+        "items": [
+          3,
+          5
+        ],
+        "gold": [
+          260,
+          700
+        ],
+        "rarityBoost": 3.2,
+        "floor": "rare",
+        "materials": 5,
+        "mimicChance": 0.22,
+        "guarded": true
+      }
+    }
+  },
+  "dungeon": {
+    "_doc": "A dungeon is a real interior built from rooms and corridors, not a marker. `rooms` is how many the layout aims for at difficulty 1; deeper zones get more. Everything inside is dark, which is why a torch matters.",
+    "rooms": [
+      6,
+      11
+    ],
+    "roomSize": [
+      9,
+      17
+    ],
+    "corridor": 3.2,
+    "wallHeight": 4.6,
+    "cellSize": 6,
+    "packsPerRoom": [
+      1,
+      3
+    ],
+    "chestChance": 0.55,
+    "bossRoom": true,
+    "sconceEvery": 7,
+    "clearRewardGold": [
+      80,
+      240
+    ],
+    "clearRewardItems": [
+      1,
+      3
+    ]
+  },
+  "pets": {
+    "_doc": "Companions. `perLevel` scales a pet off its OWNER's level so a pet never falls behind. `leash` is how far it may get from you before it gives up and comes back.",
+    "perLevel": 1.17,
+    "leash": 26,
+    "follow": 4.5,
+    "engage": 22,
+    "reviveSeconds": 14,
+    "maxAlive": 6
+  },
+  "light": {
+    "_doc": "Night used to be unplayable. Every character now carries a torch; `torch` is its point light, `ambientNight` is the floor the sky light never drops below, and `maxLights` caps how many world lights (braziers, sconces, campfires) are switched on at once \u2014 the nearest win.",
+    "torch": {
+      "range": 34,
+      "intensity": 3.2,
+      "color": "#ffb060",
+      "flicker": 0.16,
+      "height": 1.55
+    },
+    "ambientNight": 0.16,
+    "maxLights": 10,
+    "brazier": {
+      "range": 26,
+      "intensity": 2.4,
+      "color": "#ff9040"
+    },
+    "sconce": {
+      "range": 22,
+      "intensity": 2.8,
+      "color": "#ffb070"
+    },
+    "dungeonAmbient": 0.05
+  },
+  "encounters": {
+    "_doc": "Set-piece encounters on the road, rolled instead of a plain pack. `everySeconds` is how often one is considered, `chance` how often the roll takes, and `maxLive` how many can be running at once. The weights are in data/encounters.json.",
+    "everySeconds": 26,
+    "chance": 0.55,
+    "maxLive": 3,
+    "radius": 90,
+    "ambushRadius": 26
   }
- ],
- "world": {
-  "width": 256,
-  "height": 128,
-  "metresPerCell": 640,
-  "_doc": "256 x 128 cells at 640 m = a planet surface 163 km x 82 km."
- },
- "terrain": {
-  "detailFlat": 13,
-  "detailRelief": 78,
-  "detailFine": 2.4,
-  "rings": [
-   {
-    "extent": 192,
-    "res": 96
-   },
-   {
-    "extent": 576,
-    "res": 96
-   },
-   {
-    "extent": 1728,
-    "res": 96
-   },
-   {
-    "extent": 5184,
-    "res": 96
-   },
-   {
-    "extent": 15552,
-    "res": 96
-   }
-  ],
-  "ringsLow": [
-   {
-    "extent": 256,
-    "res": 48
-   },
-   {
-    "extent": 1024,
-    "res": 48
-   },
-   {
-    "extent": 6144,
-    "res": 48
-   }
-  ],
-  "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count \u2014 near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests. riverDepth is how deep a river cuts its valley into the ground, in metres.",
-  "riverDepth": 16,
-  "reliefScale": 0.22,
-  "_reliefDoc": "How tall the world is against how wide it is. universe/ gives a planet its TRUE relief \u2014 often 8 km \u2014 and this map is 90-160 km across, not 40,000, so the real number turns every coastline into a cliff. 0.22 keeps mountains that read as mountains and slopes you can walk up. It is multiplied by the planet-scale knob, so a smaller map gets proportionally smaller hills."
- },
- "sky": {
-  "dayLengthSeconds": 900,
-  "siblingScale": 160,
-  "moonScale": 1,
-  "starScale": 2.2,
-  "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way. startFraction is where in the day a new run begins: 0 midnight, 0.25 dawn, 0.5 noon. orbitScale/moonOrbitScale run the orbits on their own clock: at real speed a 365-day sibling needs ~91 hours of play to go round, so it looks welded to the sun.",
-  "startFraction": 0.34,
-  "orbitScale": 150,
-  "moonOrbitScale": 6
- },
- "props": {
-  "density": 1,
-  "radius": 7,
-  "grassPerCell": 150,
-  "_doc": "Scatter knobs. radius is in 64 m prop cells, so 7 is props out to ~450 m. density scales every kit; the debug menu changes it live."
- },
- "features": {
-  "radius": 2600,
-  "_doc": "How far out rivers, roads, bridges and settlements are built, in metres."
- },
- "weather": {
-  "minMinutes": 1.2,
-  "maxMinutes": 4,
-  "transitionSeconds": 20,
-  "_doc": "How long a weather state holds and how long it takes to roll in. The states themselves and which ones a climate allows live in worldgen/js/weather.js."
- },
- "save": {
-  "autoSaveSeconds": 45,
-  "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did \u2014 never the world, which is a pure function of the seed."
- },
- "space": {
-  "auUnits": 14000,
-  "earthUnits": 700,
-  "speed": 160,
-  "boost": 3.6,
-  "warp": 26,
-  "landRange": 1.8,
-  "shipScale": 12,
-  "camBack": 90,
-  "camLift": 26,
-  "rimAu": 14,
-  "ascentSeconds": 3.2,
-  "descentSeconds": 2.6,
-  "_doc": "Space runs in its own compressed units: 1 AU is auUnits across and an Earth-sized planet is earthUnits in radius, because metres over a 163 km map and hundreds of millions of kilometres cannot share a coordinate space. speed is the cruise rate; boost and warp multiply it. landRange is how close to a world you must be, in its own radii, before you can put down."
- },
- "sound": {
-  "method": "hybrid",
-  "volume": 0.75,
-  "_doc": "Which Sound Lab maker to use (synth, library, hybrid, retro) and the master volume. Audio starts on the first click, because a browser will not hand a page an audio context before that. ?sound=off turns both sound and voices off."
- },
- "town": {
-  "talkRange": 3.6,
-  "radius": 900,
-  "_doc": "How close you must stand to talk to somebody, and how far from the player settlements keep their people."
- },
- "ranks": {
-  "_doc": "Every spawn rolls a rank. A champion takes one modifier and a rare takes two plus a name of its own, which is where 'go and kill the glowing one' comes from. Bosses are placed, never rolled.",
-  "championChance": 0.11,
-  "rareChance": 0.03,
-  "normal": {
-   "hp": 1,
-   "dmg": 1,
-   "armor": 1,
-   "xp": 1,
-   "gold": 1,
-   "drop": 1,
-   "dropBonus": 0,
-   "dropRarity": 1
-  },
-  "champion": {
-   "hp": 2.6,
-   "dmg": 1.35,
-   "armor": 1.4,
-   "xp": 2.4,
-   "gold": 2.6,
-   "drop": 1.6,
-   "dropBonus": 1,
-   "dropRarity": 1.5
-  },
-  "rare": {
-   "hp": 4.5,
-   "dmg": 1.6,
-   "armor": 1.7,
-   "xp": 4.5,
-   "gold": 5,
-   "drop": 2,
-   "dropBonus": 2,
-   "dropRarity": 2.2
-  },
-  "boss": {
-   "hp": 1,
-   "dmg": 1,
-   "armor": 1,
-   "xp": 1,
-   "gold": 1,
-   "drop": 1,
-   "dropBonus": 0,
-   "dropRarity": 1
-  }
- },
- "zones": {
-  "_doc": "Level bands come from the World Forge region graph: how many region borders from the one you started in. bandWidth is how many levels a single region spans. The starting region is always band 1 whatever the graph says.",
-  "bandWidth": 4,
-  "startLevel": 1,
-  "packChance": 0.78,
-  "packRadius": 10
- },
- "chests": {
-  "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny \u2014 finding one should be an event. Dungeons place their own on top of this.",
-  "perCell": 0.012,
-  "radius": 5,
-  "openRange": 3.2,
-  "kinds": {
-   "wooden": {
-    "name": "Wooden Chest",
-    "weight": 52,
-    "items": [
-     1,
-     2
-    ],
-    "gold": [
-     14,
-     40
-    ],
-    "rarityBoost": 1.1,
-    "materials": 1
-   },
-   "iron": {
-    "name": "Iron-Bound Chest",
-    "weight": 30,
-    "items": [
-     2,
-     3
-    ],
-    "gold": [
-     40,
-     110
-    ],
-    "rarityBoost": 1.5,
-    "floor": "magic",
-    "materials": 2
-   },
-   "gilded": {
-    "name": "Gilded Chest",
-    "weight": 14,
-    "items": [
-     2,
-     4
-    ],
-    "gold": [
-     120,
-     300
-    ],
-    "rarityBoost": 2.2,
-    "floor": "rare",
-    "materials": 3
-   },
-   "warded": {
-    "name": "Warded Chest",
-    "weight": 4,
-    "items": [
-     3,
-     5
-    ],
-    "gold": [
-     260,
-     700
-    ],
-    "rarityBoost": 3.2,
-    "floor": "rare",
-    "materials": 5,
-    "mimicChance": 0.22,
-    "guarded": true
-   }
-  }
- },
- "dungeon": {
-  "_doc": "A dungeon is a real interior built from rooms and corridors, not a marker. `rooms` is how many the layout aims for at difficulty 1; deeper zones get more. Everything inside is dark, which is why a torch matters.",
-  "rooms": [
-   6,
-   11
-  ],
-  "roomSize": [
-   9,
-   17
-  ],
-  "corridor": 3.2,
-  "wallHeight": 4.6,
-  "cellSize": 6,
-  "packsPerRoom": [
-   1,
-   3
-  ],
-  "chestChance": 0.55,
-  "bossRoom": true,
-  "sconceEvery": 7,
-  "clearRewardGold": [
-   80,
-   240
-  ],
-  "clearRewardItems": [
-   1,
-   3
-  ]
- },
- "pets": {
-  "_doc": "Companions. `perLevel` scales a pet off its OWNER's level so a pet never falls behind. `leash` is how far it may get from you before it gives up and comes back.",
-  "perLevel": 1.17,
-  "leash": 26,
-  "follow": 4.5,
-  "engage": 22,
-  "reviveSeconds": 14,
-  "maxAlive": 6
- },
- "light": {
-  "_doc": "Night used to be unplayable. Every character now carries a torch; `torch` is its point light, `ambientNight` is the floor the sky light never drops below, and `maxLights` caps how many world lights (braziers, sconces, campfires) are switched on at once \u2014 the nearest win.",
-  "torch": {
-   "range": 34,
-   "intensity": 3.2,
-   "color": "#ffb060",
-   "flicker": 0.16,
-   "height": 1.55
-  },
-  "ambientNight": 0.16,
-  "maxLights": 10,
-  "brazier": {
-   "range": 26,
-   "intensity": 2.4,
-   "color": "#ff9040"
-  },
-  "sconce": {
-   "range": 22,
-   "intensity": 2.8,
-   "color": "#ffb070"
-  },
-  "dungeonAmbient": 0.05
- },
- "encounters": {
-  "_doc": "Set-piece encounters on the road, rolled instead of a plain pack. `everySeconds` is how often one is considered, `chance` how often the roll takes, and `maxLive` how many can be running at once. The weights are in data/encounters.json.",
-  "everySeconds": 26,
-  "chance": 0.55,
-  "maxLive": 3,
-  "radius": 90,
-  "ambushRadius": 26
- }
 }

@@ -90,7 +90,7 @@ export function createSaves() {
  * Everything worth keeping about a run. Pass the live objects; get plain JSON back.
  * Items are already plain data from Emberveil's generator, so they travel as they are.
  */
-export function snapshot({ id, name, seed, classId, player, control, elapsed, playtime, pins, place, weather, materials, dungeonsCleared }) {
+export function snapshot({ id, name, seed, classId, player, control, elapsed, playtime, markers, place, weather, materials, dungeonsCleared }) {
   return {
     id, name, seed, classId,
     version: 1,
@@ -109,7 +109,9 @@ export function snapshot({ id, name, seed, classId, player, control, elapsed, pl
       pendingTalent: player.pendingTalent, talents: player.talents,
     },
     position: { x: control.x, z: control.z, yaw: control.yaw, pitch: control.pitch },
-    pins: (pins || []).map(p => ({ x: p.x, y: p.y, name: p.name })),
+    // Markers replaced the old bare `pins` array: a quest destination, a story objective and a
+    // dropped pin are the same kind of thing now, and each carries the world it is on.
+    markers: markers || null,
     // round 4: the materials bag and which dungeons you have already emptied
     materials: materials || {},
     dungeonsCleared: [...(dungeonsCleared || [])],
@@ -141,9 +143,10 @@ export function restore(save, { rpg, player, control, map }) {
     if (Number.isFinite(save.position.yaw)) control.yaw = save.position.yaw;
     if (Number.isFinite(save.position.pitch)) control.pitch = save.position.pitch;
   }
-  if (map && Array.isArray(save.pins)) {
-    map.pins.length = 0;
-    for (const pin of save.pins) map.pins.push({ ...pin });
+  // A save from before markers existed carries a plain `pins` array; turn each one into a pin
+  // marker on the world being loaded so an old save does not lose them.
+  if (map?.markers && Array.isArray(save.pins) && !save.markers) {
+    for (const pin of save.pins) map.markers.drop(pin.x, pin.y, pin.name);
   }
   return save.elapsed || 0;
 }

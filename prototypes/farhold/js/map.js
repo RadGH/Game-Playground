@@ -14,6 +14,7 @@
 import { el, panel, button } from '../../../shared/ui.js';
 import { layersPanel } from '../../../worldgen/js/layers-panel.js';
 import { zoneTone } from './zones.js';
+import { MARKER_LOOKS, distanceText } from './markers.js';
 
 /** The wash each danger step puts over a region, and the colour its number is written in. */
 const TONE_RGB = {
@@ -32,7 +33,12 @@ import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, pins = [], zones = null, getLevel = () => 1, sites = null, gates = null } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null } = {}) {
+  // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
+  // a quest destination, a story objective and a pin the player dropped are one kind of thing and
+  // the minimap and space mode can see them too.
+  const book = markers;
+  const pins = () => (book ? book.here() : []);
   const world = terrain.world;
 
   const state = {
@@ -96,20 +102,52 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       if (chips) chips.append(chip); else side.append(chip);
     }
 
+    // Markers: quests, story objectives and dropped pins, each with a star that tracks or untracks
+    // it. A tracked marker is the one the minimap draws and points an arrow at; an untracked one
+    // still sits on this map, it just stops following you around.
+    const here = pins();
     const list = el('div', { class: 'pin-list' });
-    if (!pins.length) {
-      list.append(el('p', { class: 'muted small', text: 'Shift-click the map to drop a pin.' }));
+    if (!here.length) {
+      list.append(el('p', { class: 'muted small', text: 'Shift-click the map to drop a pin. Quests mark themselves.' }));
     } else {
-      for (const pin of pins) {
-        list.append(el('div', { class: 'pin-row' },
-          el('i', { class: 'pin-dot' }),
-          el('span', { class: 'pin-name', text: pin.name }),
-          el('span', { class: 'muted small', text: `${pin.x},${pin.y}` }),
-          el('button', { class: 'pin-del', text: '×', onclick: () => { removePin(pin); } }),
-        ));
+      const player = getPlayer();
+      for (const m of here) {
+        const look = MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin;
+        const away = book ? book.bearing(m, player, terrain).distance : 0;
+        const star = el('button', {
+          class: 'pin-track' + (m.tracked ? ' on' : ''),
+          text: m.tracked ? '★' : '☆',
+          title: m.tracked ? 'Tracked — showing on the minimap. Click to stop.' : 'Not tracked. Click to follow it on the minimap.',
+          onclick: () => { book.toggle(m); buildSide(); draw(); },
+        });
+        const row = el('div', { class: 'pin-row' + (m.tracked ? ' tracked' : '') },
+          star,
+          el('i', { class: 'pin-dot', text: look.icon, style: `color:${m.done ? '#9ae06a' : look.color}` }),
+          el('span', { class: 'pin-name', text: m.name }),
+          el('span', { class: 'muted small', text: distanceText(away) }),
+        );
+        if (m.kind === 'pin') {
+          row.append(el('button', { class: 'pin-del', text: '×', title: 'Remove this pin', onclick: () => { removePin(m); } }));
+        }
+        list.append(row);
       }
     }
-    side.append(panel('Pins', list));
+    side.append(panel('Tracking', list));
+
+    // Markers on OTHER worlds. They cannot be drawn on this map, so they are listed with the world
+    // they are on — the same list space mode puts a ring around.
+    const away = book ? book.elsewhere() : [];
+    if (away.length) {
+      const other = el('div', { class: 'pin-list' });
+      for (const g of away) {
+        other.append(el('div', { class: 'pin-row' },
+          el('i', { class: 'pin-dot', text: '◉', style: 'color:#9fb4d4' }),
+          el('span', { class: 'pin-name', text: g.planetName || 'an unnamed world' }),
+          el('span', { class: 'muted small', text: `${g.markers.length}${g.tracked ? ' · ' + g.tracked + ' tracked' : ''}` }),
+        ));
+      }
+      side.append(panel('Other worlds', other));
+    }
 
     if (state.selected) {
       const s = state.selected;
@@ -211,20 +249,31 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(10,6,4,.9)'; ctx.stroke();
     }
 
-    // pins
-    for (const pin of pins) {
-      const px = ox + (pin.x + 0.5) * scale, py = oy + (pin.y + 0.5) * scale;
+    // markers: quests, story objectives, dropped pins. A tracked one gets a ring around it, so you
+    // can tell at a glance which of them the minimap is going to keep pointing at.
+    for (const m of pins()) {
+      const look = MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin;
+      const px = ox + (m.cell.x + 0.5) * scale, py = oy + (m.cell.y + 0.5) * scale;
+      const colour = m.done ? '#9ae06a' : look.color;
+      if (m.tracked) {
+        ctx.beginPath();
+        ctx.arc(px, py, Math.max(9, scale * 1.5), 0, Math.PI * 2);
+        ctx.strokeStyle = colour; ctx.lineWidth = 1.6;
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
       ctx.beginPath();
       ctx.arc(px, py, Math.max(4, scale * 0.8), 0, Math.PI * 2);
-      ctx.fillStyle = '#ffd070';
+      ctx.fillStyle = colour;
       ctx.fill();
-      ctx.lineWidth = 2; ctx.strokeStyle = '#2a2010'; ctx.stroke();
-      if (pin.name) {
+      ctx.lineWidth = 2; ctx.strokeStyle = '#150f0a'; ctx.stroke();
+      if (m.name) {
         ctx.font = '600 12px system-ui, sans-serif';
         ctx.fillStyle = '#ffe6a8';
         ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 3;
-        ctx.strokeText(pin.name, px + 8, py + 4);
-        ctx.fillText(pin.name, px + 8, py + 4);
+        ctx.strokeText(m.name, px + 10, py + 4);
+        ctx.fillText(m.name, px + 10, py + 4);
       }
     }
 
@@ -367,15 +416,14 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
 
   // ---------------------------------------------------------------- pins
   function addPin(x, y, name = null) {
-    const pin = { x, y, name: name || `Pin ${pins.length + 1}` };
-    pins.push(pin);
+    if (!book) return null;
+    const pin = book.drop(x, y, name);
     buildSide();
     draw();
     return pin;
   }
   function removePin(pin) {
-    const i = pins.indexOf(pin);
-    if (i >= 0) pins.splice(i, 1);
+    if (book) book.remove(pin);
     buildSide();
     draw();
   }
@@ -394,7 +442,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   window.addEventListener('resize', () => { if (state.open) draw(); });
 
   return {
-    root, state, pins,
+    root, state, markers: book,
+    get pins() { return pins(); },
     /** Step the zoom from a button or a test. */
     setZoom(z) { state.zoom = ZOOMS.includes(z) ? z : 1; if (state.zoom === 1) state.centre = null; draw(); },
     /** Turn the level overlay on or off (the checkbox, the debug menu and the tests). */

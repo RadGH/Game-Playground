@@ -22,6 +22,7 @@
 import { makeStar } from '../../../universe/js/stars.js';
 import { generateSystem } from '../../../universe/js/system.js';
 import { generatePlanetMap, reliefFor, surfaceOf } from '../../../universe/js/planetmap.js';
+import { ARCH_BY_KEY } from '../../../universe/js/system.js';
 import { elevationToMetres } from '../../../worldgen/js/relief.js';
 import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
 import { makeNoise2D, fbm, subSeed, clamp, lerp, makeRng, smoothstep, blur } from '../../../worldgen/js/noise.js';
@@ -67,11 +68,37 @@ export function createSystem({ seed = 1, starClass = null } = {}) {
  * Which planet to land on: a landable body, preferring one you can breathe on, then one in the
  * star's water zone, then anything solid.
  */
-export function chooseLanding(system, { prefer = null } = {}) {
+/**
+ * Is this a world worth starting a character on?
+ *
+ * Two things, and both matter. `surfaceOf().inhabited` is the same predicate worldgen uses to
+ * decide whether to found any settlements at all, so without it you can land somewhere with no
+ * towns, no people, no work and no trade. And `biomeMode: 'single'` worlds are locked to one biome
+ * family all the way round — a lava world is lava everywhere — which makes the first hour one
+ * colour and gives the zone bands nothing to distinguish themselves with.
+ */
+export function isHabitableStart(planet) {
+  if (!planet || planet.giant || planet.landable === false) return false;
+  if (!surfaceOf(planet).inhabited) return false;
+  if (ARCH_BY_KEY[planet.archetype]?.biomeMode === 'single') return false;
+  return true;
+}
+
+export function chooseLanding(system, { prefer = null, requireHabitable = false } = {}) {
   const solid = system.planets.filter(p => !p.giant && p.landable !== false);
   if (prefer != null) {
     const hit = solid.find(p => p.id === prefer || p.name === prefer);
     if (hit) return hit;
+  }
+  // "Habitable start": only a settled, multi-biome world will do, and if this system has none the
+  // caller is told so rather than being handed the least-bad rock.
+  if (requireHabitable) {
+    const good = solid.filter(isHabitableStart);
+    if (!good.length) return null;
+    return good.sort((a, b) =>
+      ((b.atmosphere?.breathable ? 1 : 0) - (a.atmosphere?.breathable ? 1 : 0))
+      || ((b.orbit?.inZone ? 1 : 0) - (a.orbit?.inZone ? 1 : 0))
+      || (a.difficulty - b.difficulty))[0];
   }
   // `surfaceOf().inhabited` is the SAME predicate worldgen uses to decide whether to found any
   // settlements at all, and it is pure archetype + atmosphere, so it costs nothing to ask. Without
@@ -86,12 +113,37 @@ export function chooseLanding(system, { prefer = null } = {}) {
   return solid.sort((a, b) => score(b) - score(a))[0] || system.planets[0];
 }
 
-/** Everything a run needs: the star, the system around it, the planet, and its surface map. */
-export function createWorld({ seed = 1, starClass = null, prefer = null, width = 256, height = 128 } = {}) {
-  const { star, system } = createSystem({ seed, starClass });
-  const planet = chooseLanding(system, { prefer });
-  const world = generatePlanetMap(planet, { width, height });
-  return { star, system, planet, world };
+/**
+ * Everything a run needs: the star, the system around it, the planet, and its surface map.
+ *
+ * With `habitable: true` (the title screen's default) the seed is treated as a STARTING POINT
+ * rather than a fixed answer: about a quarter of systems have no settled, multi-biome world in
+ * them at all, and landing on a locked-biome rock with nobody on it is a poor first hour. Nearby
+ * seeds are tried in order until one does, and the seed that was actually used comes back as
+ * `systemSeed` so the run is still reproducible and the player can be told.
+ */
+export function createWorld({
+  seed = 1, starClass = null, prefer = null, width = 256, height = 128,
+  habitable = false, searchSeeds = 24, regionScale = 1,
+} = {}) {
+  let usedSeed = seed;
+  let star = null, system = null, planet = null;
+
+  for (let i = 0; i <= (habitable ? searchSeeds : 0); i++) {
+    usedSeed = seed + i;
+    ({ star, system } = createSystem({ seed: usedSeed, starClass }));
+    planet = chooseLanding(system, { prefer, requireHabitable: habitable && !prefer });
+    if (planet) break;
+  }
+  // nothing within reach: take the best of the seed the player actually asked for
+  if (!planet) {
+    usedSeed = seed;
+    ({ star, system } = createSystem({ seed, starClass }));
+    planet = chooseLanding(system, { prefer });
+  }
+
+  const world = generatePlanetMap(planet, { width, height, regionScale });
+  return { star, system, planet, world, systemSeed: usedSeed, movedSeed: usedSeed !== seed };
 }
 
 // ---------------------------------------------------------------------------- paths
@@ -334,6 +386,63 @@ export function makeTerrain(world, planet = null, opts = {}) {
   if (anyLake) blur(lakeField, w, h, 1);
   const lakeSurfaceAt = (fx, fy) => elevationToMetres(layer(world.elevation, fx, fy), relief);
 
+  /**
+   * Lakes as whole bodies of water, not loose cells.
+   *
+   * The carve above digs each lake a basin, but nothing ever drew water in it — a lake was a dry
+   * hole in the ground with a blue dot on the map. Flood-filling `water === 2` gives one entry per
+   * lake, and every cell of a lake shares ONE surface height (the lowest rim reading, so the far
+   * shore is never left standing in mid-air). `js/features.js` lays a flat sheet at that height and
+   * lets the banks poke through it, which is how a shoreline meets its water.
+   */
+  const lakes = [];
+  if (anyLake) {
+    const seen = new Uint8Array(w * h);
+    for (let i0 = 0; i0 < w * h; i0++) {
+      if (world.water[i0] !== 2 || seen[i0]) continue;
+      const cells = [];
+      const stack = [i0];
+      seen[i0] = 1;
+      let minX = w, maxX = 0, minY = h, maxY = 0, surface = Infinity;
+      while (stack.length) {
+        const i = stack.pop();
+        const cx = i % w, cy = (i / w) | 0;
+        cells.push(i);
+        if (cx < minX) minX = cx; if (cx > maxX) maxX = cx;
+        if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
+        surface = Math.min(surface, elevationToMetres(world.elevation[i], relief));
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = cx + dx, ny = cy + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+          const j = IDX(w, nx, ny);
+          if (world.water[j] === 2 && !seen[j]) { seen[j] = 1; stack.push(j); }
+        }
+      }
+      lakes.push({
+        cells, surface,
+        wx: ((minX + maxX) / 2 + 0.5) * M_PER_CELL, wz: ((minY + maxY) / 2 + 0.5) * M_PER_CELL,
+        radius: (Math.max(maxX - minX, maxY - minY) / 2 + 1) * M_PER_CELL,
+      });
+    }
+  }
+
+  /**
+   * A lake is LEVEL, and the carve has to know that.
+   *
+   * It used to dig each cell down from that cell's own map elevation, which on a lake spread over
+   * uneven ground left half the bed standing above the water line — so the sheet laid at the lake's
+   * one surface height came out buried, and the other half of the lake was a dry shelf. This field
+   * holds the whole lake's surface at each of the lake's OWN cells, and nothing outside them.
+   *
+   * It used to be dilated a ring outward, on the theory that would grade the rim. It did the
+   * opposite: a lake in a bowl sits well below the ground around it, so handing the rim the lake's
+   * level dug a 240 m trench round the outside of every lake. Outside a lake cell the carve goes
+   * back to the local map height, and the blurred `lakeField` fades the depth out to nothing, which
+   * is all the grading the rim needs.
+   */
+  const lakeLevel = new Float32Array(w * h);
+  for (const lake of lakes) for (const i of lake.cells) lakeLevel[i] = lake.surface;
+
   const roadWidth = klass => (klass === 'trail' ? 4.5 : 7);
   const roadPaths = (world.roads || []).map(r => {
     const points = smoothPath(r.cells.map(toMetres), 5);
@@ -397,10 +506,13 @@ export function makeTerrain(world, planet = null, opts = {}) {
     if (anyLake) {
       const fx = x / M_PER_CELL, fy = z / M_PER_CELL;
       // full depth inside a real lake cell, with the blurred field only shaping the rim outside it
-      const inLake = world.water[IDX(w, cellX(x), cellY(z))] === 2 ? 1 : 0;
+      const cell = IDX(w, cellX(x), cellY(z));
+      const inLake = world.water[cell] === 2 ? 1 : 0;
       const lake = Math.max(inLake, layer(lakeField, fx, fy));
       if (lake > 0.05) {
-        const surface = lakeSurfaceAt(fx, fy);
+        // the lake's OWN level where there is one, so the bed is dug from the water line and not
+        // from whatever the map happened to say this corner of the basin was
+        const surface = inLake ? lakeLevel[cell] : lakeSurfaceAt(fx, fy);
         const bed = surface - lakeDepth * smoothstep(0.05, 0.6, lake);
         height = Math.min(height, bed);
       }
@@ -433,7 +545,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
     // Whether you are IN a lake is the map's own answer for this cell — the blurred field is for
     // shaping the basin, and a one-cell lake blurs away to almost nothing.
     if (anyLake && world.water[IDX(w, cellX(x), cellY(z))] === 2) {
-      const surface = lakeSurfaceAt(x / M_PER_CELL, z / M_PER_CELL);
+      const surface = lakeLevel[IDX(w, cellX(x), cellY(z))] || lakeSurfaceAt(x / M_PER_CELL, z / M_PER_CELL);
       const ground = heightAt(x, z);
       if (surface > ground) return { kind: 'lake', surface, depth: surface - ground, dist: 0 };
     }
@@ -593,7 +705,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
   return {
     world, planet, relief, hasSea, seaLevel, widthM, depthM, metresPerCell: M_PER_CELL,
     width: w, height: h,
-    riverPaths, roadPaths,
+    riverPaths, roadPaths, lakes,
     heightAt, naturalHeightAt, slopeAt, normalAt, colorAt, biomeAt, biomeIdAt, temperatureAt,
     underwater, waterAt, riverAt, roadAt,
     clampToWorld, spawnPoint, layer,

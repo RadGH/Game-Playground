@@ -101,13 +101,16 @@ walking. *wary.*
 every day. Curious rather than hostile — they will follow you for a kilometre and then lose
 interest. *skittish.*
 
-### Ocean and coast
+### The shoreline
 
-**Shingle Crab** — *variation (beetle)* with the legs lengthened and the body flattened. Moves
-sideways at speed and holds its ground with both claws up, which is bluff. *territorial.*
+Nothing lives in the water — see the note below — but the strip of land beside it is still worth
+populating.
 
 **Sun Moth** — *variation (moth)* at half the Carrion Moth's size, in white and pale gold. Drifts
-over water in clouds at dusk. Purely decorative, and the better for it. *skittish.*
+over the shallows in clouds at dusk. Purely decorative, and the better for it. *skittish.*
+
+**Shingle Hopper** — *variation (frog)* in wet grey, the colour of the stones it sits on. Lives on
+the tide line and goes off like a spring when you get close. *skittish.*
 
 ---
 
@@ -252,16 +255,19 @@ the pack, and the pack is already close.
 **Mirage Walker** — *variation (chibi humanoid, shimmering)*. Looks exactly like an ordinary traveller
 until you are within ten metres of it.
 
-### Ocean and coast
+### The sea — deliberately empty
 
-There is nothing in the water at all, and swimming already works.
+**Nothing lives in the water, and that is a decision, not an omission.** An earlier draft of this
+file had a crocodile on the reefs, a kelp slime on the tide line and something large moving under
+the surface that never quite broke it. All three are cut.
 
-**Reef Gleaner** — *variation (crocodile)*, coast only, sunning on rocks.
-**Tidewrack** — *variation (slime)* in kelp browns, on the shoreline, slow, and worth avoiding
-rather than fighting.
-**Shoal-Thing** — *bespoke.* Something large under the surface that never fully breaks it. You see a
-shape and a wake. Whether it can reach you is the whole tension, and a swimming enemy is the one
-genuinely new body plan on this list.
+The reason is that swimming in Farhold is surface-only — no diving, no depth, no way to fight back
+at something below you — so anything in the water is either harmless scenery or an unanswerable
+attack on a player who cannot turn to face it. A swimming body plan is also the one genuinely new
+plan on this whole list, and it would buy a single biome. The sea stays barren until swimming is a
+real place to be rather than a way across.
+
+The **shoreline** is fair game and is stocked above.
 
 ---
 

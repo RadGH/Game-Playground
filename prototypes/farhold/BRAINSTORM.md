@@ -184,7 +184,9 @@ are not built yet.
 That file holds about forty new creatures written out properly: fifteen pieces of **neutral
 wildlife** (the game currently has none — everything charges you, which makes a planet a shooting
 gallery), eight kinds of **people who are not in a town** (the roads between settlements are empty),
-and hostiles filling the four thin biome families — `ice`, `crystal`, `void` and `toxic`. Each says
+and hostiles filling the four thin biome families — `ice`, `crystal`, `void` and `toxic`. The
+**sea is deliberately left barren**: swimming here is surface-only, so anything in the water is
+either scenery or an attack you cannot answer. Each says
 what the thing is in Dwarf-Fortress-style plain sentences, and each is tagged **variation**,
 **variation+**, **bespoke** or **chibi** so the cost of building it is visible up front. Most are
 variations, which is the whole point of having a procedural creature system.

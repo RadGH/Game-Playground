@@ -344,7 +344,7 @@
     "packRadius": 10
   },
   "chests": {
-    "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny \u2014 finding one should be an event. Dungeons place their own on top of this.",
+    "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny \u2014 finding one should be an event. Dungeons place their own on top of this. Every kind declares a `floor` rarity: the worst thing it may contain, and the colour of the beacon standing over it. The beam is a promise, so the two must never disagree \u2014 one shaft for a common find, four and a ring of motes for a legendary.",
     "perCell": 0.012,
     "radius": 5,
     "openRange": 3.2,
@@ -361,7 +361,8 @@
           40
         ],
         "rarityBoost": 1.1,
-        "materials": 1
+        "materials": 1,
+        "floor": "normal"
       },
       "iron": {
         "name": "Iron-Bound Chest",
@@ -405,7 +406,7 @@
           700
         ],
         "rarityBoost": 3.2,
-        "floor": "rare",
+        "floor": "legendary",
         "materials": 5,
         "mimicChance": 0.22,
         "guarded": true

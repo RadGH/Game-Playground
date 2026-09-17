@@ -292,6 +292,67 @@ def('affix:cond_roadFind', v => `+${pct(v)} better loot from anything you kill a
 // `manaRegen` is one unique's spelling of `mana_regen`. One line beats a data migration.
 def('affix:manaRegen', v => `+${n1(v)} mana a second`, { field: 'mpRegen', plain: true });
 
+// ───────────────── the light, mount and quiver slots' own properties ─────────────────
+//
+// "Add affixes specifically for the light source and mount slots, that do not apply to other
+// slots." These only make sense on the thing they are bolted to, which is exactly why they are
+// worth having: a lantern that frightens what it shines on is a different decision from +4 armour.
+
+// The BASE reach of a light, and separately the affix that adds to it — one says "lights 34 metres",
+// the other says "lights 12 more metres", and a card carrying both reads correctly.
+def('affix:cond_lightBase', v => `lights ${n1(v)} metres of ground`, {
+  derive: (v, d) => { d.lightRange = Math.max(d.lightRange || 0, v); },
+});
+def('affix:cond_mountBase', v => `carries you at ${n1(v)}x your own pace`, {
+  derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
+});
+def('affix:cond_mountWind', v => `${n1(v)} seconds of hard riding before it blows`, {
+  derive: (v, d) => { d.mountStamina = Math.max(d.mountStamina || 0, v); },
+});
+def('affix:cond_lightRange', v => `lights ${n1(v)} more metres of ground`, {
+  derive: (v, d) => { d.lightRange = (d.lightRange || 0) + v; },
+});
+def('affix:cond_lightSteady', v => `${pct(v)} less likely to be noticed while it is lit`, {
+  derive: (v, d) => { d.stealth = (d.stealth || 0) + v; },
+});
+def('affix:cond_lightWard', v => `${pct(v)} less damage from anything standing in its light`, {
+  dmgIn: (v) => 1 - v,
+});
+def('affix:cond_lightReveal', v => `shows chests and doorways ${n1(v)} metres further out`, {
+  derive: (v, d) => { d.revealRange = (d.revealRange || 0) + v; },
+});
+
+def('affix:cond_mountSpeed', v => `+${n1(v)}x to how fast it carries you`, {
+  derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
+});
+def('affix:cond_mountStamina', v => `${n1(v)} more seconds of hard riding before it blows`, {
+  derive: (v, d) => { d.mountStamina = (d.mountStamina || 0) + v; },
+});
+def('affix:cond_mountSlope', v => `${pct(v)} less slowed by broken ground and hills`, {
+  derive: (v, d) => { d.mountSlope = (d.mountSlope || 0) + v; },
+});
+def('affix:cond_mountTrample', v => `rides down what it runs into for ${n1(v)} damage`, {
+  derive: (v, d) => { d.trample = (d.trample || 0) + v; },
+});
+def('affix:cond_mountCalm', v => `${pct(v)} less likely to throw you when something charges`, {
+  derive: (v, d) => { d.mountCalm = (d.mountCalm || 0) + v; },
+});
+
+// Quivers add DAMAGE, not armour — the play-test's change, and the reason they are worth a slot.
+def('affix:cond_quiverDamage', v => `+${n1(v)} damage on every arrow`, {
+  derive: (v, d) => { d.arrowDamage = (d.arrowDamage || 0) + v; },
+});
+def('affix:cond_quiverElement', () => 'the heads carry an element, and leave its mark', {});
+def('affix:cond_quiverSplit', v => `every shot is ${n1(v)} arrows`, {
+  derive: (v, d) => { d.arrowsPerShot = Math.max(d.arrowsPerShot || 1, v); },
+});
+def('affix:cond_quiverHoming', v => `the heads turn toward what you aimed at`, {
+  derive: (v, d) => { d.arrowHoming = (d.arrowHoming || 0) + v; },
+});
+def('affix:cond_quiverBurst', v => `arrows burst on impact for ${n1(v)} metres`, {
+  derive: (v, d) => { d.arrowBurst = Math.max(d.arrowBurst || 0, v); },
+});
+
 // ───────────────────────────── legendary powers ─────────────────────────────
 // The 24 ids in items.json `legendaryEffects`. Five of them were written for Emberveil's *travel*
 // layer — camping, foraging, map nodes, night raids — which Farhold does not have in that shape, so

@@ -18,6 +18,7 @@
 import { Loot } from '../../emberveil/js/loot.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor } from './affixes.js';
+import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 // Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
@@ -226,6 +227,9 @@ export class Rpg {
     // Round 6: units, floors, caps, slot rules and item levels. This MUST run before anything
     // reads the affix tables — the loot pool, the shop, the crafting bench and the uniques all
     // reach through the same objects. See js/affixes.js for why the data needed restating at all.
+    // the light and mount slots' own affixes live in js/gear.js; they are tuned with the rest
+    items.affixes = items.affixes || {};
+    items.affixes.slotOnly = SLOT_AFFIX_LIST.map(a => ({ ...a }));
     this.affixReport = tuneAffixData(items);
     this.weightAffixes();
     this.itemLevels();
@@ -268,6 +272,11 @@ export class Rpg {
       }
       return item;
     };
+  }
+
+  /** Roll one of the light/mount slot affixes. Same tiers, same caps as anything else. */
+  rollSlotAffix(def, ilvl = 1, rng = this.rng) {
+    return rollAffixValue(def, ilvl, rng);
   }
 
   /**
@@ -326,6 +335,9 @@ export class Rpg {
       name, classId, avatar, level, xp: xpForLevel(level), gold: base.startGold ?? 0,
       attrs: { str: base.str ?? 6, dex: base.dex ?? 6, int: base.int ?? 6, con: base.con ?? 6 },
       pendingAttr: 0, pendingPassive: 0, pendingTalent: 0,
+      // Boats and ships are unlockables rather than loot: bought once, owned for the run, and
+      // chosen from a dropdown. See js/gear.js for why they are kept out of the item system.
+      vehicles: startingVehicles(),
       passiveRanks: {}, talents: [],
       equipment: {}, bag: [],
       kills: 0, deaths: 0,

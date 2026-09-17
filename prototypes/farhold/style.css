@@ -846,3 +846,15 @@ body {
 /* something has lowered it — the "of Early Promise" affix, worn or in the bag */
 .tip-req .req-cut { color: #7fd4ff; }
 .tip-req .req-no  { color: #ff7a5a; font-weight: 600; }
+
+/* the shop's three shelves, plus whatever you have sold back */
+.shop-tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 7px; }
+.trade-col { min-width: 0; }
+.trade-col .trade-row { cursor: default; }
+.trade-col .trade-row:hover { background: rgba(120, 180, 220, .08); }
+/* the gambler */
+.crate-row .coin { margin-left: auto; }
+.crate-result {
+  margin-top: 8px; padding: 7px 9px; border-radius: 5px;
+  background: rgba(255, 210, 74, .1); border: 1px solid rgba(255, 210, 74, .3);
+}

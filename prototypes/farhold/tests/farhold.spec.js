@@ -162,7 +162,12 @@ test('the character sheet wears an item and the body picks up the weapon', async
   await land(page);
   const outcome = await page.evaluate(async () => {
     const f = window.farhold;
-    const item = f.give('greatsword', 'rare');
+    // Round 6 gave every item a level requirement, so a level-1 character cannot simply put on
+    // whatever falls out of the generator. Level up first — the point of this test is the sheet and
+    // the body, not the requirement (which has its own tests in tests/affixes.test.js).
+    f.player.level = 30;
+    f.rpg.refresh(f.player, { full: true });
+    const item = f.give('greatsword', 'rare', { level: 10 });
     f.hud.toggleSheet(true);
     f.hud.setTab('inventory');          // round 4: the bag lives on its own tab
     const rows = document.querySelectorAll('#sheet-bag .row');
@@ -183,6 +188,36 @@ test('the character sheet wears an item and the body picks up the weapon', async
   expect(outcome.slotsDrawn).toBe(12);
   expect(outcome.worn).toBe(outcome.item);
   expect(outcome.damageAfter[1]).toBeGreaterThan(outcome.damageBefore[1]);
+});
+
+test('a level requirement is refused out loud, not silently ignored', async ({ page }) => {
+  // The other half of the same change: clicking a bag row you have not grown into must say why,
+  // and leave what you were wearing alone.
+  const errors = await land(page);
+  const outcome = await page.evaluate(async () => {
+    const f = window.farhold;
+    f.player.level = 1;
+    f.rpg.refresh(f.player, { full: true });
+    const before = f.player.equipment.weapon?.name || null;
+    const item = f.give('greatsword', 'rare', { level: 40 });
+    f.hud.toggleSheet(true);
+    f.hud.setTab('inventory');
+    const rows = document.querySelectorAll('#sheet-bag .row');
+    rows[rows.length - 1].click();
+    await new Promise(r => setTimeout(r, 150));
+    const log = [...document.querySelectorAll('#log div')].map(n => n.textContent).join(' | ');
+    return {
+      item: item.name, ilvl: item.ilvl, req: item.levelReq,
+      before, after: f.player.equipment.weapon?.name || null,
+      stillInBag: f.player.bag.includes(item),
+      said: /needs level/.test(log),
+    };
+  });
+  expect(outcome.req).toBeGreaterThan(1);
+  expect(outcome.after).toBe(outcome.before);
+  expect(outcome.stillInBag).toBe(true);
+  expect(outcome.said).toBe(true);
+  expect(errors).toEqual([]);
 });
 
 test('enemies appear around the player, chase, and are cleared away when you leave', async ({ page }) => {

@@ -44,6 +44,7 @@ import { createPets } from './pets.js';
 import { createSites } from './sites.js';
 import { createEncounters } from './encounters.js';
 import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
+import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES } from './gear.js';
 import { createCrafting, Materials } from './craft.js';
 import { showRewards, rewardsOpen } from '../../../shared/rewards.js';
 import { familiesOf } from '../../../worldgen/js/biomes.js';
@@ -924,6 +925,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // A boss or a rare leaves a BAG rather than pushing five things silently into the inventory.
     // Walking over to pick it up is the beat that makes the kill feel finished.
     if ((e.rank === 'boss' || e.rank === 'rare') && (drops.length || Object.keys(mats).length)) {
+      /**
+       * "When receiving a loot crate from a kill, ensure there is always at least a rare item in
+       * it."
+       *
+       * A bag is the reward for a fight you had to work for, and walking across a field to open one
+       * holding two normals is worse than getting nothing. If the rolls did not produce a rare, one
+       * is rolled with `floor: 'rare'` and added — and the beacon over the bag then shows it,
+       * because the beacon reads the best thing inside.
+       */
+      const RANKS = ['normal', 'magic', 'rare', 'legendary'];
+      if (!drops.some(d => RANKS.indexOf(d.rarity) >= 2)) {
+        const promised = rpg.rollDrop({
+          level: e.level, rng: field.rng, magicFind: player.derived.magicFind,
+          bases: e.dropBases, chance: 1, floor: 'rare',
+        });
+        if (promised) drops.push(promised);
+      }
       chests.dropBag(e.x, e.z, {
         items: drops, gold: Math.round(e.gold * 0.5), mats: {},
         title: e.rank === 'boss' ? e.name + ' falls' : 'A rare kill',
@@ -1215,7 +1233,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function talkContext(npc) {
     return {
       gold: player.gold,
-      stock: npc.trades ? folk.stockFor(npc, player.level) : [],
+      // the three shelves plus the buyback list — see js/town.js `shelves`
+      shelves: npc.trades ? folk.shelves(npc, player.level) : null,
+      stock: npc.trades ? folk.forSale(npc, player.level) : [],
+      vehicles: npc.trades ? folk.vehicles() : [],
+      ownsVehicle: (slot, key) => (player.vehicles?.owned?.[slot] || []).includes(key),
+      crates: npc.gambles ? folk.CRATE_TIERS : [],
+      lastCrate, lastCrateLifted,
       bag: player.bag,
       offer: folk.questFrom(npc, { level: player.level, enemies: bestiary.enemies, nodes: world.nodes }),
       active: questLog.active,
@@ -1225,8 +1249,41 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     };
   }
 
+  // what the gambler last pulled out of a crate, so the panel can show it
+  let lastCrate = null, lastCrateLifted = false;
+
   const talk = createTalkPanel({
     describe: item => hud.describe(item),
+    /**
+     * The SAME hover card the inventory uses, on every row of the shop.
+     *
+     * "Update shops to support the same item hover effects as the menu, and also support comparing.
+     * All item interfaces should have these tooltips." `hud.tipFor` already builds the full card —
+     * properties, set progress, item level, and the delta against what you are wearing — so the
+     * shop simply asks for it rather than growing a second, worse one.
+     */
+    tip: (node, item) => hud.tipFor(node, item),
+    buyVehicle: v => {
+      const r = unlockVehicle(player, v.slot, v.key);
+      hud.log(r.ok ? `The ${r.kind.name} is yours. Pick it on the character sheet.` : r.why, r.ok ? 'loot' : 'bad');
+      if (r.ok) sound.coin(); else sound.ui('error');
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    gamble: tier => {
+      const r = folk.gamble(talk.npc, tier.key, player, { level: player.level });
+      if (!r.ok) { hud.log(r.why, 'bad'); sound.ui('error'); }
+      else {
+        lastCrate = r.item;
+        lastCrateLifted = r.lifted;
+        hud.log(`${tier.name}: ${r.item.name}.${r.lifted ? ' Better than the seal promised.' : ''}`, 'loot');
+        sound.loot(r.item);
+      }
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
     price: item => Math.max(1, Math.round(rpg.price(item) * campaign.priceMultiplier(talk.npc?.node?.id))),
     sellPrice: item => Math.max(1, Math.round(rpg.price(item) * (items.sellFactor ?? 0.35))),
     buy: item => {
@@ -2551,7 +2608,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get terrain() { return terrain; },
     launch, land,
     get folk() { return folk; },
-    questLog, markers, talk, sound, speech, campaign, settings,
+    questLog, markers, talk, talkContext, sound, speech, campaign, settings,
     chart, galaxy, warp, beginJump,
     get starId() { return starId; },
     get starNow() { return starNow(); },
@@ -2580,8 +2637,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return field.add(def, level, control.x + 3, control.z + 3);
     },
     hit: () => field.strike(control, player, { reach: 9, arc: 6.3 }),
-    give: (baseKey, rarity = 'rare') => {
-      const item = attuneWeapon(rpg.loot.generate(baseKey, rarity, 'high', { rng: rpg.rng }));
+    give: (baseKey, rarity = 'rare', opts = {}) => {
+      const level = opts.level ?? player.level;
+      const item = attuneWeapon(rpg.loot.generate(baseKey, rarity, 'high', { rng: rpg.rng, level, ...opts }));
       if (item) player.bag.push(item);
       hud.setPlayer(player);
       return item;

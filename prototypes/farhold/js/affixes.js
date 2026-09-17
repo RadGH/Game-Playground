@@ -79,6 +79,14 @@ export const ENGINE_UNIT = {
   cond_levelReqReduce: 'flat',
   // flags — present or absent, the value is ignored
   cond_extraSetPiece: 'flag', cond_setThresholdReduce: 'flag',
+  // round 6: the light, mount and quiver slots' own properties (js/gear.js)
+  cond_lightRange: 'flat', cond_lightBase: 'flat', cond_lightReveal: 'flat',
+  cond_lightSteady: 'frac', cond_lightWard: 'frac',
+  cond_mountSpeed: 'flat', cond_mountBase: 'flat', cond_mountWind: 'flat',
+  cond_mountStamina: 'flat', cond_mountTrample: 'flat',
+  cond_mountSlope: 'frac', cond_mountCalm: 'frac',
+  cond_quiverDamage: 'flat', cond_quiverSplit: 'flat', cond_quiverHoming: 'flat',
+  cond_quiverBurst: 'flat', cond_quiverElement: 'flag',
 };
 
 /**
@@ -102,6 +110,9 @@ export const AFFIX_CAP = {
   cond_physDmgReducePct: 0.5, cond_magicDmgReducePct: 0.5, cond_manaShieldOnHit: 0.5,
   cond_goldOnEliteKill: 3, cond_killInitBonus: 0.6, cond_speedOnFirstHit: 0.5,
   cond_poisonStackPower: 1.5, cond_levelReqReduce: 12,
+  cond_lightRange: 60, cond_lightSteady: 0.6, cond_lightWard: 0.5, cond_lightReveal: 90,
+  cond_mountSlope: 0.7, cond_mountCalm: 0.8, cond_mountStamina: 60, cond_mountTrample: 60,
+  cond_quiverDamage: 40, cond_quiverSplit: 4, cond_quiverBurst: 6,
 };
 
 // ---------------------------------------------------------------------------- the balance table
@@ -202,6 +213,17 @@ export const AFFIX_TUNING = {
   // item itself without even being equipped as well as other items once you have it equipped." It
   // is the one affix worth reading on an item you cannot yet wear, which is why it is here at all.
   early_promise: { min: 2, max: 4, ilvl: 4, growth: 2.5 },
+
+  // ---- the light, mount and quiver slots' own affixes (js/gear.js). Their `slots` come from
+  // SLOT_AFFIXES rather than SLOT_RULES, because the module that invents them owns that fact.
+  wide_beam: { min: 8, max: 20, ilvl: 1, slots: ['light'] },
+  steady_flame: { min: 0.1, max: 0.25, ilvl: 3, slots: ['light'] },
+  warding_light: { min: 0.1, max: 0.22, ilvl: 5, slots: ['light'] },
+  seeking_light: { min: 12, max: 30, ilvl: 4, slots: ['light'] },
+  surefoot: { min: 0.15, max: 0.35, ilvl: 1, slots: ['mount'] },
+  longwind: { min: 6, max: 18, ilvl: 1, slots: ['mount'] },
+  trample: { min: 4, max: 14, ilvl: 4, slots: ['mount'] },
+  calm: { min: 0.15, max: 0.4, ilvl: 3, slots: ['mount'] },
 
   // ---- flags: the value is ignored, but they are the rarest thing in the pool
   set_piece_bonus: { min: 1, max: 1, ilvl: 10, growth: 1 },

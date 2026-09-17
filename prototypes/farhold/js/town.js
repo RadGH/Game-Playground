@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { makeActor, setActorAnim } from './actors.js';
 import { makeQuest } from './quests.js';
+import { createGearShop, categoryOf, VEHICLES } from './gear.js';
 
 /**
  * The little badge that floats over somebody worth talking to. Drawn into a canvas once per glyph
@@ -51,6 +52,7 @@ function badgeSprite(glyph, colour) {
 /** What badge a role wears: work to hand out, or a stall. */
 export function badgeFor(role) {
   if (role.quests) return { glyph: '!', color: '#ffd24a', kind: 'quest' };
+  if (role.gambles) return { glyph: '?', color: '#ffd24a', kind: 'gambler' };
   if (role.trades) return { glyph: '$', color: '#8fe0a0', kind: 'shop' };
   return null;
 }
@@ -63,6 +65,28 @@ export const ROLES = [
   { key: 'smith', name: 'Smith', minSize: 3, trades: true, greeting: 'Steel, if you have the coin.' },
   { key: 'innkeeper', name: 'Innkeeper', minSize: 3, quests: true, greeting: 'A bed, a fire, and trouble to spare.' },
   { key: 'guard', name: 'Guard', minSize: 2, guards: true, greeting: 'Move along, or do not. It is all the same to me.' },
+  /**
+   * The gambler. "Add a gambler who sells loot crates similar to the ones you can find randomly.
+   * These should have only one item in them. You should be able to buy any rarity of loot crate at
+   * a different price, guaranteeing at LEAST that level of loot inside. However any loot crate
+   * should have a small chance to have even better loot inside of it — increased for higher loot
+   * crates." Only in a real town: somewhere with three houses cannot support one.
+   */
+  { key: 'gambler', name: 'Gambler', minSize: 3, gambles: true, greeting: 'Sealed, unopened, and I do not know what is in it either. That is the arrangement.' },
+];
+
+/**
+ * What a sealed crate costs and what it promises.
+ *
+ * `floor` is the worst thing inside — the guarantee you are paying for. `lift` is the chance the
+ * roll comes out a tier better than the promise, and it climbs with the price, because the whole
+ * appeal of the expensive crate is that it can still surprise you.
+ */
+export const CRATE_TIERS = [
+  { key: 'plain', name: 'Plain Crate', floor: 'normal', price: 60, lift: 0.1 },
+  { key: 'marked', name: 'Marked Crate', floor: 'magic', price: 240, lift: 0.14 },
+  { key: 'sealed', name: 'Sealed Crate', floor: 'rare', price: 900, lift: 0.2 },
+  { key: 'warded', name: 'Warded Crate', floor: 'legendary', price: 3200, lift: 0.28 },
 ];
 
 /**
@@ -72,11 +96,33 @@ export const ROLES = [
  */
 const HEADCOUNT = [3, 3, 4, 6, 8, 9];
 
-/** What a merchant's stock is drawn from. */
-const STOCK_BY_ROLE = {
-  merchant: ['ring', 'necklace', 'cloth_helm', 'light_boots', 'light_chest', 'dagger'],
-  smith: ['sword', 'longsword', 'hammer', 'medium_chest', 'medium_helm', 'heavy_gauntlets'],
+/**
+ * What a merchant's stock is drawn from, by category.
+ *
+ * "Make it so that shops have a menu more like Diablo 2 where you can filter by categories: armor,
+ * weapon, other; and offer a larger selection of random loot in each one."
+ *
+ * So a shop is three lists rather than one, and each one is stocked from bases that belong in it.
+ * `other` is the interesting one: jewellery, the torch and the mount slots, and the quivers — the
+ * things you do not go looking for and then find you want.
+ */
+export const SHOP_CATEGORIES = ['weapon', 'armor', 'other'];
+
+export const STOCK_BY_ROLE = {
+  merchant: {
+    weapon: ['dagger', 'sword', 'wand', 'scepter', 'shortbow', 'staff'],
+    armor: ['cloth_helm', 'light_boots', 'light_chest', 'cloth_robe', 'light_gloves', 'light_legs'],
+    other: ['ring', 'necklace'],
+  },
+  smith: {
+    weapon: ['sword', 'longsword', 'hammer', 'axe', 'sword2h', 'axe2h', 'crossbow', 'mace'],
+    armor: ['medium_chest', 'medium_helm', 'heavy_gauntlets', 'heavy_chest', 'heavy_helm', 'shield', 'medium_legs'],
+    other: ['ring', 'necklace'],
+  },
 };
+
+/** How many of each category a shop carries. A big selection is the point. */
+export const STOCK_COUNT = { weapon: 8, armor: 8, other: 6 };
 
 /**
  * How a guard fights. Deliberately not a bestiary entry: a guard is scaled off the PLAYER's level so
@@ -87,6 +133,8 @@ const GUARD = { hp: 260, dmg: [14, 22], armor: 22, speed: 5.2, reach: 3, attackE
 export function createTownFolk(scene, terrain, opts = {}) {
   const { features, rpg, namegen = null, looks = [], seed = 1, radius = 900, balance = {} } = opts;
   const cfg = balance.town || {};
+  // every merchant carries a light, a mount and a quiver whatever else it sells
+  const gearShop = createGearShop({ rpg });
   const talkRange = cfg.talkRange ?? 3.6;
   /** How far from the middle of a settlement a guard will go, and how far the watch reaches. */
   const guardReach = cfg.guardReach ?? 42;
@@ -180,7 +228,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
         name, role: role.key, roleName: role.name, gender,
         guards: !!role.guards, guardTimer: 0, target: null,
         greeting: role.greeting,
-        trades: !!role.trades, givesQuests: !!role.quests,
+        trades: !!role.trades, givesQuests: !!role.quests, gambles: !!role.gambles,
         node, x, z, y: terrain.heightAt(x, z),
         facing: rng() * Math.PI * 2,
         home: [x, z],
@@ -218,18 +266,33 @@ export function createTownFolk(scene, terrain, opts = {}) {
     live.delete(id);
   }
 
-  /** Stock is rolled once per merchant, from what a player of this level would use. */
+  /**
+   * Stock is rolled once per merchant, from what a player of this level would use.
+   *
+   * Each item carries the category it was stocked under so the shop panel can filter, and a
+   * merchant keeps a **buyback** list: "when you sell an item to the shop, the item becomes
+   * available from the for sale menu again; until the shop refreshes later". Selling a thing you
+   * meant to keep should cost you the margin, not the item.
+   */
   function stockFor(npc, level) {
     if (npc.stock) return npc.stock;
     const rng = makeRng((seed ^ npc.id.split(':').reduce((a, c) => a + c.charCodeAt(0), 0) * 2654435761) >>> 0);
-    const bases = STOCK_BY_ROLE[npc.role] || STOCK_BY_ROLE.merchant;
+    const table = STOCK_BY_ROLE[npc.role] || STOCK_BY_ROLE.merchant;
     const items = [];
-    for (let i = 0; i < 6; i++) {
-      const rarity = rng() < 0.12 ? 'rare' : rng() < 0.45 ? 'magic' : 'normal';
-      const item = rpg.loot.generate(rng.pick(bases), rarity, rpg.qualityFor(level), { rng });
-      if (item) items.push(item);
+    for (const category of SHOP_CATEGORIES) {
+      const bases = table[category] || [];
+      if (!bases.length) continue;
+      for (let i = 0; i < (STOCK_COUNT[category] || 6); i++) {
+        const rarity = rng() < 0.1 ? 'rare' : rng() < 0.42 ? 'magic' : 'normal';
+        // a shop's gear is levelled to whoever walked in, so the selection is always worth a look
+        const item = rpg.loot.generate(rng.pick(bases), rarity, rpg.qualityFor(level), { rng, level });
+        if (item) { item.shopCategory = category; items.push(item); }
+      }
     }
+    // the mounts, lights and quivers every shop carries, whatever else it sells
+    for (const extra of gearShop.stockFor(npc, level, rng)) { extra.shopCategory = 'other'; items.push(extra); }
     npc.stock = items;
+    npc.buyback = npc.buyback || [];
     return items;
   }
 
@@ -381,25 +444,81 @@ export function createTownFolk(scene, terrain, opts = {}) {
     },
 
     stockFor, questFrom, populate, depopulate,
+    /** Everyone currently in the world, for the debug menu and the tests. */
+    roster: () => [...live.values()].flat(),
 
-    /** Take an item off a merchant. */
+    /**
+     * Take an item off a merchant. Buying something back out of the buyback list costs what you
+     * were paid for it plus the shop's margin — the merchant is not a charity, but it is not a
+     * disaster either.
+     */
     buy(npc, item, player, multiplier = 1) {
-      const price = Math.max(1, Math.round(rpg.price(item) * multiplier));
+      const fromBuyback = (npc.buyback || []).includes(item);
+      const price = Math.max(1, Math.round(rpg.price(item) * multiplier * (fromBuyback ? 1 : 1)));
       if (player.gold < price) return { ok: false, why: `That is ${price} gold and you have ${player.gold}.` };
       player.gold -= price;
       player.bag.push(item);
-      npc.stock = npc.stock.filter(i => i !== item);
-      return { ok: true, price };
+      npc.stock = (npc.stock || []).filter(i => i !== item);
+      npc.buyback = (npc.buyback || []).filter(i => i !== item);
+      return { ok: true, price, fromBuyback };
     },
 
-    /** Sell one of yours. */
+    /**
+     * Sell one of yours — and the merchant puts it straight back on the shelf.
+     *
+     * "Change it so when you sell an item to the shop, the item becomes available from the for sale
+     * menu again; until the shop refreshes later." The buyback list is capped, oldest out first, so
+     * a long session does not turn a village smith into a warehouse.
+     */
     sell(npc, item, player) {
       const price = Math.max(1, Math.round(rpg.price(item) * (rpg.items.sellFactor ?? 0.35)));
       const i = player.bag.indexOf(item);
       if (i < 0) return { ok: false, why: 'You are not carrying that.' };
       player.bag.splice(i, 1);
       player.gold += price;
+      npc.buyback = npc.buyback || [];
+      item.shopCategory = item.shopCategory || categoryOf(item);
+      npc.buyback.unshift(item);
+      if (npc.buyback.length > (cfg.buybackSlots ?? 12)) npc.buyback.length = cfg.buybackSlots ?? 12;
       return { ok: true, price };
+    },
+
+    /** Everything a merchant will sell you right now: its own stock, then anything you sold it. */
+    forSale(npc, level) {
+      return [...stockFor(npc, level), ...(npc.buyback || [])];
+    },
+
+    /** What this person sells, sorted into the shop's three tabs. */
+    shelves(npc, level) {
+      const out = { weapon: [], armor: [], other: [], buyback: [...(npc.buyback || [])] };
+      for (const item of stockFor(npc, level)) out[categoryOf(item)].push(item);
+      return out;
+    },
+
+    /** The vehicles on offer — unlockables, not items, so they are their own list. */
+    vehicles: () => gearShop.vehiclesFor(),
+
+    CRATE_TIERS,
+
+    /**
+     * Buy a sealed crate and open it. One item, never less than what the tier promised, and a
+     * `lift` chance of one tier better — which is the only reason to buy the expensive one.
+     */
+    gamble(npc, tierKey, player, { level = 1 } = {}) {
+      const tier = CRATE_TIERS.find(t => t.key === tierKey);
+      if (!tier) return { ok: false, why: 'No such crate.' };
+      if ((player.gold || 0) < tier.price) {
+        return { ok: false, why: `That crate is ${tier.price} gold and you have ${player.gold || 0}.` };
+      }
+      const rng = makeRng((seed ^ Date.now()) >>> 0);
+      const RANKS = ['normal', 'magic', 'rare', 'legendary'];
+      let floor = tier.floor;
+      if (rng() < tier.lift) floor = RANKS[Math.min(RANKS.length - 1, RANKS.indexOf(floor) + 1)];
+      const item = rpg.rollDrop({ level, rng, magicFind: player.derived?.magicFind || 0, chance: 1, floor });
+      if (!item) return { ok: false, why: 'The crate was empty. It happens.' };
+      player.gold -= tier.price;
+      player.bag.push(item);
+      return { ok: true, item, tier, lifted: floor !== tier.floor, price: tier.price };
     },
 
     stats() {

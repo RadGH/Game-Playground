@@ -107,6 +107,8 @@ export function snapshot({ id, name, seed, classId, player, control, elapsed, pl
       equipment: player.equipment, bag: player.bag,
       passiveRanks: player.passiveRanks, pendingPassive: player.pendingPassive,
       pendingTalent: player.pendingTalent, talents: player.talents,
+      // unlockables rather than loot, so they travel with the character — see js/gear.js
+      vehicles: player.vehicles,
     },
     position: { x: control.x, z: control.z, yaw: control.yaw, pitch: control.pitch },
     // Markers replaced the old bare `pins` array: a quest destination, a story objective and a
@@ -135,6 +137,7 @@ export function restore(save, { rpg, player, control, map }) {
   player.passiveRanks = p.passiveRanks || {};
   player.pendingPassive = p.pendingPassive ?? 0;
   player.pendingTalent = p.pendingTalent ?? 0;
+  if (p.vehicles) player.vehicles = p.vehicles;
   player.talents = p.talents || [];
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;

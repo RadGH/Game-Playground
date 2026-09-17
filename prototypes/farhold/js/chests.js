@@ -147,6 +147,91 @@ export function sconceBody(iron = '#3a3a42', flame = '#ffb070') {
   ]);
 }
 
+/**
+ * A shaft of light over something worth walking to.
+ *
+ * "Add rarity glow to these crates and normal chests to indicate (and guarantee) a minimum rarity
+ * level. Higher rarities or specials like sets should have additional beams of glow and particles
+ * to indicate how valuable they are."
+ *
+ * So the beacon is a **promise**: its colour is the rarity the container is guaranteed to hold, and
+ * the number of beams climbs with it — one for a common find, four plus a ring of motes for
+ * something legendary. A player learns to read it from across a field, and it never lies, because
+ * the same `floor` drives the beam and the roll.
+ *
+ * Built from a cone with an additive material and no depth write, which is the cheapest thing that
+ * reads as light in a scene with no post-processing.
+ */
+export const RARITY_BEACON = {
+  normal: { color: '#c9c2b6', beams: 1, height: 1.8, motes: 0, opacity: 0.11 },
+  magic: { color: '#7f95ff', beams: 2, height: 3.0, motes: 0, opacity: 0.2 },
+  rare: { color: '#e8d020', beams: 3, height: 4.0, motes: 5, opacity: 0.24 },
+  legendary: { color: '#ff8020', beams: 4, height: 5.2, motes: 8, opacity: 0.28 },
+  set: { color: '#2fc4b2', beams: 4, height: 5.2, motes: 8, opacity: 0.28 },
+  unique: { color: '#ff5a3c', beams: 5, height: 6.0, motes: 10, opacity: 0.3 },
+};
+
+const BEACON_CONE = new THREE.ConeGeometry(0.34, 1, 7, 1, true);
+const MOTE = new THREE.SphereGeometry(0.06, 5, 4);
+
+/**
+ * `rarity` is the guaranteed floor. Returns a group to park at the container's feet, with an
+ * `update(dt)` that turns the beams and bobs the motes.
+ */
+export function createBeacon(rarity = 'normal') {
+  const look = RARITY_BEACON[rarity] || RARITY_BEACON.normal;
+  const group = new THREE.Group();
+  group.name = 'farhold-beacon';
+  const material = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(look.color),
+    transparent: true, opacity: look.opacity,
+    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
+  });
+  const beams = [];
+  for (let i = 0; i < look.beams; i++) {
+    const beam = new THREE.Mesh(BEACON_CONE, material);
+    // point UP: a cone is built apex-up, and a light shaft reads better wide at the top
+    beam.rotation.x = Math.PI;
+    beam.scale.set(1 - i * 0.14, look.height * (1 + i * 0.1), 1 - i * 0.14);
+    beam.position.y = look.height * (1 + i * 0.1) / 2;
+    beam.rotation.y = (i / Math.max(1, look.beams)) * Math.PI * 2;
+    beam.renderOrder = 8;
+    group.add(beam);
+    beams.push(beam);
+  }
+  const motes = [];
+  const moteMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(look.color), transparent: true, opacity: 0.8,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  for (let i = 0; i < look.motes; i++) {
+    const mote = new THREE.Mesh(MOTE, moteMat);
+    mote.userData.phase = (i / Math.max(1, look.motes)) * Math.PI * 2;
+    mote.userData.radius = 0.5 + (i % 3) * 0.22;
+    group.add(mote);
+    motes.push(mote);
+  }
+  let t = 0;
+  return {
+    group, rarity, look,
+    update(dt) {
+      t += dt;
+      for (let i = 0; i < beams.length; i++) {
+        beams[i].rotation.y += dt * (0.25 + i * 0.12);
+        beams[i].material.opacity = look.opacity * (0.75 + 0.25 * Math.sin(t * 1.6 + i));
+      }
+      for (const m of motes) {
+        const a = m.userData.phase + t * 0.9;
+        m.position.set(Math.cos(a) * m.userData.radius, 0.5 + Math.sin(t * 1.4 + m.userData.phase) * 0.45, Math.sin(a) * m.userData.radius);
+      }
+    },
+    dispose() {
+      material.dispose();
+      moteMat.dispose();
+    },
+  };
+}
+
 // ---------------------------------------------------------------------------- the field
 
 export function createChests(scene, terrain, { seed = 1, balance = {}, zones = null, rpg = null, collide = null } = {}) {
@@ -194,6 +279,7 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
       const c = live[i];
       if (Math.abs(Math.floor(c.x / CELL) - cx) <= radius && Math.abs(Math.floor(c.z / CELL) - cz) <= radius) continue;
       scene.remove(c.mesh);
+      dropBeacon(c);
       live.splice(i, 1);
     }
     const held = new Set(live.map(c => c.key));
@@ -225,15 +311,32 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
     mesh.scale.setScalar(look.scale || 1);
     mesh.name = 'farhold-chest-' + kind;
     scene.add(mesh);
+    const spec = kinds[kind] || {};
     const chest = {
       kind, x, z, y, mesh, facing,
       key: key || `placed:${Math.round(x)},${Math.round(z)}`,
-      opened: isOpen, level, spec: kinds[kind] || {},
-      name: kinds[kind]?.name || 'Chest',
+      opened: isOpen, level, spec,
+      name: spec.name || 'Chest',
+      floor: spec.floor || 'normal',
     };
+    // The beacon promises what is inside. Same `floor` drives the colour and the roll, so it cannot
+    // lie; an opened chest loses it, because there is nothing left to promise.
+    if (!isOpen) {
+      chest.beacon = createBeacon(chest.floor);
+      chest.beacon.group.position.set(x, y + 0.2, z);
+      scene.add(chest.beacon.group);
+    }
     live.push(chest);
     collide?.add(x, z, 0.8, 1);
     return chest;
+  }
+
+  /** Take a container's beacon away — it has been opened, or it has gone. */
+  function dropBeacon(holder) {
+    if (!holder?.beacon) return;
+    scene.remove(holder.beacon.group);
+    holder.beacon.dispose();
+    holder.beacon = null;
   }
 
   /** The chest you are standing next to, or null. */
@@ -259,6 +362,7 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
     chest.opened = true;
     opened.add(chest.key);
     chest.mesh.geometry = geometryFor(chest.kind, true);
+    dropBeacon(chest);
 
     if (spec.mimicChance && r() < spec.mimicChance) return { mimic: true, chest };
 
@@ -292,8 +396,25 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
     mesh.name = 'farhold-lootbag';
     scene.add(mesh);
     const bag = { x, z, y, mesh, contents, bob: 0, life: 0 };
+    // a bag wears the colour of the best thing in it, so you know from a distance whether the walk
+    // over is worth making
+    bag.beacon = createBeacon(bestRarity(contents.items));
+    bag.beacon.group.position.set(x, y, z);
+    scene.add(bag.beacon.group);
     bags.push(bag);
     return bag;
+  }
+
+  /** The best rarity in a list of items — what a bag's beacon is coloured by. */
+  function bestRarity(items = []) {
+    const order = ['normal', 'magic', 'rare', 'legendary'];
+    let best = 'normal';
+    for (const it of items || []) {
+      if (it?.setId) return 'set';
+      if (it?.isUnique) return 'unique';
+      if (order.indexOf(it?.rarity) > order.indexOf(best)) best = it.rarity;
+    }
+    return best;
   }
 
   /** Bob the bags, and hand over anything the player has walked onto. Returns what was collected. */
@@ -305,18 +426,22 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
       b.life += dt;
       b.mesh.position.y = b.y + 0.1 + Math.sin(b.bob) * 0.08;
       b.mesh.rotation.y += dt * 0.8;
+      b.beacon?.update(dt);
       if (Math.hypot(b.x - px, b.z - pz) < range) {
         got.push(b.contents);
         scene.remove(b.mesh);
+        dropBeacon(b);
         bags.splice(i, 1);
       }
     }
+    // the chests you can see turn their beams too
+    for (const c of live) c.beacon?.update(dt);
     return got;
   }
 
   function clear() {
-    for (const c of live) scene.remove(c.mesh);
-    for (const b of bags) scene.remove(b.mesh);
+    for (const c of live) { scene.remove(c.mesh); dropBeacon(c); }
+    for (const b of bags) { scene.remove(b.mesh); dropBeacon(b); }
     live.length = 0; bags.length = 0;
     centre = [Infinity, Infinity];
   }

@@ -288,6 +288,21 @@ export const SLOT_RULES = {
   hp_on_kill: [...JEWELLERY, 'hands', 'weapon'],
 };
 
+/**
+ * Affixes Farhold adds that Emberveil's `items.json` does not carry.
+ *
+ * They are injected at load rather than written into the file, because that file is SHARED with
+ * `prototypes/emberveil/`, which has its own effect registry and its own test that every affix in
+ * it resolves. Adding a row there broke that test — correctly. Anything only this game understands
+ * belongs here.
+ */
+export const FARHOLD_AFFIXES = [
+  {
+    id: 'early_promise', name: 'of Early Promise', stat: 'cond_levelReqReduce',
+    min: 2, max: 4, extended: true,
+  },
+];
+
 // ---------------------------------------------------------------------------- item level
 
 /**

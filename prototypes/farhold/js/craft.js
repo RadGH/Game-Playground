@@ -18,6 +18,7 @@
 // Pure: no DOM, no Three.js. The crafting tab in hud.js only draws what `quote()` says.
 
 import { makeRng } from '../../emberveil/js/rng.js';
+import { GEAR_BASES, createGearShop } from './gear.js';
 
 /**
  * The materials bag. Separate from the item bag on purpose — the user asked for it, and it is
@@ -58,9 +59,20 @@ const FORGE_POOLS = {
   weapon: ['dagger', 'sword', 'rapier', 'hammer', 'saber', 'shortbow', 'bow', 'wand', 'scepter', 'staff', 'quarterstaff'],
   armour: ['cloth_helm', 'light_helm', 'medium_helm', 'heavy_helm', 'cloth_chest', 'light_chest', 'medium_chest', 'heavy_chest', 'light_legs', 'medium_legs', 'heavy_legs', 'light_gauntlets', 'medium_gauntlets', 'heavy_gauntlets', 'light_boots', 'medium_boots', 'heavy_boots'],
   trinket: ['ring', 'necklace', 'gold_signet', 'silver_amulet'],
+  /**
+   * Quivers at the bench. "To crafting menus, add Quivers."
+   *
+   * They are not in `items.json` — they are a Farhold base from `js/gear.js` — so the forge has to
+   * build them through the gear shop's own maker rather than through `loot.generate`. Everything
+   * downstream is the same item either way: it prices, upgrades, recycles and describes itself like
+   * anything else you could have found.
+   */
+  quiver: ['quiver', 'quiver_ember', 'quiver_rime', 'quiver_split', 'quiver_seeker', 'quiver_burst'],
 };
 
 export function createCrafting({ data, rpg, materials = new Materials(), rng = makeRng(7) }) {
+  // the same maker the shops use, so a forged quiver and a bought one are the same kind of thing
+  const gearShop = createGearShop({ rpg });
   const M = data.materials || {};
   const recipes = data.recipes || [];
   const bandCost = data.bandCost || [1];
@@ -244,7 +256,10 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       // dagger you had no use for, which is not crafting, it is a slot machine.
       const key = baseKey && allowed.includes(baseKey) ? baseKey : allowed[Math.floor(rng() * allowed.length)];
       const rarity = forgeRarity(r.rarity, magicFind);
-      const made = rpg.loot.generate(key, rarity, rpg.qualityFor(level), { rng });
+      // a quiver comes out of the gear catalogue; everything else out of items.json
+      const made = GEAR_BASES[key]
+        ? gearShop.make(key, rarity, level, rng)
+        : rpg.loot.generate(key, rarity, rpg.qualityFor(level), { rng, level });
       if (made) made.crafted = true;
       const lucky = rarity !== r.rarity;
       return {
@@ -348,6 +363,23 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
   function forgeOptions(recipe, player = null) {
     const pool = FORGE_POOLS[recipe.makes] || [...FORGE_POOLS.weapon, ...FORGE_POOLS.armour, ...FORGE_POOLS.trinket];
     const level = player?.level || 1;
+
+    // a quiver is a Farhold base rather than an items.json one, so it is listed straight from the
+    // gear catalogue — there is no act table to filter it through
+    if (recipe.makes === 'quiver') {
+      return pool.map(baseKey => {
+        const base = GEAR_BASES[baseKey];
+        if (!base) return null;
+        return {
+          baseKey, name: base.name, type: base.type, slot: base.slot,
+          tier: 'quiver', dmg: null, armor: null,
+          arrowDamage: base.arrowDamage || 0,
+          twoHanded: false, ranged: false, canUse: true,
+          desc: base.lore,
+        };
+      }).filter(Boolean);
+    }
+
     const allowed = rpg.loot.basesForAct(pool, Math.ceil(level / 5));
     return allowed.map(baseKey => {
       const base = rpg.loot.base(baseKey);

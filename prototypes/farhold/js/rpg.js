@@ -17,7 +17,7 @@
 
 import { Loot } from '../../emberveil/js/loot.js';
 import { makeRng } from '../../emberveil/js/rng.js';
-import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor } from './affixes.js';
+import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
 import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE } from './weapons.js';
@@ -292,6 +292,10 @@ export class Rpg {
     // the light and mount slots' own affixes live in js/gear.js; they are tuned with the rest
     items.affixes = items.affixes || {};
     items.affixes.slotOnly = SLOT_AFFIX_LIST.map(a => ({ ...a }));
+    // …and the ones only Farhold understands. items.json is shared with Emberveil, which has its
+    // own registry and a test that every affix in the file resolves — so anything this game adds
+    // goes in at load, never into the file.
+    items.affixes.farhold = FARHOLD_AFFIXES.map(a => ({ ...a }));
     this.affixReport = tuneAffixData(items);
     this.weightAffixes();
     this.itemLevels();

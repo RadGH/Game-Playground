@@ -252,6 +252,14 @@ that is phase 4.
 | `js/starchart.js` | `M` with no ground under you: system → nearby stars → arm → galaxy, and the jump. **Projections and reach rules are pure and node-tested.** |
 | `js/warp.js` | The five-second tunnel between stars: one buffer of line segments stretched by a single intensity curve. |
 | `js/water-plan.js` | Where a river's sheet ends and where a lake's sheet goes. Split out of `features.js` so node can test that the water meets its bank. **Pure, node-testable.** |
+| `js/affixes.js` | What an affix is worth and when it may appear: units, floors, caps, slot rules, item levels and tiers. **Pure, node-testable.** |
+| `js/gear.js` | Mounts, lights and quivers (loot), and boats and ships (unlockables). **Pure, node-testable.** |
+| `js/weapons.js` | A weapon's attack pattern, dual wielding, two-handers, staves and wands. **Pure, node-testable.** |
+| `js/perks.js` | The perk forest: four arms, oddballs, keystones, and what walking them grants. **Pure, node-testable.** |
+| `js/skilltalents.js` | A three-tier tree per skill, folded into the plan that gets cast. **Pure, node-testable.** |
+| `js/meteors.js` | Something falls out of the sky for thirty seconds and leaves a chest. |
+| `js/town-plan.js` | What a town is made of and how it is laid out. **Pure, node-testable.** |
+| `js/sky-looks.js` | The six skies a system can have. **Pure, node-testable.** |
 | `js/main.js` | Boot, wiring, the frame loop, `window.farhold`. |
 | `data/balance.json` | Every knob: player numbers, enemy scaling, drops, ring sizes, scatter density, weather timing, sky exaggeration. |
 | `data/enemies.json` | 46 enemies, 6 bosses, 10 companions, 14 champion/rare modifiers. |

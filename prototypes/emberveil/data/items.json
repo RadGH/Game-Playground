@@ -2102,14 +2102,6 @@
         "max": 0.6,
         "extended": true,
         "physicalOnly": true
-      },
-      {
-        "id": "early_promise",
-        "name": "of Early Promise",
-        "stat": "cond_levelReqReduce",
-        "min": 2,
-        "max": 4,
-        "extended": true
       }
     ]
   },

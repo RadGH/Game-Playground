@@ -563,3 +563,128 @@ each cell's own elevation — which used to leave half a lake standing above its
 > trench right round every lake. A lake in a bowl sits well below the ground around it, so handing
 > the rim the lake's level tells the carve to cut the bank down to it. The blurred `lakeField` was
 > already fading the depth out at the rim; that is all the grading it needed.
+
+---
+
+# Rounds 6–9 — the second play-test list
+
+Forty-six items, in four rounds. The full list and its state is in
+`~/claude/agent/farhold-feedback2-checklist.md`.
+
+## Round 6 — items, affixes and loot
+
+**The seven reported affix bugs were one bug.** `0.1% critical chance on the first hit`,
+`0% Critical chance`, `skills come back 0% sooner`, `0.1% experience`, `0.1% better loot`,
+`0.1% critical damage` and `1993% damage to the undead` all came from the same place: **the data and
+the reader disagree about what the number means.**
+
+Emberveil's `items.json` is not consistent with itself — some percentages are stored as a fraction
+(`critChance: 0.02–0.1` meaning 2–10%), some as a plain percentage (`dmg_vs_undead: 8–20`). And
+Farhold's two consumers are each internally consistent and picked opposite sides: the plain stats in
+`STAT_FIELDS` are read as **percentage points** (`rng() * 100 < critChance`), and the `cond_*`
+effects are read as **fractions** (`1 + v`). Hand the first one 0.02 and it prints "0%" and does
+nothing; hand the second one 19.93 and it prints "+1993%".
+
+`js/affixes.js` states, per stat, which unit its own consumer reads, restates the whole table once
+at load, and then applies the balance pass on top: floors under everything, caps on the
+multiplicative ones, and slot rules. 10,787 sampled rolls, zero unreadable values.
+
+| | |
+|---|---|
+| `ENGINE_UNIT` | `pct` / `frac` / `flat` / `flag`, per stat. **The authority.** |
+| `AFFIX_TUNING` | the level-1 range for every affix, in engine units, with its minimum item level |
+| `AFFIX_CAP` | a ceiling applied to a roll **and again after crafting** |
+| `SLOT_RULES` | experience on a helm only; the odd conditionals on jewellery and their one home |
+| `AFFIX_TIERS` | crude → mythic, chosen by the item's level |
+
+**Item levels.** Every drop carries an `ilvl`, a wearer requirement and affixes rolled inside its
+tier. An affix has a minimum item level — damage from 1, crit from 3, the "first hit against a
+target" conditionals from 8 — so early gear is simpler without being weak. `of Early Promise` lowers
+the requirement, **on its own item while it is still in the bag** and on everything else once worn,
+and the card turns that line a different colour.
+
+Multiplicative conditionals grow at 1.7× rather than 3× across the tiers, because a share of
+everything compounds with every other share you are wearing. Without that, the top tier reached
+"critical hits ignore 90% of armour".
+
+**Three things found while in there.** `Effects.update()` ticked its timers and nothing ever rebuilt
+the derived sheet, so the move-speed proc never reached the legs — and `cond_sustainedDmgBonus`,
+`cond_killInitBonus`, `cond_afterSkillSpellPow` and cheat death's cooldown were dead the same way.
+Poison paid out `perSecond * dt` sixty times a second, which is the same total and reads as "1
+damage"; DoTs land in whole one-second ticks now. And the 23 road-weapon properties had **no
+description at all**, which is how a bow came to say "Starwake: 2".
+
+**Loot beacons.** Every chest and bag stands under a shaft of light coloured by the rarity it is
+*guaranteed* to hold, with the beam count climbing — one for common, four plus motes for legendary.
+The same `floor` drives the beam and the roll, so it cannot lie.
+
+**`js/gear.js`** draws the line between loot and unlockables. Mounts, lights and quivers are loot:
+they roll rarities, carry slot-exclusive affixes, upgrade and price like anything else. Boats and
+ships are not: bought once, owned for the run, chosen from a dropdown, never in a drop table.
+
+## Round 7 — combat and the perk forest
+
+**A weapon is a pattern, not a number** (`js/weapons.js`). Each base maps to a sequence of strike
+shapes, each with its own reach, arc, damage share and timing; you walk the sequence and it resets
+when you stop. A longsword is slash-slash-overhead at 3.0 m; a rapier is thrust-thrust at 3.3 m; a
+dagger is jab-jab-slash at 1.9 m and twice the speed; a halberd is thrust-sweep-overhead at 4.6 m.
+The pattern is drawn on the card as glyphs and said in words.
+
+That one idea covers all four asks: dual wielding is two patterns on two clocks, a two-hander is a
+pattern with a wider arc, a staff is a pattern whose strikes are spells, and `areaPct` scales every
+strike's reach, arc and splash — and the drawn arc — together.
+
+**The perk forest** (`js/perks.js`) replaced attribute point-buy, the passive ladder and the talent
+picks: three screens that each spent a different currency and none of which was a decision. 89
+generated nodes — a hub, four arms, oddballs between them, a keystone at the end of each. A node is
+reachable when something touching it is taken, which makes **the shape of the tree the cost**: a
+keystone is a dozen points of walking, and those points are stats you may not have wanted.
+
+**A tree per skill** (`js/skilltalents.js`): three tiers, one pick each. Tier 1 is how it is thrown,
+tier 2 what happens when it lands, tier 3 what it does to the fight. Nothing is a stat — every node
+changes the plan that gets cast — and each names a visual change, so a fully-talented spell is
+visibly not the one you started with.
+
+## Round 8 — the world
+
+Twelve bespoke buildings and a real town **plan**: a square, streets radiating from it with a bend,
+plots either side, buildings facing their street. What a settlement wants is ordered so the trades
+come first — whatever runs out of plots is what a hamlet does without.
+
+The quiet ring round a town is measured from its own footprint (it used to be a flat 57 m, inside a
+city's 95 m wall), and anything that chases you in **gives up at the line and walks out** — the half
+that was missing, since the old rule only stopped things spawning inside.
+
+Four water fixes: lakes are drained out of settlement footprints before the carve; roads sit above
+water **and** on the ground (pinned within 3.5 m outside a real crossing, which took floating spans
+from 37/23/48 points on three seeds to 2/1/1); a **sea lane is not drawn as a road at all**; and
+`plantable()` is the stricter question props ask, because `underwater()` asks about a point and a
+lake's sheet is a whole cell wide.
+
+Level 50, with a curve in three sections — 30→40 costs 1.00× the whole first thirty, 40→50 costs
+1.90×. Planets are banded low/medium/high and a world's regions are laid **inside** its band, so the
+softest corner of a far-reach world is level 30. Every system carries all three bands.
+
+Meteors fall for thirty seconds on a real arc, marked on the map with a countdown, and leave a chest
+that is never worse than rare.
+
+## Round 9 — space, the map and the chart
+
+Seed 777's neutron star was drawn at 1540 units with two planets orbiting *inside* it at 491 and
+862. The floor on the drawn radius is right — a neutron star is twenty kilometres across — but it is
+now also capped at 42% of the closest orbit. Checked across sixty seeds.
+
+**Flying again.** The throttle took nearly a second to reach full and the wing could only carry 92%
+of the ship's weight, so holding W got you a slow sink with some drift. It eases to full in a third
+of a second and the wing reaches just over 1 at speed, so level flight holds its line and the nose
+is what changes altitude — 6.5 km in ten seconds on W alone. A soft floor keeps you off a rise you
+are passing over. Props reach further as you climb rather than switching off.
+
+The warp lockout was nine body radii — nearly half an AU. Three now. Leaving a planet points the
+ship away from it, and the system streaks past while the drive runs.
+
+Six skies (`js/sky-looks.js`) instead of one, picked by the star's seed and recoloured within the
+look. The map drags to pan, zooms out to the whole planet, and past 4.2× draws World Forge's own
+region detail — thirty-six times the cells over the patch you are looking at — rather than a bigger
+blur. The chart lets you click a world for what it knows, and a **Survey** panel lists what orbits
+any star you select.

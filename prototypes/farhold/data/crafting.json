@@ -1,141 +1,436 @@
 {
-  "_doc": "Farhold's crafting. There is no mining and no woodcutting — every material in the game comes out of an item you recycled, or off a chest, a champion, a rare or a boss. THREE materials, one per rung of the rarity ladder, because twelve was a list nobody could hold in their head: Scrap Iron from anything, Bound Essence from magic and rare gear, Resonant Dust only from legendaries and the things that are hard to kill. Advanced work needs the advanced material — that is the whole progression.",
-
+  "_doc": "Farhold's crafting. There is no mining and no woodcutting \u2014 every material in the game comes out of an item you recycled, or off a chest, a champion, a rare or a boss. THREE materials, one per rung of the rarity ladder, because twelve was a list nobody could hold in their head: Scrap Iron from anything, Bound Essence from magic and rare gear, Resonant Dust only from legendaries and the things that are hard to kill. Advanced work needs the advanced material \u2014 that is the whole progression.",
   "materials": {
-    "scrap":   { "name": "Scrap Iron",    "tier": 1, "rarity": "normal",    "color": "#9a9285", "desc": "Bent fittings, broken buckles, cut straps. Everything you recycle gives some of this." },
-    "essence": { "name": "Bound Essence", "tier": 2, "rarity": "rare",      "color": "#6ab0e8", "desc": "What is left when a magic property is pulled apart. Magic and rare gear gives it; so do champions." },
-    "dust":    { "name": "Resonant Dust", "tier": 3, "rarity": "legendary", "color": "#c88ae8", "desc": "Only a legendary grinds this fine, and only a rare or a boss carries any. Everything worth doing costs it." }
+    "scrap": {
+      "name": "Scrap Iron",
+      "tier": 1,
+      "rarity": "normal",
+      "color": "#9a9285",
+      "desc": "Bent fittings, broken buckles, cut straps. Everything you recycle gives some of this."
+    },
+    "essence": {
+      "name": "Bound Essence",
+      "tier": 2,
+      "rarity": "rare",
+      "color": "#6ab0e8",
+      "desc": "What is left when a magic property is pulled apart. Magic and rare gear gives it; so do champions."
+    },
+    "dust": {
+      "name": "Resonant Dust",
+      "tier": 3,
+      "rarity": "legendary",
+      "color": "#c88ae8",
+      "desc": "Only a legendary grinds this fine, and only a rare or a boss carries any. Everything worth doing costs it."
+    }
   },
-
   "_salvageDoc": "What recycling an item gives back, by rarity. Better gear gives better material and more of it; quality adds a little on top; a unique or a set piece always leaves dust behind whatever else it rolls.",
-
   "salvage": {
-    "normal":    { "scrap": [2, 4] },
-    "magic":     { "scrap": [3, 5], "essence": [1, 2] },
-    "rare":      { "scrap": [4, 7], "essence": [2, 4] },
-    "legendary": { "scrap": [6, 10], "essence": [3, 6], "dust": [1, 3] }
+    "normal": {
+      "scrap": [
+        2,
+        4
+      ]
+    },
+    "magic": {
+      "scrap": [
+        3,
+        5
+      ],
+      "essence": [
+        1,
+        2
+      ]
+    },
+    "rare": {
+      "scrap": [
+        4,
+        7
+      ],
+      "essence": [
+        2,
+        4
+      ]
+    },
+    "legendary": {
+      "scrap": [
+        6,
+        10
+      ],
+      "essence": [
+        3,
+        6
+      ],
+      "dust": [
+        1,
+        3
+      ]
+    }
   },
   "salvageByTier": {
-    "cloth":  { "scrap": [1, 2] },
-    "light":  { "scrap": [1, 2] },
-    "medium": { "scrap": [2, 3] },
-    "heavy":  { "scrap": [3, 5] },
-    "scaled": { "scrap": [2, 4], "essence": [0, 1] },
-    "plate":  { "scrap": [4, 6] },
-    "runed":  { "scrap": [1, 2], "essence": [1, 2] }
+    "cloth": {
+      "scrap": [
+        1,
+        2
+      ]
+    },
+    "light": {
+      "scrap": [
+        1,
+        2
+      ]
+    },
+    "medium": {
+      "scrap": [
+        2,
+        3
+      ]
+    },
+    "heavy": {
+      "scrap": [
+        3,
+        5
+      ]
+    },
+    "scaled": {
+      "scrap": [
+        2,
+        4
+      ],
+      "essence": [
+        0,
+        1
+      ]
+    },
+    "plate": {
+      "scrap": [
+        4,
+        6
+      ]
+    },
+    "runed": {
+      "scrap": [
+        1,
+        2
+      ],
+      "essence": [
+        1,
+        2
+      ]
+    }
   },
   "salvageByCategory": {
-    "light":  { "scrap": [1, 2] },
-    "heavy":  { "scrap": [2, 4] },
-    "magic":  { "scrap": [1, 2], "essence": [0, 1] },
-    "ranged": { "scrap": [1, 3] }
+    "light": {
+      "scrap": [
+        1,
+        2
+      ]
+    },
+    "heavy": {
+      "scrap": [
+        2,
+        4
+      ]
+    },
+    "magic": {
+      "scrap": [
+        1,
+        2
+      ],
+      "essence": [
+        0,
+        1
+      ]
+    },
+    "ranged": {
+      "scrap": [
+        1,
+        3
+      ]
+    }
   },
-
   "_harvestDoc": "What a body leaves behind. Ordinary things give scrap; a champion is worth an essence; a rare and a boss are where dust comes from.",
   "salvageByFamily": {
-    "undead":     { "scrap": [1, 2] },
-    "construct":  { "scrap": [2, 4] },
-    "elemental":  { "essence": [0, 1] },
-    "beast":      { "scrap": [1, 2] },
-    "dragonkin":  { "scrap": [2, 3], "essence": [0, 1] },
-    "aberration": { "essence": [0, 1] },
-    "fiend":      { "essence": [0, 1] },
-    "humanoid":   { "scrap": [1, 3] }
+    "undead": {
+      "scrap": [
+        1,
+        2
+      ]
+    },
+    "construct": {
+      "scrap": [
+        2,
+        4
+      ]
+    },
+    "elemental": {
+      "essence": [
+        0,
+        1
+      ]
+    },
+    "beast": {
+      "scrap": [
+        1,
+        2
+      ]
+    },
+    "dragonkin": {
+      "scrap": [
+        2,
+        3
+      ],
+      "essence": [
+        0,
+        1
+      ]
+    },
+    "aberration": {
+      "essence": [
+        0,
+        1
+      ]
+    },
+    "fiend": {
+      "essence": [
+        0,
+        1
+      ]
+    },
+    "humanoid": {
+      "scrap": [
+        1,
+        3
+      ]
+    }
   },
-
   "_recipeDoc": "The bench, in two halves. `kind: create` makes something new and lives on the Crafting tab; everything else reworks an item you already have and lives on the Upgrade tab. `minRarity`/`slot`/`minLevel` gate an action to items it makes sense on. Costs scale with the item's level band (js/craft.js `bandCost`), so reworking a level-28 weapon is not the price of a level-2 one.",
-
   "recipes": [
     {
-      "id": "forge_weapon", "kind": "create", "name": "Forge a weapon", "makes": "weapon", "rarity": "normal",
-      "desc": "Beat scrap into a plain weapon of your level. Pick exactly which one — it comes out normal, and magic find can carry it higher.",
-      "cost": { "scrap": 10 }
-    },
-    {
-      "id": "forge_armour", "kind": "create", "name": "Forge armour", "makes": "armour", "rarity": "normal",
-      "desc": "A plain piece of armour of your level, in whichever slot you need filling.",
-      "cost": { "scrap": 8 }
-    },
-    {
-      "id": "forge_trinket", "kind": "create", "name": "Cast a trinket", "makes": "trinket", "rarity": "magic",
-      "desc": "A ring or an amulet. Trinkets roll an extra property, so this is the cheapest way to a useful magic item.",
-      "cost": { "scrap": 6, "essence": 2 }
-    },
-    {
-      "id": "forge_fine", "kind": "create", "name": "Forge a fine piece", "makes": "any", "rarity": "rare", "minLevel": 8,
-      "desc": "The same work done properly: rare, with three properties on it.",
-      "cost": { "scrap": 14, "essence": 6 }
-    },
-    {
-      "id": "forge_masterwork", "kind": "create", "name": "Forge a masterwork", "makes": "any", "rarity": "legendary", "minLevel": 18,
-      "desc": "Everything you have, spent on one piece. Legendary, with five or six properties.",
-      "cost": { "scrap": 20, "essence": 12, "dust": 6 }
-    },
-
-    {
-      "id": "temper", "kind": "quality", "name": "Temper", "group": "base",
-      "desc": "Raise the item's quality one step. Every number on it goes up — damage, armour and every property together.",
-      "cost": { "scrap": 8, "essence": 1 }
-    },
-    {
-      "id": "reinforce", "kind": "intrinsic", "name": "Reinforce", "stat": "armor", "value": 0.25, "slot": "armour", "group": "base",
-      "desc": "Beat extra plate into the piece: a quarter more armour, permanently. Up to three times.",
-      "cost": { "scrap": 12 }
-    },
-    {
-      "id": "hone", "kind": "intrinsic", "name": "Hone", "stat": "dmg", "value": 0.2, "slot": "weapon", "minLevel": 12, "group": "base",
-      "desc": "A fifth more damage on the base itself, before any property. Up to three times.",
-      "cost": { "scrap": 10, "essence": 2 }
-    },
-
-    {
-      "id": "promote", "kind": "promote", "name": "Promote", "group": "rarity",
-      "desc": "Push the item up a rarity and roll it a new property with the room that makes.",
-      "cost": { "essence": 4 },
-      "costByTarget": {
-        "magic": { "scrap": 6, "essence": 3 },
-        "rare": { "scrap": 10, "essence": 6 },
-        "legendary": { "essence": 10, "dust": 4 }
+      "id": "forge_weapon",
+      "kind": "create",
+      "name": "Forge a weapon",
+      "makes": "weapon",
+      "rarity": "normal",
+      "desc": "Beat scrap into a plain weapon of your level. Pick exactly which one \u2014 it comes out normal, and magic find can carry it higher.",
+      "cost": {
+        "scrap": 10
       }
     },
     {
-      "id": "inscribe", "kind": "addAffix", "name": "Inscribe", "minRarity": "magic", "group": "properties",
+      "id": "forge_armour",
+      "kind": "create",
+      "name": "Forge armour",
+      "makes": "armour",
+      "rarity": "normal",
+      "desc": "A plain piece of armour of your level, in whichever slot you need filling.",
+      "cost": {
+        "scrap": 8
+      }
+    },
+    {
+      "id": "forge_quiver",
+      "kind": "create",
+      "name": "Bind a quiver",
+      "makes": "quiver",
+      "rarity": "normal",
+      "desc": "Hide, thread and twenty heads. Pick which kind \u2014 the plain one adds damage to every arrow, and the special ones brand them, split them, steer them or make them burst.",
+      "cost": {
+        "scrap": 8,
+        "essence": 2
+      }
+    },
+    {
+      "id": "forge_trinket",
+      "kind": "create",
+      "name": "Cast a trinket",
+      "makes": "trinket",
+      "rarity": "magic",
+      "desc": "A ring or an amulet. Trinkets roll an extra property, so this is the cheapest way to a useful magic item.",
+      "cost": {
+        "scrap": 6,
+        "essence": 2
+      }
+    },
+    {
+      "id": "forge_fine",
+      "kind": "create",
+      "name": "Forge a fine piece",
+      "makes": "any",
+      "rarity": "rare",
+      "minLevel": 8,
+      "desc": "The same work done properly: rare, with three properties on it.",
+      "cost": {
+        "scrap": 14,
+        "essence": 6
+      }
+    },
+    {
+      "id": "forge_masterwork",
+      "kind": "create",
+      "name": "Forge a masterwork",
+      "makes": "any",
+      "rarity": "legendary",
+      "minLevel": 18,
+      "desc": "Everything you have, spent on one piece. Legendary, with five or six properties.",
+      "cost": {
+        "scrap": 20,
+        "essence": 12,
+        "dust": 6
+      }
+    },
+    {
+      "id": "temper",
+      "kind": "quality",
+      "name": "Temper",
+      "group": "base",
+      "desc": "Raise the item's quality one step. Every number on it goes up \u2014 damage, armour and every property together.",
+      "cost": {
+        "scrap": 8,
+        "essence": 1
+      }
+    },
+    {
+      "id": "reinforce",
+      "kind": "intrinsic",
+      "name": "Reinforce",
+      "stat": "armor",
+      "value": 0.25,
+      "slot": "armour",
+      "group": "base",
+      "desc": "Beat extra plate into the piece: a quarter more armour, permanently. Up to three times.",
+      "cost": {
+        "scrap": 12
+      }
+    },
+    {
+      "id": "hone",
+      "kind": "intrinsic",
+      "name": "Hone",
+      "stat": "dmg",
+      "value": 0.2,
+      "slot": "weapon",
+      "minLevel": 12,
+      "group": "base",
+      "desc": "A fifth more damage on the base itself, before any property. Up to three times.",
+      "cost": {
+        "scrap": 10,
+        "essence": 2
+      }
+    },
+    {
+      "id": "promote",
+      "kind": "promote",
+      "name": "Promote",
+      "group": "rarity",
+      "desc": "Push the item up a rarity and roll it a new property with the room that makes.",
+      "cost": {
+        "essence": 4
+      },
+      "costByTarget": {
+        "magic": {
+          "scrap": 6,
+          "essence": 3
+        },
+        "rare": {
+          "scrap": 10,
+          "essence": 6
+        },
+        "legendary": {
+          "essence": 10,
+          "dust": 4
+        }
+      }
+    },
+    {
+      "id": "inscribe",
+      "kind": "addAffix",
+      "name": "Inscribe",
+      "minRarity": "magic",
+      "group": "properties",
       "desc": "Add one more property, if the item has a slot free for it.",
-      "cost": { "essence": 3 }
+      "cost": {
+        "essence": 3
+      }
     },
     {
-      "id": "reweave", "kind": "reroll", "name": "Reweave one property", "minRarity": "magic", "growth": 1.4, "group": "properties",
+      "id": "reweave",
+      "kind": "reroll",
+      "name": "Reweave one property",
+      "minRarity": "magic",
+      "growth": 1.4,
+      "group": "properties",
       "desc": "Trade one property you do not want for a different one. Each reweave of the same item costs more than the last.",
-      "cost": { "essence": 2, "dust": 1 }
+      "cost": {
+        "essence": 2,
+        "dust": 1
+      }
     },
     {
-      "id": "sharpen", "kind": "values", "name": "Re-roll the numbers", "minRarity": "magic", "group": "properties",
+      "id": "sharpen",
+      "kind": "values",
+      "name": "Re-roll the numbers",
+      "minRarity": "magic",
+      "group": "properties",
       "desc": "Keep every property, roll their values again. The cheap, safe way to fix a bad roll.",
-      "cost": { "essence": 3 }
+      "cost": {
+        "essence": 3
+      }
     },
     {
-      "id": "recast", "kind": "rerollAll", "name": "Recast every property", "minRarity": "rare", "group": "properties",
-      "desc": "Throw the whole set back and roll it again. The gamble — it can come out worse.",
-      "cost": { "essence": 6, "dust": 2 }
+      "id": "recast",
+      "kind": "rerollAll",
+      "name": "Recast every property",
+      "minRarity": "rare",
+      "group": "properties",
+      "desc": "Throw the whole set back and roll it again. The gamble \u2014 it can come out worse.",
+      "cost": {
+        "essence": 6,
+        "dust": 2
+      }
     },
-
     {
-      "id": "brand_fire", "kind": "brand", "name": "Brand with fire", "element": "fire", "minRarity": "rare", "slot": "weapon", "group": "brand",
+      "id": "brand_fire",
+      "kind": "brand",
+      "name": "Brand with fire",
+      "element": "fire",
+      "minRarity": "rare",
+      "slot": "weapon",
+      "group": "brand",
       "desc": "Your hits set light to what they touch.",
-      "cost": { "essence": 6, "dust": 2 }
+      "cost": {
+        "essence": 6,
+        "dust": 2
+      }
     },
     {
-      "id": "brand_ice", "kind": "brand", "name": "Brand with rime", "element": "ice", "minRarity": "rare", "slot": "weapon", "group": "brand",
+      "id": "brand_ice",
+      "kind": "brand",
+      "name": "Brand with rime",
+      "element": "ice",
+      "minRarity": "rare",
+      "slot": "weapon",
+      "group": "brand",
       "desc": "Your hits leave the target slowed.",
-      "cost": { "essence": 6, "dust": 2 }
+      "cost": {
+        "essence": 6,
+        "dust": 2
+      }
     },
     {
-      "id": "brand_void", "kind": "brand", "name": "Brand with void", "element": "shadow", "minRarity": "rare", "slot": "weapon", "group": "brand",
+      "id": "brand_void",
+      "kind": "brand",
+      "name": "Brand with void",
+      "element": "shadow",
+      "minRarity": "rare",
+      "slot": "weapon",
+      "group": "brand",
       "desc": "Your hits eat away at what they land on.",
-      "cost": { "essence": 6, "dust": 3 }
+      "cost": {
+        "essence": 6,
+        "dust": 3
+      }
     }
   ],
-
   "_groupDoc": "How the Upgrade tab sorts its list.",
   "groups": {
     "base": "The item itself",
@@ -143,7 +438,13 @@
     "properties": "Properties",
     "brand": "Brands"
   },
-
   "_bandDoc": "How much dearer the work gets as the item's level rises. A band is five levels.",
-  "bandCost": [1, 1.4, 1.9, 2.6, 3.4, 4.4]
+  "bandCost": [
+    1,
+    1.4,
+    1.9,
+    2.6,
+    3.4,
+    4.4
+  ]
 }

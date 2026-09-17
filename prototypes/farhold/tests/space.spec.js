@@ -23,23 +23,26 @@ test('J lifts off the ground and ends up in space', async ({ page }) => {
   const airborne = await page.evaluate(() => ({ mode: window.farhold.mode, alt: Math.round(window.farhold.air.altitude) }));
   expect(airborne.mode).toBe('air');
 
-  // Hold the throttle open and the nose up from a timer rather than a per-frame await: under
-  // SwiftShader, with the whole suite running, three thousand awaited animation frames is a minute
-  // of wall clock. The flight model still does all the work; this only holds the stick.
-  await page.evaluate(() => {
+  // Fly the climb on a FIXED clock rather than on animation frames.
+  //
+  // The handover is what is under test, not how long it takes: under SwiftShader, with the whole
+  // suite running, the real frame rate makes a nine-kilometre climb take most of a minute of wall
+  // clock and the result depends on how busy the machine is. Stepping the flight model directly at
+  // a fixed dt exercises exactly the same code — thrust, lift, drag, the ceiling check — and takes
+  // the same number of milliseconds every time.
+  await page.evaluate(async () => {
     const f = window.farhold;
-    // Bring the ceiling down for the test. The handover is what is under test, not the altitude it
-    // happens at; climbing the real 9 km at SwiftShader's frame rate takes most of a minute, and
-    // this is the same code path in a tenth of the time.
-    f.air.cfg.ceiling = 1200;
-    window.__climb = setInterval(() => {
-      if (!f.air || f.mode !== 'air') return;
+    for (let i = 0; i < 900 && f.mode === 'air'; i++) {
       f.air.state.throttle = 1;
-      f.air.state.pitch = 1.2;
-    }, 16);
+      f.air.state.pitch = 1.2;                             // nose up
+      const out = f.air.update(1 / 30, null, f.camera);
+      if (out.leftAtmosphere) break;
+      if (i % 60 === 0) await new Promise(r => setTimeout(r, 0));
+    }
+    // let the game's own loop see the altitude and make the handover
+    for (let i = 0; i < 120 && f.mode === 'air'; i++) await new Promise(r => requestAnimationFrame(r));
   });
-  await page.waitForFunction(() => window.farhold.mode === 'space', null, { timeout: 60000 });
-  await page.evaluate(() => clearInterval(window.__climb));
+  await page.waitForFunction(() => window.farhold.mode === 'space', null, { timeout: 30000 });
   const after = await page.evaluate(() => {
     const f = window.farhold;
     const s = f.space.stats();

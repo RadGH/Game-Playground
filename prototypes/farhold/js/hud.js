@@ -1019,7 +1019,9 @@ export class Hud {
     }
 
     out.push(el('h4', null, 'Cost'));
-    out.push(this.costTable(q.cost || {}));
+    // A refused quote carries no priced cost, and "Costs nothing" under a greyed-out button reads
+    // as a bug. Fall back to the recipe's own list so you can still see what it would take.
+    out.push(this.costTable(q.cost || r.cost || {}));
 
     out.push(el('h4', null, 'What changes'));
     const change = el('div', 'forge-result');

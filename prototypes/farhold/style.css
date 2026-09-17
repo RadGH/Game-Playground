@@ -858,3 +858,47 @@ body {
   margin-top: 8px; padding: 7px 9px; border-radius: 5px;
   background: rgba(255, 210, 74, .1); border: 1px solid rgba(255, 210, 74, .3);
 }
+
+/* ---------------------------------------------------------------- the perk forest */
+.perks-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+.perks-head h3 { margin: 0; }
+.perk-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+.perk-arm { display: inline-flex; align-items: center; gap: 5px; color: #9fb0c8; }
+.perk-arm i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.perks-body { display: flex; gap: 12px; flex: 1; min-height: 460px; }
+.perk-canvas { flex: 1; min-width: 0; min-height: 440px; border: 1px solid #222c3c; border-radius: 6px; }
+.perk-side { width: 270px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.perk-side h4 { margin: 4px 0 0; font-size: 15px; color: #eaf6ff; }
+.perk-side .warn { color: #ffa860; }
+.perk-side .good { color: #8fe0a0; }
+.perk-bars { display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+.perk-bar { display: flex; justify-content: space-between; }
+/* the perks tab is a column so the canvas can fill it — but  still has to win, or the
+   forest bleeds through whatever tab you are actually on */
+.tab-body[data-tab="perks"]:not(.hidden) { display: flex; flex-direction: column; min-height: 0; }
+.tab-body.hidden { display: none !important; }
+
+/* a skill's own three tiers */
+.skilltree { display: flex; flex-direction: column; gap: 6px; }
+.tier-head { margin: 8px 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #8fa0b8; }
+.tier-head.locked { opacity: .5; }
+.tier-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.talent-card {
+  flex: 1 1 150px; min-width: 140px; padding: 7px 9px; border-radius: 5px; cursor: pointer;
+  border: 1px solid #263246; background: rgba(255,255,255,.02);
+  display: flex; flex-direction: column; gap: 3px; font-size: 12px;
+}
+.talent-card:hover { border-color: #3f5d80; }
+.talent-card.on { border-color: #7fd8ff; background: rgba(127, 216, 255, .1); }
+.talent-card.locked { opacity: .4; cursor: default; }
+
+/* a weapon's attack pattern */
+.tip-pattern { display: flex; align-items: baseline; gap: 8px; margin-top: 3px; }
+.tip-pattern .glyphs { font-size: 15px; letter-spacing: 3px; color: #ffd24a; }
+
+/* the boat and ship dropdowns */
+.vehicles { display: flex; flex-direction: column; gap: 5px; }
+.vehicle-row { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+.vehicle-row select {
+  background: #131a26; color: #dfe7f2; border: 1px solid #2a3a4e; border-radius: 4px; padding: 3px 5px;
+}

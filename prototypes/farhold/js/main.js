@@ -45,6 +45,9 @@ import { createSites } from './sites.js';
 import { createEncounters } from './encounters.js';
 import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
 import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES } from './gear.js';
+import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, OFFHAND_DAMAGE } from './weapons.js';
+import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
+import { allocate as allocatePerk, refundAll as refundPerks, pointsLeft as perkPointsLeft } from './perks.js';
 import { createCrafting, Materials } from './craft.js';
 import { showRewards, rewardsOpen } from '../../../shared/rewards.js';
 import { familiesOf } from '../../../worldgen/js/biomes.js';
@@ -820,6 +823,40 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }),
     onTakeTalent: id => { if (rpg.takeTalent(player, id)) { sound.ui('click'); hud.log(`Talent taken: ${rpg.talentList.find(t => t.id === id)?.name}.`, 'level'); autoSave(); } hud.setPlayer(player); },
     onSpendPassive: id => { if (rpg.spendPassive(player, id)) { sound.ui('click'); autoSave(); } hud.setPlayer(player); },
+
+    // ---- round 7: the perk forest, the per-skill talent trees, and the vehicle dropdowns
+    onTakePerk: id => {
+      const out = allocatePerk(player, rpg.forest, id);
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      sound.ui('click');
+      hud.log(`Perk taken: ${out.node.name}.`, 'level');
+      rpg.refresh(player, { full: true });
+      hud.setPlayer(player);
+      autoSave();
+    },
+    onRefundPerks: () => {
+      const back = refundPerks(player);
+      hud.log(back ? `${back} perk point${back === 1 ? '' : 's'} back. Spend them again.` : 'Nothing to take back.', back ? 'level' : '');
+      rpg.refresh(player, { full: true });
+      hud.setPlayer(player);
+      autoSave();
+    },
+    onPickTalent: (skillId, tier, nodeId, shape) => {
+      const out = pickTalent(player, skillId, tier, nodeId, { shape });
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      sound.ui('click');
+      hud.log(`${out.node.name} on ${skillId}.`, 'level');
+      hud.setPlayer(player);
+      autoSave();
+    },
+    onClearTalent: (skillId, tier) => { clearTalent(player, skillId, tier); sound.ui('click'); hud.setPlayer(player); autoSave(); },
+    onSelectVehicle: (slot, key) => {
+      if (!selectVehicle(player, slot, key)) return;
+      sound.ui('click');
+      hud.log(`${vehicleFor(player, slot)?.name} it is.`, '');
+      hud.setPlayer(player);
+      autoSave();
+    },
   });
   hud.setPlayer(player);
 
@@ -2166,6 +2203,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // haste is a real stat: keep the controller's swing clock in step with it
     control.attackEvery = player.derived.attackEvery ?? (balance.player?.attackEvery ?? 0.62);
+    /**
+     * …and each HAND keeps its own rhythm, because a dagger and a greatsword do not swing at
+     * the same speed and a dual-wielder swings both. `haste` scales whatever the weapon's own
+     * pattern says; see js/weapons.js.
+     */
+    {
+      const hands = handsOf(player);
+      const hasteK = control.attackEvery / (balance.player?.attackEvery ?? 0.62);
+      control.dualWield = hands.dual;
+      control.mainEvery = strikeAt(hands.main, control.mainStep).every * hasteK;
+      control.offEvery = hands.dual ? strikeAt(hands.off, control.offStep).every * hasteK : null;
+    }
     const step = control.update(dt, snap, { frozen });
 
     if (step.mountChanged) {
@@ -2205,10 +2254,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     // --- attacking
-    if (step.attacked) {
-      const weapon = player.equipment.weapon;
-      const reach = balance.player?.attackReach ?? 2.9;
-      const arc = balance.player?.attackArc ?? 1.5;
+    /**
+     * ONE SWING, of whichever hand swung.
+     *
+     * A weapon is a PATTERN now, not a number: the strike that comes out depends on how far into
+     * its sequence you are, and each shape has its own reach, arc, damage share and splash. A
+     * greatsword sweeps then comes down overhead; a rapier thrusts; a dagger jabs twice and slashes.
+     * `derived.areaPct` widens all of it at once, and the drawn arc is scaled by the same number so
+     * what you see is what hits.
+     */
+    const swingWith = (hand, stepIndex) => {
+      const hands = handsOf(player);
+      const weapon = hand === 'off' ? hands.off : hands.main;
+      const share = hand === 'off' ? OFFHAND_DAMAGE : 1;
+      const shape = withArea(strikeAt(weapon, stepIndex), player.derived.areaPct || 0);
+      const reach = shape.reach;
+      const arc = shape.arc;
       // What this weapon is made of. A wand throws its element; a branded sword carries it into the
       // swing. Both go through `magicResist` instead of armour and leave their status behind.
       const element = elementOf(weapon);
@@ -2219,21 +2280,77 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
         reportHit(enemy, result);
       };
-      const meleeOpts = { element, onHit: brandHit, applyStatus: statusHook };
+      const meleeOpts = {
+        element, onHit: brandHit, applyStatus: statusHook,
+        // the field calls this `power`: the off hand hits for less, and each strike shape has its
+        // own share of a full hit
+        power: share * shape.damage,
+      };
+
+      if (isStaff(weapon)) {
+        /**
+         * A STAFF DOES NOT SWING. Its attack is a close-range spell, free to cast, chosen from its
+         * element's own list — "replace the auto attacks with a close range spell… this eventually
+         * acts like an additional spell but does not require mana to use".
+         */
+        const spell = staffSpell(weapon, element);
+        const a = aim();
+        const base = Math.max(1, Math.round((player.derived.damage[1] || 6) * (spell.mult || 1) * share));
+        const radius = (spell.radius || spell.width || 3) * shape.scale;
+        sound.combat('cast');
+        spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 1.1, control.z), element, scale: shape.scale });
+        if (spell.shape === 'nova') {
+          spellfx.aoe({ at: new THREE.Vector3(control.x, control.y + 0.2, control.z), element, radius, scale: shape.scale });
+          for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) })) {
+            brandHit(enemy, result);
+            if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
+          }
+        } else if (spell.shape === 'cone' || spell.shape === 'wave') {
+          const range = (spell.range || 9) * shape.scale;
+          const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
+          fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: range, arc: wide });
+          for (const { enemy, result } of field.strike(control, player, { reach: range, arc: wide, ...meleeOpts })) {
+            if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
+          }
+        } else {
+          // lob, ground and chain all leave the hand as a bolt and do their work where they land
+          const plan = talentPlan(player, 'staff:' + spell.key, {
+            element, range: (spell.range || 12) * shape.scale, splash: radius,
+            projectiles: 1, spread: 0,
+            status: spell.status || leaves,
+            statusSpec: (spell.status || leaves) ? skillData.statuses[spell.status || leaves] : null,
+          });
+          const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.1, a.z + a.dz * 0.6);
+          fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: spell.mult || 1 }, from, true);
+        }
+        control.swing = Math.max(control.swing, 0.32);
+        return;
+      }
 
       if (weapon?.castElement && weapon?.ranged) {
-        // a wand: a real bolt of its own element, aimed where the crosshair is
+        /**
+         * A WAND. Every wand throws a bolt, and what the bolt DOES is what makes one different from
+         * the next — "update wands so each one also has a projectile effect, area, chain/bounce,
+         * explosion, multi-shot". The behaviour is decided once from the item's own id, so a given
+         * wand always behaves the same way.
+         */
+        const how = wandBehaviour(weapon);
         const a = aim();
         const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.15, a.z + a.dz * 0.6);
         const plan = {
-          element, range: weapon.castRange ?? 34, splash: 2.2,
-          projectiles: 1, spread: 0,
+          element, range: (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1),
+          splash: (how.splash ?? 2.2) * shape.scale,
+          projectiles: how.projectiles || 1, spread: how.spread || 0,
+          chains: how.chains || 0, homing: how.homing || 0,
           status: leaves, statusSpec: leaves ? skillData.statuses[leaves] : null,
         };
         sound.combat('bow');
-        fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: 1 }, from, true);
+        fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (how.mult || 1) * share }, from, true);
         control.swing = Math.max(control.swing, 0.3);
-      } else if (weapon?.ranged) {
+        return;
+      }
+
+      if (weapon?.ranged) {
         // A bow aims where the CROSSHAIR is, not where the body is pointing — see aim(). Using the
         // body's facing meant every arrow flew flat (fixed in round 3) and, once the camera moved
         // over the shoulder, a shoulder's width to the right of the reticle (fixed in round 4).
@@ -2241,37 +2358,53 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const ax = a.dx, ay = a.dy, az = a.dz;
         const eyeY = a.y;
         const range = balance.player?.arrowRange ?? 46;
-        const arrow = fx.shoot({
-          x: control.x + ax * 0.7, y: eyeY + ay * 0.5, z: control.z + az * 0.7,
-          dirX: ax, dirY: ay, dirZ: az,
-          range, speed: balance.player?.arrowSpeed ?? 42,
-        });
-        // if something is directly in the shot, it stops there
+        // a quiver decides how many arrows leave and what they do when they land
+        const shots = Math.max(1, Math.round(player.derived.arrowsPerShot || 1));
+        const spread = shots > 1 ? 0.08 : 0;
         sound.combat('bow');
-        const target = field.hitScan(control.x, eyeY, control.z, ax, ay, az, { range });
-        if (target && arrow) arrow.range = Math.min(arrow.range, target.distance);
-      } else {
-        // a swing: the white arc IS the hit box — same reach, same angle
-        fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach, arc });
-        const hits = field.strike(control, player, { reach, arc, ...meleeOpts });
-        sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
-        // a branded weapon flashes its element on every body it lands on
-        if (element !== 'physical') {
-          for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element, crit: h.result.crit });
+        for (let i = 0; i < shots; i++) {
+          const t = shots === 1 ? 0 : (i / (shots - 1) - 0.5) * 2;
+          const yaw = Math.atan2(ax, az) + t * spread;
+          const dx = Math.sin(yaw) * Math.hypot(ax, az), dz = Math.cos(yaw) * Math.hypot(ax, az);
+          const arrow = fx.shoot({
+            x: control.x + dx * 0.7, y: eyeY + ay * 0.5, z: control.z + dz * 0.7,
+            dirX: dx, dirY: ay, dirZ: dz,
+            range, speed: balance.player?.arrowSpeed ?? 42,
+          });
+          const target = field.hitScan(control.x, eyeY, control.z, dx, ay, dz, { range });
+          if (target && arrow) arrow.range = Math.min(arrow.range, target.distance);
         }
-        // and a little splash damage behind the arc, so nothing is ever purely single-target
-        const splash = balance.player?.meleeSplash ?? 1;
-        if (splash > 0) {
-          const [dx, dz] = control.facing();
-          const already = new Set(hits.map(h => h.enemy));
-          for (const { enemy, result } of field.strikeArea(control.x + dx * reach * 0.6, control.z + dz * reach * 0.6, splash, player, { falloff: 0.3, element })) {
-            if (!already.has(enemy)) brandHit(enemy, result);
-          }
+        return;
+      }
+
+      // a swing: the white arc IS the hit box — same reach, same angle, same shape as the strike
+      fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach, arc });
+      const hits = field.strike(control, player, { reach, arc, ...meleeOpts });
+      sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
+      // a branded weapon flashes its element on every body it lands on
+      if (element !== 'physical') {
+        for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element, crit: h.result.crit });
+      }
+      // `sunder` from the perk forest: the third strike of a pattern strips armour for good
+      if (player.perkFlags?.sunder && shape.last) {
+        for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
+      }
+      // and a little splash behind the arc, scaled by the strike's own shape and the area stat
+      const splash = (balance.player?.meleeSplash ?? 1) * (shape.splash || 1);
+      if (splash > 0) {
+        const [dx, dz] = control.facing();
+        const already = new Set(hits.map(h => h.enemy));
+        for (const { enemy, result } of field.strikeArea(control.x + dx * reach * 0.6, control.z + dz * reach * 0.6, splash, player, { falloff: 0.3, element, power: share * shape.damage })) {
+          if (!already.has(enemy)) brandHit(enemy, result);
         }
       }
-    }
+    };
+
+    if (step.attacked) swingWith('main', step.step || 0);
+    if (step.attackedOff) swingWith('off', step.offStep || 0);
 
     field.update(dt, control, player, {
+
       onStatusDamage: (e, amount) => {
         if (amount > 0.6) hud.log(`${e.name} takes ${amount.toFixed(0)}.`);
       },
@@ -2637,6 +2770,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return field.add(def, level, control.x + 3, control.z + 3);
     },
     hit: () => field.strike(control, player, { reach: 9, arc: 6.3 }),
+    /** How many perk points are unspent — the level-up currency, since round 7. */
+    perkPoints: () => perkPointsLeft(player),
     give: (baseKey, rarity = 'rare', opts = {}) => {
       const level = opts.level ?? player.level;
       const item = attuneWeapon(rpg.loot.generate(baseKey, rarity, 'high', { rng: rpg.rng, level, ...opts }));

@@ -145,7 +145,8 @@ test('a fight gives xp, a level and loot', async ({ page }) => {
       killed,
       before,
       after: { level: f.player.level, xp: f.player.xp, bag: f.player.bag.length, gold: f.player.gold, kills: f.player.kills },
-      pending: f.player.pendingAttr,
+      // round 7: a level opens the perk forest rather than handing out attribute points
+      pending: f.perkPoints(),
       damage: f.player.derived.damage,
     };
   });

@@ -11,6 +11,7 @@ import { dirname, join } from 'node:path';
 import { Rpg, xpForLevel, levelFromXp, itemScore, heldLookFor, offhandLookFor, LIVE_STATS, SLOTS, MAX_LEVEL, effectFor } from '../js/rpg.js';
 import { EFFECTS } from '../js/effects.js';
 import { makeRng } from '../../emberveil/js/rng.js';
+import { allocate, canTake, pointsFor, pointsLeft } from '../js/perks.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const items = JSON.parse(readFileSync(join(here, '../../emberveil/data/items.json'), 'utf8'));
@@ -39,7 +40,10 @@ test('a new character is alive, unarmed and carrying nothing', () => {
   assert.ok(p.derived.damage[0] >= 1 && p.derived.damage[1] > p.derived.damage[0]);
 });
 
-test('levelling raises health and hands out points to spend', () => {
+test('levelling raises health and hands out perk points to spend', () => {
+  // Round 7 replaced attribute point-buy with the perk forest: a level no longer accrues three
+  // attribute points, it opens another step of the tree. The attributes are still there — they are
+  // just something you walk to rather than something you are handed.
   const r = rpg();
   const p = r.createPlayer({});
   const hp1 = p.maxHp;
@@ -47,13 +51,29 @@ test('levelling raises health and hands out points to spend', () => {
   assert.equal(gained, 3);
   assert.equal(p.level, 4);
   assert.ok(p.maxHp > hp1, 'levelling did not raise health');
-  assert.equal(p.pendingAttr, 3 * (balance.progression.attrPerLevel));
-  const con = p.attrs.con;
-  assert.equal(r.spendAttr(p, 'con'), true);
-  assert.equal(p.attrs.con, con + 1);
-  assert.ok(p.maxHp > hp1, 'CON did not feed health');
-  p.pendingAttr = 0;
-  assert.equal(r.spendAttr(p, 'con'), false, 'spent a point that was not there');
+  assert.ok(pointsLeft(p) > 0, 'four levels bought no perk points');
+  assert.equal(pointsLeft(p), pointsFor(4));
+
+  // spend one, and it has to be somewhere the tree can reach
+  const reachable = r.forest.nodes.find(n => canTake(p, r.forest, n.id).ok);
+  assert.ok(reachable, 'nothing at all is reachable from the hub');
+  assert.equal(allocate(p, r.forest, reachable.id).ok, true);
+  assert.equal(pointsLeft(p), pointsFor(4) - 1);
+  r.refresh(p, { full: true });
+
+  // …and a node on the far rim is not, however many points you have
+  const rim = r.forest.nodes.find(n => n.kind === 'keystone');
+  assert.equal(canTake(p, r.forest, rim.id).ok, false, 'a keystone was reachable from the hub');
+  assert.match(canTake(p, r.forest, rim.id).why, /connects/);
+
+  // spending every point stops you spending more
+  while (pointsLeft(p) > 0) {
+    const next = r.forest.nodes.find(n => canTake(p, r.forest, n.id).ok);
+    if (!next) break;
+    allocate(p, r.forest, next.id);
+  }
+  const any = r.forest.nodes.find(n => !(p.perks || []).includes(n.id));
+  assert.equal(canTake(p, r.forest, any.id).ok, false, 'spent a point that was not there');
 });
 
 test('a better weapon hits harder, and armour is worth wearing', () => {

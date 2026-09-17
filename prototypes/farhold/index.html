@@ -168,6 +168,7 @@
       <button data-tab="character" class="on">Character</button>
       <button data-tab="inventory">Inventory</button>
       <button data-tab="skills">Skills</button>
+      <button data-tab="perks">Perks</button>
       <button data-tab="crafting">Crafting</button>
       <button data-tab="upgrade">Upgrade</button>
       <button data-tab="journal">Journal</button>
@@ -183,6 +184,8 @@
         <div class="slot-grid" id="sheet-slots"></div>
         <h3>Attributes <span class="small muted" id="sheet-points"></span></h3>
         <div id="sheet-attrs"></div>
+        <h3>Boat and ship <span class="small muted">bought once, yours for good</span></h3>
+        <div id="sheet-vehicles" class="vehicles"></div>
         <h3>Companions</h3>
         <div id="sheet-pets" class="pets"></div>
       </div>
@@ -226,11 +229,22 @@
         <div id="sheet-skills" class="skilllist"></div>
       </div>
       <div>
-        <h3>Talents <span class="small muted" id="sheet-talent-points"></span></h3>
-        <div id="sheet-talents" class="passives"></div>
-        <h3>Passives <span class="small muted" id="sheet-passive-points"></span></h3>
-        <div id="sheet-passives" class="passives"></div>
+        <h3>Talents <span class="small muted" id="sheet-talent-points">one per tier, per skill</span></h3>
+        <div id="sheet-skilltree" class="skilltree"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------------- perks -->
+  <div class="tab-body hidden" data-tab="perks">
+    <div class="perks-head">
+      <h3>Perks <span class="small muted" id="perk-points"></span></h3>
+      <div class="perk-legend" id="perk-legend"></div>
+      <button id="perk-refund" class="ghost">Take it all back</button>
+    </div>
+    <div class="perks-body">
+      <canvas id="perk-canvas" class="perk-canvas"></canvas>
+      <aside class="perk-side" id="perk-side"></aside>
     </div>
   </div>
 

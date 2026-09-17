@@ -11,6 +11,10 @@ import { itemScore, SLOTS, describeAffix } from './rpg.js';
 import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
+import { treeFor, picksFor, talentSummary, TIER_LEVELS } from './skilltalents.js';
+import { ARMS, NODE_KINDS, pointsFor, pointsLeft, spentBy, takenOf, canTake, armProgress } from './perks.js';
+import { patternGlyphs, patternText, handsOf, profileOf } from './weapons.js';
+import { VEHICLES, vehicleFor } from './gear.js';
 import { MARKER_LOOKS, distanceText } from './markers.js';
 import { installTooltips, registerTip, hideTip, refreshTip } from '../../../shared/tooltip.js';
 // The playground's one number formatter. Nothing on screen should ever read "513.4100000000000001"
@@ -100,7 +104,15 @@ export class Hud {
     rpg, terrain, onEquip, onSpendAttr, onSpendPassive = null, onTakeTalent = null,
     onRecycle = null, onCraft = null, craft = null, pets = null, zones = null,
     journal = null, seed = 1, onOpen = null, onClose = null,
+    // round 7: the perk forest, the per-skill talent trees, the vehicle dropdowns
+    onTakePerk = null, onRefundPerks = null, onPickTalent = null, onClearTalent = null,
+    onSelectVehicle = null,
   } = {}) {
+    this.onTakePerk = onTakePerk;
+    this.onRefundPerks = onRefundPerks;
+    this.onPickTalent = onPickTalent;
+    this.onClearTalent = onClearTalent;
+    this.onSelectVehicle = onSelectVehicle;
     this.journal = journal;
     this.onSpendPassive = onSpendPassive;
     this.onTakeTalent = onTakeTalent;
@@ -125,6 +137,10 @@ export class Hud {
     this.skillState = [];
     /** How many world cells the minimap shows across. `+` and `-` change it. */
     this.minimapSpan = 26;
+    /** Which skill's talent tree is showing on the Skills tab. */
+    this.talentSkill = null;
+    /** Which perk node the forest has selected. */
+    this.perkPick = null;
 
     // `+` and `-` zoom the minimap. It is fixed at 26 cells otherwise, which is either far too
     // close for finding a town or far too wide for picking your way between trees.
@@ -676,6 +692,7 @@ export class Hud {
     if (this.tab === 'character') this.renderCharacter();
     if (this.tab === 'inventory') this.renderInventory();
     if (this.tab === 'skills') this.renderSkills();
+    if (this.tab === 'perks') this.renderPerks();
     if (this.tab === 'crafting') this.renderCrafting();
     if (this.tab === 'upgrade') this.renderUpgrade();
     if (this.tab === 'journal') this.renderJournal();
@@ -742,6 +759,39 @@ export class Hud {
       return row;
     }));
     $('sheet-points').textContent = player.pendingAttr ? `${player.pendingAttr} point${player.pendingAttr > 1 ? 's' : ''} to spend` : 'no points to spend';
+
+    /**
+     * The boat and the ship: a DROPDOWN, not an equipment slot.
+     *
+     * "In the inventory, instead of equipping them from a list you change them using a dropdown.
+     * This treats them more as unlockables than items, and keeps them out of the loot pool."
+     */
+    const vbox = $('sheet-vehicles');
+    if (vbox) {
+      const kids = [];
+      for (const [slot, spec] of Object.entries(VEHICLES)) {
+        const owned = player.vehicles?.owned?.[slot] || [spec.starter];
+        const active = player.vehicles?.active?.[slot] || spec.starter;
+        const row = el('div', 'vehicle-row');
+        row.append(el('span', 'muted small', slot === 'boat' ? 'Boat' : 'Ship'));
+        const select = el('select');
+        for (const key of owned) {
+          const kind = spec.kinds[key];
+          if (!kind) continue;
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = kind.name;
+          opt.selected = key === active;
+          select.append(opt);
+        }
+        select.onchange = () => this.onSelectVehicle?.(slot, select.value);
+        row.append(select);
+        const kind = spec.kinds[active];
+        row.append(el('span', 'muted small', kind?.lore || ''));
+        kids.push(row);
+      }
+      vbox.replaceChildren(...kids);
+    }
 
     // companions
     const petBox = $('sheet-pets');
@@ -838,49 +888,260 @@ export class Hud {
       if (!this.skillState.length) box.replaceChildren(el('p', 'muted small', 'No skills on this screen.'));
     }
 
-    // talents: the choices only appear when there is a point to spend
-    const talentBox = $('sheet-talents');
-    if (talentBox) {
-      const taken = (player.talents || []).map(id => this.rpg.talentList.find(t => t.id === id)).filter(Boolean);
-      const kids = taken.map(t => {
-        const row = el('div', 'passive-row maxed');
-        row.title = t.desc;
-        row.append(el('span', 'passive-name', t.name), el('span', 'muted small', t.desc));
-        return row;
-      });
-      if (player.pendingTalent) {
-        for (const t of this.rpg.talentChoices(player)) {
-          const row = el('div', 'passive-row');
-          row.title = t.desc;
-          const btn = el('button', null, '+');
-          btn.onclick = () => { this.onTakeTalent?.(t.id); this.renderSheet(); };
-          row.append(el('span', 'passive-name', t.name), el('span', 'muted small', t.desc), btn);
+    /**
+     * A TREE PER SKILL, three tiers deep, one node per tier.
+     *
+     * The broad talent ladder and the passive tree both moved into the Perks forest, so this space
+     * is now where a skill becomes *yours*: pick the skill on the left, and its three tiers appear
+     * on the right. Tier 1 is how it is thrown, tier 2 is what happens when it lands, tier 3 is what
+     * it does to the fight — and you may only have one from each, so a Firebolt is either a fan of
+     * three or one that bursts, never both.
+     */
+    const treeBox = $('sheet-skilltree');
+    if (treeBox) {
+      const list = this.skillState.filter(s => !s.locked);
+      if (!list.length) {
+        treeBox.replaceChildren(el('p', 'muted small', 'No skills yet. They unlock as you level.'));
+      } else {
+        if (!list.some(s => s.id === this.talentSkill)) this.talentSkill = list[0]?.id || null;
+        const chosen = list.find(s => s.id === this.talentSkill) || list[0];
+        const picker = el('div', 'shop-tabs');
+        for (const s of list) {
+          const b = el('button', 'chip' + (s.id === chosen.id ? ' on' : ''), s.name);
+          b.onclick = () => { this.talentSkill = s.id; this.renderSheet(); };
+          picker.append(b);
+        }
+        const kids = [picker];
+        const tree = treeFor(chosen.id, chosen.shape || 'bolt');
+        const picks = picksFor(player, chosen.id);
+        for (const tier of tree.tiers) {
+          const open = (player.level ?? 1) >= tier.level;
+          kids.push(el('h4', 'tier-head' + (open ? '' : ' locked'),
+            `Tier ${tier.tier}${open ? '' : ` — level ${tier.level}`}`));
+          const row = el('div', 'tier-row');
+          for (const node of tier.nodes) {
+            const on = picks[tier.tier] === node.id;
+            const card = el('div', 'talent-card' + (on ? ' on' : '') + (open ? '' : ' locked'));
+            card.innerHTML = `<b>${node.name}</b><span class="muted small">${node.desc}</span>`;
+            if (open) {
+              card.onclick = () => {
+                if (on) this.onClearTalent?.(chosen.id, tier.tier);
+                else this.onPickTalent?.(chosen.id, tier.tier, node.id, chosen.shape || 'bolt');
+                this.renderSheet();
+              };
+            }
+            row.append(card);
+          }
           kids.push(row);
         }
-      } else if (!taken.length) {
-        kids.push(el('p', 'muted small', 'A talent at levels 3, 8, 13, 18, 23 and 28.'));
+        const summary = talentSummary(player, chosen.id);
+        kids.push(el('p', 'muted small', summary
+          ? `${chosen.name}: ${summary}. The spell is drawn bigger and busier for every talent on it.`
+          : `${chosen.name} has no talents yet. Pick one from each tier.`));
+        treeBox.replaceChildren(...kids);
       }
-      talentBox.replaceChildren(...kids);
     }
     const tp = $('sheet-talent-points');
-    if (tp) tp.textContent = player.pendingTalent ? `${player.pendingTalent} to choose` : '';
+    if (tp) tp.textContent = `one per tier · tiers open at ${TIER_LEVELS.join(', ')}`;
+  }
 
-    // the passive tree
-    const tree = $('sheet-passives');
-    if (tree) {
-      tree.replaceChildren(...this.rpg.passives(player).map(node => {
-        const row = el('div', 'passive-row' + (node.rank >= node.maxRank ? ' maxed' : ''));
-        row.title = node.desc;
-        const pips = el('span', 'passive-pips', '●'.repeat(node.rank) + '○'.repeat(Math.max(0, node.maxRank - node.rank)));
-        const btn = el('button', null, '+');
-        btn.disabled = !player.pendingPassive || node.rank >= node.maxRank;
-        btn.onclick = () => { this.onSpendPassive?.(node.id); this.renderSheet(); };
-        row.append(el('span', 'passive-name', node.name), pips, btn);
-        return row;
+
+  // ---------------------------------------------------------------- the perk forest
+
+  /**
+   * The forest, drawn on a canvas.
+   *
+   * Nodes are dots, links are lines, taken ones are lit and the reachable ones glow faintly. Click
+   * one to select it; the side panel says what it does and offers the point. It is a canvas rather
+   * than ninety DOM nodes because it is drawn on every hover and pan, and because the links have to
+   * be drawn UNDER the nodes.
+   */
+  renderPerks() {
+    const player = this.player;
+    const forest = this.rpg?.forest;
+    const canvas = $('perk-canvas');
+    if (!forest || !canvas) return;
+
+    const points = pointsLeft(player);
+    $('perk-points').textContent = points > 0
+      ? `${points} point${points === 1 ? '' : 's'} to spend · ${spentBy(player)} taken`
+      : `${spentBy(player)} taken · none left to spend`;
+
+    const legend = $('perk-legend');
+    if (legend) {
+      legend.replaceChildren(...ARMS.map(a => {
+        const n = el('span', 'perk-arm');
+        n.innerHTML = `<i style="background:${a.color}"></i>${a.name}`;
+        n.title = a.blurb;
+        return n;
       }));
     }
-    const pp = $('sheet-passive-points');
-    if (pp) pp.textContent = player.pendingPassive ? `${player.pendingPassive} to spend` : 'none to spend';
+
+    const refund = $('perk-refund');
+    if (refund && !refund.dataset.wired) {
+      refund.dataset.wired = '1';
+      refund.onclick = () => { this.onRefundPerks?.(); this.renderSheet(); };
+    }
+
+    this.drawForest();
+    this.renderPerkSide();
+
+    if (!canvas.dataset.wired) {
+      canvas.dataset.wired = '1';
+      canvas.addEventListener('click', e => {
+        const hit = this.perkUnder(e);
+        if (hit) { this.perkPick = hit.id; this.renderSheet(); }
+      });
+      canvas.addEventListener('mousemove', e => {
+        const hit = this.perkUnder(e);
+        canvas.style.cursor = hit ? 'pointer' : 'default';
+      });
+      window.addEventListener('resize', () => { if (this.tab === 'perks' && this.sheetOpen) this.drawForest(); });
+    }
+  }
+
+  /** Map a canvas pixel to the node under it, or null. */
+  perkUnder(e) {
+    const forest = this.rpg?.forest;
+    const canvas = $('perk-canvas');
+    if (!forest || !canvas || !this._perkView) return null;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = canvas.width / Math.max(1, rect.width);
+    const px = (e.clientX - rect.left) * dpr, py = (e.clientY - rect.top) * dpr;
+    const { cx, cy, scale } = this._perkView;
+    let best = null, bd = Infinity;
+    for (const node of forest.nodes) {
+      const nx = cx + node.x * scale, ny = cy + node.y * scale;
+      const d = Math.hypot(nx - px, ny - py);
+      if (d < bd) { bd = d; best = node; }
+    }
+    return bd <= 18 * dpr ? best : null;
+  }
+
+  drawForest() {
+    const player = this.player;
+    const forest = this.rpg?.forest;
+    const canvas = $('perk-canvas');
+    if (!forest || !canvas) return;
+    const wrap = canvas.parentElement;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.max(360, wrap.clientWidth - 8), h = Math.max(320, wrap.clientHeight - 8);
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0b0e15';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // fit the whole forest, whatever size it is
+    let span = 0;
+    for (const n of forest.nodes) span = Math.max(span, Math.hypot(n.x, n.y));
+    const scale = (Math.min(canvas.width, canvas.height) / 2 - 34 * dpr) / Math.max(1, span);
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    this._perkView = { cx, cy, scale, dpr };
+
+    const taken = takenOf(player);
+    const colourOf = node => ARMS.find(a => a.key === node.arm)?.color || '#9fb4d4';
+
+    // links first, under everything
+    for (const [a, b] of forest.links) {
+      const na = forest.byId.get(a), nb = forest.byId.get(b);
+      if (!na || !nb) continue;
+      const live = taken.has(a) && taken.has(b);
+      ctx.strokeStyle = live ? 'rgba(220, 230, 245, .55)' : 'rgba(110, 130, 170, .16)';
+      ctx.lineWidth = (live ? 2 : 1) * dpr;
+      ctx.beginPath();
+      ctx.moveTo(cx + na.x * scale, cy + na.y * scale);
+      ctx.lineTo(cx + nb.x * scale, cy + nb.y * scale);
+      ctx.stroke();
+    }
+
+    for (const node of forest.nodes) {
+      const x = cx + node.x * scale, y = cy + node.y * scale;
+      const kind = NODE_KINDS[node.kind];
+      const r = (node.kind === 'hub' ? 9 : 4.5 * (kind?.size || 1)) * dpr;
+      const has = taken.has(node.id);
+      const open = !has && canTake(player, forest, node.id).ok;
+      const colour = colourOf(node);
+
+      if (node.kind === 'keystone') {
+        // a keystone is a diamond, so it reads as different from across the screen
+        ctx.beginPath();
+        ctx.moveTo(x, y - r * 1.4); ctx.lineTo(x + r * 1.4, y);
+        ctx.lineTo(x, y + r * 1.4); ctx.lineTo(x - r * 1.4, y);
+        ctx.closePath();
+      } else if (node.kind === 'talent') {
+        ctx.beginPath();
+        ctx.rect(x - r, y - r, r * 2, r * 2);
+      } else {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+      }
+      ctx.fillStyle = has ? colour : open ? 'rgba(180, 200, 225, .28)' : 'rgba(90, 105, 135, .3)';
+      ctx.fill();
+      ctx.lineWidth = (has ? 2 : 1) * dpr;
+      ctx.strokeStyle = has ? '#ffffff' : open ? colour : 'rgba(120, 140, 175, .5)';
+      ctx.stroke();
+
+      if (this.perkPick === node.id) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 7 * dpr, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6 * dpr; ctx.stroke();
+      }
+    }
+
+    // the hub says what it is, because an unlabelled dot in the middle is a mystery
+    ctx.font = `600 ${11 * dpr}px system-ui, sans-serif`;
+    ctx.fillStyle = 'rgba(220, 230, 245, .8)';
+    ctx.textAlign = 'center';
+    ctx.fillText('you began here', cx, cy + 22 * dpr);
+    // …and so does each arm, out past its rim so the label never sits on a node
+    for (const arm of ARMS) {
+      const x = cx + Math.cos(arm.angle) * (span * scale + 20 * dpr);
+      const y = cy + Math.sin(arm.angle) * (span * scale + 20 * dpr);
+      ctx.fillStyle = arm.color;
+      ctx.fillText(arm.name, Math.max(60 * dpr, Math.min(canvas.width - 60 * dpr, x)), Math.max(14 * dpr, Math.min(canvas.height - 6 * dpr, y)));
+    }
+    ctx.textAlign = 'left';
+  }
+
+  /** The panel beside the forest: what the selected node does, and the button that takes it. */
+  renderPerkSide() {
+    const player = this.player;
+    const forest = this.rpg?.forest;
+    const side = $('perk-side');
+    if (!side || !forest) return;
+    const kids = [];
+
+    const walked = armProgress(player, forest);
+    const bars = el('div', 'perk-bars');
+    for (const arm of ARMS) {
+      const row = el('div', 'perk-bar');
+      row.innerHTML = `<span style="color:${arm.color}">${arm.name}</span><b>${walked[arm.key] || 0}</b>`;
+      row.title = arm.blurb;
+      bars.append(row);
+    }
+    kids.push(bars);
+
+    const node = this.perkPick ? forest.byId.get(this.perkPick) : null;
+    if (!node) {
+      kids.push(el('p', 'muted small', 'Click a node. Anything touching something you have already taken can be taken next — the shape of the tree is the cost.'));
+    } else {
+      const has = takenOf(player).has(node.id);
+      const check = canTake(player, forest, node.id);
+      const kind = NODE_KINDS[node.kind];
+      kids.push(el('h4', null, node.name || 'A perk'));
+      kids.push(el('p', 'muted small', `${kind?.name || node.kind}${node.arm ? ` · ${ARMS.find(a => a.key === node.arm)?.name}` : node.oddball ? ' · out on its own' : ''}`));
+      kids.push(el('p', null, node.desc || ''));
+      if (node.cost) kids.push(el('p', 'warn small', node.cost));
+      if (has) kids.push(el('p', 'small good', 'Taken.'));
+      else if (check.ok) {
+        const b = el('button', 'primary', 'Take it');
+        b.onclick = () => { this.onTakePerk?.(node.id); this.renderSheet(); };
+        kids.push(b);
+      } else kids.push(el('p', 'muted small', check.why));
+    }
+    side.replaceChildren(...kids);
   }
 
   // ---------------------------------------------------------------- crafting and upgrading
@@ -1218,7 +1479,23 @@ export class Hud {
     if (item.armor) base.push(`<b>${item.armor}</b> armour`);
     if (item.ranged) base.push('ranged');
     if (item.brand) base.push(`branded with ${item.brand}`);
+    if (item.quiver) base.push('quiver');
     if (base.length) bits.push(`<div class="tip-base">${base.join(' · ')}</div>`);
+
+    /**
+     * THE WEAPON'S RHYTHM, as glyphs and then in words.
+     *
+     * "The attack pattern should be indicated on the weapon using some type of glyphs." A rapier
+     * shows two arrows, a greatsword shows a sweep and a drop. Below it, the same thing said plainly,
+     * with the reach and the clock — which is how you tell a dagger from a halberd without equipping
+     * either of them.
+     */
+    if (item.type === 'weapon' && !item.ranged) {
+      const p = profileOf(item);
+      bits.push(`<div class="tip-pattern"><span class="glyphs">${patternGlyphs(item)}</span>`
+        + `<span class="muted small">${patternText(item)}</span></div>`);
+      if (p.twoHanded) bits.push('<div class="tip-dim">Two-handed — it takes the off hand with it.</div>');
+    }
 
     // Every property, in plain language, each one listed ONCE.
     //

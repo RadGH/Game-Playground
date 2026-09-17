@@ -234,7 +234,8 @@ test('the sheet has tabs, and opening it gives the mouse back straight away', as
     }
     return { tabs, seen, pointerLocked: !!document.pointerLockElement, open: f.hud.sheetOpen };
   });
-  expect(out.tabs).toEqual(['character', 'inventory', 'skills', 'crafting', 'upgrade', 'journal']);
+  // round 7 added Perks, where attribute point-buy, the passive ladder and the talent picks went
+  expect(out.tabs).toEqual(['character', 'inventory', 'skills', 'perks', 'crafting', 'upgrade', 'journal']);
   expect(out.pointerLocked, 'the mouse was still captured with the sheet open').toBe(false);
   for (const [tab, info] of Object.entries(out.seen)) {
     expect(info.shown, `${tab} did not show`).toBe(true);

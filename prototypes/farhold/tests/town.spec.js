@@ -248,9 +248,12 @@ test('the journal shows the survey, the work and the grudge', async ({ page }) =
       text: document.getElementById('sheet-journal')?.textContent || '',
       zones: document.querySelectorAll('#sheet-zones .zone-row').length,
     };
+    // round 7: the passive tree and the broad talent ladder both moved into the Perks forest, and
+    // the Skills tab now carries a small talent tree per skill instead.
     f.hud.setTab('skills');
-    out.talents = document.querySelectorAll('#sheet-talents').length;
-    out.passives = document.querySelectorAll('#sheet-passives .passive-row').length;
+    out.skillTalents = document.querySelectorAll('#sheet-skilltree .talent-card').length;
+    f.hud.setTab('perks');
+    out.perkNodes = f.rpg.forest.nodes.length;
     return out;
   });
   expect(journal.zones, 'the journal should list the regions and their level bands').toBeGreaterThan(2);
@@ -258,5 +261,6 @@ test('the journal shows the survey, the work and the grudge', async ({ page }) =
   expect(journal.rows).toBeGreaterThan(6);
   expect(journal.text).toContain('surveyed');
   expect(journal.text.toLowerCase()).toContain('moor hound');
-  expect(journal.passives).toBeGreaterThan(2);
+  expect(journal.skillTalents, 'a skill should offer talents to pick from').toBeGreaterThan(4);
+  expect(journal.perkNodes, 'the perk forest is empty').toBeGreaterThan(40);
 });

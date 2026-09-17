@@ -19,6 +19,8 @@ import { Loot } from '../../emberveil/js/loot.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
+import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
+import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE } from './weapons.js';
 // Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
@@ -233,6 +235,8 @@ export class Rpg {
     this.affixReport = tuneAffixData(items);
     this.weightAffixes();
     this.itemLevels();
+    /** The perk forest. One shape for every class - see js/perks.js. */
+    this.forest = buildForest();
   }
 
   /**
@@ -343,7 +347,7 @@ export class Rpg {
       kills: 0, deaths: 0,
     };
     for (let l = 2; l <= level; l++) {
-      player.pendingAttr += this.b.progression?.attrPerLevel ?? 3;
+      // attributes are no longer bought a point at a time - the forest is where a level goes
       if (l % PASSIVE_EVERY === 0) player.pendingPassive++;
       if (TALENT_LEVELS.includes(l)) player.pendingTalent++;
     }
@@ -365,6 +369,10 @@ export class Rpg {
       magicFind: 0, goldFind: 0, xpFind: 0, blockChance: 0, blockPower: 0,
       // round 4: the stats that used to be carried and ignored
       barrier: 0, barrierRegen: 0, cooldownReduction: 0, manaSteal: 0, haste: 0,
+      // round 6/7: the perk forest, the quivers and the weapon work all land here
+      areaPct: 0, petDamagePct: 0, petSlots: 0, arrowDamage: 0, arrowsPerShot: 1, arrowHoming: 0,
+      arrowBurst: 0, lightRange: 0, revealRange: 0, mountSpeed: 0, mountStamina: 0, mountSlope: 0,
+      mountCalm: 0, trample: 0, stealth: 0, staminaEase: 0,
       str: unit.attrs?.str ?? 0, dex: unit.attrs?.dex ?? 0, int: unit.attrs?.int ?? 0, con: unit.attrs?.con ?? 0,
       // passive-tree fields, zeroed here so the effect registry can add to them too
       resistAll: 0, thorns: 0, hpOnKill: 0, manaOnKill: 0, lifeStealFrac: 0,
@@ -401,7 +409,26 @@ export class Rpg {
     }
     d.lifeSteal += d.lifeStealFrac * 100;      // nodes store a fraction, gear stores a percent
 
-    // talents: broad masteries, taken one per talent level
+    /**
+     * THE PERK FOREST, on top of everything else.
+     *
+     * It replaced attribute point-buy, the passive ladder and the talent picks - three screens that
+     * each spent a different currency and none of which was a decision. Its stat keys are `derived`
+     * field names already, so there is nothing to translate; its FLAGS are what the combat code
+     * reads for the keystones and the rule-changing talents.
+     */
+    if (unit.perks) {
+      const { stats, flags } = perkBonuses(unit, this.forest);
+      for (const [key, value] of Object.entries(stats)) {
+        if (key in d) d[key] += value;
+        else d[key] = value;
+      }
+      unit.perkFlags = flags;
+    } else {
+      unit.perkFlags = unit.perkFlags || {};
+    }
+
+    // talents: broad masteries, one per talent level (kept so a save from before the forest loads)
     for (const id of unit.talents || []) {
       const t = this.talentList.find(x => x.id === id);
       if (!t) continue;
@@ -529,7 +556,7 @@ export class Rpg {
     // An item level is a promise you have to grow into. `force` is for the tests and the debug menu;
     // `equipRefusal` is what the interface asks so it can say why rather than doing nothing.
     if (!force) {
-      const why = this.equipRefusal(player, item);
+      const why = this.equipRefusal(player, item, { into });
       if (why) return { refused: why };
     }
     let slot = into || (item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot);
@@ -555,12 +582,23 @@ export class Rpg {
     return old;
   }
 
-  /** Why this player cannot wear this item, in a sentence, or null when they can. */
-  equipRefusal(player, item) {
+  /**
+   * Why this player cannot wear this item, in a sentence, or null when they can.
+   *
+   * `into` matters: a one-handed sword is a `weapon` by type and an off-hand weapon by intent, and
+   * the two-handed rule only applies to the second of those.
+   */
+  equipRefusal(player, item, { into = null } = {}) {
     if (!item) return null;
     const req = this.levelRequirement(item, player);
     if ((player.level ?? 1) < req.level) {
       return `${item.name} needs level ${req.level}. You are ${player.level ?? 1}.`;
+    }
+    // …and a two-handed weapon takes the off hand with it, unless a keystone says otherwise
+    const slot = into || (item.type === 'weapon' ? 'weapon' : item.slot);
+    if (slot === 'offhand') {
+      const why = offhandRefusal(player, item);
+      if (why) return why;
     }
     return null;
   }
@@ -581,7 +619,7 @@ export class Rpg {
     const after = levelFromXp(player.xp);
     if (after === before) return 0;
     player.level = after;
-    player.pendingAttr += (after - before) * (this.b.progression?.attrPerLevel ?? 3);
+    // ...and the same on a multi-level jump: perk points are derived from level, not accrued
     for (let l = before + 1; l <= after; l++) {
       if (l % PASSIVE_EVERY === 0) player.pendingPassive++;
       if (TALENT_LEVELS.includes(l)) player.pendingTalent++;

@@ -14,7 +14,7 @@ export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack ·
 /** Reads the keyboard and mouse. Pointer lock is optional — dragging works too. */
 export function createInput(dom) {
   const keys = new Set();
-  const state = { forward: 0, strafe: 0, run: false, jump: false, attack: false, look: [0, 0], locked: false };
+  const state = { forward: 0, strafe: 0, run: false, jump: false, attack: false, attackHeld: false, look: [0, 0], locked: false };
   const pressed = new Set();
   const down = e => {
     if (e.repeat) return;
@@ -48,8 +48,13 @@ export function createInput(dom) {
     state.look[1] += dy;
   };
   dom.addEventListener('mousemove', move);
-  dom.addEventListener('mousedown', e => { if (e.button === 0) { dragging = true; state.attack = true; } });
-  window.addEventListener('mouseup', () => { dragging = false; });
+  // HOLD TO ATTACK. `state.attack` used to be a one-shot cleared by every sample(), so a swing
+  // cost a click. It is now simply whether the button is down, and the weapon's own clock decides
+  // how often that turns into a swing - "change it so holding down the mouse button repeatedly
+  // attacks (with all weapons)".
+  dom.addEventListener('mousedown', e => { if (e.button === 0) { dragging = true; state.attack = true; state.attackHeld = true; } });
+  window.addEventListener('mouseup', e => { dragging = false; if (!e || e.button === 0) state.attackHeld = false; });
+  window.addEventListener('blur', () => { dragging = false; state.attackHeld = false; });
   // A panel being open must block the click that would grab the mouse again — otherwise clicking a
   // button in the character sheet immediately captures the pointer and the sheet becomes unusable.
   let blocked = () => false;
@@ -74,7 +79,8 @@ export function createInput(dom) {
       // `keys` rides along so a mode with its own bindings (the ship's C-to-descend) can read them
       const snapshot = { ...state, look: [state.look[0], state.look[1]], pressed: new Set(pressed), keys };
       state.look[0] = 0; state.look[1] = 0;
-      state.attack = false;
+      // a held button keeps attacking; a tapped one fires once and clears
+      state.attack = !!state.attackHeld;
       pressed.clear();
       return snapshot;
     },
@@ -107,6 +113,12 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
     vy: 0, yaw: 0, pitch: -0.18, grounded: true,
     camDistance: 7.5, camDistanceUsed: 7.5, moving: 0, running: false,
     attackCooldown: 0, swing: 0,
+    /**
+     * DUAL WIELDING: each hand has its own clock and its own place in its weapon's pattern.
+     * `mainStep` and `offStep` walk the sequence and reset when you stop, which is what makes a
+     * combo a combo. See js/weapons.js.
+     */
+    offCooldown: 0, mainStep: 0, offStep: 0, idleSince: 0,
     attackEvery: b.attackEvery ?? 0.62,      // main.js keeps this in step with derived.attackEvery
     firstPerson: false, eyeHeight: 1.5,
     swimming: false, waterDepth: 0, waterSurface: 0,
@@ -167,6 +179,7 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
     }
     if (self.attackCooldown > 0) self.attackCooldown -= dt;
     if (self.swing > 0) self.swing -= dt;
+    if (self.offCooldown > 0) self.offCooldown -= dt;
 
     // --- what am I standing in?
     const water = terrain.waterAt(self.x, self.z);
@@ -243,14 +256,34 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
     }
 
     // --- swinging (not while riding: you have your hands full)
-    if (!frozen && input?.attack && self.attackCooldown <= 0 && !self.mounted && !self.swimming) {
-      // how fast you swing is a STAT — `initiative` / haste — not a constant. It was computed in
-      // rpg.js and never read, so the property did nothing at all.
-      self.attackCooldown = self.attackEvery ?? b.attackEvery ?? 0.62;
-      self.swing = 0.35;
-      out.attacked = true;
+    //
+    // Two hands, two clocks. The main hand swings on its weapon's own rhythm; the off hand, when
+    // it holds a second weapon, swings on ITS rhythm - "when dual wielding, you should be able to
+    // attack with each weapon on separate cooldowns". Stop attacking for a moment and both
+    // patterns reset to their first strike.
+    const canSwing = !frozen && !self.mounted && !self.swimming;
+    if (canSwing && input?.attack) {
+      self.idleSince = 0;
+      if (self.attackCooldown <= 0) {
+        // how fast you swing is a STAT - `initiative` / haste - not a constant.
+        self.attackCooldown = (self.mainEvery ?? self.attackEvery ?? b.attackEvery ?? 0.62);
+        self.swing = 0.35;
+        out.attacked = true;
+        out.hand = 'main';
+        out.step = self.mainStep;
+        self.mainStep++;
+      }
+      if (self.dualWield && self.offCooldown <= 0) {
+        self.offCooldown = (self.offEvery ?? self.attackEvery ?? b.attackEvery ?? 0.62);
+        self.swing = Math.max(self.swing, 0.3);
+        out.attackedOff = true;
+        out.offStep = self.offStep;
+        self.offStep++;
+      }
+    } else if (canSwing) {
+      self.idleSince += dt;
+      if (self.idleSince > (b.comboResetSeconds ?? 1.1)) { self.mainStep = 0; self.offStep = 0; }
     }
-
     // --- the camera
     // It sits behind the player ALONG THE VIEW RAY and looks down it. That is the trick for looking
     // up: when the ground is in the way we shorten the distance instead of lifting the camera, so

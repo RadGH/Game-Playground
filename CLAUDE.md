@@ -4,6 +4,12 @@ This directory holds standalone **experiments** (reusable libraries + brainstorm
 
 Owner: Radley Sustaire (independent project). Sandbox: auto-commit freely, no remote yet.
 
+## Queueing work - Do Not Stop For Feedack
+
+When work has been laid out and is ready for development, whether through rounds or milestones or feedback, it is absolutely critical that you complete all the work requested by the user. Do not stop to request feedback, unless specifically requested BY the user. Do not stop after a milestone has been reached if there are other milestones still pending. Use multiple agents, the `/loop` or `/goal` features, or other scheduled tasks to continue working until all pending work has been completed. If any tasks are put on hold or shelved, they should be noted in documentation and never forgotten, and brought up when all other work has been completed. It is acceptable to break projects into smaller batches, but what is not acceptable is pausing while work is still remaining.
+
+A specific example of "what went wrong" was on 9/17/2026, the agent stopped after round 6, in the middle of the night, wasting 12 hours of productivity for the user to review work while the user was not even available to review it. There were 3 other rounds of updates pending that were simply delayed. This should be avoided at all costs. Delaying work is completely undesired.  The user returned to an incomplete project, wasting hours of additional time.
+
 ## Layout
 - `<experiment>/` — a library other code imports (voice-lab, lingo, avatar-2d, avatar-3d, namegen, items, combined). Stable APIs, READMEs, tests.
 - `prototypes/<name>/` — a small game built from the experiments. Throwaway: it may hard-code things and break when experiments change; when one graduates, copy it out to its own repo. Each has `index.html`, `README.md` (what it tests, what worked, what didn't), `js/`, `data/`, `tests/`.

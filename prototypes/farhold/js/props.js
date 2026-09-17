@@ -474,6 +474,27 @@ export function createProps(scene, terrain, opts = {}) {
     },
     /** Change how thick the world is and rebuild on the spot. */
     setDensity(d, x, z) { cfg.density = clamp(d, 0, 4); rebuild(x, z); },
+    /**
+     * How far out props are placed, in prop cells.
+     *
+     * "You can also see trees and other props only nearby. As you ascend in the air, trees should
+     * appear from farther away but at lower quality level, until disappearing everywhere when
+     * reaching higher altitude."
+     *
+     * Climbing therefore does two things at once: the RADIUS grows, so the forest reaches toward
+     * the horizon instead of ending in a circle a hundred metres out, and the DENSITY falls, so the
+     * instance budget pays for the extra ground rather than for more trees on the same ground. Past
+     * a ceiling the density reaches zero and they are gone, which is right — from four kilometres
+     * up you cannot make out a bush.
+     */
+    setRadius(r, x, z) {
+      const want = Math.max(1, Math.round(r));
+      if (want === cfg.radius) return false;
+      cfg.radius = want;
+      rebuild(x, z);
+      return true;
+    },
+    get radius() { return cfg.radius; },
     setVisible(v, x, z) { visible = !!v; rebuild(x, z); },
     setGrass(v, x, z) { grassVisible = !!v; rebuild(x, z); },
     stats() {

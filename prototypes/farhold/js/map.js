@@ -28,7 +28,8 @@ const TONE_LABELS = [
   ['trivial', 'far below you'], ['easy', 'easy'], ['even', 'a fair fight'],
   ['hard', 'dangerous'], ['deadly', 'do not go here yet'],
 ];
-import { renderWorld, legend as legendRows, DEFAULT_LAYERS } from '../../../worldgen/js/render.js';
+import { renderWorld, legend as legendRows, DEFAULT_LAYERS, worldPixels } from '../../../worldgen/js/render.js';
+import { generateRegionDetail } from '../../../worldgen/js/local.js';
 import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
@@ -177,10 +178,28 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     const { scale, offsetX: ox, offsetY: oy } = viewBox();
     ctx.fillStyle = '#05070d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    state.view = renderWorld(ctx, world, {
-      layers: state.layers, layer: state.layer,
-      scale, offsetX: ox, offsetY: oy,
-    });
+    /**
+     * ZOOMING IN GIVES YOU MORE MAP, NOT A BIGGER BLUR.
+     *
+     * "When zooming in it gets extremely laggy / low FPS yet the map doesn't actually get more
+     * detailed. Can the map get more detailed, eventually fading into the interim and then fully
+     * zoomed in levels like seen in the Star Forge experiment?"
+     *
+     * Past `DETAIL_FROM` the view switches to World Forge's own **region detail** — the same six-
+     * times pass the World Forge viewer uses — for whichever region is under the middle of the
+     * screen. It is generated once per region and cached, so panning around inside one costs
+     * nothing, and it is a genuinely different map rather than the same pixels made larger.
+     */
+    const detail = state.zoom >= DETAIL_FROM ? detailUnderView() : null;
+    if (detail) {
+      drawDetail(ctx, detail, scale, ox, oy);
+      state.view = { scale, offsetX: ox, offsetY: oy, detail: detail.regionId };
+    } else {
+      state.view = renderWorld(ctx, world, {
+        layers: state.layers, layer: state.layer,
+        scale, offsetX: ox, offsetY: oy,
+      });
+    }
 
     // ---- the level-band overlay: every region washed in how dangerous it is to YOU right now
     if (state.levels && zones) {
@@ -369,13 +388,84 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     };
   }
 
+  /**
+   * The region detail under the middle of the view, generated once and kept.
+   *
+   * A detail pass is a quarter of a million cells of noise, so it is cached by region id and only
+   * ever built for the one you are looking at. Falls back to null (and therefore to the plain world
+   * image) on a world with no named regions.
+   */
+  const detailCache = new Map();
+  function detailUnderView() {
+    if (!world.region || !world.regions?.length) return null;
+    const c = state.centre || playerCell();
+    const cx = Math.max(0, Math.min(world.width - 1, Math.round(c.x)));
+    const cy = Math.max(0, Math.min(world.height - 1, Math.round(c.y)));
+    const id = world.region[cy * world.width + cx];
+    if (id == null || !world.regions[id]) return null;
+    if (!detailCache.has(id)) {
+      try {
+        detailCache.set(id, generateRegionDetail(world, id, { factor: 6, maxCells: 260000 }));
+      } catch {
+        detailCache.set(id, null);
+      }
+    }
+    const d = detailCache.get(id);
+    return d ? { ...d, regionId: id } : null;
+  }
+
+  /**
+   * Draw a region's detail where that region actually sits on the world map, so panning and zooming
+   * stay continuous — the detail lands exactly over the cells it was generated from.
+   */
+  function drawDetail(ctx, detail, scale, ox, oy) {
+    ctx.fillStyle = '#05070d';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // the plain world underneath, so the ground outside this region is still there
+    renderWorld(ctx, world, { layers: state.layers, layer: state.layer, scale, offsetX: ox, offsetY: oy });
+    const factor = detail.factor || 6;
+    const px = worldPixels(detail, { layer: state.layer || 'biomes', hillshade: state.layers?.hillshade !== false, shade: 3 });
+    const img = ctx.createImageData(detail.width, detail.height);
+    img.data.set(px.data);
+    if (!detailBuffer || detailBuffer.width !== detail.width || detailBuffer.height !== detail.height) {
+      detailBuffer = document.createElement('canvas');
+      detailBuffer.width = detail.width;
+      detailBuffer.height = detail.height;
+    }
+    detailBuffer.getContext('2d').putImageData(img, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    //  is the top-left WORLD cell the detail was generated from, and  how many
+    // of them it covers — so the detail lands exactly over the ground it came from.
+    ctx.drawImage(
+      detailBuffer,
+      ox + detail.origin.x * scale, oy + detail.origin.y * scale,
+      detail.worldCells.w * scale, detail.worldCells.h * scale,
+    );
+  }
+  let detailBuffer = null;
+
   /** Where the player is, in map cells. */
   function playerCell() {
     const p = getPlayer();
     return { x: p.x / M_PER_CELL, y: p.z / M_PER_CELL };
   }
 
-  const ZOOMS = [1, 1.8, 3.2, 5.6, 10];
+/**
+ * The zoom ladder.
+ *
+ * "Ideally the map should work more like Google Maps and when zoomed out I should see all of it…
+ * Can the map get more detailed, eventually fading into the interim and then fully zoomed in levels
+ * like seen in the Star Forge experiment?"
+ *
+ * `1` is the whole planet, edge to edge, which is the thing that was missing — the old ladder
+ * bottomed out at a zoom that still cropped the poles on a tall map. Above that the steps get
+ * bigger, and past `DETAIL_FROM` the renderer stops upscaling the world image and starts drawing
+ * the **region detail** instead, which is genuinely more map rather than a bigger blur.
+ */
+  const ZOOMS = [1, 1.6, 2.6, 4.2, 6.8, 11, 18];
+
+  /** Past this zoom, draw the interim detail rather than a magnified world image. */
+  const DETAIL_FROM = 4.2;
 
   function cellFromEvent(ev) {
     const rect = canvas.getBoundingClientRect();
@@ -402,6 +492,52 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     readout.className = 'readout' + (zone && zone.id >= 0 ? ' zone-' + zoneTone(zone.midLevel, getLevel()) : '');
   });
 
+  /**
+   * DRAG TO PAN, like every map anyone has used.
+   *
+   * "Ideally the map should work more like Google Maps… I could not zoom out all the way to see the
+   * entire planet, nor could I pan the camera around." A left-drag moves the view; a drag that
+   * barely moved is still treated as a click, so shift-clicking a pin and dragging the map are not
+   * in each other's way.
+   */
+  let dragFrom = null;
+  canvas.addEventListener('pointerdown', ev => {
+    if (ev.button !== 0) return;
+    dragFrom = { x: ev.clientX, y: ev.clientY, centre: { ...(state.centre || playerCell()) }, moved: 0 };
+    canvas.setPointerCapture?.(ev.pointerId);
+  });
+  canvas.addEventListener('pointermove', ev => {
+    if (!dragFrom) return;
+    const { scale } = viewBox();
+    const dx = ev.clientX - dragFrom.x, dy = ev.clientY - dragFrom.y;
+    dragFrom.moved = Math.max(dragFrom.moved, Math.hypot(dx, dy));
+    if (dragFrom.moved < 4) return;
+    state.justDragged = true;
+    const dpr = canvas.width / Math.max(1, canvas.getBoundingClientRect().width);
+    state.centre = {
+      x: dragFrom.centre.x - (dx * dpr) / scale,
+      y: dragFrom.centre.y - (dy * dpr) / scale,
+    };
+    state.dragged = true;
+    canvas.style.cursor = 'grabbing';
+    draw();
+  });
+  const endDrag = ev => {
+    if (!dragFrom) return;
+    canvas.releasePointerCapture?.(ev?.pointerId);
+    canvas.style.cursor = 'crosshair';
+    dragFrom = null;
+  };
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+
+  /** Put the view back on the player — the button, and what Escape-less closing does. */
+  function recentre() {
+    state.centre = null;
+    state.dragged = false;
+    draw();
+  }
+
   // the wheel zooms, in steps, around the pointer
   canvas.addEventListener('wheel', ev => {
     ev.preventDefault();
@@ -418,6 +554,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   }, { passive: false });
 
   canvas.addEventListener('click', ev => {
+    // a click that was really the end of a drag is not a click
+    if (state.justDragged) { state.justDragged = false; return; }
     const cell = cellFromEvent(ev);
     if (!cell) return;
     if (ev.shiftKey) {
@@ -461,6 +599,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     get pins() { return pins(); },
     /** Step the zoom from a button or a test. */
     setZoom(z) { state.zoom = ZOOMS.includes(z) ? z : 1; if (state.zoom === 1) state.centre = null; draw(); },
+    /** Put the view back over the player. */
+    recentre,
+    ZOOMS, DETAIL_FROM,
     /** Turn the level overlay on or off (the checkbox, the debug menu and the tests). */
     setLevels(on) { state.levels = !!on; buildSide(); draw(); },
     get isOpen() { return state.open; },

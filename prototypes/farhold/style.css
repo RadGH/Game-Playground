@@ -236,10 +236,17 @@ body {
   margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 24px; cursor: pointer;
 }
 .map-body { flex: 1; display: flex; min-height: 0; }
-.map-canvas-wrap { flex: 1; position: relative; min-width: 0; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
-.map-canvas { flex: 1; min-height: 0; border: 1px solid #222c3c; border-radius: 6px; cursor: crosshair; }
+/* The map and the panels beside it need a real gutter: at some sizes the canvas ran under the
+   layers and pin columns — "the map covers up the layers/pins/cell menus on the right side, there
+   is not enough space between the columns". */
+.map-canvas-wrap { flex: 1; position: relative; min-width: 0; padding: 10px 16px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+.map-canvas { flex: 1; min-height: 0; border: 1px solid #222c3c; border-radius: 6px; cursor: crosshair; touch-action: none; }
 .map-readout { font: 12px var(--mono, ui-monospace, Consolas, monospace); min-height: 18px; }
-.map-side { width: 290px; overflow-y: auto; padding: 10px 12px 10px 0; display: flex; flex-direction: column; gap: 10px; }
+.map-side {
+  width: 300px; flex: 0 0 300px; overflow-y: auto; padding: 10px 14px 10px 0;
+  display: flex; flex-direction: column; gap: 10px;
+  border-left: 1px solid #1a2433;
+}
 
 /* the layers panel is World Forge's, so it needs World Forge's chip styling */
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }

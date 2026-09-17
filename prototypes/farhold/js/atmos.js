@@ -32,6 +32,12 @@ const DEFAULTS = {
   drag: 0.24,             // thick air slows you; it thins out with altitude
   maxSpeed: 900,
   liftSpeed: 26,          // how fast it rises with no throttle at all, so take-off is forgiving
+  liftMax: 1.04,          // a wing can carry the whole ship (and a little more) at speed
+  liftSpeedFull: 95,      // …once it is going this fast
+  throttleUp: 3.2,        // how quickly W reaches full — about a third of a second
+  throttleDown: 2.2,
+  hoverFloor: 12,         // metres of ground clearance the ship will not sink below on its own
+  hoverPush: 16,          // …and how hard it pushes back up to keep it
   turnRate: 1.5,          // radians a second at full deflection
   rollRate: 2.2,
   clearance: 6,           // metres of hull below the centre point
@@ -127,8 +133,21 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
       state.pitch = Math.max(-1.35, Math.min(1.35, state.pitch - (input.look?.[1] || 0) * 0.0019 * invert * sens));
       const rollWant = (input.strafe || 0) * -0.6;
       state.roll += (rollWant - state.roll) * Math.min(1, dt * cfg.rollRate);
-      // W and S are the throttle, not a direction — this is a ship, not a character
-      state.throttle = Math.max(0, Math.min(1, state.throttle + (input.forward || 0) * dt * 1.1));
+      /**
+       * W AND S FLY YOU FORWARD AND BACK.
+       *
+       * "The spaceship flying system in atmosphere… changed at some point so that W/S only go up and
+       * down, not forward and back, so I can no longer fly around the planet. The goal is to fly
+       * around the planet and reveal more terrain."
+       *
+       * W was always the throttle, but it took nearly a second to reach full and the wing could only
+       * ever carry 92% of the ship's weight — so holding W got you a slow sink with some forward
+       * drift, and the only thing that actually moved you was Space. It eases to full in about a
+       * third of a second now, and level flight below actually holds its altitude.
+       */
+      const want = input.forward || 0;
+      const ease = want > state.throttle ? cfg.throttleUp : cfg.throttleDown;
+      state.throttle = Math.max(0, Math.min(1, state.throttle + (want - state.throttle) * Math.min(1, dt * ease)));
       state.boosting = !!input.run;
       // Space lifts, C drops. Straight vertical thrust, so you can hold an altitude, hop a ridge and
       // put down on a flat spot without having to fly a landing pattern.
@@ -154,7 +173,16 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     // always sinks a little with no input, which is what makes "hold this altitude" a thing you do
     // rather than a thing that happens.
     const level = Math.max(0, 1 - Math.abs(state.pitch) / 1.2);
-    const lift = Math.min(0.92, (state.speed / 120) * air * level);
+    /**
+     * A wing that can actually hold the ship up.
+     *
+     * It used to be capped at 0.92, so a ship flying flat out and dead level still fell out of the
+     * sky at 0.8 m/s² — which is why crossing a continent needed a hand on Space the whole way. It
+     * reaches `cfg.liftMax` (just over 1) with speed, so level flight holds its line and a nose-up
+     * or nose-down attitude is what changes your altitude. Below the speed it needs, it still sags:
+     * a hovering ship should sink.
+     */
+    const lift = Math.min(cfg.liftMax, (state.speed / cfg.liftSpeedFull) * air * level);
     state.velocity.y -= gravity * (1 - lift) * dt;
     // and thin air is less of a brake, which is why you accelerate as you climb
     const drag = cfg.drag * air;
@@ -170,6 +198,24 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
       // the edge of the map is a wall, not a cliff — bounce off it too
       state.velocity.x *= -0.4; state.velocity.z *= -0.4;
       state.x = cx; state.z = cz;
+    }
+
+    /**
+     * A SOFT FLOOR over the terrain.
+     *
+     * Flying across a continent means looking at it, and looking at it means not watching the
+     * ground come up. This is not autopilot — you can still fly it into a hill at speed, and you can
+     * still descend deliberately by pointing the nose down — but with the stick centred the ship
+     * will not sink into a rise it is passing over. It is what makes "fly around and find somewhere
+     * to land" a thing you can do rather than a thing you have to concentrate on.
+     */
+    {
+      const ahead = terrain.heightAt(state.x + state.velocity.x * 0.6, state.z + state.velocity.z * 0.6);
+      const clear = state.y - Math.max(ahead, terrain.heightAt(state.x, state.z));
+      if (clear < cfg.hoverFloor && state.lift >= 0 && state.pitch > -0.35) {
+        const need = (cfg.hoverFloor - clear) / cfg.hoverFloor;
+        state.velocity.y += cfg.hoverPush * need * dt;
+      }
     }
 
     // ---- the ground is solid. A ship does not take damage here; it bounces.

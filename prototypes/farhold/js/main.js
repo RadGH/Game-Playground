@@ -17,6 +17,7 @@ import { createSpeech } from './speech.js';
 import { createSettings } from './settings.js';
 import { NameGen } from '../../../namegen/js/namegen.js';
 import { generatePlanetMap } from '../../../universe/js/planetmap.js';
+import { BIOMES } from '../../../worldgen/js/biomes.js';
 import { createTerrainView } from './terrain.js';
 import { createSky } from './sky.js';
 import { createProps } from './props.js';
@@ -1574,6 +1575,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     getState: () => ({
       galaxy, starId, star: starNow(), system, systemSeed,
       bodies: space?.bodies || null,
+      /**
+       * What the survey of another star can tell you: what is orbiting it and roughly how hard each
+       * one is. Building the system costs a few milliseconds and the answer is cached per star, so
+       * clicking around the chart stays instant.
+       */
+      surveyOf: star => surveyStar(star),
+      /** …and the surface of a world you have actually been down to. */
+      surfaceOf: p => surfaceKnown(p),
       // the ship's position in AU, for the "you are here" dot on the system view
       shipAu: space ? { x: space.state.position.x / space.AU, z: space.state.position.z / space.AU } : null,
       markers: markers.markers,
@@ -1581,6 +1590,50 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     onTravel: (target, reach) => beginJump(target, reach),
     onClose: () => regrab(),
   });
+
+  /**
+   * The survey cache. A star's system is deterministic from its seed, so this is a pure function
+   * with a memo in front of it rather than any kind of state.
+   */
+  const surveyCache = new Map();
+  function surveyStar(target) {
+    if (!target) return null;
+    if (surveyCache.has(target.id)) return surveyCache.get(target.id);
+    let out = null;
+    try {
+      const built = target.id === starId ? { system } : createSystem({ seed: target.seed });
+      const planets = (built.system.planets || []).map(p => ({
+        name: p.name,
+        kind: p.giant ? 'gas giant' : (p.archetypeName || p.archetype || 'world'),
+        band: bandForPlanet(p).name,
+        color: p.giant ? '#d8b070' : p.atmosphere?.breathable ? '#8fe0a0' : '#8fb8d8',
+      }));
+      const moons = (built.system.planets || []).reduce((n, p) => n + (p.moons?.length || 0), 0);
+      out = { planets, moons };
+    } catch { out = null; }
+    surveyCache.set(target.id, out);
+    return out;
+  }
+
+  /**
+   * What is known about a world's SURFACE — only ever the one you are standing on, because that is
+   * the only surface map this run has built. Everything else honestly says it is unmapped.
+   */
+  function surfaceKnown(p) {
+    if (!p || p.id !== planet.id || !world) return null;
+    const counts = new Map();
+    for (const b of world.biome) counts.set(b, (counts.get(b) || 0) + 1);
+    const total = world.biome.length || 1;
+    const top = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1]).slice(0, 4)
+      .map(([id, n]) => ({ name: BIOMES?.[id]?.name || `biome ${id}`, share: Math.round((n / total) * 100) }));
+    return {
+      regions: world.regions?.length || 0,
+      biomes: counts.size,
+      towns: (world.nodes || []).filter(n => n.type === 'settlement' || n.type === 'port').length,
+      top,
+    };
+  }
 
   const warp = createWarp({ opts: { seconds: balance.space?.warpSeconds ?? 5 } });
   let jump = null;          // { from, to, reach } while the drive is running
@@ -1714,6 +1767,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     lastAirLod = -1;
     view.setSkirtScale(1, air.state.x, air.state.z);
     view.setViewScale(1, air.state.x, air.state.z);
+    props.setRadius(lowQuality ? 5 : 7, air.state.x, air.state.z);
     props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
     props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
     const st = air.state;
@@ -1764,9 +1818,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       gates.update(air.state.x, air.state.z);
       sites.update(air.state.x, air.state.z);
       const high = Math.min(1, Math.max(0, (air.state.y - terrain.heightAt(air.state.x, air.state.z)) / 2600));
-      if (Math.abs(high - lastAirLod) > 0.2) {
+      if (Math.abs(high - lastAirLod) > 0.12) {
         lastAirLod = high;
-        props.setDensity((settings.get('density') ?? 1) * (1 - high * 0.92), air.state.x, air.state.z);
+        /**
+         * Props REACH FURTHER and thin out as you climb, rather than simply switching off.
+         *
+         * At ground level the scatter is seven cells across; from a kilometre up it is nearly three
+         * times that at a fifth of the density, so the forest runs to the horizon instead of ending
+         * in a circle around the ship. The two together keep the instance count roughly flat.
+         */
+        const baseRadius = lowQuality ? 5 : 7;
+        props.setRadius(Math.round(baseRadius * (1 + high * 1.9)), air.state.x, air.state.z);
+        props.setDensity((settings.get('density') ?? 1) * Math.max(0, 1 - high * 1.15), air.state.x, air.state.z);
         props.setGrass(high < 0.25 && settings.get('grass') !== false, air.state.x, air.state.z);
         // and deepen the clipmap skirts, because from up here you are looking straight down the
         // seam between two rings and a head-height skirt does not cover it
@@ -1874,7 +1937,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const out = warp.update(dt, camera);
       space.state.throttle = 1;
       space.update(dt, null, camera);
+      // the system itself streaks past — without this the tunnel plays over a set of stationary
+      // planets, which reads as a screen effect rather than as going somewhere
+      space.warpStretch(out.intensity, space.heading());
       if (out.done) {
+        space.releaseWarp();
         if (jump) arriveAt(jump.to);
         else mode = 'space';
       }

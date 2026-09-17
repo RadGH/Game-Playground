@@ -126,7 +126,7 @@ const CLASS_SIZE = {
  * system view has nothing live to draw and the orbits are taken from the system data instead.
  */
 export function createStarChart({ getState, onTravel = null, onClose = null } = {}) {
-  const state = { open: false, level: 'system', zoom: 1, selected: null, centre: { x: 0, y: 0 } };
+  const state = { open: false, level: 'system', zoom: 1, selected: null, world: null, centre: { x: 0, y: 0 } };
 
   const canvas = el('canvas', { class: 'chart-canvas' });
   const wrap = el('div', { class: 'chart-wrap' }, canvas);
@@ -181,6 +181,46 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
         el('p', { class: 'small muted', text: s.star?.className || '' }),
         el('p', { class: 'small', text: `${(s.system?.planets || []).length} worlds${countMoons(s.system) ? `, ${countMoons(s.system)} moons` : ''}` }),
       ));
+      /**
+       * WHAT THE CHART KNOWS ABOUT THE WORLD YOU PICKED.
+       *
+       * Everything here comes from the system data, which is what a survey would tell you: what kind
+       * of world it is, its air, its gravity, its temperature, what is in the ground. The regions
+       * and biomes of the surface are the part you only get once you have BEEN there — the chart
+       * says so rather than inventing them, which is the seam a real scanning mechanic will slot
+       * into later.
+       */
+      if (state.world?.planet) {
+        const p = state.world.planet;
+        const kids2 = [
+          el('p', { class: 'muted small', text: state.world.moon ? `Moon of ${state.world.moon.name}` : (p.archetypeName || p.archetype || 'world') }),
+          el('p', { class: 'small', text: `${((p.radius || 1) * 6371).toFixed(0)} km across · ${(p.gravity ?? 1).toFixed(2)} g` }),
+          el('p', { class: 'small', text: p.atmosphere?.density > 0.08
+            ? `${p.atmosphere.breathable ? 'Breathable' : 'Unbreathable'} air` : 'No air worth the name' }),
+        ];
+        if (p.temperature?.K) kids2.push(el('p', { class: 'small', text: `${Math.round(p.temperature.K - 273)}°C on average` }));
+        if (p.orbit?.au) kids2.push(el('p', { class: 'small muted', text: `${p.orbit.au.toFixed(2)} AU out` }));
+        const res = (p.resources || []).map(r => r.name || r.key);
+        if (res.length) kids2.push(el('p', { class: 'small', text: `Resources: ${res.slice(0, 4).join(', ')}` }));
+        const rare = (p.rareElements || []).map(r => r.name || r.key);
+        if (rare.length) kids2.push(el('p', { class: 'small warn', text: `Rare: ${rare.join(', ')}` }));
+
+        // the surface, once you have actually been down there
+        const surface = s.surfaceOf?.(p);
+        if (surface) {
+          kids2.push(el('h4', { text: 'Surface' }));
+          kids2.push(el('p', { class: 'small', text: `${surface.regions} named regions · ${surface.biomes} biomes · ${surface.towns} settlements` }));
+          if (surface.top?.length) {
+            kids2.push(el('p', { class: 'small muted', text: surface.top.map(b => `${b.name} ${b.share}%`).join(' · ') }));
+          }
+        } else {
+          kids2.push(el('p', { class: 'small muted', text: 'The surface is unmapped. Land on it and the chart fills in.' }));
+        }
+        const mine = (s.markers || []).filter(m => m.planetId === p.id);
+        if (mine.length) kids2.push(el('p', { class: 'small', text: `${mine.length} marker${mine.length > 1 ? 's' : ''} down there.` }));
+        kids.push(panel(p.name, ...kids2));
+      }
+
       const rows = (s.system?.planets || []).map(p => {
         const mine = (s.markers || []).filter(m => m.planetId === p.id);
         return el('div', { class: 'chart-row' + (mine.length ? ' marked' : '') },
@@ -207,6 +247,36 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
           }))
           : el('p', { class: 'small muted', text: 'Nothing inside the drive\'s reach. Zoom out and pick a closer star first.' }),
       ));
+    }
+
+    /**
+     * THE SURVEY.
+     *
+     * "In the 'Nearby Stars' or other views when a planet is selected, add a 'survey' panel to
+     * reveal planets and their types in the star region, later we will implement a more detailed
+     * scanning mechanic required to be able to view this info."
+     *
+     * For now the survey is free and tells you what is orbiting the star you picked, so choosing
+     * where to jump is a decision rather than a coin toss. When scanning arrives it gates THIS
+     * panel; everything else stays as it is.
+     */
+    if (state.selected && state.level !== 'system') {
+      const survey = s.surveyOf?.(state.selected);
+      const kids2 = [];
+      if (!survey) {
+        kids2.push(el('p', { class: 'muted small', text: 'Too far to read. Jump closer and it will resolve.' }));
+      } else {
+        kids2.push(el('p', { class: 'small muted', text: `${survey.planets.length} worlds${survey.moons ? `, ${survey.moons} moons` : ''}` }));
+        for (const w of survey.planets) {
+          kids2.push(el('div', { class: 'chart-row' },
+            el('span', { class: 'chart-dot', style: `background:${w.color}` }),
+            el('span', { class: 'chart-rowname', text: w.name }),
+            el('span', { class: 'muted small', text: w.kind }),
+            el('span', { class: 'muted small', text: w.band }),
+          ));
+        }
+      }
+      kids.push(panel(`Survey — ${state.selected.name}`, ...kids2));
     }
 
     if (state.selected) {
@@ -292,6 +362,9 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
     const live = new Map();
     for (const b of s.bodies || []) if (!b.moon) live.set(b.planet.id, b);
     const labels = [];
+    // where each body ended up on screen, so a click can find it again
+    const hits = [];
+    state._systemHits = hits;
 
     for (const p of planets) {
       const au = p.orbit?.au || 1;
@@ -305,17 +378,28 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
       const angle = b ? Math.atan2(b.position.z, b.position.x) : ((p.seed ?? p.id) % 360) * Math.PI / 180;
       const px = cx + Math.cos(angle) * r, py = cy + Math.sin(angle) * r;
       const size = Math.max(3, Math.min(11, (p.radius || 1) * (p.giant ? 4.5 : 3)));
+      hits.push({ px, py, r: size, planet: p, moon: null });
       ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI * 2);
       ctx.fillStyle = p.giant ? '#d8b070' : p.atmosphere?.breathable ? '#8fe0a0' : '#8fb8d8';
       ctx.fill();
       ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(5,7,14,.9)'; ctx.stroke();
+      if (state.world?.planet === p) {
+        ctx.beginPath(); ctx.arc(px, py, size + 8, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6; ctx.stroke();
+      }
 
       // moons, as a tight ring of specks
       for (let i = 0; i < (p.moons?.length || 0); i++) {
         const ma = angle + (i + 1) * 1.7;
+        const mx = px + Math.cos(ma) * (size + 6), my = py + Math.sin(ma) * (size + 6);
+        hits.push({ px: mx, py: my, r: 3, planet: p.moons[i], moon: p });
         ctx.beginPath();
-        ctx.arc(px + Math.cos(ma) * (size + 6), py + Math.sin(ma) * (size + 6), 1.8, 0, Math.PI * 2);
+        ctx.arc(mx, my, 1.8, 0, Math.PI * 2);
         ctx.fillStyle = '#c8d4e4'; ctx.fill();
+        if (state.world?.planet === p.moons[i]) {
+          ctx.beginPath(); ctx.arc(mx, my, 7, 0, Math.PI * 2);
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4; ctx.stroke();
+        }
       }
 
       // labels crowd badly on a tight system; drop one that would land on another
@@ -445,7 +529,24 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
 
   canvas.addEventListener('click', e => {
     const s = getState();
-    if (!s?.galaxy || state.level === 'system') return;
+    /**
+     * PICK A WORLD OUT OF THE SYSTEM VIEW.
+     *
+     * "In the galaxy map view allow selecting planets and moons in 'This System' view showing
+     * similar to the world forge system, region map, biomes, etc."
+     *
+     * The side panel then shows what the chart actually knows about it — its archetype, its air,
+     * its gravity, its temperature, its resources, and the regions and biomes of its surface once
+     * you have been there, which is the "world forge" half.
+     */
+    if (state.level === 'system') {
+      const hit = worldUnder(e, s);
+      state.world = hit || null;
+      build();
+      draw();
+      return;
+    }
+    if (!s?.galaxy) return;
     const rect = canvas.getBoundingClientRect();
     const dpr = canvas.width / rect.width;
     const proj = projector({ level: state.level, centre: state.centre, width: canvas.width, height: canvas.height, zoom: state.zoom });
@@ -455,6 +556,20 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
     build();
     draw();
   });
+
+  /** The world under a click on the system view, or null. */
+  function worldUnder(e, s) {
+    if (!state._systemHits) return null;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = canvas.width / Math.max(1, rect.width);
+    const px = (e.clientX - rect.left) * dpr, py = (e.clientY - rect.top) * dpr;
+    let best = null, bd = Infinity;
+    for (const hit of state._systemHits) {
+      const d = Math.hypot(hit.px - px, hit.py - py);
+      if (d < bd) { bd = d; best = hit; }
+    }
+    return best && bd <= Math.max(16 * dpr, (best.r || 6) + 10 * dpr) ? best : null;
+  }
 
   window.addEventListener('resize', () => { if (state.open) draw(); });
 

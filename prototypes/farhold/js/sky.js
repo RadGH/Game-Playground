@@ -17,6 +17,8 @@
 // midnight. How BIG they are drawn is not real — see `siblingScale` below.
 
 import * as THREE from 'three';
+import { SKY_LOOKS } from './sky-looks.js';
+export { SKY_LOOKS } from './sky-looks.js';
 import { clamp } from '../../../worldgen/js/noise.js';
 import { createPlanet, createStar } from '../../../assets/js/space-models.js';
 import { cloudTexture } from '../../../universe/js/texture.js';
@@ -480,20 +482,35 @@ export function galaxyTexture(star = {}, planet = {}, { width = 2048, height = 1
   let seed = ((star?.seed ?? 1) * 2654435761 ^ (planet?.id ? String(planet.id).length * 97 : 7)) >>> 0;
   const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 
-  ctx.fillStyle = '#04050b';
+  /**
+   * A HANDFUL OF DIFFERENT SKIES, and each star picks one and then tints it.
+   *
+   * "The skybox with the purple haze and stars is very cool. Can we have several variations of this
+   * skybox used by different stars? Can each one customize the colors of the skybox so that stars
+   * all feel more unique and different?"
+   *
+   * It was already seeded by the star, so no two systems shared a sky — but every one of them was
+   * the same *kind* of sky: one dusty band in blue and violet. These are six genuinely different
+   * looks, chosen by the star's own seed and then recoloured within the look's own range, so a
+   * system reads as somewhere rather than as another roll of the same dice.
+   */
+  const look = SKY_LOOKS[Math.floor(rnd() * SKY_LOOKS.length)] || SKY_LOOKS[0];
+  ctx.fillStyle = look.base;
   ctx.fillRect(0, 0, width, height);
 
   // the band: blobs strung along a sine so the plane is not a ruler-straight stripe
-  const hueA = 200 + rnd() * 60, hueB = 280 + rnd() * 50;
+  const hueA = look.hueA[0] + rnd() * (look.hueA[1] - look.hueA[0]);
+  const hueB = look.hueB[0] + rnd() * (look.hueB[1] - look.hueB[0]);
   ctx.globalCompositeOperation = 'lighter';
-  for (let i = 0; i < 420; i++) {
-    const t = i / 420;
+  const blobs = Math.round(420 * look.dust);
+  for (let i = 0; i < blobs; i++) {
+    const t = i / blobs;
     const x = t * width;
     const y = height * 0.5 + Math.sin(t * Math.PI * 2 + rnd() * 0.4) * height * 0.06 + (rnd() - 0.5) * height * 0.16;
-    const r = height * (0.04 + rnd() * 0.12);
+    const r = height * (0.04 + rnd() * 0.12) * look.spread;
     const hue = rnd() < 0.6 ? hueA : hueB;
     const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, `hsla(${hue}, 60%, ${28 + rnd() * 22}%, ${0.05 + rnd() * 0.07})`);
+    g.addColorStop(0, `hsla(${hue}, ${look.sat}%, ${28 + rnd() * 22}%, ${(0.05 + rnd() * 0.07) * look.glow})`);
     g.addColorStop(1, 'hsla(0,0%,0%,0)');
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();

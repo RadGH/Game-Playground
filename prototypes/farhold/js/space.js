@@ -32,7 +32,12 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   const approachCfg = {
     slowFrom: cfg.slowFrom ?? 26,        // start easing off the throttle here
     slowTo: cfg.slowTo ?? 0.25,          // …down to this fraction of cruise at the surface
-    noWarpWithin: cfg.noWarpWithin ?? 9, // warp will not engage this close to anything
+    // How close counts as "in the way" for the warp drive, in body radii.
+    //
+    // It was nine, which for an Earth-sized world is nearly half an AU: "I'm 0.34 AU away from a
+    // planet and still can't boost, it's tiny in comparison. It started working around 0.75 AU but
+    // it's just too far away." Three radii is about a tenth of that, and is genuinely "in your lap".
+    noWarpWithin: cfg.noWarpWithin ?? 3,
     entry: cfg.entryAltitude ?? 0.5,     // fall below this over a landable world and you are in its air
     tiers: cfg.detailTiers || [
       { key: 'far', within: Infinity, detail: 32, textureSize: 256 },
@@ -47,7 +52,22 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   scene.background = new THREE.Color(0x03050b);
 
   // ---------------------------------------------------------------- the star
-  const starRadius = Math.max(EARTH * 2.2, EARTH * (star.radius ?? 1) * 1.6);
+  /**
+   * HOW BIG THE STAR IS DRAWN — and it has to leave room for its own planets.
+   *
+   * Seed 777: "there is a Neutron Star with rings and a shaft sticking out of it, very cool; however
+   * there are two planets INSIDE the diameter of the sun."
+   *
+   * A neutron star is twenty kilometres across, so its true radius is nothing, and the floor here
+   * (`EARTH * 2.2`, so it is visible at all) made the drawn star 1540 units while its innermost
+   * world orbited at 491. The floor is right — an invisible star is worse — but it cannot be
+   * allowed to swallow the system. So the drawn radius is also capped at a fraction of the closest
+   * orbit, which is the one number that guarantees every planet is outside it.
+   */
+  const closestAu = Math.min(...(system.planets || []).map(p => p.orbit?.au ?? Infinity), Infinity);
+  const wanted = Math.max(EARTH * 2.2, EARTH * (star.radius ?? 1) * 1.6);
+  const roomFor = Number.isFinite(closestAu) ? closestAu * AU * 0.42 : Infinity;
+  const starRadius = Math.max(EARTH * 0.5, Math.min(wanted, roomFor));
   const starModel = createStar(star, { radius: starRadius });
   scene.add(starModel.group);
   const starLight = new THREE.PointLight(new THREE.Color(star.color || '#fff0c0'), 2.6, 0, 0);
@@ -281,8 +301,15 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     state.position.copy(body.position).addScaledVector(tmp, body.radius * offset);
     state.velocity.set(0, 0, 0);
     state.throttle = 0;
-    // look back at the world you just left
-    const look = tmp.clone().multiplyScalar(-1);
+    /**
+     * FACING AWAY FROM THE WORLD YOU JUST LEFT.
+     *
+     * "When you exit a planet, the vehicle is facing backwards and pointing directly at the planet.
+     * They should be pointing away since you just left the planet." It used to turn and look back,
+     * which is a nice shot and a bad control state: the first thing you do on leaving is fly
+     * somewhere, and the first thing the ship did was point at the one place you had finished with.
+     */
+    const look = tmp.clone();
     state.yaw = Math.atan2(look.x, look.z);
     state.pitch = Math.asin(clamp(look.y, -1, 1));
     return body;
@@ -468,6 +495,61 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     };
   }
 
+  /**
+   * STRETCH THE SYSTEM PAST YOU WHILE THE DRIVE IS RUNNING.
+   *
+   * "When warp animation starts, make all the existing stars/planets from the system you were in
+   * quickly warp and stretch behind you as if you are moving forward quickly. The current star warp
+   * effect is good, but the stationary planets in the background kills the mood."
+   *
+   * `k` is the drive's intensity, 0 to 1. Every body is pushed out along the line from the ship
+   * through it — so whatever is ahead flies past and whatever is behind recedes — and stretched
+   * along that same line, which is what a long exposure of something going past at speed looks
+   * like. Nothing is destroyed: `releaseWarp()` puts every body back, and the placement pass
+   * re-seats them on the next frame anyway.
+   */
+  function warpStretch(k = 0, forwardDir = null) {
+    const push = 1 + k * 26;
+    const stretch = 1 + k * 34;
+    const dirV = forwardDir || heading();
+    for (const b of [...bodies, STAR]) {
+      const group = b.model?.group;
+      if (!group) continue;
+      if (!b._rest) b._rest = { scale: group.scale.clone() };
+      if (k <= 0.001) {
+        group.scale.copy(b._rest.scale);
+        group.position.copy(b.position);
+        continue;
+      }
+      tmp.copy(b.position).sub(state.position);
+      const along = tmp.dot(dirV);
+      // slide it away from the ship along its own line
+      group.position.copy(state.position).addScaledVector(tmp, push);
+      // …and smear it along the direction of travel
+      group.scale.copy(b._rest.scale);
+      group.scale.addScaledVector(new THREE.Vector3(Math.abs(dirV.x), Math.abs(dirV.y), Math.abs(dirV.z)), stretch * b._rest.scale.x);
+      // anything behind us fades as it goes
+      const mat = b.model.surface?.material || b.model.group.children[0]?.material;
+      if (mat && 'opacity' in mat) {
+        mat.transparent = true;
+        mat.opacity = along < 0 ? Math.max(0, 1 - k * 1.4) : 1;
+      }
+    }
+  }
+
+  /** Put every body back where it belongs. */
+  function releaseWarp() {
+    for (const b of [...bodies, STAR]) {
+      const group = b.model?.group;
+      if (!group || !b._rest) continue;
+      group.scale.copy(b._rest.scale);
+      group.position.copy(b.position);
+      const mat = b.model.surface?.material || group.children[0]?.material;
+      if (mat && 'opacity' in mat) mat.opacity = 1;
+      b._rest = null;
+    }
+  }
+
   /** The star, as a body the crosshair can find. */
   const STAR = {
     isStar: true, planet: { name: star.name || 'the star', id: 'star' },
@@ -496,6 +578,7 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     scene, bodies, ship, state, AU, EARTH,
     enter, update, nearest, canLand, landingSpot, readout, placeBodies,
     atmosphereEntry, refineDetail, throttleLimit, tierFor,
+    warpStretch, releaseWarp,
     targetUnder, describe, STAR,
     /** The way the ship is pointing, for `targetUnder`. */
     heading() {

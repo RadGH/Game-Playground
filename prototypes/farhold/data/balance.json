@@ -276,7 +276,7 @@
     "descentSeconds": 2.6,
     "slowFrom": 26,
     "slowTo": 0.25,
-    "noWarpWithin": 9,
+    "noWarpWithin": 3,
     "entryAltitude": 0.5,
     "warpSeconds": 5,
     "_doc": "Space runs in its own compressed units: 1 AU is auUnits across and an Earth-sized planet is earthUnits in radius, because metres over a 163 km map and hundreds of millions of kilometres cannot share a coordinate space. speed is the cruise rate; boost and warp multiply it. landRange is how close to a world you must be, in its own radii, before you can put down. The approach knobs are all in body radii above the surface: slowFrom is where the throttle starts easing off toward slowTo (a fraction of cruise) so a planet stops going from speck to wall in one frame; noWarpWithin locks warp out near anything; and falling below entryAltitude over a landable world drops you into its atmosphere with no key press at all. warpSeconds is how long the jump between stars takes."
@@ -509,5 +509,14 @@
     "shootingEvery": 22,
     "shootingSeconds": 1.6,
     "_doc": "A meteor is rolled every `everySeconds` on the surface and lands `fallSeconds` later, somewhere `landRange` metres away \u2014 far enough to be a walk, near enough to find. It is on the map and in the sky the whole time it is falling, and it leaves a Meteorite chest (see chests.kinds.meteorite): 1-3 items, never worse than rare, with the rarity beams. `shootingEvery` is the decorative streaks that never land."
+  },
+  "flight": {
+    "liftMax": 1.04,
+    "liftSpeedFull": 95,
+    "throttleUp": 3.2,
+    "throttleDown": 2.2,
+    "hoverFloor": 12,
+    "hoverPush": 16,
+    "_doc": "Flying the ship inside the atmosphere. W and S are the throttle and the mouse steers, so the nose is where you are looking and the ship goes where the nose points. `liftMax` is how much of the ship's weight the wing carries at `liftSpeedFull`: at or above 1 the ship holds its altitude in level flight, which is what lets you cross a continent with one hand. `hoverFloor` is a soft floor over the terrain so looking at the scenery does not fly you into it - you can still dive into a hill deliberately. `ceiling` is where the air ends and js/space.js takes over."
   }
 }

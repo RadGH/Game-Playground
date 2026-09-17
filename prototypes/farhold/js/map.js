@@ -33,7 +33,7 @@ import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null } = {}) {
   // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
   // the minimap and space mode can see them too.
@@ -247,6 +247,21 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       ctx.fillStyle = v.kind === 'lair' ? '#ff6a3a' : '#ffa860';
       ctx.fill();
       ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(10,6,4,.9)'; ctx.stroke();
+    }
+
+    // anything still falling, so you can plan the walk before it lands
+    for (const m of meteors?.marks || []) {
+      const mx = ox + (m.x / M_PER_CELL + 0.5) * scale, my = oy + (m.z / M_PER_CELL + 0.5) * scale;
+      ctx.beginPath();
+      ctx.arc(mx, my, 6, 0, Math.PI * 2);
+      ctx.strokeStyle = '#ff8a40'; ctx.lineWidth = 2;
+      ctx.setLineDash([3, 3]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.font = '600 13px system-ui, sans-serif';
+      ctx.fillStyle = '#ff8a40'; ctx.textAlign = 'center';
+      ctx.fillText('\u2604', mx, my + 4);
+      ctx.font = '10px system-ui, sans-serif';
+      ctx.fillText(`${m.secondsLeft}s`, mx, my + 18);
+      ctx.textAlign = 'left';
     }
 
     // markers: quests, story objectives, dropped pins. A tracked one gets a ring around it, so you

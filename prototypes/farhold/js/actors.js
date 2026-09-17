@@ -335,8 +335,30 @@ export class EnemyField {
         }
       }
 
+      /**
+       * TURNED BACK AT THE TOWN LINE.
+       *
+       * `wild()` already keeps anything hostile from SPAWNING inside a settlement's watch, but
+       * nothing stopped one that spawned outside from chasing you all the way to the well — which
+       * is "I still frequently get attacked while in town. Right now I've been attacked while
+       * talking to NPCs in town, very annoying".
+       *
+       * So a chase ends at the line. It does not simply stop: it gives up and walks away, which is
+       * what an animal does when a place has people and dogs in it.
+       */
+      if (!e.boss && !this.wild(e.x, e.z)) {
+        e.state = 'flee';
+        const zone = this.safeZones.find(sz => (e.x - sz.x) ** 2 + (e.z - sz.z) ** 2 < sz.r * sz.r);
+        if (zone) e.facing = Math.atan2(e.x - zone.x, e.z - zone.z);
+        e.fleeFor = Math.max(e.fleeFor || 0, 2.5);
+      }
+      if (e.state === 'flee') {
+        e.fleeFor = (e.fleeFor || 0) - dt;
+        if (e.fleeFor <= 0 && this.wild(e.x, e.z)) e.state = 'wander';
+      }
+
       // decide
-      if (e.state !== 'chase' && dist < e.aggroRange) {
+      if (e.state !== 'chase' && e.state !== 'flee' && dist < e.aggroRange) {
         e.state = 'chase';
         // a pack notices together: anything of the same kind close by joins in
         for (const mate of this.enemies) {
@@ -351,7 +373,10 @@ export class EnemyField {
       const standOff = e.ranged ? Math.min(e.ranged.range * 0.65, e.ranged.range - 6) : 0;
 
       let speed = 0;
-      if (e.state === 'chase') {
+      if (e.state === 'flee') {
+        // straight back out of the watch, and no attacking on the way
+        speed = e.speed * 1.15;
+      } else if (e.state === 'chase') {
         e.facing = Math.atan2(dx, dz);
         if (standOff > 0) {
           // keep the gap: walk in when too far, back off when the player closes

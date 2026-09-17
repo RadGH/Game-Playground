@@ -36,6 +36,8 @@ export function createTalkPanel(handlers = {}) {
   let current = null;
   /** Which shelf of the shop is showing. Kept between renders so a buy does not reset it. */
   let shopTab = 'weapon';
+  /** Which bag items are ticked for which gather job. Kept between renders so a tick sticks. */
+  const handOver = new Map();
   let context = null;
 
   function render() {
@@ -69,7 +71,65 @@ export function createTalkPanel(handlers = {}) {
           el('div', { class: 'muted small', text: `Pays ${offer.reward.gold} gold and ${offer.reward.xp} xp` }),
           el('button', { class: 'talk-btn primary', text: 'Take the job', onclick: () => { handlers.accept?.(offer); render(); } }),
         ));
-      } else if (!ready.length && context.hasQuest(offer?.id)) {
+      }
+
+      /**
+       * HANDING OVER THINGS YOU ARE ALREADY CARRYING.
+       *
+       * "I had a quest to collect 6 daggers. I actually had 6 daggers on me, but I had to go witness
+       * them drop… there should also be a dialog that asks me to select the items in question and
+       * submit the quest, that way it doesn't accidentally take something the player meant to keep.
+       * There should be an 'Add all' button to simplify the process, but would still let you
+       * unselect and re-select other items if it gets it wrong."
+       *
+       * So: every gather job this person gave you lists what in your bag would count, each with a
+       * checkbox. Nothing is taken until you press the button, and the count on the button says
+       * exactly how many are going.
+       */
+      for (const q of context.active || []) {
+        if (q.done || q.kind !== 'gather' || q.giverId !== npc.id) continue;
+        const usable = context.gatherable?.(q) || [];
+        if (!usable.length) continue;
+        const need = Math.max(0, q.count - (q.progress || 0));
+        const chosen = handOver.get(q.id) || (handOver.set(q.id, new Set()), handOver.get(q.id));
+        const rows = usable.map(item => {
+          const box = el('label', { class: 'hand-row' });
+          const tick = document.createElement('input');
+          tick.type = 'checkbox';
+          tick.checked = chosen.has(item);
+          tick.onchange = () => { if (tick.checked) chosen.add(item); else chosen.delete(item); render(); };
+          box.append(tick, el('span', { class: rarity(item), text: item.name }));
+          handlers.tip?.(box, item);
+          return box;
+        });
+        const picked = usable.filter(i => chosen.has(i)).length;
+        kids.push(el('div', { class: 'talk-quest hand-in' },
+          el('div', { class: 'q-title', text: q.title }),
+          el('div', { class: 'muted small', text: `${need} more. You are carrying ${usable.length} that would do.` }),
+          el('div', { class: 'hand-list' }, ...rows),
+          el('div', { class: 'hand-tools' },
+            el('button', {
+              class: 'talk-btn', text: 'Add all',
+              onclick: () => { for (const i of usable.slice(0, need)) chosen.add(i); render(); },
+            }),
+            el('button', {
+              class: 'talk-btn', text: 'Clear',
+              onclick: () => { chosen.clear(); render(); },
+            }),
+            el('button', {
+              class: 'talk-btn primary', text: picked ? `Hand over ${Math.min(picked, need)}` : 'Pick some first',
+              onclick: () => {
+                if (!picked) return;
+                handlers.submitGather?.(q, usable.filter(i => chosen.has(i)));
+                chosen.clear();
+                render();
+              },
+            }),
+          ),
+        ));
+      }
+
+      if (!ready.length && context.hasQuest(offer?.id)) {
         kids.push(el('p', { class: 'muted small', text: 'You already have my work. Come back when it is done.' }));
       } else if (!offer) {
         kids.push(el('p', { class: 'muted small', text: 'Nothing needs doing just now.' }));

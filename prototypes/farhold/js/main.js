@@ -10,7 +10,7 @@ import { createShip } from '../../../assets/js/space-models.js';
 import { createAtmosphere } from './atmos.js';
 import { createTownFolk } from './town.js';
 import { createTalkPanel } from './talkui.js';
-import { QuestLog } from './quests.js';
+import { QuestLog, gatherable, submitGather } from './quests.js';
 import { Campaign } from './campaign.js';
 import { createSound } from './sound.js';
 import { createSpeech } from './speech.js';
@@ -33,12 +33,13 @@ import { generateGalaxy } from '../../../universe/js/galaxy.js';
 import { createSaves, snapshot, restore, playtimeText } from './save.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
-import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS } from './rpg.js';
+import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS } from './rpg.js';
 import { Hud } from './hud.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom } from './skills.js';
 // round 4: the RPG expansion
 import { buildZones } from './zones.js';
 import { createChests } from './chests.js';
+import { createMeteors } from './meteors.js';
 import { createDungeon, createGates, lookForBiome } from './dungeon.js';
 import { createPets } from './pets.js';
 import { createSites } from './sites.js';
@@ -250,9 +251,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   let palette = atmospherePalette(planet);
   // Round 4: how hard a fight is belongs to the PLACE. World Forge already grows named regions with
   // borders it draws on the map, so those are the level bands — see js/zones.js.
+  /**
+   * A WORLD'S OWN DIFFICULTY BAND.
+   *
+   * "Let's categorize planets by difficulty and have low (1-30), medium (30-40), and high (40-50)
+   * difficulty." The band is a level range; the region graph then lays its own ladder INSIDE it, so
+   * the softest corner of a far-reach world is still level 30 and its worst is 40.
+   */
+  let band = bandForPlanet(planet);
   let zones = buildZones(world, {
     spawn: [terrain.spawnPoint().x, terrain.spawnPoint().z],
-    maxLevel: 30, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: balance.zones?.startLevel ?? 1,
+    maxLevel: band.max, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: band.min,
   });
 
   status('finding somewhere to stand…');
@@ -1261,6 +1270,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
   applyGearLook();
 
+  /**
+   * SOMETHING FALLS OUT OF THE SKY.
+   *
+   * A meteor is rolled every five minutes on the surface, is visible in the sky and on the map for
+   * the whole thirty seconds it takes to come down, and leaves a Meteorite chest where it lands —
+   * 1-3 items, never worse than rare, with the beams that go with that. See js/meteors.js.
+   */
+  const meteors = createMeteors({
+    scene, terrain, chests, balance, rng: () => field.rng(),
+    onWarn: m => {
+      const away = Math.hypot(m.x - control.x, m.z - control.z);
+      hud.log(`Something is coming down, about ${away > 1000 ? `${(away / 1000).toFixed(1)} km` : `${Math.round(away)} m`} off. Thirty seconds.`, 'level');
+      sound.ui('open');
+    },
+    onLand: (m, chest) => {
+      const away = Math.hypot(m.x - control.x, m.z - control.z);
+      hud.log(away < 60 ? 'It comes down close enough to feel.' : 'It lands. Whatever is in it is still hot.', 'loot');
+      sound.combat('death', { beast: true });
+      if (chest) chest.name = 'Meteorite';
+    },
+  });
+
   // ---------------------------------------------------------------- the map
   let map = null;
   map = makeMap();
@@ -1276,6 +1307,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       vehicles: npc.trades ? folk.vehicles() : [],
       ownsVehicle: (slot, key) => (player.vehicles?.owned?.[slot] || []).includes(key),
       crates: npc.gambles ? folk.CRATE_TIERS : [],
+      // what in the bag would count toward one of this person's gather jobs
+      gatherable: quest => gatherable(quest, player.bag),
       lastCrate, lastCrateLifted,
       bag: player.bag,
       offer: folk.questFrom(npc, { level: player.level, enemies: bestiary.enemies, nodes: world.nodes }),
@@ -1304,6 +1337,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const r = unlockVehicle(player, v.slot, v.key);
       hud.log(r.ok ? `The ${r.kind.name} is yours. Pick it on the character sheet.` : r.why, r.ok ? 'loot' : 'bad');
       if (r.ok) sound.coin(); else sound.ui('error');
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    submitGather: (quest, chosen) => {
+      const out = submitGather(quest, player.bag, chosen);
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      hud.log(out.done
+        ? `${quest.title} — that is all of them.`
+        : `Handed over ${out.taken.length}. ${out.left} to go.`, out.done ? 'good' : '');
+      sound.ui('click');
       hud.setPlayer(player);
       talk.update(talkContext(talk.npc));
       autoSave();
@@ -1405,6 +1449,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       zones,
       getLevel: () => player.level,
       sites: { get sites() { return sites.sites; } },
+      meteors: { get marks() { return meteors.marks(); } },
       gates: { get nodes() { return gates.nodes; } },
     });
   }
@@ -1423,10 +1468,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     terrain = makeTerrain(world, planet, balance.terrain);
     palette = atmospherePalette(planet);
     // a new world has its own regions, so it has its own level bands
+    band = bandForPlanet(planet);
     zones = buildZones(world, {
       spawn: [terrain.spawnPoint().x, terrain.spawnPoint().z],
-      maxLevel: 30, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: balance.zones?.startLevel ?? 1,
+      maxLevel: band.max, bandWidth: balance.zones?.bandWidth ?? 4, startLevel: band.min,
     });
+    hud.log(`${planet.name} — ${band.name.toLowerCase()}, levels ${band.min}–${band.max}. ${band.blurb}`, 'level');
     hud.zones = zones;
 
     sky = createSky({ star, system, planet, balance, palette });
@@ -2631,6 +2678,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (dungeon) hud.drawDungeonMap(control, dungeon.plan, field.enemies, chests.chests);
       else hud.drawMinimap(control, field.enemies, [
         ...chests.chests.filter(c => !c.opened).map(c => ({ x: c.x, z: c.z, color: '#ffd24a', r: 3 })),
+        // something still in the air, with how long you have to get there
+        ...meteors.marks().map(m => ({ x: m.x, z: m.z, icon: '☄', color: '#ff8a40' })),
         ...gates.visible.map(g => ({ x: g.x, z: g.z, color: '#b090ff', r: 4 })),
         ...sites.visible.map(v => ({ x: v.x, z: v.z, color: v.kind === 'lair' ? '#ff6a3a' : '#ffa860', r: 3.4 })),
         ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
@@ -2640,6 +2689,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         return { ...m, x: b.x, z: b.z, distance: b.distance };
       }));
     }
+    // the sky's own events: a meteor every few minutes, and shooting stars in between
+    if (!dungeon) meteors.update(dt, control);
     if (state.frames % 12 === 0) map.tick();
 
     renderFrame();
@@ -2741,7 +2792,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get terrain() { return terrain; },
     launch, land,
     get folk() { return folk; },
-    questLog, markers, talk, talkContext, sound, speech, campaign, settings,
+    questLog, markers, talk, talkContext, sound, speech, campaign, settings, meteors,
+    get band() { return band; },
     chart, galaxy, warp, beginJump,
     get starId() { return starId; },
     get starNow() { return starNow(); },

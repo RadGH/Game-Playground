@@ -97,6 +97,12 @@ test('the world is busy: packs, ranks and set-piece encounters, not one straggle
   const errors = await land(page, { seed: 5 });
   const out = await page.evaluate(async () => {
     const f = window.farhold;
+    // Round 8 gave every settlement a quiet ring nothing hostile spawns in, and a new run starts
+    // beside a town. Walk out of it first: this test is about the spawn ring being busy, not about
+    // whether towns are safe (which tests/round8.test.js covers).
+    const town = f.folk.safeZones()[0];
+    if (town) f.teleport(town.x + town.r * 2.2, town.z + town.r * 2.2);
+    await new Promise(r => setTimeout(r, 300));
     await new Promise(r => setTimeout(r, 6000));
     const ranks = {};
     for (const e of f.field.enemies) ranks[e.rank] = (ranks[e.rank] || 0) + 1;

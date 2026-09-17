@@ -11,6 +11,8 @@
 //
 // Bucketed by a grid so a frame costs a handful of checks, not thousands.
 
+import { BUILDING_INFO } from './town-plan.js';
+
 export class ObstacleField {
   constructor(bucket = 24) {
     this.bucket = bucket;
@@ -155,8 +157,13 @@ export const PROP_SOLIDS = {
   crystal: [0.7, 3.4], ruin: [2.2, 4], column: [0.6, 5], standing_stone: [0.7, 5],
 };
 
-/** Buildings are bigger and all solid. */
-export const BUILDING_SOLIDS = {
-  hut: [2.6, 4], house: [3.6, 6], hall: [6.0, 8], tower: [2.6, 12],
-  wall: [3.2, 4], well: [1.4, 3], bridge: [0, 0],      // a bridge is to be walked on, not into
-};
+/**
+ * Buildings are bigger and all solid — except a bridge and a street, which are to be walked ON.
+ *
+ * Derived from `js/town-plan.js` rather than written twice: the catalogue there is the one place
+ * that knows what a town is made of, and a building added there is solid here without anybody
+ * having to remember.
+ */
+export const BUILDING_SOLIDS = Object.fromEntries(
+  Object.entries(BUILDING_INFO).map(([key, info]) => [key, info.solid]),
+);

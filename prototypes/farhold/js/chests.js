@@ -110,6 +110,8 @@ function chestBody({ wood = '#5a4029', band = '#6a6e78', trim = '#c8a24a', lid =
 
 /** The four kinds, as closed and open geometry built once and shared by every instance. */
 export const CHEST_LOOKS = {
+  // a meteorite: black glassy rock with a hot seam still glowing in it
+  meteorite: { wood: '#2a2420', band: '#6a3a28', trim: '#ff8a40', gems: 4, scale: 1.3 },
   wooden: { wood: '#5a4029', band: '#6a5a4a', trim: '#8a7a5a', gems: 0, scale: 1 },
   iron: { wood: '#4a3a2c', band: '#7a7e88', trim: '#9aa0aa', gems: 0, scale: 1.08 },
   gilded: { wood: '#4a3524', band: '#c8a24a', trim: '#ffd24a', gems: 3, scale: 1.16 },

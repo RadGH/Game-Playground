@@ -410,6 +410,21 @@
         "materials": 5,
         "mimicChance": 0.22,
         "guarded": true
+      },
+      "meteorite": {
+        "name": "Meteorite",
+        "weight": 0,
+        "items": [
+          1,
+          3
+        ],
+        "gold": [
+          180,
+          480
+        ],
+        "rarityBoost": 2.8,
+        "floor": "rare",
+        "materials": 4
       }
     }
   },
@@ -481,5 +496,18 @@
     "maxLive": 3,
     "radius": 90,
     "ambushRadius": 26
+  },
+  "meteors": {
+    "everySeconds": 300,
+    "chance": 0.6,
+    "fallSeconds": 30,
+    "landRange": [
+      220,
+      900
+    ],
+    "startHeight": 2600,
+    "shootingEvery": 22,
+    "shootingSeconds": 1.6,
+    "_doc": "A meteor is rolled every `everySeconds` on the surface and lands `fallSeconds` later, somewhere `landRange` metres away \u2014 far enough to be a walk, near enough to find. It is on the map and in the sky the whole time it is falling, and it leaves a Meteorite chest (see chests.kinds.meteorite): 1-3 items, never worse than rare, with the rarity beams. `shootingEvery` is the decorative streaks that never land."
   }
 }

@@ -163,12 +163,72 @@ export const SLOTS = [
 ];
 /** Slots whose contents are gear you fight with, for the "worth wearing" arrow. */
 export const RING_SLOTS = ['ring', 'ring2'];
-export const MAX_LEVEL = 30;
+export const MAX_LEVEL = 50;
 
-/** XP needed to *reach* a level. A gentle curve — this prototype is about the walk, not the grind. */
+/**
+ * XP needed to *reach* a level.
+ *
+ * "Raise the max level to 50, but make the curve from 30-40 take about as much xp as it does from
+ * 1-30, and even worse through level 50."
+ *
+ * So the curve has three sections rather than one exponent. Levels 1–30 are the walk the game was
+ * built around and keep their old, gentle shape. 30–40 is a second game of the same size stacked on
+ * top: reaching 40 costs roughly twice what reaching 30 did. 40–50 is steeper again — the levels
+ * you get on the hard worlds, and only there.
+ */
+export const LEVEL_BANDS = [
+  { to: 30, base: 58, power: 1.86 },
+  { to: 40, share: 1.0 },      // 30→40 costs about as much again as 1→30
+  { to: 50, share: 1.9 },      // …and 40→50 costs nearly twice THAT
+];
+
 export function xpForLevel(level) {
   if (level <= 1) return 0;
-  return Math.round(58 * Math.pow(level - 1, 1.86));
+  const l = Math.min(level, MAX_LEVEL);
+  const early = n => Math.round(58 * Math.pow(n - 1, 1.86));
+  if (l <= 30) return early(l);
+
+  const toThirty = early(30);
+  if (l <= 40) {
+    // a smooth climb across the band, costing `share` of the whole first thirty levels
+    const t = (l - 30) / 10;
+    return Math.round(toThirty + toThirty * LEVEL_BANDS[1].share * Math.pow(t, 1.35));
+  }
+  const toForty = xpForLevel(40);
+  const t = (l - 40) / 10;
+  return Math.round(toForty + toThirty * LEVEL_BANDS[2].share * Math.pow(t, 1.45));
+}
+
+/**
+ * How hard a world is, and therefore who belongs on it.
+ *
+ * "Let's categorize planets by difficulty and have low (1-30), medium (30-40), and high (40-50)
+ * difficulty." A band is a level range and a name; `js/zones.js` lays its regions inside it, so a
+ * medium world's easiest corner is still level 30.
+ */
+export const PLANET_BANDS = [
+  { key: 'low', name: 'Settled space', min: 1, max: 30, blurb: 'Where anyone can make a start.' },
+  { key: 'medium', name: 'The far reach', min: 30, max: 40, blurb: 'Nothing out here is anyone\'s first world.' },
+  { key: 'high', name: 'The deep dark', min: 40, max: 50, blurb: 'Bring everything you have.' },
+];
+
+/**
+ * Which band a world falls in, from its own seed and what kind of place it is.
+ *
+ * Hostility comes first — a void-touched rock or a world with no air is never a starting world —
+ * and the seed decides the rest, so a system carries a spread rather than three of the same.
+ */
+export function bandForPlanet(planet, { force = null } = {}) {
+  const want = force || planet?.forcedBand;
+  if (want) return PLANET_BANDS.find(b => b.key === want) || PLANET_BANDS[0];
+  const hostile = !planet?.atmosphere?.breathable;
+  const nasty = ['voidTouched', 'volcanic', 'crystal', 'irradiated'].includes(planet?.archetype);
+  let score = 0;
+  if (hostile) score += 1;
+  if (nasty) score += 1;
+  const seed = Math.abs(Math.round((planet?.seed ?? planet?.id ?? 0)));
+  score += (seed % 3 === 0) ? 1 : 0;
+  return PLANET_BANDS[Math.min(PLANET_BANDS.length - 1, score)];
 }
 export function levelFromXp(xp) {
   let l = 1;

@@ -103,6 +103,49 @@ export function makeQuest(kind, ctx) {
   return null;
 }
 
+/**
+ * WHAT IN THE BAG WOULD COUNT TOWARD THIS JOB.
+ *
+ * "I had a quest to collect 6 daggers. I actually had 6 daggers on me, but I had to go witness them
+ * drop. It should have just let me use the ones I had on me."
+ *
+ * A gather quest only ever advanced through `onLoot`, so anything already in the bag was invisible
+ * to it — you could be standing in front of the person who asked, carrying exactly what they wanted,
+ * and be told to go and find some. This lists what would count, and `submitGather` takes the ones
+ * the player chose.
+ *
+ * The choosing is the other half of the ask: "there should also be a dialog that asks me to select
+ * the items in question and submit the quest, that way it doesn't accidentally take something the
+ * player meant to keep." So nothing is ever taken automatically — the quest says what it can use,
+ * and the player hands it over.
+ */
+export function gatherable(quest, bag = []) {
+  if (!quest || quest.kind !== 'gather') return [];
+  return bag.filter(item => item && item.baseKey === quest.target);
+}
+
+/**
+ * Hand over the chosen items. Returns what was taken and whether that finished the job.
+ *
+ * Refuses rather than over-taking: handing in eight daggers for a job that wants six leaves you the
+ * other two, because a quest should never be a way to lose things.
+ */
+export function submitGather(quest, bag, chosen = []) {
+  if (!quest || quest.kind !== 'gather') return { ok: false, why: 'That job does not want items.' };
+  const need = Math.max(0, (quest.count || 0) - (quest.progress || 0));
+  if (!need) return { ok: false, why: 'You have already brought enough.' };
+  const usable = chosen.filter(item => item && item.baseKey === quest.target && bag.includes(item));
+  if (!usable.length) return { ok: false, why: 'Nothing you picked is what they asked for.' };
+  const taken = usable.slice(0, need);
+  for (const item of taken) {
+    const at = bag.indexOf(item);
+    if (at >= 0) bag.splice(at, 1);
+  }
+  quest.progress = (quest.progress || 0) + taken.length;
+  if (quest.progress >= quest.count) quest.done = true;
+  return { ok: true, taken, done: !!quest.done, left: Math.max(0, quest.count - quest.progress) };
+}
+
 /** The jobs a player is carrying. Progress only ever happens through events. */
 export class QuestLog {
   constructor() {

@@ -902,3 +902,10 @@ body {
 .vehicle-row select {
   background: #131a26; color: #dfe7f2; border: 1px solid #2a3a4e; border-radius: 4px; padding: 3px 5px;
 }
+
+/* handing over things you were already carrying */
+.talk-quest.hand-in { border-left: 2px solid #7fd8ff; }
+.hand-list { display: flex; flex-direction: column; gap: 2px; margin: 6px 0; max-height: 170px; overflow-y: auto; }
+.hand-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; cursor: pointer; padding: 1px 0; }
+.hand-row input { accent-color: #7fd8ff; }
+.hand-tools { display: flex; gap: 6px; flex-wrap: wrap; }

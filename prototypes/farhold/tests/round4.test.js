@@ -478,14 +478,25 @@ test('every modifier changes something, and every one is visible', () => {
 
 test('a chest kind exists for every rung of the ladder, and warded is the rarest', () => {
   const kinds = balance.chests.kinds;
-  const weights = Object.values(kinds).map(k => k.weight);
-  assert.equal(Object.keys(kinds).length, 4);
+  // Round 8 added the meteorite, which is placed by an event rather than scattered — it carries
+  // `weight: 0` so the wild-chest roller never picks it.
+  const wild = Object.entries(kinds).filter(([, k]) => k.weight > 0);
+  assert.equal(wild.length, 4);
+  const weights = wild.map(([, k]) => k.weight);
   assert.equal(Math.min(...weights), kinds.warded.weight, 'the best chest is not the rarest');
   let lastGold = 0;
   for (const key of ['wooden', 'iron', 'gilded', 'warded']) {
     assert.ok(kinds[key].gold[0] > lastGold, `${key} is not worth more than the one below it`);
     lastGold = kinds[key].gold[0];
   }
+  // every kind promises a rarity out loud, because the beacon over it is coloured by that promise
+  for (const [key, kind] of Object.entries(kinds)) {
+    assert.ok(kind.floor, `${key} makes no promise for its beacon to show`);
+  }
+  // …and the meteorite is the one an event drops, never one you stumble on
+  assert.equal(kinds.meteorite.weight, 0);
+  assert.equal(kinds.meteorite.floor, 'rare');
+  assert.deepEqual(kinds.meteorite.items, [1, 3]);
 });
 
 test('rank chances leave most spawns ordinary', () => {

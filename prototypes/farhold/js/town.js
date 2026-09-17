@@ -424,7 +424,32 @@ export function createTownFolk(scene, terrain, opts = {}) {
      * The circles a settlement's watch covers. The enemy field refuses to spawn anything inside one
      * — being jumped by a pack while standing in a market square is not an encounter.
      */
-    safeZones: () => features.settlements.map(s => ({ x: s.wx, z: s.wz, r: guardReach * 1.35 })),
+    /**
+     * WHERE NOTHING HOSTILE MAY SPAWN OR WANDER.
+     *
+     * "I still frequently get attacked while in town. Make sure the town has a safe radius around it
+     * that is larger than its walls (for towns with walls)."
+     *
+     * It used to be a flat 57 m from the centre of every settlement — which is inside the wall ring
+     * of a city (`ring + 14`, up to 93 m) and only just outside a hamlet. The radius is now measured
+     * from the settlement's own footprint: its ring, its wall, and a margin beyond that, so the
+     * quiet ground genuinely starts before the gate rather than somewhere in the market.
+     */
+    safeZones: () => features.settlements.map(s => {
+      const size = s.size || 1;
+      const ring = 16 + size * 13;                 // the same ring buildSettlement lays out to
+      const wall = size >= 4 ? ring + 14 : ring;   // …and the wall a city puts round it
+      /**
+       * Just outside the gate, and no further.
+       *
+       * The margin has to clear the walls so nothing ever appears INSIDE a settlement — but the
+       * spawn ring is only 34–115 m across, so a hundred-metre margin on top of a city's own
+       * 95 m wall empties the whole world around it, which is the opposite complaint ("the map is so
+       * expansive but enemies are few and far between"). Anything that wanders in from further out
+       * is turned around by the flee rule in js/actors.js instead.
+       */
+      return { x: s.wx, z: s.wz, r: Math.max(guardReach, wall + (cfg.safeMargin ?? 18)) };
+    }),
 
     /** Everyone worth a pip on the minimap: a stall, or somebody with work. */
     marks: () => [...live.values()].flat()

@@ -350,7 +350,9 @@ export function createProps(scene, terrain, opts = {}) {
             if (counts[key] >= PROP_KINDS[key].cap) break;
             const x = baseX + (rng() - 0.5) * CELL;
             const z = baseZ + (rng() - 0.5) * CELL;
-            if (terrain.underwater(x, z)) continue;
+            // `plantable` is stricter than `underwater`: a lake sheet reaches past its own cells,
+            // so a tree that merely was not standing ON water could still be standing IN it
+            if (!terrain.plantable(x, z)) continue;
             // nothing grows on a cliff face, and nothing grows in the middle of a road
             if (terrain.slopeAt(x, z, 4) > 0.75) continue;
             if (terrain.roadAt(x, z) > 0.35) continue;
@@ -383,7 +385,7 @@ export function createProps(scene, terrain, opts = {}) {
             if (counts[key] < PROP_KINDS[key].cap) {
               const x = baseX + (rng() - 0.5) * CELL * 0.6;
               const z = baseZ + (rng() - 0.5) * CELL * 0.6;
-              if (!terrain.underwater(x, z) && terrain.slopeAt(x, z, 6) < 0.35 && terrain.roadAt(x, z) < 0.2) {
+              if (terrain.plantable(x, z) && terrain.slopeAt(x, z, 6) < 0.35 && terrain.roadAt(x, z) < 0.2) {
                 const y = terrain.heightAt(x, z);
                 const scale = 0.8 + rng() * 0.6;
                 matrix.compose(
@@ -400,7 +402,7 @@ export function createProps(scene, terrain, opts = {}) {
                   for (let k = 0; k < 3 && counts.column < PROP_KINDS.column.cap; k++) {
                     const a = rng() * Math.PI * 2, r = 3 + rng() * 5;
                     const fx = x + Math.cos(a) * r, fz = z + Math.sin(a) * r;
-                    if (terrain.underwater(fx, fz)) continue;
+                    if (!terrain.plantable(fx, fz)) continue;
                     matrix.compose(
                       new THREE.Vector3(fx, terrain.heightAt(fx, fz) - 0.2, fz),
                       new THREE.Quaternion().setFromEuler(new THREE.Euler(rng() * 0.2 - 0.1, rng() * 6.3, 0)),
@@ -429,7 +431,9 @@ export function createProps(scene, terrain, opts = {}) {
             if (grass >= grassMesh.instanceMatrix.count) break;
             const x = baseX + (rng() - 0.5) * CELL;
             const z = baseZ + (rng() - 0.5) * CELL;
-            if (terrain.underwater(x, z)) continue;
+            // `plantable` is stricter than `underwater`: a lake sheet reaches past its own cells,
+            // so a tree that merely was not standing ON water could still be standing IN it
+            if (!terrain.plantable(x, z)) continue;
             if (terrain.slopeAt(x, z, 3) > 0.6) continue;
             if (terrain.roadAt(x, z) > 0.45) continue;
             const s = 0.7 + rng() * 0.9;

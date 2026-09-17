@@ -23,6 +23,7 @@ import { makeStar } from '../../../universe/js/stars.js';
 import { generateSystem } from '../../../universe/js/system.js';
 import { generatePlanetMap, reliefFor, surfaceOf } from '../../../universe/js/planetmap.js';
 import { ARCH_BY_KEY } from '../../../universe/js/system.js';
+import { PLANET_BANDS, bandForPlanet } from './rpg.js';
 import { elevationToMetres } from '../../../worldgen/js/relief.js';
 import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
 import { makeNoise2D, fbm, subSeed, clamp, lerp, makeRng, smoothstep, blur } from '../../../worldgen/js/noise.js';
@@ -58,10 +59,52 @@ const SAND_RGB = rgbOf('#d8c795');
  * A star, its system, and the planet you are going to land on.
  * `seed` picks everything; the same seed always gives the same sky and the same ground.
  */
-export function createSystem({ seed = 1, starClass = null } = {}) {
+/**
+ * A FULLER SYSTEM, with somewhere to go at every level.
+ *
+ * "Let's also make it so there are more stars per system, and so that every system has at least one
+ * tier of each planet."
+ *
+ * Two changes on top of Star Forge's own generator, and neither touches the shared library:
+ *
+ *   * `planets: 0.85` pushes every star toward the top of its own planet range, so a system is
+ *     four to eight worlds rather than two or three;
+ *   * every planet's difficulty band is then read, and any band with nothing in it is handed the
+ *     nearest unclaimed world — so a system always has a low, a medium and a high world to fly to,
+ *     however its rolls came out.
+ *
+ * Forcing a band does not change what a world IS; it changes which level range its regions are laid
+ * over, which is the thing a player actually meets.
+ */
+export function createSystem({ seed = 1, starClass = null, fillBands = true } = {}) {
   const star = makeStar({ seed: seed >>> 0, classKey: starClass, id: 0 });
-  const system = generateSystem(star, { seed: subSeed(seed, 'system'), rareWorlds: 0.55 });
+  const system = generateSystem(star, { seed: subSeed(seed, 'system'), rareWorlds: 0.55, planets: 0.85 });
+  if (fillBands) balanceBands(system);
   return { star, system };
+}
+
+/**
+ * Make sure every difficulty band has a world in this system.
+ *
+ * Runs over the landable planets, notes which bands are already represented, and forces the rest
+ * onto whichever worlds are furthest from the star — the outer dark is where the hard ones belong,
+ * and it keeps the inner system as the place you start.
+ */
+export function balanceBands(system) {
+  const landable = (system.planets || []).filter(p => !p.giant && p.landable !== false);
+  if (landable.length < PLANET_BANDS.length) return system;
+  const have = new Set();
+  for (const p of landable) have.add(bandForPlanet(p).key);
+  const missing = PLANET_BANDS.filter(b => !have.has(b.key));
+  if (!missing.length) return system;
+  // hardest band onto the furthest world
+  const byDistance = [...landable].sort((a, b) => (b.orbit?.au ?? 0) - (a.orbit?.au ?? 0));
+  for (const band of [...missing].reverse()) {
+    const pick = byDistance.find(p => !p.forcedBand);
+    if (!pick) break;
+    pick.forcedBand = band.key;
+  }
+  return system;
 }
 
 /**
@@ -382,7 +425,43 @@ export function makeTerrain(world, planet = null, opts = {}) {
   const lakeDepth = opts.lakeDepth ?? 7;
   const lakeField = new Float32Array(w * h);
   let anyLake = false;
-  for (let i = 0; i < w * h; i++) if (world.water[i] === 2) { lakeField[i] = 1; anyLake = true; }
+
+  /**
+   * NO LAKE IN THE MIDDLE OF A TOWN.
+   *
+   * "We should also fix an issue I witnessed where a town had a lake right in the middle. It was
+   * kind of cool, but it made travelling between buildings terrible. It's OK if a river passes
+   * through a town so long as bridges are formed, but let's try to keep lakes from appearing in the
+   * same place as a town."
+   *
+   * World Forge founds settlements on habitability and fills depressions into lakes, and the two
+   * passes do not talk to each other — so a town can end up sitting in one. A river is fine: it is
+   * a narrow carved channel with bridges where roads cross it. A lake is a hole. So any lake cell
+   * inside a settlement's footprint is simply not a lake here; the carve and the sheet both read
+   * this mask, so the water never appears rather than appearing and being walked through.
+   */
+  const townCells = new Set();
+  for (const node of world.nodes || []) {
+    if (node.type !== 'settlement' && node.type !== 'port') continue;
+    // a port is MEANT to be on water; only inland settlements push the lake out
+    if (node.type === 'port') continue;
+    const reach = 1 + Math.round((node.size || 1) * 0.6);
+    for (let dy = -reach; dy <= reach; dy++) {
+      for (let dx = -reach; dx <= reach; dx++) {
+        const nx = node.x + dx, ny = node.y + dy;
+        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+        if (Math.hypot(dx, dy) > reach) continue;
+        townCells.add(IDX(w, nx, ny));
+      }
+    }
+  }
+  let drained = 0;
+  for (let i = 0; i < w * h; i++) {
+    if (world.water[i] !== 2) continue;
+    if (townCells.has(i)) { world.water[i] = 0; drained++; continue; }
+    lakeField[i] = 1;
+    anyLake = true;
+  }
   if (anyLake) blur(lakeField, w, h, 1);
   const lakeSurfaceAt = (fx, fy) => elevationToMetres(layer(world.elevation, fx, fy), relief);
 
@@ -475,9 +554,68 @@ export function makeTerrain(world, planet = null, opts = {}) {
       const surf = lerp(hit.path.surface[hit.i], hit.path.surface[Math.min(hit.path.surface.length - 1, hit.i + 1)], hit.t);
       lift[i] = Math.max(lift[i], surf + bridgeClearance - smooth[i]);
     }
+    /**
+     * …AND CLEAR OF EVERY OTHER KIND OF WATER TOO.
+     *
+     * "I found a case where the road was underwater. Roads should be safely above water level."
+     * The lift above only knew about rivers, so a road crossing a lake or running along a shore
+     * simply followed the ground down under the surface. Sea level and a lake's own level are both
+     * checked here, and the same ramping carries the approaches up to meet it.
+     */
+    const roadRide = opts.roadRide ?? 0.9;
+    // the lowest the deck may ever sit at each point, so the pin below can never undo it
+    const wetFloor = new Float64Array(path.points.length).fill(-Infinity);
+    for (let i = 0; i < path.points.length; i++) {
+      const [x, z] = path.points[i];
+      let water = -Infinity;
+      const cell = IDX(w, cellX(x), cellY(z));
+      // A SHORELINE, not a sea lane. Lifting a road clear of the sea is right where the road runs
+      // along a coast and the ground is only just under water; doing it where the sea floor is
+      // twenty metres down builds a plank across open water with nothing holding it up. Worldgen
+      // marks real crossings as bridges, and those already have their own lift above.
+      if (hasSea && smooth[i] > seaLevel - (opts.shoreDepth ?? 8)) water = Math.max(water, seaLevel);
+      if (lakeLevel[cell]) water = Math.max(water, lakeLevel[cell]);
+      if (water > -Infinity) {
+        wetFloor[i] = water + roadRide;
+        lift[i] = Math.max(lift[i], wetFloor[i] - smooth[i]);
+      }
+    }
     for (let i = 1; i < lift.length; i++) lift[i] = Math.max(lift[i], lift[i - 1] - rampPerPoint);
     for (let i = lift.length - 2; i >= 0; i--) lift[i] = Math.max(lift[i], lift[i + 1] - rampPerPoint);
     for (let i = 0; i < smooth.length; i++) smooth[i] += Math.max(0, lift[i]);
+
+    /**
+     * …AND THE ROAD STILL HAS TO SIT ON THE GROUND.
+     *
+     * Smoothing a line over four passes carries it across a dip, which is what gives a road its
+     * gentle gradient — but carried far enough it becomes a plank in the air, which is the
+     * "roads flying in the air that clip through the player" note. So outside a real crossing the
+     * deck is pinned within a few metres of the ground under it: a shallow cutting where the road
+     * climbs, a low embankment where it falls, and nothing you can walk under.
+     *
+     * A point that HAS a lift is left alone. That is a bridge, and a bridge is meant to be up there.
+     */
+    const maxFill = opts.roadFill ?? 3.5;
+    const maxCut = opts.roadCut ?? 3.5;
+    for (let i = 0; i < smooth.length; i++) {
+      if (lift[i] > 0.5) continue;
+      const ground = raw[i];
+      smooth[i] = Math.max(ground - maxCut, Math.min(ground + maxFill, smooth[i]));
+    }
+    // …and the water has the last word. Pinning the deck to the ground could pull it back under a
+    // surface it had just been lifted clear of, which is a road under water again by another route.
+    for (let i = 0; i < smooth.length; i++) {
+      if (wetFloor[i] > -Infinity) smooth[i] = Math.max(smooth[i], wetFloor[i]);
+    }
+    /**
+     * A SEA LANE IS NOT A ROAD.
+     *
+     * World Forge routes some links across open water — a shipping lane between two ports. Lifting
+     * those to sea level would lay a plank across the ocean, and leaving them alone draws a road
+     * along the sea floor. Neither is right, so the span is simply marked `wet` and `js/features.js`
+     * does not draw road there. What crosses the water is a boat.
+     */
+    path.wet = smooth.map((deck, i) => hasSea && raw[i] < seaLevel - (opts.shoreDepth ?? 8));
     path.surface = smooth;
     path.lift = lift;
   }
@@ -577,6 +715,40 @@ export function makeTerrain(world, planet = null, opts = {}) {
   const biomeAt = (x, z) => BIOMES[biomeIdAt(x, z)];
   const temperatureAt = (x, z) => layer(world.temperature, x / M_PER_CELL, z / M_PER_CELL);
   const underwater = (x, z) => !!waterAt(x, z);
+
+  /**
+   * CAN ANYTHING GROW HERE?
+   *
+   * "I found a case where trees and grass were growing underwater in a lake. Obviously they should
+   * only grow on the land."
+   *
+   * `underwater()` answers a question about a POINT — is this exact spot under water — and a lake's
+   * drawn sheet is a whole cell wide plus an overlap, so a point just inside the shore reads as dry
+   * while the water is visibly over it. Planting asks a stricter question: is this spot clear of
+   * every water surface nearby, with a margin. A tree at the water's edge then stands on the bank
+   * instead of in the shallows.
+   */
+  function plantable(x, z, margin = 0.6) {
+    if (waterAt(x, z)) return false;
+    const ground = heightAt(x, z);
+    if (hasSea && ground < seaLevel + margin) return false;
+    // any lake whose cell touches this one — the sheet reaches a little past its own cells
+    const cx0 = cellX(x), cy0 = cellY(z);
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = clamp(cx0 + dx, 0, w - 1), ny = clamp(cy0 + dy, 0, h - 1);
+        const level = lakeLevel[IDX(w, nx, ny)];
+        if (level && ground < level + margin) return false;
+      }
+    }
+    // …and a river's own surface, which is a smooth line rather than a cell
+    const river = riverIndex.nearest(x, z);
+    if (river && river.dist < river.path.half + 2) {
+      const surface = surfaceOfHit(river);
+      if (ground < surface + margin) return false;
+    }
+    return true;
+  }
 
   /** 0..1 how much river / road runs through this point, for props, spawns and the tests. */
   function riverAt(x, z) {
@@ -706,8 +878,10 @@ export function makeTerrain(world, planet = null, opts = {}) {
     world, planet, relief, hasSea, seaLevel, widthM, depthM, metresPerCell: M_PER_CELL,
     width: w, height: h,
     riverPaths, roadPaths, lakes,
+    /** How many lake cells were pushed out of a settlement's footprint, for the tests. */
+    drainedForTowns: drained,
     heightAt, naturalHeightAt, slopeAt, normalAt, colorAt, biomeAt, biomeIdAt, temperatureAt,
-    underwater, waterAt, riverAt, roadAt,
+    underwater, plantable, waterAt, riverAt, roadAt,
     clampToWorld, spawnPoint, layer,
 
     /** The graded height of the road at a point — already lifted clear of any river. Null off-road. */

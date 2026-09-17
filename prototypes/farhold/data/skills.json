@@ -13,21 +13,21 @@
    "name": "Burning",
    "kind": "damage",
    "element": "fire",
-   "perSecond": 0.18,
+   "perSecond": 0.3,
    "seconds": 5
   },
   "poison": {
    "name": "Poisoned",
    "kind": "damage",
    "element": "poison",
-   "perSecond": 0.12,
+   "perSecond": 0.26,
    "seconds": 8
   },
   "bleed": {
    "name": "Bleeding",
    "kind": "damage",
    "element": "physical",
-   "perSecond": 0.16,
+   "perSecond": 0.26,
    "seconds": 6
   },
   "chill": {
@@ -248,7 +248,8 @@
    "status": "poison",
    "cooldown": 5,
    "mp": 6,
-   "desc": "A dart that keeps working after it lands."
+   "desc": "A dart that keeps working after it lands \u2014 most of its damage arrives over the next eight seconds.",
+   "statusMult": 1.8
   },
   "shadowstep": {
    "name": "Shadow Step",

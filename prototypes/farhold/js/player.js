@@ -118,15 +118,32 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
   const right = new THREE.Vector3();
   const resolved = [0, 0];
 
-  /** Push out of anything solid, unless riding (a horse shoulders through undergrowth). */
-  function unstick(x, z) {
+  /**
+   * Push out of anything solid, unless riding (a horse shoulders through undergrowth).
+   *
+   * `feet` is how high off the ground we are. Anything whose roof is already below it stops being
+   * solid, so a wall you have genuinely cleared lets you through — "I cannot jump over walls and
+   * structures even if I clear them by several feet".
+   */
+  function unstick(x, z, feet = null) {
     let ox = x, oz = z;
     for (const field of obstacles) {
       if (!field) continue;
-      field.resolve(ox, oz, self.radius, resolved);
+      field.resolve(ox, oz, self.radius, resolved, feet);
       ox = resolved[0]; oz = resolved[1];
     }
     return [ox, oz];
+  }
+
+  /** The roof under our feet, when we are standing on something rather than on the ground. */
+  function standingOn(x, z, feet) {
+    let best = null;
+    for (const field of obstacles) {
+      if (!field?.standAt) continue;
+      const top = field.standAt(x, z, feet, self.radius);
+      if (top !== null && (best === null || top > best)) best = top;
+    }
+    return best;
   }
 
   /**
@@ -186,18 +203,23 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
       let nx = self.x + (dx / len) * speed * dt;
       let nz = self.z + (dz / len) * speed * dt;
       [nx, nz] = terrain.clampToWorld(nx, nz);
-      [nx, nz] = unstick(nx, nz);
+      [nx, nz] = unstick(nx, nz, self.y);
       [self.x, self.z] = terrain.clampToWorld(nx, nz);
     } else if (!frozen) {
       // even standing still, never be left inside something that was just built around you
-      const [cx, cz] = unstick(self.x, self.z);
+      const [cx, cz] = unstick(self.x, self.z, self.y);
       self.x = cx; self.z = cz;
     }
     self.moving = speed;
     self.running = !!(input && input.run && speed > 0 && !self.swimming);
 
     // --- up and down
-    const ground = terrain.heightAt(self.x, self.z);
+    // The floor is the terrain, OR the roof of anything wide we have jumped on top of. Without the
+    // second half you can clear a wall and then sink straight back through it.
+    const bare = terrain.heightAt(self.x, self.z);
+    const roof = self.swimming ? null : standingOn(self.x, self.z, self.y);
+    const ground = roof !== null && roof > bare ? roof : bare;
+    self.onRoof = ground !== bare;
     if (self.swimming) {
       // float at the surface: no gravity, no jumping, no diving
       const float = self.waterSurface - (b.floatDepth ?? 0.55);

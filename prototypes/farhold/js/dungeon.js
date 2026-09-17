@@ -84,6 +84,9 @@ export async function createDungeon(scene, {
   const group = new THREE.Group();
   group.name = 'farhold-dungeon';
   const solids = new ObstacleField();
+  // Down here the floor is flat and sits at zero, so a wall's roof is simply its own height. (At
+  // 4.6 m nothing in a dungeon is jumpable anyway; this is here so the field behaves consistently.)
+  solids.setGround(() => 0);
 
   // ---- floors: one slab per room and per corridor leg
   const floorParts = [];

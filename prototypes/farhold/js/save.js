@@ -90,7 +90,7 @@ export function createSaves() {
  * Everything worth keeping about a run. Pass the live objects; get plain JSON back.
  * Items are already plain data from Emberveil's generator, so they travel as they are.
  */
-export function snapshot({ id, name, seed, classId, player, control, elapsed, playtime, markers, place, weather, materials, dungeonsCleared }) {
+export function snapshot({ id, name, seed, classId, player, control, elapsed, playtime, markers, at, place, weather, materials, dungeonsCleared }) {
   return {
     id, name, seed, classId,
     version: 1,
@@ -112,6 +112,12 @@ export function snapshot({ id, name, seed, classId, player, control, elapsed, pl
     // Markers replaced the old bare `pins` array: a quest destination, a story objective and a
     // dropped pin are the same kind of thing now, and each carries the world it is on.
     markers: markers || null,
+    /**
+     * Which star and which world, not just which seed the run began from. Without this a load
+     * rebuilt the STARTING system every time, so travelling several stars out and saving put you
+     * back where you began — in the ocean, because the coordinates came along and the world did not.
+     */
+    at: at || null,
     // round 4: the materials bag and which dungeons you have already emptied
     materials: materials || {},
     dungeonsCleared: [...(dungeonsCleared || [])],

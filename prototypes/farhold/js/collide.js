@@ -16,6 +16,30 @@ export class ObstacleField {
     this.bucket = bucket;
     this.buckets = new Map();
     this.count = 0;
+    /**
+     * How high the ground is under an obstacle. Needed because a cylinder is filed with a HEIGHT
+     * and no base, and "can I jump over this" is a question about its top. Set once by whoever owns
+     * the terrain; without it nothing is jumpable and the field behaves exactly as it always did.
+     */
+    this.ground = null;
+  }
+
+  /** `fn(x, z)` → the ground height there. See `this.ground`. */
+  setGround(fn) { this.ground = fn || null; this.clearTops(); return this; }
+
+  /** Forget cached tops — the terrain changed under us (a new planet, a dungeon). */
+  clearTops() {
+    for (const list of this.buckets.values()) for (const o of list) o._top = undefined;
+  }
+
+  /**
+   * The world height of an obstacle's top, cached. An obstacle you can stand on also has to be wide
+   * enough to stand on: a tree trunk is 0.45 m across and standing on one would look ridiculous, so
+   * anything narrower than `STANDABLE_RADIUS` is solid all the way up and is never a floor.
+   */
+  topOf(o) {
+    if (o._top === undefined) o._top = (this.ground ? this.ground(o.x, o.z) : 0) + o.h;
+    return o._top;
   }
 
   _key(bx, bz) { return bx * 73856093 ^ bz * 19349663; }
@@ -44,6 +68,9 @@ export class ObstacleField {
     return this.buckets.get(this._key(Math.floor(x / this.bucket), Math.floor(z / this.bucket))) || null;
   }
 
+  /** Can you stand on top of this one, or is it too narrow to be a floor? */
+  standable(o) { return o.r >= STANDABLE_RADIUS; }
+
   /** Is this point inside something solid? */
   blocked(x, z, radius = 0) {
     const list = this.near(x, z);
@@ -59,13 +86,19 @@ export class ObstacleField {
    * Push a position out of anything it is inside. Returns [x, z] — unchanged when nothing is in
    * the way. Sliding along a wall falls out of this for free: only the overlapping axis moves.
    */
-  resolve(x, z, radius = 0.4, out = [0, 0]) {
+  resolve(x, z, radius = 0.4, out = [0, 0], feet = null) {
     out[0] = x; out[1] = z;
+    // `feet` is how high the character's feet are in the world. With it, anything whose top is
+    // already below them stops being solid — which is the whole of "I cannot jump over a wall even
+    // if I clear it by several feet". Without it (the default) every cylinder is infinitely tall,
+    // which is how this behaved before and is still right for anything that does not jump.
+    const over = Number.isFinite(feet) && this.ground;
     for (let pass = 0; pass < 2; pass++) {
       const list = this.near(out[0], out[1]);
       if (!list) break;
       let moved = false;
       for (const o of list) {
+        if (over && this.standable(o) && this.topOf(o) <= feet + CLEARANCE) continue;
         const dx = out[0] - o.x, dz = out[1] - o.z;
         const reach = o.r + radius;
         const d2 = dx * dx + dz * dz;
@@ -80,7 +113,37 @@ export class ObstacleField {
     }
     return out;
   }
+
+  /**
+   * The highest thing at this point you could be standing on — the top of any wide obstacle you are
+   * inside whose roof is at or below your feet. Returns null when there is nothing, so the caller
+   * falls back to the terrain.
+   *
+   * This is what turns "jump over the wall" into "jump ONTO the wall and then off the other side",
+   * which is what a player who cleared it by several feet expects to happen.
+   */
+  standAt(x, z, feet, radius = 0.4) {
+    if (!this.ground) return null;
+    const list = this.near(x, z);
+    if (!list) return null;
+    let best = null;
+    for (const o of list) {
+      if (!this.standable(o)) continue;
+      const dx = x - o.x, dz = z - o.z, reach = o.r + radius;
+      if (dx * dx + dz * dz >= reach * reach) continue;
+      const top = this.topOf(o);
+      if (top > feet + CLEARANCE) continue;            // we are under it, not on it
+      if (best === null || top > best) best = top;
+    }
+    return best;
+  }
 }
+
+/** Narrower than this and you cannot stand on it — a trunk, a column, a cactus. Metres. */
+export const STANDABLE_RADIUS = 0.8;
+
+/** How far above a roof still counts as being on it, in metres. Absorbs a frame of gravity. */
+export const CLEARANCE = 0.35;
 
 /**
  * How wide and tall each kind of prop is, for collision. Anything not listed is walked through —

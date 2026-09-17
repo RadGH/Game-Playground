@@ -17,6 +17,7 @@
 
 import { Loot } from '../../emberveil/js/loot.js';
 import { makeRng } from '../../emberveil/js/rng.js';
+import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor } from './affixes.js';
 // Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
@@ -222,7 +223,69 @@ export class Rpg {
     this.rng = makeRng(balance.seed ?? 1);
     // Round 4: the one place an affix, a set bonus or a legendary power turns into an effect.
     this.fx = new Effects();
+    // Round 6: units, floors, caps, slot rules and item levels. This MUST run before anything
+    // reads the affix tables — the loot pool, the shop, the crafting bench and the uniques all
+    // reach through the same objects. See js/affixes.js for why the data needed restating at all.
+    this.affixReport = tuneAffixData(items);
     this.weightAffixes();
+    this.itemLevels();
+  }
+
+  /**
+   * Item levels, tiers, and the slot and level rules that decide what may appear at all.
+   *
+   * Wraps the generator rather than replacing it, the same way `weightAffixes` does: `pool()` drops
+   * anything this slot or this item level is not allowed, and `generate()` stamps the item with its
+   * level, its wearer requirement, and values rolled from the tier the level sits in.
+   */
+  itemLevels() {
+    const loot = this.loot;
+    const pool = loot.pool.bind(loot);
+    const generate = loot.generate.bind(loot);
+    let ilvlForNext = null;
+
+    loot.pool = (base, rarity, opts = {}) => {
+      const ilvl = opts.ilvl ?? ilvlForNext ?? 99;
+      const slot = base?.slot || null;
+      return pool(base, rarity, opts).filter(a => affixAllowed(a, slot, ilvl));
+    };
+
+    loot.generate = (baseKey, rarity = 'normal', quality = 'medium', opts = {}) => {
+      const rng = opts.rng || this.rng;
+      const ilvl = opts.ilvl ?? itemLevelFor(opts.level ?? 1, rarity, rng);
+      ilvlForNext = ilvl;                                // read back by the wrapped pool()
+      const item = generate(baseKey, rarity, quality, { ...opts, ilvl });
+      ilvlForNext = null;
+      if (!item) return item;
+      item.ilvl = ilvl;
+      item.levelReq = requirementFor(ilvl);
+      // re-roll every rolled affix inside this item's own tier; intrinsics keep the base's numbers
+      for (const a of item.affixes || []) {
+        if (a.baseIntrinsic || a.intrinsic) continue;
+        a.value = rollAffixValue(a, ilvl, rng);
+        a.ilvl = ilvl;
+        a.tier = tierFor(ilvl).name;
+      }
+      return item;
+    };
+  }
+
+  /**
+   * What level you must be to wear this, after anything that lowers the requirement.
+   *
+   * "There could be an affix that lowers the level requirement for an item, which should affect the
+   * item itself without even being equipped as well as other items once you have it equipped."
+   * So it is read in two places: off the item, and off everything worn.
+   */
+  levelRequirement(item, wearer = null) {
+    const base = item?.levelReq ?? requirementFor(item?.ilvl ?? 1);
+    let off = 0;
+    for (const a of item?.affixes || []) if (a.stat === 'cond_levelReqReduce') off += a.value || 0;
+    for (const worn of Object.values(wearer?.equipment || {})) {
+      if (!worn || worn === item) continue;
+      for (const a of worn.affixes || []) if (a.stat === 'cond_levelReqReduce') off += a.value || 0;
+    }
+    return { level: Math.max(1, Math.round(base - off)), base, reduced: off > 0, off: Math.round(off) };
   }
 
   /**
@@ -449,8 +512,14 @@ export class Rpg {
   }
 
   /** Put an item on. The item that comes off goes back to the bag. Returns what was replaced. */
-  equip(player, item, { into = null } = {}) {
+  equip(player, item, { into = null, force = false } = {}) {
     if (!item) return null;
+    // An item level is a promise you have to grow into. `force` is for the tests and the debug menu;
+    // `equipRefusal` is what the interface asks so it can say why rather than doing nothing.
+    if (!force) {
+      const why = this.equipRefusal(player, item);
+      if (why) return { refused: why };
+    }
     let slot = into || (item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot);
     // A ring goes on whichever hand is free; with both full it replaces the WEAKER one, because
     // throwing away your best ring for a worse one is never what you meant.
@@ -472,6 +541,16 @@ export class Rpg {
     if (old) player.bag.push(old);
     this.refresh(player);
     return old;
+  }
+
+  /** Why this player cannot wear this item, in a sentence, or null when they can. */
+  equipRefusal(player, item) {
+    if (!item) return null;
+    const req = this.levelRequirement(item, player);
+    if ((player.level ?? 1) < req.level) {
+      return `${item.name} needs level ${req.level}. You are ${player.level ?? 1}.`;
+    }
+    return null;
   }
 
   unequip(player, slot) {

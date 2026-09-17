@@ -297,6 +297,9 @@ export function createProps(scene, terrain, opts = {}) {
   const matrix = new THREE.Matrix4();
   const colour = new THREE.Color();
   const solids = new ObstacleField();
+  // Tell the field how high the ground is, so an obstacle knows where its roof is and the player
+  // can jump over — and onto — anything they genuinely clear. See js/collide.js.
+  solids.setGround((x, z) => terrain.heightAt(x, z));
   let centre = [Infinity, Infinity];
   let rebuilds = 0;
   let visible = true;

@@ -1192,6 +1192,26 @@ export class Hud {
     ].filter(Boolean).join(' · ');
     bits.push(`<div class="tip-dim">${item.rarity}${item.quality ? ' · ' + item.quality : ''} · ${kind}</div>`);
 
+    /**
+     * Item level and what it takes to wear the thing.
+     *
+     * The requirement turns a different colour when something has lowered it — "this should cause
+     * the level requirement indicator on tooltips to appear a different color than normal,
+     * indicating it has been modified" — and it goes red when you simply cannot wear it yet, which
+     * is the one thing a card has to say loudly.
+     */
+    if (item.ilvl) {
+      const req = this.rpg?.levelRequirement
+        ? this.rpg.levelRequirement(item, player)
+        : { level: item.levelReq ?? 1, base: item.levelReq ?? 1, reduced: false, off: 0 };
+      const canWear = (player?.level ?? 99) >= req.level;
+      const cls = !canWear ? 'req-no' : req.reduced ? 'req-cut' : 'req-ok';
+      const note = req.reduced ? ` <i class="tip-dim">(was ${req.base}, ${req.off} off)</i>` : '';
+      bits.push(`<div class="tip-req">item level ${item.ilvl} · `
+        + `<span class="${cls}">requires level ${req.level}</span>${note}`
+        + (canWear ? '' : ' <i class="tip-dim">— you cannot wear this yet</i>') + '</div>');
+    }
+
     // the base numbers
     const base = [];
     if (item.dmg) base.push(`<b>${item.dmg[0]}\u2013${item.dmg[1]}</b> damage`);
@@ -1200,8 +1220,13 @@ export class Hud {
     if (item.brand) base.push(`branded with ${item.brand}`);
     if (base.length) bits.push(`<div class="tip-base">${base.join(' · ')}</div>`);
 
-    // every property, in plain language, with the intrinsic ones marked
-    const affixes = (item.affixes || []).filter(a => !(a.baseIntrinsic && !a.brand && !a.intrinsic));
+    // Every property, in plain language, each one listed ONCE.
+    //
+    // The two filters used to overlap: an affix carrying `intrinsic: true` also carries
+    // `baseIntrinsic: true`, so it passed the first test *and* the second and the card printed it
+    // twice — once as an ordinary property and again in white as "(part of the item)". The rule is
+    // simply whether it came with the base or was rolled onto it.
+    const affixes = (item.affixes || []).filter(a => !a.baseIntrinsic);
     const intrinsic = (item.affixes || []).filter(a => a.baseIntrinsic && (a.brand || a.intrinsic));
     if (affixes.length) {
       bits.push('<ul class="tip-affixes">' + affixes.map(a => {
@@ -1230,7 +1255,14 @@ export class Hud {
           + (extra ? ` <i class="tip-dim">(counts as ${counted})</i>` : '') + '</div>');
         bits.push('<ul class="tip-affixes">' + info.steps.map(st => {
           const on = counted >= st.at;
-          const names = Object.entries(st.bonus).filter(([k]) => k !== 'desc').map(([k, v]) => `${k} +${v}`).join(', ');
+          // "Update set bonuses to read naturally like other affixes, instead of summarized like
+          // 'int +7, cooldownReduction +0.05'. These are technical names, they should not be
+          // displayed to the player." A set bonus is a bag of stats, and every stat in the game
+          // already knows how to describe itself — so ask it, the same way an affix does.
+          const names = Object.entries(st.bonus)
+            .filter(([k]) => k !== 'desc')
+            .map(([stat, value]) => describeAffix({ stat, value }))
+            .join(', ');
           return `<li class="${on ? 'tip-set' : 'tip-dim'}">${st.at} pieces: ${names || st.bonus.desc || 'a power'}${on ? ' ✓' : ''}</li>`;
         }).join('') + '</ul>');
       }

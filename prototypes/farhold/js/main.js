@@ -186,7 +186,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   status('shaping the planet…');
   await frame();
   const mapSize = { width: balance.world?.width ?? 256, height: balance.world?.height ?? 128, regionScale: worldOpts.regionScale };
-  const created = createWorld({ seed, ...mapSize, habitable: worldOpts.habitable });
+  /**
+   * WHERE THE RUN IS, NOT JUST WHICH SEED IT STARTED FROM.
+   *
+   * A save used to carry the run seed and nothing else, so loading always rebuilt the *starting*
+   * system — travel several stars out, save, reload, and you woke up in the ocean of the world you
+   * had left hours ago. The save now also carries the system seed and the planet, and a load builds
+   * that system directly.
+   */
+  const at = save?.at || null;
+  const created = at?.systemSeed
+    ? (() => {
+      const built = createSystem({ seed: at.systemSeed });
+      const landing = built.system.planets.find(p => p.id === at.planetId)
+        || built.system.planets.flatMap(p => p.moons || []).find(m => m.id === at.planetId)
+        || chooseLanding(built.system);
+      return {
+        star: built.star, system: built.system, planet: landing,
+        world: generatePlanetMap(landing, mapSize),
+        systemSeed: at.systemSeed, movedSeed: false,
+      };
+    })()
+    : createWorld({ seed, ...mapSize, habitable: worldOpts.habitable });
   // the search may have stepped to a neighbouring seed; everything downstream uses the one it found
   let systemSeed = created.systemSeed ?? seed;   // `let`: a jump replaces the whole system
   let { star, system } = created;   // `let`: a jump to another star replaces both
@@ -204,7 +225,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * generator produced.
    */
   const galaxy = generateGalaxy({ seed, stars: 180, layout: 'spiral' });
-  {
+  // …and only when we are actually AT the first star. Loading a save taken several jumps out
+  // restores that star instead, and rewriting star 0 with its seed would have made two different
+  // stars claim to be the same system.
+  if (!Number.isFinite(at?.starId) || at.starId === 0) {
     const home = galaxy.stars[0];
     home.seed = systemSeed;
     home.name = star.name;
@@ -213,8 +237,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     home.color = star.color;
     home.habitable = star.habitable;
   }
-  let starId = 0;
-  const starNow = () => galaxy.stars[starId];
+  // a load puts you back at the star you were at, not at the one the run began from
+  let starId = Number.isFinite(at?.starId) ? at.starId : 0;
+  const starNow = () => galaxy.stars[starId] || galaxy.stars[0];
   // these are replaced wholesale when you land on a different world
   let planet = created.planet, world = created.world;
   let terrain = makeTerrain(world, planet, balance.terrain);
@@ -319,15 +344,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   if (!save) {
     const starter = rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: rpg.rng });
-    if (starter) rpg.equip(player, starter);
+    if (starter) rpg.equip(player, starter, { force: true });
     for (const key of classDef.startingArmour || []) {
       const piece = rpg.loot.generate(key, 'normal', 'low', { rng: rpg.rng });
-      if (piece) rpg.equip(player, piece);
+      if (piece) rpg.equip(player, piece, { force: true });
     }
     // EVERY character starts with a torch and a horse — both in slots of their own, so a torch does
     // not cost you your shield and a mount is a thing you own rather than a key you press.
-    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_TORCH)));
-    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_MOUNT)));
+    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_TORCH)), { force: true });
+    rpg.equip(player, JSON.parse(JSON.stringify(STARTER_MOUNT)), { force: true });
   }
 
   // only the player swims, so only the player pays for the swim clips
@@ -543,9 +568,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * click-to-close under the pointer, was easy to get wrong.
    */
   function regrab() {
-    const held = hud.sheetOpen || map.isOpen || chart.isOpen || talk.isOpen || settings.isOpen || debug.isOpen
+    if (!panelOpen()) input.grab();
+  }
+
+  /**
+   * Is a full-screen panel up?
+   *
+   * One predicate, used for two things: whether to take the mouse back, and whether the world is
+   * running. The debug menu is deliberately NOT in here — it is a small dev overlay you often want
+   * to read while something is moving.
+   */
+  function panelOpen() {
+    return hud.sheetOpen || map.isOpen || chart.isOpen || talk.isOpen || settings.isOpen
       || rewardsOpen() || pauseMenu.isOpen;
-    if (!held) input.grab();
+  }
+
+  /**
+   * PAUSE WHILE A PANEL IS OPEN.
+   *
+   * "Make it so the game is paused when in your inventory, trade menu or dialog, options menu, map,
+   * or other full screen indicator. If we add multiplayer later it should only work in
+   * singleplayer." Reading your bag should not be a way to get killed, and standing in a shop
+   * should not burn daylight.
+   *
+   * `multiplayer` is the seam that turn-off lives behind: set it and the world keeps running
+   * whatever is on screen, which is the only behaviour that works when somebody else is playing too.
+   */
+  const multiplayer = false;
+  function uiPaused() {
+    return !multiplayer && panelOpen();
   }
 
   /** Fire skill slot `i`. Returns the plan it ran, or null if it could not. */
@@ -557,7 +608,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // War Cry raises the damage of everything, including the skill that follows it
     const power = plan.mult * outgoingFrom(player);
     const onHit = (enemy, result) => {
-      if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * 0.9));
+      if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * 0.9 * (plan.statusMult || 1)));
       reportHit(enemy, result);
     };
     const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };
@@ -712,7 +763,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // Opening the sheet gives the mouse back IMMEDIATELY — this was the bug: the pointer stayed
     // locked, so the cursor was invisible and none of the buttons could be clicked.
     onOpen: () => { input.release(); },
-    onClose: () => { /* the next click on the canvas takes the mouse again */ },
+    // …and closing it takes the mouse BACK. It used to wait for a click on the canvas, so pressing
+    // I to leave the sheet left you with a visible cursor and no way to look around until you
+    // clicked — which also fired an attack.
+    onClose: () => { regrab(); },
     onRecycle: (item, { quiet = false } = {}) => {
       const at = player.bag.indexOf(item);
       if (at < 0) return;
@@ -745,7 +799,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     },
     onEquip: (item, unequipSlot) => {
       if (unequipSlot) { const off = rpg.unequip(player, unequipSlot); if (off) hud.log(`Took off ${off.name}.`); }
-      else { rpg.equip(player, item); hud.log(`Equipped ${item.name}.`, 'loot'); sound.equip(); }
+      else {
+        const out = rpg.equip(player, item);
+        if (out?.refused) hud.log(out.refused, 'bad');
+        else { hud.log(`Equipped ${item.name}.`, 'loot'); sound.equip(); }
+      }
       applyGearLook();
       hud.setPlayer(player);
     },
@@ -1774,6 +1832,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function currentSnapshot() {
     return snapshot({
       id: saveId, name: player.name, seed, classId, player, control,
+      // where you actually are, so a load does not drop you back at the starting star
+      at: { systemSeed, starId, planetId: planet.id, starName: star.name, planetName: planet.name },
       elapsed: state.elapsed, playtime: state.playtime,
       markers: markers.toJSON(),
       place: features.settlementAt(control.x, control.z)?.name || terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name,
@@ -1972,12 +2032,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return !!(lamp?.light || lamp?.baseKey === 'torch' || player.equipment.offhand?.light);
   }
   // panels own the mouse while they are open: the canvas must not grab it back on the next click
-  input.setBlocked(() => hud.sheetOpen || map.isOpen || talk.isOpen || settings.isOpen || debug.isOpen || rewardsOpen() || pauseMenu.isOpen);
+  // one predicate, so the mouse and the clock never disagree about whether a panel is up
+  input.setBlocked(() => panelOpen() || debug.isOpen);
 
   function tick() {
     requestAnimationFrame(tick);
     const dt = Math.min(0.1, clock.getDelta());
     if (state.paused) return;
+    if (uiPaused()) {
+      // Drain the input queue while we are stopped, or every key tapped with the map open fires the
+      // instant it closes. The panels themselves are driven by their own keydown handlers, so they
+      // keep working.
+      input.sample();
+      state.uiPaused = true;
+      return;
+    }
+    state.uiPaused = false;
     state.elapsed += dt;
     state.playtime += dt;
     state.frames++;
@@ -2220,8 +2290,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         gold: haul.gold || 0, items: (haul.items || []).map(rewardItem), button: 'Take it',
       });
     }
-    // the effect registry's own clock: how long you have been fighting, hit streaks, cheat-death
-    rpg.fx.update(player, dt, { fighting: field.engaged });
+    // The effect registry's own clock: how long you have been fighting, hit streaks, cheat-death.
+    //
+    // …and then REBUILD THE SHEET when one of those timers changes what it is worth. This was the
+    // missing half of "the move speed on hit proc doesn't seem to work in game": the timer ticked
+    // and the registry knew about the buff, but `derived.moveSpeed` is only computed in
+    // `rpg.refresh`, so nothing the buff added ever reached the legs. `rt.dirty` is set only when a
+    // bucketed timer actually moves, so this is a handful of refreshes a fight, not sixty a second.
+    const rt = rpg.fx.update(player, dt, { fighting: field.engaged });
+    if (rt.dirty) rpg.refresh(player);
     const wasFighting = fighting;
     fighting = field.engaged;
     if (fighting && !wasFighting) {

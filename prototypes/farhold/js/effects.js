@@ -150,6 +150,12 @@ def('affix:cond_firstHitCritBonus', v => `+${n1(v)}% critical chance on the firs
 def('affix:cond_goldOnEliteKill', v => `+${pct(v)} gold from everything you kill`, {
   derive: (v, d) => { d.goldFind += v * 100; },
 });
+/**
+ * The one affix worth reading on gear you cannot wear yet. It is handled in `Rpg.levelRequirement`
+ * rather than here, because it has to apply to its OWN item while that item is still in the bag —
+ * a `derive` hook only ever runs on what is equipped.
+ */
+def('affix:cond_levelReqReduce', v => `needs ${n1(v)} fewer levels to wear — this and everything else you wear`);
 def('affix:cond_hpOnKill', v => `${n1(v)} health back on a kill`, { onKill: (v, c) => { c.heal = (c.heal || 0) + v; } });
 def('affix:cond_killInitBonus', v => `a kill gives ${pct(v)} attack and move speed for 5s`, {
   onKill: (v, c) => { c.rt.killRush = 5; c.rt.killRushValue = v; },
@@ -205,6 +211,86 @@ def('affix:cond_sustainedDmgBonus', v => `+${pct(v)} damage for every 5s you sta
 def('affix:cond_thornsFlat', v => `anything that hits you takes ${n1(v)}`, {
   thornsFlat: v => v,
 });
+
+// ───────────────────────── the road weapons' own properties ─────────────────────────
+//
+// `items.json`'s 22 road weapons carry 23 bespoke properties, and not one of them had an entry
+// here. The registry's fallback prints `name: value`, which is how a bow came to say
+// **"Starwake: 2"** and **"Star brand: 0.2"** — a real property, a real number, and no way for a
+// player to know what either meant.
+//
+// Five of them were written for Emberveil's TRAVEL layer — forage rations, an extra leg of the
+// road, exhaustion, standing a watch, ramming with a vehicle — and Farhold has no travel legs and
+// no exhaustion, so the honest thing is to give each one the nearest meaning this game does have
+// and say plainly what that is, rather than leave it inert and undescribed.
+
+const BRANDS = {
+  cond_brandFire: ['fire', 'Ember Brand', 'burns'],
+  cond_brandIce: ['ice', 'Rime Brand', 'chills'],
+  cond_brandLightning: ['lightning', 'Storm Brand', 'shocks'],
+  cond_brandNature: ['poison', 'Bramble Brand', 'poisons'],
+  cond_brandShadow: ['shadow', 'Veil Brand', 'withers'],
+  cond_brandHoly: ['holy', 'Dawn Brand', 'sears'],
+  cond_brandArcane: ['arcane', 'Star Brand', 'unmakes'],
+};
+for (const [stat, [element, , verb]] of Object.entries(BRANDS)) {
+  def(`affix:${stat}`, v => `every hit lands as ${element} — it ${verb} what it touches, and ${pct(v)} of the damage is added on top`, {
+    brandElement: () => element,
+    dmgOut: (v, c) => (c.element === element ? 1 + v : 1),
+  });
+}
+
+def('affix:cond_critFromWounds', v => `+${n1(v)}% critical chance for every quarter of health the target has already lost`, {
+  critBonus: (v, c) => {
+    const missing = 1 - (c.target?.hp || 0) / Math.max(1, c.target?.maxHp || 1);
+    return v * Math.floor(missing * 4);
+  },
+});
+def('affix:cond_dmgVsNamed', v => `+${pct(v)} damage to anything with a name of its own`, {
+  dmgOut: (v, c) => (c.target?.named || c.target?.nemesis || c.target?.rank === 'boss' ? 1 + v : 1),
+});
+def('affix:cond_sunderOnHit', v => `every hit shaves ${n1(v)} armour off the target, and it stays off`, {
+  onHit: (v, c) => { if (c.target) c.target.armor = Math.max(0, (c.target.armor || 0) - v); },
+});
+def('affix:cond_nemesisMark', v => `+${pct(v)} damage to the one that killed you last`, {
+  dmgOut: (v, c) => (c.target?.nemesis ? 1 + v : 1),
+});
+def('affix:cond_killGrowth', v => `+${n1(v)} damage for every ten things this weapon has killed`, {
+  derive: (v, d, unit) => { d.damageFlat += v * Math.floor((unit.kills || 0) / 10); },
+});
+def('affix:cond_killMemory', v => `keeps a tally: +${n1(v)} health for every ten kills you have taken with it`, {
+  derive: (v, d, unit) => { d.maxHp += v * Math.floor((unit.kills || 0) / 10); },
+});
+
+// companions
+def('affix:cond_companionExtra', v => `${n1(v)} more companion${n1(v) > 1 ? 's' : ''} follow you`, { petSlots: v => v });
+def('affix:cond_companionFury', v => `your companions hit ${pct(v)} harder`, { petDamage: v => 1 + v });
+def('affix:cond_guardBond', v => `town guards fight ${pct(v)} harder while you are with them`, { guardPower: v => 1 + v });
+
+// the travel-layer five, restated for a world you walk across yourself
+def('affix:cond_forageRation', v => `out of a fight you recover ${n1(v)} health a second — it finds you something to eat`, {
+  derive: (v, d, unit, rt) => { if (!(rt?.inCombat > 0)) d.hpRegen += v; },
+});
+def('affix:cond_extraLeg', v => `+${pct(v)} move speed — it knows the shortcuts`, {
+  derive: (v, d) => { d.movePct += v * 100; },
+});
+def('affix:cond_easeExhaustion', v => `you tire ${pct(v)} more slowly: sprinting costs less and you recover faster`, {
+  derive: (v, d) => { d.staminaEase = (d.staminaEase || 0) + v; d.hpRegen += v; },
+});
+def('affix:cond_nightWard', v => `+${pct(v)} armour after dark, when the worst of it comes out`, {
+  derive: (v, d, unit) => { if (unit.atNight) d.armorPct += v * 100; },
+});
+def('affix:cond_watch', v => `you sleep lightly: +${n1(v)} health a second while you stand still`, {
+  derive: (v, d, unit) => { if (!(unit.moving > 0)) d.hpRegen += v; },
+});
+def('affix:cond_vehicleDmg', v => `+${pct(v)} damage while you are mounted — it is meant to be swung from the saddle`, {
+  dmgOut: (v, c) => (c.self?.mounted ? 1 + v : 1),
+});
+def('affix:cond_roadFind', v => `+${pct(v)} better loot from anything you kill away from a settlement`, {
+  derive: (v, d) => { d.magicFind += v * 100; },
+});
+// `manaRegen` is one unique's spelling of `mana_regen`. One line beats a data migration.
+def('affix:manaRegen', v => `+${n1(v)} mana a second`, { field: 'mpRegen', plain: true });
 
 // ───────────────────────────── legendary powers ─────────────────────────────
 // The 24 ids in items.json `legendaryEffects`. Five of them were written for Emberveil's *travel*
@@ -344,7 +430,19 @@ export class Effects {
   }
   refresh(unit) { this.rt(unit)._cache = null; }
 
-  /** Tick the timers that conditional affixes run on. */
+  /**
+   * Tick the timers that conditional affixes run on.
+   *
+   * THIS HAS TO BE CALLED EVERY FRAME. Round 6 found that nothing ever did — which is why "the move
+   * speed on hit proc doesn't seem to work in game". `combatStart` set `openingRush` and nothing
+   * ever counted it down or recomputed the sheet while it was up, so the buff existed in the
+   * registry and nowhere else. Four other affixes were dead for the same reason:
+   * `cond_sustainedDmgBonus` (needs `inCombat` to climb), `cond_killInitBonus`,
+   * `cond_afterSkillSpellPow`, and cheat death's own cooldown.
+   *
+   * Returns the runtime, and sets `rt.dirty` when the derived sheet needs rebuilding — see
+   * `timerSignature` for why that is not simply "every frame".
+   */
   update(unit, dt, { fighting = false } = {}) {
     const rt = this.rt(unit);
     rt.inCombat = fighting ? rt.inCombat + dt : 0;
@@ -352,7 +450,27 @@ export class Effects {
     for (const k of ['cheatDeath', 'skillPower', 'killRush', 'openingRush']) {
       if (rt[k] > 0) rt[k] = Math.max(0, rt[k] - dt);
     }
+    const sig = this.timerSignature(rt);
+    rt.dirty = sig !== rt._sig;
+    rt._sig = sig;
     return rt;
+  }
+
+  /**
+   * A short string that changes only when a timed affix would actually pay out differently.
+   *
+   * Re-deriving the whole sheet sixty times a second to notice that a four-second buff is still on
+   * is waste; re-deriving only when it starts and ends misses `cond_sustainedDmgBonus`, which steps
+   * up every five seconds it stays in the fight. So the signature buckets the timers: on or off for
+   * the flat ones, and in five-second steps for the one that grows.
+   */
+  timerSignature(rt) {
+    return [
+      rt.openingRush > 0 ? 1 : 0,
+      rt.killRush > 0 ? 1 : 0,
+      rt.skillPower > 0 ? 1 : 0,
+      Math.min(5, Math.floor((rt.inCombat || 0) / 5)),
+    ].join('');
   }
 
   /** Apply every `derive` hook while stats are being worked out. */

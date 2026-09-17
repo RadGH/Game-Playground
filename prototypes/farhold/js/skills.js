@@ -31,13 +31,36 @@ export function applyStatus(target, type, spec, power = 1, { longer = 0, strengt
   return target.statuses[type];
 }
 
-/** Tick every status on a unit. Returns the damage it took this step (healing counts negative). */
+/** How often a damage-over-time status actually lands, in seconds. */
+export const TICK_EVERY = 1;
+
+/**
+ * Tick every status on a unit. Returns the damage it took this step (healing counts negative).
+ *
+ * **Damage over time lands in whole ticks, not per frame.** It used to take `perSecond * dt` sixty
+ * times a second, which is arithmetically the same total and reads as nothing at all: "poison
+ * damage, at least from the ranger's poison dart skill, seems to only do one damage per tick and is
+ * almost useless". A second's worth arriving at once is the same damage and a legible number, and
+ * it is how every game that has a poison does it.
+ *
+ * Healing still runs per frame — a regeneration that arrived in lumps would look like a stutter.
+ */
 export function tickStatuses(unit, dt, { resist = 1 } = {}) {
   if (!unit.statuses) return 0;
   let damage = 0, healed = 0;
   for (const [type, st] of Object.entries(unit.statuses)) {
     st.remaining -= dt;
-    if (st.perSecond) damage += st.perSecond * st.power * dt * resist;
+    if (st.perSecond) {
+      st.since = (st.since || 0) + dt;
+      const expiring = st.remaining <= 0;
+      // pay out on the tick, and pay out whatever is left over when the status runs out, so a
+      // three-and-a-half-second burn does not silently drop its last half second
+      if (st.since >= TICK_EVERY || expiring) {
+        const span = expiring ? st.since : TICK_EVERY;
+        damage += st.perSecond * st.power * span * resist;
+        st.since = expiring ? 0 : st.since - TICK_EVERY;
+      }
+    }
     if (st.healPerSecond) healed += st.healPerSecond * (unit.maxHp || 0) * dt;
     if (st.remaining <= 0) delete unit.statuses[type];
   }
@@ -144,6 +167,9 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
       projectiles: Math.max(1, s.projectiles ?? 1), spread: s.spread ?? 0,
       status: s.status || null,
       statusSpec: s.status ? data.statuses[s.status] : null,
+      // A skill whose whole point is what it leaves behind says so, and its status hits harder than
+      // the same status applied as a side effect of something else.
+      statusMult: s.statusMult ?? 1,
       heal: s.heal ? Math.round(player.maxHp * s.heal) : 0,
       healFrac: s.heal || 0,
       pet: s.pet || null, petCount: s.count || 1, pets: !!s.pets,

@@ -10,6 +10,8 @@ const el = (tag, attrs = {}, ...kids) => {
     else if (k === 'text') node.textContent = v;
     else if (k === 'html') node.innerHTML = v;
     else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
+    // `setAttribute('disabled', false)` still disables — an attribute that is PRESENT is true
+    else if (typeof v === 'boolean') { if (v) node.setAttribute(k, ''); }
     else node.setAttribute(k, v);
   }
   node.append(...kids.filter(Boolean));
@@ -167,6 +169,9 @@ export function createTalkPanel(handlers = {}) {
           el('span', { class: 'coin', text: `${(sell ? handlers.sellPrice?.(item) : handlers.price?.(item)) ?? 0}g` }),
           el('button', {
             class: 'talk-btn', text: sell ? 'Sell' : 'Buy',
+            // E1: the Buy button stayed lit at 0 gold, so the only way to find out you could not
+            // afford something was to click it
+            disabled: !sell && (handlers.price?.(item) ?? 0) > (context.gold ?? 0),
             onclick: () => { (sell ? handlers.sell : handlers.buy)?.(item); render(); },
           }),
         );
@@ -195,19 +200,33 @@ export function createTalkPanel(handlers = {}) {
           : [el('p', { class: 'muted small', text: 'Nothing to sell.' })]),
       );
       kids.push(el('div', { class: 'talk-gold muted small', text: `You have ${context.gold} gold.` }));
+      // …and why the prices are what they are. Standing was invisible at the one counter where it
+      // should be the most obvious thing on screen.
+      const note = handlers.standingNote?.();
+      if (note) kids.push(el('div', { class: 'talk-standing small', text: note }));
       kids.push(el('div', { class: 'trade' }, theirs, mine));
 
       // vehicles: unlockables, bought once and owned for the run
+      /**
+       * E3: a level-1 village store was offering a 5200g interstellar hauler, and that block was over
+       * half the panel. It is behind a fold now, so the stock you might actually buy is what you see.
+       */
       const vehicles = (context.vehicles || []).filter(v => !context.ownsVehicle?.(v.slot, v.key));
       if (vehicles.length) {
-        kids.push(el('h3', { text: 'Boats and ships' }));
-        kids.push(el('p', { class: 'muted small', text: 'Bought once and yours for good. Pick between them on the character sheet.' }));
+        const fold = el('details', { class: 'trade-fold' });
+        fold.append(el('summary', { text: `Boats and ships (${vehicles.length})` }));
+        fold.append(el('p', { class: 'muted small', text: 'Bought once and yours for good. Pick between them on the character sheet.' }));
+        kids.push(fold);
         for (const v of vehicles) {
-          kids.push(el('div', { class: 'trade-row' },
+          fold.append(el('div', { class: 'trade-row' },
             el('span', { text: v.name }),
             el('span', { class: 'muted small', text: v.lore }),
             el('span', { class: 'coin', text: `${v.price}g` }),
-            el('button', { class: 'talk-btn', text: 'Buy', onclick: () => { handlers.buyVehicle?.(v); render(); } }),
+            el('button', {
+              class: 'talk-btn', text: 'Buy',
+              disabled: v.price > (context.gold ?? 0),
+              onclick: () => { handlers.buyVehicle?.(v); render(); },
+            }),
           ));
         }
       }
@@ -216,6 +235,10 @@ export function createTalkPanel(handlers = {}) {
     // ---- the gambler: sealed crates, one item each, a promise and a chance of better
     if (npc.gambles) {
       kids.push(el('div', { class: 'talk-gold muted small', text: `You have ${context.gold} gold.` }));
+      // …and why the prices are what they are. Standing was invisible at the one counter where it
+      // should be the most obvious thing on screen.
+      const note = handlers.standingNote?.();
+      if (note) kids.push(el('div', { class: 'talk-standing small', text: note }));
       kids.push(el('h3', { text: 'Sealed crates' }));
       kids.push(el('p', { class: 'muted small', text: 'One thing inside. Never worse than the seal says. Sometimes better.' }));
       for (const tier of context.crates || []) {

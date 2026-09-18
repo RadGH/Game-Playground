@@ -37,7 +37,7 @@ import { pointsFor } from './perks.js';
 import { createStandings, ranked as rankedFactions, createIntroducer } from './factions.js';
 import { createTerritory } from './territory.js';
 import { createJobGen, candidatesFrom } from './jobgen.js';
-import { createIncidents } from './incidents.js';
+import { createIncidents, NO_EFFECT } from './incidents.js';
 import { createPatrols } from './patrols.js';
 import { createCaravans } from './caravans.js';
 import { createWanderers } from './wanderers.js';
@@ -349,8 +349,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const intro = createIntroducer(factionData);
   // `holdings` rather than `land`, because `land()` is already the verb for putting the ship down
   const holdings = createTerritory({
-    zones, seed, factions: factionData, standings,
+    zones, seed, factions: factionData, standings, landmarks: landmarkData,
     metresPerCell: terrain.metresPerCell, saved: save?.territory || null,
+    // so a wayshrine stands on a real landmark node rather than in the middle of a field
+    nodesFor: zone => (world.nodes || []).filter(n =>
+      zones.at(n.x * terrain.metresPerCell, n.y * terrain.metresPerCell)?.id === zone.id),
   });
   const trouble = createIncidents({ data: incidentData, territory: holdings, factions: factionData, seed });
   const patrols = createPatrols({ territory: holdings, factions: factionData, standings, seed });
@@ -911,6 +914,30 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // ---- The Territory: three more things the Journal shows
     standings: () => rankedFactions(factionData, standings),
+    factionBands: () => factionData.bands || [],
+    factionName: key => intro.fullName(key),
+    distanceTo: place => distanceText(Math.hypot((place?.x ?? 0) - control.x, (place?.z ?? 0) - control.z)),
+    /** What one faction owes you, and whether you have earned it yet. */
+    factionRewards: key => {
+      if (!key) return [];
+      const ranks = rewardData.ranks || [];
+      const value = standings.get(key);
+      return (rewardData.rewards?.[key] || []).map(r => {
+        const rank = ranks.find(x => x.key === r.rank);
+        return { ...r, at: rank?.at ?? 0, rankName: rank?.name || r.rank, earned: value >= (rank?.at ?? 0) };
+      });
+    },
+    /** Everything you have earned, everywhere — what the rest of the game asks before it acts. */
+    perks: () => earnedRewards(),
+    /** The five deeds worth knowing about, biggest first — the rest are variations on them. */
+    factionDeeds: () => ([
+      ['finish a job for them', factionData.deeds?.job_done],
+      ['see a caravan of theirs home', factionData.deeds?.caravan_escorted],
+      ['clear their enemy\'s camp', factionData.deeds?.camp_cleared],
+      ['kill one of their patrol', factionData.deeds?.patrol_killed],
+      ['rob one of their caravans', factionData.deeds?.caravan_robbed],
+      ['desecrate one of their places', factionData.deeds?.landmark_desecrated],
+    ].filter(row => Number.isFinite(row[1]))),
     territoryHere: () => (hud.here ? holdings.of(hud.here.id) : null),
     board: () => localBoard,
     rumours: () => rumours.all(),
@@ -1374,8 +1401,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (gate) return { kind: 'dungeon', gate };
       const who = folk.nearest(control.x, control.z);
       if (who) return { kind: 'talk', who };
-      const met = roadFolk.near(control.x, control.z, 6)[0];
+      // 6 m on a 57 km world meant you only met somebody by walking over the exact spot
+      const met = roadFolk.near(control.x, control.z, 22)[0];
       if (met) return { kind: 'wanderer', met };
+      const mark = hud.here && holdings.landmarksIn(hud.here.id)
+        .find(l => l.state !== 'done' && Math.hypot(l.x - control.x, l.z - control.z) < 14);
+      if (mark) return { kind: 'landmark', mark };
     }
     return null;
   }
@@ -1419,7 +1450,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         break;
       }
       case 'passage': {
-        const toll = w.toll || 6;
+        const toll = earnedRewards().freeTolls ? 0 : (w.toll || 6);
+        if (!toll) {
+          hud.log(`${w.name} knows your face and lifts the chain without asking.`, 'good');
+          roadFolk.settle(w.id, 'paid');
+          break;
+        }
         if (player.gold >= toll) {
           player.gold -= toll;
           hud.log(`You pay ${toll}. ${w.name} lifts the chain.`);
@@ -1487,6 +1523,47 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hud.log(`${w.name} has said their piece.`);
         roadFolk.settle(w.id, 'helped');
     }
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  /**
+   * Standing at one of the places that fill a zone in.
+   *
+   * Some are a thing you do once (a shrine, a hunting blind); some take a few visits (a ring of
+   * stones, a collapsed mine, a washed-out road). `data/landmarks.json` says which, and what each one
+   * gives — all of it was parsed at boot and read by nothing until now.
+   */
+  function atLandmark(mark) {
+    const here = hud.here;
+    if (!here) return;
+    sound.ui('open');
+    hud.log(`${mark.name}. ${mark.blurb}`, '');
+    holdings.visitLandmark(here.id, mark.id);
+
+    if (mark.steps) {
+      const out = holdings.workLandmark(here.id, mark.id);
+      if (!out) return;
+      if (!out.finished) {
+        hud.log(`${mark.does} ${out.left} more ${out.left === 1 ? 'visit' : 'visits'}.`, '');
+        autoSave();
+        return;
+      }
+      hud.log(`${mark.name} is finished.`, 'good');
+      sound.questDone();
+    }
+
+    const gives = mark.gives || {};
+    if (gives.rest) { player.hp = player.maxHp; player.mp = player.maxMp; hud.log('You rest. Nothing follows you here.', 'good'); }
+    if (gives.revealZone) { map.revealZone?.(here.id); hud.log(`${here.name} goes on your chart.`, 'good'); }
+    if (gives.perkPoint) { player.bonusPerks = (player.bonusPerks || 0) + gives.perkPoint; hud.log('A perk point, for the trouble.', 'level'); }
+    if (gives.loot) { for (const it of rpg.loot.roll?.(gives.loot, player.level) || []) player.bag.push(it); }
+    if (gives.bench) hud.log('An anvil, and a fire that never goes out. You can work here.', '');
+    if (gives.crossing) hud.log('You can cross here.', '');
+    if (gives.callsBeast) hud.log('Bait on the hook. Something bigger than usual will come.', 'bad');
+    if (gives.opensDungeon) hud.log('The mouth is open. Something is down there.', 'loot');
+    if (gives.travelBonus) hud.log('The road is whole again. Travelling through here is quicker now.', 'good');
+    if (mark.faction) standings.deed(mark.faction, 'job_done');
     hud.setPlayer(player);
     autoSave();
   }
@@ -1626,10 +1703,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       talk.update(talkContext(talk.npc));
       autoSave();
     },
-    price: item => Math.max(1, Math.round(rpg.price(item) * campaign.priceMultiplier(talk.npc?.node?.id))),
+    /**
+     * WHAT YOU PAY, AND WHY.
+     *
+     * `standings.priceMult` was written, exported and never called — so standing changed nothing a
+     * player could feel at the one counter where it should be obvious. The shop's own deed-based
+     * multiplier and the faction band now stack: be Trusted where the Greenhand hold the ground and
+     * everything is 15% off; be Disliked and it is 40% more.
+     */
+    price: item => Math.max(1, Math.round(rpg.price(item) * shopMult())),
+    /** One line the trade panel can print, so the number has a reason next to it. */
+    standingNote: () => {
+      const key = holdings.of(hud.here?.id)?.holder;
+      if (!key) return null;
+      const band = standings.band(key);
+      if (!band || band.key === 'known') return null;
+      const pct = Math.round((band.priceMult - 1) * 100);
+      return `${intro.fullName(key)} hold this ground — ${band.name}${pct ? `, ${pct > 0 ? '+' : ''}${pct}% here` : ''}.`;
+    },
     sellPrice: item => Math.max(1, Math.round(rpg.price(item) * (items.sellFactor ?? 0.35))),
     buy: item => {
-      const r = folk.buy(talk.npc, item, player, campaign.priceMultiplier(talk.npc?.node?.id));
+      const r = folk.buy(talk.npc, item, player, shopMult());
       hud.log(r.ok ? `Bought ${item.name} for ${r.price} gold.` : r.why, r.ok ? 'loot' : 'bad');
       if (r.ok) sound.coin(); else sound.ui('error');
       hud.setPlayer(player);
@@ -2343,6 +2437,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // the board. Everything on it names something that is actually in this zone right now.
     const candidates = candidatesFrom({
       zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+      landmarks: holdings.landmarksIn(zone.id),
       npcs: roadFolk.candidates(zone.id),
       caravans: trade.candidates(zone.id),
       patrols: patrols.candidates(zone.id),
@@ -2394,14 +2489,73 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
   }
 
+  /**
+   * Every rank reward you have actually earned, keyed by its effect.
+   *
+   * `data/faction-rewards.json` was loaded and read by nothing. This is the one place that asks it,
+   * so a caller can say `earnedRewards().freeTolls` and not care which faction it came from.
+   */
+  function earnedRewards() {
+    const out = {};
+    for (const [key, list] of Object.entries(rewardData.rewards || {})) {
+      const value = standings.get(key);
+      for (const row of list) {
+        const at = (rewardData.ranks || []).find(r => r.key === row.rank)?.at ?? 999;
+        if (value < at) continue;
+        for (const [effect, amount] of Object.entries(row.effect || {})) out[effect] = amount;
+      }
+    }
+    return out;
+  }
+
+  /**
+   * What a shop charges: the campaign's own multiplier, times how the people who hold this ground
+   * feel about you.
+   */
+  function shopMult() {
+    const base = campaign.priceMultiplier(talk.npc?.node?.id);
+    const key = holdings.of(hud.here?.id)?.holder;
+    // …and what is happening here: short rations put every price up, a fair day takes them down
+    const earned = earnedRewards();
+    // the Greenhand feed everybody at half price once you are one of theirs
+    const ration = earned.rationPrice ? (earned.rationPrice + 1) / 2 : 1;
+    return base * (key ? standings.priceMult(key) : 1) * (zoneEffects.shopMult || 1) * ration;
+  }
+
   /** A faction's own colour, for a minimap mark or a row on the standing screen. */
   function factionColour(key) {
     return (factionData.factions || []).find(f => f.key === key)?.colour || null;
   }
 
+  /**
+   * What the trouble in this zone is actually doing.
+   *
+   * `trouble.effects()` was written and never called, so an incident was one red line in the log and
+   * changed nothing. It is read here once a tick and applied to the two things a player feels: how
+   * much is out there, and what a shop charges.
+   */
+  let zoneEffects = { ...NO_EFFECT };
+  let lastBudget = null;
+  function applyIncidents() {
+
+    zoneEffects = hud.here ? trouble.effects(hud.here.id) : { ...NO_EFFECT };
+    /**
+     * C11: the starting band is thinner than the rest.
+     *
+     * Fighting a kilometre outside town at level 1 took a character from 94 health to 30 in about
+     * seven seconds with thirty-three things alive in the field. A moor hound is seven swings; three
+     * arriving together is a death you cannot answer. The first band gets half the crowd, and the
+     * rest of the world is unchanged.
+     */
+    const soft = hud.here && (hud.here.minLevel ?? 1) <= 4 ? 0.5 : 1;
+    const want = Math.round((spawnCfg.maxAlive ?? 38) * zoneEffects.spawnMult * soft);
+    if (want !== lastBudget) { lastBudget = want; field.setBudget?.(want); }
+  }
+
   /** The world moving while you are in it. Cheap enough to run twice a second. */
   let lastPhase = null;
   function tickTerritory(seconds) {
+    applyIncidents();
     payBoardJobs();
     const night = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
     /**
@@ -2427,6 +2581,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     for (const event of holdings.tick(seconds / 60)) {
       if (event.kind === 'zone-changed-hands') {
         hud.log(`${zones.byId(event.zoneId)?.name || 'The ground'} belongs to ${intro.nameFor(event.to)} now.`, 'level');
+      }
+      if (event.kind === 'incident-over') {
+        // the aftermath, which is the interesting half — `onExpire` was data nothing ever read
+        const spec = trouble.byKind(event.incident);
+        const line = spec?.onExpire?.rumour;
+        if (line) {
+          const text = line.replace(/\{zone\}/g, event.zoneName || 'the place');
+          rumours.add(text, { zone: zones.byId(event.zoneId), from: 'word going round' });
+          hud.log(text + '.', '');
+        }
+        if (spec?.onExpire?.grip) holdings.press(event.zoneId, spec.onExpire.grip);
       }
     }
   }
@@ -2698,6 +2863,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         else if (it.kind === 'dungeon') enterDungeon(it.gate);
         else if (it.kind === 'leave') leaveDungeon();
         else if (it.kind === 'wanderer') meetOnTheRoad(it.met);
+        else if (it.kind === 'landmark') atLandmark(it.mark);
         else if (it.kind === 'talk') {
           // phase 7: what they say comes from Lingo and their own personality, not a fixed string
           const who = it.who;
@@ -3034,8 +3200,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     sinceRegen += dt;
     if (sinceRegen > 1) {
       sinceRegen = 0;
-      player.hp = Math.min(player.maxHp, player.hp + (player.derived.hpRegen || 0));
-      player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0));
+      /**
+       * YOU MEND WHEN NOTHING IS HITTING YOU.
+       *
+       * `hpRegen` is zero without gear that grants it, so a character who came out of a fight at 30
+       * of 94 stayed there until they levelled — and there is no potion in the starting kit. Out of a
+       * fight you get back 1.5% of your health a second, which is about a minute from nearly dead to
+       * full: long enough that running away has a cost, short enough that it is not a walk home.
+       */
+      const mending = fighting ? 0 : player.maxHp * (balance.player?.outOfCombatRegen ?? 0.015);
+      player.hp = Math.min(player.maxHp, player.hp + (player.derived.hpRegen || 0) + mending);
+      player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0) + (fighting ? 0 : player.maxMp * 0.02));
       // barrier refills out of a fight, and faster with `barrierRegen`
       const maxBarrier = player.derived.barrier || 0;
       if (maxBarrier > 0) {
@@ -3079,6 +3254,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
         : near.kind === 'leave' ? '<b>E</b> climb back out'
         : near.kind === 'wanderer' ? `<b>E</b> speak to ${near.met.name}, ${near.met.kindName.toLowerCase()}`
+        : near.kind === 'landmark' ? `<b>E</b> ${near.mark.steps ? 'work on' : 'look at'} ${near.mark.name}`
+          + (near.mark.steps ? ` · ${near.mark.done}/${near.mark.steps}` : '')
         : `<b>E</b> speak to ${near.who.name}`
       : null);
     if (bossUnit && bossUnit.dying == null) hud.boss(bossUnit);
@@ -3185,6 +3362,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         })) : []),
         ...(hud.here ? roadFolk.inZone(hud.here.id).map(w => ({
           x: w.x, z: w.z, icon: '•', color: '#eaf6ff',
+        })) : []),
+        ...(hud.here ? holdings.landmarksIn(hud.here.id).map(l => ({
+          x: l.x, z: l.z, icon: l.state === 'done' ? '◈' : '◇', color: '#a8c8e8',
         })) : []),
       ], markers.tracked().map(m => {
         const b = markers.bearing(m, control, terrain);

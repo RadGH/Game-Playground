@@ -79,6 +79,7 @@ export class EnemyField {
     this.scene = scene; this.terrain = terrain; this.rpg = rpg; this.defs = defs;
     this.bosses = bosses; this.modifiers = modifiers; this.zones = zones;
     this.cfg = balance.spawn || {};
+    this.baseAlive = this.cfg.maxAlive ?? 14;   // what `setBudget(null)` goes back to
     this.zoneCfg = balance.zones || {};
     this.onLog = onLog; this.onKill = onKill;
     this.nameRare = nameRare;
@@ -268,6 +269,18 @@ export class EnemyField {
       return biomeOk && (b.minLevel ?? 1) <= level && (b.maxLevel ?? 99) >= level;
     });
     return pool.length ? this.rng.pick(pool) : null;
+  }
+
+  /**
+   * How many may be alive at once.
+   *
+   * The Territory's incidents move this — a raid coming means more out there, and a level 1-4 band
+   * means fewer, because three moor hounds arriving together at level 1 is a death with no answer.
+   * `null` puts it back to whatever `balance.spawn` says.
+   */
+  setBudget(n) {
+    this.cfg = { ...this.cfg, maxAlive: n == null ? (this.baseAlive ?? this.cfg.maxAlive) : Math.max(2, Math.round(n)) };
+    return this.cfg.maxAlive;
   }
 
   /** One tick of the whole field: spawn, think, move, swing, die, clean up. */

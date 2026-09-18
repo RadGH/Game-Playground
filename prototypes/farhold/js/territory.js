@@ -21,6 +21,17 @@
 
 import { holderFor, factionOf } from './factions.js';
 
+/**
+ * Does this landmark belong on this ground? Reads the same `descriptor` sentence the holder picker
+ * does, because that is the only description a zone carries of what it is made of.
+ */
+function fitsGround(spec, zone) {
+  const biomes = spec.biomes || ['any'];
+  if (biomes.includes('any')) return true;
+  const ground = String(zone.biome || zone.descriptor || '').toLowerCase();
+  return biomes.some(b => ground.includes(b));
+}
+
 /** A small, fast, stable hash — the same one `js/perks.js` uses for its lattice. */
 function hash(...parts) {
   let h = 2166136261 >>> 0;
@@ -90,7 +101,12 @@ function placeIn(zone, rng, metresPerCell) {
 
 export function createTerritory({
   zones, seed = 1, factions: data, standings = null, metresPerCell = 640, saved = null,
+  // `data/landmarks.json`. Fourteen places that fill a zone in — five job frames bind to them.
+  landmarks: landmarkData = null,
+  /** `(zone) => [{ x, y, type }]` — the map nodes inside a zone, so a landmark sits on a real one. */
+  nodesFor = null,
 } = {}) {
+  const landmarkKinds = landmarkData?.landmarks || [];
   const records = new Map();
   const deltas = saved?.zones ? { ...saved.zones } : {};
   let clock = Number(saved?.hours) || 0;      // in-game hours since the run began
@@ -157,9 +173,42 @@ export function createTerritory({
       });
     }
 
+    /**
+     * THE PLACES THAT ARE NOT CAMPS.
+     *
+     * A wayshrine, a toll bridge, a ring of stones, a beacon, a collapsed mine. They sit on the map
+     * nodes World Forge already grew — a landmark node, a pass, a river crossing — so a shrine is
+     * somewhere that exists rather than a coordinate. Five job frames bind to these by `kind`; until
+     * they were placed, those five frames could never fire and the file was dead weight at boot.
+     */
+    const marks = [];
+    if (landmarkKinds.length) {
+      const spots = (nodesFor?.(zone) || [])
+        .filter(n => ['landmark', 'pass', 'settlement', 'port'].includes(n.type));
+      const want = Math.min(3, Math.max(1, Math.round(1 + rng() * 2)));
+      const pool = landmarkKinds.filter(l => fitsGround(l, zone));
+      for (let i = 0; i < want && pool.length; i++) {
+        const spec = pool[Math.floor(rng() * pool.length) % pool.length];
+        const node = spots.length ? spots[i % spots.length] : null;
+        const spot = node
+          ? { x: node.x * metresPerCell, z: node.y * metresPerCell, cell: { x: node.x, y: node.y } }
+          : placeIn(zone, rng, metresPerCell);
+        marks.push({
+          id: `l${zone.id}_${i}`,
+          type: 'landmark', kind: spec.kind, name: spec.name,
+          blurb: spec.blurb, does: spec.does, faction: spec.faction || null,
+          gives: spec.gives || {},
+          steps: spec.solve ? (spec.steps || 1) : 0,
+          done: 0, state: spec.solve ? 'unsolved' : 'unvisited',
+          x: spot.x, z: spot.z, cell: spot.cell,
+        });
+      }
+    }
+
     const record = {
       zoneId: zone.id,
       zoneName: zone.name,
+      landmarks: marks,
       holder: holder?.key || null,
       grip: 0.45 + rng() * 0.35,
       contested: rivalKey,
@@ -182,6 +231,10 @@ export function createTerritory({
       if (Number.isFinite(saveRow.heat)) record.heat = saveRow.heat;
       if (Number.isFinite(saveRow.visits)) record.visits = saveRow.visits;
       if (Array.isArray(saveRow.incidents)) record.incidents = saveRow.incidents.map(i => ({ ...i }));
+      for (const l of saveRow.landmarks || []) {
+        const mark = record.landmarks.find(m => m.id === l.id);
+        if (mark) { mark.done = l.done ?? 0; mark.state = l.state || mark.state; }
+      }
       for (const c of saveRow.cleared || []) {
         const site = record.sites.find(s => s.id === c.id);
         if (site) { site.cleared = true; site.clearedAt = c.at ?? clock; }
@@ -315,14 +368,48 @@ export function createTerritory({
       const untouched = clock - (record.lastVisit ?? 0);
       if (untouched > 12) { record.grip = clamp01(record.grip + 0.01 * hours); moved = true; }
       if (record.heat > 0) { record.heat = clamp01(record.heat - 0.02 * hours); moved = true; }
-      const before = record.incidents.length;
-      record.incidents = record.incidents.filter(i => i.endsAt == null || i.endsAt > clock);
-      if (record.incidents.length !== before) moved = true;
+      /**
+       * B7: what an incident leaves behind.
+       *
+       * Eight incidents carry an `onExpire.rumour` and nothing read it — they just vanished. The
+       * aftermath is the interesting half: a zone that went hungry remembers who did not come.
+       */
+      const gone = record.incidents.filter(i => i.endsAt != null && i.endsAt <= clock);
+      if (gone.length) {
+        record.incidents = record.incidents.filter(i => !gone.includes(i));
+        moved = true;
+        for (const row of gone) {
+          events.push({ kind: 'incident-over', zoneId: record.zoneId, zoneName: record.zoneName, incident: row.kind, after: row.after || null });
+        }
+      }
       if (moved) touch(record);
       const flip = settle(record);
       if (flip) events.push({ kind: 'zone-changed-hands', zoneId: record.zoneId, ...flip });
     }
     return events;
+  }
+
+  /**
+   * Do a day's work on a landmark that has something to do: put the fallen stone back, dig out the
+   * mine, light the beacon. Returns what happened, so the caller can say it.
+   */
+  function workLandmark(zoneId, landmarkId) {
+    const record = of(zoneId);
+    const mark = record?.landmarks.find(l => l.id === landmarkId);
+    if (!mark || !mark.steps || mark.state === 'done') return null;
+    mark.done = Math.min(mark.steps, (mark.done || 0) + 1);
+    mark.state = mark.done >= mark.steps ? 'done' : 'unsolved';
+    touch(record);
+    return { mark, finished: mark.state === 'done', left: mark.steps - mark.done };
+  }
+
+  /** You stood at one. That is all the surveyor wants. */
+  function visitLandmark(zoneId, landmarkId) {
+    const record = of(zoneId);
+    const mark = record?.landmarks.find(l => l.id === landmarkId);
+    if (!mark || mark.state === 'done') return null;
+    if (mark.state === 'unvisited') { mark.state = 'visited'; touch(record); }
+    return mark;
   }
 
   /** Put an incident on a zone. `hours` of null means it runs until something resolves it. */
@@ -348,6 +435,9 @@ export function createTerritory({
 
   return {
     of, visit, clearSite, championKilled, press, tick, addIncident, resolveIncident,
+    workLandmark, visitLandmark,
+    /** The landmarks of a zone, which is what five of the job frames bind to. */
+    landmarksIn(zoneId) { return of(zoneId)?.landmarks || []; },
     get hours() { return clock; },
     /** Every zone whose record has actually been touched — the map legend wants these. */
     known: () => [...records.values()],
@@ -372,6 +462,8 @@ export function createTerritory({
           heat: Math.round(record.heat * 1000) / 1000,
           visits: record.visits,
           cleared: record.sites.filter(s => s.cleared).map(s => ({ id: s.id, at: s.clearedAt })),
+          landmarks: record.landmarks.filter(l => l.done || l.state !== 'unsolved' && l.state !== 'unvisited')
+            .map(l => ({ id: l.id, done: l.done, state: l.state })),
           incidents: record.incidents.map(i => ({ ...i })),
         };
       }

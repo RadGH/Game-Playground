@@ -145,11 +145,30 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
       scored.push({ frame, bound, score });
     }
 
+    /**
+     * ONE THING, ONE JOB.
+     *
+     * Scoring binds each frame against the whole pool, which is right — a frame should be judged on
+     * whether it COULD run. But two frames could then both pick the same camp, and the board came out
+     * reading "Clear out the Burn Camp at Harrowfield" directly above "Look in on the Burn Camp at
+     * Harrowfield". So the board is filled greedily in score order against a shared set, re-binding
+     * as it goes, and a frame whose thing has been taken by a better frame is simply skipped.
+     */
     scored.sort((a, b) => b.score - a.score);
+    const taken = new Set();
     const out = [];
-    for (const row of scored.slice(0, Math.max(1, want))) {
+    for (const row of scored) {
+      if (out.length >= Math.max(1, want)) break;
+      const bound = { zone };
+      let ok = true;
+      for (const need of row.frame.needs || []) {
+        const value = bind(need, pool, rng, taken, ctx);
+        if (value == null) { ok = false; break; }
+        bound[need.slot] = value;
+      }
+      if (!ok) continue;
       lastOffered.set(row.frame.id, offers);
-      out.push(materialise(row.frame, row.bound, { zone, level, record, rng }));
+      out.push(materialise(row.frame, bound, { zone, level, record, rng }));
     }
     return out;
   }

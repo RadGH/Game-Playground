@@ -40,7 +40,9 @@
     "arrowSplash": 2.6,
     "meleeSplash": 1,
     "damagePerLevel": 0.1,
-    "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything."
+    "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything.",
+    "outOfCombatRegen": 0.015,
+    "_regenDoc": "Share of maximum health you get back each second while nothing is fighting you. Without it a character who walked out of a fight at a third health stayed there — hpRegen is zero without gear that grants it, and there is no potion in the starting kit."
   },
   "progression": {
     "attrPerLevel": 3,
@@ -62,7 +64,7 @@
     "everySeconds": 1.1,
     "levelSpread": 2,
     "despawnRadius": 300,
-    "_doc": "Enemies appear in a ring around the player, out of sight, and are cleaned up when you walk far enough away. A spawn is usually a whole PACK rather than one body, and `js/encounters.js` turns some of them into a set piece \u2014 a warband on the march, a hunt, an ambush. Round 4 raised maxAlive from 14 to 38 and shortened the ring, because the old numbers left one straggler at a time wandering a very large map."
+    "_doc": "Enemies appear in a ring around the player, out of sight, and are cleaned up when you walk far enough away. A spawn is usually a whole PACK rather than one body, and `js/encounters.js` turns some of them into a set piece — a warband on the march, a hunt, an ambush. Round 4 raised maxAlive from 14 to 38 and shortened the ring, because the old numbers left one straggler at a time wandering a very large map."
   },
   "loot": {
     "dropRate": 0.45,
@@ -71,7 +73,7 @@
     "shopPrice": 1,
     "plainWeight": 5,
     "exoticWeight": 1,
-    "_affixDoc": "How often each kind of property turns up. Emberveil's generator picks uniformly from 59 affixes, 40 of which are exotic conditionals \u2014 so a weapon almost never rolled plain damage. plainWeight/exoticWeight are the fallbacks; js/rpg.js AFFIX_WEIGHT names the ones worth steering."
+    "_affixDoc": "How often each kind of property turns up. Emberveil's generator picks uniformly from 59 affixes, 40 of which are exotic conditionals — so a weapon almost never rolled plain damage. plainWeight/exoticWeight are the fallbacks; js/rpg.js AFFIX_WEIGHT names the ones worth steering."
   },
   "rarity": {
     "normal": 0.52,
@@ -226,10 +228,10 @@
         "res": 48
       }
     ],
-    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count \u2014 near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests. riverDepth is how deep a river cuts its valley into the ground, in metres.",
+    "_doc": "Concentric square rings centred on the player, each three times wider than the last at the same vertex count — near ground is 2 m per quad, the horizon 162 m. Five rings reach 7.8 km in five draw calls. ?quality=low uses the smaller set for headless tests. riverDepth is how deep a river cuts its valley into the ground, in metres.",
     "riverDepth": 16,
     "reliefScale": 0.22,
-    "_reliefDoc": "How tall the world is against how wide it is. universe/ gives a planet its TRUE relief \u2014 often 8 km \u2014 and this map is 90-160 km across, not 40,000, so the real number turns every coastline into a cliff. 0.22 keeps mountains that read as mountains and slopes you can walk up. It is multiplied by the planet-scale knob, so a smaller map gets proportionally smaller hills."
+    "_reliefDoc": "How tall the world is against how wide it is. universe/ gives a planet its TRUE relief — often 8 km — and this map is 90-160 km across, not 40,000, so the real number turns every coastline into a cliff. 0.22 keeps mountains that read as mountains and slopes you can walk up. It is multiplied by the planet-scale knob, so a smaller map gets proportionally smaller hills."
   },
   "sky": {
     "dayLengthSeconds": 900,
@@ -259,7 +261,7 @@
   },
   "save": {
     "autoSaveSeconds": 45,
-    "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did \u2014 never the world, which is a pure function of the seed."
+    "_doc": "How often a run writes itself to browser storage. A save is the seed plus what the player did — never the world, which is a pure function of the seed."
   },
   "space": {
     "auUnits": 14000,
@@ -344,7 +346,7 @@
     "packRadius": 10
   },
   "chests": {
-    "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny \u2014 finding one should be an event. Dungeons place their own on top of this. Every kind declares a `floor` rarity: the worst thing it may contain, and the colour of the beacon standing over it. The beam is a promise, so the two must never disagree \u2014 one shaft for a common find, four and a ring of motes for a legendary.",
+    "_doc": "Treasure on the ground. `perCell` is how many chests a 64 m prop cell may hold at density 1, which is deliberately tiny — finding one should be an event. Dungeons place their own on top of this. Every kind declares a `floor` rarity: the worst thing it may contain, and the colour of the beacon standing over it. The beam is a promise, so the two must never disagree — one shaft for a common find, four and a ring of motes for a legendary.",
     "perCell": 0.012,
     "radius": 5,
     "openRange": 3.2,
@@ -467,7 +469,7 @@
     "maxAlive": 6
   },
   "light": {
-    "_doc": "Night used to be unplayable. Every character now carries a torch; `torch` is its point light, `ambientNight` is the floor the sky light never drops below, and `maxLights` caps how many world lights (braziers, sconces, campfires) are switched on at once \u2014 the nearest win.",
+    "_doc": "Night used to be unplayable. Every character now carries a torch; `torch` is its point light, `ambientNight` is the floor the sky light never drops below, and `maxLights` caps how many world lights (braziers, sconces, campfires) are switched on at once — the nearest win.",
     "torch": {
       "range": 34,
       "intensity": 3.2,
@@ -508,7 +510,7 @@
     "startHeight": 2600,
     "shootingEvery": 22,
     "shootingSeconds": 1.6,
-    "_doc": "A meteor is rolled every `everySeconds` on the surface and lands `fallSeconds` later, somewhere `landRange` metres away \u2014 far enough to be a walk, near enough to find. It is on the map and in the sky the whole time it is falling, and it leaves a Meteorite chest (see chests.kinds.meteorite): 1-3 items, never worse than rare, with the rarity beams. `shootingEvery` is the decorative streaks that never land."
+    "_doc": "A meteor is rolled every `everySeconds` on the surface and lands `fallSeconds` later, somewhere `landRange` metres away — far enough to be a walk, near enough to find. It is on the map and in the sky the whole time it is falling, and it leaves a Meteorite chest (see chests.kinds.meteorite): 1-3 items, never worse than rare, with the rarity beams. `shootingEvery` is the decorative streaks that never land."
   },
   "flight": {
     "liftMax": 1.04,

@@ -408,6 +408,11 @@ body {
 .talk-say { font-style: italic; color: #d8e6f2; margin: 0 0 12px; }
 .talk h3 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #7f8ea4; }
 .talk-foot { margin-top: 12px; }
+/* why the prices are what they are — standing was invisible at the one counter it should show at */
+.talk-standing { color: #ffd24a; margin: 2px 0 6px; }
+.trade-fold > summary { cursor: pointer; color: #9fb0c8; font-size: 13px; margin: 8px 0 4px; }
+.trade-fold[open] > summary { color: #cfe0ef; }
+.talk-btn:disabled { opacity: .35; cursor: default; }
 .talk-gold { margin-top: 8px; }
 
 .talk-quest {
@@ -699,6 +704,13 @@ body {
   /* load-bearing: without it a list that crosses the scroll threshold shoves every row 15px sideways */
   scrollbar-gutter: stable;
 }
+/* D1: a pane that scrolls has to LOOK like it scrolls. Two panes on the Journal were cut mid-row at
+   1366 with nothing on screen to say there was more — five of the twelve factions were simply gone. */
+.pane-body::-webkit-scrollbar { width: 10px; }
+.pane-body::-webkit-scrollbar-track { background: rgba(8, 12, 20, .6); border-radius: 5px; }
+.pane-body::-webkit-scrollbar-thumb { background: #2c3e59; border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
+.pane-body::-webkit-scrollbar-thumb:hover { background: #3f6f9a; background-clip: content-box; }
+.pane-body { scrollbar-color: #2c3e59 rgba(8, 12, 20, .6); scrollbar-width: thin; }
 .pane-body.tight { padding: 6px; gap: 5px; }
 .pane-body.flush { padding: 0; gap: 0; }
 .pane-body.grid { display: grid; align-content: start; }
@@ -1563,7 +1575,29 @@ body {
   padding: 4px 8px; border-radius: 5px; background: rgba(16, 24, 36, .6); font-size: var(--fs);
 }
 .standing-row i { width: 3px; height: 100%; min-height: 16px; border-radius: 2px; display: block; }
-.standing-row .band { font-size: var(--fs-sm); color: var(--ink-faint); }
+.standing-row .band { font-size: var(--fs-sm); color: var(--ink-faint); text-align: right; }
+.standing-row .band em { display: block; font-style: normal; color: #c8a24a; font-size: 11.5px; }
+/* the five-band ladder, so "Trusted" is a position rather than a word */
+.standing-row .ladder { display: inline-flex; gap: 2px; margin-left: 8px; vertical-align: middle; }
+.standing-row .ladder u {
+  width: 12px; height: 4px; border-radius: 2px; background: #27334a; display: inline-block;
+}
+.standing-row .ladder u.on { background: var(--accent); }
+.reward-row {
+  display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
+  padding: 4px 8px; border-radius: 5px; background: rgba(16, 24, 36, .5);
+  font-size: var(--fs); color: var(--ink-faint); opacity: .6;
+}
+.reward-row.earned { opacity: 1; color: var(--ink); border-left: 2px solid var(--gold); }
+.reward-row b { font-weight: 600; }
+.deed-list { display: flex; flex-direction: column; gap: 2px; }
+.deed-row {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: var(--fs-sm); color: var(--ink-faint); padding: 2px 8px;
+}
+.deed-row b { font-variant-numeric: tabular-nums; }
+.deed-row b.up { color: var(--good); }
+.deed-row b.down { color: var(--bad); }
 .standing-row .num { font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
 .standing-row .num.up { color: var(--good); }
 .standing-row .num.down { color: var(--bad); }
@@ -1571,6 +1605,16 @@ body {
 .job-row { cursor: pointer; }
 .job-row:hover { background: rgba(28, 42, 60, .8); }
 .job-row .scope { font-size: var(--fs-sm); color: var(--ink-faint); }
+/* D2: the rows were clickable and nothing said so, while the panel beside them read "nobody has
+   asked you for anything" */
+.job-row { grid-template-columns: 1fr auto auto; align-items: baseline; }
+.job-row .take {
+  font-size: var(--fs-sm); color: var(--accent); border: 1px solid #2f5d84;
+  border-radius: 999px; padding: 1px 9px; margin-left: 8px; white-space: nowrap;
+}
+.job-row:hover .take { background: #17293c; }
+.job-row.taken .take { color: var(--good); border-color: #2f6f4a; }
+.job-row .from { display: block; font-size: var(--fs-sm); color: var(--ink-faint); }
 .rumour-row { display: block; padding: 5px 8px; border-radius: 5px; background: rgba(16, 24, 36, .5); font-size: var(--fs); }
 .rumour-row .who { display: block; font-size: var(--fs-sm); color: var(--ink-faint); margin-top: 2px; }
 .col-survey { grid-area: survey; }

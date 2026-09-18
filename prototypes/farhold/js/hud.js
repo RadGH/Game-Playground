@@ -126,12 +126,19 @@ export class Hud {
     onSelectVehicle = null,
     // The Territory expansion: who holds the ground, what it is offering, and what people say
     standings = null, territoryHere = null, board = null, rumours = null, onTakeJob = null,
+    factionBands = null, factionDeeds = null, factionRewards = null,
+    factionName = null, distanceTo = null,
     // A1: the one line that says what you are doing
     objective = null, settings = null,
   } = {}) {
     this.objective = objective;
     this.settings = settings;
     this.standings = standings;
+    this.factionBands = factionBands;
+    this.factionDeeds = factionDeeds;
+    this.factionRewards = factionRewards;
+    this.factionName = factionName;
+    this.distanceTo = distanceTo;
     this.territoryHere = territoryHere;
     this.board = board;
     this.rumours = rumours;
@@ -2055,15 +2062,63 @@ export class Hud {
         .slice()
         .sort((a, b) => (b.key === holderKey) - (a.key === holderKey)
           || b.value - a.value || a.name.localeCompare(b.name));
+      /**
+       * A BAND NAME AND A NUMBER EXPLAIN NOTHING.
+       *
+       * The panel showed a colour, a name, a word and a number, and never said what the word meant,
+       * where you were on the ladder, what it cost you, or what moves it. All of that is data the
+       * game already has — the five bands with their price multipliers, and a thirteen-entry table
+       * of deeds — and none of it was on a screen.
+       */
+      const bands = this.factionBands?.() || [];
       sbox.replaceChildren(...(rows.length ? rows.map(f => {
         const n = el('div', 'standing-row' + (f.key === holderKey ? ' holder' : ''));
+        const at = Math.max(0, bands.findIndex(b => b.key === f.band?.key));
+        const price = f.band && f.band.priceMult !== 1
+          ? `${f.band.priceMult > 1 ? '+' : ''}${Math.round((f.band.priceMult - 1) * 100)}% in their shops`
+          : '';
         n.innerHTML = `<i style="background:${f.colour}"></i>`
-          + `<span>${f.name}${f.key === holderKey ? ' <em class="row-note">holds this ground</em>' : ''}</span>`
-          + `<span class="band">${f.band?.name || ''}</span>`
+          + `<span>${f.name}${f.key === holderKey ? ' <em class="row-note">holds this ground</em>' : ''}`
+          + `<span class="ladder">${bands.map((b, i) =>
+            `<u class="${i === at ? 'on' : ''}" title="${b.name}"></u>`).join('')}</span></span>`
+          + `<span class="band">${f.band?.name || ''}${price ? `<em>${price}</em>` : ''}</span>`
           + `<span class="num ${f.value > 0 ? 'up' : f.value < 0 ? 'down' : ''}">${f.value > 0 ? '+' : ''}${f.value}</span>`;
-        n.dataset.tip = `${f.blurb} ${f.band?.blurb || ''}`;
+        n.dataset.tip = `${f.blurb}\n${f.band?.blurb || ''}${f.unlikeable ? '\nThey cannot be reasoned with.' : ''}`;
         return n;
       }) : [el('p', 'muted small', 'Nobody has an opinion about you yet.')]));
+
+      /**
+       * WHAT BEING LIKED IS FOR.
+       *
+       * `data/faction-rewards.json` — twelve factions, two ranks each — was parsed at boot and read
+       * by nothing. It is the long reason to pick a side, so it belongs on the screen that shows the
+       * sides: the reward you have earned in white, the one you have not in grey with its threshold.
+       */
+      const rewards = this.factionRewards?.(holderKey) || [];
+      if (rewards.length) {
+        sbox.append(el('div', 'divider', 'What they owe you'));
+        const list = el('div', 'deed-list');
+        for (const r of rewards) {
+          const row = el('div', 'reward-row' + (r.earned ? ' earned' : ''));
+          row.innerHTML = `<b>${r.name}</b><span class="row-note">${r.earned ? r.rankName : `${r.rankName} · ${r.at > 0 ? '+' : ''}${r.at}`}</span>`;
+          row.dataset.tip = r.desc;
+          list.append(row);
+        }
+        sbox.append(list);
+      }
+
+      // …and what actually moves the numbers, which was in the data file and on no screen at all
+      const deeds = this.factionDeeds?.() || [];
+      if (deeds.length) {
+        sbox.append(el('div', 'divider', 'What moves it'));
+        const list = el('div', 'deed-list');
+        for (const [what, by] of deeds) {
+          const row = el('div', 'deed-row');
+          row.innerHTML = `<span>${what}</span><b class="${by > 0 ? 'up' : 'down'}">${by > 0 ? '+' : ''}${by}</b>`;
+          list.append(row);
+        }
+        sbox.append(list);
+      }
       // the reference screen says the whole name — it used to read "the Reach" in the header and
       // "The Warden's Reach" in the row three pixels below it
       const holder = rows.find(f => f.key === holderKey);
@@ -2075,9 +2130,12 @@ export class Hud {
     if (bbox) {
       const board = this.board?.() || [];
       bbox.replaceChildren(...(board.length ? board.map(job => {
-        const n = el('div', 'journal-row job-row' + (job.taken ? ' done' : ''));
-        n.innerHTML = `<span>${job.title}</span>`
-          + `<span class="muted">${job.reward.gold}g · ${job.reward.xp} xp</span>`;
+        const n = el('div', 'journal-row job-row' + (job.taken ? ' taken' : ''));
+        const from = job.faction ? this.factionName?.(job.faction) : 'a notice board';
+        const away = job.place && this.player ? this.distanceTo?.(job.place) : null;
+        n.innerHTML = `<span>${job.title}<span class="from">${from}${away ? ` · ${away}` : ''}</span></span>`
+          + `<span class="muted">${job.reward.gold}g · ${job.reward.xp} xp</span>`
+          + `<span class="take">${job.taken ? 'taken' : 'take it'}</span>`;
         n.dataset.tip = `${job.text}\n\n${job.scope === 'adjacent' ? 'Next door.' : 'In this zone.'}`;
         if (!job.taken) n.onclick = () => { this.onTakeJob?.(job); hideTip(); this.renderSheet(); };
         return n;

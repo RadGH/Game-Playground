@@ -1070,6 +1070,26 @@ export class Rpg {
   /** Break an item down for materials. */
   salvage(item, rng = this.rng) { return this.loot.salvage(item, rng); }
 
-  /** What an item sells for, so the bag can have a "sell" button later. */
-  price(item) { return this.loot.price(item); }
+  /**
+   * What an item is worth — respecting the price the item itself carries.
+   *
+   * The shared Loot.price() (prototypes/emberveil/js/loot.js) prices EVERYTHING off one global
+   * `basePrice` in the data, multiplied by quality and rarity. That works when every item is a sword
+   * or a breastplate off the same table. It does not work for js/gear.js, which sets a real price on
+   * each mount and each light so that the ladder means something: a Pitch Torch is 20 gold and a
+   * Wisp Lamp is 620. Those were being thrown away, and a Wisp Lamp sat on the shelf at 30 gold —
+   * so the "buy a better light" progression was free, and the Dray Elk was pocket change.
+   *
+   * Emberveil's loot.js is shared and has its own tests, so it is left alone: anything carrying its
+   * own `basePrice` is priced here, by the same quality/rarity curve, and everything else falls
+   * through to the shared one exactly as before.
+   */
+  price(item) {
+    if (!item?.basePrice) return this.loot.price(item);
+    const d = this.loot.d || {};
+    const shop = this.loot.T?.shopPrice ?? 1;
+    const quality = d.priceQualityMult?.[item.quality] || 1;
+    const rarity = d.priceRarityMult?.[item.rarity] || 1;
+    return Math.max(1, Math.round(item.basePrice * shop * quality * rarity * (item.isUnique ? 2 : 1)));
+  }
 }

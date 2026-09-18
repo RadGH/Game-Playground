@@ -170,8 +170,22 @@ the face rim back over a soft crown peak to a point at the nape. The rim is pull
 face, and rows below the jaw hang onto the neck. It is an outer shell, a darker inner lining shell
 (the hood colour at 55%), one piped edge (`hat.color2`, or the hood colour lightened) along rim and
 hem, and a short mantle on the chest bone whose top tucks inside the hood. The cowl's lower rows
-blend to the chest bone, so the hem follows the body while the head nods. About 1,050 triangles,
-cloth bucket only. A raised hood hides ears and all hair outside the face opening (crown cap, side
+blend to the chest bone, so the hem follows the body while the head nods. About 1,150 triangles,
+cloth bucket only.
+
+The back of that cowl is the only part of it a third-person camera ever sees, and until 2026-09-18
+it was one unbroken sheet of one colour running into the nape: Farhold's hooded mage read as a solid
+dark dome with no head in it, and as a black blob at night. It is now built the way a real hood is —
+two panels stitched up the middle and gathered at the neck. The rows behind the ears are a shade
+darker (cloth in the hood's own shadow), a piped seam runs the centre column from the brow over the
+crown to the nape, and two darker gathers fan into the nape beside it. The piping's lift off the
+cloth now scales with how dark that cloth is, because a flat 14% did nothing on a near-black hood.
+`HOOD_SHAPE.radii` came down from 0.44/0.42/0.40 to 0.42/0.405/0.385, which was the other half of
+"engulfing": the old cowl stood wider than the character's own shoulders. The rim pipe dropped from
+36 steps to 30 to pay for the seam inside the 8,500-triangle class budget (the druid, the heaviest
+look, sits at 8,428).
+
+A raised hood hides ears and all hair outside the face opening (crown cap, side
 locks, long/bob/braid backs, ponytail, buns, spikes, mohawk, tonsure, pixie and `hood_hair` locks);
 short/long/wavy hair keeps its five middle fringe locks under the brow.
 

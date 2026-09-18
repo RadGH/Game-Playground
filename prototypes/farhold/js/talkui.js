@@ -24,6 +24,28 @@ const rarity = item => item?.setId ? 'rarity-set' : item?.isUnique ? 'rarity-uni
  * handlers: { buy(item), sell(item), accept(quest), turnIn(quest), describe(item), price(item),
  *             sellPrice(item) }
  */
+/** Plain words for a slot, for the one-line spec on a shop row. */
+const SLOT_WORDS = {
+  weapon: 'main hand', offhand: 'off hand', head: 'head', chest: 'chest', legs: 'legs',
+  hands: 'hands', feet: 'feet', ring: 'ring', ring2: 'ring', necklace: 'neck',
+  mount: 'mount', light: 'light',
+};
+
+/**
+ * The racks the Other tab is sorted into.
+ *
+ * "Where shops sell boats and ship, they should also sell torches and mounts." They always did -
+ * js/gear.js put them on every shelf - but they landed in an undifferentiated "Other" tab behind
+ * Weapons, mixed in with rings and quivers, so nobody found them. Boats and ships get a heading of
+ * their own further down; these get the same treatment, which is the whole of the complaint.
+ */
+const RACKS = [
+  { key: 'mount', name: 'Mounts', note: 'Press H to get on. Faster over open ground.', is: i => i.slot === 'mount' },
+  { key: 'light', name: 'Lights', note: 'Press F. You will want one before the first night.', is: i => i.slot === 'light' },
+  { key: 'quiver', name: 'Quivers', note: 'Off hand, for a bow. They add damage, not armour.', is: i => i.subtype === 'quiver' },
+  { key: 'rest', name: 'Trinkets and oddments', note: '', is: () => true },
+];
+
 export function createTalkPanel(handlers = {}) {
   const body = el('div', { class: 'talk-body' });
   const head = el('div', { class: 'talk-head' });
@@ -163,15 +185,52 @@ export function createTalkPanel(handlers = {}) {
       ];
       if (!tabs.some(([k]) => k === shopTab)) shopTab = 'weapon';
 
+      /**
+       * The one line a shop row has to carry.
+       *
+       * E1: "rows read Scepter - 8g - Buy, three identical Scepters in a row, no damage, no slot, no
+       * level requirement, no class restriction." The full card is on hover and always was, but a
+       * shelf you have to hover item by item is a shelf you cannot scan — and three rows with the
+       * same name and the same price are indistinguishable until you do. So the numbers that decide
+       * whether a row is worth hovering go ON the row: what it is, what it does, and whether you can
+       * use it at all. Everything here is read off the item itself, so nothing new has to be passed
+       * in and the sell side gets it for free.
+       */
+      const specOf = item => {
+        const bits = [];
+        if (item.slot) bits.push(SLOT_WORDS[item.slot] || item.slot);
+        if (item.damage) bits.push(`${item.damage[0]}-${item.damage[1]} damage`);
+        else if (item.dps) bits.push(`${Math.round(item.dps)} dps`);
+        if (item.armor) bits.push(`${item.armor} armour`);
+        if (item.speed) bits.push(`${item.speed} m/s`);            // a mount, or a boat
+        if (item.range) bits.push(`lights ${item.range} m`);       // a torch, a lantern, a lamp
+        if (item.arrowDamage) bits.push(`+${item.arrowDamage} arrow damage`);
+        if (item.twoHanded) bits.push('two-handed');
+        const req = item.levelReq ?? 1;
+        if (req > 1) bits.push(`level ${req}`);
+        return bits.join(' · ');
+      };
+
       const row = (item, { sell = false } = {}) => {
-        const node = el('div', { class: 'trade-row' },
-          el('span', { class: rarity(item), text: (handlers.displayName?.(item)) ?? item.name }),
-          el('span', { class: 'coin', text: `${(sell ? handlers.sellPrice?.(item) : handlers.price?.(item)) ?? 0}g` }),
+        const price = (sell ? handlers.sellPrice?.(item) : handlers.price?.(item)) ?? 0;
+        const tooPoor = !sell && price > (context.gold ?? 0);
+        // "no indication whether it beats what you are wearing" — the card says so on hover, and the
+        // row says it in one word, so a shelf can be read without touching anything
+        const verdict = !sell ? handlers.upgradeMark?.(item) : null;
+        const cannot = !sell && handlers.cannotUse?.(item);
+        const node = el('div', { class: 'trade-row' + (cannot ? ' trade-row-no' : '') },
+          el('div', { class: 'trade-what' },
+            el('span', { class: rarity(item), text: (handlers.displayName?.(item)) ?? item.name }),
+            el('span', { class: 'trade-spec', text: specOf(item) }),
+          ),
+          ...(verdict ? [el('span', { class: 'trade-mark ' + verdict.kind, text: verdict.text })] : []),
+          el('span', { class: 'coin', text: `${price}g` }),
           el('button', {
             class: 'talk-btn', text: sell ? 'Sell' : 'Buy',
             // E1: the Buy button stayed lit at 0 gold, so the only way to find out you could not
             // afford something was to click it
-            disabled: !sell && (handlers.price?.(item) ?? 0) > (context.gold ?? 0),
+            disabled: tooPoor,
+            title: tooPoor ? `That is ${price} gold and you have ${context.gold ?? 0}.` : '',
             onclick: () => { (sell ? handlers.sell : handlers.buy)?.(item); render(); },
           }),
         );
@@ -181,6 +240,31 @@ export function createTalkPanel(handlers = {}) {
       };
 
       const shelf = shopTab === 'buyback' ? (shelves.buyback || []) : (shelves[shopTab] || []);
+
+      /**
+       * The Other tab, in racks; every other tab as a plain list.
+       *
+       * Sorting happens once, in order, so an item lands in the first rack that claims it and the
+       * last rack claims everything left. An empty rack is not drawn — a village store with no
+       * quivers should not show an empty heading called Quivers.
+       */
+      function shelfRows(items) {
+        if (shopTab !== 'other') return items.map(item => row(item));
+        const left = [...items];
+        const out = [];
+        for (const rack of RACKS) {
+          const mine = left.filter(rack.is);
+          if (!mine.length) continue;
+          for (const item of mine) left.splice(left.indexOf(item), 1);
+          out.push(el('div', { class: 'trade-rack' },
+            el('h4', { text: rack.name }),
+            ...(rack.note ? [el('span', { class: 'trade-rack-note', text: rack.note })] : []),
+          ));
+          out.push(...mine.map(item => row(item)));
+        }
+        return out;
+      }
+
       const theirs = el('div', { class: 'trade-col' },
         el('div', { class: 'shop-tabs' }, ...tabs.map(([key, label]) => el('button', {
           class: 'chip' + (key === shopTab ? ' on' : ''),
@@ -188,7 +272,7 @@ export function createTalkPanel(handlers = {}) {
           onclick: () => { shopTab = key; render(); },
         }))),
         ...(shelf.length
-          ? shelf.map(item => row(item))
+          ? shelfRows(shelf)
           : [el('p', { class: 'muted small', text: shopTab === 'buyback' ? 'You have not sold me anything.' : 'Nothing of that sort today.' })]),
       );
 

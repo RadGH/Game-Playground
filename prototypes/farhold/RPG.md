@@ -848,3 +848,106 @@ And a job generator with twenty-two frames that will only offer a frame when **e
 binds to something that exists right now**: a camp still standing, a caravan really late, a named
 enemy that really did beat you. Nothing is invented, so nothing can send you to an empty field, and
 the pin is in the zone you are standing in.
+
+### The review, in five batches
+
+`research/review-round10.md` is a play-and-inspect pass over the whole game — title screen, landing,
+first five minutes, combat, all seven sheet screens, the map, the star chart, a town, a shop, a
+dungeon, space, night — 45 findings, 2 blocker and 14 high. Its headline was that the *screens* were
+in good shape and the **connective tissue** was missing: the game never told you what to do, never
+explained the systems it had just built, and a large part of the Territory expansion was loaded at
+boot and thrown away.
+
+All 45 are implemented. The worth-knowing ones:
+
+**The first five minutes.** The level-up message promised "3 points to spend (press I)" and
+`pendingAttr` was never incremented anywhere — the perk forest replaced attribute point-buy in round
+7 and the message was never changed, so the game's own tutorial line sent you to four dead buttons.
+There is a tracked objective strip on the HUD now, the title screen says what the game is instead of
+"Round 4", and a class preview panel fills in as you scroll the thirty-entry dropdown: the four
+skills with their one-line descriptions, the starting weapon, the companion if there is one.
+
+**Two content files were parsed at boot and discarded.** `data/landmarks.json` (14) and
+`data/faction-rewards.json` (12 × 2 ranks) were read into `landmarkData` and `rewardData`, which had
+no other references. Landmarks are placed on real map nodes and usable; rank rewards are shown on the
+Journal and two are wired.
+
+**Three promised standing effects had no call sites.** Prices, hostility and patrol reaction were all
+in `EXPANSION.md` and none of them existed. Prices are wired; the band ladder and the deeds table are
+on the Journal; the full faction name is used the first time each one is mentioned.
+
+**The map named everywhere before you had been anywhere.** All 59 regions, every settlement, every
+node, from the first second — which made the rumour system redundant with a screen you already had. A
+region's name is now something you learn, by crossing into it or hearing about it. The danger wash,
+the level band, the towns and the roads are all still drawn, so route planning is unchanged.
+
+**Every key can move.** Fourteen actions, click a row and press a key, over a capture-phase listener
+that sits in front of every other key listener in the game — there was no binding table to build
+over, so the panel translates the event instead. Rebinding two actions to the same key swaps them.
+The pause menu's control list is built from the real bindings, because a hard-coded "M map" is a lie
+the moment somebody rebinds it.
+
+**Two measurement bugs on the star chart.** `fit()` measured the wrapper, which has 10px of padding,
+so the canvas ran off the bottom of the screen; and every size in the system view was in raw canvas
+pixels on a buffer that is 2× the box on a retina screen, which is why five worlds drew as 3px
+specks. Orbits fill the height now, the world you are on says "you are here", and moons are indented
+under their parent with breathable / band / levels on every row.
+
+**The torch was a spotlight.** A Three.js point light with `distance` set multiplies its falloff by
+`(1 - (d/distance)^4)^2`, which holds nearly full brightness most of the way out and then dumps the
+rest over the last fifth — on flat ground that last fifth is a crisp yellow ring. The cutoff is
+pushed out 2.2× and the decay does the fading, so by the time the hard edge arrives the light is a
+fortieth of what it was. Plus a 6 Hz two-sine flicker at an untidy ratio, so it never settles into a
+pulse you can count.
+
+**The hooded mage was a dome with a person somewhere under it.** Two causes, both in the shared
+`avatar-3d/js/chibi2.js`: the cowl's radii stood it wider than the character's own shoulders, and the
+back of it — the only part a third-person camera ever sees — was one unbroken sheet of one colour.
+Trimmed to just over the head, the rows behind the ears shaded, a piped seam up the crown.
+
+**Rumours were signed "somebody in The Bleak Moor"**, which is exactly the flavour a rumour system
+exists to avoid. A rumour is a person saying a thing; it is signed by a real one out of
+`folk.roster()` now — "Vera Thorne, the merchant in Hollowcrown".
+
+### Mounts, lights, boats and ships
+
+> "Where shops sell boats and ship, they should also sell torches and mounts. 3 of each should be
+> implemented. Boats should automatically equip when you start swimming and increase water travel
+> movement speed."
+
+Three of each already existed in `js/gear.js` — three mounts, three lights, three boats, three ships —
+and most of it was unreachable.
+
+**The shop stocked one of each and rolled for the rest.** `stockFor` guaranteed the cheapest mount and
+the cheapest light and then picked ONE of the remaining better ones at random, so the Dray Elk and the
+Wisp Lamp could go unseen for hours of walking between towns. Every shelf carries all three of each
+now; the rarity still rolls on the two dearer ones, so a shelf is worth a second look.
+
+**They were also invisible.** Mounts and lights file under the Other tab, behind Weapons, mixed in
+with rings and quivers. The Other tab is sorted into racks with headings — Mounts, Lights, Quivers,
+Trinkets — each with a line saying what the thing is for, the same treatment the boats and ships fold
+already had. And a shop row carries its own one-line spec, because a shelf you have to hover item by
+item is a shelf you cannot scan: slot, damage or armour, speed, how far a light reaches, the level it
+needs, and one word on whether it beats what you are wearing (from `itemScore`, the same number the
+inventory sorts by, so the row and the hover card can never disagree).
+
+**A Wisp Lamp was on the shelf for 30 gold.** The shared `Loot.price()`
+(`prototypes/emberveil/js/loot.js`) prices everything off one global `basePrice` in the data,
+multiplied by quality and rarity. That is right when every item comes off the same weapon-and-armour
+table, and it threw away every price `gear.js` sets — so the Pitch Torch (20) and the Wisp Lamp (620)
+cost the same, and the whole "buy a better light" ladder was free. Farhold's `rpg.price()` honours an
+item's own `basePrice` on the same quality/rarity curve; Emberveil's `loot.js` is shared and has its
+own tests, so it is untouched, and anything without a `basePrice` falls through exactly as before.
+
+**The boat was wired to nothing at all.** `js/player.js` never read the vehicle data and swimming was
+a flat 2.7 m/s whatever you owned. The controller takes a `boat` accessor, boards you on entering deep
+water — there is no key and no slot, because a boat is an unlockable, not loot — and takes its speed
+from the hull: raft 3.4, skiff 5.6, cutter 8.2, against a 5.4 walk and an 11.3 sprint. So the cheapest
+boat already beats swimming, the best one beats walking, and none of them beats running on dry land,
+which keeps water a choice rather than a shortcut. `js/boat.js` draws the three hulls so a faster
+crossing looks like a boat.
+
+The trap, and the reason the page test was worth writing: the boat was put away by watching for the
+**transition** out of swimming, and the transition is not the only way to stop swimming. `teleport()`,
+loading a save and stepping into a dungeon all skip it, and `wasSwimming` was already false by the
+next update — so the raft stayed equipped on dry land for the rest of the run. It reads the state now.

@@ -373,7 +373,11 @@ function backface(g) {
 
 function hoodColors(a) {
   const base = new THREE.Color(a.hat.color || '#4b536c');
-  const lining = base.clone().multiplyScalar(0.55), edge = base.clone().lerp(new THREE.Color('#ffffff'), 0.14);
+  // A flat 14% lift was enough on a blue or a brown hood and did nothing at all on a near-black one
+  // — the seam, the rim and the folds all vanished and the whole cowl went back to being one blob.
+  // So the darker the cloth, the further the piping is lifted off it.
+  const lift = 0.14 + (1 - Math.max(base.r, base.g, base.b)) * 0.20;
+  const lining = base.clone().multiplyScalar(0.55), edge = base.clone().lerp(new THREE.Color('#ffffff'), lift);
   return { cloth: '#' + base.getHexString(), lining: '#' + lining.getHexString(), edge: a.hat.color2 || '#' + edge.getHexString() };
 }
 
@@ -384,8 +388,11 @@ function hoodColors(a) {
  * The rim is pulled forward past the face, the crown gets a soft peak and the lower rows hang
  * past the head onto the neck, weighted to the chest so they follow the body, not the nod.
  * An outer shell, a darker inner shell and one piped edge along rim and hem close the cloth.
+ * The radii were 0.44/0.42/0.40, which stood the cowl wider than the character's own shoulders and
+ * was half of why a hooded mage read as a dome with a person somewhere under it; they are trimmed
+ * to just over the head (half-width 0.335) so the cloth still wraps it without swallowing it.
  */
-export const HOOD_SHAPE = { center: [0, 0.30, 0.0], radii: [0.44, 0.42, 0.40], thickness: 0.035, lip: 0.07, columns: 16, rows: 9 };
+export const HOOD_SHAPE = { center: [0, 0.30, 0.0], radii: [0.42, 0.405, 0.385], thickness: 0.035, lip: 0.07, columns: 16, rows: 9 };
 export function hoodGrid(shape = HOOD_SHAPE) {
   const [cx, cy, cz] = shape.center, [rx, ry, rz] = shape.radii, { columns, rows } = shape;
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -427,10 +434,10 @@ function buildHood(a, add, H, W, T) {
   const capelet = CAPELETS.includes(a.cape.id);
   const { cloth, lining, edge } = hoodColors(a), { outer, inner, columns, rows } = hoodGrid();
   const at = (j, i) => j * (rows + 1) + i;
-  const shell = (points, color, flip) => {
+  const shell = (points, color, flip, from = 0, to = rows) => {
     const g = new THREE.BufferGeometry(), idx = [];
     g.setAttribute('position', new THREE.Float32BufferAttribute(points.flatMap(p => [p.x, p.y, p.z]), 3));
-    for (let j = 0; j < columns; j++) for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < columns; j++) for (let i = from; i < to; i++) {
       const q = [at(j, i), at(j + 1, i), at(j + 1, i + 1), at(j, i + 1)];
       if (flip) idx.push(q[0], q[2], q[1], q[0], q[3], q[2]); else idx.push(q[0], q[1], q[2], q[0], q[2], q[3]);
     }
@@ -438,7 +445,18 @@ function buildHood(a, add, H, W, T) {
     // Neck-weighted hem: the bottom of the cowl follows the chest instead of swinging with the head.
     add(g, 'head', color, { scale: [H, H, H], bend: { bone: 'chest', at: 0.02 * H, width: 0.09 * H } });
   };
-  shell(outer, cloth, false);
+  /**
+   * The back of the cowl is the ONLY part of it a third-person camera ever sees, and every row used
+   * to run into the nape as one unbroken sheet of one colour — so from behind the hooded mage read
+   * as a solid dark dome with no features at all, and at night as a black blob with no head in it.
+   * A real hood is two panels stitched up the middle and gathered at the neck, so the cloth is drawn
+   * the same way now: the rows behind the ears are a shade darker, because that is cloth lying in
+   * the hood's own shadow, and a piped seam runs the crown with two gathers fanning into the nape.
+   * Three thin welts is all it takes — they give the back of the head edges to catch a light on.
+   */
+  const gatherAt = Math.max(1, rows - 3);
+  shell(outer, cloth, false, 0, gatherAt);
+  shell(outer, shade(cloth, -0.12), false, gatherAt, rows);
   shell(inner, lining, true);
   // Piped edge: up the left hem, around the face rim, down the right hem. It sits between the shells.
   const mid = (j, i) => outer[at(j, i)].clone().lerp(inner[at(j, i)], 0.5);
@@ -446,7 +464,22 @@ function buildHood(a, add, H, W, T) {
   for (let i = rows; i > 0; i--) path.push(mid(0, i));
   for (let j = 0; j <= columns; j++) path.push(mid(j, 0));
   for (let i = 1; i <= rows; i++) path.push(mid(columns, i));
-  add(taperedCurve(path.map(p => p.toArray()), [0.012, 0.022, 0.026, 0.026, 0.022, 0.012], 5, 36), 'head', edge, { scale: [H, H, H], bend: { bone: 'chest', at: 0.02 * H, width: 0.09 * H } });
+  // 30 steps rather than 36: the rim pipe is the single most expensive thing on a hooded character,
+  // and the six steps it gives back pay for the crown seam below without moving the druid — the
+  // heaviest class look — past the 8,500-triangle budget `tests/chibi2.spec.js` holds it to.
+  add(taperedCurve(path.map(p => p.toArray()), [0.012, 0.022, 0.026, 0.026, 0.022, 0.012], 5, 30), 'head', edge, { scale: [H, H, H], bend: { bone: 'chest', at: 0.02 * H, width: 0.09 * H } });
+  // The seam and the gathers sit ON the outer shell, not between the two, so they read as welts
+  // standing proud of the cloth rather than as a line drawn on it.
+  const centre = new THREE.Vector3(...HOOD_SHAPE.center);
+  const proud = (j, i) => outer[at(j, i)].clone().sub(centre).multiplyScalar(1.004).add(centre).toArray();
+  const seam = [];
+  for (let i = 1; i <= rows; i++) seam.push(proud(columns / 2, i));
+  add(taperedCurve(seam, [0.009, 0.016, 0.018, 0.012], 4, 9), 'head', edge, { scale: [H, H, H], bend: { bone: 'chest', at: 0.02 * H, width: 0.09 * H } });
+  for (const j of [columns / 2 - 3, columns / 2 + 3]) {
+    const fold = [];
+    for (let i = gatherAt - 1; i <= rows; i++) fold.push(proud(j, i));
+    add(taperedCurve(fold, [0.004, 0.013, 0.010], 3, 4), 'head', shade(cloth, -0.24), { scale: [H, H, H], bend: { bone: 'chest', at: 0.02 * H, width: 0.09 * H } });
+  }
   // Short mantle on the chest bone: the cowl's cloth settling over the neck and top of the shoulders.
   // Its top tucks inside the hood's hem, so the join stays hidden when the head turns.
   if (!capelet) add(profile([[0.285 * T, 0.255 * W, 0.17 * W, -0.012], [0.315 * T, 0.215 * W, 0.15 * W, -0.014], [0.36 * T, 0.12, 0.10, -0.02], [0.40 * T, 0.09, 0.08, -0.02]], 14), 'chest', cloth);

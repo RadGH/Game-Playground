@@ -429,8 +429,11 @@ body {
 .talk {
   position: fixed; z-index: 35; left: 50%; top: 50%; transform: translate(-50%, -50%);
   width: min(760px, 94vw); max-height: 84vh; overflow: auto;
-  background: #0d1320f2; border: 1px solid #2c3a52; border-radius: 10px; padding: 16px 20px;
-  box-shadow: 0 18px 60px #000a;
+  /* E1: at f2 the 3D character behind the panel showed through the stock list, and a shop is the
+     one screen you read line by line. Solid, with a blur behind it for the edges. */
+  background: #0d1320; border: 1px solid #2c3a52; border-radius: 10px; padding: 16px 20px;
+  box-shadow: 0 18px 60px #000c;
+  backdrop-filter: blur(3px);
 }
 .talk.hidden { display: none; }
 .talk-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 1px solid #222c3c; padding-bottom: 8px; }
@@ -469,6 +472,26 @@ body {
   border: 1px solid #222c3c; margin-bottom: 4px; font-size: 13px;
 }
 .trade-row .coin { margin-left: auto; color: #ffd070; font-variant-numeric: tabular-nums; }
+
+/* ---- E1: a shop row you can read without hovering it */
+.trade-what { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.trade-spec { font-size: 11px; color: #8595ab; line-height: 1.3; }
+/* one word on whether it beats what you are wearing */
+.trade-mark { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; padding: 1px 5px;
+  border-radius: 3px; white-space: nowrap; align-self: center; }
+.trade-mark.up { color: #8fe0a0; background: #1c3325; }
+.trade-mark.down { color: #c89090; background: #33201f; }
+/* something you cannot put on yet is dimmed rather than hidden — it is still a thing to save for */
+.trade-row-no .trade-what { opacity: 0.55; }
+.trade-row-no .trade-spec { color: #a06a6a; }
+
+/* ---- the racks in the Other tab: mounts, lights, quivers */
+.trade-rack { display: flex; align-items: baseline; gap: 8px; margin: 12px 0 2px;
+  border-bottom: 1px solid #1e2836; padding-bottom: 3px; }
+.trade-rack:first-child { margin-top: 2px; }
+.trade-rack h4 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+  color: #7fd8ff; }
+.trade-rack-note { font-size: 11px; color: #7f8ea4; }
 .trade-row .talk-btn { margin-top: 0; }
 
 /* ---------------------------------------------------------------- the passive tree */

@@ -1770,6 +1770,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     tip: (node, item) => hud.tipFor(node, item),
     displayName: item => displayName(item),
+    /**
+     * One word on a shop row saying whether it beats what you are wearing.
+     *
+     * E1 again: the card on hover has carried the full comparison for rounds, but you have to hover
+     * every row to use it, and a shelf of six Scepters all priced the same is unreadable until you
+     * do. `itemScore` is the same number the inventory sorts and compares by, so the row and the
+     * card can never disagree. Jewellery compares against the weaker of the two rings, which is the
+     * one it would actually replace.
+     */
+    upgradeMark: item => {
+      const slot = item.type === 'weapon' ? 'weapon'
+        : item.slot === 'ring' ? (itemScore(player.equipment.ring2) < itemScore(player.equipment.ring) ? 'ring2' : 'ring')
+        : item.slot;
+      if (!slot || !(slot in player.equipment)) return null;
+      const worn = player.equipment[slot];
+      if (!worn) return { kind: 'up', text: 'empty slot' };
+      const delta = itemScore(item) - itemScore(worn);
+      if (delta > 0.5) return { kind: 'up', text: 'upgrade' };
+      if (delta < -0.5) return { kind: 'down', text: 'worse' };
+      return null;                              // too close to call; the card has the detail
+    },
+    /** Why you could not put this on — the level, or a two-handed rule. Null if you can. */
+    cannotUse: item => rpg.equipRefusal(player, item) || null,
     buyVehicle: v => {
       const r = unlockVehicle(player, v.slot, v.key);
       hud.log(r.ok ? `The ${r.kind.name} is yours. Pick it on the character sheet.` : r.why, r.ok ? 'loot' : 'bad');
@@ -2577,7 +2600,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const neighbours = zones.list().filter(z => z.id !== zone.id && Math.abs(z.minLevel - zone.minLevel) <= 6);
     if (neighbours.length) {
       const pick = neighbours[Math.floor(Math.random() * neighbours.length)];
-      rumours.hear(pick, { from: 'somebody in ' + zone.name, extra: { unvisitedLandmarks: 2 } });
+      rumours.hear(pick, { from: rumourSource(zone), extra: { unvisitedLandmarks: 2 } });
     }
 
     if (record?.holder) hud.log(`${zone.name} is held by ${intro.nameFor(record.holder)}.`, '');
@@ -3587,6 +3610,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     autoSave();
   }
 
+  /**
+   * WHO TOLD YOU.
+   *
+   * E15: every rumour was signed "somebody in The Bleak Moor", which is exactly the flavour a rumour
+   * system exists to avoid — a rumour is a person saying a thing, and an anonymous one is just a
+   * notification. The zone already has people in it, so one of them gets the credit: their name,
+   * what they do, and where they are. Their trade matters more than their name here ("the smith in
+   * Pebelkeep" is a better source than a name you have never heard), so both go in.
+   *
+   * Nobody about — an empty stretch of road, a zone whose settlements are out of range — falls back
+   * to the old wording, because "somebody on the road" is honest when there is genuinely nobody.
+   */
+  function rumourSource(zone) {
+    const people = folk?.roster?.() || [];
+    if (!people.length) return 'somebody on the road';
+    const who = people[Math.floor(Math.random() * people.length)];
+    const trade = who.roleName ? who.roleName.toLowerCase() : null;
+    const place = who.node?.name || zone?.name;
+    if (who.name && trade && place) return `${who.name}, the ${trade} in ${place}`;
+    if (who.name && place) return `${who.name}, in ${place}`;
+    return who.name || 'somebody on the road';
+  }
+
   function clockText(fraction, c) {
     const hours = Math.floor(fraction * 24), minutes = Math.floor((fraction * 24 % 1) * 60);
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} · ${Math.round(c.y)} m`;
@@ -3623,6 +3669,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // planet's ground — which is exactly what "you landed in the sea at 55 m" turned out to be.
     // `folk` is rebuilt with the world, like `control` below, so it has to be a getter too
     get folk() { return folk; },
+    /** Open the shop panel on somebody, for the specs — the same call the E key makes. */
+    openTalk: who => talk.show(who, talkContext(who)),
     get control() { return control; },
     get field() { return field; },
     get props() { return props; },

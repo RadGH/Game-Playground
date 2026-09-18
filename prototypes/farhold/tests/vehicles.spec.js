@@ -135,3 +135,34 @@ test('a merchant has all three mounts and all three lights on the shelf', async 
   }
   expect(errors).toEqual([]);
 });
+
+test('the Other tab has a Mounts heading and a Lights heading, and every row says what it is', async ({ page }) => {
+  const errors = await land(page);
+  // stand in the nearest town and wait for its people to wake up, the way town.spec.js does
+  const opened = await page.evaluate(async () => {
+    const f = window.farhold;
+    const town = f.features.nearest('settlement', f.control.x, f.control.z);
+    f.teleport(town.wx, town.wz);
+    const t0 = Date.now();
+    while (f.folk.stats().people === 0 && Date.now() - t0 < 25000) await new Promise(r => setTimeout(r, 200));
+    const npc = [...f.folk.live.values()].flat().find(p => p.trades);
+    if (!npc) return false;
+    f.openTalk(npc);
+    return true;
+  });
+  test.skip(!opened, 'no merchant near the landing site on this seed');
+
+  // the shop opens on Weapons; the racks are in Other, which is the whole point of the complaint
+  await page.locator('.shop-tabs .chip', { hasText: 'Other' }).click();
+
+  const racks = await page.locator('.trade-rack h4').allTextContents();
+  expect(racks).toContain('Mounts');
+  expect(racks).toContain('Lights');
+
+  // and a row is readable without hovering it
+  const specs = await page.locator('.trade-row .trade-spec').allTextContents();
+  expect(specs.filter(Boolean).length).toBeGreaterThan(0);
+  expect(specs.some(t => /m\/s/.test(t)), 'a mount row should give its speed').toBe(true);
+  expect(specs.some(t => /lights \d+ m/.test(t)), 'a light row should say how far it lights').toBe(true);
+  expect(errors).toEqual([]);
+});

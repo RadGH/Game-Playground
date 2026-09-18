@@ -442,3 +442,48 @@ arithmetic a frame. Shown in three new Journal panes: who holds this ground, wor
 word going round.
 
 Tests: `tests/round10.test.js` (17) and `tests/expansion.test.js` (37).
+
+## The round-10 review, and the gear you buy
+
+`research/review-round10.md` is a full play-and-inspect pass: 45 findings across the title screen, the
+first five minutes, every sheet screen, the map, the chart, a town, a shop, a dungeon, space and
+night. All 45 are implemented. `RPG.md` has the write-up; what a player notices:
+
+- **The game tells you what to do now.** A tracked objective on the HUD, a title screen that says what
+  the game is, and a class preview that fills in as you scroll the thirty-entry dropdown — the four
+  skills, the starting weapon, the companion.
+- **The map only names places you have been.** You learn a region's name by crossing into it or
+  hearing a rumour about it. Danger colour, level band, towns and roads are always drawn, so planning
+  a route is unchanged.
+- **Every key can be rebound** — 14 actions, click a row and press a key — plus a field-of-view
+  slider and units on every slider.
+- **Dungeons are navigable, the torch is a flame rather than a spotlight, and the hooded mage has a
+  head.**
+- **Rumours are signed by a real person** out of the town's roster, not "somebody in The Bleak Moor".
+
+### Mounts, lights, boats and ships
+
+`js/gear.js` holds three mounts, three lights, three boats and three ships. The dividing line is
+whether a thing is **loot**: a mount, a lantern and a quiver roll a rarity, carry affixes, upgrade at
+the bench and drop as a find. A boat and a ship do not — you buy one once, you own it for the run, and
+you pick between them from a dropdown. Mixing the two is what makes an inventory tedious.
+
+Every merchant carries **all three** mounts and **all three** lights (the rarity still rolls on the
+two dearer ones), sorted into racks with headings so they are not buried behind the Weapons tab. A
+shop row carries its own spec — slot, damage or armour, speed, how far a light reaches, the level it
+needs, and one word on whether it beats what you are wearing — so a shelf can be read without hovering
+it item by item.
+
+**Boats equip themselves.** Walk into water deep enough to swim in and whichever boat you own goes
+under you; walk out and it comes with you. There is no key and no slot. The speed is the hull's:
+
+| boat | speed | price | against |
+|---|---|---|---|
+| Lashed Raft | 3.4 m/s | free, you start with it | swimming is 2.7 |
+| Fenland Skiff | 5.6 m/s | 340g | walking is 5.4 |
+| Coast Cutter | 8.2 m/s | 1400g | sprinting is 11.3 |
+
+So the cheapest boat already beats swimming, the best one beats walking, and none of them beats a
+sprint on dry land — water stays a choice, not a shortcut. `js/boat.js` draws the three hulls.
+
+Tests: `tests/vehicles.test.js` (15 node) and `tests/vehicles.spec.js` (4 page).

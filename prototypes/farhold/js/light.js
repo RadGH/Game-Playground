@@ -23,6 +23,21 @@
 
 import * as THREE from 'three';
 
+/**
+ * How far past its useful range a light's cutoff is pushed.
+ *
+ * A Three.js point light with a `distance` set does not simply stop there: it multiplies its
+ * falloff by `(1 - (d/distance)^4)^2`, which holds nearly full brightness most of the way out and
+ * then dumps the rest over the last fifth. On flat ground that last fifth is a crisp yellow ring,
+ * and the torch read as a spotlight aimed at the floor rather than as a flame. So the cutoff goes
+ * out past anything you can see and the DECAY does the fading instead — by the time the hard edge
+ * arrives the light is a fortieth of what it was, so there is no edge left to see.
+ */
+const SOFT_EDGE = 2.2;
+
+/** ~6 Hz, in radians a second: fast enough to read as a flame, slow enough not to strobe. */
+const TORCH_HZ = Math.PI * 2 * 6;
+
 export function createLight(scene, { balance = {} } = {}) {
   const cfg = balance.light || {};
   const torchCfg = cfg.torch || {};
@@ -32,7 +47,7 @@ export function createLight(scene, { balance = {} } = {}) {
   const torch = new THREE.PointLight(
     new THREE.Color(torchCfg.color || '#ffb060'),
     0,
-    torchCfg.range ?? 34,
+    (torchCfg.range ?? 34) * SOFT_EDGE,
     1.4,                                   // gentle falloff: a torch that dies at 3 m is a candle
   );
   torch.name = 'farhold-torch';
@@ -41,7 +56,7 @@ export function createLight(scene, { balance = {} } = {}) {
   // ---- the pool: world sources borrow one of these
   const pool = [];
   for (let i = 0; i < maxLights; i++) {
-    const l = new THREE.PointLight(0xffffff, 0, 20, 1.5);
+    const l = new THREE.PointLight(0xffffff, 0, 20 * SOFT_EDGE, 1.5);
     l.name = 'farhold-light-' + i;
     l.visible = false;
     scene.add(l);
@@ -50,7 +65,8 @@ export function createLight(scene, { balance = {} } = {}) {
 
   let sources = [];
   let torchOn = false;
-  let flicker = 0;
+  let flicker = 0;                          // the slow wobble every world source shares
+  let torchPhase = 0;                       // the torch's own, much faster — a flame, not a lantern
   let indoors = false;
   let nightFloor = cfg.ambientNight ?? 0.16;
 
@@ -77,14 +93,18 @@ export function createLight(scene, { balance = {} } = {}) {
   function update(dt, at, { day = 1, inside = false, ambient = null } = {}) {
     indoors = inside;
     flicker += dt * 9;
+    torchPhase += dt * TORCH_HZ;
 
     if (torchOn) {
       // The torch fades out in full daylight — carrying a light at noon should not wash the world
       // out — and comes fully up as the sun goes. Inside, it is always at full.
       const need = inside ? 1 : Math.max(0, 1 - Math.max(0, day) * 1.25);
-      const wobble = 1 + Math.sin(flicker) * (torchCfg.flicker ?? 0.16) * 0.5 + Math.sin(flicker * 2.3) * (torchCfg.flicker ?? 0.16) * 0.3;
+      // A flame is never steady. Two sines at an untidy ratio so the wobble never settles into a
+      // pulse you can count; the config's `flicker` is the peak-to-peak swing, so 0.16 is ±8%.
+      const amp = (torchCfg.flicker ?? 0.16) * 0.5;
+      const wobble = 1 + (Math.sin(torchPhase) * 0.6 + Math.sin(torchPhase * 1.7 + 1.3) * 0.4) * amp;
       torch.intensity = (torchCfg.intensity ?? 3.2) * need * wobble;
-      torch.distance = torchRange;
+      torch.distance = torchRange * SOFT_EDGE;
       torch.position.set(at.x, at.y + (torchCfg.height ?? 1.55), at.z);
     } else {
       torch.intensity = 0;
@@ -104,7 +124,7 @@ export function createLight(scene, { balance = {} } = {}) {
       const s = hit.s;
       l.visible = true;
       l.color.set(s.color || '#ff9040');
-      l.distance = s.range ?? 24;
+      l.distance = (s.range ?? 24) * SOFT_EDGE;    // same hard ring as the torch, same fix
       l.position.set(s.x, s.y, s.z);
       const wob = s.flicker === false ? 1 : 1 + Math.sin(flicker * 1.3 + i * 2.1) * 0.12;
       // fade a source out as it gets near the edge of the pool's reach, so nothing pops on

@@ -249,3 +249,29 @@ test('the journal shows who holds the ground, what is going here, and what peopl
   expect(out.zones).toBeGreaterThan(3);
   expect(errors).toEqual([]);
 });
+
+test('a job off the board pays itself, because there is nobody to hand it back to', async ({ page }) => {
+  const errors = await land(page, { seed: 11 });
+  await page.waitForTimeout(2200);
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    const hunt = f.board.find(j => j.kind === 'hunt');
+    if (!hunt) return { note: 'no hunt job on the board', kinds: f.board.map(j => j.kind) };
+    const gold = f.player.gold, xp = f.player.xp;
+    f.hud.onTakeJob(hunt);
+    const q = f.questLog.active.find(x => x.id === hunt.id);
+    // finish it through the real progress path, not by setting a flag
+    for (let i = 0; i < q.count; i++) f.questLog.onKill({ defId: q.target });
+    await new Promise(r => setTimeout(r, 1500));   // the territory tick is what pays it
+    return {
+      title: hunt.title,
+      stillActive: f.questLog.active.some(x => x.id === hunt.id),
+      gold: f.player.gold - gold, xp: f.player.xp - xp,
+    };
+  });
+  expect(out.note, out.note ? `board held ${out.kinds}` : '').toBeUndefined();
+  expect(out.stillActive, `"${out.title}" finished and nobody paid for it`).toBe(false);
+  expect(out.gold).toBeGreaterThan(0);
+  expect(out.xp).toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});

@@ -89,13 +89,16 @@ export const ARMS = [
     blurb: 'What follows you, what keeps you standing, and what you find on the way.',
     minor: [
       ['con', 4, '+4 constitution'], ['hpRegen', 1.2, '+1.2 health a second'],
-      ['petDamagePct', 8, 'companions hit 8% harder'], ['magicFind', 8, '+8% better loot'],
+      ['petDamagePct', 8, 'companions deal 8% more damage'], ['magicFind', 8, '+8% better loot'],
       ['movePct', 3, '+3% move speed'], ['goldFind', 12, '+12% gold'],
     ],
     major: [
-      ['petDamagePct', 18, 'companions hit 18% harder'], ['con', 9, '+9 constitution'],
+      ['petDamagePct', 18, 'companions deal 18% more damage'], ['con', 9, '+9 constitution'],
       ['lifeSteal', 4, '4% of damage comes back as health'], ['magicFind', 20, '+20% better loot'],
-      ['petSlots', 1, 'one more companion follows you'],
+      // "One more companion follows you — WHAT companion?" It said nothing and it did nothing:
+      // `petSlots` was a derived stat no file read. It is a real number now — js/skills.js adds it
+      // to the count of every summoning skill — and the line says which companion it means.
+      ['petSlots', 1, 'every summoning skill calls up one more companion'],
     ],
   },
 ];
@@ -120,14 +123,21 @@ export const ODDBALLS = [
  * second stat sheet.
  */
 export const TALENT_NODES = [
-  { id: 'riposte', arm: 'melee', name: 'Riposte', desc: 'Blocking or dodging leaves your next swing a guaranteed critical.', flag: 'riposte' },
-  { id: 'sunder', arm: 'melee', name: 'Sunder', desc: 'Every third swing in a pattern strips 8 armour, and it stays off.', flag: 'sunder' },
-  { id: 'volley', arm: 'ranged', name: 'Volley', desc: 'Every fourth shot is two arrows.', flag: 'volley' },
-  { id: 'mark', arm: 'ranged', name: 'Quarry', desc: 'The first arrow into a target marks it: everything takes 15% more while the mark holds.', flag: 'mark' },
-  { id: 'cauterise', arm: 'arcane', name: 'Cauterise', desc: 'A critical hit burns for a quarter of its damage again over four seconds.', flag: 'cauterise' },
-  { id: 'echo', arm: 'arcane', name: 'Echo', desc: 'A skill has a one-in-six chance to cast itself a second time for free.', flag: 'echo' },
-  { id: 'pack', arm: 'wild', name: 'Pack Sense', desc: 'Your companions heal you for a tenth of what they deal.', flag: 'pack' },
-  { id: 'scavenge', arm: 'wild', name: 'Scavenger', desc: 'Anything you kill has a one-in-five chance to leave crafting material.', flag: 'scavenge' },
+  { id: 'riposte', arm: 'melee', name: 'Riposte', desc: 'Blocking or dodging a hit makes your next swing a guaranteed critical.', flag: 'riposte' },
+  { id: 'sunder', arm: 'melee', name: 'Sunder', desc: 'The last swing of every weapon pattern strips 8 armour, and the armour does not come back.', flag: 'sunder' },
+  /**
+   * VOLLEY was `flag: 'volley'` — "every fourth shot is two arrows" — and the flag was read by
+   * nothing, because nothing counts your shots. `arrowsPerShot` is a real number that js/main.js
+   * already reads when it looses an arrow, so the node grants that instead and the line says so.
+   */
+  // (`flag` is kept on every node because tests/weapons.test.js asserts one; for Volley, Echo and
+  // Scavenger the GRANT is what does the work and the flag is just the node's name.)
+  { id: 'volley', arm: 'ranged', name: 'Volley', desc: 'Every shot looses one more arrow.', flag: 'volley', grants: { arrowsPerShot: 1 } },
+  { id: 'mark', arm: 'ranged', name: 'Quarry', desc: 'The first hit on a target marks it for 8 seconds: it takes 15% more damage from everything.', flag: 'mark' },
+  { id: 'cauterise', arm: 'arcane', name: 'Cauterise', desc: 'A critical hit also burns, for a quarter of its damage over four seconds.', flag: 'cauterise' },
+  { id: 'echo', arm: 'arcane', name: 'Echo', desc: 'One skill cast in six fires a second time, free.', flag: 'echo', grants: { echoChance: 1 / 6 } },
+  { id: 'pack', arm: 'wild', name: 'Pack Sense', desc: 'Your companions heal you for a tenth of the damage they deal.', flag: 'pack' },
+  { id: 'scavenge', arm: 'wild', name: 'Scavenger', desc: 'One kill in five leaves crafting material behind.', flag: 'scavenge', grants: { scavengeChance: 0.2 } },
 ];
 
 /**
@@ -139,26 +149,28 @@ export const TALENT_NODES = [
 export const KEYSTONES = [
   {
     id: 'titan_grip', arm: 'melee', name: "Titan's Grip", flag: 'titanGrip',
-    desc: 'You can hold a two-handed weapon in each hand. They swing slower, and they swing at everything.',
-    cost: 'Attack speed −20%.',
+    desc: 'You can hold a two-handed weapon in each hand, and every swing covers 18% more ground.',
+    cost: '−20% attack speed.',
     grants: { haste: -20, areaPct: 18 },
   },
   {
     id: 'far_shot', arm: 'ranged', name: 'Far Shot', flag: 'farShot',
-    desc: 'Arrows and bolts hit harder the further they have flown, up to half again at full range.',
-    cost: 'Everything within four metres of you takes a quarter less.',
+    desc: 'Arrows and bolts deal up to 50% more damage the further they have flown, and +5% critical chance.',
+    cost: 'Anything within four metres of you takes 25% less.',
     grants: { critChance: 5 },
   },
   {
     id: 'blood_magic', arm: 'arcane', name: 'Blood Price', flag: 'bloodMagic',
-    desc: 'Skills cost health instead of mana, and never fail for want of it.',
-    cost: 'Your mana pool is worth nothing to you.',
+    desc: 'Skills are paid for in health instead of mana, and never fail for want of it. +14 spell power.',
+    cost: 'Your mana pool stops mattering, and a skill can leave you on 1 health.',
     grants: { spellPower: 14 },
   },
   {
+    // The old line also promised the pack "take a third of everything aimed at you", which nothing
+    // in the game did — an enemy picks its own target in js/actors.js. Cut rather than left lying.
     id: 'the_pack', arm: 'wild', name: 'The Pack', flag: 'thePack',
-    desc: 'Two more companions follow you, and they take a third of everything aimed at you.',
-    cost: 'You deal 15% less yourself.',
+    desc: 'Every summoning skill calls up two more companions, and all of them deal 20% more damage.',
+    cost: 'You deal 15% less damage yourself.',
     grants: { petSlots: 2, petDamagePct: 20, damagePct: -15 },
   },
 ];
@@ -242,7 +254,9 @@ export function buildForest() {
         } else if (ring.kind === 'talent') {
           const pool = TALENT_NODES.filter(t => t.arm === arm.key);
           const t = pool[i % pool.length];
-          Object.assign(node, { name: t.name, desc: t.desc, grants: {}, flag: t.flag, talentId: t.id });
+          // `grants` as well as `flag`: Volley and Scavenger turned out to be better as a number the
+          // game already reads than as a flag nothing looked at. See TALENT_NODES.
+          Object.assign(node, { name: t.name, desc: t.desc, grants: { ...(t.grants || {}) }, flag: t.flag || null, talentId: t.id });
         } else {
           const k = KEYSTONES.find(x => x.arm === arm.key);
           Object.assign(node, {

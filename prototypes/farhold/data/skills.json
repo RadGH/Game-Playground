@@ -1,5 +1,6 @@
 {
- "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` \u2014 so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide \u2014 a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
+ "_markedDoc": "statuses.marked: Quarry (the ranged perk node) and Branding (a tier-3 skill talent) both hang this on a target. It is a plain takeMore debuff, so js/skills.js buffsOf already knows what to do with it; each caller passes its own seconds and share, so this row is the default and the name the log prints.",
+  "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` \u2014 so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide \u2014 a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
  "unlockAt": [
   1,
   3,
@@ -50,6 +51,13 @@
    "element": "lightning",
    "takeMore": 0.3,
    "seconds": 5
+  },
+  "marked": {
+   "name": "Marked",
+   "kind": "debuff",
+   "element": "arcane",
+   "takeMore": 0.15,
+   "seconds": 8
   },
   "curse": {
    "name": "Cursed",

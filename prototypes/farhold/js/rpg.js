@@ -488,6 +488,10 @@ export class Rpg {
       str: unit.attrs?.str ?? 0, dex: unit.attrs?.dex ?? 0, int: unit.attrs?.int ?? 0, con: unit.attrs?.con ?? 0,
       // passive-tree fields, zeroed here so the effect registry can add to them too
       resistAll: 0, thorns: 0, hpOnKill: 0, manaOnKill: 0, lifeStealFrac: 0,
+      // perk-forest talent nodes that are a NUMBER rather than a flag, because the number is what
+      // the game already reads: `js/main.js` asks fx.sum for 'echo' and 'scavenge' (js/effects.js
+      // DERIVED_INTO_SUM folds these in) and reads `arrowsPerShot` when it looses an arrow.
+      echoChance: 0, scavengeChance: 0,
       // talent fields, likewise
       damagePct: 0, armorPct: 0, movePct: 0, jumpPct: 0, swimPct: 0,
       mountPct: 0, floatLift: 0, arrowRangePct: 0, arrowSpeedPct: 0,
@@ -1093,6 +1097,37 @@ export class Rpg {
       }
     }
 
+    /**
+     * THE PERK FOREST'S OWN TALENT NODES, which were eight flags and only two readers.
+     *
+     *   Quarry     — the first hit on something marks it, and the mark makes everything hurt more.
+     *   Cauterise  — a critical also burns.
+     *   Pack Sense — a companion's hit mends its owner. A pet carries `owner`, and a pet's damage
+     *                comes through this same function (`rpg.strike(pet, enemy)`), so this is where
+     *                the tenth can be taken off it.
+     *
+     * Riposte is armed further up, where a dodge and a block are decided. Sunder is read by
+     * js/main.js. Volley, Echo and Scavenger turned out to be better as numbers than as flags —
+     * see TALENT_NODES in js/perks.js.
+     */
+    if (amount > 0) {
+      const flags = attacker.perkFlags;
+      if (flags?.mark && applyStatus && !defender.statuses?.marked) {
+        applyStatus(defender, 'marked', {
+          seconds: 8, takeMore: 0.15, name: 'Quarry', kind: 'debuff', element: 'arcane',
+        });
+      }
+      if (flags?.cauterise && crit && applyStatus) {
+        applyStatus(defender, 'burn', {
+          seconds: 4, perSecond: Math.max(1, amount * 0.25 / 4), name: 'Cauterised', element: 'fire',
+        });
+      }
+      const owner = attacker.owner;
+      if (owner?.perkFlags?.pack && owner.hp != null) {
+        owner.hp = Math.min(owner.maxHp ?? owner.hp, owner.hp + Math.max(1, Math.round(amount * 0.1)));
+      }
+    }
+
     // after the hit: streaks, bleeds, mana on hit, first-hit marks
     if (attacker.equipment) {
       const post = { self: attacker, target: defender, amount, crit, element, applyStatus };
@@ -1212,8 +1247,14 @@ export class Rpg {
     if (light) {
       const held = light.look?.offhand || 'torch';
       const colour = light.color || light.look?.color || '#c08040';
-      if (held === 'torch' && !player.equipment.offhand) out.offhand = { id: 'torch', color: colour };
-      else out.decor = { id: held === 'lamp' ? 'wisp_lamp' : 'belt_lantern', color: colour };
+      if (held === 'torch') {
+        // a torch is carried in the hand when that hand is free, and hangs off the belt when a
+        // shield or a second weapon has it
+        if (player.equipment.offhand) out.decor = { id: 'belt_torch', color: colour };
+        else out.offhand = { id: 'torch', color: colour };
+      } else {
+        out.decor = { id: held === 'lamp' ? 'wisp_lamp' : 'belt_lantern', color: colour };
+      }
     }
     return out;
   }

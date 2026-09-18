@@ -504,8 +504,31 @@ function buildHoodDown(a, add, W, T) {
   add(taperedCurve([[-0.12 * W, 0.215 * T, -0.212 * W], [0, 0.18 * T, -0.216 * W], [0.12 * W, 0.215 * T, -0.212 * W]], [0.006, 0.01, 0.006], 4, 6), 'chest', lining);
 }
 
+/**
+ * Parts CHIBI 2 HAS AND THE PAPER DOLL DOES NOT.
+ *
+ * `normalizeAvatar` is the 2D catalogue's normaliser: any id it has never heard of is thrown back
+ * to the slot's default. That is right for the 2D renderer, which genuinely has no drawing for
+ * them — and wrong here, because chibi2-gear.js can build things avatar-2d cannot. Round 11 added
+ * two belt lights (`belt_torch` and `wisp_lamp`, for Farhold's "torches need a model on the
+ * player") and they silently came out as `none` for exactly this reason.
+ *
+ * So: normalise as usual, then put back any id that IS one of ours. Add a part to chibi2-gear.js
+ * without a matching entry in avatar-2d/js/parts, and its id belongs in here.
+ */
+export const CHIBI2_ONLY_PARTS = { decor: ['belt_torch', 'wisp_lamp'] };
+
+function normalizeForChibi2(avatar) {
+  const a = normalizeAvatar(avatar);
+  for (const [slot, ids] of Object.entries(CHIBI2_ONLY_PARTS)) {
+    const want = avatar?.[slot]?.id;
+    if (want && ids.includes(want)) a[slot] = { ...(a[slot] || {}), id: want };
+  }
+  return a;
+}
+
 function acquire(avatar, anims = CHIBI2_ANIMS) {
-  const a = normalizeAvatar(avatar), rig = createRig(a.body);
+  const a = normalizeForChibi2(avatar), rig = createRig(a.body);
   // the clip set is part of the cache key: two characters with different animation sets are not
   // the same template
   const key = JSON.stringify(a) + '|' + anims.length;

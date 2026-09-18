@@ -35,6 +35,35 @@ import * as THREE from 'three';
  */
 const SOFT_EDGE = 2.2;
 
+/**
+ * WHY A BETTER LAMP DID NOT LOOK BETTER — and the fix.
+ *
+ *   "I bought a different light and a different mount, but there is no noticeable difference.
+ *    Upgraded lamps must be SIGNIFICANTLY better — the light radius is dreadfully low right now."
+ *
+ * The three lights differed only in `distance`, which with a decay term is almost the WRONG knob:
+ * a point light's brightness at `d` metres is roughly `intensity / d^decay`, and `distance` only
+ * decides where the window cuts it off. At decay 1.4 a torch of intensity 3.2 is putting 0.018 on
+ * the ground at forty metres — nothing you could see — so a Wisp Lamp with twice the cutoff and a
+ * tenth more intensity lit almost exactly the same circle as a Pitch Torch. That is the whole of
+ * "the difference is not there".
+ *
+ * So the RANGE now drives the brightness as well as the cutoff. `intensity` is multiplied by
+ * `(range / REFERENCE_RANGE)^DECAY`, which makes every light the same brightness at its own edge
+ * and much brighter than the last one everywhere inside it: at twenty metres the Wisp Lamp throws
+ * about four times what the torch does. A lower decay on top of that keeps the pool wide and even
+ * instead of a bright ring around your feet.
+ */
+const DECAY = 1.05;
+/** The range the configured `intensity` is written for — the starting torch. */
+const REFERENCE_RANGE = 40;
+
+/** How bright a light of this reach has to be to read at its own edge. */
+export function intensityFor(baseIntensity, range) {
+  const r = Math.max(1, range || REFERENCE_RANGE);
+  return baseIntensity * Math.pow(r / REFERENCE_RANGE, DECAY);
+}
+
 /** ~6 Hz, in radians a second: fast enough to read as a flame, slow enough not to strobe. */
 const TORCH_HZ = Math.PI * 2 * 6;
 
@@ -47,8 +76,8 @@ export function createLight(scene, { balance = {} } = {}) {
   const torch = new THREE.PointLight(
     new THREE.Color(torchCfg.color || '#ffb060'),
     0,
-    (torchCfg.range ?? 34) * SOFT_EDGE,
-    1.4,                                   // gentle falloff: a torch that dies at 3 m is a candle
+    (torchCfg.range ?? REFERENCE_RANGE) * SOFT_EDGE,
+    DECAY,                                 // gentle falloff: a torch that dies at 3 m is a candle
   );
   torch.name = 'farhold-torch';
   scene.add(torch);
@@ -56,7 +85,7 @@ export function createLight(scene, { balance = {} } = {}) {
   // ---- the pool: world sources borrow one of these
   const pool = [];
   for (let i = 0; i < maxLights; i++) {
-    const l = new THREE.PointLight(0xffffff, 0, 20 * SOFT_EDGE, 1.5);
+    const l = new THREE.PointLight(0xffffff, 0, 20 * SOFT_EDGE, DECAY);
     l.name = 'farhold-light-' + i;
     l.visible = false;
     scene.add(l);
@@ -82,9 +111,16 @@ export function createLight(scene, { balance = {} } = {}) {
     if (!on) torch.intensity = 0;
   }
 
-  /** How far the carried light reaches — a better lantern in the light slot lights more ground. */
-  let torchRange = torchCfg.range ?? 34;
-  function setRange(metres) { torchRange = metres || (torchCfg.range ?? 34); }
+  /**
+   * How far the carried light reaches — a better lantern in the light slot lights more ground, and
+   * (see `intensityFor`) throws a good deal more light inside that ground as well.
+   *
+   * `js/main.js` calls this every frame with `player.equipment.light.range`, and `rpg.refresh` now
+   * writes the affix and perk total back onto that item, so "+12 more metres of ground" reaches
+   * here instead of sitting on the character sheet.
+   */
+  let torchRange = torchCfg.range ?? REFERENCE_RANGE;
+  function setRange(metres) { torchRange = metres || (torchCfg.range ?? REFERENCE_RANGE); }
 
   /**
    * One frame. `at` is where the player is; `day` is 0 at midnight and 1 at noon (sky.dayFraction
@@ -103,7 +139,7 @@ export function createLight(scene, { balance = {} } = {}) {
       // pulse you can count; the config's `flicker` is the peak-to-peak swing, so 0.16 is ±8%.
       const amp = (torchCfg.flicker ?? 0.16) * 0.5;
       const wobble = 1 + (Math.sin(torchPhase) * 0.6 + Math.sin(torchPhase * 1.7 + 1.3) * 0.4) * amp;
-      torch.intensity = (torchCfg.intensity ?? 3.2) * need * wobble;
+      torch.intensity = intensityFor(torchCfg.intensity ?? 3.2, torchRange) * need * wobble;
       torch.distance = torchRange * SOFT_EDGE;
       torch.position.set(at.x, at.y + (torchCfg.height ?? 1.55), at.z);
     } else {
@@ -130,7 +166,8 @@ export function createLight(scene, { balance = {} } = {}) {
       // fade a source out as it gets near the edge of the pool's reach, so nothing pops on
       const fade = 1 - Math.min(1, Math.sqrt(hit.d) / 240);
       const dayFade = inside ? 1 : Math.max(0.15, 1 - Math.max(0, day));
-      l.intensity = (s.intensity ?? 2) * wob * fade * dayFade;
+      // world sources get the same treatment, so a big brazier reads as a big brazier
+      l.intensity = intensityFor(s.intensity ?? 2, s.range ?? 24) * wob * fade * dayFade;
     }
 
     // the ambient floor: a moonless night should be dim, not black
@@ -198,6 +235,6 @@ export const STARTER_TORCH = {
   affixes: [],
   look: { offhand: 'torch', color: '#c08040' },
   light: true,
-  range: 34,
+  range: 40,
   lore: 'Rag, pitch and a stick. It will not win a fight, but you can see the fight coming.',
 };

@@ -390,6 +390,47 @@ export function buildDecor(a, c) {
       add(new THREE.CylinderGeometry(0.05, 0.05, 0.014, 8), 'hips', dc, { position: [x, y - 0.045, zz], metal: true });
       break;
     }
+    /**
+     * A torch hung on the belt, for when the off hand is already holding a shield. The torch itself
+     * is drawn in `buildOffhand`; this is the same stick and flame on a hip bracket, so a player
+     * carrying a light and a shield can still see that they are carrying a light.
+     *
+     * (Both this and `wisp_lamp` below are chibi2-only parts — see CHIBI2_ONLY_PARTS in chibi2.js,
+     * without which the 2D catalogue's normaliser throws an id it does not know back to 'none'.)
+     */
+    case 'belt_torch': {
+      const [x, y, zz] = beltItem;
+      hanger(beltItem);
+      add(new THREE.CylinderGeometry(0.014, 0.017, 0.2, 6), 'hips', leather, { position: [x, y - 0.02, zz], rotation: [0.25, 0, 0.18] });
+      add(new THREE.CylinderGeometry(0.03, 0.024, 0.05, 8), 'hips', steel, { position: [x + 0.012, y + 0.072, zz - 0.02], metal: true });
+      add(new THREE.ConeGeometry(0.035, 0.09, 6), 'hips', '#ff8c2a', { position: [x + 0.014, y + 0.13, zz - 0.024], metal: true });
+      break;
+    }
+    /**
+     * A WISP LAMP on the belt: a glass jar with a small cold thing in it, hung off a bracket. The
+     * lantern above it is warm and square; this is round and cold, so a player can tell at a glance
+     * which light they are carrying.
+     */
+    case 'wisp_lamp': {
+      const [x, y, zz] = beltItem;
+      hanger(beltItem);
+      const cold = a.decor?.color || '#7fd4ff';
+      // the jar
+      add(new THREE.SphereGeometry(0.052, 10, 7), 'hips', cold, { position: [x, y, zz] });
+      // the thing inside it
+      add(gem(), 'hips', '#ffffff', { position: [x, y, zz], scale: [0.018, 0.024, 0.018] });
+      // brass cap, base and the three bands down the glass
+      add(new THREE.CylinderGeometry(0.03, 0.038, 0.028, 8), 'hips', steel, { position: [x, y + 0.058, zz], metal: true });
+      add(new THREE.CylinderGeometry(0.042, 0.042, 0.016, 8), 'hips', steel, { position: [x, y - 0.052, zz], metal: true });
+      for (let k = 0; k < 3; k++) {
+        const t = k / 3 * Math.PI * 2 + 0.5;
+        polyline(c, 'hips', [
+          [x + Math.sin(t) * 0.05, y - 0.05, zz + Math.cos(t) * 0.05],
+          [x + Math.sin(t) * 0.05, y + 0.05, zz + Math.cos(t) * 0.05],
+        ], 0.005, steel, { metal: true });
+      }
+      break;
+    }
     case 'bone_charms':
       add(taperedCurve([[-0.20 * W, 0.03, 0.12 * W], [0, -0.01, 0.17 * W], [0.20 * W, 0.03, 0.12 * W]], [0.008, 0.008, 0.008], 4, 10), 'hips', dc);
       for (const x of [-0.10, -0.05, 0.05, 0.10]) {

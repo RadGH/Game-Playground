@@ -448,6 +448,21 @@ export const DERIVED_INTO_HOOK = {
   petPower: d => 1 + (d.petDamagePct || 0) / 100,
 };
 
+/**
+ * The same seam for the hooks that are ADDED rather than multiplied.
+ *
+ * `js/main.js` already asks `rpg.fx.sum(player, 'echo')` before a cast and `sum(player,'scavenge')`
+ * on a kill — for the two legendary powers. The perk forest's Echo and Scavenger nodes wanted
+ * exactly those two things and had no way to reach them, so they were flags nothing read. Folding
+ * the derived number in here makes both nodes live without a line anywhere else.
+ */
+export const DERIVED_INTO_SUM = {
+  // …and the SKILL just cast gets a say as well as the sheet: the Echo talent on one skill sets
+  // `castRules.echo`, and js/main.js asks for this immediately after that skill's plan comes back.
+  echo: (d, unit) => (d.echoChance || 0) + (unit?.castRules?.echo || 0),
+  scavenge: d => d.scavengeChance || 0,
+};
+
 /** Every id the registry knows, for the tests and the "nothing is inert" audit. */
 export const EFFECT_IDS = Object.keys(EFFECTS);
 
@@ -629,6 +644,8 @@ export class Effects {
     c.rt = this.rt(unit); c.self = unit;
     let total = 0;
     for (const { e, v } of this.effects(unit)) if (e[name]) total += e[name](v, c) || 0;
+    const fold = DERIVED_INTO_SUM[name];
+    if (fold && unit.derived) total += fold(unit.derived, unit) || 0;
     return total;
   }
   product(unit, name, c = {}) {

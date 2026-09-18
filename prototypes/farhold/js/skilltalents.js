@@ -46,8 +46,10 @@
 //     node; it costs nothing.
 //
 // What is left as a trade is only the one the user said was fine — "a small damage increase in
-// exchange for multi-shot is acceptable" — so Fanned and Piercing still pay a little damage for
-// hitting more than one thing, and Quickened pays a little for coming back sooner.
+// exchange for multi-shot is acceptable" — so Fanned pays a little damage for hitting three
+// things, and Quickened pays a little for coming back sooner. Nothing else on the board has a cost.
+//
+// Round 11 also took the six nodes NOTHING carries out of the offer — see the note on OFFERS.
 
 import { fmt, pctOf, secs } from '../../../shared/format.js';
 
@@ -75,7 +77,7 @@ export const TALENT_EFFECTS = {
  * it is the price you pay ("each dealing 30% less damage"), and on its own it is the whole point
  * ("+35% damage").
  */
-export function describeMod(mod = {}) {
+export function describeMod(mod = {}, { heals = false } = {}) {
   const parts = [];
   const spreadWord = mod.spread >= 0.3 ? 'a wide fan' : mod.spread > 0 ? 'a fan' : 'one line';
   const shares = !!(mod.projectiles || mod.chains || mod.pierce);
@@ -94,7 +96,9 @@ export function describeMod(mod = {}) {
     const bits = [];
     if (mod.statusLonger) bits.push(`${secs(mod.statusLonger)} longer`);
     if (mod.statusPower) bits.push(`${pctOf(Math.round((mod.statusPower - 1) * 100))} harder`);
-    parts.push(`The burn, chill or poison it leaves lasts ${bits.join(' and hits ')}`);
+    parts.push(heals
+      ? `The effect it leaves lasts ${bits.join(' and is ')}`
+      : `The burn, chill or poison it leaves lasts ${bits.join(' and hits ')}`);
   }
   if (mod.sunder) parts.push(`Strips ${fmt(mod.sunder)} armour from what it hits, and the armour does not come back`);
   if (mod.leech) parts.push(`Heals you for ${pctOf(Math.round(mod.leech * 100))} of the damage it deals`);
@@ -109,8 +113,16 @@ export function describeMod(mod = {}) {
   }
   if (mod.mult && mod.mult !== 1) {
     const off = Math.round((1 - mod.mult) * 100);
-    if (mod.mult < 1) parts.push(shares ? `each dealing ${pctOf(off)} less damage` : `${pctOf(off)} less damage`);
-    else parts.push(`${pctOf(Math.round((mod.mult - 1) * 100))} more damage on every hit`);
+    if (mod.mult < 1) {
+      const what = heals ? 'healing' : 'damage';
+      parts.push(shares ? `each dealing ${pctOf(off)} less ${what}` : `${pctOf(off)} less ${what}`);
+    }
+    else {
+      // the same number does both jobs, so say the one this skill actually has: a Mend that
+      // promised "more damage" and a Firebolt that promised "more healing" both read as a mistake
+      const up = pctOf(Math.round((mod.mult - 1) * 100));
+      parts.push(heals ? `${up} more healing` : `${up} more damage on every hit`);
+    }
   }
   if (!parts.length) return 'No change.';
   return parts.join('. ').replace(/\. each /, ', each ') + '.';
@@ -165,7 +177,20 @@ export const TALENT_LIBRARY = {
 // Every node's line, written from its own numbers. Done once, at load.
 for (const node of Object.values(TALENT_LIBRARY)) node.desc = describeMod(node.mod);
 
-/** A skill's shape decides which nodes it may offer. A ground rune cannot be "fanned". */
+/**
+ * A skill's shape decides which nodes it may offer. A ground rune cannot be "fanned".
+ *
+ * "Verify every perk, skill and talent is FULLY implemented." After round 11 all but FOUR of these
+ * are — see `inertTalents()` and `PENDING_MODS` at the bottom of this file for the four and what
+ * each is waiting on. They stay on the board rather than being pulled off it because the existing
+ * suite picks two of them by name (tests/weapons.test.js) and because each is a handful of lines
+ * inside js/main.js `fireBolt`, which this round could not open. Nothing else here is a sentence
+ * with no behaviour behind it.
+ *
+ * The one that used to be in that list and is not any more is Echo: `js/main.js` already asks
+ * `rpg.fx.sum(player, 'echo')` right after the plan comes back, so the talent reaches it through
+ * `castRules` (js/effects.js DERIVED_INTO_SUM).
+ */
 const OFFERS = {
   bolt: { 1: ['fan', 'pierce', 'heavy'], 2: ['burst', 'chain', 'deepen'], 3: ['cauterise', 'echo', 'brand'] },
   nova: { 1: ['wide', 'heavy', 'quick'], 2: ['linger', 'shatter', 'drain'], 3: ['bulwark', 'overload', 'hunger'] },
@@ -174,12 +199,33 @@ const OFFERS = {
   ground: { 1: ['wide', 'quick'], 2: ['linger', 'deepen', 'drain'], 3: ['hunger', 'bulwark', 'brand'] },
   swipe: { 1: ['wide', 'heavy', 'quick'], 2: ['shatter', 'drain', 'burst'], 3: ['cauterise', 'hunger', 'overload'] },
   dash: { 1: ['quick', 'heavy'], 2: ['burst', 'shatter'], 3: ['bulwark', 'hunger'] },
-  buff: { 1: ['quick', 'wide'], 2: ['drain', 'deepen'], 3: ['bulwark', 'echo'] },
-  heal: { 1: ['quick', 'wide'], 2: ['linger', 'deepen'], 3: ['bulwark', 'echo'] },
+  // a skill you cast on yourself hits nothing, so it is offered the modifiers that still mean
+  // something on it: a shorter cooldown, a stronger effect, a longer-lasting status
+  buff: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['echo', 'hunger'] },
+  heal: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['echo', 'hunger'] },
   summon: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['hunger', 'bulwark'] },
 };
 
+/** Every talent a player can actually pick, for the audit. */
+export const OFFERED_TALENTS = [...new Set(Object.values(OFFERS).flatMap(o => Object.values(o).flat()))];
+
 const DEFAULT_OFFER = OFFERS.bolt;
+
+/**
+ * THE SHAPE NAMES IN `data/skills.json` ARE NOT THE SHAPE NAMES IN `OFFERS`.
+ *
+ * Round 10 fixed half of "every skill was offered the BOLT talent tree" — `skills.state()` was not
+ * passing `shape` at all. The other half was here and survived it: the data calls its shapes
+ * `melee`, `around` and `self`, and this table calls them `swipe`, `nova` and `buff`, so all three
+ * fell through `OFFERS[shape] || DEFAULT_OFFER` to the bolt board anyway. Eighteen of the forty
+ * skills were affected — a Consecrate was being offered "Fanned", and so was a self-heal.
+ */
+export const SHAPE_ALIASES = { melee: 'swipe', around: 'nova', self: 'buff', wave: 'cone', chain: 'beam', lob: 'bolt' };
+
+/** The offer key for a skill's own shape. */
+export function offerShape(shape = 'bolt') {
+  return OFFERS[shape] ? shape : (SHAPE_ALIASES[shape] || 'bolt');
+}
 
 /** Which levels a skill's tiers unlock at. One pick per tier, and they open as you grow. */
 export const TIER_LEVELS = [1, 8, 18];
@@ -192,13 +238,21 @@ export const TIER_LEVELS = [1, 8, 18];
  * nothing.
  */
 export function treeFor(skillId, shape = 'bolt') {
-  const offer = OFFERS[shape] || DEFAULT_OFFER;
+  const key = offerShape(shape);
+  const offer = OFFERS[key] || DEFAULT_OFFER;
+  // a skill that mends rather than hits gets the healing wording for the same modifier
+  const heals = key === 'heal' || key === 'buff';
+  const node = id => {
+    const n = TALENT_LIBRARY[id];
+    if (!n) return null;
+    return heals ? { ...n, desc: describeMod(n.mod, { heals }) } : n;
+  };
   return {
-    skillId, shape,
+    skillId, shape, offer: key,
     tiers: [1, 2, 3].map(tier => ({
       tier,
       level: TIER_LEVELS[tier - 1],
-      nodes: (offer[tier] || []).map(id => TALENT_LIBRARY[id]).filter(Boolean),
+      nodes: (offer[tier] || []).map(node).filter(Boolean),
     })),
   };
 }
@@ -257,7 +311,12 @@ export function talentPlan(player, skillId, plan) {
     const m = node.mod || {};
     if (m.projectiles) out.projectiles = Math.max(out.projectiles || 1, m.projectiles);
     if (m.spread) out.spread = Math.max(out.spread || 0, m.spread);
-    if (m.mult) { out.mult = (out.mult || 1) * m.mult; out.damage = Math.max(1, Math.round((out.damage || 1) * m.mult)); }
+    if (m.mult) {
+      out.mult = (out.mult || 1) * m.mult;
+      out.damage = Math.max(1, Math.round((out.damage || 1) * m.mult));
+      // a heal is the same number wearing a different hat, so Overload on Mend is more healing
+      if (out.heal) out.heal = Math.max(1, Math.round(out.heal * m.mult));
+    }
     if (m.speed) out.speed = (out.speed || 1) * m.speed;
     if (m.pierce) out.pierce = (out.pierce || 0) + m.pierce;
     if (m.homing) out.homing = (out.homing || 0) + m.homing;
@@ -307,7 +366,7 @@ export function castRulesFrom(skillId, plan) {
   if (!plan) return null;
   const rules = { skill: skillId };
   let any = false;
-  for (const key of ['sunder', 'leech', 'critBurn', 'critBurnSeconds', 'mark', 'markSeconds', 'killRefund']) {
+  for (const key of ['sunder', 'leech', 'critBurn', 'critBurnSeconds', 'mark', 'markSeconds', 'killRefund', 'echo']) {
     if (plan[key]) { rules[key] = plan[key]; any = true; }
   }
   return any ? rules : null;
@@ -327,6 +386,9 @@ export const IMPLEMENTED_MODS = new Set([
   'statusLonger', 'statusPower',
   // handed to rpg.strike through `player.castRules` — see castRulesFrom above
   'sunder', 'leech', 'critBurn', 'critBurnSeconds', 'mark', 'markSeconds', 'killRefund',
+  // `echo` rides castRules too, but its reader is js/main.js `castSkill`, which already asks
+  // rpg.fx.sum(player, 'echo') for the legendary of the same name (js/effects.js DERIVED_INTO_SUM)
+  'echo',
 ]);
 
 /** Mod keys nothing reads yet, with the file that would have to read them. */
@@ -337,7 +399,6 @@ export const PENDING_MODS = {
   chainFalloff: 'js/main.js fireBolt',
   ground: 'js/main.js — no lingering ground pool exists',
   groundRadius: 'js/main.js',
-  echo: 'js/main.js castSkill — the per-skill echo, unlike the legendary one',
   barrier: 'js/main.js castSkill — nothing grants a barrier off a cast',
   barrierSeconds: 'js/main.js castSkill',
   speed: 'js/main.js fireBolt — removed from every node in round 11, kept here for old saves',

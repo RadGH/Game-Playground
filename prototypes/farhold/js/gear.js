@@ -31,6 +31,56 @@
 // ---------------------------------------------------------------------------- mounts and lights
 
 /**
+ * WHAT EACH MOUNT IS, as a creature spec the 3D builder can actually make.
+ *
+ *   "The Moor Pony looked identical to the starting Trail Horse. Each mount base needs a visibly
+ *    different model."
+ *
+ * They were. `js/main.js` builds ONE horse at boot — `makeActor({ creature: { type: 'horse',
+ * size: 1.25, colors: {…} } })` — and pressing H shows or hides it, so whatever you bought, you rode
+ * that horse. Each base points at its own **creature type** now (`avatar-3d/js/creature-types.js`
+ * gained `pony`, `courser` and `elk`, because the proportions are in the type and a tint is not a
+ * different model), and this is the table the boot code should build from.
+ *
+ * Wiring it needs one line in js/main.js — see the report; everything on this side is here.
+ */
+export const MOUNT_LOOKS = {
+  trail_horse: {
+    creature: { type: 'horse', size: 1.25, colors: { body: '#6a4a32', belly: '#8a6a4a', accent: '#2e2018', eyes: '#301c10' } },
+  },
+  pony: {
+    creature: { type: 'pony', size: 1.0, colors: { body: '#8a6a44', belly: '#b09068', accent: '#3a2a18' } },
+  },
+  courser: {
+    creature: { type: 'courser', size: 1.3, colors: { body: '#4a3a30', belly: '#6a5648', accent: '#181008' } },
+  },
+  dray: {
+    creature: { type: 'elk', size: 1.45, colors: { body: '#6a5a48', belly: '#b8a684', accent: '#3a2c1c' }, features: { antlers: true } },
+  },
+};
+
+/** The look keys the bases below point at, kept beside the table they name. */
+const MOUNT_LOOK_KEYS = {
+  pony: MOUNT_LOOKS.pony, courser: MOUNT_LOOKS.courser, dray: MOUNT_LOOKS.dray,
+};
+
+/**
+ * The creature spec for whatever is in the mount slot, or the trail horse.
+ *
+ * One call, so nothing downstream has to know whether a mount carries its own look, came out of a
+ * save written before this table existed, or is the starter the character was handed.
+ */
+export function mountLook(item) {
+  if (!item) return MOUNT_LOOKS.trail_horse;
+  if (MOUNT_LOOKS[item.baseKey]) return MOUNT_LOOKS[item.baseKey];
+  if (item.look?.creature) return item.look;
+  // an old save's starter carries `mount: { creature: 'horse', size, … }` — the same thing said
+  // the way it was said before this table existed
+  if (item.mount?.creature) return { creature: { type: item.mount.creature, size: item.mount.size ?? 1.25 } };
+  return MOUNT_LOOKS.trail_horse;
+}
+
+/**
  * The three mounts and the three light sources, as item bases.
  *
  * Each is a real base with its own numbers, so the whole loot machine already knows what to do with
@@ -39,37 +89,53 @@
  * are allowed (see `SLOT_AFFIXES` below).
  */
 export const GEAR_BASES = {
-  // ---- mounts. `speed` multiplies move speed while riding; `stamina` is how long before it blows.
+  // ---- mounts. `speed` multiplies move speed while riding; `stamina` is how long it can gallop.
+  //
+  // "The Moor Pony looked identical to the starting Trail Horse. Each mount base needs a visibly
+  // different model." `look` used to be `{ body, color, scale }` and nothing read it at all —
+  // js/main.js builds ONE horse at boot and shows or hides it (see MOUNT_LOOKS below, which is the
+  // real creature spec each base should be built from).
   pony: {
     key: 'pony', name: 'Moor Pony', slot: 'mount', type: 'accessory', subtype: 'mount',
-    speed: 1.9, jump: 1.4, stamina: 26, price: 140, look: { body: 'horse', color: '#8a6a44', scale: 0.92 },
+    speed: 1.9, jump: 1.4, stamina: 26, price: 140, look: MOUNT_LOOK_KEYS.pony,
     lore: 'Short, broad and entirely unbothered. It will not win a race and it will not throw you.',
   },
   courser: {
     key: 'courser', name: 'Courser', slot: 'mount', type: 'accessory', subtype: 'mount',
-    speed: 2.5, jump: 1.6, stamina: 18, price: 420, look: { body: 'horse', color: '#4a3a30', scale: 1.05 },
+    speed: 2.5, jump: 1.6, stamina: 18, price: 420, look: MOUNT_LOOK_KEYS.courser,
     lore: 'Bred for the long straight roads between holds. Nervous on a hill, unmatched on a plain.',
   },
   dray: {
     key: 'dray', name: 'Dray Elk', slot: 'mount', type: 'accessory', subtype: 'mount',
-    speed: 2.1, jump: 2.1, stamina: 40, price: 760, look: { body: 'deer', color: '#6a5a48', scale: 1.3, antlers: true },
+    speed: 2.1, jump: 2.1, stamina: 40, price: 760, look: MOUNT_LOOK_KEYS.dray,
     lore: 'Taller at the shoulder than most doorways. It goes over broken ground as though it were a road.',
   },
 
-  // ---- light sources. `range` is metres lit; `warmth` tints it.
+  /**
+   * ---- light sources. `range` is metres lit.
+   *
+   *   "Upgraded lamps must be SIGNIFICANTLY better — the light radius is dreadfully low right now."
+   *
+   * 34 / 52 / 74 was a 1.5x ladder on a knob that barely moved what you could see (see the note on
+   * `intensityFor` in js/light.js: the brightness came from the DECAY, not from the range, so all
+   * three lit about the same circle). It is 40 / 90 / 160 now — a lantern lights more than twice
+   * the ground a torch does and a wisp lamp four times — and with the falloff fixed, the brightness
+   * inside that circle goes up with it. The prices move with the reach, so the ladder still costs
+   * something.
+   */
   torch: {
     key: 'torch', name: 'Pitch Torch', slot: 'light', type: 'accessory', subtype: 'torch',
-    range: 34, intensity: 2.2, color: '#ffb066', burn: 0, price: 20, look: { offhand: 'torch', color: '#c08040' },
+    range: 40, intensity: 2.6, color: '#ffb066', burn: 0, price: 20, look: { offhand: 'torch', color: '#c08040' },
     lore: 'Rag, pitch and a stick. It will not win a fight, but you can see the fight coming.',
   },
   lantern: {
     key: 'lantern', name: 'Shuttered Lantern', slot: 'light', type: 'accessory', subtype: 'lantern',
-    range: 52, intensity: 2.8, color: '#ffd9a0', burn: 0, price: 180, look: { offhand: 'lantern', color: '#c8b070' },
+    range: 90, intensity: 3.0, color: '#ffd9a0', burn: 0, price: 260, look: { offhand: 'lantern', color: '#c8b070' },
     lore: 'Glass, brass and a wick you can pinch down to nothing when something is listening.',
   },
   wisplamp: {
     key: 'wisplamp', name: 'Wisp Lamp', slot: 'light', type: 'accessory', subtype: 'lamp',
-    range: 74, intensity: 3.4, color: '#a8d8ff', burn: 0, price: 620, look: { offhand: 'lamp', color: '#7fd4ff' },
+    range: 160, intensity: 3.4, color: '#a8d8ff', burn: 0, price: 820, look: { offhand: 'lamp', color: '#7fd4ff' },
     lore: 'Something small and unhappy is in the jar. It gives a cold light and it does not go out.',
   },
 

@@ -231,7 +231,7 @@ same body as the slot's default. Every id used by the 30 Emberveil classes has i
 | cape | none, cape, shoulder_cape, half_cape, fur_mantle, feather_mantle, shawl | - | - |
 | held | none, sword, greatsword, greataxe, hammer, warhammer, mace, rapier, saber, daggers, cleaver, bow, crossbow, quarterstaff, staff_orb, staff_skull, staff_crook, staff_crystal, staff_totem, lute, book, hourglass, orb, flame, lightning, ring_rune | - | - |
 | offhand | none, heater_shield, kite_shield, round_shield, tower_shield, buckler, dagger, map, orb, book, quiver, torch | - | - |
-| decor | none, pauldrons, tabard, knife_rig, scroll_case, belt_lantern, bone_charms, rune_bracers, chained_tome, herb_satchel, rune_halo, prayer_ribbons, ember_censer, storm_rods, gear_pack, bead_necklace | - | - |
+| decor | none, pauldrons, tabard, knife_rig, scroll_case, belt_lantern, **belt_torch**, **wisp_lamp**, bone_charms, rune_bracers, chained_tome, herb_satchel, rune_halo, prayer_ribbons, ember_censer, storm_rods, gear_pack, bead_necklace | - | - |
 
 ### Gear and decorations
 
@@ -245,6 +245,13 @@ scroll_case, belt_lantern, bone_charms, rune_bracers (forearms), chained_tome, h
 items hang front-left, clear of both hands. Neck items move out and down over capelets
 (`CAPELETS`), and a raised hood skips its own mantle when the character wears one. Every class in
 `prototypes/emberveil/data/class-looks.json` wears one decoration and stays under 8,500 triangles.
+
+**Chibi 2-only parts.** `belt_torch` and `wisp_lamp` (round 11, for Farhold's "a light needs a model
+on the player") exist here and NOT in `avatar-2d/js/parts/decor.js`. `normalizeAvatar` is the 2D
+catalogue's normaliser, and it throws any id it has never heard of back to the slot's default — which
+is right for the 2D renderer and wrong here — so `js/chibi2.js` lists them in `CHIBI2_ONLY_PARTS` and
+puts them back after normalising. **Add a part to `chibi2-gear.js` with no 2D twin and its id belongs
+in that list**, or it will silently come out as `none`.
 
 ## Verification
 

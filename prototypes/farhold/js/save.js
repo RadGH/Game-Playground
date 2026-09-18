@@ -96,7 +96,7 @@ export function snapshot({
   // ---- these three were being PASSED and then dropped on the floor. See the note below.
   world, quests, campaign,
   // ---- The Territory expansion: who likes you, what you have knocked over, what you have heard
-  standings, territory, rumours,
+  standings, territory, rumours, waypoints,
   // where the player was last standing on the surface, for a save taken underground
   surface = null, inDungeon = false,
 }) {
@@ -152,6 +152,9 @@ export function snapshot({
     world: world || null,
     quests: quests || null,
     campaign: campaign || null,
+    // which waypoint pads you have lit, per world — a network you had to walk to earn is not
+    // something a reload should take back
+    waypoints: waypoints || null,
 
     /**
      * A save taken underground is a save taken in a DIFFERENT coordinate space: a dungeon's terrain

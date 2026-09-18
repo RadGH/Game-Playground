@@ -37,7 +37,7 @@ import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null, waypoints = null } = {}) {
   // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
   // the minimap and space mode can see them too.
@@ -365,6 +365,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
         scale, offsetX: ox, offsetY: oy,
       });
     }
+
+    drawWaypoints(ctx, scale, ox, oy);
 
     // B8: where a name has been held back, say so in grey rather than leaving a gap the player
     // reads as empty ground. The band under it still tells them whether they could survive there.
@@ -785,6 +787,52 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     return buffer;
   }
 
+  /** Where each pad landed on screen this draw, so a click can find it again. */
+  const waypointHits = [];
+
+  /**
+   * THE WAYPOINT PADS.
+   *
+   * One design everywhere — "a round concrete surface with some arcane sigildry that lights up when
+   * activated" — so they are drawn identically wherever they are, lit or not. An unlit pad is still
+   * drawn, because Diablo 2's rule is that the network is always THERE and it is your knowledge of
+   * it that grows; greying it out tells a player where to go next, which a missing icon cannot.
+   */
+  function drawWaypoints(ctx, scale, ox, oy) {
+    if (!waypoints) return;
+    const pads = waypoints.list();
+    if (!pads.length) return;
+    waypointHits.length = 0;
+
+    for (const pad of pads) {
+      const px = ox + (pad.x / M_PER_CELL) * scale;
+      const py = oy + (pad.z / M_PER_CELL) * scale;
+      if (px < -20 || py < -20 || px > canvas.width + 20 || py > canvas.height + 20) continue;
+      const r = Math.max(5, Math.min(11, 4 + scale * 0.5));
+
+      // the pad: a disc, then the sigil ring
+      ctx.beginPath();
+      ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.fillStyle = pad.lit ? 'rgba(20, 44, 58, .95)' : 'rgba(22, 26, 34, .9)';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = pad.lit ? '#6ad0ff' : 'rgba(120, 132, 148, .65)';
+      ctx.stroke();
+
+      // the sigildry — three marks on the ring, lit or dark
+      ctx.strokeStyle = pad.lit ? '#bfeaff' : 'rgba(120, 132, 148, .45)';
+      ctx.lineWidth = 1.4;
+      for (let i = 0; i < 3; i++) {
+        const a = (i / 3) * Math.PI * 2 - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(px + Math.cos(a) * r * 0.32, py + Math.sin(a) * r * 0.32);
+        ctx.lineTo(px + Math.cos(a) * r * 0.78, py + Math.sin(a) * r * 0.78);
+        ctx.stroke();
+      }
+      waypointHits.push({ px, py, r: r + 5, pad });
+    }
+  }
+
   /** Where the player is, in map cells. */
   function playerCell() {
     const p = whereIsPlayer();
@@ -904,6 +952,27 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       addPin(cell.x, cell.y);
       return;
     }
+
+    /**
+     * A CLICK ON A PAD IS A TRAVEL, and it is tested before anything else.
+     *
+     * "Allow clicking on waypoints on the map to fast travel between them." The pads are small, so
+     * the hit radius is a little wider than the drawn disc; an unlit one still answers, because
+     * being told "you have not been to Hollowcrown yet" is the point of drawing it at all.
+     */
+    const rect = canvas.getBoundingClientRect();
+    const mx = (ev.clientX - rect.left) * (canvas.width / rect.width);
+    const my = (ev.clientY - rect.top) * (canvas.height / rect.height);
+    let closest = null, best = Infinity;
+    for (const hit of waypointHits) {
+      const d = Math.hypot(hit.px - mx, hit.py - my);
+      if (d <= hit.r && d < best) { best = d; closest = hit; }
+    }
+    if (closest && waypoints?.travel) {
+      if (waypoints.travel(closest.pad.id)) toggle(false);
+      return;
+    }
+
     const info = cellInfo(world, cell.x, cell.y);
     state.selected = info ? { ...info, x: cell.x, y: cell.y } : null;
     buildSide();
@@ -969,6 +1038,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     setLevels(on) { state.levels = !!on; buildSide(); draw(); },
     get isOpen() { return state.open; },
     toggle, draw, addPin, removePin,
+    /** The same action a click on a pad runs, for main.js's handle and the tests. */
+    travelTo: id => !!waypoints?.travel?.(id),
     /** B8: which region names you have earned, for the tests and the debug menu. */
     known: () => [...known],
     knows,

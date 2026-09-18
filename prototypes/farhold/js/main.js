@@ -42,6 +42,7 @@ import { createPatrols } from './patrols.js';
 import { createCaravans } from './caravans.js';
 import { createWanderers } from './wanderers.js';
 import { createRumours } from './rumours.js';
+import { createWaypoints } from './waypoints.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
 import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, itemScore, displayName } from './rpg.js';
@@ -420,6 +421,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const roadFolk = createWanderers({ data: wandererData, territory: holdings, standings, seed });
   const rumours = createRumours({ territory: holdings, factions: factionData, seed });
   if (save?.rumours) rumours.load(save.rumours);
+
+  /**
+   * The waypoint network.
+   *
+   * Built from whatever settlements this world has, and re-pointed at the new list when you land
+   * somewhere else — the pads are per world, like the map's learned region names, because a pad on
+   * another planet is not somewhere you can walk to.
+   */
+  let waypoints = createWaypoints({ settlements: features.settlements, seed });
+  if (save?.waypoints) waypoints.load(save.waypoints);
   const jobs = createJobGen({ frames: frameData, territory: holdings, factions: factionData, standings, seed });
   /** The board for the zone you are in. Rebuilt when you cross a border, not every frame. */
   let localBoard = [];
@@ -1992,6 +2003,37 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       meteors: { get marks() { return meteors.marks(); } },
       gates: { get nodes() { return gates.nodes; } },
       showCoords: () => !!settings.get('coords'),
+      /**
+       * F15: the waypoint network, and what happens when you click one.
+       *
+       * "Allow clicking on waypoints on the map to fast travel between them." The map draws every
+       * pad, greys the ones you have not lit, and calls this for the rest. "Go here" stays beside
+       * it — the user considers it cheating but asked for it to remain for debugging.
+       */
+      waypoints: {
+        list: () => waypoints.list(),
+        travel: id => {
+          const here = waypoints.settlementAt(control.x, control.z);
+          const can = waypoints.canTravel(id, {
+            fighting: field.enemies.some(e => e && e.state === 'chase'),
+            underground: !!dungeon,
+            fromId: here?.id ?? null,
+          });
+          if (!can.ok) { hud.log(can.why, 'bad'); sound.ui('error'); return false; }
+
+          // what a town portal would anchor to, once BUILDING_EXPANSION's portal is built
+          waypoints.noteDeparture(control.x, control.z, planet?.name || null);
+          const hours = waypoints.hoursFor(control.x, control.z, can.pad);
+          control.teleport(can.pad.x, can.pad.z);
+          rebuildWorldAround(true);
+          field.clear();
+          sky.advanceHours?.(hours);
+          hud.log(`You step onto the sigil at ${can.pad.name}. ${hours < 1 ? 'Half a day' : Math.round(hours) + ' hours'} on the road.`, 'level');
+          sound.ui('click');
+          autoSave();
+          return true;
+        },
+      },
     });
   }
 
@@ -2034,6 +2076,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     features = createFeatures(scene, terrain, {
       palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
     });
+    // a pad on another planet is not somewhere you can walk to, so the network is rebuilt per world
+    waypoints = createWaypoints({ settlements: features.settlements, seed });
     weatherView = createWeatherView({
       scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
     });
@@ -2859,6 +2903,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       standings: standings.toJSON(),
       territory: holdings.toJSON(),
       rumours: rumours.toJSON(),
+      waypoints: waypoints.toJSON(),
     });
   }
   function autoSave({ quiet = true } = {}) {
@@ -3651,6 +3696,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     } : null;
     const town = features.settlementAt(control.x, control.z);
     if (town && campaign.onEnterSettlement(town.id)) hud.log(`${town.name} charted.`, 'level');
+    /**
+     * F15: crossing the boundary lights the pad. Diablo 2's rule, and the user's:
+     * "No need to get physically close to them though, entering the city boundaries is enough."
+     * `settlementAt` is already that test — the same one the HUD uses to say where you are.
+     */
+    if (town) {
+      const lit = waypoints.visit(town);
+      if (lit) {
+        hud.log(`The sigils at ${town.name} light as you cross the boundary. You can travel here from any other waypoint.`, 'level');
+        sound.questDone();
+      }
+    }
     if (!campaignDone && campaign.complete) {
       campaignDone = true;
       hud.log(`${campaignData.title} complete. The ledger is closed.`, 'level');
@@ -3804,6 +3861,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // planet's ground — which is exactly what "you landed in the sea at 55 m" turned out to be.
     // `folk` is rebuilt with the world, like `control` below, so it has to be a getter too
     get folk() { return folk; },
+    // the waypoint network, and the same travel action the map's click uses
+    get waypoints() { return waypoints; },
+    travelTo: id => map.travelTo(id),
     /** Open the shop panel on somebody, for the specs — the same call the E key makes. */
     openTalk: who => talk.show(who, talkContext(who)),
     get control() { return control; },

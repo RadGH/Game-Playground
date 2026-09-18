@@ -97,7 +97,9 @@ export function createInput(dom) {
  * `terrain` is a planet.js terrain; `balance` is data/balance.json.
  * `obstacles` is a list of ObstacleField (props, buildings) to be pushed out of.
  */
-export function createController(terrainIn, balance = {}, camera, { obstacles: obstaclesIn = [], settings = null, boat = null } = {}) {
+export function createController(terrainIn, balance = {}, camera, {
+  obstacles: obstaclesIn = [], settings = null, boat = null, derived = null,
+} = {}) {
   let obstacles = obstaclesIn;
   // Read through a binding, not a parameter: `setTerrain` swaps the whole floor out when the player
   // walks into a dungeon and back out again, and every sampler below has to follow it.
@@ -138,6 +140,20 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
 
   /** Whichever boat is selected right now, or null if the game has not wired one through. */
   const activeBoat = () => { try { return boat ? boat() : null; } catch { return null; } };
+
+  /**
+   * THE SHEET REACHES THE LEGS.
+   *
+   * Everything the player wears, rides and has spent a perk point on is added up into
+   * `player.derived` — and the controller never read a word of it. `b.moveSpeed` is the flat number
+   * out of balance.json, so every move-speed perk, `cond_extraLeg` and the `free_move` legendary
+   * were inert; and `b.mountSpeed` is one constant for every mount, which is the other half of "I
+   * bought a Moor Pony, which seemed to be identical to the Trail Horse I started with" — they had
+   * the same speed, the same jump and the same wind, whatever the shop charged.
+   *
+   * Read through a function, not captured: the sheet is rebuilt whenever gear changes.
+   */
+  const sheet = () => { try { return derived ? derived() || {} : {}; } catch { return {}; } };
 
   const forward = new THREE.Vector3();
   const right = new THREE.Vector3();
@@ -227,7 +243,7 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
     // --- move
     let speed = 0;
     if (!frozen && input && (input.forward || input.strafe)) {
-      const base = b.moveSpeed ?? 5.4;
+      const base = sheet().moveSpeed || (b.moveSpeed ?? 5.4);
       if (self.swimming) {
         /**
          * A boat is the difference between crossing a lake and going round it.
@@ -245,9 +261,12 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
         else if (!input.forward) speed *= 0.75;
       } else {
         speed = base * (input.run ? (b.runMultiplier ?? 2.1) : 1);
-        if (self.mounted) speed *= b.mountSpeed ?? 2.1;
+        // the mount you actually bought: gear.js gives the pony 1.9, the courser 2.5, the elk 2.1
+        if (self.mounted) speed *= sheet().mountSpeed || (b.mountSpeed ?? 2.1);
         const steep = terrain.slopeAt(self.x, self.z, 2);
-        speed *= 1 / (1 + Math.max(0, steep) * 1.6);
+        // …and a surefooted mount loses less of it to a hill, which is what the Dray Elk is FOR
+        const sure = self.mounted ? Math.max(0, Math.min(0.8, sheet().mountSlope || 0)) : 0;
+        speed *= 1 / (1 + Math.max(0, steep) * 1.6 * (1 - sure));
       }
       forward.set(Math.sin(self.yaw), 0, Math.cos(self.yaw));
       // right-hand side of `forward` is forward x up, which is (-cos, 0, sin)
@@ -283,7 +302,7 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
       self.grounded = false;
     } else {
       if (!frozen && input?.jump && self.grounded) {
-        const jump = (b.jumpSpeed ?? 6.4) * (self.mounted ? (b.mountJump ?? 1.5) : 1);
+        const jump = (b.jumpSpeed ?? 6.4) * (self.mounted ? (sheet().mountJump || b.mountJump || 1.5) : 1);
         self.vy = jump * Math.sqrt(Math.max(0.25, terrain.planet?.gravity ?? 1));
         self.grounded = false;
       }

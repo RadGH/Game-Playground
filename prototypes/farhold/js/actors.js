@@ -159,9 +159,10 @@ export class EnemyField {
   }
 
   /** Is this point far enough from anywhere with a watch on it to put something hostile? */
-  wild(x, z) {
+  wild(x, z, margin = 0) {
     for (const s of this.safeZones) {
-      if ((x - s.x) ** 2 + (z - s.z) ** 2 < s.r * s.r) return false;
+      const r = s.r + margin;
+      if ((x - s.x) ** 2 + (z - s.z) ** 2 < r * r) return false;
     }
     return true;
   }
@@ -551,7 +552,9 @@ export class EnemyField {
     if (list.length < 2) return;
     const CELL = 4;
     const grid = this._grid;
+    const pool = this._buckets || (this._buckets = []);
     grid.clear();
+    let used = 0;
     for (const e of list) {
       if (e.removed || e.dying != null || e.hover) continue;   // the dead and the airborne do not jostle
       const gx = Math.floor(e.x / CELL), gz = Math.floor(e.z / CELL);
@@ -559,7 +562,13 @@ export class EnemyField {
       // where a string one would allocate for every body every frame
       const key = gx * 1e6 + gz;
       let bucket = grid.get(key);
-      if (!bucket) grid.set(key, bucket = { gx, gz, list: [] });
+      if (!bucket) {
+        // the buckets themselves are reused frame to frame, so a busy fight allocates nothing here
+        bucket = pool[used] || (pool[used] = { gx: 0, gz: 0, list: [] });
+        used++;
+        bucket.gx = gx; bucket.gz = gz; bucket.list.length = 0;
+        grid.set(key, bucket);
+      }
       bucket.list.push(e);
     }
     // the half-neighbourhood: each pair of buckets is visited exactly once
@@ -695,6 +704,23 @@ export class EnemyField {
    * The nearest live enemy along a shot, in three dimensions — a bow that can only scan the
    * horizontal plane cannot hit anything up a slope or down a bank.
    */
+  /**
+   * The nearest living body to a point, ignoring one you have already hit.
+   *
+   * Added for the `chain` talent: a chained bolt has to find somewhere to jump to, and "nearest that
+   * is not the one I just burst on" is the whole rule. Kept here rather than in main.js because the
+   * enemy list belongs to the field and nothing outside it should be walking the array.
+   */
+  nearestTo(x, z, range = 12, except = null) {
+    let best = null, bd = range * range;
+    for (const e of this.enemies) {
+      if (!e || e === except || e.removed || e.dying != null) continue;
+      const d = (e.x - x) ** 2 + (e.z - z) ** 2;
+      if (d < bd) { bd = d; best = e; }
+    }
+    return best;
+  }
+
   hitScan(x, y, z, dirX, dirY, dirZ, { range = 40, width = 1.1 } = {}) {
     let best = null, bestT = Infinity;
     for (const e of this.enemies) {
@@ -743,7 +769,9 @@ export class EnemyField {
     if (e.dying != null) return;
     e.dying = 0;
     anim(e.actor, 'dead');
-    const earned = (e.playerDamage || 0) > 0 || e.boss || this.wild(e.x, e.z);
+    // the margin is for a guard whose post sits off the middle of its settlement: it can chase a
+    // little past the edge of the watch circle, and that is still its kill, not yours
+    const earned = (e.playerDamage || 0) > 0 || e.boss || this.wild(e.x, e.z, 16);
     if (!earned) {
       this.onLog(`The watch cuts down ${e.name}. Nothing in it for you.`, '');
       return;

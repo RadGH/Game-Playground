@@ -56,7 +56,7 @@ import { createPets, CLASS_PETS } from './pets.js';
 import { createSites } from './sites.js';
 import { createEncounters } from './encounters.js';
 import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
-import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES } from './gear.js';
+import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES, mountLook } from './gear.js';
 import { createBoat } from './boat.js';
 import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, OFFHAND_DAMAGE } from './weapons.js';
 import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
@@ -511,13 +511,30 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return control.firstPerson;
   }
 
-  // the horse, built once and hidden until you press H
+  /**
+   * The mount you bought is the mount you ride.
+   *
+   * E3: "I bought a moor pony, which seemed to be identical to Trail Horse I started with." It was —
+   * one hard-coded brown horse was built at boot and shown for every mount in the game, so the shop
+   * sold three animals and the world had one. `mountLook` (js/gear.js) gives each base its own body,
+   * and the model is rebuilt whenever the mount slot changes rather than once at boot.
+   */
   let horse = null;
-  try {
-    horse = await makeActor({ creature: { type: 'horse', size: 1.25, colors: { body: '#6a4a32', belly: '#8a6a4a', accent: '#2e2018', eyes: '#301c10' } } });
-    horse.group.visible = false;
-    scene.add(horse.group);
-  } catch { horse = null; }
+  let horseKey = null;
+  async function buildMount() {
+    const item = player.equipment?.mount || null;
+    const key = item?.baseKey || 'trail_horse';
+    if (horse && key === horseKey) return;
+    try {
+      const made = await makeActor(mountLook(item));
+      if (horse) { scene.remove(horse.group); horse.dispose?.(); }
+      horse = made;
+      horseKey = key;
+      horse.group.visible = false;
+      scene.add(horse.group);
+    } catch { /* keep whatever we had rather than leaving the player on foot */ }
+  }
+  await buildMount();
 
   /**
    * The boat, built once beside the horse and hidden until you are in deep water.
@@ -560,6 +577,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     obstacles: [props.solids, features.solids], settings,
     // which boat goes under you when you start swimming — read live, so buying one mid-run counts
     boat: () => vehicleFor(player, 'boat'),
+    // …and everything the player is wearing, riding and has spent a perk on. Without this the legs
+    // ran on the flat numbers out of balance.json and every move-speed perk was inert.
+    derived: () => player.derived,
   });
   const input = createInput(renderer.domElement);
   const fx = createCombatFx(scene, {
@@ -682,9 +702,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * several metres by the time it arrives, so a shot lined up on a wolf's nose burst behind it.
    */
   const BOLT_SPEED = 48;
-  function fireBolt(plan, a, dx, dy, dz, strikeOpts, from, loud = true) {
+  function fireBolt(plan, a, dx, dy, dz, strikeOpts, from, loud = true, hop = 0) {
+    /**
+     * PIERCE: do not stop at the first body.
+     *
+     * A bolt scans for what it hits and bursts there. The `pierce` talent says it should carry on
+     * through, so with it the scan is simply not allowed to shorten the flight — the bolt flies its
+     * full range and the splash along the way does the work.
+     */
     const target = field.hitScan(a.x, a.y, a.z, dx, dy, dz, { range: plan.range, width: 1.4 });
-    let dist = target ? target.distance : plan.range;
+    let dist = (plan.pierce && !hop) ? plan.range : (target ? target.distance : plan.range);
     for (let t = 2; t < dist; t += 2) {
       const gx = a.x + dx * t, gz = a.z + dz * t;
       if (a.y + dy * t <= terrain.heightAt(gx, gz)) { dist = t; break; }
@@ -701,6 +728,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const splash = plan.splash * (rpg.fx.sum(player, 'boltSplash') || 1);
         const hits = field.strikeArea(at.x, at.z, splash, player, { falloff: 0.5, ...strikeOpts });
         if (hits.length && loud) sound.combat('hit', { crit: hits.some(h => h.result.crit) });
+
+        /**
+         * CHAIN: jump to the next body along.
+         *
+         * `plan.chains` is how many more hops are left and `plan.chainFalloff` is what each one
+         * keeps. The hop is fired as another bolt from where this one burst, at the nearest enemy
+         * that is not the one just hit, so it reuses every rule above — including its own chain, one
+         * shorter, which is what makes the talent terminate.
+         */
+        const left = (plan.chains || 0) - hop;
+        if (left > 0) {
+          const next = field.nearestTo(at.x, at.z, 12, chase) || null;
+          if (next) {
+            const ndx = next.x - at.x, ndz = next.z - at.z;
+            const nlen = Math.hypot(ndx, ndz) || 1;
+            const keep = plan.chainFalloff ?? 0.65;
+            const weaker = { ...strikeOpts, power: (strikeOpts?.power ?? 1) * keep };
+            fireBolt({ ...plan, range: 14 }, { x: at.x, y: at.y, z: at.z },
+              ndx / nlen, 0, ndz / nlen, weaker,
+              new THREE.Vector3(at.x, at.y, at.z), false, hop + 1);
+          }
+        }
       })
       .catch(() => { /* the scene went away mid-flight */ });
   }
@@ -1311,8 +1360,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     field, statuses: skillData.statuses,
   });
   if (classDef.pet) {
-    pets.summonForClass(classId, player, classDef.pet).then(made => {
-      if (made.length) hud.log(`${player.name} ${classDef.pet.verb || 'calls'} ${made.length === 1 ? made[0].name : made.length + ' companions'}.`, 'good');
+    // "One more companion follows you" — the perk existed, and the class summon ignored it, so the
+    // answer to "what companion?" was "none, ever". It is the class's own, one more of them.
+    const pet = { ...classDef.pet, count: (classDef.pet.count ?? 1) + (player.derived?.petSlots || 0) };
+    pets.summonForClass(classId, player, pet).then(made => {
+      if (made.length) hud.log(`${player.name} ${pet.verb || 'calls'} ${made.length === 1 ? made[0].name : made.length + ' companions'}.`, 'good');
     });
   }
 
@@ -1983,6 +2035,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     control = createController(terrain, balance, camera, {
       obstacles: [props.solids, features.solids], settings,
       boat: () => vehicleFor(player, 'boat'),
+      derived: () => player.derived,
     });
     field = makeField();
     field.solids = [props.solids, features.solids];
@@ -3105,6 +3158,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         control.mounted = false;
         hud.log('You have nothing to ride. A mount goes in the mount slot.');
       } else {
+        if (control.mounted) buildMount();     // the slot may have changed since the last ride
         hud.log(control.mounted ? `You swing up onto the ${(player.equipment.mount?.name || 'horse').toLowerCase()}.` : 'You dismount.');
       }
       if (horse) horse.group.visible = control.mounted;
@@ -3410,6 +3464,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (selfTick > 0 && player.hp <= 0) respawn(null);
     hud.skills(skills.state());
 
+    // a cast barrier runs down in real time, not on the one-second regen tick
+    if (player.castBarrierFor > 0) {
+      player.castBarrierFor -= dt;
+      if (player.castBarrierFor <= 0) { player.castBarrierFor = 0; player.barrier = 0; }
+    }
     sinceRegen += dt;
     if (sinceRegen > 1) {
       sinceRegen = 0;
@@ -3425,11 +3484,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       player.hp = Math.min(player.maxHp, player.hp + (player.derived.hpRegen || 0) + mending);
       player.mp = Math.min(player.maxMp, player.mp + (player.derived.mpRegen || 0) + (fighting ? 0 : player.maxMp * 0.02));
       // barrier refills out of a fight, and faster with `barrierRegen`
+      /**
+       * A barrier a SKILL put up is not the gear's barrier.
+       *
+       * This wiped `player.barrier` to zero every second for anyone whose gear grants none — which
+       * is most characters — so the `bulwark` talent granted a shield that was gone before the
+       * player could be hit by anything. A cast barrier is tracked separately and ticks down on its
+       * own clock; the gear's pool refills underneath it as it always did.
+       */
       const maxBarrier = player.derived.barrier || 0;
       if (maxBarrier > 0) {
         const rate = (player.derived.barrierRegen || 0) + (fighting ? 0 : maxBarrier * 0.08);
-        player.barrier = Math.min(maxBarrier, (player.barrier || 0) + rate);
-      } else player.barrier = 0;
+        player.barrier = Math.min(maxBarrier, Math.max(player.barrier || 0, 0) + rate);
+      } else if ((player.castBarrierFor || 0) <= 0) {
+        player.barrier = 0;
+      }
     }
 
     rebuildWorldAround(false);

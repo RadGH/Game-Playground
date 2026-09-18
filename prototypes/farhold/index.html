@@ -328,20 +328,16 @@
 
   <!-- ---------------------------------------------------------- skills -->
   <div class="tab-body hidden" data-tab="skills" role="tabpanel" aria-label="Skills">
+    <!-- D5: "Your bar" and "All skills" were two renderings of the same six slots — the same names,
+         the same costs, in the same order — so one of them had to go. The bar stays, because it is
+         the one that mirrors the keys you actually press and doubles as the talent picker; what the
+         list had that it did not (what each skill DOES) moved onto the cards. -->
     <section class="pane col-bar" id="sheet-bar-pane">
       <div class="pane-head">
         <span class="pane-title">Your bar</span>
-        <span class="pane-tools keyhint">click a key to shape it · a filled dot is a talent taken</span>
+        <span class="pane-tools keyhint">keys 1–6 · click one to shape it · a filled dot is a talent taken</span>
       </div>
       <div class="pane-body flush"><div id="sheet-skillbar"></div></div>
-    </section>
-
-    <section class="pane col-list" id="sheet-skill-pane">
-      <div class="pane-head">
-        <span class="pane-title">All skills</span>
-        <span class="pane-tools keyhint">keys 1–6</span>
-      </div>
-      <div class="pane-body tight"><div id="sheet-skills" class="skilllist"></div></div>
       <div class="pane-foot"><span class="small muted" id="sheet-talent-points"></span></div>
     </section>
 
@@ -364,6 +360,14 @@
           <span class="pane-meta" id="perk-points"></span>
           <div class="pane-tools">
             <span class="keyhint">scroll to zoom · drag to move · ◆ keystone · ■ talent</span>
+            <!-- D10: eighty-nine nodes and no way to find one. Typing rings what matches and fades
+                 the rest, so "magic find" is one word away instead of a hunt. -->
+            <input type="search" id="perk-search" class="perk-search" placeholder="Find a perk…"
+                   aria-label="Find a perk by name or by what it does">
+            <span class="keyhint" id="perk-search-note"></span>
+            <!-- D9: the name under every node was on whenever you were zoomed in, whether you
+                 wanted it or not. Off by default. -->
+            <label class="chip perk-check"><input type="checkbox" id="perk-labels"> Names</label>
             <button id="perk-fit" class="chip">Fit to view</button>
           </div>
         </div>

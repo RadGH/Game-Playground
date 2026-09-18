@@ -12,6 +12,9 @@
 // Opening it releases the mouse, so the map can be clicked. Shift-click drops a pin.
 
 import { el, panel, button } from '../../../shared/ui.js';
+// D2: one wording for a location, and one way of getting it onto the clipboard. The debug menu owns
+// both so the two screens can never drift apart — see the notes there for why `execCommand` is in it.
+import { locationLine, copyTextVia, COPY_WORDS } from './debug.js';
 import { layersPanel } from '../../../worldgen/js/layers-panel.js';
 import { zoneTone } from './zones.js';
 import { MARKER_LOOKS, distanceText } from './markers.js';
@@ -93,7 +96,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     // planet's regions — main.js skips the zone lookup for the same reason. Learning a name from
     // those coordinates would hand you a region on the far side of the world for free.
     if (typeof window !== 'undefined' && window.farhold?.dungeon) return;
-    const p = getPlayer?.();
+    const p = whereIsPlayer();
     if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.z)) return;
     const zone = zones.at(p.x, p.z);
     if (zone && zone.id >= 0) remember(zone.id);
@@ -144,12 +147,67 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   const compositionBox = el('details', { class: 'map-composition' });
   const coords = el('span', { class: 'map-coords' });
 
+  /**
+   * B9: WHERE THE PLAYER IS, WHICHEVER BODY THEY ARE FLYING.
+   *
+   * `getPlayer()` hands back the walking controller, which stops moving the moment you board the
+   * ship — so in the air the arrow, the "you are here" recentre and the region you are learning all
+   * stayed stuck at the spot you took off from. In the air the ship IS the player, and `air.state`
+   * carries the same x/z/yaw the controller does.
+   */
+  const airborne = () => typeof window !== 'undefined' && window.farhold?.mode === 'air';
+  function whereIsPlayer() {
+    const ship = airborne() ? window.farhold?.air?.state : null;
+    return ship && Number.isFinite(ship.x) ? ship : getPlayer?.();
+  }
+
+  /**
+   * D2: the block a bug report quotes, on the clipboard from the map as well as the debug menu.
+   *
+   * It is a textarea rather than a toast because the page is served over plain http, where there is
+   * no clipboard API at all — the text has to be on screen and selected for Ctrl+C to be the way
+   * out. Hidden until the button is pressed.
+   */
+  const copyArea = el('textarea', { class: 'map-copy-text', readonly: 'readonly', spellcheck: 'false' });
+  const copyNote = el('span', { class: 'map-copy-note' });
+  const copyBar = el('div', { class: 'map-copy hidden' },
+    copyArea, copyNote,
+    el('button', { class: 'chip', text: 'Close', onclick: () => copyBar.classList.add('hidden') }),
+  );
+
+  /** seed, planet, biome, x, z, altitude — the six things every report of ours carries. */
+  function locationNow() {
+    const p = whereIsPlayer() || { x: 0, z: 0, y: 0 };
+    return locationLine({
+      seed,
+      planet: world.planet?.name || 'this world',
+      biome: terrain.biomeAt(p.x, p.z)?.name || '—',
+      x: p.x, z: p.z,
+      // in the air `y` is the ship's height; on foot it is the ground you are standing on
+      altitude: Number.isFinite(p.y) ? p.y : terrain.heightAt(p.x, p.z),
+    });
+  }
+
+  async function copyLocation() {
+    copyBar.classList.remove('hidden');
+    copyNote.textContent = 'Copying…';
+    const how = await copyTextVia(copyArea, locationNow());
+    copyNote.textContent = COPY_WORDS[how] || '';
+    copyNote.classList.toggle('bad', how === 'shown');
+  }
+
   const root = el('section', { class: 'map-screen hidden', id: 'map-screen' },
     el('div', { class: 'map-head' },
       el('h2', { text: world.planet?.name || 'The map' }),
       coords,
+      el('button', {
+        class: 'chip map-copy-btn', id: 'map-copy-location', text: 'Copy location',
+        title: 'Seed, world, biome and coordinates — the block to paste into a bug report.',
+        onclick: copyLocation,
+      }),
       el('button', { class: 'map-close', text: '×', onclick: () => toggle(false) }),
     ),
+    copyBar,
     el('div', { class: 'map-body' },
       el('div', { class: 'map-canvas-wrap' }, canvas, legendBox, readout),
       side,
@@ -200,7 +258,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     if (!here.length) {
       list.append(el('p', { class: 'muted small', text: 'Shift-click the map to drop a pin. Quests mark themselves.' }));
     } else {
-      const player = getPlayer();
+      const player = whereIsPlayer();
       for (const m of here) {
         const look = MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin;
         const away = book ? book.bearing(m, player, terrain).distance : 0;
@@ -456,7 +514,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     }
 
     // enemies near the player
-    const player = getPlayer();
+    const player = whereIsPlayer();
     ctx.fillStyle = '#ff5a3c';
     for (const e of getEnemies()) {
       if (e.dying != null) continue;
@@ -620,7 +678,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
 
   /** Where the player is, in map cells. */
   function playerCell() {
-    const p = getPlayer();
+    const p = whereIsPlayer();
     return { x: p.x / M_PER_CELL, y: p.z / M_PER_CELL };
   }
 
@@ -756,9 +814,16 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     draw();
   }
 
+  /**
+   * B9: while flying, main.js's tick never reaches `map.tick()` — it returns out of `stepFlight`
+   * long before it — so an open map would freeze at the frame you opened it. Five redraws a second
+   * while the map is up and the ship is moving; nothing at all on foot, where `tick()` already runs.
+   */
+  let airTimer = null;
   function toggle(open = !state.open) {
     state.open = open;
     root.classList.toggle('hidden', !open);
+    if (airTimer) { clearInterval(airTimer); airTimer = null; }
     if (open) {
       document.exitPointerLock?.();
       // B8: catch up on anything you were told since you last looked, then draw
@@ -766,9 +831,37 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       heardOf();
       buildSide();
       draw();
+      airTimer = setInterval(() => { if (state.open && airborne()) { noteWhereYouAre(); draw(); } }, 200);
     }
     return open;
   }
+
+  /**
+   * B9: IN THE AIR, M IS THE PLANET MAP — NOT THE STAR CHART.
+   *
+   * "Once you are in the atmosphere it should switch to the planet minimap and the full planet map."
+   * main.js sends M to the star chart for every mode except `ground` (js/main.js:2952) and that file
+   * belongs to another agent this round, so the map claims the key itself while you are flying.
+   *
+   * Two paths have to be covered, because js/settings.js re-sends a rebound key as a synthetic event
+   * dispatched AT the window: a real key press reaches this capture listener before any of main.js's
+   * (capture always runs first), and `stopImmediatePropagation` then settles it; a synthetic one is
+   * at-target for both of us and whichever listener was added first wins, so if main.js got there
+   * ahead of us its star chart is put away on the next turn of the event loop.
+   *
+   * When main.js can be edited again this whole block is one line there:
+   *   if (mode === 'ground' || mode === 'air') map.toggle();
+   */
+  const onMapKey = e => {
+    if (e.code !== 'KeyM' || !airborne()) return;
+    e.stopImmediatePropagation();
+    window.farhold?.pauseMenu?.toggle(false);     // what main.js's handler would have done first
+    toggle();
+    const shut = () => { if (state.open && window.farhold?.chart?.isOpen) window.farhold.chart.toggle(false); };
+    shut();
+    setTimeout(shut, 0);
+  };
+  window.addEventListener('keydown', onMapKey, true);
 
   window.addEventListener('resize', () => { if (state.open) draw(); });
 
@@ -788,7 +881,13 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     known: () => [...known],
     knows,
     /** Take the screen out of the page (used when the world under it is replaced). */
-    dispose() { root.remove(); },
+    dispose() {
+      root.remove();
+      // a new map is built for every world you land on, so the key hook and the flight redraw have
+      // to go with the old one or they stack up, each one toggling a screen nobody can see
+      window.removeEventListener('keydown', onMapKey, true);
+      if (airTimer) { clearInterval(airTimer); airTimer = null; }
+    },
     /**
      * Keep the player arrow moving while the map is open — and, open or not, watch which region you
      * are walking through, because that is how names get learned (B8).

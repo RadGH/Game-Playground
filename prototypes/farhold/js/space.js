@@ -12,11 +12,15 @@
 //   space.canLand();                         // { planet, distance } when you are close enough
 //
 // Positions come from the same orbital angles `sky.js` uses, so what you saw in the sky from the
-// ground is where you actually fly to.
+// ground is where you actually fly to. Both ends cap how fast a body may appear to move, and they
+// cap it differently on purpose: the sky cares about degrees of sky a second, out here it is metres
+// a second against the ship — a world that drifts faster than you can fly is a world you cannot
+// leave. See `clockFor` below.
 
 import * as THREE from 'three';
 import { createPlanet, createStar, createShip, createSpaceBackdrop } from '../../../assets/js/space-models.js';
 import { cloudTexture, surfaceTexture } from '../../../universe/js/texture.js';
+import { orbitLayout } from '../../../universe/js/system.js';
 import { atmospherePalette } from '../../../worldgen/js/weather.js';
 import { clamp } from '../../../worldgen/js/noise.js';
 
@@ -28,16 +32,33 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   const boostMult = cfg.boost ?? 3.6;
   const warpMult = cfg.warp ?? 26;
   const landRange = cfg.landRange ?? 1.8;         // multiples of a planet's radius
-  // The approach. All of it in body radii above the surface.
+  /**
+   * The approach.
+   *
+   * **The slow zone is measured in AU, not in body radii.** It used to be "26 radii above the
+   * surface", which sounds modest and is not: a body is drawn a twentieth of an AU across in these
+   * compressed units, so 26 radii is a third of an AU, and a gas giant's was further still. The
+   * report was *"the slowing system is far too aggressive and stops me boosting with Space; it
+   * should only slow me within roughly 0.1 AU of a planet"* — which is a distance, the same for a
+   * moon as for a giant, so that is what it is now. `slowWithinAu` is also where you come out when
+   * you leave an atmosphere, so the drop-out point sits at the very outer edge of the brake and you
+   * can boost away the moment you arrive.
+   */
   const approachCfg = {
-    slowFrom: cfg.slowFrom ?? 26,        // start easing off the throttle here
-    slowTo: cfg.slowTo ?? 0.25,          // …down to this fraction of cruise at the surface
-    // How close counts as "in the way" for the warp drive, in body radii.
-    //
-    // It was nine, which for an Earth-sized world is nearly half an AU: "I'm 0.34 AU away from a
-    // planet and still can't boost, it's tiny in comparison. It started working around 0.75 AU but
-    // it's just too far away." Three radii is about a tenth of that, and is genuinely "in your lap".
-    noWarpWithin: cfg.noWarpWithin ?? 3,
+    slowWithinAu: cfg.slowWithinAu ?? 0.1,   // start easing off the throttle this far from the surface
+    slowTo: cfg.slowTo ?? 0.25,              // …down to this fraction of cruise at the surface
+    // …with a floor in the body's own radii, because a gas giant genuinely is a bigger thing to be
+    // near. For an ordinary world these come out under the AU figure and never bite.
+    slowRadii: cfg.slowRadii ?? 3,
+    // How close counts as "in the way" for the warp drive — again a distance, and half the brake's,
+    // so there is always open water between "the drive will light" and "the ship is being slowed".
+    noWarpWithinAu: cfg.noWarpWithinAu ?? 0.05,
+    noWarpRadii: cfg.noWarpRadii ?? 1.5,
+    // Where leaving an atmosphere puts you, measured from the surface of the world you left. You
+    // used to surface 1.6 radii up with the throttle crushed to a quarter by the brake above — less
+    // than the world's own orbital speed — so the planet simply caught you again: *"leaving
+    // atmosphere sometimes drops you straight back into it as soon as space loads."*
+    exitAu: cfg.exitAu ?? 0.1,
     entry: cfg.entryAltitude ?? 0.5,     // fall below this over a landable world and you are in its air
     tiers: cfg.detailTiers || [
       { key: 'far', within: Infinity, detail: 32, textureSize: 256 },
@@ -106,11 +127,56 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   // out here at all, so there was nothing to fly to and nothing to land on. They orbit their parent
   // rather than the star, which is why they are placed in a second pass in `placeBodies`.
   const bodies = [];
+
+  /**
+   * HOW BIG A WORLD IS DRAWN, AND WHERE ITS MOONS GO.
+   *
+   * *"Planets are too close together, some are drawn larger than their own sun, and moons share an
+   * orbital ring with planets so they could collide."* All three are the same fault: nothing here
+   * knew how much room a world actually had. A giant came out at `EARTH * 11 * 0.55` — six times
+   * the drawn star — and its moons were then placed eight of THOSE radii out, a circle nearly two
+   * and a half AU wide that swept straight through its neighbours' orbits.
+   *
+   * `universe/js/system.js`'s `orbitLayout` owns the answer. Asked with `map: 'au'` it leaves the
+   * orbits exactly where they really are — this scene is flown in real AU, and the HUD says so — and
+   * lends only the geometry: the gap either side of each ring, a size cap that keeps a planet
+   * narrower than its own lane, and a moon ladder that stays inside the lane its parent owns. Two
+   * lanes never touch, so nothing a moon sweeps can meet anything else in the system.
+   */
+  const layout = orbitLayout(system, { map: 'au', starRadius: starRadius / AU });
+  const drawn = new Map();               // planet id → { radius, moonOrbits }
+  system.planets.forEach((p, i) => {
+    const moons = (p.moons || []).length;
+    const wantAu = EARTH * (p.radius ?? 1) * (p.giant ? 0.55 : 1) / AU;
+    // the lane cap, and then a second one: a world is never drawn bigger than the star it goes round
+    const capped = layout.sizeFor(i, wantAu, { moons }) * AU;
+    const radius = Math.max(EARTH * 0.1, Math.min(capped, starRadius * 0.85));
+    drawn.set(p.id, { radius, moonOrbits: layout.moonRings(i, moons, { bodyRadius: radius / AU }).map(r => r * AU) });
+  });
+
+  /**
+   * AN ORBIT YOU CAN BELIEVE.
+   *
+   * *"Planets and moons orbit at crazy speeds — pretty much all moons."* One multiplier ran every
+   * body: `orbitScale` 150 turns a 900-second day into six seconds, which is fine for a sibling
+   * planet's year and absurd for a twelve-day moon — it went round in about a minute, several times
+   * faster than the ship can fly. `sky.js` already caps each body's apparent motion separately;
+   * out here the measure that matters is linear speed, because a world that moves faster than the
+   * ship is a world you cannot get away from. So every body gets its own clock, cut back until it
+   * is drifting at no more than a small fraction of cruise.
+   */
+  const maxBodySpeed = cfg.bodySpeed ?? baseSpeed * 0.12;
+  function clockFor(radiusUnits, periodDays) {
+    const period = Math.max(0.2, periodDays);
+    const speed = (Math.PI * 2 * radiusUnits * orbitScale) / (period * dayLength);
+    return speed > maxBodySpeed ? orbitScale * (maxBodySpeed / speed) : orbitScale;
+  }
+
   const worlds = [
     ...system.planets.map(p => ({ p, parent: null })),
-    ...system.planets.flatMap(p => (p.moons || []).map(m => ({ p: m, parent: p }))),
+    ...system.planets.flatMap(p => (p.moons || []).map((m, mi) => ({ p: m, parent: p, moonIndex: mi }))),
   ];
-  for (const { p, parent } of worlds) {
+  for (const { p, parent, moonIndex = 0 } of worlds) {
     const pal = atmospherePalette(p);
     const tinted = { ...p, atmosphere: { ...(p.atmosphere || {}), color: pal.cloud } };
     const texture = {};
@@ -120,9 +186,13 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     if (homeWorld && p.id === homePlanet?.id) {
       try { texture.map = surfaceTexture(p, homeWorld, { size: 512 }); } catch { /* fall back */ }
     }
-    // a moon is genuinely smaller — that is most of what makes it feel like a moon
-    const base = EARTH * (p.radius ?? 1) * (p.giant ? 0.55 : 1) * (parent ? 0.42 : 1);
-    const radius = Math.max(EARTH * (parent ? 0.12 : 0.35), base);
+    // a moon is genuinely smaller — that is most of what makes it feel like a moon — and it also has
+    // to fit in the ring its parent left it, or it is drawn inside the planet it goes round
+    const host = parent ? drawn.get(parent.id) : null;
+    const moonOrbit = host ? (host.moonOrbits[moonIndex] ?? host.radius * 2.4) : 0;
+    const radius = parent
+      ? Math.max(EARTH * 0.06, Math.min(EARTH * (p.radius ?? 0.27) * 0.42, host.radius * 0.5, (moonOrbit - host.radius) * 0.45))
+      : drawn.get(p.id).radius;
     const baseDetail = parent ? 20 : 32, baseTexture = parent ? 128 : 256;
     const model = createPlanet(tinted, { radius, detail: baseDetail, textureSize: baseTexture, texture });
     scene.add(model.group);
@@ -131,9 +201,11 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
       // kept so the model can be rebuilt at a finer detail as the ship closes on it
       tinted, texture, baseDetail, baseTexture, tier: 'far',
       au: p.orbit?.au ?? parent?.orbit?.au ?? 1,
-      // a moon's orbit is given in PLANET RADII, not AU — the same conversion sky.js makes
-      moonRadii: parent ? (p.orbit?.radii ?? p.orbit?.planetRadii ?? 8) : 0,
+      // where this moon's ring sits, in scene units, already inside its parent's own lane
+      moonOrbit,
       period: p.orbit?.periodDays || (parent ? 12 : 365),
+      // …and its own clock, slow enough that it cannot outrun the ship (see `clockFor`)
+      clock: clockFor(parent ? moonOrbit : (p.orbit?.au ?? 1) * AU, p.orbit?.periodDays || (parent ? 12 : 365)),
       phase: ((p.seed ?? p.id) % 360) * Math.PI / 180,
       inclination: p.orbit?.inclination ?? 0,
       eccentricity: p.orbit?.eccentricity ?? 0,
@@ -171,9 +243,9 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
 
   /** Where every world is right now, on the same clock the sky uses. */
   function placeBodies(elapsed) {
-    const days = (elapsed / dayLength) * orbitScale;
     for (const b of bodies) {
       if (b.moon) continue;                      // moons go round their parent, in a second pass
+      const days = (elapsed / dayLength) * b.clock;
       const angle = b.phase + (days / b.period) * Math.PI * 2;
       // a real orbit is an ellipse: r = a(1 - e^2) / (1 + e cos θ). `universe/` already rolls an
       // eccentricity for every planet; drawing perfect circles threw it away.
@@ -192,8 +264,9 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     for (const b of bodies) {
       if (!b.moon) continue;
       const host = bodies.find(x => x.planet.id === b.parentId) || bodies[0];
+      const days = (elapsed / dayLength) * b.clock;
       const angle = b.phase + (days / Math.max(0.2, b.period)) * Math.PI * 2;
-      const r = host.radius * Math.max(2.2, b.moonRadii);
+      const r = b.moonOrbit || host.radius * 2.4;
       b.position.set(
         host.position.x + Math.cos(angle) * r,
         host.position.y + Math.sin(b.inclination) * r * 0.4,
@@ -216,11 +289,25 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   // finer sphere and a bigger texture in two steps, so the disc that was a smudge from an AU away is
   // a surface with weather on it by the time you are in its air.
 
-  /** How much of cruise speed is available this close to something. 1 far out, `slowTo` at the deck. */
+  /** How far off a body's surface the approach brake reaches, in scene units. */
+  function slowZoneFor(radius) {
+    return Math.max(approachCfg.slowWithinAu * AU, radius * approachCfg.slowRadii);
+  }
+
+  /** …and how far out the warp drive refuses to light. Always inside the brake. */
+  function warpBubbleFor(radius) {
+    return Math.max(approachCfg.noWarpWithinAu * AU, radius * approachCfg.noWarpRadii);
+  }
+
+  /**
+   * How much of cruise speed is available this close to something. 1 anywhere outside the slow zone,
+   * `slowTo` at the deck. Measured from the SURFACE in scene units, so the brake is a distance you
+   * can point at on the HUD rather than a number of radii that quietly meant a third of an AU.
+   */
   function throttleLimit() {
     const near = nearest();
     if (!near) return 1;
-    const t = clamp(near.altitude / approachCfg.slowFrom, 0, 1);
+    const t = clamp((near.distance - near.body.radius) / slowZoneFor(near.body.radius), 0, 1);
     // ease in, so the brake comes on gently rather than as a wall
     return approachCfg.slowTo + (1 - approachCfg.slowTo) * (t * t * (3 - 2 * t));
   }
@@ -290,7 +377,16 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     return { planet: near.body.planet, body: near.body, altitude: near.altitude };
   }
 
-  /** Put the ship just off the world it launched from. */
+  /**
+   * Put the ship well off the world it launched from.
+   *
+   * `offset` is in body radii, and on its own it was the whole of the problem behind *"leaving
+   * atmosphere sometimes drops you straight back in"*: 2.6 radii is a tenth of the width of a hand
+   * at this scale, inside the approach brake, and slower than the world's own orbital drift — so
+   * the planet caught the ship up and swallowed it again before you had a chance to turn. The
+   * distance is now whichever is further out, that many radii or `exitAu` clear of the surface, so
+   * you always come out at the outer edge of the brake with the throttle free.
+   */
   function enter({ fromPlanet = homePlanet, elapsed = 0, offset = 2.6 } = {}) {
     state.elapsed = elapsed;
     placeBodies(elapsed);
@@ -298,7 +394,9 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     // rise away from the star, so you leave on the daylight side and the world is lit
     tmp.copy(body.position).normalize();
     if (tmp.lengthSq() < 1e-6) tmp.set(1, 0, 0);
-    state.position.copy(body.position).addScaledVector(tmp, body.radius * offset);
+    // …and at least clear of the brake, so the throttle is yours from the first frame
+    const out = body.radius + Math.max(body.radius * (offset - 1), approachCfg.exitAu * AU, slowZoneFor(body.radius));
+    state.position.copy(body.position).addScaledVector(tmp, out);
     state.velocity.set(0, 0, 0);
     state.throttle = 0;
     /**
@@ -333,9 +431,12 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     // warp takes a moment to spin up, which is what makes it feel like a warp — and it will not
     // spin up at all with a world in your lap, which is what stops you warping into a planet
     const room = nearest();
-    state.crowded = !!room && room.altitude < approachCfg.noWarpWithin;
+    state.crowded = !!room && (room.distance - room.body.radius) < warpBubbleFor(room.body.radius);
     if (state.crowded) state.warping = false;
-    state.warpCharge = clamp(state.warpCharge + (state.warping ? dt * 1.6 : -dt * 3), 0, 1);
+    // a running drive bleeds off FAST when a world comes up, rather than coasting the ship straight
+    // through it while the charge takes a third of a second to fall
+    const bleed = state.crowded ? 12 : 3;
+    state.warpCharge = clamp(state.warpCharge + (state.warping ? dt * 1.6 : -dt * bleed), 0, 1);
     const multiplier = 1 + (state.boosting ? boostMult - 1 : 0) + state.warpCharge * (warpMult - 1);
     // …and the closer you get, the less of the throttle the ship will give you
     state.approach = throttleLimit();
@@ -486,7 +587,7 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
       name: p.name, kind: body.moon ? 'moon' : (p.giant ? 'giant' : 'planet'),
       lines, landable: body.landable,
       why: body.landable ? null
-        : p.giant ? 'A gas giant — there is no ground under the cloud, only more cloud, then a crush.'
+        : p.giant ? 'Landing unavailable — Gas giants lack a solid surface'
           : 'Nothing here will hold a ship.',
       distanceAu: state.position.distanceTo(body.position) / AU,
       altitude: altitudeOf(body),
@@ -577,7 +678,7 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   return {
     scene, bodies, ship, state, AU, EARTH,
     enter, update, nearest, canLand, landingSpot, readout, placeBodies,
-    atmosphereEntry, refineDetail, throttleLimit, tierFor,
+    atmosphereEntry, refineDetail, throttleLimit, tierFor, slowZoneFor, warpBubbleFor, layout,
     warpStretch, releaseWarp,
     targetUnder, describe, STAR,
     /** The way the ship is pointing, for `targetUnder`. */

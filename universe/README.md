@@ -273,8 +273,21 @@ L.radii[i]            // where planet i's ring is drawn, in scene units
 L.radiusFor(au)       // the same ladder for a belt or a comet (monotone, interpolated in log space)
 L.gapAt(i)            // the narrower of the two gaps around planet i
 L.sizeFor(i, wanted)  // `wanted`, capped at a third of that gap — a planet never fills its lane
+L.laneAt(i)           // how far out from planet i's ring still belongs to planet i
+L.moonRings(i, n, { bodyRadius })   // where to draw that planet's n moons, all inside its lane
 L.max                 // the outermost ring, for the camera
 ```
+
+A **lane** is the space either side of a ring that belongs to one planet and nothing else
+(`laneShare`, 0.8 of the half-gap). A moon is only ever drawn inside its parent's lane, so nothing a
+moon sweeps can meet anything else in the system — Farhold's orbit view used to put a giant's moon a
+fixed eight *planet* radii out, which on an oversized giant was a circle wider than the gap to the
+next world. `sizeFor(i, wanted, { moons: n })` caps the planet smaller again when it has moons, so
+the whole moon ladder (`moonInner` 2.4 planet radii, then ×`moonStep` 1.35 each) fits outside it.
+
+`map: 'au'` keeps the real orbit in AU instead of remapping it, and lends only the gaps, the size cap
+and the moon lanes. That is for a caller drawing the system at its own scale — a flight sim, where
+"0.3 AU away" on the HUD has to mean what it says.
 
 Each ring's place is a blend of where it sits by distance (log) and where it sits in the queue
 (`even`, 0.55 by default), then a pass outwards opens up anything still closer than `minGap`. The

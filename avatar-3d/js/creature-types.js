@@ -39,6 +39,10 @@ export const CREATURE_TYPES = {
   centipede: { plan: 'snake', label: 'Centipede', body: { len: 2.3, r: 0.1, segs: 18, headR: 0.13 }, colors: { body: '#a34b38', belly: '#d78a54', accent: '#54211e', eyes: '#ffe05a' }, features: { fangs: true, plates: true, claws: true } },
   slime:     { plan: 'float', label: 'Slime', body: { shape: 'mass', coreR: 0.35, y: 0.7, tentacles: 4, eyes: 2 }, colors: { body: '#55b884', belly: '#b8f1ad', accent: '#1d694f', eyes: '#f7f2a1' }, features: { glow: true } },
   mushroom:  { plan: 'float', label: 'Mushroom', body: { shape: 'mass', coreR: 0.3, y: 0.75, tentacles: 3, eyes: 2 }, colors: { body: '#a64b62', belly: '#e3c1a0', accent: '#5d233c', eyes: '#f6dd75' }, features: { glow: false, fangs: false } },
+  // A machine rather than an animal: three wheels, a chassis and a turret that turns. Built for
+  // Farhold's tinker, whose "sentry" used to be a golem standing still — a sentry that cannot follow
+  // you is a lamp post. The body plan is its own because nothing else here rolls.
+  turret:    { plan: 'roller', label: 'Rolling turret', body: { chassis: [0.52, 0.22, 0.72], wheelR: 0.2, wheelW: 0.11, turretR: 0.24, turretH: 0.2, barrelR: 0.055, barrelLen: 0.66, mastH: 0.2 }, colors: { body: '#8a7a5a', belly: '#b0a080', accent: '#d8a040', eyes: '#ffd060' }, features: { core: true, plates: true, spikes: true } },
   mimic:     { plan: 'float', label: 'Mimic', body: { shape: 'mass', coreR: 0.38, y: 0.8, tentacles: 5, eyes: 4 }, colors: { body: '#78553b', belly: '#b67a45', accent: '#302019', eyes: '#ffcf50' }, features: { fangs: true, glow: false } },
 };
 export const CREATURE_ANIMS = ['idle', 'walk', 'run', 'attack', 'talk', 'dead', 'fly'];

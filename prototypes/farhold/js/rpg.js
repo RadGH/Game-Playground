@@ -20,7 +20,11 @@ import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
-import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE } from './weapons.js';
+import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, canGoOffhand } from './weapons.js';
+// `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
+// js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
+// every Branding talent were doing nothing to an enemy. See `strike` for how it is applied once.
+import { incomingFrom } from './skills.js';
 // Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
@@ -90,6 +94,16 @@ function hashOf(text) {
  */
 export function attuneWeapon(item) {
   if (!item || item.type !== 'weapon') return item;
+  /**
+   * HOW MANY HANDS IT TAKES, written onto every weapon that passes through here.
+   *
+   * "Swords cannot be equipped in the off-hand, and it is not clear which weapons are one- or
+   * two-handed." `items.json` only marks `offHandOk` on the four caster bases — wand, scepter, orb,
+   * tome — so a one-handed sword was refused the off hand by every reader that asked. That file is
+   * SHARED with Emberveil, which has its own rules and its own test over it, so the flag is set on
+   * the ITEM here instead of in the data. See `markHands` in js/weapons.js for the rule.
+   */
+  markHands(item);
   const sub = item.subtype || item.baseKey;
   if (!CASTERS.has(sub)) return item;
   if (item.castElement) return item;

@@ -44,13 +44,13 @@ export async function createCreature(spec) {
   function build(sp) {
     const s = normalizeCreature(sp); state.spec = s; clear(); const T = CREATURE_TYPES[s.type]; state.plan = T.plan;
     const root = new THREE.Group(); root.scale.setScalar(s.size); group.add(root); state.root = root;
-    state.parts = ({ quad: buildQuad, spider: buildSpider, bat: buildBat, snake: buildSnake, biped: buildBiped, float: buildFloat })[T.plan](root, T, s);
+    state.parts = ({ quad: buildQuad, spider: buildSpider, bat: buildBat, snake: buildSnake, biped: buildBiped, float: buildFloat, roller: buildRoller })[T.plan](root, T, s);
   }
   build(spec);
   return {
     group, get anim() { return state.anim; }, setAnim(n) { state.anim = n; state.t = 0; }, setSpec(sp) { build(sp); }, get spec() { return state.spec; },
     metrics() { const b = new THREE.Box3().setFromObject(group); return { height: b.max.y - b.min.y, length: b.max.z - b.min.z, width: b.max.x - b.min.x }; },
-    update(dt, t) { state.t += dt; const fn = ({ quad: animQuad, spider: animSpider, bat: animBat, snake: animSnake, biped: animBiped, float: animFloat })[state.plan]; if (fn) fn(state, dt); },
+    update(dt, t) { state.t += dt; const fn = ({ quad: animQuad, spider: animSpider, bat: animBat, snake: animSnake, biped: animBiped, float: animFloat, roller: animRoller })[state.plan]; if (fn) fn(state, dt); },
     dispose() { clear(); },
   };
 }
@@ -361,4 +361,83 @@ function animFloat(st) {
   for (const tt of P.tatters) { tt.piv.rotation.x = Math.sin(t * (fast ? 5 : 2) + tt.a) * (fast ? 0.5 : 0.22) - (fast ? 0.3 : 0); tt.piv.rotation.z = Math.cos(t * 1.7 + tt.a) * 0.15; }
   for (const te of P.tentacles) for (let k = 0; k < te.chain.length; k++) { te.chain[k].rotation.x = Math.sin(t * (fast ? 5 : 2.4) - k * 0.8 + te.a) * (0.18 + k * 0.12) + atk * 0.5; te.chain[k].rotation.z = Math.cos(t * 1.9 - k * 0.6 + te.a) * (0.12 + k * 0.08); }
   for (const a of P.arms) { a.shoulder.rotation.x = Math.sin(t * (fast ? 4 : 1.6) + (a.side < 0 ? 0 : 1)) * 0.15 - atk * 1.4; a.shoulder.rotation.z = a.side * (0.18 + Math.sin(t * 1.2) * 0.08); }
+}
+
+// ------------------------------------------------------------------ roller (a wheeled machine, faces +z)
+// Three wheels — one castor at the front, a driven pair at the back — a boxy chassis, and a turret
+// on top that turns on its own and carries the barrel. It is the one body plan here that is built
+// rather than born, so it has no jaw, no legs and no tail: `P.jaw` is the barrel (it recoils where a
+// mouth would open) and `P.head` is the turret, which keeps the shared animation names honest.
+function buildRoller(root, T, s) {
+  const B = T.body, C = s.colors, F = s.features; const P = { legs: [], wheels: [], tailSegs: [] };
+  const [cw, ch, cl] = B.chassis;
+  const bodyY = B.wheelR;                       // the axles: everything hangs off this height
+  P.bodyY = bodyY;
+  const hip = new THREE.Group(); hip.position.y = bodyY; root.add(hip); P.hip = hip;
+
+  // chassis: a plated deck with a sloped nose, so it reads as a vehicle and not a crate
+  const deck = box(cw, ch, cl, C.body); deck.position.y = ch * 0.25; hip.add(deck);
+  const nose = cone(cw * 0.5, cl * 0.34, shade(C.body, -0.1), 4); nose.rotation.x = Math.PI / 2; nose.rotation.z = Math.PI / 4; nose.position.set(0, ch * 0.2, cl * 0.56); hip.add(nose);
+  const skirt = box(cw * 1.04, ch * 0.34, cl * 0.8, shade(C.body, -0.22)); skirt.position.y = -ch * 0.3; hip.add(skirt);
+  if (F.plates) for (const x of [-1, 1]) { const plate = box(ch * 0.22, ch * 0.9, cl * 0.62, C.accent); plate.position.set(x * cw * 0.52, ch * 0.3, -cl * 0.05); hip.add(plate); }
+  if (F.spikes) for (const x of [-1, 1]) { const stud = cone(ch * 0.16, ch * 0.5, C.accent, 5); stud.rotation.z = x * Math.PI / 2; stud.position.set(x * cw * 0.6, ch * 0.3, cl * 0.24); hip.add(stud); }
+
+  // wheels: a pivot each, so spinning them is one rotation and nothing has to be un-rotated first
+  const wheelGeomColour = shade(C.accent, -0.55);
+  const place = [[0, cl * 0.42, B.wheelR * 0.78], [-cw * 0.56, -cl * 0.34, B.wheelR], [cw * 0.56, -cl * 0.34, B.wheelR]];
+  for (const [x, z, r] of place) {
+    const pivot = new THREE.Group(); pivot.position.set(x, r - bodyY, z); hip.add(pivot);
+    const tyre = cyl(r, r, B.wheelW, wheelGeomColour, 14); tyre.rotation.z = Math.PI / 2; pivot.add(tyre);
+    const hub = cyl(r * 0.42, r * 0.42, B.wheelW * 1.25, C.accent, 10); hub.rotation.z = Math.PI / 2; pivot.add(hub);
+    for (let i = 0; i < 4; i++) { const spoke = box(r * 0.12, r * 1.5, B.wheelW * 0.5, shade(C.accent, -0.2)); spoke.rotation.x = (i / 4) * Math.PI; pivot.add(spoke); }
+    P.wheels.push({ pivot, r, front: z > 0 });
+  }
+
+  // the turret: its own group so it can look somewhere the chassis is not pointing
+  const turret = new THREE.Group(); turret.position.y = ch * 0.75 + B.turretH * 0.4; hip.add(turret); P.head = turret; P.neck = turret;
+  const drum = cyl(B.turretR, B.turretR * 1.1, B.turretH, shade(C.body, 0.08), 12); turret.add(drum);
+  const cap = sphere(B.turretR * 0.9, C.body, 12); cap.scale.y = 0.5; cap.position.y = B.turretH * 0.5; turret.add(cap);
+  if (F.core) { const core = glowSphere(B.turretR * 0.34, C.eyes, 1.0, 10); core.position.set(0, B.turretH * 0.62, 0); turret.add(core); P.core = core; }
+  // the eye it aims with, and the little mast behind it
+  const eye = glowSphere(B.turretR * 0.2, C.eyes, 1.2, 10); eye.position.set(0, B.turretH * 0.12, B.turretR * 0.9); turret.add(eye); P.eye = eye;
+  const mast = cyl(B.turretR * 0.07, B.turretR * 0.07, B.mastH, C.accent, 6); mast.position.set(-B.turretR * 0.5, B.turretH * 0.5 + B.mastH * 0.5, -B.turretR * 0.4); turret.add(mast);
+  const lamp = glowSphere(B.turretR * 0.11, C.belly, 0.8, 8); lamp.position.set(-B.turretR * 0.5, B.turretH * 0.5 + B.mastH, -B.turretR * 0.4); turret.add(lamp);
+
+  // the barrel — `jaw`, because that is the part the shared animations move when it attacks
+  const barrel = new THREE.Group(); barrel.position.set(0, B.turretH * 0.05, B.turretR * 0.5); turret.add(barrel); P.jaw = barrel; P.barrelZ = B.turretR * 0.5; P.recoil = B.barrelLen * 0.18;
+  const tube = cyl(B.barrelR, B.barrelR * 1.15, B.barrelLen, shade(C.body, -0.18), 10); tube.rotation.x = Math.PI / 2; tube.position.z = B.barrelLen * 0.5; barrel.add(tube);
+  const collar = cyl(B.barrelR * 1.7, B.barrelR * 1.7, B.barrelLen * 0.16, C.accent, 10); collar.rotation.x = Math.PI / 2; collar.position.z = B.barrelLen * 0.22; barrel.add(collar);
+  const muzzle = glowMesh(new THREE.TorusGeometry(B.barrelR * 1.3, B.barrelR * 0.3, 5, 10), C.eyes, 0.2); muzzle.position.z = B.barrelLen; barrel.add(muzzle); P.muzzle = muzzle;
+
+  P.type = s.type; return P;
+}
+function animRoller(st, dt) {
+  const P = st.parts, t = st.t, an = st.anim, S = st.root; const size = st.spec.size;
+  if (an === 'dead') {
+    // thrown on its side with the wheels stopped and the light out — a machine does not sag, it tips
+    S.rotation.z = Math.PI / 2.2; S.position.y = -P.bodyY * 0.35 * size;
+    P.jaw.rotation.x = 0.5; P.head.rotation.y = 0.7;
+    if (P.core) P.core.material.emissiveIntensity = 0.05;
+    if (P.muzzle) P.muzzle.material.emissiveIntensity = 0;
+    P.eye.material.emissiveIntensity = 0.05;
+    return;
+  }
+  S.rotation.z = 0; S.position.y = 0;
+  const moving = an === 'walk' || an === 'run' || an === 'fly';
+  const roll = an === 'run' ? 11 : moving ? 5 : 0;
+  for (const w of P.wheels) w.pivot.rotation.x += roll * dt * (0.2 / w.r);
+  // the chassis leans back under power and rocks over the ground it is crossing
+  P.hip.rotation.x = (moving ? -0.06 : 0) - (an === 'run' ? 0.05 : 0);
+  P.hip.rotation.z = moving ? Math.sin(t * roll * 0.5) * 0.02 : 0;
+  P.hip.position.y = P.bodyY + (moving ? Math.abs(Math.sin(t * roll * 0.5)) * 0.01 : 0);
+  // one shot every 1.1s while attacking: a quick recoil and a flash, then it slides back out
+  const atk = an === 'attack' ? (k => k < 0.12 ? k / 0.12 : Math.max(0, 1 - (k - 0.12) / 0.5))((t % 1.1) / 1.1) : 0;
+  P.jaw.position.z = P.barrelZ - atk * P.recoil;
+  P.jaw.rotation.x = -0.05 - atk * 0.12;
+  if (P.muzzle) P.muzzle.material.emissiveIntensity = atk * 3.2;
+  // idle: it sweeps the horizon. Talking: it nods at you. Fighting or driving: eyes front.
+  P.head.rotation.y = an === 'idle' ? Math.sin(t * 0.5) * 0.7 : an === 'talk' ? Math.sin(t * 3) * 0.1 : Math.sin(t * 0.9) * 0.06;
+  P.head.rotation.x = an === 'talk' ? 0.12 + Math.sin(t * 8) * 0.1 : 0;
+  P.eye.material.emissiveIntensity = 1.2 + Math.sin(t * 3) * 0.3 + atk * 1.5;
+  if (P.core) P.core.material.emissiveIntensity = 0.9 + Math.sin(t * 2.4) * 0.3 + atk;
 }

@@ -56,7 +56,7 @@
    ]
   }
  },
- "_ranksDoc": "Every spawn rolls a rank. `normal` is the table entry as written. `champion` takes one modifier, `rare` takes two and a Name Forge name, `boss` is a hand-written entry from the bosses list. Rank multipliers live in balance.json `ranks`.",
+ "_ranksDoc": "Every spawn rolls a rank. `normal` is the table entry as written. `champion` takes one modifier, `rare` takes two and a Name Forge name, `boss` is a hand-written entry from the bosses list. Rank multipliers live in balance.json `ranks`. A modifier may carry `scale` (how much bigger or smaller the body is — actors.js folds it into the rank's own size and grows the reach with it) and `fx`, the name of one of the spell effects' looping status auras, which is how a Fiery one is visibly on fire rather than merely orange in the stat block.",
  "modifiers": [
   {
    "id": "vicious",
@@ -177,6 +177,97 @@
    "speed": 0.8,
    "aura": "#8a8f9a",
    "desc": "slow, and very hard to put down"
+  },
+  {
+   "id": "giant",
+   "name": "Giant",
+   "prefix": "Giant",
+   "scale": 3.2,
+   "hp": 1.8,
+   "dmg": 1.5,
+   "armor": 1.3,
+   "speed": 0.82,
+   "attackEvery": 1.3,
+   "aura": "#c8a870",
+   "desc": "three times the size, and it hits like it"
+  },
+  {
+   "id": "fiery",
+   "name": "Fiery",
+   "prefix": "Fiery",
+   "dmg": 1.25,
+   "onHit": "burn",
+   "fx": "burn",
+   "aura": "#ff7a20",
+   "desc": "burning as it comes, and every hit sets you alight"
+  },
+  {
+   "id": "frostbound",
+   "name": "Frostbound",
+   "prefix": "Frostbound",
+   "hp": 1.35,
+   "armor": 1.3,
+   "speed": 0.9,
+   "onHit": "chill",
+   "fx": "freeze",
+   "aura": "#7fd0ff",
+   "desc": "cased in ice, and it takes the speed out of you"
+  },
+  {
+   "id": "stormlash",
+   "name": "Stormlash",
+   "prefix": "Stormlash",
+   "speed": 1.35,
+   "attackEvery": 0.7,
+   "onHit": "shock",
+   "fx": "haste",
+   "aura": "#a0e8ff",
+   "desc": "crackling, quick, and it leaves you twitching"
+  },
+  {
+   "id": "graveborn",
+   "name": "Graveborn",
+   "prefix": "Graveborn",
+   "hp": 1.4,
+   "lifeSteal": 0.35,
+   "onHit": "curse",
+   "fx": "curse",
+   "aura": "#9a6ad0",
+   "desc": "it drinks what it deals, and lays a curse doing it"
+  },
+  {
+   "id": "bramblehide",
+   "name": "Bramblehide",
+   "prefix": "Bramblehide",
+   "armor": 1.9,
+   "thorns": 0.32,
+   "speed": 0.9,
+   "fx": "root",
+   "aura": "#6a9a40",
+   "desc": "grown over with thorns that bite whoever hits it"
+  },
+  {
+   "id": "hollowed",
+   "name": "Hollowed",
+   "prefix": "Hollowed",
+   "dmg": 1.35,
+   "hp": 0.75,
+   "onHit": "bleed",
+   "fx": "bleed",
+   "aura": "#d04a4a",
+   "desc": "it opens you up, and there is not much left of it to cut"
+  },
+  {
+   "id": "wizened",
+   "name": "Wizened",
+   "prefix": "Wizened",
+   "scale": 0.55,
+   "hp": 0.65,
+   "dmg": 0.85,
+   "speed": 1.45,
+   "attackEvery": 0.8,
+   "aura": "#cfc0a0",
+   "desc": "small, shrivelled and far too quick"
   }
  ],
  "enemies": [
@@ -3472,8 +3563,8 @@
     11
    ],
    "armor": 12,
-   "speed": 3.4,
-   "reach": 3,
+   "speed": 5.0,
+   "reach": 3.2,
    "attackEvery": 2.1,
    "ranged": {
     "range": 30,
@@ -3481,8 +3572,8 @@
    },
    "look": {
     "creature": {
-     "type": "golem",
-     "size": 1.1,
+     "type": "turret",
+     "size": 1.25,
      "colors": {
       "body": "#8a7a5a",
       "belly": "#b0a080",
@@ -3490,7 +3581,8 @@
       "eyes": "#ffd060"
      }
     }
-   }
+   },
+   "_doc": "The tinker's sentry. It used to be a golem body, which stood there like a statue and read as a lamp post with a grudge; it is a three-wheeled rolling turret now so it can actually follow you about. `speed` and `reach` went up to match — it is a vehicle, not a walker."
   },
   {
    "id": "hunting_cat",

@@ -11,6 +11,16 @@
 // Round 4 added: the other eight shapes (beam, ground, dash, summon), eight more statuses, level
 // unlocks, and the two affixes that touch this file — `cooldownReduction` and
 // `cond_skillMpCostReduce`.
+//
+// ROUND 11: **the skill talents were never applied to a skill.**
+//
+// "Fanned is unlocked but only ONE projectile appears." `js/skilltalents.js` has done the work
+// since round 8 and `js/main.js` only ever called it for a staff's own spell — `castSkill` took
+// what `use()` returned and drew that, so every one of the eighteen talents on the Skills screen
+// was a sentence and nothing else. The fold happens HERE now, in `use()`, which is the one place
+// every skill's plan is built, so nothing downstream had to change to make the whole board live.
+
+import { talentPlan, talentsOn, castRulesFrom } from './skilltalents.js';
 
 /** Statuses live on the target as `{ type, remaining, power, … }`. */
 export function applyStatus(target, type, spec, power = 1, { longer = 0, strength = 1 } = {}) {
@@ -113,18 +123,45 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
 
   function update(dt) {
     for (const s of slots) if (s.ready > 0) s.ready = Math.max(0, s.ready - dt);
+    /**
+     * HUNGER pays out here. `rpg.strike` cannot reach into the bar, so a kill taken by a skill with
+     * the Hunger talent leaves the seconds owed on the player and this hands them to the right
+     * slot on the next frame. Without it the talent was a sentence: the plan carried `killRefund`
+     * and nothing ever looked at it.
+     */
+    const owed = player.cooldownRefund;
+    if (owed && owed.seconds > 0) {
+      const s = slots.find(x => x.id === owed.skill);
+      if (s) s.ready = Math.max(0, s.ready - owed.seconds);
+      player.cooldownRefund = null;
+    }
   }
 
-  /** Every cooldown comes back sooner with `cooldownReduction` on your gear. */
+  /**
+   * Every cooldown comes back sooner with `cooldownReduction` on your gear — and with the
+   * Quickened talent, which is a share of the skill's own cooldown rather than a share of yours.
+   */
   function cooldownFor(s) {
     const cut = Math.min(60, player.derived?.cooldownReduction || 0) / 100;
-    return Math.max(0.5, s.cooldown * (1 - cut));
+    let base = s.cooldown;
+    for (const node of talentsOn(player, s.id)) {
+      if (node.mod?.cooldownPct) base *= 1 + node.mod.cooldownPct / 100;
+    }
+    return Math.max(0.5, base * (1 - cut));
   }
   /** …and cost less with `cond_skillMpCostReduce`, which is a FLAT saving, not a percentage. */
   function costFor(s) {
     const off = rpg?.fx ? rpg.fx.sum(player, 'costFlat') : 0;
     return Math.max(0, Math.round((s.mp || 0) - off));
   }
+
+  /**
+   * BLOOD PRICE, the arcane keystone: "Skills cost health instead of mana, and never fail for want
+   * of it." It was a flag nothing read. This is the only place a skill is paid for, so it is the
+   * only place the swap can happen — and because the cost never fails, a skill is only ever refused
+   * for its cooldown or its level.
+   */
+  function bloodPrice() { return !!player.perkFlags?.bloodMagic; }
 
   function unlocked(s) { return (player.level || 1) >= s.unlockAt; }
 
@@ -134,7 +171,7 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
     if (!s) return { ok: false, why: null };
     if (!unlocked(s)) return { ok: false, why: `${s.name} unlocks at level ${s.unlockAt}` };
     if (s.ready > 0) return { ok: false, why: `${s.name} is not ready (${s.ready.toFixed(1)}s)` };
-    if (costFor(s) > player.mp) return { ok: false, why: `Not enough mana for ${s.name}` };
+    if (!bloodPrice() && costFor(s) > player.mp) return { ok: false, why: `Not enough mana for ${s.name}` };
     return { ok: true, skill: s };
   }
 
@@ -147,14 +184,17 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
     if (!can.ok) return { ok: false, why: can.why };
     const s = can.skill;
     const cost = costFor(s);
-    player.mp = Math.max(0, player.mp - cost);
+    // Blood Price pays in health and never kills you outright — a keystone that could end the run
+    // on a mistimed cast would only teach people not to press the button.
+    if (bloodPrice()) player.hp = Math.max(1, player.hp - cost);
+    else player.mp = Math.max(0, player.mp - cost);
     s.ready = cooldownFor(s);
 
     const d = player.derived;
     // spell power lifts anything that is not a plain physical swing
     const magic = s.element && s.element !== 'physical' ? 1 + (d.spellPower || 0) : 1;
     const mid = ((d.damage[0] + d.damage[1]) / 2) * (s.mult || 1) * magic;
-    return {
+    const plan = {
       ok: true,
       skill: s,
       kind: s.shape,
@@ -172,9 +212,39 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
       statusMult: s.statusMult ?? 1,
       heal: s.heal ? Math.round(player.maxHp * s.heal) : 0,
       healFrac: s.heal || 0,
-      pet: s.pet || null, petCount: s.count || 1, pets: !!s.pets,
+      /**
+       * `petSlots` — the perk the play-test asked about by name ("One more companion follows you —
+       * what companion?"). It is a real number now: every summoning skill calls up that many more.
+       * The class roster you start the run with is summoned in js/main.js and still needs its own
+       * line; see the note on `petSlots` in js/perks.js.
+       */
+      pet: s.pet || null,
+      petCount: Math.max(1, (s.count || 1) + Math.round(d.petSlots || 0)),
+      pets: !!s.pets,
       spent: cost,
+      paidWith: bloodPrice() ? 'health' : 'mana',
     };
+
+    /**
+     * AND NOW THE TALENTS. This one line is the whole of D7: the board was built, the modifiers
+     * were written and tested, and nothing ever ran them on a skill you actually cast.
+     */
+    const out = talentPlan(player, s.id, plan);
+
+    /**
+     * Deepening lengthens what the skill leaves on the target. `statusSpec` is the shared row out of
+     * `data/skills.json`, so it is CLONED before the seconds are changed — writing to it would have
+     * made every burn in the game longer for the rest of the run.
+     */
+    if (out.statusLonger && out.statusSpec) {
+      out.statusSpec = { ...out.statusSpec, seconds: (out.statusSpec.seconds || 4) + out.statusLonger };
+    }
+    /**
+     * The hit-time talents ride on the player until the swing lands — `rpg.strike` reads them back.
+     * Cleared to null when this skill has none, so a plain skill can never inherit the last one's.
+     */
+    player.castRules = castRulesFrom(s.id, out);
+    return out;
   }
 
   /** Cut every cooldown by `n` seconds — the `skill_refresh` legendary does this on a kill. */

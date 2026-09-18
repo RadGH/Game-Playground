@@ -81,8 +81,13 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     boosting: false,
     speed: 0,
     flying: false,
+    parked: false,          // sitting on its legs: no physics until the pilot asks for thrust
     bumped: 0,              // counts down after a bounce, for the HUD and the sound
   };
+
+  let lastYaw = 0;
+  /** A bank is a lean, not a barrel roll. */
+  const clampRoll = r => Math.max(-0.85, Math.min(0.85, r));
 
   const forward = new THREE.Vector3();
   const up = new THREE.Vector3(0, 1, 0);
@@ -95,20 +100,30 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     return Math.max(0, 1 - Math.max(0, y) / cfg.ceiling);
   }
 
-  /** Step into the cockpit from wherever the character is standing. */
+  /**
+   * Step into the cockpit from wherever the character is standing.
+   *
+   * **The ship is PARKED, on its legs, going nowhere.** "Pressing J while walking slingshots you
+   * upward as though launching" — because boarding handed the hull 26 m/s straight up and two
+   * metres of clearance, so the first thing that happened was a take-off nobody asked for. It now
+   * sits on the ground with the brake on, and the brake comes off the moment you ask for thrust
+   * (W, or Space) and not before. See the parked branch in `update`.
+   */
   function board(at) {
     state.x = at.x;
     state.z = at.z;
-    state.y = terrain.heightAt(at.x, at.z) + cfg.clearance + 2;
+    state.y = terrain.heightAt(at.x, at.z) + cfg.clearance;
     state.yaw = at.yaw ?? 0;
     // LEVEL. It used to start nose-up, which meant W climbed for ever and you could not fly across
     // the world looking for somewhere to land — "W always goes up, I can no longer fly around".
     // Lift-off is the vertical thrust below (Space), not a permanent angle of attack.
     state.pitch = 0;
     state.roll = 0;
-    state.velocity.set(0, cfg.liftSpeed, 0);
+    state.velocity.set(0, 0, 0);
     state.throttle = 0;
+    state.parked = true;
     state.flying = true;
+    lastYaw = state.yaw;
     if (ship) ship.group.visible = true;
     return state;
   }
@@ -123,7 +138,9 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     state.roll = 0;
     state.velocity.set(0, -120, 0);
     state.throttle = 0.25;
+    state.parked = false;
     state.flying = true;
+    lastYaw = state.yaw;
     if (ship) ship.group.visible = true;
     return state;
   }
@@ -151,7 +168,23 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
       const invert = settings?.get('invertFlight') ? -1 : 1;
       const sens = settings?.get('sensitivity') ?? 1;
       state.pitch = Math.max(-1.35, Math.min(1.35, state.pitch - (input.look?.[1] || 0) * 0.0019 * invert * sens));
-      const rollWant = (input.strafe || 0) * -0.6;
+      /**
+       * BANK INTO THE TURN, NOT OUT OF IT.
+       *
+       * "Turning left/right tilts the wrong way — the roll is inverted." It was. The hull is
+       * modelled nose along +Z with up along +Y, so the ship's RIGHT wing is at local -X; a
+       * positive Z rotation carries +X toward +Y and therefore drops that right wing. Banking right
+       * is a positive roll — and D (`strafe` +1) was being multiplied by -0.6, which lifted the
+       * right wing and leaned the ship away from the turn every time.
+       *
+       * The mouse now banks it too, by how fast the nose is swinging, the same way `space.js` does.
+       * Rolling does not steer here — it is the tell that says which way you are going round — and
+       * a mouse turn with a dead-level hull was the other half of "it tilts the wrong way".
+       */
+      const yawRate = (state.yaw - lastYaw + Math.PI * 3) % (Math.PI * 2) - Math.PI;
+      lastYaw = state.yaw;
+      const fromMouse = clampRoll(-yawRate / Math.max(1e-4, dt) * 0.18);
+      const rollWant = clampRoll((input.strafe || 0) * 0.6 + fromMouse);
       state.roll += (rollWant - state.roll) * Math.min(1, dt * cfg.rollRate);
       /**
        * W AND S FLY YOU FORWARD AND BACK.
@@ -181,6 +214,29 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     euler.set(-state.pitch, state.yaw, state.roll);
     quat.setFromEuler(euler);
     forward.set(0, 0, 1).applyQuaternion(quat);
+
+    /**
+     * PARKED: the ship is on the ground and stays there.
+     *
+     * No thrust, no wing, no gravity, no hover floor — the whole flight model is skipped, because
+     * every one of those wants to move a hull that is meant to be standing still. You may look
+     * around (the mouse still steers) and the moment you ask for thrust the brake comes off.
+     */
+    if (state.parked) {
+      if (state.throttle > 0.02 || state.lift > 0) {          // W or Space; Shift on its own is not a launch
+        state.parked = false;
+      } else {
+        const ground = terrain.heightAt(state.x, state.z);
+        state.y = ground + cfg.clearance;
+        state.velocity.set(0, 0, 0);
+        state.speed = 0;
+        out.altitude = cfg.clearance;
+        out.landed = true;                    // you can step straight back out again
+        out.parked = true;
+        place(camera);
+        return out;
+      }
+    }
 
     // ---- thrust, lift and drag
     const air = density(state.y);
@@ -286,7 +342,12 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     out.landed = altitude < cfg.landHeight && state.speed < cfg.landSpeed;
     out.leftAtmosphere = state.y > cfg.ceiling;
 
-    // ---- the hull and the camera
+    place(camera);
+    return out;
+  }
+
+  /** Put the hull where the state says it is, and the camera behind it. */
+  function place(camera) {
     if (ship) {
       ship.group.position.set(state.x, state.y, state.z);
       ship.group.quaternion.copy(quat);
@@ -300,7 +361,6 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
       if (camera.position.y < camGround) camera.position.y = camGround;
       camera.lookAt(state.x, state.y, state.z);
     }
-    return out;
   }
 
   /**

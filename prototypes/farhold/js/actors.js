@@ -70,12 +70,27 @@ function makeAura(colour, radius = 1.1) {
 }
 
 /**
+ * THE FIELD THAT IS LIVE RIGHT NOW.
+ *
+ * Landing on another world throws the whole planet away and builds a new `EnemyField`, but anything
+ * that was handed the OLD one at boot — the companions, most of all — keeps pointing at it. That is
+ * why a pet stood next to its owner being chewed on and never hit back: it was reading the enemy
+ * list of a planet that no longer exists, so as far as it knew nothing was there.
+ *
+ * There is only ever one field alive at a time (a dungeon reuses the surface one, it does not build
+ * a second), so the newest one to be constructed IS the live one, and `pets.js` asks for it here
+ * rather than trusting the reference it was given once.
+ */
+let liveField = null;
+export function activeEnemyField() { return liveField; }
+
+/**
  * Everything hostile in the world around the player.
  *
- * deps: { scene, terrain, rpg, defs, bosses, modifiers, zones, balance, onLog, onKill, nameRare }
+ * deps: { scene, terrain, rpg, defs, bosses, modifiers, zones, balance, spellfx, onLog, onKill, nameRare }
  */
 export class EnemyField {
-  constructor({ scene, terrain, rpg, defs, bosses = [], modifiers = [], zones = null, balance = {}, onLog = () => {}, onKill = () => {}, nameRare = null }) {
+  constructor({ scene, terrain, rpg, defs, bosses = [], modifiers = [], zones = null, balance = {}, spellfx = null, onLog = () => {}, onKill = () => {}, nameRare = null }) {
     this.scene = scene; this.terrain = terrain; this.rpg = rpg; this.defs = defs;
     this.bosses = bosses; this.modifiers = modifiers; this.zones = zones;
     this.cfg = balance.spawn || {};
@@ -98,6 +113,22 @@ export class EnemyField {
     /** The obstacle fields enemies must not walk through — props, buildings, dungeon walls. */
     this.solids = [];
     this._resolved = [0, 0];
+    /**
+     * The spell effects, if the game handed them over. Only the modifier auras use it ("Fiery" is
+     * meant to be visibly on fire), and everything still works without it — the body just wears its
+     * coloured ring and nothing else.
+     */
+    this.spellfx = spellfx;
+    /** Buckets for the shove-apart pass. Reused every frame: this must not allocate. */
+    this._grid = new Map();
+    liveField = this;
+  }
+
+  /** Hand over the spell effects after the fact, and light up anything already standing. */
+  setSpellFx(fx) {
+    this.spellfx = fx;
+    if (!fx) return;
+    for (const e of this.enemies) for (const key of e.fx || []) fx.status(e.actor.group, key, true);
   }
 
   /** The level to roll a spawn at, here: the zone's band, not the player's level. */
@@ -224,6 +255,35 @@ export class EnemyField {
     unit.facing = this.rng() * Math.PI * 2;
     unit.hover = def.flying ? 1.4 + this.rng() * 0.8 : 0;
     unit.bob = this.rng() * Math.PI * 2;
+    /**
+     * WHAT THE PLAYER'S SIDE PUT INTO IT.
+     *
+     * Every point of damage the player or one of their companions deals is added here, and nothing
+     * else ever touches it. It is the whole of the answer to "did they earn this kill?" — see
+     * `kill()`, where a body the town watch cut down on its own pays nobody.
+     */
+    unit.playerDamage = 0;
+
+    /**
+     * A MODIFIER MAY CHANGE THE SHAPE OF THE BODY, not only its numbers.
+     *
+     * `rpg.makeEnemy` sizes a spawn by its RANK alone (a champion is 1.18, a rare 1.35), so a
+     * "Giant" that is only giant in the stat block reads as an ordinary wolf that takes forever to
+     * kill. The size sits on the modifier in data/enemies.json and is folded in here, and the reach
+     * grows with it — a four-metre body with a two-metre swing has to shove its face into you to
+     * land a hit, which looks ridiculous.
+     */
+    const sizeUp = modifiers.reduce((m, mod) => m * (mod.scale ?? 1), 1);
+    if (sizeUp !== 1) {
+      unit.scale *= sizeUp;
+      unit.reach = (unit.reach || 2.2) * (1 + (sizeUp - 1) * 0.6);
+      unit.aggroRange = (unit.aggroRange || 26) * (1 + (sizeUp - 1) * 0.2);
+      unit.hover *= sizeUp;
+    }
+    /** How much room this body takes up on the ground — see `spread()`. */
+    unit.bodyR = Math.max(0.4, (unit.reach || 2.2) * 0.3);
+    /** The looping auras it wears (a modifier's `fx`), so a new spell-effects handle can restore them. */
+    unit.fx = modifiers.map(m => m.fx).filter(Boolean);
     this.pending++;
     let actor = null;
     try {
@@ -243,10 +303,16 @@ export class EnemyField {
     // the aura ring, for anything that is not an ordinary body
     const auraColour = unit.auras?.[0] || (boss ? '#ffd24a' : null);
     if (auraColour) {
-      const radius = boss ? 2.6 : unit.rank === 'rare' ? 1.6 : 1.2;
+      // the ring is drawn INSIDE the body's group, so it has to be divided by the body's own scale
+      // or a giant's ring ends up the size of a house
+      const radius = (boss ? 2.6 : unit.rank === 'rare' ? 1.6 : 1.2) / (actor.beast ? 1 : (unit.scale || 1));
       unit.aura = makeAura(auraColour, radius);
       actor.group.add(unit.aura);
     }
+    // and the looping effect a themed modifier carries: burning, dripping poison, wreathed in frost.
+    // These are the spell effects' own status auras — 23 of them already exist, parented to a body
+    // and sized off its height, so "visibly on fire" costs a line rather than a particle system.
+    for (const key of unit.fx) this.spellfx?.status(actor.group, key, true);
     this.scene.add(actor.group);
     anim(actor, 'idle');
     this.enemies.push(unit);
@@ -295,9 +361,26 @@ export class EnemyField {
       }
     }
 
+    /**
+     * WALK A COPY, NOT THE LIST ITSELF.
+     *
+     * "Cannot read properties of undefined (reading 'x') at EnemyField.update" was this loop reading
+     * `this.enemies[i]` after the list had been emptied UNDERNEATH it. The path: an enemy swings,
+     * `hooks.onEnemyStrike` runs the hit, the hit kills the player, the game respawns them — and
+     * respawning teleports you home and calls `field.clear()`. The array went to length 0 halfway
+     * down a countdown loop, so every remaining index read back `undefined`. (Leaving a dungeon and
+     * a map teleport clear the field the same way, from the same hooks.)
+     *
+     * A snapshot cannot be shortened by anything a hook does, and `removed` tells us which of the
+     * bodies in it have since been thrown away, so the loop is now safe whatever a hook gets up to.
+     */
     const despawn = cfg.despawnRadius ?? 320;
-    for (let i = this.enemies.length - 1; i >= 0; i--) {
-      const e = this.enemies[i];
+    const list = this._tickList || (this._tickList = []);
+    list.length = 0;
+    for (const e of this.enemies) list.push(e);
+    for (let i = list.length - 1; i >= 0; i--) {
+      const e = list[i];
+      if (e.removed) continue;
       const dx = player.x - e.x, dz = player.z - e.z;
       const dist = Math.hypot(dx, dz);
 
@@ -306,11 +389,11 @@ export class EnemyField {
         e.actor.group.position.y = e.y - Math.min(1.2, e.dying * 0.4);
         if (e.aura) e.aura.material.opacity = Math.max(0, 0.55 * (1 - e.dying / 2));
         e.actor.update(dt);
-        if (e.dying > 2.4) this.remove(i);
+        if (e.dying > 2.4) this.removeUnit(e);
         continue;
       }
       // a boss never despawns while it is alive — you do not get to walk away from it by accident
-      if (dist > despawn && !e.boss) { this.remove(i); continue; }
+      if (dist > despawn && !e.boss) { this.removeUnit(e); continue; }
 
       if (e.hitFlash > 0) e.hitFlash -= dt;
       if (e.swingTimer > 0) e.swingTimer -= dt;
@@ -416,6 +499,9 @@ export class EnemyField {
         }
         if (e.strolling && !e.boss) speed = e.speed * 0.32;
       }
+      // A swing can kill the player, and dying clears the whole field — so this body may have been
+      // thrown away two lines ago. Its bones are gone; do not go on animating them.
+      if (e.removed) continue;
 
       if (speed > 0) {
         speed *= 1 - slowOf(e);
@@ -442,6 +528,87 @@ export class EnemyField {
       }
       e.actor.update(dt);
     }
+
+    this.spread(dt);
+  }
+
+  /**
+   * NOTHING STANDS INSIDE ANYTHING ELSE.
+   *
+   * Observed: "enemies clip together and stack up when attacking". They all walk at the same point —
+   * the player — and there was nothing to say two bodies cannot be in the same place, so a pack of
+   * six arrived as one flickering wolf with six health bars. Pushing them apart is also what makes
+   * them SURROUND you: shoved off each other while all still heading in, they end up spread around
+   * the ring where they can each reach you.
+   *
+   * Cost matters here — this runs for dozens of bodies every frame — so it is a grid rather than
+   * every-pair-against-every-pair: buckets four metres across, each bucket compared with itself and
+   * four neighbours (the other four are the same pairs seen from the other side). A body is only
+   * ever compared with one that could actually be touching it.
+   */
+  spread(dt) {
+    const list = this.enemies;
+    if (list.length < 2) return;
+    const CELL = 4;
+    const grid = this._grid;
+    grid.clear();
+    for (const e of list) {
+      if (e.removed || e.dying != null || e.hover) continue;   // the dead and the airborne do not jostle
+      const gx = Math.floor(e.x / CELL), gz = Math.floor(e.z / CELL);
+      // one number per cell, and no two cells share it: a plain number key costs nothing to make,
+      // where a string one would allocate for every body every frame
+      const key = gx * 1e6 + gz;
+      let bucket = grid.get(key);
+      if (!bucket) grid.set(key, bucket = { gx, gz, list: [] });
+      bucket.list.push(e);
+    }
+    // the half-neighbourhood: each pair of buckets is visited exactly once
+    const NEI = [[0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+    for (const bucket of grid.values()) {
+      for (const [ox, oz] of NEI) {
+        const other = ox === 0 && oz === 0 ? bucket : grid.get((bucket.gx + ox) * 1e6 + (bucket.gz + oz));
+        if (!other) continue;
+        const same = other === bucket;
+        for (let i = 0; i < bucket.list.length; i++) {
+          for (let j = same ? i + 1 : 0; j < other.list.length; j++) this.shove(bucket.list[i], other.list[j], dt);
+        }
+      }
+    }
+  }
+
+  /** Push two overlapping bodies apart, the lighter one giving way to the heavier. */
+  shove(a, b, dt) {
+    const want = (a.bodyR || 0.6) + (b.bodyR || 0.6);
+    let dx = b.x - a.x, dz = b.z - a.z;
+    const d2 = dx * dx + dz * dz;
+    if (d2 >= want * want) return;
+    let d = Math.sqrt(d2);
+    if (d < 1e-3) {
+      // exactly on top of each other: pick a direction off their facings so it never jitters
+      dx = Math.sin(a.facing || 0) - Math.sin(b.facing || 1);
+      dz = Math.cos(a.facing || 0) - Math.cos(b.facing || 1);
+      d = Math.hypot(dx, dz) || 1;
+      if (d < 1e-3) { dx = 1; dz = 0; d = 1; }
+    }
+    const nx = dx / d, nz = dz / d;
+    // no more than a third of a metre a frame each, or a crowd flings itself apart
+    const push = Math.min((want - d) * 0.5, 0.34);
+    // a boss or a giant is not shifted by a rat: mass goes with the square of the size
+    const wa = (a.boss ? 40 : 1) * (a.scale || 1) ** 2, wb = (b.boss ? 40 : 1) * (b.scale || 1) ** 2;
+    const total = wa + wb;
+    this.slide(a, -nx * push * (wb / total), -nz * push * (wb / total));
+    this.slide(b, nx * push * (wa / total), nz * push * (wa / total));
+  }
+
+  /** Move a body sideways, obeying the same walls and water its own walking does. */
+  slide(e, dx, dz) {
+    if (!dx && !dz) return;
+    let [cx, cz] = this.terrain.clampToWorld(e.x + dx, e.z + dz);
+    [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+    if (this.terrain.underwater(cx, cz)) return;
+    e.x = cx; e.z = cz;
+    e.y = this.terrain.heightAt(cx, cz);
+    e.actor.group.position.set(e.x, e.y + (e.hover || 0), e.z);
   }
 
   /** Turn a modifier on mid-fight (a boss phase does this). */
@@ -458,11 +625,25 @@ export class EnemyField {
     if (m.lifeSteal) e.lifeSteal = (e.lifeSteal || 0) + m.lifeSteal;
     e.modifiers = [...(e.modifiers || []), m.id];
     if (m.aura && !e.aura) {
-      e.aura = makeAura(m.aura, e.boss ? 2.6 : 1.4);
+      e.aura = makeAura(m.aura, (e.boss ? 2.6 : 1.4) / (e.actor.beast ? 1 : (e.scale || 1)));
       e.actor.group.add(e.aura);
     } else if (m.aura && e.aura) {
       e.aura.material.color.set(m.aura);
     }
+    // a themed modifier turned on mid-fight lights up the same way one rolled at spawn does
+    if (m.fx && !(e.fx || []).includes(m.fx)) {
+      (e.fx || (e.fx = [])).push(m.fx);
+      this.spellfx?.status(e.actor.group, m.fx, true);
+    }
+  }
+
+  /**
+   * Record that the player's side hurt this one. Everything the player or a companion does goes
+   * through here, and nothing else does — which is exactly what `kill()` needs to know.
+   */
+  credit(e, amount = 1) {
+    if (!e || !(amount > 0)) return;
+    e.playerDamage = (e.playerDamage || 0) + amount;
   }
 
   /** Damage everything inside the player's swing. Returns what was hit. */
@@ -477,6 +658,7 @@ export class EnemyField {
       let delta = Math.abs(((toEnemy - player.yaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
       if (delta > arc / 2) continue;
       const result = this.rpg.strike(playerUnit, e, this.rng, { multiplier: power, element, skill, applyStatus: applyFn });
+      this.credit(e, result.amount);
       e.hitFlash = 0.18;
       if (e.state !== 'chase') e.state = 'chase';
       onHit?.(e, result);
@@ -499,6 +681,7 @@ export class EnemyField {
       // full damage at the centre, `falloff` of it at the rim
       const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
       const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * power, element, skill, applyStatus: applyFn });
+      this.credit(e, result.amount);
       e.hitFlash = 0.18;
       if (e.state !== 'chase') e.state = 'chase';
       onHit?.(e, result);
@@ -541,21 +724,48 @@ export class EnemyField {
     return type;
   }
 
+  /**
+   * WHO EARNED THIS ONE.
+   *
+   * Observed: "when a guard kills an enemy, the player gets the xp and loot". The town watch is a
+   * real fighter — it does damage and it finishes things off — and the reward was handed over on
+   * the death alone, whoever caused it, so standing in a market square watching guards work paid
+   * better than fighting.
+   *
+   * The rule: the player's side has to have put damage in. Not the killing blow — ANY damage, so
+   * nothing can snipe a kill you earned by landing the last hit on it. If they did not, the kill is
+   * the watch's and the reward is simply gone; the body still dies and still despawns.
+   *
+   * A kill out in the wild, where no guard can reach, always pays: the only things out there that
+   * can take a body down are the player, their companions, and their burns and poisons.
+   */
   kill(e) {
     if (e.dying != null) return;
     e.dying = 0;
     anim(e.actor, 'dead');
+    const earned = (e.playerDamage || 0) > 0 || e.boss || this.wild(e.x, e.z);
+    if (!earned) {
+      this.onLog(`The watch cuts down ${e.name}. Nothing in it for you.`, '');
+      return;
+    }
     this.onKill(e);
   }
 
-  remove(i) {
-    const e = this.enemies[i];
+  /** Take a body out of the world. Safe at any time, including from inside a hook. */
+  removeUnit(e) {
+    if (!e || e.removed) return;
+    e.removed = true;
+    this.spellfx?.clearStatuses?.(e.actor.group);
     this.scene.remove(e.actor.group);
     e.aura?.geometry.dispose();
     e.aura?.material.dispose();
     e.actor.dispose?.();
-    this.enemies.splice(i, 1);
+    const i = this.enemies.indexOf(e);
+    if (i >= 0) this.enemies.splice(i, 1);
   }
+
+  /** The same, by position in the list — kept for callers that walk the array themselves. */
+  remove(i) { this.removeUnit(this.enemies[i]); }
 
   /** The enemy the player is most likely aiming at, for the nameplate. */
   target(player, { maxDistance = 40 } = {}) {
@@ -576,5 +786,5 @@ export class EnemyField {
   /** Is anything actually fighting the player right now? Conditional affixes need to know. */
   get engaged() { return this.enemies.some(e => e.dying == null && e.state === 'chase'); }
 
-  clear() { while (this.enemies.length) this.remove(this.enemies.length - 1); }
+  clear() { while (this.enemies.length) this.removeUnit(this.enemies[this.enemies.length - 1]); }
 }

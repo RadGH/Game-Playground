@@ -324,6 +324,21 @@ body {
   color: #8fa0b8; white-space: pre-wrap;
 }
 
+/* D1: the copy drawer. It is a real textarea because the only copy that works off https is
+   "select some text and ask the document to copy the selection" — and because the text has to stay
+   on screen, selectable, until it is dismissed. It used to be written into the State box above,
+   which the refresh timer wipes five times a second. */
+.debug-copy { flex: 0 0 100%; margin-top: 6px; }
+.debug-copy.hidden { display: none; }
+.debug-copy-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.debug-copy-note { flex: 1; min-width: 0; font-size: 11px; color: #9ae0a0; }
+.debug-copy-note.bad { color: #ffb36a; }
+.debug-copy-text {
+  width: 100%; height: 132px; resize: vertical; box-sizing: border-box;
+  background: #060a12; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px; padding: 6px 7px;
+  font: 11px/1.5 var(--mono, ui-monospace, Consolas, monospace); white-space: pre;
+}
+
 #hud-weather { color: #b8d4ea; }
 
 /* ---------------------------------------------------------------- readable HUD text
@@ -386,6 +401,18 @@ body {
 .map-close {
   margin-left: auto; background: none; border: 0; color: #9fb0c8; font-size: 24px; cursor: pointer;
 }
+/* D2: "Copy location". The text sits in a real input because the game is served over plain http,
+   where there is no clipboard API — see js/debug.js `copyTextVia`. One line, so it is an input
+   rather than a textarea, and it stays up until it is closed. */
+.map-copy { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-bottom: 1px solid #222c3c; }
+.map-copy.hidden { display: none; }
+.map-copy-text {
+  flex: 1; min-width: 0; height: 26px; box-sizing: border-box;
+  background: #060a12; color: #cfe0ef; border: 1px solid #2a3446; border-radius: 5px; padding: 3px 7px;
+  font: 12px var(--mono, ui-monospace, Consolas, monospace); white-space: pre; resize: none; overflow-x: auto;
+}
+.map-copy-note { font-size: 12px; color: #9ae0a0; }
+.map-copy-note.bad { color: #ffb36a; }
 .map-body { flex: 1; display: flex; min-height: 0; }
 /* The map and the panels beside it need a real gutter: at some sizes the canvas ran under the
    layers and pin columns — "the map covers up the layers/pins/cell menus on the right side, there
@@ -446,8 +473,6 @@ body {
 .talk-foot { margin-top: 12px; }
 /* why the prices are what they are — standing was invisible at the one counter it should show at */
 .talk-standing { color: #ffd24a; margin: 2px 0 6px; }
-.trade-fold > summary { cursor: pointer; color: #9fb0c8; font-size: 13px; margin: 8px 0 4px; }
-.trade-fold[open] > summary { color: #cfe0ef; }
 .talk-btn:disabled { opacity: .35; cursor: default; }
 .talk-gold { margin-top: 8px; }
 
@@ -485,7 +510,7 @@ body {
 .trade-row-no .trade-what { opacity: 0.55; }
 .trade-row-no .trade-spec { color: #a06a6a; }
 
-/* ---- the racks in the Other tab: mounts, lights, quivers */
+/* ---- the racks inside the Gear and Other tabs: quivers, trinkets · mounts, lights, hulls */
 .trade-rack { display: flex; align-items: baseline; gap: 8px; margin: 12px 0 2px;
   border-bottom: 1px solid #1e2836; padding-bottom: 3px; }
 .trade-rack:first-child { margin-top: 2px; }
@@ -854,14 +879,8 @@ body {
 .small-bag { max-height: 190px; overflow-y: auto; }
 
 /* ----------------------------------------------------------------- skills tab */
-.skilllist { display: flex; flex-direction: column; gap: 5px; }
-.skill-row {
-  display: grid; grid-template-columns: 22px 1fr auto; gap: 6px 10px; align-items: baseline;
-  padding: 6px 8px; background: rgba(16,24,36,.6); border: 1px solid #23344a; border-radius: 6px;
-}
-.skill-row .skill-desc { grid-column: 2 / -1; }
-.skill-row .skill-title { color: #cfe0ef; }
-.skill-row.locked { opacity: .45; }
+/* `.skilllist` / `.skill-row` went with the "All skills" pane (D5) — it drew the same six slots as
+   the bar strip. The strip's own rules are down in the sheet section, under `.sk-card`. */
 .skill-slot.locked { opacity: .4; }
 .skill-slot.locked .skill-name { font-size: 10px; }
 .skill-slot.locked .skill-mp { color: #8fa0b8; }
@@ -1481,25 +1500,30 @@ body {
 .bag--grid .row .score { min-width: 0; margin-left: auto; }
 
 /* ---------------------------------------------------------------- 3. skills */
+/* D5: the "All skills" column is gone — it listed the same six slots as the bar, with the same
+   names and the same numbers (see js/hud.js renderSkills). The bar keeps the whole top of the
+   screen and the talent tree gets the whole of the rest, which is what it wanted: it lays its three
+   tiers out as three columns. */
 .tab-body[data-tab="skills"]:not(.hidden) {
   display: grid;
-  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
-  grid-template-rows: 124px minmax(0, 1fr);
-  grid-template-areas: "bar bar" "list tree";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 168px minmax(0, 1fr);
+  grid-template-areas: "bar" "tree";
   gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
 }
 .col-bar { grid-area: bar; }
-.col-list { grid-area: list; }
 .col-tree { grid-area: tree; }
 @media (max-width: 1440px) {
-  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 106px minmax(0, 1fr); }
+  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 150px minmax(0, 1fr); }
 }
 /* The in-game bar and this screen used to share nothing — the screen was a text list and the bar
  * six boxes, and neither showed which talents were on a skill. This strip is both, and it is the
  * talent picker too (which used to be a chip row INSIDE the tree, so it scrolled away with it). */
 #sheet-skillbar { display: flex; gap: 8px; align-items: stretch; padding: 8px 10px; height: 100%; }
 .sk-card {
-  flex: 1 1 0; min-width: 0; max-width: 220px; position: relative;
+  /* D5: no max-width any more — six cards share the whole width of the screen now that the
+     duplicate list beside them is gone, and each one carries a description. */
+  flex: 1 1 0; min-width: 0; position: relative;
   display: flex; flex-direction: column; gap: 2px;
   padding: 7px 9px 6px 26px;
   background: var(--pane-bg2); border: 1px solid #2a3446; border-radius: 7px;
@@ -1513,6 +1537,13 @@ body {
 }
 .sk-card .sk-name { font-weight: 600; font-size: var(--fs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sk-card .sk-cost { font-size: var(--fs-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+/* D5: what the skill DOES — the one thing the deleted "All skills" list had that the card did not.
+   Clamped to three lines so six cards stay the same height whatever the wording. */
+.sk-card .sk-desc {
+  font-size: var(--fs-sm); color: var(--ink-dim); line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sk-card.locked .sk-desc { color: var(--ink-faint); }
 .sk-card .sk-pips { display: flex; gap: 3px; margin-top: auto; }
 .sk-card .sk-pips i { width: 7px; height: 7px; border-radius: 50%; background: #26344a; border: 1px solid #38496a; }
 .sk-card .sk-pips i.on { background: var(--gold); border-color: var(--gold); }

@@ -133,11 +133,65 @@ export function patternGlyphs(item) {
   return p.pattern.map(k => STRIKES[k]?.glyph || '·').join(' ');
 }
 
-/** …and the same in words, for the hover card. */
+/**
+ * HOW MANY HANDS, and whether the other one is free.
+ *
+ * "It is not clear which weapons are one- or two-handed." `items.json` says `twoHanded` and nothing
+ * else, and only the four caster bases carry `offHandOk` — so a one-handed sword read as neither
+ * one thing nor the other, and the off hand refused it. The rule here is the obvious one: a melee
+ * weapon that is not two-handed takes one hand, and anything that takes one hand can go in either.
+ *
+ * A BOW IS NOT A ONE-HANDER even when the data forgets to say so: you cannot draw one with a sword
+ * in the other hand, which is why `ranged` is checked before anything else.
+ */
+export function oneHanded(item) {
+  if (!item || item.type !== 'weapon') return false;
+  if (item.twoHanded || item.ranged) return false;
+  return true;
+}
+
+/** Can this go in the off hand at all, ignoring what is currently in the main one? */
+export function canGoOffhand(item) {
+  if (!item) return false;
+  if (item.type !== 'weapon') return true;             // shields, quivers, tomes — held, not swung
+  return oneHanded(item);
+}
+
+/**
+ * Write the handedness onto the item.
+ *
+ * `offHandOk` is the flag `js/hud.js` and Emberveil both already read, so setting it on the ITEM
+ * (never in the shared `items.json`) is what makes the interface offer the off hand for a sword.
+ * `hands` is for anything that wants to print it.
+ */
+export function markHands(item) {
+  if (!item || item.type !== 'weapon') return item;
+  item.hands = item.twoHanded ? 2 : 1;
+  if (oneHanded(item)) item.offHandOk = true;
+  return item;
+}
+
+/** "One-handed sword" / "Two-handed — it takes the off hand with it". */
+export function handedText(item) {
+  if (!item || item.type !== 'weapon') return '';
+  const p = profileOf(item);
+  if (item.twoHanded) return `Two-handed ${p.name.toLowerCase()} — it takes both hands`;
+  if (item.ranged) return `Two-handed ${p.name?.toLowerCase() || 'bow'} — it takes both hands`;
+  return `One-handed ${p.name.toLowerCase()} — it can go in either hand`;
+}
+
+/**
+ * …and the same in words, for the hover card.
+ *
+ * The handedness leads, because that is the thing a player has to know BEFORE the rhythm: the card
+ * used to print a rapier's two arrows and its reach and never once say whether the shield could
+ * stay on.
+ */
 export function patternText(item) {
   const p = profileOf(item);
   const names = p.pattern.map(k => STRIKES[k]?.name || k);
-  return `${names.join(', then ')} — ${p.reach.toFixed(1)} m reach, a swing every ${p.every.toFixed(2)}s`;
+  return `${handedText(item)}. ${names.join(', then ')} — ${p.reach.toFixed(1)} m reach, `
+    + `a swing every ${p.every.toFixed(2)}s`;
 }
 
 /**
@@ -205,6 +259,11 @@ export function offhandRefusal(player, item) {
   }
   if (item.twoHanded && item.type === 'weapon' && !hands.titanGrip) {
     return `${item.name} takes both hands — it cannot go in the off hand.`;
+  }
+  // A bow needs the hand that is not holding it. Nothing said so, so a bow could be dropped into
+  // the off hand and then swing like a club.
+  if (item.type === 'weapon' && item.ranged && !hands.titanGrip) {
+    return `${item.name} needs both hands to draw — it cannot go in the off hand.`;
   }
   return null;
 }

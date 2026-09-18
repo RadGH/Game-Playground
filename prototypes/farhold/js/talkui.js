@@ -32,19 +32,30 @@ const SLOT_WORDS = {
 };
 
 /**
- * The racks the Other tab is sorted into.
+ * D4: FOUR SHELVES, NOT THREE.
  *
- * "Where shops sell boats and ship, they should also sell torches and mounts." They always did -
- * js/gear.js put them on every shelf - but they landed in an undifferentiated "Other" tab behind
- * Weapons, mixed in with rings and quivers, so nobody found them. Boats and ships get a heading of
- * their own further down; these get the same treatment, which is the whole of the complaint.
+ * js/gear.js sorts everything that is not a weapon or a piece of armour onto one "other" pile, and
+ * this morning's pass gave that pile headings — Mounts, Lights, Quivers, Trinkets. One tab holding
+ * four unrelated kinds of thing is still one tab: "add a Gear tab between Armour and Other, holding
+ * quivers and trinkets; Other keeps mounts and lights and gains boats and ships."
+ *
+ * So the split happens HERE rather than in gear.js — the shop is the only place that cares, and
+ * `categoryOf()` is also what a sold-back item is filed under, which must not change under it.
+ * A thing you RIDE or CARRY FOR LIGHT is Other; everything else off that pile is Gear.
  */
-const RACKS = [
-  { key: 'mount', name: 'Mounts', note: 'Press H to get on. Faster over open ground.', is: i => i.slot === 'mount' },
-  { key: 'light', name: 'Lights', note: 'Press F. You will want one before the first night.', is: i => i.slot === 'light' },
-  { key: 'quiver', name: 'Quivers', note: 'Off hand, for a bow. They add damage, not armour.', is: i => i.subtype === 'quiver' },
-  { key: 'rest', name: 'Trinkets and oddments', note: '', is: () => true },
-];
+const isTransportOrLight = i => i.slot === 'mount' || i.slot === 'light';
+
+/** The racks inside each of the two split tabs. The last rack in a list claims whatever is left. */
+const RACKS = {
+  gear: [
+    { key: 'quiver', name: 'Quivers', note: 'Off hand, for a bow. They add damage, not armour.', is: i => i.subtype === 'quiver' },
+    { key: 'rest', name: 'Trinkets and oddments', note: 'Rings and neck chains. Small numbers, and they stack.', is: () => true },
+  ],
+  other: [
+    { key: 'mount', name: 'Mounts', note: 'Press H to get on. Faster over open ground.', is: i => i.slot === 'mount' },
+    { key: 'light', name: 'Lights', note: 'Press F. You will want one before the first night.', is: i => i.slot === 'light' },
+  ],
+};
 
 export function createTalkPanel(handlers = {}) {
   const body = el('div', { class: 'talk-body' });
@@ -175,12 +186,27 @@ export function createTalkPanel(handlers = {}) {
        * comparing. All item interfaces should have these tooltips."
        */
       const shelves = context.shelves || { weapon: [], armor: [], other: [], buyback: [] };
+      /**
+       * E3 put the boats and ships behind a fold at the bottom of every tab, where a level-1 village
+       * store was offering a 5200g hauler above the stock you could actually buy. They belong on the
+       * Other shelf with the mounts — they are the same kind of purchase, bought once and kept.
+       */
+      const vehicles = (context.vehicles || []).filter(v => !context.ownsVehicle?.(v.slot, v.key));
+      const spare = shelves.other || [];
+      const stock = {
+        weapon: shelves.weapon || [],
+        armor: shelves.armor || [],
+        gear: spare.filter(i => !isTransportOrLight(i)),
+        other: spare.filter(isTransportOrLight),
+        buyback: shelves.buyback || [],
+      };
       const counts = {
-        weapon: shelves.weapon.length, armor: shelves.armor.length,
-        other: shelves.other.length, buyback: (shelves.buyback || []).length,
+        weapon: stock.weapon.length, armor: stock.armor.length,
+        gear: stock.gear.length, other: stock.other.length + vehicles.length,
+        buyback: stock.buyback.length,
       };
       const tabs = [
-        ['weapon', 'Weapons'], ['armor', 'Armour'], ['other', 'Other'],
+        ['weapon', 'Weapons'], ['armor', 'Armour'], ['gear', 'Gear'], ['other', 'Other'],
         ...(counts.buyback ? [['buyback', 'Bought from you']] : []),
       ];
       if (!tabs.some(([k]) => k === shopTab)) shopTab = 'weapon';
@@ -239,41 +265,78 @@ export function createTalkPanel(handlers = {}) {
         return node;
       };
 
-      const shelf = shopTab === 'buyback' ? (shelves.buyback || []) : (shelves[shopTab] || []);
+      const shelf = stock[shopTab] || [];
+
+      /** One heading over a group of rows, with the line that says what the group is for. */
+      const rackHead = (name, note) => el('div', { class: 'trade-rack' },
+        el('h4', { text: name }),
+        ...(note ? [el('span', { class: 'trade-rack-note', text: note })] : []),
+      );
 
       /**
-       * The Other tab, in racks; every other tab as a plain list.
+       * A boat or a ship is a HULL, not a piece of loot.
+       *
+       * D4: "Boats and ships have no rarity — base quality only." They never rolled one — they are
+       * `js/gear.js` VEHICLES entries, not items — and nothing here gives them a rarity colour, so
+       * the rack says so out loud rather than leaving the player to wonder which of them is the rare
+       * one. Bought once and owned for the run; you pick between them on the character sheet.
+       */
+      const vehicleRows = () => {
+        if (!vehicles.length) return [];
+        const out = [rackHead('Boats and ships', 'Base quality only — no rarities. Bought once and yours for good.')];
+        for (const v of vehicles) {
+          out.push(el('div', { class: 'trade-row' },
+            el('div', { class: 'trade-what' },
+              el('span', { text: v.name }),
+              el('span', { class: 'trade-spec', text: v.lore }),
+            ),
+            el('span', { class: 'coin', text: `${v.price}g` }),
+            el('button', {
+              class: 'talk-btn', text: 'Buy',
+              disabled: v.price > (context.gold ?? 0),
+              title: v.price > (context.gold ?? 0) ? `That is ${v.price} gold and you have ${context.gold ?? 0}.` : '',
+              onclick: () => { handlers.buyVehicle?.(v); render(); },
+            }),
+          ));
+        }
+        return out;
+      };
+
+      /**
+       * The Gear and Other tabs, in racks; every other tab as a plain list.
        *
        * Sorting happens once, in order, so an item lands in the first rack that claims it and the
        * last rack claims everything left. An empty rack is not drawn — a village store with no
        * quivers should not show an empty heading called Quivers.
        */
       function shelfRows(items) {
-        if (shopTab !== 'other') return items.map(item => row(item));
+        const racks = RACKS[shopTab];
+        if (!racks) return items.map(item => row(item));
         const left = [...items];
         const out = [];
-        for (const rack of RACKS) {
+        for (const rack of racks) {
           const mine = left.filter(rack.is);
           if (!mine.length) continue;
           for (const item of mine) left.splice(left.indexOf(item), 1);
-          out.push(el('div', { class: 'trade-rack' },
-            el('h4', { text: rack.name }),
-            ...(rack.note ? [el('span', { class: 'trade-rack-note', text: rack.note })] : []),
-          ));
+          out.push(rackHead(rack.name, rack.note));
           out.push(...mine.map(item => row(item)));
         }
+        // anything no rack claimed still has to be buyable
+        out.push(...left.map(item => row(item)));
+        if (shopTab === 'other') out.push(...vehicleRows());
         return out;
       }
 
+      const empty = shopTab === 'buyback' ? 'You have not sold me anything.' : 'Nothing of that sort today.';
       const theirs = el('div', { class: 'trade-col' },
         el('div', { class: 'shop-tabs' }, ...tabs.map(([key, label]) => el('button', {
           class: 'chip' + (key === shopTab ? ' on' : ''),
           text: `${label}${counts[key] ? ` (${counts[key]})` : ''}`,
           onclick: () => { shopTab = key; render(); },
         }))),
-        ...(shelf.length
+        ...(counts[shopTab]
           ? shelfRows(shelf)
-          : [el('p', { class: 'muted small', text: shopTab === 'buyback' ? 'You have not sold me anything.' : 'Nothing of that sort today.' })]),
+          : [el('p', { class: 'muted small', text: empty })]),
       );
 
       const bag = context.bag || [];
@@ -289,31 +352,8 @@ export function createTalkPanel(handlers = {}) {
       const note = handlers.standingNote?.();
       if (note) kids.push(el('div', { class: 'talk-standing small', text: note }));
       kids.push(el('div', { class: 'trade' }, theirs, mine));
-
-      // vehicles: unlockables, bought once and owned for the run
-      /**
-       * E3: a level-1 village store was offering a 5200g interstellar hauler, and that block was over
-       * half the panel. It is behind a fold now, so the stock you might actually buy is what you see.
-       */
-      const vehicles = (context.vehicles || []).filter(v => !context.ownsVehicle?.(v.slot, v.key));
-      if (vehicles.length) {
-        const fold = el('details', { class: 'trade-fold' });
-        fold.append(el('summary', { text: `Boats and ships (${vehicles.length})` }));
-        fold.append(el('p', { class: 'muted small', text: 'Bought once and yours for good. Pick between them on the character sheet.' }));
-        kids.push(fold);
-        for (const v of vehicles) {
-          fold.append(el('div', { class: 'trade-row' },
-            el('span', { text: v.name }),
-            el('span', { class: 'muted small', text: v.lore }),
-            el('span', { class: 'coin', text: `${v.price}g` }),
-            el('button', {
-              class: 'talk-btn', text: 'Buy',
-              disabled: v.price > (context.gold ?? 0),
-              onclick: () => { handlers.buyVehicle?.(v); render(); },
-            }),
-          ));
-        }
-      }
+      // the boats and ships used to be a fold under all of this (E3). They are on the Other shelf
+      // now, with the mounts — same kind of purchase, same place to look for it.
     }
 
     // ---- the gambler: sealed crates, one item each, a promise and a chance of better

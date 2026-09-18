@@ -579,15 +579,37 @@ export const ORBIT_LAYOUT_DEFAULTS = {
   starRadius: 0.6,    // how big the star is drawn, so the first ring clears it
   even: 0.55,         // 0 = true log spacing, 1 = every ring the same distance apart
   sizeCap: 0.34,      // a planet's drawn radius, at most, as a share of its narrowest gap
+
+  // ---- lanes and moons
+  //
+  // Reported from Farhold's orbit view: *"planets are too close together, some are drawn larger
+  // than their own sun, and moons share an orbital ring with planets so they could collide."* The
+  // last one is the real fault: a moon drawn a fixed number of PLANET radii out, with the planet
+  // itself drawn far too big, ends up sweeping a circle wider than the gap to the next world.
+  //
+  // A **lane** is the space either side of a ring that belongs to that planet and nothing else. A
+  // moon may only ever be drawn inside its parent's lane, and two neighbouring lanes never touch,
+  // so nothing a moon sweeps can meet anything else in the system.
+  laneShare: 0.8,     // how much of the half-gap either side a planet owns outright
+  moonInner: 2.4,     // the closest a moon is drawn, in its planet's own drawn radii
+  moonStep: 1.35,     // each moon out sits this much further than the one inside it
+
+  // 'ladder' remaps the orbits for drawing (the default, and what a chart wants).
+  // 'au' keeps the real orbit in AU and lends only the gaps, the size cap and the moon lanes —
+  // for a caller drawing the system at its own scale, where "0.3 AU away" has to mean what it says.
+  map: 'ladder',
 };
 
 /**
  * Where to draw every orbit in a system.
- * Returns { radii, radiusFor(au), gapAt(i), sizeFor(i, wanted), minGap, max }.
- *   radii[i]        — the drawn radius of planet i, in scene units
- *   radiusFor(au)   — the same mapping for anything that is not a planet (belts, comets)
- *   gapAt(i)        — the narrower of the two gaps around planet i
- *   sizeFor(i, r)   — `r`, capped so the planet cannot fill its lane
+ * Returns { radii, radiusFor(au), gapAt(i), sizeFor(i, wanted), laneAt(i), moonRings(i, n), minGap, max }.
+ *   radii[i]            — the drawn radius of planet i, in scene units
+ *   radiusFor(au)       — the same mapping for anything that is not a planet (belts, comets)
+ *   gapAt(i)            — the narrower of the two gaps around planet i
+ *   sizeFor(i, r, o)    — `r`, capped so the planet cannot fill its lane; pass `{ moons: n }` and it
+ *                         also leaves room for that many moons to circle it inside the same lane
+ *   laneAt(i)           — how far out from planet i's ring still belongs to planet i
+ *   moonRings(i, n, o)  — where to draw that planet's n moons, all inside its lane
  */
 export function orbitLayout(system, userOpts = {}) {
   const o = { ...ORBIT_LAYOUT_DEFAULTS, ...userOpts };
@@ -613,11 +635,17 @@ export function orbitLayout(system, userOpts = {}) {
 
   // the blended scale, then a pass outwards that opens up anything still too tight
   const radii = [];
-  let prev = o.starRadius;
-  for (let i = 0; i < n; i++) {
-    const r = Math.max(first + (o.outer - first) * place(aus[i], i), prev + o.minGap);
-    radii.push(r);
-    prev = r;
+  if (o.map === 'au') {
+    // Nothing to remap: the rungs ARE the orbits. The minimum-gap pass is skipped too — you cannot
+    // shove a planet outwards when the caller is drawing it where it actually is.
+    for (let i = 0; i < n; i++) radii.push(aus[i]);
+  } else {
+    let prev = o.starRadius;
+    for (let i = 0; i < n; i++) {
+      const r = Math.max(first + (o.outer - first) * place(aus[i], i), prev + o.minGap);
+      radii.push(r);
+      prev = r;
+    }
   }
 
   // a monotone mapping for everything else: straight-line interpolation between the planet rings,
@@ -644,9 +672,44 @@ export function orbitLayout(system, userOpts = {}) {
     i + 1 < radii.length ? radii[i + 1] - radii[i] : Infinity,
   );
 
+  /** How far out from planet i's ring is still planet i's own business. */
+  const laneAt = i => (radii.length ? gapAt(i) * 0.5 * clamp(o.laneShare, 0, 1) : Infinity);
+
+  /**
+   * The drawn radius a planet may have. Two caps: it never fills the gap to its neighbour, and —
+   * if it has moons — it leaves enough room for the whole moon ladder to sit outside it and still
+   * inside its lane. Without the second cap a big planet swallowed its own moons.
+   */
+  function sizeFor(i, wanted, { moons = 0 } = {}) {
+    let cap = o.sizeCap * gapAt(i);
+    if (moons > 0) {
+      const outermost = o.moonInner * Math.pow(o.moonStep, moons - 1);
+      // +0.6 is the moon's own drawn radius, which has to clear the lane edge as well
+      cap = Math.min(cap, laneAt(i) / (outermost + 0.6));
+    }
+    return Math.min(wanted, cap);
+  }
+
+  /**
+   * Where to draw planet i's moons, from a ladder that starts clear of the planet's own surface.
+   * If the outermost one has walked out of the lane the whole set is pulled back in together, so
+   * the ladder keeps its shape and no moon strays into the ring next door.
+   */
+  function moonRings(i, count, { bodyRadius = 0 } = {}) {
+    const out = [];
+    if (count <= 0) return out;
+    let r = Math.max(bodyRadius * o.moonInner, 1e-6);
+    for (let k = 0; k < count; k++) { out.push(r); r *= o.moonStep; }
+    const lane = laneAt(i);
+    const top = out[out.length - 1];
+    if (Number.isFinite(lane) && top > lane) for (let k = 0; k < out.length; k++) out[k] *= lane / top;
+    // …and never inside the planet itself, however tight the lane turned out to be
+    for (let k = 0; k < out.length; k++) out[k] = Math.max(out[k], bodyRadius * 1.5);
+    return out;
+  }
+
   return {
-    opts: o, radii, radiusFor, gapAt,
-    sizeFor: (i, wanted) => Math.min(wanted, o.sizeCap * gapAt(i)),
+    opts: o, radii, radiusFor, gapAt, laneAt, sizeFor, moonRings,
     minGap: radii.length ? Math.min(...radii.map((_, i) => gapAt(i))) : Infinity,
     max: radii.length ? radii[radii.length - 1] : o.inner,
   };

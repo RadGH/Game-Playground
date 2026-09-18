@@ -214,6 +214,31 @@ export class Hud {
     this.talentSkill = null;
     /** Which perk node the forest has selected. */
     this.perkPick = null;
+    /** D9: names under the nodes. Off until you ask for them. */
+    this.perkLabels = false;
+    /** D10: what is typed in the perk search box. */
+    this.perkQuery = '';
+
+    /**
+     * D3: LEAVING THE INVENTORY SOMETIMES LEFT THE MOUSE LOOSE.
+     *
+     * "It's fine most of the time unless I'm in the menu a while clicking around a lot." The close
+     * path always asked for the pointer back — but a browser is allowed to REFUSE that request, and
+     * does: Chrome turns down a `requestPointerLock` for about a second after the lock was given up,
+     * and again if the request did not ride on a fresh click or keypress. The refusal arrives as a
+     * `pointerlockerror` event, which nothing was listening for, so the ask failed in silence and
+     * the player was left with a cursor and no way to aim.
+     *
+     * Two halves to the fix: ask again a few times after closing (`regrabPointer`), and notice the
+     * refusal here so the last word is a line the player can act on rather than nothing at all.
+     */
+    document.addEventListener('pointerlockerror', () => {
+      if (this.sheetOpen || document.pointerLockElement) return;
+      clearTimeout(this._lockMoan);
+      this._lockMoan = setTimeout(() => {
+        if (!document.pointerLockElement && !this.sheetOpen) this.log('Click the world to aim again.', '');
+      }, 1800);
+    });
 
     // `+` and `-` zoom the minimap. It is fixed at 26 cells otherwise, which is either far too
     // close for finding a town or far too wide for picking your way between trees.
@@ -694,6 +719,8 @@ export class Hud {
     if (scaleBox) scaleBox.textContent = this.minimapScaleText();
     const whereBox = $('hud-where');
     if (whereBox && where !== undefined) whereBox.textContent = where;
+    // B2: nothing else redraws the minimap once the ship is in the air — see drawFlightMinimap
+    this.drawFlightMinimap();
   }
 
   /** Where the player is, in every form worth pasting into a bug report. */
@@ -873,6 +900,38 @@ export class Hud {
     ctx.restore();
   }
 
+  /**
+   * B2: THE MINIMAP WHILE YOU ARE FLYING THE SHIP.
+   *
+   * "The minimap does not update while flying — it appears stuck to the player's old on-foot
+   * position." It was: main.js draws the minimap from the walking controller at the bottom of the
+   * ground tick, and flight returns out of `stepFlight` long before it, so the canvas simply kept
+   * whatever was last painted on it — the ground you took off from, with an arrow standing on it.
+   *
+   * In the air the ship IS the player: `air.state` carries the same x/z/yaw, so the ordinary planet
+   * minimap is the right thing to draw, and B9 says so outright ("in atmosphere it should switch to
+   * the planet minimap"). Driven from `tick()` rather than from main.js because that file belongs to
+   * another agent this round; the one line there would be, inside the `mode === 'air'` branch:
+   *   if (state.frames % 6 === 0) hud.drawMinimap(air.state, field.enemies, [], []);
+   */
+  drawFlightMinimap() {
+    const g = typeof window !== 'undefined' ? window.farhold : null;
+    if (!g || g.mode !== 'air') return;
+    const ship = g.air?.state;
+    if (!ship || !Number.isFinite(ship.x)) return;
+    this._airFrames = (this._airFrames || 0) + 1;
+    if (this._airFrames % 6) return;                 // six times less work, same apparent smoothness
+    // the night wash is set by the ground tick, which is not running — take it off the sky directly
+    const sunY = g.sky?.sunDirection?.y;
+    if (Number.isFinite(sunY)) this.daylight = Math.max(0.28, Math.min(1, sunY * 1.7 + 0.3));
+    const book = g.markers;
+    const marks = book ? book.tracked().map(m => {
+      const b = book.bearing(m, ship, this.terrain);
+      return { ...m, x: b.x, z: b.z, distance: b.distance };
+    }) : [];
+    this.drawMinimap(ship, g.field?.enemies || [], [], marks);
+  }
+
   drawMinimap(player, enemies = [], extras = [], markers = []) {
     const canvas = $('minimap');
     const ctx = canvas.getContext('2d');
@@ -1031,10 +1090,27 @@ export class Hud {
       // put the keyboard somewhere sensible, or Tab starts at the top of the document
       $('sheet-tabs').querySelector('button.on')?.focus();
     } else {
-      this.onCloseSheet?.();
+      this.regrabPointer();
       this._returnFocus?.focus?.();
     }
     return open;
+  }
+
+  /**
+   * D3: ask for the mouse back, and keep asking for a moment.
+   *
+   * `onCloseSheet` is main.js's `regrab()`, which is already a no-op when a panel still owns the
+   * mouse or the lock is already held — so asking three more times costs nothing and covers the one
+   * window where the browser turns the first ask down flat (see the note in the constructor). The
+   * delays step over Chrome's roughly one-second lock-out after an exit.
+   */
+  regrabPointer() {
+    this.onCloseSheet?.();
+    const again = () => {
+      if (this.sheetOpen || document.pointerLockElement) return;
+      this.onCloseSheet?.();
+    };
+    for (const ms of [140, 420, 1300]) setTimeout(again, ms);
   }
 
   setTab(tab) {
@@ -1498,29 +1574,19 @@ export class Hud {
 
   renderSkills() {
     const player = this.player;
-    const box = $('sheet-skills');
-    if (box) {
-      box.replaceChildren(...this.skillState.map((s, i) => {
-        const row = el('div', 'skill-row' + (s.locked ? ' locked' : ''));
-        row.dataset.tipRender = 'skill';
-        row.dataset.tipSkill = String(i);
-        row.tabIndex = 0;
-        row.innerHTML = `<span class="skill-key">${i + 1}</span>
-          <span class="skill-title">${s.name}</span>
-          <span class="muted small">${s.locked ? `unlocks at level ${s.unlockAt}` : `${s.mp} mana · ${s.cooldown.toFixed(1)}s`}</span>
-          <span class="muted skill-desc">${s.desc || ''}</span>`;
-        return row;
-      }));
-      if (!this.skillState.length) box.replaceChildren(el('p', 'muted small', 'No skills on this screen.'));
-    }
 
     /**
-     * YOUR BAR, ON THE SCREEN THAT SHAPES IT.
+     * YOUR BAR — THE ONLY LIST OF SKILLS ON THIS SCREEN.
      *
-     * The in-game bar and this screen used to share nothing: the screen was a text list, the bar was
-     * six boxes, and neither showed which talents were on a skill. This strip is the bar — same keys,
-     * same order — and it is the talent picker too. The picker used to be a chip row built INSIDE the
-     * tree, so it scrolled away with the thing it was picking.
+     * D5: "Your Bar and All Skills show the same information." They did, and there was never any
+     * more to show: a class has exactly six skills (`skills.json` lists six ids per class) and both
+     * panels drew all six, with the same names, the same mana and the same cooldowns, in the same
+     * order. The list is gone; what it had that the strip did not — the line saying what a skill
+     * actually does — is on the card now, so nothing was lost with it.
+     *
+     * The strip is the bar: same keys, same order as the one across the bottom of the screen. It is
+     * also the talent picker (that used to be a chip row INSIDE the tree, so it scrolled away with
+     * the thing it was picking).
      *
      * Three dots under each key: filled means a talent taken on that tier, an outlined one means a
      * tier you could spend in right now, a dark one means a tier not open yet.
@@ -1538,6 +1604,7 @@ export class Hud {
         card.innerHTML = `<span class="sk-key">${i + 1}</span>`
           + `<span class="sk-name">${s.locked ? `level ${s.unlockAt}` : s.name}</span>`
           + `<span class="sk-cost">${s.locked ? 'locked' : `${s.mp} mana · ${s.cooldown.toFixed(1)}s`}</span>`
+          + `<span class="sk-desc">${s.locked ? `unlocks at level ${s.unlockAt}` : (s.desc || '')}</span>`
           + '<span class="sk-pips">' + [1, 2, 3].map(t =>
             `<i class="${picks[t] ? 'on' : t <= open ? 'open' : ''}"></i>`).join('') + '</span>';
         if (!s.locked) card.onclick = () => { this.talentSkill = s.id; this.renderSheet(); };
@@ -1680,6 +1747,31 @@ export class Hud {
     if (fit && !fit.dataset.wired) {
       fit.dataset.wired = '1';
       fit.onclick = () => { this.perkZoom = 1; this.perkPan = { x: 0, y: 0 }; this.drawForest(); };
+    }
+
+    /**
+     * D9: the names under the nodes, on a switch.
+     *
+     * "The perk tree shows a tooltip under every node when zoomed in. Make that a checkbox, default
+     * OFF." It was tied to the zoom, so coming in close to read one node buried the whole screen in
+     * eighty-nine labels. Off by default; when it is on the labels are drawn at any zoom and the
+     * ones that would land on top of each other are dropped (see `drawForest`).
+     */
+    const labelBox = $('perk-labels');
+    if (labelBox && !labelBox.dataset.wired) {
+      labelBox.dataset.wired = '1';
+      labelBox.checked = !!this.perkLabels;
+      labelBox.onchange = () => { this.perkLabels = labelBox.checked; this.drawForest(); };
+    }
+
+    /** D10: the search box. Typing redraws — nothing is filtered out, only ringed or faded. */
+    const search = $('perk-search');
+    if (search && !search.dataset.wired) {
+      search.dataset.wired = '1';
+      search.value = this.perkQuery || '';
+      search.oninput = () => { this.perkQuery = search.value; this.drawForest(); };
+      // the sheet's own keys (1-6, R, Tab) must not fire while you are typing a perk name
+      search.onkeydown = e => { if (e.code !== 'Escape') e.stopPropagation(); };
     }
 
     if (!canvas.dataset.wired) {
@@ -1855,7 +1947,30 @@ export class Hud {
     const taken = takenOf(player);
     const colourOf = node => ARMS.find(a => a.key === node.arm)?.color || '#9fb4d4';
 
-    // links first, under everything
+    /**
+     * D10: WHAT YOU TYPED, AND WHAT IT FOUND.
+     *
+     * "A player can find 'magic find' without reading 89 nodes." The name and the description are
+     * both searched, because half of these nodes are named for the feel of them ("Carrion Eye") and
+     * say what they do only in the line underneath. Nothing is hidden: a match gets a ring, the rest
+     * drop to a quarter opacity, so the shape of the tree around a match is still readable — which
+     * is the whole point, since the shape is what the perk costs.
+     */
+    const q = (this.perkQuery || '').trim().toLowerCase();
+    const hits = q
+      ? new Set(forest.nodes.filter(n => `${n.name || ''} ${n.desc || ''}`.toLowerCase().includes(q)).map(n => n.id))
+      : null;
+    const faded = node => !!hits && !hits.has(node.id);
+    const note = $('perk-search-note');
+    if (note) {
+      note.textContent = !q ? ''
+        : hits.size ? `${hits.size} of ${forest.nodes.length} match`
+        : 'nothing by that name';
+      note.classList.toggle('bad', !!q && !hits.size);
+    }
+
+    // links first, under everything — dimmed as a set while a search is on, so the rings stand out
+    if (hits) ctx.globalAlpha = 0.4;
     for (const [a, b] of forest.links) {
       const na = forest.byId.get(a), nb = forest.byId.get(b);
       if (!na || !nb) continue;
@@ -1869,6 +1984,8 @@ export class Hud {
       ctx.stroke();
     }
 
+    ctx.globalAlpha = 1;
+
     for (const node of forest.nodes) {
       const { x, y } = proj.to(node.x, node.y);
       const kind = NODE_KINDS[node.kind];
@@ -1876,6 +1993,7 @@ export class Hud {
       const has = taken.has(node.id);
       const open = !has && canTake(player, forest, node.id).ok;
       const colour = colourOf(node);
+      ctx.globalAlpha = faded(node) ? 0.22 : 1;
 
       if (node.kind === 'keystone') {
         // a keystone is a diamond, so it reads as different from across the screen
@@ -1916,27 +2034,49 @@ export class Hud {
         ctx.arc(x, y, r + 7 * dpr, 0, Math.PI * 2);
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6 * dpr; ctx.stroke();
       }
+
+      // D10: a match wears a gold ring, well clear of the white "you can take this" one
+      if (hits && hits.has(node.id)) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 10 * dpr, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 2.4 * dpr; ctx.stroke();
+      }
     }
+    ctx.globalAlpha = 1;
 
     /**
-     * Zoomed in far enough that there is room for words, every node says what it is. This is the
-     * other half of "make it zoomable": the point of coming in close is to read the tree, not to
-     * look at bigger dots.
+     * D9: the names under the nodes, when the checkbox asks for them — and always on a search hit,
+     * whatever the checkbox says, because a ring you cannot read the name of is half an answer.
+     *
+     * They used to appear on their own past 1.5× zoom, which is what the report calls "a tooltip
+     * under every node". They are drawn at any zoom now and a label that would land on one already
+     * placed is simply dropped, so zoomed out you get the ones there is room for rather than a
+     * solid block of overlapping text.
      */
-    if (zoom >= 1.5) {
+    const labelled = this.perkLabels ? forest.nodes : (hits ? forest.nodes.filter(n => hits.has(n.id)) : []);
+    if (labelled.length) {
       ctx.font = `500 ${10.5 * dpr}px system-ui, sans-serif`;
       ctx.textAlign = 'center';
-      for (const node of forest.nodes) {
+      const placed = [];
+      // hits first, so when two labels collide the one you searched for is the one that survives
+      const order = hits ? [...labelled].sort((a, b) => (hits.has(b.id) ? 1 : 0) - (hits.has(a.id) ? 1 : 0)) : labelled;
+      for (const node of order) {
         if (node.kind === 'hub' || !node.name) continue;
         const { x, y } = proj.to(node.x, node.y);
         if (x < -80 * dpr || x > canvas.width + 80 * dpr || y < 0 || y > canvas.height) continue;
         const words = node.name.length > 26 ? node.name.slice(0, 25) + '…' : node.name;
-        ctx.fillStyle = 'rgba(12, 16, 24, .78)';
         const tw = ctx.measureText(words).width;
-        ctx.fillRect(x - tw / 2 - 3 * dpr, y + 9 * dpr, tw + 6 * dpr, 13 * dpr);
-        ctx.fillStyle = takenOf(player).has(node.id) ? '#eaf6ff' : 'rgba(190, 205, 228, .82)';
+        const box = { x0: x - tw / 2 - 3 * dpr, x1: x + tw / 2 + 3 * dpr, y0: y + 9 * dpr, y1: y + 22 * dpr };
+        if (placed.some(p => box.x0 < p.x1 && box.x1 > p.x0 && box.y0 < p.y1 && box.y1 > p.y0)) continue;
+        placed.push(box);
+        const hit = !!hits && hits.has(node.id);
+        ctx.globalAlpha = faded(node) ? 0.3 : 1;
+        ctx.fillStyle = 'rgba(12, 16, 24, .78)';
+        ctx.fillRect(box.x0, box.y0, box.x1 - box.x0, 13 * dpr);
+        ctx.fillStyle = hit ? '#ffd24a' : taken.has(node.id) ? '#eaf6ff' : 'rgba(190, 205, 228, .82)';
         ctx.fillText(words, x, y + 19 * dpr);
       }
+      ctx.globalAlpha = 1;
     }
 
     // the hub says what it is, because an unlabelled dot in the middle is a mystery

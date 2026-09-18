@@ -11,6 +11,54 @@
 
 import { WEATHER, WEATHER_BY_KEY } from '../../../worldgen/js/weather.js';
 
+/**
+ * D2: THE ONE LINE A BUG REPORT NEEDS.
+ *
+ * The user pastes "seed 1, Hes-Subud IV, biome Lake, x 22844, z 10308, altitude -13" into chat and
+ * that is enough for anyone to stand exactly where the bug was. It was being typed out by hand off
+ * the State box, so it lives here as one function and the map screen imports it — the debug menu
+ * and the map must never disagree about what a location looks like.
+ */
+export function locationLine({ seed, planet, biome, x, z, altitude } = {}) {
+  const n = v => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : v);
+  return `seed ${seed}, ${planet}, biome ${biome}, x ${n(x)}, z ${n(z)}, altitude ${n(altitude)}`;
+}
+
+/**
+ * D1: COPYING, ON A PAGE THAT CANNOT USE THE CLIPBOARD API.
+ *
+ * "It claims it copied to the clipboard but the clipboard copy does not work at all." It never
+ * could: the game is served over plain http on a LAN address, which is not a secure context, so
+ * `navigator.clipboard` is simply not there — and the old code's `catch` then quietly redrew the
+ * State box, which the 400ms refresh timer wiped a moment later. So there was nothing to copy from
+ * and nothing to read.
+ *
+ * The fallback is the old one that works anywhere: put the text in a real textarea, select it, and
+ * ask the document to copy the selection. `execCommand` is deprecated and still the only thing that
+ * works off https. If even that is refused the text is selected and on screen, so ctrl-C does it.
+ *
+ * Returns 'clipboard' | 'selection' | 'shown' — what actually happened, for the status line.
+ */
+export async function copyTextVia(area, text) {
+  area.value = text;
+  // a hidden textarea cannot be selected, so the caller must have shown it first
+  area.focus();
+  area.select();
+  area.setSelectionRange(0, text.length);
+  if (window.isSecureContext && navigator.clipboard?.writeText) {
+    try { await navigator.clipboard.writeText(text); return 'clipboard'; } catch { /* fall through */ }
+  }
+  try { if (document.execCommand?.('copy')) return 'selection'; } catch { /* fall through */ }
+  return 'shown';
+}
+
+/** What to tell the user, given what `copyTextVia` managed. */
+export const COPY_WORDS = {
+  clipboard: 'Copied.',
+  selection: 'Copied.',
+  shown: 'Could not reach the clipboard — the text is selected below, press Ctrl+C.',
+};
+
 const el = (tag, attrs = {}, ...kids) => {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -122,19 +170,50 @@ export function createDebugMenu(hooks = {}) {
     sections.push(group('Character', ...kids));
   }
 
+  /**
+   * D1: the copy drawer — the text, a status line, and a Close button.
+   *
+   * It stays up until you dismiss it. The old version wrote the report into the State box, which is
+   * redrawn from the game five times a second, so it was gone before you could drag over it. This
+   * has its own box that nothing else touches, and it holds the selection.
+   */
+  const copyArea = el('textarea', { class: 'debug-copy-text', readonly: 'readonly', spellcheck: 'false' });
+  const copyNote = el('span', { class: 'debug-copy-note' });
+  const copyBox = el('div', { class: 'debug-copy hidden' },
+    el('div', { class: 'debug-copy-head' },
+      copyNote,
+      button('Copy again', () => { copyArea.select(); copyTextVia(copyArea, copyArea.value).then(say); }),
+      button('Close', () => copyBox.classList.add('hidden')),
+    ),
+    copyArea,
+  );
+  const say = how => {
+    copyNote.textContent = COPY_WORDS[how] || '';
+    // "copied" in green, "I could not, here it is" in amber — the two outcomes must not look alike
+    copyNote.classList.toggle('bad', how === 'shown');
+  };
+
+  async function offerCopy(text) {
+    copyBox.classList.remove('hidden');
+    copyNote.textContent = 'Copying…';
+    say(await copyTextVia(copyArea, text));
+  }
+
   // A block of everything worth knowing, on the clipboard, ready to paste into a chat.
-  const copyBtn = button('Copy debug report', async () => {
-    const text = hooks.report ? hooks.report() : JSON.stringify(hooks.getState?.() || {}, null, 1);
-    try {
-      await navigator.clipboard.writeText(text);
-      copyBtn.textContent = 'Copied ✓';
-    } catch {
-      // clipboard blocked (no permission, or not a secure origin) — show it instead
-      readout.textContent = text;
-      copyBtn.textContent = 'Clipboard blocked — shown below';
-    }
-    setTimeout(() => { copyBtn.textContent = 'Copy debug report'; }, 2200);
+  const copyBtn = button('Copy debug report', () => {
+    offerCopy(hooks.report ? hooks.report() : JSON.stringify(hooks.getState?.() || {}, null, 1));
   }, 'wide');
+
+  /**
+   * D2: just the location, which is what most bug reports actually quote.
+   *
+   * Everything it needs is already in `getState()` — seed, planet, biome, x, z and altitude are the
+   * first six rows of it — so no new hook had to be threaded through main.js for this.
+   */
+  const locBtn = button('Copy location', () => {
+    const s = hooks.location?.() || hooks.getState?.() || {};
+    offerCopy(locationLine(s));
+  });
   if (hooks.sound || hooks.voice) {
     const kids = [];
     if (hooks.sound) kids.push(button('Sound on/off', () => { hooks.sound(); refresh(); }));
@@ -142,9 +221,9 @@ export function createDebugMenu(hooks = {}) {
     sections.push(group('Audio', ...kids));
   }
 
-  const reportKids = [copyBtn];
+  const reportKids = [copyBtn, locBtn];
   if (hooks.save) reportKids.push(button('Save now', () => hooks.save()));
-  sections.push(group('Report', ...reportKids));
+  sections.push(group('Report', ...reportKids, copyBox));
 
   panel.append(
     el('div', { class: 'debug-head' },

@@ -23,6 +23,7 @@
 // along the surface normal is reflected and damped. You lose speed and your nerve, not health.
 
 import * as THREE from 'three';
+import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
 
 /** Everything the flight model reads. All of it is in `balance.json` `flight`. */
 const DEFAULTS = {
@@ -52,7 +53,26 @@ const DEFAULTS = {
 export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship = null, settings = null, onLog = () => {} } = {}) {
   // read through a binding: landing on a different world swaps the whole ground out
   let terrain = terrainIn;
+  /**
+   * THE FLIGHT MODEL SCALES WITH THE PLANET.
+   *
+   * Every number above is absolute metres, tuned for the full-size 163 x 81 km world. Pick "Super
+   * tiny" on the title screen and that world is 16 x 8 km: a 9 km ceiling is most of the way to
+   * space, and 900 m/s crosses the entire map in eighteen seconds. Speed, reach and altitude follow
+   * the square root of the scale — 32% of each on the smallest world — so a flight across a small
+   * world takes about as long as a flight across a big one, and the ceiling still leaves room to
+   * climb. Anything about the SHAPE of the ship (clearance, camera, roll rate) is left alone.
+   */
+  const scale = Math.sqrt(Math.max(0.05, (terrainIn?.metresPerCell || M_PER_CELL) / M_PER_CELL_DEFAULT));
+  // balance.json's own `flight` block is folded in FIRST, so the scaling applies to whatever the
+  // data file actually asks for rather than being overwritten by it
   const cfg = { ...DEFAULTS, ...(balance.flight || {}) };
+  if (scale < 0.999) {
+    const floors = { ceiling: 1200, maxSpeed: 120, thrust: 60, liftSpeedFull: 24, hoverFloor: 6, landSpeed: 12 };
+    for (const [key, floor] of Object.entries(floors)) {
+      cfg[key] = Math.max(floor, Math.round(cfg[key] * scale));
+    }
+  }
   const state = {
     x: 0, y: 0, z: 0,
     yaw: 0, pitch: 0, roll: 0, lift: 0,
@@ -193,11 +213,33 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     state.x += state.velocity.x * dt;
     state.y += state.velocity.y * dt;
     state.z += state.velocity.z * dt;
-    const [cx, cz] = terrain.clampToWorld(state.x, state.z);
-    if (cx !== state.x || cz !== state.z) {
-      // the edge of the map is a wall, not a cliff — bounce off it too
-      state.velocity.x *= -0.4; state.velocity.z *= -0.4;
-      state.x = cx; state.z = cz;
+    /**
+     * FLY AROUND THE WHOLE PLANET, AND DO NOT BOUNCE OFF THE MIDDLE OF IT.
+     *
+     * This used to call `terrain.clampToWorld`, compare the result to what went in, and treat any
+     * difference as "you hit the edge of the map" — `velocity.x *= -0.4; velocity.z *= -0.4`. Two
+     * things were wrong with that, and together they are the "W and S only go up and down" report:
+     *
+     *   * the comparison was false on most frames because the longitude wrap was not bit-exact for a
+     *     position already in range (fixed in `planet.js`), so the brake fired about forty-five times
+     *     a second anywhere on the map and the ship never got above about 7 m/s;
+     *   * and there is no edge to hit. East and west are the same line, and the top and bottom of the
+     *     map are the poles. `terrain.wrapAround` carries the ship over a pole — down the other side,
+     *     half a world round in longitude, turned about — so a heading held long enough goes all the
+     *     way round and comes back. Nothing is a wall.
+     */
+    {
+      const w = terrain.wrapAround
+        ? terrain.wrapAround(state.x, state.z)
+        : (([cx, cz]) => ({ x: cx, z: cz, turn: 0 }))(terrain.clampToWorld(state.x, state.z));
+      state.x = w.x; state.z = w.z;
+      if (w.turn) {
+        // over the top: the ship keeps its speed, but "north" is now behind it
+        state.yaw += w.turn;
+        state.velocity.x = -state.velocity.x;
+        state.velocity.z = -state.velocity.z;
+        out.crossedPole = true;
+      }
     }
 
     /**

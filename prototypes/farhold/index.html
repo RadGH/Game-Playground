@@ -32,13 +32,15 @@
     <details class="boot-knobs">
       <summary>World settings</summary>
       <div class="row">
-        <label for="boot-regions">Region size</label>
+        <label for="boot-regions">Zones per world</label>
         <select id="boot-regions">
-          <option value="3">Small — many short zones</option>
-          <option value="2" selected>Compact — a zone is a walk, not a trek</option>
-          <option value="1">Standard — World Forge's own</option>
-          <option value="0.6">Large — long journeys between bands</option>
+          <option value="3">Many — small zones, a new level band often</option>
+          <option value="2" selected>Some — a zone is a walk, not a trek</option>
+          <option value="1">Few — World Forge's own</option>
+          <option value="0.6">Very few — long journeys between bands</option>
         </select>
+        <span class="small muted">how many level bands the same ground is cut into — use
+          <b>planet size</b> below to change how far a walk actually is</span>
       </div>
       <div class="row">
         <label class="check"><input type="checkbox" id="boot-habitable" checked>
@@ -47,13 +49,17 @@
           have none, and those step to the nearest seed that does</span>
       </div>
       <div class="row">
-        <label for="boot-scale">Planet scale</label>
+        <label for="boot-scale">Planet size</label>
         <select id="boot-scale">
-          <option value="0.35">Tiny — 57 × 29 km, everything close</option>
-          <option value="0.55">Small — 90 × 45 km</option>
+          <option value="0.1">Super tiny — 16 × 8 km, walkable end to end</option>
+          <option value="0.2">Tiny — 33 × 16 km</option>
+          <option value="0.35" selected>Small — 57 × 29 km, everything close</option>
+          <option value="0.55">Compact — 90 × 45 km</option>
           <option value="0.75">Medium — 123 × 61 km</option>
-          <option value="1" selected>Full — 163 × 82 km, as the world was designed</option>
+          <option value="1">Full — 163 × 82 km, as the world was designed</option>
         </select>
+        <span class="small muted">this is the one that changes how far away everything is: the hills,
+          the ring of ground you can see, and how fast the ship flies all shrink with it</span>
       </div>
       <div class="row">
         <label for="boot-band">Levels per zone</label>
@@ -72,8 +78,10 @@
           <option value="2.4">Swarming</option>
         </select>
       </div>
-      <p class="note small">A region is one level band. Smaller regions mean the next band is a
-        shorter walk away — the bands always tile the whole 1–30 range whichever you pick.</p>
+      <p class="note small">A zone is one level band, and the bands always tile the whole range of
+        the world you are on with no gaps — 1–30 on a settled world, 30–40 out in the far reach,
+        40–50 in the deep dark. You always start on a 1–30 world, and the system you start in always
+        has somewhere you can breathe.</p>
     </details>
 
     <div class="row">
@@ -240,7 +248,9 @@
     <div class="perks-head">
       <h3>Perks <span class="small muted" id="perk-points"></span></h3>
       <div class="perk-legend" id="perk-legend"></div>
+      <button id="perk-fit" class="ghost">Fit to view</button>
       <button id="perk-refund" class="ghost">Take it all back</button>
+      <span class="small muted">scroll to zoom · drag to move · double-click to fit</span>
     </div>
     <div class="perks-body">
       <canvas id="perk-canvas" class="perk-canvas"></canvas>

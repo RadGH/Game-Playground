@@ -13,6 +13,7 @@
 // with. Colours are per-vertex, so one material paints every biome.
 
 import * as THREE from 'three';
+import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
 
 /**
  * One ring: a square grid of `res` x `res` quads covering `extent` metres, with the middle
@@ -127,7 +128,18 @@ class Ring {
  * opts: { rings: [{ extent, res }, …] innermost first, waterColor }
  */
 export function createTerrainView(scene, terrain, opts = {}) {
-  const specs = opts.rings || [{ extent: 192, res: 96 }, { extent: 576, res: 96 }, { extent: 1728, res: 96 }];
+  const base = opts.rings || [{ extent: 192, res: 96 }, { extent: 576, res: 96 }, { extent: 1728, res: 96 }];
+  /**
+   * RING EXTENTS SHRINK WITH THE WORLD.
+   *
+   * They are absolute metres — the outer one reaches 15.5 km — which is right for a 163 km planet and
+   * absurd on a 16 km one, where the outermost ring is wider than the whole map and hangs off both
+   * poles. They follow the planet-scale knob now, at the square root of it so a small world still
+   * draws a decent horizon rather than a dinner plate: a 16 km world (0.1) keeps 32% of the reach.
+   */
+  const shrink = Math.sqrt(Math.max(0.05, (terrain.metresPerCell || M_PER_CELL) / M_PER_CELL_DEFAULT));
+  const specs = shrink >= 0.999 ? base
+    : base.map(r => ({ ...r, extent: Math.max(96, Math.round(r.extent * shrink)) }));
   const rings = [];
   for (let i = 0; i < specs.length; i++) {
     // the hole is a little smaller than the ring inside it, so they overlap by a couple of quads

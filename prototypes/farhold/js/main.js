@@ -31,7 +31,7 @@ import { MarkerBook } from './markers.js';
 import { createStarChart, reachFrom, LY_PER_UNIT } from './starchart.js';
 import { createWarp } from './warp.js';
 import { generateGalaxy } from '../../../universe/js/galaxy.js';
-import { createSaves, snapshot, restore, playtimeText } from './save.js';
+import { createSaves, snapshot, restore, playtimeText, saveCarriesWorld } from './save.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
 import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS } from './rpg.js';
@@ -2009,7 +2009,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return (((1 - longitude) % 1) + 1) % 1 * dayLength;
   }
   state.elapsed = morningElapsed();
-  if (save) state.elapsed = restore(save, { rpg, player, control, map }) || 0;
+  if (save) {
+    state.elapsed = restore(save, { rpg, player, control, map }) || 0;
+    // written on every save since round 3 and never read back, so the save list's clock restarted
+    state.playtime = Math.max(0, Math.round(save.playtime || 0));
+    if (save.world && !saveCarriesWorld(save)) {
+      hud.log('This save was written before the world settings travelled with it — it may not line up.', 'bad');
+    }
+  }
   rebuildWorldAround(true);
   actor.group.position.set(control.x, control.y, control.z);
   applyGearLook();
@@ -2054,6 +2061,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       materials: craft.materials.toJSON(),
       dungeonsCleared,
       world: worldOpts,
+      // a save taken underground is in the dungeon's own coordinates — carry the way back out
+      inDungeon: !!dungeon,
+      surface: surfaceSpot,
     });
   }
   function autoSave({ quiet = true } = {}) {

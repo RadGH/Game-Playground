@@ -18,6 +18,7 @@
 import * as THREE from 'three';
 import { makeRng } from '../../../worldgen/js/noise.js';
 import { brazierBody } from './chests.js';
+import { M_PER_CELL } from './planet.js';
 
 function mergeParts(parts) {
   let total = 0;
@@ -71,14 +72,17 @@ function stoneBody(rock = '#5a5a58') {
 }
 
 export function createSites(scene, terrain, { seed = 1, balance = {}, zones = null, collide = null, radius = 2600 } = {}) {
-  const M_PER_CELL = balance.world?.metresPerCell ?? 640;
+  // The LIVE cell size, not the 640 that `data/balance.json` still writes down: the title screen's
+  // planet-scale knob moves it, and a camp placed at `cell * 640` on a 128 m-per-cell world lands
+  // five times outside the map.
+  const cell = terrain.metresPerCell || M_PER_CELL;
   const rng = makeRng((seed >>> 0) ^ 0x5173);
 
   // landmarks and passes become camps; the highest-band landmarks become lairs
   const sites = (terrain.world?.nodes || [])
     .filter(n => n.type === 'landmark' || n.type === 'pass')
     .map((n, i) => {
-      const x = n.x * M_PER_CELL, z = n.y * M_PER_CELL;
+      const x = n.x * cell, z = n.y * cell;
       const zone = zones?.at(x, z) || null;
       // a lair only makes sense out where the levels are high, and only for one landmark in four
       const lair = !!zone && zone.band >= 3 && (n.id % 4 === 0);

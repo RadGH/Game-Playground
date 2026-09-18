@@ -39,7 +39,9 @@ import { makeNoise2D, fbm, subSeed, clamp, lerp, makeRng, smoothstep, blur } fro
 export let M_PER_CELL = 640;
 export const M_PER_CELL_DEFAULT = 640;
 export function setMetresPerCell(metres) {
-  M_PER_CELL = Math.max(40, Math.min(2000, Math.round(metres)));
+  // the floor was 40 m, which stopped at a 10 x 5 km world. "Super tiny" wants 64 m (16 x 8 km) and
+  // there is no reason a test or a future knob should not go smaller, so it is 16 m now.
+  M_PER_CELL = Math.max(16, Math.min(2000, Math.round(metres)));
   return M_PER_CELL;
 }
 
@@ -76,11 +78,45 @@ const SAND_RGB = rgbOf('#d8c795');
  * Forcing a band does not change what a world IS; it changes which level range its regions are laid
  * over, which is the thing a player actually meets.
  */
-export function createSystem({ seed = 1, starClass = null, fillBands = true } = {}) {
+export function createSystem({ seed = 1, starClass = null, fillBands = true, tries = 10 } = {}) {
   const star = makeStar({ seed: seed >>> 0, classKey: starClass, id: 0 });
-  const system = generateSystem(star, { seed: subSeed(seed, 'system'), rareWorlds: 0.55, planets: 0.85 });
+  /**
+   * Keep the star, re-roll its worlds until there are enough of them.
+   *
+   * A band needs a world of its own, so a system with two rocks in it cannot have somewhere to go at
+   * every level however the bands are handed out. The star is fixed — same name, same class, same
+   * light — and only the planet roll is nudged, so a seed still means one particular star; we stop at
+   * the first roll with a body for every band and keep the fullest roll if none of them manage it
+   * (a black hole with three planets in reach is allowed to be a thin system).
+   */
+  let system = null, best = null;
+  for (let i = 0; i < Math.max(1, tries); i++) {
+    const built = generateSystem(star, {
+      seed: subSeed(seed, i ? 'system' + i : 'system'), rareWorlds: 0.55, planets: 1,
+    });
+    const n = landableBodies(built).length;
+    if (!best || n > best.n) best = { system: built, n };
+    if (n >= PLANET_BANDS.length) { system = built; break; }
+  }
+  system = system || best.system;
   if (fillBands) balanceBands(system);
   return { star, system };
+}
+
+/**
+ * Every body in this system you could actually put boots on — planets AND their moons.
+ *
+ * Moons are small planets here (own id, own seed, own surface map, `landable: true`), and the game
+ * already lets you land on one, so they count toward "a world for every band". Without them a red
+ * dwarf with one rock and a gas giant looked like a dead end.
+ */
+export function landableBodies(system) {
+  const out = [];
+  for (const p of system?.planets || []) {
+    if (!p.giant && p.landable !== false) out.push(p);
+    for (const m of p.moons || []) if (m.landable !== false) out.push(m);
+  }
+  return out;
 }
 
 /**
@@ -90,21 +126,43 @@ export function createSystem({ seed = 1, starClass = null, fillBands = true } = 
  * onto whichever worlds are furthest from the star — the outer dark is where the hard ones belong,
  * and it keeps the inner system as the place you start.
  */
-export function balanceBands(system) {
-  const landable = (system.planets || []).filter(p => !p.giant && p.landable !== false);
-  if (landable.length < PLANET_BANDS.length) return system;
-  const have = new Set();
-  for (const p of landable) have.add(bandForPlanet(p).key);
-  const missing = PLANET_BANDS.filter(b => !have.has(b.key));
+export function balanceBands(system, { protect = null } = {}) {
+  const bodies = landableBodies(system);
+  if (!bodies.length) return system;
+
+  /**
+   * THE WORLD A NEWCOMER LANDS ON IS ALWAYS A LEVEL-1 WORLD.
+   *
+   * This is the fix for "started at level 1 and was dropped into a level 30-33 zone". The low band
+   * is claimed FIRST, by whichever world `chooseLanding` would hand a new character — the same
+   * picker the new game and a load both use, so all three agree — and the rest of the bands are
+   * handed out around it. `protect` is passed when the caller has already picked the landing site.
+   */
+  const start = protect
+    || chooseLanding(system, { requireHabitable: true })
+    || chooseLanding(system)
+    || bodies[0];
+  if (start) start.forcedBand = 'low';
+
+  const have = new Set(bodies.map(b => bandForPlanet(b).key));
+  const missing = PLANET_BANDS.filter(b => !have.has(b.key) && b.key !== 'low');
   if (!missing.length) return system;
-  // hardest band onto the furthest world
-  const byDistance = [...landable].sort((a, b) => (b.orbit?.au ?? 0) - (a.orbit?.au ?? 0));
+  // hardest band onto the furthest world — the outer dark is where the hard ones belong, and it
+  // keeps the inner system as the place you start
+  const byDistance = bodies
+    .filter(b => b !== start && !b.forcedBand)
+    .sort((a, b) => (b.orbit?.au ?? 0) - (a.orbit?.au ?? 0) || (b.difficulty ?? 0) - (a.difficulty ?? 0));
   for (const band of [...missing].reverse()) {
     const pick = byDistance.find(p => !p.forcedBand);
     if (!pick) break;
     pick.forcedBand = band.key;
   }
   return system;
+}
+
+/** Which bands this system can actually send you to. `[]` means something is wrong. */
+export function bandsInSystem(system) {
+  return [...new Set(landableBodies(system).map(b => bandForPlanet(b).key))];
 }
 
 /**
@@ -172,18 +230,33 @@ export function createWorld({
   let usedSeed = seed;
   let star = null, system = null, planet = null;
 
-  for (let i = 0; i <= (habitable ? searchSeeds : 0); i++) {
+  /**
+   * THE STARTING SYSTEM ALWAYS HAS A WORLD YOU CAN LIVE ON.
+   *
+   * "There should also be at least one starting planet that is habitable, at least in the starting
+   * system." So the seed search runs whether or not the title screen's *Habitable start* box is
+   * ticked: the acceptance test is "this system contains a settled, multi-biome world", and only
+   * WHERE YOU LAND depends on the box. Untick it and you can still start on a barren rock — but the
+   * blue world is one short hop away in the same system, not a hundred seeds away.
+   *
+   * Bands are handed out AFTER the landing site is known (`fillBands: false` here, `balanceBands`
+   * below), so the world you start on is the world that gets the level-1 band.
+   */
+  for (let i = 0; i <= searchSeeds; i++) {
     usedSeed = seed + i;
-    ({ star, system } = createSystem({ seed: usedSeed, starClass }));
+    ({ star, system } = createSystem({ seed: usedSeed, starClass, fillBands: false }));
+    const liveable = landableBodies(system).some(isHabitableStart);
     planet = chooseLanding(system, { prefer, requireHabitable: habitable && !prefer });
-    if (planet) break;
+    if (planet && (liveable || prefer != null)) break;
+    planet = null;
   }
   // nothing within reach: take the best of the seed the player actually asked for
   if (!planet) {
     usedSeed = seed;
-    ({ star, system } = createSystem({ seed, starClass }));
+    ({ star, system } = createSystem({ seed, starClass, fillBands: false }));
     planet = chooseLanding(system, { prefer });
   }
+  balanceBands(system, { protect: planet });
 
   const world = generatePlanetMap(planet, { width, height, regionScale });
   return { star, system, planet, world, systemSeed: usedSeed, movedSeed: usedSeed !== seed };
@@ -804,9 +877,38 @@ export function makeTerrain(world, planet = null, opts = {}) {
    * is what "I can reach the edge of the world" was. Latitude still clamps, because the top and the
    * bottom of the map are the poles and there is nothing past them.
    */
+  /**
+   * Keep a position on the map: longitude wraps, latitude stops at the pole.
+   *
+   * NOTE THE EARLY RETURN. `((x % widthM) + widthM) % widthM` is not an identity for an x that is
+   * already in range — `x + widthM` loses a low bit, and the value comes back about 1e-11 out. 68%
+   * of in-range values failed a `wrap(x) === x` check, which is what broke flight: `js/atmos.js`
+   * compared its position against this result to decide whether it had hit the edge of the map, so
+   * the "bounced off the edge" branch fired on two frames out of three IN THE MIDDLE OF THE MAP,
+   * scaling the horizontal velocity by -0.4 about forty-five times a second. The ship hovered, W and
+   * S did nothing, and Space was the only control that still worked. It only flew correctly along an
+   * exact compass axis, where x never changed and so stayed an exact float.
+   */
   function clampToWorld(x, z) {
-    const wrapped = ((x % widthM) + widthM) % widthM;
+    const wrapped = (x >= 0 && x < widthM) ? x : ((x % widthM) + widthM) % widthM;
     return [wrapped, clamp(z, 0, depthM)];
+  }
+
+  /**
+   * The same thing for something that can go OVER THE POLE — which is the whole planet, seamlessly.
+   *
+   * The map is a rectangle of a sphere: east and west join up, and the top and bottom edges are the
+   * two poles. Cross a pole and you come down the other side, half a world round in longitude and
+   * facing the way you came. Returns the corrected position and how much to add to a heading.
+   */
+  function wrapAround(x, z) {
+    let nx = x, nz = z, turn = 0;
+    if (nz < 0) { nz = -nz; turn = Math.PI; }
+    else if (nz > depthM) { nz = depthM - (nz - depthM); turn = Math.PI; }
+    nz = clamp(nz, 0, depthM);
+    if (turn) nx += widthM / 2;
+    nx = (nx >= 0 && nx < widthM) ? nx : ((nx % widthM) + widthM) % widthM;
+    return { x: nx, z: nz, turn };
   }
 
   /**
@@ -881,7 +983,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
     /** How many lake cells were pushed out of a settlement's footprint, for the tests. */
     drainedForTowns: drained,
     heightAt, naturalHeightAt, slopeAt, normalAt, colorAt, biomeAt, biomeIdAt, temperatureAt,
-    underwater, plantable, waterAt, riverAt, roadAt,
+    underwater, plantable, waterAt, riverAt, roadAt, wrapAround,
     clampToWorld, spawnPoint, layer,
 
     /** The graded height of the road at a point — already lifted clear of any river. Null off-road. */

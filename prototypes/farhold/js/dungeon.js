@@ -26,6 +26,7 @@ import { ObstacleField } from './collide.js';
 import { DUNGEON_LOOKS, lookForBiome, layout, insideLayout } from './dungeon-plan.js';
 export { DUNGEON_LOOKS, lookForBiome, layout, insideLayout };
 import { createChests, sconceBody, brazierBody } from './chests.js';
+import { M_PER_CELL } from './planet.js';
 
 /** Merge `{ geometry, color, matrix }` parts into one vertex-coloured geometry. */
 function mergeParts(parts) {
@@ -299,13 +300,14 @@ function gateBody(stone = '#5a5248', dark = '#0a0a0c', trim = '#8a7a5a') {
  * there; now there is a door, and it opens.
  */
 export function createGates(scene, terrain, { balance = {}, zones = null, radius = 2600, collide = null } = {}) {
-  const M_PER_CELL = balance.world?.metresPerCell ?? 640;
+  // the live cell size — see the note in js/sites.js; `balance.world.metresPerCell` is a stale 640
+  const cell = terrain.metresPerCell || M_PER_CELL;
   const nodes = (terrain.world?.nodes || [])
     .filter(n => n.type === 'dungeon')
     .map(n => ({
       id: n.id, name: n.name, kind: n.kind,
-      x: n.x * M_PER_CELL, z: n.y * M_PER_CELL,
-      zone: zones?.at(n.x * M_PER_CELL, n.y * M_PER_CELL) || null,
+      x: n.x * cell, z: n.y * cell,
+      zone: zones?.at(n.x * cell, n.y * cell) || null,
       cleared: false,
     }));
 

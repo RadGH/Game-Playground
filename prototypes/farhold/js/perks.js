@@ -165,7 +165,7 @@ export const KEYSTONES = [
 
 // ---------------------------------------------------------------------------- building the tree
 
-/** Rings of the forest, outward from the hub. */
+/** Rings of the forest, outward from the hub — evenly spaced, one unit apart. */
 export const RINGS = [
   { at: 1, radius: 1, kind: 'minor', per: 3 },
   { at: 2, radius: 2, kind: 'minor', per: 4 },
@@ -173,14 +173,31 @@ export const RINGS = [
   { at: 4, radius: 4, kind: 'minor', per: 4 },
   { at: 5, radius: 5, kind: 'talent', per: 2 },
   { at: 6, radius: 6, kind: 'major', per: 3 },
-  { at: 7, radius: 7.2, kind: 'keystone', per: 1 },
+  { at: 7, radius: 7, kind: 'keystone', per: 1 },
 ];
 
-/** A little seeded noise, so the forest is not four perfectly straight spokes. */
-function wobble(seed) {
-  let h = 2166136261 ^ seed;
-  h = Math.imul(h ^ (h >>> 13), 16777619);
-  return (((h >>> 0) % 1000) / 1000 - 0.5);
+/**
+ * THE SHAPE OF THE FOREST IS A LATTICE, NOT A SCATTER.
+ *
+ * It used to place every node at `ring.radius + wobble * 0.22` and `arm.angle + wobble * 0.18`, which
+ * read as "randomly scattered" on screen and made two nodes on neighbouring rings sit almost on top
+ * of one another. There is no jitter now at all: rings are whole units out from the hub, and a ring's
+ * nodes sit on exactly even angular steps, centred on their arm.
+ *
+ * The step is the smaller of two rules, so it is tidy at both ends of the tree:
+ *
+ *   * `TANGENT_GAP / radius` keeps the GAP BETWEEN NEIGHBOURS the same however far out you are, so
+ *     ring 6 does not fan out into a wall of dots;
+ *   * `ARM_SECTOR / per` keeps an arm inside its own quarter of the circle, so ring 1 — where the
+ *     first rule wants 49° between three nodes — cannot spill into the arm next door.
+ */
+const TANGENT_GAP = 0.85;          // world units between neighbours on a ring
+const ARM_SECTOR = Math.PI / 2;    // a quarter each, four arms
+
+/** The exact angular step between two neighbours on one ring of one arm. */
+export function ringStep(radius, per) {
+  if (per <= 1) return 0;
+  return Math.min(TANGENT_GAP / Math.max(0.5, radius), ARM_SECTOR / per);
 }
 
 /**
@@ -204,16 +221,15 @@ export function buildForest() {
     grants: {}, arm: null, ring: 0,
   });
 
-  let seed = 1;
   for (const arm of ARMS) {
     let previousRing = [start];
-    const spread = 0.62;                           // radians the arm fans across
     for (const ring of RINGS) {
       const made = [];
+      const step = ringStep(ring.radius, ring.per);
       for (let i = 0; i < ring.per; i++) {
-        const t = ring.per === 1 ? 0.5 : i / (ring.per - 1);
-        const angle = arm.angle + (t - 0.5) * spread + wobble(seed++) * 0.18;
-        const radius = ring.radius + wobble(seed++) * 0.22;
+        // centred on the arm: three nodes sit at -step, 0, +step, four at -1.5, -0.5, +0.5, +1.5
+        const angle = arm.angle + (i - (ring.per - 1) / 2) * step;
+        const radius = ring.radius;
         const id = `${arm.key}:${ring.at}:${i}`;
         const node = { id, arm: arm.key, ring: ring.at, kind: ring.kind, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius };
 
@@ -253,15 +269,21 @@ export function buildForest() {
   }
 
   /**
-   * The oddballs, sitting BETWEEN the arms at ring 4, joined to whatever is nearest on either side.
-   * They are the reason a pure melee walk still passes something strange.
+   * The oddballs, sitting BETWEEN the arms, joined to whatever is nearest on either side. They are
+   * the reason a pure melee walk still passes something strange.
+   *
+   * They used to be laid out as `i / 8 * 2π + π/4`, which put four of the eight EXACTLY ON the four
+   * arm centrelines at radius 3.5 — right on top of ring-3 and ring-4 arm nodes, the opposite of
+   * "between the arms". Now they go two to a diagonal: the four diagonals are π/4 off each arm, and
+   * the pair on one diagonal sits at radius 3 and radius 5 so they never touch each other either.
    */
+  const DIAGONALS = 4;
   for (let i = 0; i < ODDBALLS.length; i++) {
     const o = ODDBALLS[i];
-    const angle = (i / ODDBALLS.length) * Math.PI * 2 + Math.PI / 4;
-    const radius = 3.5 + wobble(seed++) * 0.4;
+    const angle = -Math.PI / 4 + (i % DIAGONALS) * (Math.PI * 2 / DIAGONALS);
+    const radius = 3 + Math.floor(i / DIAGONALS) * 2;
     const node = add({
-      id: `wildcard:${i}`, arm: null, ring: 4, kind: 'minor', oddball: true,
+      id: `wildcard:${i}`, arm: null, ring: radius <= 3 ? 3 : 5, kind: 'minor', oddball: true,
       x: Math.cos(angle) * radius, y: Math.sin(angle) * radius,
       name: o.desc, desc: o.desc, grants: { [o.stat]: o.value },
     });

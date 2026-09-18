@@ -213,23 +213,47 @@ export const PLANET_BANDS = [
 ];
 
 /**
- * Which band a world falls in, from its own seed and what kind of place it is.
+ * Which band a world falls in, from WHAT KIND OF PLACE IT IS — never from a coin flip.
  *
- * Hostility comes first — a void-touched rock or a world with no air is never a starting world —
- * and the seed decides the rest, so a system carries a spread rather than three of the same.
+ * The old rule added a point when the planet's seed happened to divide by three, which promoted
+ * perfectly friendly breathable worlds to the far reach for no reason a player could see — and it
+ * tested for two archetypes (`volcanic`, `irradiated`) that do not exist, so the genuinely nasty
+ * lava and toxic worlds never got their bump. Both are fixed here.
+ *
+ * Everything in the score is something you can read off the survey panel before you fly there:
+ *
+ *   * the archetype's own `difficulty` (Star Forge gives living 0.2 … void-touched 0.95);
+ *   * air you can breathe, which makes a world softer, and no air, which makes it harder;
+ *   * sitting in the star's water zone, which is where the settled worlds are;
+ *   * orbiting out past the frost line, and how far out it is among its own siblings.
+ *
+ * `forcedBand` still wins, because `balanceBands` uses it to guarantee a system has somewhere to go
+ * at every level, and the starting world is stamped `low` so a level-1 character is never handed a
+ * level-30 zone.
  */
+export const BAND_CUTS = [0.5, 0.78];   // score < 0.5 low, < 0.78 medium, else high
+
 export function bandForPlanet(planet, { force = null } = {}) {
   const want = force || planet?.forcedBand;
   if (want) return PLANET_BANDS.find(b => b.key === want) || PLANET_BANDS[0];
-  const hostile = !planet?.atmosphere?.breathable;
-  const nasty = ['voidTouched', 'volcanic', 'crystal', 'irradiated'].includes(planet?.archetype);
-  let score = 0;
-  if (hostile) score += 1;
-  if (nasty) score += 1;
-  const seed = Math.abs(Math.round((planet?.seed ?? planet?.id ?? 0)));
-  score += (seed % 3 === 0) ? 1 : 0;
-  return PLANET_BANDS[Math.min(PLANET_BANDS.length - 1, score)];
+  const score = planetThreat(planet);
+  return PLANET_BANDS[score < BAND_CUTS[0] ? 0 : score < BAND_CUTS[1] ? 1 : 2];
 }
+
+/** The 0–1.4ish number `bandForPlanet` cuts into three. Exported so the survey can show it. */
+export function planetThreat(planet) {
+  if (!planet) return 0;
+  const NASTY = ['voidTouched', 'crystal', 'lava', 'toxic'];
+  let score = Number(planet.difficulty) || 0.4;
+  score += planet.atmosphere?.breathable ? -0.18 : 0.15;
+  if (planet.orbit?.inZone) score -= 0.08;
+  if (planet.orbit?.beyondFrost) score += 0.12;
+  if (NASTY.includes(planet.archetype)) score += 0.1;
+  // a moon of a giant is a harder place to stand than the world it circles
+  if (planet.moon && planet.archetype !== 'living') score += 0.05;
+  return Math.max(0, Math.round(score * 1000) / 1000);
+}
+
 export function levelFromXp(xp) {
   let l = 1;
   while (l < MAX_LEVEL && xp >= xpForLevel(l + 1)) l++;

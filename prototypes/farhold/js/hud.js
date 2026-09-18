@@ -12,7 +12,11 @@ import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
 import { treeFor, picksFor, talentSummary, TIER_LEVELS } from './skilltalents.js';
-import { ARMS, NODE_KINDS, pointsFor, pointsLeft, spentBy, takenOf, canTake, armProgress } from './perks.js';
+import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, armProgress } from './perks.js';
+
+/** How far in and out the perk forest zooms, and the rings it draws under the nodes. */
+const PERK_ZOOM = [0.6, 4];
+const PERK_RINGS = RINGS.map(r => r.radius);
 import { patternGlyphs, patternText, handsOf, profileOf } from './weapons.js';
 import { VEHICLES, vehicleFor } from './gear.js';
 import { MARKER_LOOKS, distanceText } from './markers.js';
@@ -986,36 +990,157 @@ export class Hud {
     this.drawForest();
     this.renderPerkSide();
 
+    const fit = $('perk-fit');
+    if (fit && !fit.dataset.wired) {
+      fit.dataset.wired = '1';
+      fit.onclick = () => { this.perkZoom = 1; this.perkPan = { x: 0, y: 0 }; this.drawForest(); };
+    }
+
     if (!canvas.dataset.wired) {
       canvas.dataset.wired = '1';
       canvas.addEventListener('click', e => {
+        if (this._perkDragged) { this._perkDragged = false; return; }
         const hit = this.perkUnder(e);
         if (hit) { this.perkPick = hit.id; this.renderSheet(); }
       });
       canvas.addEventListener('mousemove', e => {
+        if (this._perkDrag) return;
         const hit = this.perkUnder(e);
-        canvas.style.cursor = hit ? 'pointer' : 'default';
+        canvas.style.cursor = hit ? 'pointer' : 'grab';
       });
+
+      /**
+       * ZOOM AND PAN, both through the one projector.
+       *
+       * The wheel keeps whatever is under the pointer under the pointer — the same trick the world
+       * map uses — so you can aim at a corner of the forest and pull it towards you rather than
+       * zooming to the middle and hunting for it again.
+       */
+      canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        const proj = this._perkView;
+        if (!proj) return;
+        const { px, py } = this.perkPixel(e);
+        const before = proj.from(px, py);
+        const step = e.deltaY < 0 ? 1.18 : 1 / 1.18;
+        this.perkZoom = Math.max(PERK_ZOOM[0], Math.min(PERK_ZOOM[1], (this.perkZoom || 1) * step));
+        this.drawForest();
+        const after = this._perkView;
+        // put the world point that was under the pointer back under the pointer
+        this.perkPan = {
+          x: before.x - (px - after.w / 2) / after.scale,
+          y: before.y - (py - after.h / 2) / after.scale,
+        };
+        this.drawForest();
+      }, { passive: false });
+
+      canvas.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        this._perkDrag = { px: e.clientX, py: e.clientY, moved: 0 };
+        this._perkDragged = false;
+        canvas.setPointerCapture?.(e.pointerId);
+        canvas.style.cursor = 'grabbing';
+      });
+      canvas.addEventListener('pointermove', e => {
+        const drag = this._perkDrag, proj = this._perkView;
+        if (!drag || !proj) return;
+        const dx = e.clientX - drag.px, dy = e.clientY - drag.py;
+        drag.moved += Math.abs(dx) + Math.abs(dy);
+        drag.px = e.clientX; drag.py = e.clientY;
+        // client pixels -> device pixels -> world units
+        this.perkPan = {
+          x: (this.perkPan?.x || 0) - dx * proj.ratioX / proj.scale,
+          y: (this.perkPan?.y || 0) - dy * proj.ratioY / proj.scale,
+        };
+        if (drag.moved > 5) this._perkDragged = true;
+        this.drawForest();
+      });
+      const endDrag = e => {
+        if (!this._perkDrag) return;
+        this._perkDrag = null;
+        canvas.releasePointerCapture?.(e.pointerId);
+        canvas.style.cursor = 'grab';
+      };
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+      canvas.addEventListener('dblclick', () => {
+        this.perkZoom = 1; this.perkPan = { x: 0, y: 0 }; this.drawForest();
+      });
+
       window.addEventListener('resize', () => { if (this.tab === 'perks' && this.sheetOpen) this.drawForest(); });
     }
+  }
+
+  /**
+   * A mouse event as DEVICE pixels on the perk canvas.
+   *
+   * The old code worked out one ratio from the width and used it on both axes. The canvas is sized
+   * by flex, and its backing buffer was being measured from its PARENT (which also holds the 270px
+   * side panel), so the two axes had different ratios — x came out right and y was inflated by about
+   * half, which is why a click landed on whatever was ~100px below the cursor. Both axes are measured
+   * separately now, and the buffer is measured from the canvas's own box, so they cannot disagree.
+   */
+  perkPixel(e) {
+    const canvas = $('perk-canvas');
+    const rect = canvas.getBoundingClientRect();
+    return {
+      px: (e.clientX - rect.left) * (canvas.width / Math.max(1, rect.width)),
+      py: (e.clientY - rect.top) * (canvas.height / Math.max(1, rect.height)),
+    };
   }
 
   /** Map a canvas pixel to the node under it, or null. */
   perkUnder(e) {
     const forest = this.rpg?.forest;
     const canvas = $('perk-canvas');
-    if (!forest || !canvas || !this._perkView) return null;
-    const rect = canvas.getBoundingClientRect();
-    const dpr = canvas.width / Math.max(1, rect.width);
-    const px = (e.clientX - rect.left) * dpr, py = (e.clientY - rect.top) * dpr;
-    const { cx, cy, scale } = this._perkView;
+    const proj = this._perkView;
+    if (!forest || !canvas || !proj) return null;
+    const { px, py } = this.perkPixel(e);
     let best = null, bd = Infinity;
     for (const node of forest.nodes) {
-      const nx = cx + node.x * scale, ny = cy + node.y * scale;
-      const d = Math.hypot(nx - px, ny - py);
+      const { x, y } = proj.to(node.x, node.y);
+      const d = Math.hypot(x - px, y - py);
       if (d < bd) { bd = d; best = node; }
     }
-    return bd <= 18 * dpr ? best : null;
+    // the nodes themselves grow with the zoom, so the grab radius has to as well
+    const reach = 16 * proj.dpr * Math.max(1, Math.min(2.2, this.perkZoom || 1));
+    return bd <= reach ? best : null;
+  }
+
+  /**
+   * Size the backing buffer to the canvas's OWN box, and build the projector.
+   *
+   * One transform, with a real inverse, used by every draw call and by the hit test — they cannot
+   * drift apart the way the six hand-inlined copies of `cx + x * scale` did.
+   */
+  perkView() {
+    const canvas = $('perk-canvas');
+    const forest = this.rpg?.forest;
+    if (!canvas || !forest) return null;
+    const rect = canvas.getBoundingClientRect();
+    const cssW = Math.max(240, rect.width || canvas.clientWidth || 640);
+    const cssH = Math.max(240, rect.height || canvas.clientHeight || 480);
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = Math.round(cssW * dpr), h = Math.round(cssH * dpr);
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+
+    let span = 0;
+    for (const n of forest.nodes) span = Math.max(span, Math.hypot(n.x, n.y));
+    span = Math.max(1, span);
+    const fit = (Math.min(w, h) / 2 - 42 * dpr) / span;
+    const zoom = this.perkZoom || 1;
+    const pan = this.perkPan || (this.perkPan = { x: 0, y: 0 });
+    const scale = fit * zoom;
+    const cx = w / 2 - pan.x * scale, cy = h / 2 - pan.y * scale;
+    return {
+      w, h, dpr, span, fit, zoom, scale, cx, cy,
+      // client pixels -> device pixels, measured per axis so the two can never disagree
+      ratioX: w / Math.max(1, rect.width || cssW),
+      ratioY: h / Math.max(1, rect.height || cssH),
+      to: (x, y) => ({ x: cx + x * scale, y: cy + y * scale }),
+      from: (px, py) => ({ x: (px - cx) / scale, y: (py - cy) / scale }),
+    };
   }
 
   drawForest() {
@@ -1023,22 +1148,23 @@ export class Hud {
     const forest = this.rpg?.forest;
     const canvas = $('perk-canvas');
     if (!forest || !canvas) return;
-    const wrap = canvas.parentElement;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const w = Math.max(360, wrap.clientWidth - 8), h = Math.max(320, wrap.clientHeight - 8);
-    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
-    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+    const proj = this.perkView();
+    if (!proj) return;
+    this._perkView = proj;
+    const { dpr, span, scale, cx, cy, zoom } = proj;
 
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#0b0e15';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // fit the whole forest, whatever size it is
-    let span = 0;
-    for (const n of forest.nodes) span = Math.max(span, Math.hypot(n.x, n.y));
-    const scale = (Math.min(canvas.width, canvas.height) / 2 - 34 * dpr) / Math.max(1, span);
-    const cx = canvas.width / 2, cy = canvas.height / 2;
-    this._perkView = { cx, cy, scale, dpr };
+    // the rings the nodes sit on, drawn faintly, so the lattice reads as a lattice
+    ctx.strokeStyle = 'rgba(80, 100, 140, .16)';
+    ctx.lineWidth = 1 * dpr;
+    for (const ring of PERK_RINGS) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, ring * scale, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     const taken = takenOf(player);
     const colourOf = node => ARMS.find(a => a.key === node.arm)?.color || '#9fb4d4';
@@ -1050,16 +1176,17 @@ export class Hud {
       const live = taken.has(a) && taken.has(b);
       ctx.strokeStyle = live ? 'rgba(220, 230, 245, .55)' : 'rgba(110, 130, 170, .16)';
       ctx.lineWidth = (live ? 2 : 1) * dpr;
+      const a0 = proj.to(na.x, na.y), b0 = proj.to(nb.x, nb.y);
       ctx.beginPath();
-      ctx.moveTo(cx + na.x * scale, cy + na.y * scale);
-      ctx.lineTo(cx + nb.x * scale, cy + nb.y * scale);
+      ctx.moveTo(a0.x, a0.y);
+      ctx.lineTo(b0.x, b0.y);
       ctx.stroke();
     }
 
     for (const node of forest.nodes) {
-      const x = cx + node.x * scale, y = cy + node.y * scale;
+      const { x, y } = proj.to(node.x, node.y);
       const kind = NODE_KINDS[node.kind];
-      const r = (node.kind === 'hub' ? 9 : 4.5 * (kind?.size || 1)) * dpr;
+      const r = (node.kind === 'hub' ? 9 : 4.5 * (kind?.size || 1)) * dpr * Math.min(1.7, Math.max(1, zoom * 0.85));
       const has = taken.has(node.id);
       const open = !has && canTake(player, forest, node.id).ok;
       const colour = colourOf(node);
@@ -1087,6 +1214,27 @@ export class Hud {
         ctx.beginPath();
         ctx.arc(x, y, r + 7 * dpr, 0, Math.PI * 2);
         ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6 * dpr; ctx.stroke();
+      }
+    }
+
+    /**
+     * Zoomed in far enough that there is room for words, every node says what it is. This is the
+     * other half of "make it zoomable": the point of coming in close is to read the tree, not to
+     * look at bigger dots.
+     */
+    if (zoom >= 1.5) {
+      ctx.font = `500 ${10.5 * dpr}px system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      for (const node of forest.nodes) {
+        if (node.kind === 'hub' || !node.name) continue;
+        const { x, y } = proj.to(node.x, node.y);
+        if (x < -80 * dpr || x > canvas.width + 80 * dpr || y < 0 || y > canvas.height) continue;
+        const words = node.name.length > 26 ? node.name.slice(0, 25) + '…' : node.name;
+        ctx.fillStyle = 'rgba(12, 16, 24, .78)';
+        const tw = ctx.measureText(words).width;
+        ctx.fillRect(x - tw / 2 - 3 * dpr, y + 9 * dpr, tw + 6 * dpr, 13 * dpr);
+        ctx.fillStyle = takenOf(player).has(node.id) ? '#eaf6ff' : 'rgba(190, 205, 228, .82)';
+        ctx.fillText(words, x, y + 19 * dpr);
       }
     }
 

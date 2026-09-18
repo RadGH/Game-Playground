@@ -90,10 +90,17 @@ export function createSaves() {
  * Everything worth keeping about a run. Pass the live objects; get plain JSON back.
  * Items are already plain data from Emberveil's generator, so they travel as they are.
  */
-export function snapshot({ id, name, seed, classId, player, control, elapsed, playtime, markers, at, place, weather, materials, dungeonsCleared }) {
+export function snapshot({
+  id, name, seed, classId, player, control, elapsed, playtime, markers, at, place, weather,
+  materials, dungeonsCleared,
+  // ---- these three were being PASSED and then dropped on the floor. See the note below.
+  world, quests, campaign,
+  // where the player was last standing on the surface, for a save taken underground
+  surface = null, inDungeon = false,
+}) {
   return {
     id, name, seed, classId,
-    version: 1,
+    version: 2,
     updated: Date.now(),
     playtime: Math.round(playtime || 0),
     place: place || '',
@@ -123,6 +130,36 @@ export function snapshot({ id, name, seed, classId, player, control, elapsed, pl
     // round 4: the materials bag and which dungeons you have already emptied
     materials: materials || {},
     dungeonsCleared: [...(dungeonsCleared || [])],
+
+    /**
+     * THE THREE FIELDS THAT WERE BEING THROWN AWAY.
+     *
+     * `snapshot` destructures a fixed list of arguments, and `world`, `quests` and `campaign` were
+     * never added to it — so `main.js` passed all three on every save and none of them were written.
+     * Three separate bugs came out of that one omission:
+     *
+     *   * `world` holds the title screen's knobs, `planetScale` among them. Without it a load fell
+     *     back to re-reading the boot form, so a run played at Small reloaded at Full — and the
+     *     player's position is stored in METRES, so the same numbers now pointed somewhere else on a
+     *     world 1.8x wider. That is the "saved in a town, loaded into the Shallows surrounded by
+     *     water" report: the town was at 89 km east on the world you played, which is open ocean on
+     *     the world the loader built.
+     *   * `quests` — every load silently emptied the quest log.
+     *   * `campaign` — and forgot the story.
+     */
+    world: world || null,
+    quests: quests || null,
+    campaign: campaign || null,
+
+    /**
+     * A save taken underground is a save taken in a DIFFERENT coordinate space: a dungeon's terrain
+     * is a local one a few hundred metres across, centred on the origin. Restoring those numbers on
+     * to a 163 km planet put you within a few hundred metres of the map corner, which is ocean or
+     * polar ice. So the surface spot the player dropped in from is saved too, and the loader puts
+     * them back outside the door rather than inside a room that no longer exists.
+     */
+    inDungeon: !!inDungeon,
+    surface: surface ? { x: surface.x, z: surface.z } : null,
   };
 }
 
@@ -147,10 +184,25 @@ export function restore(save, { rpg, player, control, map }) {
   if (Number.isFinite(p.hp)) player.hp = Math.min(player.maxHp, p.hp);
   if (Number.isFinite(p.mp)) player.mp = Math.min(player.maxMp, p.mp);
 
-  if (save.position) {
-    control.teleport(save.position.x, save.position.z);
-    if (Number.isFinite(save.position.yaw)) control.yaw = save.position.yaw;
-    if (Number.isFinite(save.position.pitch)) control.pitch = save.position.pitch;
+  /**
+   * PUT THEM BACK WHERE THEY WERE, AND CHECK IT IS DRY LAND.
+   *
+   * A save taken underground carries dungeon-local metres, and a save written by an older build
+   * carries metres measured against a differently sized planet. Both come back as a plausible-looking
+   * pair of numbers that `teleport` happily wraps into the sea, which is why the failure was silent.
+   * So the restored spot is checked, and anything wrong falls back to the run's own spawn point —
+   * the town the character started in, which is deterministic from the world seed.
+   */
+  const spot = save.inDungeon && save.surface ? save.surface : save.position;
+  if (spot && Number.isFinite(spot.x) && Number.isFinite(spot.z)) {
+    const terrain = control.terrain || null;
+    const inRange = !terrain
+      || (spot.z >= 0 && spot.z <= (terrain.depthM ?? Infinity) && spot.x >= 0 && spot.x <= (terrain.widthM ?? Infinity));
+    const dry = !terrain?.waterAt || !terrain.waterAt(spot.x, spot.z);
+    if (inRange && dry) control.teleport(spot.x, spot.z);
+    else if (control.spawn) control.teleport(control.spawn.x, control.spawn.z);
+    if (Number.isFinite(save.position?.yaw)) control.yaw = save.position.yaw;
+    if (Number.isFinite(save.position?.pitch)) control.pitch = save.position.pitch;
   }
   // A save from before markers existed carries a plain `pins` array; turn each one into a pin
   // marker on the world being loaded so an old save does not lose them.
@@ -158,6 +210,11 @@ export function restore(save, { rpg, player, control, map }) {
     for (const pin of save.pins) map.markers.drop(pin.x, pin.y, pin.name);
   }
   return save.elapsed || 0;
+}
+
+/** Was this save written before `world` was carried? Then its metres cannot be trusted. */
+export function saveCarriesWorld(save) {
+  return !!(save && save.world && Number.isFinite(Number(save.world.planetScale)));
 }
 
 /** "3h 12m" for a save list. */

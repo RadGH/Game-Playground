@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import { createWorld, makeTerrain, createSystem, M_PER_CELL } from '../js/planet.js';
+import { createWorld, makeTerrain, createSystem, landableBodies, M_PER_CELL } from '../js/planet.js';
 // The catalogue is Three-free (js/town-plan.js); the geometry that reads it is not, so the tests
 // drive the facts rather than the meshes — the same split as dungeon-plan.js and water-plan.js.
 import { BUILDING_INFO, NEW_BUILDINGS, wantsFor, streetPlan, footprintOf } from '../js/town-plan.js';
@@ -169,11 +169,13 @@ test('planets are banded low, medium and high, and every system carries all thre
   assert.deepEqual(PLANET_BANDS.map(b => [b.min, b.max]), [[1, 30], [30, 40], [40, 50]]);
   for (const b of PLANET_BANDS) assert.ok(b.name && b.blurb, `${b.key} is not described`);
 
+  // Round 10: a moon is a landing target too (own id, own seed, own surface map), so it counts
+  // toward "somewhere to go at every level" — `landableBodies` is the list the game actually offers.
   for (const seed of [1, 7, 19, 1337, 777, 42]) {
     const { system } = createSystem({ seed });
-    const landable = system.planets.filter(p => !p.giant && p.landable !== false);
-    assert.ok(landable.length >= 3, `seed ${seed} has only ${landable.length} landable worlds`);
-    const bands = new Set(landable.map(p => bandForPlanet(p).key));
+    const bodies = landableBodies(system);
+    assert.ok(bodies.length >= 3, `seed ${seed} has only ${bodies.length} landable bodies`);
+    const bands = new Set(bodies.map(p => bandForPlanet(p).key));
     assert.equal(bands.size, 3, `seed ${seed} is missing a band: has ${[...bands].join(', ')}`);
   }
 });

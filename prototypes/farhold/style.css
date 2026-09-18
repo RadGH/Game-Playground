@@ -873,7 +873,13 @@ body {
 .perk-arm { display: inline-flex; align-items: center; gap: 5px; color: #9fb0c8; }
 .perk-arm i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .perks-body { display: flex; gap: 12px; flex: 1; min-height: 460px; }
-.perk-canvas { flex: 1; min-width: 0; min-height: 440px; border: 1px solid #222c3c; border-radius: 6px; }
+/* The buffer is sized from this element's own box (see hud.js `perkView`), so it must not be given
+   an intrinsic size to argue with — `flex: 1` owns the width, `align-self: stretch` the height. */
+.perk-canvas {
+  flex: 1; min-width: 0; min-height: 440px; align-self: stretch; display: block;
+  border: 1px solid #222c3c; border-radius: 6px; background: #0b0e15;
+  touch-action: none; cursor: grab;
+}
 .perk-side { width: 270px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
 .perk-side h4 { margin: 4px 0 0; font-size: 15px; color: #eaf6ff; }
 .perk-side .warn { color: #ffa860; }

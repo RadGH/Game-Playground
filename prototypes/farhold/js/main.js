@@ -2362,6 +2362,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
   }
 
+  /** A faction's own colour, for a minimap mark or a row on the standing screen. */
+  function factionColour(key) {
+    return (factionData.factions || []).find(f => f.key === key)?.colour || null;
+  }
+
   /** The world moving while you are in it. Cheap enough to run twice a second. */
   function tickTerritory(seconds) {
     payBoardJobs();
@@ -3114,6 +3119,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         ...sites.visible.map(v => ({ x: v.x, z: v.z, color: v.kind === 'lair' ? '#ff6a3a' : '#ffa860', r: 3.4 })),
         ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
         ...folk.marks(),
+        /**
+         * The Territory, on the minimap.
+         *
+         * Without this the whole layer is invisible: a wanderer is one body in forty square
+         * kilometres and you would have to walk into them, and a camp you are meant to clear looks
+         * like ordinary ground. Each mark is drawn in the colour of whoever it belongs to, which is
+         * also how you tell the people pushing into a zone from the people who hold it.
+         */
+        ...(hud.here ? holdings.sitesIn(hud.here.id).map(si => ({
+          x: si.x, z: si.z, r: 3.6,
+          color: si.hostile ? (factionColour(si.faction) || '#ff6a3a') : '#6f8aa8',
+        })) : []),
+        ...(hud.here ? patrols.inZone(hud.here.id).map(p => ({
+          x: p.x, z: p.z, r: 2.8, color: factionColour(p.faction) || '#9fb0c8',
+        })) : []),
+        ...(hud.here ? trade.inZone(hud.here.id).map(c => ({
+          x: c.x, z: c.z, icon: '▣', color: c.state === 'wrecked' ? '#8a6a5a' : factionColour(c.faction) || '#c8b48a',
+        })) : []),
+        ...(hud.here ? roadFolk.inZone(hud.here.id).map(w => ({
+          x: w.x, z: w.z, icon: '•', color: '#eaf6ff',
+        })) : []),
       ], markers.tracked().map(m => {
         const b = markers.bearing(m, control, terrain);
         return { ...m, x: b.x, z: b.z, distance: b.distance };

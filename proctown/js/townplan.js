@@ -63,9 +63,9 @@ const lerp = (a, b, t) => a + (b - a) * t;
  * natural hierarchy — a street is important because it is long and it came first.
  */
 export const STREET_CLASSES = [
-  { cls: 'main',  width: 7.0, setback: 2.4, surface: 'paved' },
-  { cls: 'lane',  width: 4.5, setback: 1.2, surface: 'cobble' },
-  { cls: 'alley', width: 2.6, setback: 0.4, surface: 'dirt' },
+  { cls: 'main',  width: 5.0, setback: 2.0, surface: 'paved' },
+  { cls: 'lane',  width: 3.2, setback: 1.0, surface: 'cobble' },
+  { cls: 'alley', width: 2.2, setback: 0.4, surface: 'dirt' },
 ];
 const classForDepth = d => STREET_CLASSES[Math.min(d, STREET_CLASSES.length - 1)];
 
@@ -80,41 +80,71 @@ const classForDepth = d => STREET_CLASSES[Math.min(d, STREET_CLASSES.length - 1)
  */
 export const CULTURES = {
   human: {
-    name: 'Human', grammar: 'grown', jitter: 0.30, blockMin: 14, blockMax: 27,
-    plotMin: 7, storeys: [1, 3], wall: 'stone', street: 'cobble',
+    name: 'Human', grammar: 'grown', jitter: 0.30, blockMin: 8, blockMax: 13,
+    plotMin: 5, storeys: [1, 3], wall: 'stone', street: 'cobble',
     cornerstones: ['guildhall', 'market_cross'],
   },
   elf: {
-    name: 'Elf', grammar: 'grown', jitter: 0.55, blockMin: 16, blockMax: 32,
-    plotMin: 7, storeys: [2, 4], wall: 'hedge', street: 'root',
+    name: 'Elf', grammar: 'grown', jitter: 0.55, blockMin: 9, blockMax: 16,
+    plotMin: 6, storeys: [2, 4], wall: 'hedge', street: 'root',
     cornerstones: ['canopy_hall', 'spiral_stair'],
   },
   dwarf: {
-    name: 'Dwarf', grammar: 'planned', jitter: 0.04, blockMin: 15, blockMax: 30,
-    plotMin: 7, storeys: [1, 2], wall: 'cutstone', street: 'flag',
+    name: 'Dwarf', grammar: 'planned', jitter: 0.04, blockMin: 14, blockMax: 23,
+    plotMin: 8, storeys: [1, 2], wall: 'cutstone', street: 'flag',
     cornerstones: ['great_gate', 'forge_hall'],
   },
   undead: {
-    name: 'Undead', grammar: 'grown', jitter: 0.42, blockMin: 13, blockMax: 25,
-    plotMin: 6, storeys: [1, 3], wall: 'bone', street: 'bone',
+    name: 'Undead', grammar: 'grown', jitter: 0.42, blockMin: 8, blockMax: 13,
+    plotMin: 5, storeys: [1, 3], wall: 'bone', street: 'bone',
     cornerstones: ['bone_spire', 'necropolis_row'],
   },
   orc: {
-    name: 'Orc', grammar: 'sprawl', jitter: 0.70, blockMin: 13, blockMax: 29,
-    plotMin: 6, storeys: [1, 2], wall: 'palisade', street: 'dirt',
+    name: 'Orc', grammar: 'sprawl', jitter: 0.70, blockMin: 8, blockMax: 14,
+    plotMin: 5, storeys: [1, 2], wall: 'palisade', street: 'dirt',
     cornerstones: ['war_hall', 'totem_field'],
   },
   halfling: {
-    name: 'Halfling', grammar: 'grown', jitter: 0.48, blockMin: 12, blockMax: 22,
+    name: 'Halfling', grammar: 'grown', jitter: 0.48, blockMin: 8, blockMax: 14,
     plotMin: 5, storeys: [1, 1], wall: 'hedge', street: 'dirt',
     cornerstones: ['burrow_row', 'party_tree'],
   },
   desert: {
-    name: 'Desert', grammar: 'planned', jitter: 0.16, blockMin: 14, blockMax: 30,
-    plotMin: 6, storeys: [1, 3], wall: 'mudbrick', street: 'sand',
+    name: 'Desert', grammar: 'planned', jitter: 0.16, blockMin: 13, blockMax: 22,
+    plotMin: 7, storeys: [1, 3], wall: 'mudbrick', street: 'sand',
     cornerstones: ['bazaar', 'windcatcher'],
   },
 };
+
+/**
+ * Which culture a settlement builds in.
+ *
+ * World Forge already gives every settlement a `race` (Name Forge has twelve) and a `biome`, so
+ * nothing new has to be invented or stored — a town's look falls out of who lives there and where.
+ * The four races with no culture of their own borrow the one they build most like: gnomes and
+ * dragons hoard and cut stone, so they build like dwarves; giants, trolls and goblins throw a place
+ * up out of what is to hand, so they sprawl like orcs; fey grow theirs like elves.
+ *
+ * The exception is the ground: anyone living in sand builds for shade, whatever their ancestry, so
+ * a desert biome overrides the race for the cultures that have no strong tradition of their own.
+ */
+export const CULTURE_FOR_RACE = {
+  human: 'human', elf: 'elf', fey: 'elf',
+  dwarf: 'dwarf', gnome: 'dwarf', dragon: 'dwarf',
+  halfling: 'halfling', undead: 'undead',
+  orc: 'orc', giant: 'orc', troll: 'orc', goblin: 'orc',
+};
+
+/** Deserts are built for shade before they are built for anybody's ancestry. */
+const DESERT_BIOMES = ['desert', 'dunes', 'badlands', 'sand', 'arid', 'wasteland'];
+
+export function cultureFor({ race = 'human', biome = '' } = {}) {
+  const base = CULTURE_FOR_RACE[String(race).toLowerCase()] || 'human';
+  const dry = DESERT_BIOMES.some(b => String(biome).toLowerCase().includes(b));
+  // a dwarf still cuts stone in a desert; a human or a halfling builds a shaded courtyard
+  if (dry && (base === 'human' || base === 'halfling')) return 'desert';
+  return base;
+}
 
 /** What a settlement of this size wants, in the order it gets built. */
 export const WANT_ORDER = [
@@ -376,7 +406,7 @@ function pushStreet(out, toWorld, at, along, block, street, depth, bow) {
  * The plots are cut in the block's own frame and carry the block's angle, so a building stands
  * square to its own street rather than square to the world.
  */
-function plotsInBlock(block, rng, cfg, out) {
+function plotsInBlock(block, rng, cfg, out, buildable) {
   const { plotMin } = cfg;
   const inset = 0.6;
   const w = block.w - inset * 2, d = block.d - inset * 2;
@@ -410,6 +440,17 @@ function plotsInBlock(block, rng, cfg, out) {
     else if (nearest === toTop) local = -Math.PI / 2;
     else local = Math.PI / 2;
 
+    /**
+     * A town does not build in the river.
+     *
+     * Farhold drops any building that lands in water, on a riverbank or on a cliff — silently, after
+     * the plan is made. On a settlement with a river through it that was throwing away 14 plots of
+     * 26 and leaving a city with twelve buildings in it. The planner is told what ground it may not
+     * use, so the count it reports is the truth and the gap where the water runs is deliberate
+     * rather than an accident nobody could see.
+     */
+    if (buildable && !buildable(cx, cz)) { out.blocked = (out.blocked || 0) + 1; continue; }
+
     out.plots.push({
       cx, cz, w: pw, d: pd, angle: block.angle,
       facing: block.angle + local, depth: block.depth,
@@ -421,7 +462,7 @@ function plotsInBlock(block, rng, cfg, out) {
 // ---------------------------------------------------------------------------- the plan
 
 export function planTown({
-  seed = 1, size = 3, culture = 'human', heightAt = null, followGround = null,
+  seed = 1, size = 3, culture = 'human', heightAt = null, followGround = null, buildable = null,
 } = {}) {
   const base = CULTURES[culture] || CULTURES.human;
   const cfg = { ...base, followGround: followGround ?? 0.35 };
@@ -460,7 +501,7 @@ export function planTown({
     out.square = { cx: 0, cz: 0, r: 6 };
   }
 
-  for (const b of out.blocks) plotsInBlock(b, rng, cfg, out);
+  for (const b of out.blocks) plotsInBlock(b, rng, cfg, out, buildable);
 
   /**
    * Trim on the PLOT's own corners, not its block's centre.
@@ -480,6 +521,7 @@ export function planTown({
   wants.forEach((want, i) => { if (byArea[i]) byArea[i].want = want; });
   for (const p of out.plots) if (!p.want) p.want = p.district === 'residential' ? 'house' : 'hut';
 
+  out.blocked = out.blocked || 0;
   out.wall = walled ? buildWall(wall, out.streets, rng) : null;
   out.ring = ring;
   out.wallRadius = wall;

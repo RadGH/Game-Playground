@@ -17,6 +17,7 @@
 
 import * as THREE from 'three';
 import { BUILDING_INFO, wantsFor, streetPlan, footprintOf } from './town-plan.js';
+import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { waterRibbon, lakeSheet } from './water-plan.js';
 import { makeRng, clamp } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
@@ -424,7 +425,7 @@ export function createFeatures(scene, terrain, opts = {}) {
     const homes = [6, 8, 14, 26, 40, 54][clamp(size, 0, 5)] || 8;
     const cx = node.wx, cz = node.wz;
 
-    const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null) => {
+    const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null, { solid: wantSolid = true } = {}) => {
       if (counts[key] >= BUILDINGS[key].cap) return false;
       if (terrain.underwater(x, z)) return false;
       // nothing is built in the channel or on the bank — towns sit BESIDE their river
@@ -437,105 +438,103 @@ export function createFeatures(scene, terrain, opts = {}) {
       );
       instanced[key].setMatrixAt(counts[key], matrix);
       instanced[key].setColorAt(counts[key], colour.setScalar(0.82 + rng() * 0.36));
-      const solid = BUILDING_SOLIDS[key];
+      // a gate registers its own jambs instead, so the opening stays walkable
+      const solid = wantSolid ? BUILDING_SOLIDS[key] : null;
       if (solid && solid[0] > 0) solids.add(x, z, solid[0] * Math.max(size[0], size[2]), solid[1] * size[1]);
       counts[key]++;
       return true;
     };
 
     /**
-     * THE TOWN PLAN.
+     * THE TOWN PLAN — now from `proctown/js/townplan.js`, which is the one true planner.
      *
-     * "Let's also update towns to be more complex, have 12 new bespoke buildings, and have their own
-     * road network between them similar to Minecraft… Consider a town-generation system similar to
-     * Dwarf Fortress or RimWorld."
+     * What used to be here fired 2-6 straight-ish spokes out of the middle and dropped buildings
+     * along them, and the play-test came back with exactly what that produces: "Houses sitting on
+     * roads. Some roofs don't line up with the walls. Alleyway roads clip beneath the surface
+     * texture. All the towns look and feel the same, and they don't feel anything at all natural."
      *
-     * The old layout was rings of huts all facing the middle, which reads as a village from the air
-     * and as nothing at all from the ground. This lays a town the way a town actually grows:
+     * Every one of those is the same mistake — a building was placed at a coordinate, a street was
+     * drawn at a coordinate, and nothing reconciled the two. The planner cuts the town into blocks
+     * and THE CUTS BECOME THE STREETS, then divides each block into plots. A house cannot sit on a
+     * road because a road is not a plot.
      *
-     *   1. a **square** in the middle with the well and, in a real settlement, the hall;
-     *   2. **streets** radiating out from it, bent a little so the place is not a snowflake;
-     *   3. **plots** either side of every street, filled with whatever that settlement needs —
-     *      the trades first, then houses, then the odds and ends;
-     *   4. every building **faces its street**, which is what makes a row of them read as a row.
-     *
-     * A building only goes down where the ground is flat enough and dry, so a town on a slope
-     * thins out uphill by itself rather than being clipped by a rule.
+     * It lives in the playground experiment so it can be tuned on a page instead of by flying to a
+     * town and looking at it, and Farhold imports it so there is no second copy to drift. The town's
+     * culture comes from who lives there and what the ground is, which is why a dwarf hold is a grid
+     * and an elf settlement bends along the contours.
      */
-    const plan = { streets: [], plots: [] };
-    const streetCount = Math.max(2, Math.min(6, 2 + size));
-    const streetLength = ring + 6;
-    for (let i = 0; i < streetCount; i++) {
-      // fan them out, with a wobble so no two towns share a skeleton
-      const heading = (i / streetCount) * Math.PI * 2 + rng() * 0.5;
-      const bend = (rng() - 0.5) * 0.35;
-      plan.streets.push({ heading, bend, length: streetLength * (0.65 + rng() * 0.5) });
-    }
+    const culture = cultureFor({ race: node.race, biome: node.biome });
+    const plan = planTown({
+      seed: (seed ^ (node.id * 2654435761)) >>> 0,
+      size,
+      culture,
+      // the real ground, so "follows the terrain" means this hillside and not a stand-in
+      heightAt: (lx, lz) => terrain.heightAt(cx + lx, cz + lz),
+      /**
+       * …and the ground it may not use at all.
+       *
+       * `place()` below drops anything that lands in water, on a riverbank or on a cliff — silently,
+       * after the plan is made. On the first town with a river through it that was throwing away 14
+       * plots out of 26 and leaving a city with twelve buildings in it, which is exactly the "towns
+       * feel empty" complaint. Telling the planner up front means the gap where the water runs is a
+       * deliberate hole in the plan rather than an accident nobody could see.
+       */
+      buildable: (lx, lz) => {
+        const x = cx + lx, z = cz + lz;
+        return !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 6) <= 0.62;
+      },
+    });
 
-    /** Walk a street, laying slabs and handing back the plots either side. */
-    const walkStreet = street => {
-      const plots = [];
-      const step = 6;
-      for (let d = 7; d < street.length; d += step) {
-        const t = d / Math.max(1, street.length);
-        const a = street.heading + street.bend * t;
-        const x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
-        if (terrain.underwater(x, z)) break;                 // a street does not cross open water
-        if (terrain.slopeAt(x, z, 6) > 0.62) break;          // nor climb a cliff
-        // the slab runs along +Z like every other placed body, so the yaw is the standard one
-        place('street', x, z, Math.atan2(Math.cos(a), Math.sin(a)) + Math.PI / 2, [1, 1, step / 6 * 1.1]);
-        // a plot each side, set back from the kerb
-        for (const side of [-1, 1]) {
-          const px = x + Math.cos(a + Math.PI / 2) * side * 7.5;
-          const pz = z + Math.sin(a + Math.PI / 2) * side * 7.5;
-          plots.push({ x: px, z: pz, facing: Math.atan2(x - px, z - pz), d });
-        }
-      }
-      return plots;
-    };
-
-    for (const street of plan.streets) plan.plots.push(...walkStreet(street));
-    // nearest the square first: the trades want the middle, the houses take what is left
-    plan.plots.sort((a, b) => a.d - b.d);
-
-    // the square itself
-    place('well', cx, cz, rng() * 6.3, 1);
-    if (size >= 3) place('hall', cx + 14, cz + 6, rng() * 6.3, 1);
-    if (size >= 2) place('market', cx - 9, cz + 8, rng() * 6.3, 1);
+    const toWorld = (lx, lz) => [cx + lx, cz + lz];
 
     /**
-     * What this settlement is made of, in the order it gets built.
+     * Lay the street surface along each polyline.
      *
-     * A hamlet is houses and a shrine; a city has everything. The order matters — whatever runs out
-     * of plots first is the thing a small town does without, which is why the trades are at the top.
+     * The slab runs along +Z like every other placed body, so each span is dropped at its midpoint,
+     * turned to the span's own bearing and stretched to its length — which is also what stops the
+     * alleys clipping under the ground, because every slab now sits on the height of the span it
+     * covers rather than on the height of the town centre.
      */
-    const wanted = wantsFor(size);
-
-    let plotAt = 0;
-    const takePlot = () => {
-      while (plotAt < plan.plots.length) {
-        const plot = plan.plots[plotAt++];
-        if (terrain.underwater(plot.x, plot.z)) continue;
-        if (terrain.slopeAt(plot.x, plot.z, 6) > 0.55) continue;
-        return plot;
+    for (const st of plan.streets) {
+      for (let i = 0; i < st.pts.length - 1; i++) {
+        const [ax, az] = toWorld(st.pts[i][0], st.pts[i][1]);
+        const [bx, bz] = toWorld(st.pts[i + 1][0], st.pts[i + 1][1]);
+        const run = Math.hypot(bx - ax, bz - az);
+        const steps = Math.max(1, Math.round(run / 6));
+        for (let k = 0; k < steps; k++) {
+          const t0 = k / steps, t1 = (k + 1) / steps;
+          const x0 = ax + (bx - ax) * t0, z0 = az + (bz - az) * t0;
+          const x1 = ax + (bx - ax) * t1, z1 = az + (bz - az) * t1;
+          const mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+          if (terrain.underwater(mx, mz)) continue;
+          if (terrain.riverAt(mx, mz) > 0.3) continue;
+          const len = Math.hypot(x1 - x0, z1 - z0);
+          place('street', mx, mz, Math.atan2(x1 - x0, z1 - z0),
+            [st.width / 3.4, 1, len / 6 * 1.12]);
+        }
       }
-      return null;
-    };
-
-    for (const key of wanted) {
-      const plot = takePlot();
-      if (!plot) break;
-      place(key, plot.x, plot.z, plot.facing, 0.92 + rng() * 0.2);
     }
 
-    // …and then houses in whatever is left, up to the settlement's head count
-    for (let i = 0; i < homes; i++) {
-      const plot = takePlot();
-      if (!plot) break;
-      const key = size >= 3 && rng() < 0.45 ? 'house' : rng() < 0.5 ? 'hut' : 'house';
-      place(key, plot.x, plot.z, plot.facing + (rng() - 0.5) * 0.2, 0.85 + rng() * 0.35);
-    }
+    // the square: the well at its centre, and the market beside it on anything but a hamlet
+    const [sqx, sqz] = toWorld(plan.square.cx, plan.square.cz);
+    place('well', sqx, sqz, rng() * 6.3, 1);
+    if (size >= 2) place('market', sqx - 9, sqz + 8, rng() * 6.3, 1);
 
+    /**
+     * One building per plot, standing INSIDE it and facing its own street.
+     *
+     * `plot.facing` is the angle out to the street the plot fronts, which is the reason a door is
+     * never on a blank back wall, and `plot.want` is what the planner decided this plot is for —
+     * the trades took the big plots before the houses got a look in.
+     */
+    for (const plot of plan.plots) {
+      const [x, z] = toWorld(plot.cx, plot.cz);
+      if (terrain.underwater(x, z)) continue;
+      if (terrain.slopeAt(x, z, 6) > 0.62) continue;        // a town thins out uphill by itself
+      const key = BUILDINGS[plot.want] ? plot.want : 'house';
+      // the mesh runs along +Z, so a body facing `facing` takes that as its yaw directly
+      place(key, x, z, plot.facing, 0.88 + rng() * 0.24);
+    }
 
     // a city gets a wall and towers
     if (size >= 4) {
@@ -588,10 +587,38 @@ export function createFeatures(scene, terrain, opts = {}) {
         // the mesh runs along +Z, so the LENGTH scale goes on Z and the yaw is the standard one
         place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, chord / SEG * 1.06], 0.9, low);
       }
-      // a GATEHOUSE standing over each gap, so a gate reads as a gate rather than as a hole
+      /**
+       * A GATEHOUSE THAT LINES UP WITH ITS WALL, AND THAT YOU CAN WALK THROUGH.
+       *
+       * Two reported bugs in one place. "Gates are rotated 90 degrees just like the walls used to
+       * be, and do not connect to the walls all the way" — the yaw was built from the gate's own
+       * bearing with a quarter turn bolted on, which is a different convention from the one every
+       * wall segment uses, so the gatehouse stood across the wall line instead of along it and left
+       * daylight at both joins. It now takes its bearing from THE SAME CHORD a wall segment would
+       * have occupied here, so it cannot disagree with the wall, and it is stretched to the width of
+       * the gap so the masonry actually meets.
+       *
+       * And "the gate itself should be open so the player can walk through the middle": the solid
+       * `place` would register is a single circle over the whole gatehouse, which is a plug. The
+       * gatehouse goes down with no collision of its own and two jamb solids are added at its ends
+       * instead, leaving the passage between them open.
+       */
+      const gateHalf = (SEG * 1.9) / wallR;                 // the same half-angle `isGate` clears
       for (const g of gateAngles.slice(0, 4)) {
         const gx = cx + Math.cos(g) * wallR, gz = cz + Math.sin(g) * wallR;
-        if (!terrain.underwater(gx, gz)) place('gatehouse', gx, gz, Math.atan2(Math.cos(g), Math.sin(g)) + Math.PI / 2, 1);
+        if (terrain.underwater(gx, gz)) continue;
+        const ax = cx + Math.cos(g - gateHalf) * wallR, az = cz + Math.sin(g - gateHalf) * wallR;
+        const bx = cx + Math.cos(g + gateHalf) * wallR, bz = cz + Math.sin(g + gateHalf) * wallR;
+        const chord = Math.hypot(bx - ax, bz - az);
+        const yaw = Math.atan2(bx - ax, bz - az);           // exactly what a wall segment would use
+        const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
+        if (!place('gatehouse', gx, gz, yaw, [1, 1, chord / SEG * 1.02], 0.9, low, { solid: false })) continue;
+        // the jambs: one at each end of the opening, nothing in the middle
+        const jamb = BUILDING_SOLIDS.gatehouse;
+        if (jamb && jamb[0] > 0) {
+          const r = Math.min(jamb[0] * 0.55, chord * 0.22);
+          for (const [jx, jz] of [[ax, az], [bx, bz]]) solids.add(jx, jz, r, jamb[1]);
+        }
       }
       // towers beside every gate, and at the quarters
       const towerAngles = [...gateAngles.flatMap(g => [g - 0.26, g + 0.26]),

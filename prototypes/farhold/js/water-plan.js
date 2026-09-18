@@ -75,6 +75,11 @@ export function waterRibbon(points, heights, half, { terrain, reach, skirt = 2.5
  * map. As with a river, the bank is left to poke through and hide the sheet's edge.
  */
 export function lakeSheet(lake, cellSize, terrain) {
+  // A SMALL LAKE GETS A SHORELINE INSTEAD OF CORNERS. See `round` in js/planet.js: a lake of a few
+  // cells drawn a square at a time is a blue rectangle with four right angles in it, which is what
+  // "sharp corners and looks completely unnatural" was. Anything big enough for its own outline to
+  // read as a shape is still drawn by the cell.
+  if (lake.round) return pondSheet(lake, cellSize, terrain);
   const position = [], normal = [], index = [];
   const grow = cellSize * 0.62;                         // half a cell, plus an overlap
   const y = lake.surface;
@@ -86,6 +91,109 @@ export function lakeSheet(lake, cellSize, terrain) {
       normal.push(0, 1, 0);
     }
     index.push(base, base + 2, base + 1, base + 1, base + 2, base + 3);
+  }
+  return { position, normal, index };
+}
+
+/**
+ * A pond: one lake of a few cells, drawn as a shore rather than as squares.
+ *
+ * The outline is measured from the lake's OWN cells — a ray is walked out from the middle at each of
+ * twenty angles until it leaves the footprint — so a two-cell lake comes out long and a four-cell
+ * one comes out round, and neither has a corner in it. The radius is then wobbled by a couple of
+ * slow waves keyed to the lake's own position, so two ponds on the same world are not the same
+ * circle. It is pulled in to 0.86 of the footprint on purpose: the bank has to poke through the
+ * edge of the sheet, which is what hides it (see `waterRibbon` above).
+ */
+export function pondSheet(lake, cellSize, terrain, { segments = 20 } = {}) {
+  const position = [], normal = [], index = [];
+  const y = lake.surface;
+  const cells = new Set(lake.cells);
+  const inside = (x, z) => {
+    const cx = Math.round(x / cellSize), cz = Math.round(z / cellSize);
+    if (cx < 0 || cz < 0 || cx >= terrain.width) return false;
+    return cells.has(cz * terrain.width + cx);
+  };
+  // the middle of the footprint, not the middle of the bounding box
+  let mx = 0, mz = 0;
+  for (const i of lake.cells) { mx += (i % terrain.width) * cellSize; mz += Math.floor(i / terrain.width) * cellSize; }
+  mx /= lake.cells.length; mz /= lake.cells.length;
+
+  const phase = (mx * 0.013 + mz * 0.017) % (Math.PI * 2);
+  const step = cellSize / 12;
+  position.push(mx, y, mz);
+  normal.push(0, 1, 0);
+  for (let s = 0; s < segments; s++) {
+    const a = (s / segments) * Math.PI * 2;
+    const dx = Math.cos(a), dz = Math.sin(a);
+    let r = step;
+    for (let d = step; d <= cellSize * 4; d += step) {
+      if (!inside(mx + dx * d, mz + dz * d)) break;
+      r = d;
+    }
+    r *= 0.86 * (1 + 0.14 * Math.sin(a * 3 + phase) + 0.07 * Math.sin(a * 5 - phase));
+    position.push(mx + dx * r, y, mz + dz * r);
+    normal.push(0, 1, 0);
+  }
+  for (let s = 0; s < segments; s++) index.push(0, 1 + s, 1 + ((s + 1) % segments));
+  return { position, normal, index };
+}
+
+/**
+ * A ROAD DECK WITH A THICKNESS, for the places you can see the side of it.
+ *
+ * "When they cross rivers the road surface is paper thin and looks off." The road is drawn as a flat
+ * ribbon six centimetres above the graded ground, which is right where the ground is touching it and
+ * wrong where it is not — over a river you are looking at a sheet of paper on edge. This builds the
+ * same ribbon with a top, two sides and an underside `thick` metres down, so the crossing has an
+ * edge to it from the bank.
+ *
+ * NOT WIRED YET: `js/features.js` `buildRibbons` still calls its own `ribbon()` for roads. Swapping
+ * it for this on the spans that carry a `lift` is the one-line change — see the round-11 report.
+ */
+export function roadDeck(points, heights, width, { thick = 0.45, lift = 0.06 } = {}) {
+  const position = [], normal = [], index = [];
+  const half = width / 2;
+  const n = points.length;
+  const edge = [];
+  for (let i = 0; i < n; i++) {
+    const prev = points[Math.max(0, i - 1)], next = points[Math.min(n - 1, i + 1)];
+    const dx = next[0] - prev[0], dz = next[1] - prev[1];
+    const len = Math.hypot(dx, dz) || 1;
+    edge.push({ nx: -dz / len, nz: dx / len, y: heights[i] + lift });
+  }
+  // top, then the two sides hanging off it, then the underside — four strips over the same spine
+  const strip = (yOf, nrm, flip) => {
+    const base = position.length / 3;
+    for (let i = 0; i < n; i++) {
+      const { nx, nz } = edge[i];
+      const [l, r] = yOf(i);
+      position.push(points[i][0] + nx * half, l, points[i][1] + nz * half);
+      position.push(points[i][0] - nx * half, r, points[i][1] - nz * half);
+      normal.push(...nrm(i, 0), ...nrm(i, 1));
+      if (i > 0) {
+        const a = base + (i - 1) * 2, b = a + 1, c = base + i * 2, d = c + 1;
+        if (flip) index.push(a, b, c, b, d, c);
+        else index.push(a, c, b, b, c, d);
+      }
+    }
+  };
+  strip(i => [edge[i].y, edge[i].y], () => [0, 1, 0], false);
+  strip(i => [edge[i].y - thick, edge[i].y - thick], () => [0, -1, 0], true);
+  // the two sides: a wall from the deck down to the underside on each edge
+  for (const side of [1, -1]) {
+    const base = position.length / 3;
+    for (let i = 0; i < n; i++) {
+      const { nx, nz, y } = edge[i];
+      const ex = points[i][0] + nx * side * half, ez = points[i][1] + nz * side * half;
+      position.push(ex, y, ez, ex, y - thick, ez);
+      normal.push(nx * side, 0, nz * side, nx * side, 0, nz * side);
+      if (i > 0) {
+        const a = base + (i - 1) * 2, b = a + 1, c = base + i * 2, d = c + 1;
+        if (side > 0) index.push(a, c, b, b, c, d);
+        else index.push(a, b, c, b, d, c);
+      }
+    }
   }
   return { position, normal, index };
 }

@@ -315,15 +315,17 @@ export function smoothPath(points, perSegment = 4) {
  * distance checks instead of thousands. `heightAt` asks this for every vertex of every terrain
  * ring, so the early-out when no bucket holds anything is what keeps it cheap.
  */
-function makePathIndex(paths, bucket = 220) {
+function makePathIndex(paths, bucket = 220, padOverride = null) {
   const buckets = new Map();
   const key = (bx, bz) => bx * 73856093 ^ bz * 19349663;
   for (const path of paths) {
     const pts = path.points;
     for (let i = 0; i < pts.length - 1; i++) {
       const seg = { path, i, x1: pts[i][0], z1: pts[i][1], x2: pts[i + 1][0], z2: pts[i + 1][1] };
-      // drop the segment into every bucket its bounding box touches, plus a margin for the banks
-      const pad = path.reach || 60;
+      // drop the segment into every bucket its bounding box touches, plus a margin for the banks.
+      // `padOverride` is for asking a wider question than "am I on it" — the road merge asks which
+      // corridor is within sixty metres, and a pad of the road's own width would never find it.
+      const pad = padOverride ?? (path.reach || 60);
       const bx0 = Math.floor((Math.min(seg.x1, seg.x2) - pad) / bucket);
       const bx1 = Math.floor((Math.max(seg.x1, seg.x2) + pad) / bucket);
       const bz0 = Math.floor((Math.min(seg.z1, seg.z2) - pad) / bucket);
@@ -559,10 +561,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
   for (let i = 0; i < w * h; i++) {
     if (world.water[i] !== 2) continue;
     if (townCells.has(i)) { world.water[i] = 0; drained++; continue; }
-    lakeField[i] = 1;
-    anyLake = true;
   }
-  if (anyLake) blur(lakeField, w, h, 1);
   const lakeSurfaceAt = (fx, fy) => elevationToMetres(layer(world.elevation, fx, fy), relief);
 
   /**
@@ -575,7 +574,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
    * lets the banks poke through it, which is how a shoreline meets its water.
    */
   const lakes = [];
-  if (anyLake) {
+  {
     const seen = new Uint8Array(w * h);
     for (let i0 = 0; i0 < w * h; i0++) {
       if (world.water[i0] !== 2 || seen[i0]) continue;
@@ -606,6 +605,39 @@ export function makeTerrain(world, planet = null, opts = {}) {
   }
 
   /**
+   * A SINGLE BLUE PIXEL IS NOT A LAKE.
+   *
+   * Reported from a play session: "I found a single blue pixel on the map that rendered as a lake,
+   * but it has sharp corners and looks completely unnatural" — seed 1, Hes-Subud IV, x 22844,
+   * z 10308. It is a real lake as far as the map is concerned, and on that world 25 of the 27 lakes
+   * are exactly one cell. They are not bodies of water; they are the depression filler rounding one
+   * cell of a hillside down, and a lake drawn one cell at a time comes out as a blue SQUARE a couple
+   * of hundred metres across with four right angles in it.
+   *
+   * So anything under `minLakeCells` is simply not a lake here. The cell goes back to dry land in
+   * `world.water` as well, so the minimap, the props and the carve all tell the same story rather
+   * than the map showing water where there is none. Anything up to `roundLakeCells` survives but is
+   * marked `round`, and `js/water-plan.js` gives it a shoreline instead of a rectangle.
+   */
+  const minLakeCells = opts.minLakeCells ?? 2;
+  const roundLakeCells = opts.roundLakeCells ?? 4;
+  let tinyDrained = 0;
+  for (let i = lakes.length - 1; i >= 0; i--) {
+    const lake = lakes[i];
+    if (lake.cells.length >= minLakeCells) {
+      lake.round = lake.cells.length <= roundLakeCells;
+      continue;
+    }
+    for (const c of lake.cells) world.water[c] = 0;
+    tinyDrained += lake.cells.length;
+    lakes.splice(i, 1);
+  }
+
+  // the mask the carve shapes the basins from, built from the lakes that are left
+  for (const lake of lakes) for (const i of lake.cells) { lakeField[i] = 1; anyLake = true; }
+  if (anyLake) blur(lakeField, w, h, 1);
+
+  /**
    * A lake is LEVEL, and the carve has to know that.
    *
    * It used to dig each cell down from that cell's own map elevation, which on a lake spread over
@@ -623,7 +655,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
   for (const lake of lakes) for (const i of lake.cells) lakeLevel[i] = lake.surface;
 
   const roadWidth = klass => (klass === 'trail' ? 4.5 : 7);
-  const roadPaths = (world.roads || []).map(r => {
+  let roadPaths = (world.roads || []).map(r => {
     const points = smoothPath(r.cells.map(toMetres), 5);
     return {
       kind: 'road', id: r.id, klass: r.class || 'trail', cells: r.cells, bridgeCells: r.bridges || [],
@@ -631,6 +663,89 @@ export function makeTerrain(world, planet = null, opts = {}) {
       points, surface: null,
     };
   });
+
+  /**
+   * ROADS MERGE. THEY DO NOT WEAVE.
+   *
+   * Reported: "roads spanning between cities sometimes come together, but rather than merging into
+   * one road they weave back and forth together like two messy roads that keep colliding."
+   *
+   * That is exactly what they were. World Forge routes every link with its own A* pass, so two links
+   * between neighbouring towns pick very nearly the same cells — and then `smoothPath` curves each
+   * one independently, so the two lines cross and re-cross every few metres. On the seed the user
+   * played, 44 pairs of roads shared 819 points within twenty metres of each other.
+   *
+   * The rule is a HIERARCHY (TOWN_EXPANSION 9.1-9.4). A highway outranks a road outranks a trail,
+   * and between equals the longer line is the trunk. The trunk claims its corridor; any lower road
+   * that runs inside that corridor does not draw a second line beside it — it ENDS at a junction on
+   * the trunk, and picks up again at another junction where it leaves. One road on the ground, two
+   * routes over it, and nothing left to weave against. `mergeCells` is in map cells rather than
+   * metres because the weave is a cell-sized artefact: the two lines share the cells themselves.
+   */
+  const roadRank = klass => (klass === 'highway' ? 3 : klass === 'road' ? 2 : 1);
+  const mergeDist = (opts.mergeCells ?? 0.3) * M_PER_CELL;
+
+  function mergeRoadNetwork(paths) {
+    // trunks first, so the biggest road in a corridor is the one that keeps it
+    const order = paths.slice().sort((a, b) =>
+      roadRank(b.klass) - roadRank(a.klass) || b.points.length - a.points.length);
+    const claimed = [];
+    let junctions = 0;
+    for (const path of order) {
+      if (!claimed.length || path.points.length < 4) { claimed.push(path); continue; }
+      // `pad` has to be the merge distance, not the road's own width, or the index would not even
+      // look at a corridor sixty metres away
+      const index = makePathIndex(claimed, 220, mergeDist);
+      const pts = path.points;
+      const inside = pts.map(p => {
+        const hit = index.nearest(p[0], p[1]);
+        return !!hit && hit.dist < mergeDist;
+      });
+      if (!inside.some(Boolean)) { claimed.push(path); continue; }
+      // where the trunk is, for the junction node this road ends on — the hit comes back with it,
+      // because the deck has to be pinned to the trunk's own height later on as well
+      const onTrunk = (p) => {
+        const hit = index.nearest(p[0], p[1]);
+        if (!hit) return null;
+        const a = hit.path.points[hit.i];
+        const b = hit.path.points[Math.min(hit.path.points.length - 1, hit.i + 1)];
+        return { point: [a[0] + (b[0] - a[0]) * hit.t, a[1] + (b[1] - a[1]) * hit.t], trunk: hit.path, i: hit.i, t: hit.t };
+      };
+      // every run of points that is NOT in somebody else's corridor becomes a road of its own,
+      // starting and ending on the trunk it left and rejoined
+      const pieces = [];
+      let start = -1;
+      for (let i = 0; i <= pts.length; i++) {
+        const out = i < pts.length && !inside[i];
+        if (out && start < 0) start = i;
+        if (!out && start >= 0) {
+          const run = pts.slice(start, i);
+          const joins = [];
+          if (start > 0) {
+            const j = onTrunk(run[0]);
+            if (j) { run.unshift(j.point); joins.push({ ...j, at: 'start' }); junctions++; }
+          }
+          if (i < pts.length) {
+            const j = onTrunk(run[run.length - 1]);
+            if (j) { run.push(j.point); joins.push({ ...j, at: 'end' }); junctions++; }
+          }
+          if (run.length >= 3) pieces.push({ run, joins });
+          start = -1;
+        }
+      }
+      for (let k = 0; k < pieces.length; k++) {
+        const piece = {
+          ...path, points: pieces[k].run, joins: pieces[k].joins,
+          id: k ? `${path.id}.${k}` : path.id, merged: true,
+        };
+        claimed.push(piece);
+      }
+    }
+    return { paths: claimed, junctions };
+  }
+
+  const merged = mergeRoadNetwork(roadPaths);
+  roadPaths = merged.paths;
   // A road is graded: the surface is the natural ground smoothed along the line, so the road itself
   // is flat across its width and gentle along its length instead of following every bump.
   const bridgeClearance = opts.bridgeClearance ?? 2.4;
@@ -720,7 +835,35 @@ export function makeTerrain(world, planet = null, opts = {}) {
     path.lift = lift;
   }
 
+  /**
+   * A JUNCTION IS ONE HEIGHT, NOT TWO.
+   *
+   * Each road grades its own deck, so the road joining a trunk and the trunk itself arrived at the
+   * same spot up to a metre apart — a step in the ground at every junction the merge above made, and
+   * a bridge deck that no longer matched what you collide with (the nearest road wins there, and at
+   * a junction that is a coin toss). The joining road is pulled onto the trunk's height at the
+   * junction and the correction fades out over the next few points, so the approach ramps instead
+   * of stepping. It runs after every road is graded, because a piece can be built before its trunk.
+   */
+  for (const path of roadPaths) {
+    for (const join of path.joins || []) {
+      const trunk = join.trunk;
+      if (!trunk?.surface || !path.surface) continue;
+      const y = lerp(trunk.surface[join.i], trunk.surface[Math.min(trunk.surface.length - 1, join.i + 1)], join.t);
+      const at = join.at === 'start' ? 0 : path.surface.length - 1;
+      const delta = y - path.surface[at];
+      if (!Number.isFinite(delta) || Math.abs(delta) < 1e-4) continue;
+      const span = Math.min(6, path.surface.length);
+      for (let k = 0; k < span; k++) {
+        const idx = join.at === 'start' ? k : path.surface.length - 1 - k;
+        path.surface[idx] += delta * (1 - k / span);
+      }
+    }
+  }
+
   const roadIndex = makePathIndex(roadPaths);
+  // how far past the road's own edge the deck keeps its ground when a channel is carved under it
+  const deckGrip = opts.deckGrip ?? 1.5;
 
   /** Height along a path at a nearest-point hit. */
   const surfaceOfHit = hit => lerp(hit.path.surface[hit.i], hit.path.surface[Math.min(hit.path.surface.length - 1, hit.i + 1)], hit.t);
@@ -734,8 +877,10 @@ export function makeTerrain(world, planet = null, opts = {}) {
 
     // a road flattens the ground it runs over, and its shoulders blend back into the land
     const road = roadIndex.nearest(x, z);
+    let deck = null;
     if (road && road.dist < road.path.reach) {
       const graded = surfaceOfHit(road);
+      deck = graded;
       const t = smoothstep(road.path.half, road.path.reach, road.dist);   // 0 on the road, 1 off it
       height = lerp(graded, height, t);
     }
@@ -765,6 +910,27 @@ export function makeTerrain(world, planet = null, opts = {}) {
       const carved = lerp(bed, height, t);
       height = Math.min(height, carved);        // a river only ever cuts down, never fills up
     }
+
+    /**
+     * …AND THE ROAD DECK HAS THE LAST WORD, SO A BRIDGE IS SOMETHING YOU CAN STAND ON.
+     *
+     * Reported: "roads, mainly ones crossing rivers, do not actually have any physics and you can
+     * walk right through them." They had none because the carve ran AFTER the grading and only ever
+     * cuts down: the road was lifted clear of the water a few lines above, and then the river cut
+     * the deck straight back out again. On the user's own world the worst crossing drew its deck
+     * 9.3 m above the ground you actually collided with, so you walked through the bridge and fell
+     * in the river.
+     *
+     * Collision comes from this function, so the deck has to be IN it. It holds for the width of
+     * the road plus `deckGrip` metres of abutment and then falls away to the carved channel again,
+     * which keeps the crossing the width of the bridge rather than damming the river with an
+     * embankment. Anywhere the carve did not touch the road this changes nothing: the deck already
+     * WAS the height here.
+     */
+    if (deck !== null && road.dist < road.path.half + deckGrip) {
+      const t = smoothstep(road.path.half, road.path.half + deckGrip, road.dist);
+      height = Math.max(height, lerp(deck, height, t));
+    }
     return height;
   }
 
@@ -774,8 +940,30 @@ export function makeTerrain(world, planet = null, opts = {}) {
    * ask "can I swim here?" and "how deep is it?" without knowing anything about rivers.
    */
   function waterAt(x, z) {
+    /**
+     * A RIVER IS AS WIDE AS THE WATER, NOT AS WIDE AS THE PLAN SAID.
+     *
+     * The user's longest bug report of the round: "on the edges of the river, I fall through the
+     * blue water layer and walk on the bottom, until I hit the middle of the river where I pop back
+     * on top of the blue layer and equip my raft. I then sink down to the bottom without my raft
+     * again on the other side… grass/trees are appearing underwater on the edges… NPCs are walking
+     * around underwater in that area too."
+     *
+     * Every one of those is the same disagreement. The DRAWN sheet (`js/water-plan.js`) is pushed
+     * outward per point until the carved bank has climbed back to the water line — that is the real
+     * edge of the water, and on the user's world it reaches 26 m past the plan's half-width, four
+     * times the width the plan believed in. This test used `half`, the plan's number, so everything
+     * between the plan's edge and the real edge was under the blue layer and counted as dry land:
+     * no swimming, no boat, trees planted in it and NPCs wading through it.
+     *
+     * Asking the SAME question the sheet asks — is the ground here below the river's surface, inside
+     * the bank — is what makes the two agree. `reach` is where the sheet stops as well, so there is
+     * no case left where one says water and the other says land.
+     */
     const river = riverIndex.nearest(x, z);
-    if (river && river.dist < river.path.half) {
+    // `<=`: the sheet is allowed to reach the top of the bank exactly, so the test has to as well,
+    // or there is a one-metre sliver of drawn water standing over "dry" ground at the very edge
+    if (river && river.dist <= river.path.reach) {
       const surface = surfaceOfHit(river);
       const ground = heightAt(x, z);
       if (surface > ground) return { kind: 'river', surface, depth: surface - ground, path: river.path, dist: river.dist };
@@ -841,9 +1029,11 @@ export function makeTerrain(world, planet = null, opts = {}) {
         if (level && ground < level + margin) return false;
       }
     }
-    // …and a river's own surface, which is a smooth line rather than a cell
+    // …and a river's own surface, which is a smooth line rather than a cell. The whole wetted
+    // channel, out to the bank — a seedling two metres from the plan's centre line was still in
+    // the water, which is what put grass and trees under the blue layer along every river edge.
     const river = riverIndex.nearest(x, z);
-    if (river && river.dist < river.path.half + 2) {
+    if (river && river.dist < river.path.reach + 2) {
       const surface = surfaceOfHit(river);
       if (ground < surface + margin) return false;
     }
@@ -1010,6 +1200,10 @@ export function makeTerrain(world, planet = null, opts = {}) {
     riverPaths, roadPaths, lakes,
     /** How many lake cells were pushed out of a settlement's footprint, for the tests. */
     drainedForTowns: drained,
+    /** …and how many were a single blue pixel rather than a body of water. */
+    drainedTiny: tinyDrained,
+    /** How many junction nodes the road merge created, for the tests. */
+    roadJunctions: merged.junctions,
     heightAt, naturalHeightAt, slopeAt, normalAt, colorAt, biomeAt, biomeIdAt, temperatureAt,
     underwater, plantable, waterAt, riverAt, roadAt, wrapAround,
     clampToWorld, spawnPoint, layer,

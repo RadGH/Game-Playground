@@ -123,7 +123,7 @@ export function createController(terrainIn, balance = {}, camera, {
     offCooldown: 0, mainStep: 0, offStep: 0, idleSince: 0,
     attackEvery: b.attackEvery ?? 0.62,      // main.js keeps this in step with derived.attackEvery
     firstPerson: false, eyeHeight: 1.5,
-    swimming: false, waterDepth: 0, waterSurface: 0,
+    swimming: false, wading: false, waterDepth: 0, waterSurface: 0,
     mounted: false,
     /**
      * THE BOAT PUTS ITSELF IN THE WATER.
@@ -213,13 +213,26 @@ export function createController(terrainIn, balance = {}, camera, {
     // --- what am I standing in?
     const water = terrain.waterAt(self.x, self.z);
     const wasSwimming = self.swimming;
+    const wasWading = self.wading;
     const swimDepth = b.swimDepth ?? 1.3;
+    /**
+     * THE BOAT COMES OUT AT THE SHORE, NOT IN MID-CHANNEL.
+     *
+     * "We should make it so you equip the raft even if your knees are in the water, not only when at
+     * the absolute river line, but up to the shore as well." Boarding was keyed to `swimming`, which
+     * needs 1.3 m of water — so you waded in, walked the bed, and the raft only appeared once the
+     * river was deep enough to swim in, which on a real crossing is the middle. Wading is its own
+     * state at `boardDepth` (0.55 m, about knee deep) and the boat rides on that; `swimming` is
+     * untouched, so how you MOVE is decided the same way it always was.
+     */
+    const boardDepth = b.boardDepth ?? 0.55;
     self.waterDepth = water ? water.depth : 0;
     self.waterSurface = water ? water.surface : 0;
     // deep enough to swim in, and you are actually down in it
     self.swimming = !!water && water.depth > swimDepth && self.y < water.surface + 0.2;
+    self.wading = !!water && water.depth > boardDepth && self.y < water.surface + 0.4;
     if (self.swimming && self.mounted) self.mounted = false;     // the horse will not swim
-    if (self.swimming && !wasSwimming) {
+    if (self.wading && !wasWading) {
       out.enteredWater = true;
       // step into the boat on the way in, not on a key press
       self.boating = activeBoat();
@@ -228,14 +241,13 @@ export function createController(terrainIn, balance = {}, camera, {
     /**
      * Put the boat away whenever you are not swimming — not only on the frame you climbed out.
      *
-     * This used to test `!swimming && wasSwimming`, which is the transition, and the transition is
-     * not the only way to stop swimming: `teleport()` drops you somewhere dry, a load puts you on a
-     * road, and a dungeon changes the floor under you. Any of those and `wasSwimming` was already
-     * false by the next update, so the raft stayed "equipped" on dry land for the rest of the run.
-     * Reading the state instead of the edge cannot miss, and it still only fires once because
-     * `boating` goes null on the way through.
+     * This used to test the transition, and the transition is not the only way to leave the water:
+     * `teleport()` drops you somewhere dry, a load puts you on a road, and a dungeon changes the
+     * floor under you. Any of those and the previous state was already false by the next update, so
+     * the raft stayed "equipped" on dry land for the rest of the run. Reading the state instead of
+     * the edge cannot miss, and it still only fires once because `boating` goes null on the way.
      */
-    if (!self.swimming && self.boating) {
+    if (!self.wading && self.boating) {
       out.leftBoat = self.boating;
       self.boating = null;
     }
@@ -244,7 +256,7 @@ export function createController(terrainIn, balance = {}, camera, {
     let speed = 0;
     if (!frozen && input && (input.forward || input.strafe)) {
       const base = sheet().moveSpeed || (b.moveSpeed ?? 5.4);
-      if (self.swimming) {
+      if (self.swimming || (self.boating && self.wading)) {
         /**
          * A boat is the difference between crossing a lake and going round it.
          *

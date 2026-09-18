@@ -398,8 +398,19 @@ test('the rings have a skirt around their hole, so the joins are not see-through
             ring.centre[1] - half + y * cell,
           );
           const drop = ground - pos[i * 3 + 1];
-          if (edge <= ring.hole / 2 + cell) { onLip++; lipY += drop; }
-          else if (edge <= ring.hole / 2 + cell * 3) { justOutside++; outY += drop; }
+          /**
+           * ROUND 11 MOVED THIS BAND, and the old measurement was the bug.
+           *
+           * It used to read the lip as everything within `hole/2 + cell` — which is exactly how far
+           * the skirt used to reach, a whole cell PAST the hole's rim and out beyond the finer
+           * ring's own edge. The ramp off that last dropped row had nothing covering it, and from a
+           * ship (skirt x8, rings stretched x6) it was a trench hundreds of metres deep drawn as a
+           * square round the player. The lip stops a cell inside the rim now, so the ramp is under
+           * the finer ring. The measurement follows: dropped INSIDE `hole/2 - cell`, and flat on the
+           * ground from the rim outward, which is the half this test should have been asserting.
+           */
+          if (edge <= ring.hole / 2 - cell) { onLip++; lipY += drop; }
+          else if (edge >= ring.hole / 2 && edge <= ring.hole / 2 + cell * 3) { justOutside++; outY += drop; }
         }
       }
       out.push({

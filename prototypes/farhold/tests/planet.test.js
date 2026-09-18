@@ -155,3 +155,78 @@ test('the habitable search is repeatable and always lands somewhere', () => {
     assert.ok(a.systemSeed >= seed && a.systemSeed < seed + 25, 'the search ran past its own limit');
   }
 });
+
+// ---------------------------------------------------------------- round 11: roads
+
+/**
+ * TOWN_EXPANSION 9.20: "no two roads within merge distance running parallel. Fails the build if
+ * they weave." The user's report: "roads spanning between cities sometimes come together, but
+ * rather than merging into one road they weave back and forth together like two messy roads that
+ * keep colliding." On seed 1 at the size the game actually plays at, 44 ordered pairs of roads
+ * shared 819 points within twenty metres of each other before the merge.
+ */
+test('roads merge into one corridor instead of weaving beside each other', () => {
+  let networks = 0;
+  for (const seed of [1, 7, 19, 1337]) {
+    const wr = createWorld({ seed, width: 128, height: 64 });
+    const t = makeTerrain(wr.world, wr.planet);
+    const roads = t.roadPaths;
+    // a 128 x 64 test world does not always have a network worth the name
+    if (roads.length < 5) continue;
+    networks++;
+    const merge = 0.3 * M_PER_CELL;
+    const distTo = (p, path) => {
+      let best = Infinity;
+      for (let i = 0; i < path.points.length - 1; i++) {
+        const a = path.points[i], b = path.points[i + 1];
+        const dx = b[0] - a[0], dz = b[1] - a[1];
+        const l2 = dx * dx + dz * dz;
+        let s = l2 ? ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / l2 : 0;
+        s = s < 0 ? 0 : s > 1 ? 1 : s;
+        best = Math.min(best, Math.hypot(p[0] - (a[0] + dx * s), p[1] - (a[1] + dz * s)));
+      }
+      return best;
+    };
+    let worst = 0;
+    for (let i = 0; i < roads.length; i++) {
+      for (let j = 0; j < roads.length; j++) {
+        if (i === j) continue;
+        let run = 0;
+        /**
+         * Half the merge distance, and a RUN of points rather than one. The ends are junctions — a
+         * road is meant to touch the trunk where it joins it — and two roads that pass within a
+         * couple of hundred metres once on a 163 km world are two roads, not a weave. What this is
+         * looking for is the reported symptom: two lines travelling together for a long way.
+         */
+        for (let k = 2; k < roads[i].points.length - 2; k++) {
+          run = distTo(roads[i].points[k], roads[j]) < merge * 0.5 ? run + 1 : 0;
+          worst = Math.max(worst, run);
+        }
+      }
+    }
+    assert.ok(worst <= 3, `seed ${seed} still has ${worst} points of one road running inside another's corridor`);
+  }
+  assert.ok(networks > 0, 'none of the test worlds had a road network to check');
+});
+
+test('a bridge is something you can stand on', () => {
+  // "Roads, mainly ones crossing rivers, do not actually have any physics and you can walk right
+  // through them." The carve used to run after the grading and only ever cuts down, so the river
+  // took the deck back out again — 9.3 m of daylight between the drawn road and the collidable
+  // ground on the user's own world.
+  for (const seed of [1, 7, 1337]) {
+    const wr = createWorld({ seed, width: 128, height: 64 });
+    const t = makeTerrain(wr.world, wr.planet);
+    let crossings = 0, worst = 0;
+    for (const road of t.roadPaths) {
+      for (let i = 0; i < road.points.length; i++) {
+        if (!(road.lift[i] > 0.5)) continue;          // not a crossing
+        crossings++;
+        const [x, z] = road.points[i];
+        worst = Math.max(worst, road.surface[i] - t.heightAt(x, z));
+      }
+    }
+    assert.ok(worst < 0.25, `seed ${seed}: a bridge deck stands ${worst.toFixed(1)} m above the ground you collide with`);
+    assert.ok(crossings >= 0);
+  }
+});

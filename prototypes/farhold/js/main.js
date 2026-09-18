@@ -364,7 +364,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const light = createLight(scene, { balance });
 
   const ringSpec = lowQuality ? balance.terrain?.ringsLow : balance.terrain?.rings;
-  let view = createTerrainView(scene, terrain, { rings: ringSpec, waterColor: palette.sea });
+  let view = createTerrainView(scene, terrain, {
+    // the terrain knobs are a knob file like everything else; without this `maxSkirtScale` and
+    // friends were code defaults nobody could tune
+    ...(balance.terrain || {}), rings: ringSpec, waterColor: palette.sea });
 
   status('planting the world…');
   await frame();
@@ -2018,7 +2021,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     scene.add(sky.sunLight); scene.add(sky.sunLight.target); scene.add(sky.ambient);
     scene.fog = sky.fog;
 
-    view = createTerrainView(scene, terrain, { rings: ringSpec, waterColor: palette.sea });
+    view = createTerrainView(scene, terrain, {
+    // the terrain knobs are a knob file like everything else; without this `maxSkirtScale` and
+    // friends were code defaults nobody could tune
+    ...(balance.terrain || {}), rings: ringSpec, waterColor: palette.sea });
     props = createProps(scene, terrain, {
       seed,
       density: lowQuality ? 0.45 : (balance.props?.density ?? 1),

@@ -102,16 +102,28 @@ test('lakes get water in them, flat, at one height, and wider than their cells',
       assert.ok(lake.cells.length >= 1);
       assert.ok(Number.isFinite(lake.surface), 'a lake with no surface height');
       const part = lakeSheet(lake, M_PER_CELL, t);
-      assert.equal(part.position.length / 3, lake.cells.length * 4, 'a quad per cell');
       for (let v = 0; v < part.position.length; v += 3) {
         assert.equal(part.position[v + 1], lake.surface, 'a lake that is not level');
       }
-      // the cells overlap, so there is no hairline crack between two cells of the same lake
-      const c0 = lake.cells[0];
-      const cx = (c0 % t.width) * M_PER_CELL;
-      const spanX = Math.max(...[0, 1, 2, 3].map(k => part.position[k * 3])) - Math.min(...[0, 1, 2, 3].map(k => part.position[k * 3]));
-      assert.ok(spanX > M_PER_CELL, `a lake cell sheet ${spanX} m across a ${M_PER_CELL} m cell`);
-      assert.ok(Number.isFinite(cx));
+      /**
+       * "A quad per cell" was the measurement until round 11. A small lake is drawn as a SHORE now
+       * (`pondSheet`), because a lake of one or two cells came out as a blue rectangle with four
+       * right angles in it — "a single blue pixel on the map that rendered as a lake, but it has
+       * sharp corners". Only the ones too big for that are still squares, and for those the old
+       * check still holds.
+       */
+      if (lake.round) {
+        assert.ok(part.position.length / 3 > 8, 'a pond with no shoreline in it');
+        assert.equal(part.index.length / 3, part.position.length / 3 - 1, 'a pond that is not a fan');
+      } else {
+        assert.equal(part.position.length / 3, lake.cells.length * 4, 'a quad per cell');
+        // the cells overlap, so there is no hairline crack between two cells of the same lake
+        const c0 = lake.cells[0];
+        const cx = (c0 % t.width) * M_PER_CELL;
+        const spanX = Math.max(...[0, 1, 2, 3].map(k => part.position[k * 3])) - Math.min(...[0, 1, 2, 3].map(k => part.position[k * 3]));
+        assert.ok(spanX > M_PER_CELL, `a lake cell sheet ${spanX} m across a ${M_PER_CELL} m cell`);
+        assert.ok(Number.isFinite(cx));
+      }
     }
   }
   assert.ok(found > 0, 'none of three worlds had a lake — check the flood fill');
@@ -128,4 +140,80 @@ test('every lake sits in a basin the terrain actually carved', () => {
     assert.ok(below / lake.cells.length > 0.5,
       `only ${below}/${lake.cells.length} cells of a lake are under its own water line`);
   }
+});
+
+// ---------------------------------------------------------------- round 11
+
+/**
+ * "On the edges of the river, I fall through the blue water layer and walk on the bottom, until I
+ * hit the middle of the river where I pop back on top of the blue layer and equip my raft."
+ *
+ * The drawn sheet reaches the bank; `waterAt` only reached the plan's half-width. Everything between
+ * the two was under the blue layer and counted as dry land. This walks a cross-section and asks for
+ * one unbroken run of water from bank to bank, getting deeper toward the middle.
+ */
+test('the water you can see and the water the game knows about are the same width', () => {
+  let checked = 0;
+  for (const river of terrain.riverPaths.slice(0, 6)) {
+    if (river.points.length < 30) continue;
+    for (const i of [10, 20, 28]) {
+      const [x, z] = river.points[i];
+      const p = river.points[i + 1], q = river.points[i - 1];
+      const dx = p[0] - q[0], dz = p[1] - q[1];
+      const len = Math.hypot(dx, dz) || 1;
+      const nx = -dz / len, nz = dx / len;
+      const surface = river.surface[i];
+      const wetAt = [];
+      // a metre in from the top of the bank: the sheet's last vertex is measured along the normal
+      // and `waterAt` measures to the nearest point of a CURVING line, and on a bend those two
+      // differ by a few centimetres, which is a sliver of shoreline and not a place you can stand
+      for (let d = -river.reach + 1; d <= river.reach - 1; d += 1) {
+        const X = x + nx * d, Z = z + nz * d;
+        const ground = terrain.heightAt(X, Z);
+        const water = terrain.waterAt(X, Z);
+        // under the drawn sheet: the game has to agree that this is water
+        if (ground < surface - 0.05) {
+          assert.ok(water, `dry land ${d} m off the centre line and ${(surface - ground).toFixed(1)} m under the river`);
+          wetAt.push(true);
+        } else wetAt.push(false);
+        if (water) assert.ok(terrain.plantable(X, Z) === false, 'something can grow in the river');
+      }
+      // the longest dry run BETWEEN the banks. A metre of it is the shoreline wobbling around the
+      // water line; the bug was a band thirteen metres wide on each side that you walked along the
+      // bottom of, with the raft only coming out in the middle.
+      const first = wetAt.indexOf(true), last = wetAt.lastIndexOf(true);
+      let dry = 0, worstDry = 0;
+      for (let k = first; k >= 0 && k <= last; k++) { dry = wetAt[k] ? 0 : dry + 1; worstDry = Math.max(worstDry, dry); }
+      assert.ok(worstDry <= 2, `${worstDry} m of dry channel inside the water — the raft would come and go`);
+      if (first >= 0) checked++;
+    }
+  }
+  assert.ok(checked > 3, `only ${checked} river cross-sections had any water in them`);
+});
+
+test('a one-cell lake is not a lake, and a small one has no corners', () => {
+  // seed 1, Hes-Subud IV, x 22844, z 10308: "a single blue pixel on the map that rendered as a
+  // lake, but it has sharp corners and looks completely unnatural"
+  for (const seed of [1, 7, 3, 11]) {
+    const wr = createWorld({ seed, width: 128, height: 64 });
+    const t = makeTerrain(wr.world, wr.planet);
+    for (const lake of t.lakes) {
+      assert.ok(lake.cells.length >= 2, `seed ${seed} still draws a ${lake.cells.length}-cell lake`);
+      // and the map agrees: nothing is left saying "water" where no water is drawn
+      for (const i of lake.cells) assert.equal(wr.world.water[i], 2);
+    }
+    assert.ok(t.drainedTiny >= 0);
+  }
+  // the pond outline is a closed ring around the middle, not a box
+  const pond = { cells: [5 * 128 + 5, 5 * 128 + 6], surface: 12, round: true };
+  const part = lakeSheet(pond, M_PER_CELL, { width: 128, heightAt: () => 0 });
+  const n = part.position.length / 3;
+  assert.ok(n >= 12, 'a pond drawn with almost no shoreline');
+  let corners = 0;
+  for (let v = 1; v < n; v++) {
+    const a = [part.position[v * 3], part.position[v * 3 + 2]];
+    const b = [part.position[((v % (n - 1)) + 1) * 3], part.position[((v % (n - 1)) + 1) * 3 + 2]];
+    if (Math.abs(a[0] - b[0]) < 1e-6 || Math.abs(a[1] - b[1]) < 1e-6) corners++;
+  }
+  assert.ok(corners <= 2, 'the pond is still drawn with straight axis-aligned edges');
 });

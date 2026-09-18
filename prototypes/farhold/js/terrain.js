@@ -20,16 +20,18 @@ import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
  * `hole` metres left out. Positions are rebuilt whenever the ring's snapped centre changes.
  */
 class Ring {
-  constructor(terrain, { extent, res, hole = 0 }) {
+  constructor(terrain, { extent, res, hole = 0, innerCell = 0 }) {
     this.terrain = terrain;
     this.extent = extent;
     this.res = res;
     this.cell = extent / res;
     this.hole = hole;
+    // the cell size of the ring that covers our hole, so we know how far its edge really reaches
+    this.innerCell = innerCell;
     // how far the hole's lip drops; proportional to this ring's own resolution
     this.skirt = this.cell * 1.2;
     // the ring at 1x, kept so `setViewScale` can stretch it and put it back afterwards
-    this.base = { extent, cell: this.cell, hole, skirt: this.skirt };
+    this.base = { extent, cell: this.cell, hole, skirt: this.skirt, innerCell };
     this.viewScale = 1;
     /**
      * …and how much deeper to make it. From head height a 1.2-cell drop hides the seam between two
@@ -93,14 +95,36 @@ class Ring {
         const i = y * (res + 1) + x, o = i * 3;
         const wx = cx - half + x * cell, wz = cz - half + y * cell;
         let height = h[i];
-        // A SKIRT around the hole. Where two rings of different resolution meet, their edges do not
-        // agree to the millimetre, and at a grazing angle you could see through the join. Dropping
-        // the vertices on the hole's edge makes the quads bordering it slope down into ground the
-        // finer ring is already covering, so any gap is behind a wall instead of open sky. It costs
-        // no extra vertices: the ones inside the hole are referenced by nothing else.
+        /**
+         * A SKIRT around the hole — AND IT HAS TO STAY UNDER THE FINER RING.
+         *
+         * Where two rings of different resolution meet, their edges do not agree to the millimetre,
+         * and at a grazing angle you could see through the join. Dropping the vertices on the hole's
+         * edge makes the quads bordering it slope down into ground the finer ring is already
+         * covering, so any gap is behind a wall instead of open sky.
+         *
+         * But the drop used to reach a whole cell PAST the hole's rim, and the ramp from a dropped
+         * vertex up to the next one is one cell long — so the last half of that ramp came out beyond
+         * the finer ring's own edge, in the open, where nothing covered it. On the ground the drop is
+         * a couple of metres and you never notice. In the air `js/main.js` multiplies the skirt by up
+         * to eight and stretches every ring by up to six at the same time, and that exposed ramp
+         * becomes a trench hundreds of metres deep running right round the player: "when flying
+         * around there are a few different levels of terrain that do not mesh together correctly,
+         * showing as giant squares centered around the player." One square per ring.
+         *
+         * So the drop stops one cell INSIDE the rim. The ramp then runs from `hole/2 - cell` to
+         * `hole/2`, and the finer ring covers out to `hole/2 + cell`, so the whole of it is hidden
+         * under geometry however deep it goes. The spare cell is what pays for the two rings being
+         * snapped to different grids — they can sit up to half of this cell plus half of the finer
+         * one apart, and that is less than the cell of slack we left.
+         */
         if (this.hole > 0) {
           const lx = Math.abs(wx - cx), lz = Math.abs(wz - cz);
-          if (Math.max(lx, lz) <= this.hole / 2 + cell) height -= this.skirt * this.skirtScale;
+          // how far the finer ring is SURE to reach: its own edge, less the half-cell each of us
+          // may be snapped away by. The ramp off the last dropped row is one cell long, so the last
+          // dropped row has to sit a cell inside that.
+          const cover = this.hole / 2 + cell - (cell + this.innerCell) / 2;
+          if (Math.max(lx, lz) <= cover - cell + 1e-3) height -= this.skirt * this.skirtScale;
         }
         P[o] = wx - cx; P[o + 1] = height; P[o + 2] = wz - cz;
         const l = h[y * (res + 1) + Math.max(0, x - 1)], r = h[y * (res + 1) + Math.min(res, x + 1)];
@@ -145,7 +169,8 @@ export function createTerrainView(scene, terrain, opts = {}) {
     // the hole is a little smaller than the ring inside it, so they overlap by a couple of quads
     // instead of leaving a crack where the resolutions meet
     const inner = i === 0 ? 0 : specs[i - 1].extent - 2 * (specs[i].extent / specs[i].res);
-    const ring = new Ring(terrain, { ...specs[i], hole: Math.max(0, inner) });
+    const innerCell = i === 0 ? 0 : specs[i - 1].extent / specs[i - 1].res;
+    const ring = new Ring(terrain, { ...specs[i], hole: Math.max(0, inner), innerCell });
     rings.push(ring);
     scene.add(ring.mesh);
   }
@@ -172,10 +197,6 @@ export function createTerrainView(scene, terrain, opts = {}) {
     rings,
     water,
     /**
-     * Deepen every ring's skirt. Called when the camera climbs: looking down on the seam between two
-     * clipmap rings from altitude shows a gap that a head-height skirt never covered.
-     */
-    /**
      * Stretch every ring, keeping the same number of triangles.
      *
      * "Once you enter a rocket you should enter a lower level of detail… you should see many chunks
@@ -194,6 +215,8 @@ export function createTerrainView(scene, terrain, opts = {}) {
         r.cell = r.base.cell * want;
         r.hole = r.base.hole * want;
         r.skirt = r.base.skirt * want;
+        r.innerCell = r.base.innerCell * want;    // every ring stretches by the same number, so the
+                                                  // skirt band below still lands where it should
         r.update(x, z, true);
       }
       if (water) {
@@ -202,8 +225,17 @@ export function createTerrainView(scene, terrain, opts = {}) {
       return true;
     },
 
+    /**
+     * Deepen every ring's skirt as the camera climbs — but only so far.
+     *
+     * `js/main.js` asks for up to 8x from the air, on top of the ring stretch, which used to be the
+     * only way to hide the seam from altitude. The skirt sits under the finer ring now (see `rebuild`
+     * above), so a deeper one buys nothing past the point where it covers the join, and a skirt of
+     * several hundred metres is a hole in the world for anything that samples ring geometry — or for
+     * the camera on the way down through it. `maxSkirtScale` is the ceiling.
+     */
     setSkirtScale(k, x, z) {
-      const want = Math.max(1, k);
+      const want = Math.max(1, Math.min(opts.maxSkirtScale ?? 3, k));
       let changed = false;
       for (const r of rings) {
         if (Math.abs(r.skirtScale - want) < 0.05) continue;

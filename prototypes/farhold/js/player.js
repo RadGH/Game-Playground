@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 
-export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person · E talk/open/enter · F torch · H horse · J ship · M map · I sheet · L log · O settings · ` debug';
+export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person · E talk/open/enter · L light · H horse · J ship · M map · I sheet · K log · O settings · ` debug';
 
 /** Reads the keyboard and mouse. Pointer lock is optional — dragging works too. */
 export function createInput(dom) {

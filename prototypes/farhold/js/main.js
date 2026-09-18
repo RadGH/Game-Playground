@@ -2393,11 +2393,25 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         ensureSpace().enter({ fromPlanet: planet, elapsed: state.elapsed });
         camera.far = 600000; camera.updateProjectionMatrix();
         air.leave();
+        light.setSpots(false);            // nothing to light between the worlds
         mode = 'space';
         hud.log(`${planet.name} falls away below you.`, 'level');
         hud.log('W to fly · Shift to boost · hold Space to warp · point at a world and press J to land', '');
         autoSave();
       }
+
+      /**
+       * L in the air is the landing lights.
+       *
+       * Same key as the lamp on foot — "allow the light when on foot to be toggled on both with the
+       * hotkey L for light" — because from the player's side it is one idea: L means light, and what
+       * that means depends on whether you are standing on the ground or flying over it.
+       */
+      if (snap.pressed?.has('KeyL')) {
+        light.setSpots(!light.spotsOn);
+        hud.log(light.spotsOn ? 'Landing lights on.' : 'Landing lights off.');
+      }
+      light.aimSpots(air.state, air.state?.yaw ?? 0, -0.35);
 
       /**
        * B2: the minimap follows the SHIP.
@@ -3053,6 +3067,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   let fighting = false;
   let lastAirLod = -1;
   let torchWanted = true;
+  // cleared at dawn, so the hint below is once per planetary day rather than once per session
+  let nightHintShown = false;
   /** Are you holding something that burns? The starting torch sits in the off hand. */
   function carryingLight() {
     const lamp = player.equipment.light;
@@ -3119,12 +3135,38 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
       }
     }
-    // F lights and puts out the torch. It can only be lit while you are actually carrying one.
-    if (snap.pressed?.has('KeyF')) {
-      if (!carryingLight()) hud.log('You have nothing to light. A torch goes in the off hand.');
-      else { torchWanted = !torchWanted; hud.log(torchWanted ? 'You light your torch.' : 'You snuff the torch.'); }
+    /**
+     * L IS THE LIGHT — on foot and in the ship.
+     *
+     * It was F, and the user asked for one key that means "light" wherever you are: "let's also
+     * allow the light when on foot to be toggled on both with the hotkey L for light". The log moved
+     * to K to make room. The lamp can only be lit while you are actually carrying one; the ship's
+     * spotlights are part of the ship, so they have nothing to carry.
+     */
+    if (snap.pressed?.has('KeyL')) {
+      if (!carryingLight()) hud.log('You have nothing to light. A torch or a lantern goes in the off hand.');
+      else {
+        torchWanted = !torchWanted;
+        hud.log(torchWanted ? 'You light your lamp.' : 'You snuff your lamp.');
+        nightHintShown = true;            // they know where the key is now; stop offering
+      }
     }
     light.setTorch(torchWanted && carryingLight());
+
+    /**
+     * ONCE A NIGHT, tell them the key exists.
+     *
+     * "At night, if your light is off, there should be a chat hint press L to turn the light on,
+     * shown only once per planetary day." Once per day means per planetary day, so the flag is
+     * cleared when the sun comes back up rather than on a timer — on a world with a six-minute day
+     * that is six minutes, and on a slow one it is not nagging every few seconds either way.
+     */
+    const dark = sky.isNight;
+    if (!dark) nightHintShown = false;
+    else if (!nightHintShown && !torchWanted && carryingLight() && !panelOpen()) {
+      nightHintShown = true;
+      hud.log('It is dark. Press L to light your lamp.', 'level');
+    }
 
     const frozen = hud.sheetOpen || debug.isOpen || map.isOpen || talk.isOpen || settings.isOpen || rewardsOpen() || pauseMenu.isOpen;
 

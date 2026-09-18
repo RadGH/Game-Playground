@@ -189,12 +189,72 @@ export function createLight(scene, { balance = {} } = {}) {
     for (const l of pool) scene.remove(l);
   }
 
+  /**
+   * THE SHIP'S LANDING LIGHTS.
+   *
+   * "When flying around in the surface, let's add spotlights that can be toggled on." Two real
+   * SpotLights on the hull rather than a brighter point light, because the whole value of a landing
+   * light is the CONE — you want to see the strip of ground you are about to put down on, not a
+   * uniform glow that washes the night out. They are parented to nothing and moved by the caller
+   * each frame, which is how everything else in this module works.
+   */
+  const spots = [];
+  for (let i = 0; i < 2; i++) {
+    const l = new THREE.SpotLight(
+      new THREE.Color(cfg.spot?.color || '#eaf2ff'),
+      0,
+      cfg.spot?.range ?? 220,
+      cfg.spot?.angle ?? 0.42,
+      cfg.spot?.blur ?? 0.55,
+      1.1,
+    );
+    l.name = 'farhold-spot-' + i;
+    l.visible = false;
+    scene.add(l);
+    scene.add(l.target);
+    spots.push(l);
+  }
+  let spotsOn = false;
+
+  /** Turn the landing lights on or off. */
+  function setSpots(on) {
+    spotsOn = !!on;
+    for (const l of spots) { l.visible = spotsOn; l.intensity = spotsOn ? (cfg.spot?.intensity ?? 9) : 0; }
+  }
+
+  /**
+   * Put the cones where the ship is, aimed where it is going and a little down.
+   *
+   * `at` is the hull, `yaw` where the nose points. The two lamps sit either side of the centreline
+   * so the lit ground reads as two overlapping ovals rather than one circle, which is what makes it
+   * look like a machine rather than a torch.
+   */
+  function aimSpots(at, yaw, pitch = -0.35) {
+    if (!spotsOn || !at) return;
+    const fx = Math.sin(yaw), fz = Math.cos(yaw);
+    const rx = fz, rz = -fx;                       // the hull's right, for the lamp spacing
+    const spread = cfg.spot?.spread ?? 2.6;
+    const reach = cfg.spot?.reach ?? 90;
+    spots.forEach((l, i) => {
+      const side = i === 0 ? -1 : 1;
+      l.position.set(at.x + rx * spread * side, at.y - 0.6, at.z + rz * spread * side);
+      l.target.position.set(
+        at.x + fx * reach + rx * spread * side,
+        at.y - 0.6 + Math.sin(pitch) * reach,
+        at.z + fz * reach + rz * spread * side,
+      );
+      l.target.updateMatrixWorld();
+    });
+  }
+
   return {
     torch, pool, setSources, setTorch, setRange, update, dispose,
+    spots, setSpots, aimSpots,
+    get spotsOn() { return spotsOn; },
     get torchOn() { return torchOn; },
     get indoors() { return indoors; },
     setNightFloor: v => { nightFloor = v; },
-    stats: () => ({ torch: torchOn, lit: pool.filter(l => l.visible).length, sources: sources.length }),
+    stats: () => ({ torch: torchOn, spots: spotsOn, lit: pool.filter(l => l.visible).length, sources: sources.length }),
   };
 }
 

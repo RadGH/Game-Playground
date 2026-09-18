@@ -203,3 +203,30 @@ test('the seeded generator is stable and in range', () => {
   assert.deepEqual(first, [again(), again(), again()]);
   for (const v of first) assert.ok(v >= 0 && v < 1);
 });
+
+test('a town is mostly homes, not a row of trades', () => {
+  // One plot per trade, biggest first, sounds right and is not: a settlement wants a dozen trades
+  // from size 4 up, so on a plan that yields nineteen plots thirteen of them became a forge, an inn,
+  // a chapel and a barracks, and the "city" had six homes in it. In the game that read as a town
+  // with nobody living in it.
+  for (const culture of Object.keys(CULTURES)) {
+    for (const size of [4, 5, 6]) {
+      for (const seed of [3, 11, 42]) {
+        const plan = planTown({ seed, size, culture });
+        if (plan.plots.length < 9) continue;                  // too small to say anything about
+        const homes = plan.plots.filter(p => p.want === 'house' || p.want === 'hut').length;
+        assert.ok(homes >= plan.plots.length * 0.55,
+          `${culture} size ${size} seed ${seed}: ${homes} homes of ${plan.plots.length} plots`);
+      }
+    }
+  }
+});
+
+test('the trades still arrive in want order, so a small town drops the bottom of the list', () => {
+  const small = planTown({ seed: 3, size: 4, culture: 'human' });
+  const big = planTown({ seed: 3, size: 6, culture: 'human' });
+  const tradesIn = plan => new Set(plan.plots.map(p => p.want).filter(w => w !== 'house' && w !== 'hut'));
+  const a = tradesIn(small), b = tradesIn(big);
+  // whatever the smaller town has, the bigger one has too — it does not swap one trade for another
+  for (const want of a) assert.ok(b.has(want), `the bigger town lost the ${want} the smaller one has`);
+});

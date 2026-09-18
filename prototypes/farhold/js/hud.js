@@ -264,7 +264,10 @@ export class Hud {
     window.addEventListener('keydown', e => {
       if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
       if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-      if (e.code !== 'KeyL' || this.sheetOpen) return;
+      // K, not L: the user asked for L to be the light, on foot and in the ship. The log is the
+      // thing that moved, because a light you cannot turn on at night is a worse problem than a
+      // scrollback on an unfamiliar key.
+      if (e.code !== 'KeyK' || this.sheetOpen) return;
       // …and not over a screen that already owns the whole window
       if (document.querySelector('#pause:not(.hidden), #map-screen:not(.hidden), .screen.chart:not(.hidden), #talk:not(.hidden)')) return;
       e.preventDefault();

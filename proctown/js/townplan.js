@@ -262,7 +262,14 @@ function splitBlock(block, depth, rng, cfg, out, height) {
   const { blockMin, blockMax, jitter, grammar } = cfg;
   const longest = Math.max(block.w, block.d);
 
-  if (longest <= blockMax || depth > 8) {
+  /**
+   * The depth cap has to clear the biggest town, or every size above a point is the same town.
+   *
+   * At 8 a dwarf settlement stopped subdividing before it had used its ring, and sizes 2, 3, 4 and 5
+   * all came out with exactly 31 plots — the size slider did nothing above a hamlet. A city's ring
+   * is 94 m and its blocks are 23, which needs ten halvings to reach.
+   */
+  if (longest <= blockMax || depth > 11) {
     if (block.w >= blockMin * 0.6 && block.d >= blockMin * 0.6) out.blocks.push({ ...block, depth });
     return;
   }
@@ -461,11 +468,53 @@ function plotsInBlock(block, rng, cfg, out, buildable) {
 
 // ---------------------------------------------------------------------------- the plan
 
-export function planTown({
+/**
+ * Plan a settlement, and if the ground takes too much of it away, plan it again more finely.
+ *
+ * `buildable` stops the planner laying plots in a river, on a bank or up a cliff — which is right,
+ * and on a town built across a river it can take most of the ground away. A riverside settlement
+ * came out with no houses in it at all: every surviving plot went to a trade, and the place read as
+ * a wall with a forge in it.
+ *
+ * So a town that comes out under its floor tries once more at a finer grain — smaller blocks,
+ * smaller plots — and keeps whichever attempt produced more. Real towns on awkward sites do exactly
+ * this: the plots get smaller and the lanes get tighter, because the land is what it is. Same seed
+ * either way, so a town is still the same town every visit.
+ *
+ * The floor matters as much for the SMALL as for the awkward. A hamlet's ring is only 29 m across,
+ * which is barely two blocks before the recursion stops — one settlement came out as a granary, a
+ * well and thirty-two paving slabs, with nobody living in it. A village has to be a handful of
+ * houses at minimum or it is not a village.
+ */
+export function planTown(opts = {}) {
+  let best = planOnce(opts);
+  const floor = Math.max(6, (opts.size ?? 3) * 5);
+  if (best.plots.length >= floor) return best;
+
+  // a hamlet's ring is 29 m across, so one step finer is nowhere near enough — go down in stages
+  // and keep whichever attempt built the most
+  const base = CULTURES[opts.culture] || CULTURES.human;
+  for (const k of [0.7, 0.5, 0.36]) {
+    const tighter = planOnce({
+      ...opts,
+      squeeze: {
+        blockMin: Math.max(4.5, base.blockMin * k),
+        blockMax: Math.max(6.5, base.blockMax * k),
+        plotMin: Math.max(3.2, base.plotMin * k),
+      },
+    });
+    if (tighter.plots.length > best.plots.length) best = tighter;
+    if (best.plots.length >= floor) break;
+  }
+  return best;
+}
+
+function planOnce({
   seed = 1, size = 3, culture = 'human', heightAt = null, followGround = null, buildable = null,
+  squeeze = null,
 } = {}) {
   const base = CULTURES[culture] || CULTURES.human;
-  const cfg = { ...base, followGround: followGround ?? 0.35 };
+  const cfg = { ...base, ...(squeeze || {}), followGround: followGround ?? 0.35 };
   const rng = makeRng(seed);
   const { ring, wall, walled } = footprintOf(size);
 
@@ -516,9 +565,20 @@ export function planTown({
     p.district = d < ring * 0.34 ? 'civic' : d < ring * 0.62 ? 'craft' : 'residential';
   }
 
+  /**
+   * The trades take the big plots — but a town is mostly people's houses.
+   *
+   * One plot per trade, biggest first, sounds right and is not: a settlement wants a dozen trades
+   * from size 4 up, and if the plan only yields nineteen plots then thirteen of them are a forge, an
+   * inn, a chapel, a barracks and so on, and the "city" has six homes in it. That is a trading post
+   * with delusions, not a city. The trades are capped at a third of the town, taken from the biggest
+   * plots in want-order, so whatever a small town does without is whatever is at the bottom of that
+   * list — which is the same rule as before, applied to a number that makes sense.
+   */
   const wants = WANT_ORDER.filter(k => size >= (WANT_FROM[k] ?? 0));
   const byArea = [...out.plots].sort((a, b) => (b.w * b.d) - (a.w * a.d));
-  wants.forEach((want, i) => { if (byArea[i]) byArea[i].want = want; });
+  const roomForTrades = Math.max(1, Math.floor(out.plots.length / 3));
+  wants.slice(0, roomForTrades).forEach((want, i) => { if (byArea[i]) byArea[i].want = want; });
   for (const p of out.plots) if (!p.want) p.want = p.district === 'residential' ? 'house' : 'hut';
 
   out.blocked = out.blocked || 0;

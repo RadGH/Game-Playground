@@ -64,19 +64,41 @@ export function drawPlan(ctx, plan, {
   // overlaps one, you can SEE it overlapping rather than having to be told.
   for (const s of plan.streets) {
     ctx.beginPath();
-    ctx.moveTo(X(s.a[0]), Z(s.a[1]));
-    ctx.lineTo(X(s.b[0]), Z(s.b[1]));
+    ctx.moveTo(X(s.pts[0][0]), Z(s.pts[0][1]));
+    if (s.pts.length === 3) {
+      // a grown street is bowed — draw the bend as a curve rather than two straight legs
+      ctx.quadraticCurveTo(
+        X(s.pts[1][0] * 2 - (s.pts[0][0] + s.pts[2][0]) / 2),
+        Z(s.pts[1][1] * 2 - (s.pts[0][1] + s.pts[2][1]) / 2),
+        X(s.pts[2][0]), Z(s.pts[2][1]),
+      );
+    } else {
+      for (let i = 1; i < s.pts.length; i++) ctx.lineTo(X(s.pts[i][0]), Z(s.pts[i][1]));
+    }
     ctx.strokeStyle = STREET_COLOUR[s.cls] || '#444';
     ctx.lineWidth = Math.max(1, s.width * scale);
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.stroke();
   }
 
   // ---- blocks, if asked for
+  /** Trace an oriented box, since nothing is axis-aligned any more. */
+  const trace = (b, shrink = 0) => {
+    const c = Math.cos(b.angle), sn = Math.sin(b.angle);
+    const hw = b.w / 2 - shrink, hd = b.d / 2 - shrink;
+    ctx.beginPath();
+    [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].forEach(([lx, lz], i) => {
+      const x = X(b.cx + lx * c - lz * sn), z = Z(b.cz + lx * sn + lz * c);
+      if (i) ctx.lineTo(x, z); else ctx.moveTo(x, z);
+    });
+    ctx.closePath();
+  };
+
   if (show.blocks) {
     ctx.strokeStyle = '#2f3b4e';
     ctx.lineWidth = 1;
-    for (const b of plan.blocks) ctx.strokeRect(X(b.x), Z(b.z), b.w * scale, b.d * scale);
+    for (const b of plan.blocks) { trace(b); ctx.stroke(); }
   }
 
   // ---- plots and what stands on them
@@ -87,20 +109,22 @@ export function drawPlan(ctx, plan, {
     if (show.plots) {
       ctx.strokeStyle = dim ? '#222a34' : (DISTRICT_COLOUR[p.district] || '#555');
       ctx.lineWidth = 1;
-      ctx.strokeRect(X(p.x), Z(p.z), p.w * scale, p.d * scale);
+      trace(p);
+      ctx.stroke();
     }
 
     // the building itself, fitted inside its plot with a margin of yard
     const inset = Math.min(p.w, p.d) * 0.16;
-    const bw = (p.w - inset * 2) * scale, bd = (p.d - inset * 2) * scale;
     const named = WANT_COLOUR[p.want];
     ctx.fillStyle = dim ? '#1b222c' : (named || (p.want === 'house' ? '#4e5a6a' : '#414a57'));
-    ctx.fillRect(X(p.x + inset), Z(p.z + inset), bw, bd);
+    trace(p, inset);
+    ctx.fill();
 
     if (matched) {
       ctx.strokeStyle = '#ffd24a';
       ctx.lineWidth = 2;
-      ctx.strokeRect(X(p.x + inset) - 1, Z(p.z + inset) - 1, bw + 2, bd + 2);
+      trace(p, inset);
+      ctx.stroke();
     }
 
     // which way the door faces — the reason a door is never on a blank back wall
@@ -147,7 +171,15 @@ export function drawOverlaps(ctx, plan, hits, { width, height } = {}) {
   for (const h of hits) {
     const p = h.p || plan.plots[h.i];
     if (!p) continue;
-    ctx.strokeRect(ox + p.x * scale, oz + p.z * scale, p.w * scale, p.d * scale);
+    const c = Math.cos(p.angle), sn = Math.sin(p.angle);
+    const hw = p.w / 2, hd = p.d / 2;
+    ctx.beginPath();
+    [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].forEach(([lx, lz], i) => {
+      const x = ox + (p.cx + lx * c - lz * sn) * scale, z = oz + (p.cz + lx * sn + lz * c) * scale;
+      if (i) ctx.lineTo(x, z); else ctx.moveTo(x, z);
+    });
+    ctx.closePath();
+    ctx.stroke();
   }
   ctx.restore();
 }

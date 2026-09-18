@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  planTown, overlaps, summarise, footprintOf, makeRng,
+  planTown, overlaps, summarise, footprintOf, makeRng, corners, demoTerrain,
   CULTURES, STREET_CLASSES, WANT_ORDER, WANT_FROM,
 } from '../js/townplan.js';
 
@@ -47,8 +47,11 @@ test('every plot is inside the town footprint', () => {
   for (const culture of CULTURE_KEYS) {
     const plan = planTown({ seed: 11, size: 5, culture });
     for (const p of plan.plots) {
-      const far = Math.hypot(p.cx, p.cz);
-      assert.ok(far <= plan.ring + 1, `${culture}: a plot sits ${far.toFixed(1)} m out of a ${plan.ring} m ring`);
+      // every CORNER, not the centre — a rotated plot can have its middle inside and a corner out
+      for (const [x, z] of corners(p)) {
+        const far = Math.hypot(x, z);
+        assert.ok(far <= plan.ring + 0.5, `${culture}: a plot corner sits ${far.toFixed(1)} m out of a ${plan.ring} m ring`);
+      }
     }
   }
 });
@@ -70,6 +73,59 @@ test('a walled town always has at least two ways in, and never more than four', 
       const n = plan.wall.gates.length;
       assert.ok(n >= 2 && n <= 4, `${culture} seed ${seed}: ${n} gates`);
     }
+  }
+});
+
+test('a planned culture holds one angle and a grown one does not', () => {
+  // this is the test that would have caught `grammar` being dead data: it was written into seven
+  // culture records and read in none, so every town came out a rectangular grid however the knobs
+  // were set, and an elf settlement was a dwarf settlement with different numbers.
+  const angleCount = culture => {
+    const seen = new Set();
+    for (let seed = 1; seed <= 12; seed++) {
+      for (const p of planTown({ seed, size: 5, culture }).plots) seen.add(Math.round(p.angle * 57.3));
+    }
+    return seen.size;
+  };
+  // a planned town is rotated once at the root and never again: one angle per town, no more
+  assert.ok(angleCount('dwarf') <= 14, 'a dwarf town should be a rigid grid');
+  assert.ok(angleCount('desert') <= 14, 'a desert town should be a rigid grid');
+  // a grown town bends: many more distinct angles than it has towns
+  for (const culture of ['human', 'elf', 'undead', 'halfling', 'orc']) {
+    assert.ok(angleCount(culture) > 20, `${culture} is coming out as a grid — is grammar wired?`);
+  }
+});
+
+test('a grown town bends its streets and a planned one does not', () => {
+  const bowed = culture => planTown({ seed: 5, size: 6, culture }).streets.filter(s => s.pts.length > 2).length;
+  assert.equal(bowed('dwarf'), 0, 'a dwarf street should be straight');
+  assert.ok(bowed('elf') > 0, 'an elf street should bend');
+});
+
+test('the ground changes a grown plan and is ignored by a planned one', () => {
+  // elves follow the land; dwarves cut through it. Two different heightfields, same seed.
+  const flat = () => 0;
+  const hilly = demoTerrain(3);
+  const shape = plan => plan.plots.map(p => Math.round(p.angle * 57.3)).join(',');
+
+  const elfFlat = shape(planTown({ seed: 8, size: 5, culture: 'elf', heightAt: flat }));
+  const elfHill = shape(planTown({ seed: 8, size: 5, culture: 'elf', heightAt: hilly }));
+  assert.notEqual(elfFlat, elfHill, 'an elf town ignored the terrain it was built on');
+
+  const dwarfFlat = shape(planTown({ seed: 8, size: 5, culture: 'dwarf', heightAt: flat }));
+  const dwarfHill = shape(planTown({ seed: 8, size: 5, culture: 'dwarf', heightAt: hilly }));
+  assert.equal(dwarfFlat, dwarfHill, 'a dwarf town bent to the terrain; it should cut through it');
+});
+
+test('every culture builds a town worth walking into', () => {
+  // the shrink that keeps rotated blocks out of their siblings costs floor area, and it compounds.
+  // Left unchecked it took an elf settlement down to four buildings while a dwarf one had
+  // thirty-seven. Nothing may fall off a cliff like that again.
+  for (const culture of Object.keys(CULTURES)) {
+    const counts = [];
+    for (let seed = 1; seed <= 25; seed++) counts.push(planTown({ seed, size: 5, culture }).plots.length);
+    const median = counts.sort((a, b) => a - b)[12];
+    assert.ok(median >= 15, `${culture} builds a median of ${median} plots at size 5 — that is a hamlet, not a town`);
   }
 });
 
@@ -126,6 +182,7 @@ test('street classes are a real hierarchy', () => {
     assert.ok(STREET_CLASSES[i].width < STREET_CLASSES[i - 1].width, 'a lane is not narrower than a main street');
   }
   const plan = planTown({ seed: 6, size: 6, culture: 'human' });
+  for (const s of plan.streets) assert.ok(s.pts.length >= 2, 'a street needs at least two points');
   const classes = new Set(plan.streets.map(s => s.cls));
   assert.ok(classes.size > 1, 'a city should have more than one grade of street');
 });

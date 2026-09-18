@@ -16,10 +16,14 @@
 // city → capital). They have no people in them: NPCs, shops and interiors are phase 4.
 
 import * as THREE from 'three';
-import { BUILDING_INFO, wantsFor, streetPlan, footprintOf } from './town-plan.js';
+import { BUILDING_INFO } from './town-plan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
+import {
+  describeBuilding, partsFor, describeStall, stallParts, stallsFor,
+  radiusOf, heightOf, mix, MESHES, CULTURE_KIT,
+} from '../../../proctown/js/buildkit.js';
 import { waterRibbon, lakeSheet } from './water-plan.js';
-import { makeRng, clamp } from '../../../worldgen/js/noise.js';
+import { makeRng } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
 import { ObstacleField, BUILDING_SOLIDS } from './collide.js';
 
@@ -84,38 +88,127 @@ const mat4 = (x, y, z, sx, sy, sz, ry = 0) => new THREE.Matrix4().compose(
 const BOX = new THREE.BoxGeometry(1, 1, 1);
 const CYL = new THREE.CylinderGeometry(1, 1, 1, 8);
 const CONE4 = new THREE.ConeGeometry(1, 1, 4);
-// an eight-sided stone for a shrine marker, so it reads as carved rather than cut
-const OCT = new THREE.OctahedronGeometry(1, 0);
+// what is left of the fixed palette: the four things still modelled here (wall, gatehouse,
+// well, bridge) rather than assembled by the kit
+const BEAM = '#5a4632', ROOF = '#7a4a3a', STONE = '#8a8275';
 
-const WALL_COLOR = '#cdbfa6', BEAM = '#5a4632', ROOF = '#7a4a3a', STONE = '#8a8275', TILE = '#5f6b74';
+// ---------------------------------------------------------------------------- the building kit
+//
+// A BUILDING IS A KIT, NOT A MODEL. Everything below the horizontal rule used to be twenty fixed
+// meshes — a hut, a house, a hall, a forge and so on — and every town on every world was built out
+// of the same twenty. The play-test said what that produces: "some roofs don't line up with the
+// walls", "all the towns look and feel the same", "more variety of houses, roofs, colours, walls".
+//
+// `proctown/js/buildkit.js` now describes a building from its plot, its culture and a seed, and
+// hands back a list of UNIT SHAPES. This file's only job is to stand them on the terrain.
+//
+// The instance budget is honoured the same way it always was, just one level down: there is one
+// InstancedMesh per SHAPE rather than one per building type, so a town of sixty buildings is eight
+// draw calls whatever is in it. A dwarf blockhouse and an elf bower are the same boxes and prisms.
+
+/** A geometry whose vertex colours are all white, so the per-instance colour is the whole colour. */
+function whiteGeometry(g) {
+  const n = g.attributes.position.count;
+  const color = new Float32Array(n * 3).fill(1);
+  g.setAttribute('color', new THREE.BufferAttribute(color, 3));
+  return g;
+}
+
+/**
+ * A prism: a convex cross-section in XY, extruded along Z from -0.5 to 0.5.
+ *
+ * Three.js has no triangular prism, and the gable and the lean-to are the two shapes a town is
+ * mostly made of. The section must run anti-clockwise or the faces point inward.
+ */
+function prismGeometry(section) {
+  const pos = [];
+  const tri = (a, b, c) => pos.push(...a, ...b, ...c);
+  const n = section.length;
+  for (let i = 1; i < n - 1; i++) {
+    tri([section[0][0], section[0][1], 0.5], [section[i][0], section[i][1], 0.5], [section[i + 1][0], section[i + 1][1], 0.5]);
+    tri([section[0][0], section[0][1], -0.5], [section[i + 1][0], section[i + 1][1], -0.5], [section[i][0], section[i][1], -0.5]);
+  }
+  for (let i = 0; i < n; i++) {
+    const a = section[i], b = section[(i + 1) % n];
+    tri([a[0], a[1], -0.5], [b[0], b[1], -0.5], [b[0], b[1], 0.5]);
+    tri([a[0], a[1], -0.5], [b[0], b[1], 0.5], [a[0], a[1], 0.5]);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+/**
+ * The eight unit shapes, each one metre in every direction with its ORIGIN AT THE CENTRE OF ITS
+ * BASE — so a part's `y` is its bottom and there is never a half-height to remember.
+ */
+function unitMesh(kind) {
+  let g;
+  switch (kind) {
+    case 'cyl': g = new THREE.CylinderGeometry(0.5, 0.5, 1, 10); g.translate(0, 0.5, 0); break;
+    // the triangular prism's ridge runs along +Z
+    case 'gable': g = prismGeometry([[-0.5, 0], [0.5, 0], [0, 1]]); break;
+    // …and the lean-to's single pitch rises toward -X
+    case 'shed': g = prismGeometry([[-0.5, 0], [0.5, 0], [-0.5, 1]]); break;
+    // a four-sided cone IS a pyramid; turned an eighth so its square base lines up with the axes
+    case 'hip': g = new THREE.ConeGeometry(Math.SQRT1_2, 1, 4); g.rotateY(Math.PI / 4); g.translate(0, 0.5, 0); break;
+    case 'frustum': g = new THREE.CylinderGeometry(0.225 * Math.SQRT2, 0.5 * Math.SQRT2, 1, 4);
+      g.rotateY(Math.PI / 4); g.translate(0, 0.5, 0); break;
+    case 'cone': g = new THREE.ConeGeometry(0.5, 1, 12); g.translate(0, 0.5, 0); break;
+    case 'dome': g = new THREE.SphereGeometry(0.5, 12, 5, 0, Math.PI * 2, 0, Math.PI / 2);
+      g.scale(1, 2, 1); break;
+    default: g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, 0.5, 0); break;
+  }
+  return whiteGeometry(g);
+}
+
+/** Which InstancedMesh each kit shape goes into. */
+const KIT_KEY = Object.fromEntries(MESHES.map(m => [m, 'kit_' + m]));
+
+/**
+ * How many of each shape may exist at once across every town in range.
+ *
+ * Measured rather than guessed: a settlement runs 14 parts a building (orc) to 45 (desert, where
+ * every flat roof carries four parapet walls), on 17 to 59 plots. These are sized for three or four
+ * towns inside the 2.6 km feature radius with the level-of-detail cut below doing its share.
+ */
+const KIT_CAPS = {
+  box: 9000, cyl: 1800, gable: 900, shed: 600, hip: 700, frustum: 400, cone: 500, dome: 500,
+};
+
+const KIT_PARTS = Object.fromEntries(MESHES.map(m => [
+  KIT_KEY[m], { cap: KIT_CAPS[m], kit: true, build: () => unitMesh(m) },
+]));
+
+/**
+ * The buildings a settlement wants — which are now FOOTINGS, not models.
+ *
+ * Each of these is one thin slab under a building, sized to the footprint the kit chose, and the
+ * building itself is assembled from `KIT_PARTS` on top of it. Keeping a mesh per want is not
+ * nostalgia: it is where the instance cap lives (`BUILDING_INFO.<want>.cap`), it is how the debug
+ * stats and the page tests count "how many forges are in front of me", and the footing itself earns
+ * its place by hiding the gap where sloping ground runs out from under a wall.
+ */
+const WANT_KEYS = [
+  'hut', 'house', 'hall', 'forge', 'inn', 'market', 'granary', 'chapel',
+  'barracks', 'stable', 'mill', 'warehouse', 'watchpost', 'shrine',
+];
+const WANT_FOOTINGS = Object.fromEntries(WANT_KEYS.map(key => [
+  key, { cap: BUILDING_INFO[key].cap, footing: true, build: () => unitMesh('box') },
+]));
 
 /** The buildings a settlement is made of. All small, all procedural, all instanced. */
 export const BUILDINGS = {
-  hut: { cap: BUILDING_INFO.hut.cap, build: () => mergeParts([
-    { geometry: BOX, color: WALL_COLOR, matrix: mat4(0, 1.3, 0, 4.2, 2.6, 3.6) },
-    { geometry: CONE4, color: ROOF, matrix: mat4(0, 3.5, 0, 3.6, 1.8, 3.2, Math.PI / 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 0.9, 1.82, 0.9, 1.8, 0.12) },
-  ]) },
-  house: { cap: BUILDING_INFO.house.cap, build: () => mergeParts([
-    { geometry: BOX, color: WALL_COLOR, matrix: mat4(0, 1.8, 0, 6, 3.6, 4.6) },
-    { geometry: CONE4, color: ROOF, matrix: mat4(0, 4.8, 0, 5, 2.4, 4.2, Math.PI / 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 1.1, 2.32, 1.1, 2.2, 0.14) },
-    { geometry: BOX, color: BEAM, matrix: mat4(-2, 2.4, 2.32, 0.2, 2.8, 0.14) },
-    { geometry: BOX, color: BEAM, matrix: mat4(2, 2.4, 2.32, 0.2, 2.8, 0.14) },
-    { geometry: CYL, color: STONE, matrix: mat4(2.2, 5.2, -1.2, 0.35, 2.6, 0.35) },
-  ]) },
-  hall: { cap: BUILDING_INFO.hall.cap, build: () => mergeParts([
-    { geometry: BOX, color: STONE, matrix: mat4(0, 2.6, 0, 10, 5.2, 6.5) },
-    { geometry: CONE4, color: TILE, matrix: mat4(0, 6.8, 0, 8.2, 3.2, 5.8, Math.PI / 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 1.5, 3.3, 1.8, 3, 0.2) },
-    { geometry: CYL, color: STONE, matrix: mat4(-4.2, 3, 3.4, 0.4, 6, 0.4) },
-    { geometry: CYL, color: STONE, matrix: mat4(4.2, 3, 3.4, 0.4, 6, 0.4) },
-  ]) },
-  tower: { cap: BUILDING_INFO.tower.cap, build: () => mergeParts([
-    { geometry: CYL, color: STONE, matrix: mat4(0, 5, 0, 2.4, 10, 2.4) },
-    { geometry: CYL, color: STONE, matrix: mat4(0, 10.3, 0, 2.9, 0.7, 2.9) },
-    { geometry: CONE4, color: TILE, matrix: mat4(0, 12, 0, 2.7, 3, 2.7, Math.PI / 4) },
-  ]) },
+  ...WANT_FOOTINGS,
+  ...KIT_PARTS,
+  // a wall tower: still a model, because it is the same tower in every town and it is placed by the
+  // wall's own geometry rather than by a plot. White, so the culture's own stone colours it.
+  tower: { cap: BUILDING_INFO.tower.cap, build: () => whiteGeometry(mergeParts([
+    { geometry: CYL, color: '#ffffff', matrix: mat4(0, 5, 0, 2.4, 10, 2.4) },
+    { geometry: CYL, color: '#ffffff', matrix: mat4(0, 10.3, 0, 2.9, 0.7, 2.9) },
+    { geometry: CONE4, color: '#ffffff', matrix: mat4(0, 12, 0, 2.7, 3, 2.7, Math.PI / 4) },
+  ])) },
   /**
    * A wall segment, built along **+Z** — the axis `yaw` points down, the same as the bridges.
    *
@@ -124,102 +217,27 @@ export const BUILDINGS = {
    * joining end to end into a wall. (Reported with a screenshot of a city that looked like it was
    * built out of dominoes.)
    */
-  wall: { cap: BUILDING_INFO.wall.cap, build: () => mergeParts([
-    { geometry: BOX, color: STONE, matrix: mat4(0, 1.9, 0, 1.1, 3.8, 6) },
-    { geometry: BOX, color: STONE, matrix: mat4(0, 4, -2, 1.2, 0.6, 0.9) },
-    { geometry: BOX, color: STONE, matrix: mat4(0, 4, 0, 1.2, 0.6, 0.9) },
-    { geometry: BOX, color: STONE, matrix: mat4(0, 4, 2, 1.2, 0.6, 0.9) },
-  ]) },
+  // White, like the tower: a palisade is not the colour of a bone wall is not the colour of a living
+  // hedge, and a culture you can name from the next hill is most of what section 6 is asking for.
+  wall: { cap: BUILDING_INFO.wall.cap, build: () => whiteGeometry(mergeParts([
+    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 1.9, 0, 1.1, 3.8, 6) },
+    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 4, -2, 1.2, 0.6, 0.9) },
+    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 4, 0, 1.2, 0.6, 0.9) },
+    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 4, 2, 1.2, 0.6, 0.9) },
+  ])) },
   /**
-   * TWELVE MORE BUILDINGS, so a town stops being huts and a hall.
+   * WHERE THE TWELVE MODELS WENT.
    *
-   * "Let's also update towns to be more complex, have 12 new bespoke buildings, and have their own
-   * road network between them." Each one is a real silhouette rather than a recoloured box — a
-   * forge has a chimney and a quench trough, an inn has a sign hanging off a bracket, a chapel has
-   * a spire. `js/town.js` puts the matching person inside, so a smithy is where the smith is.
+   * Round 8 added twelve bespoke buildings here — a forge with a chimney and a quench trough, an inn
+   * with a sign on a bracket, a chapel with a spire — and they were good models. They were also the
+   * only twelve, on every world, in every culture, for ever, which is the complaint this round is
+   * answering: "all the towns look and feel the same".
+   *
+   * So the silhouettes moved into `proctown/data/buildkit.json`, where a forge is a base that suits
+   * a forge plus a chimney the kit puts on it, and a dwarf forge and a halfling forge come out
+   * different. What is left here is one footing per want (see `WANT_FOOTINGS` above), which is where
+   * the cap and the count still live.
    */
-  forge: { cap: BUILDING_INFO.forge.cap, build: () => mergeParts([
-    { geometry: BOX, color: STONE, matrix: mat4(0, 1.6, 0, 6.4, 3.2, 5) },
-    { geometry: BOX, color: ROOF, matrix: mat4(0, 3.5, 0, 6.8, 0.5, 5.4) },
-    { geometry: CYL, color: STONE, matrix: mat4(2.2, 5, -1.4, 0.55, 3.6, 0.55) },   // the chimney
-    { geometry: BOX, color: '#3a2a20', matrix: mat4(0, 1.1, 2.55, 2.2, 2.2, 0.16) },
-    { geometry: CYL, color: '#2d3540', matrix: mat4(-3.6, 0.45, 1.8, 0.8, 0.9, 0.8) }, // the quench trough
-    { geometry: BOX, color: BEAM, matrix: mat4(-3.6, 1.1, 1.8, 0.9, 0.2, 0.9) },
-  ]) },
-  inn: { cap: BUILDING_INFO.inn.cap, build: () => mergeParts([
-    { geometry: BOX, color: WALL_COLOR, matrix: mat4(0, 1.8, 0, 8, 3.6, 5.4) },
-    { geometry: BOX, color: WALL_COLOR, matrix: mat4(0, 4.8, 0, 8.4, 2.4, 5.8) },
-    { geometry: CONE4, color: TILE, matrix: mat4(0, 7, 0, 6.6, 2, 5, Math.PI / 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(3.9, 4.4, 2.6, 0.14, 0.14, 1.6) },    // the sign bracket
-    { geometry: BOX, color: '#6a4a2a', matrix: mat4(3.9, 3.6, 3.3, 0.12, 1.2, 1.2) },// …and the sign
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 1.2, 2.75, 1.3, 2.4, 0.16) },
-    { geometry: CYL, color: STONE, matrix: mat4(-3, 7.4, -1.6, 0.4, 3, 0.4) },
-  ]) },
-  market: { cap: BUILDING_INFO.market.cap, build: () => mergeParts([
-    { geometry: BOX, color: BEAM, matrix: mat4(-2.2, 1.1, -1.6, 0.14, 2.2, 0.14) },
-    { geometry: BOX, color: BEAM, matrix: mat4(2.2, 1.1, -1.6, 0.14, 2.2, 0.14) },
-    { geometry: BOX, color: BEAM, matrix: mat4(-2.2, 1.1, 1.6, 0.14, 2.2, 0.14) },
-    { geometry: BOX, color: BEAM, matrix: mat4(2.2, 1.1, 1.6, 0.14, 2.2, 0.14) },
-    { geometry: BOX, color: '#8a4a3a', matrix: mat4(0, 2.4, 0, 5.2, 0.3, 4) },       // the awning
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 0.9, -1.4, 4.4, 0.18, 1) },        // the trestle
-  ]) },
-  granary: { cap: BUILDING_INFO.granary.cap, build: () => mergeParts([
-    { geometry: CYL, color: '#8a7a56', matrix: mat4(0, 2.4, 0, 2.8, 4.8, 2.8) },
-    { geometry: CONE4, color: ROOF, matrix: mat4(0, 5.8, 0, 3.2, 2, 3.2, Math.PI / 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 1, 2.75, 0.9, 2, 0.16) },
-    { geometry: CYL, color: STONE, matrix: mat4(0, 0.25, 0, 3.2, 0.5, 3.2) },        // stilts on a plinth
-  ]) },
-  chapel: { cap: BUILDING_INFO.chapel.cap, build: () => mergeParts([
-    { geometry: BOX, color: STONE, matrix: mat4(0, 2.1, 0, 5, 4.2, 8) },
-    { geometry: CONE4, color: TILE, matrix: mat4(0, 5.6, 0, 4.4, 2.6, 7, Math.PI / 4) },
-    { geometry: BOX, color: STONE, matrix: mat4(0, 4, -4.2, 2.6, 8, 2.6) },          // the spire base
-    { geometry: CONE4, color: TILE, matrix: mat4(0, 9.6, -4.2, 2, 3.4, 2, Math.PI / 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 1.3, 4.1, 1.2, 2.6, 0.18) },
-  ]) },
-  barracks: { cap: BUILDING_INFO.barracks.cap, build: () => mergeParts([
-    { geometry: BOX, color: STONE, matrix: mat4(0, 1.7, 0, 9, 3.4, 4.6) },
-    { geometry: BOX, color: TILE, matrix: mat4(0, 3.7, 0, 9.4, 0.5, 5) },
-    { geometry: BOX, color: BEAM, matrix: mat4(-3, 1.1, 2.4, 0.9, 2.2, 0.14) },
-    { geometry: BOX, color: BEAM, matrix: mat4(3, 1.1, 2.4, 0.9, 2.2, 0.14) },
-    { geometry: CYL, color: BEAM, matrix: mat4(4.9, 2.6, 2.4, 0.13, 5.2, 0.13) },    // the standard pole
-    { geometry: BOX, color: '#8a3a3a', matrix: mat4(4.9, 4.5, 2.9, 0.06, 1.1, 1.1) },
-  ]) },
-  stable: { cap: BUILDING_INFO.stable.cap, build: () => mergeParts([
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 1.3, -1.4, 7, 2.6, 3.2) },
-    { geometry: BOX, color: ROOF, matrix: mat4(0, 2.9, -1.2, 7.4, 0.4, 4.4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(-3.4, 0.6, 1.6, 0.14, 1.2, 4) },      // the paddock rail
-    { geometry: BOX, color: BEAM, matrix: mat4(3.4, 0.6, 1.6, 0.14, 1.2, 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 0.6, 3.5, 7, 1.2, 0.14) },
-  ]) },
-  mill: { cap: BUILDING_INFO.mill.cap, build: () => mergeParts([
-    { geometry: CYL, color: STONE, matrix: mat4(0, 2.6, 0, 2.6, 5.2, 2.6) },
-    { geometry: CONE4, color: ROOF, matrix: mat4(0, 6.1, 0, 3, 1.8, 3, Math.PI / 4) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 4.4, 2.7, 6.4, 0.5, 0.2) },        // the sails
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 4.4, 2.7, 0.5, 6.4, 0.2) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 1, 2.6, 0.9, 2, 0.16) },
-  ]) },
-  warehouse: { cap: BUILDING_INFO.warehouse.cap, build: () => mergeParts([
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 2, 0, 11, 4, 6) },
-    { geometry: BOX, color: ROOF, matrix: mat4(0, 4.4, 0, 11.4, 0.6, 6.4) },
-    { geometry: BOX, color: '#3a2a20', matrix: mat4(0, 1.5, 3.1, 3.2, 3, 0.2) },
-    { geometry: BOX, color: BEAM, matrix: mat4(-4.4, 0.5, 3.6, 1.2, 1, 1.2) },       // crates outside
-    { geometry: BOX, color: BEAM, matrix: mat4(-4.4, 1.5, 3.6, 1, 1, 1) },
-  ]) },
-  watchpost: { cap: BUILDING_INFO.watchpost.cap, build: () => mergeParts([
-    { geometry: BOX, color: BEAM, matrix: mat4(-1.2, 2, -1.2, 0.2, 4, 0.2) },
-    { geometry: BOX, color: BEAM, matrix: mat4(1.2, 2, -1.2, 0.2, 4, 0.2) },
-    { geometry: BOX, color: BEAM, matrix: mat4(-1.2, 2, 1.2, 0.2, 4, 0.2) },
-    { geometry: BOX, color: BEAM, matrix: mat4(1.2, 2, 1.2, 0.2, 4, 0.2) },
-    { geometry: BOX, color: BEAM, matrix: mat4(0, 4.1, 0, 3.4, 0.25, 3.4) },         // the platform
-    { geometry: CONE4, color: ROOF, matrix: mat4(0, 5.4, 0, 3, 1.6, 3, Math.PI / 4) },
-  ]) },
-  shrine: { cap: BUILDING_INFO.shrine.cap, build: () => mergeParts([
-    { geometry: CYL, color: STONE, matrix: mat4(0, 0.3, 0, 2.2, 0.6, 2.2) },
-    { geometry: BOX, color: STONE, matrix: mat4(0, 1.4, 0, 0.8, 2.8, 0.8) },
-    { geometry: OCT, color: '#c8a24a', matrix: mat4(0, 3.2, 0, 0.7, 0.9, 0.7) },
-    { geometry: CYL, color: STONE, matrix: mat4(-1.5, 0.9, 0, 0.22, 1.8, 0.22) },
-    { geometry: CYL, color: STONE, matrix: mat4(1.5, 0.9, 0, 0.22, 1.8, 0.22) },
-  ]) },
   gatehouse: { cap: BUILDING_INFO.gatehouse.cap, build: () => mergeParts([
     { geometry: BOX, color: STONE, matrix: mat4(-2.6, 3, 0, 2.2, 6, 3.4) },
     { geometry: BOX, color: STONE, matrix: mat4(2.6, 3, 0, 2.2, 6, 3.4) },
@@ -233,9 +251,9 @@ export const BUILDINGS = {
    * flat slab following the ground, so a town has a shape you can walk rather than a scatter of
    * houses on grass.
    */
-  street: { cap: BUILDING_INFO.street.cap, build: () => mergeParts([
-    { geometry: BOX, color: '#6b5c49', matrix: mat4(0, 0.06, 0, 3.4, 0.12, 6) },
-  ]) },
+  street: { cap: BUILDING_INFO.street.cap, build: () => whiteGeometry(mergeParts([
+    { geometry: BOX, color: '#ffffff', matrix: mat4(0, 0.06, 0, 3.4, 0.12, 6) },
+  ])) },
   well: { cap: BUILDING_INFO.well.cap, build: () => mergeParts([
     { geometry: CYL, color: STONE, matrix: mat4(0, 0.5, 0, 1.3, 1, 1.3) },
     { geometry: BOX, color: BEAM, matrix: mat4(-1.1, 1.6, 0, 0.16, 2.2, 0.16) },
@@ -418,14 +436,14 @@ export function createFeatures(scene, terrain, opts = {}) {
   }
 
   /** Lay out one settlement: a well in the middle, houses around it, walls if it is big enough. */
-  function buildSettlement(node, counts) {
+  function buildSettlement(node, counts, px = 0, pz = 0) {
     const rng = makeRng((seed ^ (node.id * 2654435761)) >>> 0);
     const size = node.size || 1;
     const ring = 16 + size * 13;                     // metres from the centre to the outer houses
-    const homes = [6, 8, 14, 26, 40, 54][clamp(size, 0, 5)] || 8;
     const cx = node.wx, cz = node.wz;
 
-    const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null, { solid: wantSolid = true } = {}) => {
+    const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null,
+      { solid: wantSolid = true, tint = null } = {}) => {
       if (counts[key] >= BUILDINGS[key].cap) return false;
       if (terrain.underwater(x, z)) return false;
       // nothing is built in the channel or on the bank — towns sit BESIDE their river
@@ -437,13 +455,48 @@ export function createFeatures(scene, terrain, opts = {}) {
         new THREE.Vector3(size[0], size[1], size[2]),
       );
       instanced[key].setMatrixAt(counts[key], matrix);
-      instanced[key].setColorAt(counts[key], colour.setScalar(0.82 + rng() * 0.36));
+      // a tinted mesh was built white on purpose, so the culture's own colour is the whole colour;
+      // everything else keeps the old scalar wobble so two neighbours are not identical
+      if (tint) instanced[key].setColorAt(counts[key], colour.set(tint));
+      else instanced[key].setColorAt(counts[key], colour.setScalar(0.82 + rng() * 0.36));
       // a gate registers its own jambs instead, so the opening stays walkable
       const solid = wantSolid ? BUILDING_SOLIDS[key] : null;
       if (solid && solid[0] > 0) solids.add(x, z, solid[0] * Math.max(size[0], size[2]), solid[1] * size[1]);
       counts[key]++;
       return true;
     };
+
+    /**
+     * Stand one kit part on the ground.
+     *
+     * The part list is in the BUILDING's own frame — +Z is the street side — so the whole list is
+     * turned by one yaw and dropped at one point. That is the reason a roof cannot drift away from
+     * its walls between here and `buildkit.js`: there is no per-part position in this file to get
+     * wrong, only a rotation of the list the kit already agreed on.
+     */
+    const placePart = (key, part, ox, oz, ground, yaw, cos, sin) => {
+      if (counts[key] >= BUILDINGS[key].cap) return false;
+      matrix.compose(
+        new THREE.Vector3(ox + part.x * cos + part.z * sin, ground + part.y, oz - part.x * sin + part.z * cos),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(0, yaw + (part.yaw || 0), 0)),
+        new THREE.Vector3(part.w, part.h, part.d),
+      );
+      instanced[key].setMatrixAt(counts[key], matrix);
+      instanced[key].setColorAt(counts[key], colour.set(part.colour));
+      counts[key]++;
+      return true;
+    };
+
+    /**
+     * How much of a building gets built, by how far away it is (section 3.18).
+     *
+     * A full kit building is 14 parts (an orc tent) to 45 (a desert courtyard, where every flat roof
+     * carries four parapet walls), and the feature radius is 2.6 km — so the honest thing is to stop
+     * putting shutters and washing lines on a town you can barely see. Walls, roof and eave are the
+     * silhouette; everything else is detail you have to be inside the town to read.
+     */
+    const STRUCTURE = new Set(['wall', 'roof', 'eave', 'trim', 'door', 'chimney']);
+    const near = Math.hypot(cx - px, cz - pz) < 230;
 
     /**
      * THE TOWN PLAN — now from `proctown/js/townplan.js`, which is the one true planner.
@@ -486,6 +539,8 @@ export function createFeatures(scene, terrain, opts = {}) {
     });
 
     const toWorld = (lx, lz) => [cx + lx, cz + lz];
+    const cultKit = CULTURE_KIT.cultures[culture] || CULTURE_KIT.cultures.human;
+    const townSeed = (seed ^ (node.id * 2654435761)) >>> 0;
 
     /**
      * Lay the street surface along each polyline.
@@ -509,16 +564,42 @@ export function createFeatures(scene, terrain, opts = {}) {
           if (terrain.underwater(mx, mz)) continue;
           if (terrain.riverAt(mx, mz) > 0.3) continue;
           const len = Math.hypot(x1 - x0, z1 - z0);
+          // cobble / flag / root-path / bone / sand: section 6.7, and the cheapest way there is
           place('street', mx, mz, Math.atan2(x1 - x0, z1 - z0),
-            [st.width / 3.4, 1, len / 6 * 1.12]);
+            [st.width / 3.4, 1, len / 6 * 1.12], 0.3, null, { tint: cultKit.street.colour });
         }
       }
     }
 
-    // the square: the well at its centre, and the market beside it on anything but a hamlet
+    // the square: the well at its centre
     const [sqx, sqz] = toWorld(plan.square.cx, plan.square.cz);
     place('well', sqx, sqz, rng() * 6.3, 1);
-    if (size >= 2) place('market', sqx - 9, sqz + 8, rng() * 6.3, 1);
+
+    /**
+     * OUTDOOR STALLS — the thing the user asked for by name.
+     *
+     * "More utility places like shops and other things which can be mostly like outdoor stalls."
+     * They are deliberately not buildings: they need no plot, they stand where people already are
+     * (a ring facing into the square, and the kerb of the main streets), and they are four posts and
+     * a sheet of awning, so a market is twenty of them rather than one big model. `stallsFor` works
+     * out the placement in the planner's own coordinates, so the 2D page shows them in the same
+     * spots the game builds them.
+     */
+    for (const spot of stallsFor(plan, { culture, seed: townSeed, max: size >= 3 ? 24 : 10 })) {
+      const [sx, sz] = toWorld(spot.x, spot.z);
+      if (terrain.underwater(sx, sz)) continue;
+      if (terrain.riverAt(sx, sz) > 0.3) continue;
+      if (terrain.slopeAt(sx, sz, 4) > 0.5) continue;
+      const stall = describeStall({ kind: spot.kind, culture, seed: spot.seed });
+      const yaw = Math.PI / 2 - spot.facing;
+      const cos = Math.cos(yaw), sin = Math.sin(yaw);
+      const ground = terrain.heightAt(sx, sz);
+      for (const part of stallParts(stall)) {
+        placePart(KIT_KEY[part.mesh], part, sx, sz, ground, yaw, cos, sin);
+      }
+      // a stall is walked past, not walked through, but it is not a wall either
+      solids.add(sx, sz, Math.max(stall.w, stall.d) * 0.36, stall.postH * 0.6);
+    }
 
     /**
      * One building per plot, standing INSIDE it and facing its own street.
@@ -532,8 +613,36 @@ export function createFeatures(scene, terrain, opts = {}) {
       if (terrain.underwater(x, z)) continue;
       if (terrain.slopeAt(x, z, 6) > 0.62) continue;        // a town thins out uphill by itself
       const key = BUILDINGS[plot.want] ? plot.want : 'house';
-      // the mesh runs along +Z, so a body facing `facing` takes that as its yaw directly
-      place(key, x, z, plot.facing, 0.88 + rng() * 0.24);
+      if (counts[key] >= BUILDINGS[key].cap) continue;
+
+      const desc = describeBuilding({
+        plot, culture, townSeed,
+        // the plot's own position is in the seed, so the same plot is the same building every visit
+        seed: (townSeed ^ Math.imul(Math.round(plot.cx * 8) * 73856093 ^ Math.round(plot.cz * 8) * 19349663, 1)) >>> 0,
+        want: key, district: plot.district,
+      });
+
+      const ground = terrain.heightAt(x, z);
+      // `desc.lean` is a couple of degrees a poor building has settled off the line its neighbours
+      // keep. It goes on here rather than inside the kit so the parts stay square to each other.
+      const yaw = desc.yaw + desc.lean;
+      const cos = Math.cos(yaw), sin = Math.sin(yaw);
+
+      /**
+       * The footing first: one slab under the building, in the mesh named after what the plot is
+       * for. It is where the cap and the count live, and it hides the wedge of daylight that opens
+       * under a wall when the ground falls away beneath it.
+       */
+      place(key, x, z, yaw, [desc.footprint.w + 0.7, 1, desc.footprint.d + 0.7], 0.26, ground,
+        { solid: false, tint: mix(desc.colour.wall, '#2a2621', 0.55) });
+
+      for (const part of partsFor(desc)) {
+        if (!near && !STRUCTURE.has(part.tag)) continue;
+        placePart(KIT_KEY[part.mesh], part, x, z, ground, yaw, cos, sin);
+      }
+
+      // collision from the footprint the kit actually chose, rather than one number per building type
+      solids.add(x, z, radiusOf(desc), Math.max(2.5, heightOf(desc)));
     }
 
     // a city gets a wall and towers
@@ -585,7 +694,8 @@ export function createFeatures(scene, terrain, opts = {}) {
         const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
         const lean = Math.abs(terrain.heightAt(ax, az) - terrain.heightAt(bx, bz));
         // the mesh runs along +Z, so the LENGTH scale goes on Z and the yaw is the standard one
-        place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, chord / SEG * 1.06], 0.9, low);
+        place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, chord / SEG * 1.06],
+          0.9, low, { tint: cultKit.townWall.colour });
       }
       /**
        * A GATEHOUSE THAT LINES UP WITH ITS WALL, AND THAT YOU CAN WALK THROUGH.
@@ -603,28 +713,60 @@ export function createFeatures(scene, terrain, opts = {}) {
        * gatehouse goes down with no collision of its own and two jamb solids are added at its ends
        * instead, leaving the passage between them open.
        */
+      /**
+       * THE GATE FACES THE ROAD, AND THE STRETCH GOES ACROSS THE OPENING.
+       *
+       * Third time on this one, so here is the mesh, which is what I should have read first. The
+       * gatehouse is two towers at x = +/-2.6 with a 7.4-wide span over the gap between them and a
+       * portcullis 0.25 thin in Z. So its OPENING runs along **X** (tower to tower) and you walk
+       * through it along **Z**.
+       *
+       * That gives two rules, and the first two attempts each got one of them wrong:
+       *   - the yaw must aim local +Z **radially**, out through the wall, because that is the way
+       *     the road goes. Aiming it along the wall tangent — which is what a wall SEGMENT wants —
+       *     turns the passage sideways: "its 90 degrees away from the road".
+       *   - the stretch must go on **X**, widening the opening to fill the gap. Stretching Z instead
+       *     just makes the passage longer: "the elongation affected the wrong side so now it acts
+       *     more like a tunnel".
+       *
+       * `atan2(dx, dz)` is the standard yaw for a +Z-forward body, and the radial direction at
+       * bearing `g` is `(cos g, sin g)`.
+       */
       const gateHalf = (SEG * 1.9) / wallR;                 // the same half-angle `isGate` clears
+      const GATE_SPAN = 7.4;                                // the mesh's own width, tower to tower
       for (const g of gateAngles.slice(0, 4)) {
         const gx = cx + Math.cos(g) * wallR, gz = cz + Math.sin(g) * wallR;
         if (terrain.underwater(gx, gz)) continue;
         const ax = cx + Math.cos(g - gateHalf) * wallR, az = cz + Math.sin(g - gateHalf) * wallR;
         const bx = cx + Math.cos(g + gateHalf) * wallR, bz = cz + Math.sin(g + gateHalf) * wallR;
         const chord = Math.hypot(bx - ax, bz - az);
-        const yaw = Math.atan2(bx - ax, bz - az);           // exactly what a wall segment would use
+        const wide = Math.max(1, chord / GATE_SPAN);
+        const yaw = Math.atan2(Math.cos(g), Math.sin(g));   // +Z points out along the road
         const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
-        if (!place('gatehouse', gx, gz, yaw, [1, 1, chord / SEG * 1.02], 0.9, low, { solid: false })) continue;
-        // the jambs: one at each end of the opening, nothing in the middle
+        if (!place('gatehouse', gx, gz, yaw, [wide, 1, 1], 0.9, low, { solid: false })) continue;
+
+        /**
+         * The jambs, so the middle stays open.
+         *
+         * "The gate itself should be open so the player can walk through the middle." `place` would
+         * register one circular solid over the whole gatehouse, which is a plug. Two solids at the
+         * towers instead, offset along the wall's tangent — which is perpendicular to the radial
+         * yaw above — leave the passage between them clear.
+         */
+        const tx = -Math.sin(g), tz = Math.cos(g);          // along the wall
+        const off = 2.6 * wide;                             // where the mesh puts its towers
         const jamb = BUILDING_SOLIDS.gatehouse;
         if (jamb && jamb[0] > 0) {
-          const r = Math.min(jamb[0] * 0.55, chord * 0.22);
-          for (const [jx, jz] of [[ax, az], [bx, bz]]) solids.add(jx, jz, r, jamb[1]);
+          const r = Math.min(jamb[0] * 0.5, off * 0.7);
+          for (const side of [-1, 1]) solids.add(gx + tx * off * side, gz + tz * off * side, r, jamb[1]);
         }
       }
       // towers beside every gate, and at the quarters
       const towerAngles = [...gateAngles.flatMap(g => [g - 0.26, g + 0.26]),
         ...[0, 1, 2, 3].map(i => (i / 4) * Math.PI * 2 + 0.4)];
       for (const a of towerAngles.slice(0, 10)) {
-        place('tower', cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR, 0, 1, 1.1);
+        place('tower', cx + Math.cos(a) * wallR, cz + Math.sin(a) * wallR, 0, 1, 1.1, null,
+          { tint: cultKit.townWall.colour });
       }
     }
   }
@@ -636,7 +778,7 @@ export function createFeatures(scene, terrain, opts = {}) {
 
     for (const node of settlements) {
       if (Math.hypot(node.wx - px, node.wz - pz) > radius) continue;
-      buildSettlement(node, counts);
+      buildSettlement(node, counts, px, pz);
     }
     for (const b of bridges) {
       if (Math.hypot(b.x - px, b.z - pz) > radius) continue;

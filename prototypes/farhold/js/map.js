@@ -355,10 +355,10 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
      * screen. It is generated once per region and cached, so panning around inside one costs
      * nothing, and it is a genuinely different map rather than the same pixels made larger.
      */
-    const detail = state.zoom >= DETAIL_FROM ? detailUnderView() : null;
-    if (detail) {
-      drawDetail(ctx, detail, scale, ox, oy);
-      state.view = { scale, offsetX: ox, offsetY: oy, detail: detail.regionId };
+    const details = state.zoom >= DETAIL_FROM ? detailsUnderView() : [];
+    if (details.length) {
+      drawDetail(ctx, details, scale, ox, oy);
+      state.view = { scale, offsetX: ox, offsetY: oy, detail: details[0].regionId, details: details.length };
     } else {
       state.view = renderWorld(ctx, drawnWorld(), {
         layers: state.layers, layer: state.layer,
@@ -370,7 +370,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     // reads as empty ground. The band under it still tells them whether they could survive there.
     // The two tests are renderWorld's own (`worldgen/js/render.js:278-281`), so the grey word lands
     // exactly where the name would have, at exactly the zooms that would have shown one.
-    if (zones && state.layers.labels && !detail && scale >= 1.6) {
+    if (zones && state.layers.labels && !details.length && scale >= 1.6) {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.font = '600 11px system-ui, sans-serif';
@@ -391,25 +391,48 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
 
     // ---- the level-band overlay: every region washed in how dangerous it is to YOU right now
     if (state.levels && zones) {
+      /**
+       * WASH ONLY WHAT IS ON SCREEN.
+       *
+       * "It still gets exponentially laggy when I zoom in on the world map while on a planet."
+       *
+       * This grabbed `world.width * scale` by `world.height * scale` pixels — the whole world at the
+       * current zoom — and walked every one of them in JavaScript. At the top of the zoom ladder
+       * that is a 13,670 x 13,670 pixel buffer: 186 million pixels, about 747 MB, for a canvas that
+       * can show maybe two million of them. It is quadratic in the zoom, which is exactly the
+       * "exponentially laggy" the player saw, and it was three and a quarter seconds a frame.
+       *
+       * The fix is the whole of the bug: you can only see the canvas, so only read back the part of
+       * the world rectangle that lands on it. At zoom 1 that is everything and nothing changes.
+       */
       const myLevel = getLevel();
-      const img = ctx.getImageData(ox, oy, Math.round(world.width * scale), Math.round(world.height * scale));
-      const px = img.data;
-      const w = img.width, h = img.height;
-      for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-          const cx = Math.min(world.width - 1, Math.floor(x / scale));
-          const cy = Math.min(world.height - 1, Math.floor(y / scale));
-          const id = world.region ? world.region[cy * world.width + cx] : -1;
-          if (id < 0) continue;
-          const zone = zones.byId(id);
-          const [r, g, b] = TONE_RGB[zoneTone(zone.midLevel, myLevel)] || TONE_RGB.even;
-          const i = (y * w + x) * 4;
-          px[i] = px[i] * 0.62 + r * 0.38;
-          px[i + 1] = px[i + 1] * 0.62 + g * 0.38;
-          px[i + 2] = px[i + 2] * 0.62 + b * 0.38;
+      const x0 = Math.max(0, Math.floor(ox));
+      const y0 = Math.max(0, Math.floor(oy));
+      const x1 = Math.min(canvas.width, Math.ceil(ox + world.width * scale));
+      const y1 = Math.min(canvas.height, Math.ceil(oy + world.height * scale));
+      if (x1 > x0 && y1 > y0) {
+        const img = ctx.getImageData(x0, y0, x1 - x0, y1 - y0);
+        const px = img.data;
+        const w = img.width, h = img.height;
+        // a row of canvas pixels is a row of world cells; work the cell out once per row and column
+        for (let y = 0; y < h; y++) {
+          const cy = Math.min(world.height - 1, Math.max(0, Math.floor((y + y0 - oy) / scale)));
+          const row = cy * world.width;
+          for (let x = 0; x < w; x++) {
+            const cx = Math.min(world.width - 1, Math.max(0, Math.floor((x + x0 - ox) / scale)));
+            const id = world.region ? world.region[row + cx] : -1;
+            if (id < 0) continue;
+            const zone = zones.byId(id);
+            if (!zone) continue;
+            const [r, g, b] = TONE_RGB[zoneTone(zone.midLevel, myLevel)] || TONE_RGB.even;
+            const i = (y * w + x) * 4;
+            px[i] = px[i] * 0.62 + r * 0.38;
+            px[i + 1] = px[i + 1] * 0.62 + g * 0.38;
+            px[i + 2] = px[i + 2] * 0.62 + b * 0.38;
+          }
         }
+        ctx.putImageData(img, x0, y0);
       }
-      ctx.putImageData(img, ox, oy);
 
       // The band, written ON the map under the region's own name — the user asked for it to read
       // "similar to how region names appear", and renderWorld puts those at `region.label`, which
@@ -629,52 +652,138 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    */
   const detailCache = new Map();
   function detailUnderView() {
-    if (!world.region || !world.regions?.length) return null;
-    const c = state.centre || playerCell();
-    const cx = Math.max(0, Math.min(world.width - 1, Math.round(c.x)));
-    const cy = Math.max(0, Math.min(world.height - 1, Math.round(c.y)));
-    const id = world.region[cy * world.width + cx];
-    if (id == null || !world.regions[id]) return null;
-    if (!detailCache.has(id)) {
-      try {
-        detailCache.set(id, generateRegionDetail(world, id, { factor: 6, maxCells: 260000 }));
-      } catch {
-        detailCache.set(id, null);
+    const all = detailsUnderView();
+    return all.length ? all[0] : null;
+  }
+
+  /**
+   * EVERY REGION ON SCREEN, NOT JUST THE ONE UNDER THE MIDDLE.
+   *
+   * "I see some tiles are higher quality when zooming in, but others surrounding it are still blurry
+   * chunky pixels. It should be more seamless so as you zoom in you see more detail."
+   *
+   * That is exactly what it did: the detail pass ran for whichever region sat under the centre of
+   * the view and nothing else, so one region sharpened and its neighbours stayed at world
+   * resolution — and the seam moved around as you panned, which is worse than no detail at all.
+   *
+   * The visible world rectangle is sampled for which regions it actually touches, and each of those
+   * is generated and drawn. Generation is cached per region and the shaded raster is cached on top
+   * of that (`rasterFor`), so this costs once per region per session and a pan across a border is
+   * free afterwards. The cap is there because a zoomed-OUT view can touch forty regions, and at that
+   * zoom the detail would not be visible anyway — `DETAIL_FROM` already keeps us above it.
+   */
+  function detailsUnderView() {
+    if (!world.region || !world.regions?.length) return [];
+    const { scale, offsetX: ox, offsetY: oy } = viewBox();
+
+    // which world cells the canvas can actually show
+    const x0 = Math.max(0, Math.floor((0 - ox) / scale));
+    const y0 = Math.max(0, Math.floor((0 - oy) / scale));
+    const x1 = Math.min(world.width, Math.ceil((canvas.width - ox) / scale));
+    const y1 = Math.min(world.height, Math.ceil((canvas.height - oy) / scale));
+    if (x1 <= x0 || y1 <= y0) return [];
+
+    // sample rather than walk: a region is tens of cells across, so a stride cannot miss one that
+    // covers enough of the screen to be worth sharpening
+    const stride = Math.max(1, Math.floor(Math.min(x1 - x0, y1 - y0) / 24));
+    const ids = [];
+    const seen = new Set();
+    const centreId = world.region[
+      Math.min(world.height - 1, Math.max(0, Math.round((y0 + y1) / 2))) * world.width
+      + Math.min(world.width - 1, Math.max(0, Math.round((x0 + x1) / 2)))
+    ];
+    if (centreId != null && world.regions[centreId]) { ids.push(centreId); seen.add(centreId); }
+
+    for (let y = y0; y < y1 && ids.length < DETAIL_REGION_CAP; y += stride) {
+      for (let x = x0; x < x1 && ids.length < DETAIL_REGION_CAP; x += stride) {
+        const id = world.region[y * world.width + x];
+        if (id == null || seen.has(id) || !world.regions[id]) continue;
+        seen.add(id);
+        ids.push(id);
       }
     }
-    const d = detailCache.get(id);
-    return d ? { ...d, regionId: id } : null;
+
+    const out = [];
+    for (const id of ids) {
+      if (!detailCache.has(id)) {
+        try {
+          detailCache.set(id, generateRegionDetail(world, id, { factor: 6, maxCells: 260000 }));
+        } catch {
+          detailCache.set(id, null);
+        }
+      }
+      const d = detailCache.get(id);
+      if (d) out.push({ ...d, regionId: id });
+    }
+    return out;
   }
 
   /**
    * Draw a region's detail where that region actually sits on the world map, so panning and zooming
    * stay continuous — the detail lands exactly over the cells it was generated from.
    */
-  function drawDetail(ctx, detail, scale, ox, oy) {
+  function drawDetail(ctx, details, scale, ox, oy) {
     ctx.fillStyle = '#05070d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // the plain world underneath, so the ground outside this region is still there
+    // the plain world underneath, so anything without detail yet is still there rather than a hole
     renderWorld(ctx, drawnWorld(), { layers: state.layers, layer: state.layer, scale, offsetX: ox, offsetY: oy });
-    const factor = detail.factor || 6;
-    const px = worldPixels(detail, { layer: state.layer || 'biomes', hillshade: state.layers?.hillshade !== false, shade: 3 });
-    const img = ctx.createImageData(detail.width, detail.height);
-    img.data.set(px.data);
-    if (!detailBuffer || detailBuffer.width !== detail.width || detailBuffer.height !== detail.height) {
-      detailBuffer = document.createElement('canvas');
-      detailBuffer.width = detail.width;
-      detailBuffer.height = detail.height;
-    }
-    detailBuffer.getContext('2d').putImageData(img, 0, 0);
     ctx.imageSmoothingEnabled = false;
-    //  is the top-left WORLD cell the detail was generated from, and  how many
-    // of them it covers — so the detail lands exactly over the ground it came from.
-    ctx.drawImage(
-      detailBuffer,
-      ox + detail.origin.x * scale, oy + detail.origin.y * scale,
-      detail.worldCells.w * scale, detail.worldCells.h * scale,
-    );
+    // `origin` is the top-left WORLD cell each detail was generated from and `worldCells` how many
+    // of them it covers, so each one lands exactly over the ground it came from and they tile
+    for (const detail of details) {
+      ctx.drawImage(
+        rasterFor(detail),
+        ox + detail.origin.x * scale, oy + detail.origin.y * scale,
+        detail.worldCells.w * scale, detail.worldCells.h * scale,
+      );
+    }
   }
-  let detailBuffer = null;
+
+  /**
+   * THE RASTER IS CACHED, NOT JUST THE DETAIL.
+   *
+   * "It still gets exponentially laggy when I zoom in on the world map while on a planet."
+   *
+   * The region detail itself was already cached — but every single draw then re-ran `worldPixels()`
+   * over it, built a fresh ImageData and pushed it into a canvas. That is a quarter of a million
+   * cells shaded from scratch per frame, and the map redraws on every wheel notch, every drag step
+   * and five times a second while you are flying. Zooming looked exponential because each notch
+   * enlarges the detail AND the redraws come faster as you keep turning the wheel.
+   *
+   * Nothing about that image depends on the zoom or the pan — only on WHICH region it is and which
+   * layer is showing — so it is shaded once per (region, layer, hillshade) and after that a zoom is
+   * one `drawImage` of an existing canvas.
+   */
+  /**
+   * How many regions may be sharpened at once.
+   *
+   * Each one is a 260,000-cell generate and a few megabytes of shaded raster, both cached, so the
+   * cost is paid once — but a first look at a busy view should not stall for a dozen of them.
+   */
+  const DETAIL_REGION_CAP = 9;
+
+  const rasterCache = new Map();
+  function rasterFor(detail) {
+    const key = `${detail.regionId}|${state.layer || 'biomes'}|${state.layers?.hillshade !== false}`;
+    const hit = rasterCache.get(key);
+    if (hit) return hit;
+
+    const px = worldPixels(detail, {
+      layer: state.layer || 'biomes',
+      hillshade: state.layers?.hillshade !== false,
+      shade: 3,
+    });
+    const buffer = document.createElement('canvas');
+    buffer.width = detail.width;
+    buffer.height = detail.height;
+    const img = new ImageData(new Uint8ClampedArray(px.data), detail.width, detail.height);
+    buffer.getContext('2d').putImageData(img, 0, 0);
+
+    // a handful of regions is all anyone looks at in one sitting, and each one is a few megabytes
+    if (rasterCache.size > DETAIL_REGION_CAP * 2) rasterCache.delete(rasterCache.keys().next().value);
+    rasterCache.set(key, buffer);
+    return buffer;
+  }
 
   /** Where the player is, in map cells. */
   function playerCell() {

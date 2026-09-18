@@ -192,6 +192,28 @@ export function renderWorld(ctx, world, opts = {}) {
   const oy = opts.offsetY ?? Math.round((H - world.height * scale) / 2);
   const layerName = opts.layer || (layers.regions ? 'regions' : layers.elevation ? 'elevation' : layers.temperature ? 'temperature' : layers.moisture ? 'moisture' : layers.drainage ? 'drainage' : 'biomes');
 
+  /**
+   * ONLY WALK THE CELLS THAT ARE ON SCREEN.
+   *
+   * "It still gets exponentially laggy when I zoom in on the world map while on a planet."
+   *
+   * The per-cell passes below — region borders and the highlight — loop over the WHOLE world and
+   * paint a `scale x scale` rect per cell that qualifies. The loop count is fixed, but the pixels
+   * painted go up with the square of the zoom, so at 18x a few thousand border cells became tens of
+   * millions of pixels and one draw took three seconds. Almost all of that is off screen.
+   *
+   * So the loops are clamped to the cells the canvas can actually show. At zoom 1 that is the whole
+   * world and nothing changes; zoomed in it is a few hundred cells, and the cost stops depending on
+   * the zoom at all.
+   */
+  const visible = (() => {
+    const x0 = Math.max(0, Math.floor((0 - ox) / scale) - 1);
+    const y0 = Math.max(0, Math.floor((0 - oy) / scale) - 1);
+    const x1 = Math.min(world.width, Math.ceil((W - ox) / scale) + 1);
+    const y1 = Math.min(world.height, Math.ceil((H - oy) / scale) + 1);
+    return { x0, y0, x1: Math.max(x0, x1), y1: Math.max(y0, y1) };
+  })();
+
   ctx.save();
   ctx.fillStyle = '#0a0d13'; ctx.fillRect(0, 0, W, H);
   ctx.imageSmoothingEnabled = false;
@@ -210,7 +232,7 @@ export function renderWorld(ctx, world, opts = {}) {
   if (layers.borders && world.region && world.opts?.inhabited !== false) {
     const mask = borderMask(world);
     ctx.fillStyle = 'rgba(12,14,20,0.45)';
-    for (let y = 0; y < world.height; y++) for (let x = 0; x < world.width; x++) {
+    for (let y = visible.y0; y < visible.y1; y++) for (let x = visible.x0; x < visible.x1; x++) {
       if (mask[y * world.width + x]) ctx.fillRect(ox + x * scale, oy + y * scale, Math.max(1, scale), Math.max(1, scale));
     }
   }
@@ -250,7 +272,7 @@ export function renderWorld(ctx, world, opts = {}) {
   // highlighted region outline
   if (opts.highlightRegion != null && world.region) {
     ctx.fillStyle = 'rgba(90,176,255,0.22)';
-    for (let y = 0; y < world.height; y++) for (let x = 0; x < world.width; x++) {
+    for (let y = visible.y0; y < visible.y1; y++) for (let x = visible.x0; x < visible.x1; x++) {
       if (world.region[y * world.width + x] === opts.highlightRegion) ctx.fillRect(ox + x * scale, oy + y * scale, Math.max(1, scale), Math.max(1, scale));
     }
   }

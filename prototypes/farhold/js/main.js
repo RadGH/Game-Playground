@@ -997,9 +997,43 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     hud.setPlayer(player);
   }
 
+  /**
+   * Kills near a hostile camp put it down.
+   *
+   * This is the one repeatable action the whole territory layer hangs off: small, obvious, and enough
+   * of them change who holds the ground. Four kills inside a camp's own footprint clears it — the
+   * camp's grip on the zone falls, its rival's claim rises, and the people who owned it notice.
+   */
+  const siteKills = new Map();
+  function creditKill(x, z) {
+    const here = zones.at(x, z);
+    if (!here) return;
+    for (const site of holdings.sitesIn(here.id, { hostileOnly: true })) {
+      const reach = 60 + (site.size || 1) * 25;
+      if (Math.hypot(site.x - x, site.z - z) > reach) continue;
+      const need = 3 + (site.size || 1);
+      const n = (siteKills.get(site.id) || 0) + 1;
+      siteKills.set(site.id, n);
+      if (n < need) { hud.log(`${site.name}: ${n} of ${need}.`); return; }
+      siteKills.delete(site.id);
+      const out = holdings.clearSite(here.id, site.id);
+      if (!out) return;
+      hud.log(`${site.name} is cleared.`, 'good');
+      sound.questDone();
+      if (out.flipped) {
+        const to = (factionData.factions || []).find(f => f.key === out.flipped.to);
+        hud.log(`${here.name} belongs to ${to?.short || out.flipped.to} now.`, 'level');
+      }
+      rumours.add(`${site.name} in ${here.name} has been cleared out`, { zone: here, from: 'you, mostly' });
+      autoSave();
+      return;
+    }
+  }
+
   /** What happens when something dies. Named, because the enemy field is rebuilt on every world. */
   function onEnemyKilled(e) {
     player.kills++;
+    if (!dungeon) creditKill(e.x ?? control.x, e.z ?? control.z);
     sound.combat('death', { beast: e.kind !== 'humanoid' });
     const settled = campaign.onKill(e.defId);
     if (settled === 'nemesis') {
@@ -1306,8 +1340,121 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (gate) return { kind: 'dungeon', gate };
       const who = folk.nearest(control.x, control.z);
       if (who) return { kind: 'talk', who };
+      const met = roadFolk.near(control.x, control.z, 6)[0];
+      if (met) return { kind: 'wanderer', met };
     }
     return null;
+  }
+
+  /**
+   * Somebody on the road.
+   *
+   * A wanderer is one encounter, not a shop you can come back to, so it resolves in a line or two
+   * rather than a panel: they say their piece and the one thing they are there for happens. That is
+   * deliberate — the notice board is in a town, and this is how a job reaches you when you are not.
+   */
+  function meetOnTheRoad(met) {
+    const out = roadFolk.talk(met.id);
+    if (!out) return;
+    const { wanderer: w, line } = out;
+    sound.ui('open');
+    hud.log(`${w.name}, ${w.kindName.toLowerCase()}: "${line}"`, 'good');
+    const here = zones.at(control.x, control.z);
+
+    switch (w.gives) {
+      case 'rumour':
+      case 'board': {
+        const elsewhere = zones.list().filter(z => z.id !== here?.id);
+        const pick = elsewhere[Math.floor(Math.random() * elsewhere.length)];
+        const heard = pick && rumours.hear(pick, { from: `${w.name}, on the road`, extra: { unvisitedLandmarks: 2 } });
+        hud.log(heard ? `${w.name} says ${heard.text}.` : `${w.name} has nothing new to tell you.`);
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'job': {
+        const job = localBoard.find(j => !j.taken && (!w.job || j.frame === w.job)) || localBoard.find(j => !j.taken);
+        if (job) { hud.onTakeJob?.(job); } else hud.log(`${w.name} has no work for you.`);
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'buff': {
+        const b = w.buff || { stat: 'regen', amount: 2, minutes: 20 };
+        hud.log(`${w.name} does you a kindness. It will wear off.`, 'level');
+        rpg.fx?.grant?.(player, b) ?? (player.hp = Math.min(player.derived.maxHp, player.hp + 30));
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'passage': {
+        const toll = w.toll || 6;
+        if (player.gold >= toll) {
+          player.gold -= toll;
+          hud.log(`You pay ${toll}. ${w.name} lifts the chain.`);
+          roadFolk.settle(w.id, 'paid');
+        } else hud.log(`${w.name} wants ${toll} and you have ${player.gold}.`, 'bad');
+        break;
+      }
+      case 'standing': {
+        const cut = Math.round(player.gold * (w.cutShare || 0.1));
+        if (cut > 0 && player.gold >= cut) {
+          player.gold -= cut;
+          standings.deed(w.faction || 'wardens_reach', 'toll_paid');
+          hud.log(`You hand over ${cut}. The ledger closes.`);
+          roadFolk.settle(w.id, 'paid');
+        } else { hud.log(`${w.name} looks at your purse and waves you on.`); roadFolk.settle(w.id, 'paid'); }
+        break;
+      }
+      case 'cache': {
+        const gold = 40 + Math.round(Math.random() * 60 * player.level);
+        player.gold += gold;
+        hud.log(`${w.name} points, and there is ${gold} gold where they pointed.`, 'good');
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'shop': {
+        const spec = w.stock || { count: 2, rarity: 'magic' };
+        for (let i = 0; i < spec.count; i++) {
+          const item = rpg.loot.generate(null, spec.rarity, 'low', { rng: rpg.rng, level: player.level });
+          if (item) player.bag.push(item);
+        }
+        hud.log(`${w.name} sells you ${spec.count} things off their own back.`, 'good');
+        roadFolk.settle(w.id, w.angers ? 'helped' : 'paid');
+        break;
+      }
+      case 'hire': {
+        const price = w.hire?.gold ?? 180;
+        if (player.gold < price) { hud.log(`${w.name} wants ${price} up front, and you have ${player.gold}.`, 'bad'); break; }
+        player.gold -= price;
+        // A hired sword is a real companion, not a line of text — `sellsword` is the one humanoid in
+        // the pet table, added for exactly this (every other entry is something a class summons).
+        pets.summon('sellsword', control, { count: 1 }).then(made => {
+          for (const one of made || []) one.name = w.name;
+          hud.setPlayer(player);
+        }).catch(() => {});
+        hud.log(`${w.name} takes your ${price} and falls in beside you.`, 'good');
+        roadFolk.settle(w.id, 'paid');
+        break;
+      }
+      case 'incident': {
+        // a refugee is running FROM something, and that something is the news
+        const trouble0 = trouble.describe(here?.id || 0)[0];
+        hud.log(trouble0
+          ? `${w.name} says ${here.name} is having a bad week — ${trouble0.blurb}.`
+          : `${w.name} has not stopped since the last village and cannot say what they saw.`);
+        if (here) rumours.hear(here, { from: `${w.name}, running` });
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      case 'race': {
+        hud.log(`${w.name} is going in whether you do or not. Whoever reaches the bottom takes the box.`);
+        roadFolk.settle(w.id, 'helped');
+        break;
+      }
+      default:
+        hud.log(`${w.name} has said their piece.`);
+        roadFolk.settle(w.id, 'helped');
+    }
+    hud.setPlayer(player);
+    autoSave();
   }
 
   /** Open a chest: roll the haul, show the reward screen — or find out it was never a chest. */
@@ -2465,6 +2612,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         else if (it.kind === 'chest') openChest(it.chest);
         else if (it.kind === 'dungeon') enterDungeon(it.gate);
         else if (it.kind === 'leave') leaveDungeon();
+        else if (it.kind === 'wanderer') meetOnTheRoad(it.met);
         else if (it.kind === 'talk') {
           // phase 7: what they say comes from Lingo and their own personality, not a fixed string
           const who = it.who;
@@ -2845,6 +2993,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       ? near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`
         : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
         : near.kind === 'leave' ? '<b>E</b> climb back out'
+        : near.kind === 'wanderer' ? `<b>E</b> speak to ${near.met.name}, ${near.met.kindName.toLowerCase()}`
         : `<b>E</b> speak to ${near.who.name}`
       : null);
     if (bossUnit && bossUnit.dying == null) hud.boss(bossUnit);
@@ -3002,6 +3151,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     zones, chests, gates, sites, pets, craft, light, encounters, skillData, classData, encounterData,
     // The Territory expansion, for the specs and the debug menu
     standings, holdings, trouble, patrols, trade, roadFolk, rumours, jobs, factionData,
+    creditKill, meetOnTheRoad,
     get board() { return localBoard; },
     enterTerritory, tickTerritory,
     pauseMenu,

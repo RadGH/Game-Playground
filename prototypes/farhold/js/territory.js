@@ -114,6 +114,31 @@ export function createTerritory({
       });
     }
 
+    /**
+     * WHOEVER IS PUSHING IN IS ON THE GROUND TOO.
+     *
+     * Without this, a settled zone held by the road wardens had nothing in it you could knock over —
+     * their sites are wayposts and muster yards, and neither is hostile — so the one repeatable action
+     * the whole territory layer is built around had nowhere to happen in the first zone of the game.
+     * One or two of the rival's camps go in as well, which is also what makes "burn it out before it
+     * takes root" a job the generator can actually offer.
+     */
+    const rivalFaction = factionOf(data, rivalKey);
+    const rivalKinds = (rivalFaction?.sites || []).filter(k => (data?.siteKinds || {})[k]?.hostile);
+    const rivalCount = rivalKinds.length ? 1 + (rng() < 0.4 ? 1 : 0) : 0;
+    for (let i = 0; i < rivalCount; i++) {
+      const kind = rivalKinds[i % rivalKinds.length];
+      const spec = data.siteKinds[kind];
+      const spot = placeIn(zone, rng, metresPerCell);
+      sites.push({
+        id: `s${zone.id}_r${i}`,
+        kind, name: spec.name, faction: rivalKey,
+        hostile: true, size: spec.size ?? 1, respawnHours: spec.respawnHours ?? 24,
+        x: spot.x, z: spot.z, cell: spot.cell,
+        rival: true, cleared: false, clearedAt: null,
+      });
+    }
+
     const record = {
       zoneId: zone.id,
       zoneName: zone.name,
@@ -172,11 +197,20 @@ export function createTerritory({
     site.clearedAt = clock;
     touch(record);
     if (site.hostile) {
-      record.grip = clamp01(record.grip - 0.12);
-      record.claim = clamp01(record.claim + 0.05);
       record.heat = clamp01(record.heat + 0.15);
-      if (standings && record.holder) standings.deed(record.holder, 'camp_cleared', -1);
-      if (standings && record.contested) standings.deed(record.contested, 'camp_cleared', 1);
+      // Which way the ground moves depends on WHOSE camp it was. Burning out the people pushing in
+      // helps whoever holds the zone; burning out the holder's own is what takes it off them.
+      if (site.rival || site.faction === record.contested) {
+        record.claim = clamp01(record.claim - 0.12);
+        record.grip = clamp01(record.grip + 0.05);
+        if (standings && record.contested) standings.deed(record.contested, 'camp_cleared', -1);
+        if (standings && record.holder) standings.deed(record.holder, 'camp_cleared', 1);
+      } else {
+        record.grip = clamp01(record.grip - 0.12);
+        record.claim = clamp01(record.claim + 0.05);
+        if (standings && record.holder) standings.deed(record.holder, 'camp_cleared', -1);
+        if (standings && record.contested) standings.deed(record.contested, 'camp_cleared', 1);
+      }
     }
     return { site, flipped: settle(record) };
   }

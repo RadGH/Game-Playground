@@ -164,11 +164,11 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   /**
    * D2: the block a bug report quotes, on the clipboard from the map as well as the debug menu.
    *
-   * It is a textarea rather than a toast because the page is served over plain http, where there is
-   * no clipboard API at all — the text has to be on screen and selected for Ctrl+C to be the way
+   * It is a real input rather than a toast because the page is served over plain http, where there
+   * is no clipboard API at all — the text has to be on screen and selected for Ctrl+C to be the way
    * out. Hidden until the button is pressed.
    */
-  const copyArea = el('textarea', { class: 'map-copy-text', readonly: 'readonly', spellcheck: 'false' });
+  const copyArea = el('input', { type: 'text', class: 'map-copy-text', readonly: 'readonly', spellcheck: 'false' });
   const copyNote = el('span', { class: 'map-copy-note' });
   const copyBar = el('div', { class: 'map-copy hidden' },
     copyArea, copyNote,

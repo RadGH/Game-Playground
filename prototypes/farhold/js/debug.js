@@ -45,6 +45,9 @@ export async function copyTextVia(area, text) {
   area.focus();
   area.select();
   area.setSelectionRange(0, text.length);
+  // selecting to the end scrolls a long report to the bottom; the first line is the useful one
+  area.scrollTop = 0;
+  area.scrollLeft = 0;
   if (window.isSecureContext && navigator.clipboard?.writeText) {
     try { await navigator.clipboard.writeText(text); return 'clipboard'; } catch { /* fall through */ }
   }

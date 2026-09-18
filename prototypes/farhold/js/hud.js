@@ -2045,6 +2045,34 @@ export class Hud {
     ctx.globalAlpha = 1;
 
     /**
+     * The hub and the four arm names. They are drawn BEFORE the node names so the boxes they take up
+     * can be handed to the collision test below — drawn last, a node name was being written straight
+     * across "The Deep Study".
+     */
+    const spoken = [];
+    const keep = (text, x, y, top, bottom) => {
+      const w = ctx.measureText(text).width;
+      spoken.push({ x0: x - w / 2 - 3 * dpr, x1: x + w / 2 + 3 * dpr, y0: y - top, y1: y + bottom });
+    };
+    // the hub says what it is, because an unlabelled dot in the middle is a mystery
+    ctx.font = `600 ${11 * dpr}px system-ui, sans-serif`;
+    ctx.fillStyle = 'rgba(220, 230, 245, .8)';
+    ctx.textAlign = 'center';
+    ctx.fillText('you began here', cx, cy + 22 * dpr);
+    keep('you began here', cx, cy + 22 * dpr, 11 * dpr, 4 * dpr);
+    // …and so does each arm, out past its rim so the label never sits on a node
+    for (const arm of ARMS) {
+      const ax = cx + Math.cos(arm.angle) * (span * scale + 20 * dpr);
+      const ay = cy + Math.sin(arm.angle) * (span * scale + 20 * dpr);
+      const px = Math.max(60 * dpr, Math.min(canvas.width - 60 * dpr, ax));
+      const py = Math.max(14 * dpr, Math.min(canvas.height - 6 * dpr, ay));
+      ctx.fillStyle = arm.color;
+      ctx.fillText(arm.name, px, py);
+      keep(arm.name, px, py, 11 * dpr, 4 * dpr);
+    }
+    ctx.textAlign = 'left';
+
+    /**
      * D9: the names under the nodes, when the checkbox asks for them — and always on a search hit,
      * whatever the checkbox says, because a ring you cannot read the name of is half an answer.
      *
@@ -2057,7 +2085,7 @@ export class Hud {
     if (labelled.length) {
       ctx.font = `500 ${10.5 * dpr}px system-ui, sans-serif`;
       ctx.textAlign = 'center';
-      const placed = [];
+      const placed = [...spoken];
       // hits first, so when two labels collide the one you searched for is the one that survives
       const order = hits ? [...labelled].sort((a, b) => (hits.has(b.id) ? 1 : 0) - (hits.has(a.id) ? 1 : 0)) : labelled;
       for (const node of order) {
@@ -2078,20 +2106,6 @@ export class Hud {
       }
       ctx.globalAlpha = 1;
     }
-
-    // the hub says what it is, because an unlabelled dot in the middle is a mystery
-    ctx.font = `600 ${11 * dpr}px system-ui, sans-serif`;
-    ctx.fillStyle = 'rgba(220, 230, 245, .8)';
-    ctx.textAlign = 'center';
-    ctx.fillText('you began here', cx, cy + 22 * dpr);
-    // …and so does each arm, out past its rim so the label never sits on a node
-    for (const arm of ARMS) {
-      const x = cx + Math.cos(arm.angle) * (span * scale + 20 * dpr);
-      const y = cy + Math.sin(arm.angle) * (span * scale + 20 * dpr);
-      ctx.fillStyle = arm.color;
-      ctx.fillText(arm.name, Math.max(60 * dpr, Math.min(canvas.width - 60 * dpr, x)), Math.max(14 * dpr, Math.min(canvas.height - 6 * dpr, y)));
-    }
-    ctx.textAlign = 'left';
   }
 
   /** The panel beside the forest: what the selected node does, and the button that takes it. */

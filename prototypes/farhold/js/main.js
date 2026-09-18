@@ -2368,9 +2368,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   /** The world moving while you are in it. Cheap enough to run twice a second. */
+  let lastPhase = null;
   function tickTerritory(seconds) {
     payBoardJobs();
     const night = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
+    /**
+     * Different people are on the road at night, and different people again tomorrow.
+     *
+     * The roster is cached per zone per phase so it does not churn while you stand there, which means
+     * something has to clear it — otherwise the same pedlar stands on the same stretch of road for
+     * the whole run. Dusk and dawn are the two moments it is reasonable for the road to change.
+     */
+    const phase = night ? 'n' : 'd';
+    if (lastPhase !== null && phase !== lastPhase && hud.here) {
+      roadFolk.refresh(hud.here.id);
+      boardZone = null;          // and the board is rebuilt with whoever is out there now
+    }
+    lastPhase = phase;
     patrols.update(seconds, { night });
     for (const event of trade.update(seconds, { playerNear: { x: control.x, z: control.z } })) {
       if (event.kind === 'caravan-wrecked') hud.log(`${event.name} never arrived.`, 'bad');

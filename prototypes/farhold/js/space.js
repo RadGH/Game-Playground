@@ -41,24 +41,29 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
    * report was *"the slowing system is far too aggressive and stops me boosting with Space; it
    * should only slow me within roughly 0.1 AU of a planet"* — which is a distance, the same for a
    * moon as for a giant, so that is what it is now. `slowWithinAu` is also where you come out when
-   * you leave an atmosphere, so the drop-out point sits at the very outer edge of the brake and you
-   * can boost away the moment you arrive.
+   * you leave an atmosphere, so the drop-out point sits just outside the brake and you can boost
+   * away the moment you arrive.
    */
   const approachCfg = {
     slowWithinAu: cfg.slowWithinAu ?? 0.1,   // start easing off the throttle this far from the surface
     slowTo: cfg.slowTo ?? 0.25,              // …down to this fraction of cruise at the surface
-    // …with a floor in the body's own radii, because a gas giant genuinely is a bigger thing to be
-    // near. For an ordinary world these come out under the AU figure and never bite.
-    slowRadii: cfg.slowRadii ?? 3,
+    // …with two guards in the body's own radii, because a body is drawn anywhere from a
+    // two-hundredth to a twelfth of an AU across in these compressed units and one flat distance
+    // cannot be right for both. `minRadii` stops the brake being too small to bite on a little
+    // world in a tight system; `bigRadii` is the extra a gas giant gets for being a bigger thing to
+    // be near. On an ordinary world neither one bites and the plain 0.1 AU is what you feel.
+    minRadii: cfg.slowMinRadii ?? 8,
+    bigRadii: cfg.slowBigRadii ?? 3,
     // How close counts as "in the way" for the warp drive — again a distance, and half the brake's,
     // so there is always open water between "the drive will light" and "the ship is being slowed".
     noWarpWithinAu: cfg.noWarpWithinAu ?? 0.05,
     noWarpRadii: cfg.noWarpRadii ?? 1.5,
-    // Where leaving an atmosphere puts you, measured from the surface of the world you left. You
-    // used to surface 1.6 radii up with the throttle crushed to a quarter by the brake above — less
-    // than the world's own orbital speed — so the planet simply caught you again: *"leaving
+    // Leaving an atmosphere puts you at the OUTER EDGE of the brake above — whatever that works out
+    // to for the world you left — plus this much margin, so the throttle is yours from the first
+    // frame. You used to surface 1.6 radii up with the throttle crushed to a quarter, which is
+    // slower than the world's own orbital drift, so the planet simply caught you again: *"leaving
     // atmosphere sometimes drops you straight back into it as soon as space loads."*
-    exitAu: cfg.exitAu ?? 0.1,
+    exitMargin: cfg.exitMargin ?? 1.1,
     entry: cfg.entryAltitude ?? 0.5,     // fall below this over a landable world and you are in its air
     tiers: cfg.detailTiers || [
       { key: 'far', within: Infinity, detail: 32, textureSize: 256 },
@@ -151,7 +156,11 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     // the lane cap, and then a second one: a world is never drawn bigger than the star it goes round
     const capped = layout.sizeFor(i, wantAu, { moons }) * AU;
     const radius = Math.max(EARTH * 0.1, Math.min(capped, starRadius * 0.85));
-    drawn.set(p.id, { radius, moonOrbits: layout.moonRings(i, moons, { bodyRadius: radius / AU }).map(r => r * AU) });
+    drawn.set(p.id, {
+      radius,
+      lane: layout.laneAt(i) * AU,     // the space around this ring that is this planet's alone
+      moonOrbits: layout.moonRings(i, moons, { bodyRadius: radius / AU }).map(r => r * AU),
+    });
   });
 
   /**
@@ -203,6 +212,8 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
       au: p.orbit?.au ?? parent?.orbit?.au ?? 1,
       // where this moon's ring sits, in scene units, already inside its parent's own lane
       moonOrbit,
+      // …and the lane itself, which is how far out this body's approach brake may reach
+      lane: (parent ? host.lane : drawn.get(p.id).lane),
       period: p.orbit?.periodDays || (parent ? 12 : 365),
       // …and its own clock, slow enough that it cannot outrun the ship (see `clockFor`)
       clock: clockFor(parent ? moonOrbit : (p.orbit?.au ?? 1) * AU, p.orbit?.periodDays || (parent ? 12 : 365)),
@@ -289,25 +300,45 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   // finer sphere and a bigger texture in two steps, so the disc that was a smudge from an AU away is
   // a surface with weather on it by the time you are in its air.
 
-  /** How far off a body's surface the approach brake reaches, in scene units. */
-  function slowZoneFor(radius) {
-    return Math.max(approachCfg.slowWithinAu * AU, radius * approachCfg.slowRadii);
+  /**
+   * How far off a body's surface the approach brake reaches, in scene units.
+   *
+   * 0.1 AU, or three of the body's own radii if it is a big one — but never wider than the lane it
+   * owns. That last cap is for compact systems: a red dwarf keeps its worlds a tenth of an AU apart
+   * all told, and a flat 0.1 AU bubble on each of them would put the brake on everywhere in the
+   * system, which is the complaint we are fixing, not a milder version of it.
+   */
+  function slowZoneFor(radius, lane = Infinity) {
+    // the distance rule: 0.1 AU, and never wider than the lane this world owns
+    const byDistance = Math.min(approachCfg.slowWithinAu * AU, lane);
+    // never tighter than `minRadii` of the body's own radii, or it cannot bite before you are on
+    // the deck; and never wider than `bigRadii` past 0.1 AU, which is what stopped a big world's
+    // bubble quietly meaning a third of an AU again
+    const ceiling = Math.max(approachCfg.slowWithinAu * AU, radius * approachCfg.bigRadii);
+    return Math.min(Math.max(radius * approachCfg.minRadii, byDistance), ceiling);
   }
 
-  /** …and how far out the warp drive refuses to light. Always inside the brake. */
-  function warpBubbleFor(radius) {
-    return Math.max(approachCfg.noWarpWithinAu * AU, radius * approachCfg.noWarpRadii);
+  /** …and how far out the warp drive refuses to light. Always well inside the brake. */
+  function warpBubbleFor(radius, lane = Infinity) {
+    return Math.min(
+      Math.max(approachCfg.noWarpWithinAu * AU, radius * approachCfg.noWarpRadii),
+      slowZoneFor(radius, lane) * 0.6,
+    );
   }
 
   /**
    * How much of cruise speed is available this close to something. 1 anywhere outside the slow zone,
    * `slowTo` at the deck. Measured from the SURFACE in scene units, so the brake is a distance you
    * can point at on the HUD rather than a number of radii that quietly meant a third of an AU.
+   *
+   * With no argument it answers for whatever is nearest, which is what the flight model asks. Pass
+   * a body and it answers for that one — useful when you want to know how hard a particular world
+   * is holding you rather than which world happens to be closest.
    */
-  function throttleLimit() {
-    const near = nearest();
+  function throttleLimit(body = null) {
+    const near = body ? { body, distance: state.position.distanceTo(body.position) } : nearest();
     if (!near) return 1;
-    const t = clamp((near.distance - near.body.radius) / slowZoneFor(near.body.radius), 0, 1);
+    const t = clamp((near.distance - near.body.radius) / slowZoneFor(near.body.radius, near.body.lane), 0, 1);
     // ease in, so the brake comes on gently rather than as a wall
     return approachCfg.slowTo + (1 - approachCfg.slowTo) * (t * t * (3 - 2 * t));
   }
@@ -395,7 +426,10 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     tmp.copy(body.position).normalize();
     if (tmp.lengthSq() < 1e-6) tmp.set(1, 0, 0);
     // …and at least clear of the brake, so the throttle is yours from the first frame
-    const out = body.radius + Math.max(body.radius * (offset - 1), approachCfg.exitAu * AU, slowZoneFor(body.radius));
+    const out = body.radius + Math.max(
+      body.radius * (offset - 1),
+      slowZoneFor(body.radius, body.lane) * approachCfg.exitMargin,
+    );
     state.position.copy(body.position).addScaledVector(tmp, out);
     state.velocity.set(0, 0, 0);
     state.throttle = 0;
@@ -431,7 +465,7 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     // warp takes a moment to spin up, which is what makes it feel like a warp — and it will not
     // spin up at all with a world in your lap, which is what stops you warping into a planet
     const room = nearest();
-    state.crowded = !!room && (room.distance - room.body.radius) < warpBubbleFor(room.body.radius);
+    state.crowded = !!room && (room.distance - room.body.radius) < warpBubbleFor(room.body.radius, room.body.lane);
     if (state.crowded) state.warping = false;
     // a running drive bleeds off FAST when a world comes up, rather than coasting the ship straight
     // through it while the charge takes a third of a second to fall

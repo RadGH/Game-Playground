@@ -274,7 +274,11 @@ test('closing on a world slows the ship and sharpens the world', async ({ page }
       const dir = s.state.position.clone().sub(body.position).normalize();
       s.state.position.copy(body.position).addScaledVector(dir, body.radius * (1 + alt));
       for (let i = 0; i < 10; i++) s.refineDetail(1);
-      rows.push({ alt, throttle: +s.throttleLimit().toFixed(2), tier: s.tierFor(alt).key, body: body.tier });
+      // Round 11: ask what THIS world is doing to the throttle, not whatever happens to be nearest.
+      // The brake is a distance now (0.1 AU, capped by the lane a world owns) rather than a number
+      // of body radii, so on a compact system a position 40 radii off a small world can easily be a
+      // few hundred units off a different one — and the answer is then about that other planet.
+      rows.push({ alt, throttle: +s.throttleLimit(body).toFixed(2), tier: s.tierFor(alt).key, body: body.tier });
     }
     return rows;
   });

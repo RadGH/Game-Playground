@@ -225,7 +225,11 @@ test('the sky from the ground agrees with where the ship actually flies', async 
     f.toSpace();
     const home = f.space.bodies.find(b => b.planet.id === f.planet.id);
     const distances = f.space.bodies
-      .filter(b => b.planet.id !== f.planet.id)
+      // Moons only, and no moons: a moon is now drawn in a tight ring inside its parent's own lane
+      // (round 11 — they used to sweep a circle wider than the gap to the next world), so a moon and
+      // its planet are at the same distance to three decimal places and the moon simply takes a slot
+      // in the queue ahead of it. What is being checked is which NEIGHBOUR you can see.
+      .filter(b => !b.moon && b.planet.id !== f.planet.id)
       .map(b => ({ name: b.planet.name, d: b.position.distanceTo(home.position) / f.space.AU }))
       .sort((a, b) => a.d - b.d);
     return { seen: seen.map(s => s.name), closest: distances[0], all: distances };

@@ -180,6 +180,47 @@ test('a run saved in a town loads back in the same town, on the same world', asy
   expect(errors).toEqual([]);
 });
 
+test('what the world thinks of you survives a reload', async ({ page }) => {
+  const errors = await land(page, { seed: 11 });
+  await page.waitForTimeout(2000);
+  const before = await page.evaluate(() => {
+    const f = window.farhold;
+    const here = f.hud.here || f.zones.at(f.control.x, f.control.z);
+    const camp = f.holdings.sitesIn(here.id, { hostileOnly: true })[0];
+    if (camp) for (let i = 0; i < 6; i++) f.creditKill(camp.x, camp.z);
+    f.rumours.add('somebody put a marker on this run', { zone: here, from: 'the test' });
+    f.saveNow();
+    return {
+      zoneId: here.id,
+      standings: f.standings.all(),
+      grip: f.holdings.of(here.id).grip,
+      cleared: f.holdings.sitesIn(here.id).length,
+      rumours: f.rumours.all().length,
+      camp: !!camp,
+    };
+  });
+  await page.goto('/prototypes/farhold/');
+  await page.waitForSelector('#boot-continue:not([hidden])', { timeout: 60000 });
+  await page.click('#boot-continue');
+  await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
+  const after = await page.evaluate(id => {
+    const f = window.farhold;
+    return {
+      standings: f.standings.all(),
+      grip: f.holdings.of(id).grip,
+      cleared: f.holdings.sitesIn(id).length,
+      rumours: f.rumours.all().length,
+    };
+  }, before.zoneId);
+  expect(after.standings, 'the world forgot what you did').toEqual(before.standings);
+  expect(after.rumours, 'the rumours were not carried').toBeGreaterThanOrEqual(before.rumours);
+  if (before.camp) {
+    expect(Math.abs(after.grip - before.grip)).toBeLessThan(2e-3);
+    expect(after.cleared, 'a camp you cleared came back on load').toBe(before.cleared);
+  }
+  expect(errors).toEqual([]);
+});
+
 // ---------------------------------------------------------------- The Territory
 
 test('a zone is held by somebody, offers work about itself, and changes when you knock it over', async ({ page }) => {

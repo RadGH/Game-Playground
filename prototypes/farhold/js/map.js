@@ -34,13 +34,90 @@ import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null } = {}) {
   // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
   // the minimap and space mode can see them too.
   const book = markers;
   const pins = () => (book ? book.here() : []);
   const world = terrain.world;
+
+  /**
+   * B8: THE MAP NO LONGER NAMES PLACES YOU HAVE NEVER BEEN.
+   *
+   * Opening the map on your first morning listed all fifty-nine regions by name, which made the
+   * Journal's "Word going round" pointless — the rumour had nothing left to tell you. So a region's
+   * NAME is now something you learn: you get it by crossing into it, or by hearing a rumour about
+   * it. Everything else about it is still drawn — the coastline, the roads, the towns, the danger
+   * wash and the level band — because the point was never to hide the ground, only to stop the map
+   * doing the talking. There is no fog of war.
+   *
+   * Two ways in, both of which already exist elsewhere in the game:
+   *
+   *   * `tick()` runs five times a second whether the map is open or not, so it can watch which
+   *     region you are standing in — that is the border crossing, with no hook in main.js;
+   *   * the rumour book files every line under the zone it is about, so anything you have been told
+   *     about counts as heard of.
+   *
+   * The rumour book is passed in where the caller has it and read off `window.farhold` otherwise —
+   * main.js builds the map screen without it and that file belongs to another pass this round.
+   *
+   * What you know is kept per world in this browser rather than in the save, so a reload does not
+   * blank a map you walked across. `world.planet.id` keys it, so landing somewhere else starts a
+   * fresh sheet.
+   */
+  const KNOWN_KEY = `farhold.seen.${seed}.${world.planet?.id || world.planet?.name || 'world'}`;
+  const known = new Set();
+  try {
+    const raw = JSON.parse(localStorage.getItem(KNOWN_KEY) || '[]');
+    if (Array.isArray(raw)) for (const id of raw) known.add(Number(id));
+  } catch { /* a browser with storage switched off just re-learns the names by walking */ }
+
+  function remember(id) {
+    if (id == null || id < 0 || known.has(id)) return false;
+    known.add(id);
+    try { localStorage.setItem(KNOWN_KEY, JSON.stringify([...known])); } catch { /* not worth a word */ }
+    return true;
+  }
+
+  /** Everything you have been told about, whoever handed the book over. */
+  function heardOf() {
+    const talk = rumours || (typeof window !== 'undefined' ? window.farhold?.rumours : null);
+    for (const r of talk?.all?.() || []) remember(r.zoneId);
+  }
+
+  /** Which region you are standing in, right now. Crossing the border is what names it. */
+  function noteWhereYouAre() {
+    if (!zones) return;
+    // Underground, the player's x/z belong to the dungeon's own floor and mean nothing to the
+    // planet's regions — main.js skips the zone lookup for the same reason. Learning a name from
+    // those coordinates would hand you a region on the far side of the world for free.
+    if (typeof window !== 'undefined' && window.farhold?.dungeon) return;
+    const p = getPlayer?.();
+    if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.z)) return;
+    const zone = zones.at(p.x, p.z);
+    if (zone && zone.id >= 0) remember(zone.id);
+  }
+
+  const knows = id => id != null && id >= 0 && known.has(id);
+
+  /**
+   * The world handed to World Forge's renderer, with the names of unknown regions taken out.
+   *
+   * `renderWorld()` draws region names straight off `world.regions[i].name` and there is no knob to
+   * pick which — so the map gives it a shallow copy with the unknown ones blanked. The copy is
+   * rebuilt only when the number of names you know changes, because a redraw happens on every pan
+   * and every frame the map is open.
+   */
+  let maskedWorld = null, maskedFor = -1;
+  function drawnWorld() {
+    if (!zones || !world.regions?.length) return world;
+    if (known.size >= world.regions.length) return world;
+    if (maskedWorld && maskedFor === known.size) return maskedWorld;
+    maskedFor = known.size;
+    maskedWorld = { ...world, regions: world.regions.map(r => (knows(r.id) ? r : { ...r, name: '' })) };
+    return maskedWorld;
+  }
 
   const state = {
     open: false,
@@ -104,6 +181,15 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       });
       chip.onclick = () => { state.levels = !state.levels; buildSide(); draw(); };
       if (chips) chips.append(chip); else side.append(chip);
+    }
+
+    // B8: why half the map has no names on it. One line, under the layers, where the question gets
+    // asked — not buried in a tooltip.
+    if (zones && world.regions?.length) {
+      const total = world.regions.length;
+      side.append(el('p', { class: 'muted small', text: known.size >= total
+        ? `You have walked or heard of all ${total} regions on this world.`
+        : `${known.size} of ${total} regions named. The rest fill in when you cross into them or hear about them.` }));
     }
 
     // Markers: quests, story objectives and dropped pins, each with a star that tracks or untracks
@@ -216,10 +302,33 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       drawDetail(ctx, detail, scale, ox, oy);
       state.view = { scale, offsetX: ox, offsetY: oy, detail: detail.regionId };
     } else {
-      state.view = renderWorld(ctx, world, {
+      state.view = renderWorld(ctx, drawnWorld(), {
         layers: state.layers, layer: state.layer,
         scale, offsetX: ox, offsetY: oy,
       });
+    }
+
+    // B8: where a name has been held back, say so in grey rather than leaving a gap the player
+    // reads as empty ground. The band under it still tells them whether they could survive there.
+    // The two tests are renderWorld's own (`worldgen/js/render.js:278-281`), so the grey word lands
+    // exactly where the name would have, at exactly the zooms that would have shown one.
+    if (zones && state.layers.labels && !detail && scale >= 1.6) {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '600 11px system-ui, sans-serif';
+      for (const zone of zones.zones) {
+        if (knows(zone.id) || (zone.cells || 0) < 40 / Math.max(0.6, scale / 4)) continue;
+        const spot = world.regions?.[zone.id]?.label || zone.center;
+        if (!spot) continue;
+        const lx = ox + (spot.x + 0.5) * scale, ly = oy + (spot.y + 0.5) * scale;
+        if (lx < ox - 40 || ly < oy - 20 || lx > ox + world.width * scale + 40) continue;
+        ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+        ctx.strokeText('unknown', lx, ly);
+        ctx.fillStyle = 'rgba(150, 162, 178, .85)';
+        ctx.fillText('unknown', lx, ly);
+      }
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
     }
 
     // ---- the level-band overlay: every region washed in how dangerous it is to YOU right now
@@ -487,7 +596,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     ctx.fillStyle = '#05070d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // the plain world underneath, so the ground outside this region is still there
-    renderWorld(ctx, world, { layers: state.layers, layer: state.layer, scale, offsetX: ox, offsetY: oy });
+    renderWorld(ctx, drawnWorld(), { layers: state.layers, layer: state.layer, scale, offsetX: ox, offsetY: oy });
     const factor = detail.factor || 6;
     const px = worldPixels(detail, { layer: state.layer || 'biomes', hillshade: state.layers?.hillshade !== false, shade: 3 });
     const img = ctx.createImageData(detail.width, detail.height);
@@ -551,7 +660,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     // the level band under the cursor, so hovering anywhere on the map answers "can I go there yet"
     const zone = zones && world.region ? zones.byId(world.region[cell.y * world.width + cell.x]) : null;
     readout.textContent = `${cell.x},${cell.y} · ${info.biomeName} · ${info.water === 'land' ? info.elevationMetres + ' m' : 'water'} · ${info.temperatureC}°C`
-      + (info.region ? ` · ${info.region.name}` : '')
+      // B8: the cursor does not get to read out a name the map is holding back either
+      + (info.region ? ` · ${knows(info.region.id) ? info.region.name : 'somewhere you have not been'}` : '')
       + (zone && zone.id >= 0 ? ` · level ${zone.minLevel}\u2013${zone.maxLevel} (${zone.danger})` : '')
       + (odds ? ` · usually ${odds.name.toLowerCase()}` : '');
     readout.className = 'readout' + (zone && zone.id >= 0 ? ' zone-' + zoneTone(zone.midLevel, getLevel()) : '');
@@ -651,6 +761,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     root.classList.toggle('hidden', !open);
     if (open) {
       document.exitPointerLock?.();
+      // B8: catch up on anything you were told since you last looked, then draw
+      noteWhereYouAre();
+      heardOf();
       buildSide();
       draw();
     }
@@ -671,9 +784,18 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     setLevels(on) { state.levels = !!on; buildSide(); draw(); },
     get isOpen() { return state.open; },
     toggle, draw, addPin, removePin,
+    /** B8: which region names you have earned, for the tests and the debug menu. */
+    known: () => [...known],
+    knows,
     /** Take the screen out of the page (used when the world under it is replaced). */
     dispose() { root.remove(); },
-    /** Keep the player arrow moving while the map is open. */
-    tick() { if (state.open) draw(); },
+    /**
+     * Keep the player arrow moving while the map is open — and, open or not, watch which region you
+     * are walking through, because that is how names get learned (B8).
+     */
+    tick() {
+      noteWhereYouAre();
+      if (state.open) draw();
+    },
   };
 }

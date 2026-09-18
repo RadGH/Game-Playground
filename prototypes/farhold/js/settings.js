@@ -6,8 +6,11 @@
 //   const settings = createSettings({ apply });
 //   settings.toggle();
 //   settings.get('shoulder')   // 'left' | 'right'
+//   settings.keyFor('map')     // 'KeyM' — or whatever the player rebound it to
 //
 // `apply(values)` is called on load and on every change, and is where the game does the work.
+
+import { fmt, pct } from '../../../shared/format.js';
 
 const KEY = 'farhold.settings.v1';
 
@@ -18,6 +21,9 @@ export const DEFAULTS = {
   // up, which is the aircraft convention and the opposite of what the rest of the game does.
   invertFlight: false,
   sensitivity: 1,
+  // D15: how wide the view is, in degrees. 62 is what `main.js` builds the camera with, so the
+  // default here changes nothing until the slider is moved.
+  fov: 62,
   viewDistance: 'full',        // full | medium | near
   density: 1,                  // how thick the scatter is
   grass: true,
@@ -29,30 +35,115 @@ export const DEFAULTS = {
   // the time. The biome and the altitude are player information; the rest is a debug readout.
   coords: false,
   damageNumbers: true,
+  // D15: only the keys the player actually MOVED live in here — `{ map: 'KeyN' }`. Everything else
+  // falls through to `BINDINGS`, so changing a default later reaches anyone who never touched it.
+  keys: {},
 };
+
+/**
+ * D15: THE KEYS, AND WHY THEY WORK THE WAY THEY DO.
+ *
+ * "There is no way to remap a key in a game with fifteen of them — which locks out AZERTY and
+ * left-handed players entirely."
+ *
+ * The game does not read a binding table: `js/player.js` asks `keys.has('KeyW')` and `js/main.js`
+ * asks `e.code === 'KeyM'`, both straight off the keyboard event. Rather than thread a table
+ * through every caller, this panel sits in FRONT of all of them: it listens for keydown and keyup
+ * in the capture phase — which at `window` runs before any of the game's own listeners — and, when
+ * you have moved a key, swallows the real event and sends the game the one it is looking for.
+ *
+ * So `KeyZ` bound to "walk forward" arrives at `player.js` as `KeyW`, and every consumer, present
+ * and future, keeps working with no change at all. Three rules keep it honest:
+ *
+ *   * a synthetic event is never remapped again (`isTrusted` is false on ours);
+ *   * nothing is touched while you are typing in a text box, or the rename field eats your letters;
+ *   * a default key that you moved away from and did not reuse stops doing anything, or the old key
+ *     and the new one would both work and the rebinding would look broken.
+ *
+ * The number row (skills 1-6) and the debug backtick are deliberately not in the table: the skills
+ * are positional and the debug menu is not a player-facing key.
+ */
+export const BINDINGS = [
+  { action: 'forward', label: 'Walk forward', code: 'KeyW' },
+  { action: 'back', label: 'Walk back', code: 'KeyS' },
+  { action: 'left', label: 'Step left', code: 'KeyA' },
+  { action: 'right', label: 'Step right', code: 'KeyD' },
+  { action: 'run', label: 'Run', code: 'ShiftLeft' },
+  { action: 'jump', label: 'Jump', code: 'Space' },
+  { action: 'interact', label: 'Talk, open, enter', code: 'KeyE' },
+  { action: 'firstPerson', label: 'First person', code: 'KeyV' },
+  { action: 'torch', label: 'Torch', code: 'KeyF' },
+  { action: 'mount', label: 'Whistle for the horse', code: 'KeyH' },
+  { action: 'ship', label: 'Call the ship', code: 'KeyJ' },
+  { action: 'map', label: 'Map or star chart', code: 'KeyM' },
+  { action: 'sheet', label: 'Character sheet', code: 'KeyI' },
+  { action: 'settings', label: 'These settings', code: 'KeyO' },
+];
+
+/** What a key is called on a keycap, rather than what the browser calls it. */
+const NAMED_KEYS = {
+  Space: 'Space', ShiftLeft: 'Left Shift', ShiftRight: 'Right Shift',
+  ControlLeft: 'Left Ctrl', ControlRight: 'Right Ctrl', AltLeft: 'Left Alt', AltRight: 'Right Alt',
+  ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→',
+  Backquote: '`', Minus: '−', Equal: '=', BracketLeft: '[', BracketRight: ']', Backslash: '\\',
+  Semicolon: ';', Quote: '\'', Comma: ',', Period: '.', Slash: '/',
+  Enter: 'Enter', Tab: 'Tab', Backspace: 'Backspace', CapsLock: 'Caps Lock',
+};
+
+export function keyLabel(code) {
+  if (!code) return 'none';
+  if (NAMED_KEYS[code]) return NAMED_KEYS[code];
+  if (code.startsWith('Key')) return code.slice(3);
+  if (code.startsWith('Digit')) return code.slice(5);
+  if (code.startsWith('Numpad')) return 'Num ' + code.slice(6);
+  return code;
+}
+
+/** The `key` a real keyboard would have sent with this `code` — hud.js tests `e.key === 'Shift'`. */
+function keyTextFor(code) {
+  if (code.startsWith('Key')) return code.slice(3).toLowerCase();
+  if (code.startsWith('Digit')) return code.slice(5);
+  if (code === 'Space') return ' ';
+  if (code.startsWith('Shift')) return 'Shift';
+  if (code.startsWith('Control')) return 'Control';
+  if (code.startsWith('Alt')) return 'Alt';
+  if (code.startsWith('Arrow')) return code;
+  return NAMED_KEYS[code] || code;
+}
+
+/** Keys we must never swallow, whatever anyone binds. Escape has to close what is open. */
+const NEVER_TAKE = new Set(['Escape', 'F5', 'F11', 'F12', 'Tab']);
 
 const FIELDS = [
   { key: 'shoulder', label: 'Camera shoulder', kind: 'choice', options: [['left', 'Left'], ['right', 'Right']], group: 'Controls' },
   { key: 'invertY', label: 'Invert look', kind: 'toggle', group: 'Controls' },
   { key: 'invertFlight', label: 'Invert flight pitch', kind: 'toggle', group: 'Controls' },
-  { key: 'sensitivity', label: 'Mouse sensitivity', kind: 'range', min: 0.3, max: 2.5, step: 0.1, group: 'Controls' },
+  { key: 'sensitivity', label: 'Mouse sensitivity', kind: 'range', min: 0.3, max: 2.5, step: 0.1, unit: '×', group: 'Controls' },
+  { key: 'fov', label: 'Field of view', kind: 'range', min: 55, max: 100, step: 1, unit: '°', group: 'Picture' },
   { key: 'viewDistance', label: 'View distance', kind: 'choice', options: [['near', 'Near'], ['medium', 'Medium'], ['full', 'Full']], group: 'Picture' },
-  { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 2, step: 0.25, group: 'Picture' },
+  { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 2, step: 0.25, unit: '×', group: 'Picture' },
   { key: 'grass', label: 'Grass', kind: 'toggle', group: 'Picture' },
   { key: 'sunfx', label: 'Sun rays and flare', kind: 'toggle', group: 'Picture' },
   { key: 'damageNumbers', label: 'Damage numbers', kind: 'toggle', group: 'Picture' },
   { key: 'coords', label: 'Show coordinates', kind: 'toggle', group: 'Picture' },
   { key: 'sound', label: 'Sound', kind: 'toggle', group: 'Audio' },
   { key: 'voices', label: 'Voices', kind: 'toggle', group: 'Audio' },
-  { key: 'volume', label: 'Volume', kind: 'range', min: 0, max: 1, step: 0.05, group: 'Audio' },
+  { key: 'volume', label: 'Volume', kind: 'range', min: 0, max: 1, step: 0.05, percent: true, group: 'Audio' },
 ];
+
+/** What a slider's number means. D15: "1" and "0.75" told you nothing about what they measured. */
+function valueText(field, value) {
+  if (field.percent) return pct(value);
+  return fmt(value) + (field.unit || '');
+}
 
 function read() {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
+    const saved = raw ? JSON.parse(raw) : null;
+    return saved ? { ...DEFAULTS, ...saved, keys: { ...(saved.keys || {}) } } : { ...DEFAULTS, keys: {} };
   } catch {
-    return { ...DEFAULTS };
+    return { ...DEFAULTS, keys: {} };
   }
 }
 function write(values) {
@@ -71,9 +162,21 @@ const el = (tag, attrs = {}, ...kids) => {
   return node;
 };
 
+/**
+ * D15: the label column used to be `flex: 1` against a 150px slider, and "Trees and rocks" came out
+ * three lines tall in a narrow panel. These two want to be `.settings-label { flex: 1 1 200px }` in
+ * `style.css`; they are inline here because that file belongs to another pass this round.
+ */
+const LABEL_STYLE = 'flex:1 1 200px;min-width:150px';
+const VALUE_STYLE = 'min-width:52px';
+
 export function createSettings({ apply = () => {} } = {}) {
   const values = read();
   let open = false;
+  // which binding is listening for a keypress right now, or null
+  let arming = null;
+  // the reset button, once it has been clicked once and is waiting to be meant
+  let resetArmed = false;
 
   const body = el('div', { class: 'settings-body' });
   const root = el('section', { class: 'settings hidden', id: 'settings' },
@@ -85,6 +188,75 @@ export function createSettings({ apply = () => {} } = {}) {
     el('div', { class: 'muted small', text: 'O or Esc to close · kept in this browser' }),
   );
   document.body.append(root);
+
+  // ---------------------------------------------------------------- the keys
+  const keyFor = action => values.keys?.[action] || BINDINGS.find(b => b.action === action)?.code || null;
+  /** Every default that nobody is using any more — these stop doing anything at all. */
+  const inUse = () => new Set(BINDINGS.map(b => keyFor(b.action)));
+
+  /** The code the GAME is listening for when this physical key is pressed, or null to swallow it. */
+  function translate(code) {
+    for (const b of BINDINGS) if (keyFor(b.action) === code) return b.code;
+    // a default you moved away from and did not give to anything else
+    if (BINDINGS.some(b => b.code === code) && !inUse().has(code)) return null;
+    return code;
+  }
+
+  function bind(action, code) {
+    if (!code || NEVER_TAKE.has(code)) return false;
+    const taken = BINDINGS.find(b => b.action !== action && keyFor(b.action) === code);
+    const had = keyFor(action);
+    const next = { ...values.keys, [action]: code };
+    // Two actions cannot share a key, so the one that had it takes the one being replaced. A swap
+    // rather than a clear: every action stays bound to something, which is what a player expects.
+    if (taken) next[taken.action] = had;
+    for (const b of BINDINGS) if (next[b.action] === b.code) delete next[b.action];
+    set('keys', next);
+    return true;
+  }
+
+  /**
+   * In front of every other key listener in the game (see the note on BINDINGS). It has three jobs:
+   * take the keypress the rebinding row is waiting for, translate a moved key into the one the game
+   * knows, and stay out of the way of everything else.
+   */
+  function onKey(e) {
+    if (!e.isTrusted) return;                       // one of ours, already translated
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+
+    if (arming) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (e.type !== 'keydown') return;
+      if (e.code === 'Escape') { arming = null; render(); return; }
+      const action = arming;
+      arming = null;
+      bind(action, e.code);                         // set() re-renders
+      render();
+      return;
+    }
+
+    const want = translate(e.code);
+    if (want === e.code) return;                    // the usual case: nothing to do
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (!want) return;                              // an orphaned default: it does nothing now
+    window.dispatchEvent(new KeyboardEvent(e.type, {
+      code: want, key: keyTextFor(want), bubbles: true, cancelable: true, repeat: e.repeat,
+      shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, altKey: e.altKey, metaKey: e.metaKey,
+    }));
+  }
+  window.addEventListener('keydown', onKey, true);
+  window.addEventListener('keyup', onKey, true);
+
+  /**
+   * The field of view is applied by js/main.js, which owns the camera.
+   *
+   * This used to poll `window.farhold.camera` on a timer because the settings panel was built in a
+   * round where main.js belonged to another agent. `apply()` gets the key like every other setting
+   * now, so there is no global and no interval.
+   */
 
   function set(key, value) {
     values[key] = value;
@@ -98,7 +270,7 @@ export function createSettings({ apply = () => {} } = {}) {
     body.replaceChildren(...groups.flatMap(group => [
       el('h3', { text: group }),
       ...FIELDS.filter(f => f.group === group).map(f => {
-        const row = el('div', { class: 'settings-row' }, el('span', { class: 'settings-label', text: f.label }));
+        const row = el('div', { class: 'settings-row' }, el('span', { class: 'settings-label', style: LABEL_STYLE, text: f.label }));
         if (f.kind === 'toggle') {
           row.append(el('button', {
             class: 'settings-btn' + (values[f.key] ? ' on' : ''),
@@ -119,23 +291,62 @@ export function createSettings({ apply = () => {} } = {}) {
           const input = el('input', { type: 'range', min: f.min, max: f.max, step: f.step, class: 'settings-range' });
           input.value = String(values[f.key]);
           input.addEventListener('input', () => set(f.key, Number(input.value)));
-          row.append(input, el('span', { class: 'settings-value muted', text: String(values[f.key]) }));
+          row.append(input, el('span', { class: 'settings-value muted', style: VALUE_STYLE, text: valueText(f, values[f.key]) }));
         }
         return row;
       }),
     ]),
+      // ---- the keys
+      el('h3', { text: 'Keys' }),
+      el('p', { class: 'muted small', text: arming
+        ? 'Press the key you want. Escape leaves it as it was.'
+        : 'Click a key to change it. Skills stay on 1-6.' }),
+      ...BINDINGS.map(b => {
+        const code = keyFor(b.action);
+        const moved = code !== b.code;
+        return el('div', { class: 'settings-row' },
+          el('span', { class: 'settings-label', style: LABEL_STYLE, text: b.label }),
+          el('button', {
+            class: 'settings-btn' + (arming === b.action ? ' on' : ''),
+            text: arming === b.action ? 'press a key…' : keyLabel(code),
+            title: moved ? `Normally ${keyLabel(b.code)}` : 'Click, then press the key you want',
+            onclick: () => { arming = arming === b.action ? null : b.action; render(); },
+          }),
+        );
+      }),
       el('div', { class: 'settings-row' },
-        el('span', { class: 'settings-label', text: 'Everything back to normal' }),
+        el('span', { class: 'settings-label', style: LABEL_STYLE, text: 'Keys back to normal' }),
         el('button', {
           class: 'settings-btn',
-          text: 'Reset',
-          onclick: () => { Object.assign(values, DEFAULTS); write(values); apply(values, null); render(); },
+          text: 'Reset keys',
+          onclick: () => { arming = null; set('keys', {}); },
+        })),
+      // ---- and the big one, which now takes two clicks
+      el('div', { class: 'settings-row' },
+        el('span', { class: 'settings-label', style: LABEL_STYLE, text: 'Everything back to normal' }),
+        el('button', {
+          class: 'settings-btn',
+          // D15: this used to wipe every setting on one click with nothing asked. The first click
+          // now only says what it is about to do; clicking away or closing the panel forgets it.
+          style: resetArmed ? 'background:#4a2418;border-color:#a04a2a;color:#ffd0b8;font-weight:600' : '',
+          text: resetArmed ? 'Sure? Click again' : 'Reset',
+          onclick: () => {
+            if (!resetArmed) { resetArmed = true; render(); return; }
+            resetArmed = false;
+            arming = null;
+            Object.assign(values, DEFAULTS, { keys: {} });
+            write(values);
+            apply(values, null);
+            render();
+          },
         })));
   }
 
   function toggle(v = !open) {
     open = v;
     root.classList.toggle('hidden', !open);
+    // nothing half-done survives the panel closing
+    if (!open) { arming = null; resetArmed = false; }
     if (open) { document.exitPointerLock?.(); render(); }
     return open;
   }
@@ -150,5 +361,12 @@ export function createSettings({ apply = () => {} } = {}) {
     set, toggle, render,
     all: () => ({ ...values }),
     fields: FIELDS,
+    // D15: the keys, for the pause menu's control list, the tests and anything that wants to print
+    // what a player actually has to press.
+    bindings: BINDINGS,
+    keyFor,
+    keyLabel,
+    bind,
+    resetKeys: () => set('keys', {}),
   };
 }

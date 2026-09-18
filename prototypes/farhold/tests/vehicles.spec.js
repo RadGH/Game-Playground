@@ -68,11 +68,12 @@ test('walking into deep water puts you in the boat you own, and taking you out p
   expect(afloat.boating).toBe('raft');           // what every character starts with
   expect(afloat.speed).toBeGreaterThan(2.7);     // the flat swim speed it replaces
 
-  // back onto dry land: the boat goes away rather than following you up the bank
+  // back onto dry land: the boat goes away rather than following you up the bank.
+  // `control.teleport` puts you down on the ground properly; `control.spawn` is where you landed,
+  // which is always walkable because the game chose it.
   await page.evaluate(() => {
     const f = window.farhold;
-    const spawn = f.view?.terrain?.spawnPoint?.() || null;
-    if (spawn) { f.control.x = spawn.x; f.control.z = spawn.z; f.control.y = spawn.height; }
+    f.control.teleport(f.control.spawn.x, f.control.spawn.z);
   });
   await page.waitForTimeout(400);
   const ashore = await page.evaluate(() => ({
@@ -121,18 +122,16 @@ test('a merchant has all three mounts and all three lights on the shelf', async 
   const errors = await land(page);
   const shelf = await page.evaluate(() => {
     const f = window.farhold;
-    const npc = f.features?.folk?.nearest?.(f.control.x, f.control.z, 4000)
-      || { role: 'merchant', id: 'test' };
-    const rows = f.features?.folk?.shelvesFor
-      ? f.features.folk.shelvesFor(npc, f.player.level || 1)
-      : null;
-    if (rows) return (rows.other || []).map(i => i.baseKey || i.name);
-    const stock = f.features?.folk?.stockFor?.(npc, f.player.level || 1) || [];
-    return stock.map(i => i.baseKey || i.name);
+    // any merchant will do — the rack is the same everywhere, which is the point of the fix
+    const npc = f.folk.roster().find(n => n.badge === 'shop' || n.role === 'merchant')
+      || f.folk.roster()[0];
+    if (!npc) return { none: true };
+    return { keys: f.folk.shelves(npc, f.player.level || 1).other.map(i => i.baseKey || i.name) };
   });
+  test.skip(!!shelf.none, 'nobody is awake near the landing site on this seed');
 
   for (const key of ['pony', 'courser', 'dray', 'torch', 'lantern', 'wisplamp']) {
-    expect(shelf, `the shelf is missing ${key}`).toContain(key);
+    expect(shelf.keys, `the shelf is missing ${key}`).toContain(key);
   }
   expect(errors).toEqual([]);
 });

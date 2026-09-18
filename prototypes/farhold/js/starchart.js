@@ -20,6 +20,9 @@
 
 import { el, panel, button } from '../../../shared/ui.js';
 import { MARKER_LOOKS } from './markers.js';
+// the same band the survey quotes and the zones are laid out inside, so a world reads the same
+// wherever you meet it
+import { bandForPlanet } from './rpg.js';
 
 export const CHART_LEVELS = ['system', 'neighbourhood', 'sector', 'galaxy'];
 
@@ -175,11 +178,14 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
     }));
 
     const kids = [];
+    const here = whereYouAre(s);
     if (state.level === 'system') {
+      const moons = countMoons(s.system);
       kids.push(panel('Here',
         el('div', { class: 'chart-name', text: s.star?.name || 'this star' }),
         el('p', { class: 'small muted', text: s.star?.className || '' }),
-        el('p', { class: 'small', text: `${(s.system?.planets || []).length} worlds${countMoons(s.system) ? `, ${countMoons(s.system)} moons` : ''}` }),
+        el('p', { class: 'small', text: `${(s.system?.planets || []).length} worlds${moons ? `, ${moons} moon${moons > 1 ? 's' : ''}` : ''}` }),
+        here ? el('p', { class: 'small', text: `You are at ${here.name}.` }) : null,
       ));
       /**
        * WHAT THE CHART KNOWS ABOUT THE WORLD YOU PICKED.
@@ -221,15 +227,25 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
         kids.push(panel(p.name, ...kids2));
       }
 
-      const rows = (s.system?.planets || []).map(p => {
-        const mine = (s.markers || []).filter(m => m.planetId === p.id);
-        return el('div', { class: 'chart-row' + (mine.length ? ' marked' : '') },
-          el('span', { class: 'chart-dot', style: `background:${p.giant ? '#d8b070' : '#8fb8d8'}` }),
-          el('span', { class: 'chart-rowname', text: p.name }),
-          el('span', { class: 'muted small', text: `${(p.orbit?.au ?? 0).toFixed(2)} AU` }),
-          mine.length ? el('span', { class: 'chart-mark', text: mine.map(m => (MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).icon).join('') }) : null,
-        );
-      }).filter(Boolean);
+      /**
+       * D12: the Worlds list is the one thing on this screen you choose from, so it says where you
+       * are, what you could breathe and how hard the ground is — and it lists the moons, which the
+       * header had been counting for a list that did not contain any.
+       */
+      const rows = [];
+      for (const p of s.system?.planets || []) {
+        rows.push(...worldRow(p, {
+          here: here?.id === p.id,
+          markers: (s.markers || []).filter(m => m.planetId === p.id),
+        }));
+        for (const moon of p.moons || []) {
+          rows.push(...worldRow(moon, {
+            parent: p,
+            here: here?.id === moon.id,
+            markers: (s.markers || []).filter(m => m.planetId === moon.id),
+          }));
+        }
+      }
       if (rows.length) kids.push(panel('Worlds', ...rows));
     } else {
       const from = s.star;
@@ -297,8 +313,20 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
       kids.push(panel(state.selected.name, ...kids2));
     }
 
-    kids.push(panel('Getting around',
-      el('p', { class: 'small muted', text: 'Mouse wheel zooms. Click a star to select it. M or Escape closes.' })));
+    /**
+     * D12: this used to explain the mouse wheel and nothing else — not one word about how you
+     * actually get anywhere. Travel is two different things and both belong here: another world in
+     * this system you fly to yourself, and another star the drive jumps to.
+     */
+    kids.push(panel('Getting around', state.level === 'system'
+      ? el('div', { class: 'small muted' },
+        el('p', { text: 'Another world in this system: close the chart, point the ship at it and fly. Below half a radius you fall into the air on your own — no key press.' }),
+        el('p', { text: 'Click a world to read its survey. The wheel zooms this view; roll it out to step to Nearby Stars.' }),
+        el('p', { text: 'M or Escape closes.' }))
+      : el('div', { class: 'small muted' },
+        el('p', { text: `Another star: click it, then press Jump. The drive reaches ${Math.round(JUMP_RANGE * LY_PER_UNIT).toLocaleString()} light years — anything further is several hops, each one from where the last left you.` }),
+        el('p', { text: 'The wheel steps out to the arm and the galaxy, and back in again.' }),
+        el('p', { text: 'M or Escape closes.' }))));
     side.replaceChildren(...kids);
   }
 
@@ -306,14 +334,79 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
     return (system?.planets || []).reduce((a, p) => a + (p.moons?.length || 0), 0);
   }
 
+  /**
+   * D12: WHICH WORLD YOU ARE ON — worked out rather than asked for.
+   *
+   * The chart's snapshot does not carry it, and main.js is another pass's file this round. It does
+   * not have to: `surfaceOf()` only ever answers for the one body this run has built a surface for,
+   * which is the body under your feet. So the world the chart can read a surface off IS where you
+   * are — moons included, since they are small planets with their own surface map.
+   *
+   * Worked out once per opening rather than per frame: reading a surface counts every biome cell on
+   * the planet, and the system view redraws five times a second while it is up.
+   */
+  let hereCache = { done: false, body: null };
+  function whereYouAre(s) {
+    if (hereCache.done) return hereCache.body;
+    let found = null;
+    if (s?.surfaceOf) {
+      for (const p of s.system?.planets || []) {
+        if (s.surfaceOf(p)) { found = p; break; }
+        const moon = (p.moons || []).find(m => s.surfaceOf(m));
+        if (moon) { found = moon; break; }
+      }
+    }
+    hereCache = { done: true, body: found };
+    return found;
+  }
+
+  /**
+   * One row of the Worlds list: the dot, the name, and the two things that actually decide whether
+   * you fly there — whether you can breathe when you step out, and what level the ground is.
+   *
+   * The indent on a moon is inline because `style.css` belongs to another pass this round; it wants
+   * to be a `.chart-row.moon` rule when these land together.
+   */
+  function worldRow(p, { parent = null, here = false, markers = [] } = {}) {
+    const band = bandForPlanet(p);
+    const air = p.atmosphere?.density > 0.08 && p.atmosphere?.breathable;
+    const dot = here ? '#6ad0ff' : p.giant ? '#d8b070' : air ? '#8fe0a0' : '#8fb8d8';
+    const row = el('div', {
+      class: 'chart-row' + (markers.length ? ' marked' : '') + (here ? ' on' : ''),
+      style: parent ? 'padding-left:16px' : '',
+    },
+      el('span', { class: 'chart-dot', style: `background:${dot}` }),
+      el('span', { class: 'chart-rowname', text: (parent ? '↳ ' : '') + p.name + (here ? ' · you are here' : '') }),
+      el('span', { class: 'muted small', text: `${(p.orbit?.au ?? parent?.orbit?.au ?? 0).toFixed(2)} AU` }),
+      markers.length ? el('span', { class: 'chart-mark', text: markers.map(m => (MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).icon).join('') }) : null,
+    );
+    const note = el('div', {
+      class: 'small muted',
+      style: `padding-left:${parent ? 33 : 17}px`,
+      text: `${air ? 'breathable' : p.giant ? 'no ground to stand on' : 'no air'} · ${band.name} · level ${band.min}–${band.max}`,
+    });
+    return [row, note];
+  }
+
   // ---------------------------------------------------------------- drawing
+  /**
+   * Size the backing buffer to the CANVAS's own box, not the wrapper's.
+   *
+   * D12: `.chart-wrap` has 10px of padding all round, so measuring it made the canvas 20px wider
+   * and 20px taller than the space it had — its right edge ran under the side panel and its bottom
+   * twenty pixels were off the screen, which is a slice of chart nobody could see. The canvas is
+   * `flex: 1` inside the wrapper, so its own box is already the right one. (The map screen had this
+   * exact bug for this exact reason; see `js/map.js` `fit()`.)
+   */
   function fit() {
-    const w = Math.max(320, wrap.clientWidth), h = Math.max(240, wrap.clientHeight);
+    const box = canvas.getBoundingClientRect();
+    const w = Math.max(320, Math.round(box.width) || wrap.clientWidth);
+    const h = Math.max(240, Math.round(box.height) || wrap.clientHeight);
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+    // only the buffer needs setting: the CSS box is the flex layout's business, and forcing a width
+    // back on to it is what pushed the canvas out of its wrapper in the first place
+    if (canvas.width !== Math.round(w * dpr)) canvas.width = Math.round(w * dpr);
+    if (canvas.height !== Math.round(h * dpr)) canvas.height = Math.round(h * dpr);
     return { w: canvas.width, h: canvas.height, dpr };
   }
 
@@ -321,34 +414,46 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
     if (!state.open) return;
     const s = getState();
     if (!s) return;
-    const { w, h } = fit();
+    const { w, h, dpr } = fit();
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#05070e';
     ctx.fillRect(0, 0, w, h);
-    if (state.level === 'system') drawSystem(ctx, w, h, s);
+    if (state.level === 'system') drawSystem(ctx, w, h, s, dpr);
     else drawStars(ctx, w, h, s);
   }
 
   /** The system view: real orbit radii, the star in the middle, your ship where it actually is. */
-  function drawSystem(ctx, w, h, s) {
+  function drawSystem(ctx, w, h, s, dpr = 1) {
     const planets = s.system?.planets || [];
     // The outermost orbit fills the frame. A floor of 1 AU used to be in here, which drew a red
     // dwarf's four worlds — none of them further out than 0.35 AU — as a knot in the middle of an
     // empty screen. A compact system should look compact, not small.
     const outer = Math.max(0.05, ...planets.map(p => p.orbit?.au || 0.05));
-    const pad = 46;
-    const scale = (Math.min(w, h) / 2 - pad) / (outer * 1.05) * state.zoom;
+    /**
+     * D12: FILL THE SCREEN.
+     *
+     * Everything here used to be measured in raw canvas pixels — a 46px margin, an 11px world, a
+     * 13px name — on a buffer that is twice the size of the box on any modern screen. So on a
+     * retina display the whole chart drew at half scale: five worlds as 3px specks with a third of
+     * the canvas left over. Every size below is now in CSS pixels multiplied by `dpr`, the outer
+     * orbit is fitted to the HEIGHT (and only pulled in when the canvas is narrower than it is
+     * tall), and a world has a floor it cannot shrink under.
+     */
+    const px = n => n * dpr;
+    const pad = px(30);
+    const scale = (Math.min(h, w) / 2 - pad) / (outer * 1.05) * state.zoom;
     const cx = w / 2, cy = h / 2;
 
     // the star
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 34);
+    const starR = px(20);
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, starR * 1.7);
     glow.addColorStop(0, s.star?.color || '#ffe9b0');
     glow.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = glow;
-    ctx.beginPath(); ctx.arc(cx, cy, 34, 0, Math.PI * 2); ctx.fill();
-    ctx.font = '600 13px system-ui, sans-serif';
+    ctx.beginPath(); ctx.arc(cx, cy, starR * 1.7, 0, Math.PI * 2); ctx.fill();
+    ctx.font = `600 ${px(13)}px system-ui, sans-serif`;
     ctx.fillStyle = '#ffe9b0'; ctx.textAlign = 'center';
-    ctx.fillText(s.star?.name || '', cx, cy + 48);
+    ctx.fillText(s.star?.name || '', cx, cy + px(48));
 
     // the habitable band, because it is the one thing on this screen worth planning around
     if (s.star?.habitable) {
@@ -361,6 +466,7 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
 
     const live = new Map();
     for (const b of s.bodies || []) if (!b.moon) live.set(b.planet.id, b);
+    const hereId = whereYouAre(s)?.id ?? null;
     const labels = [];
     // where each body ended up on screen, so a click can find it again
     const hits = [];
@@ -370,70 +476,81 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
       const au = p.orbit?.au || 1;
       const r = au * scale;
       ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(150, 180, 215, .18)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(150, 180, 215, .18)'; ctx.lineWidth = px(1);
       ctx.stroke();
 
       // where the world actually is right now, taken from the live scene when there is one
       const b = live.get(p.id);
       const angle = b ? Math.atan2(b.position.z, b.position.x) : ((p.seed ?? p.id) % 360) * Math.PI / 180;
-      const px = cx + Math.cos(angle) * r, py = cy + Math.sin(angle) * r;
-      const size = Math.max(3, Math.min(11, (p.radius || 1) * (p.giant ? 4.5 : 3)));
-      hits.push({ px, py, r: size, planet: p, moon: null });
-      ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI * 2);
+      const wx = cx + Math.cos(angle) * r, wy = cy + Math.sin(angle) * r;
+      const size = Math.max(px(5), Math.min(px(15), px((p.radius || 1) * (p.giant ? 5.5 : 4))));
+      hits.push({ px: wx, py: wy, r: size, planet: p, moon: null });
+      ctx.beginPath(); ctx.arc(wx, wy, size, 0, Math.PI * 2);
       ctx.fillStyle = p.giant ? '#d8b070' : p.atmosphere?.breathable ? '#8fe0a0' : '#8fb8d8';
       ctx.fill();
-      ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(5,7,14,.9)'; ctx.stroke();
+      ctx.lineWidth = px(1.2); ctx.strokeStyle = 'rgba(5,7,14,.9)'; ctx.stroke();
+      // the world you are standing on, ringed in the same blue the ship and "you are here" use
+      if (hereId != null && p.id === hereId) {
+        ctx.beginPath(); ctx.arc(wx, wy, size + px(7), 0, Math.PI * 2);
+        ctx.strokeStyle = '#6ad0ff'; ctx.lineWidth = px(2); ctx.stroke();
+      }
       if (state.world?.planet === p) {
-        ctx.beginPath(); ctx.arc(px, py, size + 8, 0, Math.PI * 2);
-        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.6; ctx.stroke();
+        ctx.beginPath(); ctx.arc(wx, wy, size + px(11), 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = px(1.6); ctx.stroke();
       }
 
       // moons, as a tight ring of specks
       for (let i = 0; i < (p.moons?.length || 0); i++) {
+        const moon = p.moons[i];
         const ma = angle + (i + 1) * 1.7;
-        const mx = px + Math.cos(ma) * (size + 6), my = py + Math.sin(ma) * (size + 6);
-        hits.push({ px: mx, py: my, r: 3, planet: p.moons[i], moon: p });
+        const mr = Math.max(px(2.6), size * 0.34);
+        const mx = wx + Math.cos(ma) * (size + px(8)), my = wy + Math.sin(ma) * (size + px(8));
+        hits.push({ px: mx, py: my, r: mr, planet: moon, moon: p });
         ctx.beginPath();
-        ctx.arc(mx, my, 1.8, 0, Math.PI * 2);
-        ctx.fillStyle = '#c8d4e4'; ctx.fill();
-        if (state.world?.planet === p.moons[i]) {
-          ctx.beginPath(); ctx.arc(mx, my, 7, 0, Math.PI * 2);
-          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4; ctx.stroke();
+        ctx.arc(mx, my, mr, 0, Math.PI * 2);
+        ctx.fillStyle = moon.atmosphere?.breathable ? '#8fe0a0' : '#c8d4e4'; ctx.fill();
+        if (hereId != null && moon.id === hereId) {
+          ctx.beginPath(); ctx.arc(mx, my, mr + px(5), 0, Math.PI * 2);
+          ctx.strokeStyle = '#6ad0ff'; ctx.lineWidth = px(1.6); ctx.stroke();
+        }
+        if (state.world?.planet === moon) {
+          ctx.beginPath(); ctx.arc(mx, my, mr + px(8), 0, Math.PI * 2);
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = px(1.4); ctx.stroke();
         }
       }
 
       // labels crowd badly on a tight system; drop one that would land on another
-      if (labels.every(l => Math.hypot(l[0] - px, l[1] - py) > 34)) {
-        labels.push([px, py]);
-        ctx.font = '11px system-ui, sans-serif';
+      if (labels.every(l => Math.hypot(l[0] - wx, l[1] - wy) > px(34))) {
+        labels.push([wx, wy]);
+        ctx.font = `${px(12)}px system-ui, sans-serif`;
         ctx.fillStyle = '#b8c8da'; ctx.textAlign = 'left';
-        ctx.fillText(p.name, px + size + 5, py + 4);
+        ctx.fillText(p.name, wx + size + px(6), wy + px(4));
       }
 
       // markers on this world
       const mine = (s.markers || []).filter(m => m.planetId === p.id);
       if (mine.length) {
-        ctx.beginPath(); ctx.arc(px, py, size + 6, 0, Math.PI * 2);
-        ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 1.4; ctx.setLineDash([3, 3]); ctx.stroke(); ctx.setLineDash([]);
-        ctx.font = '700 13px system-ui, sans-serif';
+        ctx.beginPath(); ctx.arc(wx, wy, size + px(6), 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = px(1.4); ctx.setLineDash([px(3), px(3)]); ctx.stroke(); ctx.setLineDash([]);
+        ctx.font = `700 ${px(13)}px system-ui, sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffd24a';
-        ctx.fillText(mine.map(m => (MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).icon).join(''), px, py - size - 8);
+        ctx.fillText(mine.map(m => (MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).icon).join(''), wx, wy - size - px(8));
         ctx.textAlign = 'left';
       }
     }
 
     // the ship
     if (s.shipAu) {
-      const px = cx + s.shipAu.x * scale, py = cy + s.shipAu.z * scale;
-      ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2);
+      const sx = cx + s.shipAu.x * scale, sy = cy + s.shipAu.z * scale;
+      ctx.beginPath(); ctx.arc(sx, sy, px(5), 0, Math.PI * 2);
       ctx.fillStyle = '#ffffff'; ctx.fill();
-      ctx.strokeStyle = '#6ad0ff'; ctx.lineWidth = 2; ctx.stroke();
-      ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(106,208,255,.5)'; ctx.lineWidth = 1; ctx.stroke();
-      ctx.font = '10px system-ui, sans-serif';
+      ctx.strokeStyle = '#6ad0ff'; ctx.lineWidth = px(2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(sx, sy, px(12), 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(106,208,255,.5)'; ctx.lineWidth = px(1); ctx.stroke();
+      ctx.font = `${px(11)}px system-ui, sans-serif`;
       ctx.fillStyle = '#9fd4ff'; ctx.textAlign = 'center';
-      ctx.fillText('you', px, py - 17);
+      ctx.fillText('you', sx, sy - px(18));
     }
   }
 
@@ -581,6 +698,8 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
       const s = getState();
       if (s?.star) state.centre = { x: s.star.x, y: s.star.y };
       state.selected = null;
+      // you may have landed somewhere else since you last looked
+      hereCache = { done: false, body: null };
       // "It should start zoomed in all the way at the solar system level."
       state.level = 'system';
       state.zoom = 1;

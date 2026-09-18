@@ -547,6 +547,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       if ((!key || key === 'viewDistance') && view && control) view.update(control.x, control.z, true);
       if ((!key || key === 'sunfx') && sunfx) sunfx.setEnabled(v.sunfx);
+      // D15: the field of view. settings.js used to reach for `window.farhold.camera` on a timer,
+      // because the agent that added it could not edit this file — it has the camera handed to it.
+      if ((!key || key === 'fov') && camera?.isPerspectiveCamera && camera.fov !== v.fov) {
+        camera.fov = v.fov;
+        camera.updateProjectionMatrix();
+      }
     },
   });
 
@@ -1888,6 +1894,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   function makeMap() {
     return createMapScreen({
+      // B8: a region's name is something you learn — by walking in, or by hearing about it. The map
+      // read this off `window.farhold` because the agent that built it could not edit this file;
+      // handed in properly, the map works with no global at all.
+      rumours,
       terrain, seed,
       getPlayer: () => control,
       getEnemies: () => field.enemies,
@@ -2869,10 +2879,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           ? `${dungeon.name} · level ${dungeon.level}`
           // "0m" sat four inches from "93 m" of altitude, meaning something else entirely
           : `${planet.name} · ${zones.at(control.x, control.z)?.name || ''} · ${state.playtime < 60 ? 'just landed' : playtimeText(state.playtime) + ' played'}`;
+        drawKeyHint();
       }
       return open;
     },
   };
+  /**
+   * The control list says the keys you actually have.
+   *
+   * D15 made every key rebindable, at which point a hard-coded "M map" in the markup becomes a lie
+   * the moment somebody moves it — and the pause menu is the one place a player goes to find out
+   * what to press. Built from `settings.bindings` each time the menu opens, so it is right even if
+   * the binding changed a second ago. `KEY_HELP` stays in js/player.js as the fallback for anything
+   * that wants one string and has no settings object.
+   */
+  function drawKeyHint() {
+    const hint = $('hint');
+    if (!hint || !settings?.bindings) return;
+    const parts = settings.bindings.map(b => {
+      const code = settings.keyFor(b.action);
+      // a default you moved away from and never reused does nothing at all; say so rather than
+      // printing a key that is not bound
+      return code
+        ? `<b>${settings.keyLabel(code)}</b> ${b.name}`
+        : `<span class="dim">${b.name} unbound</span>`;
+    });
+    hint.innerHTML = `${parts.join(' · ')}<br><span class="dim">in space: W fly · Shift boost · `
+      + 'hold Space warp · J land</span>';
+  }
+
   $('pause-resume').onclick = () => pauseMenu.toggle(false);
   $('pause-settings').onclick = () => { pauseMenu.toggle(false); settings.toggle(true); };
   $('pause-save').onclick = () => { autoSave({ quiet: false }); pauseMenu.toggle(false); };
@@ -3586,6 +3621,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // on another world, so the handle has to read them through a getter. Captured by value they go
     // stale the moment you fly anywhere, and a test then compares an old position against a new
     // planet's ground — which is exactly what "you landed in the sea at 55 m" turned out to be.
+    // `folk` is rebuilt with the world, like `control` below, so it has to be a getter too
+    get folk() { return folk; },
     get control() { return control; },
     get field() { return field; },
     get props() { return props; },

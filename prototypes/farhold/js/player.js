@@ -209,7 +209,17 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
       self.boating = activeBoat();
       if (self.boating) out.boarded = self.boating;
     }
-    if (!self.swimming && wasSwimming && self.boating) {
+    /**
+     * Put the boat away whenever you are not swimming — not only on the frame you climbed out.
+     *
+     * This used to test `!swimming && wasSwimming`, which is the transition, and the transition is
+     * not the only way to stop swimming: `teleport()` drops you somewhere dry, a load puts you on a
+     * road, and a dungeon changes the floor under you. Any of those and `wasSwimming` was already
+     * false by the next update, so the raft stayed "equipped" on dry land for the rest of the run.
+     * Reading the state instead of the edge cannot miss, and it still only fires once because
+     * `boating` goes null on the way through.
+     */
+    if (!self.swimming && self.boating) {
       out.leftBoat = self.boating;
       self.boating = null;
     }

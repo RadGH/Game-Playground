@@ -82,9 +82,9 @@ for (const [stat, field] of Object.entries(STAT_FIELDS)) {
 
 // `castElement` is not a stat — it is what a magic weapon is made of. It carries no number, so it
 // has no derive hook; it is here so the registry knows it and the card can describe it.
-def('affix:castElement', () => 'this weapon throws its own element, and leaves its mark', {});
+def('affix:castElement', (v, a) => `Every hit lands as ${a?.element || 'its own element'} and leaves that element's mark`, {});
 
-def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6s after a skill`, {
+def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6 seconds after you use a skill`, {
   onCast: (v, c) => { c.rt.skillPower = 6; c.rt.skillPowerValue = v; },
   derive: (v, d, unit, rt) => { if (rt?.skillPower > 0) d.spellPower += v; },
 });
@@ -92,13 +92,13 @@ def('affix:cond_ambushDmgFlat', v => `+${n1(v)} damage to anything that has not 
   dmgOut: (v, c) => (c.target && c.target.state !== 'chase' ? 1 + v / Math.max(1, c.baseDamage || 20) : 1),
   flatOut: (v, c) => (c.target && c.target.state !== 'chase' ? v : 0),
 });
-def('affix:cond_bleedOnCrit', v => `critical hits open a bleed for ${n1(v)} a second`, {
+def('affix:cond_bleedOnCrit', v => `Critical hits open a bleed for ${n1(v)} damage a second, for 6 seconds`, {
   onCrit: (v, c) => c.applyStatus?.(c.target, 'bleed', { perSecond: v, seconds: 6, name: 'Bleeding', element: 'physical' }),
 });
-def('affix:cond_burnExtend', v => `burns you set last ${n1(v)}s longer`, {
+def('affix:cond_burnExtend', v => `Burns you set last ${n1(v)} seconds longer`, {
   statusLonger: (v, c) => (c.type === 'burn' ? v : 0),
 });
-def('affix:cond_cheatDeath', v => `once a minute, survive a killing blow on ${pct(v)} health`, {
+def('affix:cond_cheatDeath', v => `Once a minute, survive a killing blow and stay up on ${pct(v)} of your health`, {
   preLethal: (v, c) => {
     if ((c.rt.cheatDeath || 0) > 0) return false;
     c.rt.cheatDeath = 60;
@@ -109,17 +109,17 @@ def('affix:cond_cheatDeath', v => `once a minute, survive a killing blow on ${pc
 def('affix:cond_coldDmgVsBurning', v => `+${pct(v)} cold damage to anything burning`, {
   dmgOut: (v, c) => (c.element === 'ice' && c.target?.statuses?.burn ? 1 + v : 1),
 });
-def('affix:cond_combatStartBarrier', v => `${n1(v)} barrier when a fight starts`, {
+def('affix:cond_combatStartBarrier', v => `Start every fight with a ${n1(v)}-point barrier`, {
   combatStart: (v, c) => { c.self.barrier = Math.max(c.self.barrier || 0, v); },
 });
-def('affix:cond_consecutiveHitDmg', v => `+${pct(v)} damage for each hit in a row on the same target`, {
+def('affix:cond_consecutiveHitDmg', v => `+${pct(v)} damage for each hit in a row on the same target, up to five`, {
   dmgOut: (v, c) => 1 + v * Math.min(5, c.rt.streak || 0),
   onHit: (v, c) => {
     if (c.rt.streakOn === c.target?.id) c.rt.streak = (c.rt.streak || 0) + 1;
     else { c.rt.streakOn = c.target?.id; c.rt.streak = 1; }
   },
 });
-def('affix:cond_critArmorPen', v => `critical hits ignore ${pct(v)} of armour`, {
+def('affix:cond_critArmorPen', v => `Critical hits ignore ${pct(v)} of the target's armour`, {
   armorPen: (v, c) => (c.crit ? v : 0),
 });
 def('affix:cond_dmgBelowHpThresh', v => `+${pct(v)} damage below half health`, {
@@ -131,13 +131,13 @@ def('affix:cond_dmgVsDemon', v => `+${pct(v)} damage to fiends`, {
 def('affix:cond_dmgVsUndead', v => `+${pct(v)} damage to the undead`, {
   dmgOut: (v, c) => (c.target?.family === 'undead' ? 1 + v : 1),
 });
-def('affix:cond_dotDmgReduce', v => `statuses on you hurt ${pct(v)} less`, {
+def('affix:cond_dotDmgReduce', v => `Burns, bleeds and poisons on you deal ${pct(v)} less damage`, {
   statusIn: (v) => 1 - v,
 });
 def('affix:cond_executeDmgPct', v => `+${pct(v)} damage to anything under a quarter health`, {
   dmgOut: (v, c) => ((c.target?.hp || 0) / Math.max(1, c.target?.maxHp || 1) < 0.25 ? 1 + v : 1),
 });
-def('affix:cond_extraSetPiece', () => 'counts as one more piece of every set you wear', { setPieces: 1 });
+def('affix:cond_extraSetPiece', () => 'Counts as one more piece of every set you are wearing', { setPieces: 1 });
 def('affix:cond_fireDmgVsPoisoned', v => `+${pct(v)} fire damage to anything poisoned`, {
   dmgOut: (v, c) => (c.element === 'fire' && c.target?.statuses?.poison ? 1 + v : 1),
 });
@@ -155,9 +155,9 @@ def('affix:cond_goldOnEliteKill', v => `+${pct(v)} gold from everything you kill
  * rather than here, because it has to apply to its OWN item while that item is still in the bag —
  * a `derive` hook only ever runs on what is equipped.
  */
-def('affix:cond_levelReqReduce', v => `needs ${n1(v)} fewer levels to wear — this and everything else you wear`);
-def('affix:cond_hpOnKill', v => `${n1(v)} health back on a kill`, { onKill: (v, c) => { c.heal = (c.heal || 0) + v; } });
-def('affix:cond_killInitBonus', v => `a kill gives ${pct(v)} attack and move speed for 5s`, {
+def('affix:cond_levelReqReduce', v => `Needs ${n1(v)} fewer levels to wear — this item and everything else you have on`);
+def('affix:cond_hpOnKill', v => `Every kill gives you ${n1(v)} health back`, { onKill: (v, c) => { c.heal = (c.heal || 0) + v; } });
+def('affix:cond_killInitBonus', v => `A kill gives +${pct(v)} attack speed and +${pct(v)} move speed for 5 seconds`, {
   onKill: (v, c) => { c.rt.killRush = 5; c.rt.killRushValue = v; },
   derive: (v, d, unit, rt) => { if (rt?.killRush > 0) { d.haste += v * 100; d.movePct += v * 100; } },
 });
@@ -167,48 +167,48 @@ def('affix:cond_lightningVsSlowed', v => `+${pct(v)} lightning damage to anythin
 def('affix:cond_lowManaRegenBonus', v => `+${n1(v)} mana a second below a third mana`, {
   derive: (v, d, unit) => { if ((unit.mp || 0) / Math.max(1, unit.maxMp || 1) < 0.34) d.mpRegen += v; },
 });
-def('affix:cond_magicDmgReducePct', v => `${pct(v)} less elemental damage taken`, {
+def('affix:cond_magicDmgReducePct', v => `You take ${pct(v)} less elemental damage`, {
   dmgIn: (v, c) => (isMagic(c.element) ? 1 - v : 1),
 });
-def('affix:cond_magicDmgVsAnyStatus', v => `+${pct(v)} spell damage to anything already suffering`, {
+def('affix:cond_magicDmgVsAnyStatus', v => `+${pct(v)} spell damage to anything already burning, bleeding, poisoned, chilled or cursed`, {
   dmgOut: (v, c) => (isMagic(c.element) && Object.keys(c.target?.statuses || {}).length ? 1 + v : 1),
 });
-def('affix:cond_manaOnAttack', v => `+${n1(v)} mana every swing`, {
+def('affix:cond_manaOnAttack', v => `Every swing returns ${n1(v)} mana`, {
   onSwing: (v, c) => { c.mana = (c.mana || 0) + v; },
 });
-def('affix:cond_manaOnCrit', v => `+${n1(v)} mana on a critical hit`, {
+def('affix:cond_manaOnCrit', v => `Every critical hit returns ${n1(v)} mana`, {
   onCrit: (v, c) => { c.mana = (c.mana || 0) + v; },
 });
 // This used to take a share of every hit out of your mana pool. In play that read as "the enemies
 // are draining my mana" — it emptied the pool, there was nothing to cast with, and it was not fun.
 // It is a plain damage reduction now, paid for by keeping your mana up rather than by spending it.
-def('affix:cond_manaShieldOnHit', v => `${pct(v)} less damage taken while your mana is above a third`, {
+def('affix:cond_manaShieldOnHit', v => `You take ${pct(v)} less damage while your mana is above a third`, {
   dmgIn: (v, c) => ((c.self.mp || 0) / Math.max(1, c.self.maxMp || 1) > 0.34 ? 1 - v : 1),
 });
-def('affix:cond_partyHpOnKill', v => `a kill heals your companions for ${n1(v)}`, {
+def('affix:cond_partyHpOnKill', v => `Every kill heals each of your companions for ${n1(v)}`, {
   onKill: (v, c) => { c.petHeal = (c.petHeal || 0) + v; },
 });
-def('affix:cond_physDmgReducePct', v => `${pct(v)} less physical damage taken`, {
+def('affix:cond_physDmgReducePct', v => `You take ${pct(v)} less physical damage`, {
   dmgIn: (v, c) => (isMagic(c.element) ? 1 : 1 - v),
 });
 def('affix:cond_poisonDmgVsBurning', v => `+${pct(v)} poison damage to anything burning`, {
   dmgOut: (v, c) => (c.element === 'poison' && c.target?.statuses?.burn ? 1 + v : 1),
 });
-def('affix:cond_poisonStackPower', v => `your poisons bite ${pct(v)} harder`, {
+def('affix:cond_poisonStackPower', v => `Poison you apply deals ${pct(v)} more damage a tick`, {
   statusPower: (v, c) => (c.type === 'poison' ? 1 + v : 1),
 });
-def('affix:cond_setThresholdReduce', () => 'set bonuses come on one piece early', { setPieces: 1 });
+def('affix:cond_setThresholdReduce', () => 'Set bonuses come on one piece early', { setPieces: 1 });
 // items.json rolls this 1-3. Read as a fraction it said "skills cost 188% less mana", which is
 // gibberish; it is a flat saving on every skill, which is what a 1-3 roll can only have meant.
-def('affix:cond_skillMpCostReduce', v => `every skill costs ${Math.round(v)} less mana`, { costFlat: v => v });
-def('affix:cond_speedOnFirstHit', v => `+${pct(v)} move speed for 4s after the first hit of a fight`, {
+def('affix:cond_skillMpCostReduce', v => `Every skill costs ${Math.round(v)} less mana`, { costFlat: v => v });
+def('affix:cond_speedOnFirstHit', v => `+${pct(v)} move speed for 4 seconds after the first hit of a fight`, {
   combatStart: (v, c) => { c.rt.openingRush = 4; c.rt.openingRushValue = v; },
   derive: (v, d, unit, rt) => { if (rt?.openingRush > 0) d.movePct += v * 100; },
 });
-def('affix:cond_sustainedDmgBonus', v => `+${pct(v)} damage for every 5s you stay in the fight, up to five`, {
+def('affix:cond_sustainedDmgBonus', v => `+${pct(v)} damage for every 5 seconds you stay in the fight, up to +${pct(v * 5)}`, {
   dmgOut: (v, c) => 1 + v * Math.min(5, Math.floor((c.rt.inCombat || 0) / 5)),
 });
-def('affix:cond_thornsFlat', v => `anything that hits you takes ${n1(v)} damage`, {
+def('affix:cond_thornsFlat', v => `Anything that hits you takes ${n1(v)} damage back`, {
   thornsFlat: v => v,
 });
 
@@ -234,59 +234,66 @@ const BRANDS = {
   cond_brandArcane: ['arcane', 'Star Brand', 'unmakes'],
 };
 for (const [stat, [element, , verb]] of Object.entries(BRANDS)) {
-  def(`affix:${stat}`, v => `every hit lands as ${element} — it ${verb} what it touches, and ${pct(v)} of the damage is added on top`, {
+  def(`affix:${stat}`, v => `Every hit lands as ${element}: it ${verb} what it touches, and ${element} damage you deal is +${pct(v)}`, {
     brandElement: () => element,
     dmgOut: (v, c) => (c.element === element ? 1 + v : 1),
   });
 }
 
-def('affix:cond_critFromWounds', v => `+${n1(v)}% critical chance for every quarter of health the target has already lost`, {
+def('affix:cond_critFromWounds', v => `+${n1(v)}% critical chance for every quarter of its health the target has already lost`, {
   critBonus: (v, c) => {
     const missing = 1 - (c.target?.hp || 0) / Math.max(1, c.target?.maxHp || 1);
     return v * Math.floor(missing * 4);
   },
 });
-def('affix:cond_dmgVsNamed', v => `+${pct(v)} damage to anything with a name of its own`, {
+def('affix:cond_dmgVsNamed', v => `+${pct(v)} damage to champions, rares and bosses`, {
   dmgOut: (v, c) => (c.target?.named || c.target?.nemesis || c.target?.rank === 'boss' ? 1 + v : 1),
 });
-def('affix:cond_sunderOnHit', v => `every hit shaves ${n1(v)} armour off the target, and it stays off`, {
+def('affix:cond_sunderOnHit', v => `Every hit strips ${n1(v)} armour off the target, and the armour does not come back`, {
   onHit: (v, c) => { if (c.target) c.target.armor = Math.max(0, (c.target.armor || 0) - v); },
 });
-def('affix:cond_nemesisMark', v => `+${pct(v)} damage to the one that killed you last`, {
+def('affix:cond_nemesisMark', v => `+${pct(v)} damage to whatever killed you last`, {
   dmgOut: (v, c) => (c.target?.nemesis ? 1 + v : 1),
 });
-def('affix:cond_killGrowth', v => `+${n1(v)} damage for every ten things this weapon has killed`, {
+def('affix:cond_killGrowth', v => `+${n1(v)} damage for every ten kills you have taken`, {
   derive: (v, d, unit) => { d.damageFlat += v * Math.floor((unit.kills || 0) / 10); },
 });
-def('affix:cond_killMemory', v => `keeps a tally: +${n1(v)} health for every ten kills you have taken with it`, {
+def('affix:cond_killMemory', v => `+${n1(v)} health for every ten kills you have taken`, {
   derive: (v, d, unit) => { d.maxHp += v * Math.floor((unit.kills || 0) / 10); },
 });
 
-// companions
-def('affix:cond_companionExtra', v => `${n1(v)} more companion${n1(v) > 1 ? 's' : ''} follow you`, { petSlots: v => v });
-def('affix:cond_companionFury', v => `your companions hit ${pct(v)} harder`, { petDamage: v => 1 + v });
-def('affix:cond_guardBond', v => `town guards fight ${pct(v)} harder while you are with them`, { guardPower: v => 1 + v });
+// ───────────────────────────── companions ─────────────────────────────
+//
+// Two of these three were hooks NOTHING EVER CALLED. `petSlots` and `petDamage` were summed by no
+// file in the game, so "your companions hit 25% harder" was a sentence on a card. `js/pets.js` asks
+// for exactly two things — `petPower` and `petHealth` — so that is what they answer to now, and the
+// extra companion is a derived number that `js/skills.js` adds to every summon.
+def('affix:cond_companionExtra', v => `Every summoning skill calls up ${n1(v)} more companion${n1(v) > 1 ? 's' : ''}`, {
+  derive: (v, d) => { d.petSlots = (d.petSlots || 0) + v; },
+});
+def('affix:cond_companionFury', v => `Your companions deal ${pct(v)} more damage`, { petPower: v => 1 + v });
+def('affix:cond_guardBond', v => `Town guards deal ${pct(v)} more damage while you are with them`, { guardPower: v => 1 + v });
 
 // the travel-layer five, restated for a world you walk across yourself
-def('affix:cond_forageRation', v => `out of a fight you recover ${n1(v)} health a second — it finds you something to eat`, {
+def('affix:cond_forageRation', v => `+${n1(v)} health a second while you are out of a fight`, {
   derive: (v, d, unit, rt) => { if (!(rt?.inCombat > 0)) d.hpRegen += v; },
 });
-def('affix:cond_extraLeg', v => `+${pct(v)} move speed — it knows the shortcuts`, {
+def('affix:cond_extraLeg', v => `+${pct(v)} move speed`, {
   derive: (v, d) => { d.movePct += v * 100; },
 });
-def('affix:cond_easeExhaustion', v => `you tire ${pct(v)} more slowly: sprinting costs less and you recover faster`, {
+def('affix:cond_easeExhaustion', v => `+${n1(v)} health a second — you tire less easily`, {
   derive: (v, d) => { d.staminaEase = (d.staminaEase || 0) + v; d.hpRegen += v; },
 });
-def('affix:cond_nightWard', v => `+${pct(v)} armour after dark, when the worst of it comes out`, {
+def('affix:cond_nightWard', v => `+${pct(v)} armour after dark`, {
   derive: (v, d, unit) => { if (unit.atNight) d.armorPct += v * 100; },
 });
-def('affix:cond_watch', v => `you sleep lightly: +${n1(v)} health a second while you stand still`, {
+def('affix:cond_watch', v => `+${n1(v)} health a second while you are standing still`, {
   derive: (v, d, unit) => { if (!(unit.moving > 0)) d.hpRegen += v; },
 });
-def('affix:cond_vehicleDmg', v => `+${pct(v)} damage while you are mounted — it is meant to be swung from the saddle`, {
+def('affix:cond_vehicleDmg', v => `+${pct(v)} damage while you are mounted`, {
   dmgOut: (v, c) => (c.self?.mounted ? 1 + v : 1),
 });
-def('affix:cond_roadFind', v => `+${pct(v)} better loot from anything you kill away from a settlement`, {
+def('affix:cond_roadFind', v => `+${pct(v)} better loot from everything you kill`, {
   derive: (v, d) => { d.magicFind += v * 100; },
 });
 // `manaRegen` is one unique's spelling of `mana_regen`. One line beats a data migration.
@@ -300,56 +307,59 @@ def('affix:manaRegen', v => `+${n1(v)} mana a second`, { field: 'mpRegen', plain
 
 // The BASE reach of a light, and separately the affix that adds to it — one says "lights 34 metres",
 // the other says "lights 12 more metres", and a card carrying both reads correctly.
-def('affix:cond_lightBase', v => `lights ${n1(v)} metres of ground`, {
+def('affix:cond_lightBase', v => `Lights ${n1(v)} metres of ground around you`, {
   derive: (v, d) => { d.lightRange = Math.max(d.lightRange || 0, v); },
 });
-def('affix:cond_mountBase', v => `carries you at ${n1(v)}x your own pace`, {
+def('affix:cond_mountBase', v => `Rides at ${n1(v)}\u00d7 your walking speed`, {
   derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
 });
-def('affix:cond_mountWind', v => `${n1(v)} seconds of hard riding before it blows`, {
+def('affix:cond_mountWind', v => `Gallops for ${n1(v)} seconds before it has to drop back to a walk`, {
   derive: (v, d) => { d.mountStamina = Math.max(d.mountStamina || 0, v); },
 });
-def('affix:cond_lightRange', v => `lights ${n1(v)} more metres of ground`, {
+def('affix:cond_lightRange', v => `Lights ${n1(v)} more metres of ground around you`, {
   derive: (v, d) => { d.lightRange = (d.lightRange || 0) + v; },
 });
-def('affix:cond_lightSteady', v => `${pct(v)} less likely to be noticed while it is lit`, {
+def('affix:cond_lightSteady', v => `Enemies are ${pct(v)} less likely to notice you while it is lit`, {
   derive: (v, d) => { d.stealth = (d.stealth || 0) + v; },
 });
-def('affix:cond_lightWard', v => `${pct(v)} less damage from anything standing in its light`, {
-  dmgIn: (v) => 1 - v,
+// The old line promised "less damage from anything standing in its light" and the hook took the
+// share off EVERY hit whether anything was lit or not. Nothing here knows where the light falls, so
+// the line now says what the hook actually does, gated on carrying a light at all.
+def('affix:cond_lightWard', v => `You take ${pct(v)} less damage while you are carrying a light`, {
+  dmgIn: (v, c) => ((c.self?.derived?.lightRange || 0) > 0 ? 1 - v : 1),
 });
-def('affix:cond_lightReveal', v => `shows chests and doorways ${n1(v)} metres further out`, {
+def('affix:cond_lightReveal', v => `Shows chests and doorways ${n1(v)} metres further out`, {
   derive: (v, d) => { d.revealRange = (d.revealRange || 0) + v; },
 });
 
-def('affix:cond_mountSpeed', v => `+${n1(v)}x to how fast it carries you`, {
+def('affix:cond_mountSpeed', v => `+${n1(v)}\u00d7 to how fast it carries you`, {
   derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
 });
-def('affix:cond_mountStamina', v => `${n1(v)} more seconds of hard riding before it blows`, {
+def('affix:cond_mountStamina', v => `+${n1(v)} seconds of gallop before it has to drop back to a walk`, {
   derive: (v, d) => { d.mountStamina = (d.mountStamina || 0) + v; },
 });
-def('affix:cond_mountSlope', v => `${pct(v)} less slowed by broken ground and hills`, {
+def('affix:cond_mountSlope', v => `Loses ${pct(v)} less speed to hills and broken ground`, {
   derive: (v, d) => { d.mountSlope = (d.mountSlope || 0) + v; },
 });
-def('affix:cond_mountTrample', v => `rides down what it runs into for ${n1(v)} damage`, {
+def('affix:cond_mountTrample', v => `Rides down whatever it runs into for ${n1(v)} damage`, {
   derive: (v, d) => { d.trample = (d.trample || 0) + v; },
 });
-def('affix:cond_mountCalm', v => `${pct(v)} less likely to throw you when something charges`, {
+def('affix:cond_mountCalm', v => `${pct(v)} less likely to throw you when something charges it`, {
   derive: (v, d) => { d.mountCalm = (d.mountCalm || 0) + v; },
 });
 
 // Quivers add DAMAGE, not armour — the play-test's change, and the reason they are worth a slot.
-def('affix:cond_quiverDamage', v => `+${n1(v)} damage on every arrow`, {
+def('affix:cond_quiverDamage', v => `+${n1(v)} damage on every arrow you loose`, {
   derive: (v, d) => { d.arrowDamage = (d.arrowDamage || 0) + v; },
 });
-def('affix:cond_quiverElement', () => 'the heads carry an element, and leave its mark', {});
-def('affix:cond_quiverSplit', v => `every shot is ${n1(v)} arrows`, {
+def('affix:cond_quiverElement', (v, a) => `Every arrow lands as ${a?.element || 'its element'} and leaves that element's mark`, {});
+def('affix:cond_quiverSplit', v => `Every shot looses ${n1(v)} arrows instead of one`, {
   derive: (v, d) => { d.arrowsPerShot = Math.max(d.arrowsPerShot || 1, v); },
 });
-def('affix:cond_quiverHoming', v => `the heads turn toward what you aimed at`, {
+def('affix:cond_quiverHoming', () => 'Arrows steer toward whatever you aimed at', {
   derive: (v, d) => { d.arrowHoming = (d.arrowHoming || 0) + v; },
 });
-def('affix:cond_quiverBurst', v => `arrows burst on impact for ${n1(v)} metres`, {
+def('affix:cond_quiverBurst', v => `Arrows burst on impact, catching everything within ${n1(v)} metres`, {
   derive: (v, d) => { d.arrowBurst = Math.max(d.arrowBurst || 0, v); },
 });
 
@@ -428,6 +438,16 @@ def('legendary:nemesis_hunter', 'Double damage to rares and bosses; killing one 
 });
 def('legendary:no_night_raids', 'Nothing ambushes you in the dark — night spawns leave you alone.', { noAmbush: () => 1 });
 
+/**
+ * Derived stats whose ONLY consumer is one of the hooks above.
+ *
+ * `js/pets.js` asks `rpg.fx.product(owner, 'petPower')` and nothing else, so a stat that a perk
+ * adds to the sheet can never reach a companion unless it is folded in here.
+ */
+export const DERIVED_INTO_HOOK = {
+  petPower: d => 1 + (d.petDamagePct || 0) / 100,
+};
+
 /** Every id the registry knows, for the tests and the "nothing is inert" audit. */
 export const EFFECT_IDS = Object.keys(EFFECTS);
 
@@ -447,7 +467,10 @@ export function describeAffix(affix) {
   const id = effectFor(affix);
   if (!id) return `${affix.name || affix.stat}: ${affix.value}`;
   const e = EFFECTS[id];
-  return e.desc(affix.value ?? 1);
+  // The AFFIX goes through too, not just its number: `castElement` and `cond_quiverElement` carry
+  // no number at all and everything they have to say is on the affix ("Every hit lands as fire"),
+  // which is why they used to print a sentence with no element in it.
+  return e.desc(affix.value ?? 1, affix);
 }
 
 /**
@@ -612,6 +635,11 @@ export class Effects {
     c.rt = this.rt(unit); c.self = unit;
     let total = 1;
     for (const { e, v } of this.effects(unit)) if (e[name]) total *= e[name](v, c) || 1;
+    // …and the derived sheet gets a say where the only reader is a hook. `js/pets.js` asks for
+    // `petPower`, never for `derived.petDamagePct`, so every perk node and keystone that said
+    // "companions hit 18% harder" was doing nothing at all. One table, so the seam is visible.
+    const fold = DERIVED_INTO_HOOK[name];
+    if (fold && unit.derived) total *= fold(unit.derived) || 1;
     return total;
   }
   /** The largest value any effect offers for this hook (cost cuts, mana shields — they do not stack). */

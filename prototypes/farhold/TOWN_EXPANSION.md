@@ -339,17 +339,17 @@ The user: landmarks are "a couple of random models thrown on top of a coordinate
 
 | # | Item | Recommendation |
 |---|---|---|
-| 10.1 | **A waypoint in every settlement** | A visible structure — a stone, an arch, a brazier — placed by the plan. |
-| 10.2 | **Activated by ENTERING the town** | Crossing the boundary is enough. No need to walk to it. |
+| 10.1 | **One waypoint design, everywhere** | A round concrete pad with arcane sigildry cut into it, **identical on every world and in every culture**. Dark and inert until activated; the sigils light when it is. It is not a local monument — it is one network, and it must read as one thing. |
+| 10.2 | **Activated by ENTERING the town** | Crossing the boundary is enough. No need to walk to it. The pad lights up wherever it is standing. |
 | 10.3 | **Always present, even before activation** | Diablo 2 rules, as requested. Shown greyed on the map. |
-| 10.4 | **Click a waypoint on the map to travel** | Between activated waypoints only. |
+| 10.4 | **Click a waypoint on the map to travel** | Between activated waypoints only. **You arrive standing on the sigil**, never beside it or above it. |
 | 10.5 | **Keep "Go here" for debugging** | The user considers it cheating but wants it retained. Mark it as a debug tool. |
 | 10.6 | **Waypoints saved per world** | Part of the save, like the map's learned region names. |
 | 10.7 | **Travel costs time** | In-game hours pass; it is fast travel, not teleportation. |
 | 10.8 | **Travel is blocked in combat** | And underground. |
-| 10.9 | **A travel animation or screen** | Not an instant cut. |
+| 10.9 | **A travel animation or screen** | Not an instant cut. The sigils spin up, the light rises, and you are gone. |
 | 10.10 | **Waypoint list in the journal** | With zone, level band and the faction holding it. |
-| 10.11 | **Culture-specific waypoint models** | Elf arch vs dwarf stone vs undead spire. |
+| 10.11 | **Towns and cities ONLY** | No waypoint at a bandit camp, fort, cult site, ruin or any other hostile landmark. A waypoint is somewhere safe you can always get back to; putting one in a camp you have to fight through defeats the point. Player-built bases are the one exception — see `BUILDING_EXPANSION.md`. |
 | 10.12 | **Waypoints on the minimap** | With a rim arrow when off screen. |
 | 10.13 | **Map shows discovered POIs** | With their purpose as a hover line. |
 | 10.14 | **Map filter by type** | Towns, POIs, enemy structures, waypoints. |
@@ -357,7 +357,7 @@ The user: landmarks are "a couple of random models thrown on top of a coordinate
 | 10.16 | **Map legend covers every icon** | Nothing unexplained. |
 | 10.17 | **Route preview** | Draw the road route between two points. |
 | 10.18 | **Distance and travel-time readout** | On hover. |
-| 10.19 | **Waypoints unlock a fast-travel achievement line** | Small reward for network completion. |
+| 10.19 | **The Town Portal** | Travelling to a waypoint opens a **portal at that waypoint back to where you just were**. Step through it to return. Opening a new one closes any existing portal, so there is never more than one. Full design in `BUILDING_EXPANSION.md`. |
 | 10.20 | **Test: every settlement has exactly one reachable waypoint** | And entering the boundary activates it. |
 
 ---

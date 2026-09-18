@@ -20,7 +20,7 @@ import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
-import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, canGoOffhand } from './weapons.js';
+import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, oneHanded } from './weapons.js';
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
 // js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
 // every Branding talent were doing nothing to an enemy. See `strike` for how it is applied once.
@@ -551,6 +551,16 @@ export class Rpg {
     }
     d.armor *= 1 + d.armorPct / 100;
 
+    /**
+     * A QUIVER ADDS DAMAGE TO EVERY ARROW — which is the entire point of the slot, and it was not
+     * happening. `derived.arrowDamage` was computed by four affixes and one perk node and read by
+     * nobody: an arrow's damage is rolled by `strike` off `derived.damage`, and nothing added the
+     * quiver to it. Folding it into `damageFlat` while a bow is held is the honest fix, because
+     * `damageFlat` is exactly "how much more every hit is worth" and it is already in the damage
+     * formula below. Put a sword back on and the quiver stops counting, as it should.
+     */
+    if (unit.equipment?.weapon?.ranged && d.arrowDamage) d.damageFlat += d.arrowDamage;
+
     d.maxHp += d.con * (b.hpPerCon ?? 4);
     d.maxMp += d.int * (b.mpPerInt ?? 2);
     d.critChance += d.dex * 0.2;
@@ -656,6 +666,16 @@ export class Rpg {
     const hpFrac = full || !before ? 1 : Math.min(1, (unit.hp ?? d.maxHp) / (before.maxHp || d.maxHp));
     const mpFrac = full || !before ? 1 : Math.min(1, (unit.mp ?? d.maxMp) / (before.maxMp || d.maxMp));
     unit.derived = d;
+    /**
+     * HOW FAR THE LIGHT REACHES, PUT BACK ON THE LAMP.
+     *
+     * `js/main.js` lights the world with `light.setRange(player.equipment.light?.range)` — the
+     * BASE number off the item — so the `Broad` affix ("+12 more metres of ground") and the perk
+     * that reaches twelve metres further were both computed into `derived.lightRange` every frame
+     * and thrown away. `d.lightRange` is rebuilt from nothing on every refresh, so writing it back
+     * cannot compound: it is always base + affixes + perks, never the last answer plus more.
+     */
+    if (unit.equipment?.light && d.lightRange > 0) unit.equipment.light.range = d.lightRange;
     unit.maxHp = d.maxHp; unit.maxMp = d.maxMp;
     unit.hp = Math.max(1, Math.round(d.maxHp * hpFrac));
     unit.mp = Math.round(d.maxMp * mpFrac);
@@ -672,6 +692,27 @@ export class Rpg {
       if (why) return { refused: why };
     }
     let slot = into || (item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot);
+    /**
+     * A ONE-HANDED WEAPON GOES IN THE FREE HAND.
+     *
+     * "Swords cannot be equipped in the off-hand… dual wielding is supposed to work." It never
+     * could: the bag has one click and that click asked for `weapon`, so a second sword always
+     * replaced the first and the off hand was only ever reachable for shields. The rule now, when
+     * no slot was asked for by name:
+     *
+     *   * the main hand is holding a one-hander, and the off hand is empty,
+     *   * the new weapon is a one-hander too,
+     *   * and it is NOT better than what is already in the main hand
+     *
+     * then it goes in the off hand and you are dual wielding. If it IS better it takes the main
+     * hand, because putting your best weapon in the hand that hits for 62% is never what you meant.
+     */
+    if (slot === 'weapon' && !into && oneHanded(item)) {
+      const main = player.equipment.weapon;
+      if (main && oneHanded(main) && !player.equipment.offhand && itemScore(item) <= itemScore(main)) {
+        slot = 'offhand';
+      }
+    }
     // A ring goes on whichever hand is free; with both full it replaces the WEAKER one, because
     // throwing away your best ring for a worse one is never what you meant.
     if (slot === 'ring' && !into) {
@@ -894,13 +935,30 @@ export class Rpg {
     // dodge has ever meant — so `of Accuracy` is worth having against anything nimble.
     const accuracy = (a?.hit ?? attacker.hit ?? 0);
     const dodge = Math.max(0, (d?.dodge ?? defender.dodge ?? 0) - accuracy * 0.5) / 100;
-    if (rng() < Math.min(0.35, dodge)) return { dodged: true, amount: 0, crit: false };
+    if (rng() < Math.min(0.35, dodge)) {
+      // RIPOSTE, the melee talent node: "blocking or dodging leaves your next swing a guaranteed
+      // critical". It was a perk flag nothing in the game read. A dodge is only ever decided here,
+      // so this is the only place that can arm it.
+      if (defender.perkFlags?.riposte) defender.riposteReady = true;
+      return { dodged: true, amount: 0, crit: false };
+    }
 
     // the attacker's affixes get a say before the roll: crit chance, then the multipliers
     const ctx = { self: attacker, target: defender, element, skill, applyStatus, baseDamage: (dmgRange[0] + dmgRange[1]) / 2 };
     const critBonus = attacker.equipment ? this.fx.critBonus(ctx) : 0;
-    const crit = rng() * 100 < (a?.critChance ?? attacker.critChance ?? 3) + critBonus;
+    // a riposte spends itself on the next swing, whatever the dice say
+    const riposte = !!(attacker.perkFlags?.riposte && attacker.riposteReady);
+    if (riposte) attacker.riposteReady = false;
+    const crit = riposte || rng() * 100 < (a?.critChance ?? attacker.critChance ?? 3) + critBonus;
     ctx.crit = crit;
+
+    /**
+     * The talents that land ON A HIT, parked on the player by `js/skills.js` when the skill was
+     * cast. `js/main.js` never sees an individual hit — it hands a shape to `field.strikeArea` and
+     * the strikes happen in here — so Shattering, Draining, Cauterise and Branding had nowhere to
+     * run and were being thrown away with the plan.
+     */
+    const rules = (attacker.castRules && skill && attacker.castRules.skill === skill) ? attacker.castRules : null;
 
     let amount = rng.range(dmgRange[0], dmgRange[1]) * multiplier;
     if (attacker.equipment) {
@@ -909,6 +967,31 @@ export class Rpg {
     }
     if (element !== 'physical' && a?.spellPower) amount *= 1 + a.spellPower;
     if (crit) amount *= 1 + (a?.critDamage ?? attacker.critDamage ?? 50) / 100;
+
+    /**
+     * WHAT THE DEFENDER IS ALREADY SUFFERING.
+     *
+     * `shock` says it "leaves the target taking more of everything", Branding says the same, and
+     * neither did anything to an enemy: `js/main.js` multiplies by `incomingFrom(victim)` when an
+     * ENEMY swings and never when the player does. Applied here for the player's swings only —
+     * `attacker.equipment && !defender.equipment` is exactly "the player is hitting something that
+     * is not the player" — so the enemy path is untouched and nothing is counted twice.
+     */
+    if (attacker.equipment && !defender.equipment) amount *= incomingFrom(defender);
+
+    /**
+     * FAR SHOT, the ranged keystone: "arrows and bolts hit harder the further they have flown, up
+     * to half again at full range… everything within four metres of you takes a quarter less."
+     *
+     * Needs to know how far apart the two are, and only the enemy carries a position — so this is
+     * live the moment `js/main.js` keeps `player.x` / `player.z` in step with the controller (one
+     * line in `tick`; see the report). Until it does, the guard simply leaves it alone rather than
+     * pretending with a made-up distance.
+     */
+    if (attacker.perkFlags?.farShot && attacker.x != null && defender.x != null) {
+      const away = Math.hypot(defender.x - attacker.x, defender.z - attacker.z);
+      amount *= away < 4 ? 0.75 : 1 + Math.min(0.5, (away - 4) / 42 * 0.5);
+    }
 
     // armour, less whatever the attacker's affixes let it ignore
     let armor = d?.armor ?? defender.armor ?? 0;
@@ -926,6 +1009,7 @@ export class Rpg {
     if (d?.blockChance && rng() * 100 < d.blockChance) {
       blocked = Math.min(amount, d.blockPower || 0);
       amount -= blocked;
+      if (defender.perkFlags?.riposte) defender.riposteReady = true;   // block arms it too
     }
     amount = Math.max(blocked ? 0 : 1, Math.round(amount));
 
@@ -973,6 +1057,40 @@ export class Rpg {
       defender.hp = Math.max(0, before - 1);
       result.dead = defender.hp <= 0;
       if (typeof console !== 'undefined') console.warn('farhold: a strike produced a non-number', { attacker: attacker.name, defender: defender.name, dmgRange });
+    }
+
+    /**
+     * THE SKILL TALENTS THAT PAY OUT ON A HIT.
+     *
+     * Four of them, all of which used to be a sentence on the Skills screen and nothing else:
+     *
+     *   Shattering — armour off, and it stays off, the same way `cond_sunderOnHit` works.
+     *   Draining   — a share of the damage comes back to you.
+     *   Cauterise  — a critical also burns, through whatever status hook the caller gave us.
+     *   Branding   — a mark that makes everything else hurt more, as a real status so it ticks down.
+     *
+     * …plus Hunger, which cannot reach the skill bar from here, so the seconds owed are left on the
+     * player and `js/skills.js` `update` hands them to the right slot on the next frame.
+     */
+    if (rules && amount > 0) {
+      if (rules.sunder) defender.armor = Math.max(0, (defender.armor || 0) - rules.sunder);
+      if (rules.leech && attacker.hp != null) {
+        attacker.hp = Math.min(attacker.maxHp ?? attacker.hp, attacker.hp + Math.round(amount * rules.leech));
+      }
+      if (rules.critBurn && crit && applyStatus) {
+        applyStatus(defender, 'burn', {
+          seconds: rules.critBurnSeconds || 4, perSecond: Math.max(1, (amount * rules.critBurn) / (rules.critBurnSeconds || 4)),
+          name: 'Cauterised', element: 'fire',
+        });
+      }
+      if (rules.mark && applyStatus) {
+        applyStatus(defender, 'marked', {
+          seconds: rules.markSeconds || 6, takeMore: rules.mark, name: 'Branded', kind: 'debuff', element: 'arcane',
+        });
+      }
+      if (rules.killRefund && defender.hp <= 0) {
+        attacker.cooldownRefund = { skill: rules.skill, seconds: rules.killRefund };
+      }
     }
 
     // after the hit: streaks, bleeds, mana on hit, first-hit marks
@@ -1077,6 +1195,25 @@ export class Rpg {
       const colour = rare ? '#c8a24a' : item.rarity === 'rare' ? '#8a7a4a' : item.rarity === 'magic' ? '#4a5a7a' : null;
       const target = key === 'head' ? 'hat' : key === 'chest' ? 'top' : key === 'legs' ? 'bottom' : 'shoes';
       out[target] = { id: part, ...(colour ? { color: colour } : {}) };
+    }
+
+    /**
+     * THE LIGHT YOU ARE CARRYING, ON THE BODY.
+     *
+     * "Torches and lights need a model on the player — a held torch, a belt-mounted lantern." The
+     * light has its own slot (so it never costs you a shield), and NOTHING drew it: `applyGearLook`
+     * only looked at `equipment.offhand`, so a torch burned in the dark with nothing in your hand.
+     *
+     * A torch is carried, so it goes in the off hand when that hand is free. A lantern and a wisp
+     * lamp hang off the belt, so they go on the `decor` slot and you keep both hands — which is
+     * also why they are the ones worth buying. The parts are in avatar-3d/js/chibi2-gear.js.
+     */
+    const light = player.equipment?.light;
+    if (light) {
+      const held = light.look?.offhand || 'torch';
+      const colour = light.color || light.look?.color || '#c08040';
+      if (held === 'torch' && !player.equipment.offhand) out.offhand = { id: 'torch', color: colour };
+      else out.decor = { id: held === 'lamp' ? 'wisp_lamp' : 'belt_lantern', color: colour };
     }
     return out;
   }

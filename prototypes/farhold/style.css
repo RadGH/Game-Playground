@@ -515,7 +515,10 @@ body {
   border-bottom: 1px solid #1e2836; padding-bottom: 3px; }
 .trade-rack:first-child { margin-top: 2px; }
 .trade-rack h4 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-  color: #7fd8ff; }
+  color: #7fd8ff; white-space: nowrap; }
+/* the note wraps, the heading does not — "Boats and ships" broke over two lines and read as two
+   headings with a rack between them */
+.trade-rack-note { flex: 1; min-width: 0; }
 .trade-rack-note { font-size: 11px; color: #7f8ea4; }
 .trade-row .talk-btn { margin-top: 0; }
 
@@ -1311,6 +1314,21 @@ body {
 .perk-arm { display: inline-flex; align-items: center; gap: 5px; color: #9fb0c8; }
 .perk-arm i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .perks-body { display: flex; gap: 12px; flex: 1; min-height: 460px; }
+
+/* D9/D10: the two controls in the forest's head bar. The search box is deliberately plain — a wide
+   pill in a row of chips reads as "type here" without a label taking the space. */
+.perk-search {
+  width: 170px; min-width: 0; box-sizing: border-box;
+  background: #0c111b; color: var(--ink, #cfe0ef); border: 1px solid #2a3446; border-radius: 12px;
+  padding: 3px 10px; font: inherit; font-size: var(--fs-sm, 12px);
+}
+.perk-search:focus { outline: none; border-color: var(--accent, #3f9fd8); }
+.perk-search::placeholder { color: var(--ink-faint, #7f8ea4); }
+#perk-search-note { white-space: nowrap; }
+#perk-search-note.bad { color: #ffb36a; }
+/* a checkbox that sits in a row of chips has to look like one, or it reads as a stray tick box */
+.perk-check { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.perk-check input { margin: 0; accent-color: var(--accent, #3f9fd8); cursor: pointer; }
 /* The buffer is sized from this element's own box (see hud.js `perkView`), so it must not be given
    an intrinsic size to argue with — `flex: 1` owns the width, `align-self: stretch` the height. */
 .perk-canvas {
@@ -1507,14 +1525,14 @@ body {
 .tab-body[data-tab="skills"]:not(.hidden) {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 168px minmax(0, 1fr);
+  grid-template-rows: 186px minmax(0, 1fr);
   grid-template-areas: "bar" "tree";
   gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
 }
 .col-bar { grid-area: bar; }
 .col-tree { grid-area: tree; }
 @media (max-width: 1440px) {
-  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 150px minmax(0, 1fr); }
+  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 168px minmax(0, 1fr); }
 }
 /* The in-game bar and this screen used to share nothing — the screen was a text list and the bar
  * six boxes, and neither showed which talents were on a skill. This strip is both, and it is the

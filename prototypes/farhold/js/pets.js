@@ -7,8 +7,13 @@
 //
 // The AI is three states and nothing clever:
 //   follow   — stay inside `follow` metres of the owner, at a slot around them so they do not stack
-//   engage   — something is inside `engage` metres of the owner: go and hit it
+//   engage   — something is inside the aggro range of the owner, or something is hurting one of
+//              them: go and hit it. A companion moves at the owner's sprint speed getting there.
 //   return   — too far from the owner (`leash`), give up and come back
+//
+// Round 11 fixed three things that made companions useless: they were reading the enemy list of a
+// planet you had already left, they never re-costed themselves when their owner levelled (so a
+// level 1 sentry was still swinging for 1 at level 20), and they only ever looked 22 m at 4 m/s.
 //
 //   const pets = createPets({ scene, terrain, rpg, defs, balance, field });
 //   await pets.summon('bone_thrall', owner, { count: 2 });
@@ -18,7 +23,7 @@
 // that says "your companions hit 40% harder" is a multiplier in one place.
 
 import * as THREE from 'three';
-import { makeActor, setActorAnim } from './actors.js';
+import { makeActor, setActorAnim, activeEnemyField } from './actors.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { tickStatuses, slowOf } from './skills.js';
 
@@ -49,6 +54,38 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
   let pending = 0;
   let currentTerrain = terrain;
 
+  /**
+   * THE ENEMY LIST IT IS ACTUALLY LOOKING AT.
+   *
+   * The field handed in here is the one that existed at boot. Landing on another world throws it
+   * away and builds a new one, and nothing ever told the companions — so after one flight a pet was
+   * reading an empty list belonging to a dead planet, which is why "my pet stood beside me getting
+   * attacked and died, without even retaliating": there was nothing for it to retaliate AGAINST as
+   * far as it could see. `activeEnemyField()` is whichever field is live now.
+   */
+  let boundField = field;
+  const live = () => (boundField ? (activeEnemyField() || boundField) : null);
+
+  /**
+   * HOW FAR A COMPANION LOOKS, AND HOW FAST IT MOVES.
+   *
+   * balance.json still says a pet notices things 22 m away and runs at its own 4-5 m/s, and those
+   * are the numbers behind "too slow and unobservant to be useful". A sprinting player does 11.3
+   * m/s (moveSpeed x runMultiplier), so a pet at 4.4 falls behind every time you run at something —
+   * it arrives after the fight. Until balance.json is retuned we take the LARGER of its number and
+   * ours; `pets.aggro` in balance.json, when someone adds it, wins outright.
+   */
+  const FLOOR = { aggro: 55 };
+  const engageAt = Math.max(cfg.aggro ?? 0, cfg.engage ?? 0, FLOOR.aggro);
+  // the leash has to clear the aggro range or a pet turns for home the moment it sets off
+  const leash = Math.max(cfg.leash ?? 0, engageAt + 12);
+  const sprint = (balance.player?.moveSpeed ?? 5.4) * (balance.player?.runMultiplier ?? 2.1);
+
+  /** Companions waiting out their cooldown: `{ defId, owner, left }`. */
+  const fallen = [];
+  /** Last frame's owner health, so a companion can tell that its owner is being hit. */
+  let ownerHpSeen = null;
+
   const byId = Object.fromEntries(defs.map(d => [d.id, d]));
 
   /** Build a live pet from a table entry, scaled off its owner. */
@@ -73,6 +110,33 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       state: 'follow', swingTimer: 0, hitFlash: 0, slot: pets.length,
       owner,
     };
+  }
+
+  /**
+   * A COMPANION IS ONLY AS STRONG AS THE DAY IT WAS SUMMONED — and that is most of "the sentry
+   * deals no damage".
+   *
+   * `make()` reads `owner.level` once. A tinker who summoned their sentry at level 1 and fought
+   * their way to level 20 still had a level 1 sentry: 6-11 raw damage against armour built for level
+   * 20, which `rpg.strike` floors at 1 a hit. It played its attack, it rolled its damage, and the
+   * number was 1 — which from across the field looks exactly like doing nothing at all.
+   *
+   * So a companion is re-costed whenever its owner gains a level, keeping the share of health it had
+   * (levelling up should not heal your pet, nor hurt it).
+   */
+  function retune(p) {
+    const def = byId[p.defId];
+    const level = p.owner?.level || 1;
+    if (!def || level === p.level) return;
+    const frac = p.maxHp > 0 ? p.hp / p.maxHp : 1;
+    const scale = Math.pow(cfg.perLevel ?? 1.17, level - 1);
+    const power = rpg.fx.product(p.owner, 'petPower');
+    const health = rpg.fx.product(p.owner, 'petHealth');
+    p.level = level;
+    p.maxHp = Math.max(1, Math.round((def.hp ?? 30) * scale * health));
+    p.hp = Math.max(1, Math.round(p.maxHp * frac));
+    p.dmg = (def.dmg ?? [4, 6]).map(v => Math.max(1, Math.round(v * scale * power)));
+    p.armor = Math.round((def.armor ?? 0) * scale);
   }
 
   /** Put `count` of a pet into the world beside its owner. */
@@ -117,9 +181,20 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
 
   /** One frame of every companion. `at` is where the owner is standing. */
   function update(dt, at, owner, hooks = {}) {
-    const leash = cfg.leash ?? 26;
     const followAt = cfg.follow ?? 4.5;
-    const engageAt = cfg.engage ?? 22;
+    const field = live();
+
+    // the owner losing health is the signal that something is on them: see the targeting below
+    const ownerHurt = ownerHpSeen != null && (owner?.hp ?? 0) < ownerHpSeen;
+    ownerHpSeen = owner?.hp ?? null;
+
+    // anything killed while you were away comes back on its own — the fall already promised it would
+    for (let i = fallen.length - 1; i >= 0; i--) {
+      fallen[i].left -= dt;
+      if (fallen[i].left > 0) continue;
+      const back = fallen.splice(i, 1)[0];
+      summon(back.defId, back.owner, { count: 1, at }).then(made => { if (made[0]) hooks.onReturned?.(made[0]); });
+    }
 
     for (let i = pets.length - 1; i >= 0; i--) {
       const p = pets[i];
@@ -132,12 +207,16 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
           scene.remove(p.actor.group);
           p.actor.dispose?.();
           pets.splice(i, 1);
-          // it comes back: the owner gets it again after the cooldown
+          // it comes back: the owner gets it again after the cooldown. `reviveSeconds` was in
+          // balance.json from the start and nothing read it, so "will come back" was a lie and a
+          // dead companion stayed dead for the rest of the run.
+          if (p.owner) fallen.push({ defId: p.defId, owner: p.owner, left: cfg.reviveSeconds ?? 14 });
           hooks.onFallen?.(p);
         }
         continue;
       }
 
+      retune(p);
       if (p.hitFlash > 0) p.hitFlash -= dt;
       if (p.swingTimer > 0) p.swingTimer -= dt;
       if (p.statuses) {
@@ -158,17 +237,36 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         continue;
       }
 
-      // pick a target: the nearest thing that is bothering the owner, or that the pet is fighting
+      /**
+       * WHAT IT SHOULD BE BITING.
+       *
+       * It used to be one rule — the enemy nearest the OWNER — which meant a companion being chewed
+       * on at the edge of a fight kept walking past its attacker to something else. Now, in order:
+       *
+       *   1. whatever is hurting the pet itself (its health went down since last frame)
+       *   2. whatever is hurting the owner (the same test, on the owner)
+       *   3. whatever it is already fighting
+       *   4. the nearest live enemy inside the aggro range
+       *
+       * 1 and 2 are read off health rather than from a "who hit me" message because the hit lands in
+       * main.js's hands, not here — and health going down is the honest version of the question
+       * anyway: something is hurting it, and whatever is nearest is what that something is.
+       */
+      const selfHurt = p._hpSeen != null && p.hp < p._hpSeen;
+      p._hpSeen = p.hp;
+
       let target = p.target;
-      if (target && (target.dying != null || Math.hypot(target.x - at.x, target.z - at.z) > leash * 1.4)) target = null;
-      if (!target && field) {
-        let best = null, bestD = engageAt;
+      if (target && (target.removed || target.dying != null || Math.hypot(target.x - at.x, target.z - at.z) > leash * 1.4)) target = null;
+      if (field && (selfHurt || ownerHurt || !target)) {
+        // measured from whoever is being hit: the pet when it is the one bleeding, else the owner
+        const fromX = selfHurt ? p.x : at.x, fromZ = selfHurt ? p.z : at.z;
+        let best = null, bestD = selfHurt || ownerHurt ? Math.max(engageAt, leash) : engageAt;
         for (const e of field.enemies) {
-          if (e.dying != null) continue;
-          const d = Math.hypot(e.x - at.x, e.z - at.z);
+          if (e.dying != null || e.removed) continue;
+          const d = Math.hypot(e.x - fromX, e.z - fromZ);
           if (d < bestD) { bestD = d; best = e; }
         }
-        target = best;
+        if (best || !target) target = best;
       }
       p.target = target;
 
@@ -193,12 +291,17 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       const dist = Math.hypot(dx, dz);
       if (dist > close) {
         p.facing = Math.atan2(dx, dz);
-        speed = p.speed * (p.state === 'return' || toOwner > 12 ? 1.5 : 1);
+        // A companion moves at the speed its owner can move, because anything slower means it turns
+        // up after the fight. Its own `speed` is only the floor now, and there is still a little
+        // extra for catching up from a long way back.
+        speed = Math.max(p.speed, sprint) * (p.state === 'return' || toOwner > 12 ? 1.2 : 1);
       } else if (p.state === 'engage' && target && p.swingTimer <= 0) {
         p.facing = Math.atan2(target.x - p.x, target.z - p.z);
         p.swingTimer = p.attackEvery;
         setActorAnim(p.actor, 'attack');
         const result = rpg.strike(p, target, rng, { element: p.ranged?.element || 'physical' });
+        // your minions' damage is your damage: this is what stops a guard walking off with the kill
+        field?.credit?.(target, result.amount);
         target.hitFlash = 0.18;
         if (target.state !== 'chase') target.state = 'chase';
         if (p.onHit?.length) field?.statusOnHit(p, target, statuses);
@@ -221,7 +324,7 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       p.actor.group.position.set(p.x, y, p.z);
       p.actor.group.rotation.y = p.facing;
       if (p.swingTimer <= 0 || p.state !== 'engage') {
-        setActorAnim(p.actor, speed > p.speed * 0.7 ? 'run' : speed > 0 ? 'walk' : 'idle');
+        setActorAnim(p.actor, speed > p.speed ? 'run' : speed > 0 ? 'walk' : 'idle');
       }
       p.actor.update(dt);
     }
@@ -271,11 +374,18 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
   function clear() {
     for (const p of pets) { scene.remove(p.actor.group); p.actor.dispose?.(); }
     pets.length = 0;
+    fallen.length = 0;
   }
 
   return {
     pets, summon, summonForClass, update, splash, nearest, heal, fall, clear,
     setTerrain: t => { currentTerrain = t; },
+    /** Point the companions at a different enemy field. Rarely needed: `live()` finds it anyway. */
+    setField: f => { boundField = f; },
+    /** What a companion can see and how fast it travels, for the tests and the debug menu. */
+    tuning: () => ({ aggro: engageAt, leash, sprint }),
+    /** Companions waiting out their revive cooldown. */
+    waiting: () => fallen.map(f => ({ defId: f.defId, left: Math.max(0, f.left) })),
     /** For the character sheet: name, health, what it is doing. */
     roster: () => pets.filter(p => p.dying == null).map(p => ({
       name: p.name, hp: Math.ceil(p.hp), maxHp: p.maxHp, state: p.state, level: p.level,

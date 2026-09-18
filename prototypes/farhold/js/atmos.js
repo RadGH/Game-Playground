@@ -121,6 +121,7 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     state.roll = 0;
     state.velocity.set(0, 0, 0);
     state.throttle = 0;
+    state.lift = 0;                     // …and nothing held over from the last flight
     state.parked = true;
     state.flying = true;
     lastYaw = state.yaw;

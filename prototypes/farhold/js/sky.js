@@ -43,7 +43,16 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   // or a short-period moon has a much faster clock than a distant one, and multiplying them all by
   // 150 makes the fast ones absurd. So each body gets its own scale, cut back until its apparent
   // motion is no more than `maxDegPerSecond` of sky — fast enough to watch, slow enough to believe.
-  const maxRate = ((cfg.maxSkyDegPerSecond ?? 1.2) * Math.PI) / 180;
+  //
+  // **Measured against the sun, not picked out of the air.** The cap was a flat 1.2°/s, and the sun
+  // itself only crosses the sky at 360° per day — 0.4°/s on a 900-second day. So a moon was allowed
+  // to move three times faster than the sun, which is exactly the *"planets and moons orbit at
+  // crazy speeds — pretty much all moons"* report: it read as a moon on a string rather than a moon
+  // in an orbit. The default is now a little over half the sun's own rate, so nothing in the sky
+  // ever outruns the thing the day is named after, and a moon still crosses in about a quarter of
+  // an hour. `maxSkyDegPerSecond` in `balance.json` overrides it if a world wants a busier sky.
+  const sunDegPerSecond = 360 / Math.max(1, dayLength);
+  const maxRate = ((cfg.maxSkyDegPerSecond ?? sunDegPerSecond * 0.6) * Math.PI) / 180;
   /** The scale this body may use, given how fast it would otherwise appear to move. */
   function clockFor(periodDays, ourPeriodDays, wanted) {
     // radians of sky per real second at the full scale: the SYNODIC rate, not the orbital one —

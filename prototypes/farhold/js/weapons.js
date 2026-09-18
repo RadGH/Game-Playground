@@ -146,8 +146,17 @@ export function patternGlyphs(item) {
  */
 export function oneHanded(item) {
   if (!item || item.type !== 'weapon') return false;
-  if (item.twoHanded || item.ranged) return false;
+  if (item.twoHanded) return false;
+  // A bow or a crossbow needs the hand that is not holding it. A WAND does not — `rpg.attuneWeapon`
+  // marks every wand `ranged` so it throws a bolt, and a wand has always been fine in either hand,
+  // so "ranged" alone is not the test.
+  if (needsBothToDraw(item)) return false;
   return true;
+}
+
+/** True for a bow, a crossbow or a javelin — something you have to draw or throw. */
+export function needsBothToDraw(item) {
+  return !!(item?.ranged && item.weaponCategory !== 'magic');
 }
 
 /** Can this go in the off hand at all, ignoring what is currently in the main one? */
@@ -166,7 +175,7 @@ export function canGoOffhand(item) {
  */
 export function markHands(item) {
   if (!item || item.type !== 'weapon') return item;
-  item.hands = item.twoHanded ? 2 : 1;
+  item.hands = oneHanded(item) ? 1 : 2;
   if (oneHanded(item)) item.offHandOk = true;
   return item;
 }
@@ -176,7 +185,7 @@ export function handedText(item) {
   if (!item || item.type !== 'weapon') return '';
   const p = profileOf(item);
   if (item.twoHanded) return `Two-handed ${p.name.toLowerCase()} — it takes both hands`;
-  if (item.ranged) return `Two-handed ${p.name?.toLowerCase() || 'bow'} — it takes both hands`;
+  if (needsBothToDraw(item)) return `Two-handed ${item.subtype || 'bow'} — it takes both hands to draw`;
   return `One-handed ${p.name.toLowerCase()} — it can go in either hand`;
 }
 
@@ -262,7 +271,7 @@ export function offhandRefusal(player, item) {
   }
   // A bow needs the hand that is not holding it. Nothing said so, so a bow could be dropped into
   // the off hand and then swing like a club.
-  if (item.type === 'weapon' && item.ranged && !hands.titanGrip) {
+  if (needsBothToDraw(item) && !hands.titanGrip) {
     return `${item.name} needs both hands to draw — it cannot go in the off hand.`;
   }
   return null;

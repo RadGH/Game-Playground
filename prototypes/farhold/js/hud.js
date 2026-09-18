@@ -54,6 +54,27 @@ const el = (tag, cls, text) => {
   return n;
 };
 
+/**
+ * What a boat or a ship is FOR, in the dry voice the rest of the character screen uses.
+ *
+ * Built from the vehicle's own numbers rather than its lore line, so the two dropdowns say what
+ * changes when you pick the other one.
+ */
+function vehicleFunction(slot, kind) {
+  if (!kind) return '';
+  // every figure is optional: a vehicle added later without one simply drops that part of the line
+  const bits = [];
+  if (slot === 'boat') {
+    bits.push('Water only');
+    if (kind.speed != null) bits.push(`${fmt(kind.speed)} m/s`);
+  } else {
+    bits.push('Reaches orbit');
+    if (kind.thrust != null) bits.push(`thrust ${fmt(kind.thrust)}×`);
+    if (kind.warp != null) bits.push(`warp ${fmt(kind.warp)}×`);
+  }
+  return bits.join(' · ');
+}
+
 /** The colour class for an item's name — the same rarity words Emberveil uses. */
 export function rarityClass(item) {
   if (!item) return 'rarity-normal';
@@ -172,6 +193,15 @@ export class Hud {
     this.onOpenSheet = onOpen;
     this.onCloseSheet = onClose;
     this.lines = [];
+    /**
+     * The last fifty lines, kept whether or not they are still on screen.
+     *
+     * The log is the only teacher this game has — every rule, every faction, every "that will not
+     * work yet" is said once in the corner and then pushed off the bottom in seconds. `L` puts this
+     * back on screen.
+     */
+    this.history = [];
+    this.historyOpen = false;
     this.sheetOpen = false;
     this.tab = 'character';
     this.bench = null;                 // the item on the crafting bench
@@ -197,6 +227,23 @@ export class Hud {
       } else return;
       e.preventDefault();
       this.log(`Minimap: ${Math.round(this.minimapSpan * 0.64)} km across.`);
+    });
+
+    /**
+     * `L` shows the last fifty lines of the log.
+     *
+     * Everything the game explains goes through five lines in the bottom corner and is then gone,
+     * with no way to read it again — so anything you looked away from was simply lost. Held off
+     * while the sheet is open, where `1`-`7` and `R` already own the keyboard.
+     */
+    window.addEventListener('keydown', e => {
+      if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      if (e.code !== 'KeyL' || this.sheetOpen) return;
+      // …and not over a screen that already owns the whole window
+      if (document.querySelector('#pause:not(.hidden), #map-screen:not(.hidden), .screen.chart:not(.hidden), #talk:not(.hidden)')) return;
+      e.preventDefault();
+      this.toggleLogHistory();
     });
 
     // Rich hover cards everywhere in the sheet. `title=""` was never going to be enough for an item
@@ -323,14 +370,39 @@ export class Hud {
 
   // ---------------------------------------------------------------- log
 
+  /**
+   * Twelve lines, not five.
+   *
+   * The box held nine and was only tall enough to show about five of them, so the one line that
+   * introduces a whole system — "The Bleak Moor is the Reach's ground." — was gone before it had
+   * been read. Twelve stay up, all fifty stay in `history`, and the text is brighter than it was.
+   */
   log(text, cls = '') {
     this.lines.unshift({ text, cls });
-    if (this.lines.length > 9) this.lines.pop();
+    if (this.lines.length > 12) this.lines.pop();
+    this.history.unshift({ text, cls });
+    if (this.history.length > 50) this.history.pop();
     const box = $('log');
-    box.replaceChildren(...this.lines.map(l => {
-      const div = el('div', l.cls, l.text);
-      return div;
-    }));
+    box.replaceChildren(...this.lines.map(l => el('div', l.cls, l.text)));
+    if (this.historyOpen) this.drawLogHistory();
+  }
+
+  /** `L` opens and closes the history panel. */
+  toggleLogHistory(on = !this.historyOpen) {
+    this.historyOpen = !!on;
+    const box = $('log-history');
+    if (!box) return;
+    box.classList.toggle('hidden', !this.historyOpen);
+    if (this.historyOpen) this.drawLogHistory();
+  }
+
+  /** The panel behind `L`: the last fifty lines, newest at the top, in the same colours. */
+  drawLogHistory() {
+    const box = $('log-history-lines');
+    if (!box) return;
+    box.replaceChildren(...(this.history.length
+      ? this.history.map(l => el('div', l.cls, l.text))
+      : [el('div', 'muted small', 'Nothing has happened yet.')]));
   }
 
   /** The one-line "press E to…" strip above the hint. */
@@ -533,7 +605,17 @@ export class Hud {
 
   // ---------------------------------------------------------------- bars and place
 
-  tick(player, { place, zone, clock, target, sky, weather, where }) {
+  tick(player, { place, zone, clock, target, sky, weather, where, flying = false }) {
+    /**
+     * E10: IN SPACE THE HUD WAS STILL THE GROUND'S.
+     *
+     * Health, mana, the status chips and the objective line all stayed up while flying, where
+     * nothing can hit you and nothing is a step away — and they sat over a minimap still drawing
+     * the surface of the world you had just left. The name and the XP bar stay: they are the only
+     * place the level is written.
+     */
+    this.flying = !!flying;
+    $('hud-left').classList.toggle('flying', this.flying);
     const hpPct = Math.max(0, player.hp / player.maxHp * 100);
     $('bar-hp-fill').style.width = hpPct + '%';
     $('bar-hp-text').textContent = player.barrier > 0
@@ -714,6 +796,83 @@ export class Hud {
     ctx.restore();
   }
 
+  /**
+   * The minimap, in space: the system from above instead of the ground you left.
+   *
+   * The canvas is never cleared between modes, so flying away from a world left the planet's
+   * surface — with a little player arrow standing on it — up for the whole flight. Everything here
+   * comes from the positions `space.js` has already worked out this frame, so there is no second
+   * copy of where anything is and nothing else has to be loaded to draw it.
+   *
+   * `bodies` are `{ x, z, au, giant, moon, target }` in AU, `ship` is `{ x, z }` in AU.
+   */
+  drawSystemMap({ bodies = [], ship = null, yaw = 0 } = {}) {
+    const canvas = $('minimap');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width;
+    ctx.imageSmoothingEnabled = true;
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = '#06080f';
+    ctx.fillRect(0, 0, size, size);
+
+    // fit the whole system, or the ship if it has wandered outside the outermost orbit. The floor is
+    // small on purpose: a red dwarf holds all of its worlds inside about half an AU, and a fixed
+    // one-AU box drew that system as five dots in the middle of nothing.
+    let reach = 0.2;
+    for (const b of bodies) reach = Math.max(reach, Math.hypot(b.x, b.z));
+    if (ship) reach = Math.max(reach, Math.hypot(ship.x, ship.z));
+    const span = reach * 2.25;
+    this.systemSpanAu = span;
+    const to = (x, z) => [x / span * size + size / 2, z / span * size + size / 2];
+
+    // the orbits first, so nothing is drawn through a planet
+    for (const b of bodies) {
+      const r = Math.hypot(b.x, b.z) / span * size;
+      if (!(r > 0.5)) continue;
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, r, 0, Math.PI * 2);
+      ctx.strokeStyle = b.target ? 'rgba(127,216,255,.5)' : 'rgba(120,150,190,.2)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // the star, then the worlds on their orbits
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffd24a';
+    ctx.fill();
+    for (const b of bodies) {
+      const [x, z] = to(b.x, b.z);
+      ctx.beginPath();
+      ctx.arc(x, z, b.giant ? 3.6 : 2.4, 0, Math.PI * 2);
+      ctx.fillStyle = b.target ? '#7fd8ff' : '#9fb0c8';
+      ctx.fill();
+      if (b.target) {
+        ctx.beginPath();
+        ctx.arc(x, z, 6.5, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(127,216,255,.8)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+    }
+
+    if (!ship) return;
+    const [sx, sz] = to(ship.x, ship.z);
+    ctx.save();
+    ctx.translate(sx, sz);
+    // the ship's heading is (sin yaw, cos yaw) looking down on the system, and the arrow is drawn
+    // pointing up the screen — hence the half turn
+    ctx.rotate(Math.PI - yaw);
+    ctx.beginPath();
+    ctx.moveTo(0, -6); ctx.lineTo(4.5, 5); ctx.lineTo(0, 2.5); ctx.lineTo(-4.5, 5); ctx.closePath();
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = 'rgba(6,8,15,.9)';
+    ctx.lineWidth = 1.6;
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
   drawMinimap(player, enemies = [], extras = [], markers = []) {
     const canvas = $('minimap');
     const ctx = canvas.getContext('2d');
@@ -856,6 +1015,8 @@ export class Hud {
 
   /** How much of the world the minimap window covers, in km — printed under it. */
   minimapScaleText() {
+    // in space the same box is the system seen from above, and km is the wrong unit for that
+    if (this.flying) return this.systemSpanAu ? `${fmt(this.systemSpanAu)} AU across` : '';
     return `${(this.minimapSpan * M_PER_CELL / 1000).toFixed(1)} km across`;
   }
 
@@ -1094,8 +1255,15 @@ export class Hud {
         }
         select.onchange = () => this.onSelectVehicle?.(slot, select.value);
         row.append(select);
-        const kind = spec.kinds[active];
-        row.append(el('span', 'muted small', kind?.lore || ''));
+        /**
+         * D7: what the thing DOES, not a joke about it.
+         *
+         * The line under these two dropdowns used to be the vehicle's lore — "Six logs and a great
+         * deal of rope. It floats, which is the entire specification." — on a screen that is
+         * otherwise a column of numbers. This is built out of the vehicle's own figures instead, so
+         * picking between two of them is a comparison rather than a read.
+         */
+        row.append(el('span', 'muted small', vehicleFunction(slot, spec.kinds[active])));
         kids.push(row);
       }
       vbox.replaceChildren(...kids);
@@ -2310,11 +2478,20 @@ export class Hud {
       zbox.replaceChildren(...(list.length ? list.map(z => {
         const n = el('div', 'zone-row' + (here && z.id === here.id ? ' here' : ''));
         const tone = zoneTone(z.midLevel, this.player?.level || 1);
-        // the descriptor used to live in a `title=` attribute, so you had to hover and wait for it
+        /**
+         * E12: THE DESCRIPTOR ONLY ON THE REGION YOU ARE IN.
+         *
+         * It is sampled from the biome under the region's middle, so with fifty-odd regions on a
+         * green world five rows in a row read "a wide stretch of warm, green open grass, easy going,
+         * open to the sea" — and where the name came out of Name Forge and the ground did not agree,
+         * "The Frost Wastes" was described as mild and well watered. One copy of it, on the row you
+         * are standing in, where it is telling you something you can check by looking up.
+         */
+        const mine = !!here && z.id === here.id;
         n.innerHTML = `<span>${z.name}${z.home ? ' <i class="muted small">(where you started)</i>' : ''}</span>
           <span class="zone-${tone}">level ${z.minLevel}–${z.maxLevel}</span>
-          <span class="muted small">${z.danger}</span>
-          <span class="zone-desc">${z.descriptor || ''}</span>`;
+          <span class="muted small">${z.danger}</span>`
+          + (mine && z.descriptor ? `<span class="zone-desc">${z.descriptor}</span>` : '');
         return n;
       }) : [el('p', 'muted small', 'No regions on this world.')]));
     }

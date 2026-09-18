@@ -304,18 +304,30 @@ export function createGearShop({ rpg } = {}) {
     /** What this merchant has on the shelf today, beyond its own trade. */
     stockFor(npc, level = 1, rng = Math.random) {
       const out = [];
-      // always the cheapest of each, so nobody is ever stranded without a light
-      out.push(make('torch', 'normal', level, rng));
-      out.push(make('pony', 'normal', level, rng));
-      out.push(make('quiver', 'normal', level, rng));
-      // …and a rolling selection of the better ones
-      for (const list of [SHOP_GEAR.mounts, SHOP_GEAR.lights, SHOP_GEAR.quivers]) {
-        // never the cheapest again — that one is already on the shelf above
-        const better = list.slice(1);
-        const key = better[Math.floor(rng() * better.length)] || list[0];
-        const rarity = rng() < 0.18 ? 'rare' : rng() < 0.55 ? 'magic' : 'normal';
-        out.push(make(key, rarity, level, rng));
+      /**
+       * ALL THREE, EVERY TIME — for mounts and lights.
+       *
+       * This used to stock the cheapest of each kind and then ONE randomly chosen better one, which
+       * meant a shop showed a Pitch Torch and, say, a Courser, and the Dray Elk and the Wisp Lamp
+       * might not turn up for an hour of walking between towns. "Where shops sell boats and ship,
+       * they should also sell torches and mounts. 3 of each" — so the mount rack and the light shelf
+       * are now a fixed, complete set, exactly like the boats and ships in the fold below them. What
+       * still rolls is the RARITY of the two dearer ones, so there is a reason to look twice at a
+       * shelf you have already seen.
+       *
+       * Quivers stay a rolling selection: there are six of them and they are loot, not a rack.
+       */
+      for (const list of [SHOP_GEAR.mounts, SHOP_GEAR.lights]) {
+        list.forEach((key, i) => {
+          // the cheapest is always plain, so the price a new character sees is the price on the base
+          const rarity = i === 0 ? 'normal' : rng() < 0.18 ? 'rare' : rng() < 0.55 ? 'magic' : 'normal';
+          out.push(make(key, rarity, level, rng));
+        });
       }
+      out.push(make('quiver', 'normal', level, rng));
+      const better = SHOP_GEAR.quivers.slice(1);
+      const key = better[Math.floor(rng() * better.length)] || SHOP_GEAR.quivers[0];
+      out.push(make(key, rng() < 0.18 ? 'rare' : rng() < 0.55 ? 'magic' : 'normal', level, rng));
       return out.filter(Boolean);
     },
     /** The vehicles this merchant will sell, as plain rows — they are not items. */

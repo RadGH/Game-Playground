@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 
-export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person · E talk/open/enter · F torch · H horse · J ship · M map · I sheet · O settings · ` debug';
+export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person · E talk/open/enter · F torch · H horse · J ship · M map · I sheet · L log · O settings · ` debug';
 
 /** Reads the keyboard and mouse. Pointer lock is optional — dragging works too. */
 export function createInput(dom) {
@@ -97,7 +97,7 @@ export function createInput(dom) {
  * `terrain` is a planet.js terrain; `balance` is data/balance.json.
  * `obstacles` is a list of ObstacleField (props, buildings) to be pushed out of.
  */
-export function createController(terrainIn, balance = {}, camera, { obstacles: obstaclesIn = [], settings = null } = {}) {
+export function createController(terrainIn, balance = {}, camera, { obstacles: obstaclesIn = [], settings = null, boat = null } = {}) {
   let obstacles = obstaclesIn;
   // Read through a binding, not a parameter: `setTerrain` swaps the whole floor out when the player
   // walks into a dungeon and back out again, and every sampler below has to follow it.
@@ -123,8 +123,21 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
     firstPerson: false, eyeHeight: 1.5,
     swimming: false, waterDepth: 0, waterSurface: 0,
     mounted: false,
+    /**
+     * THE BOAT PUTS ITSELF IN THE WATER.
+     *
+     * "Boats should automatically equip when you start swimming and increase water travel movement
+     * speed." A boat is an unlockable, not a slot you fiddle with (see js/gear.js), so there is
+     * nothing to equip by hand — the moment you are deep enough to swim, whichever boat you have
+     * selected goes under you, and it comes back out when you can stand up again. `boating` holds
+     * the spec while you are afloat so the renderer and the speed calculation can both read it.
+     */
+    boating: null,
     radius: b.bodyRadius ?? 0.45,
   };
+
+  /** Whichever boat is selected right now, or null if the game has not wired one through. */
+  const activeBoat = () => { try { return boat ? boat() : null; } catch { return null; } };
 
   const forward = new THREE.Vector3();
   const right = new THREE.Vector3();
@@ -190,15 +203,34 @@ export function createController(terrainIn, balance = {}, camera, { obstacles: o
     // deep enough to swim in, and you are actually down in it
     self.swimming = !!water && water.depth > swimDepth && self.y < water.surface + 0.2;
     if (self.swimming && self.mounted) self.mounted = false;     // the horse will not swim
-    if (self.swimming && !wasSwimming) out.enteredWater = true;
+    if (self.swimming && !wasSwimming) {
+      out.enteredWater = true;
+      // step into the boat on the way in, not on a key press
+      self.boating = activeBoat();
+      if (self.boating) out.boarded = self.boating;
+    }
+    if (!self.swimming && wasSwimming && self.boating) {
+      out.leftBoat = self.boating;
+      self.boating = null;
+    }
 
     // --- move
     let speed = 0;
     if (!frozen && input && (input.forward || input.strafe)) {
       const base = b.moveSpeed ?? 5.4;
       if (self.swimming) {
-        speed = b.swimSpeed ?? 2.7;
-        // backwards and sideways strokes are slower than a front crawl
+        /**
+         * A boat is the difference between crossing a lake and going round it.
+         *
+         * Swimming is 2.7 m/s, which is slower than walking on purpose — deep water is meant to be
+         * a wall you look for a way around. A boat turns that wall into a road: the raft you start
+         * with is 3.4, the skiff 5.6 and the cutter 8.2, so the cheapest boat is already quicker
+         * than swimming and the best one beats running on land. The speeds live on the boat in
+         * js/gear.js, not here, so buying a better one is the only thing that changes.
+         */
+        speed = self.boating?.speed || (b.swimSpeed ?? 2.7);
+        // backwards and sideways strokes are slower than a front crawl — and a boat still turns
+        // better than it reverses, so the same penalty reads correctly either way
         if (input.forward < 0) speed *= 0.65;
         else if (!input.forward) speed *= 0.75;
       } else {

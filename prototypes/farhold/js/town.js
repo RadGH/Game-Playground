@@ -448,7 +448,15 @@ export function createTownFolk(scene, terrain, opts = {}) {
        * expansive but enemies are few and far between"). Anything that wanders in from further out
        * is turned around by the flee rule in js/actors.js instead.
        */
-      return { x: s.wx, z: s.wz, r: Math.max(guardReach, wall + (cfg.safeMargin ?? 18)) };
+      /**
+       * The name rides along so somebody can say it.
+       *
+       * A player who walks to the edge of town watches a pack turn round and leave and has no idea
+       * why — the rule is invisible. `js/actors.js` says it out loud the first time it fires in a
+       * zone ("The hounds will not come inside Pebelkeep's watch"), and the minimap draws the circle,
+       * and neither can do that from a bare x/z/r.
+       */
+      return { x: s.wx, z: s.wz, r: Math.max(guardReach, wall + (cfg.safeMargin ?? 18)), name: s.name };
     }),
 
     /** Everyone worth a pip on the minimap: a stall, or somebody with work. */

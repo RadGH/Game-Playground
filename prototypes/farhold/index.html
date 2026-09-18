@@ -29,6 +29,9 @@
       <span class="pair"><label for="boot-seed">Seed</label>
         <input id="boot-seed" type="number" value="1"></span>
     </div>
+    <!-- A5: thirty classes in one dropdown, and no way to tell them apart. This fills in from
+         data/skills.json and data/classes.json every time the picker changes. -->
+    <div id="boot-class-card" class="class-card"></div>
     <details class="boot-knobs">
       <summary>World settings</summary>
       <div class="row">
@@ -99,7 +102,8 @@
       you do not want recycles into the material you make better things out of.
       <b>WASD</b> move · <b>Shift</b> run · <b>Space</b> jump · <b>click</b> swing ·
       <b>1–6</b> skills · <b>E</b> talk, open a chest, enter a dungeon · <b>F</b> torch ·
-      <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>I</b> character · <b>`</b> debug.
+      <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>I</b> character · <b>L</b> what has happened ·
+      <b>`</b> debug.
       The game saves itself as you play.</p>
   </div>
 </section>
@@ -140,6 +144,13 @@
 </div>
 
 <div id="log" class="hud"></div>
+<!-- A8: the log teaches the game and then scrolls away. `L` puts the last fifty lines back up. -->
+<div id="log-history" class="hud hidden">
+  <div class="lh-card">
+    <h3>What has happened <span class="dim">press <b>L</b> to close</span></h3>
+    <div id="log-history-lines"></div>
+  </div>
+</div>
 <!-- floating damage numbers, over whatever you just hit -->
 <div id="hitnums" class="hud"></div>
 <!-- ============================================================ the pause menu (Esc) -->
@@ -156,8 +167,8 @@
     <h3>Controls</h3>
     <div id="hint" class="keys">WASD move · Shift run · Space jump · click swing · <b>1–6</b> skills ·
       <b>E</b> talk / open a chest / enter a dungeon · <b>F</b> torch · <b>V</b> first person ·
-      <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>I</b> character · <b>O</b> settings ·
-      <b>`</b> debug<br><span class="dim">in space: W fly · Shift boost · hold Space warp · J land</span></div>
+      <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>I</b> character · <b>L</b> what has
+      happened · <b>O</b> settings · <b>`</b> debug<br><span class="dim">in space: W fly · Shift boost · hold Space warp · J land</span></div>
     <a class="back" href="../../index.html">← Playground</a>
   </div>
 </section>

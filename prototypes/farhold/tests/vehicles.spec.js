@@ -1,0 +1,138 @@
+// The boat, in the real page.
+//
+// "Boats should automatically equip when you start swimming and increase water travel movement
+// speed." The numbers are pinned in tests/vehicles.test.js; this is the part that only exists once
+// there is a browser — walking into a lake, the hull appearing under you, and the same stretch of
+// water taking less time in a boat you paid for.
+//
+// The shop half is here too: a merchant has to have all three mounts and all three lights on the
+// shelf, because the node test only proves `stockFor` returns them, not that the shop shows them.
+
+import { test, expect } from '@playwright/test';
+
+async function land(page, { seed = 11, cls = 'ranger', extra = '' } = {}) {
+  const errors = [];
+  page.on('pageerror', e => errors.push('pageerror: ' + e.message));
+  page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
+  await page.goto(`/prototypes/farhold/?auto=1&quality=low&sound=off&seed=${seed}&class=${cls}${extra}`);
+  await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
+  return errors;
+}
+
+/**
+ * Put the player in the nearest deep water and let a frame run.
+ *
+ * Searches outward from wherever they are standing rather than using a fixed coordinate: the world
+ * is generated from the seed, so "the lake" is not in the same place twice.
+ */
+async function wadeIn(page) {
+  return page.evaluate(() => {
+    const f = window.farhold;
+    const terrain = f.view?.terrain || f.control?.terrain || null;
+    const swimDepth = f.balance.player?.swimDepth ?? 1.3;
+    const { x: ox, z: oz } = f.control;
+    let found = null;
+    // rings outward, a few hundred metres — far enough to find a river or a lake on any seed
+    for (let r = 20; r <= 900 && !found; r += 20) {
+      for (let a = 0; a < 24; a++) {
+        const x = ox + Math.cos(a / 24 * Math.PI * 2) * r;
+        const z = oz + Math.sin(a / 24 * Math.PI * 2) * r;
+        const w = f.terrainAt ? f.terrainAt(x, z) : null;
+        const water = w || (terrain?.waterAt ? terrain.waterAt(x, z) : null);
+        if (water && water.depth > swimDepth + 0.6) { found = { x, z, surface: water.surface }; break; }
+      }
+    }
+    if (!found) return { found: false };
+    f.control.x = found.x;
+    f.control.z = found.z;
+    f.control.y = found.surface - 0.4;          // down in it, not skating over the top
+    return { found: true, ...found };
+  });
+}
+
+// ---------------------------------------------------------------- the boat puts itself in the water
+
+test('walking into deep water puts you in the boat you own, and taking you out puts it away', async ({ page }) => {
+  const errors = await land(page);
+  const spot = await wadeIn(page);
+  test.skip(!spot.found, 'this seed has no deep water within 900 m of the landing site');
+
+  // a couple of frames so the controller samples the water and boards
+  await page.waitForTimeout(400);
+  const afloat = await page.evaluate(() => ({
+    swimming: window.farhold.control.swimming,
+    boating: window.farhold.control.boating?.key || null,
+    speed: window.farhold.control.boating?.speed || 0,
+  }));
+  expect(afloat.swimming).toBe(true);
+  expect(afloat.boating).toBe('raft');           // what every character starts with
+  expect(afloat.speed).toBeGreaterThan(2.7);     // the flat swim speed it replaces
+
+  // back onto dry land: the boat goes away rather than following you up the bank
+  await page.evaluate(() => {
+    const f = window.farhold;
+    const spawn = f.view?.terrain?.spawnPoint?.() || null;
+    if (spawn) { f.control.x = spawn.x; f.control.z = spawn.z; f.control.y = spawn.height; }
+  });
+  await page.waitForTimeout(400);
+  const ashore = await page.evaluate(() => ({
+    swimming: window.farhold.control.swimming,
+    boating: window.farhold.control.boating?.key || null,
+  }));
+  expect(ashore.swimming).toBe(false);
+  expect(ashore.boating).toBe(null);
+  expect(errors).toEqual([]);
+});
+
+test('a boat you bought is the boat that appears, and it is faster than the one you were given', async ({ page }) => {
+  const errors = await land(page);
+  const bought = await page.evaluate(() => {
+    const f = window.farhold;
+    f.player.gold = 9999;
+    return f.buyVehicle
+      ? f.buyVehicle('boat', 'cutter')
+      : null;
+  });
+  // the handle may not expose a buy helper; fall back to the module the page already imported
+  if (!bought?.ok) {
+    await page.evaluate(async () => {
+      const gear = await import('./js/gear.js');
+      window.farhold.player.gold = 9999;
+      gear.unlockVehicle(window.farhold.player, 'boat', 'cutter');
+    });
+  }
+
+  const spot = await wadeIn(page);
+  test.skip(!spot.found, 'this seed has no deep water within 900 m of the landing site');
+  await page.waitForTimeout(400);
+
+  const afloat = await page.evaluate(() => ({
+    boating: window.farhold.control.boating?.key || null,
+    speed: window.farhold.control.boating?.speed || 0,
+  }));
+  expect(afloat.boating).toBe('cutter');
+  expect(afloat.speed).toBeGreaterThan(3.4);     // beats the raft it replaced
+  expect(errors).toEqual([]);
+});
+
+// ---------------------------------------------------------------- the rack in the shop
+
+test('a merchant has all three mounts and all three lights on the shelf', async ({ page }) => {
+  const errors = await land(page);
+  const shelf = await page.evaluate(() => {
+    const f = window.farhold;
+    const npc = f.features?.folk?.nearest?.(f.control.x, f.control.z, 4000)
+      || { role: 'merchant', id: 'test' };
+    const rows = f.features?.folk?.shelvesFor
+      ? f.features.folk.shelvesFor(npc, f.player.level || 1)
+      : null;
+    if (rows) return (rows.other || []).map(i => i.baseKey || i.name);
+    const stock = f.features?.folk?.stockFor?.(npc, f.player.level || 1) || [];
+    return stock.map(i => i.baseKey || i.name);
+  });
+
+  for (const key of ['pony', 'courser', 'dray', 'torch', 'lantern', 'wisplamp']) {
+    expect(shelf, `the shelf is missing ${key}`).toContain(key);
+  }
+  expect(errors).toEqual([]);
+});

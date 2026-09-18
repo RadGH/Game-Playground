@@ -52,11 +52,12 @@ import { buildZones } from './zones.js';
 import { createChests } from './chests.js';
 import { createMeteors } from './meteors.js';
 import { createDungeon, createGates, lookForBiome } from './dungeon.js';
-import { createPets } from './pets.js';
+import { createPets, CLASS_PETS } from './pets.js';
 import { createSites } from './sites.js';
 import { createEncounters } from './encounters.js';
 import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
 import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES } from './gear.js';
+import { createBoat } from './boat.js';
 import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, OFFHAND_DAMAGE } from './weapons.js';
 import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
 import { allocate as allocatePerk, refundAll as refundPerks, pointsLeft as perkPointsLeft } from './perks.js';
@@ -69,6 +70,18 @@ import { atmospherePalette, weatherWeights, weatherOdds, WeatherClock, WEATHER_B
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
+
+/**
+ * The ship's speed, in something a person can plan a flight with.
+ *
+ * It used to print `state.speed` straight out as "0 u/s" — scene units a second, which is an engine
+ * number and means nothing on screen. The distance beside it is already in AU, so the speed is too:
+ * full cruise is about 0.7 AU a minute, boost a little over two, and a world three AU out is then
+ * plainly a four-minute flight.
+ */
+function speedText(unitsPerSecond, auInUnits) {
+  return `${(unitsPerSecond / (auInUnits || 1) * 60).toFixed(2)} AU/min`;
+}
 
 // Round 4: every class in `data/classes.json` is playable — all thirty. What each one starts
 // holding lives there too, so the old eight-entry starter-weapon table is gone.
@@ -121,6 +134,49 @@ async function boot() {
   }));
   // ?class=mage picks one without touching the menu — handy for a test, and for trying a class out
   select.value = classIds.includes(params.get('class')) ? params.get('class') : 'ranger';
+
+  /**
+   * WHAT THE CLASS YOU ARE ABOUT TO PLAY ACTUALLY IS.
+   *
+   * Thirty entries in a dropdown, each one a name and two words of role, and the choice is locked in
+   * for the whole run. Everything needed to answer "what does this one do" was already loaded —
+   * `data/skills.json` has a one-line description of every skill, `data/classes.json` has the
+   * weapon it starts holding and what it is allowed to hold, and `pets.js` knows which classes bring
+   * a companion — so none of it had to be written twice. The Skills tab renders the same three
+   * facts once the run has started, which was far too late to be useful.
+   */
+  function drawClassCard() {
+    const box = $('boot-class-card');
+    if (!box) return;
+    const c = classes.find(x => x.id === select.value);
+    if (!c) { box.replaceChildren(); return; }
+    const unlock = skillData.unlockAt || [1];
+    const kit = [];
+    const starter = items.weaponBases?.[c.starter];
+    if (starter) kit.push(`starts with a ${starter.name.toLowerCase()}`);
+    if (c.weapons?.length) kit.push(`can hold ${c.weapons.join(', ')}`);
+    if (c.armorTier) kit.push(`${c.armorTier} armour`);
+    if (c.shield) kit.push('a shield');
+    if (c.primaryAttr) kit.push(c.primaryAttr);
+    // the companion is on the class if it has been overridden there, and in pets.js otherwise
+    const pet = c.pet || CLASS_PETS[c.id];
+    const petDef = pet && (bestiary.pets || []).find(x => x.id === pet.id);
+    const rows = (c.skills || []).map((id, i) => {
+      const sk = skillData.skills?.[id];
+      if (!sk) return '';
+      const at = unlock[i] ?? unlock[unlock.length - 1];
+      return `<li><b>${sk.name}</b><span>${sk.desc || ''}</span>`
+        + `<i>${at > 1 ? `level ${at}` : 'from the start'}</i></li>`;
+    }).join('');
+    box.innerHTML = `<h4>${c.name} <span>${c.role}</span></h4>`
+      + `<p class="cc-kit">${kit.join(' · ')}</p>`
+      + `<ul class="cc-skills">${rows}</ul>`
+      + (petDef ? `<p class="cc-pet">Brings a companion: ${petDef.name}`
+        + `${pet.count > 1 ? ` ×${pet.count}` : ''}`
+        + `${pet.extra ? `, and ${(bestiary.pets.find(x => x.id === pet.extra.id) || {}).name || 'another'}` : ''}.</p>` : '');
+  }
+  select.onchange = drawClassCard;
+  drawClassCard();
   $('boot-seed').value = params.get('seed') || String(balance.seed ?? 1);
   $('boot-name').value = '';
 
@@ -463,6 +519,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     scene.add(horse.group);
   } catch { horse = null; }
 
+  /**
+   * The boat, built once beside the horse and hidden until you are in deep water.
+   *
+   * Same reasoning as the horse above: a boat is put away far more often than it is used, and
+   * building geometry the moment somebody wades into a river is a hitch you only ever notice on the
+   * water. All three hulls live inside the one group; `show()` picks between them.
+   */
+  const boat = createBoat();
+  scene.add(boat.group);
+
   // Settings are built before the controller, because the camera reads the shoulder side, the
   // inverted look and the sensitivity on every frame. `control` is declared first and left null:
   // createSettings applies what it remembered straight away, and reaching a `let` before its
@@ -486,6 +552,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   control = createController(terrain, balance, camera, {
     obstacles: [props.solids, features.solids], settings,
+    // which boat goes under you when you start swimming — read live, so buying one mid-run counts
+    boat: () => vehicleFor(player, 'boat'),
   });
   const input = createInput(renderer.domElement);
   const fx = createCombatFx(scene, {
@@ -1875,7 +1943,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
     });
 
-    control = createController(terrain, balance, camera, { obstacles: [props.solids, features.solids], settings });
+    control = createController(terrain, balance, camera, {
+      obstacles: [props.solids, features.solids], settings,
+      boat: () => vehicleFor(player, 'boat'),
+    });
     field = makeField();
     field.solids = [props.solids, features.solids];
     encounters = createEncounters({
@@ -2302,11 +2373,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         clock: `${r.target} · ${r.distanceAu.toFixed(2)} AU`,
         target: null,
         sky: r.canLand ? 'close enough to land — press J, or just keep going down' : 'fly to a world to land on it',
-        weather: `${r.mode}${r.warpCharge > 0.05 ? ` (warp ${Math.round(r.warpCharge * 100)}%)` : ''} · ${r.speed} u/s`
+        weather: `${r.mode}${r.warpCharge > 0.05 ? ` (warp ${Math.round(r.warpCharge * 100)}%)` : ''} · ${speedText(r.speed, space.AU)}`
           + (r.approach < 0.92 ? ` · slowing (${Math.round(r.approach * 100)}%)` : '')
-          + (r.crowded ? ' · warp locked' : ''),
+          // "warp locked" read like a fault in the drive. It is a rule: you cannot warp with a
+          // world in your lap, and the fix is to fly away from it.
+          + (r.crowded ? ' · warp needs open space' : ''),
         where: `seed ${seed} · in flight`,
+        flying: true,
       });
+      // the minimap is the system from above up here, not the ground we left standing on the canvas
+      if (state.frames % 6 === 0) {
+        hud.drawSystemMap({
+          bodies: space.bodies.filter(b => !b.moon).map(b => ({
+            x: b.position.x / space.AU, z: b.position.z / space.AU,
+            giant: !!b.planet.giant,
+            target: b.planet.name === r.target,
+          })),
+          ship: { x: space.state.position.x / space.AU, z: space.state.position.z / space.AU },
+          yaw: space.state.yaw,
+        });
+      }
       return;
     }
 
@@ -2334,7 +2420,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         sky: 'the stars draw out into lines',
         weather: `warp · ${Math.round(out.t * 100)}%`,
         where: 'between stars',
+        flying: true,
       });
+      // between stars there is no system to draw — an empty field rather than the last planet's map
+      if (state.frames % 6 === 0) hud.drawSystemMap({});
       return;
     }
 
@@ -2946,7 +3035,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       if (horse) horse.group.visible = control.mounted;
     }
-    if (step.enteredWater) hud.log('You wade in and start swimming.');
+    if (step.enteredWater && !step.boarded) hud.log('You wade in and start swimming.');
+    if (step.boarded) hud.log(`You put the ${step.boarded.name} in the water.`);
+    if (step.leftBoat) hud.log(`You haul the ${step.leftBoat.name} up the bank.`);
 
     // the body follows the controller. Chibi 2 models face +Z, the same way `forward` points.
     actor.group.position.set(control.x, control.y + (control.mounted ? 1.15 : 0), control.z);
@@ -2970,6 +3061,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       horse.group.rotation.y = control.yaw;
       horse.setAnim(control.moving > 6 ? 'run' : control.moving > 0 ? 'walk' : 'idle');
       horse.update(dt);
+    }
+
+    /**
+     * And the boat, which nobody asked for by name.
+     *
+     * "Boats should automatically equip when you start swimming" — so there is no key and no slot to
+     * manage; js/player.js boards on the way in. All this does is put the hull where the controller
+     * says you are. It sits on `waterSurface` rather than `control.y`, because while swimming `y` is
+     * the body's height, which is UNDER the surface — a boat drawn there floats like a submarine.
+     */
+    if (control.boating) {
+      boat.show(control.boating.key);
+      boat.place(control.x, control.waterSurface, control.z, control.yaw);
+      boat.update(dt, control.moving);
+    } else {
+      boat.hide();
     }
 
     // --- attacking
@@ -3473,7 +3580,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // ---------------------------------------------------------------- test handle
   window.farhold = {
     THREE, renderer, scene, camera, weatherView, weather, debug, fx,
-    star, system, saves, horse,
+    star, system, saves, horse, boat,
     rpg, player, hud, actor, balance, state,
     // `control`, `field`, `props`, `features`, `view`, `sky` and the rest are REBUILT when you land
     // on another world, so the handle has to read them through a getter. Captured by value they go

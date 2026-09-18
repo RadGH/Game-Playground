@@ -46,12 +46,43 @@ body {
 #boot .status { color: #7f8ea4; min-height: 20px; margin-top: 12px; font-variant-numeric: tabular-nums; }
 #boot .note { color: #66748a; font-size: 12px; max-width: 620px; margin-top: 18px; }
 
+/* The class preview beside the picker. Thirty classes in a dropdown told you nothing about any of
+   them, and the choice lasts the whole run — so the skills, the kit and the companion are on screen
+   before the run starts rather than on the Skills tab an hour later. */
+.class-card {
+  text-align: left; margin: 0 auto 14px; max-width: 560px;
+  background: rgba(10, 16, 28, .66); border: 1px solid #23304a; border-radius: 8px;
+  padding: 10px 14px 12px;
+}
+.class-card h4 { margin: 0 0 2px; font-size: 15px; color: #e6eefa; font-weight: 600; }
+.class-card h4 span { color: #7fd8ff; font-size: 13px; font-weight: 400; margin-left: 6px; }
+.class-card .cc-kit { margin: 0 0 8px; color: #9fb0c8; font-size: 12px; }
+.class-card .cc-skills { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.class-card .cc-skills li {
+  display: grid; grid-template-columns: 130px 1fr auto; gap: 8px; align-items: baseline;
+  font-size: 12px;
+}
+.class-card .cc-skills b { color: #dfe9f6; font-weight: 600; }
+.class-card .cc-skills span { color: #8b9ab0; }
+.class-card .cc-skills i { color: #66748a; font-style: normal; font-variant-numeric: tabular-nums; }
+.class-card .cc-pet { margin: 8px 0 0; color: #8fe0a0; font-size: 12px; }
+@media (max-width: 620px) {
+  .class-card .cc-skills li { grid-template-columns: 1fr; gap: 0; }
+}
+
 /* ---------------------------------------------------------------- hud */
 
 .hud { position: fixed; z-index: 10; pointer-events: none; }
 .hud.panel { pointer-events: auto; }
 
 #hud-left { left: 14px; top: 14px; width: 260px; }
+/* E10: nothing in space can hit you, so health, mana, the status chips and the "what you are doing"
+   line are all answering a question that cannot come up until you are back on the ground. The name
+   and the XP bar stay — they are the only place the level is written. */
+#hud-left.flying .bar.hp,
+#hud-left.flying .bar.mp,
+#hud-left.flying #hud-statuses,
+#hud-left.flying #hud-objective { display: none; }
 .bar { height: 14px; background: #0c111b; border: 1px solid #2a3446; border-radius: 4px; overflow: hidden; margin-bottom: 4px; position: relative; }
 .bar > i { display: block; height: 100%; width: 0%; transition: width .12s linear; }
 .bar > span { position: absolute; inset: 0; text-align: center; font-size: 11px; line-height: 12px; text-shadow: 0 1px 2px #000; }
@@ -81,11 +112,13 @@ body {
 #target.hidden { display: none; }
 #target .bar { width: 220px; margin: 3px auto 0; }
 
+/* The log is the only teacher the game has, so it keeps twelve lines rather than five and reads at
+   full strength instead of 55% grey. `L` opens the last fifty. */
 #log {
-  position: fixed; left: 14px; bottom: 14px; width: 380px; max-height: 190px; overflow: hidden;
+  position: fixed; left: 14px; bottom: 14px; width: 380px; max-height: 252px; overflow: hidden;
   display: flex; flex-direction: column-reverse; gap: 2px; font-size: 13px;
 }
-#log div { text-shadow: 0 1px 3px #000; color: #c8d4e2; }
+#log div { text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,.8); color: #e4ecf7; line-height: 1.34; }
 #log div.good { color: #8fe0a0; }
 #log div.bad { color: #ff9a8a; }
 #log div.loot { color: #ffd070; }
@@ -909,10 +942,32 @@ body {
 
 /* the log gets a panel so it reads over bright ground, and stops short of the bar */
 #log {
-  bottom: 44px; width: 340px; max-height: 168px;
+  bottom: 44px; width: 340px; max-height: 252px;
   padding: 6px 9px; border-radius: 7px;
-  background: linear-gradient(to top, rgba(8,12,20,.62), rgba(8,12,20,0));
+  background: linear-gradient(to top, rgba(8,12,20,.72), rgba(8,12,20,0));
 }
+
+/* ---- A8: the history behind `L`. Everything the game explained, still readable. */
+#log-history {
+  position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+  background: rgba(4, 6, 12, .62);
+}
+#log-history.hidden { display: none; }
+#log-history .lh-card {
+  width: min(680px, 88vw); max-height: 70vh; display: flex; flex-direction: column;
+  background: rgba(10, 14, 24, .96); border: 1px solid #2a3a52; border-radius: 10px;
+  padding: 14px 18px 16px;
+}
+#log-history h3 {
+  margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #9fb0c8;
+}
+#log-history h3 .dim { text-transform: none; letter-spacing: 0; color: #66748a; margin-left: 8px; }
+#log-history-lines { overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+#log-history-lines div { color: #c8d4e2; line-height: 1.4; }
+#log-history-lines div.good { color: #8fe0a0; }
+#log-history-lines div.bad { color: #ff9a8a; }
+#log-history-lines div.loot { color: #ffd070; }
+#log-history-lines div.level { color: #7fd8ff; font-weight: 600; }
 
 /* a boss bar owns the top of the screen; the ordinary nameplate moves down under it */
 #boss-bar:not(.hidden) ~ #target { top: 78px; }

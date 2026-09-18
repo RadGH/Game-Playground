@@ -390,3 +390,55 @@ map and the chart, the chart stepping out to the galaxy and back, a five-second 
 in a different system with the old world's markers left where they were, a throttle that falls and a
 planet that sharpens as you close, falling into an atmosphere with nobody touching a key, and the
 clipmap covering ten kilometres at altitude for the same triangle count.
+
+## Round 10 — the play-test list, the full-screen sheet, and The Territory
+
+Seven things came back from a play-test. `RPG.md` has the full write-up of each; the headlines:
+
+1. **A level-1 character was being dropped into a level 30-33 zone.** A world's difficulty band was
+   decided partly by `seed % 3`, so 47% of seeds started you somewhere whose softest corner was level
+   30. The band now comes from what the world IS, the low band is claimed first for whichever world a
+   newcomer would land on, and every system carries a body for every band (moons count). The starting
+   system always holds a world you can live on — and turning *Habitable start* off now means
+   something: you come down on the harshest rock in the system instead, with the blue world one short
+   flight away.
+2. **Clicking the perk tree selected whatever was ~100px below the cursor.** The canvas buffer was
+   sized from its parent and one device-pixel ratio was applied to both axes. Fixed, and verified: at
+   three viewport sizes, fitted and zoomed, all 89 nodes hit-test to themselves.
+3. **The perk forest is a lattice now** — whole-unit rings, even angular steps, no jitter, and the
+   oddballs off the arm centrelines they used to sit on top of. Scroll to zoom, drag to pan.
+4. **The character sheet is a full screen.** Designed from `research/ui-round10-design.md`: a
+   persistent header, a tab rail with number keys and unspent-point badges, and one purpose-built
+   grid per screen. Nothing scrolls but a pane body.
+5. **W and S fly the ship forward again.** The longitude wrap was not bit-exact, so the "you hit the
+   edge of the map" brake fired forty-five times a second in the middle of the map: 80 m in twenty
+   seconds instead of 15.3 km. The poles wrap now too, so a heading held long enough goes round.
+6. **Planet size gets Tiny and Super tiny**, the default is Small, and the knob finally reaches
+   everything — camps, dungeon doors, the horizon and the flight model all followed a hard-coded 640
+   metres a cell before.
+7. **Save and load.** `snapshot()` was silently dropping `world`, `quests` and `campaign` from its
+   own argument list, which is why a run saved in a town reloaded into open ocean — and why every
+   load emptied the quest log.
+
+### The Territory
+
+`EXPANSION.md` is the plan. Farhold is a whole planet and crossing one is slow on purpose, but
+everything it asked of you was somewhere else. This makes a zone a place with people in it:
+
+| file | what it adds |
+|---|---|
+| `js/factions.js` · `data/factions.json` | 12 factions, a standing each from −100 to 100, and the rule that a deed for one is a third of a deed against everyone they are at odds with |
+| `js/territory.js` | one record a zone — holder, grip, real camps, open trouble — generated from the seed, with only the deltas saved |
+| `js/jobgen.js` · `data/job-frames.json` | 22 frames that only fire when every slot binds to something that exists right now |
+| `js/patrols.js` | 10 compositions walking the zone's real road nodes, reacting to your standing |
+| `js/caravans.js` | 10 manifests; trade with it, escort it, rob it, or find its wreck — the same object in four states |
+| `js/wanderers.js` · `data/wanderers.json` | 14 kinds of person on the road, the main way a job reaches you outside a town |
+| `js/incidents.js` · `data/incidents.json` | 12 things that happen TO a zone and change what spawns, what a shop charges, and which frames can fire |
+| `js/rumours.js` | the only thing allowed to talk about somewhere you are not — a sentence, never a pin |
+| `data/landmarks.json` · `data/faction-rewards.json` | 14 places that fill a zone in, and two ranks a faction of things standing buys |
+
+All of it is pure JavaScript, ticked from the game loop, so a distant patrol costs one line of
+arithmetic a frame. Shown in three new Journal panes: who holds this ground, work going here, and
+word going round.
+
+Tests: `tests/round10.test.js` (17) and `tests/expansion.test.js` (37).

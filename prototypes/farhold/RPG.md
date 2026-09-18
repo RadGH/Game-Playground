@@ -688,3 +688,163 @@ look. The map drags to pan, zooms out to the whole planet, and past 4.2× draws 
 region detail — thirty-six times the cells over the patch you are looking at — rather than a bigger
 blur. The chart lets you click a world for what it knows, and a **Survey** panel lists what orbits
 any star you select.
+
+## Round 10 — where you start, the tree, the sheet, and the ground between the towns
+
+Seven things came back from a play-test, and they turned into three pieces of work: the seven bugs,
+a full-screen interface, and an expansion that gives a zone people in it.
+
+### 1. A level-1 character in a level 30-33 zone
+
+`bandForPlanet` decided a world's difficulty partly from `seed % 3`, so one seed in three promoted a
+perfectly friendly breathable world to the far reach for no reason a player could see — and the list
+of "nasty" archetypes it checked contained `volcanic` and `irradiated`, which are not archetype keys,
+so the genuinely hostile lava and toxic worlds never got their bump. The intent was inverted in
+practice. Over 120 seeds the starting planet came out low 63, medium 41, high 16: **47% of new
+characters started on a world whose softest corner was level 30.**
+
+The band now comes only from things you can read off the survey panel before you fly there — the
+archetype's own `difficulty`, breathable air, the star's water zone, how far out it orbits — and
+`balanceBands` claims the **low band first**, for whichever world `chooseLanding` would hand a
+newcomer, handing the rest out around it. New game, load and the star-chart survey all use the same
+picker, so all three agree. 120/120 seeds now start low.
+
+"Every system has at least one planet for every level range" is guaranteed by keeping the star and
+re-rolling its worlds until there is a landable body for each band, with **moons counted** — a moon
+is a small planet here, with its own id, seed and surface map, and the game already lets you land on
+one. "At least one habitable planet in the starting system" is guaranteed by running the seed search
+whether or not the box is ticked.
+
+And that made the box a no-op, because the default landing score already prefers settled breathable
+worlds. So **Habitable start off now means something**: you come down on the harshest rock in the
+system, no towns and no trade, with the blue world one short flight away.
+
+### 2 and 3. The perk tree
+
+**Clicking selected whatever was about 100px below the cursor.** Two faults, both in `js/hud.js`.
+`drawForest` sized the canvas's backing buffer from `wrap.clientWidth` — the *parent*, which also
+holds the 270px side panel and the gap — so the buffer was 832 CSS px wide while the canvas's real
+box was 558. Then `perkUnder` worked out one device-pixel ratio from the width and applied it to the
+height as well: x was right and **y was inflated by about 1.49x**, which at the middle of the canvas
+is 111 px of error, growing with distance from the centre. (It also drew the forest squashed to 67%
+horizontally, which is part of why the layout read as scattered.)
+
+Both are gone. `perkView()` measures the canvas's own box, builds one projector with a real inverse,
+and `drawForest` and `perkUnder` both go through it — the forward transform used to be hand-inlined
+in six places. A third fault turned up while fixing it: a canvas is a replaced element, so
+`position: absolute; inset: 4px; width: auto` takes its *intrinsic* width and ignores `right`, which
+left the canvas at whatever the last buffer was and made each redraw measure that and grow it again.
+
+Checked at 1920x1080, 1366x768 and 1280x720, fitted and at 2.4x zoom with a pan on: **every one of
+the 89 nodes hit-tests to itself, 0 wrong.**
+
+**The layout is a lattice, not a scatter.** Every node was at `ring.radius + wobble * 0.22` and
+`arm.angle + wobble * 0.18`. There is no jitter at all now: rings at whole units, and a ring's nodes
+on exactly even angular steps centred on their arm — the step is the smaller of a constant tangential
+gap (so ring 6 does not fan into a wall of dots) and the arm's own quarter of the circle (so ring 1,
+where the first rule wants 49° between three nodes, cannot spill into the arm next door). The
+oddballs went two to a diagonal: `i / 8 * 2π + π/4` put **four of the eight exactly on an arm
+centreline** at radius 3.5, on top of ring-3 and ring-4 nodes — the opposite of the "sitting between
+the arms" the comment claimed. Closest pair in the forest is now 0.52 units.
+
+Scroll to zoom (keeping what is under the pointer under the pointer), drag to pan, double-click or
+**Fit to view** to reset, and node names appear once you are zoomed in far enough to read them.
+
+### 4. The sheet is a full screen
+
+See `research/ui-round10-design.md` for the spec this was built from. The short version: `#sheet` is
+`position: fixed; inset: 0` on a grid of a persistent header and a tab rail, every track is
+`minmax(0, 1fr)`, `#sheet` is `overflow: hidden`, and the only thing that scrolls anywhere in the
+interface is a `.pane-body` — whose scroll position `renderSheet` now restores, so recycling the
+fortieth item in the bag does not throw you back to the first.
+
+The header carries the materials, which used to be on the Crafting and Upgrade screens only — the two
+screens where you already know, and neither of the screens you recycle from. The rail carries a badge
+for anything unspent, which was invisible unless you happened to open the screen it belonged to.
+
+Per screen: a paper-doll equip figure (placed entirely by `[data-tip-slot]`, so `slotGrid` did not
+change); grouped stats, four-column at 1500px+; inventory filter and sort chips, a rarity-coloured
+grid view, and a **standing compare panel** that holds the last thing you pointed at rather than a
+tooltip that covered the row under it and blanked when you moved; the in-game skill bar as a strip
+you click to pick a skill, with three dots a key for its talents; the talent tree as three visible
+tier columns with what each tier is *for* written on it; the perk canvas at full size (2.4x the
+spread at 1920); crafting in three columns with the Forge button no longer below the fold at 768px;
+`#up-pick` freed from a 190px window that held thirty-odd rows five at a time, and the bench showing
+the item's full card so you can read the affix list while choosing which one to reweave; and the
+journal as nine panes with the bestiary no longer truncated to twelve.
+
+**Three bugs the design pass found, all real.** The Perks screen was titled "Character" (`setTab`'s
+title map had no `perks` key). **Every skill in the game was offered the *bolt* talent tree**, because
+`js/skills.js` `state()` built its object from an explicit field list that did not include `shape`,
+so `chosen.shape || 'bolt'` always fell through — a ground rune was offered "Fanned". And the XP bar
+was wrong above level 30, because `hud.js` kept a private copy of only the pre-30 curve. Plus: `Tab`
+closed the sheet instead of moving focus once it was open, so keyboard navigation was impossible.
+
+### 5. W and S fly the ship forward again
+
+`clampToWorld`'s longitude wrap, `((x % w) + w) % w`, is **not an identity for an x already in
+range** — `x + widthM` loses a low bit and the value comes back about 1e-11 out. 68% of in-range
+values failed a `wrap(x) === x` check. `js/atmos.js` compared its position against that result to
+decide whether it had hit the edge of the map and scaled horizontal velocity by −0.4 when it
+differed, so the brake fired **about forty-five times a second, in the middle of the map**. Holding W
+for twenty seconds moved you 80 m at 7 m/s. It only flew correctly along an exact compass axis, where
+x never changed and stayed an exact float — which is why it seemed intermittent.
+
+Measured after: 15.3 km in twenty seconds at 890 m/s, at every heading.
+
+There is no edge to hit either. East and west are the same line and the top and bottom of the map are
+the poles, so `terrain.wrapAround` carries the ship over a pole — down the other side, half a world
+round in longitude, turned about. Four pole crossings in 400 seconds of straight flight.
+
+### 6. Planet size
+
+**Tiny** (33 × 16 km) and **Super tiny** (16 × 8 km) join the list, the floor on `setMetresPerCell`
+drops from 40 m to 16 m, and the default is **Small** rather than Full — the complaint was that the
+planet is enormous, and the honest answer to that is to stop starting people on the biggest one.
+
+The knob now reaches everything. `js/sites.js` and `js/dungeon.js` were both reading a hard-coded
+640 m a cell out of `balance.json` and placing camps and dungeon doors at `cell * 640`, so at any
+other scale they landed outside the world — up to 2.9× outside at the old Tiny. The terrain view's
+ring extents follow the scale (at the square root of it, so a small world still draws a horizon
+rather than a dinner plate), and so do the flight ceiling, top speed and thrust — a 9 km ceiling on a
+16 km world is most of the way to space.
+
+"Region size" is relabelled **Zones per world**, because that is what it does: it cuts the same
+ground into more level bands, it does not shorten a walk in metres.
+
+### 7. Saved in a town, loaded into the Shallows
+
+`snapshot()` destructures a fixed argument list, and `world`, `quests` and `campaign` had never been
+added to it. `main.js` passed all three on every save and **none of them were written.** Three bugs
+came out of that one omission.
+
+`world` holds the title screen's knobs, `planetScale` among them. Without it a load fell back to
+re-reading the boot form — and the player's position is stored in **metres**, so a run played at
+Small reloaded at Full put the saved numbers on a world 1.8× wider. Reproduced exactly: played at
+0.75 in Herdalkeep, reloaded at 1.0 into `Shallows`, 38 m of water. `teleport` wraps east-west and
+clamps north-south, so an out-of-range position lands somewhere plausible-looking instead of
+throwing, which is why it failed silently into the sea.
+
+The other two: **every load silently emptied the quest log**, and forgot the campaign.
+
+On top of that the restored spot is now checked — in range, and not under water — and falls back to
+the run's own spawn point if it is not; a save taken underground carries the surface spot you dropped
+in from, because a dungeon's terrain is a *local* space a few hundred metres across and restoring
+those numbers on to a 163 km planet put you at the map corner; and `playtime` is read back, having
+been written on every save since round 3 and never read.
+
+### The Territory
+
+`EXPANSION.md` is the plan; `tests/expansion.test.js` is the proof. Twelve factions whose standing
+moves for things you actually did, and a deed for one is a third of a deed against everyone they are
+at odds with — so there is no state where everybody likes you. A territory record per zone: who holds
+it, how firmly, its real camps, its open trouble, generated from `(worldSeed, zoneId)` so a zone you
+have never entered already has a holder, with only the deltas saved. Patrols on real road nodes,
+caravans you can trade with, escort, rob or find the wreck of, fourteen kinds of person on the road,
+twelve things that can happen to a zone, and rumours — the only thing in the game allowed to talk
+about somewhere you are not, and it is a sentence, never a pin.
+
+And a job generator with twenty-two frames that will only offer a frame when **every one of its slots
+binds to something that exists right now**: a camp still standing, a caravan really late, a named
+enemy that really did beat you. Nothing is invented, so nothing can send you to an empty field, and
+the pin is in the zone you are standing in.

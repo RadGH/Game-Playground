@@ -330,6 +330,51 @@ an explicit `ms` (the module clamps its own flight to 0.16-0.45 s, which is an a
 fight), and make a bolt burst on **where its target is now**, not where it stood when you fired —
 anything charging you moves several metres while the bolt is in the air.
 
+## A world with people in it: factions, territory, and jobs made of what is there
+
+`prototypes/farhold/js/{factions,territory,jobgen}.js` are three small pure modules that solve the
+problem every big open world has: **the interesting content is always somewhere else.** If travel is
+slow — and on a real planet it is — then a quest that pins a marker twenty minutes away is a
+punishment, not an invitation.
+
+```js
+import { createStandings, ranked } from '/prototypes/farhold/js/factions.js';
+import { createTerritory } from '/prototypes/farhold/js/territory.js';
+import { createJobGen, candidatesFrom } from '/prototypes/farhold/js/jobgen.js';
+
+const standings = createStandings(factionData);              // -100..100 a faction
+const holdings = createTerritory({ zones, seed, factions: factionData, standings });
+const jobs = createJobGen({ frames: frameData, territory: holdings, factions: factionData, standings });
+
+const candidates = candidatesFrom({ zone, territory: holdings, bestiary, nodes, level });
+const board = jobs.offer({ zone, level, candidates, want: 5 });
+```
+
+Three ideas worth stealing whole:
+
+**Standing spreads to rivals.** A deed for one faction is a third of a deed against everyone they are
+at odds with, so there is no state where everybody likes you. Twelve factions stop being a checklist
+and become a question — "who do I work for round here" — that you answer differently on different
+worlds.
+
+**A place is generated, not stored.** A territory record (who holds a zone, how firmly, its real
+camps, its open trouble) is derived from `(worldSeed, zoneId)`, so a zone you have never entered
+already has a holder — walking in *reveals* it. Only the deltas — grip, cleared camps, open incidents
+— are saved, so a hundred-zone world costs a few hundred bytes rather than a world of furniture.
+
+**A quest is a fact about the world, phrased.** `jobgen` is a template engine with *typed slots*: a
+frame declares what it needs (`{ slot: 'site', type: 'site', hostile: true }`) and is only offered
+when every slot binds to something that exists right now — a camp still standing, a caravan really
+late, a named enemy that really did beat you. If a slot cannot be filled the frame is skipped in
+silence. Nothing is invented, which is the whole reason a generated job can never send you to an
+empty field. Keep four bread-and-butter frames that bind to almost anything, or a quiet zone offers
+nothing at all.
+
+The same folder has `patrols.js`, `caravans.js`, `wanderers.js`, `incidents.js` and `rumours.js` on
+top of that base — all pure, all a position and a clock until you are near them, so a world that is
+moving costs one line of arithmetic per body per frame. `prototypes/farhold/EXPANSION.md` is the
+design; `tests/expansion.test.js` is what it promises.
+
 ## Making a star do something to the picture
 
 `prototypes/farhold/js/sunfx.js` is a small, self-contained screen-space sun layer: god rays, a lens

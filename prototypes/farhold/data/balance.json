@@ -278,12 +278,17 @@
     "rimAu": 14,
     "ascentSeconds": 3.2,
     "descentSeconds": 2.6,
-    "slowFrom": 26,
+    "slowWithinAu": 0.1,
+    "slowMinRadii": 8,
+    "slowBigRadii": 3,
     "slowTo": 0.25,
-    "noWarpWithin": 3,
+    "noWarpWithinAu": 0.05,
+    "noWarpRadii": 1.5,
+    "exitMargin": 1.1,
+    "bodySpeed": 19.2,
     "entryAltitude": 0.5,
     "warpSeconds": 5,
-    "_doc": "Space runs in its own compressed units: 1 AU is auUnits across and an Earth-sized planet is earthUnits in radius, because metres over a 163 km map and hundreds of millions of kilometres cannot share a coordinate space. speed is the cruise rate; boost and warp multiply it. landRange is how close to a world you must be, in its own radii, before you can put down. The approach knobs are all in body radii above the surface: slowFrom is where the throttle starts easing off toward slowTo (a fraction of cruise) so a planet stops going from speck to wall in one frame; noWarpWithin locks warp out near anything; and falling below entryAltitude over a landable world drops you into its atmosphere with no key press at all. warpSeconds is how long the jump between stars takes."
+    "_doc": "Space runs in its own compressed units: 1 AU is auUnits across and an Earth-sized planet is earthUnits in radius, because metres over a 163 km map and hundreds of millions of kilometres cannot share a coordinate space. speed is the cruise rate; boost and warp multiply it. landRange is how close to a world you must be, in its own radii, before you can put down. The approach knobs are a DISTANCE now, not body radii: slowWithinAu (0.1 AU) is where the throttle starts easing off toward slowTo, never wider than the lane a world owns so a compact system is not braked end to end, and never tighter than slowMinRadii of its own radii so the brake still bites on a small world. '26 body radii' was a third of an AU and stopped you boosting anywhere. noWarpWithinAu locks warp out near anything; exitMargin is how far outside the brake you surface when leaving atmosphere, so the planet does not simply catch you again; bodySpeed caps how fast any world may drift, as a share of cruise, because one orbitScale for every body had moons lapping in under a minute; and falling below entryAltitude over a landable world drops you into its atmosphere with no key press at all. warpSeconds is how long the jump between stars takes."
   },
   "sound": {
     "method": "hybrid",

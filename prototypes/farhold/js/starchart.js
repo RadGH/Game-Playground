@@ -23,6 +23,7 @@ import { MARKER_LOOKS } from './markers.js';
 // the same band the survey quotes and the zones are laid out inside, so a world reads the same
 // wherever you meet it
 import { bandForPlanet } from './rpg.js';
+import { orbitLayout } from '../../../universe/js/system.js';
 
 export const CHART_LEVELS = ['system', 'neighbourhood', 'sector', 'galaxy'];
 
@@ -429,6 +430,18 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
     // dwarf's four worlds — none of them further out than 0.35 AU — as a knot in the middle of an
     // empty screen. A compact system should look compact, not small.
     const outer = Math.max(0.05, ...planets.map(p => p.orbit?.au || 0.05));
+
+    /**
+     * Space the rings by the LADDER, not by raw AU.
+     *
+     * "Planets need to have adequate spacing between each other" — and drawing each ring at its true
+     * AU is the other half of why they do not have it. Real orbits are not evenly spaced, so a
+     * system with three worlds inside 0.4 AU and one at 5 draws the first three on top of each other
+     * however big the canvas is. `orbitLayout` is the same ratio ladder the 3D view uses: it keeps a
+     * minimum gap between rings and caps a world's drawn size at a share of its own gap, so the
+     * chart and the space screen finally agree about where things are.
+     */
+    const layout = orbitLayout(s.system, { map: 'au' });
     /**
      * D12: FILL THE SCREEN.
      *
@@ -474,7 +487,8 @@ export function createStarChart({ getState, onTravel = null, onClose = null } = 
 
     for (const p of planets) {
       const au = p.orbit?.au || 1;
-      const r = au * scale;
+      const idx = planets.indexOf(p);
+      const r = (layout?.radii?.[idx] ?? au) * scale;
       ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(150, 180, 215, .18)'; ctx.lineWidth = px(1);
       ctx.stroke();

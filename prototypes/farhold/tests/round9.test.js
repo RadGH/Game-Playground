@@ -54,11 +54,26 @@ test('no planet is ever drawn inside its own star — including seed 777', () =>
 test('the warp lockout is a lap, not half an AU', () => {
   // "I'm 0.34 AU away from a planet and still can't boost, it's tiny in comparison. It started
   // working around 0.75 AU but it's just too far away."
-  const within = balance.space.noWarpWithin;
-  assert.ok(within <= 4, `the lockout is still ${within} body radii`);
-  // for a world of ordinary size that has to come out well under a third of an AU
-  const lockoutAu = (within * EARTH) / AU;
-  assert.ok(lockoutAu < 0.2, `an Earth-sized world locks warp out for ${lockoutAu.toFixed(2)} AU`);
+  //
+  // Round 11 made the approach knobs a DISTANCE rather than a count of body radii, because "26 body
+  // radii" is a third of an AU at this scale and was stopping the player boosting anywhere. The
+  // question the test asks is unchanged — how far out does the lockout actually reach — it just has
+  // to read the number the game now uses.
+  const withinAu = balance.space.noWarpWithinAu;
+  assert.ok(withinAu <= 0.1, `the lockout still reaches ${withinAu} AU`);
+  // …and it must still bite on a small world, which is what the radii floor is for
+  const radii = balance.space.noWarpRadii;
+  assert.ok(radii >= 1 && radii <= 4, `the close-in lockout is ${radii} body radii`);
+});
+
+test('the slow zone only bites near a world, so you can boost across a system', () => {
+  // "The space flight slowing system needs to be relaxed, it prevents me from boosting with
+  // spacebar too much. It only needs to slow you down when you are in immediate proximity of a
+  // planet (0.1 AU)."
+  assert.ok(balance.space.slowWithinAu <= 0.1,
+    `the brake reaches ${balance.space.slowWithinAu} AU — the ask was 0.1`);
+  // and leaving atmosphere has to put you outside it, or the planet simply catches you again
+  assert.ok(balance.space.exitMargin > 1, 'you would surface inside the brake');
 });
 
 test('the flight model can hold its own altitude, which is what flying around a planet needs', () => {

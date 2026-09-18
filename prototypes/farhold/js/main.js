@@ -1284,6 +1284,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   function makeField(forTerrain = terrain, forZones = zones) {
     return new EnemyField({
+      // C8: a Fiery enemy is visibly on fire because the field hands the modifier one of spellfx's
+      // existing looping auras. Without this the modifier still works and still wears its coloured
+      // ring — it just does not burn.
+      spellfx,
       scene, terrain: forTerrain, rpg, defs: bestiary.enemies,
       bosses: bestiary.bosses || [], modifiers: bestiary.modifiers || [],
       zones: forZones, balance: { ...balance, seed },
@@ -3346,6 +3350,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     pets.update(dt, control, player, {
       onPetHit: (p, target, result) => { if (result.crit) hud.log(`${p.name} lands a critical.`, 'good'); },
       onFallen: p => { hud.log(`${p.name} will come back.`, ''); },
+      // …and say so when it does. `reviveSeconds` was dead data, so "will come back" was a lie.
+      onReturned: p => { hud.log(`${p.name} is back.`, 'good'); },
     });
     if (!dungeon) {
       chests.update(control.x, control.z);

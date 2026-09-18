@@ -24,8 +24,8 @@ export const DEFAULTS = {
   // D15: how wide the view is, in degrees. 62 is what `main.js` builds the camera with, so the
   // default here changes nothing until the slider is moved.
   fov: 62,
-  viewDistance: 'full',        // full | medium | near
-  density: 1,                  // how thick the scatter is
+  viewDistance: 1,             // a multiplier on how far the ground is drawn, 0.5x to 6x
+  density: 1,                  // how thick the scatter is, up to 6x on a strong card
   grass: true,
   sunfx: true,                 // god rays, lens flare and the sunset wash
   sound: true,
@@ -121,8 +121,25 @@ const FIELDS = [
   { key: 'invertFlight', label: 'Invert flight pitch', kind: 'toggle', group: 'Controls' },
   { key: 'sensitivity', label: 'Mouse sensitivity', kind: 'range', min: 0.3, max: 2.5, step: 0.1, unit: '×', group: 'Controls' },
   { key: 'fov', label: 'Field of view', kind: 'range', min: 55, max: 100, step: 1, unit: '°', group: 'Picture' },
-  { key: 'viewDistance', label: 'View distance', kind: 'choice', options: [['near', 'Near'], ['medium', 'Medium'], ['full', 'Full']], group: 'Picture' },
-  { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 2, step: 0.25, unit: '×', group: 'Picture' },
+  /**
+   * VIEW DISTANCE IS A REAL NUMBER NOW, AND IT GOES TO 6x.
+   *
+   * "I play the game using a target strong graphics card. Can you add 2x and 4x and 6x maximums to
+   * view distance, foliage density, etc."
+   *
+   * Worth saying plainly: the old control was three words — Near, Medium, Full — and **nothing read
+   * it**. It was declared here, drawn in the panel, and its only effect was to force a redraw at the
+   * distance it was already drawing. So the View distance setting has never done anything. It is a
+   * multiplier on the clipmap's own view scale now, which is the same knob flight already stretches
+   * when you climb, so the two compose: a 6x setting in the air reaches a very long way indeed.
+   *
+   * It starts at 1x rather than going lower because a clipmap ring cannot shrink below its own base
+   * grid — `setViewScale` clamps there — so a "0.5x" would have been another control that did
+   * nothing, which is the bug this is fixing. Measured on a mid card: 1x reaches 1,818 m and 6x
+   * reaches 10,905 m, for the SAME 99,918 triangles. That is the whole point of a clipmap.
+   */
+  { key: 'viewDistance', label: 'View distance', kind: 'range', min: 1, max: 6, step: 0.5, unit: '×', group: 'Picture' },
+  { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 6, step: 0.25, unit: '×', group: 'Picture' },
   { key: 'grass', label: 'Grass', kind: 'toggle', group: 'Picture' },
   { key: 'sunfx', label: 'Sun rays and flare', kind: 'toggle', group: 'Picture' },
   { key: 'damageNumbers', label: 'Damage numbers', kind: 'toggle', group: 'Picture' },

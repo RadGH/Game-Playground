@@ -194,6 +194,8 @@
     "detailFlat": 13,
     "detailRelief": 78,
     "detailFine": 2.4,
+    "maxViewScale": 40,
+    "_viewDoc": "maxViewScale caps how far the clipmap may be stretched. It is the player's View distance setting (0.5x-6x) multiplied by the flight stretch (up to 6x when you reach the ceiling), so the two compose and the ceiling has to clear 36.",
     "rings": [
       {
         "extent": 192,

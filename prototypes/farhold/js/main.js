@@ -365,6 +365,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const light = createLight(scene, { balance });
 
   const ringSpec = lowQuality ? balance.terrain?.ringsLow : balance.terrain?.rings;
+
+  /**
+   * How far the ground is drawn, as the player asked for it.
+   *
+   * One function, so the ground view and the flight stretch cannot disagree. The old `viewDistance`
+   * setting was three words that nothing read; this is a multiplier on the clipmap's view scale,
+   * and everything that stretches the view multiplies through it.
+   */
+  let viewWanted = 1;
+  const viewMul = () => viewWanted;
   let view = createTerrainView(scene, terrain, {
     // the terrain knobs are a knob file like everything else; without this `maxSkirtScale` and
     // friends were code defaults nobody could tune
@@ -576,7 +586,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         props.setDensity(v.density, control.x, control.z);
         props.setGrass(v.grass, control.x, control.z);
       }
-      if ((!key || key === 'viewDistance') && view && control) view.update(control.x, control.z, true);
+      if (!key || key === 'viewDistance') {
+        // read off the values `apply` was handed, NOT off `settings` — this callback runs while
+        // createSettings is still constructing, so the binding does not exist yet
+        viewWanted = Math.max(0.5, Number(v.viewDistance) || 1);
+        if (view && control) {
+          view.setViewScale(viewWanted, control.x, control.z);
+          view.update(control.x, control.z, true);
+        }
+      }
       if ((!key || key === 'sunfx') && sunfx) sunfx.setEnabled(v.sunfx);
       // D15: the field of view. settings.js used to reach for `window.farhold.camera` on a timer,
       // because the agent that added it could not edit this file — it has the camera handed to it.
@@ -2357,7 +2375,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // whatever the flight thinned out comes back
     lastAirLod = -1;
     view.setSkirtScale(1, air.state.x, air.state.z);
-    view.setViewScale(1, air.state.x, air.state.z);
+    view.setViewScale(viewMul(), air.state.x, air.state.z);
+    // the scatter comes back to full density on the ground, at the player's own setting
+    props.setRadius(balance.props?.radius ?? 1400, air.state.x, air.state.z);
+    props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
     props.setRadius(lowQuality ? 5 : 7, air.state.x, air.state.z);
     props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
     props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
@@ -2429,7 +2450,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // at lower resolution. As you get lower altitude the planet should get more detailed and
         // eventually props should appear." At the ceiling the view reaches ten kilometres; on the
         // way down it tightens back up and the grass comes back.
-        view.setViewScale(1 + high * 5, air.state.x, air.state.z);
+        view.setViewScale(viewMul() * (1 + high * 5), air.state.x, air.state.z);
+
+        /**
+         * THE SCATTER SWEEPS OUT AND THINS AS YOU CLIMB.
+         *
+         * "Is it possible to sweep that foliage distance in flight mode so that higher up = wider
+         * range but thinner density." Yes, and it is the right trade: from a thousand metres up you
+         * want to see trees to the horizon, and you do not want each one — the eye reads the pattern,
+         * not the trunk. The radius grows with the view and the density falls off against it, so the
+         * instance count stays roughly flat and the frame time with it.
+         *
+         * `high` is 0 on the deck and 1 at the ceiling.
+         */
+        const spread = 1 + high * 4.5;
+        props.setRadius(Math.round((balance.props?.radius ?? 1400) * spread), air.state.x, air.state.z);
+        props.setDensity((settings.get('density') ?? 1) / Math.max(1, spread * 0.75), air.state.x, air.state.z);
       }
       const blend = air.spaceBlend();
       // the sky drains to black on the way up and fills back in on the way down

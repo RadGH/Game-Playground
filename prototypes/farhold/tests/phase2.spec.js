@@ -140,7 +140,19 @@ test('the world is planted, and the scatter stays instanced', async ({ page }) =
   expect(planted.props.grass).toBeGreaterThan(0);
   // thousands of things, but only a handful of draw calls — the whole point of instancing
   expect(planted.props.drawCalls).toBeLessThan(25);
-  expect(planted.drawCalls).toBeLessThan(70);
+  /**
+   * Raised from 70 to 95 in round 11, deliberately, and here is why.
+   *
+   * This budget exists to catch instancing being lost — a scatter drawn one mesh at a time is
+   * thousands of calls, not tens, which is what `props.drawCalls < 25` above is really guarding.
+   * The whole-scene number went 70 -> 73 because towns now place every trade a settlement wants
+   * instead of a handful, and each building type is its own InstancedMesh: more KINDS of thing on
+   * screen, not more draws per thing. Seventy-three calls is nothing to a GPU.
+   *
+   * If this ever climbs into the hundreds, something has stopped instancing — do not raise it again,
+   * find that instead.
+   */
+  expect(planted.drawCalls).toBeLessThan(95);
 
   // density is a live knob
   const dense = await page.evaluate(() => {

@@ -453,6 +453,16 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       const md = (elapsed / dayLength) * moon.clock;   // its own clock, the same one update() uses
       const want = kind === 'lunar' ? Math.PI : 0;
       moon.phase = want - (md / moon.period) * Math.PI * 2;
+      /**
+       * Forcing one lifts the hold.
+       *
+       * `grace` suppresses an eclipse during the first two hours of a run so a player's first
+       * impression of a sunlit world is not a dim one — but `forceEclipse` means "make one happen
+       * NOW", and it is called by the debug menu and by the tests, both of which run in the first
+       * two hours by definition. The hold was silently eating them, so this asked for an eclipse and
+       * got clear daylight back.
+       */
+      grace = 0;
       update(elapsed);
       return moon.body?.name || null;
     },

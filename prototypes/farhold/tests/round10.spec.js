@@ -303,7 +303,19 @@ test('a job off the board pays itself, because there is nobody to hand it back t
     const q = f.questLog.active.find(x => x.id === hunt.id);
     // finish it through the real progress path, not by setting a flag
     for (let i = 0; i < q.count; i++) f.questLog.onKill({ defId: q.target });
-    await new Promise(r => setTimeout(r, 1500));   // the territory tick is what pays it
+    /**
+     * WAIT FOR THE TICK, do not sleep and hope.
+     *
+     * `payBoardJobs` runs from `tickTerritory`, which the frame loop calls every 30 frames. Headless
+     * WebGL runs at about 16 fps, so that is roughly every 1.9 seconds — and this used to sleep for
+     * 1.5 of them, which is shorter than one interval. It passed on a fast run and failed on a busy
+     * one, for no reason to do with the code under test. Poll for the thing we are actually waiting
+     * for instead, with a ceiling well clear of several ticks.
+     */
+    const until = Date.now() + 12000;
+    while (f.questLog.active.some(x => x.id === hunt.id) && Date.now() < until) {
+      await new Promise(r => setTimeout(r, 100));
+    }
     return {
       title: hunt.title,
       stillActive: f.questLog.active.some(x => x.id === hunt.id),

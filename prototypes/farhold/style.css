@@ -24,10 +24,20 @@ body {
 #boot h1 b { color: #7fd8ff; font-weight: 600; }
 #boot .tagline { color: #9fb0c8; margin: 0 0 22px; max-width: 560px; }
 #boot .row { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+/* A label and the thing it labels wrap TOGETHER — the class select is wide enough that "Class" was
+   being left at the end of the line above it, pointing at nothing. */
+#boot .row .pair { display: inline-flex; align-items: center; gap: 8px; }
+/* the knob rows read as a column of label / control / explanation, not as three centred blocks */
+.boot-knobs .row { justify-content: flex-start; text-align: left; }
+.boot-knobs .row > label:first-child { min-width: 118px; text-align: right; }
+.boot-knobs .row > .small { flex: 1 1 100%; margin: 0 0 0 126px; }
+.boot-knobs .note { text-align: left; margin-left: 126px; }
 #boot label { color: #9fb0c8; font-size: 13px; }
 #boot input, #boot select {
   background: #121826; color: #e6e6e6; border: 1px solid #2c3a52; border-radius: 6px; padding: 6px 8px; font: inherit;
 }
+#boot-name { width: 130px; }
+#boot-seed { width: 90px; }
 #boot button {
   background: #1b4a6a; color: #dff2ff; border: 1px solid #2f7ba8; border-radius: 6px;
   padding: 10px 22px; font: inherit; font-size: 16px; cursor: pointer;

@@ -2329,8 +2329,42 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     for (const row of trouble.describe(zone.id)) hud.log(`${zone.name}: ${row.blurb}.`, 'bad');
   }
 
+  /**
+   * A job off a notice board pays itself.
+   *
+   * Every other quest in the game is handed back to the person who gave it, and the talk screen does
+   * the paying. A board job has no person — it came off a post in a village or out of somebody's
+   * mouth on the road — so it would have sat at "done" for ever with nobody to give it to. It pays
+   * on the frame it finishes, and the WORLD moves at the same time: the faction that posted it is
+   * pleased, whoever holds the ground feels it, and it leaves a rumour behind.
+   */
+  function payBoardJobs() {
+    for (const quest of [...questLog.active]) {
+      if (!quest.done || !quest.frame) continue;
+      const reward = questLog.turnIn(quest);
+      markers.syncQuests(questLog.active);
+      player.gold += reward.gold;
+      const levels = rpg.gainXp(player, reward.xp);
+      hud.log(`${quest.title} — done. ${reward.gold} gold, ${reward.xp} xp.`, 'good');
+      sound.questDone();
+      if (levels) hud.log(`Level ${player.level}!`, 'level');
+      const out = jobs.complete(quest);
+      if (out.rumour) {
+        rumours.add(out.rumour, { zone: zones.byId(quest.zoneId), from: 'word going round' });
+        hud.log(out.rumour + '.', '');
+      }
+      if (out.flipped) {
+        const to = (factionData.factions || []).find(f => f.key === out.flipped.to);
+        hud.log(`${quest.zoneName} belongs to ${to?.short || out.flipped.to} now.`, 'level');
+      }
+      hud.setPlayer(player);
+      autoSave();
+    }
+  }
+
   /** The world moving while you are in it. Cheap enough to run twice a second. */
   function tickTerritory(seconds) {
+    payBoardJobs();
     const night = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
     patrols.update(seconds, { night });
     for (const event of trade.update(seconds, { playerNear: { x: control.x, z: control.z } })) {

@@ -323,6 +323,10 @@ test('you fall into an atmosphere instead of pressing a key at it', async ({ pag
 // round 10 made the ceiling follow the planet size (a 9 km ceiling on a 16 km world is most of the
 // way to space). The scaling itself is covered by tests/round10.test.js.
 test('flying high widens the view without costing more triangles', async ({ page }) => {
+  // The one slow test in the file: at `scale=1` the clipmap rebuilds twenty-four times over the climb
+  // and the dive, which is 13s on an idle machine and comfortably past the 60s default when the box
+  // is busy. It is measuring real work, so it gets real headroom rather than a smaller world.
+  test.setTimeout(150_000);
   const errors = await land(page, { seed: 11, extra: '&scale=1' });
   const out = await page.evaluate(async () => {
     const f = window.farhold;

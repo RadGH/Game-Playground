@@ -95,6 +95,8 @@ export function snapshot({
   materials, dungeonsCleared,
   // ---- these three were being PASSED and then dropped on the floor. See the note below.
   world, quests, campaign,
+  // ---- The Territory expansion: who likes you, what you have knocked over, what you have heard
+  standings, territory, rumours,
   // where the player was last standing on the surface, for a save taken underground
   surface = null, inDungeon = false,
 }) {
@@ -160,6 +162,14 @@ export function snapshot({
      */
     inDungeon: !!inDungeon,
     surface: surface ? { x: surface.x, z: surface.z } : null,
+
+    /**
+     * The Territory. `territory` is only the DELTAS — a zone nobody has touched writes nothing at
+     * all, so a hundred-zone world costs less here than one item does above.
+     */
+    standings: standings || null,
+    territory: territory || null,
+    rumours: rumours || null,
   };
 }
 

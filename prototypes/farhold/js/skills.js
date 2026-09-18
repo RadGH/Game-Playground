@@ -188,6 +188,10 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
       ready: s.ready, cooldown: cooldownFor(s),
       locked: !unlocked(s), unlockAt: s.unlockAt,
       usable: unlocked(s) && s.ready <= 0 && costFor(s) <= player.mp,
+      // `shape` and `element` were missing, and the Skills screen asks for `chosen.shape || 'bolt'`
+      // — so every skill in the game was offered the BOLT talent tree. A ground rune was offered
+      // "Fanned". They are cheap to carry and nothing else has to change.
+      shape: s.shape, element: s.element,
     })),
   };
 }

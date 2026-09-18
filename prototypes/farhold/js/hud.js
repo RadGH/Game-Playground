@@ -7,11 +7,24 @@
 // one scrolling column could not hold thirty passives, six skills, a materials list and a bench.
 // Only the visible tab is rebuilt, so opening the sheet is cheap whatever is in the bag.
 
-import { itemScore, SLOTS, describeAffix } from './rpg.js';
+import { itemScore, SLOTS, describeAffix, xpForLevel } from './rpg.js';
+
+/** What each talent tier is for. Tier 1 is how it is thrown, 2 what happens when it lands, 3 what it
+ *  does to the fight — it was written down in a comment and never shown to the player. */
+const TIER_THEMES = { 1: 'how it flies', 2: 'when it lands', 3: 'what it does to the fight' };
+
+/** The seven screens, in rail order — also what the `1`–`7` keys pick. */
+const SCREENS = ['character', 'inventory', 'skills', 'perks', 'crafting', 'upgrade', 'journal'];
+
+/** What the header calls each screen. `perks` was missing, so the Perks screen said "Character". */
+const SHEET_TITLES = {
+  character: 'Character', inventory: 'Inventory', skills: 'Skills', perks: 'Perks',
+  crafting: 'Crafting', upgrade: 'Upgrade', journal: 'Journal',
+};
 import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
-import { treeFor, picksFor, talentSummary, TIER_LEVELS } from './skilltalents.js';
+import { treeFor, picksFor, talentSummary, tiersOpen, TIER_LEVELS } from './skilltalents.js';
 import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, armProgress } from './perks.js';
 
 /** How far in and out the perk forest zooms, and the rings it draws under the nodes. */
@@ -111,7 +124,14 @@ export class Hud {
     // round 7: the perk forest, the per-skill talent trees, the vehicle dropdowns
     onTakePerk = null, onRefundPerks = null, onPickTalent = null, onClearTalent = null,
     onSelectVehicle = null,
+    // The Territory expansion: who holds the ground, what it is offering, and what people say
+    standings = null, territoryHere = null, board = null, rumours = null, onTakeJob = null,
   } = {}) {
+    this.standings = standings;
+    this.territoryHere = territoryHere;
+    this.board = board;
+    this.rumours = rumours;
+    this.onTakeJob = onTakeJob;
     this.onTakePerk = onTakePerk;
     this.onRefundPerks = onRefundPerks;
     this.onPickTalent = onPickTalent;
@@ -194,6 +214,8 @@ export class Hud {
       if (this.shiftHeld === on) return;
       this.shiftHeld = on;
       refreshTip();                     // the open card re-renders in place, without flicker
+      // …and so does the standing compare panel, which is showing the same card
+      if (this.tab === 'inventory') this.showCompare(this.hoverItem || null);
     };
     window.addEventListener('keydown', e => { if (e.key === 'Shift') shift(true); });
     window.addEventListener('keyup', e => { if (e.key === 'Shift') shift(false); });
@@ -214,6 +236,21 @@ export class Hud {
       this.hoverItem = null;
       this.onRecycle?.(item);
       this.renderSheet();
+    });
+
+    /**
+     * `1`–`7` pick a screen while the sheet is open.
+     *
+     * Safe: casting on the digit keys is already frozen while the sheet is open (main.js), and the
+     * SELECT guard matters because the Boat and ship rows are real `<select>` elements.
+     */
+    window.addEventListener('keydown', e => {
+      if (!this.sheetOpen || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      const n = Number(e.key);
+      if (!(n >= 1 && n <= SCREENS.length)) return;
+      e.preventDefault();
+      this.setTab(SCREENS[n - 1]);
     });
 
     $('sheet-close').onclick = () => this.toggleSheet(false);
@@ -475,7 +512,14 @@ export class Hud {
   }
 
   /** XP thresholds without importing the module twice. */
-  _xpForLevel(level) { return level <= 1 ? 0 : Math.round(58 * Math.pow(level - 1, 1.86)); }
+  /**
+   * The XP curve, from the one place that owns it.
+   *
+   * This used to be a private copy of only the PRE-30 half of the curve (`58 * (l-1)^1.86`), so
+   * every XP bar above level 30 was measured against a number the game does not use — the bar
+   * looked full from 31 onwards. `rpg.xpForLevel` bands 30-40 and 40-50 on top of that.
+   */
+  _xpForLevel(level) { return xpForLevel(level); }
 
   // ---------------------------------------------------------------- minimap
 
@@ -671,28 +715,65 @@ export class Hud {
     hideTip();
     this.sheetOpen = open;
     $('sheet').classList.toggle('hidden', !open);
-    if (open) { this.onOpenSheet?.(); this.renderSheet(); }
-    else this.onCloseSheet?.();
+    if (open) {
+      this._returnFocus = document.activeElement;
+      this.onOpenSheet?.();
+      this.renderSheet();
+      // put the keyboard somewhere sensible, or Tab starts at the top of the document
+      $('sheet-tabs').querySelector('button.on')?.focus();
+    } else {
+      this.onCloseSheet?.();
+      this._returnFocus?.focus?.();
+    }
     return open;
   }
 
   setTab(tab) {
     hideTip();
     this.tab = tab;
-    for (const btn of $('sheet-tabs').querySelectorAll('button')) btn.classList.toggle('on', btn.dataset.tab === tab);
+    for (const btn of $('sheet-tabs').querySelectorAll('button')) {
+      btn.classList.toggle('on', btn.dataset.tab === tab);
+      btn.setAttribute('aria-selected', btn.dataset.tab === tab ? 'true' : 'false');
+    }
     for (const body of document.querySelectorAll('.tab-body')) body.classList.toggle('hidden', body.dataset.tab !== tab);
-    $('sheet-title').textContent = {
-      character: 'Character', inventory: 'Inventory', skills: 'Skills',
-      crafting: 'Crafting', upgrade: 'Upgrade', journal: 'Journal',
-    }[tab] || 'Character';
+    $('sheet-title').textContent = SHEET_TITLES[tab] || 'Character';
     this.renderSheet();
   }
 
-  /** Only the tab you are looking at gets rebuilt. */
+  /**
+   * The header, the rail badges, and then only the tab you are looking at.
+   *
+   * The header is the same on all seven screens: who you are, how far to the next level, what
+   * crafting material you are holding and how much gold. Materials used to appear on the Crafting
+   * and Upgrade screens only — which are the two screens where you already know, and neither of the
+   * screens where you decide whether to recycle something.
+   */
   renderSheet() {
     const player = this.player;
     if (!player) return;
-    $('sheet-purse').innerHTML = `<b>${player.gold}</b> gold · level ${player.level}`;
+    /**
+     * KEEP THE SCROLL.
+     *
+     * This runs on every equip, recycle, spend, craft and perk pick, and it `replaceChildren`s every
+     * list on the visible screen. Without this, recycling the fortieth item in the bag threw you back
+     * to the first. The position is kept on the PANE, which is why `.pane-body` is the only scroller
+     * in every screen.
+     */
+    const keep = [...document.querySelectorAll('#sheet .pane-body')].map(n => [n, n.scrollTop]);
+    $('sheet-purse').innerHTML = `<b>${player.gold}</b> gold`;
+    const who = $('sheet-who');
+    if (who) {
+      who.innerHTML = `<b>${player.name}</b>`
+        + `<span class="who-class">${player.classLabel || player.classId || ''}</span>`
+        + `<span class="who-level">level ${player.level}</span>`;
+    }
+    const lo = xpForLevel(player.level), hi = xpForLevel(player.level + 1);
+    const fill = $('sheet-xp-fill'), xpText = $('sheet-xp-text');
+    if (fill) fill.style.width = (hi > lo ? Math.max(0, Math.min(100, (player.xp - lo) / (hi - lo) * 100)) : 100) + '%';
+    if (xpText) xpText.textContent = hi > lo ? `${hpNum(hi - player.xp)} xp to level ${player.level + 1}` : 'level 50';
+    this.drawMaterials('sheet-materials');
+    this.railBadges();
+
     if (this.tab === 'character') this.renderCharacter();
     if (this.tab === 'inventory') this.renderInventory();
     if (this.tab === 'skills') this.renderSkills();
@@ -700,6 +781,37 @@ export class Hud {
     if (this.tab === 'crafting') this.renderCrafting();
     if (this.tab === 'upgrade') this.renderUpgrade();
     if (this.tab === 'journal') this.renderJournal();
+    for (const [node, top] of keep) node.scrollTop = top;
+  }
+
+  /**
+   * A number on the rail for anything waiting to be spent.
+   *
+   * Unspent attribute, perk and talent points are invisible today unless you happen to open the
+   * screen they belong to, so a character can walk around for an hour three perks poorer than they
+   * should be. Same for a finished quest waiting to be handed in.
+   */
+  railBadges() {
+    const player = this.player;
+    const set = (tab, n) => {
+      const b = $('rail-badge-' + tab);
+      if (!b) return;
+      b.hidden = !n;
+      if (n) { b.textContent = String(n); b.title = `${n} waiting`; }
+    };
+    set('character', player.pendingAttr || 0);
+    set('perks', pointsLeft(player));
+    // `tiersOpen` returns a COUNT of open tiers, not a list of them
+    const openTiers = tiersOpen(player.level);
+    let talentsOpen = 0;
+    for (const skill of this.skillState || []) {
+      if (skill.locked) continue;
+      const picks = picksFor(player, skill.id);
+      for (let tier = 1; tier <= openTiers; tier++) if (!picks[tier]) talentsOpen++;
+    }
+    set('skills', talentsOpen);
+    const quests = this.journal?.()?.quests || [];
+    set('journal', quests.filter(q => q.done).length);   // finished, waiting to be handed in
   }
 
   /** The worn-gear grid, used by both the character and inventory tabs. */
@@ -714,6 +826,10 @@ export class Hud {
         <span class="name ${item ? rarityClass(item) : 'muted'}">${item ? item.name : '—'}</span>`;
       div.dataset.tipRender = 'slot';
       div.dataset.tipSlot = slot;
+      // the rarity as a colour down the left edge of the plate, the same as in the bag
+      div.dataset.rarity = item
+        ? (item.setId ? 'set' : item.isUnique ? 'unique' : (item.rarity || 'normal'))
+        : 'none';
       div.tabIndex = 0;
       div.onclick = () => { if (item) { this.onEquip(null, slot); hideTip(); this.renderSheet(); } };
       return div;
@@ -743,11 +859,36 @@ export class Hud {
       ['Gold find', d.goldFind ? `+${fmt(d.goldFind)}%` : '—'],
       ['Kills', player.kills],
     ];
-    $('sheet-stats').replaceChildren(...rows.flatMap(([k, v]) => {
+    /**
+     * Sixteen rows in one list read as a wall — "did that chest help" was a question you answered by
+     * counting. They are three groups now, in three lists, and on a wide screen each group is two
+     * pairs of columns. `STAT_HELP` tooltips hang off `dt.dataset.tipStat`, not off position, so they
+     * follow the rows wherever they go.
+     */
+    const GROUPS = {
+      offence: ['Damage', 'Crit', 'Accuracy', 'Attack speed', 'Cooldowns'],
+      defence: ['Health', 'Armour', 'Magic resistance', 'Dodge', 'Block', 'Barrier'],
+      utility: ['Mana', 'Move speed', 'Better loot', 'Gold find', 'Kills'],
+    };
+    const statRow = ([k, v]) => {
       const dt = el('dt', null, k);
       if (STAT_HELP[k]) { dt.dataset.tipRender = 'stat'; dt.dataset.tipStat = k; dt.tabIndex = 0; }
       return [dt, el('dd', null, String(v))];
-    }));
+    };
+    const byName = new Map(rows.map(r => [r[0], r]));
+    let grouped = false;
+    for (const [group, names] of Object.entries(GROUPS)) {
+      const box = $('sheet-stats-' + group);
+      if (!box) continue;
+      grouped = true;
+      box.replaceChildren(...names.filter(n => byName.has(n)).flatMap(n => statRow(byName.get(n))));
+    }
+    // the flat list is the fallback for any build that still has the single `#sheet-stats`
+    const flat = $('sheet-stats');
+    if (flat) {
+      if (grouped) flat.hidden = true;
+      else flat.replaceChildren(...rows.flatMap(statRow));
+    }
 
     // attributes with the level-up spend buttons
     $('sheet-attrs').replaceChildren(...Object.entries(player.attrs).map(([key, value]) => {
@@ -834,16 +975,155 @@ export class Hud {
       : '';
   }
 
+  /**
+   * The bag, filtered, sorted, and compared against what you are wearing.
+   *
+   * What this screen is for, in order: decide whether a drop beats what you have on, clear the junk
+   * out, and find one particular thing. None of those had any help before — the bag was one flex
+   * column with no filter, no sort and no count, and the only comparison was a tooltip that followed
+   * the pointer, covered the row under it and vanished the moment you moved to the next row.
+   *
+   * Every filter reads a field an item already has (`type`, `slot`, `rarity`, `isUnique`, `setId`).
+   * Nothing here invents data.
+   */
   renderInventory() {
     const player = this.player;
     this.slotGrid('inv-slots');
-    $('inv-count').textContent = `${player.bag.length} item${player.bag.length === 1 ? '' : 's'}`;
+    this.bagFilter = this.bagFilter || { kind: 'all', rarity: 'any' };
+    this.bagSort = this.bagSort || 'score';
+    this.bagView = this.bagView || 'list';
+    this.buildBagControls();
+
+    const KIND = {
+      all: () => true,
+      weapon: i => i.type === 'weapon',
+      armour: i => ['head', 'chest', 'legs', 'hands', 'feet', 'offhand'].includes(i.slot),
+      jewel: i => ['ring', 'ring1', 'ring2', 'necklace'].includes(i.slot),
+      other: i => ['mount', 'light'].includes(i.slot) || !!i.quiver,
+    };
+    const RANK = { normal: 0, magic: 1, rare: 2, legendary: 3 };
+    const floor = { any: -1, magic: 1, rare: 2, legendary: 3 }[this.bagFilter.rarity] ?? -1;
+    const keep = i => (KIND[this.bagFilter.kind] || KIND.all)(i)
+      // a unique or a set piece always survives a rarity floor — it is never "below magic"
+      && (i.isUnique || i.setId || (RANK[i.rarity] ?? 0) >= floor);
+    const rows = player.bag.filter(keep);
+
+    const key = {
+      score: i => -itemScore(i),
+      rarity: i => -((RANK[i.rarity] ?? 0) + (i.isUnique || i.setId ? 4 : 0)),
+      slot: i => String(i.slot || ''),
+      name: i => i.name,
+    }[this.bagSort] || (i => -itemScore(i));
+    rows.sort((a, b) => {
+      const ka = key(a), kb = key(b);
+      return ka < kb ? -1 : ka > kb ? 1 : String(a.name).localeCompare(String(b.name));
+    });
+
+    $('inv-count').textContent = rows.length === player.bag.length
+      ? `${player.bag.length} item${player.bag.length === 1 ? '' : 's'}`
+      : `${rows.length} of ${player.bag.length}`;
+
     const bag = $('sheet-bag');
+    bag.classList.toggle('bag--grid', this.bagView === 'grid');
     if (!player.bag.length) {
-      bag.replaceChildren(el('div', 'empty', 'Nothing in the bag yet. Kill something.'));
+      const empty = el('div', 'empty-state');
+      empty.innerHTML = '<b>Nothing in the bag yet.</b><span>Kill something, or open a chest.</span>';
+      bag.replaceChildren(empty);
+    } else if (!rows.length) {
+      const empty = el('div', 'empty-state');
+      empty.innerHTML = '<b>Nothing matches.</b><span>Widen the filters above.</span>';
+      bag.replaceChildren(empty);
+    } else {
+      bag.replaceChildren(...rows.map(item => this.bagRow(item)));
+    }
+    this.showCompare(this.hoverItem || null);
+  }
+
+  /**
+   * The two chipbars and the two view buttons, built ONCE.
+   *
+   * `renderSheet` calls `replaceChildren` on every list in the visible screen, on every equip and
+   * every recycle. A chip rebuilt out from under a mid-click pointer swallows the click, so these are
+   * built on first render and afterwards only have a class toggled — the `dataset.wired` pattern the
+   * perk canvas already uses.
+   */
+  buildBagControls() {
+    const KINDS = [['all', 'All'], ['weapon', 'Weapons'], ['armour', 'Armour'], ['jewel', 'Jewellery'], ['other', 'Other']];
+    const RARITIES = [['any', 'Any'], ['magic', 'Magic +'], ['rare', 'Rare +'], ['legendary', 'Legendary +']];
+    const SORTS = [['score', 'How it compares'], ['rarity', 'Rarity'], ['slot', 'Slot'], ['name', 'Name']];
+
+    const filters = $('inv-filters'), sorts = $('inv-sort');
+    if (filters && !filters.dataset.wired) {
+      filters.dataset.wired = '1';
+      const kids = [el('span', 'chip-label', 'Show')];
+      for (const [value, label] of KINDS) {
+        const b = el('button', 'chip', label);
+        b.dataset.kind = value;
+        b.onclick = () => { this.bagFilter.kind = value; this.renderSheet(); };
+        kids.push(b);
+      }
+      kids.push(el('span', 'sep'), el('span', 'chip-label', 'Rarity'));
+      for (const [value, label] of RARITIES) {
+        const b = el('button', 'chip', label);
+        b.dataset.rarityFilter = value;
+        b.onclick = () => { this.bagFilter.rarity = value; this.renderSheet(); };
+        kids.push(b);
+      }
+      filters.replaceChildren(...kids);
+    }
+    if (sorts && !sorts.dataset.wired) {
+      sorts.dataset.wired = '1';
+      const kids = [el('span', 'chip-label', 'Sort by')];
+      for (const [value, label] of SORTS) {
+        const b = el('button', 'chip', label);
+        b.dataset.sort = value;
+        b.onclick = () => { this.bagSort = value; this.renderSheet(); };
+        kids.push(b);
+      }
+      sorts.replaceChildren(...kids);
+    }
+    for (const b of filters?.querySelectorAll('[data-kind]') || []) b.classList.toggle('on', b.dataset.kind === this.bagFilter.kind);
+    for (const b of filters?.querySelectorAll('[data-rarity-filter]') || []) b.classList.toggle('on', b.dataset.rarityFilter === this.bagFilter.rarity);
+    for (const b of sorts?.querySelectorAll('[data-sort]') || []) b.classList.toggle('on', b.dataset.sort === this.bagSort);
+
+    for (const [id, view] of [['inv-view-list', 'list'], ['inv-view-grid', 'grid']]) {
+      const b = $(id);
+      if (!b) continue;
+      if (!b.dataset.wired) {
+        b.dataset.wired = '1';
+        b.onclick = () => { this.bagView = view; this.renderSheet(); };
+      }
+      b.classList.toggle('on', this.bagView === view);
+      b.setAttribute('aria-pressed', this.bagView === view ? 'true' : 'false');
+    }
+  }
+
+  /**
+   * Fill the compare panel: the item you are pointing at, and the item it would replace.
+   *
+   * It is NEVER cleared on mouse-leave. A card that blanks the moment the pointer moves is unusable —
+   * the whole point is to look at one, then look at the next, and see both against the same worn
+   * item. It holds the last thing you looked at until you look at something else.
+   */
+  showCompare(item) {
+    const box = $('inv-compare-body');
+    if (!box) return;
+    if (!item) {
+      const hint = el('div', 'itemcard empty', 'Point at something in the bag.');
+      box.replaceChildren(hint);
       return;
     }
-    bag.replaceChildren(...player.bag.map(item => this.bagRow(item)));
+    const slot = item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot;
+    const worn = this.player?.equipment?.[slot];
+    const a = el('div', 'itemcard');
+    a.innerHTML = this.itemCard(item);
+    const kids = [a];
+    if (worn && worn !== item) {
+      const b = el('div', 'itemcard itemcard--worn');
+      b.innerHTML = this.itemCard(worn, { worn: true });
+      kids.push(b);
+    }
+    box.replaceChildren(...kids);
   }
 
   /** One line in the bag: name, slot, how it compares, and a recycle button. */
@@ -853,17 +1133,21 @@ export class Hud {
     const worn = player.equipment[slot];
     const delta = itemScore(item) - itemScore(worn);
     const row = el('div', 'row');
-    this.tipFor(row, item);
+    // The Upgrade tab's picker keeps its tooltip (it has no compare panel); the bag does not, because
+    // two full item cards on screen at once with one of them chasing the pointer is noise.
+    if (pick) this.tipFor(row, item);
     row.tabIndex = 0;
+    row.dataset.rarity = item.setId ? 'set' : item.isUnique ? 'unique' : (item.rarity || 'normal');
     row.innerHTML = `<span class="${rarityClass(item)}">${item.name}</span>
       <span class="muted small">${SLOT_LABELS[slot] || slot}</span>
       <span class="score ${delta > 0 ? 'up' : delta < 0 ? 'down' : ''}">${delta > 0 ? '▲ +' : delta < 0 ? '▼ ' : '– '}${Math.abs(delta)}</span>`;
     if (pick) {
       row.onclick = () => { hideTip(); pick(item); };
     } else {
-      row.onmouseenter = () => { this.hoverItem = item; };
+      row.onmouseenter = () => { this.hoverItem = item; this.showCompare(item); };
+      // `hoverItem` still clears, because `R` reads it — the PANEL does not, on purpose
       row.onmouseleave = () => { if (this.hoverItem === item) this.hoverItem = null; };
-      row.onfocus = () => { this.hoverItem = item; };
+      row.onfocus = () => { this.hoverItem = item; this.showCompare(item); };
       const scrap = el('button', 'scrap', '♺');
       scrap.dataset.tip = 'Recycle this into crafting material. What you get back depends on its rarity, what it is made of, and how well made it is.';
       scrap.textContent = '♺';
@@ -893,6 +1177,38 @@ export class Hud {
     }
 
     /**
+     * YOUR BAR, ON THE SCREEN THAT SHAPES IT.
+     *
+     * The in-game bar and this screen used to share nothing: the screen was a text list, the bar was
+     * six boxes, and neither showed which talents were on a skill. This strip is the bar — same keys,
+     * same order — and it is the talent picker too. The picker used to be a chip row built INSIDE the
+     * tree, so it scrolled away with the thing it was picking.
+     *
+     * Three dots under each key: filled means a talent taken on that tier, an outlined one means a
+     * tier you could spend in right now, a dark one means a tier not open yet.
+     */
+    const bar = $('sheet-skillbar');
+    if (bar) {
+      const open = tiersOpen(player.level ?? 1);
+      bar.replaceChildren(...this.skillState.map((s, i) => {
+        const picks = s.locked ? {} : picksFor(player, s.id);
+        const card = el('button', 'sk-card'
+          + (s.locked ? ' locked' : '')
+          + (s.id === this.talentSkill ? ' on' : ''));
+        card.dataset.tipRender = 'skill';
+        card.dataset.tipSkill = String(i);
+        card.innerHTML = `<span class="sk-key">${i + 1}</span>`
+          + `<span class="sk-name">${s.locked ? `level ${s.unlockAt}` : s.name}</span>`
+          + `<span class="sk-cost">${s.locked ? 'locked' : `${s.mp} mana · ${s.cooldown.toFixed(1)}s`}</span>`
+          + '<span class="sk-pips">' + [1, 2, 3].map(t =>
+            `<i class="${picks[t] ? 'on' : t <= open ? 'open' : ''}"></i>`).join('') + '</span>';
+        if (!s.locked) card.onclick = () => { this.talentSkill = s.id; this.renderSheet(); };
+        return card;
+      }));
+      if (!this.skillState.length) bar.replaceChildren(el('p', 'muted small', 'No skills yet.'));
+    }
+
+    /**
      * A TREE PER SKILL, three tiers deep, one node per tier.
      *
      * The broad talent ladder and the passive tree both moved into the Perks forest, so this space
@@ -909,19 +1225,17 @@ export class Hud {
       } else {
         if (!list.some(s => s.id === this.talentSkill)) this.talentSkill = list[0]?.id || null;
         const chosen = list.find(s => s.id === this.talentSkill) || list[0];
-        const picker = el('div', 'shop-tabs');
-        for (const s of list) {
-          const b = el('button', 'chip' + (s.id === chosen.id ? ' on' : ''), s.name);
-          b.onclick = () => { this.talentSkill = s.id; this.renderSheet(); };
-          picker.append(b);
-        }
-        const kids = [picker];
+        // the picker is the bar strip above now, so `#sheet-skilltree` holds exactly six children —
+        // h4, row, h4, row, h4, row — which `grid-auto-flow: column` lays out as three tier columns
+        const kids = [];
         const tree = treeFor(chosen.id, chosen.shape || 'bolt');
         const picks = picksFor(player, chosen.id);
         for (const tier of tree.tiers) {
           const open = (player.level ?? 1) >= tier.level;
+          // what each tier is FOR, which was only ever written down in a comment in this file
+          const theme = TIER_THEMES[tier.tier] || '';
           kids.push(el('h4', 'tier-head' + (open ? '' : ' locked'),
-            `Tier ${tier.tier}${open ? '' : ` — level ${tier.level}`}`));
+            `Tier ${tier.tier}${theme ? ` — ${theme}` : ''}${open ? '' : ` · level ${tier.level}`}`));
           const row = el('div', 'tier-row');
           for (const node of tier.nodes) {
             const on = picks[tier.tier] === node.id;
@@ -938,15 +1252,24 @@ export class Hud {
           }
           kids.push(row);
         }
-        const summary = talentSummary(player, chosen.id);
-        kids.push(el('p', 'muted small', summary
-          ? `${chosen.name}: ${summary}. The spell is drawn bigger and busier for every talent on it.`
-          : `${chosen.name} has no talents yet. Pick one from each tier.`));
         treeBox.replaceChildren(...kids);
+        const title = $('sheet-tree-title');
+        if (title) title.textContent = `${chosen.name} — talents`;
+        const sum = $('sheet-talent-summary');
+        if (sum) {
+          const summary = talentSummary(player, chosen.id);
+          sum.textContent = summary
+            ? `${chosen.name}: ${summary}. The spell is drawn bigger and busier for every talent on it.`
+            : `${chosen.name} has no talents yet. Pick one from each tier.`;
+        }
       }
     }
     const tp = $('sheet-talent-points');
-    if (tp) tp.textContent = `one per tier · tiers open at ${TIER_LEVELS.join(', ')}`;
+    if (tp) {
+      const ladder = this.skillState.map(s => s.unlockAt).filter(Number.isFinite);
+      tp.textContent = `one talent per tier · tiers open at ${TIER_LEVELS.join(', ')}`
+        + (ladder.length ? ` · skills unlock at ${[...new Set(ladder)].sort((a, b) => a - b).join(', ')}` : '');
+    }
   }
 
 
@@ -1289,6 +1612,31 @@ export class Hud {
         kids.push(b);
       } else kids.push(el('p', 'muted small', check.why));
     }
+
+    /**
+     * WHAT YOU HAVE ALREADY TAKEN.
+     *
+     * Nothing listed it before, so auditing a build meant hovering eighty-nine dots. Click a row to
+     * select that node in the forest. The arm colour on the left edge is dynamic on purpose —
+     * `ARMS[].color` is data, not style.
+     */
+    const taken = [...takenOf(player)].map(id => forest.byId.get(id)).filter(n => n && n.kind !== 'hub');
+    kids.push(el('div', 'divider', `Taken · ${taken.length}`));
+    const list = el('div');
+    list.id = 'perk-taken';
+    taken.sort((a, b) => String(a.arm || '').localeCompare(String(b.arm || ''))
+      || String(a.name || '').localeCompare(String(b.name || '')));
+    for (const n of taken) {
+      const row = el('div', 'list-row');
+      row.style.borderLeftColor = ARMS.find(a => a.key === n.arm)?.color || '#2a3446';
+      row.innerHTML = `<span class="row-main">${n.name || n.id}</span>`
+        + `<span class="row-note">${NODE_KINDS[n.kind]?.name || n.kind}</span>`;
+      row.onclick = () => { this.perkPick = n.id; this.renderSheet(); };
+      list.append(row);
+    }
+    if (!taken.length) list.append(el('p', 'muted small', 'Nothing taken yet.'));
+    kids.push(list);
+
     side.replaceChildren(...kids);
   }
 
@@ -1298,11 +1646,31 @@ export class Hud {
   // recipes on the left, and a detail panel on the right that only fills in when you click one.
   // The old single panel tried to show sixteen recipes and every cost at once, which is a wall.
 
+  /** Bag / worn / all, above the pick list. Built once — see `buildBagControls`. */
+  buildUpScope() {
+    const bar = $('up-scope');
+    if (!bar) return;
+    if (!bar.dataset.wired) {
+      bar.dataset.wired = '1';
+      const kids = [el('span', 'chip-label', 'Show')];
+      for (const [value, label] of [['all', 'Everything'], ['bag', 'In the bag'], ['worn', 'Worn']]) {
+        const b = el('button', 'chip', label);
+        b.dataset.scope = value;
+        b.onclick = () => { this.upScope = value; this.renderUpgrade(); };
+        kids.push(b);
+      }
+      bar.replaceChildren(...kids);
+    }
+    for (const b of bar.querySelectorAll('[data-scope]')) b.classList.toggle('on', b.dataset.scope === this.upScope);
+  }
+
   /** The materials row, shared by both tabs. */
   drawMaterials(target) {
     const box = $(target);
     if (!box) return;
-    if (!this.craft) { box.replaceChildren(el('p', 'muted small', 'No bench here.')); return; }
+    // in the header it is a strip of chips, so the empty case is three words, not a sentence
+    const tight = box.classList.contains('sheet-mats');
+    if (!this.craft) { box.replaceChildren(el('span', 'muted small', tight ? '' : 'No bench here.')); return; }
     const held = this.craft.held();
     box.replaceChildren(...(held.length ? held.map(m => {
       const chip = el('div', 'material');
@@ -1311,7 +1679,9 @@ export class Hud {
       chip.tabIndex = 0;
       chip.innerHTML = `<i style="background:${m.color}"></i><span>${m.name}</span><b>${m.n}</b>`;
       return chip;
-    }) : [el('p', 'muted small', 'Nothing yet. Recycle something on the Inventory tab — that is where every material comes from.')]));
+    }) : [el('span', 'muted small', tight
+      ? 'no materials yet'
+      : 'Nothing yet. Recycle something on the Inventory tab — that is where every material comes from.')]));
   }
 
   /** One row in a recipe list: name, what it costs, and whether you can pay for it. */
@@ -1344,7 +1714,7 @@ export class Hud {
   renderCrafting() {
     const player = this.player;
     const craft = this.craft;
-    this.drawMaterials('craft-materials');
+    // materials live in the sheet header now — one place, on all seven screens
     if (!craft) { $('craft-list').replaceChildren(); $('craft-detail').replaceChildren(); return; }
 
     const list = $('craft-list');
@@ -1373,8 +1743,13 @@ export class Hud {
     kids.push(el('h3', null, r.name));
     kids.push(el('p', 'muted', r.desc));
 
-    // what it makes: a grid you actually choose from
-    kids.push(el('h4', null, 'What to make'));
+    /**
+     * The bases go in their own column now.
+     *
+     * They used to be a `repeat(auto-fill, minmax(140px, 1fr))` grid capped at `34vh`, inside a
+     * `42vh`-capped list, inside an 86vh modal — two nested scrollers that put the Forge button below
+     * the fold on a 768px screen. The pane scrolls, and the grid is as wide as the screen allows.
+     */
     const grid = el('div', 'forge-grid');
     for (const o of options) {
       const cell = el('button', 'forge-option' + (o.baseKey === this.forgeBase ? ' on' : '') + (o.canUse ? '' : ' cannot'));
@@ -1386,7 +1761,11 @@ export class Hud {
       cell.onclick = () => { this.forgeBase = o.baseKey; hideTip(); this.renderCrafting(); };
       grid.append(cell);
     }
-    kids.push(grid);
+    const bases = $('craft-bases');
+    if (bases) bases.replaceChildren(grid);
+    else kids.push(grid);
+    const basesTitle = $('craft-bases-title');
+    if (basesTitle) basesTitle.textContent = r.name;
 
     // what it costs, and what comes out
     kids.push(el('h4', null, 'Cost'));
@@ -1415,15 +1794,28 @@ export class Hud {
   renderUpgrade() {
     const player = this.player;
     const craft = this.craft;
-    this.drawMaterials('up-materials');
+    // materials live in the sheet header now
     if (!craft) return;
 
     // the bench item may have been recycled or equipped since it was picked
     if (this.bench && !player.bag.includes(this.bench) && !Object.values(player.equipment).includes(this.bench)) this.bench = null;
 
-    // what you could work on: the bag, then what you are wearing
+    /**
+     * What you could work on — the bag, what you are wearing, or both.
+     *
+     * This list was `.small-bag { max-height: 190px }` holding thirty-odd rows five at a time, which
+     * made picking the item you cared about the slowest thing in the sheet. It is a full-height pane
+     * with a scope filter now.
+     */
+    this.upScope = this.upScope || 'all';
+    this.buildUpScope();
     const pick = $('up-pick');
-    const candidates = [...player.bag, ...Object.values(player.equipment).filter(Boolean)];
+    const worn = Object.values(player.equipment).filter(Boolean);
+    const candidates = this.upScope === 'bag' ? [...player.bag]
+      : this.upScope === 'worn' ? worn
+      : [...player.bag, ...worn];
+    const count = $('up-count');
+    if (count) count.textContent = `${candidates.length} item${candidates.length === 1 ? '' : 's'}`;
     pick.replaceChildren(...(candidates.length ? candidates.map(item => {
       const row = this.bagRow(item, { pick: it => { this.bench = it; this.craftIndex = 0; this.upRecipe = null; this.renderUpgrade(); } });
       if (item === this.bench) row.classList.add('on');
@@ -1432,10 +1824,18 @@ export class Hud {
 
     // the item itself
     const head = $('up-item');
+    const full = $('up-card');
     if (!this.bench) {
-      head.replaceChildren(el('p', 'muted small', 'Pick something on the left. Anything in your bag, or anything you are wearing.'));
+      const empty = el('div', 'empty-state');
+      empty.innerHTML = '<b>Nothing on the bench.</b><span>Pick something on the left — anything in your bag, or anything you are wearing.</span>';
+      head.replaceChildren(empty);
+      if (full) full.innerHTML = '';
       $('up-list').replaceChildren();
-      $('up-detail').replaceChildren();
+      const hint = el('div', 'empty-state');
+      hint.innerHTML = '<b>Nothing to work on yet.</b>'
+        + '<span>Pick an item, then pick what to do to it. Tempering and reinforcing raise its numbers,'
+        + ' promoting raises its rarity, reweaving trades one property for another, and a brand adds an element.</span>';
+      $('up-detail').replaceChildren(hint);
       return;
     }
     const card = el('div', 'bench-card');
@@ -1446,6 +1846,15 @@ export class Hud {
       + `${this.bench.armor ? ' · ' + this.bench.armor + ' armour' : ''}`
       + `${this.bench.reworks ? ' · reworked ' + this.bench.reworks + '×' : ''}</div>`;
     head.replaceChildren(card);
+    /**
+     * The item's FULL card, standing still under the summary.
+     *
+     * Reweaving is choosing which property to trade. You could not read the property list and pick
+     * from it at the same time, because the list was tooltip-only — so you hovered, read, moved away,
+     * lost it, and hovered again. Both are on screen now: the card here, the pickable list in the
+     * detail pane.
+     */
+    if (full) full.innerHTML = this.itemCard(this.bench, { worn: worn.includes(this.bench) });
 
     // the recipe list, grouped
     const list = $('up-list');
@@ -1516,62 +1925,127 @@ export class Hud {
 
   // ---------------------------------------------------------------- journal
 
+  /**
+   * The journal, as five panes instead of one column.
+   *
+   * Everything but the zone list used to queue up in a single 420px column — the survey, every
+   * objective, the nemesis, the quest log and the bestiary, in that order — and the bestiary was
+   * truncated to twelve because there was nowhere to put the rest. Each of those is its own pane now,
+   * and the kill list is complete.
+   */
   renderJournal() {
     const j = this.journal?.();
-    const jbox = $('sheet-journal');
-    if (jbox && j) {
-      const kids = [];
-      const head = el('div', 'journal-head');
-      head.innerHTML = `<b>${j.title}</b> <span class="muted small">${Math.round(j.share * 100)}% surveyed</span>`;
-      kids.push(head);
-      for (const o of j.objectives) {
-        const row = el('div', 'journal-row' + (o.done ? ' done' : ''));
-        row.title = o.desc;
-        row.innerHTML = `<span>${o.name}</span><span class="muted">${o.text}</span>`;
-        kids.push(row);
-      }
-      if (j.nemesis) {
-        const n = el('div', 'journal-row nemesis');
-        n.innerHTML = `<span>${j.nemesis.name} ${j.nemesis.title}</span><span class="muted">beat you ${j.nemesis.defeats}×</span>`;
-        kids.push(n);
-      }
-      if (j.quests?.length) {
-        const h = el('div', 'journal-head');
-        h.innerHTML = '<b>Work in hand</b>';
-        kids.push(h);
-        for (const q of j.quests) {
-          const row = el('div', 'journal-row' + (q.done ? ' done' : ''));
-          row.innerHTML = `<span>${q.title}</span><span class="muted">${q.progress}</span>`;
-          kids.push(row);
-        }
-      }
-      const seen = Object.entries(j.bestiary || {}).sort((a, b) => b[1] - a[1]).slice(0, 12);
-      if (seen.length) {
-        const h = el('div', 'journal-head');
-        h.innerHTML = '<b>Killed</b>';
-        kids.push(h);
-        for (const [id, n] of seen) {
-          const row = el('div', 'journal-row');
-          row.innerHTML = `<span>${(j.names?.[id] || id).replace(/_/g, ' ')}</span><span class="muted">${n}</span>`;
-          kids.push(row);
-        }
-      }
-      jbox.replaceChildren(...kids);
+    const row = (text, note, cls = '') => {
+      const n = el('div', 'journal-row' + (cls ? ' ' + cls : ''));
+      n.innerHTML = `<span>${text}</span><span class="muted">${note ?? ''}</span>`;
+      return n;
+    };
+    const fill = (id, kids, emptyText) => {
+      const box = $(id);
+      if (!box) return;
+      box.replaceChildren(...(kids.length ? kids : [el('p', 'muted small', emptyText)]));
+    };
+    const meta = (id, text) => { const n = $(id); if (n) n.textContent = text; };
+
+    // ---- the survey
+    const objectives = (j?.objectives || []).map(o => {
+      const n = row(o.name, o.text, o.done ? 'done' : '');
+      n.dataset.tip = o.desc || '';
+      return n;
+    });
+    fill('sheet-journal', objectives, 'Nothing to survey here yet.');
+    meta('journal-share', j ? `${Math.round((j.share || 0) * 100)}% surveyed · ${j.title || ''}` : '');
+
+    // ---- work in hand
+    const quests = (j?.quests || []).map(q => row(q.title, q.progress, q.done ? 'done' : ''));
+    fill('journal-quests', quests, 'Nobody has asked you for anything.');
+    meta('journal-quest-count', (j?.quests || []).length ? `${j.quests.length}` : '');
+
+    // ---- who is hunting you, and who you have put down for good
+    const foes = [];
+    if (j?.nemesis) foes.push(row(`${j.nemesis.name} ${j.nemesis.title || ''}`.trim(), `beat you ${j.nemesis.defeats}×`, 'nemesis'));
+    const beaten = j?.defeated || [];
+    if (beaten.length) {
+      foes.push(el('div', 'divider', 'Put down for good'));
+      for (const d of beaten) foes.push(row(typeof d === 'string' ? d : `${d.name} ${d.title || ''}`.trim(), ''));
+    }
+    fill('journal-foes', foes, 'Nothing has taken an interest in you yet.');
+
+    // ---- everything you have killed, all of it
+    const seen = Object.entries(j?.bestiary || {}).sort((a, b) => b[1] - a[1]);
+    fill('journal-kills', seen.map(([id, n]) => row((j.names?.[id] || id).replace(/_/g, ' '), n)),
+      'You have not killed anything yet.');
+    meta('journal-kill-count', seen.length ? `${seen.length} kinds` : '');
+
+    /**
+     * ---- WHO HOLDS THIS GROUND (The Territory).
+     *
+     * One row a faction, sorted by how they feel about you. The band name is the thing that matters —
+     * a number between -100 and 100 is not a fact a player can act on, but "Trusted" and "Hunted" are.
+     */
+    const sbox = $('journal-standing');
+    if (sbox) {
+      const holderKey = this.territoryHere?.()?.holder || null;
+      // Whoever holds the ground you are standing on goes first, then everyone else by how they feel
+      // about you. At the start of a run every number is zero, and an alphabetical list with the one
+      // faction that matters buried at the bottom of it is not a screen.
+      const rows = (this.standings?.() || [])
+        .slice()
+        .sort((a, b) => (b.key === holderKey) - (a.key === holderKey)
+          || b.value - a.value || a.name.localeCompare(b.name));
+      sbox.replaceChildren(...(rows.length ? rows.map(f => {
+        const n = el('div', 'standing-row' + (f.key === holderKey ? ' holder' : ''));
+        n.innerHTML = `<i style="background:${f.colour}"></i>`
+          + `<span>${f.name}${f.key === holderKey ? ' <em class="row-note">holds this ground</em>' : ''}</span>`
+          + `<span class="band">${f.band?.name || ''}</span>`
+          + `<span class="num ${f.value > 0 ? 'up' : f.value < 0 ? 'down' : ''}">${f.value > 0 ? '+' : ''}${f.value}</span>`;
+        n.dataset.tip = `${f.blurb} ${f.band?.blurb || ''}`;
+        return n;
+      }) : [el('p', 'muted small', 'Nobody has an opinion about you yet.')]));
+      const holder = rows.find(f => f.key === holderKey);
+      meta('journal-holder', holder ? `${holder.short} · ${holder.band?.name || ''}` : '');
     }
 
-    // the zone table: every named region and the levels that live in it
+    /** ---- WORK GOING HERE. Everything on the board names something in this zone right now. */
+    const bbox = $('journal-board');
+    if (bbox) {
+      const board = this.board?.() || [];
+      bbox.replaceChildren(...(board.length ? board.map(job => {
+        const n = el('div', 'journal-row job-row' + (job.taken ? ' done' : ''));
+        n.innerHTML = `<span>${job.title}</span>`
+          + `<span class="muted">${job.reward.gold}g · ${job.reward.xp} xp</span>`;
+        n.dataset.tip = `${job.text}\n\n${job.scope === 'adjacent' ? 'Next door.' : 'In this zone.'}`;
+        if (!job.taken) n.onclick = () => { this.onTakeJob?.(job); hideTip(); this.renderSheet(); };
+        return n;
+      }) : [el('p', 'muted small', 'Nothing going here at the moment. Walk somewhere else and come back.')]));
+    }
+
+    /** ---- WORD GOING ROUND. The only thing in the game allowed to talk about somewhere else. */
+    const rbox = $('journal-rumours');
+    if (rbox) {
+      const said = this.rumours?.() || [];
+      rbox.replaceChildren(...(said.length ? said.slice(0, 14).map(r => {
+        const n = el('div', 'rumour-row');
+        n.innerHTML = `<span>${r.text}.</span><span class="who">${r.from}</span>`;
+        return n;
+      }) : [el('p', 'muted small', 'Nobody has told you anything yet. Talk to people on the road.')]));
+    }
+
+    // ---- the zone table: every named region, the levels that live in it, and what it looks like
     const zbox = $('sheet-zones');
     if (zbox) {
       const list = this.zones?.list?.() || [];
       const here = this.here || null;
+      meta('journal-zone-count', list.length ? `${list.length} region${list.length === 1 ? '' : 's'}` : '');
       zbox.replaceChildren(...(list.length ? list.map(z => {
-        const row = el('div', 'zone-row' + (here && z.id === here.id ? ' here' : ''));
+        const n = el('div', 'zone-row' + (here && z.id === here.id ? ' here' : ''));
         const tone = zoneTone(z.midLevel, this.player?.level || 1);
-        row.innerHTML = `<span>${z.name}${z.home ? ' <i class="muted small">(where you started)</i>' : ''}</span>
+        // the descriptor used to live in a `title=` attribute, so you had to hover and wait for it
+        n.innerHTML = `<span>${z.name}${z.home ? ' <i class="muted small">(where you started)</i>' : ''}</span>
           <span class="zone-${tone}">level ${z.minLevel}–${z.maxLevel}</span>
-          <span class="muted small">${z.danger}</span>`;
-        row.title = z.descriptor || '';
-        return row;
+          <span class="muted small">${z.danger}</span>
+          <span class="zone-desc">${z.descriptor || ''}</span>`;
+        return n;
       }) : [el('p', 'muted small', 'No regions on this world.')]));
     }
   }

@@ -16,7 +16,9 @@ async function land(page, query = '') {
 const GOTO_RIVER = `
   const w = f.world; let cell = -1;
   for (let i = 0; i < w.river.length; i++) if (w.river[i] >= 2) { cell = i; break; }
-  const rx = (cell % w.width) * 640, rz = Math.floor(cell / w.width) * 640;
+  // round 10: the cell size is a title-screen knob now, so 640 is only right at Full
+  const M = f.terrain.metresPerCell;
+  const rx = (cell % w.width) * M, rz = Math.floor(cell / w.width) * M;
 `;
 
 // ---------------------------------------------------------------- rivers and water

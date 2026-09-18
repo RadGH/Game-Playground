@@ -93,18 +93,98 @@ body {
 
 /* ---------------------------------------------------------------- panels */
 
+/* ================================================================ the full-screen sheet
+ *
+ * Round 10. This used to be a 880px centred modal with `max-height: 86vh` and its own scrollbar —
+ * on a 1920 x 1080 screen it used a fifth of the pixels and still scrolled, and every one of the
+ * seven screens was two stacked columns because that was all that fitted. It is a full-viewport
+ * interface now: a header that never changes, a tab rail down the left, and one purpose-built grid
+ * per screen in the rest.
+ *
+ * Two rules hold the whole thing up:
+ *   * every grid track is `minmax(0, 1fr)`, so a long list can never push the layout wider than the
+ *     screen and nothing ever scrolls sideways;
+ *   * `#sheet` itself is `overflow: hidden`. The only thing that scrolls is a `.pane-body`.
+ *
+ * z-index 34, deliberately: `O` (settings, 38) and `M` (map, 45) can both be pressed while the sheet
+ * is open and have to draw over it.
+ */
 .sheet {
-  position: fixed; z-index: 20; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: min(880px, 94vw); max-height: 86vh; overflow: auto;
-  background: #0d1320ee; border: 1px solid #2c3a52; border-radius: 10px; padding: 18px 20px;
-  box-shadow: 0 18px 60px #000a;
+  /* ---- tokens. Every number in the sheet comes from one of these. */
+  --rail: 208px;          /* the tab rail */
+  --head: 64px;           /* the persistent header */
+  --gap: 14px;            /* between panes */
+  --pad: 20px;            /* body gutter */
+  --pane-r: 8px;          /* pane corner */
+  --doll: 372px;          /* the equip figure column */
+  --card: 360px;          /* a standing item card column */
+  --fs: 13px;             /* body text in the sheet */
+  --fs-sm: 12px;          /* the floor. Nothing in the sheet is smaller. */
+  --fs-head: 11.5px;      /* pane titles — uppercase and tracked, so 11.5px still reads */
+
+  --sheet-bg: #080d17;
+  --pane-bg: #0f1624;
+  --pane-bg2: #121a29;
+  --pane-line: #223049;
+  --pane-line-soft: #1a2433;
+  --ink: #cfe0ef;
+  --ink-dim: #9fb0c8;
+  --ink-faint: #7f8ea4;
+  --accent: #7fd8ff;
+  --gold: #ffd24a;
+  --good: #8fe0a0;
+  --bad: #ff9a8a;
+
+  position: fixed; inset: 0; z-index: 34;
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  grid-template-rows: var(--head) minmax(0, 1fr);
+  grid-template-areas:
+    "head head"
+    "rail body";
+  background: radial-gradient(130% 100% at 16% -10%, #131d2e 0%, #0b1220 52%, var(--sheet-bg) 100%);
+  color: var(--ink);
+  font-size: var(--fs);
+  overflow: hidden;
 }
 .sheet.hidden { display: none; }
 .sheet h2 { margin: 0 0 12px; font-size: 20px; color: #7fd8ff; }
 .sheet h3 { margin: 16px 0 6px; font-size: 14px; color: #9fb0c8; text-transform: uppercase; letter-spacing: 1px; }
-.sheet .close { position: absolute; right: 14px; top: 12px; cursor: pointer; color: #9fb0c8; background: none; border: 0; font-size: 20px; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
+
+.sheet-head { grid-area: head; }
+#sheet-tabs { grid-area: rail; }
+.sheet > .tab-body { grid-area: body; min-width: 0; min-height: 0; }
+
+/* ---- more air on a big screen */
+@media (min-width: 1600px) {
+  .sheet { --rail: 220px; --head: 68px; --gap: 16px; --pad: 24px; --doll: 372px; --card: 380px; }
+}
+/* ---- 1366 x 768 and 1280 x 720: shorter header, tighter gaps, narrower figure */
+@media (max-width: 1440px), (max-height: 800px) {
+  .sheet { --rail: 184px; --head: 56px; --gap: 10px; --pad: 12px; --doll: 332px; --card: 320px; }
+  .pane-head { min-height: 26px; }
+}
+/* ---- below the supported range: one column, and the body may scroll because nothing else fits */
+@media (max-width: 1120px) {
+  .sheet {
+    grid-template-columns: 1fr; grid-template-rows: var(--head) 40px minmax(0, 1fr);
+    grid-template-areas: "head" "rail" "body"; --rail: auto;
+  }
+  #sheet-tabs {
+    flex-direction: row; overflow-x: auto; overflow-y: hidden;
+    border-right: 0; border-bottom: 1px solid var(--pane-line); padding: 4px 8px;
+  }
+  #sheet-tabs button { min-height: 30px; white-space: nowrap; box-shadow: none; }
+  #sheet-tabs .rail-foot { display: none; }
+  .sheet > .tab-body:not(.hidden) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important; grid-template-areas: none !important;
+    grid-auto-rows: minmax(200px, auto); grid-auto-flow: row; overflow-y: auto;
+  }
+  .pane-body { overflow: visible; }
+}
 
 .slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .slot {
@@ -119,14 +199,27 @@ body {
 .bag .row {
   display: flex; align-items: center; gap: 8px; background: #121a29; border: 1px solid #2a3446;
   border-radius: 6px; padding: 5px 8px; cursor: pointer;
+  min-height: 34px; border-left-width: 3px; border-left-color: #2a3446;
 }
 .bag .row:hover { border-color: #3f6f9a; }
-.bag .row .score { margin-left: auto; color: #7f8ea4; font-variant-numeric: tabular-nums; }
+/* the rarity as a colour down the left edge, so a bag of forty reads at a glance */
+.bag .row[data-rarity="magic"]     { border-left-color: #7f95ff; }
+.bag .row[data-rarity="rare"]      { border-left-color: #e8d020; }
+.bag .row[data-rarity="legendary"] { border-left-color: #ff8020; }
+.bag .row[data-rarity="unique"]    { border-left-color: #ff5a3c; }
+.bag .row[data-rarity="set"]       { border-left-color: #2fc4b2; }
+.bag .row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+/* reserved width: "▲ +128" appearing must not re-flow the name beside it */
+.bag .row .score { margin-left: auto; color: #7f8ea4; font-variant-numeric: tabular-nums; min-width: 62px; text-align: right; }
 .bag .row .up { color: #8fe0a0; }
 .bag .row .down { color: #ff9a8a; }
 .bag .empty { color: #66748a; }
 
-.stats { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: auto 1fr; gap: 0 14px; font-variant-numeric: tabular-nums; font-size: var(--fs, 13px); }
+.pane .stats dt, .pane .stats dd { padding: 3px 4px; border-bottom: 1px solid rgba(34, 48, 73, .5); }
+.pane .stats dd { text-align: right; min-width: 92px; }
+/* two pairs of columns once there is room for them */
+@media (min-width: 1500px) { .pane .stats { grid-template-columns: auto 1fr auto 1fr; } }
 .stats dt { color: #8fa0b8; }
 .stats dd { margin: 0; }
 .attr-row { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
@@ -444,19 +537,208 @@ body {
    Round 4 — the tabbed sheet, crafting, zones, prompts and the boss bar
    ========================================================================== */
 
-.sheet-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
-.sheet-head h2 { margin: 0; }
-.sheet-purse { margin-left: auto; color: #cfe0ef; font-size: 13px; }
-.sheet-purse b { color: #ffd24a; }
-
-.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-.tabs button {
-  background: rgba(20,30,44,.7); border: 1px solid #23344a; color: #9fb0c8;
-  padding: 5px 12px; border-radius: 6px 6px 0 0; cursor: pointer; font: inherit; font-size: 13px;
+/* ---------------------------------------------------------------- the header
+ * Name, level, the XP bar, the crafting materials and the purse — on every screen, never moving.
+ * Materials used to live on the Crafting and Upgrade screens only, which meant the one number you
+ * want while deciding whether to recycle something was on neither of the screens you recycle from.
+ */
+.sheet-head {
+  display: grid;
+  grid-template-columns:
+    var(--rail)             /* the title, aligned with the rail below it */
+    minmax(170px, auto)     /* who */
+    minmax(170px, 260px)    /* xp */
+    minmax(0, 1fr)          /* materials, takes the slack */
+    auto                    /* purse */
+    32px;                   /* close */
+  grid-template-areas: "title who xp mats purse close";
+  align-items: center;
+  gap: var(--gap);
+  margin: 0; padding: 0 var(--pad) 0 0;
+  border-bottom: 1px solid var(--pane-line);
+  background: linear-gradient(#101827, #0b1220);
 }
-.tabs button:hover { border-color: #3f6f9a; color: #cfe0ef; }
-.tabs button.on { background: #17293c; border-color: #3f6f9a; color: #7fd8ff; }
+.sheet-head h2 {
+  grid-area: title; margin: 0;
+  font-size: 14px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--accent); padding-left: var(--pad);
+}
+.sheet-who { grid-area: who; display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.sheet-who b { font-size: 15px; color: #eaf6ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-who .who-class { font-size: var(--fs-sm); color: var(--ink-dim); text-transform: capitalize; }
+.sheet-who .who-level { font-size: var(--fs-sm); color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.sheet-xp { grid-area: xp; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sheet-xp .xpbar {
+  flex: 1; min-width: 80px; height: 7px; border-radius: 4px;
+  background: #0c111b; border: 1px solid #2a3446; overflow: hidden;
+}
+.sheet-xp .xpbar > i { display: block; height: 100%; width: 0; background: linear-gradient(#d8b040, #8a6a10); }
+.sheet-xp .xp-text { font-size: var(--fs-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.sheet-mats {
+  grid-area: mats; justify-content: flex-end; align-items: center;
+  overflow: hidden; flex-wrap: nowrap; gap: 6px;
+  font-size: var(--fs-sm); color: var(--ink-faint);
+}
+.sheet-mats .material { flex: none; }
+.sheet-purse { grid-area: purse; margin: 0; font-size: var(--fs); font-variant-numeric: tabular-nums; white-space: nowrap; color: #cfe0ef; }
+.sheet-purse b { color: var(--gold); }
+.sheet .close {
+  grid-area: close; position: static; font-size: 24px; line-height: 1;
+  width: 32px; height: 32px; border-radius: 6px;
+  cursor: pointer; color: var(--ink-dim); background: none; border: 0;
+}
+.sheet .close:hover { background: #17293c; color: #eaf6ff; }
+/* narrow: a material chip keeps its dot and its count and drops its name (46px, not 118px) */
+@media (max-width: 1340px) {
+  .sheet-mats .material { padding: 3px 7px; }
+  .sheet-mats .material > span { display: none; }
+}
+
+/* ---------------------------------------------------------------- the rail */
+.tabs {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: var(--gap) 8px var(--pad);
+  border-right: 1px solid var(--pane-line);
+  background: linear-gradient(#0c1320, #090e18);
+  overflow-y: auto; overflow-x: hidden;
+}
+.tabs button {
+  display: flex; align-items: center; gap: 9px;
+  min-height: 38px; padding: 0 10px;
+  text-align: left; font: inherit; font-size: 13.5px;
+  background: none; border: 1px solid transparent; border-radius: 6px;
+  color: var(--ink-dim); cursor: pointer;
+}
+.tabs button:hover { background: #121b2b; border-color: var(--pane-line); color: var(--ink); }
+.tabs button.on {
+  background: #17293c; border-color: #2f5d84; color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.rail-key {
+  flex: none; width: 18px; height: 18px; border-radius: 4px;
+  display: grid; place-items: center;
+  font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+  background: #0c111b; border: 1px solid #2a3446; color: var(--ink-faint);
+}
+.tabs button.on .rail-key { border-color: #2f5d84; color: var(--accent); }
+.rail-name { flex: 1; }
+/* An unspent point is invisible today unless you happen to open the screen it belongs to. */
+.rail-badge {
+  flex: none; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  display: grid; place-items: center;
+  font-size: var(--fs-sm); font-style: normal; font-weight: 600; font-variant-numeric: tabular-nums;
+  background: #4a3a10; border: 1px solid var(--gold); color: var(--gold);
+}
+/* `.rail-badge` is `display: grid`, which beats the browser's own `[hidden]` rule */
+.rail-badge[hidden] { display: none; }
+.rail-foot { margin-top: auto; padding: 10px 4px 0; display: flex; flex-direction: column; gap: 5px; }
 .tab-body.hidden { display: none; }
+
+/* ================================================================ panes
+ * One set of parts, used by all seven screens. A pane is a titled box with exactly one scrolling
+ * body; `.pane-head` and any `.chipbar` stay put while the body scrolls under them.
+ */
+.pane {
+  display: flex; flex-direction: column; min-height: 0; min-width: 0;
+  background: var(--pane-bg);
+  border: 1px solid var(--pane-line);
+  border-radius: var(--pane-r);
+  overflow: hidden;
+}
+.pane-head {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 30px; padding: 0 10px;
+  background: linear-gradient(#141d2d, #101828);
+  border-bottom: 1px solid var(--pane-line-soft);
+  flex: none;
+}
+.pane-title {
+  font-size: var(--fs-head); letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--ink-dim); font-weight: 600; white-space: nowrap;
+}
+.pane-meta { font-size: var(--fs-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pane-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.pane-body {
+  flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden;
+  padding: 10px; display: flex; flex-direction: column; gap: 8px;
+  /* load-bearing: without it a list that crosses the scroll threshold shoves every row 15px sideways */
+  scrollbar-gutter: stable;
+}
+.pane-body.tight { padding: 6px; gap: 5px; }
+.pane-body.flush { padding: 0; gap: 0; }
+.pane-body.grid { display: grid; align-content: start; }
+.pane-stack { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; min-width: 0; }
+.pane-stack > .pane.grow { flex: 1; min-height: 0; }
+.pane-stack > .pane.fixed { flex: none; }
+/* the old `.sheet h3 { margin: 16px 0 6px }` is what forced the stacked look — not inside a pane */
+.pane h3, .pane h4 { margin: 0; }
+.pane-body > h4 {
+  margin: 4px 0 0; font-size: var(--fs-head); letter-spacing: 1px;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+
+/* ---- chips and filter bars */
+.chipbar {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 10px; background: #0c1220;
+  border-bottom: 1px solid var(--pane-line-soft); flex: none;
+}
+.chipbar .chip-label {
+  font-size: var(--fs-sm); color: var(--ink-faint); text-transform: uppercase;
+  letter-spacing: .6px; margin-right: 2px;
+}
+.chipbar .sep { width: 1px; height: 16px; background: var(--pane-line); margin: 0 3px; }
+/* `capitalize` turns "In the bag" into "In The Bag" — the map screen wants it, the sheet does not */
+.sheet .chip { font-size: var(--fs-sm); min-height: 22px; display: inline-flex; align-items: center; text-transform: none; }
+
+/* ---- a generic row for the journal, zone and named-foe lists */
+.list-row {
+  display: grid; align-items: baseline; gap: 4px 10px;
+  padding: 5px 8px; border-radius: 5px;
+  background: rgba(16, 24, 36, .6);
+  border-left: 2px solid var(--pane-line);
+  font-size: var(--fs);
+}
+.list-row .row-main { font-weight: 600; color: var(--ink); }
+.list-row .row-note { color: var(--ink-faint); font-size: var(--fs-sm); }
+.list-row .row-num { color: var(--ink-dim); font-variant-numeric: tabular-nums; text-align: right; min-width: 48px; }
+
+/* ---- an item card standing in a panel rather than chasing the pointer */
+.itemcard {
+  background: rgba(10, 16, 26, .7);
+  border: 1px solid var(--pane-line);
+  border-radius: 7px; padding: 9px 11px;
+  font-size: 12.5px; line-height: 1.45;
+}
+.itemcard.empty { color: var(--ink-faint); font-style: italic; }
+.itemcard b { color: #f0c46a; }
+.itemcard--worn { border-color: #2f5d84; }
+.itemcard--worn::before {
+  content: "Worn now"; display: block; margin-bottom: 4px;
+  font-size: var(--fs-head); letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
+}
+
+/* ---- empty state, divider, key hint */
+.empty-state {
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+  padding: 14px 12px; color: var(--ink-faint); font-size: var(--fs);
+  border: 1px dashed var(--pane-line); border-radius: 6px;
+  background: rgba(10, 16, 26, .4);
+}
+.empty-state b { color: var(--ink-dim); font-weight: 600; }
+.divider {
+  display: flex; align-items: center; gap: 8px; margin: 6px 0 2px;
+  font-size: var(--fs-head); letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-faint);
+}
+.divider::after { content: ""; flex: 1; height: 1px; background: var(--pane-line); }
+.keyhint { font-size: var(--fs-sm); color: var(--ink-faint); }
+.keyhint kbd {
+  display: inline-block; min-width: 16px; padding: 1px 5px; margin: 0 1px;
+  background: #0c111b; border: 1px solid #2a3446; border-bottom-width: 2px;
+  border-radius: 4px; font: inherit; font-size: 11.5px; color: var(--ink-dim);
+}
 
 /* ----------------------------------------------------------------- inventory */
 .bagtools { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
@@ -661,23 +943,23 @@ body {
 .tip-bad { color: #ff9a8a; }
 
 /* ---------------------------------------------------------------- item hover cards */
-.tipbox .tip-dim { color: #8fa0b4; font-size: 12px; }
-.tipbox .tip-base { margin: 4px 0; color: #eaf2fa; }
-.tipbox .tip-affixes { margin: 4px 0; padding: 0 0 0 14px; list-style: none; }
-.tipbox .tip-affixes li { position: relative; margin: 2px 0; font-size: 12.5px; }
-.tipbox .tip-affixes li::before { content: '·'; position: absolute; left: -11px; color: #7f8ea4; }
-.tipbox .tip-stat { color: #8fd0ff; }
-.tipbox .tip-cond { color: #c9b3ff; }
-.tipbox .tip-set { color: #7ae06a; }
-.tipbox .tip-legend { color: #ffb040; }
-.tipbox .tip-base-affix { color: #cfd8e3; }
-.tipbox .tip-set-head { margin-top: 5px; color: #7ae06a; font-size: 12px; }
-.tipbox .tip-lore { margin-top: 5px; color: #b7a98d; font-style: italic; font-size: 12px; }
-.tipbox .tip-compare { margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(120,150,180,.22); }
-.tipbox .tip-compare .up { color: #8fe0a0; }
-.tipbox .tip-compare .down { color: #ff9a8a; }
-.tipbox .tip-foot { margin-top: 5px; color: #7f8ea4; font-size: 11px; }
-.tipbox .tip-line { margin-top: 3px; }
+:is(.tipbox, .itemcard) .tip-dim { color: #8fa0b4; font-size: 12px; }
+:is(.tipbox, .itemcard) .tip-base { margin: 4px 0; color: #eaf2fa; }
+:is(.tipbox, .itemcard) .tip-affixes { margin: 4px 0; padding: 0 0 0 14px; list-style: none; }
+:is(.tipbox, .itemcard) .tip-affixes li { position: relative; margin: 2px 0; font-size: 12.5px; }
+:is(.tipbox, .itemcard) .tip-affixes li::before { content: '·'; position: absolute; left: -11px; color: #7f8ea4; }
+:is(.tipbox, .itemcard) .tip-stat { color: #8fd0ff; }
+:is(.tipbox, .itemcard) .tip-cond { color: #c9b3ff; }
+:is(.tipbox, .itemcard) .tip-set { color: #7ae06a; }
+:is(.tipbox, .itemcard) .tip-legend { color: #ffb040; }
+:is(.tipbox, .itemcard) .tip-base-affix { color: #cfd8e3; }
+:is(.tipbox, .itemcard) .tip-set-head { margin-top: 5px; color: #7ae06a; font-size: 12px; }
+:is(.tipbox, .itemcard) .tip-lore { margin-top: 5px; color: #b7a98d; font-style: italic; font-size: 12px; }
+:is(.tipbox, .itemcard) .tip-compare { margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(120,150,180,.22); }
+:is(.tipbox, .itemcard) .tip-compare .up { color: #8fe0a0; }
+:is(.tipbox, .itemcard) .tip-compare .down { color: #ff9a8a; }
+:is(.tipbox, .itemcard) .tip-foot { margin-top: 5px; color: #7f8ea4; font-size: 11px; }
+:is(.tipbox, .itemcard) .tip-line { margin-top: 3px; }
 
 /* ---------------------------------------------------------------- the zone banner */
 #zone-banner {
@@ -715,9 +997,9 @@ body {
   78%  { opacity: 1; }
   100% { opacity: 0; }
 }
-.tipbox .tip-shift { margin-top: 5px; color: #7fd8ff; font-size: 11px; }
-.tipbox .tip-losing li { color: #a08a8a; }
-.tipbox .tip-losing li::before { content: '−'; }
+:is(.tipbox, .itemcard) .tip-shift { margin-top: 5px; color: #7fd8ff; font-size: 11px; }
+:is(.tipbox, .itemcard) .tip-losing li { color: #a08a8a; }
+:is(.tipbox, .itemcard) .tip-losing li::before { content: '−'; }
 
 /* ---------------------------------------------------------------- the pause menu (Esc) */
 #pause {
@@ -922,3 +1204,368 @@ body {
 .hand-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; cursor: pointer; padding: 1px 0; }
 .hand-row input { accent-color: #7fd8ff; }
 .hand-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ================================================================================================
+   ROUND 10 — the seven screens, each laid out for the space it now has
+   ================================================================================================
+   Every one of these was two stacked columns in an 880px box. They are grids across a full viewport
+   now. Three rules hold everywhere: a track is `minmax(0, 1fr)` so nothing can push the layout
+   sideways, the only scroller is a `.pane-body`, and any number that changes has a reserved width so
+   a live redraw never re-flows the row beside it.
+   ============================================================================================== */
+
+.pane-foot {
+  flex: none; padding: 6px 10px;
+  border-top: 1px solid var(--pane-line-soft); background: #0c1220;
+}
+
+/* ---------------------------------------------------------------- 1. character */
+.tab-body[data-tab="character"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: var(--doll) minmax(340px, 1fr) minmax(340px, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "figure stats side";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-figure { grid-area: figure; }
+.col-stats { grid-area: stats; }
+.col-side { grid-area: side; }
+@media (max-width: 1240px) {
+  .tab-body[data-tab="character"]:not(.hidden) {
+    grid-template-columns: var(--doll) minmax(0, 1fr);
+    grid-template-areas: "figure stats" "figure side";
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* The equip figure. Twelve slots in a 3-across list of text boxes became twelve name plates around
+ * a silhouette — placed purely by `[data-tip-slot]`, an attribute `slotGrid()` already writes, so
+ * the render code did not have to change at all. No item ICONS: Farhold's items carry a name, a
+ * rarity and numbers and no art, so an icon grid would be twelve identical coloured squares. */
+.doll {
+  display: grid;
+  grid-template-columns: 1fr 96px 1fr;
+  grid-template-rows: repeat(6, minmax(52px, 1fr));
+  grid-template-areas:
+    "head   body necklace"
+    "chest  body hands"
+    "weapon body offhand"
+    "legs   body ring"
+    "feet   body ring2"
+    "light  body mount";
+  gap: 6px; padding: 8px; min-height: 342px; flex: 1;
+  /* the silhouette is a BACKGROUND on the grid, so `replaceChildren` cannot wipe it */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 150'%3E%3Cg fill='none' stroke='%232b3d57' stroke-width='2' stroke-linejoin='round'%3E%3Cpath d='M30 8c7 0 11 5 11 12 0 8-5 13-11 13s-11-5-11-13c0-7 4-12 11-12z'/%3E%3Cpath d='M18 36l12-4 12 4 6 10-4 26 3 30-7 2-4-24h-12l-4 24-7-2 3-30-4-26z'/%3E%3Cpath d='M12 46l-5 30 5 3'/%3E%3Cpath d='M48 46l5 30-5 3'/%3E%3Cpath d='M23 96l-2 44h6l3-30'/%3E%3Cpath d='M37 96l2 44h-6l-3-30'/%3E%3C/g%3E%3C/svg%3E");
+  /* the silhouette scales with the box, so the figure still fills a tall pane */
+  background-repeat: no-repeat; background-position: center; background-size: auto 82%;
+}
+.doll .slot[data-tip-slot="head"] { grid-area: head; }
+.doll .slot[data-tip-slot="necklace"] { grid-area: necklace; }
+.doll .slot[data-tip-slot="chest"] { grid-area: chest; }
+.doll .slot[data-tip-slot="hands"] { grid-area: hands; }
+.doll .slot[data-tip-slot="weapon"] { grid-area: weapon; }
+.doll .slot[data-tip-slot="offhand"] { grid-area: offhand; }
+.doll .slot[data-tip-slot="legs"] { grid-area: legs; }
+.doll .slot[data-tip-slot="ring"] { grid-area: ring; }
+.doll .slot[data-tip-slot="ring1"] { grid-area: ring; }
+.doll .slot[data-tip-slot="feet"] { grid-area: feet; }
+.doll .slot[data-tip-slot="ring2"] { grid-area: ring2; }
+.doll .slot[data-tip-slot="light"] { grid-area: light; }
+.doll .slot[data-tip-slot="mount"] { grid-area: mount; }
+/* the right-hand column reads right-to-left, so every label sits against the figure */
+.doll .slot[data-tip-slot="necklace"], .doll .slot[data-tip-slot="hands"],
+.doll .slot[data-tip-slot="offhand"], .doll .slot[data-tip-slot="ring"],
+.doll .slot[data-tip-slot="ring1"], .doll .slot[data-tip-slot="ring2"],
+.doll .slot[data-tip-slot="mount"] { text-align: right; }
+.doll .slot {
+  min-height: 52px; padding: 5px 8px; display: flex; flex-direction: column;
+  justify-content: center; gap: 2px; overflow: hidden;
+  border-left: 3px solid #2a3446;
+}
+.doll .slot[data-rarity="magic"] { border-left-color: #7f95ff; }
+.doll .slot[data-rarity="rare"] { border-left-color: #e8d020; }
+.doll .slot[data-rarity="legendary"] { border-left-color: #ff8020; }
+.doll .slot[data-rarity="unique"] { border-left-color: #ff5a3c; }
+.doll .slot[data-rarity="set"] { border-left-color: #2fc4b2; }
+.doll .slot .label { font-size: var(--fs-sm); }
+.doll .slot .name {
+  margin: 0; font-size: var(--fs); line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+#sheet-attrs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+.pane #sheet-attrs .attr-row { margin: 0; min-height: 28px; }
+.pane #sheet-attrs .attr-row button { width: 28px; height: 26px; }
+
+/* the cap is gone: the pane scrolls, and a geared character has twenty-odd properties to read */
+.pane .powers { max-height: none; overflow: visible; }
+.pane .pets { max-height: none; }
+#sheet-pet-pane .pane-body, #sheet-vehicle-pane .pane-body { max-height: 160px; }
+
+/* the effect-registry warning was grey small print at the bottom of a scrolled column */
+#sheet-inert:empty { display: none; }
+#sheet-inert {
+  margin: 0; padding: 7px 9px; border-radius: 6px; font-size: var(--fs-sm);
+  color: #ffc9a0; background: rgba(60, 30, 14, .5); border: 1px solid #5a3a1e;
+}
+
+/* ---------------------------------------------------------------- 2. inventory */
+.tab-body[data-tab="inventory"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: var(--doll) minmax(380px, 1fr) var(--card);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "figure bag compare";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-bag { grid-area: bag; }
+.col-compare { grid-area: compare; }
+@media (max-width: 1240px) {
+  .tab-body[data-tab="inventory"]:not(.hidden) {
+    grid-template-columns: minmax(380px, 1fr) 330px;
+    grid-template-areas: "bag compare" "bag figure";
+    grid-template-rows: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+#inv-tools {
+  flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 7px 10px; border-top: 1px solid var(--pane-line-soft); background: #0c1220;
+}
+#inv-tools .sep { width: 1px; height: 14px; background: var(--pane-line); }
+/* "see the whole haul": four columns of rarity-edged cards instead of a one-per-line list */
+.bag--grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 6px; }
+.bag--grid .row {
+  flex-wrap: wrap; align-items: flex-start; align-content: flex-start;
+  min-height: 62px; padding: 7px 9px;
+}
+.bag--grid .row > span:first-child {
+  flex: 1 0 100%; white-space: normal;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.bag--grid .row .score { min-width: 0; margin-left: auto; }
+
+/* ---------------------------------------------------------------- 3. skills */
+.tab-body[data-tab="skills"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  grid-template-rows: 124px minmax(0, 1fr);
+  grid-template-areas: "bar bar" "list tree";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-bar { grid-area: bar; }
+.col-list { grid-area: list; }
+.col-tree { grid-area: tree; }
+@media (max-width: 1440px) {
+  .tab-body[data-tab="skills"]:not(.hidden) { grid-template-rows: 106px minmax(0, 1fr); }
+}
+/* The in-game bar and this screen used to share nothing — the screen was a text list and the bar
+ * six boxes, and neither showed which talents were on a skill. This strip is both, and it is the
+ * talent picker too (which used to be a chip row INSIDE the tree, so it scrolled away with it). */
+#sheet-skillbar { display: flex; gap: 8px; align-items: stretch; padding: 8px 10px; height: 100%; }
+.sk-card {
+  flex: 1 1 0; min-width: 0; max-width: 220px; position: relative;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 7px 9px 6px 26px;
+  background: var(--pane-bg2); border: 1px solid #2a3446; border-radius: 7px;
+  cursor: pointer; text-align: left; font: inherit; color: var(--ink);
+}
+.sk-card .sk-key {
+  position: absolute; left: 6px; top: 6px;
+  width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center;
+  font-size: var(--fs-sm); font-variant-numeric: tabular-nums;
+  background: #0c111b; border: 1px solid #2a3446; color: var(--ink-faint);
+}
+.sk-card .sk-name { font-weight: 600; font-size: var(--fs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sk-card .sk-cost { font-size: var(--fs-sm); color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.sk-card .sk-pips { display: flex; gap: 3px; margin-top: auto; }
+.sk-card .sk-pips i { width: 7px; height: 7px; border-radius: 50%; background: #26344a; border: 1px solid #38496a; }
+.sk-card .sk-pips i.on { background: var(--gold); border-color: var(--gold); }
+.sk-card .sk-pips i.open { border-color: var(--accent); }
+.sk-card:hover { border-color: #3f6f9a; }
+.sk-card.on { border-color: var(--accent); background: rgba(24, 44, 62, .9); box-shadow: inset 0 -2px 0 var(--accent); }
+.sk-card.locked { opacity: .45; cursor: default; }
+.sk-card.locked .sk-name { color: var(--ink-faint); }
+
+/* three tiers side by side instead of three stacked rows that read as one list */
+.pane .skilltree {
+  display: grid; grid-auto-flow: column;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px 12px; align-content: start; min-height: 0;
+}
+.pane .skilltree > .tier-head { margin: 0; padding-bottom: 5px; border-bottom: 1px solid var(--pane-line); }
+.pane .skilltree > .tier-row {
+  flex-direction: column; flex-wrap: nowrap; gap: 7px; min-height: 0;
+  align-content: start; justify-content: flex-start;
+}
+.pane .skilltree > .tier-row > .talent-card { flex: 0 0 auto; align-self: stretch; }
+.pane .talent-card {
+  width: auto; min-height: 62px; padding: 8px 10px; position: relative;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.pane .talent-card b { font-size: 13.5px; color: #eaf6ff; }
+.pane .talent-card .small { font-size: var(--fs-sm); }
+.pane .talent-card.on::after { content: "✓"; position: absolute; right: 8px; top: 6px; color: var(--accent); }
+
+/* ---------------------------------------------------------------- 4. perks */
+.perks-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+@media (max-width: 1440px) { .perks-body { grid-template-columns: minmax(0, 1fr) 320px; } }
+/* The canvas is taken out of flow so the pane owns the size and the two cannot argue about it —
+ * `perkView()` measures the canvas's own box, which is the other half of the click-offset fix. */
+#perk-stage { position: relative; min-height: 0; min-width: 0; overflow: hidden; }
+/* A canvas is a REPLACED element: `width: auto` takes its intrinsic size (the `width` attribute),
+ * and `right`/`bottom` are then ignored — so `inset: 4px` left it at whatever the last buffer was,
+ * overflowing the pane, and each redraw measured that and grew the buffer again. Explicit sizes. */
+#perk-stage .perk-canvas {
+  position: absolute; left: 4px; top: 4px;
+  width: calc(100% - 8px); height: calc(100% - 8px);
+  min-height: 0; min-width: 0; box-sizing: border-box;
+  border: 1px solid var(--pane-line); border-radius: 6px;
+}
+#perk-foot {
+  flex: none; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 6px 10px; border-top: 1px solid var(--pane-line-soft); background: #0c1220;
+}
+.perk-legend { font-size: var(--fs-sm); }
+.pane .perk-side { width: auto; }
+.perk-bars { font-size: var(--fs); }
+.perk-bar { padding: 3px 6px; border-radius: 4px; background: rgba(16, 24, 36, .6); font-variant-numeric: tabular-nums; }
+#perk-taken { display: flex; flex-direction: column; gap: 3px; }
+#perk-taken .list-row { cursor: pointer; }
+#perk-taken .list-row:hover { background: rgba(28, 42, 60, .8); }
+
+/* ---------------------------------------------------------------- 5. crafting */
+.tab-body[data-tab="crafting"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) var(--card);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "recipes bases detail";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-recipes { grid-area: recipes; }
+.col-bases { grid-area: bases; }
+.col-detail { grid-area: detail; }
+/* the two nested scrollers are gone — 42vh and 34vh inside an 86vh modal put the Forge button
+ * below the fold on a 768px screen. The panes scroll instead. */
+.pane .recipe-list { max-height: none; overflow: visible; gap: 4px; }
+.pane .recipe-row { min-height: 34px; align-items: center; }
+.pane .forge-grid {
+  max-height: none; overflow: visible;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 7px;
+}
+.pane .forge-option { min-height: 58px; padding: 8px 10px; display: flex; flex-direction: column; gap: 3px; }
+.pane .forge-option b { font-size: 13.5px; }
+.pane .forge-option .small { font-size: var(--fs-sm); }
+.pane .recipe-detail { gap: 8px; }
+.pane .recipe-detail h4 { margin-top: 2px; }
+.pane .forge-btn { width: 100%; min-height: 38px; font-size: 14px; margin-top: auto; }
+
+/* ---------------------------------------------------------------- 6. upgrade */
+.tab-body[data-tab="upgrade"]:not(.hidden) {
+  display: grid;
+  grid-template-columns: 340px 340px minmax(320px, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "pick bench detail";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-pick { grid-area: pick; }
+.col-bench { grid-area: bench; }
+@media (max-width: 1440px) {
+  .tab-body[data-tab="upgrade"]:not(.hidden) { grid-template-columns: 300px 330px minmax(320px, 1fr); }
+}
+@media (max-width: 1199px) {
+  .tab-body[data-tab="upgrade"]:not(.hidden) {
+    grid-template-columns: 300px minmax(320px, 1fr);
+    grid-template-areas: "pick bench" "pick detail";
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+/* the worst pane in the old sheet: thirty-odd rows in a 190px window, five at a time */
+.pane .small-bag { max-height: none; overflow: visible; }
+.pane .bench-card { padding: 10px 12px; }
+.pane .bench-affixes { gap: 4px; }
+.pane .bench-affix {
+  padding: 6px 9px; font-size: var(--fs); min-height: 30px;
+  display: flex; align-items: center;
+}
+#up-card:empty { display: none; }
+
+/* ---------------------------------------------------------------- 7. journal */
+/* the journal's five panes live in a wrapper (`#journal-body`, which the town spec reads), so the
+   tab body has to hand it the whole cell or the grid grows past the screen and the SHEET scrolls */
+.tab-body[data-tab="journal"]:not(.hidden) {
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); min-height: 0;
+}
+/* Round 10 + The Territory: nine panes. The zone list spans all three rows because a forty-region
+   world with three lines a region is the tallest thing on the screen by a long way. */
+.journal-grid {
+  display: grid; min-width: 0;
+  grid-template-columns: minmax(260px, .9fr) minmax(260px, .9fr) minmax(320px, 1.1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "survey standing zones"
+    "quests board    zones"
+    "foes   word     zones";
+  gap: var(--gap); padding: var(--gap) var(--pad) var(--pad); min-height: 0;
+}
+.col-board { grid-area: board; }
+.col-word { grid-area: word; }
+.col-standing { grid-area: standing; }
+.standing { display: flex; flex-direction: column; gap: 3px; }
+.standing-row {
+  display: grid; grid-template-columns: 3px 1fr auto auto; align-items: center; gap: 8px;
+  padding: 4px 8px; border-radius: 5px; background: rgba(16, 24, 36, .6); font-size: var(--fs);
+}
+.standing-row i { width: 3px; height: 100%; min-height: 16px; border-radius: 2px; display: block; }
+.standing-row .band { font-size: var(--fs-sm); color: var(--ink-faint); }
+.standing-row .num { font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+.standing-row .num.up { color: var(--good); }
+.standing-row .num.down { color: var(--bad); }
+.standing-row.holder { box-shadow: inset 0 0 0 1px rgba(127, 216, 255, .3); }
+.job-row { cursor: pointer; }
+.job-row:hover { background: rgba(28, 42, 60, .8); }
+.job-row .scope { font-size: var(--fs-sm); color: var(--ink-faint); }
+.rumour-row { display: block; padding: 5px 8px; border-radius: 5px; background: rgba(16, 24, 36, .5); font-size: var(--fs); }
+.rumour-row .who { display: block; font-size: var(--fs-sm); color: var(--ink-faint); margin-top: 2px; }
+.col-survey { grid-area: survey; }
+.col-quests { grid-area: quests; }
+.col-foes { grid-area: foes; }
+.col-zones { grid-area: zones; }
+@media (max-width: 1240px) {
+  .journal-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "survey zones" "quests board" "standing word" "foes foes";
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
+}
+.pane .journal { gap: 3px; margin: 0; }
+.pane .journal-row {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 10px;
+  padding: 5px 8px; font-size: var(--fs);
+}
+.pane .journal-row .muted { font-variant-numeric: tabular-nums; }
+.pane .zonelist { gap: 4px; }
+/* a zone's own description used to be in a `title=` attribute — invisible unless you hovered and waited */
+.pane .zone-row {
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas: "name band danger" "desc desc desc";
+  padding: 6px 9px; row-gap: 2px;
+}
+.pane .zone-row > :nth-child(1) { grid-area: name; font-weight: 600; }
+.pane .zone-row > :nth-child(2) { grid-area: band; font-variant-numeric: tabular-nums; }
+.pane .zone-row > :nth-child(3) { grid-area: danger; }
+.pane .zone-row .zone-desc { grid-area: desc; font-size: var(--fs-sm); color: var(--ink-faint); }
+.pane .zone-row.here { box-shadow: inset 0 0 0 1px rgba(127, 216, 255, .35); }
+
+/* ---------------------------------------------------------------- focus, and the 12px floor */
+.sheet :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 5px; }
+.sheet .bag .row:focus-visible, .sheet .slot:focus-visible { outline-offset: -1px; }
+.sheet .legend, .sheet .perk-legend { font-size: var(--fs-sm); }
+.sheet :is(.tipbox, .itemcard) .tip-foot { font-size: var(--fs-sm); }
+.sheet .tip-req { font-size: var(--fs-sm); }
+.sheet .sheet-purse, .sheet .who-level, .sheet .row-num { font-variant-numeric: tabular-nums; }

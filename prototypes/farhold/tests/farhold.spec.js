@@ -37,7 +37,10 @@ test('the planet builds, the horizon is drawn, and the sky holds the rest of the
   expect(info.worldKm[0]).toBeGreaterThan(50);
   expect(info.stats.triangles).toBeGreaterThan(2000);
   expect(info.stats.rings).toBeGreaterThanOrEqual(3);
-  expect(info.stats.viewDistance).toBeGreaterThan(2000);
+  // The horizon follows the planet size (round 10 default: Small, 57 x 29 km) — at ?quality=low the
+  // three rings reach about 1.8 km on it, which is further across THIS world than 3 km was across a
+  // full-size one. What matters is that there is a real horizon, so the floor is relative.
+  expect(info.stats.viewDistance).toBeGreaterThan(Math.min(2000, info.worldKm[0] * 1000 * 0.025));
   // the player is standing on the ground, not inside it or above it
   expect(Math.abs(info.stats.height - info.groundUnderFeet)).toBeLessThan(1.5);
   // something from the same star system is up there

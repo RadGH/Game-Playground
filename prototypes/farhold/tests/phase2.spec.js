@@ -206,7 +206,7 @@ test('the map\'s rivers, roads, bridges and towns are actually built', async ({ 
   // marked as river, not a point on the drawn curve (which bows between cell centres).
   const valley = await page.evaluate(async () => {
     const f = window.farhold;
-    const w = f.world, M = 640;
+    const w = f.world, M = f.terrain.metresPerCell;   // round 10: the planet-size knob moves this
     let cell = -1;
     for (let i = 0; i < w.river.length; i++) if (w.river[i] >= 2) { cell = i; break; }
     const x = (cell % w.width) * M, z = Math.floor(cell / w.width) * M;

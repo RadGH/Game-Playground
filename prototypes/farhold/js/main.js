@@ -4,7 +4,7 @@
 // frame loop. `window.farhold` is the handle the Playwright specs drive.
 
 import * as THREE from 'three';
-import { createWorld, makeTerrain, describePlanet, createSystem, chooseLanding, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
+import { createWorld, makeTerrain, describePlanet, createSystem, chooseLanding, isHabitableStart, landableBodies, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
 import { createSpace } from './space.js';
 import { createShip } from '../../../assets/js/space-models.js';
 import { createAtmosphere } from './atmos.js';
@@ -32,6 +32,15 @@ import { createStarChart, reachFrom, LY_PER_UNIT } from './starchart.js';
 import { createWarp } from './warp.js';
 import { generateGalaxy } from '../../../universe/js/galaxy.js';
 import { createSaves, snapshot, restore, playtimeText, saveCarriesWorld } from './save.js';
+// ---- The Territory expansion (see EXPANSION.md): who holds the ground, and what it asks of you
+import { createStandings, ranked as rankedFactions } from './factions.js';
+import { createTerritory } from './territory.js';
+import { createJobGen, candidatesFrom } from './jobgen.js';
+import { createIncidents } from './incidents.js';
+import { createPatrols } from './patrols.js';
+import { createCaravans } from './caravans.js';
+import { createWanderers } from './wanderers.js';
+import { createRumours } from './rumours.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
 import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS } from './rpg.js';
@@ -76,7 +85,8 @@ async function boot() {
   const status = t => { $('boot-status').textContent = t; };
   status('reading the data…');
 
-  const [items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen] = await Promise.all([
+  const [items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen,
+    factionData, frameData, incidentData, wandererData, landmarkData, rewardData] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
@@ -89,6 +99,13 @@ async function boot() {
     loadJSON('data/encounters.json'),
     // Name Forge, so the folk in a dwarf town have dwarf names
     NameGen.load('/namegen/data/').catch(() => null),
+    // The Territory expansion
+    loadJSON('data/factions.json'),
+    loadJSON('data/job-frames.json'),
+    loadJSON('data/incidents.json'),
+    loadJSON('data/wanderers.json'),
+    loadJSON('data/landmarks.json'),
+    loadJSON('data/faction-rewards.json'),
   ]);
 
   // all thirty classes now, each labelled with what it does and whether it brings companions
@@ -126,7 +143,7 @@ async function boot() {
         <span class="muted small">level ${s.level} · seed ${s.seed} · ${playtimeText(s.playtime)}${s.place ? ' · ' + s.place : ''}</span>`;
       const load = document.createElement('button');
       load.textContent = 'Load';
-      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save: saves.read(s.id) });
+      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save: saves.read(s.id) });
       const del = document.createElement('button');
       del.className = 'ghost';
       del.textContent = '×';
@@ -139,7 +156,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -147,7 +164,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -157,7 +174,7 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, status, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save }) {
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
@@ -213,7 +230,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         systemSeed: at.systemSeed, movedSeed: false,
       };
     })()
-    : createWorld({ seed, ...mapSize, habitable: worldOpts.habitable });
+    // `liveable: true` whether or not the box is ticked — the box decides where you LAND, and the
+    // starting system always has somewhere you could breathe (see createWorld)
+    : createWorld({ seed, ...mapSize, habitable: worldOpts.habitable, liveable: true });
   // the search may have stepped to a neighbouring seed; everything downstream uses the one it found
   let systemSeed = created.systemSeed ?? seed;   // `let`: a jump replaces the whole system
   let { star, system } = created;   // `let`: a jump to another star replaces both
@@ -313,6 +332,34 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   window.addEventListener('pointerdown', wake);
   window.addEventListener('keydown', wake);
 
+  /**
+   * ================================================================ THE TERRITORY
+   *
+   * See EXPANSION.md. Farhold is a whole planet and crossing one is slow on purpose, so the content
+   * has to be where you are standing. These seven modules turn a zone from "a name and a level band"
+   * into a place that is HELD by somebody, has real camps and roads and people on them, and asks you
+   * for things that are actually there.
+   *
+   * All seven are pure — no Three.js, no DOM — and they are ticked from the game loop rather than
+   * simulating on their own, so a distant patrol costs one line of arithmetic a frame.
+   */
+  const standings = createStandings(factionData, save?.standings || null);
+  // `holdings` rather than `land`, because `land()` is already the verb for putting the ship down
+  const holdings = createTerritory({
+    zones, seed, factions: factionData, standings,
+    metresPerCell: terrain.metresPerCell, saved: save?.territory || null,
+  });
+  const trouble = createIncidents({ data: incidentData, territory: holdings, factions: factionData, seed });
+  const patrols = createPatrols({ territory: holdings, factions: factionData, standings, seed });
+  const trade = createCaravans({ territory: holdings, factions: factionData, standings, seed });
+  const roadFolk = createWanderers({ data: wandererData, territory: holdings, standings, seed });
+  const rumours = createRumours({ territory: holdings, factions: factionData, seed });
+  if (save?.rumours) rumours.load(save.rumours);
+  const jobs = createJobGen({ frames: frameData, territory: holdings, factions: factionData, standings, seed });
+  /** The board for the zone you are in. Rebuilt when you cross a border, not every frame. */
+  let localBoard = [];
+  let boardZone = null;
+
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
   /**
@@ -351,6 +398,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const playerName = save?.name || ($('boot-name').value || '').trim() || look?.name?.split(' ')[0] || 'Wayfarer';
   const player = rpg.createPlayer({ name: playerName, classId, avatar: look?.avatar || null });
   player.barrier = 0;
+  // the pretty name, for the sheet header — `classId` is the raw id ("stormcaller")
+  player.classLabel = classDef.name || classId;
 
   // the materials bag: separate from the item bag, and it never fills
   const materials = Materials.from(save?.materials || {});
@@ -828,9 +877,39 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       objectives: campaign.list(),
       nemesis: campaign.nemesis,
       quests: questLog.active.map(q => ({ title: q.title, progress: questLog.progressText(q), done: q.done })),
+      // who you have already put down — it was in the save and never shown on the screen
+      defeated: campaign.defeatedNemeses || [],
       bestiary: campaign.bestiary,
       names: Object.fromEntries(bestiary.enemies.map(e => [e.id, e.name])),
     }),
+
+    // ---- The Territory: three more things the Journal shows
+    standings: () => rankedFactions(factionData, standings),
+    territoryHere: () => (hud.here ? holdings.of(hud.here.id) : null),
+    board: () => localBoard,
+    rumours: () => rumours.all(),
+    /**
+     * Take a job off the local board.
+     *
+     * A generated job is richer than the four shapes the quest log counts against, so it goes in with
+     * `logKind` and keeps its own words — see the note in js/jobgen.js.
+     */
+    onTakeJob: job => {
+      if (!job || job.taken) return;
+      job.taken = true;
+      questLog.add({
+        ...job,
+        kind: job.logKind || 'visit',
+        giverName: job.faction
+          ? (factionData.factions.find(f => f.key === job.faction)?.short || 'somebody local')
+          : 'a notice board',
+        fromName: job.zoneName,
+      });
+      markers.syncQuests(questLog.active);
+      sound.ui('click');
+      hud.log(`Taken: ${job.title}.`, 'good');
+      autoSave();
+    },
     onTakeTalent: id => { if (rpg.takeTalent(player, id)) { sound.ui('click'); hud.log(`Talent taken: ${rpg.talentList.find(t => t.id === id)?.name}.`, 'level'); autoSave(); } hud.setPlayer(player); },
     onSpendPassive: id => { if (rpg.spendPassive(player, id)) { sound.ui('click'); autoSave(); } hud.setPlayer(player); },
 
@@ -2041,6 +2120,86 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     hud.log(`Seed ${seed} had nowhere worth starting — this is system ${systemSeed}, the nearest that did.`, '');
   }
 
+  /**
+   * ================================================================ walking into a zone
+   *
+   * Everything the territory layer does for one zone happens here, once, on the frame you cross the
+   * border — not on a timer and not per frame. It reveals who holds the ground, starts its patrols on
+   * the real road nodes, puts people on the road, sends a caravan if there is somewhere for one to go,
+   * rolls for trouble, and builds the board.
+   */
+  function enterTerritory(zone) {
+    boardZone = zone.id;
+    const record = holdings.visit(zone.id);
+    const cell = terrain.metresPerCell;
+    const inZone = n => zones.at(n.x * cell, n.y * cell)?.id === zone.id;
+    const nodes = (world.nodes || []).filter(inZone);
+    const spot = n => ({ x: n.x * cell, z: n.y * cell, name: n.name || zone.name, kind: n.type, tags: [n.type] });
+
+    // a patrol walks between real places: the zone's settlements, landmarks and passes
+    const route = nodes.filter(n => ['settlement', 'port', 'landmark', 'pass'].includes(n.type)).map(spot);
+    const stops = route.length >= 2 ? route
+      : holdings.sitesIn(zone.id).map(si => ({ x: si.x, z: si.z, name: si.name }));
+    if (stops.length >= 2) patrols.enter(zone, stops);
+
+    // somebody on the road: junctions, landmarks and the sites themselves
+    roadFolk.populate(zone, [
+      ...nodes.map(spot),
+      ...holdings.sitesIn(zone.id).map(si => ({ x: si.x, z: si.z, kind: 'road', tags: ['road', 'camp'] })),
+    ], { night: sky.dayFraction < 0.25 || sky.dayFraction > 0.78, level: player.level });
+
+    // and a load moving between two of its settlements
+    const towns = nodes.filter(n => n.type === 'settlement' || n.type === 'port').map(spot);
+    if (towns.length >= 2 && !trade.inZone(zone.id).length) trade.dispatch(zone, towns);
+
+    // does anything happen to this place today?
+    trouble.consider(zone, {
+      biome: terrain.biomeAt(control.x, control.z).key,
+      weather: blended.key,
+      playerBeaten: !!campaign.nemesis,
+    });
+
+    // the board. Everything on it names something that is actually in this zone right now.
+    const candidates = candidatesFrom({
+      zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+      npcs: roadFolk.candidates(zone.id),
+      caravans: trade.candidates(zone.id),
+      patrols: patrols.candidates(zone.id),
+      named: campaign.nemesis ? [{ id: campaign.nemesis.id || 'nemesis', name: campaign.nemesis.name, state: 'grudge' }] : [],
+      metresPerCell: cell, level: player.level,
+    });
+    localBoard = jobs.offer({ zone, level: player.level, candidates, want: 5 });
+
+    // and one thing you now know about somewhere you have not been
+    const neighbours = zones.list().filter(z => z.id !== zone.id && Math.abs(z.minLevel - zone.minLevel) <= 6);
+    if (neighbours.length) {
+      const pick = neighbours[Math.floor(Math.random() * neighbours.length)];
+      rumours.hear(pick, { from: 'somebody in ' + zone.name, extra: { unvisitedLandmarks: 2 } });
+    }
+
+    const holder = (factionData.factions || []).find(f => f.key === record?.holder);
+    if (holder) hud.log(`${zone.name} is ${holder.short}'s ground.`, '');
+    for (const row of trouble.describe(zone.id)) hud.log(`${zone.name}: ${row.blurb}.`, 'bad');
+  }
+
+  /** The world moving while you are in it. Cheap enough to run twice a second. */
+  function tickTerritory(seconds) {
+    const night = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
+    patrols.update(seconds, { night });
+    for (const event of trade.update(seconds, { playerNear: { x: control.x, z: control.z } })) {
+      if (event.kind === 'caravan-wrecked') hud.log(`${event.name} never arrived.`, 'bad');
+      if (event.kind === 'caravan-arrived') hud.log(`${event.name} got through.`, 'good');
+      if (event.kind === 'caravan-attacked') hud.log(`${event.name} is under attack.`, 'bad');
+    }
+    // in-game hours, from the same clock the day/night cycle runs on
+    for (const event of holdings.tick(seconds / 60)) {
+      if (event.kind === 'zone-changed-hands') {
+        const to = (factionData.factions || []).find(f => f.key === event.to);
+        hud.log(`${zones.byId(event.zoneId)?.name || 'The ground'} belongs to ${to?.short || event.to} now.`, 'level');
+      }
+    }
+  }
+
   // ---------------------------------------------------------------- saving
   const saveId = save?.id || saves.newId();
   let sinceSave = 0;
@@ -2064,6 +2223,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // a save taken underground is in the dungeon's own coordinates — carry the way back out
       inDungeon: !!dungeon,
       surface: surfaceSpot,
+      // The Territory: who likes you, what you have knocked over, and what you have heard
+      standings: standings.toJSON(),
+      territory: holdings.toJSON(),
+      rumours: rumours.toJSON(),
     });
   }
   function autoSave({ quiet = true } = {}) {
@@ -2203,7 +2366,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // ---------------------------------------------------------------- keys that are not movement
   window.addEventListener('keydown', e => {
-    if (e.code === 'KeyI' || e.code === 'Tab') { e.preventDefault(); pauseMenu.toggle(false); hud.toggleSheet(); }
+    // Tab OPENS the sheet; once it is open Tab has to move focus, or keyboard navigation inside the
+    // sheet closes it on the first press. (Nothing in the old sheet was reachable by keyboard, which
+    // is the only reason this was not noticed.)
+    if (e.code === 'KeyI' || (e.code === 'Tab' && !hud.sheetOpen)) {
+      e.preventDefault(); pauseMenu.toggle(false); hud.toggleSheet();
+    }
     if (e.code === 'KeyM') {
       e.preventDefault();
       pauseMenu.toggle(false);
@@ -2742,6 +2910,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     hud.here = here;
     // crossing a border announces the new region on screen, with its band
     if (here) hud.announceZone(here, player.level);
+    if (here && here.id !== boardZone) enterTerritory(here);
+    if (state.frames % 30 === 0) tickTerritory(0.5);
     hud.tick(player, {
       place: dungeon ? dungeon.name : town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
       zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
@@ -2825,7 +2995,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get sky() { return sky; },
     get world() { return world; },
     get map() { return map; },
+    /** Is the world under your feet a settled, multi-biome one? (round 10, for the specs) */
+    liveableHere: () => isHabitableStart(planet),
+    /** Does the system you are in hold one at all? */
+    liveableInSystem: () => landableBodies(system).some(isHabitableStart),
     zones, chests, gates, sites, pets, craft, light, encounters, skillData, classData, encounterData,
+    // The Territory expansion, for the specs and the debug menu
+    standings, holdings, trouble, patrols, trade, roadFolk, rumours, jobs, factionData,
+    get board() { return localBoard; },
+    enterTerritory, tickTerritory,
     pauseMenu,
     get dungeon() { return dungeon; },
     get bossUnit() { return bossUnit; },

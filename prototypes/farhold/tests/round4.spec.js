@@ -103,7 +103,8 @@ test('the world is busy: packs, ranks and set-piece encounters, not one straggle
     const town = f.folk.safeZones()[0];
     if (town) f.teleport(town.x + town.r * 2.2, town.z + town.r * 2.2);
     await new Promise(r => setTimeout(r, 300));
-    await new Promise(r => setTimeout(r, 6000));
+    // one spawn about every 1.1s: six seconds put this on exactly the threshold and it flaked
+    await new Promise(r => setTimeout(r, 9000));
     const ranks = {};
     for (const e of f.field.enemies) ranks[e.rank] = (ranks[e.rank] || 0) + 1;
     const before = f.field.enemies.length;
@@ -262,7 +263,7 @@ test('recycling fills the materials bag, and the bench spends it', async ({ page
     const scraps = [...document.querySelectorAll('#sheet-bag .row .scrap')];
     for (const b of scraps) b.click();
     f.hud.setTab('crafting');
-    const chips = document.querySelectorAll('#craft-materials .material').length;
+    const chips = document.querySelectorAll('#sheet-materials .material').length;
     const recipes = document.querySelectorAll('#craft-list .recipe-row').length;
     const enabled = document.querySelector('#craft-detail .forge-btn')?.disabled === false;
     // and the Upgrade tab, which is where reworking an item lives now

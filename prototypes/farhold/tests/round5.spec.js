@@ -40,13 +40,35 @@ test('a habitable start puts you on a lived-in world with more than one biome', 
   expect(errors).toEqual([]);
 });
 
-test('turning the habitable start off lets the seed land where it likes', async ({ page }) => {
-  await land(page, { seed: 1, extra: '&habitable=0' });
-  const plain = await page.evaluate(() => window.farhold.planet.name);
-  await land(page, { seed: 1 });
-  const habitable = await page.evaluate(() => window.farhold.planet.name);
-  // seed 1's own system is not a habitable one, so the search has to have moved
-  expect(habitable).not.toBe(plain);
+/**
+ * Round 10 changed what the box means. It used to decide whether the seed search ran at all; now the
+ * search ALWAYS runs, because "there should be at least one habitable planet in the starting system"
+ * — and the box only decides whether you LAND on it. So the thing to check is the landing, not the
+ * system: ticked, you are always on a settled multi-biome world; unticked, you may not be.
+ */
+test('the habitable box decides where you land, not which system you start in', async ({ page }) => {
+  const seeds = [1, 4, 6, 12];
+  const off = [], on = [];
+  for (const seed of seeds) {
+    await land(page, { seed, extra: '&habitable=0' });
+    off.push(await page.evaluate(() => ({
+      name: window.farhold.planet.name,
+      liveable: window.farhold.liveableHere(),
+      systemHasOne: window.farhold.liveableInSystem(),
+    })));
+    await land(page, { seed });
+    on.push(await page.evaluate(() => ({
+      name: window.farhold.planet.name,
+      liveable: window.farhold.liveableHere(),
+      systemHasOne: window.farhold.liveableInSystem(),
+    })));
+  }
+  // with the box on, every start is a world you can live on
+  for (const row of on) expect(row.liveable, `${row.name} is not a habitable start`).toBe(true);
+  // and the starting system always holds one, whether or not you chose to land there
+  for (const row of off) expect(row.systemHasOne, `${row.name}'s system has nowhere liveable`).toBe(true);
+  // the box has to do SOMETHING: at least one of these seeds lands somewhere different with it off
+  expect(off.some((row, i) => row.name !== on[i].name || row.liveable !== on[i].liveable)).toBe(true);
 });
 
 // ---------------------------------------------------------------- 6. water meeting its bank
@@ -297,8 +319,11 @@ test('you fall into an atmosphere instead of pressing a key at it', async ({ pag
   expect(errors).toEqual([]);
 });
 
+// `scale=1` on purpose: this test is about the view widening as you climb toward a 9 km ceiling, and
+// round 10 made the ceiling follow the planet size (a 9 km ceiling on a 16 km world is most of the
+// way to space). The scaling itself is covered by tests/round10.test.js.
 test('flying high widens the view without costing more triangles', async ({ page }) => {
-  const errors = await land(page, { seed: 11 });
+  const errors = await land(page, { seed: 11, extra: '&scale=1' });
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     const ground = f.view.stats();

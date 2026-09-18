@@ -91,8 +91,10 @@ export function createSystem({ seed = 1, starClass = null, fillBands = true, tri
    */
   let system = null, best = null;
   for (let i = 0; i < Math.max(1, tries); i++) {
+    // `planets: 0.85` is Star Forge's own top-of-range nudge and is left alone — re-rolling only
+    // when a system is genuinely short keeps every seed that was already full exactly as it was
     const built = generateSystem(star, {
-      seed: subSeed(seed, i ? 'system' + i : 'system'), rareWorlds: 0.55, planets: 1,
+      seed: subSeed(seed, i ? 'system' + i : 'system'), rareWorlds: 0.55, planets: 0.85,
     });
     const n = landableBodies(built).length;
     if (!best || n > best.n) best = { system: built, n };
@@ -185,11 +187,28 @@ export function isHabitableStart(planet) {
   return true;
 }
 
-export function chooseLanding(system, { prefer = null, requireHabitable = false } = {}) {
+export function chooseLanding(system, { prefer = null, requireHabitable = false, avoidHabitable = false } = {}) {
   const solid = system.planets.filter(p => !p.giant && p.landable !== false);
   if (prefer != null) {
     const hit = solid.find(p => p.id === prefer || p.name === prefer);
     if (hit) return hit;
+  }
+  /**
+   * "Habitable start" OFF now means something again.
+   *
+   * Round 10 made the starting system always hold a settled world, and the default scoring below
+   * prefers exactly that kind of world — so unticking the box stopped changing anything at all. With
+   * `avoidHabitable` the game deliberately puts you down on the harshest rock in the system instead:
+   * no towns, no trade, and a two-minute flight to the blue world you can see from the ground. That
+   * is a real choice rather than a checkbox that does nothing.
+   */
+  if (avoidHabitable) {
+    const harsh = solid.filter(p => !isHabitableStart(p));
+    if (harsh.length) {
+      return harsh.sort((a, b) =>
+        ((b.atmosphere?.breathable ? 1 : 0) - (a.atmosphere?.breathable ? 1 : 0))
+        || (a.difficulty - b.difficulty))[0];
+    }
   }
   // "Habitable start": only a settled, multi-biome world will do, and if this system has none the
   // caller is told so rather than being handed the least-bad rock.
@@ -226,6 +245,10 @@ export function chooseLanding(system, { prefer = null, requireHabitable = false 
 export function createWorld({
   seed = 1, starClass = null, prefer = null, width = 256, height = 128,
   habitable = false, searchSeeds = 24, regionScale = 1,
+  // The seed search is a START-OF-GAME thing. `createWorld({ seed: 9 })` from a tool or a test has to
+  // mean seed 9 and nothing else, so the search only runs when a caller asks for it — `main.js` does,
+  // always, which is what gives the starting system a world you can live on.
+  liveable = habitable,
 } = {}) {
   let usedSeed = seed;
   let star = null, system = null, planet = null;
@@ -242,12 +265,16 @@ export function createWorld({
    * Bands are handed out AFTER the landing site is known (`fillBands: false` here, `balanceBands`
    * below), so the world you start on is the world that gets the level-1 band.
    */
-  for (let i = 0; i <= searchSeeds; i++) {
+  for (let i = 0; i <= (liveable || habitable ? searchSeeds : 0); i++) {
     usedSeed = seed + i;
     ({ star, system } = createSystem({ seed: usedSeed, starClass, fillBands: false }));
-    const liveable = landableBodies(system).some(isHabitableStart);
-    planet = chooseLanding(system, { prefer, requireHabitable: habitable && !prefer });
-    if (planet && (liveable || prefer != null)) break;
+    const canLive = !liveable || landableBodies(system).some(isHabitableStart);
+    planet = chooseLanding(system, {
+      prefer,
+      requireHabitable: habitable && !prefer,
+      avoidHabitable: liveable && !habitable && !prefer,
+    });
+    if (planet && (canLive || prefer != null)) break;
     planet = null;
   }
   // nothing within reach: take the best of the seed the player actually asked for

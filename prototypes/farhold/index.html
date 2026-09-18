@@ -45,8 +45,9 @@
       <div class="row">
         <label class="check"><input type="checkbox" id="boot-habitable" checked>
           Habitable start</label>
-        <span class="small muted">land on a settled, many-biomed world — about a quarter of seeds
-          have none, and those step to the nearest seed that does</span>
+        <span class="small muted">land on a settled, many-biomed world. Turn it off and you come down
+          on the harshest rock in the system instead — no towns, no trade — with the blue world one
+          short flight away. Either way the starting system always has one.</span>
       </div>
       <div class="row">
         <label for="boot-scale">Planet size</label>
@@ -168,142 +169,315 @@
 <div id="boss-bar" class="hud hidden"><div id="boss-name"></div><div class="bar hp"><i id="boss-fill"></i></div></div>
 
 <!-- ============================================================ character sheet -->
-<section id="sheet" class="sheet hidden">
-  <button class="close" id="sheet-close">×</button>
+<section id="sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-label="Character">
   <header class="sheet-head">
     <h2 id="sheet-title">Character</h2>
-    <nav class="tabs" id="sheet-tabs">
-      <button data-tab="character" class="on">Character</button>
-      <button data-tab="inventory">Inventory</button>
-      <button data-tab="skills">Skills</button>
-      <button data-tab="perks">Perks</button>
-      <button data-tab="crafting">Crafting</button>
-      <button data-tab="upgrade">Upgrade</button>
-      <button data-tab="journal">Journal</button>
-    </nav>
+    <div class="sheet-who" id="sheet-who"></div>
+    <div class="sheet-xp" id="sheet-xp">
+      <div class="xpbar"><i id="sheet-xp-fill"></i></div>
+      <span class="xp-text" id="sheet-xp-text"></span>
+    </div>
+    <div class="materials sheet-mats" id="sheet-materials"></div>
     <div class="sheet-purse" id="sheet-purse"></div>
+    <button class="close" id="sheet-close" title="Close (Esc)" aria-label="Close">×</button>
   </header>
 
+  <nav class="tabs" id="sheet-tabs" role="tablist" aria-label="Character screens">
+    <button data-tab="character" class="on" role="tab" aria-selected="true">
+      <span class="rail-key">1</span><span class="rail-name">Character</span>
+      <i class="rail-badge" id="rail-badge-character" hidden></i></button>
+    <button data-tab="inventory" role="tab" aria-selected="false">
+      <span class="rail-key">2</span><span class="rail-name">Inventory</span>
+      <i class="rail-badge" id="rail-badge-inventory" hidden></i></button>
+    <button data-tab="skills" role="tab" aria-selected="false">
+      <span class="rail-key">3</span><span class="rail-name">Skills</span>
+      <i class="rail-badge" id="rail-badge-skills" hidden></i></button>
+    <button data-tab="perks" role="tab" aria-selected="false">
+      <span class="rail-key">4</span><span class="rail-name">Perks</span>
+      <i class="rail-badge" id="rail-badge-perks" hidden></i></button>
+    <button data-tab="crafting" role="tab" aria-selected="false">
+      <span class="rail-key">5</span><span class="rail-name">Crafting</span></button>
+    <button data-tab="upgrade" role="tab" aria-selected="false">
+      <span class="rail-key">6</span><span class="rail-name">Upgrade</span></button>
+    <button data-tab="journal" role="tab" aria-selected="false">
+      <span class="rail-key">7</span><span class="rail-name">Journal</span>
+      <i class="rail-badge" id="rail-badge-journal" hidden></i></button>
+    <div class="rail-foot">
+      <span class="keyhint"><kbd>Esc</kbd> back to the world</span>
+      <span class="keyhint"><kbd>1</kbd>–<kbd>7</kbd> screens</span>
+    </div>
+  </nav>
+
+
   <!-- ---------------------------------------------------------- character -->
-  <div class="tab-body" data-tab="character">
-    <div class="cols">
-      <div>
-        <h3>Worn <span class="small muted">click to take off</span></h3>
-        <div class="slot-grid" id="sheet-slots"></div>
-        <h3>Attributes <span class="small muted" id="sheet-points"></span></h3>
-        <div id="sheet-attrs"></div>
-        <h3>Boat and ship <span class="small muted">bought once, yours for good</span></h3>
-        <div id="sheet-vehicles" class="vehicles"></div>
-        <h3>Companions</h3>
-        <div id="sheet-pets" class="pets"></div>
+  <div class="tab-body" data-tab="character" role="tabpanel" aria-label="Character">
+    <div class="pane-stack col-figure">
+      <section class="pane grow" id="sheet-equip">
+        <div class="pane-head">
+          <span class="pane-title">Worn</span>
+          <span class="pane-tools keyhint">click to take off</span>
+        </div>
+        <div class="pane-body flush"><div class="slot-grid doll" id="sheet-slots"></div></div>
+      </section>
+      <section class="pane fixed" id="sheet-attr-pane">
+        <div class="pane-head">
+          <span class="pane-title">Attributes</span>
+          <span class="pane-meta" id="sheet-points"></span>
+        </div>
+        <div class="pane-body"><div id="sheet-attrs"></div></div>
+      </section>
+    </div>
+
+    <section class="pane col-stats" id="sheet-stat-pane">
+      <div class="pane-head">
+        <span class="pane-title">Stats</span>
+        <span class="pane-tools keyhint">hover a name for what it does</span>
       </div>
-      <div>
-        <h3>Stats</h3>
-        <dl class="stats" id="sheet-stats"></dl>
-        <h3>Powers</h3>
-        <div id="sheet-powers" class="powers"></div>
-        <p class="small muted" id="sheet-inert"></p>
+      <div class="pane-body" id="sheet-stat-body">
+        <h4>Offence</h4><dl class="stats" id="sheet-stats-offence"></dl>
+        <h4>Defence</h4><dl class="stats" id="sheet-stats-defence"></dl>
+        <h4>Everything else</h4><dl class="stats" id="sheet-stats-utility"></dl>
+        <dl class="stats" id="sheet-stats" hidden></dl>
       </div>
+    </section>
+
+    <div class="pane-stack col-side">
+      <section class="pane grow" id="sheet-power-pane">
+        <div class="pane-head">
+          <span class="pane-title">Powers</span>
+          <span class="pane-tools keyhint">what the gear you are wearing actually does</span>
+        </div>
+        <div class="pane-body">
+          <div id="sheet-powers" class="powers"></div>
+          <p id="sheet-inert"></p>
+        </div>
+      </section>
+      <section class="pane fixed" id="sheet-pet-pane">
+        <div class="pane-head"><span class="pane-title">Companions</span></div>
+        <div class="pane-body tight"><div id="sheet-pets" class="pets"></div></div>
+      </section>
+      <section class="pane fixed" id="sheet-vehicle-pane">
+        <div class="pane-head">
+          <span class="pane-title">Boat and ship</span>
+          <span class="pane-tools keyhint">bought once, yours for good</span>
+        </div>
+        <div class="pane-body tight"><div id="sheet-vehicles" class="vehicles"></div></div>
+      </section>
     </div>
   </div>
 
   <!-- ---------------------------------------------------------- inventory -->
-  <div class="tab-body hidden" data-tab="inventory">
-    <div class="cols">
-      <div>
-        <h3>Worn</h3>
-        <div class="slot-grid" id="inv-slots"></div>
+  <div class="tab-body hidden" data-tab="inventory" role="tabpanel" aria-label="Inventory">
+    <section class="pane col-figure" id="inv-equip">
+      <div class="pane-head">
+        <span class="pane-title">Worn</span>
+        <span class="pane-tools keyhint">click to take off</span>
       </div>
-      <div>
-        <h3>Bag <span class="small muted" id="inv-count"></span></h3>
-        <div class="bagtools">
-          <span class="small muted">Recycle everything up to:</span>
-          <button id="inv-recycle-junk" class="ghost">normal</button>
-          <button id="inv-recycle-magic" class="ghost">magic</button>
-          <button id="inv-recycle-rare" class="ghost">rare</button>
-          <span class="small muted">click an item to wear it · hover it and press <b>R</b> to recycle it ·
-            uniques and set pieces are never taken in bulk</span>
+      <div class="pane-body flush"><div class="slot-grid doll" id="inv-slots"></div></div>
+    </section>
+
+    <section class="pane col-bag" id="inv-bag-pane">
+      <div class="pane-head">
+        <span class="pane-title">Bag</span>
+        <span class="pane-meta" id="inv-count"></span>
+        <div class="pane-tools">
+          <button class="chip on" id="inv-view-list" aria-pressed="true">List</button>
+          <button class="chip" id="inv-view-grid" aria-pressed="false">Grid</button>
         </div>
-        <div class="bag" id="sheet-bag"></div>
       </div>
-    </div>
+      <div class="chipbar" id="inv-filters"></div>
+      <div class="chipbar" id="inv-sort"></div>
+      <div class="pane-body tight"><div class="bag" id="sheet-bag"></div></div>
+      <div id="inv-tools">
+        <span class="keyhint">Click to wear · <kbd>R</kbd> recycles what you are pointing at</span>
+        <span class="sep"></span>
+        <span class="keyhint">Recycle everything up to:</span>
+        <button id="inv-recycle-junk" class="chip">normal</button>
+        <button id="inv-recycle-magic" class="chip">magic</button>
+        <button id="inv-recycle-rare" class="chip">rare</button>
+        <span class="keyhint">uniques and set pieces are never taken in bulk</span>
+      </div>
+    </section>
+
+    <section class="pane col-compare" id="inv-compare">
+      <div class="pane-head">
+        <span class="pane-title">Compare</span>
+        <span class="pane-tools keyhint">hold <kbd>Shift</kbd> for the other hand or ring</span>
+      </div>
+      <div class="pane-body" id="inv-compare-body"></div>
+    </section>
   </div>
 
   <!-- ---------------------------------------------------------- skills -->
-  <div class="tab-body hidden" data-tab="skills">
-    <div class="cols">
-      <div>
-        <h3>Your skills <span class="small muted">keys 1–6</span></h3>
-        <div id="sheet-skills" class="skilllist"></div>
+  <div class="tab-body hidden" data-tab="skills" role="tabpanel" aria-label="Skills">
+    <section class="pane col-bar" id="sheet-bar-pane">
+      <div class="pane-head">
+        <span class="pane-title">Your bar</span>
+        <span class="pane-tools keyhint">click a key to shape it · a filled dot is a talent taken</span>
       </div>
-      <div>
-        <h3>Talents <span class="small muted" id="sheet-talent-points">one per tier, per skill</span></h3>
-        <div id="sheet-skilltree" class="skilltree"></div>
+      <div class="pane-body flush"><div id="sheet-skillbar"></div></div>
+    </section>
+
+    <section class="pane col-list" id="sheet-skill-pane">
+      <div class="pane-head">
+        <span class="pane-title">All skills</span>
+        <span class="pane-tools keyhint">keys 1–6</span>
       </div>
-    </div>
+      <div class="pane-body tight"><div id="sheet-skills" class="skilllist"></div></div>
+      <div class="pane-foot"><span class="small muted" id="sheet-talent-points"></span></div>
+    </section>
+
+    <section class="pane col-tree" id="sheet-talent-pane">
+      <div class="pane-head">
+        <span class="pane-title" id="sheet-tree-title">Talents</span>
+        <span class="pane-tools keyhint">one from each tier</span>
+      </div>
+      <div class="pane-body"><div id="sheet-skilltree" class="skilltree"></div></div>
+      <div class="pane-foot"><span class="small muted" id="sheet-talent-summary"></span></div>
+    </section>
   </div>
 
   <!-- ---------------------------------------------------------- perks -->
-  <div class="tab-body hidden" data-tab="perks">
-    <div class="perks-head">
-      <h3>Perks <span class="small muted" id="perk-points"></span></h3>
-      <div class="perk-legend" id="perk-legend"></div>
-      <button id="perk-fit" class="ghost">Fit to view</button>
-      <button id="perk-refund" class="ghost">Take it all back</button>
-      <span class="small muted">scroll to zoom · drag to move · double-click to fit</span>
-    </div>
+  <div class="tab-body hidden" data-tab="perks" role="tabpanel" aria-label="Perks">
     <div class="perks-body">
-      <canvas id="perk-canvas" class="perk-canvas"></canvas>
-      <aside class="perk-side" id="perk-side"></aside>
+      <section class="pane" id="perk-stage-pane">
+        <div class="pane-head">
+          <span class="pane-title">The forest</span>
+          <span class="pane-meta" id="perk-points"></span>
+          <div class="pane-tools">
+            <span class="keyhint">scroll to zoom · drag to move · ◆ keystone · ■ talent</span>
+            <button id="perk-fit" class="chip">Fit to view</button>
+          </div>
+        </div>
+        <div class="pane-body flush" id="perk-stage"><canvas id="perk-canvas" class="perk-canvas"></canvas></div>
+        <div id="perk-foot">
+          <div class="perk-legend" id="perk-legend"></div>
+          <button id="perk-refund" class="chip">Take it all back</button>
+        </div>
+      </section>
+      <aside class="pane">
+        <div class="pane-head"><span class="pane-title">This node</span></div>
+        <div class="pane-body perk-side" id="perk-side"></div>
+      </aside>
     </div>
   </div>
 
   <!-- ---------------------------------------------------------- crafting -->
-  <div class="tab-body hidden" data-tab="crafting">
-    <div class="cols">
-      <div>
-        <h3>Materials <span class="small muted">no limit — these never fill up</span></h3>
-        <div id="craft-materials" class="materials"></div>
-        <h3>Recipes <span class="small muted">click one for the details</span></h3>
-        <div id="craft-list" class="recipe-list"></div>
+  <div class="tab-body hidden" data-tab="crafting" role="tabpanel" aria-label="Crafting">
+    <section class="pane col-recipes">
+      <div class="pane-head">
+        <span class="pane-title">Recipes</span>
+        <span class="pane-tools keyhint">click one for the details</span>
       </div>
-      <div>
-        <div id="craft-detail" class="recipe-detail"></div>
+      <div class="pane-body tight"><div id="craft-list" class="recipe-list"></div></div>
+    </section>
+    <section class="pane col-bases">
+      <div class="pane-head">
+        <span class="pane-title">What to make</span>
+        <span class="pane-meta" id="craft-bases-title"></span>
       </div>
-    </div>
+      <div class="pane-body"><div id="craft-bases"></div></div>
+    </section>
+    <section class="pane col-detail">
+      <div class="pane-head"><span class="pane-title">The forge</span></div>
+      <div class="pane-body" id="craft-detail"></div>
+    </section>
   </div>
 
   <!-- ---------------------------------------------------------- upgrade -->
-  <div class="tab-body hidden" data-tab="upgrade">
-    <div class="cols">
-      <div>
-        <h3>Materials</h3>
-        <div id="up-materials" class="materials"></div>
-        <h3>Pick something to work on</h3>
-        <div id="up-pick" class="bag small-bag"></div>
+  <div class="tab-body hidden" data-tab="upgrade" role="tabpanel" aria-label="Upgrade">
+    <section class="pane col-pick" id="up-pick-pane">
+      <div class="pane-head">
+        <span class="pane-title">Pick something to work on</span>
+        <span class="pane-meta" id="up-count"></span>
       </div>
-      <div>
-        <div id="up-item" class="bench-card-wrap"></div>
-        <h3>What you can do to it <span class="small muted">click one for the details</span></h3>
-        <div id="up-list" class="recipe-list"></div>
-        <div id="up-detail" class="recipe-detail"></div>
-      </div>
+      <div class="chipbar" id="up-scope"></div>
+      <div class="pane-body tight"><div id="up-pick" class="bag small-bag"></div></div>
+    </section>
+
+    <div class="pane-stack col-bench">
+      <section class="pane fixed">
+        <div class="pane-head"><span class="pane-title">On the bench</span></div>
+        <div class="pane-body">
+          <div id="up-item" class="bench-card-wrap"></div>
+          <div class="itemcard" id="up-card"></div>
+        </div>
+      </section>
+      <section class="pane grow">
+        <div class="pane-head">
+          <span class="pane-title">What you can do to it</span>
+          <span class="pane-tools keyhint">click one for the details</span>
+        </div>
+        <div class="pane-body tight"><div id="up-list" class="recipe-list"></div></div>
+      </section>
     </div>
+
+    <section class="pane col-detail">
+      <div class="pane-head"><span class="pane-title">The bench</span></div>
+      <div class="pane-body" id="up-detail"></div>
+    </section>
   </div>
 
   <!-- ---------------------------------------------------------- journal -->
-  <div class="tab-body hidden" data-tab="journal">
-    <div class="cols">
-      <div>
-        <h3>Journal</h3>
-        <div id="sheet-journal" class="journal"></div>
-      </div>
-      <div>
-        <h3>The world</h3>
-        <div id="sheet-zones" class="zonelist"></div>
-      </div>
+  <div class="tab-body hidden" data-tab="journal" role="tabpanel" aria-label="Journal">
+    <div class="journal-grid" id="journal-body">
+      <section class="pane col-survey">
+        <div class="pane-head">
+          <span class="pane-title">The survey</span>
+          <span class="pane-meta" id="journal-share"></span>
+        </div>
+        <div class="pane-body tight"><div id="sheet-journal" class="journal"></div></div>
+      </section>
+      <section class="pane col-quests">
+        <div class="pane-head">
+          <span class="pane-title">Work in hand</span>
+          <span class="pane-meta" id="journal-quest-count"></span>
+        </div>
+        <div class="pane-body tight"><div id="journal-quests" class="journal"></div></div>
+      </section>
+      <section class="pane col-standing">
+        <div class="pane-head">
+          <span class="pane-title">Who holds this ground</span>
+          <span class="pane-meta" id="journal-holder"></span>
+        </div>
+        <div class="pane-body tight"><div id="journal-standing" class="standing"></div></div>
+      </section>
+      <section class="pane col-board">
+        <div class="pane-head">
+          <span class="pane-title">Work going here</span>
+          <span class="pane-tools keyhint">everything on it is in this zone</span>
+        </div>
+        <div class="pane-body tight"><div id="journal-board" class="journal"></div></div>
+      </section>
+      <section class="pane col-word">
+        <div class="pane-head">
+          <span class="pane-title">Word going round</span>
+          <span class="pane-tools keyhint">about places you have not been</span>
+        </div>
+        <div class="pane-body tight"><div id="journal-rumours" class="journal"></div></div>
+      </section>
+      <section class="pane col-foes">
+        <div class="pane-head">
+          <span class="pane-title">Foes</span>
+          <span class="pane-meta" id="journal-kill-count"></span>
+        </div>
+        <div class="pane-body tight">
+          <div class="divider">Hunting you</div>
+          <div id="journal-foes" class="journal"></div>
+          <div class="divider">Put down</div>
+          <div id="journal-kills" class="journal"></div>
+        </div>
+      </section>
+      <section class="pane col-zones">
+        <div class="pane-head">
+          <span class="pane-title">The world</span>
+          <span class="pane-meta" id="journal-zone-count"></span>
+        </div>
+        <div class="pane-body tight"><div id="sheet-zones" class="zonelist"></div></div>
+      </section>
     </div>
   </div>
+
 </section>
 
 <script type="module" src="js/main.js"></script>

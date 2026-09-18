@@ -1,0 +1,78 @@
+{
+  "_doc": "What standing buys. Two ranks a faction — Trusted at +20, Sworn at +60 — and each one opens something only that faction has. This is the long reason to pick a side, because you cannot be Sworn to two factions who are at odds (a deed for one is a third of a deed against the other, see js/factions.js).",
+
+  "ranks": [
+    { "key": "trusted", "at": 20, "name": "Trusted" },
+    { "key": "sworn", "at": 60, "name": "Sworn" }
+  ],
+
+  "rewards": {
+    "wardens_reach": [
+      { "rank": "trusted", "id": "reach_backup", "name": "The road is watched",
+        "desc": "Their patrols join any fight you start within forty metres of them.", "effect": { "patrolAid": true } },
+      { "rank": "sworn", "id": "reach_warden", "name": "A warden of your own",
+        "desc": "A road warden walks with you for as long as you stay in one zone.", "effect": { "companion": "warden" } }
+    ],
+    "ashen_pact": [
+      { "rank": "trusted", "id": "pact_ignored", "name": "Not worth the trouble",
+        "desc": "Raid bands walk past you instead of at you.", "effect": { "ignoredBy": "ashen_pact" } },
+      { "rank": "sworn", "id": "pact_burn", "name": "Say the word",
+        "desc": "Once a day, name a rival camp in this zone and they will burn it for you.", "effect": { "burnCamp": 1 } }
+    ],
+    "lantern_house": [
+      { "rank": "trusted", "id": "house_prices", "name": "They know what it is",
+        "desc": "Anything with a history sells for 40% more.", "effect": { "relicPrice": 1.4 } },
+      { "rank": "sworn", "id": "house_lamp", "name": "A lamp that does not go out",
+        "desc": "A light source that never burns down and never needs oil.", "effect": { "item": "eternal_lamp" } }
+    ],
+    "cutwater": [
+      { "rank": "trusted", "id": "cut_ferry", "name": "Free water",
+        "desc": "Every ferry landing on the world takes you across for nothing.", "effect": { "freeFerry": true } },
+      { "rank": "sworn", "id": "cut_runner", "name": "A fast boat",
+        "desc": "A boat that outruns anything, and one smuggled item a day at cost.", "effect": { "vehicle": "runner", "smuggle": 1 } }
+    ],
+    "deepworn": [
+      { "rank": "trusted", "id": "worn_maps", "name": "They drew it underground",
+        "desc": "Every dungeon on this world opens with its map already drawn.", "effect": { "dungeonMaps": true } },
+      { "rank": "sworn", "id": "worn_crew", "name": "A dig crew",
+        "desc": "They will open one collapsed mine for you, in an afternoon rather than three days.", "effect": { "freeDig": 1 } }
+    ],
+    "greenhand": [
+      { "rank": "trusted", "id": "green_rations", "name": "Nobody goes hungry",
+        "desc": "Rations cost half, everywhere.", "effect": { "rationPrice": 0.5 } },
+      { "rank": "sworn", "id": "green_steading", "name": "A bed anywhere",
+        "desc": "Rest at any steading on their ground as if it were a town.", "effect": { "restAtSteadings": true } }
+    ],
+    "stonecount": [
+      { "rank": "trusted", "id": "count_free", "name": "Your face is known",
+        "desc": "No toll gate on this world charges you.", "effect": { "freeTolls": true } },
+      { "rank": "sworn", "id": "count_collect", "name": "You hold the chain",
+        "desc": "You collect the toll instead — coin arrives whether you are standing there or not.", "effect": { "tollIncome": 12 } }
+    ],
+    "quiet_wake": [
+      { "rank": "trusted", "id": "wake_uncurse", "name": "They lift it for nothing",
+        "desc": "Any curse on any item, taken off free.", "effect": { "freeUncurse": true } },
+      { "rank": "sworn", "id": "wake_revive", "name": "Not yet",
+        "desc": "One free revive a day, anywhere on the world, with no shrine and no draught.", "effect": { "reviveDaily": 1 } }
+    ],
+    "hollowed": [],
+    "saltbound": [
+      { "rank": "trusted", "id": "salt_wrecks", "name": "Every wreck on the chart",
+        "desc": "All sunken wrecks on this world are marked on your map.", "effect": { "markWrecks": true } },
+      { "rank": "sworn", "id": "salt_diver", "name": "A diver",
+        "desc": "They will fetch what you cannot reach, out of any water on the world.", "effect": { "companion": "diver" } }
+    ],
+    "emberwrights": [
+      { "rank": "trusted", "id": "wright_cheap", "name": "Half the fee",
+        "desc": "Branding a weapon costs half what it costs anyone else.", "effect": { "brandPrice": 0.5 } },
+      { "rank": "sworn", "id": "wright_second", "name": "Two brands, one blade",
+        "desc": "One weapon of yours may carry a second element at the same time.", "effect": { "doubleBrand": 1 } }
+    ],
+    "longsight": [
+      { "rank": "trusted", "id": "sight_zone", "name": "Charted ahead of you",
+        "desc": "Every zone is already mapped when you walk into it.", "effect": { "revealOnEntry": true } },
+      { "rank": "sworn", "id": "sight_neighbours", "name": "And the ones next door",
+        "desc": "The zones touching the one you are in are mapped too.", "effect": { "revealAdjacent": true } }
+    ]
+  }
+}

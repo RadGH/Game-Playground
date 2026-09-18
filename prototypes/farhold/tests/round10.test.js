@@ -31,7 +31,7 @@ const SEEDS = [1, 2, 3, 4, 7, 11, 19, 42, 77, 123, 777, 1337];
 test('a new character always starts on a level-1 world', () => {
   for (const seed of SEEDS) {
     for (const habitable of [true, false]) {
-      const { planet } = createWorld({ seed, habitable, width: 16, height: 8 });
+      const { planet } = createWorld({ seed, habitable, liveable: true, width: 16, height: 8 });
       const band = bandForPlanet(planet);
       assert.equal(band.key, 'low',
         `seed ${seed} (habitable ${habitable}) started on ${planet.name}, band ${band.key}`);
@@ -69,9 +69,10 @@ test('every system has somewhere to go at every level', () => {
 
 test('the starting system always holds a world you can live on', () => {
   for (const seed of SEEDS) {
-    // whether or not the title screen's box is ticked — the box only decides where you LAND
+    // whether or not the title screen's box is ticked — the box only decides where you LAND, and the
+    // game always asks for a liveable system (`liveable: true`, main.js)
     for (const habitable of [true, false]) {
-      const { system } = createWorld({ seed, habitable, width: 16, height: 8 });
+      const { system } = createWorld({ seed, habitable, liveable: true, width: 16, height: 8 });
       assert.ok(landableBodies(system).some(isHabitableStart),
         `seed ${seed} (habitable ${habitable}) has nowhere settled in the starting system`);
     }

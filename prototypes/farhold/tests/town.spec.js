@@ -244,8 +244,9 @@ test('the journal shows the survey, the work and the grudge', async ({ page }) =
     const f = window.farhold;
     f.hud.setTab('journal');
     const out = {
-      rows: document.querySelectorAll('#sheet-journal .journal-row').length,
-      text: document.getElementById('sheet-journal')?.textContent || '',
+      // round 10: the journal is five panes, so count across the whole body rather than one column
+      rows: document.querySelectorAll('#journal-body .journal-row').length,
+      text: document.getElementById('journal-body')?.textContent || '',
       zones: document.querySelectorAll('#sheet-zones .zone-row').length,
     };
     // round 7: the passive tree and the broad talent ladder both moved into the Perks forest, and

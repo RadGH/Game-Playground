@@ -1,0 +1,225 @@
+{
+  "_doc": "Twenty-two quest frames — eighteen that bind to something particular, and four bread-and-butter ones at the top that bind to almost anything so a quiet farming zone still has a board. A frame is a template with typed slots; js/jobgen.js fills every slot from things that EXIST in the current territory right now and refuses to emit the frame if it cannot. That is the whole idea — a job is a fact about the world, phrased, not a coordinate rolled out of nothing. `scope` local means the pin is in the zone you are standing in; `adjacent` means a zone that touches it and the text says so; `rumour` never gets a pin at all. Placeholders are {slot.field}.",
+
+  "scopes": {
+    "local": { "name": "here", "maxZoneHops": 0 },
+    "adjacent": { "name": "next door", "maxZoneHops": 1 },
+    "rumour": { "name": "somewhere out there", "maxZoneHops": 99 }
+  },
+
+  "frames": [
+    {
+      "id": "thin_the_pack", "scope": "local", "weight": 6,
+      "needs": [{ "slot": "beast", "type": "enemy" }],
+      "title": "There are too many {beast.name} about",
+      "text": "There are more {beast.name} around {zone.name} than anyone can remember. Thin them out.",
+      "goal": { "kind": "hunt", "target": "{beast.id}", "count": 6 },
+      "reward": { "gold": [35, 85], "xp": [45, 100], "standing": 4 },
+      "onDone": { "grip": 0.03 }
+    },
+    {
+      "id": "walk_it_over", "scope": "local", "weight": 5,
+      "needs": [{ "slot": "there", "type": "settlement" }],
+      "title": "Carry this to {there.name}",
+      "text": "A crate, a name, and a walk to {there.name}. Nobody will thank you but somebody will pay you.",
+      "goal": { "kind": "deliver", "count": 1, "at": "{there}" },
+      "reward": { "gold": [30, 75], "xp": [35, 85], "standing": 4 },
+      "onDone": { "grip": 0.02 }
+    },
+    {
+      "id": "bring_back", "scope": "local", "weight": 5,
+      "needs": [{ "slot": "beast", "type": "enemy" }],
+      "title": "Bring back what they carry",
+      "text": "Somebody in {zone.name} wants what a {beast.name} carries, and is not saying why.",
+      "goal": { "kind": "gather", "target": "{beast.id}", "count": 4 },
+      "reward": { "gold": [30, 70], "xp": [35, 80], "standing": 4 },
+      "onDone": {}
+    },
+    {
+      "id": "look_in_on", "scope": "local", "weight": 5,
+      "needs": [{ "slot": "spot", "type": "site" }],
+      "title": "Look in on {spot.name}",
+      "text": "Nobody has walked out to {spot.name} in a month. Go and see what is there now.",
+      "goal": { "kind": "visit", "count": 1, "at": "{spot}" },
+      "reward": { "gold": [25, 60], "xp": [30, 70], "standing": 3 },
+      "onDone": { "rumour": "somebody has been out to {spot.name}" }
+    },
+    {
+      "id": "beast_moved_in", "scope": "local", "weight": 10,
+      "needs": [
+        { "slot": "site", "type": "site", "hostile": true },
+        { "slot": "beast", "type": "enemy", "rank": "champion" }
+      ],
+      "title": "Something has taken {site.name}",
+      "text": "Nobody has been up to {site.name} since {beast.name} moved in. Put it out.",
+      "goal": { "kind": "kill", "target": "{beast.id}", "count": 1, "at": "{site}" },
+      "reward": { "gold": [60, 140], "xp": [70, 160], "standing": 6 },
+      "onDone": { "grip": -0.12, "rumour": "the way up to {site.name} is walkable again" }
+    },
+    {
+      "id": "overdue_caravan", "scope": "local", "weight": 8,
+      "needs": [{ "slot": "caravan", "type": "caravan", "state": "overdue" }],
+      "title": "{caravan.name} is overdue",
+      "text": "{caravan.name} should have been in two days ago. Walk the road and find out what happened to it.",
+      "goal": { "kind": "visit", "count": 1, "at": "{caravan}" },
+      "reward": { "gold": [40, 90], "xp": [50, 110], "standing": 6 },
+      "onDone": { "rumour": "{caravan.name} never made it out of {zone.name}" }
+    },
+    {
+      "id": "the_escort", "scope": "local", "weight": 9,
+      "needs": [{ "slot": "caravan", "type": "caravan", "state": "loading" }],
+      "title": "See {caravan.name} through",
+      "text": "{caravan.name} leaves within the hour and the road is not what it was. Walk with it.",
+      "goal": { "kind": "escort", "count": 1, "at": "{caravan}" },
+      "reward": { "gold": [90, 200], "xp": [90, 200], "standing": 8 },
+      "onDone": { "grip": 0.04 }
+    },
+    {
+      "id": "patrol_gone_quiet", "scope": "local", "weight": 7,
+      "needs": [
+        { "slot": "patrol", "type": "patrol", "state": "missing" },
+        { "slot": "site", "type": "site" }
+      ],
+      "title": "{patrol.name} has not reported",
+      "text": "{patrol.name} walked out past {site.name} and nobody has seen them since. Find them.",
+      "goal": { "kind": "visit", "count": 1, "at": "{patrol}" },
+      "reward": { "gold": [50, 120], "xp": [60, 140], "standing": 7 },
+      "onDone": { "rumour": "what is left of {patrol.name} is out past {site.name}" }
+    },
+    {
+      "id": "the_grudge", "scope": "local", "weight": 12,
+      "needs": [{ "slot": "foe", "type": "named", "state": "grudge" }],
+      "title": "{foe.name} is still out there",
+      "text": "{foe.name} beat you and has not stopped telling people. It knows where you sleep.",
+      "goal": { "kind": "kill", "target": "{foe.id}", "count": 1 },
+      "reward": { "gold": [120, 300], "xp": [150, 340], "standing": 12 },
+      "onDone": { "grip": -0.08, "rumour": "somebody finally put {foe.name} down" }
+    },
+    {
+      "id": "pay_the_toll", "scope": "local", "weight": 5,
+      "needs": [{ "slot": "gate", "type": "landmark", "kind": "toll_bridge" }],
+      "title": "Settle it at {gate.name}",
+      "text": "You walked past {gate.name} without paying. The Count remembers. Settle up, or take the long way for good.",
+      "goal": { "kind": "pay", "count": 1, "at": "{gate}" },
+      "reward": { "gold": [0, 0], "xp": [30, 60], "standing": 8 },
+      "onDone": { "rumour": "{gate.name} is open to you again" }
+    },
+    {
+      "id": "feed_the_hold", "scope": "local", "weight": 8,
+      "needs": [{ "slot": "town", "type": "settlement" }, { "slot": "trouble", "type": "incident", "kind": "hunger" }],
+      "title": "{town.name} is short",
+      "text": "{town.name} has been on half rations for a week. Bring what you can.",
+      "goal": { "kind": "gather", "target": "rations", "count": 8, "at": "{town}" },
+      "reward": { "gold": [70, 150], "xp": [60, 130], "standing": 9 },
+      "onDone": { "resolve": "hunger", "grip": 0.06 }
+    },
+    {
+      "id": "standing_stone", "scope": "local", "weight": 6,
+      "needs": [{ "slot": "stones", "type": "landmark", "kind": "standing_stones", "state": "unsolved" }],
+      "title": "The fallen stone at {stones.name}",
+      "text": "One of the stones at {stones.name} is down, and the ring has not sung since. Put it back.",
+      "goal": { "kind": "solve", "count": 1, "at": "{stones}" },
+      "reward": { "gold": [30, 70], "xp": [90, 180], "standing": 4, "perk": true },
+      "onDone": { "rumour": "the ring at {stones.name} is whole again" }
+    },
+    {
+      "id": "someones_boy", "scope": "local", "weight": 9,
+      "needs": [{ "slot": "who", "type": "npc" }, { "slot": "hole", "type": "dungeon" }],
+      "title": "{who.name} is missing somebody",
+      "text": "{who.name}'s boy went into {hole.name} three days ago on a dare. Bring him out, one way or the other.",
+      "goal": { "kind": "clear", "count": 1, "at": "{hole}" },
+      "reward": { "gold": [80, 180], "xp": [100, 220], "standing": 7 },
+      "onDone": { "rumour": "{hole.name} has been walked, at least the first of it" }
+    },
+    {
+      "id": "the_relic", "scope": "local", "weight": 7,
+      "needs": [{ "slot": "relic", "type": "item", "tag": "relic" }, { "slot": "keeper", "type": "npc", "faction": "lantern_house" }],
+      "title": "{relic.name} belongs to somebody",
+      "text": "{keeper.name} says {relic.name} came out of a grave and should go back in one. You could also sell it and say nothing.",
+      "goal": { "kind": "deliver", "target": "{relic.id}", "count": 1, "at": "{keeper}" },
+      "reward": { "gold": [40, 90], "xp": [80, 170], "standing": 10 },
+      "onDone": { "rumour": "the House has {relic.name} now" }
+    },
+    {
+      "id": "push_them_out", "scope": "local", "weight": 11,
+      "needs": [{ "slot": "sites", "type": "site", "hostile": true, "count": 3 }],
+      "title": "Break the hold on {zone.name}",
+      "text": "Three camps hold {zone.name}. Take all three and the ground changes hands.",
+      "goal": { "kind": "clearSites", "count": 3, "at": "{sites}" },
+      "reward": { "gold": [200, 420], "xp": [240, 500], "standing": 14 },
+      "onDone": { "grip": -0.3, "rumour": "{zone.name} does not belong to them any more" }
+    },
+    {
+      "id": "the_claim", "scope": "local", "weight": 8,
+      "needs": [{ "slot": "camp", "type": "site", "hostile": true, "rival": true }],
+      "title": "Burn {camp.name} out",
+      "text": "{camp.name} went up last week and it is already three tents bigger. Burn it before it takes root.",
+      "goal": { "kind": "clear", "count": 1, "at": "{camp}" },
+      "reward": { "gold": [90, 190], "xp": [100, 210], "standing": 8 },
+      "onDone": { "grip": 0.08 }
+    },
+    {
+      "id": "light_the_beacon", "scope": "local", "weight": 10,
+      "needs": [
+        { "slot": "beacon", "type": "landmark", "kind": "beacon" },
+        { "slot": "trouble", "type": "incident", "kind": "raid_coming" }
+      ],
+      "title": "Light {beacon.name}",
+      "text": "There is a raid band on the road and nobody at the tower. Reach {beacon.name} before they reach the gate.",
+      "goal": { "kind": "solve", "count": 1, "at": "{beacon}", "timed": 900 },
+      "reward": { "gold": [110, 240], "xp": [130, 280], "standing": 11 },
+      "onDone": { "resolve": "raid_coming", "grip": 0.1 }
+    },
+    {
+      "id": "dig_it_out", "scope": "local", "weight": 5,
+      "needs": [{ "slot": "mine", "type": "landmark", "kind": "collapsed_mine", "state": "unsolved" }],
+      "title": "Open {mine.name}",
+      "text": "{mine.name} came down years ago with most of a shift still in it. It is three days' digging, and you can do a day at a time.",
+      "goal": { "kind": "solve", "count": 3, "at": "{mine}" },
+      "reward": { "gold": [60, 140], "xp": [80, 190], "standing": 6, "opens": "dungeon" },
+      "onDone": { "rumour": "{mine.name} is open again, and something is down there" }
+    },
+    {
+      "id": "the_wake", "scope": "local", "weight": 7,
+      "needs": [
+        { "slot": "field", "type": "landmark", "kind": "cairn_field" },
+        { "slot": "trouble", "type": "incident", "kind": "restless_dead" }
+      ],
+      "title": "Put them back down",
+      "text": "Something got dug at {field.name} and the rest have taken it badly. Walk it after dark and finish them.",
+      "goal": { "kind": "hunt", "target": "{trouble.spawns}", "count": 6, "at": "{field}" },
+      "reward": { "gold": [90, 200], "xp": [120, 250], "standing": 9 },
+      "onDone": { "resolve": "restless_dead" }
+    },
+    {
+      "id": "map_the_edge", "scope": "local", "weight": 6,
+      "needs": [{ "slot": "marks", "type": "landmark", "state": "unvisited", "count": 3 }],
+      "title": "Put {zone.name} on the chart",
+      "text": "Three places in {zone.name} nobody has written down. Stand at each and the Longsight will pay for the telling.",
+      "goal": { "kind": "visitAll", "count": 3, "at": "{marks}" },
+      "reward": { "gold": [80, 170], "xp": [70, 150], "standing": 8, "reveals": "zone" },
+      "onDone": { "rumour": "{zone.name} is charted now" }
+    },
+    {
+      "id": "the_apprentice", "scope": "local", "weight": 5,
+      "needs": [
+        { "slot": "smith", "type": "npc", "faction": "emberwrights" },
+        { "slot": "beast", "type": "enemy", "element": true }
+      ],
+      "title": "{smith.name} wants a source",
+      "text": "{smith.name} will brand your weapon, but the fire has to come from somewhere. {beast.name} carries it.",
+      "goal": { "kind": "hunt", "target": "{beast.id}", "count": 4 },
+      "reward": { "gold": [40, 100], "xp": [90, 200], "standing": 7, "brand": true },
+      "onDone": { "rumour": "{smith.name} is branding again" }
+    },
+    {
+      "id": "the_neighbour", "scope": "adjacent", "weight": 4,
+      "needs": [{ "slot": "there", "type": "zone", "adjacent": true }, { "slot": "trouble", "type": "incident", "anywhere": true }],
+      "title": "Word from {there.name}",
+      "text": "{there.name} is next door and it is having a bad week — {trouble.blurb}. It is a walk. Nobody will mind if you do not.",
+      "goal": { "kind": "visit", "count": 1, "at": "{there}" },
+      "reward": { "gold": [110, 260], "xp": [120, 280], "standing": 9 },
+      "onDone": { "rumour": "somebody has been over to {there.name}" }
+    }
+  ]
+}

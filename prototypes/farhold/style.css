@@ -57,7 +57,7 @@ body {
 .bar > span { position: absolute; inset: 0; text-align: center; font-size: 11px; line-height: 12px; text-shadow: 0 1px 2px #000; }
 .bar.hp > i { background: linear-gradient(#d0503c, #8a2a20); }
 .bar.mp > i { background: linear-gradient(#4a8ad0, #24508a); }
-.bar.xp { height: 8px; }
+.bar.xp { height: 11px; }
 .bar.xp > i { background: linear-gradient(#d8b040, #8a6a10); }
 #hud-name { font-weight: 600; text-shadow: 0 1px 3px #000; }
 #hud-name small { color: #9fb0c8; font-weight: 400; }
@@ -90,6 +90,21 @@ body {
 #log div.bad { color: #ff9a8a; }
 #log div.loot { color: #ffd070; }
 #log div.level { color: #7fd8ff; font-weight: 600; }
+
+/* ---------------------------------------------------------------- what you are doing
+ * The game never said. You land beside a town with a quest-giver forty metres away and the screen
+ * showed no objective at all — this is one line under the bars that names the thing you are tracking
+ * and how far off it is, fed from the marker book that already existed.
+ */
+#hud-objective {
+  display: flex; align-items: baseline; gap: 8px; margin-top: 6px;
+  padding: 4px 8px; border-radius: 5px; max-width: 300px;
+  background: rgba(10, 16, 26, .55); border-left: 2px solid #7fd8ff;
+  text-shadow: 0 1px 3px #000;
+}
+#hud-objective.hidden { display: none; }
+#hud-objective b { color: #eaf6ff; font-size: 13px; }
+#hud-objective span { color: #9fb0c8; font-size: 12px; font-variant-numeric: tabular-nums; margin-left: auto; }
 
 #crosshair {
   position: fixed; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
@@ -486,7 +501,15 @@ body {
   text-shadow: 0 1px 2px #000;
 }
 .skill-slot .skill-key { position: absolute; top: 2px; left: 4px; font-size: 9px; color: #9fb2c6; }
-.skill-slot .skill-mp { position: absolute; bottom: 2px; right: 4px; font-size: 9px; color: #6fa8ff; }
+.skill-slot .skill-mp { position: absolute; bottom: 2px; right: 4px; font-size: 10px; color: #6fa8ff; }
+/* A dead key says why it is dead: red mana when you cannot afford it, the seconds left when it is
+   cooling. Both used to be the same 45% opacity, so there was no reason on screen either way. */
+.skill-slot.poor .skill-mp { color: #ff7a5a; font-weight: 600; }
+.skill-slot .skill-left {
+  position: absolute; inset: 0; display: grid; place-items: center; z-index: 2;
+  font-size: 15px; font-weight: 600; color: #eaf6ff; text-shadow: 0 1px 4px #000;
+  font-variant-numeric: tabular-nums; pointer-events: none;
+}
 .skill-slot .skill-name { padding: 0 3px; font-weight: 600; z-index: 1; }
 .skill-slot .skill-cd { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.62); }
 .skill-slot.blocked { opacity: 0.45; }
@@ -681,6 +704,9 @@ body {
 .pane-body.grid { display: grid; align-content: start; }
 .pane-stack { display: flex; flex-direction: column; gap: var(--gap); min-height: 0; min-width: 0; }
 .pane-stack > .pane.grow { flex: 1; min-height: 0; }
+/* An empty pane should not hold a full-height column open — "Nothing on your gear does anything
+   clever yet" was taking 750px at level 1 and pushing Companions to the floor. */
+.pane-stack > .pane.grow.empty { flex: 0 1 auto; }
 .pane-stack > .pane.fixed { flex: none; }
 /* the old `.sheet h3 { margin: 16px 0 6px }` is what forced the stacked look — not inside a pane */
 .pane h3, .pane h4 { margin: 0; }
@@ -770,6 +796,7 @@ body {
 .skill-row.locked { opacity: .45; }
 .skill-slot.locked { opacity: .4; }
 .skill-slot.locked .skill-name { font-size: 10px; }
+.skill-slot.locked .skill-mp { color: #8fa0b8; }
 
 /* ----------------------------------------------------------------- companions + powers */
 .pets, .powers { display: flex; flex-direction: column; gap: 3px; }
@@ -859,8 +886,13 @@ body {
 #hud-planet { max-width: 300px; }
 
 /* the skill bar sits above the hint rather than on top of it */
-#skillbar { bottom: 44px; }
-#hint { bottom: 8px; }
+/* …and the 44px that was reserved for it during play goes back to the skill bar, because `#hint` is
+   inside `#pause` and is never on screen while you are playing. */
+#skillbar { bottom: 18px; }
+/* `#hint` lives INSIDE `.pause-card` in the markup, but `#hint`'s base rule pins it to the viewport,
+   so the card showed a "Controls" heading with empty space under it and the keys floated across the
+   bottom of the screen on top of the skill bar. It is part of the card; let it sit in the card. */
+#pause #hint { position: static; transform: none; bottom: auto; left: auto; max-width: 620px; margin: 0 auto; }
 #prompt { bottom: 118px; }
 
 /* the log gets a panel so it reads over bright ground, and stops short of the bar */

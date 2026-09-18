@@ -368,7 +368,7 @@ answer.
 
 ## D. The screens
 
-### E1 note on shared layout
+### D0. A note that applies to every sheet tab
 Six of the seven sheet tabs leave between a third and two thirds of the screen empty at 1920×1080
 while the same panels are **clipped** at 1366×768. The fix is the same everywhere: let the panes
 flex to content and scroll rather than sit at fixed heights in a fixed grid. Listed once here, cited
@@ -532,7 +532,7 @@ column to stop the wrapping and suffix the sliders ("1.0×", "75%").
 
 ## E. The reward popup, the shop and the world
 
-### E2. The shop gives you nothing to decide with — high — S
+### E1. The shop gives you nothing to decide with — high — S
 **Where:** `js/talkui.js`, the trade panel
 **What is wrong:** rows read "Scepter — 8g — Buy", three identical Scepters in a row, no damage, no
 slot, no level requirement, no class restriction, and no indication whether it beats what you are

@@ -126,7 +126,11 @@ export class Hud {
     onSelectVehicle = null,
     // The Territory expansion: who holds the ground, what it is offering, and what people say
     standings = null, territoryHere = null, board = null, rumours = null, onTakeJob = null,
+    // A1: the one line that says what you are doing
+    objective = null, settings = null,
   } = {}) {
+    this.objective = objective;
+    this.settings = settings;
     this.standings = standings;
     this.territoryHere = territoryHere;
     this.board = board;
@@ -432,19 +436,32 @@ export class Hud {
         slot.innerHTML = `<span class="skill-key">${i + 1}</span>`
           + `<span class="skill-name"></span>`
           + `<span class="skill-mp"></span>`
-          + `<i class="skill-cd"></i>`;
+          + `<i class="skill-cd"></i>`
+          + `<span class="skill-left"></span>`;
         return slot;
       });
       box.replaceChildren(...this._skillSlots);
     }
     for (let i = 0; i < state.length; i++) {
       const s = state[i], slot = this._skillSlots[i];
-      slot.querySelector('.skill-name').textContent = s.locked ? `level ${s.unlockAt}` : s.name;
-      slot.querySelector('.skill-mp').textContent = s.locked ? '' : (s.mp ? String(s.mp) : '');
+      // A locked slot used to read "level 7" and nothing else, so the bar you stare at all game told
+      // you nothing about what you were working towards. Name the skill; put the level underneath.
+      slot.querySelector('.skill-name').textContent = s.name;
+      slot.querySelector('.skill-mp').textContent = s.locked ? `lvl ${s.unlockAt}` : (s.mp ? String(s.mp) : '');
       slot.querySelector('.skill-cd').style.height = `${Math.round((s.ready / s.cooldown) * 100)}%`;
+      /**
+       * C3: a dead key now says WHY it is dead. `blocked` covered both "on cooldown" and "you cannot
+       * afford it", which look identical, so a key that did nothing gave you no reason.
+       */
+      const cooling = !s.locked && s.ready > 0;
+      const poor = !s.locked && !cooling && !s.usable;
       slot.classList.toggle('blocked', !s.usable);
+      slot.classList.toggle('cooling', cooling);
+      slot.classList.toggle('poor', poor);
       slot.classList.toggle('locked', !!s.locked);
       slot.classList.toggle('ready', s.usable);
+      const left = slot.querySelector('.skill-left');
+      if (left) left.textContent = cooling && s.ready > 1.4 ? s.ready.toFixed(0) : '';
       // the hover card is the tooltip now; `title` would show a second, worse one over the top
     }
   }
@@ -463,7 +480,26 @@ export class Hud {
     const lo = this._xpForLevel(player.level), hi = this._xpForLevel(player.level + 1);
     const pct = hi > lo ? Math.max(0, Math.min(100, (player.xp - lo) / (hi - lo) * 100)) : 100;
     $('bar-xp-fill').style.width = pct + '%';
-    $('hud-name').innerHTML = `${player.name} <small>level ${player.level}${player.pendingAttr ? ' · ' + player.pendingAttr + ' points to spend' : ''}</small>`;
+    // it was a 6px unlabelled sliver, and the only XP number in the game was inside the sheet
+    const xpText = $('bar-xp-text');
+    if (xpText) xpText.textContent = hi > lo ? `${hpNum(player.xp - lo)} / ${hpNum(hi - lo)} to level ${player.level + 1}` : 'level 50';
+    // `pendingAttr` is dead — attributes stopped being bought a point at a time in round 7
+    const waiting = pointsLeft(player) ? `${pointsLeft(player)} perk` : player.pendingTalent ? `${player.pendingTalent} talent` : '';
+    $('hud-name').innerHTML = `${player.name} <small>level ${player.level}${waiting ? ` · ${waiting} to spend` : ''}</small>`;
+
+    /**
+     * WHAT YOU ARE DOING. One line, fed from the marker book that already existed — the game used to
+     * land you beside a town with a quest-giver forty metres away and say nothing at all.
+     */
+    const strip = $('hud-objective');
+    if (strip) {
+      const lead = this.objective?.();
+      strip.classList.toggle('hidden', !lead);
+      if (lead) {
+        $('objective-name').textContent = lead.name;
+        $('objective-where').textContent = lead.where || '';
+      }
+    }
 
     // statuses burning/chilling/buffing the player right now
     const chips = Object.values(player.statuses || {});
@@ -501,14 +537,22 @@ export class Hud {
   }
 
   /** Where the player is, in every form worth pasting into a bug report. */
+  /**
+   * The line under the minimap. Where you are, not what the engine thinks.
+   *
+   * It used to print the seed, the metres and the map cell permanently, which is a debug readout —
+   * useful to me, meaningless to a player, and it collided with the bottom of the minimap. The
+   * coordinates come back with "Show coordinates" in Settings, and the debug menu still has them.
+   */
   locationText(control, dungeon = null) {
+    const coords = !!this.settings?.get?.('coords');
     if (dungeon) {
-      return `seed ${this.seed} · ${dungeon.name} · x ${Math.round(control.x)} z ${Math.round(control.z)}`
-        + ` · ${dungeon.plan.rooms.length} rooms · level ${dungeon.level}`;
+      return `${dungeon.name} · ${dungeon.plan.rooms.length} rooms · level ${dungeon.level}`
+        + (coords ? ` · x ${Math.round(control.x)} z ${Math.round(control.z)}` : '');
     }
     const cell = this.terrain.cellAt(control.x, control.z);
-    return `seed ${this.seed} · x ${Math.round(control.x)} z ${Math.round(control.z)} · cell ${cell.x},${cell.y}`
-      + ` · altitude ${Math.round(control.y)} m · ${this.terrain.biomeAt(control.x, control.z).name}`;
+    return `${this.terrain.biomeAt(control.x, control.z).name} · ${Math.round(control.y)} m`
+      + (coords ? ` · seed ${this.seed} · x ${Math.round(control.x)} z ${Math.round(control.z)} · cell ${cell.x},${cell.y}` : '');
   }
 
   /** XP thresholds without importing the module twice. */
@@ -875,19 +919,34 @@ export class Hud {
       if (STAT_HELP[k]) { dt.dataset.tipRender = 'stat'; dt.dataset.tipStat = k; dt.tabIndex = 0; }
       return [dt, el('dd', null, String(v))];
     };
+    /**
+     * Six of eighteen rows read "—" at level 1, and a dash does not tell you whether that means zero
+     * or does-not-apply. They are hidden by default and a toggle in the pane header brings them back,
+     * because once you are wearing something with block on it you do want to see it.
+     */
     const byName = new Map(rows.map(r => [r[0], r]));
-    let grouped = false;
+    const blank = v => v === '—' || v === '0' || v === 0;
+    const showAll = !!this.showAllStats;
+    let hidden = 0;
     for (const [group, names] of Object.entries(GROUPS)) {
       const box = $('sheet-stats-' + group);
       if (!box) continue;
-      grouped = true;
-      box.replaceChildren(...names.filter(n => byName.has(n)).flatMap(n => statRow(byName.get(n))));
+      const wanted = names.filter(n => byName.has(n)).filter(n => {
+        if (showAll) return true;
+        const keep = !blank(byName.get(n)[1]);
+        if (!keep) hidden++;
+        return keep;
+      });
+      box.replaceChildren(...wanted.flatMap(n => statRow(byName.get(n))));
     }
-    // the flat list is the fallback for any build that still has the single `#sheet-stats`
-    const flat = $('sheet-stats');
-    if (flat) {
-      if (grouped) flat.hidden = true;
-      else flat.replaceChildren(...rows.flatMap(statRow));
+    const more = $('sheet-stats-more');
+    if (more) {
+      more.textContent = showAll ? 'hide the empty ones' : (hidden ? `show ${hidden} more` : '');
+      more.hidden = !hidden && !showAll;
+      if (!more.dataset.wired) {
+        more.dataset.wired = '1';
+        more.onclick = () => { this.showAllStats = !this.showAllStats; this.renderSheet(); };
+      }
     }
 
     // attributes with the level-up spend buttons
@@ -968,6 +1027,8 @@ export class Hud {
         row.innerHTML = `<span class="${l.rarity}">${l.from}</span><span class="muted">${l.text}</span>`;
         return row;
       }) : [el('p', 'muted small', 'Nothing on your gear does anything clever yet.')]));
+      // …and the pane shrinks to fit when there is nothing in it, so what is below rises
+      powers.closest('.pane')?.classList.toggle('empty', !lines.length);
     }
 
     $('sheet-inert').textContent = d.inert?.length
@@ -1108,6 +1169,7 @@ export class Hud {
   showCompare(item) {
     const box = $('inv-compare-body');
     if (!box) return;
+    box.closest('.pane')?.classList.toggle('empty', !item);
     if (!item) {
       const hint = el('div', 'itemcard empty', 'Point at something in the bag.');
       box.replaceChildren(hint);
@@ -2002,8 +2064,10 @@ export class Hud {
         n.dataset.tip = `${f.blurb} ${f.band?.blurb || ''}`;
         return n;
       }) : [el('p', 'muted small', 'Nobody has an opinion about you yet.')]));
+      // the reference screen says the whole name — it used to read "the Reach" in the header and
+      // "The Warden's Reach" in the row three pixels below it
       const holder = rows.find(f => f.key === holderKey);
-      meta('journal-holder', holder ? `${holder.short} · ${holder.band?.name || ''}` : '');
+      meta('journal-holder', holder ? `${holder.name} · ${holder.band?.name || ''}` : '');
     }
 
     /** ---- WORK GOING HERE. Everything on the board names something in this zone right now. */

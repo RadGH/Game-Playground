@@ -25,6 +25,10 @@ export const DEFAULTS = {
   sound: true,
   voices: true,
   volume: 0.75,
+  // C7: the HUD's bottom-right line used to read "seed 11 · x 29120 z 7191 · cell 130,32 · …" all
+  // the time. The biome and the altitude are player information; the rest is a debug readout.
+  coords: false,
+  damageNumbers: true,
 };
 
 const FIELDS = [
@@ -36,6 +40,8 @@ const FIELDS = [
   { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 2, step: 0.25, group: 'Picture' },
   { key: 'grass', label: 'Grass', kind: 'toggle', group: 'Picture' },
   { key: 'sunfx', label: 'Sun rays and flare', kind: 'toggle', group: 'Picture' },
+  { key: 'damageNumbers', label: 'Damage numbers', kind: 'toggle', group: 'Picture' },
+  { key: 'coords', label: 'Show coordinates', kind: 'toggle', group: 'Picture' },
   { key: 'sound', label: 'Sound', kind: 'toggle', group: 'Audio' },
   { key: 'voices', label: 'Voices', kind: 'toggle', group: 'Audio' },
   { key: 'volume', label: 'Volume', kind: 'range', min: 0, max: 1, step: 0.05, group: 'Audio' },

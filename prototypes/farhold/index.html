@@ -94,9 +94,9 @@
     <a class="back boot-back" href="../../index.html">← Playground</a>
 
     <div class="status" id="boot-status"></div>
-    <p class="note">Round 4: the RPG expansion. Every region has its own level band, monsters come in
-      packs with champions and rares in them, dungeons are real places you go inside, chests and
-      bosses drop a haul, and everything you do not want recycles into crafting material.
+    <p class="note">A whole planet, a level band for every region, packs with champions and rares in
+      them, dungeons you go down into, and twelve factions who all remember what you did. Everything
+      you do not want recycles into the material you make better things out of.
       <b>WASD</b> move · <b>Shift</b> run · <b>Space</b> jump · <b>click</b> swing ·
       <b>1–6</b> skills · <b>E</b> talk, open a chest, enter a dungeon · <b>F</b> torch ·
       <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>I</b> character · <b>`</b> debug.
@@ -111,8 +111,10 @@
   <div id="hud-name"></div>
   <div class="bar hp"><i id="bar-hp-fill"></i><span id="bar-hp-text"></span></div>
   <div class="bar mp"><i id="bar-mp-fill"></i><span id="bar-mp-text"></span></div>
-  <div class="bar xp"><i id="bar-xp-fill"></i></div>
+  <div class="bar xp"><i id="bar-xp-fill"></i><span id="bar-xp-text"></span></div>
   <div id="hud-statuses"></div>
+  <!-- what you are doing, and how far away it is. Without this the game never says what to do. -->
+  <div id="hud-objective" class="hidden"><b id="objective-name"></b><span id="objective-where"></span></div>
 </div>
 
 <!-- the right-hand column: place card, minimap and the location line, stacked so a long
@@ -231,13 +233,15 @@
     <section class="pane col-stats" id="sheet-stat-pane">
       <div class="pane-head">
         <span class="pane-title">Stats</span>
-        <span class="pane-tools keyhint">hover a name for what it does</span>
+        <span class="pane-tools">
+          <span class="keyhint">hover a name for what it does</span>
+          <button class="chip" id="sheet-stats-more" hidden></button>
+        </span>
       </div>
       <div class="pane-body" id="sheet-stat-body">
         <h4>Offence</h4><dl class="stats" id="sheet-stats-offence"></dl>
         <h4>Defence</h4><dl class="stats" id="sheet-stats-defence"></dl>
         <h4>Everything else</h4><dl class="stats" id="sheet-stats-utility"></dl>
-        <dl class="stats" id="sheet-stats" hidden></dl>
       </div>
     </section>
 

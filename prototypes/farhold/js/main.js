@@ -27,13 +27,14 @@ import { createCombatFx } from './combat-fx.js';
 import { createSunFx } from './sunfx.js';
 import { createDebugMenu } from './debug.js';
 import { createMapScreen } from './map.js';
-import { MarkerBook } from './markers.js';
+import { MarkerBook, distanceText } from './markers.js';
 import { createStarChart, reachFrom, LY_PER_UNIT } from './starchart.js';
 import { createWarp } from './warp.js';
 import { generateGalaxy } from '../../../universe/js/galaxy.js';
 import { createSaves, snapshot, restore, playtimeText, saveCarriesWorld } from './save.js';
+import { pointsFor } from './perks.js';
 // ---- The Territory expansion (see EXPANSION.md): who holds the ground, and what it asks of you
-import { createStandings, ranked as rankedFactions } from './factions.js';
+import { createStandings, ranked as rankedFactions, createIntroducer } from './factions.js';
 import { createTerritory } from './territory.js';
 import { createJobGen, candidatesFrom } from './jobgen.js';
 import { createIncidents } from './incidents.js';
@@ -344,6 +345,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * simulating on their own, so a distant patrol costs one line of arithmetic a frame.
    */
   const standings = createStandings(factionData, save?.standings || null);
+  // say a faction's full name the first time it comes up, and the short one after that
+  const intro = createIntroducer(factionData);
   // `holdings` rather than `land`, because `land()` is already the verb for putting the ship down
   const holdings = createTerritory({
     zones, seed, factions: factionData, standings,
@@ -821,7 +824,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // ---------------------------------------------------------------- hud + enemies
   const hud = new Hud({
-    rpg, terrain, seed, craft, zones,
+    rpg, terrain, settings, seed, craft, zones,
     pets: { roster: () => pets?.roster() || [] },
     // Opening the sheet gives the mouse back IMMEDIATELY — this was the bug: the pointer stayed
     // locked, so the cursor was invisible and none of the buttons could be clicked.
@@ -883,6 +886,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       names: Object.fromEntries(bestiary.enemies.map(e => [e.id, e.name])),
     }),
 
+    /**
+     * WHAT YOU ARE DOING, in one line under the health bars.
+     *
+     * The tracked marker if there is one; otherwise the nearest settlement, because on a fresh run
+     * the honest answer to "what now" is "go and find somebody to talk to". Everything here already
+     * existed — the marker book, the bearing maths and `distanceText` — it was just never on screen.
+     */
+    objective: () => {
+      if (dungeon) return { name: dungeon.name, where: 'find the way down' };
+      const tracked = markers.tracked()[0];
+      if (tracked) {
+        const b = markers.bearing(tracked, control, terrain);
+        return { name: tracked.name, where: distanceText(b.distance) };
+      }
+      const town = features.nearestSettlement?.(control.x, control.z) || null;
+      if (town) {
+        const d = Math.hypot(town.x - control.x, town.z - control.z);
+        return { name: town.name, where: d < 90 ? 'look for work here' : distanceText(d) };
+      }
+      const here = zones.at(control.x, control.z);
+      return here ? { name: here.name, where: `level ${here.minLevel}–${here.maxLevel}` } : null;
+    },
+
     // ---- The Territory: three more things the Journal shows
     standings: () => rankedFactions(factionData, standings),
     territoryHere: () => (hud.here ? holdings.of(hud.here.id) : null),
@@ -900,9 +926,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       questLog.add({
         ...job,
         kind: job.logKind || 'visit',
-        giverName: job.faction
-          ? (factionData.factions.find(f => f.key === job.faction)?.short || 'somebody local')
-          : 'a notice board',
+        giverName: job.faction ? intro.nameFor(job.faction) : 'a notice board',
         fromName: job.zoneName,
       });
       markers.syncQuests(questLog.active);
@@ -1021,8 +1045,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.log(`${site.name} is cleared.`, 'good');
       sound.questDone();
       if (out.flipped) {
-        const to = (factionData.factions || []).find(f => f.key === out.flipped.to);
-        hud.log(`${here.name} belongs to ${to?.short || out.flipped.to} now.`, 'level');
+        hud.log(`${here.name} belongs to ${intro.nameFor(out.flipped.to)} now.`, 'level');
       }
       rumours.add(`${site.name} in ${here.name} has been cleared out`, { zone: here, from: 'you, mostly' });
       autoSave();
@@ -1067,7 +1090,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     player.gold += e.gold;
     hud.log(`${e.name} falls. +${e.xp} xp, +${e.gold} gold.`, e.rank && e.rank !== 'normal' ? 'loot' : 'good');
     if (levels) {
-      hud.log(`Level ${player.level}! ${levels * (balance.progression?.attrPerLevel ?? 3)} points to spend (press I).`, 'level');
+      /**
+       * NAME THE CURRENCY THE GAME ACTUALLY PAYS IN.
+       *
+       * This said "3 points to spend (press I)" at every level — `balance.progression.attrPerLevel`
+       * is still 3 — but attributes stopped being bought a point at a time in round 7 and
+       * `player.pendingAttr` is never incremented by anything, so pressing I showed four dead `+`
+       * buttons and "no points to spend". A level buys a PERK now, and sometimes a talent.
+       */
+      const gained = pointsFor(player.level) - pointsFor(player.level - levels);
+      const bits = [gained ? `${gained} perk point${gained === 1 ? '' : 's'}` : null,
+        player.pendingTalent ? `${player.pendingTalent} talent` : null].filter(Boolean);
+      hud.log(`Level ${player.level}!${bits.length ? ` ${bits.join(' and ')} to spend — press I.` : ''}`, 'level');
       sound.levelUp();
     }
 
@@ -2324,8 +2358,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       rumours.hear(pick, { from: 'somebody in ' + zone.name, extra: { unvisitedLandmarks: 2 } });
     }
 
-    const holder = (factionData.factions || []).find(f => f.key === record?.holder);
-    if (holder) hud.log(`${zone.name} is ${holder.short}'s ground.`, '');
+    if (record?.holder) hud.log(`${zone.name} is held by ${intro.nameFor(record.holder)}.`, '');
     for (const row of trouble.describe(zone.id)) hud.log(`${zone.name}: ${row.blurb}.`, 'bad');
   }
 
@@ -2354,8 +2387,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hud.log(out.rumour + '.', '');
       }
       if (out.flipped) {
-        const to = (factionData.factions || []).find(f => f.key === out.flipped.to);
-        hud.log(`${quest.zoneName} belongs to ${to?.short || out.flipped.to} now.`, 'level');
+        hud.log(`${quest.zoneName} belongs to ${intro.nameFor(out.flipped.to)} now.`, 'level');
       }
       hud.setPlayer(player);
       autoSave();
@@ -2394,8 +2426,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // in-game hours, from the same clock the day/night cycle runs on
     for (const event of holdings.tick(seconds / 60)) {
       if (event.kind === 'zone-changed-hands') {
-        const to = (factionData.factions || []).find(f => f.key === event.to);
-        hud.log(`${zones.byId(event.zoneId)?.name || 'The ground'} belongs to ${to?.short || event.to} now.`, 'level');
+        hud.log(`${zones.byId(event.zoneId)?.name || 'The ground'} belongs to ${intro.nameFor(event.to)} now.`, 'level');
       }
     }
   }
@@ -2554,7 +2585,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         input.release();
         $('pause-where').textContent = dungeon
           ? `${dungeon.name} · level ${dungeon.level}`
-          : `${planet.name} · ${zones.at(control.x, control.z)?.name || ''} · ${playtimeText(state.playtime)}`;
+          // "0m" sat four inches from "93 m" of altitude, meaning something else entirely
+          : `${planet.name} · ${zones.at(control.x, control.z)?.name || ''} · ${state.playtime < 60 ? 'just landed' : playtimeText(state.playtime) + ' played'}`;
       }
       return open;
     },
@@ -3262,7 +3294,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       dayFraction: sky.dayFraction, sunY: sky.sunDirection.y,
       sky: sky.visible(),
     }),
-    teleport: (x, z) => { control.teleport(x, z); rebuildWorldAround(true); },
+    // through `clampToWorld` first: a coordinate off the map used to reach `colorAt` with a biome id
+    // that has no colour, which threw inside the ring rebuild and killed the frame loop
+    teleport: (x, z) => {
+      const [cx, cz] = terrain.clampToWorld(Number(x) || 0, Number(z) || 0);
+      control.teleport(cx, cz);
+      rebuildWorldAround(true);
+    },
     get mode() { return mode; },
     get space() { return space; },
     get air() { return air; },

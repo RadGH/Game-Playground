@@ -128,6 +128,33 @@ export function createStandings(data, saved = null) {
   };
 }
 
+/**
+ * Name a faction the way you would in conversation: in full the first time, short thereafter.
+ *
+ * Seven places in the game used `short` ("the Reach", "the Cut", "the Wrights") and exactly one used
+ * `name` — so the zone-entry log, the job giver and every rumour used a nickname the player had never
+ * seen expanded, and the Journal's own header contradicted the row three pixels below it.
+ *
+ * `createIntroducer` keeps the set of who has been introduced; it is not saved, because being
+ * reminded of a full name after a reload is not a problem worth bytes.
+ */
+export function createIntroducer(data) {
+  const met = new Set();
+  return {
+    /** Full the first time, short after that. */
+    nameFor(key) {
+      const f = factionOf(data, key);
+      if (!f) return key || 'somebody';
+      if (met.has(key)) return f.short || f.name;
+      met.add(key);
+      return f.name;
+    },
+    /** Always the full name — for a reference screen, where there is room to be exact. */
+    fullName(key) { return factionOf(data, key)?.name || key || 'somebody'; },
+    reset() { met.clear(); },
+  };
+}
+
 /** Every faction, sorted by how they feel about you — the order the Standing screen wants. */
 export function ranked(data, standings) {
   return (data?.factions || [])

@@ -50,7 +50,7 @@
         { "slot": "site", "type": "site", "hostile": true },
         { "slot": "beast", "type": "enemy", "rank": "champion" }
       ],
-      "title": "Something has taken {site.name}",
+      "title": "{beast.name} has taken {site.name}",
       "text": "Nobody has been up to {site.name} since {beast.name} moved in. Put it out.",
       "goal": { "kind": "kill", "target": "{beast.id}", "count": 1, "at": "{site}" },
       "reward": { "gold": [60, 140], "xp": [70, 160], "standing": 6 },
@@ -125,7 +125,7 @@
     {
       "id": "someones_boy", "scope": "local", "weight": 9,
       "needs": [{ "slot": "who", "type": "npc" }, { "slot": "hole", "type": "dungeon" }],
-      "title": "{who.name} is missing somebody",
+      "title": "{who.name}'s boy has not come back",
       "text": "{who.name}'s boy went into {hole.name} three days ago on a dare. Bring him out, one way or the other.",
       "goal": { "kind": "clear", "count": 1, "at": "{hole}" },
       "reward": { "gold": [80, 180], "xp": [100, 220], "standing": 7 },
@@ -152,7 +152,7 @@
     {
       "id": "the_claim", "scope": "local", "weight": 8,
       "needs": [{ "slot": "camp", "type": "site", "hostile": true, "rival": true }],
-      "title": "Burn {camp.name} out",
+      "title": "Clear out {camp.name}",
       "text": "{camp.name} went up last week and it is already three tents bigger. Burn it before it takes root.",
       "goal": { "kind": "clear", "count": 1, "at": "{camp}" },
       "reward": { "gold": [90, 190], "xp": [100, 210], "standing": 8 },

@@ -869,7 +869,8 @@ export function makeTerrain(world, planet = null, opts = {}) {
    */
   function colorAt(x, z, height = heightAt(x, z), steep = slopeAt(x, z), out = [0, 0, 0]) {
     const id = biomeIdAt(x, z);
-    const base = BIOME_RGB[id];
+    // an id with no colour used to throw and take the frame loop with it
+    const base = BIOME_RGB[id] || BIOME_RGB[0];
     let r = base[0], g = base[1], b = base[2];
     if (!isWater(id)) {
       const mottle = (fbm(n3, x * 0.0021, z * 0.0021, { octaves: 2 }) - 0.5) * 0.14;

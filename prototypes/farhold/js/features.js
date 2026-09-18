@@ -677,6 +677,16 @@ export function createFeatures(scene, terrain, opts = {}) {
       return null;
     },
 
+    /** The nearest settlement, however far off — what the HUD's objective line falls back to. */
+    nearestSettlement(x, z) {
+      let best = null, bd = Infinity;
+      for (const s of settlements) {
+        const d = Math.hypot(s.wx - x, s.wz - z);
+        if (d < bd) { bd = d; best = s; }
+      }
+      return best ? { ...best, x: best.wx, z: best.wz, distance: bd } : null;
+    },
+
     /** Am I standing in a settlement? Returns the node, for the HUD. */
     settlementAt(x, z) {
       for (const s of settlements) {

@@ -47,6 +47,22 @@ function rngFrom(seed) {
 
 const clamp01 = n => Math.max(0, Math.min(1, n));
 
+/**
+ * Give a camp a place, not just a kind.
+ *
+ * "Burn Camp" is what a thing IS; "the Burn Camp at Stonepath" is somewhere you can be told to go.
+ * The words come from the ground the zone is actually made of, so a marsh camp is not called a
+ * ridge camp.
+ */
+const SITE_WHERE = [
+  'Stonepath', 'the Low Ford', 'Greyridge', 'the Cutting', 'Harrowfield', 'the Old Mile',
+  'Blackmere', 'the Long Bend', 'Thornwell', 'the Quarry Road', 'Windfall', 'the Split Oak',
+];
+function siteName(kind, zone, i, rng) {
+  const where = SITE_WHERE[Math.floor(rng() * SITE_WHERE.length) % SITE_WHERE.length];
+  return `the ${kind} at ${where}`;
+}
+
 /** How many sites a zone carries, by how dangerous it is. A settled zone is not full of camps. */
 function siteCount(zone, rng) {
   const base = 2 + Math.floor((zone.band ?? 0) / 2);
@@ -106,7 +122,9 @@ export function createTerritory({
       const spot = placeIn(zone, rng, metresPerCell);
       sites.push({
         id: `s${zone.id}_${i}`,
-        kind, name: spec.name, faction: holder?.key || null,
+        // Every site of a kind used to be called the same thing ("Burn Camp"), so two jobs in one
+        // zone could name the same place and you could not tell them apart. A place needs a place.
+        kind, name: siteName(spec.name, zone, i, rng), faction: holder?.key || null,
         hostile: !!spec.hostile, size: spec.size ?? 1,
         respawnHours: spec.respawnHours ?? 0,
         x: spot.x, z: spot.z, cell: spot.cell,
@@ -132,7 +150,7 @@ export function createTerritory({
       const spot = placeIn(zone, rng, metresPerCell);
       sites.push({
         id: `s${zone.id}_r${i}`,
-        kind, name: spec.name, faction: rivalKey,
+        kind, name: siteName(spec.name, zone, 90 + i, rng), faction: rivalKey,
         hostile: true, size: spec.size ?? 1, respawnHours: spec.respawnHours ?? 24,
         x: spot.x, z: spot.z, cell: spot.cell,
         rival: true, cleared: false, clearedAt: null,

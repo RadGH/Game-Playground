@@ -2346,6 +2346,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         autoSave();
       }
 
+      /**
+       * B2: the minimap follows the SHIP.
+       *
+       * The ground tick is what draws the minimap, and flight returns out of `stepFlight` long
+       * before it — so the canvas kept whatever was painted the last time the player was on foot,
+       * and the arrow sat at the spot they took off from however far they flew.
+       */
+      if (state.frames % 6 === 0) hud.drawMinimap(air.state, field.enemies, [], []);
+
       const r = air.readout();
       hud.prompt(out.landed ? '<b>J</b> set down' : null);
       hud.tick(player, {
@@ -2953,7 +2962,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       pauseMenu.toggle(false);
       // "Pressing M for map while outside of a planet should instead open a galaxy map." A world
       // map of a planet you are not standing on is no use; the chart is.
-      if (mode === 'ground') map.toggle();
+      // B9: in the atmosphere M is the PLANET map, not the star chart — you are over ground, so the
+      // ground is what you want to look at. map.js had a capture-phase listener standing in for this
+      // while main.js was another agent's file; that workaround is gone now.
+      if (mode === 'ground' || mode === 'air') map.toggle();
       else { if (map.isOpen) map.toggle(false); chart.toggle(); }
     }
     if (e.code === 'KeyO') { e.preventDefault(); pauseMenu.toggle(false); settings.toggle(); }

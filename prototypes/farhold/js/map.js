@@ -840,28 +840,11 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    * B9: IN THE AIR, M IS THE PLANET MAP — NOT THE STAR CHART.
    *
    * "Once you are in the atmosphere it should switch to the planet minimap and the full planet map."
-   * main.js sends M to the star chart for every mode except `ground` (js/main.js:2952) and that file
-   * belongs to another agent this round, so the map claims the key itself while you are flying.
-   *
-   * Two paths have to be covered, because js/settings.js re-sends a rebound key as a synthetic event
-   * dispatched AT the window: a real key press reaches this capture listener before any of main.js's
-   * (capture always runs first), and `stopImmediatePropagation` then settles it; a synthetic one is
-   * at-target for both of us and whichever listener was added first wins, so if main.js got there
-   * ahead of us its star chart is put away on the next turn of the event loop.
-   *
-   * When main.js can be edited again this whole block is one line there:
-   *   if (mode === 'ground' || mode === 'air') map.toggle();
+   * The key itself is routed by js/main.js, which sends M here for `ground` and `air` and to the
+   * star chart only once there is no ground under you. What lives here is the other half: while you
+   * are flying, the map redraws five times a second (`airTimer` above) and the player arrow and the
+   * region-learning both read the flight controller rather than the parked walking one.
    */
-  const onMapKey = e => {
-    if (e.code !== 'KeyM' || !airborne()) return;
-    e.stopImmediatePropagation();
-    window.farhold?.pauseMenu?.toggle(false);     // what main.js's handler would have done first
-    toggle();
-    const shut = () => { if (state.open && window.farhold?.chart?.isOpen) window.farhold.chart.toggle(false); };
-    shut();
-    setTimeout(shut, 0);
-  };
-  window.addEventListener('keydown', onMapKey, true);
 
   window.addEventListener('resize', () => { if (state.open) draw(); });
 
@@ -883,9 +866,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     /** Take the screen out of the page (used when the world under it is replaced). */
     dispose() {
       root.remove();
-      // a new map is built for every world you land on, so the key hook and the flight redraw have
-      // to go with the old one or they stack up, each one toggling a screen nobody can see
-      window.removeEventListener('keydown', onMapKey, true);
+      // a new map is built for every world you land on, so the flight redraw has to go with the old
+      // one or they stack up, each one drawing a screen nobody can see
       if (airTimer) { clearInterval(airTimer); airTimer = null; }
     },
     /**

@@ -1,14 +1,47 @@
 {
   "_doc": "The twelve powers of a world. `holds` is the ground they prefer, scored against a zone's biome family and danger; the faction with the best score for a zone is its holder. `rivals` cuts both ways: helping one is felt by the other at a third of the rate (see js/factions.js RIVAL_SHARE). `patrol` names the composition in data/patrols, `cargo` what their caravans carry. Nothing here names another game or another game's world.",
-
   "bands": [
-    { "key": "hunted",   "min": -100, "max": -60, "name": "Hunted",   "priceMult": 1.0,  "blurb": "They shoot on sight." },
-    { "key": "disliked", "min": -59,  "max": -20, "name": "Disliked", "priceMult": 1.4,  "blurb": "They will trade, and overcharge." },
-    { "key": "known",    "min": -19,  "max": 19,  "name": "Known",    "priceMult": 1.0,  "blurb": "A stranger with coin." },
-    { "key": "trusted",  "min": 20,   "max": 59,  "name": "Trusted",  "priceMult": 0.85, "blurb": "One of theirs, near enough." },
-    { "key": "sworn",    "min": 60,   "max": 100, "name": "Sworn",    "priceMult": 0.7,  "blurb": "Their door is your door." }
+    {
+      "key": "hunted",
+      "min": -100,
+      "max": -60,
+      "name": "Hunted",
+      "priceMult": 1.0,
+      "blurb": "They shoot on sight."
+    },
+    {
+      "key": "disliked",
+      "min": -59,
+      "max": -20,
+      "name": "Disliked",
+      "priceMult": 1.4,
+      "blurb": "They will trade, and overcharge."
+    },
+    {
+      "key": "known",
+      "min": -19,
+      "max": 19,
+      "name": "Known",
+      "priceMult": 1.0,
+      "blurb": "A stranger with coin."
+    },
+    {
+      "key": "trusted",
+      "min": 20,
+      "max": 59,
+      "name": "Trusted",
+      "priceMult": 0.85,
+      "blurb": "One of theirs, near enough."
+    },
+    {
+      "key": "sworn",
+      "min": 60,
+      "max": 100,
+      "name": "Sworn",
+      "priceMult": 0.7,
+      "blurb": "Their door is your door."
+    }
   ],
-
   "deeds": {
     "_doc": "What moves a standing, and by how much. `rivalShare` in js/factions.js applies a third of the opposite sign to every rival.",
     "job_done": 6,
@@ -24,167 +57,535 @@
     "incident_resolved": 7,
     "stronghold_taken": -35
   },
-
   "factions": [
     {
-      "key": "wardens_reach", "name": "The Warden's Reach", "short": "the Reach",
+      "key": "wardens_reach",
+      "name": "The Warden's Reach",
+      "short": "the Reach",
       "colour": "#7fb4ff",
       "blurb": "Town guards, road wardens and the tax on the crossings. Order, and a price for it.",
-      "holds": { "danger": ["settled", "open country"], "biomes": ["grass", "farmland", "forest"], "weight": 1.4 },
-      "rivals": ["ashen_pact", "cutwater"],
-      "patrol": "road_watch", "cargo": "toll_coin",
+      "holds": {
+        "danger": [
+          "settled",
+          "open country"
+        ],
+        "biomes": [
+          "grass",
+          "farmland",
+          "forest"
+        ],
+        "weight": 1.4
+      },
+      "rivals": [
+        "ashen_pact",
+        "cutwater"
+      ],
+      "patrol": "road_watch",
+      "cargo": "toll_coin",
       "hostileAtStart": false,
       "greeting": "The road is watched. Keep to it and we have no argument.",
-      "sites": ["waypost", "muster_yard"]
+      "sites": [
+        "waypost",
+        "muster_yard"
+      ],
+      "plural": true
     },
     {
-      "key": "ashen_pact", "name": "The Ashen Pact", "short": "the Pact",
+      "key": "ashen_pact",
+      "name": "The Ashen Pact",
+      "short": "the Pact",
       "colour": "#ff8a5c",
       "blurb": "They burn what they cannot carry and hold the high ground above the burn.",
-      "holds": { "danger": ["wild", "lawless", "hostile"], "biomes": ["scrub", "ash", "highland"], "weight": 1.3 },
-      "rivals": ["wardens_reach", "lantern_house", "greenhand"],
-      "patrol": "raid_band", "cargo": "wool_hide",
+      "holds": {
+        "danger": [
+          "wild",
+          "lawless",
+          "hostile"
+        ],
+        "biomes": [
+          "scrub",
+          "ash",
+          "highland"
+        ],
+        "weight": 1.3
+      },
+      "rivals": [
+        "wardens_reach",
+        "lantern_house",
+        "greenhand"
+      ],
+      "patrol": "raid_band",
+      "cargo": "wool_hide",
       "hostileAtStart": true,
       "greeting": "You are a long way from anyone who would miss you.",
-      "sites": ["burn_camp", "raider_hold"]
+      "sites": [
+        "burn_camp",
+        "raider_hold"
+      ],
+      "plural": true
     },
     {
-      "key": "lantern_house", "name": "The Lantern House", "short": "the House",
+      "key": "lantern_house",
+      "name": "The Lantern House",
+      "short": "the House",
       "colour": "#ffd24a",
       "blurb": "Lamp-lighters and keepers of old things. They pay for anything with a history.",
-      "holds": { "danger": ["settled", "hostile"], "biomes": ["ruin", "forest", "grass"], "weight": 1.0 },
-      "rivals": ["ashen_pact", "deepworn"],
-      "patrol": "lamp_round", "cargo": "warded_relics",
+      "holds": {
+        "danger": [
+          "settled",
+          "hostile"
+        ],
+        "biomes": [
+          "ruin",
+          "forest",
+          "grass"
+        ],
+        "weight": 1.0
+      },
+      "rivals": [
+        "ashen_pact",
+        "deepworn"
+      ],
+      "patrol": "lamp_round",
+      "cargo": "warded_relics",
       "hostileAtStart": false,
       "greeting": "Bring us what you found and we will tell you what it was.",
-      "sites": ["lamp_station", "relic_vault"]
+      "sites": [
+        "lamp_station",
+        "relic_vault"
+      ],
+      "plural": true
     },
     {
-      "key": "cutwater", "name": "The Cutwater", "short": "the Cut",
+      "key": "cutwater",
+      "name": "The Cutwater",
+      "short": "the Cut",
       "colour": "#5fd6c0",
       "blurb": "River and coast people. Smugglers with a code, a ferry, and a very long memory.",
-      "holds": { "danger": ["open country", "lawless"], "biomes": ["coast", "wetland", "river"], "weight": 1.2 },
-      "rivals": ["wardens_reach", "saltbound"],
-      "patrol": "runner_pair", "cargo": "powder_shot",
+      "holds": {
+        "danger": [
+          "open country",
+          "lawless"
+        ],
+        "biomes": [
+          "coast",
+          "wetland",
+          "river"
+        ],
+        "weight": 1.2
+      },
+      "rivals": [
+        "wardens_reach",
+        "saltbound"
+      ],
+      "patrol": "runner_pair",
+      "cargo": "powder_shot",
       "hostileAtStart": false,
       "greeting": "We move things. We do not ask what, and neither should you.",
-      "sites": ["ferry_landing", "reed_cache"]
+      "sites": [
+        "ferry_landing",
+        "reed_cache"
+      ],
+      "plural": true
     },
     {
-      "key": "deepworn", "name": "The Deepworn", "short": "the Worn",
+      "key": "deepworn",
+      "name": "The Deepworn",
+      "short": "the Worn",
       "colour": "#a08cff",
       "blurb": "Mine-folk who went down a long way and came back up changed by it.",
-      "holds": { "danger": ["wild", "hostile"], "biomes": ["mountain", "highland", "ruin"], "weight": 1.1 },
-      "rivals": ["lantern_house"],
-      "patrol": "dig_escort", "cargo": "bound_essence",
+      "holds": {
+        "danger": [
+          "wild",
+          "hostile"
+        ],
+        "biomes": [
+          "mountain",
+          "highland",
+          "ruin"
+        ],
+        "weight": 1.1
+      },
+      "rivals": [
+        "lantern_house"
+      ],
+      "patrol": "dig_escort",
+      "cargo": "bound_essence",
       "hostileAtStart": false,
       "greeting": "Mind your footing. The ground here is thinner than it looks.",
-      "sites": ["dig_head", "sunk_gallery"]
+      "sites": [
+        "dig_head",
+        "sunk_gallery"
+      ],
+      "plural": true
     },
     {
-      "key": "greenhand", "name": "The Greenhand", "short": "the Green",
+      "key": "greenhand",
+      "name": "The Greenhand",
+      "short": "the Green",
       "colour": "#8fe0a0",
       "blurb": "Farmers, drovers and hedge-doctors. They feed everyone and forgive almost anyone.",
-      "holds": { "danger": ["settled", "open country"], "biomes": ["farmland", "grass", "wetland"], "weight": 1.3 },
-      "rivals": ["ashen_pact"],
-      "patrol": "drove", "cargo": "salt_meat",
+      "holds": {
+        "danger": [
+          "settled",
+          "open country"
+        ],
+        "biomes": [
+          "farmland",
+          "grass",
+          "wetland"
+        ],
+        "weight": 1.3
+      },
+      "rivals": [
+        "ashen_pact"
+      ],
+      "patrol": "drove",
+      "cargo": "salt_meat",
       "hostileAtStart": false,
       "greeting": "There is bread if you have none. There is work if you want it.",
-      "sites": ["steading", "drove_pen"]
+      "sites": [
+        "steading",
+        "drove_pen"
+      ],
+      "plural": true
     },
     {
-      "key": "stonecount", "name": "The Stone Count", "short": "the Count",
+      "key": "stonecount",
+      "name": "The Stone Count",
+      "short": "the Count",
       "colour": "#c8b48a",
       "blurb": "Toll-keepers of the passes and the bridges. Everything has a price and they know it.",
-      "holds": { "danger": ["open country", "wild"], "biomes": ["mountain", "highland", "river"], "weight": 1.0 },
-      "rivals": ["cutwater"],
-      "patrol": "toll_party", "cargo": "toll_coin",
+      "holds": {
+        "danger": [
+          "open country",
+          "wild"
+        ],
+        "biomes": [
+          "mountain",
+          "highland",
+          "river"
+        ],
+        "weight": 1.0
+      },
+      "rivals": [
+        "cutwater"
+      ],
+      "patrol": "toll_party",
+      "cargo": "toll_coin",
       "hostileAtStart": false,
       "greeting": "Six coin for the bridge. Four if you carry nothing worth taking.",
-      "sites": ["toll_gate", "counting_house"]
+      "sites": [
+        "toll_gate",
+        "counting_house"
+      ],
+      "plural": false
     },
     {
-      "key": "quiet_wake", "name": "The Quiet Wake", "short": "the Wake",
+      "key": "quiet_wake",
+      "name": "The Quiet Wake",
+      "short": "the Wake",
       "colour": "#b0bccc",
       "blurb": "Grave-tenders. They put down what does not stay down, and they are never in a hurry.",
-      "holds": { "danger": ["wild", "hostile", "lawless"], "biomes": ["ruin", "forest", "ash"], "weight": 0.9 },
-      "rivals": ["hollowed"],
-      "patrol": "wake_procession", "cargo": "grave_goods",
+      "holds": {
+        "danger": [
+          "wild",
+          "hostile",
+          "lawless"
+        ],
+        "biomes": [
+          "ruin",
+          "forest",
+          "ash"
+        ],
+        "weight": 0.9
+      },
+      "rivals": [
+        "hollowed"
+      ],
+      "patrol": "wake_procession",
+      "cargo": "grave_goods",
       "hostileAtStart": false,
       "greeting": "We are not here for you. Not yet.",
-      "sites": ["cairn_field", "wake_house"]
+      "sites": [
+        "cairn_field",
+        "wake_house"
+      ],
+      "plural": true
     },
     {
-      "key": "hollowed", "name": "The Hollowed", "short": "the Hollowed",
+      "key": "hollowed",
+      "name": "The Hollowed",
+      "short": "the Hollowed",
       "colour": "#c05cff",
       "blurb": "What the void-touched worlds sent back. They are not people any more and they do not trade.",
-      "holds": { "danger": ["hostile", "lawless"], "biomes": ["ash", "ruin", "mountain"], "weight": 0.8 },
-      "rivals": ["wardens_reach", "quiet_wake", "greenhand", "lantern_house"],
-      "patrol": "hollow_drift", "cargo": null,
-      "hostileAtStart": true, "unlikeable": true,
+      "holds": {
+        "danger": [
+          "hostile",
+          "lawless"
+        ],
+        "biomes": [
+          "ash",
+          "ruin",
+          "mountain"
+        ],
+        "weight": 0.8
+      },
+      "rivals": [
+        "wardens_reach",
+        "quiet_wake",
+        "greenhand",
+        "lantern_house"
+      ],
+      "patrol": "hollow_drift",
+      "cargo": null,
+      "hostileAtStart": true,
+      "unlikeable": true,
       "greeting": "…",
-      "sites": ["hollow_scar", "still_place"]
+      "sites": [
+        "hollow_scar",
+        "still_place"
+      ],
+      "plural": true
     },
     {
-      "key": "saltbound", "name": "The Saltbound", "short": "the Salt",
+      "key": "saltbound",
+      "name": "The Saltbound",
+      "short": "the Salt",
       "colour": "#6fb8d8",
       "blurb": "Whalers and wreck-divers. They own the shoreline and everything that washes on to it.",
-      "holds": { "danger": ["open country", "wild"], "biomes": ["coast", "wetland"], "weight": 1.1 },
-      "rivals": ["cutwater"],
-      "patrol": "runner_pair", "cargo": "coast_catch",
+      "holds": {
+        "danger": [
+          "open country",
+          "wild"
+        ],
+        "biomes": [
+          "coast",
+          "wetland"
+        ],
+        "weight": 1.1
+      },
+      "rivals": [
+        "cutwater"
+      ],
+      "patrol": "runner_pair",
+      "cargo": "coast_catch",
       "hostileAtStart": false,
       "greeting": "Anything the water gives up is ours. That includes you, if you go in.",
-      "sites": ["drying_racks", "wreck_camp"]
+      "sites": [
+        "drying_racks",
+        "wreck_camp"
+      ],
+      "plural": true
     },
     {
-      "key": "emberwrights", "name": "The Emberwrights", "short": "the Wrights",
+      "key": "emberwrights",
+      "name": "The Emberwrights",
+      "short": "the Wrights",
       "colour": "#ff9a3c",
       "blurb": "A forge-clan. The only people on this world who can brand a weapon and have it hold.",
-      "holds": { "danger": ["settled", "wild"], "biomes": ["mountain", "highland", "ash"], "weight": 1.0 },
-      "rivals": ["deepworn"],
-      "patrol": "dig_escort", "cargo": "forge_iron",
+      "holds": {
+        "danger": [
+          "settled",
+          "wild"
+        ],
+        "biomes": [
+          "mountain",
+          "highland",
+          "ash"
+        ],
+        "weight": 1.0
+      },
+      "rivals": [
+        "deepworn"
+      ],
+      "patrol": "dig_escort",
+      "cargo": "forge_iron",
       "hostileAtStart": false,
       "greeting": "Bring me the metal and an hour. Bring me an element and I will do better than that.",
-      "sites": ["field_forge", "ember_hall"]
+      "sites": [
+        "field_forge",
+        "ember_hall"
+      ],
+      "plural": true
     },
     {
-      "key": "longsight", "name": "The Longsight", "short": "the Longsight",
+      "key": "longsight",
+      "name": "The Longsight",
+      "short": "the Longsight",
       "colour": "#dfe8f4",
       "blurb": "Surveyors and map-makers. They pay for places, not for kills, and they are welcome everywhere.",
-      "holds": { "danger": ["open country", "wild", "settled"], "biomes": ["grass", "highland", "coast"], "weight": 0.9 },
+      "holds": {
+        "danger": [
+          "open country",
+          "wild",
+          "settled"
+        ],
+        "biomes": [
+          "grass",
+          "highland",
+          "coast"
+        ],
+        "weight": 0.9
+      },
       "rivals": [],
-      "patrol": "survey_line", "cargo": "lamp_oil",
+      "patrol": "survey_line",
+      "cargo": "lamp_oil",
       "hostileAtStart": false,
       "greeting": "Tell me what is over that ridge and I will pay you for the telling.",
-      "sites": ["survey_mark", "chart_tent"]
+      "sites": [
+        "survey_mark",
+        "chart_tent"
+      ],
+      "plural": false
     }
   ],
-
   "siteKinds": {
     "_doc": "What a faction site IS on the ground. `hostile` sites can be cleared for grip; friendly ones can be visited. `respawnHours` is in-game hours before a cleared one comes back.",
-    "waypost":        { "name": "Waypost",        "hostile": false, "size": 1, "respawnHours": 0 },
-    "muster_yard":    { "name": "Muster Yard",    "hostile": false, "size": 2, "respawnHours": 0 },
-    "burn_camp":      { "name": "Burn Camp",      "hostile": true,  "size": 2, "respawnHours": 20 },
-    "raider_hold":    { "name": "Raider Hold",    "hostile": true,  "size": 3, "respawnHours": 48 },
-    "lamp_station":   { "name": "Lamp Station",   "hostile": false, "size": 1, "respawnHours": 0 },
-    "relic_vault":    { "name": "Relic Vault",    "hostile": false, "size": 2, "respawnHours": 0 },
-    "ferry_landing":  { "name": "Ferry Landing",  "hostile": false, "size": 1, "respawnHours": 0 },
-    "reed_cache":     { "name": "Reed Cache",     "hostile": false, "size": 1, "respawnHours": 0 },
-    "dig_head":       { "name": "Dig Head",       "hostile": false, "size": 2, "respawnHours": 0 },
-    "sunk_gallery":   { "name": "Sunk Gallery",   "hostile": true,  "size": 3, "respawnHours": 36 },
-    "steading":       { "name": "Steading",       "hostile": false, "size": 2, "respawnHours": 0 },
-    "drove_pen":      { "name": "Drove Pen",      "hostile": false, "size": 1, "respawnHours": 0 },
-    "toll_gate":      { "name": "Toll Gate",      "hostile": false, "size": 1, "respawnHours": 0 },
-    "counting_house": { "name": "Counting House", "hostile": false, "size": 2, "respawnHours": 0 },
-    "cairn_field":    { "name": "Field of Cairns", "hostile": false, "size": 2, "respawnHours": 0 },
-    "wake_house":     { "name": "Wake House",     "hostile": false, "size": 2, "respawnHours": 0 },
-    "hollow_scar":    { "name": "Hollow Scar",    "hostile": true,  "size": 3, "respawnHours": 30 },
-    "still_place":    { "name": "Still Place",    "hostile": true,  "size": 2, "respawnHours": 24 },
-    "drying_racks":   { "name": "Drying Racks",   "hostile": false, "size": 1, "respawnHours": 0 },
-    "wreck_camp":     { "name": "Wreck Camp",     "hostile": false, "size": 2, "respawnHours": 0 },
-    "field_forge":    { "name": "Field Forge",    "hostile": false, "size": 1, "respawnHours": 0 },
-    "ember_hall":     { "name": "Ember Hall",     "hostile": false, "size": 3, "respawnHours": 0 },
-    "survey_mark":    { "name": "Survey Mark",    "hostile": false, "size": 1, "respawnHours": 0 },
-    "chart_tent":     { "name": "Chart Tent",     "hostile": false, "size": 1, "respawnHours": 0 }
-  }
+    "waypost": {
+      "name": "Waypost",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "muster_yard": {
+      "name": "Muster Yard",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "burn_camp": {
+      "name": "Burn Camp",
+      "hostile": true,
+      "size": 2,
+      "respawnHours": 20
+    },
+    "raider_hold": {
+      "name": "Raider Hold",
+      "hostile": true,
+      "size": 3,
+      "respawnHours": 48
+    },
+    "lamp_station": {
+      "name": "Lamp Station",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "relic_vault": {
+      "name": "Relic Vault",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "ferry_landing": {
+      "name": "Ferry Landing",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "reed_cache": {
+      "name": "Reed Cache",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "dig_head": {
+      "name": "Dig Head",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "sunk_gallery": {
+      "name": "Sunk Gallery",
+      "hostile": true,
+      "size": 3,
+      "respawnHours": 36
+    },
+    "steading": {
+      "name": "Steading",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "drove_pen": {
+      "name": "Drove Pen",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "toll_gate": {
+      "name": "Toll Gate",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "counting_house": {
+      "name": "Counting House",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "cairn_field": {
+      "name": "Field of Cairns",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "wake_house": {
+      "name": "Wake House",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "hollow_scar": {
+      "name": "Hollow Scar",
+      "hostile": true,
+      "size": 3,
+      "respawnHours": 30
+    },
+    "still_place": {
+      "name": "Still Place",
+      "hostile": true,
+      "size": 2,
+      "respawnHours": 24
+    },
+    "drying_racks": {
+      "name": "Drying Racks",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "wreck_camp": {
+      "name": "Wreck Camp",
+      "hostile": false,
+      "size": 2,
+      "respawnHours": 0
+    },
+    "field_forge": {
+      "name": "Field Forge",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "ember_hall": {
+      "name": "Ember Hall",
+      "hostile": false,
+      "size": 3,
+      "respawnHours": 0
+    },
+    "survey_mark": {
+      "name": "Survey Mark",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    },
+    "chart_tent": {
+      "name": "Chart Tent",
+      "hostile": false,
+      "size": 1,
+      "respawnHours": 0
+    }
+  },
+  "_pluralDoc": "Whether the faction takes a plural verb. \"the Cut are pushing in\" is right and \"the Stone Count are pushing in\" is not — a Count is one person and the Longsight is a body. Read by js/rumours.js."
 }

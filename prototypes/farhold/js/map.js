@@ -34,7 +34,7 @@ import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false } = {}) {
   // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
   // the minimap and space mode can see them too.
@@ -63,6 +63,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   const readout = el('div', { class: 'map-readout muted small' });
   const side = el('aside', { class: 'map-side' });
   const legendBox = el('div', { class: 'legend' });
+  // the biome breakdown, out of the legend and into a fold in the side panel
+  const compositionBox = el('details', { class: 'map-composition' });
   const coords = el('span', { class: 'map-coords' });
 
   const root = el('section', { class: 'map-screen hidden', id: 'map-screen' },
@@ -87,6 +89,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       onToggle: (key, on) => { state.layers[key] = on; draw(); },
     });
     side.append(layerPanel);
+    side.append(compositionBox);
 
     // "levels" reads as one more layer chip, sitting with Biomes / Elevation / … / Regions, because
     // that is where a player will look for it. It is an overlay rather than a base layer, so it
@@ -159,19 +162,37 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   }
 
   // ---------------------------------------------------------------- drawing
+  /**
+   * Size the backing buffer to the canvas's OWN box.
+   *
+   * It used to measure the WRAPPER — which has 26px of padding and also holds the legend and the
+   * readout underneath — and then force that size back on to the canvas with `style.width`. So the
+   * canvas was wider and taller than the space it had, ran under the opaque layers panel, and cut
+   * region names off the right-hand edge mid-word. The wrapper is a column flex and the canvas is
+   * `flex: 1` in it, so its box is already right; only the buffer needs setting. (Exactly the bug
+   * the perk canvas had, for exactly the same reason.)
+   */
   function fit() {
-    const wrap = canvas.parentElement;
-    const w = Math.max(320, wrap.clientWidth), h = Math.max(240, wrap.clientHeight);
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.max(320, rect.width || canvas.clientWidth || 640);
+    const h = Math.max(240, rect.height || canvas.clientHeight || 480);
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+    const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+    const moved = canvas.width !== bw || canvas.height !== bh;
+    if (canvas.width !== bw) canvas.width = bw;
+    if (canvas.height !== bh) canvas.height = bh;
+    return moved;
   }
 
+  /**
+   * The legend under the canvas changes height as it fills, which changes the canvas's own height —
+   * so the first draw of a freshly opened map can be one row out. One re-fit settles it, and the
+   * guard stops that becoming a loop.
+   */
+  let settling = false;
   function draw() {
     if (!state.open) return;
-    fit();
+    if (fit() && !settling) { settling = true; requestAnimationFrame(() => { settling = false; draw(); }); }
     const ctx = canvas.getContext('2d');
     // draw the map at the zoom the wheel asked for, positioned around the player. renderWorld takes
     // its own scale and offset, so there is no second transform to keep in step with the overlays.
@@ -228,7 +249,18 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       // is the open middle of the region rather than its centroid.
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      for (const zone of zones.zones) {
+      /**
+       * Forty-odd regions, each with a name, a level band and a danger word, all drawn wherever their
+       * own centre happens to be — in the dense middle of a continent that is a wall of overlapping
+       * text. Biggest regions first, and a label is only drawn if its box is clear of the ones
+       * already down. Nothing is hidden that could have been read.
+       */
+      const placed = [];
+      const clearOf = (x, y, halfW) => {
+        for (const b of placed) if (Math.abs(b.x - x) < b.halfW + halfW && Math.abs(b.y - y) < 22) return false;
+        return true;
+      };
+      for (const zone of [...zones.zones].sort((a, b) => (b.cells || 0) - (a.cells || 0))) {
         const spot = world.regions?.[zone.id]?.label || zone.center;
         if (!spot || zone.cells < 18) continue;
         const lx = ox + (spot.x + 0.5) * scale;
@@ -236,6 +268,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
         const ly = oy + (spot.y + 0.5) * scale + (state.layers.labels ? 15 : 0);
         const tone = zoneTone(zone.midLevel, myLevel);
         const label = `${zone.minLevel}\u2013${zone.maxLevel}`;
+        const halfW = Math.max(30, (zone.name?.length || 8) * 3.4);
+        if (!clearOf(lx, ly, halfW)) continue;
+        placed.push({ x: lx, y: ly, halfW });
         ctx.font = '700 14px system-ui, sans-serif';
         ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.88)';
         ctx.strokeText(label, lx, ly);
@@ -362,13 +397,31 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#ff6a3a' } }), 'lair'));
       rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#ffa860' } }), 'camp'));
     }
-    rows.push(...legendRows(world, state.layer).slice(0, state.levels && zones ? 6 : 14).map(r =>
-      el('span', { class: 'sw' }, el('i', { style: { background: r.color } }), `${r.label}${r.share > 0.004 ? ' ' + Math.round(r.share * 100) + '%' : ''}`)));
+    /**
+     * The legend used to mix two unrelated scales on one line: "far below you / a fair fight / do not
+     * go here yet" next to "Sea Ice 22% Grassland 13%", which is World Forge's own composition
+     * readout — a debug number, not something a player is planning a route with. The danger scale
+     * stays under the map; the biome breakdown moves into the side panel, behind a fold.
+     */
     legendBox.replaceChildren(...rows);
+    const parts = legendRows(world, state.layer)
+      .filter(r => r.share > 0.004)
+      .slice(0, 14)
+      .map(r => el('span', { class: 'sw' }, el('i', { style: { background: r.color } }),
+        `${r.label} ${Math.round(r.share * 100)}%`));
+    if (compositionBox) {
+      compositionBox.replaceChildren(
+        el('summary', { text: `What ${world.planet?.name || 'this world'} is made of` }),
+        el('div', { class: 'legend' }, ...parts),
+      );
+      compositionBox.hidden = !parts.length;
+    }
 
-    coords.textContent = `seed ${seed} · ${Math.round(player.x)}, ${Math.round(player.z)} m`
-      + ` · cell ${Math.round(player.x / M_PER_CELL)},${Math.round(player.z / M_PER_CELL)}`
-      + ` · zoom ${state.zoom}× (wheel)`;
+    // …and the seed and the metres are a debug readout too, behind the same switch as the HUD's
+    coords.textContent = (showCoords?.()
+      ? `seed ${seed} · ${Math.round(player.x)}, ${Math.round(player.z)} m · cell ${Math.round(player.x / M_PER_CELL)},${Math.round(player.z / M_PER_CELL)} · `
+      : '')
+      + `${Math.round(world.width * M_PER_CELL / 1000)} km across · zoom ${state.zoom}× · scroll to zoom, drag to pan`;
   }
 
   /**
@@ -377,14 +430,26 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    * `zoom` is a whole-map multiplier and `centre` is the cell the view is built around (the player,
    * unless the map has been dragged). At zoom 1 it is exactly what renderWorld drew.
    */
+  /**
+   * The view, kept ON the world.
+   *
+   * It centred on the player without caring where the edges were, so a player near the north coast
+   * opened the map to a third of a screen of empty space above the world and the south cut off. The
+   * offset is clamped to the world's own edges now — and when the drawn world is smaller than the
+   * canvas on an axis, it is centred on that axis instead, which is the only sensible answer.
+   */
   function viewBox() {
     const fit = Math.min(canvas.width / world.width, canvas.height / world.height);
     const scale = fit * state.zoom;
     const c = state.centre || playerCell();
+    const drawnW = world.width * scale, drawnH = world.height * scale;
+    const clamp = (want, drawn, box) => drawn <= box
+      ? Math.round((box - drawn) / 2)
+      : Math.round(Math.max(box - drawn, Math.min(0, want)));
     return {
       scale, fit,
-      offsetX: Math.round(canvas.width / 2 - c.x * scale),
-      offsetY: Math.round(canvas.height / 2 - c.y * scale),
+      offsetX: clamp(canvas.width / 2 - c.x * scale, drawnW, canvas.width),
+      offsetY: clamp(canvas.height / 2 - c.y * scale, drawnH, canvas.height),
     };
   }
 

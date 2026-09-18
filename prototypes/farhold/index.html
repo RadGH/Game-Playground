@@ -129,6 +129,7 @@
     <div class="small dim" id="hud-planet"></div>
   </div>
   <canvas id="minimap" width="180" height="180"></canvas>
+  <div id="hud-scale" class="small dim"></div>
   <div id="hud-where"></div>
 </div>
 <div id="skillbar" class="hud"></div>
@@ -139,6 +140,8 @@
 </div>
 
 <div id="log" class="hud"></div>
+<!-- floating damage numbers, over whatever you just hit -->
+<div id="hitnums" class="hud"></div>
 <!-- ============================================================ the pause menu (Esc) -->
 <section id="pause" class="hidden">
   <div class="pause-card">
@@ -360,7 +363,7 @@
         </div>
       </section>
       <aside class="pane">
-        <div class="pane-head"><span class="pane-title">This node</span></div>
+        <div class="pane-head"><span class="pane-title" id="perk-side-title">The forest</span></div>
         <div class="pane-body perk-side" id="perk-side"></div>
       </aside>
     </div>
@@ -385,6 +388,8 @@
     <section class="pane col-detail">
       <div class="pane-head"><span class="pane-title">The forge</span></div>
       <div class="pane-body" id="craft-detail"></div>
+      <div class="pane-foot"><span class="keyhint">Material comes from recycling gear you do not
+        want — go to <b>Inventory</b>, point at something and press <kbd>R</kbd>.</span></div>
     </section>
   </div>
 
@@ -401,7 +406,7 @@
 
     <div class="pane-stack col-bench">
       <section class="pane fixed">
-        <div class="pane-head"><span class="pane-title">On the bench</span></div>
+        <div class="pane-head"><span class="pane-title">Chosen item</span></div>
         <div class="pane-body">
           <div id="up-item" class="bench-card-wrap"></div>
           <div class="itemcard" id="up-card"></div>
@@ -417,7 +422,7 @@
     </div>
 
     <section class="pane col-detail">
-      <div class="pane-head"><span class="pane-title">The bench</span></div>
+      <div class="pane-head"><span class="pane-title">What it becomes</span></div>
       <div class="pane-body" id="up-detail"></div>
     </section>
   </div>

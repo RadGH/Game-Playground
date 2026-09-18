@@ -44,8 +44,8 @@ import { createWanderers } from './wanderers.js';
 import { createRumours } from './rumours.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
-import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS } from './rpg.js';
-import { Hud } from './hud.js';
+import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, itemScore, displayName } from './rpg.js';
+import { Hud, SLOT_LABELS } from './hud.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom } from './skills.js';
 // round 4: the RPG expansion
 import { buildZones } from './zones.js';
@@ -1000,9 +1000,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   });
   hud.setPlayer(player);
 
+  /** A hit, in the log AND over the thing you hit — see `hud.hit`. */
   function reportHit(enemy, result) {
-    if (result.dodged) hud.log(`${enemy.name} dodges.`);
-    else hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '');
+    const at = new THREE.Vector3(enemy.x, (enemy.y ?? 0) + (enemy.height || 1.7) * 0.9, enemy.z);
+    if (result.dodged) {
+      hud.log(`${enemy.name} dodges.`);
+      hud.hit(at, 'miss', 'miss', camera);
+      return;
+    }
+    hud.log(`You hit ${enemy.name} for ${result.amount}${result.crit ? ' (critical)' : ''}.`, result.crit ? 'good' : '');
+    hud.hit(at, result.amount, result.crit ? 'crit' : '', camera);
   }
 
   /**
@@ -1013,6 +1020,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function rewards(spec) {
     state.paused = true;
     input.release();
+    // the HUD, the skill bar and the "E open the gilded chest" prompt were all still legible through
+    // the popup, which is a shared overlay Emberveil uses too — so hide ours rather than dim theirs
+    document.body.classList.add('popup-open');
     return showRewards(spec, {
       base: '../../assets/data/ui',
       sounds: {
@@ -1020,18 +1030,32 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         item: r => sound.loot({ rarity: r }),
         close: () => sound.ui('click'),
       },
-    }).finally(() => { state.paused = false; });
+    }).finally(() => { state.paused = false; document.body.classList.remove('popup-open'); });
   }
 
-  /** One item, in the shape the reward popup wants. */
+  /**
+   * One item, in the shape the reward popup wants — and the one line you actually want.
+   *
+   * The card showed the item's own numbers and nothing else, which is not the question you are asking
+   * when a chest has just opened. The question is "is this better than what I have on", and the
+   * inventory already computes that number; the popup just never asked for it.
+   */
   function rewardItem(item) {
+    const slot = item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot;
+    const worn = player.equipment?.[slot];
+    const delta = worn ? itemScore(item) - itemScore(worn) : null;
+    const verdict = delta == null ? 'nothing in that slot yet'
+      : delta > 0 ? `+${delta} over your ${worn.name}`
+      : delta < 0 ? `worse than your ${worn.name}`
+      : `no better than your ${worn.name}`;
     return {
-      name: item.name, rarity: item.rarity, unique: !!item.isUnique, set: !!item.setId,
-      slot: item.type === 'weapon' ? 'Weapon' : (item.slot || ''),
+      name: displayName(item), rarity: item.rarity, unique: !!item.isUnique, set: !!item.setId,
+      slot: item.type === 'weapon' ? 'Weapon' : (SLOT_LABELS[slot] || item.slot || ''),
       lines: [
         item.dmg ? `${item.dmg[0]}–${item.dmg[1]} damage` : null,
         item.armor ? `${item.armor} armour` : null,
-        ...(item.affixes || []).filter(a => !a.baseIntrinsic).slice(0, 3).map(a => describeAffixText(a)),
+        ...(item.affixes || []).filter(a => !a.baseIntrinsic).slice(0, 2).map(a => describeAffixText(a)),
+        verdict,
       ].filter(Boolean),
     };
   }
@@ -1671,6 +1695,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * shop simply asks for it rather than growing a second, worse one.
      */
     tip: (node, item) => hud.tipFor(node, item),
+    displayName: item => displayName(item),
     buyVehicle: v => {
       const r = unlockVehicle(player, v.slot, v.key);
       hud.log(r.ok ? `The ${r.kind.name} is yours. Pick it on the character sheet.` : r.why, r.ok ? 'loot' : 'bad');
@@ -1806,6 +1831,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       sites: { get sites() { return sites.sites; } },
       meteors: { get marks() { return meteors.marks(); } },
       gates: { get nodes() { return gates.nodes; } },
+      showCoords: () => !!settings.get('coords'),
     });
   }
 
@@ -2363,6 +2389,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return (((1 - longitude) % 1) + 1) % 1 * dayLength;
   }
   state.elapsed = morningElapsed();
+  // no eclipse for the first two in-game hours — a first impression of a sunlit world should be one
+  sky.holdEclipsesUntil?.(state.elapsed + (balance.sky?.eclipseGrace ?? 450));
   if (save) {
     state.elapsed = restore(save, { rpg, player, control, map }) || 0;
     // written on every save since round 3 and never read back, so the save list's clock restarted
@@ -3116,6 +3144,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
         if (result.dodged) { hud.log(`You dodge ${e.name}.`); return; }
         hud.log(`${e.name} hits you for ${result.amount}${result.absorbed ? ` (${result.absorbed} on the barrier)` : ''}.`, 'bad');
+        hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), result.amount, 'taken', camera);
         if (result.saved) hud.log('Something would not let you die.', 'level');
         if (result.reflected) hud.log(`Thorns bite back for ${result.reflected}.`, 'good');
         if (result.defenderPost?.guard) applyStatus(player, 'guard', skillData.statuses.guard, 1);
@@ -3140,6 +3169,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
             if (victim === player) {
               hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
+              hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), result.amount, 'taken', camera);
               if (player.hp <= 0) respawn(e);
             } else if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad'); }
           })
@@ -3248,7 +3278,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     });
 
     // --- the "press E to…" line, and the boss bar
-    const near = interactTarget();
+    // …and not while a panel has the screen: the world prompt used to read "E speak to Rosie
+    // Nine-Pies" at the bottom of the screen while her own shop said "E or Esc to step away"
+    const near = talk.isOpen || rewardsOpen() || map.isOpen ? null : interactTarget();
     hud.prompt(near
       ? near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`
         : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
@@ -3273,6 +3305,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     const daylight = Math.max(0, Math.min(1, sky.sunDirection.y * 1.4));
     sky.update(state.elapsed, { gloom: blended.gloom, flash: weatherView.state.flash, cloud: blended.cloud, longitude: control.x / terrain.widthM });
+    // the sky writes the ambient colour every frame, so underground has to have the last word
+    if (dungeon) light.update(0, control, { day: 0, inside: true, ambient: sky.ambient });
     weatherView.update(dt, blended, { camera, daylight, sunDir: sky.sunDirection, baseFogColor: sky.fog.color });
     sunfx.update({
       camera, sunDirection: sky.sunDirection, dt,
@@ -3305,7 +3339,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     sinceSave += dt;
     if (sinceSave > (balance.save?.autoSaveSeconds ?? 45)) autoSave();
 
-    const target = field.target(control);
+    /**
+     * What the target bar is looking at, and how far off it is — the bar used to sit at full health
+     * on something thirty metres away with nothing to say it was out of reach.
+     */
+    const targetUnit = field.target(control);
+    const target = targetUnit ? {
+      ...targetUnit,
+      distance: Math.hypot(targetUnit.x - control.x, targetUnit.z - control.z),
+      reach: (player.derived?.reach ?? 0) || (control.reach ?? 3),
+    } : null;
     const town = features.settlementAt(control.x, control.z);
     if (town && campaign.onEnterSettlement(town.id)) hud.log(`${town.name} charted.`, 'level');
     if (!campaignDone && campaign.complete) {
@@ -3328,11 +3371,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
       clock: clockText(sky.dayFraction, control),
       target,
-      sky: skyText(sky),
-      weather: blended.name + (weather.locked ? ' · held' : '') + (control.swimming ? ' · swimming' : '') + (control.mounted ? ' · riding' : ''),
+      // underground it still reported the weather, the daylight and the surface gravity
+      sky: dungeon ? '' : skyText(sky),
+      weather: dungeon
+        ? `${dungeon.plan.rooms.length} rooms · level ${dungeon.level}`
+        : blended.name + (weather.locked ? ' · held' : '') + (control.swimming ? ' · swimming' : '') + (control.mounted ? ' · riding' : ''),
       where: hud.locationText(control, dungeon),
     });
     if (state.frames % 6 === 0) {
+      hud.daylight = Math.max(0.28, Math.min(1, sky.sunDirection.y * 1.7 + 0.3));
       if (dungeon) hud.drawDungeonMap(control, dungeon.plan, field.enemies, chests.chests);
       else hud.drawMinimap(control, field.enemies, [
         ...chests.chests.filter(c => !c.opened).map(c => ({ x: c.x, z: c.z, color: '#ffd24a', r: 3 })),
@@ -3405,7 +3452,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function skyText(s) {
     const up = s.visible().slice(0, 2);
     if (!up.length) return '';
-    return up.map(b => b.name).join(', ') + (s.isNight ? ' overhead' : ' in the daylight');
+    /**
+     * C10: this rendered "Shaukraen Anchor III, Shaukraen Anchor IV a in the daylight" — no verb, a
+     * comma where an "and" belongs, and a moon's raw catalogue designation. The chart and the space
+     * screen both already say "Moon of X"; this now agrees with them.
+     */
+    const names = up.map(b => b.moon ? `${b.parentName || 'its parent'}'s moon` : b.name);
+    const list = names.length > 1
+      ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+      : names[0];
+    const verb = names.length > 1 ? 'are' : 'is';
+    return `${list} ${verb} up${s.isNight ? '' : ', in the daylight'}`;
   }
 
   $('boot').classList.add('hidden');

@@ -286,6 +286,16 @@ export function offhandLookFor(item) {
 }
 
 /** A single number for "is this better than what I am wearing", used for the upgrade arrow. */
+/**
+ * The UI is British all the way through — "Armour", "Colour", and the trade panel even relabels the
+ * `armor` stat key — but the item BASE names come through as "Plate Armor" and "Leather Armor".
+ * `items.json` is shared with Emberveil and must not be edited here, so this is a display-time
+ * substitution at the one place a name is rendered.
+ */
+export function displayName(item) {
+  return String(item?.name || '').replace(/\bArmor\b/g, 'Armour').replace(/\bArmors\b/g, 'Armours');
+}
+
 export function itemScore(item) {
   if (!item) return 0;
   let score = 0;

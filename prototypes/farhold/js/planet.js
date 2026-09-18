@@ -1055,8 +1055,12 @@ export function makeTerrain(world, planet = null, opts = {}) {
 }
 
 /** A plain-language line about where you are, for the HUD. */
+/**
+ * The line under the place card. It used to lead with the planet's name, which is already the first
+ * line of the same card — three lines of wrapped text to say one thing twice.
+ */
 export function describePlanet(planet, star) {
   const air = planet.atmosphere?.breathable ? 'breathable air' : planet.atmosphere?.density > 0.2 ? 'air you should not breathe' : 'almost no air';
   const g = `${(planet.gravity ?? 1).toFixed(2)} g`;
-  return `${planet.name} — ${planet.archetypeName}, ${g}, ${air}, orbiting ${star.name} (${star.className}).`;
+  return `${planet.archetypeName}, ${g}, ${air} · ${star.name} (${star.className})`;
 }

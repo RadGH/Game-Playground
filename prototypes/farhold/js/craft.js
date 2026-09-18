@@ -218,6 +218,8 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
         ok: !Object.keys(short).length, recipe: r, cost: priced, costText: costText(priced),
         note: `${r.rarity} ${r.makes}, level ${player?.level || 1}`,
         why: Object.keys(short).length ? `needs ${costText(short)} more` : null, short,
+        // what fits on a button, so the reason is where the click is
+        need: Object.keys(short).length ? `Need ${costText(short)}` : null,
       };
     }
 
@@ -226,6 +228,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
     return {
       ok: !Object.keys(short).length, recipe: r, cost: priced, costText: costText(priced), note,
       why: Object.keys(short).length ? `needs ${costText(short)} more` : null, short,
+      need: Object.keys(short).length ? `Need ${costText(short)}` : null,
     };
   }
 

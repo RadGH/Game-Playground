@@ -38,7 +38,9 @@ export const KINDS = [
   {
     key: 'pushing_in', weight: 8,
     holds: c => !!c.contested && c.claim > 0.25,
-    say: c => `${c.contestedName} are pushing into ${c.zone} and ${c.holderName} are not winning`,
+    // "the Cut are pushing in" is right; "the Stone Count are pushing in" is not
+    say: c => `${c.contestedName} ${c.contestedPlural ? 'are' : 'is'} pushing into ${c.zone}`
+      + ` and ${c.holderName} ${c.holderPlural ? 'are' : 'is'} not winning`,
   },
   {
     key: 'incident', weight: 10,
@@ -97,8 +99,9 @@ export function createRumours({ territory = null, factions = null, seed = 1, max
   const heard = [];
   let told = 0;
 
-  const nameOf = key => (factions?.factions || []).find(f => f.key === key)?.short
-    || (factions?.factions || []).find(f => f.key === key)?.name || key;
+  const rowOf = key => (factions?.factions || []).find(f => f.key === key) || null;
+  const nameOf = key => rowOf(key)?.short || rowOf(key)?.name || key;
+  const pluralOf = key => rowOf(key)?.plural !== false;
 
   /** Everything true about a zone that a rumour could be built out of. */
   function factsFor(zone, extra = {}) {
@@ -107,8 +110,10 @@ export function createRumours({ territory = null, factions = null, seed = 1, max
       zoneId: zone.id,
       zone: zone.name,
       holderName: nameOf(record.holder),
+      holderPlural: pluralOf(record.holder),
       contested: record.contested || null,
       contestedName: nameOf(record.contested),
+      contestedPlural: pluralOf(record.contested),
       claim: record.claim ?? 0,
       incident: (record.incidents || [])[0] || null,
       unvisitedLandmarks: extra.unvisitedLandmarks ?? 0,

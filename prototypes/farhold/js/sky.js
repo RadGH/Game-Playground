@@ -239,6 +239,8 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   const sunDir = new THREE.Vector3(1, 0.4, 0);
   const tmp = new THREE.Vector3();
   const eclipse = { solar: 0, lunar: 0, kind: null, body: null };
+  // seconds of run time before an eclipse is allowed to start (two in-game hours by default)
+  let grace = 0;   // the run-time moment eclipses are allowed from; see `setEclipseGrace`
   let elapsed = 0, dayFraction = 0;
 
   /** Where a body sits on the sky dome, given how far round its orbit it is compared with us. */
@@ -391,6 +393,16 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
         }
       }
     }
+    /**
+     * NOT IN THE FIRST TWO HOURS.
+     *
+     * A solar eclipse is a good effect and it was landing at the worst possible moment: on some seeds
+     * the run opens at 08:16 with "A solar eclipse begins" and the world murky grey-green for the
+     * whole first minute — a player's first impression of a sunlit world, dim, with no way to know it
+     * is temporary. The eclipse still happens; it just does not happen while you are getting your
+     * bearings. `grace` is in seconds of run time and is set once, at landing.
+     */
+    if (elapsed < grace) { solar = 0; lunar = 0; solarBody = null; lunarBody = null; }
     eclipse.solar = solar;
     eclipse.lunar = lunar;
     eclipse.body = solarBody?.body?.name || lunarBody?.body?.name || null;
@@ -424,6 +436,13 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   return {
     scene, sunLight, ambient, fog, sunDirection: sunDir, bodies, eclipse,
     /**
+     * No eclipse until this moment of run time.
+     *
+     * The clock starts at whatever time of day the run begins at — which can already be past any
+     * relative window — so the caller passes the absolute moment rather than a duration.
+     */
+    holdEclipsesUntil(runTime) { grace = Math.max(0, Number(runTime) || 0); },
+    /**
      * Line a moon up with the star so an eclipse happens now. There is no cheating in the drawing —
      * it moves the moon's phase, and the same maths that finds a natural eclipse then finds this one.
      */
@@ -454,7 +473,11 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       // DOME * 0.0044 is a full-moon-sized disc; half of that still reads clearly as a body
       return bodies
         .filter(b => b.visibleSize > DOME * 0.002)
-        .map(b => ({ name: b.body.name, kind: b.kind, size: b.visibleSize, distanceAu: b.distanceAu }))
+        // `moon` and `parentName` so the HUD can say "its moon" rather than "Shaukraen Anchor IV a"
+        .map(b => ({
+          name: b.body.name, kind: b.kind, size: b.visibleSize, distanceAu: b.distanceAu,
+          moon: b.kind === 'moon', parentName: b.body.parentName || null,
+        }))
         .sort((a, b) => b.size - a.size);
     },
     dispose() {

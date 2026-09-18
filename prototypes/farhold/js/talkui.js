@@ -165,7 +165,7 @@ export function createTalkPanel(handlers = {}) {
 
       const row = (item, { sell = false } = {}) => {
         const node = el('div', { class: 'trade-row' },
-          el('span', { class: rarity(item), text: item.name }),
+          el('span', { class: rarity(item), text: (handlers.displayName?.(item)) ?? item.name }),
           el('span', { class: 'coin', text: `${(sell ? handlers.sellPrice?.(item) : handlers.price?.(item)) ?? 0}g` }),
           el('button', {
             class: 'talk-btn', text: sell ? 'Sell' : 'Buy',

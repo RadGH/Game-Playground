@@ -360,6 +360,24 @@ At Trusted (+20) and Sworn (+60) each faction opens something only it has.
 
 ---
 
+## What is built, and what is not
+
+Written after the round-10 review, so the next person does not have to guess. Everything in the table
+at the top of this document exists as a module with tests; this says how much of it reaches a player.
+
+| system | in the game | not yet |
+|---|---|---|
+| Factions and standing | 12 factions, standing that spreads to rivals, the band ladder and the deeds table on the Journal, shop prices, the full name on first mention | `hostile()` does not yet decide whether a spawn attacks you |
+| Territory | holder, grip, real camps (the holder's and the rival's), a zone that changes hands, saved as deltas | — |
+| Job generator | 22 frames, offered on entering a zone, taken from the Journal or from somebody on the road, paid when finished | the `adjacent` frame needs the caller to pass neighbouring zones, which `main.js` does not yet do |
+| Patrols | walk the zone's real road nodes, on the minimap | `reaction()` is not read, so they do not challenge, aid or follow yet; `killed()` is not called |
+| Caravans | dispatched per zone, travel, are ambushed, become a wreck, on the minimap | `escort` and `rob` are reachable only through a job, not by walking up to one |
+| Wanderers | placed on real spots, `E` to meet, nine kinds of outcome wired | no body is drawn — they are a minimap mark and a prompt |
+| Incidents | start on real conditions, change the spawn budget and shop prices, expire and leave a rumour | most of the per-incident flags (`townClosed`, `factionsFight`, `nightSpawn`) are read but not acted on |
+| Rumours | heard on entering a zone and from people on the road, shown in the Journal | — |
+| Landmarks | one to three a zone on real map nodes, `E` to use or work on, on the minimap | the `gives` effects are logged; only rest, reveal and the perk point do anything |
+| Rank rewards | shown on the Journal, earned/unearned | only `freeTolls` and `rationPrice` are acted on |
+
 ## Implementation order
 
 Each phase leaves the game playable and testable on its own.

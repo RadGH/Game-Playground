@@ -922,7 +922,12 @@ body {
   position: fixed; right: 14px; top: 14px; width: 300px;
   display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
 }
-#hud-place { position: static; max-width: 300px; }
+/* C9: five lines of right-aligned text of wildly different lengths made a ragged staircase down the
+   left edge. The title keeps the right edge; the body reads left, the way text does. */
+#hud-place { position: static; max-width: 300px; text-align: left; }
+#hud-place > div:first-child { text-align: right; }
+#hud-place .small, #hud-place .clock { text-align: right; }
+#hud-place #hud-planet { text-align: left; line-height: 1.35; }
 #minimap { position: static; }
 #hud-where { position: static; }
 
@@ -1459,6 +1464,16 @@ body {
 .pane .talent-card b { font-size: 13.5px; color: #eaf6ff; }
 .pane .talent-card .small { font-size: var(--fs-sm); }
 .pane .talent-card.on::after { content: "✓"; position: absolute; right: 8px; top: 6px; color: var(--accent); }
+/* D10: a tier that does not open for ten more levels rendered at the same contrast as the one you
+   can take right now, under a footer that said "pick one from each tier" as though you could. */
+.pane .talent-card.locked { opacity: .38; }
+.pane .skilltree > .tier-head.locked { opacity: .5; }
+.pane .talent-card:not(.locked):not(.on)::after {
+  content: "take"; position: absolute; right: 8px; top: 6px;
+  font-size: var(--fs-sm); color: var(--ink-faint);
+}
+.pane .talent-card:not(.locked):hover { border-color: var(--accent); }
+.pane .talent-card:not(.locked):hover::after { color: var(--accent); }
 
 /* ---------------------------------------------------------------- 4. perks */
 .perks-body {
@@ -1655,3 +1670,47 @@ body {
 .sheet :is(.tipbox, .itemcard) .tip-foot { font-size: var(--fs-sm); }
 .sheet .tip-req { font-size: var(--fs-sm); }
 .sheet .sheet-purse, .sheet .who-level, .sheet .row-num { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- damage numbers
+ * Every hit went to the text log in the far corner, away from the fight. A number that rises off the
+ * thing you hit is the feedback loop of a real-time game, and it was the one piece missing.
+ */
+#hitnums { position: fixed; inset: 0; pointer-events: none; z-index: 11; }
+.hitnum {
+  position: absolute; transform: translate(-50%, -50%);
+  font-size: 17px; font-weight: 700; color: #f0f4fa;
+  text-shadow: 0 2px 5px #000, 0 0 2px #000;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  animation: hitfloat .9s ease-out forwards;
+}
+.hitnum.crit { font-size: 23px; color: #ffd24a; }
+.hitnum.heal { color: #8fe0a0; }
+.hitnum.miss { color: #9fb0c8; font-size: 14px; font-weight: 600; }
+.hitnum.taken { color: #ff8a7a; }
+@keyframes hitfloat {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.8); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--drift, 0px)), -170%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .hitnum { animation-duration: .5s; } }
+
+/* While the reward popup is up, the world's own HUD is not. The popup is shared with Emberveil, so
+   the right place to fix "the skill bar shows through it" is here, not in the shared sheet. */
+body.popup-open .hud { opacity: 0; pointer-events: none; }
+/* …and the same while the map is up: the place card used to show through the map's header at about
+   20% opacity, which reads as a rendering fault rather than a design. */
+body:has(#map-screen:not(.hidden)) .hud,
+body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
+.map-composition { margin-top: 4px; }
+.map-composition > summary { cursor: pointer; color: #9fb0c8; font-size: 12px; }
+.map-composition[hidden] { display: none; }
+.map-composition .legend { margin-top: 6px; }
+
+/* anything you cannot undo takes two clicks, and the first one says what it is about to do */
+.chip.arm, .sheet button.arm {
+  background: #4a2418; border-color: #a04a2a; color: #ffd0b8; font-weight: 600;
+}
+
+/* the target bar: dim when the thing is out of reach, and out from under the boss bar */
+#target.far { opacity: .5; }
+#target.under-boss { top: auto; margin-top: 58px; }

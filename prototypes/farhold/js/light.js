@@ -115,7 +115,14 @@ export function createLight(scene, { balance = {} } = {}) {
 
     // the ambient floor: a moonless night should be dim, not black
     if (ambient) {
-      const floor = inside ? (cfg.dungeonAmbient ?? 0.05) : nightFloor;
+      /**
+       * Underground the floor was 0.05 — the same torch that throws a twenty-metre pool outdoors lit
+       * about four metres, and you could not tell a doorway from a wall. The dark should come from
+       * the COLOUR, not from the player being unable to see, so the floor is high enough to read
+       * geometry by and the light it lets through is a cold blue-grey.
+       */
+      const floor = inside ? (cfg.dungeonAmbient ?? 0.17) : nightFloor;
+      if (inside && cfg.dungeonAmbientColor) ambient.color.set(cfg.dungeonAmbientColor);
       if (ambient.intensity < floor) ambient.intensity = floor;
     }
   }

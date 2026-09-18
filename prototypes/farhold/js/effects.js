@@ -208,7 +208,7 @@ def('affix:cond_speedOnFirstHit', v => `+${pct(v)} move speed for 4s after the f
 def('affix:cond_sustainedDmgBonus', v => `+${pct(v)} damage for every 5s you stay in the fight, up to five`, {
   dmgOut: (v, c) => 1 + v * Math.min(5, Math.floor((c.rt.inCombat || 0) / 5)),
 });
-def('affix:cond_thornsFlat', v => `anything that hits you takes ${n1(v)}`, {
+def('affix:cond_thornsFlat', v => `anything that hits you takes ${n1(v)} damage`, {
   thornsFlat: v => v,
 });
 

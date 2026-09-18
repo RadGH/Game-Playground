@@ -7,7 +7,7 @@
 // one scrolling column could not hold thirty passives, six skills, a materials list and a bench.
 // Only the visible tab is rebuilt, so opening the sheet is cheap whatever is in the bag.
 
-import { itemScore, SLOTS, describeAffix, xpForLevel } from './rpg.js';
+import { itemScore, SLOTS, describeAffix, xpForLevel, displayName } from './rpg.js';
 
 /** What each talent tier is for. Tier 1 is how it is thrown, 2 what happens when it lands, 3 what it
  *  does to the fight — it was written down in a comment and never shown to the player. */
@@ -29,6 +29,14 @@ import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTa
 
 /** How far in and out the perk forest zooms, and the rings it draws under the nodes. */
 const PERK_ZOOM = [0.6, 4];
+
+/** A colour at a fraction of its strength, over the canvas's own near-black. */
+function tint(hex, amount) {
+  const n = parseInt(String(hex).replace('#', ''), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const mix = c => Math.round(11 + (c - 11) * amount);
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+}
 const PERK_RINGS = RINGS.map(r => r.radius);
 import { patternGlyphs, patternText, handsOf, profileOf } from './weapons.js';
 import { VEHICLES, vehicleFor } from './gear.js';
@@ -54,7 +62,7 @@ export function rarityClass(item) {
   return 'rarity-' + (item.rarity || 'normal');
 }
 
-const SLOT_LABELS = {
+export const SLOT_LABELS = {
   weapon: 'Weapon', offhand: 'Off hand', head: 'Head', chest: 'Chest', legs: 'Legs',
   hands: 'Hands', feet: 'Feet', ring: 'Ring', ring2: 'Second ring', necklace: 'Necklace',
   mount: 'Mount', light: 'Light',
@@ -282,9 +290,34 @@ export class Hud {
       hideTip();
       this.renderSheet();
     };
-    $('inv-recycle-junk').onclick = () => bulk('normal');
-    $('inv-recycle-magic').onclick = () => bulk('magic');
-    $('inv-recycle-rare').onclick = () => bulk('rare');
+    /**
+     * Two clicks, and the first one counts what it is about to destroy. These sat in a row of filter
+     * chips, looked exactly like filter chips, and irreversibly recycled gear on a single click.
+     */
+    const RARITY_ORDER2 = RARITY_ORDER;
+    const armBulk = (id, upTo, label) => {
+      const btn = $(id);
+      if (!btn) return;
+      const reset = () => { btn.dataset.armed = ''; btn.textContent = label; btn.classList.remove('arm'); };
+      btn.onclick = () => {
+        const cap = RARITY_ORDER2.indexOf(upTo);
+        const n = (this.player?.bag || []).filter(i =>
+          !i.isUnique && !i.setId && RARITY_ORDER2.indexOf(i.rarity || 'normal') <= cap).length;
+        if (!n) { this.log(`Nothing ${upTo} or below in the bag.`); return; }
+        if (btn.dataset.armed !== '1') {
+          btn.dataset.armed = '1';
+          btn.textContent = `Recycle ${n}? Click again`;
+          btn.classList.add('arm');
+          setTimeout(reset, 4000);
+          return;
+        }
+        reset();
+        bulk(upTo);
+      };
+    };
+    armBulk('inv-recycle-junk', 'normal', 'normal');
+    armBulk('inv-recycle-magic', 'magic', 'magic');
+    armBulk('inv-recycle-rare', 'rare', 'rare');
     this.buildMinimapBase();
   }
 
@@ -473,6 +506,31 @@ export class Hud {
     }
   }
 
+  /**
+   * FLOATING NUMBERS, WHERE YOU ARE LOOKING.
+   *
+   * Every hit, crit, heal and status tick went to the text log in the far corner of the screen, away
+   * from the fight. A number that rises off the thing you hit is the whole feedback loop of a
+   * real-time game, and it was the one piece missing. Off in Settings for people who hate them.
+   */
+  hit(worldPos, text, kind = '', camera = null) {
+    if (!camera || !worldPos) return;
+    if (this.settings && !this.settings.get('damageNumbers')) return;
+    const box = $('hitnums');
+    if (!box) return;
+    const p = worldPos.clone().project(camera);
+    if (p.z > 1 || Math.abs(p.x) > 1.1 || Math.abs(p.y) > 1.1) return;
+    const n = el('div', 'hitnum' + (kind ? ' ' + kind : ''), String(text));
+    n.style.left = `${(p.x * 0.5 + 0.5) * window.innerWidth}px`;
+    n.style.top = `${(-p.y * 0.5 + 0.5) * window.innerHeight}px`;
+    // a little sideways scatter, so three hits in a second do not stack into one unreadable number
+    n.style.setProperty('--drift', `${(Math.random() * 2 - 1) * 26}px`);
+    box.append(n);
+    setTimeout(() => n.remove(), 900);
+    // never let a long fight leave hundreds of dead nodes behind
+    while (box.childElementCount > 40) box.firstElementChild.remove();
+  }
+
   // ---------------------------------------------------------------- bars and place
 
   tick(player, { place, zone, clock, target, sky, weather, where }) {
@@ -527,10 +585,21 @@ export class Hud {
     }
     $('hud-clock').textContent = clock || '';
 
+    /**
+     * C5: the target bar used to stick to something thirty metres away at full health with nothing on
+     * it to say so — no distance, no out-of-reach state — and underground it stacked directly under
+     * the boss bar, so two red bars sat on top of each other and only one had a name.
+     */
+    const bossUp = !$('boss-bar').classList.contains('hidden');
     if (target) {
-      $('target').classList.remove('hidden');
+      const box = $('target');
+      box.classList.remove('hidden');
+      box.classList.toggle('under-boss', bossUp);
+      const away = Number.isFinite(target.distance) ? ` · ${Math.round(target.distance)} m` : '';
       const rank = target.rank && target.rank !== 'normal' ? ` · ${target.rank}` : '';
-      $('target-name').textContent = `${target.name} · level ${target.level}${rank}`;
+      box.classList.toggle('far', Number.isFinite(target.distance) && Number.isFinite(target.reach)
+        && target.distance > target.reach + 1.5);
+      $('target-name').textContent = `${target.name} · level ${target.level}${rank}${away}`;
       $('target-name').className = target.rank === 'rare' ? 'rarity-unique'
         : target.rank === 'champion' ? 'rarity-rare' : target.rank === 'boss' ? 'rarity-legendary' : '';
       $('target-fill').style.width = Math.max(0, target.hp / target.maxHp * 100) + '%';
@@ -539,6 +608,8 @@ export class Hud {
     }
     if (sky) $('hud-sky').textContent = sky;
     if (weather !== undefined) $('hud-weather').textContent = weather;
+    const scaleBox = $('hud-scale');
+    if (scaleBox) scaleBox.textContent = this.minimapScaleText();
     const whereBox = $('hud-where');
     if (whereBox && where !== undefined) whereBox.textContent = where;
   }
@@ -653,6 +724,18 @@ export class Hud {
     const cx = player.x / M_PER_CELL, cy = player.z / M_PER_CELL;
     if (this.minimapBase) {
       ctx.drawImage(this.minimapBase, cx - span / 2, cy - span / 2, span, span, 0, 0, size, size);
+      /**
+       * C8: at night the map stayed in full daylight colours while the world outside it was dark.
+       * One multiply over the base image, driven by the same gloom the sky uses.
+       */
+      const dark = 1 - Math.max(0, Math.min(1, this.daylight ?? 1));
+      if (dark > 0.05) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = `rgba(${Math.round(90 + 110 * (1 - dark))}, ${Math.round(100 + 110 * (1 - dark))}, ${Math.round(140 + 90 * (1 - dark))}, 1)`;
+        ctx.fillRect(0, 0, size, size);
+        ctx.restore();
+      }
     } else {
       ctx.fillStyle = '#14100c';
       ctx.fillRect(0, 0, size, size);
@@ -677,7 +760,7 @@ export class Hud {
       if (x.icon) {
         const [ix, iy] = toPx(x.x, x.z);
         if (ix < -8 || iy < -8 || ix > size + 8 || iy > size + 8) continue;
-        ctx.font = '600 11px system-ui, sans-serif';
+        ctx.font = '700 13px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,10,16,.95)';
@@ -687,6 +770,15 @@ export class Hud {
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       } else pip(x.x, x.z, x.color, x.r || 3.2);
     }
+    // …and which way is up. A map with no north mark and no scale is a picture.
+    ctx.font = '700 11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,10,16,.9)';
+    ctx.strokeText('N', size / 2, 11);
+    ctx.fillStyle = 'rgba(220, 232, 246, .85)';
+    ctx.fillText('N', size / 2, 11);
+    ctx.textAlign = 'left';
+
     // enemies: a red pip with a dark ring, so they read over snow, sand and grass alike; a
     // champion or a rare gets its own colour, because that is the pip worth walking towards
     for (const e of enemies) {
@@ -761,6 +853,11 @@ export class Hud {
   }
 
   // ---------------------------------------------------------------- character sheet
+
+  /** How much of the world the minimap window covers, in km — printed under it. */
+  minimapScaleText() {
+    return `${(this.minimapSpan * M_PER_CELL / 1000).toFixed(1)} km across`;
+  }
 
   toggleSheet(open = !this.sheetOpen) {
     hideTip();
@@ -874,7 +971,7 @@ export class Hud {
       const item = player.equipment[slot];
       const div = el('div', 'slot');
       div.innerHTML = `<span class="label">${SLOT_LABELS[slot]}</span>
-        <span class="name ${item ? rarityClass(item) : 'muted'}">${item ? item.name : '—'}</span>`;
+        <span class="name ${item ? rarityClass(item) : 'muted'}">${item ? displayName(item) : '—'}</span>`;
       div.dataset.tipRender = 'slot';
       div.dataset.tipSlot = slot;
       // the rarity as a colour down the left edge of the plate, the same as in the bag
@@ -1023,7 +1120,7 @@ export class Hud {
       for (const [slot, item] of Object.entries(player.equipment)) {
         for (const a of item?.affixes || []) {
           if (a.baseIntrinsic && !a.brand && !a.intrinsic) continue;
-          lines.push({ from: item.name, text: describeAffix(a), rarity: rarityClass(item) });
+          lines.push({ from: displayName(item), text: describeAffix(a), rarity: rarityClass(item) });
         }
       }
       for (const id of player.legendaryPowers || []) {
@@ -1207,9 +1304,13 @@ export class Hud {
     if (pick) this.tipFor(row, item);
     row.tabIndex = 0;
     row.dataset.rarity = item.setId ? 'set' : item.isUnique ? 'unique' : (item.rarity || 'normal');
-    row.innerHTML = `<span class="${rarityClass(item)}">${item.name}</span>
+    row.innerHTML = `<span class="${rarityClass(item)}">${displayName(item)}</span>
       <span class="muted small">${SLOT_LABELS[slot] || slot}</span>
-      <span class="score ${delta > 0 ? 'up' : delta < 0 ? 'down' : ''}">${delta > 0 ? '▲ +' : delta < 0 ? '▼ ' : '– '}${Math.abs(delta)}</span>`;
+      <span class="score ${delta > 0 ? 'up' : delta < 0 ? 'down' : ''}" title="${
+        delta > 0 ? `${delta} points better than the ${worn ? displayName(worn) : 'nothing'} you have on`
+        : delta < 0 ? `${Math.abs(delta)} points worse than your ${worn ? displayName(worn) : 'gear'}`
+        : 'about the same as what you are wearing'
+      }">${delta > 0 ? '▲ +' : delta < 0 ? '▼ ' : '– '}${Math.abs(delta)}</span>`;
     if (pick) {
       row.onclick = () => { hideTip(); pick(item); };
     } else {
@@ -1359,9 +1460,14 @@ export class Hud {
     if (!forest || !canvas) return;
 
     const points = pointsLeft(player);
+    // "0 taken · none left to spend" on a screen of inert dots, with no hint when that changes
+    const nextAt = (() => {
+      for (let l = (player.level || 1) + 1; l <= 60; l++) if (pointsFor(l) > pointsFor(player.level || 1)) return l;
+      return null;
+    })();
     $('perk-points').textContent = points > 0
       ? `${points} point${points === 1 ? '' : 's'} to spend · ${spentBy(player)} taken`
-      : `${spentBy(player)} taken · none left to spend`;
+      : `${spentBy(player)} taken${nextAt ? ` · your next point comes at level ${nextAt}` : ' · none left to spend'}`;
 
     const legend = $('perk-legend');
     if (legend) {
@@ -1373,10 +1479,30 @@ export class Hud {
       }));
     }
 
+    /**
+     * D4: two clicks for anything you cannot undo.
+     *
+     * "Take it all back" stated no cost and implied no confirmation, and the bulk-recycle chips
+     * looked exactly like the filter chips they sit beside while irreversibly destroying gear. The
+     * first click arms and says what it is about to do; the second does it.
+     */
     const refund = $('perk-refund');
     if (refund && !refund.dataset.wired) {
       refund.dataset.wired = '1';
-      refund.onclick = () => { this.onRefundPerks?.(); this.renderSheet(); };
+      refund.onclick = () => {
+        if (refund.dataset.armed !== '1') {
+          refund.dataset.armed = '1';
+          refund.textContent = `Give back all ${spentBy(this.player)}? Click again.`;
+          refund.classList.add('arm');
+          setTimeout(() => {
+            refund.dataset.armed = ''; refund.textContent = 'Take it all back'; refund.classList.remove('arm');
+          }, 4000);
+          return;
+        }
+        refund.dataset.armed = ''; refund.textContent = 'Take it all back'; refund.classList.remove('arm');
+        this.onRefundPerks?.();
+        this.renderSheet();
+      };
     }
 
     this.drawForest();
@@ -1596,11 +1722,26 @@ export class Hud {
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
       }
-      ctx.fillStyle = has ? colour : open ? 'rgba(180, 200, 225, .28)' : 'rgba(90, 105, 135, .3)';
+      /**
+       * D3: EIGHTY-NINE BLACK DOTS ON A BLACK FIELD.
+       *
+       * An untaken node was 28% white, so you could not tell which arm a node belonged to, which
+       * ones you could reach, or what any of them were without clicking each one. Every node carries
+       * its arm's colour at low saturation now, and anything you could take RIGHT NOW gets a white
+       * ring — which is the only question you are asking when you have a point to spend.
+       */
+      ctx.fillStyle = has ? colour : open ? tint(colour, 0.34) : tint(colour, 0.13);
       ctx.fill();
-      ctx.lineWidth = (has ? 2 : 1) * dpr;
-      ctx.strokeStyle = has ? '#ffffff' : open ? colour : 'rgba(120, 140, 175, .5)';
+      ctx.lineWidth = (has ? 2 : open ? 2 : 1) * dpr;
+      ctx.strokeStyle = has ? '#ffffff' : open ? '#ffffff' : 'rgba(120, 140, 175, .45)';
       ctx.stroke();
+      if (open) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 4 * dpr, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, .35)';
+        ctx.lineWidth = 1 * dpr;
+        ctx.stroke();
+      }
 
       if (this.perkPick === node.id) {
         ctx.beginPath();
@@ -1664,6 +1805,9 @@ export class Hud {
     kids.push(bars);
 
     const node = this.perkPick ? forest.byId.get(this.perkPick) : null;
+    // "THIS NODE" over a panel with no node in it
+    const sideTitle = $('perk-side-title');
+    if (sideTitle) sideTitle.textContent = node ? (node.name || 'This node') : 'The forest';
     if (!node) {
       kids.push(el('p', 'muted small', 'Click a node. Anything touching something you have already taken can be taken next — the shape of the tree is the cost.'));
     } else {
@@ -1848,7 +1992,11 @@ export class Hud {
       + (picked && !picked.canUse ? '<div class="tip-bad small">Your class cannot hold this one. It will still forge.</div>' : '');
     kids.push(out);
 
-    const btn = el('button', 'forge-btn', 'Forge it');
+    /**
+     * D9: the reason a button is dead belongs ON the button. "Forge it" was greyed out with
+     * "Scrap Iron 0 / 10" in red three hundred pixels above it.
+     */
+    const btn = el('button', 'forge-btn', q.ok ? 'Forge it' : (q.need || 'Not enough material'));
     btn.disabled = !q.ok || !picked;
     if (!q.ok) btn.dataset.tip = q.why;
     btn.onclick = () => {
@@ -1981,7 +2129,7 @@ export class Hud {
       : `<div class="tip-bad">${q.why}</div>`;
     out.push(change);
 
-    const btn = el('button', 'forge-btn', 'Do it');
+    const btn = el('button', 'forge-btn', q.ok ? 'Do it' : (q.need || q.why || 'Not yet'));
     btn.disabled = !q.ok;
     btn.onclick = () => {
       hideTip();
@@ -2189,7 +2337,7 @@ export class Hud {
     const delta = current ? itemScore(item) - itemScore(current) : 0;
 
     const bits = [];
-    bits.push(`<b class="${rarityClass(item)}">${item.name}</b>`);
+    bits.push(`<b class="${rarityClass(item)}">${displayName(item)}</b>`);
     const kind = [
       SLOT_LABELS[slot] || slot,
       item.baseName && item.baseName !== item.name ? item.baseName : null,
@@ -2325,7 +2473,7 @@ export class Hud {
 
   /** The plain-text description, still used where a tooltip cannot reach (the reward popup). */
   describe(item) {
-    const bits = [item.name, `${item.rarity}${item.quality ? ' · ' + item.quality : ''}`];
+    const bits = [displayName(item), `${item.rarity}${item.quality ? ' · ' + item.quality : ''}`];
     if (item.dmg) bits.push(`Damage ${item.dmg[0]}–${item.dmg[1]}`);
     if (item.armor) bits.push(`Armour ${item.armor}`);
     for (const a of item.affixes || []) bits.push('· ' + describeAffix(a));

@@ -241,7 +241,9 @@
     "_doc": "Real angular sizes make a sibling planet a single pixel, so siblings are drawn larger on purpose - the same cheat every space game makes. siblingScale 1 is the honest sky. Moons need no cheat: these worlds keep their moons 5-10 planet radii out (our own Moon is at 60), so moonScale 1 already fills a chunk of the sky. Sizes are computed from real orbital positions either way. startFraction is where in the day a new run begins: 0 midnight, 0.25 dawn, 0.5 noon. orbitScale/moonOrbitScale run the orbits on their own clock: at real speed a 365-day sibling needs ~91 hours of play to go round, so it looks welded to the sun.",
     "startFraction": 0.34,
     "orbitScale": 150,
-    "moonOrbitScale": 6
+    "moonOrbitScale": 6,
+    "eclipseGrace": 450,
+    "_eclipseDoc": "Seconds of run time before an eclipse may start. A day is 900 s, so 450 is two in-game hours: long enough that a new character's first impression of a sunlit world is a sunlit world."
   },
   "props": {
     "density": 1,
@@ -489,7 +491,9 @@
       "intensity": 2.8,
       "color": "#ffb070"
     },
-    "dungeonAmbient": 0.05
+    "dungeonAmbient": 0.17,
+    "dungeonAmbientColor": "#5a6e8c",
+    "_dungeonDoc": "Underground, the same torch that throws a 20 m pool outdoors lit about four metres and you could not tell a doorway from a wall. The floor is high enough that geometry reads at about twelve metres; the dark comes from the COLOUR — a cold blue-grey — not from the player being unable to see."
   },
   "encounters": {
     "_doc": "Set-piece encounters on the road, rolled instead of a plain pack. `everySeconds` is how often one is considered, `chance` how often the roll takes, and `maxLive` how many can be running at once. The weights are in data/encounters.json.",

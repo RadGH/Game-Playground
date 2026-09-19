@@ -734,7 +734,14 @@ export function createProps(scene, terrain, opts = {}) {
       return true;
     },
     /** Change how thick the world is and rebuild on the spot. */
-    setDensity(d, x, z) { cfg.density = clamp(d, 0, 4); rebuild(x, z); },
+    /**
+     * Up to 6x, because the settings panel now offers it.
+     *
+     * The clamp was 4 while the slider stopped at 2, so it never showed; raising the slider to 6x
+     * for "a target strong graphics card" would have silently capped at 4 and the top two notches
+     * would have done nothing. A slider that lies is the bug this round keeps finding.
+     */
+    setDensity(d, x, z) { cfg.density = clamp(d, 0, 6); rebuild(x, z); },
     /**
      * How far out props are placed, in prop cells.
      *

@@ -534,6 +534,22 @@ export function createFeatures(scene, terrain, opts = {}) {
        */
       buildable: (lx, lz) => {
         const x = cx + lx, z = cz + lz;
+        /**
+         * AND THE ROAD. This is the answer to "houses sitting right in the middle of the road".
+         *
+         * The claim that a building could not land on a road was true of the town's OWN streets —
+         * those are the gaps left by the block split, so a plot cannot overlap one. It was never
+         * true of the WORLD road, the inter-town route that runs through the settlement, because
+         * the planner was never told that road is there. Two systems drawing over each other with
+         * nothing reconciling them, which is the same mistake the plot generator was built to fix,
+         * one level up.
+         *
+         * `roadAt` is the same field the megaflora already keep clear of.
+         */
+        // 0.45 is the carriageway and its kerb, not the whole influence field: measured, the road
+        // reads 1.0 at its centre and fades to nothing by 18 m, and excluding all of that took 36%
+        // of a town's ground. Buildings SHOULD front close to the road — that is what a road is for
+        if (terrain.roadAt(x, z) > 0.45) return false;
         return !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 6) <= 0.62;
       },
     });
@@ -550,12 +566,36 @@ export function createFeatures(scene, terrain, opts = {}) {
      * alleys clipping under the ground, because every slab now sits on the height of the span it
      * covers rather than on the height of the town centre.
      */
+    /**
+     * A PAD AT EVERY CORNER AND EVERY END.
+     *
+     * "Roads do not connect smoothly, and two roads coming together at an angle have a sharp edge."
+     * They do, because a street is a row of rectangles laid along its own bearing: where two streets
+     * meet at an angle, each stops with a square end and the wedge between them is bare ground. A
+     * square pad the width of the street, dropped at every vertex and every endpoint, fills that
+     * wedge whatever the angle — the same trick a real junction uses, which is to pave the whole
+     * corner rather than to mitre two kerbs together.
+     */
     for (const st of plan.streets) {
+      for (const [px, pz] of st.pts) {
+        const [jx, jz] = toWorld(px, pz);
+        if (terrain.underwater(jx, jz) || terrain.riverAt(jx, jz) > 0.3) continue;
+        place('street', jx, jz, 0, [st.width / 3.4, 1, st.width / 6], 0.22, null,
+          { tint: cultKit.street.colour });
+      }
       for (let i = 0; i < st.pts.length - 1; i++) {
         const [ax, az] = toWorld(st.pts[i][0], st.pts[i][1]);
         const [bx, bz] = toWorld(st.pts[i + 1][0], st.pts[i + 1][1]);
         const run = Math.hypot(bx - ax, bz - az);
-        const steps = Math.max(1, Math.round(run / 6));
+        /**
+         * SHORT STEPS AND A REAL OVERLAP, or a street is a row of loose tiles.
+         *
+         * Each slab sits on the ground height at its own midpoint, so on any slope consecutive
+         * slabs step past each other and the seams open — "a lot of weird flat rectangles on the
+         * floor". Halving the step and overlapping by a third closes them, and costs only instances
+         * of a mesh that is already instanced.
+         */
+        const steps = Math.max(1, Math.round(run / 3));
         for (let k = 0; k < steps; k++) {
           const t0 = k / steps, t1 = (k + 1) / steps;
           const x0 = ax + (bx - ax) * t0, z0 = az + (bz - az) * t0;
@@ -566,7 +606,7 @@ export function createFeatures(scene, terrain, opts = {}) {
           const len = Math.hypot(x1 - x0, z1 - z0);
           // cobble / flag / root-path / bone / sand: section 6.7, and the cheapest way there is
           place('street', mx, mz, Math.atan2(x1 - x0, z1 - z0),
-            [st.width / 3.4, 1, len / 6 * 1.12], 0.3, null, { tint: cultKit.street.colour });
+            [st.width / 3.4, 1, len / 6 * 1.34], 0.22, null, { tint: cultKit.street.colour });
         }
       }
     }

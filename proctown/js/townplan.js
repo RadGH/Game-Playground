@@ -488,22 +488,44 @@ function plotsInBlock(block, rng, cfg, out, buildable) {
  */
 export function planTown(opts = {}) {
   let best = planOnce(opts);
-  const floor = Math.max(6, (opts.size ?? 3) * 5);
+  /**
+   * The floor has to clear what the GROUND takes, not just what the plan wants.
+   *
+   * A settlement with a road through it loses about a third of its area before a single plot is
+   * cut, and a river takes more. At five plots a size the floor was under what a clear site produces
+   * anyway, so it never fired on the towns that needed it most.
+   */
+  const floor = Math.max(8, (opts.size ?? 3) * 7);
   if (best.plots.length >= floor) return best;
 
-  // a hamlet's ring is 29 m across, so one step finer is nowhere near enough — go down in stages
-  // and keep whichever attempt built the most
+  /**
+   * FINER FIRST, THEN WIDER.
+   *
+   * Two different shortages need two different answers, and the first version only had one.
+   *
+   * A hamlet is short of plots because its ring is 29 m across and the recursion stops after two
+   * cuts — the ground is there, the blocks are just too big. Finer blocks fix that.
+   *
+   * A town with a road and a river through it is short because a third of its ground is GONE, and no
+   * amount of subdividing makes more of it: measured on Hollowcrown, 31 plots on clear ground became
+   * 15 with the real terrain, and every finer attempt stayed at 15. What a real settlement does
+   * there is cover more ground — it spreads along the bank and up the road rather than squeezing
+   * into the gaps. So the ring grows too, and the wall grows with it.
+   */
   const base = CULTURES[opts.culture] || CULTURES.human;
-  for (const k of [0.7, 0.5, 0.36]) {
-    const tighter = planOnce({
-      ...opts,
-      squeeze: {
-        blockMin: Math.max(4.5, base.blockMin * k),
-        blockMax: Math.max(6.5, base.blockMax * k),
-        plotMin: Math.max(3.2, base.plotMin * k),
-      },
-    });
-    if (tighter.plots.length > best.plots.length) best = tighter;
+  const squeezeBy = k => (k === 1 ? null : {
+    blockMin: Math.max(4.5, base.blockMin * k),
+    blockMax: Math.max(6.5, base.blockMax * k),
+    plotMin: Math.max(3.2, base.plotMin * k),
+  });
+  const attempts = [
+    { k: 0.7, ring: 1 }, { k: 0.5, ring: 1 },
+    { k: 1, ring: 1.3 }, { k: 0.7, ring: 1.3 },
+    { k: 1, ring: 1.65 }, { k: 0.7, ring: 1.65 },
+  ];
+  for (const { k, ring } of attempts) {
+    const tried = planOnce({ ...opts, ringScale: ring, squeeze: squeezeBy(k) });
+    if (tried.plots.length > best.plots.length) best = tried;
     if (best.plots.length >= floor) break;
   }
   return best;
@@ -511,12 +533,16 @@ export function planTown(opts = {}) {
 
 function planOnce({
   seed = 1, size = 3, culture = 'human', heightAt = null, followGround = null, buildable = null,
-  squeeze = null,
+  squeeze = null, ringScale = 1,
 } = {}) {
   const base = CULTURES[culture] || CULTURES.human;
   const cfg = { ...base, ...(squeeze || {}), followGround: followGround ?? 0.35 };
   const rng = makeRng(seed);
-  const { ring, wall, walled } = footprintOf(size);
+  const base0 = footprintOf(size);
+  // a town that has lost ground to a road or a river covers more of it instead
+  const ring = base0.ring * ringScale;
+  const wall = base0.wall * ringScale;
+  const walled = base0.walled;
 
   // the ground the town is built on. Farhold passes its real terrain; the page passes a stand-in,
   // because "follows the terrain" cannot be judged against flat ground.

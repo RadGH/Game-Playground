@@ -187,13 +187,41 @@ test('street classes are a real hierarchy', () => {
   assert.ok(classes.size > 1, 'a city should have more than one grade of street');
 });
 
-test('footprintOf matches what the plan actually uses', () => {
-  for (const size of [1, 3, 6]) {
+test('footprintOf is where a town STARTS, and a clear site of any real size stays there', () => {
+  // From size 3 up the base footprint is ample, so nothing should make it grow. Below that the ring
+  // is only a couple of blocks across and a hamlet has to spread a little to hold a handful of
+  // houses at all — `footprintOf` is the starting point, not a promise, and that is the whole reason
+  // the growth exists.
+  for (const size of [3, 4, 5, 6]) {
     const f = footprintOf(size);
     const plan = planTown({ seed: 2, size, culture: 'human' });
-    assert.equal(plan.ring, f.ring);
+    assert.equal(plan.ring, f.ring, `size ${size} grew on clear ground`);
     assert.equal(!!plan.wall, f.walled);
   }
+  for (const size of [0, 1, 2]) {
+    const f = footprintOf(size);
+    const plan = planTown({ seed: 2, size, culture: 'human' });
+    assert.ok(plan.ring >= f.ring, 'a settlement never shrinks below its footprint');
+    assert.ok(plan.ring <= f.ring * 1.7, `size ${size} sprawled to ${Math.round(plan.ring)} m`);
+  }
+});
+
+test('a town whose ground is taken COVERS MORE OF IT rather than emptying out', () => {
+  // A road through the middle takes about a third of a settlement's area, and no amount of
+  // subdividing makes more ground: Hollowcrown went from 31 plots on clear ground to 15 with its
+  // real terrain, and every finer attempt stayed at 15. A real town spreads along the bank and up
+  // the road instead, so the ring grows until it has the plots it needs.
+  const road = (lx) => Math.abs(lx) > 10;          // a 20 m corridor straight through
+  const clear = planTown({ seed: 11, size: 4, culture: 'human' });
+  const crossed = planTown({ seed: 11, size: 4, culture: 'human', buildable: road });
+
+  assert.ok(crossed.ring > clear.ring, 'a town that lost ground did not spread to make up for it');
+  assert.ok(crossed.plots.length >= clear.plots.length,
+    `a road left it with ${crossed.plots.length} plots against ${clear.plots.length} on clear ground`);
+  // and the wall goes with it, or a grown town stands outside its own defences
+  assert.ok(crossed.wallRadius > clear.wallRadius);
+  // nothing may end up on the blocked ground
+  for (const p of crossed.plots) assert.ok(road(p.cx), 'a plot was laid in the road corridor');
 });
 
 test('the seeded generator is stable and in range', () => {

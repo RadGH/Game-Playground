@@ -1028,7 +1028,23 @@ export function stallsFor(plan, { culture = 'human', seed = 1, max = 26 } = {}) 
   const sq = plan.square || { cx: 0, cz: 0, r: 7 };
   const count = Math.round(lerp(S.squareRing.count[0], S.squareRing.count[1],
     Math.min(1, (plan.size ?? 3) / 5)));
-  const r = Math.max(2.5, sq.r - S.squareRing.inset);
+  /**
+   * A MARKET RING NEEDS ELBOW ROOM.
+   *
+   * "The town center seems to be a well surrounded by stalls which looks good, but they are all much
+   * too close together and need spread out." The ring was however many stalls the size asked for,
+   * crammed onto whatever radius the square happened to have — so on a small square a dozen stalls
+   * stood shoulder to shoulder in a circle a few metres across.
+   *
+   * The spacing is the constraint now, not the count: each stall is given a minimum arc of kerb, the
+   * ring grows outward if the square is too tight to hold them all, and any that still will not fit
+   * are simply not built. A market with eight stalls you can walk between beats twelve you cannot.
+   */
+  const APART = S.squareRing.apart ?? 5.2;
+  const wantR = Math.max(2.5, sq.r - S.squareRing.inset);
+  // the radius that gives every stall its arc, and never less than the square itself
+  const needR = (count * APART) / (Math.PI * 2);
+  const r = Math.max(wantR, needR);
   for (let i = 0; i < count && out.length < max; i++) {
     const a = (i / count) * Math.PI * 2 + rng() * 0.25;
     out.push({

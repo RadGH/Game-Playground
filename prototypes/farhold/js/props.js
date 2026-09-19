@@ -280,18 +280,30 @@ export const MEGA_BUILDERS = {
 
   // Fronds are aimed with setFromUnitVectors for the same reason the ordinary palm's are: tipping a
   // cone with an Euler angle gives you spikes lying on their sides, not blades.
+  /**
+   * A PALM CROWN DROOPS. A flat one is a table on a post.
+   *
+   * The fronds used to splay at 23 degrees below horizontal and reach nine metres, which made a
+   * plate eighteen metres across sitting on a sixteen-metre trunk — and from any distance that is a
+   * disc, not a tree. The user's words were "giant thin discs floating in the air". They now leave
+   * the crown at 44 degrees down and reach less far, and the ring alternates between long and short
+   * so the outline is ragged rather than a wheel. A small crown mass at the top closes the middle,
+   * which is what stops you seeing sky through the centre of it.
+   */
   shelf_palm: (bark = '#6b5436', leaf = '#4f8a40') => mergeParts([
     { geometry: CYL, color: bark, matrix: at(0, 8, 0, 0.62, 16, 0.62) },
     { geometry: CYL, color: bark, matrix: at(0, 0.8, 0, 1.4, 1.6, 1.4) },
+    { geometry: SPH, color: leaf, matrix: at(0, 16.6, 0, 1.9, 1.5, 1.9) },
     ...Array.from({ length: 9 }, (_, i) => {
       const a = (i / 9) * Math.PI * 2;
-      const dir = new THREE.Vector3(Math.sin(a), -0.42, Math.cos(a)).normalize();
+      const dir = new THREE.Vector3(Math.sin(a) * 0.82, -0.8, Math.cos(a) * 0.82).normalize();
+      const long = i % 2 === 0 ? 1 : 0.78;          // a ragged outline, not a wheel
       return {
         geometry: CONE, color: leaf,
         matrix: new THREE.Matrix4().compose(
-          new THREE.Vector3(dir.x * 4.2, 16.4 + dir.y * 4.2, dir.z * 4.2),
+          new THREE.Vector3(dir.x * 3.2, 16.4 + dir.y * 3.2, dir.z * 3.2),
           new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir),
-          new THREE.Vector3(2.0, 9.0, 0.38),
+          new THREE.Vector3(1.5, 7.4 * long, 0.34),
         ),
       };
     }),
@@ -663,9 +675,19 @@ export function createProps(scene, terrain, opts = {}) {
               new THREE.Vector3(scale, scale * (0.9 + mrng() * 0.25), scale),
             );
             mesh.setMatrixAt(n, matrix);
-            const tint = spec.leafy && kit.leaf ? colour.set(kit.leaf) : colour.setScalar(1);
-            const v = 0.86 + mrng() * 0.26;
-            mesh.setColorAt(n, colour.setRGB(tint.r * v, tint.g * v, tint.b * v));
+            /**
+             * VARY THE BRIGHTNESS, DO NOT REPAINT THE WHOLE TREE.
+             *
+             * `setColorAt` is a per-INSTANCE colour and it multiplies every vertex in the mesh, so
+             * painting a leafy giant with the biome's leaf colour took the bark with it: trunk,
+             * roots, branches and canopy all came out one flat shade, which is why a twenty-metre
+             * palm read as a dark post with a slab on top rather than as a tree. The builders
+             * already bake a bark colour and a leaf colour into the vertices — that distinction is
+             * the whole reason they are two colours — so all an instance may do is shift the
+             * brightness a little, the way the ordinary trees do.
+             */
+            const v = 0.88 + mrng() * 0.22;
+            mesh.setColorAt(n, colour.setScalar(v));
             if (spec.solid) solids.add(x, z, spec.solid[0] * scale, spec.solid[1] * scale);
             megaCounts[key] = n + 1;
             break;

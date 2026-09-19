@@ -1375,13 +1375,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       onLog: (t, c) => hud.log(t, c),
       onKill: onEnemyKilled,
       // a rare gets a real name, in the language of the region it turned up in
-      nameRare: (def, rng) => {
-        if (!namegen) return null;
-        const race = zones.at(control.x, control.z)?.race || 'human';
-        return namegen.generate('person.full', { race, seed: Math.floor(rng() * 1e9) })?.text?.split(' ')[0] || null;
-      },
+      nameRare,
     });
   }
+  /**
+   * A rare or a stronghold's boss gets a real name, in the language of the region it turned up in.
+   *
+   * Declared out here rather than inline in `makeField`'s options because two callers need it: the
+   * enemy field, and `sites.populate` when it names a camp's boss. It was an object property, and
+   * the stronghold wiring called it as a bare identifier — "nameRare is not defined", thrown on
+   * walking into the first camp.
+   */
+  function nameRare(def, rng) {
+    if (!namegen) return null;
+    const race = zones.at(control.x, control.z)?.race || 'human';
+    return namegen.generate('person.full', { race, seed: Math.floor(rng() * 1e9) })?.text?.split(' ')[0] || null;
+  }
+
   let field = makeField();
   // whatever stops the player stops an enemy too
   field.solids = [props.solids, features.solids];
@@ -1450,7 +1460,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     await sites.populate(site, {
       field, chests, level,
-      nameFor: (def, rng) => nameRare?.(def, rng),
+      nameFor: nameRare,
     });
   }
 
@@ -2520,8 +2530,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          */
         sky: r.regime === 'high'
           ? (r.holding != null
-            ? `holding station at ${r.holding} m — S to descend, W to climb`
-            : `upper atmosphere · ${r.climb > 0 ? '+' : ''}${r.climb} m/s — let go to hold this altitude`)
+            ? `holding station at ${r.holding} m — nose down to descend, up to climb`
+            : `upper atmosphere · ${r.climb > 0 ? '+' : ''}${r.climb} m/s — level out to hold this altitude`)
           : 'climb to leave the atmosphere',
         weather: r.regime === 'high'
           ? `rate ${Math.round((r.throttle || 0) * 100)}% · air ${Math.round(r.air * 100)}%`

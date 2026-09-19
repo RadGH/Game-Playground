@@ -14,6 +14,15 @@ import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, '../js/atmos.js'), 'utf8');
 
+/**
+ * The file with its comments taken out.
+ *
+ * Needed because the comments in atmos.js quote the bug they are fixing — they say the words
+ * `input.forward` in order to explain why nothing reads it any more — and a test that greps the raw
+ * source then fails on the explanation rather than on the code.
+ */
+const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+
 /** Pull a number out of the DEFAULTS block, so the test reads what the game reads. */
 function knob(name) {
   const m = src.match(new RegExp(`^\\s*${name}:\\s*([0-9.]+)`, 'm'));
@@ -64,17 +73,25 @@ test('entering and leaving the band is announced, because the controls change me
   assert.match(src, /Back into thick air/);
 });
 
-test('a caller with no input object is steered by the throttle', () => {
-  // The launch cinematic, the debug menu and the page tests all drive this model directly: they set
-  // `state.throttle` and pass no input, because that is how it worked before there was a rate
-  // control. Reading only `input.forward` treated them as "nobody is asking", and the hold-station
-  // spring then pinned a ship under full power at four kilometres, fighting its own engines. It
-  // could not reach space at all.
-  assert.match(src, /input \? \(input\.forward \?\? 0\) : \(state\.throttle \?\? 0\)/,
-    'the ask must fall back to the throttle when no input object was handed in');
-  // …and both the climb branch and the exit check need it, not just one of them
-  const uses = src.match(/input \? \(input\.forward \?\? 0\) : \(state\.throttle \?\? 0\)/g) || [];
-  assert.ok(uses.length >= 2, `only ${uses.length} of the two places fall back`);
+test('W IS FORWARD — the climb is commanded by the nose, never by W and S', () => {
+  // "For some reason you keep changing flight control so that W is up and S is down. I don't want
+  // that, ever. W is always forward, s is always backward."
+  //
+  // The first version of the upper atmosphere read `input.forward` — the throttle — as a commanded
+  // climb rate, which silently turned W and S into up and down the moment you crossed into the band.
+  // The climb comes off the PITCH now, and nothing in the rate control may read `forward` again.
+  const rateBlock = code.slice(code.indexOf('const ask ='), code.indexOf('const speedCap'));
+  assert.ok(!/input\.forward|input\?\.forward/.test(rateBlock),
+    'the upper-atmosphere rate control is reading the throttle keys as a climb command again');
+  assert.match(rateBlock, /state\.pitch/, 'the climb rate has to come from the nose');
+});
+
+test('leaving the atmosphere asks for nose up AND power, not a throttle key', () => {
+  const exitLine = code.match(/const askingUp = .*/)[0];
+  assert.ok(!/input\.forward|input\?\.forward/.test(exitLine),
+    'the exit check is reading the throttle key as "asking to climb"');
+  assert.match(exitLine, /state\.pitch/);
+  assert.match(exitLine, /state\.throttle/);
 });
 
 test('once the exit is earned it latches, so it cannot depend on who is calling', () => {

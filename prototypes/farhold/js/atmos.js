@@ -332,7 +332,7 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     if (state.regime !== wasRegime) {
       out.regimeChanged = state.regime;
       if (state.regime === 'high') {
-        onLog('Upper atmosphere. The wing has nothing to bite on — W and S are a climb rate now, and letting go holds your altitude.', 'level');
+        onLog('Upper atmosphere. The wing has nothing to bite on — point the nose to climb or descend, level out to hold your altitude.', 'level');
       } else {
         onLog('Back into thick air. The wing has hold of you again.', '');
       }
@@ -362,16 +362,19 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
        *     (`climbRateTop`) and the boost applies, so the top of the band is the fastest part of it.
        */
       /**
-       * If there is no input object, the throttle IS the ask.
+       * W IS FORWARD. IT IS NEVER UP.
        *
-       * Anything that drives this model directly — the launch cinematic, the debug menu, the page
-       * tests — sets `state.throttle` and passes no input, because that is how it was steered before
-       * there was a rate control. Reading only `input.forward` meant those callers were treated as
-       * "nobody is asking", and the hold-station spring below then pinned a ship under full power at
-       * four kilometres, fighting its own engines. Trust an input object when there is one; fall
-       * back to the throttle when there is not.
+       * The first version of this read `input.forward` as the commanded climb rate, which quietly
+       * turned W and S into up and down the moment you crossed into the band — and the user's answer
+       * to that was "I don't want that, ever. W is always forward, s is always backward."
+       *
+       * They are right, and it is better flying anyway: the nose is what decides whether you go up.
+       * W and S remain the throttle, exactly as they are on the deck, and the climb rate is taken
+       * from the PITCH — point the nose up and you climb, level out and you hold. That is also the
+       * "fine tuned controls to descend" that was asked for, because the mouse is a far finer
+       * instrument than a key that is either pressed or not.
        */
-      const ask = input ? (input.forward ?? 0) : (state.throttle ?? 0);
+      const ask = Math.max(-1, Math.min(1, state.pitch / 1.1));
       const rate = cfg.climbRate * (1 + (cfg.climbRateTop - 1) * highness)
         * (state.boosting ? (cfg.boost ?? 2.8) * 0.6 + 0.4 : 1);
       const wanted = ask * rate;
@@ -490,15 +493,13 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
      * band at all.
      */
     /**
-     * "Asking to climb" is the input OR the throttle, not just the input.
+     * Leaving is nose up AND under power — which is how you would actually do it.
      *
-     * Anything that drives this model directly — the debug menu, the launch cinematic, the page
-     * tests — sets `state.throttle` and passes no input at all, because that is how the model was
-     * steered before there was a rate control. Reading only `input.forward` meant a ship under full
-     * power, at the ceiling, nose up, would sit there for ever. A ship with its engines open at the
-     * top of the air is asking to leave however the ask arrived.
+     * Not `input.forward`: that is the throttle, and reading it as "asking to climb" is the same
+     * mistake as turning W into up. A ship pointed at the sky with its engines open is asking to
+     * leave; a ship coasting level at the ceiling is sightseeing.
      */
-    const askingUp = input ? (input.forward ?? 0) : (state.throttle ?? 0);
+    const askingUp = Math.min(state.throttle ?? 0, Math.max(0, state.pitch) / 0.5);
     if (state.y > cfg.ceiling && askingUp > 0.2) state.exiting = (state.exiting || 0) + dt;
     else state.exiting = 0;
 

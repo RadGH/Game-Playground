@@ -236,6 +236,25 @@ export function createBeacon(rarity = 'normal') {
 
 // ---------------------------------------------------------------------------- the field
 
+/**
+ * THE ONE LIVE CHEST FIELD.
+ *
+ * js/sites.js has to put a cache down beside a monument (4.12 — "any sort of monuments that don't
+ * do anything currently need to do something … at the very least contain a chest nearby with
+ * loot") and js/encounters.js has to put a strongbox on a stranded cart. Neither of them is handed
+ * a chest field, and neither of them may edit js/main.js to be handed one.
+ *
+ * There is exactly one chest field per world — main.js builds a fresh one on landing and throws the
+ * old one away — so rather than a global on `window`, the module that builds them remembers the
+ * last one it built. It is replaced on the next landing, which is the behaviour you want: whoever
+ * asks always gets the field for the planet under their feet.
+ *
+ * Both callers still prefer an explicitly handed-in field (`setChests`) when somebody wires one.
+ * js/actors.js already does exactly this with `activeEnemyField()`, for the same reason.
+ */
+let CURRENT = null;
+export function currentChests() { return CURRENT; }
+
 export function createChests(scene, terrain, { seed = 1, balance = {}, zones = null, rpg = null, collide = null } = {}) {
   const cfg = balance.chests || {};
   const kinds = cfg.kinds || {};
@@ -453,8 +472,50 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
     centre = [Infinity, Infinity];
   }
 
-  return {
-    update, place, nearest, open, dropBag, collect, clear,
+  /**
+   * Take a chest away again, unopened.
+   *
+   * The defend events in js/encounters.js need it: the cart's strongbox stands there from the first
+   * second, and if the clock runs out the raiders take it. Without this the box simply stays and
+   * "they got the box" is a line of text that is not true.
+   */
+  function remove(chest) {
+    const i = live.indexOf(chest);
+    if (i < 0) return false;
+    scene.remove(chest.mesh);
+    dropBeacon(chest);
+    live.splice(i, 1);
+    return true;
+  }
+
+  /**
+   * Roll a grade's worth of loot and leave it on the ground as a bag.
+   *
+   * A rescue or a chase has no container at the end of it — there is nothing to open, the thing you
+   * freed or caught simply had something on it — so the payout is a bag you walk over. Same rolls a
+   * chest of that grade would have made, so the grades mean the same thing everywhere.
+   */
+  function rewardBag(x, z, { kind = 'iron', level = 1, magicFind = 0, rng = null } = {}) {
+    const spec = kinds[kind] || {};
+    const r = rng || makeRng(cellSeed(seed, Math.round(x), Math.round(z), 0x5eed));
+    const items = [];
+    const want = spec.items ? spec.items[0] + Math.floor(r() * (spec.items[1] - spec.items[0] + 1)) : 1;
+    for (let i = 0; i < want && rpg; i++) {
+      const item = rpg.rollDrop({
+        level, rng: rpg.rng, magicFind, chance: 1,
+        rarityBoost: spec.rarityBoost || 1,
+        floor: i === 0 ? spec.floor || null : null,
+      });
+      if (item) items.push(item);
+    }
+    const gold = spec.gold
+      ? Math.round((spec.gold[0] + r() * (spec.gold[1] - spec.gold[0])) * (1 + level * 0.12))
+      : 0;
+    return dropBag(x, z, { items, gold, mats: {} });
+  }
+
+  const api = {
+    update, place, nearest, open, dropBag, collect, clear, remove, rewardBag,
     get chests() { return live; },
     get bags() { return bags; },
     /** Every light a chest field wants lit — a warded chest glows. */
@@ -462,4 +523,6 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
       .map(c => ({ x: c.x, y: c.y + 0.8, z: c.z, color: '#b090ff', range: 10, intensity: 1.4 })),
     stats: () => ({ chests: live.length, bags: bags.length, opened: opened.size }),
   };
+  CURRENT = api;
+  return api;
 }

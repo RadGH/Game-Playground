@@ -1,0 +1,330 @@
+{
+  "_doc": "World bosses. In the user's words: 'Add world bosses of varying tiers, which are stronger than the level they reside in and are much larger and swarming in minions. These events should be displayed on the map for the region you are in.' So a world boss is NOT another dungeon boss standing in a field. It is three things at once: it is over-levelled for the ground it stands on, it is two to three times the size of anything else that lives there, and it keeps calling more bodies up for as long as it is breathing. js/sites.js places them on the same world-map slots the strongholds use, so one sits at a pass or a landmark somebody would have avoided, not on a bare coordinate. TIERS are the point of the file: tier 1 is the frightening thing a starting valley is allowed to hold, tier 4 is the thing you come back for. Original names and ideas only.",
+
+  "_schema": {
+    "tier": "1..4. Drives nothing on its own — every number below is written out per boss — but it is what the map pin, the chest grade and the test ladder read.",
+    "over": "how many levels ABOVE its zone's mid-level it is built. This is the 'stronger than the level they reside in' half: js/rpg.js compounds health at 1.13 a level and damage at 1.09, so +5 is roughly 1.8x health and 1.5x damage on top of an already large block.",
+    "scale": "body size multiplier folded in by js/actors.js `add()` on top of look.creature.size, so a 2.8 body at scale 2.4 renders at 6.7. This is the 'much larger' half, and it also widens the reach so a thing that size is not poking at you with a two-metre swing.",
+    "fx": "looping status auras from avatar-3d/js/spellfx.js, parented to the body. A world boss is lit up even before it moves.",
+    "minions": "{ first:[min,max] standing with it when you arrive, add:[min,max] per wave, every: seconds between waves, max: how many of ITS minions may live at once, radius: where they come up, weaken: level multiplier for a minion, rankBonus, prefer: {families,roles}, announce }",
+    "on": "which world-map slot types it may claim: landmark, pass, dungeon, crossing. Never road or junction — a world boss on the only road out of town is a wall, not an event.",
+    "minBand": "lowest zone band (0 settled .. 7 unforgiving) that may hold one.",
+    "biomes": "ground tags from js/sites.js `tagsFor` — the same vocabulary data/landmarks.json uses.",
+    "plan": "a layout key in data/setpieces.json — the arena it stands in.",
+    "chest": "{ kind } from balance.json chests.kinds. Placed when it dies is not possible yet (the chest field has no death hook here), so it stands in the arena from the start: the thing you can see but have to get past it to reach.",
+    "gives": "reward hooks, same table js/sites.js and tests/poi.test.js already understand.",
+    "pin": "{ color, r } for the minimap. js/main.js already forwards site.pin straight through."
+  },
+
+  "_tierDoc": "The ladder, so a new entry cannot be quietly out of line and tests/worldbosses.test.js fails if it is: over 2/3/4/5, scale 1.9/2.2/2.6/3.0, chest iron/gilded/gilded/warded, minBand 0/2/4/5. A tier-1 world boss can therefore stand in the starting valley — which is the whole point of 'varying tiers' — and it will still be a fight you walk away from the first time.",
+
+  "_chanceDoc": "How often an eligible slot grows a world boss instead of a garrison. Measured over five seeds at a tenth: one planet came out with a single world boss on it, which is not \"the region you are in\" — it is a rumour. At these numbers a planet carries two to eight, so the region you are standing in usually has one and it is still worth telling somebody about. Road and junction stay at zero on purpose: a world boss on the only road out of a zone is a wall, not an event.",
+  "chance": {
+    "landmark": 0.16,
+    "pass": 0.2,
+    "dungeon": 0.16,
+    "crossing": 0.1,
+    "road": 0,
+    "junction": 0
+  },
+
+  "bosses": [
+    {
+      "id": "bramblecoat",
+      "name": "Bramblecoat",
+      "tier": 1,
+      "weight": 10,
+      "plan": "boss_bonefield",
+      "on": ["landmark", "dungeon"],
+      "minBand": 0,
+      "biomes": ["forest", "grass", "farmland"],
+      "blurb": "Something has been dragging kills into this hollow for years, and it is still here.",
+      "over": 2,
+      "scale": 1.9,
+      "kind": "beast", "family": "beast", "role": "boss",
+      "hp": 540, "dmg": [14, 21], "armor": 14, "speed": 2.9, "reach": 4.6,
+      "aggroRange": 52, "attackEvery": 2.1, "arena": 18,
+      "xp": 380, "gold": 220, "dropBonus": 2, "dropRarity": 1.6,
+      "fx": ["rally"],
+      "look": { "creature": { "type": "bear", "size": 2.7, "colors": { "body": "#3a2c1e", "belly": "#6a5438", "accent": "#1a120a", "eyes": "#ffb03a" } } },
+      "phases": [
+        { "at": 0.5, "modifier": "frenzied", "say": "Bramblecoat stops guarding the hollow and starts clearing it." }
+      ],
+      "minions": {
+        "prefer": { "families": ["beast"] },
+        "first": [4, 6], "add": [2, 3], "every": 16, "max": 9,
+        "radius": 26, "weaken": 0.8, "rankBonus": 1.2,
+        "announce": "More come in out of the trees."
+      },
+      "chest": { "kind": "iron" },
+      "dropBases": ["battleaxe", "medium_chest", "heavy_boots", "ring"],
+      "gives": { "loot": "rare", "xp": 380, "clears": true },
+      "pin": { "color": "#ffb03a", "r": 6 }
+    },
+    {
+      "id": "the_reedmother",
+      "name": "The Reedmother",
+      "tier": 1,
+      "weight": 9,
+      "plan": "boss_bonefield",
+      "on": ["crossing", "landmark"],
+      "minBand": 0,
+      "biomes": ["wetland", "river", "coast"],
+      "blurb": "The reeds have been flattened in a circle forty metres across, and none of it is old.",
+      "over": 2,
+      "scale": 1.9,
+      "kind": "beast", "family": "beast", "role": "boss",
+      "hp": 580, "dmg": [13, 19], "armor": 20, "speed": 2.6, "reach": 5.0,
+      "aggroRange": 48, "attackEvery": 2.3, "arena": 18,
+      "xp": 380, "gold": 230, "dropBonus": 2, "dropRarity": 1.6,
+      "fx": ["poison"],
+      "look": { "creature": { "type": "crocodile", "size": 2.9, "colors": { "body": "#2f4a33", "belly": "#8a9a60", "accent": "#16241a", "eyes": "#d8e840" } } },
+      "phases": [
+        { "at": 0.45, "modifier": "venomous", "say": "The water round the Reedmother goes the colour of old tea." }
+      ],
+      "minions": {
+        "prefer": { "families": ["beast", "aberration"] },
+        "first": [4, 6], "add": [2, 3], "every": 15, "max": 9,
+        "radius": 24, "weaken": 0.8, "rankBonus": 1.2,
+        "announce": "The reeds move in three places at once."
+      },
+      "chest": { "kind": "iron" },
+      "dropBases": ["spear", "scaled_chest", "light_boots", "necklace"],
+      "gives": { "loot": "rare", "xp": 380, "clears": true },
+      "pin": { "color": "#ffb03a", "r": 6 }
+    },
+    {
+      "id": "gravel_tusk",
+      "name": "Gravel-Tusk",
+      "tier": 1,
+      "weight": 8,
+      "plan": "boss_bonefield",
+      "on": ["pass", "landmark"],
+      "minBand": 0,
+      "biomes": ["scrub", "grass", "highland"],
+      "blurb": "A wallow the size of a barn, and every thorn bush for a hundred metres is broken off at the root.",
+      "over": 2,
+      "scale": 1.9,
+      "kind": "beast", "family": "beast", "role": "boss",
+      "hp": 500, "dmg": [15, 23], "armor": 12, "speed": 3.4, "reach": 4.4,
+      "aggroRange": 54, "attackEvery": 1.9, "arena": 18,
+      "xp": 370, "gold": 210, "dropBonus": 2, "dropRarity": 1.6,
+      "fx": ["haste"],
+      "look": { "creature": { "type": "boar", "size": 2.8, "colors": { "body": "#4a3a26", "belly": "#7a6446", "accent": "#20180e", "eyes": "#e86a20" } } },
+      "phases": [
+        { "at": 0.5, "modifier": "fleet", "say": "Gravel-Tusk puts its head down and picks a line." }
+      ],
+      "minions": {
+        "prefer": { "families": ["beast"] },
+        "first": [5, 7], "add": [2, 3], "every": 15, "max": 10,
+        "radius": 26, "weaken": 0.75, "rankBonus": 1.2,
+        "announce": "The rest of the sounder comes up the slope."
+      },
+      "chest": { "kind": "iron" },
+      "dropBases": ["halberd", "medium_helm", "medium_boots", "ring"],
+      "gives": { "loot": "rare", "xp": 370, "clears": true },
+      "pin": { "color": "#ffb03a", "r": 6 }
+    },
+
+    {
+      "id": "grief_in_iron",
+      "name": "Grief-in-Iron",
+      "tier": 2,
+      "weight": 8,
+      "plan": "boss_ironmuster",
+      "on": ["pass", "landmark", "dungeon"],
+      "minBand": 2,
+      "biomes": ["mountain", "highland", "any"],
+      "blurb": "Somebody built a thing to hold this pass and then stopped coming to tell it when to stand down.",
+      "over": 3,
+      "scale": 2.2,
+      "kind": "beast", "family": "construct", "role": "boss",
+      "hp": 900, "dmg": [22, 31], "armor": 34, "speed": 2.3, "reach": 5.2,
+      "aggroRange": 50, "attackEvery": 2.5, "arena": 20,
+      "xp": 760, "gold": 420, "dropBonus": 2, "dropRarity": 1.8,
+      "fx": ["barrier", "sunder"],
+      "look": { "creature": { "type": "golem", "size": 2.9, "colors": { "body": "#5e5a54", "belly": "#7e7a72", "accent": "#2e2b28", "eyes": "#ff8a20" } } },
+      "phases": [
+        { "at": 0.6, "modifier": "ironclad", "say": "Grief-in-Iron shuts its plates and stops caring what you are holding." },
+        { "at": 0.3, "modifier": "vicious", "say": "Something inside it gives, and it stops pacing itself." }
+      ],
+      "minions": {
+        "prefer": { "families": ["construct", "humanoid"] },
+        "first": [5, 7], "add": [2, 4], "every": 14, "max": 11,
+        "radius": 28, "weaken": 0.8, "rankBonus": 1.4,
+        "announce": "The muster wakes up behind it."
+      },
+      "chest": { "kind": "gilded" },
+      "dropBases": ["warhammer", "heavy_chest", "heavy_gauntlets", "kite_shield"],
+      "gives": { "loot": "rare", "xp": 760, "clears": true, "revealZone": true },
+      "pin": { "color": "#ff8a3a", "r": 6.6 }
+    },
+    {
+      "id": "the_hungering_brood",
+      "name": "The Hungering Brood",
+      "tier": 2,
+      "weight": 8,
+      "plan": "boss_bonefield",
+      "on": ["dungeon", "landmark"],
+      "minBand": 2,
+      "biomes": ["forest", "wetland", "any"],
+      "blurb": "Silk between every trunk, and the ground under it moves when you put weight on it.",
+      "over": 3,
+      "scale": 2.2,
+      "kind": "beast", "family": "beast", "role": "boss",
+      "hp": 820, "dmg": [24, 34], "armor": 16, "speed": 3.1, "reach": 4.8,
+      "aggroRange": 54, "attackEvery": 2.0, "arena": 20,
+      "xp": 740, "gold": 400, "dropBonus": 2, "dropRarity": 1.8,
+      "fx": ["poison", "root"],
+      "look": { "creature": { "type": "spider", "size": 3.0, "colors": { "body": "#241f2c", "belly": "#3a2a3e", "accent": "#7a1c1c", "eyes": "#ff3030" } } },
+      "phases": [
+        { "at": 0.5, "modifier": "venomous", "say": "The Brood opens and the air goes sour." }
+      ],
+      "minions": {
+        "prefer": { "families": ["beast", "aberration"], "roles": ["skirmisher"] },
+        "first": [6, 9], "add": [3, 5], "every": 12, "max": 14,
+        "radius": 24, "weaken": 0.65, "rankBonus": 1.1,
+        "announce": "The floor of the wood comes apart again."
+      },
+      "chest": { "kind": "gilded" },
+      "dropBases": ["dagger", "light_chest", "light_gauntlets", "quiver"],
+      "gives": { "loot": "rare", "xp": 740, "clears": true },
+      "pin": { "color": "#ff8a3a", "r": 6.6 }
+    },
+
+    {
+      "id": "the_sallow_king",
+      "name": "The Sallow King",
+      "tier": 3,
+      "weight": 7,
+      "plan": "boss_barrow",
+      "on": ["landmark", "dungeon", "pass"],
+      "minBand": 4,
+      "biomes": ["any"],
+      "blurb": "A barrow with its stone rolled aside from the inside, and a court of them standing in the grass waiting.",
+      "over": 4,
+      "scale": 2.6,
+      "kind": "beast", "family": "undead", "role": "boss",
+      "hp": 1240, "dmg": [34, 47], "armor": 24, "speed": 2.7, "reach": 5.4,
+      "aggroRange": 56, "attackEvery": 2.2, "arena": 24,
+      "xp": 1280, "gold": 720, "dropBonus": 3, "dropRarity": 2.0,
+      "fx": ["curse", "marked"],
+      "look": { "creature": { "type": "wraith", "size": 3.0, "colors": { "body": "#332c4a", "belly": "#5f5680", "accent": "#100d1c", "eyes": "#9ae8ff" } } },
+      "phases": [
+        { "at": 0.66, "modifier": "graveborn", "say": "The Sallow King calls its court back up out of the turf." },
+        { "at": 0.33, "modifier": "leeching", "say": "It starts taking what it loses back out of you." }
+      ],
+      "minions": {
+        "prefer": { "families": ["undead"] },
+        "first": [7, 10], "add": [3, 5], "every": 12, "max": 16,
+        "radius": 30, "weaken": 0.75, "rankBonus": 1.5,
+        "announce": "More of the court stand up."
+      },
+      "chest": { "kind": "gilded" },
+      "dropBases": ["gravebound_scepter", "runed_chest", "runed_boots", "silver_amulet"],
+      "gives": { "loot": "legendary", "xp": 1280, "clears": true, "perkPoint": 1 },
+      "pin": { "color": "#ff5a3a", "r": 7.2 }
+    },
+    {
+      "id": "slagborn",
+      "name": "Slagborn",
+      "tier": 3,
+      "weight": 7,
+      "plan": "boss_slagpit",
+      "on": ["pass", "landmark", "dungeon"],
+      "minBand": 4,
+      "biomes": ["mountain", "highland", "scrub"],
+      "blurb": "The ground here has run and set again, and something is still standing in the middle of where it ran from.",
+      "over": 4,
+      "scale": 2.6,
+      "kind": "beast", "family": "elemental", "role": "boss",
+      "hp": 1160, "dmg": [37, 52], "armor": 18, "speed": 3.0, "reach": 5.2,
+      "aggroRange": 58, "attackEvery": 2.0, "arena": 24,
+      "xp": 1300, "gold": 760, "dropBonus": 3, "dropRarity": 2.0,
+      "fx": ["burn", "enchant"],
+      "look": { "creature": { "type": "elemental", "size": 2.9, "colors": { "body": "#ff5a10", "belly": "#ffc860", "accent": "#6a1400", "eyes": "#fff0a0" } } },
+      "phases": [
+        { "at": 0.6, "modifier": "fiery", "say": "Slagborn opens and the heat comes off it in a wall." },
+        { "at": 0.25, "modifier": "frenzied", "say": "It stops holding its shape and simply comes at you." }
+      ],
+      "minions": {
+        "prefer": { "families": ["elemental", "fiend", "construct"] },
+        "first": [6, 8], "add": [3, 4], "every": 13, "max": 15,
+        "radius": 28, "weaken": 0.8, "rankBonus": 1.5,
+        "announce": "More of it peels off the ground."
+      },
+      "chest": { "kind": "gilded" },
+      "dropBases": ["ember_focus", "emberbrand_wand", "runed_gauntlets", "warded_focus"],
+      "gives": { "loot": "legendary", "xp": 1300, "clears": true, "perkPoint": 1 },
+      "pin": { "color": "#ff5a3a", "r": 7.2 }
+    },
+
+    {
+      "id": "the_standing_ruin",
+      "name": "The Standing Ruin",
+      "tier": 4,
+      "weight": 5,
+      "plan": "boss_ironmuster",
+      "on": ["pass", "landmark"],
+      "minBand": 5,
+      "biomes": ["any"],
+      "blurb": "From the next ridge you take it for a broken tower. It is not a tower, and it has noticed you.",
+      "over": 5,
+      "scale": 3.0,
+      "kind": "beast", "family": "construct", "role": "boss",
+      "hp": 2000, "dmg": [52, 72], "armor": 42, "speed": 2.4, "reach": 6.4,
+      "aggroRange": 64, "attackEvery": 2.6, "arena": 28,
+      "xp": 2600, "gold": 1500, "dropBonus": 4, "dropRarity": 2.4,
+      "fx": ["barrier", "sunder", "rally"],
+      "look": { "creature": { "type": "titan", "size": 3.2, "colors": { "body": "#443b33", "belly": "#665445", "accent": "#1e1814", "eyes": "#ff5a10" } } },
+      "phases": [
+        { "at": 0.7, "modifier": "ironclad", "say": "The Standing Ruin locks itself shut." },
+        { "at": 0.4, "modifier": "unyielding", "say": "It stops stepping around the rubble and walks through it." },
+        { "at": 0.15, "modifier": "vicious", "say": "Whatever was keeping it civil has burned out." }
+      ],
+      "minions": {
+        "prefer": { "families": ["construct", "humanoid", "elemental"] },
+        "first": [8, 11], "add": [4, 6], "every": 11, "max": 18,
+        "radius": 32, "weaken": 0.8, "rankBonus": 1.8,
+        "announce": "The rubble round it gets up."
+      },
+      "chest": { "kind": "warded" },
+      "dropBases": ["voidsteel_greatsword", "dragonsteel_chest", "rune_aegis", "dragonheart_ring"],
+      "gives": { "loot": "legendary", "xp": 2600, "clears": true, "perkPoint": 1, "revealZone": true },
+      "pin": { "color": "#ff3a3a", "r": 8 }
+    },
+    {
+      "id": "the_carrion_crown",
+      "name": "The Carrion Crown",
+      "tier": 4,
+      "weight": 5,
+      "plan": "boss_barrow",
+      "on": ["pass", "landmark", "dungeon"],
+      "minBand": 5,
+      "biomes": ["mountain", "highland", "any"],
+      "blurb": "Every crag for half a mile is white with what it has dropped, and the shadow crossing you is not cloud.",
+      "over": 5,
+      "scale": 3.0,
+      "kind": "beast", "family": "dragonkin", "role": "boss",
+      "hp": 1800, "dmg": [58, 80], "armor": 30, "speed": 3.4, "reach": 6.0,
+      "aggroRange": 70, "attackEvery": 2.1, "arena": 28,
+      "xp": 2700, "gold": 1600, "dropBonus": 4, "dropRarity": 2.4,
+      "fx": ["bleed", "haste", "marked"],
+      "look": { "creature": { "type": "griffin", "size": 3.1, "colors": { "body": "#6a5636", "belly": "#c0ae82", "accent": "#3a2a14", "eyes": "#ffdc50" } } },
+      "phases": [
+        { "at": 0.6, "modifier": "fleet", "say": "The Carrion Crown stops circling and starts stooping." },
+        { "at": 0.25, "modifier": "frenzied", "say": "It comes down and stays down." }
+      ],
+      "minions": {
+        "prefer": { "families": ["beast", "dragonkin"] },
+        "first": [7, 10], "add": [4, 5], "every": 11, "max": 17,
+        "radius": 32, "weaken": 0.75, "rankBonus": 1.8,
+        "announce": "The crags empty themselves at you."
+      },
+      "chest": { "kind": "warded" },
+      "dropBases": ["starwake_bow", "wyrmscale_chest", "wyrmscale_helm", "dragontooth_amulet"],
+      "gives": { "loot": "legendary", "xp": 2700, "clears": true, "perkPoint": 1 },
+      "pin": { "color": "#ff3a3a", "r": 8 }
+    }
+  ]
+}

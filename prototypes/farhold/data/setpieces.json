@@ -13,6 +13,8 @@
     "hostile": "true if the layout belongs to something that will fight you (used by the POI test)"
   },
 
+  "_worldBossDoc": "The four world-boss arenas used by data/worldbosses.json — boss_bonefield, boss_barrow, boss_slagpit, boss_ironmuster. They are built WIDE on purpose: the thing standing in the middle is six to nine metres tall and keeps calling bodies up, so the ring has to be somewhere you can actually back off inside. No new geometry — all four are composed out of the same nineteen pieces the strongholds already use.",
+
   "layouts": {
     "wayshrine": {
       "tall": 15,
@@ -257,6 +259,69 @@
       "approach": { "piece": "palisade", "count": 5, "from": 46, "to": 34, "spread": 8, "scale": 0.7 },
       "scatter": [{ "piece": "rubble", "count": 7, "radius": 38, "inner": 26 }, { "piece": "pyre", "count": 2, "radius": 24, "inner": 14 }],
       "fires": [{ "r": 11, "a": 0.12 }, { "r": 11, "a": 0.62 }, { "r": 28, "a": 0.5 }]
+    },
+
+    "boss_bonefield": {
+      "tall": 16, "hostile": true,
+      "_centreDoc": "The middle is EMPTY, and that is the rule for all four of these: js/sites.js spawns the boss at the site's own coordinate, so a centre piece there puts a nine-metre body inside a solid model — found in a screenshot, where the den completely hid the thing it was the den of. The structure sits behind the clearing instead, which also reads better: you come up the avenue, the boss is standing in the open, and its lair is at its back.",
+      "centre": [{ "piece": "den", "scale": 2.4, "z": -17 }],
+      "rings": [
+        { "piece": "bonepile", "count": 10, "radius": 17, "rotate": "random", "jitter": 3.0, "scale": 1.6 },
+        { "piece": "menhir", "count": 6, "radius": 33, "rotate": "random", "jitter": 3.4, "scale": 1.1 },
+        { "piece": "cage", "count": 2, "radius": 21, "offset": 0.37, "rotate": "out", "scale": 0.9 }
+      ],
+      "approach": { "piece": "bonepile", "count": 7, "from": 74, "to": 30, "spread": 8, "scale": 0.9, "both": true },
+      "scatter": [
+        { "piece": "bonepile", "count": 14, "radius": 44, "inner": 20, "scale": 1.2 },
+        { "piece": "rubble", "count": 8, "radius": 42, "inner": 26, "scale": 1.1 }
+      ]
+    },
+    "boss_barrow": {
+      "tall": 17, "hostile": true,
+      "centre": [{ "piece": "altar", "scale": 2.2, "z": -13 }, { "piece": "obelisk", "scale": 1.3, "z": -24 }],
+      "rings": [
+        { "piece": "menhir", "count": 11, "radius": 24, "rotate": "in", "jitter": 0.8, "scale": 1.2 },
+        { "piece": "menhir", "count": 3, "radius": 24, "offset": 0.05, "rotate": "random", "scale": 1.1, "y": -3.2 },
+        { "piece": "bonepile", "count": 8, "radius": 15, "rotate": "random", "jitter": 2.0, "scale": 1.2 },
+        { "piece": "banner", "count": 4, "radius": 30, "offset": 0.125, "scale": 1.1 }
+      ],
+      "approach": { "piece": "waystone", "count": 9, "from": 84, "to": 30, "spread": 5.0, "both": true },
+      "scatter": [
+        { "piece": "rubble", "count": 12, "radius": 46, "inner": 28 },
+        { "piece": "bonepile", "count": 7, "radius": 40, "inner": 26 }
+      ],
+      "fires": [{ "r": 9, "a": 0.125 }, { "r": 9, "a": 0.375 }, { "r": 9, "a": 0.625 }, { "r": 9, "a": 0.875 }]
+    },
+    "boss_slagpit": {
+      "tall": 16, "hostile": true,
+      "centre": [{ "piece": "pyre", "scale": 2.6, "z": -14 }],
+      "rings": [
+        { "piece": "obelisk", "count": 3, "radius": 26, "rotate": "in", "jitter": 1.6, "scale": 0.85 },
+        { "piece": "pyre", "count": 7, "radius": 16, "rotate": "random", "jitter": 1.8, "scale": 1.3 },
+        { "piece": "rubble", "count": 16, "radius": 34, "rotate": "random", "jitter": 3.0, "scale": 1.4 }
+      ],
+      "approach": { "piece": "rubble", "count": 7, "from": 76, "to": 30, "spread": 7, "scale": 1.2, "both": true },
+      "scatter": [
+        { "piece": "rubble", "count": 14, "radius": 48, "inner": 30, "scale": 1.3 },
+        { "piece": "bonepile", "count": 5, "radius": 38, "inner": 24, "scale": 0.9 }
+      ],
+      "fires": [{ "r": 7, "a": 0 }, { "r": 7, "a": 0.2 }, { "r": 7, "a": 0.4 }, { "r": 7, "a": 0.6 }, { "r": 7, "a": 0.8 }, { "r": 20, "a": 0.5 }]
+    },
+    "boss_ironmuster": {
+      "tall": 22, "hostile": true,
+      "centre": [{ "piece": "keep", "scale": 1.15, "z": -24 }],
+      "rings": [
+        { "piece": "wall", "count": 18, "radius": 27, "rotate": "tangent", "skip": [0, 1, 9], "scale": 1.05, "broken": true },
+        { "piece": "tower", "count": 3, "radius": 27, "offset": 0.17, "rotate": "in", "scale": 0.95 },
+        { "piece": "banner", "count": 4, "radius": 19, "offset": 0.125 },
+        { "piece": "rubble", "count": 12, "radius": 16, "rotate": "random", "jitter": 2.6, "scale": 1.3 }
+      ],
+      "approach": { "piece": "waystone", "count": 8, "from": 88, "to": 34, "spread": 5.5, "scale": 1.1, "both": true },
+      "scatter": [
+        { "piece": "rubble", "count": 15, "radius": 50, "inner": 32, "scale": 1.2 },
+        { "piece": "engine", "count": 2, "radius": 40, "inner": 32, "scale": 0.8 }
+      ],
+      "fires": [{ "r": 13, "a": 0.25 }, { "r": 13, "a": 0.75 }]
     }
   }
 }

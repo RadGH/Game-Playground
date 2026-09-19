@@ -184,6 +184,21 @@
 </div>
 <div id="boss-bar" class="hud hidden"><div id="boss-name"></div><div class="bar hp"><i id="boss-fill"></i></div></div>
 
+<!-- 4.5: the notice board. Work used to be taken off a list in the Journal, which made quests a
+     menu; the Journal now only tells you what is going on, and this is the board you have to walk
+     to. Opened by `hud.openNoticeBoard()` — see the note on that method. -->
+<section id="noticeboard" class="noticeboard hidden" role="dialog" aria-modal="true" aria-label="Notice board">
+  <div class="board-card">
+    <div class="board-head">
+      <h3 id="board-title">Notice board</h3>
+      <span class="board-where" id="board-where"></span>
+      <button class="chip" id="board-close">Close</button>
+    </div>
+    <div class="board-list" id="board-list"></div>
+    <div class="board-foot muted small">Esc to step away</div>
+  </div>
+</section>
+
 <!-- ============================================================ character sheet -->
 <section id="sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-label="Character">
   <header class="sheet-head">
@@ -374,7 +389,10 @@
         <div class="pane-body flush" id="perk-stage"><canvas id="perk-canvas" class="perk-canvas"></canvas></div>
         <div id="perk-foot">
           <div class="perk-legend" id="perk-legend"></div>
-          <span class="keyhint">◆ keystone · ■ talent</span>
+          <!-- 4.2: the dotted circles are only "how far out this is". A solid line between two
+               nodes is the unlock rule itself, and saying so is cheaper than a player finding out
+               by spending a point. -->
+          <span class="keyhint">◆ keystone · ■ talent · a solid line means taking one opens the other · the dotted circles are only distance</span>
           <button id="perk-refund" class="chip">Take it all back</button>
         </div>
       </section>

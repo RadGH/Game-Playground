@@ -131,12 +131,33 @@ test('every boat is faster than swimming, and each one is faster than the last',
   }
 });
 
-test('the best boat beats running, so a lake becomes a road rather than a detour', () => {
+/**
+ * THE YARDSTICK MOVED, and it moved because the user moved it.
+ *
+ * This used to assert that the best boat is slower than a sprint on dry land — "or water stops
+ * being a choice". The ask was then: "make it so boats, at least the starting raft, goes faster -
+ * approx the same speed as a horse", and a horse at moveSpeed x mountSpeed (11.34 m/s) is already
+ * exactly a sprint on foot, because runMultiplier and mountSpeed happen to be the same 2.1. So the
+ * old rule and the new one cannot both hold: the raft alone would fail it.
+ *
+ * The rule that survives is the one that was actually being protected — riding must still be the
+ * fastest way to travel — so the ceiling is a MOUNTED sprint, not a sprint on foot.
+ */
+test('the raft is horse pace, and no boat beats a gallop', () => {
   const b = balance.player || {};
-  const run = (b.moveSpeed ?? 5.4) * (b.runMultiplier ?? 2.1);
+  const walk = b.moveSpeed ?? 5.4;
+  const horse = walk * (b.mountSpeed ?? 2.1);
+  const gallop = horse * (b.runMultiplier ?? 2.1);
+  const raft = VEHICLES.boat.kinds[VEHICLES.boat.starter];
   const best = Math.max(...Object.values(VEHICLES.boat.kinds).map(k => k.speed));
-  assert.ok(best > (b.moveSpeed ?? 5.4), 'the best boat should beat a walk');
-  assert.ok(best < run, 'a boat should not beat a sprint on dry land, or water stops being a choice');
+
+  assert.ok(Math.abs(raft.speed - horse) / horse < 0.1,
+    `the starting raft does ${raft.speed} m/s against a horse's ${horse.toFixed(2)} — "approx the ` +
+    'same speed as a horse" means within about a tenth');
+  assert.ok(best > walk, 'the best boat should beat a walk');
+  assert.ok(best < gallop,
+    `the best boat does ${best} m/s against a ${gallop.toFixed(2)} m/s gallop — a boat that outruns ` +
+    'a mount makes the mount pointless');
 });
 
 // ------------------------------------------------------------------ owning one

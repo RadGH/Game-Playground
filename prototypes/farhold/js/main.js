@@ -389,6 +389,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     grassPerCell: lowQuality ? 60 : (balance.props?.grassPerCell ?? 150),
   });
   let features = createFeatures(scene, terrain, {
+    // the pad is dark until the town has been entered; `waypoints` is built just below, so this is
+    // read through a function rather than captured
+    waypointLit: id => waypoints?.isLit?.(id),
     palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
   });
   let weatherView = createWeatherView({
@@ -439,7 +442,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * somewhere else — the pads are per world, like the map's learned region names, because a pad on
    * another planet is not somewhere you can walk to.
    */
-  let waypoints = createWaypoints({ settlements: features.settlements, seed });
+  let waypoints = createWaypoints({
+    settlements: features.settlements, seed,
+    // the same test js/features.js uses to site the pad, so the two cannot disagree
+    groundOk: (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z)
+      && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5,
+  });
   if (save?.waypoints) waypoints.load(save.waypoints);
   const jobs = createJobGen({ frames: frameData, territory: holdings, factions: factionData, standings, seed });
   /** The board for the zone you are in. Rebuilt when you cross a border, not every frame. */
@@ -492,10 +500,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const craft = createCrafting({ data: craftData, rpg, materials, rng: rpg.rng });
 
   if (!save) {
-    const starter = rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: rpg.rng });
+    // attuned like every other weapon, or a level-1 character's first sword has no facts on its
+    // card until the day it is replaced
+    const starter = attuneWeapon(rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: rpg.rng }));
     if (starter) rpg.equip(player, starter, { force: true });
     for (const key of classDef.startingArmour || []) {
-      const piece = rpg.loot.generate(key, 'normal', 'low', { rng: rpg.rng });
+      const piece = attuneWeapon(rpg.loot.generate(key, 'normal', 'low', { rng: rpg.rng }));
       if (piece) rpg.equip(player, piece, { force: true });
     }
     // EVERY character starts with a torch and a horse — both in slots of their own, so a torch does
@@ -1129,6 +1139,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.setPlayer(player);
       autoSave();
     },
+    onRefundPerk: id => {
+      const out = refundOnePerk(player, rpg.forest, id);
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      sound.ui('click');
+      hud.log(`${out.node.name} given back.`, 'level');
+      rpg.refresh(player, { full: true });
+      hud.setPlayer(player);
+      autoSave();
+    },
     onRefundPerks: () => {
       const back = refundPerks(player);
       hud.log(back ? `${back} perk point${back === 1 ? '' : 's'} back. Spend them again.` : 'Nothing to take back.', back ? 'level' : '');
@@ -1430,6 +1449,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * hold. It is the difference between a random fight and a patrol.
    */
   encounters.setSites?.(sites);
+  // sites.js and encounters.js both put chests down now — a boss hoard, a landmark cache, the bait
+  // in a trap. They find the field through a registry when nobody hands it over; this is the front
+  // door, and it means the registry is a fallback rather than the only route.
+  encounters.setChests?.(chests);
+  sites.setChests?.(chests);
 
   /** Fill a camp or a lair with what lives there. Called once per site as you come near it. */
   /**
@@ -1611,6 +1635,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const mark = hud.here && holdings.landmarksIn(hud.here.id)
         .find(l => l.state !== 'done' && Math.hypot(l.x - control.x, l.z - control.z) < 14);
       if (mark) return { kind: 'landmark', mark };
+
+      /**
+       * …and a landmark you can SEE, not only one the territory layer knows about.
+       *
+       * `landmarksIn` lists what the zone record holds. The set pieces standing on the ground come
+       * from `js/sites.js`, and nothing joined the two up — so you could walk to a ring of standing
+       * stones, look straight at it, press E, and be told there is nothing here. Every landmark site
+       * is shaped with the `cell`/`steps`/`gives` fields `atLandmark` reads, so it can be handed
+       * straight in.
+       */
+      const seen = sites.nearest?.(control.x, control.z, 18);
+      if (seen && seen.family === 'landmark') return { kind: 'landmark', mark: seen };
+
+      /**
+       * THE NOTICE BOARD — where work comes from now.
+       *
+       * "Under your journal in the 'Work going on here' you can accept quests arbitrarily from the
+       * menu. Let's remove that in favor of some other system. Players should look for towns to pick
+       * up quests." The Journal lists what you know and takes nothing; a town has a board, and this
+       * is how you reach it.
+       */
+      const inTown = features.settlementAt(control.x, control.z);
+      if (inTown) return { kind: 'board', town: inTown };
     }
     return null;
   }
@@ -1687,7 +1734,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       case 'shop': {
         const spec = w.stock || { count: 2, rarity: 'magic' };
         for (let i = 0; i < spec.count; i++) {
-          const item = rpg.loot.generate(null, spec.rarity, 'low', { rng: rpg.rng, level: player.level });
+          const item = attuneWeapon(rpg.loot.generate(null, spec.rarity, 'low', { rng: rpg.rng, level: player.level }));
           if (item) player.bag.push(item);
         }
         hud.log(`${w.name} sells you ${spec.count} things off their own back.`, 'good');
@@ -1695,17 +1742,37 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         break;
       }
       case 'hire': {
-        const price = w.hire?.gold ?? 180;
-        if (player.gold < price) { hud.log(`${w.name} wants ${price} up front, and you have ${player.gold}.`, 'bad'); break; }
-        player.gold -= price;
-        // A hired sword is a real companion, not a line of text — `sellsword` is the one humanoid in
-        // the pet table, added for exactly this (every other entry is something a class summons).
-        pets.summon('sellsword', control, { count: 1 }).then(made => {
-          for (const one of made || []) one.name = w.name;
-          hud.setPlayer(player);
-        }).catch(() => {});
-        hud.log(`${w.name} takes your ${price} and falls in beside you.`, 'good');
-        roadFolk.settle(w.id, 'paid');
+        /**
+         * AN OFFER, NOT A TRANSACTION.
+         *
+         * "I found a mercenary in town who joined me but it should have opened a dialog where they
+         * offered to join me and I was able to accept/deny. I had no idea it would just straight up
+         * hire them." It took the gold and summoned in the same frame, so meeting one on the road
+         * was indistinguishable from being robbed. `folk.hireOffer` builds the card — who they are,
+         * what they cost, what they bring — and nothing is spent until it is accepted.
+         */
+        const pet = (bestiary.pets || []).find(x => x.id === 'sellsword') || null;
+        talk.showOffer(folk.hireOffer(w, { level: player.level, gold: player.gold, pet }), {
+          accept: () => {
+            const price = w.hire?.gold ?? 180;
+            if (player.gold < price) { hud.log(`${w.name} wants ${price} up front, and you have ${player.gold}.`, 'bad'); return; }
+            player.gold -= price;
+            // A hired sword is a real companion, not a line of text — `sellsword` is the one humanoid
+            // in the pet table, added for exactly this.
+            pets.summon('sellsword', control, { count: 1 }).then(made => {
+              for (const one of made || []) one.name = w.name;
+              hud.setPlayer(player);
+            }).catch(() => {});
+            hud.log(`${w.name} takes your ${price} and falls in beside you.`, 'good');
+            roadFolk.settle(w.id, 'paid');
+            autoSave();
+          },
+          decline: () => {
+            hud.log(`${w.name} shrugs and goes back to the fire.`);
+            roadFolk.settle(w.id, 'helped');
+          },
+          dismiss: () => { /* walked away mid-sentence: they are still standing there */ },
+        });
         break;
       }
       case 'incident': {
@@ -2111,9 +2178,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     });
     features = createFeatures(scene, terrain, {
       palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
+      waypointLit: id => waypoints?.isLit?.(id),
     });
     // a pad on another planet is not somewhere you can walk to, so the network is rebuilt per world
-    waypoints = createWaypoints({ settlements: features.settlements, seed });
+    waypoints = createWaypoints({
+    settlements: features.settlements, seed,
+    // the same test js/features.js uses to site the pad, so the two cannot disagree
+    groundOk: (x, z) => !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3
+      && terrain.slopeAt(x, z, 4) <= 0.5,
+  });
     weatherView = createWeatherView({
       scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
     });
@@ -3058,7 +3131,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     heal: () => { player.hp = player.maxHp; player.mp = player.maxMp; hud.setPlayer(player); },
     give: rarity => {
       const bases = rpg.basesFor(player.level);
-      const item = rpg.loot.generate(field.rng.pick(bases), rarity, 'high', { rng: rpg.rng });
+      const item = attuneWeapon(rpg.loot.generate(field.rng.pick(bases), rarity, 'high', { rng: rpg.rng }));
       if (item) { player.bag.push(item); hud.log(`Given ${item.name}.`, 'loot'); hud.setPlayer(player); }
     },
     spawn: () => { field.spawnNear(control.x, control.z, player.level); },
@@ -3231,6 +3304,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         else if (it.kind === 'leave') leaveDungeon();
         else if (it.kind === 'wanderer') meetOnTheRoad(it.met);
         else if (it.kind === 'landmark') atLandmark(it.mark);
+        // the town's notice board: the one place work is taken from now
+        else if (it.kind === 'board') hud.openNoticeBoard({ where: it.town.name });
         else if (it.kind === 'talk') {
           // phase 7: what they say comes from Lingo and their own personality, not a fixed string
           const who = it.who;
@@ -3708,7 +3783,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // Nine-Pies" at the bottom of the screen while her own shop said "E or Esc to step away"
     const near = talk.isOpen || rewardsOpen() || map.isOpen ? null : interactTarget();
     hud.prompt(near
-      ? near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`
+      ? near.kind === 'board' ? `<b>E</b> read the notice board`
+      : near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`
         : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
         : near.kind === 'leave' ? '<b>E</b> climb back out'
         : near.kind === 'wanderer' ? `<b>E</b> speak to ${near.met.name}, ${near.met.kindName.toLowerCase()}`
@@ -3787,6 +3863,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (lit) {
         hud.log(`The sigils at ${town.name} light as you cross the boundary. You can travel here from any other waypoint.`, 'level');
         sound.questDone();
+        features.update(control.x, control.z, true);   // so the ring lights now, not on the next visit
       }
     }
     if (!campaignDone && campaign.complete) {
@@ -3831,6 +3908,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           color: v.pin?.color || (v.kind === 'lair' ? '#ff6a3a' : '#ffa860'),
           r: v.pin?.r ?? 3.4,
           glyph: v.pin?.glyph || null,
+          // a world boss carries its own character; without this it is just a big red pip
+          icon: v.pin?.icon || undefined,
         })),
         ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
         ...folk.marks(),

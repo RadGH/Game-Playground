@@ -1,5 +1,5 @@
 {
-  "_doc": "Fourteen places that fill a zone in. These are put on the map's existing landmark and pass nodes plus new slots at road junctions and river fords, and each is something you DO, not scenery. `solve` means it has a state a player can change; `uses` says which job frames can bind to it. `icon` is the map glyph, so a shrine and a gibbet are not the same dot (8.17). `gives.xp` is what walking up to one is worth the first time, before you do anything there — small on purpose, because the reward for finding a place is the place, and this is only so that wandering off the road is never worth nothing (8.19). Original names and ideas only.",
+  "_doc": "Fourteen places that fill a zone in. These are put on the map's existing landmark and pass nodes plus new slots at road junctions and river fords, and each is something you DO, not scenery. `solve` means it has a state a player can change; `uses` says which job frames can bind to it. `icon` is the map glyph, so a shrine and a gibbet are not the same dot (8.17). `gives.xp` is what walking up to one is worth the first time, before you do anything there — small on purpose, because the reward for finding a place is the place, and this is only so that wandering off the road is never worth nothing (8.19). Original names and ideas only. **4.12** — \"Any sort of monuments that don't do anything currently need to do something, either part of a quest, or at the very least contain a chest nearby with loot.\" So every entry also carries a `cache`: a chest grade, how far out from the centre it sits, and what it is called on the reward screen. js/sites.js puts it down the first time the place comes into range, once, and a monument with nothing to find is now a test failure rather than a shrug.",
 
   "landmarks": [
     {
@@ -8,6 +8,7 @@
       "blurb": "A lit stone and a shallow bowl, kept by nobody in particular.",
       "does": "Rest here without making camp. Once a day it will bring a fallen companion back.",
       "solve": false, "faction": "quiet_wake",
+      "cache": { "kind": "wooden", "at": 9, "name": "The Wayshrine Bowl" },
       "gives": { "xp": 25, "rest": true, "reviveDaily": 1 }
     },
     {
@@ -16,6 +17,7 @@
       "blurb": "Five stones in a ring and a sixth on its side in the grass.",
       "does": "Put the fallen stone back up. It takes a while and something watches you do it.",
       "solve": true, "steps": 1, "uses": ["standing_stone"],
+      "cache": { "kind": "iron", "at": 13, "name": "Under the Fallen Stone" },
       "gives": { "xp": 45, "perkPoint": 1 }
     },
     {
@@ -24,6 +26,7 @@
       "blurb": "Twelve metres of dry stone with a ladder still in it.",
       "does": "Climb it and the whole zone goes on your map. A patrol beds down here at night.",
       "solve": false, "faction": "wardens_reach",
+      "cache": { "kind": "iron", "at": 8, "name": "The Watchtower Locker" },
       "gives": { "xp": 35, "revealZone": true }
     },
     {
@@ -32,6 +35,7 @@
       "blurb": "A cage on a post, and what is left of somebody's last argument.",
       "does": "Read the plate. Whoever put them there is still out there, and now you know its name.",
       "solve": false, "uses": ["the_grudge"],
+      "cache": { "kind": "wooden", "at": 6, "name": "What the Gibbet Kept" },
       "gives": { "xp": 20, "namesFoe": true }
     },
     {
@@ -40,6 +44,7 @@
       "blurb": "Four walls, no roof, and a cellar door nobody opened.",
       "does": "The cellar is still full. So is the well, and that is a different matter.",
       "solve": false, "faction": "ashen_pact", "uses": ["someones_boy"],
+      "cache": { "kind": "gilded", "at": 11, "name": "The Farm Cellar" },
       "gives": { "xp": 35, "loot": "magic" }
     },
     {
@@ -48,6 +53,7 @@
       "blurb": "A mouth full of rubble and a rail line that stops at it.",
       "does": "Three days' digging, a day at a time. Then it is a dungeon.",
       "solve": true, "steps": 3, "faction": "deepworn", "uses": ["dig_it_out"],
+      "cache": { "kind": "gilded", "at": 10, "name": "The Mine Paybox" },
       "gives": { "xp": 60, "opensDungeon": true }
     },
     {
@@ -56,6 +62,7 @@
       "blurb": "A flat boat, a rope, and somebody who would rather you paid.",
       "does": "Cross without swimming. Free if the Cut like you.",
       "solve": false, "faction": "cutwater",
+      "cache": { "kind": "iron", "at": 8, "name": "The Ferryman's Box" },
       "gives": { "xp": 25, "crossing": true }
     },
     {
@@ -64,6 +71,7 @@
       "blurb": "A good bridge, a chain across it, and a chair.",
       "does": "Pay, fight, or ford it somewhere with a worse bottom.",
       "solve": false, "faction": "stonecount", "uses": ["pay_the_toll"],
+      "cache": { "kind": "iron", "at": 7, "name": "The Toll Chest" },
       "gives": { "xp": 30, "crossing": true, "toll": 6 }
     },
     {
@@ -72,6 +80,7 @@
       "blurb": "A platform in a tree and a hook for the bait.",
       "does": "Hang something on the hook and wait. Whatever comes is bigger than usual.",
       "solve": false,
+      "cache": { "kind": "iron", "at": 9, "name": "The Blind's Cache" },
       "gives": { "xp": 30, "callsBeast": "champion" }
     },
     {
@@ -80,6 +89,7 @@
       "blurb": "Thirty piles of stone, laid out in rows by somebody careful.",
       "does": "Dig one. There is something in it, and there is a reason it was under stone.",
       "solve": false, "faction": "quiet_wake", "uses": ["the_wake"],
+      "cache": { "kind": "gilded", "at": 12, "name": "Under the Third Cairn" },
       "gives": { "xp": 45, "loot": "rare", "curse": true, "startsIncident": "restless_dead" }
     },
     {
@@ -88,6 +98,7 @@
       "blurb": "A cage of dry wood on the highest thing for a mile, unlit.",
       "does": "Light it and every friendly patrol in the zone comes. Once, and loudly.",
       "solve": true, "steps": 1, "uses": ["light_the_beacon"],
+      "cache": { "kind": "iron", "at": 10, "name": "The Beacon Store" },
       "gives": { "xp": 40, "callsPatrol": true }
     },
     {
@@ -96,6 +107,7 @@
       "blurb": "A hull on its side in four metres of water, still mostly closed.",
       "does": "Dive it. The Salt say it is theirs and they are not entirely wrong.",
       "solve": false, "faction": "saltbound",
+      "cache": { "kind": "gilded", "at": 9, "name": "The Wreck's Hold" },
       "gives": { "xp": 55, "loot": "rare" }
     },
     {
@@ -104,6 +116,7 @@
       "blurb": "An anvil under a lean-to and a fire that somehow never goes out.",
       "does": "A crafting bench, outside a town, which is the whole point of it.",
       "solve": false, "faction": "emberwrights", "uses": ["the_apprentice"],
+      "cache": { "kind": "iron", "at": 7, "name": "The Smith's Offcuts" },
       "gives": { "xp": 30, "bench": true }
     },
     {
@@ -112,6 +125,7 @@
       "blurb": "Forty metres of road that is now forty metres of gully.",
       "does": "Two days' work with stone from the bank. Then travel through here is faster for good.",
       "solve": true, "steps": 2, "uses": ["dig_it_out"],
+      "cache": { "kind": "wooden", "at": 10, "name": "What the Gully Washed Out" },
       "gives": { "xp": 35, "travelBonus": 0.15 }
     }
   ]

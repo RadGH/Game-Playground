@@ -31,6 +31,185 @@ const TONE_LABELS = [
   ['trivial', 'far below you'], ['easy', 'easy'], ['even', 'a fair fight'],
   ['hard', 'dangerous'], ['deadly', 'do not go here yet'],
 ];
+/**
+ * 4.11: ONE TABLE OF MARKS, AND THE KEY IS DRAWN FROM IT.
+ *
+ * "Update the map icons to have a legend, I want to be able to clearly see towns and their size at
+ * a glance, as well as dungeons/caves with other icons."
+ *
+ * Before this the map drew a purple triangle for every dungeon mouth, an orange dot for every camp
+ * and whatever World Forge's own node layer felt like underneath — a cave, a dungeon and a bandit
+ * camp were three dots you could not tell apart, the five sizes of settlement were three shades of
+ * cream, and the key under the canvas named three of the fifteen things on screen.
+ *
+ * So there is one table. `drawMark()` is the only thing that puts a place on the map AND the only
+ * thing that fills a swatch in the key, which means the key cannot drift from the map: if a mark
+ * changes shape, the swatch changes with it.
+ *
+ * The settlement ladder is a deliberate silhouette family — the same square growing, then a ring
+ * around the two biggest, then a star for a capital — because "at a glance" is about size, and five
+ * unrelated shapes would have to be learnt instead of read.
+ */
+export const MAP_MARKS = {
+  // 5.1's world bosses (js/sites.js `family: 'worldboss'`) are another agent's work this round, and
+  // this file owns every mark on the map — so one is kept for them here. It is first in the order,
+  // which is what puts it on top of whatever else stands on the same ground.
+  worldboss: { label: 'world boss',     group: 'Beware',      shape: 'burst',  r: 6.0, fill: '#ff3a3a', line: '#2a0808', ring: true },
+
+  capital:   { label: 'capital',        group: 'Settlements', shape: 'star',   r: 5.4, fill: '#ffe08a', line: '#3a2a10', ring: true },
+  city:      { label: 'city',           group: 'Settlements', shape: 'square', r: 4.4, fill: '#f6f0e2', line: '#2a2a2a', ring: true },
+  town:      { label: 'town',           group: 'Settlements', shape: 'square', r: 3.4, fill: '#e8ddc4', line: '#2a2a2a' },
+  village:   { label: 'village',        group: 'Settlements', shape: 'square', r: 2.6, fill: '#c9bfa4', line: '#2a2a2a' },
+  hamlet:    { label: 'hamlet',         group: 'Settlements', shape: 'square', r: 1.9, fill: '#a79e8a', line: '#2a2a2a' },
+  port:      { label: 'port',           group: 'Settlements', shape: 'anchor', r: 3.2, fill: '#8fd3ff', line: '#123045' },
+
+  dungeon:   { label: 'dungeon',        group: 'Underground', shape: 'gate',   r: 4.2, fill: '#c090ff', line: '#1d1030' },
+  cave:      { label: 'cave',           group: 'Underground', shape: 'mouth',  r: 3.8, fill: '#c2a98a', line: '#241a12' },
+  lair:      { label: 'beast lair',     group: 'Underground', shape: 'fang',   r: 4.0, fill: '#ff6a3a', line: '#2a1210' },
+  cleared:   { label: 'already cleared', group: 'Underground', shape: 'gate',  r: 4.2, fill: '#5c6a7a', line: '#151b22' },
+
+  camp:      { label: 'camp or stockade', group: 'Held ground', shape: 'tent', r: 3.6, fill: '#ffa860', line: '#2a1708' },
+  fort:      { label: 'fort or tower',    group: 'Held ground', shape: 'keep', r: 4.2, fill: '#ff6a3a', line: '#2a1208' },
+  castle:    { label: 'castle',           group: 'Held ground', shape: 'keep', r: 5.0, fill: '#ff4a4a', line: '#2a0c0c' },
+  landmark:  { label: 'landmark',         group: 'Held ground', shape: 'pip',  r: 3.0, fill: '#8fd0ff', line: '#10283a' },
+  pass:      { label: 'mountain pass',    group: 'Held ground', shape: 'cross', r: 3.0, fill: '#d8d2c4', line: '#2a2a2a' },
+};
+
+/** The order the key lists them in, which is also the order they are drawn on the map. */
+export const MARK_ORDER = [
+  'worldboss',
+  'capital', 'city', 'town', 'village', 'hamlet', 'port',
+  'dungeon', 'cave', 'lair', 'cleared',
+  'camp', 'fort', 'castle', 'landmark', 'pass',
+];
+
+/**
+ * Which mark a place on this world wears.
+ *
+ * World Forge files a settlement under `kind` (its tier) and a dungeon under `type`, and farhold's
+ * own strongholds carry a `pin.glyph` from `data/strongholds.json` — three vocabularies for one
+ * question, answered once here so the map and the key can never disagree about a place.
+ */
+export function markFor(node) {
+  if (!node) return null;
+  if (node.family === 'worldboss' || node.worldBoss) return 'worldboss';
+  if (node.family === 'landmark') return 'landmark';
+  if (node.family === 'stronghold') {
+    const glyph = node.pin?.glyph || 'camp';
+    if (glyph === 'castle') return 'castle';
+    if (glyph === 'fort' || glyph === 'tower' || glyph === 'siege') return 'fort';
+    if (glyph === 'lair') return 'lair';
+    return 'camp';
+  }
+  if (node.type === 'settlement') return MAP_MARKS[node.kind] ? node.kind : 'village';
+  if (node.type === 'port') return 'port';
+  if (node.type === 'pass') return 'pass';
+  if (node.type === 'dungeon') return node.kind === 'lair' ? 'lair' : 'dungeon';
+  if (node.kind === 'cave') return 'cave';
+  return null;
+}
+
+/** Draw one mark. `k` scales the whole thing, so the key can draw the same shapes a little larger. */
+export function drawMark(ctx, key, x, y, k = 1) {
+  const mark = MAP_MARKS[key];
+  if (!mark) return;
+  const r = mark.r * k;
+  ctx.lineWidth = Math.max(0.7, r * 0.3);
+  ctx.strokeStyle = mark.line;
+  ctx.fillStyle = mark.fill;
+  ctx.beginPath();
+  switch (mark.shape) {
+    case 'square':
+      ctx.rect(x - r, y - r, r * 2, r * 2);
+      break;
+    case 'star':
+      for (let i = 0; i < 10; i++) {
+        const a = (Math.PI / 5) * i - Math.PI / 2, rr = i % 2 ? r * 0.45 : r;
+        const px = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr;
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      }
+      ctx.closePath();
+      break;
+    // a harbour ring with a bar through it — a port is a settlement, so it keeps a round silhouette
+    case 'anchor':
+      ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
+      break;
+    // a dungeon is a doorway: square shoulders, round head, standing on the ground line
+    case 'gate':
+      ctx.moveTo(x - r * 0.7, y + r);
+      ctx.lineTo(x - r * 0.7, y - r * 0.25);
+      ctx.arc(x, y - r * 0.25, r * 0.7, Math.PI, 0);
+      ctx.lineTo(x + r * 0.7, y + r);
+      ctx.closePath();
+      break;
+    // a cave is a hole in a hillside: the same doorway with no straight sides at all
+    case 'mouth':
+      ctx.arc(x, y + r * 0.45, r * 0.95, Math.PI, 0);
+      ctx.closePath();
+      break;
+    // a lair is a mouth with teeth in it
+    case 'fang':
+      ctx.moveTo(x - r, y + r * 0.8);
+      ctx.lineTo(x - r * 0.45, y - r * 0.9);
+      ctx.lineTo(x, y + r * 0.1);
+      ctx.lineTo(x + r * 0.45, y - r * 0.9);
+      ctx.lineTo(x + r, y + r * 0.8);
+      ctx.closePath();
+      break;
+    case 'tent':
+      ctx.moveTo(x, y - r);
+      ctx.lineTo(x + r * 0.95, y + r * 0.75);
+      ctx.lineTo(x - r * 0.95, y + r * 0.75);
+      ctx.closePath();
+      break;
+    // a keep: a block with two merlons, so a held place never reads as a village square
+    case 'keep':
+      ctx.moveTo(x - r, y + r * 0.85);
+      ctx.lineTo(x - r, y - r * 0.5);
+      ctx.lineTo(x - r * 0.45, y - r * 0.5);
+      ctx.lineTo(x - r * 0.45, y - r);
+      ctx.lineTo(x + r * 0.45, y - r);
+      ctx.lineTo(x + r * 0.45, y - r * 0.5);
+      ctx.lineTo(x + r, y - r * 0.5);
+      ctx.lineTo(x + r, y + r * 0.85);
+      ctx.closePath();
+      break;
+    // a world boss is a burst: eight spikes, so it never reads as a place you walk into casually
+    case 'burst':
+      for (let i = 0; i < 16; i++) {
+        const a = (Math.PI / 8) * i - Math.PI / 2, rr = i % 2 ? r * 0.42 : r;
+        const px = x + Math.cos(a) * rr, py = y + Math.sin(a) * rr;
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+      }
+      ctx.closePath();
+      break;
+    case 'cross':
+      ctx.moveTo(x - r, y); ctx.lineTo(x + r, y);
+      ctx.moveTo(x, y - r); ctx.lineTo(x, y + r);
+      break;
+    // a landmark is a plain pip: it is scenery with a use, not somewhere to plan a route around
+    case 'pip':
+    default:
+      ctx.arc(x, y, r * 0.75, 0, Math.PI * 2);
+  }
+  if (mark.shape === 'cross') ctx.stroke();
+  else { ctx.fill(); ctx.stroke(); }
+  if (mark.shape === 'anchor') {
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.8, y); ctx.lineTo(x + r * 0.8, y);
+    ctx.moveTo(x, y - r); ctx.lineTo(x, y + r);
+    ctx.stroke();
+  }
+  // the two biggest settlements wear a ring, which is what makes the size ladder readable zoomed out
+  if (mark.ring) {
+    ctx.beginPath();
+    ctx.arc(x, y, r * 1.55, 0, Math.PI * 2);
+    ctx.strokeStyle = mark.fill;
+    ctx.lineWidth = Math.max(0.6, r * 0.18);
+    ctx.stroke();
+  }
+}
+
 import { renderWorld, legend as legendRows, DEFAULT_LAYERS, worldPixels } from '../../../worldgen/js/render.js';
 import { generateRegionDetail } from '../../../worldgen/js/local.js';
 import { cellInfo } from '../../../worldgen/js/world.js';
@@ -145,6 +324,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   const legendBox = el('div', { class: 'legend' });
   // the biome breakdown, out of the legend and into a fold in the side panel
   const compositionBox = el('details', { class: 'map-composition' });
+  // 4.11: what every mark on the map means, built once from MAP_MARKS — see `buildKey`
+  const keyBox = el('div', { class: 'map-key' });
   const coords = el('span', { class: 'map-coords' });
 
   /**
@@ -216,14 +397,51 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   document.body.append(root);
 
   // ---------------------------------------------------------------- the side panel
+
+  /**
+   * THE KEY: every mark, drawn by the same code that draws the map.
+   *
+   * Each swatch is a tiny canvas with `drawMark()` called on it, so a change to a shape or a colour
+   * shows up here without anybody remembering to update a list of coloured squares. Built once —
+   * nothing in it depends on where you are — and the settlement rows come first because the size
+   * ladder is the thing the report was actually asking to be able to read.
+   */
+  function buildKey() {
+    if (keyBox.dataset.built) return;
+    keyBox.dataset.built = '1';
+    keyBox.append(el('h4', { class: 'map-key-title', text: 'What the marks mean' }));
+    let group = null;
+    let list = null;
+    for (const name of MARK_ORDER) {
+      const mark = MAP_MARKS[name];
+      if (!mark) continue;
+      if (mark.group !== group) {
+        group = mark.group;
+        keyBox.append(el('div', { class: 'map-key-group', text: group }));
+        list = el('div', { class: 'map-key-rows' });
+        keyBox.append(list);
+      }
+      const swatch = el('canvas', { class: 'map-key-swatch', width: 22, height: 22 });
+      const ctx = swatch.getContext('2d');
+      // the biggest mark is 5.4 units across, so 1.7x fits a 22px box with room for the ring
+      drawMark(ctx, name, 11, 11, Math.min(1.7, 8 / mark.r));
+      list.append(el('div', { class: 'map-key-row' }, swatch, el('span', { text: mark.label })));
+    }
+    keyBox.append(el('p', { class: 'muted small', text:
+      'Settlements grow with their size, and the two biggest wear a ring. Dungeons, caves and lairs '
+      + 'are three different mouths; held ground is a tent or a keep.' }));
+  }
+
   function buildSide() {
     side.replaceChildren();
+    buildKey();
     const layerPanel = layersPanel({
       layer: state.layer, layers: state.layers,
       onLayer: name => { state.layer = name; buildSide(); draw(); },
       onToggle: (key, on) => { state.layers[key] = on; draw(); },
     });
     side.append(layerPanel);
+    side.append(keyBox);
     side.append(compositionBox);
 
     // "levels" reads as one more layer chip, sitting with Biomes / Elevation / … / Regions, because
@@ -361,7 +579,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       state.view = { scale, offsetX: ox, offsetY: oy, detail: details[0].regionId, details: details.length };
     } else {
       state.view = renderWorld(ctx, drawnWorld(), {
-        layers: state.layers, layer: state.layer,
+        // 4.11: the place marks are ours now — `drawPlaces` puts every one of them down from the
+        // one table the key is drawn from. Labels stay World Forge's.
+        layers: { ...state.layers, nodes: false }, layer: state.layer,
         scale, offsetX: ox, offsetY: oy,
       });
     }
@@ -477,23 +697,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       ctx.textBaseline = 'alphabetic';
     }
 
-    // ---- dungeon mouths and camps, so a route can be planned around what is on it
-    for (const g of gates?.nodes || []) {
-      const gx = ox + (g.x / M_PER_CELL + 0.5) * scale, gy = oy + (g.z / M_PER_CELL + 0.5) * scale;
-      ctx.beginPath();
-      ctx.moveTo(gx, gy - 6); ctx.lineTo(gx + 5, gy + 4); ctx.lineTo(gx - 5, gy + 4); ctx.closePath();
-      ctx.fillStyle = g.cleared ? '#6a7a8a' : '#c090ff';
-      ctx.fill();
-      ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(8,6,14,.9)'; ctx.stroke();
-    }
-    for (const v of sites?.sites || []) {
-      const sx = ox + (v.x / M_PER_CELL + 0.5) * scale, sy = oy + (v.z / M_PER_CELL + 0.5) * scale;
-      ctx.beginPath();
-      ctx.arc(sx, sy, v.kind === 'lair' ? 4.5 : 3, 0, Math.PI * 2);
-      ctx.fillStyle = v.kind === 'lair' ? '#ff6a3a' : '#ffa860';
-      ctx.fill();
-      ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(10,6,4,.9)'; ctx.stroke();
-    }
+    // ---- every place on this world, in one pass, so a route can be planned around what is on it
+    drawPlaces(ctx, scale, ox, oy);
 
     // anything still falling, so you can plan the walk before it lands
     for (const m of meteors?.marks || []) {
@@ -585,9 +790,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       for (const [tone, label] of TONE_LABELS) {
         rows.push(el('span', { class: 'sw' }, el('i', { style: { background: TONE_TEXT[tone] } }), label));
       }
-      rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#c090ff' } }), 'dungeon'));
-      rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#ff6a3a' } }), 'lair'));
-      rows.push(el('span', { class: 'sw' }, el('i', { style: { background: '#ffa860' } }), 'camp'));
+      // the three place swatches that used to sit here were a colour each for fifteen kinds of
+      // place; the key in the side panel draws all of them, with their real shapes
+      rows.push(el('span', { class: 'sw muted' }, 'places and their marks are in the key, right'));
     }
     /**
      * The legend used to mix two unrelated scales on one line: "far below you / a fair fight / do not
@@ -728,7 +933,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     ctx.fillStyle = '#05070d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // the plain world underneath, so anything without detail yet is still there rather than a hole
-    renderWorld(ctx, drawnWorld(), { layers: state.layers, layer: state.layer, scale, offsetX: ox, offsetY: oy });
+    renderWorld(ctx, drawnWorld(), { layers: { ...state.layers, nodes: false }, layer: state.layer, scale, offsetX: ox, offsetY: oy });
     ctx.imageSmoothingEnabled = false;
     // `origin` is the top-left WORLD cell each detail was generated from and `worldCells` how many
     // of them it covers, so each one lands exactly over the ground it came from and they tile
@@ -798,6 +1003,56 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    * drawn, because Diablo 2's rule is that the network is always THERE and it is your knowledge of
    * it that grows; greying it out tells a player where to go next, which a missing icon cannot.
    */
+  /**
+   * 4.11: EVERY PLACE ON THE MAP, DRAWN FROM THE ONE TABLE.
+   *
+   * World Forge's own `nodes` layer is switched off for this screen (see `draw`) and this replaces
+   * it, for two reasons beyond the key: its settlement ladder was three shades of cream, and at the
+   * zooms where the region detail is drawn its icons were painted over by the detail raster — so
+   * zooming in far enough used to make every town on the map disappear.
+   *
+   * What is shown thins out as you zoom out, the way World Forge's own did, because at zoom 1 a
+   * world has a few hundred of these on it. The biggest places survive to the bottom.
+   */
+  function drawPlaces(ctx, scale, ox, oy) {
+    if (!state.layers.nodes) return;
+    const cleared = new Set((gates?.nodes || []).filter(g => g.cleared).map(g => g.id));
+    const order = new Map(MARK_ORDER.map((key, i) => [key, i]));
+    const marks = [];
+
+    // World Forge's places: settlements, ports, passes, dungeons, caves
+    for (const node of world.nodes || []) {
+      const key = markFor(node);
+      if (!key) continue;
+      // at a whole-world zoom only the places you would plan a route around are drawn
+      if (scale < 3 && !(node.type === 'settlement' ? (node.size || 0) >= 3 : node.type === 'dungeon')) continue;
+      if (scale < 1.6 && node.type === 'settlement' && (node.size || 0) < 4) continue;
+      marks.push({
+        key: node.type === 'dungeon' && cleared.has(node.id) ? 'cleared' : key,
+        x: ox + (node.x + 0.5) * scale, y: oy + (node.y + 0.5) * scale,
+      });
+    }
+
+    // farhold's own: strongholds and landmarks, which stand on the ground in metres, not cells
+    for (const site of sites?.sites || []) {
+      const key = markFor(site);
+      if (!key) continue;
+      if (scale < 2.2 && site.family !== 'stronghold' && site.family !== 'worldboss') continue;
+      marks.push({
+        key: site.cleared ? 'cleared' : key,
+        x: ox + (site.x / M_PER_CELL + 0.5) * scale, y: oy + (site.z / M_PER_CELL + 0.5) * scale,
+      });
+    }
+
+    // smallest first, so a capital is never hidden under the hamlet beside it
+    marks.sort((a, b) => (order.get(b.key) ?? 0) - (order.get(a.key) ?? 0));
+    const k = Math.min(1.5, Math.max(0.7, scale / 4));
+    for (const m of marks) {
+      if (m.x < -20 || m.y < -20 || m.x > canvas.width + 20 || m.y > canvas.height + 20) continue;
+      drawMark(ctx, m.key, m.x, m.y, k);
+    }
+  }
+
   function drawWaypoints(ctx, scale, ox, oy) {
     if (!waypoints) return;
     const pads = waypoints.list();

@@ -18,6 +18,7 @@
 import * as THREE from 'three';
 import { BUILDING_INFO } from './town-plan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
+import { padSpotFor } from './waypoints.js';
 import {
   describeBuilding, partsFor, describeStall, stallParts, stallsFor,
   radiusOf, mix, MESHES, CULTURE_KIT,
@@ -238,6 +239,45 @@ export const BUILDINGS = {
    * different. What is left here is one footing per want (see `WANT_FOOTINGS` above), which is where
    * the cap and the count still live.
    */
+  /**
+   * THE WAYPOINT PAD — one design everywhere.
+   *
+   * "I would like waypoints to all be exactly the same everywhere, a round concrete surface with
+   * some arcane sigildry that lights up when activated. When you teleport to a waypoint, you arrive
+   * at this sigil."
+   *
+   * A low concrete disc with a kerb, sunk so it reads as laid INTO the ground rather than set on
+   * top of it. The sigil ring is a second mesh so it can be lit on its own — see `waysigil`.
+   */
+  waypoint: { cap: BUILDING_INFO.waypoint.cap, build: () => mergeParts([
+    { geometry: CYL, color: '#8d8a84', matrix: mat4(0, 0.16, 0, 3.4, 0.32, 3.4) },   // the pad
+    { geometry: CYL, color: '#6f6c67', matrix: mat4(0, 0.34, 0, 3.0, 0.1, 3.0) },    // the inner face
+    ...[0, 1, 2, 3, 4, 5].map(i => {
+      const a = (i / 6) * Math.PI * 2;
+      // six kerb stones round the rim, so the edge is cut rather than moulded
+      return { geometry: BOX, color: '#7b7872', matrix: mat4(Math.cos(a) * 3.15, 0.3, Math.sin(a) * 3.15, 1.5, 0.5, 0.5, -a) };
+    }),
+  ]) },
+  /**
+   * The sigildry. Dark until the town has been entered, then lit.
+   *
+   * Drawn as a separate mesh in its own colour so `place` can tint one instance bright and another
+   * dead — the pad underneath is the same grey either way, which is what makes an unlit waypoint
+   * read as "not yet" rather than as a different object.
+   */
+  waysigil: { cap: BUILDING_INFO.waysigil.cap, build: () => mergeParts([
+    ...[0, 1, 2, 3, 4, 5, 6, 7].map(i => {
+      const a = (i / 8) * Math.PI * 2;
+      return { geometry: BOX, color: '#ffffff', matrix: mat4(Math.cos(a) * 2.1, 0.4, Math.sin(a) * 2.1, 0.9, 0.06, 0.18, -a) };
+    }),
+    ...[0, 1, 2, 3].map(i => {
+      const a = (i / 4) * Math.PI * 2 + Math.PI / 8;
+      // four spokes into the middle, and a mark at the centre you arrive standing on
+      return { geometry: BOX, color: '#ffffff', matrix: mat4(Math.cos(a) * 1.15, 0.4, Math.sin(a) * 1.15, 2.0, 0.06, 0.14, -a) };
+    }),
+    { geometry: CYL, color: '#ffffff', matrix: mat4(0, 0.41, 0, 0.5, 0.06, 0.5) },
+  ]) },
+
   gatehouse: { cap: BUILDING_INFO.gatehouse.cap, build: () => mergeParts([
     { geometry: BOX, color: STONE, matrix: mat4(-2.6, 3, 0, 2.2, 6, 3.4) },
     { geometry: BOX, color: STONE, matrix: mat4(2.6, 3, 0, 2.2, 6, 3.4) },
@@ -289,6 +329,13 @@ export function createFeatures(scene, terrain, opts = {}) {
   const radius = opts.radius ?? 2600;
   const refreshEvery = opts.refreshEvery ?? 260;
   const seed = (opts.seed ?? 1) >>> 0;
+  /**
+   * F15: which waypoint pads have been lit.
+   *
+   * A function, not a value — `main.js` rebuilds the waypoint book with the world, and the pad has
+   * to show the state at the moment the town is drawn rather than the one it had at boot.
+   */
+  const waypointLit = opts.waypointLit || null;
 
   const toMetres = i => { const [x, y] = IDX_XY(i, W); return [x * M_PER_CELL, y * M_PER_CELL]; };
 
@@ -614,6 +661,31 @@ export function createFeatures(scene, terrain, opts = {}) {
     // the square: the well at its centre
     const [sqx, sqz] = toWorld(plan.square.cx, plan.square.cz);
     place('well', sqx, sqz, rng() * 6.3, 1);
+
+    /**
+     * THE WAYPOINT PAD.
+     *
+     * "I still haven't seen a waypoint." The network, the map and the travel have all worked since
+     * they went in — there was simply nothing standing on the ground, because `features.js` belonged
+     * to another agent that round and the pad was never built.
+     *
+     * It goes where `js/waypoints.js` says it goes, so the thing you walk up to and the dot you click
+     * on the map are the same spot, and you arrive standing on the sigil. The pad is grey concrete
+     * whichever town it is in; only the sigil ring changes, and only between lit and unlit.
+     */
+    {
+      // the same predicate the travel book uses, so the pad you see and the pad you land on match
+      const padOk = (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z)
+        && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5;
+      const pad = padSpotFor(node, padOk);
+      if (padOk(pad.x, pad.z)) {
+        const lit = waypointLit ? !!waypointLit(node.id) : false;
+        place('waypoint', pad.x, pad.z, 0, 1, 0.12);
+        place('waysigil', pad.x, pad.z, 0, 1, 0.12, null,
+          // dead stone until you have been here; then it burns
+          { solid: false, tint: lit ? '#7fe8ff' : '#3a4048' });
+      }
+    }
 
     /**
      * OUTDOOR STALLS — the thing the user asked for by name.

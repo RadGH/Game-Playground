@@ -34,6 +34,9 @@
 //
 // Pure data and arithmetic — no DOM, no Three.js — so the node tests drive the real thing.
 
+// Player-facing numbers go through shared/format.js, so a reach never renders "2.7000000000000002".
+import { fmt } from '../../../shared/format.js';
+
 // ---------------------------------------------------------------------------- strike shapes
 
 /**
@@ -180,27 +183,235 @@ export function markHands(item) {
   return item;
 }
 
-/** "One-handed sword" / "Two-handed — it takes the off hand with it". */
+// ------------------------------------------------------------ what a weapon IS, before you swing it
+
+/**
+ * THREE FACTS EVERY WEAPON HAS TO STATE, and used not to.
+ *
+ *   "I got a weapon called 'truthseeker' that shoots a projectile. How am I supposed to know that
+ *    without testing it? All weapons should indicate if they are melee or ranged, and one hand or
+ *    two handed. Wands and staves should also display their element type."
+ *
+ * Truthseeker is a unique built on the `wand` base, so `rpg.attuneWeapon` makes it ranged and gives
+ * it an element — and then the item card skipped its whole description block, because that block was
+ * guarded with `!item.ranged`. Every ranged weapon in the game therefore said nothing at all about
+ * what it was: not that it shoots, not how many hands it takes, not what element it throws.
+ *
+ * So the three facts are computed ONCE, here, and written onto the item (see `describeWeapon`), and
+ * every screen reads the same fields rather than working it out again and disagreeing.
+ */
+
+/**
+ * How far a shot carries when the item itself does not say.
+ *
+ * A wand carries its own `castRange` (34 m, written by `rpg.attuneWeapon`); an arrow's flight is
+ * `data/balance.json` player.arrowRange. Neither number is reachable from here — this module is
+ * pure arithmetic with no data loading — so they are repeated, and tests/weapon-facts.test.js fails
+ * if either one drifts away from its real source.
+ */
+export const SHOT_REACH = { bow: 46, wand: 34 };
+
+/** Plain family words for the bases whose swing pattern does not name them. */
+const FAMILY_WORDS = {
+  bow: 'Bow', shortbow: 'Shortbow', longbow: 'Longbow', crossbow: 'Crossbow',
+  javelin: 'Javelin', sling: 'Sling',
+  wand: 'Wand', staff: 'Staff', scepter: 'Sceptre', orb: 'Orb', tome: 'Tome',
+};
+
+/**
+ * What each element is called and what it leaves behind.
+ *
+ * `rpg.js` CAST_ELEMENTS is the source of the name on an item the generator has attuned — it writes
+ * `castName` onto the item — so this table is only the fallback for a weapon that was branded at the
+ * bench, or one a test built by hand. Same words, deliberately.
+ */
+const ELEMENT_WORDS = {
+  fire: { name: 'Flame', does: 'sets what it hits alight' },
+  ice: { name: 'Rime', does: 'slows what it hits' },
+  lightning: { name: 'Storm', does: 'leaves the target taking more of everything' },
+  poison: { name: 'Blight', does: 'keeps working after it lands' },
+  shadow: { name: 'Gloom', does: 'curses what it hits' },
+  arcane: { name: 'Arc', does: 'raw force — no status, but the hardest hitting' },
+  holy: { name: 'Dawn', does: 'burns what should not be walking' },
+};
+
+/**
+ * Does this thing shoot, throw or cast at a distance?
+ *
+ * `item.ranged` is the truth once `rpg.attuneWeapon` has been over the item — but a card can be
+ * drawn from a raw base before that (a shop rolled its stock straight out of the generator for
+ * rounds), and a wand read as a melee club until something attuned it. Checking the base too means
+ * the answer never depends on how far through the pipeline the item happens to be.
+ */
+export function isRangedWeapon(item) {
+  if (!item || item.type !== 'weapon') return false;
+  if (item.ranged) return true;
+  return (item.subtype || item.baseKey) === 'wand';
+}
+
+/** The family word a player would use: "Bow", "Wand", "Longsword", "Sabre". */
+export function familyOf(item) {
+  if (!item || item.type !== 'weapon') return 'Fists';
+  const sub = item.subtype || '';
+  const key = item.baseKey || '';
+  if (FAMILY_WORDS[sub]) return FAMILY_WORDS[sub];
+  if (FAMILY_WORDS[key]) return FAMILY_WORDS[key];
+  const named = WEAPON_PATTERNS[key] || WEAPON_PATTERNS[sub]
+    || Object.entries(WEAPON_PATTERNS).find(([k]) => key.endsWith('_' + k))?.[1];
+  if (named?.name) return named.name;
+  // a road weapon or a unique whose base is in neither table: tidy up whatever word it does have
+  const word = sub || key;
+  return word ? word.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Weapon';
+}
+
+/** The element a magic weapon is made of, with the words to say it. Null for steel. */
+export function elementFacts(item) {
+  const el = item?.brand || item?.castElement || null;
+  if (!el) return null;
+  const words = ELEMENT_WORDS[el] || { name: el.replace(/\b\w/, c => c.toUpperCase()), does: '' };
+  return { element: el, name: item?.castName || words.name, does: words.does };
+}
+
+/**
+ * Everything the card has to say about what this weapon IS, in one object.
+ *
+ * `headline` is the unmissable line — "Ranged · Two-handed · Bow" — and `tags` is the same thing
+ * split up, for a row of chips. `line` is the sentence underneath it. Nothing here is a swing
+ * number; `profileOf` and `strikeAt` still own the rhythm.
+ */
+export function weaponFacts(item) {
+  if (!item || item.type !== 'weapon') {
+    return {
+      isWeapon: false, ranged: false, melee: true, hands: 1, twoHanded: false,
+      family: 'Fists', tags: [], headline: '', line: '', handNote: '',
+      element: null, elementName: null, elementNote: null, castLine: null, shotRange: null,
+    };
+  }
+  const ranged = isRangedWeapon(item);
+  const twoHands = !oneHanded(item);
+  const family = familyOf(item);
+  const el = elementFacts(item);
+  const staff = isStaff(item);
+  const wand = (item.subtype || item.baseKey) === 'wand';
+  const profile = profileOf(item);
+
+  // how far it reaches: a shot's flight, or the swing's own reach in metres
+  const shotRange = ranged
+    ? (item.castRange || (wand ? SHOT_REACH.wand : SHOT_REACH.bow))
+    : null;
+
+  /**
+   * The hand note, spelled out rather than implied.
+   *
+   * "One-handed" on its own does not tell a new player that the off hand is therefore free, and
+   * "two-handed" does not tell them the shield is coming off. Both are said outright.
+   */
+  const handNote = !twoHands
+    ? 'It can go in either hand, so the off hand stays free.'
+    : needsBothToDraw(item)
+      ? 'Both hands are on the draw — no shield, no second weapon.'
+      : 'It takes both hands, so the off hand stays empty.';
+
+  const tags = [
+    ranged ? 'Ranged' : 'Melee',
+    twoHands ? 'Two-handed' : 'One-handed',
+    // "Wands and staves should also display their element type" — and so should a sceptre, an orb,
+    // a tome and anything branded at the bench, for the same reason: the element is the difference
+    // between two weapons whose numbers look identical.
+    el ? `${el.name} ${family}` : family,
+  ];
+  const headline = tags.join(' · ');
+
+  // what the attack actually does, for the wand and staff cases the play-test named
+  let castLine = null;
+  if (wand) {
+    const how = wandBehaviour(item);
+    castLine = `${el ? el.name + ' bolt' : 'Bolt'} — ${how.desc}, about ${fmt(shotRange)} m.`;
+  } else if (staff) {
+    const spell = staffSpell(item, el?.element || 'arcane');
+    castLine = `${spell.name} — a close-range spell, cast instead of a swing and free to use.`;
+  }
+
+  // the sentence under the headline
+  let line;
+  const attuned = el ? `, attuned to ${el.name}` : '';
+  if (wand) {
+    line = `A ${twoHands ? 'two' : 'one'}-handed ${family.toLowerCase()}${attuned}. `
+      + `It throws a bolt rather than swinging — about ${fmt(shotRange)} m. ${handNote}`;
+  } else if (staff) {
+    line = `A two-handed ${family.toLowerCase()}${attuned}. `
+      + 'Its attack is a spell, not a swing. ' + handNote;
+  } else if (ranged) {
+    const verb = (item.subtype || item.baseKey) === 'javelin' ? 'It is thrown' : 'It shoots';
+    line = `A ${twoHands ? 'two' : 'one'}-handed ${family.toLowerCase()}. ${verb} — about ${fmt(shotRange)} m. ${handNote}`;
+  } else {
+    line = `A ${twoHands ? 'two' : 'one'}-handed ${family.toLowerCase()}${attuned}. `
+      + `Swung in melee — ${fmt(profile.reach, { decimals: 1 })} m reach, a swing every ${fmt(profile.every)}s. ${handNote}`;
+  }
+
+  return {
+    isWeapon: true,
+    ranged, melee: !ranged,
+    hands: twoHands ? 2 : 1, twoHanded: twoHands,
+    family, tags, headline, line, handNote,
+    element: el?.element || null,
+    elementName: el?.name || null,
+    elementNote: el ? `${el.name}${el.does ? ' — ' + el.does : ''}.` : null,
+    castLine,
+    shotRange,
+    reach: ranged ? shotRange : profile.reach,
+    every: profile.every,
+  };
+}
+
+/**
+ * Write the facts onto the item, so every screen reads one answer.
+ *
+ * Called from `rpg.attuneWeapon`, which is the one gate every generated weapon passes through —
+ * drop, chest, shop shelf, crafting bench. The fields are written on the ITEM, never into the
+ * shared `data/items.json`: that file belongs to Emberveil as well, and it has a test that every
+ * affix in it resolves.
+ */
+export function describeWeapon(item) {
+  if (!item || item.type !== 'weapon') return item;
+  markHands(item);
+  const f = weaponFacts(item);
+  item.rangeClass = f.ranged ? 'ranged' : 'melee';
+  item.gripWord = f.twoHanded ? 'Two-handed' : 'One-handed';
+  item.familyName = f.family;
+  item.weaponTags = f.tags;
+  item.weaponHeadline = f.headline;
+  item.weaponLine = f.line;
+  item.handNote = f.handNote;
+  item.elementName = f.elementName;
+  item.elementNote = f.elementNote;
+  item.castLine = f.castLine;
+  if (f.shotRange) item.shotRange = f.shotRange;
+  return item;
+}
+
+/** "One-handed sword, melee" / "Two-handed bow, ranged — it takes both hands to draw". */
 export function handedText(item) {
   if (!item || item.type !== 'weapon') return '';
-  const p = profileOf(item);
-  if (item.twoHanded) return `Two-handed ${p.name.toLowerCase()} — it takes both hands`;
-  if (needsBothToDraw(item)) return `Two-handed ${item.subtype || 'bow'} — it takes both hands to draw`;
-  return `One-handed ${p.name.toLowerCase()} — it can go in either hand`;
+  const f = weaponFacts(item);
+  return `${f.headline} — ${f.handNote}`;
 }
 
 /**
  * …and the same in words, for the hover card.
  *
- * The handedness leads, because that is the thing a player has to know BEFORE the rhythm: the card
- * used to print a rapier's two arrows and its reach and never once say whether the shield could
- * stay on.
+ * The headline leads, because melee-or-ranged and one-hand-or-two are the things a player has to
+ * know BEFORE the rhythm: the card used to print a rapier's two arrows and its reach and never once
+ * say whether the shield could stay on — and for anything ranged it printed nothing at all.
  */
 export function patternText(item) {
+  const f = weaponFacts(item);
+  if (!f.isWeapon) return '';
+  if (f.ranged || isStaff(item)) return f.line;
   const p = profileOf(item);
   const names = p.pattern.map(k => STRIKES[k]?.name || k);
-  return `${handedText(item)}. ${names.join(', then ')} — ${p.reach.toFixed(1)} m reach, `
-    + `a swing every ${p.every.toFixed(2)}s`;
+  return `${f.headline}. ${names.join(', then ')} — ${fmt(p.reach, { decimals: 1 })} m reach, `
+    + `a swing every ${fmt(p.every)}s. ${f.handNote}`;
 }
 
 /**

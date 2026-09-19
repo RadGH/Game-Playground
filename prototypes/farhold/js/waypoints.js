@@ -47,13 +47,47 @@ export function boundaryOf(node) {
  * of open ground a town has — and at a fixed bearing from the centre so it is in the same relative
  * place in every town, which is what makes it findable without a marker.
  */
-export function padSpotFor(node) {
+export function padSpotFor(node, groundOk = null) {
   const size = node.size || 1;
   const out = 10 + size * 2.2;
-  return { x: node.wx + out, z: node.wz - out * 0.35 };
+
+  /**
+   * The same bearing in every town — unless that bearing is in the river.
+   *
+   * A fixed offset made the pad findable without a marker, which is the point of one design
+   * everywhere. It also put Hollowcrown's pad in the water, because the offset knows nothing about
+   * the ground: the town sits on a bend and its south-east corner is the river. So the standard
+   * bearing is tried first and the rest of the compass after it, and only then does it give up and
+   * take the standard one anyway — a pad in an awkward spot beats no pad at all.
+   *
+   * `groundOk` is passed by BOTH the renderer and the travel book, so the pad you walk up to and
+   * the pad you arrive on can never be different places.
+   */
+  const base = { x: out, z: -out * 0.35 };
+  if (!groundOk) return { x: node.wx + base.x, z: node.wz + base.z };
+
+  /**
+   * Rings as well as bearings, because a town on a river bend can be wet the whole way round.
+   *
+   * Hollowcrown sits in the crook of its river and every one of the eight standard bearings at the
+   * standard radius came back wet — so the search fell through to the default and put the pad in the
+   * water, where the renderer then refused to build it and the player found nothing. Stepping out a
+   * ring at a time finds the bank. A pad ten metres further from the square is a much smaller
+   * compromise than no pad at all.
+   */
+  for (const out2 of [1, 1.45, 1.95, 2.5]) {
+    for (const step of [0, 1, -1, 2, -2, 3, -3, 4]) {
+      const a = (step / 8) * Math.PI * 2;
+      const bx = (base.x * Math.cos(a) - base.z * Math.sin(a)) * out2;
+      const bz = (base.x * Math.sin(a) + base.z * Math.cos(a)) * out2;
+      const x = node.wx + bx, z = node.wz + bz;
+      if (groundOk(x, z)) return { x, z };
+    }
+  }
+  return { x: node.wx + base.x, z: node.wz + base.z };
 }
 
-export function createWaypoints({ settlements = [], seed = 1 } = {}) {
+export function createWaypoints({ settlements = [], seed = 1, groundOk = null } = {}) {
   /** Lit pads, by settlement id. A `Set` because the only question ever asked is "is it lit?". */
   const lit = new Set();
   /** Where you were standing when you last travelled — the anchor a town portal would use. */
@@ -74,7 +108,7 @@ export function createWaypoints({ settlements = [], seed = 1 } = {}) {
     name: node.name,
     size: node.size || 1,
     node,
-    ...padSpotFor(node),
+    ...padSpotFor(node, groundOk),
     lit: lit.has(node.id),
   }));
 

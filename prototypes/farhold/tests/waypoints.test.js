@@ -103,3 +103,34 @@ test('loading over an existing book replaces it rather than adding to it', () =>
   assert.ok(w.isLit(1));
   assert.ok(!w.isLit(3), 'the old network should be gone, not merged');
 });
+
+test('the pad hunts for dry ground, rings as well as bearings', () => {
+  // Hollowcrown sits in the crook of its river and every one of the eight standard bearings at the
+  // standard radius came back wet, so the search fell through to the default, put the pad in the
+  // water, and the renderer then refused to build it — the player found nothing at all. A pad ten
+  // metres further from the square is a much smaller compromise than no pad.
+  const town = { id: 9, name: 'Rivermouth', size: 4, wx: 0, wz: 0 };
+
+  // everything inside 25 m is water: the only dry ground is further out
+  const wetInside = (x, z) => Math.hypot(x, z) > 25;
+  const spot = padSpotFor(town, wetInside);
+  assert.ok(wetInside(spot.x, spot.z), 'the pad was left standing in the water');
+
+  // and a clear site still uses the standard bearing, so a pad is where you expect it
+  const clear = padSpotFor(town, () => true);
+  const plain = padSpotFor(town);
+  assert.equal(Math.round(clear.x), Math.round(plain.x));
+  assert.equal(Math.round(clear.z), Math.round(plain.z));
+});
+
+test('the travel book and the renderer are given the SAME ground test', () => {
+  // if they ever disagree, the pad you walk up to and the pad you land on are different places
+  const town = { id: 3, name: 'Fordwich', size: 3, wx: 100, wz: 100 };
+  const ok = (x, z) => x > 100;
+  const book = createWaypoints({ settlements: [town], seed: 1, groundOk: ok });
+  assert.deepEqual(
+    { x: book.byId(3).x, z: book.byId(3).z },
+    padSpotFor(town, ok),
+    'createWaypoints is not siting the pad the same way padSpotFor does',
+  );
+});

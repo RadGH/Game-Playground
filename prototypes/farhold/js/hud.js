@@ -25,7 +25,7 @@ import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
 import { treeFor, picksFor, talentSummary, tiersOpen, TIER_LEVELS } from './skilltalents.js';
-import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, armProgress } from './perks.js';
+import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, canRefund, refundOne, linksOf, armProgress } from './perks.js';
 
 /** How far in and out the perk forest zooms, and the rings it draws under the nodes. */
 const PERK_ZOOM = [0.6, 4];
@@ -151,7 +151,7 @@ export class Hud {
     onRecycle = null, onCraft = null, craft = null, pets = null, zones = null,
     journal = null, seed = 1, onOpen = null, onClose = null,
     // round 7: the perk forest, the per-skill talent trees, the vehicle dropdowns
-    onTakePerk = null, onRefundPerks = null, onPickTalent = null, onClearTalent = null,
+    onTakePerk = null, onRefundPerks = null, onRefundPerk = null, onPickTalent = null, onClearTalent = null,
     onSelectVehicle = null,
     // The Territory expansion: who holds the ground, what it is offering, and what people say
     standings = null, territoryHere = null, board = null, rumours = null, onTakeJob = null,
@@ -174,6 +174,9 @@ export class Hud {
     this.onTakeJob = onTakeJob;
     this.onTakePerk = onTakePerk;
     this.onRefundPerks = onRefundPerks;
+    // 4.3: one perk back rather than all of them. main.js may not hand us a callback for it yet, in
+    // which case `refundPerk` does the work here — see the note there.
+    this.onRefundPerk = onRefundPerk;
     this.onPickTalent = onPickTalent;
     this.onClearTalent = onClearTalent;
     this.onSelectVehicle = onSelectVehicle;
@@ -212,6 +215,8 @@ export class Hud {
     this.minimapSpan = 26;
     /** Which skill's talent tree is showing on the Skills tab. */
     this.talentSkill = null;
+    /** Is the town notice board up? See `openNoticeBoard`. */
+    this.boardOpen = false;
     /** Which perk node the forest has selected. */
     this.perkPick = null;
     /** D9: names under the nodes. Off until you ask for them. */
@@ -1938,14 +1943,29 @@ export class Hud {
     ctx.fillStyle = '#0b0e15';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // the rings the nodes sit on, drawn faintly, so the lattice reads as a lattice
-    ctx.strokeStyle = 'rgba(80, 100, 140, .16)';
+    /**
+     * THE GUIDE RINGS ARE NOT EDGES, AND THEY USED TO LOOK EXACTLY LIKE ONES.
+     *
+     * "I took the perk from the '8% Experience' which is connected to 'Companions deal 18% more
+     * damage' and '18% critical damage', but it appears the node is not actually connected to these
+     * when it comes to unlocking the next node. However there is a line connecting them."
+     *
+     * Every one of those three nodes sits at radius 3, so the ring-3 circle sweeps straight through
+     * all of them — and it was drawn 1px in rgba(80,100,140,.16) while a real link was drawn 1px in
+     * rgba(110,130,170,.16). Two lines nobody could tell apart, one of which meant something. The
+     * circles are dotted and dimmer now and the links are brighter and thicker (below), so the only
+     * solid line between two nodes is one that says "taking this opens that".
+     */
+    ctx.save();
+    ctx.strokeStyle = 'rgba(70, 86, 118, .28)';
     ctx.lineWidth = 1 * dpr;
+    ctx.setLineDash([1.5 * dpr, 5 * dpr]);
     for (const ring of PERK_RINGS) {
       ctx.beginPath();
       ctx.arc(cx, cy, ring * scale, 0, Math.PI * 2);
       ctx.stroke();
     }
+    ctx.restore();
 
     const taken = takenOf(player);
     const colourOf = node => ARMS.find(a => a.key === node.arm)?.color || '#9fb4d4';
@@ -1972,14 +1992,26 @@ export class Hud {
       note.classList.toggle('bad', !!q && !hits.size);
     }
 
-    // links first, under everything — dimmed as a set while a search is on, so the rings stand out
+    /**
+     * Links, under everything — dimmed as a set while a search is on, so the rings stand out.
+     *
+     * An untaken link was 16% of a grey-blue, which is why the ring circles could pass for one. It
+     * is a clear line now, and the edges of whichever node is SELECTED are drawn on top in that
+     * node's own colour: point at a perk and the screen shows you precisely what taking it opens,
+     * which is the question the report was really asking.
+     */
     if (hits) ctx.globalAlpha = 0.4;
+    const picked = this.perkPick && forest.byId.has(this.perkPick) ? this.perkPick : null;
+    const touching = picked ? new Set(forest.neighbours.get(picked) || []) : null;
     for (const [a, b] of forest.links) {
       const na = forest.byId.get(a), nb = forest.byId.get(b);
       if (!na || !nb) continue;
       const live = taken.has(a) && taken.has(b);
-      ctx.strokeStyle = live ? 'rgba(220, 230, 245, .55)' : 'rgba(110, 130, 170, .16)';
-      ctx.lineWidth = (live ? 2 : 1) * dpr;
+      const onPick = !!picked && (a === picked || b === picked);
+      ctx.strokeStyle = onPick ? colourOf(forest.byId.get(picked))
+        : live ? 'rgba(225, 235, 250, .7)'
+        : 'rgba(126, 148, 190, .38)';
+      ctx.lineWidth = (onPick ? 2.6 : live ? 2 : 1.2) * dpr;
       const a0 = proj.to(na.x, na.y), b0 = proj.to(nb.x, nb.y);
       ctx.beginPath();
       ctx.moveTo(a0.x, a0.y);
@@ -2111,6 +2143,27 @@ export class Hud {
     }
   }
 
+  /**
+   * Hand ONE perk back.
+   *
+   * main.js owns the point-spending callbacks, and its `onRefundPerks` takes no argument and empties
+   * the whole tree — so calling that with an id would quietly wipe a forty-point walk. When main.js
+   * hands us an `onRefundPerk` we use it (it can log, play the click and save); until then the work
+   * happens here and the sheet stays correct, because `rpg.refresh` is what rebuilds the stat sheet
+   * and the HUD already holds the rpg.
+   */
+  refundPerk(id) {
+    const player = this.player;
+    const forest = this.rpg?.forest;
+    if (!player || !forest) return;
+    if (this.onRefundPerk) { this.onRefundPerk(id); this.renderSheet(); return; }
+    const out = refundOne(player, forest, id);
+    if (!out.ok) { this.log(out.why, 'bad'); return; }
+    this.rpg?.refresh?.(player, { full: true });
+    this.log(`${out.node.name || 'That perk'} given back. The point is yours again.`, 'level');
+    this.renderSheet();
+  }
+
   /** The panel beside the forest: what the selected node does, and the button that takes it. */
   renderPerkSide() {
     const player = this.player;
@@ -2143,12 +2196,51 @@ export class Hud {
       kids.push(el('p', 'muted small', `${kind?.name || node.kind}${node.arm ? ` · ${ARMS.find(a => a.key === node.arm)?.name}` : node.oddball ? ' · out on its own' : ''}`));
       kids.push(el('p', null, node.desc || ''));
       if (node.cost) kids.push(el('p', 'warn small', node.cost));
-      if (has) kids.push(el('p', 'small good', 'Taken.'));
-      else if (check.ok) {
+      if (has) {
+        kids.push(el('p', 'small good', 'Taken.'));
+        /**
+         * ONE PERK BACK — "as long as nothing requires it".
+         *
+         * The button is always here and always says where it stands, because "you cannot" with no
+         * reason is the thing that sends a player back to Take it all back. `canRefund` names the
+         * perks that would be cut off from the middle if this one went.
+         */
+        const back = canRefund(player, forest, node.id);
+        const b = el('button', 'chip perk-refund-one' + (back.ok ? '' : ' off'), 'Give this one back');
+        b.disabled = !back.ok;
+        b.dataset.tip = back.ok
+          ? 'Nothing you have taken reaches the middle through this one, so it can go back and the point is yours again.'
+          : back.why;
+        if (back.ok) b.onclick = () => { this.refundPerk(node.id); };
+        kids.push(b);
+        if (!back.ok) kids.push(el('p', 'warn small', back.why));
+      } else if (check.ok) {
         const b = el('button', 'primary', 'Take it');
         b.onclick = () => { this.onTakePerk?.(node.id); this.renderSheet(); };
         kids.push(b);
       } else kids.push(el('p', 'muted small', check.why));
+
+      /**
+       * WHAT THIS ONE ACTUALLY TOUCHES.
+       *
+       * The report was a player reading a guide circle as an edge (see `drawForest`). A drawn line
+       * is now unmistakable, and this is the same answer in words: every node this one connects to,
+       * which is exactly the set `canTake` walks. Click a row to jump to it.
+       */
+      const near = linksOf(forest, node.id);
+      if (near.length) {
+        kids.push(el('div', 'divider', has ? `Opens · ${near.length}` : `Connects to · ${near.length}`));
+        const web = el('div', 'perk-links');
+        for (const n of near) {
+          const row = el('div', 'list-row' + (takenOf(player).has(n.id) ? ' on' : ''));
+          row.style.borderLeftColor = ARMS.find(a => a.key === n.arm)?.color || '#2a3446';
+          row.innerHTML = `<span class="row-main">${n.kind === 'hub' ? 'Where you began' : (n.name || n.id)}</span>`
+            + `<span class="row-note">${takenOf(player).has(n.id) ? 'taken' : NODE_KINDS[n.kind]?.name || n.kind}</span>`;
+          row.onclick = () => { this.perkPick = n.id; this.renderSheet(); };
+          web.append(row);
+        }
+        kids.push(web);
+      }
     }
 
     /**
@@ -2598,7 +2690,20 @@ export class Hud {
       meta('journal-holder', holder ? `${holder.name} · ${holder.band?.name || ''}` : '');
     }
 
-    /** ---- WORK GOING HERE. Everything on the board names something in this zone right now. */
+    /**
+     * ---- WORK GOING HERE. Everything on the board names something in this zone right now.
+     *
+     * 4.5: THE JOURNAL SAYS WHAT IS GOING ON. IT IS NOT WHERE YOU TAKE IT.
+     *
+     * "Under your journal in the 'Work going on here' you can accept quests arbitrarily from the
+     * menu. Let's remove that in favour of some other system. Players should look for towns to pick
+     * up quests, or pick up randomly from events in the world, but not just through interface."
+     *
+     * Taking a job was a click on this row, which made the Journal a shop of quests — you never had
+     * to meet anybody or go anywhere. The rows stay, because knowing what is going on in a region is
+     * the point of a journal, and each one now says where the work is actually taken: off a notice
+     * board in a town, or from the person on the road who is asking.
+     */
     const bbox = $('journal-board');
     if (bbox) {
       const board = this.board?.() || [];
@@ -2608,11 +2713,16 @@ export class Hud {
         const away = job.place && this.player ? this.distanceTo?.(job.place) : null;
         n.innerHTML = `<span>${job.title}<span class="from">${from}${away ? ` · ${away}` : ''}</span></span>`
           + `<span class="muted">${job.reward.gold}g · ${job.reward.xp} xp</span>`
-          + `<span class="take">${job.taken ? 'taken' : 'take it'}</span>`;
-        n.dataset.tip = `${job.text}\n\n${job.scope === 'adjacent' ? 'Next door.' : 'In this zone.'}`;
-        if (!job.taken) n.onclick = () => { this.onTakeJob?.(job); hideTip(); this.renderSheet(); };
+          + `<span class="where">${job.taken ? 'taken' : job.faction ? 'from them' : 'town board'}</span>`;
+        n.dataset.tip = `${job.text}\n\n${job.scope === 'adjacent' ? 'Next door.' : 'In this zone.'}`
+          + (job.taken ? '' : `\n\nHeard of, not taken. ${job.faction
+            ? 'Find somebody of theirs — in a town, or on the road — and they will put your name to it.'
+            : 'Read it off the notice board in a settlement, or from whoever is asking on the road.'}`);
         return n;
       }) : [el('p', 'muted small', 'Nothing going here at the moment. Walk somewhere else and come back.')]));
+      // one line under the list so the missing "take it" is explained rather than simply missing
+      bbox.append(el('p', 'muted small',
+        'Work is heard of here and taken elsewhere: a notice board in a settlement, or the person asking.'));
     }
 
     /** ---- WORD GOING ROUND. The only thing in the game allowed to talk about somewhere else. */
@@ -2652,6 +2762,69 @@ export class Hud {
         return n;
       }) : [el('p', 'muted small', 'No regions on this world.')]));
     }
+  }
+
+  // ---------------------------------------------------------------- the notice board
+
+  /**
+   * THE BOARD IN A SETTLEMENT — the one screen a board job may be taken from.
+   *
+   * 4.5: "Players should look for towns to pick up quests, or pick up randomly from events in the
+   * world, but not just through interface." The Journal lost its take-a-job click; this is where
+   * that click went, and it only opens when something in the world opens it — main.js calls this
+   * when the player walks up to a board in a town, the same way it opens the talk panel for a
+   * person. Nothing on the sheet and no key opens it.
+   *
+   *   hud.openNoticeBoard({ where: town.name });
+   */
+  openNoticeBoard({ where = '', title = 'Notice board' } = {}) {
+    const root = $('noticeboard');
+    if (!root) return false;
+    this.boardOpen = true;
+    const heading = $('board-title');
+    if (heading) heading.textContent = title;
+    const place = $('board-where');
+    if (place) place.textContent = where ? `in ${where}` : '';
+    if (!root.dataset.wired) {
+      root.dataset.wired = '1';
+      $('board-close').onclick = () => this.closeNoticeBoard();
+      // click the dark behind the card to step away, the way every other overlay here behaves
+      root.onclick = e => { if (e.target === root) this.closeNoticeBoard(); };
+      window.addEventListener('keydown', e => {
+        if (this.boardOpen && e.code === 'Escape') { e.preventDefault(); this.closeNoticeBoard(); }
+      });
+    }
+    root.classList.remove('hidden');
+    this.renderNoticeBoard();
+    return true;
+  }
+
+  closeNoticeBoard() {
+    this.boardOpen = false;
+    $('noticeboard')?.classList.add('hidden');
+  }
+
+  /** What is pinned to it. Redrawn after every take, so a job that goes flips to "taken". */
+  renderNoticeBoard() {
+    const list = $('board-list');
+    if (!list) return;
+    const board = this.board?.() || [];
+    list.replaceChildren(...(board.length ? board.map(job => {
+      const row = el('div', 'board-job' + (job.taken ? ' taken' : ''));
+      const from = job.faction ? this.factionName?.(job.faction) : 'posted by the village';
+      const away = job.place && this.player ? this.distanceTo?.(job.place) : null;
+      row.innerHTML = `<span>${job.title}<span class="from">${from}${away ? ` · ${away}` : ''}</span></span>`
+        + `<span class="pay">${job.reward.gold}g · ${job.reward.xp} xp</span>`;
+      row.dataset.tip = `${job.text}\n\n${job.scope === 'adjacent' ? 'Next door.' : 'In this zone.'}`;
+      if (job.taken) {
+        row.append(el('span', 'muted small', 'taken'));
+      } else {
+        const take = el('button', 'chip', 'Take it');
+        take.onclick = () => { this.onTakeJob?.(job); hideTip(); this.renderNoticeBoard(); };
+        row.append(take);
+      }
+      return row;
+    }) : [el('p', 'muted small', 'Nothing is pinned to it today. Come back after something happens here.')]));
   }
 
   /**
@@ -2716,7 +2889,23 @@ export class Hud {
      * with the reach and the clock — which is how you tell a dagger from a halberd without equipping
      * either of them.
      */
-    if (item.type === 'weapon' && !item.ranged) {
+    /**
+     * EVERY weapon describes itself — this used to skip the ranged ones entirely.
+     *
+     * "I got a weapon called 'truthseeker' that shoots a projectile. How am I supposed to know that
+     * without testing it?" The guard here was `&& !item.ranged`, so the whole description block was
+     * skipped for every bow, wand and staff in the game: the one class of weapon whose behaviour you
+     * cannot guess from its name was the one class that said nothing. `js/weapons.js` now writes a
+     * headline, a sentence and the element onto the item, and `patternText` returns a ranged or a
+     * staff sentence instead of a swing rhythm, so there is nothing left for the guard to protect.
+     */
+    if (item.type === 'weapon') {
+      if (item.weaponHeadline) bits.push(`<div class="tip-head">${item.weaponHeadline}</div>`);
+      if (item.weaponLine) bits.push(`<div class="tip-dim">${item.weaponLine}</div>`);
+      if (item.castLine) bits.push(`<div class="tip-dim">${item.castLine}</div>`);
+      if (item.elementNote) bits.push(`<div class="tip-dim">${item.elementNote}</div>`);
+    }
+    if (item.type === 'weapon' && item.rangeClass === 'melee') {
       const p = profileOf(item);
       bits.push(`<div class="tip-pattern"><span class="glyphs">${patternGlyphs(item)}</span>`
         + `<span class="muted small">${patternText(item)}</span></div>`);

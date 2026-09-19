@@ -20,7 +20,7 @@ import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
-import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, oneHanded } from './weapons.js';
+import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, oneHanded, describeWeapon } from './weapons.js';
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
 // js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
 // every Branding talent were doing nothing to an enemy. See `strike` for how it is applied once.
@@ -105,29 +105,43 @@ export function attuneWeapon(item) {
    */
   markHands(item);
   const sub = item.subtype || item.baseKey;
-  if (!CASTERS.has(sub)) return item;
-  if (item.castElement) return item;
-  // a brand put on at the bench wins over the base's own attunement
-  const forced = item.brand;
-  const pick = forced
-    ? CAST_ELEMENTS.find(e => e.element === forced) || CAST_ELEMENTS[0]
-    : CAST_ELEMENTS[Math.floor(hashOf(item.id || item.baseKey) * CAST_ELEMENTS.length)];
-  item.castElement = pick.element;
-  item.castStatus = pick.status;
-  item.castName = pick.name;
-  if (RANGED_CASTERS.has(sub)) {
-    item.ranged = true;
-    item.castRange = 34;
+  if (CASTERS.has(sub) && !item.castElement) {
+    // a brand put on at the bench wins over the base's own attunement
+    const forced = item.brand;
+    const pick = forced
+      ? CAST_ELEMENTS.find(e => e.element === forced) || CAST_ELEMENTS[0]
+      : CAST_ELEMENTS[Math.floor(hashOf(item.id || item.baseKey) * CAST_ELEMENTS.length)];
+    item.castElement = pick.element;
+    item.castStatus = pick.status;
+    item.castName = pick.name;
+    if (RANGED_CASTERS.has(sub)) {
+      item.ranged = true;
+      item.castRange = 34;
+    }
+    // it reads on the card like any other property
+    if (!(item.affixes || []).some(a => a.stat === 'castElement')) {
+      (item.affixes || (item.affixes = [])).push({
+        id: 'cast_' + pick.element, name: pick.name, stat: 'castElement', value: 1,
+        element: pick.element, baseIntrinsic: true, intrinsic: true,
+      });
+    }
+    // and the name says what it is: "Flame Wand of Vitality"
+    if (!item.isUnique && !item.setId && !item.name.startsWith(pick.name)) item.name = `${pick.name} ${item.name}`;
   }
-  // it reads on the card like any other property
-  if (!(item.affixes || []).some(a => a.stat === 'castElement')) {
-    (item.affixes || (item.affixes = [])).push({
-      id: 'cast_' + pick.element, name: pick.name, stat: 'castElement', value: 1,
-      element: pick.element, baseIntrinsic: true, intrinsic: true,
-    });
-  }
-  // and the name says what it is: "Flame Wand of Vitality"
-  if (!item.isUnique && !item.setId && !item.name.startsWith(pick.name)) item.name = `${pick.name} ${item.name}`;
+  /**
+   * AND THEN SAY WHAT IT IS, IN WORDS.
+   *
+   * "I got a weapon called 'truthseeker' that shoots a projectile. How am I supposed to know that
+   * without testing it?" Truthseeker is a unique on the `wand` base, so the two lines above make it
+   * ranged and give it an element — and nothing downstream said either out loud. `describeWeapon`
+   * writes `weaponHeadline`, `weaponLine`, `rangeClass`, `gripWord`, `elementNote` and `castLine`
+   * onto the item, and it runs LAST because the headline quotes the element the block above just
+   * picked. See js/weapons.js.
+   *
+   * Every one of these fields is written on the ITEM, never into `data/items.json` — that file is
+   * shared with Emberveil, which has its own registry and a test over every affix in it.
+   */
+  describeWeapon(item);
   return item;
 }
 

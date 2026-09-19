@@ -18,12 +18,20 @@
 // chest whose grade goes up with the tier, prisoners, standing, a quest hook. `tests/poi.test.js`
 // fails if any point of interest has none of those.
 //
+// A fourth kind of place was added in round 12: a WORLD BOSS (`data/worldbosses.json`). "Add world
+// bosses of varying tiers, which are stronger than the level they reside in and are much larger and
+// swarming in minions. These events should be displayed on the map for the region you are in." It
+// is the same machinery — a slot, a layout, a purpose — with three differences: it is built at its
+// zone's level plus `over`, it is two to three times the size of anything else on that ground
+// (`def.scale`, folded in by js/actors.js), and it keeps calling bodies up on a clock for as long as
+// it is alive. See `populateWorldBoss` and `tickWaves`.
+//
 //   const sites = createSites(scene, terrain, { seed, balance, zones, collide });
-//   sites.update(px, pz);                      // builds the set pieces near you
+//   sites.update(px, pz);                      // builds the set pieces near you, ticks the waves
 //   for (const s of sites.due(px, pz)) …       // hostile sites close enough to fill with bodies
 //   await sites.populate(site, { field, chests, nameFor });   // garrison + named boss + the chest
 //
-// The three JSON files are fetched by this module at IMPORT, not handed in, so nothing outside this
+// The four JSON files are fetched by this module at IMPORT, not handed in, so nothing outside this
 // file had to change to get the places built — and by the time `createSites` is reached (main.js
 // grows a star, a system, a planet and a whole terrain first) they are long since back, so the site
 // list is built there and then. `sites.ready` is there for anyone who needs to be sure.
@@ -31,7 +39,7 @@
 import * as THREE from 'three';
 import { makeRng } from '../../../worldgen/js/noise.js';
 import { BIOMES } from '../../../worldgen/js/biomes.js';
-import { brazierBody } from './chests.js';
+import { brazierBody, currentChests } from './chests.js';
 import { M_PER_CELL } from './planet.js';
 
 function mergeParts(parts) {
@@ -339,8 +347,8 @@ const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
  */
 let CACHE = null;
 const grab = name => fetch(new URL(`../data/${name}.json`, import.meta.url)).then(r => r.json());
-const SITE_DATA = Promise.all([grab('strongholds'), grab('setpieces'), grab('landmarks')])
-  .then(([strongholds, setpieces, landmarks]) => { CACHE = { strongholds, setpieces, landmarks }; return CACHE; })
+const SITE_DATA = Promise.all([grab('strongholds'), grab('setpieces'), grab('landmarks'), grab('worldbosses')])
+  .then(([strongholds, setpieces, landmarks, worldbosses]) => { CACHE = { strongholds, setpieces, landmarks, worldbosses }; return CACHE; })
   .catch(() => null);     // no places this run; the rest of the world still stands
 
 // ---------------------------------------------------------------------------- the sites
@@ -359,9 +367,23 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   let strongholds = data?.strongholds || CACHE?.strongholds || null;
   let setpieces = data?.setpieces || CACHE?.setpieces || null;
   let landmarkData = data?.landmarks || CACHE?.landmarks || null;
+  let worldBossData = data?.worldbosses || CACHE?.worldbosses || null;
   let sites = [];
   let shown = [];
   let lastPoint = null;
+
+  /**
+   * The chest field, for the two things this module has to put on the ground itself.
+   *
+   * `populate` is handed one by main.js and we keep it; `currentChests()` is the fallback so a
+   * monument still gets its cache on a run where the player has not walked into a stronghold yet.
+   * `setChests` is the front door for whoever eventually wires it properly.
+   */
+  let chestField = null;
+  const theChests = () => chestField || currentChests();
+
+  /** Live world-boss fights: one record per boss that is up, holding its swarm and its clock. */
+  const waves = [];
 
   // one InstancedMesh per piece, plus the fire, which is shared with the chest field's brazier
   const meshes = {};
@@ -396,6 +418,7 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     ready = SITE_DATA.then(d => {
       if (!d) return null;
       strongholds = d.strongholds; setpieces = d.setpieces; landmarkData = d.landmarks;
+      worldBossData = d.worldbosses;
       sites = buildSites();
       if (lastPoint) update(lastPoint[0], lastPoint[1], true);
       return d;
@@ -501,6 +524,8 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     const layouts = setpieces?.layouts || {};
     const marks = landmarkData?.landmarks || [];
     const chance = strongholds?.chance || { landmark: 0.45, pass: 0.5, dungeon: 0.5, crossing: 0.35, road: 0.16, junction: 0.45 };
+    const wbKinds = worldBossData?.bosses || [];
+    const wbChance = worldBossData?.chance || {};
     const out = [];
     for (const slot of slotsFrom(terrain.world)) {
       // A road cell can sit on a ford, and a landmark node can sit a metre above the tide line. A
@@ -512,6 +537,52 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       const tags = tagsFor(slot);
 
       const gap = townGap(slot.x, slot.z);
+
+      /**
+       * A WORLD BOSS GETS FIRST REFUSAL ON A SLOT.
+       *
+       * Rolled before the garrisons because a fort and a world boss both want a pass, and if the
+       * garrison wins every time you never see one. The chances in data/worldbosses.json are a
+       * tenth or so per eligible slot, which is eight or nine on a whole planet: enough that the
+       * region you are standing in usually has one, few enough that it is still the thing you tell
+       * somebody about.
+       *
+       * The clearance is 60 m wider than a stronghold's. The arena is where the swarm comes up, and
+       * a swarm spilling into a village is a bug and not a set piece.
+       */
+      const wbFits = wbKinds.filter(w => {
+        if (!(w.on || []).includes(slot.on)) return false;
+        if ((w.minBand ?? 0) > band) return false;
+        if (!layouts[w.plan]) return false;
+        const b = w.biomes || ['any'];
+        if (!b.includes('any') && !b.some(t => tags.has(t))) return false;
+        return gap > layoutRadius(w.plan) + 60;
+      });
+      if (wbFits.length && rng() < (wbChance[slot.on] ?? 0)) {
+        const spec = weighted(wbFits, rng());
+        out.push({
+          id: slot.id, key: slot.key,
+          // `kind` is its own word so nothing that switches on 'camp' or 'lair' picks it up by
+          // accident; `family` is what the rest of this file tests.
+          kind: 'worldboss', type: spec.id, family: 'worldboss', plan: spec.plan, spec,
+          worldBoss: true, tier: spec.tier || 1,
+          name: spec.name, blurb: spec.blurb,
+          gives: spec.gives || {}, faction: null, hostile: true,
+          x: slot.x, z: slot.z, cell: slot.cell, zone,
+          // THE 'stronger than the level they reside in' HALF. The zone's own mid-level is what
+          // everything else here is built at; this is that plus the boss's `over`.
+          zoneLevel: zone?.midLevel ?? 1,
+          level: (zone?.midLevel ?? 1) + (spec.over || 0),
+          pin: {
+            color: spec.pin?.color || '#ff3a3a',
+            r: spec.pin?.r ?? (5.5 + (spec.tier || 1)),
+            glyph: 'worldboss', icon: '\u2620',
+          },
+          populated: false, cleared: false,
+        });
+        continue;
+      }
+
       const fits = kinds.filter(k => {
         if (!(k.on || []).includes(slot.on)) return false;
         if ((k.minBand ?? 1) > band) return false;
@@ -669,6 +740,16 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   let lastCentre = null;
   function update(px, pz, force = false) {
     lastPoint = [px, pz];
+    /**
+     * TWO THINGS THAT HAVE TO HAPPEN EVERY FRAME, above the movement guard.
+     *
+     * The rest of `update` only runs when you have moved 180 m, which is right for rebuilding
+     * instance buffers and wrong for anything with a clock in it. main.js calls this every frame on
+     * the surface, so the swarm clock and the monument caches go here — before the early return, or
+     * a world boss would only call a wave when you happened to walk a furlong.
+     */
+    tickWaves(px, pz);
+    if ((furnishIn -= 1) <= 0) { furnishIn = 20; furnishLandmarks(px, pz); }
     if (!force && lastCentre && Math.hypot(px - lastCentre[0], pz - lastCentre[1]) < 180) return;
     lastCentre = [px, pz];
     shown = sites
@@ -713,6 +794,9 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   async function populate(site, { field, chests = null, nameFor = null, level = null } = {}) {
     const out = { boss: null, chest: null, garrison: [], prisoners: 0 };
     if (!site || !field) return out;
+    // keep the chest field: the monument caches in `furnishLandmarks` have no other way to get one
+    if (chests) chestField = chests;
+    if (site.family === 'worldboss') return populateWorldBoss(site, { field, chests: chests || theChests(), level });
     const spec = site.spec;
     const lvl = level ?? site.level ?? 1;
     const rng = field.rng;
@@ -771,6 +855,220 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     return given ? `${given} ${epithet}` : `${cap(epithet.replace(/^(the|who|of) /, ''))} of ${site.name}`;
   }
 
+  // ---------------------------------------------------------------- world bosses
+
+  /** `[min,max]` -> a whole number in that range. */
+  const span = (pair, rng) => {
+    const [lo, hi] = pair || [1, 1];
+    return lo + Math.floor(rng() * Math.max(1, hi - lo + 1));
+  };
+
+  /** What may be called up as this boss's swarm: what lives here, narrowed by what it prefers. */
+  function minionPool(rec) {
+    const field = rec.field;
+    const all = field.defsFor(rec.site.x, rec.site.z, rec.level);
+    if (!all.length) return [];
+    const want = rec.spec.minions?.prefer || {};
+    const fits = all.filter(d =>
+      (!want.families || want.families.includes(d.family)) &&
+      (!want.roles || want.roles.includes(d.role)));
+    return fits.length ? fits : all;
+  }
+
+  /**
+   * Bring `n` more bodies up around the boss.
+   *
+   * Two caps, and both matter. `minions.max` is how many of ITS swarm may be alive at once, which is
+   * what stops a fight you are losing from becoming a fight you cannot walk away from. The enemy
+   * field's own `maxAlive` is the frame-rate cap, and we stop four short of it so the ordinary
+   * spawner is not starved out by one very loud place.
+   *
+   * `awake` is what makes a reinforcement a reinforcement: the first lot are standing about when you
+   * arrive, everything after that arrives already coming at you.
+   */
+  async function addMinions(rec, n, { awake = false } = {}) {
+    const spec = rec.spec.minions || {};
+    const field = rec.field;
+    const rng = field.rng;
+    const pool = minionPool(rec);
+    if (!pool.length) return [];
+    const maxAlive = balance.spawn?.maxAlive ?? 38;
+    const lvl = Math.max(1, Math.round(rec.level * (spec.weaken ?? 0.8)));
+    const made = [];
+    for (let i = 0; i < n; i++) {
+      if (rec.minions.length >= (spec.max ?? 10)) break;
+      if (field.enemies.length + field.pending > maxAlive - 4) break;
+      const a = rng() * Math.PI * 2;
+      const r = 8 + rng() * Math.max(2, (spec.radius ?? 26) - 8);
+      const [x, z] = terrain.clampToWorld(rec.site.x + Math.cos(a) * r, rec.site.z + Math.sin(a) * r);
+      if (terrain.underwater(x, z) || !field.wild(x, z)) continue;
+      const rank = field.rpg.rollRank(rng, { bonus: spec.rankBonus || 1 });
+      const unit = await field.addRanked(rng.pick(pool), lvl, x, z, rank);
+      if (!unit) continue;
+      unit.siteKey = rec.key;
+      unit.minionOf = rec.key;
+      if (awake) { unit.state = 'chase'; unit.aggroRange = Math.max(unit.aggroRange, 70); }
+      rec.minions.push(unit);
+      made.push(unit);
+    }
+    return made;
+  }
+
+  /**
+   * PUT A WORLD BOSS UP.
+   *
+   * Everything that makes it a world boss rather than a large enemy is in the data: the level it is
+   * built at already carries `over`, `def.scale` makes it two to three times the size of anything
+   * else on this ground (js/actors.js folds it in and widens the reach with it), `def.fx` gives it
+   * looping auras so it is lit up before it moves, and `minions` is the swarm that keeps coming.
+   *
+   * The chest stands in the arena from the start rather than dropping on the kill. That is
+   * deliberate: the chest field has no death hook to hang a drop on, and a warded chest you can see
+   * from the approach — with the thing standing between you and it — is a better reason to go than
+   * a promise.
+   */
+  async function populateWorldBoss(site, { field, chests, level }) {
+    const out = { boss: null, chest: null, garrison: [], prisoners: 0, worldBoss: true };
+    const spec = site.spec;
+    if (!spec) return out;
+    const lvl = Math.max(1, Math.round(level ?? site.level ?? 1));
+    const rng = field.rng;
+
+    const unit = await field.add(spec, lvl, site.x, site.z, { boss: true });
+    if (!unit) return out;
+    unit.boss = true;
+    unit.siteKey = site.key;
+    unit.worldBoss = spec.id;
+    unit.tier = spec.tier || 1;
+    unit.aggroRange = spec.aggroRange ?? 56;
+    out.boss = unit;
+
+    if (chests && spec.chest?.kind) {
+      const a = rng() * Math.PI * 2, r = 9 + (spec.tier || 1) * 2;
+      const [cx, cz] = terrain.clampToWorld(site.x + Math.cos(a) * r, site.z + Math.sin(a) * r);
+      out.chest = chests.place(spec.chest.kind, cx, cz, {
+        key: `worldboss:${site.key}`, level: lvl, facing: rng() * Math.PI * 2,
+        name: `${spec.name}: the Hoard`,
+      });
+    }
+
+    const rec = { key: site.key, site, spec, field, level: lvl, boss: unit, minions: [], t: 0 };
+    waves.push(rec);
+    await addMinions(rec, span(spec.minions?.first || [4, 6], rng));
+    out.garrison = rec.minions.slice();
+
+    field.onLog?.(`${spec.name} is here, and it is not the size of anything else in this region.`, 'bad');
+    return out;
+  }
+
+  /**
+   * THE SWARM CLOCK.
+   *
+   * "swarming in minions" is not a headcount at spawn time — it is bodies that keep arriving while
+   * the boss lives, so the fight has a shape: clear the floor, get some damage in, clear the floor
+   * again. This runs off the wall clock rather than a `dt`, because the only per-frame call this
+   * module is given is `update(px, pz)` and it carries no time with it. Capped at half a second so a
+   * tab that was in the background does not empty six waves at once on the frame it comes back.
+   *
+   * Waves only run while you are near enough to be in the fight; walk away and the boss stands there
+   * with whatever is left of its swarm. It never despawns — js/actors.js refuses to clean up a boss —
+   * and the site is marked cleared the moment it goes down, so it does not come back.
+   */
+  let waveClock = null;
+  function tickWaves(px, pz) {
+    if (!waves.length) { waveClock = null; return; }
+    const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    const dt = waveClock == null ? 0 : Math.min(0.5, Math.max(0, (now - waveClock) / 1000));
+    waveClock = now;
+    for (let i = waves.length - 1; i >= 0; i--) {
+      const rec = waves[i];
+      const boss = rec.boss;
+      if (!boss || boss.dying != null) {
+        // KILLED. The place is finished and stops refilling.
+        rec.site.cleared = true;
+        rec.site.populated = true;
+        waves.splice(i, 1);
+        rec.field.onLog?.(`${rec.spec.name} goes down. Whatever was coming for it stops coming.`, 'loot');
+        continue;
+      }
+      if (boss.removed) {
+        /**
+         * TAKEN OFF THE BOARD WITHOUT DYING.
+         *
+         * `field.clear()` empties the whole enemy field, and three ordinary things call it: going
+         * down into a dungeon, landing on a world, and rebuilding the world around a teleport. The
+         * first draft read that as a kill — so walking into a cave beside a world boss quietly
+         * finished it, and coming back out you found a marked, cleared, empty arena. It is not
+         * dead: drop the record and let the site be filled again next time you come near it.
+         */
+        rec.site.populated = false;
+        waves.splice(i, 1);
+        continue;
+      }
+      rec.minions = rec.minions.filter(u => u && !u.removed && u.dying == null);
+      const near = Math.hypot(rec.site.x - px, rec.site.z - pz);
+      if (near > (rec.spec.minions?.range ?? 260)) continue;
+      rec.t += dt;
+      const spec = rec.spec.minions || {};
+      if (rec.t < (spec.every ?? 14)) continue;
+      rec.t = 0;
+      if (rec.minions.length >= (spec.max ?? 10)) continue;
+      addMinions(rec, span(spec.add || [2, 3], rec.field.rng), { awake: true });
+      if (spec.announce) rec.field.onLog?.(spec.announce, 'bad');
+    }
+  }
+
+  /** Is this site's boss still standing? Used by `relax` so a live fight is never doubled up. */
+  function waveFor(key) { return waves.find(w => w.key === key) || null; }
+
+  // ---------------------------------------------------------------- 4.12: nothing is decorative
+
+  /**
+   * A CACHE BESIDE EVERY MONUMENT.
+   *
+   * "Any sort of monuments that don't do anything currently need to do something, either part of a
+   * quest, or at the very least contain a chest nearby with loot." The fourteen landmarks all
+   * declare a `gives` block, but the only code that reads it is main.js's `atLandmark`, which is fed
+   * by the territory layer and not by the set pieces standing on the ground — so walking up to the
+   * standing stones you can SEE has always been worth exactly nothing. A cache fixes that without
+   * needing anything outside this file: `data/landmarks.json` says the grade, how far out it sits
+   * and what it is called, and the chest field does the rest.
+   *
+   * Safe to run more than once. A cache that was looted stays looted; one that was cleaned up
+   * because you walked out of range comes back when you walk in again.
+   */
+  let furnishIn = 0;
+  function furnishLandmarks(px, pz) {
+    const chests = theChests();
+    if (!chests) return;
+    for (const s of sites) {
+      const cache = s.spec?.cache;
+      if (s.family !== 'landmark' || !cache || s.cacheTaken) continue;
+      if (s.cacheChest) {
+        if (s.cacheChest.opened) { s.cacheTaken = true; s.cacheChest = null; continue; }
+        if (chests.chests.includes(s.cacheChest)) continue;      // still standing where we left it
+        s.cacheChest = null;                                     // range-culled; put it back below
+      }
+      if (Math.hypot(s.x - px, s.z - pz) > 150) continue;
+      // A ferry landing and a sunken wreck both stand at the waterline, so the first angle rolled is
+      // often in the sea. Walk round the place rather than giving up on it — a monument that quietly
+      // never got its cache because of one unlucky angle is the bug this whole item is about.
+      const rng = makeRng((seed ^ (s.id * 2246822519) ^ 0xca5e) >>> 0);
+      const start = rng() * Math.PI * 2, r = cache.at ?? 9;
+      let spot = null;
+      for (let i = 0; i < 8 && !spot; i++) {
+        const a = start + (i / 8) * Math.PI * 2;
+        const [x, z] = terrain.clampToWorld(s.x + Math.cos(a) * r, s.z + Math.sin(a) * r);
+        if (!terrain.underwater?.(x, z)) spot = [x, z];
+      }
+      if (!spot) continue;                       // all the way round is water; try again next pass
+      s.cacheChest = chests.place(cache.kind || 'wooden', spot[0], spot[1], {
+        key: `landmark:${s.key}`, level: s.level || 1,
+        facing: rng() * Math.PI * 2, name: cache.name || `${s.name}: the Cache`,
+      });
+    }
+  }
+
   /** Sites close enough to fill with bodies, and not filled yet. Each comes back once. */
   function due(px, pz, range = 150) {
     const out = [];
@@ -786,16 +1084,29 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   /** Walking far enough away lets a site be filled again, so the world is not used up. */
   function relax(px, pz, range = 420) {
     for (const s of sites) {
+      // …except a world boss that is still standing. It never despawns, so letting the site be
+      // filled again would put a SECOND one on the same coordinate the moment you walked back.
+      if (s.family === 'worldboss' && waveFor(s.key)) continue;
       if (s.populated && !s.cleared && Math.hypot(s.x - px, s.z - pz) > range) s.populated = false;
     }
   }
 
   return {
     get sites() { return sites; },
-    /** Resolves once the three data files are in and the site list is built. */
+    /** Resolves once the four data files are in and the site list is built. */
     ready,
     update, due, relax, populate,
     get visible() { return shown; },
+    /** Every world boss on this planet, cleared or not — what a map layer or a quest would read. */
+    get worldBosses() { return sites.filter(s => s.family === 'worldboss'); },
+    /** The ones that are up right now, with their swarm. */
+    liveBosses: () => waves.map(w => ({
+      key: w.key, id: w.spec.id, name: w.spec.name, tier: w.spec.tier,
+      x: w.site.x, z: w.site.z, level: w.level,
+      hp: w.boss?.hp ?? 0, maxHp: w.boss?.maxHp ?? 0, minions: w.minions.length,
+    })),
+    /** Hand over the chest field, so monuments get their caches and a boss gets its hoard. */
+    setChests(c) { if (c) chestField = c; },
     /** The nearest place you are standing in, whether it fights back or not. */
     nearest: (x, z, range = 40) => {
       let best = null, bestD = range;
@@ -815,6 +1126,9 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       camps: sites.filter(s => s.kind === 'camp').length,
       lairs: sites.filter(s => s.kind === 'lair').length,
       landmarks: sites.filter(s => s.family === 'landmark').length,
+      worldBosses: sites.filter(s => s.family === 'worldboss').length,
+      bossesUp: waves.length,
+      caches: sites.filter(s => s.cacheChest).length,
       pieces: PIECE_KEYS.reduce((n, k) => n + meshes[k].count, 0),
     }),
     dispose() {

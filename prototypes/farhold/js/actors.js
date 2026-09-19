@@ -273,8 +273,13 @@ export class EnemyField {
      * kill. The size sits on the modifier in data/enemies.json and is folded in here, and the reach
      * grows with it — a four-metre body with a two-metre swing has to shove its face into you to
      * land a hit, which looks ridiculous.
+     *
+     * …AND SO MAY THE DEF ITSELF. "World bosses … are much larger" — a world boss cannot rely on
+     * rolling the Giant modifier to be big, so `def.scale` in data/worldbosses.json says outright
+     * how many times the size of an ordinary body of its kind it is, and it multiplies with whatever
+     * modifiers it happens to be wearing. A tier-4 world boss comes out around nine metres.
      */
-    const sizeUp = modifiers.reduce((m, mod) => m * (mod.scale ?? 1), 1);
+    const sizeUp = modifiers.reduce((m, mod) => m * (mod.scale ?? 1), 1) * (def.scale ?? 1);
     if (sizeUp !== 1) {
       unit.scale *= sizeUp;
       unit.reach = (unit.reach || 2.2) * (1 + (sizeUp - 1) * 0.6);
@@ -283,8 +288,14 @@ export class EnemyField {
     }
     /** How much room this body takes up on the ground — see `spread()`. */
     unit.bodyR = Math.max(0.4, (unit.reach || 2.2) * 0.3);
-    /** The looping auras it wears (a modifier's `fx`), so a new spell-effects handle can restore them. */
-    unit.fx = modifiers.map(m => m.fx).filter(Boolean);
+    /**
+     * The looping auras it wears, so a new spell-effects handle can restore them.
+     *
+     * Two sources: whatever modifiers it rolled (`fiery` burns, `graveborn` is cursed) and whatever
+     * the def itself declares. The second is there for world bosses, which have to be lit up before
+     * they move — a nine-metre body standing in a field with no aura on it reads as scenery.
+     */
+    unit.fx = [...(def.fx || []), ...modifiers.map(m => m.fx).filter(Boolean)];
     this.pending++;
     let actor = null;
     try {
@@ -473,6 +484,16 @@ export class EnemyField {
       if (e.state === 'flee') {
         // straight back out of the watch, and no attacking on the way
         speed = e.speed * 1.15;
+        /**
+         * A RUNNER KEEPS YOU AT ITS BACK.
+         *
+         * `facing` is set once when something bolts out of a town's watch, which is fine for two
+         * and a half seconds of running in a straight line. The chase events in js/encounters.js
+         * need the other thing: a body that keeps putting distance between itself and you for half
+         * a minute, whichever way you come at it. Without this you sidestep once and it runs
+         * cheerfully back into your swing, and "catch it before it gets away" is not a chase.
+         */
+        if (e.quarry) e.facing = Math.atan2(-dx, -dz);
       } else if (e.state === 'chase') {
         e.facing = Math.atan2(dx, dz);
         if (standOff > 0) {

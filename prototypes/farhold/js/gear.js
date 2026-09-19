@@ -216,16 +216,36 @@ export const SLOT_AFFIX_LIST = Object.entries(SLOT_AFFIXES)
  * the inventory picks between what you own from a dropdown. That is the whole difference, and it is
  * the reason a rocket does not clutter a loot roll or a recycling bin.
  */
+/**
+ * HORSE PACE, in metres a second.
+ *
+ * `data/balance.json` player.moveSpeed (5.4) x player.mountSpeed (2.1). Repeated here because this
+ * module is a plain data table with nothing loaded into it, and tests/boats.test.js fails if the
+ * two ever drift apart. It is the yardstick the raft is measured against — see below.
+ */
+export const HORSE_PACE = 5.4 * 2.1;
+
 export const VEHICLES = {
   boat: {
     slot: 'boat',
     starter: 'raft',
     kinds: {
-      raft: { key: 'raft', name: 'Lashed Raft', speed: 3.4, price: 0, look: { hull: '#6a5238' },
+      /**
+       * "Make it so boats, at least the starting raft, goes faster - approx the same speed as a
+       * horse."
+       *
+       * The raft was 3.4 m/s — a hair above the 2.7 m/s swim it replaced, and under two thirds of a
+       * plain walk. Crossing anything wider than a river meant several real minutes of holding W
+       * while the shore crept past, so a lake stayed a wall you went round rather than a road.
+       * The raft is horse pace now (11.34 m/s), and the ladder above it keeps its shape: the skiff
+       * is about a quarter faster again and the cutter about half as fast again, both still short
+       * of a gallop, so buying one is an upgrade and riding is still the fastest way to travel.
+       */
+      raft: { key: 'raft', name: 'Lashed Raft', speed: 11.3, price: 0, look: { hull: '#6a5238' },
         lore: 'Six logs and a great deal of rope. It floats, which is the entire specification.' },
-      skiff: { key: 'skiff', name: 'Fenland Skiff', speed: 5.6, price: 340, look: { hull: '#7a6a4a' },
+      skiff: { key: 'skiff', name: 'Fenland Skiff', speed: 14.2, price: 340, look: { hull: '#7a6a4a' },
         lore: 'Flat-bottomed and quick in the shallows. Built for reed channels, not open water.' },
-      cutter: { key: 'cutter', name: 'Coast Cutter', speed: 8.2, price: 1400, look: { hull: '#4a5a6a' },
+      cutter: { key: 'cutter', name: 'Coast Cutter', speed: 17.4, price: 1400, look: { hull: '#4a5a6a' },
         lore: 'A keel, a sail and somewhere dry to sit. It will cross a sea if you are patient.' },
     },
   },

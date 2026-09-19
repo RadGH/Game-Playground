@@ -346,6 +346,27 @@ export function pointsLeft(player) {
 }
 
 /**
+ * EVERY EDGE OF ONE NODE — and the only place anything is allowed to ask.
+ *
+ *   "I took the perk from the '8% Experience' which is connected to 'Companions deal 18% more
+ *    damage' and '18% critical damage', but it appears the node is not actually connected to these
+ *    when it comes to unlocking the next node. However there is a line connecting them, what's the
+ *    deal?"
+ *
+ * The line the player was reading was not an edge at all — it was one of the faint guide circles the
+ * canvas drew at each ring radius, in the same weight and almost the same colour as a real link. All
+ * three of those nodes sit at radius 3, so the ring-3 circle threads through the lot of them and
+ * reads as a connection. The forest itself was right the whole time.
+ *
+ * The screen now asks THIS function what a node touches, and draws exactly that and nothing else, so
+ * a line on the canvas and an unlock can no longer mean different things. Names come back with the
+ * ids because both callers want to write them out.
+ */
+export function linksOf(forest, id) {
+  return (forest?.neighbours?.get(id) || []).map(other => forest.byId.get(other)).filter(Boolean);
+}
+
+/**
  * Can this node be taken right now?
  *
  * A node is reachable when one of its neighbours is already taken — which is the whole rule, and
@@ -374,14 +395,69 @@ export function allocate(player, forest, id) {
 /**
  * Give every point back.
  *
- * A full refund rather than one node at a time, because taking a single node out of the middle of a
- * walk can orphan everything past it, and a tree that silently disconnects itself is worse than one
- * you have to replan.
+ * Still here, and still the way out of a walk you regret wholesale — see `canRefund` for the one
+ * node at a time version.
  */
 export function refundAll(player) {
   const spent = spentBy(player);
   player.perks = [];
   return spent;
+}
+
+/**
+ * Which of your taken nodes would be cut off from the hub if this one went back?
+ *
+ * The old code refused single refunds altogether, because "taking a single node out of the middle of
+ * a walk can orphan everything past it". That is true of a node in the middle of a walk and false of
+ * the node on the end of one, and the player is asking for the end of one: "can you allow resetting
+ * a single perk, as long as nothing requires it". So work out which it is rather than guessing —
+ * walk the taken nodes out from the hub with this one removed, and anything the walk never reaches
+ * is what requires it.
+ */
+export function orphanedBy(player, forest, id) {
+  const taken = takenOf(player);
+  if (!taken.has(id) || id === 'start') return [];
+  const left = new Set(taken);
+  left.delete(id);
+  const seen = new Set(['start']);
+  const queue = ['start'];
+  while (queue.length) {
+    const at = queue.pop();
+    for (const next of forest.neighbours.get(at) || []) {
+      if (!left.has(next) || seen.has(next)) continue;
+      seen.add(next);
+      queue.push(next);
+    }
+  }
+  return [...left].filter(other => other !== 'start' && !seen.has(other))
+    .map(other => forest.byId.get(other)).filter(Boolean);
+}
+
+/** Can this one node go back? `why` is what the screen prints when it cannot. */
+export function canRefund(player, forest, id) {
+  const node = forest.byId.get(id);
+  if (!node) return { ok: false, why: 'No such perk.' };
+  if (id === 'start') return { ok: false, why: 'Where you began costs nothing and cannot be given back.' };
+  if (!takenOf(player).has(id)) return { ok: false, why: 'You have not taken that one.' };
+  const cut = orphanedBy(player, forest, id);
+  if (cut.length) {
+    const names = cut.slice(0, 3).map(n => n.name || n.id).join(', ');
+    return {
+      ok: false, node, orphans: cut,
+      why: cut.length === 1
+        ? `${names} only reaches the middle through this one. Give that one back first.`
+        : `${cut.length} perks reach the middle through this one — ${names}${cut.length > 3 ? ' and others' : ''}. Give those back first.`,
+    };
+  }
+  return { ok: true, node, orphans: [] };
+}
+
+/** Hand one point back. Returns `{ ok }` or `{ ok: false, why }`. */
+export function refundOne(player, forest, id) {
+  const check = canRefund(player, forest, id);
+  if (!check.ok) return check;
+  player.perks = (player.perks || []).filter(taken => taken !== id);
+  return { ok: true, node: check.node };
 }
 
 // ---------------------------------------------------------------------------- what it all adds up to

@@ -16,7 +16,12 @@ import * as THREE from 'three';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { makeActor, setActorAnim } from './actors.js';
 import { makeQuest } from './quests.js';
+import { attuneWeapon } from './rpg.js';
 import { createGearShop, categoryOf, VEHICLES } from './gear.js';
+// A hired sword is one of the folk, but the offer they make is pure arithmetic with no scene in
+// it — so it lives in its own module and the node tests can drive it. See js/hire.js.
+export { hireOffer, HIRE_ROLE_WORDS } from './hire.js';
+import { hireOffer as buildHireOffer } from './hire.js';
 
 /**
  * The little badge that floats over somebody worth talking to. Drawn into a canvas once per glyph
@@ -285,7 +290,15 @@ export function createTownFolk(scene, terrain, opts = {}) {
       for (let i = 0; i < (STOCK_COUNT[category] || 6); i++) {
         const rarity = rng() < 0.1 ? 'rare' : rng() < 0.42 ? 'magic' : 'normal';
         // a shop's gear is levelled to whoever walked in, so the selection is always worth a look
-        const item = rpg.loot.generate(rng.pick(bases), rarity, rpg.qualityFor(level), { rng, level });
+        /**
+         * Straight out of the generator, and then ATTUNED.
+         *
+         * A shop rolled its stock with `rpg.loot.generate` and nothing else, while every drop,
+         * chest and crate went through `attuneWeapon` — so a wand bought over a counter had no
+         * element, no `ranged` flag and, once the card started printing them, no headline either.
+         * A weapon you paid for should say the same things as one you found.
+         */
+        const item = attuneWeapon(rpg.loot.generate(rng.pick(bases), rarity, rpg.qualityFor(level), { rng, level }));
         if (item) { item.shopCategory = category; items.push(item); }
       }
     }
@@ -477,6 +490,15 @@ export function createTownFolk(scene, terrain, opts = {}) {
     },
 
     stockFor, questFrom, populate, depopulate,
+
+    /**
+     * The offer a hireable person makes — see js/hire.js. Exposed on the folk object so main.js can
+     * hand it to the talk panel without importing anything new.
+     */
+    hireOffer(who, { level = 1, gold = 0, pet = null } = {}) {
+      return buildHireOffer(who, { playerLevel: level, gold, pet });
+    },
+
     /** Everyone currently in the world, for the debug menu and the tests. */
     roster: () => [...live.values()].flat(),
 

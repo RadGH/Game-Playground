@@ -1640,6 +1640,15 @@ body {
 #perk-taken .list-row { cursor: pointer; }
 #perk-taken .list-row:hover { background: rgba(28, 42, 60, .8); }
 
+/* 4.2: what the selected node actually touches, in words as well as in lines on the canvas */
+.perk-links { display: flex; flex-direction: column; gap: 3px; }
+.perk-links .list-row { cursor: pointer; }
+.perk-links .list-row:hover { background: rgba(28, 42, 60, .8); }
+.perk-links .list-row.on .row-note { color: #8fe0a0; }
+/* 4.3: one perk back. Disabled says WHY in the line under it, never just greys out. */
+.perk-refund-one { align-self: flex-start; }
+.perk-refund-one:disabled { opacity: .45; cursor: not-allowed; }
+
 /* ---------------------------------------------------------------- 5. crafting */
 .tab-body[data-tab="crafting"]:not(.hidden) {
   display: grid;
@@ -1750,19 +1759,47 @@ body {
 .standing-row .num.up { color: var(--good); }
 .standing-row .num.down { color: var(--bad); }
 .standing-row.holder { box-shadow: inset 0 0 0 1px rgba(127, 216, 255, .3); }
-.job-row { cursor: pointer; }
-.job-row:hover { background: rgba(28, 42, 60, .8); }
 .job-row .scope { font-size: var(--fs-sm); color: var(--ink-faint); }
-/* D2: the rows were clickable and nothing said so, while the panel beside them read "nobody has
-   asked you for anything" */
 .job-row { grid-template-columns: 1fr auto auto; align-items: baseline; }
-.job-row .take {
-  font-size: var(--fs-sm); color: var(--accent); border: 1px solid #2f5d84;
+/* 4.5: the journal row is a notice, not a button — it no longer takes the job, so it no longer
+   looks like something you press. `where` says where the work is actually taken. */
+.job-row .where {
+  font-size: var(--fs-sm); color: var(--ink-faint); border: 1px dashed var(--pane-line);
   border-radius: 999px; padding: 1px 9px; margin-left: 8px; white-space: nowrap;
 }
-.job-row:hover .take { background: #17293c; }
-.job-row.taken .take { color: var(--good); border-color: #2f6f4a; }
+.job-row.taken .where { color: var(--good); border-style: solid; border-color: #2f6f4a; }
 .job-row .from { display: block; font-size: var(--fs-sm); color: var(--ink-faint); }
+
+/* ---- the notice board in a settlement: the one place a board job is taken from a screen.
+   Opened by `hud.openNoticeBoard()` when the player walks up to a board in a town. */
+.noticeboard {
+  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center;
+  background: rgba(4, 7, 12, .72);
+}
+.noticeboard.hidden { display: none; }
+.noticeboard .board-card {
+  width: min(680px, 92vw); max-height: 80vh; display: flex; flex-direction: column;
+  /* solid, not the panel's usual translucency: a village behind the board showed straight through it */
+  background: #0d1420; border: 1px solid var(--pane-line); border-radius: 10px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .6);
+}
+.noticeboard .chip { text-transform: none; }
+.noticeboard .board-head {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--pane-line-soft);
+}
+.noticeboard .board-head h3 { margin: 0; font-size: 16px; color: var(--ink); }
+.noticeboard .board-head .board-where { color: var(--ink-faint); font-size: var(--fs-sm); flex: 1; }
+.noticeboard .board-list { overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+.noticeboard .board-job {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 2px 10px; align-items: baseline;
+  padding: 7px 9px; border-radius: 6px; background: rgba(16, 24, 36, .6);
+  border-left: 2px solid var(--pane-line); font-size: var(--fs);
+}
+.noticeboard .board-job .from { display: block; font-size: var(--fs-sm); color: var(--ink-faint); }
+.noticeboard .board-job .pay { color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.noticeboard .board-job.taken { opacity: .6; }
+.noticeboard .board-foot { padding: 8px 14px; border-top: 1px solid var(--pane-line-soft); }
 .rumour-row { display: block; padding: 5px 8px; border-radius: 5px; background: rgba(16, 24, 36, .5); font-size: var(--fs); }
 .rumour-row .who { display: block; font-size: var(--fs-sm); color: var(--ink-faint); margin-top: 2px; }
 .col-survey { grid-area: survey; }
@@ -1783,6 +1820,10 @@ body {
   padding: 5px 8px; font-size: var(--fs);
 }
 .pane .journal-row .muted { font-variant-numeric: tabular-nums; }
+/* the work rows have a third column — where the job is actually taken — and `.pane .journal-row`
+   above is more specific than `.job-row`, so it was wrapping onto a line of its own */
+.pane .job-row { grid-template-columns: 1fr auto auto; }
+.pane .job-row .where { justify-self: end; }
 .pane .zonelist { gap: 4px; }
 /* a zone's own description used to be in a `title=` attribute — invisible unless you hovered and waited */
 .pane .zone-row {
@@ -1847,3 +1888,13 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 /* the target bar: dim when the thing is out of reach, and out from under the boss bar */
 #target.far { opacity: .5; }
 #target.under-boss { top: auto; margin-top: 58px; }
+
+/* ---------------------------------------------------------------- 4.11: the map key
+   Fifteen kinds of place, each drawn by the map's own `drawMark()` into a 22px canvas, so a swatch
+   here is literally the mark on the map rather than a coloured square that has to be kept in step. */
+.map-key { display: flex; flex-direction: column; gap: 3px; }
+.map-key-title { margin: 0; font-size: 12px; color: #cfe0f4; text-transform: uppercase; letter-spacing: .06em; }
+.map-key-group { font-size: 11px; color: #7f8fa6; margin-top: 4px; }
+.map-key-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
+.map-key-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #9fb0c8; }
+.map-key-swatch { width: 22px; height: 22px; flex: 0 0 22px; }

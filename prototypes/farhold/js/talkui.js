@@ -69,6 +69,12 @@ export function createTalkPanel(handlers = {}) {
 
   let open = false;
   let current = null;
+  /**
+   * Which panel is showing. 'talk' is the ordinary conversation; 'offer' is a single yes-or-no
+   * proposition — hiring somebody, today — that has to be read before it is answered.
+   */
+  let mode = 'talk';
+  let offerState = null;
   /** Which shelf of the shop is showing. Kept between renders so a buy does not reset it. */
   let shopTab = 'weapon';
   /** Which bag items are ticked for which gather job. Kept between renders so a tick sticks. */
@@ -76,6 +82,7 @@ export function createTalkPanel(handlers = {}) {
   let context = null;
 
   function render() {
+    if (mode === 'offer') return renderOffer();
     if (!current) return;
     const npc = current;
     head.replaceChildren(
@@ -171,6 +178,20 @@ export function createTalkPanel(handlers = {}) {
       }
     }
 
+    /**
+     * ---- somebody who will walk with you.
+     *
+     * The same offer, inside an ordinary conversation, for a hireable person who also trades or
+     * hands out work. `context.hireOffer` is `js/town.js` `hireOffer()`; nothing is spent until the
+     * button is pressed, which is the entire point of 4.18.
+     */
+    if (context.hireOffer) {
+      kids.push(...offerNodes(context.hireOffer,
+        o => { handlers.hire?.(o); render(); },
+        o => { handlers.declineHire?.(o); render(); },
+      ));
+    }
+
     // ---- trade
     if (npc.trades) {
       /**
@@ -231,7 +252,20 @@ export function createTalkPanel(handlers = {}) {
         if (item.speed) bits.push(`${item.speed} m/s`);            // a mount, or a boat
         if (item.range) bits.push(`lights ${item.range} m`);       // a torch, a lantern, a lamp
         if (item.arrowDamage) bits.push(`+${item.arrowDamage} arrow damage`);
-        if (item.twoHanded) bits.push('two-handed');
+        /**
+         * MELEE OR RANGED, AND HOW MANY HANDS — on the row, not only on the hover card.
+         *
+         * "I got a weapon called 'truthseeker' that shoots a projectile. How am I supposed to know
+         * that without testing it?" A shelf of six weapons at the same price is unreadable if the
+         * only way to find out which of them shoots is to buy one. `rangeClass`, `gripWord` and
+         * `elementName` are written onto every weapon by `describeWeapon` (js/weapons.js), so the
+         * row and the card can never disagree.
+         */
+        if (item.type === 'weapon') {
+          if (item.rangeClass) bits.push(item.rangeClass);
+          bits.push((item.gripWord || (item.twoHanded ? 'Two-handed' : 'One-handed')).toLowerCase());
+          if (item.elementName) bits.push(item.elementName.toLowerCase());
+        } else if (item.twoHanded) bits.push('two-handed');
         const req = item.levelReq ?? 1;
         if (req > 1) bits.push(`level ${req}`);
         return bits.join(' · ');
@@ -399,7 +433,84 @@ export function createTalkPanel(handlers = {}) {
     body.replaceChildren(...kids);
   }
 
+  /**
+   * AN OFFER YOU CAN READ BEFORE YOU ANSWER IT.
+   *
+   *   "I found a mercenary in town who joined me but it should have opened a dialog where they
+   *    offered to join me and I was able to accept/deny. I had no idea it would just straight up
+   *    hire them… the dialog just needs improved so you can see something about the person before
+   *    recruiting them."
+   *
+   * Pressing E on a mercenary captain used to take the gold and summon the sellsword in the same
+   * frame — the first you knew of the price was the number missing from your purse. This draws the
+   * whole thing first: who they are, what they cost against what you are carrying, what they bring
+   * to a fight, and two buttons. `js/town.js` `hireOffer()` builds the object; nothing is decided
+   * here.
+   *
+   * Everything uses classes style.css already has (talk-quest, trade-row, coin, talk-btn), so the
+   * panel needs no new stylesheet to look like the rest of the game.
+   */
+  /**
+   * The body of an offer: their words, what you get, the price against your purse, two buttons.
+   *
+   * Shared by the standalone panel (the mercenary captain you meet on the road) and by the block
+   * inside an ordinary conversation (somebody in a town who will walk with you), so the two can
+   * never end up describing the same bargain differently.
+   */
+  function offerNodes(o, onAccept, onDecline) {
+    const kids = [];
+    // their own words first, so it reads as somebody speaking rather than a receipt
+    for (const line of o.lines || []) kids.push(el('p', { class: 'talk-say', text: line }));
+    if (o.blurb) kids.push(el('p', { class: 'muted small', text: o.blurb }));
+
+    const card = el('div', { class: 'talk-quest' },
+      el('div', { class: 'q-title', text: o.title || 'What you would be taking on' }),
+    );
+    for (const [label, value] of o.rows || []) {
+      card.append(el('div', { class: 'trade-row' },
+        el('div', { class: 'trade-what' },
+          el('span', { text: label }),
+          el('span', { class: 'trade-spec', text: String(value) }),
+        ),
+      ));
+    }
+    if (o.terms) card.append(el('div', { class: 'muted small', text: o.terms }));
+    kids.push(card);
+
+    // the price, and the purse next to it — the two numbers the decision is actually made on
+    kids.push(el('div', { class: 'talk-gold muted small', text: `${o.price} gold. You have ${o.gold}.` }));
+    if (o.refusal) kids.push(el('div', { class: 'talk-standing small', text: o.refusal }));
+
+    kids.push(el('div', { class: 'hand-tools' },
+      el('button', {
+        class: 'talk-btn primary', text: o.acceptText || 'Agree',
+        // E1's rule: a button you cannot use should say so before you press it, not after
+        disabled: !!o.refusal,
+        title: o.refusal || '',
+        onclick: () => onAccept(o),
+      }),
+      el('button', { class: 'talk-btn', text: o.declineText || 'No', onclick: () => onDecline(o) }),
+    ));
+    return kids;
+  }
+
+  function renderOffer() {
+    const o = offerState?.offer;
+    if (!o) return;
+    head.replaceChildren(
+      el('h2', { text: o.name }),
+      ...(o.subtitle ? [el('span', { class: 'talk-role muted', text: o.subtitle })] : []),
+      el('button', { class: 'talk-close', text: '×', onclick: () => close() }),
+    );
+    body.replaceChildren(...offerNodes(o,
+      () => { const h = offerState?.handlers; close(); h?.accept?.(o); },
+      () => { const h = offerState?.handlers; close(); h?.decline?.(o); },
+    ));
+  }
+
   function show(npc, ctx) {
+    mode = 'talk';
+    offerState = null;
     current = npc;
     context = ctx;
     open = true;
@@ -408,17 +519,47 @@ export function createTalkPanel(handlers = {}) {
     render();
   }
 
+  /**
+   * Put a single yes-or-no proposition on screen.
+   *
+   *   panel.showOffer(folk.hireOffer(w, { level, gold, pet }), {
+   *     accept: offer => { … take the gold, summon the companion … },
+   *     decline: offer => hud.log(`${offer.name} shrugs and goes back to the fire.`),
+   *     dismiss: () => {},                     // walked away without answering
+   *   });
+   *
+   * Closing the panel any other way (Esc, the ×) counts as walking away, NOT as a refusal, so the
+   * person is still there to talk to.
+   */
+  function showOffer(offer, handlers2 = {}) {
+    if (!offer) return false;
+    mode = 'offer';
+    offerState = { offer, handlers: handlers2 };
+    current = null;
+    open = true;
+    root.classList.remove('hidden');
+    document.exitPointerLock?.();
+    renderOffer();
+    return true;
+  }
+
   function close() {
+    const walked = mode === 'offer' ? offerState : null;
     open = false;
     current = null;
+    mode = 'talk';
+    offerState = null;
     root.classList.add('hidden');
+    walked?.handlers?.dismiss?.(walked.offer);
   }
 
   return {
     root,
     get isOpen() { return open; },
     get npc() { return current; },
-    show, close, render,
+    show, showOffer, close, render,
+    /** Which panel is up: 'talk' or 'offer'. The input layer checks this before swallowing Esc. */
+    get mode() { return mode; },
     /** Refresh from a new context object (after a buy, a level, a turn-in). */
     update(ctx) { context = ctx; if (open) render(); },
   };

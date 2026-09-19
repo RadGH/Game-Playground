@@ -42,6 +42,16 @@ export const BUILDING_INFO = {
   shrine: { cap: 140, solid: [1.0, 3], from: 0, role: null },
   gatehouse: { cap: 80, solid: [4.0, 7], from: 4, role: null },
   street: { cap: 900, solid: [0, 0], from: 0, role: null },
+  /**
+   * The waypoint pad, and the sigils cut into its face.
+   *
+   * Two meshes rather than one because the sigils have to light up on their own: the pad is grey
+   * concrete whether or not you have been here, and the ring only glows once the town has been
+   * entered. One design on every world and in every culture — it is a single network, not a local
+   * monument, so it has to read as one thing wherever it is found.
+   */
+  waypoint: { cap: 60, solid: [0, 0], from: 0, role: null },
+  waysigil: { cap: 60, solid: [0, 0], from: 0, role: null },
 };
 
 /** The twelve added in round 8, for the tests and the docs. */

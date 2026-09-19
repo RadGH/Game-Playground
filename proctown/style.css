@@ -36,3 +36,18 @@
 .stats b { color: #e4ecf7; font-weight: 600; }
 .stats .key { display: inline-block; width: 11px; height: 11px; border-radius: 2px;
   vertical-align: -1px; margin-right: 4px; }
+
+/* ---------------------------------------------------------------- the building kit gallery */
+.kit-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(var(--tile, 170px), 1fr)); }
+.kit-grid.wide { grid-template-columns: 1fr; }
+.kit-tile { margin: 0; background: #0d1118; border: 1px solid #222c3c; border-radius: 6px;
+  padding: 6px; display: flex; flex-direction: column; gap: 5px; }
+.kit-tile canvas { width: 100%; height: auto; display: block; border-radius: 4px; }
+.kit-tile figcaption { font-size: 11px; color: #7f8ea4; line-height: 1.45; }
+.kit-tile figcaption b { display: block; color: #cfe0ef; font-weight: 600; font-size: 12px; }
+.kit-tile figcaption span { display: block; }
+.kit-tile.palette figcaption { font-size: 12px; }
+.kit-links { display: flex; gap: 8px; margin: 8px 0 0; }
+.kit-links a { flex: 1; text-align: center; background: #1b2436; color: #cfe0ef; border: 1px solid #2f3b52;
+  border-radius: 4px; padding: 6px 8px; font-size: 12px; text-decoration: none; }
+.kit-links a:hover { background: #24304a; }

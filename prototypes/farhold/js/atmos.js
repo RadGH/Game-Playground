@@ -27,7 +27,20 @@ import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
 
 /** Everything the flight model reads. All of it is in `balance.json` `flight`. */
 const DEFAULTS = {
-  ceiling: 9000,          // metres: above this the world is gone and space takes over
+  ceiling: 46000,         // metres: the top of the air. Above it, and only deliberately, space takes over
+  /**
+   * THE UPPER ATMOSPHERE.
+   *
+   * Above `highFrom` x ceiling the wing has nothing to bite on and the flight model changes
+   * character: the throttle stops being thrust and becomes a COMMANDED VERTICAL RATE, so letting go
+   * holds the altitude you are at instead of falling out of it. See `updateHigh` for why that is the
+   * right model rather than a second set of numbers for the same one.
+   */
+  highFrom: 0.22,         // fraction of the ceiling where rate control takes over
+  climbRate: 260,         // m/s of climb or descent at full deflection up there
+  holdGain: 1.9,          // how hard it holds the altitude you left it at
+  holdDamp: 2.4,          // …without bouncing around it
+  exitHold: 1.1,          // seconds of held climb AT the ceiling before space takes you
   thrust: 260,            // m/s² at full throttle
   boost: 2.8,
   drag: 0.24,             // thick air slows you; it thins out with altitude
@@ -83,6 +96,12 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     flying: false,
     parked: false,          // sitting on its legs: no physics until the pilot asks for thrust
     bumped: 0,              // counts down after a bounce, for the HUD and the sound
+    // the upper atmosphere: how far into it we are, the altitude being held, and how long the
+    // pilot has been asking to leave. See the regime note in `update`.
+    regime: 'surface',
+    highness: 0,
+    holdY: null,
+    exiting: 0,
   };
 
   let lastYaw = 0;
@@ -110,6 +129,8 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
    * (W, or Space) and not before. See the parked branch in `update`.
    */
   function board(at) {
+    resetHigh();
+
     state.x = at.x;
     state.z = at.z;
     state.y = terrain.heightAt(at.x, at.z) + cfg.clearance;
@@ -129,8 +150,17 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     return state;
   }
 
+  /** The upper-atmosphere state is per flight and is never carried between them. */
+  function resetHigh() {
+    state.holdY = null;
+    state.exiting = 0;
+    state.highness = 0;
+    state.regime = 'surface';
+  }
+
   /** Drop in from space, above the point the ship was over. */
   function descend(at, { altitude = cfg.ceiling * 0.92, yaw = 0 } = {}) {
+    resetHigh();
     state.x = at.x;
     state.z = at.z;
     state.y = Math.max(terrain.heightAt(at.x, at.z) + 200, altitude);
@@ -147,6 +177,8 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
   }
 
   function leave() {
+    resetHigh();
+
     state.flying = false;
     if (ship) ship.group.visible = false;
   }
@@ -259,8 +291,60 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
      * or nose-down attitude is what changes your altitude. Below the speed it needs, it still sags:
      * a hovering ship should sink.
      */
+    /**
+     * THE UPPER ATMOSPHERE IS A DIFFERENT MACHINE, not the same one with thinner air.
+     *
+     * "I'd like to have an upper atmosphere mode where you match the planets speed and get fine
+     * tuned controls to descend. And seamlessly load the ground planet beneath while still flying.
+     * Same for takeoff. Is there a better system?"
+     *
+     * There is, and this is it. Down low, the throttle is THRUST and the wing does the holding —
+     * which is right, because that is what flying in air is. Up high there is no air to hold you, so
+     * the same controls give a ship that either climbs forever or falls, and the player is left
+     * riding the throttle to stay put. So above `highFrom` the throttle becomes a commanded VERTICAL
+     * RATE and the model holds whatever altitude you stop at, actively, with a damped spring. Let go
+     * and you hover; nudge S and you descend at a rate you can read off the HUD.
+     *
+     * That is the whole of "match the planet's speed": in planet-local coordinates, holding station
+     * IS matching it. And because nothing here tears the ground down, the terrain keeps streaming
+     * underneath the entire way — which is the "seamlessly load the ground beneath while still
+     * flying" half, for descent and for take-off alike.
+     *
+     * The two regimes blend rather than switch: `highness` ramps 0 to 1 across the band, so the wing
+     * fades out as the rate control fades in and there is no altitude where the ship changes hands.
+     */
+    const highFrom = cfg.ceiling * cfg.highFrom;
+    const highness = Math.max(0, Math.min(1, (state.y - highFrom) / Math.max(1, cfg.ceiling - highFrom)));
+    state.highness = highness;
+    state.regime = highness > 0.02 ? 'high' : 'surface';
+
     const lift = Math.min(cfg.liftMax, (state.speed / cfg.liftSpeedFull) * air * level);
-    state.velocity.y -= gravity * (1 - lift) * dt;
+    // gravity and the wing still act, faded out as the air runs out
+    state.velocity.y -= gravity * (1 - lift) * dt * (1 - highness);
+
+    if (highness > 0.02) {
+      /**
+       * Rate control, and a held altitude.
+       *
+       * `wanted` is the vertical rate the player is asking for. With no input it is zero, and the
+       * spring below pulls the ship back to `holdY` — the altitude it was at when they stopped
+       * asking. With input, `holdY` follows the ship, so letting go holds wherever you got to.
+       */
+      const ask = (input?.forward ?? 0);
+      const wanted = ask * cfg.climbRate;
+      if (Math.abs(ask) > 0.02) {
+        state.holdY = state.y;
+        const blendRate = wanted - state.velocity.y;
+        state.velocity.y += blendRate * Math.min(1, dt * 2.6) * highness;
+      } else {
+        if (state.holdY == null) state.holdY = state.y;
+        const off = state.holdY - state.y;
+        const push = off * cfg.holdGain - state.velocity.y * cfg.holdDamp;
+        state.velocity.y += push * dt * highness;
+      }
+    } else {
+      state.holdY = null;
+    }
     // and thin air is less of a brake, which is why you accelerate as you climb
     const drag = cfg.drag * air;
     state.velocity.multiplyScalar(Math.max(0, 1 - drag * dt));
@@ -341,7 +425,21 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     // ---- can we put down, and have we left?
     out.altitude = altitude;
     out.landed = altitude < cfg.landHeight && state.speed < cfg.landSpeed;
-    out.leftAtmosphere = state.y > cfg.ceiling;
+    /**
+     * LEAVING IS SOMETHING YOU DO, not a line you drift across.
+     *
+     * The old rule handed you to space the instant `y` passed the ceiling, so a ship coasting upward
+     * was ejected from the world it was looking at. Now the ceiling has to be held: you must still be
+     * asking to climb, at the top, for `exitHold` seconds. Stop asking and you simply hover there,
+     * in the upper atmosphere, with the ground still drawn below — which is the point of having the
+     * band at all.
+     */
+    if (state.y > cfg.ceiling && (input?.forward ?? 0) > 0.2) state.exiting = (state.exiting || 0) + dt;
+    else state.exiting = 0;
+    out.leftAtmosphere = state.exiting > cfg.exitHold;
+    out.regime = state.regime;
+    out.highness = highness;
+    out.holdingAt = state.holdY;
 
     place(camera);
     return out;
@@ -384,9 +482,16 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
         altitude: Math.round(state.y - terrain.heightAt(state.x, state.z)),
         speed: Math.round(state.speed),
         throttle: state.throttle,
-      lift: state.lift,
+        lift: state.lift,
         air: +density(state.y).toFixed(2),
         boosting: state.boosting,
+        // the upper atmosphere: which machine you are flying, how fast you are rising or falling,
+        // and whether the ship is holding station for you
+        regime: state.regime,
+        highness: +state.highness.toFixed(2),
+        climb: Math.round(state.velocity.y),
+        holding: state.regime === 'high' && state.holdY != null
+          && Math.abs(state.velocity.y) < 4 ? Math.round(state.holdY) : null,
       };
     },
   };

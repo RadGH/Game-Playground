@@ -1,11 +1,12 @@
 # Procedural Towns
 
-The town planner, and a page to tune it on.
+The town planner, the building kit, and two pages to tune them on.
 
 **This is the one true planner.** `prototypes/farhold/` imports `js/townplan.js` from here, so a town
 tuned on this page is the town you walk into in the game. There is no second copy to drift.
 
-Open it at `http://<LAN-IP>:8400/proctown/`.
+Open them at `http://<LAN-IP>:8400/proctown/` (the plan) and
+`http://<LAN-IP>:8400/proctown/kit.html` (the building kit gallery).
 
 ## Why it exists
 
@@ -45,7 +46,112 @@ know what an elf is.**
 The written design for each culture — aesthetic, materials, palette and cornerstone buildings — is in
 `prototypes/farhold/TOWN_EXPANSION.md` §6.
 
-## The page
+## The building kit: a building is a KIT, not a model
+
+`js/buildkit.js` is the second half of the same idea. The planner fixed **where** a building goes;
+the kit fixes **what** goes there. Before it, `prototypes/farhold/js/features.js` held twenty fixed
+meshes and every town on every world was built out of the same twenty — which is the rest of the
+play-test:
+
+> *"Some roofs don't line up with the walls."*
+> *"All the towns look and feel the same."*
+> *"I'd like houses to have procedural parts and colours, more variety, more bases, more utility
+> places like shops and other things which can be mostly like outdoor stalls."*
+> *"More variety of houses, roofs, colours, walls, towers, bridges."*
+
+```
+plot + culture + seed  ->  describeBuilding()  ->  a building DESCRIPTION
+                       ->  partsFor()          ->  a flat list of unit shapes
+```
+
+```js
+import { describeBuilding, partsFor } from './buildkit.js';
+
+const desc  = describeBuilding({ plot, culture: 'dwarf', seed: 7, townSeed, want: plot.want });
+const parts = partsFor(desc);   // [{ mesh, x, y, z, w, h, d, yaw, colour, tag, mass }]
+```
+
+`partsFor` returns nothing but numbers and the names of eight unit shapes, so the 3D game instances
+them and the 2D gallery draws the same list as polygons. **If the gallery looks right, the game
+looks right.**
+
+### The roof is generated from the wall rectangle
+
+This is the permanent fix for *"some roofs don't line up with the walls"*, and it is structural
+rather than careful. `roofFor(rect, opts)` takes `rect` — **the rectangle the walls actually
+occupy** — and there is no other source of position or size in it. There is no parameter that could
+disagree with the walls, because there is no parameter that describes the walls. Everything it
+returns is centred on the rect and is `rect.w + 2·eave` by `rect.d + 2·eave`.
+
+`roofsCover(desc)` asserts it across every base, roof, culture and seed (3,745 combinations in the
+node test, and live on the gallery page).
+
+### What is in it
+
+| Table | Count | Where |
+|---|---|---|
+| House bases | 26 | `data/buildkit.json` → `bases` — the twelve from the design (long, square, L, courtyard, tower-house, row, round, stilted, dug-in, terraced, hall, stacked) plus fourteen culture ones |
+| Roof types | 12 | gable, hip, half-hip, gambrel, mansard, flat, domed, conical, sawtooth, tiered, turf mound, tent |
+| Roof materials | 10 | thatch, slate, clay tile, shingle, turf, lead, canvas, bone plate, leaf scale, verdigris copper |
+| Wall materials | 13 | timber frame, wattle, cut stone, rubble, brick, log, plaster, mud brick, carved trunk, chitin, bone, hide, salvaged plate |
+| Extras | 29 | porches, lean-tos, fences, gardens, benches, stairs, balconies, stilts, columns, banners, signs, shutters, washing lines, cellar doors, braziers, totems, pit fires, roof terraces… |
+| Stall kinds | 7 | `data/buildkit.json` → `stalls` |
+| Unit shapes | 8 | box, cylinder, gable prism, shed prism, pyramid, frustum, cone, dome |
+
+Every number that decides how a building looks is in `data/`, not in the code — the inset from the
+plot line, the storey height range, the eave overhang, the jetty, the colour jitter, the window
+spacing, the chimney chance, and how far each extra reaches into the yard. A test fails if one of
+them goes missing.
+
+### Cultures are parameter sets here too
+
+`data/cultures.json` holds the same seven the planner knows, from the kit's side: a palette, weighted
+base and roof tables, materials, a street surface, a town-wall kind, a night lamp colour and which
+stalls it keeps. Each one has **at least three silhouettes nobody else builds**:
+
+| Culture | Only they build | Reads as |
+|---|---|---|
+| Human | jettied, cross-wing, hall | timber frame, thatch and clay tile, upper storeys over the lane |
+| Elf | canopy house, bower, stilt house | pale timber, leaf-scale cones, a second storey of bridges |
+| Dwarf | blockhouse, delve mouth, terraced | cut stone, brass courses, flat lead roofs, squat and on axis |
+| Undead | tomb row, spire, stacked | bone and cracked plaster, half-fallen roofs, cages and braziers |
+| Orc | war hall, hide tent, pit house | rough timber and hide, soot and blood red, totems |
+| Halfling | burrow, roundhouse, L-plan | turf domes, round painted doors, dug into the bank |
+| Desert | courtyard, wind-catcher, bazaar block | mud brick, flat roofs lived on, indigo trim, shade |
+
+`the sameness test` in `tests/buildkit.test.js` is the one that matters: it builds five real towns per
+culture and fails if any two cultures' base mixes overlap more than 62%.
+
+### Outdoor stalls
+
+The user asked for these by name. A stall is deliberately **not a building**: it needs no plot, it
+stands where people already are, and it is four posts, an awning, a trestle and some goods.
+`stallsFor(plan, { culture, seed })` places a ring facing into the square and a scatter along the
+kerb of the main streets — never in the carriageway, which a test checks.
+
+### The gallery
+
+`kit.html` draws every base × roof, every material pair, a street of one culture, the stalls and the
+seven palettes, from the same `partsFor()` list the game instances. The "Checks" box runs
+`roofsCover` over the whole matrix live; `Audit every combination` prints the numbers.
+
+### What it costs
+
+One InstancedMesh per unit shape rather than one per building type, so a town is **eight draw
+calls** whatever is in it. Measured over eight seeds a culture:
+
+| Town | Buildings | Instances close up | Instances beyond 230 m |
+|---|---|---|---|
+| Human capital | 45 | ~1,350 | ~750 |
+| Desert capital (the worst) | 58 | ~2,750 | ~1,565 |
+| Orc village | 11 | ~190 | ~110 |
+
+Plus 80–150 for the stalls. Only the town you are standing in is built at full detail; past 230 m a
+building is its walls, roof, eaves, door and chimney and nothing else, which is a little over half
+the parts. `features.js` caps the box mesh at 9,000, which covers one capital at full detail and
+three more at distance inside the 2.6 km feature radius.
+
+## The plan page
 
 | Control | What it is for |
 |---|---|
@@ -59,6 +165,7 @@ The written design for each culture — aesthetic, materials, palette and corner
 | Checks | Live overlap verdict. Red boxes mean a building is on a street and the **planner** is wrong. |
 | Sameness report | 200 towns, and the spread of streets / plots / gates. Numbers, not vibes. |
 | Copy / Paste JSON | Reproduce a reported town exactly. |
+| Kit gallery → | `kit.html`, the building-kit page above. |
 
 ## API
 
@@ -88,7 +195,7 @@ is the generator everything else draws from.
 
 ## Rules the tests hold
 
-`node --test proctown/tests/townplan.test.js` (14 tests):
+`node --test proctown/tests/townplan.test.js` (the plan):
 
 - the same seed is the same town, and a different seed is a different town
 - **nothing sits on a street**, across 7 cultures × 11 seeds × 6 sizes
@@ -101,9 +208,28 @@ is the generator everything else draws from.
 - the culture genuinely changes the shape of the town
 - street classes are a real hierarchy
 
+`node --test proctown/tests/buildkit.test.js` (the kit, 20 tests):
+
+- the same seed is the same building, and a different seed is a different building
+- **a roof is generated from the wall rectangle** — the eave board is exactly the walls plus the same
+  overhang all round, and every roof covers its own walls across 3,745 combinations
+- a roof is never taller than the building can carry
+- no combination yields NaN geometry, or a part with no size, or a shape that is not one of the eight
+- a building stands inside its plot: its walls are inside the rectangle, its eaves stay within 0.6 m
+  of the plot line, and its yard clutter stays in the yard
+- the kit frame turns onto the plot frame whichever edge fronts the street
+- every culture has at least three silhouettes nobody else builds, and no two build the same town
+- wealth changes what a building is made of
+- every name in the data points at something that exists, and the knobs are all in the data
+- a stall is deterministic and never stands in the carriageway
+- a real plan turns into a real town in every culture at every size, inside the part budget
+
 ## Still to build
 
-`TOWN_EXPANSION.md` is the full plan. From §2, still open: the 3D preview, the building-kit gallery,
-the palette editor, the walkability flood-fill, the performance readout, and the regression guard
-that Farhold's import and this page produce identical plans. §1 items not yet in: approach roads
-seeding the graph, terrain-aware streets, and plot-fill (yards, pens, woodpiles).
+`TOWN_EXPANSION.md` is the full plan. From §2, still open: the 3D preview, a live palette editor that
+writes back to `data/cultures.json`, the walkability flood-fill, the on-page performance readout, and
+the regression guard that Farhold's import and this page produce identical plans. §1 items not yet
+in: approach roads seeding the graph, terrain-aware streets, and plot-fill (yards, pens, woodpiles —
+the kit does the clutter that touches a building, but the empty half of a big plot is still empty).
+From §3: level-of-detail past the two tiers `features.js` has, signage glyphs, smoke by day and
+window light at night.

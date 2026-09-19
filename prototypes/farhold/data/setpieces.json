@@ -1,0 +1,262 @@
+{
+  "_doc": "How a place is BUILT on the ground. The complaint was that a landmark was 'a couple of random models thrown on top of a coordinate location' — so nothing here is one model. A layout is an approach you walk up, a centre you can see from the next ridge, and surroundings that say who used to be here. js/sites.js owns the geometry for each `piece`; this file owns where the pieces go, so a new place is a few lines of JSON and no new code. Distances are metres, angles are TURNS (0..1, so 0.25 is a quarter way round). Original names and ideas only.",
+
+  "_ringDoc": "A ring of N pieces at radius R only closes if N is at least 2*pi*R divided by the piece's width (a palisade is 6 m, a curtain wall 9 m) times its scale. Below that you get a picket fence with the middle missing, which is what the first pass shipped. `skip` is then what makes a gate a gate. A ring that is MEANT to be a ruin — a burnt farm, a hunting blind, an abandoned tower — says `broken: true` and is left alone.",
+
+  "_schema": {
+    "tall": "roughly how high the tallest piece stands — used by the tests to check a set piece is actually visible from a distance",
+    "centre": "[{ piece, scale, x, z, y, spin }] — the thing you came to see",
+    "rings": "[{ piece, count, radius, scale, rotate: in|out|tangent|random, offset (turns), angle (turns, for a single piece), skip: [index], jitter, y }]",
+    "approach": "{ piece, count, from, to, spread, scale, both } — markers that walk you in from `from` metres out to `to` metres out. `both` puts a line either side, which is what makes it read as an avenue rather than a trail of litter",
+    "scatter": "[{ piece, count, radius, scale, inner }] — what is lying about",
+    "fires": "[{ r, a }] — a lit brazier at radius r, angle a. These become real lights.",
+    "hostile": "true if the layout belongs to something that will fight you (used by the POI test)"
+  },
+
+  "layouts": {
+    "wayshrine": {
+      "tall": 15,
+      "centre": [{ "piece": "obelisk", "scale": 1.25 }, { "piece": "altar", "scale": 1.1, "z": 4.5 }],
+      "rings": [{ "piece": "waystone", "count": 8, "radius": 11, "rotate": "in", "jitter": 0.6 }],
+      "approach": { "piece": "waystone", "count": 6, "from": 52, "to": 16, "spread": 3.2, "scale": 0.9, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 4, "radius": 20, "inner": 13, "scale": 0.8 }],
+      "fires": [{ "r": 3.4, "a": 0.25 }, { "r": 3.4, "a": 0.75 }]
+    },
+    "standing_stones": {
+      "tall": 13,
+      "centre": [{ "piece": "altar", "scale": 1.4 }],
+      "rings": [
+        { "piece": "menhir", "count": 7, "radius": 16, "rotate": "in", "jitter": 0.8 },
+        { "piece": "menhir", "count": 1, "radius": 16, "angle": 0.5, "rotate": "random", "scale": 0.95, "y": -2.6 }
+      ],
+      "approach": { "piece": "waystone", "count": 7, "from": 60, "to": 20, "spread": 4.5, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 6, "radius": 26, "inner": 17 }]
+    },
+    "watchtower": {
+      "tall": 18,
+      "centre": [{ "piece": "tower", "scale": 1.05 }],
+      "rings": [
+        { "piece": "wall", "count": 6, "radius": 13, "rotate": "tangent", "skip": [0], "scale": 0.7, "broken": true },
+        { "piece": "banner", "count": 1, "radius": 9, "angle": 0.1 }
+      ],
+      "approach": { "piece": "waystone", "count": 5, "from": 48, "to": 18, "spread": 3, "scale": 0.8 },
+      "scatter": [{ "piece": "rubble", "count": 5, "radius": 22, "inner": 14 }],
+      "fires": [{ "r": 7, "a": 0.6 }]
+    },
+    "gibbet": {
+      "tall": 9,
+      "centre": [{ "piece": "cage", "scale": 1.4 }],
+      "rings": [{ "piece": "waystone", "count": 4, "radius": 7, "rotate": "in", "scale": 0.8 }],
+      "approach": { "piece": "waystone", "count": 4, "from": 36, "to": 12, "spread": 2.4, "scale": 0.7, "both": true },
+      "scatter": [{ "piece": "bonepile", "count": 2, "radius": 12, "inner": 5, "scale": 0.7 }]
+    },
+    "burnt_farm": {
+      "tall": 11,
+      "centre": [{ "piece": "hut", "scale": 1.5 }],
+      "rings": [
+        { "piece": "hut", "count": 3, "radius": 15, "rotate": "out", "jitter": 2.4, "scale": 1.1 },
+        { "piece": "palisade", "count": 9, "radius": 26, "rotate": "tangent", "skip": [0, 1], "scale": 0.9, "broken": true }
+      ],
+      "approach": { "piece": "rubble", "count": 5, "from": 46, "to": 20, "spread": 5, "scale": 0.9 },
+      "scatter": [{ "piece": "rubble", "count": 10, "radius": 24, "inner": 6 }, { "piece": "pyre", "count": 2, "radius": 18, "inner": 9 }],
+      "fires": [{ "r": 10, "a": 0.4 }]
+    },
+    "collapsed_mine": {
+      "tall": 14,
+      "centre": [{ "piece": "den", "scale": 1.6 }],
+      "rings": [
+        { "piece": "hut", "count": 2, "radius": 17, "rotate": "in", "scale": 0.9 },
+        { "piece": "engine", "count": 1, "radius": 12, "angle": 0.62, "scale": 0.8 }
+      ],
+      "approach": { "piece": "waystone", "count": 6, "from": 54, "to": 18, "spread": 2.2, "scale": 0.8, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 14, "radius": 26, "inner": 7, "scale": 1.2 }],
+      "fires": [{ "r": 9, "a": 0.15 }]
+    },
+    "ferry_landing": {
+      "tall": 10,
+      "centre": [{ "piece": "hut", "scale": 1.1 }],
+      "rings": [
+        { "piece": "banner", "count": 1, "radius": 8, "angle": 0.25, "scale": 0.9 },
+        { "piece": "waystone", "count": 5, "radius": 13, "rotate": "in", "scale": 0.8 }
+      ],
+      "approach": { "piece": "waystone", "count": 5, "from": 44, "to": 15, "spread": 3.4, "both": true, "scale": 0.8 },
+      "scatter": [{ "piece": "rubble", "count": 4, "radius": 18, "inner": 10, "scale": 0.7 }],
+      "fires": [{ "r": 6, "a": 0.8 }]
+    },
+    "toll_bridge": {
+      "tall": 13,
+      "centre": [{ "piece": "gatehouse", "scale": 1.15 }],
+      "rings": [
+        { "piece": "wall", "count": 4, "radius": 12, "rotate": "tangent", "scale": 0.8, "offset": 0.12, "broken": true },
+        { "piece": "banner", "count": 2, "radius": 7, "offset": 0.25, "scale": 0.9 }
+      ],
+      "approach": { "piece": "waystone", "count": 6, "from": 50, "to": 14, "spread": 3.6, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 5, "radius": 20, "inner": 13, "scale": 0.8 }],
+      "fires": [{ "r": 6.5, "a": 0.5 }]
+    },
+    "hunting_blind": {
+      "tall": 12,
+      "centre": [{ "piece": "tower", "scale": 0.62 }],
+      "rings": [{ "piece": "palisade", "count": 5, "radius": 11, "rotate": "tangent", "skip": [0, 3], "scale": 0.8, "broken": true }],
+      "approach": { "piece": "waystone", "count": 4, "from": 38, "to": 14, "spread": 3, "scale": 0.7 },
+      "scatter": [{ "piece": "bonepile", "count": 4, "radius": 18, "inner": 6, "scale": 0.8 }],
+      "fires": [{ "r": 8, "a": 0.7 }]
+    },
+    "cairn_field": {
+      "tall": 11,
+      "centre": [{ "piece": "menhir", "scale": 1.35 }],
+      "rings": [
+        { "piece": "rubble", "count": 12, "radius": 14, "rotate": "random", "jitter": 1.6, "scale": 1.3 },
+        { "piece": "rubble", "count": 14, "radius": 23, "rotate": "random", "jitter": 2.2, "scale": 1.15 }
+      ],
+      "approach": { "piece": "waystone", "count": 6, "from": 56, "to": 26, "spread": 4, "both": true, "scale": 0.8 },
+      "scatter": [{ "piece": "bonepile", "count": 3, "radius": 28, "inner": 16, "scale": 0.7 }]
+    },
+    "beacon": {
+      "tall": 20,
+      "centre": [{ "piece": "obelisk", "scale": 1.5 }, { "piece": "pyre", "scale": 2.2, "z": 5 }],
+      "rings": [{ "piece": "waystone", "count": 6, "radius": 12, "rotate": "in", "scale": 0.9 }],
+      "approach": { "piece": "waystone", "count": 7, "from": 64, "to": 18, "spread": 3, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 5, "radius": 24, "inner": 15 }],
+      "fires": [{ "r": 5, "a": 0 }]
+    },
+    "sunken_wreck": {
+      "tall": 12,
+      "centre": [{ "piece": "hull", "scale": 1.3 }],
+      "rings": [{ "piece": "waystone", "count": 5, "radius": 15, "rotate": "random", "jitter": 2.5, "scale": 0.8 }],
+      "approach": { "piece": "rubble", "count": 5, "from": 44, "to": 18, "spread": 5, "scale": 1.1 },
+      "scatter": [{ "piece": "rubble", "count": 8, "radius": 24, "inner": 9 }, { "piece": "bonepile", "count": 2, "radius": 20, "inner": 12, "scale": 0.7 }]
+    },
+    "forge_fire": {
+      "tall": 11,
+      "centre": [{ "piece": "hut", "scale": 1.2 }],
+      "rings": [
+        { "piece": "banner", "count": 2, "radius": 9, "offset": 0.125, "scale": 0.85 },
+        { "piece": "waystone", "count": 6, "radius": 14, "rotate": "in", "scale": 0.75 }
+      ],
+      "approach": { "piece": "waystone", "count": 5, "from": 42, "to": 16, "spread": 3, "both": true, "scale": 0.8 },
+      "scatter": [{ "piece": "rubble", "count": 5, "radius": 19, "inner": 11, "scale": 0.8 }],
+      "fires": [{ "r": 4.2, "a": 0.5 }, { "r": 6.5, "a": 0.18 }]
+    },
+    "broken_road": {
+      "tall": 9,
+      "centre": [{ "piece": "rubble", "scale": 2.6 }],
+      "rings": [
+        { "piece": "rubble", "count": 8, "radius": 12, "rotate": "random", "jitter": 3, "scale": 1.6 },
+        { "piece": "engine", "count": 1, "radius": 14, "angle": 0.3, "scale": 0.7 }
+      ],
+      "approach": { "piece": "waystone", "count": 6, "from": 50, "to": 16, "spread": 3.4, "both": true, "scale": 0.8 },
+      "scatter": [{ "piece": "rubble", "count": 10, "radius": 26, "inner": 14, "scale": 1.1 }],
+      "fires": [{ "r": 11, "a": 0.6 }]
+    },
+
+    "bandit_camp": {
+      "tall": 16, "hostile": true,
+      "centre": [{ "piece": "pyre", "scale": 1.3 }],
+      "rings": [
+        { "piece": "tent", "count": 5, "radius": 9, "rotate": "in", "jitter": 1.4 },
+        { "piece": "palisade", "count": 20, "radius": 19, "rotate": "tangent", "skip": [0], "scale": 1 },
+        { "piece": "banner", "count": 2, "radius": 12, "offset": 0.33, "scale": 1.7 },
+        { "piece": "tower", "count": 1, "radius": 14, "angle": 0.66, "rotate": "in", "scale": 0.55 }
+      ],
+      "approach": { "piece": "palisade", "count": 4, "from": 34, "to": 22, "spread": 7, "scale": 0.6 },
+      "scatter": [{ "piece": "rubble", "count": 5, "radius": 24, "inner": 12, "scale": 0.8 }, { "piece": "bonepile", "count": 2, "radius": 17, "inner": 10, "scale": 0.7 }],
+      "fires": [{ "r": 0, "a": 0 }, { "r": 14, "a": 0.5 }]
+    },
+    "raider_stockade": {
+      "tall": 17, "hostile": true,
+      "centre": [{ "piece": "hut", "scale": 1.3 }, { "piece": "pyre", "scale": 1.4, "x": -7, "z": 5 }],
+      "rings": [
+        { "piece": "tent", "count": 6, "radius": 13, "rotate": "in", "jitter": 1.8 },
+        { "piece": "palisade", "count": 23, "radius": 26, "rotate": "tangent", "skip": [0], "scale": 1.2 },
+        { "piece": "tower", "count": 2, "radius": 26, "offset": 0.25, "rotate": "in", "scale": 0.6 },
+        { "piece": "cage", "count": 2, "radius": 10, "offset": 0.6, "rotate": "out" },
+        { "piece": "banner", "count": 2, "radius": 20, "offset": 0.12, "scale": 1.5 }
+      ],
+      "approach": { "piece": "waystone", "count": 5, "from": 52, "to": 30, "spread": 5, "scale": 0.8, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 7, "radius": 32, "inner": 18 }, { "piece": "bonepile", "count": 3, "radius": 24, "inner": 14, "scale": 0.8 }],
+      "fires": [{ "r": 8.6, "a": 0.42 }, { "r": 20, "a": 0.5 }, { "r": 20, "a": 0 }]
+    },
+    "watchtower_hold": {
+      "tall": 19, "hostile": true,
+      "centre": [{ "piece": "tower", "scale": 1.15 }],
+      "rings": [
+        { "piece": "palisade", "count": 16, "radius": 15, "rotate": "tangent", "skip": [0], "scale": 1 },
+        { "piece": "tent", "count": 2, "radius": 10, "offset": 0.3, "rotate": "in" },
+        { "piece": "banner", "count": 1, "radius": 7, "angle": 0.12 }
+      ],
+      "approach": { "piece": "waystone", "count": 5, "from": 46, "to": 18, "spread": 3, "both": true, "scale": 0.8 },
+      "scatter": [{ "piece": "rubble", "count": 5, "radius": 22, "inner": 14 }],
+      "fires": [{ "r": 6, "a": 0.55 }]
+    },
+    "border_fort": {
+      "tall": 22, "hostile": true,
+      "centre": [{ "piece": "keep", "scale": 0.85 }],
+      "rings": [
+        { "piece": "wall", "count": 23, "radius": 32, "rotate": "tangent", "skip": [0] },
+        { "piece": "gatehouse", "count": 1, "radius": 32, "angle": 0, "rotate": "tangent" },
+        { "piece": "tower", "count": 4, "radius": 32, "offset": 0.125, "rotate": "in", "scale": 0.8 },
+        { "piece": "tent", "count": 4, "radius": 20, "offset": 0.06, "rotate": "in" },
+        { "piece": "cage", "count": 1, "radius": 15, "angle": 0.42 },
+        { "piece": "banner", "count": 4, "radius": 28, "offset": 0.125 }
+      ],
+      "approach": { "piece": "waystone", "count": 7, "from": 70, "to": 36, "spread": 5, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 8, "radius": 42, "inner": 34 }, { "piece": "engine", "count": 1, "radius": 40, "inner": 36, "scale": 0.8 }],
+      "fires": [{ "r": 12, "a": 0.2 }, { "r": 12, "a": 0.7 }, { "r": 30, "a": 0 }]
+    },
+    "castle": {
+      "tall": 30, "hostile": true,
+      "centre": [{ "piece": "keep", "scale": 1.35 }],
+      "rings": [
+        { "piece": "wall", "count": 28, "radius": 46, "rotate": "tangent", "skip": [0], "scale": 1.15 },
+        { "piece": "gatehouse", "count": 1, "radius": 46, "angle": 0, "rotate": "tangent", "scale": 1.3 },
+        { "piece": "tower", "count": 6, "radius": 46, "offset": 0.0833, "rotate": "in" },
+        { "piece": "wall", "count": 22, "radius": 24, "rotate": "tangent", "skip": [0, 11], "scale": 0.8 },
+        { "piece": "hut", "count": 4, "radius": 33, "offset": 0.18, "rotate": "in", "scale": 1.1 },
+        { "piece": "cage", "count": 2, "radius": 18, "offset": 0.55 },
+        { "piece": "banner", "count": 6, "radius": 42, "offset": 0.083, "scale": 1.1 },
+        { "piece": "den", "count": 1, "radius": 15, "angle": 0.5, "scale": 0.9 }
+      ],
+      "approach": { "piece": "menhir", "count": 8, "from": 96, "to": 52, "spread": 7, "scale": 0.8, "both": true },
+      "scatter": [{ "piece": "rubble", "count": 12, "radius": 60, "inner": 48 }, { "piece": "engine", "count": 2, "radius": 58, "inner": 50 }],
+      "fires": [{ "r": 16, "a": 0.1 }, { "r": 16, "a": 0.6 }, { "r": 44, "a": 0 }, { "r": 30, "a": 0.35 }]
+    },
+    "cult_circle": {
+      "tall": 17, "hostile": true,
+      "centre": [{ "piece": "altar", "scale": 1.7 }, { "piece": "obelisk", "scale": 1.1, "z": -9 }],
+      "rings": [
+        { "piece": "menhir", "count": 9, "radius": 18, "rotate": "in", "jitter": 0.5 },
+        { "piece": "cage", "count": 3, "radius": 11, "offset": 0.16, "rotate": "out" },
+        { "piece": "tent", "count": 3, "radius": 25, "offset": 0.3, "rotate": "in" },
+        { "piece": "banner", "count": 3, "radius": 21, "offset": 0.08, "scale": 0.9 }
+      ],
+      "approach": { "piece": "waystone", "count": 8, "from": 66, "to": 22, "spread": 3.6, "both": true },
+      "scatter": [{ "piece": "bonepile", "count": 5, "radius": 30, "inner": 20 }, { "piece": "rubble", "count": 6, "radius": 34, "inner": 22 }],
+      "fires": [{ "r": 6, "a": 0 }, { "r": 6, "a": 0.25 }, { "r": 6, "a": 0.5 }, { "r": 6, "a": 0.75 }]
+    },
+    "beast_lair": {
+      "tall": 16, "hostile": true,
+      "centre": [{ "piece": "den", "scale": 1.9 }],
+      "rings": [
+        { "piece": "menhir", "count": 5, "radius": 20, "rotate": "random", "jitter": 2.6, "scale": 0.9 },
+        { "piece": "bonepile", "count": 7, "radius": 13, "rotate": "random", "jitter": 2.2, "scale": 1.3 }
+      ],
+      "approach": { "piece": "bonepile", "count": 5, "from": 52, "to": 24, "spread": 6, "scale": 0.8, "both": true },
+      "scatter": [{ "piece": "bonepile", "count": 8, "radius": 30, "inner": 16 }, { "piece": "rubble", "count": 5, "radius": 28, "inner": 18, "scale": 0.9 }]
+    },
+    "siege_camp": {
+      "tall": 14, "hostile": true,
+      "centre": [{ "piece": "engine", "scale": 1.5 }],
+      "rings": [
+        { "piece": "tent", "count": 8, "radius": 17, "rotate": "in", "jitter": 2.2 },
+        { "piece": "engine", "count": 2, "radius": 26, "offset": 0.3, "rotate": "in" },
+        { "piece": "palisade", "count": 30, "radius": 30, "rotate": "tangent", "skip": [0, 15], "scale": 1.1 },
+        { "piece": "banner", "count": 4, "radius": 22, "offset": 0.125 },
+        { "piece": "cage", "count": 1, "radius": 12, "angle": 0.7 }
+      ],
+      "approach": { "piece": "palisade", "count": 5, "from": 46, "to": 34, "spread": 8, "scale": 0.7 },
+      "scatter": [{ "piece": "rubble", "count": 7, "radius": 38, "inner": 26 }, { "piece": "pyre", "count": 2, "radius": 24, "inner": 14 }],
+      "fires": [{ "r": 11, "a": 0.12 }, { "r": 11, "a": 0.62 }, { "r": 28, "a": 0.5 }]
+    }
+  }
+}

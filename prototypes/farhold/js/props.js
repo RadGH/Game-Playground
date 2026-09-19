@@ -204,6 +204,189 @@ export const PROP_KINDS = {
   ]) },
 };
 
+
+// ---------------------------------------------------------------------------- megaflora
+//
+// "Give another pass over each biome and add large objects, depending on biome, giant trees,
+// boulders, arches, or other features. They should be 2-3 times taller than our tallest trees
+// currently."
+//
+// The tallest ordinary prop above is the conifer at 9 metres, so everything here stands between 17
+// and 26 — two to three times that. At that height a tree stops being scenery and becomes a thing
+// you steer by: a valley with three of them in it is a valley you recognise on the way back.
+// `data/megaflora.json` owns which biome gets which, how often, and how much room each takes up;
+// this owns the shapes.
+//
+// Two rules keep them cheap. Each is one InstancedMesh like every other prop, capped in the low
+// teens, because a dozen 24 m trees fill a skyline on their own. And they are rolled on their OWN
+// random stream (the 0x4d67 salt below) instead of sharing the cell's rng — so adding them did not
+// move a single tree that was already standing, which is the exact failure the "nearest cell first"
+// note above was written about.
+
+/** Like `at`, but with all three rotations. A leaning trunk needs more than a spin. */
+const tilt = (x, y, z, sx, sy, sz, ex = 0, ey = 0, ez = 0) =>
+  new THREE.Matrix4().compose(
+    new THREE.Vector3(x, y, z),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(ex, ey, ez)),
+    new THREE.Vector3(sx, sy, sz),
+  );
+
+/**
+ * One builder per megaflora kind, returning a single merged geometry — same contract as
+ * `PROP_KINDS[key].build`. Keys must match `kinds` in data/megaflora.json; the test checks that.
+ */
+/**
+ * The catalogue, fetched at IMPORT rather than inside `createProps`.
+ *
+ * Same reason js/sites.js does it: a page that lands and asks about the world on the next line was
+ * finding nothing there yet. By the time `createProps` is reached, main.js has generated a star, a
+ * system, a planet and a terrain, so this is long since back and the giants are in the first
+ * rebuild rather than the second.
+ */
+let MEGA_DATA = null;
+const MEGA_READY = fetch(new URL('../data/megaflora.json', import.meta.url))
+  .then(r => r.json())
+  .then(d => { MEGA_DATA = d; return d; })
+  .catch(() => null);      // no giants this run; the world still stands
+
+export const MEGA_BUILDERS = {
+  // An old broadleaf stands on a flare of buttress roots, not on a pole. Without them a 13 m trunk
+  // reads as a telegraph post with a bush on it.
+  elder_broadleaf: (bark = '#4a3a2a', leaf = '#3f7a45') => mergeParts([
+    { geometry: CYL, color: bark, matrix: at(0, 6.5, 0, 1.5, 13, 1.5) },
+    ...[0, 1, 2, 3, 4].map(i => {
+      const a = (i / 5) * Math.PI * 2;
+      return { geometry: CONE, color: bark, matrix: at(Math.cos(a) * 1.7, 1.7, Math.sin(a) * 1.7, 1.0, 3.4, 1.0) };
+    }),
+    { geometry: CYL, color: bark, matrix: tilt(2.6, 13.5, 0, 0.5, 6, 0.5, 0, 0, -0.9) },
+    { geometry: CYL, color: bark, matrix: tilt(-2.4, 14, 0.8, 0.45, 5.5, 0.45, 0.3, 0, 0.85) },
+    { geometry: SPH, color: leaf, matrix: at(0, 18.5, 0, 8.5, 5.0, 8.5) },
+    { geometry: SPH, color: leaf, matrix: at(4.6, 16.2, 2.0, 4.6, 3.2, 4.6) },
+    { geometry: SPH, color: leaf, matrix: at(-4.2, 16.8, -2.4, 4.2, 3.0, 4.2) },
+    { geometry: SPH, color: leaf, matrix: at(0.8, 21.4, 0.4, 4.4, 2.6, 4.4) },
+  ]),
+
+  crown_conifer: (bark = '#3b2f24', leaf = '#2f5c46') => mergeParts([
+    { geometry: CYL, color: bark, matrix: at(0, 8, 0, 1.0, 16, 1.0) },
+    ...[0, 1, 2, 3].map(i => {
+      const a = (i / 4) * Math.PI * 2;
+      return { geometry: CONE, color: bark, matrix: at(Math.cos(a) * 1.1, 1.2, Math.sin(a) * 1.1, 0.7, 2.4, 0.7) };
+    }),
+    { geometry: CONE, color: leaf, matrix: at(0, 9.5, 0, 6.2, 9.0, 6.2) },
+    { geometry: CONE, color: leaf, matrix: at(0, 15.5, 0, 4.6, 7.5, 4.6) },
+    { geometry: CONE, color: leaf, matrix: at(0, 20.5, 0, 3.0, 6.0, 3.0) },
+    { geometry: CONE, color: leaf, matrix: at(0, 24.0, 0, 1.5, 4.0, 1.5) },
+  ]),
+
+  // Fronds are aimed with setFromUnitVectors for the same reason the ordinary palm's are: tipping a
+  // cone with an Euler angle gives you spikes lying on their sides, not blades.
+  shelf_palm: (bark = '#6b5436', leaf = '#4f8a40') => mergeParts([
+    { geometry: CYL, color: bark, matrix: at(0, 8, 0, 0.62, 16, 0.62) },
+    { geometry: CYL, color: bark, matrix: at(0, 0.8, 0, 1.4, 1.6, 1.4) },
+    ...Array.from({ length: 9 }, (_, i) => {
+      const a = (i / 9) * Math.PI * 2;
+      const dir = new THREE.Vector3(Math.sin(a), -0.42, Math.cos(a)).normalize();
+      return {
+        geometry: CONE, color: leaf,
+        matrix: new THREE.Matrix4().compose(
+          new THREE.Vector3(dir.x * 4.2, 16.4 + dir.y * 4.2, dir.z * 4.2),
+          new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir),
+          new THREE.Vector3(2.0, 9.0, 0.38),
+        ),
+      };
+    }),
+  ]),
+
+  // A dead giant, split open. The dark core is what makes it read as hollow rather than as a pole.
+  hollow_snag: (bark = '#4a4038') => mergeParts([
+    { geometry: CYL, color: bark, matrix: at(0, 7, 0, 1.45, 14, 1.25) },
+    { geometry: CYL, color: '#221c18', matrix: at(0, 3.4, 0.85, 0.75, 6.8, 0.6) },
+    { geometry: CYL, color: bark, matrix: tilt(2.4, 14.6, 0, 0.45, 7, 0.45, 0, 0, -0.95) },
+    { geometry: CYL, color: bark, matrix: tilt(-2.0, 15.4, 0.6, 0.4, 6.2, 0.4, 0.25, 0, 0.85) },
+    { geometry: CONE, color: bark, matrix: at(0, 17.4, 0, 1.05, 7.0, 1.05) },
+  ]),
+
+  // A tor is stacked, weathered slabs — one boulder scaled up just looks like a bad boulder.
+  tor: (stone = '#6e675c') => mergeParts([
+    { geometry: ICO, color: stone, matrix: at(0, 3.2, 0, 5.4, 3.4, 5.0) },
+    { geometry: ICO, color: stone, matrix: at(0.6, 8.0, -0.4, 4.2, 2.6, 4.0, 0.8) },
+    { geometry: ICO, color: stone, matrix: at(-0.5, 12.2, 0.5, 3.2, 2.2, 3.0, 1.9) },
+    { geometry: ICO, color: stone, matrix: at(0.3, 15.8, -0.2, 2.2, 1.8, 2.2, 2.7) },
+    { geometry: ICO, color: stone, matrix: at(0, 18.0, 0, 1.2, 1.0, 1.2, 0.4) },
+    { geometry: ICO, color: stone, matrix: at(4.8, 1.0, 3.2, 1.8, 1.1, 1.6) },
+  ]),
+
+  // The span is seven blocks walked round a half-circle, each tipped to follow it. Two legs and a
+  // flat lintel read as a doorway; this reads as weather.
+  stone_arch: (stone = '#8a7a5e') => mergeParts([
+    { geometry: BOX, color: stone, matrix: at(-7.4, 7.0, 0, 3.6, 14, 3.0) },
+    { geometry: BOX, color: stone, matrix: at(7.2, 6.6, 0, 3.2, 13.2, 2.8) },
+    ...Array.from({ length: 7 }, (_, i) => {
+      const t = (i / 6) * Math.PI;
+      return {
+        geometry: BOX, color: stone,
+        matrix: tilt(-7.2 + (i / 6) * 14.4, 13.6 + Math.sin(t) * 5.8, 0, 3.0, 2.8, 2.8, 0, 0, -Math.cos(t) * 0.72),
+      };
+    }),
+    { geometry: BOX, color: stone, matrix: at(0, 19.8, 0, 3.4, 2.2, 3.0) },
+    { geometry: ICO, color: stone, matrix: at(-9.5, 0.8, 2.4, 1.6, 1.0, 1.4) },
+  ]),
+
+  basalt_stack: (stone = '#3e3a3c') => mergeParts([
+    { geometry: CYL, color: stone, matrix: at(-0.6, 11, -0.4, 2.2, 22, 2.2, 0.2) },
+    ...[[2.9, 1.2, 15, 1.5], [-2.6, -1.8, 19, 1.7], [1.5, -3.1, 11, 1.2], [-3.4, 2.7, 13, 1.4], [0.5, 3.8, 8, 1.0], [3.4, -2.4, 6, 0.9]]
+      .map(([x, z, h, r], i) => ({ geometry: CYL, color: stone, matrix: at(x, h / 2, z, r, h, r, i * 0.5) })),
+    { geometry: CYL, color: stone, matrix: tilt(5.6, 0.9, 1.6, 1.0, 5.4, 1.0, 0, 0.4, Math.PI / 2 - 0.15) },
+  ]),
+
+  crystal_spire: (gem = '#9fd8ff') => mergeParts([
+    { geometry: ICO, color: '#4a4a56', matrix: at(0, 0.6, 0, 3.8, 1.2, 3.8) },
+    { geometry: OCT, color: gem, matrix: at(0, 12, 0, 2.6, 13, 2.6) },
+    { geometry: OCT, color: gem, matrix: at(2.9, 6.6, 1.3, 1.6, 7.6, 1.6, 0.7) },
+    { geometry: OCT, color: gem, matrix: at(-2.5, 5.4, -1.7, 1.3, 6.2, 1.3, 1.6) },
+    { geometry: OCT, color: gem, matrix: at(1.1, 3.2, -2.9, 0.9, 4.2, 0.9, 2.4) },
+    { geometry: OCT, color: gem, matrix: tilt(-3.6, 2.0, 2.4, 0.8, 4.6, 0.8, 0.3, 0.8, 0.28) },
+  ]),
+
+  ice_fang: (ice = '#cfe8ff') => mergeParts([
+    { geometry: CONE, color: ice, matrix: at(0, 10.5, 0, 3.0, 21, 3.0) },
+    { geometry: CONE, color: ice, matrix: tilt(3.4, 5.6, 1.4, 1.5, 11, 1.5, 0, 0, -0.2) },
+    { geometry: CONE, color: ice, matrix: tilt(-2.8, 4.2, -1.8, 1.2, 8.4, 1.2, 0.18, 0, 0.16) },
+    { geometry: ICO, color: '#a8c6dd', matrix: at(0, 0.5, 0, 4.2, 1.0, 4.0) },
+  ]),
+
+  cap_mushroom: (stem = '#d8cdb4', cap = '#8a4a5a') => mergeParts([
+    { geometry: CYL, color: stem, matrix: at(0, 6.5, 0, 1.15, 13, 1.15) },
+    { geometry: CYL, color: stem, matrix: at(0, 0.5, 0, 2.0, 1.0, 2.0) },
+    { geometry: CYL, color: '#e0d6c0', matrix: at(0, 9.6, 0, 2.5, 0.4, 2.5) },
+    { geometry: SPH, color: cap, matrix: at(0, 13.9, 0, 6.8, 4.2, 6.8) },
+    { geometry: CYL, color: stem, matrix: at(4.4, 2.1, 2.7, 0.42, 4.2, 0.42) },
+    { geometry: SPH, color: cap, matrix: at(4.4, 4.3, 2.7, 2.4, 1.6, 2.4) },
+  ]),
+
+  // Something died here a long time ago and the ribs stayed up. The halves lean in at 0.3 rad so the
+  // cage closes over your head instead of standing as two fences.
+  rib_arch: (bone = '#cfc7ae') => mergeParts([
+    { geometry: CYL, color: bone, matrix: tilt(0, 17.4, 0, 0.45, 21, 0.45, Math.PI / 2, 0, 0) },
+    ...[-8.4, -5.0, -1.7, 1.7, 5.0, 8.4].flatMap(z => [1, -1].map(s => ({
+      geometry: CYL, color: bone,
+      matrix: tilt(s * 3.1, 9.2, z, 0.3, 18.2, 0.3, 0, 0, s * 0.3),
+    }))),
+    { geometry: SPH, color: bone, matrix: at(0, 2.4, 13.0, 2.4, 2.0, 3.2) },
+    { geometry: BOX, color: bone, matrix: at(0, 1.5, 15.8, 1.5, 1.3, 2.8) },
+    { geometry: CYL, color: bone, matrix: tilt(2.6, 0.5, -11.5, 0.32, 7.0, 0.32, 0, 0.5, Math.PI / 2) },
+  ]),
+
+  mast_cactus: (skin = '#4a7a4a') => mergeParts([
+    { geometry: CYL, color: skin, matrix: at(0, 8.5, 0, 1.5, 17, 1.5) },
+    { geometry: CYL, color: skin, matrix: tilt(2.2, 8.5, 0, 0.7, 4.4, 0.7, 0, 0, Math.PI / 2) },
+    { geometry: CYL, color: skin, matrix: at(4.2, 11.4, 0, 0.7, 6.0, 0.7) },
+    { geometry: CYL, color: skin, matrix: tilt(-2.0, 11.5, 0.4, 0.62, 4.0, 0.62, 0, 0, Math.PI / 2) },
+    { geometry: CYL, color: skin, matrix: at(-3.9, 14.0, 0.4, 0.62, 5.2, 0.62) },
+    { geometry: CONE, color: skin, matrix: at(0, 17.4, 0, 1.5, 1.4, 1.5) },
+  ]),
+};
+
 export const PROP_KEYS = Object.keys(PROP_KINDS);
 
 // ---------------------------------------------------------------------------- what grows where
@@ -294,6 +477,37 @@ export function createProps(scene, terrain, opts = {}) {
   grassMesh.name = 'farhold-grass';
   scene.add(grassMesh);
 
+  /**
+   * MEGAFLORA ARRIVES A MOMENT AFTER THE REST OF THE WORLD.
+   *
+   * The catalogue is JSON and `createProps` is synchronous, so the giants cannot be there on the
+   * first frame. Until the file lands there are simply none, and when it does we rebuild wherever
+   * the player is standing — one extra rebuild at boot, and nothing to wire up anywhere else.
+   */
+  let mega = null;
+  const megaMeshes = {};
+  let lastPoint = null;
+  const buildMega = data => {
+    if (!data) return;
+    mega = data;
+    for (const [key, spec] of Object.entries(data.kinds || {})) {
+      const build = MEGA_BUILDERS[key];
+      if (!build) continue;
+      const mesh = new THREE.InstancedMesh(build(), new THREE.MeshLambertMaterial({ vertexColors: true }), spec.cap || 12);
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      mesh.count = 0;
+      mesh.frustumCulled = false;
+      // an empty InstancedMesh still costs a slot in the render list, and there are twelve of
+      // these — so an unused giant is hidden outright rather than drawn with nought instances
+      mesh.visible = false;
+      mesh.name = 'farhold-mega-' + key;
+      scene.add(mesh);
+      megaMeshes[key] = mesh;
+    }
+    if (lastPoint) rebuild(lastPoint[0], lastPoint[1]);
+  };
+  if (MEGA_DATA) buildMega(MEGA_DATA); else MEGA_READY.then(buildMega);
+
   const matrix = new THREE.Matrix4();
   const colour = new THREE.Color();
   const solids = new ObstacleField();
@@ -316,8 +530,10 @@ export function createProps(scene, terrain, opts = {}) {
   /** Fill every instanced mesh from the cells around (px, pz). */
   function rebuild(px, pz) {
     rebuilds++;
+    lastPoint = [px, pz];
     const counts = {};
     for (const key of PROP_KEYS) counts[key] = 0;
+    const megaCounts = {};
     let grass = 0;
     solids.clear();
 
@@ -419,6 +635,43 @@ export function createProps(scene, terrain, opts = {}) {
           }
         }
 
+        // A GIANT, NOW AND THEN.
+        //
+        // Own random stream, own roll, at most one per cell: two 24 m trees in one 64 m cell is not
+        // a landmark, it is a wall you cannot see past. The ground has to be flatter than an
+        // ordinary tree needs (nothing this heavy stays up on a slope) and off the road, because
+        // nobody lets a thing this size grow through the highway.
+        if (mega) {
+          const mrng = makeRng(cellSeed(seed ^ 0x4d67, cx, cz));
+          const mix = mega.biomes?.[kit.biomeKey] || mega.biomes?.default || [];
+          for (const [key, per] of mix) {
+            const mesh = megaMeshes[key];
+            if (!mesh) continue;
+            if (mrng() > per * Math.min(1.6, cfg.density)) continue;
+            const n = megaCounts[key] || 0;
+            if (n >= mesh.instanceMatrix.count) continue;
+            const x = baseX + (mrng() - 0.5) * CELL * 0.7;
+            const z = baseZ + (mrng() - 0.5) * CELL * 0.7;
+            if (!terrain.plantable(x, z)) continue;
+            if (terrain.slopeAt(x, z, 8) > (mega.minSlope ?? 0.42)) continue;
+            if (terrain.roadAt(x, z) > (mega.roadClear ?? 0.2)) continue;
+            const spec = mega.kinds[key] || {};
+            const scale = 0.85 + mrng() * 0.4;
+            matrix.compose(
+              new THREE.Vector3(x, terrain.heightAt(x, z) - 0.3, z),
+              new THREE.Quaternion().setFromEuler(new THREE.Euler(0, mrng() * Math.PI * 2, 0)),
+              new THREE.Vector3(scale, scale * (0.9 + mrng() * 0.25), scale),
+            );
+            mesh.setMatrixAt(n, matrix);
+            const tint = spec.leafy && kit.leaf ? colour.set(kit.leaf) : colour.setScalar(1);
+            const v = 0.86 + mrng() * 0.26;
+            mesh.setColorAt(n, colour.setRGB(tint.r * v, tint.g * v, tint.b * v));
+            if (spec.solid) solids.add(x, z, spec.solid[0] * scale, spec.solid[1] * scale);
+            megaCounts[key] = n + 1;
+            break;
+          }
+        }
+
         // grass, only in the cells you are standing among
         if (Math.abs(dx) <= cfg.grassRadius && Math.abs(dz) <= cfg.grassRadius && grassVisible) {
           const id = terrain.biomeIdAt(baseX, baseZ);
@@ -457,13 +710,21 @@ export function createProps(scene, terrain, opts = {}) {
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
+    for (const [key, mesh] of Object.entries(megaMeshes)) {
+      mesh.count = visible ? (megaCounts[key] || 0) : 0;
+      mesh.visible = mesh.count > 0;
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    }
     grassMesh.count = visible && grassVisible ? grass : 0;
     grassMesh.instanceMatrix.needsUpdate = true;
     if (grassMesh.instanceColor) grassMesh.instanceColor.needsUpdate = true;
   }
 
   return {
-    meshes, grassMesh, cfg, solids,
+    meshes, grassMesh, cfg, solids, megaMeshes,
+    /** What the megaflora catalogue said, once it arrived. Null until then. */
+    get megaflora() { return mega; },
     /** Follow the player; only regenerates when you cross into a new prop cell. */
     update(x, z, force = false) {
       const cx = Math.round(x / CELL), cz = Math.round(z / CELL);
@@ -505,13 +766,23 @@ export function createProps(scene, terrain, opts = {}) {
         if (m.count > 0) drawCalls++;
         triangles += m.count * (m.geometry.attributes.position.count / 3);
       }
+      let giants = 0;
+      for (const mesh of Object.values(megaMeshes)) {
+        giants += mesh.count;
+        instances += mesh.count;
+        if (mesh.count > 0) drawCalls++;
+        triangles += mesh.count * (mesh.geometry.attributes.position.count / 3);
+      }
       if (grassMesh.count) { drawCalls++; instances += grassMesh.count; triangles += grassMesh.count * (grassGeom.attributes.position.count / 3); }
-      return { instances, drawCalls, triangles: Math.round(triangles), grass: grassMesh.count, rebuilds, density: cfg.density, solids: solids.count };
+      return { instances, drawCalls, triangles: Math.round(triangles), grass: grassMesh.count, giants, rebuilds, density: cfg.density, solids: solids.count };
     },
     dispose() {
       for (const key of PROP_KEYS) {
         const m = meshes[key];
         scene.remove(m); m.geometry.dispose(); m.material.dispose(); m.dispose();
+      }
+      for (const mesh of Object.values(megaMeshes)) {
+        scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); mesh.dispose();
       }
       scene.remove(grassMesh); grassGeom.dispose(); grassMesh.material.dispose(); grassMesh.dispose();
     },

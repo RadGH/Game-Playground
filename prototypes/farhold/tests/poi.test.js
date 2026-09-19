@@ -209,6 +209,23 @@ test('8.3 — a set piece is visible from the next ridge', () => {
   assert.ok(castle.tall >= 28, 'a castle should be the thing you navigate by');
 });
 
+test('8.2 — a wall that is meant to be a wall actually closes', () => {
+  // How wide each piece is, from js/sites.js: a palisade spans 6 m of x and a curtain wall 9 m. A
+  // ring of N at radius R only closes if N >= 2*pi*R / (width * scale) — below that you get a picket
+  // fence with the middle missing, which is what the first pass of this shipped and what the
+  // screenshots caught. A ruin says so with `broken: true` and is left alone.
+  const WIDTH = { palisade: 6, wall: 9 };
+  for (const [key, l] of Object.entries(setpieces.layouts || {})) {
+    for (const r of l.rings || []) {
+      const w = WIDTH[r.piece];
+      if (!w || r.broken) continue;
+      const need = Math.ceil((2 * Math.PI * r.radius) / (w * (r.scale ?? 1)));
+      assert.ok((r.count || 1) >= need,
+        `${key}'s ${r.piece} ring is ${r.count} at ${r.radius} m — it needs ${need} to close, or mark it "broken": true`);
+    }
+  }
+});
+
 test('8.2 — every piece a layout asks for has been built', () => {
   for (const [key, l] of Object.entries(setpieces.layouts || {})) {
     const asked = new Set();

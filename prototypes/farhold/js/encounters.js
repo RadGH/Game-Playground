@@ -16,12 +16,36 @@
 //
 // Pure-ish: it owns no meshes and no DOM. The enemy field does all the building.
 
-export function createEncounters({ field, zones, terrain, balance = {}, data = {}, onLog = () => {}, isNight = () => false }) {
+export function createEncounters({ field, zones, terrain, balance = {}, data = {}, onLog = () => {}, isNight = () => false, sites = null }) {
   const cfg = balance.encounters || {};
   const table = (data.encounters || []).filter(e => e.weight > 0);
   let since = 0;
   let live = [];
   const history = [];
+  /**
+   * WHO OWNS THE GROUND YOU ARE WALKING OVER.
+   *
+   * A set piece that rolls two hundred metres from a fort should be that fort's soldiers, not a
+   * pack of moor hounds that happen to live in the biome. `js/sites.js` knows where the forts,
+   * camps and castles are and what each one garrisons, so when it is handed over the encounter
+   * borrows the nearest one's `garrison.prefer` and says whose patrol it is. Without it nothing
+   * changes — the table still rolls the way it always did.
+   */
+  let siteField = sites;
+  const OWNED_BY = 380;        // metres. Further than this and a place has no say in what you meet.
+
+  /** The hostile place nearest a point, if it is close enough to have a patrol out here. */
+  function ownerOf(x, z) {
+    const near = siteField?.visible || siteField?.sites || null;
+    if (!near) return null;
+    let best = null, bestD = OWNED_BY;
+    for (const s of near) {
+      if (!s.hostile || s.cleared) continue;
+      const d = Math.hypot(s.x - x, s.z - z);
+      if (d < bestD) { bestD = d; best = s; }
+    }
+    return best;
+  }
 
   /** Pick an encounter by weight, skipping the ones that do not belong right now. */
   function pick(rng, { night = false } = {}) {
@@ -53,15 +77,25 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     return [at.x + Math.cos(a) * d, at.z + Math.sin(a) * d];
   }
 
-  /** The table entries that fit what this encounter wants, falling back to anything that lives here. */
-  function poolFor(spec, x, z, level) {
+  /**
+   * The table entries that fit what this encounter wants, falling back to anything that lives here.
+   *
+   * A nearby stronghold narrows it first: within `OWNED_BY` metres of a raider stockade you meet
+   * raiders, because that is who is out here. If the two asks cannot both be met the encounter's
+   * own preference wins — a beast hunt near a fort is still a beast hunt.
+   */
+  function poolFor(spec, x, z, level, owner = null) {
     const all = field.defsFor(x, z, level);
     if (!all.length) return [];
-    const want = spec.prefer || {};
-    const narrow = all.filter(d =>
+    const fits = (list, want) => list.filter(d =>
       (!want.families || want.families.includes(d.family)) &&
       (!want.roles || want.roles.includes(d.role)));
-    return narrow.length >= 1 ? narrow : all;
+    const owned = owner?.spec?.garrison?.prefer ? fits(all, owner.spec.garrison.prefer) : all;
+    const base = owned.length ? owned : all;
+    const narrow = fits(base, spec.prefer || {});
+    if (narrow.length) return narrow;
+    const wide = fits(all, spec.prefer || {});
+    return wide.length ? wide : all;
   }
 
   /** Build one. Returns a record of what was put down, or null. */
@@ -73,7 +107,8 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     if (!field.wild(x, z)) return null;             // a set piece does not happen inside a town
 
     const level = zones ? zones.levelFor(x, z, rng) : playerLevel;
-    const pool = poolFor(spec, x, z, level);
+    const owner = ownerOf(x, z);
+    const pool = poolFor(spec, x, z, level, owner);
     if (!pool.length) return null;
 
     const span = spec.count || [3, 5];
@@ -113,9 +148,12 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
 
     history.push(spec.id);
     if (history.length > 6) history.shift();
-    const record = { id: spec.id, name: spec.name, x, z, level, units: made, at: Date.now() };
+    const record = { id: spec.id, name: spec.name, x, z, level, units: made, at: Date.now(), owner: owner?.key || null };
     live.push(record);
-    onLog(spec.announce || spec.name, spec.aggro ? 'bad' : '');
+    // …and say whose they are. "A warband on the road" is a line; "A warband on the road — out of
+    // Harrowfen" is a reason to go and find Harrowfen.
+    const line = owner ? `${spec.announce || spec.name} — out of ${owner.name}.` : (spec.announce || spec.name);
+    onLog(line, spec.aggro ? 'bad' : '');
     return record;
   }
 
@@ -138,6 +176,8 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
 
   return {
     update, run, pick, table,
+    /** Hand over the site field so a set piece near a stronghold is that stronghold's patrol. */
+    setSites(s) { siteField = s; },
     get live() { return live; },
     /** Force one, for the debug menu and the tests. */
     force: (id, at, level = 1) => {

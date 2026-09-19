@@ -1,0 +1,1893 @@
+{
+  "schema": 1,
+  "note": "The building kit. Every knob that decides what a building LOOKS like lives here, not in code, so a town can be retuned without touching js/buildkit.js. Lengths are metres. A pitch is the rise over half the span, so 1.0 is a 45-degree roof.",
+  "knobs": {
+    "plotInset": 0.55,
+    "storeyHeight": [
+      2.5,
+      3.1
+    ],
+    "eaveBase": 0.26,
+    "eavePerPitch": 0.2,
+    "eaveThick": 0.16,
+    "jetty": [
+      0.0,
+      0.42
+    ],
+    "colourJitter": 0.06,
+    "sizeJitter": 0.07,
+    "windowSpacing": 2.3,
+    "windowSize": [
+      0.75,
+      1.15
+    ],
+    "doorWidth": [
+      1.0,
+      1.5
+    ],
+    "doorHeight": [
+      2.0,
+      2.4
+    ],
+    "chimneyChance": 0.62,
+    "signChance": 0.85,
+    "maxRoofHeight": 6.5,
+    "roofThick": 0.14,
+    "leanOnPoor": 0.035
+  },
+  "wallMaterials": {
+    "timber_frame": {
+      "name": "Timber frame",
+      "colour": "#d9cdb2",
+      "beams": 0.9,
+      "wealth": [
+        0.25,
+        1.0
+      ]
+    },
+    "wattle": {
+      "name": "Wattle and daub",
+      "colour": "#cbbc9c",
+      "beams": 0.55,
+      "wealth": [
+        0.0,
+        0.6
+      ]
+    },
+    "cut_stone": {
+      "name": "Cut stone",
+      "colour": "#9a958a",
+      "beams": 0.0,
+      "wealth": [
+        0.45,
+        1.0
+      ]
+    },
+    "rubble": {
+      "name": "Rubble",
+      "colour": "#8b877c",
+      "beams": 0.0,
+      "wealth": [
+        0.0,
+        0.7
+      ]
+    },
+    "brick": {
+      "name": "Brick",
+      "colour": "#a06a55",
+      "beams": 0.0,
+      "wealth": [
+        0.4,
+        1.0
+      ]
+    },
+    "log": {
+      "name": "Log",
+      "colour": "#7d6446",
+      "beams": 0.25,
+      "wealth": [
+        0.0,
+        0.7
+      ]
+    },
+    "plaster": {
+      "name": "Plaster",
+      "colour": "#e3dccb",
+      "beams": 0.3,
+      "wealth": [
+        0.3,
+        1.0
+      ]
+    },
+    "mud_brick": {
+      "name": "Mud brick",
+      "colour": "#cba97e",
+      "beams": 0.0,
+      "wealth": [
+        0.0,
+        0.9
+      ]
+    },
+    "carved_trunk": {
+      "name": "Carved trunk",
+      "colour": "#b9b1a0",
+      "beams": 0.4,
+      "wealth": [
+        0.2,
+        1.0
+      ]
+    },
+    "chitin": {
+      "name": "Fungal chitin",
+      "colour": "#8e8a78",
+      "beams": 0.2,
+      "wealth": [
+        0.0,
+        0.8
+      ]
+    },
+    "bone": {
+      "name": "Bone and lath",
+      "colour": "#cfc7ae",
+      "beams": 0.7,
+      "wealth": [
+        0.0,
+        0.8
+      ]
+    },
+    "hide": {
+      "name": "Hide on frame",
+      "colour": "#9a7c5c",
+      "beams": 0.8,
+      "wealth": [
+        0.0,
+        0.5
+      ]
+    },
+    "scrap": {
+      "name": "Salvaged plate",
+      "colour": "#6f6458",
+      "beams": 0.6,
+      "wealth": [
+        0.0,
+        0.6
+      ]
+    }
+  },
+  "roofMaterials": {
+    "thatch": {
+      "name": "Thatch",
+      "colour": "#a98d52",
+      "pitch": [
+        0.85,
+        1.35
+      ],
+      "thick": 0.34,
+      "wealth": [
+        0.0,
+        0.65
+      ]
+    },
+    "slate": {
+      "name": "Slate",
+      "colour": "#4f5a63",
+      "pitch": [
+        0.7,
+        1.2
+      ],
+      "thick": 0.12,
+      "wealth": [
+        0.45,
+        1.0
+      ]
+    },
+    "clay_tile": {
+      "name": "Clay tile",
+      "colour": "#9a5540",
+      "pitch": [
+        0.6,
+        1.05
+      ],
+      "thick": 0.14,
+      "wealth": [
+        0.3,
+        1.0
+      ]
+    },
+    "shingle": {
+      "name": "Wood shingle",
+      "colour": "#7a6349",
+      "pitch": [
+        0.65,
+        1.15
+      ],
+      "thick": 0.14,
+      "wealth": [
+        0.1,
+        0.85
+      ]
+    },
+    "turf": {
+      "name": "Turf",
+      "colour": "#5c7145",
+      "pitch": [
+        0.28,
+        0.6
+      ],
+      "thick": 0.4,
+      "wealth": [
+        0.0,
+        0.8
+      ]
+    },
+    "lead": {
+      "name": "Lead",
+      "colour": "#7b8189",
+      "pitch": [
+        0.1,
+        0.45
+      ],
+      "thick": 0.1,
+      "wealth": [
+        0.5,
+        1.0
+      ]
+    },
+    "canvas": {
+      "name": "Canvas",
+      "colour": "#c9bda2",
+      "pitch": [
+        0.5,
+        1.1
+      ],
+      "thick": 0.08,
+      "wealth": [
+        0.0,
+        0.7
+      ]
+    },
+    "bone_plate": {
+      "name": "Bone plate",
+      "colour": "#bdb49a",
+      "pitch": [
+        0.7,
+        1.3
+      ],
+      "thick": 0.16,
+      "wealth": [
+        0.0,
+        0.9
+      ]
+    },
+    "leaf_scale": {
+      "name": "Leaf scale",
+      "colour": "#6f8a5a",
+      "pitch": [
+        0.8,
+        1.4
+      ],
+      "thick": 0.16,
+      "wealth": [
+        0.2,
+        1.0
+      ]
+    },
+    "copper": {
+      "name": "Verdigris copper",
+      "colour": "#5d8d7e",
+      "pitch": [
+        0.5,
+        1.1
+      ],
+      "thick": 0.1,
+      "wealth": [
+        0.55,
+        1.0
+      ]
+    }
+  },
+  "roofs": {
+    "gable": {
+      "name": "Gable",
+      "pitch": [
+        0.6,
+        1.25
+      ],
+      "shapes": [
+        "rect"
+      ]
+    },
+    "hip": {
+      "name": "Hip",
+      "pitch": [
+        0.55,
+        1.1
+      ],
+      "shapes": [
+        "rect"
+      ]
+    },
+    "half_hip": {
+      "name": "Half hip",
+      "pitch": [
+        0.7,
+        1.2
+      ],
+      "shapes": [
+        "rect"
+      ]
+    },
+    "gambrel": {
+      "name": "Gambrel",
+      "pitch": [
+        0.8,
+        1.3
+      ],
+      "shapes": [
+        "rect"
+      ]
+    },
+    "mansard": {
+      "name": "Mansard",
+      "pitch": [
+        0.9,
+        1.4
+      ],
+      "shapes": [
+        "rect"
+      ]
+    },
+    "flat": {
+      "name": "Flat",
+      "pitch": [
+        0.05,
+        0.16
+      ],
+      "shapes": [
+        "rect",
+        "round"
+      ],
+      "parapet": 0.55
+    },
+    "domed": {
+      "name": "Domed",
+      "pitch": [
+        0.45,
+        0.85
+      ],
+      "shapes": [
+        "rect",
+        "round"
+      ]
+    },
+    "conical": {
+      "name": "Conical",
+      "pitch": [
+        0.9,
+        1.7
+      ],
+      "shapes": [
+        "round",
+        "rect"
+      ]
+    },
+    "sawtooth": {
+      "name": "Sawtooth",
+      "pitch": [
+        0.35,
+        0.7
+      ],
+      "shapes": [
+        "rect"
+      ]
+    },
+    "pagoda": {
+      "name": "Tiered",
+      "pitch": [
+        0.45,
+        0.8
+      ],
+      "shapes": [
+        "rect"
+      ]
+    },
+    "turf_mound": {
+      "name": "Turf mound",
+      "pitch": [
+        0.3,
+        0.6
+      ],
+      "shapes": [
+        "rect",
+        "round"
+      ]
+    },
+    "tent": {
+      "name": "Tent",
+      "pitch": [
+        0.85,
+        1.3
+      ],
+      "shapes": [
+        "rect",
+        "round"
+      ]
+    }
+  },
+  "bases": {
+    "hovel": {
+      "name": "Hovel",
+      "min": [
+        2.4,
+        2.4
+      ],
+      "max": [
+        5.0,
+        4.6
+      ],
+      "ratio": [
+        1.0,
+        1.35
+      ],
+      "storeys": [
+        1,
+        1
+      ],
+      "roofs": [
+        "gable",
+        "hip",
+        "flat",
+        "domed",
+        "turf_mound",
+        "conical",
+        "tent"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "woodpile"
+      ]
+    },
+    "long": {
+      "name": "Longhouse",
+      "min": [
+        5.8,
+        3.6
+      ],
+      "max": [
+        15.0,
+        7.5
+      ],
+      "ratio": [
+        1.7,
+        2.8
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "gable",
+        "half_hip",
+        "hip",
+        "gambrel",
+        "flat",
+        "turf_mound",
+        "sawtooth"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "porch",
+        "leanto",
+        "woodpile",
+        "fence",
+        "bench"
+      ]
+    },
+    "square": {
+      "name": "Square house",
+      "min": [
+        4.2,
+        3.8
+      ],
+      "max": [
+        9.0,
+        8.5
+      ],
+      "ratio": [
+        0.95,
+        1.3
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "gable",
+        "hip",
+        "half_hip",
+        "mansard",
+        "flat",
+        "pagoda",
+        "domed"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "porch",
+        "fence",
+        "woodpile",
+        "cellar",
+        "bench"
+      ]
+    },
+    "ell": {
+      "name": "L-plan",
+      "min": [
+        6.2,
+        5.2
+      ],
+      "max": [
+        13.0,
+        11.0
+      ],
+      "ratio": [
+        1.0,
+        1.5
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "gable",
+        "hip",
+        "half_hip",
+        "gambrel",
+        "mansard",
+        "flat"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": -0.19,
+          "w": 1,
+          "d": 0.62,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": -0.27,
+          "z": 0.31,
+          "w": 0.46,
+          "d": 0.38,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "porch",
+        "fence",
+        "garden",
+        "woodpile",
+        "bench"
+      ]
+    },
+    "courtyard": {
+      "name": "Courtyard",
+      "min": [
+        8.0,
+        7.4
+      ],
+      "max": [
+        16.0,
+        15.0
+      ],
+      "ratio": [
+        0.95,
+        1.25
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "flat",
+        "hip",
+        "gable",
+        "pagoda",
+        "domed"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0.36,
+          "w": 1,
+          "d": 0.28,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0,
+          "z": -0.36,
+          "w": 1,
+          "d": 0.28,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": -0.36,
+          "z": 0,
+          "w": 0.28,
+          "d": 0.44,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0.36,
+          "z": 0,
+          "w": 0.28,
+          "d": 0.44,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "gate_arch",
+        "well_head",
+        "awning",
+        "garden"
+      ]
+    },
+    "tower_house": {
+      "name": "Tower house",
+      "min": [
+        3.8,
+        3.8
+      ],
+      "max": [
+        7.5,
+        7.5
+      ],
+      "ratio": [
+        0.9,
+        1.15
+      ],
+      "storeys": [
+        3,
+        5
+      ],
+      "roofs": [
+        "conical",
+        "hip",
+        "pagoda",
+        "gable",
+        "flat"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.78,
+          "d": 0.78,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "stair",
+        "balcony",
+        "banner"
+      ]
+    },
+    "row": {
+      "name": "Row",
+      "min": [
+        7.5,
+        3.6
+      ],
+      "max": [
+        16.0,
+        7.0
+      ],
+      "ratio": [
+        2.0,
+        3.2
+      ],
+      "storeys": [
+        1,
+        3
+      ],
+      "roofs": [
+        "gable",
+        "half_hip",
+        "mansard",
+        "sawtooth",
+        "flat",
+        "hip"
+      ],
+      "masses": [
+        {
+          "x": -0.335,
+          "z": 0,
+          "w": 0.33,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.33,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "storeyBump": 1
+        },
+        {
+          "x": 0.335,
+          "z": 0,
+          "w": 0.33,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "fence",
+        "bench",
+        "washing"
+      ]
+    },
+    "round": {
+      "name": "Roundhouse",
+      "min": [
+        4.0,
+        4.0
+      ],
+      "max": [
+        9.0,
+        9.0
+      ],
+      "ratio": [
+        1.0,
+        1.0
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "conical",
+        "domed",
+        "turf_mound",
+        "tent"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "shape": "round"
+        }
+      ],
+      "extras": [
+        "porch",
+        "woodpile",
+        "fence"
+      ]
+    },
+    "stilted": {
+      "name": "Stilt house",
+      "min": [
+        4.4,
+        4.0
+      ],
+      "max": [
+        10.0,
+        8.0
+      ],
+      "ratio": [
+        1.1,
+        1.8
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "gable",
+        "hip",
+        "conical",
+        "tent",
+        "domed"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.92,
+          "d": 0.92,
+          "storeys": 1,
+          "roof": "main",
+          "lift": 1.9
+        }
+      ],
+      "extras": [
+        "stilts",
+        "stair",
+        "balcony"
+      ]
+    },
+    "dug_in": {
+      "name": "Dug-in",
+      "min": [
+        4.4,
+        4.2
+      ],
+      "max": [
+        11.0,
+        9.0
+      ],
+      "ratio": [
+        1.0,
+        1.7
+      ],
+      "storeys": [
+        1,
+        1
+      ],
+      "roofs": [
+        "turf_mound",
+        "domed",
+        "flat"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "sink": 0.55
+        }
+      ],
+      "extras": [
+        "porch",
+        "garden",
+        "bench",
+        "chimney_stub"
+      ]
+    },
+    "terraced": {
+      "name": "Terraced",
+      "min": [
+        7.0,
+        4.4
+      ],
+      "max": [
+        15.0,
+        9.0
+      ],
+      "ratio": [
+        1.5,
+        2.4
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "flat",
+        "gable",
+        "hip",
+        "mansard",
+        "pagoda"
+      ],
+      "masses": [
+        {
+          "x": -0.26,
+          "z": 0,
+          "w": 0.46,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0.26,
+          "z": 0,
+          "w": 0.46,
+          "d": 1,
+          "storeys": 2,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "stair",
+        "fence",
+        "balcony"
+      ]
+    },
+    "hall": {
+      "name": "Hall",
+      "min": [
+        8.5,
+        6.0
+      ],
+      "max": [
+        20.0,
+        13.0
+      ],
+      "ratio": [
+        1.3,
+        2.1
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "gable",
+        "half_hip",
+        "hip",
+        "gambrel",
+        "pagoda"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": -0.08,
+          "w": 1,
+          "d": 0.76,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0,
+          "z": 0.39,
+          "w": 0.3,
+          "d": 0.18,
+          "storeys": 1,
+          "roof": "lean"
+        }
+      ],
+      "extras": [
+        "columns",
+        "steps",
+        "banner",
+        "sign"
+      ]
+    },
+    "stacked": {
+      "name": "Stacked",
+      "min": [
+        4.4,
+        4.4
+      ],
+      "max": [
+        9.5,
+        9.0
+      ],
+      "ratio": [
+        0.95,
+        1.3
+      ],
+      "storeys": [
+        1,
+        1
+      ],
+      "roofs": [
+        "gable",
+        "hip",
+        "mansard",
+        "conical",
+        "pagoda"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.8,
+          "d": 0.8,
+          "storeys": 1,
+          "roof": "eave"
+        },
+        {
+          "x": 0,
+          "z": 0.04,
+          "w": 1,
+          "d": 0.94,
+          "storeys": 1,
+          "roof": "eave",
+          "floor": 1
+        },
+        {
+          "x": 0,
+          "z": -0.03,
+          "w": 0.72,
+          "d": 0.72,
+          "storeys": 1,
+          "roof": "main",
+          "floor": 2
+        }
+      ],
+      "extras": [
+        "stair",
+        "balcony",
+        "sign"
+      ]
+    },
+    "jettied": {
+      "name": "Jettied",
+      "min": [
+        4.8,
+        4.2
+      ],
+      "max": [
+        11.0,
+        8.0
+      ],
+      "ratio": [
+        1.15,
+        1.9
+      ],
+      "storeys": [
+        2,
+        3
+      ],
+      "roofs": [
+        "gable",
+        "half_hip",
+        "gambrel",
+        "mansard"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "jetty": 0.38
+        }
+      ],
+      "extras": [
+        "sign",
+        "bench",
+        "shutters",
+        "washing"
+      ]
+    },
+    "crosswing": {
+      "name": "Cross-wing",
+      "min": [
+        9.5,
+        6.8
+      ],
+      "max": [
+        19.0,
+        13.0
+      ],
+      "ratio": [
+        1.3,
+        1.9
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "gable",
+        "half_hip",
+        "hip",
+        "flat"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.6,
+          "d": 0.62,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": -0.34,
+          "z": 0,
+          "w": 0.3,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0.34,
+          "z": 0,
+          "w": 0.3,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "porch",
+        "columns",
+        "sign",
+        "banner"
+      ]
+    },
+    "canopy": {
+      "name": "Canopy house",
+      "min": [
+        4.4,
+        4.4
+      ],
+      "max": [
+        10.0,
+        10.0
+      ],
+      "ratio": [
+        1.0,
+        1.15
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "conical",
+        "domed",
+        "tent"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.24,
+          "d": 0.24,
+          "storeys": 2,
+          "roof": "none",
+          "shape": "round"
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "shape": "round",
+          "floor": 2
+        }
+      ],
+      "extras": [
+        "spiral_stair",
+        "hanging_lamp",
+        "balcony"
+      ]
+    },
+    "bower": {
+      "name": "Bower",
+      "min": [
+        5.2,
+        4.2
+      ],
+      "max": [
+        13.0,
+        8.5
+      ],
+      "ratio": [
+        1.4,
+        2.3
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "conical",
+        "gable",
+        "domed",
+        "tent"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": -0.12,
+          "w": 0.94,
+          "d": 0.7,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0.3,
+          "z": 0.34,
+          "w": 0.16,
+          "d": 0.16,
+          "storeys": 2,
+          "roof": "main",
+          "shape": "round"
+        }
+      ],
+      "extras": [
+        "hanging_lamp",
+        "garden",
+        "spiral_stair"
+      ]
+    },
+    "blockhouse": {
+      "name": "Blockhouse",
+      "min": [
+        5.2,
+        4.6
+      ],
+      "max": [
+        13.0,
+        11.0
+      ],
+      "ratio": [
+        1.0,
+        1.5
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "flat",
+        "mansard",
+        "hip",
+        "pagoda"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "band": 1
+        }
+      ],
+      "extras": [
+        "steps",
+        "columns",
+        "banner",
+        "bench"
+      ]
+    },
+    "delve": {
+      "name": "Delve mouth",
+      "min": [
+        5.6,
+        4.6
+      ],
+      "max": [
+        14.0,
+        10.0
+      ],
+      "ratio": [
+        1.1,
+        1.8
+      ],
+      "storeys": [
+        1,
+        1
+      ],
+      "roofs": [
+        "flat",
+        "turf_mound"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": -0.14,
+          "w": 1,
+          "d": 0.7,
+          "storeys": 1,
+          "roof": "main",
+          "sink": 0.42,
+          "band": 1
+        },
+        {
+          "x": 0,
+          "z": 0.34,
+          "w": 0.42,
+          "d": 0.24,
+          "storeys": 1,
+          "roof": "lean"
+        }
+      ],
+      "extras": [
+        "steps",
+        "columns",
+        "brazier"
+      ]
+    },
+    "burrow": {
+      "name": "Burrow",
+      "min": [
+        4.4,
+        4.2
+      ],
+      "max": [
+        11.0,
+        9.5
+      ],
+      "ratio": [
+        1.0,
+        1.5
+      ],
+      "storeys": [
+        1,
+        1
+      ],
+      "roofs": [
+        "turf_mound",
+        "domed"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "shape": "round",
+          "sink": 0.48
+        }
+      ],
+      "extras": [
+        "round_door",
+        "garden",
+        "bench",
+        "chimney_stub",
+        "fence"
+      ]
+    },
+    "tomb_row": {
+      "name": "Tomb row",
+      "min": [
+        6.2,
+        3.8
+      ],
+      "max": [
+        14.0,
+        7.0
+      ],
+      "ratio": [
+        1.8,
+        2.8
+      ],
+      "storeys": [
+        1,
+        1
+      ],
+      "roofs": [
+        "gable",
+        "half_hip",
+        "flat"
+      ],
+      "masses": [
+        {
+          "x": -0.34,
+          "z": 0,
+          "w": 0.3,
+          "d": 0.8,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.3,
+          "d": 0.8,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0.34,
+          "z": 0,
+          "w": 0.3,
+          "d": 0.8,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "cage",
+        "brazier",
+        "steps"
+      ]
+    },
+    "spire": {
+      "name": "Spire",
+      "min": [
+        3.4,
+        3.4
+      ],
+      "max": [
+        7.0,
+        7.0
+      ],
+      "ratio": [
+        0.9,
+        1.1
+      ],
+      "storeys": [
+        2,
+        4
+      ],
+      "roofs": [
+        "conical",
+        "gable",
+        "tent"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 0.66,
+          "d": 0.66,
+          "storeys": 1,
+          "roof": "main",
+          "taper": 0.12
+        }
+      ],
+      "extras": [
+        "cage",
+        "brazier",
+        "banner"
+      ]
+    },
+    "war_hall": {
+      "name": "War hall",
+      "min": [
+        9.5,
+        6.4
+      ],
+      "max": [
+        21.0,
+        13.0
+      ],
+      "ratio": [
+        1.4,
+        2.2
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "gable",
+        "tent",
+        "half_hip"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 0.8,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": -0.42,
+          "z": 0,
+          "w": 0.16,
+          "d": 0.6,
+          "storeys": 1,
+          "roof": "lean"
+        },
+        {
+          "x": 0.42,
+          "z": 0,
+          "w": 0.16,
+          "d": 0.6,
+          "storeys": 1,
+          "roof": "lean"
+        }
+      ],
+      "extras": [
+        "totems",
+        "pit_fire",
+        "banner",
+        "hide_flap"
+      ]
+    },
+    "hide_tent": {
+      "name": "Hide tent",
+      "min": [
+        3.8,
+        3.8
+      ],
+      "max": [
+        9.0,
+        9.0
+      ],
+      "ratio": [
+        1.0,
+        1.0
+      ],
+      "storeys": [
+        1,
+        1
+      ],
+      "roofs": [
+        "tent",
+        "conical"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main",
+          "shape": "round",
+          "low": 0.72
+        }
+      ],
+      "extras": [
+        "pit_fire",
+        "totems",
+        "hide_flap"
+      ]
+    },
+    "windcatcher": {
+      "name": "Wind-catcher",
+      "min": [
+        5.2,
+        4.6
+      ],
+      "max": [
+        12.0,
+        10.0
+      ],
+      "ratio": [
+        1.0,
+        1.5
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "flat"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": 0,
+          "w": 1,
+          "d": 1,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": -0.3,
+          "z": -0.28,
+          "w": 0.24,
+          "d": 0.24,
+          "storeys": 2,
+          "roof": "main",
+          "floor": 1
+        }
+      ],
+      "extras": [
+        "awning",
+        "steps",
+        "roof_terrace",
+        "bench"
+      ]
+    },
+    "bazaar_block": {
+      "name": "Bazaar block",
+      "min": [
+        8.5,
+        7.0
+      ],
+      "max": [
+        17.0,
+        14.0
+      ],
+      "ratio": [
+        1.0,
+        1.4
+      ],
+      "storeys": [
+        1,
+        2
+      ],
+      "roofs": [
+        "flat",
+        "domed"
+      ],
+      "masses": [
+        {
+          "x": 0,
+          "z": -0.3,
+          "w": 1,
+          "d": 0.36,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": -0.36,
+          "z": 0.16,
+          "w": 0.28,
+          "d": 0.6,
+          "storeys": 1,
+          "roof": "main"
+        },
+        {
+          "x": 0.36,
+          "z": 0.16,
+          "w": 0.28,
+          "d": 0.6,
+          "storeys": 1,
+          "roof": "main"
+        }
+      ],
+      "extras": [
+        "awning",
+        "gate_arch",
+        "roof_terrace",
+        "awning"
+      ]
+    }
+  },
+  "extras": {
+    "note": "Small attached things. Each one is a rule, not a model: a porch is two posts and a slab in front of the door, wherever the door turned out to be. `reach` is [metres past the wall face, which way it sticks out] - an extra is only built when the yard on that side is wide enough, or a lean-to ends up in next door's kitchen. `yardSlack` is how far past the plot line the clutter may go: a plot is cut with its own inset and the street's half width is already out of the block, so a porch onto the pavement is a porch, not a porch in the road.",
+    "yardSlack": 1.0,
+    "list": [
+      "porch",
+      "leanto",
+      "woodpile",
+      "fence",
+      "garden",
+      "bench",
+      "stair",
+      "balcony",
+      "stilts",
+      "columns",
+      "steps",
+      "banner",
+      "sign",
+      "shutters",
+      "washing",
+      "cellar",
+      "gate_arch",
+      "well_head",
+      "awning",
+      "spiral_stair",
+      "hanging_lamp",
+      "round_door",
+      "cage",
+      "brazier",
+      "totems",
+      "pit_fire",
+      "hide_flap",
+      "roof_terrace",
+      "chimney_stub"
+    ],
+    "reach": {
+      "porch": [
+        1.6,
+        "front"
+      ],
+      "leanto": [
+        2.6,
+        "side"
+      ],
+      "woodpile": [
+        1.0,
+        "side"
+      ],
+      "fence": [
+        1.9,
+        "front"
+      ],
+      "garden": [
+        2.0,
+        "front"
+      ],
+      "bench": [
+        0.8,
+        "front"
+      ],
+      "stair": [
+        1.3,
+        "side"
+      ],
+      "spiral_stair": [
+        1.3,
+        "side"
+      ],
+      "balcony": [
+        1.6,
+        "front"
+      ],
+      "stilts": [
+        0,
+        "none"
+      ],
+      "columns": [
+        0.9,
+        "front"
+      ],
+      "steps": [
+        1.4,
+        "front"
+      ],
+      "banner": [
+        0.2,
+        "front"
+      ],
+      "sign": [
+        1.3,
+        "front"
+      ],
+      "shutters": [
+        0,
+        "none"
+      ],
+      "washing": [
+        1.4,
+        "front"
+      ],
+      "cellar": [
+        1.4,
+        "front"
+      ],
+      "gate_arch": [
+        0.4,
+        "front"
+      ],
+      "well_head": [
+        0,
+        "none"
+      ],
+      "awning": [
+        2.2,
+        "front"
+      ],
+      "hanging_lamp": [
+        0.4,
+        "front"
+      ],
+      "round_door": [
+        0,
+        "none"
+      ],
+      "cage": [
+        0.9,
+        "front"
+      ],
+      "brazier": [
+        1.1,
+        "front"
+      ],
+      "totems": [
+        1.1,
+        "side"
+      ],
+      "pit_fire": [
+        3.0,
+        "front"
+      ],
+      "hide_flap": [
+        0.3,
+        "front"
+      ],
+      "roof_terrace": [
+        0,
+        "none"
+      ],
+      "chimney_stub": [
+        0.4,
+        "side"
+      ]
+    }
+  },
+  "stalls": {
+    "note": "An outdoor stall is a first-class small structure, not a building: four posts, an awning, a trestle and some goods. Section 3.17 - the user asked for these by name.",
+    "kinds": {
+      "produce": {
+        "name": "Produce stall",
+        "goods": "crates",
+        "awning": "#8a6a3a"
+      },
+      "cloth": {
+        "name": "Cloth stall",
+        "goods": "bolts",
+        "awning": "#6a4a7a"
+      },
+      "fish": {
+        "name": "Fish stall",
+        "goods": "barrels",
+        "awning": "#3a6a7a"
+      },
+      "iron": {
+        "name": "Ironmonger",
+        "goods": "crates",
+        "awning": "#5a4a3a"
+      },
+      "charms": {
+        "name": "Charm stall",
+        "goods": "jars",
+        "awning": "#7a6a2a"
+      },
+      "bread": {
+        "name": "Bread stall",
+        "goods": "crates",
+        "awning": "#9a7a4a"
+      },
+      "brew": {
+        "name": "Brew stall",
+        "goods": "barrels",
+        "awning": "#6a5a2a"
+      }
+    },
+    "size": {
+      "w": [
+        2.2,
+        3.4
+      ],
+      "d": [
+        1.6,
+        2.4
+      ],
+      "postH": [
+        2.0,
+        2.4
+      ],
+      "tableH": 0.9
+    },
+    "squareRing": {
+      "count": [
+        3,
+        9
+      ],
+      "inset": 2.6
+    },
+    "streetSide": {
+      "everyMetres": 22,
+      "offset": 0.9,
+      "chance": 0.55
+    }
+  }
+}

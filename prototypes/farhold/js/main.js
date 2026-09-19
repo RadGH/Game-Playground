@@ -1412,8 +1412,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // camps with a fire in them, and the lairs the world bosses keep
   let sites = createSites(scene, terrain, { seed, balance, zones, collide: features.solids, radius: balance.features?.radius ?? 2600 });
+  /**
+   * A set piece near a stronghold is that stronghold's people.
+   *
+   * Inert until this is called: a warband rolled within a few hundred metres of a fort now draws
+   * from THAT garrison and says where it came from, instead of being whatever the biome happens to
+   * hold. It is the difference between a random fight and a patrol.
+   */
+  encounters.setSites?.(sites);
 
   /** Fill a camp or a lair with what lives there. Called once per site as you come near it. */
+  /**
+   * Fill a stronghold with what lives there. Called once per site as you come near it.
+   *
+   * The body of this used to live here: a champion, four or five of whatever the biome has, and a
+   * coin-flip between an iron and a gilded chest, for every site in the game whether it was a bandit
+   * camp or a castle. `js/sites.js` knows far more than that now — each of the eight stronghold types
+   * declares its own garrison, a named boss with an epithet, prisoners, and a chest grade that climbs
+   * with the tier — so the work belongs there and this hands it the things only main.js has: the
+   * enemy field, the chest pool, and the namer.
+   *
+   * A lair keeps its own path, because a lair is one boss and nothing else, and `bossUnit` is what
+   * the rest of the file watches to know the world boss is up.
+   */
   async function populateSite(site) {
     const level = site.level || player.level;
     if (site.kind === 'lair') {
@@ -1427,23 +1448,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       return;
     }
-    // a camp: a leader if one fits the level, and four or five of whatever lives here
-    const pool = field.defsFor(site.x, site.z, level);
-    if (!pool.length) return;
-    const leaders = pool.filter(d => d.role === 'leader');
-    const rest = pool.filter(d => d.role !== 'leader');
-    if (leaders.length) {
-      await field.addRanked(field.rng.pick(leaders), level, site.x, site.z, 'champion');
-    }
-    const n = 4 + field.rng.int(0, 2);
-    for (let i = 0; i < n && rest.length; i++) {
-      const a = field.rng() * Math.PI * 2, r = 4 + field.rng() * 10;
-      const [x, z] = terrain.clampToWorld(site.x + Math.cos(a) * r, site.z + Math.sin(a) * r);
-      if (terrain.underwater(x, z)) continue;
-      await field.addRanked(field.rng.pick(rest), level, x, z, i === 0 ? field.rpg.rollRank(field.rng, { bonus: 2 }) : 'normal');
-    }
-    // and something worth the fight, in the middle of it
-    chests.place(field.rng() < 0.4 ? 'gilded' : 'iron', site.x + 2.5, site.z + 2.5, { level, facing: field.rng() * 6.28 });
+    await sites.populate(site, {
+      field, chests, level,
+      nameFor: (def, rng) => nameRare?.(def, rng),
+    });
   }
 
   // ---------------------------------------------------------------- dungeons
@@ -2377,8 +2385,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     view.setSkirtScale(1, air.state.x, air.state.z);
     view.setViewScale(viewMul(), air.state.x, air.state.z);
     // the scatter comes back to full density on the ground, at the player's own setting
-    props.setRadius(balance.props?.radius ?? 1400, air.state.x, air.state.z);
     props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
+    props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
     props.setRadius(lowQuality ? 5 : 7, air.state.x, air.state.z);
     props.setDensity(settings.get('density') ?? 1, air.state.x, air.state.z);
     props.setGrass(settings.get('grass') !== false, air.state.x, air.state.z);
@@ -2440,7 +2448,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * in a circle around the ship. The two together keep the instance count roughly flat.
          */
         const baseRadius = lowQuality ? 5 : 7;
-        props.setRadius(Math.round(baseRadius * (1 + high * 1.9)), air.state.x, air.state.z);
+        // the reach scales with the view the player asked for, so a 6x card sees trees as far as it
+        // draws ground rather than a ring of them inside an empty plain
+        props.setRadius(Math.round(baseRadius * (1 + high * 1.9) * Math.sqrt(viewMul())), air.state.x, air.state.z);
         props.setDensity((settings.get('density') ?? 1) * Math.max(0, 1 - high * 1.15), air.state.x, air.state.z);
         props.setGrass(high < 0.25 && settings.get('grass') !== false, air.state.x, air.state.z);
         // and deepen the clipmap skirts, because from up here you are looking straight down the
@@ -2452,20 +2462,6 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // way down it tightens back up and the grass comes back.
         view.setViewScale(viewMul() * (1 + high * 5), air.state.x, air.state.z);
 
-        /**
-         * THE SCATTER SWEEPS OUT AND THINS AS YOU CLIMB.
-         *
-         * "Is it possible to sweep that foliage distance in flight mode so that higher up = wider
-         * range but thinner density." Yes, and it is the right trade: from a thousand metres up you
-         * want to see trees to the horizon, and you do not want each one — the eye reads the pattern,
-         * not the trunk. The radius grows with the view and the density falls off against it, so the
-         * instance count stays roughly flat and the frame time with it.
-         *
-         * `high` is 0 on the deck and 1 at the ceiling.
-         */
-        const spread = 1 + high * 4.5;
-        props.setRadius(Math.round((balance.props?.radius ?? 1400) * spread), air.state.x, air.state.z);
-        props.setDensity((settings.get('density') ?? 1) / Math.max(1, spread * 0.75), air.state.x, air.state.z);
       }
       const blend = air.spaceBlend();
       // the sky drains to black on the way up and fills back in on the way down
@@ -2515,9 +2511,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         zone: null,
         clock: `${r.altitude} m · ${r.speed} m/s`,
         target: null,
-        sky: r.altitude > air.cfg.ceiling * 0.6 ? 'the sky is going black — keep climbing' : 'climb to leave the atmosphere',
-        weather: `throttle ${Math.round(r.throttle * 100)}%${r.boosting ? ' · boost' : ''}`
-          + `${r.lift > 0 ? ' · climbing' : r.lift < 0 ? ' · descending' : ''} · air ${Math.round(r.air * 100)}%`,
+        /**
+         * The upper atmosphere says what it is, and what the controls do up there.
+         *
+         * A player who climbs into a band where the throttle has quietly changed meaning needs to be
+         * told, once, in the place they are already looking. Below it, the old line still points the
+         * way out.
+         */
+        sky: r.regime === 'high'
+          ? (r.holding != null
+            ? `holding station at ${r.holding} m — S to descend, W to climb`
+            : `upper atmosphere · ${r.climb > 0 ? '+' : ''}${r.climb} m/s — let go to hold this altitude`)
+          : 'climb to leave the atmosphere',
+        weather: r.regime === 'high'
+          ? `rate ${Math.round((r.throttle || 0) * 100)}% · air ${Math.round(r.air * 100)}%`
+            + `${r.holding != null ? ' · station held' : ''}`
+          : `throttle ${Math.round(r.throttle * 100)}%${r.boosting ? ' · boost' : ''}`
+            + `${r.lift > 0 ? ' · climbing' : r.lift < 0 ? ' · descending' : ''} · air ${Math.round(r.air * 100)}%`,
         where: `seed ${seed} · x ${Math.round(air.state.x)} z ${Math.round(air.state.z)} · ${r.altitude} m`,
       });
       return;
@@ -3555,7 +3565,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       sites.relax(control.x, control.z);
       encounters.update(dt, control, player);
       for (const site of sites.due(control.x, control.z)) {
-        hud.log(site.kind === 'lair' ? `Something lives at ${site.name}.` : `A camp at ${site.name}.`, 'bad');
+        // a castle is not "a camp": sites.js gives each place its own blurb and its own type name
+        hud.log(site.kind === 'lair'
+          ? `Something lives at ${site.name}.`
+          : (site.blurb || `${site.spec?.name || 'A camp'} at ${site.name}.`), 'bad');
         populateSite(site);
       }
     }
@@ -3779,7 +3792,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // something still in the air, with how long you have to get there
         ...meteors.marks().map(m => ({ x: m.x, z: m.z, icon: '☄', color: '#ff8a40' })),
         ...gates.visible.map(g => ({ x: g.x, z: g.z, color: '#b090ff', r: 4 })),
-        ...sites.visible.map(v => ({ x: v.x, z: v.z, color: v.kind === 'lair' ? '#ff6a3a' : '#ffa860', r: 3.4 })),
+        // each stronghold type draws itself: sites.js carries a colour, a radius and a glyph per
+        // kind, so a castle and a bandit camp are not the same orange dot
+        ...sites.visible.map(v => ({
+          x: v.x, z: v.z,
+          color: v.pin?.color || (v.kind === 'lair' ? '#ff6a3a' : '#ffa860'),
+          r: v.pin?.r ?? 3.4,
+          glyph: v.pin?.glyph || null,
+        })),
         ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
         ...folk.marks(),
         /**

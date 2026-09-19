@@ -303,8 +303,13 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
     }
   }
 
-  /** Put one chest into the world. Dungeons call this directly. */
-  function place(kind, x, z, { key = null, opened: isOpen = false, facing = 0, level = null } = {}) {
+  /**
+   * Put one chest into the world. Dungeons call this directly, and so does a bandit camp.
+   *
+   * `name` overrides the grade's own label. A camp's strongbox reading "Iron-Bound Chest" on the
+   * reward screen tells you nothing about where you just fought; "The Stockade's Strongbox" does.
+   */
+  function place(kind, x, z, { key = null, opened: isOpen = false, facing = 0, level = null, name = null } = {}) {
     const look = CHEST_LOOKS[kind] || CHEST_LOOKS.wooden;
     const mesh = new THREE.Mesh(geometryFor(kind, isOpen), material);
     const y = terrain.heightAt(x, z);
@@ -318,7 +323,7 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
       kind, x, z, y, mesh, facing,
       key: key || `placed:${Math.round(x)},${Math.round(z)}`,
       opened: isOpen, level, spec,
-      name: spec.name || 'Chest',
+      name: name || spec.name || 'Chest',
       floor: spec.floor || 'normal',
     };
     // The beacon promises what is inside. Same `floor` drives the colour and the roll, so it cannot

@@ -1,0 +1,53 @@
+{
+  "_doc": "Megaflora — the big things. The ask was 'give another pass over each biome and add large objects … giant trees, boulders, arches, or other features. They should be 2-3 times taller than our tallest trees currently.' The tallest ordinary prop in js/props.js is the conifer at 9 metres, so everything here stands between 17 and 26 — two to three times that — and every land biome gets at least one. They are rolled on their OWN random stream (see the `0x4d67` salt in props.js) so that adding them did not reshuffle a single tree that was already there.",
+
+  "_schema": {
+    "kinds": "the catalogue. `tall` is roughly how high it stands (the test checks it against the tallest ordinary tree), `solid` is [radius, height] for the collision field — carried here rather than in js/collide.js's PROP_SOLIDS because that file belongs to somebody else this round, `leafy` says the biome's leaf tint applies.",
+    "biomes": "[[kind, chance per 64 m prop cell at density 1]] — a chance of 0.02 is about four in the block of ground you can see, which is rare enough that each one still reads as a place.",
+    "minSlope": "steeper than this and nothing this big would have stayed up",
+    "roadClear": "how much road under a point rules it out — nobody lets a 24 m tree grow through the highway"
+  },
+
+  "minSlope": 0.42,
+  "roadClear": 0.2,
+
+  "kinds": {
+    "elder_broadleaf": { "name": "Elder Broadleaf", "tall": 24, "solid": [2.2, 24], "leafy": true, "cap": 14 },
+    "crown_conifer":   { "name": "Crown Conifer",   "tall": 26, "solid": [1.6, 26], "leafy": true, "cap": 14 },
+    "shelf_palm":      { "name": "Shelf Palm",      "tall": 20, "solid": [1.2, 20], "leafy": true, "cap": 12 },
+    "hollow_snag":     { "name": "Hollow Snag",     "tall": 21, "solid": [1.8, 21], "leafy": false, "cap": 12 },
+    "tor":             { "name": "Tor",             "tall": 19, "solid": [5.2, 19], "leafy": false, "cap": 12 },
+    "stone_arch":      { "name": "Stone Arch",      "tall": 21, "solid": [3.2, 21], "leafy": false, "cap": 10 },
+    "basalt_stack":    { "name": "Basalt Stack",    "tall": 22, "solid": [3.6, 22], "leafy": false, "cap": 12 },
+    "crystal_spire":   { "name": "Crystal Spire",   "tall": 25, "solid": [2.8, 25], "leafy": false, "cap": 12 },
+    "ice_fang":        { "name": "Ice Fang",        "tall": 21, "solid": [2.6, 21], "leafy": false, "cap": 12 },
+    "cap_mushroom":    { "name": "Cap Mushroom",    "tall": 18, "solid": [1.6, 18], "leafy": false, "cap": 12 },
+    "rib_arch":        { "name": "Rib Arch",        "tall": 18, "solid": [3.4, 18], "leafy": false, "cap": 10 },
+    "mast_cactus":     { "name": "Mast Cactus",     "tall": 18, "solid": [1.4, 18], "leafy": false, "cap": 12 }
+  },
+
+  "biomes": {
+    "default":         [["tor", 0.010]],
+    "grassland":       [["elder_broadleaf", 0.014], ["tor", 0.008]],
+    "savanna":         [["elder_broadleaf", 0.016], ["rib_arch", 0.008]],
+    "shrubland":       [["tor", 0.014], ["hollow_snag", 0.008]],
+    "temperateForest": [["elder_broadleaf", 0.030], ["crown_conifer", 0.012]],
+    "rainforest":      [["elder_broadleaf", 0.026], ["shelf_palm", 0.020], ["cap_mushroom", 0.010]],
+    "borealForest":    [["crown_conifer", 0.032], ["hollow_snag", 0.010]],
+    "beach":           [["shelf_palm", 0.016], ["rib_arch", 0.008]],
+    "marsh":           [["hollow_snag", 0.022], ["cap_mushroom", 0.016]],
+    "desert":          [["stone_arch", 0.016], ["mast_cactus", 0.018], ["rib_arch", 0.010]],
+    "badlands":        [["stone_arch", 0.022], ["tor", 0.018], ["rib_arch", 0.008]],
+    "tundra":          [["ice_fang", 0.012], ["hollow_snag", 0.010], ["tor", 0.010]],
+    "ice":             [["ice_fang", 0.024], ["crystal_spire", 0.008]],
+    "hills":           [["tor", 0.020], ["elder_broadleaf", 0.014]],
+    "mountains":       [["tor", 0.022], ["basalt_stack", 0.014], ["crown_conifer", 0.008]],
+    "snowyPeaks":      [["ice_fang", 0.020], ["basalt_stack", 0.010]],
+    "volcanic":        [["basalt_stack", 0.026], ["stone_arch", 0.010], ["rib_arch", 0.008]],
+    "blighted":        [["hollow_snag", 0.026], ["cap_mushroom", 0.020], ["rib_arch", 0.010]],
+    "ashPlain":        [["hollow_snag", 0.018], ["rib_arch", 0.014], ["basalt_stack", 0.010]],
+    "veiledHills":     [["crystal_spire", 0.018], ["hollow_snag", 0.014], ["cap_mushroom", 0.010]],
+    "hallowed":        [["elder_broadleaf", 0.030], ["cap_mushroom", 0.012]],
+    "glimmerwaste":    [["crystal_spire", 0.030], ["tor", 0.010]]
+  }
+}

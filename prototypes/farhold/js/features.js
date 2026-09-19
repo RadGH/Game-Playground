@@ -20,7 +20,7 @@ import { BUILDING_INFO } from './town-plan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import {
   describeBuilding, partsFor, describeStall, stallParts, stallsFor,
-  radiusOf, heightOf, mix, MESHES, CULTURE_KIT,
+  radiusOf, mix, MESHES, CULTURE_KIT,
 } from '../../../proctown/js/buildkit.js';
 import { waterRibbon, lakeSheet } from './water-plan.js';
 import { makeRng } from '../../../worldgen/js/noise.js';
@@ -587,7 +587,11 @@ export function createFeatures(scene, terrain, opts = {}) {
      */
     for (const spot of stallsFor(plan, { culture, seed: townSeed, max: size >= 3 ? 24 : 10 })) {
       const [sx, sz] = toWorld(spot.x, spot.z);
-      if (terrain.underwater(sx, sz)) continue;
+      // A stall stands on dry ground, and "dry" has to mean properly dry. `underwater` is true only
+      // below the waterline, so a stall on a beach town came out ankle-deep in the surf, which looks
+      // exactly as odd as it sounds. Eight hundred millimetres of freeboard settles it.
+      if (terrain.underwater(sx, sz) || terrain.waterAt?.(sx, sz)) continue;
+      if (terrain.heightAt(sx, sz) < (terrain.seaLevel ?? 0) + 0.8) continue;
       if (terrain.riverAt(sx, sz) > 0.3) continue;
       if (terrain.slopeAt(sx, sz, 4) > 0.5) continue;
       const stall = describeStall({ kind: spot.kind, culture, seed: spot.seed });
@@ -636,13 +640,17 @@ export function createFeatures(scene, terrain, opts = {}) {
       place(key, x, z, yaw, [desc.footprint.w + 0.7, 1, desc.footprint.d + 0.7], 0.26, ground,
         { solid: false, tint: mix(desc.colour.wall, '#2a2621', 0.55) });
 
+      // the tallest part is worked out on the way past, not by asking `heightOf` — that would build
+      // the whole kit a second time, for every building, on every rebuild
+      let top = 0;
       for (const part of partsFor(desc)) {
+        top = Math.max(top, part.y + part.h);
         if (!near && !STRUCTURE.has(part.tag)) continue;
         placePart(KIT_KEY[part.mesh], part, x, z, ground, yaw, cos, sin);
       }
 
       // collision from the footprint the kit actually chose, rather than one number per building type
-      solids.add(x, z, radiusOf(desc), Math.max(2.5, heightOf(desc)));
+      solids.add(x, z, radiusOf(desc), Math.max(2.5, top));
     }
 
     // a city gets a wall and towers

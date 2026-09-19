@@ -1,118 +1,118 @@
 {
-  "_doc": "Fourteen places that fill a zone in. These are put on the map's existing landmark and pass nodes plus new slots at road junctions and river fords, and each is something you DO, not scenery. `solve` means it has a state a player can change; `uses` says which job frames can bind to it. Original names and ideas only.",
+  "_doc": "Fourteen places that fill a zone in. These are put on the map's existing landmark and pass nodes plus new slots at road junctions and river fords, and each is something you DO, not scenery. `solve` means it has a state a player can change; `uses` says which job frames can bind to it. `icon` is the map glyph, so a shrine and a gibbet are not the same dot (8.17). `gives.xp` is what walking up to one is worth the first time, before you do anything there — small on purpose, because the reward for finding a place is the place, and this is only so that wandering off the road is never worth nothing (8.19). Original names and ideas only.",
 
   "landmarks": [
     {
-      "kind": "wayshrine", "name": "Wayshrine", "weight": 10,
+      "kind": "wayshrine", "icon": "shrine", "name": "Wayshrine", "weight": 10,
       "on": ["road", "junction"], "biomes": ["any"],
       "blurb": "A lit stone and a shallow bowl, kept by nobody in particular.",
       "does": "Rest here without making camp. Once a day it will bring a fallen companion back.",
       "solve": false, "faction": "quiet_wake",
-      "gives": { "rest": true, "reviveDaily": 1 }
+      "gives": { "xp": 25, "rest": true, "reviveDaily": 1 }
     },
     {
-      "kind": "standing_stones", "name": "Standing Stones", "weight": 7,
+      "kind": "standing_stones", "icon": "stones", "name": "Standing Stones", "weight": 7,
       "on": ["landmark", "highland"], "biomes": ["grass", "highland", "scrub"],
       "blurb": "Five stones in a ring and a sixth on its side in the grass.",
       "does": "Put the fallen stone back up. It takes a while and something watches you do it.",
       "solve": true, "steps": 1, "uses": ["standing_stone"],
-      "gives": { "perkPoint": 1 }
+      "gives": { "xp": 45, "perkPoint": 1 }
     },
     {
-      "kind": "watchtower", "name": "Watchtower", "weight": 8,
+      "kind": "watchtower", "icon": "tower", "name": "Watchtower", "weight": 8,
       "on": ["landmark", "pass"], "biomes": ["any"],
       "blurb": "Twelve metres of dry stone with a ladder still in it.",
       "does": "Climb it and the whole zone goes on your map. A patrol beds down here at night.",
       "solve": false, "faction": "wardens_reach",
-      "gives": { "revealZone": true }
+      "gives": { "xp": 35, "revealZone": true }
     },
     {
-      "kind": "gibbet", "name": "Gibbet", "weight": 6,
+      "kind": "gibbet", "icon": "gibbet", "name": "Gibbet", "weight": 6,
       "on": ["road", "junction"], "biomes": ["any"],
       "blurb": "A cage on a post, and what is left of somebody's last argument.",
       "does": "Read the plate. Whoever put them there is still out there, and now you know its name.",
       "solve": false, "uses": ["the_grudge"],
-      "gives": { "namesFoe": true }
+      "gives": { "xp": 20, "namesFoe": true }
     },
     {
-      "kind": "burnt_farm", "name": "Burnt Farm", "weight": 8,
+      "kind": "burnt_farm", "icon": "farm", "name": "Burnt Farm", "weight": 8,
       "on": ["farmland", "road"], "biomes": ["farmland", "grass"],
       "blurb": "Four walls, no roof, and a cellar door nobody opened.",
       "does": "The cellar is still full. So is the well, and that is a different matter.",
       "solve": false, "faction": "ashen_pact", "uses": ["someones_boy"],
-      "gives": { "loot": "magic" }
+      "gives": { "xp": 35, "loot": "magic" }
     },
     {
-      "kind": "collapsed_mine", "name": "Collapsed Mine", "weight": 6,
+      "kind": "collapsed_mine", "icon": "mine", "name": "Collapsed Mine", "weight": 6,
       "on": ["mountain", "landmark"], "biomes": ["mountain", "highland"],
       "blurb": "A mouth full of rubble and a rail line that stops at it.",
       "does": "Three days' digging, a day at a time. Then it is a dungeon.",
       "solve": true, "steps": 3, "faction": "deepworn", "uses": ["dig_it_out"],
-      "gives": { "opensDungeon": true }
+      "gives": { "xp": 60, "opensDungeon": true }
     },
     {
-      "kind": "ferry_landing", "name": "Ferry Landing", "weight": 7,
+      "kind": "ferry_landing", "icon": "ferry", "name": "Ferry Landing", "weight": 7,
       "on": ["river", "coast"], "biomes": ["river", "coast", "wetland"],
       "blurb": "A flat boat, a rope, and somebody who would rather you paid.",
       "does": "Cross without swimming. Free if the Cut like you.",
       "solve": false, "faction": "cutwater",
-      "gives": { "crossing": true }
+      "gives": { "xp": 25, "crossing": true }
     },
     {
-      "kind": "toll_bridge", "name": "Toll Bridge", "weight": 8,
+      "kind": "toll_bridge", "icon": "bridge", "name": "Toll Bridge", "weight": 8,
       "on": ["river", "road"], "biomes": ["river", "grass", "highland"],
       "blurb": "A good bridge, a chain across it, and a chair.",
       "does": "Pay, fight, or ford it somewhere with a worse bottom.",
       "solve": false, "faction": "stonecount", "uses": ["pay_the_toll"],
-      "gives": { "crossing": true, "toll": 6 }
+      "gives": { "xp": 30, "crossing": true, "toll": 6 }
     },
     {
-      "kind": "hunting_blind", "name": "Hunting Blind", "weight": 6,
+      "kind": "hunting_blind", "icon": "blind", "name": "Hunting Blind", "weight": 6,
       "on": ["forest", "wetland"], "biomes": ["forest", "wetland", "grass"],
       "blurb": "A platform in a tree and a hook for the bait.",
       "does": "Hang something on the hook and wait. Whatever comes is bigger than usual.",
       "solve": false,
-      "gives": { "callsBeast": "champion" }
+      "gives": { "xp": 30, "callsBeast": "champion" }
     },
     {
-      "kind": "cairn_field", "name": "Field of Cairns", "weight": 6,
+      "kind": "cairn_field", "icon": "cairns", "name": "Field of Cairns", "weight": 6,
       "on": ["landmark"], "biomes": ["any"],
       "blurb": "Thirty piles of stone, laid out in rows by somebody careful.",
       "does": "Dig one. There is something in it, and there is a reason it was under stone.",
       "solve": false, "faction": "quiet_wake", "uses": ["the_wake"],
-      "gives": { "loot": "rare", "curse": true, "startsIncident": "restless_dead" }
+      "gives": { "xp": 45, "loot": "rare", "curse": true, "startsIncident": "restless_dead" }
     },
     {
-      "kind": "beacon", "name": "Beacon", "weight": 7,
+      "kind": "beacon", "icon": "beacon", "name": "Beacon", "weight": 7,
       "on": ["highland", "landmark"], "biomes": ["any"],
       "blurb": "A cage of dry wood on the highest thing for a mile, unlit.",
       "does": "Light it and every friendly patrol in the zone comes. Once, and loudly.",
       "solve": true, "steps": 1, "uses": ["light_the_beacon"],
-      "gives": { "callsPatrol": true }
+      "gives": { "xp": 40, "callsPatrol": true }
     },
     {
-      "kind": "sunken_wreck", "name": "Sunken Wreck", "weight": 5,
+      "kind": "sunken_wreck", "icon": "wreck", "name": "Sunken Wreck", "weight": 5,
       "on": ["coast", "river"], "biomes": ["coast", "river", "wetland"],
       "blurb": "A hull on its side in four metres of water, still mostly closed.",
       "does": "Dive it. The Salt say it is theirs and they are not entirely wrong.",
       "solve": false, "faction": "saltbound",
-      "gives": { "loot": "rare" }
+      "gives": { "xp": 55, "loot": "rare" }
     },
     {
-      "kind": "forge_fire", "name": "Forge Fire", "weight": 6,
+      "kind": "forge_fire", "icon": "forge", "name": "Forge Fire", "weight": 6,
       "on": ["road", "landmark"], "biomes": ["any"],
       "blurb": "An anvil under a lean-to and a fire that somehow never goes out.",
       "does": "A crafting bench, outside a town, which is the whole point of it.",
       "solve": false, "faction": "emberwrights", "uses": ["the_apprentice"],
-      "gives": { "bench": true }
+      "gives": { "xp": 30, "bench": true }
     },
     {
-      "kind": "broken_road", "name": "Broken Road", "weight": 5,
+      "kind": "broken_road", "icon": "washout", "name": "Broken Road", "weight": 5,
       "on": ["road"], "biomes": ["any"],
       "blurb": "Forty metres of road that is now forty metres of gully.",
       "does": "Two days' work with stone from the bank. Then travel through here is faster for good.",
       "solve": true, "steps": 2, "uses": ["dig_it_out"],
-      "gives": { "travelBonus": 0.15 }
+      "gives": { "xp": 35, "travelBonus": 0.15 }
     }
   ]
 }

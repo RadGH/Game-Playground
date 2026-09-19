@@ -3573,7 +3573,7 @@
    "look": {
     "creature": {
      "type": "turret",
-     "size": 1.25,
+     "size": 1.5,
      "colors": {
       "body": "#8a7a5a",
       "belly": "#b0a080",

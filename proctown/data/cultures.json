@@ -1,0 +1,721 @@
+{
+  "schema": 1,
+  "note": "A culture is a parameter set over one generator (TOWN_EXPANSION section 6.1). Nothing in js/buildkit.js knows what an elf is: it reads the weights below. `signature` lists the bases NO other culture builds, which is what makes a culture readable from the next hill.",
+  "cultures": {
+    "human": {
+      "name": "Human",
+      "blurb": "Timber, thatch and compromise. Nothing is symmetrical and everything has been patched.",
+      "signature": [
+        "jettied",
+        "crosswing",
+        "hall"
+      ],
+      "bases": {
+        "hovel": 0.5,
+        "long": 3.0,
+        "square": 3.0,
+        "row": 2.0,
+        "jettied": 3.0,
+        "crosswing": 1.0,
+        "hall": 1.0,
+        "tower_house": 0.6
+      },
+      "roofs": {
+        "gable": 4,
+        "half_hip": 2.5,
+        "hip": 2,
+        "gambrel": 1.2,
+        "mansard": 0.6,
+        "sawtooth": 0.3
+      },
+      "wallMaterials": {
+        "timber_frame": 4,
+        "wattle": 3,
+        "plaster": 2,
+        "rubble": 1.2,
+        "brick": 1,
+        "cut_stone": 0.8
+      },
+      "roofMaterials": {
+        "thatch": 3.5,
+        "clay_tile": 3,
+        "shingle": 2,
+        "slate": 1.2,
+        "lead": 0.3
+      },
+      "palette": {
+        "wall": [
+          "#ddd0b4",
+          "#e6dcc4",
+          "#cdbb9c",
+          "#c9b998",
+          "#d6c3a4"
+        ],
+        "wallUpper": [
+          "#e8e0cc",
+          "#d9cdb2",
+          "#cfc0a2"
+        ],
+        "roof": [
+          "#8a4a34",
+          "#9a5540",
+          "#7a6349",
+          "#a98d52"
+        ],
+        "trim": [
+          "#5a4632",
+          "#4a3826"
+        ],
+        "door": [
+          "#5e4327",
+          "#3f2f1f",
+          "#6a4a2a"
+        ],
+        "accent": "#a8752f"
+      },
+      "street": {
+        "surface": "cobble",
+        "colour": "#6b6254"
+      },
+      "townWall": {
+        "kind": "stone",
+        "colour": "#8a8275"
+      },
+      "night": {
+        "lamp": "#ffc271",
+        "glow": "#ffb45e",
+        "flame": "#ffa542"
+      },
+      "stalls": [
+        "produce",
+        "cloth",
+        "bread",
+        "brew",
+        "iron"
+      ],
+      "storeyScale": 1.0
+    },
+    "elf": {
+      "name": "Elf",
+      "blurb": "Grown, not built. Long curved eaves, tall narrow windows and a second storey of bridges.",
+      "signature": [
+        "canopy",
+        "bower",
+        "stilted"
+      ],
+      "bases": {
+        "hovel": 0.35,
+        "canopy": 3.0,
+        "bower": 3.0,
+        "stilted": 2.5,
+        "tower_house": 1.2,
+        "square": 0.8
+      },
+      "roofs": {
+        "conical": 4,
+        "domed": 2,
+        "tent": 1.5,
+        "gable": 1.2,
+        "hip": 0.8
+      },
+      "wallMaterials": {
+        "carved_trunk": 4,
+        "plaster": 2,
+        "timber_frame": 1.5,
+        "cut_stone": 1
+      },
+      "roofMaterials": {
+        "leaf_scale": 4,
+        "copper": 2.5,
+        "shingle": 1.5,
+        "turf": 1
+      },
+      "palette": {
+        "wall": [
+          "#ded8c8",
+          "#cfd3c4",
+          "#c4cbbd",
+          "#e2ddd0",
+          "#d3d6cc"
+        ],
+        "wallUpper": [
+          "#e7e4d6",
+          "#d8dcd0"
+        ],
+        "roof": [
+          "#6f8a5a",
+          "#5d8d7e",
+          "#7a9a68",
+          "#4f7a6a"
+        ],
+        "trim": [
+          "#8fa08a",
+          "#6f8478"
+        ],
+        "door": [
+          "#5d8d7e",
+          "#7a9a68"
+        ],
+        "accent": "#9fd8c0"
+      },
+      "street": {
+        "surface": "root",
+        "colour": "#4e5a42"
+      },
+      "townWall": {
+        "kind": "hedge",
+        "colour": "#4d6b42"
+      },
+      "night": {
+        "lamp": "#bfe8d8",
+        "glow": "#a8e0cc",
+        "flame": "#8fd8c8"
+      },
+      "stalls": [
+        "charms",
+        "cloth",
+        "produce"
+      ],
+      "storeyScale": 1.12
+    },
+    "dwarf": {
+      "name": "Dwarf",
+      "blurb": "Cut, square and permanent. Squat, wide, banded in colour courses and built to outlast.",
+      "signature": [
+        "blockhouse",
+        "delve",
+        "terraced"
+      ],
+      "bases": {
+        "hovel": 0.3,
+        "blockhouse": 3.5,
+        "delve": 2.0,
+        "terraced": 2.5,
+        "square": 2.0,
+        "row": 1.5,
+        "tower_house": 1.0
+      },
+      "roofs": {
+        "flat": 4,
+        "mansard": 1.6,
+        "hip": 1.5,
+        "pagoda": 0.7,
+        "turf_mound": 0.5
+      },
+      "wallMaterials": {
+        "cut_stone": 4,
+        "rubble": 2,
+        "brick": 1.5,
+        "scrap": 0.6
+      },
+      "roofMaterials": {
+        "lead": 4,
+        "slate": 3,
+        "copper": 1.2,
+        "turf": 0.6
+      },
+      "palette": {
+        "wall": [
+          "#8e8a82",
+          "#7c7a74",
+          "#9a958a",
+          "#6f6e69",
+          "#84817a"
+        ],
+        "wallUpper": [
+          "#9c988e",
+          "#877f74"
+        ],
+        "roof": [
+          "#7b8189",
+          "#4f5a63",
+          "#5a5f64"
+        ],
+        "trim": [
+          "#b8933f",
+          "#8d6f2c"
+        ],
+        "door": [
+          "#3a3733",
+          "#4a4238"
+        ],
+        "accent": "#d4a63c"
+      },
+      "street": {
+        "surface": "flag",
+        "colour": "#7a7970"
+      },
+      "townWall": {
+        "kind": "cutstone",
+        "colour": "#7f7d76"
+      },
+      "night": {
+        "lamp": "#ffb14a",
+        "glow": "#ff8f2e",
+        "flame": "#ff7a1e"
+      },
+      "stalls": [
+        "iron",
+        "brew",
+        "produce"
+      ],
+      "storeyScale": 0.88
+    },
+    "undead": {
+      "name": "Undead",
+      "blurb": "A town still standing out of habit. Nothing is repaired and everything is occupied.",
+      "signature": [
+        "tomb_row",
+        "spire",
+        "stacked"
+      ],
+      "bases": {
+        "hovel": 0.9,
+        "tomb_row": 3.0,
+        "spire": 2.0,
+        "stacked": 2.0,
+        "long": 1.5,
+        "square": 1.5,
+        "row": 1.5,
+        "tower_house": 0.8
+      },
+      "roofs": {
+        "gable": 3,
+        "half_hip": 2,
+        "conical": 2,
+        "flat": 1.2,
+        "sawtooth": 0.8,
+        "tent": 0.5
+      },
+      "wallMaterials": {
+        "bone": 3.5,
+        "rubble": 2.5,
+        "plaster": 2,
+        "chitin": 1.5,
+        "log": 1
+      },
+      "roofMaterials": {
+        "bone_plate": 3.5,
+        "slate": 2,
+        "thatch": 1.5,
+        "shingle": 1.2,
+        "copper": 0.8
+      },
+      "palette": {
+        "wall": [
+          "#bdb6a2",
+          "#a099a0",
+          "#8d8694",
+          "#cfc7ae",
+          "#9a93a2"
+        ],
+        "wallUpper": [
+          "#a8a094",
+          "#938c9a"
+        ],
+        "roof": [
+          "#5a5163",
+          "#6a6350",
+          "#4a4a52",
+          "#5d7a62"
+        ],
+        "trim": [
+          "#6b6474",
+          "#4e4856"
+        ],
+        "door": [
+          "#3c3a44",
+          "#2e2c36"
+        ],
+        "accent": "#7fd08a"
+      },
+      "street": {
+        "surface": "bone",
+        "colour": "#8d8878"
+      },
+      "townWall": {
+        "kind": "bone",
+        "colour": "#c4bca4"
+      },
+      "night": {
+        "lamp": "#8ef2a4",
+        "glow": "#6fd88c",
+        "flame": "#5fe08a"
+      },
+      "stalls": [
+        "charms",
+        "fish",
+        "cloth"
+      ],
+      "storeyScale": 1.05
+    },
+    "orc": {
+      "name": "Orc",
+      "blurb": "Built fast, from what was to hand. No plan; blocks that grew by accretion.",
+      "signature": [
+        "war_hall",
+        "hide_tent",
+        "dug_in"
+      ],
+      "bases": {
+        "hovel": 0.8,
+        "war_hall": 1.5,
+        "hide_tent": 2.0,
+        "dug_in": 2.5,
+        "long": 3.0
+      },
+      "roofs": {
+        "tent": 2.2,
+        "gable": 3.0,
+        "turf_mound": 1.6,
+        "half_hip": 1.4,
+        "sawtooth": 0.8,
+        "hip": 0.8
+      },
+      "wallMaterials": {
+        "hide": 3.5,
+        "log": 3,
+        "scrap": 2.5,
+        "rubble": 1.5,
+        "wattle": 1
+      },
+      "roofMaterials": {
+        "canvas": 3,
+        "thatch": 2.5,
+        "shingle": 1.5,
+        "turf": 1.5,
+        "bone_plate": 1
+      },
+      "palette": {
+        "wall": [
+          "#6b6156",
+          "#5a5049",
+          "#7a6a52",
+          "#4e4740",
+          "#665a4c"
+        ],
+        "wallUpper": [
+          "#6f6354",
+          "#5b5147"
+        ],
+        "roof": [
+          "#4a3f38",
+          "#6a3a30",
+          "#55483c",
+          "#3f3833"
+        ],
+        "trim": [
+          "#8a3a2a",
+          "#6a2f22"
+        ],
+        "door": [
+          "#2f2a26",
+          "#3d342c"
+        ],
+        "accent": "#b03a2a"
+      },
+      "street": {
+        "surface": "dirt",
+        "colour": "#5c5044"
+      },
+      "townWall": {
+        "kind": "palisade",
+        "colour": "#6a5740"
+      },
+      "night": {
+        "lamp": "#ff7a3a",
+        "glow": "#ff5f24",
+        "flame": "#ff4e18"
+      },
+      "stalls": [
+        "iron",
+        "brew",
+        "fish"
+      ],
+      "storeyScale": 0.95
+    },
+    "halfling": {
+      "name": "Halfling",
+      "blurb": "Dug in and comfortable. Round doors, turf roofs, houses cut into the bank.",
+      "signature": [
+        "burrow",
+        "round",
+        "ell"
+      ],
+      "bases": {
+        "hovel": 0.5,
+        "burrow": 3.5,
+        "round": 3.0,
+        "ell": 2.0,
+        "long": 1.5
+      },
+      "roofs": {
+        "turf_mound": 4,
+        "domed": 2.5,
+        "conical": 2,
+        "gable": 1.2,
+        "hip": 0.8
+      },
+      "wallMaterials": {
+        "wattle": 3,
+        "plaster": 3,
+        "timber_frame": 2,
+        "rubble": 1.5,
+        "brick": 1
+      },
+      "roofMaterials": {
+        "turf": 4,
+        "thatch": 3,
+        "shingle": 1.5,
+        "clay_tile": 1
+      },
+      "palette": {
+        "wall": [
+          "#d8c99e",
+          "#cbbf94",
+          "#e0d3a8",
+          "#c3b98e",
+          "#d2c7a0"
+        ],
+        "wallUpper": [
+          "#e2d8b4",
+          "#d0c69e"
+        ],
+        "roof": [
+          "#5c7145",
+          "#6d7f4a",
+          "#4f6640",
+          "#7a8a52"
+        ],
+        "trim": [
+          "#8a6a3a",
+          "#6f5430"
+        ],
+        "door": [
+          "#3f7a5a",
+          "#a8452f",
+          "#2f5f8a",
+          "#c8922f"
+        ],
+        "accent": "#d8a83a"
+      },
+      "street": {
+        "surface": "dirt",
+        "colour": "#6b5c3f"
+      },
+      "townWall": {
+        "kind": "hedge",
+        "colour": "#4d6b42"
+      },
+      "night": {
+        "lamp": "#ffd28a",
+        "glow": "#ffbe66",
+        "flame": "#ffad4e"
+      },
+      "stalls": [
+        "produce",
+        "bread",
+        "brew",
+        "cloth"
+      ],
+      "storeyScale": 0.8
+    },
+    "desert": {
+      "name": "Desert",
+      "blurb": "Shade is the architecture. Tight alleys, flat roofs lived on, courtyards behind blank walls.",
+      "signature": [
+        "courtyard",
+        "windcatcher",
+        "bazaar_block"
+      ],
+      "bases": {
+        "hovel": 0.5,
+        "courtyard": 3.0,
+        "windcatcher": 2.5,
+        "bazaar_block": 1.2,
+        "square": 2.5,
+        "row": 1.5,
+        "tower_house": 0.8
+      },
+      "roofs": {
+        "flat": 5,
+        "domed": 2,
+        "pagoda": 0.5
+      },
+      "wallMaterials": {
+        "mud_brick": 4,
+        "plaster": 3.5,
+        "cut_stone": 1.2,
+        "brick": 1
+      },
+      "roofMaterials": {
+        "clay_tile": 2,
+        "canvas": 2,
+        "lead": 1,
+        "turf": 0.2
+      },
+      "palette": {
+        "wall": [
+          "#e6d8bc",
+          "#efe5d2",
+          "#d8c4a2",
+          "#cba97e",
+          "#e0d0ae"
+        ],
+        "wallUpper": [
+          "#f0e8d6",
+          "#dfd2b8"
+        ],
+        "roof": [
+          "#d9cbb0",
+          "#c8b394",
+          "#9a5540"
+        ],
+        "trim": [
+          "#31407a",
+          "#27335f"
+        ],
+        "door": [
+          "#31407a",
+          "#3f5190",
+          "#7a3a2a"
+        ],
+        "accent": "#c96a3a"
+      },
+      "street": {
+        "surface": "sand",
+        "colour": "#c8b490"
+      },
+      "townWall": {
+        "kind": "mudbrick",
+        "colour": "#cba97e"
+      },
+      "night": {
+        "lamp": "#ffd9a0",
+        "glow": "#ffc87e",
+        "flame": "#ffb765"
+      },
+      "stalls": [
+        "cloth",
+        "charms",
+        "produce",
+        "fish"
+      ],
+      "storeyScale": 1.0
+    }
+  },
+  "wantBases": {
+    "note": "A trade building leans toward a shape that suits it, but only from what its culture already builds \u2014 so an inn in a dwarf hold is a dwarf building with a sign on it, not a human one.",
+    "hall": [
+      "hall",
+      "crosswing",
+      "war_hall",
+      "blockhouse",
+      "canopy",
+      "bazaar_block",
+      "tomb_row",
+      "long"
+    ],
+    "forge": [
+      "long",
+      "blockhouse",
+      "delve",
+      "war_hall",
+      "square"
+    ],
+    "inn": [
+      "jettied",
+      "stacked",
+      "courtyard",
+      "square",
+      "long",
+      "bower"
+    ],
+    "market": [
+      "bazaar_block",
+      "courtyard",
+      "hall",
+      "long",
+      "square"
+    ],
+    "granary": [
+      "round",
+      "tower_house",
+      "square",
+      "burrow",
+      "hide_tent"
+    ],
+    "chapel": [
+      "spire",
+      "tower_house",
+      "hall",
+      "canopy",
+      "square"
+    ],
+    "stable": [
+      "long",
+      "war_hall",
+      "row",
+      "square"
+    ],
+    "warehouse": [
+      "long",
+      "blockhouse",
+      "hall",
+      "bazaar_block",
+      "square"
+    ],
+    "barracks": [
+      "long",
+      "blockhouse",
+      "row",
+      "war_hall",
+      "terraced"
+    ],
+    "mill": [
+      "tower_house",
+      "round",
+      "spire",
+      "windcatcher"
+    ],
+    "watchpost": [
+      "tower_house",
+      "spire",
+      "windcatcher"
+    ],
+    "shrine": [
+      "hovel",
+      "round",
+      "spire",
+      "hide_tent",
+      "burrow"
+    ],
+    "house": [],
+    "hut": []
+  },
+  "wealth": {
+    "note": "Section 3.8 - weathering by wealth and age. Poor gets patched roofs and a lean; rich gets paint, glazing and a storey more.",
+    "byDistrict": {
+      "civic": 0.78,
+      "craft": 0.55,
+      "residential": 0.34
+    },
+    "byWant": {
+      "hall": 0.95,
+      "chapel": 0.85,
+      "inn": 0.7,
+      "barracks": 0.7,
+      "forge": 0.6,
+      "warehouse": 0.5,
+      "market": 0.6,
+      "granary": 0.45,
+      "mill": 0.45,
+      "stable": 0.35,
+      "watchpost": 0.4,
+      "shrine": 0.6,
+      "house": 0.4,
+      "hut": 0.2
+    },
+    "jitter": 0.18
+  }
+}

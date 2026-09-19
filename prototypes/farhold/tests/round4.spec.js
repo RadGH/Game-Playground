@@ -73,13 +73,17 @@ test('the map draws the level-band overlay, with a legend and a toggle', async (
       // round 4b: it is a `levels` chip beside Regions rather than a checkbox above the list
       toggle: !!document.querySelector('.chip[data-layer="levels"]'),
       legend: [...document.querySelectorAll('.legend .sw')].map(n => n.textContent),
+      // round 12: the PLACE marks moved out of the danger legend and into a key of their own, so a
+      // player can tell a dungeon from a camp from a town. The legend under the map is now only the
+      // level-band wash; the marks are in `.map-key`.
+      key: document.querySelector('.map-key')?.textContent || '',
     };
   });
   expect(on.levels).toBe(true);
   expect(on.toggle).toBe(true);
   expect(on.warm).toBeGreaterThan(20);
   expect(on.legend.join(' ')).toContain('do not go here yet');
-  expect(on.legend.join(' ')).toContain('dungeon');
+  expect(on.key.toLowerCase(), 'the map key does not name a dungeon').toContain('dungeon');
 
   // and turning it off really turns it off
   const off = await page.evaluate(() => {

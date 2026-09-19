@@ -61,7 +61,7 @@ import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES, m
 import { createBoat } from './boat.js';
 import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, OFFHAND_DAMAGE } from './weapons.js';
 import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
-import { allocate as allocatePerk, refundAll as refundPerks, pointsLeft as perkPointsLeft } from './perks.js';
+import { allocate as allocatePerk, refundAll as refundPerks, refundOne as refundOnePerk, pointsLeft as perkPointsLeft } from './perks.js';
 import { createCrafting, Materials } from './craft.js';
 import { showRewards, rewardsOpen } from '../../../shared/rewards.js';
 import { familiesOf } from '../../../worldgen/js/biomes.js';

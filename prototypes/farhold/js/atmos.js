@@ -27,7 +27,7 @@ import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
 
 /** Everything the flight model reads. All of it is in `balance.json` `flight`. */
 const DEFAULTS = {
-  ceiling: 46000,         // metres: the top of the air. Above it, and only deliberately, space takes over
+  ceiling: 20000,         // metres: the top of the air. Above it, and only deliberately, space takes over
   /**
    * THE UPPER ATMOSPHERE.
    *
@@ -36,8 +36,10 @@ const DEFAULTS = {
    * holds the altitude you are at instead of falling out of it. See `updateHigh` for why that is the
    * right model rather than a second set of numbers for the same one.
    */
-  highFrom: 0.22,         // fraction of the ceiling where rate control takes over
-  climbRate: 260,         // m/s of climb or descent at full deflection up there
+  highFrom: 0.26,         // fraction of the ceiling where rate control takes over
+  climbRate: 900,         // m/s of climb or descent at full deflection at the BOTTOM of the band
+  climbRateTop: 2.2,      // …multiplied by this much again at the ceiling, because thin air is fast
+  thinSpeed: 1.8,         // how much the airframe speed limit relaxes by the ceiling, where there is no air
   holdGain: 1.9,          // how hard it holds the altitude you left it at
   holdDamp: 2.4,          // …without bouncing around it
   exitHold: 1.1,          // seconds of held climb AT the ceiling before space takes you
@@ -102,6 +104,7 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     highness: 0,
     holdY: null,
     exiting: 0,
+    readyToLeave: false,
   };
 
   let lastYaw = 0;
@@ -156,6 +159,7 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     state.exiting = 0;
     state.highness = 0;
     state.regime = 'surface';
+    state.readyToLeave = false;
   }
 
   /** Drop in from space, above the point the ship was over. */
@@ -316,7 +320,23 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     const highFrom = cfg.ceiling * cfg.highFrom;
     const highness = Math.max(0, Math.min(1, (state.y - highFrom) / Math.max(1, cfg.ceiling - highFrom)));
     state.highness = highness;
+    const wasRegime = state.regime;
     state.regime = highness > 0.02 ? 'high' : 'surface';
+    /**
+     * Say it once, when it happens.
+     *
+     * The controls change meaning at this line and there is nothing to see out of the window that
+     * tells you so — the player climbed through it and reported that nothing had happened. It is one
+     * line in the log, on the way in and on the way out, and the HUD carries the rest.
+     */
+    if (state.regime !== wasRegime) {
+      out.regimeChanged = state.regime;
+      if (state.regime === 'high') {
+        onLog('Upper atmosphere. The wing has nothing to bite on — W and S are a climb rate now, and letting go holds your altitude.', 'level');
+      } else {
+        onLog('Back into thick air. The wing has hold of you again.', '');
+      }
+    }
 
     const lift = Math.min(cfg.liftMax, (state.speed / cfg.liftSpeedFull) * air * level);
     // gravity and the wing still act, faded out as the air runs out
@@ -329,14 +349,39 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
        * `wanted` is the vertical rate the player is asking for. With no input it is zero, and the
        * spring below pulls the ship back to `holdY` — the altitude it was at when they stopped
        * asking. With input, `holdY` follows the ship, so letting go holds wherever you got to.
+       *
+       * TWO THINGS THIS GOT WRONG THE FIRST TIME, and they made the climb to space take 75 seconds
+       * where it used to take 19:
+       *
+       *   * The commanded rate was a SPEED LIMIT, not an assist. At 4 km the ship was already
+       *     climbing 510 m/s on thrust; crossing into the band then dragged it down toward 260. The
+       *     climb got slower the higher you went — 510 at 4 km, 309 at 24 km — which is backwards,
+       *     because thin air is where a ship should be quickest. Asking to climb can now only ever
+       *     ADD to a climb already in progress.
+       *   * And the rate was far too low for the distance. It scales up with altitude now
+       *     (`climbRateTop`) and the boost applies, so the top of the band is the fastest part of it.
        */
-      const ask = (input?.forward ?? 0);
-      const wanted = ask * cfg.climbRate;
+      /**
+       * If there is no input object, the throttle IS the ask.
+       *
+       * Anything that drives this model directly — the launch cinematic, the debug menu, the page
+       * tests — sets `state.throttle` and passes no input, because that is how it was steered before
+       * there was a rate control. Reading only `input.forward` meant those callers were treated as
+       * "nobody is asking", and the hold-station spring below then pinned a ship under full power at
+       * four kilometres, fighting its own engines. Trust an input object when there is one; fall
+       * back to the throttle when there is not.
+       */
+      const ask = input ? (input.forward ?? 0) : (state.throttle ?? 0);
+      const rate = cfg.climbRate * (1 + (cfg.climbRateTop - 1) * highness)
+        * (state.boosting ? (cfg.boost ?? 2.8) * 0.6 + 0.4 : 1);
+      const wanted = ask * rate;
       if (Math.abs(ask) > 0.02) {
         state.holdY = state.y;
-        const blendRate = wanted - state.velocity.y;
-        state.velocity.y += blendRate * Math.min(1, dt * 2.6) * highness;
+        // never slow a climb the engines are already winning: take whichever is faster
+        const target = ask > 0 ? Math.max(state.velocity.y, wanted) : Math.min(state.velocity.y, wanted);
+        state.velocity.y += (target - state.velocity.y) * Math.min(1, dt * 2.6) * highness;
       } else {
+        // nobody is asking: hold the altitude they stopped at, with a damped spring
         if (state.holdY == null) state.holdY = state.y;
         const off = state.holdY - state.y;
         const push = off * cfg.holdGain - state.velocity.y * cfg.holdDamp;
@@ -348,7 +393,17 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
     // and thin air is less of a brake, which is why you accelerate as you climb
     const drag = cfg.drag * air;
     state.velocity.multiplyScalar(Math.max(0, 1 - drag * dt));
-    if (state.velocity.length() > cfg.maxSpeed) state.velocity.setLength(cfg.maxSpeed);
+    /**
+     * THE SPEED CAP RISES AS THE AIR THINS.
+     *
+     * `maxSpeed` is an airframe limit — it exists because air pushes back, and there is less of it
+     * the higher you go. Holding one number all the way up made the top of the climb the slowest
+     * part of it: the ship pinned at 532 m/s from 4 km to the ceiling with nothing resisting it.
+     * Letting the cap climb with `highness` means the last stretch is the quick one, which is both
+     * what the physics says and what makes the trip to space feel like leaving rather than commuting.
+     */
+    const speedCap = cfg.maxSpeed * (1 + highness * (cfg.thinSpeed ?? 1.8));
+    if (state.velocity.length() > speedCap) state.velocity.setLength(speedCap);
 
     // ---- move
     state.x += state.velocity.x * dt;
@@ -434,9 +489,32 @@ export function createAtmosphere({ scene, terrain: terrainIn, balance = {}, ship
      * in the upper atmosphere, with the ground still drawn below — which is the point of having the
      * band at all.
      */
-    if (state.y > cfg.ceiling && (input?.forward ?? 0) > 0.2) state.exiting = (state.exiting || 0) + dt;
+    /**
+     * "Asking to climb" is the input OR the throttle, not just the input.
+     *
+     * Anything that drives this model directly — the debug menu, the launch cinematic, the page
+     * tests — sets `state.throttle` and passes no input at all, because that is how the model was
+     * steered before there was a rate control. Reading only `input.forward` meant a ship under full
+     * power, at the ceiling, nose up, would sit there for ever. A ship with its engines open at the
+     * top of the air is asking to leave however the ask arrived.
+     */
+    const askingUp = input ? (input.forward ?? 0) : (state.throttle ?? 0);
+    if (state.y > cfg.ceiling && askingUp > 0.2) state.exiting = (state.exiting || 0) + dt;
     else state.exiting = 0;
-    out.leftAtmosphere = state.exiting > cfg.exitHold;
+
+    /**
+     * ONCE YOU HAVE COMMITTED TO LEAVING, YOU LEAVE — it latches.
+     *
+     * Reporting `leftAtmosphere` only on the frames where the hold was still being met made the flag
+     * depend on who happened to be calling. `main.js` steps the model once a frame with the real
+     * input; anything else that steps it — the tests, the debug menu — passes its own. The moment
+     * two callers disagreed about whether the pilot was asking, the counter reset and a ship that
+     * had earned its exit sat above the ceiling for ever. It is a one-way door now, opened by
+     * holding the climb and closed only by coming back down into the air.
+     */
+    if (state.exiting > cfg.exitHold) state.readyToLeave = true;
+    if (state.y < cfg.ceiling * 0.95) state.readyToLeave = false;
+    out.leftAtmosphere = !!state.readyToLeave;
     out.regime = state.regime;
     out.highness = highness;
     out.holdingAt = state.holdY;

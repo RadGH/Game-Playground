@@ -3330,6 +3330,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     else if (!control.grounded) setActorAnim(actor, 'jump');
     else if (control.moving > 0) setActorAnim(actor, control.running ? 'run' : 'walk');
     else setActorAnim(actor, 'idle');
+
+    /**
+     * THE STRIDE HAS TO MATCH THE GROUND.
+     *
+     * "Can you make the character walking animation fixed? He doesn't walk, but my minions do."
+     *
+     * The legs were moving the whole time — checked the bones, they swing 0.7 rad, and the mesh is
+     * properly skinned to them. The fault is that a walk cycle is a fixed 1.05 seconds while the
+     * body covers 5.4 metres in that second: a 2.7 metre stride on a character a metre and a bit
+     * tall. The feet skate, and a model gliding with its knees moving does not read as walking. The
+     * companions never had the problem because a creature's gait is driven from its own speed.
+     *
+     * So the clip is played at the rate the body is actually travelling. `STRIDE` is how far one
+     * full cycle should carry you; the clamp inside `setRate` keeps a sprint from turning into a
+     * blur and a crawl from stopping dead.
+     */
+    if (actor.setRate) {
+      const cycle = control.running ? 0.65 : 1.05;          // the clip's own length, chibi2-motion.js
+      const STRIDE = control.running ? 3.4 : 2.0;           // metres one cycle should cover
+      const moving = control.moving > 0.15 && control.grounded && !control.mounted;
+      actor.setRate(moving ? (control.moving * cycle) / STRIDE : 1);
+    }
     actor.update(dt);
 
     if (horse) horse.group.visible = control.mounted;

@@ -587,6 +587,8 @@ export async function createChibi2Character(avatar, opts = {}) {
     anim = name; action = next;
   }
   install(avatar);
+  let rate = 1;                     // clip playback rate; see `setRate`
+
   return {
     group,
     get anim() { return anim; }, get parts() { return asset.rig.byName; },
@@ -595,9 +597,23 @@ export async function createChibi2Character(avatar, opts = {}) {
     stats() { return { meshes: asset.template.parts.length, bones: asset.rig.bones.length, triangles: asset.template.parts.reduce((n, p) => n + p.geometry.index.count / 3, 0) }; },
     setAnim: play,
     async setAvatar(a) { if (!disposed) install(a); },
+    /**
+     * How fast the current clip plays, 1 being its own natural pace.
+     *
+     * A walk cycle is a fixed 1.05 seconds — about two steps a second — and the game moves a body
+     * 5.4 metres in that second. That is a 2.7 metre stride on a character a metre and a bit tall,
+     * so the legs swing while the feet skate over the ground, and what you see is a model gliding
+     * with its knees moving: "he doesn't walk, but my minions do". The creatures did not have the
+     * problem because their gait is driven from their own speed.
+     *
+     * The caller sets this from the speed it is actually moving the body at, so a step lands where
+     * a step should land.
+     */
+    setRate(k) { rate = Math.max(0.15, Math.min(3.5, Number(k) || 1)); },
+    get rate() { return rate; },
     update(dt) {
       if (disposed) return;
-      const d = Math.min(0.1, Math.max(0, dt)); elapsed += d; asset.mixer.update(d);
+      const d = Math.min(0.1, Math.max(0, dt)); elapsed += d; asset.mixer.update(d * rate);
       const blinkTime = elapsed % 3.7, blink = anim === 'dead' ? 0.05 : 1 - 0.95 * Math.max(0, 1 - Math.abs(blinkTime - 3.5) / 0.075);
       asset.rig.byName.eyeL.scale.y = asset.rig.byName.eyeR.scale.y = blink;
     },

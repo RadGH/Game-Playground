@@ -24,6 +24,14 @@ import { orbitLayout } from '../../../universe/js/system.js';
 import { atmospherePalette } from '../../../worldgen/js/weather.js';
 import { clamp } from '../../../worldgen/js/noise.js';
 
+/**
+ * The rungs of the planet texture ladder, smallest first.
+ *
+ * Module level so it cannot land in a temporal dead zone: `placeBodies` runs while the factory body
+ * is still executing and reaches for the first rung.
+ */
+const LADDER = [256, 512, 1024];
+
 export function createSpace({ star, system, homePlanet, homeWorld = null, balance = {}, seed = 1 } = {}) {
   const cfg = balance.space || {};
   const AU = cfg.auUnits ?? 14000;
@@ -132,6 +140,8 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   // out here at all, so there was nothing to fly to and nothing to land on. They orbit their parent
   // rather than the star, which is why they are placed in a second pass in `placeBodies`.
   const bodies = [];
+  /** `${planetId}@${size}` -> the layer set at that size. Generated once, then switched between. */
+  const textureCache = new Map();
 
   /**
    * HOW BIG A WORLD IS DRAWN, AND WHERE ITS MOONS GO.
@@ -188,13 +198,8 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
   for (const { p, parent, moonIndex = 0 } of worlds) {
     const pal = atmospherePalette(p);
     const tinted = { ...p, atmosphere: { ...(p.atmosphere || {}), color: pal.cloud } };
-    const texture = {};
-    const clouds = cloudTexture(tinted, { size: 256 });
-    if (clouds) texture.clouds = clouds;
-    // the world we launched from gets its real surface map; the rest get the procedural one
-    if (homeWorld && p.id === homePlanet?.id) {
-      try { texture.map = surfaceTexture(p, homeWorld, { size: 512 }); } catch { /* fall back */ }
-    }
+    // the cheapest rung to start on — the ladder fills in as the ship closes
+    const texture = texturesFor(p, tinted, LADDER[0]);
     // a moon is genuinely smaller — that is most of what makes it feel like a moon — and it also has
     // to fit in the ring its parent left it, or it is drawn inside the planet it goes round
     const host = parent ? drawn.get(parent.id) : null;
@@ -350,6 +355,50 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
     return best;
   }
 
+  /**
+   * THE TEXTURE LADDER.
+   *
+   * "Can the planets also switch to a higher resolution texture as you get closer? It might make
+   * sense to generate 2-3 LOD textures."
+   *
+   * That is exactly right, and it was not what happened. There WAS a three-tier system — far / near
+   * / close, with `textureSize` 256 / 512 / 1024 — but `textureSize` is only read by
+   * `createPlanet` when NOBODY HANDS IN A MAP: it sizes the fallback procedural blotch. The world
+   * you launched from always hands in a real map, so its tier size did nothing at all, and measuring
+   * it confirmed the surface stayed 1024 wide at every distance including the far one.
+   *
+   * Worse, the map was REGENERATED on every tier change. `surfaceTexture` rasterises an equirect
+   * image a pixel at a time on the main thread; doing that each time the ship crosses a threshold —
+   * and again when it drops back — is the most expensive possible way to change a number.
+   *
+   * So: generate each rung ONCE, keep it, and switch. Flying out and back in costs nothing the
+   * second time, and the first rung is the cheap one, so arriving in a system does not stall.
+   */
+  function texturesFor(planet, tinted, size) {
+    const key = `${planet.id}@${size}`;
+    const hit = textureCache.get(key);
+    if (hit) return hit;
+
+    const set = {};
+    // clouds and lights ride the same ladder a rung down: they are soft, and nobody reads a cloud
+    const soft = Math.max(128, size >> 1);
+    try { const c = cloudTexture(tinted, { size: soft }); if (c) set.clouds = c; } catch { /* no clouds */ }
+    // the world we launched from gets its REAL surface map; the rest keep the procedural one, which
+    // `createPlanet` builds itself from `textureSize`
+    if (homeWorld && planet.id === homePlanet?.id) {
+      try { set.map = surfaceTexture(planet, homeWorld, { size }); } catch { /* fall back */ }
+    }
+    textureCache.set(key, set);
+    return set;
+  }
+
+  /** Which rung a tier stands on. A moon is small on screen, so it never needs the top one. */
+  function ladderFor(tier, moon) {
+    const i = Math.max(0, approachCfg.tiers.findIndex(t => t.key === tier.key));
+    const rung = LADDER[Math.min(LADDER.length - 1, i)];
+    return moon ? Math.max(LADDER[0], rung >> 1) : rung;
+  }
+
   let refineCooldown = 0;
 
   /**
@@ -380,12 +429,16 @@ export function createSpace({ star, system, homePlanet, homeWorld = null, balanc
 
   function rebuildBody(body, tier) {
     const detail = tier.key === 'far' ? body.baseDetail : Math.round(tier.detail * (body.moon ? 0.6 : 1));
-    const textureSize = tier.key === 'far' ? body.baseTexture : Math.round(tier.textureSize * (body.moon ? 0.5 : 1));
-    const texture = { ...body.texture };
-    // the world we launched from has a REAL map; draw it bigger as we come back down to it
-    if (homeWorld && body.planet.id === homePlanet?.id && tier.key !== 'far') {
-      try { texture.map = surfaceTexture(body.planet, homeWorld, { size: Math.min(1024, textureSize * 2) }); } catch { /* keep the old one */ }
-    }
+    /**
+     * Step up or down the ladder — no rasterising here.
+     *
+     * `textureSize` is what `createPlanet` uses for the procedural fallback, so it has to agree with
+     * the rung, or a world with no real map would stay coarse while its neighbour sharpened.
+     */
+    const textureSize = ladderFor(tier, body.moon);
+    const texture = texturesFor(body.planet, body.tinted, textureSize);
+    body.texture = texture;
+    body.textureSize = textureSize;
     const next = createPlanet(body.tinted, { radius: body.radius, detail, textureSize, texture });
     next.group.position.copy(body.model.group.position);
     next.group.quaternion.copy(body.model.group.quaternion);

@@ -553,3 +553,69 @@ it played out exactly like one that was not. `js/town.js` grew `spawnOne()` — 
 and look work `populate()` does for a settlement's roster, for one person standing at coordinates —
 so a prisoner is a figure with a name you can walk up to and talk to. The boss going down frees
 them, and they say so.
+
+---
+
+## 20. The last five — and they were all the same bug again
+
+Closing the round meant clearing the five items that were still partly done. Every one of them was
+another finished module with no way in.
+
+### The whole top of the tech tree was unreachable
+
+`js/shipyard.js` has carried `stationProgress`, `stationGate`, `buildStationModule` and `nextStep`
+since the shipyard landed. **Nothing imported any of them.** So §9.15's orbital yard — four modules,
+each lifted by a hauler, ending in refuelling and refitting in orbit — could not be reached at all,
+and neither could §9.16's one line telling the player what to build next.
+
+Both are in the shipyard panel now. The yard appears only once you own a hauler or already have
+something up there, because a list of four things you cannot touch for twenty hours of play is
+noise, and that panel is busy enough.
+
+The **refining families** are shown where the decision is actually made: select an Alloy Forge in
+the catalogue and it lists what it makes and what is still locked, with the same learn-by-doing
+progress the bench shows. Listing it only once you own the bench is exactly backwards — "why would
+I build one of these" is asked before the thing exists.
+
+### The work board had no screen at all
+
+`js/work.js` has done the whole of §6.6 — ten units of work, supplied by the player swinging, by a
+machine, or by an assigned citizen — from the day it landed. You could not see an order, put a swing
+into one, or point anybody at it.
+
+The build panel has a **Work** section now: the order, a bar, the two buttons, and the **credit
+line**, which is the feature rather than a decoration — a unit is a unit whoever produced it, and
+the row says where they came from.
+
+> It also turned up a shadowing bug: `board` was declared **twice** on `window.farhold` — the work
+> board and the zone's notice board — and the later one silently won. Nothing outside `main.js`
+> could reach `js/work.js`. It is `workBoard` now.
+
+### Recruiting, and a migrant with a face
+
+`colony.recruitOffer` and its refilling `townPool` had no way in. Talking to anybody in a town who
+is not a guard now offers to bring them home to work — a different question from the mercenary hire
+beside it, and worth keeping apart: a mercenary walks with you and fights, a recruit goes to your
+holding and never leaves it.
+
+They arrive with a **body**, standing at the claim stone, through the `folk.spawnOne()` written for
+the prisoners. A colony of six is six people walking about rather than a number on a screen.
+
+### Density that radiates out — and my own bug in it
+
+§1.4, the last of the graphics round. The instance cap and the nearest-cell-first scan stopped trees
+*shifting*; what was left was the outer ring arriving all at once as a wall. A cell is thinned by
+how far out it is now — flat inside 62% of the radius, easing to 0.22 at the rim — and grass gets
+its own fade over its own much smaller radius, where the view falloff was always exactly 1 and using
+it would have been a change that did nothing.
+
+**The rule that makes it safe**: a thinned cell is a *subset* of the dense one, never a different
+scatter. Every tree standing there at arm's length was already standing there at the horizon, so
+walking towards a wood adds trees *between* the ones you could already see.
+
+> And the bug the test caught, which is the same lesson as everything else here. `break`ing out of
+> the scatter loop is the obvious way to thin a cell, and it is wrong: the cell's `rng` is shared
+> with the ruin roll, the megaflora and the grass, so stopping early consumed fewer numbers and
+> every one of those got a different answer. Trees stood still while the bushes around them jumped
+> — worse than the pop-in it was meant to cure. The item is drawn in full now and only the write to
+> the mesh is skipped, so the stream ends in the same place whatever the thinning says.

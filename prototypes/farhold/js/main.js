@@ -64,13 +64,14 @@ import { createPortals } from './portal.js';
 import { createBuild } from './build.js';
 import { createBuildUI } from './build-ui.js';
 import { createHomes } from './homes.js';
-import { WorkBoard } from './work.js';
+import { WorkBoard, progressText, progressFraction, creditLine, workLeft } from './work.js';
 import { createColony } from './colony.js';
 import { createFarm } from './farm.js';
 import {
   migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel, grantShip,
   yard as shipYard, PART_IDS, SUBSYSTEMS, SHIPS, PAD, FUEL,
   canBuildPart, buildPart, buildPad as buildLaunchPad, assembleShip, shipReady, refuel, partCost,
+  STATION, stationProgress, stationGate, buildStationModule, nextStep as shipNextStep,
 } from './shipyard.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
@@ -2041,9 +2042,46 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           : { ok: true, why: Object.entries(PAD.cost).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ') })
         : { ok: false, why: 'Built.' };
       const fuelHave = purse.count(FUEL.id);
+
+      /**
+       * §9.15 — THE FAR END. Four modules, each one lifted into orbit by a hauler.
+       *
+       * js/shipyard.js has had `stationProgress`, `stationGate` and `buildStationModule` since the
+       * shipyard landed and NOTHING imported any of them, so the whole top of the tech tree was
+       * unreachable. Shown only once the gate is passable or something is already up: a list of
+       * four things you cannot touch for twenty hours of play is noise, and this panel is busy.
+       */
+      const yardGate = stationGate(player);
+      const prog = stationProgress(player);
+      const station = (yardGate.ok || prog.done.length) ? {
+        name: STATION.name,
+        fraction: prog.fraction,
+        gateWhy: yardGate.ok ? '' : yardGate.why,
+        modules: STATION.modules.map(m => {
+          const up = prog.done.includes(m.id);
+          const short = purse.missing(m.cost);
+          const shortText = Object.entries(short).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ');
+          return {
+            id: m.id, name: m.name, up,
+            ok: !up && yardGate.ok && !shortText && y.fuel >= STATION.fuelPerModule && stations.includes('assembler'),
+            note: up ? 'up there'
+              : !yardGate.ok ? yardGate.why
+              : !stations.includes('assembler') ? 'a module is assembler work'
+              : shortText ? `short ${shortText}`
+              : y.fuel < STATION.fuelPerModule ? `lifting it wants ${STATION.fuelPerModule} lift fuel`
+              : m.desc,
+          };
+        }),
+      } : null;
+
       return {
+        station,
         atAssembler: here,
         started: !!y.pad || PART_IDS.some(id => (y.built[id] || 0) > 0) || (player.vehicles?.owned?.ship || []).length > 0,
+        // §9.16 — one line saying what to build next, so the player is never guessing which of the
+        // seven buttons below is the one that will actually move. Another export that had been
+        // sitting in js/shipyard.js with nobody calling it.
+        next: shipNextStep(player)?.text || '',
         summary: (player.vehicles?.owned?.ship || []).length
           ? `${SHIPS[player.vehicles.active?.ship]?.key || 'ship'} · tanks ${y.fuel.toFixed(1)}/${FUEL.capacity}`
           : 'Four subsystems, a pad, and a tank of fuel.',
@@ -2078,6 +2116,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.log(out.ok ? `${out.added.toFixed(1)} lift fuel aboard. Tanks at ${out.fuel.toFixed(1)}.` : out.why, out.ok ? 'good' : 'bad');
       return out;
     },
+    /**
+     * §9.15 — a module is built AND lifted in one action, because they are one decision.
+     *
+     * `buildStationModule` checks the fuel BEFORE it takes anything out of the bag: a module that
+     * is built and then cannot be lifted would quietly eat twenty hull plates for nothing.
+     */
+    buildModule: id => {
+      const out = buildStationModule(player, id, payBag(), { stations: benchesNear() });
+      hud.log(out.ok
+        ? `${out.module?.name || 'The module'} goes up.${out.complete ? ` ${STATION.name} is finished — you can refuel and refit in orbit now.` : ''}`
+        : out.why, out.ok ? 'level' : 'bad');
+      if (out.ok) { sound.questDone(); autoSave(); }
+      return out;
+    },
   };
 
   const buildUI = createBuildUI({
@@ -2105,6 +2157,36 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * js/colony.js and js/farm.js were both complete, both ticking, and both invisible: there was no
      * way to see a citizen, accept a migrant, break a field or collect a penny.
      */
+    /**
+     * §6.6 — the work board, and the three things that can put units into it.
+     *
+     * js/work.js has kept a board of orders since the colony landed and had no screen at all: you
+     * could not see an order, swing at one, or point a citizen at it. A unit is a unit whoever
+     * produced it, which is the whole idea, so the row carries the credit line.
+     */
+    workboard: {
+      list: () => board.open().slice(0, 6).map(o => ({
+        id: o.id,
+        title: o.title || o.tag || 'work',
+        progress: progressText(o),
+        fraction: progressFraction(o),
+        credit: creditLine(o),
+        left: workLeft(o),
+      })),
+      /** Citizens with no station to go to — the ones a click can actually move. */
+      idle: () => (colony.citizens || []).filter(c => !c.stationId && c.rung !== 'leaving').length,
+      swing: id => {
+        const res = board.swing(id, { units: 1, by: 'player', byName: player.name });
+        if (res.complete) { hud.log(`${res.order.title || 'The job'} is done.`, 'good'); sound.questDone(); }
+        else if (res.applied <= 0) hud.log('Nothing left to do on that one.', '');
+      },
+      assign: id => {
+        const who = (colony.citizens || []).find(c => !c.stationId && c.rung !== 'leaving');
+        if (!who) { hud.log('Nobody is free.', 'warn'); return; }
+        colony.assign(who.id, { stationId: id });
+        hud.log(`${who.name} goes to it.`, 'good');
+      },
+    },
     holding: {
       state: () => {
         const beds = (build.entries || []).filter(e => e.key === 'bed').length;
@@ -2938,6 +3020,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       lastCrate, lastCrateLifted,
       bag: player.bag,
       offer: folk.questFrom(npc, { level: player.level, enemies: bestiary.enemies, nodes: world.nodes }),
+      /**
+       * §6.5 — somebody in this town who would come and work at your holding.
+       *
+       * Offered only once you have somewhere to put them: `recruit()` refuses without a spare bed
+       * ("nobody signs on to sleep in the mud") and offering a deal that cannot be taken is exactly
+       * the kind of dead button this round has been removing. The offer is cached on the NPC so it
+       * does not reshuffle every time the panel redraws.
+       */
+      recruitOffer: recruitFrom(npc),
       active: questLog.active,
       hasQuest: id => questLog.has(id),
       readyToTurnIn: giverId => questLog.readyToTurnIn(giverId),
@@ -2947,6 +3038,57 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // what the gambler last pulled out of a crate, so the panel can show it
   let lastCrate = null, lastCrateLifted = false;
+
+  /**
+   * The recruit offer for one person, built once and remembered on them.
+   *
+   * `recruitOffer` draws a fresh name, job and price every call, so rebuilding it on every panel
+   * redraw would shuffle the person in front of you mid-sentence. It is shaped into the same
+   * `offerNodes` object the mercenary hire uses, because from the player's side these are two
+   * versions of one question: will you come with me.
+   */
+  function recruitFrom(npc) {
+    if (!npc?.node || npc.guards) return null;
+    if (colony.spareBeds() <= 0) return null;          // no bed, no deal — see colony.recruit
+    if (npc.recruitOffer === null) return null;        // they already said no, or you took them
+    if (!npc.recruitOffer) {
+      const zone = zones.at(npc.x, npc.z);
+      const raw = colony.recruitOffer({
+        settlementId: npc.node.id,
+        settlementName: npc.node.name,
+        size: npc.node.size || 2,
+        standing: zone?.holder ? Math.max(0, (standings.get(zone.holder) || 0) / 100) : 0,
+      });
+      if (!raw.ok) { npc.recruitOffer = null; return null; }
+      const c = raw.citizen;
+      npc.recruitOffer = {
+        ...raw,
+        title: `${c.name}, ${(colony.jobOf(c)?.name || c.job).toLowerCase()}`,
+        lines: [raw.text],
+        blurb: `${c.name} ${raw.skillWord}. They would live at your holding and work it — not walk with you.`,
+        rows: [
+          ['Work', colony.jobOf(c)?.name || c.job],
+          ['Skill', raw.skillWord],
+          ['From', raw.settlementName],
+          ['Beds spare', colony.spareBeds()],
+        ],
+        terms: 'They stay at the holding. Feed them and give them a bed, or they will walk back.',
+        price: raw.price,
+        gold: Math.floor(player.gold),
+        acceptText: 'Take them on',
+        declineText: 'Not today',
+        refusal: player.gold < raw.price
+          ? `That costs ${raw.price} gold and you have ${Math.floor(player.gold)}.`
+          : (colony.spareBeds() <= 0 ? 'Build them a bed first.' : ''),
+      };
+    }
+    // the purse and the beds move while the panel is open, so those two are refreshed every look
+    npc.recruitOffer.gold = Math.floor(player.gold);
+    npc.recruitOffer.refusal = player.gold < npc.recruitOffer.price
+      ? `That costs ${npc.recruitOffer.price} gold and you have ${Math.floor(player.gold)}.`
+      : (colony.spareBeds() <= 0 ? 'Build them a bed first.' : '');
+    return npc.recruitOffer;
+  }
 
   const talk = createTalkPanel({
     describe: item => hud.describe(item),
@@ -3049,6 +3191,41 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.setPlayer(player);
       talk.update(talkContext(talk.npc));
       autoSave();
+    },
+    /**
+     * §6.5 — they pack up and go to your holding.
+     *
+     * A BODY as well as a line in a panel: `folk.spawnOne` (written for the prisoners) gives them a
+     * face standing at the claim stone, so a colony of six is six people walking about rather than
+     * a number on a screen.
+     */
+    recruit: async offer => {
+      const out = colony.recruit(offer, { gold: player.gold });
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      player.gold -= offer.price;
+      if (talk.npc) talk.npc.recruitOffer = null;
+      hud.log(`${out.citizen.name} packs up and starts for your holding.`, 'level');
+      sound.questDone();
+      const home = defence.spot?.();
+      if (home) {
+        const a = Math.random() * Math.PI * 2;
+        folk.spawnOne({
+          groupId: 'colony', role: 'villager',
+          roleName: colony.jobOf(out.citizen)?.name || out.citizen.job,
+          name: out.citizen.name,
+          x: home.x + Math.cos(a) * 5, z: home.z + Math.sin(a) * 5,
+          greeting: 'Good to be somewhere with walls. What wants doing?',
+          seed,
+        }).then(who => { if (who) out.citizen.body = who.id; });
+      }
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
+    declineRecruit: () => {
+      if (talk.npc) talk.npc.recruitOffer = null;
+      hud.log('You leave them to it.', '');
+      talk.update(talkContext(talk.npc));
     },
     accept: quest => {
       questLog.add(quest);
@@ -5578,7 +5755,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get works() { return works; },
     get colony() { return colony; },
     get farm() { return farm; },
-    get board() { return board; },
+    /**
+     * The WORK board, under its own name.
+     *
+     * `board` was declared twice on this object — the work board here and the zone's notice board
+     * further down — and the later one silently won, so `farhold.board` has been the job list all
+     * along and nothing could reach js/work.js at all.
+     */
+    get workBoard() { return board; },
     get portals() { return portals; },
     get terraform() { return terraform; },
     get ore() { return ore; },

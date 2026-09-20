@@ -72,7 +72,7 @@ function costLine(cost, have) {
     });
 }
 
-export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, mining = null, works = null, nearest = null, shipyard = null, garage = null, holding = null } = {}) {
+export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, mining = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null } = {}) {
   const pieces = catalogue?.structures || [];
   const categories = catalogue?.categories || {};
   const have = id => (store?.have ? store.have(id) : 0);
@@ -106,9 +106,24 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
   const garageBox = el('div', { class: 'build-yard build-garage' });
   /** §6.5/6.8/6.9 — the people who live here, the fields they work, and the tax they pay. */
   const holdBox = el('div', { class: 'build-yard build-holding' });
+  /** §6.6 — ten units of work, and who is putting them in. */
+  const workBox = el('div', { class: 'build-yard build-work' });
   const detail = el('div', { class: 'build-detail' });
   const keys = el('div', { class: 'build-keys muted small' });
-  root.append(head, steps, toolRow, catRow, listBox, minesBox, benchBox, holdBox, garageBox, yardBox, detail, keys);
+  /**
+   * THE MIDDLE SCROLLS; THE HEAD AND THE KEY LINE DO NOT.
+   *
+   * There are nine sections that can be up at once — first steps, tools, catalogue, digging, the
+   * bench you are at, the work board, the holding, the garage and the shipyard with the orbital
+   * yard under it — and a base that has all of them is a base that has earned all of them. With
+   * only the catalogue scrolling, the rest pushed past the bottom of a fixed-height panel and were
+   * simply cut off, which is the same class of bug as the title screen the user could not see the
+   * submit button on. The head and the key line stay put so the close button and the controls are
+   * always reachable.
+   */
+  const body = el('div', { class: 'build-body' },
+    steps, toolRow, catRow, listBox, minesBox, benchBox, workBox, holdBox, garageBox, yardBox, detail);
+  root.append(head, body, keys);
 
   head.append(
     el('h2', { text: 'Build' }),
@@ -192,6 +207,34 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       list.append(el('li', { class: c.short ? 'short' : '', text: `${c.text} — you have ${c.got}` }));
     }
     detail.append(list);
+
+    /**
+     * WHAT A BENCH IS FOR, WHERE YOU DECIDE TO BUILD ONE.
+     *
+     * The bench panel lower down lists what a machine can make — but only once you own it, which is
+     * exactly backwards: the question "why would I build an Alloy Forge" is asked in the catalogue,
+     * before the thing exists. `works.board(type)` answers it, and the same learn-by-doing lock the
+     * bench shows is shown here, so a recipe you cannot run yet says what unlocks it rather than
+     * being hidden and then turning up unannounced.
+     */
+    if (works?.machineDefs?.[p.id]) {
+      const recipes = works.board(p.id) || [];
+      const open = recipes.filter(r => r.unlocked);
+      detail.append(el('p', { class: 'small', text:
+        recipes.length
+          ? `Makes ${recipes.length} thing${recipes.length === 1 ? '' : 's'} · ${open.length} you already know`
+          : 'Makes nothing on its own.' }));
+      const list = el('ul', { class: 'build-cost' });
+      for (const r of recipes.slice(0, 8)) {
+        const out = Object.keys(r.outputs || {}).map(k => k.replace(/_/g, ' ')).join(', ');
+        list.append(el('li', {
+          class: r.unlocked ? '' : 'short',
+          text: r.unlocked ? `${r.name} → ${out}` : `${r.name} — ${r.unlock?.text || 'not learned yet'}`,
+        }));
+      }
+      if (recipes.length > 8) list.append(el('li', { class: 'muted', text: `…and ${recipes.length - 8} more` }));
+      detail.append(list);
+    }
 
     const notes = [];
     if (p.power?.use) notes.push(`Draws ${p.power.use} kW. It will not run without a generator in reach.`);
@@ -314,6 +357,9 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
 
     yardBox.append(el('h3', { text: 'Shipyard' }));
     yardBox.append(el('p', { class: 'small muted', text: state.summary }));
+    // §9.16 — one line saying what to do next, so the player is never guessing which of the seven
+    // buttons below is the one that will actually move
+    if (state.next) yardBox.append(el('p', { class: 'small', text: `Next: ${state.next}` }));
 
     const action = (label, note, run, ok) => {
       const row = el('div', { class: 'build-yard-row' });
@@ -331,6 +377,22 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       action('Put the ship together', state.assembleWhy || 'Everything is ready.', () => shipyard.assemble(), state.assembleOk);
     }
     action('Fill the tanks', state.fuelText, () => shipyard.refuel(), state.fuelOk);
+
+    /**
+     * §9.15 — the orbital yard, four modules, each lifted by a hauler.
+     *
+     * Only up once the gate is passable or something is already in orbit: a list of four things you
+     * cannot touch for twenty hours of play is noise, and this panel has enough in it already.
+     */
+    if (state.station) {
+      yardBox.append(el('h3', { text: state.station.name }));
+      const bar = el('div', { class: 'build-work-bar' }, el('i', { style: `width:${Math.round(state.station.fraction * 100)}%` }));
+      yardBox.append(bar);
+      if (state.station.gateWhy) yardBox.append(el('p', { class: 'small bad', text: state.station.gateWhy }));
+      for (const m of state.station.modules) {
+        action(m.up ? `${m.name} ✓` : `Lift the ${m.name}`, m.note, () => shipyard.buildModule(m.id), m.ok);
+      }
+    }
   }
 
   /**
@@ -397,10 +459,56 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     act('Break a field here', h.fieldNote, () => holding.field(), h.fieldOk);
   }
 
+  /**
+   * THE WORK BOARD — §6.6, "10 units of work… supplied by the player working manually, by a
+   * machine, or by an assigned NPC."
+   *
+   * js/work.js has done all of that from the day it landed and had no screen: you could not see an
+   * order, put a swing into one, or point a citizen at it. The whole idea of the module is that a
+   * unit is a unit whoever produced it, so the row shows where the units came FROM — that credit
+   * line is the feature, not a decoration.
+   */
+  function drawWork() {
+    workBox.replaceChildren();
+    if (!workboard) return;
+    const rows = workboard.list() || [];
+    if (!rows.length) return;
+
+    workBox.append(el('h3', { text: 'Work' }));
+    const idle = workboard.idle?.() ?? 0;
+    workBox.append(el('p', { class: 'small muted', text: idle ? `${idle} idle · click an order to put them on it` : 'Everybody is on something.' }));
+
+    for (const o of rows) {
+      const row = el('div', { class: 'build-work-row' });
+      row.append(
+        el('span', { class: 'build-row-name', text: o.title }),
+        el('span', { class: 'muted small', text: o.progress }),
+      );
+      // a bar, because "6.5 of 10" is a number and a bar is a glance
+      const bar = el('div', { class: 'build-work-bar' }, el('i', { style: `width:${Math.round(o.fraction * 100)}%` }));
+      row.append(bar);
+      row.append(el('span', { class: 'muted small build-work-credit', text: o.credit || 'nobody has touched it' }));
+
+      const tools = el('div', { class: 'build-yard-row' });
+      tools.append(el('button', {
+        class: 'small', text: 'Put your back into it',
+        onclick: () => { workboard.swing(o.id); redraw(); },
+      }));
+      if (idle > 0) {
+        tools.append(el('button', {
+          class: 'small', text: 'Send somebody',
+          onclick: () => { workboard.assign(o.id); redraw(); },
+        }));
+      }
+      row.append(tools);
+      workBox.append(row);
+    }
+  }
+
   function redraw() {
     if (!open) return;
     drawSteps(); drawTools(); drawCats(); drawList(); drawMines(); drawBench();
-    drawHolding(); drawGarage(); drawYard(); drawDetail();
+    drawWork(); drawHolding(); drawGarage(); drawYard(); drawDetail();
   }
 
   const api = {
@@ -419,6 +527,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       drawDetail();
       drawMines();
       drawBench();
+      drawWork();
       drawHolding();
       drawGarage();
       drawYard();

@@ -1103,3 +1103,35 @@ relationship (ground in the way takes the shafts down), not a particular fractio
 **The greeting test demanded more than five characters.** Lingo generated "Aye?" and the suite went
 red. An arbitrary length was never the point; an empty line or a stray `{` from a binding that did
 not resolve is what would actually be a bug, so that is what it checks.
+
+### The last five, and the lesson holding
+
+Clearing the five items that were still half-done at the end of the round found five more of the
+same thing. That is now the defining fact about rounds 11 and 12: **twelve finished modules with no
+way in**, and not one genuine algorithmic bug among them.
+
+* `js/shipyard.js` had `stationProgress`, `stationGate`, `buildStationModule` **and** `nextStep`,
+  and nothing imported any of them — so §9.15's orbital yard and §9.16's "here is what to build
+  next" were both unreachable.
+* `js/work.js` did every part of the ten-units work system and had no screen whatever.
+* `colony.recruitOffer` and its refilling `townPool` had no way in.
+* And `board` was declared **twice** on `window.farhold` — the work board and the zone's notice
+  board — so the later one silently won and nothing outside `main.js` could reach `js/work.js` at
+  all. A duplicate key in an object literal is not an error in JavaScript; it is a shrug.
+
+### The density falloff, and the bug the test found in my own fix
+
+§1.4 was the last of the graphics round: *"density should radiate out from the player position to
+avoid pop-in."* The cap and the nearest-cell-first scan had already stopped trees **shifting**; what
+remained was the outer ring arriving all at once as a wall.
+
+The fix has one rule that makes it safe rather than merely different: **a thinned cell is a subset
+of the dense one**, never a different scatter. Every tree standing there at arm's length was already
+standing there at the horizon, so approaching a wood adds trees *between* the ones you could see.
+
+The obvious implementation — `break` out of the scatter loop when the quota is met — is wrong, and
+`tests/density.spec.js` caught it on the first run. The cell's `rng` is shared with everything after
+the trees: the ruin roll, the megaflora, the grass. Stopping early consumed fewer numbers, so all of
+those got a different answer, and the bushes jumped while the trees stood still — worse than the
+pop-in it was meant to cure. The item is drawn in full now and only the write to the mesh is
+skipped, so the stream ends in the same place whatever the thinning decides.

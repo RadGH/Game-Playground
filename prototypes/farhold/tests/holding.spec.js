@@ -113,3 +113,85 @@ test('a citizen with a bed pays tax, and one without pays nothing', async ({ pag
   expect(out.prosperity, 'prosperity ignored the fourteen structures').toBeGreaterThan(1);
   expect(errors).toEqual([]);
 });
+
+test('somebody in a town will come and work for you, once you have a bed for them', async ({ page }) => {
+  const errors = await land(page);
+
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    // stand in a town and find somebody who is not a guard
+    const town = f.terrain.world.nodes.filter(n => n.type === 'settlement').sort((a, b) => b.size - a.size)[0];
+    const cell = f.terrain.metresPerCell;
+    f.teleport(town.x * cell, town.y * cell);
+    for (let i = 0; i < 60 && !f.folk.nearest(f.control.x, f.control.z, 200); i++) await new Promise(r => setTimeout(r, 250));
+    /**
+     * Somebody who is NOT a guard.
+     *
+     * A town guard does not abandon their post to come and dig your ore, and `recruitFrom` refuses
+     * them on purpose — the nearest person to the middle of a settlement is very often one.
+     */
+    let who = null;
+    for (let r = 20; r <= 200 && !who; r += 20) {
+      const found = f.folk.nearest(f.control.x, f.control.z, r);
+      if (found && !found.guards) who = found;
+      else if (found) {
+        // step past the guard and look again
+        const all = [];
+        for (let a = 0; a < 16; a++) {
+          const th = (a / 16) * Math.PI * 2;
+          const near = f.folk.nearest(f.control.x + Math.cos(th) * r, f.control.z + Math.sin(th) * r, r);
+          if (near && !near.guards) all.push(near);
+        }
+        who = all[0] || null;
+      }
+    }
+    if (!who) return { nobody: true };
+    f.teleport(who.x, who.z);
+    await new Promise(r => setTimeout(r, 400));
+
+    /**
+     * No bed, no offer.
+     *
+     * `colony.recruit` refuses without a spare bed — "nobody signs on to sleep in the mud" — and
+     * offering a deal that cannot be taken is the kind of dead button this round has been removing.
+     */
+    f.colony.setBase({ structures: 4, defences: 0, beds: 0 });
+    f.openTalk(who);
+    await new Promise(r => setTimeout(r, 250));
+    const withoutBed = document.querySelector('#talk')?.textContent || '';
+
+    // …now give them somewhere to sleep, and enough gold
+    f.colony.setBase({ structures: 8, defences: 1, beds: 3 });
+    f.player.gold = 5000;
+    who.recruitOffer = undefined;                 // let it be built again now the answer has changed
+    f.openTalk(who);
+    await new Promise(r => setTimeout(r, 300));
+    const withBed = document.querySelector('#talk')?.textContent || '';
+
+    const before = f.colony.citizens.length;
+    const take = [...document.querySelectorAll('#talk button')].find(b => b.textContent === 'Take them on');
+    const gold = f.player.gold;
+    take?.click();
+    await new Promise(r => setTimeout(r, 900));
+
+    return {
+      withoutBed: /work as a|would come and work/.test(withoutBed),
+      offered: /would come and work/.test(withBed),
+      hadButton: !!take,
+      before, after: f.colony.citizens.length,
+      paid: gold - f.player.gold,
+      // …and they turn up at the holding as a person, not a line in a panel
+      bodies: f.folk.nearest(f.control.x, f.control.z, 999) ? true : false,
+      newest: f.colony.citizens[f.colony.citizens.length - 1]?.name || null,
+    };
+  });
+
+  expect(out.nobody, 'nobody was home in the biggest settlement on the world').toBeFalsy();
+  expect(out.withoutBed, 'a recruit was offered with nowhere to put them').toBe(false);
+  expect(out.offered, 'nobody in town would come and work').toBe(true);
+  expect(out.hadButton, 'the offer has no way to accept it').toBe(true);
+  expect(out.after, 'taking them on did not add a citizen').toBe(out.before + 1);
+  expect(out.paid, 'they came for free').toBeGreaterThan(0);
+  expect(out.newest, 'the new citizen has no name').toBeTruthy();
+  expect(errors).toEqual([]);
+});

@@ -1935,6 +1935,17 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
   pointer-events: auto;
 }
 .build-ui.hidden { display: none; }
+/* the middle scrolls so nothing is ever cut off the bottom; the head and the key line stay put */
+.build-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* room for the scrollbar so it never sits on top of a price */
+  padding-right: 4px;
+}
 .build-head { display: flex; align-items: center; justify-content: space-between; }
 .build-head h2 { margin: 0; font-size: 15px; letter-spacing: .04em; color: #eaf2fb; }
 .build-close {
@@ -1955,7 +1966,8 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 .build-tool.on, .build-cat.on { background: #1d3446; border-color: #4f88b5; color: #cfe9ff; }
 
 .build-list {
-  flex: 1;
+  flex: 0 0 auto;
+  max-height: 34vh;
   min-height: 80px;
   overflow-y: auto;
   display: flex;
@@ -2038,3 +2050,11 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 
 /* the holding: who lives here, and what they are worth */
 .build-holding .build-yard-row button { flex: 0 0 auto; }
+
+/* the work board: an order, a bar, and who put the units in */
+.build-work-row { display: grid; gap: 2px; padding: 3px 0; border-bottom: 1px solid #1a222c; }
+.build-work-row:last-child { border-bottom: 0; }
+.build-work-bar { height: 4px; background: #18212c; border-radius: 2px; overflow: hidden; }
+.build-work-bar i { display: block; height: 100%; background: #6ad0ff; }
+/* the credit line is the feature — a unit is a unit whoever produced it */
+.build-work-credit { font-size: 10.5px; font-style: italic; }

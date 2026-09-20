@@ -635,9 +635,38 @@ export function createProps(scene, terrain, opts = {}) {
     // Scanning outward from the player spends the cap on the ground you can actually see, and that
     // ordering barely changes as you walk — so the trees near you stay put and only the far ones,
     // which you cannot make out anyway, drop off the end.
+    /**
+     * DENSITY RADIATES OUT FROM THE PLAYER — the last piece of the graphics round.
+     *
+     * "If possible density should radiate out from the player position to avoid pop-in."
+     *
+     * The cap and the nearest-cell-first scan above stopped trees SHIFTING. What was left is the
+     * outer edge: the ring of cells the radius has just reached arrives all at once, as a wall of
+     * trees appearing together. This thins a cell by how far out it is, so that ring comes in a few
+     * at a time over several steps instead.
+     *
+     * THE PART THAT MATTERS: a thinned cell is a SUBSET of the dense one, never a different
+     * scatter. The count is drawn from the cell's own rng exactly as before and then only the first
+     * `keep` of them are placed — so every tree that stood there at arm's length was already
+     * standing there at the horizon, and walking towards a wood adds trees between the ones you
+     * could already see rather than rearranging it.
+     *
+     * Flat inside two thirds of the radius, because that is the ground you are actually looking at.
+     */
+    const fadeFrom = cfg.radius * 0.62;
+    const fadeSpan = Math.max(1, cfg.radius - fadeFrom);
+    const thinAt = (dx, dz) => {
+      const out = Math.hypot(dx, dz);
+      if (out <= fadeFrom) return 1;
+      const t = Math.min(1, (out - fadeFrom) / fadeSpan);
+      // ease out rather than a straight line: the drop is gentle where you can still make them out
+      return Math.max(0.22, 1 - t * t * 0.78);
+    };
+
     for (const [dx, dz] of spiralOffsets(cfg.radius)) {
       {
         const cx = cx0 + dx, cz = cz0 + dz;
+        const thin = thinAt(dx, dz);
         const rng = makeRng(cellSeed(seed, cx, cz));
         const baseX = cx * CELL, baseZ = cz * CELL;
         const kit = kitAt(baseX, baseZ);
@@ -647,8 +676,22 @@ export function createProps(scene, terrain, opts = {}) {
           const want = per * cfg.density;
           let n = Math.floor(want);
           if (rng() < want - n) n++;
+          // the far cells keep only the first few of the same scatter — see `thinAt` above
+          const keep = thin >= 1 ? n : Math.max(n > 0 ? 1 : 0, Math.round(n * thin));
           for (let i = 0; i < n; i++) {
-            if (counts[key] >= PROP_KINDS[key].cap) break;
+            /**
+             * SKIP THE PLACEMENT, NOT THE DRAW.
+             *
+             * `break`ing out of this loop is the obvious way to thin a cell and it is wrong: the
+             * cell's `rng` is shared with everything after it — the ruin roll, the megaflora, the
+             * grass — so stopping early consumed fewer numbers and every one of those got a
+             * DIFFERENT answer. Trees stayed put and the bushes around them jumped, which is worse
+             * than the pop-in this was meant to cure.
+             *
+             * So the item is drawn in full and only the write to the mesh is skipped. The stream
+             * ends in exactly the same place whatever `keep` says.
+             */
+            const place = i < keep && counts[key] < PROP_KINDS[key].cap;
             const x = baseX + (rng() - 0.5) * CELL;
             const z = baseZ + (rng() - 0.5) * CELL;
             // `plantable` is stricter than `underwater`: a lake sheet reaches past its own cells,
@@ -664,12 +707,13 @@ export function createProps(scene, terrain, opts = {}) {
               new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rng() * Math.PI * 2, 0)),
               new THREE.Vector3(scale, scale * (0.85 + rng() * 0.4), scale),
             );
-            meshes[key].setMatrixAt(counts[key], matrix);
             // a little colour variation, plus the biome's leaf tint on anything leafy
             const tint = kit.leaf && ['broadleaf', 'conifer', 'palm', 'bush', 'fern', 'reed'].includes(key)
               ? colour.set(kit.leaf)
               : colour.setScalar(1);
-            const v = 0.82 + rng() * 0.32;
+            const v = 0.82 + rng() * 0.32;          // drawn either way — see `place` above
+            if (!place) continue;
+            meshes[key].setMatrixAt(counts[key], matrix);
             meshes[key].setColorAt(counts[key], colour.setRGB(tint.r * v, tint.g * v, tint.b * v));
             const solid = PROP_SOLIDS[key];
             if (solid) solids.add(x, z, solid[0] * scale, solid[1] * scale);
@@ -772,7 +816,21 @@ export function createProps(scene, terrain, opts = {}) {
           const id = terrain.biomeIdAt(baseX, baseZ);
           const tags = BIOMES[id]?.tags || [];
           const lush = tags.includes('fertile') ? 1 : tags.includes('open') ? 0.7 : tags.includes('forest') ? 0.6 : tags.includes('cold') || tags.includes('dry') || tags.includes('harsh') ? 0.12 : 0.35;
-          const n = Math.floor(cfg.grassPerCell * lush * cfg.density);
+          /**
+           * Grass gets its OWN fade, over its own radius.
+           *
+           * The view falloff above is flat until 62% of the prop radius, and grass only reaches a
+           * couple of cells — so `thin` is always exactly 1 here and using it would have been a
+           * change that did nothing. Grass is also where the edge shows worst: it is most of the
+           * instance count and it ends in a visible line on the ground. Its own ring fades from
+           * full at the middle to a fifth at the last ring, so the line becomes a thinning.
+           *
+           * Safe to shorten this loop, unlike the props one: grass is the last thing drawn in a
+           * cell, so the numbers it does not take are not owed to anybody.
+           */
+          const gOut = Math.max(Math.abs(dx), Math.abs(dz)) / Math.max(1, cfg.grassRadius);
+          const gThin = Math.max(0.2, 1 - gOut * gOut * 0.8);
+          const n = Math.floor(cfg.grassPerCell * lush * cfg.density * gThin);
           const tint = colour.set(kit.leaf || '#5f8f45');
           const tr = tint.r, tg = tint.g, tb = tint.b;
           for (let i = 0; i < n && grass < grassMesh.count + grassMesh.instanceMatrix.count; i++) {
@@ -858,6 +916,8 @@ export function createProps(scene, terrain, opts = {}) {
       return true;
     },
     get radius() { return cfg.radius; },
+    /** Every instanced mesh, for a test that wants to count what is actually on the ground. */
+    get meshes() { return { ...meshes, ...megaMeshes, grass: grassMesh }; },
     setVisible(v, x, z) { visible = !!v; rebuild(x, z); },
     setGrass(v, x, z) { grassVisible = !!v; rebuild(x, z); },
     stats() {

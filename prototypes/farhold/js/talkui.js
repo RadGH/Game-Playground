@@ -192,6 +192,21 @@ export function createTalkPanel(handlers = {}) {
       ));
     }
 
+    /**
+     * ---- somebody who will come and WORK for you.
+     *
+     * A different thing from the hire above, and worth keeping apart: a mercenary walks with you
+     * and fights; a recruit goes to your holding and never leaves it. §6.5 — "build your own city
+     * and acquire NPCs… recruiting from other towns." `js/colony.js` has had `recruitOffer` and a
+     * refilling `townPool` since the colony landed and there was no way to reach either.
+     */
+    if (context.recruitOffer) {
+      kids.push(...offerNodes(context.recruitOffer,
+        o => { handlers.recruit?.(o); render(); },
+        o => { handlers.declineRecruit?.(o); render(); },
+      ));
+    }
+
     // ---- trade
     if (npc.trades) {
       /**

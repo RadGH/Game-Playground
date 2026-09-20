@@ -147,3 +147,85 @@ test('build mode swallows the swing, so you do not attack the fence you are plac
   expect(after.kills).toBe(before);
   expect(errors).toEqual([]);
 });
+
+test('with every section up, nothing falls off the bottom of the panel', async ({ page }) => {
+  test.setTimeout(150_000);
+  const errors = await land(page);
+
+  /**
+   * The same failure the title screen had — "I can't see the submit button with all the options
+   * open." Nine sections can be up at once (first steps, tools, catalogue, digging, the bench you
+   * are at, the work board, the holding, the garage, the shipyard with the orbital yard under it)
+   * and a base that has earned all of them is exactly when the panel matters most.
+   */
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    const t = f.terrain;
+    const flat = (x, z) => !t.underwater(x, z) && !t.waterAt(x, z) && t.slopeAt(x, z, 10) <= 0.25;
+    let spot = null;
+    outer: for (let r = 0; r <= 1200; r += 20) for (let a = 0; a < 16; a++) {
+      const th = (a / 16) * Math.PI * 2;
+      const x = f.control.x + Math.cos(th) * r, z = f.control.z + Math.sin(th) * r;
+      if (flat(x, z) && flat(x + 14, z) && flat(x - 14, z)) { spot = { x, z }; break outer; }
+    }
+    if (!spot) return { none: true };
+    f.teleport(spot.x, spot.z);
+    for (const piece of f.structures.structures || []) {
+      for (const id of Object.keys(piece.cost || {})) f.bag.add(id, 900);
+    }
+    for (const id of ['ship_hull', 'ship_drive', 'ship_tanks', 'ship_avionics', 'steel_ingot',
+                      'machine_part', 'rope', 'lift_fuel', 'charcoal', 'cut_stone', 'gravel']) f.bag.add(id, 200);
+    await new Promise(r => setTimeout(r, 400));
+
+    // everything that puts a section on the panel
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    await new Promise(r => setTimeout(r, 200));
+    f.build.setTool('smooth'); f.build.setRadius(20);
+    for (const [dx, dz] of [[0, 0], [13, 0], [-13, 0], [0, 13]]) { f.build.aim(spot.x + dx, spot.z + dz); f.build.paint(); }
+    f.build.setTool('build');
+    for (const [key, dx, dz] of [['claim_stone', 9, 9], ['assembler', 3, 0], ['burner_generator', 6, 0],
+                                 ['storage_crate', 9, 0], ['bed', -3, 0], ['bed', -5, 0], ['furnace', 0, 4]]) {
+      f.build.select(key); f.build.aim(spot.x + dx, spot.z + dz); f.build.placeHere();
+    }
+    f.stores.put(f.stores.poolAt(spot.x + 9, spot.z), 'coal', 300);
+    f.shipyardApi.buildPad();
+    const { createOrder } = await import('/prototypes/farhold/js/work.js');
+    f.workBoard.post(createOrder({ id: 'oz', title: 'Split the timber', tag: 'build', units: 10 }));
+    // stand at the bench so its section and the garage both come up
+    f.teleport(spot.x + 2, spot.z);
+    await new Promise(r => setTimeout(r, 2400));
+
+    const panel = document.getElementById('build-ui');
+    const body = panel.querySelector('.build-body');
+    const keys = panel.querySelector('.build-keys');
+    const headings = [...panel.querySelectorAll('h2, h3')].map(h => h.textContent);
+    const pRect = panel.getBoundingClientRect();
+    const kRect = keys.getBoundingClientRect();
+
+    // scroll to the very bottom and make sure the last section is reachable
+    body.scrollTop = body.scrollHeight;
+    await new Promise(r => setTimeout(r, 120));
+    const last = [...panel.querySelectorAll('.build-body > div')].filter(d => d.textContent.trim()).pop();
+    const lRect = last.getBoundingClientRect();
+    f.build.setMode(false);
+
+    return {
+      headings,
+      scrolls: body.scrollHeight > body.clientHeight,
+      // the key line must be inside the panel, not pushed off the bottom of it
+      keysInside: kRect.bottom <= pRect.bottom + 1 && kRect.top >= pRect.top,
+      // …and the last section must be reachable by scrolling
+      lastReachable: lRect.bottom <= pRect.bottom + 2,
+      panelInView: pRect.bottom <= window.innerHeight + 1 && pRect.top >= 0,
+    };
+  });
+
+  expect(out.none, 'nowhere flat enough to build a full base').toBeFalsy();
+  // a real base has most of the panel open at once
+  expect(out.headings.length, `only ${out.headings.length} sections came up: ${out.headings.join(', ')}`)
+    .toBeGreaterThanOrEqual(5);
+  expect(out.keysInside, 'the control line is pushed off the bottom of the panel').toBe(true);
+  expect(out.lastReachable, 'the bottom section cannot be scrolled to').toBe(true);
+  expect(out.panelInView, 'the panel itself hangs off the screen').toBe(true);
+  expect(errors).toEqual([]);
+});

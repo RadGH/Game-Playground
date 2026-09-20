@@ -156,3 +156,102 @@ test('…and then J actually leaves the planet', async ({ page }) => {
   expect(flying.fuel, 'the launch did not burn any fuel').toBeLessThan(90);
   expect(errors).toEqual([]);
 });
+
+test('the orbital yard is reachable once you have a hauler, and the panel says what is next', async ({ page }) => {
+  test.setTimeout(150_000);
+  const errors = await land(page);
+
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    const t = f.terrain;
+    const flat = (x, z) => !t.underwater(x, z) && !t.waterAt(x, z) && t.slopeAt(x, z, 10) <= 0.25;
+    let spot = null;
+    outer: for (let r = 0; r <= 1200; r += 20) for (let a = 0; a < 16; a++) {
+      const th = (a / 16) * Math.PI * 2;
+      const x = f.control.x + Math.cos(th) * r, z = f.control.z + Math.sin(th) * r;
+      if (flat(x, z) && flat(x + 14, z) && flat(x - 14, z)) { spot = { x, z }; break outer; }
+    }
+    if (!spot) return { none: true };
+    f.teleport(spot.x, spot.z);
+    for (const piece of f.structures.structures || []) {
+      for (const id of Object.keys(piece.cost || {})) f.bag.add(id, 900);
+    }
+    for (const id of ['ship_hull', 'ship_drive', 'ship_tanks', 'ship_avionics', 'cut_stone', 'gravel',
+                      'steel_ingot', 'machine_part', 'rope', 'lift_fuel', 'composite_plate',
+                      'control_board', 'aether_cell', 'tempered_alloy', 'copper_ingot', 'glass', 'cloth']) f.bag.add(id, 200);
+    /**
+     * …and every ingredient the subsystem tiers name, read out of the data.
+     *
+     * A hand-written list goes stale the moment somebody edits a tier, and it goes stale silently —
+     * the first run of this test died on "Short 2 Cut Focuser", a material nobody would have
+     * guessed. This test is about the orbital yard, not about refining.
+     */
+    const { SUBSYSTEMS: SUBS, STATION: ST } = await import('/prototypes/farhold/js/shipyard.js');
+    for (const sub of Object.values(SUBS)) {
+      for (const tier of sub.tiers || []) for (const id of Object.keys(tier.cost || {})) f.bag.add(id, 200);
+    }
+    for (const m of ST.modules) for (const id of Object.keys(m.cost || {})) f.bag.add(id, 200);
+    await new Promise(r => setTimeout(r, 400));
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
+    await new Promise(r => setTimeout(r, 200));
+    f.build.setTool('smooth'); f.build.setRadius(20);
+    for (const [dx, dz] of [[0, 0], [13, 0], [-13, 0], [0, 13], [0, -13]]) { f.build.aim(spot.x + dx, spot.z + dz); f.build.paint(); }
+    f.build.setTool('build');
+    f.build.select('claim_stone'); f.build.aim(spot.x + 9, spot.z + 9); f.build.placeHere();
+    f.build.select('assembler'); f.build.aim(spot.x + 3, spot.z); f.build.placeHere();
+    f.build.select('burner_generator'); f.build.aim(spot.x + 6, spot.z); f.build.placeHere();
+    f.build.select('storage_crate'); f.build.aim(spot.x + 9, spot.z); f.build.placeHere();
+    f.stores.put(f.stores.poolAt(spot.x + 9, spot.z), 'coal', 400);
+    await new Promise(r => setTimeout(r, 2200));
+
+    // the panel tells you what to do next before you have done anything
+    const early = document.querySelector('#build-ui .build-shipyard')?.textContent || '';
+    // …and the yard is NOT offered yet: it wants a hauler
+    const yardEarly = /Orbital Yard/.test(early);
+
+    // the whole arc, through the panel's own actions
+    f.shipyardApi.buildPad();
+    const partLog = [];
+    for (const part of ['hull', 'drive', 'tanks', 'avionics']) {
+      // three tiers of each: a hauler is the tier-3 ship
+      for (let i = 0; i < 3; i++) partLog.push([part, f.shipyardApi.buildPart(part).why || 'ok']);
+    }
+    const { assembleShip } = await import('/prototypes/farhold/js/shipyard.js');
+    const fakeBag = { count: () => Infinity, spend: () => true, canAfford: () => true, missing: () => ({}), add: () => 0 };
+    const hauler = assembleShip(f.player, 'hauler', fakeBag);
+    f.shipyardApi.refuel();
+    await new Promise(r => setTimeout(r, 400));
+
+    const late = document.querySelector('#build-ui .build-shipyard')?.textContent || '';
+    const rows = [...document.querySelectorAll('#build-ui .build-shipyard .build-yard-row')]
+      .map(r => [r.querySelector('button')?.textContent, r.querySelector('button')?.disabled, r.querySelector('span')?.textContent]);
+    const lift = rows.find(r => /Lift the/.test(r[0] || ''));
+    const beforeUp = f.player.vehicles.shipyard?.station ? Object.keys(f.player.vehicles.shipyard.station).length : 0;
+    if (lift && !lift[1]) {
+      [...document.querySelectorAll('#build-ui .build-shipyard .build-yard-row button')]
+        .find(b => b.textContent === lift[0])?.click();
+    }
+    await new Promise(r => setTimeout(r, 400));
+    f.build.setMode(false);
+
+    const { stationProgress } = await import('/prototypes/farhold/js/shipyard.js');
+    return {
+      yardEarly, hasNext: /Next:/.test(early),
+      haulerOk: hauler.ok, haulerWhy: hauler.why || '', partLog,
+      yardLate: /Orbital Yard/.test(late),
+      liftLabel: lift?.[0] || null, liftDisabled: lift?.[1], liftNote: lift?.[2] || '',
+      up: stationProgress(f.player).done,
+      beforeUp,
+    };
+  });
+
+  expect(out.none, 'nowhere flat enough').toBeFalsy();
+  expect(out.hasNext, 'the shipyard never says what to do next').toBe(true);
+  expect(out.yardEarly, 'the orbital yard was offered before there was a ship to lift it with').toBe(false);
+  expect(out.haulerOk, `could not build a hauler: ${out.haulerWhy} · parts: ${JSON.stringify(out.partLog)}`).toBe(true);
+  expect(out.yardLate, 'a hauler on the pad did not bring up the orbital yard').toBe(true);
+  expect(out.liftLabel, 'the yard offers no module to lift').toMatch(/Lift the/);
+  expect(out.up.length, `nothing went up (${out.liftNote})`).toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});

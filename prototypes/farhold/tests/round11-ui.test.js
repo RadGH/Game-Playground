@@ -227,13 +227,32 @@ test('markFor speaks all three of the vocabularies the world uses for a place', 
   assert.equal(markFor({ type: 'landmark', kind: 'cave' }), 'cave');
   // js/sites.js pins, which are a glyph per stronghold type — read, never rewritten
   assert.equal(markFor({ family: 'stronghold', pin: { glyph: 'castle' } }), 'castle');
-  assert.equal(markFor({ family: 'stronghold', pin: { glyph: 'tower' } }), 'fort');
   assert.equal(markFor({ family: 'stronghold', pin: { glyph: 'siege' } }), 'fort');
   assert.equal(markFor({ family: 'stronghold', pin: { glyph: 'lair' } }), 'lair');
-  assert.equal(markFor({ family: 'stronghold', pin: { glyph: 'cult' } }), 'camp');
-  assert.equal(markFor({ family: 'landmark', pin: { glyph: 'shrine' } }), 'landmark');
-  // and anything the map has no mark for is left off rather than drawn as a mystery dot
-  assert.equal(markFor({ type: 'landmark', kind: 'ancientwood' }), null);
+  /**
+   * R14 — these three rows used to assert the BUG.
+   *
+   * A tower and a cult circle both came back as something else (`fort` and `camp`), so a Raider
+   * Stockade and a Cult Circle wore the bandit-camp tent; and `{ type: 'landmark' }` came back
+   * null, which is the whole fault: `markFor` tested `node.family === 'landmark'` and a World
+   * Forge node has no `family` at all, only a `type`. Ten of the eleven landmark kinds it places —
+   * volcano, waterfall, ancient wood, battlefield, crater, monolith, shrine, tower, ruin, vent —
+   * were on the planet, named, in `world.nodes`, and never drawn. `cave` survived by accident,
+   * through an unrelated line further down. On seed 7 that is forty-four places missing from the
+   * map, and the old assertion below locked it in.
+   */
+  assert.equal(markFor({ family: 'stronghold', pin: { glyph: 'tower' } }), 'tower');
+  assert.equal(markFor({ family: 'stronghold', pin: { glyph: 'cult' } }), 'shrine');
+  assert.equal(markFor({ type: 'landmark', kind: 'ancientwood' }), 'ancientwood');
+  assert.equal(markFor({ type: 'landmark', kind: 'volcano' }), 'volcano');
+  assert.equal(markFor({ type: 'landmark', kind: 'waterfall' }), 'waterfall');
+  // farhold's own landmarks carry their icon in `pin.glyph` — the minimap always read it and the
+  // world map threw it away, which made the small map the more informative of the two
+  assert.equal(markFor({ family: 'landmark', pin: { glyph: 'shrine' } }), 'shrine');
+  // a landmark kind with no mark of its own is still a landmark, not nothing
+  assert.equal(markFor({ type: 'landmark', kind: 'somethingnew' }), 'landmark');
+  // and anything the map has no mark for at all is left off rather than drawn as a mystery dot
+  assert.equal(markFor({ type: 'crossing' }), null);
   assert.equal(markFor(null), null);
 });
 

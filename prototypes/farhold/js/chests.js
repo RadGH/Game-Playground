@@ -523,6 +523,8 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
 
   const api = {
     update, place, nearest, open, dropBag, collect, clear, remove, rewardBag,
+    /** R14: the bags on the ground, so a test can prove a kill actually paid out. */
+    get bags() { return bags; },
     get chests() { return live; },
     get bags() { return bags; },
     /** Every light a chest field wants lit — a warded chest glows. */

@@ -50,7 +50,21 @@ function cellSeed(seed, cx, cz) {
 function mergeParts(parts) {
   let total = 0;
   const prepared = parts.map(p => {
-    const g = p.geometry.toNonIndexed();
+    /**
+     * `toNonIndexed()` RETURNS THE SAME OBJECT WHEN THERE IS NOTHING TO DO.
+     *
+     * Three.js warns "BufferGeometry is already non-indexed" and hands `this` straight back. Every
+     * base geometry up there is a module-level `const` shared by every part that uses it — so
+     * `applyMatrix4` was transforming the SHARED one, and the second slab of a tor was built on top
+     * of the first slab's transform, the third on top of that, and so on. Five of the twelve giants
+     * (tor, stone_arch, crystal_spire, ice_fang, rib_arch) reuse one base several times, and every
+     * one of them was coming out at coordinates in the thousands. That is a very large part of "its
+     * full of other giant shapes everywhere. They don't look like trees."
+     *
+     * The warning has been in the console of every test run for weeks, which is its own lesson.
+     */
+    const src = p.geometry.toNonIndexed();
+    const g = src === p.geometry ? src.clone() : src;
     g.applyMatrix4(p.matrix);
     g.computeVertexNormals();
     total += g.attributes.position.count;
@@ -291,19 +305,36 @@ export const MEGA_BUILDERS = {
    * which is what stops you seeing sky through the centre of it.
    */
   shelf_palm: (bark = '#6b5436', leaf = '#4f8a40') => mergeParts([
-    { geometry: CYL, color: bark, matrix: at(0, 8, 0, 0.62, 16, 0.62) },
-    { geometry: CYL, color: bark, matrix: at(0, 0.8, 0, 1.4, 1.6, 1.4) },
-    { geometry: SPH, color: leaf, matrix: at(0, 16.6, 0, 1.9, 1.5, 1.9) },
-    ...Array.from({ length: 9 }, (_, i) => {
-      const a = (i / 9) * Math.PI * 2;
-      const dir = new THREE.Vector3(Math.sin(a) * 0.82, -0.8, Math.cos(a) * 0.82).normalize();
-      const long = i % 2 === 0 ? 1 : 0.78;          // a ragged outline, not a wheel
+    /**
+     * SECOND PASS, AND THE FIRST ONE ONLY HALF FIXED IT.
+     *
+     * Round 11 cured the eighteen-metre disc by steepening the fronds. Looking at all twelve giants
+     * side by side afterwards showed what was left: a sixteen-metre bare trunk carrying a crown
+     * about four metres across reads as a lamp post with a shrub on it, whatever angle the fronds
+     * leave at. A palm's crown is roughly a third of its height and this one was a fifth.
+     *
+     * So the trunk comes down to 12 m and the crown goes up: eleven fronds instead of nine, longer,
+     * wider, in two ranks — an upper rank that arches out and a lower one that hangs. Two ranks is
+     * what stops it being a single plane of blades seen edge-on from the side.
+     */
+    { geometry: CYL, color: bark, matrix: tilt(0.4, 7, 0, 0.64, 14, 0.58, 0, 0, -0.055) },
+    { geometry: CYL, color: bark, matrix: at(0, 0.8, 0, 1.5, 1.6, 1.5) },
+    // the crown mass, which is what closes the middle so you do not see sky through it
+    { geometry: SPH, color: leaf, matrix: at(0.8, 14.4, 0, 2.9, 2.2, 2.9) },
+    ...Array.from({ length: 11 }, (_, i) => {
+      const upper = i % 2 === 0;
+      const a = (i / 11) * Math.PI * 2;
+      // the upper rank arches OUT (-0.34), the lower one hangs (-1.0) — a palm is two ranks deep
+      const drop = upper ? -0.34 : -1.0;
+      const dir = new THREE.Vector3(Math.sin(a), drop, Math.cos(a)).normalize();
+      const long = upper ? 1 : 0.82;
+      const from = new THREE.Vector3(0.8, upper ? 14.8 : 14.1, 0);
       return {
         geometry: CONE, color: leaf,
         matrix: new THREE.Matrix4().compose(
-          new THREE.Vector3(dir.x * 3.2, 16.4 + dir.y * 3.2, dir.z * 3.2),
+          from.clone().addScaledVector(dir, 4.0 * long),
           new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir),
-          new THREE.Vector3(1.5, 7.4 * long, 0.34),
+          new THREE.Vector3(2.0, 8.6 * long, 0.42),
         ),
       };
     }),
@@ -378,15 +409,57 @@ export const MEGA_BUILDERS = {
 
   // Something died here a long time ago and the ribs stayed up. The halves lean in at 0.3 rad so the
   // cage closes over your head instead of standing as two fences.
+  /**
+   * A RIBCAGE IS CURVED, AND STRAIGHT POLES IN A TRIANGLE ARE SCAFFOLDING.
+   *
+   * Which is exactly what the first version looked like beside the other eleven: an A-frame, or a
+   * ladder leaning against nothing. The second attempt built each rib from three segments placed by
+   * their centres — and three segments that are not chained end to end do not meet, so it came out
+   * as a heap of loose sticks, which was worse.
+   *
+   * This walks a half-circle and drops a short segment at each step, tilted to follow the tangent —
+   * the same construction `stone_arch` uses, and the reason that one reads as an arch. Six ribs,
+   * each a semicircle in its own z-plane, tapering towards the tail.
+   */
   rib_arch: (bone = '#cfc7ae') => mergeParts([
-    { geometry: CYL, color: bone, matrix: tilt(0, 17.4, 0, 0.45, 21, 0.45, Math.PI / 2, 0, 0) },
-    ...[-8.4, -5.0, -1.7, 1.7, 5.0, 8.4].flatMap(z => [1, -1].map(s => ({
-      geometry: CYL, color: bone,
-      matrix: tilt(s * 3.1, 9.2, z, 0.3, 18.2, 0.3, 0, 0, s * 0.3),
-    }))),
-    { geometry: SPH, color: bone, matrix: at(0, 2.4, 13.0, 2.4, 2.0, 3.2) },
-    { geometry: BOX, color: bone, matrix: at(0, 1.5, 15.8, 1.5, 1.3, 2.8) },
-    { geometry: CYL, color: bone, matrix: tilt(2.6, 0.5, -11.5, 0.32, 7.0, 0.32, 0, 0.5, Math.PI / 2) },
+    // …at the size of a giant. The first arc version came out ten metres tall, which is shorter
+    // than the ordinary conifers around it — a dead thing you step over, not one you walk under.
+    ...[-13.0, -8.1, -3.0, 2.0, 7.1, 11.9].flatMap((z, ri) => {
+      const k = [0.70, 0.88, 1.0, 0.98, 0.84, 0.64][ri];   // widest at the shoulder
+      /**
+       * An ELLIPSE, not a circle. A ribcage is tall and narrow; a circular arch as tall as this one
+       * needs to be came out thirty-six metres across, which is a bridge.
+       */
+      const RY = 18.6 * k, RX = 6.6 * k;
+      const STEPS = 10;
+      return Array.from({ length: STEPS }, (_, i) => {
+        const t = ((i + 0.5) / STEPS) * Math.PI;
+        const x = -Math.cos(t) * RX;
+        const y = Math.sin(t) * RY;
+        /**
+         * The tangent to an ellipse is (RX sin t, RY cos t), which is NOT at angle `-t` the way a
+         * circle's is — that shortcut worked while the two radii were equal and falls apart the
+         * moment they are not. The rotation about Z carrying a cylinder's +Y axis onto a direction
+         * (tx, ty) is `atan2(-tx, ty)`.
+         */
+        const tx = RX * Math.sin(t), ty = RY * Math.cos(t);
+        const len = Math.hypot(tx, ty);
+        // …and the segment is as long as the step it has to cover, so consecutive ones meet
+        const seg = (len * Math.PI) / STEPS * 1.1;
+        return {
+          geometry: CYL, color: bone,
+          matrix: tilt(x, y, z, 0.32 * k, seg, 0.32 * k, 0, 0, Math.atan2(-tx, ty)),
+        };
+      });
+    }),
+    // the spine, laid along the top of the ribs rather than through them
+    { geometry: CYL, color: bone, matrix: tilt(0, 17.6, -0.6, 0.5, 28, 0.5, Math.PI / 2, 0, 0) },
+    // a skull and a jaw at one end, which is what makes it a body and not a ruin
+    { geometry: SPH, color: bone, matrix: at(0, 3.0, 19.4, 3.0, 2.6, 4.0) },
+    { geometry: BOX, color: bone, matrix: tilt(0, 1.5, 22.2, 1.9, 1.4, 3.6, -0.18, 0, 0) },
+    { geometry: CYL, color: bone, matrix: tilt(0, 5.2, 15.6, 0.55, 7.4, 0.55, Math.PI / 2 - 0.45, 0, 0) },
+    // and a loose rib on the ground, because nothing this old is still complete
+    { geometry: CYL, color: bone, matrix: tilt(4.6, 0.4, -17.4, 0.32, 8.0, 0.32, 0, 0.5, Math.PI / 2) },
   ]),
 
   mast_cactus: (skin = '#4a7a4a') => mergeParts([

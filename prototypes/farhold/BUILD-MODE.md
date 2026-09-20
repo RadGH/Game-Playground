@@ -12,7 +12,10 @@ town portal). The design document is the brief; this is what the code does and w
 | `js/build.js` | Build mode — ghost, brush ring, meshes for 98 structures, the portal ring | yes |
 | `js/build-ui.js` | The panel `B` puts up — first steps, tools, catalogue, live prices, why the ghost is red | no |
 | `js/homes.js` | Every base you ever raised, and the route home from another star system | no |
-| `data/structures.json` | 98 structures, 25 materials, the placement rules | — |
+| `js/mining.js` | Drills on seams, and the route whose length decides the transfer rate | no |
+| `js/ore-view.js` | The seams, drawn — one InstancedMesh per kind | yes |
+| `js/defence.js` | The raid you ring for, and the turrets that answer it | no |
+| `data/structures.json` | 98 structures, 25 materials, the placement rules, and seven guns | — |
 | `tests/building.test.js` | 31 node tests over all of the above | — |
 
 Two small edits to files that already existed: `js/terrain.js` gained `editedAt()`, and
@@ -297,3 +300,256 @@ between lit sigils is a game rule, not a cheat.
 > **A settlement id is a number, and the first settlement on a world is `0`.** Every `id || null` and
 > every `if (padPick)` in `js/map.js` silently dropped the pad nearest the middle of the map. All the
 > checks there are against `null` on purpose.
+
+---
+
+## 13. Ore, drills, and the route that decides the rate — `js/mining.js`
+
+> *"set up resources to be mined at a location, route between them determines transfer rate."*
+
+`js/resources.js` knew what was in the ground and `js/stores.js` knew what a cart costs over a
+distance. Neither was reachable, and the node field was being built with a call that took none of
+its arguments:
+
+```js
+createNodeField({ data: resourceData, seed, terrain })   // takes none of `seed`, `terrain`
+```
+
+`createNodeField` scatters seams inside one circle — `area` defaults to a 300 m radius at the
+**origin**. So every ore seam in the game was about twenty-nine kilometres from where the player
+lands, and nobody could ever have found one.
+
+**`createNodeWorld`** generates a 512 m tile at a time, seeded by the world seed folded with the
+tile's own coordinates, so a seam stays where you left it without a single one being saved. What
+*is* saved is what you took out of it.
+
+### Three ways ore moves, and they are the same sum on purpose
+
+| | Rate | Cost of getting it home |
+|---|---|---|
+| You, with a pick (`E`) | `faceRate` × your tool | the walk, paid by carrying it |
+| A drill on the seam | `drillRate`, needs power | none, *if* it is in a storage pool |
+| A **route** | `haulThroughput(metres)` | double the distance, roughly half the delivery |
+
+They agree because the trade-off the user asked for — *"resources dense but far away, or less dense
+and closer"* — only works if both sides are comparable in one number. That number is ore delivered
+per second, and `haulReport` is where it is computed.
+
+**Digging and hauling are separate.** A drill fills its own stock; the route drains it at whatever
+the distance allows. That is what makes a long route *visible* — the stock sits there climbing —
+instead of silently scaling the drill down. The panel says which in one word: `power`, `seam`,
+`no route`, `hauling`, `digging`.
+
+### In play
+
+* Seams are drawn by `js/ore-view.js` — one InstancedMesh per kind, a faint emissive tint so a seam
+  never reads as one of the thousands of scenery boulders `js/props.js` scatters. A worked-out seam
+  shrinks rather than vanishing.
+* `E` on one takes a swing. The prompt says what is in it *and* how rich it is, because that is the
+  decision you are making.
+* Build a **drill** on a seam and it binds to it. It needs power, so it needs a generator in reach,
+  which needs fuel, which needs a store in reach of the generator. The layout is the puzzle.
+* The **Route** tool: click a drill, then click a store. Both ends are objects standing in the
+  world, so they are picked in the world — picking them off a list would mean naming forty crates.
+
+> One more found here: the world prompt's final fallback was `near.who.name`, correct for every
+> branch above it and wrong the moment a new kind of thing was added. Standing on an ore seam threw
+> a TypeError sixty times a second.
+
+---
+
+## 14. The benches — and the fifth join that was never made
+
+`js/refine.js` holds sixteen machines and sixty-one recipes with a real unlock system (you learn a
+recipe by *doing* the one before it). Every machine id in `data/refining.json` has a structure with
+**exactly the same id** in `data/structures.json`. Nothing called `works.place`.
+
+So you could build the entire refining chain — furnace, smelter, alloy forge, assembler — and it
+would stand on the grass as geometry while the module that runs it had an empty machine list.
+`works.toJSON` and `works.load` were never called either, so even if it had worked, a reload would
+have emptied every queue.
+
+Both are one line each, in `joinSystems` and beside the other save fields.
+
+**The panel shows the bench you are standing next to, and only that one.** A base ends up with
+sixteen; listing them all turns the panel into a spreadsheet, and walking up to the one you want is
+already how every other interaction in Farhold works.
+
+A locked recipe is **shown**, greyed, with what unlocks it. A recipe you cannot see is a recipe you
+will never go looking for.
+
+### The whole chain, end to end
+
+`E` on a seam → ore in the pool at your feet → a drill on the seam → a generator in reach of the
+drill → a fuel crate in reach of the generator → a **route** to a crate sixty metres away → a
+furnace beside that crate → iron ingots → the Waypoint Pad's cost → a base you can fold home to from
+another star system.
+
+Every link in that sentence is covered by `tests/mining.spec.js` and `tests/base-roundtrip.spec.js`,
+played through the keyboard and the mouse.
+
+---
+
+## 15. §9 — the sky, and the sixth and seventh joins
+
+The launch gate has been refusing correctly since it was wired: *"You have no ship. Build one: hull,
+drive, tanks, avionics, then put them together on a pad."* What had never been checked is that the
+refusal could be **satisfied**. A gate with no key behind it is worse than no gate.
+
+Two things were missing, and both are the same shape as everything else in this document.
+
+**Nothing ever put fuel in the tanks.** `canLaunch` refuses a flight the tanks cannot pay for and
+`spendFlightFuel` takes it out again; `y.fuel` only ever moved when the save migration back-filled a
+character who *already had* a ship. So a player who built one from nothing would have had a finished
+ship, a finished pad, and a permanent refusal telling them the tanks were empty. `refuel()` takes
+`lift_fuel` out of the pool at your feet or the bag on your back, and `data/shipyard.json` grew a
+`fuel.capacity` rather than a magic number appearing in code.
+
+**`bagOf` only recognises a purse by its `canAfford`.** Anything without that method is treated as a
+plain `{ id: count }` map and read with `held[id]` — so the purse the shipyard was handed (which had
+`count` and `spend` but no `canAfford`) came back completely empty, and every subsystem answered
+*"the assembler has not built a Hull Section yet"* while ninety of them sat in the crate at the
+player's feet.
+
+### The shipyard screen
+
+There wasn't one. It is a section of the build panel now, up when you are standing at an **assembler**
+(where three of the four subsystems are fitted) or once you have started, so a half-built ship can
+always be found again.
+
+Every row is a button with its refusal **written beside it** rather than a disabled button with a
+tooltip. `js/shipyard.js`'s `why` strings are deliberately specific — "the assembler has not built a
+Drive Assembly yet", "the pad wants 12 metres of level ground, use the smoothing tool" — and hiding
+them behind a greyed-out button throws all of that away.
+
+`tests/shipyard.spec.js` presses every one of those buttons in order and then presses `J`.
+
+---
+
+## 16. §7 — the raid you ring for, and the turrets that answer
+
+`js/raid.js` was written pure and complete: notoriety, two gates, waves, night scaling, loss rules,
+rewards. Nothing imported it. `js/defence.js` is the join.
+
+**Nothing here ever fires on its own**, which is the user's own condition on the feature:
+
+> *"[the tower defence] might be better as a quest rather than a random event, so the player can
+> decide when to start on it rather than being a burden."*
+
+Three separate acts, and between them the world is quiet:
+
+1. **The offer.** `E` at an **Alarm Bell** asks whether anything out there has noticed you. It
+   answers with the tier, or with *which of the two gates is short* — "there is not enough here yet
+   for anybody to bother with" reads very differently from "nothing would come at a place with no
+   defences, and nothing should, until you have some."
+2. **Taking it on.** A second `E`. Still nothing happens.
+3. **The bell.** A third. Night is harder and pays better, and that is a choice you made at an hour
+   you picked, not a punishment for having built a fourth wall.
+
+### The turrets
+
+`data/structures.json` listed nineteen defensive structures and **not one of them had any numbers**
+— no range, no damage, no rate — so "defensive structure" meant a shape with a cost. Seven of them
+have a `defence` block now (range, damage, seconds between shots, splash, element), tuned beside the
+costs they are paid for.
+
+`js/defence.js` gates on **the block, not the category**: a wall, a gate, a trap and a barricade
+share `cat: "defence"` and must never snipe across the valley. An unpowered turret is a post.
+
+The shot is drawn through the same `spellfx.projectile` the player's own spells use — a turret whose
+target loses health across the clearing with nothing in between reads as broken.
+
+> Same bug as the ore, in a different file: `ring()` called `spawnWave()` with no position, and its
+> `x = 0, z = 0` defaults put every raider at the world origin — twenty-nine kilometres from the base
+> they had come to attack. The raid asks the buildings where they are now.
+
+---
+
+## 17. §6.3 — the motorcycle, the car and the truck
+
+> *"I definitely want the ability to craft a motorcycle and a car and eventually a truck."*
+
+Both halves existed. `js/vehicles.js` held what they cost, how fast each is on road and off it, what
+slope stops it, what it drinks and how it wears. `avatar-3d/js/ground-vehicles.js` held all three
+bodies, built from primitives, with wheels that turn and a motorcycle that leans into a corner.
+Neither file was imported by the game.
+
+**`G` gets on and off.** `H` stays the horse, because they are genuinely different things: the horse
+climbs and swims badly, the motorcycle does neither and does not care about the hill until suddenly
+it does. Shift is the throttle.
+
+A ground vehicle **replaces** the walking speed rather than multiplying it. `speedOn()` already knows
+the surface, the slope and how worn the thing is, so applying the walker's hill penalty on top would
+charge the slope twice.
+
+`drive()` runs every frame with the metres actually covered: it burns the fuel, puts the wear on, and
+when the tank runs dry it says so once and puts you on your feet. A vehicle comes out of the shed
+with an **empty tank** on purpose — the first thing a new owner does is go and find charcoal.
+
+The **Garage** is a section of the build panel shown at a bench that could do the work, not a row in
+the catalogue: everything in that list has a footprint and a ghost, and a motorcycle has neither.
+
+> Two of my own, both worth recording. The `G` handler first landed inside the *flight* block (there
+> are two `KeyL` handlers, one for the carried lamp and one for the landing lights), so it was
+> unreachable on foot; moved, it then sat above `const frozen = …` and took the whole page down with
+> a TDZ error on the first frame.
+
+---
+
+## 18. §6.5 / §6.8 / §6.9 — the people, the fields and the tax
+
+`js/colony.js` (citizens with jobs, moods, beds, hunger rungs, migration offers, recruiting from
+towns, tax) and `js/farm.js` (plots your folk harvest and **replant** but never start) were both
+complete, both already ticking in the frame loop, and both completely invisible. There was no way to
+see a citizen, accept a migrant, break a field or collect a penny.
+
+**`colony.setBase()` is the one input the whole module has**, and nothing called it. Beds decide how
+many people can live here, defences decide whether anybody feels safe enough to come, structures
+decide prosperity and therefore what a tax is worth — so every one of those was zero for ever:
+appeal 0, migration never, prosperity exactly 1.00, tax nothing. It is fed from what is actually
+standing now, which means knocking a turret down genuinely lowers the appeal.
+
+The **Holding** section of the build panel appears once there is a bed, because a colony with
+nowhere to sleep is not a colony and a panel of zeroes teaches nothing. It shows the head count
+against the beds, the appeal as a percentage, the fields and how many are ripe, and the meals in
+store — then the migrants waiting at the gate with *Take them in* / *Turn away*, a *Collect the tax*
+button that says how many are housed, and *Break a field here*.
+
+> **The Necesse rule, kept exactly.** *"They don't plant new crops but they will harvest and replant
+> existing crops, this way the player still has to set up the crops in the first place but they
+> maintain it after that."* `layPlot({ by: 'citizen' })` is refused with "Only you can break new
+> ground. Your folk will work a field, not start one." — and `tests/holding.spec.js` checks it.
+
+---
+
+## 19. Two more `gives` blocks nobody read
+
+Recorded here because it is the same failure as everything above, found twice more while closing the
+round-11 loose ends.
+
+**`data/landmarks.json` uses sixteen `gives` keys. Nine were handled and seven were not** — `xp`,
+`curse`, `namesFoe`, `callsPatrol`, `reviveDaily`, `startsIncident`, `toll` — so seven kinds of
+landmark were a name, a blurb and no consequence whatever. It went unnoticed because the *territory*
+layer reads its own copy for the zone record: the world knew something had happened at the standing
+stones and the player never found out.
+
+`reviveDaily` in particular is worth its own line. Writing `player.reviveCharge = 1` and stopping
+would have been the exact mistake this whole round is about, so `respawn()` spends it (you get up
+where you fell, and keep your gold) and it expires with the day.
+
+**`data/strongholds.json` has one too**, and `territory.clearSite` was doing only half the job. It
+moved the grip and the claim — that part worked — and the whole payout went in the bin: `xp`, a
+guaranteed `loot` grade, `standing`, a `perkPoint`, `revealZone`, `opensDungeon`, `liftsSiege`. The
+difference between clearing a bandit camp and taking a Stonecount keep was two lines in the log.
+
+The guaranteed loot needed one small change in `js/chests.js`: `place()` takes a `floor` now. The
+beacon colour and the roll read the same field, so raising it makes the light outside the box match
+what is really in it — a stronghold's `gives.loot` is a promise about *that keep*, not about the
+grade of chest it happens to use.
+
+**And the prisoners.** `sites.populate` has returned a count since the strongholds landed and
+nothing ever did anything with it, so a camp whose entire point was that somebody was being held in
+it played out exactly like one that was not. `js/town.js` grew `spawnOne()` — the same body, name
+and look work `populate()` does for a settlement's roster, for one person standing at coordinates —
+so a prisoner is a figure with a name you can walk up to and talk to. The boss going down frees
+them, and they say so.

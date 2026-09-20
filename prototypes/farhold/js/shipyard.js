@@ -291,6 +291,33 @@ export function grantShip(player, kind = 'lander') {
 
 // ---------------------------------------------------------------------------- fuel
 
+/**
+ * PUT FUEL IN THE TANKS.
+ *
+ * `canLaunch` refuses a flight the tanks cannot pay for and `spendFlightFuel` takes it out again —
+ * and nothing anywhere put any IN. `y.fuel` only ever moved when the migration back-filled a save
+ * that already had a ship, so a player who built one from nothing had a finished ship, a finished
+ * pad, and a permanent refusal telling them the tanks were empty.
+ *
+ * `bag` is anything with `count`/`spend` — the materials bag or a storage pool — so you can fuel up
+ * out of a tank beside the pad without carrying it.
+ */
+export function refuel(player, bag, units = null) {
+  const y = yard(player);
+  const purse = bagOf(bag);
+  const have = purse.count(FUEL.id);
+  if (have <= 0) {
+    return { ok: false, why: `No ${MATERIALS[FUEL.id]?.name || 'lift fuel'} to hand. A fuel synthesiser makes it.` };
+  }
+  const room = Math.max(0, (FUEL.capacity ?? 60) - y.fuel);
+  if (room <= 0) return { ok: false, why: 'The tanks are full.' };
+  const take = Math.min(have, room, units == null ? Infinity : units);
+  if (take <= 0) return { ok: false, why: 'Nothing to put in.' };
+  purse.spend({ [FUEL.id]: take });
+  y.fuel = Math.round((y.fuel + take) * 100) / 100;
+  return { ok: true, added: take, fuel: y.fuel };
+}
+
 /** What one leg costs this ship, in units of Lift Fuel. */
 export function fuelFor(kind, leg) {
   const base = FUEL.legs[leg];

@@ -219,6 +219,8 @@ export function createBuild(scene, {
    */
   onPlace = null,
   onRemove = null,
+  /** `(from, to) => ({ ok, why })` — the route tool's two ends. js/mining.js owns what it means. */
+  onRoute = null,
 } = {}) {
   const book = plan || createBuildPlan({ catalogue, terrain, terraform, store: store || makeBag(), siteOk });
   const rules = catalogue?.rules || {};
@@ -252,6 +254,8 @@ export function createBuild(scene, {
   let radius = 8;
   let aimAt = { x: 0, z: 0 };
   let lastCheck = { ok: false, why: '' };
+  /** The first end of a route, while the second is being picked. See `routeClick`. */
+  let routeFrom = null;
   /** The polyline being dragged for a road or a wall (§4.14, §4.16). */
   let runPoints = [];
 
@@ -292,6 +296,16 @@ export function createBuild(scene, {
       entry.y = terrain.heightAt(entry.x, entry.z);
       g.position.y = entry.y;
     }
+  }
+
+  /** The nearest thing you have built to a point, allowing for how big it is. */
+  function nearestEntry(x, z, reach = 4) {
+    let best = null;
+    for (const e of book.entries) {
+      const dist = Math.hypot(e.x - x, e.z - z);
+      if (dist <= reach + Math.max(e.w, e.d) / 2 && (!best || dist < best.dist)) best = { e, dist };
+    }
+    return best ? best.e : null;
   }
 
   const api = {
@@ -373,8 +387,38 @@ export function createBuild(scene, {
       if (tool === 'remove') return api.removeAt(aimAt.x, aimAt.z);
       if (tool === 'road' || tool === 'wall') return api.addRunPoint(aimAt.x, aimAt.z);
       if (tool === 'clear') return api.clear();
+      if (tool === 'route') return api.routeClick(aimAt.x, aimAt.z);
       return api.paint();
     },
+
+    /**
+     * §1 — the route tool: click a drill, then click a store.
+     *
+     * The two ends are both objects standing in the world, so they are PICKED in the world. Picking
+     * them off a list would mean naming forty crates, and naming forty crates is how a base builder
+     * stops being a game.
+     *
+     * This file knows nothing about mining; `onRoute` is handed the two entries and whoever owns
+     * the rates decides whether they make a route. The half-finished pick lives here because it is
+     * a property of the cursor, not of the ore.
+     */
+    routeClick(x, z) {
+      const hit = nearestEntry(x, z, 8);
+      if (!hit) { routeFrom = null; return { ok: false, why: 'Click a drill, then a store.' }; }
+      if (!routeFrom) {
+        routeFrom = hit;
+        log(`${hit.name} — now click the store to send it to.`, '');
+        return { ok: true, picked: hit.id, waiting: true };
+      }
+      const from = routeFrom;
+      routeFrom = null;
+      if (from.id === hit.id) return { ok: false, why: 'A route needs two ends.' };
+      const res = onRoute ? onRoute(from, hit) : { ok: false, why: 'Nothing here lays routes.' };
+      if (!res.ok && res.why) log(res.why, 'warn');
+      return res;
+    },
+    /** The half-picked end, so the panel can say a route is in progress. */
+    get routeFrom() { return routeFrom; },
 
     placeHere() {
       if (!selected) return { ok: false, why: 'Nothing selected.' };
@@ -475,11 +519,8 @@ export function createBuild(scene, {
 
     /** §4.7 — the deconstruct tool. */
     removeAt(x, z, reach = 3) {
-      let best = null;
-      for (const e of book.entries) {
-        const dist = Math.hypot(e.x - x, e.z - z);
-        if (dist <= reach + Math.max(e.w, e.d) / 2 && (!best || dist < best.dist)) best = { e, dist };
-      }
+      const e = nearestEntry(x, z, reach);
+      const best = e ? { e, dist: 0 } : null;
       if (!best) return { ok: false, why: 'Nothing to take down there.' };
       const res = book.remove(best.e.id);
       if (res.ok) api.forget(best.e.id);

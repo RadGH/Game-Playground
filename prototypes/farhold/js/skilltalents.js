@@ -397,8 +397,10 @@ export const PENDING_MODS = {
   homing: 'js/main.js fireBolt / js/combat-fx.js — a projectile cannot steer yet',
   chains: 'js/main.js fireBolt — nothing jumps from one body to the next',
   chainFalloff: 'js/main.js fireBolt',
-  ground: 'js/main.js — no lingering ground pool exists',
-  groundRadius: 'js/main.js',
+  // `ground` and `groundRadius` sat here from round 7 to round 12 with the note "no lingering
+  // ground pool exists" — which was true, and meant the `linger` talent, offered on four of the
+  // six skill trees, did nothing at all when taken. js/main.js has pools now (`dropPool` /
+  // `tickPools`), so they are off this list.
   barrier: 'js/main.js castSkill — nothing grants a barrier off a cast',
   barrierSeconds: 'js/main.js castSkill',
   speed: 'js/main.js fireBolt — removed from every node in round 11, kept here for old saves',

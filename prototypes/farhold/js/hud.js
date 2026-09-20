@@ -213,6 +213,14 @@ export class Hud {
     this.skillState = [];
     /** How many world cells the minimap shows across. `+` and `-` change it. */
     this.minimapSpan = 26;
+    /**
+     * How much further an affix lets you see, as a multiplier on the span.
+     *
+     * Kept apart from `minimapSpan` on purpose: `+` and `-` write that directly, so folding the
+     * affix into it would mean the player's own setting drifting every frame. `revealRange` was
+     * derived off the affixes and read by nothing at all until this.
+     */
+    this.revealMul = 1;
     /** Which skill's talent tree is showing on the Skills tab. */
     this.talentSkill = null;
     /** Is the town notice board up? See `openNoticeBoard`. */
@@ -946,7 +954,7 @@ export class Hud {
     const size = canvas.width;
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, size, size);
-    const span = this.minimapSpan;       // cells across the window; `+` and `-` change it
+    const span = this.minimapSpan * (this.revealMul || 1);   // `+`/`-` set the base; an affix widens it
     const cx = player.x / M_PER_CELL, cy = player.z / M_PER_CELL;
     if (this.minimapBase) {
       ctx.drawImage(this.minimapBase, cx - span / 2, cy - span / 2, span, span, 0, 0, size, size);

@@ -380,3 +380,29 @@ Each phase leaves the game playable.
 `npm run test:unit` (1117 node tests) and `npx playwright test prototypes/farhold/tests/`
 (108 page tests). New tests required: planner determinism, zero building-street overlap, gate
 passability, every POI has a purpose, no two roads weaving, every settlement has one waypoint.
+
+---
+
+## Status, 2026-09-19
+
+What is in, what is partly in, and what is still only a paragraph in this document.
+
+| § | Status |
+|---|---|
+| 1. The town plan | **In.** `proctown/js/townplan.js` is the one planner and Farhold imports it — there is no second copy to drift. Recursive binary subdivision; the cuts *become* the streets, so a plot can never be on one (`overlaps()` is a hard assertion and a test runs 7 cultures × 11 seeds × 6 sizes). |
+| 2. The tuning experiment | **In.** `playground/proctown/` with seed stepping, culture and size knobs, overlays, a four-seed compare, a live overlap verdict and a 200-town spread report. |
+| 3. The building kit | **In.** `proctown/js/buildkit.js` + `drawkit.js`, with `proctown/kit.html` drawing every part on its own — a roof that does not meet its walls is obvious there rather than three hundred metres away in the game. |
+| 4. Streets and surfaces | **Mostly in.** Hierarchy falls out of the recursion (`main` / `street` / `alley`) and the centre is a well with stalls spread around it. *Owed:* the sharp seam where two roads meet at an angle is better but not gone. |
+| 5. Walls and gates | **In.** Gates rotate radially and take the wide stretch on X with two jamb solids, which took three attempts and finally reading the mesh: the opening is on X (7.4 m span) and the passage runs on Z. |
+| 6. Racial and cultural cities | **In.** Seven cultures as **parameter sets over one generator**, not seven code paths. `jitter` alone takes a dwarf from a rigid grid (0.04) to a halfling's wander (0.48). |
+| 7. Enemy structures | **In.** Eight stronghold types in `js/sites.js`, each with its own garrison, a named boss with an epithet, prisoners and a chest grade that climbs with the tier. |
+| 8. Landmarks with a purpose | **Partly.** They are placed, drawn, and `E` works them. *Owed:* the `gives.*` hooks (xp / prisoners / standing / clears / liftsSiege) are read by the territory layer only — `atLandmark()` in main.js still ignores them. |
+| 9. Roads and traffic | **In.** Patrols walk real road nodes, caravans run between real places, and the round-12 road gap turned out to be **one** stray `wet: true` flag on dry land splitting a ribbon in half. |
+| 10. Waypoints and the map | **In, and then some.** The same round concrete pad with the same sigil ring everywhere, towns and cities only, never a hostile landmark. Clicking one on the map now **selects** it and a button travels. Player-built pads join the same network (`BUILDING_EXPANSION.md` §5), and `js/homes.js` carries them across star systems. |
+
+### The one that was a real find
+
+**Houses sitting in the middle of the road.** The planner cannot put a plot on a street it cut
+itself — that part was always true, and I said so more confidently than I should have. But the
+`buildable` predicate Farhold hands it never asked `terrain.roadAt()`, so a plot could not be in a
+lake and could be squarely across the *world* highway. The predicate asks now.

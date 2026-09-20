@@ -57,7 +57,16 @@ function ribbon(points, heights, width, { lift = 0.1 } = {}) {
 function mergeParts(parts) {
   let total = 0;
   const prepared = parts.map(p => {
-    const g = p.geometry.toNonIndexed();
+    /**
+     * CLONE. `toNonIndexed()` hands `this` straight back when a geometry is already non-indexed.
+     *
+     * The base geometries are module-level `const`s shared by every part that uses them, so
+     * `applyMatrix4` was transforming the shared one and each reuse compounded the last — a wall
+     * built on the previous wall's transform, a roof on that. js/chests.js, js/sites.js and
+     * js/dungeon.js all clone first; this file and js/props.js did not.
+     */
+    const src = p.geometry.toNonIndexed();
+    const g = src === p.geometry ? src.clone() : src;
     g.applyMatrix4(p.matrix);
     g.computeVertexNormals();
     total += g.attributes.position.count;

@@ -487,3 +487,49 @@ So the cheapest boat already beats swimming, the best one beats walking, and non
 sprint on dry land — water stays a choice, not a shortcut. `js/boat.js` draws the three hulls.
 
 Tests: `tests/vehicles.test.js` (15 node) and `tests/vehicles.spec.js` (4 page).
+
+## Rounds 11 and 12 — a base, and everything that was already built but not plugged in
+
+Two play-test rounds and `BUILDING_EXPANSION.md`. The detail is in **`BUILD-MODE.md`** (§§0, 12–19)
+and the "Rounds 11 and 12" section of **`RPG.md`**; this is the short version.
+
+### What you can do now that you could not before
+
+Press **`B`**. A panel comes up with four numbered steps at the top telling you how to start a base,
+and they disappear once you own anything. Then:
+
+1. **Level** a circle of ground — nothing in the catalogue will sit on raw Farhold, which is the
+   point of the tool.
+2. Put down a **Claim Stone**. The ground is yours; a raid comes for this.
+3. A **Storage Crate** and a **Burner Generator** beside it, with coal in the crate.
+4. A **Waypoint Pad** when you can afford one — and now you can come home from anywhere, including
+   from another star system.
+
+Along the way: `E` works an ore seam, a **drill** on a seam digs it for you, a **route** to a crate
+carries it at a rate the distance decides, a **bench** you walk up to smelts it, a **turret** shoots
+what comes at you, an **alarm bell** offers you a raid you choose the hour of, **beds** make a
+holding with people who pay tax, a **field** you break is one your folk will replant for ever, a
+**motorcycle** is `G`, and four subsystems on a levelled pad open the sky.
+
+### The real story of the round
+
+Almost none of that was new code. It was **seven joins that had never been made**: complete, tested
+modules that no line of `main.js` imported, or imported and never fed. From the player's side that
+is indistinguishable from a feature that does not exist, and it is much harder to notice than a
+crash, because every test of the module itself passes.
+
+A few, for flavour: nothing called `build.confirm()`, so clicking in build mode drew a sword. The
+build ghost was aimed at the player's own feet. Ore was generated with
+`createNodeField({ data, seed, terrain })` — a function that takes **none** of those three — so
+every seam in the game sat in a 300 m circle around the origin, about 29 km from where anyone lands.
+`js/raid.js` was imported by nothing at all. And `canLaunch` refused a flight the tanks could not pay
+for while nothing, anywhere, ever put fuel in them.
+
+### Two things worth carrying to the next project
+
+A **settlement id is a number, and the first one is `0`** — so every `if (padPick)` in the map
+silently dropped the pad nearest the middle of the screen.
+
+And **three TDZ crashes** from `const`s read above their own declaration. `node --check` cannot see
+them, they do not fire until that line runs, and one of them only fired on a *load* — so every
+fresh-start test in the suite passed while every saved game was broken.

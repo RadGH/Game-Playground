@@ -101,6 +101,8 @@ export function snapshot({
   terraform, build, portal, colony, farm, work,
   // …and what the base is holding and making: the crates' contents and the grid's charge
   stores, grid,
+  // §1 — which seams you have worked out, and the drills and routes standing on them
+  ore, mining, works, defence,
   // where the player was last standing on the surface, for a save taken underground
   surface = null, inDungeon = false,
 }) {
@@ -173,6 +175,10 @@ export function snapshot({
      */
     stores: stores || null,
     grid: grid || null,
+    ore: ore || null,
+    mining: mining || null,
+    works: works || null,
+    defence: defence || null,
     portal: portal || null,
     colony: colony || null,
     farm: farm || null,

@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 import { createWorld, makeTerrain, createSystem, landableBodies, M_PER_CELL } from '../js/planet.js';
 // The catalogue is Three-free (js/town-plan.js); the geometry that reads it is not, so the tests
 // drive the facts rather than the meshes — the same split as dungeon-plan.js and water-plan.js.
-import { BUILDING_INFO, NEW_BUILDINGS, wantsFor, streetPlan, footprintOf } from '../js/town-plan.js';
+import { BUILDING_INFO, NEW_BUILDINGS, footprintOf } from '../js/town-plan.js';
 import { BUILDING_SOLIDS } from '../js/collide.js';
 import { xpForLevel, MAX_LEVEL, PLANET_BANDS, bandForPlanet, Rpg } from '../js/rpg.js';
 import { gatherable, submitGather, makeQuest } from '../js/quests.js';
@@ -41,21 +41,16 @@ test('a town has twelve more kinds of building, and each one can be walked into'
   assert.deepEqual(BUILDING_SOLIDS.bridge, [0, 0], 'a bridge is to be walked on, not into');
 });
 
-test('a town plan grows with the settlement, and drops the right things when it is small', () => {
-  // the order is the design: the trades are at the top, so a hamlet does without the ornaments
-  const hamlet = wantsFor(0), village = wantsFor(2), city = wantsFor(5);
-  assert.ok(hamlet.length < village.length, 'a hamlet wants as much as a village');
-  assert.ok(village.length < city.length, 'a village wants as much as a city');
-  assert.ok(!hamlet.includes('barracks'), 'a hamlet should not have a barracks');
-  assert.ok(city.includes('forge') && city.includes('inn') && city.includes('barracks'));
-  for (const key of city) assert.ok(BUILDING_INFO[key], `${key} is wanted but does not exist`);
-
-  // more streets for a bigger place, and all of them leave the square
-  const small = streetPlan(1, 29, () => 0.5), big = streetPlan(5, 81, () => 0.5);
-  assert.ok(big.length > small.length, 'a city has no more streets than a hamlet');
-  for (const st of big) assert.ok(st.length > 0 && Number.isFinite(st.heading));
-
-  // the footprint is what the quiet ground is measured from
+/**
+ * `wantsFor` and `streetPlan` were tested here and are gone — see the note in js/town-plan.js.
+ *
+ * They were the old spoke planner, replaced by proctown/js/townplan.js in round 11, and this test
+ * was the only thing still importing them. A dead function with a passing test beside it reads as
+ * load-bearing, which is worse than no test at all. The rule it asserted (trades first, ornaments
+ * last) is not the rule the game uses any more either — proctown caps trades at a third of the
+ * plots, so most of a town is homes.
+ */
+test('the footprint is still what the quiet ground is measured from', () => {
   assert.ok(footprintOf(5).wall > footprintOf(1).wall);
   assert.equal(footprintOf(5).walled, true);
   assert.equal(footprintOf(1).walled, false);

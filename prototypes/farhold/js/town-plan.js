@@ -63,35 +63,19 @@ export const NEW_BUILDINGS = [
 ];
 
 /**
- * What a settlement of this size wants, in the order it gets built.
+ * `wantsFor` AND `streetPlan` USED TO LIVE HERE. THEY ARE GONE ON PURPOSE.
  *
- * The order is the design: whatever runs out of plots first is what a small town does without, so
- * the trades are at the top and the ornaments are at the bottom. A hamlet gets a granary and a
- * shrine; a city gets everything.
- */
-export function wantsFor(size = 1) {
-  const order = ['forge', 'inn', 'granary', 'chapel', 'stable', 'warehouse', 'barracks', 'mill', 'watchpost', 'shrine'];
-  return order.filter(key => size >= (BUILDING_INFO[key]?.from ?? 0));
-}
-
-/**
- * The street skeleton of a settlement: how many streets radiate from the square, and how long.
+ * They were the old spoke planner: a settlement got N streets radiating from a square, and the
+ * buildings were dropped along them. `proctown/js/townplan.js` replaced all of it in round 11 — the
+ * town is cut into blocks and the CUTS become the streets, which is why a plot can no longer sit on
+ * a road — and these two were kept alive by nothing but a test that still imported them.
  *
- * Kept here so a test can check that a bigger settlement really does get a bigger plan without
- * standing up a renderer.
+ * That is worse than plain dead code: a function with a passing test beside it looks load-bearing,
+ * and the next person to read this file would reasonably believe the game still plans towns this
+ * way. `wantsFor` in particular had a genuinely different answer to the one the game now uses
+ * (proctown caps trades at a third of the plots), so the test was asserting a rule that is no
+ * longer true anywhere.
  */
-export function streetPlan(size = 1, ring = 30, rng = Math.random) {
-  const count = Math.max(2, Math.min(6, 2 + size));
-  const streets = [];
-  for (let i = 0; i < count; i++) {
-    streets.push({
-      heading: (i / count) * Math.PI * 2 + rng() * 0.5,
-      bend: (rng() - 0.5) * 0.35,
-      length: (ring + 6) * (0.65 + rng() * 0.5),
-    });
-  }
-  return streets;
-}
 
 /** How wide a settlement's footprint is, which is also where its quiet ground starts. */
 export function footprintOf(size = 1) {

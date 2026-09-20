@@ -148,14 +148,36 @@ test('ground between you and the star puts the rays out, and lights the horizon 
       f.sunfx.update({ camera: f.camera, sunDirection: sd, cloud: 0, eclipse: 0, day: 1, dt: 0.016 });
       return f.sunfx.stats();
     };
-    // walk the world until we find somewhere with high ground in the way
+    /**
+     * Walk the world until we find somewhere with high ground in the way.
+     *
+     * A SEEDED walk, not `Math.random()`. This hunt gives up after 400 tries, so with a random walk
+     * it was a coin flip that happened to land most of the time — it passed in isolation and failed
+     * about one full-suite run in three, which is the worst kind of test to own. The same seed
+     * visits the same places every time, so it either finds a ridge on this world or it never did.
+     */
+    /**
+     * Sweep the country for the MOST blocked spot, rather than darting about until something lands
+     * in a window.
+     *
+     * The old version threw 400 `Math.random()` darts and kept the first reading between 0.2 and
+     * 0.9 — and at this sun angle this world does not produce one: the whole spread is 0 with a
+     * handful of readings around 0.04-0.14. So it passed when a dart happened to find the tail and
+     * failed about one full-suite run in three, which is the worst kind of test to own.
+     *
+     * An even sweep, every run the same, keeping the worst-occluded spot it saw. What is under test
+     * is the RELATIONSHIP — ground in the way takes the shafts down — not a particular fraction.
+     */
     let clear = null, partly = null;
     const sx = f.control.x, sz = f.control.z;
-    for (let i = 0; i < 400 && !(clear && partly); i++) {
-      f.teleport(sx + (Math.random() - 0.5) * 30000, sz + (Math.random() - 0.5) * 20000);
-      const s = sample();
-      if (!clear && s.blocked === 0) clear = s;
-      if (!partly && s.blocked > 0.2 && s.blocked < 0.9) partly = s;
+    const STEP = 16, SPAN = 30000;
+    for (let a = 0; a < STEP; a++) {
+      for (let b = 0; b < STEP; b++) {
+        f.teleport(sx + (a / (STEP - 1) - 0.5) * SPAN, sz + (b / (STEP - 1) - 0.5) * SPAN * 0.7);
+        const sample2 = sample();
+        if (sample2.blocked === 0) { if (!clear || sample2.strength > clear.strength) clear = sample2; }
+        else if (!partly || sample2.blocked > partly.blocked) partly = sample2;
+      }
     }
     // and the horizon wash when the star is right on the skyline
     f.setTime(((0.25 - 0.34 + 1) % 1) * 900);

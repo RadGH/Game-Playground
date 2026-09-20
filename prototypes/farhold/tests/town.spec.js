@@ -71,7 +71,16 @@ test('E opens a conversation, and Esc closes it', async ({ page }) => {
     greeting: document.querySelector('#talk .talk-say')?.textContent,
   }));
   expect(shown.heading).toBe(shown.name);
-  expect(shown.greeting.length).toBeGreaterThan(5);
+  /**
+   * They said SOMETHING, and it is a finished line rather than a raw template.
+   *
+   * This used to demand more than five characters, which is an arbitrary number that Lingo walked
+   * into the moment it generated a four-word greeting — one full-suite run in three failed on a
+   * perfectly good "Aye?". What would actually be a bug is an empty line or a stray `{` from a
+   * binding that did not resolve, so that is what is checked.
+   */
+  expect(shown.greeting.trim().length, 'they said nothing at all').toBeGreaterThan(1);
+  expect(shown.greeting, 'a binding did not resolve in the greeting').not.toMatch(/[{}]/);
   await page.keyboard.press('Escape');
   await expect(page.locator('#talk')).toBeHidden();
 });

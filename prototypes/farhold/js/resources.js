@@ -404,3 +404,107 @@ export function placedNode({ data = {}, rng = makeRng(2), kindId, x = 0, z = 0, 
   if (id) node.id = id;
   return node;
 }
+
+// ---------------------------------------------------------------------------- the whole world
+
+/** How wide one tile of ore is, in metres. */
+const TILE = 512;
+
+/**
+ * Ore across a whole planet, generated a tile at a time and remembered.
+ *
+ * `createNodeField` above scatters seams inside one circle, which is the right shape for a test and
+ * the wrong one for a 163 km world. It was being called as
+ * `createNodeField({ data, seed, terrain })` — neither of which it takes — so every seam in the
+ * game was scattered around the ORIGIN, about twenty-nine kilometres from where the player actually
+ * lands, and nobody could ever have found one.
+ *
+ * A tile's seed comes from the world seed and the tile's own coordinates, so a seam is in the same
+ * place every time you walk back to it, without any of them being stored — the same bargain the
+ * terrain itself makes. What IS stored is what you took out: `worked`, `amount` and the respawn
+ * clock, and only for tiles you actually touched.
+ *
+ *   const ore = createNodeWorld({ data, seed, terrain, planet, band });
+ *   ore.near(x, z, 60);        // what is in reach
+ *   ore.around(x, z);          // everything in the tiles around you, for the map and the drills
+ *   ore.tick(seconds);         // respawn clocks
+ */
+export function createNodeWorld({ data = {}, seed = 1, terrain = null, planet = null, band = 'medium', perTile = 14 } = {}) {
+  /** tile key -> the nodes in it. A tile is generated once and then it is history. */
+  const tiles = new Map();
+  /** What the player has taken, by node id, so a regenerated tile does not refill itself. */
+  const worked = new Map();
+
+  const keyOf = (tx, tz) => `${tx},${tz}`;
+
+  function tileAt(tx, tz) {
+    const key = keyOf(tx, tz);
+    let got = tiles.get(key);
+    if (got) return got;
+    // a tile's own seed: the world's, folded with where the tile is. Same tile, same seams, always.
+    const tileSeed = (seed * 73856093) ^ (tx * 19349663) ^ (tz * 83492791);
+    const nodes = createNodeField({
+      data,
+      rng: makeRng(tileSeed >>> 0),
+      area: { x: (tx + 0.5) * TILE, z: (tz + 0.5) * TILE, radius: TILE * 0.5 },
+      biomeAt: terrain ? (x, z) => terrain.biomeAt(x, z).key : null,
+      band, planet, count: perTile, minGap: 22,
+    });
+    for (const n of nodes) {
+      // an id that survives the tile being dropped and rebuilt, which is what makes `worked` work
+      n.id = `${key}:${n.id}`;
+      const taken = worked.get(n.id);
+      if (taken) Object.assign(n, taken);
+      // a seam under the sea or inside a cliff is a seam nobody will ever work
+      if (terrain && (terrain.underwater(n.x, n.z) || terrain.slopeAt(n.x, n.z, 4) > 0.8)) n.gone = true;
+    }
+    const live = nodes.filter(n => !n.gone);
+    tiles.set(key, live);
+    return live;
+  }
+
+  /** Every node in the nine tiles around a point. */
+  function around(x, z) {
+    const tx = Math.floor(x / TILE), tz = Math.floor(z / TILE);
+    const out = [];
+    for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) out.push(...tileAt(tx + dx, tz + dz));
+    return out;
+  }
+
+  return {
+    TILE,
+    around,
+    /** What is within `reach` metres, nearest first. */
+    near(x, z, reach = 60) {
+      return around(x, z)
+        .map(n => ({ node: n, away: Math.hypot(n.x - x, n.z - z) }))
+        .filter(r => r.away <= reach + (r.node.radius || 2))
+        .sort((a, b) => a.away - b.away)
+        .map(r => r.node);
+    },
+    /** The one you are standing at, if any. */
+    at(x, z, reach = 4) { return this.near(x, z, reach)[0] || null; },
+    byId(id) {
+      const [key] = String(id).split(':');
+      const [tx, tz] = key.split(',').map(Number);
+      return tileAt(tx, tz).find(n => n.id === id) || null;
+    },
+    /** Remember what came out of one, so walking away and back does not refill it. */
+    noteWorked(node) {
+      if (!node) return;
+      worked.set(node.id, { amount: node.amount, worked: node.worked, depleted: node.depleted, respawnIn: node.respawnIn });
+    },
+    /** Respawn clocks, for every tile that has been visited. */
+    tick(seconds) {
+      for (const nodes of tiles.values()) tickNodes(nodes, seconds, data);
+      for (const nodes of tiles.values()) for (const n of nodes) if (worked.has(n.id)) this.noteWorked(n);
+    },
+    get tilesLoaded() { return tiles.size; },
+    toJSON() { return { worked: [...worked.entries()] }; },
+    load(json) {
+      worked.clear();
+      for (const [id, state] of json?.worked || []) worked.set(id, state);
+      tiles.clear();
+    },
+  };
+}

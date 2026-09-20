@@ -951,3 +951,155 @@ The trap, and the reason the page test was worth writing: the boat was put away 
 **transition** out of swimming, and the transition is not the only way to stop swimming. `teleport()`,
 loading a save and stepping into a dungeon all skip it, and `wasSwimming` was already false by the
 next update — so the raft stayed equipped on dry land for the rest of the run. It reads the state now.
+
+## Rounds 11 and 12 — the world got denser, and then it got a base in it
+
+Two play-test rounds and the building expansion, run together. The full request list is in
+`~/claude/agent/farhold-MASTER-outstanding.md`; what follows is what was actually wrong, because in
+almost every case the feature already existed and was not connected to anything.
+
+### The theme: finished modules that nothing called
+
+This round's bugs were nearly all the same shape. Somebody (often me, in an earlier round) wrote a
+complete, tested, pure module — and then no line of `main.js` ever imported it, or imported it and
+never called the one function that feeds it. From the player's side that is indistinguishable from a
+feature that does not exist, and it is much harder to spot than a crash.
+
+The count, by the end: **seven joins that had never been made.**
+
+| What looked finished | What was actually missing |
+|---|---|
+| Build mode | nothing called `build.confirm()` — clicking drew a sword |
+| The build ghost | aimed at `control.x, control.z`, the player's own feet |
+| The power grid and storage pools | nothing called `grid.add` or `stores.add` |
+| The save | `stores` and `grid` were not in it — reloaded crates were empty |
+| Ore in the ground | `createNodeField({ data, seed, terrain })` takes none of those |
+| The refining layer | nothing called `works.place`; 16 machines, 61 recipes, empty list |
+| Raids | `js/raid.js` was imported by nothing at all |
+| The colony | `colony.setBase()` was never called: appeal 0, tax 0, prosperity 1.00 |
+| Ground vehicles | neither `js/vehicles.js` nor `ground-vehicles.js` was imported |
+| The ship's tanks | `canLaunch` refuses, `spendFlightFuel` spends, nothing ever added any |
+
+All of it is written up in detail in **`BUILD-MODE.md` §§0, 12–18**, which is now the document for
+the whole building side of the game.
+
+### The ones that were genuine bugs
+
+**A road with a gap in it** (seed 14343310, Baus-Beinen II, x 9720, z 16259). One stray `wet: true`
+flag on a point of dry land, which split the ribbon in half. The wet test now asks the terrain as
+well as the flag, so a single wrong flag between two dry neighbours cannot cut a road any more.
+
+**Houses sitting in the middle of the road.** The town planner's `buildable` predicate never asked
+`terrain.roadAt()`. It checked water, rivers and slope — so a plot could not be in a lake, but could
+be squarely across the highway. My earlier claim that this was "structurally impossible" was true
+only of the town's *own* streets, which the planner cuts itself; the world road network is a
+different thing entirely and the planner had never heard of it.
+
+**"E to read the notice board" followed you around the whole town.** Mine. I had hung it on
+`features.settlementAt()`, which is the entire settlement, so it also sat on top of every other
+thing you might have pressed E on. It is a real object at a real spot now, with five metres of reach.
+
+**The perk tree's phantom lines.** '+8% experience', 'companions deal 18% more damage' and '18%
+critical damage' all sit at radius 3, and `drawForest` painted a faint guide *ring* at every radius
+in almost exactly the colour of an untaken link — so the ring-3 circle threaded through exactly
+those three nodes and looked like edges between them. The forest data was right the whole time.
+
+**Square snowflakes in the desert.** A `PointsMaterial` with no map IS a square, and the snow
+arithmetic never asked what biome it was falling on.
+
+**The map took 3.28 seconds to open.** Two wrong guesses first (the rasteriser, then the border
+loop). The real cause was `getImageData(ox, oy, world.width * scale, world.height * scale)` — a
+13,670² buffer, about 747 MB. Clamped to the canvas: 35 ms, and flat at every zoom.
+
+**Climbing to space took 75 seconds.** My regression from the upper-atmosphere work: the rate
+control was acting as a *speed limit*, dragging 510 m/s at 4 km down to 260. `Math.max(velocity.y,
+wanted)` instead, ceiling 46,000 → 20,000: 19.3 s, and accelerating the whole way.
+
+**And W became up.** Twice. The rule is written into a test now: it fails if the climb rate control
+ever reads `forward` again. W is forward. S is backward. Always.
+
+### The new modules this round
+
+| File | What it is |
+|---|---|
+| `js/build-ui.js` | The panel `B` puts up: first steps, tools, catalogue, live prices, why the ghost is red |
+| `js/homes.js` | Every base you ever raised, and the route home from another star system |
+| `js/mining.js` | Drills on seams, and the route whose length decides the transfer rate |
+| `js/ore-view.js` | The seams, drawn — one InstancedMesh per kind |
+| `js/defence.js` | The raid you ring for, and the turrets that answer it |
+| `js/questhelp.js` | What to do now that you are standing on the marker |
+| `js/terraform.js` | Terrain edits as brushes, not a heightfield |
+| `js/buildplan.js` | The build ledger: snapping, validity, claims, costs, blueprints |
+| `js/stores.js` `js/power.js` `js/refine.js` | Storage pools, the grid, and the benches |
+| `js/colony.js` `js/farm.js` `js/work.js` | The people, their fields, and ten units of work |
+| `js/portal.js` `js/waypoints.js` `js/shipyard.js` | The town portal, the network, and the sky |
+
+### The eye check that found a real bug
+
+`3.2` on the list was "check the other eleven megaflora by eye" — the kind of task that usually ends
+in a shrug. Rendering all twelve side by side against a 9 m conifer for scale turned up something
+much worse than a badly-shaped tree.
+
+**`mergeParts` was transforming shared geometry.** `p.geometry.toNonIndexed()` returns **the same
+object** when a geometry is already non-indexed — Three.js says so in the console, and
+*"BufferGeometry is already non-indexed"* has been scrolling past in every test run for weeks. The
+base geometries (`BOX`, `CYL`, `ICO`, `OCT`, `CONE`, `SPH`) are module-level consts shared by every
+part that uses them, so `applyMatrix4` was mutating the shared one and each reuse compounded the
+last: the second slab of a tor built on the first slab's transform, the third on that.
+
+Four giants reuse one base several times, and all four were coming out at coordinates in the
+thousands — a 65 m tor, a 167 m stone arch, a crystal spire 20 km across. That is a very large part
+of *"it's full of other giant shapes everywhere. They don't look like trees."*
+
+`js/features.js` had the identical line, so **every building in every town** was built the same way.
+`js/chests.js`, `js/sites.js` and `js/dungeon.js` all clone first, which is why nobody noticed.
+
+The other two were ordinary shape problems: the Shelf Palm was *still* a 16 m bare post with a 4 m
+tuft on it (trunk down to 14, crown up, eleven fronds in two ranks), and the Rib Arch was six
+straight poles in a triangle, which reads as scaffolding — each rib is an elliptical arc now, with
+the tangent worked out properly rather than borrowed from the circular case.
+
+`tests/megaflora.spec.js` measures all twelve: between 15 and 32 metres tall, and the **narrow**
+horizontal span under 1.4× the height — which is exactly the "giant thin disc" that was reported,
+while still letting a ribcage be forty metres from skull to tail.
+
+### The last eight dead stats
+
+`8.4` on the list was a row of affix and talent keys that `js/effects.js` derived faithfully onto
+the character sheet and **nothing anywhere ever read**. Same shape as everything else this round,
+one layer down: the derivation was tested, the tooltip was right, and the number went nowhere.
+
+| Key | What it does now |
+|---|---|
+| `arrowHoming` | Widens the shot's own hit test. An arrow that *curves* is a projectile simulation; what the affix promises is that you hit the thing you pointed at. |
+| `arrowBurst` | A real area hit where the arrow lands. |
+| `stealth` | Shortens the aggro range in `js/actors.js`, with a floor of 0.25 — a foe you are standing on top of notices you however quiet your boots are. |
+| `revealRange` | Widens the minimap. Kept as `hud.revealMul` and **not** folded into `minimapSpan`, because `+`/`-` write that directly and the player's own setting would drift every frame. |
+| `cond_nightWard` | Reads `unit.atNight`. Nothing ever set it on the player. |
+| `cond_watch` | Reads `unit.moving`. Same. |
+| `cond_vehicleDmg` | Already read `self.mounted`, which the controller does set — this one was fine. |
+
+And the talent **`linger`**. `PENDING_MODS` in `js/skilltalents.js` has carried `ground` and
+`groundRadius` since round 7 with the note *"no lingering ground pool exists"* — which was true, and
+meant a tier-2 talent offered on four of the six skill trees did nothing whatever when taken.
+
+There are pools now: `dropPool` / `tickPools`, a translucent disc that fades as it burns out so you
+can see how long you have to stand clear of it, ticking on a **clock** rather than per frame. That
+last part is not an optimisation — a pool paying `perSecond * dt` sixty times a second reads as
+"1 damage" however correct the total, which is exactly the trap the damage-over-time effects fell
+into in round 6 and is written up above.
+
+### Two flaky tests, fixed at the root rather than retried
+
+Both had been passing most of the time for rounds, which is the worst way for a test to fail.
+
+**The sun-shaft test threw four hundred `Math.random()` darts** across thirty kilometres and kept
+the first reading with the sun between 20% and 90% occluded. Measured properly, this world at that
+sun angle produces a spread of *zero* with a handful of readings around 0.04–0.14 — so the test was
+waiting for a tail event and failing about one full-suite run in three. It sweeps an even 16×16 grid
+now, every run the same, and keeps the worst-occluded spot it saw. What is under test is the
+relationship (ground in the way takes the shafts down), not a particular fraction.
+
+**The greeting test demanded more than five characters.** Lingo generated "Aye?" and the suite went
+red. An arbitrary length was never the point; an empty line or a stray `{` from a binding that did
+not resolve is what would actually be a bug, so that is what it checks.

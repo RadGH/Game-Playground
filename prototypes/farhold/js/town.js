@@ -261,6 +261,55 @@ export function createTownFolk(scene, terrain, opts = {}) {
     live.set(node.id, people);
   }
 
+  /**
+   * ONE PERSON, ANYWHERE — a freed prisoner, a survivor, a migrant who moved in.
+   *
+   * `populate` builds a settlement's whole roster around a node. This is the same body-and-badge
+   * work for a single person standing at coordinates, so somebody let out of a cell is a figure you
+   * can walk up to and talk to rather than a number in a log line. They are filed under a group id
+   * of the caller's choosing so `depopulate` can take them away with everything else on that world.
+   *
+   *   const who = await spawnOne({ groupId: 'freed', role: 'wanderer', x, z, name });
+   */
+  async function spawnOne({
+    groupId = 'loose', role = 'wanderer', roleName = null, name = null, gender = null,
+    x = 0, z = 0, greeting = null, node = null, seed = 1,
+  } = {}) {
+    // one stable rng per person, from where they are standing, so a reload does not reshuffle them
+    const rng = makeRng(((seed ^ Math.round(x) * 2654435761 ^ Math.round(z) * 40503) >>> 0) || 1);
+    const roleRow = ROLES.find(r => r.key === role) || ROLES[0];
+    const chosen = name ? { name, gender: gender || (rng() < 0.5 ? 'f' : 'm') } : nameFor(node || { id: 0 }, roleRow, rng);
+    const look = looks.length ? looks[Math.floor(rng() * looks.length)] : null;
+    let actor = null;
+    pending++;
+    try {
+      actor = await makeActor({ avatar: look ? JSON.parse(JSON.stringify(look)) : {} });
+    } catch { /* a body we cannot build is a person we skip */ }
+    finally { pending--; }
+    if (!actor) return null;
+
+    const npc = {
+      id: `${groupId}:${live.get(groupId)?.length || 0}`,
+      name: chosen.name, role: roleRow.key, roleName: roleName || roleRow.name, gender: chosen.gender,
+      guards: false, guardTimer: 0, target: null,
+      greeting: greeting || roleRow.greeting,
+      trades: false, givesQuests: false, gambles: false,
+      node: node || null, x, z, y: terrain.heightAt(x, z),
+      facing: rng() * Math.PI * 2,
+      home: [x, z],
+      wanderTimer: rng() * 4,
+      actor, stock: null, offered: null,
+      freed: true,
+    };
+    actor.group.position.set(x, npc.y, z);
+    actor.group.rotation.y = npc.facing;
+    scene.add(actor.group);
+    setActorAnim(actor, 'idle');
+    if (!live.has(groupId)) live.set(groupId, []);
+    live.get(groupId).push(npc);
+    return npc;
+  }
+
   function depopulate(id) {
     const people = live.get(id);
     if (!people) return;
@@ -478,6 +527,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
       .map(n => ({ x: n.x, z: n.z, icon: n.badge === 'quest' ? '!' : '$', color: n.badge === 'quest' ? '#ffd24a' : '#8fe0a0', kind: n.badge })),
 
     /** Whoever is close enough to talk to. */
+    spawnOne,
     nearest(x, z, range = talkRange) {
       let best = null, bd = range;
       for (const people of live.values()) {

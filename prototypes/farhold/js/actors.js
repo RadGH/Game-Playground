@@ -466,14 +466,22 @@ export class EnemyField {
       }
 
       // decide
-      if (e.state !== 'chase' && e.state !== 'flee' && dist < e.aggroRange) {
+      /**
+       * STEALTH SHORTENS HOW FAR AWAY YOU ARE NOTICED.
+       *
+       * `d.stealth` was derived from the affixes and read by nothing, so every cloak in the game
+       * was a number on a tooltip. It is a fraction off the aggro range with a floor, because an
+       * enemy you are standing on top of has to notice you however quiet your boots are.
+       */
+      const notice = e.aggroRange * Math.max(0.25, 1 - (player?.derived?.stealth || 0));
+      if (e.state !== 'chase' && e.state !== 'flee' && dist < notice) {
         e.state = 'chase';
         // a pack notices together: anything of the same kind close by joins in
         for (const mate of this.enemies) {
           if (mate === e || mate.dying != null || mate.state === 'chase') continue;
           if (mate.defId === e.defId && Math.hypot(mate.x - e.x, mate.z - e.z) < 14) mate.state = 'chase';
         }
-      } else if (e.state === 'chase' && dist > e.aggroRange * 2.2 && !e.boss) {
+      } else if (e.state === 'chase' && dist > notice * 2.2 && !e.boss) {
         e.state = 'wander';
       }
 

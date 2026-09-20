@@ -328,7 +328,7 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
    * `name` overrides the grade's own label. A camp's strongbox reading "Iron-Bound Chest" on the
    * reward screen tells you nothing about where you just fought; "The Stockade's Strongbox" does.
    */
-  function place(kind, x, z, { key = null, opened: isOpen = false, facing = 0, level = null, name = null } = {}) {
+  function place(kind, x, z, { key = null, opened: isOpen = false, facing = 0, level = null, name = null, floor = null } = {}) {
     const look = CHEST_LOOKS[kind] || CHEST_LOOKS.wooden;
     const mesh = new THREE.Mesh(geometryFor(kind, isOpen), material);
     const y = terrain.heightAt(x, z);
@@ -343,7 +343,14 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
       key: key || `placed:${Math.round(x)},${Math.round(z)}`,
       opened: isOpen, level, spec,
       name: name || spec.name || 'Chest',
-      floor: spec.floor || 'normal',
+      /**
+       * `floor` may be raised by the caller.
+       *
+       * The grade's own floor is right for scattered chests, but a stronghold's `gives.loot` is a
+       * PROMISE about that particular keep — and since the beacon colour and the roll read the same
+       * field, raising it here makes the light outside match what is really in the box.
+       */
+      floor: floor || spec.floor || 'normal',
     };
     // The beacon promises what is inside. Same `floor` drives the colour and the roll, so it cannot
     // lie; an opened chest loses it, because there is nothing left to promise.

@@ -1,0 +1,76 @@
+{
+  "_doc": "Raids on your base — and the important word is that a raid is a QUEST you take, never an event that happens to you. BUILDING_EXPANSION.md §7.1 and §7.4: a base with no turrets is not raided, because being raided for building a house is a punishment for playing. So the offer needs base size AND defence, both, and js/raid.js will not let a wave spawn until the player has said yes. (§7.20 names Frontier Foundry's wave code as prior art; the shape below is that shape.)",
+
+  "_notorietyDoc": "One score out of the things that make a base look worth robbing. Structures and wealth push it up; a waypoint is a beacon and pushes it hard. Notoriety picks which TIER is on offer — it does not start anything.",
+  "notoriety": {
+    "perStructure": 1.0,
+    "perDefence": 1.5,
+    "perCitizen": 1.2,
+    "perRefineryThroughput": 0.6,
+    "waypoint": 18,
+    "perThousandGold": 4,
+    "max": 400
+  },
+
+  "_gateDoc": "BOTH gates, always. `minSize` counts structures; `minDefence` counts turrets, walls, traps and standing guards. A player who builds twenty houses and no wall sees no raid offer at all, which is the point — and a player who wants one sooner builds a turret.",
+  "_rewardDoc": "§7.13: a rare crate is the FLOOR, never the roll. `crates` lists guaranteed crates by rarity; a tier may add better on top. Materials and blueprints are the pull, standing is the world noticing.",
+
+  "tiers": [
+    {
+      "key": "prowlers", "name": "Prowlers at the Fence", "rank": 1,
+      "minNotoriety": 12, "minSize": 6, "minDefence": 2,
+      "waves": 3, "packPerWave": [2, 4], "breatherHours": 0.25,
+      "levelOffset": -1, "boss": false,
+      "crates": ["rare"],
+      "reward": { "gold": [80, 160], "xp": [120, 240], "standing": 4, "blueprints": 0 },
+      "text": "Something has been counting your fence posts after dark. Ring the bell and have it out with them."
+    },
+    {
+      "key": "warband", "name": "The Warband", "rank": 2,
+      "minNotoriety": 45, "minSize": 14, "minDefence": 5,
+      "waves": 4, "packPerWave": [3, 6], "breatherHours": 0.35,
+      "levelOffset": 0, "boss": false,
+      "crates": ["rare", "rare"],
+      "reward": { "gold": [180, 340], "xp": [280, 520], "standing": 7, "blueprints": 1 },
+      "text": "A warband has your smoke on their map. They will come whether you are ready or not — so be ready first."
+    },
+    {
+      "key": "siege", "name": "The Siege", "rank": 3,
+      "minNotoriety": 95, "minSize": 26, "minDefence": 10,
+      "waves": 5, "packPerWave": [4, 7], "breatherHours": 0.4,
+      "levelOffset": 1, "boss": true,
+      "crates": ["rare", "epic"],
+      "reward": { "gold": [380, 700], "xp": [600, 1100], "standing": 10, "blueprints": 1 },
+      "text": "They have brought ladders. Whatever you have built, this is the night it is measured."
+    },
+    {
+      "key": "reckoning", "name": "The Reckoning", "rank": 4,
+      "minNotoriety": 180, "minSize": 40, "minDefence": 18,
+      "waves": 7, "packPerWave": [5, 9], "breatherHours": 0.5,
+      "levelOffset": 2, "boss": true,
+      "crates": ["epic", "epic"],
+      "reward": { "gold": [800, 1500], "xp": [1400, 2400], "standing": 14, "blueprints": 2 },
+      "text": "Everything that hates you on this world has agreed on one thing, and the one thing is you."
+    }
+  ],
+
+  "_nightDoc": "§7.18: night raids are harder and pay more. The player chooses when to ring the bell, so this is a real decision rather than a coin toss.",
+  "night": { "hpMultiplier": 1.2, "dmgMultiplier": 1.15, "goldMultiplier": 1.4, "xpMultiplier": 1.3, "fromHour": 20, "toHour": 5 },
+
+  "_earlyDoc": "§7.4: starting it yourself before the warning runs out is meant to pay. The bonus is on gold only, so it never changes what drops.",
+  "early": { "warningHours": 6, "goldBonus": 0.25 },
+
+  "_targetDoc": "§7.8: raiders walk at ONE thing, so a wall in the right place means something. Preference order — a lit waypoint first (it is the beacon), then the biggest refinery, then the largest store, then the centre of the claim.",
+  "targets": ["waypoint", "refinery", "store", "centre"],
+
+  "_scaleDoc": "§7.17: difficulty comes from your level and your defences, never from how many days have passed. A player who spent a week building turrets gets a harder raid because they asked for one.",
+  "scale": {
+    "hpPerPlayerLevel": 0.06,
+    "hpPerDefence": 0.02,
+    "dmgPerPlayerLevel": 0.05,
+    "maxDefenceScaling": 1.6
+  },
+
+  "_lossDoc": "§7.11: you can lose, and losing is never a deleted base. Some structures are broken (repairable) and some materials are taken. That is all.",
+  "loss": { "structuresBrokenFraction": 0.2, "materialsTakenFraction": 0.25, "citizensLeave": 1 }
+}

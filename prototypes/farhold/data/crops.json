@@ -1,0 +1,138 @@
+{
+  "_doc": "Farming. The one rule that shapes everything: the PLAYER lays a plot and sows it, and after that a farmer harvests it and puts the same seed back in the same hole forever. Citizens never break new ground. (Design reference, comments only: Necesse's farmers do exactly this, and the asymmetry is why a farm still feels like something you built.) Growth is in in-game hours so it ticks on the same clock as everything else. Yields are whole units of the named good; `food` is how many citizen-meals a unit is worth, so a gourd feeds more than a handful of grain.",
+  "_soilDoc": "Soil is a light touch, not a farming sim. Every harvest wears a plot a little; replanting restores some of it, and a plot left fallow (ripe and unharvested, or stubble and unreplanted) recovers faster. Soil scales yield, so a farm nobody works slowly becomes a worse farm rather than a broken one.",
+  "soil": {
+    "start": 1,
+    "wearPerHarvest": 0.04,
+    "restorePerReplant": 0.02,
+    "fallowRestorePerDay": 0.06,
+    "min": 0.45,
+    "max": 1.2
+  },
+  "_workDoc": "Harvesting and replanting are WORK UNITS on the same board as everything else (js/work.js), which is what lets the player scythe a field by hand at three in the morning, a farmer do it at nine, and a harvester machine do it while you are on another continent. Same unit, three sources.",
+  "work": {
+    "harvestUnits": 3,
+    "replantUnits": 2,
+    "harvestTag": "harvest",
+    "replantTag": "replant"
+  },
+  "_ruinDoc": "A plot that is ripe and nobody comes for it does not rot away instantly — it stands for `spoilAfterHours` and then the yield drops off, so a week away costs you a harvest rather than the farm.",
+  "spoil": {
+    "afterHours": 96,
+    "yieldFloor": 0.35,
+    "perHourAfter": 0.01
+  },
+  "_cookDoc": "A cook turns raw crop into meals, and meals go further than raw crop. It is one more work order on the same board, so the player can stand at the pot themselves at two in the morning if the stores are low. `batch` raw units in, `batch * food * multiplier` meals out; js/colony.js eats meals before it eats raw.",
+  "cook": {
+    "tag": "cook",
+    "units": 3,
+    "batch": 4,
+    "multiplier": 1.6,
+    "stopAtMeals": 60
+  },
+  "crops": [
+    {
+      "key": "grain",
+      "name": "Pale Grain",
+      "good": "grain",
+      "growHours": 72,
+      "yield": 4,
+      "food": 1,
+      "seedCost": 2,
+      "biomes": [
+        "grass",
+        "any"
+      ],
+      "blurb": "Dull, reliable, and the reason anybody stays."
+    },
+    {
+      "key": "roots",
+      "name": "Stonecap Roots",
+      "good": "roots",
+      "growHours": 96,
+      "yield": 3,
+      "food": 2,
+      "seedCost": 2,
+      "biomes": [
+        "grass",
+        "tundra",
+        "rock",
+        "any"
+      ],
+      "blurb": "Takes its time and does not care what the weather did."
+    },
+    {
+      "key": "gourd",
+      "name": "Lantern Gourd",
+      "good": "gourd",
+      "growHours": 132,
+      "yield": 2,
+      "food": 4,
+      "seedCost": 3,
+      "biomes": [
+        "grass",
+        "jungle"
+      ],
+      "blurb": "One of these is a meal for three. Two months to get there."
+    },
+    {
+      "key": "fibre",
+      "name": "Cord Reed",
+      "good": "fibre",
+      "growHours": 84,
+      "yield": 5,
+      "food": 0,
+      "seedCost": 2,
+      "biomes": [
+        "grass",
+        "jungle",
+        "any"
+      ],
+      "blurb": "Not food. Rope, cloth, sacking — the things a colony runs out of second."
+    },
+    {
+      "key": "herb",
+      "name": "Ember Herb",
+      "good": "herb",
+      "growHours": 60,
+      "yield": 2,
+      "food": 0,
+      "seedCost": 4,
+      "biomes": [
+        "grass",
+        "lava",
+        "rock"
+      ],
+      "blurb": "Goes in a pot, not a bowl. The alchemy bench wants it."
+    },
+    {
+      "key": "frostcap",
+      "name": "Frostcap",
+      "good": "frostcap",
+      "growHours": 108,
+      "yield": 3,
+      "food": 2,
+      "seedCost": 3,
+      "biomes": [
+        "tundra",
+        "ice"
+      ],
+      "blurb": "The only thing that will put out roots where nothing else will."
+    },
+    {
+      "key": "sporeling",
+      "name": "Cellar Sporeling",
+      "good": "sporeling",
+      "growHours": 48,
+      "yield": 3,
+      "food": 1,
+      "seedCost": 2,
+      "biomes": [
+        "any",
+        "toxic",
+        "void"
+      ],
+      "blurb": "Grows in the dark and underground, which is the whole point of it."
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "_doc": "The colony: who lives at your base, what they do all day, what they eat and what they pay you. Design references (comments only, never in game text): Colony Survival for the go-to-work loop, Necesse for workers who maintain what you laid out rather than inventing it. The numbers here are the whole balance of js/colony.js — no rule lives in code that could live in this file. Hours are in-game hours; a day is 24 of them.",
+
+  "_scheduleDoc": "A rudimentary day, deliberately. Wake, walk to the job, work it, walk home, eat, sleep. Boundaries are hours of the day; js/colony.js steps a citizen through them and nothing else decides where they are. A citizen with no job still wakes and still eats — an idle mouth is meant to be visible.",
+  "schedule": {
+    "wake": 6,
+    "leaveForWork": 7,
+    "leaveWork": 18,
+    "bed": 22,
+    "mealHours": [7, 13, 19],
+    "travelHoursDefault": 0.25,
+    "walkSpeedMetresPerHour": 3000,
+    "maxTravelHours": 2
+  },
+
+  "_jobsDoc": "A job says which work orders a citizen will pick up (`tags`), how fast they turn hours into work units, and whether the job is allowed to CREATE anything. `mayBreakGround` is false on every job in this file and that is the Necesse rule made literal: a farmer harvests and replants the plots the player laid out, and can never lay a new one. Nothing in js/farm.js will let a citizen past that flag.",
+  "jobs": [
+    {
+      "key": "labourer", "name": "Labourer",
+      "tags": ["haul", "build", "craft", "mine", "chop"],
+      "unitsPerHour": 1.0, "mayBreakGround": false,
+      "blurb": "Turns their hand to whatever order is nearest."
+    },
+    {
+      "key": "farmer", "name": "Farmer",
+      "tags": ["harvest", "replant"],
+      "unitsPerHour": 1.2, "mayBreakGround": false,
+      "blurb": "Brings in what is ripe and puts the next seed in the same hole. Will not break new ground."
+    },
+    {
+      "key": "miner", "name": "Miner",
+      "tags": ["mine", "haul"],
+      "unitsPerHour": 1.15, "mayBreakGround": false,
+      "blurb": "Works a face or a drill; carries ore to the nearest store."
+    },
+    {
+      "key": "smelter", "name": "Smelter",
+      "tags": ["refine", "craft"],
+      "unitsPerHour": 1.1, "mayBreakGround": false,
+      "blurb": "Feeds the furnaces and pulls the ingots."
+    },
+    {
+      "key": "carpenter", "name": "Carpenter",
+      "tags": ["build", "craft", "chop"],
+      "unitsPerHour": 1.15, "mayBreakGround": false,
+      "blurb": "Raises what you have outlined and keeps it standing."
+    },
+    {
+      "key": "hauler", "name": "Hauler",
+      "tags": ["haul"],
+      "unitsPerHour": 1.4, "mayBreakGround": false,
+      "blurb": "Walks the pool boundary all day so nothing sits in the wrong crate."
+    },
+    {
+      "key": "cook", "name": "Cook",
+      "tags": ["cook", "haul"],
+      "unitsPerHour": 1.1, "mayBreakGround": false,
+      "blurb": "Turns raw crop into meals, which go further than raw crop."
+    },
+    {
+      "key": "guard", "name": "Guard",
+      "tags": ["watch", "repair"],
+      "unitsPerHour": 0.8, "mayBreakGround": false,
+      "blurb": "Stands a post. Counts toward the base's defence, not its output."
+    }
+  ],
+
+  "_foodDoc": "Citizens eat, and an unfed colony has to degrade in a way the player NOTICES without being a disaster they cannot come back from. Four rungs: hungry (slower), grumbling (stops paying tax), downs tools (does no work at all), leaves (walks out). Nobody ever starves to death — a dead citizen is a save-scum, a departed one is a lesson. Hunger runs 0..1 and one full day with nothing to eat is `hungerPerDay`.",
+  "food": {
+    "perCitizenPerDay": 2,
+    "hungerPerDay": 0.5,
+    "hungerFedPerMeal": 0.34,
+    "rungs": {
+      "hungry": 0.3,
+      "grumbling": 0.55,
+      "downsTools": 0.78,
+      "leaves": 1.0
+    },
+    "outputAtHungry": 0.65,
+    "moodLossPerDayHungry": 0.35,
+    "moodGainPerDayFed": 0.2,
+    "cookedMealMultiplier": 1.6
+  },
+
+  "_housingDoc": "A bed is the whole housing model. Housed citizens sleep, recover mood and pay tax; an unhoused one sleeps rough, loses mood and pays nothing. Spare beds are also the single biggest pull on migration, which is what makes building a house BEFORE you have anybody a sensible thing to do.",
+  "housing": {
+    "moodLossPerDayUnhoused": 0.25,
+    "moodGainPerNightHoused": 0.12,
+    "spareBedsIgnoredAbove": 12
+  },
+
+  "_taxDoc": "Gold out of people rather than out of loot. Only a citizen who is both FED and HOUSED pays — that is the whole lever, and it means the answer to 'how do I make money' is always 'look after more people'. Mood scales it, prosperity (your refined output, your waypoint, your walls) scales it again, and the cap stops a hundred peasants from replacing the game.",
+  "tax": {
+    "perCitizenPerDay": 6,
+    "moodFloor": 0.25,
+    "prosperityPerStructure": 0.01,
+    "prosperityMax": 1.5,
+    "unhousedPays": 0,
+    "grumblingPays": 0
+  },
+
+  "_migrationDoc": "New people arrive because the place is worth coming to — spare beds, food in the store, walls up, and folk already there who are not miserable. Appeal runs 0..1 and is rolled against once per in-game day. A migrant is an OFFER, never an automatic arrival: they turn up at the edge of the claim and the player says yes or no, because a citizen you did not choose is a mouth you did not budget for.",
+  "migration": {
+    "rollEveryHours": 24,
+    "baseChance": 0.08,
+    "chanceAtFullAppeal": 0.55,
+    "weights": { "spareBeds": 0.3, "foodDays": 0.3, "safety": 0.2, "mood": 0.2 },
+    "foodDaysForFullMarks": 6,
+    "spareBedsForFullMarks": 3,
+    "safetyForFullMarks": 6,
+    "offerExpiresHours": 12,
+    "maxPending": 2
+  },
+
+  "_recruitDoc": "The other way to get people: walk into a town and pay somebody to come back with you. A town has a small pool that refills slowly, the price climbs with the size of your colony (you are asking them to leave a working town for a hole in the ground), and good standing with whoever holds the zone knocks it down. Refusing is free.",
+  "recruit": {
+    "poolPerSettlementSize": 1.5,
+    "poolRefillDays": 8,
+    "basePrice": 120,
+    "pricePerExistingCitizen": 18,
+    "priceBySkill": 90,
+    "standingDiscountAtMax": 0.35,
+    "maxSkill": 1.6,
+    "minSkill": 0.75
+  },
+
+  "_namesDoc": "Plain invented names, built from syllables so the colony never repeats itself and nothing here belongs to anybody else. A game that already has Name Forge can pass its own `makeName` into createColony and this table is ignored.",
+  "names": {
+    "first": ["Ard", "Bri", "Cal", "Dov", "El", "Fen", "Gwyn", "Hal", "Ing", "Jor", "Kest", "Lin", "Mar", "Nev", "Orr", "Pel", "Quill", "Rha", "Sev", "Tam", "Ul", "Ver", "Wyn", "Yst"],
+    "last": ["a", "en", "ith", "ora", "us", "wen", "ric", "ana", "eld", "os", "iel", "ur"],
+    "family": ["Ashfoot", "Bellow", "Carrick", "Dunmer", "Elmgate", "Fallow", "Granner", "Holt", "Iverly", "Jarrow", "Kelm", "Lowry", "Marrow", "Nettle", "Orrick", "Prynne", "Quarry", "Raddle", "Selk", "Thorn", "Underhill", "Vance", "Weld", "Yarrow"]
+  }
+}

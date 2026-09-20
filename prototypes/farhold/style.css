@@ -15,9 +15,22 @@ body {
 /* ---------------------------------------------------------------- loading + title */
 
 #boot {
-  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center;
+  position: fixed; inset: 0; z-index: 40; display: grid;
   background: radial-gradient(circle at 50% 40%, #16203a, #05070d 70%);
   text-align: center; padding: 24px;
+  /**
+   * THE TITLE SCREEN SCROLLS.
+   *
+   * "Allow scrolling on the main menu screen. I can't see the submit button with all the options
+   * open." It was `place-items: center` on a fixed, full-viewport grid with no overflow: once the
+   * content grew past the screen — the class card, the save list, the control legend — centring
+   * pushed it off BOTH ends at once and there was no way to reach either. `safe center` centres only
+   * while it fits and falls back to the start edge when it does not, which is exactly the rule you
+   * want, and `overflow-y: auto` then makes the rest reachable.
+   */
+  place-items: safe center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 #boot.hidden { display: none; }
 #boot h1 { font-size: 40px; letter-spacing: 6px; margin: 0 0 6px; font-weight: 600; }

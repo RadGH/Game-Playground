@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "_doc": "Ground vehicles you build: a motorcycle, a car and a truck, in that order. They are NOT a faster horse — each one gives something up. The bike is the quickest thing on the planet and carries almost nothing; the car seats the people who travel with you and hates rough ground; the truck is the slowest of the three and is the only way to move a ship's hull across a valley. The horse row is here as the yardstick, not as something you build: it needs no fuel and climbs ground nothing on wheels will look at, so it is never strictly worse than any of them. Read by js/vehicles.js.",
+
+  "_fuelDoc": "Everything with an engine drinks Burner Fuel (data/workshop.json, chemical bench). Deliberately NOT the ship's Drive Fuel: a fuel synthesiser is the last structure in the game and a motorcycle should not have to wait for it.",
+  "fuel": {
+    "id": "fuel_burner",
+    "name": "Burner Fuel",
+    "_doc": "`perKm` on each vehicle is units of this per kilometre driven. A full tank is `tank` units; at zero the engine stops and you walk, which is the whole reason the horse never stops being useful."
+  },
+
+  "_yardstickDoc": "A mounted horse is moveSpeed (5.4) x mountSpeed (2.1) = 11.34 m/s, the same figure js/gear.js repeats as HORSE_PACE. Every vehicle below is measured against this row, and tests/ground-vehicles.test.js fails if the two drift apart.",
+  "horse": {
+    "key": "horse",
+    "name": "Trail Horse",
+    "speed": 11.34,
+    "road": 1.0,
+    "offroad": 0.92,
+    "maxSlope": 0.55,
+    "seats": 1,
+    "carry": 4,
+    "ford": 0.9,
+    "perKm": 0,
+    "tank": 0,
+    "noise": 0.2,
+    "shelter": false,
+    "tow": false,
+    "reference": true,
+    "lore": "Patient, unremarkable, and it does not care that the fuel bench is thirty kilometres away."
+  },
+
+  "_ladderDoc": "`speed` is metres a second on level open ground. `road` multiplies it on a made road, `offroad` on broken ground, and above `maxSlope` (rise over run) the wheels simply will not take it — that is the stat the horse wins and it is why a bike is useless in the hills. `carry` is extra units of load, `seats` is how many people ride along, `ford` is how deep the water may be before it drowns.",
+  "vehicles": {
+    "motorcycle": {
+      "key": "motorcycle",
+      "name": "Trail Scrambler",
+      "rung": 1,
+      "model": "motorcycle",
+      "speed": 20.0,
+      "road": 1.15,
+      "offroad": 0.62,
+      "maxSlope": 0.30,
+      "seats": 1,
+      "carry": 3,
+      "ford": 0.35,
+      "perKm": 0.6,
+      "tank": 12,
+      "noise": 0.9,
+      "turn": 1.0,
+      "shelter": false,
+      "tow": false,
+      "haul": 0,
+      "wearPerKm": 0.08,
+      "colors": { "body": "#b8562e", "frame": "#3a3f46", "metal": "#8f97a2", "trim": "#1d2024" },
+      "craft": {
+        "stations": ["workbench", "assembler"],
+        "cost": { "steel": 8, "part": 5, "tyre": 2, "cell": 1, "wire": 6, "leather": 2 },
+        "hours": 6
+      },
+      "lore": "One seat, two wheels and an engine bolted where the sense used to be. Nothing on this planet is quicker across a flat.",
+      "gives": "The fastest thing you will ever sit on, and the cheapest engine to feed.",
+      "costs": "It carries a satchel, it drowns in a stream, and the first real hill stops it dead."
+    },
+    "car": {
+      "key": "car",
+      "name": "Ridge Runabout",
+      "rung": 2,
+      "model": "car",
+      "speed": 17.0,
+      "road": 1.2,
+      "offroad": 0.55,
+      "maxSlope": 0.34,
+      "seats": 4,
+      "carry": 9,
+      "ford": 0.5,
+      "perKm": 1.1,
+      "tank": 24,
+      "noise": 0.7,
+      "turn": 0.7,
+      "shelter": true,
+      "tow": false,
+      "haul": 0,
+      "wearPerKm": 0.06,
+      "colors": { "body": "#3e6b7a", "frame": "#2a3238", "metal": "#98a0aa", "glass": "#1b2733", "trim": "#c8b47a" },
+      "craft": {
+        "stations": ["workbench", "assembler", "alloy_forge"],
+        "cost": { "steel": 18, "part": 12, "tyre": 4, "cell": 2, "wire": 12, "glass": 4, "leather": 4, "plate_steel": 1 },
+        "hours": 14
+      },
+      "lore": "A box on four wheels with glass in it. The only vehicle where the weather stays outside and everyone you travel with comes along.",
+      "gives": "Four seats, a roof over the night, and a road speed nothing else touches.",
+      "costs": "Off the road it wallows, it is thirsty, and it will not climb what the bike will not climb."
+    },
+    "truck": {
+      "key": "truck",
+      "name": "Longbed Hauler",
+      "rung": 3,
+      "model": "truck",
+      "speed": 13.5,
+      "road": 1.1,
+      "offroad": 0.88,
+      "maxSlope": 0.46,
+      "seats": 2,
+      "carry": 26,
+      "ford": 1.2,
+      "perKm": 2.0,
+      "tank": 40,
+      "noise": 1.0,
+      "turn": 0.45,
+      "shelter": true,
+      "tow": true,
+      "haul": 2,
+      "wearPerKm": 0.05,
+      "colors": { "body": "#7a6a3a", "frame": "#32363c", "metal": "#8f97a2", "glass": "#1b2733", "trim": "#4a4030" },
+      "craft": {
+        "stations": ["workbench", "assembler", "alloy_forge", "refinery"],
+        "cost": { "steel": 34, "part": 24, "tyre": 6, "cell": 4, "wire": 18, "glass": 4, "plate_steel": 6, "composite": 2 },
+        "hours": 28
+      },
+      "lore": "Six wheels, a flat bed and low gearing. It is the slowest thing you will build and the only one that can put a hull plate on the pad in one trip.",
+      "gives": "A bed that swallows a camp, water up to the axles, broken ground it barely notices, and it is the only vehicle that can haul a ship subsystem.",
+      "costs": "Slower than the other two, drinks more than both together, and it corners like a barge."
+    }
+  },
+
+  "_repairDoc": "Wear is gentle on purpose — this is not a survival sim. A vehicle at 0 condition still drives, it just gives up a third of its speed and eats fuel until you spend an evening on it.",
+  "repair": {
+    "cost": { "scrap": 6, "part": 1 },
+    "restores": 50,
+    "brokenSpeed": 0.66,
+    "brokenThirst": 1.35
+  },
+
+  "_surfaceDoc": "What js/vehicles.js multiplies `speed` by. Whoever wires the controller passes one of these names; anything unknown counts as open ground.",
+  "surfaces": {
+    "road": "road",
+    "open": 1.0,
+    "rough": "offroad",
+    "sand": 0.8,
+    "snow": 0.7,
+    "marsh": 0.5
+  }
+}

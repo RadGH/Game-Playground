@@ -11,6 +11,11 @@
 //
 // Heights come from `planet.js` (`terrain.heightAt`), so the shape you see is the shape you collide
 // with. Colours are per-vertex, so one material paints every biome.
+//
+// That one sampler is also how the player's own terrain edits get drawn: `js/terraform.js` puts
+// itself in front of `terrain.heightAt`, so a levelled building pad appears here with no change to
+// the ring code at all. The one thing it does need is `editedAt()` at the bottom of this file —
+// a ring only rebuilds when it MOVES, and flattening the ground you are standing on moves nothing.
 
 import * as THREE from 'three';
 import { M_PER_CELL, M_PER_CELL_DEFAULT } from './planet.js';
@@ -254,6 +259,34 @@ export function createTerrainView(scene, terrain, opts = {}) {
     update(x, z, force = false) {
       for (const r of rings) if (r.update(x, z, force)) rebuilds++;
       if (water) water.position.set(x, terrain.seaLevel, z);
+    },
+
+    /**
+     * THE GROUND CHANGED UNDER US — REDRAW THE RINGS THAT CAN SEE IT.
+     *
+     * `js/terraform.js` lets the player level, raise and lower the ground, and those edits go in
+     * front of `terrain.heightAt` — so collision, the camera and prop placement pick them up on the
+     * next frame for free. The clipmap does not, because a ring only rebuilds when its snapped
+     * centre moves, and levelling the ground you are standing on moves nothing at all. Without this
+     * you smooth a hillside and the hillside is still drawn there until you walk a cell away.
+     *
+     * Forcing every ring would work and costs about 92,000 vertices of resampling, which is a
+     * visible hitch on a modest machine and happens on every click of a paint tool. So only the
+     * rings whose covered square actually touches the edit are rebuilt: a 6 m pad under your boots
+     * is one ring, and the outermost ring — the expensive one in perceived terms, because it covers
+     * 15 km of mountains — is left alone unless the edit is somehow out there.
+     */
+    editedAt(ex, ez, radius = 0, px = null, pz = null) {
+      let touched = 0;
+      for (const r of rings) {
+        const half = r.extent / 2;
+        if (Math.abs(ex - r.centre[0]) - radius > half) continue;
+        if (Math.abs(ez - r.centre[1]) - radius > half) continue;
+        r.update(px == null ? r.centre[0] : px, pz == null ? r.centre[1] : pz, true);
+        rebuilds++;
+        touched++;
+      }
+      return touched;
     },
     /** How much geometry is on screen, for the HUD and the tests. */
     stats() {

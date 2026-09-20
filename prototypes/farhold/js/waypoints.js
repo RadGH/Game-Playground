@@ -26,6 +26,21 @@
 //   waypoints.list()                 // for the map and the journal
 //   waypoints.canTravel(from, to)    // why not, if not
 //   waypoints.toJSON() / .load(…)    // part of the save
+//
+// ## The one exception to towns-only: a pad the player built
+//
+// `BUILDING_EXPANSION.md` §5.5–5.20 adds a waypoint the player raises themselves, and it is
+// deliberately the SAME pad — same concrete, same sigil ring, same network. It is not a second
+// system with its own rules; it is a row in the same book with three differences:
+//
+//   * it is lit the moment it is finished, because you were obviously there (§5.8);
+//   * it needs power to stay lit, and a dark pad cannot be travelled to (§5.10) — which is the one
+//     real reason to keep a base's grid up;
+//   * there may be one per base claim, not one per player (§5.9), so a second base gets a second.
+//
+// `js/buildplan.js` places the pad and owns the claim; this file only decides whether you may
+// travel to it. Keeping the two apart is what stops "can I go there?" from needing to know
+// anything about foundations.
 
 /**
  * How far from the middle of a settlement counts as "inside it".
@@ -87,11 +102,17 @@ export function padSpotFor(node, groundOk = null) {
   return { x: node.wx + base.x, z: node.wz + base.z };
 }
 
-export function createWaypoints({ settlements = [], seed = 1, groundOk = null } = {}) {
+export function createWaypoints({ settlements = [], seed = 1, groundOk = null, built = [] } = {}) {
   /** Lit pads, by settlement id. A `Set` because the only question ever asked is "is it lit?". */
   const lit = new Set();
   /** Where you were standing when you last travelled — the anchor a town portal would use. */
   let lastDeparture = null;
+  /**
+   * Pads the player raised (§5.5). Kept as a list rather than folded into `settlements` because a
+   * base is not a settlement — it has no NPCs, no shop and no boundary to cross — and pretending
+   * otherwise would have every town system in the game trying to populate it.
+   */
+  let builtPads = (built || []).map(p => ({ ...p }));
 
   /**
    * ONLY TOWNS AND CITIES.
@@ -103,14 +124,35 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null } 
    */
   const eligible = node => !!node && (node.size || 1) >= 1;
 
-  const pads = () => settlements.filter(eligible).map(node => ({
+  const townPads = () => settlements.filter(eligible).map(node => ({
     id: node.id,
     name: node.name,
     size: node.size || 1,
     node,
     ...padSpotFor(node, groundOk),
     lit: lit.has(node.id),
+    kind: 'town',
   }));
+
+  /**
+   * A player pad reads exactly like a town pad to everything downstream — same fields, same shape,
+   * same `lit` flag. The map, the journal and the travel screen never have to ask which kind it is;
+   * the only place the difference shows up is `canTravel`, where an unpowered one is refused.
+   */
+  const playerPads = () => builtPads.map(p => ({
+    id: p.id,
+    name: p.name,
+    size: 1,
+    node: null,
+    x: p.x, z: p.z,
+    lit: p.powered !== false,
+    kind: 'built',
+    claim: p.claim ?? null,
+    powered: p.powered !== false,
+    faction: p.faction || null,       // §5.19 — the sigils light in your faction's colour
+  }));
+
+  const pads = () => [...townPads(), ...playerPads()];
 
   return {
     /** Every pad in the world, lit or not — the map draws the unlit ones greyed. */
@@ -119,11 +161,50 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null } 
     /** One pad by settlement id. */
     byId(id) { return pads().find(p => p.id === id) || null; },
 
-    /** Is this one lit? */
-    isLit(id) { return lit.has(id); },
+    /** Is this one lit? A pad you built is lit while its grid is up, and dark the moment it is not. */
+    isLit(id) {
+      if (lit.has(id)) return true;
+      const own = builtPads.find(p => p.id === id);
+      return !!own && own.powered !== false;
+    },
 
     /** How many are lit, for the journal line. */
-    get count() { return lit.size; },
+    get count() { return lit.size + builtPads.filter(p => p.powered !== false).length; },
+
+    /**
+     * §5.5–5.9 — file a pad the player finished building.
+     *
+     * One per claim, refused with a sentence rather than silently ignored, because the materials
+     * for a Waypoint Core are a genuine milestone (§5.6) and quietly eating one would be unforgivable.
+     */
+    addBuilt({ id, name, x, z, claim = null, powered = true, faction = null }) {
+      if (!id) return { ok: false, why: 'That pad has no name.' };
+      if (builtPads.some(p => p.id === id)) return { ok: false, why: 'That waypoint is already on the network.' };
+      if (claim != null && builtPads.some(p => p.claim === claim)) {
+        return { ok: false, why: 'This claim already has a waypoint. One per base.' };
+      }
+      const pad = { id, name: name || 'Your Waypoint', x, z, claim, powered: !!powered, faction };
+      builtPads.push(pad);
+      return { ok: true, pad: this.byId(id) };
+    },
+
+    /** §5.12 — the pad can be knocked down; the core survives, so this is not a deletion of the run. */
+    removeBuilt(id) {
+      const before = builtPads.length;
+      builtPads = builtPads.filter(p => p.id !== id);
+      return builtPads.length !== before;
+    },
+
+    /** §5.10 — the grid went down, or came back up. */
+    setPowered(id, on) {
+      const pad = builtPads.find(p => p.id === id);
+      if (!pad) return false;
+      pad.powered = !!on;
+      return true;
+    },
+
+    /** Every pad you raised yourself, for the base overview and for §5.11's raid targeting. */
+    builtList() { return playerPads(); },
 
     /**
      * Entering a settlement lights its pad.
@@ -155,6 +236,16 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null } 
     canTravel(id, { fighting = false, underground = false, fromId = null } = {}) {
       const pad = this.byId(id);
       if (!pad) return { ok: false, why: 'There is no waypoint there.' };
+      /**
+       * §5.10 — A DARK WAYPOINT CANNOT BE TRAVELLED TO.
+       *
+       * Said before "you have not been there", because for a pad you built yourself the honest
+       * reason is never that you have not visited it. The sigils are what carry you; no power, no
+       * sigils, and the answer has to point at the generator rather than at your travel history.
+       */
+      if (pad.kind === 'built' && !pad.powered) {
+        return { ok: false, why: `The sigils at ${pad.name} are dark. Its grid is down.` };
+      }
       if (!pad.lit) return { ok: false, why: `You have not been to ${pad.name} yet.` };
       if (fighting) return { ok: false, why: 'Not while something is trying to kill you.' };
       if (underground) return { ok: false, why: 'Not from underground. Get back to the surface first.' };
@@ -180,13 +271,34 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null } 
     },
     get departure() { return lastDeparture; },
 
-    /** Part of the save: which pads are lit, and where the portal would lead. */
-    toJSON() { return { lit: [...lit], departure: lastDeparture, seed }; },
+    /**
+     * §5.17 — the journal's list of the network.
+     *
+     * `zoneFor(pad)` is supplied by the caller (`js/zones.js` knows the bands, `js/territory.js`
+     * knows who holds the ground); this only decides the order and what a row looks like, so the
+     * journal does not need to know that a pad can be a town or a base.
+     */
+    journal({ zoneFor = null } = {}) {
+      return pads()
+        .filter(p => p.lit)
+        .map(p => ({
+          id: p.id, name: p.name, kind: p.kind, x: p.x, z: p.z,
+          ...(zoneFor ? zoneFor(p) : {}),
+        }))
+        .sort((a, b) => (a.minLevel ?? 0) - (b.minLevel ?? 0) || a.name.localeCompare(b.name));
+    },
+
+    /**
+     * Part of the save: which pads are lit, where the portal would lead, and — §5.16 — the pads the
+     * player built, which are the only part of the network that is not a function of the seed.
+     */
+    toJSON() { return { lit: [...lit], departure: lastDeparture, seed, built: builtPads.map(p => ({ ...p })) }; },
     load(data) {
       if (!data) return;
       lit.clear();
       for (const id of data.lit || []) lit.add(id);
       lastDeparture = data.departure || null;
+      builtPads = (data.built || []).map(p => ({ ...p }));
     },
   };
 }

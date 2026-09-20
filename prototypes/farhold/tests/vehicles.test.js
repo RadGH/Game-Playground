@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import {
-  GEAR_BASES, SHOP_GEAR, VEHICLES, VEHICLE_SLOTS,
+  GEAR_BASES, SHOP_GEAR, VEHICLES, VEHICLE_SLOTS, SHIP_GATE_VERSION,
   createGearShop, categoryOf, startingVehicles, vehicleFor, unlockVehicle, selectVehicle,
 } from '../js/gear.js';
 
@@ -94,23 +94,65 @@ test('mounts and lights file under Other, next to the boats and ships', () => {
 
 // ------------------------------------------------------------------ three boats, three ships
 
-test('there are three boats and three ships, and one of each is free to start with', () => {
+/**
+ * WHAT THIS USED TO SAY, and why it does not say it any more.
+ *
+ * It used to be "there are three boats and three ships, and one of each is free to start with".
+ * Both halves were genuinely invalidated by BUILDING_EXPANSION.md §9:
+ *
+ *   §9.1  "You do not start with a ship"        — the ship slot starts EMPTY
+ *   §9.2  "You cannot buy one"                  — every ship's price is null
+ *   §9.11 "Better ships are built, not bought"  — the three hulls are the three tiers of the yard
+ *
+ * and the boat ladder grew a fourth rung that can only be built (the Pitch Launch), which is the
+ * "more craftable equipment: … boats" half of the same ask. What has NOT changed, and is still
+ * pinned below, is that a new character is handed a raft and nothing else.
+ */
+test('four boats and three ships: one boat is free, one is built, and no ship is either', () => {
   assert.deepEqual(VEHICLE_SLOTS, ['boat', 'ship']);
-  for (const slot of VEHICLE_SLOTS) {
-    const kinds = Object.values(VEHICLES[slot].kinds);
-    assert.equal(kinds.length, 3, `three ${slot}s`);
-    const free = kinds.filter(k => k.price === 0);
-    assert.equal(free.length, 1, `exactly one free ${slot}`);
-    assert.equal(free[0].key, VEHICLES[slot].starter);
-  }
+
+  const boats = Object.values(VEHICLES.boat.kinds);
+  assert.equal(boats.length, 4, 'three bought boats and one built one');
+  const freeBoats = boats.filter(k => k.price === 0);
+  assert.equal(freeBoats.length, 1, 'exactly one free boat');
+  assert.equal(freeBoats[0].key, VEHICLES.boat.starter);
+  assert.equal(boats.filter(k => k.buildOnly).length, 1, 'exactly one boat you have to build');
+
+  const ships = Object.values(VEHICLES.ship.kinds);
+  assert.equal(ships.length, 3, 'three ships, as tiers of the yard');
+  assert.equal(VEHICLES.ship.starter, null, 'nobody is handed a ship');
+  for (const ship of ships) assert.equal(ship.price, null, `${ship.key} still has a price on it`);
+  for (const ship of ships) assert.ok(ship.tier >= 1, `${ship.key} needs a tier for js/shipyard.js`);
 });
 
-test('the shop offers the two you have to pay for, and never the one you were given', () => {
+test('a ship cannot be bought, and it says so rather than doing nothing', () => {
+  const player = { gold: 999999, vehicles: startingVehicles() };
+  const r = unlockVehicle(player, 'ship', 'lander');
+  assert.equal(r.ok, false);
+  assert.match(r.why, /built, not bought/);
+  assert.equal(player.gold, 999999, 'a refused ship costs nothing');
+  // the yard's own door still opens
+  const granted = unlockVehicle(player, 'ship', 'lander', { granted: true });
+  assert.equal(granted.ok, true);
+  assert.deepEqual(player.vehicles.owned.ship, ['lander']);
+});
+
+/**
+ * §9.2 again: "Remove ships from shop stock entirely. Boats stay buyable." The shelf is two boats
+ * now — it used to be two boats and two ships — and it is `price > 0` that does the filtering, so a
+ * ship (price null) and the built-only launch (price null) both fall off it for the same reason.
+ */
+test('the shelf offers the two boats you pay for, and nothing that has to be built', () => {
   const rows = shop.vehiclesFor();
-  assert.equal(rows.length, 4, 'two boats and two ships are for sale');
-  for (const row of rows) assert.ok(row.price > 0, `${row.key} is on the shelf at no price`);
+  assert.equal(rows.length, 2, 'two boats are for sale and no ships at all');
+  for (const row of rows) {
+    assert.ok(row.price > 0, `${row.key} is on the shelf at no price`);
+    assert.equal(row.slot, 'boat', `${row.key} is a ${row.slot} and should not be on a shelf`);
+  }
   const keys = rows.map(r => r.key);
-  assert.ok(!keys.includes('raft') && !keys.includes('lander'), 'the starters are not sold');
+  assert.ok(!keys.includes('raft'), 'the starter is not sold');
+  assert.ok(!keys.includes('launch'), 'the built-only boat is not sold');
+  for (const key of Object.keys(VEHICLES.ship.kinds)) assert.ok(!keys.includes(key), `${key} is still on a shelf`);
 });
 
 // ------------------------------------------------------------------ the boat is worth having
@@ -123,11 +165,22 @@ test('every boat is faster than swimming, and each one is faster than the last',
       `${kind.name} does ${kind.speed} m/s against a ${swim} m/s swim — a boat that is slower than ` +
       'swimming is a boat nobody boards');
   }
-  // the ladder has to climb with the price, or the dear ones are a trap
-  const byPrice = [...kinds].sort((a, b) => a.price - b.price);
-  for (let i = 1; i < byPrice.length; i++) {
-    assert.ok(byPrice[i].speed > byPrice[i - 1].speed,
-      `${byPrice[i].name} costs more than ${byPrice[i - 1].name} and is not faster`);
+  // The ladder has to climb, or the dear ones are a trap. The three bought boats climb with their
+  // price; the built one sits above all of them because it is the only one with an engine — and it
+  // pays for that by being the only boat that can run out of fuel.
+  const bought = kinds.filter(k => k.price > 0).sort((a, b) => a.price - b.price);
+  const free = kinds.find(k => k.price === 0);
+  for (let i = 0; i < bought.length; i++) {
+    const under = i === 0 ? free : bought[i - 1];
+    assert.ok(bought[i].speed > under.speed,
+      `${bought[i].name} costs more than ${under.name} and is not faster`);
+  }
+  const built = kinds.filter(k => k.buildOnly);
+  for (const boat of built) {
+    assert.ok(boat.speed > bought[bought.length - 1].speed,
+      `${boat.name} takes a workshop to make and is not faster than the best one on a shelf`);
+    assert.ok(boat.perKm > 0 && boat.fuel,
+      `${boat.name} is the fastest boat and nothing holds it back — give it a fuel line`);
   }
 });
 
@@ -162,11 +215,19 @@ test('the raft is horse pace, and no boat beats a gallop', () => {
 
 // ------------------------------------------------------------------ owning one
 
-test('a new character owns the raft and the lander, and nothing else', () => {
+/**
+ * §9.1 in one test. A new character gets the raft they always got and NOTHING to fly, and the gate
+ * stamp is what tells js/shipyard.js that this is a new character rather than a save from before
+ * the gate existed (which keeps its ship — see tests/shipyard.test.js).
+ */
+test('a new character owns the raft, no ship, and nothing with an engine', () => {
   const v = startingVehicles();
   assert.deepEqual(v.owned.boat, ['raft']);
-  assert.deepEqual(v.owned.ship, ['lander']);
+  assert.deepEqual(v.owned.ship, [], 'you do not start with a ship');
+  assert.deepEqual(v.owned.ground, [], 'and nothing on wheels either');
   assert.equal(v.active.boat, 'raft');
+  assert.equal(v.active.ship, null);
+  assert.equal(v.shipyard.gate, SHIP_GATE_VERSION, 'a new character is stamped, so it is never migrated');
 });
 
 test('buying a boat takes the gold once, and you cannot buy it twice', () => {
@@ -202,6 +263,9 @@ test('vehicleFor falls back to the starter rather than returning nothing', () =>
   assert.equal(vehicleFor({}, 'boat').key, 'raft', 'a player with no vehicles block still has a raft');
   assert.equal(vehicleFor({ vehicles: { active: { boat: 'nonsense' }, owned: {} } }, 'boat').key, 'raft');
   assert.equal(vehicleFor({}, 'submarine'), null);
+  // the ship slot has no starter to fall back to any more, and null is the honest answer: anything
+  // that flies should be asking shipyard.canLaunch(), which says WHY in words
+  assert.equal(vehicleFor({}, 'ship'), null, 'no ship until one is built');
 });
 
 // ------------------------------------------------------------------ the wiring player.js expects

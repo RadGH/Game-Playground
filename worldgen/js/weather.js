@@ -105,7 +105,18 @@ export function weatherWeights(climate = {}) {
     add('rain', fall * 1.15 * warm);
     // storms need heat as well as water — they are an engine, not just a cloud
     add('storm', fall * 0.55 * clamp((temp - 0.52) * 3, 0, 1) * (1 + (tags.includes('hot') ? 0.6 : 0)));
-    const freezing = clamp((0.34 - temp) * 5, 0, 1);
+    /**
+     * NOT ON SAND.
+     *
+     * "I'm in the desert and the weather seems like its snowing." Snow already wanted cold and damp,
+     * and a hot desert supplies neither — but a COLD desert (high, polar, or a badland at altitude)
+     * clears the temperature test, and `wet` ground nearby was enough to give it something to fall.
+     * A place defined by having no water does not get snowfall, whatever the arithmetic says, so the
+     * arid biomes are excluded outright rather than left to a threshold.
+     */
+    const arid = ['desert', 'dunes', 'badlands', 'ashPlain', 'sand', 'scorched']
+      .some(k => biome?.key === k || tags.includes(k));
+    const freezing = clamp((0.34 - temp) * 5, 0, 1) * (arid ? 0 : 1);
     add('snow', fall * 1.1 * freezing);
     add('blizzard', fall * 0.5 * freezing * (0.35 + height * 1.3 + (tags.includes('harsh') ? 0.4 : 0)));
   }

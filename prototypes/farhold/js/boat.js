@@ -5,13 +5,14 @@
 // hull, so that going faster across a lake also LOOKS like going faster across a lake rather than
 // swimming at an improbable pace.
 //
-// Three hulls for the three boats in js/gear.js, chunky Three.js primitives in the same style as
-// avatar-3d/js/vehicles.js. Everything is built facing +z, because that is where the controller's
+// Four hulls for the four boats in js/gear.js — three you can buy and the Pitch Launch you have to
+// build — chunky Three.js primitives in the same style as avatar-3d/js/vehicles.js. Everything is
+// built facing +z, because that is where the controller's
 // yaw of 0 points (js/player.js: `forward.set(sin(yaw), 0, cos(yaw))`), so the group can take
 // `rotation.y = control.yaw` with no correction.
 //
 //   import { createBoat } from './boat.js';
-//   const boat = createBoat();          // a THREE.Group, hidden, all three hulls inside it
+//   const boat = createBoat();          // a THREE.Group, hidden, every hull inside it
 //   scene.add(boat.group);
 //   boat.show('skiff');                 // swap hull, make visible
 //   boat.place(x, waterSurface, z, yaw);
@@ -35,8 +36,8 @@ const cyl = (rt, rb, h, c, s = 10, extra) => mesh(new THREE.CylinderGeometry(rt,
 /**
  * Six logs and a great deal of rope.
  *
- * Deliberately the ugliest of the three: it is the one you are given, and the shop has to look like
- * an improvement from the first time you see it.
+ * Deliberately the ugliest of them: it is the one you are given, and the shop has to look like an
+ * improvement from the first time you see it.
  */
 function buildRaft() {
   const g = new THREE.Group();
@@ -107,10 +108,59 @@ function buildCutter() {
   return g;
 }
 
-const HULLS = { raft: buildRaft, skiff: buildSkiff, cutter: buildCutter };
+/**
+ * The Pitch Launch — the rung the shop does not sell.
+ *
+ * "More craftable equipment: … boats." It is the only boat with an engine, so it is the only one
+ * that reads as machinery rather than carpentry: a cabin, a stack with a sooty top, and a churn of
+ * water at the stern instead of a sail. That difference has to be visible from the shore, otherwise
+ * the fastest boat in the game looks exactly like the second fastest.
+ */
+function buildLaunch() {
+  const g = new THREE.Group();
+  const hull = '#5a5248', trim = '#3a3630', metal = '#8f97a2', glass = '#1b2733';
+  const body = box(1.5, 0.55, 4.6, hull);
+  body.position.y = 0.05;
+  g.add(body);
+  const rubbing = box(1.58, 0.1, 4.4, trim);          // the rubbing strake along the waterline
+  rubbing.position.y = 0.2;
+  g.add(rubbing);
+  const bow = mesh(new THREE.ConeGeometry(0.8, 1.4, 4), hull);
+  bow.rotation.x = -Math.PI / 2;
+  bow.rotation.y = Math.PI / 4;
+  bow.position.set(0, 0.05, 2.9);
+  g.add(bow);
+  const deck = box(1.52, 0.08, 2.2, trim);
+  deck.position.set(0, 0.34, 0.4);
+  g.add(deck);
+  // the wheelhouse: a box with dark glass in the front of it
+  const house = box(1.1, 0.8, 1.3, hull);
+  house.position.set(0, 0.75, -0.3);
+  g.add(house);
+  const screen = mesh(new THREE.BoxGeometry(0.9, 0.34, 0.06), glass, { roughness: 0.25, metalness: 0.4 });
+  screen.position.set(0, 0.95, 0.34);
+  g.add(screen);
+  const stack = cyl(0.11, 0.13, 0.85, metal, 10, { roughness: 0.45, metalness: 0.65 });
+  stack.position.set(0.3, 1.3, -0.8);
+  g.add(stack);
+  const soot = cyl(0.12, 0.12, 0.12, '#1a1c20', 10);
+  soot.position.set(0.3, 1.74, -0.8);
+  g.add(soot);
+  // the fuel can lashed to the deck, which is the whole reason this boat can run out
+  const can = box(0.3, 0.34, 0.24, '#8a5a2a');
+  can.position.set(-0.45, 0.55, -1.2);
+  g.add(can);
+  const prop = cyl(0.22, 0.22, 0.06, metal, 10, { roughness: 0.4, metalness: 0.75 });
+  prop.rotation.x = Math.PI / 2;
+  prop.position.set(0, -0.15, -2.35);
+  g.add(prop);
+  return g;
+}
+
+const HULLS = { raft: buildRaft, skiff: buildSkiff, cutter: buildCutter, launch: buildLaunch };
 
 /**
- * One group holding all three hulls, with at most one visible.
+ * One group holding every hull, with at most one visible.
  *
  * Built once at boot like the horse at js/main.js:513 — a boat is put away far more often than it
  * is used, and rebuilding geometry every time somebody wades into a river is the kind of hitch you

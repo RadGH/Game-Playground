@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "_doc": "The gate in BUILDING_EXPANSION.md §9: you do not start with a ship and you cannot buy one. Four subsystems — hull, drive, tanks, avionics — each built from a DIFFERENT refined material so the whole of the refining chain gets used, one of them (the drive) needing a rare element off the planet you are standing on, fuel that is a separate consumable, and a launch pad you place like any other structure. Read by js/shipyard.js. Every id here comes from data/workshop.json; every element key comes from universe/data/elements.json.",
+
+  "_balanceDoc": "§9.20 asks for the whole gate to be one tunable block in data/balance.json. That file belongs to another pair of hands this round, so the block lives here instead and js/shipyard.js takes a `balance` override: if `balance.shipGate` ever appears, it wins over everything below, field by field.",
+
+  "gate": {
+    "version": 1,
+    "_versionDoc": "Stamped into player.vehicles.shipyard when a character is made. A save with no stamp was made before the gate existed, so migrateSave() hands that character the Surveyor Lander and marks its four subsystems built — §9.19, nobody mid-run loses the ship they have been flying."
+  },
+
+  "_subsystemDoc": "Three tiers each, and a ship needs all four at its own tier. `signature` is the refined material that subsystem is mostly made of and no other subsystem uses — that is §9.5, and it is what stops one furnace and one recipe being the whole industry.",
+  "subsystems": {
+    "hull": {
+      "id": "hull", "name": "Hull", "signature": "plate_steel", "station": "assembler",
+      "desc": "Frame, skin and the seals between them. It is what keeps the outside outside.",
+      "tiers": [
+        { "tier": 1, "name": "Patched Hull",    "cost": { "plate_steel": 6,  "part": 4,  "rope": 2 },                         "hours": 10 },
+        { "tier": 2, "name": "Welded Hull",     "cost": { "plate_steel": 12, "part": 8,  "composite": 2 },                    "hours": 20 },
+        { "tier": 3, "name": "Braced Hull",     "cost": { "plate_steel": 22, "part": 14, "composite": 5, "nullplate": 1 },    "hours": 36 }
+      ]
+    },
+    "drive": {
+      "id": "drive", "name": "Drive", "signature": "ceramic", "station": "assembler",
+      "desc": "The engine and the tiles that stop it cooking everything else. The one piece that needs something the planet had to give you.",
+      "coresPerTier": [1, 2, 3],
+      "tiers": [
+        { "tier": 1, "name": "Salvaged Drive",  "cost": { "ceramic": 6,  "part": 5,  "steel": 6 },                            "hours": 14 },
+        { "tier": 2, "name": "Tuned Drive",     "cost": { "ceramic": 12, "part": 10, "steel": 14 },                           "hours": 26 },
+        { "tier": 3, "name": "Heavy Drive",     "cost": { "ceramic": 20, "part": 16, "steel": 24, "plate_steel": 4 },         "hours": 44 }
+      ]
+    },
+    "tanks": {
+      "id": "tanks", "name": "Tanks", "signature": "composite", "station": "assembler",
+      "desc": "Where the fuel sits and, more to the point, stays. A tank that leaks is a short flight.",
+      "tiers": [
+        { "tier": 1, "name": "Strapped Tanks",  "cost": { "composite": 4,  "glass": 2, "part": 3 },                           "hours": 8 },
+        { "tier": 2, "name": "Lined Tanks",     "cost": { "composite": 9,  "glass": 4, "part": 6,  "steel": 6 },              "hours": 16 },
+        { "tier": 3, "name": "Deep Tanks",      "cost": { "composite": 16, "glass": 6, "part": 10, "plate_steel": 3 },        "hours": 30 }
+      ],
+      "capacity": [18, 34, 60],
+      "_capacityDoc": "Units of Drive Fuel the ship can hold at each tier. A lander's tanks hold three launches; deep tanks hold a tour."
+    },
+    "avionics": {
+      "id": "avionics", "name": "Avionics", "signature": "circuit", "station": "assembler",
+      "desc": "How the ship knows which way is up, where the pad is, and how far it is to the next world.",
+      "tiers": [
+        { "tier": 1, "name": "Bare Avionics",   "cost": { "circuit": 3,  "wire": 8,  "glass": 2 },                            "hours": 7 },
+        { "tier": 2, "name": "Charted Avionics","cost": { "circuit": 6,  "wire": 14, "lens": 2, "cell": 2 },                  "hours": 15 },
+        { "tier": 3, "name": "Deepfield Avionics","cost": { "circuit": 11, "wire": 22, "lens": 4, "cell": 4 },                "hours": 28 }
+      ]
+    },
+    "warp": {
+      "id": "warp", "name": "Warp Coil", "signature": "nullplate", "station": "refinery", "optional": true,
+      "desc": "§9.15: a coil, not a ship. Without it you fly between the worlds of one star; with it you leave the star.",
+      "coresPerTier": [1],
+      "coreMustDifferFromDrive": true,
+      "_coreDoc": "The coil's core has to come from a DIFFERENT family than the drive's, and a planet's one or two rare elements almost never span two families — so this is the piece that makes you go somewhere else for it, which is exactly what §9.6 asks for.",
+      "tiers": [
+        { "tier": 1, "name": "Warp Coil", "cost": { "nullplate": 2, "circuit": 6, "plate_steel": 4 }, "hours": 40 }
+      ]
+    }
+  },
+
+  "_coreDoc": "The rare element goes into a CHARGED CORE, and there are four ways to make one — one per family of element. Every rare element in universe/data/elements.json belongs to exactly one family, so whatever the world under your feet happens to hold, there is a core you can build from it. That is the design decision: the gate must never hard-lock on a seed. tests/shipyard.test.js reads elements.json and fails if a new element is ever added to it without a home here.",
+  "cores": {
+    "core_arcane": {
+      "id": "core_arcane", "name": "Arcane Core", "family": "arcane", "station": "assembler",
+      "elements": ["aetherite", "nullstone", "umbralShale"],
+      "cost": { "lens": 1, "wire": 3 }, "elementCost": 2, "hours": 6,
+      "desc": "A violet charge that will not sit still. The steadiest of the four and the hardest to find."
+    },
+    "core_thermal": {
+      "id": "core_thermal", "name": "Thermal Core", "family": "thermal", "station": "assembler",
+      "elements": ["pyrocrystal", "emberlace", "helionGas"],
+      "cost": { "ceramic": 1, "wire": 3 }, "elementCost": 2, "hours": 6,
+      "desc": "It burns from the inside and you build the tile around it before you touch it."
+    },
+    "core_electric": {
+      "id": "core_electric", "name": "Voltaic Core", "family": "electric", "station": "assembler",
+      "elements": ["voltaicOre", "cryonite", "glimmerSalt"],
+      "cost": { "cell": 1, "wire": 3 }, "elementCost": 2, "hours": 6,
+      "desc": "A cell wound round a streak of storm-metal. Loud, bright, and perfectly reliable."
+    },
+    "core_grown": {
+      "id": "core_grown", "name": "Grown Core", "family": "grown", "station": "assembler",
+      "elements": ["ferrovine", "xenoplasm", "brinepearl"],
+      "cost": { "composite": 1, "wire": 3 }, "elementCost": 2, "hours": 6,
+      "desc": "Metal laid down by something alive. It is warm to hold and nobody enjoys that."
+    }
+  },
+
+  "_shipDoc": "§9.11: the three hulls that used to be shop stock are buildable tiers now. `needs` is the tier each subsystem must be at; `assembly` is what it costs to put them together on the pad.",
+  "ships": {
+    "lander": {
+      "key": "lander", "tier": 1,
+      "needs": { "hull": 1, "drive": 1, "tanks": 1, "avionics": 1 },
+      "assembly": { "rope": 6, "part": 4, "plate_steel": 2 }, "hours": 12,
+      "fuel": { "launch": 1.0, "land": 1.0, "jump": 1.0, "warp": 1.0 }
+    },
+    "runner": {
+      "key": "runner", "tier": 2,
+      "needs": { "hull": 2, "drive": 2, "tanks": 2, "avionics": 2 },
+      "assembly": { "rope": 8, "part": 10, "plate_steel": 4 }, "hours": 22,
+      "fuel": { "launch": 0.8, "land": 0.8, "jump": 0.9, "warp": 1.1 }
+    },
+    "hauler": {
+      "key": "hauler", "tier": 3,
+      "needs": { "hull": 3, "drive": 3, "tanks": 3, "avionics": 3 },
+      "assembly": { "rope": 10, "part": 16, "plate_steel": 8 }, "hours": 40,
+      "fuel": { "launch": 1.5, "land": 1.3, "jump": 0.75, "warp": 0.7 }
+    }
+  },
+
+  "_fuelDoc": "§9.7 and §9.10: fuel is a consumable and it is per FLIGHT, not per launch, so the industry stays relevant after the first time the sky opens. Units of Drive Fuel (data/workshop.json), multiplied by the ship's own row above.",
+  "fuel": {
+    "id": "fuel_drive",
+    "legs": { "launch": 6, "land": 3, "jump": 8, "warp": 20 },
+    "reserve": 1,
+    "_reserveDoc": "A launch is refused unless there is enough left over to put the ship down again. Stranding a player in orbit with a dry tank is a loss they cannot undo, and that is not a difficulty setting, it is a bug."
+  },
+
+  "_padDoc": "§9.8: the pad is a structure, and the terrain tools exist so that you can make the ground flat enough for it. js/build.js owns placing it; these are the numbers it should read.",
+  "pad": {
+    "id": "launch_pad",
+    "name": "Launch Pad",
+    "cost": { "block": 40, "plate_steel": 4, "part": 6, "cell": 2 },
+    "hours": 18,
+    "flatRadius": 12,
+    "maxSlope": 0.04,
+    "clearance": 30,
+    "power": 20,
+    "desc": "A levelled apron of cut block with a burn ring in the middle. It is also where the ship comes back to (§9.13)."
+  },
+
+  "_stationDoc": "§9.15 and the far end of the ladder: an orbital yard. Four modules, each one a tier-3 craft that has to be LAUNCHED into orbit, which means a hauler, a pad and a lot of fuel. Finished, it refuels a ship without a synthesiser on the ground, it is a pad you can return to from anywhere in the system, and it is where an interstellar run is fitted out. It is a stated goal with stated requirements rather than a second game — everything it needs already exists in this file.",
+  "station": {
+    "id": "orbital_yard",
+    "name": "Orbital Yard",
+    "requires": { "ship": "hauler", "pad": true, "warp": false },
+    "fuelPerModule": 14,
+    "modules": [
+      { "id": "spine",  "name": "Spine and Airlock", "cost": { "plate_steel": 14, "part": 18, "circuit": 4, "composite": 6 },  "hours": 30,
+        "desc": "A corridor with a door at each end. Everything else bolts to it." },
+      { "id": "ring",   "name": "Habitat Ring",      "cost": { "plate_steel": 20, "composite": 12, "glass": 10, "part": 16 },  "hours": 44,
+        "desc": "Somewhere to sleep that is not a seat. It is also the only window in the system." },
+      { "id": "cradle", "name": "Ship Cradle",       "cost": { "plate_steel": 18, "part": 20, "cell": 8, "circuit": 6 },       "hours": 40,
+        "desc": "Clamps, a fuel arm and a crane. A ship parked here is repaired and fuelled without ever landing." },
+      { "id": "array",  "name": "Power Array",       "cost": { "glass": 24, "wire": 40, "cell": 12, "circuit": 8 },            "hours": 36,
+        "desc": "Panels and batteries. Nothing above works without it, so it is the one people build first and the one this list puts last." }
+    ],
+    "grants": {
+      "refuel": true,
+      "returnPad": true,
+      "warpFitting": true,
+      "desc": "Refuel in orbit, return to it from anywhere in the system, and fit the warp coil without a refinery on the ground."
+    }
+  },
+
+  "_marketDoc": "§9.18: skipping is possible and it is meant to hurt. A city — not a village, not a camp — will sell a finished subsystem or a charged core at a price that assumes you are desperate. Buying is never cheaper than building, and the point of it is that a bad seed can never wall a player in.",
+  "market": {
+    "minSettlement": "city",
+    "parts": {
+      "hull": 9000,
+      "drive": 14000,
+      "tanks": 7000,
+      "avionics": 11000
+    },
+    "core": 18000,
+    "element": 2500,
+    "fuel": 260,
+    "_fuelPriceDoc": "Per unit of Drive Fuel, so a launch bought over the counter is about 1,600 gold. Enough to get home once; not a way to live."
+  }
+}

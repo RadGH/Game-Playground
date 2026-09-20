@@ -23,6 +23,13 @@
 // active from a dropdown. Mixing the two is what makes an inventory tedious, so they are kept apart
 // here and everywhere downstream.
 //
+// **What changed when the industry arrived.** Every light and every boat carries a `craft` block
+// now (ids from data/workshop.json), two lights and one boat were added above the top of the shop's
+// ladder that can ONLY be built, and the ship slot stopped being something a merchant sells at all —
+// see the note over `VEHICLES.ship` and js/shipyard.js. Ground vehicles (motorcycle, car, truck)
+// live in js/vehicles.js and keep their ownership inside the same `player.vehicles` block, because
+// that is the block js/save.js already writes.
+//
 //   import { GEAR_BASES, VEHICLES, createGearShop, categoryOf } from './gear.js';
 //   const shop = createGearShop({ rpg });
 //   shop.stockFor(npc, level, rng);        // what every merchant carries whatever else it sells
@@ -123,20 +130,46 @@ export const GEAR_BASES = {
    * inside that circle goes up with it. The prices move with the reach, so the ladder still costs
    * something.
    */
+  /**
+   * ---- and then "more craftable equipment: lanterns…".
+   *
+   * The ladder did not need a second, parallel list of crafted lamps beside the bought ones — that
+   * is how a game ends up with two torches. Instead **every rung became craftable** (a `craft`
+   * block: what it costs and which bench it wants, ids from data/workshop.json), and two rungs were
+   * added ABOVE the shop's best one that can only be built. So the shelf is unchanged, the ladder
+   * is longer, and the reason to own a workshop is that the shelf runs out.
+   */
   torch: {
     key: 'torch', name: 'Pitch Torch', slot: 'light', type: 'accessory', subtype: 'torch',
     range: 40, intensity: 2.6, color: '#ffb066', burn: 0, price: 20, look: { offhand: 'torch', color: '#c08040' },
+    craft: { station: 'hand', cost: { timber: 1, fibre: 2, sap: 1 }, hours: 0.1 },
     lore: 'Rag, pitch and a stick. It will not win a fight, but you can see the fight coming.',
   },
   lantern: {
     key: 'lantern', name: 'Shuttered Lantern', slot: 'light', type: 'accessory', subtype: 'lantern',
     range: 90, intensity: 3.0, color: '#ffd9a0', burn: 0, price: 260, look: { offhand: 'lantern', color: '#c8b070' },
+    craft: { station: 'workbench', cost: { glass: 2, ingot_copper: 2, leather: 1, sap: 2 }, hours: 1 },
     lore: 'Glass, brass and a wick you can pinch down to nothing when something is listening.',
   },
   wisplamp: {
     key: 'wisplamp', name: 'Wisp Lamp', slot: 'light', type: 'accessory', subtype: 'lamp',
     range: 160, intensity: 3.4, color: '#a8d8ff', burn: 0, price: 820, look: { offhand: 'lamp', color: '#7fd4ff' },
+    craft: { station: 'workbench', cost: { glass: 3, lens: 1, ingot_copper: 3, wire: 2 }, hours: 3 },
     lore: 'Something small and unhappy is in the jar. It gives a cold light and it does not go out.',
+  },
+  mirror_lamp: {
+    key: 'mirror_lamp', name: 'Mirror Lamp', slot: 'light', type: 'accessory', subtype: 'lantern',
+    range: 210, intensity: 3.6, color: '#ffe6b8', burn: 0, price: 0, buildOnly: true,
+    look: { offhand: 'lantern', color: '#d8c884' },
+    craft: { station: 'workbench', cost: { glass: 4, lens: 2, ingot_copper: 4, wire: 3, gum: 1 }, hours: 4 },
+    lore: 'A polished dish behind the flame. All of the light goes forward, which is where you were going anyway.',
+  },
+  arc_lamp: {
+    key: 'arc_lamp', name: 'Arc Lamp', slot: 'light', type: 'accessory', subtype: 'lamp',
+    range: 300, intensity: 4.0, color: '#dcefff', burn: 0, price: 0, buildOnly: true,
+    look: { offhand: 'lamp', color: '#cfe6ff' },
+    craft: { station: 'assembler', cost: { cell: 2, wire: 6, lens: 2, glass: 3, part: 1 }, hours: 6 },
+    lore: 'A cell, two electrodes and a gap. It does not flicker, it does not care about wind, and it makes everything look dead.',
   },
 
   // ---- quivers. THEY ADD DAMAGE, NOT ARMOUR — the whole point of the change.
@@ -242,64 +275,181 @@ export const VEHICLES = {
        * of a gallop, so buying one is an upgrade and riding is still the fastest way to travel.
        */
       raft: { key: 'raft', name: 'Lashed Raft', speed: 11.3, price: 0, look: { hull: '#6a5238' },
+        craft: { station: 'hand', cost: { timber: 6, rope: 3 }, hours: 1 },
         lore: 'Six logs and a great deal of rope. It floats, which is the entire specification.' },
       skiff: { key: 'skiff', name: 'Fenland Skiff', speed: 14.2, price: 340, look: { hull: '#7a6a4a' },
+        craft: { station: 'sawmill', cost: { plank: 10, rope: 4, sap: 3 }, hours: 4 },
         lore: 'Flat-bottomed and quick in the shallows. Built for reed channels, not open water.' },
       cutter: { key: 'cutter', name: 'Coast Cutter', speed: 17.4, price: 1400, look: { hull: '#4a5a6a' },
+        craft: { station: 'sawmill', cost: { plank: 22, rope: 8, fibre: 12, ingot_iron: 4, gum: 2 }, hours: 10 },
         lore: 'A keel, a sail and somewhere dry to sit. It will cross a sea if you are patient.' },
+      /**
+       * The rung the shop does not have.
+       *
+       * "More craftable equipment: … boats" wanted something past the end of the bought ladder, and
+       * a powered launch is the obvious one: the only boat with an engine, so the only boat that
+       * drinks Burner Fuel — the same fuel the motorcycle drinks (js/vehicles.js). It is faster than
+       * the cutter and it is the only one that can run out. Still under a gallop, because riding
+       * stays the fastest way to travel; see the yardstick in tests/vehicles.test.js.
+       */
+      launch: { key: 'launch', name: 'Pitch Launch', speed: 20.5, price: null, buildOnly: true,
+        fuel: 'fuel_burner', perKm: 0.5, tank: 16, look: { hull: '#5a5248' },
+        craft: { station: 'assembler', cost: { plank: 18, steel: 6, part: 3, gum: 3, cell: 1 }, hours: 12 },
+        lore: 'A cutter with an engine where the mast used to be. Loud, quick, and it stops when the can is empty.' },
     },
   },
+  /**
+   * SHIPS ARE BUILT, NOT BOUGHT — BUILDING_EXPANSION.md §9.1 and §9.2.
+   *
+   * "You do not start with a ship and you cannot buy one." So the starter is gone, every price is
+   * null (which is what keeps them off `vehiclesFor()`'s shelf — it only lists a positive price),
+   * and the three hulls became the three TIERS of js/shipyard.js: a lander is the four subsystems
+   * at tier 1, a runner at tier 2, a hauler at tier 3. Anyone already mid-run keeps the ship they
+   * have — that migration is `shipyard.migrateSave`, and it is not optional.
+   */
   ship: {
     slot: 'ship',
-    starter: 'lander',
+    starter: null,
+    built: true,
     kinds: {
-      lander: { key: 'lander', name: 'Surveyor Lander', thrust: 1, warp: 1, price: 0, look: { hull: 'explorer' },
-        lore: 'Standard issue. It gets down, and usually back up.' },
-      runner: { key: 'runner', name: 'Verge Runner', thrust: 1.35, warp: 1.2, price: 2200, look: { hull: 'courier' },
+      lander: { key: 'lander', name: 'Surveyor Lander', thrust: 1, warp: 1, price: null, tier: 1, look: { hull: 'explorer' },
+        lore: 'Four subsystems, a pad and a week of work. It gets down, and usually back up.' },
+      runner: { key: 'runner', name: 'Verge Runner', thrust: 1.35, warp: 1.2, price: null, tier: 2, look: { hull: 'courier' },
         lore: 'Stripped to the frame and over-engined. Everything that is not thrust has been removed.' },
-      hauler: { key: 'hauler', name: 'Deepfield Hauler', thrust: 0.9, warp: 1.6, price: 5200, look: { hull: 'hauler' },
+      hauler: { key: 'hauler', name: 'Deepfield Hauler', thrust: 0.9, warp: 1.6, price: null, tier: 3, look: { hull: 'hauler' },
         lore: 'Slow off a world and tireless between them. The drive is most of the ship.' },
     },
   },
 };
 
+/**
+ * The stamp that tells an old save from a new character.
+ *
+ * It has to be written by `startingVehicles()`, and `startingVehicles()` cannot import
+ * js/shipyard.js because shipyard.js imports this file — so the number is repeated here rather
+ * than shared, exactly the way HORSE_PACE above repeats a figure out of balance.json.
+ * tests/shipyard.test.js fails if this and data/shipyard.json's `gate.version` ever disagree.
+ */
+export const SHIP_GATE_VERSION = 1;
+
 /** Which vehicle slots exist, in the order the sheet shows them. */
 export const VEHICLE_SLOTS = Object.keys(VEHICLES);
 
-/** What a new character owns before they have bought anything. */
+/**
+ * What a new character owns before they have built or bought anything: a raft, and that is all.
+ *
+ * The ship slot is deliberately EMPTY — that is the whole of §9.1 in one line. The `shipyard` stamp
+ * is what tells `shipyard.migrateSave()` that this character was made after the gate existed and
+ * must therefore earn a ship, rather than being an old save that should keep the one it has.
+ */
 export function startingVehicles() {
   const owned = {};
   const active = {};
   for (const [slot, spec] of Object.entries(VEHICLES)) {
-    owned[slot] = [spec.starter];
-    active[slot] = spec.starter;
+    owned[slot] = spec.starter ? [spec.starter] : [];
+    active[slot] = spec.starter || null;
   }
-  return { owned, active };
+  owned.ground = [];                           // motorcycles, cars and trucks — see js/vehicles.js
+  active.ground = null;
+  return { owned, active, rigs: {}, shipyard: { gate: SHIP_GATE_VERSION } };
 }
 
-/** The spec of whichever one is selected, or the starter. */
+/**
+ * The spec of whichever one is selected, or the slot's starter.
+ *
+ * The ship slot has no starter any more, so this returns **null** when you have not built one —
+ * and that is the honest answer. Everything that flies should be asking `shipyard.canLaunch()`
+ * anyway, which says why in plain words instead of handing back a ship that does not exist.
+ */
 export function vehicleFor(player, slot) {
   const spec = VEHICLES[slot];
   if (!spec) return null;
   const key = player?.vehicles?.active?.[slot] || spec.starter;
-  return spec.kinds[key] || spec.kinds[spec.starter];
+  return spec.kinds[key] || (spec.starter ? spec.kinds[spec.starter] : null);
 }
 
-/** Buy one. Returns `{ ok }` or `{ ok: false, why }` — owning one twice is not a thing. */
-export function unlockVehicle(player, slot, key) {
+/**
+ * Take one into your ownership. Boats are bought; ships are handed over by the yard.
+ *
+ * `granted` is the yard's door: js/shipyard.js calls this with it after the four subsystems are
+ * assembled on the pad. Without it, a ship is refused with the reason — because "you cannot buy
+ * one" is a rule the player should be told once, not a button that quietly does nothing.
+ */
+export function unlockVehicle(player, slot, key, { granted = false } = {}) {
   const spec = VEHICLES[slot];
   const kind = spec?.kinds?.[key];
   if (!kind) return { ok: false, why: 'No such vehicle.' };
   player.vehicles = player.vehicles || startingVehicles();
   const owned = player.vehicles.owned[slot] || (player.vehicles.owned[slot] = []);
   if (owned.includes(key)) return { ok: false, why: `You already own the ${kind.name}.` };
-  if ((player.gold || 0) < kind.price) {
-    return { ok: false, why: `The ${kind.name} is ${kind.price} gold and you have ${player.gold || 0}.` };
+  if (!granted) {
+    if (spec.built) return { ok: false, why: `A ${kind.name} is built, not bought. Hull, drive, tanks, avionics — then a pad.` };
+    if (kind.buildOnly || kind.price == null) return { ok: false, why: `Nobody sells the ${kind.name}. It has to be built.` };
+    if ((player.gold || 0) < kind.price) {
+      return { ok: false, why: `The ${kind.name} is ${kind.price} gold and you have ${player.gold || 0}.` };
+    }
+    player.gold -= kind.price;
   }
-  player.gold -= kind.price;
   owned.push(key);
   player.vehicles.active[slot] = key;          // a thing you just bought is the thing you want
   return { ok: true, kind };
+}
+
+/**
+ * Build one at a bench instead of buying it — the craftable half of the boat ladder.
+ *
+ * Every boat carries a `craft` block now, so the raft you were given is also the raft you could
+ * have made, and the Pitch Launch at the top can ONLY be made. Same bag as everything else (the
+ * `Materials` class in js/craft.js, or a plain `{ plank: 10 }` object).
+ */
+export function craftVehicle(player, slot, key, bag, { stations = [] } = {}) {
+  const spec = VEHICLES[slot];
+  const kind = spec?.kinds?.[key];
+  if (!kind) return { ok: false, why: 'No such vehicle.' };
+  if (!kind.craft) return { ok: false, why: `A ${kind.name} is not something you can put together yourself.` };
+  if (stations.length && kind.craft.station !== 'hand' && !stations.includes(kind.craft.station)) {
+    return { ok: false, why: `You need a ${kind.craft.station.replace(/_/g, ' ')} for that.` };
+  }
+  const purse = bagOf(bag);
+  if (!purse.canAfford(kind.craft.cost)) {
+    const short = Object.entries(purse.missing(kind.craft.cost)).map(([id, n]) => `${n} ${id.replace(/_/g, ' ')}`).join(', ');
+    return { ok: false, why: `Short ${short}.` };
+  }
+  purse.spend(kind.craft.cost);
+  return unlockVehicle(player, slot, key, { granted: true });
+}
+
+/**
+ * The one place a light's, a boat's or a ship's recipe is read from, so a recipe book does not have
+ * to know which of the three tables a thing came out of.
+ */
+export function gearRecipes() {
+  const out = [];
+  for (const base of Object.values(GEAR_BASES)) {
+    if (base.craft) out.push({ kind: 'gear', slot: base.slot, key: base.key, name: base.name, ...base.craft, buildOnly: !!base.buildOnly });
+  }
+  for (const [slot, spec] of Object.entries(VEHICLES)) {
+    for (const kind of Object.values(spec.kinds)) {
+      if (kind.craft) out.push({ kind: 'vehicle', slot, key: kind.key, name: kind.name, ...kind.craft, buildOnly: !!kind.buildOnly });
+    }
+  }
+  return out;
+}
+
+/** The same duck-typed bag js/vehicles.js uses, kept here so gear.js imports nothing from it. */
+function bagOf(bag) {
+  if (bag && typeof bag.canAfford === 'function') return bag;
+  const held = bag || {};
+  return {
+    count: id => held[id] || 0,
+    canAfford: cost => Object.entries(cost || {}).every(([id, n]) => (held[id] || 0) >= n),
+    missing: cost => {
+      const out = {};
+      for (const [id, n] of Object.entries(cost || {})) { const short = n - (held[id] || 0); if (short > 0) out[id] = short; }
+      return out;
+    },
+    spend: cost => { for (const [id, n] of Object.entries(cost || {})) held[id] = (held[id] || 0) - n; return true; },
+  };
 }
 
 /** Switch which one is active. The dropdown calls this. */

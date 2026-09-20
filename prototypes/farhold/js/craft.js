@@ -1,8 +1,19 @@
 // Farhold — crafting, and the materials bag it runs on.
 //
-// The rule the user set: **no mining, no chopping trees.** Every material comes out of an item you
-// recycled, or off something that was hard to kill. That makes the bench part of the loot loop
-// rather than a second game bolted on: a bad rare is not rubbish, it is four Bound Essence.
+// The rule this bench was built to: **every material comes out of an item you recycled, or off
+// something that was hard to kill.** That made the bench part of the loot loop rather than a second
+// game bolted on: a bad rare is not rubbish, it is four Bound Essence.
+//
+// BUILDING_EXPANSION §3.8 folds the rest of the world in beside it rather than replacing it.
+// Farhold now digs ore, fells trees and smelts ingots (js/resources.js, js/refine.js), so recycled
+// gear is **one input among several** — not the only one, and still the best one for the three
+// magical materials, because nothing you dig out of the ground grinds into Resonant Dust.
+//
+// What that means in code is one small change and no rewrite: the bench pays for a recipe out of a
+// SUPPLY rather than straight out of the bag. The supply is the materials bag first (it is in your
+// pockets, it costs nothing to reach) and then the storage pool the bench is standing in (§3.11 —
+// craft from storage: if a store is in range you do not have to carry the parts). Everything else
+// about the bench — quotes, rerolls, promotion, the forge — is untouched.
 //
 // The shape of the bench is borrowed (in idea, not in name) from the trading-card-style crafting of
 // the big loot ARPGs: single-property rerolls, a rarity ladder you promote up, a full recast that is
@@ -10,7 +21,8 @@
 // from. More advanced work costs rarer components — that is the whole progression.
 //
 //   import { createCrafting } from './craft.js';
-//   const craft = createCrafting({ data, rpg, materials });
+//   const craft = createCrafting({ data, rpg, materials });                    // bag only
+//   const craft = createCrafting({ data, rpg, materials, stores, resources, bench });  // and the store pool
 //   craft.recycle(item);                  // item -> materials
 //   craft.quote('reweave', item, { index: 2 });
 //   craft.apply('reweave', item, { index: 2 });
@@ -70,12 +82,60 @@ const FORGE_POOLS = {
   quiver: ['quiver', 'quiver_ember', 'quiver_rime', 'quiver_split', 'quiver_seeker', 'quiver_burst'],
 };
 
-export function createCrafting({ data, rpg, materials = new Materials(), rng = makeRng(7) }) {
+/**
+ * `stores` is a js/stores.js network and `bench` is where the bench stands ({ x, z }) — together
+ * they are §3.11's craft-from-storage. `resources` is data/resources.json, so an ingot or a plank
+ * spent at the anvil prints with its own name rather than its id. All three are optional: without
+ * them this is exactly the bench it always was, paying out of the bag in your pockets.
+ */
+export function createCrafting({ data, rpg, materials = new Materials(), rng = makeRng(7), stores = null, bench = null, resources = null }) {
   // the same maker the shops use, so a forged quiver and a bought one are the same kind of thing
   const gearShop = createGearShop({ rpg });
-  const M = data.materials || {};
+  // the bench knows the names of both halves of the economy: the three recycled materials, and
+  // everything js/refine.js makes
+  const M = { ...(resources?.materials || {}), ...(data.materials || {}) };
   const recipes = data.recipes || [];
   const bandCost = data.bandCost || [1];
+
+  // ---------------------------------------------------------------- the supply
+  //
+  // Where a recipe's cost is paid from. The bag first — it is in your pockets and costs nothing to
+  // reach — and then whatever store pool the bench is standing in. Two sources, one interface, so
+  // nothing downstream (quote, apply, the buttons) had to learn about either of them.
+  let benchAt = bench;
+  const poolHere = () => (stores && benchAt ? stores.poolAt(benchAt.x ?? 0, benchAt.z ?? 0) : null);
+
+  const supply = {
+    /** How much of one thing the bench can reach, bag and pool together. */
+    count(id) {
+      const pool = poolHere();
+      return materials.count(id) + (pool ? stores.count(pool, id) : 0);
+    },
+    /** What is short, for the "needs 3 more Resonant Dust" line on the button. */
+    missing(cost) {
+      const out = {};
+      for (const [id, n] of Object.entries(cost || {})) {
+        const short = n - supply.count(id);
+        if (short > 0) out[id] = short;
+      }
+      return out;
+    },
+    /** Take the whole cost or nothing. Bag first, then the pool tops up whatever is left. */
+    spend(cost) {
+      if (Object.keys(supply.missing(cost)).length) return false;
+      const pool = poolHere();
+      for (const [id, n] of Object.entries(cost || {})) {
+        const fromBag = Math.min(n, materials.count(id));
+        if (fromBag > 0) materials.spend({ [id]: fromBag });
+        const left = n - fromBag;
+        if (left > 0 && pool) stores.take(pool, id, left);
+      }
+      return true;
+    },
+    /** Where the bench is, so the pool it reaches follows it about. */
+    setBench(at) { benchAt = at; return benchAt; },
+    get pool() { return poolHere(); },
+  };
 
   /** How much dearer this item's level makes the work. */
   function band(item) {
@@ -213,7 +273,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       extra = player ? (bandCost[Math.min(bandCost.length - 1, Math.floor(((player.level || 1) - 1) / 5))] || 1) : 1;
       const priced = {};
       for (const [k, n] of Object.entries(cost)) priced[k] = Math.max(1, Math.ceil(n * extra));
-      const short = materials.missing(priced);
+      const short = supply.missing(priced);
       return {
         ok: !Object.keys(short).length, recipe: r, cost: priced, costText: costText(priced),
         note: `${r.rarity} ${r.makes}, level ${player?.level || 1}`,
@@ -224,7 +284,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
     }
 
     const priced = scaleCost(cost, item, extra);
-    const short = materials.missing(priced);
+    const short = supply.missing(priced);
     return {
       ok: !Object.keys(short).length, recipe: r, cost: priced, costText: costText(priced), note,
       why: Object.keys(short).length ? `needs ${costText(short)} more` : null, short,
@@ -249,7 +309,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
   function apply(id, item, { index = 0, player = null, baseKey = null, magicFind = 0 } = {}) {
     const q = quote(id, item, { index, player });
     if (!q.ok) return q;
-    if (!materials.spend(q.cost)) return { ok: false, why: 'the materials went somewhere' };
+    if (!supply.spend(q.cost)) return { ok: false, why: 'the materials went somewhere' };
     const r = q.recipe;
 
     if (r.kind === 'create') {
@@ -418,6 +478,10 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
   return {
     materials, recipes, byId, M,
     recycle, harvest, quote, apply, board, costText, forgeOptions, forgeRarity,
+    /** Bag + store pool, as one thing to ask. §3.8 and §3.11 in six lines. */
+    supply,
+    /** Move the bench (or tell it which anvil you are standing at) so it draws from that pool. */
+    setBench: at => supply.setBench(at),
     groups: data.groups || {},
     /** The two halves of the bench: what makes something new, and what reworks what you have. */
     creates: recipes.filter(r => r.kind === 'create'),
@@ -438,5 +502,21 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       .filter(([, n]) => n > 0)
       .map(([id, n]) => ({ id, n, ...(M[id] || { name: id, tier: 1, color: '#9a9285' }) }))
       .sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name)),
+    /**
+     * The same list, plus what the store pool beside the bench is holding, marked so the panel can
+     * say which is in your pockets and which is in the crate behind you. The bench spends both.
+     */
+    heldAll() {
+      const pool = supply.pool;
+      const ids = new Set([...Object.keys(materials.held), ...(pool ? Object.keys(pool.totals) : [])]);
+      return [...ids]
+        .map(id => {
+          const bag = materials.count(id);
+          const stored = pool ? stores.count(pool, id) : 0;
+          return { id, n: bag + stored, bag, stored, ...(M[id] || { name: id, tier: 1, color: '#9a9285' }) };
+        })
+        .filter(r => r.n > 0)
+        .sort((a, b) => (a.tier || 1) - (b.tier || 1) || String(a.name).localeCompare(String(b.name)));
+    },
   };
 }

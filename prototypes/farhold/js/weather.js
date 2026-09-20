@@ -108,9 +108,38 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
     flakeDrift[i * 2] = Math.random() * 2 - 1;
     flakeDrift[i * 2 + 1] = Math.random() * 2 - 1;
   }
+  /**
+   * A ROUND FLAKE, because a `PointsMaterial` with no map draws a SQUARE.
+   *
+   * "The snow is square icons instead of round. Is that supposed to be snow or wind? Can we try a
+   * different particle?" It was square because that is what a point sprite is by default — a flat
+   * quad of solid colour with nothing shaping it. One small canvas with a radial falloff, generated
+   * once and shared by the snow and the dust, turns every one of them into a soft disc.
+   *
+   * `depthWrite: false` matters as much as the shape: without it each sprite punches a hole in the
+   * depth buffer and the ones behind it disappear, which reads as flickering.
+   */
+  const SPRITE = (() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 32;
+    const g = c.getContext('2d').createRadialGradient(16, 16, 0, 16, 16, 16);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.45, 'rgba(255,255,255,0.75)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 32, 32);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  })();
+
   const flakeGeom = new THREE.BufferGeometry();
   flakeGeom.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
-  const snow = new THREE.Points(flakeGeom, new THREE.PointsMaterial({ color: 0xffffff, size: 0.16, transparent: true, opacity: 0, sizeAttenuation: true }));
+  const snow = new THREE.Points(flakeGeom, new THREE.PointsMaterial({
+    color: 0xffffff, size: 0.26, transparent: true, opacity: 0, sizeAttenuation: true,
+    map: SPRITE, depthWrite: false,
+  }));
   snow.frustumCulled = false;
   snow.visible = false;
   snow.name = 'farhold-snow';
@@ -126,7 +155,10 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
   const dustGeom = new THREE.BufferGeometry();
   dustGeom.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
   const dust = new THREE.Points(dustGeom, new THREE.PointsMaterial({
-    color: new THREE.Color(palette.fog || '#c8a878'), size: 0.3, transparent: true, opacity: 0, sizeAttenuation: true,
+    // bigger and warmer than a flake, so blown sand never reads as snow even at a glance
+    color: new THREE.Color(palette.dust || palette.fog || '#c8a878'),
+    size: 0.52, transparent: true, opacity: 0, sizeAttenuation: true,
+    map: SPRITE, depthWrite: false,
   }));
   dust.frustumCulled = false;
   dust.visible = false;

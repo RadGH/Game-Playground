@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "_doc": "Power and logistics (BUILDING_EXPANSION §8). Read by js/power.js (generation, storage, draw, shedding) and js/stores.js (pools, hauling).\n\nTHE POOL IDEA, lifted from prototypes/frontier-foundry: stores whose reach overlaps form one pool and share everything inside it for free. A machine standing inside a pool can draw from and deliver to every store in it without anybody carrying anything. Anything outside every pool needs a cart, a mule or a drone. That one rule is what makes distance a real cost in §1's node trade-off — a mother lode is only worth it if you are willing to move the pool out to it.\n\nTHE GRID: generators and power poles link the same way stores do, so a base comes out as tight clusters joined by roads, which is the shape we want anyway.",
+
+  "_generatorDoc": "`gen` is units of power at full output. `fuel` is units burned per second at full output — a generator carrying half the load burns half the fuel (the duty cycle, lifted from Frontier Foundry), so a base with spare capacity does not drain its coal overnight. `dayOnly` scales with daylight; `windVaries` scales with the weather module's wind. `supplyRadius` is how far it reaches on its own before you need poles.",
+  "generators": {
+    "burner_generator": {
+      "name": "Burner Generator", "tier": 1, "gen": 30, "supplyRadius": 10,
+      "fuel": { "coal": 0.06, "charcoal": 0.09, "log": 0.2, "lift_fuel": 0.02 },
+      "build": { "iron_ingot": 12, "brick": 16, "machine_part": 1 },
+      "desc": "Burns whatever you have. Loud, dirty, dependable, and the reason you go looking for coal before you go looking for wind."
+    },
+    "wind_turbine": {
+      "name": "Wind Turbine", "tier": 1, "gen": 26, "supplyRadius": 12, "windVaries": true,
+      "build": { "plank": 20, "iron_ingot": 10, "cloth": 8, "machine_part": 2 },
+      "desc": "Free power that stops when the air does. Build two more than you think you need, or build a battery."
+    },
+    "solar_array": {
+      "name": "Solar Array", "tier": 2, "gen": 44, "supplyRadius": 12, "dayOnly": true,
+      "build": { "glass": 24, "copper_ingot": 14, "steel_ingot": 8, "machine_part": 3 },
+      "desc": "Nothing at night, which is exactly what makes a battery bank a decision rather than a formality — §8.7."
+    },
+    "geothermal_tap": {
+      "name": "Geothermal Tap", "tier": 2, "gen": 95, "supplyRadius": 14,
+      "coolant": { "water": 0.05 },
+      "needsGround": ["volcanic", "ashPlain", "gas_vent"],
+      "build": { "steel_ingot": 26, "machine_part": 10, "brick": 20, "control_board": 1 },
+      "desc": "The best generator in the game, and it only works where the ground is hot. A reason to build the base somewhere awkward."
+    }
+  },
+
+  "_storeDoc": "Power storage. `store` is capacity; batteries charge from spare generation and discharge when the grid falls short.",
+  "batteries": {
+    "battery_bank": {
+      "name": "Battery Bank", "tier": 2, "store": 600, "supplyRadius": 8,
+      "build": { "copper_ingot": 20, "steel_ingot": 10, "acid": 8, "machine_part": 2 },
+      "desc": "Carries a solar base through the night. Without one, solar is a daytime hobby."
+    },
+    "aether_bank": {
+      "name": "Aether Bank", "tier": 3, "store": 2400, "supplyRadius": 8,
+      "build": { "aether_cell": 2, "tempered_alloy": 8, "control_board": 2 },
+      "desc": "Four of the cheap ones in the footprint of one, and it does not leak."
+    }
+  },
+
+  "_poleDoc": "Poles are the cheapest thing in the game and they are what makes a base a base. A power pole extends the grid; a logistics pole extends the store pool — §8.2, and it is drawn on the ground so you can see what is joined to what.",
+  "poles": {
+    "power_pole": { "name": "Power Pole", "tier": 1, "supplyRadius": 18, "build": { "plank": 4, "copper_ingot": 2 }, "desc": "Relays power. Two poles whose circles overlap are one grid." },
+    "logistics_pole": { "name": "Logistics Pole", "tier": 1, "linkRadius": 22, "build": { "plank": 6, "iron_ingot": 3, "rope": 2 }, "desc": "Relays goods. Everything inside the ring shares one pile; a drill under it never needs carrying." },
+    "relay_mast": { "name": "Relay Mast", "tier": 2, "supplyRadius": 34, "linkRadius": 34, "build": { "steel_ingot": 14, "machine_part": 3, "control_board": 1 }, "desc": "Both jobs, twice the reach. What you plant when the quarry is finally worth reaching." }
+  },
+
+  "_storageDoc": "Stores. `cap` is total units held; `linkRadius` is how far this store reaches to join a pool or feed a machine. `accepts` narrows what may go in: omitted means anything solid, `fluid` and `gas` mean only that.",
+  "storage": {
+    "storage_crate": { "name": "Storage Crate", "tier": 1, "cap": 250, "linkRadius": 7, "build": { "plank": 10, "rope": 2 }, "desc": "The first one you build, and the one you end up with forty of." },
+    "storage_silo": { "name": "Storage Silo", "tier": 2, "cap": 1200, "linkRadius": 9, "accepts": ["bulk"], "build": { "cut_stone": 24, "steel_ingot": 8, "beam": 6 }, "desc": "Ore, stone, gravel and coal only. Bulk wants its own building or it swamps everything else." },
+    "fluid_tank": { "name": "Fluid Tank", "tier": 2, "cap": 600, "linkRadius": 8, "accepts": ["fluid"], "build": { "steel_ingot": 12, "resin": 6, "machine_part": 1 }, "desc": "Water, coolant, acid, fuel." },
+    "gas_tank": { "name": "Gas Tank", "tier": 2, "cap": 400, "linkRadius": 8, "accepts": ["gas"], "build": { "steel_ingot": 16, "machine_part": 2, "composite_plate": 1 }, "desc": "Pressurised. The only thing a vent collector can deliver into." }
+  },
+
+  "_shareDoc": "Lifted from Frontier Foundry, and it is there because of a bug rather than a design: without it three drills fill every crate in the base with ore, the smelters have nowhere to put their ingots, and the whole place deadlocks on eight iron ingots it can no longer make. So one raw material may take at most a quarter of a general store, and all raw materials together at most half. A silo or a tank holds one kind of thing anyway, so neither cap applies to them.",
+  "storeShare": { "perResource": 0.25, "rawTotal": 0.5, "rawKinds": ["ore", "stone", "wood", "organic", "fluid", "gas", "salvage", "rare"] },
+
+  "_shedDoc": "LOAD SHEDDING, in a stated order (§8.5). When a grid cannot cover its draw it sheds from the BOTTOM of this list upward, one class at a time, until what is left fits — and it says which class it dropped, in the log rather than a modal (§8.10).\n\nThe order is argued, not arbitrary:\n  life       — the water pump and the heaters. A base that sheds these kills the people in it.\n  defence    — turrets. If a raid is on, nothing else matters; if one is not, they draw almost nothing.\n  extraction — drills and pumps. Shedding these is a death spiral: the coal stops, so the generator stops, so the coal stops harder.\n  waypoint   — a dark waypoint cannot be travelled to (§5.10). Losing it costs you fast travel, not the base, so it goes before the drills but after the guns.\n  refining   — furnaces and the refinery. Annoying to lose; it only costs time.\n  crafting   — benches. You are usually standing at one, so you will notice and can fix it.\n  comfort    — lamps, decoration, anything cosmetic. Shed first, always, and nobody minds.\n\n`floor` is the fraction of its draw a class keeps even while shed — 0 means it stops dead, 0.2 means it limps.",
+  "shedding": {
+    "order": ["life", "defence", "extraction", "waypoint", "refining", "crafting", "comfort"],
+    "floor": { "life": 1.0, "defence": 0.0, "extraction": 0.0, "waypoint": 0.0, "refining": 0.0, "crafting": 0.0, "comfort": 0.0 },
+    "brownoutBelow": 0.85,
+    "restoredAbove": 0.98,
+    "idleShare": 0.25,
+    "_idleShareNote": "A machine with nothing to do still draws a quarter of its rating — the lights on it, the heater in it. It is why a base full of idle smelters is not free."
+  },
+
+  "_haulerDoc": "What moves goods between pools that do not touch (§8.3). Throughput is worked out in js/stores.js the same way the node trade-off is: capacity over the round trip, so doubling the distance halves the delivery and nobody has to be told that twice.",
+  "haulers": {
+    "hand_cart": { "name": "Hand Cart", "capacity": 160, "speed": 3.4, "loadSeconds": 12, "powerUse": 0, "build": { "plank": 12, "iron_ingot": 4, "rope": 2 } },
+    "pack_mule": { "name": "Pack Mule", "capacity": 260, "speed": 4.0, "loadSeconds": 16, "powerUse": 0, "upkeep": { "grain": 0.01 }, "build": {} },
+    "hauler_drone": { "name": "Hauler Drone", "capacity": 200, "speed": 7.5, "loadSeconds": 4, "powerUse": 12, "build": { "machine_part": 6, "control_board": 1, "composite_plate": 2 } }
+  },
+
+  "_stateDoc": "What a machine shows on its face (§8.8). js/power.js and js/refine.js set exactly one of these and the UI paints it: running, idle (nothing queued), starved (queued, missing an input), unpowered (no grid reaches it), shed (grid reaches it but the grid is short), or blocked (finished and nowhere to put the output).",
+  "machineStates": ["running", "idle", "starved", "unpowered", "shed", "blocked"]
+}

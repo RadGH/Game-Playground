@@ -15,6 +15,20 @@ import { M_PER_CELL } from './planet.js';
 
 export const QUEST_KINDS = ['hunt', 'visit', 'gather', 'clear'];
 
+/**
+ * KINDS THAT NEVER APPEAR ON A BOARD.
+ *
+ * A raid is a job you take and then choose the hour for (BUILDING_EXPANSION.md §7.4), so it is not
+ * something `makeQuest` rolls and a town crier does not hand you one. `js/raid.js` builds it,
+ * already quest-shaped, and it goes in the same log as everything else so the journal, the map pins
+ * and the save do not need a second list. It advances only through `onRaidWave`, and the raid's own
+ * `canFire()` is what decides whether anything is coming — nothing in this file can start one.
+ */
+export const STARTED_KINDS = ['raid'];
+
+/** Is this a job the world offered you, or one you set going yourself? */
+export const isStarted = quest => STARTED_KINDS.includes(quest?.kind);
+
 /** How many, and what it pays. Scaled by the player's level. */
 const SHAPE = {
   hunt:   { count: [3, 7],  gold: [35, 80],  xp: [40, 90] },
@@ -160,7 +174,14 @@ export class QuestLog {
   }
 
   has(id) { return this.active.some(q => q.id === id); }
-  byGiver(giverId) { return this.active.filter(q => q.giverId === giverId); }
+
+  // A raid has no giver — you took it off your own board and you pay yourself out of what was
+  // carrying it. Filtering it out here stops a raid from turning up in a village merchant's
+  // "finished jobs" list, which it otherwise would, every raid having `giverId: null`.
+  byGiver(giverId) { return this.active.filter(q => q.giverId === giverId && !isStarted(q)); }
+
+  /** The raids in the log, whatever state they are in. For the base panel and the journal. */
+  raids() { return this.active.filter(q => q.kind === 'raid'); }
 
   /** Something died. */
   onKill({ defId }) {
@@ -200,10 +221,25 @@ export class QuestLog {
     return advanced;
   }
 
+  /**
+   * A wave of a raid was cleared. `js/raid.js` owns the raid's own state machine; this only keeps
+   * the log's progress counter in step so the journal and the tracker read right.
+   */
+  onRaidWave({ questId = null, quest = null, wave = null } = {}) {
+    const q = quest || this.active.find(j => j.id === questId);
+    if (!q || q.kind !== 'raid') return null;
+    q.progress = wave == null ? (q.progress || 0) + 1 : wave;
+    if (q.progress >= q.count) q.done = true;
+    return q;
+  }
+
   /** Finished jobs this person can pay out. */
   readyToTurnIn(giverId) {
-    return this.active.filter(q => q.done && !q.turnedIn && q.giverId === giverId);
+    return this.active.filter(q => q.done && !q.turnedIn && q.giverId === giverId && !isStarted(q));
   }
+
+  /** A raid pays itself out — there is nobody to walk back to. */
+  readyRaids() { return this.active.filter(q => q.kind === 'raid' && q.done && !q.turnedIn); }
 
   turnIn(quest) {
     quest.turnedIn = true;
@@ -216,6 +252,12 @@ export class QuestLog {
   /** "2 / 5" for the journal. */
   progressText(q) {
     if (q.kind === 'visit') return q.done ? 'arrived' : 'not yet there';
+    if (q.kind === 'raid') {
+      if (q.state === 'offered') return 'not taken';
+      if (q.state === 'accepted') return 'ring the bell when you are ready';
+      if (q.state === 'lost') return 'overrun';
+      return `wave ${Math.min(Math.max(q.progress, q.wave || 1), q.count)} / ${q.count}`;
+    }
     return `${Math.min(q.progress, q.count)} / ${q.count}`;
   }
 

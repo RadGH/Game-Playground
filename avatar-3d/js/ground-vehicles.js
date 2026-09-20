@@ -65,8 +65,10 @@ function wheel(r, wide, C) {
   const hub = cyl(r * 0.45, r * 0.45, wide * 1.12, C.metal, 10, metal(C.metal));
   hub.rotation.z = Math.PI / 2;
   g.add(hub);
+  // the spokes sit INSIDE the face of the tyre (wide * 0.8, not wider): poking out turns every
+  // wheel into a cog, which was the first thing the screenshot showed
   for (let i = 0; i < 4; i++) {
-    const spoke = box(wide * 1.2, r * 1.3, 0.035, C.metal, metal(C.metal));
+    const spoke = box(wide * 0.8, r * 1.3, 0.035, C.metal, metal(C.metal));
     spoke.rotation.x = (i / 4) * Math.PI;
     g.add(spoke);
   }

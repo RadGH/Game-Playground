@@ -457,9 +457,31 @@ export function createFeatures(scene, terrain, opts = {}) {
          * gravel across the ocean — so the road stops at the shore and picks up again on the far
          * side, which is what a coast road actually does.
          */
+        /**
+         * A SEA LANE IS A RUN OF WET POINTS, NOT ONE.
+         *
+         * Reported at seed 14343310, Baus-Beinen II, x 9720 z 16259: "the road stops and starts
+         * again with a gap in the middle". The road point nearest that spot carries `wet: true` and
+         * stands on 3.1 m of dry land, with dry points either side and no water within thirty
+         * metres. One stray flag, and because the loop below both BREAKS the ribbon at a wet point
+         * and skips the point itself, a single bad sample cuts the road in two and leaves a hole
+         * where the join should be.
+         *
+         * A route crossing open water is wet for a stretch — that is what a lane is. So a point only
+         * counts as wet if its neighbour agrees, or if the ground under it really is water now:
+         * the deck-grading pass in planet.js can lift a crossing clear of a channel after the flag
+         * was set, which leaves the flag describing a world that no longer exists.
+         */
+        const wetAt = i => {
+          if (i < 0 || i >= r.points.length || !r.wet?.[i]) return false;
+          if (r.wet[i - 1] || r.wet[i + 1]) return true;          // part of a real run
+          const [wx, wz] = r.points[i];
+          return !!terrain.waterAt(wx, wz);                        // …or genuinely over water
+        };
+
         let runStart = a;
         for (let i = a; i <= b + 1; i++) {
-          const wet = i > b || r.wet?.[i];
+          const wet = i > b || wetAt(i);
           if (!wet) continue;
           if (i - runStart >= 2) {
             push(road, ribbon(r.points.slice(runStart, i), r.surface.slice(runStart, i), r.half * 2, { lift: 0.06 }));

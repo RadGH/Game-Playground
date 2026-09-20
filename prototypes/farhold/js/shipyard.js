@@ -4,17 +4,20 @@
 //   "You do not start with a ship and you cannot buy one. You build a base, you dig up ore, you
 //    refine it, you make fuel, and only then does the sky open."
 //
-// Four subsystems — hull, drive, tanks, avionics — each mostly made of a DIFFERENT refined material
-// so no single furnace is the whole industry (§9.5). The drive needs a charged core, and a core is
-// where the planet's own rare element goes (§9.6). Fuel is separate, consumable and paid per flight
-// rather than per launch (§9.7, §9.10), the pad is a structure (§9.8), and the three hulls that used
-// to sit in a shop are buildable tiers now (§9.11). Past all that, the far end of the ladder is an
-// orbital yard (§9.15).
+// Four subsystems — hull, drive, tanks, avionics — each made of a DIFFERENT tier-3 material so no
+// single furnace is the whole industry (§9.5), and the avionics carrying the rare element (§9.6).
+// Those four are built by the REFINING chain (data/refining.json's `build_hull` and its three
+// siblings, run by js/refine.js); this module is the layer above it — which tier of each you have,
+// the pad they go together on (§9.8), the fuel every flight burns (§9.7, §9.10), the warp coil
+// (§9.15), the orbital yard, and the migration that lets anyone mid-run keep their ship (§9.19).
+// The three hulls that used to sit in a shop are the three tiers (§9.11).
 //
 // **The one rule that outranks the rest: the gate must never hard-lock a run.** A seed that put you
-// on a world whose rare element does not suit is not a difficulty setting, it is a dead save. So
-// there are four core recipes covering every element in universe/data/elements.json between them,
-// and a city will sell you a finished part at a price that hurts (§9.18). You can always get off.
+// on a world whose rare element does not suit is not a difficulty setting, it is a dead save. Two
+// things make that impossible and neither of them is in this file: `build_avionics` asks for a
+// COUNT of rare element rather than a particular one, and lift fuel has a gas route and a sulphur
+// route. This file adds the third — a city will sell you a finished part at a price that hurts
+// (§9.18). You can always get off.
 //
 //   import { migrateSave, buildPart, assembleShip, canLaunch, spendFlightFuel } from './shipyard.js';
 //   migrateSave(player);                       // once, on load — §9.19
@@ -25,12 +28,11 @@
 // Pure data and arithmetic: no DOM, no Three.js, so the node tests drive the whole arc end to end.
 
 import DATA from '../data/shipyard.json' with { type: 'json' };
-import { bagOf, costText, MATERIALS, STATIONS, costValue } from './vehicles.js';
+import { bagOf, costText, MATERIALS, STATIONS, costValue, recipeFor, recipesFor } from './vehicles.js';
 import { VEHICLES, unlockVehicle } from './gear.js';
 import { fmt } from '../../../shared/format.js';
 
 export const SUBSYSTEMS = DATA.subsystems;
-export const CORES = DATA.cores;
 export const SHIPS = DATA.ships;
 export const STATION = DATA.station;
 export const PAD = DATA.pad;
@@ -40,6 +42,9 @@ export const GATE_VERSION = DATA.gate.version;
 
 /** The order a player meets them in, and the order the journal lists them. */
 export const PART_IDS = ['hull', 'drive', 'tanks', 'avionics'];
+
+/** "a Hull Section", "an Avionics Rack" — small thing, but the log reads like a person wrote it. */
+const an = name => `${/^[aeiou]/i.test(name || '') ? 'an' : 'a'} ${name}`;
 
 // ---------------------------------------------------------------------------- state
 
@@ -57,16 +62,19 @@ export function yard(player) {
   // Field by field rather than "the whole block or a fresh one", because js/gear.js's
   // `startingVehicles()` writes a block with only the version stamp in it — and a half-filled yard
   // whose `fuel` is undefined would sail through every `fuel < needed` check there is.
+  const stamped = v.shipyard?.gate != null;
   const y = (v.shipyard = v.shipyard || {});
-  if (y.gate == null) y.gate = GATE_VERSION;
   y.built = y.built || { hull: 0, drive: 0, tanks: 0, avionics: 0, warp: 0 };
   for (const id of ['hull', 'drive', 'tanks', 'avionics', 'warp']) y.built[id] = y.built[id] || 0;
-  if (y.driveFamily === undefined) y.driveFamily = null;   // which family of element charged the drive's core
-  if (y.warpFamily === undefined) y.warpFamily = null;     // and the coil's, which has to be a different one
   if (typeof y.fuel !== 'number') y.fuel = 0;
   y.pad = !!y.pad;
   y.station = y.station || {};
   y.bought = y.bought || [];                               // parts paid for rather than built, for the journal
+  // A save written before the gate existed has a vehicles block with no stamp in it. Catching that
+  // HERE rather than only in `migrateSave()` means an old character keeps their ship even if nobody
+  // ever wires the migration into the load path — the worst outcome of a missed call should not be
+  // somebody's ship quietly vanishing.
+  if (!stamped) { y.gate = GATE_VERSION; keepExistingShip(player, y); }
   return y;
 }
 
@@ -84,65 +92,54 @@ export function yard(player) {
 export function migrateSave(player) {
   if (!player) return { migrated: false };
   const v = player.vehicles;
-  const stamped = v?.shipyard?.gate;
-  if (stamped >= GATE_VERSION) return { migrated: false, kept: [...(v?.owned?.ship || [])] };
-
+  if (v?.shipyard?.gate >= GATE_VERSION) return { migrated: false, kept: [...(v?.owned?.ship || [])] };
   const owned = [...(v?.owned?.ship || [])];
-  const y = yard(player);
-  y.gate = GATE_VERSION;
-  if (!owned.length) return { migrated: true, kept: [] };
-
-  // the best ship they already own decides how far along the yard is: you cannot have been flying a
-  // Deepfield Hauler without, in this new telling, having built tier-3 everything
-  const tier = Math.max(...owned.map(k => SHIPS[k]?.tier || 1));
-  for (const id of PART_IDS) y.built[id] = Math.max(y.built[id] || 0, tier);
-  y.driveFamily = y.driveFamily || 'arcane';      // it flew, so something was in the core
-  y.pad = true;
-  y.fuel = Math.max(y.fuel, fuelFor(owned[0], 'launch') + fuelFor(owned[0], 'land'));
-  player.vehicles.active.ship = player.vehicles.active.ship || owned[0];
-  return { migrated: true, kept: owned, tier };
+  yard(player);                                   // does the work; see `keepExistingShip` below
+  return { migrated: true, kept: owned, tier: owned.length ? Math.max(...owned.map(k => SHIPS[k]?.tier || 1)) : 0 };
 }
-
-// ---------------------------------------------------------------------------- cores
-
-/** Which family of core a rare element can charge, or null if nothing here knows it. */
-export function coreForElement(elementKey) {
-  for (const core of Object.values(CORES)) if (core.elements.includes(elementKey)) return core;
-  return null;
-}
-
-/** Given what a world actually holds, which cores you could build standing on it. */
-export function coresFor(elementKeys = []) {
-  const out = [];
-  for (const key of elementKeys) { const c = coreForElement(key); if (c && !out.includes(c)) out.push(c); }
-  return out;
-}
-
-/** The bag id a rare element arrives under — the contract in data/workshop.json. */
-export const elementId = key => `el_${key}`;
 
 /**
- * Build a charged core. Takes the element out of the bag and puts the core in, so a core is a
- * thing you can carry, trade and lose rather than a flag on a save.
+ * The half of the migration that touches the yard: whatever ship they already own stays theirs, and
+ * the yard is back-filled to the state that ship implies.
+ *
+ * The best ship they own decides how far along it is — you cannot have been flying a Deepfield
+ * Hauler without, in this new telling, having built tier-3 everything — and they get a tank of fuel
+ * so the next launch is not a wall they never agreed to.
  */
-export function buildCore(player, coreId, bag, { stations = [], element = null } = {}) {
-  const core = CORES[coreId];
-  if (!core) return { ok: false, why: 'No such core.' };
-  if (stations.length && !stations.includes(core.station)) {
-    return { ok: false, why: `You need ${STATIONS[core.station]?.name || core.station} for that.` };
-  }
-  const purse = bagOf(bag);
-  // whichever of this family's elements you are actually holding; the named one wins if given
-  const useKey = [element, ...core.elements].find(k => k && core.elements.includes(k) && purse.count(elementId(k)) >= core.elementCost);
-  if (!useKey) {
-    const names = core.elements.join(', ');
-    return { ok: false, why: `A ${core.name} needs ${core.elementCost} of ${names}, and you have none of them.` };
-  }
-  const cost = { ...core.cost, [elementId(useKey)]: core.elementCost };
-  if (!purse.spend(cost)) return { ok: false, why: `Short ${costText(purse.missing(cost))}.` };
-  purse.add(coreId, 1);
-  return { ok: true, core, element: useKey };
+function keepExistingShip(player, y) {
+  const owned = player.vehicles?.owned?.ship || [];
+  if (!owned.length) return;
+  const tier = Math.max(...owned.map(k => SHIPS[k]?.tier || 1));
+  for (const id of PART_IDS) y.built[id] = Math.max(y.built[id] || 0, tier);
+  y.pad = true;
+  y.fuel = Math.max(y.fuel, fuelFor(owned[0], 'launch') + fuelFor(owned[0], 'land'));
+  player.vehicles.active = player.vehicles.active || {};
+  player.vehicles.active.ship = player.vehicles.active.ship || owned[0];
 }
+
+// ---------------------------------------------------------------------------- the rare element
+
+/**
+ * §9.6 — which part needs something only a planet can give you, and how much.
+ *
+ * The answer is not in this file and should not be: `build_avionics` in data/refining.json carries
+ * `rareInput: 4`, a COUNT rather than an id, so js/refine.js spends whichever rare element the
+ * ground under you actually holds. That is the design decision that makes the gate impossible to
+ * hard-lock — no world needs a *particular* element, it just needs one — and this function only
+ * reads it back out so a quest pin or a journal line can say so.
+ */
+export function rareInputFor(id) {
+  const part = SUBSYSTEMS[id]?.part;
+  return part ? (recipeFor(part)?.rareInput || 0) : 0;
+}
+
+/** Every subsystem whose refining recipe wants a rare element, in the order you meet them. */
+export function partsNeedingElement() {
+  return Object.keys(SUBSYSTEMS).filter(id => rareInputFor(id) > 0);
+}
+
+/** How many ways there are to make a thing — two routes to lift fuel is why no world is a dead end. */
+export function routesFor(materialId) { return recipesFor(materialId).length; }
 
 // ---------------------------------------------------------------------------- the four subsystems
 
@@ -154,18 +151,17 @@ export function nextTier(player, id) {
   return sub.tiers[at] || null;
 }
 
-/** What building the next tier of this subsystem costs, cores included. */
+/** What building the next tier of this subsystem costs, and whether a rare element goes into it. */
 export function partCost(player, id) {
   const tier = nextTier(player, id);
   if (!tier) return null;
-  const sub = SUBSYSTEMS[id];
-  const cores = sub.coresPerTier ? (sub.coresPerTier[tier.tier - 1] || 0) : 0;
-  return { cost: { ...tier.cost }, cores, tier };
+  return { cost: { ...tier.cost }, tier, rare: rareInputFor(id) };
 }
 
 /**
  * Can the next tier of this subsystem be built? The refusals are deliberately specific — a player
- * staring at a locked Drive should be told it is the core that is missing, not "cannot build".
+ * staring at a locked Drive should be told that the assembler has not made a Drive Assembly yet,
+ * not "cannot build".
  */
 export function canBuildPart(player, id, bag, { stations = [] } = {}) {
   const sub = SUBSYSTEMS[id];
@@ -177,25 +173,18 @@ export function canBuildPart(player, id, bag, { stations = [] } = {}) {
   }
   const purse = bagOf(bag);
   const missing = purse.missing(next.cost);
-  if (Object.keys(missing).length) return { ok: false, why: `Short ${costText(missing)}.`, missing };
-
-  if (next.cores > 0) {
-    const y = yard(player);
-    const held = Object.values(CORES).filter(c => purse.count(c.id) >= next.cores);
-    // §9.15: the coil's core must come from a different family than the drive's, which is what
-    // sends you to another world for it rather than mining the same hillside twice
-    const allowed = sub.coreMustDifferFromDrive && y.driveFamily
-      ? held.filter(c => c.family !== y.driveFamily)
-      : held;
-    if (!allowed.length) {
-      const why = sub.coreMustDifferFromDrive && y.driveFamily && held.length
-        ? `The ${sub.name} cannot run on the same family of core as the drive. Find an element that is not ${y.driveFamily}.`
-        : `The ${sub.name} needs ${next.cores} charged core${next.cores === 1 ? '' : 's'}.`;
-      return { ok: false, why, needsCore: next.cores };
+  if (Object.keys(missing).length) {
+    // the tier-1 refusal is nearly always "you have not made the part yet", so say THAT rather than
+    // listing a material the player has never seen a recipe for
+    const part = sub.part;
+    if (missing[part]) {
+      const rare = rareInputFor(id);
+      const extra = rare ? ` It also wants ${fmt(rare)} of whatever rare element this world holds.` : '';
+      return { ok: false, why: `The assembler has not built ${an(MATERIALS[part]?.name || part)} yet.${extra}`, missing };
     }
-    return { ok: true, tier: next.tier, cost: next.cost, core: allowed[0], cores: next.cores };
+    return { ok: false, why: `Short ${costText(missing)}.`, missing };
   }
-  return { ok: true, tier: next.tier, cost: next.cost, cores: 0 };
+  return { ok: true, tier: next.tier, cost: next.cost };
 }
 
 /** Build the next tier of a subsystem. */
@@ -203,15 +192,9 @@ export function buildPart(player, id, bag, opts = {}) {
   const check = canBuildPart(player, id, bag, opts);
   if (!check.ok) return check;
   const purse = bagOf(bag);
-  const cost = { ...check.cost };
-  if (check.cores) cost[check.core.id] = (cost[check.core.id] || 0) + check.cores;
-  if (!purse.spend(cost)) return { ok: false, why: `Short ${costText(purse.missing(cost))}.` };
+  if (!purse.spend(check.cost)) return { ok: false, why: `Short ${costText(purse.missing(check.cost))}.` };
   const y = yard(player);
   y.built[id] = check.tier.tier;
-  if (check.core) {
-    if (id === 'warp') y.warpFamily = check.core.family;
-    else y.driveFamily = check.core.family;
-  }
   return { ok: true, id, tier: check.tier.tier, name: check.tier.name };
 }
 
@@ -222,7 +205,7 @@ export function buildPart(player, id, bag, opts = {}) {
  * twice. Villages and camps do not stock it; a city does.
  */
 export function buyPart(player, id, { gold = 0, settlement = 'city', spend } = {}) {
-  const price = MARKET.parts[id] ?? (CORES[id] ? MARKET.core : null);
+  const price = MARKET.parts[id] ?? null;
   const sub = SUBSYSTEMS[id];
   if (price == null) return { ok: false, why: 'Nobody sells that.' };
   if (settlement !== MARKET.minSettlement) return { ok: false, why: 'Only a city deals in ship parts.' };
@@ -286,7 +269,7 @@ export function assembleShip(player, kind, bag, opts = {}) {
 
 // ---------------------------------------------------------------------------- fuel
 
-/** What one leg costs this ship, in units of Drive Fuel. */
+/** What one leg costs this ship, in units of Lift Fuel. */
 export function fuelFor(kind, leg) {
   const base = FUEL.legs[leg];
   if (base == null) return 0;
@@ -330,7 +313,8 @@ export function canLaunch(player, { leg = 'launch', fromPad = true } = {}) {
   if (leg === 'warp' && !(y.built.warp > 0)) return { ok: false, why: 'Leaving the star needs a warp coil.' };
   const need = fuelFor(kind, leg) + (leg === 'launch' ? fuelFor(kind, 'land') * FUEL.reserve : 0);
   if (y.fuel < need) {
-    return { ok: false, why: `That flight wants ${fmt(need)} Drive Fuel and the tanks hold ${fmt(y.fuel)}.`, need, have: y.fuel };
+    const fuelName = MATERIALS[FUEL.id]?.name || 'fuel';
+    return { ok: false, why: `That flight wants ${fmt(need)} ${fuelName} and the tanks hold ${fmt(y.fuel)}.`, need, have: y.fuel };
   }
   return { ok: true, kind, need };
 }
@@ -379,12 +363,13 @@ export function buildStationModule(player, id, bag, { stations = [] } = {}) {
   const y = yard(player);
   if (y.station[id]) return { ok: false, why: `The ${mod.name} is already up there.` };
   if (stations.length && !stations.includes('assembler')) return { ok: false, why: 'A module is assembler work.' };
+  // the fuel is checked BEFORE anything is taken out of the bag: a module that is built and then
+  // cannot be lifted would have quietly eaten twenty hull plates for nothing
+  if (y.fuel < STATION.fuelPerModule) {
+    return { ok: false, why: `Lifting it wants ${fmt(STATION.fuelPerModule)} ${MATERIALS[FUEL.id]?.name || 'fuel'}; you have ${fmt(y.fuel)}.` };
+  }
   const purse = bagOf(bag);
   if (!purse.spend(mod.cost)) return { ok: false, why: `Short ${costText(purse.missing(mod.cost))}.` };
-  if (y.fuel < STATION.fuelPerModule) {
-    purse.add && Object.entries(mod.cost).forEach(([k, n]) => purse.add(k, n));   // nothing is taken for a flight that cannot happen
-    return { ok: false, why: `Lifting it wants ${fmt(STATION.fuelPerModule)} Drive Fuel; you have ${fmt(y.fuel)}.` };
-  }
   y.fuel = Math.round((y.fuel - STATION.fuelPerModule) * 100) / 100;
   y.station[id] = true;
   return { ok: true, id, name: mod.name, progress: stationProgress(player) };
@@ -404,17 +389,19 @@ export function nextStep(player) {
   if (!y.pad) return { id: 'pad', text: `Level some ground and lay a ${PAD.name}: ${costText(PAD.cost)}.` };
   for (const id of PART_IDS) {
     if ((y.built[id] || 0) < 1) {
-      const next = partCost(player, id);
-      const core = SUBSYSTEMS[id].coresPerTier ? ' and a charged core' : '';
-      return { id, text: `Build the ${SUBSYSTEMS[id].name}: ${costText(next.cost)}${core}.` };
+      const rare = rareInputFor(id);
+      const extra = rare ? ` It needs ${fmt(rare)} of whatever rare element this world holds.` : '';
+      return { id, text: `Have the assembler build ${an(MATERIALS[SUBSYSTEMS[id].part]?.name || id)}.${extra}` };
     }
   }
   if (!owned.length) return { id: 'assemble', text: `Put the four together on the pad: ${costText(SHIPS.lander.assembly)}.` };
   const kind = player?.vehicles?.active?.ship || owned[0];
   if (y.fuel < fuelFor(kind, 'launch') + fuelFor(kind, 'land')) {
-    return { id: 'fuel', text: `Synthesise Drive Fuel — a launch and a landing is ${fmt(fuelFor(kind, 'launch') + fuelFor(kind, 'land'))} units.` };
+    return { id: 'fuel', text: `Synthesise ${MATERIALS[FUEL.id]?.name || 'fuel'} — a launch and a landing is ${fmt(fuelFor(kind, 'launch') + fuelFor(kind, 'land'))} units.` };
   }
-  if (!(y.built.warp > 0)) return { id: 'warp', text: `A warp coil needs a core from a different element family than the drive's ${y.driveFamily || 'core'}.` };
+  if (!(y.built.warp > 0)) {
+    return { id: 'warp', text: `A warp coil, which wants ${fmt(rareInputFor('warp'))} more rare element than this world was ever going to give you.` };
+  }
   const st = stationProgress(player);
   if (!st.complete) return { id: 'station', text: `The ${STATION.name}: ${st.left.length} module${st.left.length === 1 ? '' : 's'} left to lift.` };
   return { id: 'done', text: 'The yard is finished. There is nothing left down here that you need.' };

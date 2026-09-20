@@ -23,12 +23,12 @@
 // active from a dropdown. Mixing the two is what makes an inventory tedious, so they are kept apart
 // here and everywhere downstream.
 //
-// **What changed when the industry arrived.** Every light and every boat carries a `craft` block
-// now (ids from data/workshop.json), two lights and one boat were added above the top of the shop's
-// ladder that can ONLY be built, and the ship slot stopped being something a merchant sells at all —
-// see the note over `VEHICLES.ship` and js/shipyard.js. Ground vehicles (motorcycle, car, truck)
-// live in js/vehicles.js and keep their ownership inside the same `player.vehicles` block, because
-// that is the block js/save.js already writes.
+// **What changed when the industry arrived.** Every light and every boat carries a `craft` block now
+// (material ids from data/resources.json, benches from data/refining.json), two lights and one boat
+// were added above the top of the shop's ladder that can ONLY be built, and the ship slot stopped
+// being something a merchant sells at all — see the note over `VEHICLES.ship` and js/shipyard.js.
+// Ground vehicles (motorcycle, car, truck) live in js/vehicles.js and keep their ownership inside
+// this same `player.vehicles` block, because that is the block js/save.js already writes.
 //
 //   import { GEAR_BASES, VEHICLES, createGearShop, categoryOf } from './gear.js';
 //   const shop = createGearShop({ rpg });
@@ -135,40 +135,40 @@ export const GEAR_BASES = {
    *
    * The ladder did not need a second, parallel list of crafted lamps beside the bought ones — that
    * is how a game ends up with two torches. Instead **every rung became craftable** (a `craft`
-   * block: what it costs and which bench it wants, ids from data/workshop.json), and two rungs were
+   * block: what it costs and which bench it wants, ids from data/resources.json), and two rungs were
    * added ABOVE the shop's best one that can only be built. So the shelf is unchanged, the ladder
    * is longer, and the reason to own a workshop is that the shelf runs out.
    */
   torch: {
     key: 'torch', name: 'Pitch Torch', slot: 'light', type: 'accessory', subtype: 'torch',
     range: 40, intensity: 2.6, color: '#ffb066', burn: 0, price: 20, look: { offhand: 'torch', color: '#c08040' },
-    craft: { station: 'hand', cost: { timber: 1, fibre: 2, sap: 1 }, hours: 0.1 },
+    craft: { station: 'hand', cost: { log: 1, fibre: 2, resin: 1 }, hours: 0.1 },
     lore: 'Rag, pitch and a stick. It will not win a fight, but you can see the fight coming.',
   },
   lantern: {
     key: 'lantern', name: 'Shuttered Lantern', slot: 'light', type: 'accessory', subtype: 'lantern',
     range: 90, intensity: 3.0, color: '#ffd9a0', burn: 0, price: 260, look: { offhand: 'lantern', color: '#c8b070' },
-    craft: { station: 'workbench', cost: { glass: 2, ingot_copper: 2, leather: 1, sap: 2 }, hours: 1 },
+    craft: { station: 'hand', cost: { glass: 2, copper_ingot: 2, leather: 1, resin: 2 }, hours: 1 },
     lore: 'Glass, brass and a wick you can pinch down to nothing when something is listening.',
   },
   wisplamp: {
     key: 'wisplamp', name: 'Wisp Lamp', slot: 'light', type: 'accessory', subtype: 'lamp',
     range: 160, intensity: 3.4, color: '#a8d8ff', burn: 0, price: 820, look: { offhand: 'lamp', color: '#7fd4ff' },
-    craft: { station: 'workbench', cost: { glass: 3, lens: 1, ingot_copper: 3, wire: 2 }, hours: 3 },
+    craft: { station: 'crystal_cutter', cost: { glass: 3, lens: 1, copper_ingot: 3, silver_ingot: 1 }, hours: 3 },
     lore: 'Something small and unhappy is in the jar. It gives a cold light and it does not go out.',
   },
   mirror_lamp: {
     key: 'mirror_lamp', name: 'Mirror Lamp', slot: 'light', type: 'accessory', subtype: 'lantern',
     range: 210, intensity: 3.6, color: '#ffe6b8', burn: 0, price: 0, buildOnly: true,
     look: { offhand: 'lantern', color: '#d8c884' },
-    craft: { station: 'workbench', cost: { glass: 4, lens: 2, ingot_copper: 4, wire: 3, gum: 1 }, hours: 4 },
+    craft: { station: 'crystal_cutter', cost: { glass: 4, lens: 2, copper_ingot: 4, machine_part: 1, resin: 1 }, hours: 4 },
     lore: 'A polished dish behind the flame. All of the light goes forward, which is where you were going anyway.',
   },
   arc_lamp: {
     key: 'arc_lamp', name: 'Arc Lamp', slot: 'light', type: 'accessory', subtype: 'lamp',
     range: 300, intensity: 4.0, color: '#dcefff', burn: 0, price: 0, buildOnly: true,
     look: { offhand: 'lamp', color: '#cfe6ff' },
-    craft: { station: 'assembler', cost: { cell: 2, wire: 6, lens: 2, glass: 3, part: 1 }, hours: 6 },
+    craft: { station: 'assembler', cost: { aether_cell: 1, control_board: 1, lens: 2, glass: 3, machine_part: 1 }, hours: 6 },
     lore: 'A cell, two electrodes and a gap. It does not flicker, it does not care about wind, and it makes everything look dead.',
   },
 
@@ -275,27 +275,27 @@ export const VEHICLES = {
        * of a gallop, so buying one is an upgrade and riding is still the fastest way to travel.
        */
       raft: { key: 'raft', name: 'Lashed Raft', speed: 11.3, price: 0, look: { hull: '#6a5238' },
-        craft: { station: 'hand', cost: { timber: 6, rope: 3 }, hours: 1 },
+        craft: { station: 'hand', cost: { log: 6, rope: 3 }, hours: 1 },
         lore: 'Six logs and a great deal of rope. It floats, which is the entire specification.' },
       skiff: { key: 'skiff', name: 'Fenland Skiff', speed: 14.2, price: 340, look: { hull: '#7a6a4a' },
-        craft: { station: 'sawmill', cost: { plank: 10, rope: 4, sap: 3 }, hours: 4 },
+        craft: { station: 'sawmill', cost: { plank: 10, rope: 4, resin: 3 }, hours: 4 },
         lore: 'Flat-bottomed and quick in the shallows. Built for reed channels, not open water.' },
       cutter: { key: 'cutter', name: 'Coast Cutter', speed: 17.4, price: 1400, look: { hull: '#4a5a6a' },
-        craft: { station: 'sawmill', cost: { plank: 22, rope: 8, fibre: 12, ingot_iron: 4, gum: 2 }, hours: 10 },
+        craft: { station: 'sawmill', cost: { plank: 22, beam: 4, rope: 8, cloth: 12, iron_ingot: 4 }, hours: 10 },
         lore: 'A keel, a sail and somewhere dry to sit. It will cross a sea if you are patient.' },
       /**
        * The rung the shop does not have.
        *
        * "More craftable equipment: … boats" wanted something past the end of the bought ladder, and
        * a powered launch is the obvious one: the only boat with an engine, so the only boat that
-       * drinks Burner Fuel — the same fuel the motorcycle drinks (js/vehicles.js). It is faster than
+       * burns charcoal — the same gas producer the motorcycle runs on (js/vehicles.js). It is faster than
        * the cutter and it is the only one that can run out. Still under a gallop, because riding
        * stays the fastest way to travel; see the yardstick in tests/vehicles.test.js.
        */
       launch: { key: 'launch', name: 'Pitch Launch', speed: 20.5, price: null, buildOnly: true,
-        fuel: 'fuel_burner', perKm: 0.5, tank: 16, look: { hull: '#5a5248' },
-        craft: { station: 'assembler', cost: { plank: 18, steel: 6, part: 3, gum: 3, cell: 1 }, hours: 12 },
-        lore: 'A cutter with an engine where the mast used to be. Loud, quick, and it stops when the can is empty.' },
+        fuel: 'charcoal', perKm: 0.5, tank: 16, look: { hull: '#5a5248' },
+        craft: { station: 'assembler', cost: { plank: 18, steel_ingot: 6, machine_part: 3, resin: 4, control_board: 1 }, hours: 12 },
+        lore: 'A cutter with an engine where the mast used to be. Loud, quick, and it stops when the hopper is empty.' },
     },
   },
   /**

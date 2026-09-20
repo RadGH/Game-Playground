@@ -21,7 +21,11 @@ import { dirname, join } from 'node:path';
 import {
   GEAR_BASES, SHOP_GEAR, VEHICLES, VEHICLE_SLOTS, SHIP_GATE_VERSION,
   createGearShop, categoryOf, startingVehicles, vehicleFor, unlockVehicle, selectVehicle,
+  craftVehicle, gearRecipes,
 } from '../js/gear.js';
+// the material chain the craft blocks are written against — data/resources.json, reached through
+// the helpers in js/vehicles.js (see the note over MATERIALS in there)
+import { MATERIALS, rawInputs, costValue, isGathered } from '../js/vehicles.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const balance = JSON.parse(readFileSync(join(here, '../data/balance.json'), 'utf8'));
@@ -278,4 +282,71 @@ test('player.js boards on entering deep water and steps off on leaving', () => {
   assert.match(src, /out\.boarded/, 'entering the water announces the boat');
   assert.match(src, /out\.leftBoat/, 'leaving the water puts it away');
   assert.match(src, /self\.boating\?\.speed/, 'the boat, not the flat swim speed, drives movement');
+});
+
+// ------------------------------------------------------------------ the craftable half
+
+/**
+ * "I would also like to have more craftable equipment: lanterns, boats…"
+ *
+ * The decision behind these: the ladder did not grow a second, parallel set of crafted lamps beside
+ * the bought ones — that is how a game ends up with two torches and a player wondering which is
+ * which. Every rung became craftable, and the new rungs sit ABOVE the top of the shop's ladder and
+ * can only be built. So the shelf is exactly what it was, and the reason to own a workshop is that
+ * the shelf runs out.
+ */
+test('every light and every boat can be made, and nothing needs a material that does not exist', () => {
+  const recipes = gearRecipes();
+  for (const base of Object.values(GEAR_BASES)) {
+    if (base.slot !== 'light') continue;
+    assert.ok(base.craft, `${base.name} cannot be made at any bench`);
+  }
+  for (const kind of Object.values(VEHICLES.boat.kinds)) {
+    assert.ok(kind.craft, `${kind.name} cannot be made at any bench`);
+  }
+  for (const r of recipes) {
+    for (const id of Object.keys(r.cost)) assert.ok(MATERIALS[id], `${r.name} wants "${id}", which is not a material`);
+    const raw = rawInputs(r.cost);
+    assert.ok(raw, `${r.name} needs something the refining chain cannot produce`);
+    for (const id of Object.keys(raw)) {
+      assert.ok(isGathered(id) || id === 'rare', `${r.name} bottoms out at "${id}", which nobody gathers`);
+    }
+  }
+});
+
+test('the light ladder climbs in reach, and the crafted rungs sit above the bought ones', () => {
+  const lights = Object.values(GEAR_BASES).filter(b => b.slot === 'light');
+  const shelf = SHOP_GEAR.lights.map(k => GEAR_BASES[k]);
+  const built = lights.filter(b => b.buildOnly);
+  assert.equal(built.length, 2, 'two lights you have to make');
+  const bestBought = Math.max(...shelf.map(b => b.range));
+  for (const lamp of built) {
+    assert.ok(lamp.range > bestBought,
+      `${lamp.name} takes a workshop and lights less ground than the best one on a shelf`);
+    assert.ok(costValue(lamp.craft.cost) > costValue(GEAR_BASES.wisplamp.craft.cost),
+      `${lamp.name} lights further than a Wisp Lamp and costs less to make`);
+  }
+  // and the shelf is untouched: the shop still sells exactly the three it always sold
+  const shop2 = createGearShop({ rpg: null });
+  const keys = shop2.stockFor({ role: 'merchant' }, 10, () => 0.5).map(i => i.baseKey);
+  for (const lamp of built) assert.ok(!keys.includes(lamp.key), `${lamp.name} turned up on a shelf`);
+});
+
+test('a boat can be built at a bench instead of bought, and the built-only one only that way', () => {
+  const player = { gold: 0, vehicles: startingVehicles() };
+  const bag = {};
+  for (const id of Object.keys(MATERIALS)) bag[id] = 999;
+
+  const skiff = craftVehicle(player, 'boat', 'skiff', bag, { stations: ['sawmill'] });
+  assert.equal(skiff.ok, true, 'a skiff is carpentry; you should not have to buy one');
+  assert.ok(player.vehicles.owned.boat.includes('skiff'));
+  assert.equal(player.gold, 0, 'building one costs materials, not gold');
+
+  const noBench = craftVehicle(player, 'boat', 'launch', bag, { stations: ['sawmill'] });
+  assert.equal(noBench.ok, false);
+  assert.match(noBench.why, /assembler/);
+
+  const launch = craftVehicle(player, 'boat', 'launch', bag, { stations: ['assembler'] });
+  assert.equal(launch.ok, true);
+  assert.equal(unlockVehicle(player, 'boat', 'raft').ok, false, 'and you still cannot own one twice');
 });

@@ -31,7 +31,8 @@
 // opens a .js file. Imported as a module (the pattern proctown/js/buildkit.js already uses) rather
 // than fetched, so this module also works in a test with nothing wired to it.
 import DATA from '../data/vehicles.json' with { type: 'json' };
-import WORKSHOP from '../data/workshop.json' with { type: 'json' };
+import RESOURCES from '../data/resources.json' with { type: 'json' };
+import REFINING from '../data/refining.json' with { type: 'json' };
 import { fmt, pct } from '../../../shared/format.js';
 
 /** Every ground vehicle, keyed. */
@@ -46,15 +47,48 @@ export const GROUND_SLOT = 'ground';
 export const LADDER = Object.values(GROUND_VEHICLES).sort((a, b) => a.rung - b.rung).map(v => v.key);
 
 /**
- * THE MATERIAL CHAIN, and why it lives in this file.
+ * THE MATERIAL CHAIN — one chain, and it is not this module's.
  *
- * These three helpers belong in a `js/workshop.js` of their own. The file list this round did not
- * include one and inventing files nobody else knows about is how two agents end up with two
- * material tables, so they sit here — the first module that needed them — and js/shipyard.js
- * imports them from here. If a refining module ever lands, move these three and delete this note.
+ * This file was first written against a material table of its own, because the refining layer was
+ * being built by another pair of hands at the same time. It landed: `data/resources.json` (77
+ * materials) and `data/refining.json` (61 recipes over 16 machines), driven by js/refine.js. Two
+ * parallel chains is a real defect — a player would find two kinds of steel — so the table that
+ * was here is gone and these helpers read THEIRS. Every cost in data/vehicles.json,
+ * data/shipyard.json and js/gear.js's craft blocks spells its ids the way resources.json does.
+ *
+ * They live in this module rather than one of their own only because the file list this round did
+ * not include a new home for them; js/shipyard.js imports them from here.
  */
-export const MATERIALS = WORKSHOP.materials;
-export const STATIONS = WORKSHOP.stations;
+export const MATERIALS = RESOURCES.materials;
+/** Every machine that does work, plus `hand` for the things that need no bench at all. */
+export const STATIONS = { hand: { name: 'Bare hands', tier: 0, desc: 'A torch, a rope, a lashed raft.' }, ...REFINING.machines };
+
+/**
+ * What a material is gathered as, rather than made.
+ *
+ * It is read off `kind` and not off "has no recipe", because water has both: you scoop it out of a
+ * river AND you melt ice into it, and a chain that followed the recipe would walk off looking for
+ * ice on a world that has none.
+ */
+const GATHERED_KINDS = new Set(['ore', 'stone', 'wood', 'organic', 'fluid', 'gas', 'salvage', 'rare']);
+export const isGathered = id => GATHERED_KINDS.has(MATERIALS[id]?.kind);
+
+/**
+ * Every recipe that makes each thing, not just the first one.
+ *
+ * Several ids have two or three routes on purpose — steel out of scrap plate or out of ore, lift
+ * fuel out of gas or out of sulphur — and which one is cheapest depends on the world. So the
+ * walker below tries them all and keeps the shortest, otherwise "what does a hull cost?" answers
+ * with sixteen meteoric iron just because the meteor recipe happened to be listed first.
+ */
+const RECIPES_FOR = {};
+for (const r of REFINING.recipes) {
+  for (const id of Object.keys(r.outputs || {})) (RECIPES_FOR[id] = RECIPES_FOR[id] || []).push(r);
+}
+/** How this id is made — every route — or an empty list when it comes out of the ground. */
+export function recipesFor(id) { return RECIPES_FOR[id] || []; }
+/** The route the cost walker would take. */
+export function recipeFor(id) { return RECIPES_FOR[id]?.[0] || null; }
 
 /** A material's rough worth. Unknown ids are worth 1 rather than nothing, so a typo cannot make a craft free. */
 export function valueOf(id) { return MATERIALS[id]?.value ?? 1; }
@@ -67,24 +101,34 @@ export function costValue(cost) {
 /**
  * Everything a cost eventually comes out of the ground as.
  *
- * Walks the chain down to the raw ids, so a test can ask "is this craft actually producible?" and
- * get a real answer rather than trusting that somebody spelled `plate_steel` right. Returns null
- * the moment it meets an id that is neither gathered nor made by anything, which is the failure we
- * want loudly rather than quietly.
+ * Walks the chain down to the gathered ids, so a test can ask "is this craft actually producible?"
+ * and get a real answer rather than trusting that somebody spelled `composite_plate` right.
+ * Returns null the moment it meets an id that is neither gathered nor made by anything, which is
+ * the failure we want loudly rather than quietly. A recipe's `rareInput` comes back as `rare`,
+ * because which element it is depends on the world you are standing on (js/refine.js decides).
  */
 export function rawInputs(cost, seen = new Set()) {
   const out = {};
+  const add = (id, n) => { out[id] = (out[id] || 0) + n; };
+  const total = bag => Object.values(bag).reduce((a, b) => a + b, 0);
+
   for (const [id, n] of Object.entries(cost || {})) {
-    const m = MATERIALS[id];
-    // rare elements arrive in the bag as `el_<key>` from js/resources.js — see workshop.json's contract
-    if (!m && id.startsWith('el_')) { out[id] = (out[id] || 0) + n; continue; }
-    if (!m) return null;                                   // nothing makes this and nobody digs it up
-    if (!m.inputs) { out[id] = (out[id] || 0) + n; continue; }
+    if (!MATERIALS[id]) return null;                       // nothing makes this and nobody digs it up
+    if (isGathered(id)) { add(id, n); continue; }
     if (seen.has(id)) return null;                         // a recipe that needs itself is a dead end
-    const deeper = rawInputs(m.inputs, new Set([...seen, id]));
-    if (!deeper) return null;
-    const runs = Math.ceil(n / (m.out || 1));
-    for (const [rid, rn] of Object.entries(deeper)) out[rid] = (out[rid] || 0) + rn * runs;
+
+    let best = null;
+    for (const recipe of RECIPES_FOR[id] || []) {
+      const runs = Math.ceil(n / (recipe.outputs[id] || 1));
+      const deeper = rawInputs(recipe.inputs, new Set([...seen, id]));
+      if (!deeper) continue;                               // this route is blocked; try the next one
+      const got = {};
+      for (const [rid, rn] of Object.entries(deeper)) got[rid] = rn * runs;
+      if (recipe.rareInput) got.rare = (got.rare || 0) + recipe.rareInput * runs;
+      if (!best || total(got) < total(best)) best = got;
+    }
+    if (!best) return null;
+    for (const [rid, rn] of Object.entries(best)) add(rid, rn);
   }
   return out;
 }
@@ -312,7 +356,7 @@ export function describeVehicle(key) {
       `${fmt(spec.speed * spec.road)} m/s on a road · ${fmt(spec.speed * spec.offroad)} m/s on broken ground`,
       `climbs a ${pct(spec.maxSlope)} slope (a horse manages ${pct(horse.maxSlope)})`,
       `${fmt(spec.seats)} seat${spec.seats === 1 ? '' : 's'} · carries ${fmt(spec.carry)} · fords ${fmt(spec.ford)} m of water`,
-      `${fmt(spec.perKm)} ${GROUND_FUEL.name} a kilometre · a ${fmt(spec.tank)} unit tank goes ${fmt(spec.tank / spec.perKm)} km`,
+      `${fmt(spec.perKm)} ${GROUND_FUEL.name} a kilometre · a ${fmt(spec.tank)} unit hopper goes ${fmt(spec.tank / spec.perKm)} km`,
     ],
     cost: costText(spec.craft.cost),
     stations: (spec.craft.stations || []).map(s => STATIONS[s]?.name || s),

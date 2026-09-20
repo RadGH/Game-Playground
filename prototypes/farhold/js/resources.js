@@ -336,6 +336,78 @@ export function kindsForBiome(data, biome, { indoors = false } = {}) {
 }
 
 /**
+ * R14 — WHERE DOES <THIS> COME FROM?
+ *
+ *   "We need a way for the player to locate materials, through combination of scanning in the world
+ *    or filters on the map."
+ *
+ * Half of "locate a material" is the sweep; the other half is knowing what you are looking for
+ * before you sweep for it. This is the index behind both: material id → the node kinds that yield
+ * it, the biomes those kinds live in, the tool tier they need, and whether they want water or a
+ * roof. Derived from data/resources.json at load, never written by hand — add a node kind and the
+ * Find list and the tooltips follow it on their own.
+ */
+export function materialIndex(data = {}) {
+  const mats = data.materials || {};
+  const out = new Map();
+  for (const [kindId, kind] of Object.entries(data.nodeKinds || {})) {
+    for (const res of Object.keys(kind.resources || {})) {
+      if (!out.has(res)) {
+        out.set(res, {
+          id: res,
+          name: mats[res]?.name || res.replace(/_/g, ' '),
+          colour: mats[res]?.colour || mats[res]?.color || '#9a9285',
+          kinds: [], biomes: new Set(), hardness: Infinity,
+          // `indoors` means "you will only find this underground", so it starts true and one
+          // surface kind is enough to clear it. Iron comes out of a deep vein AND an ore outcrop;
+          // telling a player to go and find a cave for it would be a lie.
+          indoors: true, nearWater: false, placedOnly: true, fromPlanet: true,
+        });
+      }
+      const row = out.get(res);
+      row.kinds.push({ id: kindId, name: kind.name || kindId, hardness: kind.hardness ?? 1, desc: kind.desc || '' });
+      for (const b of kind.biomes || []) row.biomes.add(b);
+      row.hardness = Math.min(row.hardness, kind.hardness ?? 1);
+      if (!kind.indoors) row.indoors = false;
+      // …whereas `nearWater` is a hint about where to look, so any kind that wants water sets it
+      if (kind.nearWater) row.nearWater = true;
+      // "placed only" and "from the planet" are only true of a material if EVERY kind that makes it
+      // is — one ordinary seam is enough to make it something you can go and find
+      if (!kind.placedOnly) row.placedOnly = false;
+      if (!kind.fromPlanet) row.fromPlanet = false;
+    }
+  }
+  for (const row of out.values()) {
+    row.biomes = [...row.biomes];
+    if (!Number.isFinite(row.hardness)) row.hardness = 1;
+  }
+  return out;
+}
+
+/**
+ * One line saying where to look. "Grassland, marsh or beach, at the water's edge — bare hands."
+ *
+ * `biomeName` turns a World Forge biome key into the words a player reads; without it the keys go
+ * through as they are, which is still better than nothing.
+ */
+export function whereToFind(row, { biomeName = null, toolNames = null } = {}) {
+  if (!row) return '';
+  const where = row.indoors
+    ? 'underground — in a cave or a mine'
+    : row.biomes.length
+      ? row.biomes.slice(0, 4).map(b => (biomeName ? biomeName(b) : b)).join(', ')
+        + (row.biomes.length > 4 ? ` and ${row.biomes.length - 4} more` : '')
+      : 'anywhere on the surface';
+  const water = row.nearWater ? ", at the water's edge" : '';
+  const tool = row.hardness <= 0
+    ? 'bare hands'
+    : toolNames?.[row.hardness]
+      ? toolNames[row.hardness].toLowerCase()
+      : `a tier-${row.hardness} tool`;
+  return `${where}${water} \u2014 ${tool}.`;
+}
+
+/**
  * Lay out a patch of nodes.
  *
  * opts:
@@ -350,7 +422,28 @@ export function kindsForBiome(data, biome, { indoors = false } = {}) {
  * Nodes are spaced apart so two never sit on top of each other — a node you cannot walk round is a
  * node that does not exist.
  */
-export function createNodeField({ data = {}, rng = makeRng(1), area = { x: 0, z: 0, radius: 300 }, biomeAt = null, biome = 'grassland', band = 'medium', planet = null, count = 24, minGap = 18 } = {}) {
+export function createNodeField({ data = {}, rng = makeRng(1), area = { x: 0, z: 0, radius: 300 }, biomeAt = null, biome = 'grassland', band = 'medium', planet = null, count = 24, minGap = 18,
+  /**
+   * R14 — `nearWater` IS READ NOW.
+   *
+   *   "Where do you find clay?"
+   *
+   * Clay comes from one node kind, `clay_bank`, and it is not rare: marsh, grassland, rainforest,
+   * temperate forest, beach and savanna, hardness 0, bare hands will do. Its own description says
+   * "Cut out of a riverbank with your hands if you have to" and it carries `nearWater: true` — and
+   * `kindsForBiome` never looked at that flag, so clay banks were scattered evenly across six whole
+   * biomes instead of sitting at the water's edge where the game tells you to look.
+   *
+   * This is the same shape of bug as `deep_vein`'s `indoors` one round earlier: a rule written into
+   * the data, read by nobody. And it matters more than it sounds, because the furnace costs clay and
+   * the kiln costs clay — clay is the gate on the first two machines in the game, so a player who
+   * cannot find it cannot start refining at all.
+   *
+   * `waterNear(x, z)` is supplied by whoever owns the terrain. Without it (the node tests) nothing
+   * is filtered and the behaviour is exactly what it was.
+   */
+  waterNear = null,
+} = {}) {
   const bandCfg = data.planetBands?.[band] || data.planetBands?.medium || { richness: 1, density: 1, rareChance: 0.8 };
   const want = Math.max(1, Math.round(count * (bandCfg.density || 1)));
   const nodes = [];
@@ -362,8 +455,17 @@ export function createNodeField({ data = {}, rng = makeRng(1), area = { x: 0, z:
     const x = area.x + Math.cos(a) * d, z = area.z + Math.sin(a) * d;
     if (nodes.some(n => Math.hypot(n.x - x, n.z - z) < minGap)) continue;
     const here = biomeAt ? biomeAt(x, z) : biome;
-    const kinds = kindsForBiome(data, here);
+    let kinds = kindsForBiome(data, here);
     if (!kinds.length) continue;
+    /**
+     * R14: away from water, the kinds that want water are simply not on the table here. Filtering
+     * the KINDS rather than rejecting the spot is what keeps the density right — rejecting spots
+     * would eat the retry budget and thin every other seam in a dry biome along with the clay.
+     */
+    if (waterNear && !waterNear(x, z)) {
+      const dry = kinds.filter(([, k]) => !k.nearWater);
+      if (dry.length) kinds = dry;
+    }
     const [kindId, kind] = rng.pick(kinds);
     const res = pickResource(rng, kind);
     if (!res) continue;
@@ -523,6 +625,18 @@ export function createNodeWorld({ data = {}, seed = 1, terrain = null, planet = 
       rng: makeRng(tileSeed >>> 0),
       area: { x: (tx + 0.5) * TILE, z: (tz + 0.5) * TILE, radius: TILE * 0.5 },
       biomeAt: terrain ? (x, z) => terrain.biomeAt(x, z).key : null,
+      /**
+       * R14: a clay bank belongs on a bank. Sampled at four points about thirty metres out rather
+       * than at one — a riverbank is a line, and asking only about the spot itself would put a clay
+       * bank IN the river, where `gone` would then delete it.
+       */
+      waterNear: terrain ? (x, z) => {
+        const R = 30;
+        for (const [dx, dz] of [[R, 0], [-R, 0], [0, R], [0, -R]]) {
+          if (terrain.underwater(x + dx, z + dz) || terrain.riverAt(x + dx, z + dz) > 0.25) return true;
+        }
+        return false;
+      } : null,
       band, planet, count: perTile, minGap: 22,
     });
     for (const n of nodes) {

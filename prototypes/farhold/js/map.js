@@ -18,6 +18,7 @@ import { locationLine, copyTextVia, COPY_WORDS } from './debug.js';
 import { layersPanel } from '../../../worldgen/js/layers-panel.js';
 import { zoneTone } from './zones.js';
 import { MARKER_LOOKS, distanceText, worldKey } from './markers.js';
+import { registerTip, refreshTip, tipOpen } from '../../../shared/tooltip.js';
 
 /** The wash each danger step puts over a region, and the colour its number is written in. */
 const TONE_RGB = {
@@ -82,15 +83,72 @@ export const MAP_MARKS = {
   castle:    { label: 'castle',           group: 'Held ground', shape: 'keep', r: 5.0, fill: '#ff4a4a', line: '#2a0c0c' },
   landmark:  { label: 'landmark',         group: 'Held ground', shape: 'pip',  r: 3.0, fill: '#8fd0ff', line: '#10283a' },
   pass:      { label: 'mountain pass',    group: 'Held ground', shape: 'cross', r: 3.0, fill: '#d8d2c4', line: '#2a2a2a' },
+
+  /**
+   * R14 — TEN OF WORLD FORGE'S ELEVEN LANDMARK KINDS WERE NOT ON THE MAP AT ALL.
+   *
+   *   "The legend also does not seem to line up with the actual icons used on the map very well."
+   *
+   * `markFor` tested `node.family === 'landmark'` — and a World Forge node has no `family`, only a
+   * `type`. So a volcano, a waterfall, an ancient wood, a battlefield, a crater, a monolith, a
+   * shrine, a tower, a ruin and a vent were all on the planet, all named, all in `world.nodes`, and
+   * every one of them fell through to `return null` and was never drawn. `cave` survived by pure
+   * accident, because of an unrelated `node.kind === 'cave'` line further down.
+   *
+   * They get their own marks rather than one shared blue pip, because the whole complaint was that
+   * the map does not tell you what you are looking at.
+   */
+  volcano:   { label: 'volcano',          group: 'Landmarks', shape: 'peak',  r: 4.2, fill: '#ff7a3a', line: '#2a1006' },
+  waterfall: { label: 'waterfall',        group: 'Landmarks', shape: 'fall',  r: 3.4, fill: '#8fd3ff', line: '#123045' },
+  ancientwood: { label: 'ancient wood',   group: 'Landmarks', shape: 'tree',  r: 3.6, fill: '#7ac86a', line: '#12280e' },
+  battlefield: { label: 'battlefield',    group: 'Landmarks', shape: 'blades', r: 3.6, fill: '#d0a0a0', line: '#2a1414' },
+  crater:    { label: 'crater',           group: 'Landmarks', shape: 'ring',  r: 3.6, fill: '#b0a08a', line: '#241c14' },
+  monolith:  { label: 'standing stone',   group: 'Landmarks', shape: 'stone', r: 3.4, fill: '#c8c0b0', line: '#2a2620' },
+  shrine:    { label: 'shrine',           group: 'Landmarks', shape: 'arch',  r: 3.2, fill: '#ffd9a0', line: '#2e2010' },
+  ruin:      { label: 'ruin',             group: 'Landmarks', shape: 'broken', r: 3.4, fill: '#a89c88', line: '#241e16' },
+  tower:     { label: 'old tower',        group: 'Landmarks', shape: 'stone', r: 3.6, fill: '#bcae96', line: '#2a2418' },
+  vent:      { label: 'vent',             group: 'Landmarks', shape: 'peak',  r: 2.8, fill: '#c8b060', line: '#2a2410' },
+
+  /**
+   * R14 — and the two things the map has always drawn and the key has never mentioned.
+   *
+   *   "some new icons like for waypoints are missing from the legend. The town portal icons could
+   *    also be improved as the current one is too dark."
+   */
+  waypoint:  { label: 'waypoint (lit)',   group: 'Travel',    shape: 'sigil', r: 4.2, fill: '#7fe8ff', line: '#0c3040', ring: true },
+  waypointOff: { label: 'waypoint (not lit yet)', group: 'Travel', shape: 'sigil', r: 3.8, fill: '#5a6a78', line: '#151d24' },
+  portal:    { label: 'portal',           group: 'Travel',    shape: 'arch',  r: 4.0, fill: '#c88aff', line: '#2a1040', ring: true },
 };
 
 /** The order the key lists them in, which is also the order they are drawn on the map. */
+/** R14: what each map layer is called in a sentence, for the legend strip and the fold's heading. */
+export const LAYER_WORDS = {
+  biomes: 'Ground', elevation: 'Height', temperature: 'Temperature', rainfall: 'Rainfall',
+  regions: 'Regions', weather: 'Weather', rivers: 'Water', political: 'Who holds it',
+};
+
 export const MARK_ORDER = [
   'worldboss',
   'capital', 'city', 'town', 'village', 'hamlet', 'port',
   'dungeon', 'cave', 'lair', 'cleared',
-  'camp', 'fort', 'castle', 'landmark', 'pass',
+  'camp', 'fort', 'castle', 'pass',
+  // R14: the landmark kinds that were never drawn, and the travel marks the key never mentioned
+  'volcano', 'waterfall', 'ancientwood', 'battlefield', 'crater', 'monolith', 'shrine', 'ruin', 'tower', 'vent',
+  'landmark',
+  'waypoint', 'waypointOff', 'portal',
 ];
+
+/**
+ * R14 — a World Forge landmark `kind` → the mark it wears.
+ *
+ * Anything not in here is a plain `landmark` pip, which is what all eleven of them used to be, on
+ * the days they were drawn at all.
+ */
+export const LANDMARK_MARKS = {
+  volcano: 'volcano', waterfall: 'waterfall', ancientwood: 'ancientwood',
+  battlefield: 'battlefield', crater: 'crater', monolith: 'monolith',
+  shrine: 'shrine', ruin: 'ruin', tower: 'tower', vent: 'vent', cave: 'cave',
+};
 
 /**
  * Which mark a place on this world wears.
@@ -102,12 +160,27 @@ export const MARK_ORDER = [
 export function markFor(node) {
   if (!node) return null;
   if (node.family === 'worldboss' || node.worldBoss) return 'worldboss';
-  if (node.family === 'landmark') return 'landmark';
+  if (node.family === 'landmark') {
+    // R14: farhold's own landmarks carry an icon name in `pin.glyph` — the MINIMAP has been reading
+    // it all along and the big map threw it away, so the small map was the more informative of the
+    // two, which is backwards.
+    return LANDMARK_MARKS[node.pin?.glyph] || LANDMARK_MARKS[node.type] || 'landmark';
+  }
+  /**
+   * R14 — THE LINE THAT WAS MISSING.
+   *
+   * World Forge files a landmark as `{ type: 'landmark', kind: 'volcano' | … }` with no `family` at
+   * all, so the test above could never match one and ten of the eleven kinds were invisible.
+   */
+  if (node.type === 'landmark') return LANDMARK_MARKS[node.kind] || 'landmark';
   if (node.family === 'stronghold') {
     const glyph = node.pin?.glyph || 'camp';
     if (glyph === 'castle') return 'castle';
-    if (glyph === 'fort' || glyph === 'tower' || glyph === 'siege') return 'fort';
+    if (glyph === 'fort' || glyph === 'siege') return 'fort';
+    if (glyph === 'tower') return 'tower';
     if (glyph === 'lair') return 'lair';
+    // R14: a cult circle is not a bandit camp and should not wear its tent
+    if (glyph === 'cult') return 'shrine';
     return 'camp';
   }
   if (node.type === 'settlement') return MAP_MARKS[node.kind] ? node.kind : 'village';
@@ -196,18 +269,121 @@ export function drawMark(ctx, key, x, y, k = 1) {
       ctx.moveTo(x - r, y); ctx.lineTo(x + r, y);
       ctx.moveTo(x, y - r); ctx.lineTo(x, y + r);
       break;
+    /**
+     * R14 — THE LANDMARK SHAPES.
+     *
+     * Ten World Forge landmark kinds were drawn as nothing at all and fourteen of farhold's own were
+     * drawn as this one blue pip. Each of these is deliberately readable at 8 px and deliberately
+     * unlike its neighbours in silhouette, not only in colour — three of the existing marks are
+     * near-identical yellow-oranges and at that size a colour difference is not a difference.
+     */
+    // a volcano is a cone with its top taken off
+    case 'peak':
+      ctx.moveTo(x - r, y + r * 0.8);
+      ctx.lineTo(x - r * 0.3, y - r * 0.9);
+      ctx.lineTo(x + r * 0.3, y - r * 0.9);
+      ctx.lineTo(x + r, y + r * 0.8);
+      ctx.closePath();
+      break;
+    // a waterfall is a lip with the water going over it
+    case 'fall':
+      ctx.moveTo(x - r, y - r * 0.8);
+      ctx.lineTo(x + r, y - r * 0.8);
+      ctx.lineTo(x + r * 0.55, y + r);
+      ctx.lineTo(x - r * 0.55, y + r);
+      ctx.closePath();
+      break;
+    // an ancient wood is a canopy on a trunk
+    case 'tree':
+      ctx.moveTo(x, y - r);
+      ctx.lineTo(x + r * 0.85, y + r * 0.25);
+      ctx.lineTo(x + r * 0.25, y + r * 0.25);
+      ctx.lineTo(x + r * 0.25, y + r);
+      ctx.lineTo(x - r * 0.25, y + r);
+      ctx.lineTo(x - r * 0.25, y + r * 0.25);
+      ctx.lineTo(x - r * 0.85, y + r * 0.25);
+      ctx.closePath();
+      break;
+    // a battlefield is two blades crossed
+    case 'blades':
+      ctx.moveTo(x - r, y - r); ctx.lineTo(x + r, y + r);
+      ctx.moveTo(x + r, y - r); ctx.lineTo(x - r, y + r);
+      break;
+    // a crater is a rim with nothing in it
+    case 'ring':
+      ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
+      break;
+    // a standing stone, and an old tower, are the same upright slab at different sizes
+    case 'stone':
+      ctx.moveTo(x - r * 0.45, y + r);
+      ctx.lineTo(x - r * 0.35, y - r * 0.7);
+      ctx.lineTo(x + r * 0.35, y - r);
+      ctx.lineTo(x + r * 0.45, y + r);
+      ctx.closePath();
+      break;
+    // a shrine, and a portal, are a doorway with nothing behind it
+    case 'arch':
+      ctx.moveTo(x - r * 0.75, y + r);
+      ctx.lineTo(x - r * 0.75, y - r * 0.2);
+      ctx.arc(x, y - r * 0.2, r * 0.75, Math.PI, 0);
+      ctx.lineTo(x + r * 0.75, y + r);
+      ctx.closePath();
+      break;
+    // a ruin is a wall with a piece missing
+    case 'broken':
+      ctx.moveTo(x - r, y + r);
+      ctx.lineTo(x - r, y - r * 0.5);
+      ctx.lineTo(x - r * 0.3, y - r * 0.5);
+      ctx.lineTo(x - r * 0.3, y + r * 0.1);
+      ctx.lineTo(x + r * 0.3, y + r * 0.1);
+      ctx.lineTo(x + r * 0.3, y - r);
+      ctx.lineTo(x + r, y - r);
+      ctx.lineTo(x + r, y + r);
+      ctx.closePath();
+      break;
+    /**
+     * R14 — the waypoint pad, which was a near-black hole.
+     *
+     *   "The town portal icons could also be improved as the current one is too dark."
+     *
+     * It filled `rgba(20, 44, 58, .95)` inside a thin blue ring, which on grassland or a beach is
+     * the darkest thing on the screen and reads as a crater rather than as somewhere to travel to.
+     * A sigil is a LIT disc now: a bright fill with a four-pointed star cut across it, so a lit pad
+     * and an unlit one differ in brightness rather than only in outline.
+     */
+    case 'sigil':
+      ctx.arc(x, y, r * 0.8, 0, Math.PI * 2);
+      break;
     // a landmark is a plain pip: it is scenery with a use, not somewhere to plan a route around
     case 'pip':
     default:
       ctx.arc(x, y, r * 0.75, 0, Math.PI * 2);
   }
-  if (mark.shape === 'cross') ctx.stroke();
+  if (mark.shape === 'cross' || mark.shape === 'blades') ctx.stroke();
   else { ctx.fill(); ctx.stroke(); }
   if (mark.shape === 'anchor') {
     ctx.beginPath();
     ctx.moveTo(x - r * 0.8, y); ctx.lineTo(x + r * 0.8, y);
     ctx.moveTo(x, y - r); ctx.lineTo(x, y + r);
     ctx.stroke();
+  }
+  // R14: the star cut into a waypoint sigil, in its own outline colour so it reads as an inlay
+  if (mark.shape === 'sigil') {
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const a = (Math.PI / 2) * i;
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(a) * r * 0.78, y + Math.sin(a) * r * 0.78);
+    }
+    ctx.lineWidth = Math.max(0.6, r * 0.18);
+    ctx.stroke();
+  }
+  // …and the empty middle of a crater, so it is a rim rather than a filled disc
+  if (mark.shape === 'ring') {
+    ctx.beginPath();
+    ctx.arc(x, y, r * 0.36, 0, Math.PI * 2);
+    ctx.fillStyle = mark.line;
+    ctx.fill();
   }
   // the two biggest settlements wear a ring, which is what makes the size ladder readable zoomed out
   if (mark.ring) {
@@ -225,7 +401,32 @@ import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null, waypoints = null, allowDebugTeleport = () => true, bases = null } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null, waypoints = null, allowDebugTeleport = () => true, bases = null,
+  /**
+   * R14 — FINDING THINGS. The other half of the map's job.
+   *
+   *   "I previously asked for a scan tool to locate resources. Where is that? Where do you find
+   *    clay? We need a way for the player to locate materials, through combination of scanning in
+   *    the world or filters on the map."
+   *
+   * The scanner already existed, buried three clicks deep inside build mode with a 144 m radius. It
+   * belongs on the map, which is where a player goes when the question is "where is X".
+   *
+   *   `findables`  () => [{ id, name, colour, where }]   what can be swept for, and where it lives
+   *   `onSweep`    (materialId) => { found, hits }        run a sweep from where the player stands
+   *   `scanState`  () => ({ want, hits, until })          what the last sweep turned up
+   *   `onKeep`     (hit) => marker                        keep one of them as a saved place
+   */
+  findables = null, onSweep = null, scanState = null, onKeep = null,
+  /**
+   * R14 — THE PORTAL, WHICH HAD A FINISHED `mapMarkers()` THAT NOTHING IMPORTED.
+   *
+   * `js/portal.js:211` has built both ends of the town portal into map-ready rows since §6.8 landed,
+   * and nothing anywhere called it — the thirteenth module of this kind this project has turned up.
+   * The portal was on the ground, in the save, in the journal, and not on the map.
+   */
+  portals = null,
+} = {}) {
   // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
   // the minimap and space mode can see them too.
@@ -333,6 +534,10 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
      */
     focus: null,
   };
+  /** R14: which material the Find panel is set to. Outside `state` because it is pure interface. */
+  let findWant = null;
+  /** R14: every mark drawn this frame, in screen pixels, so a hover can be resolved. */
+  const placeHits = [];
 
   const canvas = el('canvas', { class: 'map-canvas', id: 'map-canvas' });
   const readout = el('div', { class: 'map-readout muted small' });
@@ -422,10 +627,22 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    * nothing in it depends on where you are — and the settlement rows come first because the size
    * ladder is the thing the report was actually asking to be able to read.
    */
+  /**
+   * R14 — THE KEY IS REBUILT, AND IT SAYS WHEN IT IS LYING.
+   *
+   * It used to return early on `dataset.built`, so nothing whose presence depends on the state of
+   * the run could ever be in it — a waypoint row that should only appear once you have lit one, a
+   * marker row, a scan filter. And the layers panel's `nodes` chip hides every place on the map
+   * while the key goes on listing all of them, so switching it off reads as a rendering fault
+   * rather than as something you did.
+   */
   function buildKey() {
-    if (keyBox.dataset.built) return;
-    keyBox.dataset.built = '1';
+    keyBox.replaceChildren();
     keyBox.append(el('h4', { class: 'map-key-title', text: 'What the marks mean' }));
+    if (state.layers.nodes === false) {
+      keyBox.append(el('p', { class: 'map-key-off', text:
+        'Places are switched off — turn "nodes" back on in Layers, above, to see them.' }));
+    }
     let group = null;
     let list = null;
     for (const name of MARK_ORDER) {
@@ -443,9 +660,27 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       drawMark(ctx, name, 11, 11, Math.min(1.7, 8 / mark.r));
       list.append(el('div', { class: 'map-key-row' }, swatch, el('span', { text: mark.label })));
     }
+    /**
+     * R14 — the six things the map has always drawn and the key never mentioned: the markers. They
+     * are drawn from `MARKER_LOOKS`, the same table the minimap and the side list read, so a glyph
+     * here and a glyph on the map cannot drift apart.
+     */
+    keyBox.append(el('div', { class: 'map-key-group', text: 'Yours' }));
+    const mine = el('div', { class: 'map-key-rows' });
+    for (const [kind, look] of Object.entries(MARKER_LOOKS)) {
+      mine.append(el('div', { class: 'map-key-row' },
+        el('i', { class: 'map-key-glyph', text: look.icon, style: `color:${look.color}` }),
+        el('span', { text: look.label.toLowerCase() })));
+    }
+    mine.append(el('div', { class: 'map-key-row' },
+      el('i', { class: 'map-key-glyph', text: '\u2605', style: 'color:#ffd24a' }),
+      el('span', { text: 'starred — highlighted on the map' })));
+    keyBox.append(mine);
+
     keyBox.append(el('p', { class: 'muted small', text:
       'Settlements grow with their size, and the two biggest wear a ring. Dungeons, caves and lairs '
-      + 'are three different mouths; held ground is a tent or a keep.' }));
+      + 'are three different mouths; held ground is a tent or a keep. Small places appear as you '
+      + 'zoom in.' }));
   }
 
   function buildSide() {
@@ -454,7 +689,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     const layerPanel = layersPanel({
       layer: state.layer, layers: state.layers,
       onLayer: name => { state.layer = name; buildSide(); draw(); },
-      onToggle: (key, on) => { state.layers[key] = on; draw(); },
+      // R14: `nodes` hides every place on the map, and the key has to say so — so a toggle that
+      // changes what the key should read rebuilds the side, not only the canvas
+      onToggle: (key, on) => { state.layers[key] = on; if (key === 'nodes') buildSide(); draw(); },
     });
     side.append(layerPanel);
     side.append(keyBox);
@@ -519,6 +756,70 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       }
     }
     side.append(panel('Tracking', list));
+
+    /**
+     * R14 — FIND. A material, a sweep, and where the hits are.
+     *
+     *   "The scanner tool should let you select a material and scan for it, displaying it with a
+     *    marker in the world for some time and displaying it on the world map as well."
+     *
+     * A dropdown of everything the world can yield, each row saying where it lives, so the answer to
+     * "where do you find clay?" is on the screen BEFORE you sweep — a sweep that comes back empty
+     * still has to teach you something. The hits are listed nearest first with a ⌖ and a Keep.
+     */
+    if (findables && onSweep) {
+      const kids = [];
+      const rows = findables() || [];
+      const st = scanState?.() || {};
+      const pick = el('select', { class: 'find-pick' });
+      pick.append(el('option', { value: '', text: 'anything at all' }));
+      for (const r of rows) {
+        const o = el('option', { value: r.id, text: r.name });
+        if (r.id === findWant) o.selected = true;
+        pick.append(o);
+      }
+      pick.onchange = () => { findWant = pick.value || null; buildSide(); };
+      kids.push(pick);
+
+      const chosen = rows.find(r => r.id === findWant);
+      if (chosen?.where) kids.push(el('p', { class: 'muted small', text: chosen.where }));
+
+      kids.push(el('button', {
+        class: 'chip',
+        text: findWant ? `Sweep for ${(chosen?.name || findWant).toLowerCase()}` : 'Sweep for anything',
+        onclick: () => { onSweep(findWant); buildSide(); draw(); },
+      }));
+
+      const hits = st.hits || [];
+      if (st.swept) {
+        if (!hits.length) {
+          kids.push(el('p', { class: 'muted small', text: 'The last sweep found nothing in range. Walk somewhere else and try again.' }));
+        } else {
+          const list = el('div', { class: 'pin-list' });
+          for (const h of hits.slice(0, 12)) {
+            const row = el('div', { class: 'pin-row' },
+              el('i', { class: 'pin-dot', text: '\u25c6', style: `color:${h.colour}` }),
+              el('span', { class: 'pin-name', text: h.name }),
+              el('span', { class: 'muted small', text: distanceText(h.distance) }),
+              el('button', {
+                class: 'pin-go', text: '\u2316', title: `Show this ${h.name.toLowerCase()} on the map`,
+                onclick: () => locate({ x: h.x, z: h.z, name: h.name, kind: 'seam' }),
+              }),
+            );
+            if (onKeep) {
+              row.append(el('button', {
+                class: 'pin-keep', text: '\u2726', title: 'Keep this place, so you can find it again later',
+                onclick: () => { onKeep(h); buildSide(); draw(); },
+              }));
+            }
+            list.append(row);
+          }
+          kids.push(list);
+          if (hits.length > 12) kids.push(el('p', { class: 'muted small', text: `and ${hits.length - 12} more` }));
+        }
+      }
+      side.append(panel('Find', ...kids));
+    }
 
     // Markers on OTHER worlds. They cannot be drawn on this map, so they are listed with the world
     // they are on — the same list space mode puts a ring around.
@@ -678,6 +979,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     }
 
     drawWaypoints(ctx, scale, ox, oy);
+    drawPortals(ctx, scale, ox, oy);
 
     // B8: where a name has been held back, say so in grey rather than leaving a gap the player
     // reads as empty ground. The band under it still tells them whether they could survive there.
@@ -969,6 +1271,30 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
      * readout — a debug number, not something a player is planning a route with. The danger scale
      * stays under the map; the biome breakdown moves into the side panel, behind a fold.
      */
+    /**
+     * R14 — THE STRIP UNDER THE MAP GOES BLANK WHEN THE LEVEL OVERLAY IS OFF.
+     *
+     *   "The legend also does not seem to line up with the actual icons used on the map very well."
+     *
+     * `rows` was only filled `if (state.levels && zones)`, so turning the bands off — or switching
+     * to Elevation, or Temperature — left the strip empty and the colour ramp for the layer you were
+     * actually looking at buried in a collapsed fold in the side panel. Whichever layer is drawn now
+     * always has its own key under it.
+     *
+     * And the danger strip never said what the numbers ON the map are: the map writes "14–17" and
+     * "Hostile" in those colours and nothing explained that the top line is a level range and the
+     * bottom is the region's own character.
+     */
+    if (rows.length) {
+      rows.unshift(el('span', { class: 'sw muted' }, 'a region shows its level range and how rough it is:'));
+    } else {
+      const ramp = legendRows(world, state.layer)
+        .filter(r => r.share > 0.004)
+        .slice(0, 10)
+        .map(r => el('span', { class: 'sw' }, el('i', { style: { background: r.color } }), r.label));
+      if (ramp.length) rows.push(el('span', { class: 'sw muted' }, `${LAYER_WORDS[state.layer] || state.layer}:`), ...ramp);
+    }
+
     legendBox.replaceChildren(...rows);
     const parts = legendRows(world, state.layer)
       .filter(r => r.share > 0.004)
@@ -977,7 +1303,14 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
         `${r.label} ${Math.round(r.share * 100)}%`));
     if (compositionBox) {
       compositionBox.replaceChildren(
-        el('summary', { text: `What ${world.planet?.name || 'this world'} is made of` }),
+        /**
+         * R14: this always said "What <planet> is made of" while the rows below it came from
+         * whichever layer was drawn — so on the Temperature layer it offered to tell you what the
+         * planet was made of and then listed temperature bands.
+         */
+        el('summary', { text: state.layer === 'biomes'
+          ? `What ${world.planet?.name || 'this world'} is made of`
+          : `${LAYER_WORDS[state.layer] || state.layer}, across the whole world` }),
         el('div', { class: 'legend' }, ...parts),
       );
       compositionBox.hidden = !parts.length;
@@ -1189,16 +1522,38 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     const order = new Map(MARK_ORDER.map((key, i) => [key, i]));
     const marks = [];
 
+    /**
+     * R14 — THE THINNING WAS DEAD CODE, AND IT WAS DEAD FOR AN INTERESTING REASON.
+     *
+     * These tests used to read `scale`, which is BUFFER pixels per map cell: `fit * zoom`, where
+     * `fit` divides `canvas.width` — the backing buffer, up to twice the CSS width on a retina
+     * display — by the world's 256 cells. On an ordinary 1600 px canvas at dpr 2 that is 12.5 at
+     * zoom 1, four times the highest threshold here. So nothing was ever thinned: every hamlet,
+     * cave, pass, port and stronghold on the whole planet was drawn at the whole-world zoom, which
+     * is several hundred marks piled on top of each other — and the thresholds silently moved with
+     * the display's pixel ratio, so the map drew differently on two machines.
+     *
+     * `state.zoom` is a number this file owns, off a fixed ladder (1, 1.6, 2.6, 4.2, …), and means
+     * the same thing everywhere. Zoomed all the way out you get the places you would plan a route
+     * around; zoom in and the rest arrive.
+     */
+    const z = state.zoom;
+
     // World Forge's places: settlements, ports, passes, dungeons, caves
     for (const node of world.nodes || []) {
       const key = markFor(node);
       if (!key) continue;
       // at a whole-world zoom only the places you would plan a route around are drawn
-      if (scale < 3 && !(node.type === 'settlement' ? (node.size || 0) >= 3 : node.type === 'dungeon')) continue;
-      if (scale < 1.6 && node.type === 'settlement' && (node.size || 0) < 4) continue;
+      if (z < 1.6 && !(node.type === 'settlement' ? (node.size || 0) >= 3 : node.type === 'dungeon')) continue;
+      if (z < 1.3 && node.type === 'settlement' && (node.size || 0) < 4) continue;
+      // …and a landmark is scenery: it arrives once you are close enough to walk to it
+      if (z < 2.6 && node.type === 'landmark') continue;
       marks.push({
         key: node.type === 'dungeon' && cleared.has(node.id) ? 'cleared' : key,
         x: ox + (node.x + 0.5) * scale, y: oy + (node.y + 0.5) * scale,
+        // R14: what the hover card reads
+        id: 'node:' + node.id, name: node.name || '', type: node.type, kind: node.kind,
+        cell: { x: node.x, y: node.y },
       });
     }
 
@@ -1206,12 +1561,28 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     for (const site of sites?.sites || []) {
       const key = markFor(site);
       if (!key) continue;
-      if (scale < 2.2 && site.family !== 'stronghold' && site.family !== 'worldboss') continue;
+      if (z < 2.6 && site.family !== 'stronghold' && site.family !== 'worldboss') continue;
       marks.push({
         key: site.cleared ? 'cleared' : key,
         x: ox + (site.x / M_PER_CELL + 0.5) * scale, y: oy + (site.z / M_PER_CELL + 0.5) * scale,
+        id: 'site:' + site.key, name: site.name || '', type: site.family, kind: site.type,
+        blurb: site.blurb || site.spec?.blurb || '', cleared: !!site.cleared,
+        cell: { x: Math.floor(site.x / M_PER_CELL), y: Math.floor(site.z / M_PER_CELL) },
       });
     }
+
+    /**
+     * R14 — WHAT IS UNDER THE POINTER.
+     *
+     *   "It would also be great if the map had hover tooltips to show what icons mean and some
+     *    other meta info about the region and what the icon is for."
+     *
+     * The map is a canvas, so there is nothing to hang a `title` on — a hover has to be hit-tested.
+     * The marks are already being positioned here, in screen pixels, so the hit list is free: it is
+     * the same loop, one push longer. Rebuilt on every draw, which is also every pan and zoom, so it
+     * can never describe a mark that has moved.
+     */
+    placeHits.length = 0;
 
     // smallest first, so a capital is never hidden under the hamlet beside it
     marks.sort((a, b) => (order.get(b.key) ?? 0) - (order.get(a.key) ?? 0));
@@ -1219,6 +1590,26 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     for (const m of marks) {
       if (m.x < -20 || m.y < -20 || m.x > canvas.width + 20 || m.y > canvas.height + 20) continue;
       drawMark(ctx, m.key, m.x, m.y, k);
+      // R14: the hit radius is a little wider than the mark, because a 3 px pip is not a target
+      placeHits.push({ x: m.x, y: m.y, r: Math.max(9, (MAP_MARKS[m.key]?.r || 3) * k + 4), mark: m });
+    }
+  }
+
+  /**
+   * R14 — both ends of the town portal, from `portals.mapMarkers()`.
+   *
+   * Drawn after the waypoints and before the markers, so a portal standing on a pad is visible over
+   * it rather than under it. Only the ends on THIS world are drawn; the book files them per world
+   * for the same reason the marker book does.
+   */
+  function drawPortals(ctx, scale, ox, oy) {
+    const ends = portals?.mapMarkers?.() || [];
+    for (const end of ends) {
+      if (end.world && book && worldKey(end.world) !== book.key) continue;
+      const px = ox + (end.x / M_PER_CELL + 0.5) * scale;
+      const py = oy + (end.z / M_PER_CELL + 0.5) * scale;
+      if (px < -20 || py < -20 || px > canvas.width + 20 || py > canvas.height + 20) continue;
+      drawMark(ctx, 'portal', px, py, Math.min(1.5, Math.max(0.8, scale / 5)));
     }
   }
 
@@ -1234,17 +1625,37 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       if (px < -20 || py < -20 || px > canvas.width + 20 || py > canvas.height + 20) continue;
       const r = Math.max(5, Math.min(11, 4 + scale * 0.5));
 
-      // the pad: a disc, then the sigil ring
+      /**
+       * R14 — A LIT WAYPOINT IS LIT.
+       *
+       *   "The town portal icons could also be improved as the current one is too dark."
+       *
+       * A lit pad filled `rgba(20, 44, 58, .95)` — near-black with a blue cast — inside a thin
+       * blue ring. On grassland (#6f9f52) or a beach (#d3c592) that is the darkest thing on the
+       * screen, so the one place you can travel to read as a hole in the ground. The lit one is a
+       * bright disc now with a soft halo around it, and the unlit one stays dark: the difference
+       * between them is brightness, which is what "lit" means, rather than the colour of an
+       * outline nobody can see at eight pixels.
+       */
+      if (pad.lit) {
+        const halo = ctx.createRadialGradient(px, py, r * 0.3, px, py, r * 2.1);
+        halo.addColorStop(0, 'rgba(127, 232, 255, .55)');
+        halo.addColorStop(1, 'rgba(127, 232, 255, 0)');
+        ctx.beginPath();
+        ctx.arc(px, py, r * 2.1, 0, Math.PI * 2);
+        ctx.fillStyle = halo;
+        ctx.fill();
+      }
       ctx.beginPath();
       ctx.arc(px, py, r, 0, Math.PI * 2);
-      ctx.fillStyle = pad.lit ? 'rgba(20, 44, 58, .95)' : 'rgba(22, 26, 34, .9)';
+      ctx.fillStyle = pad.lit ? '#9fe9ff' : 'rgba(30, 36, 46, .92)';
       ctx.fill();
       ctx.lineWidth = 2;
-      ctx.strokeStyle = pad.lit ? '#6ad0ff' : 'rgba(120, 132, 148, .65)';
+      ctx.strokeStyle = pad.lit ? '#0c3040' : 'rgba(120, 132, 148, .65)';
       ctx.stroke();
 
-      // the sigildry — three marks on the ring, lit or dark
-      ctx.strokeStyle = pad.lit ? '#bfeaff' : 'rgba(120, 132, 148, .45)';
+      // the sigildry — three marks on the ring, dark on a lit pad so they read as an inlay
+      ctx.strokeStyle = pad.lit ? 'rgba(12, 48, 64, .85)' : 'rgba(120, 132, 148, .45)';
       ctx.lineWidth = 1.4;
       for (let i = 0; i < 3; i++) {
         const a = (i / 3) * Math.PI * 2 - Math.PI / 2;
@@ -1315,6 +1726,36 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       + (zone && zone.id >= 0 ? ` · level ${zone.minLevel}\u2013${zone.maxLevel} (${zone.danger})` : '')
       + (odds ? ` · usually ${odds.name.toLowerCase()}` : '');
     readout.className = 'readout' + (zone && zone.id >= 0 ? ' zone-' + zoneTone(zone.midLevel, getLevel()) : '');
+
+    /**
+     * R14 — and what the hover card should describe.
+     *
+     * A place first, then a waypoint pad, then a marker, then the ground: most specific wins. `key`
+     * is a stable identity, and when it changes while a card is already open the shared engine's
+     * `refreshTip()` re-renders in place without moving the box — which is the whole reason that
+     * function exists and is already how the item cards work.
+     */
+    const rect = canvas.getBoundingClientRect();
+    const dpr = canvas.width / Math.max(1, rect.width);
+    const mx = (ev.clientX - rect.left) * dpr, my = (ev.clientY - rect.top) * dpr;
+    const near = (hx, hy, hr) => (mx - hx) ** 2 + (my - hy) ** 2 <= hr * hr;
+
+    let hover = null;
+    for (const h of placeHits) if (near(h.x, h.y, h.r)) { hover = { tier: 'place', key: h.mark.id, mark: h.mark }; break; }
+    if (!hover) for (const h of waypointHits) if (near(h.px, h.py, h.r)) { hover = { tier: 'pad', key: 'pad:' + h.pad.id, pad: h.pad }; break; }
+    if (!hover) {
+      const { scale, ox, oy } = viewBox();
+      for (const m of pins()) {
+        const px = ox + (m.cell.x + 0.5) * scale, py = oy + (m.cell.y + 0.5) * scale;
+        if (near(px, py, Math.max(10, scale * 1.2))) { hover = { tier: 'marker', key: 'm:' + m.id, marker: m }; break; }
+      }
+    }
+    if (!hover) hover = { tier: 'cell', key: `c:${cell.x},${cell.y}`, cell };
+
+    if (state.hover?.key !== hover.key) {
+      state.hover = hover;
+      if (tipOpen()) refreshTip();
+    }
   });
 
   /**
@@ -1377,6 +1818,16 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     if (state.zoom === 1) state.centre = null;
     draw();
   }, { passive: false });
+
+  /**
+   * R14: the shared tooltip engine hides on `pointerdown`, and `pointerover` does not fire again
+   * while the pointer is still inside the same element — so after one click the map's hover card
+   * would not come back until you moved off the canvas entirely. Re-arming it here is one line and
+   * keeps `shared/tooltip.js` untouched, which matters because Emberveil uses it too.
+   */
+  canvas.addEventListener('pointerup', ev => {
+    canvas.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, clientX: ev.clientX, clientY: ev.clientY }));
+  });
 
   canvas.addEventListener('click', ev => {
     // a click that was really the end of a drag is not a click
@@ -1489,6 +1940,86 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    */
 
   window.addEventListener('resize', () => { if (state.open) draw(); });
+
+  /**
+   * R14 — WHAT IS THAT?
+   *
+   *   "It would also be great if the map had hover tooltips to show what icons mean and some other
+   *    meta info about the region and what the icon is for."
+   *
+   * The readout under the canvas stays — it is the always-visible fact line, and the house rule is
+   * that a fact must never hide inside a tooltip. This is the detail on top of it: what the mark you
+   * are pointing at IS, which is the half the readout cannot give you, because the readout is about
+   * the ground and a mark is about a thing standing on it.
+   *
+   * A place first, then a marker, then the cell itself, because that is the order of specificity.
+   */
+  function hoverCard() {
+    const h = state.hover;
+    if (!h) return null;
+    const card = el('div', { class: 'tip-map' });
+
+    if (h.tier === 'place') {
+      const m = h.mark;
+      const mark = MAP_MARKS[m.key] || {};
+      card.append(el('b', { text: m.name || mark.label || 'somewhere' }));
+      card.append(el('div', { class: 'tip-what', text: mark.label || m.type || '' }));
+      if (m.cleared) card.append(el('div', { class: 'tip-note', text: 'You have already cleared this.' }));
+      else if (m.blurb) card.append(el('div', { class: 'tip-note', text: m.blurb }));
+      const zone = zoneAtCell(m.cell);
+      if (zone) card.append(el('div', { class: 'tip-note', text: zoneWords(zone) }));
+      return card;
+    }
+
+    if (h.tier === 'marker') {
+      const look = MARKER_LOOKS[h.marker.kind] || MARKER_LOOKS.pin;
+      card.append(el('b', { text: h.marker.name }));
+      card.append(el('div', { class: 'tip-what', text: look.label + (h.marker.starred ? ' · starred' : '') }));
+      if (h.marker.note) card.append(el('div', { class: 'tip-note', text: h.marker.note }));
+      card.append(el('div', { class: 'tip-note', text: h.marker.tracked
+        ? 'The minimap is pointing at this.' : 'Not tracked — the minimap is ignoring it.' }));
+      return card;
+    }
+
+    if (h.tier === 'pad') {
+      card.append(el('b', { text: h.pad.name }));
+      card.append(el('div', { class: 'tip-what', text: h.pad.lit ? 'Waypoint — lit' : 'Waypoint — not lit yet' }));
+      card.append(el('div', { class: 'tip-note', text: h.pad.lit
+        ? 'You can travel here from any other lit waypoint.'
+        : 'Walk into this settlement once and the sigils light.' }));
+      return card;
+    }
+
+    // the ground itself
+    const info = cellInfo(world, h.cell.x, h.cell.y);
+    if (!info) return null;
+    card.append(el('b', { text: info.region && knows(info.region.id) ? info.region.name : info.biomeName }));
+    card.append(el('div', { class: 'tip-what', text:
+      `${info.biomeName} \u00b7 ${info.water === 'land' ? info.elevationMetres + ' m' : 'water'} \u00b7 ${info.temperatureC}\u00b0C` }));
+    const zone = zoneAtCell(h.cell);
+    if (zone) card.append(el('div', { class: 'tip-note', text: zoneWords(zone) }));
+    else if (info.region && !knows(info.region.id)) {
+      card.append(el('div', { class: 'tip-note', text: 'You have not been here, and nobody has told you about it.' }));
+    }
+    return card;
+  }
+
+  /** The zone standing on a cell, or null over open water. */
+  function zoneAtCell(cell) {
+    if (!zones || !world.region || !cell) return null;
+    const id = world.region[cell.y * world.width + cell.x];
+    const zone = id >= 0 ? zones.byId(id) : null;
+    return zone && zone.id >= 0 ? zone : null;
+  }
+
+  /** "level 9–12 · Wild · dangerous for you" — the two lines the map writes, explained. */
+  function zoneWords(zone) {
+    return `level ${zone.minLevel}\u2013${zone.maxLevel} \u00b7 ${zone.danger} \u00b7 ${Object.fromEntries(TONE_LABELS)[zoneTone(zone.midLevel, getLevel())] || ''}`;
+  }
+
+  registerTip('mapHover', () => hoverCard());
+  canvas.dataset.tipRender = 'mapHover';
+  canvas.dataset.tipClass = 'tip-map-box';
 
   /**
    * R14 — SHOW ME THAT ONE.

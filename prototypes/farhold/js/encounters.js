@@ -12,6 +12,18 @@
 // you, whether they have already seen you — and the bestiary fills it with whatever lives here.
 //
 //   const enc = createEncounters({ field, zones, terrain, balance, data, onLog });
+//
+// R14 — WHICH LINES ARE CHATTER, AND WHICH ARE THE POINT.
+//
+//   "There are events that happen very frequently in the chat … They happen too often."
+//
+// This module was the loudest thing in the game: one roll every 26 seconds at 55% is a line every
+// 47 seconds, about 76 an hour, into a log that holds twelve lines. So `onLog` now takes a third
+// argument on the two calls that ANNOUNCE something — an ambient tag saying which pool the line came
+// from and how big that pool is — and js/main.js hands those to `js/ambient.js`, which says no most
+// of the time. Everything else (the win, the fail, the trap springing) is untagged and therefore
+// never throttled, because those are the consequences of what the player just did and silencing
+// them would be much worse than the noise.
 //   enc.update(dt, control, player);
 //
 // ROUND 12 ADDS THE OTHER HALF. "Add more events like that too, to give the world more things to do
@@ -46,6 +58,61 @@ let EVENTS = null;
 const EVENT_DATA = fetch(new URL('../data/events.json', import.meta.url))
   .then(r => r.json()).then(d => { EVENTS = d; return d; })
   .catch(() => null);
+
+
+/**
+ * R14 — THE LINE THAT NAMES WHAT ACTUALLY TURNED UP.
+ *
+ *   "They happen too often, and they aren't represented on the minimap or in game very well… make
+ *    these events more impactful, clearly visible, and less generic."
+ *
+ * All twenty-two announce strings named NOTHING — not a creature, not a faction, not a place. "A
+ * warband is coming up the road" names no warband and no road, and the game knew both: `made` is
+ * the list of bodies that were just spawned, `owner` is whose ground it is, and the zone is right
+ * there. It was simply never reached for.
+ *
+ * Every spec gained a `named` variant with `{tokens}`. This fills them, and returns null the moment
+ * one cannot be filled — at which point the caller falls back to the old generic `announce`. That
+ * fallback is the important half: a line that says "{beast} is out here" with no beast is worse
+ * than the generic line it replaced, and a missing line is worse than both.
+ */
+export function nameLine(spec, made = [], { owner = null, place = null } = {}) {
+  if (!spec?.named) return null;
+  const alive = (made || []).filter(Boolean);
+  if (!alive.length && /\{beasts?\}|\{count\}/.test(spec.named)) return null;
+  // whichever kind there is most of is what the line should be about
+  const tally = new Map();
+  for (const u of alive) {
+    const key = u.defId || u.name;
+    if (!key) continue;
+    tally.set(key, (tally.get(key) || { n: 0, name: u.baseName || u.name }));
+    tally.get(key).n++;
+  }
+  const top = [...tally.values()].sort((a, b) => b.n - a.n)[0];
+  const ctx = {
+    beast: top?.name || null,
+    beasts: top ? (top.n === 1 ? top.name : plural(top.name)) : null,
+    count: alive.length || null,
+    owner: owner?.name || null,
+    place: place || null,
+  };
+  let missing = false;
+  const out = spec.named.replace(/\{(\w+)\}/g, (whole, key) => {
+    const v = ctx[key];
+    if (v == null || v === '') { missing = true; return whole; }
+    return String(v);
+  });
+  return missing ? null : out;
+}
+
+/** "Moor Hound" -> "Moor Hounds". Enough English for a bestiary of forty-six. */
+export function plural(name) {
+  const s = String(name || '');
+  if (/(?:s|x|z|ch|sh)$/i.test(s)) return s + 'es';
+  if (/[^aeiou]y$/i.test(s)) return s.slice(0, -1) + 'ies';
+  if (/(?:man)$/i.test(s)) return s.slice(0, -3) + 'men';
+  return s + 's';
+}
 
 export function createEncounters({ field, zones, terrain, balance = {}, data = {}, onLog = () => {}, isNight = () => false, sites = null, chests = null }) {
   const cfg = balance.encounters || {};
@@ -213,8 +280,20 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     live.push(record);
     // …and say whose they are. "A warband on the road" is a line; "A warband on the road — out of
     // Harrowfen" is a reason to go and find Harrowfen.
-    const line = owner ? `${spec.announce || spec.name} — out of ${owner.name}.` : (spec.announce || spec.name);
-    onLog(line, spec.aggro ? 'bad' : '');
+    // R14: the specific line if every token in it binds, the old generic one if not
+    const where = zones?.at?.(x, z);
+    const named = nameLine(spec, made, { owner, place: where && where.id >= 0 ? where.name : null });
+    const base = named || spec.announce || spec.name;
+    const line = owner && !named ? `${base} — out of ${owner.name}.` : base;
+    /**
+     * R14: a warband that belongs to somebody is an ACTIVITY — it names a real fort you can walk to
+     * and it is worth a line. One that belongs to nobody is flavour, and flavour is rationed.
+     */
+    onLog(line, spec.aggro ? 'bad' : '', {
+      tier: owner ? 'activity' : 'flavour',
+      id: spec.id, pool: 'encounter', poolSize: table.filter(e => !e.kind).length,
+      at: { x, z },
+    });
     return record;
   }
 
@@ -279,7 +358,17 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     events.push(ev);
     history.push(spec.id);
     if (history.length > 6) history.shift();
-    onLog(spec.announce || spec.name, spec.kind === 'defend' || spec.kind === 'rescue' ? 'bad' : 'level');
+    /**
+     * R14: every road event has a clock, a place and a reward, which is the definition of an
+     * activity — so this one is always worth its two points, and it also gets a row in the Nearby
+     * panel and a beacon in the world (js/nearby.js, js/beacon.js).
+     */
+    const evWhere = zones?.at?.(ev.x, ev.z);
+    const evNamed = nameLine(spec, ev.units, { place: evWhere && evWhere.id >= 0 ? evWhere.name : null });
+    onLog(evNamed || spec.announce || spec.name, spec.kind === 'defend' || spec.kind === 'rescue' ? 'bad' : 'level', {
+      tier: 'activity', id: spec.id, pool: 'event', poolSize: table.filter(e => e.kind).length,
+      at: { x: ev.x, z: ev.z },
+    });
     return ev;
   }
 

@@ -26,8 +26,8 @@ import { createWeatherView } from './weather.js';
 import { createCombatFx } from './combat-fx.js';
 import { createSunFx } from './sunfx.js';
 import { createDebugMenu } from './debug.js';
-import { createMapScreen } from './map.js';
-import { MarkerBook, distanceText } from './markers.js';
+import { createMapScreen, markFor as mapMarkFor } from './map.js';
+import { MarkerBook, distanceText, MARKER_LOOKS } from './markers.js';
 import { createStarChart, reachFrom, LY_PER_UNIT } from './starchart.js';
 import { createWarp } from './warp.js';
 import { generateGalaxy } from '../../../universe/js/galaxy.js';
@@ -48,7 +48,8 @@ import { createStoreNetwork } from './stores.js';
 import { createLogistics, createAwayClock } from './logistics.js';
 import { createGrid } from './power.js';
 import { createWorks } from './refine.js';
-import { createNodeWorld, createNodePatch, placedNode } from './resources.js';
+import { createNodeWorld, createNodePatch, placedNode, materialIndex, whereToFind } from './resources.js';
+import { createBeacons } from './beacon.js';
 import { createMining } from './mining.js';
 import { createOreView } from './ore-view.js';
 import { createDefence } from './defence.js';
@@ -564,6 +565,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   let rebuildBoard = false;
   /** R14: the Nearby Activities list, kept so the journal can show the same rows the panel does. */
   let nearbyRows = [];
+  /** …and what the beacons and the screen-edge arrows are pointing at right now. */
+  let beaconRows = [];
 
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
@@ -1699,9 +1702,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   let chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
   let gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: features.solids });
   // set-piece encounters on the road: warbands, ambushes, swarms, a rare with an escort
+  /**
+   * R14 — ONE CHOKE POINT FOR EVERYTHING THE WORLD SAYS TO ITSELF.
+   *
+   *   "There are events that happen very frequently in the chat like 'something out there has your
+   *    measure and …'. They happen too often."
+   *
+   * Seven places called `hud.log` with an ambient line and none of them knew about the other six.
+   * `js/ambient.js` is the budget they all draw on: two lines a minute, never the same sentence
+   * twice in a run, nothing at all during a fight or underground, and a line whose `{tokens}` cannot
+   * be filled is refused rather than printed as "undefined".
+   */
+  const ambient = createAmbient({ now: () => state.elapsed });
+
+  /**
+   * The one router. A line with no ambient tag is a consequence of something the player did — a
+   * win, a fail, a level, a loot — and goes straight through untouched. A tagged one has to be
+   * afforded.
+   */
+  function sayAmbient(text, tone, meta) {
+    if (!meta) { hud.log(text, tone); return true; }
+    const line = ambient.offer({ ...meta, text, tone, zoneId: hud.here?.id ?? null });
+    if (!line) return false;
+    hud.log(line.text, line.tone);
+    return true;
+  }
+
   let encounters = createEncounters({
     field, zones, terrain, balance, data: encounterData,
-    onLog: (t, c) => hud.log(t, c),
+    onLog: (t, c, meta) => sayAmbient(t, c, meta),
     isNight: () => sky.isNight,
   });
 
@@ -1822,7 +1851,47 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * material, the best of each judged by what it would deliver from where you are standing — the
    * same number js/resources.js compares seams with everywhere else — with a bearing and a pin.
    */
-  const scanState = { swept: false, radius: 0, found: 0, rows: [], pinned: new Set() };
+  /**
+   * R14 — THE SCANNER, REMEMBERED AND WIDENED.
+   *
+   *   "I previously asked for a scan tool to locate resources. Where is that? Where do you find
+   *    clay? … The scanner tool should let you select a material and scan for it, displaying it
+   *    with a marker in the world for some time and displaying it on the world map as well."
+   *
+   * It existed and nobody could find it: it was a TOOL inside build mode, reachable only by pressing
+   * B, picking Scan, aiming at the ground and clicking, with a default radius of 144 m on a world
+   * that scatters about fourteen seams to a 512 m tile. So it was a sweep you could not find, that
+   * found nothing, of a thing you did not know the name of.
+   *
+   * Three changes: a `want` filter so you can sweep FOR something; a radius measured in hundreds of
+   * metres rather than tens; and `hits`, which is every seam found rather than the single best one
+   * per material — because "show me where the clay is" wants all of them, and the old shape could
+   * only ever answer "here is one".
+   */
+  const scanState = {
+    swept: false, radius: 0, found: 0, rows: [], pinned: new Set(),
+    /** The material id the last sweep was looking for, or null for everything. */
+    want: null,
+    /** Every seam the last sweep turned up, for the beacons and the map layer. */
+    hits: [],
+    /** When the in-world beacons over those hits go out. A sweep is a torch, not a map. */
+    until: 0,
+  };
+  /** How long scan beacons stand in the world, in seconds. */
+  const SCAN_SHOWS_FOR = 150;
+  /** How far a sweep reaches. "for now just a large proximity." */
+  const SCAN_RADIUS = 900;
+  /**
+   * R14 — material id → the node kinds that yield it, the biomes they live in, the tool they want.
+   * Derived from data/resources.json once, so adding a node kind updates every list that reads it.
+   */
+  const materialWhere = materialIndex(resourceData || {});
+  /** A World Forge biome key as a player reads it. BIOMES is indexed by id, so this walks it once. */
+  const biomeWords = (() => {
+    const byKey = new Map();
+    for (const b of Object.values(BIOMES || {})) if (b?.key) byKey.set(b.key, b.name || b.key);
+    return key => byKey.get(key) || String(key).replace(/([A-Z])/g, ' $1').toLowerCase();
+  })();
 
   const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   function compassTo(dx, dz) {
@@ -1831,8 +1900,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return COMPASS[(Math.round(a / (Math.PI / 4)) + 8) % 8];
   }
 
-  function sweepForDeposits(x, z, radius) {
-    const seams = oreHere().near(x, z, radius).filter(n => !n.gone && !n.depleted);
+  function sweepForDeposits(x, z, radius, { want = null } = {}) {
+    const all = oreHere().near(x, z, radius).filter(n => !n.gone && !n.depleted);
+    // R14: sweeping FOR something is the whole ask — "let you select a material and scan for it"
+    const seams = want ? all.filter(n => n.resource === want) : all;
     const byResource = new Map();
     for (const n of seams) {
       const rep = mining.report(n, control, { tool: toolTierFor(player), stores });
@@ -1857,13 +1928,51 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     scanState.swept = true;
     scanState.radius = radius;
     scanState.found = seams.length;
+    scanState.want = want;
     scanState.rows = [...byResource.values()].sort((a, b) => b.deliveredPerMinute - a.deliveredPerMinute || a.distance - b.distance);
+    /**
+     * R14 — EVERY hit, not one per material.
+     *
+     * `rows` keeps the best seam of each kind, which is the right shape for "what is around here".
+     * It is the wrong shape for "show me where the clay is", which is the thing that was asked for:
+     * that wants all of them, on the ground and on the map. `hits` is that list, and the beacons and
+     * the map layer both read it.
+     */
+    scanState.hits = seams
+      .map(n => ({
+        id: n.id, x: n.x, z: n.z, resource: n.resource,
+        name: n.resourceName || resourceData?.materials?.[n.resource]?.name || n.resource,
+        colour: n.colour || resourceData?.materials?.[n.resource]?.colour || '#c08a3e',
+        band: n.band || 'fair',
+        distance: Math.hypot(n.x - control.x, n.z - control.z),
+      }))
+      .sort((a, b) => a.distance - b.distance);
+    scanState.until = state.elapsed + SCAN_SHOWS_FOR;
+
     sound.ui(seams.length ? 'open' : 'error');
-    hud.log(seams.length
-      ? `Sweep: ${seams.length} deposits within ${Math.round(radius)} m — ${scanState.rows.slice(0, 4).map(r => r.resourceName.toLowerCase()).join(', ')}${scanState.rows.length > 4 ? ` and ${scanState.rows.length - 4} more` : ''}.`
-      : `Sweep: nothing within ${Math.round(radius)} m.`, seams.length ? 'good' : 'warn');
+    const what = want
+      ? (resourceData?.materials?.[want]?.name || want.replace(/_/g, ' ')).toLowerCase()
+      : null;
+    if (seams.length) {
+      const near = scanState.hits[0];
+      hud.log(what
+        ? `Sweep: ${seams.length} ${what} within ${Math.round(radius)} m — nearest ${Math.round(near.distance)} m ${compassTo(near.x - control.x, near.z - control.z)}.`
+        : `Sweep: ${seams.length} deposits within ${Math.round(radius)} m — ${scanState.rows.slice(0, 4).map(r => r.resourceName.toLowerCase()).join(', ')}${scanState.rows.length > 4 ? ` and ${scanState.rows.length - 4} more` : ''}.`,
+      'good');
+      hud.log(`They are lit for ${Math.round(SCAN_SHOWS_FOR / 60)} minutes, and on the map.`, '');
+    } else if (what) {
+      /**
+       * A sweep that finds nothing must say where the thing DOES live, or it is a dead end. This is
+       * the whole of "where do you find clay?" — the game knows, and never said.
+       */
+      const row = materialWhere?.get?.(want);
+      hud.log(`Sweep: no ${what} within ${Math.round(radius)} m.`, 'warn');
+      if (row) hud.log(`${row.name} is found in ${whereToFind(row, { biomeName: biomeWords })}`, '');
+    } else {
+      hud.log(`Sweep: nothing within ${Math.round(radius)} m.`, 'warn');
+    }
     buildUI.refresh();
-    return { found: seams.length, rows: scanState.rows };
+    return { found: seams.length, rows: scanState.rows, hits: scanState.hits };
   }
 
   /** Put one scanned deposit on the map and the minimap, through the one marker book. */
@@ -1892,6 +2001,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   /** The seams, drawn. One InstancedMesh per kind — see js/ore-view.js. */
   let oreView = createOreView(scene, { data: resourceData || {} });
+
+  /**
+   * R14 — the columns of light over whatever you are being pointed at.
+   *
+   * A pool of six, built once and re-aimed, shared by the Nearby panel and the scanner. It lives on
+   * the scene rather than being rebuilt per world, and `clear()` is enough when the ground changes —
+   * see js/beacon.js.
+   */
+  const beacons = createBeacons(scene, { heightAt: (x, z) => terrain.heightAt(x, z) });
 
   /** Ten units of work, from a swing, a machine or a citizen — js/work.js keeps them the same. */
   const board = new WorkBoard(save?.work || {});
@@ -3824,6 +3942,38 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       meteors: { get marks() { return meteors.marks(); } },
       gates: { get nodes() { return gates.nodes; } },
       showCoords: () => !!settings.get('coords'),
+      // R14: `portals.mapMarkers()` has been finished and unimported since §6.8 — the portal was on
+      // the ground, in the save and in the journal, and not on the map
+      portals: { mapMarkers: () => portals.mapMarkers?.() || [] },
+      /**
+       * R14 — THE SCANNER, ON THE MAP WHERE PEOPLE LOOK FOR IT.
+       *
+       *   "I previously asked for a scan tool to locate resources. Where is that? Where do you find
+       *    clay?"
+       *
+       * It was a tool inside build mode with a 144 m reach. `findables` is every material this world
+       * can yield, each with the one line that answers "where do I look" — which is on screen BEFORE
+       * you sweep, so a sweep that comes back empty still teaches you something.
+       */
+      findables: () => [...materialWhere.values()]
+        .filter(row => !row.placedOnly && !row.fromPlanet)
+        .map(row => ({
+          id: row.id, name: row.name, colour: row.colour,
+          where: whereToFind(row, { biomeName: biomeWords, toolNames: resourceData?.tools ? Object.fromEntries(Object.values(resourceData.tools).map(t => [t.tier, t.name])) : null }),
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+      onSweep: want => sweepForDeposits(control.x, control.z, SCAN_RADIUS, { want: want || null }),
+      scanState: () => scanState,
+      /** Keep one of the hits, so it is still there when the sweep goes out. */
+      onKeep: hit => {
+        const m = markers.save({
+          cellX: Math.floor(hit.x / M_PER_CELL), cellY: Math.floor(hit.z / M_PER_CELL),
+          name: hit.name, note: `${hit.band} seam`, from: { type: 'scan', id: hit.id, label: hit.name },
+        });
+        hud.log(`${hit.name} kept — it is on the map with a star.`, 'level');
+        autoSave();
+        return m;
+      },
       // "Make the current teleport feature a debug option, but keep it enabled by default"
       allowDebugTeleport: () => settings.get('debugTeleport') !== false,
       // every base the character ever raised, and the trip home from here — see js/homes.js
@@ -3949,7 +4099,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     field.solids = [props.solids, features.solids];
     encounters = createEncounters({
       field, zones, terrain, balance, data: encounterData,
-      onLog: (t, c) => hud.log(t, c), isNight: () => sky.isNight,
+      // R14: the same router as the first one, or landing on a second world would un-throttle the
+      // whole ambient layer — which is exactly the kind of thing that goes unnoticed for months
+      onLog: (t, c, meta) => sayAmbient(t, c, meta), isNight: () => sky.isNight,
     });
     pets.setTerrain(terrain);
     chests.clear();
@@ -4732,7 +4884,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     if (record?.holder) hud.log(`${zone.name} is held by ${intro.nameFor(record.holder)}.`, '');
-    if (started) hud.log(`${zone.name}: ${started.blurb}.`, 'bad');
+    // R14: a tier-C zone event costs four of the purse's four points, so it cannot happen twice in
+    // two minutes however much the world wants it to
+    if (started) {
+      sayAmbient(`${zone.name}: ${started.blurb}.`, 'bad',
+        { tier: 'zone', id: 'inc:' + started.kind, zoneId: zone.id });
+    }
   }
 
   /**
@@ -4881,9 +5038,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     lastPhase = phase;
     patrols.update(seconds, { night });
     for (const event of trade.update(seconds, { playerNear: { x: control.x, z: control.z } })) {
-      if (event.kind === 'caravan-wrecked') hud.log(`${event.name} never arrived.`, 'bad');
-      if (event.kind === 'caravan-arrived') hud.log(`${event.name} got through.`, 'good');
-      if (event.kind === 'caravan-attacked') hud.log(`${event.name} is under attack.`, 'bad');
+      /**
+       * R14: a load being taken apart is something you can run to, so it is an activity and it
+       * carries a position. Arriving and being wrecked are flavour — they are news about something
+       * that is already over.
+       */
+      if (event.kind === 'caravan-wrecked') sayAmbient(`${event.name} never arrived.`, 'bad', { tier: 'flavour', id: 'car-lost:' + event.id });
+      if (event.kind === 'caravan-arrived') sayAmbient(`${event.name} got through.`, 'good', { tier: 'flavour', id: 'car-in:' + event.id });
+      if (event.kind === 'caravan-attacked') {
+        sayAmbient(`${event.name} is under attack.`, 'bad',
+          { tier: 'activity', id: 'car-hit:' + event.id, at: { x: event.x, z: event.z } });
+      }
     }
     // in-game hours, from the same clock the day/night cycle runs on
     /**
@@ -5924,10 +6089,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // R14: `fresh` is false on a place that has already introduced itself once — walking away
         // and back used to announce the same camp every time. See `due()` in js/sites.js.
         if (site.fresh) {
-          // a castle is not "a camp": sites.js gives each place its own blurb and its own type name
-          hud.log(site.kind === 'lair'
+          // a castle is not "a camp": sites.js gives each place its own blurb and its own type name.
+          // R14: a place you can walk to and clear is an activity, and it announces itself once.
+          sayAmbient(site.kind === 'lair'
             ? `Something lives at ${site.name}.`
-            : (site.blurb || `${site.spec?.name || 'A camp'} at ${site.name}.`), 'bad');
+            : (site.blurb || `${site.spec?.name || 'A camp'} at ${site.name}.`), 'bad',
+          { tier: 'activity', id: 'site:' + site.key, at: { x: site.x, z: site.z } });
         }
         populateSite(site);
       }
@@ -6419,7 +6586,42 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         onLocate: a => map?.locate?.({ x: a.x, z: a.z, name: a.name, kind: a.kind === 'fall' ? 'fall' : 'place' }),
       });
       nearbyRows = rows;
+
+      /**
+       * R14 — AND THE SAME THINGS, IN THE WORLD.
+       *
+       *   "In the world, there should be a large animated pointer above the location or object to
+       *    help the player find it, and a radial arrow pointing to it when its off-screen."
+       *
+       * One pool of six beacons (js/beacon.js) serves two callers: whatever the Nearby panel is
+       * pointing at, and — while a sweep is still lit — the deposits it turned up. The scan wins
+       * when one is running, because you asked for it in the last couple of minutes and it is the
+       * more specific request.
+       */
+      const scanLit = scanState.until > state.elapsed && scanState.hits.length;
+      beaconRows = (dungeon || flying) ? []
+        : scanLit
+          ? scanState.hits.slice(0, 6).map(h => ({
+            id: 'scan:' + h.id, x: h.x, z: h.z, name: h.name,
+            color: h.colour, where: distanceText(h.distance),
+          }))
+          : rows.slice(0, 6).map(a => ({
+            id: a.id, x: a.x, z: a.z, name: a.name,
+            color: (MARKER_LOOKS[a.kind] || MARKER_LOOKS.quest).color,
+            where: `${a.where} ${a.compass}`,
+          }));
+      beacons.set(beaconRows.map(b => ({ ...b, y: terrain.heightAt(b.x, b.z) })));
     }
+    // R14: the ambient purse earns while you walk, and not at all during a fight or underground
+    ambient.tick(dt, {
+      fighting: field.enemies.some(e => e && e.state === 'chase'),
+      inTown: !!town,
+      inDungeon: !!dungeon,
+    });
+
+    // the beacons breathe and turn every frame; the list behind them only changes four times a second
+    if (!dungeon) beacons.update(dt, camera);
+    hud.edgeArrows(beaconRows.map(b => ({ ...b, y: terrain.heightAt(b.x, b.z) + 6 })), camera);
 
     renderFrame();
   }
@@ -6567,12 +6769,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get view() { return view; },
     get sky() { return sky; },
     get world() { return world; },
+    /** R14: which mark a place wears, so a test can prove the landmarks are drawn at all. */
+    mapMarkFor,
     get map() { return map; },
     /** Is the world under your feet a settled, multi-biome one? (round 10, for the specs) */
     liveableHere: () => isHabitableStart(planet),
     /** Does the system you are in hold one at all? */
     liveableInSystem: () => landableBodies(system).some(isHabitableStart),
     zones, chests, gates, sites, pets, craft, light, encounters, skillData, classData, encounterData,
+    // R14: the ambient purse, the nearby list and the beacons, for the tests and the debug menu
+    ambient,
+    get nearby() { return nearbyRows; },
+    beacons,
+    get materialWhere() { return materialWhere; },
     // The Territory expansion, for the specs and the debug menu
     standings, holdings, trouble, patrols, trade, roadFolk, rumours, jobs, factionData,
     creditKill, meetOnTheRoad,

@@ -507,6 +507,90 @@ export class Hud {
    * Nodes are reused between frames: this runs at 60 fps and rebuilding a dozen elements a frame is
    * the kind of waste that shows up as a stutter.
    */
+  /**
+   * R14 — A RADIAL ARROW FOR ANYTHING OFF THE SIDE OF THE SCREEN.
+   *
+   *   "In the world, there should be a large animated pointer above the location or object to help
+   *    the player find it, and a radial arrow pointing to it when its off-screen."
+   *
+   * The pointer itself is `js/beacon.js`, a column of light over the spot. This is its other half:
+   * when the spot is behind you or past the edge, the beacon is doing nothing and an arrow pinned
+   * to the rim of the screen is the only thing that can help.
+   *
+   * There were already two rim arrows in this file — the minimap's (`drawMinimap`) and space mode's
+   * brackets (`reticles` above) — and neither is this one: the first is on a 180 px circle in the
+   * corner and the second gives up the moment a thing leaves the view. This is the ELSE branch that
+   * was never written.
+   *
+   * A node pool of five, built once, exactly like `this._ret` above: the panel it serves is redrawn
+   * four times a second for the whole run, and five divs a redraw is fifteen thousand an hour.
+   */
+  edgeArrows(list = [], camera = null) {
+    const box = $('edge-arrows');
+    if (!box) return;
+    if (!camera || !list.length) {
+      if (this._edge) for (const n of this._edge) n.node.hidden = true;
+      return;
+    }
+    const MAX = 5;
+    if (!this._edge) {
+      this._edge = [];
+      for (let i = 0; i < MAX; i++) {
+        const node = el('div', 'edge-arrow');
+        node.hidden = true;
+        node.innerHTML = '<i class="ea-tip"></i><span class="ea-name"></span><span class="ea-dist"></span>';
+        box.append(node);
+        this._edge.push({ node, tip: node.querySelector('.ea-tip'), name: node.querySelector('.ea-name'), dist: node.querySelector('.ea-dist'), key: null });
+      }
+    }
+
+    const w = window.innerWidth, h = window.innerHeight;
+    // the rim the arrows sit on: a little inside the screen so the whole arrow is visible
+    const rx = w / 2 - 54, ry = h / 2 - 54;
+    /**
+     * A scratch vector without importing Three.js.
+     *
+     * `hud.js` deliberately has no Three.js import — it is the one big file that is pure DOM, and
+     * `reticles` above works the same way, projecting vectors its caller built. `camera.position`
+     * is a Vector3, so cloning it gives us one to reuse, and `.set()` overwrites it every row.
+     */
+    const v = camera.position.clone();
+
+    for (let i = 0; i < MAX; i++) {
+      const row = this._edge[i];
+      const a = list[i];
+      if (!a) { row.node.hidden = true; row.key = null; continue; }
+      v.set(a.x, a.y ?? 0, a.z).project(camera);
+      const behind = v.z > 1;
+      // on screen and in front: the beacon in the world is doing this job, so the arrow steps back
+      if (!behind && Math.abs(v.x) <= 0.96 && Math.abs(v.y) <= 0.96) { row.node.hidden = true; continue; }
+      row.node.hidden = false;
+
+      /**
+       * A point behind the camera projects to the OPPOSITE side of the screen, which is how you get
+       * an arrow pointing confidently away from the thing it is tracking. Flipping both axes when
+       * `z > 1` is the standard fix and it is one line.
+       */
+      let dx = behind ? -v.x : v.x;
+      let dy = behind ? -v.y : v.y;
+      if (dx === 0 && dy === 0) dy = -1;
+      // push the direction out to whichever rim it hits first
+      const scale = Math.min(rx / Math.abs(dx * rx || 1e-6), ry / Math.abs(dy * ry || 1e-6));
+      const px = w / 2 + dx * rx * scale;
+      const py = h / 2 - dy * ry * scale;
+      row.node.style.left = `${px}px`;
+      row.node.style.top = `${py}px`;
+      // the tip turns to point outward; 0 rad is up, and screen y runs down
+      row.tip.style.transform = `rotate(${Math.atan2(dx, dy)}rad)`;
+      if (row.key !== a.id) {
+        row.key = a.id;
+        row.name.textContent = a.name || '';
+        row.node.style.color = a.color || '#ffd24a';
+      }
+      row.dist.textContent = a.where || '';
+    }
+  }
+
   reticles(marks, under = null, camera = null, card = null) {
     const box = $('reticles');
     if (!box) return;

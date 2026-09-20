@@ -102,6 +102,31 @@ export function padSpotFor(node, groundOk = null) {
   return { x: node.wx + base.x, z: node.wz + base.z };
 }
 
+/**
+ * Where a town's notice board stands.
+ *
+ * Opposite the waypoint pad across the square, so the two things you go to a town centre FOR are not
+ * on top of each other. It is a real object with a real position because the alternative — which is
+ * what shipped first — was to treat the whole settlement as the board: "E to read billboard" followed
+ * you around the entire town, over every other thing you might have wanted to press E on.
+ */
+export function boardSpotFor(node, groundOk = null) {
+  const size = node.size || 1;
+  const out = 9 + size * 1.8;
+  const base = { x: -out, z: out * 0.4 };
+  if (!groundOk) return { x: node.wx + base.x, z: node.wz + base.z };
+  for (const ring of [1, 1.45, 1.95, 2.5]) {
+    for (const step of [0, 1, -1, 2, -2, 3, -3, 4]) {
+      const a = (step / 8) * Math.PI * 2;
+      const bx = (base.x * Math.cos(a) - base.z * Math.sin(a)) * ring;
+      const bz = (base.x * Math.sin(a) + base.z * Math.cos(a)) * ring;
+      const x = node.wx + bx, z = node.wz + bz;
+      if (groundOk(x, z)) return { x, z };
+    }
+  }
+  return { x: node.wx + base.x, z: node.wz + base.z };
+}
+
 export function createWaypoints({ settlements = [], seed = 1, groundOk = null, built = [] } = {}) {
   /** Lit pads, by settlement id. A `Set` because the only question ever asked is "is it lit?". */
   const lit = new Set();

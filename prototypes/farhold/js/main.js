@@ -42,7 +42,19 @@ import { createPatrols } from './patrols.js';
 import { createCaravans } from './caravans.js';
 import { createWanderers } from './wanderers.js';
 import { createRumours } from './rumours.js';
-import { createWaypoints } from './waypoints.js';
+import { createWaypoints, boardSpotFor } from './waypoints.js';
+// The building expansion: BUILDING_EXPANSION.md. Industry, ground, colony, and the way off the rock.
+import { createStoreNetwork } from './stores.js';
+import { createGrid } from './power.js';
+import { createWorks } from './refine.js';
+import { createNodeField, tickNodes } from './resources.js';
+import { createTerraform } from './terraform.js';
+import { createPortals } from './portal.js';
+import { createBuild } from './build.js';
+import { WorkBoard } from './work.js';
+import { createColony } from './colony.js';
+import { createFarm } from './farm.js';
+import { migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel } from './shipyard.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
 import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, itemScore, displayName } from './rpg.js';
@@ -101,7 +113,8 @@ async function boot() {
   status('reading the data…');
 
   const [items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen,
-    factionData, frameData, incidentData, wandererData, landmarkData, rewardData] = await Promise.all([
+    factionData, frameData, incidentData, wandererData, landmarkData, rewardData,
+    resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
@@ -121,6 +134,14 @@ async function boot() {
     loadJSON('data/wanderers.json'),
     loadJSON('data/landmarks.json'),
     loadJSON('data/faction-rewards.json'),
+    // the building expansion's own data
+    loadJSON('data/resources.json').catch(() => null),
+    loadJSON('data/refining.json').catch(() => null),
+    loadJSON('data/power.json').catch(() => null),
+    loadJSON('data/structures.json').catch(() => null),
+    loadJSON('data/colony.json').catch(() => null),
+    loadJSON('data/crops.json').catch(() => null),
+    loadJSON('data/raids.json').catch(() => null),
   ]);
 
   // all thirty classes now, each labelled with what it does and whether it brings companions
@@ -201,7 +222,7 @@ async function boot() {
         <span class="muted small">level ${s.level} · seed ${s.seed} · ${playtimeText(s.playtime)}${s.place ? ' · ' + s.place : ''}</span>`;
       const load = document.createElement('button');
       load.textContent = 'Load';
-      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save: saves.read(s.id) });
+      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: saves.read(s.id) });
       const del = document.createElement('button');
       del.className = 'ghost';
       del.textContent = '×';
@@ -214,7 +235,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -222,7 +243,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -232,7 +253,7 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, status, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save }) {
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
@@ -326,6 +347,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // these are replaced wholesale when you land on a different world
   let planet = created.planet, world = created.world;
   let terrain = makeTerrain(world, planet, balance.terrain);
+  /**
+   * THE GROUND THE PLAYER HAS RESHAPED.
+   *
+   * `terraform` holds the brushes — a level here, a road strip there — and `wrap` puts them in front
+   * of the world's own height so everything downstream (collision, the camera, the clipmap, props)
+   * asks one question and gets the edited answer. It has to be built BEFORE `createTerrainView`,
+   * because the clipmap samples the terrain it is handed at construction.
+   */
+  let terraform = createTerraform({ saved: save?.terraform || null });
+  terrain = terraform.wrap(terrain);
   let palette = atmospherePalette(planet);
   // Round 4: how hard a fight is belongs to the PLACE. World Forge already grows named regions with
   // borders it draws on the map, so those are the level bands — see js/zones.js.
@@ -1453,6 +1484,65 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // in a trap. They find the field through a registry when nobody hands it over; this is the front
   // door, and it means the registry is a fallback rather than the only route.
   encounters.setChests?.(chests);
+
+  /**
+   * ================= THE BUILDING EXPANSION =================
+   *
+   * BUILDING_EXPANSION.md, wired. The order matters and it is the order of the doc: stores hold
+   * things, the grid powers the things that move them, the works turn ore into parts, the board
+   * turns effort into progress, the colony supplies the effort, and `build` is the hand that puts
+   * any of it on the ground.
+   */
+  const stores = createStoreNetwork({ power: powerData || {}, materials: resourceData || {} });
+  const grid = createGrid({ power: powerData || {}, stores, log: (t, c) => hud.log(t, c) });
+  const works = createWorks({
+    refining: refiningData || {}, resources: resourceData || {},
+    stores, grid, log: (t, c) => hud.log(t, c),
+    rareElement: planet?.rare?.[0] || null,
+  });
+  /** Ore in the ground. The trade-off the user asked for lives in js/resources.js. */
+  const nodes = createNodeField({ data: resourceData || {}, seed, terrain });
+
+  /** Ten units of work, from a swing, a machine or a citizen — js/work.js keeps them the same. */
+  const board = new WorkBoard(save?.work || {});
+  const colony = createColony({
+    data: colonyData || null, board, seed,
+    name: `${player.name}'s holding`,
+  });
+  if (save?.colony) colony.load(save.colony);
+  const farm = createFarm({ data: cropData || null, board, seed });
+  if (save?.farm) farm.load(save.farm);
+
+  /** Exactly one portal, ever — the whole state is one variable in js/portal.js. */
+  const portals = createPortals({
+    saved: save?.portal || null,
+    spotOk: (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z) && terrain.slopeAt(x, z, 4) < 0.6,
+  });
+
+  /**
+   * Build mode. `B` toggles it; the rest of the keys are listed on screen when it is up.
+   *
+   * `store` is how a cost is paid: the pool the ghost is standing in first, then the materials bag,
+   * so a bench beside a crate builds out of the crate without the player carrying anything.
+   */
+  const build = createBuild(scene, {
+    terrain, terraform, view,
+    catalogue: structureData || null,
+    plan: null,
+    spellfx,
+    store: {
+      have: id => stores.count?.(id, control.x, control.z) ?? materials.count?.(id) ?? 0,
+      take: (id, n) => (stores.take?.(id, n, control.x, control.z) ?? materials.spend?.({ [id]: n })),
+      give: (id, n) => (stores.put?.(id, n, control.x, control.z) ?? materials.add?.(id, n)),
+    },
+    onLog: (t, c) => hud.log(t, c),
+    onClear: (x, z, r) => props.clearAround?.(x, z, r) || { removed: 0, materials: {} },
+  });
+  if (save?.build) build.load?.(save.build);
+
+  // an old save keeps the ship it already has — the gate only applies to a fresh start
+  migrateShipyard(player);
+
   sites.setChests?.(chests);
 
   /** Fill a camp or a lair with what lives there. Called once per site as you come near it. */
@@ -1649,15 +1739,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (seen && seen.family === 'landmark') return { kind: 'landmark', mark: seen };
 
       /**
-       * THE NOTICE BOARD — where work comes from now.
+       * THE NOTICE BOARD — where work comes from now, and it is a THING you walk up to.
        *
-       * "Under your journal in the 'Work going on here' you can accept quests arbitrarily from the
-       * menu. Let's remove that in favor of some other system. Players should look for towns to pick
-       * up quests." The Journal lists what you know and takes nothing; a town has a board, and this
-       * is how you reach it.
+       * "Under your journal you can accept quests arbitrarily from the menu... Players should look
+       * for towns to pick up quests." The Journal lists what you know and takes nothing; a town has
+       * a board, and this is how you reach it.
+       *
+       * The first version tested `features.settlementAt()`, which is the whole settlement — so "E to
+       * read the notice board" followed the player around the entire town and sat on top of every
+       * other thing they might have wanted to press E on. It is a real object at a real spot now,
+       * and you have to be next to it.
        */
+      // a portal mouth, either end of it
+      const end = portals.endAt?.(control.x, control.z, planet?.name || null);
+      if (end) return { kind: 'portal', end };
+
       const inTown = features.settlementAt(control.x, control.z);
-      if (inTown) return { kind: 'board', town: inTown };
+      if (inTown) {
+        const board = boardSpotFor(inTown, (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z)
+          && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5);
+        if (Math.hypot(control.x - board.x, control.z - board.z) < 5) return { kind: 'board', town: inTown };
+      }
     }
     return null;
   }
@@ -2125,7 +2227,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           if (!can.ok) { hud.log(can.why, 'bad'); sound.ui('error'); return false; }
 
           // what a town portal would anchor to, once BUILDING_EXPANSION's portal is built
-          waypoints.noteDeparture(control.x, control.z, planet?.name || null);
+          /**
+           * THE TOWN PORTAL OPENS BEHIND YOU.
+           *
+           * Travelling to a waypoint leaves a way back to exactly where you were standing. Opening
+           * a new one closes any existing one — there is only ever one, because in js/portal.js the
+           * whole state is a single variable and there is nowhere for a second to live.
+           */
+          const from = waypoints.noteDeparture(control.x, control.z, planet?.name || null);
+          const opened = portals.open({
+            anchor: { x: from.x, z: from.z, world: from.world },
+            exit: { x: can.pad.x, z: can.pad.z, world: planet?.name || null, name: can.pad.name },
+          });
+          if (opened?.closed) hud.log('The portal you left open has closed.', '');
+          build.showPortal?.(portals.portal?.exit || null);
           const hours = waypoints.hoursFor(control.x, control.z, can.pad);
           control.teleport(can.pad.x, can.pad.z);
           rebuildWorldAround(true);
@@ -2152,6 +2267,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     markers.setWorld({ systemSeed, planetId: planet.id, planetName: planet.name, starName: star.name });
     world = generatePlanetMap(planet, mapSize);
     terrain = makeTerrain(world, planet, balance.terrain);
+    // a new world starts unshaped; the brushes are per planet, like the waypoint network
+    terraform = createTerraform({ saved: null });
+    terrain = terraform.wrap(terrain);
     palette = atmospherePalette(planet);
     // a new world has its own regions, so it has its own level bands
     band = bandForPlanet(planet);
@@ -2412,6 +2530,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function launch() {
     if (mode !== 'ground') return;
     if (dungeon) { hud.log('Not down here.', 'bad'); return; }
+    /**
+     * YOU DO NOT START WITH A SHIP.
+     *
+     * BUILDING_EXPANSION.md §9: four subsystems, a rare element and a tank of fuel before the sky
+     * opens. `canLaunch` also refuses a launch that would leave you nothing to land with, and says
+     * which part is missing rather than greying a key out in silence. An existing save keeps the
+     * ship it already had — `migrateShipyard` ran at boot.
+     */
+    const gate = canLaunchShip(player);
+    if (!gate.ok) { hud.log(gate.why, 'bad'); sound.ui('error'); return; }
+    spendFlightFuel(player, 'launch');
     ensureSpace();
     ensureAir().board(control);
     input.grab();                       // the mouse steers the ship; you cannot fly without it
@@ -3033,6 +3162,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       territory: holdings.toJSON(),
       rumours: rumours.toJSON(),
       waypoints: waypoints.toJSON(),
+      /**
+       * THE BASE IS PART OF THE SAVE.
+       *
+       * `snapshot()` destructures a fixed argument list, and its own comment records what happened
+       * the last time something was left off it — `world`, `quests` and `campaign` were silently
+       * dropped and every load emptied them. So each of these is added here AND in save.js's
+       * parameter list, together.
+       */
+      terraform: terraform.toJSON(),
+      build: build.toJSON?.() || null,
+      portal: portals.toJSON?.() || null,
+      colony: colony.toJSON?.() || null,
+      farm: farm.toJSON?.() || null,
+      work: board.toJSON?.() || null,
     });
   }
   function autoSave({ quiet = true } = {}) {
@@ -3204,6 +3347,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (e.code === 'KeyI' || (e.code === 'Tab' && !hud.sheetOpen)) {
       e.preventDefault(); pauseMenu.toggle(false); hud.toggleSheet();
     }
+    /**
+     * B IS BUILD MODE.
+     *
+     * "How does build mode work? How do I start building a base?" — it starts here. B puts the ghost
+     * up, the mouse wheel turns it, click puts it down, Enter finishes a run of wall or road, and
+     * Ctrl+Z takes back the last thing. Everything else is on screen while the mode is up.
+     */
+    if (e.code === 'KeyB' && !hud.sheetOpen && !map.isOpen && !talk.isOpen) {
+      e.preventDefault();
+      const on = !build.mode;
+      build.setMode(on);
+      hud.log(on
+        ? 'Build mode. Scroll to turn · click to place · Enter to finish a run · Ctrl+Z to undo · B to stop.'
+        : 'Build mode off.', on ? 'level' : '');
+    }
+    if (build.mode) {
+      if (e.code === 'Enter') { e.preventDefault(); build.finishRun?.(); }
+      if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); build.undo?.(); }
+      if (e.code === 'Escape') { e.preventDefault(); build.setMode(false); }
+    }
     if (e.code === 'KeyM') {
       e.preventDefault();
       pauseMenu.toggle(false);
@@ -3306,6 +3469,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         else if (it.kind === 'landmark') atLandmark(it.mark);
         // the town's notice board: the one place work is taken from now
         else if (it.kind === 'board') hud.openNoticeBoard({ where: it.town.name });
+        else if (it.kind === 'portal') {
+          const out = portals.use?.(it.end);
+          if (out?.ok) {
+            control.teleport(out.to.x, out.to.z);
+            rebuildWorldAround(true);
+            field.clear();
+            hud.log('You step through.', 'level');
+            autoSave();
+          } else if (out?.why) hud.log(out.why, 'bad');
+        }
         else if (it.kind === 'talk') {
           // phase 7: what they say comes from Lingo and their own personality, not a fixed string
           const who = it.who;
@@ -3770,7 +3943,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // --- light. The torch fades out in daylight and comes fully up at night; braziers, sconces,
     // warded chests and dungeon mouths hand their positions over and the nearest handful get lit.
-    light.setSources(dungeon ? dungeon.lights() : [...chests.lights(), ...gates.lights(), ...sites.lights()]);
+    // …and anything the player has built that burns. A lamp post you put up has to light the street
+    // it stands on, or there is no reason to put one up.
+    light.setSources(dungeon
+      ? dungeon.lights()
+      : [...chests.lights(), ...gates.lights(), ...sites.lights(), ...(build.lights?.() || [])]);
     light.setRange(player.equipment.light?.range || null);
     light.update(dt, control, {
       day: Math.max(0, Math.min(1, sky.sunDirection.y * 1.6)),
@@ -3783,7 +3960,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // Nine-Pies" at the bottom of the screen while her own shop said "E or Esc to step away"
     const near = talk.isOpen || rewardsOpen() || map.isOpen ? null : interactTarget();
     hud.prompt(near
-      ? near.kind === 'board' ? `<b>E</b> read the notice board`
+      ? near.kind === 'portal' ? `<b>E</b> step through the portal`
+      : near.kind === 'board' ? `<b>E</b> read the notice board`
       : near.kind === 'chest' ? `<b>E</b> open the ${near.chest.name.toLowerCase()}`
         : near.kind === 'dungeon' ? `<b>E</b> go down into ${near.gate.name}${near.gate.zone ? ` · level ${near.gate.zone.minLevel}–${near.gate.zone.maxLevel}` : ''}`
         : near.kind === 'leave' ? '<b>E</b> climb back out'
@@ -3881,6 +4059,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (here) hud.announceZone(here, player.level);
     if (here && here.id !== boardZone) enterTerritory(here);
     if (state.frames % 30 === 0) tickTerritory(0.5);
+
+    /**
+     * The base runs whether you are watching it or not.
+     *
+     * The grid and the works tick every frame because a duty cycle and a smelter both care about
+     * fractions of a second; the colony and the farm are given the clock instead, because a citizen's
+     * day is measured in hours and a crop's life in days.
+     */
+    grid.tick(dt);
+    works.tick(dt);
+    if (state.frames % 15 === 0) {
+      colony.setClock?.(sky.dayFraction * 24, Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1);
+      colony.tick?.(dt * 15);
+      farm.tick?.(dt * 15);
+      board.runMachines?.(works.machines?.() || [], (dt * 15) / 3600);
+    }
+    if (state.frames % 900 === 0) tickNodes(nodes, 1, resourceData || {});
+
+    // build mode follows the ground under the cursor
+    if (build.mode) build.aim(control.x, control.z);
     hud.tick(player, {
       place: dungeon ? dungeon.name : town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
       zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
@@ -4030,6 +4228,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get folk() { return folk; },
     // the waypoint network, and the same travel action the map's click uses
     get waypoints() { return waypoints; },
+    // the building expansion, for the tests and the debug menu
+    get build() { return build; },
+    get stores() { return stores; },
+    get grid() { return grid; },
+    get works() { return works; },
+    get colony() { return colony; },
+    get farm() { return farm; },
+    get board() { return board; },
+    get portals() { return portals; },
+    get terraform() { return terraform; },
+    get nodes() { return nodes; },
+    shipGate: () => canLaunchShip(player),
     travelTo: id => map.travelTo(id),
     /** Open the shop panel on somebody, for the specs — the same call the E key makes. */
     openTalk: who => talk.show(who, talkContext(who)),

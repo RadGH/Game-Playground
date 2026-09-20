@@ -52,6 +52,8 @@ export const BUILDING_INFO = {
    */
   waypoint: { cap: 60, solid: [0, 0], from: 0, role: null },
   waysigil: { cap: 60, solid: [0, 0], from: 0, role: null },
+  /** The town's notice board — a real object you walk up to, not the whole settlement. */
+  noticeboard: { cap: 60, solid: [0.9, 2.4], from: 1, role: null },
 };
 
 /** The twelve added in round 8, for the tests and the docs. */

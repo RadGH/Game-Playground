@@ -18,7 +18,7 @@
 import * as THREE from 'three';
 import { BUILDING_INFO } from './town-plan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
-import { padSpotFor } from './waypoints.js';
+import { padSpotFor, boardSpotFor } from './waypoints.js';
 import {
   describeBuilding, partsFor, describeStall, stallParts, stallsFor,
   radiusOf, mix, MESHES, CULTURE_KIT,
@@ -276,6 +276,16 @@ export const BUILDINGS = {
       return { geometry: BOX, color: '#ffffff', matrix: mat4(Math.cos(a) * 1.15, 0.4, Math.sin(a) * 1.15, 2.0, 0.06, 0.14, -a) };
     }),
     { geometry: CYL, color: '#ffffff', matrix: mat4(0, 0.41, 0, 0.5, 0.06, 0.5) },
+  ]) },
+
+  /** A board on two posts, with a roof over it so the notices survive the weather. */
+  noticeboard: { cap: BUILDING_INFO.noticeboard.cap, build: () => mergeParts([
+    { geometry: BOX, color: BEAM, matrix: mat4(-0.75, 1.1, 0, 0.16, 2.2, 0.16) },
+    { geometry: BOX, color: BEAM, matrix: mat4(0.75, 1.1, 0, 0.16, 2.2, 0.16) },
+    { geometry: BOX, color: '#6a5238', matrix: mat4(0, 1.5, 0, 1.9, 1.2, 0.12) },
+    { geometry: BOX, color: '#d8cfb4', matrix: mat4(-0.35, 1.7, 0.08, 0.36, 0.48, 0.03) },
+    { geometry: BOX, color: '#cfc6a8', matrix: mat4(0.3, 1.45, 0.08, 0.3, 0.4, 0.03) },
+    { geometry: BOX, color: BEAM, matrix: mat4(0, 2.3, 0.12, 2.2, 0.14, 0.5) },
   ]) },
 
   gatehouse: { cap: BUILDING_INFO.gatehouse.cap, build: () => mergeParts([
@@ -706,6 +716,13 @@ export function createFeatures(scene, terrain, opts = {}) {
         place('waysigil', pad.x, pad.z, 0, 1, 0.12, null,
           // dead stone until you have been here; then it burns
           { solid: false, tint: lit ? '#7fe8ff' : '#3a4048' });
+      }
+      // …and the notice board, opposite the pad across the square. A real object with a real
+      // position, because the first version treated the whole settlement as the board and "E to
+      // read the notice board" then followed the player around the entire town.
+      const board = boardSpotFor(node, padOk);
+      if (padOk(board.x, board.z)) {
+        place('noticeboard', board.x, board.z, Math.atan2(node.wx - board.x, node.wz - board.z), 1, 0.15);
       }
     }
 

@@ -97,6 +97,8 @@ export function snapshot({
   world, quests, campaign,
   // ---- The Territory expansion: who likes you, what you have knocked over, what you have heard
   standings, territory, rumours, waypoints,
+  // the building expansion: the ground you reshaped, what you built on it, and who lives there
+  terraform, build, portal, colony, farm, work,
   // where the player was last standing on the surface, for a save taken underground
   surface = null, inDungeon = false,
 }) {
@@ -155,6 +157,12 @@ export function snapshot({
     // which waypoint pads you have lit, per world — a network you had to walk to earn is not
     // something a reload should take back
     waypoints: waypoints || null,
+    terraform: terraform || null,
+    build: build || null,
+    portal: portal || null,
+    colony: colony || null,
+    farm: farm || null,
+    work: work || null,
 
     /**
      * A save taken underground is a save taken in a DIFFERENT coordinate space: a dungeon's terrain

@@ -58,7 +58,8 @@ test('§1 the distance trade-off actually trades off: a rich node far away loses
   // …and unarguably worse once you have carried it home
   assert.ok(r.deliveredPerMinute < l.deliveredPerMinute,
     `far rich delivers ${r.deliveredPerMinute}/min, near lean delivers ${l.deliveredPerMinute}/min`);
-  // and the player is told why, in words
+  // and the player is told why, in words — with a name that does not stutter
+  assert.match(nodeText(rich, ctx), /^Mother Lode Iron Ore Outcrop \(2\.2x\)/);
   assert.match(nodeText(rich, ctx), /at the face/);
   assert.match(nodeText(rich, ctx), /once you have walked it home/);
 
@@ -528,10 +529,16 @@ test('§2 a machine outside every store pool has nothing to work with', () => {
 
 test('§9.6 the rare-element recipe is honest about a world that has none', () => {
   const r = rig({ machine: 'assembler', stock: {} });
+  const recipe = REF.recipes.find(x => x.id === 'build_avionics');
+  // pretend the boards have been made, so the only thing standing in the way is the element itself
+  Object.assign(r.works.completed, { make_machine_part: 20, make_control_board: 20 });
+
+  assert.equal(r.works.inputsOf(recipe), null, 'there is no input list to write');
   assert.match(r.works.queue('m1', 'build_avionics', 1).why, /no rare element/);
+
   r.works.rare = 'aetherite';
-  const ins = r.works.inputsOf(REF.recipes.find(x => x.id === 'build_avionics'));
-  assert.equal(ins.aetherite, 4);
+  assert.equal(r.works.inputsOf(recipe).aetherite, 4);
+  assert.equal(r.works.queue('m1', 'build_avionics', 1).ok, true);
 });
 
 test('§2 a queue survives being saved and loaded', () => {

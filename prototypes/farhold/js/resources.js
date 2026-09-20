@@ -135,13 +135,24 @@ function whyNotWorkable(node, ctx) {
   return 'not workable';
 }
 
+/**
+ * What to call a node: its material and its kind, minus any word they already share. "Iron Ore" in
+ * an "Ore Outcrop" is an "Iron Ore Outcrop", not an "Iron Ore Ore Outcrop".
+ */
+export function nodeLabel(node, ctx = {}) {
+  const resourceName = node.resourceName || ctx.data?.materials?.[node.resource]?.name || node.resource;
+  const kindName = ctx.data?.nodeKinds?.[node.kind]?.name || node.kind;
+  const rest = kindName.split(' ').filter(w => !resourceName.toLowerCase().includes(w.toLowerCase())).join(' ');
+  return rest ? `${resourceName} ${rest}` : resourceName;
+}
+
 /** One line a player can read off a node before deciding to walk to it. */
 export function nodeText(node, ctx = {}) {
   const r = haulReport(node, ctx);
-  const kindName = ctx.data?.nodeKinds?.[node.kind]?.name || node.kind;
-  if (!r.workable) return `${r.bandName} ${r.resourceName} ${kindName} — ${r.why}`;
-  if (r.pooled) return `${r.bandName} ${r.resourceName} ${kindName} (${r.richness}x) — ${r.facePerMinute}/min, inside the store pool, so nothing to carry.`;
-  return `${r.bandName} ${r.resourceName} ${kindName} (${r.richness}x) — ${r.facePerMinute}/min at the face, ${Math.round(r.distance)} m away, ${r.deliveredPerMinute}/min once you have walked it home.`;
+  const what = nodeLabel(node, ctx);
+  if (!r.workable) return `${r.bandName} ${what} — ${r.why}`;
+  if (r.pooled) return `${r.bandName} ${what} (${r.richness}x) — ${r.facePerMinute}/min, inside the store pool, so nothing to carry.`;
+  return `${r.bandName} ${what} (${r.richness}x) — ${r.facePerMinute}/min at the face, ${Math.round(r.distance)} m away, ${r.deliveredPerMinute}/min once you have walked it home.`;
 }
 
 /**

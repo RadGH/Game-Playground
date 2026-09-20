@@ -216,7 +216,7 @@ import { cellInfo } from '../../../worldgen/js/world.js';
 import { weatherAt, weatherOdds } from '../../../worldgen/js/weather.js';
 import { M_PER_CELL } from './planet.js';
 
-export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null, waypoints = null } = {}) {
+export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onTeleport = null, seed = 1, markers = null, zones = null, getLevel = () => 1, sites = null, gates = null, meteors = null, showCoords = () => false, rumours = null, waypoints = null, allowDebugTeleport = () => true, bases = null } = {}) {
   // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
   // the minimap and space mode can see them too.
@@ -316,6 +316,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     view: null,
     hover: null,
     selected: null,
+    /** Which waypoint pad the player has clicked. The travel button reads this; a click never does. */
+    padPick: null,
   };
 
   const canvas = el('canvas', { class: 'map-canvas', id: 'map-canvas' });
@@ -515,10 +517,81 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       side.append(panel('Other worlds', other));
     }
 
+    /**
+     * YOUR BASES, WHEREVER THEY ARE.
+     *
+     * The pads above are this world's. This list is not: it is every base the character ever
+     * raised, in this system or any other, each with how many legs the trip home takes. A base four
+     * hundred light years away is still one button — "It should be easy to teleport back to your
+     * bases even if you go to a different star system" — it just costs more of the clock.
+     */
+    if (bases) {
+      const rows = bases.list() || [];
+      if (rows.length) {
+        const list = el('div', { class: 'pin-list' });
+        for (const b of rows) {
+          const where = b.step === 'here'
+            ? (b.away != null ? distanceText(b.away / M_PER_CELL) : 'on this world')
+            : b.step === 'land' ? (b.planetName || 'another world')
+            : (b.starName || 'another system');
+          const row = el('div', { class: 'pin-row' },
+            el('i', { class: 'pin-dot', text: '⌂', style: `color:${b.ok ? '#6ad0ff' : '#8a8f98'}` }),
+            el('span', { class: 'pin-name', text: b.name }),
+            el('span', { class: 'muted small', text: where }),
+          );
+          const go = el('button', { class: 'small', text: b.step === 'here' ? 'Travel' : 'Fold home' });
+          go.disabled = !b.ok;
+          if (!b.ok) go.title = b.reason || '';
+          go.onclick = () => { if (bases.go && bases.go(b.id)) toggle(false); };
+          row.append(go);
+          list.append(row);
+        }
+        side.append(panel('Your bases', list));
+      }
+    }
+
+    /**
+     * The picked waypoint, and the one button that carries you there.
+     *
+     * The refusal is printed here rather than only in the log, because this panel is where the
+     * decision is made — being told "you have not been to Hollowcrown yet" after the screen has
+     * closed is a worse answer than being told before you press anything.
+     */
+    if (state.padPick != null && waypoints) {
+      const pad = (waypoints.list() || []).find(p => p.id === state.padPick);
+      if (!pad) {
+        state.padPick = null;
+      } else {
+        const me = playerCell();
+        const away = Math.hypot(pad.x / M_PER_CELL - me.x, pad.z / M_PER_CELL - me.y);
+        const can = waypoints.canTravel ? waypoints.canTravel(pad.id) : { ok: pad.lit };
+        const kids = [
+          el('p', { class: 'small', text: `${pad.kind === 'built' ? 'your own waypoint' : 'a settlement'} · ${distanceText(away)}` }),
+          el('p', { class: 'small', text: pad.lit ? 'The sigils are lit.' : 'The sigils are dark. Walk in once to wake them.' }),
+        ];
+        if (!can.ok && can.why) kids.push(el('p', { class: 'small bad', text: can.why }));
+        const go = button('Travel to this waypoint', () => {
+          if (waypoints.travel && waypoints.travel(pad.id)) toggle(false);
+        }, 'small');
+        go.disabled = !can.ok;
+        kids.push(go);
+        side.append(panel(pad.name, ...kids));
+      }
+    }
+
     if (state.selected) {
       const s = state.selected;
       const kids = [el('p', { class: 'small', text: `${s.biomeName} · ${s.heightMetres} m` })];
-      if (onTeleport) kids.push(button('Go here', () => { onTeleport(s.x * M_PER_CELL, s.y * M_PER_CELL); toggle(false); }, 'small'));
+      /**
+       * "Make the current teleport feature a debug option, but keep it enabled by default."
+       *
+       * Standing on any cell you can see is not a game rule, it is a way of getting to a bug. It
+       * answers to Settings → Debug now; the waypoint button above it never does.
+       */
+      if (onTeleport && allowDebugTeleport()) {
+        kids.push(button('Go here', () => { onTeleport(s.x * M_PER_CELL, s.y * M_PER_CELL); toggle(false); }, 'small'));
+        kids.push(el('p', { class: 'small muted', text: 'Debug teleport — Settings → Debug turns this off.' }));
+      }
       side.append(panel(`Cell ${s.x},${s.y}`, ...kids));
     }
   }
@@ -1084,6 +1157,17 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
         ctx.lineTo(px + Math.cos(a) * r * 0.78, py + Math.sin(a) * r * 0.78);
         ctx.stroke();
       }
+      // the picked pad wears a ring outside the disc, so it reads as chosen at every zoom
+      if (state.padPick === pad.id) {
+        ctx.beginPath();
+        ctx.arc(px, py, r + 4.5, 0, Math.PI * 2);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffd98a';
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
       waypointHits.push({ px, py, r: r + 5, pad });
     }
   }
@@ -1223,14 +1307,27 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       const d = Math.hypot(hit.px - mx, hit.py - my);
       if (d <= hit.r && d < best) { best = d; closest = hit; }
     }
-    if (closest && waypoints?.travel) {
-      if (waypoints.travel(closest.pad.id)) toggle(false);
+    if (closest) {
+      /**
+       * CLICKING A PAD PICKS IT. IT DOES NOT TRAVEL.
+       *
+       * "let you click on them, indicate as selected, and click a button to teleport to it." It
+       * used to travel on the click itself, which meant a misplaced click on a world map could cost
+       * you a day on the road with no way to say no. Now the pad is marked on the canvas, the side
+       * panel says where it is and whether the sigils are lit, and the button is the commitment.
+       */
+      state.padPick = closest.pad.id;
+      state.selected = null;
+      buildSide();
+      draw();
       return;
     }
 
     const info = cellInfo(world, cell.x, cell.y);
     state.selected = info ? { ...info, x: cell.x, y: cell.y } : null;
+    state.padPick = null;
     buildSide();
+    draw();
   });
 
   // ---------------------------------------------------------------- pins
@@ -1295,6 +1392,16 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     toggle, draw, addPin, removePin,
     /** The same action a click on a pad runs, for main.js's handle and the tests. */
     travelTo: id => !!waypoints?.travel?.(id),
+    /** Pick a pad from outside the canvas — the journal's network list, and the tests. */
+    /**
+     * A settlement id is a NUMBER, and the first settlement on a world is 0 — so every `id || null`
+     * and every `if (padPick)` in this file silently dropped the pad the player most often clicks:
+     * the one nearest the middle of the map. All the checks here are against `null` on purpose.
+     */
+    pickPad(id) { state.padPick = id == null ? null : id; buildSide(); draw(); return state.padPick; },
+    get padPick() { return state.padPick; },
+    /** Where every pad is drawn right now, so a test can click one without knowing the projection. */
+    get padHits() { return waypointHits.map(h => ({ x: h.px, y: h.py, r: h.r, id: h.pad.id, lit: h.pad.lit })); },
     /** B8: which region names you have earned, for the tests and the debug menu. */
     known: () => [...known],
     knows,

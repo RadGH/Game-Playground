@@ -1911,3 +1911,80 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 .map-key-rows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
 .map-key-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #9fb0c8; }
 .map-key-swatch { width: 22px; height: 22px; flex: 0 0 22px; }
+
+/* ---------------------------------------------------------------- build mode
+   The panel that answers "how does build mode work". Right-hand column, because the ghost you are
+   aiming is in the middle of the screen and the panel must never be under the cursor. */
+.build-ui {
+  position: fixed;
+  top: 64px;
+  right: 12px;
+  bottom: 12px;
+  width: 322px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(12, 16, 22, .93);
+  border: 1px solid #2a3542;
+  border-radius: 10px;
+  color: #cfd8e3;
+  font-size: 13px;
+  z-index: 40;
+  /* the panel is a readout, not a target: clicks on the WORLD must not be eaten by its padding */
+  pointer-events: auto;
+}
+.build-ui.hidden { display: none; }
+.build-head { display: flex; align-items: center; justify-content: space-between; }
+.build-head h2 { margin: 0; font-size: 15px; letter-spacing: .04em; color: #eaf2fb; }
+.build-close {
+  background: none; border: 0; color: #8a97a8; font-size: 20px; line-height: 1; cursor: pointer;
+}
+.build-close:hover { color: #eaf2fb; }
+
+.build-steps h3 { margin: 4px 0 2px; font-size: 12px; color: #ffd98a; }
+.build-steplist { margin: 0; padding-left: 18px; color: #b6c2d0; font-size: 12px; line-height: 1.45; }
+.build-steplist li { margin-bottom: 3px; }
+
+.build-tools, .build-cats { display: flex; flex-wrap: wrap; gap: 4px; }
+.build-tool, .build-cat {
+  background: #18202b; border: 1px solid #2a3542; color: #b6c2d0;
+  border-radius: 5px; padding: 3px 7px; font-size: 11.5px; cursor: pointer;
+}
+.build-tool:hover, .build-cat:hover { border-color: #3d556e; color: #eaf2fb; }
+.build-tool.on, .build-cat.on { background: #1d3446; border-color: #4f88b5; color: #cfe9ff; }
+
+.build-list {
+  flex: 1;
+  min-height: 80px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid #222c38;
+  border-bottom: 1px solid #222c38;
+  padding: 6px 0;
+}
+.build-row {
+  display: flex; justify-content: space-between; gap: 8px; align-items: baseline;
+  background: none; border: 1px solid transparent; border-radius: 5px;
+  padding: 4px 6px; text-align: left; cursor: pointer; color: inherit; font: inherit;
+}
+.build-row:hover { background: #18212c; }
+.build-row.on { background: #1d3446; border-color: #4f88b5; }
+/* you can still SELECT something you cannot afford — seeing the price is the point */
+.build-row.short .build-row-cost { color: #d98a7a; }
+.build-row-name { color: #e6eef7; }
+.build-row-cost { color: #8a97a8; font-size: 11px; text-align: right; }
+
+.build-detail h3 { margin: 2px 0; font-size: 13px; color: #eaf2fb; }
+.build-detail p { margin: 2px 0; line-height: 1.4; }
+.build-cost { margin: 4px 0; padding-left: 16px; font-size: 12px; color: #b6c2d0; }
+.build-cost li.short { color: #d98a7a; }
+.build-why { color: #d98a7a; font-size: 12px; }
+.build-ok { color: #8ad6a0; font-size: 12px; }
+.build-keys { line-height: 1.4; }
+
+@media (max-width: 900px) {
+  .build-ui { width: auto; left: 12px; }
+}

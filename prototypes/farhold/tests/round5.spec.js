@@ -331,7 +331,7 @@ test('flying high widens the view without costing more triangles', async ({ page
   // and the dive, which is 13s on an idle machine and comfortably past the 60s default when the box
   // is busy. It is measuring real work, so it gets real headroom rather than a smaller world.
   test.setTimeout(150_000);
-  const errors = await land(page, { seed: 11, extra: '&scale=1' });
+  const errors = await land(page, { seed: 11, extra: '&scale=1&ship=1' });
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     const ground = f.view.stats();

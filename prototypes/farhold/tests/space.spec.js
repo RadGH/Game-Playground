@@ -6,7 +6,10 @@ async function land(page, query = '') {
   const errors = [];
   page.on('pageerror', e => errors.push('pageerror: ' + e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
-  await page.goto('/prototypes/farhold/?auto=1&quality=low&seed=7' + query);
+  // `ship=1` hands over a finished ship. §9 of BUILDING_EXPANSION means a fresh character has no
+  // ship and cannot buy one — which is the point — but these tests are about how the thing FLIES,
+  // not about earning it, so the gate is satisfied up front rather than mined through.
+  await page.goto('/prototypes/farhold/?auto=1&quality=low&seed=7&ship=1' + query);
   await page.waitForFunction(() => document.body.dataset.ready === '1' && !!window.farhold, null, { timeout: 120000 });
   return errors;
 }

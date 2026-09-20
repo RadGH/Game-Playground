@@ -267,6 +267,28 @@ export function assembleShip(player, kind, bag, opts = {}) {
   return { ok: true, kind, name: VEHICLES.ship.kinds[kind].name };
 }
 
+/**
+ * Hand a finished ship over, no questions asked.
+ *
+ * For `?ship=1` and the tests that are about FLYING rather than about earning the thing. The gate
+ * is §9's whole point and must stay real in ordinary play, but a test of how the drive handles
+ * should not have to mine ore first — and it must not simulate the grant by poking at the player
+ * object, because the shape of the yard is exactly the sort of thing that drifts.
+ */
+export function grantShip(player, kind = 'lander') {
+  if (!player) return { ok: false, why: 'Nobody to give it to.' };
+  const got = unlockVehicle(player, 'ship', kind, { granted: true });
+  if (!got.ok) return got;
+  const y = yard(player);
+  const tier = SHIPS[kind]?.tier || 1;
+  for (const id of PART_IDS) y.built[id] = Math.max(y.built[id] || 0, tier);
+  y.pad = true;
+  y.fuel = Math.max(y.fuel, (fuelFor(kind, 'launch') + fuelFor(kind, 'land')) * 4);
+  player.vehicles.active = player.vehicles.active || {};
+  player.vehicles.active.ship = kind;
+  return { ok: true, kind };
+}
+
 // ---------------------------------------------------------------------------- fuel
 
 /** What one leg costs this ship, in units of Lift Fuel. */

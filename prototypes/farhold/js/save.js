@@ -96,9 +96,11 @@ export function snapshot({
   // ---- these three were being PASSED and then dropped on the floor. See the note below.
   world, quests, campaign,
   // ---- The Territory expansion: who likes you, what you have knocked over, what you have heard
-  standings, territory, rumours, waypoints,
+  standings, territory, rumours, waypoints, homes,
   // the building expansion: the ground you reshaped, what you built on it, and who lives there
   terraform, build, portal, colony, farm, work,
+  // …and what the base is holding and making: the crates' contents and the grid's charge
+  stores, grid,
   // where the player was last standing on the surface, for a save taken underground
   surface = null, inDungeon = false,
 }) {
@@ -157,8 +159,20 @@ export function snapshot({
     // which waypoint pads you have lit, per world — a network you had to walk to earn is not
     // something a reload should take back
     waypoints: waypoints || null,
+    // the bases, filed against the character rather than any one world — see js/homes.js
+    homes: homes || null,
     terraform: terraform || null,
     build: build || null,
+    /**
+     * THE CRATES AND THE GRID.
+     *
+     * js/build.js saves WHERE the crate is; only js/stores.js knows what is in it, and only
+     * js/power.js knows how much charge a battery bank is holding. Left off this list, a reloaded
+     * base was a field of empty boxes beside a generator with nothing to burn — so the waypoint pad
+     * came back dark and the base you had spent an hour on could not be travelled to.
+     */
+    stores: stores || null,
+    grid: grid || null,
     portal: portal || null,
     colony: colony || null,
     farm: farm || null,

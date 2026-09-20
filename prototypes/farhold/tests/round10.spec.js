@@ -115,7 +115,9 @@ test('a new character starts on a level-1 world, at the size the title screen sa
 // ---------------------------------------------------------------- 5. flying
 
 test('W flies the ship forward, not just up', async ({ page }) => {
-  const errors = await land(page, { seed: 11 });
+  // `ship=1` — a fresh character has no ship since BUILDING_EXPANSION §9; this test is about the
+  // controls, so it is given one rather than made to build it
+  const errors = await land(page, { seed: 11, extra: '&ship=1' });
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     f.launch();

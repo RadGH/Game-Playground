@@ -51,10 +51,12 @@ import { createNodeField, tickNodes } from './resources.js';
 import { createTerraform } from './terraform.js';
 import { createPortals } from './portal.js';
 import { createBuild } from './build.js';
+import { createBuildUI } from './build-ui.js';
+import { createHomes } from './homes.js';
 import { WorkBoard } from './work.js';
 import { createColony } from './colony.js';
 import { createFarm } from './farm.js';
-import { migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel } from './shipyard.js';
+import { migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel, grantShip } from './shipyard.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
 import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, itemScore, displayName } from './rpg.js';
@@ -249,6 +251,26 @@ async function boot() {
       console.error(err);
     });
   };
+
+  /**
+   * `?load=<id>` — or `?load=last` — starts straight into a save.
+   *
+   * There was no way to continue a save without a human clicking a row, which meant no test could
+   * ever prove that anything survives a reload: it could only check that `snapshot()` had the right
+   * fields on it, which is exactly the check that passed every time `world`, `quests` and
+   * `campaign` were being dropped on the floor. Now a test does what a player does.
+   */
+  const wanted = params.get('load');
+  if (wanted) {
+    const chosen = wanted === 'last' ? saves.lastId() : wanted;
+    const data = chosen ? saves.read(chosen) : null;
+    if (data) {
+      begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: data })
+        .catch(err => { status('failed: ' + err.message); console.error(err); });
+      return;
+    }
+    status(`no save called ${wanted}`);
+  }
 
   if (params.has('auto')) $('boot-start').click();
 }
@@ -473,8 +495,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * somewhere else — the pads are per world, like the map's learned region names, because a pad on
    * another planet is not somewhere you can walk to.
    */
+  /**
+   * EVERY BASE YOU EVER RAISED, WHEREVER IT IS.
+   *
+   * "It should be easy to teleport back to your bases even if you go to a different star system."
+   * The waypoint network below is per world and gets thrown away every time you land somewhere
+   * else; this does not. It is the one register that outlives a planet, so a base you built four
+   * hundred light years ago is still on the list — and `routeTo` says how many legs the trip home
+   * takes rather than refusing.
+   */
+  const homes = createHomes(save?.homes || null);
+  /** Which world we are standing on, in the two numbers the register files a base under. */
+  const worldKey = () => ({ systemSeed, planetId: planet?.id ?? null });
+
   let waypoints = createWaypoints({
     settlements: features.settlements, seed,
+    built: homes.forWorld(worldKey()),
     // the same test js/features.js uses to site the pad, so the two cannot disagree
     groundOk: (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z)
       && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5,
@@ -655,6 +691,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     derived: () => player.derived,
   });
   const input = createInput(renderer.domElement);
+
+  /** Clicks taken while build mode is up, drained by the frame loop. Filled just after `build`. */
+  let buildClicks = 0;
   const fx = createCombatFx(scene, {
     // `terrain` is replaced when you land on a new world, so read it through the binding
     groundAt: (x, z) => terrain.heightAt(x, z),
@@ -1495,6 +1534,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
   const stores = createStoreNetwork({ power: powerData || {}, materials: resourceData || {} });
   const grid = createGrid({ power: powerData || {}, stores, log: (t, c) => hud.log(t, c) });
+  /**
+   * The pools and the grid come back BEFORE build.load runs.
+   *
+   * `build.load` walks every piece and rejoins it to both, and `stores.add`/`grid.add` on an id
+   * that is already there replaces it — so loading the contents first and the buildings second
+   * keeps the coal in the crate rather than handing back an empty one of the same name.
+   */
+  if (save?.stores) stores.load(save.stores);
+  if (save?.grid) grid.load(save.grid);
   const works = createWorks({
     refining: refiningData || {}, resources: resourceData || {},
     stores, grid, log: (t, c) => hud.log(t, c),
@@ -1520,6 +1568,84 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   });
 
   /**
+   * Where the camera is pointing at the ground, in world metres.
+   *
+   * Marched rather than solved: the terrain is a noise field with rivers and roads carved into it,
+   * so there is no closed form for "where does this ray meet it". Forty one-metre steps covers the
+   * whole useful build range and costs forty height lookups, which is nothing beside the clipmap
+   * rebuilding itself. Looking at the sky returns the far end of the march, so the ghost slides out
+   * to arm's length instead of vanishing.
+   */
+  function aimSpot(maxRange = 40) {
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    const from = camera.position;
+    let last = { x: control.x, z: control.z };
+    for (let t = 1.5; t <= maxRange; t += 1) {
+      const x = from.x + dir.x * t;
+      const y = from.y + dir.y * t;
+      const z = from.z + dir.z * t;
+      if (y <= terrain.heightAt(x, z)) return { x, z };
+      last = { x, z };
+    }
+    return last;
+  }
+
+  /**
+   * Put a finished piece on the grid, in the storage pools, or both.
+   *
+   * `power.make` is a generator, `power.store` a battery, `power.reach` a pole and `power.use` a
+   * machine that draws — the four shapes js/power.js already knows. `store.slots` is a crate. A
+   * piece that is none of those (a wall, a statue, a road) joins nothing, which is correct.
+   */
+  function joinSystems(entry, def) {
+    if (!entry || !def) return;
+    const power = def.power || null;
+    // A REJOIN MUST NOT BE A RESET. `stores.add` and `grid.add` both build a fresh unit and drop
+    // the old one, so on a load — where the pools and the grid were restored a moment earlier —
+    // calling them again would empty every crate and flatten every battery.
+    if (grid.get(entry.id) || stores.get(entry.id)) return;
+    if (power) {
+      if (power.make != null || power.store != null || power.reach != null) {
+        // a generator, a battery or a pole: the type carries its own numbers in data/power.json
+        grid.add({ id: entry.id, type: entry.key, name: entry.name, x: entry.x, z: entry.z });
+      } else if (power.use != null) {
+        // a machine: it only needs how much it pulls and how early it is shed in a brownout
+        grid.add({
+          id: entry.id, type: entry.key, name: entry.name, x: entry.x, z: entry.z,
+          draw: power.use, priority: def.cat === 'waypoint' ? 'waypoint' : def.cat === 'defence' ? 'defence' : 'refining',
+        });
+      }
+    }
+    if (def.store?.slots) {
+      stores.add({ id: entry.id, type: entry.key, name: entry.name, x: entry.x, z: entry.z });
+    }
+  }
+
+  /**
+   * CARRY THE GRID'S ANSWER BACK TO THE THINGS THAT CARE.
+   *
+   * `grid.tick` works out what is lit; nothing was reading the result. So a pad's `powered` flag
+   * never moved off whatever js/buildplan.js set it to when it was placed, which for anything with
+   * a `power.use` is `false` — the sigils could never light however many generators you built
+   * beside them. Run after the grid, once a second rather than every frame: a waypoint that takes
+   * a tick to notice the lights came back is fine, sixty needless writes a second is not.
+   */
+  function syncPower() {
+    for (const entry of build.entries || []) {
+      const lit = grid.get(entry.id) ? grid.poweredOf(entry.id) > 0 : true;
+      if (entry.powered === lit) continue;
+      entry.powered = lit;
+      if (!entry.waypoint) continue;
+      waypoints.setPowered(entry.id, lit);
+      homes.setPowered(entry.id, lit);
+      hud.log(lit
+        ? `The sigils at ${entry.name} come up. You can travel here from anywhere now.`
+        : `The sigils at ${entry.name} go dark. Its grid is down.`, lit ? 'level' : 'bad');
+    }
+  }
+
+  /**
    * Build mode. `B` toggles it; the rest of the keys are listed on screen when it is up.
    *
    * `store` is how a cost is paid: the pool the ghost is standing in first, then the materials bag,
@@ -1530,18 +1656,141 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     catalogue: structureData || null,
     plan: null,
     spellfx,
+    /**
+     * THE POOL YOU ARE STANDING IN, THEN THE BAG ON YOUR BACK.
+     *
+     * js/stores.js addresses a POOL, not a position — `count(pool, res)` — so the pool has to be
+     * looked up first. I had these three calling `count(id, x, z)`, which passed the resource id as
+     * the pool and the player's x as the resource: a crate at your feet paid for nothing, every
+     * cost came out of the bag, and the whole storage-pool layer was decorative. `poolAt` returns
+     * null when there is nothing near, and then the bag is the only answer anyway.
+     *
+     * The sum is deliberate: a bench beside a half-full crate builds out of BOTH rather than
+     * refusing because neither holds the whole cost on its own.
+     */
     store: {
-      have: id => stores.count?.(id, control.x, control.z) ?? materials.count?.(id) ?? 0,
-      take: (id, n) => (stores.take?.(id, n, control.x, control.z) ?? materials.spend?.({ [id]: n })),
-      give: (id, n) => (stores.put?.(id, n, control.x, control.z) ?? materials.add?.(id, n)),
+      have: id => {
+        const pool = stores.poolAt?.(control.x, control.z);
+        return (pool ? stores.count(pool, id) : 0) + (materials.count?.(id) ?? 0);
+      },
+      take: (id, n) => {
+        const pool = stores.poolAt?.(control.x, control.z);
+        const fromPool = pool ? Math.min(n, stores.count(pool, id)) : 0;
+        if (fromPool > 0) stores.take(pool, id, fromPool);
+        const rest = n - fromPool;
+        if (rest > 0) materials.spend?.({ [id]: rest });
+        return n;
+      },
+      // a refund goes back into the pool if there is one, because that is where the next build
+      // will look for it — putting it in the bag means carrying it back to the crate by hand
+      give: (id, n) => {
+        const pool = stores.poolAt?.(control.x, control.z);
+        // `put` returns how many actually FITTED — the caps in js/stores.js mean a full crate takes
+        // some of a refund and not all of it — so whatever it would not take goes in the bag
+        const stored = pool ? stores.put(pool, id, n) : 0;
+        if (n - stored > 0) materials.add?.(id, n - stored);
+        return n;
+      },
     },
     onLog: (t, c) => hud.log(t, c),
     onClear: (x, z, r) => props.clearAround?.(x, z, r) || { removed: 0, materials: {} },
+    /**
+     * A WAYPOINT PAD JOINS THE NETWORK THE MOMENT IT IS FINISHED.
+     *
+     * Two registers, on purpose: `waypoints` so the map on THIS world draws it beside the towns,
+     * and `homes` so it is still there after you fold to another star. The pad is filed under the
+     * world it stands on, which is why both calls happen here rather than inside build.js — that
+     * file has no idea what system it is in and should not learn.
+     */
+    /**
+     * A PIECE HAS TO JOIN THE SYSTEMS THAT MAKE IT WORK.
+     *
+     * The grid, the storage pools and the waypoint network are all built above and every one of
+     * them was empty: nothing ever called `grid.add` or `stores.add`, so a generator you built
+     * generated nothing, a crate held nothing, and the pad you paid four crystal for stayed dark
+     * for ever. The catalogue already says which is which — `power.make`, `power.use`,
+     * `store.slots` — and the ids in data/structures.json match data/power.json exactly, so the
+     * join is this and nothing more.
+     */
+    onPlace: (entry, def) => {
+      joinSystems(entry, def);
+      if (!entry?.waypoint) return;
+      const name = `${planet?.name || 'This world'} — ${entry.claim || 'base'}`;
+      waypoints.addBuilt({ id: entry.id, name, x: entry.x, z: entry.z, claim: entry.claim, powered: !!entry.powered });
+      homes.add({
+        id: entry.id, name, x: entry.x, z: entry.z, claim: entry.claim, powered: !!entry.powered,
+        starId, systemSeed, starName: star?.name || '',
+        planetId: planet?.id ?? null, planetName: planet?.name || '',
+        founded: Math.round(state.elapsed || 0),
+      });
+      hud.log(`${name} is on the waypoint network. You can travel back to it from anywhere.`, 'level');
+    },
+    onRemove: entry => {
+      grid.remove(entry.id);
+      stores.remove(entry.id);
+      if (!entry?.waypoint) return;
+      waypoints.removeBuilt(entry.id);
+      homes.remove(entry.id);
+    },
   });
-  if (save?.build) build.load?.(save.build);
+  /**
+   * The panel that answers the question. B puts it up with the ghost.
+   *
+   * It is handed the SAME `store.have` build mode pays out of, so a price it shows is a price the
+   * placement will agree with — the one thing a build interface must never get wrong.
+   */
+  const buildUI = createBuildUI({
+    catalogue: structureData || null,
+    build,
+    store: { have: id => {
+      const pool = stores.poolAt?.(control.x, control.z);
+      return (pool ? stores.count(pool, id) : 0) + (materials.count?.(id) ?? 0);
+    } },
+    onLog: (t, c) => hud.log(t, c),
+  });
+  document.body.append(buildUI.root);
+
+  /**
+   * The mouse, in build mode. Registered HERE rather than beside `createInput`, because `build` is
+   * a `const` declared further down and a click during the load would have hit it before it exists.
+   *
+   * A click counter rather than a flag: a player putting a line of fence posts down clicks faster
+   * than the frame rate on a bad frame, and a dropped post feels like the game ignoring you.
+   */
+  renderer.domElement.addEventListener('mousedown', e => {
+    if (!build.mode || e.button !== 0) return;
+    buildClicks++;
+  });
+  renderer.domElement.addEventListener('wheel', e => {
+    if (!build.mode) return;
+    e.preventDefault();
+    // the terrain tools have no ghost to turn, so the wheel sizes the brush for them instead
+    if (build.tool === 'build') build.rotate(Math.sign(e.deltaY) * (Math.PI / 8));
+    else build.setRadius(build.radius - Math.sign(e.deltaY) * 2);
+  }, { passive: false });
+
+  if (save?.build) {
+    build.load?.(save.build);
+    // …and everything that came back joins the grid and the pools again, or a reloaded base is a
+    // field of dead machinery beside a dark pad
+    for (const entry of build.entries || []) {
+      joinSystems(entry, build.defOf(entry.key));
+      if (entry.waypoint) {
+        waypoints.addBuilt({ id: entry.id, name: entry.name, x: entry.x, z: entry.z, claim: entry.claim, powered: !!entry.powered });
+      }
+    }
+  }
 
   // an old save keeps the ship it already has — the gate only applies to a fresh start
   migrateShipyard(player);
+  /**
+   * `?ship=1` starts with one.
+   *
+   * The gate is §9's whole point and stays real in ordinary play. This exists for the flight tests,
+   * which are about how the drive handles and should not have to mine ore first, and for anybody
+   * who wants to look at space without earning it.
+   */
+  if (params.get('ship') === '1') grantShip(player);
 
   sites.setChests?.(chests);
 
@@ -2208,6 +2457,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       meteors: { get marks() { return meteors.marks(); } },
       gates: { get nodes() { return gates.nodes; } },
       showCoords: () => !!settings.get('coords'),
+      // "Make the current teleport feature a debug option, but keep it enabled by default"
+      allowDebugTeleport: () => settings.get('debugTeleport') !== false,
+      // every base the character ever raised, and the trip home from here — see js/homes.js
+      bases: {
+        list: () => homes.overview({ ...worldKey(), x: control.x, z: control.z }),
+        go: id => returnToBase(id),
+      },
       /**
        * F15: the waypoint network, and what happens when you click one.
        *
@@ -2298,9 +2554,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
       waypointLit: id => waypoints?.isLit?.(id),
     });
-    // a pad on another planet is not somewhere you can walk to, so the network is rebuilt per world
+    // A pad on another planet is not somewhere you can WALK to, so the network is rebuilt per
+    // world — but the bases on this world come back out of the register, which is not.
     waypoints = createWaypoints({
     settlements: features.settlements, seed,
+    built: homes.forWorld({ systemSeed, planetId: nextPlanet?.id ?? planet?.id ?? null }),
     // the same test js/features.js uses to site the pad, so the two cannot disagree
     groundOk: (x, z) => !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3
       && terrain.slopeAt(x, z, 4) <= 0.5,
@@ -2573,6 +2831,84 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return;
     }
     beginDescent(target);
+  }
+
+  /**
+   * GO HOME, FROM ANYWHERE.
+   *
+   * "It should be easy to teleport back to your bases even if you go to a different star system."
+   *
+   * js/homes.js works out how many legs the trip takes; this takes them. All three endings put the
+   * player on the sigil, because the pad IS the destination — §5 of BUILDING_EXPANSION is explicit
+   * that you arrive standing on it — and all three open the town portal behind you, so the way back
+   * to whatever you were doing is the same whether home was over the hill or four hundred light
+   * years away.
+   *
+   * The refusals are the waypoint network's own, not new ones. A base is a waypoint; it should not
+   * have a second, different rulebook just because you built it.
+   */
+  function returnToBase(id) {
+    const route = homes.routeTo(id, { ...worldKey(), x: control.x, z: control.z });
+    if (!route.ok) { hud.log(route.why, 'bad'); sound.ui('error'); return false; }
+    if (field.enemies.some(e => e && e.state === 'chase')) {
+      hud.log('Not while something is trying to kill you.', 'bad'); sound.ui('error'); return false;
+    }
+    if (dungeon) { hud.log('Not from underground. Get back to the surface first.', 'bad'); sound.ui('error'); return false; }
+    const base = route.base;
+
+    // the way back, opened before anything moves, so the anchor is where the player actually stood
+    const from = waypoints.noteDeparture(control.x, control.z, planet?.name || null);
+    const opened = portals.open({
+      anchor: { x: from.x, z: from.z, world: from.world },
+      exit: { x: base.x, z: base.z, world: base.planetName || null, name: base.name },
+    });
+    if (opened?.closed) hud.log('The portal you left open has closed.', '');
+
+    /**
+     * A FOLD IS A FOLD, whether the sigils do it or the drive does.
+     *
+     * Rebuilding the system from the base's own `systemSeed` is exactly what `arriveAt` does coming
+     * out of warp — a star is its seed — so travelling home across the galaxy costs the same second
+     * of generation and lands in the same place it would have if you had flown.
+     */
+    if (route.step === 'jump') {
+      const target = galaxy.stars[base.starId] || { id: base.starId, seed: base.systemSeed, name: base.starName };
+      // Not from inside the tunnel — there is nowhere to leave a portal and nothing to leave it at.
+      // Everywhere else is allowed on purpose: "It should be easy to teleport back to your bases
+      // even if you go to a different star system", and making the player land on some unrelated
+      // world first so they can stand on a sigil is the opposite of easy.
+      if (mode === 'warp') { hud.log('Not mid-jump.', 'bad'); return false; }
+      const built = createSystem({ seed: base.systemSeed });
+      star = built.star;
+      system = built.system;
+      starId = base.starId ?? starId;
+      systemSeed = base.systemSeed;
+      if (target) { target.name = star.name; target.classKey = star.classKey; }
+      space?.dispose?.();
+      space = null;
+      hud.log(`The sigils fold ${Math.round(base.x / 1000)} km and ${star.name} with them.`, 'level');
+    }
+
+    if (route.step === 'jump' || route.step === 'land') {
+      const all = [...system.planets, ...system.planets.flatMap(x => x.moons || [])];
+      const p = all.find(x => x.id === base.planetId);
+      if (!p) { hud.log(`${base.name} is not where the chart says it is.`, 'bad'); return false; }
+      camera.far = 24000; camera.updateProjectionMatrix();
+      buildPlanet(p, null);
+      mode = 'ground';
+    }
+
+    control.teleport(base.x, base.z);
+    rebuildWorldAround(true);
+    field.clear();
+    // a longer trip is a longer trip: one leg is the ordinary waypoint cost, three is most of a day
+    const hours = Math.min(24, waypoints.hoursFor(from.x, from.z, base) * route.legs);
+    sky.advanceHours?.(hours);
+    build.showPortal?.(portals.portal?.exit || null);
+    hud.log(`You step onto the sigil at ${base.name}. ${Math.round(hours)} hours.`, 'level');
+    sound.ui('click');
+    autoSave();
+    return true;
   }
 
   /** Come down out of space into the air over a world, and keep flying. */
@@ -3162,6 +3498,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       territory: holdings.toJSON(),
       rumours: rumours.toJSON(),
       waypoints: waypoints.toJSON(),
+      // the bases, which belong to the CHARACTER and not to any one world
+      homes: homes.toJSON(),
+      // what the crates are holding, and what the grid is carrying
+      stores: stores.toJSON(),
+      grid: grid.toJSON(),
       /**
        * THE BASE IS PART OF THE SAVE.
        *
@@ -3358,6 +3699,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       e.preventDefault();
       const on = !build.mode;
       build.setMode(on);
+      buildUI.setOpen(on);
       hud.log(on
         ? 'Build mode. Scroll to turn · click to place · Enter to finish a run · Ctrl+Z to undo · B to stop.'
         : 'Build mode off.', on ? 'level' : '');
@@ -3365,7 +3707,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (build.mode) {
       if (e.code === 'Enter') { e.preventDefault(); build.finishRun?.(); }
       if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); build.undo?.(); }
-      if (e.code === 'Escape') { e.preventDefault(); build.setMode(false); }
+      if (e.code === 'Escape') { e.preventDefault(); build.setMode(false); buildUI.setOpen(false); }
+      // the brush is the terrain tools' whole interface; it needs a size you can change
+      if (e.code === 'BracketLeft') { e.preventDefault(); build.setRadius(build.radius - 2); }
+      if (e.code === 'BracketRight') { e.preventDefault(); build.setRadius(build.radius + 2); }
     }
     if (e.code === 'KeyM') {
       e.preventDefault();
@@ -3439,6 +3784,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     state.frames++;
 
     const snap = input.sample();
+    /**
+     * A CLICK IN BUILD MODE IS NOT A SWING.
+     *
+     * The controller runs its own attack clock off `snap.attack`, so suppressing the swing in the
+     * frame loop was not enough — the arm still came up and the swing timer still ran, which reads
+     * as the character taking a swipe at the fence post they are placing. The button is taken away
+     * from the controller entirely while the mode is up.
+     */
+    if (build.mode) { snap.attack = false; snap.attackHeld = false; }
 
     // J is the ship: board it on the ground, put it down in space
     if (snap.pressed?.has('KeyJ')) {
@@ -3773,8 +4127,25 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     };
 
-    if (step.attacked) swingWith('main', step.step || 0);
-    if (step.attackedOff) swingWith('off', step.offStep || 0);
+    /**
+     * A CLICK IN BUILD MODE BUILDS. IT DOES NOT SWING.
+     *
+     * Nothing was calling `build.confirm()` at all: every key worked, the ghost tracked the ground,
+     * and clicking drew a sword. `buildClicks` is filled by the listener on the canvas rather than
+     * read off `step.attacked`, because a swing is rate-limited by attack speed and putting a fence
+     * post down should not be.
+     */
+    if (buildClicks > 0) {
+      for (let i = 0; i < buildClicks; i++) {
+        const res = build.confirm();
+        if (res && res.ok === false && res.why) hud.log(res.why, 'warn');
+      }
+      buildClicks = 0;
+      buildUI.refresh();
+    } else if (!build.mode) {
+      if (step.attacked) swingWith('main', step.step || 0);
+      if (step.attackedOff) swingWith('off', step.offStep || 0);
+    }
 
     field.update(dt, control, player, {
 
@@ -4067,8 +4438,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * fractions of a second; the colony and the farm are given the clock instead, because a citizen's
      * day is measured in hours and a crop's life in days.
      */
-    grid.tick(dt);
+    // a solar array wants the sun's HEIGHT, not the hour: noon is 1, midnight 0, dusk in between
+    grid.tick(dt, {
+      daylight: Math.max(0, Math.sin(sky.dayFraction * Math.PI * 2 - Math.PI / 2)),
+      wind: blended.wind ?? 0.5,
+    });
     works.tick(dt);
+    // the grid's answer reaches the pad, the turret and the smelter — see syncPower
+    if (state.frames % 20 === 0) syncPower();
     if (state.frames % 15 === 0) {
       colony.setClock?.(sky.dayFraction * 24, Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1);
       colony.tick?.(dt * 15);
@@ -4077,8 +4454,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     if (state.frames % 900 === 0) tickNodes(nodes, 1, resourceData || {});
 
-    // build mode follows the ground under the cursor
-    if (build.mode) build.aim(control.x, control.z);
+    /**
+     * BUILD MODE FOLLOWS WHERE YOU ARE LOOKING, NOT WHERE YOU ARE STANDING.
+     *
+     * This was `build.aim(control.x, control.z)` — the player's own feet — so the ghost sat inside
+     * the character, the brush levelled the ground you were standing on, and placing anything meant
+     * walking onto the exact spot and then off it again. The cursor is a ray now: march out along
+     * the camera's heading in one-metre steps until it goes under the ground, which is a hit test
+     * that costs a handful of height lookups and needs no physics.
+     */
+    if (build.mode) {
+      const spot = aimSpot();
+      build.aim(spot.x, spot.z);
+      buildUI.tick();
+    }
     hud.tick(player, {
       place: dungeon ? dungeon.name : town ? `${town.name} (${town.kind || 'settlement'})` : (terrain.regionAt(control.x, control.z) || terrain.biomeAt(control.x, control.z).name),
       zone: dungeon ? { minLevel: dungeon.level, maxLevel: dungeon.level + 2, midLevel: dungeon.level + 1, danger: 'Underground' } : here,
@@ -4231,7 +4620,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // the building expansion, for the tests and the debug menu
     get build() { return build; },
     get stores() { return stores; },
+    /** The materials bag itself. `materials` below is already taken by its JSON readout. */
+    get bag() { return materials; },
     get grid() { return grid; },
+    /** The build catalogue, so a test or the debug menu can read a cost without a second fetch. */
+    get structures() { return structureData || { structures: [] }; },
     get works() { return works; },
     get colony() { return colony; },
     get farm() { return farm; },
@@ -4314,6 +4707,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get band() { return band; },
     chart, galaxy, warp, beginJump,
     get starId() { return starId; },
+    /** Every base you ever raised, and the trip home — see js/homes.js. */
+    homes,
+    returnToBase,
     get starNow() { return starNow(); },
     get systemSeed() { return systemSeed; },
     skills, spellfx, sunfx,

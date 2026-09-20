@@ -10,11 +10,61 @@ town portal). The design document is the brief; this is what the code does and w
 | `js/buildplan.js` | The build ledger — catalogue, snapping, validity, claims, costs, blueprints | no |
 | `js/portal.js` | The one portal: open, use, check, save | no |
 | `js/build.js` | Build mode — ghost, brush ring, meshes for 98 structures, the portal ring | yes |
+| `js/build-ui.js` | The panel `B` puts up — first steps, tools, catalogue, live prices, why the ghost is red | no |
+| `js/homes.js` | Every base you ever raised, and the route home from another star system | no |
 | `data/structures.json` | 98 structures, 25 materials, the placement rules | — |
 | `tests/building.test.js` | 31 node tests over all of the above | — |
 
 Two small edits to files that already existed: `js/terrain.js` gained `editedAt()`, and
 `js/waypoints.js` learned about pads the player built.
+
+---
+
+## 0. How build mode actually works, from the player's side
+
+This section is the answer to *"How does build mode work? How do I start building a base?"* — the
+question that turned up four joins that had never been made. Every module below was finished and
+tested; none of them were reachable.
+
+**`B` opens build mode.** A panel comes up on the right with four numbered steps at the top (they
+disappear once you own anything), a row of tools, the catalogue by group, and — beneath whatever is
+selected — its price against what you are actually holding, plus the live reason the ghost is red.
+
+| Input | What it does |
+|---|---|
+| `B` | Build mode on and off. `Esc` also leaves. |
+| move the mouse | The ghost follows **where you are looking**, not where you stand |
+| left click | Use the current tool: place, level, raise, lower, clear, take down |
+| scroll | Turn the ghost · sizes the brush when a terrain tool is up |
+| `[` `]` | Brush size, for when the wheel is doing something else |
+| `Enter` | Finish a run of road or wall |
+| `Ctrl+Z` | Undo the last thing |
+
+**Starting a base**, in the order the panel lists it:
+
+1. **Level** a circle of ground. Nothing in the catalogue will sit on raw Farhold.
+2. **Claim Stone** (*Waypoint* group). The ground is yours; raids come for this.
+3. A **Storage Crate** and a **Burner Generator** beside it, with coal in the crate.
+4. A **Waypoint Pad** when you can afford one. Now you can come home from anywhere.
+
+### The four joins that were missing
+
+Build mode was complete and inert. Worth recording, because every one of them is the same shape as
+the bugs in `RPG.md`: a finished module that nothing ever called.
+
+* **Nothing called `build.confirm()`.** Every key worked; clicking drew a sword. There was no mouse
+  wiring in build mode at all.
+* **The ghost was aimed at `control.x, control.z`** — the player's own feet — so building meant
+  standing on the exact spot and then walking off it.
+* **Nothing called `grid.add` or `stores.add`.** A generator you built generated nothing, a crate
+  held nothing, and a waypoint pad (which draws 25 kW) could never light. The catalogue ids in
+  `data/structures.json` match `data/power.json` exactly; the join is four lines.
+* **`stores` and `grid` were not in the save.** `build` saved *where* the crate was; only
+  `js/stores.js` knew what was in it. A reloaded base was empty boxes beside a dead generator.
+
+Plus one in the build-mode cost callback itself: it called `stores.count(id, x, z)` when the
+signature is `count(pool, res)`, so a crate at your feet paid for nothing and the whole storage-pool
+layer was decorative.
 
 ---
 
@@ -196,3 +246,54 @@ material, every structure has a description), the "you are short of 6 rough ston
 refund split, the claim rules, wall runs, blueprints, the light list, and one end-to-end chain that
 levels ground, stakes a claim, seats a waypoint core, powers it, travels, and walks back through the
 portal.
+
+---
+
+## 12. Getting home, from anywhere — `js/homes.js`
+
+> *"It should be easy to teleport back to your bases even if you go to a different star system."*
+
+`js/waypoints.js` is **per world**, and rightly so: it is built from the settlements of the planet
+you are standing on and thrown away the moment you land somewhere else. That is correct for a town —
+a town on another planet is not somewhere you can walk to — and completely wrong for a base, which
+is the one thing in the game the player made with their own hands.
+
+So the register of bases lives **above** the world, beside the character, and is saved with them:
+
+```js
+const homes = createHomes(save?.homes);
+homes.add({ id, name, x, z, starId, systemSeed, starName, planetId, planetName, claim });
+homes.forWorld({ systemSeed, planetId })   // → pads for createWaypoints({ built })
+homes.routeTo(id, here)                    // → { step: 'here' | 'land' | 'jump', legs, why }
+```
+
+**A world is two numbers, not one.** Every world uses the same metre grid and the same map size, so
+`planetId` 2 exists in every system. Matching on it alone would fold the player to the right
+coordinates on the wrong planet — which is not a rare accident but the expected case the moment
+somebody builds a second base.
+
+**Three legs, and `routeTo` names which.** `here` is the ordinary waypoint network. `land` flies
+down to another world in this system. `jump` rebuilds the system from the base's own `systemSeed` —
+exactly what `arriveAt` does coming out of warp, because a star *is* its seed — then lands, then
+puts you on the sigil. The clock cost is the ordinary waypoint cost times the number of legs, so
+crossing the galaxy is most of a day and walking home is half of one. A town portal opens behind
+you in all three cases.
+
+The only refusal is mid-jump. Being in space is deliberately allowed: making the player land on some
+unrelated world first so they can stand on a sigil is the opposite of easy.
+
+### On the map
+
+The map's side panel grew a **Your bases** list — every base, wherever it is, with one button each
+(`Travel` or `Fold home`) and the reason greyed out if the grid is down. Waypoint pads on *this*
+world are drawn as sigil discs as before, but clicking one now **selects** it and the panel's button
+is what travels. It used to travel on the click itself, so a misplaced click on a world map cost you
+a day on the road with no way to say no.
+
+`Go here` — teleport to any cell you can see — is now **Settings → Debug → Map "Go here" teleport**,
+on by default at the user's request. The waypoint button never answers to that switch: travelling
+between lit sigils is a game rule, not a cheat.
+
+> **A settlement id is a number, and the first settlement on a world is `0`.** Every `id || null` and
+> every `if (padPick)` in `js/map.js` silently dropped the pad nearest the middle of the map. All the
+> checks there are against `null` on purpose.

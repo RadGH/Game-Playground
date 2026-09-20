@@ -209,6 +209,16 @@ export function createBuild(scene, {
    */
   onClear = null,
   onLog = null,
+  /**
+   * Somebody put a piece down, or took one away: `(entry, def) => void`.
+   *
+   * The one thing this file cannot know is what a piece MEANS. A waypoint pad is a lamp post as far
+   * as geometry goes; it is only a waypoint because js/main.js holds the network and the register of
+   * bases. So the catalogue flag travels out through here and the game decides what to do with it,
+   * which keeps build mode ignorant of star systems and the register ignorant of Three.js.
+   */
+  onPlace = null,
+  onRemove = null,
 } = {}) {
   const book = plan || createBuildPlan({ catalogue, terrain, terraform, store: store || makeBag(), siteOk });
   const rules = catalogue?.rules || {};
@@ -291,6 +301,12 @@ export function createBuild(scene, {
     get selected() { return selected; },
     get radius() { return radius; },
     get lastCheck() { return lastCheck; },
+    /** Where the cursor is on the ground, which is not where the player is standing. */
+    get aimAt() { return { ...aimAt }; },
+    /** Everything standing, for the grid, the storage pools and the base overview. */
+    get entries() { return book.entries; },
+    /** The catalogue row behind a piece, so a caller can read its `power` or `store` block. */
+    defOf(key) { return book.byId(key) || null; },
     get runPoints() { return runPoints; },
 
     /** §4.1 — a build mode you toggle. Nothing below does anything while it is off. */
@@ -369,6 +385,7 @@ export function createBuild(scene, {
       if (def?.flatten) groundChanged(at.x, at.z, Math.max(def.w, def.d));
       addMesh(res.entry);
       log(`${res.entry.name} built.`, 'good');
+      if (onPlace) onPlace(res.entry, def || null);
       return res;
     },
 
@@ -467,6 +484,7 @@ export function createBuild(scene, {
       const res = book.remove(best.e.id);
       if (res.ok) api.forget(best.e.id);
       if (res.ok) log(`${res.entry.name} taken down. ${book.costText(res.refund) || 'Nothing'} recovered.`, 'good');
+      if (res.ok && onRemove) onRemove(res.entry, book.byId(res.entry.key) || null);
       return res;
     },
 
@@ -474,6 +492,9 @@ export function createBuild(scene, {
     undo() {
       const res = book.undo();
       if (res.ok) api.forget(res.entry.id);
+      // an undone waypoint pad has to leave the register too, or the map keeps offering a trip to
+      // somewhere there is no longer a pad
+      if (res.ok && onRemove) onRemove(res.entry, book.byId(res.entry.key) || null);
       return res;
     },
 

@@ -35,6 +35,15 @@ export const DEFAULTS = {
   // the time. The biome and the altitude are player information; the rest is a debug readout.
   coords: false,
   damageNumbers: true,
+  /**
+   * "Go here" — click any cell on the map and be standing on it.
+   *
+   * The user's own words: "Make the current teleport feature a debug option, but keep it enabled by
+   * default for now so I can keep using it." So it defaults ON and sits in its own Debug group,
+   * where turning it off is an explicit choice rather than something to be discovered. The waypoint
+   * network is NOT behind this switch — travelling between lit sigils is a game rule, not a cheat.
+   */
+  debugTeleport: true,
   // D15: only the keys the player actually MOVED live in here — `{ map: 'KeyN' }`. Everything else
   // falls through to `BINDINGS`, so changing a default later reaches anyone who never touched it.
   keys: {},
@@ -147,6 +156,7 @@ const FIELDS = [
   { key: 'sound', label: 'Sound', kind: 'toggle', group: 'Audio' },
   { key: 'voices', label: 'Voices', kind: 'toggle', group: 'Audio' },
   { key: 'volume', label: 'Volume', kind: 'range', min: 0, max: 1, step: 0.05, percent: true, group: 'Audio' },
+  { key: 'debugTeleport', label: 'Map "Go here" teleport', kind: 'toggle', group: 'Debug' },
 ];
 
 /** What a slider's number means. D15: "1" and "0.75" told you nothing about what they measured. */

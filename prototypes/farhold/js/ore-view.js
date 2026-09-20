@@ -95,8 +95,66 @@ export function createOreView(scene, { data = {} } = {}) {
     return m;
   }
 
+  /**
+   * THE HAUL ROUTES, DRAWN ON THE GROUND.
+   *
+   * A route used to be an entry in a panel and nothing else — the ore moved, and the player had no
+   * way to see where it went or why a long one was slow. Now that js/haulpath.js walks a real path
+   * round water and up banks, the path is worth showing: a route that goes twice as far as the crow
+   * flies EXPLAINS ITSELF the moment you look at it.
+   *
+   * One mesh for all of them, rebuilt when the set changes. A few hundred flat markers.
+   */
+  const routeMat = new THREE.MeshBasicMaterial({ color: new THREE.Color('#7fd4ff'), transparent: true, opacity: 0.5 });
+  const routeGeo = new THREE.BoxGeometry(1, 0.06, 1);
+  const routeMesh = new THREE.InstancedMesh(routeGeo, routeMat, 900);
+  routeMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  routeMesh.count = 0;
+  routeMesh.frustumCulled = false;
+  routeMesh.name = 'farhold-routes';
+  root.add(routeMesh);
+  let routeKey = '';
+
   return {
     root,
+    routeMesh,
+
+    /**
+     * `routes` is `mining.overview()`: every row with a `route.points` gets a dotted track.
+     *
+     * The key is what the routes ARE, so walking about does not rebuild them and moving a crate
+     * does. Markers are laid every 4 m along the path rather than one per path point, so the line
+     * reads the same whatever the search grid happened to be.
+     */
+    drawRoutes(rows = [], { heightAt = null } = {}) {
+      const key = rows.map(r => `${r.id}:${r.route?.metres ?? -1}:${r.route?.points?.length ?? 0}`).join('|');
+      if (key === routeKey) return routeMesh.count;
+      routeKey = key;
+
+      let i = 0;
+      for (const row of rows) {
+        const pts = row.route?.points || [];
+        for (let k = 0; k + 1 < pts.length && i < routeMesh.instanceMatrix.count; k++) {
+          const [ax, az] = pts[k], [bx, bz] = pts[k + 1];
+          const len = Math.hypot(bx - ax, bz - az);
+          const steps = Math.max(1, Math.round(len / 4));
+          for (let t = 0; t < steps && i < routeMesh.instanceMatrix.count; t++) {
+            const f = (t + 0.5) / steps;
+            const x = ax + (bx - ax) * f, z = az + (bz - az) * f;
+            dummy.position.set(x, (heightAt ? heightAt(x, z) : 0) + 0.08, z);
+            dummy.rotation.set(0, Math.atan2(bx - ax, bz - az), 0);
+            dummy.scale.set(0.5, 1, 1.8);
+            dummy.updateMatrix();
+            routeMesh.setMatrixAt(i, dummy.matrix);
+            i++;
+          }
+        }
+      }
+      routeMesh.count = i;
+      routeMesh.instanceMatrix.needsUpdate = true;
+      return i;
+    },
+
     /**
      * Put the seams in range on the ground.
      *

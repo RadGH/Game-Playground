@@ -9,7 +9,7 @@
 
 import * as THREE from 'three';
 
-export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person · E talk/open/enter · L light · B build · H horse · G drive · J ship · M map · I sheet · K log · O settings · ` debug';
+export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person (hold: look around) · E talk/open/enter · L light · B build · H horse · G drive · J ship · M map · I sheet · K log · O settings · ` debug';
 
 /** Reads the keyboard and mouse. Pointer lock is optional — dragging works too. */
 export function createInput(dom) {
@@ -114,6 +114,22 @@ export function createController(terrainIn, balance = {}, camera, {
     x: spawn.x, z: spawn.z, y: spawn.height,
     vy: 0, yaw: 0, pitch: -0.18, grounded: true,
     camDistance: 7.5, camDistanceUsed: 7.5, moving: 0, running: false,
+    /**
+     * R14 — FREE LOOK, so you can stand still and look at your own character's face.
+     *
+     *   "Allow holding V in walk mode to cause the camera to change to rotation mode, where mouse
+     *    moves the camera. This is to allow you to get a front view look at your character. The
+     *    camera should stick that way until you move your mouse again."
+     *
+     * Normally the mouse moves `yaw`/`pitch`, which turn the BODY and drag the camera along behind
+     * it — so there is no way to see the character from the front, ever. These are an OFFSET added
+     * to the camera's angles and to nothing else: the body keeps facing `yaw`, walking still goes
+     * where the body is pointed, and aiming is still aiming.
+     *
+     * `freeLook` stays true after V comes back up, which is the "sticks that way" half. The first
+     * mouse movement after that zeroes the offset and hands control back.
+     */
+    freeLook: false, freeYaw: 0, freePitch: 0,
     attackCooldown: 0, swing: 0,
     /**
      * DUAL WIELDING: each hand has its own clock and its own place in its weapon's pattern.
@@ -198,10 +214,27 @@ export function createController(terrainIn, balance = {}, camera, {
     if (input) {
       const sens = opt('sensitivity', 1);
       const invert = opt('invertY', false) ? 1 : -1;
-      self.yaw -= input.look[0] * 0.0026 * sens;
-      // positive pitch looks up. The old ceiling of 0.75 rad stopped you seeing the sky directly
-      // overhead, which is the point of being on a planet with a system above it.
-      self.pitch = Math.max(-1.25, Math.min(1.45, self.pitch + input.look[1] * 0.0022 * sens * invert));
+      /**
+       * R14: hold V and the mouse swings the camera round the character rather than turning them.
+       * First person is excluded — there is no camera to orbit when it is inside the head — and so
+       * is anything that has frozen the controls.
+       */
+      const orbiting = !frozen && !self.firstPerson && !!input.keys?.has('KeyV');
+      const stirred = input.look[0] !== 0 || input.look[1] !== 0;
+      if (orbiting) {
+        self.freeLook = true;
+        self.freeYaw -= input.look[0] * 0.0026 * sens;
+        self.freePitch = Math.max(-1.0, Math.min(1.1, self.freePitch + input.look[1] * 0.0022 * sens * invert));
+      } else {
+        // V is up. The camera holds where it was left until the mouse actually moves again.
+        if (self.freeLook && stirred) { self.freeLook = false; self.freeYaw = 0; self.freePitch = 0; }
+        if (!self.freeLook) {
+          self.yaw -= input.look[0] * 0.0026 * sens;
+          // positive pitch looks up. The old ceiling of 0.75 rad stopped you seeing the sky directly
+          // overhead, which is the point of being on a planet with a system above it.
+          self.pitch = Math.max(-1.25, Math.min(1.45, self.pitch + input.look[1] * 0.0022 * sens * invert));
+        }
+      }
       // H mounts and dismounts — but you cannot ride while swimming
       if (!frozen && input.pressed?.has('KeyH') && !self.swimming) {
         self.mounted = !self.mounted;
@@ -379,10 +412,17 @@ export function createController(terrainIn, balance = {}, camera, {
     // the direction you are looking never changes — you can put your back to a hill and still see
     // straight up into space. It is then nudged over the character's shoulder so the body does not
     // sit in the middle of the screen.
-    const cp = Math.cos(self.pitch);
-    const lookX = Math.sin(self.yaw) * cp;
-    const lookY = Math.sin(self.pitch);
-    const lookZ = Math.cos(self.yaw) * cp;
+    /**
+     * R14: the camera looks along yaw+freeYaw. With free look off both offsets are zero and this is
+     * exactly what it was. `self.yaw` itself is untouched, which is what keeps the body facing
+     * forward while you walk round it.
+     */
+    const camYaw = self.yaw + (self.freeLook ? self.freeYaw : 0);
+    const camPitch = Math.max(-1.25, Math.min(1.45, self.pitch + (self.freeLook ? self.freePitch : 0)));
+    const cp = Math.cos(camPitch);
+    const lookX = Math.sin(camYaw) * cp;
+    const lookY = Math.sin(camPitch);
+    const lookZ = Math.cos(camYaw) * cp;
     const headY = self.y + (self.mounted ? 2.35 : 1.55);
 
     // FIRST PERSON: the camera sits at the eye instead of behind the body. `eyeAt` is filled in by
@@ -428,6 +468,8 @@ export function createController(terrainIn, balance = {}, camera, {
 
   /** Drop the player somewhere else on the planet (used by the map and the tests). */
   function teleport(x, z) {
+    // R14: a camera swung round behind you is not something to carry across a teleport
+    self.freeLook = false; self.freeYaw = 0; self.freePitch = 0;
     [self.x, self.z] = terrain.clampToWorld(x, z);
     self.y = terrain.heightAt(self.x, self.z);
     self.vy = 0; self.grounded = true; self.swimming = false;

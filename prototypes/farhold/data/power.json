@@ -72,6 +72,15 @@
   },
 
   "_haulerDoc": "What moves goods between pools that do not touch (§8.3). Throughput is worked out in js/stores.js the same way the node trade-off is: capacity over the round trip, so doubling the distance halves the delivery and nobody has to be told that twice.",
+  "_travelDoc": "Round 14 — how long goods take to cross the gap between two storage pools. js/logistics.js reads this. Inside one pool nothing moves at all and nothing here applies; that is still js/stores.js's rule and it is still free.\n\n  roadFactor  how many times quicker a made road is than open ground. Applied in proportion to how much of the walked route actually runs on one, so a track laid the whole way is the full speed-up and half a track is half of it. This is the number that makes the Road tool worth the stone.\n  minSeconds  nothing ever arrives faster than this, so a twelve-metre hop is still a trip.\n  maxMetres   past this there is no route worth running and the delivery is refused with a sentence telling you to put a store in between.\n  batch       a standing order ships when the source pool holds at least this much of something.\n  loadCap     and never more than this in one go, because a hauler has a back.",
+  "travel": {
+    "roadFactor": 2.6,
+    "minSeconds": 5,
+    "maxMetres": 4000,
+    "batch": 20,
+    "loadCap": 200
+  },
+
   "haulers": {
     "hand_cart": { "name": "Hand Cart", "capacity": 160, "speed": 3.4, "loadSeconds": 12, "powerUse": 0, "build": { "plank": 12, "iron_ingot": 4, "rope": 2 } },
     "pack_mule": { "name": "Pack Mule", "capacity": 260, "speed": 4.0, "loadSeconds": 16, "powerUse": 0, "upkeep": { "grain": 0.01 }, "build": {} },

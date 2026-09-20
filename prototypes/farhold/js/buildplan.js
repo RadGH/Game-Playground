@@ -9,7 +9,8 @@
 //     structural simulation": a piece needs ground under it, and that is the whole model);
 //   * a piece you cannot afford is refused with a sentence saying what you are short of (§4.4);
 //   * deconstruct gives most of it back (§4.7) and undo takes the last one away (§4.9);
-//   * a claim is a real boundary (§4.10), and exactly one waypoint may stand in it (§5.9).
+//   * one waypoint may stand in one outpost (§5.9) — and since round 14 that is the ONLY thing left
+//     that a group of buildings gates. There is no claim to be inside of any more; see `check`.
 //
 //   import { createBuildPlan, makeBag } from './buildplan.js';
 //   const plan = createBuildPlan({ catalogue, terrain, terraform, store: makeBag({ timber: 40 }) });
@@ -19,7 +20,80 @@
 // The catalogue is `data/structures.json`. The caller loads the JSON and passes it in, because a
 // browser and `node --test` fetch a file in two different ways and neither belongs in here.
 
+import { groupOutposts } from './outposts.js';
+import { levelUnderSlab } from './roadplan.js';
+
 const TAU = Math.PI * 2;
+
+/**
+ * THE CATALOGUE'S SHORT NAMES ARE THE SAME THINGS AS THE MATERIALS, AND NOTHING SAID SO.
+ *
+ * `data/structures.json` says it in its own header, and then it was left: *"the ids in `cost` are a
+ * CONTRACT, not an inventory. §1 (gathering) and §2 (refining) belong to another part of this
+ * expansion and will decide where `iron` or `plank` actually comes from."* They did decide — and
+ * they decided on `iron_ingot`, `log`, `cut_stone`, `machine_part`. Nobody ever went back and
+ * joined the two vocabularies, so a palisade cost 6 `timber` and **nothing in the game has ever
+ * produced a single unit of anything called `timber`.** Twenty-two pieces of the catalogue were
+ * unbuildable by any honest route, which is the thirteenth join of this kind and the one that makes
+ * felling a tree pointless: you get logs and the fence wants timber.
+ *
+ * One table, applied once when a cost is read, so the catalogue keeps its readable short names and
+ * the rest of the game keeps its precise ones. `costText` prints the catalogue's word, because
+ * "6 timber" is what a fence is made of however the bag spells it.
+ */
+export const MATERIAL_ALIASES = {
+  timber: 'log',
+  iron: 'iron_ingot',
+  copper: 'copper_ingot',
+  steel: 'steel_ingot',
+  alloy: 'bronze_ingot',
+  block: 'cut_stone',
+  crystal: 'crystal_raw',
+  parts: 'machine_part',
+  salvage: 'salvage_metal',
+  fuel: 'lift_fuel',
+};
+
+/** A cost in the catalogue's words, translated into the words the storage pools use. */
+export function realCost(cost) {
+  const out = {};
+  for (const [k, n] of Object.entries(cost || {})) {
+    const id = MATERIAL_ALIASES[k] || k;
+    out[id] = (out[id] || 0) + n;
+  }
+  return out;
+}
+
+/** The material id a catalogue cost line actually spends. */
+export const realMaterial = id => MATERIAL_ALIASES[id] || id;
+
+/**
+ * Translate a whole catalogue ONCE, at load, so there is one vocabulary from there on.
+ *
+ * `realCost` is idempotent — `log` is not a key in the alias table — so a catalogue that has been
+ * through here can still be handed to `createBuildPlan` safely, and a raw one straight off disk
+ * still works because the plan translates again. The names table gains an entry per translated id
+ * so every screen can still print "6 timber" rather than "6 log": a fence is made of timber
+ * whatever the storage pool calls it.
+ *
+ *   const catalogue = alignCatalogue(structureData, resourceData);
+ */
+export function alignCatalogue(catalogue, resources = null) {
+  if (!catalogue?.structures) return catalogue;
+  const names = { ...(catalogue.materials || {}) };
+  for (const [short, real] of Object.entries(MATERIAL_ALIASES)) {
+    if (!names[real]) names[real] = { ...(names[short] || {}), name: names[short]?.name || real.replace(/_/g, ' ') };
+  }
+  // …and anything the catalogue spends that it never named gets the resource file's own word
+  for (const [id, m] of Object.entries(resources?.materials || {})) {
+    if (!names[id]) names[id] = { name: m.name, tier: m.tier };
+  }
+  return {
+    ...catalogue,
+    materials: names,
+    structures: catalogue.structures.map(st => (st.cost ? { ...st, cost: realCost(st.cost) } : st)),
+  };
+}
 
 /** Every material cost in the game is a plain `{ id: count }` map; these three do the arithmetic. */
 export function addCost(into, cost, times = 1) {
@@ -138,10 +212,19 @@ export function createBuildPlan({
     return null;
   }
 
+  /**
+   * A group for the piece you just put down, because it was not near any existing one.
+   *
+   * This used to be the thing a Claim Stone bought you. It is now free and automatic: build a drill
+   * and a crate on a seam a kilometre from home and you have an outpost, because that is what the
+   * word means. The `claim` id it hands out is still called a claim in the save file — an old save
+   * has to keep loading, and the terrain brushes, the waypoint register and js/defence.js all file
+   * against that id — but everything the player ever reads calls it an outpost.
+   */
   function newClaim(x, z, name = null) {
     const c = {
       id: 'cl' + (nextClaim++), x, z, radius: claimRadius,
-      name: name || 'Camp ' + nextClaim,
+      name: name || 'Outpost ' + (nextClaim - 1),
     };
     claims.push(c);
     return c;
@@ -164,9 +247,16 @@ export function createBuildPlan({
     return { y: base, gap: worst };
   }
 
-  /** The bill for one piece, and what the store is short of. */
+  /**
+   * The bill for one piece, and what the store is short of.
+   *
+   * `cost` comes back in the MATERIALS' own ids, not the catalogue's short names — see
+   * `MATERIAL_ALIASES` — because everything that pays it (the storage pools, the bag, the refunds)
+   * speaks that vocabulary and there is no good place further down to translate. `costText` turns
+   * it back into words for the screen.
+   */
   function billFor(def, times = 1) {
-    const cost = scaleCost(def.cost || {}, times) ;
+    const cost = realCost(scaleCost(def.cost || {}, times));
     const missing = {};
     for (const [k, n] of Object.entries(cost)) {
       const short = n - bank.have(k);
@@ -175,11 +265,20 @@ export function createBuildPlan({
     return { cost, missing, short: Object.keys(missing).length > 0 };
   }
 
-  /** "6 timber, 2 iron" — for the ghost's cost line and for the refusal sentence. */
+  /**
+   * "6 log, 2 iron ingot" — for the ghost's cost line and for the refusal sentence.
+   *
+   * Reads BOTH vocabularies, because a bill is in material ids and a catalogue row is in the
+   * catalogue's short names, and this one function prints both.
+   */
   function costText(cost) {
     const names = catalogue?.materials || {};
+    const resources = catalogue?.resourceNames || {};
     return Object.entries(cost)
-      .map(([k, n]) => `${n} ${(names[k]?.name || k).toLowerCase()}`)
+      .map(([k, n]) => {
+        const word = names[k]?.name || resources[k]?.name || k.replace(/_/g, ' ');
+        return `${n} ${word.toLowerCase()}`;
+      })
       .join(', ');
   }
 
@@ -240,8 +339,17 @@ export function createBuildPlan({
 
       if (terrain?.waterAt && terrain.waterAt(x, z)) { out.why = 'You cannot build on water.'; return out; }
 
-      // A piece that flattens its own ground is allowed to land on a slope — that is what it is for.
-      const flattens = !!def.flatten;
+      /**
+       * A piece that flattens its own ground is allowed to land on a slope — that is what it is for.
+       *
+       * Round 14 adds the second half of that sentence: **anything flat is a tile, and a tile levels
+       * under itself.** *"Maybe these tiles and slabs just need to level the ground beneath them
+       * automatically, though IDK how to handle slopes."* A rug, a flower bed, a patch of caltrops
+       * and a paving square are all 10 cm tall, all sat on the height of their own middle, and all
+       * poked a corner through the hill on anything but a billiard table. They now level to the mean
+       * height under the footprint and skirt out to the ground around them — see `slabLevel` below.
+       */
+      const flattens = !!def.flatten || def.h <= 0.3;
       if (!flattens) {
         const maxSlope = def.slope ?? defaultSlope;
         if (steepness(x, z) > maxSlope) { out.why = 'The ground is too steep here — level it first.'; return out; }
@@ -265,13 +373,33 @@ export function createBuildPlan({
 
       const claim = claimAt(x, z);
       if (def.waypoint && claim && entries.some(e => e.waypoint && e.claim === claim.id)) {
-        out.why = 'This claim already has a waypoint. One per base.';       // §5.9
+        out.why = 'This outpost already has a waypoint. One per base.';     // §5.9
         return out;
       }
-      if (!claim && !def.claims && entries.length > 0) {
-        out.why = 'That is outside your claim. Put down a claim stone first.';
-        return out;
-      }
+
+      /**
+       * ROUND 14 — THE CLAIM GATE IS GONE. THIS IS WHERE IT USED TO BE.
+       *
+       * It read:
+       *
+       *     if (!claim && !def.claims && entries.length > 0) {
+       *       out.why = 'That is outside your claim. Put down a claim stone first.';
+       *
+       * …and it was a genuine deadlock, reported exactly as one: *"I can't build a claim stone
+       * because it requires 2 iron ingots. I can't refine iron without a furnace. I can't build a
+       * furnace without a claim stone."* Every one of those three sentences was true. The first
+       * thing you ever build stakes a claim for free, so your FIRST furnace was fine — but the
+       * moment you wanted a second site, the only key to it cost two ingots you could only make at a
+       * machine you were no longer allowed to place.
+       *
+       * The answer is not a cheaper stone. It is the user's own: *"I don't really want to have claim
+       * stones and would rather just allow building arbitrarily anywhere."* So every rule about the
+       * WORLD is kept — not on water, not on a slope, not inside something else, on the right ground
+       * for the machine — and the one rule about paperwork is deleted. A claim is now only a
+       * bookkeeping group: it exists so the reshaping allowance and the terrain brushes have
+       * something to be filed against, it is made for you wherever you build, and nothing anywhere
+       * asks you to buy one. js/outposts.js works out what the groups MEAN from the geometry.
+       */
 
       if (bill.short) { out.why = `You are short of ${costText(bill.missing)}.`; return out; }
 
@@ -301,14 +429,24 @@ export function createBuildPlan({
        * footing rule above becomes true by construction rather than by hoping the player levelled
        * enough. The brush is filed against this claim so razing the base puts the hillside back.
        */
-      if (def.flatten && terraform) {
-        const h = ground(x, z);
-        if (def.flatten === 'strip') {
-          terraform.slab({ x, z, w: def.w, d: def.d, rot, h, claim: claim.id });
-        } else if (def.flatten === 'pit') {
+      /**
+       * ROUND 14 — LEVEL TO THE AVERAGE, NOT TO THE MIDDLE.
+       *
+       * This used to take `ground(x, z)` — the height at the piece's own centre — and flatten the
+       * whole footprint to it. On flat ground that is right and on a slope it is exactly the "tiles
+       * clip through the terrain" complaint: a 6 m paving square laid across a one-in-six bank has
+       * corners half a metre above and half a metre below the height it chose, so one corner floats
+       * and the opposite one is buried. `levelUnderSlab` in js/roadplan.js samples the four corners
+       * AND the middle, levels to the mean, and sizes the skirt by how far the ground was falling —
+       * so half the slab is a shallow cut, half a shallow fill, and the edge eases out to the
+       * hillside instead of ending in a step.
+       */
+      if (terraform && (def.flatten || def.h <= 0.3)) {
+        if (def.flatten === 'pit') {
           terraform.lower({ x, z, r: Math.max(def.w, def.d) / 2, amount: 2.4, claim: claim.id });
         } else {
-          terraform.slab({ x, z, w: def.w + 0.6, d: def.d + 0.6, rot, h, claim: claim.id });
+          levelUnderSlab({ x, z, w: def.w + (def.flatten === 'strip' ? 0 : 0.6), d: def.d + (def.flatten === 'strip' ? 0 : 0.6), rot },
+            { terrain: { heightAt: ground }, terraform, claim: claim.id });
         }
       }
 
@@ -326,7 +464,20 @@ export function createBuildPlan({
         powered: !def.power?.use,          // a machine is dark until the grid reaches it
       };
       entries.push(entry);
-      if (def.claims) { claim.x = x; claim.z = z; claim.stone = entry.id; }
+      /**
+       * A CLAIM STONE IS A SIGNPOST NOW, NOT A PERMIT.
+       *
+       * It is kept in the catalogue on purpose rather than deleted — an old save may have one
+       * standing, js/defence.js finds the middle of a base by looking for one, and it is a
+       * perfectly good thing to put in the middle of a camp. What it does is move the group's
+       * centre to itself and carry a NAME, which js/outposts.js reads so an outpost you cared
+       * enough about to mark is called something other than "Mine 3".
+       */
+      if (def.claims) {
+        claim.x = x; claim.z = z; claim.stone = entry.id;
+        if (name) claim.name = name;
+        entry.outpostName = claim.name;
+      }
       return { ok: true, entry, claim, cost: test.cost };
     },
 
@@ -337,7 +488,9 @@ export function createBuildPlan({
       const entry = entries[i];
       const def = byId.get(entry.key);
       entries.splice(i, 1);
-      const back = scaleCost(def?.cost || {}, refund);
+      // in material ids, like the bill — a refund of "timber" would put a word nothing spends
+      // back into the pool, and the player would watch their logs disappear into a phantom
+      const back = realCost(scaleCost(def?.cost || {}, refund));
       bank.give(back);
       return { ok: true, entry, refund: back };
     },
@@ -349,7 +502,7 @@ export function createBuildPlan({
       if (entries.length > undoDepth + 200) return { ok: false, why: 'Too long ago.' };
       const def = byId.get(entry.key);
       entries.pop();
-      bank.give(def?.cost || {});                    // undo is a full refund; deconstruct is not
+      bank.give(realCost(def?.cost || {}));          // undo is a full refund; deconstruct is not
       return { ok: true, entry };
     },
 
@@ -416,7 +569,7 @@ export function createBuildPlan({
     /** Total bill for a blueprint, so the player can be told before they stamp it. */
     billFor(blueprint) {
       const total = {};
-      for (const p of blueprint?.pieces || []) addCost(total, byId.get(p.key)?.cost || {});
+      for (const p of blueprint?.pieces || []) addCost(total, realCost(byId.get(p.key)?.cost || {}));
       return total;
     },
 
@@ -439,6 +592,42 @@ export function createBuildPlan({
         });
       }
       return out;
+    },
+
+    /**
+     * §4.4 — the bill for `times` of something, without placing it.
+     *
+     * The road tool needs this: a lane is priced by the metre, so it has to ask what 62 m of gravel
+     * costs and whether the pool covers it BEFORE it starts painting ground. `pay` and `refund` are
+     * the other two thirds of the same job — the store is private to this module on purpose, so
+     * anything that spends has to come through here and there is one place where a bill is checked
+     * against a purse.
+     */
+    quote(id, times = 1) {
+      const def = byId.get(id);
+      if (!def) return { ok: false, why: 'No such structure.' };
+      const bill = billFor(def, times);
+      return {
+        ok: !bill.short, def, times,
+        cost: bill.cost, missing: bill.missing,
+        text: costText(bill.cost),
+        why: bill.short ? `You are short of ${costText(bill.missing)}.` : '',
+      };
+    },
+    pay(cost) { return bank.take(cost); },
+    refundOf(cost, fraction = refund) { return scaleCost(cost, fraction); },
+    giveBack(cost) { bank.give(cost); return cost; },
+
+    /**
+     * Round 14 — the groups, worked out from the geometry rather than declared.
+     *
+     * Delegated to js/outposts.js so the clustering can be tested on its own and so this file does
+     * not grow a second idea of what a base is. `lanes` is a js/roadplan.js book's lanes, because a
+     * road you laid between two clusters says they are one holding.
+     */
+    outposts({ lanes = [], gap } = {}) {
+      const names = Object.fromEntries(claims.map(c => [c.id, c.name]));
+      return groupOutposts(entries, { lanes, gap, defOf: k => byId.get(k) || null, names });
     },
 
     /** Everything in one claim, for a raid to path at and for the base overview panel. */

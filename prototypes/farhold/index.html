@@ -135,6 +135,20 @@
   <canvas id="minimap" width="180" height="180"></canvas>
   <div id="hud-scale" class="small dim"></div>
   <div id="hud-where"></div>
+  <!--
+    R14 — "Add a 'Nearby Activities' area below the minimap when walking around… It should show
+    what nearby activities are available including the ones that pop up in chat or have a location
+    nearby." Filled by js/nearby-ui.js from js/nearby.js; hidden when there is nothing in it.
+  -->
+  <div id="nearby" class="hud-card hidden">
+    <div class="nb-head" id="nearby-head">
+      <span class="nb-title">Nearby</span>
+      <span class="nb-count" id="nearby-count"></span>
+      <span class="nb-caret" id="nearby-caret">▾</span>
+    </div>
+    <div class="nb-rows" id="nearby-rows"></div>
+    <div class="nb-more small dim" id="nearby-more"></div>
+  </div>
 </div>
 <div id="skillbar" class="hud"></div>
 
@@ -250,13 +264,6 @@
         </div>
         <div class="pane-body flush"><div class="slot-grid doll" id="sheet-slots"></div></div>
       </section>
-      <section class="pane fixed" id="sheet-attr-pane">
-        <div class="pane-head">
-          <span class="pane-title">Attributes</span>
-          <span class="pane-meta" id="sheet-points"></span>
-        </div>
-        <div class="pane-body"><div id="sheet-attrs"></div></div>
-      </section>
     </div>
 
     <section class="pane col-stats" id="sheet-stat-pane">
@@ -268,6 +275,14 @@
         </span>
       </div>
       <div class="pane-body" id="sheet-stat-body">
+        <!--
+          R14: attributes moved off the Character screen and into Stats, where they are a readout
+          rather than a shop. "Remove attributes from the Character screen, but keep them under
+          stats. STR/DEX/INT/CON can still be used but is instead gained through perks." The four
+          `+` buttons that used to sit beside them had been dead since round 7 — the perk forest
+          replaced point-buy and `player.pendingAttr` has not been incremented by anything since.
+        -->
+        <h4>Attributes</h4><dl class="stats" id="sheet-stats-attrs"></dl>
         <h4>Offence</h4><dl class="stats" id="sheet-stats-offence"></dl>
         <h4>Defence</h4><dl class="stats" id="sheet-stats-defence"></dl>
         <h4>Everything else</h4><dl class="stats" id="sheet-stats-utility"></dl>
@@ -516,7 +531,17 @@
           <span class="pane-title">The world</span>
           <span class="pane-meta" id="journal-zone-count"></span>
         </div>
-        <div class="pane-body tight"><div id="sheet-zones" class="zonelist"></div></div>
+        <div class="pane-body tight">
+          <div id="sheet-zones" class="zonelist"></div>
+          <!--
+            R14: "Add the ability to store locations and view them in a list, with a checkbox to
+            toggle whether the location is highlighted on the map with a star." It lives in the
+            world column because that is the column about where things are; the star is the
+            checkbox, and ⌖ takes you there.
+          -->
+          <div class="divider">Places you keep</div>
+          <div id="journal-saved" class="journal"></div>
+        </div>
       </section>
     </div>
   </div>

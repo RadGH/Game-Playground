@@ -16,7 +16,8 @@
 // city → capital). They have no people in them: NPCs, shops and interiors are phase 4.
 
 import * as THREE from 'three';
-import { BUILDING_INFO } from './town-plan.js';
+import { BUILDING_INFO, streetLanes } from './town-plan.js';
+import { laneRibbon } from './roadplan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { padSpotFor, boardSpotFor } from './waypoints.js';
 import {
@@ -403,7 +404,29 @@ export function createFeatures(scene, terrain, opts = {}) {
   const roadMat = new THREE.MeshLambertMaterial({ color: new THREE.Color('#6b5c49') });
   const riverMesh = new THREE.Mesh(new THREE.BufferGeometry(), waterMat);
   const roadMesh = new THREE.Mesh(new THREE.BufferGeometry(), roadMat);
-  for (const m of [riverMesh, roadMesh]) { m.frustumCulled = false; m.name = 'farhold-' + (m === riverMesh ? 'rivers' : 'roads'); scene.add(m); }
+  /**
+   * ROUND 14 — every street of every town in one mesh, with the culture's colour on the vertices.
+   *
+   * A street used to be an instance of the `street` box. It is a ribbon now (see `js/roadplan.js`),
+   * and a ribbon is geometry rather than a transform — so the colour cannot ride on the instance and
+   * has to ride on the vertices instead. One mesh for the lot, rebuilt with the settlements.
+   */
+  const streetMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const streetMesh = new THREE.Mesh(new THREE.BufferGeometry(), streetMat);
+  for (const m of [riverMesh, roadMesh, streetMesh]) {
+    m.frustumCulled = false;
+    m.name = 'farhold-' + (m === riverMesh ? 'rivers' : m === roadMesh ? 'roads' : 'streets');
+    scene.add(m);
+  }
+
+  /** Append one ribbon's triangles to a growing buffer, offsetting its indices. */
+  function pushRibbon(into, part) {
+    const base = into.position.length / 3;
+    into.position.push(...part.position);
+    into.normal.push(...part.normal);
+    if (part.color) into.color.push(...part.color);
+    for (const i of part.index) into.index.push(i + base);
+  }
 
   const instanced = {};
   for (const key of BUILDING_KEYS) {
@@ -523,8 +546,47 @@ export function createFeatures(scene, terrain, opts = {}) {
     }
   }
 
+  /**
+   * WHERE THE WORLD'S ROADS REACH A TOWN.
+   *
+   * *"…can they be interconnected somehow and actually connect to the real roads passing through
+   * towns?"* They could not, because the two systems had never been introduced: `planTown` was
+   * handed the ground and the culture and told nothing at all about the inter-town route running
+   * past the door. The route's own polyline is right here — it is the same one `buildRibbons`
+   * draws — so the crossings are a walk down it looking for the step from outside the ring to
+   * inside, interpolated to the exact metre.
+   *
+   * Returned in the TOWN'S coordinates, because that is what the planner works in.
+   */
+  function roadLinksFor(cx, cz, ring) {
+    const out = [];
+    for (const r of roads) {
+      const pts = r.points;
+      if (!pts || pts.length < 2) continue;
+      let wasIn = Math.hypot(pts[0][0] - cx, pts[0][1] - cz) <= ring;
+      for (let i = 1; i < pts.length; i++) {
+        const d = Math.hypot(pts[i][0] - cx, pts[i][1] - cz);
+        const isIn = d <= ring;
+        if (isIn !== wasIn) {
+          // linear crossing between the two samples: close enough at a road's sample spacing
+          const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
+          const da = Math.hypot(ax - cx, az - cz), db = Math.hypot(bx - cx, bz - cz);
+          const t = Math.abs(db - da) < 1e-6 ? 0.5 : (ring - da) / (db - da);
+          const x = ax + (bx - ax) * t, z = az + (bz - az) * t;
+          // a road that grazes the ring crosses twice within a few metres; one high street is enough
+          if (!out.some(([ox, oz]) => Math.hypot(ox - (x - cx), oz - (z - cz)) < 10)) {
+            out.push([x - cx, z - cz]);
+          }
+        }
+        wasIn = isIn;
+        if (out.length >= 4) return out;             // four gates is as many as a town ever needs
+      }
+    }
+    return out;
+  }
+
   /** Lay out one settlement: a well in the middle, houses around it, walls if it is big enough. */
-  function buildSettlement(node, counts, px = 0, pz = 0) {
+  function buildSettlement(node, counts, px = 0, pz = 0, streets = null) {
     const rng = makeRng((seed ^ (node.id * 2654435761)) >>> 0);
     const size = node.size || 1;
     const ring = 16 + size * 13;                     // metres from the centre to the outer houses
@@ -609,6 +671,13 @@ export function createFeatures(scene, terrain, opts = {}) {
       seed: (seed ^ (node.id * 2654435761)) >>> 0,
       size,
       culture,
+      /**
+       * The high streets: where the world road arrives, so the town's own plan grows out to meet it
+       * instead of stopping dead at the wall. `planTown` also runs a connectivity pass now, which
+       * is the other half of "random flat rectangles" — paving with no road attached to it is
+       * dropped rather than drawn.
+       */
+      links: roadLinksFor(cx, cz, ring),
       // the real ground, so "follows the terrain" means this hillside and not a stand-in
       heightAt: (lx, lz) => terrain.heightAt(cx + lx, cz + lz),
       /**
@@ -647,55 +716,40 @@ export function createFeatures(scene, terrain, opts = {}) {
     const townSeed = (seed ^ (node.id * 2654435761)) >>> 0;
 
     /**
-     * Lay the street surface along each polyline.
+     * ROUND 14 — A STREET IS A LANE, NOT A ROW OF TILES.
      *
-     * The slab runs along +Z like every other placed body, so each span is dropped at its midpoint,
-     * turned to the span's own bearing and stretched to its length — which is also what stops the
-     * alleys clipping under the ground, because every slab now sits on the height of the span it
-     * covers rather than on the height of the town centre.
-     */
-    /**
-     * A PAD AT EVERY CORNER AND EVERY END.
+     *   "Is it possible for the road tool under the build menu, as well as the side streets used in
+     *    some town generators, use the same road network as the main road infrastructure? … The
+     *    tiles in town clip through the terrain. It would be better if they behaved like the regular
+     *    roads, which we've worked on to get smooth on the terrain."
      *
-     * "Roads do not connect smoothly, and two roads coming together at an angle have a sharp edge."
-     * They do, because a street is a row of rectangles laid along its own bearing: where two streets
-     * meet at an angle, each stops with a square end and the wedge between them is bare ground. A
-     * square pad the width of the street, dropped at every vertex and every endpoint, fills that
-     * wedge whatever the angle — the same trick a real junction uses, which is to pave the whole
-     * corner rather than to mitre two kerbs together.
+     * What was here laid a white slab every three metres along each street, each one turned to its
+     * span's bearing and sitting on the ground height at its OWN midpoint, plus a square pad on
+     * every junction to fill the wedge where two bearings met. That is two rounds of patches on the
+     * wrong model: on a slope consecutive slabs still step past each other and the seams open, and a
+     * flat slab on sloped ground puts a corner under the surface.
+     *
+     * `streetLanes` resamples each street at three metres, rounds its corners in the PLAN and grades
+     * its heights; `laneRibbon` draws it as one continuous strip whose quads share their vertices —
+     * so a seam is not a thing that can happen and a junction needs no pad. The same two functions
+     * draw the roads between towns and the roads the player lays in build mode, which is the whole
+     * of what was asked for: one road network, one way of meeting the ground.
+     *
+     * It deliberately does NOT reshape the ground. `features.js` has no terraform book, and painting
+     * brushes from here would write a permanent terrain edit into the save every time a settlement
+     * was rebuilt — they accumulate, and a town you walked past forty times would carry forty copies
+     * of its own streets. A street lane grades with two smoothing passes instead of the world roads'
+     * four: it follows the hillside rather than cutting into it, which is the right answer when
+     * nothing is going to carve the hill for it.
      */
-    for (const st of plan.streets) {
-      for (const [px, pz] of st.pts) {
-        const [jx, jz] = toWorld(px, pz);
-        if (terrain.underwater(jx, jz) || terrain.riverAt(jx, jz) > 0.3) continue;
-        place('street', jx, jz, 0, [st.width / 3.4, 1, st.width / 6], 0.22, null,
-          { tint: cultKit.street.colour });
-      }
-      for (let i = 0; i < st.pts.length - 1; i++) {
-        const [ax, az] = toWorld(st.pts[i][0], st.pts[i][1]);
-        const [bx, bz] = toWorld(st.pts[i + 1][0], st.pts[i + 1][1]);
-        const run = Math.hypot(bx - ax, bz - az);
-        /**
-         * SHORT STEPS AND A REAL OVERLAP, or a street is a row of loose tiles.
-         *
-         * Each slab sits on the ground height at its own midpoint, so on any slope consecutive
-         * slabs step past each other and the seams open — "a lot of weird flat rectangles on the
-         * floor". Halving the step and overlapping by a third closes them, and costs only instances
-         * of a mesh that is already instanced.
-         */
-        const steps = Math.max(1, Math.round(run / 3));
-        for (let k = 0; k < steps; k++) {
-          const t0 = k / steps, t1 = (k + 1) / steps;
-          const x0 = ax + (bx - ax) * t0, z0 = az + (bz - az) * t0;
-          const x1 = ax + (bx - ax) * t1, z1 = az + (bz - az) * t1;
-          const mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
-          if (terrain.underwater(mx, mz)) continue;
-          if (terrain.riverAt(mx, mz) > 0.3) continue;
-          const len = Math.hypot(x1 - x0, z1 - z0);
-          // cobble / flag / root-path / bone / sand: section 6.7, and the cheapest way there is
-          place('street', mx, mz, Math.atan2(x1 - x0, z1 - z0),
-            [st.width / 3.4, 1, len / 6 * 1.34], 0.22, null, { tint: cultKit.street.colour });
-        }
+    if (streets) {
+      const tint = new THREE.Color(cultKit.street.colour);
+      for (const lane of streetLanes(plan, {
+        cx, cz, terrain,
+        // a street stops at the water and picks up on the far side, as a road does at a sea lane
+        skip: (x, z) => terrain.underwater(x, z) || terrain.riverAt(x, z) > 0.3,
+      })) {
+        pushRibbon(streets, laneRibbon(lane, { lift: 0.12, color: [tint.r, tint.g, tint.b] }));
       }
     }
 
@@ -943,10 +997,12 @@ export function createFeatures(scene, terrain, opts = {}) {
     const counts = {};
     for (const key of BUILDING_KEYS) counts[key] = 0;
     solids.clear();
+    // ROUND 14: every town's streets go into one ribbon buffer — see buildSettlement
+    const streets = { position: [], normal: [], color: [], index: [] };
 
     for (const node of settlements) {
       if (Math.hypot(node.wx - px, node.wz - pz) > radius) continue;
-      buildSettlement(node, counts, px, pz);
+      buildSettlement(node, counts, px, pz, streets);
     }
     for (const b of bridges) {
       if (Math.hypot(b.x - px, b.z - pz) > radius) continue;
@@ -973,6 +1029,18 @@ export function createFeatures(scene, terrain, opts = {}) {
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
+
+    // the streets, as one ribbon mesh
+    streetMesh.geometry.dispose();
+    const sg = new THREE.BufferGeometry();
+    if (streets.position.length) {
+      sg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(streets.position), 3));
+      sg.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(streets.normal), 3));
+      sg.setAttribute('color', new THREE.BufferAttribute(new Float32Array(streets.color), 3));
+      sg.setIndex(streets.index);
+    }
+    streetMesh.geometry = sg;
+    streetMesh.visible = visible && streets.position.length > 0;
   }
 
   function rebuild(px, pz) {
@@ -982,7 +1050,7 @@ export function createFeatures(scene, terrain, opts = {}) {
   }
 
   return {
-    rivers, roads, bridges, settlements, instanced, riverMesh, roadMesh, solids,
+    rivers, roads, bridges, settlements, instanced, riverMesh, roadMesh, streetMesh, solids,
 
     update(x, z, force = false) {
       if (!force && Math.hypot(x - centre[0], z - centre[1]) < refreshEvery) return false;
@@ -1051,7 +1119,7 @@ export function createFeatures(scene, terrain, opts = {}) {
         const m = instanced[key];
         scene.remove(m); m.geometry.dispose(); m.material.dispose(); m.dispose();
       }
-      for (const m of [riverMesh, roadMesh]) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
+      for (const m of [riverMesh, roadMesh, streetMesh]) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
     },
   };
 }

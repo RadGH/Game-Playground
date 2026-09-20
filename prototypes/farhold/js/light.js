@@ -22,6 +22,7 @@
 //   light.update(dt, { x, y, z }, { day, indoors });
 
 import * as THREE from 'three';
+import { GEAR_BASES, MOUNT_LOOKS } from './gear.js';
 
 /**
  * How far past its useful range a light's cutoff is pushed.
@@ -259,22 +260,52 @@ export function createLight(scene, { balance = {} } = {}) {
 }
 
 /**
+ * R14 — BUILT FROM ITS OWN BASE, LIKE EVERYTHING ELSE.
+ *
+ * `starterItem` turns a `GEAR_BASES` entry into the item a new character is handed. The whole point
+ * is the `affixes` array: a mount's and a lamp's numbers reach the character sheet as INTRINSIC
+ * affixes (`cond_mountBase`, `cond_mountWind`, `cond_lightBase` — js/effects.js), and the two
+ * starters used to be hand-written literals with `affixes: []`. So the card said nothing, and
+ * js/player.js fell through to balance.json's `mountSpeed` of 2.1 — making the free horse as quick
+ * as the 760-gold Dray Elk.
+ *
+ * This is deliberately NOT `createGearShop().make()`: that needs an rng and a rarity roll, and a
+ * starter is always plain, always the same, and must not depend on module load order.
+ */
+function starterItem(key, id) {
+  const base = GEAR_BASES[key];
+  const item = {
+    id,
+    baseKey: key, name: base.name, baseName: base.name,
+    type: base.type, subtype: base.subtype, slot: base.slot,
+    rarity: 'normal', quality: 'medium',
+    affixes: [],
+    look: base.look, lore: base.lore,
+    basePrice: base.price,
+  };
+  const add = (stat, value) => item.affixes.push({
+    id: 'base_' + stat, stat, value, name: base.name, baseIntrinsic: true, intrinsic: true,
+  });
+  if (base.range) { item.range = base.range; item.light = true; add('cond_lightBase', base.range); }
+  if (base.intensity) item.intensity = base.intensity;
+  if (base.color) item.color = base.color;
+  if (base.speed) { item.speed = base.speed; add('cond_mountBase', base.speed); }
+  if (base.jump) item.jump = base.jump;
+  if (base.stamina) { item.stamina = base.stamina; add('cond_mountWind', base.stamina); }
+  return item;
+}
+
+/**
  * The starting mount. A horse used to be a key you pressed; it is a thing you own now, so it can be
  * lost, replaced by something better, and shown on the character sheet with everything else.
+ *
+ * R14: 1.6x, which is below every mount a shop sells — see the note over GEAR_BASES.trail_horse.
  */
 export const STARTER_MOUNT = {
-  id: 'mount_start',
-  baseKey: 'trail_horse',
-  name: 'Trail Horse',
-  baseName: 'Trail Horse',
-  type: 'accessory',
-  subtype: 'mount',
-  slot: 'mount',
-  rarity: 'normal',
-  quality: 'medium',
-  affixes: [],
-  mount: { creature: 'horse', size: 1.25, speed: 2.1, jump: 1.5 },
-  lore: 'Patient, unremarkable, and faster than your own legs. H to get on it.',
+  ...starterItem('trail_horse', 'mount_start'),
+  // kept for saves written before the base existed; js/gear.js `mountLook` still reads it
+  mount: { creature: 'horse', size: 1.25, speed: 1.6, jump: 1.3 },
+  look: MOUNT_LOOKS.trail_horse,
 };
 
 /**
@@ -282,19 +313,9 @@ export const STARTER_MOUNT = {
  * meant choosing between seeing at night and carrying a shield — and the Chibi 2 body's `torch`
  * off-hand part still draws it, so you can see it burning in your character's hand.
  */
-export const STARTER_TORCH = {
-  id: 'torch_start',
-  baseKey: 'torch',
-  name: 'Pitch Torch',
-  baseName: 'Pitch Torch',
-  type: 'accessory',
-  subtype: 'torch',
-  slot: 'light',
-  rarity: 'normal',
-  quality: 'medium',
-  affixes: [],
-  look: { offhand: 'torch', color: '#c08040' },
-  light: true,
-  range: 40,
-  lore: 'Rag, pitch and a stick. It will not win a fight, but you can see the fight coming.',
-};
+/**
+ * R14: its own base, and a worse one. It used to be a copy of the shop's 20-gold Pitch Torch, so
+ * the first rung of the light ladder was something you already had — 26 metres against the torch's
+ * 40 makes buying one a real step up.
+ */
+export const STARTER_TORCH = starterItem('guttering_brand', 'torch_start');

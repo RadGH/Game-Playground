@@ -121,6 +121,15 @@ export function haulReport(node, ctx = {}) {
   };
 }
 
+/**
+ * Why you cannot work this, AND WHAT TO DO ABOUT IT.
+ *
+ * "too hard for an Iron Tool — you need a Steel Tool" is a true sentence that leaves the player
+ * stuck, because nothing anywhere in Farhold tells them a tool tier is read off the weapon in their
+ * hands. There is no pick slot to go and fill. So the tool's own `from` line comes out with the
+ * refusal: the data says where a tier comes from, and every screen that prints a refusal gets the
+ * answer for free.
+ */
 function whyNotWorkable(node, ctx) {
   const data = ctx.data || {};
   const kind = data.nodeKinds?.[node.kind];
@@ -128,8 +137,14 @@ function whyNotWorkable(node, ctx) {
   if (!kind) return 'no such node kind';
   if (kind.handMinable === false) return `${kind.name} has to be taken by a structure, not by hand`;
   if (t && (t.tier ?? 0) < (kind.hardness ?? 0)) {
-    const need = Object.entries(data.tools || {}).find(([, x]) => (x.tier ?? 0) >= kind.hardness);
-    return `too hard for a ${t.name || 'tool'} — you need a ${need ? need[1].name : 'better tool'}`;
+    // the CHEAPEST tool that clears the bar, not whichever happens to come first in the file
+    const need = Object.entries(data.tools || {})
+      .filter(([, x]) => (x.tier ?? 0) >= kind.hardness && !x.structure)
+      .sort((a, b) => (a[1].tier ?? 0) - (b[1].tier ?? 0))[0];
+    const how = need?.[1]?.from ? `. That means ${need[1].from}` : '';
+    const a = /^[aeiou]/i.test(t.name || '') ? 'an' : 'a';
+    const holding = (t.tier ?? 0) <= 0 ? 'too hard to shift by hand' : `too hard for ${a} ${t.name || 'tool'}`;
+    return `${holding}. You need a ${need ? need[1].name : 'better tool'}${how}`;
   }
   if (node.depleted) return 'worked out; it will come back';
   return 'not workable';
@@ -300,9 +315,23 @@ export function rollRichness(rng, data, bandScale = 1) {
  * Which node kinds suit this biome. An empty `biomes` list in the data means "anywhere on land",
  * which is how boulders and wrecks turn up everywhere without being listed twenty-five times.
  */
-export function kindsForBiome(data, biome) {
+/**
+ * Which node kinds suit this biome ON THE SURFACE.
+ *
+ * `indoors` and `placedOnly` were in the data from the start and read by nobody, and an empty
+ * `biomes` list means "anywhere on land" — so the Deep Vein, whose whole description is
+ * *"Underground, and something is usually standing in front of it"*, was scattered across open
+ * grassland like any outcrop. It is hardness 2, its heaviest resource weight is iron ore, and the
+ * only tier-2 tool is a steel weapon you cannot have yet. Reported in play, exactly: *"I found iron
+ * ore but it says I need a steel tool. How do I get steel if I can't mine iron?"* — a wall with no
+ * door, made out of one unread flag.
+ *
+ * Pass `indoors: true` for a dungeon floor and the underground kinds come back instead.
+ */
+export function kindsForBiome(data, biome, { indoors = false } = {}) {
   return Object.entries(data.nodeKinds || {})
-    .filter(([, k]) => !k.fromPlanet)
+    .filter(([, k]) => !k.fromPlanet && !k.placedOnly)
+    .filter(([, k]) => !!k.indoors === !!indoors)
     .filter(([, k]) => !k.biomes?.length || k.biomes.includes(biome));
 }
 
@@ -392,6 +421,39 @@ function makeNode({ data, rng, seq, kindId, kind, res, x, z, bandCfg, biome }) {
 }
 
 /**
+ * A FIXED HANDFUL OF NODES, WITH THE SAME SHAPE AS THE WHOLE-PLANET ORE.
+ *
+ * A dungeon floor is not a tiled world — it is one room plan that exists while you are in it — so
+ * `createNodeWorld` is the wrong tool and a second interaction path would be the wrong answer. This
+ * wraps a plain list in the same `near/at/around/byId/noteWorked/tick` interface the surface ore
+ * offers, so the E prompt, the seam view and the drills are one code path underground and above.
+ *
+ * Nothing is saved: a dungeon is regenerated every time you go down it, and its seams come back
+ * with it. That is the same bargain the enemies in it already make.
+ */
+export function createNodePatch(nodes = [], data = {}) {
+  const live = nodes.filter(Boolean);
+  const around = () => live;
+  return {
+    around,
+    near(x, z, reach = 60) {
+      return live
+        .map(n => ({ node: n, away: Math.hypot(n.x - x, n.z - z) }))
+        .filter(r => r.away <= reach + (r.node.radius || 2))
+        .sort((a, b) => a.away - b.away)
+        .map(r => r.node);
+    },
+    at(x, z, reach = 4) { return this.near(x, z, reach)[0] || null; },
+    byId(id) { return live.find(n => n.id === id) || null; },
+    noteWorked() { /* nothing to remember: the floor is rebuilt on every visit */ },
+    tick(seconds) { tickNodes(live, seconds, data); },
+    get nodes() { return live; },
+    toJSON() { return null; },
+    load() { /* not saved — see the note above */ },
+  };
+}
+
+/**
  * A node the world put there on purpose rather than by scatter: a meteor fall, a cleared camp, a
  * wreck at the landing site. The event systems own where; this owns what is in it.
  */
@@ -434,6 +496,19 @@ export function createNodeWorld({ data = {}, seed = 1, terrain = null, planet = 
   const tiles = new Map();
   /** What the player has taken, by node id, so a regenerated tile does not refill itself. */
   const worked = new Map();
+  /**
+   * Seams the WORLD put down rather than the scatter: a meteor fall, most of all.
+   *
+   * `meteor_site` is the only source of meteoric iron and the only route to tempered alloy that
+   * skips the refinery — the data literally says "which is why a meteor fall is worth the walk".
+   * It was in the ordinary scatter, where it was a hardness-2 seam holding iron ore that a new
+   * player could see and could not work, which is the same wall the Deep Vein was. So it is
+   * `placedOnly` now, and this is where a meteor puts one.
+   *
+   * Filed by tile so `around` finds it, and saved, because a fall is an event and an event that
+   * does not survive a reload is not one.
+   */
+  const placed = new Map();
 
   const keyOf = (tx, tz) => `${tx},${tz}`;
 
@@ -458,10 +533,12 @@ export function createNodeWorld({ data = {}, seed = 1, terrain = null, planet = 
       // a seam under the sea or inside a cliff is a seam nobody will ever work
       if (terrain && (terrain.underwater(n.x, n.z) || terrain.slopeAt(n.x, n.z, 4) > 0.8)) n.gone = true;
     }
-    const live = nodes.filter(n => !n.gone);
+    const live = nodes.filter(n => !n.gone).concat(placed.get(key) || []);
     tiles.set(key, live);
     return live;
   }
+
+  const tileKeyOf = (x, z) => keyOf(Math.floor(x / TILE), Math.floor(z / TILE));
 
   /** Every node in the nine tiles around a point. */
   function around(x, z) {
@@ -474,6 +551,24 @@ export function createNodeWorld({ data = {}, seed = 1, terrain = null, planet = 
   return {
     TILE,
     around,
+    /**
+     * Put a seam down by hand. Returns it, or null if the kind is not in the data.
+     *
+     * The id carries the tile so `byId` can find it again, and `pl` marks it as placed so a reload
+     * puts it back where the scatter would never have generated it.
+     */
+    place({ kindId, x, z, band: atBand = band, rng = null, id = null }) {
+      const node = placedNode({ data, rng: rng || makeRng(((x * 73856093) ^ (z * 19349663)) >>> 0), kindId, x, z, band: atBand, id });
+      if (!node) return null;
+      const key = tileKeyOf(x, z);
+      node.id = id || `${key}:pl${(placed.get(key)?.length || 0)}`;
+      node.placedHere = true;
+      if (!placed.has(key)) placed.set(key, []);
+      placed.get(key).push(node);
+      // a tile already generated has to be told, or the seam does not exist until you leave and return
+      if (tiles.has(key)) tiles.get(key).push(node);
+      return node;
+    },
     /** What is within `reach` metres, nearest first. */
     near(x, z, reach = 60) {
       return around(x, z)
@@ -500,10 +595,21 @@ export function createNodeWorld({ data = {}, seed = 1, terrain = null, planet = 
       for (const nodes of tiles.values()) for (const n of nodes) if (worked.has(n.id)) this.noteWorked(n);
     },
     get tilesLoaded() { return tiles.size; },
-    toJSON() { return { worked: [...worked.entries()] }; },
+    toJSON() {
+      return {
+        worked: [...worked.entries()],
+        placed: [...placed.values()].flat().map(n => ({ ...n })),
+      };
+    },
     load(json) {
       worked.clear();
+      placed.clear();
       for (const [id, state] of json?.worked || []) worked.set(id, state);
+      for (const n of json?.placed || []) {
+        const key = tileKeyOf(n.x, n.z);
+        if (!placed.has(key)) placed.set(key, []);
+        placed.get(key).push({ ...n });
+      }
       tiles.clear();
     },
   };

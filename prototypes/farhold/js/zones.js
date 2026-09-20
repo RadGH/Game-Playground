@@ -167,6 +167,31 @@ export function buildZones(world, { spawn = null, maxLevel = 30, bandWidth = 4, 
     return id >= 0 ? (zones[id] || OPEN) : OPEN;
   }
 
+  /** Is this the sea rather than somewhere? */
+  const isOpenWater = zone => !zone || zone.id < 0;
+
+  /**
+   * R14 — THE ZONE YOU ARE REALLY IN, FOR ANYTHING THAT COUNTS AS *ARRIVING* SOMEWHERE.
+   *
+   *   "There are events that happen very frequently in the chat… They happen too often."
+   *
+   * Open water is a zone with `id: -1`, and `js/main.js` treats every change of zone id as walking
+   * into new territory: it re-announces the region, re-rolls what is happening here, re-populates
+   * the road and hears another rumour. So on a world with rivers — which is all of them — wading in
+   * and stepping out again is a full arrival, several times a minute, and that is most of the chat
+   * the player was complaining about.
+   *
+   * `atOrLast` remembers the last real region and hands that back over water, so a river is
+   * something you cross rather than a country you visit. `at()` is untouched: the map readout, the
+   * spawn bands and the tests all genuinely do want to know that you are in the sea.
+   */
+  let lastReal = null;
+  function atOrLast(x, z) {
+    const zone = at(x, z);
+    if (!isOpenWater(zone)) { lastReal = zone; return zone; }
+    return lastReal || zone;
+  }
+
   /** The level to roll a spawn at, here. A little spread inside the band keeps a zone varied. */
   function levelFor(x, z, rng = Math.random) {
     const zone = at(x, z);
@@ -177,7 +202,7 @@ export function buildZones(world, { spawn = null, maxLevel = 30, bandWidth = 4, 
 
   return {
     zones, startId, maxHops, bandWidth: width, maxLevel, gaps,
-    at, levelFor,
+    at, atOrLast, isOpenWater, levelFor,
     /** For the map legend and the debug report. */
     list: () => zones.slice().sort((a, b) => a.minLevel - b.minLevel || a.name.localeCompare(b.name)),
     byId: id => zones[id] || OPEN,

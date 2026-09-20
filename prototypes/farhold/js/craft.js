@@ -497,6 +497,34 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       }
       return [...out.entries()].map(([key, list]) => ({ key, name: (data.groups || {})[key] || key, list }));
     },
+    /**
+     * R14 — WHICH MATERIALS THIS SCREEN CAN ACTUALLY SPEND.
+     *
+     *   "The top of the inventory where it shows currencies has become too much. Instead, only show
+     *    relevant materials for the current screen. The crafting screen should show things like
+     *    Bound Essence and Scrap Iron."
+     *
+     * The header strip listed every material you were carrying on all seven tabs, so by the time
+     * you had a workshop it was two rows of chips above every screen, including the ones that
+     * cannot spend a single one of them. This is the set a given tab is about, read off the recipes
+     * themselves rather than written down twice — add a recipe and the strip follows it.
+     *
+     * `null` means "this screen does not spend materials", which is different from "it spends none
+     * of the ones you have": the first hides the strip, the second says you have nothing yet.
+     */
+    spendableOn(tab) {
+      const want = tab === 'crafting' ? recipes.filter(r => r.kind === 'create')
+        : tab === 'upgrade' ? recipes.filter(r => r.kind !== 'create')
+          // Recycling is where materials come FROM, so the Inventory tab shows everything a recipe
+          // anywhere could want — that is the screen where you decide whether to break something up.
+          : tab === 'inventory' ? recipes
+            : null;
+      if (!want) return null;
+      const ids = new Set();
+      for (const r of want) for (const id of Object.keys(r.cost || {})) ids.add(id);
+      return ids;
+    },
+
     /** Every material the player holds, sorted by tier, for the materials panel. */
     held: () => Object.entries(materials.held)
       .filter(([, n]) => n > 0)

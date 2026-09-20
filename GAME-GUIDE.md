@@ -375,6 +375,74 @@ top of that base — all pure, all a position and a clock until you are near the
 moving costs one line of arithmetic per body per frame. `prototypes/farhold/EXPANSION.md` is the
 design; `tests/expansion.test.js` is what it promises.
 
+## Gathering that costs a walk, and routes that lay themselves
+
+`prototypes/farhold/js/{resources,haulpath,mining}.js` are three pure modules that answer one
+question — **how much of this stuff actually arrives at my base per minute** — and make every way of
+moving it agree on the answer.
+
+```js
+import { createNodeWorld, haulReport, kindsForBiome } from '/prototypes/farhold/js/resources.js';
+import { findHaulPath, bestStoreFor } from '/prototypes/farhold/js/haulpath.js';
+import { createMining } from '/prototypes/farhold/js/mining.js';
+
+const ore = createNodeWorld({ data, seed, terrain, planet, band });   // a 512 m tile at a time
+const mining = createMining({ data, ore, stores, terrain });
+mining.bindDrill(entry, ore.at(entry.x, entry.z, 6));
+mining.autoRoute(entry.id);           // it finds its own store
+```
+
+Four ideas worth stealing whole:
+
+**One number decides everything.** Richness and distance fold into `deliveredPerMinute`, so a Mother
+Lode four hundred metres out and a Lean seam behind the workshop are genuinely comparable, and the
+player can read the trade-off *before* committing rather than regretting it after.
+
+**The distance is the WALK, not the line.** `haulpath.js` is A\* over an 8 m grid where water is a
+wall and a step costs its length times a slope penalty. That one change is the difference between
+"the nearest store" and "the store that delivers most", which are different stores surprisingly
+often — and it gives you the path, so you can *draw* the route. A track that visibly doubles back
+round a lake explains its own throughput.
+
+**Three kinds of node, not one.** Surface / `indoors` / `placedOnly`. Farhold shipped with a
+hardness-2 dungeon seam scattered across open grassland because `kindsForBiome` read the biome list
+and nothing else — and the only tool that could work it was a steel weapon the player could not have
+yet. State the rule as a test: *whatever the surface offers, a brand new player must be able to work
+it.* It will catch the second offender you did not know about.
+
+**A refusal has to say what to do.** "You need a Steel Tool" is true and useless if nothing in the
+game says where a tool tier comes from. Put the answer in the data (`tools[].from`) so every screen
+that prints a refusal gets it for free.
+
+**One vocabulary, joined at the boundary.** Farhold's build catalogue priced things in `timber` and
+`iron`; its refining chain produced `log` and `iron_ingot`; the catalogue's own header said "§1 and
+§2 will decide where `iron` actually comes from" and nobody ever went back. A palisade cost six
+units of a thing that has never existed. If you have two files that name the same concept
+differently, **write the alias table the day you notice**, apply it once where the data is loaded,
+and put a test on it — a cost you cannot obtain is not a price, it is a wall, and it produces no
+crash and no wrong number to find it by.
+
+## Scenery you can knock down, when the scatter is a pure function
+
+`prototypes/farhold/js/props.js` scatters trees, rocks and grass from a cell seed — the same cell
+always produces the same trees, and nothing is stored. Which is exactly why **you cannot delete one**
+without a plan.
+
+The plan is a **ledger of exceptions** beside the generator, and it is two lists because there are
+two questions: `felled` names one prop by its position rounded to a tenth of a metre (far inside the
+gap between neighbouring scatter points, exact enough to hash the same every rebuild) and carries
+its regrow clock; `cleared` is a list of circles, which keeps working on cells that have not been
+generated yet. Both are tiny and both go in the save — a whole base is a couple of dozen circles.
+
+Two rules that make it safe:
+
+- **Skip the placement, not the draw.** When you thin or suppress an item in a scatter loop, draw
+  all its random numbers anyway and skip only the write to the mesh. The cell's rng is shared with
+  everything after it, so stopping early makes the ruins, the giants and the grass all move.
+- **Gathering is the verb you already have.** Give each prop an hp, a tool tier and a drop list and
+  let the ordinary attack land on it when the swing hits nothing alive. No gathering key, no
+  gathering mode, and the tool ladder is the same one the ore uses so there is one rule to learn.
+
 ## Making a star do something to the picture
 
 `prototypes/farhold/js/sunfx.js` is a small, self-contained screen-space sun layer: god rays, a lens

@@ -26,12 +26,14 @@ import {
 import { createStoreNetwork } from '../js/stores.js';
 import { createGrid } from '../js/power.js';
 import { createWorks } from '../js/refine.js';
+import { realCost } from '../js/buildplan.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = f => JSON.parse(readFileSync(join(here, f), 'utf8'));
 const RES = read('../data/resources.json');
 const REF = read('../data/refining.json');
 const POW = read('../data/power.json');
+const STR = read('../data/structures.json');
 
 /** A node built by hand so a test can state exactly what it is arguing about. */
 function node({ id = 'n', kind = 'ore_outcrop', resource = 'iron_ore', richness = 1, x = 0, z = 0, amount = 1000 }) {
@@ -572,6 +574,17 @@ test('§3.20 no recipe is a dead end — every output is an input, a fuel, or a 
       for (const k of Object.keys(d.coolant || {})) consumed.add(k);
       for (const k of Object.keys(d.upkeep || {})) consumed.add(k);
     }
+  }
+  /**
+   * …AND THE BUILD CATALOGUE, which is the biggest consumer in the game and was not in this list.
+   *
+   * That blind spot is the other half of round 13's material-vocabulary bug: the catalogue spends
+   * `timber` and `parts` in its own short names, so even if it HAD been counted here it would have
+   * added words nothing makes rather than uses for the things that are made. `realCost` is the
+   * translation, and with it this test is finally asking the whole question.
+   */
+  for (const piece of STR.structures || []) {
+    for (const k of Object.keys(realCost(piece.cost || {}))) consumed.add(k);
   }
   const goals = new Set([
     ...REF.goals.ship, ...REF.goals.network,

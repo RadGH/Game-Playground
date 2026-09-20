@@ -720,6 +720,10 @@ body {
   font-size: var(--fs-sm); color: var(--ink-faint);
 }
 .sheet-mats .material { flex: none; }
+/* R14: "+4 more" opens the materials this screen does not spend. It has to stay readable when the
+   strip wraps to a second row, so it is allowed to wrap where the chips are not. */
+.sheet-mats { flex-wrap: wrap; max-height: 56px; }
+.sheet-mats .mat-more { flex: none; padding: 3px 9px; font-size: var(--fs-sm); white-space: nowrap; }
 .sheet-purse { grid-area: purse; margin: 0; font-size: var(--fs); font-variant-numeric: tabular-nums; white-space: nowrap; color: #cfe0ef; }
 .sheet-purse b { color: var(--gold); }
 .sheet .close {
@@ -732,6 +736,8 @@ body {
 @media (max-width: 1340px) {
   .sheet-mats .material { padding: 3px 7px; }
   .sheet-mats .material > span { display: none; }
+  /* …but the toggle keeps its words, or it is an unlabelled button */
+  .sheet-mats .mat-more { padding: 3px 7px; }
 }
 
 /* ---------------------------------------------------------------- the rail */
@@ -1486,9 +1492,8 @@ body {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 
-#sheet-attrs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
-.pane #sheet-attrs .attr-row { margin: 0; min-height: 28px; }
-.pane #sheet-attrs .attr-row button { width: 28px; height: 26px; }
+/* R14: the Attributes pane is gone — the four values are rows in the Stats pane now, and the `+`
+   buttons beside them had been dead since the perk forest replaced point-buy in round 7. */
 
 /* the cap is gone: the pane scrolls, and a geared character has twenty-odd properties to read */
 .pane .powers { max-height: none; overflow: visible; }
@@ -1837,6 +1842,27 @@ body {
    above is more specific than `.job-row`, so it was wrapping onto a line of its own */
 .pane .job-row { grid-template-columns: 1fr auto auto; }
 .pane .job-row .where { justify-self: end; }
+/* ---------------------------------------------------------------- R14: ⌖ locate, ★ keep
+   "add a target icon to 'locate on map'". One glyph, one verb, on every row with a position — so
+   every row that has one grows a column for it, and the rows without one do not shift. */
+.pane .journal-row.has-locate { grid-template-columns: 1fr auto auto; }
+.pane .job-row.has-locate,
+.pane .zone-row.has-locate { grid-template-columns: 1fr auto auto auto; }
+.row-locate, .row-star, .row-forget {
+  justify-self: end; align-self: center;
+  width: 22px; height: 22px; padding: 0; border: 0; border-radius: 5px;
+  background: none; color: var(--ink-faint); cursor: pointer;
+  font-size: 14px; line-height: 1;
+}
+.row-locate:hover, .row-forget:hover { background: #1b2c40; color: #cfe6ff; }
+.row-locate:focus-visible, .row-star:focus-visible, .row-forget:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
+.row-star:hover { color: var(--gold); }
+.row-star.on { color: var(--gold); }
+.row-forget:hover { color: #ff9a8a; }
+/* the kept-places row leads with its star, so it is a four-column grid the other way round */
+.pane .saved-row { grid-template-columns: auto 1fr auto auto auto; gap: 2px 8px; align-items: center; }
+.pane .saved-row .row-star { justify-self: start; }
+
 .pane .zonelist { gap: 4px; }
 /* a zone's own description used to be in a `title=` attribute — invisible unless you hovered and waited */
 .pane .zone-row {
@@ -2002,8 +2028,15 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 }
 
 /* the drills, and the one word that says what is holding each of them up */
-.build-mines { border-bottom: 1px solid #222c38; padding-bottom: 6px; }
-.build-mines h3 { margin: 4px 0 2px; font-size: 12px; color: #ffd98a; }
+.build-mines, .build-scan { border-bottom: 1px solid #222c38; padding-bottom: 6px; }
+.build-mines h3, .build-scan h3 { margin: 4px 0 2px; font-size: 12px; color: #ffd98a; }
+/* the scanner's rows are the drill rows' shape, with the note and the pin button on a second line */
+.build-scan .build-mine button {
+  grid-column: 3; grid-row: 2; justify-self: end;
+  background: #1b4a6a; border: 1px solid #2f7ba8; color: #dff2ff;
+  border-radius: 4px; padding: 1px 8px; font: inherit; font-size: 10.5px; cursor: pointer;
+}
+.build-scan .build-mine .muted { grid-column: 1 / 3; }
 .build-mine {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -2058,3 +2091,59 @@ body:has(.chart:not(.hidden)) .hud { opacity: 0; pointer-events: none; }
 .build-work-bar i { display: block; height: 100%; background: #6ad0ff; }
 /* the credit line is the feature — a unit is a unit whoever produced it */
 .build-work-credit { font-size: 10.5px; font-style: italic; }
+
+/* ================================================================ build mode owns the mouse
+ *
+ * "Pressing B to open the build menu should also free up the cursor so you can select items from
+ * it." With the pointer freed, the fixed dot in the middle of the screen is telling the player they
+ * are aiming somewhere they are not — the ghost is under the cursor. So the dot goes and the canvas
+ * carries a real crosshair.
+ */
+body.building #crosshair { display: none; }
+body.building canvas { cursor: crosshair; }
+
+/* ---------------------------------------------------------------- R14: Nearby Activities
+   "Add a 'Nearby Activities' area below the minimap when walking around… In the world, there should
+   be a large animated pointer above the location or object to help the player find it, and a radial
+   arrow pointing to it when its off-screen."
+   The panel is five rows of two lines under the minimap. It is redrawn four times a second, so
+   everything here has to be cheap: no shadows that repaint the column, no transitions on the rows. */
+#nearby { width: 180px; padding: 0; overflow: hidden; }
+#nearby .nb-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 8px; cursor: pointer; user-select: none;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+#nearby .nb-title { flex: 1; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; color: #9fb4d4; }
+#nearby .nb-count { font-variant-numeric: tabular-nums; color: #cfe6ff; font-size: 11px; }
+#nearby .nb-caret { color: #9fb4d4; font-size: 10px; }
+#nearby.shut .nb-rows, #nearby.shut .nb-more { display: none; }
+
+#nearby .nb-row {
+  display: grid; grid-template-columns: 14px 1fr 20px; grid-template-areas: "icon name go" "where where clock";
+  gap: 0 6px; padding: 4px 8px 5px;
+  border-top: 1px solid rgba(255, 255, 255, .05);
+}
+#nearby .nb-row:first-child { border-top: 0; }
+#nearby .nb-icon { grid-area: icon; font-style: normal; font-size: 11px; color: #ffd24a; line-height: 1.3; }
+#nearby .nb-name {
+  grid-area: name; font-size: 11.5px; color: #eaf6ff; line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#nearby .nb-go {
+  grid-area: go; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 4px;
+  background: none; color: #7f97b5; cursor: pointer; font-size: 12px; line-height: 1;
+}
+#nearby .nb-go:hover { background: #1b2c40; color: #cfe6ff; }
+#nearby .nb-go:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
+#nearby .nb-where { grid-area: where; font-size: 10px; color: #8ea6c4; font-variant-numeric: tabular-nums; }
+#nearby .nb-clock { grid-area: clock; font-size: 10px; color: #8ea6c4; text-align: right; font-variant-numeric: tabular-nums; }
+/* a clock you are about to lose. Colour only — a flashing row four times a second is unreadable. */
+#nearby .nb-clock.soon { color: #ffc65a; }
+#nearby .nb-clock.urgent { color: #ff7a5a; font-weight: 600; }
+#nearby .nb-more { padding: 4px 8px 6px; font-size: 10px; }
+
+/* the right-hand column is a fixed width, and the panel must not push the minimap about */
+@media (max-height: 760px) {
+  #nearby .nb-row:nth-child(n+4) { display: none; }
+}

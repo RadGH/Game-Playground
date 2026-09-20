@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import { createTerraform, applyEdit, areaOf, rectDist, segmentHit } from '../js/terraform.js';
-import { createBuildPlan, makeBag, boxesOverlap, cornersOf, scaleCost } from '../js/buildplan.js';
+import { createBuildPlan, makeBag, boxesOverlap, cornersOf, scaleCost, MATERIAL_ALIASES } from '../js/buildplan.js';
 import { createPortals, nudgeTo } from '../js/portal.js';
 import { createWaypoints } from '../js/waypoints.js';
 
@@ -170,7 +170,8 @@ test('every structure in the catalogue is complete and its materials are declare
     assert.ok(s.w > 0 && s.d > 0 && s.h > 0, `${s.id} has no size`);
     assert.ok(Object.keys(s.cost).length > 0, `${s.id} is free`);
     for (const mat of Object.keys(s.cost)) {
-      assert.ok(catalogue.materials[mat], `${s.id} costs "${mat}", which is not a declared material`);
+      assert.ok(catalogue.materials[mat] || MATERIAL_ALIASES[mat],
+        `${s.id} costs "${mat}", which is neither a declared material nor an alias for one`);
     }
     assert.ok(typeof s.desc === 'string' && s.desc.length > 10, `${s.id} has no description`);
   }
@@ -291,31 +292,47 @@ test('you are told what you are short of, and deconstruct gives most of it back'
 
 test('undo is a full refund; the deconstruct tool is not', () => {
   const terrain = fakeTerrain({ amplitude: 0 });
-  const bag = makeBag({ plank: 20, iron: 20 });
+  const bag = makeBag({ plank: 20, iron_ingot: 20 });
   const plan = createBuildPlan({ catalogue, terrain, store: bag });
   plan.place({ id: 'crafting_table', x: 0, z: 0 });
   plan.undo();
   assert.equal(bag.have('plank'), 20, 'undo should cost nothing at all');
 });
 
-test('the first thing you build stakes a claim, and one claim gets one waypoint', () => {
+/**
+ * ROUND 14 REWROTE THE SECOND HALF OF THIS TEST, AND THE REASON IS THE WHOLE POINT OF THE ROUND.
+ *
+ * It used to assert that building 400 m from home was REFUSED with "put down a claim stone first",
+ * and then that placing a claim stone opened it up. That rule was a deadlock the moment you wanted a
+ * second site: a claim stone cost two iron ingots, iron needs a furnace, and a furnace had to stand
+ * inside a claim. The user hit it and said so, and the fix is to delete the rule rather than to
+ * price it differently — *"I would rather just allow building arbitrarily anywhere."*
+ *
+ * So what is asserted now is the opposite: the far-away furnace goes down on its own, and doing so
+ * makes a second group by itself. The waypoint rule is untouched, because one pad per place is about
+ * the travel network and not about permission to build.
+ */
+test('you can build anywhere, and a cluster out on its own becomes its own outpost', () => {
   const terrain = fakeTerrain({ amplitude: 0 });
   const plan = createBuildPlan({ catalogue, terrain });
   plan.place({ id: 'campfire', x: 0, z: 0 });
-  assert.equal(plan.claims.length, 1, 'the first placement did not stake a claim');
+  assert.equal(plan.claims.length, 1, 'the first placement did not make a group');
 
   assert.equal(plan.place({ id: 'waypoint_pad', x: 12, z: 0 }).ok, true);
   const second = plan.check({ id: 'waypoint_pad', x: 26, z: 0 });
   assert.equal(second.ok, false);
   assert.match(second.why, /One per base/);
 
-  // …and far away, outside the claim, you need a stone first
-  const outside = plan.check({ id: 'campfire', x: 400, z: 400 });
-  assert.equal(outside.ok, false);
-  assert.match(outside.why, /claim stone/);
-  assert.equal(plan.place({ id: 'claim_stone', x: 400, z: 400 }).ok, true);
-  assert.equal(plan.place({ id: 'campfire', x: 404, z: 400 }).ok, true);
-  assert.equal(plan.claims.length, 2);
+  // …and far away, with no stone, no permit and nothing but the ground rules
+  const outside = plan.check({ id: 'furnace', x: 400, z: 400 });
+  assert.equal(outside.ok, true, outside.why);
+  assert.equal(plan.place({ id: 'furnace', x: 400, z: 400 }).ok, true);
+  assert.equal(plan.claims.length, 2, 'a distant build should make its own group');
+
+  // and the geometry agrees: two places, not one
+  const posts = plan.outposts();
+  assert.equal(posts.length, 2);
+  assert.ok(posts.every(p => p.name && p.count > 0));
 });
 
 test('a wall run follows a polyline, corners itself and never overlaps', () => {
@@ -346,7 +363,15 @@ test('a blueprint stamps the same cluster somewhere else', () => {
   const b = plan.place({ id: 'anvil', x: 12, z: 0 }).entry;
   const bp = plan.blueprint([a.id, b.id], 'Smithy');
   assert.equal(bp.pieces.length, 2);
-  assert.deepEqual(plan.billFor(bp), { stone: 16, clay: 6, iron: 10, timber: 3 });
+  /**
+   * The bill is in MATERIAL ids, not the catalogue's short names.
+   *
+   * Round 13: the catalogue costs things in `timber`/`iron`/`parts` and the game produces `log`,
+   * `iron_ingot`, `machine_part`, and the two had never been joined — a palisade cost six units of
+   * a thing nothing in Farhold has ever made. `MATERIAL_ALIASES` is the join, and a bill comes back
+   * in the words the storage pools and the refunds speak.
+   */
+  assert.deepEqual(plan.billFor(bp), { stone: 16, clay: 6, iron_ingot: 10, log: 3 });
 
   plan.place({ id: 'claim_stone', x: 300, z: 300 });
   const stamped = plan.stamp(bp, 300, 306, Math.PI / 2);
@@ -583,7 +608,8 @@ test('building a pad, joining the network and travelling home is one chain', () 
   const terrain = fakeTerrain({ amplitude: 7 });
   const ground = createTerraform();
   ground.wrap(terrain);
-  const bag = makeBag({ concrete: 40, waypoint_core: 1, crystal: 6, steel: 20, stone: 20, iron: 6 });
+  // in material ids, which is what a bill is priced in — see the blueprint test above
+  const bag = makeBag({ concrete: 40, waypoint_core: 1, crystal_raw: 6, steel_ingot: 20, stone: 20, iron_ingot: 6 });
   const plan = createBuildPlan({ catalogue, terrain, terraform: ground, store: bag });
   const waypoints = createWaypoints({ settlements: [town('t1', 'Hollowcrown', 2000, 2000)] });
   waypoints.visit(waypoints.settlementAt(2000, 2000));

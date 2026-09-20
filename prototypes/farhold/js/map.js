@@ -17,7 +17,7 @@ import { el, panel, button } from '../../../shared/ui.js';
 import { locationLine, copyTextVia, COPY_WORDS } from './debug.js';
 import { layersPanel } from '../../../worldgen/js/layers-panel.js';
 import { zoneTone } from './zones.js';
-import { MARKER_LOOKS, distanceText } from './markers.js';
+import { MARKER_LOOKS, distanceText, worldKey } from './markers.js';
 
 /** The wash each danger step puts over a region, and the colour its number is written in. */
 const TONE_RGB = {
@@ -50,6 +50,15 @@ const TONE_LABELS = [
  * around the two biggest, then a star for a capital — because "at a glance" is about size, and five
  * unrelated shapes would have to be learnt instead of read.
  */
+/**
+ * R14 — the ring `locate()` draws, by what it was asked to find. One table so the journal, the
+ * notice board and the Find list all get the same colour for the same kind of thing.
+ */
+export const FOCUS_COLOURS = {
+  quest: '#ffd24a', saved: '#8fe0a0', seam: '#c08a3e', fall: '#ff8a40',
+  pad: '#6ad0ff', base: '#9ae06a', place: '#ffffff',
+};
+
 export const MAP_MARKS = {
   // 5.1's world bosses (js/sites.js `family: 'worldboss'`) are another agent's work this round, and
   // this file owns every mark on the map — so one is kept for them here. It is first in the order,
@@ -318,6 +327,11 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     selected: null,
     /** Which waypoint pad the player has clicked. The travel button reads this; a click never does. */
     padPick: null,
+    /**
+     * R14 — the place `locate()` was asked to show, and when the ring over it stops pulsing.
+     * `{ x, y, name, kind, until }` in map cells, or null.
+     */
+    focus: null,
   };
 
   const canvas = el('canvas', { class: 'map-canvas', id: 'map-canvas' });
@@ -494,8 +508,12 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
           el('span', { class: 'pin-name', text: m.name }),
           el('span', { class: 'muted small', text: distanceText(away) }),
         );
-        if (m.kind === 'pin') {
-          row.append(el('button', { class: 'pin-del', text: '×', title: 'Remove this pin', onclick: () => { removePin(m); } }));
+        /**
+         * You may throw away what you put there yourself — a dropped pin, or a deposit the scanner
+         * found. A quest marker is not yours to delete; untracking it is what the star is for.
+         */
+        if (m.kind === 'pin' || m.kind === 'seam') {
+          row.append(el('button', { class: 'pin-del', text: '×', title: 'Remove this marker', onclick: () => { removePin(m); } }));
         }
         list.append(row);
       }
@@ -807,12 +825,90 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       ctx.fillStyle = colour;
       ctx.fill();
       ctx.lineWidth = 2; ctx.strokeStyle = '#150f0a'; ctx.stroke();
+      /**
+       * R14 — THE GLYPH THE MARKER ALREADY CARRIES.
+       *
+       * `MARKER_LOOKS` gives every kind an icon — `!` for a quest, `◈` for a pin, `☄` for an
+       * impact, `✦` for a saved place — and the minimap draws them. This screen threw them away and
+       * drew six near-identical coloured dots, so "which of these is the meteor" was a question you
+       * answered by hovering. The dot stays (it is what reads at a distance); the glyph goes on top
+       * of it once there is room for one.
+       */
+      if (look.icon && scale >= 5) {
+        ctx.font = `700 ${Math.round(Math.min(14, Math.max(9, scale * 1.1)))}px system-ui, sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#150f0a';
+        ctx.fillText(look.icon, px, py + 0.5);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      }
+      /**
+       * …and the star, which is the checkbox in the list made visible on the map.
+       * "a checkbox to toggle whether the location is highlighted on the map with a star."
+       * Up and to the left, so it never sits on the glyph it belongs to.
+       */
+      if (m.starred) {
+        const r = Math.max(5, scale * 0.85);
+        const sx = px - r * 1.5, sy = py - r * 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const a = -Math.PI / 2 + i * Math.PI / 5;
+          const rr = i % 2 ? r * 0.44 : r;
+          const X = sx + Math.cos(a) * rr, Y = sy + Math.sin(a) * rr;
+          if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = '#ffd24a';
+        ctx.fill();
+        ctx.lineWidth = 1.4; ctx.strokeStyle = '#2a1f08'; ctx.stroke();
+      }
       if (m.name) {
         ctx.font = '600 12px system-ui, sans-serif';
         ctx.fillStyle = '#ffe6a8';
         ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 3;
         ctx.strokeText(m.name, px + 10, py + 4);
         ctx.fillText(m.name, px + 10, py + 4);
+      }
+    }
+
+    /**
+     * R14 — WHERE YOU ASKED TO BE SHOWN.
+     *
+     *   "add a target icon to 'locate on map' which opens the map, centered on that location."
+     *
+     * Centring alone is not enough on a map that draws a couple of hundred marks: you get taken
+     * somewhere and then have to work out which of the things in front of you was the answer. Three
+     * dashed rings breathe outward over 1.4 s and restart, for as long as `focus.until` says, with
+     * the name beside them. Drawn after the places and before the player, so nothing important hides
+     * under it.
+     */
+    if (state.focus) {
+      const f = state.focus;
+      const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+      if (now >= f.until) state.focus = null;
+      else {
+        const fx = ox + (f.x + 0.5) * scale, fy = oy + (f.y + 0.5) * scale;
+        const t = ((now - (f.start || 0)) % 1400) / 1400;
+        const grow = 1 + t * 0.35;
+        const base = Math.max(10, scale * 1.4);
+        ctx.save();
+        ctx.setLineDash([5, 4]);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = FOCUS_COLOURS[f.kind] || FOCUS_COLOURS.place;
+        for (const [k, alpha] of [[1, 0.9], [1.7, 0.55], [2.6, 0.3]]) {
+          ctx.globalAlpha = alpha * (1 - t);
+          ctx.beginPath();
+          ctx.arc(fx, fy, base * k * grow, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+        if (f.name) {
+          ctx.font = '700 13px system-ui, sans-serif';
+          ctx.fillStyle = FOCUS_COLOURS[f.kind] || FOCUS_COLOURS.place;
+          ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineWidth = 3;
+          const ly = fy - base * 2.6 - 8;
+          ctx.strokeText(f.name, fx + 8, ly);
+          ctx.fillText(f.name, fx + 8, ly);
+        }
       }
     }
 
@@ -1288,7 +1384,23 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     const cell = cellFromEvent(ev);
     if (!cell) return;
     if (ev.shiftKey) {
-      addPin(cell.x, cell.y);
+      /**
+       * R14 — SHIFT DROPS A PIN, CTRL-SHIFT KEEPS A PLACE.
+       *
+       * Two different promises. A pin is the quick one you drop while reading the map and throw
+       * away in a minute; a kept place is the clay bank you want to be able to find in an hour, and
+       * it carries a star that highlights it and a row in the journal. The default name is what the
+       * ground actually is there, which beats "Place 4".
+       */
+      if (ev.ctrlKey || ev.metaKey) {
+        const info = cellInfo(world, cell.x, cell.y) || {};
+        // only a region you have actually been to gets named — B8's rule, the same one the readout
+        // under the cursor obeys
+        const region = info.region && knows(info.region.id) ? info.region.name : '';
+        const name = [info.biomeName || 'Somewhere', region].filter(Boolean).join(', ');
+        const m = book?.save?.({ cellX: cell.x, cellY: cell.y, name, from: { type: 'pin' } });
+        if (m) { buildSide(); draw(); }
+      } else addPin(cell.x, cell.y);
       return;
     }
 
@@ -1378,8 +1490,71 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
 
   window.addEventListener('resize', () => { if (state.open) draw(); });
 
+  /**
+   * R14 — SHOW ME THAT ONE.
+   *
+   *   "add a target icon to 'locate on map' which opens the map, centered on that location."
+   *
+   * The one door every screen uses: the journal's work-in-hand rows, the notice board, the Nearby
+   * Activities panel and the map's own lists. It takes world metres OR map cells, because the quest
+   * log thinks in metres and the marker book thinks in cells and neither should have to convert.
+   *
+   * Refuses rather than lying when the place is on another world — a journal row for a job two
+   * systems away must not quietly centre the map on the wrong ground.
+   */
+  let focusRaf = null;
+  function locate(place, opts = {}) {
+    if (!place) return { ok: false, why: 'There is nowhere to go.' };
+    const cell = place.cell
+      ? { x: Math.round(place.cell.x), y: Math.round(place.cell.y) }
+      : (Number.isFinite(place.x) && Number.isFinite(place.z))
+        ? { x: Math.floor(place.x / M_PER_CELL), y: Math.floor(place.z / M_PER_CELL) }
+        : null;
+    if (!cell) return { ok: false, why: 'That place has no position on it.' };
+    if (place.world && book && worldKey(place.world) !== book.key) {
+      return { ok: false, why: 'That is on another world.' };
+    }
+    const w = world?.width ?? world?.size ?? 0, h = world?.height ?? world?.size ?? 0;
+    if (w && h && (cell.x < 0 || cell.y < 0 || cell.x >= w || cell.y >= h)) {
+      return { ok: false, why: 'That is not on this world.' };
+    }
+
+    if (opts.open !== false && !state.open) toggle(true);
+    const want = opts.zoom ?? 4.2;
+    // snap to the zoom ladder rather than inventing a step nothing else can reach
+    state.zoom = ZOOMS.reduce((best, z) => (Math.abs(z - want) < Math.abs(best - want) ? z : best), ZOOMS[0]);
+    state.centre = { ...cell };
+    state.justDragged = true;              // so "you are here" still means back to the player
+    const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    state.focus = {
+      x: cell.x, y: cell.y,
+      name: place.name || '',
+      kind: place.kind || 'place',
+      start: now,
+      until: now + (opts.hold ?? 6000),
+    };
+    buildSide();
+    draw();
+
+    /**
+     * `tick()` runs about five times a second (main.js redraws the map every twelve frames), which
+     * turns a 1.4-second pulse into a stutter. So the ring gets its own frame loop for as long as
+     * it is alive, and stops the moment it is not. Cancelled in `dispose()` beside `airTimer`, or a
+     * map replaced mid-pulse leaves a loop drawing a screen nobody can see.
+     */
+    if (focusRaf) cancelAnimationFrame(focusRaf);
+    const step = () => {
+      if (!state.focus || !state.open) { focusRaf = null; draw(); return; }
+      draw();
+      focusRaf = requestAnimationFrame(step);
+    };
+    focusRaf = requestAnimationFrame(step);
+    return { ok: true, cell, zoom: state.zoom };
+  }
+
   return {
     root, state, markers: book,
+    locate,
     get pins() { return pins(); },
     /** Step the zoom from a button or a test. */
     setZoom(z) { state.zoom = ZOOMS.includes(z) ? z : 1; if (state.zoom === 1) state.centre = null; draw(); },
@@ -1411,6 +1586,8 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       // a new map is built for every world you land on, so the flight redraw has to go with the old
       // one or they stack up, each one drawing a screen nobody can see
       if (airTimer) { clearInterval(airTimer); airTimer = null; }
+      // R14: and the focus pulse, for the same reason
+      if (focusRaf) { cancelAnimationFrame(focusRaf); focusRaf = null; }
     },
     /**
      * Keep the player arrow moving while the map is open — and, open or not, watch which region you

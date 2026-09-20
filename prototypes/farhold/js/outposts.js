@@ -1,0 +1,202 @@
+// Farhold — an outpost is a group of things standing near each other. That is the whole definition.
+//
+// *"Can we remove the need to build claim stones and instead encourage random outposts? I would
+// like to slap down a drill at a remote deposit, connect it to the power grid and storage, and send
+// the output back to my base using a travel route."*
+//
+// Until round 14 a base was a CLAIM — a 64 m circle staked by the first thing you built, and the
+// only way to get a second one was a Claim Stone that cost two iron ingots. Which you could not
+// have, because iron needs a furnace and a furnace had to stand inside a claim. That deadlock is
+// gone (see js/buildplan.js), and with it goes the idea that the player has to declare where a base
+// is before they are allowed to build one.
+//
+// What replaces it is this: **an outpost is worked out from the geometry, after the fact.** Put a
+// drill and a crate down on a seam nine hundred metres from home and you have made an outpost; you
+// did not decide to, and you did not pay for the privilege. Take the drill away again and the
+// outpost stops existing. Nothing is stored, nothing can drift out of step with what is actually
+// standing there, and old saves need no migration because there is nothing new in them to migrate.
+//
+//   import { groupOutposts, outpostAt } from './outposts.js';
+//   const posts = groupOutposts(build.entries, { lanes: roads.lanes });
+//   posts[0].name      // "Ironrest" — or "Camp 2" if nothing in it has a name
+//
+// Pure: no Three.js, no DOM, no storage. `entries` are js/buildplan.js's ledger rows and the only
+// fields read are `x`, `z`, `w`, `d`, `key`, `name` and `cat`.
+
+/**
+ * How big a gap still counts as "the same place", in metres.
+ *
+ * Measured between FOOTPRINT EDGES, not centres, so a 12 m wide refinery joins the group the same
+ * way a 1 m brazier does. Forty is a little further than a logistics pole reaches (22 m) and a
+ * little less than a relay mast pair (34 m each), which lines the idea up with the one the storage
+ * pools already use: things that can hand each other goods are one place.
+ */
+export const LINK_GAP = 40;
+
+/** Rough radius of a footprint — half its diagonal, so a rotated box is still covered. */
+const radiusOf = e => Math.hypot(e.w || 1, e.d || 1) / 2;
+
+/** Edge-to-edge gap between two pieces. Negative means they overlap, which counts as touching. */
+export function gapBetween(a, b) {
+  return Math.hypot(a.x - b.x, a.z - b.z) - radiusOf(a) - radiusOf(b);
+}
+
+/**
+ * What an outpost is FOR, in one word, from what is standing in it.
+ *
+ * The order matters: a place with a waypoint pad is where you travel to whatever else is in it, and
+ * a place with a drill is a mine even if somebody left a bed there. This is what lets the map and
+ * the build panel label a dot without the player having to name every pile of crates they leave
+ * behind on a hillside.
+ */
+export function roleOf(members, defOf = null) {
+  const cats = new Set();
+  const keys = new Set();
+  for (const e of members) {
+    cats.add(e.cat || defOf?.(e.key)?.cat || '');
+    keys.add(e.key);
+  }
+  if (members.some(e => e.waypoint)) return 'hub';
+  if (keys.has('drill') || keys.has('pump')) return 'mine';
+  if (cats.has('refine') || cats.has('craft')) return 'works';
+  if (cats.has('power')) return 'power';
+  if (cats.has('store')) return 'depot';
+  if (cats.has('defence')) return 'fort';
+  return 'camp';
+}
+
+/** The plain-language word for a role, for a label on a map or a heading in a panel. */
+export const ROLE_WORDS = {
+  hub: 'Hub', mine: 'Mine', works: 'Workshops', power: 'Power', depot: 'Depot', fort: 'Fort', camp: 'Camp',
+};
+
+/**
+ * Cut the ledger into outposts.
+ *
+ * Single-linkage clustering: two pieces are in the same outpost if they are within `gap` of each
+ * other, or if a chain of pieces joins them. That is deliberately the loosest rule available — a
+ * base is a base because you can walk between its parts, and any tighter rule ends up splitting a
+ * long base in two at a point the player would not recognise as a border.
+ *
+ * `lanes` from js/roadplan.js join as well, which is the other half of the user's sentence: a road
+ * you laid out to the seam is a statement that the seam is part of your holding, so two clusters
+ * with a road running between them come back as one outpost rather than two.
+ */
+export function groupOutposts(entries = [], { gap = LINK_GAP, lanes = [], defOf = null, names = null } = {}) {
+  const list = entries.filter(e => e && Number.isFinite(e.x) && Number.isFinite(e.z));
+  if (!list.length) return [];
+
+  const parent = list.map((_, i) => i);
+  const find = a => { while (parent[a] !== a) { parent[a] = parent[parent[a]]; a = parent[a]; } return a; };
+  const join = (a, b) => { const ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb; };
+
+  for (let i = 0; i < list.length; i++) {
+    for (let j = i + 1; j < list.length; j++) {
+      if (gapBetween(list[i], list[j]) <= gap) join(i, j);
+    }
+  }
+
+  /**
+   * A ROAD IS A JOIN.
+   *
+   * Without this, the drill at the seam and the smelters at home are two outposts with a track
+   * between them — which is technically true and reads as wrong, because the player built that
+   * track precisely to say they are one holding. A piece counts as on a lane if it is within the
+   * lane's own reach, and everything on one lane is joined to everything else on it.
+   */
+  for (const lane of lanes || []) {
+    const touching = [];
+    for (let i = 0; i < list.length; i++) {
+      const e = list[i];
+      const pad = (lane.reach || lane.half + 6) + radiusOf(e);
+      for (let k = 0; k + 1 < lane.points.length; k++) {
+        if (segDist(e.x, e.z, lane.points[k][0], lane.points[k][1], lane.points[k + 1][0], lane.points[k + 1][1]) <= pad) {
+          touching.push(i);
+          break;
+        }
+      }
+    }
+    for (let i = 1; i < touching.length; i++) join(touching[0], touching[i]);
+  }
+
+  const byRoot = new Map();
+  for (let i = 0; i < list.length; i++) {
+    const root = find(i);
+    if (!byRoot.has(root)) byRoot.set(root, []);
+    byRoot.get(root).push(list[i]);
+  }
+
+  const out = [];
+  let n = 0;
+  for (const members of byRoot.values()) {
+    n++;
+    let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity, cx = 0, cz = 0;
+    for (const e of members) {
+      cx += e.x; cz += e.z;
+      x0 = Math.min(x0, e.x - radiusOf(e)); x1 = Math.max(x1, e.x + radiusOf(e));
+      z0 = Math.min(z0, e.z - radiusOf(e)); z1 = Math.max(z1, e.z + radiusOf(e));
+    }
+    cx /= members.length; cz /= members.length;
+    const role = roleOf(members, defOf);
+    /**
+     * THE NAME COMES FROM THE GEOMETRY TOO, OR FROM A STONE IF YOU PUT ONE DOWN.
+     *
+     * A Claim Stone no longer permits anything — it is a signpost, and what it does now is carry the
+     * name of the group it stands in. Anything without one is called after what it does and how far
+     * out it is, which is at least honest: "Mine 3" is a better label than "Camp 7" for a hole in a
+     * hillside with a drill in it.
+     */
+    const stone = members.find(e => e.outpostName);
+    const claimId = members.find(e => e.claim)?.claim || null;
+    const given = stone?.outpostName || (names && claimId ? names[claimId] : null);
+    out.push({
+      id: claimId || 'op' + n,
+      claim: claimId,
+      name: given || `${ROLE_WORDS[role] || 'Camp'} ${n}`,
+      named: !!given,
+      role,
+      x: cx, z: cz,
+      bounds: { x0, x1, z0, z1 },
+      radius: Math.max(Math.hypot(x1 - x0, z1 - z0) / 2, 6),
+      members,
+      count: members.length,
+      keys: [...new Set(members.map(e => e.key))],
+    });
+  }
+  // biggest first: the base you live in should head any list this ends up in
+  out.sort((a, b) => b.count - a.count);
+  return out;
+}
+
+/** Which outpost is this point in, if any? Used to label a map pin and to name a delivery. */
+export function outpostAt(posts, x, z, slack = LINK_GAP) {
+  let best = null;
+  for (const p of posts) {
+    const inside = x >= p.bounds.x0 - slack && x <= p.bounds.x1 + slack
+      && z >= p.bounds.z0 - slack && z <= p.bounds.z1 + slack;
+    if (!inside) continue;
+    const d = Math.hypot(p.x - x, p.z - z);
+    if (!best || d < best.d) best = { post: p, d };
+  }
+  return best?.post || null;
+}
+
+/** One line per outpost for a panel: "Mine 3 — 4 pieces, 940 m out". No drawing in it. */
+export function outpostLines(posts, from = null) {
+  return posts.map(p => ({
+    id: p.id,
+    name: p.name,
+    role: p.role,
+    count: p.count,
+    metres: from ? Math.round(Math.hypot(p.x - from.x, p.z - from.z)) : null,
+    text: `${p.name} — ${p.count} piece${p.count === 1 ? '' : 's'}`
+      + (from ? `, ${Math.round(Math.hypot(p.x - from.x, p.z - from.z))} m out` : ''),
+  }));
+}
+
+function segDist(x, z, x1, z1, x2, z2) {
+  const dx = x2 - x1, dz = z2 - z1;
+  const len2 = dx * dx + dz * dz;
+  const t = len2 > 0 ? Math.max(0, Math.min(1, ((x - x1) * dx + (z - z1) * dz) / len2)) : 0;
+  return Math.hypot(x - (x1 + dx * t), z - (z1 + dz * t));
+}

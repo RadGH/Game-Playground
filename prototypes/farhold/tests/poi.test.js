@@ -226,24 +226,63 @@ test('8.2 — a wall that is meant to be a wall actually closes', () => {
   }
 });
 
+/**
+ * Every place a layout can name a piece. R14 added `grids` (rows rather than rings — the Field of
+ * Cairns says "laid out in rows" and had none) and this list did not know about it, so the new
+ * `cairn` piece read as built-and-never-placed. Keeping the list in one function means the next
+ * primitive only has to be added once.
+ */
+function piecesIn(l) {
+  const out = new Set();
+  for (const c of l.centre || []) out.add(c.piece);
+  for (const r of l.rings || []) out.add(r.piece);
+  for (const g of l.grids || []) out.add(g.piece);
+  for (const s of l.scatter || []) out.add(s.piece);
+  if (l.approach) out.add(l.approach.piece);
+  return out;
+}
+
 test('8.2 — every piece a layout asks for has been built', () => {
   for (const [key, l] of Object.entries(setpieces.layouts || {})) {
-    const asked = new Set();
-    for (const c of l.centre || []) asked.add(c.piece);
-    for (const r of l.rings || []) asked.add(r.piece);
-    for (const s of l.scatter || []) asked.add(s.piece);
-    if (l.approach) asked.add(l.approach.piece);
-    for (const piece of asked) assert.ok(PIECES.has(piece), `${key} asks for a "${piece}", and js/sites.js has no such piece`);
+    for (const piece of piecesIn(l)) assert.ok(PIECES.has(piece), `${key} asks for a "${piece}", and js/sites.js has no such piece`);
   }
   // and nothing was built that nothing uses
   const used = new Set();
-  for (const l of Object.values(setpieces.layouts || {})) {
-    for (const c of l.centre || []) used.add(c.piece);
-    for (const r of l.rings || []) used.add(r.piece);
-    for (const s of l.scatter || []) used.add(s.piece);
-    if (l.approach) used.add(l.approach.piece);
-  }
+  for (const l of Object.values(setpieces.layouts || {})) for (const p of piecesIn(l)) used.add(p);
   for (const piece of PIECES) assert.ok(used.has(piece), `the "${piece}" piece is built and never placed`);
+});
+
+/**
+ * R14 — a grid has to fit in its instance budget, and it has to READ as rows.
+ *
+ *   "A lot of the structures in this location are too short."
+ */
+test('8.5 — a grid of pieces fits its cap and is wide enough to read as rows', () => {
+  for (const [key, l] of Object.entries(setpieces.layouts || {})) {
+    for (const g of l.grids || []) {
+      const n = (g.cols || 1) * (g.rows || 1) - (g.skip || []).length;
+      assert.ok(n > 0, `${key}'s grid places nothing`);
+      assert.ok((g.cols || 1) >= 2 && (g.rows || 1) >= 2, `${key}'s grid is a line, not rows`);
+      // the jitter must not be big enough to lose the row it is in
+      assert.ok((g.jitter || 0) * 2 < Math.min(g.gapX ?? 6, g.gapZ ?? 6),
+        `${key}'s grid jitters further than the gap between pieces — the rows disappear`);
+    }
+  }
+});
+
+test('8.6 — the Field of Cairns is made of cairns, and they are taller than a person', () => {
+  const l = setpieces.layouts.cairn_field;
+  assert.ok(l, 'the Field of Cairns layout is gone');
+  const grid = (l.grids || []).find(g => g.piece === 'cairn');
+  assert.ok(grid, 'the Field of Cairns has no cairns in it');
+  const n = grid.cols * grid.rows - (grid.skip || []).length;
+  assert.ok(n >= 24, `only ${n} cairns — the blurb promises about thirty`);
+  // the piece itself: read `tall` off js/sites.js, which is the one number the world uses for LOD
+  const src = readFileSync(new URL('../js/sites.js', import.meta.url), 'utf8');
+  const m = src.match(/cairn: \{ tall: ([0-9.]+)/);
+  assert.ok(m, 'there is no cairn piece in js/sites.js');
+  assert.ok(Number(m[1]) * (grid.scale ?? 1) > 2.2,
+    `a cairn stands ${(Number(m[1]) * (grid.scale ?? 1)).toFixed(1)} m — that is a heap of gravel, not a grave marker`);
 });
 
 test('7.14 — a faction-owned structure names a faction that exists', () => {

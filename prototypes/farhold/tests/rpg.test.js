@@ -101,10 +101,27 @@ test('equipping swaps, keeps the old piece, and a two-hander clears the off hand
   const shield = r.loot.generate('light_chest', 'normal', 'low', { rng: makeRng(5) });
   r.equip(p, sword);
   assert.equal(p.equipment.weapon, sword);
+  /**
+   * A BETTER ONE-HANDER WITH A HAND FREE EQUIPS BOTH, best in the main hand.
+   *
+   * The rule has always sent a WORSE one-hander to the empty off hand — that is how dual wielding
+   * is reached at all, since the bag has one click. Round 13 made it symmetric: upgrading half of a
+   * pair used to drop the other half in the bag, which is never what the player meant. Nothing goes
+   * to the bag here because nothing came off.
+   */
   const sword2 = r.loot.generate('rapier', 'magic', 'low', { rng: makeRng(6) });
   const replaced = r.equip(p, sword2);
-  assert.equal(replaced, sword);
-  assert.ok(p.bag.includes(sword), 'the replaced weapon vanished instead of going to the bag');
+  assert.equal(replaced, null, 'something was taken off when both hands could be full');
+  assert.equal(p.equipment.weapon, sword2, 'the better weapon is not in the main hand');
+  assert.equal(p.equipment.offhand, sword, 'the one it beat did not slide into the free hand');
+  assert.ok(!p.bag.includes(sword), 'a weapon went to the bag with a hand free');
+  // …and with the off hand full, a better weapon does swap and the old one goes to the bag
+  r.unequip(p, 'offhand');
+  p.equipment.offhand = shield;
+  const sword3 = r.loot.generate('rapier', 'rare', 'high', { rng: makeRng(61) });
+  assert.equal(r.equip(p, sword3, { force: true }), sword2, 'the replaced weapon did not come back');
+  assert.ok(p.bag.includes(sword2), 'the replaced weapon vanished instead of going to the bag');
+  r.unequip(p, 'offhand');
 
   // a two-handed weapon pushes the off hand back into the bag
   const twoHander = r.loot.generate('greatsword', 'normal', 'low', { rng: makeRng(7) });

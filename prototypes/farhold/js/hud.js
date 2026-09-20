@@ -101,6 +101,12 @@ const STATUS_COLOR = {
 
 /** What each line on the character sheet actually means, for its hover card. */
 const STAT_HELP = {
+  // R14: the four attributes are a readout now, under Stats. They are earned on perk nodes —
+  // js/perks.js hands out str/dex/int/con — not bought a point at a time.
+  Strength: 'Raises the damage of every melee swing, and how much you can carry. Earned on perk nodes.',
+  Dexterity: 'Raises ranged damage and adds a little critical chance and dodge. Earned on perk nodes.',
+  Intellect: 'Raises spell power and the size of your mana pool. Earned on perk nodes.',
+  Constitution: 'Raises health and how fast it comes back. Earned on perk nodes.',
   Health: 'How much damage you can take before you black out. Constitution and `+health` gear raise it.',
   Mana: 'What skills are paid for with. Intellect and `+mana` gear raise the pool; mana regeneration refills it.',
   Damage: 'The range one swing rolls in, after your weapon, your attribute, your talents and every damage property on your gear.',
@@ -147,7 +153,7 @@ const CHANGE_TEXT = {
 
 export class Hud {
   constructor({
-    rpg, terrain, onEquip, onSpendAttr, onSpendPassive = null, onTakeTalent = null,
+    rpg, terrain, onEquip, onSpendPassive = null, onTakeTalent = null,
     onRecycle = null, onCraft = null, craft = null, pets = null, zones = null,
     journal = null, seed = 1, onOpen = null, onClose = null,
     // round 7: the perk forest, the per-skill talent trees, the vehicle dropdowns
@@ -159,7 +165,18 @@ export class Hud {
     factionName = null, distanceTo = null,
     // A1: the one line that says what you are doing
     objective = null, settings = null,
+    /**
+     * R14 — the map, at arm's length.
+     *
+     * `hud.js` must not import `js/map.js`: the HUD is built once at boot and the map is rebuilt on
+     * every world you land on. So the journal gets three callbacks instead — show me that place,
+     * star it, forget it — and knows nothing else about the map screen.
+     */
+    onLocate = null, onStarSaved = null, onForgetSaved = null,
   } = {}) {
+    this.onLocate = onLocate;
+    this.onStarSaved = onStarSaved;
+    this.onForgetSaved = onForgetSaved;
     this.objective = objective;
     this.settings = settings;
     this.standings = standings;
@@ -192,7 +209,6 @@ export class Hud {
     this.terrain = terrain;
     this.seed = seed;
     this.onEquip = onEquip;
-    this.onSpendAttr = onSpendAttr;
     this.onOpenSheet = onOpen;
     this.onCloseSheet = onClose;
     this.lines = [];
@@ -1200,7 +1216,9 @@ export class Hud {
       b.hidden = !n;
       if (n) { b.textContent = String(n); b.title = `${n} waiting`; }
     };
-    set('character', player.pendingAttr || 0);
+    // R14: `pendingAttr` has not been incremented by anything since round 7, so this badge could
+    // only ever read zero. The Character tab has nothing waiting on it — perks and talents do.
+    set('character', 0);
     set('perks', pointsLeft(player));
     // `tiersOpen` returns a COUNT of open tiers, not a list of them
     const openTiers = tiersOpen(player.level);
@@ -1259,6 +1277,23 @@ export class Hud {
       ['Better loot', d.magicFind ? `+${fmt(d.magicFind)}%` : '—'],
       ['Gold find', d.goldFind ? `+${fmt(d.goldFind)}%` : '—'],
       ['Kills', player.kills],
+      /**
+       * R14 — THE FOUR ATTRIBUTES, AS A READOUT.
+       *
+       *   "Remove attributes from the Character screen, but keep them under stats. STR/DEX/INT/CON
+       *    can still be used but is instead gained through perks."
+       *
+       * They were their own pane with a `+` button beside each one, and those buttons had been dead
+       * since round 7: the perk forest replaced point-buy and nothing has incremented
+       * `player.pendingAttr` since, so the pane read "no points to spend" for the whole of a run.
+       * The numbers themselves are still real and still do work — `js/perks.js` hands out `str`,
+       * `dex`, `int` and `con` on its nodes — so they belong with the other things you read and
+       * cannot click.
+       */
+      ['Strength', player.attrs?.str ?? 0],
+      ['Dexterity', player.attrs?.dex ?? 0],
+      ['Intellect', player.attrs?.int ?? 0],
+      ['Constitution', player.attrs?.con ?? 0],
     ];
     /**
      * Sixteen rows in one list read as a wall — "did that chest help" was a question you answered by
@@ -1267,6 +1302,8 @@ export class Hud {
      * follow the rows wherever they go.
      */
     const GROUPS = {
+      // R14: first, because they are what the rest is built out of
+      attrs: ['Strength', 'Dexterity', 'Intellect', 'Constitution'],
       offence: ['Damage', 'Crit', 'Accuracy', 'Attack speed', 'Cooldowns'],
       defence: ['Health', 'Armour', 'Magic resistance', 'Dodge', 'Block', 'Barrier'],
       utility: ['Mana', 'Move speed', 'Better loot', 'Gold find', 'Kills'],
@@ -1282,6 +1319,9 @@ export class Hud {
      * because once you are wearing something with block on it you do want to see it.
      */
     const byName = new Map(rows.map(r => [r[0], r]));
+    // R14: an attribute reading 0 is a fact about your character, not an empty row, and the four of
+    // them vanishing under "hide the empty ones" would put the pane straight back where it was.
+    const ATTRS = new Set(GROUPS.attrs);
     const blank = v => v === '—' || v === '0' || v === 0;
     const showAll = !!this.showAllStats;
     let hidden = 0;
@@ -1289,7 +1329,7 @@ export class Hud {
       const box = $('sheet-stats-' + group);
       if (!box) continue;
       const wanted = names.filter(n => byName.has(n)).filter(n => {
-        if (showAll) return true;
+        if (showAll || ATTRS.has(n)) return true;
         const keep = !blank(byName.get(n)[1]);
         if (!keep) hidden++;
         return keep;
@@ -1306,20 +1346,6 @@ export class Hud {
       }
     }
 
-    // attributes with the level-up spend buttons
-    $('sheet-attrs').replaceChildren(...Object.entries(player.attrs).map(([key, value]) => {
-      const row = el('div', 'attr-row');
-      const label = el('span', null, key.toUpperCase());
-      label.style.width = '42px';
-      const val = el('b', null, String(value));
-      val.style.width = '28px';
-      const btn = el('button', null, '+');
-      btn.disabled = !player.pendingAttr;
-      btn.onclick = () => { this.onSpendAttr(key); this.renderSheet(); };
-      row.append(label, val, btn);
-      return row;
-    }));
-    $('sheet-points').textContent = player.pendingAttr ? `${player.pendingAttr} point${player.pendingAttr > 1 ? 's' : ''} to spend` : 'no points to spend';
 
     /**
      * The boat and the ship: a DROPDOWN, not an equipment slot.
@@ -2302,24 +2328,67 @@ export class Hud {
     for (const b of bar.querySelectorAll('[data-scope]')) b.classList.toggle('on', b.dataset.scope === this.upScope);
   }
 
-  /** The materials row, shared by both tabs. */
+  /**
+   * The materials row, shared by both tabs.
+   *
+   * R14 — ONLY WHAT THIS SCREEN CAN SPEND.
+   *
+   *   "The top of the inventory where it shows currencies has become too much. Instead, only show
+   *    relevant materials for the current screen. The crafting screen should show things like Bound
+   *    Essence and Scrap Iron. Maybe there can be a dropdown to view all next to the filtered ones,
+   *    where you can view all other materials."
+   *
+   * It used to list everything you were carrying above all seven tabs — two rows of chips over the
+   * Journal, which cannot spend any of them. Now `craft.spendableOn(tab)` says which materials the
+   * screen in front of you is actually about, and `+n more` opens the rest in place. The toggle is
+   * a button rather than a real dropdown because the strip is already a row of chips and a `select`
+   * of thirty materials is worse than the thing being fixed — same job, one click, no menu.
+   *
+   * The screens that spend nothing (Character, Skills, Perks, Journal) get no strip at all; gold is
+   * beside it and is the only thing those screens care about.
+   */
   drawMaterials(target) {
     const box = $(target);
     if (!box) return;
     // in the header it is a strip of chips, so the empty case is three words, not a sentence
     const tight = box.classList.contains('sheet-mats');
     if (!this.craft) { box.replaceChildren(el('span', 'muted small', tight ? '' : 'No bench here.')); return; }
+
+    const relevant = tight ? this.craft.spendableOn?.(this.tab) ?? null : null;
+    if (tight && relevant === null) { box.replaceChildren(); box.hidden = true; return; }
+    box.hidden = false;
+
     const held = this.craft.held();
-    box.replaceChildren(...(held.length ? held.map(m => {
-      const chip = el('div', 'material');
-      chip.dataset.tipRender = 'material';
-      chip.dataset.tipMaterial = m.id;
-      chip.tabIndex = 0;
-      chip.innerHTML = `<i style="background:${m.color}"></i><span>${m.name}</span><b>${m.n}</b>`;
-      return chip;
-    }) : [el('span', 'muted small', tight
-      ? 'no materials yet'
-      : 'Nothing yet. Recycle something on the Inventory tab — that is where every material comes from.')]));
+    const showAll = !!this.showAllMaterials;
+    const shown = relevant && !showAll ? held.filter(m => relevant.has(m.id)) : held;
+    const rest = relevant ? held.length - shown.length : 0;
+
+    const chip = m => {
+      const c = el('div', 'material');
+      c.dataset.tipRender = 'material';
+      c.dataset.tipMaterial = m.id;
+      c.tabIndex = 0;
+      c.innerHTML = `<i style="background:${m.color}"></i><span>${m.name}</span><b>${m.n}</b>`;
+      return c;
+    };
+
+    const kids = shown.map(chip);
+    if (!held.length) {
+      kids.push(el('span', 'muted small', tight
+        ? 'no materials yet'
+        : 'Nothing yet. Recycle something on the Inventory tab — that is where every material comes from.'));
+    } else if (!shown.length) {
+      kids.push(el('span', 'muted small', 'nothing this screen uses'));
+    }
+    if (relevant && (rest > 0 || showAll)) {
+      const more = el('button', 'chip mat-more', showAll ? 'show less' : `+${rest} more`);
+      more.title = showAll
+        ? 'Back to the ones this screen can spend'
+        : 'Show every material you are carrying, not only the ones this screen uses';
+      more.onclick = () => { this.showAllMaterials = !this.showAllMaterials; this.drawMaterials(target); };
+      kids.push(more);
+    }
+    box.replaceChildren(...kids);
   }
 
   /** One row in a recipe list: name, what it costs, and whether you can pay for it. */
@@ -2575,11 +2644,33 @@ export class Hud {
    * truncated to twelve because there was nowhere to put the rest. Each of those is its own pane now,
    * and the kill list is complete.
    */
+  /**
+   * R14 — ⌖, THE ONE BUTTON THAT MEANS "SHOW ME WHERE".
+   *
+   *   "for anything else on this screen with a primary location, add a target icon to 'locate on
+   *    map' which opens the map, centered on that location."
+   *
+   * One glyph (U+2316) and one verb, everywhere it appears, so it is learned once. Returns null
+   * when the thing has no position, and the caller simply appends nothing — a row without a place
+   * must not grow a button that does nothing, which is the failure this whole round keeps finding.
+   */
+  locateButton(place, what = '') {
+    if (!place || (!Number.isFinite(place.x) && !place.cell)) return null;
+    if (!this.onLocate) return null;
+    const b = el('button', 'row-locate', '\u2316');
+    b.dataset.tip = `Show ${what || place.name || 'this'} on the map.`;
+    b.setAttribute('aria-label', `Show ${what || place.name || 'this'} on the map`);
+    b.onclick = ev => { ev.stopPropagation(); hideTip(); this.onLocate(place); };
+    return b;
+  }
+
   renderJournal() {
     const j = this.journal?.();
-    const row = (text, note, cls = '') => {
+    const row = (text, note, cls = '', place = null, what = '') => {
       const n = el('div', 'journal-row' + (cls ? ' ' + cls : ''));
       n.innerHTML = `<span>${text}</span><span class="muted">${note ?? ''}</span>`;
+      const go = this.locateButton(place, what);
+      if (go) { n.append(go); n.classList.add('has-locate'); }
       return n;
     };
     const fill = (id, kids, emptyText) => {
@@ -2591,7 +2682,7 @@ export class Hud {
 
     // ---- the survey
     const objectives = (j?.objectives || []).map(o => {
-      const n = row(o.name, o.text, o.done ? 'done' : '');
+      const n = row(o.name, o.text, o.done ? 'done' : '', o.place, o.name);
       n.dataset.tip = o.desc || '';
       return n;
     });
@@ -2599,7 +2690,7 @@ export class Hud {
     meta('journal-share', j ? `${Math.round((j.share || 0) * 100)}% surveyed · ${j.title || ''}` : '');
 
     // ---- work in hand
-    const quests = (j?.quests || []).map(q => row(q.title, q.progress, q.done ? 'done' : ''));
+    const quests = (j?.quests || []).map(q => row(q.title, q.progress, q.done ? 'done' : '', q.place, q.title));
     fill('journal-quests', quests, 'Nobody has asked you for anything.');
     meta('journal-quest-count', (j?.quests || []).length ? `${j.quests.length}` : '');
 
@@ -2726,6 +2817,10 @@ export class Hud {
           + (job.taken ? '' : `\n\nHeard of, not taken. ${job.faction
             ? 'Find somebody of theirs — in a town, or on the road — and they will put your name to it.'
             : 'Read it off the notice board in a settlement, or from whoever is asking on the road.'}`);
+        // R14: the position was already here, one line above, and was only ever turned into a
+        // distance. A job you can be told the distance to is a job you can be shown.
+        const go = this.locateButton(job.place, job.title);
+        if (go) { n.append(go); n.classList.add('has-locate'); }
         return n;
       }) : [el('p', 'muted small', 'Nothing going here at the moment. Walk somewhere else and come back.')]));
       // one line under the list so the missing "take it" is explained rather than simply missing
@@ -2742,6 +2837,40 @@ export class Hud {
         n.innerHTML = `<span>${r.text}.</span><span class="who">${r.from}</span>`;
         return n;
       }) : [el('p', 'muted small', 'Nobody has told you anything yet. Talk to people on the road.')]));
+    }
+
+    /**
+     * ---- R14: PLACES YOU KEEP.
+     *
+     *   "Add the ability to store locations and view them in a list, with a checkbox to toggle
+     *    whether the location is highlighted on the map with a star."
+     *
+     * Three controls a row and no more: the star (highlighted on the map, or not), ⌖ (show me), and
+     * × (forget it). They are saved markers — `js/markers.js` — so they ride the save with
+     * everything else and no second store has to be kept in step.
+     */
+    const savedBox = $('journal-saved');
+    if (savedBox) {
+      const kept = j?.saved || [];
+      savedBox.replaceChildren(...(kept.length ? kept.map(sv => {
+        const n = el('div', 'journal-row saved-row has-locate');
+        const star = el('button', 'row-star' + (sv.starred ? ' on' : ''), sv.starred ? '\u2605' : '\u2606');
+        star.dataset.tip = sv.starred
+          ? 'Starred. Highlighted on the map. Click to stop.'
+          : 'Not starred. Click to highlight it on the map.';
+        star.setAttribute('aria-pressed', sv.starred ? 'true' : 'false');
+        star.onclick = ev => { ev.stopPropagation(); this.onStarSaved?.(sv.id, !sv.starred); this.renderJournal(); };
+        n.append(star);
+        n.append(el('span', null, sv.name));
+        n.append(el('span', 'muted', sv.note || ''));
+        const go = this.locateButton(sv.place, sv.name);
+        if (go) n.append(go);
+        const del = el('button', 'row-forget', '\u00d7');
+        del.dataset.tip = 'Forget this place.';
+        del.onclick = ev => { ev.stopPropagation(); hideTip(); this.onForgetSaved?.(sv.id); this.renderJournal(); };
+        n.append(del);
+        return n;
+      }) : [el('p', 'muted small', 'Nothing kept yet. Ctrl-shift-click the map, or keep a place off one of these lists.')]));
     }
 
     // ---- the zone table: every named region, the levels that live in it, and what it looks like
@@ -2767,6 +2896,10 @@ export class Hud {
           <span class="zone-${tone}">level ${z.minLevel}–${z.maxLevel}</span>
           <span class="muted small">${z.danger}</span>`
           + (mine && z.descriptor ? `<span class="zone-desc">${z.descriptor}</span>` : '');
+        // R14: a region's centre is a real place, and "where is The Frost Wastes" was a question
+        // the zone table could not answer
+        const go = z.center ? this.locateButton({ cell: { x: z.center.x, y: z.center.y }, name: z.name, kind: 'place' }, z.name) : null;
+        if (go) { n.append(go); n.classList.add('has-locate'); }
         return n;
       }) : [el('p', 'muted small', 'No regions on this world.')]));
     }

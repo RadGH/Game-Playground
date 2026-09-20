@@ -82,18 +82,45 @@ export function createIncidents({ data, territory = null, factions = null, seed 
     const open = table.filter(spec => eligible(spec, zone, ctx));
     if (!open.length) return null;
 
-    for (const spec of open) {
+    /**
+     * R14 — THE BLANDEST LINE IN THE FILE WAS THE ONLY ONE ANYBODY EVER SAW, AND IT WAS A MECHANISM.
+     *
+     *   "There are events that happen very frequently in the chat like 'something out there has your
+     *    measure and…'. They happen too often, and they aren't represented on the minimap or in game
+     *    very well."
+     *
+     * This loop walked `open` in FILE ORDER and returned on the first thing that fired. `grudge`
+     * sits fourth in data/incidents.json and its start condition is `playerBeaten`, which is a
+     * FORCED start — chance 1, no roll. So from the first time the player died and picked up a
+     * nemesis, `grudge` was picked every single time and returned, and the eight interesting
+     * incidents below it — the feud, the bloom, the collapse, the ash fall, the fair day, the
+     * quarantine, the bounty, the washed-out road — could never start in a zone the player was
+     * newly entering. Ever.
+     *
+     * Two changes. The order inside each group is shuffled, so "first in the file" stops being
+     * "always wins"; and a forced incident that is ALREADY RUNNING here does not get to block the
+     * rest — `territory.addIncident` refuses a duplicate of the same kind in the same zone and
+     * returns null, and that null used to fall out of the bottom of the loop as "nothing happened".
+     * Now it simply tries the next one.
+     */
+    const isForced = spec => !!(spec.starts?.caravanLost || spec.starts?.cairnDug
+      || spec.starts?.playerBeaten || spec.starts?.namedSurvived || spec.starts?.holderGrip
+      || spec.starts?.gripsWithin != null);
+    // a stable shuffle off this roll's own rng, so the same zone in the same state is repeatable
+    const shuffled = open
+      .map(spec => ({ spec, key: rng(), forced: isForced(spec) }))
+      .sort((a, b) => (b.forced - a.forced) || (a.key - b.key));
+
+    for (const { spec, forced } of shuffled) {
       // a condition that names something specific (a lost caravan, a dug grave) fires at once;
       // an ambient one has to roll its own chance
-      const forced = !!(spec.starts?.caravanLost || spec.starts?.cairnDug
-        || spec.starts?.playerBeaten || spec.starts?.namedSurvived || spec.starts?.holderGrip
-        || spec.starts?.gripsWithin != null);
       const chance = spec.starts?.chance ?? (forced ? 1 : 0.06);
       if (!forced && rng() > chance) continue;
       const row = territory.addIncident(zone.id, {
         kind: spec.kind, name: spec.name, blurb: spec.blurb,
         spawns: spec.effects?.nightSpawn || null,
       }, spec.hours);
+      // null means one of these is already running here — try the next rather than giving up
       if (row) return { ...row, spec };
     }
     return null;

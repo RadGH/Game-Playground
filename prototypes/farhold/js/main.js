@@ -10,7 +10,7 @@ import { createShip } from '../../../assets/js/space-models.js';
 import { createAtmosphere } from './atmos.js';
 import { createTownFolk } from './town.js';
 import { createTalkPanel } from './talkui.js';
-import { QuestLog, gatherable, submitGather } from './quests.js';
+import { QuestLog, gatherable, submitGather, makeFallQuest } from './quests.js';
 import { Campaign } from './campaign.js';
 import { createSound } from './sound.js';
 import { createSpeech } from './speech.js';
@@ -45,9 +45,10 @@ import { createRumours } from './rumours.js';
 import { createWaypoints, boardSpotFor } from './waypoints.js';
 // The building expansion: BUILDING_EXPANSION.md. Industry, ground, colony, and the way off the rock.
 import { createStoreNetwork } from './stores.js';
+import { createLogistics, createAwayClock } from './logistics.js';
 import { createGrid } from './power.js';
 import { createWorks } from './refine.js';
-import { createNodeWorld } from './resources.js';
+import { createNodeWorld, createNodePatch, placedNode } from './resources.js';
 import { createMining } from './mining.js';
 import { createOreView } from './ore-view.js';
 import { createDefence } from './defence.js';
@@ -62,6 +63,7 @@ import { createGroundVehicle } from '../../../avatar-3d/js/ground-vehicles.js';
 import { createTerraform } from './terraform.js';
 import { createPortals } from './portal.js';
 import { createBuild } from './build.js';
+import { alignCatalogue } from './buildplan.js';
 import { createBuildUI } from './build-ui.js';
 import { createHomes } from './homes.js';
 import { WorkBoard, progressText, progressFraction, creditLine, workLeft } from './work.js';
@@ -82,6 +84,9 @@ import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFro
 import { buildZones } from './zones.js';
 import { createChests } from './chests.js';
 import { createMeteors } from './meteors.js';
+import { nearbyList } from './nearby.js';
+import { drawNearby } from './nearby-ui.js';
+import { createAmbient } from './ambient.js';
 import { createDungeon, createGates, lookForBiome } from './dungeon.js';
 import { createPets, CLASS_PETS } from './pets.js';
 import { createSites } from './sites.js';
@@ -118,6 +123,10 @@ function speedText(unitsPerSecond, auInUnits) {
 // holding lives there too, so the old eight-entry starter-weapon table is gone.
 
 const state = { ready: false, running: false, paused: false, elapsed: 0, frames: 0, playtime: 0 };
+/** R14: how long a press of V may last and still count as "tap for first person". */
+const V_TAP = 0.28;
+/** The V key in flight: when it went down, and whether it has swung the camera yet. */
+let vKey = null;
 const saves = createSaves();
 
 async function loadJSON(url) {
@@ -291,7 +300,22 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData: rawStructures, colonyData, cropData, raidData, status, save }) {
+  /**
+   * ONE VOCABULARY FOR MATERIALS, FROM HERE ON.
+   *
+   * `data/structures.json` costs things in short names — `timber`, `iron`, `parts` — and says in
+   * its own header that §1 and §2 "will decide where `iron` or `plank` actually comes from". They
+   * decided: `log`, `iron_ingot`, `machine_part`. Nobody joined the two up, so a palisade cost six
+   * `timber` and **nothing in Farhold has ever produced one unit of anything called `timber`** —
+   * twenty-two pieces of the catalogue were unbuildable by any honest route, and felling a tree
+   * gave you logs a fence would not take.
+   *
+   * `alignCatalogue` is the join, done once at the boundary so nothing downstream has to know there
+   * were ever two words for the same thing. The display names come with it, so the panel still says
+   * "6 timber".
+   */
+  const structureData = alignCatalogue(rawStructures, resourceData);
   const seed = save ? save.seed : (Number($('boot-seed').value) || 1);
   const classId = save ? save.classId : $('boot-class').value;
   const lowQuality = params.get('quality') === 'low';
@@ -536,6 +560,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   /** The board for the zone you are in. Rebuilt when you cross a border, not every frame. */
   let localBoard = [];
   let boardZone = null;
+  /** R14: dusk and dawn want a new notice board, and nothing else that arriving somewhere does. */
+  let rebuildBoard = false;
+  /** R14: the Nearby Activities list, kept so the journal can show the same rows the panel does. */
+  let nearbyRows = [];
 
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
@@ -721,6 +749,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   /** Clicks taken while build mode is up, drained by the frame loop. Filled just after `build`. */
   let buildClicks = 0;
+  /** Where the mouse is on screen, -1..1 on each axis. Only meaningful with the pointer unlocked. */
+  const pointerNdc = [0, 0];
   const fx = createCombatFx(scene, {
     // `terrain` is replaced when you land on a new world, so read it through the binding
     groundAt: (x, z) => terrain.heightAt(x, z),
@@ -1154,13 +1184,66 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       applyGearLook();
       hud.setPlayer(player);
     },
-    onSpendAttr: key => { rpg.spendAttr(player, key); hud.setPlayer(player); },
+    /**
+     * R14: `onSpendAttr` is gone with the pane that called it. The four `+` buttons had been dead
+     * since round 7 (the perk forest replaced point-buy and nothing increments `player.pendingAttr`),
+     * and attributes are now a readout under Stats — see js/hud.js `renderCharacter`.
+     */
+
+    /**
+     * R14 — SHOW ME THAT ON THE MAP.
+     *
+     * `hud.js` must not import `js/map.js` (the HUD is built before the world is, and the map is
+     * rebuilt on every landing), so the three things the journal needs are handed to it as
+     * callbacks. `map` is assigned a few hundred lines below this — hence the `?.`: a click cannot
+     * happen before there is a map, but a test can call it.
+     */
+    onLocate: (place, opts) => {
+      const out = map?.locate?.(place, opts);
+      if (out && !out.ok) hud.log(out.why || 'That is not somewhere you can be shown.', 'warn');
+      return out;
+    },
+    /** The checkbox: is this place highlighted on the map with a star? */
+    onStarSaved: (id, on) => {
+      const m = markers.markers.find(x => x.id === id);
+      if (!m) return false;
+      markers.star(m, on);
+      autoSave();
+      return m.starred;
+    },
+    /** Throw one away. A place you saved is yours to unsave — a quest marker is not. */
+    onForgetSaved: id => {
+      const m = markers.markers.find(x => x.id === id);
+      if (!m || m.kind !== 'saved') return false;
+      markers.remove(m);
+      autoSave();
+      return true;
+    },
     journal: () => ({
       title: campaignData.title,
       share: campaign.share,
       objectives: campaign.list(),
+      /** R14: the places you have decided to keep — the map's list, mirrored into the journal. */
+      saved: markers.saved().map(m => ({
+        id: m.id, name: m.name, note: m.note || '',
+        starred: !!m.starred, tracked: !!m.tracked,
+        place: { x: (m.cell.x + 0.5) * M_PER_CELL, z: (m.cell.y + 0.5) * M_PER_CELL, name: m.name, kind: 'saved' },
+      })),
       nemesis: campaign.nemesis,
-      quests: questLog.active.map(q => ({ title: q.title, progress: questLog.progressText(q), done: q.done })),
+      /**
+       * R14: a quest row carries its PLACE now, not only its words.
+       *
+       * "On the journal screen > work in hand, and for Work Going On Here, and anything else on
+       *  this screen with a primary location, add a target icon to 'locate on map'."
+       *
+       * The position was right there on the quest and was being thrown away one line before the
+       * screen that wanted it — the journal could say "Clear the Sunken Vault" and had no way to
+       * say where the Sunken Vault is.
+       */
+      quests: questLog.active.map(q => ({
+        title: q.title, progress: questLog.progressText(q), done: q.done,
+        place: q.place ? { ...q.place, kind: q.markerKind || 'quest' } : null,
+      })),
       // who you have already put down — it was in the save and never shown on the screen
       defeated: campaign.defeatedNemeses || [],
       bestiary: campaign.bestiary,
@@ -1502,9 +1585,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (bonus) drops.push(bonus);
     }
 
-    // A boss or a rare leaves a BAG rather than pushing five things silently into the inventory.
-    // Walking over to pick it up is the beat that makes the kill feel finished.
-    if ((e.rank === 'boss' || e.rank === 'rare') && (drops.length || Object.keys(mats).length)) {
+    /**
+     * A boss or a rare leaves a BAG rather than pushing five things silently into the inventory.
+     * Walking over to pick it up is the beat that makes the kill feel finished.
+     *
+     * R14 — A GIANT ALWAYS LEAVES ONE.
+     *
+     * "Now we have giant monsters which are useful, but sometimes they don't drop anything
+     * interesting. Make them always drop a loot crate."
+     *
+     * The Giant modifier (data/enemies.json) is three times the size, 1.8x health and 1.5x damage,
+     * but it is only a CHAMPION — one modifier — so it fell into the `else` branch and handed you
+     * whatever the ordinary drop roll produced, which is frequently nothing at all. A fight that
+     * reads as a set piece has to pay like one.
+     *
+     * Two changes, both of them here: a giant counts as bag-worthy, and it does so even when the
+     * rolls came up empty (`|| giant` on the second test), because "always" has to mean always. The
+     * rare floor below then applies to it exactly as it does to a boss, so the bag is never a
+     * walk across a field for two normals.
+     */
+    const giant = !!e.modifiers?.includes('giant');
+    if ((e.rank === 'boss' || e.rank === 'rare' || giant) && (drops.length || Object.keys(mats).length || giant)) {
       /**
        * "When receiving a loot crate from a kill, ensure there is always at least a rare item in
        * it."
@@ -1524,8 +1625,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       chests.dropBag(e.x, e.z, {
         items: drops, gold: Math.round(e.gold * 0.5), mats: {},
-        title: e.rank === 'boss' ? e.name + ' falls' : 'A rare kill',
-        subtitle: e.rank === 'boss' ? 'Everything it was hoarding is yours.' : `${e.name} was carrying something.`,
+        title: e.rank === 'boss' ? e.name + ' falls'
+          : giant && e.rank !== 'rare' ? 'The big one goes down'
+            : 'A rare kill',
+        subtitle: e.rank === 'boss' ? 'Everything it was hoarding is yours.'
+          : giant && e.rank !== 'rare' ? `Something that size does not travel light.`
+            : `${e.name} was carrying something.`,
       });
       hud.log('It dropped a bag. Walk over it.', 'loot');
     } else {
@@ -1660,11 +1765,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     band: planet?.band || 'medium',
   });
   if (save?.ore) ore.load(save.ore);
+  if (save?.props) props.loadHarvest(save.props, control?.x ?? 0, control?.z ?? 0);
+  /**
+   * THE SEAMS ON THIS FLOOR, when you are underground.
+   *
+   * The Deep Vein's own description is "underground, and something is usually standing in front of
+   * it" and its data has said `indoors: true` since it landed — but nothing read that flag, so deep
+   * veins scattered across open grassland. They are hardness 2, their heaviest resource weight is
+   * iron ore, and the only hand tool that clears hardness 2 is a steel weapon you cannot have yet:
+   * "I found iron ore but it says I need a steel tool. How do I get steel if I can't mine iron?"
+   *
+   * So the surface scatter no longer offers them (js/resources.js `kindsForBiome`) and a dungeon
+   * floor does. `oreHere()` is the one question — what is in the ground where I am standing — and
+   * every screen asks it rather than reaching for whichever list it happens to know about.
+   */
+  let dungeonOre = null;
+  const oreHere = () => dungeonOre || ore;
 
   /** Drills, routes, and the sum that says a long route delivers less. */
   const mining = createMining({
     data: resourceData || {}, ore, stores, grid, bag: materials,
     log: (t, c) => hud.log(t, c),
+    // the ground a hauler has to walk over, so a route round a lake costs what it costs
+    terrain,
   });
   // (the saved drills are reattached after `build` exists — see below. `build` is a const declared
   // a hundred lines down, so doing it here would be a crash on any save with a drill in it.)
@@ -1686,6 +1809,86 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // this up with the other loads read a `const` a hundred lines before its declaration, which is
   // a crash on every save that has a base in it and on no save that does not.
   if (save?.defence) defence.load(save.defence);
+
+  /**
+   * §1 — THE SCANNER. "A way to find ones nearby."
+   *
+   * The deposits have always been fixed in place: a seam's position is a pure function of the world
+   * seed, so the one you found yesterday is where you left it. What was missing was any way to know
+   * one was there without walking over it, and they are sparse on purpose — about fourteen to a
+   * 512 m tile. Fourteen in a quarter of a square kilometre is a long walk between lucky finds.
+   *
+   * A sweep therefore answers the question a player actually has: WHERE IS THE IRON. One row per
+   * material, the best of each judged by what it would deliver from where you are standing — the
+   * same number js/resources.js compares seams with everywhere else — with a bearing and a pin.
+   */
+  const scanState = { swept: false, radius: 0, found: 0, rows: [], pinned: new Set() };
+
+  const COMPASS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  function compassTo(dx, dz) {
+    // +z is north in Farhold's world space, the same convention the minimap draws with
+    const a = Math.atan2(dx, dz);
+    return COMPASS[(Math.round(a / (Math.PI / 4)) + 8) % 8];
+  }
+
+  function sweepForDeposits(x, z, radius) {
+    const seams = oreHere().near(x, z, radius).filter(n => !n.gone && !n.depleted);
+    const byResource = new Map();
+    for (const n of seams) {
+      const rep = mining.report(n, control, { tool: toolTierFor(player), stores });
+      const row = byResource.get(n.resource);
+      if (!row || rep.deliveredPerMinute > row.deliveredPerMinute) {
+        byResource.set(n.resource, {
+          id: n.id,
+          x: n.x, z: n.z,
+          resource: n.resource,
+          resourceName: n.resourceName || rep.resourceName,
+          band: (n.band || 'fair').replace(/ /g, '-'),
+          bandName: rep.bandName,
+          workable: rep.workable,
+          why: rep.why,
+          deliveredPerMinute: rep.deliveredPerMinute,
+          distance: Math.hypot(n.x - control.x, n.z - control.z),
+          compass: compassTo(n.x - control.x, n.z - control.z),
+          pinned: scanState.pinned.has(n.id),
+        });
+      }
+    }
+    scanState.swept = true;
+    scanState.radius = radius;
+    scanState.found = seams.length;
+    scanState.rows = [...byResource.values()].sort((a, b) => b.deliveredPerMinute - a.deliveredPerMinute || a.distance - b.distance);
+    sound.ui(seams.length ? 'open' : 'error');
+    hud.log(seams.length
+      ? `Sweep: ${seams.length} deposits within ${Math.round(radius)} m — ${scanState.rows.slice(0, 4).map(r => r.resourceName.toLowerCase()).join(', ')}${scanState.rows.length > 4 ? ` and ${scanState.rows.length - 4} more` : ''}.`
+      : `Sweep: nothing within ${Math.round(radius)} m.`, seams.length ? 'good' : 'warn');
+    buildUI.refresh();
+    return { found: seams.length, rows: scanState.rows };
+  }
+
+  /** Put one scanned deposit on the map and the minimap, through the one marker book. */
+  function pinDeposit(id) {
+    const row = scanState.rows.find(r => r.id === id);
+    if (!row || scanState.pinned.has(id)) return null;
+    const m = markers.add({
+      kind: 'seam',
+      name: `${row.resourceName} — ${row.bandName.toLowerCase()}`,
+      cellX: Math.floor(row.x / M_PER_CELL),
+      cellY: Math.floor(row.z / M_PER_CELL),
+    });
+    scanState.pinned.add(id);
+    row.pinned = true;
+    hud.log(`${row.resourceName} pinned — ${Math.round(row.distance)} m ${row.compass}.`, 'level');
+    return m;
+  }
+
+  /**
+   * Redraw the haul routes. Called when a route is laid, a store is built, or a piece comes down —
+   * never every frame, because the path only moves when one of its ends does.
+   */
+  function drawRoutes() {
+    oreView?.drawRoutes?.(mining.overview(), { heightAt: (x, z) => terrain.heightAt(x, z) });
+  }
 
   /** The seams, drawn. One InstancedMesh per kind — see js/ore-view.js. */
   let oreView = createOreView(scene, { data: resourceData || {} });
@@ -1734,7 +1937,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
   function aimSpot(maxRange = 40) {
     const dir = new THREE.Vector3();
-    camera.getWorldDirection(dir);
+    /**
+     * THE RAY GOES THROUGH THE CURSOR when there is one.
+     *
+     * Build mode frees the pointer so the panel can be used, and a freed pointer makes the camera's
+     * own heading the wrong ray: you would be pointing at one patch of ground with the mouse and
+     * building on another in the middle of the screen. Unprojecting the cursor costs one matrix
+     * multiply and makes the two agree. With the pointer locked there IS no cursor, and the nose of
+     * the camera is the aim, exactly as before.
+     */
+    if (!input.state.locked) {
+      dir.set(pointerNdc[0], pointerNdc[1], 0.5).unproject(camera).sub(camera.position).normalize();
+    } else {
+      camera.getWorldDirection(dir);
+    }
     const from = camera.position;
     let last = { x: control.x, z: control.z };
     for (let t = 1.5; t <= maxRange; t += 1) {
@@ -1885,6 +2101,53 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   /**
+   * What the current run of swings at one seam has come to, so the log gets a total rather than a
+   * line every second. Flushed when you stop swinging, when the seam runs out, or on a timer.
+   */
+  const tally = { res: null, got: 0, at: 0 };
+  /** What the terrain tools have knocked down since the last frame — see `onGround`. */
+  const groundPile = { removed: 0, bag: {} };
+  function flushGroundPile() {
+    if (!groundPile.removed) return;
+    const what = matText(groundPile.bag);
+    hud.log(`The ground moves. ${groundPile.removed} thing${groundPile.removed === 1 ? '' : 's'} came down with it${what ? ` — ${what}` : ''}.`, 'good');
+    groundPile.removed = 0;
+    groundPile.bag = {};
+  }
+  function flushTally() {
+    if (!tally.res || tally.got <= 0) { tally.res = null; tally.got = 0; return; }
+    hud.log(`${matText({ [tally.res]: tally.got })} out of the seam.`, 'good');
+    tally.res = null;
+    tally.got = 0;
+  }
+
+  /**
+   * "9 log, 2 resin" — one wording for every pile of materials the world hands you.
+   */
+  function matText(bag) {
+    return Object.entries(bag || {})
+      .filter(([, n]) => n > 0)
+      .map(([id, n]) => `${Math.round(n)} ${(resourceData?.materials?.[id]?.name || id.replace(/_/g, ' ')).toLowerCase()}`)
+      .join(', ');
+  }
+
+  /**
+   * Put a pile of materials somewhere sensible: the storage pool at your feet, then your own bag.
+   *
+   * The same rule build mode's refunds follow, and for the same reason — whatever you just felled is
+   * most likely going straight back into the next thing you build, and that looks in the pool.
+   */
+  function payOut(bag) {
+    for (const [id, n] of Object.entries(bag || {})) {
+      if (!(n > 0)) continue;
+      const pool = stores.poolAt?.(control.x, control.z);
+      const stored = pool ? stores.put(pool, id, n) : 0;
+      if (n - stored > 0) materials.add(id, n - stored);
+    }
+    return bag;
+  }
+
+  /**
    * Build mode. `B` toggles it; the rest of the keys are listed on screen when it is up.
    *
    * `store` is how a cost is paid: the pool the ghost is standing in first, then the materials bag,
@@ -1932,7 +2195,37 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       },
     },
     onLog: (t, c) => hud.log(t, c),
-    onClear: (x, z, r) => props.clearAround?.(x, z, r) || { removed: 0, materials: {} },
+    /**
+     * THE CLEAR TOOL, which for the whole life of the expansion silently did nothing.
+     *
+     * `props.clearAround` did not exist, and `?.()` turned the whole call into `undefined` — so the
+     * tool reported "Cleared 0 of it" and the player learned the build interface lies. It exists
+     * now (js/props.js), and this is the one line that was missing.
+     */
+    onClear: (x, z, r) => props.clearAround(x, z, r),
+    onScan: (x, z, r) => sweepForDeposits(x, z, r),
+    /**
+     * …and the terrain tools take the trees with them.
+     *
+     * Everything standing in the brush comes down — you keep the timber, same as Clear — and the
+     * rebuild underneath re-reads the ground height for everything left, so nothing is stranded in
+     * the air over a levelled plot.
+     */
+    /**
+     * One click of a terrain tool is one message; one run of road is one message too.
+     *
+     * A road is cleared leg by leg in brush-sized steps (js/build.js `clearProps`), which for a
+     * hundred metres through a wood is thirty calls — and thirty log lines is a log nobody reads.
+     * The take is piled up and reported on the next frame, so the player sees "the road goes
+     * through: 214 log, 30 stone" once.
+     */
+    onGround: (x, z, r) => {
+      const out = props.groundMoved(x, z, r);
+      if (!out.removed) return;
+      payOut(out.materials);
+      groundPile.removed += out.removed;
+      for (const [id, n] of Object.entries(out.materials)) groundPile.bag[id] = (groundPile.bag[id] || 0) + n;
+    },
     /**
      * A WAYPOINT PAD JOINS THE NETWORK THE MOMENT IT IS FINISHED.
      *
@@ -1954,6 +2247,25 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     onPlace: (entry, def) => {
       joinSystems(entry, def);
       /**
+       * A NEW CRATE IS A NEW ANSWER FOR EVERY DRILL THAT HAD NONE.
+       *
+       * The usual order of play is drill first, storage second — you put the drill on the seam you
+       * walked out to and then work out where to keep the ore. Without this the drill sits on its
+       * capped little stockpile for ever and the player has to know to go and re-route it by hand.
+       */
+      if (def?.store?.slots) {
+        // only the drills this crate could plausibly serve: each re-route is an A* search, and a
+        // base with a dozen of each would otherwise spend a second thinking about it on one click
+        for (const row of mining.overview()) {
+          if (row.route) continue;
+          const drill = (build.entries || []).find(e => e.id === row.id);
+          if (!drill || Math.hypot(drill.x - entry.x, drill.z - entry.z) > 700) continue;
+          const got = mining.autoRoute(row.id, { quiet: true });
+          if (got.ok) hud.log(`${row.name} now hauls to ${entry.name} — ${got.rate.direct ? 'no trip at all' : `${got.rate.perMinute.toFixed(1)}/min`}.`, 'good');
+        }
+        drawRoutes();
+      }
+      /**
        * A DRILL PUT DOWN ON A SEAM STARTS WORKING IT.
        *
        * The catalogue calls it `drill`; js/resources.js knows what is under it. Refused out loud
@@ -1961,11 +2273,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * "nothing happened" is the worst possible answer to having done so.
        */
       if (entry.key === 'drill' || entry.key === 'pump') {
-        const seam = ore.at(entry.x, entry.z, 6);
+        const seam = oreHere().at(entry.x, entry.z, 6);
         const got = mining.bindDrill(entry, seam);
-        hud.log(got.ok
-          ? `${entry.name} bites into the ${(resourceData?.materials?.[seam.resource]?.name || seam.resource).toLowerCase()}. It needs power, and a route to somewhere to put it.`
-          : got.why, got.ok ? 'good' : 'warn');
+        if (!got.ok) hud.log(got.why, 'warn');
+        else {
+          const what = (resourceData?.materials?.[seam.resource]?.name || seam.resource).toLowerCase();
+          /**
+           * …AND IT FINDS ITS OWN WAY HOME.
+           *
+           * "We should not require the user to click the route button." The drill asks js/mining.js
+           * for the store that delivers the most over ground a hauler can actually walk, and lays
+           * the route itself. If there is nowhere to send it, the message says what to build.
+           */
+          const road = mining.autoRoute(entry.id, { quiet: true });
+          hud.log(road.ok
+            ? `${entry.name} bites into the ${what}. ${road.rate.direct
+              ? 'It is standing in your store pool, so everything it digs is already home.'
+              : `Hauling ${road.rate.perMinute.toFixed(1)}/min over ${Math.round(road.rate.metres)} m to ${stores.pools().find(p => p.id === road.route.toPoolId)?.name || 'your store'}.`} It needs power.`
+            : `${entry.name} bites into the ${what}. ${road.why}`, road.ok ? 'good' : 'warn');
+          drawRoutes();
+        }
       }
       if (!entry?.waypoint) return;
       const name = `${planet?.name || 'This world'} — ${entry.claim || 'base'}`;
@@ -1987,18 +2314,85 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     onRoute: (from, to) => {
       const pool = stores.poolAt(to.x, to.z);
       if (!pool) return { ok: false, why: `${to.name} is not a store. A route ends somewhere that holds things.` };
-      return mining.route(from.id, pool.id);
+      /**
+       * R14 — TWO STORES IS A SUPPLY LINE, NOT A MISTAKE.
+       *
+       * Clicking a drill and then a store lays a mining route, as it always has. Clicking a STORE
+       * and then a store is the thing that was asked for — "send the output back to my base using a
+       * travel route" — and it used to be refused for the wrong reason, because `mining.route`
+       * cannot bind something that is not a drill and said so about the wrong end.
+       */
+      const fromPool = stores.poolAt(from.x, from.z);
+      if (fromPool && fromPool.id !== pool.id && !mining.overview().some(r => r.id === from.id)) {
+        const made = logistics.link(fromPool.id, pool.id);
+        if (!made.ok) return made;
+        hud.log(`${fromPool.name} now sends what it piles up to ${pool.name}. ${made.quote.text}`, 'good');
+        return { ok: true };
+      }
+      const out = mining.route(from.id, pool.id);
+      if (out.ok) drawRoutes();
+      return out;
     },
     onRemove: entry => {
       grid.remove(entry.id);
       stores.remove(entry.id);
       works.remove(entry.id);
       mining.unbindDrill(entry.id);
+      drawRoutes();
       if (!entry?.waypoint) return;
       waypoints.removeBuilt(entry.id);
       homes.remove(entry.id);
     },
   });
+  /**
+   * R14 — GOODS THAT TAKE TIME TO ARRIVE.
+   *
+   *   "I would like to slap down a drill at a remote deposit, connect it to the power grid and
+   *    storage, and send the output back to my base using a travel route. Resources should take
+   *    time to move unless in the immediate vicinity, and should be able to greatly improve that
+   *    time by building roads."
+   *
+   * Inside one storage pool nothing moves and nothing is charged — that is js/stores.js's rule and
+   * it is unchanged. Between two pools a load leaves one and arrives at the other on a real clock,
+   * timed by the ground a hauler can actually walk (js/haulpath.js) and cut sharply by how much of
+   * that ground is a road you laid. `build.roads` is the book of those roads.
+   */
+  const logistics = createLogistics({
+    stores, terrain,
+    roads: build.roads,
+    power: powerData || {},
+    materials: resourceData?.materials || {},
+    log: t => hud.log(t, ''),
+  });
+
+  /**
+   * …and the base keeps working when you are not on the planet.
+   *
+   * "Production and manufacturing should continue even if you leave a planet." The clock is stamped
+   * on the way out and run forward on the way back, capped so a weekend away is not a mountain of
+   * iron. The grid is in the list because without it the generators would run for six hours on no
+   * fuel at all.
+   */
+  const away = createAwayClock({
+    works, logistics, stores, grid,
+    materials: resourceData?.materials || {},
+  });
+
+  /**
+   * R14 — THE WORKS KEPT RUNNING WHILE YOU WERE GONE.
+   *
+   * This sits HERE, rather than beside `save?.works` a few hundred lines up, for one reason: the
+   * catch-up has to happen after the stores, the grid, the works AND build mode are all back, or it
+   * runs a base that is still half empty and produces nothing out of nothing. `resume()` re-stamps
+   * the clock itself, so running it twice is harmless.
+   */
+  if (save?.logistics) logistics.load(save.logistics);
+  if (save?.away) {
+    away.load(save.away);
+    const back = away.resume();
+    if (back.text) hud.log(back.text, 'level');
+  }
+
   /**
    * The panel that answers the question. B puts it up with the ghost.
    *
@@ -2140,7 +2534,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return (pool ? stores.count(pool, id) : 0) + (materials.count?.(id) ?? 0);
     } },
     onLog: (t, c) => hud.log(t, c),
+    // the × leaves the mode, not just the panel — see the note beside the button
+    onClose: () => { build.setMode(false); document.body.classList.remove('building'); regrab(); },
     mining,
+    scan: { state: () => scanState, pin: id => pinDeposit(id) },
     works,
     // the bench you are standing next to — a base ends up with sixteen and listing them all turns
     // the panel into a spreadsheet
@@ -2279,9 +2676,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * A click counter rather than a flag: a player putting a line of fence posts down clicks faster
    * than the frame rate on a bad frame, and a dropped post feels like the game ignoring you.
    */
+  /**
+   * A CLICK IS A CLICK; A DRAG TURNS THE CAMERA.
+   *
+   * With the pointer freed in build mode (see `input.setBlocked`) the left button does two jobs:
+   * dragging the view round, and putting a piece down. They are told apart the way every desktop
+   * application tells them apart — by whether the mouse moved between press and release. Six pixels
+   * is comfortably more than a hand shakes and far less than a deliberate drag.
+   */
+  let downAt = null;
   renderer.domElement.addEventListener('mousedown', e => {
     if (!build.mode || e.button !== 0) return;
-    buildClicks++;
+    downAt = [e.clientX, e.clientY];
+  });
+  window.addEventListener('mouseup', e => {
+    if (!build.mode || e.button !== 0 || !downAt) return;
+    const moved = Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]);
+    downAt = null;
+    if (moved <= 6) buildClicks++;
+  });
+  /**
+   * WHERE THE CURSOR IS, in normalised device coordinates.
+   *
+   * Only used while the pointer is free. With it locked there is no cursor and the camera's own
+   * heading is the aim, which is what `aimSpot` falls back to.
+   */
+  renderer.domElement.addEventListener('mousemove', e => {
+    const r = renderer.domElement.getBoundingClientRect();
+    pointerNdc[0] = ((e.clientX - r.left) / r.width) * 2 - 1;
+    pointerNdc[1] = -((e.clientY - r.top) / r.height) * 2 + 1;
   });
   renderer.domElement.addEventListener('wheel', e => {
     if (!build.mode) return;
@@ -2294,7 +2717,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   if (save?.build) {
     build.load?.(save.build);
     // the drills and their routes, now that the pieces they hang off are back
-    if (save.mining) mining.load(save.mining, id => (build.entries || []).find(e => e.id === id) || null);
+    if (save.mining) { mining.load(save.mining, id => (build.entries || []).find(e => e.id === id) || null); drawRoutes(); }
     // …and everything that came back joins the grid and the pools again, or a reloaded base is a
     // field of dead machinery beside a dark pad
     for (const entry of build.entries || []) {
@@ -2560,6 +2983,30 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         bossUnit = await field.placeBoss(bossDef, level, dungeon.bossRoom.x, dungeon.bossRoom.z);
       }
     }
+    /**
+     * THE DEEP VEINS, WHICH ARE THE ONLY PLACE DEEP VEINS BELONG.
+     *
+     * Roughly twice what an outcrop holds, hardness 2, and something is usually standing in front
+     * of it — which is exactly what the data has always said and what nothing ever built. One per
+     * room or so, never in the room you came in by, so going down is a mining decision as well as a
+     * fighting one. The pack that was already placed in that room IS the guard.
+     */
+    {
+      const rooms = dungeon.rooms.filter(r => r.kind !== 'entrance');
+      const veins = [];
+      for (const room of rooms) {
+        if (field.rng() > 0.55) continue;
+        const x = room.x + (field.rng() - 0.5) * (room.w - 4);
+        const z = room.z + (field.rng() - 0.5) * (room.h - 4);
+        const made = placedNode({
+          data: resourceData || {}, rng: field.rng, kindId: 'deep_vein', x, z,
+          band: planet?.band || 'medium', id: `dv${veins.length}`,
+        });
+        if (made) veins.push(made);
+      }
+      dungeonOre = veins.length ? createNodePatch(veins, resourceData || {}) : null;
+    }
+
     field.paused = true;                        // nothing wanders in from outside: this is a closed place
     light.setTorch(true);
     scene.fog.near = 2; scene.fog.far = 70;
@@ -2572,6 +3019,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   function leaveDungeon() {
     if (!dungeon) return;
+    dungeonOre = null;                          // the floor's seams go with the floor
     field.clear();
     bossUnit = null;
     hud.boss(null);
@@ -2694,7 +3142,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         .find(e => e.key === 'alarm_bell' && Math.hypot(e.x - control.x, e.z - control.z) < 4);
       if (bell) return { kind: 'bell', bell };
 
-      const seam = ore.at(control.x, control.z, 4);
+      const seam = oreHere().at(control.x, control.z, 4);
       if (seam) return { kind: 'seam', seam };
     }
     return null;
@@ -2752,16 +3200,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         } else hud.log(`${w.name} wants ${toll} and you have ${player.gold}.`, 'bad');
         break;
       }
-      case 'standing': {
-        const cut = Math.round(player.gold * (w.cutShare || 0.1));
-        if (cut > 0 && player.gold >= cut) {
-          player.gold -= cut;
-          standings.deed(w.faction || 'wardens_reach', 'toll_paid');
-          hud.log(`You hand over ${cut}. The ledger closes.`);
-          roadFolk.settle(w.id, 'paid');
-        } else { hud.log(`${w.name} looks at your purse and waves you on.`); roadFolk.settle(w.id, 'paid'); }
-        break;
-      }
+      /**
+       * R14: THE TAX COLLECTOR IS GONE.
+       *
+       * "I had an event at town from a tax collector who took some money. Remove that lol."
+       *
+       * It was the only wanderer that took a share of your purse for nothing you chose, which is
+       * the one kind of road event that is purely a subtraction. `tax_collector` is out of
+       * data/wanderers.json and this was its only handler, so the `standing` branch goes with it.
+       * `cutShare` is still read in js/wanderers.js:101 — harmless, and there if a *chosen* tribute
+       * ever wants it.
+       */
       case 'cache': {
         const gold = 40 + Math.round(Math.random() * 60 * player.level);
         player.gold += gold;
@@ -2863,15 +3312,64 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     const gives = mark.gives || {};
+
+    /**
+     * R14 — A LANDMARK PAYS ONCE.
+     *
+     *   "I found a node 'E look at field of cairns' and it allows me to repeatedly press E to gain
+     *    infinite experience."
+     *
+     * Correct, and it was not only experience: loot, a perk point, a curse and the rest of the
+     * one-off `gives` all fired again on every press. A landmark with `steps` was safe by accident,
+     * because `workLandmark` only pays out on the last step — but twelve of the sixteen kinds in
+     * data/landmarks.json carry `solve: false`, have no steps, and so had no gate whatever.
+     *
+     * `holdings.takeLandmark` is true exactly once per landmark, for the life of the save. What it
+     * gates is the things that only make sense once: the reward, the punishment, and the events
+     * that change the world. What it does NOT gate is the standing offer a place makes — you can
+     * rest at a shrine again tomorrow, the bench is still a bench, the ford is still a ford, and
+     * the toll is charged every time you go through, which is what a toll is.
+     */
+    const firstTime = holdings.takeLandmark(here.id, mark.id);
+
+    // --- the standing offer. True every time you come back.
     if (gives.rest) { player.hp = player.maxHp; player.mp = player.maxMp; hud.log('You rest. Nothing follows you here.', 'good'); }
+    if (gives.bench) hud.log('An anvil, and a fire that never goes out. You can work here.', '');
+    if (gives.crossing) hud.log('You can cross here.', '');
+    if (gives.travelBonus) hud.log('The road is whole again. Travelling through here is quicker now.', 'good');
+    if (gives.reviveDaily) {
+      // one charge, and the day it was granted — `reviveDaily` means daily
+      player.reviveCharge = 1;
+      player.reviveDay = Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900));
+      hud.log('The water holds. If you fall today, you will get up once.', 'good');
+    }
+    if (gives.toll) {
+      const due = Math.round(gives.toll === true ? 25 * player.level : gives.toll);
+      if (player.gold >= due) {
+        player.gold -= due;
+        hud.log(`${due} gold to pass. The way is open.`, '');
+        if (mark.faction) standings.deed(mark.faction, 'toll_paid');
+      } else {
+        hud.log(`They want ${due} gold and you have ${player.gold}. You go the long way round.`, 'bad');
+      }
+    }
+
+    if (!firstTime) {
+      // Everything below has already happened here. Say so rather than silently doing nothing, or
+      // the second press reads like the key stopped working.
+      if (gives.xp || gives.loot || gives.perkPoint || gives.curse || gives.namesFoe) {
+        hud.log('You have already had what there is to have here.', '');
+      }
+      autoSave();
+      return;
+    }
+
+    // --- and the one-off, from here down.
     if (gives.revealZone) { map.revealZone?.(here.id); hud.log(`${here.name} goes on your chart.`, 'good'); }
     if (gives.perkPoint) { player.bonusPerks = (player.bonusPerks || 0) + gives.perkPoint; hud.log('A perk point, for the trouble.', 'level'); }
     if (gives.loot) { for (const it of rpg.loot.roll?.(gives.loot, player.level) || []) player.bag.push(it); }
-    if (gives.bench) hud.log('An anvil, and a fire that never goes out. You can work here.', '');
-    if (gives.crossing) hud.log('You can cross here.', '');
     if (gives.callsBeast) hud.log('Bait on the hook. Something bigger than usual will come.', 'bad');
     if (gives.opensDungeon) hud.log('The mouth is open. Something is down there.', 'loot');
-    if (gives.travelBonus) hud.log('The road is whole again. Travelling through here is quicker now.', 'good');
 
     /**
      * THE SEVEN `gives` KEYS NOTHING READ.
@@ -2891,22 +3389,6 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       applyStatus(player, 'curse', skillData.statuses?.curse, gives.curse === true ? 1 : gives.curse);
       hud.log('Something here takes an interest in you. It does not feel like a blessing.', 'bad');
       sound.combat('death', { beast: true });
-    }
-    if (gives.reviveDaily) {
-      // one charge, and the day it was granted — `reviveDaily` means daily
-      player.reviveCharge = 1;
-      player.reviveDay = Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900));
-      hud.log('The water holds. If you fall today, you will get up once.', 'good');
-    }
-    if (gives.toll) {
-      const due = Math.round(gives.toll === true ? 25 * player.level : gives.toll);
-      if (player.gold >= due) {
-        player.gold -= due;
-        hud.log(`${due} gold to pass. The way is open.`, '');
-        if (mark.faction) standings.deed(mark.faction, 'toll_paid');
-      } else {
-        hud.log(`They want ${due} gold and you have ${player.gold}. You go the long way round.`, 'bad');
-      }
     }
     if (gives.namesFoe) {
       // the thing that lives here gets a NAME, which is what makes it worth coming back for
@@ -2957,6 +3439,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       mats[id] = (mats[id] || 0) + 1 + Math.floor(field.rng() * 2);
     }
     takeHaul({ items: haul.items, gold: haul.gold, mats });
+    /**
+     * R14 — opening the crate is what finishes a fall. It pays itself out, like a raid: nobody
+     * handed it to you, so there is nobody to walk back to.
+     */
+    const fell = questLog.onChestOpened({ key: chest.key });
+    if (fell) {
+      const xp = 40 + player.level * 12;
+      rpg.gainXp(player, xp);
+      fell.reward = { gold: 0, xp };
+      questLog.turnIn(fell);
+      markers.syncQuests(questLog.active);
+      hud.log(`The crater is picked clean. +${xp} xp.`, 'good');
+    }
     autoSave();
     rewards({
       title: chest.name, subtitle: 'The lid comes up.',
@@ -2991,12 +3486,39 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const away = Math.hypot(m.x - control.x, m.z - control.z);
       hud.log(`Something is coming down, about ${away > 1000 ? `${(away / 1000).toFixed(1)} km` : `${Math.round(away)} m`} off. Thirty seconds.`, 'level');
       sound.ui('open');
+      /**
+       * R14 — AND IT GOES IN THE LOG, WITH A PIN ON IT.
+       *
+       * "I could not tell where the meteor landed however, so it should have its own map marker. It
+       *  would be interesting to act like a quest."
+       *
+       * The job is created the moment the fall starts, so the marker is on the map for the whole
+       * thirty seconds and stays there afterwards. `markers.syncQuests` picks it up on its next
+       * pass and draws it with its own ☄ rather than a quest's exclamation mark — see
+       * js/markers.js MARKER_LOOKS.fall.
+       */
+      questLog.add(makeFallQuest({
+        x: m.x, z: m.z, seconds: m.seconds,
+        cell: { x: Math.floor(m.x / M_PER_CELL), y: Math.floor(m.z / M_PER_CELL) },
+      }));
+      markers.syncQuests(questLog.active);
     },
     onLand: (m, chest) => {
       const away = Math.hypot(m.x - control.x, m.z - control.z);
       hud.log(away < 60 ? 'It comes down close enough to feel.' : 'It lands. Whatever is in it is still hot.', 'loot');
       sound.combat('death', { beast: true });
+      questLog.onFallLanded(m.chestKey);
       if (chest) chest.name = 'Meteorite';
+      /**
+       * …AND THE CRATER IS A SEAM.
+       *
+       * `meteor_site` is the only source of meteoric iron and its own description says "which is
+       * why a meteor fall is worth the walk" — and it was in the ordinary scatter, so meteoric iron
+       * turned up in fields where nothing had fallen while an actual meteor left only a chest. It
+       * is placed by hand now, here, where a meteor actually lands.
+       */
+      const seam = ore.place?.({ kindId: 'meteor_site', x: m.x + 4, z: m.z + 2, band: planet?.band || 'medium' });
+      if (seam) hud.log('Metal shows in the crater — still warm, and hard going.', 'level');
     },
   });
 
@@ -3279,6 +3801,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     return createTownFolk(scene, terrain, {
       features, rpg, namegen, looks: npcLooks, seed, balance,
       radius: lowQuality ? 500 : (balance.town?.radius ?? 900),
+      // R14: so a crier's errand lands somewhere near, at a level you can survive — js/quests.js
+      zoneAt: (x, z) => zones.at(x, z),
     });
   }
 
@@ -3795,6 +4319,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     mode = 'ground';
     rebuildWorldAround(true);
     hud.log(`You set down on ${planet.name}.`, 'good');
+    // R14: …and whatever your works made while you were away is waiting for you
+    const back = away.resume();
+    if (back.text) hud.log(back.text, 'level');
     autoSave();
   }
 
@@ -3874,6 +4401,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         air.leave();
         light.setSpots(false);            // nothing to light between the worlds
         mode = 'space';
+        /**
+         * R14 — start the away clock.
+         *
+         * "Production and manufacturing should continue even if you leave a planet." This is the
+         * one moment the planet is genuinely left behind, so it is where the stamp goes. It is also
+         * written into every save (see `snapshot`), which covers quitting from orbit.
+         */
+        away.mark();
         hud.log(`${planet.name} falls away below you.`, 'level');
         hud.log('W to fly · Shift to boost · hold Space to warp · point at a world and press J to land', '');
         autoSave();
@@ -4150,8 +4685,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const towns = nodes.filter(n => n.type === 'settlement' || n.type === 'port').map(spot);
     if (towns.length >= 2 && !trade.inZone(zone.id).length) trade.dispatch(zone, towns);
 
-    // does anything happen to this place today?
-    trouble.consider(zone, {
+    /**
+     * Does anything happen to this place today?
+     *
+     * R14 — AND IF IT DOES, *THAT* IS THE NEWS.
+     *
+     * The line under this used to be `for (const row of trouble.describe(zone.id))`, and
+     * `describe()` returns everything currently RUNNING in the zone, not what has just started. So
+     * an incident that began forty minutes ago was announced again as though it were news — and
+     * with open water re-triggering this function several times a minute (see the note in the main
+     * loop), that is where "something out there has your measure and has told its friends" was
+     * coming from, over and over. `consider()` already returns the one that started. Announce that.
+     */
+    const started = trouble.consider(zone, {
       biome: terrain.biomeAt(control.x, control.z).key,
       weather: blended.key,
       playerBeaten: !!campaign.nemesis,
@@ -4166,6 +4712,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       patrols: patrols.candidates(zone.id),
       named: campaign.nemesis ? [{ id: campaign.nemesis.id || 'nemesis', name: campaign.nemesis.name, state: 'grudge' }] : [],
       metresPerCell: cell, level: player.level,
+      /**
+       * R14 — tell the generator where the board is, how wide the world is, and what level each
+       * place sits at, so its own "local means local" rule can finally be enforced. Without these
+       * three it was handed every settlement on the planet and no way to tell them apart. See the
+       * note at the top of js/jobgen.js.
+       */
+      from: { x: control.x, z: control.z },
+      wrapM: terrain.widthM || 0,
+      zoneAt: (x, z) => zones.at(x, z),
     });
     localBoard = jobs.offer({ zone, level: player.level, candidates, want: 5 });
 
@@ -4177,7 +4732,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
     if (record?.holder) hud.log(`${zone.name} is held by ${intro.nameFor(record.holder)}.`, '');
-    for (const row of trouble.describe(zone.id)) hud.log(`${zone.name}: ${row.blurb}.`, 'bad');
+    if (started) hud.log(`${zone.name}: ${started.blurb}.`, 'bad');
+  }
+
+  /**
+   * R14 — just the board, please.
+   *
+   * Dusk and dawn want the notice board rebuilt with whoever is on the road now. They used to get
+   * that by setting `boardZone = null`, which made the game believe you had walked into the region
+   * for the first time — and so it re-announced the region, re-rolled the trouble, re-populated the
+   * road and heard a fresh rumour, twice an in-game day, for ever.
+   */
+  function buildLocalBoard(zone) {
+    if (!zone) return;
+    const cell = terrain.metresPerCell;
+    localBoard = jobs.offer({
+      zone, level: player.level, want: 5,
+      candidates: candidatesFrom({
+        zone, territory: holdings, bestiary: bestiary.enemies || [], nodes: world.nodes || [],
+        landmarks: holdings.landmarksIn(zone.id),
+        npcs: roadFolk.candidates(zone.id),
+        caravans: trade.candidates(zone.id),
+        patrols: patrols.candidates(zone.id),
+        named: campaign.nemesis ? [{ id: campaign.nemesis.id || 'nemesis', name: campaign.nemesis.name, state: 'grudge' }] : [],
+        metresPerCell: cell, level: player.level,
+        from: { x: control.x, z: control.z },
+        wrapM: terrain.widthM || 0,
+        zoneAt: (x, z) => zones.at(x, z),
+      }),
+    });
   }
 
   /**
@@ -4291,7 +4874,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const phase = night ? 'n' : 'd';
     if (lastPhase !== null && phase !== lastPhase && hud.here) {
       roadFolk.refresh(hud.here.id);
-      boardZone = null;          // and the board is rebuilt with whoever is out there now
+      // R14: rebuild the board with whoever is out there now — WITHOUT re-announcing the region,
+      // the trouble and a fresh rumour, which is what `boardZone = null` used to do here.
+      rebuildBoard = true;
     }
     lastPhase = phase;
     patrols.update(seconds, { night });
@@ -4301,7 +4886,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (event.kind === 'caravan-attacked') hud.log(`${event.name} is under attack.`, 'bad');
     }
     // in-game hours, from the same clock the day/night cycle runs on
-    for (const event of holdings.tick(seconds / 60)) {
+    /**
+     * R14 — AN HOUR MEANS THE SAME THING TO EVERY CLOCK IN THE GAME.
+     *
+     * This read `seconds / 60`: one territory hour per sixty real seconds. The sun runs off
+     * `balance.json` `sky.dayLengthSeconds` (900), which is twenty-four hours in fifteen real
+     * minutes — one sky hour per 37.5 seconds. So an incident written as "24 hours" (the ash fall,
+     * the fair day) lasted twenty-four real minutes, which the sun says is a day and two thirds,
+     * and an incident's lifetime never lined up with anything the player could see out of a window.
+     * Deriving it from the same number means "48 hours" is two sunrises, because it is.
+     */
+    const hoursPerSecond = 24 / (balance.sky?.dayLengthSeconds ?? 900);
+    for (const event of holdings.tick(seconds * hoursPerSecond)) {
       if (event.kind === 'zone-changed-hands') {
         hud.log(`${zones.byId(event.zoneId)?.name || 'The ground'} belongs to ${intro.nameFor(event.to)} now.`, 'level');
       }
@@ -4354,9 +4950,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       grid: grid.toJSON(),
       // which seams you have worked out, and the drills and routes standing on them
       ore: ore.toJSON(),
+      // what you have cut down and where you have cleared the ground — see js/props.js
+      props: props.toJSON(),
       mining: mining.toJSON(),
       // the benches, their queues, and the recipes you have unlocked by doing them
       works: works.toJSON(),
+      // R14 — loads on the road, the standing orders behind them, and when you left
+      logistics: logistics.toJSON(),
+      away: away.toJSON(),
       // §7 — the raid you took on, and how far through it you are
       defence: defence.toJSON(),
       /**
@@ -4523,9 +5124,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const code = settings.keyFor(b.action);
       // a default you moved away from and never reused does nothing at all; say so rather than
       // printing a key that is not bound
+      // R14: `b.name` was a typo for `b.label` — every row in the pause menu's control list read
+      // "W undefined" for the whole life of the rebinding panel.
       return code
-        ? `<b>${settings.keyLabel(code)}</b> ${b.name}`
-        : `<span class="dim">${b.name} unbound</span>`;
+        ? `<b>${settings.keyLabel(code)}</b> ${b.label}`
+        : `<span class="dim">${b.label} unbound</span>`;
     });
     hint.innerHTML = `${parts.join(' · ')}<br><span class="dim">in space: W fly · Shift boost · `
       + 'hold Space warp · J land</span>';
@@ -4556,6 +5159,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const on = !build.mode;
       build.setMode(on);
       buildUI.setOpen(on);
+      /**
+       * The middle-of-the-screen dot is a LIE while the cursor is free: it says "you are aiming
+       * here" and the ghost is under the mouse. So it goes away, and the canvas gets a real
+       * crosshair cursor instead.
+       */
+      document.body.classList.toggle('building', on);
+      if (on) input.release(); else regrab();
       hud.log(on
         ? 'Build mode. Scroll to turn · click to place · Enter to finish a run · Ctrl+Z to undo · B to stop.'
         : 'Build mode off.', on ? 'level' : '');
@@ -4563,7 +5173,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (build.mode) {
       if (e.code === 'Enter') { e.preventDefault(); build.finishRun?.(); }
       if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); build.undo?.(); }
-      if (e.code === 'Escape') { e.preventDefault(); build.setMode(false); buildUI.setOpen(false); }
+      if (e.code === 'Escape') {
+        e.preventDefault();
+        // a half-dragged road is thrown away first; a second Esc leaves the mode
+        if (build.cancelRun?.()) { hud.log('Run dropped.', ''); buildUI.refresh(); }
+        else {
+          build.setMode(false); buildUI.setOpen(false);
+          document.body.classList.remove('building'); regrab();
+        }
+      }
       // the brush is the terrain tools' whole interface; it needs a size you can change
       if (e.code === 'BracketLeft') { e.preventDefault(); build.setRadius(build.radius - 2); }
       if (e.code === 'BracketRight') { e.preventDefault(); build.setRadius(build.radius + 2); }
@@ -4620,7 +5238,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
   // panels own the mouse while they are open: the canvas must not grab it back on the next click
   // one predicate, so the mouse and the clock never disagree about whether a panel is up
-  input.setBlocked(() => panelOpen() || debug.isOpen);
+  /**
+   * BUILD MODE GIVES THE MOUSE BACK.
+   *
+   * "Pressing B to open the build menu should also free up the cursor so you can select items from
+   * it." It is a panel with forty buttons in it and the pointer was locked to the middle of the
+   * screen, so the only way to pick anything was the keyboard, and there were no keys. The mode is
+   * therefore in the blocked list: the click that would normally re-take the pointer does not, and
+   * `aimSpot` reads the real cursor instead of the camera's nose. Dragging still turns the camera —
+   * js/player.js has always supported that for players who would rather not be captured at all.
+   */
+  input.setBlocked(() => panelOpen() || debug.isOpen || build.mode);
 
   function tick() {
     requestAnimationFrame(tick);
@@ -4798,8 +5426,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
 
 
-    // V is first person: the head comes off the model, not just the camera
-    if (!frozen && snap.pressed?.has('KeyV')) setFirstPerson(!control.firstPerson);
+    /**
+     * V DOES TWO THINGS NOW: TAP FOR FIRST PERSON, HOLD TO LOOK AROUND.
+     *
+     *   "Allow holding V in walk mode to cause the camera to change to rotation mode, where mouse
+     *    moves the camera. This is to allow you to get a front view look at your character."
+     *
+     * The orbiting itself is in js/player.js — it is the camera's own angles, and the body keeps
+     * facing where it was facing. All this does is decide which of the two a press of V was: a tap
+     * shorter than `V_TAP` that never actually swung the camera toggles first person (the head
+     * comes off the model, not just the camera), and anything else was a look-around and must NOT
+     * also flip the view mode when you let go.
+     */
+    if (!frozen && snap.pressed?.has('KeyV')) vKey = { at: state.elapsed, orbited: false };
+    if (vKey && control.freeLook) vKey.orbited = true;
+    if (vKey && !snap.keys?.has('KeyV')) {
+      if (!vKey.orbited && state.elapsed - vKey.at < V_TAP) setFirstPerson(!control.firstPerson);
+      vKey = null;
+    }
 
     // skills on 1-6 — not while a panel has the keyboard
     if (!frozen && snap.pressed?.size) {
@@ -5128,7 +5772,65 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           if (!already.has(enemy)) brandHit(enemy, result);
         }
       }
+
+      /**
+       * AND THE SAME SWING TAKES DOWN A TREE, A BOULDER OR A SEAM.
+       *
+       * "Since we need timber and stone now, can we update the existing wood and stone to be
+       * mineable? I think it would be more fun to attack these objects rather than press E on
+       * them." So there is no gathering key and no gathering mode: the thing you already do sixty
+       * times a minute is the thing that gathers. Only when the swing landed on nothing living —
+       * hitting a wolf standing in front of an oak should fight the wolf.
+       */
+      if (!hits.length) harvestSwing(share * shape.damage, reach);
     };
+
+    /**
+     * One swing, against whatever scenery is in front of you.
+     *
+     * The tool tier is the same ladder a seam uses, read off the weapon in your hands, so there is
+     * one rule for "can I get this out of the ground" rather than two. A seam takes its swing from
+     * js/mining.js and a tree from js/props.js; both pay out through `payOut`, which puts the goods
+     * in the store beside you if there is one.
+     */
+    function harvestSwing(power = 1, reach = 3) {
+      const toolKey = toolTierFor(player);
+      const tier = resourceData?.tools?.[toolKey]?.tier ?? 1;
+      const [fx0, fz0] = control.facing();
+      const ax = control.x + fx0 * reach * 0.45, az = control.z + fz0 * reach * 0.45;
+
+      // a seam first: it is the smaller target and the one you walked out here for
+      const seam = oreHere().at(ax, az, Math.max(2.5, reach * 0.9));
+      if (seam) {
+        const out = mining.swing(seam, 1.0, { tool: toolKey });
+        if (out.got > 0) {
+          sound.ui('click');
+          /**
+           * A swing a second would be a log line a second, which is a log nobody reads. The take is
+           * added up and reported when you stop, when the seam runs out, or after a few seconds of
+           * steady work — so the number in the log is always "what that seam gave you", never a
+           * running commentary.
+           */
+          tally.res = out.resource;
+          tally.got += out.got;
+          tally.at = state.elapsed;
+          if (out.depleted) { flushTally(); hud.log('The seam is worked out.', ''); }
+        } else if (out.why) hud.log(`You cannot work this: ${out.why}.`, 'warn');
+        return true;
+      }
+
+      const res = props.strike(ax, az, { damage: Math.max(1, (player.derived.damage?.[1] || 8) * power * 0.85), reach: Math.max(2.6, reach), tier });
+      if (!res.hit) {
+        if (res.blocked && res.why) hud.log(res.why, 'warn');
+        return false;
+      }
+      sound.combat('hit');
+      if (!res.felled) return true;
+      payOut(res.materials);
+      const got = matText(res.materials);
+      hud.log(`You ${res.verb} the ${res.name}.${got ? ` ${got}.` : ''}`, 'good');
+      return true;
+    }
 
     /**
      * A CLICK IN BUILD MODE BUILDS. IT DOES NOT SWING.
@@ -5219,10 +5921,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       sites.relax(control.x, control.z);
       encounters.update(dt, control, player);
       for (const site of sites.due(control.x, control.z)) {
-        // a castle is not "a camp": sites.js gives each place its own blurb and its own type name
-        hud.log(site.kind === 'lair'
-          ? `Something lives at ${site.name}.`
-          : (site.blurb || `${site.spec?.name || 'A camp'} at ${site.name}.`), 'bad');
+        // R14: `fresh` is false on a place that has already introduced itself once — walking away
+        // and back used to announce the same camp every time. See `due()` in js/sites.js.
+        if (site.fresh) {
+          // a castle is not "a camp": sites.js gives each place its own blurb and its own type name
+          hud.log(site.kind === 'lair'
+            ? `Something lives at ${site.name}.`
+            : (site.blurb || `${site.spec?.name || 'A camp'} at ${site.name}.`), 'bad');
+        }
         populateSite(site);
       }
     }
@@ -5356,8 +6062,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             : st.state === 'running' ? 'They are already at the wall'
             : `<b>E</b> listen at the bell${st.why ? ` · ${st.why}` : ''}`;
         })()
-        : near.kind === 'seam' ? `<b>E</b> work the ${(resourceData?.materials?.[near.seam.resource]?.name || near.seam.resource).toLowerCase()}`
+        /**
+         * …and the prompt says WHAT YOU ARE DIGGING WITH.
+         *
+         * Farhold has no pick slot: the tool tier is read off the weapon in your hands, and nothing
+         * on screen ever said so — which is half of why "I need a steel tool" read as a dead end.
+         * Naming the tool on the one prompt where it matters teaches the rule in passing, and the
+         * refusal (js/resources.js) says where the next tier comes from when you hit one.
+         */
+        : near.kind === 'seam' ? `<b>E</b> or swing to work the ${(resourceData?.materials?.[near.seam.resource]?.name || near.seam.resource).toLowerCase()}`
           + ` · ${(resourceData?.richnessBands?.find(b => b.key === near.seam.band)?.name || near.seam.band || '').toLowerCase()}`
+          + ` · ${(resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase()}`
         /**
          * …and anything this list has not heard of is NOT a person.
          *
@@ -5473,11 +6188,32 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (state.frames % 45 === 0) {
       sound.place(terrain.biomeAt(control.x, control.z).key, { inTown: !!town, storm: blended.wind });
     }
-    const here = dungeon ? null : zones.at(control.x, control.z);
+    /**
+     * R14 — ARRIVING SOMEWHERE IS NOT THE SAME AS THE ZONE ID CHANGING.
+     *
+     *   "There are events that happen very frequently in the chat… They happen too often."
+     *
+     * `zones.at()` calls open water a zone of its own (`id: -1`), and this line treated any change
+     * of id as walking into new territory — which re-announced the region, re-rolled what is
+     * happening here, re-populated the road and heard another rumour. Wading into a river and back
+     * out did all of that, several times a minute, on every world that has rivers.
+     *
+     * `atOrLast` hands back the last real region while you are in the water, so a river is
+     * something you cross. The map readout and the spawn bands still use `at()`, because they do
+     * genuinely want to know you are in the sea.
+     */
+    const here = dungeon ? null : zones.atOrLast(control.x, control.z);
     hud.here = here;
     // crossing a border announces the new region on screen, with its band
-    if (here) hud.announceZone(here, player.level);
+    if (here && !zones.isOpenWater(here)) hud.announceZone(here, player.level);
     if (here && here.id !== boardZone) enterTerritory(here);
+    /**
+     * …and R14's other half: dusk and dawn used to set `boardZone = null` to get the notice board
+     * rebuilt with whoever is on the road now, which is right — but it did it by pretending you had
+     * just arrived, so everything else `enterTerritory` says was said again. Twice an in-game day,
+     * for ever. The board now asks for itself.
+     */
+    if (here && rebuildBoard) { rebuildBoard = false; buildLocalBoard(here); }
     if (state.frames % 30 === 0) tickTerritory(0.5);
 
     /**
@@ -5493,6 +6229,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       wind: blended.wind ?? 0.5,
     });
     works.tick(dt);
+    // R14: the carts on the road between your outposts and your base — js/logistics.js
+    for (const got of logistics.tick(dt).arrived) {
+      hud.log(`${got.n} ${got.name.toLowerCase()} arrived at ${got.to}.`, 'good');
+    }
     // the grid's answer reaches the pad, the turret and the smelter — see syncPower
     if (state.frames % 20 === 0) syncPower();
     if (state.frames % 15 === 0) {
@@ -5518,7 +6258,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     tickPools(dt);
     // the seams' respawn clocks, and the drills and routes that work them
-    if (state.frames % 900 === 0) ore.tick(15);
+    if (state.frames % 900 === 0) { oreHere().tick(15); props.tickHarvest(15); }
+    // the run of swings is over the moment you stop, or after three quiet seconds
+    if (tally.res && state.elapsed - tally.at > 3) flushTally();
+    flushGroundPile();
     mining.tick(dt);
     /**
      * THE TURRETS SHOOT BACK.
@@ -5547,7 +6290,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // …and the rocks on the ground. It does its own "has anything changed" check.
     if (state.frames % 10 === 0) {
-      oreView.update(ore.around(control.x, control.z), control.x, control.z, {
+      oreView.update(oreHere().around(control.x, control.z), control.x, control.z, {
         heightAt: (x, z) => terrain.heightAt(x, z),
         // seams are sparse — about fourteen to a 512 m tile — so a short draw radius means walking
         // through a field of ore and seeing none of it. This is cheap: one InstancedMesh per kind.
@@ -5641,6 +6384,42 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // the sky's own events: a meteor every few minutes, and shooting stars in between
     if (!dungeon) meteors.update(dt, control);
     if (state.frames % 12 === 0) map.tick();
+
+    /**
+     * R14 — WHAT IS GOING ON WITHIN WALKING DISTANCE.
+     *
+     *   "Add a 'Nearby Activities' area below the minimap when walking around… It should show what
+     *    nearby activities are available including the ones that pop up in chat or have a location
+     *    nearby."
+     *
+     * Every one of these lists already existed and none of them was ever shown together.
+     * `encounters.events` in particular is a finished activity feed — id, name, position, seconds
+     * left — that nothing in the game read. Redrawn four times a second, which for distances and
+     * clocks is indistinguishable from every frame and fifteen times less work; the list itself is
+     * pure (js/nearby.js) so the sort order is tested rather than eyeballed.
+     */
+    if (state.frames % 15 === 0) {
+      // `mode` is 'ground' when you are on your feet; anything else is flight or a jump
+      const flying = mode !== 'ground';
+      const rows = (dungeon || flying) ? [] : nearbyList({
+        at: { x: control.x, z: control.z },
+        wrapM: terrain.widthM || 0,
+        events: encounters.events || [],
+        meteors: meteors.marks(),
+        sites: sites.visible || [],
+        caravans: hud.here ? trade.inZone(hud.here.id) : [],
+        folk: hud.here ? roadFolk.inZone(hud.here.id) : [],
+        quests: questLog.active.map(q => ({
+          id: q.id, title: q.title, place: q.place, done: q.done,
+          markerKind: q.markerKind, progress: questLog.progressText(q),
+        })),
+      });
+      drawNearby(rows, {
+        hidden: !!dungeon || flying,
+        onLocate: a => map?.locate?.({ x: a.x, z: a.z, name: a.name, kind: a.kind === 'fall' ? 'fall' : 'place' }),
+      });
+      nearbyRows = rows;
+    }
 
     renderFrame();
   }
@@ -5768,6 +6547,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get ore() { return ore; },
     get oreView() { return oreView; },
     get mining() { return mining; },
+    /** Round 13: the scanner's last sweep, and the pin button behind it. */
+    scan: { sweep: (x, z, r = 400) => sweepForDeposits(x ?? control.x, z ?? control.z, r), state: () => scanState, pin: id => pinDeposit(id) },
     get defence() { return defence; },
     /** Every enemy id, so a test can spawn one without reading the data file. */
     get bestiaryIds() { return (bestiary.enemies || []).map(e => e.id); },
@@ -5796,7 +6577,6 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     standings, holdings, trouble, patrols, trade, roadFolk, rumours, jobs, factionData,
     creditKill, meetOnTheRoad,
     get sites() { return sites; },
-    get folk() { return folk; },
     get board() { return localBoard; },
     enterTerritory, tickTerritory,
     pauseMenu,
@@ -5847,7 +6627,6 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get palette() { return palette; },
     get terrain() { return terrain; },
     launch, land,
-    get folk() { return folk; },
     questLog, markers, talk, talkContext, sound, speech, campaign, settings, meteors,
     get band() { return band; },
     chart, galaxy, warp, beginJump,

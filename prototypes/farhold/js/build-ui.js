@@ -33,11 +33,16 @@ import { el } from '../../../shared/ui.js';
 const TOOLS = [
   { key: 'smooth', name: 'Level', hint: 'Flatten a circle of ground to the height under the cursor. Do this first.' },
   { key: 'build', name: 'Place', hint: 'Put the selected piece down. Scroll to turn it.' },
-  { key: 'road', name: 'Road', hint: 'Click a line of points, Enter to lay the road along it.' },
-  { key: 'wall', name: 'Wall', hint: 'Same, but a wall — and Enter puts a gate where you double back.' },
+  { key: 'road', name: 'Road', hint: 'Click a corner, then another, then press Enter. It lays one smooth road, not a row of tiles — the ground comes up to meet it and the corners round themselves. Goods travel far quicker over one.' },
+  { key: 'wall', name: 'Wall', hint: 'Same as Road, but a wall — and a gate goes where you double back over a corner.' },
   { key: 'raise', name: 'Raise', hint: 'Pull the ground up under the brush.' },
   { key: 'lower', name: 'Lower', hint: 'Push it down. A moat is a lowered ring.' },
-  { key: 'clear', name: 'Clear', hint: 'Fell the trees and boulders in the brush. You keep the timber.' },
+  { key: 'clear', name: 'Clear', hint: 'Fell every tree, bush and boulder in the brush, and keep what they drop. [ and ] size the brush.' },
+  /**
+   * The scanner. It comes before Take down because finding a seam is an early-game job and
+   * deconstructing is a late one.
+   */
+  { key: 'scan', name: 'Scan', hint: 'Sweep for ore, stone, clay and timber. [ and ] widen the sweep. What it finds is listed below and pinned to the map.' },
   { key: 'remove', name: 'Take down', hint: 'Deconstruct what you point at. Most of the cost comes back.' },
   /**
    * The route tool: click a drill, then click a store.
@@ -51,15 +56,28 @@ const TOOLS = [
 /**
  * THE FIRST THING A NEW PLAYER NEEDS IS NOT A CATALOGUE, IT IS A SENTENCE.
  *
- * Four steps, in order, in the words the panel's own buttons use. It sits above the list and goes
- * away for good once there is a claim stone on the map, because the answer to "how do I start a
- * base" stops being useful the moment you have one.
+ * Six steps, in order, in the words the panel's own buttons use. It sits above the list and goes
+ * away for good once anything at all is standing, because the answer to "how do I start a base"
+ * stops being useful the moment you have one.
+ *
+ * Round 13 added the first and the fifth. The first, because every step after it spends materials
+ * and nothing anywhere said where materials come from — and "your weapon is your tool" is a rule a
+ * player has no way to guess. The fifth, because the scanner and the self-routing drill are the
+ * whole of getting ore without standing over it.
+ *
+ * ROUND 14 DELETED THE THIRD. It said *"choose Claim Stone under Waypoint, and put it in the middle.
+ * The ground is yours now"* — and it was the instruction that led straight into the deadlock the
+ * user hit, because the stone cost two iron ingots and iron needed a furnace and a furnace needed
+ * the stone. There is no permit any more. You build where you like, and a cluster of things you
+ * built becomes an outpost because it IS one.
  */
 const FIRST_STEPS = [
-  'Pick Level, aim at flat-ish ground and click. That is your plot.',
-  'Pick Place, choose Claim Stone under Waypoint, and put it in the middle. The ground is yours now.',
-  'Build a Storage Crate and a Burner Generator beside it, and put coal in the crate.',
-  'When you can afford a Waypoint Pad, build it. You can travel home from anywhere after that.',
+  'Materials come off the land: swing at a tree for timber, a boulder for stone, a seam for ore. Your weapon is your tool.',
+  'Pick Level, aim at flat-ish ground and click. Whatever is growing there comes down and you keep it. That is your plot.',
+  'Pick Place and put down a Furnace and a Storage Crate. You can build anywhere — no permit, no marker, no ceremony.',
+  'Build a Burner Generator beside the crate and put coal in the crate. Anything within reach of a store shares its pile.',
+  'Pick Scan to find the seams around you, then put a Drill on one — it finds its own way to your store.',
+  'Far from home? Put a crate out there too and link it back. The load takes a while; a road makes it much quicker.',
 ];
 
 /** "12 stone, 2 iron" — and the ones you are short of are the ones that matter. */
@@ -72,7 +90,7 @@ function costLine(cost, have) {
     });
 }
 
-export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, mining = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null } = {}) {
+export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, onClose = null, mining = null, scan = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null } = {}) {
   const pieces = catalogue?.structures || [];
   const categories = catalogue?.categories || {};
   const have = id => (store?.have ? store.have(id) : 0);
@@ -92,6 +110,15 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
   const listBox = el('div', { class: 'build-list' });
   /** §1 — what every drill is doing, and what is holding it up. Empty until you own a drill. */
   const minesBox = el('div', { class: 'build-mines' });
+  /**
+   * §1 — what the last sweep of the scanner turned up. Empty until you press Scan.
+   *
+   * Its OWN class, not `build-mines` as well. The file already learned this once with `build-yard`:
+   * two sections sharing a class means `querySelector('.build-mines')` returns whichever happens to
+   * be first in the document, and a test (or a stylesheet) meaning the drill list silently gets the
+   * scanner. It looks identical, so it shares the LOOK — see `.build-scan` in style.css.
+   */
+  const scanBox = el('div', { class: 'build-scan' });
   /** §2 — the bench you are standing next to, and what it can make. */
   const benchBox = el('div', { class: 'build-bench' });
   /** §9 — the pad, the four subsystems, the ship, and the tanks. */
@@ -122,12 +149,18 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
    * always reachable.
    */
   const body = el('div', { class: 'build-body' },
-    steps, toolRow, catRow, listBox, minesBox, benchBox, workBox, holdBox, garageBox, yardBox, detail);
+    steps, toolRow, catRow, listBox, scanBox, minesBox, benchBox, workBox, holdBox, garageBox, yardBox, detail);
   root.append(head, body, keys);
 
   head.append(
     el('h2', { text: 'Build' }),
-    el('button', { class: 'build-close', text: '×', title: 'Close (B)', onclick: () => api.setOpen(false) }),
+    /**
+     * The × leaves BUILD MODE, not just the panel.
+     *
+     * Closing only the panel left the mode running with the pointer freed, no catalogue and no way
+     * back except pressing B twice — a state the player has no name for and no way out of.
+     */
+    el('button', { class: 'build-close', text: '×', title: 'Close (B)', onclick: () => { api.setOpen(false); onClose?.(); } }),
   );
   keys.textContent = 'scroll turn · click place · Enter finish a run · Ctrl+Z undo · Esc or B leave · [ ] brush size';
 
@@ -177,8 +210,14 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
         onclick: () => {
           pick = p.id;
           build?.select(p.id);
-          // choosing a thing to build means you want to build it, so the tool follows the choice
-          if (build?.tool !== 'build' && p.cat !== 'road') build.setTool('build');
+          /**
+           * Choosing a thing to build means you want to build it, so the tool follows the choice —
+           * EXCEPT for the pieces that are laid as a run. A road or a palisade picked while the
+           * Road or Wall tool is up is you choosing which road, not you asking to place one slab.
+           */
+          const runnable = p.cat === 'road' || p.cat === 'defence';
+          const onRunTool = build?.tool === 'road' || build?.tool === 'wall';
+          if (build?.tool !== 'build' && !(runnable && onRunTool)) build.setTool('build');
           redraw();
         },
       });
@@ -240,10 +279,34 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     if (p.power?.use) notes.push(`Draws ${p.power.use} kW. It will not run without a generator in reach.`);
     if (p.power?.make) notes.push(`Makes ${p.power.make} kW${p.power.burns ? `, burning ${p.power.burns}` : ''}.`);
     if (p.store?.slots) notes.push(`Holds ${p.store.slots} slots, shared with every store it can reach.`);
-    if (p.claims) notes.push('Stakes the ground. A base starts here.');
+    // Round 14: it stakes nothing. You can build anywhere; this only puts a name on the place.
+    if (p.claims) notes.push('Optional. Names this outpost and marks its middle.');
     if (p.waypoint) notes.push('Joins the waypoint network. You can travel back to it from anywhere.');
     if (p.slope != null) notes.push(`Wants ground no steeper than about 1 in ${Math.max(1, Math.round(1 / p.slope))}.`);
     for (const n of notes) detail.append(el('p', { class: 'small muted', text: n }));
+
+    /**
+     * A RUN TOOL SAYS WHERE IT HAS GOT TO.
+     *
+     * "The build Road tool doesn't seem to do anything." Half of that was the world — there was no
+     * preview, which js/build.js now draws — and half was here: the panel showed the piece's cost
+     * and the ghost's verdict, neither of which changes when you click a corner, so the panel was
+     * as silent as the ground. Now the tool that is up owns this line.
+     */
+    if (build && (build.tool === 'road' || build.tool === 'wall')) {
+      const n = (build.runPoints || []).length;
+      const word = build.tool === 'wall' ? 'wall' : 'road';
+      detail.append(el('p', {
+        class: n >= 2 ? 'build-ok' : 'build-why',
+        text: !n ? `Click the first corner of the ${word} on the ground.`
+          : n === 1 ? 'One corner down. Click the next one.'
+          : `${n} corners · press Enter to lay the ${word} · Esc to drop the run.`,
+      }));
+      if (build.tool === 'wall' && n >= 2) {
+        detail.append(el('p', { class: 'small muted', text: 'Double back over a corner and the gate goes there.' }));
+      }
+      return;
+    }
 
     /**
      * WHY THE GHOST IS RED.
@@ -281,6 +344,47 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
         : `${r.stock} piled up · no route`;
       line.append(el('span', { class: 'muted small', text: note }));
       minesBox.append(line);
+    }
+  }
+
+  /**
+   * WHAT THE SCANNER FOUND — the answer to "where is the iron on this planet".
+   *
+   * One row per material rather than one per seam: a sweep over half a kilometre turns up forty
+   * outcrops and a list of forty is not an answer, it is a spreadsheet. The row carries the best of
+   * that material within reach, judged by what it would DELIVER from where you are standing, which
+   * is the same number js/resources.js has used to compare seams since it was written.
+   *
+   * "Pin it" drops a marker, so the thing you just found is on the map and the minimap with an
+   * arrow on the rim when it is off the edge — exactly what js/markers.js was built for.
+   */
+  function drawScan() {
+    scanBox.replaceChildren();
+    const state = scan?.state?.();
+    // up while the Scan tool is picked, or once a sweep has been made — never otherwise, or the
+    // panel carries an empty heading for the whole game
+    if (!state || (!state.swept && build?.tool !== 'scan')) return;
+    scanBox.append(el('h3', { text: 'Deposits' }));
+    if (!state.rows?.length) {
+      scanBox.append(el('p', { class: 'small muted', text: state.swept
+        ? `Nothing within ${Math.round(state.radius)} m. Walk somewhere else and sweep again.`
+        : 'Pick Scan, aim at the ground and click.' }));
+      return;
+    }
+    scanBox.append(el('p', { class: 'small muted', text: `${state.found} seams within ${Math.round(state.radius)} m · best of each` }));
+    for (const row of state.rows) {
+      const line = el('div', { class: 'build-mine' });
+      line.append(
+        el('span', { class: 'build-mine-name', text: row.resourceName }),
+        el('span', { class: 'build-mine-rate', text: `${Math.round(row.distance)} m ${row.compass}` }),
+        el('span', { class: `build-mine-limit limit-${row.band}`, text: row.bandName }),
+        el('span', { class: 'muted small', text: `${row.deliveredPerMinute}/min delivered` }),
+      );
+      line.append(el('button', {
+        class: 'small', text: row.pinned ? 'pinned' : 'pin it',
+        onclick: () => { scan.pin(row.id); redraw(); },
+      }));
+      scanBox.append(line);
     }
   }
 
@@ -507,7 +611,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
 
   function redraw() {
     if (!open) return;
-    drawSteps(); drawTools(); drawCats(); drawList(); drawMines(); drawBench();
+    drawSteps(); drawTools(); drawCats(); drawList(); drawScan(); drawMines(); drawBench();
     drawWork(); drawHolding(); drawGarage(); drawYard(); drawDetail();
   }
 
@@ -525,6 +629,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     tick() {
       if (!open) return;
       drawDetail();
+      drawScan();
       drawMines();
       drawBench();
       drawWork();

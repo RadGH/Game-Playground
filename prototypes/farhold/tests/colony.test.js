@@ -609,8 +609,10 @@ test('a raid lives in the quest log without becoming a village errand', () => {
   const offer = makeOffer(2);
   log.add(offer);
   assert.equal(isStarted(offer), true);
-  assert.deepEqual(STARTED_KINDS, ['raid']);
+  // R14 added `fall` — a meteor is a job nobody handed you either. Both must stay out of QUEST_KINDS.
+  assert.deepEqual(STARTED_KINDS, ['raid', 'fall']);
   assert.ok(!QUEST_KINDS.includes('raid'), 'a raid must never be rolled onto a job board');
+  assert.ok(!QUEST_KINDS.includes('fall'), 'a meteor must never be rolled onto a job board');
   assert.equal(log.byGiver(null).length, 0, 'a raid turned up in an NPC\'s job list');
   assert.equal(log.raids().length, 1);
   assert.equal(log.progressText(offer), 'not taken');

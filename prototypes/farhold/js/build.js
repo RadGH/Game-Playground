@@ -28,6 +28,7 @@
 
 import * as THREE from 'three';
 import { createBuildPlan, makeBag } from './buildplan.js';
+import { createRoadBook, laneRibbon, levelUnderSlab } from './roadplan.js';
 
 /** Geometry is shared: a hundred fence panels are a hundred meshes over four geometries. */
 const GEO = {
@@ -208,6 +209,27 @@ export function createBuild(scene, {
    * what was standing in it and what it drops.
    */
   onClear = null,
+  /**
+   * §1 — the scanner: `(x, z, radius) => { found, rows }`.
+   *
+   * "Add a scan tool with fixed resource deposits like Satisfactory… we definitely need a way to
+   * find ones nearby." The seams have been fixed in place since round 11 — a seam's position is a
+   * pure function of the world seed — but there was no way to know one was there except to walk
+   * over it, and they are sparse by design. So the ping.
+   *
+   * Like `onClear`, the sweep is a callback: this file knows where you pointed and nothing about
+   * what is in the ground.
+   */
+  onScan = null,
+  /**
+   * The ground under a brush just changed shape: `(x, z, radius) => void`.
+   *
+   * Reported in play: "When using raise/lower/level tools it does not affect the grass/trees." A
+   * terrain edit moved the ground and left everything growing on it at the height it was scattered
+   * at, so a levelled plot kept its trees hanging in the air. `js/props.js` owns the scatter, so it
+   * is told and it decides — this file only knows where the brush landed.
+   */
+  onGround = null,
   onLog = null,
   /**
    * Somebody put a piece down, or took one away: `(entry, def) => void`.
@@ -226,9 +248,36 @@ export function createBuild(scene, {
   const rules = catalogue?.rules || {};
   const log = (msg, kind) => { if (onLog) onLog(msg, kind); };
 
+  /**
+   * ROUND 14 — THE ROADS YOU LAY, AS ROADS.
+   *
+   * *"The road tool places a lot of rectangles that leave gaps in between and look unnatural."* It
+   * did, because a road was ninety separate four-metre boxes in the build ledger, each sitting on
+   * the height of its own middle. js/roadplan.js is the other idea — a polyline with a graded height
+   * per point, which is what the world's own roads have always been — and this book holds the ones
+   * the player laid. They are NOT entries in the ledger: a lane has no footprint, collides with
+   * nothing, and putting ninety boxes in the ledger meant ninety overlap tests on every ghost frame.
+   */
+  const roads = createRoadBook({ terrain, terraform });
+
   const root = new THREE.Group();
   root.name = 'farhold-build';
   scene.add(root);
+
+  /** One mesh per lane, drawn by the same ribbon maths js/features.js uses for the world's roads. */
+  const roadGroup = new THREE.Group();
+  roadGroup.name = 'farhold-build-roads';
+  scene.add(roadGroup);
+  const laneMeshes = new Map();
+
+  /**
+   * WHAT YOU DID LAST, SO CTRL+Z KNOWS WHICH BOOK TO LOOK IN.
+   *
+   * There are two ledgers now — pieces in js/buildplan.js and lanes in the road book — and `undo`
+   * used to be "pop the pieces". Lay a road, press Ctrl+Z, and it would quietly take down the shed
+   * you built ten minutes ago instead. A three-line stack of `{ kind, id }` is the whole fix.
+   */
+  let actions = [];
 
   /** entry id → its group, so deconstructing one piece does not walk the scene graph. */
   const meshes = new Map();
@@ -245,6 +294,64 @@ export function createBuild(scene, {
   brush.rotation.x = Math.PI / 2;
   brush.visible = false;
   scene.add(brush);
+
+  /**
+   * THE RUN YOU ARE DRAGGING, DRAWN.
+   *
+   * Reported in play: *"The build 'Road' tool doesn't seem to do anything."* It did exactly what it
+   * was written to do — every click pushed a point onto a list and Enter turned the list into a
+   * road — but nothing about that was VISIBLE. Four clicks and a silent array is indistinguishable
+   * from a broken tool, and the player is right to call it one.
+   *
+   * So: a peg at every point you have clicked, a band of ground between them, and a dashed leg from
+   * the last peg to wherever the cursor is now. The preview uses the same half-width the piece
+   * itself will, so what you see is where the road goes.
+   */
+  const runGroup = new THREE.Group();
+  runGroup.name = 'farhold-build-run';
+  runGroup.visible = false;
+  scene.add(runGroup);
+  const runPegMat = matFor('#7fd4ff', { transparent: true, opacity: 0.9 });
+  const runBandMat = matFor('#7fd4ff', { transparent: true, opacity: 0.35 });
+  const runGhostMat = matFor('#e0c070', { transparent: true, opacity: 0.28 });
+
+  /** Rebuild the preview from `runPoints` plus wherever the cursor is. Cheap: a dozen boxes. */
+  function drawRun() {
+    while (runGroup.children.length) {
+      const c = runGroup.children.pop();
+      c.geometry?.dispose?.();
+    }
+    const isRun = mode && (tool === 'road' || tool === 'wall');
+    runGroup.visible = isRun && runPoints.length > 0;
+    if (!runGroup.visible) return;
+    const def = book.byId(selected) || book.byId(tool === 'road' ? 'road_dirt' : 'palisade');
+    const half = def?.road?.half ?? Math.max(1.2, def?.d ?? 1.4);
+
+    const peg = (x, z) => {
+      const m = new THREE.Mesh(GEO.cyl, runPegMat);
+      m.position.set(x, terrain.heightAt(x, z) + 0.6, z);
+      m.scale.set(0.5, 1.2, 0.5);
+      runGroup.add(m);
+    };
+    const band = (ax, az, bx, bz, mat) => {
+      const len = Math.hypot(bx - ax, bz - az);
+      if (len < 0.2) return;
+      const m = new THREE.Mesh(GEO.box, mat);
+      const mx = (ax + bx) / 2, mz = (az + bz) / 2;
+      m.position.set(mx, terrain.heightAt(mx, mz) + 0.12, mz);
+      m.scale.set(half * 2, 0.08, len);
+      m.rotation.y = Math.atan2(bx - ax, bz - az);
+      runGroup.add(m);
+    };
+
+    for (const [x, z] of runPoints) peg(x, z);
+    for (let i = 0; i + 1 < runPoints.length; i++) {
+      band(runPoints[i][0], runPoints[i][1], runPoints[i + 1][0], runPoints[i + 1][1], runBandMat);
+    }
+    // the leg you have not committed to yet, in the brush's own colour
+    const last = runPoints[runPoints.length - 1];
+    band(last[0], last[1], aimAt.x, aimAt.z, runGhostMat);
+  }
 
   let mode = false;
   let tool = 'build';
@@ -284,7 +391,49 @@ export function createBuild(scene, {
     meshes.set(entry.id, g);
   }
 
+  /**
+   * Draw one lane: a single strip of triangles, two vertices per point, every quad sharing the
+   * previous quad's edge.
+   *
+   * This is the whole fix for *"a lot of rectangles that leave gaps in between"*. There is no gap
+   * because there is nothing to have a gap between — the geometry is continuous by construction, and
+   * the heights it is drawn at are the same graded heights the ground under it was levelled to.
+   */
+  function addLaneMesh(lane) {
+    const def = lane.key ? book.byId(lane.key) : null;
+    const colour = def?.look?.color || '#6b5c49';
+    const parts = laneRibbon(lane, { lift: (def?.h ?? 0.06) + 0.02 });
+    const geom = new THREE.BufferGeometry();
+    if (!parts.position.length) return null;
+    geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(parts.position), 3));
+    geom.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(parts.normal), 3));
+    geom.setIndex(parts.index);
+    const mesh = new THREE.Mesh(geom, matFor(colour));
+    mesh.frustumCulled = false;
+    mesh.name = 'farhold-lane-' + lane.id;
+    roadGroup.add(mesh);
+    laneMeshes.set(lane.id, mesh);
+    return mesh;
+  }
+
+  function forgetLane(id) {
+    const m = laneMeshes.get(id);
+    if (!m) return false;
+    roadGroup.remove(m);
+    m.geometry?.dispose?.();
+    laneMeshes.delete(id);
+    return true;
+  }
+
   /** Redraw the ground after a brush lands. Cheap: only the rings that can see the edit. */
+  /**
+   * The ground under here changed shape: tell the clipmap, and reseat anything standing on it.
+   *
+   * `r` here is the REDRAW radius, which for a run of road is the whole length of the run — so the
+   * prop callback is NOT fired from here. Clearing a 100 m circle of forest because you laid a
+   * 100 m road is not what anybody meant, and it was the first thing that went wrong when the two
+   * were folded together. `clearProps` below is the one that takes a brush-sized radius.
+   */
   function groundChanged(x, z, r) {
     if (view?.editedAt) view.editedAt(x, z, r, aimAt.x, aimAt.z);
     // anything already standing sits back down on the new ground, so levelling under a finished
@@ -296,6 +445,27 @@ export function createBuild(scene, {
       entry.y = terrain.heightAt(entry.x, entry.z);
       g.position.y = entry.y;
     }
+  }
+
+  const isRunTool = () => tool === 'road' || tool === 'wall';
+
+  /**
+   * Whatever is growing inside this brush comes down, and you keep it.
+   *
+   * Separate from `groundChanged` on purpose — see the note there. `r` is the size of the thing you
+   * actually painted, never the size of the patch that had to be redrawn.
+   */
+  function clearProps(x, z, r) {
+    if (onGround && r > 0) onGround(x, z, r);
+  }
+
+  /** How long a clicked polyline is, in metres. The road tool prices by the metre. */
+  function runLength(points) {
+    let total = 0;
+    for (let i = 0; i + 1 < points.length; i++) {
+      total += Math.hypot(points[i + 1][0] - points[i][0], points[i + 1][1] - points[i][1]);
+    }
+    return total;
   }
 
   /** The nearest thing you have built to a point, allowing for how big it is. */
@@ -327,17 +497,34 @@ export function createBuild(scene, {
     setMode(on) {
       mode = !!on;
       ghost.visible = mode && tool === 'build' && !!selected;
-      brush.visible = mode && tool !== 'build';
+      brush.visible = mode && tool !== 'build' && !isRunTool();
       if (!mode) runPoints = [];
+      drawRun();
       return mode;
     },
 
-    /** 'build' | 'smooth' | 'raise' | 'lower' | 'road' | 'wall' | 'remove' | 'clear'. */
+    /** 'build' | 'smooth' | 'raise' | 'lower' | 'road' | 'wall' | 'remove' | 'clear' | 'route'. */
     setTool(name) {
       tool = name;
-      if (name !== 'build') runPoints = [];
+      runPoints = [];
+      /**
+       * THE ROAD TOOL PICKS A ROAD FOR YOU.
+       *
+       * It used to fall back to `road_dirt` deep inside `finishRun`, after the run was already
+       * drawn — so the panel showed whatever was selected before (a crate, say), the cost line was
+       * that crate's cost, and nothing on screen connected the tool to the thing it was about to
+       * lay. Choosing the cheapest piece of the right sort when you pick the tool means the panel
+       * is telling the truth from the first click, and picking a different road still overrides it.
+       */
+      const wantCat = name === 'road' ? 'road' : name === 'wall' ? 'defence' : null;
+      if (wantCat && book.byId(selected)?.cat !== wantCat) {
+        const fallback = name === 'road' ? 'road_dirt' : 'palisade';
+        if (book.byId(fallback)) api.select(fallback);
+      }
       ghost.visible = mode && tool === 'build' && !!selected;
-      brush.visible = mode && tool !== 'build';
+      // a run tool draws its own line; the round brush would say it paints a circle, which it does not
+      brush.visible = mode && tool !== 'build' && !isRunTool();
+      drawRun();
       return tool;
     },
 
@@ -368,6 +555,8 @@ export function createBuild(scene, {
       if (tool !== 'build') {
         brush.position.set(x, terrain.heightAt(x, z) + 0.15, z);
         brush.scale.set(radius * 2, radius * 2, radius * 2);
+        // a run has no brush — it has the line you are laying, which has to follow the cursor
+        if (tool === 'road' || tool === 'wall') drawRun();
         return null;
       }
       if (!selected) return null;
@@ -387,6 +576,7 @@ export function createBuild(scene, {
       if (tool === 'remove') return api.removeAt(aimAt.x, aimAt.z);
       if (tool === 'road' || tool === 'wall') return api.addRunPoint(aimAt.x, aimAt.z);
       if (tool === 'clear') return api.clear();
+      if (tool === 'scan') return api.scan();
       if (tool === 'route') return api.routeClick(aimAt.x, aimAt.z);
       return api.paint();
     },
@@ -426,8 +616,9 @@ export function createBuild(scene, {
       const res = book.place({ id: selected, x: at.x, z: at.z, rot: at.rot ?? rot });
       if (!res.ok) { log(res.why, 'warn'); return res; }
       const def = book.byId(selected);
-      if (def?.flatten) groundChanged(at.x, at.z, Math.max(def.w, def.d));
+      if (def?.flatten) { groundChanged(at.x, at.z, Math.max(def.w, def.d)); clearProps(at.x, at.z, Math.max(def.w, def.d) * 0.6); }
       addMesh(res.entry);
+      actions.push({ kind: 'entry', id: res.entry.id });
       log(`${res.entry.name} built.`, 'good');
       if (onPlace) onPlace(res.entry, def || null);
       return res;
@@ -450,6 +641,7 @@ export function createBuild(scene, {
       else return { ok: false, why: 'That tool does not paint.' };
       if (!res.ok) { log(res.why, 'warn'); return res; }
       groundChanged(x, z, radius * 1.6);
+      clearProps(x, z, radius);
       return res;
     },
 
@@ -463,8 +655,32 @@ export function createBuild(scene, {
     clear() {
       if (!onClear) return { ok: false, why: 'Nothing here can be cleared yet.' };
       const res = onClear(aimAt.x, aimAt.z, radius) || {};
-      if (res.materials && store?.give) store.give(res.materials);
-      if (res.removed) log(`Cleared ${res.removed} of it. ${book.costText(res.materials || {})} recovered.`, 'good');
+      /**
+       * `store.give` takes `(id, n)`, ONE LINE AT A TIME.
+       *
+       * This was `store.give(res.materials)` — the whole bag as the first argument — so the
+       * resource id was an object and the amount was `undefined`. Even once the clearing itself
+       * worked, every log and every boulder went straight into the void. The same shape of mistake
+       * as the tool that was never wired: it type-checks, it runs, and it does nothing.
+       */
+      if (res.materials && store?.give) {
+        for (const [id, n] of Object.entries(res.materials)) if (n > 0) store.give(id, n);
+      }
+      if (res.removed) log(`Cleared ${res.removed} of it. ${book.costText(res.materials || {}) || 'Nothing'} recovered.`, 'good');
+      else log('Nothing standing in the brush to clear.', '');
+      return { ok: true, ...res };
+    },
+
+    /**
+     * Sweep for deposits. The brush size is the range, so `[` and `]` trade reach for detail.
+     *
+     * Centred on the CURSOR rather than the player, because "what is over that ridge" is the
+     * question you actually have — a ping at your own feet only ever tells you about ground you
+     * have already walked.
+     */
+    scan() {
+      if (!onScan) return { ok: false, why: 'Nothing here can scan.' };
+      const res = onScan(aimAt.x, aimAt.z, Math.max(120, radius * 18)) || {};
       return { ok: true, ...res };
     },
 
@@ -476,14 +692,89 @@ export function createBuild(scene, {
      */
     addRunPoint(x, z) {
       runPoints.push([x, z]);
+      drawRun();
+      // say something on the FIRST click, because that is the one that looks like nothing happened
+      if (runPoints.length === 1) {
+        log(`Corner one. Click the next corner, then press Enter to lay the ${tool}.`, '');
+      } else {
+        const [ax, az] = runPoints[runPoints.length - 2];
+        log(`${runPoints.length} corners · ${Math.round(Math.hypot(x - ax, z - az))} m · Enter to lay it, Esc to drop the run.`, '');
+      }
       return { ok: true, points: runPoints.length };
     },
 
+    /** Throw away a half-dragged run. Esc does this before it leaves build mode. */
+    cancelRun() {
+      const had = runPoints.length;
+      runPoints = [];
+      drawRun();
+      return had;
+    },
+
     finishRun({ id = null, gateAt = [] } = {}) {
-      if (runPoints.length < 2) { runPoints = []; return { ok: false, why: 'A run needs two points.' }; }
+      if (runPoints.length < 2) {
+        const why = runPoints.length === 1
+          ? 'A run needs two corners. Click a second one, then press Enter.'
+          : `Pick the ${tool === 'wall' ? 'Wall' : 'Road'} tool, then click along the ground.`;
+        runPoints = [];
+        drawRun();
+        log(why, 'warn');
+        return { ok: false, why };
+      }
       const pieceId = id || selected || (tool === 'road' ? 'road_dirt' : 'palisade');
       const def = book.byId(pieceId);
       const claim = book.claimAt(runPoints[0][0], runPoints[0][1])?.id ?? null;
+
+      /**
+       * A ROAD IS A LANE, NOT A ROW OF TILES. (Round 14.)
+       *
+       * *"It would be better if they behaved like the regular roads, which we've worked on to get
+       * smooth on the terrain."* So a road run no longer goes anywhere near `plan.run` — it is
+       * planned as a polyline, the ground under it is graded to the lane's own heights, and it is
+       * drawn as one ribbon. Three things fall out of that and all three were bugs before:
+       *
+       *   * no seams, because consecutive quads share their vertices;
+       *   * no sharp wedge at a corner, because the corner is rounded in the PLAN (see
+       *     `smoothPoints`) instead of being paved over with a square pad afterwards;
+       *   * no clipping, because the ribbon is drawn at exactly the height the ground was levelled
+       *     to rather than at the height of each tile's own midpoint.
+       *
+       * It is priced by the metre at the same rate the tiles were: one section's cost per `def.w`
+       * metres of road, so a player who knew what a dirt track cost before still does.
+       */
+      if (def?.road) {
+        const metres = runLength(runPoints);
+        const sections = Math.max(1, Math.round(metres / Math.max(1, def.w)));
+        const bill = book.quote(pieceId, sections);
+        if (!bill.ok) {
+          log(`${Math.round(metres)} m of ${def.name} costs ${bill.text}. ${bill.why}`, 'warn');
+          runPoints = [];
+          drawRun();
+          return { ok: false, why: bill.why };
+        }
+        const laid = roads.lay(runPoints, {
+          half: def.road.half ?? Math.max(1.2, def.d / 2),
+          surface: def.road.surface || 'dirt',
+          key: pieceId, name: def.name, claim,
+        });
+        if (!laid.ok) {
+          log(laid.why, 'warn');
+          runPoints = [];
+          drawRun();
+          return laid;
+        }
+        book.pay(bill.cost);
+        addLaneMesh(laid.lane);
+        actions.push({ kind: 'lane', id: laid.lane.id });
+        const mid = laid.lane.points[Math.floor(laid.lane.points.length / 2)];
+        groundChanged(mid[0], mid[1], metres);
+        // …and the trees come down ALONG the road, not in a circle the size of it
+        for (const [px, pz] of laid.lane.points) clearProps(px, pz, laid.lane.half + 1.5);
+        log(`${Math.round(metres)} m of ${def.name} laid for ${book.costText(bill.cost)}.`, 'good');
+        runPoints = [];
+        drawRun();
+        return { ok: true, lane: laid.lane, metres, cost: bill.cost, placed: [] };
+      }
 
       /**
        * THE GROUND IS GRADED FIRST, THEN THE PIECES GO ON IT.
@@ -494,7 +785,7 @@ export function createBuild(scene, {
        * footings in the air. So each leg gets its strip brush, the clipmap is told, and only then
        * does `plan.run` measure the ground it is standing on.
        */
-      if (def?.road || def?.run) {
+      if (def?.run) {
         for (let i = 0; i + 1 < runPoints.length; i++) {
           const [ax, az] = runPoints[i], [bx, bz] = runPoints[i + 1];
           terraform.strip({
@@ -508,12 +799,40 @@ export function createBuild(scene, {
         const span = Math.hypot(runPoints[0][0] - runPoints[runPoints.length - 1][0],
           runPoints[0][1] - runPoints[runPoints.length - 1][1]);
         groundChanged(mid[0], mid[1], span);
+        /**
+         * …and the trees come down ALONG the road, not in a circle the size of it.
+         *
+         * A run is the one edit whose redraw radius is nothing like its footprint, so the prop
+         * clearing walks the legs in brush-sized steps instead. A road through a wood should be a
+         * road through a wood.
+         */
+        const half = (def.road?.half ?? Math.max(1.2, def.d)) + 1.5;
+        for (let i = 0; i + 1 < runPoints.length; i++) {
+          const [ax, az] = runPoints[i], [bx, bz] = runPoints[i + 1];
+          const legLen = Math.hypot(bx - ax, bz - az);
+          const steps = Math.max(1, Math.ceil(legLen / half));
+          for (let k = 0; k <= steps; k++) {
+            const t = k / steps;
+            clearProps(ax + (bx - ax) * t, az + (bz - az) * t, half);
+          }
+        }
       }
 
       const res = book.run({ id: pieceId, points: runPoints, gateAt });
       for (const entry of res.placed || []) addMesh(entry);
+      /**
+       * SAY WHAT WENT DOWN.
+       *
+       * `finishRun` logged only its failures, so a road that laid perfectly was indistinguishable
+       * from a key that did nothing — and Enter is a key you cannot see the effect of if the
+       * sections are behind you. Every other tool in this file says what it did; so does this one.
+       */
+      const laid = (res.placed || []).length;
+      if (laid) log(`${laid} section${laid === 1 ? '' : 's'} of ${def?.name || pieceId} laid.`, 'good');
+      else if (!res.skipped?.length) log(`Nothing was laid. ${res.why || 'Check you can afford it.'}`, 'warn');
       if (res.skipped?.length) log(`${res.skipped.length} sections would not fit: ${res.skipped[0].why}`, 'warn');
       runPoints = [];
+      drawRun();
       return res;
     },
 
@@ -521,6 +840,27 @@ export function createBuild(scene, {
     removeAt(x, z, reach = 3) {
       const e = nearestEntry(x, z, reach);
       const best = e ? { e, dist: 0 } : null;
+      /**
+       * A ROAD IS TAKEN UP, NOT DECONSTRUCTED PIECE BY PIECE.
+       *
+       * It is not in the ledger any more (see the road book above), so `nearestEntry` cannot find
+       * it — and a tool that silently refuses to remove the thing you are pointing at is the same
+       * class of bug as a tool that silently does nothing. A lane comes up whole, which is also what
+       * you want: nobody wants to click ninety times to take up ninety metres of track.
+       */
+      if (!best) {
+        const hit = roads.nearest(x, z, reach + 4);
+        if (hit) {
+          const def = book.byId(hit.lane.key);
+          const sections = Math.max(1, Math.round((hit.lane.metres || 0) / Math.max(1, def?.w || 4)));
+          const back = book.refundOf(book.quote(hit.lane.key, sections).cost || {});
+          book.giveBack(back);
+          roads.remove(hit.lane.id);
+          forgetLane(hit.lane.id);
+          log(`${Math.round(hit.lane.metres)} m of ${hit.lane.name || 'road'} taken up. ${book.costText(back) || 'Nothing'} recovered.`, 'good');
+          return { ok: true, lane: hit.lane, refund: back };
+        }
+      }
       if (!best) return { ok: false, why: 'Nothing to take down there.' };
       const res = book.remove(best.e.id);
       if (res.ok) api.forget(best.e.id);
@@ -531,6 +871,25 @@ export function createBuild(scene, {
 
     /** §4.9 — undo the last placement, geometry and all. */
     undo() {
+      // the newest thing wins, whichever book it is in — see `actions` above
+      while (actions.length) {
+        const last = actions[actions.length - 1];
+        if (last.kind === 'lane') {
+          actions.pop();
+          const lane = roads.get(last.id);
+          if (!lane) continue;
+          const def = book.byId(lane.key);
+          const sections = Math.max(1, Math.round((lane.metres || 0) / Math.max(1, def?.w || 4)));
+          book.giveBack(book.quote(lane.key, sections).cost || {});   // undo is a full refund
+          roads.remove(lane.id);
+          forgetLane(lane.id);
+          log(`${Math.round(lane.metres)} m of ${lane.name || 'road'} undone.`, 'good');
+          return { ok: true, lane };
+        }
+        if (!book.entries.some(e => e.id === last.id)) { actions.pop(); continue; }
+        break;
+      }
+      if (actions[actions.length - 1]?.kind === 'entry') actions.pop();
       const res = book.undo();
       if (res.ok) api.forget(res.entry.id);
       // an undone waypoint pad has to leave the register too, or the map keeps offering a trip to
@@ -550,12 +909,21 @@ export function createBuild(scene, {
     /** Hand every lamp, brazier and lit machine to `js/light.js`'s pool. */
     lights: () => book.lights(),
 
-    /** Rebuild every mesh from the ledger — after a load, or after a claim is razed. */
+    /** Rebuild every mesh from the ledger — after a load, or after an outpost is razed. */
     rebuild() {
       for (const id of [...meshes.keys()]) api.forget(id);
       for (const entry of book.entries) addMesh(entry);
+      for (const id of [...laneMeshes.keys()]) forgetLane(id);
+      for (const lane of roads.lanes) addLaneMesh(lane);
       return book.entries.length;
     },
+
+    /** The road book, so js/logistics.js can ask how much of a haul runs on a made surface. */
+    get roads() { return roads; },
+    /** Every lane the player has laid — the same shape `terrain.roadPaths` carries. */
+    get lanes() { return roads.lanes; },
+    /** Round 14 — the groups, worked out from what is standing rather than declared with a stone. */
+    outposts(opts = {}) { return book.outposts({ lanes: roads.lanes, ...opts }); },
 
     /**
      * The portal's geometry. One ring, because there is one portal — `js/portal.js` guarantees that
@@ -578,19 +946,27 @@ export function createBuild(scene, {
       if (brush.visible) brush.rotation.z += dt * 0.4;
     },
 
-    setVisible(on) { root.visible = !!on; },
+    setVisible(on) { root.visible = !!on; roadGroup.visible = !!on; },
 
     dispose() {
       scene.remove(root);
+      scene.remove(roadGroup);
       scene.remove(ghost);
       scene.remove(brush);
+      scene.remove(runGroup);
       if (api.portalRing) scene.remove(api.portalRing);
     },
 
-    toJSON() { return { plan: book.toJSON(), terraform: terraform?.toJSON?.() || null }; },
+    toJSON() { return { plan: book.toJSON(), terraform: terraform?.toJSON?.() || null, roads: roads.toJSON() }; },
     load(data) {
       book.load(data?.plan);
       if (data?.terraform && terraform) terraform.load(data.terraform);
+      /**
+       * A save written before round 14 has no `roads` key, and that is fine — it also has its roads
+       * as ordinary `road_dirt` entries in the ledger, which still load and still draw. Old tracks
+       * stay as they were; new ones are lanes. Nothing has to be migrated and nothing disappears.
+       */
+      roads.load(data?.roads);
       api.rebuild();
       return book.entries.length;
     },

@@ -505,6 +505,66 @@ export const KITS = {
   glimmerwaste:    [['crystal', 4.0], ['rock', 1.6]],
 };
 
+/**
+ * WHAT A PROP IS MADE OF — the table that turns scenery into supplies.
+ *
+ * "Since we need timber and stone now, can we update the existing wood and stone to be mineable? I
+ * think it would be more fun to attack these objects rather than press E on them."
+ *
+ * Both halves of that matter. The timber and stone the building expansion asks for were only ever
+ * available from ore-style seams, while the player walked through a forest of trees that were
+ * scenery — so the world was full of the exact thing they were short of and none of it could be
+ * touched. And a tree is not a conversation: you hit it until it falls over, which is what every
+ * swing in the game already does, so felling one needs no new key and no prompt.
+ *
+ *   hp     how much damage brings it down (one swing of a starting sword is roughly 8-14)
+ *   tier   the tool tier the swing has to clear — the same ladder js/resources.js uses, read off
+ *          your weapon by js/main.js `toolTierFor`. A crystal needs steel; a bush needs nothing.
+ *   drops  what it leaves, scaled by how big the instance happens to be
+ *   regrow in-game seconds before it comes back, or null for the ones that never do. A felled wood
+ *          is a crop and a broken boulder is a hole in the ground — the same split js/resources.js
+ *          makes with `respawnSeconds`.
+ *
+ * Anything NOT in this table stays scenery: a ruin, a column and a standing stone are landmarks,
+ * not quarries, and hitting one does nothing at all.
+ */
+export const PROP_HARVEST = {
+  broadleaf: { hp: 34, tier: 1, drops: { log: 9, resin: 1 }, verb: 'fell', regrow: 21600 },
+  conifer:   { hp: 34, tier: 1, drops: { log: 10, resin: 2 }, verb: 'fell', regrow: 21600 },
+  palm:      { hp: 26, tier: 1, drops: { log: 7, fibre: 3 }, verb: 'fell', regrow: 21600 },
+  deadtree:  { hp: 18, tier: 0, drops: { log: 5 }, verb: 'fell', regrow: 28800 },
+  stump:     { hp: 14, tier: 1, drops: { log: 3 }, verb: 'grub out', regrow: null },
+  bush:      { hp: 6, tier: 0, drops: { fibre: 4 }, verb: 'cut back', regrow: 7200 },
+  fern:      { hp: 5, tier: 0, drops: { fibre: 3 }, verb: 'cut back', regrow: 7200 },
+  reed:      { hp: 5, tier: 0, drops: { reed: 4, fibre: 1 }, verb: 'cut', regrow: 5400 },
+  cactus:    { hp: 12, tier: 0, drops: { fibre: 5, water: 2 }, verb: 'cut down', regrow: 21600 },
+  mushroom:  { hp: 3, tier: 0, drops: { fibre: 1 }, verb: 'pick', regrow: 5400 },
+  rock:      { hp: 16, tier: 1, drops: { stone: 6, flint: 1 }, verb: 'break up', regrow: null },
+  boulder:   { hp: 46, tier: 1, drops: { stone: 22, rubble: 6, flint: 2 }, verb: 'break up', regrow: null },
+  bones:     { hp: 6, tier: 0, drops: { bone: 3 }, verb: 'gather', regrow: null },
+  crystal:   { hp: 30, tier: 2, drops: { crystal_raw: 6 }, verb: 'break off', regrow: 18000 },
+};
+
+/** A readable name for a prop, for the log line and the prompt. */
+export const PROP_NAMES = {
+  broadleaf: 'tree', conifer: 'pine', palm: 'palm', deadtree: 'dead tree', stump: 'stump',
+  bush: 'bush', fern: 'fern', reed: 'reeds', cactus: 'cactus', mushroom: 'mushrooms',
+  rock: 'rock', boulder: 'boulder', bones: 'bones', crystal: 'crystal',
+};
+
+/**
+ * A stable name for one instance of a prop.
+ *
+ * Props have no identity of their own: the scatter is a pure function of the cell's seed, so the
+ * same tree is regenerated from scratch every time you walk back to it. Its POSITION is therefore
+ * the only thing about it that persists, and rounding to a tenth of a metre is far inside the gap
+ * between two neighbouring scatter points while being exact enough that the same tree hashes to the
+ * same string on every rebuild.
+ */
+export function propKey(kind, x, z) {
+  return `${kind}@${x.toFixed(1)},${z.toFixed(1)}`;
+}
+
 /** A tint per biome so the same tree is not the same green in a jungle and a boreal forest. */
 const LEAF_TINT = {
   rainforest: '#2f7a3c', temperateForest: '#3f7a45', borealForest: '#2f5c46', hallowed: '#7fd0a0',
@@ -593,6 +653,58 @@ export function createProps(scene, terrain, opts = {}) {
   };
   if (MEGA_DATA) buildMega(MEGA_DATA); else MEGA_READY.then(buildMega);
 
+  /**
+   * THE HARVEST LEDGER — what has been cut down, and where the ground has been cleared.
+   *
+   * The scatter is a pure function of the cell seed, so there is nowhere to write "this tree is
+   * gone" except a list of exceptions kept beside it. Two lists, because there are two different
+   * questions:
+   *
+   *   `felled`  one prop, by `propKey`. Chopping a tree. Small, exact, and it carries the clock the
+   *             wood regrows on.
+   *   `cleared` a circle of ground. The Clear tool and the terrain tools paint one rather than
+   *             naming a hundred bushes, and it keeps working on props that have not been
+   *             generated yet — which matters, because a cell you have not walked into has no
+   *             instances to name.
+   *
+   * Both are tiny and both go in the save. A whole base is a couple of dozen circles.
+   */
+  const felled = new Map();          // propKey -> { kind, x, z, regrowIn }
+  let cleared = [];                  // { x, z, r }
+  /** Live damage on things that are standing, by propKey. Not saved: a half-chopped tree heals. */
+  const wounded = new Map();
+  /** Everything actually placed this rebuild, so `nearest` can find something to hit. */
+  let standing = [];
+  /** Circles never grow without bound: a base is a few dozen and the oldest fall off the end. */
+  const CLEAR_CAP = 400;
+
+  const insideCleared = (x, z, list = cleared) => {
+    for (let i = 0; i < list.length; i++) {
+      const c = list[i];
+      if ((x - c.x) * (x - c.x) + (z - c.z) * (z - c.z) <= c.r * c.r) return true;
+    }
+    return false;
+  };
+
+  /**
+   * The circles that can possibly reach into one cell.
+   *
+   * A rebuild places a few thousand things and tests each against the cleared list, so a base with
+   * two hundred circles round it would be half a million distance checks per rebuild for an answer
+   * that is "no" almost every time. A cell is 64 m across, so anything further than its half
+   * diagonal plus the circle's own radius cannot touch it — and the usual answer is an empty list,
+   * which costs one length check in the inner loop.
+   */
+  const CELL_REACH = CELL * 0.75;
+  function clearedNear(cx, cz) {
+    if (!cleared.length) return cleared;
+    const out = [];
+    for (const c of cleared) {
+      if (Math.hypot(c.x - cx, c.z - cz) <= c.r + CELL_REACH) out.push(c);
+    }
+    return out;
+  }
+
   const matrix = new THREE.Matrix4();
   const colour = new THREE.Color();
   const solids = new ObstacleField();
@@ -621,6 +733,7 @@ export function createProps(scene, terrain, opts = {}) {
     const megaCounts = {};
     let grass = 0;
     solids.clear();
+    standing = [];
 
     const cx0 = Math.round(px / CELL), cz0 = Math.round(pz / CELL);
     // NEAREST CELL FIRST.
@@ -671,6 +784,8 @@ export function createProps(scene, terrain, opts = {}) {
         const baseX = cx * CELL, baseZ = cz * CELL;
         const kit = kitAt(baseX, baseZ);
         if (!kit) continue;
+        // the handful of cleared circles that can reach into this cell, and usually none at all
+        const cellCleared = clearedNear(baseX, baseZ);
 
         for (const [key, per] of kit.list) {
           const want = per * cfg.density;
@@ -713,11 +828,22 @@ export function createProps(scene, terrain, opts = {}) {
               : colour.setScalar(1);
             const v = 0.82 + rng() * 0.32;          // drawn either way — see `place` above
             if (!place) continue;
+            /**
+             * …AND SKIP ANYTHING THAT HAS BEEN CUT DOWN.
+             *
+             * Same rule as `place` above and for the same reason: the numbers are all drawn first
+             * and only the write to the mesh is skipped, so felling one tree cannot shuffle the
+             * bushes around it. The cell's rng ends in exactly the same place either way.
+             */
+            const id = propKey(key, x, z);
+            if (felled.has(id) || (cellCleared.length && insideCleared(x, z, cellCleared))) continue;
             meshes[key].setMatrixAt(counts[key], matrix);
             meshes[key].setColorAt(counts[key], colour.setRGB(tint.r * v, tint.g * v, tint.b * v));
             const solid = PROP_SOLIDS[key];
             if (solid) solids.add(x, z, solid[0] * scale, solid[1] * scale);
             counts[key]++;
+            // what you can walk up to and hit. Only the ones with something in them.
+            if (PROP_HARVEST[key]) standing.push({ id, kind: key, x, z, y, scale });
           }
         }
 
@@ -842,6 +968,8 @@ export function createProps(scene, terrain, opts = {}) {
             if (!terrain.plantable(x, z)) continue;
             if (terrain.slopeAt(x, z, 3) > 0.6) continue;
             if (terrain.roadAt(x, z) > 0.45) continue;
+            // a levelled building plot is bare earth, not a lawn
+            if (cellCleared.length && insideCleared(x, z, cellCleared)) continue;
             const s = 0.7 + rng() * 0.9;
             matrix.compose(
               new THREE.Vector3(x, terrain.heightAt(x, z), z),
@@ -874,10 +1002,175 @@ export function createProps(scene, terrain, opts = {}) {
     if (grassMesh.instanceColor) grassMesh.instanceColor.needsUpdate = true;
   }
 
+  /** How much a prop of this size drops, rounded so a swing never pays out 0.7 of a log. */
+  function yieldOf(kind, scale = 1) {
+    const spec = PROP_HARVEST[kind];
+    if (!spec) return {};
+    const out = {};
+    for (const [id, n] of Object.entries(spec.drops)) {
+      const got = Math.max(1, Math.round(n * (0.6 + scale * 0.55)));
+      out[id] = (out[id] || 0) + got;
+    }
+    return out;
+  }
+
+  /** Put one prop on the felled list, with the clock it regrows on. */
+  function fell(prop) {
+    const spec = PROP_HARVEST[prop.kind];
+    felled.set(prop.id, { kind: prop.kind, x: prop.x, z: prop.z, regrowIn: spec?.regrow ?? null });
+    wounded.delete(prop.id);
+    return yieldOf(prop.kind, prop.scale);
+  }
+
   return {
     meshes, grassMesh, cfg, solids, megaMeshes,
     /** What the megaflora catalogue said, once it arrived. Null until then. */
     get megaflora() { return mega; },
+
+    // ------------------------------------------------------------------ harvesting
+
+    /** Everything standing near a point that has something in it, nearest first. */
+    near(x, z, reach = 4) {
+      return standing
+        .map(p => ({ p, away: Math.hypot(p.x - x, p.z - z) }))
+        .filter(r => r.away <= reach)
+        .sort((a, b) => a.away - b.away)
+        .map(r => r.p);
+    },
+    /** The one thing a swing would land on, or null. */
+    nearest(x, z, reach = 3.2) { return this.near(x, z, reach)[0] || null; },
+    /** What a prop is called, what it holds and what it would take to bring down. */
+    describe(prop) {
+      if (!prop) return null;
+      const spec = PROP_HARVEST[prop.kind];
+      if (!spec) return null;
+      const hp = spec.hp * (0.6 + prop.scale * 0.55);
+      return {
+        ...prop,
+        name: PROP_NAMES[prop.kind] || prop.kind,
+        verb: spec.verb,
+        tier: spec.tier,
+        maxHp: hp,
+        hp: wounded.has(prop.id) ? wounded.get(prop.id) : hp,
+        drops: yieldOf(prop.kind, prop.scale),
+      };
+    },
+
+    /**
+     * SWING AT SOMETHING. The whole of "it would be more fun to attack these objects".
+     *
+     * `tier` is the tool ladder from js/resources.js, read off the weapon in the player's hands —
+     * so a crystal spire refuses a bronze sword with the same sentence a crystal SEAM would, and
+     * there is one rule to learn rather than two. Returns what happened, in words, because a swing
+     * that does nothing and says nothing is the bug this round keeps finding.
+     */
+    strike(x, z, { damage = 10, reach = 3.2, tier = 1 } = {}) {
+      const prop = this.nearest(x, z, reach);
+      if (!prop) return { hit: false };
+      const spec = PROP_HARVEST[prop.kind];
+      const name = PROP_NAMES[prop.kind] || prop.kind;
+      if ((tier ?? 0) < spec.tier) {
+        return { hit: false, blocked: true, name, why: `The ${name} is too hard for what you are carrying.` };
+      }
+      const max = spec.hp * (0.6 + prop.scale * 0.55);
+      const left = (wounded.has(prop.id) ? wounded.get(prop.id) : max) - Math.max(1, damage);
+      if (left > 0) {
+        wounded.set(prop.id, left);
+        return { hit: true, name, verb: spec.verb, left, max, felled: false, materials: {} };
+      }
+      const materials = fell(prop);
+      rebuild(lastPoint ? lastPoint[0] : x, lastPoint ? lastPoint[1] : z);
+      return { hit: true, name, verb: spec.verb, left: 0, max, felled: true, materials };
+    },
+
+    /**
+     * §4.19 — CLEAR A CIRCLE OF GROUND, and keep what was standing in it.
+     *
+     * `js/build.js` has called `onClear` since build mode landed and `js/main.js` wired it to
+     * `props.clearAround?.()` — a method that did not exist, so the optional-chaining swallowed it
+     * and the Clear tool silently did nothing for the whole life of the expansion. Reported in
+     * play, exactly: "The build tool Clear also doesn't do anything, I expected it would delete the
+     * trees/grass."
+     *
+     * The circle is remembered rather than the props inside it, so ground you cleared stays clear
+     * when you walk away and come back — and stays clear for cells that had not been generated when
+     * you painted it.
+     */
+    clearAround(x, z, r = 8, { keepGround = false } = {}) {
+      const materials = {};
+      let removed = 0;
+      for (const prop of this.near(x, z, r)) {
+        for (const [id, n] of Object.entries(fell(prop))) materials[id] = (materials[id] || 0) + n;
+        removed++;
+      }
+      if (!keepGround) {
+        cleared.push({ x: +x.toFixed(1), z: +z.toFixed(1), r: +r.toFixed(1) });
+        if (cleared.length > CLEAR_CAP) cleared = cleared.slice(-CLEAR_CAP);
+      }
+      rebuild(lastPoint ? lastPoint[0] : x, lastPoint ? lastPoint[1] : z);
+      return { removed, materials };
+    },
+
+    /**
+     * The ground under here just moved. Everything standing on it has to move with it.
+     *
+     * "When using raise/lower/level tools it does not affect the grass/trees." Two separate faults
+     * in one sentence: nothing was cleared out of the brush, AND every instance keeps the height it
+     * was placed at, so a levelled plot left its trees hanging in the air or buried to the canopy.
+     * A terrain edit therefore fells what is inside the brush (you keep the timber, same as Clear)
+     * and rebuilds, which re-reads `terrain.heightAt` for everything that is left.
+     */
+    groundMoved(x, z, r = 8) {
+      return this.clearAround(x, z, r);
+    },
+
+    /**
+     * Regrowth. "A clearing is a crop, not a scar" — the same promise js/resources.js makes about
+     * seams, kept with the same kind of clock. Rocks and boulders carry `regrow: null` and never
+     * come back, which is also true of the boulder in the ore data.
+     */
+    tickHarvest(seconds = 0) {
+      if (seconds <= 0 || !felled.size) return 0;
+      let back = 0;
+      for (const [id, row] of felled) {
+        if (row.regrowIn == null) continue;
+        row.regrowIn -= seconds;
+        if (row.regrowIn > 0) continue;
+        felled.delete(id);
+        back++;
+      }
+      if (back && lastPoint) rebuild(lastPoint[0], lastPoint[1]);
+      return back;
+    },
+
+    /** For the tests and the debug menu. */
+    get felledCount() { return felled.size; },
+    get clearedCount() { return cleared.length; },
+
+    toJSON() {
+      return {
+        cleared,
+        felled: [...felled.entries()].map(([id, row]) => [id, row.kind, row.x, row.z, row.regrowIn]),
+      };
+    },
+    loadHarvest(json, x = 0, z = 0) {
+      felled.clear();
+      wounded.clear();
+      cleared = (json?.cleared || []).slice(-CLEAR_CAP);
+      for (const [id, kind, fx, fz, regrowIn] of json?.felled || []) {
+        felled.set(id, { kind, x: fx, z: fz, regrowIn: regrowIn ?? null });
+      }
+      rebuild(lastPoint ? lastPoint[0] : x, lastPoint ? lastPoint[1] : z);
+      return felled.size;
+    },
+    /**
+     * There is deliberately NO `resetHarvest`.
+     *
+     * Landing on another world builds a whole new `createProps` (js/main.js `buildPlanet`), so the
+     * ledger is empty by construction — a reset method would have no caller, and a method with no
+     * caller is the exact thing the last three rounds kept finding.
+     */
+
     /** Follow the player; only regenerates when you cross into a new prop cell. */
     update(x, z, force = false) {
       const cx = Math.round(x / CELL), cz = Math.round(z / CELL);

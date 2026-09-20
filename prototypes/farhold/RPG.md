@@ -1135,3 +1135,228 @@ the trees: the ruin roll, the megaflora, the grass. Stopping early consumed fewe
 those got a different answer, and the bushes jumped while the trees stood still — worse than the
 pop-in it was meant to cure. The item is drawn in full now and only the write to the mesh is
 skipped, so the stream ends in the same place whatever the thinning decides.
+
+---
+
+## Round 13 — the play-test list: build tools, gathering, and the roads
+
+Eleven items, and eight of them were the same fault wearing different clothes: **a rule written into
+the data and read by nobody, or a module finished and never called.** Rounds 11 and 12 found twelve
+of those; this round found eight more and one genuine design mistake.
+
+### "Titan's Grip (we should change the name)"
+
+Two things in one line. The name is a warrior talent out of another game and the playground's one
+hard content rule is that nothing player-facing borrows a name from somebody else's — it is
+**Doubled Grasp** now (`js/perks.js`). A player's save holds the *node* id (`melee:7:0` — where the
+node sits in the forest, not what it is called), so renaming it costs nobody their point. Moving a
+keystone to a different ring or arm would; that is the change to be careful with.
+
+### "…tried to equip a second greatsword, it just replaced my main hand"
+
+The keystone exists to let you carry two two-handers, and the one click the inventory has could
+never do it. `rpg.equip`'s auto-slot rule opened with `if (slot === 'weapon' && !into &&
+oneHanded(item))` — the single case the keystone is *for* was excluded by the guard on the branch.
+
+The branch asks the right question now: not "is this a one-hander" but **"would the off hand
+actually take it"**, which `offhandRefusal` already answers, keystone and all, in the one place that
+knows the rule. So the keystone works without `js/rpg.js` ever learning what a keystone is.
+
+While it was open, the same branch got the other half right. It used to fill the off hand only when
+the new weapon was the *worse* of the two and drop the loser in the bag otherwise — so upgrading
+half of a pair silently unequipped the other half. **With a hand free, both go on, best in the main
+hand.** And a two-hander no longer sweeps the off hand into the bag when Doubled Grasp is taken.
+
+### "I found iron ore but it says I need a steel tool. How do I get steel if I can't mine iron?"
+
+A wall with no door in it, made out of one unread flag. `deep_vein` has carried `indoors: true`
+since the day it landed and its own description reads *"Underground, and something is usually
+standing in front of it"* — but `kindsForBiome` filtered on `fromPlanet` and the biome list only, and
+an empty biome list means "anywhere on land". So deep veins were scattered across open grassland.
+They are hardness 2, their heaviest resource weight is iron ore, and the only hand tool that clears
+hardness 2 is a steel weapon you cannot have yet.
+
+Three fixes, and a test that keeps them:
+
+* `kindsForBiome` reads `indoors` and `placedOnly`. Deep veins now live where their own data always
+  said they did, and `enterDungeon` puts one in about half the rooms — which also means the pack
+  already standing in that room *is* the guard the description promised.
+* `meteor_site` is `placedOnly`, because the test written for the first fix immediately caught it
+  doing the same thing: hardness 2, holds iron ore, scattered in fields where nothing had fallen.
+  `js/meteors.js` places one in the crater now, so meteoric iron comes from a meteor.
+* **The refusal says what to do.** Nothing anywhere in Farhold tells a player that a tool tier is
+  read off the weapon in their hands — there is no pick slot to go and fill — so "you need a Steel
+  Tool" was a true sentence that left them stuck. Every tool in `data/resources.json` carries a
+  `from` line now, and the refusal prints it: *"too hard for an Iron Tool. You need a Steel Tool.
+  That means carrying a steel weapon: forge Steel at an Alloy Forge from iron ingots and charcoal."*
+
+The standing rule, pinned by `tests/round13.test.js`: **whatever the surface offers, a brand new
+player holding a starting weapon must be able to work it.** Crystal and obsidian may be a "come back
+later"; nothing holding iron ore may be.
+
+### "The build Clear tool doesn't do anything"
+
+It did not. `js/main.js` wired it to `props.clearAround?.(x, z, r)` — a method `js/props.js` never
+had — and the optional-chaining swallowed the whole call, so the tool reported *"Cleared 0 of it"*
+and the player learned the build interface lies. Underneath that sat a second one: `build.js`'s
+`clear()` called `store.give(res.materials)` when `give` takes `(id, n)`, so even once the felling
+worked every log would have gone into the void.
+
+`js/props.js` now keeps a **harvest ledger** — the only place it *could* keep one, because the
+scatter is a pure function of the cell seed and there is nowhere to write "this tree is gone" except
+a list of exceptions beside it. Two lists, two questions: `felled` names one prop by position
+(`propKey`, rounded to a tenth of a metre — far inside the gap between neighbouring scatter points
+and exact enough to hash the same on every rebuild) and carries its regrow clock; `cleared` is a
+circle of ground, which keeps working on cells that have not been generated yet. Both go in the save
+and both are tiny — a whole base is a couple of dozen circles.
+
+The skip in the scatter loop follows the rule round 12 learned the hard way: **the numbers are all
+drawn and only the write to the mesh is skipped**, so felling one tree cannot shuffle the bushes
+around it.
+
+### "Raise/lower/level do not affect the grass/trees"
+
+Two faults in one sentence — nothing was cleared out of the brush, *and* every instance keeps the
+height it was scattered at, so a levelled plot left its trees hanging in the air. `js/build.js` has
+an `onGround` callback now; a terrain edit fells what is inside the brush (you keep the timber, same
+as Clear) and rebuilds, which re-reads `heightAt` for everything left standing.
+
+### "More fun to attack these objects than press E on them"
+
+Right, and there is no new key and no gathering mode: **the swing you already make sixty times a
+minute is the thing that gathers.** `PROP_HARVEST` in `js/props.js` gives every tree, bush, reed,
+rock and boulder an hp, a tool tier, a verb and a drop list. A swing that lands on nothing living
+goes to the scenery instead — a seam first, because it is the smaller target and the one you walked
+out here for, then whatever is standing in the arc.
+
+The tool tier is the *same ladder a seam uses*, read off your weapon, so a crystal refuses a bronze
+sword with the same sentence a crystal seam would. One rule to learn, not two. Woods regrow; a
+broken boulder does not — the same split `js/resources.js` already makes with `respawnSeconds`.
+
+### "Add a scan tool with fixed resource deposits like Satisfactory"
+
+We had the deposits — a seam's position has been a pure function of the world seed since round 11,
+so the one you found yesterday is where you left it — and no way to know one was there except to
+walk over it. They are sparse on purpose, about fourteen to a 512 m tile.
+
+**Scan** is a build tool. It sweeps from the cursor (not your feet: "what is over that ridge" is the
+question you actually have), and the panel answers the one a player is really asking — *where is the
+iron* — with **one row per material**, the best of each judged by what it would deliver from where
+you are standing. Bearing, distance, richness band, and a **Pin it** button that drops a `seam`
+marker into the one marker book, so it is on the map, on the minimap, and on the rim as an arrow
+when it is off the edge.
+
+### "We should not require the user to click the route button"
+
+A drill with no route fills a capped little stockpile and stops, and the old interface made that the
+default: you had to know the Route tool existed, pick it, and click two objects. Now **a drill lays
+its own route** the moment it bites, and a new crate re-routes every drill that had none — because
+the usual order of play is drill first, storage second.
+
+"Maybe just use a pathfinding to route the way" turned out to fix a real number, not just a click. A
+route's distance was `Math.hypot` between its ends, straight into `haulThroughput` — so a crate on
+the far side of a lake was "forty metres away" and delivered as if the hauler swam. `js/haulpath.js`
+is A\* over an 8 m grid where **water is a wall, a bank costs what it costs, and the answer is the
+length actually walked**, plus the points, so the route can be *drawn*. `bestStoreFor` then picks the
+store that delivers most rather than the one that is nearest, which is a distinction that only means
+anything once the walk is measured. The tracks are laid on the ground by `js/ore-view.js`; a route
+that goes twice as far as the crow flies explains itself the moment you look at it.
+
+### "Pressing B should also free up the cursor"
+
+It is a panel with forty buttons and the pointer was locked to the middle of the screen. Build mode
+joins the blocked list, so the click that would re-take the pointer does not, and `aimSpot`
+unprojects the **real cursor** instead of the camera's nose — otherwise you point at one patch of
+ground with the mouse and build on another in the middle of the screen. Left-drag still turns the
+camera (`js/player.js` has always supported that), so the two jobs are told apart the way every
+desktop application tells them apart: **did the mouse move between press and release.** Six pixels.
+
+The fixed dot in the middle is a lie while the cursor is free, so it goes, and the canvas carries a
+real crosshair. The × on the panel leaves the *mode*, not just the panel — closing only the panel
+left build mode running with a freed pointer, no catalogue and no way back.
+
+### "The Road tool doesn't seem to do anything"
+
+It did exactly what it was written to do — every click pushed a point onto an array and Enter turned
+the array into a road — and **none of that was visible**. Four clicks and a silent array is
+indistinguishable from a broken tool, and the player is right to call it one.
+
+Now: a peg at every corner, a band of ground between them, a dashed leg from the last peg to the
+cursor, using the *piece's own half-width* so what you see is where the road goes. The first click
+says so in the log, because that is the one that looked like nothing happened. `finishRun` reports
+what it laid rather than only its failures. Esc drops a half-drawn run before it leaves the mode.
+And picking the Road tool **picks a road** — it used to fall back to `road_dirt` deep inside
+`finishRun`, after the run was drawn, so the panel was quoting the price of whatever crate you had
+selected.
+
+### "Random flat rectangles in town… can they connect to the real roads?"
+
+Two separate things, and both are in `proctown/js/townplan.js` so the tuning page gets them too.
+
+**One network.** The cuts that make the blocks are in principle already connected — a child street
+runs from one edge of its block to the other, and those edges are its parent's streets. Three things
+break that in practice: a drifting child block *shrinks* to stay in its slot, so its alleys stop
+short; `clipPolyline` cuts every street to the wall circle and can leave a stub with both junctions
+outside; and the renderer drops any span that lands in water. Any of those leaves paving with no
+road attached to it — a flat rectangle in a field, which is exactly what the player saw.
+`connectStreets` groups the streets into connected components, takes the one containing the square
+as the town, gives every other component a **spur** to reach it, and throws away whatever will not
+join. 462 towns across seven cultures now come out in exactly one piece, with about 0.7 orphan
+streets dropped each.
+
+**The highway comes in.** `linkRoads` takes the points where the world road crosses the town's ring
+— `js/features.js` walks the route's own polyline looking for the step from outside to inside — and
+lays a main street from each to wherever the plan comes closest. A road reaching a town becomes its
+high street, which is what a road does.
+
+Both run **before a single plot is cut**, because a spur is a street and cutting plots first would
+put houses on roads again — the one thing this planner exists to make impossible. A spur crosses a
+block rather than bounding it, so the plots are trimmed against the added streets afterwards;
+`overlaps()` stays at zero over 462 towns.
+
+### The one nobody reported, found by fixing the one they did
+
+"Since we need timber and stone now, can we update the existing wood and stone to be mineable?" —
+and once a tree gave you logs, the next question was what a log is for. **Nothing.**
+
+`data/structures.json` prices everything in short names — `timber`, `iron`, `parts`, `block` — and
+says so in its own header, in as many words:
+
+> *"the ids in `cost` are a CONTRACT, not an inventory. §1 (gathering) and §2 (refining) belong to
+> another part of this expansion and will decide where `iron` or `plank` actually comes from."*
+
+They decided. They decided on `log`, `iron_ingot`, `machine_part`, `cut_stone`. And nobody ever went
+back and joined the two vocabularies, so **a palisade cost six units of a thing that has never
+existed**. Twenty-two pieces of the catalogue were priced in `timber`, twenty-six in `iron`,
+twenty-four in `steel`, sixteen in `parts` — none of which any bench, seam or tree has ever
+produced. Two more, `wire` and `concrete`, were not aliases for anything: ten structures spent wire
+and no recipe in the game made a single unit of it.
+
+This is the thirteenth join of exactly this kind, and the worst one, because there is no crash and
+no wrong number — the prices are simply unpayable, for ever, and the only symptom is that building
+anything feels impossible.
+
+* `MATERIAL_ALIASES` in `js/buildplan.js` is the table. Ten short names, one line each.
+* `alignCatalogue(structureData, resourceData)` runs **once at boot**, at the boundary, so nothing
+  downstream has to know there were ever two words for the same thing — and it carries the display
+  names across, so the panel still says "6 timber" while the pool spends logs.
+* `wire` and `concrete` are real materials now, with real recipes: `draw_wire` at the smelter (Copper
+  Ore's own description has read *"wire, fittings, and half of bronze"* since the day it landed) and
+  `pour_concrete` at the stonecutter.
+* `tests/round13.test.js` states the rule: **every build cost must be something the game actually
+  produces** — dug out of the ground or made at a bench. A cost you cannot obtain is not a price, it
+  is a wall.
+
+And `tests/industry.test.js`'s §3.20 — *"no recipe is a dead end"* — had the same blind spot from the
+other side: it counted refining and power as consumers and not the build catalogue, which is the
+biggest consumer in the game. It counts it now, in the right vocabulary, and is finally asking the
+whole question.
+
+### What this round is really about
+
+Eight of eleven items were a join that had never been made or a flag that nothing read — nine, with
+the material vocabulary the ninth found on its way past. The two that
+were not — the equip rule and the straight-line haul distance — were both *wrong questions* asked in
+the right place: "is this a one-hander" instead of "would the off hand take it", and "how far apart
+are these" instead of "how far is the walk". Neither crashes, neither shows up in a test that was
+not written to look for it, and both are invisible until somebody plays the game and says so.

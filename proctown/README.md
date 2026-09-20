@@ -179,19 +179,54 @@ const plan = planTown({ seed: 7, size: 4, culture: 'human' });
 
 | Field | Shape |
 |---|---|
-| `streets` | `[{ a:[x,z], b:[x,z], cls, width, depth }]` — `cls` is `main` / `lane` / `alley`, clipped to the wall |
+| `streets` | `[{ pts:[[x,z],…], cls, width, depth }]` — `cls` is `main` / `lane` / `alley`, clipped to the wall. A `highway: true` street is a road from outside that was brought in; a `spur: true` one was added to join an otherwise orphaned lane |
 | `blocks` | `[{ x, z, w, d, depth }]` |
 | `plots` | `[{ x, z, w, d, cx, cz, facing, district, want }]` — `facing` is the angle out to the street |
 | `square` | `{ cx, cz, r }` — open ground, nothing built on it |
 | `wall` | `{ kind, poly, gates:[{ angle, x, z, road }] }` or `null` below size 4 |
+| `links` | how many of the `links` you passed became a high street |
+| `connect` | `{ groups, spurs, dropped }` — how many pieces the plan was in before the network pass, how many spurs it took to join them, and how much paving was thrown away for having nothing to reach |
 | `ring`, `wallRadius`, `culture`, `size`, `seed` | |
+
+`planTown` also takes `links: [[x, z], …]` — **where the world's roads arrive**, in the town's own
+coordinates. Farhold works these out by walking the inter-town route's own polyline looking for the
+step from outside the ring to inside (`roadLinksFor` in `js/features.js`).
 
 Everything is deterministic from `seed` alone, so a town is the same town every visit and **nothing
 has to be stored**. A bug report that names a seed is reproducible.
 
 Helpers: `overlaps(plan)` returns the hit list (must be empty), `summarise(plan)` gives the one-line
 shape used by the batch report, `footprintOf(size)` gives `{ ring, wall, walled }`, and `makeRng(seed)`
-is the generator everything else draws from.
+is the generator everything else draws from. `connectStreets(out)` and `linkRoads(out, links)` run
+inside `planTown` and are exported so a test (or the page) can re-measure a plan; `nearestOnStreets`
+is the "where would a spur join" primitive both of them use.
+
+## One network, and the road that comes into town
+
+Reported from Farhold, twice: *"There are still random flat rectangles in town I think are supposed
+to be roads, can they be interconnected somehow and actually connect to the real roads passing
+through towns? They still don't feel quite natural."*
+
+The cuts that make the blocks **are** in principle a connected network — a child street runs from one
+edge of its block to the other, and those edges are its parent's streets. Three things break that:
+
+1. a drifting child block *shrinks* to stay inside its slot, so its alleys stop short of the street
+   that made them;
+2. `clipPolyline` cuts every street to the wall circle, which can leave a stub near the edge with
+   both of its junctions outside;
+3. the renderer drops any span that lands in water or on a riverbank, which can halve a street.
+
+Any of those leaves **paving with no road attached to it** — a slab in a field, which no player can
+read as a road. `connectStreets` groups the streets into connected components, takes the one holding
+the square as the town, gives every other component a **spur** to reach it (up to 26 m), and drops
+whatever will not join. `linkRoads` takes the points where a world road meets the ring and lays a
+main street from each to wherever the plan comes closest — a road reaching a town becomes its high
+street, because that is what a road does.
+
+**Both run before a single plot is cut.** A spur is a street, and cutting plots first and laying
+spurs through them afterwards would put houses on roads again — the one thing this planner exists to
+make impossible. A spur crosses a block rather than bounding it, so plots are trimmed against the
+added streets afterwards, and `overlaps()` stays at zero.
 
 ## Rules the tests hold
 
@@ -207,6 +242,10 @@ is the generator everything else draws from.
 - the trades get the big plots, not an alley
 - the culture genuinely changes the shape of the town
 - street classes are a real hierarchy
+- **every town is one connected network** — 7 cultures × 5 seeds × 6 sizes, no loose paving
+- a road arriving from outside becomes a street that starts at the ring and ends on the plan
+- a spur is a street, so nothing is ever built on one (`overlaps()` still empty with links passed)
+- `linkRoads` does nothing when the road already meets the plan
 
 `node --test proctown/tests/buildkit.test.js` (the kit, 20 tests):
 
@@ -229,7 +268,7 @@ is the generator everything else draws from.
 `TOWN_EXPANSION.md` is the full plan. From §2, still open: the 3D preview, a live palette editor that
 writes back to `data/cultures.json`, the walkability flood-fill, the on-page performance readout, and
 the regression guard that Farhold's import and this page produce identical plans. §1 items not yet
-in: approach roads seeding the graph, terrain-aware streets, and plot-fill (yards, pens, woodpiles —
+in: terrain-aware streets, and plot-fill (yards, pens, woodpiles —
 the kit does the clutter that touches a building, but the empty half of a big plot is still empty).
 From §3: level-of-detail past the two tiers `features.js` has, signage glyphs, smoke by day and
 window light at night.

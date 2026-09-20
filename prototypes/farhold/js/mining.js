@@ -13,6 +13,13 @@
 //      `haulThroughput(distance)` from js/stores.js: double the distance and the delivery roughly
 //      halves. Same sum as the walk in (1), on purpose — the game should only teach this once.
 //
+// `distance` in (3) is **the ground a hauler can actually walk**, not the straight line — round 13
+// found that a crate on the far side of a lake was "forty metres away" and delivered as if the
+// hauler swam. js/haulpath.js is the A* that measures it, and it is also what lets `autoRoute` pick
+// the store that DELIVERS most rather than the one that is nearest, which are different stores more
+// often than you would think. A drill lays its own route when it is built; the Route tool is an
+// override for when you want a different crate.
+//
 // The point of all three agreeing is the trade-off the user asked for: a rich seam far away and a
 // poor one at your feet should be comparable in one number, and they are — ore delivered per second.
 //
@@ -21,25 +28,31 @@
 //   import { createMining } from './mining.js';
 //   const mining = createMining({ data, ore, stores, grid, log });
 //   mining.bindDrill(entry, node);        // a drill was built on a seam
-//   mining.route(fromId, toPoolId);       // lay a haul route
+//   mining.autoRoute(drillId);            // …or let it find its own store, over real ground
+//   mining.route(fromId, toPoolId);       // lay a haul route by hand
 //   mining.tick(dt);                      // run every drill and every route
 //   mining.swing(node, seconds, ctx);     // you, with a pick
 
 import { mine, drillRate, haulReport, faceRate } from './resources.js';
+import { findHaulPath, bestStoreFor } from './haulpath.js';
 
-export function createMining({ data = {}, ore: oreIn = null, stores = null, grid = null, log = null, bag = null } = {}) {
+export function createMining({ data = {}, ore: oreIn = null, stores = null, grid = null, log = null, bag = null, terrain = null } = {}) {
   const say = (t, k) => { if (log) log(t, k); };
   let ore = oreIn;
 
   /** entry id -> { entry, nodeId, stock } — a drill and the seam it was built on. */
   const drills = new Map();
   /**
-   * Routes, as `{ id, fromId, toPoolId, hauler, carried }`.
+   * Routes, as `{ id, fromId, toPoolId, hauler, carried, path, pathKey }`.
    *
    * A route holds no rate of its own: the rate is recomputed from where its ends ARE every tick, so
    * moving a crate or joining two pools with a relay mast changes the throughput without anybody
    * having to remember to tell the route about it. This is the same decision js/work.js made about
    * orders holding no source.
+   *
+   * `path` is the exception, and it is a cache rather than state: A* is cheap once and not cheap
+   * sixty times a second, so the walked route is kept until `pathKey` — the two ends, to the metre
+   * — says one of them has moved. It is not saved, because it is derivable.
    */
   let routes = [];
   let seq = 0;
@@ -74,17 +87,54 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
    * `fromId` is a drill; `toPoolId` is a storage pool. Both ends are looked up fresh every tick, so
    * a route to a pool that is later knocked down simply stops delivering rather than throwing.
    */
-  function route(fromId, toPoolId, hauler = 'hand_cart') {
+  function route(fromId, toPoolId, hauler = 'hand_cart', { quiet = false } = {}) {
     const drill = drills.get(fromId);
     if (!drill) return { ok: false, why: 'Routes start at a drill.' };
     const pool = stores?.pools?.().find(p => p.id === toPoolId);
     if (!pool) return { ok: false, why: 'No storage there to route to.' };
-    if (routes.some(r => r.fromId === fromId)) return { ok: false, why: 'That drill already has a route.' };
-    const r = { id: `r${++seq}`, fromId, toPoolId, hauler, carried: 0 };
+    // re-routing is allowed: pointing a drill at a nearer crate is a thing a player does on purpose
+    routes = routes.filter(r => r.fromId !== fromId);
+    const r = { id: `r${++seq}`, fromId, toPoolId, hauler, carried: 0, path: null, pathKey: '' };
     routes.push(r);
     const rate = rateOf(r);
-    say(`Route laid. ${rate.perMinute.toFixed(1)}/min over ${Math.round(rate.metres)} m.`, 'good');
+    if (!rate.direct && !rate.perSecond) {
+      routes = routes.filter(x => x !== r);
+      return { ok: false, why: rate.why || 'Nothing can get from the drill to that store on foot.' };
+    }
+    if (!quiet) {
+      say(rate.direct
+        ? 'The drill is standing in the store pool. Everything it digs is already home.'
+        : `Route laid. ${rate.perMinute.toFixed(1)}/min over ${Math.round(rate.metres)} m of walking.`, 'good');
+    }
     return { ok: true, route: r, rate };
+  }
+
+  /**
+   * §1 — THE ROUTE LAYS ITSELF.
+   *
+   * "We should not require the user to click the route button but maybe just use a pathfinding to
+   * route the way." A drill with no route is a drill that fills its own little stockpile and stops,
+   * which is a state no player ever wants and the old interface made the default — you had to know
+   * the Route tool existed, pick it, and click two objects.
+   *
+   * So a drill finds its own store: whichever pool DELIVERS the most, measured over the ground a
+   * hauler can actually walk (js/haulpath.js), not the straight line through the hill. The Route
+   * tool is still there for when you want a different one.
+   */
+  function autoRoute(fromId, { quiet = false } = {}) {
+    const drill = drills.get(fromId);
+    if (!drill) return { ok: false, why: 'Routes start at a drill.' };
+    const pools = stores?.pools?.() || [];
+    if (!pools.length) return { ok: false, why: 'Nowhere to send it yet. Build a storage crate.' };
+    const here = poolAt(drill.entry.x, drill.entry.z);
+    const pick = bestStoreFor({
+      from: { x: drill.entry.x, z: drill.entry.z },
+      pools, terrain,
+      rateFor: metres => stores.haulThroughput(metres, 'hand_cart'),
+      insidePoolId: here?.id || null,
+    });
+    if (!pick) return { ok: false, why: 'No store this drill can reach on foot. A relay mast or a nearer crate would fix it.' };
+    return route(fromId, pick.pool.id, 'hand_cart', { quiet });
   }
 
   function unroute(id) {
@@ -108,9 +158,32 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
     if (here && here.id === pool.id) {
       return { perSecond: Infinity, perMinute: Infinity, metres: 0, direct: true, why: 'The drill is in the pool. No trip to make.' };
     }
-    const metres = Math.hypot(pool.x - drill.entry.x, pool.z - drill.entry.z);
+    /**
+     * THE DISTANCE IS THE WALK, NOT THE LINE.
+     *
+     * `Math.hypot` between the two ends was the whole of this before: a crate on the far side of a
+     * lake was "forty metres away" and delivered as if the hauler swam. The path is cached on the
+     * route and recomputed only when an end actually moves, because A* is cheap once and not cheap
+     * sixty times a second.
+     */
+    const pathKey = `${drill.entry.x.toFixed(0)},${drill.entry.z.toFixed(0)}>${pool.x.toFixed(0)},${pool.z.toFixed(0)}`;
+    if (r.pathKey !== pathKey) {
+      r.path = findHaulPath({ from: { x: drill.entry.x, z: drill.entry.z }, to: pool, terrain });
+      r.pathKey = pathKey;
+    }
+    if (!r.path?.ok) {
+      return { perSecond: 0, perMinute: 0, metres: Infinity, direct: false, points: [], why: r.path?.why || 'No way through.' };
+    }
+    const metres = r.path.metres;
     const haul = stores.haulThroughput(metres, r.hauler);
-    return { perSecond: haul.perSecond, perMinute: haul.perMinute, metres, direct: false, hauler: haul.hauler, why: '' };
+    const crow = Math.hypot(pool.x - drill.entry.x, pool.z - drill.entry.z);
+    return {
+      perSecond: haul.perSecond, perMinute: haul.perMinute, metres, direct: false,
+      hauler: haul.hauler, points: r.path.points, crow,
+      // "it is 40 m away and the cart walks 96" is the sentence that explains a slow route
+      detour: crow > 1 ? +(metres / crow).toFixed(2) : 1,
+      why: '',
+    };
   }
 
   /** Everything a panel wants to draw, with no drawing in it. */
@@ -131,7 +204,10 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
         stock: Math.round(d.stock),
         powered: !!d.entry.powered,
         remaining: node ? (node.infinite ? Infinity : node.amount) : 0,
-        route: r ? { id: r.id, to: r.toPoolId, perMinute: rate.perMinute, metres: Math.round(rate.metres), direct: rate.direct } : null,
+        route: r ? {
+          id: r.id, to: r.toPoolId, perMinute: rate.perMinute, metres: Math.round(rate.metres),
+          direct: rate.direct, detour: rate.detour || 1, points: rate.points || [],
+        } : null,
         /**
          * The bottleneck, in one word, which is the only thing anybody actually reads.
          *
@@ -150,7 +226,7 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
   }
 
   return {
-    bindDrill, unbindDrill, route, unroute, rateOf, overview,
+    bindDrill, unbindDrill, route, autoRoute, unroute, rateOf, overview,
     /** A new world means new seams under the same drills — see main.js's buildPlanet. */
     setOre(next) { ore = next; drills.clear(); routes = []; },
     get drills() { return [...drills.values()]; },
@@ -215,7 +291,7 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
     toJSON() {
       return {
         drills: [...drills.values()].map(d => ({ id: d.entry.id, nodeId: d.nodeId, stock: d.stock, resource: d.resource })),
-        routes: routes.map(r => ({ ...r })),
+        routes: routes.map(({ id, fromId, toPoolId, hauler, carried }) => ({ id, fromId, toPoolId, hauler, carried })),
         seq,
       };
     },
@@ -226,7 +302,7 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
         const entry = entryOf ? entryOf(d.id) : null;
         if (entry) drills.set(d.id, { entry, nodeId: d.nodeId, stock: d.stock || 0, resource: d.resource });
       }
-      routes = (json?.routes || []).filter(r => drills.has(r.fromId)).map(r => ({ ...r }));
+      routes = (json?.routes || []).filter(r => drills.has(r.fromId)).map(r => ({ ...r, path: null, pathKey: '' }));
       seq = json?.seq || routes.length;
     },
   };

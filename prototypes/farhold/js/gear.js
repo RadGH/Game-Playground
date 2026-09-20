@@ -96,6 +96,42 @@ export function mountLook(item) {
  * are allowed (see `SLOT_AFFIXES` below).
  */
 export const GEAR_BASES = {
+  /**
+   * ---- R14: THE TWO THINGS YOU ARE HANDED, AS REAL BASES.
+   *
+   *   "Add the walking speed and gallop speed to the starting trail horse, lower than all the rest.
+   *    Do the same for the starting torch."
+   *
+   * Both starters were hand-written item literals in js/light.js with no `affixes` array, which had
+   * two consequences nobody had noticed:
+   *
+   *   * the item card showed NOTHING about either of them. A mount's numbers reach the character
+   *     sheet as intrinsic affixes (`cond_mountBase`, `cond_mountWind` — see `make()` below), and a
+   *     literal with no affixes carries none, so the Trail Horse's card was a name and a line of
+   *     lore;
+   *   * and with no `cond_mountBase`, `js/player.js:280` fell through to `balance.json`'s
+   *     `mountSpeed` of 2.1 — so the free horse rode at exactly the Dray Elk's speed and a tenth
+   *     faster than the 140-gold Moor Pony. The starter was quietly the second-best mount in the
+   *     game.
+   *
+   * They are bases now, built the same way every other mount and lamp is built, and both sit BELOW
+   * the cheapest rung you can buy: 1.6x against the pony's 1.9x, 26 metres against the torch's 40.
+   * `starter: true` is documentation — SHOP_GEAR is an explicit list of keys and neither is on it,
+   * so no shelf can offer them.
+   */
+  trail_horse: {
+    key: 'trail_horse', name: 'Trail Horse', slot: 'mount', type: 'accessory', subtype: 'mount',
+    speed: 1.6, jump: 1.3, stamina: 20, price: 0, starter: true, look: MOUNT_LOOKS.trail_horse,
+    lore: 'Patient, unremarkable, and faster than your own legs. It is not faster than anything else.',
+  },
+  guttering_brand: {
+    key: 'guttering_brand', name: 'Guttering Brand', slot: 'light', type: 'accessory', subtype: 'torch',
+    range: 26, intensity: 2.2, color: '#ffa050', burn: 0, price: 0, starter: true,
+    look: { offhand: 'torch', color: '#b07038' },
+    craft: { station: 'hand', cost: { log: 1, fibre: 1 }, hours: 0.1 },
+    lore: 'A stick and whatever would burn. You can see your own feet and about as far as you can throw it.',
+  },
+
   // ---- mounts. `speed` multiplies move speed while riding; `stamina` is how long it can gallop.
   //
   // "The Moor Pony looked identical to the starting Trail Horse. Each mount base needs a visibly

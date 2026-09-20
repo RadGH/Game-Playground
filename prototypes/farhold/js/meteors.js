@@ -33,9 +33,26 @@ const DEFAULTS = {
   landRange: [220, 900],
   /** How high it starts. */
   startHeight: 2600,
-  /** Shooting stars: how often, and how long each lasts. */
-  shootingEvery: 22,
+  /**
+   * Shooting stars: how often, and how long each lasts.
+   *
+   * R14 — THEY WERE WALLPAPER, AND THAT WAS THE PROBLEM.
+   *
+   * "I saw what looked like a shooting star, can you change it so that falling stars are actual
+   *  events and leave behind a meteor with a special loot crate inside."
+   *
+   * One every 22 seconds at a 70% roll is a star roughly every half minute, all night, none of
+   * which ever meant anything — so by the time a REAL fall crossed the sky there was no reason to
+   * look up. Two changes: they are much rarer (a minute and a half between rolls at two in five),
+   * and `shootingRealChance` of them are not decoration at all — the streak is the opening of a
+   * real fall, which then lands where it was always going to. A star you see now is worth walking
+   * toward, because two in five of them are.
+   */
+  shootingEvery: 90,
+  shootingChance: 0.4,
   shootingSeconds: 1.6,
+  /** …and this share of those are the start of a real one. */
+  shootingRealChance: 0.4,
   /** How many items the chest holds, and the worst of them. */
   items: [1, 3],
   floor: 'rare',
@@ -104,6 +121,9 @@ export function createMeteors(opts = {}) {
     scene.add(body.group);
     const meteor = {
       x: gx, z: gz, ground,
+      // R14: the crate's key is settled at DROP time, not at landing, because the quest that tracks
+      // this fall is created thirty seconds before there is a crate to key it against.
+      chestKey: `meteor:${Math.round(gx)},${Math.round(gz)}`,
       from: [gx + Math.cos(entryAngle) * lateral, ground + cfg.startHeight, gz + Math.sin(entryAngle) * lateral],
       body, t: 0, seconds, landed: false,
     };
@@ -133,9 +153,7 @@ export function createMeteors(opts = {}) {
     meteor.landed = true;
     scene.remove(meteor.body.group);
     meteor.body.dispose();
-    const chest = chests?.place?.('meteorite', meteor.x, meteor.z, {
-      key: `meteor:${Math.round(meteor.x)},${Math.round(meteor.z)}`,
-    });
+    const chest = chests?.place?.('meteorite', meteor.x, meteor.z, { key: meteor.chestKey });
     onLand?.(meteor, chest);
     return chest;
   }
@@ -153,11 +171,19 @@ export function createMeteors(opts = {}) {
       }
     }
 
-    // ---- shooting stars, which are only ever decoration
+    // ---- shooting stars. Most are decoration; some are the first second of a real fall.
     sinceShooting += dt;
     if (sinceShooting >= cfg.shootingEvery) {
       sinceShooting = 0;
-      if (rng() < 0.7) shootingStar();
+      if (rng() < (cfg.shootingChance ?? 0.4)) {
+        if (player && rng() < (cfg.shootingRealChance ?? 0.4)) {
+          // a real one, announced the same way the five-minute roll announces its own
+          const a = rng() * Math.PI * 2;
+          const [lo, hi] = cfg.landRange;
+          const d = lo + rng() * (hi - lo);
+          drop(player.x + Math.cos(a) * d, player.z + Math.sin(a) * d);
+        } else shootingStar();
+      }
     }
 
     // ---- fly whatever is in the air

@@ -44,8 +44,8 @@
     "loom": {
       "name": "Loom", "tier": 1, "speed": 1.0, "powerUse": 3, "priority": "refining",
       "fuels": {}, "unpoweredSpeed": 0.6,
-      "build": { "plank": 10, "rope": 4, "iron_ingot": 2 },
-      "desc": "Fibre to cloth to rope. Cheap, and everything wants rope."
+      "build": { "plank": 10, "fibre": 12, "iron_ingot": 2 },
+      "desc": "Fibre to cloth to rope. Cheap, and everything wants rope. Round 14: it used to COST four rope, which only a loom makes — so nobody could ever build the first one."
     },
     "smelter": {
       "name": "Smelter", "tier": 1, "speed": 2.2, "powerUse": 14, "priority": "refining",
@@ -56,8 +56,8 @@
     "alloy_forge": {
       "name": "Alloy Forge", "tier": 1, "speed": 1.4, "powerUse": 18, "priority": "refining",
       "fuels": {}, "needsPower": true,
-      "build": { "brick": 24, "steel_ingot": 8, "machine_part": 3 },
-      "desc": "Two ingots in, one better one out. It is the gate on every mid-tier piece of gear — §2.5."
+      "build": { "brick": 24, "iron_ingot": 14, "cut_stone": 8 },
+      "desc": "Two ingots in, one better one out. It is the gate on every mid-tier piece of gear — §2.5. Round 14: it used to cost three machine parts, which only the assembler makes, and the assembler costs ten of them — so the whole of tier 2 hung on a part nothing in the game could produce. It is built from iron and block now, and it files the first rough parts itself."
     },
     "chemical_bench": {
       "name": "Chemical Bench", "tier": 1, "speed": 1.2, "powerUse": 6, "priority": "refining",
@@ -128,6 +128,7 @@
     { "id": "tap_resin", "machine": "sawmill", "name": "Press Resin", "time": 12, "inputs": { "log": 2 }, "outputs": { "resin": 3, "plank": 1 }, "unlock": { "recipe": "saw_planks", "times": 4 } },
 
     { "id": "cut_block", "machine": "stonecutter", "name": "Cut Block", "time": 12, "inputs": { "stone": 3 }, "outputs": { "cut_stone": 2 } },
+    { "id": "pour_concrete", "machine": "stonecutter", "name": "Pour Concrete", "time": 18, "inputs": { "gravel": 3, "sand": 2, "water": 2 }, "outputs": { "concrete": 3 }, "unlock": { "recipe": "crush_rubble", "times": 3 }, "desc": "The catalogue has always spent concrete and nothing has ever made any — this is where it comes from now." },
     { "id": "crush_rubble", "machine": "stonecutter", "name": "Crush Rubble", "time": 8, "inputs": { "rubble": 3 }, "outputs": { "gravel": 4 } },
     { "id": "crush_slag", "machine": "stonecutter", "name": "Crush Slag", "time": 10, "inputs": { "slag": 4 }, "outputs": { "gravel": 3 }, "desc": "Slag is not rubbish, it is road base. §2.17 — the byproducts are real and they all go somewhere." },
 
@@ -147,12 +148,14 @@
 
     { "id": "smelt_iron_dust", "machine": "smelter", "name": "Smelt Iron Dust", "time": 12, "power": 6, "inputs": { "iron_dust": 3 }, "outputs": { "iron_ingot": 2, "slag": 1 }, "waste": ["slag"] },
     { "id": "smelt_copper_dust", "machine": "smelter", "name": "Smelt Copper Dust", "time": 12, "power": 6, "inputs": { "copper_dust": 3 }, "outputs": { "copper_ingot": 2, "slag": 1 }, "waste": ["slag"] },
+    { "id": "draw_wire", "machine": "smelter", "name": "Draw Wire", "time": 14, "power": 5, "inputs": { "copper_ingot": 1 }, "outputs": { "wire": 4 }, "desc": "Copper Ore's own description has said 'wire, fittings, and half of bronze' since it landed, and until round 13 there was no wire in the game — ten structures spent a material nothing produced." },
     { "id": "smelt_iron_conc", "machine": "smelter", "name": "Smelt Iron Concentrate", "time": 14, "power": 8, "inputs": { "iron_concentrate": 2 }, "outputs": { "iron_ingot": 3 }, "unlock": { "recipe": "smelt_iron_dust", "times": 5 }, "desc": "Three ingots for two loads and no slag. Two machines' worth of effort for that, which is the whole yield chain in one line." },
     { "id": "smelt_copper_conc", "machine": "smelter", "name": "Smelt Copper Concentrate", "time": 14, "power": 8, "inputs": { "copper_concentrate": 2 }, "outputs": { "copper_ingot": 3 }, "unlock": { "recipe": "smelt_copper_dust", "times": 5 } },
     { "id": "smelt_bulk_iron", "machine": "smelter", "name": "Smelt Iron Ore", "time": 9, "power": 5, "inputs": { "iron_ore": 2 }, "outputs": { "iron_ingot": 1, "slag": 1 }, "waste": ["slag"], "desc": "The furnace recipe, twice as fast, for when you have not built the crusher yet." },
 
     { "id": "forge_bronze", "machine": "alloy_forge", "name": "Forge Bronze", "time": 20, "power": 10, "inputs": { "copper_ingot": 3, "tin_ingot": 1 }, "outputs": { "bronze_ingot": 3 }, "unlock": { "recipe": "smelt_copper", "times": 10 }, "desc": "Ten coppers smelted and the recipe turns up on its own — §2.18." },
     { "id": "forge_steel", "machine": "alloy_forge", "name": "Forge Steel", "time": 24, "power": 12, "inputs": { "iron_ingot": 3, "charcoal": 2 }, "outputs": { "steel_ingot": 3 }, "unlock": { "recipe": "smelt_iron", "times": 10 } },
+    { "id": "forge_rough_part", "machine": "alloy_forge", "name": "File a Rough Part", "time": 70, "power": 12, "inputs": { "iron_ingot": 4, "plank": 2 }, "outputs": { "machine_part": 1 }, "desc": "ROUND 14 \u2014 THE BOOTSTRAP. Until this recipe, the ONLY thing in the game that made a machine part was the assembler, and the assembler cost eight machine parts. Nothing in Farhold has ever produced one by any honest route, so the smelter, the crusher, the washer, the drill, the wind turbine and eleven other pieces were all unbuildable \u2014 the same self-gate as the claim stone, hidden one layer deeper. Gears and shafts cut and filed at a forge: three times the time of an assembled one and no bronze, so the assembler is still worth reaching." },
     { "id": "forge_meteoric", "machine": "alloy_forge", "name": "Work Meteoric Iron", "time": 40, "power": 18, "inputs": { "meteoric_iron": 2, "steel_ingot": 1 }, "outputs": { "tempered_alloy": 2 }, "unlock": { "recipe": "forge_steel", "times": 6 }, "desc": "The only route to tempered alloy that does not need a refinery — which is why a meteor fall is worth the walk." },
 
     { "id": "crush_iron", "machine": "crusher", "name": "Crush Iron Ore", "time": 7, "power": 8, "inputs": { "iron_ore": 2 }, "outputs": { "iron_dust": 3 }, "desc": "Three dust from two ore: half again the metal out of the same node. This is what makes a lean seam near the base beat a rich one across the valley." },

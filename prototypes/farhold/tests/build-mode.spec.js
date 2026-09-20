@@ -26,10 +26,12 @@ test('B opens a panel that says what to do and what everything costs', async ({ 
   await expect(page.locator('#build-ui')).toBeVisible();
 
   const panel = page.locator('#build-ui');
-  // the four steps, because "how do I start a base" must be answerable without leaving the game
-  await expect(panel.locator('.build-steplist li')).toHaveCount(4);
+  // the steps, because "how do I start a base" must be answerable without leaving the game — and
+  // the first of them must say where materials come from, which is the one thing nothing else says
+  await expect(panel.locator('.build-steplist li')).toHaveCount(6);
+  await expect(panel.locator('.build-steplist li').first()).toContainText('swing at a tree');
   await expect(panel).toContainText('Level');
-  await expect(panel).toContainText('Claim Stone');
+  await expect(panel).toContainText('Outpost Marker');
 
   // every tool has a button, and picking one takes
   const tools = await panel.locator('.build-tool').allTextContents();
@@ -41,7 +43,7 @@ test('B opens a panel that says what to do and what everything costs', async ({ 
   const cost = await page.evaluate(() => {
     const f = window.farhold;
     const row = [...document.querySelectorAll('#build-ui .build-row')]
-      .find(r => r.textContent.includes('Claim Stone'));
+      .find(r => r.textContent.includes('Outpost Marker'));
     row.click();
     const piece = (f.structures.structures || []).find(p => p.id === 'claim_stone');
     return {
@@ -106,7 +108,7 @@ test('the ghost follows the camera, and a click on the ground builds', async ({ 
 
   // …then put a claim stone down with a click, through the panel
   await page.evaluate(() => {
-    const row = [...document.querySelectorAll('#build-ui .build-row')].find(r => r.textContent.includes('Claim Stone'));
+    const row = [...document.querySelectorAll('#build-ui .build-row')].find(r => r.textContent.includes('Outpost Marker'));
     row.click();
   });
   await canvas.click({ position: { x: 480, y: 360 } });

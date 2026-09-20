@@ -1167,8 +1167,8 @@
       },
       "cost": {
         "brick": 18,
-        "steel": 8,
-        "parts": 3
+        "iron": 10,
+        "block": 8
       },
       "look": {
         "kind": "machine",
@@ -1244,7 +1244,7 @@
       "snap": "grid",
       "cost": {
         "timber": 8,
-        "rope": 4
+        "fibre": 10
       },
       "look": {
         "kind": "loom",
@@ -2318,7 +2318,7 @@
     },
     {
       "id": "claim_stone",
-      "name": "Claim Stone",
+      "name": "Outpost Marker",
       "cat": "waypoint",
       "tier": 1,
       "w": 1.2,
@@ -2327,14 +2327,13 @@
       "snap": "grid",
       "claims": true,
       "cost": {
-        "stone": 12,
-        "iron": 2
+        "stone": 12
       },
       "look": {
         "kind": "statue",
         "color": "#8e8a80"
       },
-      "desc": "Marks a base. It is what a raid comes for and what stops a town growing on top of you."
+      "desc": "Optional. Names the outpost it stands in and marks its middle, which is where a raid comes. Round 14: it does not permit anything \u2014 you can build anywhere without one."
     },
     {
       "id": "waypoint_pad",

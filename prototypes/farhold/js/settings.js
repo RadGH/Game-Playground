@@ -80,7 +80,7 @@ export const BINDINGS = [
   { action: 'run', label: 'Run', code: 'ShiftLeft' },
   { action: 'jump', label: 'Jump', code: 'Space' },
   { action: 'interact', label: 'Talk, open, enter', code: 'KeyE' },
-  { action: 'firstPerson', label: 'First person', code: 'KeyV' },
+  { action: 'firstPerson', label: 'First person (hold to look around)', code: 'KeyV' },
   { action: 'torch', label: 'Light on and off', code: 'KeyL' },
   { action: 'log', label: 'What has happened', code: 'KeyK' },
   { action: 'mount', label: 'Whistle for the horse', code: 'KeyH' },

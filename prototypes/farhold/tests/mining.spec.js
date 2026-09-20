@@ -163,7 +163,7 @@ test('a drill on a seam plus a route fills the crate, and a longer route fills i
   expect(errors).toEqual([]);
 });
 
-test('the route tool is two clicks in the world, and the panel says what is holding a drill up', async ({ page }) => {
+test('a drill routes itself to the best store, and the Route tool moves it to another one', async ({ page }) => {
   const errors = await land(page);
 
   const out = await page.evaluate(async () => {
@@ -198,6 +198,7 @@ test('the route tool is two clicks in the world, and the panel says what is hold
     // the panel says "no route" before there is one
     await new Promise(r => setTimeout(r, 2200));
     const beforeText = document.querySelector('#build-ui .build-mines')?.textContent || '';
+    const autoMetres = Math.round(f.mining.routes[0]?.rate?.metres ?? 0);
 
     // …and the route tool is two clicks on the ground
     f.build.setTool('route');
@@ -211,7 +212,7 @@ test('the route tool is two clicks in the world, and the panel says what is hold
     f.build.setMode(false);
 
     return {
-      beforeText, afterText,
+      beforeText, afterText, autoMetres,
       firstWaiting: !!first.waiting, half,
       secondOk: second.ok, secondWhy: second.why || '',
       routes: f.mining.routes.length,
@@ -222,7 +223,14 @@ test('the route tool is two clicks in the world, and the panel says what is hold
   expect(out.none, 'no buildable seam in range').toBeFalsy();
   expect(out.drillWhy, `the drill would not go down: ${out.drillWhy}`).toBeFalsy();
   expect(out.beforeText, 'the panel does not list the drill').toContain('Digging');
-  expect(out.beforeText, 'the panel does not say the drill has no route').toContain('no route');
+  /**
+   * "We should not require the user to click the route button but maybe just use a pathfinding to
+   * route the way." The drill went down before either crate existed, so it had nowhere to send its
+   * ore; the crate that arrived afterwards is what it routes itself to, without a single click.
+   */
+  expect(out.beforeText, 'the drill did not route itself to the crate that arrived').not.toContain('no route');
+  expect(out.beforeText, 'the panel does not show the automatic route').toContain('route');
+  expect(out.autoMetres, 'the automatic route went to the far crate, not the near one').toBeLessThan(40);
   expect(out.firstWaiting, 'the first click did not pick an end').toBe(true);
   expect(out.half, 'the first click picked the wrong thing').toBe('drill');
   expect(out.secondOk, `the second click did not lay the route: ${out.secondWhy}`).toBe(true);

@@ -8,6 +8,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   planTown, overlaps, summarise, footprintOf, makeRng, corners, demoTerrain,
+  connectStreets, linkRoads, nearestOnStreets,
   CULTURES, STREET_CLASSES, WANT_ORDER, WANT_FROM,
 } from '../js/townplan.js';
 
@@ -257,4 +258,66 @@ test('the trades still arrive in want order, so a small town drops the bottom of
   const a = tradesIn(small), b = tradesIn(big);
   // whatever the smaller town has, the bigger one has too — it does not swap one trade for another
   for (const want of a) assert.ok(b.has(want), `the bigger town lost the ${want} the smaller one has`);
+});
+
+// ---------------------------------------------------------------------------- one network
+
+/** How many separate pieces a set of streets is in. The pass that fixes this also measures it. */
+function pieces(plan) {
+  const probe = connectStreets({ streets: plan.streets.slice(), square: plan.square });
+  return probe.groups || 1;
+}
+
+test('every town is ONE connected street network — no paving with no road attached to it', () => {
+  // Reported in play: "There are still random flat rectangles in town I think are supposed to be
+  // roads, can they be interconnected somehow… They still don't feel quite natural." A street that
+  // reaches nothing is a slab in a field, and there is no way for a player to read it as a road.
+  for (const culture of CULTURE_KEYS) {
+    for (const seed of [1, 2, 3, 7, 11]) {
+      for (const size of [1, 2, 3, 4, 5, 6]) {
+        const plan = planTown({ seed, size, culture });
+        if (plan.streets.length < 2) continue;
+        assert.equal(pieces(plan), 1,
+          `${culture} size ${size} seed ${seed} came out in more than one piece`);
+      }
+    }
+  }
+});
+
+test('the highway comes into town, and becomes a street of the town', () => {
+  const links = [[-40, 0], [0, 42]];
+  const plan = planTown({ seed: 7, size: 4, culture: 'human', links });
+  const high = plan.streets.filter(st => st.highway);
+  assert.ok(high.length >= 1, 'no road was brought into the town at all');
+  // each one starts where the road arrives…
+  for (const st of high) {
+    assert.ok(links.some(([lx, lz]) => Math.hypot(st.pts[0][0] - lx, st.pts[0][1] - lz) < 0.01),
+      'a high street does not start where the road arrives');
+    // …and ends ON the existing plan, which is what "connect to the real roads" means
+    const others = plan.streets.filter(o => o !== st);
+    const end = nearestOnStreets(others, st.pts[st.pts.length - 1][0], st.pts[st.pts.length - 1][1]);
+    assert.ok(end && end.distance < 1.5, 'a high street ends in a field');
+  }
+  assert.equal(pieces(plan), 1);
+});
+
+test('a spur is a STREET, so nothing is ever built on one', () => {
+  // The whole design rests on "a plot cannot overlap a street" — a spur crosses a block rather than
+  // bounding it, so it is the one kind of street that could break that if the plots were cut first.
+  for (const culture of CULTURE_KEYS) {
+    for (const seed of [1, 5, 13, 42]) {
+      for (const size of [2, 4, 6]) {
+        const plan = planTown({ seed, size, culture, links: [[-30, 10], [25, -30]] });
+        assert.equal(overlaps(plan).length, 0,
+          `${culture} size ${size} seed ${seed}: something is standing on a street`);
+      }
+    }
+  }
+});
+
+test('linkRoads does nothing when the road already meets the plan', () => {
+  const out = { streets: [{ pts: [[0, 0], [20, 0]], cls: 'main', width: 5 }], square: { cx: 0, cz: 0, r: 5 } };
+  assert.equal(linkRoads(out, [[10, 0.5]]), 0, 'a redundant high street was laid anyway');
+  assert.equal(out.streets.length, 1);
+  assert.equal(linkRoads(out, [[10, 30]]), 1, 'a road arriving 30 m away was not brought in');
 });

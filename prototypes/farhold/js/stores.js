@@ -11,6 +11,13 @@
 // worth what it looks like if you are willing to move the pool out to it — plant a logistics pole,
 // drop a crate, and the walk goes away. Until then the walk is the price of the richness.
 //
+// ROUND 14 CHANGED NOTHING IN HERE, AND THAT IS THE POINT. *"Resources should take time to move
+// unless in the immediate vicinity"* — the immediate vicinity IS the pool, and inside one nothing
+// moves and nothing is charged. What round 14 added is the other side of the gap: js/logistics.js
+// takes two pools, asks `gapBetween` how far apart they are, and moves goods between them on a real
+// clock. The rule this file states stays exactly as it was, because it is the rule the user
+// described.
+//
 //   import { createStoreNetwork } from './stores.js';
 //   const net = createStoreNetwork({ power, materials });
 //   net.add({ id: 'crate1', type: 'storage_crate', x: 0, z: 0 });
@@ -203,6 +210,12 @@ export function createStoreNetwork({ power = {}, materials = {} } = {}) {
     ));
   }
 
+  /**
+   * A pool by its id. js/logistics.js addresses the two ends of a delivery this way, because a pool
+   * outlives the frame it was looked up in but a pool OBJECT does not — `rebuild` makes new ones.
+   */
+  function pool(id) { all(); return pools.find(p => p.id === id) || poolOf(id); }
+
   /** Accept a pool object, a pool id, or the id of any store in one. */
   const asPool = p => {
     if (!p) return null;
@@ -351,7 +364,7 @@ export function createStoreNetwork({ power = {}, materials = {} } = {}) {
   }
 
   return {
-    Store, add, remove, get, rebuild, pools: all, poolOf, poolAt, shares,
+    Store, add, remove, get, rebuild, pools: all, pool, poolOf, poolAt, shares,
     accepts, roomFor, count, put, take, canAfford, spend, missing,
     gapBetween, haulThroughput, linkAdvice, overview, toJSON, load,
     get size() { return stores.size; },

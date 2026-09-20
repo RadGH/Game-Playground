@@ -61,6 +61,17 @@ climb back out** · **`F` light or snuff your torch** · `H` mount a horse · `J
 
 **In space:** `W` throttle · mouse steer · `Shift` boost · hold `Space` to warp · `J` land.
 
+**Build mode (`B`):** opens the panel **and gives you the mouse back**, so you can click the tools
+and the catalogue. The ghost follows the cursor, not the middle of the screen; left-drag still turns
+the camera, and a click is a click only if the mouse did not move. `Enter` finishes a run of road or
+wall · `Esc` drops a half-drawn run, then leaves the mode · `Ctrl+Z` undo · `[` `]` brush size ·
+scroll turns the piece (or sizes the brush).
+
+**Gathering:** there is no gathering key. **Swing at it.** Trees, bushes, reeds, rocks, boulders and
+ore seams all come down to the weapon in your hands, and the tool tier is read off that weapon — so
+a crystal refuses a bronze sword and says what would work instead. `E` on a seam still takes a
+single measured swing and reports what it would deliver per minute.
+
 URL options: `?seed=7`, `?auto=1` (skip the title), `?class=mage` (pick a class without the menu),
 `?quality=low` (smaller budgets — what the Playwright specs use), `?weather=storm` (start in a given
 sky and hold it).
@@ -220,7 +231,7 @@ that is phase 4.
 | `js/sky.js` | Star, sibling planets with their weather, moons, starfield, day/night, the two-pass render. Each body on its own shell (so they occlude) and its own orbital clock (so none of them whips round). |
 | `js/sunfx.js` | God rays, lens flare, the corona ring during an eclipse, and the sun going behind a ridge — screen space, with a terrain march for the occlusion. |
 | `js/weather.js` | Cloud decks, rain, snow, dust, lightning, fog. |
-| `js/props.js` | The scatter: 16 prop kinds, per-biome kits, grass, ruins. One draw call per kind. |
+| `js/props.js` | The scatter: 16 prop kinds, per-biome kits, grass, ruins. One draw call per kind. Plus the **harvest ledger** — what you have felled and where you have cleared — since a pure-function scatter has nowhere else to record it. |
 | `js/features.js` | Rivers, roads, bridges and settlements from the map's own data. |
 | `js/debug.js` | The backtick menu, including a copy-to-clipboard debug report. |
 | `js/map.js` | The full-screen map on `M`, over World Forge's own `renderWorld()`. |
@@ -257,7 +268,11 @@ that is phase 4.
 | `js/weapons.js` | A weapon's attack pattern, dual wielding, two-handers, staves and wands. **Pure, node-testable.** |
 | `js/perks.js` | The perk forest: four arms, oddballs, keystones, and what walking them grants. **Pure, node-testable.** |
 | `js/skilltalents.js` | A three-tier tree per skill, folded into the plan that gets cast. **Pure, node-testable.** |
-| `js/meteors.js` | Something falls out of the sky for thirty seconds and leaves a chest. |
+| `js/meteors.js` | Something falls out of the sky for thirty seconds and leaves a chest — and a Meteor Fall seam in the crater, the only source of meteoric iron. |
+| `js/haulpath.js` | A\* over an 8 m grid: what a hauler actually walks between a drill and a store, round the water and along the contour. **Pure, node-testable.** |
+| `js/resources.js` | What is in the ground, what it costs to get home, and the whole-planet seam field. Surface, indoors and placed-by-hand kinds are three different things. **Pure, node-testable.** |
+| `js/mining.js` | Drills, routes that lay themselves, and the one number the resource system exists to produce. **Pure, node-testable.** |
+| `js/ore-view.js` | The seams on the ground, and the haul routes drawn between them. |
 | `js/town-plan.js` | What a town is made of and how it is laid out. **Pure, node-testable.** |
 | `js/sky-looks.js` | The six skies a system can have. **Pure, node-testable.** |
 | `js/main.js` | Boot, wiring, the frame loop, `window.farhold`. |
@@ -356,6 +371,19 @@ level overlay, a busy world, a chest that pays out, a dungeon you can stand in w
 you, the torch, the sheet's five tabs and the mouse coming back, recycling feeding the bench,
 companions that follow, all thirty classes booting, the galaxy sitting behind the planets with the
 atmosphere in front, camps that fill when you walk up to them, and a live fight with no NaN in it.
+
+Round 13 adds `tests/round13.test.js` (13 node tests) and `tests/round13.spec.js` (7 browser tests).
+The node ones pin the rules: **nothing on the surface holding iron ore may need a tool you cannot
+have yet** (it caught a second offender the moment it was written), an `indoors` seam is underground
+and a `placedOnly` one is nowhere in the scatter, a refusal names the tool *and* where the tool comes
+from, a haul route walks round water instead of through it, a cliff is a wall and an unreachable
+store answers instead of searching the planet, the best store is the one that *delivers* most, a
+drill lays its own route and re-routing moves it rather than refusing, the drawn path is the measured
+one, and every entry in `PROP_HARVEST` has health, a tool tier, a verb, and drops that are real
+materials. The browser ones play it: Clear actually clears and pays out, levelling takes the trees
+with it, a tree comes down to repeated swings and leaves timber, `B` frees the cursor and the panel's
+buttons work, the Road tool draws the run from the first click and Enter lays it, the scanner finds
+deposits and pins them to the map, and every town on the world is one connected street network.
 
  `worldgen/tests/weather.test.js` covers the weather model (no
 snow in a desert, no rain on a dry world, a clock that crossfades, palettes that vary by seed but
@@ -500,7 +528,10 @@ and they disappear once you own anything. Then:
 
 1. **Level** a circle of ground — nothing in the catalogue will sit on raw Farhold, which is the
    point of the tool.
-2. Put down a **Claim Stone**. The ground is yours; a raid comes for this.
+2. Put down a **Furnace** and a **Storage Crate**. You can build anywhere — there is no permit. An
+   **Outpost Marker** is optional and only names the place; a raid comes for whatever you have built.
+   (Round 14: the Claim Stone is gone. It cost two iron ingots, iron needed a furnace, and a furnace
+   needed a claim — so your second base was impossible.)
 3. A **Storage Crate** and a **Burner Generator** beside it, with coal in the crate.
 4. A **Waypoint Pad** when you can afford one — and now you can come home from anywhere, including
    from another star system.
@@ -533,3 +564,44 @@ silently dropped the pad nearest the middle of the screen.
 And **three TDZ crashes** from `const`s read above their own declaration. `node --check` cannot see
 them, they do not fire until that line runs, and one of them only fired on a *load* — so every
 fresh-start test in the suite passed while every saved game was broken.
+
+---
+
+## Round 13 — the play-test list: build tools, gathering, and the roads
+
+Eleven items. Eight of them were the same fault in different clothes — **a rule written into the
+data and read by nobody, or a module finished and never called** — which is now three rounds
+running. The full write-up is in `RPG.md`; the build-mode half is in `BUILD-MODE.md`.
+
+### What you can do now that you could not before
+
+* **Swing at a tree and get timber.** Trees, bushes, reeds, rocks, boulders and crystals all have
+  health, a tool tier and a drop list (`PROP_HARVEST`). The swing you already make is the gathering
+  verb; there is no new key. Woods regrow, boulders do not.
+* **Clear actually clears**, and pays out what was standing there. It called a method that did not
+  exist, behind an `?.`, for the whole life of the building expansion.
+* **Level, Raise and Lower take the trees with them** and rebuild what is left on the new ground,
+  instead of leaving a levelled plot with its wood hanging in the air.
+* **Road and Wall draw the run as you click it** — pegs, bands and a dashed leg to the cursor — and
+  picking the tool picks a piece, so the panel stops quoting the price of a crate.
+* **Scan** sweeps for deposits from the cursor and lists one row per material, best of each by what
+  it would deliver, with a bearing and a pin that goes to the map, the minimap and the rim arrows.
+* **A drill lays its own route**, to whichever store *delivers* most over ground a hauler can walk —
+  `js/haulpath.js` is A\* with water as a wall — and the track is drawn on the ground.
+* **`B` gives you the mouse back**, so the panel is clickable and the ghost is under the cursor.
+* **Iron is reachable.** The Deep Vein said `indoors: true` from the day it landed and nothing read
+  it, so a hardness-2 iron seam was scattered on open grassland with no tier-2 tool in the game yet.
+* **A town is one street network**, and the highway that passes through becomes its high street.
+* **Build costs are payable.** The catalogue priced things in `timber`/`iron`/`parts`; the game
+  produces `log`/`iron_ingot`/`machine_part`; the two had never been introduced, so a palisade cost
+  six units of a thing nothing has ever made. One alias table, applied once at boot — plus `wire`
+  and `concrete`, which ten structures spent and no recipe produced, now made at a real bench.
+
+### The rule that came out of it
+
+> **Whatever the surface offers, a brand new player holding a starting weapon must be able to work
+> it.** Crystal and obsidian may be a "come back later"; nothing holding iron ore may be.
+
+`tests/round13.test.js` checks it over every biome, and it caught a second offender (`meteor_site`)
+within a minute of being written — which is the argument for writing the rule down as a test rather
+than fixing the one seam that was reported.

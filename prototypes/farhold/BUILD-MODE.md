@@ -46,8 +46,9 @@ selected — its price against what you are actually holding, plus the live reas
 **Starting a base**, in the order the panel lists it:
 
 1. **Level** a circle of ground. Nothing in the catalogue will sit on raw Farhold.
-2. **Claim Stone** (*Waypoint* group). The ground is yours; raids come for this.
-3. A **Storage Crate** and a **Burner Generator** beside it, with coal in the crate.
+2. A **Furnace** and a **Storage Crate**. You can build anywhere — round 14 removed the permit; see
+   §14.1. (An **Outpost Marker** is optional and only puts a name on the place.)
+3. A **Burner Generator** beside the crate, with coal in it.
 4. A **Waypoint Pad** when you can afford one. Now you can come home from anywhere.
 
 ### The four joins that were missing
@@ -619,3 +620,332 @@ walking towards a wood adds trees *between* the ones you could already see.
 > every one of those got a different answer. Trees stood still while the bushes around them jumped
 > — worse than the pop-in it was meant to cure. The item is drawn in full now and only the write to
 > the mesh is skipped, so the stream ends in the same place whatever the thinning says.
+
+---
+
+## Round 13 — the tools that did nothing, and the routes that lay themselves
+
+Reported in play, and every item here was a tool the panel offered that the world ignored. Full
+write-up in `RPG.md`; this is the build-mode half.
+
+### The toolbar now
+
+| Tool | What it does | Round 13 |
+|---|---|---|
+| Level | Flatten a circle to the height under the cursor | fells what is inside the brush and rebuilds the props at the new height |
+| Place | Put the selected piece down | — |
+| Road | Click corners, Enter to lay | **draws the run as you click it**, picks a road for you, says what it laid |
+| Wall | Same, with a gate where you double back | same preview |
+| Raise / Lower | Pull the ground up or push it down | same prop handling as Level |
+| **Scan** | Sweep for deposits and pin them | **new** |
+| Clear | Fell the trees and boulders in the brush | **now does anything at all** |
+| Take down | Deconstruct what you point at | — |
+| Route | Click a drill, then a store | still here, but a drill routes itself |
+
+### B gives the mouse back
+
+Build mode is in `input.setBlocked`, so the click that would re-take the pointer does not.
+`aimSpot()` unprojects the **real cursor** when the pointer is free and falls back to the camera's
+heading when it is locked — otherwise you point at one patch of ground with the mouse and build on
+another in the middle of the screen. Left-drag still turns the camera; a click and a drag are told
+apart by whether the mouse moved more than six pixels between press and release. `body.building`
+hides the fixed crosshair dot (a lie, while there is a cursor) and puts a real one on the canvas.
+
+### The run preview
+
+`js/build.js` keeps a `farhold-build-run` group: a peg at every clicked corner, a band of ground
+between consecutive corners, and a dashed leg from the last peg to the cursor — all at the piece's
+own half-width, so the preview is the footprint. Without it, four clicks and a silent array were
+indistinguishable from a broken tool.
+
+`setTool('road')` also selects `road_dirt` (and `'wall'` selects `palisade`) unless a piece of that
+category is already picked. The fallback used to live inside `finishRun`, *after* the run was drawn,
+so the panel spent the whole time quoting the price of whatever you last selected.
+
+### The harvest ledger
+
+`js/props.js` is a pure function of the cell seed, so there is nowhere to record "this tree is gone"
+except a list of exceptions kept beside it:
+
+```js
+props.strike(x, z, { damage, reach, tier })   // a swing. { hit, name, verb, felled, materials }
+props.clearAround(x, z, r)                     // the Clear tool. { removed, materials }
+props.groundMoved(x, z, r)                     // a terrain edit: clear + rebuild at the new height
+props.near(x, z, reach) / props.nearest(...)   // what is standing and can be harvested
+props.describe(prop)                           // name, verb, tool tier, hp, what it drops
+props.tickHarvest(seconds)                     // regrowth clocks
+props.toJSON() / props.loadHarvest(json)       // in the save
+```
+
+`felled` is keyed by `propKey(kind, x, z)` — the position rounded to a tenth of a metre, which is far
+inside the gap between two neighbouring scatter points and exact enough to hash the same on every
+rebuild. `cleared` is a list of circles, so ground you cleared stays clear for cells that had not
+been generated when you painted it. The skip follows round 12's rule: the numbers are all drawn and
+only the write to the mesh is skipped, so felling one tree cannot shuffle the bushes around it.
+
+`PROP_HARVEST` gives each kind `hp`, `tier`, `drops`, `verb` and `regrow`. The tier is the same
+ladder `js/resources.js` uses for seams, read off your weapon by `toolTierFor` — one rule, not two.
+
+### Scan, and the deposits
+
+`build.setTool('scan')` then click: `onScan(x, z, radius)` sweeps from the **cursor**, and the panel
+shows one row per material — the best of each, judged by delivered-per-minute from where you are
+standing — with a bearing and a **Pin it** button that drops a `seam` marker into `js/markers.js`.
+The brush size is the range, so `[` and `]` trade reach for detail.
+
+### Routes lay themselves, over ground you can walk
+
+`js/haulpath.js` is A\* over an 8 m grid. Water is impassable, anything steeper than `MAX_SLOPE`
+(0.62) is a bank a loaded cart does not go up, a step costs its length times `stepCost(slope)`, and
+the search is bounded to half again the straight-line distance so an unreachable store fails fast.
+
+```js
+findHaulPath({ from, to, terrain })   // { ok, metres, points, direct }
+bestStoreFor({ from, pools, terrain, rateFor, insidePoolId })
+mining.autoRoute(drillId)             // the drill picks its own store
+```
+
+`mining.rateOf` uses the **walked** length, cached on the route and recomputed only when an end
+moves, and reports a `detour` ratio. A drill auto-routes when it is placed; a new store re-routes
+every drill that had none. `js/ore-view.js` `drawRoutes` lays the track on the ground, because a
+route that goes twice as far as the crow flies explains itself the moment you look at it.
+
+### One vocabulary for materials
+
+`data/structures.json` prices in short names (`timber`, `iron`, `parts`, `block`); everything that
+*produces* a material speaks `log`, `iron_ingot`, `machine_part`, `cut_stone`. The catalogue's own
+header deferred the join to "§1 and §2", and the join was never made — so **a palisade cost six
+units of a thing nothing in the game has ever produced.**
+
+```js
+import { alignCatalogue, realCost, MATERIAL_ALIASES } from './buildplan.js';
+const catalogue = alignCatalogue(structureData, resourceData);   // once, at boot
+```
+
+Ten aliases, applied at the boundary, with the display names carried across so the panel still says
+"6 timber" while the pool spends logs. `realCost` is idempotent, so a raw catalogue handed straight
+to `createBuildPlan` still works — the plan translates again and lands on the same answer.
+
+`wire` and `concrete` were not aliases for anything: ten structures spent wire and no recipe made
+any. They are real materials now, from `draw_wire` at the smelter and `pour_concrete` at the
+stonecutter.
+
+The rule, in `tests/round13.test.js`: **every build cost must be something the game actually
+produces** — dug out of the ground or made at a bench. A cost you cannot obtain is not a price, it
+is a wall.
+
+---
+
+## Round 14 — the permit that could not be bought, and the road that was a row of tiles
+
+Two things the player asked for, and both of them turned out to be the same fault underneath: a rule
+written down in one file and never reconciled with the file that would have to satisfy it.
+
+### 14.1 The deadlock, in the user's own words
+
+> "I can't build a claim stone because it requires 2 iron ingots. I can't refine iron without a
+> furnace. I can't build a furnace without a claim stone. I don't really want to have claim stones
+> and would rather just allow building arbitrarily anywhere."
+
+Every sentence of that is true. `js/buildplan.js` refused any placement outside a claim once anything
+at all was standing; the only way to make a second claim was a Claim Stone; a Claim Stone cost two
+iron ingots; iron comes out of a furnace; a furnace had to stand inside a claim. Your *first* base
+was fine, because the first thing you ever build stakes a claim for free. Your second was impossible.
+
+**The gate is deleted, not repriced.** Every rule about the WORLD is kept — not on water, not on a
+slope, not inside another building, on the right ground for the machine — and the one rule about
+paperwork is gone. The lines it used to occupy in `check()` now carry the note explaining why.
+
+### 14.2 An outpost is worked out, not declared
+
+`js/outposts.js` replaces the idea a Claim Stone used to sell you. An outpost is **a group of things
+standing near each other**, found by single-linkage clustering over footprint edges with a 40 m gap —
+a little further than a logistics pole reaches, so two crates that share a pile are never called two
+different places. A road you laid joins two clusters into one, because that is what laying it said.
+
+Nothing is stored. The group cannot drift out of step with what is actually standing there, and an
+old save needs no migration because there is nothing new in it to migrate. `roleOf()` reads the
+group and names it — Mine, Depot, Works, Power, Fort, Hub — so the panel has something to list.
+
+The Claim Stone survives as the **Outpost Marker**: 12 stone, permits nothing, and all it does is
+carry the name of the group it stands in. `js/defence.js` still finds the middle of a base by looking
+for one, and a save that has one still loads.
+
+### 14.3 The other two self-gates, found by the test written for the first
+
+The test that would have caught the claim stone is *"walk the whole catalogue and prove every piece
+is reachable from a bare-handed start"*. It is in `tests/round14.test.js` and it found two more of
+exactly the same shape within a minute:
+
+| Piece | Cost | Made by |
+|---|---|---|
+| Loom | 4 **rope** | the loom, and nothing else |
+| Assembler | 10 **machine parts** | the assembler, and nothing else |
+
+The second one is the expensive one: with no machine parts obtainable, the smelter, alloy forge,
+crusher, washer, refinery, crystal cutter, drill, pump, wind turbine, battery bank, hauler drone and
+eleven more were unbuildable by any honest route, and `wire`, `lens`, `bronze` and `lift fuel` were
+unreachable behind them. **Twenty-two of the ninety-eight pieces in the catalogue, and the entire top
+half of the refining chain.**
+
+The fixes are three lines of data:
+
+* the loom costs 10 **fibre** (which you pull out of the ground);
+* the alloy forge costs iron and block instead of steel and machine parts;
+* a new recipe, **`forge_rough_part`** on the alloy forge: 4 iron ingots and 2 planks into one machine
+  part, at seventy seconds — three times an assembler's and with no bronze in it, so reaching the
+  assembler is still worth doing.
+
+With those, the walk reaches every machine and every one of the 98 structures. The test asserts that,
+and it is the one in this file to keep green above all the others: **a cost you cannot obtain is not
+a price, it is a wall.**
+
+### 14.4 Goods take time to move — `js/logistics.js`
+
+> "I would like to slap down a drill at a remote deposit, connect it to the power grid and storage,
+> and send the output back to my base using a travel route. Resources should take time to move unless
+> in the immediate vicinity, and should be able to greatly improve that time by building roads…
+> (no vehicles right now, materials can just teleport after a delay)."
+
+Three rules, and the first one is unchanged from §8:
+
+1. **Inside one storage pool nothing moves.** That is what a pool IS, and planting a logistics pole
+   to make one is still the reward.
+2. **Between two pools a load takes a real trip.** `handling + metres / speed`, where `metres` is the
+   ground a hauler can actually walk (`js/haulpath.js`'s A\*, not the crow flight through the hill).
+   The goods leave the source pool the moment it is sent, so a base cannot spend the same ore twice
+   by shipping it and smelting it, and they land in the destination when the clock runs out.
+3. **A road cuts it sharply**, in proportion to how much of the walked route runs on one:
+   `boost = 1 + roadFraction × (roadFactor − 1)`, and `roadFactor` is 2.6 in `data/power.json`'s new
+   `travel` block. A track laid the whole way is the full speed-up; half a track is half of it, so
+   finishing one is worth doing.
+
+`link(from, to)` is a **standing order** — "whatever piles up in this pool goes to that one" — so
+nobody has to press a button per cartload. One load on the road per link at a time, or a rich mine
+floods the track. A load that arrives at a full store waits at the gate marked `waiting` and tries
+again every tick; it never bounces and it never vanishes, because losing a player's ore for reasons
+they cannot see is the worst thing a logistics system can do.
+
+### 14.5 The base keeps working while you are off the planet
+
+> "Production and manufacturing should continue even if you leave a planet."
+
+`createAwayClock` stamps the wall clock on the way out and runs the base forward on the way back.
+The machines and the carts take turns in fifteen-minute slices rather than running one after the
+other — a mine that ships ore home so the smelters can eat it would smelt nothing if all the refining
+happened before any of the hauling. The power grid is ticked too, or the generators would run for six
+hours on no fuel at all.
+
+**The cap is six hours, and it is a promise rather than a balance knob.** Without one, a player who
+leaves the game open over a weekend comes back to a hundred thousand ingots and the progression is
+gone. Six hours is a generous reward for setting a base up and an amount you could plausibly have sat
+and watched.
+
+The summary is a **diff of what the stores hold**, not a log of what the machines claim they made,
+because a furnace that smelted forty ingots into a full crate and then jammed has produced nothing as
+far as anybody can tell. `back.text` is the line for the HUD; the stamp goes in the save.
+
+### 14.6 A road you lay is a road — `js/roadplan.js`
+
+> "The road tool places a lot of rectangles that leave gaps in between and look unnatural. The tiles
+> in town clip through the terrain. It would be better if they behaved like the regular roads, which
+> we've worked on to get smooth on the terrain."
+
+There were two completely different ideas of what a road is.
+
+* **The world's roads** are a polyline with a graded height per point. `js/planet.js` smooths the
+  natural ground along the line four times, stores it as `surface`, and carves the terrain down to
+  meet it; `js/features.js` draws one continuous ribbon, two vertices per point, every quad sharing
+  its neighbour's edge. No seam is possible because there are no sections.
+* **The build tool's roads** were ninety separate 4 m `road_dirt` boxes in the build ledger, each
+  sitting on the height of its own middle. On a slope they step past each other; at a corner each
+  stops square and the wedge between two bearings is bare grass.
+
+`js/roadplan.js` is the first idea, made reusable. A **lane** is `{ points, surface, half }` — the
+same three fields `terrain.roadPaths` carries — and the file makes them, levels the ground under
+them, and turns them into triangles:
+
+```js
+const lane = planLane([[0,0],[40,10],[80,4]], { terrain, half: 2 });
+levelLane(lane, terraform, { claim });          // the ground comes up to meet it
+const geom = laneRibbon(lane, { lift: 0.06 });  // → { position, normal, index }
+```
+
+Three decisions worth keeping:
+
+* **Resampled by total length, not leg by leg.** The first version walked each leg at a fixed 3 m
+  step, carried the remainder into the next, and moved the last point on to the true end if it had
+  stopped within a whisker of it. Both leave gaps — measured on a 90 m street, a tail 0.72 m short was
+  pulled forward and left a **3.72 m gap where the spacing is 3 m**. Dividing the whole line into
+  `ceil(length / spacing)` equal steps makes every gap the same and never longer than the spacing.
+* **Corners are rounded in the PLAN.** Two light 1-2-1 passes over the points turn a corner into a
+  short curve, and a curve has no wedge to pave over. `js/features.js` was dropping a square pad on
+  every junction to fill that wedge; a lane needs none.
+* **A levelling brush is only as long as the road is straight.** `strip()` grades linearly from one
+  end to the other — a chord — while the lane's surface is a smoothed curve. Painting a brush every
+  ten metres regardless left the road **2.8 m off the ground it was drawn on** on a nine-metre swell.
+  A brush now stops at ten metres *or* wherever the chord has drifted 25 cm from the curve.
+
+And one bug that only showed up because of the above: a strip brush has a rounded cap at each end,
+and in a chain each cap reaches back over its neighbour's middle. Because `segmentHit` clamps `t`,
+the ground there was pulled towards the neighbour's *endpoint* height rather than towards the road's
+height at that spot — half the road floating and half buried, which is the complaint the round set
+out to fix arriving through a different door. `strip({ caps: false })` in `js/terraform.js` says "the
+next leg covers the ground past my end, so I do not"; every point on a chain then belongs to exactly
+one brush and the skirt is purely sideways, which is what a road shoulder is anyway.
+
+The lanes live in their own book (`createRoadBook`) rather than the build ledger, because a lane has
+no footprint, collides with nothing, and ninety boxes in the ledger meant ninety overlap tests on
+every frame the ghost was up. `Ctrl+Z` learned about the second book at the same time — before that,
+laying a road and pressing undo quietly took down the shed you built ten minutes earlier.
+
+### 14.7 Tiles and slabs level to the average, not to the middle
+
+The user's own fallback — *"maybe these tiles and slabs just need to level the ground beneath them
+automatically, though IDK how to handle slopes"* — is the right answer for anything that cannot be a
+line. **Anything 30 cm tall or less is a tile now, and a tile levels under itself.** That covers the
+rug, the flower bed, the caltrops, the moss carpet and the paving square, all of which were 10 cm
+tall, all of which sat on the height of their own middle, and all of which poked a corner through the
+hill on anything but a billiard table.
+
+How to handle slopes: **level to the mean of the four corners and the centre.** Level to the lowest
+corner and the pad sits in a pit; to the highest and it stands on a plinth; the mean makes half of it
+a shallow cut and half a shallow fill, which is how a real terrace is built. Five samples rather than
+four because a slab across a ridge has four corners that agree and a middle two metres higher. The
+skirt is sized by how far the ground was falling, so a slab on a hummock gets a 1.2 m feather and one
+cut into a bank gets a wide one.
+
+### 14.8 Town streets
+
+`streetLanes()` in `js/town-plan.js` turns proctown's street polylines into the same lanes, sampled
+every three metres BEFORE the water check (an alley straight through a town can be two corners ninety
+metres apart, and asking "is this in the river?" of two corners tells you nothing about the
+eighty-eight metres between them). It grades with **two** passes rather than four on purpose: nothing
+carves the ground under a town — `js/features.js` has no terraform book, and painting brushes from
+there would write a permanent terrain edit into the save every time a settlement was rebuilt — so a
+street has to follow the hillside instead of cutting into it.
+
+`js/features.js` belonged to another agent this round, so the change there is written out as an
+exact patch in **`research/round14-build-handoff.md`** rather than made. The same document carries
+the `js/main.js` wiring for §14.4 and §14.5, without which `js/logistics.js` is a finished module
+nothing calls — which is the fault rounds 11 to 13 kept finding, and not one to repeat.
+
+### 14.9 Tests — `tests/round14.test.js`
+
+Twenty-four of them. In rough order of how much they matter:
+
+* **every piece in the catalogue is reachable from a bare-handed start** (§14.3), walking machines,
+  recipes and the three tool tiers to a fixed point;
+* the three self-gates stay fixed — no iron in the marker, no rope in the loom, more than one thing
+  in the game that makes a machine part;
+* you can build anywhere, and the world rules (water, slope, footing) are all still enforced;
+* an outpost comes out of the geometry, and a road joins two of them;
+* a load's time is `handling + metres / speed`, doubling the distance doubles the wait, a road cuts
+  it by `roadFactor` and half a road by half of that;
+* goods are in neither pile while they are on the road, and a full destination holds them at the gate;
+* the away clock produces, caps at six hours, and keeps its stamp across a save;
+* a laid road has no gaps — checked on the points AND by walking the index buffer to prove each quad
+  shares an edge with the one before it;
+* the ground under a laid road is within half a metre of the surface it is drawn at;
+* a tile's corners are within 12 cm of the ground it sits on, and a slab levels to the mean;
+* a town street is a lane, and it breaks at the water instead of leaving a hole.

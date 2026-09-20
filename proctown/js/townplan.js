@@ -524,7 +524,7 @@ export function planTown(opts = {}) {
     { k: 1, ring: 1.65 }, { k: 0.7, ring: 1.65 },
   ];
   for (const { k, ring } of attempts) {
-    const tried = planOnce({ ...opts, ringScale: ring, squeeze: squeezeBy(k) });
+    const tried = planOnce({ ...opts, ringScale: ring, squeeze: squeezeBy(k) });   // `opts` carries `links`
     if (tried.plots.length > best.plots.length) best = tried;
     if (best.plots.length >= floor) break;
   }
@@ -534,6 +534,11 @@ export function planTown(opts = {}) {
 function planOnce({
   seed = 1, size = 3, culture = 'human', heightAt = null, followGround = null, buildable = null,
   squeeze = null, ringScale = 1,
+  /**
+   * Where the world's roads reach this town, in the town's own coordinates. See `linkRoads`.
+   * Farhold works these out from where the inter-town route crosses the settlement's ring.
+   */
+  links = [],
 } = {}) {
   const base = CULTURES[culture] || CULTURES.human;
   const cfg = { ...base, ...(squeeze || {}), followGround: followGround ?? 0.35 };
@@ -576,6 +581,18 @@ function planOnce({
     out.square = { cx: 0, cz: 0, r: 6 };
   }
 
+  /**
+   * ONE NETWORK, AND THE HIGHWAY JOINS IT — BEFORE A SINGLE PLOT IS CUT.
+   *
+   * Order matters twice over. The roads come in first so a link can be the thing that rescues an
+   * otherwise orphaned lane near the edge. And both happen before `plotsInBlock`, because a spur is
+   * a STREET: cutting the plots first and laying spurs through them afterwards would put houses on
+   * roads again, which is the one thing this planner exists to make impossible. The plots are then
+   * trimmed against the new streets below, since a spur crosses a block rather than bounding it.
+   */
+  out.links = linkRoads(out, links);
+  out.connect = connectStreets(out);
+
   for (const b of out.blocks) plotsInBlock(b, rng, cfg, out, buildable);
 
   /**
@@ -585,6 +602,25 @@ function planOnce({
    * from that corner then stood outside the town — outside the wall, on the wrong side of the gate.
    */
   out.plots = out.plots.filter(p => corners(p).every(([x, z]) => Math.hypot(x, z) <= ring));
+
+  /**
+   * …and nothing stands on a spur or a high street either.
+   *
+   * The cuts that made the blocks cannot be built on because a plot is cut from a block and a block
+   * is what is left between cuts. A spur is not one of those — it crosses a block to reach the
+   * lane on the far side — so it is the one kind of street a plot CAN land on, and `overlaps()`
+   * would rightly call that a broken plan. Cheap: a handful of added streets against a few dozen
+   * plots.
+   */
+  const added = out.streets.filter(st => st.spur || st.highway);
+  if (added.length) {
+    out.plots = out.plots.filter(p => !added.some(st => {
+      for (let i = 0; i + 1 < st.pts.length; i++) {
+        if (obbOverlap(p, segmentBox(st.pts[i], st.pts[i + 1], st.width), 0.02)) return true;
+      }
+      return false;
+    }));
+  }
 
   for (const p of out.plots) {
     const d = Math.hypot(p.cx - out.square.cx, p.cz - out.square.cz);
@@ -698,6 +734,177 @@ function buildWall(radius, streets, rng) {
   return { kind: radius, poly, gates };
 }
 
+// ---------------------------------------------------------------------------- one network
+
+/**
+ * The nearest point on a polyline to a point, and how far it is.
+ *
+ * Returned as `{ x, z, distance, street, at }` so a spur can be laid to exactly where it should
+ * join rather than to the nearest CORNER, which is what makes a T-junction look like a T rather
+ * than like two roads that nearly meet.
+ */
+export function nearestOnStreets(streets, px, pz, { skip = null } = {}) {
+  let best = null;
+  for (const st of streets) {
+    if (st === skip) continue;
+    for (let i = 0; i + 1 < st.pts.length; i++) {
+      const [ax, az] = st.pts[i], [bx, bz] = st.pts[i + 1];
+      const dx = bx - ax, dz = bz - az;
+      const len2 = dx * dx + dz * dz;
+      const t = len2 ? Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / len2)) : 0;
+      const x = ax + dx * t, z = az + dz * t;
+      const distance = Math.hypot(px - x, pz - z);
+      if (!best || distance < best.distance) best = { x, z, distance, street: st, at: t };
+    }
+  }
+  return best;
+}
+
+/** Do these two streets share ground? Their widths count, so a T-junction touches. */
+function streetsMeet(a, b, tol = 0.6) {
+  const reach = (a.width + b.width) / 2 + tol;
+  for (const [px, pz] of a.pts) {
+    const near = nearestOnStreets([b], px, pz);
+    if (near && near.distance <= reach) return true;
+  }
+  for (const [px, pz] of b.pts) {
+    const near = nearestOnStreets([a], px, pz);
+    if (near && near.distance <= reach) return true;
+  }
+  return false;
+}
+
+/**
+ * MAKE THE STREETS ONE NETWORK, AND DROP WHATEVER WILL NOT JOIN.
+ *
+ * Reported in play, twice: *"There are still random flat rectangles in town I think are supposed to
+ * be roads, can they be interconnected somehow… They still don't feel quite natural."*
+ *
+ * The cuts that make the blocks are, in principle, already a connected network — a child street
+ * runs from one edge of its block to the other, and those edges are its parent's streets. In
+ * practice three things break that:
+ *
+ *   * a drifting child block SHRINKS to stay inside its slot, so its alleys stop short of the
+ *     street that made them;
+ *   * `clipPolyline` cuts every street to the wall circle, which can leave a stub near the edge
+ *     with both of its junctions outside;
+ *   * the renderer drops any span that lands in water or on a riverbank, which can cut a street in
+ *     half and leave the far end stranded.
+ *
+ * Any of those leaves paving with no road attached to it: a flat rectangle in a field, which is
+ * exactly what the player saw. So after the plan is cut, the streets are grouped into connected
+ * components, the one containing the square is the town, and every other component either gets a
+ * SPUR to reach it or is thrown away. Nothing is left floating.
+ */
+export function connectStreets(out, { maxSpur = 26 } = {}) {
+  const streets = out.streets;
+  if (streets.length < 2) return { spurs: 0, dropped: 0 };
+
+  const groupOf = new Array(streets.length).fill(-1);
+  const groups = [];
+  for (let i = 0; i < streets.length; i++) {
+    if (groupOf[i] >= 0) continue;
+    const g = groups.length;
+    const stack = [i];
+    groups.push([]);
+    groupOf[i] = g;
+    while (stack.length) {
+      const k = stack.pop();
+      groups[g].push(k);
+      for (let j = 0; j < streets.length; j++) {
+        if (groupOf[j] >= 0) continue;
+        if (!streetsMeet(streets[k], streets[j])) continue;
+        groupOf[j] = g;
+        stack.push(j);
+      }
+    }
+  }
+  if (groups.length <= 1) return { spurs: 0, dropped: 0, groups: groups.length };
+
+  // the town is whichever group is nearest the square — the place everything should lead to
+  const sq = out.square || { cx: 0, cz: 0 };
+  let home = 0, homeDist = Infinity;
+  for (let g = 0; g < groups.length; g++) {
+    for (const i of groups[g]) {
+      const near = nearestOnStreets([streets[i]], sq.cx, sq.cz);
+      if (near && near.distance < homeDist) { homeDist = near.distance; home = g; }
+    }
+  }
+
+  const keep = new Set(groups[home]);
+  const spurs = [];
+  let dropped = 0;
+
+  /**
+   * Nearest first, and a joined group JOINS THE TOWN.
+   *
+   * Two orphan lanes beside each other should both end up connected by one spur and a join, not be
+   * thrown away because neither of them alone was near the square. So the groups are taken in order
+   * of how close they are, and each one that gets a spur becomes part of what the next may join to.
+   */
+  const rest = groups.map((g, i) => i).filter(i => i !== home);
+  const distOf = g => {
+    let best = Infinity;
+    for (const i of groups[g]) {
+      for (const [px, pz] of streets[i].pts) {
+        const near = nearestOnStreets([...keep].map(k => streets[k]), px, pz);
+        if (near && near.distance < best) best = near.distance;
+      }
+    }
+    return best;
+  };
+
+  rest.sort((a, b) => distOf(a) - distOf(b));
+  for (const g of rest) {
+    let link = null;
+    for (const i of groups[g]) {
+      for (const [px, pz] of streets[i].pts) {
+        const near = nearestOnStreets([...keep].map(k => streets[k]), px, pz);
+        if (near && (!link || near.distance < link.distance)) link = { ...near, from: [px, pz] };
+      }
+    }
+    if (link && link.distance <= maxSpur) {
+      spurs.push({
+        pts: [link.from, [link.x, link.z]],
+        cls: 'alley', width: STREET_CLASSES[2].width, depth: 9, spur: true,
+      });
+      for (const i of groups[g]) keep.add(i);
+    } else {
+      dropped += groups[g].length;
+    }
+  }
+
+  out.streets = streets.filter((_, i) => keep.has(i)).concat(spurs);
+  return { spurs: spurs.length, dropped, groups: groups.length };
+}
+
+/**
+ * THE HIGHWAY COMES INTO TOWN.
+ *
+ * *"…and actually connect to the real roads passing through towns?"* A settlement had a street plan
+ * and the world had a road network and the two had never been introduced: the inter-town route ran
+ * straight past (or straight through) a town whose own streets stopped dead at the wall.
+ *
+ * `links` are the points on the town's edge where a road arrives, in the town's own coordinates.
+ * Each one gets a main street from the edge to wherever the existing network comes closest — which
+ * is what a road does when it reaches a town: it becomes the high street.
+ */
+export function linkRoads(out, links = []) {
+  if (!links.length || !out.streets.length) return 0;
+  let made = 0;
+  for (const [lx, lz] of links) {
+    const near = nearestOnStreets(out.streets, lx, lz);
+    if (!near) continue;
+    if (near.distance < 2) continue;                 // the road already meets the plan here
+    out.streets.push({
+      pts: [[lx, lz], [near.x, near.z]],
+      cls: 'main', width: STREET_CLASSES[0].width, depth: 0, highway: true,
+    });
+    made++;
+  }
+  return made;
+}
+
 /** How long a street polyline is, end to end. */
 function streetLength(s) {
   let n = 0;
@@ -743,6 +950,7 @@ export function summarise(plan) {
   return {
     seed: plan.seed, culture: plan.culture, size: plan.size,
     streets: plan.streets.length, plots: plan.plots.length,
+    highways: plan.links || 0, spurs: plan.connect?.spurs || 0, orphans: plan.connect?.dropped || 0,
     square: Math.round(plan.square.r * 10) / 10,
     gates: plan.wall ? plan.wall.gates.length : 0,
     wants,

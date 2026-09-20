@@ -449,19 +449,19 @@ export function handsOf(player) {
   const offIsWeapon = !!off && off.type === 'weapon';
   const offTwo = !!off?.twoHanded;
 
-  // the keystone that lets you carry two two-handers — see js/perks.js
-  const titanGrip = !!player?.perkFlags?.titanGrip;
+  // the keystone that lets you carry two two-handers — Doubled Grasp, see js/perks.js
+  const doubleGrip = !!player?.perkFlags?.doubleGrip;
 
   return {
     main, off,
     mainTwo,
     /** True when both hands hold a real weapon and both are swinging. */
-    dual: offIsWeapon && (!mainTwo || titanGrip) && (!offTwo || titanGrip),
+    dual: offIsWeapon && (!mainTwo || doubleGrip) && (!offTwo || doubleGrip),
     /** An off hand that is a shield, a quiver or a tome — held, not swung. */
     heldOff: !!off && !offIsWeapon,
-    titanGrip,
+    doubleGrip,
     /** Can `item` go in the off hand at all right now? */
-    offhandBlocked: mainTwo && !titanGrip,
+    offhandBlocked: mainTwo && !doubleGrip,
   };
 }
 
@@ -474,15 +474,15 @@ export function handsOf(player) {
 export function offhandRefusal(player, item) {
   const hands = handsOf(player);
   if (!item) return null;
-  if (hands.mainTwo && !hands.titanGrip) {
+  if (hands.mainTwo && !hands.doubleGrip) {
     return `${hands.main.name} takes both hands. Put it away first, or find the grip that frees one.`;
   }
-  if (item.twoHanded && item.type === 'weapon' && !hands.titanGrip) {
+  if (item.twoHanded && item.type === 'weapon' && !hands.doubleGrip) {
     return `${item.name} takes both hands — it cannot go in the off hand.`;
   }
   // A bow needs the hand that is not holding it. Nothing said so, so a bow could be dropped into
   // the off hand and then swing like a club.
-  if (needsBothToDraw(item) && !hands.titanGrip) {
+  if (needsBothToDraw(item) && !hands.doubleGrip) {
     return `${item.name} needs both hands to draw — it cannot go in the off hand.`;
   }
   return null;

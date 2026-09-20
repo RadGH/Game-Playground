@@ -94,7 +94,9 @@ function boundsOf(e) {
 export function areaOf(e) {
   if (e.shape === 'strip') {
     const len = Math.hypot(e.x2 - e.x1, e.z2 - e.z1);
-    return len * e.reach * 2 + Math.PI * e.reach * e.reach;
+    // a capless strip is the rectangle and nothing else — no end circles, so a chain of them costs
+    // the road's own area rather than the road's area plus a circle per joint
+    return len * e.reach * 2 + (e.caps === false ? 0 : Math.PI * e.reach * e.reach);
   }
   if (e.shape === 'rect') return (e.w + e.feather * 2) * (e.d + e.feather * 2);
   return Math.PI * e.reach * e.reach;
@@ -109,6 +111,29 @@ export function areaOf(e) {
  */
 export function biteOf(e, x, z) {
   if (e.shape === 'strip') {
+    /**
+     * A STRIP IN A CHAIN HAS NO ROUNDED ENDS, AND ROUND 14 NEEDED THAT BADLY.
+     *
+     * A lane is levelled by a run of strips laid nose to tail. With the usual rounded cap, every
+     * strip's end circle reaches back over its neighbour's middle — and because `segmentHit` clamps
+     * `t`, the ground there gets pulled towards the NEIGHBOUR'S endpoint height rather than towards
+     * the road's height at that spot. On rolling ground that put the road surface nearly three
+     * metres above the ground it was drawn on: half the road floating, half buried, which is the
+     * exact complaint the round set out to fix, arriving through a different door.
+     *
+     * `caps: false` says "the next leg covers the ground past my end, so I do not". Every point on a
+     * chain of strips then belongs to exactly one of them, and the skirt is purely sideways — which
+     * is what a road shoulder is anyway.
+     */
+    if (e.caps === false) {
+      const dx = e.x2 - e.x1, dz = e.z2 - e.z1;
+      const len2 = dx * dx + dz * dz;
+      const t = len2 > 0 ? ((x - e.x1) * dx + (z - e.z1) * dz) / len2 : 0;
+      if (t < 0 || t > 1) return null;
+      const dist = Math.abs((x - e.x1) * dz - (z - e.z1) * dx) / (Math.sqrt(len2) || 1);
+      if (dist >= e.reach) return null;
+      return { w: 1 - smoothstep(e.half, e.reach, dist), t };
+    }
     const hit = segmentHit(x, z, e.x1, e.z1, e.x2, e.z2);
     if (hit.dist >= e.reach) return null;
     return { w: 1 - smoothstep(e.half, e.reach, hit.dist), t: hit.t };
@@ -250,11 +275,11 @@ export function createTerraform({
      * is a street, not a ribbon over lumps", so a player-painted road and a town's own street are
      * the same brush.
      */
-    strip({ x1, z1, x2, z2, half = 3, feather = null, h1, h2, claim = null }) {
+    strip({ x1, z1, x2, z2, half = 3, feather = null, h1, h2, claim = null, caps = true }) {
       const e = {
         shape: 'strip', kind: 'level', x1, z1, x2, z2,
         half, reach: half + (feather == null ? Math.max(1.5, half * 0.8) : feather),
-        h1, h2: h2 == null ? h1 : h2, claim,
+        h1, h2: h2 == null ? h1 : h2, claim, caps,
       };
       const no = afford(e);
       return no ? { ok: false, why: no } : { ok: true, edit: add(e) };

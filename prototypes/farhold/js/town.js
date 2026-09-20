@@ -16,6 +16,7 @@ import * as THREE from 'three';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { makeActor, setActorAnim } from './actors.js';
 import { makeQuest } from './quests.js';
+import { M_PER_CELL } from './planet.js';
 import { attuneWeapon } from './rpg.js';
 import { createGearShop, categoryOf, VEHICLES } from './gear.js';
 // A hired sword is one of the folk, but the offer they make is pure arithmetic with no scene in
@@ -136,7 +137,12 @@ export const STOCK_COUNT = { weapon: 8, armor: 8, other: 6 };
 const GUARD = { hp: 260, dmg: [14, 22], armor: 22, speed: 5.2, reach: 3, attackEvery: 1.2, perLevel: 1.17 };
 
 export function createTownFolk(scene, terrain, opts = {}) {
-  const { features, rpg, namegen = null, looks = [], seed = 1, radius = 900, balance = {} } = opts;
+  const {
+    features, rpg, namegen = null, looks = [], seed = 1, radius = 900, balance = {},
+    // R14: the zone band at a point, so a village crier cannot send a level-3 player to a level-30
+    // town. Optional — left out, quests are picked exactly as they were. See js/quests.js.
+    zoneAt = null,
+  } = opts;
   const cfg = balance.town || {};
   // every merchant carries a light, a mount and a quiver whatever else it sells
   const gearShop = createGearShop({ rpg });
@@ -367,6 +373,11 @@ export function createTownFolk(scene, terrain, opts = {}) {
     for (let tries = 0; tries < 6; tries++) {
       const q = makeQuest(rng.pick(kinds), {
         rng, level, giver: npc, enemies, nodes, terrain, from: npc.node,
+        // R14: where the giver is standing, so "near" can mean near. `npc.node` is a map node in
+        // CELLS; `at` wants world metres, which is what the quest's own `place` is measured in.
+        at: { x: (npc.node?.x ?? 0) * M_PER_CELL, z: (npc.node?.y ?? 0) * M_PER_CELL },
+        wrapM: terrain?.widthM || 0,
+        zoneAt,
       });
       if (q) { npc.offered = q; return q; }
     }

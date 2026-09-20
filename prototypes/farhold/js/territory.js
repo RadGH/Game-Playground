@@ -403,6 +403,34 @@ export function createTerritory({
     return { mark, finished: mark.state === 'done', left: mark.steps - mark.done };
   }
 
+  /**
+   * R14 — THE ONE-SHOT REWARD HAS BEEN TAKEN.
+   *
+   *   "I found a node 'E look at field of cairns' and it allows me to repeatedly press E to gain
+   *    infinite experience."
+   *
+   * `atLandmark` in js/main.js paid out a landmark's whole `gives` block every single time you
+   * pressed E at it. That was invisible for the landmarks with `steps`, because `workLandmark`
+   * above counts those down to `done` and the payout only happens on the last one — but a landmark
+   * with `solve: false` (the Field of Cairns is one; so are the standing stones, the shrine and
+   * nine others) has no steps, never reaches `done`, and so had nothing at all stopping it. Stand
+   * still, hold E, gain a level a second.
+   *
+   * `taken` is its own flag rather than reusing `state: 'done'`, because `done` means "the work
+   * here is finished" and a landmark you can still rest at or cross at is not finished — it has
+   * just already paid its one-off. `touch(record)` puts it in the save with everything else.
+   *
+   * Returns true the FIRST time and false afterwards, so the caller can simply ask.
+   */
+  function takeLandmark(zoneId, landmarkId) {
+    const record = of(zoneId);
+    const mark = record?.landmarks.find(l => l.id === landmarkId);
+    if (!mark || mark.taken) return false;
+    mark.taken = true;
+    touch(record);
+    return true;
+  }
+
   /** You stood at one. That is all the surveyor wants. */
   function visitLandmark(zoneId, landmarkId) {
     const record = of(zoneId);
@@ -435,7 +463,7 @@ export function createTerritory({
 
   return {
     of, visit, clearSite, championKilled, press, tick, addIncident, resolveIncident,
-    workLandmark, visitLandmark,
+    workLandmark, visitLandmark, takeLandmark,
     /** The landmarks of a zone, which is what five of the job frames bind to. */
     landmarksIn(zoneId) { return of(zoneId)?.landmarks || []; },
     get hours() { return clock; },

@@ -32,7 +32,36 @@ export const MARKER_LOOKS = {
   quest:    { icon: '!', color: '#ffd24a', label: 'Quest' },
   campaign: { icon: '◆', color: '#ff9f4a', label: 'Story' },
   pin:      { icon: '◈', color: '#7fd4ff', label: 'Pin' },
+  /**
+   * A deposit the scanner turned up. Its own kind rather than a plain pin, because the map wants to
+   * be able to say "these five are ore and that one is a quest" at a glance, and because a sweep can
+   * drop several at once and they should not drown out the pins the player placed by hand.
+   */
+  seam:     { icon: '◆', color: '#c08a3e', label: 'Deposit' },
   home:     { icon: '⌂', color: '#9ae06a', label: 'Home' },
+  /**
+   * R14 — WHERE THE SKY FELL.
+   *
+   * "I could not tell where the meteor landed however, so it should have its own map marker."
+   *
+   * A meteor was drawn only while it was still in the air (`meteors.marks()`, which empties the
+   * moment it lands), so the one instant you actually needed to know where it came down was the
+   * instant the game stopped telling you. This marker is dropped when the fall STARTS — thirty
+   * seconds of warning you can walk on — and stays until the crate is opened.
+   */
+  fall:     { icon: '☄', color: '#ff8a40', label: 'Impact' },
+  /**
+   * R14 — A PLACE YOU DECIDED TO REMEMBER.
+   *
+   *   "Add the ability to store locations and view them in a list, with a checkbox to toggle
+   *    whether the location is highlighted on the map with a star."
+   *
+   * Its own kind rather than a `pin`, because the two are different promises: a pin is the quick
+   * one you drop while reading the map and throw away again, and a saved place is the clay bank you
+   * want to be able to find in an hour's time. The star is `starred`, which every kind carries —
+   * starring the quest you are actually doing is a reasonable thing to want.
+   */
+  saved:    { icon: '✦', color: '#8fe0a0', label: 'Saved' },
 };
 
 export const MARKER_KINDS = Object.keys(MARKER_LOOKS);
@@ -82,6 +111,48 @@ export class MarkerBook {
     return marker;
   }
 
+  /**
+   * R14 — KEEP A PLACE.
+   *
+   * De-duplicates on the cell: saving the same ford from the map and then again off a quest row
+   * should give you one row, renamed, not two. Returns the marker either way.
+   *
+   * `from` records where it came from — `{ type: 'quest'|'scan'|'place'|'pin'|'journal', id, label }`
+   * — and its id field is deliberately NOT called `questId`: `syncQuests` below deletes any marker
+   * whose `questId` has left the live log, so a place saved off a quest would be swept away at the
+   * exact moment you handed the quest in, which is when you most want to remember where it was.
+   */
+  save({ cellX = 0, cellY = 0, name = '', note = '', from = null, starred = true, tracked = false } = {}) {
+    const cx = Math.round(cellX), cy = Math.round(cellY);
+    const had = this.here().find(m => m.kind === 'saved' && Math.abs(m.cell.x - cx) <= 1 && Math.abs(m.cell.y - cy) <= 1);
+    if (had) {
+      if (name) had.name = name;
+      if (note) had.note = note;
+      if (from) had.from = from;
+      had.starred = !!starred;
+      return had;
+    }
+    const n = this.markers.filter(m => m.kind === 'saved').length + 1;
+    const marker = this.add({ kind: 'saved', name: name || `Place ${n}`, cellX: cx, cellY: cy, tracked });
+    marker.starred = !!starred;
+    marker.note = note || '';
+    marker.from = from || { type: 'pin' };
+    marker.madeAt = Date.now();
+    return marker;
+  }
+
+  /** The checkbox: highlight this one on the world map, or stop. Legal on any kind. */
+  star(marker, on = !marker.starred) {
+    marker.starred = !!on;
+    return marker.starred;
+  }
+
+  /** Everything starred on this world — what the map draws a star beside. */
+  starred() { return this.here().filter(m => m.starred); }
+
+  /** The saved places on this world, newest last, for the map's own list. */
+  saved() { return this.here().filter(m => m.kind === 'saved'); }
+
   /** A pin the player dropped by shift-clicking the map. */
   drop(cellX, cellY, name = null) {
     const n = this.markers.filter(m => m.kind === 'pin').length + 1;
@@ -119,7 +190,10 @@ export class MarkerBook {
         continue;
       }
       const m = this.add({
-        kind: 'quest', name: q.title, questId: q.id,
+        // R14: a quest may ask for its own marker look — a meteor is an impact, not an exclamation
+        // mark. Anything that does not ask is a quest, exactly as before.
+        kind: MARKER_LOOKS[q.markerKind] ? q.markerKind : 'quest',
+        name: q.title, questId: q.id,
         cellX: q.place.cell.x, cellY: q.place.cell.y,
       });
       m.done = !!q.done;

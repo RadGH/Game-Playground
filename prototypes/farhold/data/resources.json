@@ -73,6 +73,8 @@
     "lens": { "name": "Ground Lens", "kind": "part", "tier": 2, "weight": 0.3, "value": 40, "stack": 20, "colour": "#cfeef5", "desc": "Glass or crystal, ground true. Optics and sighting." },
     "focuser": { "name": "Cut Focuser", "kind": "part", "tier": 3, "weight": 0.3, "value": 90, "stack": 15, "colour": "#9fe0d8", "desc": "A crystal cut to hold a field steady. The waypoint core is mostly these." },
     "machine_part": { "name": "Machine Part", "kind": "part", "tier": 2, "weight": 1.0, "value": 55, "stack": 25, "colour": "#8f969e", "desc": "Gears, shafts, bearings. Every tier-three structure is a pile of these." },
+    "wire": { "name": "Wire", "kind": "part", "tier": 1, "weight": 0.3, "value": 14, "stack": 40, "colour": "#c88a4a", "desc": "Copper drawn out thin. Ten structures in the catalogue ask for it — and until round 13 nothing in the game made a single unit, which is the sort of thing a catalogue written before its supply chain quietly leaves behind." },
+    "concrete": { "name": "Concrete", "kind": "refined", "tier": 2, "weight": 1.5, "value": 8, "stack": 25, "colour": "#a7a49c", "desc": "Gravel, sand and water. Poured for the things that have to take a real load." },
     "control_board": { "name": "Control Board", "kind": "part", "tier": 3, "weight": 0.4, "value": 120, "stack": 20, "colour": "#5fae7a", "desc": "Copper and gold on fired board. What tells a machine what to do." },
     "tempered_alloy": { "name": "Tempered Alloy", "kind": "refined", "tier": 3, "weight": 0.9, "value": 110, "stack": 25, "colour": "#7f8aa0", "desc": "Steel taken further than a forge can take it. Hulls and drive housings." },
     "composite_plate": { "name": "Composite Plate", "kind": "part", "tier": 3, "weight": 1.2, "value": 150, "stack": 20, "colour": "#6d7480", "desc": "Alloy laid over cloth and resin. Light, and it does not care about heat." },
@@ -92,7 +94,7 @@
   "_rareDoc": "Rare elements are NOT listed above one by one, because which ones exist is the universe's business, not Farhold's — universe/data/elements.json assigns 1-2 to each planet. js/resources.js reads a planet's `rare` keys and makes a `rare_seam` node kind for each, borrowing the element's own name and colour. This table is only the bits Farhold needs that the universe does not say: how a seam behaves.",
   "rareSeam": { "baseYield": 0.14, "amountBand": [40, 110], "respawnSeconds": 0, "hardness": 3, "radius": 3, "weightPerUnit": 0.8, "stack": 15 },
 
-  "_nodeDoc": "A node kind. `baseYield` is units per second at the face at richness 1.0 with the right tool — multiply by the node's richness for what the player actually gets. `swingSeconds` turns that into a per-swing number for the held-tool interaction (yieldPerSecond x swingSeconds). `amountBand` is how much is in one node before richness. `respawnSeconds` 0 means it never comes back (a wreck, a meteor). `hardness` is the tool tier needed: 0 bare hands, 1 stone/iron tool, 2 steel, 3 powered. `handMinable` false means a structure has to take it — gas vents, per §1.14. `biomes` are worldgen biome keys; empty means anywhere on land.",
+  "_nodeDoc": "A node kind. `baseYield` is units per second at the face at richness 1.0 with the right tool — multiply by the node's richness for what the player actually gets. `swingSeconds` turns that into a per-swing number for the held-tool interaction (yieldPerSecond x swingSeconds). `amountBand` is how much is in one node before richness. `respawnSeconds` 0 means it never comes back (a wreck, a meteor). `hardness` is the tool tier needed: 0 bare hands, 1 stone/iron tool, 2 steel, 3 powered. `handMinable` false means a structure has to take it — gas vents, per §1.14. `biomes` are worldgen biome keys; empty means anywhere on land — BUT `indoors: true` keeps a kind out of the open-air scatter (a deep vein is a dungeon seam, and one on the surface is a hardness-2 iron seam a new player cannot work and cannot get past), `placedOnly: true` keeps it out entirely because an event system puts it down by hand, and `fromPlanet: true` does the same for the rare seam the field places itself. All three are read by js/resources.js `kindsForBiome`.",
   "nodeKinds": {
     "ore_outcrop": {
       "name": "Ore Outcrop", "resources": { "iron_ore": 4, "copper_ore": 3, "tin_ore": 1.2, "coal": 2.5, "silver_ore": 0.7, "gold_ore": 0.35 },
@@ -182,7 +184,8 @@
     "meteor_site": {
       "name": "Meteor Fall", "resources": { "meteoric_iron": 8, "iron_ore": 2 },
       "baseYield": 0.24, "swingSeconds": 2.0, "amountBand": [15, 45], "respawnSeconds": 0, "hardness": 2, "radius": 2,
-      "biomes": [], "desc": "Still warm. The meteor event already drops these — §1.15 only asks that they be worth walking to."
+      "biomes": [], "placedOnly": true,
+      "desc": "Still warm. Placed where a meteor actually lands (js/meteors.js), never scattered: it is hardness 2 and holds iron ore, so on open ground it reads to a new player as iron they cannot mine — and meteoric iron turning up in a field nothing fell on is the opposite of §1.15's 'worth walking to'."
     },
     "rare_seam": {
       "name": "Rare Seam", "resources": {},
@@ -220,13 +223,13 @@
     "hauler": { "name": "Hauler Drone", "capacity": 200, "speed": 7.5, "loadSeconds": 4, "powerUse": 12 }
   },
 
-  "_toolDoc": "Tool tiers gate the hard nodes and multiply the soft ones — §1's recommendation that hand-mining stays slow enough that a drill feels like a promotion. `tier` must be >= the node's hardness or you cannot work it at all.",
+  "_toolDoc": "Tool tiers gate the hard nodes and multiply the soft ones — §1's recommendation that hand-mining stays slow enough that a drill feels like a promotion. `tier` must be >= the node's hardness or you cannot work it at all.\n\n`from` says where a tier comes from in the PLAYER'S terms. Farhold has no pick slot: the tier is read off whatever weapon you are carrying (js/main.js `toolTierFor`), and nothing on screen ever said so — which is why 'you need a Steel Tool' read as a dead end rather than as an instruction. js/resources.js prints this line with every refusal.",
   "tools": {
-    "hands": { "name": "Bare Hands", "tier": 0, "rate": 0.5 },
-    "stone_tool": { "name": "Stone Tool", "tier": 1, "rate": 0.8 },
-    "iron_tool": { "name": "Iron Tool", "tier": 1, "rate": 1.0 },
-    "steel_tool": { "name": "Steel Tool", "tier": 2, "rate": 1.35 },
-    "powered_tool": { "name": "Powered Cutter", "tier": 3, "rate": 1.9, "powerUse": 6 },
-    "drill": { "name": "Drill", "tier": 3, "rate": 3.2, "powerUse": 18, "structure": true, "note": "The promotion: it works the node while you are somewhere else, and it never gets tired." }
+    "hands": { "name": "Bare Hands", "tier": 0, "rate": 0.5, "from": "nothing at all in your hands" },
+    "stone_tool": { "name": "Stone Tool", "tier": 1, "rate": 0.8, "from": "carrying a stone, bone or wooden weapon" },
+    "iron_tool": { "name": "Iron Tool", "tier": 1, "rate": 1.0, "from": "carrying an iron, bronze, copper or silver weapon" },
+    "steel_tool": { "name": "Steel Tool", "tier": 2, "rate": 1.35, "from": "carrying a steel weapon: forge Steel at an Alloy Forge from iron ingots and charcoal, then craft or buy a steel blade" },
+    "powered_tool": { "name": "Powered Cutter", "tier": 3, "rate": 1.9, "powerUse": 6, "from": "a powered cutter" },
+    "drill": { "name": "Drill", "tier": 3, "rate": 3.2, "powerUse": 18, "structure": true, "from": "a Drill built on the seam and wired to a generator, which needs no tool of yours at all", "note": "The promotion: it works the node while you are somewhere else, and it never gets tired." }
   }
 }

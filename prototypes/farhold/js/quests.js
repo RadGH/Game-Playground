@@ -24,7 +24,7 @@ export const QUEST_KINDS = ['hunt', 'visit', 'gather', 'clear'];
  * and the save do not need a second list. It advances only through `onRaidWave`, and the raid's own
  * `canFire()` is what decides whether anything is coming — nothing in this file can start one.
  */
-export const STARTED_KINDS = ['raid'];
+export const STARTED_KINDS = ['raid', 'fall'];
 
 /** Is this a job the world offered you, or one you set going yourself? */
 export const isStarted = quest => STARTED_KINDS.includes(quest?.kind);
@@ -41,12 +41,58 @@ const pick = (rng, list) => list[Math.floor(rng() * list.length)] ?? null;
 const between = (rng, [lo, hi]) => lo + Math.floor(rng() * (hi - lo + 1));
 
 /**
+ * R14 — NEAR FIRST, AND NEVER ABSURDLY FAR.
+ *
+ *   "That location was hours of foot travel away in a much higher level zone. Rework the quest
+ *    system to focus on nearby locations, adjacent towns preferred when possible."
+ *
+ * `makeQuest('visit')` picked flat at random out of every settlement, port and landmark on the
+ * whole planet, which on a world this size means the average errand was most of a continent. This
+ * is the one place that changes it: sort by distance the short way round, throw away anything past
+ * the budget, and draw with a squared roll so the nearest few win most of the time without the same
+ * village winning every time.
+ *
+ * `from` is world metres. Without it (the node tests) nothing is measured and nothing is dropped.
+ */
+const NEAR_METRES = 5200;
+
+function nearest(rng, list, { from = null, wrapM = 0, budget = NEAR_METRES } = {}) {
+  if (!list.length) return null;
+  if (!from) return pick(rng, list);
+  const withAway = list.map(n => {
+    let dx = (n.x ?? 0) - from.x;
+    if (wrapM > 0) {
+      if (dx > wrapM / 2) dx -= wrapM;
+      if (dx < -wrapM / 2) dx += wrapM;
+    }
+    return { n, away: Math.hypot(dx, (n.z ?? 0) - from.z) };
+  }).sort((a, b) => a.away - b.away);
+  // inside the budget if anything is; otherwise the three closest, because a board with nothing on
+  // it is worse than a long walk and there are worlds where the nearest village really is far
+  const inside = withAway.filter(r => r.away <= budget);
+  const bag = inside.length ? inside : withAway.slice(0, 3);
+  const at = Math.min(bag.length - 1, Math.floor(rng() ** 2 * bag.length));
+  return { ...bag[at].n, away: bag[at].away };
+}
+
+/**
  * Build one job.
  * ctx: { rng, level, giver, enemies (bestiary defs), nodes (world.nodes), terrain, from (the
  * settlement the giver stands in) }
  */
 export function makeQuest(kind, ctx) {
-  const { rng, level = 1, giver, enemies = [], nodes = [], terrain, from = null } = ctx;
+  const {
+    rng, level = 1, giver, enemies = [], nodes = [], terrain, from = null,
+    // R14: where the giver is standing, how wide the world is, and what level a place sits at.
+    at = null, wrapM = terrain?.widthM || 0, zoneAt = null,
+  } = ctx;
+  /** A destination this player has no business walking to yet. */
+  const tooHigh = node => {
+    if (!zoneAt || !Number.isFinite(node?.x)) return false;
+    const z = zoneAt(node.x, node.z);
+    const band = z?.minLevel ?? z?.midLevel;
+    return Number.isFinite(band) && band > level + 4;
+  };
   const shape = SHAPE[kind] || SHAPE.hunt;
   const scale = 1 + (level - 1) * 0.12;
   const base = {
@@ -71,13 +117,16 @@ export function makeQuest(kind, ctx) {
     if (!def) return null;
     const count = between(rng, shape.count);
     if (kind === 'clear') {
-      const dens = nodes.filter(n => n.type === 'dungeon');
-      const site = pick(rng, dens);
+      const dens = nodes
+        .map(n => (n.type === 'dungeon' ? { ...n, x: n.x * M_PER_CELL, z: n.y * M_PER_CELL, cell: { x: n.x, y: n.y } } : null))
+        .filter(Boolean)
+        .filter(n => !tooHigh(n));
+      const site = nearest(rng, dens, { from: at, wrapM });
       if (!site) return null;
       return {
         ...base,
         target: def.id, targetName: def.name, count,
-        place: { x: site.x * M_PER_CELL, z: site.y * M_PER_CELL, name: site.name || 'the ruin', cell: { x: site.x, y: site.y } },
+        place: { x: site.x, z: site.z, name: site.name || 'the ruin', cell: site.cell },
         title: `Clear ${site.name || 'the ruin'}`,
         text: `${count} ${def.name} have made a home of ${site.name || 'the ruin'}. Put them out of it.`,
       };
@@ -91,16 +140,22 @@ export function makeQuest(kind, ctx) {
   }
 
   if (kind === 'visit') {
-    // somewhere else on the map, not where you are standing
-    const places = nodes.filter(n => (n.type === 'settlement' || n.type === 'port' || n.type === 'landmark') && n.id !== from?.id);
-    const site = pick(rng, places);
+    // R14: somewhere else on the map, not where you are standing — and NEAR, and not six bands up
+    const places = nodes
+      .filter(n => (n.type === 'settlement' || n.type === 'port' || n.type === 'landmark') && n.id !== from?.id)
+      .map(n => ({ ...n, x: n.x * M_PER_CELL, z: n.y * M_PER_CELL, cell: { x: n.x, y: n.y } }))
+      .filter(n => !tooHigh(n));
+    const site = nearest(rng, places, { from: at, wrapM });
     if (!site) return null;
+    const far = Number.isFinite(site.away) && site.away > NEAR_METRES;
     return {
       ...base,
       count: 1,
-      place: { x: site.x * M_PER_CELL, z: site.y * M_PER_CELL, name: site.name, cell: { x: site.x, y: site.y } },
+      place: { x: site.x, z: site.z, name: site.name, cell: site.cell },
       title: `Carry word to ${site.name}`,
-      text: `Take word to ${site.name}. It is a walk, but the news will not carry itself.`,
+      text: far
+        ? `Take word to ${site.name}. It is a long way — pack for it.`
+        : `Take word to ${site.name}. It is a walk, but the news will not carry itself.`,
     };
   }
 
@@ -158,6 +213,44 @@ export function submitGather(quest, bag, chosen = []) {
   quest.progress = (quest.progress || 0) + taken.length;
   if (quest.progress >= quest.count) quest.done = true;
   return { ok: true, taken, done: !!quest.done, left: Math.max(0, quest.count - quest.progress) };
+}
+
+/**
+ * R14 — A FALL FROM THE SKY IS A JOB.
+ *
+ * "I saw what looked like a shooting star, can you change it so that falling stars are actual
+ *  events and leave behind a meteor with a special loot crate inside. I could not tell where the
+ *  meteor landed however, so it should have its own map marker. It would be interesting to act
+ *  like a quest."
+ *
+ * A meteor used to be a line in the log and a dot that vanished the moment it landed, which is the
+ * worst possible timing: the thirty seconds you could see it were the thirty seconds you did not
+ * need to. Making it quest-shaped costs almost nothing and buys all of it at once — the journal
+ * lists it, the marker book pins it (`markerKind: 'fall'`, its own ☄ rather than a quest's `!`),
+ * the minimap arrow points at it, and it survives a save like any other job.
+ *
+ * It is a STARTED kind, like a raid: nobody handed it to you, so there is nobody to walk back to.
+ * It pays itself out the moment the crate is open.
+ */
+export function makeFallQuest({ x, z, cell, seconds = 30, id = null } = {}) {
+  return {
+    id: id || 'q_fall_' + Math.round(x) + '_' + Math.round(z),
+    kind: 'fall',
+    giverId: null,
+    giverName: 'the sky',
+    markerKind: 'fall',
+    count: 1,
+    progress: 0,
+    done: false,
+    turnedIn: false,
+    state: 'falling',
+    seconds,
+    chestKey: `meteor:${Math.round(x)},${Math.round(z)}`,
+    place: { x, z, name: 'the impact', cell: { x: cell?.x ?? 0, y: cell?.y ?? 0 } },
+    title: 'Something came down',
+    text: 'A star fell, and it did not burn up. Whatever is in the crater is still hot.',
+    reward: { gold: 0, xp: 0 },
+  };
 }
 
 /** The jobs a player is carrying. Progress only ever happens through events. */
@@ -233,6 +326,30 @@ export class QuestLog {
     return q;
   }
 
+  /**
+   * R14 — a crate was opened. The only job that cares is a `fall`, and its whole completion
+   * condition is "you got there and you opened it".
+   */
+  onChestOpened({ key = null } = {}) {
+    if (!key) return null;
+    const q = this.active.find(j => j.kind === 'fall' && j.chestKey === key && !j.done);
+    if (!q) return null;
+    q.progress = 1;
+    q.done = true;
+    q.state = 'found';
+    return q;
+  }
+
+  /** A fall has landed — the crate is on the ground now, so the wording changes. */
+  onFallLanded(chestKey) {
+    const q = this.active.find(j => j.kind === 'fall' && j.chestKey === chestKey);
+    if (q) q.state = 'landed';
+    return q || null;
+  }
+
+  /** Falls that are finished and have nobody to hand them to. Cleared out like a raid. */
+  readyFalls() { return this.active.filter(q => q.kind === 'fall' && q.done && !q.turnedIn); }
+
   /** Finished jobs this person can pay out. */
   readyToTurnIn(giverId) {
     return this.active.filter(q => q.done && !q.turnedIn && q.giverId === giverId && !isStarted(q));
@@ -252,6 +369,10 @@ export class QuestLog {
   /** "2 / 5" for the journal. */
   progressText(q) {
     if (q.kind === 'visit') return q.done ? 'arrived' : 'not yet there';
+    if (q.kind === 'fall') {
+      if (q.done) return 'opened';
+      return q.state === 'landed' ? 'down — go and dig it out' : 'still coming down';
+    }
     if (q.kind === 'raid') {
       if (q.state === 'offered') return 'not taken';
       if (q.state === 'accepted') return 'ring the bell when you are ready';

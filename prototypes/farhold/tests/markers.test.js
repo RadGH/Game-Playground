@@ -165,3 +165,99 @@ test('distances read as people say them', () => {
   assert.equal(distanceText(999), '999 m');
   assert.equal(distanceText(NaN), '');
 });
+
+// ---------------------------------------------------------------- R14: places you keep
+//
+//   "Add the ability to store locations and view them in a list, with a checkbox to toggle whether
+//    the location is highlighted on the map with a star."
+//
+// A saved place is a marker with a new kind, not a second store — a second store is one more thing
+// to keep in step and one more thing to forget in `snapshot()`, which is exactly how `world`,
+// `quests` and `campaign` were lost for a whole round.
+
+test('a saved place is kept, starred, and filed on the world you were standing on', () => {
+  const book = new MarkerBook();
+  book.setWorld(world(8812, 3));
+  const m = book.save({ cellX: 118, cellY: 44, name: 'Clay bank by the ford', note: 'furnace clay' });
+  assert.equal(m.kind, 'saved');
+  assert.equal(m.starred, true, 'a place you deliberately kept starts highlighted');
+  assert.equal(m.tracked, false, 'and does NOT start hogging the minimap arrow');
+  assert.equal(m.note, 'furnace clay');
+  assert.deepEqual(book.saved().map(x => x.name), ['Clay bank by the ford']);
+  assert.deepEqual(book.starred().map(x => x.name), ['Clay bank by the ford']);
+
+  // …and it is not on the next world over
+  book.setWorld(world(8812, 4));
+  assert.deepEqual(book.saved(), []);
+});
+
+test('saving the same place twice renames it rather than making a second row', () => {
+  const book = new MarkerBook();
+  book.setWorld(world(1, 0));
+  book.save({ cellX: 20, cellY: 20, name: 'The ford' });
+  book.save({ cellX: 21, cellY: 20, name: 'The ford, north side' });   // one cell over
+  assert.equal(book.saved().length, 1, 'two rows for the same ford');
+  assert.equal(book.saved()[0].name, 'The ford, north side');
+  book.save({ cellX: 60, cellY: 60, name: 'Somewhere else' });
+  assert.equal(book.saved().length, 2);
+});
+
+test('the star is a toggle, and it works on any kind of marker', () => {
+  const book = new MarkerBook();
+  book.setWorld(world(1, 0));
+  const quest = book.add({ kind: 'quest', name: 'Clear the vault', cellX: 4, cellY: 4 });
+  assert.equal(!!quest.starred, false);
+  assert.equal(book.star(quest), true, 'starring a quest marker is a reasonable thing to want');
+  assert.equal(book.star(quest), false);
+  assert.equal(book.star(quest, true), true);
+  assert.deepEqual(book.starred().map(m => m.name), ['Clear the vault']);
+});
+
+test('a place saved off a quest survives the quest being handed in', () => {
+  // `syncQuests` deletes any marker whose `questId` has left the live log. A saved place records
+  // where it came from in `from.id` for exactly that reason — being swept away the moment you hand
+  // the quest in is when you most want to remember where it was.
+  const book = new MarkerBook();
+  book.setWorld(world(1, 0));
+  const quest = { id: 'q_abc', title: 'Clear the vault', place: { cell: { x: 9, y: 9 } } };
+  book.syncQuests([quest]);
+  assert.equal(book.here().filter(m => m.kind === 'quest').length, 1);
+  book.save({ cellX: 9, cellY: 9, name: 'The vault', from: { type: 'quest', id: quest.id, label: quest.title } });
+
+  book.syncQuests([]);                       // handed in
+  assert.equal(book.here().filter(m => m.kind === 'quest').length, 0, 'the quest marker should go');
+  assert.equal(book.saved().length, 1, 'the place you kept must NOT go with it');
+  assert.equal(book.saved()[0].from.id, 'q_abc');
+});
+
+test('saved places and stars ride the save with everything else', () => {
+  const book = new MarkerBook();
+  book.setWorld(world(5, 2));
+  book.save({ cellX: 7, cellY: 8, name: 'The seam', note: 'iron' });
+  const quest = book.add({ kind: 'quest', name: 'A job', cellX: 1, cellY: 1 });
+  book.star(quest, true);
+
+  const again = new MarkerBook(JSON.parse(JSON.stringify(book.toJSON())));
+  assert.equal(again.saved().length, 1);
+  assert.equal(again.saved()[0].note, 'iron');
+  assert.equal(again.starred().length, 2);
+
+  // an OLD save has no `starred` at all, and must simply come back unstarred rather than crashing
+  const old = new MarkerBook({ markers: [{ id: 'm1', kind: 'pin', name: 'Old pin', cell: { x: 1, y: 1 }, systemSeed: 5, planetId: 2 }], nextId: 2, world: { systemSeed: 5, planetId: 2 } });
+  assert.equal(old.starred().length, 0);
+  assert.equal(old.here().length, 1);
+});
+
+test('a quest may ask for its own marker glyph, and anything that does not is still a quest', () => {
+  const book = new MarkerBook();
+  book.setWorld(world(1, 0));
+  book.syncQuests([
+    { id: 'q1', title: 'Carry word', place: { cell: { x: 2, y: 2 } } },
+    { id: 'q2', title: 'Something came down', markerKind: 'fall', place: { cell: { x: 3, y: 3 } } },
+    { id: 'q3', title: 'Nonsense', markerKind: 'not_a_kind', place: { cell: { x: 4, y: 4 } } },
+  ]);
+  const byName = Object.fromEntries(book.here().map(m => [m.name, m.kind]));
+  assert.equal(byName['Carry word'], 'quest');
+  assert.equal(byName['Something came down'], 'fall', 'a meteor is an impact, not an exclamation mark');
+  assert.equal(byName.Nonsense, 'quest', 'an unknown kind falls back rather than drawing blank');
+});

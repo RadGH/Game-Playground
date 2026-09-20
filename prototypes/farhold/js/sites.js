@@ -110,6 +110,39 @@ export const PIECES = {
     { geometry: BOX, color: '#5d564c', matrix: at(0, 1.9, 0.22, 0.34, 0.3, 0.06) },
   ]) },
 
+  /**
+   * R14 — A CAIRN. A STACK OF STONES SOMEBODY BUILT, NOT A HEAP THAT FELL.
+   *
+   *   "A lot of the structures in this location are too short (seed 1, Hes-Subud IV, biome
+   *    Temperate Forest, x 6981, z 2827, altitude 6)."
+   *
+   * That is the Field of Cairns, and there was no cairn in this file. The layout was built out of
+   * `rubble` — a 1.8 m heap of broken stone, which is the right piece for a ruin and the wrong one
+   * for a grave marker — so a landmark whose own blurb promises "thirty piles of stone, laid out in
+   * rows by somebody careful" was two dozen ankle-high piles of debris scattered round a menhir.
+   *
+   * This is what the blurb describes: seven stones stacked smallest-at-the-top on a flat footing,
+   * 3.4 m to the capstone, each course turned a little off the one below so it reads as stacked
+   * rather than extruded. It is solid, because walking through a grave marker is worse than walking
+   * round one.
+   */
+  cairn: { tall: 3.4, cap: 180, solid: [0.85, 3], build: (stone = '#6f6a5e') => mergeParts([
+    { geometry: BOX, color: '#5a544a', matrix: at(0, 0.11, 0, 2.0, 0.22, 1.8, 0.2) },
+    ...[
+      // y, width, depth, spin, tint — narrowing as it goes up, each course turned off the last
+      [0.42, 1.62, 1.44, 0.10, stone],
+      [0.86, 1.46, 1.30, 0.55, '#65604f'],
+      [1.28, 1.30, 1.16, 1.05, stone],
+      [1.68, 1.12, 1.00, 1.70, '#6b6659'],
+      [2.06, 0.94, 0.86, 2.35, stone],
+      [2.42, 0.76, 0.70, 3.00, '#5f5a50'],
+      [2.76, 0.58, 0.54, 3.75, stone],
+    ].map(([y, w, d, spin, tint]) =>
+      ({ geometry: BOX, color: tint, matrix: at(0, y, 0, w, y < 1.3 ? 0.44 : 0.38, d, spin) })),
+    // the capstone: a rounded one, set slightly off centre the way a real one always is
+    { geometry: ICO, color: '#7b7466', matrix: at(0.07, 3.12, -0.05, 0.46, 0.34, 0.42) },
+  ]) },
+
   /** A proper standing stone — eight metres, not the five the ordinary props scatter. */
   menhir: { tall: 8.2, cap: 70, solid: [0.9, 8], build: (stone = '#6a6459') => mergeParts([
     { geometry: BOX, color: stone, matrix: at(0, 3.8, 0, 1.35, 7.4, 0.85) },
@@ -484,6 +517,13 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     let r = 12;
     for (const ring of l.rings || []) r = Math.max(r, ring.radius || 0);
     for (const sc of l.scatter || []) r = Math.max(r, sc.radius || 0);
+    // R14: a grid has a corner, not a radius — half the diagonal is how far it actually reaches.
+    // Without this a Field of Cairns would be allowed to overlap the next site by twenty metres.
+    for (const g of l.grids || []) {
+      const w = ((g.cols || 1) - 1) * (g.gapX ?? 6) / 2 + (g.jitter || 0);
+      const h = ((g.rows || 1) - 1) * (g.gapZ ?? 6) / 2 + (g.jitter || 0);
+      r = Math.max(r, Math.hypot(w, h));
+    }
     return r;
   }
 
@@ -694,6 +734,37 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
           cx + Math.cos(a) * r, cz + Math.sin(a) * r,
           yawFor(ring.rotate || 'in', a, rng),
           (ring.scale ?? 1) * (jitter ? 0.9 + rng() * 0.2 : 1), ring.y || 0);
+      }
+    }
+
+    /**
+     * R14 — ROWS. Because some places were laid out by somebody, not weathered into a circle.
+     *
+     * The layout schema could say "ring" and "scatter" and nothing else, so the Field of Cairns —
+     * whose own blurb in data/landmarks.json reads "thirty piles of stone, laid out in ROWS by
+     * somebody careful" — was two concentric circles of rubble. A ring reads as ritual and a grid
+     * reads as a graveyard, and the difference is the whole character of the place.
+     *
+     * `{ piece, cols, rows, gapX, gapZ, jitter, scale, spin, skip }`. The grid is centred on the
+     * site and turned by `spin`, so it is not always square to the compass. `jitter` is metres of
+     * slop on each one: enough that it was dug by hand, not enough to lose the rows.
+     */
+    for (const g of layout.grids || []) {
+      const cols = Math.max(1, g.cols || 1), rws = Math.max(1, g.rows || 1);
+      const gx = g.gapX ?? 6, gz = g.gapZ ?? 6;
+      const spin = g.spin ?? rng() * Math.PI * 2;
+      const cos = Math.cos(spin), sin = Math.sin(spin);
+      let n = 0;
+      for (let r = 0; r < rws; r++) {
+        for (let c = 0; c < cols; c++, n++) {
+          if ((g.skip || []).includes(n)) continue;
+          const lx = (c - (cols - 1) / 2) * gx + (g.jitter ? (rng() - 0.5) * g.jitter * 2 : 0);
+          const lz = (r - (rws - 1) / 2) * gz + (g.jitter ? (rng() - 0.5) * g.jitter * 2 : 0);
+          put(g.piece,
+            cx + lx * cos - lz * sin, cz + lx * sin + lz * cos,
+            spin + (g.wobble ?? 0.12) * (rng() - 0.5) * 2,
+            (g.scale ?? 1) * (1 - (g.vary ?? 0.12) / 2 + rng() * (g.vary ?? 0.12)), g.y || 0);
+        }
       }
     }
 
@@ -1076,6 +1147,18 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       if (!s.hostile || s.populated || s.cleared) continue;
       if (Math.hypot(s.x - px, s.z - pz) > range) continue;
       s.populated = true;
+      /**
+       * R14 — A CAMP INTRODUCES ITSELF ONCE.
+       *
+       * `relax()` below deliberately un-populates a site you have walked 420 m away from, so the
+       * world is not used up — that is right, and it stays. But the caller announces everything
+       * `due()` hands back, so walking away from a bandit camp and back again announced it again,
+       * and again, for the whole run. `announced` is separate from `populated` precisely because
+       * they mean different things: one is "is there anybody here right now", the other is "have
+       * you ever been told about this place". `relax()` clears the first and never the second.
+       */
+      s.fresh = !s.announced;
+      s.announced = true;
       out.push(s);
     }
     return out;

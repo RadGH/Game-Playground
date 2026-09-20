@@ -310,9 +310,24 @@ def('affix:manaRegen', v => `+${n1(v)} mana a second`, { field: 'mpRegen', plain
 def('affix:cond_lightBase', v => `Lights ${n1(v)} metres of ground around you`, {
   derive: (v, d) => { d.lightRange = Math.max(d.lightRange || 0, v); },
 });
-def('affix:cond_mountBase', v => `Rides at ${n1(v)}\u00d7 your walking speed`, {
-  derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
-});
+/**
+ * R14 — SAY IT IN METRES A SECOND, NOT ONLY IN MULTIPLES.
+ *
+ *   "Add the walking speed and gallop speed to the starting trail horse, lower than all the rest."
+ *
+ * "1.6x your walking speed" is true and tells you nothing you can compare: the number you want when
+ * you are looking at two horses is how fast each one actually goes. `js/player.js:280` computes
+ * mounted speed as `moveSpeed x (running ? runMultiplier : 1) x mountSpeed`, so both figures fall
+ * straight out of the multiplier. The two constants are data/balance.json's `player.moveSpeed` and
+ * `player.runMultiplier`, repeated here for the same reason HORSE_PACE is repeated in js/gear.js —
+ * this file is a description table with nothing loaded into it.
+ */
+const WALK_MS = 5.4;
+const RUN_X = 2.1;
+def('affix:cond_mountBase',
+  v => `Rides at ${n1(v)}\u00d7 your walking speed — ${n1(v * WALK_MS)} m/s at a walk, ${n1(v * WALK_MS * RUN_X)} m/s at a gallop`, {
+    derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
+  });
 def('affix:cond_mountWind', v => `Gallops for ${n1(v)} seconds before it has to drop back to a walk`, {
   derive: (v, d) => { d.mountStamina = Math.max(d.mountStamina || 0, v); },
 });

@@ -14,6 +14,30 @@
 // The other rule is distance. Farhold is a whole planet and crossing one is slow on purpose, so a
 // job's pin is in the zone you are standing in. A frame marked `adjacent` may point one zone over and
 // its text says so; anything further away is a RUMOUR, which is a sentence, not a marker.
+//
+// R14 — THAT RULE WAS WRITTEN DOWN AND NEVER ENFORCED.
+//
+//   "The current quest system generated one to carry wood to another location. That location was
+//    hours of foot travel away in a much higher level zone. Rework the quest system to focus on
+//    nearby locations, adjacent towns preferred when possible."
+//
+// `candidatesFrom` pushed EVERY settlement and EVERY dungeon on the whole planet into the bag — it
+// is handed `world.nodes`, which is the world, not the zone — and `fits()` had no distance test at
+// all. So `walk_it_over`, a frame whose scope is literally `"local"`, would happily bind the town
+// forty kilometres away in a level-30 band and call it a local job.
+//
+// The fix is in three places, all of them here:
+//   * every candidate you can stand on now carries `away` (metres, the short way round the world)
+//     and `zoneLevel`, computed by `candidatesFrom` when it is told where you are;
+//   * a scope carries a METRE BUDGET as well as a hop count, and `fits()` enforces it — a frame
+//     that cannot bind inside its own budget is skipped, exactly as it is skipped when a slot has
+//     nothing to bind to;
+//   * `bind()` prefers the near one. Given four towns inside the budget it does not roll flat, it
+//     rolls biased to the front of a distance-sorted list, so "adjacent towns preferred" is the
+//     default behaviour rather than a lucky roll.
+//
+// Everything stays backwards compatible: a candidate with no `away` (the node tests hand in plain
+// data with no position) is never filtered out, because an unknown distance is not a far one.
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
@@ -56,24 +80,64 @@ function fits(need, candidate, ctx) {
   if (need.adjacent && !candidate.adjacent) return false;
   // `rival` means "belongs to whoever is pushing in", which is a fact about the territory record
   if (need.rival && candidate.faction !== ctx.contested) return false;
+  /**
+   * R14 — THE DISTANCE BUDGET.
+   *
+   * `ctx.maxMetres` comes from the frame's own scope (see SCOPE_METRES). A candidate that does not
+   * know where it is has no `away` and is never rejected — an unknown distance is not a far one,
+   * and the node tests hand in positionless data on purpose.
+   */
+  if (ctx.maxMetres != null && Number.isFinite(candidate.away) && candidate.away > ctx.maxMetres) return false;
+  /**
+   * …and the level band. A town is a fine destination; a town six bands up with everything between
+   * here and there able to kill you is not a job, it is a death sentence with a gold reward on it.
+   */
+  if (ctx.maxLevel != null && Number.isFinite(candidate.zoneLevel) && candidate.zoneLevel > ctx.maxLevel) return false;
   return true;
 }
+
+/**
+ * How far a frame of each scope may reach, in metres.
+ *
+ * A zone cell is 640 m across by default, so `local` is a handful of cells — five to ten minutes at
+ * a walk, which is the longest an errand should ever be. `adjacent` is one zone over and says so in
+ * its own text. A scope may override this in data/job-frames.json with `maxMetres`.
+ */
+export const SCOPE_METRES = { local: 4200, adjacent: 12000, rumour: Infinity };
+
+/** How far above the player's level a job's destination may sit. Two bands, not six. */
+export const LEVEL_HEADROOM = 4;
 
 /** Fill one slot, or fail. `count` slots collect several and fail if there are not enough. */
 function bind(need, pool, rng, used, ctx) {
   const want = need.count || 1;
   const open = pool.filter(c => fits(need, c, ctx) && !used.has(c));
   if (open.length < want) return null;
+  /**
+   * R14 — NEAR FIRST.
+   *
+   * Sorted by distance, then drawn with a squared roll, which lands in the first third of the list
+   * about 58% of the time and in the last third about 11%. That is "adjacent towns preferred when
+   * possible" without ever being "the same town every time" — the far one is still reachable, it is
+   * just no longer as likely as the one next door. Candidates with no position sort last and are
+   * drawn exactly as before.
+   */
+  const ranked = open.every(c => !Number.isFinite(c.away))
+    ? open
+    : open.slice().sort((a, b) => (a.away ?? Infinity) - (b.away ?? Infinity));
+  const draw = bag => {
+    const at = Math.min(bag.length - 1, Math.floor(rng() ** 2 * bag.length));
+    return bag.splice(at, 1)[0];
+  };
   if (want === 1) {
-    const picked = open[Math.floor(rng() * open.length) % open.length];
+    const picked = draw(ranked.slice());
     used.add(picked);
     return picked;
   }
   const chosen = [];
-  const bag = open.slice();
+  const bag = ranked.slice();
   for (let i = 0; i < want && bag.length; i++) {
-    const at = Math.floor(rng() * bag.length) % bag.length;
-    const picked = bag.splice(at, 1)[0];
+    const picked = draw(bag);
     used.add(picked);
     chosen.push(picked);
   }
@@ -121,14 +185,29 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
      * a stone back"), and anything offered in the last few boards is pushed down hard so the notice
      * board does not read like a loop.
      */
+    /**
+     * R14: what this frame's own scope lets it reach. `scopes` in data/job-frames.json may set
+     * `maxMetres`; otherwise SCOPE_METRES decides, and an unknown scope is treated as local.
+     */
+    const ctxFor = frame => {
+      const scope = scopes[frame.scope] || null;
+      const metres = scope?.maxMetres ?? SCOPE_METRES[frame.scope] ?? SCOPE_METRES.local;
+      return {
+        ...ctx,
+        maxMetres: Number.isFinite(metres) ? metres : null,
+        maxLevel: frame.scope === 'rumour' ? null : level + LEVEL_HEADROOM,
+      };
+    };
+
     const scored = [];
     for (const frame of frames) {
       if (exclude.includes(frame.id)) continue;
       const used = new Set();
       const bound = { zone };
+      const fctx = ctxFor(frame);
       let ok = true;
       for (const need of frame.needs || []) {
-        const value = bind(need, pool, rng, used, ctx);
+        const value = bind(need, pool, rng, used, fctx);
         if (value == null) { ok = false; break; }
         bound[need.slot] = value;
       }
@@ -160,9 +239,10 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
     for (const row of scored) {
       if (out.length >= Math.max(1, want)) break;
       const bound = { zone };
+      const fctx = ctxFor(row.frame);
       let ok = true;
       for (const need of row.frame.needs || []) {
-        const value = bind(need, pool, rng, taken, ctx);
+        const value = bind(need, pool, rng, taken, fctx);
         if (value == null) { ok = false; break; }
         bound[need.slot] = value;
       }
@@ -267,20 +347,57 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
 export function candidatesFrom({
   zone, territory = null, bestiary = [], nodes = [], landmarks = [], npcs = [],
   caravans = [], patrols = [], named = [], items = [], metresPerCell = 640, level = 1,
+  /**
+   * R14 — WHERE THE BOARD IS STANDING, AND HOW BIG THE WORLD IS.
+   *
+   * `from` is the notice board's own position in world metres (in practice, the player). Given it,
+   * every candidate you can walk to gets an `away` and `jobgen`'s distance budget starts working.
+   * Left out — which is what every node test does — nothing gets an `away` and behaviour is exactly
+   * what it was before.
+   *
+   * `wrapM` is the world's east-west width. The map is a sphere unrolled, so a town at the far left
+   * edge may be a short walk west rather than a long walk east, and measuring it the naive way is
+   * how you get "hours of foot travel" for somewhere that is twenty minutes off.
+   *
+   * `zoneAt(x, z)` hands back the zone standing at a point, so a destination can be rejected for
+   * being six level bands up rather than only for being far.
+   */
+  from = null, wrapM = 0, zoneAt = null,
 } = {}) {
   const out = [];
   const record = territory?.of?.(zone?.id);
 
+  /** Metres from the board to a point, the short way round. */
+  const awayTo = (x, z) => {
+    if (!from || !Number.isFinite(x) || !Number.isFinite(z)) return undefined;
+    let dx = x - from.x;
+    if (wrapM > 0) {
+      if (dx > wrapM / 2) dx -= wrapM;
+      if (dx < -wrapM / 2) dx += wrapM;
+    }
+    return Math.hypot(dx, z - from.z);
+  };
+  /** Stamp `away` and `zoneLevel` on anything that knows where it is. */
+  const placed = c => {
+    const away = awayTo(c.x, c.z);
+    if (away != null) c.away = away;
+    if (zoneAt && Number.isFinite(c.x) && Number.isFinite(c.z)) {
+      const z = zoneAt(c.x, c.z);
+      if (z) { c.zoneLevel = z.minLevel ?? z.midLevel ?? null; c.zoneName = z.name || null; c.adjacent = z.id !== zone?.id; }
+    }
+    return c;
+  };
+
   for (const site of territory?.sitesIn?.(zone?.id) || []) {
-    out.push({ ...site, type: 'site' });
+    out.push(placed({ ...site, type: 'site' }));
   }
   for (const i of record?.incidents || []) {
     out.push({ type: 'incident', id: i.kind, kind: i.kind, name: i.name || i.kind, blurb: i.blurb || '', spawns: i.spawns || null });
   }
-  for (const l of landmarks) out.push({ ...l, type: 'landmark' });
-  for (const n of npcs) out.push({ ...n, type: 'npc' });
-  for (const c of caravans) out.push({ ...c, type: 'caravan' });
-  for (const p of patrols) out.push({ ...p, type: 'patrol' });
+  for (const l of landmarks) out.push(placed({ ...l, type: 'landmark' }));
+  for (const n of npcs) out.push(placed({ ...n, type: 'npc' }));
+  for (const c of caravans) out.push(placed({ ...c, type: 'caravan' }));
+  for (const p of patrols) out.push(placed({ ...p, type: 'patrol' }));
   for (const f of named) out.push({ ...f, type: 'named' });
   for (const it of items) out.push({ ...it, type: 'item' });
 
@@ -297,17 +414,17 @@ export function candidatesFrom({
   // the zone's own dungeons, from the map the world already grew
   for (const n of nodes) {
     if (n.type !== 'dungeon') continue;
-    out.push({
+    out.push(placed({
       type: 'dungeon', id: 'd' + n.id, name: n.name || 'the ruin',
       x: n.x * metresPerCell, z: n.y * metresPerCell, cell: { x: n.x, y: n.y },
-    });
+    }));
   }
   for (const n of nodes) {
     if (n.type !== 'settlement' && n.type !== 'port') continue;
-    out.push({
+    out.push(placed({
       type: 'settlement', id: 't' + n.id, name: n.name || 'the village',
       x: n.x * metresPerCell, z: n.y * metresPerCell, cell: { x: n.x, y: n.y },
-    });
+    }));
   }
   return out;
 }

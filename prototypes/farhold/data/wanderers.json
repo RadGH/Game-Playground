@@ -285,28 +285,6 @@
       "faction": "lantern_house"
     },
     {
-      "key": "tax_collector",
-      "name": "Tax Collector",
-      "role": "guard",
-      "where": [
-        "road",
-        "settlement"
-      ],
-      "when": [
-        "day"
-      ],
-      "weight": 5,
-      "blurb": "Two guards, a ledger, and no sense of humour at all.",
-      "lines": [
-        "A tenth of what you are carrying, and the Reach forgets your face.",
-        "Everyone thinks they are the exception. Nobody is the exception."
-      ],
-      "wants": "cut",
-      "gives": "standing",
-      "faction": "wardens_reach",
-      "cutShare": 0.1
-    },
-    {
       "key": "wounded_patroller",
       "name": "Wounded Patroller",
       "role": "guard",

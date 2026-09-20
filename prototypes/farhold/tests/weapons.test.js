@@ -113,22 +113,54 @@ test('a two-handed weapon takes the off hand, and says why', () => {
   assert.ok(out?.refused, 'an off-hand weapon went on under a two-hander');
 });
 
-test("Titan's Grip is the keystone that lets you carry two of them", () => {
+test('Doubled Grasp is the keystone that lets you carry two of them', () => {
   // "For the keystone perks, add one that allows you to equip two 2-handed melee weapons."
   const player = rpg.createPlayer({ level: 40 });
   rpg.equip(player, make('greatsword'), { force: true });
   rpg.equip(player, make('axe2h'), { into: 'offhand', force: true });
   assert.equal(handsOf(player).dual, false, 'two two-handers should need the keystone');
-  player.perkFlags = { titanGrip: true };
+  player.perkFlags = { doubleGrip: true };
   assert.equal(handsOf(player).dual, true, 'the keystone did not free the hand');
   assert.equal(offhandRefusal(player, make('axe2h')), null);
   // the keystone exists in the forest, at the end of the melee arm, and it costs something
-  const stone = KEYSTONES.find(k => k.flag === 'titanGrip');
-  assert.ok(stone, 'no Titan\'s Grip keystone');
+  const stone = KEYSTONES.find(k => k.flag === 'doubleGrip');
+  assert.ok(stone, 'no Doubled Grasp keystone');
   assert.equal(stone.arm, 'melee');
   assert.ok(stone.cost, 'a keystone with no cost is a stat node with a bigger circle');
   assert.ok(stone.grants.haste < 0, 'the cost is not actually paid');
+  // …and nothing player-facing borrows another game's name for it
+  for (const k of KEYSTONES) assert.ok(!/titan'?s grip/i.test(k.name), `${k.id} still carries the old name`);
 });
+
+test('with the keystone, a SECOND two-hander goes in the free hand instead of replacing the first', () => {
+  // Reported in play: "I took the keystone and equipped a two handed weapon, then tried to equip a
+  // second greatsword — it just replaced my main hand instead of equipping into my off hand."
+  const player = rpg.createPlayer({ level: 40 });
+  player.perkFlags = { doubleGrip: true };
+  const first = make('greatsword');
+  const second = make('axe2h');
+  rpg.equip(player, first, { force: true });
+  rpg.equip(player, second, { force: true });          // no `into` — the bag has one click
+  const held = [player.equipment.weapon, player.equipment.offhand];
+  assert.ok(held.includes(first) && held.includes(second), 'one of the two two-handers went to the bag');
+  assert.ok(!player.bag.includes(first) && !player.bag.includes(second));
+  assert.equal(handsOf(player).dual, true);
+  // and a two-hander picked up afterwards no longer sweeps the off hand into the bag
+  const third = make('greatsword');
+  third.name = 'Better Greatsword';
+  rpg.equip(player, third, { force: true });
+  assert.ok(player.equipment.offhand, 'equipping a two-hander emptied the keystone-held off hand');
+});
+
+test('without the keystone, a second two-hander still takes the main hand', () => {
+  const player = rpg.createPlayer({ level: 40 });
+  rpg.equip(player, make('greatsword'), { force: true });
+  const second = make('axe2h');
+  rpg.equip(player, second, { force: true });
+  assert.equal(player.equipment.weapon, second, 'a two-hander should replace a two-hander');
+  assert.equal(player.equipment.offhand, undefined, 'the off hand is not free without the keystone');
+});
+
 
 test('each hand swings on its own clock, and the off hand hits for less', () => {
   const player = rpg.createPlayer({ level: 40 });
@@ -283,7 +315,7 @@ test('what you walked past is what you get', () => {
   assert.ok(Object.keys(stats).length > 3, 'a long walk granted almost nothing');
   assert.ok(stats.int > 0 || stats.spellPower > 0, 'the arcane arm gave no arcane stats');
   // walking one arm should not hand you another arm's keystone
-  assert.ok(!keystones.includes('titan_grip'), 'the arcane walk collected a melee keystone');
+  assert.ok(!keystones.includes('doubled_grasp'), 'the arcane walk collected a melee keystone');
   const walked = armProgress(player, forest);
   assert.ok(walked.arcane > walked.melee, 'the arm counter is wrong');
   // every talent node in the forest names a flag the game can actually read

@@ -148,7 +148,14 @@ export const TALENT_NODES = [
  */
 export const KEYSTONES = [
   {
-    id: 'titan_grip', arm: 'melee', name: "Titan's Grip", flag: 'titanGrip',
+    /**
+     * The keystone that lets you carry two two-handers.
+     *
+     * Renamed from the name it shipped with, which was lifted straight out of another game's talent
+     * tree — the playground's one hard content rule is that nothing player-facing borrows a name
+     * from somebody else's game. `RENAMED_PERKS` below keeps a save made under the old id working.
+     */
+    id: 'doubled_grasp', arm: 'melee', name: 'Doubled Grasp', flag: 'doubleGrip',
     desc: 'You can hold a two-handed weapon in each hand, and every swing covers 18% more ground.',
     cost: '−20% attack speed.',
     grants: { haste: -20, areaPct: 18 },
@@ -330,6 +337,14 @@ export function pointsFor(level = 1) {
 }
 
 /** Which nodes are taken. The hub is always taken and costs nothing. */
+/**
+ * A note on renaming a keystone, since this round did one.
+ *
+ * What a player's save holds is the NODE id — `melee:7:0`, which is where the node sits in the
+ * forest, not what it is called — and `keystoneId`/`name` hang off that. So renaming a keystone
+ * costs nobody their point. Moving one to a different ring or a different arm WOULD, and that is
+ * the change to be careful with.
+ */
 export function takenOf(player) {
   const taken = new Set(player?.perks || []);
   taken.add('start');
@@ -466,7 +481,7 @@ export function refundOne(player, forest, id) {
  * Everything the taken nodes grant: the stat bag, the talent flags and the keystones.
  *
  * `stats` keys are `derived` field names, so `rpg.refresh` can fold them in without a translation
- * table. `flags` is what the combat code asks — `flags.riposte`, `flags.titanGrip`.
+ * table. `flags` is what the combat code asks — `flags.riposte`, `flags.doubleGrip`.
  */
 export function perkBonuses(player, forest) {
   const stats = {};

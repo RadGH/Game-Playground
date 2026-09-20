@@ -20,7 +20,7 @@ import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
-import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, oneHanded, describeWeapon } from './weapons.js';
+import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, describeWeapon } from './weapons.js';
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
 // js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
 // every Branding talent were doing nothing to an enemy. See `strike` for how it is applied once.
@@ -711,24 +711,56 @@ export class Rpg {
     }
     let slot = into || (item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot);
     /**
-     * A ONE-HANDED WEAPON GOES IN THE FREE HAND.
+     * A WEAPON GOES IN THE FREE HAND, WHATEVER KIND OF WEAPON IT IS.
      *
      * "Swords cannot be equipped in the off-hand… dual wielding is supposed to work." It never
      * could: the bag has one click and that click asked for `weapon`, so a second sword always
      * replaced the first and the off hand was only ever reachable for shields. The rule now, when
      * no slot was asked for by name:
      *
-     *   * the main hand is holding a one-hander, and the off hand is empty,
-     *   * the new weapon is a one-hander too,
-     *   * and it is NOT better than what is already in the main hand
+     *   * the main hand is holding something, and the off hand is EMPTY,
+     *   * and the off hand would actually take the new weapon — which is `offhandRefusal`'s
+     *     question, not this file's, so bows, staves and the two-hander keystone are all already
+     *     decided by the time the branch is reached
      *
-     * then it goes in the off hand and you are dual wielding. If it IS better it takes the main
-     * hand, because putting your best weapon in the hand that hits for 62% is never what you meant.
+     * then BOTH go on, best in the main hand. The first version of this asked `oneHanded(item)`
+     * instead, and that guard excluded the one case Doubled Grasp exists to allow — two
+     * two-handers — which is exactly what the play-test reported.
      */
-    if (slot === 'weapon' && !into && oneHanded(item)) {
+    if (slot === 'weapon' && !into) {
       const main = player.equipment.weapon;
-      if (main && oneHanded(main) && !player.equipment.offhand && itemScore(item) <= itemScore(main)) {
-        slot = 'offhand';
+      /**
+       * …AND SO DOES A SECOND TWO-HANDER, ONCE DOUBLED GRASP IS TAKEN.
+       *
+       * Reported in play: "I took the keystone, equipped a two handed weapon, and tried to equip a
+       * second greatsword — it just replaced my main hand." The rule above was written for two
+       * one-handers and said so in code: `oneHanded(item)` guarded the whole branch, so the one
+       * case the keystone exists to allow was the one case that could never reach the off hand.
+       *
+       * The question is not "is this a one-hander" but "would the off hand actually take it" —
+       * which `offhandRefusal` already answers, keystone and all, in the one place that knows the
+       * rule. So the branch asks that instead, and the keystone works without this file ever
+       * learning what a keystone is.
+       */
+      const fitsOffHand = !offhandRefusal(player, item);
+      if (main && !player.equipment.offhand && fitsOffHand) {
+        /**
+         * WITH A HAND FREE, BOTH WEAPONS GO ON. THE BETTER ONE TAKES THE MAIN HAND.
+         *
+         * The old rule only filled the off hand when the new weapon was the WORSE of the two, and
+         * dropped the loser in the bag otherwise — so upgrading half of a pair silently unequipped
+         * the other half. Putting your best weapon in the hand that hits for 62% is still never
+         * what you meant, so a better weapon swaps in and the one it beat slides across.
+         */
+        if (itemScore(item) <= itemScore(main)) slot = 'offhand';
+        else if (!offhandRefusal({ ...player, equipment: { ...player.equipment, weapon: item } }, main)) {
+          player.equipment.offhand = main;
+          player.equipment.weapon = item;
+          const at = player.bag.indexOf(item);
+          if (at >= 0) player.bag.splice(at, 1);
+          this.refresh(player);
+          return null;                                  // nothing came off — both hands are full
+        }
       }
     }
     // A ring goes on whichever hand is free; with both full it replaces the WEAKER one, because
@@ -741,8 +773,8 @@ export class Rpg {
     if (!SLOTS.includes(slot)) return null;
     const old = player.equipment[slot] || null;
     player.equipment[slot] = item;
-    // a two-handed weapon clears the off hand
-    if (slot === 'weapon' && item.twoHanded && player.equipment.offhand) {
+    // a two-handed weapon clears the off hand — unless Doubled Grasp says both hands can hold one
+    if (slot === 'weapon' && item.twoHanded && player.equipment.offhand && !player.perkFlags?.doubleGrip) {
       player.bag.push(player.equipment.offhand);
       delete player.equipment.offhand;
     }

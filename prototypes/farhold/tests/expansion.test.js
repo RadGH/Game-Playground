@@ -77,7 +77,10 @@ test('every faction is complete, and every rival is a real faction', () => {
 test('every data file the expansion ships is the size the plan promised', () => {
   assert.ok(frames.frames.length >= 18, `only ${frames.frames.length} job frames`);
   assert.ok(incidentData.incidents.length >= 12, `only ${incidentData.incidents.length} incidents`);
-  assert.ok(wandererData.kinds.length >= 14, `only ${wandererData.kinds.length} kinds of wanderer`);
+  // R14 removed `tax_collector` on the user's ask — "I had an event at town from a tax collector
+  // who took some money. Remove that lol." — which took the floor from 14 to 13.
+  assert.ok(wandererData.kinds.length >= 13, `only ${wandererData.kinds.length} kinds of wanderer`);
+  assert.ok(!wandererData.kinds.some(k => k.key === 'tax_collector'), 'the tax collector is gone for good');
   assert.ok(landmarkData.landmarks.length >= 14, `only ${landmarkData.landmarks.length} landmarks`);
   assert.ok(Object.keys(CARGO).length >= 10, 'fewer than ten cargo manifests');
   assert.ok(Object.keys(COMPOSITIONS).length >= 10, 'fewer than ten patrol compositions');

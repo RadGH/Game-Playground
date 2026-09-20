@@ -199,6 +199,15 @@ export function createBuild(scene, {
   plan = null,
   /** `avatar-3d/js/spellfx.js`, if the game has one. Optional on purpose — see `buildPortalRing`. */
   spellfx = null,
+  /**
+   * §4.19 — the clearing tool: `(x, z, radius) => { removed, materials }`.
+   *
+   * Trees and boulders belong to `js/props.js` and `js/features.js`, neither of which is this
+   * round's file, so the tool exists here and the felling happens there. A callback rather than an
+   * import because the two are genuinely separate jobs: this decides WHERE you swung, that decides
+   * what was standing in it and what it drops.
+   */
+  onClear = null,
   onLog = null,
 } = {}) {
   const book = plan || createBuildPlan({ catalogue, terrain, terraform, store: store || makeBag(), siteOk });
@@ -347,6 +356,7 @@ export function createBuild(scene, {
       if (tool === 'build') return api.placeHere();
       if (tool === 'remove') return api.removeAt(aimAt.x, aimAt.z);
       if (tool === 'road' || tool === 'wall') return api.addRunPoint(aimAt.x, aimAt.z);
+      if (tool === 'clear') return api.clear();
       return api.paint();
     },
 
@@ -380,6 +390,21 @@ export function createBuild(scene, {
       if (!res.ok) { log(res.why, 'warn'); return res; }
       groundChanged(x, z, radius * 1.6);
       return res;
+    },
+
+    /**
+     * §4.19 — clear the trees and rocks in the brush, and keep what they drop.
+     *
+     * Building anywhere wooded is otherwise impossible: a tree is a prop the placement rules know
+     * nothing about, so a furnace would happily be put down inside one. The materials go back to
+     * the store, which is also the cheapest early source of timber in the whole expansion.
+     */
+    clear() {
+      if (!onClear) return { ok: false, why: 'Nothing here can be cleared yet.' };
+      const res = onClear(aimAt.x, aimAt.z, radius) || {};
+      if (res.materials && store?.give) store.give(res.materials);
+      if (res.removed) log(`Cleared ${res.removed} of it. ${book.costText(res.materials || {})} recovered.`, 'good');
+      return { ok: true, ...res };
     },
 
     /**

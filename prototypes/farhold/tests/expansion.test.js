@@ -428,18 +428,36 @@ test('wiping out a patrol is felt, and loosens their hold', () => {
 
 // ---------------------------------------------------------------- caravans
 
-test('a caravan travels, is ambushed on the way, and is a wreck if nobody was watching', () => {
+test('a caravan travels, and one that meets trouble with nobody watching is a wreck', () => {
+  /**
+   * UPDATED BY THE CIVILIZATION EXPANSION §7.6, and the old assertion is why.
+   *
+   * This used to read `assert.equal(c.state, 'wrecked')` — flatly, for every unescorted caravan —
+   * because js/caravans.js ambushed every single one of them unconditionally. That was right for
+   * flavour and wrong as a rule the player is now betting money on: a trade run of the player's own
+   * is a manifest, a carrier and some guards, and "you always lose it" is not a risk model. Trouble
+   * is a roll made once at dispatch (`ambushChanceFor`), so this test now forces the roll it wants
+   * rather than assuming it — and the world's own caravans got better at the same time, because a
+   * road with a caravan on it is no longer a road with a wreck on it.
+   */
   const zones = zonesFixture();
   const land = createTerritory({ zones, seed: 31, factions });
   const trade = createCaravans({ territory: land, factions, seed: 31 });
   const route = [{ x: 0, z: 0, name: 'Herdalkeep' }, { x: 2000, z: 0, name: 'Menwin' }];
-  const c = trade.dispatch(zones.byId(1), route);
+  const c = trade.dispatch(zones.byId(1), route, { danger: 1, guards: 0 });
   assert.equal(c.state, 'loading');
   trade.update(90);
   assert.equal(c.state, 'travelling');
+  c.willAmbush = true;                       // the roll, forced, so the rest of the test is about the ROAD
   for (let i = 0; i < 60; i++) trade.update(30);
-  assert.ok(['wrecked', 'arrived', 'ambushed'].includes(c.state), `it is still ${c.state}`);
   assert.equal(c.state, 'wrecked', 'nobody was there to see it, so it should be a wreck');
+
+  // …and a run that is not rolled into trouble simply gets there, which never used to be possible
+  const lucky = trade.dispatch(zones.byId(1), route);
+  lucky.willAmbush = false;
+  trade.update(90);
+  for (let i = 0; i < 60; i++) trade.update(30);
+  assert.equal(lucky.state, 'arrived');
 });
 
 test('escorting one gets it home, and the people who own it notice', () => {

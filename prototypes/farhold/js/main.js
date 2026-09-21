@@ -100,7 +100,9 @@ import { createEncounters } from './encounters.js';
 import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
 import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES, mountLook } from './gear.js';
 import { createBoat } from './boat.js';
-import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, OFFHAND_DAMAGE } from './weapons.js';
+import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, chargedForm, OFFHAND_DAMAGE } from './weapons.js';
+// R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
+import { pushFor } from './combat-feel.js';
 import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
 import { allocate as allocatePerk, refundAll as refundPerks, refundOne as refundOnePerk, pointsLeft as perkPointsLeft } from './perks.js';
 import { createCrafting, Materials } from './craft.js';
@@ -6215,6 +6217,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * acts like an additional spell but does not require mana to use".
          */
         const spell = staffSpell(weapon, element);
+        /**
+         * R15 — AND A HELD CHARGE IS A DIFFERENT SPELL, WHICH IT HAS NEVER BEEN.
+         *
+         *   "staves are lacking their magical appeal, find a way to improve all of these"
+         *
+         * `CHARGED_FORMS` in js/weapons.js says what a released charge becomes — a cone becomes a
+         * sustained jet, a nova becomes a dome that shoves everything out, a wave becomes a wall
+         * that stands and burns, a lob becomes a mortar, a chain jumps five times instead of three
+         * — and `chargedForm()` was exported and called by NOBODY. Six forms written down, zero
+         * reachable, which is the fault this project keeps finding written out in one table.
+         *
+         * So a full charge has until now been the same spell at 1.6x damage and 2x radius: a fine
+         * weapon and not the design, and not something a player can feel is a second spell.
+         *
+         * `charge.tap` is the test. A quick tap is the ordinary cast, which is what makes a staff
+         * usable without holding anything; a real charge is one of these.
+         */
+        const charged = shape.charge && !shape.charge.tap ? chargedForm(spell) : null;
         const a = aim();
         const base = Math.max(1, Math.round((player.derived.damage[1] || 6) * (spell.mult || 1) * share));
         const radius = (spell.radius || spell.width || 3) * shape.scale;
@@ -6226,6 +6246,82 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           at: new THREE.Vector3(control.x, control.y + 1.1, control.z), element,
           ms: Math.round(380 * (shape.charge?.radius || shape.scale || 1)),
         });
+        /**
+         * R15 — THE FOUR CHARGED FORMS.
+         *
+         * Each is a branch, and each is deliberately a different KIND of thing rather than a bigger
+         * version of the tap — that is the whole of "two spells per staff". The numbers come from
+         * `CHARGED_FORMS` in js/weapons.js so the table stays the single place they are written.
+         */
+        if (charged && charged.shape === 'jet') {
+          /**
+           * A SUSTAINED JET. The cone, five times over, at a fifth of the power each and reaching
+           * half again as far — so the total is the same hit spread over three quarters of a
+           * second, and standing in it is much worse than being clipped by it.
+           */
+          const range = (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45);
+          const wide = (spell.arc || 0.9) * shape.scale * 0.8;
+          const ticks = charged.ticks || 5;
+          for (let i = 0; i < ticks; i++) {
+            const when = i * 130;
+            setTimeout(() => {
+              if (!state.running) return;
+              fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: range, arc: wide });
+              for (const { enemy } of field.strike(control, player, {
+                reach: range, arc: wide, ...meleeOpts, power: meleeOpts.power / ticks,
+              })) {
+                if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.4));
+              }
+            }, when);
+          }
+          control.swing = Math.max(control.swing, 0.32 + ticks * 0.13);
+          hud.log(`${spell.name || 'The jet'} holds.`, '');
+          return;
+        }
+        if (charged && charged.shape === 'dome') {
+          /**
+           * A DOME THAT POPS. The nova, and then everything inside it is shoved outward — which is
+           * the one thing a caster has never had and the reason a staff felt like a worse bow.
+           */
+          spellfx.aoe({ points: ringPoints(control.x, control.z, radius, 12), element, stagger: 0.03 });
+          for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, {
+            falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1),
+          })) {
+            brandHit(enemy, result);
+            if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
+            /**
+             * The shove goes on `e.push`, which is the SAME field js/actors.js fills for a hammer's
+             * knockback and the same one it travels over 0.18 s — so a dome resists by rank through
+             * `pushFor` exactly as a maul does, and a boss is barely moved. Writing a position here
+             * instead would have pushed things through walls.
+             */
+            const dx = enemy.x - control.x, dz = enemy.z - control.z;
+            const len = Math.hypot(dx, dz) || 1;
+            const metres = pushFor(enemy, charged.push || 2.4);
+            if (metres > 0.01) enemy.push = { dx: dx / len, dz: dz / len, metres, t: 0.18, span: 0.18, done: 0 };
+          }
+          control.swing = Math.max(control.swing, 0.4);
+          hud.log('The dome pops.', '');
+          return;
+        }
+        if (charged && charged.shape === 'wall') {
+          /**
+           * A WALL THAT STANDS. `dropPool` is the lingering-ground system the skills already use,
+           * so a wall is a pool in front of you rather than a second mechanism that behaves almost
+           * the same. Three seconds for a wave, four for a ground spell, from the table.
+           */
+          const ahead = 4.5 * shape.scale;
+          const wx = control.x + a.dx * ahead, wz = control.z + a.dz * ahead;
+          dropPool({
+            x: wx, z: wz, r: radius * 1.15, seconds: charged.seconds || 3,
+            element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) * 0.5,
+          });
+          spellfx.aoe({ points: ringPoints(wx, wz, radius * 1.15, 10), element, stagger: 0.03 });
+          control.swing = Math.max(control.swing, 0.4);
+          hud.log(`${charged.name === 'field' ? 'The ground stays poisoned' : 'A wall stands'} for ${charged.seconds || 3} seconds.`, '');
+          return;
+        }
+
         if (spell.shape === 'nova') {
           /**
            * R15 — THE NOVA HAS NEVER DRAWN ANYTHING.
@@ -6237,7 +6333,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
            * correctly; this was the one that did not, and `ringPoints` was already sitting here.
            */
           spellfx.aoe({ points: ringPoints(control.x, control.z, radius), element, stagger: 0.04 });
-          for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) })) {
+          // R15: a charged staff's nova pays for the charge. `withArea` already folds the charge
+          // into the radius and into the shapes that route through `meleeOpts`; this branch
+          // computes its own power and so never saw it — a full charge was twice the circle at the
+          // same damage, which reads as the charge doing nothing.
+          for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) })) {
             brandHit(enemy, result);
             if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
           }
@@ -6256,8 +6356,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             status: spell.status || leaves,
             statusSpec: (spell.status || leaves) ? skillData.statuses[spell.status || leaves] : null,
           });
+          /**
+           * R15 — the two charged forms that are still a bolt, but a different one.
+           *
+           * A MORTAR is aimed: it lands where you are pointing rather than on the first thing it
+           * meets, and it leaves the ground burning, which is what makes it worth the wind-up over
+           * just throwing two of the ordinary ones. A STORM jumps five times instead of three.
+           */
+          if (charged?.shape === 'mortar') {
+            plan.kind = 'ground';
+            plan.radius = radius * 1.4;
+            plan.groundRadius = radius * 1.4;
+            plan.ground = Math.max(plan.ground || 0, 3);
+            hud.log('It arcs up and comes down where you are pointing.', '');
+          } else if (charged?.shape === 'storm') {
+            plan.chains = charged.chains || 5;
+            hud.log('It jumps.', '');
+          }
           const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.1, a.z + a.dz * 0.6);
-          fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: spell.mult || 1 }, from, true);
+          // R15: …and so does a charged lob. Same fault, same fix.
+          fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (spell.mult || 1) * (shape.charge?.power || 1) }, from, true);
         }
         control.swing = Math.max(control.swing, 0.32);
         return;

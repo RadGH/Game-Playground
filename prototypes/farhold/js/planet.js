@@ -1864,6 +1864,30 @@ export function makeTerrain(world, planet = null, opts = {}) {
    * Somewhere sensible to start: dry land, not a cliff, not in a river, and leaning toward a road
    * or a town, because an empty plain is a poor first thing to see.
    */
+  /**
+   * R17 — DRY GROUND TO WALK ON, NOT A DRY PIXEL TO STAND ON.
+   *
+   * `spawnPoint` asked `waterAt(x, z)` of the exact spot and nothing around it, which is the same
+   * one-point test round 17 replaced everywhere else in the game (`dryFor` in js/features.js, the
+   * footprint walk in the town builder). It did not matter much until this round widened the river
+   * carve so the water meets its bank — after that, seed 19 put the player fourteen metres from a
+   * channel, and two seconds of walking forward ended underwater. The browser suite found it:
+   * `round3.spec.js` walks for two seconds and then presses H, and a horse will not be mounted in
+   * the water.
+   *
+   * Twelve metres and eight bearings, which is about two seconds at a walk — the distance a new
+   * player covers before they have looked at anything.
+   */
+  function dryAround(x, z, r = 12) {
+    if (waterAt(x, z) || riverAt(x, z) > 0.25) return false;
+    for (let a = 0; a < 8; a++) {
+      const px = x + Math.cos((a / 8) * Math.PI * 2) * r;
+      const pz = z + Math.sin((a / 8) * Math.PI * 2) * r;
+      if (waterAt(px, pz) || riverAt(px, pz) > 0.25) return false;
+    }
+    return true;
+  }
+
   function spawnPoint(rng = makeRng(world.seed)) {
     const towns = (world.nodes || []).filter(n => n.type === 'settlement' || n.type === 'port');
 
@@ -1885,7 +1909,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
         const angle = rng() * Math.PI * 2;
         const out = 18 + rng() * 26;
         let [x, z] = clampToWorld(pick.x * M_PER_CELL + Math.cos(angle) * out, pick.y * M_PER_CELL + Math.sin(angle) * out);
-        if (waterAt(x, z)) continue;
+        if (!dryAround(x, z)) continue;
         if (slopeAt(x, z, 6) > 0.5) continue;
         return { x, z, height: heightAt(x, z), town: pick.name };
       }

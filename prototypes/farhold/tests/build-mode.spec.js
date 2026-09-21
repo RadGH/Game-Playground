@@ -125,9 +125,23 @@ test('the ghost follows the camera, and a click on the ground builds', async ({ 
   const edits = await page.evaluate(() => window.farhold.terraform.count);
   expect(edits, 'clicking with the Level tool did not touch the ground').toBeGreaterThan(0);
 
-  // …then put a claim stone down with a click, through the panel
+  /**
+   * …then put a claim stone down with a click, through the panel.
+   *
+   * R17: the Level tool is still selected here, and the panel no longer draws the placement
+   * catalogue for a tool that does not place anything ("If I select 'Scan', it shouldn't show
+   * those placement options"). So this puts the Place tool back first, which is what a player
+   * does, and picks the category the marker is filed under before looking for its row.
+   */
   await page.evaluate(() => {
+    const f = window.farhold;
+    f.build.setTool('build');
+    f.buildUI.refresh();
+    const cat = [...document.querySelectorAll('#build-ui .build-cat')]
+      .find(b => /waypoint|marker|claim/i.test(b.textContent));
+    cat?.click();
     const row = [...document.querySelectorAll('#build-ui .build-row')].find(r => r.textContent.includes('Outpost Marker'));
+    if (!row) throw new Error('no Outpost Marker row: ' + [...document.querySelectorAll('#build-ui .build-cat')].map(b => b.textContent).join('/'));
     row.click();
   });
   await canvas.click({ position: { x: 480, y: 360 } });

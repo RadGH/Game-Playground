@@ -247,7 +247,9 @@ test('the sheet has tabs, and opening it gives the mouse back straight away', as
   const out = await page.evaluate(async () => {
     const f = window.farhold;
     f.hud.toggleSheet(true);
-    const tabs = [...document.querySelectorAll('#sheet-tabs button')].map(b => b.dataset.tab);
+    // R17: a tab whose screen nothing has mounted is hidden by `numberRail()`, so ask for the ones
+    // actually on the rail rather than every button in the markup
+    const tabs = [...document.querySelectorAll('#sheet-tabs button:not([hidden])')].map(b => b.dataset.tab);
     const seen = {};
     for (const t of tabs) {
       f.hud.setTab(t);
@@ -256,8 +258,16 @@ test('the sheet has tabs, and opening it gives the mouse back straight away', as
     }
     return { tabs, seen, pointerLocked: !!document.pointerLockElement, open: f.hud.sheetOpen };
   });
-  // round 7 added Perks, where attribute point-buy, the passive ladder and the talent picks went
-  expect(out.tabs).toEqual(['character', 'inventory', 'skills', 'perks', 'crafting', 'upgrade', 'journal']);
+  /**
+   * Round 7 added Perks, where attribute point-buy, the passive ladder and the talent picks went.
+   * Round 17 added four more — the combat log and the Holding, which were full-window overlays on
+   * keys of their own, and the two screens that round built. Asserted as a PREFIX plus a set, so
+   * the next round to add a screen does not have to come back here: what this test is actually for
+   * is that every tab on the rail has a body, shows when picked, and is not empty.
+   */
+  expect(out.tabs.slice(0, 7)).toEqual(['character', 'inventory', 'skills', 'perks', 'crafting', 'upgrade', 'journal']);
+  expect(out.tabs).toContain('log');
+  expect(out.tabs).toContain('holding');
   expect(out.pointerLocked, 'the mouse was still captured with the sheet open').toBe(false);
   for (const [tab, info] of Object.entries(out.seen)) {
     expect(info.shown, `${tab} did not show`).toBe(true);

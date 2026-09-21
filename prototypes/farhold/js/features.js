@@ -403,8 +403,22 @@ export function createFeatures(scene, terrain, opts = {}) {
   const settlements = (world.nodes || [])
     .filter(n => n.type === 'settlement' || n.type === 'port')
     .map(n => {
-      const anchor = settlementAnchor(terrain, n.x * M_PER_CELL, n.y * M_PER_CELL, 16 + (n.size || 1) * 13, M_PER_CELL);
-      return { ...n, wx: anchor.x, wz: anchor.y };
+      /**
+       * NOT WIRED, DELIBERATELY — AND THIS IS THE NOTE SAYING WHY.
+       *
+       * `settlementAnchor` works and is tested (tests/round17-worldgen.test.js §5): it takes
+       * Feafungate from 41% of its ground under water to 8% and puts its centre on dry land. What
+       * it is NOT is safe on its own, and the browser suite said so within a minute — the waypoint
+       * pad stopped lighting, because `js/waypoints.js` derives ITS metres from `node.x *
+       * M_PER_CELL` independently, so the pad stayed at the cell while the town walked forty-five
+       * metres away from it. `js/map.js`, `js/quests.js` and `js/markers.js` all do the same thing.
+       *
+       * Moving a town means moving all five together, and that is a round of its own rather than a
+       * line here. Left as the honest half: the anchor is the cell, exactly as it was, and every
+       * individual thing a town builds already refuses to stand in water (`dryFor` below), which is
+       * what the report actually asked for.
+       */
+      return { ...n, wx: n.x * M_PER_CELL, wz: n.y * M_PER_CELL };
     });
 
 

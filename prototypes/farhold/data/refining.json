@@ -8,18 +8,21 @@
       "name": "Campfire", "tier": 0, "speed": 1.0, "powerUse": 0, "priority": "refining",
       "fuels": { "log": 40, "charcoal": 90, "coal": 120, "resin": 60 },
       "build": { "stone": 6, "log": 4 },
+      "labour": { "secondsPerUnit": 30, "auto": false },
       "desc": "Cook, boil, burn. Free, no power, and the only thing you can build the hour you land."
     },
     "furnace": {
       "name": "Furnace", "tier": 0, "speed": 1.0, "powerUse": 0, "priority": "refining",
       "fuels": { "charcoal": 45, "coal": 70, "log": 18 },
       "build": { "stone": 20, "clay": 10 },
+      "labour": { "secondsPerUnit": 30, "auto": false },
       "desc": "Ore in, ingot out, slag on the floor. The first real structure — §2.2."
     },
     "kiln": {
       "name": "Kiln", "tier": 0, "speed": 1.0, "powerUse": 0, "priority": "refining",
       "fuels": { "charcoal": 50, "coal": 80, "log": 20 },
       "build": { "stone": 16, "clay": 16 },
+      "labour": { "secondsPerUnit": 30, "auto": false },
       "desc": "Clay to brick, sand to glass. Everything you build after this is made of its output."
     },
 
@@ -27,24 +30,28 @@
       "name": "Sawmill", "tier": 1, "speed": 1.6, "powerUse": 4, "priority": "refining",
       "fuels": {}, "unpoweredSpeed": 0.35,
       "build": { "plank": 14, "beam": 4, "iron_ingot": 6 },
+      "labour": { "secondsPerUnit": 45, "auto": true },
       "desc": "Logs to planks at a sane rate. It turns by hand at a third the speed, so it is worth having before the grid is."
     },
     "stonecutter": {
       "name": "Stonecutter", "tier": 1, "speed": 1.3, "powerUse": 5, "priority": "refining",
       "fuels": {}, "unpoweredSpeed": 0.4,
       "build": { "cut_stone": 10, "iron_ingot": 6, "beam": 2 },
+      "labour": { "secondsPerUnit": 45, "auto": true },
       "desc": "Rubble and slag to block and gravel. The wall tool's feedstock — §2.7."
     },
     "tannery": {
       "name": "Tannery", "tier": 1, "speed": 1.0, "powerUse": 3, "priority": "refining",
       "fuels": {}, "unpoweredSpeed": 0.6,
       "build": { "plank": 12, "rope": 6, "brick": 8 },
+      "labour": { "secondsPerUnit": 45, "auto": true },
       "desc": "Hides to leather, with lye and a lot of water. It smells; put it downwind of the beds."
     },
     "loom": {
       "name": "Loom", "tier": 1, "speed": 1.0, "powerUse": 3, "priority": "refining",
       "fuels": {}, "unpoweredSpeed": 0.6,
       "build": { "plank": 10, "fibre": 12, "iron_ingot": 2 },
+      "labour": { "secondsPerUnit": 45, "auto": true },
       "desc": "Fibre to cloth to rope. Cheap, and everything wants rope. Round 14: it used to COST four rope, which only a loom makes — so nobody could ever build the first one."
     },
     "smelter": {
@@ -63,6 +70,7 @@
       "name": "Chemical Bench", "tier": 1, "speed": 1.2, "powerUse": 6, "priority": "refining",
       "fuels": {}, "unpoweredSpeed": 0.5,
       "build": { "brick": 14, "glass": 10, "copper_ingot": 6 },
+      "labour": { "secondsPerUnit": 45, "auto": true },
       "desc": "Sulphur, salt, ash and water into the things later machines refuse to run without."
     },
     "crusher": {
@@ -101,6 +109,19 @@
       "fuels": {}, "needsPower": true, "coolant": { "coolant": 0.08 },
       "build": { "tempered_alloy": 12, "machine_part": 16, "control_board": 4, "composite_plate": 4 },
       "desc": "The last structure you build, and the one you keep running — fuel is spent per flight, not per ship. §9.7, §9.10."
+    },
+    "workshop": {
+      "name": "Workshop", "tier": 1, "speed": 1.0, "powerUse": 4, "priority": "refining",
+      "fuels": {}, "unpoweredSpeed": 0.5,
+      "labour": { "secondsPerUnit": 45, "auto": true },
+      "build": { "plank": 16, "iron_ingot": 6, "rope": 4 },
+      "desc": "Benches, vices and a rack of hand tools. Fourteen of the twenty-two trade goods are made here — one cheap bench is the whole trade tier. A pair of hands turns it; wire it to the grid and it turns itself."
+    },
+    "manufactory": {
+      "name": "Manufactory", "tier": 2, "speed": 1.5, "powerUse": 26, "priority": "refining",
+      "fuels": {}, "needsPower": true,
+      "build": { "steel_ingot": 18, "machine_part": 8, "brick": 16 },
+      "desc": "Line shafts and jigs. Makes the goods a workshop cannot, and needs nobody standing at it — power is the whole cost."
     }
   },
 

@@ -110,16 +110,40 @@ export function hungerRung(citizen, foodCfg) {
 export function createColony({
   data = null, board = null, food = null, seed = 1, name = 'the colony', hour = 6, day = 1,
   makeName = null,
+  /**
+   * THE CIVILIZATION EXPANSION, AND BOTH OF THESE ARE OPTIONAL.
+   *
+   * `housing` is a js/housing.js register — houses, utilities, comfort and which bed a citizen
+   * sleeps in. `stationAt(id)` is a callback the game layer supplies that turns a station id into
+   * `{ x, z }`, because this file must never learn what a machine is.
+   *
+   * Without either of them the module behaves EXACTLY as it did before: `setBase({ beds: n })`
+   * still hands out anonymous beds in list order and everybody's walk to work is still the flat
+   * quarter of an hour. Forty-two tests point at that behaviour and not one of them changes.
+   */
+  housing = null, stationAt = null,
 } = {}) {
   const D = data || FALLBACK;
   const sched = D.schedule || FALLBACK.schedule;
   const foodCfg = D.food || FALLBACK.food;
   const houseCfg = D.housing || FALLBACK.housing;
+  const comfortCfg = D.comfort || { moodFloor: 0.4, moodSpan: 1.2 };
   const taxCfg = D.tax || FALLBACK.tax;
   const migCfg = D.migration || FALLBACK.migration;
   const recCfg = D.recruit || FALLBACK.recruit;
   const jobs = D.jobs || FALLBACK.jobs;
-  const jobBy = key => jobs.find(j => j.key === key) || jobs[0];
+  /**
+   * A VENDOR IS NOT IN `jobs`, AND THAT IS DELIBERATE.
+   *
+   * §5.2 wanted the vendor listed with the rest. It must not be: `rollMigration` picks a migrant's
+   * trade with `pick(rng, jobs)`, so a vendor in that array would let a Forge-Warden walk in off
+   * the road — the exact thing §5's whole move-in ritual exists to prevent — and every existing
+   * test that walks `jobs` asserts a positive `unitsPerHour` and a non-empty tag list, which a
+   * vendor has neither of. It lives in its own key and is reachable only through `jobBy('vendor')`.
+   */
+  const vendorJob = D.vendorJob || { key: 'vendor', name: 'Trader', tags: [], unitsPerHour: 0, tendMax: 0, rentPerDay: 14, blurb: 'Keeps a stall. Pays you rent, works for nobody.' };
+  const jobBy = key => (key === 'vendor' ? vendorJob : jobs.find(j => j.key === key)) || jobs[0];
+  const guardCfg = D.guard || {};
 
   const rng = rngFrom(hash('colony', seed));
   const nameOf = makeName || (() => makeColonistName(rng, D.names));
@@ -166,6 +190,9 @@ export function createColony({
         job: j.key,
         jobName: j.name,
         stationId: null,
+        stations: [],               // §3.5 — a smelter may mind up to `tendMax` machines
+        posted: null,               // §8.1 — the watch post they stand in, if any
+        postName: null,
         state: 'asleep',
         travelLeft: 0,
         travelHours: sched.travelHoursDefault,
@@ -196,8 +223,15 @@ export function createColony({
     assign(citizenId, { job = null, stationId = undefined } = {}) {
       const c = colony.byId(citizenId);
       if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
-      if (job) { const j = jobBy(job); c.job = j.key; c.jobName = j.name; }
-      if (stationId !== undefined) c.stationId = stationId;
+      if (job) { const j = jobBy(job); c.job = j.key; c.jobName = j.name; c.stations = []; c.stationId = null; }
+      if (stationId !== undefined) {
+        if (stationId == null) { c.stationId = null; c.stations = []; }
+        else {
+          // §3.5 — the cap lives in the data and the refusal names her
+          const out = colony.bind(c.id, stationId);
+          if (!out.ok) return out;
+        }
+      }
       return { ok: true, citizen: c };
     },
 
@@ -207,13 +241,171 @@ export function createColony({
     /** Beds in, beds out. Housing is set by whatever built the houses. */
     setBeds(n) { colony.base.beds = Math.max(0, Math.floor(n)); colony._assignBeds(); return colony.base.beds; },
 
+    /** The housing register, or null. Swappable at runtime, because landing rebuilds everything. */
+    housing,
+    setHousing(h) { housing = h; colony.housing = h; colony._assignBeds(); return h; },
+    stationAt,
+    setStationAt(fn) { stationAt = fn; colony.stationAt = fn; return fn; },
+
     _assignBeds() {
+      /**
+       * WITH A HOUSING REGISTER THIS IS TWO LINES; WITHOUT ONE IT IS WHAT IT ALWAYS WAS.
+       *
+       * The old behaviour is kept whole rather than shimmed, because `setBase({ beds: 3 })` is how
+       * every existing test and the live game have put people under a roof since the colony landed,
+       * and a "shim" that behaved almost the same would be a bug waiting for a quiet afternoon.
+       */
+      if (housing) { housing.assign(colony.citizens, { stationAt }); return; }
       const beds = colony.base.beds || 0;
       colony.citizens.forEach((c, i) => { c.home = i < beds ? `bed_${i + 1}` : null; });
     },
 
-    spareBeds() { return Math.max(0, (colony.base.beds || 0) - colony.citizens.length); },
+    spareBeds() {
+      if (housing) return housing.report().spare;
+      return Math.max(0, (colony.base.beds || 0) - colony.citizens.length);
+    },
     housed() { return colony.citizens.filter(c => c.home).length; },
+
+    /** How comfortable is this person's bed? 0 for a bedroll in the mud, 0 for nowhere at all. */
+    comfortOf(c) { return (c && c.home && typeof c.home === 'object' ? c.home.comfort : 0) || 0; },
+
+    /**
+     * HOW LONG THE WALK TO WORK ACTUALLY TAKES.
+     *
+     * At `walkSpeedMetresPerHour` (3000) a station 90 m from the bed costs 0.03 h each way and one
+     * 1.2 km away costs 0.4 h each way — 0.8 h out of an 11 h shift, 7% of their output, gone into
+     * walking. At the `maxTravelHours` cap (2 h, so 6 km) they spend a third of the day on the road
+     * and the roster says so in words. **This is the housing lesson and it is the only one: build
+     * the bunkhouse next to the furnaces.**
+     *
+     * Both numbers have been sitting in data/colony.json unread since the colony landed.
+     */
+    travelHoursOf(c) {
+      const fallback = sched.travelHoursDefault ?? 0.25;
+      const cap = sched.maxTravelHours ?? 2;
+      if (!c || !c.home || typeof c.home !== 'object' || c.stationId == null) return Math.min(fallback, cap);
+      const st = stationAt ? stationAt(c.stationId) : null;
+      if (!st || !Number.isFinite(st.x)) return Math.min(fallback, cap);
+      const metres = Math.hypot(st.x - c.home.x, st.z - c.home.z);
+      return clamp(metres / (sched.walkSpeedMetresPerHour || 3000), 0.02, cap);
+    },
+
+    /** The walk, in the only unit a player reads it in. */
+    walkMinutesOf(c) { return Math.round(colony.travelHoursOf(c) * 60); },
+
+    // ---------------------------------------------------------------- bound to a machine
+
+    /** Every station somebody is minding, so the caller can ask "who has this furnace?". */
+    stationsOf(citizenId) {
+      const c = colony.byId(citizenId);
+      if (!c) return [];
+      return c.stationId == null ? [] : (Array.isArray(c.stations) ? c.stations : [c.stationId]);
+    },
+
+    /**
+     * Tie somebody to a machine. §3.5 — how many one person may mind is a number in the data.
+     *
+     * `tendMax` does NOT multiply their output. A smelter bound to three furnaces still produces
+     * about 10.6 units a day; the board hands them out oldest-first, so three furnaces each run
+     * about a quarter of a shift. The panel states it in the only honest way there is: *"She keeps
+     * about 0.77 of a furnace lit; you have asked her to keep three."* The cap exists because a
+     * citizen bound to nine machines is a spreadsheet, not a person.
+     */
+    bind(citizenId, stationId) {
+      const c = colony.byId(citizenId);
+      if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
+      const job = jobBy(c.job);
+      const max = job.tendMax ?? 1;
+      if (max <= 0) return { ok: false, why: `${c.name} is a ${job.name.toLowerCase()}. That is not their work.` };
+      const have = Array.isArray(c.stations) ? c.stations.slice() : (c.stationId == null ? [] : [c.stationId]);
+      if (have.includes(stationId)) return { ok: true, citizen: c, stations: have };
+      if (have.length >= max) {
+        return { ok: false, why: `${c.name} already minds ${have.length === 1 ? 'one' : have.length}. Somebody else will have to take it.` };
+      }
+      have.push(stationId);
+      c.stations = have;
+      c.stationId = have[0];
+      /**
+       * A BED IS CHOSEN FOR THE WALK, SO CHANGING THE WALK HAS TO FREE THE BED.
+       *
+       * Without this the rule never fires once: in the live game a citizen is WELCOMED (and takes
+       * the most comfortable free bed, because they have nowhere to be in the morning) and only
+       * then bound to a machine, and `housing.assign` deliberately leaves anybody who already has a
+       * bed exactly where they are. So the whole "build the bunkhouse next to the furnaces" lesson
+       * would have been dead data — taught by a test and never by the game.
+       */
+      housing?.release?.(c.id);
+      colony._assignBeds();
+      return { ok: true, citizen: c, stations: have };
+    },
+
+    unbind(citizenId, stationId = null) {
+      const c = colony.byId(citizenId);
+      if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
+      const have = Array.isArray(c.stations) ? c.stations.slice() : (c.stationId == null ? [] : [c.stationId]);
+      const left = stationId == null ? [] : have.filter(s => s !== stationId);
+      c.stations = left;
+      c.stationId = left[0] ?? null;
+      return { ok: true, citizen: c, stations: left };
+    },
+
+    /**
+     * Guards actually standing a post, which is the number js/defence.js wants.
+     *
+     * Somebody who has downed tools or is packing is not on the wall, so they are not a point of
+     * defence — and `notorietyOf` reading them as one would mean a starving village being offered
+     * a harder raid than a fed one.
+     */
+    stationed() {
+      return colony.citizens.filter(c => c.posted && c.rung !== 'downsTools' && c.rung !== 'leaving').length;
+    },
+    tending() { return colony.citizens.filter(c => c.stationId != null).length; },
+
+    // ---------------------------------------------------------------- standing a post
+
+    /** The posts that are standing, handed in by the game layer: [{ id, slots, name, x, z }]. */
+    posts: [],
+    setPosts(list = []) { colony.posts = list.filter(Boolean); return colony.posts.length; },
+
+    /**
+     * Put a guard in a post. §8.1 — a post is a place to stand, not a turret.
+     *
+     * Every refusal is a sentence, because "greyed out" is the one answer a player cannot act on.
+     */
+    station(citizenId, postId) {
+      const c = colony.byId(citizenId);
+      if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
+      const post = colony.posts.find(p => p.id === postId);
+      if (!post) return { ok: false, why: 'There is no post there.' };
+      if (c.job !== 'guard') return { ok: false, why: `${c.name} is a ${jobBy(c.job).name.toLowerCase()}. Put them on guard duty first.` };
+      const rung = hungerRung(c, foodCfg);
+      if (rung === 'downsTools' || rung === 'leaving') return { ok: false, why: `${c.name} has downed tools. Feed them and ask again.` };
+      if (c.stationId != null) return { ok: false, why: `${c.name} minds the ${c.stationName || 'machine'}. Somebody has to.` };
+      const in_ = colony.citizens.filter(o => o.posted === postId && o.id !== c.id).length;
+      if (in_ >= (post.slots || 1)) return { ok: false, why: `Every slot in that ${post.name ? post.name.toLowerCase() : 'post'} is taken.` };
+      c.posted = postId;
+      c.postName = post.name || 'the watch';
+      return { ok: true, citizen: c, post };
+    },
+
+    unstation(citizenId) {
+      const c = colony.byId(citizenId);
+      if (!c) return { ok: false, why: 'Nobody by that name lives here.' };
+      c.posted = null; c.postName = null;
+      return { ok: true, citizen: c };
+    },
+
+    /** What the guards cost you a day. Paid in `collectTax`, out of the same purse. */
+    wages() {
+      const per = guardCfg.wagePerDay ?? jobBy('guard').wagePerDay ?? 8;
+      return colony.citizens.filter(c => c.job === 'guard' && c.posted).length * per;
+    },
+
+    /** What the traders pay you a day. §5.6 — vendors are the better gold, and they cost you beds. */
+    rent() {
+      const per = vendorJob.rentPerDay || 14;
+      return colony.citizens.filter(c => c.job === 'vendor' && c.home).length * per;
+    },
 
     /**
      * Citizens standing a watch. A guard is worth a point of defence the same as a turret is, which
@@ -301,14 +493,28 @@ export function createColony({
 
       if (asleepNow) {
         if (c.state !== 'asleep') { c.state = 'asleep'; c.travelLeft = 0; }
-        if (c.home) c.mood = clamp01(c.mood + (houseCfg.moodGainPerNightHoused || 0) * (dt / 8));
-        else c.mood = clamp01(c.mood - (houseCfg.moodLossPerDayUnhoused || 0) * (dt / 24));
+        /**
+         * COMFORT SCALES THE NIGHT, AND NOTHING ELSE.
+         *
+         *   moodGainPerNight = base × (moodFloor + moodSpan × comfort)      // 0.048 … 0.19
+         *
+         * A bedroll in the mud is comfort 0 and gives back four-tenths of what a bed used to; a
+         * cottage with a well, a hearth and a privy in range is 0.80 and gives back a third more.
+         * Without a housing register `comfortOf` is 0 for everybody, so the floor applies evenly
+         * and the module behaves as it did — see `_assignBeds`.
+         */
+        if (c.home) {
+          const cf = housing ? colony.comfortOf(c) : 1;
+          const scale = housing ? ((comfortCfg.moodFloor ?? 0.4) + (comfortCfg.moodSpan ?? 1.2) * cf) : 1;
+          c.mood = clamp01(c.mood + (houseCfg.moodGainPerNightHoused || 0) * scale * (dt / 8));
+        } else c.mood = clamp01(c.mood - (houseCfg.moodLossPerDayUnhoused || 0) * (dt / 24));
       } else if (workNow && colony._willWork(c, rung)) {
         if (c.state === 'asleep' || c.state === 'home' || c.state === 'to_home') {
           // They set off THIS step and arrive on a later one. Walking to work has to be a state the
           // roster can actually show, or the player never sees why the furnace is cold at seven.
           c.state = 'to_work';
-          c.travelLeft = Math.min(c.travelHours ?? sched.travelHoursDefault, sched.maxTravelHours ?? 2);
+          c.travelLeft = colony.travelHoursOf(c);
+          c.travelHours = c.travelLeft;
         } else if (c.state === 'to_work') {
           c.travelLeft = Math.max(0, c.travelLeft - dt);
           if (c.travelLeft <= 1e-6) c.state = 'working';
@@ -320,7 +526,8 @@ export function createColony({
         // will find them standing about looking at the empty pot.
         if (c.state === 'working' || c.state === 'to_work') {
           c.state = 'to_home';
-          c.travelLeft = Math.min(c.travelHours ?? sched.travelHoursDefault, sched.maxTravelHours ?? 2);
+          c.travelLeft = colony.travelHoursOf(c);
+          c.travelHours = c.travelLeft;
         } else if (c.state === 'to_home') {
           c.travelLeft = Math.max(0, c.travelLeft - dt);
           if (c.travelLeft <= 1e-6) c.state = 'home';
@@ -352,6 +559,18 @@ export function createColony({
      */
     _doWork(c, dt, events) {
       const job = jobBy(c.job);
+      /**
+       * A TRADER WORKS FOR NOBODY, AND THIS LINE IS WHY IT IS NOT A BUG.
+       *
+       * §5.2. A vendor's `tags` is an empty array, and an empty tag list is the "will do anything"
+       * signal EVERYWHERE ELSE in this file and in js/work.js `tagsMatch`. Without this guard a
+       * Forge-Warden who moved in to sell you a sword would quietly start smelting, which would be
+       * a very confusing bug to be handed: the furnaces speed up and nobody can say who is at them.
+       */
+      if (!(job.unitsPerHour > 0)) { c.idleHours = round2(c.idleHours + dt); return; }
+      // a guard standing a post is at the post, not on the board — their shift shows in the
+      // ledger through the `watch` order the game layer posts, not by pulling ordinary work
+      if (c.job === 'guard' && c.posted) { c.idleHours = round2(c.idleHours + dt); return; }
       const rung = hungerRung(c, foodCfg);
       const hungerFactor = rung === 'content' ? 1 : (foodCfg.outputAtHungry ?? 0.65);
       const moodFactor = 0.6 + 0.4 * clamp01(c.mood);
@@ -359,10 +578,16 @@ export function createColony({
       const asked = budget;
       if (!board) { c.idleHours = round2(c.idleHours + dt); return; }
 
+      const mine = Array.isArray(c.stations) && c.stations.length ? c.stations : (c.stationId == null ? [] : [c.stationId]);
       let guard = 0;
       while (budget > 1e-6 && guard++ < 32) {
-        const order = board.nextFor({ tags: job.tags, stationId: c.stationId })
-          || board.nextFor({ tags: job.tags });
+        // their OWN stations first, oldest order across them, then anything else their job covers
+        let order = null;
+        for (const st of mine) {
+          const o = board.nextFor({ tags: job.tags, stationId: st });
+          if (o && (!order || o.postedAt < order.postedAt)) order = o;
+        }
+        order = order || board.nextFor({ tags: job.tags });
         if (!order) break;
         const res = board.work(order, { source: 'citizen', by: c.id, byName: c.name, units: budget });
         if (res.applied <= 0) break;
@@ -414,9 +639,41 @@ export function createColony({
         gold += due;
         paid.push({ id: c.id, name: c.name, gold: round2(due) });
       }
+      /**
+       * WAGES OUT AND RENT IN, IN THE SAME PASS. §5.6 and §8.3.
+       *
+       * Six vendors in a thirty-structure outpost is about 113 gold a day against six citizens' tax
+       * of roughly 36 — **vendors are the better gold, and they cost you beds that could have held
+       * workers.** That is the trade the housing screen has to show, and it does.
+       *
+       * The day's total may come out negative and the line says so rather than hiding it: *"318 in
+       * tax, 154 in rent, 96 out in wages."* An outpost that cannot pay its guards does not lose
+       * them that evening — they drop to grumbling after three unpaid days and walk out on the
+       * seventh, with a warning each time.
+       */
+      const rent = Math.round(colony.rent() * prosperity);
+      const wages = Math.round(colony.wages());
       gold = Math.round(gold);
-      colony.gold += gold;
-      return { gold, paid, skipped, prosperity: round2(prosperity), day: colony.day };
+      const net = gold + rent - wages;
+      colony.gold += net;
+      if (wages > 0 && colony.gold < 0) {
+        colony.unpaidDays = (colony.unpaidDays || 0) + 1;
+        const sulk = guardCfg.unpaidDaysBeforeMood ?? 3;
+        const quit = guardCfg.unpaidDaysBeforeLeaving ?? 7;
+        for (const c of colony.citizens) {
+          if (c.job !== 'guard' || !c.posted) continue;
+          if (colony.unpaidDays >= sulk) c.mood = clamp01(c.mood - 0.15);
+          if (colony.unpaidDays >= quit) { c.posted = null; c.postName = null; c.hunger = 1; }
+        }
+        colony._say(colony.unpaidDays >= quit
+          ? 'The watch has not been paid in a week. They have walked off their posts.'
+          : `The watch has not been paid for ${colony.unpaidDays} day${colony.unpaidDays === 1 ? '' : 's'}. They have noticed.`);
+      } else if (wages > 0) colony.unpaidDays = 0;
+      return {
+        gold: net, tax: gold, rent, wages,
+        paid, skipped, prosperity: round2(prosperity), day: colony.day,
+        line: `${gold} in tax, ${rent} in rent, ${wages} out in wages. ${net} gold.`,
+      };
     },
 
     /** How well the place is doing, which is mostly how much of it there is. */
@@ -444,8 +701,27 @@ export function createColony({
       const mood = colony.citizens.length
         ? clamp01(colony.citizens.reduce((s, c) => s + c.mood, 0) / colony.citizens.length)
         : 0.6;   // an empty colony is neither happy nor unhappy; it is just quiet
-      const score = beds * w.spareBeds + days * w.foodDays + safe * w.safety + mood * w.mood;
-      return { score: round2(clamp01(score)), beds: round2(beds), foodDays: round2(days), safety: round2(safe), mood: round2(mood) };
+      /**
+       * TWO NEW TERMS, §2.7 and §5.8.
+       *
+       * `comfort` is the mean comfort of the FREE beds — nobody is drawn by a full manor — and
+       * `trade` is how many traders have already set up, capped at four. Without a housing register
+       * or any vendors both are zero, and because the other four weights were rescaled to leave
+       * room for them an old colony reads slightly lower rather than differently: a tidy village
+       * with a well, a hearth, two spare cottage beds and a quartermaster in residence reaches
+       * about 0.72 and rolls a migrant at 0.42 a day; the same village with the beds in the mud
+       * reaches about 0.46 and rolls at 0.30. A day and a half against two and a half per arrival —
+       * noticeable, and never the difference between a colony and no colony.
+       */
+      const comfort = housing ? clamp01(housing.report().freeComfort) : 0;
+      const trade = clamp01(colony.citizens.filter(c => c.job === 'vendor').length / 4);
+      const score = beds * w.spareBeds + days * w.foodDays + safe * w.safety + mood * w.mood
+        + comfort * (w.comfort || 0) + trade * (w.trade || 0);
+      return {
+        score: round2(clamp01(score)),
+        beds: round2(beds), foodDays: round2(days), safety: round2(safe), mood: round2(mood),
+        comfort: round2(comfort), trade: round2(trade),
+      };
     },
 
     /** Once a day: does anybody turn up? Returns an OFFER, never a citizen. */
@@ -567,6 +843,12 @@ export function createColony({
         rungs,
         working: colony.citizens.filter(c => c.state === 'working').length,
         guards: colony.guards(),
+        posted: colony.stationed(),
+        tending: colony.tending(),
+        traders: colony.citizens.filter(c => c.job === 'vendor').length,
+        wages: colony.wages(),
+        rent: colony.rent(),
+        comfort: housing ? housing.report().meanComfort : 0,
         idle: colony.citizens.filter(c => c.state === 'working' && c.idleHours > 0).length,
         gold: colony.gold,
         prosperity: round2(colony.prosperity()),
@@ -580,15 +862,34 @@ export function createColony({
 
     /** One sentence per citizen for the roster: "Marwen Thorn — farmer, working, fed". */
     roster() {
-      return colony.citizens.map(c => ({
-        id: c.id, name: c.name, job: c.jobName, station: c.stationId,
-        state: CITIZEN_STATES[c.state]?.name || c.state,
-        rung: HUNGER_WORDS[c.rung]?.name || c.rung,
-        housed: !!c.home,
-        mood: round2(c.mood),
-        unitsToday: c.unitsToday,
-        line: `${c.name} — ${c.jobName.toLowerCase()}, ${(CITIZEN_STATES[c.state]?.name || c.state).toLowerCase()}, ${(HUNGER_WORDS[c.rung]?.name || c.rung).toLowerCase()}${c.home ? '' : ', no bed'}`,
-      }));
+      return colony.citizens.map(c => {
+        const walk = colony.walkMinutesOf(c);
+        const mine = Array.isArray(c.stations) ? c.stations : (c.stationId == null ? [] : [c.stationId]);
+        const bits = [
+          `${c.jobName.toLowerCase()}`,
+          (CITIZEN_STATES[c.state]?.name || c.state).toLowerCase(),
+          (HUNGER_WORDS[c.rung]?.name || c.rung).toLowerCase(),
+        ];
+        if (!c.home) bits.push('no bed');
+        if (c.posted) bits.push(`on ${c.postName || 'the watch'}`);
+        if (mine.length > 1) bits.push(`${mine.length} stations`);
+        if (walk >= 5 && mine.length) bits.push(`${walk} minutes each way`);
+        return {
+          id: c.id, name: c.name, job: c.jobName, station: c.stationId,
+          stations: mine,
+          state: CITIZEN_STATES[c.state]?.name || c.state,
+          rung: HUNGER_WORDS[c.rung]?.name || c.rung,
+          housed: !!c.home,
+          house: c.home && typeof c.home === 'object' ? c.home.house : null,
+          comfort: colony.comfortOf(c),
+          walkMinutes: walk,
+          posted: c.posted || null,
+          tending: mine.length,
+          mood: round2(c.mood),
+          unitsToday: c.unitsToday,
+          line: `${c.name} — ${bits.join(', ')}`,
+        };
+      });
     },
 
     toJSON() {
@@ -596,6 +897,8 @@ export function createColony({
         name: colony.name, hour: colony.hour, day: colony.day, gold: colony.gold,
         citizens: colony.citizens, departed: colony.departed.map(c => ({ id: c.id, name: c.name, leftOn: c.leftOn, leftBecause: c.leftBecause })),
         base: colony.base, townPools: colony.townPools, seq,
+        unpaidDays: colony.unpaidDays || 0,
+        housing: housing?.toJSON?.() || null,
       };
     },
 
@@ -609,7 +912,22 @@ export function createColony({
       colony.departed = saved.departed || [];
       colony.base = { ...colony.base, ...(saved.base || {}) };
       colony.townPools = saved.townPools || {};
+      colony.unpaidDays = saved.unpaidDays || 0;
       seq = saved.seq || colony.citizens.length + 1;
+      /**
+       * A CITIZEN'S `home` USED TO BE THE STRING `bed_3`. IT IS AN OBJECT NOW.
+       *
+       * Upgraded in place rather than migrated in a pass somewhere else, because a save written
+       * before the Civilization Expansion is the common case for a long time and "my whole village
+       * is sleeping rough since the update" is the bug that would come of getting it wrong. A
+       * string simply means "was housed"; `_assignBeds` immediately gives them a real bed if there
+       * is one, and the anonymous path keeps working when there is no housing register at all.
+       */
+      for (const c of colony.citizens) {
+        if (typeof c.home === 'string') c.home = { bedId: c.home, entryId: null, house: null, x: 0, z: 0, comfort: 0 };
+        if (c.stationId != null && !Array.isArray(c.stations)) c.stations = [c.stationId];
+      }
+      if (housing && saved.housing) housing.load(saved.housing);
       colony._assignBeds();
       return colony;
     },

@@ -54,6 +54,28 @@ export function createDefence({
    */
   getField = () => null,
   getBuild = () => null,
+  /**
+   * THE NINTH JOIN — AND IT IS THREE LINES. The Civilization Expansion §8.5.
+   *
+   * `colony.guards()` has counted citizens standing a watch since the colony landed, and
+   * `baseOf()` below hard-coded `citizens: 0` right next to it. COLONY.md's own wiring table has
+   * listed handing that number over as owed ever since. Two consequences, both immediate and both
+   * correct:
+   *
+   *   * data/raids.json gates the Warband at `minDefence: 5` — **four guards and a bolt turret now
+   *     qualify**, where before you needed five turrets;
+   *   * `notoriety.perCitizen: 1.2` and `perRefineryThroughput: 0.6` finally get real numbers
+   *     instead of zeroes, so a village of twelve with a watch is noticed by the world. That is the
+   *     correct reading of `notorietyOf` and it has never once fired.
+   *
+   * Both come in as GETTERS for the reason the field and the build ledger do, stated in full above:
+   * both are rebuilt when the player lands somewhere else, and capturing either by value means
+   * holding a pointer to the last planet's colony.
+   */
+  getColony = () => null,
+  getWorks = () => null,
+  getOutposts = () => null,
+  folk = null,
 } = {}) {
   const say = (t, k) => { if (log) log(t, k); };
 
@@ -79,10 +101,32 @@ export function createDefence({
    * the world origin — about twenty-nine kilometres away, exactly the bug that hid every ore seam.
    * Asking the buildings where they are means it is right even if the player walks off.
    */
-  function baseSpot() {
+  function baseSpot({ near = null } = {}) {
     const build = getBuild();
     const entries = build?.entries || [];
     if (!entries.length) return null;
+    /**
+     * ROUND 14 LEFT THIS LOOKING FOR A CLAIM STONE THAT IS NOW OPTIONAL.
+     *
+     * js/outposts.js works an outpost out from the geometry, so the right answer is the outpost
+     * nearest whoever rang the bell, falling back to the largest one, and only then to the stone
+     * and the average. A raid at "the middle of everything you have ever built" is a raid in the
+     * sea when your mine is nine hundred metres from your house.
+     */
+    const posts = getOutposts?.() || null;
+    if (posts?.length) {
+      let best = posts[0];
+      if (near) {
+        let bestD = Infinity;
+        for (const p of posts) {
+          const d = Math.hypot(p.x - near.x, p.z - near.z);
+          if (d < bestD) { bestD = d; best = p; }
+        }
+      } else {
+        for (const p of posts) if ((p.entries?.length || 0) > (best.entries?.length || 0)) best = p;
+      }
+      if (best) return { x: best.x, z: best.z, name: best.name };
+    }
     const stone = entries.find(e => build.defOf?.(e.key)?.claims);
     if (stone) return { x: stone.x, z: stone.z };
     const sum = entries.reduce((a, e) => ({ x: a.x + e.x, z: a.z + e.z }), { x: 0, z: 0 });
@@ -96,13 +140,18 @@ export function createDefence({
       const def = build.defOf?.(e.key);
       return def?.cat === 'defence' && (e.powered !== false);
     });
+    const colony = getColony?.() || null;
+    const posted = colony?.stationed?.() || 0;
     return {
       structures: entries.length,
-      defences: defences.length,
-      citizens: 0,
-      throughput: 0,
+      // a guard standing a post is worth a turret, which is what makes "spend gold on people" a
+      // real alternative to "spend materials on walls" — BUILDING_EXPANSION §4e, finally wired
+      defences: defences.length + posted,
+      citizens: colony?.citizens?.length || 0,
+      throughput: getWorks?.()?.throughputPerMinute?.() || 0,
       waypoint: entries.some(e => e.waypoint),
       gold: 0,
+      posted,
     };
   }
 
@@ -163,7 +212,85 @@ export function createDefence({
     },
 
     /** Where the raid arrives — for the caller's own spawn calls, and for the map marker. */
-    spot() { return baseSpot(); },
+    spot(opts = {}) { return baseSpot(opts); },
+
+    /**
+     * R14 — TAKE OVER A FIGHT SOMEBODY ELSE STARTED.
+     *
+     * `js/muster.js` builds its own raid quest — same `raidOffer`, same `beginRaid`, same shape —
+     * because a drill is not an offer the world made you and must not occupy the slot a real raid
+     * needs. But `spawnWave`, `killed` and `lost` all read the quest held HERE, so without this the
+     * muster could be started and nothing would ever walk out of the treeline.
+     *
+     * Adopting rather than duplicating is the whole point: there is still exactly one wave system,
+     * one `canFire` gate and one kill counter, and `loseRaid` still decides what a loss costs — so
+     * a drill's "nothing at stake" flag cannot be bypassed by a second code path, because there
+     * isn't one.
+     */
+    adopt(next) { quest = next || null; return quest; },
+    // (there is already a `quest` getter at the top of this object — a duplicate key in an object
+    // literal is not an error in JavaScript, it is a shrug, and this project has been bitten by
+    // exactly that before: `board` was declared twice on window.farhold and the later one won.)
+
+    /**
+     * YOUR GUARDS TURN OUT. The Civilization Expansion §8.5.
+     *
+     * Every posted, fed guard gets a body at their post, with the stat block out of
+     * `data/colony.json`'s `guard` — the SAME table js/town.js reads for a town's watch, so your
+     * guard and a town guard can never quietly become different things.
+     *
+     * A guard that falls is KNOCKED DOWN, not killed. They are back at their post the next morning
+     * at half mood. Killing your own citizens by ringing a bell is the punishment-for-playing shape
+     * all over again, and COLONY.md §4's rule already stands: *"a dead citizen makes you reload, a
+     * departed one makes you build a granary."*
+     */
+    async rally({ level = 1 } = {}) {
+      const colony = getColony?.();
+      const build = getBuild();
+      if (!colony || !build?.entries) return 0;
+      const stats = colony.data?.guard || {};
+      const posts = new Map((build.entries || [])
+        .filter(e => build.defOf?.(e.key)?.post)
+        .map(e => [e.id, e]));
+      let out = 0;
+      for (const c of colony.citizens || []) {
+        if (!c.posted || c.rung === 'downsTools' || c.rung === 'leaving') continue;
+        const post = posts.get(c.posted);
+        if (!post) continue;
+        const tower = !!build.defOf?.(post.key)?.post?.reachBonus;
+        const body = await folk?.spawnOne?.({
+          groupId: 'watch', role: 'guard', roleName: 'Guard',
+          name: c.name, x: post.x + (Math.random() - 0.5) * 2, z: post.z + (Math.random() - 0.5) * 2,
+          greeting: 'Stay behind me.',
+          fight: {
+            hp: Math.round((stats.hp ?? 260) * Math.pow(stats.perLevel ?? 1.17, Math.max(0, level - 1))),
+            dmg: stats.dmg ?? [14, 22],
+            armor: stats.armor ?? 22,
+            speed: stats.speed ?? 5.2,
+            reach: tower ? (stats.towerReach ?? 7) : (stats.reach ?? 3),
+            attackEvery: stats.attackEvery ?? 1.2,
+          },
+          onDown: () => { c.mood = Math.max(0, (c.mood || 0.5) * 0.5); c.knockedDown = true; },
+        });
+        if (body) out++;
+      }
+      return out;
+    },
+
+    /**
+     * How many bodies the watch can put on the wall, without spawning any of them.
+     *
+     * Used by the Holding screen and by the muster board's difficulty line, which both want the
+     * number long before anybody rings anything.
+     */
+    watch() {
+      const colony = getColony?.();
+      if (!colony) return { posted: 0, slots: 0 };
+      const build = getBuild();
+      const slots = (build?.entries || [])
+        .reduce((n, e) => n + (build.defOf?.(e.key)?.post?.slots || 0), 0);
+      return { posted: colony.stationed?.() || 0, slots };
+    },
 
     /** Put the current wave on the ground. Called by `ring` and between waves. */
     async spawnWave({ level = 1, x = null, z = null } = {}) {

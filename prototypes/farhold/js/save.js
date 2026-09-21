@@ -99,6 +99,15 @@ export function snapshot({
   standings, territory, rumours, waypoints, homes,
   // the building expansion: the ground you reshaped, what you built on it, and who lives there
   terraform, build, portal, colony, farm, work,
+  /**
+   * The Civilization Expansion: houses and who sleeps in them, the traders who moved in, what is in
+   * the hold and in the Trade Post, the carts on the long roads, and the muster cooldowns.
+   *
+   * ONE FIELD, `civics`, on purpose: js/civics.js owns all six modules and hands back one blob, so
+   * there is no chance of this list and js/main.js's call drifting apart the way `world`, `quests`
+   * and `campaign` did — see the note below, which is the whole reason that rule exists.
+   */
+  civics,
   // …and what the base is holding and making: the crates' contents and the grid's charge
   stores, grid,
   // §1 — which seams you have worked out, and the drills and routes standing on them
@@ -183,6 +192,9 @@ export function snapshot({
     colony: colony || null,
     farm: farm || null,
     work: work || null,
+    // the Civilization Expansion, added to the parameter list ABOVE and to this object in the same
+    // edit — the comment further down records what happened the last time one of those was skipped
+    civics: civics || null,
 
     /**
      * A save taken underground is a save taken in a DIFFERENT coordinate space: a dungeon's terrain

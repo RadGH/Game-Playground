@@ -125,10 +125,34 @@ export function raidersFor({ enemies = [], biome = 'any', level = 1, levelOffset
 export function raidOffer({
   base = {}, level = 1, biome = 'any', enemies = [], bosses = [], modifiers = [],
   rng = Math.random, data = null, enabled = true, at = 0, placeName = 'your base', place = null,
+  /**
+   * THE MUSTER (the Civilization Expansion §9), AND IT IS TWO ARGUMENTS.
+   *
+   *   "Allow the town center to initiate wave defense minigames that reward loot or resources for
+   *    victory, or just nothing if defeated besides death penalty if the player dies. No need to
+   *    penalize for a minigame."
+   *
+   * This file is already that fight: four tiers, night and early scaling, a guaranteed rare crate,
+   * a journal, and one gate nothing can spawn through. A second wave system would be a join nobody
+   * made and it would immediately drift. So a DRILL is an ordinary raid with a flag on it —
+   * `forceTier` lets you pick the rank off a board instead of earning it with turrets, and `drill`
+   * changes the two ends: what a loss costs (nothing at all) and what a win pays (materials and
+   * crates rather than reputation).
+   *
+   * Everything in between — `canFire`, `acceptRaid`, `beginRaid`, `currentWave`, `waveSpawns`,
+   * `onRaiderKilled`, `clearWave` and the RaidBook — is untouched, which means every rule the raid
+   * already keeps keeps itself for free.
+   */
+  forceTier = null, drill = false,
 } = {}) {
   if (!enabled) return null;
   const D = data || FALLBACK;
-  const { tier, notoriety, why } = tierFor({ base, data: D });
+  let tier, notoriety, why;
+  if (forceTier) {
+    tier = (D.tiers || FALLBACK.tiers).find(t => t.key === forceTier) || null;
+    notoriety = notorietyOf(base, D);
+    why = tier ? null : 'No such muster.';
+  } else ({ tier, notoriety, why } = tierFor({ base, data: D }));
   if (!tier) return { ok: false, tier: null, notoriety, why };
 
   const pool = raidersFor({ enemies, biome, level, levelOffset: tier.levelOffset || 0 });
@@ -153,7 +177,8 @@ export function raidOffer({
   return {
     ok: true,
     id: `raid_${Math.floor(rng() * 1e9).toString(36)}`,
-    kind: 'raid',
+    kind: drill ? 'muster' : 'raid',
+    drill: !!drill,
     state: 'offered',
     tierKey: tier.key,
     tierName: tier.name,
@@ -309,6 +334,24 @@ export function loseRaid(quest, { base = {}, materials = 0, data = null } = {}) 
   const L = (data || FALLBACK).loss || FALLBACK.loss;
   quest.state = 'lost';
   quest.done = true;
+  /**
+   * A DRILL THAT DID NOT HOLD COSTS NOTHING. §9.5, and the user was explicit about it.
+   *
+   * No structures broken, no materials taken, no citizen leaves, no standing lost, no gold lost, no
+   * repair bill. The only thing you are out is the time and the cooldown — which is also the only
+   * version of this anybody would ever actually press.
+   *
+   * The zeros are returned FROM HERE rather than left to the call site, because a call site that
+   * re-derives the loss from `raids.json`'s own `loss` block would bypass the flag entirely and a
+   * minigame would quietly start eating walls.
+   */
+  if (quest.drill) {
+    return {
+      ok: true, quest, drill: true,
+      structuresBroken: 0, materialsTaken: 0, citizensLeave: 0,
+      line: 'They got through. Nothing is broken and nothing is missing — it was a drill.',
+    };
+  }
   return {
     ok: true,
     quest,
@@ -341,16 +384,50 @@ export function raidRewards(quest, { rng = Math.random, data = null } = {}) {
     return RARITY_ORDER[Math.max(floor, at < 0 ? floor : at)];
   });
   if (!crates.length) crates.push('rare');
+  /**
+   * A DRILL PAYS GOODS, NOT REPUTATION. §9.3.
+   *
+   * The crates and the rare floor above are UNCHANGED — that is the "reward loot" half of the
+   * request and it must survive the flag. What changes is that the gold is scaled down, the world
+   * does not think better of you for a practice, and the tier's `spoils` block pays out in real
+   * materials into the nearest store pool. You get both: the crate is the loot and the spoils are
+   * the resources.
+   */
+  const M = D.muster || { goldMultiplier: 0.6, standing: 0 };
+  const goldScale = quest.drill ? (M.goldMultiplier ?? 0.6) : 1;
   return {
-    gold: Math.round((quest.reward?.gold || 0) * nightGold * earlyGold),
+    gold: Math.round((quest.reward?.gold || 0) * nightGold * earlyGold * goldScale),
     xp: Math.round((quest.reward?.xp || 0) * nightXp),
-    standing: quest.reward?.standing || 0,
+    standing: quest.drill ? (M.standing || 0) : (quest.reward?.standing || 0),
+    spoils: quest.drill ? rollSpoils(quest, rng, D) : null,
     crates,
     blueprints: quest.blueprints || 0,
+    drill: !!quest.drill,
     night: !!quest.night,
     early: !!quest.early,
     line: `${quest.tierName} held${quest.night ? ', in the dark' : ''}. ${crates.length} crate${crates.length === 1 ? '' : 's'} out of what they were carrying.`,
   };
+}
+
+/**
+ * What a held muster pays in materials.
+ *
+ * The range per material is the tier's own `spoils` block in data/raids.json, so tuning it never
+ * touches this file. Delivered into the nearest store pool, or into the materials bag if there is
+ * none within `muster.spoilsRadius` — which is the caller's job, because js/raid.js has never known
+ * where a crate is and should not start now.
+ */
+export function rollSpoils(quest, rng = Math.random, data = null) {
+  const D = data || FALLBACK;
+  const tier = (D.tiers || FALLBACK.tiers).find(t => t.key === quest?.tierKey);
+  const table = tier?.spoils;
+  if (!table) return null;
+  const out = {};
+  for (const [res, range] of Object.entries(table)) {
+    const [lo, hi] = Array.isArray(range) ? range : [range, range];
+    out[res] = between(rng, [lo, hi]);
+  }
+  return out;
 }
 
 /**

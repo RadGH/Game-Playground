@@ -21,6 +21,7 @@
       "minNotoriety": 12, "minSize": 6, "minDefence": 2,
       "waves": 3, "packPerWave": [2, 4], "breatherHours": 0.25,
       "levelOffset": -1, "boss": false,
+      "spoils": { "iron_ingot": [4, 8], "plank": [6, 12] },
       "crates": ["rare"],
       "reward": { "gold": [80, 160], "xp": [120, 240], "standing": 4, "blueprints": 0 },
       "text": "Something has been counting your fence posts after dark. Ring the bell and have it out with them."
@@ -30,6 +31,7 @@
       "minNotoriety": 45, "minSize": 14, "minDefence": 5,
       "waves": 4, "packPerWave": [3, 6], "breatherHours": 0.35,
       "levelOffset": 0, "boss": false,
+      "spoils": { "steel_ingot": [4, 7], "brick": [10, 18], "machine_part": [1, 2] },
       "crates": ["rare", "rare"],
       "reward": { "gold": [180, 340], "xp": [280, 520], "standing": 7, "blueprints": 1 },
       "text": "A warband has your smoke on their map. They will come whether you are ready or not — so be ready first."
@@ -39,6 +41,7 @@
       "minNotoriety": 95, "minSize": 26, "minDefence": 10,
       "waves": 5, "packPerWave": [4, 7], "breatherHours": 0.4,
       "levelOffset": 1, "boss": true,
+      "spoils": { "steel_ingot": [10, 16], "machine_part": [4, 7], "wire": [8, 14] },
       "crates": ["rare", "epic"],
       "reward": { "gold": [380, 700], "xp": [600, 1100], "standing": 10, "blueprints": 1 },
       "text": "They have brought ladders. Whatever you have built, this is the night it is measured."
@@ -48,6 +51,7 @@
       "minNotoriety": 180, "minSize": 40, "minDefence": 18,
       "waves": 7, "packPerWave": [5, 9], "breatherHours": 0.5,
       "levelOffset": 2, "boss": true,
+      "spoils": { "steel_ingot": [20, 34], "machine_part": [8, 14], "control_board": [1, 3] },
       "crates": ["epic", "epic"],
       "reward": { "gold": [800, 1500], "xp": [1400, 2400], "standing": 14, "blueprints": 2 },
       "text": "Everything that hates you on this world has agreed on one thing, and the one thing is you."
@@ -69,6 +73,16 @@
     "hpPerDefence": 0.02,
     "dmgPerPlayerLevel": 0.05,
     "maxDefenceScaling": 1.6
+  },
+
+  "_musterDoc": "The Civilization Expansion \u00a79. A MUSTER is an ordinary raid with `drill: true` on it, so every rule js/raid.js already keeps keeps itself for free: nothing spawns before the bell, night is harder and pays more, and the rare crate is a floor rather than a roll. What the flag changes is the two ends. You pick the rank instead of earning it (`forceTier`), and LOSING COSTS NOTHING \u2014 no broken structures, no materials taken, no citizen leaves, no standing lost, no repair bill. The only thing you are out is the time and the cooldown. The user's words: 'No need to penalize for a minigame.'\n\n`spoils` above are the materials a held muster pays into the nearest store pool, or into the materials bag if there is no pool within sixty metres. The crates are the loot and the spoils are the resources, which is the whole 'reward loot or resources' of the request \u2014 you get both.",
+  "muster": {
+    "goldMultiplier": 0.6,
+    "standing": 0,
+    "cooldownHours": { "prowlers": 12, "warband": 18, "siege": 24, "reckoning": 36 },
+    "leashMetres": 300,
+    "leashSeconds": 45,
+    "spoilsRadius": 60
   },
 
   "_lossDoc": "§7.11: you can lose, and losing is never a deleted base. Some structures are broken (repairable) and some materials are taken. That is all.",

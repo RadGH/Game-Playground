@@ -55,6 +55,15 @@
     "storage_crate": { "name": "Storage Crate", "tier": 1, "cap": 250, "linkRadius": 7, "build": { "plank": 10, "rope": 2 }, "desc": "The first one you build, and the one you end up with forty of." },
     "storage_silo": { "name": "Storage Silo", "tier": 2, "cap": 1200, "linkRadius": 9, "accepts": ["bulk"], "build": { "cut_stone": 24, "steel_ingot": 8, "beam": 6 }, "desc": "Ore, stone, gravel and coal only. Bulk wants its own building or it swamps everything else." },
     "fluid_tank": { "name": "Fluid Tank", "tier": 2, "cap": 600, "linkRadius": 8, "accepts": ["fluid"], "build": { "steel_ingot": 12, "resin": 6, "machine_part": 1 }, "desc": "Water, coolant, acid, fuel." },
+    "trade_post": {
+      "name": "Trade Post",
+      "tier": 2,
+      "cap": 900,
+      "linkRadius": 10,
+      "accepts": ["trade"],
+      "build": { "plank": 30, "beam": 8, "brick": 18, "iron_ingot": 6 },
+      "desc": "The Civilization Expansion \u00a76.4. Trade goods only \u2014 finished product waiting for a cart, kept out of the crate the ore is in. It is also the only place a trade route may start or end."
+    },
     "gas_tank": { "name": "Gas Tank", "tier": 2, "cap": 400, "linkRadius": 8, "accepts": ["gas"], "build": { "steel_ingot": 16, "machine_part": 2, "composite_plate": 1 }, "desc": "Pressurised. The only thing a vent collector can deliver into." }
   },
 

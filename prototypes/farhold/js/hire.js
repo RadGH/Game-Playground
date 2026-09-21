@@ -93,3 +93,50 @@ export function hireOffer(who, { playerLevel = 1, gold = 0, pet = null } = {}) {
     refusal: gold >= price ? null : `They want ${price} gold up front and you have ${gold}.`,
   };
 }
+
+/**
+ * GUARDS FOR A TRIP, NOT FOR A LIFE. The Civilization Expansion §8.6.
+ *
+ * A route guard is neither a citizen nor a hired sword. They are hired for the run out of the
+ * Armiger's contract list — which is precisely why the Armiger is the vendor who unlocks them — at
+ * ten gold a guard a trip, and each one is 18% off the chance of the cart being taken.
+ *
+ * They are never a guarantee. If the ambush does fire they roll once against the raiders,
+ * `survive = guards / (guards + 2)`, so two guards save a cart half the time and four save a wagon
+ * two-thirds of the time. A guard you can buy your way out of trouble with is a tax, not a choice.
+ */
+export function guardContract({ carrier = null, guards = 0, data = null, danger = 0.35 } = {}) {
+  const G = data?.guard || {};
+  const per = G.routeGuardGold ?? 10;
+  const max = carrier?.guardsMax ?? 0;
+  const n = Math.max(0, Math.min(Math.floor(guards), max));
+  const cut = G.routeGuardAmbushCut ?? 0.18;
+  const before = Math.max(0.03, Math.min(0.7, 0.34 * danger));
+  const after = Math.max(0.03, Math.min(0.7, 0.34 * danger * (1 - cut * n)));
+  return {
+    guards: n, max, gold: n * per, perGuard: per,
+    survive: n > 0 ? Math.round((n / (n + 2)) * 100) / 100 : 0,
+    riskBefore: Math.round(before * 100) / 100,
+    riskAfter: Math.round(after * 100) / 100,
+    text: n === 0
+      ? `No guards. ${Math.round(after * 100)}% chance somebody takes it off you.`
+      : `${n} guard${n === 1 ? '' : 's'}, ${n * per} gold the trip. Risk falls from ${Math.round(before * 100)}% to ${Math.round(after * 100)}%, and if it does happen they see them off about ${Math.round((n / (n + 2)) * 100)}% of the time.`,
+  };
+}
+
+/**
+ * What a hired sword standing a post at your holding costs you, against what a citizen guard does.
+ *
+ * §8.2, and the whole point is that it is a real choice rather than a better option: a citizen
+ * guard is cheaper and wants a village around them; a hired sword is instant, needs no bed and
+ * never gets hungry, and costs nearly twice as much every single day for ever.
+ */
+export function postedCost({ data = null, days = 1 } = {}) {
+  const G = data?.guard || {};
+  const citizen = (G.wagePerDay ?? 8) * days;
+  const hired = (G.hireRetainerPerDay ?? 14) * days;
+  return {
+    citizen, hired, days,
+    text: `A citizen on guard duty costs ${G.wagePerDay ?? 8} gold a day and a bed and two rations. A hired sword costs ${G.hireRetainerPerDay ?? 14} a day and nothing else at all.`,
+  };
+}

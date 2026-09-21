@@ -17,6 +17,24 @@
 const SPEED = 2.4;              // metres a second — a loaded cart
 const AMBUSH_SHARE = 0.6;       // how far along the road trouble finds an unescorted one
 
+/**
+ * THE CHANCE OF TROUBLE, IN ONE SUM. The Civilization Expansion §7.6.
+ *
+ * `danger` is 0..1 from the zone's level band and how contested it is — which is what finally gives
+ * the faction layer something to do with trade. Each guard is worth 18% off, up to the carrier's
+ * limit, and a route you walk beside is worth 25% off on top.
+ *
+ * A hand cart with two guards through a quiet zone: 0.34 × 0.35 × 0.64 = **7.6%**. A wagon through
+ * a contested one with none: **31%**. Losing a full wagon is 620 kg of goods and it should hurt,
+ * which is why the wagon takes four guards and why the drone — faster than anything that wants to
+ * rob it — takes none.
+ */
+export function ambushChanceFor({ danger = null, guards = 0, escorted = false } = {}) {
+  const d = danger == null ? 0.45 : Math.max(0, Math.min(1, danger));
+  const raw = 0.34 * d * (1 - 0.18 * Math.max(0, guards)) * (1 - (escorted ? 0.25 : 0));
+  return Math.max(0.03, Math.min(0.7, raw));
+}
+
 function hash(...parts) {
   let h = 2166136261 >>> 0;
   for (const p of parts) {
@@ -54,23 +72,39 @@ export function createCaravans({ territory = null, factions = null, standings = 
    * Send one out. `route` is `[{x,z,name}, …]` — real settlements and the road between them, so the
    * caravan travels somewhere that exists and arrives somewhere that exists.
    */
-  function dispatch(zone, route = [], { cargo = null, escorted = false } = {}) {
+  function dispatch(zone, route = [], {
+    cargo = null, escorted = false,
+    /**
+     * A CARAVAN CAN BE YOURS NOW. The Civilization Expansion §7.
+     *
+     * `owner: 'player'` with a manifest, a carrier and some guards is a trade run: it travels the
+     * same polyline, meets the same trouble and can be escorted the same way, and `arrive` pays out
+     * instead of pleasing a faction. Everything else about the module is unchanged, which is the
+     * point — a second caravan would immediately drift from this one.
+     */
+    owner = null, manifest = null, carrier = null, guards = null, danger = null, revenue = 0, routeId = null,
+  } = {}) {
     if (!zone || route.length < 2) return null;
     const rng = rngFrom(hash(seed, 'caravan', zone.id, made++));
     const record = territory?.of?.(zone.id);
     const holder = (factions?.factions || []).find(f => f.key === record?.holder);
     const key = cargo || holder?.cargo || 'salt_meat';
-    const manifest = CARGO[key] || CARGO.salt_meat;
-    const name = `the ${manifest.name.toLowerCase()} run`;
+    const load = CARGO[key] || CARGO.salt_meat;
+    const name = owner === 'player' && route.length
+      ? `your ${(carrier || 'cart').replace(/_/g, ' ')} to ${route[route.length - 1].name}`
+      : `the ${load.name.toLowerCase()} run`;
 
     const span = route.reduce((sum, p, i) => i ? sum + Math.hypot(p.x - route[i - 1].x, p.z - route[i - 1].z) : 0, 0);
     const row = {
       id: `c${zone.id}_${made}`,
       type: 'caravan',
-      name, cargo: key, manifest,
-      faction: manifest.faction, zoneId: zone.id,
+      name, cargo: key, manifest: load,
+      // the player's half: what is actually in it, who it belongs to, and what it is worth
+      owner: owner || null, goods: manifest || null, carrier: carrier || null,
+      routeId, revenue,
+      faction: load.faction, zoneId: zone.id,
       vehicle: VEHICLES[Math.floor(rng() * VEHICLES.length) % VEHICLES.length],
-      guards: manifest.guards ?? (2 + Math.floor(rng() * 3)),
+      guards: guards != null ? guards : (load.guards ?? (2 + Math.floor(rng() * 3))),
       route, leg: 0, t: 0,
       x: route[0].x, z: route[0].z,
       from: route[0].name, to: route[route.length - 1].name,
@@ -82,6 +116,18 @@ export function createCaravans({ territory = null, factions = null, standings = 
       state: 'loading',        // loading | travelling | ambushed | wrecked | arrived | robbed
       escorted, ambushAt: AMBUSH_SHARE + rng() * 0.25,
       ambushed: false,
+      /**
+       * TROUBLE IS A ROLL MADE ONCE, AT DISPATCH — NOT A CERTAINTY. §7.6.
+       *
+       * This used to be unconditional: EVERY unescorted caravan was ambushed, always, at about
+       * two-thirds of the way along. That is right for flavour and wrong as a rule the player is
+       * betting money on, and it also meant a road with a caravan on it was really a road with a
+       * wreck on it. Rolling once at dispatch fixes the world's own caravans at the same time as it
+       * makes a player's trade run a gamble with numbers behind it.
+       *
+       *   0.34 × danger × (1 − 0.18 × guards) × (1 − 0.25 × escorted), floored at 3%, capped at 70%
+       */
+      willAmbush: rng() < ambushChanceFor({ danger, guards: guards != null ? guards : (load.guards ?? 2), escorted }),
     };
     all.set(row.id, row);
     return row;
@@ -116,7 +162,7 @@ export function createCaravans({ territory = null, factions = null, standings = 
       row.z = a.z + (b.z - a.z) * row.t;
 
       const share = row.span ? row.travelled / row.span : 1;
-      if (!row.ambushed && !row.escorted && share >= row.ambushAt) {
+      if (!row.ambushed && row.willAmbush && !row.escorted && share >= row.ambushAt) {
         row.ambushed = true;
         row.state = 'ambushed';
         // if you are not there to see it, it is a wreck by the time anyone walks past
@@ -146,6 +192,8 @@ export function createCaravans({ territory = null, factions = null, standings = 
     const row = all.get(id);
     if (!row || row.state === 'arrived') return null;
     row.state = 'arrived';
+    // a run of yours pays out what js/trade.js quoted, and not a gold piece more or less
+    if (row.owner === 'player') row.payout = row.revenue || 0;
     if (row.escorted) {
       if (standings && row.faction) standings.deed(row.faction, 'caravan_escorted');
       if (territory) territory.press(row.zoneId, 0.04);

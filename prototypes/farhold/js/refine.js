@@ -28,12 +28,37 @@
  * which is the whole point of §8: a machine outside every pool has nothing to work with.
  * `grid` is a js/power.js grid, or null for a base that has not got that far yet.
  */
-export function createWorks({ refining = {}, resources = {}, stores = null, grid = null, log = null, rareElement = null } = {}) {
+export function createWorks({ refining = {}, resources = {}, stores = null, grid = null, log = null, rareElement = null, labour = null } = {}) {
   const MACHINES = refining.machines || {};
   const RECIPES = Object.fromEntries((refining.recipes || []).map(r => [r.id, r]));
   const BY_MACHINE = {};
   for (const r of refining.recipes || []) (BY_MACHINE[r.machine] ||= []).push(r);
   const MATS = resources.materials || {};
+  /**
+   * THE EXCHANGE RATE, AND IT IS FIXED IN ONE PLACE.
+   *
+   * The Civilization Expansion §3. js/work.js deliberately says nothing about what a work unit
+   * BUYS — that is the caller's business, and it is why the unit is interchangeable between your
+   * arm, a citizen's shift and a powered machine. Here is where this game decides: **one work unit
+   * buys thirty seconds of a tended machine's running time.**
+   *
+   * A smelter at mood 0.7 puts about 10.6 units in over an 11-hour shift, which is 319 seconds of
+   * furnace out of a 412-second working day — the furnace is lit for about three-quarters of the
+   * shift and dark all night. That is the readable number the whole round hangs on: **one worker is
+   * one furnace.** Two furnaces and one smelter is two half-lit furnaces, and the panel says so.
+   */
+  const LAB = { secondsPerUnit: 30, bankSeconds: 120, orderUnits: 4, ...(labour || {}) };
+  /**
+   * …AND IT IS OFF UNTIL SOMEBODY IS THERE TO SWITCH IT ON.
+   *
+   * Passing the `labour` block (data/colony.json's `labour`) is what turns the rule on. That is not
+   * squeamishness about the feature — it is that a machine which refuses to run without a worker is
+   * only fair in a game that HAS workers, a work board and a screen saying so. A caller that has
+   * not wired the colony (an old save path, a node test about smelting, the balance harness) gets
+   * the module it has always had, and the one that has wired it gets the furnace that goes cold at
+   * six. One argument, and the sentence in the panel is the same either way.
+   */
+  const LABOUR_ON = !!labour;
 
   const machines = new Map();
   /** How many times each recipe has been completed, ever. This is the whole unlock system. */
@@ -54,6 +79,15 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       crafting: false, progress: 0,
       fuelSeconds: 0, fuelRes: null,
       state: 'idle', starvedFor: null, made: 0,
+      /**
+       * SECONDS OF WORK PAID FOR IN ADVANCE, AND NOT ONE SECOND MORE.
+       *
+       * Capped at `labour.bankSeconds` so a furnace cannot be charged for a week and left. A machine
+       * that runs out mid-batch keeps its progress AND its inputs and simply stops; when somebody
+       * turns up it carries on from where it was.
+       */
+      workBank: 0,
+      workedSeconds: 0,
       enabled: true,
     };
     machines.set(id, m);
@@ -180,6 +214,104 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     return { speed: (def.speed ?? 1) * factor, why: '' };
   }
 
+  // ---------------------------------------------------------------- somebody has to work it
+
+  /**
+   * HOW MANY SECONDS OF WORK ONE UNIT BUYS AT THIS MACHINE, OR 0 FOR "NOBODY IS NEEDED".
+   *
+   * The Civilization Expansion §3.2. Three answers, and the data decides which:
+   *
+   *   * no `labour` block, or `secondsPerUnit: 0` — a tier-2 machine. Power is the whole cost and
+   *     always was (INDUSTRY.md §3); a refinery is unaffected by any of this.
+   *   * `auto: false` — tier 0. Somebody stands at it. **This is the user's furnace.**
+   *   * `auto: true` — tier 1. A pair of hands turns it, and POWER TURNS IT FOR YOU: the moment the
+   *     grid is actually carrying the bench it pays its own labour. That is exactly the promotion
+   *     INDUSTRY.md §1 makes of the drill, applied to a bench, and it is why a wired sawmill is
+   *     worth more than a second sawmill.
+   */
+  function labourNeed(m) {
+    if (!LABOUR_ON) return 0;
+    const L = m.def.labour;
+    const per = L?.secondsPerUnit || 0;
+    if (per <= 0) return 0;
+    if (L.auto && grid && grid.poweredOf(m.id) >= 0.05) return 0;
+    return per;
+  }
+
+  /** How deep the bank may go, in seconds, for this machine. */
+  const bankCap = m => m.def.labour?.bankSeconds ?? LAB.bankSeconds;
+
+  /**
+   * Work units, turned into machine seconds.
+   *
+   * The ONLY way the bank fills. `units` came off an ordinary work order on js/work.js's board, so
+   * it makes no difference at all whether the player swung at it, a citizen filled it on their
+   * shift, or a Tender Arm ground through it while everyone was asleep — which is the whole
+   * interchangeability claim, finally pointed at a machine.
+   */
+  function credit(machineId, units = 1) {
+    const m = get(machineId);
+    if (!m) return 0;
+    const per = m.def.labour?.secondsPerUnit || LAB.secondsPerUnit;
+    const before = m.workBank;
+    m.workBank = Math.min(bankCap(m), m.workBank + Math.max(0, units) * per);
+    return m.workBank - before;
+  }
+
+  /**
+   * Put one small order per machine that wants tending on the board, and take it off again when it
+   * does not.
+   *
+   * §3.3. This is the join — js/refine.js posts ORDINARY work orders and nothing else, so all three
+   * sources already work and not one line of js/work.js changes. The smelter job's tags in
+   * data/colony.json are already `["refine", "craft"]` and the order's tag is `refine`: **they
+   * already matched.** That is how close this join has been since the colony landed.
+   *
+   * Four units is two minutes of furnace — about eight iron ingots — which is a small enough grain
+   * that a citizen's shift reads as a stream of completions and a large enough one that the board
+   * is not a thousand rows.
+   */
+  function postLabour(board, { at = 0, units = LAB.orderUnits } = {}) {
+    if (!board) return 0;
+    let posted = 0;
+    for (const m of machines.values()) {
+      const need = labourNeed(m);
+      const id = `lab_${m.id}`;
+      const open = board.get(id);
+      if (!need || !m.queue.length || !m.enabled) {
+        if (open && !open.complete) board.cancel(id);
+        continue;
+      }
+      if (m.workBank >= bankCap(m) - 1e-6) continue;
+      if (open && !open.complete && !open.cancelled) continue;      // one open order per machine
+      board.postJob({
+        id, tag: 'refine', stationId: m.id,
+        name: `Work the ${m.name}`, units, priority: 1, postedAt: at,
+        meta: { machine: m.id, seconds: units * need },
+      });
+      posted++;
+    }
+    return posted;
+  }
+
+  /**
+   * Sweep a board's finished orders and pay the machines they were for.
+   *
+   * Safe to run more than once: a swept order is stamped, so a caller that also sweeps for its own
+   * reasons cannot pay a furnace twice for the same four units.
+   */
+  function collectLabour(board) {
+    if (!board?.finished) return 0;
+    let units = 0;
+    for (const o of board.finished) {
+      if (!o.complete || o._labourPaid || !o.meta?.machine) continue;
+      o._labourPaid = true;
+      credit(o.meta.machine, o.units);
+      units += o.units;
+    }
+    return units;
+  }
+
   // ---------------------------------------------------------------- one machine, one step
 
   function step(m, dt) {
@@ -191,6 +323,25 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
 
     const { speed, why } = speedOf(m);
     if (speed <= 0) { m.state = why || 'unpowered'; grid?.setBusy(m.id, false); return; }
+
+    /**
+     * NOBODY IS WORKING THIS, SO IT IS NOT WORKING.
+     *
+     * §3.2, and the ordering is the ordering this file already uses for coolant below: **labour is
+     * checked before the inputs are consumed**, because a machine that has already eaten two iron
+     * ore cannot then be told nobody was there to do it. Progress and inputs are held exactly where
+     * they were; when somebody turns up it carries on.
+     */
+    const labourSeconds = labourNeed(m);
+    if (labourSeconds > 0 && m.workBank <= 1e-6) {
+      if (m.state !== 'unworked') log?.(`${m.name} is standing cold. Nobody is working it.`);
+      m.state = 'unworked';
+      m.starvedFor = null;
+      if (m.coldSince == null) m.coldSince = m.workedSeconds;
+      grid?.setBusy(m.id, false);
+      return;
+    }
+    m.coldSince = null;
 
     let budget = dt;
     let guard = 0;
@@ -221,7 +372,10 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       // real seconds to finish, never negative — a slice that ran backwards used to wind the
       // progress bar down and let a machine finish a job it had been refusing to run
       const need = Math.max(0, (recipe.time - m.progress) / speed);
-      const slice = Math.max(0, Math.min(budget, need));
+      // …and never longer than the work that has actually been paid for. Without this clamp a
+      // 20-second catch-up slice would run a furnace with three seconds in the bank for the whole
+      // twenty, which is the one way a machine could produce something nobody worked for.
+      const slice = Math.max(0, Math.min(budget, need, labourSeconds > 0 ? m.workBank : Infinity));
 
       // coolant is taken BEFORE the work is credited, because a machine that has already done the
       // work cannot then be told it was not allowed to
@@ -242,6 +396,14 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
 
       m.progress += slice * speed;
       budget -= slice;
+      m.workedSeconds += slice;
+      // a tended machine spends its bank at one second a second, whatever speed it is running at:
+      // a worker's hour buys machine TIME, not machine output, so wiring a bench to the grid makes
+      // the same hour go further rather than making the hour cheaper
+      if (labourSeconds > 0) {
+        m.workBank = Math.max(0, m.workBank - slice);
+        if (m.workBank <= 1e-6) { m.state = 'unworked'; grid?.setBusy(m.id, false); break; }
+      }
       if (m.fuelSeconds > 0) m.fuelSeconds = Math.max(0, m.fuelSeconds - slice);
       m.state = 'running';
       grid?.setBusy(m.id, true);
@@ -324,6 +486,11 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       fuel: m.fuelRes ? { resource: m.fuelRes, name: nameOf(m.fuelRes), seconds: +m.fuelSeconds.toFixed(1) } : null,
       made: m.made,
       pooled: !!poolFor(m),
+      // the Civilization Expansion §3: who is keeping this lit, and for how much longer
+      needsWorking: labourNeed(m) > 0,
+      workBank: Math.round(m.workBank),
+      workBankMax: bankCap(m),
+      minutesLeft: Math.round((m.workBank / 60) * 10) / 10,
     };
   }
 
@@ -334,6 +501,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       case 'idle': return m.queue.length ? 'Waiting' : 'Nothing queued';
       case 'starved': return m.starvedFor === 'fuel' ? 'Out of fuel' : `Waiting for ${nameOf(m.starvedFor)}`;
       case 'blocked': return 'Finished, and nowhere to put it';
+      case 'unworked': return 'Standing cold — nobody is working this';
       case 'unpowered': return 'No power reaches this';
       case 'shed': return 'Grid is short — this was switched off to keep the important things on';
       default: return m.state;
@@ -365,6 +533,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
         id: m.id, type: m.type, x: m.x, z: m.z, enabled: m.enabled,
         queue: m.queue.map(j => ({ recipe: j.recipe, left: j.left === Infinity ? -1 : j.left, done: j.done })),
         progress: m.progress, crafting: m.crafting, fuelSeconds: m.fuelSeconds, fuelRes: m.fuelRes, made: m.made,
+        workBank: m.workBank, workedSeconds: m.workedSeconds,
       })),
     };
   }
@@ -381,14 +550,52 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       machine.fuelSeconds = spec.fuelSeconds || 0;
       machine.fuelRes = spec.fuelRes || null;
       machine.made = spec.made || 0;
+      machine.workBank = spec.workBank || 0;
+      machine.workedSeconds = spec.workedSeconds || 0;
       machine.queue = (spec.queue || []).map(j => ({ recipe: j.recipe, left: j.left < 0 ? Infinity : j.left, done: j.done || 0 }));
     }
     return machines.size;
   }
 
+  /**
+   * THE TENDER ARMS, AND WHY THEY COME OUT OF `machines()`.
+   *
+   * js/main.js's tick has called `board.runMachines(works.machines?.() || [], hours)` since the
+   * building expansion landed, and `works.machines` did not exist — so the third work source,
+   * the one js/work.js:284 was written for, has never once run. The Civilization Expansion's
+   * Tender Arm (§3.6) is exactly that source: a powered arm on a post that works whatever bench it
+   * can reach. `setTenders` is how the game layer hands them over (it knows what is built; this
+   * file must not), and `machines()` is the list that dead call site was always asking for.
+   *
+   * A record is js/work.js's own shape — `{ id, name, stationId, tags, unitsPerHour, powered }` —
+   * so `machineUnits` already returns 0 for an unpowered one and the arm dies with the grid with no
+   * new rule anywhere.
+   */
+  let tenders = [];
+  function setTenders(list = []) { tenders = list.filter(Boolean); return tenders.length; }
+
+  /** Every machine at once, for the Holding screen's Work tab. */
+  function labourBoard() {
+    return [...machines.values()].map(m => ({
+      id: m.id, name: m.name, type: m.type,
+      state: m.state, stateText: stateText(m),
+      needsWorking: labourNeed(m) > 0,
+      auto: !!m.def.labour?.auto,
+      secondsPerUnit: m.def.labour?.secondsPerUnit || 0,
+      workBank: Math.round(m.workBank), workBankMax: bankCap(m),
+      queued: m.queue.length,
+      lit: m.workedSeconds > 0 && m.state === 'running',
+    }));
+  }
+
   return {
     place, remove: removeMachine, get, queue, cancel, clear, tick, catchUp,
     isUnlocked, unlockProgress, available, board, inputsOf, snapshot, stateText, allJobs,
+    // the Civilization Expansion §3 — work runs the machines
+    labourNeed, credit, postLabour, collectLabour, labourBoard, setTenders,
+    machines: () => tenders,
+    all: () => [...machines.values()],
+    labour: LAB,
     recipes: RECIPES, machineDefs: MACHINES, completed,
     set rare(key) { rareElement = key; },
     get rare() { return rareElement; },

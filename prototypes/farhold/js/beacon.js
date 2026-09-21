@@ -90,7 +90,12 @@ export function createBeacons(scene, { max = MAX, heightAt = null } = {}) {
         const key = a.id || `${Math.round(a.x)},${Math.round(a.z)}`;
         if (b.key !== key) {
           b.key = key;
-          b.ground = Number.isFinite(a.y) ? a.y : (heightAt ? heightAt(a.x, a.z) : 0);
+          /**
+           * `a.y` is where the caller wants the ARROW to point, which main.js raises six metres so
+           * the screen-edge arrow does not aim at somebody's feet. The beacon stands on the ground,
+           * so it asks for the ground rather than trusting a number meant for something else.
+           */
+          b.ground = heightAt ? heightAt(a.x, a.z) : (Number.isFinite(a.y) ? a.y : 0);
           b.group.position.set(a.x, b.ground, a.z);
           if (a.color) b.mat.color.set(a.color);
         }

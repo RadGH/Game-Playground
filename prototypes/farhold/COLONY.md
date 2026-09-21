@@ -249,3 +249,13 @@ states and finishes a ten-unit order; a farmer harvests and replants for a month
 new plot; an unfed colony walks down the ladder a rung at a time and then walks out; tax scales with
 a fed and housed population and is zero without beds; and a raid cannot fire until the player accepts
 it.
+
+---
+
+## The Civilization Expansion
+
+Housing, comfort, NPC-run machines, vendors, trade goods, routes, guards and the muster all extend
+this module rather than replacing it. See **`CIVILIZATION.md`** — and in particular §2 (a bed is a
+building now, and the walk to work is real metres), §4 (a vendor is a citizen with the `vendor` job,
+who pays rent and does no work at all), §7 (`colony.station` and wages), and §10, which lists the
+three places that round reads differently from what was designed.

@@ -1724,3 +1724,55 @@ None of them is needed for the game to play correctly.
 | `avatar-3d/js/chibi2-gear.js` | **shared, additive** — two dispatch lines |
 | `avatar-2d/js/parts/gear.js` | **shared, additive** — a 2D entry for every new id, so a portrait still draws a weapon |
 | `data/balance.json` | the formula constants, and `combat` / `ranged` / `staff` blocks |
+
+## Round 15 — the industry you can find your way through
+
+A twenty-item play-test list. The theme was the same one as round 14, from the
+other end: round 14 was *rules written into the data and read by nobody*, and
+round 15 was **doors**. Almost everything asked for existed and could not be
+reached.
+
+| what the player said | what was actually true |
+|---|---|
+| "I built a furnace. Now what? How do I interact with it?" | `drawBench` has listed every recipe a machine can make since the building expansion. The only way in was pressing B and noticing a panel halfway down a sidebar. **E did nothing.** |
+| "How do you even get better tools? I do not see a slot" | There is no slot: your weapon IS your tool. `data/resources.json` has carried a sentence explaining every rung of that ladder the whole time and never put one on a screen. |
+| "The useful stuff is still at the bottom" | True. Round 14 fixed what the map *drew* and left the sidebar in the order it had grown in — Layers, key, biome breakdown, and only then the reason you opened it. |
+| "I don't know how to get iron ore or transport it to my base" | `FIRST_STEPS` in the build panel answers exactly that, and `drawSteps` opens with `if (started) return` — so it is on screen for the one minute you do not need it and gone for the hour you do. |
+| "Add a motorcycle, car and truck… same slot" | All three existed and were already faster than a horse. They lived in a slot of their own on a key of their own, so the game had two unrelated answers to "what am I travelling on". |
+
+### The two the end-to-end test found
+
+Writing *"a few drills next to an outpost marker with a chest, and have that base
+generate ore"* as a spec turned up two things nothing else would have:
+
+* The join that makes a placed drill a working drill read
+  `entry.key === 'drill' || entry.key === 'pump'` — **two literal names**. So the
+  Small Drill added an hour earlier placed correctly, cost its iron and dug
+  nothing. It asks `def.needs === 'node'` now, which is the catalogue's own word.
+* **The furnace was broken for everybody playing alone.** The Civilization
+  Expansion's labour gate is meant to stay off until you have workers; I turned
+  it on from minute one. A player alone in the world was told "Standing cold —
+  nobody is working this". You count as labour when you stand at a machine now,
+  which is what `refine.js`'s own comment says work units mean.
+
+### `js/nextstep.js`
+
+Twelve rules in dependency order; the first whose condition is true is the
+answer, with one sentence for what, one for why, and one for where. Every field
+comes from what is actually STANDING — pools, machine queues, drill routes,
+generator output, outpost count — rather than a flag somebody remembered to set,
+because a flag that drifts tells you to do something you have already done.
+
+It is pure, so the test walks a whole playthrough in a loop and asserts the two
+things that matter more than any sentence: the chain always terminates, and it
+never tells you to do something you cannot do yet. That loop found a real
+ordering flaw on its first run.
+
+### And the staff
+
+`CHARGED_FORMS` and `chargedForm()` had been exported since round 14 and called
+by nobody — six forms written down, zero reachable, so a full charge was the same
+spell at 1.6x damage. All six are branches now: jet, dome (shoved through
+`e.push`, so it resists by rank the way a hammer does), wall, field, mortar and
+storm. A javelin's `carried: 6` was read by nobody too; it runs out now, and the
+ones you threw stick in the ground to be picked back up.

@@ -4,11 +4,22 @@
 round because other agents were in them. Everything below is written as a copy-pasteable patch
 against the code as it stood when I finished.
 
-> **STATUS, 2026-09-21.** Three of the twelve have since been applied in commit `8a30e98`:
-> **1** (the staff nova), **2** (`spellfx.cast`'s dropped `scale`) and **12** (the charge meter,
-> done properly as a class in `style.css` rather than the inline styles sketched below). Their
-> sections are kept for the record and marked **APPLIED**; do not apply them again. Everything
-> else in this file is still outstanding.
+> **STATUS, 2026-09-21.** Six of the twelve have been applied, and **every missing FEATURE in this
+> file is now built.** What is left is tidying and performance.
+>
+> * `8a30e98` — **1** (the staff nova drew nothing), **2** (`spellfx.cast`'s dropped `scale`),
+>   **12** (the charge meter, done as a class in `style.css` rather than the inline styles below).
+> * `4e8ba68` — **3a**, **3b** (a charged nova and lob ignored the charge's damage) and **3c**, the
+>   four charged forms. `CHARGED_FORMS` and `chargedForm()` had been exported and called by nobody:
+>   six forms written down and zero reachable. `tests/charged-forms.test.js` fails if any of them
+>   stops being dispatched.
+> * `b1298b6` — **4**, the javelin count, the pick-up loop and `hud.ammo()`.
+>
+> Those sections are kept for the record and marked **APPLIED**; do not apply them again.
+>
+> **Still outstanding: 5, 6, 7, 8, 9, 10, 11.** Every one is either performance (5, batched
+> sprites) or tidying that replaces a working indirection with the direct call. The game plays
+> correctly without all of them, which is what the "Without it" column already said.
 
 Read this first: **most of the combat revamp is already live.** Where a main.js change could be
 avoided it was, by putting the work in a file I own — `js/combat-feel.js` (new), `js/weapons.js`,
@@ -20,8 +31,8 @@ correctly without them. Each one says which it is.
 |---|---|---|---|
 | 1 | main.js | the staff nova draws nothing (`aoe` called with the wrong shape) | ~~a real bug~~ **APPLIED in `8a30e98`** |
 | 2 | main.js | `spellfx.cast` is passed `scale`, which it does not take | ~~a real bug~~ **APPLIED in `8a30e98`** |
-| 3 | main.js | a charged staff's nova and lob ignore the charge | **half a feature missing** |
-| 4 | main.js | a javelin is never counted | **a feature missing** |
+| 3 | main.js | a charged staff's nova and lob ignore the charge | ~~half a feature missing~~ **APPLIED in `4e8ba68`** |
+| 4 | main.js | a javelin is never counted | ~~a feature missing~~ **APPLIED in `b1298b6`** |
 | 5 | main.js | `BatchedSpellFx` instead of `SpellFx` | performance only |
 | 6 | main.js | the swing clip, passed straight | works today through a marker — see below |
 | 7 | main.js | hit-stop reaches `spellfx` and `props` too | works today for everything else |
@@ -29,7 +40,7 @@ correctly without them. Each one says which it is.
 | 9 | main.js | the off hand's dice and the arrow's draw, passed explicitly | already covered by the channel |
 | 10 | main.js | `field.statusData` — one line, so an axe's bleed reads the real row | a copy of the row is used |
 | 11 | main.js | a wand's heavy bolt flies slower | cosmetic |
-| 12 | hud.js | the draw reticle, the charge meter and the javelin count | **APPLIED in `8a30e98`** — `hud.chargeMeter` is live; the javelin count still needs patch 4 |
+| 12 | hud.js | the draw reticle, the charge meter and the javelin count | **APPLIED** — `hud.chargeMeter` in `8a30e98`, `hud.ammo` in `b1298b6` |
 
 ---
 
@@ -85,7 +96,7 @@ Replace with:
 
 ---
 
-## 3 — A CHARGED STAFF'S NOVA AND LOB IGNORE THE CHARGE. `js/main.js`, in `swingWith`
+## 3 — A CHARGED STAFF'S NOVA AND LOB IGNORE THE CHARGE. `js/main.js`, in `swingWith`  ·  **APPLIED in `4e8ba68`**
 
 **What works already.** `js/weapons.js` `withArea` folds the charge into the strike's `scale` and
 its `damage` share, so a charged staff already gets the bigger **radius** everywhere and the bigger
@@ -129,9 +140,15 @@ shape, 1.6× the damage and 2× the radius, which is a reasonable weapon and not
 the four forms is a main.js job because every one of them is a branch of `swingWith`; the data and
 the charge curve are ready and tested (`tests/combat-feel.test.js`).
 
+**Built in `4e8ba68`.** All six: cone→jet (five ticks), nova→dome (shoved through `e.push`, so it
+resists by rank the way a hammer's knockback does), wave→wall and ground→field (both through
+`dropPool`, the lingering-ground system the skills already use), lob→mortar (aimed, and it leaves
+the ground burning), chain→storm (five jumps). A tap is still the plain spell — `charge.tap` is the
+test — because a staff you have to hold down to use at all is worse than the one we had.
+
 ---
 
-## 4 — A JAVELIN IS NEVER COUNTED. `js/main.js`, in `swingWith`, the `weapon?.ranged` branch
+## 4 — A JAVELIN IS NEVER COUNTED. `js/main.js`, in `swingWith`, the `weapon?.ranged` branch  ·  **APPLIED in `b1298b6`**
 
 A javelin is the best weapon in the game because it is a one-handed bow with no cost. The design
 gives it six in hand, thrown at 1.15×, picked back up off the ground. The controller already refuses

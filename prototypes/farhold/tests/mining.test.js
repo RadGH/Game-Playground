@@ -182,3 +182,55 @@ test('createNodeField still does what it did, so nothing that used it moved', ()
   assert.ok(nodes.length > 0);
   for (const n of nodes) assert.ok(Math.hypot(n.x, n.z) <= 220);
 });
+
+/**
+ * R15 — THE SMALL DRILL.
+ *
+ *   "I would like to add a Small Drill crafted out of just iron ingots for earlier game use."
+ *
+ * The full Drill costs 14 steel and 5 machine parts, which is most of the way down the tech tree —
+ * so between swinging at a rock by hand and an industrial base there was nothing at all. The rung
+ * that was missing is automation WITHOUT a tech jump: iron only, no power, and tier 1 so it refuses
+ * exactly the seams an iron weapon refuses.
+ */
+test('a small drill digs with no generator anywhere, and a real drill does not', () => {
+  const data = JSON.parse(readFileSync(new URL('../data/resources.json', import.meta.url)));
+  const node = { id: 'n1', kind: 'ore_outcrop', resource: 'iron_ore', amount: 500, richness: 1, hardness: 1 };
+  const ore = { byId: id => (id === 'n1' ? node : null), noteWorked() {} };
+  const m = createMining({ data, ore, stores: null });
+
+  // both stand on the same seam; neither has power
+  const small = { id: 'e1', key: 'small_drill', x: 0, z: 0, powered: false };
+  assert.equal(m.bindDrill(small, node).ok, true);
+  m.tick(10);
+  const dugSmall = m.overview()[0]?.stock ?? 0;
+  assert.ok(dugSmall > 0, 'the small drill dug nothing without power — it is hand cranked');
+
+  m.unbindDrill('e1');
+  const big = { id: 'e2', key: 'drill', x: 0, z: 0, powered: false };
+  assert.equal(m.bindDrill(big, node).ok, true);
+  m.tick(10);
+  assert.equal(m.overview()[0]?.stock ?? 0, 0, 'an unpowered real Drill dug anyway');
+});
+
+test('a small drill is slower than a real one and faster than swinging', () => {
+  const data = JSON.parse(readFileSync(new URL('../data/resources.json', import.meta.url)));
+  const T = data.tools;
+  assert.ok(T.small_drill, 'there is no small drill');
+  assert.ok(T.small_drill.rate > T.iron_tool.rate,
+    'the small drill is no better than standing there hitting it, so nobody would build one');
+  assert.ok(T.small_drill.rate < T.drill.rate,
+    'the small drill matches the powered one, so the powered one is not a promotion');
+  // tier 1: it is automation, not a tech jump, and must refuse a hardness-2 seam
+  assert.equal(T.small_drill.tier, 1);
+  assert.ok(T.small_drill.handCranked, 'the no-power rule is a property of the drill, not a name in the code');
+});
+
+test('the small drill costs iron and nothing else, and iron is something you can actually make', () => {
+  const S = JSON.parse(readFileSync(new URL('../data/structures.json', import.meta.url)));
+  const p = (S.structures || []).find(x => x.id === 'small_drill');
+  assert.ok(p, 'the small drill is not in the catalogue');
+  assert.deepEqual(Object.keys(p.cost), ['iron'], `it costs ${JSON.stringify(p.cost)} — the ask was iron only`);
+  assert.ok(!p.power, 'it asks for power, which is the whole thing it exists to avoid');
+  assert.equal(p.needs, 'node', 'a drill that does not have to stand on a seam is not a drill');
+});

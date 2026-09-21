@@ -1311,6 +1311,14 @@
       "powerUse": 6,
       "from": "a powered cutter"
     },
+    "small_drill": {
+      "name": "Small Drill",
+      "tier": 1,
+      "rate": 1.4,
+      "from": "a Small Drill built on the seam — six iron ingots, and it needs no power at all",
+      "_r15": "R15: the early-game drill. Tier 1, so it works the same seams a plain iron weapon does and refuses the hard ones — it is automation, not a tech jump. 1.4x against the full Drill's 3.2x and an iron tool's 1.0x, so it beats standing there swinging and is comfortably worse than the powered thing it leads to.",
+      "handCranked": true
+    },
     "drill": {
       "name": "Drill",
       "tier": 3,

@@ -122,6 +122,7 @@ const STAT_HELP = {
   'Move speed': 'Metres a second at a walk. Heavy armour slows you; talents and haste do not.',
   'Better loot': 'Magic find: shifts every drop roll towards the good end of the rarity table.',
   Kills: 'Everything you have put down, on every world.',
+  Tool: 'Your weapon IS your tool — there is no separate tool slot. A stone, bone or wooden weapon digs at tier 1; iron, bronze, copper or silver is tier 1 and faster; steel is tier 2 and opens the hard seams. Hover the row for what you are carrying and what the next rung takes.',
 };
 
 /** What a zone's colour means, spelled out under the banner. */
@@ -176,7 +177,10 @@ export class Hud {
     onLocate = null, onStarSaved = null, onForgetSaved = null,
     /** R14: the same list the Nearby panel draws, so the journal cannot disagree with it. */
     nearby = null,
+    /** R15: which tool tier the weapon in your hand counts as, and how to get the next one. */
+    tool = null,
   } = {}) {
+    this.tool = tool;
     this.nearby = nearby;
     this.onLocate = onLocate;
     this.onStarSaved = onStarSaved;
@@ -1401,6 +1405,22 @@ export class Hud {
       ['Gold find', d.goldFind ? `+${fmt(d.goldFind)}%` : '—'],
       ['Kills', player.kills],
       /**
+       * R15 — THERE IS NO TOOL SLOT, AND NOTHING EVER SAID SO.
+       *
+       *   "Also how do you even get better tools? I do not see a slot for tools in the character or
+       *    inventory menu"
+       *
+       * There isn't one, on purpose: **your weapon is your tool**. `toolTierFor` in js/main.js reads
+       * the thing in your hand — stone/bone/wood is tier 1, iron/bronze/copper/silver is tier 1 at a
+       * better rate, steel is tier 2 — and `data/resources.json` has carried a `from` sentence for
+       * every rung of that ladder since the building expansion, explaining exactly how to get it.
+       *
+       * None of it was on a screen anywhere. So a player looking for a pickaxe finds no slot, no
+       * item and no explanation, and concludes the game is missing a feature it simply does
+       * differently. One row, and its hover card is the `from` line out of the data.
+       */
+      ['Tool', this.tool?.()?.name || '—'],
+      /**
        * R14 — THE FOUR ATTRIBUTES, AS A READOUT.
        *
        *   "Remove attributes from the Character screen, but keep them under stats. STR/DEX/INT/CON
@@ -1429,11 +1449,22 @@ export class Hud {
       attrs: ['Strength', 'Dexterity', 'Intellect', 'Constitution'],
       offence: ['Damage', 'Crit', 'Accuracy', 'Attack speed', 'Cooldowns'],
       defence: ['Health', 'Armour', 'Magic resistance', 'Dodge', 'Block', 'Barrier'],
-      utility: ['Mana', 'Move speed', 'Better loot', 'Gold find', 'Kills'],
+      utility: ['Mana', 'Move speed', 'Tool', 'Better loot', 'Gold find', 'Kills'],
     };
     const statRow = ([k, v]) => {
       const dt = el('dt', null, k);
       if (STAT_HELP[k]) { dt.dataset.tipRender = 'stat'; dt.dataset.tipStat = k; dt.tabIndex = 0; }
+      // R15: the Tool row's card is built from the live answer, not from a fixed sentence
+      if (k === 'Tool') {
+        const t = this.tool?.();
+        dt.dataset.tip = t
+          ? `Your weapon is your tool — there is no separate tool slot.\n\nRight now: ${t.name}`
+            + ` (tier ${t.tier}, digs at ${t.rate}x).\nYou have it from ${t.from}.`
+            + (t.next ? `\n\nNext rung — ${t.next.name}: ${t.next.from}` : '')
+          : 'Your weapon is your tool. There is no separate tool slot.';
+        dt.dataset.tipRender = '';
+        dt.tabIndex = 0;
+      }
       return [dt, el('dd', null, String(v))];
     };
     /**

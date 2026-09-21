@@ -1210,6 +1210,25 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     /** R14: the journal's "Going on near you" reads the same list the panel under the minimap does. */
     nearby: () => nearbyRows,
+    /**
+     * R15 — WHAT COUNTS AS YOUR TOOL, AND HOW TO GET A BETTER ONE.
+     *
+     * "How do you even get better tools? I do not see a slot for tools" — there is no slot, your
+     * weapon is the tool, and `data/resources.json` has carried a `from` sentence for every rung of
+     * that ladder the whole time without ever putting one on a screen. This hands the sheet the
+     * live answer plus the next rung up, so the row can say both.
+     */
+    tool: () => {
+      const key = toolTierFor(player);
+      const all = resourceData?.tools || {};
+      const here = all[key];
+      if (!here) return null;
+      // the cheapest rung strictly above this one, by tier then by rate
+      const next = Object.values(all)
+        .filter(t => (t.tier > here.tier) || (t.tier === here.tier && t.rate > here.rate))
+        .sort((a, b) => a.tier - b.tier || a.rate - b.rate)[0] || null;
+      return { key, ...here, next };
+    },
     onLocate: (place, opts) => {
       const out = map?.locate?.(place, opts);
       if (out && !out.ok) hud.log(out.why || 'That is not somewhere you can be shown.', 'warn');

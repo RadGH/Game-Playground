@@ -75,7 +75,16 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
     for (const d of drills.values()) {
       if (d.nodeId === node.id) return { ok: false, why: 'Something is already drilling that seam.' };
     }
-    drills.set(entry.id, { entry, nodeId: node.id, stock: 0, resource: node.resource });
+    /**
+     * R15 — WHICH DRILL IS THIS?
+     *
+     * `drillRate` has always taken a `drill` key into `data.tools` and every caller passed the
+     * default. With the Small Drill there are two, so the entry's own key decides: `small_drill`
+     * for the iron one, `drill` for the powered one. A structure key that is not a tool falls back
+     * to the full drill, which is what every existing save does.
+     */
+    const tool = data?.tools?.[entry.key] ? entry.key : 'drill';
+    drills.set(entry.id, { entry, nodeId: node.id, stock: 0, resource: node.resource, tool });
     return { ok: true, drill: drills.get(entry.id), node };
   }
 
@@ -192,7 +201,9 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
       const node = ore?.byId(d.nodeId) || null;
       const r = routes.find(x => x.fromId === d.entry.id) || null;
       const rate = r ? rateOf(r) : null;
-      const dig = node ? drillRate(node, { data, powered: d.entry.powered ? 1 : 0 }) : 0;
+      // R15: a hand-cranked drill's rate does not depend on the grid
+      const lit = data?.tools?.[d.tool]?.handCranked || d.entry.powered ? 1 : 0;
+      const dig = node ? drillRate(node, { data, drill: d.tool, powered: lit }) : 0;
       return {
         id: d.entry.id,
         name: d.entry.name,
@@ -269,9 +280,18 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
       for (const d of drills.values()) {
         const node = ore?.byId(d.nodeId);
         if (!node) continue;
-        if (!d.entry.powered) continue;
+        /**
+         * R15 — A HAND-CRANKED DRILL NEEDS NO POWER.
+         *
+         * `entry.powered` is set by the grid and a piece with no `power` block never gets one, so
+         * before this an unpowered drill of any kind simply never ran — which would have made the
+         * Small Drill an ornament. Whether a drill needs the grid is a property of the DRILL, in
+         * data/resources.json (`handCranked: true`), not a name this file has to recognise: add a
+         * third kind of drill tomorrow and nothing here changes.
+         */
+        if (!data?.tools?.[d.tool]?.handCranked && !d.entry.powered) continue;
         if (d.stock >= STOCK_CAP) continue;
-        const out = mine(node, dt, { data, drill: true, rate: drillRate(node, { data, powered: 1 }) });
+        const out = mine(node, dt, { data, drill: true, rate: drillRate(node, { data, drill: d.tool, powered: 1 }) });
         if (out.got > 0) { d.stock += out.got; ore?.noteWorked?.(node); }
       }
       for (const r of routes) {

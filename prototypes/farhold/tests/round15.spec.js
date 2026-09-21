@@ -90,3 +90,35 @@ test('a furnace can be told what to smelt, and it says what it is short of', asy
   if (out.queued) expect(out.queued.ok || !!out.queued.why).toBe(true);
   expect(errors).toEqual([]);
 });
+
+/**
+ *   "Also how do you even get better tools? I do not see a slot for tools in the character or
+ *    inventory menu"
+ *
+ * There isn't one, on purpose — your weapon IS your tool. `data/resources.json` has carried a
+ * sentence for every rung of that ladder since the building expansion and none of it was ever on a
+ * screen, so a player looking for a pickaxe concludes the feature is missing rather than different.
+ */
+test('the character sheet says what your tool is and how to get a better one', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(() => {
+    const fh = window.farhold;
+    const t = fh.hud.tool ? fh.hud.tool() : null;
+    fh.hud.toggleSheet(true);
+    const dt = [...document.querySelectorAll('#sheet-stats-utility dt')].find(n => n.textContent === 'Tool');
+    return {
+      tool: t ? { name: t.name, tier: t.tier, from: t.from, next: t.next?.name ?? null } : null,
+      rowOnScreen: !!dt,
+      value: dt?.nextElementSibling?.textContent ?? null,
+      tip: dt?.dataset.tip ?? null,
+    };
+  });
+  console.log('tool:', JSON.stringify(out, null, 1));
+  expect(out.tool, 'the game cannot say what your tool is').not.toBeNull();
+  expect(out.rowOnScreen, 'there is no Tool row on the character sheet').toBe(true);
+  expect(out.value).toBe(out.tool.name);
+  // the card has to answer the actual question — "there is no slot" and "here is the next rung"
+  expect(out.tip).toMatch(/no separate tool slot/i);
+  expect(out.tip).toMatch(/Next rung/);
+  expect(errors).toEqual([]);
+});

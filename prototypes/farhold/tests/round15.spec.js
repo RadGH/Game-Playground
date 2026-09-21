@@ -261,3 +261,57 @@ test('every ground vehicle is genuinely faster than the horse', async ({ page })
   }
   expect(errors).toEqual([]);
 });
+
+/**
+ *   "I have stone and clay and I built a furnace. Now what?"
+ *   "I don't really know how to get iron ore or how to transport ore to my base for refining."
+ *
+ * The build panel's six-line starting list was written for exactly these and deleted itself the
+ * moment anything was standing — on screen for the minute you did not need it, gone for the hour
+ * you did. Both players had already built something.
+ */
+test('the build panel always says what to do next, even once you have built things', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(() => {
+    const fh = window.farhold;
+    // open build mode with nothing built: the numbered starting list
+    fh.build.setMode(true); fh.buildUI.setOpen(true); fh.buildUI.refresh();
+    const fresh = document.querySelector('.build-steps')?.textContent || '';
+    // now build something, which is what used to make the guidance vanish
+    const t = fh.terrain;
+    const ok = (x, z) => !t.underwater(x, z) && t.riverAt(x, z) <= 0.3 && t.slopeAt(x, z, 4) < 0.16;
+    let bx = null, bz = null;
+    for (let r = 20; r < 900 && bx === null; r += 20) {
+      for (let a = 0; a < 16; a++) {
+        const x = fh.control.x + Math.cos(a / 16 * 6.283) * r, z = fh.control.z + Math.sin(a / 16 * 6.283) * r;
+        if (ok(x, z)) { bx = x; bz = z; break; }
+      }
+    }
+    fh.build.select('storage_crate');
+    /**
+     * The catalogue prices things in SHORT names (`plank`, `iron`) and the bag holds the real ids
+     * (`plank`, `iron_ingot`) — `MATERIAL_ALIASES` joins them at boot. Granting both spellings is
+     * the test's business, not the game's.
+     */
+    for (const [id, n] of Object.entries({ plank: 40, iron: 20, iron_ingot: 20, log: 40, stone: 60 })) fh.bag.add?.(id, n);
+    fh.build.aim?.(bx, bz);
+    const placed = fh.build.placeHere();
+    fh.buildUI.refresh();
+    const after = document.querySelector('.build-steps')?.textContent || '';
+    fh.build.setMode(false);
+    return {
+      fresh: fresh.slice(0, 80), after,
+      placed: { ok: !!placed?.ok, why: placed?.why ?? null },
+      entries: (fh.build.entries || []).length,
+      hasNext: !!document.querySelector('.build-next'),
+    };
+  });
+  console.log('next step:', JSON.stringify(out, null, 1));
+  expect(out.fresh).toMatch(/Starting a base/);
+  expect(out.placed.ok, out.placed.why || '').toBe(true);
+  expect(out.entries).toBeGreaterThan(0);
+  // THE BUG: this used to be empty
+  expect(out.after.length, 'the guidance vanished the moment something was built').toBeGreaterThan(20);
+  expect(out.after).toMatch(/Next/);
+  expect(errors).toEqual([]);
+});

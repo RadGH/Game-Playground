@@ -2257,3 +2257,25 @@ body.building canvas { cursor: crosshair; }
   background: #101a28; color: #eaf6ff; border: 1px solid var(--pane-line, #2a3446); border-radius: 4px;
   font-size: var(--fs-sm, 12px); font-variant-numeric: tabular-nums;
 }
+
+/* ---------------------------------------------------------------- R15: the one thing to do next
+   "I have stone and clay and I built a furnace. Now what?" The six-line starting list deleted itself
+   the moment anything was standing, so it was on screen for the minute you did not need it and gone
+   for the hour you did. This replaces it and never goes away. */
+.build-next {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 8px 10px; margin-bottom: 10px; border-radius: 6px;
+  background: rgba(28, 44, 26, .55); border-left: 3px solid #7ac86a;
+}
+.build-next b { color: #eaf6ff; font-size: var(--fs, 13px); }
+.build-next .small { color: #b8cbb4; line-height: 1.45; }
+.build-next-tag {
+  align-self: flex-start; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: #7ac86a; font-weight: 700;
+}
+.build-next-where {
+  margin-top: 2px; font-size: 11px; color: #8fd0ff;
+}
+.build-next-where::before { content: '→ '; }
+.build-next.done { background: rgba(26, 38, 52, .55); border-left-color: #6a7480; }
+.build-next.done b { color: #cfe6ff; }

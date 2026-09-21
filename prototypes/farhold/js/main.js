@@ -66,6 +66,7 @@ import { createPortals } from './portal.js';
 import { createBuild } from './build.js';
 import { alignCatalogue } from './buildplan.js';
 import { createBuildUI } from './build-ui.js';
+import { nextStep as chainNextStep } from './nextstep.js';
 import { createHomes } from './homes.js';
 import { WorkBoard, progressText, progressFraction, creditLine, workLeft } from './work.js';
 import { createColony } from './colony.js';
@@ -2985,6 +2986,36 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hud.log(out.ok ? `${out.added?.toFixed?.(1) ?? ''} ${GROUND_FUEL.name} in the tank.` : out.why, out.ok ? 'good' : 'bad');
         return out;
       },
+    },
+    /**
+     * R15 — THE ONE THING TO DO NEXT.
+     *
+     * Every field here is read from what is actually standing rather than from a flag somebody
+     * remembered to set — which is the only way a hint can be trusted, because a flag that drifts
+     * out of step tells you to do something you have already done.
+     */
+    nextStep: () => {
+      const entries = build.entries || [];
+      const defOf = k => build.defOf?.(k) || null;
+      const machineOf = e => works.get?.(e.id) || null;
+      const smelters = entries.filter(e => works.machineDefs?.[e.key]).map(machineOf).filter(Boolean);
+      const fuels = Object.keys(refiningData?.machines?.furnace?.fuels || { log: 1, charcoal: 1, coal: 1 });
+      const pools = stores.pools?.() || [];
+      const haveAnywhere = id => pools.reduce((n, p) => n + stores.count(p, id), 0) + (materials.count?.(id) ?? 0);
+      const drills = mining.overview?.() || [];
+      return chainNextStep({
+        have: haveAnywhere,
+        toolTier: resourceData?.tools?.[toolTierFor(player)]?.tier ?? 0,
+        hasStore: pools.length > 0,
+        hasSmelter: smelters.length > 0,
+        hasFuel: fuels.some(f => haveAnywhere(f) > 0),
+        hasDrill: entries.some(e => defOf(e.key)?.needs === 'node'),
+        hasRoute: drills.some(d => d.routed || d.deliveredPerMinute > 0),
+        hasPower: entries.some(e => defOf(e.key)?.power?.make > 0),
+        hasLink: (logistics.links || []).length > 0,
+        smelting: smelters.some(m => (m.queue || []).length > 0),
+        outposts: (build.outposts?.() || []).length,
+      });
     },
     nearest: () => (build.entries || [])
       .filter(e => works.machineDefs?.[e.key])
@@ -7203,6 +7234,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     interactTarget,
     /** R15: the three ground vehicles, for the spec that checks they all beat a horse. */
     groundVehicles: GROUND_VEHICLES,
+    /** R15: the build panel, so a spec can prove the guidance survives building something. */
+    get buildUI() { return buildUI; },
     /** The Civilization Expansion, for tests/civilization.spec.js. */
     get civics() { return civics; },
     get holding() { return holding; },

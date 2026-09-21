@@ -90,7 +90,13 @@ function costLine(cost, have) {
     });
 }
 
-export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, onClose = null, mining = null, scan = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null } = {}) {
+export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, onClose = null, mining = null, scan = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null,
+  /**
+   * R15 — `() => ({ text, why, where })`, or null when the chain is finished. See js/nextstep.js.
+   * The panel does not work any of it out; it only draws whatever it is handed.
+   */
+  nextStep = null,
+} = {}) {
   const pieces = catalogue?.structures || [];
   const categories = catalogue?.categories || {};
   const have = id => (store?.have ? store.have(id) : 0);
@@ -164,15 +170,45 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
   );
   keys.textContent = 'scroll turn · click place · Enter finish a run · Ctrl+Z undo · Esc or B leave · [ ] brush size';
 
+  /**
+   * R15 — THE GUIDANCE STOPPED EXACTLY WHEN IT STARTED BEING NEEDED.
+   *
+   *   "I have stone and clay and I built a furnace. Now what?"
+   *   "I don't really know how to get iron ore or how to transport ore to my base for refining."
+   *
+   * `FIRST_STEPS` was written for precisely those two questions, and it deleted itself the moment
+   * anything at all was standing — so it was on screen for the one minute you did not need it and
+   * gone for the hour you did. Both players above had already built something.
+   *
+   * The list still goes when you have started, because six numbered lines over a base you have
+   * already built is clutter. What replaces it is ONE step that never goes away: the first
+   * unfinished link in the chain (js/nextstep.js), with why it is next and where to do it.
+   */
   function drawSteps() {
-    // gone once there is a claim on the map — see FIRST_STEPS
-    const started = (build?.entries || []).length > 0;
     steps.replaceChildren();
-    if (started) return;
-    steps.append(el('h3', { text: 'Starting a base' }));
-    const ol = el('ol', { class: 'build-steplist' });
-    for (const line of FIRST_STEPS) ol.append(el('li', { text: line }));
-    steps.append(ol);
+    const started = (build?.entries || []).length > 0;
+
+    if (!started) {
+      steps.append(el('h3', { text: 'Starting a base' }));
+      const ol = el('ol', { class: 'build-steplist' });
+      for (const line of FIRST_STEPS) ol.append(el('li', { text: line }));
+      steps.append(ol);
+      return;
+    }
+
+    const next = nextStep?.();
+    if (!next) {
+      steps.append(el('div', { class: 'build-next done' },
+        el('b', { text: 'Your base runs itself.' }),
+        el('span', { class: 'small', text: 'Power, ore, smelting and a supply route are all in place. What you build past here is up to you.' })));
+      return;
+    }
+    const card = el('div', { class: 'build-next' });
+    card.append(el('span', { class: 'build-next-tag', text: 'Next' }));
+    card.append(el('b', { text: next.text }));
+    card.append(el('span', { class: 'small', text: next.why }));
+    if (next.where) card.append(el('span', { class: 'build-next-where', text: next.where }));
+    steps.append(card);
   }
 
   function drawTools() {

@@ -2579,7 +2579,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * rather than silently, because a drill is an expensive thing to put in the wrong place and
        * "nothing happened" is the worst possible answer to having done so.
        */
-      if (entry.key === 'drill' || entry.key === 'pump') {
+      /**
+       * R15 — ANY PIECE THAT HAS TO STAND ON A SEAM IS A DRILL.
+       *
+       * This tested two literal keys, so the Small Drill added this round placed correctly, looked
+       * right, cost its iron and dug absolutely nothing — the join that makes a drill a drill was
+       * behind `entry.key === 'drill'`. That is the whole fault class this project keeps finding,
+       * in miniature: the feature was complete and there was one string in the way.
+       *
+       * `needs: 'node'` is the catalogue's own word for "this must be built on a resource", and it
+       * is what `js/buildplan.js` already checks before it will let you place one. Asking the same
+       * question here means the next thing that stands on a seam works without anybody remembering
+       * to add its name to a list.
+       */
+      if (def?.needs === 'node' || entry.key === 'drill' || entry.key === 'pump') {
         const seam = oreHere().at(entry.x, entry.z, 6);
         const got = mining.bindDrill(entry, seam);
         if (!got.ok) hud.log(got.why, 'warn');
@@ -7069,6 +7082,32 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const out = civics.muster.tickLeash(dt, { x: control.x, z: control.z, spot: defence.spot?.() });
       if (out?.warn) hud.log(`You are ${out.metres} m from the muster. ${out.seconds}s and it is over.`, 'warn');
       if (out?.over) { hud.log(out.line, ''); defence.adopt(null); }
+    }
+
+    /**
+     * R15 — YOU ARE SOMEBODY. STANDING AT A MACHINE WORKS IT.
+     *
+     * The Civilization Expansion made a machine need work units before it will run, which is the
+     * right rule and the whole reason citizens are worth having. But I turned it on from the first
+     * minute of a new game, before a player can possibly have a colony — so somebody who built a
+     * furnace, queued iron and stood there watching was told "Standing cold — nobody is working
+     * this", by a game in which they were the only person alive.
+     *
+     * js/refine.js's own note has the answer in it: work units are interchangeable, and "it makes
+     * no difference at all whether the player swung at it, a citizen filled it on their shift, or a
+     * Tender Arm ground through it while everyone was asleep." You standing next to a machine IS
+     * somebody working it. It credits at exactly the rate the machine spends, so a furnace you are
+     * attending runs, and one you walked away from coasts on its bank — two minutes — and then
+     * waits. Which is precisely what a citizen is then worth hiring for.
+     */
+    if (!dungeon && state.frames % 15 === 0) {
+      const attended = dt * 15;
+      const perUnit = colonyData?.labour?.secondsPerUnit || 30;
+      for (const e of build.entries || []) {
+        if (!works.machineDefs?.[e.key]) continue;
+        if (Math.hypot(e.x - control.x, e.z - control.z) > 8) continue;
+        works.credit?.(e.id, attended / perUnit);
+      }
     }
 
     // R14: the ambient purse earns while you walk, and not at all during a fight or underground

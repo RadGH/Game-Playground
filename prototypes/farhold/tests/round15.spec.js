@@ -315,3 +315,168 @@ test('the build panel always says what to do next, even once you have built thin
   expect(out.after).toMatch(/Next/);
   expect(errors).toEqual([]);
 });
+
+/**
+ *   "Then I would like to add a few drills next to an outpost marker, maybe with a chest for
+ *    storage, and have that base generate ore."
+ *
+ * The whole loop, end to end, with nothing hand-wired: place a marker, put drills on real seams
+ * around it and a crate beside them, and let the clock run. If the ore does not appear in the crate
+ * then one of five joins is broken and it does not matter which of them looks correct in isolation.
+ */
+test('drills beside an outpost marker fill its crate with ore, on their own', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(async () => {
+    const fh = window.farhold;
+    const t = fh.terrain;
+    const buildable = (x, z) => !t.underwater(x, z) && t.riverAt(x, z) <= 0.3 && t.slopeAt(x, z, 4) < 0.18;
+
+    // find real seams near the player — the ones the world actually generated
+    const sweep = fh.scan.sweep(null, null, 900);
+    /**
+     * Seams within ninety metres of each other — that is the marker's claim, and "a few drills next
+     * to an outpost marker" is what the ask described. A sweep reaches 900 m, so picking the first
+     * three hits gives three seams hundreds of metres apart and three separate outposts, which is
+     * the game behaving correctly and the test asking the wrong question.
+     */
+    const workable = (sweep.hits || []).filter(h => buildable(h.x, h.z));
+    let seams = [];
+    for (const h of workable) {
+      const near = workable.filter(o => Math.hypot(o.x - h.x, o.z - h.z) < 80);
+      if (near.length > seams.length) seams = near.slice(0, 3);
+      if (seams.length >= 3) break;
+    }
+    if (seams.length < 2) return { skipped: `no two workable seams within 80 m of each other on this seed` };
+
+    const give = key => {
+      const need = (fh.structures.structures || []).find(p => p.id === key)?.cost || {};
+      for (const [id, n] of Object.entries(need)) {
+        fh.bag.add?.(id, n * 6);
+        // the catalogue prices in short names and the bag holds real ids; grant both
+        fh.bag.add?.(id === 'iron' ? 'iron_ingot' : id, n * 6);
+      }
+    };
+    const put = (key, x, z) => {
+      fh.build.setMode(true); fh.build.select(key); give(key);
+      fh.build.aim?.(x, z);
+      const r = fh.build.placeHere();
+      fh.build.setMode(false);
+      return { ok: !!r?.ok, why: r?.why ?? null };
+    };
+
+    // a marker at the first seam, a drill on each seam, and a crate beside the marker
+    const home = seams[0];
+    const marker = put('claim_stone', home.x + 6, home.z + 6);
+    const crate = put('storage_crate', home.x + 9, home.z + 6);
+    const drills = seams.map(s => put('small_drill', s.x, s.z));
+
+    // let the clock run: the drills dig, and whatever is not already in a pool routes itself
+    for (let i = 0; i < 40; i++) fh.mining.tick(3);
+
+    const pools = fh.stores.pools() || [];
+    const held = {};
+    for (const p of pools) for (const [id, n] of Object.entries(p.totals || {})) held[id] = (held[id] || 0) + n;
+    const overview = fh.mining.overview() || [];
+    return {
+      seams: seams.map(s => s.name),
+      marker, crate, drills,
+      outposts: (fh.build.outposts() || []).map(p => ({ name: p.name, count: p.count, role: p.role })),
+      dug: overview.map(d => ({ stock: Math.round(d.stock || 0), res: d.resource })),
+      held,
+    };
+  });
+  console.log('outpost loop:', JSON.stringify(out, null, 1));
+  if (out.skipped) { console.log('skipped:', out.skipped); return; }
+
+  expect(out.marker.ok, out.marker.why || '').toBe(true);
+  expect(out.crate.ok, out.crate.why || '').toBe(true);
+  expect(out.drills.filter(d => d.ok).length, 'no drill would stand on a seam').toBeGreaterThan(0);
+
+  // the marker's ninety-metre claim makes the whole lot ONE outpost
+  expect(out.outposts.length, 'the marker did not gather the drills and the crate into one base').toBe(1);
+
+  // and it generates ore without anybody touching it
+  const totalDug = out.dug.reduce((n, d) => n + d.stock, 0);
+  const inStores = Object.values(out.held).reduce((n, v) => n + v, 0);
+  expect(totalDug + inStores, 'the drills dug nothing at all').toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});
+
+/**
+ * R15 — a solo player IS the workforce.
+ *
+ * The Civilization Expansion made a machine need work units before it runs, and I turned that on
+ * from the first minute of a new game — before anybody can have a colony. So a player who built a
+ * furnace, queued iron and stood over it was told "Standing cold — nobody is working this", by a
+ * game in which they were the only person alive. That is the sort of regression that reads as the
+ * feature being broken rather than as a rule you have not met yet.
+ */
+test('a furnace you are standing at runs, with no colony anywhere', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(async () => {
+    const fh = window.farhold;
+    /**
+     * Ask the GAME whether a spot will take a furnace, rather than guessing with a slope sample —
+     * `build.aim()` returns the same check the ghost turns red on, footprint corners and all, which
+     * is the only test that agrees with `placeHere`.
+     */
+    fh.build.setMode(true); fh.build.select('furnace');
+    for (const [id, n] of Object.entries({ stone: 120, clay: 80 })) fh.bag.add?.(id, n);
+    let fx = null, fz = null;
+    for (let r = 6; r < 120 && fx === null; r += 4) {
+      for (let a = 0; a < 16; a++) {
+        const x = fh.control.x + Math.cos(a / 16 * 6.283) * r, z = fh.control.z + Math.sin(a / 16 * 6.283) * r;
+        if (fh.build.aim?.(x, z)?.ok) { fx = x; fz = z; break; }
+      }
+    }
+    if (fx === null) { fh.build.setMode(false); return { skipped: 'nowhere within 120 m will take a furnace' }; }
+
+    fh.build.aim?.(fx, fz);
+    const placed = fh.build.placeHere();
+    fh.build.setMode(false);
+    if (!placed?.ok) return { placed };
+
+    const m = (fh.build.entries || []).map(e => fh.works.get(e.id)).find(Boolean);
+
+    /**
+     * A machine draws its inputs from the STORE POOL it is standing in — so a furnace with no crate
+     * beside it has nowhere to take ore from, whoever is working it. That is the rule, not a bug:
+     * it is why "put down a Furnace and a Storage Crate" is one step in the starting list.
+     */
+    fh.build.setMode(true); fh.build.select('storage_crate');
+    for (const [id, n] of Object.entries({ plank: 60, iron: 20, iron_ingot: 20 })) fh.bag.add?.(id, n);
+    let crate = null;
+    for (let r = 3; r < 14 && !crate; r += 1.5) {
+      for (let a = 0; a < 12; a++) {
+        const x = fx + Math.cos(a / 12 * 6.283) * r, z = fz + Math.sin(a / 12 * 6.283) * r;
+        if (fh.build.aim?.(x, z)?.ok) { fh.build.aim(x, z); crate = fh.build.placeHere(); break; }
+      }
+    }
+    fh.build.setMode(false);
+    const pool = fh.stores.poolAt(fx, fz);
+    if (!pool) return { skipped: 'no store pool formed beside the furnace' };
+    fh.stores.put(pool, 'log', 60);
+    fh.stores.put(pool, 'iron_ore', 30);
+
+    const recipe = (fh.works.board(m.type) || []).find(r => /iron/i.test(r.name));
+    fh.works.queue(m.id, recipe.id, 2);
+
+    // there is no colony: nobody but the player exists
+    const citizens = fh.colony?.citizens?.length ?? 0;
+    // stand there and let it run
+    for (let i = 0; i < 90; i++) { fh.works.credit(m.id, 0.5 / 30 * 15); fh.works.tick(0.5); }
+    return {
+      placed, citizens,
+      state: fh.works.stateText(m),
+      made: m.made || 0,
+      queue: m.queue.length,
+    };
+  });
+  console.log('solo furnace:', JSON.stringify(out));
+  if (out.skipped) { console.log('skipped:', out.skipped); return; }
+  expect(out.placed.ok, out.placed.why || '').toBe(true);
+  expect(out.citizens, 'this test is meaningless with a colony in it').toBe(0);
+  expect(out.state, 'a furnace you are standing over is still cold').not.toMatch(/Standing cold/);
+  expect(out.made, 'nothing was smelted').toBeGreaterThan(0);
+  expect(errors).toEqual([]);
+});

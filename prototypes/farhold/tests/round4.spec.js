@@ -218,13 +218,24 @@ test('every character starts with a lit torch that lights a large area', async (
   const out = await page.evaluate(() => {
     const f = window.farhold;
     f.setTime(500);                              // push the clock round to night
-    const lit = { torch: f.light.torchOn, range: f.light.torch.distance, offhand: f.player.equipment.light?.name };
+    const lit = {
+      torch: f.light.torchOn, range: f.light.torch.distance,
+      offhand: f.player.equipment.light?.name,
+      slot: f.player.equipment.light?.slot,
+    };
     f.light.setTorch(false);
     const dark = f.light.torch.intensity;
     f.light.setTorch(true);
     return { ...lit, dark };
   });
-  expect(out.offhand).toContain('Torch');
+  /**
+   * R16: the SLOT, not the word. The starting light is a "Guttering Brand" and has been for a
+   * while; this asked for the word "Torch" in its name, so it has been failing on a naming choice
+   * rather than on anything about light. What the test is for is that every character starts with
+   * something in the light slot and that it is already lit.
+   */
+  expect(out.slot, 'nothing is in the light slot at all').toBe('light');
+  expect(out.offhand, 'the light has no name').toBeTruthy();
   expect(out.torch).toBe(true);
   expect(out.range).toBeGreaterThanOrEqual(25);
   expect(out.dark).toBe(0);

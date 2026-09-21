@@ -133,10 +133,29 @@ test('a quest marks itself on the map, the minimap and the tracking list', async
 
   await page.keyboard.press('KeyM');
   await page.waitForTimeout(400);
-  const side = await page.evaluate(() => document.querySelector('#map-screen').innerText);
-  expect(side).toContain('TRACKING');
-  expect(side).toContain('Carry word to Somewhere');
-  expect(side).toContain('Test pin');
+  /**
+   * R16 — TWO LISTS, NOT ONE CALLED "TRACKING".
+   *
+   * Round 14 split the one Tracking panel in two — "they were one list called Tracking, sorted by
+   * nothing in particular, which is why the answer to 'where is my quest' was to read fourteen
+   * rows" — so a job now lives under **Work in hand** and a place you kept under **Places you
+   * keep**. This asked for the word TRACKING and has been red ever since. What it is for is that a
+   * marker you made turns up in the map's own side column, so that is what it checks: each one on
+   * its own tab, which is also the thing the split was for.
+   */
+  const side = await page.evaluate(async () => {
+    const out = {};
+    for (const [key, into] of [['work', 'work'], ['places', 'places']]) {
+      const tab = [...document.querySelectorAll('.map-tab')]
+        .find(b => (key === 'work' ? /work/i : /place/i).test(b.textContent));
+      tab?.click();
+      await new Promise(r => setTimeout(r, 150));
+      out[into] = document.querySelector('#map-screen').innerText;
+    }
+    return out;
+  });
+  expect(side.work, 'the job is not under Work in hand').toContain('Carry word to Somewhere');
+  expect(side.places, 'the dropped pin is not under Places you keep').toContain('Test pin');
   await page.keyboard.press('KeyM');
   expect(errors).toEqual([]);
 });

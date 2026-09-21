@@ -691,22 +691,37 @@ let findFavOnly = false;
       keyBox.append(el('p', { class: 'map-key-off', text:
         'Places are switched off — turn "nodes" back on in Layers, above, to see them.' }));
     }
-    let group = null;
-    let list = null;
+    /**
+     * R16 — ONE HEADING PER GROUP.
+     *
+     * This emitted a heading every time the group CHANGED while walking `MARK_ORDER`, which is only
+     * the same thing as "one per group" if the order happens to keep every group together. It does
+     * not: the five "Held ground" marks sit either side of the eleven "Landmarks" ones, so the key
+     * has read `Beware / Settlements / Underground / Held ground / Landmarks / Held ground /
+     * Travel / Yours` — eight headings for seven groups, with one of them twice, which reads as a
+     * mistake because it is one. Gathering first keeps `MARK_ORDER` inside each group and the order
+     * a group first appears in for the headings.
+     */
+    const byGroup = new Map();
     for (const name of MARK_ORDER) {
       const mark = MAP_MARKS[name];
       if (!mark) continue;
-      if (mark.group !== group) {
-        group = mark.group;
-        keyBox.append(el('div', { class: 'map-key-group', text: group }));
-        list = el('div', { class: 'map-key-rows' });
-        keyBox.append(list);
-      }
+      if (!byGroup.has(mark.group)) byGroup.set(mark.group, []);
+      byGroup.get(mark.group).push(name);
+    }
+    let list = null;
+    for (const [group, names] of byGroup) {
+      keyBox.append(el('div', { class: 'map-key-group', text: group }));
+      list = el('div', { class: 'map-key-rows' });
+      keyBox.append(list);
+      for (const name of names) {
+      const mark = MAP_MARKS[name];
       const swatch = el('canvas', { class: 'map-key-swatch', width: 22, height: 22 });
       const ctx = swatch.getContext('2d');
       // the biggest mark is 5.4 units across, so 1.7x fits a 22px box with room for the ring
       drawMark(ctx, name, 11, 11, Math.min(1.7, 8 / mark.r));
       list.append(el('div', { class: 'map-key-row' }, swatch, el('span', { text: mark.label })));
+      }
     }
     /**
      * R14 — the six things the map has always drawn and the key never mentioned: the markers. They

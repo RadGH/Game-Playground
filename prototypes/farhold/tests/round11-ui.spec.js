@@ -24,25 +24,48 @@ test('the map has a key, and every mark in it is drawn by the map itself', async
 
   const out = await page.evaluate(() => {
     const rows = [...document.querySelectorAll('.map-key-row')];
-    // a swatch is a canvas: count the ones that actually have ink on them, so an empty box fails
-    const inked = rows.filter(row => {
+    /**
+     * A key row shows its mark one of two ways: a drawn swatch (a canvas) for the things the map
+     * paints itself, or a glyph (`.map-key-glyph`) for the marker book's own icons, which are
+     * characters and not drawings. R16: this counted only the canvases and compared the total
+     * against every row, so the eight glyph rows made it fail — and what it is actually for is
+     * "no row shows an empty box", which is a rule about the rows that HAVE a swatch.
+     */
+    const swatched = rows.filter(r => r.querySelector('canvas'));
+    const glyphed = rows.filter(r => r.querySelector('.map-key-glyph') && r.querySelector('.map-key-glyph').textContent.trim());
+    const inked = swatched.filter(row => {
       const canvas = row.querySelector('canvas');
-      if (!canvas) return false;
       const px = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
       for (let i = 3; i < px.length; i += 4) if (px[i] > 8) return true;
       return false;
     }).length;
     return {
       rows: rows.length,
+      swatched: swatched.length,
+      glyphed: glyphed.length,
       inked,
       groups: [...document.querySelectorAll('.map-key-group')].map(n => n.textContent),
       words: rows.map(n => n.textContent.trim()),
     };
   });
 
-  expect(out.rows, 'the key lists nothing').toBe(16);
-  expect(out.inked, 'a swatch in the key is an empty box').toBe(out.rows);
-  expect(out.groups).toEqual(['Beware', 'Settlements', 'Underground', 'Held ground']);
+  /**
+   * R16 — the numbers, brought up to date, and a rule underneath them.
+   *
+   * This asked for exactly 16 rows and 4 groups, and the map has had 37 rows and 7 groups for
+   * several rounds — so the test has been red for longer than anybody noticed, which makes it worse
+   * than no test at all. An exact count is still the right guard (it catches a mark added twice),
+   * but the assertions that matter are the rules: every swatch has ink in it, no label appears
+   * twice, and no GROUP HEADING appears twice — which it did, because the key emitted a heading
+   * every time the group changed while walking a list that does not keep its groups together.
+   */
+  expect(out.rows, 'the key lists nothing').toBe(37);
+  expect(out.inked, 'a swatch in the key is an empty box').toBe(out.swatched);
+  expect(out.swatched + out.glyphed, 'a key row shows neither a swatch nor a glyph').toBe(out.rows);
+  expect(new Set(out.words).size, `the key lists something twice: ${out.words.filter((w, i) => out.words.indexOf(w) !== i)}`)
+    .toBe(out.words.length);
+  expect(new Set(out.groups).size, `a group heading appears twice: ${out.groups}`).toBe(out.groups.length);
+  expect(out.groups).toEqual(['Beware', 'Settlements', 'Underground', 'Held ground', 'Landmarks', 'Travel', 'Yours']);
   // the two the report asked for by name
   expect(out.words).toEqual(expect.arrayContaining(['capital', 'city', 'town', 'village', 'hamlet', 'dungeon', 'cave']));
   expect(errors).toEqual([]);
@@ -92,7 +115,17 @@ test('a journal row no longer takes the job, and the notice board still does', a
     rows[0]?.click();
     // nothing may have been taken, and no button may be offering to
     const afterClick = f.questLog.active.length;
-    const buttons = document.querySelectorAll('#journal-board button').length;
+    /**
+     * R16 — A BUTTON THAT TAKES WORK, not any button at all.
+     *
+     * Round 14 gave every journal row with a place a `⌖` locate button, so this counted those and
+     * has been red ever since — which is how a test stops being read. What the rule is actually
+     * about is that the Journal must not be a shop of quests: nothing in it may ACCEPT one. So it
+     * counts the buttons that are not the locate glyph, and still checks that clicking a row takes
+     * nothing, which is the assertion with the teeth.
+     */
+    const allButtons = [...document.querySelectorAll('#journal-board button')];
+    const buttons = allButtons.filter(b => b.textContent.trim() !== '\u2316').length;
 
     // …and the board in a settlement is the way in
     f.hud.toggleSheet(false);

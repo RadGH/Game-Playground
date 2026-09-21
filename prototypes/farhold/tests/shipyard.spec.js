@@ -58,11 +58,24 @@ test('the shipyard is reachable, and every refusal it gives can be satisfied', a
     f.build.setTool('build');
     f.build.select('claim_stone'); f.build.aim(spot.x + 8, spot.z + 8); f.build.placeHere();
     // an assembler is where three of the four subsystems are fitted, and it needs power
+    /**
+     * R16 — SPACED OUT, because they were touching.
+     *
+     * An assembler is 3.4 m wide and a burner generator 2.6, and these stood three metres apart:
+     * half-widths of 1.7 and 1.3 add up to exactly 3.0, so whether the generator went down at all
+     * came down to which way `snap: 'grid'` rounded them. It refused with "That would stand inside
+     * the Assembler", the pad then had no power, and the failure read as a shipyard problem in a
+     * test about the shipyard. Five metres of clearance is not a knife edge.
+     */
     f.build.select('assembler'); f.build.aim(spot.x + 3, spot.z);
     const asm = f.build.placeHere();
-    f.build.select('burner_generator'); f.build.aim(spot.x + 6, spot.z); f.build.placeHere();
-    f.build.select('storage_crate'); f.build.aim(spot.x + 9, spot.z); f.build.placeHere();
-    f.stores.put(f.stores.poolAt(spot.x + 9, spot.z), 'coal', 400);
+    f.build.select('burner_generator'); f.build.aim(spot.x + 8, spot.z);
+    const gen = f.build.placeHere();
+    f.build.select('storage_crate'); f.build.aim(spot.x + 13, spot.z);
+    const crate = f.build.placeHere();
+    if (!gen.ok) return { genWhy: gen.why };
+    if (!crate.ok) return { crateWhy: crate.why };
+    f.stores.put(f.stores.poolAt(spot.x + 13, spot.z), 'coal', 400);
     await new Promise(r => setTimeout(r, 2200));
     if (!asm.ok) return { asmWhy: asm.why };
 
@@ -102,6 +115,8 @@ test('the shipyard is reachable, and every refusal it gives can be satisfied', a
 
   expect(out.none, 'nowhere flat enough for a pad').toBeFalsy();
   expect(out.asmWhy, `the assembler would not go down: ${out.asmWhy}`).toBeFalsy();
+  expect(out.genWhy, `the generator would not go down: ${out.genWhy}`).toBeFalsy();
+  expect(out.crateWhy, `the crate would not go down: ${out.crateWhy}`).toBeFalsy();
   expect(out.shown, 'standing at an assembler did not bring up the shipyard').toContain('Shipyard');
   expect(out.before.ok, 'the character started with a ship').toBe(false);
 

@@ -13,13 +13,35 @@ test('the map opens with a Find panel that can sweep for clay', async ({ page })
   const errors = await land(page);
   await page.evaluate(() => window.farhold.map.toggle(true));
   await page.waitForTimeout(400);
-  const panels = await page.evaluate(() =>
-    [...document.querySelectorAll('.map-side .panel-title, .map-side h3, .map-side .panel > *:first-child')].map(n => n.textContent.trim()));
+  /**
+   * R16 — CLICK THE TAB FIRST.
+   *
+   * The map's side column has four tabs and opens on `work`; the Find panel is only built when
+   * `find` is the one showing. So this has been asking an unopened panel for its dropdown and
+   * getting nothing since the day it was written — it never tested the thing it is named after.
+   */
+  const panels = await page.evaluate(() => {
+    const tab = [...document.querySelectorAll('.map-tab')].find(b => /find/i.test(b.textContent));
+    tab?.click();
+    return [...document.querySelectorAll('.map-side .panel-title, .map-side h3, .map-side .panel > *:first-child')]
+      .map(n => n.textContent.trim());
+  });
+  await page.waitForTimeout(250);
   console.log('map side panels:', JSON.stringify(panels));
   const opts = await page.evaluate(() => [...document.querySelectorAll('.find-pick option')].map(o => o.textContent));
   console.log('findable count:', opts.length, 'sample:', JSON.stringify(opts.slice(0, 8)));
-  expect(opts.length).toBeGreaterThan(10);
+  expect(opts.length, 'the Find tab has no material dropdown in it').toBeGreaterThan(10);
   expect(opts.join('|')).toMatch(/Clay/i);
+  /**
+   * R16 — "…have a sort by distance option and filter by favorites."
+   */
+  const controls = await page.evaluate(() => ({
+    sorts: [...document.querySelectorAll('.find-row select option')].map(o => o.textContent),
+    fav: !!document.querySelector('.find-fav input[type=checkbox]'),
+  }));
+  console.log('find controls:', JSON.stringify(controls));
+  expect(controls.sorts.join('|'), 'the Find tab cannot be sorted').toMatch(/Nearest/i);
+  expect(controls.fav, 'the Find tab cannot be cut down to favourites').toBe(true);
   expect(errors).toEqual([]);
 });
 

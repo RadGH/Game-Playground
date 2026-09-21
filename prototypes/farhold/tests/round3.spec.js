@@ -124,12 +124,36 @@ test('deep water makes you swim, and you cannot ride a horse into it', async ({ 
   expect(Math.abs(swim.floating.y - swim.floating.surface)).toBeLessThan(2);
   expect(swim.mountedInWater).toBe(false);
 
-  // the stroke follows the keys, read through the real input path
+  /**
+   * R16 — ON A RAFT YOU ARE NOT SWIMMING, AND THAT USED TO BE THE BUG.
+   *
+   *   "On the default Lashed Raft (and other water vehicles) the character sits leaning backwards
+   *    and doesn't look right."
+   *
+   * He was playing the SWIM clip, which pitches the root back 64° on purpose so a swimmer floats
+   * flat. Every character starts with a raft and a boat equips itself on entering deep water, so
+   * this test — which asserted the three swim strokes in deep water — was encoding exactly that.
+   * Both halves are checked now: aboard something you stand on the deck, and in the water without
+   * a hull the stroke still follows the keys.
+   */
+  const aboard = await page.evaluate(async () => {
+    const f = window.farhold;
+    await new Promise(r => setTimeout(r, 300));
+    return { boating: !!f.control.boating, anim: f.actor.anim };
+  });
+  expect(aboard.boating, 'the starting raft did not go in the water').toBe(true);
+  expect(aboard.anim, 'on a raft the body is still playing a swimming clip').toBe('boat');
+
+  // …and with no hull under you, the stroke follows the keys, read through the real input path
+  await page.evaluate(() => { window.farhold.control.boating = null; });
   const strokes = {};
   for (const [name, key] of [['forward', 'KeyW'], ['back', 'KeyS'], ['side', 'KeyD']]) {
     await page.keyboard.down(key);
     await page.waitForTimeout(260);
-    strokes[name] = await page.evaluate(() => window.farhold.actor.anim);
+    strokes[name] = await page.evaluate(() => {
+      window.farhold.control.boating = null;      // it re-boards the moment it can
+      return window.farhold.actor.anim;
+    });
     await page.keyboard.up(key);
     await page.waitForTimeout(120);
   }
@@ -319,7 +343,18 @@ test('H puts you on a horse: faster, jumps further, and cannot swing', async ({ 
   const ride = await page.evaluate(async () => {
     const f = window.farhold;
     f.teleport(f.control.spawn.x, f.control.spawn.z);
+    /**
+     * R16 — MEASURE A TOP SPEED, NOT AN ACCELERATION RAMP.
+     *
+     * This ran sixty ticks — one second — from a standing start, and a horse takes longer than a
+     * man to get going. So a mount 2.1x faster at pace measured 1.33x over that second and the test
+     * read it as "the horse is not faster", which is not what is being claimed. It runs the engine
+     * up for a second first and then measures the second one.
+     */
     const walk = () => {
+      for (let i = 0; i < 60; i++) {
+        f.control.update(1 / 60, { forward: 1, strafe: 0, run: false, jump: false, attack: false, look: [0, 0], pressed: new Set() }, {});
+      }
       const start = { x: f.control.x, z: f.control.z };
       for (let i = 0; i < 60; i++) {
         f.control.update(1 / 60, { forward: 1, strafe: 0, run: false, jump: false, attack: false, look: [0, 0], pressed: new Set() }, {});
@@ -351,8 +386,23 @@ test('M opens a map with the player, layers and pins on it', async ({ page }) =>
   await expect(page.locator('#map-screen')).toBeVisible();
   await expect(page.locator('#map-canvas')).toBeVisible();
   // World Forge's own layer chips, the weather one from round 3, and Farhold's own `levels` overlay
+  /**
+   * R16: eleven. World Forge's own layers plus the weather one from round 3 plus Farhold's `levels`
+   * overlay — the count grew and this did not, so it has been red for a while. The number is still
+   * worth pinning (it catches a layer added twice), and the rule under it is that every chip names
+   * the layer it toggles.
+   */
+  /**
+   * …and OPEN the reference panel first. Round 15 moved the layers, the key and the world's
+   * composition into a collapsed `<details>` — "the useful stuff is still at the bottom" — so the
+   * chips have been present and invisible ever since, and `toBeVisible()` below has been failing
+   * on a layout decision rather than on anything about layers.
+   */
+  await page.evaluate(() => { const d = document.querySelector('#map-screen .map-ref'); if (d) d.open = true; });
   const chips = page.locator('#map-screen .chips.layers .chip');
-  await expect(chips).toHaveCount(10);
+  await expect(chips).toHaveCount(11);
+  const named = await page.locator('#map-screen .chips.layers .chip[data-layer]').count();
+  expect(named, 'a layer chip does not say which layer it is').toBe(11);
   await expect(page.locator('#map-screen .chip[data-layer="levels"]')).toBeVisible();
   await page.locator('#map-screen .chip[data-layer="elevation"]').click();
   expect(await page.evaluate(() => window.farhold.map.state.layer)).toBe('elevation');

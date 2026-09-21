@@ -14,18 +14,46 @@ import { itemScore, SLOTS, describeAffix, xpForLevel, displayName } from './rpg.
 const TIER_THEMES = { 1: 'how it flies', 2: 'when it lands', 3: 'what it does to the fight' };
 
 /** The seven screens, in rail order — also what the `1`–`7` keys pick. */
-const SCREENS = ['character', 'inventory', 'skills', 'perks', 'crafting', 'upgrade', 'journal'];
+/**
+ * The rail, in order. R17 added four: the combat log and the Holding, which used to be overlays on
+ * keys of their own, and the two screens this round built (Research, Followers).
+ *
+ * The digits on the rail are stamped from THIS list by `numberRail()`, not written into index.html,
+ * so adding a screen no longer means renumbering every keycap below it by hand and then finding out
+ * six months later that one of them was never changed.
+ */
+const SCREENS = [
+  'character', 'inventory', 'skills', 'perks', 'crafting', 'upgrade', 'journal',
+  'log', 'holding', 'research', 'followers',
+];
 
 /** What the header calls each screen. `perks` was missing, so the Perks screen said "Character". */
 const SHEET_TITLES = {
   character: 'Character', inventory: 'Inventory', skills: 'Skills', perks: 'Perks',
   crafting: 'Crafting', upgrade: 'Upgrade', journal: 'Journal',
+  log: 'What has happened', holding: 'The Holding', research: 'Research', followers: 'Followers',
 };
 import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
 import { treeFor, picksFor, talentSummary, tiersOpen, TIER_LEVELS } from './skilltalents.js';
 import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, canRefund, refundOne, linksOf, armProgress } from './perks.js';
+
+/**
+ * HOW CLOSE YOU HAVE TO BE FOR A SHOP OR A JOB TO APPEAR ON THE MINIMAP.
+ *
+ *   "Update the minimap so that nodes like shops and available quests only show up in close
+ *    proximity (maybe 100 or 200 ft). Maybe the same distance that enemies are revealed at."
+ *
+ * 70 metres, which is about 230 feet and is roughly where an enemy pip starts showing up — the
+ * field only has bodies in it out to a couple of hundred metres and they are thin at the edge. The
+ * point is that walking into a town should REVEAL it: a row of `$` and `!` glyphs visible from the
+ * next valley is the map doing the exploring for you.
+ *
+ * An extra opts in by carrying `near`; anything without it is drawn wherever it is, because a
+ * stronghold, a meteor and a dungeon mouth are destinations rather than things you stumble on.
+ */
+export const MINIMAP_NEAR = 70;
 
 /** How far in and out the perk forest zooms, and the rings it draws under the nodes. */
 const PERK_ZOOM = [0.6, 4];
@@ -38,14 +66,14 @@ function tint(hex, amount) {
   return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
 }
 const PERK_RINGS = RINGS.map(r => r.radius);
-import { patternGlyphs, patternText, handsOf, profileOf } from './weapons.js';
+import { patternGlyphs, patternText, handsOf, profileOf, spellShapeOf } from './weapons.js';
 import { VEHICLES, vehicleFor } from './gear.js';
 import { MARKER_LOOKS, distanceText } from './markers.js';
 import { NEARBY_ICONS, mmss } from './nearby.js';
 import { installTooltips, registerTip, hideTip, refreshTip } from '../../../shared/tooltip.js';
 // The playground's one number formatter. Nothing on screen should ever read "513.4100000000000001"
 // — Emberveil hit exactly this and `shared/format.js` is the fix it produced.
-import { fmt, hp as hpNum } from '../../../shared/format.js';
+import { fmt, hp as hpNum, mat } from '../../../shared/format.js';
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => {
@@ -54,6 +82,23 @@ const el = (tag, cls, text) => {
   if (text != null) n.textContent = text;
   return n;
 };
+
+/**
+ * IS SOME SCREEN ALREADY THE WHOLE WINDOW?
+ *
+ * Written down once because three different places were asking it with three different selector
+ * lists, and the held-mode readout was asking it with none at all. Anything that covers the game
+ * belongs in here: the character sheet, the pause menu, the map, the star chart, a conversation,
+ * the Holding, and any screen a later round injects that marks itself `.screen`.
+ */
+export function screenOpen(hud = null) {
+  if (hud?.sheetOpen) return true;
+  return !!document.querySelector(
+    '#sheet:not(.hidden), #pause:not(.hidden), #map-screen:not(.hidden), '
+    + '.screen.chart:not(.hidden), #talk:not(.hidden), .civ-screen:not(.hidden), '
+    + '#boot:not(.hidden)',
+  );
+}
 
 /**
  * What a boat or a ship is FOR, in the dry voice the rest of the character screen uses.
@@ -324,24 +369,18 @@ export class Hud {
     });
 
     /**
-     * `L` shows the last fifty lines of the log.
+     * R17 — THE LOG'S OWN KEY LISTENER IS GONE, AND THAT IS THE FIX.
      *
-     * Everything the game explains goes through five lines in the bottom corner and is then gone,
-     * with no way to read it again — so anything you looked away from was simply lost. Held off
-     * while the sheet is open, where `1`-`7` and `R` already own the keyboard.
+     *   "Pressing 'K' opens a new civilization menu… This also opens the combat log though it shows
+     *    up behind the window… Also the 'L' hotkey no longer closes the combat log but K does."
+     *
+     * Both were true at once. `settings.js` had the `log` action on **KeyK** while js/main.js had
+     * the Holding hard-coded on **KeyK** as well, so one press ran both — and `torch` had taken
+     * KeyL, so the key the help text still advertised for the log did nothing. js/hud.js listening
+     * for a raw key code of its own was how a second owner of K got in without the binding table
+     * ever knowing. Every key now goes through `settings.BINDINGS` in js/main.js: **L** is the log,
+     * **F** is the light, **K** is the Holding, and each opens the sheet on its own tab.
      */
-    window.addEventListener('keydown', e => {
-      if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
-      if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-      // K, not L: the user asked for L to be the light, on foot and in the ship. The log is the
-      // thing that moved, because a light you cannot turn on at night is a worse problem than a
-      // scrollback on an unfamiliar key.
-      if (e.code !== 'KeyK' || this.sheetOpen) return;
-      // …and not over a screen that already owns the whole window
-      if (document.querySelector('#pause:not(.hidden), #map-screen:not(.hidden), .screen.chart:not(.hidden), #talk:not(.hidden)')) return;
-      e.preventDefault();
-      this.toggleLogHistory();
-    });
 
     // Rich hover cards everywhere in the sheet. `title=""` was never going to be enough for an item
     // with six properties on it, and the user asked for the affixes "properly detailed".
@@ -355,7 +394,7 @@ export class Hud {
     registerTip('material', node => {
       const m = this.craft?.M?.[node.dataset.tipMaterial];
       if (!m) return null;
-      return `<b>${m.name}</b><div class="tip-dim">Tier ${m.tier} · you have ${this.craft.materials.count(node.dataset.tipMaterial)}</div>`
+      return `<b>${m.name}</b><div class="tip-dim">Tier ${m.tier} · you have ${mat(this.craft.materials.count(node.dataset.tipMaterial))}</div>`
         + `<div class="tip-line">${m.desc || ''}</div>`;
     });
     registerTip('skill', node => {
@@ -410,16 +449,21 @@ export class Hud {
     window.addEventListener('keydown', e => {
       if (!this.sheetOpen || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
       if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-      const n = Number(e.key);
-      if (!(n >= 1 && n <= SCREENS.length)) return;
+      // `1`-`9` then `0` for the tenth. Past that a screen is reached by clicking the rail —
+      // there is no eleventh digit, and inventing a modifier for one would be worse than the gap.
+      if (e.key.length !== 1 || !/[0-9]/.test(e.key)) return;
+      const at = e.key === '0' ? 9 : Number(e.key) - 1;
+      const tab = this.railTabs?.[at];
+      if (!tab) return;
       e.preventDefault();
-      this.setTab(SCREENS[n - 1]);
+      this.setTab(tab);
     });
 
     $('sheet-close').onclick = () => this.toggleSheet(false);
     for (const btn of $('sheet-tabs').querySelectorAll('button')) {
       btn.onclick = () => this.setTab(btn.dataset.tab);
     }
+    this.numberRail();
     // "everything up to X" rather than "everything normal": the old button only ever took plain
     // items, which is why recycling a bag full of magic junk had to be done one row at a time.
     const RARITY_ORDER = ['normal', 'magic', 'rare', 'legendary'];
@@ -481,16 +525,27 @@ export class Hud {
     if (this.history.length > 50) this.history.pop();
     const box = $('log');
     box.replaceChildren(...this.lines.map(l => el('div', l.cls, l.text)));
-    if (this.historyOpen) this.drawLogHistory();
+    if (this.sheetOpen && this.tab === 'log') this.drawLogHistory();
   }
 
-  /** `L` opens and closes the history panel. */
-  toggleLogHistory(on = !this.historyOpen) {
-    this.historyOpen = !!on;
-    const box = $('log-history');
-    if (!box) return;
-    box.classList.toggle('hidden', !this.historyOpen);
-    if (this.historyOpen) this.drawLogHistory();
+  /**
+   * `L` OPENS THE LOG — ON THE SHEET, NOT OVER IT.
+   *
+   * It used to be a floating card of its own with its own open flag, which is how it ended up
+   * BEHIND the Holding screen and still up after the Holding closed: two overlays on two keys
+   * with no idea about each other. It is a tab now, so "open the log" means "open the sheet on the
+   * Log tab" and "close the log" means the sheet's own close.
+   */
+  toggleLogHistory(on = null) {
+    const showing = this.sheetOpen && this.tab === 'log';
+    const want = on == null ? !showing : !!on;
+    this.historyOpen = want;
+    if (want) {
+      if (!this.sheetOpen) this.toggleSheet(true);
+      this.setTab('log');
+    } else if (showing) {
+      this.toggleSheet(false);
+    }
   }
 
   /** The panel behind `L`: the last fifty lines, newest at the top, in the same colours. */
@@ -867,15 +922,66 @@ export class Hud {
       box = this._held = el('div', 'held-mode');
       document.body.append(box);
     }
+    /**
+     * R17 — "[object HTMLElement]" ABOVE THE WEAPON NAME.
+     *
+     * `el(tag, cls, text)` takes exactly three arguments and the third is set with `textContent`.
+     * This was calling `el('div', 'hm-ring', ...modes.map(...))`, so the FIRST pip element was
+     * stringified into the ring's text — which is what "[object HTMLElement]" is — and every pip
+     * after it was dropped on the floor. The ring has to be built by appending.
+     */
+    // remembered so `refreshHeld()` can re-ask the question when a screen opens or closes
+    if (mode) this._heldArgs = { mode, modes, labels };
     if (!mode || modes.length < 2) { box.classList.remove('on'); return; }
+    /**
+     * …and it has to go away while a screen owns the window. The held-mode readout is a fixed box
+     * on top of everything at z-index 40; the character sheet does not paint over it, so "Weapon —
+     * Swing at what is in front of you" sat across the middle of the inventory.
+     */
+    if (screenOpen(this)) { box.classList.remove('on'); return; }
     if (box.dataset.mode === mode && box.dataset.n === String(modes.length)) { box.classList.add('on'); return; }
     box.dataset.mode = mode; box.dataset.n = String(modes.length);
     box.classList.add('on');
+    const ring = el('div', 'hm-ring');
+    for (const m of modes) ring.append(el('i', 'hm-pip' + (m === mode ? ' on' : '')));
     box.replaceChildren(
-      el('div', 'hm-ring', ...modes.map(m => el('i', 'hm-pip' + (m === mode ? ' on' : '')))),
+      ring,
       el('div', 'hm-name', labels[mode]?.name || mode),
       el('div', 'hm-note muted small', labels[mode]?.note || ''),
     );
+  }
+
+  /**
+   * What the mount in the slot is worth, in the same units as the Ride row.
+   *
+   * Asks `ground()` for the answer rather than working it out again, because working it out again
+   * is how the two rows came to disagree in the first place.
+   */
+  mountNote(worn) {
+    const mount = this.ground?.()?.options?.find(o => o.key === 'mount');
+    if (mount?.note) return mount.note;
+    // no ground list (a test, or the sheet opened before the world did) — say what we can
+    return worn?.speed ? `${Math.round(worn.speed * 100) / 100}× walking pace` : 'Carries you.';
+  }
+
+  /**
+   * Ask the held-mode readout to reconsider whether it should be on screen.
+   *
+   * Called from `tick`, which is the only thing in the game that runs whatever the player is doing.
+   * Opening the map, the Holding or a conversation is not something js/hud.js is told about, so
+   * watching for it is cheaper than threading a callback through six modules — and the work is one
+   * `querySelector` on a frame that is already drawing a planet.
+   */
+  refreshHeld() {
+    const a = this._heldArgs;
+    if (!a) return;
+    const box = this._held;
+    const want = !screenOpen(this) && a.modes.length >= 2;
+    // nothing to do unless the answer changed since last frame
+    if (!box || box.classList.contains('on') === want) return;
+    if (!want) { box.classList.remove('on'); return; }
+    box.dataset.mode = '';                  // force a rebuild, the short-circuit above would skip it
+    this.heldMode(a.mode, a.modes, a.labels);
   }
 
   // ---------------------------------------------------------------- bars and place
@@ -890,6 +996,7 @@ export class Hud {
      * place the level is written.
      */
     this.flying = !!flying;
+    this.refreshHeld();
     $('hud-left').classList.toggle('flying', this.flying);
     const hpPct = Math.max(0, player.hp / player.maxHp * 100);
     $('bar-hp-fill').style.width = hpPct + '%';
@@ -1225,6 +1332,8 @@ export class Hud {
     };
     // chests, dungeon mouths and the folk worth talking to, under the enemy pips
     for (const x of extras) {
+      // R17: a mark that only shows up close. See MINIMAP_NEAR.
+      if (x.near && Math.hypot(x.x - player.x, x.z - player.z) > x.near) continue;
       if (x.icon) {
         const [ix, iy] = toPx(x.x, x.z);
         if (ix < -8 || iy < -8 || ix > size + 8 || iy > size + 8) continue;
@@ -1267,6 +1376,21 @@ export class Hud {
       if (inside) {
         ctx.font = '700 12px system-ui, sans-serif';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        /**
+         * R17 — "Waypoints favorited on the map with a star do not show a star on the minimap."
+         *
+         * A gold ring around the glyph, which is how the full map draws a favourite as well
+         * (js/map.js `drawMarkerDot`) — ON the icon, never beside it. The old big-map version
+         * painted the star a marker and a half up and to the left of its own dot, which is the
+         * other half of the same report: "it is not clear which of these is the actual location".
+         */
+        if (m.starred) {
+          ctx.beginPath();
+          ctx.arc(mx, my, 8, 0, Math.PI * 2);
+          ctx.lineWidth = 1.6;
+          ctx.strokeStyle = '#ffd24a';
+          ctx.stroke();
+        }
         ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(8,10,16,.95)';
         ctx.strokeText(look.icon, mx, my);
         ctx.fillStyle = m.done ? '#9ae06a' : look.color;
@@ -1384,6 +1508,53 @@ export class Hud {
     for (const ms of [140, 420, 1300]) setTimeout(again, ms);
   }
 
+  /**
+   * PUT THE DIGITS ON THE RAIL, AND HIDE THE SCREENS NOTHING HAS MOUNTED.
+   *
+   * Two jobs that have to happen together, because they are the same question: which of these tabs
+   * is real right now. A Research tab with nothing behind it is worse than no tab — it is a
+   * promise — so a rail button whose screen has not been mounted is removed, and the numbering
+   * then runs over what is left rather than over the markup.
+   */
+  numberRail() {
+    const rail = $('sheet-tabs');
+    if (!rail) return;
+    const live = [];
+    for (const key of SCREENS) {
+      const btn = rail.querySelector(`button[data-tab="${key}"]`);
+      if (!btn) continue;
+      // `log`, `character` and the rest are always here; the three mounted screens only once
+      // js/main.js has handed one in
+      const mountable = ['holding', 'research', 'followers'].includes(key);
+      const present = !mountable || !!this.mounted?.[key];
+      btn.hidden = !present;
+      if (present) live.push(key);
+    }
+    this.railTabs = live;
+    live.forEach((key, i) => {
+      const cap = rail.querySelector(`button[data-tab="${key}"] .rail-key`);
+      if (cap) cap.textContent = i < 9 ? String(i + 1) : (i === 9 ? '0' : '');
+    });
+    const hint = $('rail-keyhint');
+    if (hint) {
+      hint.innerHTML = live.length > 9
+        ? '<kbd>1</kbd>–<kbd>9</kbd>, <kbd>0</kbd> screens'
+        : `<kbd>1</kbd>–<kbd>${live.length}</kbd> screens`;
+    }
+    // a tab that has just been hidden must not stay selected
+    if (!live.includes(this.tab)) this.setTab(live[0] || 'character');
+  }
+
+  /**
+   * Hand js/hud.js a screen that lives in its own file — js/civics-ui.js, js/research-ui.js,
+   * js/followers-ui.js. Anything with a `draw()` will do; the tab appears the moment one arrives.
+   */
+  mount(tab, screen) {
+    this.mounted = this.mounted || {};
+    this.mounted[tab] = screen;
+    this.numberRail();
+  }
+
   setTab(tab) {
     hideTip();
     this.tab = tab;
@@ -1392,6 +1563,10 @@ export class Hud {
       btn.setAttribute('aria-selected', btn.dataset.tab === tab ? 'true' : 'false');
     }
     for (const body of document.querySelectorAll('.tab-body')) body.classList.toggle('hidden', body.dataset.tab !== tab);
+    // a mounted screen has its own `hidden` flag on its own root, and it has to agree with the tab
+    for (const [key, screen] of Object.entries(this.mounted || {})) {
+      if (key === tab) screen.show?.(); else screen.hide?.();
+    }
     $('sheet-title').textContent = SHEET_TITLES[tab] || 'Character';
     this.renderSheet();
   }
@@ -1437,6 +1612,10 @@ export class Hud {
     if (this.tab === 'crafting') this.renderCrafting();
     if (this.tab === 'upgrade') this.renderUpgrade();
     if (this.tab === 'journal') this.renderJournal();
+    if (this.tab === 'log') this.drawLogHistory();
+    // The three mounted screens draw themselves. They are handed in by js/main.js (`hud.mounted`)
+    // so js/hud.js never has to import them — the point of keeping them in files of their own.
+    if (this.mounted?.[this.tab]?.draw) this.mounted[this.tab].draw();
     for (const [node, top] of keep) node.scrollTop = top;
   }
 
@@ -1670,7 +1849,18 @@ export class Hud {
           this.renderSheet();
         };
         row.append(select);
-        row.append(el('span', 'muted small', worn ? toolFunction(slot, worn) : 'Nothing in the slot.'));
+        /**
+         * R17 — THE SAME HORSE AT TWO DIFFERENT SPEEDS.
+         *
+         *   "They both say trail horse, but the move speeds are different (1.6m/s vs 8.6m/s)."
+         *
+         * Both were printing the truth about different numbers. A mount's `speed` is a MULTIPLIER
+         * on the walk — the Trail Horse is 1.6× — and `toolFunction` was stamping "m/s" on the end
+         * of it. The Ride row multiplies it by the walk speed and gets the real 8.6 m/s. One
+         * number now, taken from the Ride row's own option so the two can never drift again.
+         */
+        row.append(el('span', 'muted small',
+          worn ? (slot === 'mount' ? this.mountNote(worn) : toolFunction(slot, worn)) : 'Nothing in the slot.'));
         kids.push(row);
       }
 
@@ -1689,6 +1879,19 @@ export class Hud {
           opt.selected = key === active;
           select.append(opt);
         }
+        /**
+         * R17 — AN EMPTY DROPDOWN IS NOT AN ANSWER.
+         *
+         * You do not start with a ship (BUILDING_EXPANSION §9.1), so `owned.ship` is `[]` and this
+         * select rendered as a blank box with nothing in it — which reads as broken rather than as
+         * "you have not got one yet". A single disabled row says so instead.
+         */
+        if (!select.children.length) {
+          const none = document.createElement('option');
+          none.value = ''; none.textContent = '(None)'; none.selected = true; none.disabled = true;
+          select.append(none);
+          select.disabled = true;
+        }
         select.onchange = () => this.onSelectVehicle?.(slot, select.value);
         row.append(select);
         /**
@@ -1699,7 +1902,11 @@ export class Hud {
          * otherwise a column of numbers. This is built out of the vehicle's own figures instead, so
          * picking between two of them is a comparison rather than a read.
          */
-        row.append(el('span', 'muted small', vehicleFunction(slot, spec.kinds[active])));
+        row.append(el('span', 'muted small', spec.kinds[active]
+          ? vehicleFunction(slot, spec.kinds[active])
+          : (slot === 'ship'
+            ? 'None yet. A ship is built, never bought — four subsystems at an assembler, then a pad.'
+            : 'None yet.')));
         kids.push(row);
       }
 
@@ -1722,7 +1929,9 @@ export class Hud {
       const ground = this.ground?.();
       if (ground) {
         const row = el('div', 'vehicle-row');
-        row.append(el('span', 'muted small', 'Ride'));
+        // "Ride" and the Mount slot above it are two different questions — what you OWN, and what
+        // H brings — and naming them both after the horse is what made them look like a duplicate.
+        row.append(el('span', 'muted small', 'Ride (H)'));
         const select = el('select');
         for (const opt of ground.options) {
           const o = document.createElement('option');
@@ -2727,7 +2936,9 @@ export class Hud {
       c.dataset.tipRender = 'material';
       c.dataset.tipMaterial = m.id;
       c.tabIndex = 0;
-      c.innerHTML = `<i style="background:${m.color}"></i><span>${m.name}</span><b>${m.n}</b>`;
+      // R17: a pile of clay is a float — `6.000000000003` — and `mat()` is the one place that is
+      // rounded for display. The stored amount stays exact.
+      c.innerHTML = `<i style="background:${m.color}"></i><span>${m.name}</span><b>${mat(m.n)}</b>`;
       return c;
     };
 
@@ -2770,7 +2981,7 @@ export class Hud {
       const m = this.craft.M[id] || { name: id, color: '#888' };
       const row = el('div', 'cost-row' + (have >= want ? ' ok' : ' short'));
       row.innerHTML = `<i style="background:${m.color}"></i><span>${m.name}</span>`
-        + `<b>${have} / ${want}</b>`;
+        + `<b>${mat(have)} / ${mat(want)}</b>`;
       box.append(row);
     }
     if (!Object.keys(cost || {}).length) box.append(el('div', 'muted small', 'Costs nothing.'));
@@ -3474,9 +3685,27 @@ export class Hud {
       if (item.weaponHeadline) bits.push(`<div class="tip-head">${item.weaponHeadline}</div>`);
       if (item.weaponLine) bits.push(`<div class="tip-dim">${item.weaponLine}</div>`);
       if (item.castLine) bits.push(`<div class="tip-dim">${item.castLine}</div>`);
+      /**
+       * R17 — THE SPELL'S SHAPE, not a melee rhythm.
+       *
+       *   "It also appears to show a dot and a slash as the attack style like a melee weapon.
+       *    Instead, can it show an icon indicating what type of spell is cast by the staff?"
+       *
+       * It was drawing `CATEGORY_PATTERNS.magic`, which is `['jab', 'slash']` — a melee poke and a
+       * melee cut, neither of which a staff has ever done — because a magic weapon has no pattern
+       * row and that was the fallback. The glyph and the caption come out of the same row of
+       * js/spellshapes.js, so a circle-with-a-dot can never end up labelled "a cone in front of
+       * you".
+       */
+      const shape = spellShapeOf(item);
+      if (shape) {
+        bits.push(`<div class="tip-pattern"><span class="glyphs">${shape.svg}</span>`
+          + `<span class="muted small">${shape.label}</span></div>`);
+      }
       if (item.elementNote) bits.push(`<div class="tip-dim">${item.elementNote}</div>`);
     }
-    if (item.type === 'weapon' && item.rangeClass === 'melee') {
+    // …and a caster does not also get the melee rhythm row underneath it
+    if (item.type === 'weapon' && item.rangeClass === 'melee' && !spellShapeOf(item)) {
       const p = profileOf(item);
       bits.push(`<div class="tip-pattern"><span class="glyphs">${patternGlyphs(item)}</span>`
         + `<span class="muted small">${patternText(item)}</span></div>`);

@@ -21,6 +21,9 @@
 // every skill's plan is built, so nothing downstream had to change to make the whole board live.
 
 import { talentPlan, talentsOn, castRulesFrom } from './skilltalents.js';
+// R17 — the one place the follower bonus is read off `derived`, so the summon cap and the follower
+// book can never drift apart about what The Kept Company is worth.
+import { followerBonus } from './followers.js';
 
 /**
  * A BURNING ENEMY DID NOT LOOK LIKE IT WAS BURNING.
@@ -132,14 +135,41 @@ export function incomingFrom(unit) {
 }
 
 export function createSkillBar({ data, player, rpg, unlocks = null }) {
-  const ids = data.classes?.[player.classId] || data.classes?.ranger || [];
   const unlockAt = unlocks || data.unlockAt || [1, 3, 7, 12, 18, 24];
-  const slots = ids.map((id, i) => ({
-    id, ...(data.skills[id] || {}),
-    cooldown: data.skills[id]?.cooldown ?? 6,
-    ready: 0,
-    unlockAt: unlockAt[i] ?? 1,
-  }));
+  const slots = [];
+
+  /**
+   * Fill the bar from a list of skill ids. One function rather than an expression, because R17's
+   * custom class can change what is on the bar WHILE THE GAME IS RUNNING.
+   */
+  function fill(ids) {
+    const next = (ids || []).map((id, i) => ({
+      id, ...(data.skills[id] || {}),
+      cooldown: data.skills[id]?.cooldown ?? 6,
+      // a slot keeps whatever cooldown it was already sitting on, so unlearning the thing in
+      // slot 3 is not a free reset of slot 3 mid-fight
+      ready: slots[i]?.ready ?? 0,
+      unlockAt: unlockAt[i] ?? 1,
+    }));
+    slots.length = 0;
+    slots.push(...next);
+  }
+  fill(data.classes?.[player.classId] || data.classes?.ranger || []);
+
+  /**
+   * R17 — UNLEARN A SKILL AT ANY TIME, AND HAVE THE BAR ACTUALLY CHANGE.
+   *
+   *   "You should be able to unlearn a skill at any time."
+   *
+   * The bar used to be built once, from `data.classes[player.classId]`, and that was fine when a
+   * class was a fixed list. A custom class rewrites `data.classes.custom` whenever the player
+   * re-spends a pick, and without this the screen would show the new spell and the key would still
+   * fire the old one — a change that looks applied and is not, which is the worst kind.
+   */
+  function relearn(ids = null) {
+    fill(ids || data.classes?.[player.classId] || []);
+    return slots.map(s => s.id);
+  }
 
   function update(dt) {
     for (const s of slots) if (s.ready > 0) s.ready = Math.max(0, s.ready - dt);
@@ -233,13 +263,26 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
       heal: s.heal ? Math.round(player.maxHp * s.heal) : 0,
       healFrac: s.heal || 0,
       /**
-       * `petSlots` — the perk the play-test asked about by name ("One more companion follows you —
-       * what companion?"). It is a real number now: every summoning skill calls up that many more.
-       * The class roster you start the run with is summoned in js/main.js and still needs its own
-       * line; see the note on `petSlots` in js/perks.js.
+       * R17 — A SUMMON IS A CAP, NOT A COUNT, AND THE KEPT COMPANY MOVES THE CAP.
+       *
+       *   "Spells that summon creatures should only summon one per type unless the spell itself has
+       *    a different limit, however, these spells should also update with 'The Kept Company'
+       *    increasing their limit (while still obeying your total follower limit)."
+       *
+       * Round 16 had the green arm granting `petSlots`, and js/skills.js added it to `petCount` —
+       * how many bodies ONE CAST puts down. That is the thing the user asked to stop: casting
+       * Raise Thrall three times then gave you nine thralls, because nothing anywhere counted what
+       * was already standing there.
+       *
+       * So `petCount` is the spell's own number again and nothing adds to it, and `petCap` is the
+       * new thing: how many of this creature may exist at once. js/followers.js is what enforces
+       * both that and the total follower limit, at the one door every summon goes through
+       * (`pets.summon`) — a cap checked here would be a cap the hire path and the class companion
+       * never asked. The number is carried on the plan anyway because the skill card shows it.
        */
       pet: s.pet || null,
-      petCount: Math.max(1, (s.count || 1) + Math.round(d.petSlots || 0)),
+      petCount: Math.max(1, s.count || 1),
+      petCap: Math.max(1, (s.count || 1) + followerBonus(d)),
       pets: !!s.pets,
       spent: cost,
       paidWith: bloodPrice() ? 'health' : 'mana',
@@ -272,6 +315,8 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
 
   return {
     slots, update, use, check, refresh, cooldownFor, costFor,
+    // R17 — rebuild the bar from a new list of ids, for the custom class's respec
+    relearn,
     /** For the HUD. */
     state: () => slots.map(s => ({
       id: s.id, name: s.name, desc: s.desc, mp: costFor(s),

@@ -161,6 +161,21 @@ export function snapshot({
        */
       devices: player.devices || {},
       held: player.held || 'weapon',
+      /**
+       * R17 — THE CLASS THEY BUILT, AND WHO THEY ARE PAYING.
+       *
+       * `classId` on a custom character is the string "custom", which means nothing on its own:
+       * `build` is the loadout, the six spell picks, the element and the opening choice, and
+       * js/newgame.js re-installs the class from it before a load is handed back — without this a
+       * custom character reloads as whatever `classData.classes[0]` happens to be, with the wrong
+       * skill bar, and nothing says so.
+       *
+       * `followers` is the mercenary contracts. A save carries the contracts and not the bodies,
+       * because the bodies are meshes and the world is rebuilt from its seed; js/followers.js
+       * `tick` summons anybody under contract back beside you once the run is up.
+       */
+      build: player.build || null,
+      followers: player.followers || null,
     },
     position: { x: control.x, z: control.z, yaw: control.yaw, pitch: control.pitch },
     // Markers replaced the old bare `pins` array: a quest destination, a story objective and a
@@ -264,6 +279,10 @@ export function restore(save, { rpg, player, control, map }) {
   // R16 — the two built devices, and which of the four things the wheel has you holding
   player.devices = p.devices || {};
   player.held = p.held || 'weapon';
+  // R17 — the custom class and the mercenary contracts. A save from before this round has neither,
+  // and a preset class never has a `build` at all.
+  player.build = p.build || null;
+  player.followers = p.followers || { contracts: [] };
   player.talents = p.talents || [];
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;

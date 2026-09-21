@@ -29,6 +29,10 @@
 import * as THREE from 'three';
 import { createBuildPlan, makeBag } from './buildplan.js';
 import { createRoadBook, laneRibbon, levelUnderSlab } from './roadplan.js';
+// R17 — the research gate. See `createBuild`'s `plan` line for why this is imported here rather
+// than handed in: js/main.js's `createBuild` call belongs to another pair of hands this round, and
+// js/research.js keeps ONE state that everything asks for by name.
+import { sharedResearch } from './research.js';
 
 /** Geometry is shared: a hundred fence panels are a hundred meshes over four geometries. */
 const GEO = {
@@ -244,7 +248,19 @@ export function createBuild(scene, {
   /** `(from, to) => ({ ok, why })` — the route tool's two ends. js/mining.js owns what it means. */
   onRoute = null,
 } = {}) {
-  const book = plan || createBuildPlan({ catalogue, terrain, terraform, store: store || makeBag(), siteOk });
+  /**
+   * R17 — THE RESEARCH GATE IS FITTED HERE, at the one place a plan is made for the real game.
+   *
+   * `sharedResearch()` is handed the catalogue so it can resolve a `tech` key to a node and a node
+   * to a sentence. It locks NOTHING until data/research.json has loaded and NOTHING at all for a
+   * piece with no `tech` key — which is every low-tech piece in the game. A caller that passes its
+   * own `plan` (the balance harness, a node test) is untouched.
+   */
+  const research = sharedResearch({ catalogue });
+  const book = plan || createBuildPlan({
+    catalogue, terrain, terraform, store: store || makeBag(), siteOk,
+    locked: def => research.lockReason(def),
+  });
   const rules = catalogue?.rules || {};
   const log = (msg, kind) => { if (onLog) onLog(msg, kind); };
 
@@ -964,10 +980,37 @@ export function createBuild(scene, {
       if (api.portalRing) scene.remove(api.portalRing);
     },
 
-    toJSON() { return { plan: book.toJSON(), terraform: terraform?.toJSON?.() || null, roads: roads.toJSON() }; },
+    /** R17 — what the player has learned, in case js/main.js has not been given its own slot yet. */
+    get research() { return research; },
+
+    /**
+     * R17 — RESEARCH RIDES IN THE BUILD BLOB, and here is the honest reason.
+     *
+     * js/main.js's `currentSnapshot()` and js/save.js's parameter list are the two places a new save
+     * key has to be added TOGETHER — main.js's own comment records what happened the last time one
+     * of them was left off, which is that `world`, `quests` and `campaign` were silently dropped and
+     * every load emptied them. Both files belong to another pair of hands this round, so rather than
+     * hand over a research system that forgets itself on every reload, it travels inside `build`,
+     * which is already saved and already loaded.
+     *
+     * It is not an unreasonable place for it either: research gates the build catalogue and nothing
+     * else. If a later round gives it a slot of its own, `research.toJSON()`/`load` move across
+     * unchanged and this reader keeps working for old saves.
+     */
+    toJSON() {
+      return {
+        plan: book.toJSON(),
+        terraform: terraform?.toJSON?.() || null,
+        roads: roads.toJSON(),
+        research: research.toJSON(),
+      };
+    },
     load(data) {
       book.load(data?.plan);
       if (data?.terraform && terraform) terraform.load(data.terraform);
+      // a save from before R17 has no `research` key, which is a brand-new tree with nothing bought
+      // and every low-tech piece available — exactly what that save already had
+      if (data?.research) research.load(data.research);
       /**
        * A save written before round 14 has no `roads` key, and that is fine — it also has its roads
        * as ordinary `road_dirt` entries in the ledger, which still load and still draw. Old tracks

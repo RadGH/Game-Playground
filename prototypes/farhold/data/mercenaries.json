@@ -1,0 +1,290 @@
+{
+  "_doc": "Round 17 — who will walk with you, and the rules about how many of them there can be. js/followers.js reads this file and nothing else does. A mercenary is a COMPANION you bought: a body in the world that fights beside you (js/pets.js), not a citizen who goes and lives at your holding (that is colony.recruitOffer, and it is a different thing entirely). `slots` is the follower ladder, `perType` the summon rule, `scaling` how anybody who follows you keeps up with your level, and `mercenaries` the types a mercenary broker sells.",
+
+  "_slotsDoc": "THREE FOLLOWERS AT LEVEL ONE, four at twenty, five at thirty — the user's own ladder. `perk` is a derived stat: the Kept Company arm of the perk forest grants `followerSlots`, and js/perks.js is the only place that number is handed out. Everything that follows you — a class companion, a bought mercenary, a summoned wolf — takes one slot, so the ladder is the one number that decides how big your company can be.",
+  "slots": {
+    "base": 3,
+    "at": { "20": 1, "30": 1 },
+    "perkStat": "followerSlots",
+    "hardCap": 12
+  },
+
+  "_perTypeDoc": "ONE PER TYPE unless the spell that calls it says otherwise. `base` is that one; a summoning skill in data/skills.json may carry its own `count`, which wins; and the Kept Company arm adds its `followerSlots` on top of whichever of those applies. The TOTAL limit above still holds over all of it — five slots and four mercenaries leaves room for exactly one wolf.",
+  "perType": { "base": 1, "perkStat": "followerSlots" },
+
+  "_scalingDoc": "Everybody who follows you is re-costed off YOUR level every frame js/pets.js runs (see `retune`), so a sentry summoned at level 1 is never still swinging for 1 at level 20. `perLevel` is the same compounding step balance.json uses for a class companion; `pricePerLevel` is how much more a broker charges for somebody who can survive where you are going.",
+  "scaling": { "perLevel": 1.17, "pricePerLevel": 0.12, "restockDays": 3, "offerCount": 4 },
+
+  "_mercDoc": "Each type is a whole body: the numbers js/pets.js builds a unit from, a look, the abilities it casts on its own cooldown, and the upgrades it grows into. `minLevel` keeps a 900-gold caster off a level-2 village's board. `minTownSize` is the settlement size that can support one. `abilities` fire at whatever the follower is already fighting; `upgrades` are read every time the follower is re-costed, so a mercenary hired at level 4 who reaches level 22 has learned everything below 22 by the time you look at them.",
+  "mercenaries": [
+    {
+      "id": "blade_for_hire",
+      "name": "Blade for Hire",
+      "role": "brute",
+      "blurb": "Somebody's second son with a hanger and no plans. Cheap, and stands where you point.",
+      "price": 180, "minLevel": 1, "minTownSize": 1,
+      "hp": 300, "dmg": [16, 26], "armor": 24,
+      "speed": 4.6, "reach": 2.6, "attackEvery": 1.4,
+      "abilities": [
+        { "id": "heavy_swing", "name": "Heavy Swing", "element": "physical", "cooldown": 9, "mult": 1.9, "desc": "One committed blow at whatever they are already fighting." }
+      ],
+      "upgrades": [
+        { "atLevel": 10, "note": "trades the hanger for a longsword", "held": "fh_longsword", "dmgMult": 1.16 },
+        { "atLevel": 20, "note": "learns to open a guard", "ability": "rive" },
+        { "atLevel": 30, "note": "buys plate out of their own pay", "top": "plate", "hpMult": 1.2, "armorAdd": 12 }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.52, "width": 0.7, "headSize": 0.5, "skin": "#d9a77a" },
+        "hair": { "id": "short", "color": "#4a3a28" }, "eyes": { "id": "narrow", "color": "#6b4a2a" },
+        "facialHair": { "id": "stubble" },
+        "top": { "id": "strapped_leather", "color": "#6a5236", "color2": "#4a3a26" },
+        "bottom": { "id": "pants", "color": "#3f3226" }, "shoes": { "id": "boots", "color": "#332618" },
+        "held": { "id": "fh_sword", "color": "#c8ccd4" }
+      } }
+    },
+    {
+      "id": "shield_warden",
+      "name": "Shield Warden",
+      "role": "guard",
+      "blurb": "Paid by the hour to be the thing that gets hit. Slow, heavy, and very hard to move.",
+      "price": 320, "minLevel": 3, "minTownSize": 2,
+      "hp": 520, "dmg": [12, 20], "armor": 46,
+      "speed": 4.2, "reach": 2.6, "attackEvery": 1.7,
+      "onHit": ["weaken"],
+      "abilities": [
+        { "id": "shield_check", "name": "Shield Check", "element": "physical", "cooldown": 11, "mult": 1.3, "radius": 3.6, "status": "web", "desc": "Knocks everything around them off its feet." }
+      ],
+      "upgrades": [
+        { "atLevel": 14, "note": "takes a kite shield off a dead raider", "offhand": "fh_kite_shield", "hpMult": 1.15 },
+        { "atLevel": 26, "note": "learns to plant and hold", "ability": "hold_the_line", "armorAdd": 20 }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.55, "width": 0.85, "headSize": 0.48, "skin": "#c98f63" },
+        "hair": { "id": "buzz", "color": "#2e2418" }, "eyes": { "id": "angry", "color": "#4a6b8a" },
+        "top": { "id": "chainmail", "color": "#9aa0aa", "color2": "#7a8088" },
+        "bottom": { "id": "greaves", "color": "#8a9098" }, "shoes": { "id": "heavy", "color": "#75797f" },
+        "hat": { "id": "great_helm", "color": "#8a9098" },
+        "decor": { "id": "pauldrons", "color": "#7a8088" },
+        "held": { "id": "fh_mace", "color": "#b0b4bc" }, "offhand": { "id": "fh_heater_shield", "color": "#6f7a88" }
+      } }
+    },
+    {
+      "id": "longshot",
+      "name": "Longshot",
+      "role": "archer",
+      "blurb": "Sits behind you, says nothing, and empties a quiver into whatever you are looking at.",
+      "price": 260, "minLevel": 2, "minTownSize": 2,
+      "hp": 220, "dmg": [18, 28], "armor": 12,
+      "speed": 5.0, "reach": 2.2, "attackEvery": 1.3,
+      "ranged": { "range": 26, "element": "physical" },
+      "abilities": [
+        { "id": "pinning_bolt", "name": "Pinning Bolt", "element": "physical", "cooldown": 10, "mult": 1.7, "range": 26, "status": "web", "desc": "Puts a shaft through a leg and leaves it there." }
+      ],
+      "upgrades": [
+        { "atLevel": 12, "note": "restrings to a war bow", "dmgMult": 1.2, "rangeAdd": 6 },
+        { "atLevel": 24, "note": "learns to loose three at once", "ability": "fan_of_shafts" }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.5, "width": 0.55, "headSize": 0.5, "skin": "#e0ac69" },
+        "hair": { "id": "ponytail", "color": "#6a5a3a" }, "eyes": { "id": "almond", "color": "#4a7a4a" },
+        "top": { "id": "leather", "color": "#4a5a3a", "color2": "#39472d" },
+        "bottom": { "id": "pants", "color": "#3a4430" }, "shoes": { "id": "boots", "color": "#2f2a1e" },
+        "hat": { "id": "hood", "color": "#3f4a32" },
+        "held": { "id": "bow", "color": "#8a6a3a" }, "offhand": { "id": "quiver", "color": "#5a4428" }
+      } }
+    },
+    {
+      "id": "hedge_burner",
+      "name": "Hedge Burner",
+      "role": "caster",
+      "blurb": "Learned the one spell and never learned another. It is, to be fair, a very good spell.",
+      "price": 420, "minLevel": 5, "minTownSize": 3,
+      "hp": 190, "dmg": [14, 24], "armor": 8,
+      "speed": 4.6, "reach": 2.2, "attackEvery": 1.6,
+      "ranged": { "range": 22, "element": "fire" },
+      "onHit": ["burn"],
+      "abilities": [
+        { "id": "kindle", "name": "Kindle", "element": "fire", "cooldown": 8, "mult": 1.8, "range": 22, "status": "burn", "desc": "Sets one thing alight and steps back." },
+        { "id": "ember_ring", "name": "Ember Ring", "element": "fire", "cooldown": 16, "mult": 1.4, "radius": 4.2, "status": "burn", "minLevel": 18, "desc": "A ring of fire around whatever they are aiming at." }
+      ],
+      "upgrades": [
+        { "atLevel": 18, "note": "learns the ring", "ability": "ember_ring" },
+        { "atLevel": 28, "note": "burns hotter than anything a village taught them", "dmgMult": 1.25 }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.48, "width": 0.5, "headSize": 0.52, "skin": "#c98f63" },
+        "hair": { "id": "wavy", "color": "#8a3a20" }, "eyes": { "id": "glow", "color": "#ff9a40" },
+        "top": { "id": "robe", "color": "#7a3a22", "color2": "#5a2a18" },
+        "bottom": { "id": "pants", "color": "#4a2a1a" }, "shoes": { "id": "sandals", "color": "#5a4430" },
+        "extras": { "id": "soot" },
+        "held": { "id": "flame", "color": "#ff8a40" }, "decor": { "id": "ember_censer", "color": "#c06a30" }
+      } }
+    },
+    {
+      "id": "frost_binder",
+      "name": "Frost Binder",
+      "role": "caster",
+      "blurb": "Does not kill much. Everything they touch arrives late, which is worse for it.",
+      "price": 440, "minLevel": 6, "minTownSize": 3,
+      "hp": 200, "dmg": [12, 20], "armor": 10,
+      "speed": 4.6, "reach": 2.2, "attackEvery": 1.5,
+      "ranged": { "range": 22, "element": "ice" },
+      "onHit": ["chill"],
+      "abilities": [
+        { "id": "rime_burst", "name": "Rime Burst", "element": "ice", "cooldown": 9, "mult": 1.4, "radius": 4.0, "status": "chill", "desc": "Everything near their target slows to a walk." }
+      ],
+      "upgrades": [
+        { "atLevel": 16, "note": "learns to hold a thing still", "ability": "lock_in_place" },
+        { "atLevel": 26, "note": "their rime bites as well as slows", "dmgMult": 1.2 }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.49, "width": 0.5, "headSize": 0.52, "skin": "#e8d4c0" },
+        "hair": { "id": "long", "color": "#cfe6f2" }, "eyes": { "id": "glow", "color": "#9fd8ff" },
+        "top": { "id": "high_collar_robe", "color": "#3a5a78", "color2": "#2a4258" },
+        "bottom": { "id": "pants", "color": "#2a3a4a" }, "shoes": { "id": "pointed", "color": "#31485c" },
+        "held": { "id": "staff_crystal", "color": "#9fd8ff" }
+      } }
+    },
+    {
+      "id": "field_mender",
+      "name": "Field Mender",
+      "role": "healer",
+      "blurb": "Kills nothing worth counting and is the reason you walked out of the last three fights.",
+      "price": 500, "minLevel": 6, "minTownSize": 3,
+      "hp": 240, "dmg": [8, 14], "armor": 14,
+      "speed": 4.8, "reach": 2.2, "attackEvery": 1.8,
+      "abilities": [
+        { "id": "field_dressing", "name": "Field Dressing", "cooldown": 12, "heal": 0.12, "healsPets": true, "desc": "Puts a twelfth of your health back, and the same into everyone else who follows you." },
+        { "id": "second_wind", "name": "Second Wind", "cooldown": 30, "heal": 0.28, "healsPets": true, "minLevel": 20, "desc": "The one they save for when it has gone badly." }
+      ],
+      "upgrades": [
+        { "atLevel": 20, "note": "learns what to do when it has gone badly", "ability": "second_wind" },
+        { "atLevel": 30, "note": "carries enough for everybody", "hpMult": 1.25 }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.48, "width": 0.55, "headSize": 0.5, "skin": "#d9a77a" },
+        "hair": { "id": "bob", "color": "#c8b08a" }, "eyes": { "id": "round", "color": "#7a9a6a" },
+        "top": { "id": "apron", "color": "#d8d2c2", "color2": "#b8b2a2" },
+        "bottom": { "id": "skirt", "color": "#6a6250" }, "shoes": { "id": "boots", "color": "#4a4032" },
+        "held": { "id": "fh_scepter", "color": "#e6d8a8" }, "decor": { "id": "herb_satchel", "color": "#6a7a4a" }
+      } }
+    },
+    {
+      "id": "shadow_knife",
+      "name": "Shadow Knife",
+      "role": "skirmisher",
+      "blurb": "Works the edges of a fight. Never stands where the shield wall is and never gets thanked.",
+      "price": 380, "minLevel": 4, "minTownSize": 3,
+      "hp": 230, "dmg": [20, 30], "armor": 14,
+      "speed": 5.6, "reach": 2.2, "attackEvery": 1.0,
+      "onHit": ["bleed"],
+      "abilities": [
+        { "id": "opened_vein", "name": "Opened Vein", "element": "physical", "cooldown": 8, "mult": 1.6, "status": "bleed", "statusMult": 1.6, "desc": "A cut that keeps paying out." }
+      ],
+      "upgrades": [
+        { "atLevel": 14, "note": "buys a matched pair", "held": "fh_daggers", "dmgMult": 1.18 },
+        { "atLevel": 24, "note": "learns where the gap in the armour is", "ability": "in_the_gap" }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.5, "width": 0.52, "headSize": 0.5, "skin": "#b98a5e" },
+        "hair": { "id": "slicked", "color": "#241c16" }, "eyes": { "id": "slit", "color": "#8a7a4a" },
+        "accessory": { "id": "scarf_mask", "color": "#2a2a30" },
+        "top": { "id": "wraps", "color": "#2f2f36", "color2": "#23232a" },
+        "bottom": { "id": "pants", "color": "#23232a" }, "shoes": { "id": "boots", "color": "#1c1c22" },
+        "held": { "id": "fh_dagger", "color": "#b8bcc4" }, "decor": { "id": "knife_rig", "color": "#3a3a42" }
+      } }
+    },
+    {
+      "id": "galecaller",
+      "name": "Galecaller",
+      "role": "caster",
+      "blurb": "Charges anything they hit so that everything else lands harder. Expensive for a reason.",
+      "price": 620, "minLevel": 9, "minTownSize": 4,
+      "hp": 210, "dmg": [16, 26], "armor": 10,
+      "speed": 4.6, "reach": 2.2, "attackEvery": 1.5,
+      "ranged": { "range": 24, "element": "lightning" },
+      "onHit": ["shock"],
+      "abilities": [
+        { "id": "arc_over", "name": "Arc Over", "element": "lightning", "cooldown": 9, "mult": 1.7, "radius": 3.8, "status": "shock", "desc": "Jumps between everything standing too close together." }
+      ],
+      "upgrades": [
+        { "atLevel": 20, "note": "calls it down instead of across", "ability": "called_down", "dmgMult": 1.15 },
+        { "atLevel": 30, "note": "the storm follows them now", "dmgMult": 1.2 }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.51, "width": 0.52, "headSize": 0.5, "skin": "#8a6a4a" },
+        "hair": { "id": "spiky", "color": "#e6e0a0" }, "eyes": { "id": "glow", "color": "#ffe86a" },
+        "extras": { "id": "lightning_arcs" },
+        "top": { "id": "sash_robe", "color": "#3a4a6a", "color2": "#2a3550" },
+        "bottom": { "id": "pants", "color": "#2a3550" }, "shoes": { "id": "sandals", "color": "#4a4a56" },
+        "held": { "id": "lightning", "color": "#ffe86a" }, "decor": { "id": "storm_rods", "color": "#c8d0e0" }
+      } }
+    },
+    {
+      "id": "bone_singer",
+      "name": "Bonesinger",
+      "role": "caster",
+      "blurb": "Nobody asks where they trained. Their curses stick, which is what you are paying for.",
+      "price": 560, "minLevel": 8, "minTownSize": 4,
+      "hp": 220, "dmg": [15, 25], "armor": 12,
+      "speed": 4.5, "reach": 2.2, "attackEvery": 1.6,
+      "ranged": { "range": 22, "element": "shadow" },
+      "onHit": ["curse"],
+      "abilities": [
+        { "id": "long_curse", "name": "Long Curse", "element": "shadow", "cooldown": 10, "mult": 1.5, "range": 22, "status": "curse", "statusMult": 1.8, "desc": "A curse that outlasts the thing wearing it." }
+      ],
+      "upgrades": [
+        { "atLevel": 18, "note": "learns to take health back with it", "ability": "tithe", "dmgMult": 1.12 },
+        { "atLevel": 28, "note": "curses everything in the same breath", "ability": "black_chorus" }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.5, "width": 0.48, "headSize": 0.52, "skin": "#cfc4b0" },
+        "hair": { "id": "bald", "color": "#cfc4b0" }, "eyes": { "id": "hollow", "color": "#c090ff" },
+        "extras": { "id": "face_glyphs" },
+        "top": { "id": "trim_robe", "color": "#33283c", "color2": "#241c2c" },
+        "bottom": { "id": "pants", "color": "#241c2c" }, "shoes": { "id": "pointed", "color": "#2c2436" },
+        "held": { "id": "staff_skull", "color": "#b0a898" }, "decor": { "id": "bone_charms", "color": "#cfc4b0" }
+      } }
+    },
+    {
+      "id": "houndmaster",
+      "name": "Houndmaster",
+      "role": "skirmisher",
+      "blurb": "Comes with the dog. The dog is the expensive half and they will tell you so.",
+      "price": 700, "minLevel": 12, "minTownSize": 4,
+      "hp": 280, "dmg": [18, 28], "armor": 18,
+      "speed": 5.2, "reach": 2.4, "attackEvery": 1.2,
+      "onHit": ["bleed"],
+      "brings": { "id": "grove_wolf", "count": 1 },
+      "abilities": [
+        { "id": "set_on", "name": "Set On", "element": "physical", "cooldown": 12, "mult": 1.7, "status": "bleed", "desc": "Sends the hound in first and follows it." }
+      ],
+      "upgrades": [
+        { "atLevel": 22, "note": "the hound grows into something you would not keep indoors", "dmgMult": 1.15 },
+        { "atLevel": 32, "note": "works a second hound", "bringsCount": 2 }
+      ],
+      "look": { "avatar": {
+        "body": { "height": 0.52, "width": 0.62, "headSize": 0.5, "skin": "#b98a5e" },
+        "hair": { "id": "braids", "color": "#4a3a28" }, "eyes": { "id": "narrow", "color": "#6a7a4a" },
+        "top": { "id": "fur_tunic", "color": "#5a4a32", "color2": "#43371f" },
+        "bottom": { "id": "pants", "color": "#3a3024" }, "shoes": { "id": "boots", "color": "#2f2618" },
+        "cape": { "id": "fur_mantle", "color": "#6a5a42" },
+        "held": { "id": "fh_spear", "color": "#a08a60" }
+      } }
+    }
+  ],
+
+  "_abilityDoc": "The abilities named by `upgrades[].ability` and not carried in the type's own `abilities` list. Kept in one table so an upgrade can hand the same trick to more than one type without repeating it.",
+  "abilities": {
+    "rive": { "id": "rive", "name": "Rive", "element": "physical", "cooldown": 14, "mult": 2.2, "status": "weaken", "desc": "Opens a guard and leaves it open." },
+    "hold_the_line": { "id": "hold_the_line", "name": "Hold the Line", "element": "physical", "cooldown": 20, "mult": 1.0, "radius": 4.4, "status": "web", "desc": "Plants, and nothing gets past them for a while." },
+    "fan_of_shafts": { "id": "fan_of_shafts", "name": "Fan of Shafts", "element": "physical", "cooldown": 14, "mult": 1.5, "radius": 4.0, "range": 26, "desc": "Three at once, into whatever is bunched up." },
+    "lock_in_place": { "id": "lock_in_place", "name": "Lock in Place", "element": "ice", "cooldown": 16, "mult": 1.1, "range": 22, "status": "web", "desc": "One thing stops moving entirely." },
+    "in_the_gap": { "id": "in_the_gap", "name": "In the Gap", "element": "physical", "cooldown": 13, "mult": 2.4, "status": "bleed", "desc": "Finds the join in the armour." },
+    "called_down": { "id": "called_down", "name": "Called Down", "element": "lightning", "cooldown": 15, "mult": 2.0, "radius": 4.6, "status": "shock", "desc": "Straight down, on the biggest thing in the group." },
+    "tithe": { "id": "tithe", "name": "Tithe", "element": "shadow", "cooldown": 14, "mult": 1.6, "range": 22, "heal": 0.05, "desc": "Takes a piece of what it kills and gives it to you." },
+    "black_chorus": { "id": "black_chorus", "name": "Black Chorus", "element": "shadow", "cooldown": 22, "mult": 1.3, "radius": 5.0, "status": "curse", "desc": "Everything within earshot is cursed at once." },
+    "second_wind": { "id": "second_wind", "name": "Second Wind", "cooldown": 30, "heal": 0.28, "healsPets": true, "desc": "The one they save for when it has gone badly." },
+    "ember_ring": { "id": "ember_ring", "name": "Ember Ring", "element": "fire", "cooldown": 16, "mult": 1.4, "radius": 4.2, "status": "burn", "desc": "A ring of fire around whatever they are aiming at." }
+  }
+}

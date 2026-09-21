@@ -1,0 +1,124 @@
+/*
+  Farhold — the scanner chooser, round 17.
+
+  Its own stylesheet, injected by js/scanner-ui.js, the way civics.css is injected by
+  js/civics-ui.js: adding a screen to the game should touch neither index.html nor style.css. No
+  inline styles anywhere — the only thing the module sets in JavaScript is which class a row
+  carries.
+
+  The palette is the operations-console one the rest of the interface uses: a near-black panel, a
+  cyan rule, amber for the thing you are being asked to decide.
+*/
+
+.scan-panel {
+  position: fixed;
+  right: 18px;
+  bottom: 96px;
+  width: 268px;
+  max-height: 58vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(110, 190, 220, 0.4);
+  border-radius: 7px;
+  background: rgba(8, 13, 18, 0.93);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.55);
+  color: #d6e4ec;
+  font: 13px/1.4 system-ui, sans-serif;
+  z-index: 60;
+}
+
+.scan-panel.hidden { display: none; }
+
+.scan-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid rgba(110, 190, 220, 0.28);
+}
+
+.scan-head h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7fd4ff;
+}
+
+.scan-head .scan-tier { font-size: 11px; color: #8fa2ae; }
+
+.scan-note { margin: 0; font-size: 11.5px; color: #93a5b1; }
+
+/* the list of materials the survey has seen, each a toggle */
+.scan-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.scan-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.035);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.scan-row:hover { background: rgba(127, 212, 255, 0.12); }
+
+.scan-row[aria-pressed="true"] {
+  border-color: rgba(232, 178, 74, 0.7);
+  background: rgba(232, 178, 74, 0.14);
+  color: #ffdfa4;
+}
+
+.scan-row .scan-count { margin-left: auto; font-size: 11px; color: #8fa2ae; }
+.scan-row[aria-pressed="true"] .scan-count { color: #e8b24a; }
+
+.scan-empty { padding: 10px 2px; font-size: 11.5px; color: #8fa2ae; }
+
+.scan-actions { display: flex; gap: 6px; }
+
+.scan-actions button {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid rgba(110, 190, 220, 0.4);
+  border-radius: 4px;
+  background: rgba(127, 212, 255, 0.08);
+  color: #cfe6f2;
+  font: 12px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.scan-actions button:hover { background: rgba(127, 212, 255, 0.2); }
+
+/* wiping a survey is hours of walking: the button says so before it is pressed */
+.scan-actions button.scan-danger {
+  border-color: rgba(220, 110, 110, 0.55);
+  background: rgba(200, 80, 80, 0.12);
+  color: #f0b4b4;
+}
+
+.scan-actions button.scan-danger:hover { background: rgba(200, 80, 80, 0.28); }
+.scan-actions button:disabled { opacity: 0.4; cursor: default; }
+
+.scan-foot { font-size: 11px; color: #7d8d99; }
+
+@media (max-width: 720px) {
+  .scan-panel { right: 8px; left: 8px; width: auto; bottom: 74px; }
+}

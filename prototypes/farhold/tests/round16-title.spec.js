@@ -84,8 +84,10 @@ test('New game step 1: a name, a class, and the class previewed beside it', asyn
   await page.click('#boot-new');
   await expect(page.locator('#boot-character')).toBeVisible();
 
-  // all thirty classes, and the card fills in from the data rather than being a stub
-  expect(await page.locator('#boot-class option').count()).toBe(30);
+  // all thirty classes plus R17's "Custom — build your own class" at the top, and the card fills in
+  // from the data rather than being a stub
+  expect(await page.locator('#boot-class option').count()).toBe(31);
+  expect(await page.locator('#boot-class option[value="custom"]').count()).toBe(1);
   await expect(page.locator('#boot-class-card h4')).toContainText('Ranger');
   // …and a rendered figure, which is avatar-2d's SVG and nothing heavier
   expect(await page.locator('#boot-figure svg').count()).toBe(1);

@@ -59,7 +59,12 @@ test('the map has a key, and every mark in it is drawn by the map itself', async
    * twice, and no GROUP HEADING appears twice — which it did, because the key emitted a heading
    * every time the group changed while walking a list that does not keep its groups together.
    */
-  expect(out.rows, 'the key lists nothing').toBe(37);
+  /**
+   * R17: 38 — 29 map marks plus nine "Yours" rows. The outpost marker (item 20) is the new kind;
+   * `waypoint` was added to MARKER_LOOKS in the same round so the minimap can draw a starred pad,
+   * and the key deliberately skips it because a pad already has its own row under Travel.
+   */
+  expect(out.rows, 'the key lists nothing').toBe(38);
   expect(out.inked, 'a swatch in the key is an empty box').toBe(out.swatched);
   expect(out.swatched + out.glyphed, 'a key row shows neither a swatch nor a glyph').toBe(out.rows);
   expect(new Set(out.words).size, `the key lists something twice: ${out.words.filter((w, i) => out.words.indexOf(w) !== i)}`)

@@ -123,10 +123,20 @@ export const ARMS = [
     major: [
       ['petDamagePct', 18, 'companions deal 18% more damage'], ['con', 9, '+9 constitution'],
       ['lifeSteal', 4, '4% of damage comes back as health'], ['magicFind', 20, '+20% better loot'],
-      // "One more companion follows you — WHAT companion?" It said nothing and it did nothing:
-      // `petSlots` was a derived stat no file read. It is a real number now — js/skills.js adds it
-      // to the count of every summoning skill — and the line says which companion it means.
-      ['petSlots', 1, 'every summoning skill calls up one more companion'],
+      /**
+       * R17 — THIS NODE MOVES YOUR FOLLOWER LIMIT NOW, NOT YOUR SUMMON COUNT.
+       *
+       *   "We can update 'The Kept Company' branch of the Perks menu instead of making your
+       *    summoning skill summon more, to instead increase your companion limit."
+       *
+       * Round 16 had it granting `petSlots`, which js/skills.js added to `petCount` — how many
+       * bodies one CAST put down. So casting Raise Thrall three times gave you nine thralls and
+       * nothing counted what was already standing there. `followerSlots` is the one number the
+       * follower book reads (js/followers.js), and it does two things with it: it raises the total
+       * number of things that may walk with you, and it raises the per-type cap on a summon. A
+       * mercenary, a class companion and a summoned wolf all take one of the same slots.
+       */
+      ['followerSlots', 1, 'one more follower may walk with you — and one more of each thing you summon'],
     ],
   },
 
@@ -344,10 +354,14 @@ export const KEYSTONES = [
   {
     // The old line also promised the pack "take a third of everything aimed at you", which nothing
     // in the game did — an enemy picks its own target in js/actors.js. Cut rather than left lying.
+    // R17 — and the keystone at the end of the same arm moved with it. "Calls up two more
+    // companions" was the same promise as the node above and had the same problem: it added to a
+    // cast rather than to a limit. Two more FOLLOWER SLOTS is a much bigger thing — five at level
+    // one instead of three — and it raises the per-type cap on every summon by two on top.
     id: 'the_pack', arm: 'wild', name: 'The Pack', flag: 'thePack',
-    desc: 'Every summoning skill calls up two more companions, and all of them deal 20% more damage.',
+    desc: 'Two more followers may walk with you, two more of each thing you summon, and all of them deal 20% more damage.',
     cost: 'You deal 15% less damage yourself.',
-    grants: { petSlots: 2, petDamagePct: 20, damagePct: -15 },
+    grants: { followerSlots: 2, petDamagePct: 20, damagePct: -15 },
   },
 
   /**

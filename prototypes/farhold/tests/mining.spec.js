@@ -128,6 +128,9 @@ test('a drill on a seam plus a route fills the crate, and a longer route fills i
     for (const dx of [0, 30, 60]) { f.build.aim(node.x + dx, node.z); f.build.paint(); }
     f.build.setTool('build');
     f.build.select('claim_stone'); f.build.aim(node.x + 3, node.z + 6); f.build.placeHere();
+    // R17 — this spec places a piece the tech tree now gates. `unlockAll` spends nothing and
+    // earns nothing; it just takes every node, so the spec goes on testing the thing it is about.
+    f.build.research?.unlockAll?.();
     f.build.select('drill'); f.build.aim(node.x, node.z);
     const drill = f.build.placeHere();
     f.build.select('burner_generator'); f.build.aim(node.x + 7, node.z);
@@ -205,6 +208,9 @@ test('a drill routes itself to the best store, and the Route tool moves it to an
     for (const dx of [0, 30, 60]) { f.build.aim(node.x + dx, node.z); f.build.paint(); }
     f.build.setTool('build');
     f.build.select('claim_stone'); f.build.aim(node.x + 3, node.z + 6); f.build.placeHere();
+    // R17 — this spec places a piece the tech tree now gates. `unlockAll` spends nothing and
+    // earns nothing; it just takes every node, so the spec goes on testing the thing it is about.
+    f.build.research?.unlockAll?.();
     f.build.select('drill'); f.build.aim(node.x, node.z);
     const drill = f.build.placeHere();
     f.build.select('burner_generator'); f.build.aim(node.x + 7, node.z); f.build.placeHere();

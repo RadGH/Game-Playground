@@ -17,8 +17,30 @@ import { el, panel, button } from '../../../shared/ui.js';
 import { locationLine, copyTextVia, COPY_WORDS } from './debug.js';
 import { layersPanel } from '../../../worldgen/js/layers-panel.js';
 import { zoneTone } from './zones.js';
-import { MARKER_LOOKS, distanceText, worldKey } from './markers.js';
+import { MARKER_LOOKS, MARKER_VIEWS, distanceText, worldKey } from './markers.js';
+// R17 — item 20: an outpost's marker is made and kept in step by the module that knows what an
+// outpost IS, not by this screen. See `syncOutpostMarkers` for why it is locked.
+import { syncOutpostMarkers, renameOutpostMarker } from './outposts.js';
+// R17 — item 9: the hit-test is its own pure module, so the node tests drive the resolver the game
+// uses rather than a second copy of it. The whole of why is at the top of that file.
+import { pickHit, markHitRadius } from './map-hits.js';
 import { registerTip, refreshTip, tipOpen } from '../../../shared/tooltip.js';
+
+/**
+ * R17 — the map's own stylesheet, injected rather than linked.
+ *
+ * Every rule in `map17.css` is either reserving space so the canvas cannot be resized by something
+ * underneath it (item 8) or styling a row this round added. It is injected here, the way
+ * js/civics-ui.js injects civics.css, so a whole round of map work touches neither index.html nor
+ * style.css — both of which belong to other passes, and a concurrent write to either loses work.
+ */
+const MAP_CSS_HREF = 'map17.css';
+if (typeof document !== 'undefined' && !document.querySelector(`link[href="${MAP_CSS_HREF}"]`)) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = MAP_CSS_HREF;
+  document.head.appendChild(link);
+}
 
 /** The wash each danger step puts over a region, and the colour its number is written in. */
 const TONE_RGB = {
@@ -129,6 +151,16 @@ export const ROLE_COLOUR = { mine: '#c08a3e', refinery: '#9fb4d4', farm: '#7ac86
 export const LAYER_WORDS = {
   biomes: 'Ground', elevation: 'Height', temperature: 'Temperature', rainfall: 'Rainfall',
   regions: 'Regions', weather: 'Weather', rivers: 'Water', political: 'Who holds it',
+};
+
+/**
+ * R17 — the two visibility switches, as buttons. One table, read by every list that draws a marker
+ * row, and keyed by `MARKER_VIEWS` so a third switch cannot be added to js/markers.js without a
+ * glyph to draw it with.
+ */
+export const VIEW_CHIPS = {
+  showOnMap: ['▣', 'Shown on the map. Click to hide it.', 'Hidden from the map. Click to show it.'],
+  showInWorld: ['◍', 'Shown in the world. Click to hide it.', 'Hidden in the world. Click to show it.'],
 };
 
 export const MARK_ORDER = [
@@ -399,6 +431,112 @@ export function drawMark(ctx, key, x, y, k = 1) {
   }
 }
 
+/**
+ * R17 — THE MARK, ON ITS OWN, AT ANY SIZE.
+ *
+ *   "if you are hovering over an icon on the map, can we show the icon itself in the tooltip to the
+ *    left of the name so it's clear that icon is corresponding to what is on the map? This will
+ *    help with understanding that a village is a white square."
+ *
+ * One function, called by the key AND by the hover card, and it calls `drawMark()` — so there are
+ * still exactly two places a mark is ever drawn (the map and this), and this one is the map's own
+ * code. A swatch cannot go stale because there is nothing in it to go stale.
+ *
+ * `box` is the CSS size; the buffer is twice that so it is sharp on a retina screen. The scale is
+ * worked out from the mark's own radius so the biggest (a capital, 5.4) and the smallest (a vent,
+ * 2.8) both fill the square instead of the vent being a speck.
+ */
+export function markSwatch(key, box = 20) {
+  const mark = MAP_MARKS[key];
+  const canvas = document.createElement('canvas');
+  const dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
+  canvas.width = Math.round(box * dpr);
+  canvas.height = Math.round(box * dpr);
+  canvas.style.width = `${box}px`;
+  canvas.style.height = `${box}px`;
+  if (!mark) return canvas;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  // leave room for the ring the two biggest settlements and the world boss wear (1.55x)
+  drawMark(ctx, key, box / 2, box / 2, (box / 2 - 1) / (mark.r * (mark.ring ? 1.55 : 1)));
+  return canvas;
+}
+
+/**
+ * R17 — ONE ICON PER MARKER, WITH THE FAVOURITE ON IT RATHER THAN BESIDE IT.
+ *
+ *   "the markers for ore is confusing. It shows a star icon to the top-left and a green circle to
+ *    the bottom-right. It is not clear which of these is the actual location of the ore. Can we
+ *    combine them into one icon?"
+ *
+ * They were one marker all along. The dot was drawn at the marker's true position and the star was
+ * drawn at `px - r*1.5, py - r*1.5` — a marker and a half up and to the left of it — with a comment
+ * explaining that this was so the star "never sits on the glyph it belongs to". Which is precisely
+ * the problem: two sprites a dozen pixels apart, neither labelled, and the one that catches the eye
+ * is the one that is NOT where the ore is.
+ *
+ * So a favourite is now a gold rim around the marker's own disc. Same position, same glyph, one
+ * thing on the ground. The key says what the gold ring means.
+ *
+ * Exported because the minimap and the world beacons should draw markers the same way; see
+ * `research/round17-map-handoff.md`.
+ */
+export function drawMarkerDot(ctx, marker, x, y, r) {
+  const look = MARKER_LOOKS[marker.kind] || MARKER_LOOKS.pin;
+  /**
+   * R17 — an outpost's marker wears its ROLE, so a mine and a depot are not one flag twice.
+   *
+   * `syncOutpostMarkers()` copies the role onto the marker; the two tables are the same ones the
+   * Supply list reads, which is what stops the map and that list disagreeing about what a place is.
+   */
+  const role = marker.kind === 'outpost' ? marker.role : null;
+  const glyph = (role && ROLE_GLYPH[role]) || look.icon;
+  const colour = marker.done ? '#9ae06a'
+    : (marker.colour || (role && ROLE_COLOUR[role]) || look.color);
+
+  // the favourite rim, drawn first so the disc sits inside it rather than on top of it
+  if (marker.starred) {
+    ctx.beginPath();
+    ctx.arc(x, y, r + Math.max(2, r * 0.5), 0, Math.PI * 2);
+    ctx.lineWidth = Math.max(1.4, r * 0.34);
+    ctx.strokeStyle = '#ffd24a';
+    ctx.stroke();
+  }
+
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = colour;
+  ctx.fill();
+  ctx.lineWidth = Math.max(1.4, r * 0.34);
+  ctx.strokeStyle = '#150f0a';
+  ctx.stroke();
+
+  // the glyph the kind already carries, once the disc is big enough to hold one
+  if (glyph && r >= 5) {
+    ctx.font = `700 ${Math.round(Math.min(15, r * 1.5))}px system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#150f0a';
+    ctx.fillText(glyph, x, y + 0.5);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+}
+
+/** The same combined icon on its own, for the key and the hover card. */
+export function markerSwatch(marker, box = 20) {
+  const canvas = document.createElement('canvas');
+  const dpr = Math.min(2, (typeof window !== 'undefined' && window.devicePixelRatio) || 1);
+  canvas.width = Math.round(box * dpr);
+  canvas.height = Math.round(box * dpr);
+  canvas.style.width = `${box}px`;
+  canvas.style.height = `${box}px`;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  drawMarkerDot(ctx, marker, box / 2, box / 2, box * 0.3);
+  return canvas;
+}
+
 import { renderWorld, legend as legendRows, DEFAULT_LAYERS, worldPixels } from '../../../worldgen/js/render.js';
 import { generateRegionDetail } from '../../../worldgen/js/local.js';
 import { cellInfo } from '../../../worldgen/js/world.js';
@@ -447,6 +585,16 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    * The portal was on the ground, in the save, in the journal, and not on the map.
    */
   portals = null,
+  /**
+   * R17 — `() => void`, called when the player changes something the save carries: a favourite, a
+   * tracked deposit, a visibility switch, an outpost's name.
+   *
+   * Optional, and the map works without it — the marker book is already inside `markers.toJSON()`
+   * and therefore inside the periodic autosave, so nothing is ever LOST. It only decides whether a
+   * change is written immediately or at the next tick of the clock. js/main.js belongs to another
+   * pass this round; the one line to wire it is in `research/round17-map-handoff.md`.
+   */
+  onChanged = null,
 } = {}) {
   // Pins used to be a bare array owned by this screen. They are markers now (`js/markers.js`), so
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
@@ -584,8 +732,53 @@ let findFavOnly = false;
   let supplyFrom = null;
   /** …and the most one cart may carry, which is the "max limit" the route is created with. */
   let supplyBatch = 60;
-  /** R14: every mark drawn this frame, in screen pixels, so a hover can be resolved. */
-  const placeHits = [];
+  /**
+   * R14: every mark drawn this frame, in screen pixels, so a hover can be resolved.
+   *
+   * R17 — AND IT IS ONE LIST NOW, IN PAINT ORDER, RESOLVED BY WHOSE CENTRE IS NEAREST.
+   *
+   *   "I found a spikey icon on the map with a red circle that appears to be a world boss. However
+   *    if I hover directly over it it says something about 'ancient wood' that I think is from the
+   *    surrounding. There is only a few pixels at the top-left of the icon that give me the correct
+   *    World Boss tooltip."
+   *
+   * Nothing was offset. The hit list was built in DRAW order — `marks` is sorted smallest-last so a
+   * capital is never hidden under the hamlet beside it, which puts the world boss (first in
+   * MARK_ORDER, therefore drawn on top) at the very END of the list — and the hover loop then took
+   * the FIRST entry whose circle contained the pointer and `break`ed. So whatever was painted
+   * UNDERNEATH won every overlap. An ancient wood a few metres away had its hit circle over most of
+   * the boss's burst, and the only pixels left for the boss were the ones outside that circle: the
+   * sliver at the top-left.
+   *
+   * Two separate lists (places and pads) made it worse — pads were only consulted if no place
+   * matched at all — and the marker branch had a third bug: it destructured `{ scale, ox, oy }` out
+   * of `viewBox()`, which returns `offsetX`/`offsetY`, so every marker's screen position was NaN
+   * and a marker could never be hovered at all.
+   *
+   * So: one list, every drawable pushes into it with the radius it was actually drawn at, and the
+   * winner is the one whose CENTRE is nearest the pointer — ties going to whatever was painted last,
+   * which is the thing you can see. Terrain is the fallback and only the fallback, so an icon always
+   * beats the ground under it.
+   */
+  const hits = [];
+
+  /** The backing-buffer scale in use, so a hit radius can be stated in CSS pixels. Set by `fit()`. */
+  let bufferDpr = 1;
+
+  /**
+   * What is under this point, in buffer pixels. `null` means bare ground.
+   *
+   * `want` narrows it to one tier — the click handler asks for `'pad'` only, because clicking a pad
+   * picks it and clicking anything else selects a cell.
+   */
+  function hitAt(mx, my, want = null) {
+    return pickHit(hits, mx, my, want);
+  }
+
+  /** Push one drawable onto the hit list, in paint order. */
+  function pushHit(tier, x, y, r, extra) {
+    hits.push({ tier, x, y, r, order: hits.length, ...extra });
+  }
 
   const canvas = el('canvas', { class: 'map-canvas', id: 'map-canvas' });
   const readout = el('div', { class: 'map-readout muted small' });
@@ -605,6 +798,30 @@ let findFavOnly = false;
    * stayed stuck at the spot you took off from. In the air the ship IS the player, and `air.state`
    * carries the same x/z/yaw the controller does.
    */
+  /**
+   * R17 — "something the save cares about just changed."
+   *
+   * Every favourite, tracked deposit, visibility switch and outpost rename goes through here. The
+   * data itself is already inside `markers.toJSON()` and `waypoints.toJSON()`, so a change is never
+   * lost — this only decides whether it is written now or at the next autosave.
+   */
+  function noteChange() {
+    try { onChanged?.(); } catch { /* a save that refuses is not worth losing the click over */ }
+  }
+
+  /**
+   * The waypoint book that can be WRITTEN to.
+   *
+   * js/main.js hands this screen a narrowed `{ list, travel }` view of the network — enough to draw
+   * the pads and to travel, and not enough to star one. The real book is on `window.farhold`, which
+   * is the same door this file already uses for the rumour book and the dungeon check, and it is the
+   * honest one to use until main.js (another pass's file this round) passes the whole thing in. See
+   * `research/round17-map-handoff.md`.
+   */
+  const padBook = () => (waypoints && typeof waypoints.star === 'function')
+    ? waypoints
+    : (typeof window !== 'undefined' ? window.farhold?.waypoints || null : null);
+
   const airborne = () => typeof window !== 'undefined' && window.farhold?.mode === 'air';
   function whereIsPlayer() {
     const ship = airborne() ? window.farhold?.air?.state : null;
@@ -731,13 +948,26 @@ let findFavOnly = false;
     keyBox.append(el('div', { class: 'map-key-group', text: 'Yours' }));
     const mine = el('div', { class: 'map-key-rows' });
     for (const [kind, look] of Object.entries(MARKER_LOOKS)) {
+      // `waypoint` is not a marker — it is a pad, and it already has a row under Travel above. It
+      // only lives in MARKER_LOOKS so the minimap can draw a starred pad; see js/markers.js.
+      if (kind === 'waypoint') continue;
+      /**
+       * R17 — the swatch is the marker icon itself, drawn by `drawMarkerDot()`, which is the one
+       * function that puts a marker on the map. The key used to print the bare glyph in the
+       * marker's colour, which is not what the map draws at all — the map draws a filled disc with
+       * the glyph cut into it — so the two did not match, on the one panel whose job is matching.
+       */
       mine.append(el('div', { class: 'map-key-row' },
-        el('i', { class: 'map-key-glyph', text: look.icon, style: `color:${look.color}` }),
+        markerSwatch({ kind }, 18),
         el('span', { text: look.label.toLowerCase() })));
     }
+    /**
+     * R17 — and what the gold ring means, because it replaced the star that used to float up and
+     * to the left of a favourite. One icon, in one place, with its state drawn on it.
+     */
     mine.append(el('div', { class: 'map-key-row' },
-      el('i', { class: 'map-key-glyph', text: '\u2605', style: 'color:#ffd24a' }),
-      el('span', { text: 'starred — highlighted on the map' })));
+      markerSwatch({ kind: 'saved', starred: true }, 18),
+      el('span', { text: 'a gold ring — one of your Favorites' })));
     keyBox.append(mine);
 
     keyBox.append(el('p', { class: 'muted small', text:
@@ -843,39 +1073,235 @@ let findFavOnly = false;
      * counts as work: somebody did not set it, but it is a thing to go and do and it expires.
      */
     const WORK_KINDS = new Set(['quest', 'campaign', 'fall']);
-    const here = pins().filter(m => (tab === 'work') === WORK_KINDS.has(m.kind));
-    const list = el('div', { class: 'pin-list' });
-    if (!here.length) {
-      list.append(el('p', { class: 'muted small', text: tab === 'work'
-        ? 'Nothing on your list. Notice boards are in settlements; people on the road ask too.'
-        : 'Shift-click the map to drop a pin, or ctrl-shift-click to keep a place.' }));
-    } else {
+
+    /**
+     * R17 — ONE ROW BUILDER FOR EVERY MARKER LIST.
+     *
+     * Work in hand, Favorites, Places and Tracked Resources are four lists of the same thing, and
+     * before this round three of them were three copies of the same twenty lines with different
+     * bits missing — which is why the Find tab's star could only be switched ON ("I starred Copper
+     * Ore from the Find menu and I can see it under Places you keep menu, but I don't see a way to
+     * un-star it"). One builder, and every list gets every control.
+     *
+     * The controls, left to right:
+     *   ★  favourite — files it under Favorites. Works in both directions, everywhere.
+     *   ◉  the icon, drawn by the same routine the map uses
+     *   name — an editable field on an outpost marker (item 20), plain text otherwise
+     *   ◎  tracked — the minimap's arrow
+     *   ▣  show on the map (item 19)
+     *   ◍  show in the world (item 19)
+     *   ×  remove — or a padlock on a marker that is not yours to remove
+     */
+    function markerRow(m, { showDistance = true } = {}) {
       const player = whereIsPlayer();
-      for (const m of here) {
-        const look = MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin;
-        const away = book ? book.bearing(m, player, terrain).distance : 0;
-        const star = el('button', {
-          class: 'pin-track' + (m.tracked ? ' on' : ''),
-          text: m.tracked ? '★' : '☆',
-          title: m.tracked ? 'Tracked — showing on the minimap. Click to stop.' : 'Not tracked. Click to follow it on the minimap.',
-          onclick: () => { book.toggle(m); buildSide(); draw(); },
-        });
-        const row = el('div', { class: 'pin-row' + (m.tracked ? ' tracked' : '') },
-          star,
-          el('i', { class: 'pin-dot', text: look.icon, style: `color:${m.done ? '#9ae06a' : look.color}` }),
-          el('span', { class: 'pin-name', text: m.name }),
-          el('span', { class: 'muted small', text: distanceText(away) }),
-        );
-        /**
-         * You may throw away what you put there yourself — a dropped pin, or a deposit the scanner
-         * found. A quest marker is not yours to delete; untracking it is what the star is for.
-         */
-        if (m.kind === 'pin' || m.kind === 'seam') {
-          row.append(el('button', { class: 'pin-del', text: '×', title: 'Remove this marker', onclick: () => { removePin(m); } }));
+      const away = book ? book.bearing(m, player, terrain).distance : 0;
+      const row = el('div', { class: 'pin-row' + (m.tracked ? ' tracked' : '') });
+
+      row.append(el('button', {
+        class: 'pin-track' + (m.starred ? ' on' : ''),
+        text: m.starred ? '★' : '☆',
+        title: m.starred ? 'A favorite. Click to un-star it.' : 'Add to Favorites',
+        onclick: () => { book.star(m, !m.starred); noteChange(); buildSide(); draw(); },
+      }));
+
+      /**
+       * The icon itself, so the list and the map teach each other. 18px rather than 15: the glyph
+       * inside the disc only draws above a radius of 5 (below that it is illegible anyway), and a
+       * 15px box lands at 4.5 — so a list of quests, pins and deposits would have been a column of
+       * identical coloured circles, which is the thing the swatch is here to stop.
+       */
+      row.append(markerSwatch(m, 18));
+
+      /**
+       * Item 20 — "The marker should also let you rename the location which can appear on the map
+       * too." Only an outpost's marker gets the field, because it is the only kind whose name the
+       * game picked for you; everything else you already named when you put it down.
+       */
+      if (m.kind === 'outpost') {
+        const field = el('input', { class: 'pin-rename', value: m.name, title: 'Name this place' });
+        const commit = () => {
+          if (field.value.trim() && field.value.trim() !== m.name) {
+            renameOutpostMarker(book, m, field.value);
+            noteChange();
+            draw();
+          }
+        };
+        field.onchange = commit;
+        field.onblur = commit;
+        field.onkeydown = ev => { if (ev.key === 'Enter') field.blur(); };
+        row.append(field);
+      } else {
+        row.append(el('span', { class: 'pin-name', text: m.name }));
+      }
+
+      if (showDistance) row.append(el('span', { class: 'muted small', text: distanceText(away) }));
+
+      row.append(el('button', {
+        class: 'pin-go', text: '⌖', title: `Show ${m.name} on the map`,
+        onclick: () => locate({ cell: { x: m.cell.x, y: m.cell.y }, name: m.name, kind: m.kind }),
+      }));
+
+      row.append(el('button', {
+        class: 'pin-eye' + (m.tracked ? ' on' : ''),
+        text: '◎',
+        title: m.tracked ? 'Tracked — the minimap points at this. Click to stop.' : 'Not tracked. Click to follow it on the minimap.',
+        onclick: () => { book.toggle(m); noteChange(); buildSide(); draw(); },
+      }));
+
+      /**
+       * Item 19 — the two switches, as two small squares.
+       *
+       *   "Can they have a toggle to show on the map, and show on the game world? That way you can
+       *    uncheck those to keep them favorited but hide them from the map/world so they are not
+       *    distracting."
+       */
+      for (const where of MARKER_VIEWS) {
+        const [glyph, on, off] = VIEW_CHIPS[where];
+        const lit = m[where] !== false;
+        row.append(el('button', {
+          class: 'pin-eye' + (lit ? ' on' : ''),
+          text: glyph,
+          title: lit ? on : off,
+          onclick: () => { book.show(m, where, !lit); noteChange(); buildSide(); draw(); },
+        }));
+      }
+
+      /**
+       * You may throw away what you put there yourself — a dropped pin, a kept place, or a deposit
+       * you are tracking. A quest marker is not yours to delete (untracking it is what the ◎ is
+       * for), and an outpost's marker is not either: it says what is standing on the ground, and
+       * the way to get rid of it is to knock the buildings down.
+       */
+      if (book.canRemove(m) && !m.questId && !WORK_KINDS.has(m.kind)) {
+        row.append(el('button', {
+          class: 'pin-del', text: '×',
+          title: m.kind === 'seam' ? 'Stop tracking this deposit' : 'Remove this marker',
+          onclick: () => { removePin(m); },
+        }));
+      } else if (m.locked) {
+        row.append(el('span', { class: 'pin-locked', text: '⚭', title: 'This marker stands as long as the buildings do.' }));
+      }
+      return row;
+    }
+
+    /** A list of markers, or one grey line saying why there are none. */
+    function markerList(rows, emptyText) {
+      const list = el('div', { class: 'pin-list' });
+      if (!rows.length) list.append(el('p', { class: 'map-empty', text: emptyText }));
+      else for (const m of rows) list.append(markerRow(m));
+      return list;
+    }
+
+    /**
+     * R17 — THE SELECTED GROUP: what you just clicked, and what you can do about it.
+     *
+     * The click handler works out what was under the pointer from the same hit list the tooltip
+     * uses, so this names the village rather than the field it stands in. If there is already a
+     * marker there it is shown as a full row — every control, including the un-star — and if there
+     * is not, the one button that makes one.
+     */
+    function selectedRows() {
+      const s = state.selected;
+      if (!s) {
+        return [el('p', { class: 'map-empty', text:
+          'Click anywhere on the map. What you clicked shows up here, with a button to keep it.' })];
+      }
+      const hit = s.hit;
+      // a marker on that ground already — the click may have landed on it, or a cell beside it
+      const marker = hit?.marker
+        || (book ? book.here().find(m => Math.abs(m.cell.x - s.x) <= 1 && Math.abs(m.cell.y - s.y) <= 1) : null);
+
+      const kids = [];
+      const swatch = marker ? markerSwatch(marker, 18)
+        : hit?.mark ? markSwatch(hit.mark.key, 18)
+        : hit?.pad ? markSwatch(hit.pad.lit ? 'waypoint' : 'waypointOff', 18)
+        : null;
+      const head = el('div', { class: 'map-selected' });
+      if (swatch) head.append(swatch);
+      head.append(el('span', { class: 'pin-name', text: s.name || marker?.name || s.biomeName || 'somewhere' }));
+      kids.push(head);
+      kids.push(el('p', { class: 'small muted', text: `cell ${s.x},${s.y} · ${s.biomeName} · ${s.heightMetres} m` }));
+
+      if (marker) {
+        kids.push(markerRow(marker, { showDistance: false }));
+      } else {
+        kids.push(button('Add to Favorites', () => {
+          /**
+           * The default name is what the ground actually IS there, which beats "Place 4" — the same
+           * rule ctrl-shift-click follows, and for the same reason. A region you have not been to
+           * does not get named (B8).
+           */
+          const region = s.region && knows(s.region.id) ? s.region.name : '';
+          const name = s.name || [s.biomeName || 'Somewhere', region].filter(Boolean).join(', ');
+          book?.save?.({ cellX: s.x, cellY: s.y, name, from: { type: 'place' } });
+          noteChange();
+          buildSide();
+          draw();
+        }, 'small'));
+      }
+
+      /**
+       * "Make the current teleport feature a debug option, but keep it enabled by default."
+       * It answers to Settings → Debug; the waypoint button never does.
+       */
+      if (onTeleport && allowDebugTeleport()) {
+        kids.push(button('Go here', () => { onTeleport(s.x * M_PER_CELL, s.y * M_PER_CELL); toggle(false); }, 'small'));
+        kids.push(el('p', { class: 'small muted', text: 'Debug teleport — Settings → Debug turns this off.' }));
+      }
+      return kids;
+    }
+
+    /**
+     * R17 — THE WAYPOINTS YOU HAVE LIT, WITH A STAR AND THE TWO SWITCHES.
+     *
+     * A pad is not a marker (see the note on `MARKER_LOOKS.waypoint`), so it needs its own rows. The
+     * star is what item 19 asked for: `js/waypoints.js` keeps it, `minimapPads()` hands the starred
+     * ones to the small map, and the two switches hide a pad you want to keep but stop seeing.
+     *
+     * Returns null when there is nothing to show, so the panel is not drawn empty.
+     */
+    function padList() {
+      const all = waypoints?.list?.() || [];
+      const lit = all.filter(p => p.lit);
+      if (!lit.length) return null;
+      const api = padBook();
+      const player = playerCell();
+      const sorted = [...lit].sort((a, b) =>
+        (b.starred ? 1 : 0) - (a.starred ? 1 : 0) || String(a.name).localeCompare(String(b.name)));
+      const list = el('div', { class: 'pin-list' });
+      for (const pad of sorted.slice(0, 18)) {
+        const row = el('div', { class: 'pin-row' + (pad.starred ? ' tracked' : '') });
+        if (api) {
+          row.append(el('button', {
+            class: 'pin-track' + (pad.starred ? ' on' : ''),
+            text: pad.starred ? '★' : '☆',
+            title: pad.starred ? 'A favorite — showing on the minimap. Click to un-star it.' : 'Add to Favorites, and to the minimap',
+            onclick: () => { api.star(pad.id); noteChange(); buildSide(); draw(); },
+          }));
+        }
+        row.append(markSwatch('waypoint', 15));
+        row.append(el('span', { class: 'pin-name', text: pad.name }));
+        row.append(el('span', { class: 'muted small', text:
+          distanceText(Math.hypot(pad.x / M_PER_CELL - player.x, pad.z / M_PER_CELL - player.y) * M_PER_CELL) }));
+        row.append(el('button', {
+          class: 'pin-go', text: '⌖', title: `Show ${pad.name} on the map`,
+          onclick: () => { state.padPick = pad.id; locate({ x: pad.x, z: pad.z, name: pad.name, kind: 'pad' }); },
+        }));
+        if (api) {
+          for (const where of MARKER_VIEWS) {
+            const [glyph, on, off] = VIEW_CHIPS[where];
+            const isOn = pad[where] !== false;
+            row.append(el('button', {
+              class: 'pin-eye' + (isOn ? ' on' : ''), text: glyph, title: isOn ? on : off,
+              onclick: () => { api.show(pad.id, where, !isOn); noteChange(); buildSide(); draw(); },
+            }));
+          }
         }
         list.append(row);
       }
+      return list;
     }
+
     /**
      * R15 — the tracking list is two different questions, so it is two tabs.
      *
@@ -883,7 +1309,54 @@ let findFavOnly = false;
      * remember. They were one list called Tracking, sorted by nothing in particular, which is why
      * the answer to "where is my quest" was to read fourteen rows.
      */
-    if (tab === 'work' || tab === 'places') side.append(panel(tab === 'work' ? 'Work in hand' : 'Places you keep', list));
+    if (tab === 'work') {
+      side.append(panel('Work in hand', markerList(
+        pins().filter(m => WORK_KINDS.has(m.kind)),
+        'Nothing on your list. Notice boards are in settlements; people on the road ask too.',
+      )));
+    }
+
+    if (tab === 'places') {
+      /**
+       * R17 — ITEM 11, THE WHOLE OF IT.
+       *
+       *   "On the map from the Places menu add a 'Selected' group that shows where you click on,
+       *    and from there add an 'Add to Favorites' button that stores it under 'Places you keep'.
+       *    Also rename 'Places you keep' which sounds weird, why not simply 'Favorites' or 'My
+       *    Locations' or 'Starred Places'. … My idea is just keeping Places clean to actual
+       *    locations you may want to visit."
+       *
+       * So the tab is three groups instead of one:
+       *
+       *   Selected   — what you last clicked, with the button that keeps it
+       *   Favorites  — everything starred, whatever put it there (was "Places you keep")
+       *   Places     — the rest of what you dropped or kept
+       *
+       * and deposits are NOT here at all any more: they are the Find tab's Tracked Resources, which
+       * is the "keeping Places clean" half of the ask. A deposit you starred is a favourite like
+       * anything else and appears in the first list — one marker, two lists, still one icon.
+       */
+      side.append(panel('Selected', ...selectedRows()));
+
+      const mine = pins().filter(m => !WORK_KINDS.has(m.kind));
+      side.append(panel('Favorites', markerList(
+        mine.filter(m => m.starred),
+        'Nothing starred yet. The ☆ on any row here or in Find adds it.',
+      )));
+      side.append(panel('Places', markerList(
+        mine.filter(m => !m.starred && m.kind !== 'seam'),
+        'Shift-click the map to drop a pin, or ctrl-shift-click to keep a place.',
+      )));
+
+      /**
+       * Item 19 named waypoints specifically — "Waypoints favorited on the map with a star do not
+       * show a star on the minimap" — and a pad is not a marker, so it needs its own row. Only the
+       * lit ones: an unlit pad is somewhere you have not been, and sixty of those would bury the
+       * handful you use. `js/waypoints.js` keeps the star and the two switches per pad.
+       */
+      const padRows = padList();
+      if (padRows) side.append(panel('Waypoints', padRows));
+    }
 
     /**
      * R14 — FIND. A material, a sweep, and where the hits are.
@@ -933,9 +1406,33 @@ let findFavOnly = false;
        * "filter by favourites" means the places you already said mattered, not a second idea of
        * the word.
        */
+      /**
+       * R17 — FAVOURITED AND TRACKED ARE TWO DIFFERENT ANSWERS, AND BOTH COME OFF THE MARKER.
+       *
+       *   "Also marking a resource on the map shouldn't necessarily favorite the location. Maybe we
+       *    should have 'Tracked Resources' under the Find menu that is persistent list of what
+       *    you've tracked (until you untrack it) but you can also favorite these locations to put
+       *    them under Places."
+       *
+       * R16 worked a row's favourite state out by rounding its METRES and looking the string up in a
+       * set built from marker CELLS multiplied back into metres — which agreed only by accident, and
+       * only for a marker whose cell happened to round the same way. Worse, it was one-way: there
+       * was a ✦ that kept a place and nothing anywhere that un-kept it ("I starred Copper Ore from
+       * the Find menu and I can see it under Places you keep menu, but I don't see a way to un-star
+       * it").
+       *
+       * Both questions are now asked of the marker that is actually standing on that ground, so
+       * there is one answer and it can be toggled from either end.
+       */
       const me = whereIsPlayer();
-      const starred = new Set([...(book?.saved?.() || []), ...(book?.starred?.() || [])]
-        .map(m => `${Math.round(m.cell.x * M_PER_CELL)},${Math.round(m.cell.y * M_PER_CELL)}`));
+      const cellOf = h => ({ x: Math.floor(h.x / M_PER_CELL), y: Math.floor(h.z / M_PER_CELL) });
+      const markerFor = h => {
+        if (!book) return null;
+        const c = cellOf(h);
+        return book.trackedResource({ id: h.id, cellX: c.x, cellY: c.y })
+          || book.here().find(m => Math.abs(m.cell.x - c.x) <= 1 && Math.abs(m.cell.y - c.y) <= 1)
+          || null;
+      };
       const survey = (scanned?.() || []).map(r => ({ ...r, from: 'survey' }));
       const seen = new Set();
       const merged = [];
@@ -944,7 +1441,8 @@ let findFavOnly = false;
         if (seen.has(key)) continue;
         seen.add(key);
         const distance = h.distance ?? Math.hypot(h.x - me.x, h.z - me.z);
-        merged.push({ ...h, distance, fav: starred.has(`${Math.round(h.x)},${Math.round(h.z)}`) });
+        const mark = markerFor(h);
+        merged.push({ ...h, distance, mark, fav: !!mark?.starred, kept: !!mark && mark.kind === 'seam' });
       }
       const shown = merged
         .filter(h => !findWant || h.resource === findWant)
@@ -966,7 +1464,7 @@ let findFavOnly = false;
       favTick.type = 'checkbox';
       favTick.checked = findFavOnly;
       favTick.onchange = () => { findFavOnly = favTick.checked; buildSide(); };
-      favBox.append(favTick, el('span', { class: 'small', text: 'Favourites only' }));
+      favBox.append(favTick, el('span', { class: 'small', text: 'Favorites only' }));
       sortRow.append(sortPick, favBox);
       kids.push(sortRow);
 
@@ -975,35 +1473,81 @@ let findFavOnly = false;
           class: 'muted small',
           text: st.swept || survey.length
             ? (findFavOnly
-              ? 'Nothing in your survey is starred yet. The \u2726 on a row keeps it.'
+              ? 'Nothing in your survey is starred yet. The \u2606 on a row adds it to Favorites.'
               : 'Nothing found. Sweep from somewhere else, or carry the scanner and walk.')
             : 'Sweep from here, or build a Prospector\u2019s Scanner and everything you walk past is remembered.',
         }));
       } else {
         const list = el('div', { class: 'pin-list' });
         for (const h of shown.slice(0, 24)) {
-          const row = el('div', { class: 'pin-row' },
-            el('i', { class: 'pin-dot', text: '\u25c6', style: `color:${h.colour || '#c08a3e'}` }),
-            el('span', { class: 'pin-name', text: h.name }),
-            el('span', { class: 'muted small', text: distanceText(h.distance) }),
-            el('button', {
-              class: 'pin-go', text: '\u2316', title: `Show this ${String(h.name).toLowerCase()} on the map`,
-              onclick: () => locate({ x: h.x, z: h.z, name: h.name, kind: 'seam' }),
-            }),
-          );
-          if (onKeep) {
-            row.append(el('button', {
-              class: 'pin-keep' + (h.fav ? ' on' : ''), text: '\u2726',
-              title: h.fav ? 'Already kept' : 'Keep this place, so you can find it again later',
-              onclick: () => { onKeep(h); buildSide(); draw(); },
-            }));
-          }
+          const row = el('div', { class: 'pin-row' + (h.kept ? ' tracked' : '') });
+
+          /**
+           * The star: Favorites, in both directions, from this tab as well as from Places. It stars
+           * whatever marker is on that ground; where there is none it asks the game to keep the
+           * place (`onKeep`, which logs it and writes the save), and `MarkerBook.save()` absorbs a
+           * deposit you are already tracking rather than laying a second icon on top of it.
+           */
+          row.append(el('button', {
+            class: 'pin-track' + (h.fav ? ' on' : ''),
+            text: h.fav ? '\u2605' : '\u2606',
+            title: h.fav ? 'A favorite. Click to un-star it.' : 'Add to Favorites',
+            onclick: () => {
+              if (h.mark) book.star(h.mark, !h.mark.starred);
+              else if (onKeep) onKeep(h);
+              else book?.save?.({ cellX: cellOf(h).x, cellY: cellOf(h).y, name: h.name });
+              noteChange();
+              buildSide();
+              draw();
+            },
+          }));
+
+          row.append(el('i', { class: 'pin-dot', text: '\u25c6', style: `color:${h.colour || '#c08a3e'}` }));
+          row.append(el('span', { class: 'pin-name', text: h.name }));
+          row.append(el('span', { class: 'muted small', text: distanceText(h.distance) }));
+          row.append(el('button', {
+            class: 'pin-go', text: '\u2316', title: `Show this ${String(h.name).toLowerCase()} on the map`,
+            onclick: () => locate({ x: h.x, z: h.z, name: h.name, kind: 'seam' }),
+          }));
+
+          /**
+           * \u2026and the track, which is the new thing: a persistent mark on the map that is NOT a
+           * favourite. "marking a resource on the map shouldn't necessarily favorite the location."
+           */
+          row.append(el('button', {
+            class: 'pin-eye' + (h.kept ? ' on' : ''),
+            text: '\u25c8',
+            title: h.kept ? 'Tracked \u2014 on the map until you untrack it. Click to stop.' : 'Track this deposit: keep it on the map',
+            onclick: () => {
+              const c = cellOf(h);
+              if (h.kept) book.untrackResource(h.mark);
+              else book.trackResource({ id: h.id, name: h.name, cellX: c.x, cellY: c.y, colour: h.colour, note: h.band ? `${h.band} seam` : '' });
+              noteChange();
+              buildSide();
+              draw();
+            },
+          }));
           list.append(row);
         }
         kids.push(list);
         if (shown.length > 24) kids.push(el('p', { class: 'muted small', text: `and ${shown.length - 24} more` }));
       }
       side.append(panel('Find', ...kids));
+
+      /**
+       * R17 \u2014 TRACKED RESOURCES: the persistent list, under Find, where the user asked for it.
+       *
+       *   "\u2026a persistent list of what you've tracked (until you untrack it) \u2026 My idea is just
+       *    keeping Places clean to actual locations you may want to visit."
+       *
+       * So deposits are here and NOT in Places any more. They are the same `seam` markers the map
+       * draws, which is why this list survives a save without anything new going into one: they are
+       * already inside `markers.toJSON()`.
+       */
+      side.append(panel('Tracked Resources', markerList(
+        book ? book.resourceTracks() : [],
+        'Nothing tracked. The \u25c8 on a row above keeps a deposit on the map until you untrack it.',
+      )));
     }
 
     // Markers on OTHER worlds. They cannot be drawn on this map, so they are listed with the world
@@ -1083,7 +1627,12 @@ let findFavOnly = false;
       }
     }
 
-    if (state.selected) {
+    /**
+     * R17: on the Places tab this is the Selected group, built above — everything this panel used to
+     * say, plus what you clicked and the button that keeps it. On the other three tabs the old
+     * cell panel stays, so the debug teleport does not vanish when you are looking at Supply.
+     */
+    if (state.selected && tab !== 'places') {
       const s = state.selected;
       const kids = [el('p', { class: 'small', text: `${s.biomeName} · ${s.heightMetres} m` })];
       /**
@@ -1217,6 +1766,9 @@ let findFavOnly = false;
     const w = Math.max(320, rect.width || canvas.clientWidth || 640);
     const h = Math.max(240, rect.height || canvas.clientHeight || 480);
     const dpr = Math.min(2, window.devicePixelRatio || 1);
+    // R17: remembered so a hit radius can be written in CSS pixels and scaled once. A 9-BUFFER-pixel
+    // target is four and a half real pixels on a retina screen, which is not a target.
+    bufferDpr = dpr;
     const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
     const moved = canvas.width !== bw || canvas.height !== bh;
     if (canvas.width !== bw) canvas.width = bw;
@@ -1233,6 +1785,20 @@ let findFavOnly = false;
   function draw() {
     if (!state.open) return;
     if (fit() && !settling) { settling = true; requestAnimationFrame(() => { settling = false; draw(); }); }
+    // R17: one hit list, rebuilt in paint order every draw, so it can never describe a mark that
+    // has moved and the thing on top is the thing you point at. See `hitAt()`.
+    hits.length = 0;
+    /**
+     * R17 — item 20: an outpost is a place on the map, and this is where it becomes one.
+     *
+     * Done in `draw()` rather than in main.js because this screen is already handed `outposts()` and
+     * the marker book, and a join made in the file that has both ends of it is a join that cannot
+     * be forgotten. It is cheap: the ledger is already being read for the Supply layer.
+     */
+    if (outposts && book) {
+      try { syncOutpostMarkers(book, outposts() || [], { metresPerCell: M_PER_CELL }); }
+      catch { /* a half-built ledger is not worth losing the whole map over */ }
+    }
     const ctx = canvas.getContext('2d');
     // draw the map at the zoom the wheel asked for, positioned around the player. renderWorld takes
     // its own scale and offset, so there is no second transform to keep in step with the overlays.
@@ -1399,9 +1965,19 @@ let findFavOnly = false;
     // markers: quests, story objectives, dropped pins. A tracked one gets a ring around it, so you
     // can tell at a glance which of them the minimap is going to keep pointing at.
     for (const m of pins()) {
+      /**
+       * R17 — item 19: a marker you switched off is not drawn here.
+       *
+       *   "That way you can uncheck those to keep them favorited but hide them from the map/world
+       *    so they are not distracting."
+       *
+       * `showOnMap !== false` rather than `showOnMap` on purpose: a marker out of a save written
+       * before this round has no such field, and an absent switch must read as ON.
+       */
+      if (m.showOnMap === false) continue;
       const look = MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin;
       const px = ox + (m.cell.x + 0.5) * scale, py = oy + (m.cell.y + 0.5) * scale;
-      const colour = m.done ? '#9ae06a' : look.color;
+      const colour = m.done ? '#9ae06a' : (m.colour || look.color);
       if (m.tracked) {
         ctx.beginPath();
         ctx.arc(px, py, Math.max(9, scale * 1.5), 0, Math.PI * 2);
@@ -1410,47 +1986,17 @@ let findFavOnly = false;
         ctx.stroke();
         ctx.setLineDash([]);
       }
-      ctx.beginPath();
-      ctx.arc(px, py, Math.max(4, scale * 0.8), 0, Math.PI * 2);
-      ctx.fillStyle = colour;
-      ctx.fill();
-      ctx.lineWidth = 2; ctx.strokeStyle = '#150f0a'; ctx.stroke();
       /**
-       * R14 — THE GLYPH THE MARKER ALREADY CARRIES.
+       * R17 — the disc, the glyph and the favourite, as ONE icon at the marker's true position.
        *
-       * `MARKER_LOOKS` gives every kind an icon — `!` for a quest, `◈` for a pin, `☄` for an
-       * impact, `✦` for a saved place — and the minimap draws them. This screen threw them away and
-       * drew six near-identical coloured dots, so "which of these is the meteor" was a question you
-       * answered by hovering. The dot stays (it is what reads at a distance); the glyph goes on top
-       * of it once there is room for one.
+       * See `drawMarkerDot` at the top of this file for the whole of why: the star used to be
+       * painted a marker and a half up and to the left, so a kept ore seam read as two unrelated
+       * things and the eye went to the one that was not where the ore is.
        */
-      if (look.icon && scale >= 5) {
-        ctx.font = `700 ${Math.round(Math.min(14, Math.max(9, scale * 1.1)))}px system-ui, sans-serif`;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#150f0a';
-        ctx.fillText(look.icon, px, py + 0.5);
-        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-      }
-      /**
-       * …and the star, which is the checkbox in the list made visible on the map.
-       * "a checkbox to toggle whether the location is highlighted on the map with a star."
-       * Up and to the left, so it never sits on the glyph it belongs to.
-       */
-      if (m.starred) {
-        const r = Math.max(5, scale * 0.85);
-        const sx = px - r * 1.5, sy = py - r * 1.5;
-        ctx.beginPath();
-        for (let i = 0; i < 10; i++) {
-          const a = -Math.PI / 2 + i * Math.PI / 5;
-          const rr = i % 2 ? r * 0.44 : r;
-          const X = sx + Math.cos(a) * rr, Y = sy + Math.sin(a) * rr;
-          if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y);
-        }
-        ctx.closePath();
-        ctx.fillStyle = '#ffd24a';
-        ctx.fill();
-        ctx.lineWidth = 1.4; ctx.strokeStyle = '#2a1f08'; ctx.stroke();
-      }
+      const dotR = Math.max(4, scale * 0.8);
+      drawMarkerDot(ctx, m, px, py, dotR);
+      // R17: and it goes on the one hit list, at the size it was actually drawn
+      pushHit('marker', px, py, Math.max(10 * bufferDpr, dotR + 5 * bufferDpr), { marker: m, key: 'm:' + m.id });
       if (m.name) {
         ctx.font = '600 12px system-ui, sans-serif';
         ctx.fillStyle = '#ffe6a8';
@@ -1734,6 +2280,114 @@ let findFavOnly = false;
         detail.worldCells.w * scale, detail.worldCells.h * scale,
       );
     }
+    ctx.imageSmoothingEnabled = true;
+    drawWays(ctx, details, scale, ox, oy);
+  }
+
+  /**
+   * R17 — THE ROADS AND RIVERS SURVIVE THE ZOOM.
+   *
+   *   "Can we find a way to incorporate roads and rivers on the higher detailed maps? Currently they
+   *    shown when zoomed out all the way but disappear when you zoom in. Ideally they should exist
+   *    at all zoom levels, including the map."
+   *
+   * They were never removed — they were BURIED. `renderWorld()` draws the world image and then
+   * strokes the rivers and the roads on top of it as vectors; `drawDetail()` calls it for the ground
+   * underneath and then paints the region-detail raster over the lot, which is opaque. So the
+   * moment the zoom crossed `DETAIL_FROM` every river and every road on screen was covered by a
+   * sharper picture of the same ground with no water and no roads in it. Past that zoom the map
+   * became genuinely harder to navigate than the blurry one it replaced.
+   *
+   * So the ways are re-drawn ON TOP of the rasters, from two sources at once:
+   *
+   *   * the WORLD's own rivers, sea lanes and roads, which carry on past the edge of a region and
+   *     are what a route is actually planned along — so a highway does not stop dead at a border;
+   *   * the DETAIL's own `streams` and `paths`, which are the same drainage model run six times
+   *     finer, so zooming in adds tributaries rather than fattening the same blue line. That is the
+   *     whole point of the detail pass and it had never been drawn.
+   *
+   * Colours and widths are World Forge's own (`worldgen/js/render.js`), deliberately, so the ways
+   * do not change appearance at the zoom where the source changes.
+   */
+  function drawWays(ctx, details, scale, ox, oy) {
+    const wantRivers = state.layers.rivers !== false;
+    const wantRoads = state.layers.roads !== false;
+    if (!wantRivers && !wantRoads) return;
+
+    /** Stroke a run of cell indices from any grid, given how to turn one into a world position. */
+    const run = (cells, toWorld) => {
+      ctx.beginPath();
+      for (let i = 0; i < cells.length; i++) {
+        const p = toWorld(cells[i]);
+        const x = ox + p.x * scale, y = oy + p.y * scale;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.stroke();
+    };
+    const worldCell = c => ({ x: (c % world.width) + 0.5, y: ((c / world.width) | 0) + 0.5 });
+    /** A detail cell sits `factor` to a world cell, offset by the region's top-left corner. */
+    const detailCell = d => {
+      const f = d.factor || 1;
+      return c => ({
+        x: d.origin.x + ((c % d.width) + 0.5) / f,
+        y: d.origin.y + (((c / d.width) | 0) + 0.5) / f,
+      });
+    };
+
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (wantRivers) {
+      // the world's rivers first — they are the big ones, and they leave the region
+      for (const r of world.rivers || []) {
+        ctx.strokeStyle = '#3f8fc4';
+        ctx.lineWidth = Math.max(1.1, scale * (0.3 + r.width * 0.2));
+        run(r.cells, worldCell);
+      }
+      // …then the region's own streams, which is the detail you zoomed in for
+      for (const d of details) {
+        const at = detailCell(d);
+        for (const s of d.streams || []) {
+          ctx.strokeStyle = s.major ? '#3f8fc4' : 'rgba(80,150,200,0.7)';
+          ctx.lineWidth = Math.max(0.8, (scale / (d.factor || 1)) * (s.major ? 0.5 : 0.26));
+          run(s.cells, at);
+        }
+      }
+    }
+
+    if (wantRoads) {
+      ctx.setLineDash([scale * 1.2, scale * 1.2]);
+      ctx.strokeStyle = 'rgba(190,220,255,0.45)';
+      ctx.lineWidth = Math.max(0.6, scale * 0.14);
+      for (const l of world.seaLanes || []) run(l.cells, worldCell);
+      ctx.setLineDash([]);
+
+      const order = { trail: 0, road: 1, highway: 2 };
+      for (const road of [...(world.roads || [])].sort((a, b) => (order[a.class] ?? 0) - (order[b.class] ?? 0))) {
+        if (road.class === 'highway') { ctx.strokeStyle = 'rgba(50,36,24,0.85)'; ctx.lineWidth = Math.max(1.1, scale * 0.34); }
+        else if (road.class === 'road') { ctx.strokeStyle = 'rgba(62,48,34,0.7)'; ctx.lineWidth = Math.max(0.8, scale * 0.22); }
+        else { ctx.strokeStyle = 'rgba(70,60,48,0.5)'; ctx.lineWidth = Math.max(0.6, scale * 0.14); ctx.setLineDash([scale * 0.7, scale * 0.7]); }
+        run(road.cells, worldCell);
+        ctx.setLineDash([]);
+      }
+
+      // the region's own tracks between the places inside it, in the detail view's own palette
+      for (const d of details) {
+        const at = detailCell(d);
+        const step = scale / (d.factor || 1);
+        for (const p of d.paths || []) {
+          ctx.strokeStyle = p.class === 'highway' ? 'rgba(226,205,160,0.95)'
+            : p.class === 'road' ? 'rgba(206,186,146,0.85)' : 'rgba(196,180,150,0.6)';
+          ctx.lineWidth = Math.max(1.0, step * (p.class === 'highway' ? 0.8 : 0.55));
+          if (p.class === 'trail') ctx.setLineDash([step * 1.4, step * 1.2]);
+          run(p.cells, at);
+          ctx.setLineDash([]);
+        }
+      }
+    }
+
+    ctx.restore();
   }
 
   /**
@@ -1870,16 +2524,25 @@ let findFavOnly = false;
      * the same loop, one push longer. Rebuilt on every draw, which is also every pan and zoom, so it
      * can never describe a mark that has moved.
      */
-    placeHits.length = 0;
-
     // smallest first, so a capital is never hidden under the hamlet beside it
     marks.sort((a, b) => (order.get(b.key) ?? 0) - (order.get(a.key) ?? 0));
     const k = Math.min(1.5, Math.max(0.7, scale / 4));
     for (const m of marks) {
       if (m.x < -20 || m.y < -20 || m.x > canvas.width + 20 || m.y > canvas.height + 20) continue;
       drawMark(ctx, m.key, m.x, m.y, k);
-      // R14: the hit radius is a little wider than the mark, because a 3 px pip is not a target
-      placeHits.push({ x: m.x, y: m.y, r: Math.max(9, (MAP_MARKS[m.key]?.r || 3) * k + 4), mark: m });
+      /**
+       * R17 — the hit radius, in real pixels rather than buffer pixels.
+       *
+       * It used to be `Math.max(9, r * k + 4)`, and every number in that line is a BUFFER pixel:
+       * `scale` divides `canvas.width`, which is up to twice the CSS width on a retina display. So
+       * the nine-pixel floor that was meant to make a 3 px pip clickable was four and a half real
+       * pixels, and the target silently changed size depending on the machine. Both constants are
+       * scaled by the buffer ratio now, so a mark is the same size target everywhere.
+       *
+       * The circle also follows the mark's own drawn size — including the 1.55x ring a capital and
+       * a world boss wear — so the whole of what you can see is what you can point at.
+       */
+      pushHit('place', m.x, m.y, markHitRadius(MAP_MARKS[m.key], k, bufferDpr), { mark: m, key: m.id });
     }
   }
 
@@ -1921,7 +2584,17 @@ let findFavOnly = false;
     }
     ctx.restore();
 
-    // ---- and the outposts themselves
+    /**
+     * ---- and the outposts themselves.
+     *
+     * R17 — ONCE, NOT TWICE. Item 20 gives every outpost a marker of its own (`syncOutpostMarkers`
+     * in `draw()`), drawn in the same role colour with the same role glyph and carrying the name you
+     * gave it. Leaving this loop switched on as well would put a second disc and a second copy of
+     * the name on exactly the same pixel — which is the complaint item 11 made about ore seams,
+     * made again. So where there is a marker book, the supply layer draws only the CARTS, which is
+     * the half of it a marker cannot show.
+     */
+    if (book) return;
     for (const p of posts) {
       const [px, py] = at(p);
       if (px < -20 || py < -20 || px > canvas.width + 20 || py > canvas.height + 20) continue;
@@ -2005,6 +2678,8 @@ let findFavOnly = false;
     waypointHits.length = 0;
 
     for (const pad of pads) {
+      // R17 — item 19: a pad you switched off is not drawn. Absent reads as ON, as everywhere else.
+      if (pad.showOnMap === false) continue;
       const px = ox + (pad.x / M_PER_CELL) * scale;
       const py = oy + (pad.z / M_PER_CELL) * scale;
       if (px < -20 || py < -20 || px > canvas.width + 20 || py > canvas.height + 20) continue;
@@ -2060,7 +2735,19 @@ let findFavOnly = false;
         ctx.setLineDash([]);
       }
 
+      // R17: the pad's star, drawn ON the disc's rim rather than beside it — same rule as a marker
+      if (pad.starred) {
+        ctx.beginPath();
+        ctx.arc(px, py, r + Math.max(2, r * 0.45), 0, Math.PI * 2);
+        ctx.lineWidth = Math.max(1.4, r * 0.3);
+        ctx.strokeStyle = '#ffd24a';
+        ctx.stroke();
+      }
+
       waypointHits.push({ px, py, r: r + 5, pad });
+      // R17: …and onto the one hit list, so a pad and a landmark on the same ground are resolved by
+      // which of them you are actually pointing at rather than by which list was consulted first.
+      pushHit('pad', px, py, r + 5 * bufferDpr, { pad, key: 'pad:' + pad.id });
     }
   }
 
@@ -2110,7 +2797,32 @@ let findFavOnly = false;
       + (info.region ? ` · ${knows(info.region.id) ? info.region.name : 'somewhere you have not been'}` : '')
       + (zone && zone.id >= 0 ? ` · level ${zone.minLevel}\u2013${zone.maxLevel} (${zone.danger})` : '')
       + (odds ? ` · usually ${odds.name.toLowerCase()}` : '');
-    readout.className = 'readout' + (zone && zone.id >= 0 ? ' zone-' + zoneTone(zone.midLevel, getLevel()) : '');
+    /**
+     * R17 — THE LINE THAT MOVED THE WHOLE MAP.
+     *
+     *   "When you hover over the full screen planetary map a bar appears with your hover tooltip.
+     *    Can that bars space be reserved so that the map doesn't shift position and size when you
+     *    hover? Also when I open the map the first time I click on the map canvas element the sides
+     *    shrink in."
+     *
+     * This read `readout.className = 'readout' + tone`, which REPLACES the class list rather than
+     * adding to it — so the first time the pointer crossed the canvas, the strip under it lost
+     * `map-readout` (12px monospace, `min-height: 18px`) and `small`. `.readout` is not a class
+     * style.css has ever defined, so the strip fell back to the body font and its reserved height
+     * went with it.
+     *
+     * That is the whole bug, both halves of it. The strip lives in the same column flex as the
+     * canvas, the canvas is `flex: 1` in that column, and `viewBox()` fits the whole planet into
+     * whatever height the canvas ends up with — so a strip that grew by a few pixels took them out
+     * of the map and the map redrew SMALLER, its left and right edges moving inward. "The sides
+     * shrink in", exactly, and it happened on the first pointer move rather than on the click.
+     *
+     * Two fixes, because one of them alone would leave the trap set for the next person: the class
+     * list is added to rather than overwritten here, and `map17.css` makes the wrap a grid whose
+     * bottom two rows are a fixed height, so nothing written into them can ever resize the map again.
+     */
+    readout.className = 'map-readout muted small readout'
+      + (zone && zone.id >= 0 ? ' zone-' + zoneTone(zone.midLevel, getLevel()) : '');
 
     /**
      * R14 — and what the hover card should describe.
@@ -2123,19 +2835,12 @@ let findFavOnly = false;
     const rect = canvas.getBoundingClientRect();
     const dpr = canvas.width / Math.max(1, rect.width);
     const mx = (ev.clientX - rect.left) * dpr, my = (ev.clientY - rect.top) * dpr;
-    const near = (hx, hy, hr) => (mx - hx) ** 2 + (my - hy) ** 2 <= hr * hr;
 
-    let hover = null;
-    for (const h of placeHits) if (near(h.x, h.y, h.r)) { hover = { tier: 'place', key: h.mark.id, mark: h.mark }; break; }
-    if (!hover) for (const h of waypointHits) if (near(h.px, h.py, h.r)) { hover = { tier: 'pad', key: 'pad:' + h.pad.id, pad: h.pad }; break; }
-    if (!hover) {
-      const { scale, ox, oy } = viewBox();
-      for (const m of pins()) {
-        const px = ox + (m.cell.x + 0.5) * scale, py = oy + (m.cell.y + 0.5) * scale;
-        if (near(px, py, Math.max(10, scale * 1.2))) { hover = { tier: 'marker', key: 'm:' + m.id, marker: m }; break; }
-      }
-    }
-    if (!hover) hover = { tier: 'cell', key: `c:${cell.x},${cell.y}`, cell };
+    // R17: one list, nearest centre wins, ground only when nothing is under the pointer at all
+    const hit = hitAt(mx, my);
+    const hover = hit
+      ? { tier: hit.tier, key: hit.key, mark: hit.mark, pad: hit.pad, marker: hit.marker }
+      : { tier: 'cell', key: `c:${cell.x},${cell.y}`, cell };
 
     if (state.hover?.key !== hover.key) {
       state.hover = hover;
@@ -2250,11 +2955,9 @@ let findFavOnly = false;
     const rect = canvas.getBoundingClientRect();
     const mx = (ev.clientX - rect.left) * (canvas.width / rect.width);
     const my = (ev.clientY - rect.top) * (canvas.height / rect.height);
-    let closest = null, best = Infinity;
-    for (const hit of waypointHits) {
-      const d = Math.hypot(hit.px - mx, hit.py - my);
-      if (d <= hit.r && d < best) { best = d; closest = hit; }
-    }
+    // R17: the same hit list the hover uses, narrowed to pads — so what you click and what the
+    // tooltip just told you was there can never be two different things
+    const closest = hitAt(mx, my, 'pad');
     if (closest) {
       /**
        * CLICKING A PAD PICKS IT. IT DOES NOT TRAVEL.
@@ -2271,8 +2974,23 @@ let findFavOnly = false;
       return;
     }
 
+    /**
+     * R17 — WHAT YOU CLICKED, AS A THING YOU CAN DO SOMETHING WITH.
+     *
+     *   "On the map from the Places menu add a 'Selected' group that shows where you click on, and
+     *    from there add an 'Add to Favorites' button that stores it under 'Places you keep'."
+     *
+     * A click already produced `state.selected` — the CELL, with its biome and height and a debug
+     * teleport button — and nothing else. So clicking a village told you "Grassland, 210 m" and
+     * gave you no way to keep it. What was clicked is worked out from the same hit list the hover
+     * uses, so the Selected panel names the village rather than the field it stands in, and the
+     * marker under the pointer (if any) is carried along so the button can un-star as well as star.
+     */
+    const on = hitAt(mx, my);
     const info = cellInfo(world, cell.x, cell.y);
-    state.selected = info ? { ...info, x: cell.x, y: cell.y } : null;
+    state.selected = info ? { ...info, x: cell.x, y: cell.y } : { x: cell.x, y: cell.y, biomeName: 'somewhere', heightMetres: 0 };
+    state.selected.hit = on || null;
+    state.selected.name = on?.marker?.name || on?.mark?.name || on?.pad?.name || '';
     state.padPick = null;
     buildSide();
     draw();
@@ -2344,10 +3062,23 @@ let findFavOnly = false;
     if (!h) return null;
     const card = el('div', { class: 'tip-map' });
 
+    /**
+     * R17 — THE ICON, BESIDE THE NAME.
+     *
+     *   "can we show the icon itself in the tooltip to the left of the name so it's clear that icon
+     *    is corresponding to what is on the map? This will help with understanding that a village is
+     *    a white square."
+     *
+     * `markSwatch()` calls `drawMark()`, which is the function that put the thing on the map in the
+     * first place, so the swatch is the same shape in the same colours by construction — there is
+     * no second drawing of a village to keep in step.
+     */
+    const head = (swatch, name) => el('div', { class: 'tip-map-head' }, swatch, el('b', { text: name }));
+
     if (h.tier === 'place') {
       const m = h.mark;
       const mark = MAP_MARKS[m.key] || {};
-      card.append(el('b', { text: m.name || mark.label || 'somewhere' }));
+      card.append(head(markSwatch(m.key, 20), m.name || mark.label || 'somewhere'));
       card.append(el('div', { class: 'tip-what', text: mark.label || m.type || '' }));
       if (m.cleared) card.append(el('div', { class: 'tip-note', text: 'You have already cleared this.' }));
       else if (m.blurb) card.append(el('div', { class: 'tip-note', text: m.blurb }));
@@ -2358,16 +3089,20 @@ let findFavOnly = false;
 
     if (h.tier === 'marker') {
       const look = MARKER_LOOKS[h.marker.kind] || MARKER_LOOKS.pin;
-      card.append(el('b', { text: h.marker.name }));
-      card.append(el('div', { class: 'tip-what', text: look.label + (h.marker.starred ? ' · starred' : '') }));
+      card.append(head(markerSwatch(h.marker, 20), h.marker.name));
+      card.append(el('div', { class: 'tip-what', text: look.label + (h.marker.starred ? ' · favorite' : '') }));
       if (h.marker.note) card.append(el('div', { class: 'tip-note', text: h.marker.note }));
       card.append(el('div', { class: 'tip-note', text: h.marker.tracked
         ? 'The minimap is pointing at this.' : 'Not tracked — the minimap is ignoring it.' }));
+      // R17: the outpost marker says why it has no × on it, rather than leaving that a mystery
+      if (h.marker.locked) {
+        card.append(el('div', { class: 'tip-note', text: 'This one stands as long as the buildings do.' }));
+      }
       return card;
     }
 
     if (h.tier === 'pad') {
-      card.append(el('b', { text: h.pad.name }));
+      card.append(head(markSwatch(h.pad.lit ? 'waypoint' : 'waypointOff', 20), h.pad.name));
       card.append(el('div', { class: 'tip-what', text: h.pad.lit ? 'Waypoint — lit' : 'Waypoint — not lit yet' }));
       card.append(el('div', { class: 'tip-note', text: h.pad.lit
         ? 'You can travel here from any other lit waypoint.'
@@ -2493,6 +3228,43 @@ let findFavOnly = false;
     get padPick() { return state.padPick; },
     /** Where every pad is drawn right now, so a test can click one without knowing the projection. */
     get padHits() { return waypointHits.map(h => ({ x: h.px, y: h.py, r: h.r, id: h.pad.id, lit: h.pad.lit })); },
+    /**
+     * R17 — everything drawn this frame that can be pointed at, and the resolver itself.
+     *
+     * Exposed so a browser spec can ask "what is under the centre of the world boss?" without
+     * reimplementing the projection — which is exactly how the reported bug survived a round: the
+     * only thing that knew where a mark was drawn was the drawing code, and the only thing that
+     * knew where it could be clicked was a second list beside it.
+     */
+    get hits() { return hits.map(h => ({ tier: h.tier, x: h.x, y: h.y, r: h.r, key: h.key })); },
+    hitAt: (x, y, want = null) => {
+      const h = hitAt(x, y, want);
+      return h ? { tier: h.tier, key: h.key, name: h.marker?.name || h.mark?.name || h.pad?.name || '' } : null;
+    },
+    /**
+     * R17 — WHAT THE MINIMAP SHOULD DRAW.
+     *
+     * One call, so js/hud.js never has to know that a favourite is a different checkbox to a track,
+     * or that a waypoint pad is not a marker. See `research/round17-map-handoff.md` for the line.
+     */
+    minimapMarkers(player) {
+      const rows = [];
+      for (const m of book?.minimap?.() || []) {
+        const b = book.bearing(m, player, terrain);
+        rows.push({ ...m, x: b.x, z: b.z, distance: b.distance });
+      }
+      for (const p of padBook()?.minimapPads?.() || []) {
+        rows.push({ ...p, distance: Math.hypot(p.x - player.x, p.z - player.z) });
+      }
+      return rows;
+    },
+    /** …and what the 3D world should put a beacon over. */
+    worldMarkers() {
+      return [
+        ...(book?.inWorld?.() || []),
+        ...(padBook()?.worldPads?.() || []).map(p => ({ ...p, kind: 'waypoint' })),
+      ];
+    },
     /** B8: which region names you have earned, for the tests and the debug menu. */
     known: () => [...known],
     knows,

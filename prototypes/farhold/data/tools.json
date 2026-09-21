@@ -97,6 +97,7 @@
       "id": "scanner",
       "name": "Prospector's Scanner",
       "level": 1,
+      "tier": 1,
       "cost": {
         "iron_ingot": 3,
         "crystal": 1,
@@ -106,6 +107,41 @@
       "range": 110,
       "desc": "Sweeps the ground around you and names what is under it. What it finds stays on your map for good — it is a survey, not a torch.",
       "made": "Built at a workbench. One crystal, a little wire and three iron."
+    },
+    {
+      "id": "deep_scanner",
+      "name": "Deep Scanner",
+      "level": 12,
+      "tier": 2,
+      "replaces": "scanner",
+      "cost": {
+        "steel_ingot": 4,
+        "crystal": 3,
+        "wire": 6,
+        "machine_part": 2
+      },
+      "at": "workbench",
+      "range": 210,
+      "desc": "Twice the reach of the prospector's set and it reads through rock — the buried veins a hand scanner walks straight over.",
+      "made": "Built at a workbench once you are forging steel. It supersedes the first scanner rather than replacing it in the bag: the wheel holds one scanner, and it is the best one you own."
+    },
+    {
+      "id": "survey_array",
+      "name": "Survey Array",
+      "level": 24,
+      "tier": 3,
+      "replaces": "deep_scanner",
+      "cost": {
+        "steel_ingot": 8,
+        "crystal": 6,
+        "wire": 12,
+        "machine_part": 6,
+        "control_board": 2
+      },
+      "at": "workbench",
+      "range": 380,
+      "desc": "A shoulder rig that reads the whole valley and tells the difference between a seam and a rare seam without your having to stand on it.",
+      "made": "Built at a workbench. The end of prospecting on foot."
     },
     {
       "id": "command_rod",

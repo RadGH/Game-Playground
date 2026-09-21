@@ -19,6 +19,8 @@ import * as THREE from 'three';
 import { makeRng, clamp } from '../../../worldgen/js/noise.js';
 import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
 import { ObstacleField, PROP_SOLIDS } from './collide.js';
+// R17 — the no-dependency registry js/tools.js reads the gather clock and the work clip out of.
+import { harvestInfo } from './harvestinfo.js';
 
 const CELL = 64;                     // metres across one prop cell
 
@@ -528,22 +530,44 @@ export const KITS = {
  * Anything NOT in this table stays scenery: a ruin, a column and a standing stone are landmarks,
  * not quarries, and hitting one does nothing at all.
  */
+/**
+ * R17 added `work`: which body animation a gather at this thing plays.
+ *
+ * "Generate a mining animation to use when a tool is being used, to differentiate it from the
+ * attack animation." Three of them exist now (`avatar-3d/js/chibi2-motion.js`, opt-in list), and
+ * the choice belongs HERE rather than in the animation code, because what you do to a thing is a
+ * property of the thing: you chop a tree, you pick at a rock and you stoop over a bush. It is an
+ * explicit field rather than a guess from the drops — `stump` drops timber and is grubbed out, not
+ * chopped — for the same reason `wood` is an explicit flag on the giants.
+ */
 export const PROP_HARVEST = {
-  broadleaf: { hp: 34, tier: 1, drops: { log: 9, resin: 1 }, verb: 'fell', regrow: 21600 },
-  conifer:   { hp: 34, tier: 1, drops: { log: 10, resin: 2 }, verb: 'fell', regrow: 21600 },
-  palm:      { hp: 26, tier: 1, drops: { log: 7, fibre: 3 }, verb: 'fell', regrow: 21600 },
-  deadtree:  { hp: 18, tier: 0, drops: { log: 5 }, verb: 'fell', regrow: 28800 },
-  stump:     { hp: 14, tier: 1, drops: { log: 3 }, verb: 'grub out', regrow: null },
-  bush:      { hp: 6, tier: 0, drops: { fibre: 4 }, verb: 'cut back', regrow: 7200 },
-  fern:      { hp: 5, tier: 0, drops: { fibre: 3 }, verb: 'cut back', regrow: 7200 },
-  reed:      { hp: 5, tier: 0, drops: { reed: 4, fibre: 1 }, verb: 'cut', regrow: 5400 },
-  cactus:    { hp: 12, tier: 0, drops: { fibre: 5, water: 2 }, verb: 'cut down', regrow: 21600 },
-  mushroom:  { hp: 3, tier: 0, drops: { fibre: 1 }, verb: 'pick', regrow: 5400 },
-  rock:      { hp: 16, tier: 1, drops: { stone: 6, flint: 1 }, verb: 'break up', regrow: null },
-  boulder:   { hp: 46, tier: 1, drops: { stone: 22, rubble: 6, flint: 2 }, verb: 'break up', regrow: null },
-  bones:     { hp: 6, tier: 0, drops: { bone: 3 }, verb: 'gather', regrow: null },
-  crystal:   { hp: 30, tier: 2, drops: { crystal_raw: 6 }, verb: 'break off', regrow: 18000 },
+  broadleaf: { hp: 34, tier: 1, drops: { log: 9, resin: 1 }, verb: 'fell', regrow: 21600, work: 'chop' },
+  conifer:   { hp: 34, tier: 1, drops: { log: 10, resin: 2 }, verb: 'fell', regrow: 21600, work: 'chop' },
+  palm:      { hp: 26, tier: 1, drops: { log: 7, fibre: 3 }, verb: 'fell', regrow: 21600, work: 'chop' },
+  deadtree:  { hp: 18, tier: 0, drops: { log: 5 }, verb: 'fell', regrow: 28800, work: 'chop' },
+  stump:     { hp: 14, tier: 1, drops: { log: 3 }, verb: 'grub out', regrow: null, work: 'dig' },
+  bush:      { hp: 6, tier: 0, drops: { fibre: 4 }, verb: 'cut back', regrow: 7200, work: 'forage' },
+  fern:      { hp: 5, tier: 0, drops: { fibre: 3 }, verb: 'cut back', regrow: 7200, work: 'forage' },
+  reed:      { hp: 5, tier: 0, drops: { reed: 4, fibre: 1 }, verb: 'cut', regrow: 5400, work: 'forage' },
+  cactus:    { hp: 12, tier: 0, drops: { fibre: 5, water: 2 }, verb: 'cut down', regrow: 21600, work: 'chop' },
+  mushroom:  { hp: 3, tier: 0, drops: { fibre: 1 }, verb: 'pick', regrow: 5400, work: 'forage' },
+  rock:      { hp: 16, tier: 1, drops: { stone: 6, flint: 1 }, verb: 'break up', regrow: null, work: 'dig' },
+  boulder:   { hp: 46, tier: 1, drops: { stone: 22, rubble: 6, flint: 2 }, verb: 'break up', regrow: null, work: 'dig' },
+  bones:     { hp: 6, tier: 0, drops: { bone: 3 }, verb: 'gather', regrow: null, work: 'forage' },
+  crystal:   { hp: 30, tier: 2, drops: { crystal_raw: 6 }, verb: 'break off', regrow: 18000, work: 'dig' },
 };
+
+/**
+ * R17 — PUBLISH THE ROWS SO THE GATHER CLOCK CAN READ THEM.
+ *
+ * js/tools.js runs the progress bar and has to know how long a job takes and which clip the body
+ * plays; it is pure and cannot import this file (Three.js), and js/main.js — which sits between
+ * them — is not ours this round. One registry with no dependencies, written here where the numbers
+ * live and read there. See js/harvestinfo.js for why this is a registry and not a second copy.
+ */
+for (const [kind, spec] of Object.entries(PROP_HARVEST)) {
+  harvestInfo.set(kind, { work: spec.work, tier: spec.tier, verb: spec.verb, seconds: null, mega: false });
+}
 
 /** A readable name for a prop, for the log line and the prompt. */
 export const PROP_NAMES = {
@@ -636,6 +660,17 @@ export function createProps(scene, terrain, opts = {}) {
     if (!data) return;
     mega = data;
     for (const [key, spec] of Object.entries(data.kinds || {})) {
+      /**
+       * R17 — a wood giant publishes its own gather clock and its own work clip, the same way the
+       * ordinary props do at import. It happens here rather than at import because the catalogue
+       * is fetched, so there is nothing to publish until it lands.
+       */
+      if (spec.wood && spec.harvest) {
+        harvestInfo.set(key, {
+          work: spec.harvest.work, tier: spec.harvest.tier, verb: spec.harvest.verb,
+          seconds: spec.harvest.seconds ?? null, name: spec.name, mega: true,
+        });
+      }
       const build = MEGA_BUILDERS[key];
       if (!build) continue;
       const mesh = new THREE.InstancedMesh(build(), new THREE.MeshLambertMaterial({ vertexColors: true }), spec.cap || 12);
@@ -912,6 +947,24 @@ export function createProps(scene, terrain, opts = {}) {
             if (terrain.roadAt(x, z) > (mega.roadClear ?? 0.2)) continue;
             const spec = mega.kinds[key] || {};
             const scale = 0.85 + mrng() * 0.4;
+            /**
+             * R17 — A FELLED GIANT STAYS FELLED.
+             *
+             * Same rule as the ordinary props above and for the same reason: every random number is
+             * drawn FIRST and only the write to the mesh is skipped, so cutting one down cannot
+             * shuffle the next cell's giant to somewhere else. `mrng` has to end in exactly the
+             * same place whether this tree is standing or not, which is why the `continue` is here
+             * and not three lines earlier where it would be cheaper.
+             */
+            const megaId = propKey(key, x, z);
+            /**
+             * A CLEARED CIRCLE DOES NOT DELETE A GIANT, deliberately, which is why `insideCleared`
+             * is not tested here the way it is for the ordinary props. The Clear tool paints an
+             * 8 m circle and a giant is a landmark you navigate by; having one silently disappear
+             * because you levelled a building plot near it would be the same "it just vanished"
+             * complaint from the other direction. A giant comes down when you cut it down.
+             */
+            if (felled.has(megaId)) continue;
             matrix.compose(
               new THREE.Vector3(x, terrain.heightAt(x, z) - 0.3, z),
               new THREE.Quaternion().setFromEuler(new THREE.Euler(0, mrng() * Math.PI * 2, 0)),
@@ -933,6 +986,16 @@ export function createProps(scene, terrain, opts = {}) {
             mesh.setColorAt(n, colour.setScalar(v));
             if (spec.solid) solids.add(x, z, spec.solid[0] * scale, spec.solid[1] * scale);
             megaCounts[key] = n + 1;
+            /**
+             * …AND YOU CAN WALK UP TO IT. The one line item 12 was missing.
+             *
+             * `standing` is the list `near`, `nearest`, `describe` and `strike` all read, and
+             * megaflora were never on it — which is the whole of "I was disappointed I could not
+             * cut it down". Everything goes on, not only the wood ones: a Stone Arch has to be
+             * findable so that swinging at it can say WHY it refuses, instead of doing nothing,
+             * which is indistinguishable from this bug.
+             */
+            standing.push({ id: megaId, kind: key, x, z, y: terrain.heightAt(x, z), scale, mega: true });
             break;
           }
         }
@@ -1002,9 +1065,40 @@ export function createProps(scene, terrain, opts = {}) {
     if (grassMesh.instanceColor) grassMesh.instanceColor.needsUpdate = true;
   }
 
+  /**
+   * R17 — WHAT IT TAKES TO BRING THIS THING DOWN, ordinary tree or giant, in one lookup.
+   *
+   * `PROP_HARVEST` is the table for the scenery props; `data/megaflora.json`'s `kinds[k].harvest` is
+   * the same shape for the giants. Every caller below asked `PROP_HARVEST[prop.kind]` directly,
+   * which is why a giant could not be felled, described or cleared — there is no `elder_broadleaf`
+   * row in `PROP_HARVEST` and there should not be, because a giant is fifteen of a tree and that
+   * number belongs in the catalogue beside everything else about it. One function, so adding a
+   * thirteenth giant is a data change.
+   *
+   * Returns null for anything that is scenery — a ruin, a column, a Stone Arch — which is what
+   * every caller already treats as "you cannot harvest this".
+   */
+  function harvestSpec(kind) {
+    if (PROP_HARVEST[kind]) return PROP_HARVEST[kind];
+    const giant = mega?.kinds?.[kind];
+    if (giant?.wood && giant.harvest) return { ...giant.harvest, mega: true, name: giant.name };
+    return null;
+  }
+
+  /**
+   * …and why one of them refuses, when it does. A giant made of stone is findable on purpose (it is
+   * pushed onto `standing` like everything else) so that swinging at it can say this, rather than
+   * doing nothing — which is exactly what the bug being fixed here looked like.
+   */
+  function refusalFor(kind) {
+    const giant = mega?.kinds?.[kind];
+    if (giant && !giant.wood) return giant.why || `The ${giant.name} is not made of anything you can take.`;
+    return null;
+  }
+
   /** How much a prop of this size drops, rounded so a swing never pays out 0.7 of a log. */
   function yieldOf(kind, scale = 1) {
-    const spec = PROP_HARVEST[kind];
+    const spec = harvestSpec(kind);
     if (!spec) return {};
     const out = {};
     for (const [id, n] of Object.entries(spec.drops)) {
@@ -1016,7 +1110,7 @@ export function createProps(scene, terrain, opts = {}) {
 
   /** Put one prop on the felled list, with the clock it regrows on. */
   function fell(prop) {
-    const spec = PROP_HARVEST[prop.kind];
+    const spec = harvestSpec(prop.kind);
     felled.set(prop.id, { kind: prop.kind, x: prop.x, z: prop.z, regrowIn: spec?.regrow ?? null });
     wounded.delete(prop.id);
     return yieldOf(prop.kind, prop.scale);
@@ -1042,18 +1136,38 @@ export function createProps(scene, terrain, opts = {}) {
     /** What a prop is called, what it holds and what it would take to bring down. */
     describe(prop) {
       if (!prop) return null;
-      const spec = PROP_HARVEST[prop.kind];
-      if (!spec) return null;
+      const spec = harvestSpec(prop.kind);
+      /**
+       * R17 — a giant that refuses still DESCRIBES itself. Returning null here is what made the
+       * Stone Arch silent: `beginGather` reads `props.describe()` and a null answer means "nothing
+       * here", which is a lie when there is a twenty-one metre arch in front of you.
+       */
+      if (!spec) {
+        const why = refusalFor(prop.kind);
+        if (!why) return null;
+        return { ...prop, name: this.nameOf(prop.kind), mega: true, harvestable: false, why, tier: 99, drops: {} };
+      }
       const hp = spec.hp * (0.6 + prop.scale * 0.55);
       return {
         ...prop,
-        name: PROP_NAMES[prop.kind] || prop.kind,
+        name: this.nameOf(prop.kind),
+        harvestable: true,
+        mega: !!spec.mega,
         verb: spec.verb,
         tier: spec.tier,
+        /** R17 — which gather clip the body should play. See js/tools.js `workClipFor`. */
+        work: spec.work || (spec.drops?.log ? 'chop' : 'dig'),
+        /** R17 — a giant carries its own bar length; an ordinary prop uses data/tools.json's. */
+        seconds: spec.seconds ?? null,
         maxHp: hp,
         hp: wounded.has(prop.id) ? wounded.get(prop.id) : hp,
         drops: yieldOf(prop.kind, prop.scale),
       };
+    },
+
+    /** The word for a prop kind, ordinary or giant. The giants carry their own proper names. */
+    nameOf(kind) {
+      return PROP_NAMES[kind] || mega?.kinds?.[kind]?.name || kind;
     },
 
     /**
@@ -1067,8 +1181,14 @@ export function createProps(scene, terrain, opts = {}) {
     strike(x, z, { damage = 10, reach = 3.2, tier = 1 } = {}) {
       const prop = this.nearest(x, z, reach);
       if (!prop) return { hit: false };
-      const spec = PROP_HARVEST[prop.kind];
-      const name = PROP_NAMES[prop.kind] || prop.kind;
+      const spec = harvestSpec(prop.kind);
+      const name = this.nameOf(prop.kind);
+      /**
+       * R17 — a giant made of stone says so. Without this a swing at a Basalt Stack threw on
+       * `spec.tier`, because `strike` had never been asked about anything that is not in
+       * `PROP_HARVEST` — `nearest` only ever returned things that were.
+       */
+      if (!spec) return { hit: false, blocked: true, name, why: refusalFor(prop.kind) || `The ${name} gives nothing.` };
       if ((tier ?? 0) < spec.tier) {
         return { hit: false, blocked: true, name, why: `The ${name} is too hard for what you are carrying.` };
       }
@@ -1100,6 +1220,13 @@ export function createProps(scene, terrain, opts = {}) {
       const materials = {};
       let removed = 0;
       for (const prop of this.near(x, z, r)) {
+        /**
+         * R17 — the Clear tool does not level a Stone Arch. `near` returns the giants now, and a
+         * clearing brush that could delete a twenty-metre landmark by accident is not a clearing
+         * brush. Anything with no harvest row is left standing, which is also what happens to a
+         * ruin and a column: they were never on `standing` and so were never cleared either.
+         */
+        if (!harvestSpec(prop.kind)) continue;
         for (const [id, n] of Object.entries(fell(prop))) materials[id] = (materials[id] || 0) + n;
         removed++;
       }

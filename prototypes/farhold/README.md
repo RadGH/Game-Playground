@@ -13,6 +13,17 @@ Working title. Independent project (Radley Sustaire). Sandbox.
 it. All ten phases and the round-3 queue are done. **Round 4 is the RPG expansion** — level-banded
 regions, a much bigger bestiary, dungeons you go inside, chests, bosses, crafting from recycled
 gear, companions, thirty classes and light you can carry. [`RPG.md`](RPG.md) documents it.
+**Round 17 adds a thirty-first class: the one you build.** Point-buy spells off a tier list drawn
+from all thirty presets, eighteen loadouts, a companion or a sealed chest to open with, follower
+slots you manage on a screen of their own, and ten kinds of mercenary for hire in town.
+[`CLASSES.md`](CLASSES.md) documents the builder, the spell tier list, the follower rules and the
+mercenary data format.
+**Round 17 also gives every building a screen of its own** — press `E` at a furnace and you get the
+furnace, not the build menu — and puts four ages of **research** behind the high-tech half of the
+catalogue, with everything low-tech yours from the moment you land.
+[`RESEARCH.md`](RESEARCH.md) documents the tree, the points and the gate; the station screens, the
+tidied build panel and the onboarding deadlock they fixed are in the "Round 17" section of
+[`BUILD-MODE.md`](BUILD-MODE.md).
 
 ---
 

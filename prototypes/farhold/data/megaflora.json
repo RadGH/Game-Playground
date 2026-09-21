@@ -1,8 +1,11 @@
 {
   "_doc": "Megaflora — the big things. The ask was 'give another pass over each biome and add large objects … giant trees, boulders, arches, or other features. They should be 2-3 times taller than our tallest trees currently.' The tallest ordinary prop in js/props.js is the conifer at 9 metres, so everything here stands between 17 and 26 — two to three times that — and every land biome gets at least one. They are rolled on their OWN random stream (see the `0x4d67` salt in props.js) so that adding them did not reshuffle a single tree that was already there.",
 
+  "_harvestDoc": "R17 — A MEGA-TREE YOU CAN ACTUALLY CUT DOWN.\n\n\"I found one of the new mega-trees at (seed 56138, Chodikvraun III, biome Grassland, x 11438, z 3187, altitude 22) but was disappointed I could not cut it down. Could these trees be updated to be cut down and reward ~15 times more than a normal tree? Obviously this should only work for mega trees actually made of wood, but maybe not all mega-structures.\"\n\nHe could not, and the reason is the same shape as everything else this round: js/props.js keeps a harvest ledger (`felled`, by `propKey`, saved) and a `standing` list of everything you can walk up to and hit — and megaflora were never put on either. They are drawn out of their own `megaMeshes` on their own random stream, and the line that files an ordinary tree as hittable (`if (PROP_HARVEST[key]) standing.push(...)`) is in the ordinary prop loop, two hundred lines above the giant one. So a 24 m tree was scenery with a collision cylinder round it. Nothing was broken; the join had never been made.\n\nWHICH ONES. `wood: true` is an EXPLICIT flag rather than a guess at the name, because 'hollow_snag' and 'crown_conifer' share no word and 'crystal_spire' and 'shelf_palm' both end in a plant. Only the four wood-bodied kinds can be felled. Everything else carries `why`, a sentence the game says when you swing at it, because a giant that refuses silently reads exactly like the bug being fixed here.\n\nWHAT IT PAYS. Fifteen times the ordinary tree of the same family, to the log: a broadleaf drops 9 logs, an Elder Broadleaf drops 135. `tier` is one step above its ordinary cousin (a Crown Conifer needs steel where a pine needs iron) and `seconds` is the gather bar — four to seven times a normal tree — so the payout is earned rather than collected. `regrow` is deliberately far longer than the 6 hours an ordinary tree takes: a giant is a landmark, and one that grew back over lunch would stop being one.",
+
   "_schema": {
-    "kinds": "the catalogue. `tall` is roughly how high it stands (the test checks it against the tallest ordinary tree), `solid` is [radius, height] for the collision field — carried here rather than in js/collide.js's PROP_SOLIDS because that file belongs to somebody else this round, `leafy` says the biome's leaf tint applies.",
+    "kinds": "the catalogue. `tall` is roughly how high it stands (the test checks it against the tallest ordinary tree), `solid` is [radius, height] for the collision field — carried here rather than in js/collide.js's PROP_SOLIDS because that file belongs to somebody else this round, `leafy` says the biome's leaf tint applies. `wood` says it can be felled; a wood kind carries `harvest` and a non-wood one carries `why`.",
+    "harvest": "{ like: the ordinary PROP_HARVEST row this is fifteen of, tier: the tool tier the swing must clear, hp: how much damage brings it down if you insist on hitting it with a sword, seconds: the gather bar, drops: what it leaves before the per-instance size scaling, verb, work: which mining clip the body plays, regrow: in-game seconds }",
     "biomes": "[[kind, chance per 64 m prop cell at density 1]] — a chance of 0.02 is about four in the block of ground you can see, which is rare enough that each one still reads as a place.",
     "minSlope": "steeper than this and nothing this big would have stayed up",
     "roadClear": "how much road under a point rules it out — nobody lets a 24 m tree grow through the highway"
@@ -12,18 +15,38 @@
   "roadClear": 0.2,
 
   "kinds": {
-    "elder_broadleaf": { "name": "Elder Broadleaf", "tall": 24, "solid": [2.2, 24], "leafy": true, "cap": 14 },
-    "crown_conifer":   { "name": "Crown Conifer",   "tall": 26, "solid": [1.6, 26], "leafy": true, "cap": 14 },
-    "shelf_palm":      { "name": "Shelf Palm",      "tall": 20, "solid": [1.2, 20], "leafy": true, "cap": 12 },
-    "hollow_snag":     { "name": "Hollow Snag",     "tall": 21, "solid": [1.8, 21], "leafy": false, "cap": 12 },
-    "tor":             { "name": "Tor",             "tall": 19, "solid": [5.2, 19], "leafy": false, "cap": 12 },
-    "stone_arch":      { "name": "Stone Arch",      "tall": 21, "solid": [3.2, 21], "leafy": false, "cap": 10 },
-    "basalt_stack":    { "name": "Basalt Stack",    "tall": 22, "solid": [3.6, 22], "leafy": false, "cap": 12 },
-    "crystal_spire":   { "name": "Crystal Spire",   "tall": 25, "solid": [2.8, 25], "leafy": false, "cap": 12 },
-    "ice_fang":        { "name": "Ice Fang",        "tall": 21, "solid": [2.6, 21], "leafy": false, "cap": 12 },
-    "cap_mushroom":    { "name": "Cap Mushroom",    "tall": 18, "solid": [1.6, 18], "leafy": false, "cap": 12 },
-    "rib_arch":        { "name": "Rib Arch",        "tall": 18, "solid": [3.4, 18], "leafy": false, "cap": 10 },
-    "mast_cactus":     { "name": "Mast Cactus",     "tall": 18, "solid": [1.4, 18], "leafy": false, "cap": 12 }
+    "elder_broadleaf": { "name": "Elder Broadleaf", "tall": 24, "solid": [2.2, 24], "leafy": true, "cap": 14,
+      "wood": true,
+      "harvest": { "like": "broadleaf", "tier": 2, "hp": 380, "seconds": 16, "verb": "fell", "work": "chop",
+        "drops": { "log": 135, "resin": 15 }, "regrow": 172800 } },
+    "crown_conifer":   { "name": "Crown Conifer",   "tall": 26, "solid": [1.6, 26], "leafy": true, "cap": 14,
+      "wood": true,
+      "harvest": { "like": "conifer", "tier": 2, "hp": 400, "seconds": 18, "verb": "fell", "work": "chop",
+        "drops": { "log": 150, "resin": 30 }, "regrow": 172800 } },
+    "shelf_palm":      { "name": "Shelf Palm",      "tall": 20, "solid": [1.2, 20], "leafy": true, "cap": 12,
+      "wood": true,
+      "harvest": { "like": "palm", "tier": 2, "hp": 300, "seconds": 13, "verb": "fell", "work": "chop",
+        "drops": { "log": 105, "fibre": 45 }, "regrow": 129600 } },
+    "hollow_snag":     { "name": "Hollow Snag",     "tall": 21, "solid": [1.8, 21], "leafy": false, "cap": 12,
+      "wood": true,
+      "harvest": { "like": "deadtree", "tier": 1, "hp": 220, "seconds": 11, "verb": "bring down", "work": "chop",
+        "drops": { "log": 75 }, "regrow": 216000 } },
+    "tor":             { "name": "Tor",             "tall": 19, "solid": [5.2, 19], "leafy": false, "cap": 12,
+      "wood": false, "why": "A tor is the hill with the soil washed off it. There is no felling that." },
+    "stone_arch":      { "name": "Stone Arch",      "tall": 21, "solid": [3.2, 21], "leafy": false, "cap": 10,
+      "wood": false, "why": "The arch is one piece of bedrock. Take a bite out of it and the rest comes down on you." },
+    "basalt_stack":    { "name": "Basalt Stack",    "tall": 22, "solid": [3.6, 22], "leafy": false, "cap": 12,
+      "wood": false, "why": "Cooled lava, in columns, all the way through. Quarry it properly or leave it alone." },
+    "crystal_spire":   { "name": "Crystal Spire",   "tall": 25, "solid": [2.8, 25], "leafy": false, "cap": 12,
+      "wood": false, "why": "It is a single crystal twenty-five metres tall. Nothing you are carrying will start it." },
+    "ice_fang":        { "name": "Ice Fang",        "tall": 21, "solid": [2.6, 21], "leafy": false, "cap": 12,
+      "wood": false, "why": "Ice this old is rock. A tool made for wood only polishes it." },
+    "cap_mushroom":    { "name": "Cap Mushroom",    "tall": 18, "solid": [1.6, 18], "leafy": false, "cap": 12,
+      "wood": false, "why": "The stalk is wet pulp — it tears rather than cuts, and nothing useful comes off it." },
+    "rib_arch":        { "name": "Rib Arch",        "tall": 18, "solid": [3.4, 18], "leafy": false, "cap": 10,
+      "wood": false, "why": "Whatever it was the bones of, they went to stone a long time ago." },
+    "mast_cactus":     { "name": "Mast Cactus",     "tall": 18, "solid": [1.4, 18], "leafy": false, "cap": 12,
+      "wood": false, "why": "Under the spines it is all water and pith. There is no timber in a cactus." }
   },
 
   "biomes": {

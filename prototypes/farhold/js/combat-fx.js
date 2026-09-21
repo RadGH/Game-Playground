@@ -38,7 +38,33 @@ const BRAND_COLOUR = {
   poison: 0x9ede6a, shadow: 0xc090ff, holy: 0xffe6a0, arcane: 0xb8a0ff, true: 0xffffff,
 };
 
+/**
+ * R17 — THE STYLESHEET THE CHARGE METER NEVER HAD.
+ *
+ * `js/hud.js` `chargeMeter()` has appended `<div class="charge-meter"><i></i></div>` to the body on
+ * every frame the attack button is held since round 15, and `grep -rn charge-meter` across the
+ * whole project returns that one line and nothing else: there is no `.charge-meter` rule in
+ * style.css or in any other stylesheet. An unstyled div has no size and no background, and a width
+ * percentage on an inline `<i>` does nothing — so a bow's draw and a staff's channel have both been
+ * drawing an invisible bar. That is one half of "does holding it actually do anything?".
+ *
+ * The rules belong in style.css with every other colour in the game, and style.css is not ours to
+ * edit this round. Linking the stylesheet from the module that owns "what a fight looks like" is
+ * the version of this fix that is actually live rather than sitting in a handoff note — the same
+ * decision js/civics-ui.js made for civics.css. The <link> is added once and is a no-op in node.
+ */
+const CSS_HREF = 'combat.css';
+function ensureCombatStyles() {
+  if (typeof document === 'undefined') return;
+  if (document.querySelector(`link[href="${CSS_HREF}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = CSS_HREF;
+  document.head.appendChild(link);
+}
+
 export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = {}) {
+  ensureCombatStyles();
   // ---------------------------------------------------------------- swipe arcs
   //
   // A ring sector, built fresh each swing because its angle, its radius and its PLANE all come from
@@ -229,7 +255,121 @@ export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = 
     return a;
   }
 
+  // ---------------------------------------------------------------- the channel, as you build it
+  //
+  // R17 — "If charging it does increase its power, we need visual indicators to let you know when
+  // it has ramped up and when it is finished ramping up so that the player can execute it
+  // correctly." The bar under the crosshair is one answer; this is the other, and it is the one
+  // that works while you are looking at the thing you are about to hit.
+  //
+  // Three pieces, all pooled and all off when nothing is charging:
+  //
+  //   ring    a disc on the ground that grows from 0.5 m to the radius the spell will ACTUALLY
+  //           cover — so a nova shows you its own footprint before it goes off
+  //   shards  three motes orbiting the hands, faster and wider as it fills
+  //   flash   a pulse at full, because a colour change on its own is not an event
+  //
+  // It reads `feel.body`, posted once a frame by whatever is ticking the controller, because this
+  // module is handed a `dt` and nothing else — see the note on `postBody` in js/combat-feel.js.
+  const channelRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.82, 1, 40, 1),
+    new THREE.MeshBasicMaterial({
+      color: 0xb9a6ff, transparent: true, opacity: 0, depthWrite: false,
+      side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+    }),
+  );
+  channelRing.geometry.rotateX(-Math.PI / 2);
+  channelRing.frustumCulled = false;
+  channelRing.visible = false;
+  channelRing.name = 'farhold-channel-ring';
+  scene.add(channelRing);
+
+  const SHARDS = 3;
+  const shardGeom = new THREE.OctahedronGeometry(0.11, 0);
+  const shards = [];
+  for (let i = 0; i < SHARDS; i++) {
+    const mesh = new THREE.Mesh(shardGeom, new THREE.MeshBasicMaterial({
+      color: 0xb9a6ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    mesh.visible = false;
+    mesh.frustumCulled = false;
+    mesh.name = 'farhold-channel-shard';
+    scene.add(mesh);
+    shards.push(mesh);
+  }
+  let channelPhase = 0;
+  let channelWasFull = false;
+
+  /**
+   * Draw one frame of a charge. `fill` is 0..1, `radius` the multiplier the release will apply, and
+   * `full` says the ceiling has been reached — which is the moment the player is waiting to see.
+   *
+   * Public as well as self-driven, so the fight screen can charge something that is not the player.
+   */
+  function channel({ x, y, z, yaw = 0, fill = 0, full = false, radius = 1, element = 'arcane', base = 5.5, dt = 0 } = {}) {
+    const hex = BRAND_COLOUR[element] ?? BRAND_COLOUR.arcane;
+    channelPhase += dt * (2.2 + fill * 5.5);
+    // the footprint the spell will really cover: the staff's own radius, times what the charge buys
+    const r = Math.max(0.5, base * radius * (0.35 + fill * 0.65));
+    channelRing.visible = true;
+    channelRing.position.set(x, y + 0.06, z);
+    channelRing.scale.setScalar(r);
+    channelRing.material.color.setHex(full ? 0xffe07a : hex);
+    channelRing.material.opacity = (0.12 + fill * 0.3) * (full ? 1.5 : 1);
+
+    // the motes, out at the hands and rising as it builds
+    for (let i = 0; i < SHARDS; i++) {
+      const live = i < 1 + Math.floor(fill * (SHARDS - 1) + 0.001);
+      const m = shards[i];
+      m.visible = live;
+      if (!live) continue;
+      const a = channelPhase + (i / SHARDS) * Math.PI * 2;
+      const out = 0.42 + fill * 0.36;
+      m.position.set(x + Math.cos(a) * out, y + 1.05 + fill * 0.35 + Math.sin(a * 2) * 0.05, z + Math.sin(a) * out);
+      m.rotation.set(a, a * 1.4, 0);
+      m.scale.setScalar(0.7 + fill * 1.1);
+      m.material.color.setHex(full ? 0xffe07a : hex);
+      m.material.opacity = 0.45 + fill * 0.5;
+    }
+
+    // …and the ceiling announces itself exactly once, not on every frame it stays there
+    if (full && !channelWasFull) {
+      puff(x, y + 1.15, z, { size: 0.7, life: 0.3, color: 0xffe07a });
+      feel.jolt(0.03);
+    }
+    channelWasFull = full;
+    // the facing is unused for a nova and kept so a cone can point the ring later
+    channelRing.rotation.y = yaw;
+  }
+
+  /** Nothing is charging: put it all away. Cheap, and safe to call every frame. */
+  function endChannel() {
+    if (channelRing.visible) channelRing.visible = false;
+    for (const m of shards) m.visible = false;
+    channelWasFull = false;
+  }
+
   function update(dt) {
+    /**
+     * The charge draws itself from the shared channel. `feel.body` is posted once a frame by
+     * whatever is ticking the controller; with nothing posted (the first frame, a node test, a
+     * cutscene) `active` is false and this is two comparisons and a `visible = false`.
+     */
+    const body = feel.body;
+    const ch = body?.active ? body.charge : null;
+    if (ch && ch.fill > 0 && ch.kind !== 'draw') {
+      channel({
+        x: body.x, y: body.y, z: body.z, yaw: body.yaw,
+        fill: Math.max(0, Math.min(1, ch.fill)),
+        full: !!ch.ready && ch.fill >= 0.99,
+        radius: ch.radius ?? 1,
+        element: feel.swing.element === 'physical' ? 'arcane' : (feel.swing.element || 'arcane'),
+        dt,
+      });
+    } else {
+      endChannel();
+    }
+
     for (const s of swipes) {
       if (s.life <= 0) continue;
       s.life -= dt;
@@ -297,6 +437,8 @@ export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = 
 
   return {
     swipe, shoot, update, land, puff, dust, arrows, swipes,
+    /** R17 — the growing effect at the hands while a staff builds. See `channel` above. */
+    channel, endChannel,
     /** Hold the world still for a moment — the same hit-stop a heavy blow takes. */
     freeze(ms = 80) { feel.jolt(0, ms / 1000); },
     stats: () => ({
@@ -309,6 +451,9 @@ export function createCombatFx(scene, { onArrowLand = null, groundAt = null } = 
       for (const bx of boxes) { scene.remove(bx.mesh); bx.mesh.geometry.dispose(); bx.mesh.material.dispose(); }
       for (const a of arrows) { scene.remove(a.group); a.group.traverse(o => { if (o.material) o.material.dispose(); }); }
       for (const p of puffs) { scene.remove(p.mesh); p.mesh.geometry.dispose(); p.mesh.material.dispose(); }
+      scene.remove(channelRing); channelRing.geometry.dispose(); channelRing.material.dispose();
+      for (const m of shards) { scene.remove(m); m.material.dispose(); }
+      shardGeom.dispose();
       arrowGeom.dispose(); headGeom.dispose();
     },
   };

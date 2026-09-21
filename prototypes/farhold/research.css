@@ -1,0 +1,215 @@
+/* Farhold — the Research screen (js/research-ui.js), R17.
+ *
+ * Injected by its own module, like civics.css and station.css. It has to look right in two frames:
+ * as a tab of the character sheet (where js/hud.js owns the header and the rail) and as its own
+ * overlay opened from the build panel (`research--overlay`). Everything below the `.research` block
+ * is shared by both; only the overlay rules position it.
+ */
+
+.research {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #dfe4ea;
+  font-size: 13px;
+  min-height: 0;
+}
+
+.research[hidden] { display: none !important; }
+
+/* ---------------------------------------------------------------- the overlay frame */
+
+.research--overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(920px, calc(100vw - 32px));
+  max-height: min(84vh, 820px);
+  z-index: 62;
+  background: #14161aef;
+  border: 1px solid #3a4250;
+  border-radius: 10px;
+  box-shadow: 0 18px 60px #000a;
+  padding: 12px 14px 14px;
+}
+
+/* ---------------------------------------------------------------- head */
+
+.res-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+}
+
+.res-head h2 { margin: 0; font-size: 17px; letter-spacing: 0.02em; }
+
+/* The number the whole screen is about. It is a colour of its own so the eye finds it first. */
+.res-points {
+  color: #e8c86a;
+  font-weight: 600;
+}
+
+.res-sub { flex: 1 1 auto; }
+
+.res-close {
+  background: #222834;
+  border: 1px solid #3a4250;
+  border-radius: 5px;
+  color: #cfd6df;
+  cursor: pointer;
+  font: inherit;
+  padding: 3px 10px;
+}
+.res-close:hover { background: #2c3440; }
+
+/* ---------------------------------------------------------------- the body */
+
+.res-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Four ages and the ledger. They wrap rather than scroll sideways — a tech tree you have to scroll
+ * horizontally to read is a tech tree nobody plans against. */
+.res-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.res-pane {
+  background: #181c22;
+  border: 1px solid #262c36;
+  border-radius: 8px;
+  padding: 10px 11px 12px;
+}
+
+.res-pane h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8fa0b4;
+}
+
+.res-age-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* One swatch per age, taking the colour out of data/research.json so the palette is data too. */
+.res-tone {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.res-free {
+  color: #8fbf72;
+  margin: 6px 0 0;
+}
+
+.res-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------- a node */
+
+.res-node {
+  border: 1px solid #2d3542;
+  border-left: 3px solid #39414f;
+  border-radius: 6px;
+  padding: 8px 9px 9px;
+  background: #1c2129;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.res-node--ready { border-left-color: #e8c86a; }
+.res-node--done { border-left-color: #6fbf72; opacity: 0.72; }
+.res-node--blocked { opacity: 0.6; }
+
+.res-node-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.res-node-head b { flex: 1 1 auto; }
+
+.res-cost {
+  color: #e8c86a;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.res-node--done .res-cost { color: #6fbf72; }
+
+.res-blurb { margin: 2px 0; line-height: 1.4; }
+.res-why { margin: 0; font-style: italic; }
+
+.res-opens {
+  margin: 2px 0 0;
+  color: #9fb6c8;
+  line-height: 1.4;
+}
+
+.res-buy {
+  align-self: flex-start;
+  margin-top: 6px;
+  background: #2a3341;
+  border: 1px solid #3f4a5a;
+  border-radius: 5px;
+  color: #e6ebf1;
+  cursor: pointer;
+  font: inherit;
+  padding: 4px 11px;
+}
+.res-buy:hover:not(:disabled) { background: #36414f; }
+.res-buy:disabled { opacity: 0.45; cursor: default; }
+
+/* The sentence beside a button that will not press. It is never optional: a greyed button with
+ * nothing next to it is the one answer a player cannot act on. */
+.res-verdict {
+  color: #c9a05e;
+  font-size: 12px;
+  margin-top: 3px;
+}
+.res-verdict--done { color: #6fbf72; }
+
+/* ---------------------------------------------------------------- where points come from */
+
+.res-earn-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid #20262f;
+}
+.res-earn-row:last-child { border-bottom: 0; }
+.res-earn-row b { flex: 0 0 auto; }
+.res-earn-row .small { flex: 1 1 auto; }
+
+.res-earn-n {
+  color: #e8c86a;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 460px) {
+  .research--overlay {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 32px);
+  }
+  .res-columns { grid-template-columns: 1fr; }
+}

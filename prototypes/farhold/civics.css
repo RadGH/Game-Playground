@@ -35,6 +35,26 @@
 
 .civics[hidden] { display: none !important; }
 
+/*
+ * R17 — the same screen, as a tab of the character sheet.
+ *
+ * Only the positioning changes. It stops being a fixed full-window overlay with a z-index and
+ * becomes a box that fills whatever it was mounted in, so the sheet's own close, Esc and cursor
+ * hand-off cover it. Everything below this rule — the rail, the panes, the rows — is untouched.
+ */
+.civics--tab {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+.civics--tab .civics-head { padding-bottom: 6px; }
+.civics--tab .civics-head h2 { font-size: 15px; }
+
 .civics-head {
   display: flex;
   align-items: baseline;

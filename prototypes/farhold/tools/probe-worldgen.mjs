@@ -29,7 +29,8 @@ import {
   createWorld, createSystem, makeTerrain, setMetresPerCell, M_PER_CELL_DEFAULT, M_PER_CELL,
 } from '../js/planet.js';
 import { generatePlanetMap } from '../../../universe/js/planetmap.js';
-import { footprintOf, streetLanes } from '../js/town-plan.js';
+import { footprintOf, streetLanes, settlementAnchor } from '../js/town-plan.js';
+
 import { ringCrossings } from '../js/roadplan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { describeBuilding, radiusOf, stallsFor } from '../../../proctown/js/buildkit.js';
@@ -152,7 +153,12 @@ if (ORE_ONLY) { probeOre(); process.exit(0); }
 
 const towns = (world.nodes || [])
   .filter(n => n.type === 'settlement' || n.type === 'port')
-  .map(n => ({ ...n, wx: n.x * M_PER_CELL, wz: n.y * M_PER_CELL }));
+  // R17: the same anchor the game uses, not a second copy of the arithmetic — a settlement whose
+  // cell has a river through it is nudged under a cell onto dry ground (js/features.js).
+  .map(n => {
+    const a = settlementAnchor(terrain, n.x * M_PER_CELL, n.y * M_PER_CELL, 16 + (n.size || 1) * 13, M_PER_CELL);
+    return { ...n, wx: a.x, wz: a.y };
+  });
 const node = towns
   .map(t => ({ t, d: Math.hypot(t.wx - AT_X, t.wz - AT_Z) }))
   .sort((a, b) => a.d - b.d)[0];

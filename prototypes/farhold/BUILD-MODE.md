@@ -1042,3 +1042,202 @@ sentence for its last shift, so a bench can say "2.5 by You, 1.5 by Marwen".
 written them out and the constructor read `now` and threw the rest away (`fromJSON`, which does read
 them, is called by nobody) — invisible for a machine's order, which is re-posted within the second,
 and a silent loss of every harvest and build order and the half-shift already in it.
+
+---
+
+## Round 17 — stations, the panel and research
+
+Four items, and three of them are the same complaint in different clothes: **the build panel had
+become the only screen in the game, so everything you might want to do to a building was a section
+of it.** The fourth is the deadlock that came out of the first hour of play.
+
+> *"I built a furnace, campfire, kiln, and loom, but I still cannot figure out how to convert iron
+> ore into ingots. The furnace says it can smelt iron. But when I press E to open it it just opens
+> the regular build menu."*
+>
+> *"The build menu itself could use some work… it shows a list of building category buttons and a
+> list of buildings even if the 'Place' option is not selected. If I select 'Scan', it shouldn't show
+> those placement options. It also has a 'Tools and devices' menu… There is also a garage menu…
+> there should be a distinct Garage building where you manage that sort of thing."*
+>
+> *"Since I still can't craft an iron ingot, I can't build a chest, so I can't complete the building
+> onboarding."*
+
+### 17.1 The deadlock, which was a ring three links long
+
+The onboarding says to build a Storage Crate before a forge. A Storage Crate cost **6 planks and an
+iron ingot**. A plank came off a **Sawmill**, a Sawmill cost **8 iron ingots**, an ingot came out of
+a **Furnace** — and a furnace draws its inputs only from a **storage pool**, which is the thing you
+were trying to build. Every link in that ring was correct on its own, which is why it survived four
+rounds of play-testing: the fault is only visible if you ask the whole question at once.
+
+Three changes, and the ring is cut:
+
+* **The Crafting Table costs six logs and two stone** — both of which bare hands take off a tree and
+  a boulder — **and it carries its own three-slot shelf**, so it IS a storage pool the moment it is
+  down. It used to cost 6 planks and 2 iron ingots, which is to say it was inside the ring it is the
+  way out of.
+* **`split_planks`**: one log into two planks, twenty seconds, on the Crafting Table. Against the
+  Sawmill's four planks in nine seconds — a Sawmill is 4.4× better and still worth every ingot, and
+  a wedge and a mallet will get you the first six planks in the game.
+* **The Storage Crate is the Storage Box**: six slots, **6 planks and no metal at all**. Above it,
+  a **Storage Chest** — 8 planks and 2 iron ingots, twenty slots, which is exactly the old crate's
+  capacity at roughly the old crate's price. So a settled base is as roomy as it always was and the
+  NEW thing is the rung below.
+
+**The id `storage_crate` did not move.** Every save in existence files its crates under it — in the
+build ledger, in the store network and in `data/power.json` — so what changed is the name the player
+reads. A save written before this round also keeps the `cap: 250` written inside each of its crates
+(`Store.toJSON` writes the number, not the type), so no existing base shrank.
+
+### 17.2 A station is a screen, and it is a row of JSON
+
+Every structure may carry a `station` block:
+
+```json
+"station": {
+  "title": "Furnace",
+  "blurb": "Ore in, ingot out, wood or coal underneath. Hold E to work it yourself, or house somebody who will.",
+  "recipes": ["smelt_iron", "smelt_copper", "smelt_tin", "…"],
+  "panels": ["tools"]
+}
+```
+
+`js/station-ui.js` draws it. `E` opens it (see the handoff note below), and adding a station later
+is a row in `data/structures.json`, not a panel in code. `panels` are the three built-in sections —
+`tools`, `garage`, `shipyard` — for the things that are not refining recipes.
+
+**Four benches had no entry in `data/refining.json` at all**, and that was the whole of why E did
+nothing at them: js/main.js's `interactTarget` offers a `machine` only for something in
+`works.machineDefs`, so a Crafting Table, an Anvil, a Workbench and a Garage were structures the game
+could build and had no door into. Three of them run no recipe and are listed anyway, with no `labour`
+block, so they never ask for a worker and never post an order. The cost of listing them is a name and
+a footprint; the benefit is a key that works.
+
+**One renderer, two mounts.** `drawStationBody` is shared between the station screen and the build
+panel's "the bench you are standing next to" section, because two copies of a recipe list is how a
+bench reached with B starts behaving differently from the same bench reached with E.
+
+**"Load it from your pack."** A machine draws only from the pool it stands in, and everything you
+dig up while you are away from home is in the bag on your back — so *"I have forty iron ore and the
+furnace says it has none"* is the honest report, and the answer (walk home, stand next to the crate,
+swing at something else) is not one anybody could guess. The button is `plan.pay(bill)` followed by
+`plan.giveBack(bill)` on the build ledger's own purse: `pay` takes from the pool first and then the
+bag, `giveBack` puts back into the pool first and spills only what the crates will not hold. Doing
+both with the same bill is exactly "tip the pack into the store", and it reuses the one purse in the
+game that already knows which order those two come in.
+
+### 17.3 The tool rail hides what the tool cannot use
+
+`TOOLS` gained a `kind`: `place` (Place, Road, Wall), `brush` (Level, Raise, Lower, Clear), `scan`,
+`point` (Take down, Route). The category row, the catalogue and the detail card are drawn **only for
+a placement tool** — and Road and Wall narrow the catalogue to their own family, because picking a
+Statue while the Road tool is up was only ever a way to make the panel quote a price for something
+the tool would never lay. A brush tool gets its radius and its sentence instead.
+
+It was not really a display bug. Nothing in `js/build-ui.js` knew which tools place something;
+`catsForTool(toolKey, catKeys)` is that fact, stated once, and it is a pure function so
+`node --test` checks it without a browser.
+
+**Out of the panel entirely:** the *Tools and devices* bench, which now lives at the Crafting Table,
+the Anvil and the Workbench — filtered by the `at` key `data/tools.json` has carried since the day it
+was written and **which nothing had ever read**, so you could forge a Steelhead Pick standing in an
+empty field. `at: "hand"` is the one exception and it is deliberate: the Knapped Tool is lashed
+together out of four logs and eight fibre with no bench at all, and it shows on every station screen.
+And the *Garage*, which is a **building** now — `data/structures.json` `garage`, 16 planks, 8 iron
+and 10 block, behind Steelwork. Note what it does not do: the parts are still cut on an Assembler
+(and for the bigger rigs an Alloy Forge and a Refinery), because `data/vehicles.json` owns that rule
+and a garage is a shed with a pit in it. Its blurb says so; put it beside the line.
+
+### 17.4 Research: four ages, and the first one is free
+
+`js/research.js` + `data/research.json`. Seven purchasable nodes over four ages, twenty-seven points
+in total, which is about eight hours of play.
+
+**The rule the whole system is built around is enforced by ABSENCE.** A structure is locked only if
+it carries a `tech` key naming a node. No key, no lock — so the default for anything anybody adds to
+the catalogue later is "available", and the failure mode of forgetting is a piece that is too cheap
+rather than a player who lands on a planet and cannot build a box. Getting that default backwards is
+how §17.1 happened in the first place.
+
+| Age | Node | Cost | Opens |
+|---|---|---|---|
+| 1 Timber | — | — | everything not named below, from the moment you land |
+| 2 Iron | Ironworking | 2 | Smelter, Alloy Forge, Crusher, Drill, Pump, Storage Silo, Ballista, Reinforced Wall |
+| 2 Iron | Drawn Wire | 3 | Battery Bank, Solar Array, Wind Turbine, Repair Station, Flame and Frost turrets |
+| 2 Iron | Reagents | 3 | Chemical Bench, Washer, Alchemy Bench |
+| 3 Steel | Steelwork | 4 | Refinery, Manufactory, Hauler Post, Tender Arm, Geothermal Tap, Garage |
+| 3 Steel | Ground Glass | 4 | Crystal Cutter, Enchanting Altar, Shield Pylon, Crystal Lamp, Tesla Coil |
+| 4 Rocket | Assembly | 5 | Assembler |
+| 4 Rocket | Propulsion | 6 | Fuel Synthesiser, Waypoint Pad |
+
+Points come from **finishing a quest, finding somewhere new, and killing something with a name** —
+one function, `research.award(reason, n)`, so each of those call sites is a single line. Nothing is
+bought with materials or gold: research is what you did, not what you saved up.
+
+A locked row in the catalogue is **shown**, struck through, carrying the sentence *"Locked — research
+Ironworking (Age of Iron), 2 points."* Shown, because a piece you cannot see is a piece you will
+never go looking for and the whole point of four ages is that you can see where the fourth one is.
+With the sentence, because a greyed row with no reason is the one answer a player cannot act on.
+
+Research rides in the `build` blob of the save (`js/build.js`'s `toJSON`/`load`) rather than in a
+slot of its own, because adding a save key means editing `js/main.js`'s `currentSnapshot()` **and**
+`js/save.js`'s parameter list together, and both belong to another pair of hands this round. It is
+not an unreasonable home: research gates the build catalogue and nothing else.
+
+### 17.5 The bug under all of it: **building has been free since the expansion landed**
+
+`js/buildplan.js` spends a whole bill at once — `bank.take({ log: 6, iron_ingot: 1 })` — because a
+half-paid structure is worse than an unpaid one, and `makeBag` does exactly that, so every node test
+has always passed. `js/main.js` hands in a different object: `take(id, n)` and `give(id, n)`, **one
+line at a time**, because `js/build.js`'s clear tool calls them that way (round 13's own note:
+*"this was `store.give(res.materials)` — the whole bag as the first argument"*). Nobody joined the
+two up.
+
+So in the real game the cost object arrived as the material id and `undefined` arrived as the count.
+`stores.count(pool, {object})` is 0, `n - fromPool` is `NaN`, `materials.spend({'[object Object]':
+NaN})` refuses and changes nothing — **and the placement went ahead anyway**, because `check` had
+already approved it off `bank.have(id)`, which is the one method both shapes agree on.
+
+That is why nobody noticed: you still could not build what you could not afford, you simply never ran
+out. Every structure in Farhold has been free, and every deconstruct has refunded nothing, for the
+whole of the building expansion. `bankAdapter` in `js/buildplan.js` is the join — it detects which
+contract a store speaks (a per-line one takes two arguments) and checks `have` before it spends a
+penny, so a bill that is half payable buys nothing.
+
+And two prices that round 13's rule could not see, because they name materials something *does*
+produce — at the far end of the tech tree:
+
+* a tier-1 **Power Pole** cost 2 `wire`, and wire is drawn on a **Smelter**, which needs a grid,
+  which needs poles. Copper now, which comes straight out of a furnace.
+* a **Lamp Post** cost 1 `fuel`, which aliases to `lift_fuel`, which comes out of the **Fuel
+  Synthesiser** — the last structure in the game. A street lamp was priced in rocket propellant.
+  Resin off a sawmill now.
+
+### 17.6 Where each thing is reached
+
+* **A station** — walk up and press `E` (after the one-line js/main.js patch in
+  `research/round17-build-handoff.md`); until then, `B` → the bench section → **"Open the Furnace"**.
+* **Tools and devices** — the station screen of a Crafting Table, an Anvil or a Workbench.
+* **The garage** — build a **Garage** and press `E` at it.
+* **Research** — the **Research** tab of the character sheet once `js/hud.js` mounts it (the rail
+  entry and `#sheet-body-research` already exist), or the **Research** button in the build panel's
+  head, which opens the same screen as an overlay.
+* **The Storage Chest** — Build mode → Storage, once you can smelt two ingots.
+
+### 17.7 Tests
+
+`tests/round17-build.test.js`, 22 of them. The first is the round: **land with nothing, gather, build
+a Crafting Table, split planks, build a Storage Box, build a Furnace, and smelt iron ore into an
+ingot** — through the real ledger, the real pools, the real refining engine and the real work board,
+with no research bought and no test-only shortcut. Under it: the purse fix, round 13's rule extended
+to the new entries, every station's recipes resolving, the tech gates agreeing with the tree in both
+directions, the tree being finishable and nothing in it stranded, Box and Chest capacities, an old
+save's crates surviving, and the tool rail.
+
+The last three of them **draw the screens**, in `tests/tiny-dom.mjs` — sixty lines of `document`,
+deliberately not a DOM. `node --check` proves a file parses; it does not prove that a helper renamed
+in one place was renamed in the other, or that a `const` is not read above its own declaration, both
+of which this project has shipped. It caught one on its first run: `drawStationBody` opened with
+`box.replaceChildren()`, which silently wiped the heading and the "Open the Furnace" button the build
+panel had just put above it.

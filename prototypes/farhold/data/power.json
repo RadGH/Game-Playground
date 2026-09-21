@@ -50,9 +50,12 @@
     "relay_mast": { "name": "Relay Mast", "tier": 2, "supplyRadius": 34, "linkRadius": 34, "build": { "steel_ingot": 14, "machine_part": 3, "control_board": 1 }, "desc": "Both jobs, twice the reach. What you plant when the quarry is finally worth reaching." }
   },
 
+  "_r17StorageDoc": "R17 — STORAGE IS TWO RUNGS NOW, and the id of the first one did not move. `storage_crate` is what the player reads as a Storage Box: six slots, no metal, and the first thing you can build. `storage_chest` is the old crate's capacity at the old crate's rough price — two iron ingots — so a settled base is exactly as roomy as it was and the NEW thing is the rung below. A save written before this round carries `cap: 250` inside its own crates (js/stores.js `Store.toJSON` writes the number, not the type), so no existing base shrinks. `crafting_table` is in this table for a different reason: see its own note.",
   "_storageDoc": "Stores. `cap` is total units held; `linkRadius` is how far this store reaches to join a pool or feed a machine. `accepts` narrows what may go in: omitted means anything solid, `fluid` and `gas` mean only that.",
   "storage": {
-    "storage_crate": { "name": "Storage Crate", "tier": 1, "cap": 250, "linkRadius": 7, "build": { "plank": 10, "rope": 2 }, "desc": "The first one you build, and the one you end up with forty of." },
+    "storage_crate": { "name": "Storage Box", "tier": 1, "cap": 120, "linkRadius": 7, "build": { "plank": 6 }, "desc": "Six slots. No metal in it anywhere, which is the point — it is the first store you build, before a forge exists." },
+    "storage_chest": { "name": "Storage Chest", "tier": 1, "cap": 400, "linkRadius": 8, "build": { "plank": 8, "iron_ingot": 2 }, "desc": "Twenty slots, banded and pegged. Three times the Box for two iron ingots." },
+    "crafting_table": { "name": "Crafting Table", "tier": 1, "cap": 60, "linkRadius": 6, "build": { "log": 6, "stone": 2 }, "desc": "A bench with a shelf under it. It holds almost nothing — but a machine can only draw from a STORAGE POOL, and this is the only bench in the game you can put down before you own a store, so it has to be its own pool or it could never run its own recipes. Three slots' worth; that is a wedge, a mallet and a few logs." },
     "storage_silo": { "name": "Storage Silo", "tier": 2, "cap": 1200, "linkRadius": 9, "accepts": ["bulk"], "build": { "cut_stone": 24, "steel_ingot": 8, "beam": 6 }, "desc": "Ore, stone, gravel and coal only. Bulk wants its own building or it swamps everything else." },
     "fluid_tank": { "name": "Fluid Tank", "tier": 2, "cap": 600, "linkRadius": 8, "accepts": ["fluid"], "build": { "steel_ingot": 12, "resin": 6, "machine_part": 1 }, "desc": "Water, coolant, acid, fuel." },
     "trade_post": {

@@ -232,3 +232,39 @@ These need files owned by other agents. Nothing below is guesswork — the call 
    craft-from-storage. Without them the bench behaves exactly as it always has.
 9. **`data/balance.json`** (owned elsewhere) is the right home for a `world.industry` block if these
    numbers want tuning without touching data files — §9.20.
+
+---
+
+## R17 — the station screen, and the ring that stopped the chain starting
+
+Two notes, both about the very bottom of this chain rather than the top.
+
+**1. A bench is reached with `E`, and what it offers is data.** Every structure may carry a
+`station` block (`title`, `blurb`, `recipes`, `panels`) in `data/structures.json`; `js/station-ui.js`
+draws it and `js/build-ui.js`'s bench section reuses the same renderer. Adding a station is a row in
+a JSON file. Note the join it depends on: **js/main.js offers a `machine` on `E` only for something
+listed in `data/refining.json`'s `machines`** — so a bench that is a structure and not a machine has
+no door at all. That is why the Crafting Table, the Anvil, the Workbench and the Garage are listed
+in there now, three of them with no recipes and no `labour` block (`labourNeed` reads
+`L?.secondsPerUnit || 0`, so they never ask for a worker and never post an order).
+
+**2. The chain could not start.** Tier 0 is "burns something and needs no grid", and the first thing
+above it that a player can actually reach was a Sawmill, which cost eight iron ingots. Planks came
+only off a Sawmill; the first *storage pool* cost planks; and a machine draws its inputs **only from
+the pool it stands in** — so the first store in the game stood behind the first store in the game.
+
+The **Crafting Table** is the rung that was missing. Six logs and two stone, its own three-slot shelf
+in `data/power.json`'s `storage` table (so it is a pool the moment it is down, which is the only
+reason it can run its own recipes before anything else exists), and `split_planks`: one log into two
+planks in twenty seconds, against a Sawmill's four in nine. The Sawmill is 4.4× better and worth
+every ingot; the wedge and mallet get you the first six planks.
+
+It is filed here as **tier 1 with `powerUse: 0`**, not tier 0, because tier 0 in `data/refining.json`
+means *burns something* and `tests/industry.test.js` asserts that. The Garage is tier 1 here and
+tier 2 in `data/structures.json` for the same kind of reason: this file's tier is what a machine
+NEEDS, the catalogue's tier is what order the build list puts it in.
+
+**And one number moved.** `storage_crate` — what the player now reads as a **Storage Box** — is 120
+units and six slots, and the new `storage_chest` is 400 and twenty. The Chest is the old crate; the
+Box is a rung below it that costs no metal. One raw material may still take only a quarter of a
+general store (`storeShare`), so a Box holds 30 iron ore and a Chest 100.

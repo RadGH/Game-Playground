@@ -80,6 +80,22 @@ export function createCivicsScreen({
   getPlayer = () => ({ gold: 0 }), getDay = () => 1,
   log = null, mount = document.body,
   /**
+   * R17 — THE HOLDING IS A TAB NOW.
+   *
+   *   "Pressing K opens a new civilization menu, which I like. However it does not free up the
+   *    cursor so I have to press ESC afterwards… I think the combat log could simply be added to
+   *    the inventory screen as the 8th tab. In fact, the new civilization menu could probably live
+   *    there too."
+   *
+   * Nothing about this screen changes: it keeps its own markup, its own stylesheet and its own
+   * rail. `embedded` only says that something else owns the window — so it drops the fixed
+   * full-screen positioning and its own close button, and lets the character sheet's one Esc, one
+   * cursor hand-off and one set of number keys cover it. The stand-alone form still works; the
+   * `away` card and the hold readout are deliberately NOT embedded, because both have to be
+   * readable while you are walking about.
+   */
+  embedded = false, awayMount = document.body,
+  /**
    * R14 — the muster needs two things this module must not know how to do: where you are standing
    * (so a drill is called AT somewhere) and how to put the wave on the ground. Both are callbacks,
    * so js/civics-ui.js stays a screen and nothing else.
@@ -103,23 +119,22 @@ export function createCivicsScreen({
       return b;
     }));
   const subtitle = el('span', { class: 'civics-sub' });
-  const root = el('div', { class: 'civics', hidden: true }, [
-    el('div', { class: 'civics-head' }, [
-      el('h2', { text: 'The Holding' }),
-      subtitle,
-      el('button', { class: 'civics-close', text: 'Close  (K)', onclick: () => hide() }),
-    ]),
-    rail,
-    body,
+  const head = el('div', { class: 'civics-head' }, [
+    el('h2', { text: 'The Holding' }),
+    subtitle,
+    // embedded, the sheet's own × is the close button; two of them side by side is a question
+    embedded ? null : el('button', { class: 'civics-close', text: 'Close  (K)', onclick: () => hide() }),
   ]);
+  const root = el('div', { class: `civics${embedded ? ' civics--tab' : ''}`, hidden: true }, [head, rail, body]);
   mount.appendChild(root);
 
   // the away card and the hold readout live beside it rather than inside it, because both have to
-  // be visible while the player is walking about
+  // be visible while the player is walking about — which is why they mount on the page even when
+  // the screen itself is a tab inside the character sheet
   const awayCard = el('div', { class: 'civ-away', hidden: true });
-  mount.appendChild(awayCard);
+  awayMount.appendChild(awayCard);
   const holdReadout = el('div', { class: 'civ-hold', hidden: true });
-  mount.appendChild(holdReadout);
+  awayMount.appendChild(holdReadout);
 
   function say(t, k) { if (log) log(t, k); }
 
@@ -362,7 +377,9 @@ export function createCivicsScreen({
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (!awayCard.hidden) { awayCard.hidden = true; return; }
-      if (open) hide();
+      // R17: embedded, the character sheet owns Esc. Hiding ourselves here would leave the sheet
+      // open on an empty tab, which is the worse half of both answers.
+      if (open && !embedded) hide();
     }
   });
 

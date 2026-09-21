@@ -317,7 +317,10 @@ test('every one of the thirty classes boots and gets a skill bar', async ({ page
   // one page load, then swap the class through the boot menu would be slow; instead check the data
   // the boot menu is built from, and boot three of the awkward ones for real.
   const errors = await land(page);
-  const listed = await page.evaluate(() => [...document.querySelectorAll('#boot-class option')].length);
+  // R17 put a thirty-first entry at the top of the picker — "Custom — build your own class" — so
+  // the count is 31 and the thirty presets are what is left once it is taken out.
+  const listed = await page.evaluate(() => [...document.querySelectorAll('#boot-class option')]
+    .filter(o => o.value !== 'custom').length);
   expect(listed).toBe(30);
   for (const cls of ['runesmith', 'chronomancer', 'tinker']) {
     const e = await land(page, { cls });

@@ -31,6 +31,13 @@
 // Pure: no DOM, no Three.js. The bar is drawn by js/hud.js, the ore comes out through js/mining.js
 // and js/props.js, and the marks go in the marker book. This file decides, it does not draw.
 
+// R17 — the swing channel (for the work animations) and the harvest registry (for the clock).
+// Both are pure: no DOM, no Three.js, so the node tests still drive this file directly.
+import { feel } from './combat-feel.js';
+import { harvestInfo, propKindFromJobId } from './harvestinfo.js';
+// R17 — the SAME alias table the build catalogue was joined to in round 13. See `priceRow` below.
+import { realMaterial } from './buildplan.js';
+
 /** The ring the mouse wheel turns. Order matters — it is the order you scroll through. */
 export const HELD_MODES = ['weapon', 'tool', 'scanner', 'rod'];
 
@@ -132,32 +139,73 @@ export function canWork(player, node, resources) {
  * `have(id)` is anything that answers "how many of this material have I got" — the materials bag or
  * a store pool, so building at a bench beside a full crate does not mean carrying it all first.
  */
-export function buildable(data, player, have = () => 0) {
+export function buildable(data, player, have = () => 0, names = null) {
   const rows = [];
+  const price = cost => priceRow(cost, have, names);
   for (const base of data?.bases || []) {
-    const cost = base.cost || {};
-    const short = Object.entries(cost).filter(([m, n]) => have(m) < n).map(([m, n]) => ({ m, n, got: have(m) }));
+    const p = price(base.cost || {});
     rows.push({
-      kind: 'tool', id: base.id, name: base.name, base, cost, at: base.at || 'hand',
+      kind: 'tool', id: base.id, name: base.name, base, cost: p.cost, at: base.at || 'hand',
       desc: base.desc, made: base.made,
       level: base.level || 1,
-      canAfford: short.length === 0,
-      short,
+      canAfford: p.short.length === 0,
+      short: p.short,
+      names: p.names,
       owned: !!(player?.equipment?.tool?.baseKey === base.id
         || (player?.bag || []).some(i => i?.baseKey === base.id)),
     });
   }
   for (const dev of data?.devices || []) {
-    const cost = dev.cost || {};
-    const short = Object.entries(cost).filter(([m, n]) => have(m) < n).map(([m, n]) => ({ m, n, got: have(m) }));
+    const p = price(dev.cost || {});
     rows.push({
-      kind: 'device', id: dev.id, name: dev.name, device: dev, cost, at: dev.at || 'workbench',
+      kind: 'device', id: dev.id, name: dev.name, device: dev, cost: p.cost, at: dev.at || 'workbench',
       desc: dev.desc, made: dev.made, level: dev.level || 1,
-      canAfford: short.length === 0, short,
+      canAfford: p.short.length === 0, short: p.short, names: p.names,
       owned: !!player?.devices?.[dev.id],
+      /** R17 — scanner tiers. `tier` is which sweep this device is; see SCANNER_TIERS below. */
+      tier: dev.tier || 1,
     });
   }
   return rows;
+}
+
+/**
+ * R17 — **A COST YOU CANNOT OBTAIN IS NOT A PRICE, IT IS A WALL.** Round 13's rule, broken again.
+ *
+ *   "I asked for scrollwheel to reveal Weapon, Tool, Scanner, but I don't see the Scanner option."
+ *
+ * He could not, and neither could anybody, ever. `heldModes()` puts `scanner` in the ring when
+ * `player.devices.scanner` is set, `giveDevice` sets it, and the only thing that calls `giveDevice`
+ * is `buildTool` in js/main.js — which refuses unless `canAfford`. The Prospector's Scanner costs
+ * `{ iron_ingot: 3, crystal: 1, wire: 2 }`, and **there is no material called `crystal`**. The
+ * material table in `data/resources.json` calls it `crystal_raw` ("Rough Crystal"). `have('crystal')`
+ * therefore returned 0 forever, the Build button was permanently disabled, and the scanner could not
+ * be built by any honest route — nor could the Command Rod or the Powered Cutter, which are priced
+ * the same way.
+ *
+ * This is exactly the fault round 13 found in `data/structures.json`, where the catalogue priced
+ * things in `timber`/`iron`/`parts` while the game produced `log`/`iron_ingot`/`machine_part`. It
+ * was fixed there by `alignCatalogue()` in js/buildplan.js — and `data/tools.json` was never put
+ * through it, because the tool bench was written three rounds later and nobody joined it up. The
+ * alias table is the SAME table (`crystal -> crystal_raw` is already in it), so this asks it rather
+ * than keeping a second copy.
+ *
+ * The display name survives the translation: the panel still says "1 crystal" because that is what
+ * a player calls it, and the pool is still charged `crystal_raw` because that is what it holds.
+ */
+export function priceRow(cost, have = () => 0, names = null) {
+  const out = {};
+  const words = {};
+  for (const [word, n] of Object.entries(cost || {})) {
+    const id = realMaterial(word);
+    out[id] = (out[id] || 0) + n;
+    // keep the word the catalogue used, so "1 crystal" does not become "1 crystal_raw" on screen
+    words[id] = names?.[id]?.name || (word !== id ? word : id.replace(/_/g, ' '));
+  }
+  const short = Object.entries(out)
+    .filter(([m, n]) => have(m) < n)
+    .map(([m, n]) => ({ m, n, got: have(m) }));
+  return { cost: out, short, names: words };
 }
 
 /** Mark a device as built. Devices are owned, not rolled — there is no rare scanner. */
@@ -172,13 +220,60 @@ export function giveDevice(player, id) {
 // ---------------------------------------------------------------------------- the held mode
 
 /**
+ * R17 — THE SCANNER TIERS, newest first.
+ *
+ *   "In the future we can add upgraded scanning tools."
+ *
+ * Three of them in `data/tools.json`, and the ring carries ONE scanner — the best one you own — so
+ * that building the Deep Scanner improves the thing you already use instead of adding a fourth
+ * entry to the wheel that does the same job slightly better. Each tier says how far it sweeps, how
+ * often, and what it is able to notice at all: a hand scanner cannot tell a rare seam from an
+ * ordinary one until you are standing on it, and the Survey Array can name one across a valley.
+ */
+export const SCANNER_DEVICES = ['survey_array', 'deep_scanner', 'scanner'];
+
+/** Which scanner this player is carrying, or null. The best owned, never a choice to get wrong. */
+export function scannerDevice(player) {
+  return SCANNER_DEVICES.find(id => player?.devices?.[id]) || null;
+}
+
+/**
+ * The tier's numbers, out of `data/tools.json`, with the first tier's figures as the floor.
+ *
+ * `detects` is the interesting one and it is why this is data rather than a multiplier: a tier is
+ * allowed to see KINDS of thing, not merely further. `'*'` means everything.
+ */
+export function scannerTier(player, data = null) {
+  const id = scannerDevice(player);
+  if (!id) return null;
+  const dev = (data?.devices || []).find(d => d.id === id) || null;
+  const tier = dev?.tier || 1;
+  return {
+    id,
+    name: dev?.name || 'Scanner',
+    tier,
+    range: dev?.range ?? (data?.scan?.range ?? 110),
+    /** Seconds between sweeps. A better rig reads the ground faster as well as wider. */
+    everySeconds: (data?.scan?.everySeconds ?? 0.45) / (1 + (tier - 1) * 0.5),
+    /** What it can pick out. Tier 3 names a rare seam without your standing on it. */
+    detects: tier >= 3 ? '*' : tier >= 2 ? 'buried' : 'surface',
+  };
+}
+
+/**
  * Which modes this player can scroll to. A mode with nothing behind it is not in the ring — the
  * wheel on a new character has two entries and earns the other two.
+ *
+ * R17 — "I asked for scrollwheel to reveal Weapon, Tool, Scanner, but I don't see the Scanner
+ * option." This function was never the bug: it has always put `scanner` in the ring the moment
+ * `player.devices.scanner` is true. Nothing could ever set it, because the Prospector's Scanner was
+ * priced in a material that does not exist — see `priceRow` above, which is the actual fix. What
+ * changed here is only that the ring now accepts any of the three scanner tiers.
  */
 export function heldModes(player) {
   const out = ['weapon'];
   if (toolItem(player)) out.push('tool');
-  if (player?.devices?.scanner) out.push('scanner');
+  if (scannerDevice(player)) out.push('scanner');
   if (player?.devices?.command_rod) out.push('rod');
   return out;
 }
@@ -215,6 +310,31 @@ export function holdWeapon(player) { if (player) player.held = 'weapon'; }
  * about ore or timber. That is what lets the same object run a seam, a tree and — in the same round
  * — a manufacturing structure you are turning a crank on.
  */
+/**
+ * R17 — WHICH CLIP THE BODY PLAYS WHILE THE BAR FILLS.
+ *
+ *   "Generate a mining animation to use when a tool is being used, to differentiate it from the
+ *    attack animation."
+ *
+ * There was one animation for every attack in the game and a gather used it, so digging a seam for
+ * three and a half seconds was a man swinging a sword at a rock. `avatar-3d/js/chibi2-motion.js`
+ * has three real ones now, on their own opt-in list so Emberveil builds exactly what it built
+ * before: `pickSwing` (two hands on a pick, overhead, straight down), `chopSwing` (an axe, diagonal
+ * into a trunk) and `forage` (bent over a bush, hands low).
+ *
+ * The verb comes out of the harvest registry — `chop` for a tree, `dig` for a rock, `forage` for a
+ * bush — which js/props.js publishes from the same rows that say what the thing drops. A seam is
+ * always a pick.
+ */
+export const WORK_CLIPS = { dig: 'pickSwing', chop: 'chopSwing', forage: 'forage' };
+
+export function workClipFor(job) {
+  if (!job) return null;
+  if (job.kind === 'seam') return WORK_CLIPS.dig;
+  const row = harvestInfo.get(propKindFromJobId(job.id));
+  return WORK_CLIPS[row?.work] || WORK_CLIPS.dig;
+}
+
 export function createGathering({ data = {}, onLog = () => {} } = {}) {
   const cfg = data.gather || {};
   let job = null;
@@ -226,11 +346,25 @@ export function createGathering({ data = {}, onLog = () => {} } = {}) {
    */
   function begin({ id, kind = 'seam', name = '', x = 0, y = 0, z = 0, seconds = 3, speed = 1, onDone = null, meta = null }) {
     if (job && job.id === id) return job;          // already working this one; do not restart the bar
+    /**
+     * R17 — A GIANT TAKES AS LONG AS A GIANT TAKES.
+     *
+     * js/main.js works the length out from two generic sizes (`secondsFor('prop')` = 2.4 s), which
+     * was right while everything you could cut down was roughly tree-sized. An Elder Broadleaf is
+     * fifteen trees and pays out like fifteen trees, and collecting that in two and a half seconds
+     * would make felling the giants the only sensible way to get timber. Its own length is in
+     * `data/megaflora.json` beside its drops, published into the registry by js/props.js, and it
+     * wins over whatever generic figure the caller worked out.
+     */
+    const row = harvestInfo.get(propKindFromJobId(id));
+    const want = row?.seconds > 0 ? row.seconds : seconds;
     job = {
       id, kind, name, x, y, z, meta,
-      total: Math.max(0.2, seconds / Math.max(0.25, speed)),
+      total: Math.max(0.2, want / Math.max(0.25, speed)),
       elapsed: 0, done: false, onDone,
       from: { x, z },
+      /** Which body clip this job plays. Read by `tick` below and by js/actors.js through `feel`. */
+      clip: workClipFor({ id, kind }),
     };
     return job;
   }
@@ -304,6 +438,24 @@ export function createScanner({ data = {}, markers = null, onLog = () => {}, lab
   let on = false;
   let since = 0;
   let ping = 0;
+  /**
+   * R17 — WHAT IT IS LISTENING FOR.
+   *
+   *   "It should allow you to right click to select what to scan for, or to clear the scan results."
+   *
+   * An empty set means everything, which is what it has always done and what a new player wants.
+   * Once you are hunting a particular material a full sweep is noise — twenty markers on the map
+   * and the one you came for somewhere among them. The set is material ids (`iron_ore`,
+   * `crystal_raw`), because that is what a node carries; the panel turns them into words.
+   *
+   * It is part of the save, beside `found` and `on`: a filter you have to set again every time you
+   * load is a filter nobody uses twice.
+   */
+  let wanted = new Set();
+  /** The tier doing the sweeping. Null until a player with a scanner ticks it. */
+  let tier = null;
+  /** The right-click chooser, in a browser. Null in node — see `attachChooser` at the end. */
+  let chooser = null;
 
   function setOn(v, player = null) {
     const want = !!v;
@@ -327,14 +479,26 @@ export function createScanner({ data = {}, markers = null, onLog = () => {}, lab
     if (!on || !at) return [];
     ping = Math.max(0, ping - dt);
     since += dt;
-    if (since < (cfg.everySeconds ?? 0.45)) return [];
+    /**
+     * R17 — the tier decides the clock and the reach. `scannerTier` reads `data/tools.json`, so a
+     * fourth scanner tomorrow is a data change; with no tier (a test, or a save from before the
+     * tiers landed) the figures fall back to exactly what they were.
+     */
+    tier = scannerTier(player, data) || tier;
+    if (since < (tier?.everySeconds ?? cfg.everySeconds ?? 0.45)) return [];
     since = 0;
-    const range = (cfg.range ?? 110) + (player?.equipment?.tool?.scanBonus || 0);
+    const range = (tier?.range ?? cfg.range ?? 110) + (player?.equipment?.tool?.scanBonus || 0);
     const fresh = [];
     for (const n of nodesNear(at.x, at.z, range)) {
       if (!n || n.gone) continue;
       const id = String(n.id);
       if (found.has(id)) continue;
+      /**
+       * The filter. Empty means everything; otherwise only what you asked for, by material id.
+       * A rare seam answers to its own `rare_seam` as well as to whatever it is rich in, so
+       * "show me rare seams" is a thing the chooser can offer without a second mechanism.
+       */
+      if (wanted.size && !wanted.has(n.resource) && !(n.rare && wanted.has('rare_seam'))) continue;
       if (Math.hypot(n.x - at.x, n.z - at.z) > range) continue;
       const row = {
         id, x: n.x, z: n.z, kind: n.kind,
@@ -358,7 +522,7 @@ export function createScanner({ data = {}, markers = null, onLog = () => {}, lab
     return fresh;
   }
 
-  return {
+  const api = {
     tick, setOn,
     toggle(player) { return setOn(!on, player); },
     get on() { return on; },
@@ -372,13 +536,62 @@ export function createScanner({ data = {}, markers = null, onLog = () => {}, lab
     },
     has: id => found.has(String(id)),
     get size() { return found.size; },
+
+    // ------------------------------------------------------------ R17: what to look for
+
+    /** The material ids currently being listened for. Empty means everything. */
+    get wanted() { return [...wanted]; },
+    /** True when nothing is filtered out — the state a new scanner starts in. */
+    get scanningAll() { return wanted.size === 0; },
+    /** Turn one material on or off. Returns whether it is now wanted. */
+    toggleWanted(resource) {
+      if (!resource) return false;
+      if (wanted.has(resource)) wanted.delete(resource); else wanted.add(resource);
+      return wanted.has(resource);
+    },
+    /** Set the whole list at once, or clear it back to everything. */
+    setWanted(list = null) {
+      wanted = new Set((list || []).filter(Boolean));
+      return [...wanted];
+    },
+    /**
+     * "…or to clear the scan results." Forget the survey. Deliberately separate from turning the
+     * scanner off, and deliberately loud: a survey is hours of walking and wiping it by accident
+     * would be the worst thing in this panel.
+     */
+    clearFound() {
+      const n = found.size;
+      found.clear();
+      if (n) onLog(`Survey wiped — ${n} ${n === 1 ? 'mark' : 'marks'} forgotten.`, 'warn');
+      return n;
+    },
+    /** Which scanner is doing the work, so a panel can name it. Null until a sweep has run. */
+    get tier() { return tier; },
+    /** What the survey holds, counted by material — the chooser's own list. */
+    tally() {
+      const out = new Map();
+      for (const r of found.values()) {
+        const row = out.get(r.resource) || { resource: r.resource, name: r.name, count: 0 };
+        row.count++;
+        out.set(r.resource, row);
+      }
+      return [...out.values()].sort((a, b) => b.count - a.count);
+    },
+
+    /** The chooser panel, once a browser has built one. Null in node and until the import lands. */
+    get chooser() { return chooser; },
+
     /** Remembered across a save, because a survey you have to redo is not a survey. */
-    toJSON() { return { on, found: [...found.values()] }; },
+    toJSON() { return { on, found: [...found.values()], want: [...wanted] }; },
     load(saved) {
       if (!saved) return;
       found.clear();
       for (const r of saved.found || []) found.set(String(r.id), r);
       on = !!saved.on;
+      wanted = new Set(saved.want || []);
     },
   };
+
+
+  return api;
 }

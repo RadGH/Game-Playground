@@ -27,6 +27,9 @@
 // MATERIALS you are carrying — that is a different and older lesson, and teaching it twice in two
 // different currencies would just be confusing.
 
+// R17: a quantity of a material is printed with one decimal, never raw.
+import { mat } from '../../../shared/format.js';
+
 const round2 = n => Math.round(n * 100) / 100;
 
 export function createHold({ goods = [], capacity = 40 } = {}) {
@@ -108,7 +111,7 @@ export function createHold({ goods = [], capacity = 40 } = {}) {
     take(id, fits);
     other.put(id, fits);
     const name = BY_ID.get(id)?.name || id;
-    return { moved: fits, why: fits < n ? `${fits} of ${n} ${name.toLowerCase()} went in. That is all that fitted.` : null };
+    return { moved: fits, why: fits < n ? `${mat(fits)} of ${mat(n)} ${name.toLowerCase()} went in. That is all that fitted.` : null };
   }
 
   return {

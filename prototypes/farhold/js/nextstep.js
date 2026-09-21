@@ -18,6 +18,15 @@
 // because `data/refining.json` gives it a `fuels` block, a hardness-2 seam needs a steel tool
 // because `kindsForBiome` says so.
 //
+// R17 — HOW THIS DIFFERS FROM js/onboarding.js, because the two look alike and are not.
+//
+// This is a hint that is ALWAYS true and never finishes: it looks at a base in any state, at hour
+// one or hour forty, and names the first unfinished link. It pays nothing, remembers nothing and
+// lives in the build panel. The onboarding line is a QUEST — five steps, taken from a person in a
+// town, paid out as you go, and over for good once you have smelted iron. They say some of the same
+// sentences on purpose; if you change the wording of a rung here, the matching step over there
+// should say the same thing, or the player is being told two different things about one action.
+//
 // PURE: no DOM, no Three.js, no imports from the game. Everything it needs is passed in, which is
 // what lets `tests/nextstep.test.js` walk a player through the whole chain in a loop.
 //
@@ -57,9 +66,19 @@ export const STEPS = [
   {
     id: 'store',
     when: c => !c.hasStore,
-    text: 'Build a Storage Crate.',
-    why: 'A crate is what makes a pile of materials shared: anything you build within reach of one can spend what is in it, and a drill can deliver to it.',
-    where: 'Build mode (B) · Storage',
+    /**
+     * R17 — THE CRATE IS A BOX, AND THE SENTENCE NAMES THE BENCH THAT MAKES ITS PLANKS.
+     *
+     * It used to say "Build a Storage Crate" and stop, and the crate cost six planks and an iron
+     * ingot. Planks came off a Sawmill, a Sawmill cost eight ingots, ingots came out of a Furnace,
+     * and a Furnace can only draw from a storage pool — so the hint was pointing at the far side of
+     * a ring. The Box costs six planks and no metal now, and the Crafting Table that splits them
+     * costs six logs and two stone and carries its own shelf. Both halves are in the `why`, because
+     * a hint that names a thing you cannot yet make is the fault this file exists to prevent.
+     */
+    text: 'Build a Storage Box.',
+    why: 'Six planks, no metal. Planks are split from logs at a Crafting Table — six logs and two stone, and it keeps a shelf of its own so it works before you own any store at all.',
+    where: 'Build mode (B) · Workshop, then Storage',
   },
   {
     id: 'clay',
@@ -98,10 +117,21 @@ export const STEPS = [
   },
   {
     id: 'drill',
-    when: c => !c.hasDrill && c.have('iron') >= 6,
+    /**
+     * R17 — IT ASKED FOR `iron`, WHICH IS NOT A MATERIAL.
+     *
+     * `iron` is the build catalogue's SHORT NAME; the thing a furnace actually makes is
+     * `iron_ingot` (js/buildplan.js `MATERIAL_ALIASES`, round 13's whole note). The `have` callback
+     * js/main.js supplies counts real materials out of the pools and the bag, so `have('iron')` has
+     * been exactly zero for every player who has ever run the game — and this hint, which is how you
+     * find out that automation exists at all, could never fire.
+     */
+    when: c => !c.hasDrill && c.have('iron_ingot') >= 6,
     text: 'Build a Small Drill on a seam.',
     why: 'Six iron ingots, no power needed. It works the seam while you are somewhere else, which is the whole point of having a base.',
-    where: 'Build mode (B) · Refining',
+    // R16 split extraction out of Refining into its own group; this line was still sending people
+    // to the old one.
+    where: 'Build mode (B) · Extraction',
   },
   {
     id: 'route',

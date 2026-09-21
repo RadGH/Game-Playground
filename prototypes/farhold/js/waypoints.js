@@ -171,6 +171,29 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null, b
   let builtPads = (built || []).map(p => ({ ...p }));
 
   /**
+   * R17 — WHAT THE PLAYER HAS DECIDED ABOUT EACH PAD.
+   *
+   *   "Waypoints favorited on the map with a star do not show a star on the minimap. Can they have
+   *    a toggle to show on the map, and show on the game world? That way you can uncheck those to
+   *    keep them favorited but hide them from the map/world so they are not distracting."
+   *
+   * The pads themselves are a function of the seed — every settlement on the world has one, lit or
+   * not — so none of this can live on a pad row: `townPads()` rebuilds them from scratch on every
+   * call and would throw a star away a frame after it was set. It lives here, keyed by pad id, and
+   * rides `toJSON()` with the lit set.
+   *
+   * Only the DELTAS are stored. A pad nobody has touched is not in the map at all, so a world with
+   * sixty settlements costs nothing until you actually star one.
+   */
+  const marks = new Map();
+  const markOf = id => marks.get(String(id)) || null;
+  const markFor = id => {
+    const key = String(id);
+    if (!marks.has(key)) marks.set(key, { starred: false, showOnMap: true, showInWorld: true });
+    return marks.get(key);
+  };
+
+  /**
    * ONLY TOWNS AND CITIES.
    *
    * "Only towns/cities should have this, but not 'hostile' landmarks like bandit camps." A waypoint
@@ -208,7 +231,21 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null, b
     faction: p.faction || null,       // §5.19 — the sigils light in your faction's colour
   }));
 
-  const pads = () => [...townPads(), ...playerPads()];
+  /**
+   * R17 — every pad carries what the player decided about it, so the map, the minimap and the
+   * journal all read one row rather than each remembering to ask a second question.
+   */
+  const dress = pad => {
+    const m = markOf(pad.id);
+    return {
+      ...pad,
+      starred: !!m?.starred,
+      showOnMap: m ? m.showOnMap !== false : true,
+      showInWorld: m ? m.showInWorld !== false : true,
+    };
+  };
+
+  const pads = () => [...townPads(), ...playerPads()].map(dress);
 
   return {
     /** Every pad in the world, lit or not — the map draws the unlit ones greyed. */
@@ -260,7 +297,53 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null, b
     },
 
     /** Every pad you raised yourself, for the base overview and for §5.11's raid targeting. */
-    builtList() { return playerPads(); },
+    builtList() { return playerPads().map(dress); },
+
+    // ------------------------------------------------------ R17: starring and hiding a pad
+
+    /** Favourite a pad, or stop. Legal on an unlit one — "I want to go there" is a fair thing to say. */
+    star(id, on = null) {
+      const m = markFor(id);
+      m.starred = on == null ? !m.starred : !!on;
+      return m.starred;
+    },
+    isStarred(id) { return !!markOf(id)?.starred; },
+
+    /**
+     * Show this pad on the map / in the world, or stop. `where` is the field name itself —
+     * `showOnMap` or `showInWorld` — the same vocabulary js/markers.js uses, so a screen that can
+     * toggle a marker can toggle a pad with the same line of code.
+     */
+    show(id, where, on = null) {
+      if (where !== 'showOnMap' && where !== 'showInWorld') return false;
+      const m = markFor(id);
+      m[where] = on == null ? m[where] === false : !!on;
+      return m[where];
+    },
+    shown(id, where) {
+      const m = markOf(id);
+      return m ? m[where] !== false : true;
+    },
+
+    /**
+     * The pads the MINIMAP should draw, shaped like the marker rows it already understands.
+     *
+     * A starred pad is on it because starring something is a request to be shown it; a lit pad is
+     * not, because every town you have ever walked into has one and sixty cyan rings would bury the
+     * quest you are actually doing. `kind: 'waypoint'` borrows MARKER_LOOKS' glyph — see the note
+     * on it in js/markers.js for why a pad is not a marker.
+     */
+    minimapPads() {
+      return pads()
+        .filter(p => p.starred && p.showOnMap)
+        .map(p => ({
+          id: p.id, kind: 'waypoint', name: p.name, x: p.x, z: p.z,
+          starred: true, lit: p.lit, tracked: true,
+        }));
+    },
+
+    /** …and the ones a beacon should stand over in the 3D world. */
+    worldPads() { return pads().filter(p => p.starred && p.showInWorld); },
 
     /**
      * Entering a settlement lights its pad.
@@ -348,13 +431,28 @@ export function createWaypoints({ settlements = [], seed = 1, groundOk = null, b
      * Part of the save: which pads are lit, where the portal would lead, and — §5.16 — the pads the
      * player built, which are the only part of the network that is not a function of the seed.
      */
-    toJSON() { return { lit: [...lit], departure: lastDeparture, seed, built: builtPads.map(p => ({ ...p })) }; },
+    toJSON() {
+      return {
+        lit: [...lit], departure: lastDeparture, seed, built: builtPads.map(p => ({ ...p })),
+        // R17 — only the pads the player actually touched, as [id, {starred, showOnMap, showInWorld}]
+        marks: [...marks.entries()].map(([id, m]) => [id, { ...m }]),
+      };
+    },
     load(data) {
       if (!data) return;
       lit.clear();
       for (const id of data.lit || []) lit.add(id);
       lastDeparture = data.departure || null;
       builtPads = (data.built || []).map(p => ({ ...p }));
+      marks.clear();
+      for (const [id, m] of data.marks || []) {
+        marks.set(String(id), {
+          starred: !!m?.starred,
+          // an absent switch reads as ON, the same rule js/markers.js `load()` follows
+          showOnMap: m?.showOnMap !== false,
+          showInWorld: m?.showInWorld !== false,
+        });
+      }
     },
   };
 }

@@ -47,7 +47,46 @@ export const CHIBI2_COMBAT_ALL = [...CHIBI2_ALL_ANIMS, ...CHIBI2_COMBAT_ANIMS];
  * Their own list, so a game that has no boats and no mounts builds exactly what it built before.
  */
 export const CHIBI2_RIDE_ANIMS = ['boat', 'sit'];
-export const CHIBI2_COMBAT_RIDE = [...CHIBI2_COMBAT_ALL, ...CHIBI2_RIDE_ANIMS];
+
+/**
+ * WORKING AT SOMETHING, opt-in — added 2026-09-21.
+ *
+ *   "Generate a mining animation to use when a tool is being used, to differentiate it from the
+ *    attack animation."
+ *
+ * Digging a seam and felling a tree both played `attack` — the one-handed overhead sword chop —
+ * because that is the only clip there was. A man swinging a sword at a rock for three and a half
+ * seconds is the whole of what a gather looked like.
+ *
+ *   `pickSwing` — both hands on a pick, overhead, driven straight down. Loops.
+ *   `chopSwing` — an axe, diagonally across the body into a trunk. Loops.
+ *   `forage`    — bent over a bush with both hands low, alternating. Loops.
+ *
+ * ALL THREE LOOP, which is why none of them is in `ONE_SHOTS`: the gather bar decides how long the
+ * job takes, so the body has to keep going until it fills. They are built to return to the neutral
+ * pose at the end of every cycle (every term is multiplied by a `rec` that reaches zero by u=1, and
+ * every term is zero at u=0), so the loop point is invisible and the crossfade back to `idle` has
+ * nothing to smooth over.
+ *
+ * Their own list, so a game with no gathering builds exactly what it built before.
+ */
+export const CHIBI2_WORK_ANIMS = ['pickSwing', 'chopSwing', 'forage'];
+
+/**
+ * THE SET FARHOLD ASKS FOR.
+ *
+ * `prototypes/farhold/js/actors.js` is the only importer this constant has ever had, and Emberveil
+ * asks for none of the opt-in lists (it takes the default `CHIBI2_ANIMS`). Adding the work clips to
+ * this composed name therefore reaches the one game that wants them and cannot touch the other:
+ * `CHIBI2_ANIMS`, `CHIBI2_SWIM_ANIMS`, `CHIBI2_ALL_ANIMS`, `CHIBI2_COMBAT_ANIMS`,
+ * `CHIBI2_COMBAT_ALL` and `CHIBI2_RIDE_ANIMS` are all byte-for-byte what they were, and
+ * `prototypes/farhold/tests/round17-combat.test.js` fails if any of them moves.
+ *
+ * `CHIBI2_COMBAT_RIDE_WORK` is the same list under the name that says what is in it, for anything
+ * written from here on.
+ */
+export const CHIBI2_COMBAT_RIDE = [...CHIBI2_COMBAT_ALL, ...CHIBI2_RIDE_ANIMS, ...CHIBI2_WORK_ANIMS];
+export const CHIBI2_COMBAT_RIDE_WORK = CHIBI2_COMBAT_RIDE;
 
 export const ONE_SHOTS = new Set([
   'attack', 'cast', 'hit', 'jump', 'dead',
@@ -61,6 +100,7 @@ const LENGTHS = {
   arcCut: 0.62, slam: 1.05, lunge: 0.55, shoot: 0.6, reload: 1, castPoint: 0.35,
   castStaff: 0.7, channel: 1.6,
   boat: 2.4, sit: 3,
+  pickSwing: 1, chopSwing: 0.85, forage: 1.4,
 };
 
 // Keyframes are generated once per body template. Three.js handles interpolation and crossfades.
@@ -338,6 +378,64 @@ export function createClips(rig, anims = CHIBI2_ANIMS) {
         pose.elbowL[0] = -0.55; pose.elbowR[0] = -0.95;
         pose.head[1] = sweep * 0.09;
         bob = Math.sin(cycle * 2) * 0.012;
+      } else if (name === 'pickSwing') {
+        // A PICK, NOT A SWORD. Both hands on the haft, straight up over the head, and the whole
+        // body folds over the blow on the way down — a pick does its work with the shoulders and
+        // the back, which is what makes it read as work rather than as a fight. The knees bend on
+        // the strike so the weight goes into the ground instead of into a stance.
+        const raise = THREE.MathUtils.smoothstep(u, 0.02, 0.40);
+        const strike = THREE.MathUtils.smoothstep(u, 0.40, 0.54);
+        const rec = 1 - THREE.MathUtils.smoothstep(u, 0.66, 0.98);
+        const up = raise * (1 - strike);
+        pose.armR[0] = (-2.45 * up + 1.15 * strike) * rec;
+        pose.armL[0] = (-2.35 * up + 1.10 * strike) * rec;
+        pose.armR[2] = 0.12 + 0.10 * rec; pose.armL[2] = -0.12 - 0.10 * rec;
+        pose.elbowR[0] = -0.12 + (-0.55 * up + 0.72 * strike) * rec;
+        pose.elbowL[0] = pose.elbowR[0];
+        pose.chest[0] = (-0.26 * up + 0.62 * strike) * rec;
+        pose.head[0] = (-0.20 * up + 0.34 * strike) * rec;
+        pose.kneeL[0] = 0.50 * strike * rec; pose.kneeR[0] = 0.50 * strike * rec;
+        pose.legL[0] = -0.26 * strike * rec; pose.legR[0] = -0.26 * strike * rec;
+        bob = (0.028 * up - 0.110 * strike) * rec;
+      } else if (name === 'chopSwing') {
+        // AN AXE INTO A TRUNK. Diagonal across the body rather than overhead, because a tree is a
+        // vertical thing you cut sideways — and the chest turns into the wind-up and out of the
+        // follow-through, which is the difference between chopping and hammering.
+        const raise = THREE.MathUtils.smoothstep(u, 0.02, 0.36);
+        const cut = THREE.MathUtils.smoothstep(u, 0.36, 0.52);
+        const rec = 1 - THREE.MathUtils.smoothstep(u, 0.62, 0.98);
+        const up = raise * (1 - cut);
+        pose.chest[1] = (0.50 * up - 0.42 * cut) * rec;
+        pose.hips[1] = pose.chest[1] * 0.45;
+        pose.head[1] = pose.chest[1] * 0.3;
+        pose.armR[0] = (-2.00 * up + 1.35 * cut) * rec;
+        pose.armL[0] = (-1.75 * up + 1.25 * cut) * rec;
+        pose.armR[1] = (0.35 * up - 0.30 * cut) * rec;
+        pose.armR[2] = 0.12 + (0.35 * up - 0.10 * cut) * rec;
+        pose.armL[2] = -0.12 - 0.30 * up * rec;
+        pose.elbowR[0] = -0.12 + (-0.70 * up + 0.85 * cut) * rec;
+        pose.elbowL[0] = pose.elbowR[0];
+        pose.chest[0] = (-0.15 * up + 0.45 * cut) * rec;
+        pose.head[0] = (-0.12 * up + 0.25 * cut) * rec;
+        pose.kneeL[0] = 0.32 * cut * rec; pose.kneeR[0] = 0.22 * cut * rec;
+        bob = (0.020 * up - 0.070 * cut) * rec;
+      } else if (name === 'forage') {
+        // BENT OVER A BUSH. No swing at all: the back is folded, the knees are soft and the hands
+        // work low and alternately. Built out of `cycle` rather than out of `u`, so it is periodic
+        // by construction — this one has no strike to come back from.
+        const reach = Math.sin(cycle);
+        pose.chest[0] = 0.66 + reach * 0.07;
+        pose.head[0] = 0.26;
+        pose.hips[0] = 0.20;
+        pose.legL[0] = 0.24; pose.legR[0] = 0.10;
+        pose.kneeL[0] = 0.58; pose.kneeR[0] = 0.42;
+        pose.footL[0] = -0.20; pose.footR[0] = -0.14;
+        pose.armR[0] = -0.28 + reach * 0.30; pose.armR[2] = 0.22;
+        pose.armL[0] = -0.28 - reach * 0.30; pose.armL[2] = -0.22;
+        pose.elbowR[0] = -0.90 - Math.max(0, reach) * 0.25;
+        pose.elbowL[0] = -0.90 - Math.max(0, -reach) * 0.25;
+        pose.head[1] = reach * 0.10;
+        bob = -0.075 + Math.sin(cycle * 2) * 0.012;
       } else if (name === 'sit') {
         // Astride: thighs forward and out, shins hanging, hands low on the reins. `rootY` drops the
         // whole body so the seat is where a saddle is rather than where the feet were.

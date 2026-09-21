@@ -55,7 +55,16 @@ const BY_ID = Object.fromEntries(STR.structures.map(s => [s.id, s]));
 /** A pool with a crate in it and a machine standing beside it. Everything §3 argues about. */
 function bench({ type = 'furnace', labour = COLONY.labour, fill = {} } = {}) {
   const stores = createStoreNetwork({ power: POW, materials: RES.materials });
-  stores.add({ id: 'crate', type: 'storage_crate', x: 0, z: 0 });
+  /**
+   * R17 — A STORAGE CHEST, because a Storage Box is six slots now.
+   *
+   * `storage_crate` is what the player reads as a Storage Box: the first store in the game, six
+   * slots, no metal in it. Its cap is 120 and js/stores.js will only let one raw material take a
+   * quarter of that, so a crate no longer holds the forty ore these tests pour into it — and every
+   * one of them is about the LABOUR maths, not about how big a box is. `storage_chest` is the old
+   * crate's capacity at the old crate's price, so the scenery is the size it always was.
+   */
+  stores.add({ id: 'crate', type: 'storage_chest', x: 0, z: 0 });
   const works = createWorks({ refining: REF, resources: RES, stores, labour });
   works.place({ id: 'm1', type, x: 1, z: 0 });
   for (const [res, n] of Object.entries(fill)) stores.put(stores.poolAt(0, 0), res, n);
@@ -738,7 +747,8 @@ test('a colony fed on the clock and a colony caught up in slices end up in the s
 test('the away window is capped, the crate is the real cap, and nobody walks out while you are gone', async () => {
   const { createCivics } = await import('../js/civics.js');
   const stores = createStoreNetwork({ power: POW, materials: RES.materials });
-  stores.add({ id: 'crate', type: 'storage_crate', x: 0, z: 0 });
+  // R17 — a Chest, not a Box: forty ore no longer fits in the six-slot first store. See `bench`.
+  stores.add({ id: 'crate', type: 'storage_chest', x: 0, z: 0 });
   stores.put(stores.poolAt(0, 0), 'iron_ore', 40);       // exactly twenty ingots' worth
   stores.put(stores.poolAt(0, 0), 'coal', 400);
   const works = createWorks({ refining: REF, resources: RES, stores, labour: COLONY.labour });

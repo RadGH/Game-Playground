@@ -53,7 +53,14 @@ import { createLogistics, createAwayClock } from './logistics.js';
 import { createGrid } from './power.js';
 import { createWorks, createHandWork } from './refine.js';
 import { createNodeWorld, createNodePatch, placedNode, materialIndex, whereToFind, nodeLabel } from './resources.js';
-import { createBeacons } from './beacon.js';
+import { createBeacons, BEACON_RANGE } from './beacon.js';
+// R17 — the scanner's right-click chooser. See the note where it is constructed.
+import { createScannerChooser } from './scanner-ui.js';
+// R17 — the custom class: the opening kit a build asks for, and the screen that manages the company
+import { applyOpeningKit } from './classbuild.js';
+import { createFollowers } from './followers.js';
+import { createFollowersScreen } from './followers-ui.js';
+import { roadHireOffer } from './hire.js';
 import { createMining } from './mining.js';
 import { createOreView } from './ore-view.js';
 import { createDefence } from './defence.js';
@@ -71,6 +78,8 @@ import { createBuild } from './build.js';
 import { alignCatalogue } from './buildplan.js';
 import { createBuildUI } from './build-ui.js';
 import { nextStep as chainNextStep } from './nextstep.js';
+// R17 — the five-step line that takes a new player from an empty field to an iron ingot.
+import { createOnboarding } from './onboarding.js';
 import { createHomes } from './homes.js';
 import { WorkBoard, progressText, progressFraction, creditLine, workLeft } from './work.js';
 import { createColony } from './colony.js';
@@ -88,7 +97,12 @@ import {
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
 import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, itemScore, displayName } from './rpg.js';
-import { Hud, SLOT_LABELS } from './hud.js';
+import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
+// R17: one rule for printing a quantity of a material. Ore, timber and clay are all floats —
+// "you are short of 6.000000000003 clay" was the stored number reaching the screen untouched.
+// aliased: two functions in this file already have a local `mat` holding a material's NAME,
+// and a shadowed import is a bug waiting for whoever edits one of them next.
+import { mat as matAmount } from '../../../shared/format.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom } from './skills.js';
 // round 4: the RPG expansion
 import { buildZones } from './zones.js';
@@ -105,6 +119,7 @@ import { createEventProps } from './eventprops.js';
 import {
   HELD_MODES, HELD_LABELS, makeTool, toolItem, toolKeyFor, toolTierOf, toolSpeed, toolYield,
   toolReach, canWork, buildable as buildableTools, giveDevice, heldModes, heldNow, cycleHeld,
+  workClipFor,
   holdWeapon, createGathering, createScanner,
 } from './tools.js';
 import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
@@ -112,7 +127,7 @@ import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES, m
 import { createBoat } from './boat.js';
 import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, chargedForm, OFFHAND_DAMAGE } from './weapons.js';
 // R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
-import { pushFor } from './combat-feel.js';
+import { pushFor, feel } from './combat-feel.js';
 import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
 import { allocate as allocatePerk, refundAll as refundPerks, refundOne as refundOnePerk, pointsLeft as perkPointsLeft } from './perks.js';
 import { createCrafting, Materials } from './craft.js';
@@ -174,7 +189,9 @@ async function boot() {
 
   const [items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen,
     factionData, frameData, incidentData, wandererData, landmarkData, rewardData,
-    resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData] = await Promise.all([
+    resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData,
+    // R17 — the custom class's tuning and the ten hireable mercenary types
+    classbuildData, mercData] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
@@ -205,6 +222,16 @@ async function boot() {
     // the Civilization Expansion §6 — the twenty-two trade goods, injected into resources and
     // refining at boot by js/trade.js rather than written into either file
     loadJSON('data/tradegoods.json').catch(() => null),
+    /**
+     * R17 — the custom class and the mercenary types.
+     *
+     * Both `.catch(() => null)` like everything else added since round 14: without
+     * `classbuild.json` the title screen simply does not offer the Custom entry and the thirty
+     * presets are untouched, and without `mercenaries.json` the follower book falls back to its
+     * own defaults (three slots, one of each summon) and nobody is for hire.
+     */
+    loadJSON('data/classbuild.json').catch(() => null),
+    loadJSON('data/mercenaries.json').catch(() => null),
   ]);
 
   /**
@@ -223,10 +250,10 @@ async function boot() {
   const data = { items, balance, bestiary, talents, campaignData, classLooks, skillData, classData,
     craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData,
     landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData,
-    cropData, raidData, goodsData };
+    cropData, raidData, goodsData, classbuildData, mercData };
 
   status('');
-  const choice = await runTitle({ classData, classLooks, skillData, items, bestiary, balance, saves, params, settings, status });
+  const choice = await runTitle({ classData, classLooks, skillData, items, bestiary, balance, saves, params, settings, status, classbuildData });
   await begin({ ...data, status, settings, choice, save: choice.save || null }).catch(err => {
     status('failed: ' + err.message);
     const start = $('boot-start');
@@ -235,7 +262,7 @@ async function boot() {
   });
 }
 
-async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData: rawStructures, colonyData, cropData, raidData, goodsData, status, settings, choice, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData: rawStructures, colonyData, cropData, raidData, goodsData, classbuildData, mercData, status, settings, choice, save }) {
   /**
    * ONE VOCABULARY FOR MATERIALS, FROM HERE ON.
    *
@@ -519,6 +546,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // the folk who live in the settlements, and the work they hand out
   const questLog = save?.quests ? QuestLog.fromJSON(save.quests) : new QuestLog();
   /**
+   * R17 — the onboarding line. Built much further down, once the base modules it reads exist;
+   * declared here as a `let` so the HUD's `objective:` closure can name it without reading a
+   * `const` that has not been initialised yet. Round 11 produced three crashes of exactly that
+   * shape and `node --check` can see none of them.
+   */
+  let onboard = null;
+  /**
    * Everything the player is keeping an eye on: quest destinations, story objectives and the pins
    * they dropped themselves. It carries the world each one is on, so flying somewhere else no
    * longer leaves the old planet's pins scattered over the new one's map.
@@ -602,6 +636,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const firstTool = makeTool((toolData.bases || [])[0], 'normal', toolData, { level: 1 });
     if (firstTool) rpg.equip(player, firstTool, { force: true });
     player.held = 'weapon';
+    /**
+     * R17 — THE CUSTOM CLASS'S OPENING KIT.
+     *
+     * A build is installed AS a class on the title screen (js/newgame.js), so everything above this
+     * line has already happened for it: the starter weapon out of `classDef.starter`, the armour
+     * out of `classDef.startingArmour`, and the companion out of `classDef.pet`. What is left is
+     * the three things a class def has no field for — the second weapon a dual loadout wants, the
+     * element a branded caster was attuned to, and the sealed chest. A preset class returns
+     * immediately without doing anything at all.
+     */
+    applyOpeningKit({ player, rpg, classDef, data: classbuildData, log: (t, k) => hud.log(t, k) });
   }
 
   // only the player swims, so only the player pays for the swim clips
@@ -1333,6 +1378,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * existed — the marker book, the bearing maths and `distanceText` — it was just never on screen.
      */
     objective: () => {
+      /**
+       * R17 — the onboarding line speaks first while it is live, and only while it is live.
+       *
+       * Round 10's review put this strip here because "the game never said what to do"; what it
+       * says is WHERE something is, which is no use at all for the opening ten minutes, where
+       * every move is a key nobody has been told about. js/onboarding.js returns null the moment
+       * the line is over, or if the player never took it, so the strip goes straight back to the
+       * marker book. It never holds the line hostage.
+       */
+      const guide = onboard?.objective();
+      if (guide) return guide;
       if (dungeon) return { name: dungeon.name, where: 'find the way down' };
       const tracked = markers.tracked()[0];
       if (tracked) {
@@ -1526,7 +1582,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         gold: spec.gold, xp: spec.xp,
         items: (spec.items || []).map(rewardItem),
         extras: [
-          ...Object.entries(spec.mats || {}).map(([k, n]) => ({ kind: 'quest', text: `${n} ${craft.M[k]?.name || k}` })),
+          ...Object.entries(spec.mats || {}).map(([k, n]) => ({ kind: 'quest', text: `${matAmount(n)} ${craft.M[k]?.name || k}` })),
           ...(spec.extras || []).filter(x => x.text).map(x => ({ kind: 'memory', text: x.text })),
         ],
       }),
@@ -1619,7 +1675,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       paid.gold ? `${paid.gold} gold` : null,
       paid.xp ? `${paid.xp} xp` : null,
       ...paid.items.map(it => it.name),
-      ...Object.entries(paid.mats).map(([k, n]) => `${n} ${craft.M[k]?.name || k}`),
+      ...Object.entries(paid.mats).map(([k, n]) => `${matAmount(n)} ${craft.M[k]?.name || k}`),
       ...paid.extras.map(x => x.text).filter(Boolean),
     ].filter(Boolean);
     hud.log(`${quest.title} — done.${bits.length ? ` ${bits.join(', ')}.` : ''}`, 'good');
@@ -1923,10 +1979,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     scene, terrain, rpg, defs: bestiary.pets || [], balance: { ...balance, seed },
     field, statuses: skillData.statuses,
   });
+  /**
+   * R17 — THE FOLLOWER BOOK, and it goes in BEFORE the class companion is summoned.
+   *
+   * It installs the limit on `pets.summon` (`pets.setGate`) and registers the ten hireable types,
+   * so every door into the pet system — a summoning skill, a hire, the class companion below —
+   * asks the same question. Built here rather than later because the class companion is the first
+   * thing through that door.
+   */
+  const followers = createFollowers({
+    data: mercData, skillData, pets,
+    getPlayer: () => player,
+    // where a new body is PUT DOWN: the player's position lives on `control`, not on `player`
+    getAt: () => control,
+    log: (t, k) => hud.log(t, k),
+  });
+
   if (classDef.pet) {
-    // "One more companion follows you" — the perk existed, and the class summon ignored it, so the
-    // answer to "what companion?" was "none, ever". It is the class's own, one more of them.
-    const pet = { ...classDef.pet, count: (classDef.pet.count ?? 1) + (player.derived?.petSlots || 0) };
+    /**
+     * R17 — the perk no longer adds to this. The Kept Company grants `followerSlots` now, which is
+     * a limit on how many things may walk with you rather than a number added to a summon; the
+     * follower book above enforces it at `pets.summon`. See js/perks.js and js/skills.js.
+     */
+    const pet = { ...classDef.pet };
     pets.summonForClass(classId, player, pet).then(made => {
       if (made.length) hud.log(`${player.name} ${pet.verb || 'calls'} ${made.length === 1 ? made[0].name : made.length + ' companions'}.`, 'good');
     });
@@ -2537,8 +2612,51 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * would be the tenth thing that has to be right for the character sheet to open at all.
    * civics.css is loaded by the module itself, so index.html needs no change either.
    */
+  /**
+   * R17 — THE FOLLOWERS SCREEN.
+   *
+   *   "We should also add a Followers tab to the menu where you can manage your follower slots."
+   *
+   * Its own module and its own stylesheet, the way the Holding screen is — and like the Holding
+   * screen this round, it is mounted INSIDE the character sheet on the tab index.html reserves for
+   * it, so it inherits the sheet's one Esc, one close and one cursor hand-off. `F` is a shortcut
+   * straight to that tab, not a second window.
+   */
+  const company = createFollowersScreen({
+    followers, pets,
+    getPlayer: () => player,
+    getAt: () => control,
+    getDay: () => Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+    mount: document.getElementById('sheet-body-followers') || document.body,
+    embedded: !!document.getElementById('sheet-body-followers'),
+    /**
+     * WHERE YOU COULD HIRE SOMEBODY, IF ANYWHERE. A broker keeps a board in every settlement; out
+     * on the road the tab says so in a sentence rather than showing four dead rows.
+     */
+    hireAt: () => {
+      const town = features.settlementAt(control.x, control.z);
+      return town ? { town, name: town.name } : null;
+    },
+    log: (t, k) => hud.log(t, k),
+    // the Spells tab is the in-game respec, and it needs the live bar or a changed pick would
+    // reach the screen and not the keys
+    classData, skillData, classLooks, classbuildData, skills, forest: rpg.forest,
+  });
+  hud.mount('followers', company);
+
   const holding = createCivicsScreen({
     civics, colony, works,
+    /**
+     * R17 — it mounts INSIDE the character sheet, on the tab index.html reserves for it.
+     *
+     * The screen is unchanged: same markup, same civics.css, same rail. `embedded` only drops the
+     * fixed full-window positioning and its own close button, so the sheet's one Esc, one × and
+     * one cursor hand-off cover it. The "while you were away" card and the hold readout stay on the
+     * page (`awayMount`), because both have to be readable while you are walking about.
+     */
+    mount: document.getElementById('sheet-body-holding') || document.body,
+    embedded: !!document.getElementById('sheet-body-holding'),
+    awayMount: document.body,
     getPlayer: () => player,
     getDay: () => Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
     log: (t, c) => hud.log(t, c),
@@ -2590,6 +2708,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     },
   });
 
+  /**
+   * R17 — hand the Holding to the character sheet, so it gets a rail button and a number.
+   *
+   * `hud.mount` is the one join: js/hud.js never imports js/civics-ui.js, it just shows and hides
+   * whatever it was given and calls `draw()` when that tab is the one you are looking at. The same
+   * door is what js/research-ui.js and js/followers-ui.js come through.
+   */
+  hud.mount('holding', holding);
+
   /** Exactly one portal, ever — the whole state is one variable in js/portal.js. */
   const portals = createPortals({
     saved: save?.portal || null,
@@ -2633,6 +2760,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     label: n => nodeLabel(n, { data: resourceData }),
   });
   if (save?.scanner) scanner.load(save.scanner);
+  /**
+   * R17 — THE SCANNER'S RIGHT-CLICK CHOOSER: what to sweep for, and "forget survey".
+   *
+   * Constructed here rather than lazily imported from inside `createScanner`, so that the one
+   * thing in the game that claims the right mouse button is visible in the file that owns the
+   * input. It only takes the event while the scanner is what you are holding — right-click was
+   * completely unclaimed in Farhold before this, which is why it was free to take.
+   */
+  const scanChooser = createScannerChooser({
+    scanner,
+    onLog: (t, c) => hud.log(t, c),
+    materialName: id => resourceData?.materials?.[id]?.name || id,
+    canOpen: () => heldNow(player) === 'scanner',
+  });
 
   /**
    * Start working whatever is in front of you, if the tool can work it. Returns true if a bar went
@@ -2674,6 +2815,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (prop) {
       const about = props.describe?.(prop) || {};
       const tier = toolTierOf(player, resourceData);
+      /**
+       * R17 — a giant that is not made of wood says WHY.
+       *
+       * "Obviously this should only work for mega trees actually made of wood, but maybe not all
+       * mega-structures." The refusal below is true but implies a better tool would do it, which
+       * for a stone arch is a lie you can act on. data/megaflora.json carries a sentence for every
+       * one of the eight that gives nothing; `props.describe()` hands it over.
+       */
+      if (about.harvestable === false) {
+        hud.log(about.why || `The ${about.name || 'it'} gives nothing.`, 'warn');
+        return true;
+      }
       if ((about.tier ?? 0) > tier) {
         hud.log(`The ${about.name || 'it'} is too hard for what you are carrying.`, 'warn');
         return true;
@@ -3221,7 +3374,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           done: (y.built[id] || 0) > 0,
           tier: y.built[id] || 0,
           ok: can.ok, why: can.ok ? '' : can.why,
-          costText: next ? Object.entries(next.cost).map(([k, n]) => `${n} ${k.replace(/_/g, ' ')}`).join(', ') : 'finished',
+          costText: next ? Object.entries(next.cost).map(([k, n]) => `${matAmount(n)} ${k.replace(/_/g, ' ')}`).join(', ') : 'finished',
         };
       });
       const ready = shipReady(player, 'lander');
@@ -3374,7 +3527,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           return (pool ? stores.count(pool, id) : 0) + (materials.count?.(id) ?? 0);
         };
         const names = resourceData?.materials || {};
-        return buildableTools(toolData, player, have)
+        return buildableTools(toolData, player, have, resourceData?.materials)
           .filter(r => r.level <= player.level + 2)
           .map(r => ({ ...r, names: Object.fromEntries(Object.entries(names).map(([k, v]) => [k, v.name || k])) }));
       },
@@ -4318,19 +4471,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * was indistinguishable from being robbed. `folk.hireOffer` builds the card — who they are,
          * what they cost, what they bring — and nothing is spent until it is accepted.
          */
-        const pet = (bestiary.pets || []).find(x => x.id === 'sellsword') || null;
-        talk.showOffer(folk.hireOffer(w, { level: player.level, gold: player.gold, pet }), {
-          accept: () => {
-            const price = w.hire?.gold ?? 180;
-            if (player.gold < price) { hud.log(`${w.name} wants ${price} up front, and you have ${player.gold}.`, 'bad'); return; }
-            player.gold -= price;
-            // A hired sword is a real companion, not a line of text — `sellsword` is the one humanoid
-            // in the pet table, added for exactly this.
-            pets.summon('sellsword', control, { count: 1 }).then(made => {
-              for (const one of made || []) one.name = w.name;
-              hud.setPlayer(player);
-            }).catch(() => {});
-            hud.log(`${w.name} takes your ${price} and falls in beside you.`, 'good');
+        /**
+         * R17 — ONE OF TEN, NOT ALWAYS THE SAME SELLSWORD.
+         *
+         *   "Companions should also be hireable at town, which we sort of have right now but is
+         *    only for a single person."
+         *
+         * It was literally one person: `sellsword` is the single humanoid in the bestiary's pet
+         * table and this line asked for it by name, so every mercenary in the game was the same
+         * body with a different label. `roadHireOffer` picks a type out of data/mercenaries.json
+         * from a hash of who this person is, so they always sell the same thing and two captains
+         * sell different people. The hire goes through the follower book, which charges for it,
+         * writes the contract a save carries, and refuses when there is no slot left.
+         */
+        const offer = roadHireOffer(w, {
+          mercenaries: mercData?.mercenaries || [],
+          playerLevel: player.level, gold: player.gold, scaling: mercData?.scaling,
+        });
+        talk.showOffer(offer, {
+          accept: async () => {
+            const out = await followers.hire(offer.mercId, { at: control });
+            if (!out.ok) { hud.log(out.why, 'bad'); return; }
+            if (out.unit) out.unit.name = w.name;
+            hud.setPlayer(player);
             roadFolk.settle(w.id, 'paid');
             autoSave();
           },
@@ -4598,7 +4761,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         if (left > 0 && pool) stores.take(pool, m, left);
       }
     };
-    const row = buildableTools(toolData, player, have).find(r => r.kind === kind && r.id === id);
+    const row = buildableTools(toolData, player, have, resourceData?.materials).find(r => r.kind === kind && r.id === id);
     if (!row) return;
     if (!row.canAfford) {
       const names = resourceData?.materials || {};
@@ -4718,6 +4881,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * does not reshuffle every time the panel redraws.
        */
       recruitOffer: recruitFrom(npc),
+      /**
+       * R17 — THE BROKER'S BOARD, in a conversation like every other offer.
+       *
+       * `F` → Hire shows the same board, and that is the screen for comparing four of them side by
+       * side. This is the person: "add a mercenary person who sells mercenaries to the player".
+       * The board is deterministic per settlement and per day, so walking away and coming back does
+       * not reshuffle who is on it.
+       */
+      mercBoard: npc.brokers
+        ? followers.board({ town: npc.node, day: Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1 })
+        : null,
       active: questLog.active,
       hasQuest: id => questLog.has(id),
       readyToTurnIn: giverId => questLog.readyToTurnIn(giverId),
@@ -4964,6 +5138,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.log('You leave them to it.', '');
       talk.update(talkContext(talk.npc));
     },
+    /**
+     * R17 — hire one of the names on the broker's board.
+     *
+     * `followers.hire` is the only door: it charges, writes the contract a save carries, puts the
+     * body down and refuses in a sentence when there is no slot left or not enough gold. The panel
+     * redraws afterwards because the board's own refusal lines change the moment your purse does.
+     */
+    hireMerc: async id => {
+      const out = await followers.hire(id, { at: control });
+      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
+      sound.coin();
+      hud.setPlayer(player);
+      talk.update(talkContext(talk.npc));
+      autoSave();
+    },
     accept: quest => {
       // R16: remember which settlement the job came out of, so handing it in from the journal three
       // zones later earns that place the same regard walking back would have
@@ -5126,8 +5315,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * pad, greys the ones you have not lit, and calls this for the rest. "Go here" stays beside
        * it — the user considers it cheating but asked for it to remain for debugging.
        */
-      waypoints: {
-        list: () => waypoints.list(),
+      /**
+       * R17 — the map gets the WHOLE waypoint network, not a two-method view of it.
+       *
+       * It stars pads, hides them and feeds the starred ones to the minimap (js/waypoints.js
+       * `star`/`show`/`minimapPads`), and with only `{ list, travel }` it had to go and find the
+       * real book on `window.farhold` to do any of that. `Object.create` keeps `travel` ours —
+       * it is real logic (the fighting/underground/from checks, the portal, the hours on the road)
+       * and belongs here, beside the things it moves.
+       */
+      onChanged: () => autoSave(),
+      waypoints: Object.assign(Object.create(waypoints), {
         travel: id => {
           const here = waypoints.settlementAt(control.x, control.z);
           const can = waypoints.canTravel(id, {
@@ -5162,7 +5360,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           autoSave();
           return true;
         },
-      },
+      }),
     });
   }
 
@@ -6330,6 +6528,32 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
   window.addEventListener('beforeunload', () => { try { autoSave(); } catch { /* ignore */ } });
 
+  /**
+   * R17 — THE ONBOARDING LINE, WIRED UP.
+   *
+   * Five steps from an empty field to an iron ingot: take a job in the first town, cut timber and
+   * break stone, put a crate down, dig clay and raise a furnace, smelt. It is one quest in the
+   * ordinary log, so the journal row, the save, the marker sweep and the turn-in path already work
+   * on it; what is wired here is the four things only main.js has.
+   *
+   * `game` is READ, never written — the module asks what is standing and what is in a pool rather
+   * than keeping bookkeeping of its own, which is the only way a hint can be trusted. `pay` is
+   * js/questrewards.js, the one payer; there is no second one. It awaits its own data file rather
+   * than joining the `loadJSON` block at the top, so a failed fetch turns the tutorial off instead
+   * of stopping the game from booting.
+   */
+  onboard = await createOnboarding({
+    questLog,
+    structures: structureData, refining: refiningData, resources: resourceData,
+    game: { player, control, stores, materials: craft.materials, build, features },
+    pay: quest => grantReward(quest, questRewardCtx()),
+    log: (text, tone) => hud.log(text, tone),
+    save: () => autoSave(),
+    // the research module, if it has landed. `createOnboarding` also looks for
+    // `window.farhold.research` at award time, so this can stay null until it exists.
+    research: null,
+  }).catch(err => { console.warn('onboarding: could not start', err); return null; });
+
   // ---------------------------------------------------------------- debug menu
   const shown = { props: true, grass: true, features: true };
   const debug = createDebugMenu({
@@ -6501,17 +6725,39 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * Ctrl+Z takes back the last thing. Everything else is on screen while the mode is up.
      */
     /**
-     * K IS THE HOLDING.
+     * K IS THE HOLDING — AND IT IS A TAB OF THE CHARACTER SHEET NOW.
      *
      * Five tabs: who lives here, what they sleep in, what is being worked, which traders would move
      * in and why the rest will not, and what is in the hold. Every refusal on that screen is a
      * sentence rather than a greyed-out row, because a greyed-out row is the one answer a player
      * cannot act on.
+     *
+     * R17 — "Pressing 'K' opens a new civilization menu, which I like. However it does not free up
+     * the cursor so I have to press ESC afterwards." It was a second full-window overlay that knew
+     * nothing about the pointer lock: `hud.toggleSheet` releases the mouse on the way in and asks
+     * for it back on the way out, and this screen went round it. As a tab it gets all of that for
+     * free, along with one Esc and one close button.
      */
-    if (e.code === 'KeyK' && !hud.sheetOpen && !map.isOpen && !talk.isOpen && !build.mode) {
+    if (e.code === 'KeyK' && !map.isOpen && !talk.isOpen && !build.mode) {
       e.preventDefault();
       pauseMenu.toggle(false);
-      holding.toggle();
+      // pressing it again while you are already looking at the Holding closes the sheet
+      if (hud.sheetOpen && hud.tab === 'holding') hud.toggleSheet(false);
+      else { if (!hud.sheetOpen) hud.toggleSheet(true); hud.setTab('holding'); }
+    }
+    /**
+     * R17 — F IS YOUR COMPANY.
+     *
+     * Three tabs: who follows you and a dismiss on everything that can be dismissed, the mercenary
+     * board in whatever settlement you are standing in, and the spell respec — "you should be able
+     * to unlearn a skill at any time", which means at any time and not only on the title screen.
+     * Like `K` it is a shortcut to a tab of the sheet, so there is one window and one Esc.
+     */
+    if (e.code === 'KeyF' && !map.isOpen && !talk.isOpen && !build.mode) {
+      e.preventDefault();
+      pauseMenu.toggle(false);
+      if (hud.sheetOpen && hud.tab === 'followers') hud.toggleSheet(false);
+      else { if (!hud.sheetOpen) hud.toggleSheet(true); hud.setTab('followers'); }
     }
     if (e.code === 'KeyB' && !hud.sheetOpen && !map.isOpen && !talk.isOpen) {
       e.preventDefault();
@@ -6619,6 +6865,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // instant it closes. The panels themselves are driven by their own keydown handlers, so they
       // keep working.
       input.sample();
+      /**
+       * R17 — THE ONE PIECE OF HUD THAT HAS TO KEEP THINKING WHILE THE GAME IS STOPPED.
+       *
+       * "[the held-mode readout] stays visible even when the inventory is open." `hud.tick` is what
+       * asks the readout whether it should be on screen, and this early return is why it was never
+       * asked: opening ANY panel stops the frame loop dead, so the last thing drawn before the
+       * inventory came up stayed drawn on top of it. One call, here, is the whole fix — and it
+       * covers the map, a conversation, the settings and the pause menu as well as the sheet,
+       * because all of them come through `panelOpen()`.
+       */
+      hud.refreshHeld();
       state.uiPaused = true;
       return;
     }
@@ -6887,6 +7144,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     const step = control.update(dt, snap, { frozen });
     // R15: the draw and the channel are only playable if you can see where you are in them
+    // R17 — where the body is, for the charge effect and the work animations. One writer, on the
+    // frame loop, rather than the gather clock having to do it because it was the only thing called.
+    feel.postBody(control);
     hud.chargeMeter?.(control.charge);
 
     if (step.mountChanged) {
@@ -6961,6 +7221,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       else setActorAnim(actor, 'swim');
     } else if (control.mounted) {
       setActorAnim(actor, 'sit');
+    } else if (gathering.active) {
+      // R17 — working a seam or felling a tree is a pick swing, not a sword swing. It was going
+      // through `control.swing` and coming out as the attack clip, which is what the report
+      // ("generate a mining animation… to differentiate it from the attack animation") is about.
+      setActorAnim(actor, workClipFor(gathering.job));
     } else if (control.swing > 0) setActorAnim(actor, 'attack');
     else if (!control.grounded) setActorAnim(actor, 'jump');
     else if (control.moving > 0) setActorAnim(actor, control.running ? 'run' : 'walk');
@@ -7536,6 +7801,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // …and say so when it does. `reviveSeconds` was dead data, so "will come back" was a lie.
       onReturned: p => { hud.log(`${p.name} is back.`, 'good'); },
     });
+    /**
+     * R17 — a save carries the CONTRACTS and not the bodies, because the bodies are meshes and the
+     * world they stood in is rebuilt from its seed. This is what puts a mercenary you are paying
+     * for back beside you after a load. It runs on a slow clock of its own.
+     */
+    followers.tick(dt);
     if (!dungeon) {
       chests.update(control.x, control.z);
       gates.update(control.x, control.z);
@@ -7644,6 +7915,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         hud.log(`${q.title}: arrived.`, 'good');
       }
     }
+    // R17 — the onboarding line watches what is actually standing and what is actually in a pool.
+    // It throttles itself (half a second), so this is one comparison on most frames.
+    onboard?.tick(dt);
 
     // --- light. The torch fades out in daylight and comes fully up at night; braziers, sconces,
     // warded chests and dungeon mouths hand their positions over and the nearest handful get lit.
@@ -8034,7 +8308,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           icon: v.pin?.icon || undefined,
         })),
         ...pets.pets.filter(p => p.dying == null).map(p => ({ x: p.x, z: p.z, color: '#7ae06a', r: 2.6 })),
-        ...folk.marks(),
+        /**
+         * R17 — a shop and a job only show up once you are nearly on top of them.
+         *
+         * `folk.marks()` is every stall and every person with work in the zone, and it was drawn at
+         * any distance, so a town read as a cluster of `$` and `!` glyphs from the next hill and
+         * there was nothing left to find by walking in. `near` is the opt-in; MINIMAP_NEAR is the
+         * distance, and it is the one place it is written down.
+         */
+        ...folk.marks().map(m => ({ ...m, near: MINIMAP_NEAR })),
         /**
          * The Territory, on the minimap.
          *
@@ -8076,12 +8358,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * share the rim with. Tracked-ness is ignored on purpose — you have not tracked the seam
          * you found four seconds ago and you want to see it anyway.
          */
-        ? markers.here().filter(m => m.kind === 'seam')
-        : markers.tracked()
-      ).map(m => {
-        const b = markers.bearing(m, control, terrain);
-        return { ...m, x: b.x, z: b.z, distance: b.distance, label: scanner.on ? m.name : undefined };
-      }));
+        ? markers.here().filter(m => m.kind === 'seam').map(m => {
+          const b = markers.bearing(m, control, terrain);
+          return { ...m, x: b.x, z: b.z, distance: b.distance, label: m.name };
+        })
+        /**
+         * R17 — "Waypoints favorited on the map with a star do not show a star on the minimap."
+         *
+         * They could not: this was fed `markers.tracked()`, and STARRING SOMETHING DOES NOT TRACK
+         * IT. Two different checkboxes, only one of which ever reached the small map — and a
+         * waypoint pad is not a marker at all, so no amount of marker filtering was going to find
+         * one. `map.minimapMarkers()` is the single call that knows all three things, so js/hud.js
+         * does not have to, and it honours the show-on-map switch this round added.
+         */
+        : map.minimapMarkers(control)
+      ));
     }
     // the sky's own events: a meteor every few minutes, and shooting stars in between
     if (!dungeon) meteors.update(dt, control);
@@ -8145,6 +8436,43 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             color: (MARKER_LOOKS[a.kind] || MARKER_LOOKS.quest).color,
             where: `${a.where} ${a.compass}`,
           }));
+      /**
+       * R17 — AND THE MARKERS AND WAYPOINTS YOU ASKED TO SEE IN THE WORLD.
+       *
+       *   "Can they have a toggle to show on the map, and show on the game world? That way you can
+       *    uncheck those to keep them favorited but hide them from the map/world so they are not
+       *    distracting."
+       *
+       * There is a "show in the world" switch on every marker and every waypoint pad now, and this
+       * is its consumer — without it the switch would be a saved boolean nothing reads, which is
+       * this project's signature fault wearing a checkbox. The beacon pool is six and the Nearby
+       * list has first claim on it, because that is what the pool was built for; your own pins fill
+       * whatever is left, nearest first, and only inside BEACON_RANGE. A scan owns the pool
+       * outright while it is lit, for the same reason it always has.
+       */
+      if (!scanLit && !dungeon && !flying && beaconRows.length < 6) {
+        const mine = [];
+        for (const m of map.worldMarkers?.() || []) {
+          // markers are filed in map CELLS; `bearing` is the one place that turns one into metres
+          const b = m.kind === 'waypoint' ? { x: m.x, z: m.z, distance: Math.hypot(m.x - control.x, m.z - control.z) }
+            : markers.bearing(m, control, terrain);
+          if (!Number.isFinite(b.x) || b.distance > BEACON_RANGE) continue;
+          mine.push({
+            id: 'mark:' + (m.id ?? m.name), x: b.x, z: b.z, name: m.name,
+            color: (MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).color,
+            where: distanceText(b.distance), distance: b.distance,
+          });
+        }
+        mine.sort((a, b) => a.distance - b.distance);
+        // …and never twice: the Nearby list can already be pointing at the same quest
+        const taken = new Set(beaconRows.map(b => b.name));
+        for (const row of mine) {
+          if (beaconRows.length >= 6) break;
+          if (taken.has(row.name)) continue;
+          taken.add(row.name);
+          beaconRows.push(row);
+        }
+      }
       /**
        * The ground height is sampled ONCE here, not per frame. The edge arrows below are drawn
        * every frame, and re-sampling six terrain heights sixty times a second to place six
@@ -8362,6 +8690,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         reveal: id => revealInstance(id),
       };
     },
+    /**
+     * R17 — the company: the slot ladder, the contracts, the summon gate and the broker's board.
+     *
+     * Also the door js/onboarding.js and any later module use to find the research module without
+     * being timed against it — everything on `window.farhold` is a live getter, so reading one
+     * before it exists is `undefined` rather than a crash.
+     */
+    get followers() { return followers; },
+    get company() { return company; },
     /** The holding's population, the rod, and the Town Hall. */
     get holdingPop() { return population({ colony }); },
     get rod() { return commandRod; },

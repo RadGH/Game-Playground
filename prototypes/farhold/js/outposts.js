@@ -224,6 +224,97 @@ export function outpostAt(posts, x, z, slack = LINK_GAP) {
   return best?.post || null;
 }
 
+/**
+ * R17 — AN OUTPOST IS ALSO A PLACE ON THE MAP.
+ *
+ *   "The outpost marker should put a waypoint on the world and map too. This one should not be
+ *    removable unless you destroy the building, but can also be hidden from displaying. The marker
+ *    should also let you rename the location which can appear on the map too."
+ *
+ * Until now an outpost existed only inside the Supply tab. It was worked out from the geometry,
+ * listed, linked up with carts — and there was no dot for it on the map and nothing over it in the
+ * world, so the base you had spent an hour building was the one thing on the planet you could not
+ * navigate back to. Meanwhile js/markers.js already draws on the map, the minimap, in space and (as
+ * of this round) in the world, and already rides the save. There was no reason for a second system;
+ * there was only a join nobody had made — this file's signature fault, for the thirteenth time.
+ *
+ * So: one marker per outpost, kept in step with the ledger.
+ *
+ *   * **created** when an outpost appears, at its centre, named after it;
+ *   * **moved and renamed** as the outpost grows, UNLESS the player renamed it themselves — a name
+ *     you typed beats a name we worked out, every time, which is why `renamed` is recorded;
+ *   * **locked**, so the × never appears and `book.remove()` refuses it (js/markers.js);
+ *   * **deleted** — with `force`, the only caller that may — when the buildings are gone, which is
+ *     the user's "not removable unless you destroy the building" read literally;
+ *   * left alone otherwise, so the two visibility switches and the star the player set survive
+ *     every sync.
+ *
+ * Pure: `book` is a MarkerBook, which is plain data. No DOM, no Three.js, so the node tests drive
+ * exactly the code the game does.
+ *
+ * @param {object} book    a MarkerBook
+ * @param {Array}  posts   rows from `groupOutposts()` (or main.js's mapped version of them)
+ * @param {object} opts    `metresPerCell` — passed in rather than imported, so this file stays
+ *                         free of js/planet.js and the node tests stay free of a world
+ * @returns {Array} the markers, in the same order as `posts`
+ */
+export function syncOutpostMarkers(book, posts = [], { metresPerCell = 640 } = {}) {
+  if (!book) return [];
+  const live = new Set();
+  const out = [];
+
+  for (const post of posts) {
+    if (!post || !Number.isFinite(post.x) || !Number.isFinite(post.z)) continue;
+    const id = String(post.id);
+    live.add(id);
+    const cellX = Math.floor(post.x / metresPerCell);
+    const cellY = Math.floor(post.z / metresPerCell);
+
+    let marker = book.here().find(m => m.kind === 'outpost' && String(m.from?.id) === id);
+    if (!marker) {
+      marker = book.add({
+        kind: 'outpost', name: post.name || 'Outpost', cellX, cellY,
+        // it is not a quest: it does not get to own the minimap arrow until the player says so
+        tracked: false, locked: true,
+        from: { type: 'outpost', id, label: post.name || 'Outpost' },
+      });
+    } else {
+      // the buildings moved the middle of the place; the marker follows the ground, not the name
+      marker.cell.x = cellX;
+      marker.cell.y = cellY;
+      if (!marker.renamed && post.name) marker.name = post.name;
+    }
+    marker.role = post.role || 'camp';
+    out.push(marker);
+  }
+
+  /**
+   * And the other half of "not removable unless you destroy the building": when the ledger stops
+   * mentioning an outpost, its marker goes — with `force`, because the lock exists to stop the
+   * PLAYER deleting it, not to stop the thing that owns it.
+   */
+  for (const m of book.here()) {
+    if (m.kind === 'outpost' && !live.has(String(m.from?.id))) book.remove(m, { force: true });
+  }
+  return out;
+}
+
+/**
+ * Rename an outpost's marker, and remember that a person did it.
+ *
+ * `renamed` is the whole point: without it the next `syncOutpostMarkers()` — which runs every time
+ * the map is drawn — would write "Mine 3" straight back over "Ironrest", and the player would watch
+ * their name vanish a quarter of a second after typing it.
+ */
+export function renameOutpostMarker(book, marker, name) {
+  if (!book || !marker) return null;
+  const clean = String(name || '').trim().slice(0, 48);
+  if (!clean) return marker.name;
+  marker.name = clean;
+  marker.renamed = true;
+  return marker.name;
+}
+
 /** One line per outpost for a panel: "Mine 3 — 4 pieces, 940 m out". No drawing in it. */
 export function outpostLines(posts, from = null) {
   return posts.map(p => ({

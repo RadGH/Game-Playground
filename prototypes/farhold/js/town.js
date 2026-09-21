@@ -59,6 +59,8 @@ function badgeSprite(glyph, colour) {
 export function badgeFor(role) {
   if (role.quests) return { glyph: '!', color: '#ffd24a', kind: 'quest' };
   if (role.gambles) return { glyph: '?', color: '#ffd24a', kind: 'gambler' };
+  // R17: a broker is a shop for people, so the pip is a trader's with a colour of its own
+  if (role.brokers) return { glyph: '$', color: '#c08aff', kind: 'broker' };
   if (role.trades) return { glyph: '$', color: '#8fe0a0', kind: 'shop' };
   return null;
 }
@@ -79,6 +81,16 @@ export const ROLES = [
    * crates." Only in a real town: somewhere with three houses cannot support one.
    */
   { key: 'gambler', name: 'Gambler', minSize: 3, gambles: true, greeting: 'Sealed, unopened, and I do not know what is in it either. That is the arrangement.' },
+  /**
+   * R17 — THE BROKER. "Add a mercenary person who sells mercenaries to the player."
+   *
+   * The game already had a hire, and it was one person selling one product: the road captain asked
+   * `pets.summon('sellsword')` by name, so every mercenary in the world was the same body wearing a
+   * different label. This is the shop. They are not a hired sword themselves — they keep a board,
+   * and what is on it comes from data/mercenaries.json through js/followers.js `board()`. Size 2
+   * and up, because a hamlet has nobody to sell.
+   */
+  { key: 'broker', name: 'Mercenary Broker', minSize: 2, brokers: true, greeting: 'Four names on the board today. They all want paying up front.' },
 ];
 
 /**
@@ -239,7 +251,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
         name, role: role.key, roleName: role.name, gender,
         guards: !!role.guards, guardTimer: 0, target: null,
         greeting: role.greeting,
-        trades: !!role.trades, givesQuests: !!role.quests, gambles: !!role.gambles,
+        trades: !!role.trades, givesQuests: !!role.quests, gambles: !!role.gambles, brokers: !!role.brokers,
         node, x, z, y: terrain.heightAt(x, z),
         facing: rng() * Math.PI * 2,
         home: [x, z],
@@ -299,7 +311,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
       name: chosen.name, role: roleRow.key, roleName: roleName || roleRow.name, gender: chosen.gender,
       guards: false, guardTimer: 0, target: null,
       greeting: greeting || roleRow.greeting,
-      trades: false, givesQuests: false, gambles: false,
+      trades: false, givesQuests: false, gambles: false, brokers: false,
       node: node || null, x, z, y: terrain.heightAt(x, z),
       facing: rng() * Math.PI * 2,
       home: [x, z],

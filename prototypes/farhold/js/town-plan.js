@@ -155,3 +155,57 @@ export function streetLanes(plan, { cx = 0, cz = 0, terrain = null, skip = null,
   }
   return lanes;
 }
+
+// ---------------------------------------------------------------- where a settlement stands
+
+/**
+ * The driest spot within about a cell of where a settlement was filed.
+ *
+ * Scored by how much of the town's own ring would be dry, because that is what the player sees —
+ * a centre that happens to be a metre above the waterline with a river either side of it is not a
+ * better place to put a town than one thirty metres up the bank.
+ *
+ * Exported because `tools/probe-worldgen.mjs` and the round-17 tests have to ask the same
+ * question the game asks — a probe that works the answer out for itself is a probe that can agree
+ * with a bug.
+ *
+ * `cell` is the map cell in metres — the anchor never moves further than that, because every
+ * consumer that derives metres from `node.x * M_PER_CELL` has exactly that much slack.
+ *
+ * Returns the original point unchanged when it is already good enough (85% dry), so the great
+ * majority of towns on the planet are not touched at all and no existing world is reshuffled.
+ */
+export function settlementAnchor(terrain, x0, z0, ring, cell = 224) {
+  const wetness = (x, z) => {
+    let dry = 0, n = 0;
+    // the centre, then two rings of eight — sixteen samples is enough to tell a river through the
+    // middle from a pond at the edge, and cheap enough to run for every settlement at load
+    for (const r of [0, ring * 0.5, ring]) {
+      const steps = r === 0 ? 1 : 8;
+      for (let a = 0; a < steps; a++) {
+        const px = x + Math.cos((a / steps) * Math.PI * 2) * r;
+        const pz = z + Math.sin((a / steps) * Math.PI * 2) * r;
+        n++;
+        if (!terrain.underwater(px, pz) && terrain.riverAt(px, pz) < 0.3) dry++;
+      }
+    }
+    return dry / n;
+  };
+  const here = wetness(x0, z0);
+  if (here >= 0.85) return { x: x0, y: z0 };
+  let best = { x: x0, y: z0, score: here };
+  // a fixed spiral: two rings of twelve, out to just under one cell
+  for (const r of [cell * 0.35, cell * 0.7]) {
+    for (let a = 0; a < 12; a++) {
+      const px = x0 + Math.cos((a / 12) * Math.PI * 2) * r;
+      const pz = z0 + Math.sin((a / 12) * Math.PI * 2) * r;
+      // a candidate that is itself in the water is not a candidate, however dry its ring is
+      if (terrain.underwater(px, pz)) continue;
+      const score = wetness(px, pz);
+      // strictly better, so the first candidate at the smaller radius wins a tie and the town
+      // moves as little as it can get away with
+      if (score > best.score + 0.001) best = { x: px, y: pz, score };
+    }
+  }
+  return best;
+}

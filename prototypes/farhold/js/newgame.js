@@ -29,6 +29,17 @@
 
 import { playtimeText } from './save.js';
 import { CLASS_PETS } from './pets.js';
+/**
+ * R17 — THE THIRTY-FIRST CLASS IS THE ONE YOU BUILD.
+ *
+ * `installCustomClass` writes a synthetic entry into the three data objects this file already
+ * holds, so "custom" is a class id like any other from the moment it is installed — main.js finds
+ * it with `classData.classes.find(...)`, `createSkillBar` reads `skillData.classes.custom`, and the
+ * body comes out of `classLooks.classes.custom`. There is no "if the class is custom" branch
+ * anywhere downstream, which is the whole reason it was done this way.
+ */
+import { createBuild, installCustomClass } from './classbuild.js';
+import { createClassBuilder } from './classbuild-ui.js';
 import { renderSVG, normalizeAvatar } from '../../../avatar-2d/js/render.js';
 import { openAppearance } from './appearance.js';
 
@@ -64,22 +75,68 @@ function canExit(params) {
 
 export async function runTitle({
   classData, classLooks, skillData, items, bestiary, balance, saves, params, settings, status = () => {},
+  // R17 — data/classbuild.json. Left out (an old caller, or a test), the Custom option simply is
+  // not offered and every one of the thirty presets works exactly as it did.
+  classbuildData = null,
 } = {}) {
   const classes = classData.classes;
-  const classIds = classes.map(c => c.id);
   const select = $('boot-class');
+  const CUSTOM_ID = classbuildData?.custom?.id || 'custom';
+
+  /**
+   * R17 — THE BUILD, AND THE BUILDER.
+   *
+   * `build` is the live point-buy object and it is also what a save carries (`player.build`), so
+   * there is one of it and the builder edits it in place. The builder screen is made once, lazily,
+   * the first time Custom is chosen — a player who never touches it never pays for it.
+   *
+   * `installCustomClass` runs on EVERY change rather than once at the end, because the class card,
+   * the figure beside it and `classLooks.classes.custom` all read the installed class rather than
+   * the build. Installing once at the end would have meant the card said one thing while the
+   * preview showed another, which is exactly the kind of half-applied change this round is about.
+   */
+  let build = classbuildData ? createBuild(classbuildData) : null;
+  let builder = null;
+  function ensureBuilder() {
+    if (builder || !classbuildData) return builder;
+    builder = createClassBuilder({
+      classData, skillData, classLooks, data: classbuildData, build,
+      onChange: b => {
+        build = b;
+        installCustomClass({ classData, skillData, classLooks, data: classbuildData, build: b });
+        drawClassCard();
+      },
+      onClose: () => { drawClassCard(); select.focus(); },
+    });
+    return builder;
+  }
 
   // ---------------------------------------------------------------- the class picker
   // Filled whatever screen we end up on, and before any early return: `tests/round4.spec.js` counts
   // `#boot-class option` after the game has already started, and the picker also has to be right
   // the moment somebody opens the character step.
-  select.replaceChildren(...classes.map(c => {
-    const o = document.createElement('option');
-    o.value = c.id;
-    o.textContent = `${c.name} — ${c.role}${c.pet ? ' (companions)' : ''}`;
-    return o;
-  }));
-  select.value = classIds.includes(params.get('class')) ? params.get('class') : 'ranger';
+  //
+  // R17 — and Custom is the FIRST entry, because it is the one that needs finding. It is an option
+  // added here rather than an element in index.html, so the whole feature touches neither the page
+  // nor style.css; the thirty presets below it are untouched and `?class=` still names any of them.
+  function fillPicker() {
+    const rows = classes.filter(c => c.id !== CUSTOM_ID).map(c => {
+      const o = document.createElement('option');
+      o.value = c.id;
+      o.textContent = `${c.name} — ${c.role}${c.pet ? ' (companions)' : ''}`;
+      return o;
+    });
+    if (classbuildData) {
+      const o = document.createElement('option');
+      o.value = CUSTOM_ID;
+      o.textContent = 'Custom — build your own class';
+      rows.unshift(o);
+    }
+    select.replaceChildren(...rows);
+  }
+  fillPicker();
+  const pickable = id => [...select.options].some(o => o.value === id);
+  select.value = pickable(params.get('class')) ? params.get('class') : 'ranger';
 
   $('boot-seed').value = params.get('seed') || String(balance?.seed ?? 1);
   $('boot-name').value = params.get('name') || '';
@@ -115,25 +172,57 @@ export async function runTitle({
     return typed || classLooks.classes[select.value]?.name?.split(' ')[0] || 'Wayfarer';
   }
 
-  const result = () => ({
-    action: 'new',
-    seed: readSeed(),
-    classId: select.value,
-    name: readName(),
-    avatar: liveAvatar(),
-    world: readWorld(),
-    save: null,
-  });
+  const result = () => {
+    /**
+     * R17 — `?class=custom&auto` must not start a run with a class that does not exist.
+     *
+     * The deep links return before a single pixel of the flow is drawn, so nobody has been near the
+     * builder — and `skillData.classes.custom` would be missing, which sends `createSkillBar` to
+     * its ranger fallback with no explanation. Installing the default build first gives a whole,
+     * playable custom class (every empty pick falls back to the cheapest thing of its own tier),
+     * which is the honest answer to being asked for one without being told what it should be.
+     */
+    if (select.value === CUSTOM_ID && classbuildData && !skillData.classes?.[CUSTOM_ID]) {
+      installCustomClass({ classData, skillData, classLooks, data: classbuildData, build });
+    }
+    return {
+      action: 'new',
+      seed: readSeed(),
+      classId: select.value,
+      name: readName(),
+      avatar: liveAvatar(),
+      world: readWorld(),
+      save: null,
+    };
+  };
 
   // ---------------------------------------------------------------- the deep links
   //
   // Done before a single pixel of the new flow is drawn: `?auto` and `?load=` are how every existing
   // spec gets into the game, and neither should pay for a map preview it is never going to look at.
+  /**
+   * R17 — A SAVED CUSTOM CLASS HAS TO EXIST AGAIN BEFORE THE SAVE IS HANDED BACK.
+   *
+   * A save carries `classId: "custom"` and the build itself on `player.build`. `classData` does not
+   * have a class called "custom" in a fresh session, so without this `begin()` would fall back to
+   * `classData.classes[0]` — you would load your custom character as a warrior, with a warrior's
+   * skill bar, and nothing at all would say so. Every path out of this file that returns a load
+   * goes through here first.
+   */
+  function loaded(data) {
+    const saved = data?.player?.build;
+    if (saved && classbuildData) {
+      build = saved;
+      installCustomClass({ classData, skillData, classLooks, data: classbuildData, build: saved });
+    }
+    return { action: 'load', save: data, seed: data.seed, classId: data.classId, name: data.name, avatar: data.avatar || null, world: data.world || null };
+  }
+
   const wanted = params.get('load');
   if (wanted) {
     const chosen = wanted === 'last' ? saves.lastId() : wanted;
     const data = chosen ? saves.read(chosen) : null;
-    if (data) return { action: 'load', save: data, seed: data.seed, classId: data.classId, name: data.name, avatar: data.avatar || null, world: data.world || null };
+    if (data) return loaded(data);
     status(`no save called ${wanted}`);
   }
   if (params.has('auto')) return result();
@@ -183,7 +272,7 @@ export async function runTitle({
       const last = saves.lastId();
       const data = last ? saves.read(last) : null;
       if (!data) { refreshMenu(); return; }
-      finish({ action: 'load', save: data, seed: data.seed, classId: data.classId, name: data.name, avatar: data.avatar || null, world: data.world || null });
+      finish(loaded(data));
     };
     const exitBtn = $('boot-exit');
     if (exitBtn) exitBtn.onclick = () => {
@@ -217,7 +306,7 @@ export async function runTitle({
         load.textContent = 'Load';
         load.onclick = () => {
           const data = saves.read(s.id);
-          if (data) finish({ action: 'load', save: data, seed: data.seed, classId: data.classId, name: data.name, avatar: data.avatar || null, world: data.world || null });
+          if (data) finish(loaded(data));
         };
         const del = document.createElement('button');
         del.className = 'ghost';
@@ -240,6 +329,23 @@ export async function runTitle({
      */
     function drawClassCard() {
       const box = $('boot-class-card');
+      /**
+       * R17 — THE CUSTOM CLASS DRAWS ITS OWN CARD, AND THE CARD IS THE WAY IN.
+       *
+       * The card box is the one element on this screen that this file already owns outright, so the
+       * builder writes its summary and its "Open the builder" button straight into it. That is the
+       * entire hook: no new element in index.html, no new rule in style.css, and a player who picks
+       * Custom out of the dropdown has the button in front of them without being told about it.
+       */
+      if (select.value === CUSTOM_ID && classbuildData) {
+        const b = ensureBuilder();
+        // installed before the card is drawn, so `classLooks.classes.custom` exists for the figure
+        installCustomClass({ classData, skillData, classLooks, data: classbuildData, build });
+        b?.card(box);
+        drawFigure();
+        return;
+      }
+      if (box) box.classList.remove('cb-card');
       const c = classes.find(x => x.id === select.value);
       if (box && c) {
         const unlock = skillData.unlockAt || [1];
@@ -310,6 +416,23 @@ export async function runTitle({
     $('boot-appearance-reset').onclick = () => { chosenAvatar = null; drawFigure(); };
 
     $('boot-to-world').onclick = () => {
+      /**
+       * R17 — A HALF-BUILT CUSTOM CLASS CANNOT WALK OUT OF THE GATE.
+       *
+       * `buildRefusal` names the one thing that is short — an empty spell slot, an unattuned staff
+       * — and the builder opens on the tab that can fix it rather than the player being bounced
+       * with a message and left to guess. A preset class has nothing to check and goes straight on.
+       */
+      if (select.value === CUSTOM_ID && classbuildData) {
+        const b = ensureBuilder();
+        const refusal = b?.refusal;
+        if (refusal) {
+          status(refusal);
+          b.show(refusal.toLowerCase().includes('spell') ? 'spells' : 'loadout');
+          return;
+        }
+        installCustomClass({ classData, skillData, classLooks, data: classbuildData, build });
+      }
       show('boot-world');
       schedulePreview();
     };

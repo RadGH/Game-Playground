@@ -67,6 +67,24 @@ export function createFeel() {
     shotPower: 1,
     /** Set while an arrow is landing, so the shot carries the draw it was loosed at. */
     shot: null,
+    /**
+     * R17 — THE STAFF CHARGE, and the field that was read by one function and written by none.
+     *
+     * `js/weapons.js` `withArea` has read `feel.swing.charge` since round 15 and nothing anywhere
+     * ever assigned it, so every charged staff cast in the game came out at 1.0x power and 1.0x
+     * radius and the six `CHARGED_FORMS` never fired. It is declared here now — an undeclared
+     * property on a shared channel is an invitation to exactly that bug — and `chargeAt()` is its
+     * one writer. `{ fill, power, radius, ready, tap, mana }`, or null once a swing has spent it.
+     */
+    charge: null,
+    /**
+     * R17 — WHICH CLIP THE BODY SHOULD BE PLAYING, widened past the swing.
+     *
+     * js/player.js writes this on every swing and js/actors.js substitutes it for `'attack'` on the
+     * player's body. js/tools.js now writes it too, for the gather animations, because a pick swing
+     * is the same question ("what is this body doing right now") asked about a different verb.
+     */
+    clip: null,
   };
 
   return {
@@ -153,6 +171,30 @@ export function createFeel() {
 
     /** The swing channel — see the comment on `swing` above. */
     swing,
+
+    /**
+     * R17 — WHERE THE PLAYER'S BODY IS, once a frame.
+     *
+     * Two round-17 pieces need it and neither can reach it: the growing effect at the hands while a
+     * staff charges (js/combat-fx.js `channel`), and the pick-swing animation while a gather bar
+     * fills (js/tools.js). Both are drawn by modules that are handed a `dt` and nothing else.
+     *
+     * `js/tools.js` `gathering.tick(dt, control)` is the one call js/main.js makes every single
+     * frame into a file that is ours this round, and the controller it passes is the body — so that
+     * is where this is written, and it is written for everybody rather than for the gather clock.
+     * It belongs in main.js's own frame block; see research/round17-combat-handoff.md, which has
+     * the two lines that would move it there. Readers must cope with `active: false`, because
+     * nothing has posted yet on the first frame and nothing posts at all in the node tests.
+     */
+    body: { active: false, x: 0, y: 0, z: 0, yaw: 0, charge: null },
+    postBody(at = null) {
+      const b = this.body;
+      if (!at || typeof at.x !== 'number') { b.active = false; b.charge = null; return b; }
+      b.active = true;
+      b.x = at.x; b.y = at.y ?? 0; b.z = at.z; b.yaw = at.yaw ?? 0;
+      b.charge = at.charge || null;
+      return b;
+    },
     postSwing(strike, { hand = null, weapon = null, element = null } = {}) {
       swing.strike = strike;
       swing.weapon = weapon || strike?.item || null;
@@ -167,7 +209,14 @@ export function createFeel() {
     beginShotImpact(power = 1, strike = null) { swing.shot = { power, strike }; },
     endShotImpact() { swing.shot = null; },
 
-    reset() { stopLeft = 0; shake = 0; shakeAge = 0; swing.strike = null; swing.shot = null; },
+    reset() {
+      stopLeft = 0; shake = 0; shakeAge = 0;
+      swing.strike = null; swing.shot = null;
+      // R17 — a charge left on the channel across a load or a landing would be spent by whatever
+      // swung first on the new world, which is a free 1.6x nobody built
+      swing.charge = null; swing.clip = null;
+      this.body.active = false; this.body.charge = null;
+    },
   };
 }
 

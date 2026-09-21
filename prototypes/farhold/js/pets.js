@@ -25,7 +25,10 @@
 import * as THREE from 'three';
 import { makeActor, setActorAnim, activeEnemyField } from './actors.js';
 import { makeRng } from '../../emberveil/js/rng.js';
-import { tickStatuses, slowOf } from './skills.js';
+import { tickStatuses, slowOf, applyStatus } from './skills.js';
+// R17 — the level-scaling arithmetic lives in the (Three.js-free) follower book so a node test can
+// drive it. See `scaleFollower` there; this file is the only caller.
+import { scaleFollower } from './followers.js';
 
 /**
  * Which pets a class brings, and what it calls them. Data rather than code because the class list
@@ -88,26 +91,76 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
 
   const byId = Object.fromEntries(defs.map(d => [d.id, d]));
 
+  /**
+   * R17 — A DEF CAN BE ADDED AFTER THE FACT.
+   *
+   * The ten hireable mercenary types live in `data/mercenaries.json` rather than in the bestiary:
+   * `data/enemies.json` is the enemy tables and Emberveil's build script owns it, and putting ten
+   * hireable people in there would put ten more rows in front of every reader that walks it. So
+   * js/followers.js registers them here at boot and the pet system treats them like anything else
+   * it summons. Safe to call twice with the same id — the later one wins.
+   */
+  function register(def) {
+    if (!def?.id) return null;
+    byId[def.id] = def;
+    return def;
+  }
+
+  /**
+   * R17 — THE FOLLOWER GATE, and the reason it lives here rather than at the call sites.
+   *
+   * Three completely separate things summon: a summoning skill in js/main.js, a hire in
+   * js/followers.js, and the class companion at the start of a run. A limit checked at the call
+   * sites is a limit with three copies and three chances to be missed, which is this project's
+   * signature fault written as a rule. `pets.summon` is the one door, so the question is asked at
+   * the door: js/followers.js installs `setGate` and everything obeys it for free.
+   *
+   * The default gate is the old behaviour exactly — `cfg.maxAlive` and nothing else — so a run with
+   * no follower book behaves as it always did.
+   */
+  let gate = null;
+  function admitted(defId, opts) {
+    if (gate) return gate(defId, opts);
+    return pets.length + pending >= (cfg.maxAlive ?? 6)
+      ? { ok: false, why: 'You have as many companions as you can keep.' }
+      : { ok: true, why: null };
+  }
+
   /** Build a live pet from a table entry, scaled off its owner. */
   function make(def, owner) {
     const level = owner.level || 1;
-    const scale = Math.pow(cfg.perLevel ?? 1.17, level - 1);
     // affixes and legendary powers get a say in how strong a companion is
     const power = rpg.fx.product(owner, 'petPower');
     const health = rpg.fx.product(owner, 'petHealth');
-    const hp = Math.max(1, Math.round((def.hp ?? 30) * scale * health));
+    const at = scaleFollower({ def, level, perLevel: cfg.perLevel ?? 1.17, power, health });
     return {
       id: 'p' + Math.floor(rng() * 1e9).toString(36),
       defId: def.id, name: def.name, kind: def.kind || 'beast', family: def.family || 'beast',
       role: def.role || 'skirmisher', level,
-      hp, maxHp: hp,
-      dmg: (def.dmg ?? [4, 6]).map(v => Math.max(1, Math.round(v * scale * power))),
-      armor: Math.round((def.armor ?? 0) * scale),
+      hp: at.hp, maxHp: at.hp,
+      dmg: at.dmg,
+      armor: at.armor,
       derived: { resistAll: 0, thorns: 0, dodge: 0 },
       speed: def.speed ?? 4.4, reach: def.reach ?? 2.4, attackEvery: def.attackEvery ?? 1.5,
-      ranged: def.ranged || null, onHit: def.onHit || null, flying: !!def.flying, glow: def.glow || null,
-      look: def.look || null,
+      ranged: def.ranged ? { ...def.ranged } : null, onHit: def.onHit || null, flying: !!def.flying, glow: def.glow || null,
+      look: def.look ? JSON.parse(JSON.stringify(def.look)) : null,
       state: 'follow', swingTimer: 0, hitFlash: 0, slot: pets.length,
+      /**
+       * R17 — WHAT KIND OF FOLLOWER THIS IS: 'companion' (came with your class or your build),
+       * 'mercenary' (paid for) or 'summon' (called up by a spell). The follower book counts by it
+       * and the per-type cap only applies to the third, so it is set at the door in `summon`.
+       */
+      origin: 'summon',
+      /**
+       * R17 — the spells a mercenary casts on its own clock, and the upgrades it grows into.
+       * A bestiary pet has neither and the whole block is inert for one. `learned` is what has
+       * already been applied, so an upgrade fires once however many times a pet is re-costed.
+       */
+      abilities: (def.abilities || []).filter(a => (a.minLevel ?? 1) <= level).map(a => ({ ...a, ready: (a.cooldown || 10) * 0.4 })),
+      abilityBook: def.abilityBook || null,
+      upgrades: def.upgrades || [],
+      learned: [],
+      carrying: null,
       owner,
     };
   }
@@ -129,24 +182,110 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     const level = p.owner?.level || 1;
     if (!def || level === p.level) return;
     const frac = p.maxHp > 0 ? p.hp / p.maxHp : 1;
-    const scale = Math.pow(cfg.perLevel ?? 1.17, level - 1);
     const power = rpg.fx.product(p.owner, 'petPower');
     const health = rpg.fx.product(p.owner, 'petHealth');
     p.level = level;
-    p.maxHp = Math.max(1, Math.round((def.hp ?? 30) * scale * health));
+    /**
+     * R17 — THE UPGRADES A FOLLOWER GROWS INTO.
+     *
+     *   "…some companions should equip better weapons or learn new skills at higher levels."
+     *
+     * Read here rather than at a level-up event, because this is the one place that already knows
+     * a follower's level has moved — and it fires for a mercenary hired at level 4 who is looked at
+     * again at 22, which a level-up event would have missed entirely. `learned` makes it happen
+     * once: an upgrade already in that list is skipped however many times this runs.
+     */
+    const grown = applyUpgrades(p, level);
+    const at = scaleFollower({ def, level, perLevel: cfg.perLevel ?? 1.17, power, health, grown });
+    p.maxHp = at.hp;
     p.hp = Math.max(1, Math.round(p.maxHp * frac));
-    p.dmg = (def.dmg ?? [4, 6]).map(v => Math.max(1, Math.round(v * scale * power)));
-    p.armor = Math.round((def.armor ?? 0) * scale);
+    p.dmg = at.dmg;
+    p.armor = at.armor;
   }
 
-  /** Put `count` of a pet into the world beside its owner. */
-  async function summon(defId, owner, { count = 1, at = null } = {}) {
+  /**
+   * Everything a follower has grown into by now, and the one-off effects of anything new.
+   *
+   * Returns the cumulative multipliers so `retune` can apply them to the base numbers rather than
+   * to the current ones — compounding a 1.16 damage bump on every re-cost would have a level-40
+   * mercenary hitting for thousands.
+   */
+  function applyUpgrades(p, level) {
+    const out = { dmgMult: 1, hpMult: 1, armorAdd: 0 };
+    for (const up of p.upgrades || []) {
+      if (level < (up.atLevel ?? 1)) continue;
+      out.dmgMult *= up.dmgMult ?? 1;
+      out.hpMult *= up.hpMult ?? 1;
+      out.armorAdd += up.armorAdd ?? 0;
+      if (up.rangeAdd && p.ranged) p.ranged.range = (p.ranged.range || 20) + up.rangeAdd;
+      if (p.learned.includes(up.atLevel + ':' + (up.note || ''))) continue;
+      p.learned.push(up.atLevel + ':' + (up.note || ''));
+      // a new spell out of the shared ability book, or off the type's own list
+      if (up.ability) {
+        const spec = p.abilityBook?.[up.ability] || (byId[p.defId]?.abilities || []).find(a => a.id === up.ability);
+        if (spec && !(p.abilities || []).some(a => a.id === spec.id)) {
+          p.abilities.push({ ...spec, ready: spec.cooldown || 10 });
+        }
+      }
+      // …and a better weapon, which is a real change to the body rather than a line in a panel
+      if (up.held || up.offhand || up.top) refit(p, up);
+      if (up.note) p.carrying = up.note;
+      if (up.bringsCount) p.bringsCount = up.bringsCount;
+    }
+    return out;
+  }
+
+  /**
+   * REBUILD THE BODY WITH THE NEW KIT ON IT.
+   *
+   * An avatar is baked into a merged skinned mesh at build time, so there is no "swap the sword"
+   * — the body is rebuilt and the old one thrown away. It is an await inside a frame, so the swap
+   * is guarded: the pet keeps fighting with the body it has until the new one is ready, and if the
+   * pet dies in the meantime the new actor is disposed rather than left in the scene.
+   */
+  function refit(p, up) {
+    if (!p.look?.avatar || p.refitting) return;
+    const next = JSON.parse(JSON.stringify(p.look));
+    if (up.held) next.avatar.held = { ...(next.avatar.held || {}), id: up.held };
+    if (up.offhand) next.avatar.offhand = { ...(next.avatar.offhand || {}), id: up.offhand };
+    if (up.top) next.avatar.top = { ...(next.avatar.top || {}), id: up.top };
+    p.refitting = true;
+    makeActor(next).then(actor => {
+      p.refitting = false;
+      if (!actor) return;
+      if (p.removed || p.dying != null || !pets.includes(p)) { actor.dispose?.(); return; }
+      scene.remove(p.actor.group);
+      p.actor.dispose?.();
+      p.actor = actor;
+      p.look = next;
+      actor.group.position.set(p.x, p.y + (p.hover || 0), p.z);
+      actor.group.rotation.y = p.facing || 0;
+      scene.add(actor.group);
+      setActorAnim(actor, 'idle');
+    }).catch(() => { p.refitting = false; });
+  }
+
+  /**
+   * Put `count` of a pet into the world beside its owner.
+   *
+   * R17 — `origin` says what kind of follower this is ('summon' by default, so every existing call
+   * site means exactly what it did before) and the gate is asked once per body rather than once per
+   * call: summoning three wolves into one free slot puts one wolf down and stops, which is the
+   * honest answer rather than refusing the whole cast. `refused` is left on the returned array so a
+   * caller can say WHY only one turned up.
+   */
+  async function summon(defId, owner, { count = 1, at = null, origin = 'summon', name = null } = {}) {
     const def = byId[defId];
     if (!def) return [];
     const made = [];
+    made.refused = null;
     for (let i = 0; i < count; i++) {
-      if (pets.length + pending >= (cfg.maxAlive ?? 6)) break;
+      const allow = admitted(defId, { origin, name: name || def.name });
+      if (!allow.ok) { made.refused = allow.why; break; }
+      if (pets.length + pending >= (cfg.maxAlive ?? 6)) { made.refused = 'You have as many companions as you can keep.'; break; }
       const unit = make(def, owner);
+      unit.origin = origin;
+      if (name) unit.name = name;
       const home = at || { x: owner.x ?? 0, z: owner.z ?? 0 };
       const a = rng() * Math.PI * 2;
       unit.x = home.x + Math.cos(a) * 2.4;
@@ -170,13 +309,36 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     return made;
   }
 
-  /** The whole roster a class starts with. */
+  /**
+   * The whole roster a class starts with.
+   *
+   * R17 — filed as `companion` rather than `summon`, because the follower book treats the three
+   * kinds differently: a companion cannot be dismissed (it came with you), and the per-type cap is
+   * a rule about SUMMONING spells rather than about what your class brought to the first morning.
+   */
   async function summonForClass(classId, owner, overrides = null) {
     const spec = overrides || CLASS_PETS[classId];
     if (!spec) return [];
-    const out = await summon(spec.id, owner, { count: spec.count || 1 });
-    if (spec.extra) out.push(...await summon(spec.extra.id, owner, { count: spec.extra.count || 1 }));
+    const out = await summon(spec.id, owner, { count: spec.count || 1, origin: 'companion' });
+    if (spec.extra) out.push(...await summon(spec.extra.id, owner, { count: spec.extra.count || 1, origin: 'companion' }));
     return out;
+  }
+
+  /**
+   * R17 — LET ONE GO. The Followers screen's dismiss button, and nothing else calls it.
+   *
+   * Not the same thing as dying: a dismissed follower leaves no body and is never put back by the
+   * revive clock, which is exactly the difference between "they walked off" and "they fell".
+   */
+  function remove(uid) {
+    const i = pets.findIndex(p => p.id === uid);
+    if (i < 0) return false;
+    const p = pets[i];
+    p.removed = true;
+    scene.remove(p.actor.group);
+    p.actor.dispose?.();
+    pets.splice(i, 1);
+    return true;
   }
 
   /** One frame of every companion. `at` is where the owner is standing. */
@@ -275,6 +437,22 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       else if (target) p.state = 'engage';
       else p.state = 'follow';
 
+      /**
+       * R17 — MERCENARIES HAVE THEIR OWN SPELLS.
+       *
+       *   "…add a mercenary person who sells mercenaries to the player and add a variety of types
+       *    with their own spells."
+       *
+       * A bestiary pet has no `abilities` at all and this whole block costs it one `for` over an
+       * empty array. A hired caster has two or three, each on its own clock, and they fire at
+       * whatever the follower is already fighting — no separate targeting, because a second
+       * targeting rule is a second thing that can point at the wrong enemy.
+       */
+      for (const ab of p.abilities || []) {
+        ab.ready = Math.max(0, (ab.ready ?? 0) - dt);
+      }
+      if (p.abilities?.length) castAbility(p, target, hooks);
+
       let speed = 0, goalX = at.x, goalZ = at.z, close = followAt;
       if (p.state === 'engage' && target) {
         goalX = target.x; goalZ = target.z;
@@ -330,6 +508,70 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     }
   }
 
+  /**
+   * One follower's spell, if one is ready and there is something to point it at.
+   *
+   * Three shapes and no more, because three is what the ten types in data/mercenaries.json need:
+   * a single target, a radius around the target, and a heal that goes on the owner rather than on
+   * anything else. Damage goes through `rpg.strike` exactly like a swing does, so an affix that
+   * says "your companions hit 40% harder" lifts a spell as well as a bite — which is the reason
+   * pets have always gone through `strike` rather than rolling their own numbers.
+   */
+  function castAbility(p, target, hooks = {}) {
+    const field = live();
+    for (const ab of p.abilities) {
+      if (ab.ready > 0) continue;
+      // a heal needs nobody to fight; everything else does
+      if (!ab.heal && !target) continue;
+      if (ab.heal && !ab.mult) {
+        const owner = p.owner;
+        if (!owner || owner.hp == null) continue;
+        // never spend the cooldown on a full-health party — a healer that heals nothing is the
+        // report this file's header is already full of
+        const hurt = owner.hp < (owner.maxHp || 0) * 0.92;
+        if (!hurt) continue;
+        const amount = Math.max(1, Math.round((owner.maxHp || 0) * (ab.heal || 0.1)));
+        owner.hp = Math.min(owner.maxHp, owner.hp + amount);
+        if (ab.healsPets) heal(Math.round(amount * 0.6));
+        ab.ready = ab.cooldown || 12;
+        setActorAnim(p.actor, 'attack');
+        hooks.onPetCast?.(p, ab, { healed: amount });
+        continue;
+      }
+      const reach = ab.range || (p.ranged?.range ?? 0) || Math.max(p.reach || 2.4, 4);
+      if (Math.hypot(target.x - p.x, target.z - p.z) > reach) continue;
+      ab.ready = ab.cooldown || 10;
+      p.facing = Math.atan2(target.x - p.x, target.z - p.z);
+      setActorAnim(p.actor, 'attack');
+      const hit = victim => {
+        const result = rpg.strike(p, victim, rng, { multiplier: ab.mult || 1.5, element: ab.element || 'physical' });
+        field?.credit?.(victim, result.amount);
+        victim.hitFlash = 0.18;
+        if (victim.state !== 'chase') victim.state = 'chase';
+        if (ab.status && statuses?.[ab.status]) {
+          applyStatus(victim, ab.status, statuses[ab.status], Math.max(1, (p.dmg?.[1] || 6) * 0.6 * (ab.statusMult || 1)));
+        }
+        if (result.dead) { field?.kill(victim); if (p.target === victim) p.target = null; }
+        return result;
+      };
+      if (ab.radius && field) {
+        for (const e of field.enemies) {
+          if (e.dying != null || e.removed) continue;
+          if (Math.hypot(e.x - target.x, e.z - target.z) > ab.radius) continue;
+          hit(e);
+        }
+      } else {
+        hit(target);
+      }
+      // `tithe` and its kind pay the owner back a share of what they took
+      if (ab.heal && p.owner?.hp != null) {
+        p.owner.hp = Math.min(p.owner.maxHp, p.owner.hp + Math.round((p.owner.maxHp || 0) * ab.heal));
+      }
+      hooks.onPetCast?.(p, ab, { at: target });
+      return;                                     // one spell a frame, however many are ready
+    }
+  }
+
   /** Something killed a companion. */
   function fall(p) {
     if (p.dying != null) return;
@@ -379,6 +621,9 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
 
   return {
     pets, summon, summonForClass, update, splash, nearest, heal, fall, clear,
+    // R17 — the three the follower book needs: add a type at runtime, install the limit, let one go
+    register, remove,
+    setGate: fn => { gate = typeof fn === 'function' ? fn : null; },
     setTerrain: t => { currentTerrain = t; },
     /** Point the companions at a different enemy field. Rarely needed: `live()` finds it anyway. */
     setField: f => { boundField = f; },
@@ -386,9 +631,11 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     tuning: () => ({ aggro: engageAt, leash, sprint }),
     /** Companions waiting out their revive cooldown. */
     waiting: () => fallen.map(f => ({ defId: f.defId, left: Math.max(0, f.left) })),
-    /** For the character sheet: name, health, what it is doing. */
+    /** For the character sheet and the Followers screen: who they are and what they are doing. */
     roster: () => pets.filter(p => p.dying == null).map(p => ({
+      uid: p.id, defId: p.defId, origin: p.origin || 'summon',
       name: p.name, hp: Math.ceil(p.hp), maxHp: p.maxHp, state: p.state, level: p.level,
+      abilities: (p.abilities || []).map(a => a.name), carrying: p.carrying || null,
     })),
     get alive() { return pets.filter(p => p.dying == null).length; },
     stats: () => ({ pets: pets.length, alive: pets.filter(p => p.dying == null).length }),

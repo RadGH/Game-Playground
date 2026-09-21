@@ -35,7 +35,13 @@ body {
 #boot.hidden { display: none; }
 #boot h1 { font-size: 40px; letter-spacing: 6px; margin: 0 0 6px; font-weight: 600; }
 #boot h1 b { color: #7fd8ff; font-weight: 600; }
-#boot .tagline { color: #9fb0c8; margin: 0 0 22px; max-width: 560px; }
+/* R17: THE TAGLINE SAT AGAINST THE LEFT EDGE while everything around it was centred.
+   `.boot-inner` is 1040px wide and the tagline is capped at 560px — with no auto side margins that
+   560px box simply starts at the left of the 1040, so the words inside it were centred within a box
+   that was itself shoved to one side. `margin-inline: auto` centres the BOX; `text-align` was never
+   the problem. Same trap for `.note`, which only looked right because its parent happens to be
+   exactly as wide as its cap. */
+#boot .tagline { color: #9fb0c8; margin: 0 auto 22px; max-width: 560px; }
 #boot .row { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
 /* A label and the thing it labels wrap TOGETHER — the class select is wide enough that "Class" was
    being left at the end of the line above it, pointing at nothing. */
@@ -57,7 +63,7 @@ body {
 }
 #boot button:hover { background: #24618a; }
 #boot .status { color: #7f8ea4; min-height: 20px; margin-top: 12px; font-variant-numeric: tabular-nums; }
-#boot .note { color: #66748a; font-size: 12px; max-width: 620px; margin-top: 18px; }
+#boot .note { color: #66748a; font-size: 12px; max-width: 620px; margin: 18px auto 0; }
 
 /* The class preview beside the picker. Thirty classes in a dropdown told you nothing about any of
    them, and the choice lasts the whole run — so the skills, the kit and the companion are on screen
@@ -1370,6 +1376,25 @@ body {
 /* the perks tab is a column so the canvas can fill it — but  still has to win, or the
    forest bleeds through whatever tab you are actually on */
 .tab-body[data-tab="perks"]:not(.hidden) { display: flex; flex-direction: column; min-height: 0; }
+
+/* ================================================================ R17 — the four tabs added this round
+ * Log, Holding, Research and Followers. Three of them are a MOUNT POINT and nothing else: the
+ * screen inside brings its own markup and its own stylesheet (js/civics-ui.js has done this since
+ * the Civilization expansion), so all style.css owes them is a box that fills the body and does not
+ * scroll on its own — the panel inside owns its own scrolling, the way every other pane does.
+ */
+.tab-body[data-tab="log"]:not(.hidden) { display: flex; flex-direction: column; min-height: 0; }
+.tab-body[data-tab="holding"]:not(.hidden),
+.tab-body[data-tab="research"]:not(.hidden),
+.tab-body[data-tab="followers"]:not(.hidden) { display: block; min-height: 0; overflow: hidden; }
+.sheet-mount { height: 100%; min-height: 0; position: relative; }
+/* A tab nothing has mounted into yet says so, rather than being a blank rectangle. */
+.sheet-mount:empty::after {
+  content: 'Nothing here yet.';
+  display: block; padding: 18px; color: var(--ink-faint, #7f8ea4); font-size: 12px;
+}
+/* The Log tab's lines keep the colours they were logged in — the same classes the HUD log uses. */
+#log-history-lines > div { padding: 2px 0; }
 .tab-body.hidden { display: none !important; }
 
 /* a skill's own three tiers */

@@ -29,6 +29,8 @@ import {
   ARMS, ODDBALLS, TALENT_NODES, KEYSTONES, RINGS, NODE_KINDS,
   buildForest, ringStep, pointsFor, canTake, allocate, perkBonuses,
 } from '../js/perks.js';
+// R17 — the derived keys js/followers.js declares it reads. See the note in the grant test below.
+import { FOLLOWER_STATS } from '../js/followers.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const forest = buildForest();
@@ -196,6 +198,16 @@ test('every stat a node grants is a field js/rpg.js actually computes', () => {
   const table = rpg.slice(open, close);
   const known = new Set([...table.matchAll(/(\w+)\s*:/g)].map(m => m[1]));
   assert.ok(known.has('magicFind') && known.has('armor'), 'the derived table did not parse');
+  /**
+   * R17 — and the stats another module declares it reads off `derived`.
+   *
+   * The point of this test is that a perk stat has a READER, so a typo is a failure rather than a
+   * node that does nothing for ever. js/rpg.js declares a starting value for every stat its own
+   * formulas use; `followerSlots` is not one of those — js/followers.js is what reads it, and
+   * `rpg.derive` folds an undeclared perk stat in anyway. So the known set is both files' answer,
+   * and a typo is still in neither.
+   */
+  for (const stat of FOLLOWER_STATS) known.add(stat);
 
   const seen = new Set();
   for (const node of forest.nodes) {

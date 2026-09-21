@@ -198,6 +198,48 @@ export function createTalkPanel(handlers = {}) {
     }
 
     /**
+     * ---- R17: THE MERCENARY BROKER'S BOARD.
+     *
+     *   "Companions should also be hireable at town, which we sort of have right now but is only
+     *    for a single person. Update that to be a mercenary person who sells mercenaries to the
+     *    player and add a variety of types with their own spells."
+     *
+     * `context.hireOffer` above is ONE person offering themselves. This is a shop: four names, each
+     * with what they fight as, what they cast and what they grow into, and a Hire button per row.
+     * The rows come from js/followers.js `board()`, which is also what the Followers screen shows —
+     * one list, two places to read it, so a price can never differ between them.
+     *
+     * Every row carries its own `refusal` (no slot left, not enough gold), so a button you cannot
+     * press says why before you press it, which is E1's rule and the one this panel exists for.
+     */
+    if (context.mercBoard?.length) {
+      kids.push(el('h3', { text: 'For hire' }));  // `.talk h3` already styles these
+      for (const m of context.mercBoard) {
+        const card = el('div', { class: 'talk-quest' },
+          el('div', { class: 'q-title', text: `${m.name} — ${m.price} gold` }),
+        );
+        if (m.blurb) card.append(el('div', { class: 'muted small', text: m.blurb }));
+        for (const [label, value] of m.rows || []) {
+          card.append(el('div', { class: 'trade-row' },
+            el('div', { class: 'trade-what' },
+              el('span', { text: label }),
+              el('span', { class: 'trade-spec', text: String(value) }),
+            ),
+          ));
+        }
+        if (m.refusal) card.append(el('div', { class: 'talk-standing small', text: m.refusal }));
+        card.append(el('div', { class: 'hand-tools' },
+          el('button', {
+            class: 'talk-btn primary', text: 'Hire',
+            disabled: !!m.refusal, title: m.refusal || '',
+            onclick: () => { handlers.hireMerc?.(m.id); },
+          }),
+        ));
+        kids.push(card);
+      }
+    }
+
+    /**
      * ---- somebody who will come and WORK for you.
      *
      * A different thing from the hire above, and worth keeping apart: a mercenary walks with you

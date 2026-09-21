@@ -1869,3 +1869,775 @@ from scratch every time you land on a new world.
 **A `modulepreload` tag says "this is a JavaScript module".** The generator emitted six for `.json`
 files it had found behind dynamic imports, and the browser refused each one with a console error —
 enough to fail every spec that asserts a clean console, with nothing whatever wrong with the page.
+
+## Round 17 — onboarding
+
+> *"Let's add a brief onboarding quest line that holds the hand of the player and guides them
+> through accepting a quest at the starter town, harvesting basic resources, and starting a basic
+> base. This quest should require you to get enough resources to build the necessary stuff required
+> to smelt iron ore."*
+
+### The gap it fills, which is not the one round 10 filled
+
+Round 10's review found that *"the game never said what to do"*, and the answer was the tracked
+objective line under the health bars. That line has always said **where** something is. It has never
+once said **what to press** — and the first ten minutes of Farhold are nothing but keys nobody has
+been told about: `E` on a tree, `B` for the build panel, `E` on a furnace, `M` for the map's Find
+tab. `js/nextstep.js` writes those sentences already and has since round 15, and every one of them
+is inside the build panel, which a player who does not know `B` exists will never open.
+
+So this is the same sentences, on the line the player is already reading, in order, paying out as it
+goes.
+
+### The line — `data/onboarding.json`, `js/onboarding.js`
+
+Five steps, because "brief" was the ask and a tutorial you cannot see the end of is one people turn
+off. It is **one** quest in the log rather than five, because five rows in the journal for the first
+ten minutes is a journal nobody opens again.
+
+| # | Step | What the strip says | How it notices it is finished |
+|---|---|---|---|
+| 1 | Take the job | `E to talk · take the job` | the act of accepting |
+| 2 | Cut timber and break stone | `E on a tree, then on a boulder` | 8 log and 20 stone, anywhere — bag or pool |
+| 3 | Put a crate on the ground | `B for build · Storage` | a store is standing **and** a storage pool has formed |
+| 4 | Dig clay and raise a furnace | `B for build · Refining` | a `furnace` is standing |
+| 5 | Smelt your first iron | `E on an ore seam, then E on the Furnace` | one `iron_ingot` exists |
+
+The numbers in step 2 are not invented: 20 stone is exactly what a Campfire and a Furnace cost
+between them in `data/structures.json`, and `tests/round17-onboarding.test.js` §2.1 asserts the
+gather step asks for at least what the rest of the line goes on to spend — so if somebody makes a
+furnace dearer, the test says the tutorial is now under-collecting rather than the player finding
+out the hard way.
+
+The line deliberately does **not** require a campfire. `data/refining.json` lets a furnace burn
+plain logs, so demanding one would be a step you could skip, and a tutorial that asks for something
+optional teaches people to ignore it.
+
+### Every way in, written down
+
+This project's signature fault is a finished module with no way in — twelve of them in round 11
+alone — so each join is named:
+
+* **offered** — `js/quests.js` gained `setFirstJob`. `makeQuest` asks it before it rolls anything,
+  and `js/town.js`'s `questFrom` is the only door a settlement's work comes through and calls
+  `makeQuest` six times. So whoever in the starter town gives out work offers this first, through
+  the talk screen that already exists. **`js/town.js` is untouched.**
+* **in the log** — the ordinary `accept:` handler. It saves, loads, appears in the journal and
+  turns in like any other job, because it *is* one.
+* **on the HUD** — `onboard.objective()`, from main.js's own `objective:` provider. Before the job
+  is taken it points at the town and says how far; after, it is the step; when the line is over it
+  returns `null` and the strip goes straight back to the marker book.
+* **advancing** — `onboard.tick(dt)`, one call in the frame loop, throttled to twice a second.
+* **spoken** — `js/questhelp.js` gained an `onboard` case, so the frame loop's existing helper says
+  the step out loud when it changes. Its `away` is `Infinity` on purpose: `helpersNear` sorts on it,
+  so a real destination you are standing on always wins and the tutorial never elbows out "the door
+  is the way in".
+* **paid** — `js/questrewards.js` `grantReward`, injected. There is no second payer. Steps 1–4 pay
+  small coin and experience on the spot; step 5 sets `quest.done` and the quest's own reward (a
+  crate) is paid by the ordinary turn-in.
+
+### Two decisions worth keeping
+
+**It is not a `STARTED_KIND`.** A raid and a meteor pay themselves because there is nobody to walk
+back to. This has a giver, and `js/town.js` caches `npc.offered` — only the turn-in path clears it.
+A line that paid itself in a field would leave the one person who helped you with nothing else to
+say for the rest of the run.
+
+**The step writes itself onto the quest.** `stepName` and `stepHud` are copied onto the quest object
+each time it advances. That is denormalised on purpose: `js/questhelp.js` is pure and has never been
+handed a data file, and giving it one so it could look a step up would mean every caller of
+`helperFor` — the frame loop and four test files — learning about onboarding. A quest that can
+describe itself needs none of that, and it survives the save for free.
+
+### Nothing can send you to an empty field
+
+`js/jobgen.js`'s rule is *"nothing is invented, so nothing can send you to an empty field"*, and it
+matters most in a tutorial, because the tutorial is the one part of the game a player has no way to
+second-guess. Two other agents were re-cutting the early crafting chain in this same round, so
+`resolveTargets()` checks every id the line names against the file that would have to contain it —
+`storage_crate`/`storage_box` and `furnace` against `data/structures.json`, `smelt_iron` and
+`iron_ingot` against `data/refining.json`, `log`/`stone`/`tree`/`boulder` against
+`data/resources.json` — and against the recipe's own `machine`, so the line cannot build one thing
+and smelt at another.
+
+A problem fails `tests/round17-onboarding.test.js` loudly; at runtime it logs the problem and **turns
+the whole line off**. A broken tutorial must never be the reason somebody cannot play.
+
+### Ignorable, by construction
+
+There is no decline button in the talk screen's job card (`js/talkui.js` draws only "Take the job"),
+so declining is walking away — which means the gates have to carry the whole weight of "do not nag
+me". It is never offered to a character above level 6, never to a save with an iron ingot in it,
+never to one with anything at all already standing, and never again once taken or finished. Not
+taking it blocks nothing: the test builds the entire base and smelts an ingot with the line sitting
+unoffered, and nothing is paid, nothing is logged and nothing is added.
+
+### Research
+
+Each finished step calls `research.award('onboarding:<step>', n)` — 1, 1, 2, 2, 4, ten for the line.
+The module is found either as an injected option or as `window.farhold.research` at award time, and
+the call is wrapped: until the research system lands, a missing module is silence rather than a
+thrown error in the middle of the frame loop.
+
+### Files
+
+`data/onboarding.json` (new), `js/onboarding.js` (new), `js/quests.js` (`setFirstJob`,
+`ONBOARD_KIND`, the `onboard` progress row), `js/questhelp.js` (the `onboard` case), `js/nextstep.js`
+(a note saying how the two differ), `tests/round17-onboarding.test.js` (new, 22 checks).
+The five lines `js/main.js` needs are written out in `research/round17-quest-handoff.md`.
+
+## Round 17 — the map
+
+Six items, and five of them turned out to be one sentence each about something that was **already
+drawn and being asked about wrongly**. Nothing on this list was a missing feature.
+
+### Item 8 — the map must not move
+
+> *"When you hover over the full screen planetary map a bar appears with your hover tooltip. Can
+> that bars space be reserved so that the map doesn't shift position and size when you hover? Also
+> when I open the map the first time I click on the map canvas element the sides shrink in."*
+
+There is no tooltip involved and there are not two bugs. The mousemove handler read
+
+```js
+readout.className = 'readout' + tone;
+```
+
+which **replaces** the class list rather than adding to it — so the first time the pointer crossed
+the canvas, the strip under it lost `map-readout` (12px monospace, `min-height: 18px`) and `small`.
+`.readout` is a class style.css has never defined, so the strip fell back to the body font and its
+reserved height went with it.
+
+That is the whole of it, both halves. The strip shares a column flex with the canvas, the canvas is
+`flex: 1` in that column, and `viewBox()` fits the entire planet into whatever height the canvas
+ends up with — so a strip that grew by a few pixels took them out of the map and the map redrew
+**smaller**, its left and right edges moving inward. "The sides shrink in", exactly; it happened on
+the first pointer move rather than on the click, which is why it read as a click.
+
+Two fixes, because either alone leaves the trap set. The class list is added to, and `map17.css`
+(new, injected by `js/map.js` the way `js/civics-ui.js` injects `civics.css`, so neither style.css
+nor index.html is touched) turns `.map-canvas-wrap` into a **grid** whose legend and readout rows
+are a fixed height and whose readout is `nowrap` — nothing written into them can resize the map
+again, at any window width.
+
+### Item 9 — the hit-test was the reverse of the paint order
+
+> *"There is only a few pixels at the top-left of the icon that give me the correct World Boss
+> tooltip."*
+
+Nothing was offset. `drawPlaces()` sorts its marks smallest-last so a capital is never hidden under
+the hamlet beside it — which puts the world boss, first in `MARK_ORDER` and therefore painted on
+top, at the very **end** of the hit list — and the hover then walked that list forwards and took the
+first circle containing the pointer:
+
+```js
+for (const h of placeHits) if (near(h.x, h.y, h.r)) { hover = …; break; }
+```
+
+So whatever was painted **underneath** won every overlap. An ancient wood a short way off had its
+hit circle over most of the burst, and the only pixels left for the boss were the ones outside that
+circle: the sliver at the top-left.
+
+Two more faults were tangled into it. Places and pads were separate lists consulted in a fixed
+order, so a pad under a landmark could never be pointed at. And the marker branch destructured
+`{ scale, ox, oy }` out of `viewBox()`, which returns `offsetX`/`offsetY` — every marker's screen
+position was `NaN`, so **a marker could not be hovered at all**, in any circumstance, since R14.
+Separately the hit radius was written in backing-buffer pixels (`Math.max(9, …)`), which is four and
+a half real pixels on a retina display: every target on the map silently changed size with the
+machine.
+
+`js/map-hits.js` (new, pure, node-tested) is the rule: one list in paint order, and **the mark whose
+centre is nearest the pointer wins**, ties going to whatever was painted last. Ground is never in
+the list, so an icon always beats the terrain under it. The hover card now shows the icon itself
+beside the name, drawn by `markSwatch()` → `drawMark()` — the same function that put it on the map,
+so a swatch cannot go stale.
+
+### Item 10 — the roads and rivers were buried, not removed
+
+`renderWorld()` draws the world image and then strokes the rivers and roads on top as vectors.
+`drawDetail()` calls it for the ground underneath and then paints the opaque region-detail raster
+over the lot — so the moment the zoom crossed `DETAIL_FROM` every river and road on screen was
+covered by a sharper picture of the same ground with no water and no roads in it, and the detailed
+map was harder to navigate than the blurry one it replaced.
+
+`drawWays()` re-draws them on top, from two sources: the world's own rivers, sea lanes and roads,
+which carry on past a region border and are what a route is planned along; and each detail's own
+`streams` and `paths` — the same drainage model run six times finer, generated since R14 and never
+once drawn. So zooming in now adds tributaries rather than fattening the same blue line. Both obey
+the `rivers` and `roads` layer chips, which at these zooms had been doing nothing.
+
+### Item 11 — one place, one marker
+
+> *"the markers for ore is confusing. It shows a star icon to the top-left and a green circle to the
+> bottom-right. It is not clear which of these is the actual location of the ore."*
+
+Half of that was the drawing: a favourite's star was painted at `px - r*1.5, py - r*1.5`, with a
+comment explaining that this was so it "never sits on the glyph it belongs to" — which is precisely
+the problem. Two sprites a dozen pixels apart, neither labelled, and the one that catches the eye is
+the one that is **not** where the ore is. A favourite is a gold rim around the marker's own disc now
+(`drawMarkerDot`), and the key says so.
+
+The other half was real duplication: `MarkerBook.save()` de-duplicated only against
+`kind === 'saved'`, so a deposit could carry a `seam` marker from the scanner **and** a `saved`
+marker from the Keep button, one cell apart. It absorbs any co-located `saved`/`seam`/`pin` now, so
+favouriting a tracked deposit stars the marker that is there rather than laying a second one on it.
+
+And the Find tab's favourite state was worked out by rounding a row's **metres** and looking the
+string up in a set built from marker **cells** multiplied back into metres — which agreed only by
+coincidence — with no un-star anywhere at all. Both questions are asked of the marker standing on
+that ground now, so there is one answer and it toggles from either end.
+
+The tabs are re-cut to match what the user actually asked for:
+
+* **Places** → a **Selected** group (what you last clicked, named from the same hit list the
+  tooltip uses, with **Add to Favorites**), **Favorites** (was "Places you keep"), **Places**, and
+  **Waypoints** with a star and the two switches on each lit pad.
+* **Find** → the sweep and the survey as before, each row with a two-way ★ and a new ◈ that
+  **tracks** a deposit, plus a persistent **Tracked Resources** list. A tracked resource *is* a
+  `seam` marker — that is the whole implementation, which is why "persistent until you untrack it"
+  came free rather than as a second list to remember to put in the save.
+
+### Item 19 — favourited and tracked were two checkboxes and only one reached the minimap
+
+Every marker now carries `showOnMap` and `showInWorld`, saved, defaulting to on — and an **absent**
+switch reads as on, so one patch cannot blank every marker in every existing run. `book.minimap()`
+is tracked **or** starred, minus anything switched off, which is the bug: the minimap was fed
+`tracked()` and starring something does not track it. Waypoint pads get the same three switches in
+`js/waypoints.js`, stored as deltas keyed by pad id so a world with sixty settlements costs nothing
+until you star one — and pad `0` is deliberately in the test, because a settlement id is a number
+and the first one is 0.
+
+### Item 20 — an outpost is a place on the map
+
+`js/outposts.js` knew what an outpost was, `js/markers.js` knew how to put something on a map and on
+a minimap and in space, and **nothing joined them** — this project's signature fault, for the
+fourteenth time. So the base you spent an hour building was the one thing on the planet you could
+not navigate back to.
+
+`syncOutpostMarkers()` makes the join, from `draw()`, because that is the file that already has both
+ends of it. The marker is `locked`, and the lock is enforced in `MarkerBook.remove()` rather than by
+hiding the × — a hidden button is a rule nothing checks — with a `force` flag for the one caller
+that owns it, which deletes the marker when the ledger stops mentioning the outpost. It is
+renameable inline, and `renamed` is recorded, because without it the next sync (every draw) would
+write "Mine 3" back over "Ironrest" a quarter of a second after you typed it. It wears its role's
+colour and glyph, and the supply layer stops drawing its own disc where a marker book exists — two
+discs and two copies of the name on one pixel is item 11's complaint made again.
+
+### Files
+
+`js/map.js`, `js/markers.js`, `js/waypoints.js`, `js/outposts.js`, new `js/map-hits.js`, new
+`map17.css`, new `tests/round17-map.test.js` (16 checks). `tests/round11-ui.spec.js` asserts the
+number of rows in the key, which went 37 → 38 with the outpost row. The four joins `js/main.js` and
+`js/hud.js` need — the minimap feed, the star on a minimap favourite, the whole waypoint book, and
+the world-beacon consumer for `showInWorld` — are written out in
+`research/round17-map-handoff.md`.
+
+## Round 17 — the custom class, followers and mercenaries
+
+> *"I've been thinking it would be really cool to build a custom class in this game… We can extract
+> all the existing classes into a spell tier list and allow choosing spells… You should be able to
+> unlearn a skill at any time… If you have 5 follower slots and hire 4 mercenaries, you can only
+> summon one wolf."*
+
+The full write-up is **[`CLASSES.md`](CLASSES.md)** — the builder, the tier list format, the follower
+rules and the mercenary data format. This is the short version and the three things worth keeping.
+
+**A custom class is a CLASS.** The title screen's picker has a thirty-first entry at the top —
+*"Custom — build your own class"* — and choosing it turns the class card into a build summary with
+an **Open the builder** button. The builder is four tabs: Loadout (eighteen of them), Spells (the
+point-buy), Opening (a companion or a sealed chest) and Look. When it is done,
+`installCustomClass()` writes a synthetic entry into the three data objects `main.js` has already
+loaded: a class called `custom` in `classData.classes`, the six chosen spell ids in slot order in
+`skillData.classes.custom`, and a body in `classLooks.classes.custom`.
+
+Everything downstream then works with **no change at all** — `classData.classes.find(...)` finds it,
+`createSkillBar` reads `data.classes[player.classId]`, `classDef.pet` summons the companion,
+`classDef.starter` and `classDef.startingArmour` equip the loadout. There is not one "if the class
+is custom" branch in the game. The alternative was a dozen of them, in files this round did not own.
+
+**The spell tier list is derived, not generated.** `data/classes.json` and `data/skills.json`
+already say which class gets which skill and at what level. A committed `spells.json` would have
+been a third statement of the same fact — right on the day it was generated and silently wrong the
+first time somebody added a skill to a class, with nothing failing, because a tier list missing a
+spell just quietly does not offer it. A spell's tier is the **earliest** level any of the thirty
+hands it out on; the six rungs ARE `skills.json`'s own `unlockAt`, and `data/classbuild.json`'s copy
+of the levels is compared against it at load and **throws** if the two disagree.
+
+**The Kept Company grants a LIMIT now, not a count.** Round 16 had the green arm granting
+`petSlots`, which `js/skills.js` added to `petCount` — how many bodies one *cast* puts down. So
+casting Raise Thrall three times gave you nine thralls, because nothing anywhere counted what was
+already standing there. The arm grants `followerSlots`, which raises two numbers: how many things
+may walk with you at all, and how many of each creature a summoning spell may have standing.
+`The Pack`, the keystone at the end of the same arm, gives two of each.
+
+### The rule that made the whole thing one system
+
+Three completely separate things summon a body: a summoning skill in `js/main.js`, a hire in
+`js/followers.js`, and the class companion at the start of a run. A limit checked at the call sites
+is a limit with three copies and three chances to be missed, which is this project's signature fault
+written out as an architecture. So the gate is installed **on `js/pets.js`** — `pets.setGate` — and
+`pets.summon` is the one door every one of them goes through.
+
+That is the whole of the user's sentence, as a test:
+
+> *"If you have 5 follower slots and hire 4 mercenaries, you can only summon one wolf."*
+
+Five slots is level 30 with no perks. Four contracts fill four of them. The fifth admits exactly one
+wolf, and the second wolf is refused with *"You have 5 of 5 follower slots filled."* It is also why
+a cast that cannot fit everything it asked for **puts down what it can and stops** rather than
+refusing the whole thing — `pets.summon` leaves the reason on the returned array as `made.refused`.
+
+### What a player notices
+
+* **F opens your company.** Three tabs: who follows you (with a dismiss on everything that can be
+  dismissed, and a slot strip that makes "three of five" a picture rather than a sentence), the
+  mercenary board in whatever settlement you are standing in, and the **spell respec** — because
+  *"at any time"* has to mean in a field at level 22 and not only on the title screen.
+* **Three follower slots at level 1, four at 20, five at 30**, plus the perk arm. A class companion,
+  a bought mercenary and a summoned wolf all take one of the same slots.
+* **Ten kinds of mercenary** over four roles, each with its own spells on its own cooldowns, its own
+  body, and upgrades it grows into — a Blade for Hire trades up to a longsword at 10, learns to open
+  a guard at 20 and buys plate at 30; a Field Mender learns what to do when it has gone badly at 20.
+  A broker's board is deterministic per settlement and restocks every few days.
+* **The road captain sells one of the ten** rather than always the same sellsword. Which one is a
+  hash of who they are, so the same person always sells the same thing.
+* **Followers keep up with you, always.** Re-costed off the owner's level every frame, so a sentry
+  summoned at level 1 is never still swinging for 1 at level 20 — and a mercenary hired at level 4
+  and looked at again at 22 has already learned everything below 22, because the upgrades are read
+  where a level change is *noticed* rather than at a level-up event that would have missed it.
+
+### Two traps this round hit
+
+**A weapon upgrade cannot be swapped on.** An avatar is baked into a merged skinned mesh at build
+time, so `p.look.avatar.held.id = 'fh_longsword'` does nothing at all — the body has to be rebuilt.
+`refit()` does it, guarded, because it is an `await` inside a frame: the follower keeps fighting with
+the body it has until the new one is ready, and if it dies in the meantime the new actor is disposed
+rather than left standing in the scene.
+
+**An upgrade must multiply the BASE numbers, not the current ones.** `retune` runs every time the
+owner's level changes; compounding a 1.16 damage bump on each pass would have a level-40 mercenary
+hitting for thousands. `applyUpgrades` returns the cumulative multipliers and `scaleFollower` applies
+them once, to the table's own numbers — which is also why that arithmetic lives in the (Three.js-free)
+`js/followers.js` and has a test over it.
+
+### Files and the handoff
+
+`data/classbuild.json`, `data/mercenaries.json`, `js/classbuild.js`, `js/classbuild-ui.js` +
+`classbuild.css`, `js/followers.js`, `js/followers-ui.js` + `followers.css`, and edits to
+`js/pets.js`, `js/skills.js`, `js/perks.js`, `js/hire.js` and `js/newgame.js`. 25 tests in
+`tests/round17-class.test.js`.
+
+The eight joins `js/main.js` and `js/save.js` need — loading the two data files, handing them to the
+title screen and to `begin`, the one-line opening-kit hook, creating the follower book before the
+class companion is summoned, the Followers screen on `F`, routing the road hire through the book,
+and carrying `build` and `followers` on the saved player — are written out in full, with anchors, in
+**`research/round17-class-handoff.md`**, along with four optional tidy-ups (`js/rpg.js` declaring
+`followerSlots`, `js/effects.js` restating the companion affix, a Mercenary Broker role in
+`js/town.js`, and the screen as a character-sheet tab).
+
+## Round 17 — weapons, tools and seams
+
+Five reports, and **four of them were a join that had never been made** rather than an algorithm
+that was wrong. That is now this project's signature fault for the fifth round running, and the
+shape of it barely changes: two halves of a system exist, both finished, and the one line that
+introduces them to each other was never written. A missing join is indistinguishable from a missing
+feature from the player's chair, and much harder to find than a crash.
+
+### Item 3 — the staff tooltip, the spell glyph, "Unmaking", and the charge that did nothing
+
+> "The staff tooltip 'A two-handed staff, attuned to (element) … off hand stays empty' is repeated
+> twice in the tooltip. It also appears to show a dot and a slash as the attack style like a melee
+> weapon … Also it seems I can hold to charge the spell before releasing, does holding it actually
+> do anything?"
+
+Five separate faults under one report.
+
+**The sentence was printed twice because two printers had the same string.** `describeWeapon` writes
+`weaponFacts().line` onto the item as `item.weaponLine` and js/hud.js prints it; then, because a
+staff is **not** `ranged` (only a wand is — `RANGED_CASTERS` in js/rpg.js has one entry), the card
+fell into its `rangeClass === 'melee'` branch and printed `patternText(item)` underneath — and
+`patternText` opened with `if (f.ranged || isStaff(item)) return f.line;`, the identical string.
+Neither printer could know about the other. `patternText` now returns the one thing only it knows —
+what the button does — and the melee branch had the same duplication (reach and clock in both
+lines), so that went too.
+
+**The dot and the slash were a melee fallback a staff has never used.** `patternGlyphs` walks
+`profileOf(item).pattern`; a magic weapon has no pattern row, so it fell through to
+`CATEGORY_PATTERNS.magic` = `['jab', 'slash']`, whose glyphs are `·` and `⟋`. The card was not
+describing the staff at all. `js/spellshapes.js` is a nine-shape vocabulary — `nova`, `cone`,
+`wave`, `lob`, `ground`, `chain`, `bolt`, `beam`, `self` — where **the glyph and the caption come
+out of the same row**, so a staff cannot draw a cone and be captioned "area surrounding you". The
+shapes key off the `shape` field `STAFF_SPELLS` entries already carried, so nothing had to be
+invented; a wand gets `bolt`, because a wand's variety lives in `WAND_BEHAVIOURS` instead. Fixing
+that turned up a smaller one of the same kind: `isWand()` is "magic and one-handed", which is a
+wand, a sceptre, an orb AND a tome — but only a wand is made `ranged`, and js/main.js throws a bolt
+only `if (weapon.castElement && weapon.ranged)`, so an orb is SWUNG. Those three get the `brand`
+shape ("your swing carries it"), which is what actually happens, and they keep their rhythm row. The
+glyphs are plain SVG with presentation attributes and `stroke="currentColor"` — no stylesheet, so
+they work in an item card, a shop row or a tooltip without any of them loading anything.
+
+**"Unmaking" is now "Arc Burst".** It was the name of the arcane nova and it described nothing:
+"unmaking" is a mood, not a shape. `STAFF_SPELLS` is Farhold's own table — not in the shared
+`data/items.json`, not in Emberveil — so the rename is local, and a save stores the spell's KEY, so
+nobody's staff changed.
+
+**And holding the staff genuinely did nothing.** The channel had a reader and no writer:
+js/player.js builds `self.windCharge` on release and hands it out as `out.charge`; js/main.js never
+reads `step.charge`; js/weapons.js `withArea` reads **`feel.swing.charge`**, which a grep shows is
+assigned nowhere in the codebase. So `shape.charge` was permanently `undefined`, which took the
+whole of round 15 with it: `chargedForm()` is gated on `shape.charge && !shape.charge.tap`, so the
+jet, the dome, the wall, the field, the mortar and the storm — six charged forms and about 130 lines
+of main.js — had **never once fired**, and the 0.60x–1.60x damage and 0.7x–2.0x radius were both
+multiplied by one. `chargeAt()` is the one function both halves already call (every frame while the
+button is down, and once more on release), so it posts the answer now and `withArea` consumes it —
+for a two-handed magic weapon only, so a sword can never pick up a charge left lying on the channel.
+
+**One input mode per weapon, in the data.** `WEAPON_TRAITS` carries `input: 'repeat' | 'charge'` and
+`inputOf(item)` is the single answer. Repeat: hold the button and it swings, shoots or casts on its
+clock, and nothing builds. Charge: hold and it BUILDS, let go and it goes off, and nothing swings on
+a clock. Staves and drawn bows charge; crossbows, javelins, wands and every melee base repeat. A
+charge weapon still releases itself at its own ceiling, which is the ceiling of one mode rather than
+a second mode. A test asserts that `inputOf` and `rpg.swingPlan`'s own two tests (`isStaff()` and
+`rangedPlan().kind`) can never disagree.
+
+**And the ramp is visible at last, which needed a third fix nobody had reported.**
+`hud.chargeMeter()` has built `<div class="charge-meter"><i></i></div>` on every frame the button is
+held since round 15 — and `grep -rn charge-meter` across the whole project returned that one line
+and nothing else. **There was no `.charge-meter` rule in any stylesheet.** An unstyled div has no
+size and a width percentage on an inline `<i>` does nothing, so the bar has been running invisibly
+for two rounds. `combat.css` is the four states (`short` / `ready` / `near` / `full`, named once in
+`chargeState()` so the bar and the caption cannot disagree), with the full state glowing and pulsing
+because a colour change on a 7 px bar is not an announcement. On the character's side,
+`js/combat-fx.js` `channel()` grows a ring on the ground **at the radius the spell will actually
+cover** and orbits one to three motes at the hands, going gold with a pop at the ceiling.
+
+### Item 12 — the mega-trees you could not cut down
+
+> "I found one of the new mega-trees … but was disappointed I could not cut it down. Could these
+> trees be updated to be cut down and reward ~15 times more than a normal tree?"
+
+One line. `standing` is the list `near`, `nearest`, `describe` and `strike` all read, and the
+megaflora loop in js/props.js never pushed onto it — the line that files an ordinary tree as
+hittable sits two hundred lines above the giant one. Everything else about a giant already worked.
+
+`data/megaflora.json` now carries an explicit `wood: true` flag (explicit, because "hollow_snag" and
+"crown_conifer" share no word and "crystal_spire" and "shelf_palm" both end in a plant) and a
+`harvest` block beside the drops: fifteen times the ordinary tree of the same family **to the log**
+(an Elder Broadleaf is 135 logs against a broadleaf's 9), one tool tier higher, a gather bar four to
+seven times as long, and a regrowth clock measured in days rather than the six hours an ordinary
+tree takes — a giant is a landmark and one that grew back over lunch would stop being one.
+
+The eight giants that are not wood are on `standing` too, deliberately, each carrying a `why`
+sentence: a giant that refuses **silently** is indistinguishable from the bug being fixed. The Clear
+tool and the terrain brushes leave every giant alone, so levelling a building plot cannot make a
+landmark vanish.
+
+The bar length was its own small join. js/main.js works it out from two generic sizes
+(`secondsFor('prop')` = 2.4 s) and could not know about a sixteen-second tree. Copying the number
+into `data/tools.json` would be a second copy that drifts, so `js/harvestinfo.js` is a registry with
+no dependencies at all that js/props.js writes and js/tools.js reads — the numbers stay beside the
+drops, and the gather clock looks them up by the kind it parses out of the job id (`propKey`'s
+format puts the kind in there exactly, which is a fact rather than a guess at a display name).
+
+### Item 13 — a mining animation
+
+> "Generate a mining animation to use when a tool is being used, to differentiate it from the
+> attack animation."
+
+Three of them, in `avatar-3d/js/chibi2-motion.js` on their own opt-in list (`CHIBI2_WORK_ANIMS`),
+following the round-14 pattern exactly: `pickSwing` (both hands on a pick, overhead, driven straight
+down with the body folding over the blow), `chopSwing` (an axe, diagonally across the body, the
+chest turning into the wind-up) and `forage` (bent over a bush, hands low, alternating). All three
+**loop**, so none is in `ONE_SHOTS`, and each is built to return to the neutral pose at both ends of
+its cycle so the loop point is invisible.
+
+`CHIBI2_ANIMS`, `CHIBI2_SWIM_ANIMS`, `CHIBI2_ALL_ANIMS`, `CHIBI2_COMBAT_ANIMS`, `CHIBI2_COMBAT_ALL`
+and `CHIBI2_RIDE_ANIMS` are byte-for-byte what they were; only the composed `CHIBI2_COMBAT_RIDE` —
+whose one importer in the whole playground is `prototypes/farhold/js/actors.js` — gained them.
+Emberveil takes the default twelve and imports none of the opt-in lists, which a test asserts by
+grepping its source.
+
+Which clip plays is a property of the THING, not of the animation code — you chop a tree, you pick
+at a rock, you stoop over a bush — so `work` is an explicit field on every `PROP_HARVEST` row and
+every wood giant, published through the same registry as the bar length.
+
+### Item 14 — the Scanner that was never in the mouse wheel
+
+> "I asked for scrollwheel to reveal Weapon, Tool, Scanner, but I don't see the Scanner option."
+
+**`heldModes()` was never wrong.** It has put `scanner` in the ring the moment
+`player.devices.scanner` is true since round 16. Nothing could ever set it: `giveDevice` is only
+called by `buildTool` in js/main.js, which refuses unless `canAfford`, and the Prospector's Scanner
+costs `{ iron_ingot: 3, crystal: 1, wire: 2 }` — and **there is no material called `crystal`**. The
+table in `data/resources.json` calls it `crystal_raw`. `have('crystal')` returned 0 for ever, the
+Build button was permanently disabled, and the scanner could not be built by any honest route. Nor
+could the Command Rod or the Powered Cutter, which are priced the same way.
+
+This is exactly round 13's rule — **a cost you cannot obtain is not a price, it is a wall** — broken
+again in a different file. It was fixed for `data/structures.json` by `alignCatalogue()` in
+js/buildplan.js, and `data/tools.json` was never put through it because the tool bench was written
+three rounds later. `priceRow()` in js/tools.js asks the **same** alias table (`crystal → crystal_raw`
+was already in it) rather than keeping a second copy, and carries the catalogue's word along so the
+panel still says "1 crystal" while the pool is charged `crystal_raw`. A test now walks every cost in
+`data/tools.json` and fails on anything the game does not produce.
+
+On top of that: **three scanner tiers** in data (Prospector's Scanner, Deep Scanner, Survey Array —
+each reaching further, sweeping faster and, through `detects`, able to notice kinds of thing the one
+below cannot), with the ring carrying **one** scanner, the best one you own, so building an upgrade
+improves the thing you already use instead of adding a fourth entry to the wheel. And **right-click
+opens a chooser** (`js/scanner-ui.js` + `scanner.css`, its own module and its own stylesheet, the
+way `js/civics-ui.js` does it): the materials your survey has actually found, each a toggle, plus
+"Everything" and "Forget survey". The list is built from what has been found rather than from the
+whole seventy-row material table, because a chooser that offers you a material this world does not
+have is the "sent to an empty field" failure the job generator was rewritten to avoid. Right-click
+was completely unclaimed in Farhold — `grep contextmenu` and `grep 'button === 2'` over `js/`
+returned nothing at all — so the panel takes it, and only while the scanner is the held mode.
+
+### Item 26 — the resource graphics
+
+> "It's a single color orange rock right now. Can we add some iron 'crystals' growing out of it and
+> make it have a mix of regular rock texture and the ore texture … I did once find a plant fiber
+> source that looked like a tiny cone-shaped tree."
+
+`SHAPES` in js/ore-view.js was **one primitive per kind**, painted in the ORE's colour from tip to
+base — so an iron outcrop was a solid orange rock, which is not a thing that exists in any ground
+anywhere, and a fibre patch was a 1.2 m cone. The comment above the table said the shapes were
+"deliberately low-poly and slightly wrong-looking", which is how a stand-in survives ten rounds.
+
+Every kind is a merged composite in two material groups now: **group 0 is the host** (ordinary rock,
+ordinary bark, ordinary sand, in the dull colour the surrounding ground already is) and **group 1 is
+the seam** (the crystals growing out of the cracks, the wet clay in the scoop, the cut logs at the
+foot of the tree). Two materials is still one InstancedMesh — the geometry carries two groups — so
+a hundred outcrops is two draw calls, not two hundred.
+
+Three things keep a seam reading as interactive from thirty metres, which is what the old flat glow
+was doing and must not be lost. The **glow is concentrated**: emissive was 0.35 over the whole rock
+and is now 0 on the host and 0.55 on the seam, so the same light comes off a fifth of the surface.
+The **silhouette is wrong on purpose**: js/props.js scatters single round lumps and single trunks,
+and every seam here has spikes, steps or a cluster standing off the host. And **nothing in props.js
+has two colours meeting at an edge** — its props are one tint with a brightness wobble.
+
+The specific two: an iron outcrop is broken grey rock with blades of ore leaning out of the seam
+line, and a fibre patch is a clump of nine splayed blades and two pale seed heads over a low mound,
+with nothing resembling a trunk. The node tree is a tree **with a felling notch and two bucked logs
+at its foot**, which is a silhouette no scenery tree has. And three node kinds — `wreck`,
+`camp_scrap` and `meteor_site` — had no row in `SHAPES` or `LOOKS` at all and had been drawing as
+iron outcrops in the fallback brown; a crashed lander, an abandoned camp and a meteor crater were
+three orange rocks. They have their own shapes now, and a test fails if a node kind ever loses one.
+
+`tests/three-loader.mjs` is a small resolver hook that points the bare `three` specifier at the file
+index.html's import map already points it at, so `node --test` **builds** all seventeen composites
+and checks the groups rather than reading the table as text. That also caught the trap js/props.js
+documented in round 16: `toNonIndexed()` hands back the same object when a geometry is already
+non-indexed, so a shared base transformed in place puts the next part at coordinates in the
+thousands — the test asserts every vertex is inside a ten-metre box.
+
+### Tests
+
+`tests/round17-combat.test.js`, 34 of them. The shape of most is not "does this compute correctly"
+but "do these two halves of the game agree", because that is where four of the five bugs were.
+
+`tests/three-loader.mjs` is new and is worth reusing: it maps the bare `three` specifier to the file
+index.html's import map already names, so `node --test` can drive any module that draws something.
+Three.js only touches WebGL when you make a renderer; a `BufferGeometry` is arithmetic.
+
+### Found on the way past, not fixed (not ours this round)
+
+`js/rpg.js` `attuneWeapon` undoes its own quarterstaff fix. It sets `weaponCategory = 'light'` and
+`castElement = null`, and then two lines later `if (CASTERS.has(sub) && !item.castElement)` fires —
+because `sub` is the SUBTYPE, and items.json files a quarterstaff's subtype as `staff`, which is in
+`CASTERS`. So every quarterstaff is re-attuned, gets an element affix and is renamed "Storm Staff".
+`isStaff()` still says no (it checks `weaponCategory`), so it swings as a pole and no free area spell
+comes back — but `elementOf()` returns the element, so a quarterstaff's hits go through magic resist
+and leave a status. Cosmetic plus one small gameplay leak, in a file this round does not own.
+
+## Round 17 — worldgen
+
+Three reports, one coordinate. *"At the location (seed 56138, Chodikvraun III, biome Grassland,
+x 11572, z 2995, altitude 24) the center of the town has a bunch of stuff semi-underwater. The water
+does not touch the shoreline. There is a tower inside of the bridge. And the bridge only connects to
+one side of the road (I think the road just stops)"*; *"the river collides with a road here and
+messes with the water, can we make sure crossings like this generated raised bridges instead"*; and
+*"try to prevent spawning Clay and other resources directly on the road."*
+
+### The world the user was standing on
+
+Finding it was the first job, and worth writing down: **a world position means nothing without the
+planet-size knob.** A metre is `M_PER_CELL_DEFAULT * planetScale` of a map cell, so x 11572 z 2995 on
+seed 56138 is Grassland at 21 m with a town seventeen metres away on **Super tiny** (0.1) — and Sea
+Ice 1,178 m under the ocean on Full. The report said Grassland and altitude 24, so 0.1 is the world.
+`tools/probe-worldgen.mjs` builds it exactly — same seed search, same map size, same `balance.terrain`
+knobs — runs the real town planner over the real ground, and prints a number for every claim in the
+report. It is kept; `--seed`, `--planet`, `--x`, `--z`, `--scale` and `--ore` point it anywhere.
+
+The town at that spot is **Feafungate**, and the probe's first line explains the whole of item 4:
+its map node sits in the middle of a river channel, 5.4 m under the water, with 57% of the ground
+inside its ring under the surface.
+
+### Item 6 — three separate reasons a crossing was not a bridge
+
+`findCrossings` had to agree that a road was over a river before `heightAt` would leave the channel
+open; where it did not, the deck clamp raised the ground to meet the road, which is the earth plug
+the user saw. Twenty-four of the fifty-nine road samples sitting over water around Feafungate had no
+bridge, and they failed for three different reasons.
+
+**The lift was sampled at the road's corners, not walked along it.** `lift[i]` asked the river index
+about each road POINT and nothing in between. A road point is a fifth of a map cell — 12.8 m on the
+smallest planet and 128 m on the largest — and the deck between two points is a straight
+interpolation, so a river passing between two points got a lift at neither of them and the deck ran
+through the water. It is the same blind spot round 16's `ringCrossings` fixed for town gates: a
+question asked of a polyline's samples instead of of the polyline. Each leg is now walked every four
+metres and the WORST water on it charged to both of its ends, which is what makes the straight line
+between them clear it too. The lake and sea floors are walked the same way.
+
+**The junction pass pulled finished bridges back into the river.** *"A junction is one height, not
+two"* lowers the last six points of a merged road onto its trunk's height, and it had no idea what
+those points were standing over. Road 8's crossing came out 1.37 m over the water where the lift had
+put it 2.40 — under the clearance `findCrossings` demands — so no crossing was recorded and the
+ground was plugged instead. Road 12 lost 1.19 m the same way. Every road point now carries `floor`,
+the water it may never go under, written before the junction pass and applied after it, with the
+approaches ramped back up to it.
+
+Worth keeping: **it is the RESTORATION that ramps, not the road.** The first version of that fix
+ramped `surface` itself, the way the lift pass appears to — but the lift ramps a DELTA that is zero
+nearly everywhere, and ramping an absolute height says "a road may never descend more than half a
+metre between two points", which on a full-sized planet is two points 128 m apart. Seed 7's road 4
+came down off a pass, so its 140 m descent was flattened into a 140 m viaduct and the deck clamp
+built the embankment under it. `planet.test.js`'s *"a lifted road is something you can stand on"*
+caught it within a minute.
+
+**And the angle was a veto it had no business being.** `crossesSquarely` refused to call anything a
+crossing if the road met the river at under 44 degrees, on the reasoning that a road running
+alongside a river is a quay. That reasoning is sound and this was the wrong place for it: the quay in
+`heightAt` is already guarded by `river.dist >= river.path.half`, which is to say a quay is a thing
+you build BESIDE the water, while `findCrossings` tests `dist <= half` — the road is over the water
+itself. Road 63 sat at dist 0.00 of a six-metre river and was called "alongside" because it met the
+water at 41 degrees. Seven of the twenty-four misses were nothing but this.
+
+That change then exposed a fourth thing, which is the interesting one: **the quay rebuilt the dam
+round 16 removed.** It was kept off a crossing by `!crossesSquarely`, which was only sound while the
+two agreed about what a crossing IS — so a forty-degree road now got a bridge AND a quay shelving the
+channel up underneath it. The footprint is the authority on where a bridge is; nothing else gets to
+fill it.
+
+Around the user's town: **35 of 59 wet road samples had a bridge before, 58 of 59 after.** The one
+left is a road stub that dead-ends inside a river channel at a junction, two decimetres outside a
+neighbouring deck's edge.
+
+### Item 4d and 4c — a bridge where the road is not
+
+*"The bridge only connects to one side of the road (I think the road just stops)."* It does. `back`
+and `fwd` measured how far the WATER reached along the crossing's tangent and nothing asked whether
+there was any road out there — and road 58 ends at the exact cell of Feafungate's town node, which is
+in the middle of the river. So `fwd` ran thirty-seven metres past the road's last point and half the
+deck landed in an empty field, with `roadAt` reading 0.00 for the last nineteen of them.
+
+That is also the whole of *"there is a tower inside of the bridge"*, and it is why the two are one
+fix. A crossing's footprint is a HOLE: `heightAt` leaves the river channel carved under every metre
+of it so the water can run through. The part that ran past the road was ground the town planner was
+entitled to build on (`roadAt` says 0.00 there) and that the terrain had dug out to the river bed.
+A tower stood in a bridge because the bridge was somewhere the road was not.
+
+So both walks now stop at the end of the carriageway, the centre shifts to sit between what is left
+(and only as far as it can go while the middle is still over the water — a forty-degree road is over
+water for a long way along its own line, and one crossing's middle had ended up 12.1 m from a
+six-metre channel), and a merged pair's union is clamped to the road as well as grown to cover it.
+Belt and braces on top: `terrain.bridgedAt(x, z, pad)` publishes the footprint, and the town planner,
+`place()`, the street lanes and `js/sites.js`'s set-piece slots all ask it.
+
+**Not done, and deliberate:** the town is still in the river. Moving a settlement means moving
+`node.x/node.y`, which is a map cell — 64 m at this planet size, 224 at the default — and World
+Forge has already routed every road to the old cell, while `js/map.js`, `js/quests.js`,
+`js/markers.js` and `js/waypoints.js` all derive their own metres from it. A sub-cell offset would
+have to be read by every one of those, and four of them belong to other people this round. What is
+fixed is everything the town DOES about it: its square, its plots and its structures now all stay out
+of the water, and the river through it is bridged rather than dammed.
+
+### Item 4a — "semi-underwater" is a question about a footprint
+
+Every water test in `js/features.js` asked `underwater(x, z)` of ONE point: the exact middle of the
+thing being placed. A hut is three and a half metres across, a warehouse eleven and the waypoint pad
+six, so anything whose centre cleared the water by a few centimetres went down with a third of itself
+in the river and passed every check there was. At Feafungate that was the well, the waypoint pad, a
+market stall and a length of the town wall — four of the hundred and forty things the builder stands
+on the ground. `dryFor` walks a ring of samples at the thing's own radius with 40 cm of freeboard,
+and `place()` takes the kit's real footprint rather than the generic radius for its building type.
+
+And in `proctown/js/townplan.js`, **the square goes where you can stand.** It took whichever block sat
+nearest the middle, whatever was there, and Farhold hangs the well, the market stalls and the civic
+district off it. The planner already knew which ground it may not use; it simply was not asking here.
+
+Measured at Feafungate: **four things built partly in the water before, none after**; six street
+lanes planned across the bridge deck, none drawn there.
+
+### Item 4b — the channel had no rim for the water to stop against
+
+*"The water does not touch the shoreline."* `waterRibbon` has pushed the drawn sheet outward, per
+point and per side, until the carved ground climbs back to the water line since round 5 — that is how
+a real shoreline hides the edge of a sheet. What it cannot do is find a bank that was never built.
+The carve blends from the flat bed back to the NATURAL ground at `reach`, and the natural ground is
+`naturalHeightAt`, which piles up to 78 m of relief noise on the map's elevation. So the rim of the
+channel was wherever that noise happened to leave it: measured across three worlds, **between 9% and
+28% of river edges had no point anywhere out to `reach` that reached the water line**, and the sheet
+then ran the full thirty metres and stopped in mid-air — 5.59 m of open edge at the user's own town.
+
+The shortfall is nearly always small (97% under five metres, two thirds under one) because it is
+noise rather than topography, so the outer part of the channel is brought UP to the water line where
+it falls short, fading in from the water's own edge so the river keeps its width, capped at
+`bankRise` so a river genuinely running along a shelf gets no thirty-metre wall built round it. It
+never touches the water itself, never fills a bridge's footprint (it fades out over eight metres
+rather than switching off — a rim that is absent inside a footprint and full height a metre outside
+it is a five-metre cliff around every bridge, and the round-16 walk measured a player being asked to
+climb 5.14 m in one step onto one), never dams a river mouth, and never towers over a road beside it
+(a road running along a river whose surface sits above the carriageway is the quay case, and it
+started getting a five-metre wall of earth along its verge).
+
+Second half, in `js/water-plan.js`: **the walk then bisects back onto the waterline.** The coarse
+walk steps in half a channel width — three metres on an average river, eight on a big one — and took
+the first step where the bank had come back up, which on anything but a cliff is somewhere UP the
+bank. Five halvings put the edge within a tenth of the step of the real crossing.
+
+One thing this turned up that is worth keeping: **`waterAt` and the drawn sheet were measuring
+against different numbers.** `waterAt` asks about the NEAREST point of the river line; the sheet is
+built per point and runs out across the channel from the point it belongs to, so on a bend the two
+are a quarter of a metre apart. That never mattered while the ground in that band was random noise;
+the rim makes the ground sweep smoothly through exactly that quarter metre, and `water.test.js`
+caught dry land 0.15 m under a drawn river on the first run. `riverTopAt` is now the one answer both
+of them use — the higher of the quad's two corners, which is the band the sheet is actually drawn in.
+It is deliberately NOT a window of several points: three points is 384 m on a full-sized planet and a
+mountain stream falls ten metres in that, which reported a river ten metres above the road beside it
+and dropped the player into it.
+
+Near the user's probe: **31 open sheet edges before, 6 after.** World-wide the "no bank at all"
+figure goes from 28%/9%/19% to 8%/2%/4% on three test worlds; what is left is river mouths and rivers
+spilling into basins, where the bank really does not come back and the skirt closes it as before.
+
+### Item 7 — nothing is dug out of the middle of a road
+
+`createNodeWorld.tileAt` picks a spot, asks the biome what grows there and puts a seam down. It had
+never known where the roads are, so a clay bank on the carriageway was not a rare accident: 1.8% of
+the seams around the user's town were on one, boulders and felled-tree stumps included. `roadAt` is
+the same field the megaflora and the town planner already keep clear of, `0.45` is the same threshold
+`js/features.js` uses for a building (the carriageway and its kerb, not the whole eighteen-metre
+influence field — a seam BESIDE a road is exactly where a seam wants to be), and `bridgedAt` is asked
+as well. The node's own radius is in the question: a two-metre seam whose centre is a metre off the
+kerb still has half of itself in the road.
+
+**It runs AFTER the scatter, never inside it.** Round 12's density bug is the reason: the tile's rng
+is shared by everything generated after it, so rejecting a spot mid-loop — or breaking out of one —
+consumes a different number of rng calls and every seam downstream moves. Marking `gone` is how the
+underwater and cliff rejections already work and it costs the rng nothing; there is a test that
+generates the same tiles with only the road filter switched off and checks every surviving seam is in
+the same place, with the same contents, in the same amount.
+
+Around the user's town: **144 seams on a road before, 0 after**, out of 7,579.
+
+### Files
+
+`js/planet.js` (the lift, the floor, the crossing walk and footprint, the bank rim, `bridgedAt`,
+`riverTopAt`), `js/water-plan.js` (the bisection), `js/features.js` (`dryFor`, the bridge-aware
+`buildable` and street `skip`), `js/resources.js` (`onTheRoad`), `js/sites.js` (a slot is never on a
+bridge), `proctown/js/townplan.js` (the square goes on buildable ground), `tools/probe-worldgen.mjs`
+(new) and 14 tests in `tests/round17-worldgen.test.js`. Three assertions in `tests/round16-roads.test.js`
+were re-aimed rather than relaxed — each is commented with what changed underneath it and why the
+thing the test exists to catch is unchanged.

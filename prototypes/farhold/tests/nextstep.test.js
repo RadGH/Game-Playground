@@ -73,7 +73,10 @@ test('the chain always terminates, and every step is reachable', () => {
     furnace: () => { p.hasSmelter = true; },
     fuel: () => { p.hasFuel = true; },
     findore: () => { p.bag.iron_ore = 5; },
-    smelt: () => { p.smelting = true; p.bag.iron = 8; },
+    // R17: the drill rule asks for `iron_ingot`, which is what a furnace actually makes. It used
+    // to ask for `iron` — the build catalogue's short name, which nothing in the game produces —
+    // so this walk was feeding it a material that never existed.
+    smelt: () => { p.smelting = true; p.bag.iron_ingot = 8; },
     drill: () => { p.hasDrill = true; },
     route: () => { p.hasRoute = true; },
     link: () => { p.hasLink = true; },
@@ -98,7 +101,7 @@ test('the chain always terminates, and every step is reachable', () => {
 test('the link step waits until there really are two outposts', () => {
   const p = fresh();
   Object.assign(p, {
-    toolTier: 1, bag: { log: 9, stone: 9, clay: 12, iron: 9, iron_ore: 2 },
+    toolTier: 1, bag: { log: 9, stone: 9, clay: 12, iron_ingot: 9, iron_ore: 2 },
     hasStore: true, hasSmelter: true, hasFuel: true, hasDrill: true,
     hasRoute: true, hasPower: true, smelting: true, outposts: 1,
   });

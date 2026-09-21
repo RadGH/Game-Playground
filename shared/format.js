@@ -53,6 +53,23 @@ export function sign(v, { decimals = MAX_DECIMALS, plus = '+' } = {}) {
 /** A low–high pair ("10–19"). */
 export function range(lo, hi, { decimals = 0 } = {}) { return `${fmt(lo, { decimals })}–${fmt(hi, { decimals })}`; }
 
+/**
+ * A QUANTITY OF A MATERIAL — one decimal place, trailing zero trimmed.
+ *
+ * Farhold R17: "Update all resources in chat and inventory to round to 1 decimal place. It can stay
+ * a float underlying. In the chat it showed some long string like 'you lack 6.000000000003 clay'."
+ *
+ * Ore, timber, fibre and clay all come out of the ground as fractions — a gather pays `base *
+ * toolYield * richness` — so the stored amount genuinely is 6.000000000003, and it should stay
+ * that way. What must never happen is printing it. Two decimals is more precision than a pile of
+ * clay deserves on a screen, so this is its own formatter rather than a call to `fmt`.
+ *
+ *   mat(6.000000000003)  // "6"
+ *   mat(6.25)            // "6.3"
+ *   mat(0.04)            // "0"    — you have effectively none, and that is the useful answer
+ */
+export function mat(v) { return fmt(v, { decimals: 1 }); }
+
 /** Seconds with one decimal, for meters and timelines ("12.4s"). */
 export function secs(v) { return num(v) ? `${fmt(v, { decimals: 1 })}s` : ''; }
 

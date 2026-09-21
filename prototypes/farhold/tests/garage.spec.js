@@ -52,21 +52,42 @@ test('a motorcycle is built at a bench, ridden with G, and burns what it drinks'
     for (const id of ['steel_ingot', 'machine_part', 'bronze_ingot', 'leather', 'resin', 'cloth', 'charcoal']) f.bag.add(id, 200);
     await new Promise(r => setTimeout(r, 400));
 
-    // the garage is only offered at a bench that could do the work
+    /**
+     * R17 — THE GARAGE IS A BUILDING NOW, NOT A SECTION OF THE BUILD PANEL.
+     *
+     *   "There is also a garage menu. I haven't got that far yet, but there should be a distinct
+     *    Garage building where you manage that sort of thing."
+     *
+     * So the build panel must no longer carry one at all (`awayFromBench`), and the rows must turn
+     * up on the Garage's own station screen instead. Everything below the screen — what a vehicle
+     * costs, which benches have to be in reach, G getting on it — is unchanged.
+     */
     window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyB', bubbles: true }));
     await new Promise(r => setTimeout(r, 250));
     const awayFromBench = document.querySelector('#build-ui .build-garage')?.textContent || '';
 
-    f.build.setTool('smooth'); f.build.setRadius(18);
-    f.build.aim(spot.x, spot.z); f.build.paint();
+    f.build.setTool('smooth'); f.build.setRadius(22);
+    for (const dx of [0, 10]) { f.build.aim(spot.x + dx, spot.z); f.build.paint(); }
     f.build.setTool('build');
-    f.build.select('claim_stone'); f.build.aim(spot.x + 5, spot.z + 5); f.build.placeHere();
+    f.build.select('claim_stone'); f.build.aim(spot.x + 5, spot.z + 8); f.build.placeHere();
+    // R17 — this spec places pieces the tech tree now gates. `unlockAll` spends nothing and
+    // earns nothing; it just takes every node, so the spec goes on testing the thing it is about.
+    f.build.research?.unlockAll?.();
     f.build.select('assembler'); f.build.aim(spot.x + 2, spot.z);
     const asm = f.build.placeHere();
+    // …and the garage itself, within the ten metres `benchesNear` reaches, because the parts are
+    // still cut on the assembler: a garage is a shed with a pit in it, not a machine shop
+    f.build.select('garage'); f.build.aim(spot.x + 9, spot.z);
+    const gar = f.build.placeHere();
     await new Promise(r => setTimeout(r, 400));
-    const atBench = document.querySelector('#build-ui .build-garage')?.textContent || '';
 
-    const buildRow = [...document.querySelectorAll('#build-ui .build-garage .build-yard-row')]
+    f.control.teleport(spot.x + 9, spot.z);
+    await new Promise(r => setTimeout(r, 300));
+    const opened = gar.ok ? f.buildUI.openStation(gar.entry) : false;
+    await new Promise(r => setTimeout(r, 250));
+    const atBench = document.querySelector('#station-ui')?.textContent || '';
+
+    const buildRow = [...document.querySelectorAll('#station-ui .build-yard-row')]
       .find(r => /Build the/.test(r.querySelector('button')?.textContent || ''));
     const buildLabel = buildRow?.querySelector('button')?.textContent || '';
     const buildNote = buildRow?.querySelector('span')?.textContent || '';
@@ -75,11 +96,12 @@ test('a motorcycle is built at a bench, ridden with G, and burns what it drinks'
     const owned = [...(f.player.vehicles?.owned?.ground || [])];
 
     // it comes out of the shed with an empty tank on purpose, so fuel it
-    const fuelRow = [...document.querySelectorAll('#build-ui .build-garage .build-yard-row')]
+    const fuelRow = [...document.querySelectorAll('#station-ui .build-yard-row')]
       .find(r => /Fuel the/.test(r.querySelector('button')?.textContent || ''));
     fuelRow?.querySelector('button')?.click();
     await new Promise(r => setTimeout(r, 200));
     const tank = f.player.vehicles?.rigs?.[owned[0]]?.fuel ?? 0;
+    f.buildUI.closeStation();
     f.build.setMode(false);
     await new Promise(r => setTimeout(r, 200));
 
@@ -112,6 +134,7 @@ test('a motorcycle is built at a bench, ridden with G, and burns what it drinks'
 
     return {
       asmOk: asm.ok, asmWhy: asm.why || '',
+      garOk: gar.ok, garWhy: gar.why || '', opened,
       awayFromBench, atBench, buildLabel, buildNote,
       owned, tank, onIt, bodyHidden,
       before, after, covered,
@@ -122,8 +145,10 @@ test('a motorcycle is built at a bench, ridden with G, and burns what it drinks'
 
   expect(out.none, 'nowhere flat to build').toBeFalsy();
   expect(out.asmOk, `the assembler would not go down: ${out.asmWhy}`).toBe(true);
-  expect(out.awayFromBench, 'the garage was offered with no bench anywhere').toBe('');
-  expect(out.atBench, 'standing at an assembler did not offer the garage').toContain('Garage');
+  expect(out.garOk, `the garage would not go down: ${out.garWhy}`).toBe(true);
+  expect(out.awayFromBench, 'the build panel still carries a garage menu of its own').toBe('');
+  expect(out.opened, 'E at a Garage did not open its own screen').toBe(true);
+  expect(out.atBench, 'the garage screen does not say what it is').toContain('Garage');
   expect(out.buildLabel, `no vehicle was offered: ${out.buildNote}`).toMatch(/Build the/);
   expect(out.owned.length, `the vehicle was not built: ${out.buildNote}`).toBeGreaterThan(0);
   expect(out.tank, 'the tank is empty and the Fuel button did nothing').toBeGreaterThan(0);

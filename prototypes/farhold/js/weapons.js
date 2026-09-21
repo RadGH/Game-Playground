@@ -38,6 +38,10 @@
 import { fmt } from '../../../shared/format.js';
 // The swing channel: one writer, several readers. See `withArea` below and js/combat-feel.js.
 import { feel } from './combat-feel.js';
+// R17 — the glyph AND the caption for a spell's shape, out of one row. See js/spellshapes.js.
+import { SPELL_SHAPES, shapeRow } from './spellshapes.js';
+
+export { SPELL_SHAPES } from './spellshapes.js';
 
 // ---------------------------------------------------------------------------- strike shapes
 
@@ -162,43 +166,101 @@ STRIKES.shot = mk('shot', 'Shot', '→', 1, 1, 1, 1, 0.9, 0.30, 0, 55, 0.18, 0, 
  *   flow         after two connecting strikes the third costs 0.35x its clock
  *   guard        block chance granted while the weapon is held
  *   pierceBodies how many bodies a shot passes through
+ *   input        R17 — 'repeat' or 'charge'. See INPUT_MODES below. Exactly one, never both.
  */
 export const WEAPON_TRAITS = {
   // it smashes
-  hammer: { armourBreak: 0.07, guard: 0 },
-  warhammer: { armourBreak: 0.07, guard: 0 },
-  mace: { armourBreak: 0.05, guard: 0 },
+  hammer: { armourBreak: 0.07, guard: 0, input: 'repeat' },
+  warhammer: { armourBreak: 0.07, guard: 0, input: 'repeat' },
+  mace: { armourBreak: 0.05, guard: 0, input: 'repeat' },
   // it slashes
-  sword: { flow: false, guard: 0.08, momentum: true },
-  longsword: { guard: 0.08, momentum: true },
+  sword: { flow: false, guard: 0.08, momentum: true, input: 'repeat' },
+  longsword: { guard: 0.08, momentum: true, input: 'repeat' },
   // the sweep
-  sword2h: { damage: 1.20, guard: 0.06 },
-  greatsword: { damage: 1.20, guard: 0.06 },
+  sword2h: { damage: 1.20, guard: 0.06, input: 'repeat' },
+  greatsword: { damage: 1.20, guard: 0.06, input: 'repeat' },
   // it bites
-  axe: { bleed: 1 },
-  battleaxe: { bleed: 1 },
-  axe2h: { damage: 1.20, bleed: 1, armourBreak: 0.05 },
+  axe: { bleed: 1, input: 'repeat' },
+  battleaxe: { bleed: 1, input: 'repeat' },
+  axe2h: { damage: 1.20, bleed: 1, armourBreak: 0.05, input: 'repeat' },
   // it adds range
-  halberd: { damage: 1.20, pierceLine: 3, brace: 0.35, guard: 0.06 },
-  polearm: { damage: 1.20, pierceLine: 3, brace: 0.35, guard: 0.06 },
-  spear: { pierceLine: 2, brace: 0.25, guard: 0.05 },
+  halberd: { damage: 1.20, pierceLine: 3, brace: 0.35, guard: 0.06, input: 'repeat' },
+  polearm: { damage: 1.20, pierceLine: 3, brace: 0.35, guard: 0.06, input: 'repeat' },
+  spear: { pierceLine: 2, brace: 0.25, guard: 0.05, input: 'repeat' },
   // the point
-  rapier: { guard: 0.10 },
+  rapier: { guard: 0.10, input: 'repeat' },
   // the flow
-  scimitar: { flow: true, momentum: true },
-  sabre: { flow: true, momentum: true },
+  scimitar: { flow: true, momentum: true, input: 'repeat' },
+  sabre: { flow: true, momentum: true, input: 'repeat' },
   // the back
-  dagger: { damage: 0.80, backstab: 2.2 },
+  dagger: { damage: 0.80, backstab: 2.2, input: 'repeat' },
   // a staff parries, which is the monk's defence
-  quarterstaff: { guard: 0.12 },
-  scepter: { armourBreak: 0.04 },
+  quarterstaff: { guard: 0.12, input: 'repeat' },
+  scepter: { armourBreak: 0.04, input: 'repeat' },
   // ranged
-  bow: { pierceBodies: 1, draw: true },
-  shortbow: { pierceBodies: 1, draw: true },
-  longbow: { pierceBodies: 2, draw: true },
-  crossbow: { pierceBodies: 2, reload: true },
-  javelin: { thrown: true },
+  bow: { pierceBodies: 1, draw: true, input: 'charge' },
+  shortbow: { pierceBodies: 1, draw: true, input: 'charge' },
+  longbow: { pierceBodies: 2, draw: true, input: 'charge' },
+  crossbow: { pierceBodies: 2, reload: true, input: 'repeat' },
+  javelin: { thrown: true, input: 'repeat' },
 };
+
+// ------------------------------------------------------------------ one input mode, never two
+
+/**
+ * R17 — HOLD TO REPEAT **OR** HOLD TO CHARGE. NOT BOTH, AND THE WEAPON SAYS WHICH.
+ *
+ *   "I think 'hold-to-power' weapons are a good idea but it conflicts with our hold-to-attack
+ *    system, so let's have it be one or the other, not mixed."
+ *
+ * The conflict is real and it was never written down anywhere. Farhold has held the mouse button
+ * down to attack repeatedly since round 7 ("change it so holding down the mouse button repeatedly
+ * attacks (with all weapons)"), and round 14 gave bows a draw and staves a channel — which are the
+ * opposite instruction for the same button. Nothing in the data said which of the two a given
+ * weapon obeyed: `rpg.swingPlan` worked it out from `isStaff()` and `rangedPlan().kind`, two
+ * unrelated tests in a file that has nothing to do with rhythm, and no screen could ask the
+ * question at all.
+ *
+ *   repeat  hold the button and it swings, shoots or casts on its clock. Nothing builds.
+ *   charge  hold the button and it BUILDS; let go and it goes off. Nothing swings on a clock.
+ *
+ * A charge weapon still releases itself at its own ceiling (js/player.js `autoLoose`), so holding
+ * the button on a bow gives you a stream of full-power shots rather than an arm that trembles for
+ * ever. That is the ceiling of one mode, not a second mode: at no point does a `charge` weapon fire
+ * something it did not build, and at no point does a `repeat` weapon build anything.
+ *
+ * The table is keyed off `WEAPON_TRAITS.input` so it lives beside the rest of what a family IS.
+ */
+export const INPUT_MODES = ['repeat', 'charge'];
+
+/**
+ * Which of the two this weapon obeys. Never null; bare fists repeat.
+ *
+ * The staff case does not come from `WEAPON_TRAITS` because a staff has no family row — there are
+ * six different staff bases in items.json and they are all "a magic weapon that takes two hands".
+ * `isStaff()` is the one test for that and it is already the test `rpg.swingPlan` uses, so asking
+ * it here keeps the two answers from ever disagreeing (tests/round17-combat.test.js checks it).
+ */
+export function inputOf(item) {
+  if (!item || item.type !== 'weapon') return 'repeat';
+  // a staff is the charge weapon the whole mechanic was built for
+  if (isStaff(item)) return 'charge';
+  const traits = traitsOf(item);
+  if (traits.input) return traits.input;
+  // a base nobody wrote a row for: a drawn bow charges, everything else repeats
+  return rangedPlan(item)?.kind === 'draw' ? 'charge' : 'repeat';
+}
+
+/** True when holding the button BUILDS something rather than swinging again. */
+export const chargesOnHold = item => inputOf(item) === 'charge';
+
+/** One sentence for the card: what this weapon's button does. */
+export function inputNote(item) {
+  if (inputOf(item) !== 'charge') return 'Hold the attack button to keep attacking.';
+  return isStaff(item)
+    ? 'Hold to build the spell, let go to cast it. A tap is the small version and costs nothing.'
+    : 'Hold to draw, let go to loose. A full draw is worth about three times a flinch.';
+}
 
 /** The trait bag for a weapon, read the same way its pattern is. Always an object. */
 export function traitsOf(item) {
@@ -378,8 +440,82 @@ export function profileOf(item) {
   };
 }
 
-/** The glyph row a card draws: one per strike in the pattern. */
+/**
+ * WHAT SHAPE THIS WEAPON'S SPELL IS, or null for anything made of steel.
+ *
+ * R17, reported in play: a staff's item card drew "· ⟋" — a dot and a slash — as its attack style,
+ * which is a melee jab followed by a melee cut, which a staff has never done. The cause is two
+ * lines apart in this file and neither of them is wrong on its own. `profileOf` falls back to
+ * `CATEGORY_PATTERNS.magic` = `['jab', 'slash']` for anything with no pattern row, `patternGlyphs`
+ * dutifully drew those two glyphs — and a staff's actual attack goes down `STAFF_SPELLS`, which
+ * `patternGlyphs` had never heard of. The card was describing a fallback the weapon never uses.
+ *
+ * So a magic weapon resolves to a SPELL SHAPE instead: the `shape` its spell already carries
+ * (`nova`, `cone`, `wave`, `lob`, `ground`, `chain`), or `bolt` for a wand, whose variety lives in
+ * `WAND_BEHAVIOURS` rather than in a shape. The glyph and the caption come out of the same row of
+ * `js/spellshapes.js`, so the picture and the words cannot drift apart.
+ *
+ * Returns `{ key, label, note, aim, svg, spell, element }`, or null when the weapon is not one that
+ * casts. A raw `quarterstaff` is deliberately NOT one: items.json files it `magic` + `twoHanded`
+ * and `isStaff()` excludes it by name, for the reason written on that function.
+ */
+export function spellShapeOf(item) {
+  if (!item || item.type !== 'weapon') return null;
+  const el = elementFacts(item);
+  if (isStaff(item)) {
+    const spell = staffSpell(item, el?.element || 'arcane');
+    const row = shapeRow(spell.shape);
+    return { ...row, spell, element: el?.element || 'arcane', elementName: el?.name || 'Arc' };
+  }
+  if (isWand(item)) {
+    /**
+     * A WAND THROWS A BOLT — AN ORB DOES NOT, and `isWand()` cannot tell them apart.
+     *
+     * `isWand()` is "magic and one-handed", which is a wand, a sceptre, an orb and a tome. Only a
+     * wand is made `ranged` (`RANGED_CASTERS` in js/rpg.js has exactly one entry), and js/main.js
+     * throws a bolt only `if (weapon.castElement && weapon.ranged)` — so an orb is swung, and its
+     * element rides the blow. Captioning one "a bolt at what you point at" would be a card
+     * describing behaviour the weapon does not have, which is the fault this whole item is about.
+     */
+    if (isRangedWeapon(item)) {
+      const how = wandBehaviour(item);
+      return { ...SPELL_SHAPES.bolt, spell: null, behaviour: how, element: el?.element || null, elementName: el?.name || null };
+    }
+    return { ...SPELL_SHAPES.brand, spell: null, element: el?.element || null, elementName: el?.name || null };
+  }
+  return null;
+}
+
+/**
+ * Does the attack button cast, rather than swing?
+ *
+ * A staff's attack IS the spell and a wand's IS the bolt, so on those two the card should draw the
+ * spell shape instead of a rhythm. An orb, a tome and a sceptre are swung with the element on them,
+ * so their rhythm is still the thing worth drawing and the brand is an extra fact beside it.
+ */
+export function castsInsteadOfSwinging(item) {
+  return isStaff(item) || (isWand(item) && isRangedWeapon(item));
+}
+
+/**
+ * The glyph row a card draws.
+ *
+ * For a weapon you swing, one glyph per strike in the pattern — the rhythm, which is what the
+ * original ask was about ("the attack pattern should be indicated on the weapon using some type of
+ * glyphs"). For a weapon that CASTS, one spell-shape glyph, because a staff has no rhythm to draw.
+ *
+ * THIS RETURNS SVG MARKUP FOR A CASTER, and a string of unicode glyphs for everything else. That
+ * looks odd until you notice where it goes: js/hud.js drops it straight into `innerHTML` inside
+ * `<span class="glyphs">`, and has done since round 14. Returning the picture from the same
+ * function that already returned the picture means the fix is live without hud.js changing at all —
+ * which matters this round, because hud.js is not ours to edit and an unapplied patch is the same
+ * bug by another route. `spellShapeOf()` is there for any screen that wants the pieces separately.
+ */
 export function patternGlyphs(item) {
+  // only a weapon whose attack IS the spell gives up its rhythm row for a spell glyph; an orb is
+  // swung with an element on it, and its rhythm is still the thing worth drawing
+  const shape = castsInsteadOfSwinging(item) ? spellShapeOf(item) : null;
+  if (shape) return shape.svg;
   const p = profileOf(item);
   return p.pattern.map(k => STRIKES[k]?.glyph || '·').join(' ');
 }
@@ -576,8 +712,15 @@ export function weaponFacts(item) {
     const how = wandBehaviour(item);
     castLine = `${el ? el.name + ' bolt' : 'Bolt'} — ${how.desc}, about ${fmt(shotRange)} m.`;
   } else if (staff) {
+    /**
+     * R17 — "free to use" was true when this was written and has not been since round 14: the tap
+     * is free, and the CHARGE spends mana per second held (`STAFF_CHARGE.mana`). Saying "free"
+     * beside a bar that drains your mana is worse than saying nothing.
+     */
     const spell = staffSpell(item, el?.element || 'arcane');
-    castLine = `${spell.name} — a close-range spell, cast instead of a swing and free to use.`;
+    const row = shapeRow(spell.shape);
+    castLine = `${spell.name} — ${row.label.toLowerCase()}, cast instead of a swing. `
+      + 'A tap is free; holding it builds the spell and spends mana.';
   }
 
   // the sentence under the headline
@@ -593,8 +736,12 @@ export function weaponFacts(item) {
     const verb = (item.subtype || item.baseKey) === 'javelin' ? 'It is thrown' : 'It shoots';
     line = `A ${twoHands ? 'two' : 'one'}-handed ${family.toLowerCase()}. ${verb} — about ${fmt(shotRange)} m. ${handNote}`;
   } else {
-    line = `A ${twoHands ? 'two' : 'one'}-handed ${family.toLowerCase()}${attuned}. `
-      + `Swung in melee — ${fmt(profile.reach, { decimals: 1 })} m reach, a swing every ${fmt(profile.every)}s. ${handNote}`;
+    /**
+     * R17 — the reach and the clock used to be here AND in `patternText` two lines below it on the
+     * same card. The rhythm line is the one that knows what the pattern is, so it keeps the
+     * numbers; this sentence says what the thing IS and hands the hands over.
+     */
+    line = `A ${twoHands ? 'two' : 'one'}-handed ${family.toLowerCase()}${attuned}, swung in melee. ${handNote}`;
   }
 
   return {
@@ -655,11 +802,51 @@ export function handedText(item) {
 export function patternText(item) {
   const f = weaponFacts(item);
   if (!f.isWeapon) return '';
-  if (f.ranged || isStaff(item)) return f.line;
+  /**
+   * R17 — AND IT SAYS IT ONCE.
+   *
+   *   "The staff tooltip 'A two-handed staff, attuned to (element) … off hand stays empty' is
+   *    repeated twice in the tooltip."
+   *
+   * It was, word for word. `describeWeapon` writes `weaponFacts().line` onto the item as
+   * `item.weaponLine`, and js/hud.js prints that; then, because a staff is not `ranged` (only a
+   * wand is — see `RANGED_CASTERS` in js/rpg.js), the card fell into its `rangeClass === 'melee'`
+   * branch and printed `patternText(item)` underneath — and `patternText` opened by returning
+   * `f.line`, the identical string. Two printers, one sentence, no way for either of them to know.
+   *
+   * The block below is the one that belongs here: what the weapon DOES when you press the button,
+   * which the headline sentence never says. For a caster that is the spell and its shape; for a
+   * blade it is the rhythm. Neither repeats the sentence above it.
+   */
+  const shape = castsInsteadOfSwinging(item) ? spellShapeOf(item) : null;
+  if (shape) {
+    const spell = shape.spell;
+    const size = spell?.radius ? `about ${fmt(spell.radius, { decimals: 1 })} m across`
+      : spell?.range ? `out to about ${fmt(spell.range, { decimals: 1 })} m`
+      : f.shotRange ? `out to about ${fmt(f.shotRange)} m`
+      : null;
+    const name = spell?.name || (shape.elementName ? `${shape.elementName} bolt` : 'Bolt');
+    return `${name} — a spell, ${shape.label.toLowerCase()}${size ? `, ${size}` : ''}. ${inputNote(item)}`;
+  }
+  if (f.ranged) {
+    const plan = rangedPlan(item);
+    const how = plan?.kind === 'draw' ? 'Drawn and loosed'
+      : plan?.kind === 'reload' ? `One heavy bolt, then ${fmt(plan.reload)}s to crank it back`
+      : 'Thrown';
+    return `${how} — about ${fmt(f.shotRange)} m. ${inputNote(item)}`;
+  }
   const p = profileOf(item);
   const names = p.pattern.map(k => STRIKES[k]?.name || k);
-  return `${f.headline}. ${names.join(', then ')} — ${fmt(p.reach, { decimals: 1 })} m reach, `
-    + `a swing every ${fmt(p.every)}s. ${f.handNote}`;
+  /**
+   * Same rule as the caster branch: no headline, no hand note. Both are already on the line above
+   * this one (`item.weaponLine`), and the reach and the clock were printed twice for every melee
+   * weapon in the game for exactly the same reason the staff sentence was. What is left is the one
+   * thing only this line knows — the rhythm.
+   */
+  /** An orb, a tome or a sceptre: a swing with an element on it, so say both. */
+  const brand = isWand(item) ? spellShapeOf(item) : null;
+  return `${names.join(', then ')} — ${fmt(p.reach, { decimals: 1 })} m reach, `
+    + `a swing every ${fmt(p.every)}s.${brand ? ` ${brand.label}.` : ''} ${inputNote(item)}`;
 }
 
 /**
@@ -844,7 +1031,14 @@ export function withArea(strike, areaPct = 0) {
    * on this object, so folding the charge in here is the whole of it. It is consumed, so the next
    * ordinary swing is an ordinary swing.
    */
-  const charge = feel.swing.charge;
+  /**
+   * …and only a STAFF may spend it. `chargeAt` posts on every frame the button is held, so the
+   * charge sits on the channel until something takes it; without this guard the next ordinary
+   * sword swing after you put a staff away would collect a 1.6x multiplier it never built.
+   * `strike.magic` and `strike.twoHanded` both come off `profileOf`, which is exactly `isStaff`'s
+   * test spelled in the fields the strike already carries.
+   */
+  const charge = (strike.magic && strike.twoHanded) ? feel.swing.charge : null;
   if (charge) {
     feel.swing.charge = null;
     out.scale *= charge.radius ?? 1;
@@ -904,7 +1098,20 @@ export const STAFF_SPELLS = {
     { key: 'lob', name: 'Bile Flask', shape: 'lob', range: 13, radius: 3.4, mult: 0.9, status: 'poison' },
   ],
   arcane: [
-    { key: 'nova', name: 'Unmaking', shape: 'nova', radius: 5.5, mult: 0.95 },
+    /**
+     * R17 — "Unmaking" became "Arc Burst".
+     *
+     *   "I think this is referred to as 'Unmaking' in the tooltip but I don't like that descriptor."
+     *
+     * It was the name of the arcane nova, and it described nothing: "unmaking" is a mood, not a
+     * shape, and the player who reported it had been casting it for an hour without knowing it went
+     * off around his own feet. The new name says the element ("Arc" is what the game already calls
+     * arcane, on the item itself) and what it does. `STAFF_SPELLS` is Farhold's own table — it does
+     * not exist in Emberveil and it is not in the shared `data/items.json` — so the rename is local,
+     * and a staff already carrying `staffSpell: 'nova'` in a save keeps the same spell under the new
+     * word, because the save stores the KEY and not the name.
+     */
+    { key: 'nova', name: 'Arc Burst', shape: 'nova', radius: 5.5, mult: 0.95 },
     { key: 'lob', name: 'Star Shot', shape: 'lob', range: 15, radius: 3, mult: 1.1 },
     { key: 'cone', name: 'Rift Cone', shape: 'cone', range: 9, arc: 0.8, mult: 0.9 },
   ],
@@ -1001,23 +1208,58 @@ export const STAFF_CHARGE = {
  * deliberate — a staff that refuses to do anything for a third of a second reads as broken.
  */
 export function chargeAt(held = 0, c = STAFF_CHARGE) {
-  if (!(held > 0)) return { ready: false, tap: true, power: c.tapPower, radius: c.tapRadius, fill: 0, mana: 0 };
-  if (held < c.min) {
-    return { ready: false, tap: true, power: c.tapPower, radius: c.tapRadius, fill: held / c.min * 0.3, mana: 0 };
-  }
-  let power, radius, fill;
-  if (held <= c.full) {
-    const k = (held - c.min) / Math.max(0.001, c.full - c.min);
-    power = c.powerMin + (c.powerFull - c.powerMin) * k;
-    radius = c.radiusMin + (c.radiusFull - c.radiusMin) * k;
-    fill = 0.3 + k * 0.5;
+  let out;
+  if (!(held > 0)) {
+    out = { ready: false, tap: true, power: c.tapPower, radius: c.tapRadius, fill: 0, mana: 0 };
+  } else if (held < c.min) {
+    out = { ready: false, tap: true, power: c.tapPower, radius: c.tapRadius, fill: held / c.min * 0.3, mana: 0 };
   } else {
-    const k = Math.min(1, (held - c.full) / Math.max(0.001, c.max - c.full));
-    power = c.powerFull + (c.powerMax - c.powerFull) * k;
-    radius = c.radiusFull + (c.radiusMax - c.radiusFull) * k;
-    fill = 0.8 + k * 0.2;
+    let power, radius, fill;
+    if (held <= c.full) {
+      const k = (held - c.min) / Math.max(0.001, c.full - c.min);
+      power = c.powerMin + (c.powerFull - c.powerMin) * k;
+      radius = c.radiusMin + (c.radiusFull - c.radiusMin) * k;
+      fill = 0.3 + k * 0.5;
+    } else {
+      const k = Math.min(1, (held - c.full) / Math.max(0.001, c.max - c.full));
+      power = c.powerFull + (c.powerMax - c.powerFull) * k;
+      radius = c.radiusFull + (c.radiusMax - c.radiusFull) * k;
+      fill = 0.8 + k * 0.2;
+    }
+    out = { ready: true, tap: false, power, radius, fill, mana: c.mana * Math.min(held, c.max) };
   }
-  return { ready: true, tap: false, power, radius, fill, mana: c.mana * Math.min(held, c.max) };
+  /**
+   * R17 — AND THIS IS THE LINE THAT MAKES THE CHARGE REAL.
+   *
+   *   "Also it seems I can hold to charge the spell before releasing, does holding it actually do
+   *    anything? If not, it should repeatedly use the spell instead."
+   *
+   * It did not. Holding the staff did nothing whatsoever, and the reason is a channel with a reader
+   * and no writer — the signature fault of the last four rounds, found again:
+   *
+   *   js/player.js  builds `self.windCharge = { power, radius, tap, fill }` on release and hands it
+   *                 out as `out.charge` from the controller step.
+   *   js/main.js    never reads `step.charge`. `swingWith` takes the strike and the area stat and
+   *                 nothing else.
+   *   js/weapons.js `withArea` reads `feel.swing.charge` — a property NOTHING in the codebase ever
+   *                 assigned. A grep for `swing.charge` returns this file and nothing else.
+   *
+   * So `shape.charge` was permanently undefined, which took the whole of round 15 down with it:
+   * `chargedForm()` is gated on `shape.charge && !shape.charge.tap`, so the jet, the dome, the
+   * wall, the field, the mortar and the storm — six charged forms and about 130 lines of main.js —
+   * had never once fired, and the 0.60x–1.60x damage and 0.7x–2.0x radius were multiplied by one.
+   *
+   * `chargeAt` is the fix because it is the one function BOTH halves already call: js/player.js
+   * runs it every frame while the button is down and once more on release, with the held time. The
+   * last call before a staff's swing is therefore always exactly the charge that was released, so
+   * posting the answer here puts the value on the channel that `withArea` has been reading all
+   * along. No main.js change, no player.js change, one writer.
+   *
+   * `withArea` consumes it and only for a staff swing (see there), so a melee swing can never pick
+   * up a charge left lying on the channel.
+   */
+  feel.swing.charge = out;
+  return out;
 }
 
 /**
@@ -1060,4 +1302,65 @@ export function isStaff(item) {
 export function isWand(item) {
   if (!item) return false;
   return item.weaponCategory === 'magic' && !item.twoHanded;
+}
+
+// ------------------------------------------------------------------ the ramp, said out loud
+
+/**
+ * R17 — WHAT THE CHARGE IS DOING, IN THE FOUR WORDS A BAR NEEDS.
+ *
+ *   "If charging it does increase its power, we need visual indicators to let you know when it has
+ *    ramped up and when it is finished ramping up so that the player can execute it correctly."
+ *
+ * Two separate things had to be true for the player to see anything, and neither was:
+ *
+ *   1. the charge had to DO something — it did not; see the note on `chargeAt` above;
+ *   2. something had to draw it. `js/hud.js` `chargeMeter()` builds `<div class="charge-meter">`
+ *      every frame the button is down… and there is not one `.charge-meter` rule in style.css, or
+ *      in any stylesheet in the project. A bare `<div>` with a bare `<i>` inside it: no size, no
+ *      background, and `width: %` on an inline element does nothing at all. The meter has been
+ *      running, invisibly, since round 15. `js/combat-fx.js` now injects the stylesheet.
+ *
+ * This is the third piece: the STATES, named once here so the bar, the log line and any future
+ * readout all agree on where "fully charged" is.
+ *
+ *   short  under the floor — a release now is the free tap, not the spell you were building
+ *   ready  past the floor and building
+ *   near   inside the last fifth before full
+ *   full   at the ceiling. It releases itself here (js/player.js `autoLoose`), which is the
+ *          "finished ramping up" the player asked to be able to see.
+ */
+export const CHARGE_STATES = ['short', 'ready', 'near', 'full'];
+
+export function chargeState(fill = 0, ready = false) {
+  if (!ready) return 'short';
+  if (fill >= 0.99) return 'full';
+  return fill > 0.8 ? 'near' : 'ready';
+}
+
+/**
+ * The bar's whole datum, from the controller's live `charge` object (js/player.js `self.charge`).
+ *
+ * Never throws and never returns undefined: with nothing charging it hands back `{ active: false }`,
+ * which is the one thing the drawing code has to be able to ask.
+ */
+export function chargeReadout(charge) {
+  if (!charge || !(charge.fill > 0)) return { active: false, fill: 0, ready: false, state: 'short', label: '' };
+  const fill = Math.max(0, Math.min(1, charge.fill));
+  const ready = !!charge.ready;
+  const state = chargeState(fill, ready);
+  return {
+    active: true,
+    fill, ready,
+    state,
+    full: state === 'full',
+    kind: charge.kind || 'charge',
+    power: charge.power ?? 1,
+    radius: charge.radius ?? 1,
+    /** One word under the bar. "Release" is deliberately the loudest, because it is the instruction. */
+    label: state === 'full' ? 'Release'
+      : state === 'near' ? 'Almost'
+      : state === 'ready' ? (charge.kind === 'draw' ? 'Drawing' : 'Building')
+      : (charge.kind === 'draw' ? 'Nocking' : 'Tap'),
+  };
 }

@@ -650,7 +650,10 @@ export class Rpg {
       // round 4: the stats that used to be carried and ignored
       barrier: 0, barrierRegen: 0, cooldownReduction: 0, manaSteal: 0, haste: 0,
       // round 6/7: the perk forest, the quivers and the weapon work all land here
-      areaPct: 0, petDamagePct: 0, petSlots: 0, arrowDamage: 0, arrowsPerShot: 1, arrowHoming: 0,
+      // R17 — `followerSlots` is The Kept Company's grant: how many things may WALK WITH YOU, and
+      // how many of each creature a summoning spell may have standing. `petSlots` is the old key,
+      // still granted by the `cond_companionExtra` affix; js/followers.js adds the two together.
+      areaPct: 0, petDamagePct: 0, petSlots: 0, followerSlots: 0, arrowDamage: 0, arrowsPerShot: 1, arrowHoming: 0,
       arrowBurst: 0, lightRange: 0, revealRange: 0, mountSpeed: 0, mountStamina: 0, mountSlope: 0,
       mountCalm: 0, trample: 0, stealth: 0, staminaEase: 0,
       // R16: how fast the gather bar fills and how much comes off it, so an affix or a perk that

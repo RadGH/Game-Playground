@@ -1,0 +1,100 @@
+/*
+ * Farhold R17 — the Followers screen.
+ *
+ * Its own stylesheet, injected by js/followers-ui.js, so adding a whole screen touches neither
+ * style.css nor index.html. Same palette as the character sheet and the Holding screen: this is one
+ * game, and a second colour scheme would read as a second application.
+ */
+
+.flw {
+  --flw-bg: #080d17;
+  --flw-pane: #0f1624;
+  --flw-line: #223049;
+  --flw-soft: #1a2433;
+  --flw-ink: #cfe0ef;
+  --flw-dim: #9fb0c8;
+  --flw-faint: #7f8ea4;
+  --flw-accent: #7fd8ff;
+  --flw-gold: #ffd24a;
+  --flw-good: #8fe0a0;
+  --flw-bad: #ff9a8a;
+
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 12px;
+  padding: 20px;
+  background: var(--flw-bg);
+  color: var(--flw-ink);
+  font: 13px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+
+.flw[hidden] { display: none !important; }
+
+/* …and the same screen as a tab of the character sheet, which is where the lead agent mounts it */
+.flw--tab {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+}
+.flw--tab .flw-head { padding-bottom: 6px; }
+.flw--tab .flw-head h2 { font-size: 15px; }
+
+.flw-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--flw-line); padding-bottom: 10px; }
+.flw-head h2 { margin: 0; font-size: 20px; color: var(--flw-accent); }
+.flw-head .flw-sub { color: var(--flw-faint); font-size: 12px; }
+.flw-head .flw-close { margin-left: auto; background: none; border: 1px solid var(--flw-line); color: var(--flw-dim); border-radius: 4px; padding: 4px 10px; cursor: pointer; font: inherit; }
+.flw-head .flw-close:hover { color: var(--flw-ink); border-color: var(--flw-accent); }
+
+.flw-rail { display: flex; gap: 6px; flex-wrap: wrap; }
+.flw-rail button { background: var(--flw-soft); border: 1px solid var(--flw-line); color: var(--flw-dim); border-radius: 4px; padding: 5px 12px; cursor: pointer; font: inherit; }
+.flw-rail button:hover { color: var(--flw-ink); }
+.flw-rail button.on { background: var(--flw-pane); color: var(--flw-accent); border-color: var(--flw-accent); }
+
+.flw-body { overflow: auto; padding-right: 6px; }
+.flw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; align-items: start; }
+
+.flw-pane { background: var(--flw-pane); border: 1px solid var(--flw-line); border-radius: 6px; padding: 12px 14px; }
+.flw-pane h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--flw-faint); }
+.flw-empty { color: var(--flw-faint); font-style: italic; padding: 6px 0; }
+.flw-note { color: var(--flw-faint); font-size: 12px; }
+.flw-bad { color: var(--flw-bad); }
+.flw-good { color: var(--flw-good); }
+.flw-gold { color: var(--flw-gold); }
+
+.flw-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 7px 0; border-bottom: 1px solid var(--flw-soft); }
+.flw-row:last-child { border-bottom: none; }
+.flw-row b { font-weight: 600; }
+.flw-row .flw-right { color: var(--flw-dim); text-align: right; font-variant-numeric: tabular-nums; }
+.flw-row .flw-sub { grid-column: 1 / -1; color: var(--flw-faint); font-size: 12px; }
+.flw-row .flw-act { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.flw-row button { background: var(--flw-soft); border: 1px solid var(--flw-line); color: var(--flw-dim); border-radius: 4px; padding: 3px 10px; cursor: pointer; font: inherit; font-size: 12px; }
+.flw-row button:hover { color: var(--flw-ink); border-color: var(--flw-accent); }
+.flw-row button.flw-go { color: var(--flw-gold); border-color: var(--flw-gold); }
+.flw-row button[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* the slot strip: one box a slot, filled ones lit */
+.flw-slots { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.flw-slot { width: 30px; height: 30px; border-radius: 5px; border: 1px solid var(--flw-line); background: var(--flw-soft); display: grid; place-items: center; font-size: 15px; color: var(--flw-faint); }
+.flw-slot.full { border-color: var(--flw-accent); color: var(--flw-accent); background: #14243a; }
+.flw-slot.locked { opacity: 0.35; }
+
+.flw-hp { height: 4px; background: var(--flw-soft); border-radius: 2px; overflow: hidden; grid-column: 1 / -1; }
+.flw-hp i { display: block; height: 100%; background: var(--flw-good); }
+
+@media (max-width: 720px) {
+  .flw { padding: 12px; }
+  .flw-grid { grid-template-columns: 1fr; }
+}
+
+/* the respec's box, which lives beside the tab body rather than inside it — see js/followers-ui.js */
+.flw-respec { overflow: auto; min-height: 0; }
+.flw-respec[hidden] { display: none !important; }

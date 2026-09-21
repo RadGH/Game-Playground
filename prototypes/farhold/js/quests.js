@@ -30,6 +30,33 @@ export const STARTED_KINDS = ['raid', 'fall'];
 /** Is this a job the world offered you, or one you set going yourself? */
 export const isStarted = quest => STARTED_KINDS.includes(quest?.kind);
 
+/**
+ * R17 — THE HAND-HOLDING LINE IS A QUEST LIKE ANY OTHER.
+ *
+ * js/onboarding.js's five steps live in one quest of this kind. It is deliberately NOT in
+ * `STARTED_KINDS`: it has a real giver in a real town, and handing it in at the end is what clears
+ * that giver's cached offer (js/town.js caches `npc.offered` and only the turn-in path clears it),
+ * so a line that paid itself in a field would leave the one person who helped you with nothing else
+ * to say for the rest of the run.
+ */
+export const ONBOARD_KIND = 'onboard';
+
+/**
+ * R17 — THE JOB A GIVER HANDS OVER BEFORE ANY OTHER.
+ *
+ * js/town.js's `questFrom` is the only door a settlement's work comes through, and every one of its
+ * six tries calls `makeQuest`. Asking here — once, at the top — is what lets the onboarding line be
+ * offered by whoever in the starter town gives out work, through the talk screen that already
+ * exists, without js/town.js or js/main.js knowing anything about it.
+ *
+ * It is a single slot rather than a list because there is only ever one first job, and a list would
+ * be a queue nobody could see the order of. `setFirstJob(null)` turns it off again.
+ */
+let firstJob = null;
+export function setFirstJob(fn) { firstJob = typeof fn === 'function' ? fn : null; }
+/** For the tests: what is registered right now. */
+export function getFirstJob() { return firstJob; }
+
 /** How many, and what it pays. Scaled by the player's level. */
 const SHAPE = {
   hunt:   { count: [3, 7],  gold: [35, 80],  xp: [40, 90] },
@@ -82,6 +109,20 @@ function nearest(rng, list, { from = null, wrapM = 0, budget = NEAR_METRES } = {
  * settlement the giver stands in) }
  */
 export function makeQuest(kind, ctx) {
+  /**
+   * R17: the onboarding line gets first refusal, and it refuses itself the moment the player has
+   * taken it, levelled past it, or built anything — see js/onboarding.js `offerFor`. A thrown error
+   * in there must not cost the giver their job offer, hence the guard: a broken tutorial is never
+   * allowed to be the reason a town has no work.
+   */
+  if (firstJob) {
+    try {
+      const first = firstJob(ctx);
+      if (first) return first;
+    } catch (err) {
+      console.warn('quests: the first-job hook threw; falling back to ordinary work', err);
+    }
+  }
   const {
     rng, level = 1, giver, enemies = [], nodes = [], terrain, from = null,
     // R14: where the giver is standing, how wide the world is, and what level a place sits at.
@@ -418,6 +459,15 @@ export class QuestLog {
   /** "2 / 5" for the journal. */
   progressText(q) {
     if (q.kind === 'visit') return q.done ? 'arrived' : 'not yet there';
+    /**
+     * R17 — the onboarding line counts its own steps. `q.step` is the index of the step you are ON,
+     * so the row reads "2 / 5" while you are working the third one, which is what a progress line
+     * is for. `?? 0` matters: a save written before this round has no `step` field at all, and
+     * `undefined / 5` on the journal row would read "NaN / 5".
+     */
+    if (q.kind === ONBOARD_KIND) {
+      return q.done ? 'ready to hand in' : `${Math.min(q.step ?? 0, q.count ?? 0)} / ${q.count ?? 0}`;
+    }
     if (q.kind === 'fall') {
       if (q.done) return 'opened';
       // R15: short enough for the Nearby panel's second line, which is about ninety pixels wide

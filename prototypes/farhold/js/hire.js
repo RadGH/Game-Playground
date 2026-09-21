@@ -37,13 +37,27 @@ export const HIRE_ROLE_WORDS = {
   healer: { name: 'Healer', note: 'Keeps you standing rather than killing anything.' },
 };
 
-/** What the hired body is carrying, read off its look so the offer cannot lie about it. */
+/**
+ * What the hired body is carrying, read off its look so the offer cannot lie about it.
+ *
+ * TWO SHAPES OF LOOK, because there are two in the game. `data/enemies.json`'s `sellsword` uses a
+ * compact `{ parts: { weapon, offhand, chest } }` form; everything built on the real avatar schema
+ * (the thirty class looks, and R17's ten mercenary types) uses `{ held: { id }, offhand: { id },
+ * top: { id } }`. Reading only the first meant a mercenary whose look was a real avatar simply had
+ * no "Carrying" line — an empty row rather than a wrong one, which is why nobody noticed.
+ */
 function armedWith(look) {
-  const parts = look?.avatar?.parts || {};
+  const a = look?.avatar || {};
+  const parts = a.parts || {};
+  const id = v => (typeof v === 'string' ? v : v?.id) || null;
   const words = [];
-  if (parts.weapon) words.push(String(parts.weapon).replace(/_/g, ' '));
-  if (parts.offhand) words.push(String(parts.offhand).replace(/_/g, ' '));
-  const armour = parts.chest ? String(parts.chest).replace(/_/g, ' ') : null;
+  const main = parts.weapon || id(a.held);
+  const off = parts.offhand || id(a.offhand);
+  // "none" is a real part id meaning nothing at all, and it must not print as a weapon called none
+  const real = v => (v && v !== 'none' ? String(v).replace(/^fh_/, '').replace(/_/g, ' ') : null);
+  if (real(main)) words.push(real(main));
+  if (real(off)) words.push(real(off));
+  const armour = real(parts.chest || id(a.top));
   if (!words.length && !armour) return null;
   return [words.join(' and '), armour].filter(Boolean).join(', over ');
 }
@@ -91,6 +105,54 @@ export function hireOffer(who, { playerLevel = 1, gold = 0, pet = null } = {}) {
     declineText: 'Not today',
     /** Why you cannot, if you cannot. The panel prints this instead of lighting the button. */
     refusal: gold >= price ? null : `They want ${price} gold up front and you have ${gold}.`,
+  };
+}
+
+/**
+ * R17 — THE PERSON ON THE ROAD SELLS ONE OF THE TEN TYPES, NOT ALWAYS THE SAME SELLSWORD.
+ *
+ *   "Companions should also be hireable at town, which we sort of have right now but is only for a
+ *    single person. Update that to be a mercenary person who sells mercenaries to the player and
+ *    add a variety of types with their own spells."
+ *
+ * The hire path had exactly one product: `sellsword`, the one humanoid in the bestiary's pet table.
+ * `data/mercenaries.json` has ten, each with its own numbers, its own spells and its own upgrades,
+ * and js/followers.js is what sells them from a board in a settlement. This is the other door: the
+ * mercenary captain you meet on the ROAD, who cannot carry a board around with them and offers one
+ * person, take it or leave it.
+ *
+ * WHICH one is deterministic from who they are, so walking away and coming back does not reshuffle
+ * the person in front of you mid-sentence — the same rule the town board follows for the same
+ * reason. Returns the offer with a `mercId` on it, which is what the accept handler summons.
+ */
+export function roadHireOffer(who, { mercenaries = [], playerLevel = 1, gold = 0, scaling = null } = {}) {
+  if (!who) return null;
+  const pool = mercenaries.filter(m => (m.minLevel ?? 1) <= playerLevel + 3);
+  if (!pool.length) return hireOffer(who, { playerLevel, gold });
+  // a plain hash of their id, so this person always sells the same thing
+  const text = String(who.id ?? who.name ?? 'someone');
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+  const merc = pool[Math.abs(h) % pool.length];
+  const per = scaling?.pricePerLevel ?? 0.12;
+  const price = Math.max(1, Math.round((merc.price ?? 200) * (1 + per * Math.max(0, playerLevel - 1))));
+  const base = hireOffer({ ...who, hire: { ...(who.hire || {}), gold: price, hp: merc.hp, dmg: merc.dmg } }, {
+    playerLevel, gold,
+    pet: { role: merc.role, attackEvery: merc.attackEvery, reach: merc.ranged?.range || merc.reach, look: merc.look },
+  });
+  if (!base) return null;
+  return {
+    ...base,
+    mercId: merc.id,
+    name: who.name || merc.name,
+    subtitle: [merc.name, base.subtitle].filter(Boolean).join(' · '),
+    blurb: merc.blurb || base.blurb,
+    rows: [
+      ...base.rows,
+      ['Casts', (merc.abilities || []).map(a => a.name).join(', ') || 'nothing — they just hit things'],
+      ['Grows into', (merc.upgrades || []).map(u => `level ${u.atLevel}: ${u.note}`).join(' · ') || 'no more than they are'],
+    ],
+    terms: 'Paid up front. They take one of your follower slots, level with you, and walk with you until they fall or you let them go.',
   };
 }
 

@@ -1,0 +1,108 @@
+{
+  "_doc": "R17 — the hand-holding line. \"Let's add a brief onboarding quest line that holds the hand of the player and guides them through accepting a quest at the starter town, harvesting basic resources, and starting a basic base. This quest should require you to get enough resources to build the necessary stuff required to smelt iron ore.\" FIVE steps, no more, because a tutorial you cannot see the end of is a tutorial people turn off. Every target below is an id that has to resolve against data that already exists — data/structures.json, data/refining.json, data/resources.json — and tests/round17-onboarding.test.js fails loudly if one of them stops resolving. That is deliberate: js/jobgen.js's rule is 'nothing is invented, so nothing can send you to an empty field', and a tutorial that points at a structure somebody renamed is the worst possible version of that bug because it is the first thing a new player ever sees.",
+
+  "id": "q_onboard",
+  "title": "First Ground",
+  "blurb": "Somewhere to stand, something to burn, and the first iron you ever pulled out of this world.",
+
+  "_offerDoc": "When a quest-giver offers it, and — much more importantly — when nobody ever will. A returning character must not be nagged: `maxLevel` keeps it off anybody who has played, `notIf` keeps it off a save that has already done the work, and once it is taken or finished it is never offered again. There is no decline button in the talk screen's job card (js/talkui.js only draws 'Take the job'), so declining IS walking away — which is why the gates below have to be the real protection rather than a flag the player sets.",
+  "offer": {
+    "maxLevel": 6,
+    "notIf": {
+      "material": "iron_ingot",
+      "atLeast": 1,
+      "built": 1,
+      "_doc": "An ingot in the bag, or anything at all standing, means this player does not need telling. `built` is how many of your own structures are up before the offer stops."
+    }
+  },
+
+  "_giverDoc": "What the person in the town says. One paragraph, spoken by whoever in the starter town gives out work — the offer is not tied to a hand-picked NPC, because a named stranger who might not have been spawned is exactly the empty field this project keeps falling into. Whoever hands out jobs hands out this one first.",
+  "giver": {
+    "text": "You came down with nothing, so start with nothing. Cut wood, break rock, put a box on the ground to keep it in, and get a fire hot enough to turn ore into metal. Do that much and you are somebody who lives here. Come back when you have an ingot and I will see you right.",
+    "accepted": "Good. Trees first."
+  },
+
+  "_stepsDoc": "In order, and the order is the whole design: each step assumes the one above it is done, so each one only has to say ONE thing. `hud` is the line under the health bars and it must name the key you press — round 10's review found the game 'never said what to do', and 'gather materials' is not saying what to do. `check` is how the step notices it is finished, and every check reads what is actually standing or actually in a pool rather than a flag somebody remembered to set, because a flag that drifts out of step tells you to do something you have already done.",
+  "steps": [
+    {
+      "id": "hired",
+      "name": "Take the job",
+      "hud": "E to talk · take the job",
+      "text": "Somebody in town has work for a newcomer. Take it.",
+      "where": "The nearest settlement",
+      "check": { "kind": "accepted" },
+      "reward": { "gold": 15, "xp": 20, "kind": "coin" },
+      "research": 1,
+      "_doc": "Completed by the act of accepting, so the first thing the line ever does is pay you. A tutorial step you finish before you have read it is the cheapest possible way to teach somebody that these steps pay out."
+    },
+    {
+      "id": "timber",
+      "name": "Cut timber and break stone",
+      "hud": "E on a tree, then on a boulder",
+      "text": "Everything you are about to build starts as wood and rock. Put any weapon in your hand — that is your tool — and work a tree and a boulder until you have enough of both.",
+      "where": "Anywhere with trees and loose rock",
+      "check": {
+        "kind": "materials",
+        "need": { "log": 8, "stone": 20 },
+        "nodes": ["tree", "boulder"],
+        "_doc": "The numbers are not picked out of the air: 20 stone is exactly what a Campfire and a Furnace cost between them in data/structures.json, and 8 logs covers the store's timber however the plank chain ends up being fixed. The test asserts need >= what those structures actually cost, so if somebody makes a furnace dearer this step stops being a lie about how much you need."
+      },
+      "reward": { "gold": 20, "xp": 35, "kind": "coin" },
+      "research": 1
+    },
+    {
+      "id": "store",
+      "name": "Put a crate on the ground",
+      "hud": "B for build · Storage",
+      "text": "A pile of materials on the floor is yours alone. A crate is what makes it a base: anything you build within reach of one can spend what is in it, and the first thing you ever put down stakes your claim for free.",
+      "where": "Build mode (B) · Storage",
+      "check": {
+        "kind": "structure",
+        "anyOf": ["storage_crate", "storage_box"],
+        "pool": true,
+        "_doc": "`anyOf` rather than one id because round 17 is re-cutting the early chain and the cheap store may end up called either thing; the test insists at least one of them exists. `pool` is the real completion — a storage pool has formed — so the step cannot be finished by a structure that happens to share the name but holds nothing."
+      },
+      "reward": { "gold": 25, "xp": 45, "kind": "coin" },
+      "research": 2
+    },
+    {
+      "id": "heat",
+      "name": "Dig clay and raise a furnace",
+      "hud": "B for build · Refining",
+      "text": "Ore is not metal. A furnace is what makes any, and it is stone and clay — and clay only forms beside water, so a marsh, a riverbank, a lakeshore or a beach. It needs no tool at all: your hands will do.",
+      "where": "Map (M) · Find · sweep for Clay, then Build (B) · Refining",
+      "check": {
+        "kind": "structure",
+        "anyOf": ["furnace"],
+        "_doc": "Only the furnace is required. A Campfire burns logs into charcoal and is the better fuel, but data/refining.json lets a furnace burn plain logs — so demanding a campfire first would be a step you can skip, and a tutorial that asks for something optional teaches the player to ignore it."
+      },
+      "reward": { "gold": 30, "xp": 60, "kind": "coin" },
+      "research": 2
+    },
+    {
+      "id": "ingot",
+      "name": "Smelt your first iron",
+      "hud": "E on an ore seam, then E on the Furnace",
+      "text": "Iron ore breaks out of an outcrop — hills, badlands, or plain open grassland. Bring it back, walk up to the furnace, press E and queue the smelt. Feed it logs if you have nothing better to burn.",
+      "where": "Map (M) · Find · sweep for Iron Ore",
+      "check": {
+        "kind": "recipe",
+        "recipe": "smelt_iron",
+        "material": "iron_ingot",
+        "count": 1,
+        "_doc": "The recipe id is named so the test can prove it still exists, still runs on a machine the previous step builds, and still puts out the material this step is waiting for. The completion itself is the ingot being in a pool or in the bag, because there are other honest ways to make one and a tutorial should never refuse work you actually did."
+      },
+      "finishes": true,
+      "research": 4
+    }
+  ],
+
+  "_finishDoc": "The last step finishes the QUEST, and the quest is handed in the ordinary way — at the person who gave it, or from the journal's own 'Hand it in' button (R16). It is deliberately not one of the STARTED_KINDS that pay themselves: handing it in clears the giver's cached offer so they have real work for you next time, and it counts as a job on the campaign's ledger, both of which you lose if the line quietly pays itself in a field.",
+  "reward": {
+    "gold": 90,
+    "xp": 140,
+    "kind": "crate",
+    "extras": {}
+  },
+  "finished": "That is a base. Everything after this is bigger versions of the same four moves."
+}

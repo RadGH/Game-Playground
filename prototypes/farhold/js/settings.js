@@ -92,7 +92,35 @@ export const BINDINGS = [
   { action: 'interact', label: 'Talk, open, enter', code: 'KeyE' },
   { action: 'firstPerson', label: 'First person (hold to look around)', code: 'KeyV' },
   { action: 'torch', label: 'Light on and off', code: 'KeyL' },
-  { action: 'log', label: 'What has happened', code: 'KeyK' },
+  /**
+   * R17 — THE KEY THAT HAD TWO OWNERS.
+   *
+   *   "Pressing 'K' opens a new civilization menu… This also opens the combat log though it shows
+   *    up behind the window… Also the 'L' hotkey no longer closes the combat log but K does. I
+   *    assume we re-worked the hotkeys. Can you clean that up?"
+   *
+   * `log` was on KeyK in this table while js/main.js had the Holding hard-coded on KeyK and never
+   * put it in the table at all — so K ran both, and the Holding was the one that got the cursor.
+   * The Holding is a real row now, which is what stops a second owner of a key appearing again.
+   *
+   * The log has **no default key**: it is the eighth tab of the character sheet, which is what the
+   * user asked for ("the combat log could simply be added to the inventory screen as the 8th tab"),
+   * so `I` then `8` opens it. The row stays so it is still on the rebinding panel for anyone who
+   * wants it back on a key of its own — `keyFor` already returns null for an action nobody has
+   * bound, and `drawKeyHint` already prints that as "unbound" rather than inventing a keycap.
+   * L stays the light, on foot and in the ship, because that is what was asked for in round 15.
+   */
+  { action: 'log', label: 'What has happened (also sheet tab 8)', code: null },
+  { action: 'holding', label: 'The Holding', code: 'KeyK' },
+  /**
+   * Build mode had the same gap the Holding did — hard-coded on KeyB in js/main.js and missing
+   * from this table, so it could not be rebound and nothing stopped a later round handing KeyB to
+   * something else as well. tests/round17-ui.test.js now fails if any key listened for in
+   * js/main.js is absent from here, which is the rule rather than the instance.
+   */
+  { action: 'build', label: 'Build mode', code: 'KeyB' },
+  // R17 — your company: who follows you, the mercenary board, and the spell respec.
+  { action: 'company', label: 'Followers', code: 'KeyF' },
   { action: 'mount', label: 'Whistle for the horse', code: 'KeyH' },
   { action: 'ship', label: 'Call the ship', code: 'KeyJ' },
   { action: 'map', label: 'Map or star chart', code: 'KeyM' },

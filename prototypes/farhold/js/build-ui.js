@@ -21,6 +21,9 @@
 // have is exactly what the placement will find.
 
 import { el } from '../../../shared/ui.js';
+import { createStationScreen, drawStationBody } from './station-ui.js';
+import { createResearchScreen } from './research-ui.js';
+import { sharedResearch } from './research.js';
 
 /**
  * The tools, in the order a base is actually built.
@@ -29,29 +32,71 @@ import { el } from '../../../shared/ui.js';
  * (§4.11 — most pieces want a 1-in-5 bank and the planet is rarely that), so a player who tries the
  * list top-down and gets "the ground is too steep" four times has been failed by the ordering, not
  * by the game.
+ *
+ * R17 ADDED `kind`, AND IT IS THE WHOLE OF THE SECOND HALF OF THE PANEL COMPLAINT.
+ *
+ *   "The build menu itself could use some work. For example it shows a list of building category
+ *    buttons and a list of buildings even if the 'Place' option is not selected. If I select
+ *    'Scan', it shouldn't show those placement options."
+ *
+ * Quite right, and it was not a display bug so much as a missing fact: nothing in this file knew
+ * which tools PLACE something. The category row, the catalogue and the detail card were simply
+ * always drawn. `kind` is that fact, stated once:
+ *
+ *   place  — the catalogue is the point (Place, Road, Wall; a road and a wall are still a choice of
+ *            WHICH piece, so they keep the list and it is filtered to their own family).
+ *   brush  — a circle of ground. Size, not catalogue.
+ *   scan   — the sweep and what it found.
+ *   point  — you aim it at a thing that is already standing. Nothing to choose beforehand.
  */
-const TOOLS = [
-  { key: 'smooth', name: 'Level', hint: 'Flatten a circle of ground to the height under the cursor. Do this first.' },
-  { key: 'build', name: 'Place', hint: 'Put the selected piece down. Scroll to turn it.' },
-  { key: 'road', name: 'Road', hint: 'Click a corner, then another, then press Enter. It lays one smooth road, not a row of tiles — the ground comes up to meet it and the corners round themselves. Goods travel far quicker over one.' },
-  { key: 'wall', name: 'Wall', hint: 'Same as Road, but a wall — and a gate goes where you double back over a corner.' },
-  { key: 'raise', name: 'Raise', hint: 'Pull the ground up under the brush.' },
-  { key: 'lower', name: 'Lower', hint: 'Push it down. A moat is a lowered ring.' },
-  { key: 'clear', name: 'Clear', hint: 'Fell every tree, bush and boulder in the brush, and keep what they drop. [ and ] size the brush.' },
+export const TOOLS = [
+  { key: 'smooth', name: 'Level', kind: 'brush', hint: 'Flatten a circle of ground to the height under the cursor. Do this first.' },
+  { key: 'build', name: 'Place', kind: 'place', hint: 'Put the selected piece down. Scroll to turn it.' },
+  { key: 'road', name: 'Road', kind: 'place', cats: ['road'], hint: 'Click a corner, then another, then press Enter. It lays one smooth road, not a row of tiles — the ground comes up to meet it and the corners round themselves. Goods travel far quicker over one.' },
+  { key: 'wall', name: 'Wall', kind: 'place', cats: ['defence'], hint: 'Same as Road, but a wall — and a gate goes where you double back over a corner.' },
+  { key: 'raise', name: 'Raise', kind: 'brush', hint: 'Pull the ground up under the brush.' },
+  { key: 'lower', name: 'Lower', kind: 'brush', hint: 'Push it down. A moat is a lowered ring.' },
+  { key: 'clear', name: 'Clear', kind: 'brush', hint: 'Fell every tree, bush and boulder in the brush, and keep what they drop. [ and ] size the brush.' },
   /**
    * The scanner. It comes before Take down because finding a seam is an early-game job and
    * deconstructing is a late one.
    */
-  { key: 'scan', name: 'Scan', hint: 'Sweep for ore, stone, clay and timber. [ and ] widen the sweep. What it finds is listed below and pinned to the map.' },
-  { key: 'remove', name: 'Take down', hint: 'Deconstruct what you point at. Most of the cost comes back.' },
+  { key: 'scan', name: 'Scan', kind: 'scan', hint: 'Sweep for ore, stone, clay and timber. [ and ] widen the sweep. What it finds is listed below and pinned to the map.' },
+  { key: 'remove', name: 'Take down', kind: 'point', hint: 'Deconstruct what you point at. Most of the cost comes back.' },
   /**
    * The route tool: click a drill, then click a store.
    *
    * It is a build-mode tool rather than a panel button because the two things it joins are both
    * standing in the world, and picking them off a list would mean naming forty crates.
    */
-  { key: 'route', name: 'Route', hint: 'Click a drill, then a store. How far apart they are decides how fast the ore moves.' },
+  { key: 'route', name: 'Route', kind: 'point', hint: 'Click a drill, then a store. How far apart they are decides how fast the ore moves.' },
 ];
+
+/** The tool that is up, as a row of the table above. Falls back to Place, which is the default. */
+export const toolInfo = key => TOOLS.find(t => t.key === key) || TOOLS.find(t => t.key === 'build');
+
+/**
+ * WHICH CATEGORIES THE TOOL THAT IS UP CAN ACTUALLY USE — the whole of the panel-tidy rule, and it
+ * is a pure function so `node --test` can check it without a browser.
+ *
+ * Place gets all of them. Road and Wall get their own family and nothing else, because picking a
+ * Statue while the Road tool is up was only ever a way to make the panel quote a price for
+ * something the tool would never lay. Every other tool gets NONE, and the category row, the
+ * catalogue and the detail card then draw nothing at all.
+ */
+export function catsForTool(toolKey, catKeys = []) {
+  const info = toolInfo(toolKey);
+  if (info.kind !== 'place') return [];
+  if (!info.cats) return [...catKeys];
+  return catKeys.filter(k => info.cats.includes(k));
+}
+
+/**
+ * R17 — this panel's own stylesheet, loaded by this module, the way civics.css and station.css are.
+ * Only the rules this round added: the `hidden` tool rail, a locked catalogue row and two buttons.
+ * Everything the panel already looked like is still style.css's.
+ */
+const CSS_HREF = 'buildpanel.css';
 
 /**
  * THE FIRST THING A NEW PLAYER NEEDS IS NOT A CATALOGUE, IT IS A SENTENCE.
@@ -74,10 +119,17 @@ const TOOLS = [
 const FIRST_STEPS = [
   'Materials come off the land: swing at a tree for timber, a boulder for stone, a seam for ore. Your weapon is your tool.',
   'Pick Level, aim at flat-ish ground and click. Whatever is growing there comes down and you keep it. That is your plot.',
-  'Pick Place and put down a Furnace and a Storage Crate. You can build anywhere — no permit, no marker, no ceremony.',
-  'Build a Burner Generator beside the crate and put coal in the crate. Anything within reach of a store shares its pile.',
-  'Pick Scan to find the seams around you, then put a Drill on one — it finds its own way to your store.',
-  'Far from home? Put a crate out there too and link it back. The load takes a while; a road makes it much quicker.',
+  /**
+   * R17 REWROTE THE THIRD AND ADDED THE FOURTH, and the reason is the deadlock the round opened on.
+   * It used to say "put down a Furnace and a Storage Crate" — and the crate cost six planks, which
+   * came off a Sawmill, which cost eight iron ingots, which came out of the Furnace. The Crafting
+   * Table is the rung that was missing: logs and stone, its own shelf, and it splits planks.
+   */
+  'Pick Place and put down a Crafting Table — six logs and two stone. Walk up to it, press E, and split some logs into planks.',
+  'Build a Storage Box out of six of those planks, then a Furnace beside it. Anything within reach of a store shares its pile.',
+  'Press E at the Furnace, queue Smelt Iron, and hold E to work it. That is your first ingot — and a Storage Chest after it.',
+  'Pick Scan to find the seams around you, then put a Small Drill on one — it finds its own way to your store.',
+  'Far from home? Put a box out there too and link it back. The load takes a while; a road makes it much quicker.',
 ];
 
 /**
@@ -109,7 +161,11 @@ function costLine(cost, have) {
 }
 
 export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, onClose = null, mining = null, scan = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null,
-  /** R16 — `{ list(), build(kind, id) }`. The tools and devices bench; see `drawToolBench`. */
+  /**
+   * R16 — `{ list(), build(kind, id) }`. R17 moved the rows themselves out to the station screen
+   * (js/station-ui.js `drawToolPanel`), where they are filtered by each row's own `at` bench; this
+   * panel only passes the callbacks through.
+   */
   tools = null,
   /**
    * R15 — `() => ({ text, why, where })`, or null when the chain is finished. See js/nextstep.js.
@@ -117,6 +173,10 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
    */
   nextStep = null,
 } = {}) {
+  if (typeof document !== 'undefined' && !document.querySelector(`link[href="${CSS_HREF}"]`)) {
+    document.head.appendChild(el('link', { rel: 'stylesheet', href: CSS_HREF }));
+  }
+
   const pieces = catalogue?.structures || [];
   const categories = catalogue?.categories || {};
   const have = id => (store?.have ? store.have(id) : 0);
@@ -147,6 +207,8 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
    * scanner. It looks identical, so it shares the LOOK — see `.build-scan` in style.css.
    */
   const scanBox = el('div', { class: 'build-scan' });
+  /** What the brush tools have to say for themselves, now that they no longer borrow the catalogue. */
+  const brushBox = el('div', { class: 'build-brush' });
   /** §2 — the bench you are standing next to, and what it can make. */
   const benchBox = el('div', { class: 'build-bench' });
   /** §9 — the pad, the four subsystems, the ship, and the tanks. */
@@ -157,20 +219,20 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
    * shipyard silently gets the holding.
    */
   const yardBox = el('div', { class: 'build-yard build-shipyard' });
-  /** The motorcycle, the car and the truck — built at a bench, not placed on the ground. */
-  const garageBox = el('div', { class: 'build-yard build-garage' });
   /**
-   * R16 — THE TOOL BENCH.
+   * R17 — THE GARAGE AND THE TOOL BENCH ARE NOT IN THIS PANEL ANY MORE.
    *
-   *   "Instead of having tool be based on weapon (no idea how that works) change it so you build
-   *    new tools."
+   *   "It also has a 'Tools and devices' menu where I can craft a knapped tool… I think that menu
+   *    should only open if you open a crafting table of some kind. There is also a garage menu…
+   *    there should be a distinct Garage building where you manage that sort of thing."
    *
-   * It belongs here and not in the crafting screen for one plain reason: a tool is paid for out of
-   * the MATERIALS bag — timber, stone, iron ingots — which is the same purse everything else in
-   * this panel spends, and the crafting screen spends the three recycled gear materials instead.
-   * Making the player carry the cost across two economies to build a pickaxe would be silly.
+   * Both were sections of the build panel that appeared whenever you happened to stand near any
+   * bench at all, which meant the panel was a menu of everything in the game at once and neither
+   * one belonged to a building. They are STATIONS now (js/station-ui.js): the tools live at the
+   * Crafting Table, the Anvil and the Workbench — filtered by the `at` key data/tools.json has
+   * carried since the day it was written and nothing has ever read — and the garage lives at a
+   * Garage, which you build. The two boxes are gone from the body below; nothing replaced them.
    */
-  const toolsBox = el('div', { class: 'build-yard build-tools-bench' });
   /** §6.5/6.8/6.9 — the people who live here, the fields they work, and the tax they pay. */
   const holdBox = el('div', { class: 'build-yard build-holding' });
   /** §6.6 — ten units of work, and who is putting them in. */
@@ -189,11 +251,49 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
    * always reachable.
    */
   const body = el('div', { class: 'build-body' },
-    steps, toolRow, catRow, listBox, scanBox, minesBox, benchBox, toolsBox, workBox, holdBox, garageBox, yardBox, detail);
+    steps, toolRow, catRow, listBox, brushBox, scanBox, minesBox, benchBox, workBox, holdBox, yardBox, detail);
   root.append(head, body, keys);
+
+  /**
+   * R17 — THE TWO SCREENS THIS PANEL IS THE DOOR TO.
+   *
+   * They are created here rather than in js/main.js for one plain reason: everything they need —
+   * the works, the purse, the tool list, the garage, the shipyard, the work board — is already
+   * handed to this panel, so wiring them here costs nothing and adds no argument to a call site in
+   * somebody else's file. `openStation` is what js/main.js's E handler should call (see
+   * research/round17-build-handoff.md); until it does, the bench section below carries a button
+   * that opens the same screen, so neither of these is a finished module with no door.
+   */
+  const station = createStationScreen({
+    catalogue, works, store, build, tools, garage, shipyard, workboard,
+    onLog,
+    /**
+     * CLOSING THE STATION ONLY LEAVES BUILD MODE IF THE STATION WAS THE WHOLE REASON YOU WERE IN IT.
+     *
+     * `onClose` is js/main.js's `build.setMode(false); …; regrab()`. That is exactly right when E
+     * opened the screen straight off the ground — the pointer has to come back. It is exactly wrong
+     * when you opened it from the build panel's own bench section, because then the panel is still
+     * up behind it and dropping out of build mode to close a sub-screen would be the game taking a
+     * mode away you did not ask it to.
+     */
+    onClose: () => { if (!open) onClose?.(); },
+  });
+  const research = sharedResearch({ catalogue });
+  const researchScreen = createResearchScreen({ research, log: onLog, standalone: true });
 
   head.append(
     el('h2', { text: 'Build' }),
+    /**
+     * R17 — the door to the Research screen, put where the question is asked. A player reading
+     * "Locked — research Ironworking" on a catalogue row should not have to close build mode, open
+     * the character sheet and find a tab; the tab still exists and is the main way in, and this is
+     * the shortcut from the place that made you want it.
+     */
+    el('button', {
+      class: 'build-research', text: 'Research',
+      title: 'Four ages. Everything low-tech is yours from the start; the rest is bought with points you earn by finishing quests, finding places and killing things with names.',
+      onclick: () => researchScreen.toggle(),
+    }),
     /**
      * The × leaves BUILD MODE, not just the panel.
      *
@@ -258,9 +358,18 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     }
   }
 
+  /** R17 — see `catsForTool` above; this only supplies the tool that is up. */
+  const toolCats = () => catsForTool(build?.tool, catKeys);
+
   function drawCats() {
     catRow.replaceChildren();
-    for (const key of catKeys) {
+    const keys = toolCats();
+    catRow.hidden = keys.length === 0;
+    if (!keys.length) return;
+    // a tool that narrows the list must also move the selection into it, or the panel shows a
+    // heading for a category whose rows are not drawn
+    if (!keys.includes(cat)) cat = keys[0];
+    for (const key of keys) {
       catRow.append(el('button', {
         class: 'build-cat' + (key === cat ? ' on' : ''),
         text: categories[key].name || key,
@@ -271,14 +380,29 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
 
   function drawList() {
     listBox.replaceChildren();
+    const keys = toolCats();
+    listBox.hidden = keys.length === 0;
+    if (!keys.length) return;
     if (CAT_BLURB[cat]) listBox.append(el('p', { class: 'build-cat-blurb small muted', text: CAT_BLURB[cat] }));
     const rows = pieces.filter(p => p.cat === cat).sort((a, b) => (a.tier || 1) - (b.tier || 1) || a.name.localeCompare(b.name));
     for (const p of rows) {
       const parts = costLine(p.cost, have);
       const afford = parts.every(c => !c.short);
+      /**
+       * R17 — A LOCKED ROW IS SHOWN, AND IT SAYS WHICH NODE OPENS IT.
+       *
+       * Two rules, and they are the same rule the bench's locked recipes already follow. It is
+       * SHOWN, because a piece you cannot see is a piece you will never go looking for and the
+       * whole point of four ages is that you can see where the fourth one is. And it carries the
+       * SENTENCE rather than going grey and silent, because a greyed-out row with no reason is the
+       * one answer a player cannot act on.
+       */
+      const lock = build?.plan?.lockOf?.(p) || null;
       const row = el('button', {
-        class: 'build-row' + (pick === p.id ? ' on' : '') + (afford ? '' : ' short'),
+        class: 'build-row' + (pick === p.id ? ' on' : '') + (lock ? ' locked' : afford ? '' : ' short'),
+        title: lock ? lock.text : (p.desc || ''),
         onclick: () => {
+          if (lock) { onLog?.(lock.text, 'warn'); return; }
           pick = p.id;
           build?.select(p.id);
           /**
@@ -294,15 +418,49 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       });
       row.append(
         el('span', { class: 'build-row-name', text: p.name }),
-        el('span', { class: 'build-row-cost', text: parts.map(c => c.text).join(' · ') || 'free' }),
+        el('span', { class: 'build-row-cost', text: lock ? lock.text : (parts.map(c => c.text).join(' · ') || 'free') }),
       );
       listBox.append(row);
     }
     if (!rows.length) listBox.append(el('p', { class: 'muted small', text: 'Nothing in this group yet.' }));
   }
 
+  /**
+   * R17 — WHAT A NON-PLACEMENT TOOL SAYS INSTEAD OF A CATALOGUE.
+   *
+   * The complaint was that the panel showed building categories while Scan was up. Hiding them is
+   * only half the fix: what is left is an empty panel, which is no more of an answer. A brush tool
+   * owns a radius and a sentence; a point tool owns a sentence. The scanner has its own section
+   * lower down and already says what it found, so it gets nothing here.
+   */
+  function drawBrush() {
+    brushBox.replaceChildren();
+    const info = toolInfo(build?.tool);
+    if (info.kind === 'place' || info.kind === 'scan') { brushBox.hidden = true; return; }
+    brushBox.hidden = false;
+    brushBox.append(el('h3', { text: info.name }));
+    brushBox.append(el('p', { class: 'small muted', text: info.hint }));
+    if (info.kind === 'brush' && build?.setRadius) {
+      const r = Math.round(build.radius || 0);
+      const bar = el('div', { class: 'build-yard-row build-brush-size' });
+      bar.append(el('span', { class: 'muted small', text: `Brush ${r} m` }));
+      for (const step of [-4, -1, 1, 4]) {
+        bar.append(el('button', {
+          class: 'build-tool', text: step > 0 ? `+${step}` : String(step),
+          title: '[ and ] do the same thing without opening the panel.',
+          onclick: () => { build.setRadius((build.radius || 0) + step); redraw(); },
+        }));
+      }
+      brushBox.append(bar);
+    }
+  }
+
   function drawDetail() {
     detail.replaceChildren();
+    // R17 — the detail card is about a piece you are placing, so it goes away with the catalogue.
+    // See `toolCats`: a Scan sweep has nothing to say about the cost of a Storage Box.
+    if (toolInfo(build?.tool).kind !== 'place') { detail.hidden = true; return; }
+    detail.hidden = false;
     const p = pieces.find(x => x.id === pick);
     if (!p) {
       detail.append(el('p', { class: 'muted small', text: 'Pick something to see what it costs and what it does.' }));
@@ -310,6 +468,17 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     }
     detail.append(el('h3', { text: p.name }));
     if (p.desc) detail.append(el('p', { class: 'small', text: p.desc }));
+
+    // …and if it is behind the tech tree, that is the first thing said about it, because no amount
+    // of levelling or iron will change the answer
+    const lock = build?.plan?.lockOf?.(p) || null;
+    if (lock) {
+      detail.append(el('p', { class: 'build-why', text: lock.text }));
+      detail.append(el('button', {
+        class: 'small', text: `Open Research`,
+        onclick: () => researchScreen.show(),
+      }));
+    }
 
     // the cost, with the shortfall spelled out — "you are short of 4 iron" beats a red number
     const list = el('ul', { class: 'build-cost' });
@@ -481,6 +650,14 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
    * Walking up to the one you want is already how every other interaction in Farhold works, so the
    * queue belongs to whatever is within a few metres. `nearest()` is supplied by the game, because
    * this file has no idea where the player is.
+   *
+   * R17 — THE CONTROLS ARE js/station-ui.js's, DRAWN INTO THIS BOX.
+   *
+   * The body of this section used to be a hundred and forty lines of switch, priority, work bar,
+   * queue, batch row and recipe list, and the station screen needed every one of them. Two copies
+   * of a recipe list is how a bench you reach with B starts behaving differently from the same
+   * bench reached with E, which is exactly the sort of split this round exists to close. So there
+   * is one renderer and two mounts, and it emits the same `build-recipe` markup it always did.
    */
   function drawBench() {
     benchBox.replaceChildren();
@@ -488,135 +665,29 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     if (!bench || !works) return;
     const m = works.get(bench.id);
     if (!m) return;
+    const def = pieces.find(p => p.id === bench.key) || null;
 
-    const snap = works.snapshot(m.id) || {};
     benchBox.append(el('h3', { text: m.name }));
-    benchBox.append(el('p', { class: 'small muted', text: works.stateText(m) }));
-
     /**
-     * R16 — THE SWITCH AND THE QUEUE ORDER, side by side above the jobs.
+     * THE BUTTON THAT IS THE STATION SCREEN'S GUARANTEED DOOR.
      *
-     * `m.enabled` was read in three places and set in none (js/refine.js `setEnabled` has the whole
-     * note). `priority` is new and goes straight onto the machine's work order, which js/work.js
-     * `nextFor` has always sorted by — so "first" genuinely means the next citizen free walks here
-     * rather than to the loom.
-     *
-     * Both are on one row because they are the same question asked twice: of the benches I own,
-     * which ones matter.
+     * E should open it, and js/main.js's E handler is one line away from doing so (see
+     * research/round17-build-handoff.md). This button exists so that the screen is reachable
+     * whether or not that line has been applied — this project's signature fault is a finished
+     * module nothing calls, and "another agent will add the call site" is not a door.
      */
-    if (works.setEnabled) {
-      // The classes are borrowed on purpose: `build-yard-row` is the flex row this panel already
-      // uses everywhere and `build-tool` is the toggle button that already has an `.on` look, so
-      // none of this needs a line of new CSS. (It does NOT borrow `build-tools`, which the tool row
-      // owns — two sections sharing a class is a fault this file has already learned twice.)
-      const bar = el('div', { class: 'build-yard-row build-bench-switch' });
-      bar.append(el('button', {
-        class: 'build-tool' + (snap.enabled === false ? '' : ' on'),
-        text: snap.enabled === false ? 'Switched off' : 'Running',
-        title: 'A machine that is off keeps its queue, its half-finished batch and its banked work — it just stops, and stops asking for a worker.',
-        onclick: () => { works.setEnabled(m.id, snap.enabled === false); redraw(); },
-      }));
-      if (snap.needsWorking || (m.def.labour?.secondsPerUnit || 0) > 0) {
-        for (let p = 0; p <= 2; p++) {
-          bar.append(el('button', {
-            class: 'build-tool build-prio' + ((snap.priority ?? 1) === p ? ' on' : ''),
-            text: ['Last', 'Normal', 'First'][p],
-            title: `Workers take this one ${works.PRIORITY_WORDS?.[p] || 'normally'}.`,
-            onclick: () => { works.setPriority(m.id, p); redraw(); },
-          }));
-        }
-      }
-      benchBox.append(bar);
-    }
-
-    /**
-     * R16 — WHO IS KEEPING THIS LIT, and how far through the current four units they are.
-     *
-     * The bar is the machine's OWN work order off the board, not a second clock — the same number
-     * the bar over the structure draws while you hold E, so helping by hand and watching the panel
-     * tell the same story. `workboard.at(stationId)` is optional: without it the panel falls back
-     * to the bank, which is the other half of the same fact.
-     */
-    if (snap.needsWorking) {
-      const order = workboard?.at?.(m.id) || null;
-      const work = el('div', { class: 'build-bench-work' });
-      work.append(el('span', { class: 'small', text: order ? `${order.title} · ${order.progress}` : `${snap.minutesLeft} min of work banked` }));
-      const frac = order ? order.fraction : Math.min(1, (snap.workBank || 0) / Math.max(1, snap.workBankMax || 1));
-      work.append(el('div', { class: 'build-work-bar' }, el('i', { style: `width:${Math.round(frac * 100)}%` })));
-      const credit = order?.credit || snap.lastCredit;
-      work.append(el('span', { class: 'muted small build-work-credit', text: credit
-        ? (order?.credit ? credit : `last shift: ${credit}`)
-        : 'Nobody has worked this yet. Stand here and hold E.' }));
-      benchBox.append(work);
-    } else {
-      benchBox.append(el('p', { class: 'small muted', text: 'Runs itself — it wants power, not hands.' }));
-    }
-
-    // what is already queued, with a way to take it back off
-    for (let i = 0; i < m.queue.length; i++) {
-      const job = m.queue[i];
-      const r = works.recipes[job.recipe];
-      const row = el('div', { class: 'build-job' },
-        el('span', { text: r?.name || job.recipe }),
-        el('span', { class: 'muted small', text: job.left === Infinity ? 'repeating' : `${job.done}/${job.done + job.left}` }),
-      );
-      row.append(el('button', { class: 'small', text: '×', title: 'Take this off the queue', onclick: () => { works.cancel(m.id, i); redraw(); } }));
-      benchBox.append(row);
-    }
-
-    /**
-     * R16 — HOW MANY. "Make twenty planks and stop", and the standing order.
-     *
-     * `works.queue(id, recipe, count)` has taken a count since the day it was written, and `count
-     * <= 0` has always meant "keep going until told otherwise" — the queue rows above have printed
-     * the word "repeating" for it all along. The panel only ever sent 1. So the whole of batching
-     * and standing orders existed, was saved, was drawn, and could not be reached: clicking a
-     * recipe twenty times was the only way to make twenty of anything.
-     *
-     * It is a choice you make ONCE and then click recipes, rather than three buttons on every row,
-     * because a bench has a dozen recipes and thirty-six buttons is not a panel.
-     */
-    const batchRow = el('div', { class: 'build-yard-row build-bench-batch' });
-    batchRow.append(el('span', { class: 'muted small', text: 'Make' }));
-    for (const n of [1, 5, 20, 0]) {
-      batchRow.append(el('button', {
-        class: 'build-tool build-batch' + (batch === n ? ' on' : ''),
-        text: n === 0 ? 'keep going' : `×${n}`,
-        title: n === 0 ? 'A standing order: it makes them until you take the job off, or until it runs out of what it eats.' : `Queue ${n} at a time.`,
-        onclick: () => { batch = n; redraw(); },
-      }));
-    }
-    benchBox.append(batchRow);
-
-    // …and everything it could make. A locked recipe is SHOWN, greyed, with what unlocks it —
-    // a recipe you cannot see is a recipe you will never go looking for.
-    for (const r of works.board(m.type)) {
-      const ins = works.inputsOf(r);
-      const short = ins ? Object.entries(ins).filter(([id, n]) => have(id) < n) : [];
-      const row = el('button', {
-        class: 'build-recipe' + (r.unlocked ? '' : ' locked'),
-        title: r.desc || '',
-        onclick: () => {
-          if (!r.unlocked) { if (onLog) onLog(r.unlock?.text || 'Not learned yet.', 'warn'); return; }
-          const out = works.queue(m.id, r.id, batch);
-          if (!out.ok && onLog) onLog(out.why, 'warn');
-          else if (onLog) {
-            onLog(batch === 0
-              ? `${m.name}: ${r.name}, on a standing order — it will keep making them.`
-              : `${m.name}: ${batch} × ${r.name} queued.`, 'good');
-          }
-          redraw();
-        },
-      });
-      row.append(
-        el('span', { class: 'build-row-name', text: r.name }),
-        el('span', { class: 'build-row-cost', text: !r.unlocked ? (r.unlock?.text || 'locked')
-          : !ins ? 'needs a rare element this world does not hold'
-          : short.length ? `short ${short.map(([id, n]) => `${Math.ceil(n - have(id))} ${id.replace(/_/g, ' ')}`).join(', ')}`
-          : `${Math.round(r.time)}s` }),
-      );
-      benchBox.append(row);
-    }
+    benchBox.append(el('button', {
+      class: 'small build-open-station',
+      text: `Open the ${m.name}`,
+      title: "The station's own screen: only what this one can make, and a way to run it.",
+      onclick: () => { station.open(bench); },
+    }));
+    drawStationBody(benchBox, {
+      entry: bench, def, works, store, build, tools, garage, shipyard, workboard, onLog,
+      batch, setBatch: n => { batch = n; },
+      redraw,
+      compact: true,
+    });
   }
 
   /**
@@ -674,31 +745,6 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     }
   }
 
-  /**
-   * THE GARAGE — a vehicle is BUILT AT A BENCH, not put down on the ground.
-   *
-   * Which is why it cannot live in the catalogue list above: everything there has a footprint and a
-   * ghost, and a motorcycle has neither. It is shown at the bench that makes it, the same rule the
-   * shipyard follows, so the panel never turns into a menu of everything in the game at once.
-   */
-  function drawGarage() {
-    garageBox.replaceChildren();
-    if (!garage) return;
-    const rows = garage.list() || [];
-    if (!rows.length) return;
-    garageBox.append(el('h3', { text: 'Garage' }));
-    for (const v of rows) {
-      const row = el('div', { class: 'build-yard-row' });
-      const b = el('button', {
-        class: 'small',
-        text: v.owned ? (v.fuelOk ? `Fuel the ${v.name}` : v.name) : `Build the ${v.name}`,
-        onclick: () => { (v.owned ? garage.refuel : garage.build)(v.key); redraw(); },
-      });
-      b.disabled = v.owned ? !v.fuelOk : !v.ok;
-      row.append(b, el('span', { class: (v.owned || v.ok) ? 'small' : 'small bad', text: v.note }));
-      garageBox.append(row);
-    }
-  }
 
   /**
    * THE HOLDING — the people, the fields and the money.
@@ -788,44 +834,10 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
 
   function redraw() {
     if (!open) return;
-    drawSteps(); drawTools(); drawCats(); drawList(); drawScan(); drawMines(); drawBench();
-    drawToolBench(); drawWork(); drawHolding(); drawGarage(); drawYard(); drawDetail();
+    drawSteps(); drawTools(); drawCats(); drawList(); drawBrush(); drawScan(); drawMines();
+    drawBench(); drawWork(); drawHolding(); drawYard(); drawDetail();
   }
 
-  /**
-   * R16 — the tools and the two devices you can build right now, with what each is short of.
-   *
-   * `tools` is `{ list(), build(kind, id) }`, handed in by js/main.js. A row that cannot be paid
-   * for says WHY in materials rather than going grey — a greyed-out row is the one answer a player
-   * cannot act on, which is the rule the Holding panel already follows.
-   */
-  function drawToolBench() {
-    toolsBox.replaceChildren();
-    if (!tools) return;
-    const rows = tools.list() || [];
-    if (!rows.length) return;
-    toolsBox.append(el('h3', { text: 'Tools and devices' }));
-    toolsBox.append(el('p', {
-      class: 'small muted',
-      text: 'A tool is pick and axe in one. Its tier says what it can work; its quality says how fast.',
-    }));
-    for (const r of rows) {
-      const row = el('div', { class: 'build-yard-row' });
-      const cost = Object.entries(r.cost || {})
-        .map(([m, n]) => `${n} ${(r.names?.[m] || m).toLowerCase()}`).join(', ');
-      const b = el('button', {
-        class: 'small',
-        text: r.owned && r.kind === 'device' ? `${r.name} ✓` : `Build the ${r.name}`,
-        onclick: () => { tools.build(r.kind, r.id); redraw(); },
-      });
-      b.disabled = !r.canAfford || (r.owned && r.kind === 'device');
-      const note = r.owned && r.kind === 'device' ? r.desc
-        : r.canAfford ? `${cost} — ${r.desc}`
-        : `Short: ${r.short.map(s => `${Math.ceil(s.n - s.got)} ${(r.names?.[s.m] || s.m).toLowerCase()}`).join(', ')}`;
-      row.append(b, el('span', { class: r.canAfford || r.owned ? 'small' : 'small bad', text: note }));
-      toolsBox.append(row);
-    }
-  }
 
   const api = {
     root,
@@ -846,15 +858,45 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       drawBench();
       drawWork();
       drawHolding();
-      drawGarage();
       drawYard();
+      // R17 — the station screen has a live queue and a live work bar on it, and it is up while
+      // the panel is, so it ticks with everything else rather than owning a clock of its own.
+      station.tick();
     },
     /** A full rebuild — after a placement, when the bag changed, or when the tool did. */
     refresh: redraw,
+
+    /**
+     * R17 — THE DOOR js/main.js's E HANDLER SHOULD USE.
+     *
+     *   "I built a furnace… when I press E to open it it just opens the regular build menu."
+     *
+     * Hand it a build-ledger entry. It returns TRUE if that entry has a station screen and the
+     * screen is now up, and FALSE if it is not a station at all — so the caller can fall through to
+     * whatever else E does there. It is on this panel's API rather than on a module of its own
+     * because js/main.js already holds a `buildUI` and nothing else has to be threaded anywhere.
+     *
+     * The exact three lines for js/main.js are in research/round17-build-handoff.md.
+     */
+    openStation(entry) {
+      if (!entry) return false;
+      if (station.isOpen && station.at?.id === entry.id) return true;   // E again is not a toggle
+      return station.open(entry);
+    },
+    closeStation() { return station.close(); },
+    get station() { return station; },
+
+    /** R17 — the Research screen, for the hud tab wiring and for the tests. */
+    get research() { return research; },
+    get researchScreen() { return researchScreen; },
+    openResearch() { researchScreen.show(); return researchScreen; },
+
     /** For the tests and the debug menu. */
     select(id) { pick = id; build?.select(id); redraw(); return pick; },
     get categories() { return catKeys; },
-    dispose() { root.remove(); },
+    /** R17 — which categories the tool that is up will actually draw. The panel-tidy rule, askable. */
+    get toolCategories() { return toolCats(); },
+    dispose() { root.remove(); station.dispose(); researchScreen.dispose(); },
   };
   return api;
 }

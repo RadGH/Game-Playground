@@ -16,7 +16,7 @@
 // city → capital). They have no people in them: NPCs, shops and interiors are phase 4.
 
 import * as THREE from 'three';
-import { BUILDING_INFO, streetLanes } from './town-plan.js';
+import { BUILDING_INFO, streetLanes, settlementAnchor } from './town-plan.js';
 import { laneRibbon, ringCrossings } from './roadplan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { padSpotFor, boardSpotFor } from './waypoints.js';
@@ -340,6 +340,8 @@ export const BUILDING_KEYS = Object.keys(BUILDINGS);
 /**
  * opts: { palette, seed, radius (metres of features kept around the player), refreshEvery (metres) }
  */
+
+
 export function createFeatures(scene, terrain, opts = {}) {
   const world = terrain.world;
   const palette = opts.palette || {};
@@ -376,9 +378,36 @@ export function createFeatures(scene, terrain, opts = {}) {
    */
   const bridges = terrain.crossings || [];
 
+  /**
+   * ROUND 17 — A TOWN IS BUILT AT ITS ANCHOR, AND THE ANCHOR MAY BE IN A RIVER.
+   *
+   * The round-17 pass made every individual thing a town builds refuse to stand in water, which is
+   * what the report asked for. It left the harder half: at Feafungate (seed 56138) the map node
+   * itself sits eighteen metres down under five metres of river, so *forty-one per cent of the
+   * ground inside the town ring is water* and the builder was simply dropping sixteen of the
+   * hundred and thirty-nine things it wanted to put down. Nothing looked broken any more; there was
+   * just a hole where half a town should be.
+   *
+   * World Forge picks a settlement's CELL from habitability, and a cell is 64 m here and 224 m at
+   * the default planet size — far coarser than the terrain the player walks on, so a perfectly
+   * reasonable cell can have a river through the middle of it. Moving the cell is not the answer:
+   * the roads are already routed to it, and js/map.js, js/quests.js, js/markers.js and
+   * js/waypoints.js each derive their own metres from `node.x * M_PER_CELL`.
+   *
+   * So the CELL does not move and the ANCHOR does — by less than a cell, which is under the
+   * precision of every one of those consumers, so the map pin, the quest marker and the waypoint
+   * all still land inside the town. The search is a fixed spiral rather than a random walk, so a
+   * town is in the same place every time you come back to the world, which is the whole contract of
+   * a seeded planet.
+   */
   const settlements = (world.nodes || [])
     .filter(n => n.type === 'settlement' || n.type === 'port')
-    .map(n => ({ ...n, wx: n.x * M_PER_CELL, wz: n.y * M_PER_CELL }));
+    .map(n => {
+      const anchor = settlementAnchor(terrain, n.x * M_PER_CELL, n.y * M_PER_CELL, 16 + (n.size || 1) * 13, M_PER_CELL);
+      return { ...n, wx: anchor.x, wz: anchor.y };
+    });
+
+
 
   // ---------------------------------------------------------------- meshes
   const waterMat = new THREE.MeshLambertMaterial({

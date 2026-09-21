@@ -28,7 +28,8 @@ test('B opens a panel that says what to do and what everything costs', async ({ 
   const panel = page.locator('#build-ui');
   // the steps, because "how do I start a base" must be answerable without leaving the game — and
   // the first of them must say where materials come from, which is the one thing nothing else says
-  await expect(panel.locator('.build-steplist li')).toHaveCount(6);
+  // (R17 made it seven: the Crafting Table and the first plank are two steps of their own now)
+  await expect(panel.locator('.build-steplist li')).toHaveCount(7);
   await expect(panel.locator('.build-steplist li').first()).toContainText('swing at a tree');
   await expect(panel).toContainText('Level');
   await expect(panel).toContainText('Outpost Marker');
@@ -38,6 +39,24 @@ test('B opens a panel that says what to do and what everything costs', async ({ 
   expect(tools).toEqual(expect.arrayContaining(['Level', 'Place', 'Road', 'Wall', 'Take down']));
   await panel.locator('.build-tool', { hasText: 'Level' }).first().click();
   expect(await page.evaluate(() => window.farhold.build.tool)).toBe('smooth');
+
+  /**
+   * R17 — "If I select 'Scan', it shouldn't show those placement options."
+   *
+   * A tool that does not place anything must take the category row, the catalogue and the detail
+   * card off the panel with it. Levelling a circle of ground has nothing to say about the price of
+   * a Storage Box.
+   */
+  const whileLevelling = await page.evaluate(() => ({
+    rows: document.querySelectorAll('#build-ui .build-row').length,
+    cats: document.querySelectorAll('#build-ui .build-cat').length,
+  }));
+  expect(whileLevelling.rows, 'the catalogue is still up with the Level tool selected').toBe(0);
+  expect(whileLevelling.cats, 'the category buttons are still up with the Level tool selected').toBe(0);
+
+  // …and Place brings them back
+  await panel.locator('.build-tool', { hasText: 'Place' }).first().click();
+  expect(await page.evaluate(() => window.farhold.build.tool)).toBe('build');
 
   // a piece shows a price, and the price is the one the placement will charge
   const cost = await page.evaluate(() => {
@@ -185,6 +204,9 @@ test('with every section up, nothing falls off the bottom of the panel', async (
     f.build.setTool('smooth'); f.build.setRadius(20);
     for (const [dx, dz] of [[0, 0], [13, 0], [-13, 0], [0, 13]]) { f.build.aim(spot.x + dx, spot.z + dz); f.build.paint(); }
     f.build.setTool('build');
+    // R17 — the assembler is behind the tech tree now. `unlockAll` spends nothing and earns
+    // nothing; it just takes every node, so this stays a test about the panel's layout.
+    f.build.research?.unlockAll?.();
     for (const [key, dx, dz] of [['claim_stone', 9, 9], ['assembler', 3, 0], ['burner_generator', 6, 0],
                                  ['storage_crate', 9, 0], ['bed', -3, 0], ['bed', -5, 0], ['furnace', 0, 4]]) {
       f.build.select(key); f.build.aim(spot.x + dx, spot.z + dz); f.build.placeHere();

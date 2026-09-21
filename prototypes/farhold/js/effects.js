@@ -268,7 +268,11 @@ def('affix:cond_killMemory', v => `+${n1(v)} health for every ten kills you have
 // file in the game, so "your companions hit 25% harder" was a sentence on a card. `js/pets.js` asks
 // for exactly two things — `petPower` and `petHealth` — so that is what they answer to now, and the
 // extra companion is a derived number that `js/skills.js` adds to every summon.
-def('affix:cond_companionExtra', v => `Every summoning skill calls up ${n1(v)} more companion${n1(v) > 1 ? 's' : ''}`, {
+// R17 — this is a FOLLOWER SLOT now, not a body per cast. A summoning skill puts down its own
+// number; what this raises is how many things may walk with you at once, and how many of each
+// creature may be standing (js/followers.js). The key stays `petSlots` so an old save is unchanged
+// and js/followers.js `followerBonus` adds it to `followerSlots`.
+def('affix:cond_companionExtra', v => `${n1(v)} more follower may walk with you`, {
   derive: (v, d) => { d.petSlots = (d.petSlots || 0) + v; },
 });
 def('affix:cond_companionFury', v => `Your companions deal ${pct(v)} more damage`, { petPower: v => 1 + v });

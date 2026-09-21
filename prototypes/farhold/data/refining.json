@@ -8,6 +8,7 @@
     "_doc": "R16 \u2014 what your own two hands are worth at a bench, in work units per REAL second. `handStandPerSecond` is just being in the room: one unit every thirty seconds, which is thirty machine-seconds every thirty seconds, so attending a furnace keeps it lit exactly 1:1 and no better (this is R15's rule, kept). `handHoldPerSecond` is holding E, and it is three times that \u2014 jumping in has to genuinely speed the thing up or the key is a fancier way of standing still. Both go through js/work.js's board as ordinary player units, so a citizen who turns up to help is filling the same order and the ledger says who did what. A machine that needs no worker (tier 2, or a tier-1 bench on the grid) takes neither: see js/refine.js `labourNeed`."
   },
 
+  "_r17MachineDoc": "R17 — FOUR BENCHES THAT HAD NO ENTRY IN HERE AT ALL, and why that mattered. js/main.js's `interactTarget` offers a `machine` when what you are standing at is one of these — that is the ONLY route E has into a station. A Crafting Table, an Anvil, a Workbench and a Garage were structures in data/structures.json and nothing here, so pressing E at one did nothing whatever and the build panel was the only door. Three of them run no refining recipe at all and still belong here: No `labour` block at all means they never ask for a worker and never post an order (js/refine.js `labourNeed` reads `L?.secondsPerUnit || 0`), so the cost of listing them is a name and a footprint.",
   "_machineDoc": "A machine. `tier` 0/1/2 as above. `powerUse` is the idle draw in units; `recipePower` on a recipe is the extra while it is working. `fuels` is what it can burn when there is no grid — the number is how many seconds of work one unit buys. `speed` multiplies every recipe's time. `priority` is the load-shedding class from data/power.json. `inputSlots` is how many different inputs it can hold, purely so the UI can draw it.",
   "machines": {
     "campfire": {
@@ -128,6 +129,36 @@
       "fuels": {}, "needsPower": true,
       "build": { "steel_ingot": 18, "machine_part": 8, "brick": 16 },
       "desc": "Line shafts and jigs. Makes the goods a workshop cannot, and needs nobody standing at it — power is the whole cost."
+    },
+
+    "crafting_table": {
+      "name": "Crafting Table", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "_tier": "Tier 1 rather than tier 0 although it is the cheapest bench in the game, because tier 0 in this file means BURNS SOMETHING (a campfire, a furnace, a kiln) and this one does not — it is a wedge and a mallet. tests/industry.test.js asserts that invariant, and it is worth more than the tidiness of calling the first bench tier 0.",
+      "fuels": {},
+      "build": { "log": 6, "stone": 2 },
+      "labour": { "secondsPerUnit": 20, "auto": false },
+      "_r17": "THE BENCH THAT MAKES THE FIRST PLANK, AND WHY IT HAS TO EXIST. The Storage Box costs six planks and no iron, which is what was asked for and what the onboarding line has always said. But a plank came off a Sawmill, a Sawmill cost eight iron ingots, iron came out of a Furnace, and a machine can only draw from a STORAGE POOL — so the first store in the game stood behind the first store in the game. This bench breaks the ring: it costs six logs and two stone, both of which bare hands take off a tree and a boulder; it carries its own three-slot shelf (data/power.json) so it IS a pool the moment it is down; and it splits logs into planks. Slowly — one log for two planks against the Sawmill's four, and twice the seconds — because it is a wedge and a mallet, not a mill.",
+      "desc": "A trestle, a vice and a wedge. Splits logs into planks and twists cord, and it is where a tool is built — the only bench you can put down the hour you land."
+    },
+    "anvil": {
+      "name": "Anvil", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "fuels": {},
+      "build": { "iron_ingot": 10, "log": 3 },
+      "desc": "Where an iron head is forged on to a haft. Walk up and press E."
+    },
+    "workbench": {
+      "name": "Workbench", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "fuels": {},
+      "build": { "plank": 8, "iron_ingot": 4 },
+      "desc": "Fine work: a scanner, a command rod, the devices that are built once and owned rather than rolled. Walk up and press E."
+    },
+    "garage": {
+      "name": "Garage", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "_tier": "Tier 1 here and tier 2 in data/structures.json, and the two mean different things: this file's tier is what a machine NEEDS (tier 2 means it does not run at all without a grid, which tests/industry.test.js enforces) and the catalogue's tier is what order the build list puts it in. A garage needs nothing and belongs late in the list.",
+      "fuels": {},
+      "build": { "plank": 16, "iron_ingot": 8, "cut_stone": 10 },
+      "_r17": "\"There is also a garage menu. I haven't got that far yet, but there should be a distinct Garage building where you manage that sort of thing.\" The garage rows used to hang off the build panel and appeared whenever you stood near ANY bench at all. They are a building now. Note what it deliberately does not do: the parts are still cut on an Assembler (and for the bigger rigs an Alloy Forge and a Refinery), because data/vehicles.json owns that rule — a garage is a shed with a pit in it, not a machine shop. Put it beside the line.",
+      "desc": "A pit, a bench and a fuel drum. Build, fuel and repair what you drive, from one screen."
     }
   },
 
@@ -150,6 +181,8 @@
     { "id": "melt_glass", "machine": "kiln", "name": "Melt Glass", "time": 22, "inputs": { "sand": 3 }, "outputs": { "glass": 2 } },
     { "id": "burn_bone", "machine": "kiln", "name": "Burn Bone", "time": 16, "inputs": { "bone": 3 }, "outputs": { "ash": 3 }, "desc": "Bone ash. Not glamorous; it is where lye comes from." },
 
+    { "id": "split_planks", "machine": "crafting_table", "name": "Split Planks", "time": 20, "inputs": { "log": 1 }, "outputs": { "plank": 2 }, "desc": "A wedge and a mallet. Two planks a log against a Sawmill's four, and twice the time — but it costs no iron, which is the whole reason it is here. R17: without it the first Storage Box could not be built until after the first Furnace, and the onboarding asks for it before." },
+    { "id": "twist_cord", "machine": "crafting_table", "name": "Twist Cord", "time": 16, "inputs": { "fibre": 5 }, "outputs": { "rope": 1 }, "desc": "Rope by hand — a third of what a Loom gets out of the same fibre. Enough for a well head and a washing line before you own one." },
     { "id": "saw_planks", "machine": "sawmill", "name": "Saw Planks", "time": 9, "inputs": { "log": 1 }, "outputs": { "plank": 4 }, "desc": "Four planks a log — §2.6. Hacking one apart by hand gives you two and a headache." },
     { "id": "saw_beams", "machine": "sawmill", "name": "Cut Beams", "time": 14, "inputs": { "log": 2 }, "outputs": { "beam": 1, "plank": 2 }, "unlock": { "recipe": "saw_planks", "times": 8 } },
     { "id": "tap_resin", "machine": "sawmill", "name": "Press Resin", "time": 12, "inputs": { "log": 2 }, "outputs": { "resin": 3, "plank": 1 }, "unlock": { "recipe": "saw_planks", "times": 4 } },

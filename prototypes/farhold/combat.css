@@ -1,0 +1,92 @@
+/*
+  Farhold — the combat readouts, round 17.
+
+  WHY THIS FILE EXISTS AT ALL. js/hud.js has built `<div class="charge-meter"><i></i></div>` under
+  the crosshair on every frame the attack button is held since round 15, and there has never been a
+  single `.charge-meter` rule anywhere in the project. A bare div has no size and no background, and
+  `width: 60%` on an `<i>` — an inline element — does nothing whatsoever. So the bow's draw and the
+  staff's channel have both been drawing a completely invisible bar, which is what the play-test
+  reported as "does holding it actually do anything?".
+
+  These rules belong in style.css beside every other colour in the game, and that is where they
+  should end up. style.css is not ours to edit this round, so js/combat-fx.js links this file at
+  start-up (the same trick js/civics-ui.js uses for civics.css) rather than leaving the fix in a
+  handoff note nobody applies. See research/round17-combat-handoff.md.
+
+  No inline styles anywhere: the only thing JavaScript sets is the fill's width, which is the datum
+  the bar exists to show.
+*/
+
+.charge-meter {
+  position: fixed;
+  left: 50%;
+  top: calc(50% + 34px);
+  transform: translateX(-50%);
+  width: 172px;
+  height: 7px;
+  border: 1px solid rgba(180, 210, 235, 0.35);
+  border-radius: 4px;
+  background: rgba(8, 12, 18, 0.62);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 40;
+  transition: opacity 120ms ease-out;
+}
+
+.charge-meter.on { opacity: 1; }
+
+.charge-meter > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #6f7d8c;
+  transition: width 60ms linear, background-color 120ms ease-out;
+}
+
+/*
+  The four states are named once, in js/weapons.js `chargeState`, so the bar, the caption and
+  anything added later cannot disagree about where "fully charged" is.
+
+    short  under the floor — letting go now gives you the free tap, not the spell
+    ready  past the floor and building
+    near   the last fifth
+    full   at the ceiling, and it releases itself here
+*/
+.charge-meter[data-state="short"] > i { background: #6f7d8c; }
+.charge-meter[data-state="ready"] > i { background: #5fa8e0; }
+.charge-meter[data-state="near"]  > i { background: #e8b24a; }
+.charge-meter[data-state="full"]  > i { background: #ffe07a; }
+
+/*
+  FULL HAS TO BE UNMISSABLE. "We need visual indicators to let you know when it has ramped up and
+  when it is finished ramping up so that the player can execute it correctly" — a colour change on
+  a 7 px bar is not that on its own, so at full the whole bar picks up a glow and a slow pulse.
+*/
+.charge-meter[data-state="full"] {
+  border-color: rgba(255, 224, 122, 0.85);
+  box-shadow: 0 0 9px rgba(255, 210, 90, 0.55);
+  animation: charge-full 520ms ease-in-out infinite alternate;
+}
+
+@keyframes charge-full {
+  from { box-shadow: 0 0 6px rgba(255, 210, 90, 0.35); }
+  to   { box-shadow: 0 0 14px rgba(255, 210, 90, 0.75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .charge-meter[data-state="full"] { animation: none; }
+  .charge-meter > i { transition: none; }
+}
+
+/*
+  The spell-shape glyph on an item card. The SVG itself carries stroke and fill as presentation
+  attributes (see js/spellshapes.js) so it renders correctly with no stylesheet at all; this only
+  lines it up with the text beside it.
+*/
+.spell-glyph {
+  vertical-align: -3px;
+  margin-right: 4px;
+  color: #b9a6ff;
+}

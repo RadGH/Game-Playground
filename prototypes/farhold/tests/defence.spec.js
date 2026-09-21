@@ -161,6 +161,9 @@ test('a turret shoots what comes into range, and a wall does not', async ({ page
 
     f.build.setMode(true);
     f.build.setTool('build');
+    // R17 — this spec places a piece the tech tree now gates. `unlockAll` spends nothing and
+    // earns nothing; it just takes every node, so the spec goes on testing the thing it is about.
+    f.build.research?.unlockAll?.();
     f.build.select('ballista_turret'); f.build.aim(spot.x + 2, spot.z);
     const turret = f.build.placeHere();
     f.build.select('palisade'); f.build.aim(spot.x - 4, spot.z);

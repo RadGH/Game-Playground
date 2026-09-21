@@ -73,6 +73,24 @@ export function helperFor(quest, at = {}, opts = {}) {
         : { kind: 'gather', text: `You have what ${quest.giverName} asked for. Take it back.`, away };
     case 'raid':
       return { kind: 'raid', text: `Wave ${(quest.progress ?? 0) + 1} of ${quest.count ?? '?'}. Stand at the wall.`, away };
+    /**
+     * R17 — THE ONBOARDING LINE, WHICH IS EVERYWHERE AND NOWHERE.
+     *
+     * It has no `place`, so it talks wherever you are standing — which is right: "press E on a
+     * tree" is true in any field. `stepName`/`stepHud` are written onto the quest by
+     * js/onboarding.js precisely so this stays pure and never has to read a data file.
+     *
+     * `away` is Infinity (there is no place), and `helpersNear` sorts on it — so this sentence is
+     * the LAST one offered and a real destination you are standing on always wins. That is
+     * deliberate: the HUD's objective line is where the step actually lives, and this is only the
+     * spoken reminder. Suppressing a "the door is the way in" line for five minutes of tutorial
+     * would be the tutorial getting in the way of the game.
+     */
+    case 'onboard':
+      if (!quest.stepName) return null;
+      return quest.done
+        ? { kind: 'onboard', text: `${quest.title} is done. ${quest.giverName} will settle up — or hand it in from the journal.`, away }
+        : { kind: 'onboard', text: `${quest.stepName}${quest.stepHud ? `. ${quest.stepHud}` : ''}.`, away };
     default:
       return left > 0
         ? { kind: quest.kind || 'job', text: `${quest.title}: ${left} to go.`, away }

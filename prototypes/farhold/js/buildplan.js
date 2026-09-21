@@ -110,6 +110,57 @@ export function scaleCost(cost, factor) {
 }
 
 /**
+ * R17 — TWO CONTRACTS FOR THE SAME OBJECT, AND BUILDING WAS FREE FOR THE WHOLE EXPANSION.
+ *
+ * This file has always spent a WHOLE BILL at once: `bank.take(test.cost)` with `{ log: 6,
+ * iron_ingot: 1 }`, because a half-paid structure is worse than an unpaid one. `makeBag` below does
+ * exactly that, and every node test has therefore always passed.
+ *
+ * js/main.js hands in a different object. Its methods are `take(id, n)` and `give(id, n)` — ONE
+ * LINE AT A TIME — because js/build.js's clear tool calls them that way (round 13's note: *"this
+ * was `store.give(res.materials)` — the whole bag as the first argument"*). Nobody joined the two
+ * up. So in the real game `bank.take({ log: 6, iron_ingot: 1 })` ran with the cost object as the
+ * material id and `undefined` as the count: `stores.count(pool, {object})` is 0, `n - fromPool` is
+ * NaN, `materials.spend({ '[object Object]': NaN })` refuses and changes nothing — and the
+ * placement went ahead regardless, because `check` had already approved it.
+ *
+ * **Every structure in Farhold has been free since the building expansion landed, and a deconstruct
+ * has refunded nothing.** `check` reads `bank.have(id)`, which is the one method both shapes agree
+ * on, so the refusal sentence was right and only the deduction was missing — which is precisely why
+ * nobody noticed: you still could not build what you could not afford, you simply never ran out.
+ *
+ * One adapter, at the boundary, that speaks both. A per-line store declares itself by taking two
+ * arguments; a whole-bill store takes one. `have` is checked here rather than inside the per-line
+ * branch because main.js's `take` has no refusal in it at all — it takes what it can and returns
+ * the number it was asked for — and a bill that is half payable must buy nothing.
+ */
+export function bankAdapter(store) {
+  if (!store) return { have: () => Infinity, take: () => true, give: () => {}, perLine: false };
+  const have = id => (store.have ? store.have(id) : Infinity);
+  const perLine = typeof store.take === 'function' && store.take.length >= 2;
+  if (!perLine) {
+    return {
+      have,
+      take: cost => (store.take ? !!store.take(cost) : true),
+      give: cost => { store.give?.(cost); },
+      perLine: false,
+    };
+  }
+  return {
+    have,
+    take(cost) {
+      for (const [k, n] of Object.entries(cost || {})) if (n > 0 && have(k) < n) return false;
+      for (const [k, n] of Object.entries(cost || {})) if (n > 0) store.take(k, n);
+      return true;
+    },
+    give(cost) {
+      for (const [k, n] of Object.entries(cost || {})) if (n > 0) store.give?.(k, n);
+    },
+    perLine: true,
+  };
+}
+
+/**
  * A plain material bag, good enough for tests and for a game that has not built its store pools yet.
  * The real game passes its own `store` with the same three methods — §4.5 wants building to draw
  * from a pool in range rather than from the player's pockets, and that decision lives outside here.
@@ -180,6 +231,13 @@ export function createBuildPlan({
   store = null,
   /** `(need, x, z) => boolean` — is there an ore node / water / a gas vent here? */
   siteOk = null,
+  /**
+   * R17 — `(def) => ({ text }) | null`. The research gate, and it is a CALLBACK rather than an
+   * import for the same reason `siteOk` is: this file knows the rules of the ground, and what a
+   * player has learned belongs to js/research.js. Omitted, nothing is ever locked — which is the
+   * direction a missing gate must fail in.
+   */
+  locked = null,
   saved = null,
 } = {}) {
   const rules = { ...(catalogue?.rules || {}) };
@@ -194,7 +252,7 @@ export function createBuildPlan({
 
   const byId = new Map((catalogue?.structures || []).map(s => [s.id, s]));
 
-  const bank = store || { have: () => Infinity, take: () => true, give: () => {} };
+  const bank = bankAdapter(store);
   const ground = (x, z) => (terrain?.heightAt ? terrain.heightAt(x, z) : 0);
   const steepness = (x, z, step = 2) => (terrain?.slopeAt ? terrain.slopeAt(x, z, step) : 0);
 
@@ -301,6 +359,16 @@ export function createBuildPlan({
       return !!def && (def.cat === 'extract' || def.needs === 'node' || def.needs === 'water');
     },
     costText,
+    /**
+     * R17 — WHY THIS ROW IS GREY, for anything that wants to ask without pretending to place one.
+     * The build panel draws a locked row rather than hiding it, because a piece you cannot see is a
+     * piece you will never go looking for — the same argument js/build-ui.js makes for a locked
+     * recipe.
+     */
+    lockOf: idOrDef => {
+      const def = typeof idOrDef === 'string' ? byId.get(idOrDef) : idOrDef;
+      return def && locked ? locked(def) : null;
+    },
 
     /**
      * §4.2/§4.3 — snap by default, free placement when the player holds the key down.
@@ -347,6 +415,18 @@ export function createBuildPlan({
       const foot = footingOf(spot);
       const bill = billFor(def);
       const out = { ok: false, why: '', def, cost: bill.cost, missing: bill.missing, ghostY: foot.y, gap: foot.gap };
+
+      /**
+       * R17 — THE RESEARCH GATE, AND IT IS THE FIRST REFUSAL ON PURPOSE.
+       *
+       * Before the ground, before the purse: a piece you have not researched is not a thing you can
+       * fix by standing somewhere flatter or fetching more iron, so telling the player about the
+       * slope first would send them off to do work that could never help. The sentence names the
+       * node and the age (js/research.js `lockReason`), because "Locked" on its own is the one
+       * answer nobody can act on.
+       */
+      const gate = locked ? locked(def) : null;
+      if (gate) { out.why = gate.text || 'You have not researched this yet.'; out.locked = gate; return out; }
 
       if (terrain?.waterAt && terrain.waterAt(x, z)) { out.why = 'You cannot build on water.'; return out; }
 
@@ -617,6 +697,10 @@ export function createBuildPlan({
     quote(id, times = 1) {
       const def = byId.get(id);
       if (!def) return { ok: false, why: 'No such structure.' };
+      // the road and wall tools price a whole run through here, so the gate has to be asked here
+      // too or a locked cobbled road could be laid by the metre
+      const gate = locked ? locked(def) : null;
+      if (gate) return { ok: false, def, times, cost: {}, missing: {}, text: '', why: gate.text, locked: gate };
       const bill = billFor(def, times);
       return {
         ok: !bill.short, def, times,

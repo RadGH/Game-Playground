@@ -80,6 +80,9 @@ test('a base is built, saved, reloaded, and reachable from another star system',
     f.build.aim(f.control.x + 6, f.control.z + 10);
     const stone = f.build.placeHere();
 
+    // R17 — this spec places a piece the tech tree now gates. `unlockAll` spends nothing and
+    // earns nothing; it just takes every node, so the spec goes on testing the thing it is about.
+    f.build.research?.unlockAll?.();
     f.build.select('waypoint_pad');
     f.build.aim(f.control.x + 10, f.control.z + 10);
     const pad = f.build.placeHere();
@@ -172,6 +175,7 @@ test('a save taken beside a finished base reloads with the base still on it', as
     f.build.aim(f.control.x + 10, f.control.z + 10); f.build.paint();
     f.build.setTool('build');
     f.build.select('claim_stone'); f.build.aim(f.control.x + 6, f.control.z + 10); f.build.placeHere();
+    f.build.research?.unlockAll?.();   // R17 — the tech tree gates this piece; see the note above.
     f.build.select('waypoint_pad'); f.build.aim(f.control.x + 10, f.control.z + 10);
     const res = f.build.placeHere();
     f.build.select('storage_crate'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();
@@ -235,6 +239,7 @@ test('a base is one button away from another star system', async ({ page }) => {
     f.build.aim(f.control.x + 10, f.control.z + 10); f.build.paint();
     f.build.setTool('build');
     f.build.select('claim_stone'); f.build.aim(f.control.x + 6, f.control.z + 10); f.build.placeHere();
+    f.build.research?.unlockAll?.();   // R17 — the tech tree gates this piece; see the note above.
     f.build.select('waypoint_pad'); f.build.aim(f.control.x + 10, f.control.z + 10);
     const pad = f.build.placeHere();
     f.build.select('storage_crate'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();

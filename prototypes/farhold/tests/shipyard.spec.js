@@ -67,6 +67,9 @@ test('the shipyard is reachable, and every refusal it gives can be satisfied', a
      * the Assembler", the pad then had no power, and the failure read as a shipyard problem in a
      * test about the shipyard. Five metres of clearance is not a knife edge.
      */
+    // R17 — this spec places a piece the tech tree now gates. `unlockAll` spends nothing and
+    // earns nothing; it just takes every node, so the spec goes on testing the thing it is about.
+    f.build.research?.unlockAll?.();
     f.build.select('assembler'); f.build.aim(spot.x + 3, spot.z);
     const asm = f.build.placeHere();
     f.build.select('burner_generator'); f.build.aim(spot.x + 8, spot.z);
@@ -214,6 +217,7 @@ test('the orbital yard is reachable once you have a hauler, and the panel says w
     for (const [dx, dz] of [[0, 0], [13, 0], [-13, 0], [0, 13], [0, -13]]) { f.build.aim(spot.x + dx, spot.z + dz); f.build.paint(); }
     f.build.setTool('build');
     f.build.select('claim_stone'); f.build.aim(spot.x + 9, spot.z + 9); f.build.placeHere();
+    f.build.research?.unlockAll?.();   // R17 — the tech tree gates this piece; see the note above.
     f.build.select('assembler'); f.build.aim(spot.x + 3, spot.z); f.build.placeHere();
     f.build.select('burner_generator'); f.build.aim(spot.x + 6, spot.z); f.build.placeHere();
     f.build.select('storage_crate'); f.build.aim(spot.x + 9, spot.z); f.build.placeHere();

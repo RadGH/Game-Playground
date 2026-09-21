@@ -552,3 +552,60 @@ test('the metres-per-cell knob is left where it was found', () => {
   assert.equal(M_PER_CELL, M_PER_CELL_DEFAULT);
   setMetresPerCell(M_PER_CELL_DEFAULT);
 });
+
+// ---------------------------------------------------------------------------------------------
+// R17 (lead) — §5 the settlement anchor
+//
+// The worldgen pass stopped every individual thing a town builds from standing in water. It left
+// the harder half: at Feafungate (seed 56138) the map NODE is in the middle of a river, so 41% of
+// the ground inside the town ring was water and the builder was simply dropping sixteen of the
+// hundred and thirty-nine things it wanted to put down — nothing looked broken, there was just a
+// hole where half a town should be.
+//
+// The cell does not move (roads are routed to it, and four other modules derive their own metres
+// from it). The ANCHOR moves, by less than a cell, which is under the precision of all of them.
+
+import { settlementAnchor } from '../js/town-plan.js';
+
+test('§5.1 a dry anchor is left exactly where it was', () => {
+  // nothing is wet anywhere: the function must not shuffle a town that has no problem
+  const dry = { underwater: () => false, riverAt: () => 0 };
+  const out = settlementAnchor(dry, 1000, 2000, 68, 224);
+  assert.equal(out.x, 1000);
+  assert.equal(out.y, 2000);
+});
+
+test('§5.2 a river through the middle moves the town off it', () => {
+  // a 60 m band of river running north-south through x = 1000
+  const wet = {
+    underwater: x => Math.abs(x - 1000) < 30,
+    riverAt: x => (Math.abs(x - 1000) < 30 ? 1 : 0),
+  };
+  const out = settlementAnchor(wet, 1000, 2000, 68, 224);
+  assert.ok(Math.abs(out.x - 1000) > 30, 'the anchor is out of the channel');
+  assert.equal(wet.underwater(out.x), false, 'and the anchor itself is dry');
+});
+
+test('§5.3 it never moves further than one cell, whatever the cell is', () => {
+  const allWet = { underwater: () => true, riverAt: () => 1 };
+  for (const cell of [64, 224, 448]) {
+    const out = settlementAnchor(allWet, 5000, 5000, 68, cell);
+    const moved = Math.hypot(out.x - 5000, out.y - 5000);
+    assert.ok(moved <= cell * 0.7 + 0.001, `moved ${moved} with a ${cell} m cell`);
+  }
+});
+
+test('§5.4 nowhere dry to go means it stays put rather than picking somewhere worse', () => {
+  const allWet = { underwater: () => true, riverAt: () => 1 };
+  const out = settlementAnchor(allWet, 5000, 5000, 68, 224);
+  // every candidate is refused for being in the water, so the original point survives
+  assert.equal(out.x, 5000);
+  assert.equal(out.y, 5000);
+});
+
+test('§5.5 the same world gives the same anchor every time — a town does not wander', () => {
+  const wet = { underwater: x => Math.abs(x - 1000) < 30, riverAt: x => (Math.abs(x - 1000) < 30 ? 1 : 0) };
+  const a = settlementAnchor(wet, 1000, 2000, 68, 224);
+  const b = settlementAnchor(wet, 1000, 2000, 68, 224);
+  assert.deepEqual(a, b);
+});

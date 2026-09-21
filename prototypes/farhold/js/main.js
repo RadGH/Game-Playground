@@ -69,6 +69,10 @@ import { createBuildUI } from './build-ui.js';
 import { createHomes } from './homes.js';
 import { WorkBoard, progressText, progressFraction, creditLine, workLeft } from './work.js';
 import { createColony } from './colony.js';
+// the Civilization Expansion: one module owns housing, vendors, the hold, trade, the muster and
+// the away half, so main.js constructs ONE thing and ticks ONE thing
+import { createCivics } from './civics.js';
+import { createCivicsScreen } from './civics-ui.js';
 import { createFarm } from './farm.js';
 import {
   migrateSave as migrateShipyard, canLaunch as canLaunchShip, spendFlightFuel, grantShip,
@@ -142,7 +146,7 @@ async function boot() {
 
   const [items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen,
     factionData, frameData, incidentData, wandererData, landmarkData, rewardData,
-    resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData] = await Promise.all([
+    resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData] = await Promise.all([
     loadJSON('../emberveil/data/items.json'),
     loadJSON('data/balance.json'),
     loadJSON('data/enemies.json'),
@@ -170,6 +174,9 @@ async function boot() {
     loadJSON('data/colony.json').catch(() => null),
     loadJSON('data/crops.json').catch(() => null),
     loadJSON('data/raids.json').catch(() => null),
+    // the Civilization Expansion §6 — the twenty-two trade goods, injected into resources and
+    // refining at boot by js/trade.js rather than written into either file
+    loadJSON('data/tradegoods.json').catch(() => null),
   ]);
 
   // all thirty classes now, each labelled with what it does and whether it brings companions
@@ -250,7 +257,7 @@ async function boot() {
         <span class="muted small">level ${s.level} · seed ${s.seed} · ${playtimeText(s.playtime)}${s.place ? ' · ' + s.place : ''}</span>`;
       const load = document.createElement('button');
       load.textContent = 'Load';
-      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: saves.read(s.id) });
+      load.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData, status, save: saves.read(s.id) });
       const del = document.createElement('button');
       del.className = 'ghost';
       del.textContent = '×';
@@ -263,7 +270,7 @@ async function boot() {
     if (last && saves.read(last)) {
       const cont = $('boot-continue');
       cont.hidden = false;
-      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: saves.read(last) });
+      cont.onclick = () => begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData, status, save: saves.read(last) });
     }
   }
   drawSaves();
@@ -271,7 +278,7 @@ async function boot() {
 
   $('boot-start').onclick = () => {
     $('boot-start').disabled = true;
-    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: null }).catch(err => {
+    begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData, status, save: null }).catch(err => {
       status('failed: ' + err.message);
       $('boot-start').disabled = false;
       console.error(err);
@@ -291,7 +298,7 @@ async function boot() {
     const chosen = wanted === 'last' ? saves.lastId() : wanted;
     const data = chosen ? saves.read(chosen) : null;
     if (data) {
-      begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, status, save: data })
+      begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData, cropData, raidData, goodsData, status, save: data })
         .catch(err => { status('failed: ' + err.message); console.error(err); });
       return;
     }
@@ -301,7 +308,7 @@ async function boot() {
   if (params.has('auto')) $('boot-start').click();
 }
 
-async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData: rawStructures, colonyData, cropData, raidData, status, save }) {
+async function begin({ items, balance, bestiary, talents, campaignData, classLooks, skillData, classData, craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData, landmarkData, rewardData, resourceData, refiningData, powerData, structureData: rawStructures, colonyData, cropData, raidData, goodsData, status, save }) {
   /**
    * ONE VOCABULARY FOR MATERIALS, FROM HERE ON.
    *
@@ -1772,6 +1779,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     refining: refiningData || {}, resources: resourceData || {},
     stores, grid, log: (t, c) => hud.log(t, c),
     rareElement: planet?.rare?.[0] || null,
+    /**
+     * THE CIVILIZATION EXPANSION §3 — AND THIS ONE ARGUMENT IS THE WHOLE SWITCH.
+     *
+     *   "The goal being that you can have ore sent to a town and have an NPC run the furnace to
+     *    smelt it automatically, consuming work."
+     *
+     * With it, a tended machine refuses to run unless somebody has put work units into it: one unit
+     * is thirty seconds of running time, so one bound smelter is worth about one furnace. Without
+     * it js/refine.js behaves exactly as it always has, which is why the balance harness and the
+     * node tests still drive the module they have always driven.
+     */
+    labour: colonyData?.labour || null,
   });
   /**
    * The benches, their queues, and which recipes you have unlocked by doing them.
@@ -1833,6 +1852,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // getters: the enemy field is rebuilt on every landing, and `build` is declared below this
     getField: () => field,
     getBuild: () => build,
+    /**
+     * THE NINTH JOIN. `colony.guards()` has counted the citizens standing a watch since the colony
+     * landed, and `defence.baseOf()` hard-coded `citizens: 0` right next to it. Two consequences,
+     * both immediate: four guards and a bolt turret now qualify for a Warband where before you
+     * needed five turrets, and `notoriety.perCitizen` finally gets a real number rather than a
+     * zero, so a village of twelve with a watch is noticed by the world.
+     *
+     * Getters, for the same reason `getField` is one: both are rebuilt on every landing.
+     */
+    getColony: () => colony,
+    getWorks: () => works,
+    getOutposts: () => build?.outposts?.() || null,
+    folk: null,
   });
   // the raid you had taken on, and how far through it you were. AFTER `defence` exists: putting
   // this up with the other loads read a `const` a hundred lines before its declaration, which is
@@ -2016,10 +2048,98 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const colony = createColony({
     data: colonyData || null, board, seed,
     name: `${player.name}'s holding`,
+    /**
+     * `stationAt` is how a citizen's walk to work becomes a real number of metres —
+     * `walkSpeedMetresPerHour` and `maxTravelHours` have sat unread in data/colony.json since the
+     * colony landed. A callback rather than an object because js/colony.js must never learn what a
+     * machine is, and because `civics` is declared below this and has to be read lazily.
+     */
+    stationAt: id => civics?.stationAt?.(id) || null,
   });
   if (save?.colony) colony.load(save.colony);
   const farm = createFarm({ data: cropData || null, board, seed });
   if (save?.farm) farm.load(save.farm);
+
+  /**
+   * ================= THE CIVILIZATION EXPANSION =================
+   *
+   *   "Do a new Civilization Expansion which integrates with the build system and adds NPC housing
+   *    and utilities. The goal being that you can have ore sent to a town and have an NPC run the
+   *    furnace to smelt it automatically, consuming work."
+   *
+   * One module, one tick, one save field. js/civics.js owns js/housing.js, js/vendors.js,
+   * js/hold.js, js/trade.js and js/muster.js, and it injects the twenty-two trade goods into the
+   * live resources and refining data before anything reads either — never into the files, which is
+   * the rule data/items.json taught when it turned out to be shared with Emberveil.
+   */
+  const civics = createCivics({
+    data: colonyData || null, goods: goodsData || null, raids: raidData || null,
+    resources: resourceData || {}, refining: refiningData || {},
+    colony, works, board, stores, farm, bestiary,
+    dayLengthSeconds: balance.sky?.dayLengthSeconds ?? 900,
+    seed, log: t => hud.log(t, 'level'),
+  });
+  if (save?.civics) civics.loadJSON(save.civics);
+
+  /**
+   * THE HOLDING SCREEN — its own file, its own stylesheet, and `K` opens it.
+   *
+   * js/hud.js is three thousand lines and carries nine other screens; a sixth tab bolted into it
+   * would be the tenth thing that has to be right for the character sheet to open at all.
+   * civics.css is loaded by the module itself, so index.html needs no change either.
+   */
+  const holding = createCivicsScreen({
+    civics, colony, works,
+    getPlayer: () => player,
+    getDay: () => Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+    log: (t, c) => hud.log(t, c),
+    /**
+     * WHERE A MUSTER WOULD BE CALLED, IF YOU CALLED ONE NOW.
+     *
+     * Your own holding if you are standing in it, otherwise the town you are in. `null` means
+     * neither, and the tab says so in a sentence rather than showing four dead rows.
+     */
+    musterAt: () => {
+      const home = defence.spot?.({ near: { x: control.x, z: control.z } });
+      const town = features.settlementAt(control.x, control.z);
+      if (home && Math.hypot(home.x - control.x, home.z - control.z) < 90) {
+        return {
+          placeId: 'home', placeName: colony.name || 'your holding',
+          base: defence.base, level: player.level, at: state.elapsed,
+        };
+      }
+      if (town) {
+        return {
+          placeId: 't' + town.id, placeName: town.name,
+          base: civics.muster.baseForTown(town, {
+            plots: town.size || 0,
+            guards: colony.guards?.() || 0,
+            walled: !!town.walled,
+          }),
+          level: player.level, at: state.elapsed,
+        };
+      }
+      return null;
+    },
+    /**
+     * CALL ONE. The muster builds the quest; `defence` adopts it so there is still exactly one
+     * wave system, one kill counter and one `loseRaid` deciding what a loss costs.
+     */
+    onMuster: (tier, spot) => {
+      const out = civics.muster.start({
+        placeId: spot.placeId, placeName: spot.placeName, tier, base: spot.base,
+        level: player.level, biome: terrain.biomeAt(control.x, control.z).key,
+        at: state.elapsed, hour: sky.dayFraction * 24,
+      });
+      if (!out.ok) { hud.log(out.why || 'Not now.', 'bad'); return out; }
+      defence.adopt(out.quest);
+      defence.rally?.({ level: player.level });
+      defence.spawnWave({ level: player.level });
+      hud.log(`The muster is called at ${spot.placeName}. Stay near the ground or it is called off.`, 'bad');
+      sound.questDone();
+      return out;
+    },
+  });
 
   /** Exactly one portal, ever — the whole state is one variable in js/portal.js. */
   const portals = createPortals({
@@ -2364,6 +2484,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     onPlace: (entry, def) => {
       joinSystems(entry, def);
+      // houses, utilities, watch posts, Trade Posts and Tender Arms, all worked out from where
+      // things stand rather than declared — the same rule js/outposts.js applies to outposts
+      civics.rebuild(build.entries, build.defOf);
       /**
        * A NEW CRATE IS A NEW ANSWER FOR EVERY DRILL THAT HAD NONE.
        *
@@ -2455,6 +2578,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       grid.remove(entry.id);
       stores.remove(entry.id);
       works.remove(entry.id);
+      // a house that was pulled down must not leave its citizen holding a bed that is not there
+      civics.rebuild(build.entries, build.defOf);
       mining.unbindDrill(entry.id);
       drawRoutes();
       if (!entry?.waypoint) return;
@@ -2509,6 +2634,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     away.load(save.away);
     const back = away.resume();
     if (back.text) hud.log(back.text, 'level');
+    /**
+     * THE HALF THE AWAY CLOCK NEVER COVERED: THE PEOPLE.
+     *
+     *   "Production and manufacturing should continue even if you leave a planet."
+     *
+     * js/logistics.js runs the grid, the machines and the shipments forward. Nobody woke, nobody
+     * walked to work, nobody ate and nobody filled a labour order — which did not matter before
+     * this round, because a citizen's work never made a single ingot. `civics.away` takes the
+     * window that clock already decided on, cap included, and runs the colony, the fields and the
+     * trade routes across the same seconds in the same order the live loop uses. No second clock.
+     *
+     * The mercy: nobody walks out while you are off-world. Losing your village because you took a
+     * flight is a punishment for playing.
+     */
+    civics.rebuild(build.entries, build.defOf);
+    const card = civics.away({ seconds: back.seconds, rng: rpg.rng });
+    if (card) holding.showAway(card);
   }
 
   /**
@@ -2840,6 +2982,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // field of dead machinery beside a dark pad
     for (const entry of build.entries || []) {
       joinSystems(entry, build.defOf(entry.key));
+      civics.rebuild(build.entries, build.defOf);
       if (entry.waypoint) {
         waypoints.addBuilt({ id: entry.id, name: entry.name, x: entry.x, z: entry.z, claim: entry.claim, powered: !!entry.powered });
       }
@@ -4474,6 +4617,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // R14: …and whatever your works made while you were away is waiting for you
     const back = away.resume();
     if (back.text) hud.log(back.text, 'level');
+    /**
+     * THE HALF THE AWAY CLOCK NEVER COVERED: THE PEOPLE.
+     *
+     *   "Production and manufacturing should continue even if you leave a planet."
+     *
+     * js/logistics.js runs the grid, the machines and the shipments forward. Nobody woke, nobody
+     * walked to work, nobody ate and nobody filled a labour order — which did not matter before
+     * this round, because a citizen's work never made a single ingot. `civics.away` takes the
+     * window that clock already decided on, cap included, and runs the colony, the fields and the
+     * trade routes across the same seconds in the same order the live loop uses. No second clock.
+     *
+     * The mercy: nobody walks out while you are off-world. Losing your village because you took a
+     * flight is a punishment for playing.
+     */
+    civics.rebuild(build.entries, build.defOf);
+    const card = civics.away({ seconds: back.seconds, rng: rpg.rng });
+    if (card) holding.showAway(card);
     autoSave();
   }
 
@@ -5137,6 +5297,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       build: build.toJSON?.() || null,
       portal: portals.toJSON?.() || null,
       colony: colony.toJSON?.() || null,
+      // who sleeps where, which traders moved in, what is in the hold and the Trade Post, the carts
+      // on the long roads, and the muster cooldowns. js/save.js's parameter list already has it.
+      civics: civics.toJSON?.() || null,
       farm: farm.toJSON?.() || null,
       work: board.toJSON?.() || null,
     });
@@ -5319,6 +5482,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * up, the mouse wheel turns it, click puts it down, Enter finishes a run of wall or road, and
      * Ctrl+Z takes back the last thing. Everything else is on screen while the mode is up.
      */
+    /**
+     * K IS THE HOLDING.
+     *
+     * Five tabs: who lives here, what they sleep in, what is being worked, which traders would move
+     * in and why the rest will not, and what is in the hold. Every refusal on that screen is a
+     * sentence rather than a greyed-out row, because a greyed-out row is the one answer a player
+     * cannot act on.
+     */
+    if (e.code === 'KeyK' && !hud.sheetOpen && !map.isOpen && !talk.isOpen && !build.mode) {
+      e.preventDefault();
+      pauseMenu.toggle(false);
+      holding.toggle();
+    }
     if (e.code === 'KeyB' && !hud.sheetOpen && !map.isOpen && !talk.isOpen) {
       e.preventDefault();
       const on = !build.mode;
@@ -6421,7 +6597,33 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       colony.setClock?.(sky.dayFraction * 24, Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1);
       colony.tick?.(dt * 15);
       farm.tick?.(dt * 15);
+      /**
+       * `works.machines()` RETURNS SOMETHING NOW.
+       *
+       * This call has been here since the building expansion and `works.machines` did not exist, so
+       * js/work.js's third source — the whole reason `runMachines` was written — has never once
+       * run. It returns the Tender Arms, which js/civics.js hands over in `rebuild`.
+       */
       board.runMachines?.(works.machines?.() || [], (dt * 15) / 3600);
+      /**
+       * …and the labour orders, the vendor day, and the carts on the long roads.
+       *
+       *   "you can have ore sent to a town and have an NPC run the furnace to smelt it
+       *    automatically, consuming work."
+       *
+       * `civics.tick` posts at most one small order per machine that wants tending and takes it off
+       * again when it does not, then pays each finished order into the machine it was for. That is
+       * the join the whole expansion is about.
+       */
+      const civ = civics.tick(dt * 15, {
+        day: Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1,
+        hour: sky.dayFraction * 24,
+        gold: player.gold, rng: rpg.rng, at: state.elapsed,
+      });
+      for (const r of civ.arrived || []) player.gold += civics.trade.collect(r.id).gold || 0;
+      if (civ.vendor) hud.log(`${civ.vendor.name} is asking after a bed. Press K.`, 'level');
+      holding.drawHold();
+      if (holding.open) holding.draw();
     }
     tickPools(dt);
     // the seams' respawn clocks, and the drills and routes that work them
@@ -6610,8 +6812,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             color: (MARKER_LOOKS[a.kind] || MARKER_LOOKS.quest).color,
             where: `${a.where} ${a.compass}`,
           }));
-      beacons.set(beaconRows.map(b => ({ ...b, y: terrain.heightAt(b.x, b.z) })));
+      /**
+       * The ground height is sampled ONCE here, not per frame. The edge arrows below are drawn
+       * every frame, and re-sampling six terrain heights sixty times a second to place six
+       * triangles is three hundred and sixty lookups a second for a number that has not moved.
+       * `y` is where the ARROW points (six metres up, so it does not aim at somebody's feet);
+       * js/beacon.js asks the terrain for the ground itself, because the two are not the same.
+       */
+      for (const b of beaconRows) b.y = terrain.heightAt(b.x, b.z) + 6;
+      beacons.set(beaconRows);
     }
+    /**
+     * R14 — THE MUSTER'S LEASH. Walk away from a drill and it is called off, which is the only
+     * thing that stops "call it and go and do something else" being the optimal play.
+     */
+    if (civics.muster.quest) {
+      const out = civics.muster.tickLeash(dt, { x: control.x, z: control.z, spot: defence.spot?.() });
+      if (out?.warn) hud.log(`You are ${out.metres} m from the muster. ${out.seconds}s and it is over.`, 'warn');
+      if (out?.over) { hud.log(out.line, ''); defence.adopt(null); }
+    }
+
     // R14: the ambient purse earns while you walk, and not at all during a fight or underground
     ambient.tick(dt, {
       fighting: field.enemies.some(e => e && e.state === 'chase'),
@@ -6621,7 +6841,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // the beacons breathe and turn every frame; the list behind them only changes four times a second
     if (!dungeon) beacons.update(dt, camera);
-    hud.edgeArrows(beaconRows.map(b => ({ ...b, y: terrain.heightAt(b.x, b.z) + 6 })), camera);
+    hud.edgeArrows(beaconRows, camera);
 
     renderFrame();
   }
@@ -6771,6 +6991,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get world() { return world; },
     /** R14: which mark a place wears, so a test can prove the landmarks are drawn at all. */
     mapMarkFor,
+    /** The Civilization Expansion, for tests/civilization.spec.js. */
+    get civics() { return civics; },
+    get holding() { return holding; },
+    get housing() { return civics.housing; },
+    get hold() { return civics.hold; },
+    /**
+     * NOT `trade` — THAT NAME IS ALREADY TAKEN, AND TAKING IT AGAIN LOSES SILENTLY.
+     *
+     * `trade` further down this same object literal is js/caravans.js, the loads that move between
+     * a zone's settlements. A duplicate key in an object literal is not an error in JavaScript, it
+     * is a shrug: the later one wins, and `farhold.trade` would have gone on being the caravans
+     * while looking for all the world like it was the goods market. This project has been bitten by
+     * exactly that once already — `board` was declared twice and js/work.js became unreachable.
+     */
+    get goodsMarket() { return civics.trade; },
+    get muster() { return civics.muster; },
     get map() { return map; },
     /** Is the world under your feet a settled, multi-biome one? (round 10, for the specs) */
     liveableHere: () => isHabitableStart(planet),

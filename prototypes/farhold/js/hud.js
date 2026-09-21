@@ -467,6 +467,41 @@ export class Hud {
   }
 
   /** The one-line "press E to…" strip above the hint. */
+  /**
+   * R15 — THE DRAW, AND THE CHANNEL.
+   *
+   * Round 14's combat work gave a bow a real draw and a staff a real charge: hold the button and
+   * the shot builds, with a floor under which it will not loose and a ceiling past which it pays
+   * 1.6x. All of that is live — `control.charge` is `{ fill, power, ready, kind }` on every frame
+   * the button is down — and NOTHING drew it. So the player is holding a mouse button and guessing
+   * at a mechanic with a floor and a ceiling in it, which is the one thing a charge weapon cannot
+   * survive.
+   *
+   * One bar under the crosshair. Grey until the shot is worth taking, blue once it is, amber near
+   * the top and gold at full. The node is built once and only its width and colour change after
+   * that, because this runs every frame.
+   */
+  chargeMeter(charge) {
+    let bar = this._charge;
+    if (!charge || !charge.fill) {
+      if (bar) bar.root.classList.remove('on');
+      return;
+    }
+    if (!bar) {
+      const root = el('div', 'charge-meter');
+      const fill = el('i', null);
+      root.append(fill);
+      document.body.append(root);
+      bar = this._charge = { root, fill, state: null };
+    }
+    const k = Math.max(0, Math.min(1, charge.fill || 0));
+    bar.root.classList.add('on');
+    bar.fill.style.width = (k * 100).toFixed(1) + '%';
+    // the class carries the colour, so the palette lives in style.css with every other colour
+    const state = !charge.ready ? 'short' : k >= 0.99 ? 'full' : k > 0.8 ? 'near' : 'ready';
+    if (bar.state !== state) { bar.state = state; bar.root.dataset.state = state; }
+  }
+
   prompt(text) {
     const box = $('prompt');
     if (!box) return;

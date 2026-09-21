@@ -5875,6 +5875,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       control.offEvery = hands.dual ? strikeAt(hands.off, control.offStep).every * hasteK : null;
     }
     const step = control.update(dt, snap, { frozen });
+    // R15: the draw and the channel are only playable if you can see where you are in them
+    hud.chargeMeter?.(control.charge);
 
     if (step.mountChanged) {
       if (control.mounted && !player.equipment.mount) {
@@ -6041,9 +6043,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const base = Math.max(1, Math.round((player.derived.damage[1] || 6) * (spell.mult || 1) * share));
         const radius = (spell.radius || spell.width || 3) * shape.scale;
         sound.combat('cast');
-        spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 1.1, control.z), element, scale: shape.scale });
+        // R15: `cast` takes { at, element, ms } — `scale` was silently dropped, so a wide-area
+        // build's flourish was the same size as everybody else's. A bigger charge holds longer,
+        // which is the only feedback the cast itself gives.
+        spellfx.cast({
+          at: new THREE.Vector3(control.x, control.y + 1.1, control.z), element,
+          ms: Math.round(380 * (shape.charge?.radius || shape.scale || 1)),
+        });
         if (spell.shape === 'nova') {
-          spellfx.aoe({ at: new THREE.Vector3(control.x, control.y + 0.2, control.z), element, radius, scale: shape.scale });
+          /**
+           * R15 — THE NOVA HAS NEVER DRAWN ANYTHING.
+           *
+           * `SpellFx.aoe`'s signature is `{ points, element, crit, stagger }` — it walks `points`
+           * and draws one burst at each. This call passed `at` and `radius`, so `points` defaulted
+           * to `[]`, the loop ran zero times, and every staff nova in the game has been invisible
+           * for its whole life. Both of the other `aoe` call sites in this file pass `points`
+           * correctly; this was the one that did not, and `ringPoints` was already sitting here.
+           */
+          spellfx.aoe({ points: ringPoints(control.x, control.z, radius), element, stagger: 0.04 });
           for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) })) {
             brandHit(enemy, result);
             if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));

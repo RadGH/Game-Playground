@@ -20,6 +20,7 @@
 // `store.have(id)` is the same callback build mode pays costs out of, so what the panel says you
 // have is exactly what the placement will find.
 
+import { mat } from '../../../shared/format.js';
 import { el } from '../../../shared/ui.js';
 import { createStationScreen, drawStationBody } from './station-ui.js';
 import { createResearchScreen } from './research-ui.js';
@@ -156,7 +157,8 @@ function costLine(cost, have) {
     .map(([id, n]) => {
       const got = have(id);
       const name = id.replace(/_/g, ' ');
-      return { text: `${n} ${name}`, short: got < n, got, need: n };
+      // R17 — one decimal at most: a cost can be a fraction and the panel is where you read it
+      return { text: `${mat(n)} ${name}`, short: got < n, got, need: n };
     });
 }
 

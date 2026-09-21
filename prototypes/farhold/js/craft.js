@@ -29,6 +29,7 @@
 //
 // Pure: no DOM, no Three.js. The crafting tab in hud.js only draws what `quote()` says.
 
+import { mat } from '../../../shared/format.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { GEAR_BASES, createGearShop } from './gear.js';
 
@@ -157,8 +158,18 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
   }
 
   /** A plain-language line for a cost, for the button. */
+  /**
+   * R17 — A QUANTITY OF A MATERIAL IS PRINTED WITH ONE DECIMAL, NEVER RAW.
+   *
+   *   "Update all resources in chat and inventory to round to 1 decimal place. It can stay a float
+   *    underlying. In the chat it showed some long string like 'you lack 6.000000000003 clay'."
+   *
+   * A gather pays `base * toolYield * richness`, so the stored amount genuinely is 6.000000000003 and
+   * it should stay that way — what must never happen is printing it. `mat()` in shared/format.js is
+   * the one rule, and this is the line the user was actually reading when they hit it.
+   */
   function costText(cost) {
-    return Object.entries(cost).map(([id, n]) => `${n} ${M[id]?.name || id}`).join(', ');
+    return Object.entries(cost).map(([id, n]) => `${mat(n)} ${M[id]?.name || id}`).join(', ');
   }
 
   // ---------------------------------------------------------------- recycling

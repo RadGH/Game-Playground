@@ -173,6 +173,13 @@ export function createResearchScreen({ research = null, log = null, standalone =
     get open() { return open; },
     draw,
     refresh: draw,
+    /**
+     * R17 — how many nodes could be bought this instant, for the character sheet's rail badge.
+     *
+     * An unspent point is invisible unless you happen to open the screen it belongs to, which is
+     * the reason `railBadges()` exists at all (round 14 added it for perk and talent points).
+     */
+    ready() { return research?.summary?.()?.ready || 0; },
     dispose() { root.remove(); },
   };
 

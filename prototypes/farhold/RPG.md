@@ -1870,6 +1870,93 @@ from scratch every time you land on a new world.
 files it had found behind dynamic imports, and the browser refused each one with a console error —
 enough to fail every spec that asserts a clean console, with nothing whatever wrong with the page.
 
+## Round 17 — the interface, the keys, and what the lead agent joined up
+
+The round's own write-ups are the five sections below this one, one per cluster. This is the part
+that belongs to no cluster: the shared files (`js/main.js`, `js/hud.js`, `style.css`,
+`index.html`), every handoff patch applied, and the four reports that were nobody's system in
+particular.
+
+**"[object HTMLElement]" over the weapon name.** `el(tag, cls, text)` takes three arguments and
+sets the third with `textContent`. The held-mode ring was calling
+`el('div', 'hm-ring', ...modes.map(m => el('i', …)))`, so the FIRST pip element was stringified
+into the ring's text — which is what "[object HTMLElement]" is — and every pip after it was dropped
+on the floor. The ring is built by appending now.
+
+**…and it stayed up over the open inventory.** `hud.tick` is the only thing that asks the readout
+whether it should be on screen, and `tick()` returns early the moment any panel opens
+(`if (uiPaused()) { input.sample(); return; }`), so the last thing drawn before the inventory came
+up stayed drawn on top of it. One `hud.refreshHeld()` in that early-return branch covers the sheet,
+the map, a conversation, the settings and the pause menu, because all five come through
+`panelOpen()`.
+
+**The title tagline.** Centred as TEXT, inside a 560px box with no auto side margins, inside a
+1040px panel — so the words were centred in a box that was itself shoved to the left.
+`margin-inline: auto`. `text-align` was never the problem.
+
+**Mount 1.6 m/s vs Ride 8.6 m/s.** A mount's `speed` is a MULTIPLIER on the walk (the Trail Horse is
+1.6×) and `toolFunction` was stamping "m/s" on the end of it; the Ride row multiplies by the walk
+speed and gets the real 8.6. Both read the Ride row's own option now, so they cannot drift again.
+The ship dropdown was a blank box because `owned.ship` is `[]` by design — it says **(None)**.
+
+**THE KEYS, which had two owners.** `js/settings.js` had the `log` action on **KeyK** while
+`js/main.js` had the Holding hard-coded on **KeyK** and had never put it in the binding table — so
+one press ran both, the Holding got the cursor, and rebinding could not separate them. `torch` had
+taken KeyL, so the key the title screen still advertised for the log did nothing at all. On top of
+that `js/hud.js` was listening for a raw `KeyK` of its own, which is how a second owner got in
+without the table ever knowing.
+
+Every key goes through `settings.BINDINGS` now. The Holding, build mode and the Followers screen are
+real rows (all three were hard-coded and unrebindable); the log has **no default key**, because it
+is the eighth tab of the character sheet, which is what was asked for. **L stays the light**, on
+foot and in the ship, because that is what round 15 asked for.
+
+The rule, rather than the instance: `tests/round17-ui.test.js` fails if any `e.code === 'KeyX'` in
+js/main.js is absent from `BINDINGS`. It caught KeyB and KeyF within a minute of being written.
+
+**The log and the Holding are tabs.** Both were full-window overlays on keys of their own that knew
+nothing about each other or about the pointer lock — which is the whole of *"it does not free up the
+cursor so I have to press ESC afterwards"* and *"it also opens the combat log though it shows up
+behind the window"*. As tabs they inherit one Esc, one close button, one cursor hand-off and one set
+of number keys. `js/civics-ui.js` gained `embedded`, which drops its fixed positioning and its own
+close button and changes nothing else.
+
+**The rail numbers itself.** Round 17 added four tabs (Log, Holding, Research, Followers). A
+hand-numbered keycap in the markup is how a rail ends up saying "7" twice, so `numberRail()` stamps
+the digits from `SCREENS` order, hides any tab nothing has mounted, and renumbers what is left.
+`hud.mount(tab, screen)` is the one door the three external screens come through — js/hud.js never
+imports any of them.
+
+**Shops and jobs on the minimap** now appear inside 70 m (`MINIMAP_NEAR`), which is about 230 feet
+and roughly where an enemy pip starts. A mark opts in by carrying `near`; a stronghold, a meteor and
+a dungeon mouth are destinations and stay visible at any range.
+
+**Resource amounts print with one decimal.** The amount STAYS a float — a gather pays
+`base * toolYield * richness` and rounding the store would lose material a grain at a time — but
+`shared/format.js` gained `mat()` and all five places that turn a quantity into words go through it:
+`craft.costText`, `buildplan.costText`, the build catalogue's price line, a station's recipe list
+and the material chips. A test walks them by source rather than trusting five separate fixes.
+
+**The town was still in the river.** The worldgen cluster stopped every individual thing a town
+builds from standing in water, and left the harder half: at Feafungate the map NODE is eighteen
+metres down under five metres of river, so 41% of the ground inside the town ring was water and the
+builder was simply dropping sixteen of the hundred and thirty-nine things it wanted to put down.
+Nothing looked broken any more — there was just a hole where half a town should be.
+
+The CELL does not move (roads are routed to it, and `js/map.js`, `js/quests.js`, `js/markers.js` and
+`js/waypoints.js` each derive their own metres from it). The ANCHOR does, by less than a cell, which
+is under the precision of all of them: `settlementAnchor()` in `js/town-plan.js` scores candidates
+by how much of the town's own ring would be dry and takes the first strictly better one on a fixed
+spiral, so a town is in the same place every time you come back. **41% underwater → 8%, and the
+centre stands dry.** A town that is already fine (85% dry) is not touched at all.
+
+**And the cheapest test in the round.** Moving `settlementAnchor` into js/town-plan.js and
+forgetting to widen js/features.js's import of that file took the whole game down. `node --check`
+cannot see it — the name is legal, it is simply never bound — and no node test can either, because
+js/features.js imports Three.js. `tests/round17-ui.spec.js` now just loads the game and asserts the
+console said nothing red. This round added nine modules and touched eleven files; that is the only
+thing that covers the class.
+
 ## Round 17 — onboarding
 
 > *"Let's add a brief onboarding quest line that holds the hand of the player and guides them

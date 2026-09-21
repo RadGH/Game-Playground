@@ -20,6 +20,7 @@
 // The catalogue is `data/structures.json`. The caller loads the JSON and passes it in, because a
 // browser and `node --test` fetch a file in two different ways and neither belongs in here.
 
+import { mat } from '../../../shared/format.js';
 import { groupOutposts } from './outposts.js';
 import { levelUnderSlab } from './roadplan.js';
 
@@ -335,7 +336,8 @@ export function createBuildPlan({
     return Object.entries(cost)
       .map(([k, n]) => {
         const word = names[k]?.name || resources[k]?.name || k.replace(/_/g, ' ');
-        return `${n} ${word.toLowerCase()}`;
+        // R17 — `mat()` and not the raw float: "You are short of 6.000000000003 clay."
+        return `${mat(n)} ${word.toLowerCase()}`;
       })
       .join(', ');
   }

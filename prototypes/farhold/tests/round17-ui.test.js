@@ -158,3 +158,38 @@ test('shops and jobs are gated by MINIMAP_NEAR, destinations are not', async () 
   assert.equal(/sites\.visible[\s\S]{0,400}near: MINIMAP_NEAR/.test(main), false,
     'a stronghold is a destination and stays visible');
 });
+
+// ---------------------------------------------------------------------------------------------
+// R17 item 17 — "update all resources in chat and inventory to round to 1 decimal place"
+//
+// The amount STAYS a float: a gather pays `base * toolYield * richness` and rounding the store
+// would lose material a grain at a time. What must not happen is printing it. There are five
+// places in the game that turn a quantity into words, and the rule is that all five go through
+// `mat()` — so this walks them by source rather than trusting five separate fixes to stay fixed.
+
+test('every place that prints a quantity of a material goes through mat()', () => {
+  const owners = [
+    ['js/craft.js', 'costText'],                 // the crafting button and its refusal
+    ['js/buildplan.js', 'costText'],             // "you are short of …"
+    ['js/build-ui.js', 'text: `${mat(n)}'],      // the build catalogue's price line
+    ['js/station-ui.js', 'const cost ='],        // a station's recipe list
+    ['js/hud.js', 'mat(m.n)'],                   // the material chips in the sheet header
+  ];
+  for (const [file, marker] of owners) {
+    const src = read(file);
+    assert.ok(src.includes("from '../../../shared/format.js'"), `${file} does not import the formatter`);
+    assert.ok(src.includes(marker), `${file} no longer has the line this test was aimed at`);
+  }
+});
+
+test('no cost line interpolates a bare count beside a material name', () => {
+  // the exact shape of the reported bug: `${n} ${name}` with nothing rounding n
+  for (const file of ['js/craft.js', 'js/buildplan.js', 'js/build-ui.js', 'js/station-ui.js']) {
+    const src = read(file)
+      .split('\n')
+      .filter(l => !/^\s*(\*|\/\/)/.test(l))     // comments quote the old line on purpose
+      .join('\n');
+    const bad = [...src.matchAll(/`\$\{n\}\s+\$\{[^}]*(name|word|m\b)[^}]*\}/g)].map(m => m[0]);
+    assert.deepEqual(bad, [], `${file} prints a raw count`);
+  }
+});

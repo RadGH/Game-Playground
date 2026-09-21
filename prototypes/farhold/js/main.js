@@ -56,6 +56,13 @@ import { createNodeWorld, createNodePatch, placedNode, materialIndex, whereToFin
 import { createBeacons, BEACON_RANGE } from './beacon.js';
 // R17 — the scanner's right-click chooser. See the note where it is constructed.
 import { createScannerChooser } from './scanner-ui.js';
+/**
+ * R17 — RESEARCH. `sharedResearch()` is the one instance js/build.js and js/build-ui.js already
+ * use; it takes no arguments and loads data/research.json itself. Points only come into being
+ * through `award(reason, n)`, and every caller of it in this file is tagged R17.
+ */
+import { sharedResearch } from './research.js';
+import { createResearchScreen } from './research-ui.js';
 // R17 — the custom class: the opening kit a build asks for, and the screen that manages the company
 import { applyOpeningKit } from './classbuild.js';
 import { createFollowers } from './followers.js';
@@ -1671,6 +1678,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // and `giverNodeId` is recorded when the job is taken so handing it in from the journal three
     // zones away earns exactly the same as walking back would have
     if (!quest.frame) campaign.onQuestDone(quest, npc?.node?.id ?? quest.giverNodeId ?? null);
+    /**
+     * R17 — and it is worth a research point.
+     *
+     * Here rather than at the three places a quest can be handed in, because `grantQuest` is
+     * already the one payer for every path (round 16) and a second bookkeeper would drift from it.
+     * A campaign objective is worth two; `data/research.json` owns which is which, so this only
+     * has to say what happened.
+     */
+    sharedResearch().award(quest.storyId || quest.campaign ? 'story' : 'quest', 1);
     const bits = [
       paid.gold ? `${paid.gold} gold` : null,
       paid.xp ? `${paid.xp} xp` : null,
@@ -1810,6 +1826,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }
     if (!dungeon) creditKill(e.x ?? control.x, e.z ?? control.z);
     sound.combat('death', { beast: e.kind !== 'humanoid' });
+    /**
+     * R17 — a boss is worth researching. A world boss is its own tier (`data/worldbosses.json`
+     * marks them, and js/sites.js carries the family through onto the body), so it pays more.
+     */
+    if (e.rank === 'boss' || e.worldBoss || e.family === 'worldboss') {
+      sharedResearch().award(e.worldBoss || e.family === 'worldboss' ? 'worldboss' : 'boss', 1);
+    }
     const settled = campaign.onKill(e.defId);
     if (settled === 'nemesis') {
       hud.log('The grudge is settled.', 'level');
@@ -2716,6 +2739,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * door is what js/research-ui.js and js/followers-ui.js come through.
    */
   hud.mount('holding', holding);
+
+  /**
+   * R17 — THE RESEARCH TAB.
+   *
+   * Same door as the Holding and the Followers screen: its own module, its own stylesheet, mounted
+   * into the div index.html reserves for it. There is a second way in — a Research button in the
+   * build panel's head — because the decision to research something is usually made while looking
+   * at the piece you cannot build yet.
+   */
+  const researchScreen = createResearchScreen({
+    research: sharedResearch(),
+    log: (t, c) => hud.log(t, c),
+  });
+  researchScreen.mount(document.getElementById('sheet-body-research'));
+  hud.mount('research', researchScreen);
 
   /** Exactly one portal, ever — the whole state is one variable in js/portal.js. */
   const portals = createPortals({
@@ -3685,7 +3723,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         have: haveAnywhere,
         toolTier: resourceData?.tools?.[toolTierFor(player)]?.tier ?? 0,
         hasStore: pools.length > 0,
-        hasSmelter: smelters.length > 0,
+        // R17 — "is there a FURNACE", not "is there a bench". `smelters` is every machine in
+        // data/refining.json, which now includes the Crafting Table, the Anvil, the Workbench and
+        // the Garage, none of which smelts anything. Every tier-0 burner has a `fuels` block.
+        hasSmelter: smelters.some(m => Object.keys(m.def?.fuels || {}).length > 0),
         hasFuel: fuels.some(f => haveAnywhere(f) > 0),
         hasDrill: entries.some(e => defOf(e.key)?.needs === 'node'),
         hasRoute: drills.some(d => d.routed || d.deliveredPerMinute > 0),
@@ -4595,6 +4636,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * the record's state; this takes the pin off the set piece standing on the ground.
      */
     if (firstTime && !holdings.standingOffer(row) && row.siteKey) sites.markTaken?.(row.siteKey);
+    // R17 — the first time at a landmark is a research point. `firstTime` is already exactly once.
+    if (firstTime) sharedResearch().award('landmark', 1);
 
     // --- the standing offer. True every time you come back.
     if (gives.rest) { player.hp = player.maxHp; player.mp = player.maxMp; hud.log('You rest. Nothing follows you here.', 'good'); }
@@ -6174,6 +6217,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function enterTerritory(zone) {
     boardZone = zone.id;
     const record = holdings.visit(zone.id);
+    // R17 — exploring pays for research, and `visits` is 1 the first time only
+    if (record?.visits === 1) sharedResearch().award('region', 1);
 
     /**
      * R16 — EVERY LANDMARK IN THIS ZONE GETS A MODEL, AND EVERY MODEL GETS A LEDGER.
@@ -6972,20 +7017,40 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * recipe list up on whatever you are standing at.
          */
         else if (it.kind === 'machine') {
+          /**
+           * R17 — E AT A STATION OPENS THAT STATION'S SCREEN.
+           *
+           *   "I built a furnace, campfire, kiln, and loom, but I still cannot figure out how to
+           *    convert iron ore into ingots… when I press E to open it it just opens the regular
+           *    build menu."
+           *
+           * It did. The only door into a machine's recipe list was the build panel's bench section,
+           * so asking a furnace what it could make put the whole catalogue, the tool rail, the
+           * digging list and the shipyard on screen and left you to find the furnace in it.
+           * `buildUI.openStation` returns false for anything with no screen of its own, so the old
+           * answer is still the fallback and nothing ends up with no answer at all.
+           *
+           * TAP E to open it, HOLD E to work it: the frame loop's `handWork.tick` runs off
+           * `keys.has('KeyE')` and is untouched here, so holding the key keeps putting units into
+           * the same order whether the screen is up or not.
+           */
           const m = it.works;
-          const wants = m && works.labourNeed(m) > 0 && m.queue.length > 0 && m.enabled !== false;
-          if (wants) {
-            handWork.tick(0.25, { at: state.elapsed, holding: true, machine: it.machine });
-            hud.log(`You put your back into the ${m.name}. Hold E to keep at it — B opens its recipes.`, 'good');
-          } else {
-            build.setMode(true);
-            buildUI.setOpen(true);
-            document.body.classList.add('building');
-            buildUI.refresh();
+          if (buildUI.openStation?.(it.machine)) {
             input.release();
-            hud.log(m
-              ? `${m.name}. ${works.stateText(m)} Pick what it should make.`
-              : `${it.machine.name || 'It'} is not a machine that makes anything.`, m ? '' : 'warn');
+            if (m) hud.log(`${m.name}. ${works.stateText(m)} Hold E to work it.`, '');
+          } else {
+            const wants = m && works.labourNeed(m) > 0 && m.queue.length > 0 && m.enabled !== false;
+            if (wants) {
+              handWork.tick(0.25, { at: state.elapsed, holding: true, machine: it.machine });
+              hud.log(`You put your back into the ${m.name}. Hold E to keep at it.`, 'good');
+            } else {
+              build.setMode(true);
+              buildUI.setOpen(true);
+              document.body.classList.add('building');
+              buildUI.refresh();
+              input.release();
+              hud.log(`${it.machine.name || 'It'} is not a machine that makes anything.`, 'warn');
+            }
           }
         }
         else if (it.kind === 'seam') {

@@ -24,6 +24,15 @@ catalogue, with everything low-tech yours from the moment you land.
 [`RESEARCH.md`](RESEARCH.md) documents the tree, the points and the gate; the station screens, the
 tidied build panel and the onboarding deadlock they fixed are in the "Round 17" section of
 [`BUILD-MODE.md`](BUILD-MODE.md).
+**And a five-step line holds your hand from an empty field to your first iron ingot** — a job taken
+in the starter town, timber and stone, a crate on the ground, a furnace, a smelt
+([`js/onboarding.js`](js/onboarding.js)).
+
+Round 17's other five clusters — the interface and the keys, the map, weapons/tools/seams, worldgen,
+and onboarding — each have a `## Round 17` section in [`RPG.md`](RPG.md).
+[`FUTURE_SYSTEM_BRAINSTORM.md`](FUTURE_SYSTEM_BRAINSTORM.md) is the parking lot for what comes after
+this round: scanning that turns into material discovery, a research tree that branches, more land
+vehicles, followers with opinions. **Nothing in it is built**, deliberately.
 
 ---
 

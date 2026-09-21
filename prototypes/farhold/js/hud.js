@@ -1651,6 +1651,11 @@ export class Hud {
     // R16: finished AND hand-in-able. A raid or a meteor pays itself the moment it finishes, so
     // counting those would leave a number on the rail with no button anywhere that clears it.
     set('journal', quests.filter(q => q.done && q.canHandIn !== false).length);
+    // R17 — points you could spend right now. Only once the screen is mounted, or the badge would
+    // be a number pointing at a tab that is not on the rail.
+    set('research', this.mounted?.research ? (this.mounted.research.ready?.() || 0) : 0);
+    // …and slots standing empty, which is the one thing the Followers tab is for
+    set('followers', this.mounted?.followers ? (this.mounted.followers.badge?.() || 0) : 0);
   }
 
   /** The worn-gear grid, used by both the character and inventory tabs. */

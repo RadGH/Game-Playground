@@ -292,6 +292,14 @@ export function createFollowersScreen({
 
   return {
     show, hide, toggle, draw,
+    /**
+     * R17 — empty follower slots, for the character sheet's rail badge. A slot you did not know
+     * you had is a mercenary you did not hire, which is the same problem an unspent perk point is.
+     */
+    badge() {
+      // `report()` already computes it: `free` is the cap minus who is actually standing
+      return followers?.report?.()?.free || 0;
+    },
     get open() { return open; },
     get root() { return root; },
     set tab(t) { tab = t; draw(); },

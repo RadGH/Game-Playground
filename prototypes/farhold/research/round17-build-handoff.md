@@ -153,6 +153,13 @@ but E is where the player looks, and E currently opens the build menu.
 `buildUI.openStation(entry)` takes a build-ledger entry (which `it.machine` is) and returns
 `true`/`false`. `buildUI.closeStation()` closes it; the × on the screen and `Esc` already do.
 
+### 2b. nothing else has to tick it
+
+`buildUI.tick()` is called inside `if (build.mode)`, and the whole point of the patch above is that
+E opens a station WITHOUT entering build mode — so the screen would have drawn once and then sat
+there with a queue that never ticked down. It owns a 400 ms clock of its own while it is up and
+stops it dead on close (`js/station-ui.js`, `startClock`). No change is needed at the call site.
+
 ### 2a. the pointer comes back
 
 The station screen calls the same `onClose` js/main.js already passes `createBuildUI`, which is

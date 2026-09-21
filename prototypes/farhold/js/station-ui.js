@@ -27,6 +27,7 @@
 //
 // No inline styles: station.css, injected by this module, the way js/civics-ui.js injects its own.
 
+import { mat } from '../../../shared/format.js';
 import { el } from '../../../shared/ui.js';
 
 const CSS_HREF = 'station.css';
@@ -295,7 +296,8 @@ function drawToolPanel(box, { entry, def, tools, redraw }) {
   }
   for (const r of rows) {
     const row = el('div', { class: 'build-yard-row' });
-    const cost = Object.entries(r.cost || {}).map(([m, n]) => `${n} ${(r.names?.[m] || m).toLowerCase()}`).join(', ');
+    // R17 — `mat()`, so a recipe never quotes a price with twelve decimals in it
+    const cost = Object.entries(r.cost || {}).map(([m, n]) => `${mat(n)} ${(r.names?.[m] || m).toLowerCase()}`).join(', ');
     const b = el('button', {
       class: 'small',
       text: r.owned && r.kind === 'device' ? `${r.name} ✓` : `Build the ${r.name}`,
@@ -456,6 +458,9 @@ export function createStationScreen({
   const startClock = () => {
     if (timer || typeof setInterval !== 'function') return;
     timer = setInterval(() => { if (open) draw(); }, 400);
+    // …and it must never be the reason a process stays alive. A node test that opens a station and
+    // does not close it would otherwise hang the whole run on a timer nobody is watching.
+    timer.unref?.();
   };
   const stopClock = () => { if (timer) { clearInterval(timer); timer = null; } };
 

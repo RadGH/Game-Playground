@@ -1271,6 +1271,27 @@ export class Hud {
         ctx.strokeText(look.icon, mx, my);
         ctx.fillStyle = m.done ? '#9ae06a' : look.color;
         ctx.fillText(look.icon, mx, my);
+        /**
+         * R16 — AND WHAT IT IS, while the scanner is running.
+         *
+         *   "…and show the name of the resource on the floating indicator."
+         *
+         * Only when the caller asks (js/main.js passes `label` for deposits and only while the
+         * scanner is up), because a name beside every marker in an ordinary game would turn the
+         * minimap into a wall of text. It is drawn under the glyph and skipped where it would land
+         * on another one, the same rule the rim distances follow.
+         */
+        if (m.label) {
+          const ly = my + 11;
+          if (labelled.every(l => Math.hypot(l[0] - mx, l[1] - ly) > 22)) {
+            labelled.push([mx, ly]);
+            ctx.font = '600 9px system-ui, sans-serif';
+            ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(8,10,16,.95)';
+            ctx.strokeText(m.label, mx, ly);
+            ctx.fillStyle = '#e8dfd2';
+            ctx.fillText(m.label, mx, ly);
+          }
+        }
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
         continue;
       }

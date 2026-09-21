@@ -92,14 +92,35 @@ test('R16.8 — the scanner finds what is under the ground and keeps it', async 
     const found = f.scanner.size;
     const marks = f.markers.here().filter(m => m.kind === 'seam');
     const named = marks.filter(m => m.name && m.name.length > 2).length;
+    /**
+     * "…and show the name of the resource on the floating indicator." The minimap only ever drew a
+     * glyph; while the scanner is up it draws the material's name under it too. Read the pixels,
+     * because a label that is computed and not painted is the whole class of bug this round is about.
+     */
+    const mini = document.getElementById('minimap');
+    // the label is painted in #e8dfd2 on a dark map, so count the near-white pixels: the whole
+    // canvas is opaque, which makes an alpha test meaningless
+    const ink = () => {
+      const px = mini.getContext('2d').getImageData(0, 0, mini.width, mini.height).data;
+      let n = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        if (px[i] > 200 && px[i + 1] > 195 && px[i + 2] > 185) n++;
+      }
+      return n;
+    };
+    const withNames = ink();
     f.scanner.setOn(false);
-    return { before, found, marks: marks.length, named, on: f.scanner.on };
+    await new Promise(r => setTimeout(r, 700));
+    const withoutNames = ink();
+    return { before, found, marks: marks.length, named, on: f.scanner.on, withNames, withoutNames };
   });
   console.log('SCAN ' + JSON.stringify(out));
   expect(out.found, 'a sweep with the scanner on found nothing at all').toBeGreaterThan(0);
   expect(out.marks, 'nothing the scanner found reached the map').toBeGreaterThan(out.before);
   expect(out.named, 'the deposits on the map do not say what they are').toBeGreaterThan(0);
   expect(out.on).toBe(false);
+  expect(out.withNames, 'the minimap draws no more while the scanner is up, so the names are not on it')
+    .toBeGreaterThan(out.withoutNames);
   expect(errors).toEqual([]);
 });
 

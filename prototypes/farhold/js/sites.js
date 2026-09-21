@@ -1269,6 +1269,62 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     /** Mark one cleared, so it stops refilling. */
     clear(key) { const s = sites.find(v => v.key === key); if (s) { s.cleared = true; s.populated = true; } return s || null; },
 
+    /** Every instance kind this file knows about, including the ones it will not scatter. */
+    instanceKinds: () => (instanceData?.instances || []),
+
+    /**
+     * R16 — PUT A QUEST-ONLY PLACE ON THE GROUND.
+     *
+     *   "Have one be a dragons lair, which can both be discovered randomly or through a quest from
+     *    someone in town or elsewhere."
+     *
+     * Four of the twenty carry `discovery: "quest"`, which means `buildSites` deliberately never
+     * scatters them: they are not somewhere you stumble across, they are somewhere you are SENT.
+     * That is only true if something can do the sending — otherwise they are four entries in a JSON
+     * file that nothing reads, which is the fault this whole round keeps finding.
+     *
+     * So: find the nearest slot to `near` that suits the place and has nothing on it, and build the
+     * mouth there. Returns the site, or null if this world has nowhere that fits — which is a real
+     * answer, and the caller must not promise a place it could not put down.
+     */
+    placeInstance(id, near = null, { maxAway = 4000 } = {}) {
+      const spec = (instanceData?.instances || []).find(i => i.id === id);
+      if (!spec || !setpieces?.layouts?.[spec.plan]) return null;
+      const already = sites.find(s => s.family === 'instance' && s.type === id);
+      if (already) return already;
+      const from = near || (lastPoint ? { x: lastPoint[0], z: lastPoint[1] } : { x: 0, z: 0 });
+      const taken = new Set(sites.map(s => String(s.key)));
+      let best = null, bestD = maxAway;
+      for (const slot of slotsFrom(terrain.world)) {
+        if (taken.has(String(slot.key))) continue;
+        if (terrain.underwater?.(slot.x, slot.z)) continue;
+        const d = Math.hypot(slot.x - from.x, slot.z - from.z);
+        if (d >= bestD) continue;
+        const tags = tagsFor(slot);
+        if (!(spec.on || []).some(t => tags.has(t))) continue;
+        if (townGap(slot.x, slot.z) <= (spec.townGap ?? 200)) continue;
+        bestD = d; best = slot;
+      }
+      if (!best) return null;
+      const zone = zones?.at(best.x, best.z) || null;
+      const site = {
+        id: best.id, key: best.key,
+        kind: 'instance', type: spec.id, family: 'instance', plan: spec.plan, spec,
+        instance: spec,
+        name: spec.name, blurb: spec.blurb, does: 'Go in.',
+        gives: spec.gives || {}, faction: null, hostile: false,
+        tier: 0, arch: spec.arch || 'stone',
+        x: best.x, z: best.z, cell: best.cell, zone,
+        level: Math.max(1, (zone?.midLevel ?? 1) + (spec.interior?.overLevel ?? 0)),
+        pin: { color: '#b090ff', r: 3.6, glyph: spec.icon || 'dungeon' },
+        populated: false, cleared: false, fromQuest: true,
+      };
+      sites.push(site);
+      lastCentre = null;
+      if (lastPoint) update(lastPoint[0], lastPoint[1], true);
+      return site;
+    },
+
     /**
      * R16 — A CONSUMED LANDMARK STOPS ADVERTISING ITSELF.
      *

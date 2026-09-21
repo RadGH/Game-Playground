@@ -309,3 +309,40 @@ test('R16.7 — the target bar names what the crosshair is on', async ({ page })
     .toContain(out.farName);
   expect(errors).toEqual([]);
 });
+
+test('R16.10 — the four places nobody stumbles on are ones you can be sent to', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    const kinds = f.instances.kinds;
+    const questOnly = kinds.filter(k => k.discovery === 'quest');
+    const scattered = new Set(f.instances.mouths.map(m => m.instance.id));
+    /**
+     * `discovery: "quest"` means js/sites.js deliberately never scatters it — so without something
+     * that SENDS you, those entries are dead data, which is the fault this whole round keeps
+     * finding. `revealInstance` is the sending; the Town Hall's "Word of …" row is the door to it.
+     */
+    const before = f.instances.mouths.length;
+    const target = questOnly[0];
+    const made = target ? f.instances.reveal(target.id) : null;
+    await new Promise(r => setTimeout(r, 400));
+    const after = f.instances.mouths;
+    const opened = after.find(m => m.instance.id === target?.id) || null;
+    return {
+      questOnly: questOnly.map(k => k.id),
+      noneScattered: questOnly.every(k => !scattered.has(k.id)),
+      before, after: after.length,
+      revealed: !!made, opened: !!opened,
+      marked: f.markers.here().some(m => m.name === made?.name),
+      leadsExist: Array.isArray(f.instances.leads),
+    };
+  });
+  console.log('LEADS ' + JSON.stringify(out));
+  expect(out.questOnly.length, 'no place is quest-only, so being sent somewhere means nothing').toBeGreaterThan(0);
+  expect(out.noneScattered, 'a quest-only place was scattered on the map anyway').toBe(true);
+  expect(out.revealed, 'nothing can put a quest-only place on the ground').toBe(true);
+  expect(out.after, 'revealing one did not add a mouth').toBeGreaterThan(out.before);
+  expect(out.opened, 'the revealed place has no door you can press E at').toBe(true);
+  expect(out.marked, 'you were sent somewhere and it is not on your chart').toBe(true);
+  expect(errors).toEqual([]);
+});

@@ -1941,6 +1941,48 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * again whenever the world is rebuilt.
    */
   let gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: features.solids });
+  /**
+   * R16 — SOMEBODY TELLS YOU WHERE A PLACE IS.
+   *
+   *   "Have one be a dragons lair, which can both be discovered randomly or through a quest from
+   *    someone in town or elsewhere."
+   *
+   * Four of the twenty instanced places carry `discovery: "quest"` and are never scattered on the
+   * map — they are somewhere you are SENT. `revealInstance` is the sending: it puts the mouth on
+   * the ground near you, opens the door, files a marker so you can find it again, and hands back
+   * the site so the caller can point a job at it. Without this those four would be four entries in
+   * a JSON file that nothing reads, which is the fault this whole round keeps turning up.
+   */
+  function revealInstance(id, near = null) {
+    const site = sites.placeInstance?.(id, near || { x: control.x, z: control.z });
+    if (!site) return null;
+    openMouths();
+    markers.save?.({
+      cellX: Math.floor(site.x / terrain.metresPerCell),
+      cellY: Math.floor(site.z / terrain.metresPerCell),
+      name: site.name, note: site.blurb || '',
+      from: { type: 'instance', id: site.type, label: site.name },
+    });
+    hud.log(`${site.name} is on your chart. ${site.blurb || ''}`, 'level');
+    autoSave();
+    return site;
+  }
+
+  /**
+   * The instanced places a settlement could tell you about: quest-only ones that suit this zone's
+   * band and are not already standing somewhere. Cached per town so the offer does not reshuffle
+   * every time the Town Hall redraws.
+   */
+  function hallLeads(zone) {
+    const band = zone?.band ?? 1;
+    const standing = new Set((sites.sites || []).filter(s => s.family === 'instance').map(s => s.type));
+    return (sites.instanceKinds?.() || []).filter(i =>
+      (i.discovery === 'quest' || i.discovery === 'both')
+      && !standing.has(i.id)
+      && (i.minBand ?? 0) <= band
+      && (i.maxBand == null || band <= i.maxBand));
+  }
+
   function openMouths() {
     const extra = sites?.mouths?.() || [];
     if (!extra.length) return;
@@ -2400,12 +2442,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           station: c.station, housed: c.housed,
         })),
         offers: hallOffers(town, pop),
-        // the same board the notice board shows, so a hall is a second way to find work rather
-        // than a second set of work
-        jobs: (localBoard || []).slice(0, 6).map(j => ({
-          id: j.id, title: j.title, text: j.text,
-          reward: j.reward ? `${j.reward.gold || 0} gold, ${j.reward.xp || 0} xp` : '',
-        })),
+        /**
+         * The same board the notice board shows — a hall is a second way to find work rather than
+         * a second set of work — plus the one thing only a hall has: somebody who knows where a
+         * place IS. That is the "or through a quest from someone in town" half of the ask, and it
+         * is the only route to the four instanced places that are never scattered on the map.
+         */
+        jobs: [
+          ...hallLeads(zone).slice(0, 2).map(i => ({
+            id: `lead:${i.id}`, lead: i.id,
+            title: `Word of ${i.name}`,
+            text: `${i.blurb} Somebody here knows the way, and will mark it on your chart.`,
+            reward: 'a place on your chart',
+          })),
+          ...(localBoard || []).slice(0, 5).map(j => ({
+            id: j.id, title: j.title, text: j.text,
+            reward: j.reward ? `${j.reward.gold || 0} gold, ${j.reward.xp || 0} xp` : '',
+          })),
+        ],
         work: (works.allJobs?.() || []).slice(0, 8).map(w => ({
           id: `${w.machine}:${w.index}`, name: `${w.machineName} — ${w.name}`,
           state: w.state, fraction: w.progress || 0, credit: null,
@@ -2421,7 +2475,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       townHall.refresh();
     },
-    onTakeJob: j => { takeBoardJob(j); },
+    onTakeJob: j => {
+      // a "lead" is not a job off the board: it is somebody telling you where a place is
+      if (j.lead) { revealInstance(j.lead); townHall.refresh(); return; }
+      takeBoardJob(j);
+    },
     log: (t, c) => hud.log(t, c),
   });
 
@@ -3920,6 +3978,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           q.text = H.quest.text || q.text;
           q.found = true;
           q.reward = { ...q.reward, ...(H.quest.reward || {}) };
+          /**
+           * `to: "instance:<id>"` is what makes one of these places lead to another — the ash tomb
+           * is how you learn where the wyrm's hold is. The place is put on the ground NOW, so the
+           * job has a real destination rather than a name; a job that points nowhere is the dead
+           * pointer this round set out to remove.
+           */
+          const to = String(H.quest.to || '');
+          if (to.startsWith('instance:')) {
+            const led = revealInstance(to.slice('instance:'.length), { x: node.x, z: node.z });
+            if (led) q.place = { x: led.x, z: led.z, name: led.name, cell: led.cell };
+          }
           questLog.add(q);
           markers.syncQuests(questLog.active);
           hud.log(`${H.quest.found || 'You find something here.'} — ${q.title}`, 'level');
@@ -8286,7 +8355,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get scanner() { return scanner; },
     /** Every instanced place on this planet, and the doors they opened. */
     get instances() {
-      return { mouths: sites.mouths?.() || [], gates: gates.nodes.length };
+      return {
+        mouths: sites.mouths?.() || [], gates: gates.nodes.length,
+        kinds: (sites.instanceKinds?.() || []).map(i => ({ id: i.id, discovery: i.discovery, minBand: i.minBand })),
+        leads: hallLeads(hud.here),
+        reveal: id => revealInstance(id),
+      };
     },
     /** The holding's population, the rod, and the Town Hall. */
     get holdingPop() { return population({ colony }); },

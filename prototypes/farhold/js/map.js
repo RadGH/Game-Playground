@@ -980,6 +980,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
 
     drawWaypoints(ctx, scale, ox, oy);
     drawPortals(ctx, scale, ox, oy);
+    drawScan(ctx, scale, ox, oy);
 
     // B8: where a name has been held back, say so in grey rather than leaving a gap the player
     // reads as empty ground. The band under it still tells them whether they could survive there.
@@ -1592,6 +1593,36 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       drawMark(ctx, m.key, m.x, m.y, k);
       // R14: the hit radius is a little wider than the mark, because a 3 px pip is not a target
       placeHits.push({ x: m.x, y: m.y, r: Math.max(9, (MAP_MARKS[m.key]?.r || 3) * k + 4), mark: m });
+    }
+  }
+
+  /**
+   * R14 — WHAT THE LAST SWEEP TURNED UP, ON THE MAP.
+   *
+   *   "The scanner tool should let you select a material and scan for it, displaying it with a
+   *    marker in the world for some time and displaying it on the world map as well."
+   *
+   * The world half is js/beacon.js, a column of light over each hit. This is the map half: a small
+   * diamond in the material's own colour at every hit, for as long as the sweep is lit. They are
+   * deliberately NOT markers — a sweep can turn up fifty seams and fifty entries in the marker book
+   * would bury the pins you placed by hand. Keep one and it becomes a saved place, which is a
+   * decision rather than a side effect.
+   */
+  function drawScan(ctx, scale, ox, oy) {
+    const st = scanState?.();
+    if (!st?.hits?.length) return;
+    for (const h of st.hits) {
+      const px = ox + (h.x / M_PER_CELL + 0.5) * scale;
+      const py = oy + (h.z / M_PER_CELL + 0.5) * scale;
+      if (px < -10 || py < -10 || px > canvas.width + 10 || py > canvas.height + 10) continue;
+      const r = Math.max(3, Math.min(7, scale * 0.6));
+      ctx.beginPath();
+      ctx.moveTo(px, py - r); ctx.lineTo(px + r, py); ctx.lineTo(px, py + r); ctx.lineTo(px - r, py);
+      ctx.closePath();
+      ctx.fillStyle = h.colour || '#c08a3e';
+      ctx.fill();
+      ctx.lineWidth = 1.4; ctx.strokeStyle = '#1a1208';
+      ctx.stroke();
     }
   }
 

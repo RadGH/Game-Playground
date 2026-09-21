@@ -41,6 +41,7 @@ const PERK_RINGS = RINGS.map(r => r.radius);
 import { patternGlyphs, patternText, handsOf, profileOf } from './weapons.js';
 import { VEHICLES, vehicleFor } from './gear.js';
 import { MARKER_LOOKS, distanceText } from './markers.js';
+import { NEARBY_ICONS, mmss } from './nearby.js';
 import { installTooltips, registerTip, hideTip, refreshTip } from '../../../shared/tooltip.js';
 // The playground's one number formatter. Nothing on screen should ever read "513.4100000000000001"
 // — Emberveil hit exactly this and `shared/format.js` is the fix it produced.
@@ -173,7 +174,10 @@ export class Hud {
      * star it, forget it — and knows nothing else about the map screen.
      */
     onLocate = null, onStarSaved = null, onForgetSaved = null,
+    /** R14: the same list the Nearby panel draws, so the journal cannot disagree with it. */
+    nearby = null,
   } = {}) {
+    this.nearby = nearby;
     this.onLocate = onLocate;
     this.onStarSaved = onStarSaved;
     this.onForgetSaved = onForgetSaved;
@@ -2910,6 +2914,29 @@ export class Hud {
       // one line under the list so the missing "take it" is explained rather than simply missing
       bbox.append(el('p', 'muted small',
         'Work is heard of here and taken elsewhere: a notice board in a settlement, or the person asking.'));
+    }
+
+    /**
+     * ---- R14: GOING ON NEAR YOU.
+     *
+     *   "These should also appear in the journal with a button to view location."
+     *
+     * The same rows as the Nearby panel under the minimap, from the same pure list (js/nearby.js),
+     * because two lists of "what is happening" that could disagree is worse than one that is
+     * sometimes a second out of date. The panel is five rows and a glance while you walk; this is
+     * all of them, when you have stopped to read.
+     */
+    const nbox = $('journal-nearby');
+    if (nbox) {
+      const near = this.nearby?.() || [];
+      nbox.replaceChildren(...(near.length ? near.map(a => {
+        const n = el('div', 'journal-row has-locate');
+        n.innerHTML = `<span>${NEARBY_ICONS[a.kind] || '·'} ${a.name}</span>`
+          + `<span class="muted">${a.where} ${a.compass}${a.ttl != null ? ` · ${mmss(a.ttl)} left` : a.state ? ` · ${a.state}` : ''}</span>`;
+        const go = this.locateButton({ x: a.x, z: a.z, name: a.name, kind: a.kind === 'fall' ? 'fall' : 'place' }, a.name);
+        if (go) n.append(go);
+        return n;
+      }) : [el('p', 'muted small', 'Nothing going on within a walk of here. Keep moving.')]));
     }
 
     /** ---- WORD GOING ROUND. The only thing in the game allowed to talk about somewhere else. */

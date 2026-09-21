@@ -515,7 +515,17 @@
           <span class="pane-title">Word going round</span>
           <span class="pane-tools keyhint">about places you have not been</span>
         </div>
-        <div class="pane-body tight"><div id="journal-rumours" class="journal"></div></div>
+        <div class="pane-body tight">
+          <!--
+            R14 — "These should also appear in the journal with a button to view location."
+            The same rows the Nearby panel shows under the minimap, kept here because the panel is
+            five rows and a glance while you walk, and this is the whole list when you stop.
+          -->
+          <div class="divider">Going on near you</div>
+          <div id="journal-nearby" class="journal"></div>
+          <div class="divider">Heard about</div>
+          <div id="journal-rumours" class="journal"></div>
+        </div>
       </section>
       <section class="pane col-foes">
         <div class="pane-head">

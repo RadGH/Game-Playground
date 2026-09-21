@@ -1208,6 +1208,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * callbacks. `map` is assigned a few hundred lines below this — hence the `?.`: a click cannot
      * happen before there is a map, but a test can call it.
      */
+    /** R14: the journal's "Going on near you" reads the same list the panel under the minimap does. */
+    nearby: () => nearbyRows,
     onLocate: (place, opts) => {
       const out = map?.locate?.(place, opts);
       if (out && !out.ok) hud.log(out.why || 'That is not somewhere you can be shown.', 'warn');

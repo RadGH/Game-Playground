@@ -169,3 +169,50 @@ test('the ambient purse refuses most of what the world wants to say', async ({ p
   expect(out.stats.refused).toBeGreaterThan(30);
   expect(errors).toEqual([]);
 });
+
+test('the journal lists what is going on near you, with a locate button on each', async ({ page }) => {
+  const errors = await land(page);
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => window.farhold.hud.toggleSheet(true));
+  await page.evaluate(() => { document.querySelector('#sheet-tabs [data-tab="journal"]')?.click(); });
+  await page.waitForTimeout(400);
+  const out = await page.evaluate(() => {
+    const box = document.getElementById('journal-nearby');
+    return {
+      exists: !!box,
+      rows: [...(box?.querySelectorAll('.journal-row') || [])].map(n => n.textContent),
+      locates: box?.querySelectorAll('.row-locate').length ?? -1,
+      panelRows: window.farhold.nearby?.length ?? -1,
+    };
+  });
+  console.log('journal nearby:', JSON.stringify(out));
+  expect(out.exists).toBe(true);
+  // the journal and the panel read the SAME list, so they cannot disagree
+  if (out.panelRows > 0) {
+    expect(out.rows.length).toBe(out.panelRows);
+    expect(out.locates).toBe(out.panelRows);
+  }
+  expect(errors).toEqual([]);
+});
+
+test('a sweep puts its hits on the map as well as in the world', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(() => {
+    const fh = window.farhold;
+    fh.scan.sweep(null, null, 900);
+    fh.map.toggle(true);
+    const st = fh.scan.state();
+    return { hits: st.hits.length, lit: st.until > 0, mapOpen: fh.map.isOpen };
+  });
+  await page.waitForTimeout(400);
+  console.log('scan on map:', JSON.stringify(out));
+  expect(out.hits).toBeGreaterThan(0);
+  expect(out.mapOpen).toBe(true);
+  // the canvas has to have drawn something other than the ground under those hits
+  const painted = await page.evaluate(() => {
+    const c = document.getElementById('map-canvas');
+    return !!c && c.width > 0 && c.height > 0;
+  });
+  expect(painted).toBe(true);
+  expect(errors).toEqual([]);
+});

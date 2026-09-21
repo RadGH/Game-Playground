@@ -1360,3 +1360,367 @@ were not — the equip rule and the straight-line haul distance — were both *w
 the right place: "is this a one-hander" instead of "would the off hand take it", and "how far apart
 are these" instead of "how far is the walk". Neither crashes, neither shows up in a test that was
 not written to look for it, and both are invisible until somebody plays the game and says so.
+
+---
+
+# Round 14 — a play-test list, and three redesigns
+
+Twenty items off a play-test, plus three pieces the user asked a design agent to plan first: the
+map, the ambient events, and the Civilization expansion. The designs are in `research/` —
+`map-redesign.md`, `events-redesign.md`, `civilization-expansion.md`, `combat-redesign.md` — and
+each one starts with an audit rather than a proposal, which is why they are worth keeping.
+
+## The shape of the round
+
+Nine of the twenty items turned out to be **a rule written into the data and read by nobody**. That
+is now the third round running where it has been the dominant fault, and it is worth stating as a
+pattern rather than as a list of bugs:
+
+| the rule | where it was written | what nobody did with it |
+|---|---|---|
+| `nearWater: true` on `clay_bank` | `data/resources.json` | `kindsForBiome` never looked, so clay was scattered over six biomes instead of on riverbanks |
+| `named` scope budgets | `data/job-frames.json` `scopes` | `fits()` had no distance test, so a "local" job could bind a town 40 km away |
+| `label` on every key binding | `js/settings.js` BINDINGS | the pause menu read `b.name`, so every row said "W undefined" |
+| `MARKER_LOOKS[kind].icon` | `js/markers.js` | the world map drew six identical dots; the minimap and the side panel both drew the glyph |
+| `node.type === 'landmark'` | World Forge `nodes.js` | `markFor` tested `family`, which World Forge nodes do not have — 10 of 11 kinds never drawn |
+| `portal.mapMarkers()` | `js/portal.js:211` | imported by nothing. The thirteenth module of this kind |
+| `encounters.events` | `js/encounters.js:428` | a finished activity feed with positions and clocks, read by nothing |
+| `TWO_HANDED_SCALE.damage` | `js/weapons.js:102` | `profileOf` never returns `damage`; its only effect was making bows 20% slower |
+| `claim_stone` costing 2 iron | `data/structures.json` | iron needs a furnace, a furnace needed a claim — your second base was impossible |
+
+The lesson the round keeps teaching: **a flag that nothing reads is indistinguishable from a missing
+feature, and much harder to find**, because the data says the feature is there. The defence is a
+test that walks the data and asserts somebody consumes every field — `tests/landmark-gives.test.js`
+does it for landmarks, `tests/scanner.test.js` now does it for node kinds and biomes, and
+`tests/round14.test.js` does it for the build catalogue.
+
+## The exploit
+
+> "I found a node 'E look at field of cairns' and it allows me to repeatedly press E to gain
+> infinite experience."
+
+`atLandmark` paid out a landmark's whole `gives` block on every press of E. The landmarks with
+`steps` were safe *by accident* — `workLandmark` counts them down and only pays on the last one —
+but twelve of the sixteen kinds carry `solve: false`, have no steps, and so had nothing stopping
+them at all. Stand still, hold E, gain a level a second.
+
+`territory.takeLandmark()` is true exactly once per landmark for the life of the save. What it gates
+is the things that only make sense once: the reward, the curse, the events that change the world.
+What it does not gate is the **standing offer** a place makes — you can rest at a shrine again
+tomorrow, the bench is still a bench, the ford is still a ford, and a toll is charged every time,
+because that is what a toll is. Splitting those two was the whole of the fix.
+
+And while in there: the Field of Cairns was built out of `rubble`, a 1.8 m heap of broken stone,
+while its own blurb promised "thirty piles of stone, laid out in rows by somebody careful". There
+was no cairn in the file and the layout schema could say "ring" and "scatter" and not "rows".
+
+## What "they happen too often" actually was
+
+Five separate bugs, each of which alone would have been survivable:
+
+1. **Open water is a zone** (`id: -1`), and the main loop treated any change of zone id as walking
+   into new territory. Wading into a river and back re-announced the region, re-rolled the trouble,
+   re-populated the road and heard another rumour — several times a minute, on every world with
+   rivers.
+2. **Dusk and dawn** cleared `boardZone` to rebuild the notice board, which is right, by pretending
+   you had just arrived, which is not. Twice an in-game day, for ever.
+3. **`describe()` is a status readout** and was printed as news, so an incident that started forty
+   minutes ago was announced again.
+4. **`grudge` starved everything else.** It is a forced incident (chance 1, no roll) sitting fourth
+   in `data/incidents.json`, and the loop returned on the first thing that fired. So from the first
+   time the player died, the eight interesting incidents could never start in a zone they were newly
+   entering. The blandest line in the game was the only one anybody ever saw, and it was not bad
+   luck — it was the mechanism.
+5. **Two clocks disagreed about an hour**: the territory ran one per 60 real seconds against the
+   sun's 37.5, so a "24 hour" incident lasted 1.6 in-game days.
+
+On top of those, `js/ambient.js` is the budget every ambient source now draws on: two lines a
+minute, never the same sentence twice in a run, nothing at all during a fight or underground, and a
+line whose `{tokens}` cannot be filled is refused rather than printed. Measured in the browser: 40
+offers in, 1 through, 39 refused.
+
+All 22 ambient strings named nothing — not a creature, not a faction, not a place. Each has a
+`named` variant now, filled from the creatures that actually spawned, with the generic line kept as
+the fallback. That fallback is the important half: `{beast} is out here` with no beast is worse than
+the line it replaced.
+
+## The new modules
+
+| file | what it is |
+|---|---|
+| `js/ambient.js` | the purse, the no-repeat window, `bind()`. Pure; `tests/ambient.test.js` |
+| `js/nearby.js` | what is worth a row, nearest first, clocks first. Pure; `tests/nearby.test.js` |
+| `js/nearby-ui.js` | the five-row panel under the minimap, at 4 Hz, on a cached node pool |
+| `js/beacon.js` | six columns of light, shared by the Nearby panel and the scanner |
+
+The one rule that makes the beacon work: **it is the same size on screen at any distance.** A
+pointer that shrinks is invisible at exactly the range you need it, because you can see the cart at
+40 m — the beacon is for 400 m.
+
+The one rule that makes the Nearby panel work: **a clock under 30 seconds beats distance.** A rescue
+you are about to fail is the thing you need to see, and it is hardly ever the nearest thing.
+
+## Where do you find clay?
+
+`clay_bank`: marsh, grassland, rainforest, temperate forest, beach, savanna. Hardness 0 — bare hands.
+It was never rare, it was invisible, and clay gates the furnace *and* the kiln, which are the first
+two machines in the game. Three causes, in order of how badly each one hurt:
+
+* `nearWater: true` was read by nobody, so clay banks were not on banks;
+* the scanner was a tool inside build mode, three clicks deep;
+* its default reach was 144 m on a world that scatters about fourteen seams to a 512 m tile.
+
+The Find panel on the map is the fix: 28 materials in a dropdown, each with one line saying where it
+lives — **on screen before you sweep**, because a sweep that comes back empty still has to teach you
+something.
+
+The same audit found `water_source` listing `lake` and `coast`, and `ice_field` listing `seaIce` —
+all water biomes, and `createNodeWorld` deletes any node standing on water, so the one seam that
+never runs out only ever existed in marsh. And `gas_vent` listing `toxic`, which World Forge has
+never had. `tests/scanner.test.js` now fails if any node kind names a biome that does not exist or
+is under water.
+
+---
+
+# Round 14 — combat
+
+> "Critique the current combat system and provide suggestions to make all weapon types more unique,
+> interesting, and have satisfying physics. Hammers should smash, swords should slash, and polearms
+> should add some range. Add more animation and effects to all sort of attacks and spells. Revamp
+> all melee weapons to have better and more satisfying visuals. Ensure the character holds weapons
+> and shields properly. Melee weapons are currently terrible compared to ranged and wands, and
+> staves are lacking their magical appeal."
+
+The plan is `research/combat-redesign.md` — 1,328 lines, measured against the real modules. This is
+what was built. What could not be built, because `main.js` and `hud.js` belonged to another agent
+this round, is written out as copy-pasteable patches in `research/round14-combat-handoff.md`.
+
+## The short version
+
+**The user was right, and the gap was bigger than "terrible" suggests.** At level 20 with identical
+gear, a greatsword — the heaviest weapon in the game, both hands, no shield — did **165** damage a
+second. A bow did **336**, at eleven times the range. Over ten realistic seconds (something notices
+you at 30 m and closes at 3.6 m/s, so a melee character gets two and a half of the ten) it was
+**462 against 3,362**. The best melee weapon in the game was a pair of daggers, and every two-handed
+weapon sat in the bottom seven.
+
+But the arithmetic was not the real problem. **A melee swing was one flat white ring drawn on the
+grass, resolved on the frame the button went down**, with no wind-up, no impact, no recoil, no
+knockback, and one animation — a single overhead chop that played whether you were stabbing with a
+rapier or loosing an arrow. There was nothing to feel. Ranged felt better because `spellfx.js` was
+doing real work for it and *nothing at all* for melee.
+
+## The bugs, and they were most of it
+
+Nine mechanisms made the gap and twelve bugs sat under them. In rough order of how much each one
+cost:
+
+* **`TWO_HANDED_SCALE.damage` was dead data.** It declared `damage: 1.25` and `profileOf` returned
+  `reach`, `arc` and `every` and never `damage`. Two-handers paid a 1.2× slower clock and collected
+  none of the bonus it was written for. **And the scale fired on the wrong weapons anyway**: its
+  guard was `two && !WEAPON_PATTERNS[key]`, and every real two-hander is *in* that table — so the
+  only weapons it ever touched were `bow`, `shortbow` and `crossbow`. The one effect
+  `TWO_HANDED_SCALE` has ever had on this game was **making bows 20% slower**, which is the opposite
+  of what it was for. The bonus lives in `WEAPON_TRAITS` now and reaches the weapons it was written
+  for; what is left of the scale is an honest default for an unlisted two-hander.
+* **A bow's rate of fire was an accident.** `bow` was in neither weapon table, so `profileOf` fell
+  through to `CATEGORY_PATTERNS.light` — *the light-melee swing clock*. 1.91 shots a second with no
+  draw, no nock, no aim and no reload. Nobody designed it.
+* **Every arrow was a free 2.6 m area attack at full power.** `onArrowLand` calls
+  `field.strikeArea(...)` with no `power`, which defaults to 1, and `arrowSplash` was 2.6 m at 0.45
+  falloff. A melee jab was 0.65 of a hit inside a 0.3 m splash that *excluded everything the swing
+  had already hit*. The bow's area was larger, cheaper and unconditional.
+* **The off hand lent only its clock, never its damage.** `rpg.strike` reads `a.damage`, which
+  `derive` computes from `equipment.weapon` alone, and the off hand's share was 0.62 of the **main
+  hand's** numbers. So the mathematically correct off-hand weapon was always the fastest weapon in
+  the game regardless of its damage. Longsword-and-dagger did 490 against dual longswords' 344.
+  That is not a build, it is an exploit, and it sat at the top of the damage table.
+* **`damageFlat` was added to the weapon's dice before everything else multiplied**, so gear diluted
+  the weapon. At level 20 with a modest +12 flat, a greatsword's 15–29 became 27–41 and a dagger's
+  3–7 became 15–19: a 4.4× difference in raw weapon damage collapsed to 1.9×, while the greatsword
+  still paid the whole of its 0.88-swings-a-second clock.
+* **A quarterstaff was a wand.** `items.json` files it `weaponCategory: "magic", twoHanded: true`,
+  which is exactly the test `isStaff()` uses — so it cast a free shaped area spell on its own
+  four-strike pattern, **one every 0.41 seconds, the highest sustained area damage in the game**.
+  It is also the starting weapon of the monk, the bard, the druid, the shaman and the scavenger.
+  That file is shared with Emberveil, so the fix is written onto the **item** in `attuneWeapon`, the
+  same way `ranged`, `castElement` and every `describeWeapon` field already are.
+* **The staff nova drew nothing at all.** `spellfx.aoe` walks a `points` array; the call passed
+  `{ at, radius }`, so the loop ran zero times. Every other call site in the file gets it right.
+  *(Still live — patch 1 of the handoff.)*
+* **An ordinary steel sword hit drew no impact effect whatsoever**, because of one condition:
+  `if (element !== 'physical')`. `spellfx.impact({ element: 'physical' })` has always built two
+  crossed slash planes, a spark burst and a dust puff, and nothing ever asked it for them.
+* **A greatsword rendered as an axe.** `HELD_BY_SUBTYPE` sent `greatsword`, `sword2h`, `battleaxe`
+  and `axe2h` all to `'greataxe'`. A `halberd`, a `spear` and a `javelin` were all a bare pole. A
+  `wand` was a cone of fire floating in the palm — there was no wand model anywhere in the game.
+* **Statuses had no auras.** `applyStatus` mutated `target.statuses` and drew nothing; all 23 auras
+  exist and Farhold wired them only to enemy *modifiers*. A burning enemy did not look like it was
+  burning.
+* **A kill drew nothing.** The only `spellfx` call in `onEnemyKilled` is behind a legendary.
+
+## What a hit is now — `js/combat-feel.js` (new)
+
+Six things make a blow read as a blow. Greps for `shake`, `hitstop`, `knockback`, `timeScale` and
+`recoil` across the whole playground came back with nothing but unrelated comments — **five of the
+six did not exist**.
+
+| | what | where the numbers are |
+|---|---|---|
+| hit-stop | the world runs at 0.05× for 35–150 ms and eases back over 40 ms. ×1.6 on a crit, ×2.2 on a kill, capped at 260 ms. One at a time; a longer one replaces a shorter one. **The camera and the mouse are exempt** — a hit-stop that fights your aim is nausea, not weight | `STRIKES[*].hitstop` |
+| screen shake | 4 mm to 32 mm of camera **position**, never rotation; two out-of-phase sine pairs at 38 Hz rather than `Math.random()`, which reads as static; biased 70% along the way the blow went; decays to nothing over 180 ms, hard ceiling 0.12 m | `STRIKES[*].shake` |
+| knockback | 0.15 m for a jab, 1.1 m for an overhead, **2.2 m for a slam**, eased out over 0.18 s. Champion ×0.70, rare ×0.50, boss ×0.25, hovering ×1.25. A body with a wall behind it absorbs the push and **takes extra damage instead** | `STRIKES[*].push` |
+| stagger | it cannot walk **and it cannot swing** — `swingTimer` is held rather than decremented, which is the half that matters, or a 0.65 s stagger removes movement and no attacks. Diminishing returns: the second inside six seconds is 60%, the third 30%, the fourth nothing, so a maul cannot lock a boss | `STRIKES[*].stagger` |
+| recoil | the body is nudged 8 cm along the blow and eases back over 120 ms. Costs nothing, independent of the physics, and it is the difference between "a number appeared" and "I hit something" | fixed |
+| **weight** | a swing is three parts now: `press → [wind-up] → the damage lands → [recovery] → next swing`. You walk at 55% while committed. A press during recovery is **buffered for 180 ms** rather than dropped. The off hand may not wind up while the main hand is | `FAMILY_WIND` |
+
+**The invariant, and there is a test for it:** `wind + recover` comes **out of** the weapon's
+existing `every`, never on top of it, so the rate of fire — and therefore every damage-per-second
+number — is exactly what it was. Splitting a swing into three is pure feel; if it changes the
+balance of the game by accident it has done more harm than good.
+
+Both hit-stop and shake are a Settings toggle, on by default, next to Damage numbers.
+
+## Weapon identity
+
+Three new strike shapes, and physics on all nine:
+
+* **`arc`** — the sword finisher. A 2.3-radian sweep that carries you 0.6 m forward and hits
+  everything in front of you.
+* **`slam`** — the hammer finisher. 2.25× damage, 2.2 m of knockback, 0.65 s of stagger, 150 ms of
+  hit-stop and the heaviest shake in the game.
+* **`lunge`** — the point-weapon finisher. 1.4 m of ground covered and 40% of armour ignored.
+
+…and a `WEAPON_TRAITS` table, read the way patterns are:
+
+| family | what it is now |
+|---|---|
+| **hammer, maul, mace** | **it smashes.** `slam` finisher, and **armour break**: 7% of what is left of the target's armour stripped for 8 s, floored at 45% of base — which helps everything else hitting the same body, and is what a hammer is *for*. `guard: 0` — a hammer does not parry |
+| **sword, longsword** | **it slashes.** `slash, slash, arc`; **momentum** — each consecutive connecting strike is +8%, up to +16% on the third, reset by a miss; alternating `slash`/`slashBack` clips so a combo reads as one |
+| **greatsword, two-handed sword** | the sweep. `sweep, overhead, arc`, the resurrected **1.20** two-hander bonus, 4.2 m reach — every strike is an area strike |
+| **axe, battleaxe, greataxe** | **it bites.** `bleed` on a connecting cleave — low up front, high in total, and it goes on working while you back off |
+| **halberd** | **it adds range.** `pierceLine: 3` — a thrust is not a cone, it is a **0.9 m line out to 7.4 m** that hits every body along it. That out-reaches every enemy in `data/enemies.json` by nearly three metres, *and there is a test that says so*. Plus `brace: 0.35` — standing your ground against something that closed on you is worth more |
+| **spear** | the one-handed polearm: 6.2 m line, two bodies, and **the shield stays on**. The first time a spear has been different from a sword |
+| **rapier** | the point. `thrust, thrust, lunge`, 25% and 40% armour pierce, and the gap closer melee never had |
+| **sabre / scimitar** | the flow: connect twice and the third strike costs 0.35× its clock |
+| **dagger** | the back. Family damage **0.80** — a dagger should not be the highest sustained damage in the game — in exchange for **2.2× from the rear 100°**, plus a bleed. The enemy's facing was already tracked; it is one angle and one comparison |
+| **quarterstaff** | a real pole at last: `jab, sweep, jab, sweep`, 3.5 m, physical damage (so it loses the `spellPower` multiplier it should never have had), and `guard: 0.12` — a staff parries, which is the monk's defence |
+| **bow** | **a draw.** Under 0.35 s it refuses — you have not nocked. 0.95 s is full draw and 1.60×. Past 1.6 s the arms start to shake and the power bleeds away. Splash 2.6 → 0.9 m: an arrow hits what you aimed at, and the quiver's `arrowBurst` affix goes back to being the thing that makes it an area shot |
+| **crossbow** | one heavy bolt at 1.80×, then a **1.25 s reload** you are defenceless through |
+| **javelin** | counted: six in hand, thrown, picked back up. *(Data and plan are live; the counting itself is handoff patch 4.)* |
+| **wand** | unchanged in character — it always works, never runs out, is never the biggest number — with the splash pulled from 2.2 to 1.3 m. It is a bolt, not a grenade |
+| **sceptre** | a real mace pattern, and the one weapon whose *swings* get `spellPower`, because its element is not physical |
+
+### One deliberate softening of the design
+
+The plan refuses a bow release under 0.35 s outright — *"you have not nocked"*. With the draw meter
+not yet on the HUD (it is `js/hud.js`, patch 12 of the handoff), a refusal reads as a broken bow
+rather than as a lesson. So a draw that has not reached the nock **keeps going on its own** after
+the button comes up: a click gets you the weak 0.55× shot a third of a second later, holding gets
+you the 1.60× one, and nothing you pressed is ever thrown away. A draw or a channel held past its
+ceiling also **releases itself**, because "holding the mouse button repeatedly attacks" is an older
+standing request and a weapon you have to let go of to fire would have broken it.
+
+## The staff — a siege engine, not a pistol
+
+A staff cast a free shaped area spell every 0.6 s with no cast time, no mana and no choice. It was
+simultaneously the most powerful weapon in the game and the least interesting: you held the button
+and area damage came out.
+
+It charges now. A **tap** is still free and still weak (0.60×). Holding drinks **4 mana a second**
+and builds: 0.60× at 0.35 s, 1.00× at 1.40 s, **1.60× and twice the radius** at 2.60 s. You move at
+60% while it builds. `STAFF_CHARGE` and `chargeAt()` are in `js/weapons.js`, tested, and the release
+folds into the strike through `withArea` so the radius and the damage both scale.
+
+`CHARGED_FORMS` says what each shape *should become* at full charge — a cone into a sustained jet, a
+nova into a dome that shoves everything out, a wave into a wall that stands for three seconds, a lob
+into an aimed mortar. **That part is not built**: each is a new branch of `swingWith`, which is
+main.js. It is the largest single thing still owed and it is written up in the handoff.
+
+Every staff also wears the topper its element asks for. Five toppers already existed in
+`chibi2-gear.js` and four of them were unreachable, because `HELD_BY_SUBTYPE` sent every staff in
+the game to `staff_orb`.
+
+## Animation — `avatar-3d/js/chibi2-motion.js`, additively
+
+**Fourteen new clips**: `slash`, `slashBack`, `thrust`, `overhead`, `sweep`, `jab`, `arcCut`,
+`slam`, `lunge`, `shoot`, `reload`, `castPoint`, `castStaff`, `channel`. They are in a **separate
+exported list** (`CHIBI2_COMBAT_ANIMS` / `CHIBI2_COMBAT_ALL`), so `CHIBI2_ANIMS` and
+`CHIBI2_ALL_ANIMS` are byte-for-byte what they were and Emberveil builds exactly what it always
+built. Farhold asks for the longer list in `makeActor`.
+
+The slam is the one worth describing: both arms go overhead and **stay there for 0.42 s** — the
+pause *is* the weight — then come down through the target in 0.14 s with the hips dropping under it.
+
+## New weapon models — `avatar-3d/js/chibi2-weapons.js` (new file)
+
+Eighteen procedural weapons on new `fh_` ids, reached through **one dispatch line** in
+`chibi2-gear.js`, so every id Emberveil uses is untouched. Built from a shared parts vocabulary —
+`grip` with five wrap bands, four `pommel` kinds, a `guard` with a real forward sweep and thickness,
+a `blade` with a spine, a fuller and two lighter edge stripes, a `haft` with ferrules, `langets`, a
+`collar`, an `axeHead` crescent with a beard, and a `gem` that only appears at rare and above.
+
+**And the grip fix, which is probably what "ensure the character holds weapons properly" meant.** In
+hand space `+y` runs UP THE FOREARM toward the elbow and `−y` is out past the fingertips — it says
+so at the top of `chibi2-gear.js`. The greataxe head sat at **y +0.44**, the hammer at +0.40, the
+warhammer at +0.46, the mace at +0.42. All of them behind the fist. The `attack` clip swings the arm
+about the shoulder, so **as the character chopped down, the head travelled up and back**: you were
+hitting things with the butt of the handle. Every weapon in the new kit has its head at negative y
+and its butt at positive y, and `tests/round14-combat.test.js` asserts it family by family.
+
+A **shield is strapped to the forearm**, on `elbowL`, not gripped in the fist on `handL` — which is
+how a buckler is held and how nothing else is. It is also about twice the size it was.
+
+`avatar-3d/js/chibi2-weapon-ids.js` holds the catalogue with no Three.js in it, the same way
+`creature-types.js` does, so the node tests and the tools can read it.
+
+## The rebalance
+
+| change | before | after |
+|---|---|---|
+| the damage formula | `(dice + flat) × attr × talent × level` | **`(dice × level + flat) × attr × talent`** — the weapon scales, the flat bonus does not |
+| `damagePerLevel` | 0.10 | 0.11, to hold the curve where the simulator tuned it |
+| the off hand | 0.62 of the **main hand's** dice | **its own dice**, at 0.60 |
+| `arrowSplash` | 2.6 m | 0.9 m |
+| `TWO_HANDED_SCALE.damage` | dead `1.25` | gone; the live 1.20 is in `WEAPON_TRAITS` |
+| wand splash | 2.2 m | 1.3 m |
+
+The greatsword-to-dagger ratio of average hit goes from **1.99× to about 2.9×** — the difference a
+player reads on the item card is finally the difference they feel in the fight. In the measured
+table the best sustained damage in the game is now a **two-handed melee weapon**, the crossbow is
+mid-table, and the whole spread across seventeen options is under **2.5×**. `tests/round14-combat.test.js`
+asserts all three, so the day it drifts, something fails.
+
+## The channel, and why it exists
+
+`js/main.js` was not ours this round, and it is where `swingWith` lives — it computes the strike
+shape once and then hands the **pieces** of it (a reach, an angle, a power) to four different
+systems, none of which is told which of the nine shapes they came from. That is precisely why a
+hammer smash and a dagger jab drew the same white ring.
+
+`js/weapons.js` `withArea` is called exactly once per swing, in `swingWith`, on the frame the swing
+happens. It posts the whole shape to `js/combat-feel.js`, and `combat-fx.js`, `actors.js` and the
+clip chooser read the one record instead of each guessing. It is a side effect in an otherwise pure
+function and it is documented at length where it happens. The same channel carries a bow's draw to
+the arrow that lands two seconds later and a staff's charge to the spell it becomes.
+
+Handoff patches 6, 8 and 9 replace the indirection with the direct call the day main.js is free.
+None of them is needed for the game to play correctly.
+
+## Files
+
+| file | what |
+|---|---|
+| `js/combat-feel.js` | **new** — hit-stop, shake, the stagger book, knockback resistance, the swing channel |
+| `js/weapons.js` | 9 strike shapes with physics, `WEAPON_TRAITS`, `RANGED`, `FAMILY_WIND`, `swingTiming`, `drawPower`, `STAFF_CHARGE`/`chargeAt`, `CHARGED_FORMS`, `clipFor`; the suffix now beats the subtype (`obsidian_scimitar` is filed under the subtype "sword", so the sabre rhythm never fired on a real item) |
+| `js/player.js` | the three-part swing, the input buffer, the off-hand interleave, the bow draw, the staff channel, the commitment on the legs, the camera shake |
+| `js/actors.js` | `land()` — impact, sparks, recoil, knockback, stagger, hit-stop, all in one place; the pierce line; backstab; brace; momentum; armour break; bleed; status auras; the death effect |
+| `js/rpg.js` | the damage formula, `offDamage`, the swing plan on `derived`, armour pierce, the sunder read, the whole held-model mapping, the quarterstaff reclassification |
+| `js/combat-fx.js` | the arc drawn in the weapon's own plane, opening as it travels; dust at the feet; the hit box behind a debug switch |
+| `js/skills.js` | `setStatusFx`/`setStatusPulse` — everything that applies a status lights up, without every call site remembering |
+| `avatar-3d/js/chibi2-weapons.js` | **new** — 18 weapons, 3 strapped shields |
+| `avatar-3d/js/chibi2-weapon-ids.js` | **new** — the catalogue, Three.js-free |
+| `avatar-3d/js/chibi2-motion.js` | **shared, additive** — 14 combat clips in their own opt-in list |
+| `avatar-3d/js/chibi2-gear.js` | **shared, additive** — two dispatch lines |
+| `avatar-2d/js/parts/gear.js` | **shared, additive** — a 2D entry for every new id, so a portrait still draws a weapon |
+| `data/balance.json` | the formula constants, and `combat` / `ranged` / `staff` blocks |

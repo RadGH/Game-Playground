@@ -9,6 +9,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { Rpg, xpForLevel, levelFromXp, itemScore, heldLookFor, offhandLookFor, LIVE_STATS, SLOTS, MAX_LEVEL, effectFor } from '../js/rpg.js';
+import { FARHOLD_HELD, FARHOLD_OFFHAND } from '../../../avatar-3d/js/chibi2-weapon-ids.js';
 import { EFFECTS } from '../js/effects.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { allocate, canTake, pointsFor, pointsLeft } from '../js/perks.js';
@@ -289,9 +290,16 @@ test('loot rolls produce real, wearable items across the level range', () => {
 
 test('a weapon always ends up in the character\'s hand as a part that exists', () => {
   const r = rpg();
-  // the Chibi 2 held/offhand vocabulary, from avatar-3d
-  const held = new Set(['none', 'book', 'bow', 'cleaver', 'crossbow', 'daggers', 'flame', 'greataxe', 'hammer', 'hourglass', 'lightning', 'lute', 'mace', 'orb', 'rapier', 'ring_rune', 'saber', 'staff_crook', 'staff_crystal', 'staff_orb', 'staff_skull', 'staff_totem', 'sword', 'warhammer', 'quarterstaff', 'greatsword']);
-  const offhand = new Set(['none', 'dagger', 'heater_shield', 'kite_shield', 'map', 'quiver']);
+  // the Chibi 2 held/offhand vocabulary — the original ids from chibi2-gear.js plus the Farhold
+  // weapon kit, which is imported rather than retyped so a new model cannot go missing quietly
+  const held = new Set([
+    'none', 'book', 'bow', 'cleaver', 'crossbow', 'daggers', 'flame', 'greataxe', 'hammer',
+    'hourglass', 'lightning', 'lute', 'mace', 'orb', 'rapier', 'ring_rune', 'saber', 'staff_crook',
+    'staff_crystal', 'staff_orb', 'staff_skull', 'staff_totem', 'sword', 'warhammer',
+    'quarterstaff', 'greatsword',
+    ...FARHOLD_HELD,
+  ]);
+  const offhand = new Set(['none', 'dagger', 'heater_shield', 'kite_shield', 'map', 'quiver', 'buckler', ...FARHOLD_OFFHAND]);
   for (const key of Object.keys(items.weaponBases)) {
     const item = r.loot.generate(key, 'normal', 'low', { rng: makeRng(1) });
     const look = heldLookFor(item);

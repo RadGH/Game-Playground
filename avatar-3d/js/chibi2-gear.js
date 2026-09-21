@@ -12,6 +12,12 @@
 //   head   +z forward, head spans y 0..0.60 (see CHIBI2.md, Head space and hoods); positions scale by H.
 import * as THREE from 'three';
 import { profile, taperedCurve } from './chibi2-geometry.js';
+/**
+ * The Farhold weapon kit, 2026-09-20. ADDITIVE AND OPT-IN: every builder in it answers to an `fh_`
+ * id that nothing in this file has ever used, so a look that does not name one reaches exactly the
+ * code it always did. See `avatar-3d/js/chibi2-weapons.js` for why it is a separate file.
+ */
+import { buildFarholdHeld, buildFarholdOffhand } from './chibi2-weapons.js';
 
 const low = () => new THREE.SphereGeometry(1, 8, 5);
 const gem = () => new THREE.IcosahedronGeometry(1, 0);
@@ -52,6 +58,7 @@ function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx 
 export function buildHeld(a, c) {
   const id = a.held.id, hc = a.held.color, { add, trim, leather, steel } = c;
   if (id === 'none') return;
+  if (buildFarholdHeld(a, c)) return;            // an `fh_` weapon; everything below is unchanged
   const R = 'handR', z = 0.055;
   const shaft = (bone, from, to, r, color) => add(profile([[from, r, r], [to, r, r]], 8), bone, color, { position: [0, 0, z] });
   const sword = (bone, len) => {
@@ -194,6 +201,7 @@ export function buildHeld(a, c) {
 export function buildOffhand(a, c) {
   const id = a.offhand.id, oc = a.offhand.color, { add, trim, leather, steel, W, T } = c, L = 'handL';
   if (id === 'none') return;
+  if (buildFarholdOffhand(a, c)) return;         // an `fh_` shield, strapped to the forearm
   if (id === 'dagger') { add(profile([[-0.22, 0.015, 0.015], [0.15, 0.015, 0.015]], 5), L, steel, { position: [0, 0.01, 0.08], metal: true }); return; }
   if (id === 'book') { add(new THREE.BoxGeometry(0.16, 0.20, 0.035), L, oc, { position: [0, 0.02, 0.10] }); return; }
   if (id === 'orb') { add(new THREE.SphereGeometry(0.11, 10, 6), L, oc, { position: [0, 0.16, 0.12], metal: true }); return; }

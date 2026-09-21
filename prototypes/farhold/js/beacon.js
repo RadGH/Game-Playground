@@ -26,7 +26,22 @@ const MAX = 6;
 export const BEACON_RANGE = 1400;
 
 // built once and shared by every beacon — a pool that allocated geometry would defeat its own point
-const SHAFT = new THREE.CylinderGeometry(0.18, 0.5, 14, 6, 1, true);
+/**
+ * R15 — THE BEAM STARTS ABOVE THE ARROWHEADS.
+ *
+ *   "To the arrow indicators we've added that you can see in a distance, make their beams only
+ *    appear above the arrow heads, so that they aren't touching the ground. Right now they have a
+ *    pillar coming out of the ground."
+ *
+ * It was 14 units tall centred at y=7, so it ran 0 → 14: a column standing ON the spot, which reads
+ * as a thing in the world rather than as a sign pointing at one — and at close range you walk into
+ * it. The arrows sit at 5 → 8.8, so the beam now starts at 10.5 and goes up from there, and the
+ * bottom of it is wider than the top so it reads as light spreading away from the arrows rather
+ * than as a post holding them up.
+ */
+const SHAFT = new THREE.CylinderGeometry(0.1, 0.62, 13, 6, 1, true);
+/** Where the beam begins, in the same units the chevrons use. Above all three of them. */
+const BEAM_FROM = 10.5;
 const CHEVRON = new THREE.ConeGeometry(1.1, 1.6, 4);
 const RING = new THREE.RingGeometry(1.6, 2.0, 24);
 
@@ -43,7 +58,8 @@ function makeOne() {
   });
 
   const shaft = new THREE.Mesh(SHAFT, mat);
-  shaft.position.y = 7;
+  // centred half its own height above where it starts, so its BOTTOM sits at BEAM_FROM
+  shaft.position.y = BEAM_FROM + 13 / 2;
   group.add(shaft);
 
   // three chevrons pointing DOWN, chasing each other toward the ground
@@ -56,6 +72,12 @@ function makeOne() {
     chevrons.push(c);
   }
 
+  /**
+   * The ring stays on the ground, because it is the only thing that says WHERE, exactly — the beam
+   * says which way and the arrows say "down here", and neither of them is a position. It is a flat
+   * disc lying on the surface rather than a pillar standing on it, which is not what the complaint
+   * was about.
+   */
   const ring = new THREE.Mesh(RING, mat);
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.12;

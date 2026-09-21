@@ -36,6 +36,16 @@ export const DEFAULTS = {
   coords: false,
   damageNumbers: true,
   /**
+   * WHAT A HIT FEELS LIKE. Round 14 gave a connecting blow weight: the world holds still for 35 to
+   * 150 milliseconds and the camera takes a knock of a few millimetres. Both read as force and
+   * both are a matter of taste, so both are a switch — on by default, off in one click for anyone
+   * who finds them distracting. Nothing about the damage changes either way. See js/combat-feel.js.
+   */
+  hitStop: true,
+  screenShake: true,
+  /** Draw the flat white ring on the grass again — it IS the hit box, which is worth seeing. */
+  showHitboxes: false,
+  /**
    * "Go here" — click any cell on the map and be standing on it.
    *
    * The user's own words: "Make the current teleport feature a debug option, but keep it enabled by
@@ -152,11 +162,14 @@ const FIELDS = [
   { key: 'grass', label: 'Grass', kind: 'toggle', group: 'Picture' },
   { key: 'sunfx', label: 'Sun rays and flare', kind: 'toggle', group: 'Picture' },
   { key: 'damageNumbers', label: 'Damage numbers', kind: 'toggle', group: 'Picture' },
+  { key: 'hitStop', label: 'Impact freeze', kind: 'toggle', group: 'Picture' },
+  { key: 'screenShake', label: 'Screen shake', kind: 'toggle', group: 'Picture' },
   { key: 'coords', label: 'Show coordinates', kind: 'toggle', group: 'Picture' },
   { key: 'sound', label: 'Sound', kind: 'toggle', group: 'Audio' },
   { key: 'voices', label: 'Voices', kind: 'toggle', group: 'Audio' },
   { key: 'volume', label: 'Volume', kind: 'range', min: 0, max: 1, step: 0.05, percent: true, group: 'Audio' },
   { key: 'debugTeleport', label: 'Map "Go here" teleport', kind: 'toggle', group: 'Debug' },
+  { key: 'showHitboxes', label: 'Show swing hit boxes', kind: 'toggle', group: 'Debug' },
 ];
 
 /** What a slider's number means. D15: "1" and "0.75" told you nothing about what they measured. */

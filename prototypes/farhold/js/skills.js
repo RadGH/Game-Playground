@@ -22,6 +22,23 @@
 
 import { talentPlan, talentsOn, castRulesFrom } from './skilltalents.js';
 
+/**
+ * A BURNING ENEMY DID NOT LOOK LIKE IT WAS BURNING.
+ *
+ * `applyStatus` mutated `target.statuses` and drew nothing: all twenty-three status auras exist in
+ * `avatar-3d/js/spellfx.js` and Farhold wired them only to enemy MODIFIERS, so a poisoned wolf and
+ * a healthy one were the same wolf. The renderer cannot be imported here — this module is pure, and
+ * the node tests depend on that — so the field hands in a sink at start-up and everything that
+ * hangs a status on anything goes through it for free.
+ *
+ *   setStatusFx((unit, type, on) => spellfx.status(unit.actor.group, type, on));
+ *   setStatusPulse((unit, type) => spellfx.pulseStatus(unit.actor.group, type));
+ */
+let statusFx = null;
+let statusPulse = null;
+export function setStatusFx(fn) { statusFx = typeof fn === 'function' ? fn : null; }
+export function setStatusPulse(fn) { statusPulse = typeof fn === 'function' ? fn : null; }
+
 /** Statuses live on the target as `{ type, remaining, power, … }`. */
 export function applyStatus(target, type, spec, power = 1, { longer = 0, strength = 1 } = {}) {
   if (!spec) return null;
@@ -38,6 +55,7 @@ export function applyStatus(target, type, spec, power = 1, { longer = 0, strengt
   };
   // refreshing beats stacking: a second burn resets the timer rather than doubling the pain
   target.statuses[type] = existing ? { ...entry, remaining: Math.max(existing.remaining, entry.remaining) } : entry;
+  if (!existing) statusFx?.(target, type, true);
   return target.statuses[type];
 }
 
@@ -69,10 +87,12 @@ export function tickStatuses(unit, dt, { resist = 1 } = {}) {
         const span = expiring ? st.since : TICK_EVERY;
         damage += st.perSecond * st.power * span * resist;
         st.since = expiring ? 0 : st.since - TICK_EVERY;
+        // a burn that ticks should LOOK like it ticked: a 1.7x pop on the aura, once a second
+        if (!expiring) statusPulse?.(unit, type);
       }
     }
     if (st.healPerSecond) healed += st.healPerSecond * (unit.maxHp || 0) * dt;
-    if (st.remaining <= 0) delete unit.statuses[type];
+    if (st.remaining <= 0) { delete unit.statuses[type]; statusFx?.(unit, type, false); }
   }
   if (healed > 0) unit.hp = Math.min(unit.maxHp ?? unit.hp, (unit.hp ?? 0) + healed);
   if (damage > 0) unit.hp = Math.max(0, (unit.hp ?? 0) - damage);

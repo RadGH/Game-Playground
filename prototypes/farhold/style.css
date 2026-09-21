@@ -2119,8 +2119,21 @@ body.building canvas { cursor: crosshair; }
 #nearby .nb-caret { color: #9fb4d4; font-size: 10px; }
 #nearby.shut .nb-rows, #nearby.shut .nb-more { display: none; }
 
+/**
+ * R15 — THE SECOND LINE WRAPPED ONE WORD PER LINE.
+ *
+ *   "The 'Nearby' menu below the map gets too tall because the right column wraps every word like
+ *    'go ahd dig it out' are all on one line."
+ *
+ * The clock sat in a fixed 20 px column — the width of the ⌖ button above it — so anything longer
+ * than "12s" became a vertical stack of words and a five-row panel grew to the height of the
+ * screen. The third column is `auto` now, so it takes the width of whichever of the button and the
+ * clock is wider, and the name above it gives way (it already has an ellipsis). Nothing on the
+ * second line is allowed to wrap at all.
+ */
 #nearby .nb-row {
-  display: grid; grid-template-columns: 14px 1fr 20px; grid-template-areas: "icon name go" "where where clock";
+  display: grid; grid-template-columns: 14px minmax(0, 1fr) auto;
+  grid-template-areas: "icon name go" "where where clock";
   gap: 0 6px; padding: 4px 8px 5px;
   border-top: 1px solid rgba(255, 255, 255, .05);
 }
@@ -2136,8 +2149,16 @@ body.building canvas { cursor: crosshair; }
 }
 #nearby .nb-go:hover { background: #1b2c40; color: #cfe6ff; }
 #nearby .nb-go:focus-visible { outline: 2px solid #4a86c0; outline-offset: 1px; }
-#nearby .nb-where { grid-area: where; font-size: 10px; color: #8ea6c4; font-variant-numeric: tabular-nums; }
-#nearby .nb-clock { grid-area: clock; font-size: 10px; color: #8ea6c4; text-align: right; font-variant-numeric: tabular-nums; }
+#nearby .nb-where {
+  grid-area: where; font-size: 10px; color: #8ea6c4; font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+#nearby .nb-clock {
+  grid-area: clock; font-size: 10px; color: #8ea6c4; text-align: right;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  /* it may not push the row wider than the panel, however long a state word turns out to be */
+  max-width: 96px; overflow: hidden; text-overflow: ellipsis;
+}
 /* a clock you are about to lose. Colour only — a flashing row four times a second is unreadable. */
 #nearby .nb-clock.soon { color: #ffc65a; }
 #nearby .nb-clock.urgent { color: #ff7a5a; font-weight: 600; }

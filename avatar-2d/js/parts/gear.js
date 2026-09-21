@@ -77,6 +77,13 @@ export const cape = {
 };
 // held (right hand, x≈212) and offhand (left hand, x≈88). Drawn in the torso group; the hand circles are r12 at y290.
 const grip = (x, y) => `<circle cx="${x}" cy="${y}" r="12" fill="${S}"/>`;
+/**
+ * A new id that draws an existing piece. Used by the Farhold weapon kit below: the 3D models are
+ * new, the 2D portraits catch up family by family, and in the meantime a sword is still a sword.
+ */
+function held_alias(name, from = 'sword') { return { name, alias: from, get pieces() { return held[from].pieces; } }; }
+function offhand_alias(name, from) { return { name, alias: from, get pieces() { return offhand[from].pieces; } }; }
+
 export const held = {
   none: { name: 'None', pieces: [] },
   sword: { name: 'Sword', pieces: [{ layer: 'held', svg: `<path d="M208 276 L216 276 L214 150 L210 150 Z" fill="${H}"/><path d="M212 150 L210 150 L212 136 L214 150 Z" fill="${H}"/><path d="M198 276 L226 276 L226 282 L198 282 Z" fill="#d8b040"/><path d="M209 282 L215 282 L215 304 L209 304 Z" fill="#5a3a1a"/><circle cx="212" cy="308" r="4" fill="#d8b040"/><path d="M212 154 L212 272" stroke="rgba(255,255,255,.4)" stroke-width="1.5"/>${grip(212, 290)}` }] },
@@ -104,6 +111,34 @@ export const held = {
   flame: { bespoke: true, name: 'Flame in the palm', pieces: [{ layer: 'held', svg: `${grip(212, 290)}<path d="M212 278 C200 264 204 250 212 238 C214 252 224 254 220 266 C228 258 230 246 226 236 C238 250 232 272 212 278 Z" fill="#ff8c2a"><animate attributeName="d" values="M212 278 C200 264 204 250 212 238 C214 252 224 254 220 266 C228 258 230 246 226 236 C238 250 232 272 212 278 Z;M212 278 C198 262 206 246 214 234 C212 250 226 252 222 264 C230 254 228 244 224 238 C238 252 230 274 212 278 Z;M212 278 C200 264 204 250 212 238 C214 252 224 254 220 266 C228 258 230 246 226 236 C238 250 232 272 212 278 Z" dur="0.9s" repeatCount="indefinite"/></path><path d="M212 276 C206 268 208 258 214 250 C214 260 220 262 218 270 Z" fill="#ffe27a"/>` }] },
   lightning: { bespoke: true, name: 'Lightning at the fists', pieces: [{ layer: 'held', svg: `${grip(212, 290)}<g stroke="${HD}" stroke-width="3" fill="none" stroke-linecap="round"><path d="M212 276 L206 262 L214 256 L206 240"><animate attributeName="opacity" values="1;.3;1" dur=".5s" repeatCount="indefinite"/></path><path d="M220 280 L228 268 L222 262 L232 250"><animate attributeName="opacity" values=".3;1;.3" dur=".7s" repeatCount="indefinite"/></path></g>` }, { layer: 'offhand', svg: `${grip(88, 290)}<g stroke="${HD}" stroke-width="3" fill="none" stroke-linecap="round"><path d="M88 276 L94 262 L86 256 L94 240"><animate attributeName="opacity" values=".4;1;.4" dur=".6s" repeatCount="indefinite"/></path></g>` }] },
   ring_rune: { bespoke: true, name: 'Floating ring-rune', pieces: [{ layer: 'held', svg: `<g><circle cx="150" cy="262" r="16" fill="none" stroke="${HD}" stroke-width="3"/><circle cx="150" cy="262" r="9" fill="none" stroke="${HD}" stroke-width="2" stroke-dasharray="4 3"><animateTransform attributeName="transform" type="rotate" from="0 150 262" to="360 150 262" dur="6s" repeatCount="indefinite"/></circle><circle cx="150" cy="262" r="24" fill="${HD}" opacity=".15"/></g>` }] },
+
+  /**
+   * FARHOLD'S WEAPON KIT, 2026-09-20 — one 2D entry for every `fh_` id the 3D kit gained.
+   *
+   * ADDITIVE ONLY: nothing above is changed, and no existing id moves. They are here because
+   * `normalizeAvatar` drops any part id the 2D kit has never heard of, so without them a character
+   * sheet portrait would show an empty hand for a sword that renders correctly in 3D. Most reuse
+   * the nearest existing art under a new name; the five families the 2D kit never had — spear,
+   * halberd, javelin, sceptre and wand — are drawn.
+   */
+  fh_sword: held_alias('Sword'),
+  fh_longsword: held_alias('Longsword'),
+  fh_greatsword: held_alias('Greatsword (two-handed)', 'greatsword'),
+  fh_greataxe: held_alias('Great-axe (two-handed)', 'greataxe'),
+  fh_axe: held_alias('Axe', 'greataxe'),
+  fh_hammer: held_alias('Hammer', 'hammer'),
+  fh_maul: held_alias('Maul (two-handed)', 'warhammer'),
+  fh_mace: held_alias('Mace', 'mace'),
+  fh_rapier: held_alias('Rapier', 'rapier'),
+  fh_sabre: held_alias('Sabre', 'saber'),
+  fh_dagger: held_alias('Dagger', 'daggers'),
+  fh_daggers: held_alias('Paired daggers', 'daggers'),
+  fh_quarterstaff: held_alias('Quarterstaff', 'quarterstaff'),
+  fh_spear: { name: 'Spear', pieces: [{ layer: 'held', svg: `<path d="M209 330 L215 330 L215 168 L209 168 Z" fill="#5a3a1a"/><path d="M212 108 L219 140 L216 170 L208 170 L205 140 Z" fill="${H}"/><path d="M204 168 L220 168 L220 176 L204 176 Z" fill="#8a8f98"/><path d="M209 330 L215 330 L212 344 Z" fill="#8a8f98"/>${grip(212, 272)}${grip(212, 290)}` }] },
+  fh_halberd: { name: 'Halberd', pieces: [{ layer: 'held', svg: `<path d="M209 334 L215 334 L215 150 L209 150 Z" fill="#5a3a1a"/><path d="M212 96 L218 128 L215 152 L209 152 L206 128 Z" fill="${H}"/><path d="M215 150 C240 146 252 158 250 178 C236 170 224 170 215 174 Z" fill="${H}"/><path d="M209 156 C196 160 190 172 194 186 C200 176 206 172 209 172 Z" fill="${HD}"/><path d="M204 150 L220 150 L220 158 L204 158 Z" fill="#8a8f98"/>${grip(212, 272)}${grip(212, 292)}` }] },
+  fh_javelin: { name: 'Javelin', pieces: [{ layer: 'held', svg: `<path d="M210 320 L214 320 L214 186 L210 186 Z" fill="#7a5a2a"/><path d="M212 150 L217 176 L215 190 L209 190 L207 176 Z" fill="${H}"/><path d="M206 186 L218 186 L218 192 L206 192 Z" fill="#8a8f98"/><path d="M206 268 L218 268 L218 276 L206 276 Z" fill="#b09a72"/>${grip(212, 290)}` }] },
+  fh_scepter: { name: 'Sceptre', pieces: [{ layer: 'held', svg: `<path d="M209 312 L215 312 L215 226 L209 226 Z" fill="#2a2018"/><path d="M212 196 L226 214 L212 234 L198 214 Z" fill="#d8b040"/><circle cx="212" cy="214" r="7" fill="${HD}"/><path d="M204 226 L220 226 L220 232 L204 232 Z" fill="#d8b040"/><circle cx="212" cy="316" r="4" fill="#d8b040"/>${grip(212, 292)}` }] },
+  fh_wand: { bespoke: true, name: 'Wand', pieces: [{ layer: 'held', svg: `<path d="M210 300 L216 300 L212 236 L208 236 Z" fill="#3a2f28"/><path d="M206 262 L218 262 L218 268 L206 268 Z" fill="#d8b040"/><path d="M212 220 L219 234 L212 248 L205 234 Z" fill="${HD}"><animate attributeName="opacity" values="1;.55;1" dur="1.8s" repeatCount="indefinite"/></path>${grip(212, 292)}` }] },
 };
 export const offhand = {
   none: { name: 'None', pieces: [] },
@@ -117,5 +152,9 @@ export const offhand = {
   orb: { bespoke: true, name: 'Orb', pieces: [{ layer: 'offhand', svg: `<circle cx="88" cy="270" r="14" fill="${OD}"/><circle cx="84" cy="266" r="4" fill="rgba(255,255,255,.5)"/>${grip(88, 290)}` }] },
   book: { bespoke: true, name: 'Tome', pieces: [{ layer: 'offhand', svg: `<rect x="60" y="250" width="44" height="52" rx="3" fill="${O}"/><rect x="64" y="254" width="36" height="44" rx="2" fill="none" stroke="#d8b040" stroke-width="2"/><circle cx="82" cy="276" r="7" fill="${OD}"/>${grip(88, 292)}` }] },
   quiver: { name: 'Quiver (on back)', pieces: [{ layer: 'capeBack', svg: `<path d="M180 212 L206 200 L226 262 L200 274 Z" fill="${O}"/><g stroke="#e8e0c0" stroke-width="3">${[184, 192, 200].map(x => `<path d="M${x} 208 L${x - 6} 186"/>`).join('')}</g><g fill="#c83a2a">${[178, 186, 194].map(x => `<path d="M${x} 186 L${x - 4} 176 L${x + 4} 178 Z"/>`).join('')}</g>` }, { layer: 'accessory', svg: `<path d="M110 214 L196 258" stroke="${OD}" stroke-width="6"/>` }] },
+  /** The strapped shields, so a portrait still draws one when the 3D look names an `fh_` id. */
+  fh_heater_shield: offhand_alias('Heater shield (strapped)', 'heater_shield'),
+  fh_kite_shield: offhand_alias('Kite shield (strapped)', 'kite_shield'),
+  fh_tower_shield: offhand_alias('Tower shield (strapped)', 'tower_shield'),
   torch: { name: 'Torch', pieces: [{ layer: 'offhand', svg: `<path d="M85 296 L91 296 L91 236 L85 236 Z" fill="#5a3a1a"/><path d="M88 236 C78 222 82 210 88 200 C92 212 100 214 96 226 C104 216 102 206 98 200 C110 214 104 234 88 236 Z" fill="#ff8c2a"/>${grip(88, 290)}` }] },
 };

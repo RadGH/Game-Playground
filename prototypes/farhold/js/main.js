@@ -3405,6 +3405,39 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         .find(e => e.key === 'alarm_bell' && Math.hypot(e.x - control.x, e.z - control.z) < 4);
       if (bell) return { kind: 'bell', bell };
 
+      /**
+       * R15 — E ON A MACHINE OPENS ITS RECIPES.
+       *
+       *   "I have stone and clay and I built a furnace. Now what? How do I interact with the
+       *    furnace and tell it what to smelt?"
+       *
+       * You could not. The recipe picker has existed since the building expansion — `drawBench` in
+       * js/build-ui.js, which lists everything a machine can make and queues it — but the ONLY way
+       * to reach it was to press B, enter build mode, and notice a panel that appears halfway down
+       * the sidebar when you happen to be standing close enough. E, which is the key this game uses
+       * for every other "use the thing in front of you", did nothing at all.
+       *
+       * So a player builds a furnace, walks up to it, presses E, and the game is silent. Which is
+       * the same shape as every other fault this project keeps finding: the feature was finished
+       * and there was no door into it.
+       *
+       * Above the seam, because a machine is something you built and put there on purpose and ore
+       * is something the world scattered — if the two are within four metres of each other, you
+       * meant the machine.
+       */
+      const machine = (build.entries || [])
+        .filter(e => works.machineDefs?.[e.key])
+        .map(e => ({ e, away: Math.hypot(e.x - control.x, e.z - control.z) }))
+        /**
+         * Six metres, not four. A machine is a big object and you stand in FRONT of one — placing a
+         * furnace at arm's length and turning round puts its centre about 4.75 m away, which a
+         * four-metre reach misses by a quarter of a metre. That is the sort of number that makes a
+         * feature feel broken rather than absent, because it works from one side and not the other.
+         */
+        .filter(r => r.away < 6)
+        .sort((a, b) => a.away - b.away)[0]?.e;
+      if (machine) return { kind: 'machine', machine, works: works.get(machine.id) };
+
       const seam = oreHere().at(control.x, control.z, 4);
       if (seam) return { kind: 'seam', seam };
     }
@@ -5674,6 +5707,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             hud.log('They are already at the wall.', 'bad');
           }
         }
+        /**
+         * R15 — the furnace answers now. E puts up build mode with the bench panel open on the
+         * machine you are standing at, which is where `drawBench` has always lived; what was
+         * missing was the door, not the room.
+         */
+        else if (it.kind === 'machine') {
+          build.setMode(true);
+          buildUI.setOpen(true);
+          document.body.classList.add('building');
+          buildUI.refresh();
+          input.release();
+          const m = it.works;
+          hud.log(m
+            ? `${m.name}. ${works.stateText(m)} Pick what it should make.`
+            : `${it.machine.name || 'It'} is not a machine that makes anything.`, m ? '' : 'warn');
+        }
         else if (it.kind === 'seam') {
           const out = mining.swing(it.seam, 1.6, { tool: toolTierFor(player) });
           if (out.got <= 0) hud.log(out.why ? `You cannot work this: ${out.why}.` : 'Nothing comes loose.', 'warn');
@@ -6415,6 +6464,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * Naming the tool on the one prompt where it matters teaches the rule in passing, and the
          * refusal (js/resources.js) says where the next tier comes from when you hit one.
          */
+        /**
+         * R15 — and the prompt says so, which is the other half. "I built a furnace. Now what?"
+         * was as much about nothing appearing at the bottom of the screen as about E doing nothing.
+         * It says what the machine is DOING, not just its name: a furnace with no fuel and a
+         * furnace with nothing queued need different things from you.
+         */
+        : near.kind === 'machine' ? `<b>E</b> work the ${(near.machine.name || 'machine').toLowerCase()}`
+          + (near.works ? ` · ${works.stateText(near.works)}` : '')
         : near.kind === 'seam' ? `<b>E</b> or swing to work the ${(resourceData?.materials?.[near.seam.resource]?.name || near.seam.resource).toLowerCase()}`
           + ` · ${(resourceData?.richnessBands?.find(b => b.key === near.seam.band)?.name || near.seam.band || '').toLowerCase()}`
           + ` · ${(resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase()}`
@@ -6993,6 +7050,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get world() { return world; },
     /** R14: which mark a place wears, so a test can prove the landmarks are drawn at all. */
     mapMarkFor,
+    /** R15: what E would act on right now, so a spec can prove the furnace answers. */
+    interactTarget,
     /** The Civilization Expansion, for tests/civilization.spec.js. */
     get civics() { return civics; },
     get holding() { return holding; },

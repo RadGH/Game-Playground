@@ -20,7 +20,10 @@ import { makeRng } from '../../emberveil/js/rng.js';
 import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
-import { handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, describeWeapon } from './weapons.js';
+import {
+  handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, describeWeapon,
+  strikeAt, traitsOf, familyWind, rangedPlan, clipFor, CLIP_SECONDS, isStaff, isWand, STAFF_CHARGE,
+} from './weapons.js';
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
 // js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
 // every Branding talent were doing nothing to an enemy. See `strike` for how it is applied once.
@@ -105,6 +108,24 @@ export function attuneWeapon(item) {
    */
   markHands(item);
   const sub = item.subtype || item.baseKey;
+  /**
+   * A QUARTERSTAFF IS A POLE, AND items.json SAYS IT IS A WAND.
+   *
+   * It is filed `weaponCategory: "magic", twoHanded: true`, which is exactly the test `isStaff()`
+   * uses — so a quarterstaff cast a free shaped area spell on its own four-strike pattern, one
+   * every 0.41 seconds, the highest sustained area damage in the game. It is also the STARTING
+   * WEAPON of the monk, the bard, the druid, the shaman and the scavenger.
+   *
+   * `items.json` is shared with Emberveil and has a test over it, so the fix goes on the ITEM here,
+   * the same way `ranged`, `castElement`, `offHandOk` and every `describeWeapon` field already do.
+   * Its damage becomes physical, which also takes away the `spellPower` multiplier it should never
+   * have had.
+   */
+  if ((item.baseKey === 'quarterstaff' || sub === 'quarterstaff') && item.weaponCategory === 'magic') {
+    item.weaponCategory = 'light';
+    item.castElement = null;
+    item.castStatus = null;
+  }
   if (CASTERS.has(sub) && !item.castElement) {
     // a brand put on at the bench wins over the base's own attunement
     const forced = item.brand;
@@ -288,27 +309,150 @@ export function levelFromXp(xp) {
   return l;
 }
 
+/**
+ * ONE WEAPON'S SWING PLAN — every number js/player.js needs to run the three-part swing.
+ *
+ *   hold      'draw' for a bow, 'charge' for a staff, null for anything you click
+ *   steps     one row per strike in the pattern: how long the wind-up is, what the whole cycle is,
+ *             and which clip the body plays
+ *   afterShot the nock after an arrow; `afterCast` the beat after a spell; a crossbow's reload
+ *
+ * Pure arithmetic over js/weapons.js, so the node tests drive it without a browser.
+ */
+function swingPlanFor(item, { off = false } = {}) {
+  if (!item || item.type !== 'weapon') {
+    return { hold: null, steps: [{ key: 'jab', windMs: 60, every: 0.46, clip: 'jab', clipSeconds: 0.26 }] };
+  }
+  const profile = profileOf(item);
+  const two = !!profile.twoHanded;
+  const steps = profile.pattern.map((key, i) => {
+    const strike = strikeAt(item, i);
+    return {
+      key,
+      windMs: familyWind(item) * (strike.wind || 1),
+      every: strike.every,
+      clip: clipFor(key, { twoHanded: two, step: i }),
+      clipSeconds: CLIP_SECONDS[clipFor(key, { twoHanded: two, step: i })] || 0.5,
+    };
+  });
+  const traits = traitsOf(item);
+  /**
+   * `flow` is the sabre's promise: if you keep connecting, the finisher costs a third of its clock.
+   * The controller cannot see whether a strike landed, so the rule it runs is the honest half —
+   * the LAST strike of a pattern you have stayed in is the cheap one. Miss, stop, or get knocked
+   * off the rhythm and the pattern resets, which takes the discount with it.
+   */
+  const plan = { hold: null, steps, twoHanded: two, flow: !!traits.flow, guard: traits.guard || 0 };
+  if (off) return plan;                       // the off hand never draws and never charges
+
+  if (isStaff(item)) {
+    plan.hold = 'charge';
+    plan.charge = STAFF_CHARGE;
+    plan.afterCast = 0.28;
+    plan.clip = 'castStaff';
+    plan.channelClip = 'channel';
+    return plan;
+  }
+  if (isWand(item)) { plan.clip = 'castPoint'; return plan; }
+  const shot = rangedPlan(item);
+  if (shot) {
+    plan.range = shot.range;
+    plan.splash = shot.splash;
+    if (shot.kind === 'draw') {
+      plan.hold = 'draw'; plan.draw = shot; plan.afterShot = 0.12; plan.clip = 'shoot';
+    } else if (shot.kind === 'reload') {
+      // no draw scaling: one heavy bolt, then you are defenceless for a second and a quarter
+      plan.hold = null; plan.reload = shot.reload; plan.power = shot.power; plan.clip = 'shoot';
+      plan.steps = [{ key: 'shot', windMs: 180, every: shot.reload, clip: 'shoot', clipSeconds: 0.6 }];
+    } else if (shot.kind === 'throw') {
+      plan.hold = null; plan.power = shot.power; plan.carried = shot.carried; plan.clip = 'thrust';
+      plan.steps = [{ key: 'shot', windMs: 150, every: shot.every, clip: 'thrust', clipSeconds: 0.42 }];
+    }
+  }
+  return plan;
+}
+
 /** Emberveil item subtypes -> the Chibi 2 part the character actually holds. */
+/**
+ * Emberveil item subtypes -> the Chibi 2 part the character actually holds.
+ *
+ * ROUND 14 REWROTE THIS ROW BY ROW, because most of it was wrong:
+ *
+ *   * `greatsword`, `sword2h`, `battleaxe` and `axe2h` ALL mapped to `greataxe`, so a greatsword
+ *     rendered as an axe even though a greatsword blade existed and nothing routed to it;
+ *   * `halberd`, `spear` and `javelin` all mapped to `quarterstaff` — a bare pole with no head;
+ *   * `wand` mapped to `flame`, which is a cone of fire floating in the palm: there was no wand
+ *     model anywhere in the game;
+ *   * a `scepter` was a mace and a `quarterstaff` was a shepherd's crook.
+ *
+ * The new ids are built in `avatar-3d/js/chibi2-weapons.js` — a new file, so Emberveil's own looks
+ * are byte-for-byte untouched — and every one of them has its head PAST THE FINGERTIPS. In hand
+ * space `+y` runs up the forearm toward the elbow and `-y` is out past the fingers, and every haft
+ * weapon in the old file had its head at `+0.40` to `+0.46`: as the character chopped down, the
+ * head travelled UP AND BACK. You were hitting things with the butt of the handle. That is almost
+ * certainly what "ensure the character holds weapons properly" was about.
+ */
 const HELD_BY_SUBTYPE = {
-  dagger: 'daggers', sword: 'sword', longsword: 'sword', rapier: 'rapier', saber: 'saber',
-  sword2h: 'greataxe', greatsword: 'greataxe', axe2h: 'greataxe', battleaxe: 'greataxe', cleaver: 'cleaver',
-  hammer: 'hammer', warhammer: 'warhammer', mace: 'mace', halberd: 'quarterstaff', spear: 'quarterstaff',
-  javelin: 'quarterstaff', quarterstaff: 'staff_crook', staff: 'staff_orb', wand: 'flame', scepter: 'mace',
-  orb: 'orb', tome: 'book', bow: 'bow', shortbow: 'bow', crossbow: 'crossbow',
+  dagger: 'fh_daggers', sword: 'fh_sword', longsword: 'fh_longsword', rapier: 'fh_rapier',
+  saber: 'fh_sabre', scimitar: 'fh_sabre',
+  sword2h: 'fh_greatsword', greatsword: 'fh_greatsword', axe2h: 'fh_greataxe',
+  battleaxe: 'fh_axe', axe: 'fh_axe', cleaver: 'cleaver',
+  hammer: 'fh_hammer', warhammer: 'fh_maul', mace: 'fh_mace',
+  halberd: 'fh_halberd', spear: 'fh_spear', javelin: 'fh_javelin',
+  quarterstaff: 'fh_quarterstaff', staff: 'staff_orb', wand: 'fh_wand', scepter: 'fh_scepter',
+  orb: 'orb', tome: 'book', bow: 'bow', shortbow: 'bow', longbow: 'bow', crossbow: 'crossbow',
 };
-const OFFHAND_BY_SUBTYPE = { shield: 'heater_shield', quiver: 'quiver', dagger: 'dagger' };
+
+/**
+ * WHICH TOPPER A STAFF WEARS, by what it is made of.
+ *
+ * Every staff in the game was `staff_orb`. Five toppers already existed in `chibi2-gear.js` and
+ * four of them were unreachable, so a fire staff, a shadow staff and a holy staff were the same
+ * object in three tints.
+ */
+const STAFF_TOPPER = {
+  fire: 'staff_crystal', ice: 'staff_crystal', lightning: 'staff_totem',
+  poison: 'staff_crook', shadow: 'staff_skull', holy: 'staff_orb', arcane: 'staff_orb',
+};
+/** …and the colour that goes with it, so the topper is not a grey lump on a grey stick. */
+const ELEMENT_TINT = {
+  fire: '#ff8a40', ice: '#9fd8ff', lightning: '#ffe86a', poison: '#9ede6a',
+  shadow: '#c090ff', holy: '#ffe6a0', arcane: '#b8a0ff',
+};
+
+/**
+ * A shield is STRAPPED TO THE FOREARM, not gripped in the fist.
+ *
+ * `chibi2-gear.js` binds every shield to `handL` at weight 1, which is how a buckler is held and
+ * how nothing else is. The strapped versions live in `chibi2-weapons.js` and ride `elbowL`.
+ */
+const OFFHAND_BY_SUBTYPE = { shield: 'fh_heater_shield', buckler: 'buckler', quiver: 'quiver', dagger: 'dagger' };
 
 /** What a weapon looks like in the character's hand — the item's own look wins if it has one. */
 export function heldLookFor(item) {
   if (!item) return { id: 'none' };
   if (item.look?.held) return { id: item.look.held, color: item.look.color || '#b9c2cc' };
-  const id = HELD_BY_SUBTYPE[item.subtype] || HELD_BY_SUBTYPE[item.baseKey] || 'sword';
-  return { id, color: item.rarity === 'legendary' ? '#ffb040' : item.rarity === 'rare' ? '#e8d020' : '#b9c2cc' };
+  const sub = item.subtype || item.baseKey;
+  let id = HELD_BY_SUBTYPE[item.subtype] || HELD_BY_SUBTYPE[item.baseKey] || 'fh_sword';
+  // a staff wears the topper its element asks for, rather than an orb for all seven
+  const el = item.castElement || item.brand || null;
+  if (sub === 'staff' && el) id = STAFF_TOPPER[el] || 'staff_orb';
+  /**
+   * WHAT RARITY LOOKS LIKE. Three colours for the whole game meant a legendary maul and a common
+   * maul were the same object in two tints; the new models read `quality` and add a gem, a ferrule
+   * and a brighter edge as it climbs. A branded weapon takes its element's colour instead, because
+   * "this one is on fire" is worth more than "this one is rare".
+   */
+  const quality = item.rarity === 'legendary' ? 3 : item.rarity === 'unique' ? 3 : item.rarity === 'rare' ? 2 : item.rarity === 'magic' ? 1 : 0;
+  const color = el ? (ELEMENT_TINT[el] || '#b9c2cc')
+    : item.rarity === 'legendary' ? '#ffb040' : item.rarity === 'rare' ? '#e8d020' : '#b9c2cc';
+  return { id, color, quality, element: el || null };
 }
 export function offhandLookFor(item) {
   if (!item) return { id: 'none' };
   if (item.look?.offhand) return { id: item.look.offhand, color: item.look.color || '#9aa3ad' };
-  if (item.isShield || item.isMagicShield) return { id: item.slot === 'offhand' && item.isMagicShield ? 'kite_shield' : 'heater_shield', color: '#8d97a3' };
+  // strapped to the forearm, not gripped in the fist — see chibi2-weapons.js
+  if (item.isShield || item.isMagicShield) return { id: item.isMagicShield ? 'fh_kite_shield' : 'fh_heater_shield', color: '#8d97a3', quality: item.rarity === 'legendary' ? 3 : item.rarity === 'rare' ? 2 : 0 };
   const id = OFFHAND_BY_SUBTYPE[item.subtype] || 'none';
   return { id, color: '#9aa3ad' };
 }
@@ -593,10 +737,46 @@ export class Rpg {
     // level — so without this a level-20 character with a perfect bow did almost nothing to a
     // level-25 anything. Training counts for something: every level is worth a flat share more.
     const skill = 1 + (lvl - 1) * (b.damagePerLevel ?? 0.1);
+    /**
+     * THE WEAPON SCALES WITH YOU; THE FLAT BONUS DOES NOT.
+     *
+     * Round 14. `damageFlat` used to be added to the weapon's dice BEFORE everything multiplied, so
+     * gear diluted the weapon itself: at level 20 with a modest +12 flat, a greatsword's 15-29
+     * became 27-41 and a dagger's 3-7 became 15-19 — a 4.4x difference in raw weapon damage
+     * collapsed to 1.9x, while the greatsword still paid the whole of its 0.88-swings-a-second
+     * clock. Heavy weapons paid the speed penalty and collected almost none of the damage advantage
+     * they were designed around, which is most of why melee was behind.
+     *
+     * Multiplying the WEAPON by the level term and adding the flat bonus after it keeps the level
+     * curve where the simulator tuned it (with `damagePerLevel` nudged 0.10 -> 0.11 to compensate)
+     * and takes the greatsword-to-dagger ratio from 1.99x to about 2.9x. The difference a player
+     * reads on the item card is finally the difference they feel in the fight.
+     */
     d.damage = [
-      Math.max(1, Math.round((wd[0] + d.damageFlat) * scale * talentDmg * skill)),
-      Math.max(2, Math.round((wd[1] + d.damageFlat) * scale * talentDmg * skill)),
+      Math.max(1, Math.round((wd[0] * skill + d.damageFlat) * scale * talentDmg)),
+      Math.max(2, Math.round((wd[1] * skill + d.damageFlat) * scale * talentDmg)),
     ];
+    /**
+     * AND THE OFF HAND USES ITS OWN DICE.
+     *
+     * The off hand used to lend only its CLOCK: `rpg.strike` reads `a.damage`, which was computed
+     * from `equipment.weapon` alone, and the off hand's share was 0.62 of the MAIN hand's numbers.
+     * The mathematically correct off-hand weapon was therefore always the fastest weapon in the
+     * game whatever its damage — longsword-and-dagger beat dual longswords by 40%, which is not a
+     * build, it is an exploit, and it sat at the top of the damage table.
+     */
+    const off = unit.equipment?.offhand;
+    if (off && off.type === 'weapon' && off.dmg) {
+      const offCat = off.weaponCategory || 'light';
+      const offAttr = offCat === 'magic' ? d.int : offCat === 'heavy' ? d.str : d.dex;
+      const offScale = 1 + offAttr * (b.damagePerAttr ?? 0.03);
+      d.offDamage = [
+        Math.max(1, Math.round((off.dmg[0] * skill + d.damageFlat) * offScale * talentDmg)),
+        Math.max(2, Math.round((off.dmg[1] * skill + d.damageFlat) * offScale * talentDmg)),
+      ];
+    } else {
+      d.offDamage = null;
+    }
     d.levelScale = skill;
     d.moveSpeed = (b.moveSpeed ?? 5.2) * (1 - Math.min(0.2, (d.armor / 400))) * (1 + d.movePct / 100);
     // how often you can swing, from `initiative`-style haste (a point of initiative is worth
@@ -620,6 +800,39 @@ export class Rpg {
       'attackEvery', 'levelScale', 'damagePct', 'armorPct', 'movePct']) {
       if (typeof d[key] === 'number') d[key] = Math.round(d[key] * 1000) / 1000;
     }
+    /**
+     * WHAT THE WEAPON IS FOR, in the shape the CONTROLLER needs it.
+     *
+     * js/player.js owns the swing clock and has no idea what is in your hands — it is handed an
+     * `every` by main.js and nothing else, which is why every weapon in the game had the same
+     * one-frame swing. `derived` is the one thing the controller already reads (`sheet()`), so the
+     * whole plan goes here: how long each strike of the pattern takes to come round, which clip it
+     * plays, and whether this weapon is held rather than clicked.
+     */
+    d.swing = {
+      main: swingPlanFor(unit.equipment?.weapon),
+      off: swingPlanFor(unit.equipment?.offhand, { off: true }),
+    };
+    /** A weapon that parries. A staff, a rapier and a polearm all do; a hammer does not. */
+    const guard = traitsOf(unit.equipment?.weapon)?.guard || 0;
+    if (guard > 0) d.blockChance = Math.round((d.blockChance + guard * 100) * 1000) / 1000;
+    /**
+     * Spending mana from the controller, which has no reference to the character.
+     *
+     * A staff's channel drinks four mana a second and stops when there is none left — that is the
+     * decision the whole redesign turns on. A closure is the smallest thing that can carry it: it
+     * is not serialised (functions do not survive JSON, and `derived` is rebuilt on load anyway)
+     * and it cannot be used to reach anything but the mana pool. Returns what was actually paid.
+     */
+    d.spendMana = (want = 0) => {
+      if (!(want > 0)) return 0;
+      const have = unit.mp ?? 0;
+      const paid = Math.min(have, want);
+      unit.mp = Math.max(0, have - paid);
+      return paid;
+    };
+    d.manaLeft = () => unit.mp ?? 0;
+
     d.inert = [...new Set(d.inert)];
     return d;
   }
@@ -974,13 +1187,18 @@ export class Rpg {
    * One swing. Returns what happened so the caller can show numbers, play an animation and write
    * a line in the log. Attacker and defender are any `{ derived }` character or plain enemy.
    */
-  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null } = {}) {
+  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null, hand = 'main', pen = 0 } = {}) {
     const a = attacker.derived, d = defender.derived;
     // Read every field with a fallback, NEVER `a ? a.x : fallback`. Round 4 gave enemies and pets a
     // small `derived` bag (resistAll / thorns / dodge) so modifiers could hang off them, which made
     // `a` truthy for an enemy — and `a.damage` is undefined on an enemy, so the old form rolled
     // rng.range(undefined, undefined) and every number in the fight came out NaN.
-    const dmgRange = a?.damage || attacker.dmg || [3, 5];
+    /**
+     * THE OFF HAND ROLLS ITS OWN DICE. Before round 14 it lent only its clock — `a.damage` is the
+     * MAIN hand's numbers — so the best off-hand weapon in the game was always the fastest one
+     * regardless of its damage. See `derive`'s `offDamage`.
+     */
+    const dmgRange = (hand === 'off' && a?.offDamage) || a?.damage || attacker.dmg || [3, 5];
     // Accuracy was carried and never read. It cancels the defender's dodge, which is the only thing
     // dodge has ever meant — so `of Accuracy` is worth having against anything nimble.
     const accuracy = (a?.hit ?? attacker.hit ?? 0);
@@ -1045,7 +1263,15 @@ export class Rpg {
 
     // armour, less whatever the attacker's affixes let it ignore
     let armor = d?.armor ?? defender.armor ?? 0;
+    // a hammer's armour break, carried as a `sunder` fraction on the body and floored at 45%
+    if (defender.sunder > 0) armor *= Math.max(0.45, 1 - defender.sunder);
     if (attacker.equipment) armor *= 1 - this.fx.armorPen(ctx);
+    /**
+     * …and what the STRIKE SHAPE goes through on its own. A rapier's lunge ignores 40% of armour
+     * and a thrust 25%; that is the whole reason to take a point weapon against something plated,
+     * and it is a shape property rather than an affix so every rapier in the game has it.
+     */
+    if (pen > 0) armor *= 1 - Math.min(0.85, pen);
     amount *= 100 / (100 + Math.max(0, armor));
     const mres = d?.magicResist ?? defender.magicResist ?? 0;
     if (isMagic(element) && mres > 0) amount *= 100 / (100 + mres);

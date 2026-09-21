@@ -105,13 +105,28 @@ export function nearbyList({
       ttl: null, state: p.offer || p.wants || '',
     }, p.x, p.z);
   }
-  // somewhere hostile you can see from here
+  /**
+   * R15 — ONLY THE PLACES THAT ARE ACTUALLY AN ERRAND.
+   *
+   *   "Remove waypoints for things that aren't consumable like bandit camps, we don't need a
+   *    pointer to those."
+   *
+   * Right: a bandit camp is scenery with people in it. It does not run out, it is not going
+   * anywhere, there are several within a walk of anywhere, and a beacon over each one turns the
+   * one signal the panel has into wallpaper — which is the same fault the ambient chatter had.
+   *
+   * What stays is what you would cross a field FOR: a world boss (one of them on the whole planet,
+   * and it is gone once you kill it), and a place a job you are carrying actually points at — that
+   * one arrives through `quests` below, so a bandit camp you have been PAID to clear is still in
+   * the list, and the identical camp next to it is not.
+   */
   for (const s of sites) {
     if (s.cleared) continue;
+    if (!s.worldBoss) continue;
     add({
-      id: 'site:' + (s.key ?? s.id), kind: s.worldBoss ? 'foe' : 'site',
-      name: s.name || 'A camp', ttl: null,
-      state: s.worldBoss ? 'far bigger than you' : (s.spec?.name || 'hostile'),
+      id: 'site:' + (s.key ?? s.id), kind: 'foe',
+      name: s.name || 'Something large', ttl: null,
+      state: 'far bigger than you',
     }, s.x, s.z);
   }
   // and the jobs you are already carrying, so the panel is the whole answer to "what now"

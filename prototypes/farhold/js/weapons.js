@@ -36,23 +36,52 @@
 
 // Player-facing numbers go through shared/format.js, so a reach never renders "2.7000000000000002".
 import { fmt } from '../../../shared/format.js';
+// The swing channel: one writer, several readers. See `withArea` below and js/combat-feel.js.
+import { feel } from './combat-feel.js';
 
 // ---------------------------------------------------------------------------- strike shapes
 
 /**
- * The four shapes a melee strike can take. `reach` and `arc` multiply the weapon's own numbers;
- * `damage` is the share of a full hit; `wind` is how long the swing takes before it lands.
+ * The shapes a melee strike can take, and what each one DOES to the thing it lands on.
+ *
+ * `reach` and `arc` multiply the weapon's own numbers; `damage` is the share of a full hit; `wind`
+ * is how long the swing takes before it lands. Those four are the original four fields and they
+ * still mean exactly the same thing.
+ *
+ * Round 14 added the physics. A swing used to be resolved on the frame the button went down with
+ * nothing to feel — no weight going in, no jolt coming out. These say what a hit is worth as a
+ * PHYSICAL event, and every one of them is read by js/combat-feel.js:
+ *
+ *   push     metres of knockback
+ *   stagger  seconds the target cannot act
+ *   hitstop  milliseconds the world holds still on a connecting hit
+ *   shake    screen-shake coefficient (metres = shake x 0.035, capped at 0.12)
+ *   pen      share of the target's armour this shape goes through
+ *   step     metres the ATTACKER moves forward on the swing
  *
  * `glyph` is what the item card draws, so a player can read a weapon's rhythm without equipping it.
  */
 export const STRIKES = {
-  slash: { key: 'slash', name: 'Slash', glyph: '⟋', reach: 1, arc: 1, damage: 1, wind: 1, splash: 1 },
-  thrust: { key: 'thrust', name: 'Thrust', glyph: '⟶', reach: 1.45, arc: 0.4, damage: 1.15, wind: 0.9, splash: 0.5 },
-  sweep: { key: 'sweep', name: 'Sweep', glyph: '◡', reach: 1.1, arc: 1.9, damage: 0.9, wind: 1.15, splash: 1.6 },
-  overhead: { key: 'overhead', name: 'Overhead', glyph: '⟱', reach: 1.15, arc: 0.8, damage: 1.7, wind: 1.6, splash: 1.3 },
-  jab: { key: 'jab', name: 'Jab', glyph: '·', reach: 0.75, arc: 0.55, damage: 0.65, wind: 0.5, splash: 0.3 },
-  cleave: { key: 'cleave', name: 'Cleave', glyph: '⤬', reach: 1.25, arc: 1.5, damage: 1.35, wind: 1.35, splash: 1.8 },
+  //                                   glyph reach  arc  dmg  wind splash push stagger hitstop shake pen  step
+  jab:      mk('jab',      'Jab',      '·', 0.78, 0.55, 0.65, 0.50, 0.3, 0.15, 0,    35,  0.10, 0,    0),
+  slash:    mk('slash',    'Slash',    '⟋', 1.00, 1.00, 1.00, 1.00, 1.0, 0.35, 0,    55,  0.20, 0,    0),
+  thrust:   mk('thrust',   'Thrust',   '⟶', 1.55, 0.35, 1.20, 0.90, 0.4, 0.55, 0,    55,  0.18, 0.25, 0.3),
+  sweep:    mk('sweep',    'Sweep',    '◡', 1.10, 2.10, 0.95, 1.15, 1.7, 0.60, 0.18, 70,  0.30, 0,    0),
+  cleave:   mk('cleave',   'Cleave',   '⤲', 1.25, 1.55, 1.35, 1.30, 1.8, 0.75, 0.15, 85,  0.35, 0,    0),
+  overhead: mk('overhead', 'Overhead', '⟱', 1.15, 0.85, 1.75, 1.55, 1.3, 1.10, 0.35, 110, 0.55, 0.10, 0),
+
+  /** The sword finisher — a wide fluid sweep that carries you half a metre into it. */
+  arc:   mk('arc',   'Arc Cut', '◟', 1.10, 2.30, 1.45, 1.25, 1.6, 0.70, 0.20, 80,  0.35, 0,    0.6),
+  /** The hammer finisher — the smash. The heaviest thing in the game. */
+  slam:  mk('slam',  'Slam',    '▼', 1.00, 1.20, 2.25, 1.85, 2.6, 2.20, 0.65, 150, 0.90, 0.20, 0),
+  /** The point-weapon finisher — you cover ground and you go through armour. */
+  lunge: mk('lunge', 'Lunge',   '⇢', 1.80, 0.30, 1.35, 1.05, 0.3, 0.40, 0,    60,  0.22, 0.40, 1.4),
 };
+
+/** One row of the table above, so the numbers line up and a missing field is impossible. */
+function mk(key, name, glyph, reach, arc, damage, wind, splash, push, stagger, hitstop, shake, pen, step) {
+  return { key, name, glyph, reach, arc, damage, wind, splash, push, stagger, hitstop, shake, pen, step };
+}
 
 export const STRIKE_KEYS = Object.keys(STRIKES);
 
@@ -70,27 +99,211 @@ export const STRIKE_KEYS = Object.keys(STRIKES);
  */
 export const WEAPON_PATTERNS = {
   // ---- light, one-handed
-  dagger: { pattern: ['jab', 'jab', 'slash'], reach: 1.9, arc: 1.1, every: 0.34, name: 'Dagger' },
-  rapier: { pattern: ['thrust', 'thrust'], reach: 3.3, arc: 0.7, every: 0.52, name: 'Rapier' },
-  spear: { pattern: ['thrust', 'thrust', 'sweep'], reach: 3.9, arc: 0.8, every: 0.66, name: 'Spear' },
-  scimitar: { pattern: ['slash', 'slash', 'thrust'], reach: 2.6, arc: 1.5, every: 0.46, name: 'Sabre' },
+  dagger: { pattern: ['jab', 'jab', 'slash'], reach: 2.0, arc: 1.1, every: 0.34, name: 'Dagger' },
+  rapier: { pattern: ['thrust', 'thrust', 'lunge'], reach: 3.3, arc: 0.7, every: 0.52, name: 'Rapier' },
+  spear: { pattern: ['thrust', 'thrust', 'sweep'], reach: 4.0, arc: 0.8, every: 0.66, name: 'Spear' },
+  scimitar: { pattern: ['slash', 'slash', 'arc'], reach: 2.7, arc: 1.5, every: 0.46, name: 'Sabre' },
+  // `rimecut_sabre` spells it the other way, and `halberd`'s own subtype in items.json is `polearm`
+  sabre: { pattern: ['slash', 'slash', 'arc'], reach: 2.7, arc: 1.5, every: 0.46, name: 'Sabre' },
 
   // ---- heavy, one-handed
-  sword: { pattern: ['slash', 'slash', 'slash'], reach: 2.7, arc: 1.4, every: 0.58, name: 'Sword' },
+  sword: { pattern: ['slash', 'slash', 'arc'], reach: 2.8, arc: 1.4, every: 0.58, name: 'Sword' },
   longsword: { pattern: ['slash', 'slash', 'overhead'], reach: 3.0, arc: 1.5, every: 0.64, name: 'Longsword' },
-  axe: { pattern: ['cleave', 'slash'], reach: 2.6, arc: 1.3, every: 0.7, name: 'Axe' },
-  mace: { pattern: ['overhead', 'slash'], reach: 2.4, arc: 1.1, every: 0.74, name: 'Mace' },
-  hammer: { pattern: ['overhead', 'sweep'], reach: 2.5, arc: 1.2, every: 0.82, name: 'Hammer' },
-  warhammer: { pattern: ['overhead', 'overhead'], reach: 2.6, arc: 1.1, every: 0.94, name: 'Warhammer' },
-  battleaxe: { pattern: ['cleave', 'cleave', 'overhead'], reach: 2.8, arc: 1.5, every: 0.86, name: 'Battleaxe' },
+  axe: { pattern: ['cleave', 'slash', 'cleave'], reach: 2.6, arc: 1.3, every: 0.68, name: 'Axe' },
+  mace: { pattern: ['overhead', 'slash', 'slam'], reach: 2.4, arc: 1.1, every: 0.62, name: 'Mace' },
+  hammer: { pattern: ['overhead', 'sweep', 'slam'], reach: 2.5, arc: 1.2, every: 0.66, name: 'Hammer' },
+  warhammer: { pattern: ['overhead', 'overhead', 'slam'], reach: 2.6, arc: 1.1, every: 0.76, name: 'Warhammer' },
+  battleaxe: { pattern: ['cleave', 'slash', 'cleave'], reach: 2.8, arc: 1.5, every: 0.82, name: 'Battleaxe' },
+  scepter: { pattern: ['overhead', 'slash'], reach: 2.5, arc: 1.1, every: 0.64, name: 'Sceptre' },
 
   // ---- two-handed. Wider, longer, slower — and they take the off hand with them.
-  sword2h: { pattern: ['sweep', 'sweep', 'overhead'], reach: 3.8, arc: 2.0, every: 0.92, name: 'Two-handed Sword' },
-  greatsword: { pattern: ['sweep', 'overhead', 'sweep'], reach: 4.1, arc: 2.1, every: 1.02, name: 'Greatsword' },
-  axe2h: { pattern: ['cleave', 'cleave', 'overhead'], reach: 3.6, arc: 1.9, every: 1.0, name: 'Two-handed Axe' },
-  halberd: { pattern: ['thrust', 'sweep', 'overhead'], reach: 4.6, arc: 1.7, every: 1.06, name: 'Halberd' },
-  quarterstaff: { pattern: ['jab', 'sweep', 'jab', 'sweep'], reach: 3.4, arc: 1.6, every: 0.5, name: 'Quarterstaff' },
+  sword2h: { pattern: ['sweep', 'overhead', 'arc'], reach: 3.9, arc: 2.0, every: 0.88, name: 'Two-handed Sword' },
+  greatsword: { pattern: ['sweep', 'overhead', 'arc'], reach: 4.2, arc: 2.1, every: 0.96, name: 'Greatsword' },
+  axe2h: { pattern: ['cleave', 'cleave', 'slam'], reach: 3.6, arc: 1.9, every: 0.94, name: 'Two-handed Axe' },
+  halberd: { pattern: ['thrust', 'sweep', 'overhead'], reach: 4.8, arc: 1.7, every: 1.0, name: 'Halberd' },
+  // A quarterstaff is a POLE, not a spell launcher. `items.json` files it under `magic` and that is
+  // what made it cast a free area spell every 0.41 s; `rpg.attuneWeapon` writes `light` onto the
+  // item so this row is what it swings on. See §1.5 G of research/combat-redesign.md.
+  quarterstaff: { pattern: ['jab', 'sweep', 'jab', 'sweep'], reach: 3.5, arc: 1.6, every: 0.48, name: 'Quarterstaff' },
+  polearm: { pattern: ['thrust', 'sweep', 'overhead'], reach: 4.8, arc: 1.7, every: 1.0, name: 'Polearm' },
+
+  /**
+   * ---- ranged, and the reason they are in this table at all.
+   *
+   * A bow was in NEITHER table, so `profileOf` fell through to the `light` melee category and a
+   * bow's rate of fire was the dagger swing clock — 1.91 shots a second with no draw, no nock and
+   * no reload, which nobody designed. Worse, the two-handed scale only fired on weapons NOT in this
+   * table, so the one effect it ever had was making bows 20% slower. Both are fixed by the rows
+   * being here. The `pattern` is a single shot shape; the draw and the reload live in RANGED.
+   */
+  bow: { pattern: ['shot'], reach: 1, arc: 0.3, every: 1.05, name: 'Bow', shoots: true },
+  shortbow: { pattern: ['shot'], reach: 1, arc: 0.3, every: 0.85, name: 'Shortbow', shoots: true },
+  longbow: { pattern: ['shot'], reach: 1, arc: 0.3, every: 1.15, name: 'Longbow', shoots: true },
+  crossbow: { pattern: ['shot'], reach: 1, arc: 0.3, every: 1.25, name: 'Crossbow', shoots: true },
+  javelin: { pattern: ['shot'], reach: 1, arc: 0.3, every: 0.75, name: 'Javelin', shoots: true },
 };
+
+// `shot` is not a melee shape and never reaches `field.strike`; it is here so `strikeAt` on a bow
+// returns something real rather than silently borrowing a slash.
+STRIKES.shot = mk('shot', 'Shot', '→', 1, 1, 1, 1, 0.9, 0.30, 0, 55, 0.18, 0, 0);
+
+/**
+ * WHAT A FAMILY IS FOR — the traits, keyed the way `WEAPON_PATTERNS` is (base key, then subtype,
+ * then `_suffix`, then category).
+ *
+ *   damage       flat multiplier on the whole family. This is where the two-hander bonus lives, and
+ *                it is a real one at last: `TWO_HANDED_SCALE.damage` was declared in 2026 and read
+ *                by nothing, so every two-hander paid a 1.2x slower clock and collected none of it.
+ *   armourBreak  share of the target's CURRENT armour stripped per hit, as a `sunder` status
+ *   bleed        stacks applied by a connecting `cleave`
+ *   backstab     multiplier for a hit landed in the target's rear 100 degrees
+ *   pierceLine   a `thrust` is a line out to full reach, not a cone; the number is how many bodies
+ *   brace        extra damage on a thrust against something that closed on you this second
+ *   flow         after two connecting strikes the third costs 0.35x its clock
+ *   guard        block chance granted while the weapon is held
+ *   pierceBodies how many bodies a shot passes through
+ */
+export const WEAPON_TRAITS = {
+  // it smashes
+  hammer: { armourBreak: 0.07, guard: 0 },
+  warhammer: { armourBreak: 0.07, guard: 0 },
+  mace: { armourBreak: 0.05, guard: 0 },
+  // it slashes
+  sword: { flow: false, guard: 0.08, momentum: true },
+  longsword: { guard: 0.08, momentum: true },
+  // the sweep
+  sword2h: { damage: 1.20, guard: 0.06 },
+  greatsword: { damage: 1.20, guard: 0.06 },
+  // it bites
+  axe: { bleed: 1 },
+  battleaxe: { bleed: 1 },
+  axe2h: { damage: 1.20, bleed: 1, armourBreak: 0.05 },
+  // it adds range
+  halberd: { damage: 1.20, pierceLine: 3, brace: 0.35, guard: 0.06 },
+  polearm: { damage: 1.20, pierceLine: 3, brace: 0.35, guard: 0.06 },
+  spear: { pierceLine: 2, brace: 0.25, guard: 0.05 },
+  // the point
+  rapier: { guard: 0.10 },
+  // the flow
+  scimitar: { flow: true, momentum: true },
+  sabre: { flow: true, momentum: true },
+  // the back
+  dagger: { damage: 0.80, backstab: 2.2 },
+  // a staff parries, which is the monk's defence
+  quarterstaff: { guard: 0.12 },
+  scepter: { armourBreak: 0.04 },
+  // ranged
+  bow: { pierceBodies: 1, draw: true },
+  shortbow: { pierceBodies: 1, draw: true },
+  longbow: { pierceBodies: 2, draw: true },
+  crossbow: { pierceBodies: 2, reload: true },
+  javelin: { thrown: true },
+};
+
+/** The trait bag for a weapon, read the same way its pattern is. Always an object. */
+export function traitsOf(item) {
+  if (!item) return {};
+  const key = item.baseKey || '';
+  return WEAPON_TRAITS[key]
+    || Object.entries(WEAPON_TRAITS).find(([k]) => key.endsWith('_' + k))?.[1]
+    || WEAPON_TRAITS[item.subtype]
+    || {};
+}
+
+/**
+ * HOW LONG THE SWING TAKES BEFORE IT LANDS — the weight, by family, in milliseconds.
+ *
+ * A dagger is out and back before you have registered it; a greatsword is a decision. The rule that
+ * makes this free is in §3.5 of the design: `wind + recover` is taken OUT of the weapon's existing
+ * `every`, never added to it, so the rate of fire — and every damage-per-second number — is exactly
+ * what it was.
+ */
+export const FAMILY_WIND = {
+  dagger: 70, rapier: 95, scimitar: 105, sabre: 105, sword: 120, longsword: 130, spear: 140,
+  scepter: 170, mace: 180, axe: 200, battleaxe: 210, hammer: 260, warhammer: 275,
+  halberd: 300, polearm: 300, sword2h: 320, greatsword: 330, axe2h: 340, quarterstaff: 110,
+  bow: 0, shortbow: 0, longbow: 0, crossbow: 180, javelin: 150,
+};
+const CATEGORY_WIND = { light: 110, heavy: 190, magic: 120 };
+
+/** The wind-up a family is worth, in milliseconds, before the strike shape scales it. */
+export function familyWind(item) {
+  if (!item) return 80;
+  const key = item.baseKey || '';
+  const found = FAMILY_WIND[key]
+    ?? Object.entries(FAMILY_WIND).find(([k]) => key.endsWith('_' + k))?.[1]
+    ?? FAMILY_WIND[item.subtype];
+  if (found != null) return found;
+  return CATEGORY_WIND[item.weaponCategory] ?? 150;
+}
+
+/**
+ * The three parts of one swing, in seconds.
+ *
+ *   wind      you are committed: you turn at 35% and walk at 55%
+ *   active    the frame the damage lands
+ *   recover   the weapon is coming back; the next press is BUFFERED rather than dropped, and the
+ *             off hand is allowed to go here and only here
+ *
+ * `every` is the whole cycle and it is unchanged, so nothing about damage per second moves.
+ */
+export function swingTiming(item, step = 0, hasteK = 1) {
+  const strike = strikeAt(item, step);
+  const every = strike.every * hasteK;
+  let wind = (familyWind(item) / 1000) * strike.wind * hasteK;
+  let recover = wind * 0.45;
+  // never let the windup and the recovery eat the whole clock — a 90% ceiling leaves a real gap
+  const room = every * 0.9;
+  if (wind + recover > room && wind + recover > 0) {
+    const k = room / (wind + recover);
+    wind *= k; recover *= k;
+  }
+  return { wind, recover, every, windMs: wind * 1000, recoverMs: recover * 1000, strike };
+}
+
+/**
+ * RANGED, spelled out — a draw, a reload or a throw rather than a swing clock by accident.
+ *
+ * `power` is the share of a full hit. A bow at full draw is worth 1.60 of one and takes 1.05 s to
+ * get there, which is 1.52 shares a second against the 1.91 flat shares it used to get for free.
+ */
+export const RANGED = {
+  bow: { kind: 'draw', min: 0.35, full: 0.95, powerMin: 0.55, powerFull: 1.60, hold: 1.6, decay: 0.03, range: 46, splash: 0.9 },
+  shortbow: { kind: 'draw', min: 0.28, full: 0.75, powerMin: 0.55, powerFull: 1.40, hold: 1.4, decay: 0.03, range: 38, splash: 0.9 },
+  longbow: { kind: 'draw', min: 0.40, full: 1.10, powerMin: 0.55, powerFull: 1.75, hold: 1.8, decay: 0.03, range: 54, splash: 0.9 },
+  crossbow: { kind: 'reload', reload: 1.25, power: 1.80, range: 50, splash: 0.9 },
+  javelin: { kind: 'throw', power: 1.15, carried: 6, every: 0.75, range: 28, splash: 1.4 },
+};
+
+/** How a ranged weapon fires: a draw, a reload or a throw. Null for anything that is not one. */
+export function rangedPlan(item) {
+  if (!item || item.weaponCategory === 'magic') return null;
+  const key = item.baseKey || '';
+  const plan = RANGED[key]
+    || Object.entries(RANGED).find(([k]) => key.endsWith('_' + k))?.[1]
+    || RANGED[item.subtype];
+  if (plan) return plan;
+  // a unique built on an unnamed ranged base still has to behave like something
+  return item.ranged ? RANGED.bow : null;
+}
+
+/**
+ * How far a bow is drawn after `held` seconds, and what that shot is worth.
+ *
+ * Under `min` you have not nocked and the shot refuses. Past `hold` the arms start to tremble and
+ * the power bleeds away, which is the thing that stops "hold it forever" being the right play.
+ */
+export function drawPower(plan, held = 0) {
+  if (!plan) return { ready: true, power: 1, draw: 1 };
+  if (plan.kind !== 'draw') return { ready: true, power: plan.power ?? 1, draw: 1 };
+  if (held < plan.min) return { ready: false, power: 0, draw: Math.max(0, held / plan.min) * 0.35 };
+  const span = Math.max(0.001, plan.full - plan.min);
+  const k = Math.min(1, (held - plan.min) / span);
+  let power = plan.powerMin + (plan.powerFull - plan.powerMin) * k;
+  const over = Math.max(0, held - plan.hold);
+  if (over > 0) power *= Math.max(0.5, 1 - over * (plan.decay ?? 0.03));
+  return { ready: true, power, draw: 0.35 + k * 0.65, shaky: over > 0 };
+}
 
 /** Anything not named above falls back on its category. */
 export const CATEGORY_PATTERNS = {
@@ -99,34 +312,66 @@ export const CATEGORY_PATTERNS = {
   magic: { pattern: ['jab', 'slash'], reach: 2.2, arc: 1.1, every: 0.6 },
 };
 
-const TWO_HANDED_SCALE = { reach: 1.18, arc: 1.25, damage: 1.25, every: 1.2 };
+/**
+ * The scale an UNLISTED two-hander gets — a road weapon or a unique whose base is in neither table.
+ *
+ * It used to carry `damage: 1.25` and `profileOf` never returned it, so the bonus was dead data for
+ * the life of the game; and the guard it sat behind (`two && !WEAPON_PATTERNS[key]`) excluded every
+ * real two-hander, so the only weapons it ever touched were bows. The damage share now lives in
+ * `WEAPON_TRAITS`, which applies to the weapons it was written for, and bows have their own rows —
+ * so what is left here is what it was always meant to be: a sensible default for a two-handed
+ * weapon nobody has written a pattern for.
+ */
+const TWO_HANDED_SCALE = { reach: 1.18, arc: 1.25, every: 1.2 };
 
 /**
- * Everything about how a weapon swings: the pattern, the reach, the arc, the clock.
+ * Everything about how a weapon swings: the pattern, the reach, the arc, the clock, the traits.
  *
  * Reads the base key first, then the subtype, then the category — so the twenty-odd road weapons and
  * uniques all get a sensible rhythm from the family they belong to without a row each.
  */
 export function profileOf(item) {
   if (!item) {
-    return { ...CATEGORY_PATTERNS.light, pattern: ['jab'], name: 'Fists', unarmed: true, twoHanded: false, ranged: false };
+    return {
+      ...CATEGORY_PATTERNS.light, pattern: ['jab'], name: 'Fists', unarmed: true,
+      twoHanded: false, ranged: false, traits: {}, wind: 80, damageTrait: 1,
+    };
   }
   const key = item.baseKey || '';
+  /**
+   * THE SUFFIX BEATS THE SUBTYPE, and it has to.
+   *
+   * `items.json` files `obsidian_scimitar` and `rimecut_sabre` under the subtype "sword", so
+   * checking the subtype first gave both of them the plain sword rhythm and the `_scimitar` rule
+   * below never fired on a real item — only on one a test built by hand with no subtype, which is
+   * exactly why it looked like it worked. Most specific first: the base key, then what the base key
+   * ENDS with, then the subtype, then the category.
+   */
   const named = WEAPON_PATTERNS[key]
-    || WEAPON_PATTERNS[item.subtype]
-    // a road weapon called `obsidian_scimitar` should swing like a scimitar
     || Object.entries(WEAPON_PATTERNS).find(([k]) => key.endsWith('_' + k))?.[1]
+    || WEAPON_PATTERNS[item.subtype]
     || CATEGORY_PATTERNS[item.weaponCategory] || CATEGORY_PATTERNS.heavy;
   const two = !!item.twoHanded;
+  const listed = !!(WEAPON_PATTERNS[key] || WEAPON_PATTERNS[item.subtype]
+    || Object.entries(WEAPON_PATTERNS).find(([k]) => key.endsWith('_' + k)));
+  const unlistedTwo = two && !listed;
+  const traits = traitsOf(item);
   return {
     ...named,
     name: named.name || item.subtype || 'Weapon',
-    reach: named.reach * (two && !WEAPON_PATTERNS[key] ? TWO_HANDED_SCALE.reach : 1),
-    arc: named.arc * (two && !WEAPON_PATTERNS[key] ? TWO_HANDED_SCALE.arc : 1),
-    every: named.every * (two && !WEAPON_PATTERNS[key] ? TWO_HANDED_SCALE.every : 1),
+    reach: named.reach * (unlistedTwo ? TWO_HANDED_SCALE.reach : 1),
+    arc: named.arc * (unlistedTwo ? TWO_HANDED_SCALE.arc : 1),
+    every: named.every * (unlistedTwo ? TWO_HANDED_SCALE.every : 1),
     twoHanded: two,
-    ranged: !!item.ranged,
+    ranged: !!item.ranged || !!named.shoots,
     magic: item.weaponCategory === 'magic',
+    traits,
+    /**
+     * The family damage multiplier. An unlisted two-hander gets the same 1.20 a real one does, so
+     * "the game has never heard of this weapon" is not a reason to be worse than a longsword.
+     */
+    damageTrait: traits.damage ?? (unlistedTwo ? 1.20 : 1),
+    wind: familyWind(item),
   };
 }
 
@@ -415,6 +660,45 @@ export function patternText(item) {
 }
 
 /**
+ * WHICH CLIP A STRIKE PLAYS.
+ *
+ * Every attack in the game played the same overhead chop: shooting a bow, casting from a staff,
+ * stabbing with a rapier and cleaving with an axe were one animation. The clips themselves are in
+ * `avatar-3d/js/chibi2-motion.js` (added as an opt-in list, so Emberveil's set is untouched); this
+ * is the table that picks one, and it is here rather than in the renderer because the shape and
+ * the handedness both live in this module.
+ *
+ * A one-handed `slash` alternates `slash` and `slashBack` so a combo reads as a combo instead of
+ * the same swing three times. A two-handed anything sweeping uses the locked-arms `sweep`.
+ */
+const CLIPS = {
+  jab: { one: 'jab', two: 'jab' },
+  slash: { one: 'slash', alt: 'slashBack', two: 'sweep' },
+  thrust: { one: 'thrust', two: 'thrust' },
+  sweep: { one: 'slash', alt: 'slashBack', two: 'sweep' },
+  cleave: { one: 'slash', alt: 'slashBack', two: 'sweep' },
+  overhead: { one: 'overhead', two: 'overhead' },
+  arc: { one: 'arcCut', two: 'arcCut' },
+  slam: { one: 'slam', two: 'slam' },
+  lunge: { one: 'lunge', two: 'lunge' },
+  shot: { one: 'shoot', two: 'shoot' },
+};
+/** How long each clip runs, so `setRate` can stretch it onto the swing's real wind-up. */
+export const CLIP_SECONDS = {
+  slash: 0.5, slashBack: 0.5, thrust: 0.42, overhead: 0.85, sweep: 0.92, jab: 0.26,
+  arcCut: 0.62, slam: 1.05, lunge: 0.55, shoot: 0.6, reload: 1, castPoint: 0.35,
+  castStaff: 0.7, channel: 1.6, attack: 0.85, cast: 1.25,
+};
+
+/** The clip for one strike of one weapon. `step` alternates the two sword cuts. */
+export function clipFor(shapeKey, { twoHanded = false, step = 0 } = {}) {
+  const row = CLIPS[shapeKey];
+  if (!row) return 'attack';
+  if (twoHanded) return row.two;
+  return row.alt && step % 2 === 1 ? row.alt : row.one;
+}
+
+/**
  * The strike that comes next.
  *
  * `step` is how many swings into the sequence you are; it lives on the controller's hand and resets
@@ -425,9 +709,29 @@ export function strikeAt(item, step = 0) {
   const shape = STRIKES[p.pattern[step % p.pattern.length]] || STRIKES.slash;
   return {
     ...shape,
+    /**
+     * The weapon this strike came from, carried so a reader downstream can tell WHICH HAND swung.
+     * js/main.js resolves both hands through the same `field.strike`, passing only a power, so
+     * without this there is no way to know that the off hand's own dice should be rolled.
+     */
+    item,
     reach: p.reach * shape.reach,
     arc: p.arc * shape.arc,
+    /**
+     * THE FAMILY BONUS, folded into the strike's own damage share.
+     *
+     * `js/main.js` resolves a swing as `power: share * shape.damage`, so a multiplier put here is
+     * the whole of the two-hander bonus, the dagger's 0.80 and the halberd's 1.20 — applied in one
+     * place, read by every caller, and visible to the tests without a browser.
+     */
+    damage: shape.damage * (p.damageTrait ?? 1),
+    baseDamage: shape.damage,
     every: p.every * shape.wind,
+    traits: p.traits || {},
+    family: p.name,
+    twoHanded: !!p.twoHanded,
+    ranged: !!p.ranged,
+    magic: !!p.magic,
     last: (step % p.pattern.length) === p.pattern.length - 1,
     index: step % p.pattern.length,
     of: p.pattern.length,
@@ -495,7 +799,7 @@ export function offhandRefusal(player, item) {
  * controller keeps two timers and two pattern positions, and this decides what each hand does with
  * a frame. The off hand hits for less, because two full weapons would simply be twice the damage.
  */
-export const OFFHAND_DAMAGE = 0.62;
+export const OFFHAND_DAMAGE = 0.60;
 
 export function handPlans(player, { mainStep = 0, offStep = 0 } = {}) {
   const hands = handsOf(player);
@@ -522,13 +826,42 @@ export function withArea(strike, areaPct = 0) {
   // reach grows more slowly than the arc: a bigger swing should widen before it lengthens, or a
   // dagger build ends up out-ranging a halberd
   const reachK = 1 + (k - 1) * 0.45;
-  return {
+  const out = {
     ...strike,
     reach: strike.reach * reachK,
     arc: Math.min(Math.PI * 1.6, strike.arc * k),
     splash: (strike.splash || 1) * k,
     scale: k,
   };
+  /**
+   * A CHARGED STAFF IS BIGGER AND IT HITS HARDER.
+   *
+   * The controller posts what the channel built on the frame it was released (js/player.js). Both
+   * numbers a staff's spell reads — the radius, through `scale`, and its share of a full hit — are
+   * on this object, so folding the charge in here is the whole of it. It is consumed, so the next
+   * ordinary swing is an ordinary swing.
+   */
+  const charge = feel.swing.charge;
+  if (charge) {
+    feel.swing.charge = null;
+    out.scale *= charge.radius ?? 1;
+    out.damage *= charge.power ?? 1;
+    out.charge = charge;
+  }
+  /**
+   * AND THIS IS WHERE THE SWING IS ANNOUNCED.
+   *
+   * `js/main.js` calls `withArea(strikeAt(weapon, step))` exactly once, inside `swingWith`, on the
+   * frame a swing happens — and then hands the pieces of it (a reach, an arc, a power) to four
+   * different systems, none of which is told WHICH SHAPE it is. That is why a hammer smash and a
+   * dagger jab drew the same white ring: nothing downstream knew the difference.
+   *
+   * Posting the whole shape here gives `combat-fx.js`, `actors.js` and the animation chooser one
+   * record to read instead of three guesses, without main.js having to pass it to each of them.
+   * It is a side effect in an otherwise pure function, which is why it is spelled out at length.
+   */
+  feel.postSwing(out);
+  return out;
 }
 
 // ---------------------------------------------------------------------------- staves and wands
@@ -592,12 +925,12 @@ export const STAFF_SPELLS = {
  * one wand different from the next.
  */
 export const WAND_BEHAVIOURS = [
-  { key: 'plain', name: 'true-flying', desc: 'a single bolt, fast and straight', projectiles: 1, splash: 2.2 },
-  { key: 'burst', name: 'bursting', desc: 'the bolt bursts on impact', projectiles: 1, splash: 4.2, mult: 0.95 },
-  { key: 'split', name: 'splitting', desc: 'throws three bolts in a fan', projectiles: 3, spread: 0.16, splash: 1.6, mult: 0.55 },
-  { key: 'chain', name: 'chaining', desc: 'jumps from what it hits to what is behind it', projectiles: 1, chains: 2, splash: 1.8, mult: 0.8 },
-  { key: 'seeking', name: 'seeking', desc: 'turns after what you aimed at', projectiles: 1, homing: 1, splash: 2.2, mult: 0.9 },
-  { key: 'heavy', name: 'heavy', desc: 'one slow bolt that lands hard', projectiles: 1, splash: 3.4, mult: 1.45, slow: 0.6 },
+  { key: 'plain', name: 'true-flying', desc: 'a single bolt, fast and straight', projectiles: 1, splash: 1.3 },
+  { key: 'burst', name: 'bursting', desc: 'the bolt bursts on impact', projectiles: 1, splash: 3.2, mult: 0.95 },
+  { key: 'split', name: 'splitting', desc: 'throws three bolts in a fan', projectiles: 3, spread: 0.16, splash: 1.1, mult: 0.55 },
+  { key: 'chain', name: 'chaining', desc: 'jumps from what it hits to what is behind it', projectiles: 1, chains: 2, splash: 1.2, mult: 0.8 },
+  { key: 'seeking', name: 'seeking', desc: 'turns after what you aimed at', projectiles: 1, homing: 1, splash: 1.3, mult: 0.9 },
+  { key: 'heavy', name: 'heavy', desc: 'one slow bolt that lands hard', projectiles: 1, splash: 2.6, mult: 1.45, slow: 0.6, speed: 34 },
 ];
 
 /** A stable 0..1 from a string, so the same wand always behaves the same way. */
@@ -631,9 +964,91 @@ export function staffSpell(item, element = 'arcane') {
   return pick;
 }
 
+/**
+ * A STAFF IS A SIEGE ENGINE, NOT A PISTOL.
+ *
+ * A wand always works, never runs dry and is never the biggest number. A staff asks you to stop,
+ * commit and spend something — and what comes out is enormous. Before this, a staff cast a free
+ * shaped spell every 0.6 s for nothing at all, which made it simultaneously the strongest weapon in
+ * the game and the least interesting.
+ *
+ *   under `min`   nothing: the topper flickers and goes out
+ *   at `min`      0.60x damage, 0.7x radius — one shard orbiting
+ *   at `full`     1.00x, 1.0x — three shards, the rune disc complete
+ *   at `max`      1.60x, 2.0x — the disc cracks the ground
+ *
+ * A TAP is still free and still weak; only the charge costs mana. `mana` is per second held.
+ */
+export const STAFF_CHARGE = {
+  min: 0.35, full: 1.40, max: 2.60,
+  powerMin: 0.60, powerFull: 1.00, powerMax: 1.60,
+  radiusMin: 0.7, radiusFull: 1.0, radiusMax: 2.0,
+  tapPower: 0.60, tapRadius: 0.8,
+  mana: 4,
+  /** A blow worth more than this share of your health knocks you out of the channel. */
+  breakAt: 0.25,
+  /** You move at this share of your speed while the staff is building. */
+  moveWhile: 0.6,
+};
+
+/**
+ * What the staff has built up after `held` seconds.
+ *
+ * `ready` false means a release right now is a TAP: the same shaped spell, free, at 0.60x. That is
+ * deliberate — a staff that refuses to do anything for a third of a second reads as broken.
+ */
+export function chargeAt(held = 0, c = STAFF_CHARGE) {
+  if (!(held > 0)) return { ready: false, tap: true, power: c.tapPower, radius: c.tapRadius, fill: 0, mana: 0 };
+  if (held < c.min) {
+    return { ready: false, tap: true, power: c.tapPower, radius: c.tapRadius, fill: held / c.min * 0.3, mana: 0 };
+  }
+  let power, radius, fill;
+  if (held <= c.full) {
+    const k = (held - c.min) / Math.max(0.001, c.full - c.min);
+    power = c.powerMin + (c.powerFull - c.powerMin) * k;
+    radius = c.radiusMin + (c.radiusFull - c.radiusMin) * k;
+    fill = 0.3 + k * 0.5;
+  } else {
+    const k = Math.min(1, (held - c.full) / Math.max(0.001, c.max - c.full));
+    power = c.powerFull + (c.powerMax - c.powerFull) * k;
+    radius = c.radiusFull + (c.radiusMax - c.radiusFull) * k;
+    fill = 0.8 + k * 0.2;
+  }
+  return { ready: true, tap: false, power, radius, fill, mana: c.mana * Math.min(held, c.max) };
+}
+
+/**
+ * EVERY STAFF CARRIES TWO SPELLS, not one — the tap and the charged form, and for three of the four
+ * shapes the charged form is a different KIND of thing.
+ *
+ * `hold` is what a released charge becomes. `cone` becomes a sustained jet, a `nova` becomes a dome
+ * that pushes everything out when it pops, a `wave` becomes a wall that stays and burns anything
+ * crossing it, and a `lob` becomes a mortar. Anything without a `hold` simply fires bigger.
+ */
+export const CHARGED_FORMS = {
+  cone: { shape: 'jet', name: 'sustained', sustain: true, ticks: 5, manaPerSecond: 4, rangeScale: 1.45, note: 'held down, it becomes a jet' },
+  nova: { shape: 'dome', name: 'dome', push: 2.4, note: 'a dome that shoves everything out when it pops' },
+  wave: { shape: 'wall', name: 'wall', seconds: 3, note: 'a wall that stands for three seconds' },
+  ground: { shape: 'wall', name: 'field', seconds: 4, note: 'the ground stays poisoned' },
+  lob: { shape: 'mortar', name: 'mortar', aimed: true, note: 'a mortar you aim before it drops' },
+  chain: { shape: 'storm', name: 'storm', chains: 5, note: 'it jumps five times instead of three' },
+};
+
+/** The charged form of a staff's spell. Never null — a shape with no entry just fires bigger. */
+export function chargedForm(spell) {
+  if (!spell) return null;
+  return CHARGED_FORMS[spell.shape] || { shape: spell.shape, name: 'greater', note: 'the same spell, much larger' };
+}
+
 /** Is this a staff — a weapon whose attack is a spell rather than a swing? */
 export function isStaff(item) {
   if (!item) return false;
+  // A QUARTERSTAFF IS A POLE. `items.json` files it under `magic` and it is shared with Emberveil,
+  // so it cannot be fixed there; `rpg.attuneWeapon` writes `light` onto the item and this guard
+  // catches the case where a card is drawn from a raw base before anything attuned it. Without it
+  // the monk, the bard, the druid, the shaman and the scavenger all started the game holding the
+  // highest sustained area damage in the game.
+  if ((item.baseKey || item.subtype) === 'quarterstaff') return false;
   if (item.weaponCategory !== 'magic') return false;
   return !!item.twoHanded;
 }

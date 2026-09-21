@@ -22,7 +22,13 @@ import { createCreature } from '../../../avatar-3d/js/creatures.js';
 import { normalizeAvatar } from '../../../avatar-2d/js/render.js';
 import { familiesOf } from '../../../worldgen/js/biomes.js';
 import { makeRng } from '../../emberveil/js/rng.js';
-import { tickStatuses, slowOf, applyStatus } from './skills.js';
+import { tickStatuses, slowOf, applyStatus, setStatusFx, setStatusPulse } from './skills.js';
+import { feel, staggerFor, pushFor } from './combat-feel.js';
+import { traitsOf } from './weapons.js';
+import { CHIBI2_COMBAT_ALL } from '../../../avatar-3d/js/chibi2-motion.js';
+
+/** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
+const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
 
 /** Build a body from a look: `{ avatar }` gives a Chibi 2 humanoid, `{ creature }` gives a beast. */
 export async function makeActor(look = {}) {
@@ -35,20 +41,75 @@ export async function makeActor(look = {}) {
     return actor;
   }
   const avatar = normalizeAvatar ? normalizeAvatar(look.avatar || {}) : (look.avatar || {});
-  const actor = await createChibi2Character(avatar, { swim: !!look.swim });
+  /**
+   * THE COMBAT CLIPS, asked for by name.
+   *
+   * Every attack in the game played `attack` — the same overhead chop for a rapier thrust, an axe
+   * cleave, a bow shot and a staff cast. `CHIBI2_COMBAT_ALL` is the swimming set plus fourteen
+   * strike clips; it is a separate list in the shared module precisely so a game that does not ask
+   * for them builds exactly what it always built. `swim` is folded in rather than passed, because
+   * `chibi2.js` lets `opts.swim` win over `opts.anims` and we want both.
+   *
+   * THE COST, since it is paid by every body in the game and not only the player: clips are
+   * generated once per distinct avatar and cached, and 29 of them take about 90 ms against 45 ms
+   * for 15. A town of twenty different faces pays about another second, spread over the frames it
+   * takes to place them; the town tests show no change in their timings. Enemies do not use the
+   * new clips, but they share `makeActor` and there is no honest way to tell them apart here.
+   */
+  const actor = await createChibi2Character(avatar, { anims: CHIBI2_COMBAT_ALL });
   actor.beast = false;
+  actor.combatClips = true;
+  /**
+   * WHICH BODY IS THE PLAYER'S — the one whose stride main.js drives.
+   *
+   * The clip a swing plays has to come from the strike shape, and `js/main.js` asks for `'attack'`
+   * for every attack there is. It is not ours to edit this round, and `setActorAnim` is also called
+   * by js/town.js and js/pets.js for their own brawlers, so a blanket substitution would put the
+   * player's greatsword sweep on a townsman throwing a punch.
+   *
+   * `setRate` is the tell: it is called on exactly one body in the game, every frame, by the block
+   * in main.js that matches the walk cycle to the ground speed. Marking on the first call is
+   * narrow, cannot misfire on an NPC, and goes away the moment main.js passes the clip itself
+   * (see research/round14-combat-handoff.md, patch 6 — one line).
+   */
+  if (actor.setRate) {
+    const rate = actor.setRate.bind(actor);
+    actor.setRate = k => { actor.playerDriven = true; rate(k); };
+  }
   return actor;
 }
+
+/**
+ * The fourteen strike clips, and what each one falls back to.
+ *
+ * A creature has four clips and will never have a `slam`; a humanoid built before round 14 (or one
+ * a test made by hand) has twelve. Either way the answer is the overhead chop it used to play, so
+ * a missing clip is a plainer animation rather than a character standing idle mid-swing — which is
+ * what `chibi2.js` does with a name it does not know.
+ */
+const COMBAT_CLIPS = {
+  slash: 'attack', slashBack: 'attack', thrust: 'attack', overhead: 'attack', sweep: 'attack',
+  jab: 'attack', arcCut: 'attack', slam: 'attack', lunge: 'attack',
+  shoot: 'attack', reload: 'attack', castPoint: 'cast', castStaff: 'cast', channel: 'cast',
+};
 
 /** Animation names differ slightly between the two builders; this is the translation. */
 function anim(actor, name) {
   if (!actor) return;
   if (actor.beast) {
     const map = { ready: 'idle', run: 'run', walk: 'walk', attack: 'attack', hit: 'idle', dead: 'dead', idle: 'idle', jump: 'run' };
-    actor.setAnim(map[name] || 'idle');
-  } else {
-    actor.setAnim(name);
+    actor.setAnim(map[name] || COMBAT_CLIPS[name] || 'idle');
+    return;
   }
+  /**
+   * A SWING PLAYS ITS OWN CLIP. `main.js` asks for `'attack'` whatever is in your hands — a rapier
+   * thrust, an axe cleave, a bow shot and a staff cast were one overhead chop — so the shape's own
+   * clip is substituted here, for the player's body only. `feel.swing.clip` is posted by the
+   * controller when the swing starts, which is the frame the animation should start on.
+   */
+  if (name === 'attack' && actor.playerDriven && feel.swing.clip) name = feel.swing.clip;
+  if (COMBAT_CLIPS[name] && !actor.combatClips) name = COMBAT_CLIPS[name];
+  actor.setAnim(name);
 }
 export { anim as setActorAnim };
 
@@ -119,6 +180,20 @@ export class EnemyField {
      * coloured ring and nothing else.
      */
     this.spellfx = spellfx;
+    /**
+     * Statuses draw themselves from now on. `js/skills.js` is pure and cannot see a renderer, so
+     * the field lends it one: everything that applies a burn, a poison, a chill or a curse — a
+     * skill, a branded weapon, an enemy modifier, an axe opening a vein — lights up without its
+     * own call site having to remember. See `setStatusFx` there.
+     */
+    setStatusFx((unit, type, on) => {
+      const group = unit?.actor?.group;
+      if (group) this.spellfx?.status?.(group, type, on);
+    });
+    setStatusPulse((unit, type) => {
+      const group = unit?.actor?.group;
+      if (group) this.spellfx?.pulseStatus?.(group, type);
+    });
     /** Buckets for the shove-apart pass. Reused every frame: this must not allocate. */
     this._grid = new Map();
     liveField = this;
@@ -252,6 +327,8 @@ export class EnemyField {
     const unit = this.rpg.makeEnemy(def, level, this.rng, { rank: boss ? 'boss' : rank, modifiers, name });
     unit.x = x; unit.z = z; unit.y = this.terrain.heightAt(x, z);
     unit.state = 'wander'; unit.wanderTimer = 0; unit.swingTimer = 0; unit.hitFlash = 0;
+    // round 14: the physics book — knockback in flight, stagger left, armour stripped, recoil
+    unit.stagger = 0; unit.push = null; unit.recoil = null; unit.sunder = 0; unit.sunderLeft = 0; unit.closing = 0;
     unit.home = [x, z];
     unit.facing = this.rng() * Math.PI * 2;
     unit.hover = def.flying ? 1.4 + this.rng() * 0.8 : 0;
@@ -364,6 +441,8 @@ export class EnemyField {
   /** One tick of the whole field: spawn, think, move, swing, die, clean up. */
   update(dt, player, playerUnit, hooks = {}) {
     const cfg = this.cfg;
+    // one running clock, so the stagger book knows what "inside six seconds" means
+    this.clock = (this.clock || 0) + dt;
     if (!this.paused) {
       this.sinceSpawn += dt;
       const alive = this.enemies.length + this.pending;
@@ -408,7 +487,58 @@ export class EnemyField {
       if (dist > despawn && !e.boss) { this.removeUnit(e); continue; }
 
       if (e.hitFlash > 0) e.hitFlash -= dt;
-      if (e.swingTimer > 0) e.swingTimer -= dt;
+      /**
+       * STAGGERED: IT CANNOT ACT, not merely cannot walk.
+       *
+       * Holding `swingTimer` rather than letting it run down is the half that matters. Without it a
+       * 0.65 s stagger from a maul removes 0.65 s of WALKING and none of the attacks, and a smash
+       * that buys you no time is just a number with a sound effect.
+       */
+      if (e.stagger > 0) {
+        e.stagger -= dt;
+        if (e.stagger <= 0) { e.stagger = 0; this.spellfx?.status?.(e.actor.group, 'stun', false); }
+      } else if (e.swingTimer > 0) {
+        e.swingTimer -= dt;
+      }
+      // a hammer's armour break wears off
+      if (e.sunderLeft > 0) {
+        e.sunderLeft -= dt;
+        if (e.sunderLeft <= 0) { e.sunder = 0; this.spellfx?.status?.(e.actor.group, 'sunder', false); }
+      }
+      /** How long this one has been closing on you, for a polearm's `brace`. */
+      e.closing = dist < (e.lastDist ?? dist) - 0.01 ? (e.closing || 0) + dt : 0;
+      e.lastDist = dist;
+
+      /**
+       * KNOCKBACK, taken BEFORE the chase branch so it goes through the same `clampToWorld`,
+       * `unstick` and underwater guards everything else does. Eased out over 0.18 s — and a body
+       * with a wall behind it, which cannot travel, takes the blow into itself instead: a flat
+       * 1.5% of its health (`balance.json` player.combat.wallSlamShare). Knowing the enemy's own
+       * maximum is the only number available here, and it means a wall is worth fighting against
+       * whatever hit you landed.
+       */
+      if (e.push) {
+        const p = e.push;
+        p.t -= dt;
+        const was = p.done;
+        const k = Math.max(0, Math.min(1, 1 - p.t / p.span));
+        p.done = p.metres * (1 - (1 - k) ** 3);
+        const step = p.done - was;
+        if (step > 0) {
+          const nx = e.x + p.dx * step, nz = e.z + p.dz * step;
+          let [cx, cz] = this.terrain.clampToWorld(nx, nz);
+          if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
+          if (!this.terrain.underwater(cx, cz) && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
+            e.x = cx; e.z = cz;
+          } else if (!p.walled) {
+            // slammed into something: the blow had nowhere to go, so it went into the body
+            p.walled = true;
+            e.hp = Math.max(0, e.hp - Math.max(1, Math.round((e.maxHp || 20) * 0.015)));
+            if (e.hp <= 0) { this.kill(e); continue; }
+          }
+        }
+        if (p.t <= 0) e.push = null;
+      }
 
       // burns and poisons keep working between swings; a chill takes the legs out of the chase
       if (e.statuses) {
@@ -489,6 +619,15 @@ export class EnemyField {
       const standOff = e.ranged ? Math.min(e.ranged.range * 0.65, e.ranged.range - 6) : 0;
 
       let speed = 0;
+      if (e.stagger > 0) {
+        // reeling: no walk, no swing, no shot. The body still gets its frame so the clip plays.
+        e.y = this.terrain.heightAt(e.x, e.z);
+        let sy = e.y;
+        if (e.hover) { e.bob += dt * 1.6; sy += e.hover + Math.sin(e.bob) * 0.22; }
+        this.placeBody(e, sy);
+        e.actor.update(dt);
+        continue;
+      }
       if (e.state === 'flee') {
         // straight back out of the watch, and no attacking on the way
         speed = e.speed * 1.15;
@@ -550,7 +689,8 @@ export class EnemyField {
       e.y = this.terrain.heightAt(e.x, e.z);
       let y = e.y;
       if (e.hover) { e.bob += dt * 1.6; y += e.hover + Math.sin(e.bob) * 0.22; }
-      e.actor.group.position.set(e.x, y, e.z);
+      if (e.recoil) { e.recoil.t -= dt; if (e.recoil.t <= 0) e.recoil = null; }
+      this.placeBody(e, y);
       e.actor.group.rotation.y = e.facing;
       if (e.aura) e.aura.rotation.y += dt * 0.9;
       if (e.swingTimer <= 0 || e.state !== 'chase') {
@@ -679,26 +819,216 @@ export class EnemyField {
    * Record that the player's side hurt this one. Everything the player or a companion does goes
    * through here, and nothing else does — which is exactly what `kill()` needs to know.
    */
+  /**
+   * Put a body where it stands, plus the visual recoil from the last thing that hit it.
+   *
+   * 8 cm along the blow, eased back over 120 ms. It costs nothing, it is independent of the
+   * knockback physics, and it is the difference between "a number appeared" and "I hit something".
+   */
+  placeBody(e, y) {
+    const r = e.recoil;
+    if (!r) { e.actor.group.position.set(e.x, y, e.z); return; }
+    const k = Math.max(0, r.t / r.span);
+    const back = 0.08 * k * k;
+    e.actor.group.position.set(e.x + r.dx * back, y, e.z + r.dz * back);
+  }
+
   credit(e, amount = 1) {
     if (!e || !(amount > 0)) return;
     e.playerDamage = (e.playerDamage || 0) + amount;
   }
 
-  /** Damage everything inside the player's swing. Returns what was hit. */
-  strike(player, playerUnit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null } = {}) {
+  /**
+   * WHAT A CONNECTING HIT DOES, beyond the number — the one place all of it happens.
+   *
+   * Round 14. Before this, `strike` rolled damage, set an 0.18 s colour flash, and that was the
+   * whole of it: the thing you hit kept walking toward you at the same speed with a number floating
+   * over its head. Six things make a blow read as a blow and five of them did not exist anywhere in
+   * the game. They are gathered here rather than in `main.js` so that every path that damages
+   * something — a swing, a splash, an arrow, a spell — gets the same treatment for free.
+   */
+  land(e, result, { strike = null, fromX = 0, fromZ = 0, element = 'physical', share = 1 } = {}) {
+    this.credit(e, result.amount);
+    e.hitFlash = 0.18;
+    if (e.state !== 'chase') e.state = 'chase';
+    if (!(result.amount > 0) && !result.blocked) return;
+
+    const at = this._vec || (this._vec = new THREE.Vector3());
+    const bodyY = (e.y || 0) + 0.9 * (e.scale || 1) + (e.hover || 0);
+
+    /**
+     * (a) THE IMPACT EFFECT, WHICH A STEEL SWORD NEVER GOT.
+     *
+     * `main.js` gates its own impact call behind `element !== 'physical'`, so an ordinary sword hit
+     * drew nothing at all — while `spellfx.impact({ element: 'physical' })` has always built two
+     * crossed slash planes, a spark burst and a dust puff and nobody ever asked it for them. Drawing
+     * the physical case here fixes it without touching main.js, and without drawing the elemental
+     * one twice.
+     */
+    if (element === 'physical') {
+      at.set(e.x, bodyY, e.z);
+      this.spellfx?.impact?.({ at, element: 'physical', crit: !!result.crit });
+    }
+    /** (b) SPARKS ON ARMOUR. A blow that was blocked, or one that skated off plate. */
+    if (result.blocked > 0 || ((e.armor || 0) > 40 && share >= 1)) {
+      at.set(e.x, bodyY, e.z);
+      this.spellfx?.impact?.({ at, element: 'true', crit: false });
+    }
+
+    /** (c) RECOIL: the body is nudged along the blow and eases back. The cheap half of weight. */
+    const dx = e.x - fromX, dz = e.z - fromZ;
+    const len = Math.hypot(dx, dz) || 1;
+    e.recoil = { dx: dx / len, dz: dz / len, t: 0.12, span: 0.12 };
+
+    if (!strike) return;
+
+    /** (d) KNOCKBACK. Travelled over 0.18 s, resisted by rank, and a wall makes it hurt more. */
+    const push = pushFor(e, (strike.push || 0) * share);
+    if (push > 0.01) {
+      e.push = { dx: dx / len, dz: dz / len, metres: push, t: 0.18, span: 0.18, done: 0 };
+    }
+
+    /** (e) STAGGER, with the diminishing returns that stop a maul locking a boss for ever. */
+    const stagger = staggerFor(e, (strike.stagger || 0) * share, this.clock || 0);
+    if (stagger > 0.01) {
+      e.stagger = Math.max(e.stagger || 0, stagger);
+      anim(e.actor, 'hit');
+      if (stagger > 0.4) this.spellfx?.status?.(e.actor.group, 'stun', true);
+    }
+
+    /** (f) HIT-STOP AND SCREEN SHAKE — the global half, owned by js/combat-feel.js. */
+    feel.hit({
+      strike, crit: !!result.crit, killed: !!result.dead,
+      fromX, fromZ, toX: e.x, toZ: e.z,
+    });
+  }
+
+  /**
+   * ARMOUR BREAK — a hammer's whole reason to exist.
+   *
+   * Every hammer hit strips 7% of what is left of the target's armour for eight seconds, floored at
+   * 45% of the original. Against a 60-armour enemy that is the difference between taking 62.5% of
+   * your damage and taking 74%, and it helps everything else hitting the same body — which is what
+   * a hammer is FOR. Carried as a fraction on the unit and read by `rpg.strike`.
+   */
+  sunder(e, share = 0.07) {
+    if (!e || !(share > 0)) return;
+    e.sunder = Math.min(0.55, (e.sunder || 0) + share);
+    e.sunderLeft = 8;
+    this.spellfx?.status?.(e.actor.group, 'sunder', true);
+  }
+
+  /**
+   * Damage everything inside the player's swing. Returns what was hit.
+   *
+   * Round 14 gave the swing a SHAPE beyond a cone. A polearm's thrust is a line out to its full
+   * reach that hits every body along it — which is the whole promise of "polearms should add some
+   * range", and it out-reaches every enemy in `data/enemies.json` by nearly three metres. A dagger
+   * landed in something's back is worth 2.2x. Both read the strike out of the swing channel
+   * (js/combat-feel.js), because `main.js` hands this function a reach and an arc and never says
+   * which shape they came from.
+   */
+  strike(player, playerUnit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, hand = null, strike: shapeIn = null } = {}) {
     const hits = [];
+    const shape = shapeIn || feel.swing.strike || null;
+    const weapon = shape?.item || null;
+    const traits = weapon ? traitsOf(weapon) : {};
+    // which hand swung: the strike carries the item it came from, and the off hand rolls its own dice
+    const which = hand || (weapon && weapon === playerUnit?.equipment?.offhand ? 'off' : 'main');
+    const line = shape?.key === 'thrust' && traits.pierceLine ? traits.pierceLine : 0;
+    const fx = Math.sin(player.yaw), fz = Math.cos(player.yaw);
+    let pierced = 0;
+
     for (const e of this.enemies) {
       if (e.dying != null) continue;
       const dx = e.x - player.x, dz = e.z - player.z;
       const dist = Math.hypot(dx, dz);
       if (dist > reach + (e.reach || 2) * 0.4) continue;
-      const toEnemy = Math.atan2(dx, dz);
-      let delta = Math.abs(((toEnemy - player.yaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
-      if (delta > arc / 2) continue;
-      const result = this.rpg.strike(playerUnit, e, this.rng, { multiplier: power, element, skill, applyStatus: applyFn });
-      this.credit(e, result.amount);
-      e.hitFlash = 0.18;
-      if (e.state !== 'chase') e.state = 'chase';
+      if (line) {
+        /**
+         * A LINE, NOT A CONE. 0.9 m either side of where you are pointing, out to full reach, and
+         * it stops after `pierceLine` bodies. A halberd thrust is 4.8 x 1.55 = 7.4 m of it.
+         */
+        const along = dx * fx + dz * fz;
+        if (along < 0 || along > reach) continue;
+        const off = Math.abs(dx * fz - dz * fx);
+        if (off > 0.9 + (e.reach || 2) * 0.25) continue;
+        if (pierced >= line) continue;
+        pierced++;
+      } else {
+        const toEnemy = Math.atan2(dx, dz);
+        const delta = Math.abs(((toEnemy - player.yaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+        if (delta > arc / 2) continue;
+      }
+
+      let mult = power;
+      /**
+       * MOMENTUM, the sword's own reward: each consecutive connecting strike is +8% damage, up to
+       * +16% on the third, and it resets the moment you miss or stop. A sword should never feel
+       * like waiting — this is what makes a combo worth finishing rather than restarting.
+       */
+      if (traits.momentum) mult *= 1 + Math.min(2, playerUnit?.combo || 0) * 0.08;
+      /**
+       * THE BACK. A dagger landed in the target's rear 100 degrees is worth 2.2x and bleeds it.
+       * The facing is already tracked on every body, so this is one angle and one comparison.
+       */
+      let behind = false;
+      if (traits.backstab) {
+        const away = Math.atan2(-dx, -dz);                     // from the target toward the attacker
+        const delta = Math.abs(((away - (e.facing || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+        behind = delta < 0.87;                                 // 100 degrees, half either side
+        if (behind) mult *= traits.backstab;
+      }
+      /** BRACE: a polearm thrust against something that closed on you this second does more. */
+      if (traits.brace && shape?.key === 'thrust' && e.closing > 0) mult *= 1 + traits.brace;
+
+      const result = this.rpg.strike(playerUnit, e, this.rng, {
+        multiplier: mult, element, skill, applyStatus: applyFn,
+        hand: which, pen: shape?.pen || 0,
+      });
+      this.land(e, result, { strike: shape, fromX: player.x, fromZ: player.z, element, share: power });
+
+      // a hammer strips armour, an axe opens a vein, a knife in the back does both
+      if (traits.armourBreak && result.amount > 0) this.sunder(e, traits.armourBreak);
+      if (result.amount > 0 && (behind || (traits.bleed && shape?.key === 'cleave'))) {
+        this.bleed?.(e, result.amount);
+      }
+
+      onHit?.(e, result);
+      hits.push({ enemy: e, result });
+      if (result.dead) this.kill(e);
+    }
+    // the combo only counts while you keep connecting
+    if (playerUnit) playerUnit.combo = hits.length ? Math.min(3, (playerUnit.combo || 0) + 1) : 0;
+    return hits;
+  }
+
+  /**
+   * Damage everything within `radius` of a point — an arrow landing, or a heavy weapon's shockwave.
+   * Every attack in the game goes through this or `strike`, so nothing is ever single-target.
+   */
+  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null } = {}) {
+    const hits = [];
+    /**
+     * AN ARROW CARRIES THE DRAW IT WAS LOOSED AT.
+     *
+     * A bow's shot is resolved here, from `main.js`'s `onArrowLand`, which passes no `power` at all
+     * — so every arrow in the game was a full-power 2.6 m area hit for free while a melee jab was
+     * 0.65 of one. The shot channel (js/combat-feel.js) is opened by js/combat-fx.js for exactly
+     * the moment the callback runs, so the arrow's own draw arrives here without main.js having to
+     * pass it. An explicit `power` always wins.
+     */
+    const shot = power == null ? feel.swing.shot : null;
+    const mult = power != null ? power : (shot?.power ?? 1);
+    const shape = shot?.strike || null;
+    for (const e of this.enemies) {
+      if (e.dying != null) continue;
+      const d = Math.hypot(e.x - x, e.z - z);
+      if (d > radius + (e.reach || 2) * 0.25) continue;
+      // full damage at the centre, `falloff` of it at the rim
+      const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
+      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn });
+      this.land(e, result, { strike: shape, fromX: x, fromZ: z, element, share: near });
       onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) this.kill(e);
@@ -707,26 +1037,16 @@ export class EnemyField {
   }
 
   /**
-   * Damage everything within `radius` of a point — an arrow landing, or a heavy weapon's shockwave.
-   * Every attack in the game goes through this or `strike`, so nothing is ever single-target.
+   * A cut that keeps working. An axe is the melee damage-over-time weapon: less up front, more in
+   * total, and it goes on paying while you back off. `bleed` is already a status with an aura.
    */
-  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null } = {}) {
-    const hits = [];
-    for (const e of this.enemies) {
-      if (e.dying != null) continue;
-      const d = Math.hypot(e.x - x, e.z - z);
-      if (d > radius + (e.reach || 2) * 0.25) continue;
-      // full damage at the centre, `falloff` of it at the rim
-      const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
-      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * power, element, skill, applyStatus: applyFn });
-      this.credit(e, result.amount);
-      e.hitFlash = 0.18;
-      if (e.state !== 'chase') e.state = 'chase';
-      onHit?.(e, result);
-      hits.push({ enemy: e, result });
-      if (result.dead) this.kill(e);
-    }
-    return hits;
+  bleed(e, amount = 1) {
+    if (!e) return;
+    // the field is built without the skill data, so the one status it applies on its own carries a
+    // copy of its row from data/skills.json. tests/round14.test.js checks the two never drift.
+    const spec = this.statusData?.bleed || BLEED;
+    applyStatus(e, 'bleed', spec, Math.max(1, amount * 0.35));
+    this.spellfx?.status?.(e.actor.group, 'bleed', true);
   }
 
   /**
@@ -798,6 +1118,19 @@ export class EnemyField {
     if (e.dying != null) return;
     e.dying = 0;
     anim(e.actor, 'dead');
+    /**
+     * A DEATH DREW NOTHING. `onEnemyKilled` in main.js has one `spellfx` call in it and it is
+     * behind a legendary. The moment a thing dies is the moment most worth marking, so it gets the
+     * biggest impact the engine draws and a longer hold on the world — see js/combat-feel.js, where
+     * a killing blow is worth 2.2x the hit-stop.
+     */
+    if (this.spellfx?.impact) {
+      const at = this._vec || (this._vec = new THREE.Vector3());
+      at.set(e.x, (e.y || 0) + 0.8 * (e.scale || 1) + (e.hover || 0), e.z);
+      this.spellfx.impact({ at, element: e.element || 'physical', crit: true });
+    }
+    this.spellfx?.clearStatuses?.(e.actor.group);
+    e.stagger = 0; e.push = null;
     // the margin is for a guard whose post sits off the middle of its settlement: it can chase a
     // little past the edge of the watch circle, and that is still its kill, not yours
     const earned = (e.playerDamage || 0) > 0 || e.boss || this.wild(e.x, e.z, 16);

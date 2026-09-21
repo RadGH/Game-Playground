@@ -67,7 +67,9 @@ test('a rapier thrusts and a longsword slashes, in that order, and the combo res
   const rapier = make('rapier'), longsword = make('longsword');
   assert.equal(strikeAt(rapier, 0).key, 'thrust');
   assert.equal(strikeAt(rapier, 1).key, 'thrust');
-  assert.equal(strikeAt(rapier, 2).key, 'thrust', 'the pattern must wrap');
+  // round 14: the rapier finishes with a lunge, and the pattern wraps after three
+  assert.equal(strikeAt(rapier, 2).key, 'lunge', 'the rapier finisher is missing');
+  assert.equal(strikeAt(rapier, 3).key, 'thrust', 'the pattern must wrap');
   assert.equal(strikeAt(longsword, 0).key, 'slash');
   assert.equal(strikeAt(longsword, 2).key, 'overhead', 'the longsword finisher is missing');
   // the last strike of a pattern knows it is the last — `sunder` and the like hang off that

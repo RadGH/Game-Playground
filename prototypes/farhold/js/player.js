@@ -8,6 +8,8 @@
 // walking through them, and `H` puts you on a horse.
 
 import * as THREE from 'three';
+import { feel } from './combat-feel.js';
+import { drawPower, chargeAt, STAFF_CHARGE } from './weapons.js';
 
 export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person (hold: look around) · E talk/open/enter · L light · B build · H horse · G drive · J ship · M map · I sheet · K log · O settings · ` debug';
 
@@ -137,6 +139,37 @@ export function createController(terrainIn, balance = {}, camera, {
      * combo a combo. See js/weapons.js.
      */
     offCooldown: 0, mainStep: 0, offStep: 0, idleSince: 0,
+    /**
+     * ROUND 14: A SWING IS THREE PARTS, NOT ONE FRAME.
+     *
+     *   press --[ windLeft ]--> the damage lands --[ recoverLeft ]--> the next swing is allowed
+     *
+     * `windLeft` is the commitment: while it is running you walk at 55% and the body is already
+     * moving. `recoverLeft` is the weapon coming back — a press inside it is BUFFERED rather than
+     * dropped, so an early click fires the instant recovery ends instead of being thrown away.
+     * The off hand may only go during the main hand's recovery, which is what turns dual wielding
+     * from a doubling into an interleave.
+     *
+     * The rule that makes all of it free: `wind + recover` is taken OUT of the weapon's `every`,
+     * never added to it (js/weapons.js `swingTiming`), so the rate of fire is exactly what it was.
+     */
+    windLeft: 0, windSpan: 0, recoverLeft: 0, buffered: 0, windHand: 'main',
+    offWindLeft: 0, offWindSpan: 0,
+    /** Which clip the body should be playing for this swing. Read through js/actors.js. */
+    swingClip: 'attack', swingRate: 1,
+    /**
+     * HOLD TO DRAW, HOLD TO CHARGE.
+     *
+     * `held` is how long the attack button has been down on a weapon that wants to be held: a bow's
+     * draw, a crossbow's nothing, a staff's charge. `charge` is what the interface should draw —
+     * 0..1 fill plus the power it is worth right now.
+     */
+    held: 0, charging: null, charge: null, drawing: 0,
+    windPower: 1, windRecover: 0, windCharge: null,
+    /** Consecutive connecting strikes, for the sword's momentum. Set by main.js/actors.js. */
+    momentum: 0,
+    /** Javelins in hand. Throwing one spends it; there is no infinite spear.  */
+    ammo: null,
     attackEvery: b.attackEvery ?? 0.62,      // main.js keeps this in step with derived.attackEvery
     firstPerson: false, eyeHeight: 1.5,
     swimming: false, wading: false, waterDepth: 0, waterSurface: 0,
@@ -209,6 +242,9 @@ export function createController(terrainIn, balance = {}, camera, {
    * One step. `input` is a snapshot from createInput().sample(); `dt` is seconds.
    * Returns what happened so main.js can pick an animation and fire an attack.
    */
+  /** Scratch for the camera shake, so a fight never allocates. */
+  const shakeBuf = [0, 0, 0];
+
   function update(dt, input, { frozen = false } = {}) {
     const out = { attacked: false, landed: false, mountChanged: false, enteredWater: false };
     if (input) {
@@ -241,9 +277,24 @@ export function createController(terrainIn, balance = {}, camera, {
         out.mountChanged = true;
       }
     }
+    /**
+     * THE WORLD CAN HOLD STILL, AND THE MOUSE NEVER DOES.
+     *
+     * `feel.advance` is ticked here with the REAL dt because the controller is the one thing main.js
+     * calls every single frame. Everything below it runs on `dt`, the scaled one — so a hit-stop
+     * freezes the body, the swing clock and the enemies, and leaves looking around alone. A
+     * hit-stop that fights your aim is nausea, not weight.
+     */
+    feel.setEnabled({ hitStop: opt('hitStop', true) !== false, screenShake: opt('screenShake', true) !== false });
+    feel.debugHitboxes = opt('showHitboxes', false) === true;
+    feel.advance(dt);
+    dt = dt * feel.scale;
+
     if (self.attackCooldown > 0) self.attackCooldown -= dt;
     if (self.swing > 0) self.swing -= dt;
     if (self.offCooldown > 0) self.offCooldown -= dt;
+    if (self.recoverLeft > 0) self.recoverLeft -= dt;
+    if (self.buffered > 0) self.buffered -= dt;
 
     // --- what am I standing in?
     const water = terrain.waterAt(self.x, self.z);
@@ -289,6 +340,17 @@ export function createController(terrainIn, balance = {}, camera, {
     }
 
     // --- move
+    /**
+     * WEIGHT: YOU ARE COMMITTED WHILE THE SWING IS COMING ROUND.
+     *
+     * A greatsword you can walk out of mid-swing weighs nothing. During the wind-up the legs go to
+     * 55%, and while a staff is building or a bow is drawn they go to 60% — enough to shuffle, not
+     * enough to kite. The MOUSE is deliberately left alone: slowing the look while a player is
+     * lining up a shot is the difference between weight and a fight with the controls.
+     */
+    const committed = self.windLeft > 0 || self.offWindLeft > 0;
+    const commitK = committed ? 0.55 : (self.held > 0 && self.charging) ? (STAFF_CHARGE.moveWhile ?? 0.6) : 1;
+
     let speed = 0;
     if (!frozen && input && (input.forward || input.strafe)) {
       const base = sheet().moveSpeed || (b.moveSpeed ?? 5.4);
@@ -329,6 +391,8 @@ export function createController(terrainIn, balance = {}, camera, {
           speed *= 1 / (1 + Math.max(0, steep) * 1.6 * (1 - sure));
         }
       }
+      // the swing you are already committed to takes the legs out from under you
+      speed *= commitK;
       forward.set(Math.sin(self.yaw), 0, Math.cos(self.yaw));
       // right-hand side of `forward` is forward x up, which is (-cos, 0, sin)
       right.set(-forward.z, 0, forward.x);
@@ -346,7 +410,7 @@ export function createController(terrainIn, balance = {}, camera, {
       self.x = cx; self.z = cz;
     }
     self.moving = speed;
-    self.running = !!(input && input.run && speed > 0 && !self.swimming);
+    self.running = !!(input && input.run && speed > 0 && !self.swimming && commitK >= 1);
 
     // --- up and down
     // The floor is the terrain, OR the roof of anything wide we have jumped on top of. Without the
@@ -379,32 +443,197 @@ export function createController(terrainIn, balance = {}, camera, {
 
     // --- swinging (not while riding: you have your hands full)
     //
-    // Two hands, two clocks. The main hand swings on its weapon's own rhythm; the off hand, when
-    // it holds a second weapon, swings on ITS rhythm - "when dual wielding, you should be able to
-    // attack with each weapon on separate cooldowns". Stop attacking for a moment and both
-    // patterns reset to their first strike.
+    // ONE SWING IS THREE PARTS. Round 14 split it:
+    //
+    //   press --[ wind-up ]--> the damage lands --[ recovery ]--> the next swing is allowed
+    //
+    // Before this, everything happened on the frame the button went down: no wind-up, no impact, no
+    // recovery, no commitment and no cancel. `control.swing = 0.35` existed only so the renderer
+    // could pick the attack clip. There was nothing to feel.
+    //
+    // The rule that makes the split free is that `wind + recover` comes OUT of the weapon's own
+    // `every`, never on top of it (js/weapons.js `swingTiming`), so the rate of fire — and every
+    // damage-per-second number in the game — is exactly what it was before.
+    //
+    // Two hands, two clocks, and the off hand may not be in its wind-up while the main hand is in
+    // its own. That is what makes dual wielding an interleave rather than a doubling.
     const canSwing = !frozen && !self.mounted && !self.swimming;
-    if (canSwing && input?.attack) {
-      self.idleSince = 0;
-      if (self.attackCooldown <= 0) {
-        // how fast you swing is a STAT - `initiative` / haste - not a constant.
-        self.attackCooldown = (self.mainEvery ?? self.attackEvery ?? b.attackEvery ?? 0.62);
-        self.swing = 0.35;
-        out.attacked = true;
-        out.hand = 'main';
-        out.step = self.mainStep;
-        self.mainStep++;
+    const plan = sheet().swing || null;
+    const mainPlan = plan?.main || null;
+    const offPlan = plan?.off || null;
+    let holding = !!(canSwing && input?.attack);
+    const stepOf = (p, step) => (p?.steps?.length ? p.steps[step % p.steps.length] : null);
+    /** Haste is folded into `mainEvery` by main.js, so the ratio recovers it for the wind-up too. */
+    const hasteOf = (sp, every) => (sp?.every > 0 && every > 0 ? every / sp.every : 1);
+
+    /** The damage lands. `power` rides along for a drawn bow and a charged staff. */
+    const landMain = () => {
+      self.windLeft = 0;
+      out.attacked = true;
+      out.hand = 'main';
+      out.step = self.mainStep;
+      out.power = self.windPower || 1;
+      // the arrow that is about to leave the bow needs to know what the draw was worth; main.js
+      // does not pass `step.power` on to `fx.shoot`, so it goes through the channel instead
+      feel.swing.shotPower = out.power;
+      if (self.windCharge) out.charge = self.windCharge;
+      self.windCharge = null;
+      self.mainStep++;
+      self.recoverLeft = self.windRecover || 0;
+    };
+    const landOff = () => {
+      self.offWindLeft = 0;
+      out.attackedOff = true;
+      out.offStep = self.offStep;
+      self.offStep++;
+    };
+
+    if (!canSwing) {
+      self.windLeft = 0; self.offWindLeft = 0; self.recoverLeft = 0; self.buffered = 0;
+      self.held = 0; self.charge = null; self.drawing = 0; self.charging = null;
+    } else {
+      // a swing already in the air comes down when its wind-up runs out
+      if (self.windLeft > 0) { self.windLeft -= dt; if (self.windLeft <= 0) landMain(); }
+      if (self.offWindLeft > 0) { self.offWindLeft -= dt; if (self.offWindLeft <= 0) landOff(); }
+
+      if (holding) self.idleSince = 0;
+      else {
+        self.idleSince += dt;
+        if (self.idleSince > (b.comboResetSeconds ?? 1.1)) {
+          self.mainStep = 0; self.offStep = 0; self.momentum = 0;
+        }
       }
-      if (self.dualWield && self.offCooldown <= 0) {
-        self.offCooldown = (self.offEvery ?? self.attackEvery ?? b.attackEvery ?? 0.62);
-        self.swing = Math.max(self.swing, 0.3);
-        out.attackedOff = true;
-        out.offStep = self.offStep;
-        self.offStep++;
+
+      /**
+       * HOLD TO DRAW, HOLD TO CHARGE.
+       *
+       * A bow used to loose an arrow every 0.52 s because it fell through to the light-melee swing
+       * clock — no draw, no nock, no aim. A staff cast a free area spell every 0.6 s. Both are now
+       * held: the button down builds it, the button up fires it, and letting go too early is a
+       * refusal rather than a weak shot.
+       */
+      const hold = mainPlan?.hold || null;                  // 'draw' | 'charge' | null
+      self.charging = hold === 'charge' ? true : null;
+      if (hold) {
+        /**
+         * HOLDING THE BUTTON MUST STILL ATTACK.
+         *
+         * "Change it so holding down the mouse button repeatedly attacks (with all weapons)" is an
+         * older request and it still stands. A weapon you have to RELEASE to fire breaks it: hold
+         * the mouse on a bow and it would draw for ever and never loose. So a draw held past full,
+         * or a channel held past its ceiling, releases itself — hold the button and you get a
+         * steady stream of full-power shots, let go early and you get the weaker one you asked for.
+         */
+        const top = hold === 'draw' ? (mainPlan.draw?.full ?? 0.95) : (mainPlan.charge?.max ?? 2.6);
+        const autoLoose = holding && self.held >= top;
+        if (autoLoose) holding = false;
+        /**
+         * A CLICK STILL SHOOTS — it just shoots badly.
+         *
+         * The design refuses a release under 0.35 s outright ("you have not nocked"). With the
+         * draw meter not yet on the HUD (see research/round14-combat-handoff.md §12) that reads as
+         * a broken bow rather than as a lesson, so a draw that has not reached the nock keeps
+         * going on its own after the button comes up: a click gets you a 0.55x shot a third of a
+         * second later, and holding gets you the 1.60x one. Nothing is ever thrown away, and the
+         * difference between the two is something you can see rather than something you are told.
+         */
+        if (hold === 'draw' && !holding && self.held > 0 && self.held < (mainPlan.draw?.min ?? 0.35)) {
+          holding = true;
+        }
+        if (holding && self.attackCooldown <= 0) {
+          self.held += dt;
+          if (hold === 'draw') {
+            const d = drawPower(mainPlan.draw, self.held);
+            self.drawing = d.draw;
+            self.charge = { fill: d.draw, power: d.power, ready: d.ready, shaky: !!d.shaky, kind: 'draw' };
+            self.swing = 0.2;
+            self.swingClip = 'shoot';
+            feel.swing.clip = 'shoot';
+          } else {
+            const c = chargeAt(self.held, mainPlan.charge);
+            // the channel drinks mana, and it stops building when there is none left
+            const want = (mainPlan.charge?.mana ?? STAFF_CHARGE.mana) * dt;
+            const paid = sheet().spendMana ? sheet().spendMana(want) : want;
+            if (paid < want * 0.5 && self.held > (mainPlan.charge?.min ?? STAFF_CHARGE.min)) {
+              self.held = Math.max(self.held - dt, mainPlan.charge?.min ?? STAFF_CHARGE.min);
+            }
+            self.charge = { fill: c.fill, power: c.power, radius: c.radius, ready: c.ready, tap: c.tap, kind: 'charge' };
+            self.swing = 0.2;                       // keep the body in its attack pose while it builds
+            self.swingClip = mainPlan.channelClip || 'channel';
+            feel.swing.clip = self.swingClip;
+          }
+        } else if (self.held > 0) {
+          // let go: this is the shot
+          const held = self.held;
+          self.held = 0; self.drawing = 0;
+          const fire = hold === 'draw' ? drawPower(mainPlan.draw, held) : chargeAt(held, mainPlan.charge);
+          const allowed = hold === 'draw' ? fire.ready : true;     // a staff tap is still a cast
+          if (allowed && self.attackCooldown <= 0) {
+            self.windPower = fire.power;
+            self.windCharge = hold === 'charge'
+              ? { power: fire.power, radius: fire.radius, tap: !!fire.tap, fill: fire.fill }
+              : { power: fire.power, draw: fire.draw, kind: 'draw' };
+            self.windRecover = 0;
+            self.attackCooldown = hold === 'draw' ? (mainPlan.afterShot ?? 0.12) : (mainPlan.afterCast ?? 0.28);
+            self.swing = 0.35;
+            self.swingClip = hold === 'draw' ? 'shoot' : 'castStaff';
+            feel.swing.clip = self.swingClip;
+            landMain();
+          }
+          self.charge = null;
+        } else {
+          self.charge = null;
+        }
+      } else {
+        /**
+         * A MELEE SWING, AND THE BUFFER THAT MAKES IT FEEL RESPONSIVE.
+         *
+         * A press that arrives during recovery used to be thrown away, so a player pressing in
+         * rhythm with the animation kept dropping swings. It is remembered for 180 ms instead and
+         * fires the instant recovery ends.
+         */
+        if (holding && (self.recoverLeft > 0 || self.attackCooldown > 0)) self.buffered = 0.18;
+        const want = holding || self.buffered > 0;
+        if (want && self.attackCooldown <= 0 && self.windLeft <= 0 && self.recoverLeft <= 0) {
+          const sp = stepOf(mainPlan, self.mainStep);
+          let every = self.mainEvery ?? self.attackEvery ?? b.attackEvery ?? 0.62;
+          const hk = hasteOf(sp, every);
+          // a sabre rewards hitting: stay in the rhythm and the finisher costs a third of its clock
+          const steps = mainPlan?.steps?.length || 1;
+          if (mainPlan?.flow && self.mainStep > 0 && (self.mainStep % steps) === steps - 1) every *= 0.35;
+          let wind = ((sp?.windMs ?? 0) / 1000) * hk;
+          let recover = wind * 0.45;
+          const room = every * 0.9;
+          if (wind + recover > room && wind + recover > 0) { const k = room / (wind + recover); wind *= k; recover *= k; }
+          self.attackCooldown = every;
+          self.windLeft = wind; self.windSpan = wind; self.windRecover = recover;
+          self.windPower = 1; self.windCharge = null;
+          self.buffered = 0;
+          // the body starts moving NOW, not when the damage lands
+          self.swing = Math.max(0.2, wind + recover + 0.12);
+          self.swingClip = sp?.clip || 'attack';
+          feel.swing.clip = self.swingClip;
+          // stretch the clip to the swing it is actually playing, so a hasted character speeds up
+          self.swingRate = sp?.clipSeconds > 0 ? Math.max(0.35, Math.min(2.6, sp.clipSeconds / Math.max(0.12, wind + recover))) : 1;
+          if (wind <= 0) landMain();
+        }
+
+        /**
+         * THE OFF HAND, and the one rule that keeps it honest: it may not be winding up while the
+         * main hand is. Two weapons can no longer land on the same frame.
+         */
+        if (self.dualWield && holding && self.offCooldown <= 0 && self.offWindLeft <= 0 && self.windLeft <= 0) {
+          const sp = stepOf(offPlan, self.offStep);
+          const every = self.offEvery ?? self.attackEvery ?? b.attackEvery ?? 0.62;
+          const hk = hasteOf(sp, every);
+          let wind = ((sp?.windMs ?? 0) / 1000) * hk;
+          if (wind + wind * 0.45 > every * 0.9) wind = every * 0.9 / 1.45;
+          self.offCooldown = every;
+          self.offWindLeft = wind; self.offWindSpan = wind;
+          self.swing = Math.max(self.swing, wind + 0.2);
+          if (wind <= 0) landOff();
+        }
       }
-    } else if (canSwing) {
-      self.idleSince += dt;
-      if (self.idleSince > (b.comboResetSeconds ?? 1.1)) { self.mainStep = 0; self.offStep = 0; }
     }
     // --- the camera
     // It sits behind the player ALONG THE VIEW RAY and looks down it. That is the trick for looking
@@ -436,7 +665,8 @@ export function createController(terrainIn, balance = {}, camera, {
       // a step forward out of the face, so the nose is never in the near plane
       const camX = self.x + lookX * 0.12, camY = ey + lookY * 0.12, camZ = self.z + lookZ * 0.12;
       self.camDistanceUsed = 0;
-      camera.position.set(camX, camY, camZ);
+      const k1 = feel.cameraOffset(shakeBuf);
+      camera.position.set(camX + k1[0], camY + k1[1], camZ + k1[2]);
       camera.lookAt(camX + lookX, camY + lookY, camZ + lookZ);
       return out;
     }
@@ -460,7 +690,15 @@ export function createController(terrainIn, balance = {}, camera, {
     const camZ = self.z - lookZ * dist + rz * shoulder;
     let camY = headY - lookY * dist + (b.cameraLift ?? 0.25);
     camY = Math.max(camY, terrain.heightAt(camX, camZ) + 0.35);
-    camera.position.set(camX, camY, camZ);
+    /**
+     * SCREEN SHAKE — position only, never rotation.
+     *
+     * Rotating the camera moves the crosshair and ruins the shot you were lining up, which is the
+     * single most common way shake is done badly. The amplitude and the direction come out of
+     * js/combat-feel.js, which biases it 70% along the way the blow went.
+     */
+    const k2 = feel.cameraOffset(shakeBuf);
+    camera.position.set(camX + k2[0], camY + k2[1], camZ + k2[2]);
     camera.lookAt(camX + lookX, camY + lookY, camZ + lookZ);
 
     return out;

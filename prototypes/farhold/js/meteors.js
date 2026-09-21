@@ -24,9 +24,24 @@
 import * as THREE from 'three';
 
 const DEFAULTS = {
-  /** Seconds between rolls, and the chance each roll fires. */
+  /**
+   * Seconds between rolls, and the chance each roll fires.
+   *
+   * R15 — FIVE PER CENT OF WHAT IT WAS.
+   *
+   *   "For meteorise … make them about 5% chance of spawning from currently, there are too many."
+   *
+   * The arithmetic, so the next person can retune it without redoing it: a real fall came from two
+   * places. This roll (0.6 every 300 s = 0.0020/s) and the shooting-star roll below, of which
+   * `shootingRealChance` were real (0.4 x 0.4 every 90 s = 0.0018/s). About 0.0038 a second
+   * together — one every four and a half minutes, which is why the sky was full of them.
+   *
+   * At 0.03 here and 0.02 there it is 0.00019/s: **one about every eighty-eight minutes**. That is
+   * genuinely rare, which is the point — a meteor is meant to be the thing you drop what you are
+   * doing for. Both numbers are in `balance.json` under `meteors` if it wants moving.
+   */
   everySeconds: 300,
-  chance: 0.6,
+  chance: 0.03,
   /** How long the fall takes, start to impact. */
   fallSeconds: 30,
   /** Where it comes down, in metres from the player. Far enough to be a walk, near enough to find. */
@@ -51,8 +66,11 @@ const DEFAULTS = {
   shootingEvery: 90,
   shootingChance: 0.4,
   shootingSeconds: 1.6,
-  /** …and this share of those are the start of a real one. */
-  shootingRealChance: 0.4,
+  /**
+   * …and this share of those are the start of a real one. R15: 0.4 -> 0.02, see the note above.
+   * The decorative stars keep their own rate: they are the sky, and the sky is free.
+   */
+  shootingRealChance: 0.02,
   /** How many items the chest holds, and the worst of them. */
   items: [1, 3],
   floor: 'rare',

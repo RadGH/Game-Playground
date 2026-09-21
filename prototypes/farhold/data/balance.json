@@ -39,12 +39,45 @@
     "bodyRadius": 0.45,
     "arrowRange": 46,
     "arrowSpeed": 42,
-    "arrowSplash": 2.6,
+    "arrowSplash": 0.9,
     "meleeSplash": 1,
-    "damagePerLevel": 0.1,
-    "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything.",
+    "damagePerLevel": 0.11,
+    "_damageDoc": "damagePerLevel is what a level is worth in raw damage. A weapon's base does not change when you level but an enemy's health compounds every level, so without this a perfect bow at level 20 could not scratch a level-25 anything. Round 14 moved it: the level term multiplies the WEAPON'S OWN DICE and damageFlat is added afterwards (js/rpg.js derive), so gear no longer dilutes the weapon — 0.10 -> 0.11 keeps the overall curve where the simulator tuned it.",
     "outOfCombatRegen": 0.015,
-    "_regenDoc": "Share of maximum health you get back each second while nothing is fighting you. Without it a character who walked out of a fight at a third health stayed there — hpRegen is zero without gear that grants it, and there is no potion in the starting kit."
+    "_regenDoc": "Share of maximum health you get back each second while nothing is fighting you. Without it a character who walked out of a fight at a third health stayed there — hpRegen is zero without gear that grants it, and there is no potion in the starting kit.",
+    "_arrowSplashDoc": "Round 14: an arrow used to burst for 2.6 m at full power on every shot, for free, while a melee jab was 0.65 of a hit inside a 0.3 m splash. An arrow hits what you aimed at now; the quiver's arrowBurst affix is what turns it back into an area shot, which is what that affix is for.",
+    "combat": {
+      "_doc": "What a hit feels like, round 14. The per-shape numbers — knockback, stagger, hit-stop, shake — live on the strike shapes in js/weapons.js, because a shape is where they belong. These are the few that are global.",
+      "hitStopFloor": 0.05,
+      "hitStopMaxMs": 260,
+      "shakePerPoint": 0.035,
+      "shakeMaxMetres": 0.12,
+      "knockbackSeconds": 0.18,
+      "staggerWindowSeconds": 6,
+      "recoilMetres": 0.08,
+      "windCommitSpeed": 0.55,
+      "inputBufferSeconds": 0.18,
+      "wallSlamShare": 0.015
+    },
+    "ranged": {
+      "_doc": "A bow's rate of fire used to be the light-melee swing clock, because `bow` was in neither weapon table and profileOf fell through to the `light` category: 1.91 shots a second with no draw, no nock and no reload, and nobody designed it. The real numbers are per-base in js/weapons.js RANGED; these are the shared ones.",
+      "bowDrawMin": 0.35,
+      "bowDrawFull": 0.95,
+      "bowPowerMin": 0.55,
+      "bowPowerFull": 1.6,
+      "crossbowReload": 1.25,
+      "crossbowPower": 1.8,
+      "javelinCarried": 6
+    },
+    "staff": {
+      "_doc": "A staff cast a free shaped area spell every 0.6 s with no cast time, no mana and no choice — the most powerful weapon in the game and the least interesting. It charges now: a tap is still free and weak, a full channel is 1.6x damage over twice the radius, and it drinks mana while it builds. js/weapons.js STAFF_CHARGE is the live copy.",
+      "chargeMin": 0.35,
+      "chargeFull": 1.4,
+      "chargeMax": 2.6,
+      "channelMana": 4,
+      "breakAtShareOfHealth": 0.25,
+      "moveWhileChannelling": 0.6
+    }
   },
   "progression": {
     "attrPerLevel": 3,
@@ -486,7 +519,15 @@
   },
   "light": {
     "_spotDoc": "The ship's landing lights (B3). Two SpotLights either side of the centreline rather than one brighter lamp, because the value of a landing light is the CONE - you want the strip of ground you are about to put down on, not a uniform glow that washes the night out. `reach` is how far ahead the cones are aimed and `spread` how far apart the lamps sit.",
-    "spot": { "color": "#eaf2ff", "range": 220, "angle": 0.42, "blur": 0.55, "intensity": 9, "spread": 2.6, "reach": 90 },
+    "spot": {
+      "color": "#eaf2ff",
+      "range": 220,
+      "angle": 0.42,
+      "blur": 0.55,
+      "intensity": 9,
+      "spread": 2.6,
+      "reach": 90
+    },
     "_doc": "Night used to be unplayable. Every character now carries a torch; `torch` is its point light, `ambientNight` is the floor the sky light never drops below, and `maxLights` caps how many world lights (braziers, sconces, campfires) are switched on at once — the nearest win.",
     "torch": {
       "range": 34,

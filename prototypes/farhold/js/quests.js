@@ -246,9 +246,18 @@ export function makeFallQuest({ x, z, cell, seconds = 30, id = null } = {}) {
     state: 'falling',
     seconds,
     chestKey: `meteor:${Math.round(x)},${Math.round(z)}`,
-    place: { x, z, name: 'the impact', cell: { x: cell?.x ?? 0, y: cell?.y ?? 0 } },
-    title: 'Something came down',
-    text: 'A star fell, and it did not burn up. Whatever is in the crater is still hot.',
+    place: { x, z, name: 'Meteor Crater', cell: { x: cell?.x ?? 0, y: cell?.y ?? 0 } },
+    /**
+     * R15 — IT IS CALLED WHAT IT IS.
+     *
+     *   "For meteorise instead of saying 'Something came down' just say 'Meteor Crater'"
+     *
+     * "Something came down" is atmospheric and tells you nothing: on the map, in the Nearby panel
+     * and in the journal it has to survive being read at a glance beside twenty other rows, and a
+     * row that could be anything is a row you skip.
+     */
+    title: 'Meteor Crater',
+    text: 'A star fell and did not burn up. Whatever is in the crater is still hot.',
     reward: { gold: 0, xp: 0 },
   };
 }
@@ -371,7 +380,8 @@ export class QuestLog {
     if (q.kind === 'visit') return q.done ? 'arrived' : 'not yet there';
     if (q.kind === 'fall') {
       if (q.done) return 'opened';
-      return q.state === 'landed' ? 'down — go and dig it out' : 'still coming down';
+      // R15: short enough for the Nearby panel's second line, which is about ninety pixels wide
+      return q.state === 'landed' ? 'down' : 'falling';
     }
     if (q.kind === 'raid') {
       if (q.state === 'offered') return 'not taken';

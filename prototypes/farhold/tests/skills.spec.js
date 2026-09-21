@@ -60,7 +60,15 @@ test('a firebolt reaches an enemy, hurts it, and leaves it burning', async ({ pa
     await new Promise(r => setTimeout(r, 900));
     const burning = { ...(enemy.statuses || {}) };
     const hpMid = enemy.hp;
-    await new Promise(r => setTimeout(r, 900));
+    /**
+     * LONG ENOUGH TO CATCH A WHOLE TICK.
+     *
+     * Damage over time lands in whole seconds (js/skills.js `TICK_EVERY`), not per frame, so a
+     * 900 ms window only sees a tick if the bolt happened to land early. Under load — the whole
+     * browser suite in one run — it did not, and this went red for a reason that had nothing to do
+     * with burning. 1.6 s always contains a tick whenever the bolt has landed at all.
+     */
+    await new Promise(r => setTimeout(r, 1600));
     return {
       slot, hpBefore, hpMid, hpAfter: enemy.hp,
       burn: !!burning.burn,

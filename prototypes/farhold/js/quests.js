@@ -12,6 +12,7 @@
 //   log.readyToTurnIn(giver.id);
 
 import { M_PER_CELL } from './planet.js';
+import { rewardKindFor } from './questrewards.js';
 
 export const QUEST_KINDS = ['hunt', 'visit', 'gather', 'clear'];
 
@@ -95,6 +96,22 @@ export function makeQuest(kind, ctx) {
   };
   const shape = SHAPE[kind] || SHAPE.hunt;
   const scale = 1 + (level - 1) * 0.12;
+  const reward = {
+    gold: Math.round(between(rng, shape.gold) * scale),
+    xp: Math.round(between(rng, shape.xp) * scale),
+  };
+  /**
+   * R16 — WHAT IT PAYS IN, DECIDED WHERE THE JOB IS MADE.
+   *
+   *   "Let's have some quests give money and xp, some give item reward via loot crate popup, others
+   *    give materials… or a fourth option where the quest giver asks what type of reward you want."
+   *
+   * The kind is settled here, once, rather than at the moment of handing in — so the talk screen and
+   * the journal can both TELL you what is on offer before you walk back for it, and so a job cannot
+   * quietly change what it pays between being taken and being finished. The rule itself lives in
+   * `js/questrewards.js`; this only hands it the finished numbers to judge.
+   */
+  reward.kind = rewardKindFor({ kind, reward }, { rng, level });
   const base = {
     id: 'q_' + Math.floor(rng() * 1e9).toString(36),
     kind,
@@ -104,10 +121,7 @@ export function makeQuest(kind, ctx) {
     progress: 0,
     done: false,
     turnedIn: false,
-    reward: {
-      gold: Math.round(between(rng, shape.gold) * scale),
-      xp: Math.round(between(rng, shape.xp) * scale),
-    },
+    reward,
   };
 
   if (kind === 'hunt' || kind === 'clear') {
@@ -258,7 +272,8 @@ export function makeFallQuest({ x, z, cell, seconds = 30, id = null } = {}) {
      */
     title: 'Meteor Crater',
     text: 'A star fell and did not burn up. Whatever is in the crater is still hot.',
-    reward: { gold: 0, xp: 0 },
+    // a fall pays itself out when the crate comes open; plain coin and experience, no chooser
+    reward: { gold: 0, xp: 0, kind: 'coin' },
   };
 }
 
@@ -367,12 +382,37 @@ export class QuestLog {
   /** A raid pays itself out — there is nobody to walk back to. */
   readyRaids() { return this.active.filter(q => q.kind === 'raid' && q.done && !q.turnedIn); }
 
+  /**
+   * Hand a job in. Bookkeeping only — `js/questrewards.js` does the paying.
+   *
+   * R16: it REFUSES a second attempt. There are four ways into this now (the talk screen, the board
+   * sweep, the meteor crate and the journal's own "Hand it in" button), and the journal button in
+   * particular can be pressed twice before the screen has redrawn. A quest that was already handed
+   * in returns null, and a null is the caller's signal to pay nothing.
+   */
   turnIn(quest) {
+    if (!quest || quest.turnedIn) return null;
     quest.turnedIn = true;
     const i = this.active.indexOf(quest);
     if (i >= 0) this.active.splice(i, 1);
     this.finished.push(quest);
     return quest.reward;
+  }
+
+  /**
+   * R16 — EVERY FINISHED JOB, WHEREVER THE PERSON WHO ASKED IS STANDING.
+   *
+   *   "It's currently difficult to turn in a quest, finding the right quest giver. Allow quests to
+   *    be turned in through the interface journal page."
+   *
+   * The journal's list. It is deliberately NOT filtered by who gave the job or by how far away they
+   * are: walking three zones back to a named villager to be told "well done" is the complaint, and
+   * gating half the list behind that would only have made the button look broken. The started kinds
+   * (a raid, a meteor fall) stay out because they pay themselves the moment they finish — there is
+   * nobody to hand them to and no button that would help.
+   */
+  readyAnywhere() {
+    return this.active.filter(q => q.done && !q.turnedIn && !isStarted(q));
   }
 
   /** "2 / 5" for the journal. */

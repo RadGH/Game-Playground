@@ -80,6 +80,24 @@ const FIRST_STEPS = [
   'Far from home? Put a crate out there too and link it back. The load takes a while; a road makes it much quicker.',
 ];
 
+/**
+ * R16 — WHAT A WHOLE GROUP OF PIECES IS FOR, above the list of them.
+ *
+ *   "Drills and similar resource extraction devices should be on their own building menu and are
+ *    automated, separate from manufacturing devices which require work to be done by the player
+ *    or NPC."
+ *
+ * Splitting the category was the easy half. The half that makes it mean something is SAYING what
+ * the difference is, once, at the top of each list — because a player looking at a Drill and a
+ * Furnace side by side has no way at all to know that one of them will quietly stop when nobody is
+ * standing at it. Only the groups where there is something real to say have a line.
+ */
+const CAT_BLURB = {
+  extract: 'These run themselves. Put one on a seam or in the water, give it power if it wants any, and it works while you are somewhere else. No worker, ever.',
+  refine: 'These need somebody at them. Stand at one and hold E to work it, send one of your people, or — for the benches that take power — wire it to the grid and it pays its own way.',
+  craft: 'Benches you use yourself. Walk up and press E.',
+};
+
 /** "12 stone, 2 iron" — and the ones you are short of are the ones that matter. */
 function costLine(cost, have) {
   return Object.entries(cost || {})
@@ -91,6 +109,8 @@ function costLine(cost, have) {
 }
 
 export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, onClose = null, mining = null, scan = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null,
+  /** R16 — `{ list(), build(kind, id) }`. The tools and devices bench; see `drawToolBench`. */
+  tools = null,
   /**
    * R15 — `() => ({ text, why, where })`, or null when the chain is finished. See js/nextstep.js.
    * The panel does not work any of it out; it only draws whatever it is handed.
@@ -107,6 +127,8 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
   let open = false;
   let cat = catKeys.includes('waypoint') ? 'waypoint' : catKeys[0] || null;
   let pick = null;
+  /** R16 — how many of a recipe one click queues. 0 is the standing order. See `drawBench`. */
+  let batch = 1;
 
   const root = el('div', { class: 'build-ui hidden', id: 'build-ui' });
   const head = el('div', { class: 'build-head' });
@@ -137,6 +159,18 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
   const yardBox = el('div', { class: 'build-yard build-shipyard' });
   /** The motorcycle, the car and the truck — built at a bench, not placed on the ground. */
   const garageBox = el('div', { class: 'build-yard build-garage' });
+  /**
+   * R16 — THE TOOL BENCH.
+   *
+   *   "Instead of having tool be based on weapon (no idea how that works) change it so you build
+   *    new tools."
+   *
+   * It belongs here and not in the crafting screen for one plain reason: a tool is paid for out of
+   * the MATERIALS bag — timber, stone, iron ingots — which is the same purse everything else in
+   * this panel spends, and the crafting screen spends the three recycled gear materials instead.
+   * Making the player carry the cost across two economies to build a pickaxe would be silly.
+   */
+  const toolsBox = el('div', { class: 'build-yard build-tools-bench' });
   /** §6.5/6.8/6.9 — the people who live here, the fields they work, and the tax they pay. */
   const holdBox = el('div', { class: 'build-yard build-holding' });
   /** §6.6 — ten units of work, and who is putting them in. */
@@ -155,7 +189,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
    * always reachable.
    */
   const body = el('div', { class: 'build-body' },
-    steps, toolRow, catRow, listBox, scanBox, minesBox, benchBox, workBox, holdBox, garageBox, yardBox, detail);
+    steps, toolRow, catRow, listBox, scanBox, minesBox, benchBox, toolsBox, workBox, holdBox, garageBox, yardBox, detail);
   root.append(head, body, keys);
 
   head.append(
@@ -237,6 +271,7 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
 
   function drawList() {
     listBox.replaceChildren();
+    if (CAT_BLURB[cat]) listBox.append(el('p', { class: 'build-cat-blurb small muted', text: CAT_BLURB[cat] }));
     const rows = pieces.filter(p => p.cat === cat).sort((a, b) => (a.tier || 1) - (b.tier || 1) || a.name.localeCompare(b.name));
     for (const p of rows) {
       const parts = costLine(p.cost, have);
@@ -312,6 +347,18 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     }
 
     const notes = [];
+    /**
+     * R16 — DOES THIS PIECE NEED A PERSON? The question is answered here, at the moment you decide
+     * to build one, and it is answered out of the DATA rather than from a list of ids: a piece is
+     * automated if it is not a js/refining.json machine, or if the machine it is has no `labour`
+     * block at all. `auto: true` is the middle case — a bench that wants hands until it is wired.
+     */
+    const mdef = works?.machineDefs?.[p.id] || null;
+    const lab = mdef?.labour || null;
+    if (p.cat === 'extract') notes.push('Automated. Nobody works it — it digs on its own for as long as it has what it needs.');
+    else if (mdef && !lab) notes.push('Automated once it is powered. Nobody stands at it.');
+    else if (lab?.auto) notes.push('Needs a pair of hands — yours, holding E, or one of your people — until you wire it to the grid. Then it pays its own labour.');
+    else if (lab) notes.push('Always needs somebody at it. Hold E to work it yourself, or house a worker who will.');
     if (p.power?.use) notes.push(`Draws ${p.power.use} kW. It will not run without a generator in reach.`);
     if (p.power?.make) notes.push(`Makes ${p.power.make} kW${p.power.burns ? `, burning ${p.power.burns}` : ''}.`);
     if (p.store?.slots) notes.push(`Holds ${p.store.slots} slots, shared with every store it can reach.`);
@@ -368,6 +415,9 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     const rows = mining?.overview?.() || [];
     if (!rows.length) return;
     minesBox.append(el('h3', { text: 'Digging' }));
+    // R16 — the other half of the split, said where the drills are listed rather than only in the
+    // catalogue: nothing on this list will ever ask you for a worker.
+    minesBox.append(el('p', { class: 'small muted', text: 'Automated. None of these needs anybody at it — only power, a seam and somewhere to put what comes up.' }));
     for (const r of rows) {
       const line = el('div', { class: 'build-mine' });
       line.append(
@@ -439,8 +489,68 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     const m = works.get(bench.id);
     if (!m) return;
 
+    const snap = works.snapshot(m.id) || {};
     benchBox.append(el('h3', { text: m.name }));
     benchBox.append(el('p', { class: 'small muted', text: works.stateText(m) }));
+
+    /**
+     * R16 — THE SWITCH AND THE QUEUE ORDER, side by side above the jobs.
+     *
+     * `m.enabled` was read in three places and set in none (js/refine.js `setEnabled` has the whole
+     * note). `priority` is new and goes straight onto the machine's work order, which js/work.js
+     * `nextFor` has always sorted by — so "first" genuinely means the next citizen free walks here
+     * rather than to the loom.
+     *
+     * Both are on one row because they are the same question asked twice: of the benches I own,
+     * which ones matter.
+     */
+    if (works.setEnabled) {
+      // The classes are borrowed on purpose: `build-yard-row` is the flex row this panel already
+      // uses everywhere and `build-tool` is the toggle button that already has an `.on` look, so
+      // none of this needs a line of new CSS. (It does NOT borrow `build-tools`, which the tool row
+      // owns — two sections sharing a class is a fault this file has already learned twice.)
+      const bar = el('div', { class: 'build-yard-row build-bench-switch' });
+      bar.append(el('button', {
+        class: 'build-tool' + (snap.enabled === false ? '' : ' on'),
+        text: snap.enabled === false ? 'Switched off' : 'Running',
+        title: 'A machine that is off keeps its queue, its half-finished batch and its banked work — it just stops, and stops asking for a worker.',
+        onclick: () => { works.setEnabled(m.id, snap.enabled === false); redraw(); },
+      }));
+      if (snap.needsWorking || (m.def.labour?.secondsPerUnit || 0) > 0) {
+        for (let p = 0; p <= 2; p++) {
+          bar.append(el('button', {
+            class: 'build-tool build-prio' + ((snap.priority ?? 1) === p ? ' on' : ''),
+            text: ['Last', 'Normal', 'First'][p],
+            title: `Workers take this one ${works.PRIORITY_WORDS?.[p] || 'normally'}.`,
+            onclick: () => { works.setPriority(m.id, p); redraw(); },
+          }));
+        }
+      }
+      benchBox.append(bar);
+    }
+
+    /**
+     * R16 — WHO IS KEEPING THIS LIT, and how far through the current four units they are.
+     *
+     * The bar is the machine's OWN work order off the board, not a second clock — the same number
+     * the bar over the structure draws while you hold E, so helping by hand and watching the panel
+     * tell the same story. `workboard.at(stationId)` is optional: without it the panel falls back
+     * to the bank, which is the other half of the same fact.
+     */
+    if (snap.needsWorking) {
+      const order = workboard?.at?.(m.id) || null;
+      const work = el('div', { class: 'build-bench-work' });
+      work.append(el('span', { class: 'small', text: order ? `${order.title} · ${order.progress}` : `${snap.minutesLeft} min of work banked` }));
+      const frac = order ? order.fraction : Math.min(1, (snap.workBank || 0) / Math.max(1, snap.workBankMax || 1));
+      work.append(el('div', { class: 'build-work-bar' }, el('i', { style: `width:${Math.round(frac * 100)}%` })));
+      const credit = order?.credit || snap.lastCredit;
+      work.append(el('span', { class: 'muted small build-work-credit', text: credit
+        ? (order?.credit ? credit : `last shift: ${credit}`)
+        : 'Nobody has worked this yet. Stand here and hold E.' }));
+      benchBox.append(work);
+    } else {
+      benchBox.append(el('p', { class: 'small muted', text: 'Runs itself — it wants power, not hands.' }));
+    }
 
     // what is already queued, with a way to take it back off
     for (let i = 0; i < m.queue.length; i++) {
@@ -454,6 +564,30 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       benchBox.append(row);
     }
 
+    /**
+     * R16 — HOW MANY. "Make twenty planks and stop", and the standing order.
+     *
+     * `works.queue(id, recipe, count)` has taken a count since the day it was written, and `count
+     * <= 0` has always meant "keep going until told otherwise" — the queue rows above have printed
+     * the word "repeating" for it all along. The panel only ever sent 1. So the whole of batching
+     * and standing orders existed, was saved, was drawn, and could not be reached: clicking a
+     * recipe twenty times was the only way to make twenty of anything.
+     *
+     * It is a choice you make ONCE and then click recipes, rather than three buttons on every row,
+     * because a bench has a dozen recipes and thirty-six buttons is not a panel.
+     */
+    const batchRow = el('div', { class: 'build-yard-row build-bench-batch' });
+    batchRow.append(el('span', { class: 'muted small', text: 'Make' }));
+    for (const n of [1, 5, 20, 0]) {
+      batchRow.append(el('button', {
+        class: 'build-tool build-batch' + (batch === n ? ' on' : ''),
+        text: n === 0 ? 'keep going' : `×${n}`,
+        title: n === 0 ? 'A standing order: it makes them until you take the job off, or until it runs out of what it eats.' : `Queue ${n} at a time.`,
+        onclick: () => { batch = n; redraw(); },
+      }));
+    }
+    benchBox.append(batchRow);
+
     // …and everything it could make. A locked recipe is SHOWN, greyed, with what unlocks it —
     // a recipe you cannot see is a recipe you will never go looking for.
     for (const r of works.board(m.type)) {
@@ -464,8 +598,13 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
         title: r.desc || '',
         onclick: () => {
           if (!r.unlocked) { if (onLog) onLog(r.unlock?.text || 'Not learned yet.', 'warn'); return; }
-          const out = works.queue(m.id, r.id, 1);
+          const out = works.queue(m.id, r.id, batch);
           if (!out.ok && onLog) onLog(out.why, 'warn');
+          else if (onLog) {
+            onLog(batch === 0
+              ? `${m.name}: ${r.name}, on a standing order — it will keep making them.`
+              : `${m.name}: ${batch} × ${r.name} queued.`, 'good');
+          }
           redraw();
         },
       });
@@ -621,7 +760,9 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
     for (const o of rows) {
       const row = el('div', { class: 'build-work-row' });
       row.append(
-        el('span', { class: 'build-row-name', text: o.title }),
+        // `name` is what js/work.js's `createOrder` actually calls it — "Work the Furnace". A row
+        // falling through to `o.tag` printed the word "refine" on every line of the board.
+        el('span', { class: 'build-row-name', text: o.title || o.name || o.tag || 'work' }),
         el('span', { class: 'muted small', text: o.progress }),
       );
       // a bar, because "6.5 of 10" is a number and a bar is a glance
@@ -648,7 +789,42 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
   function redraw() {
     if (!open) return;
     drawSteps(); drawTools(); drawCats(); drawList(); drawScan(); drawMines(); drawBench();
-    drawWork(); drawHolding(); drawGarage(); drawYard(); drawDetail();
+    drawToolBench(); drawWork(); drawHolding(); drawGarage(); drawYard(); drawDetail();
+  }
+
+  /**
+   * R16 — the tools and the two devices you can build right now, with what each is short of.
+   *
+   * `tools` is `{ list(), build(kind, id) }`, handed in by js/main.js. A row that cannot be paid
+   * for says WHY in materials rather than going grey — a greyed-out row is the one answer a player
+   * cannot act on, which is the rule the Holding panel already follows.
+   */
+  function drawToolBench() {
+    toolsBox.replaceChildren();
+    if (!tools) return;
+    const rows = tools.list() || [];
+    if (!rows.length) return;
+    toolsBox.append(el('h3', { text: 'Tools and devices' }));
+    toolsBox.append(el('p', {
+      class: 'small muted',
+      text: 'A tool is pick and axe in one. Its tier says what it can work; its quality says how fast.',
+    }));
+    for (const r of rows) {
+      const row = el('div', { class: 'build-yard-row' });
+      const cost = Object.entries(r.cost || {})
+        .map(([m, n]) => `${n} ${(r.names?.[m] || m).toLowerCase()}`).join(', ');
+      const b = el('button', {
+        class: 'small',
+        text: r.owned && r.kind === 'device' ? `${r.name} ✓` : `Build the ${r.name}`,
+        onclick: () => { tools.build(r.kind, r.id); redraw(); },
+      });
+      b.disabled = !r.canAfford || (r.owned && r.kind === 'device');
+      const note = r.owned && r.kind === 'device' ? r.desc
+        : r.canAfford ? `${cost} — ${r.desc}`
+        : `Short: ${r.short.map(s => `${Math.ceil(s.n - s.got)} ${(r.names?.[s.m] || s.m).toLowerCase()}`).join(', ')}`;
+      row.append(b, el('span', { class: r.canAfford || r.owned ? 'small' : 'small bad', text: note }));
+      toolsBox.append(row);
+    }
   }
 
   const api = {

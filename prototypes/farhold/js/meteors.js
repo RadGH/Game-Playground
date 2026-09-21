@@ -115,7 +115,20 @@ function makeBody(scale = 1, colour = '#ffb066') {
 }
 
 export function createMeteors(opts = {}) {
-  const { scene, terrain, chests = null, rng = Math.random, onLand = null, onWarn = null } = opts;
+  const {
+    scene, terrain, chests = null, rng = Math.random, onLand = null, onWarn = null,
+    /**
+     * R16 — MAY ONE FALL YET?
+     *
+     *   "Meteor events shouldn't occur until the player equips a tool capable of mining one."
+     *
+     * A crater's seam is `meteor_site`, hardness 2 — so before a steel tool the whole event was a
+     * thirty-second sprint to a rock you could not touch, and it filed a quest and a map pin on
+     * the way. The predicate is injected rather than decided here because this module knows about
+     * rocks falling out of the sky and nothing whatever about the player's inventory.
+     */
+    canFall = () => true,
+  } = opts;
   const cfg = { ...DEFAULTS, ...(opts.balance?.meteors || {}) };
 
   let sinceRoll = 0;
@@ -181,7 +194,7 @@ export function createMeteors(opts = {}) {
     sinceRoll += dt;
     if (sinceRoll >= cfg.everySeconds) {
       sinceRoll = 0;
-      if (player && rng() < cfg.chance) {
+      if (player && canFall() && rng() < cfg.chance) {
         const a = rng() * Math.PI * 2;
         const [lo, hi] = cfg.landRange;
         const d = lo + rng() * (hi - lo);
@@ -194,7 +207,9 @@ export function createMeteors(opts = {}) {
     if (sinceShooting >= cfg.shootingEvery) {
       sinceShooting = 0;
       if (rng() < (cfg.shootingChance ?? 0.4)) {
-        if (player && rng() < (cfg.shootingRealChance ?? 0.4)) {
+        // the gate is asked HERE TOO. This is the other door a real fall comes through, and a
+        // gate on one of two doors is not a gate.
+        if (player && canFall() && rng() < (cfg.shootingRealChance ?? 0.4)) {
           // a real one, announced the same way the five-minute roll announces its own
           const a = rng() * Math.PI * 2;
           const [lo, hi] = cfg.landRange;

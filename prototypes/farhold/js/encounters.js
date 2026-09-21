@@ -53,6 +53,23 @@
 let chestLookup = null;
 import('./chests.js').then(m => { chestLookup = m.currentChests; }).catch(() => {});
 
+/**
+ * R16 — WHAT AN EVENT ACTUALLY PUTS ON THE GROUND.
+ *
+ *   "I also found a marker that reads 'Somebody in a cage' but there was no person to speak about,
+ *    nothing to interact with. Just a dead pointer to nothing."
+ *
+ * This module used to be proud of owning no meshes. That was the bug: a `rescue` was four idle
+ * guards in an empty field, and the cage in its own name existed only in the sentence. `props` is
+ * js/eventprops.js (a handful of disposable meshes) and `folk` is a callback into js/town.js's
+ * `spawnOne`, so a captive is a real body standing in a real cage, with something to say when the
+ * guards are down. Both are injected rather than imported, the same way the chest field is, so this
+ * file still loads in a plain node test with neither of them.
+ */
+let propField = null;
+let spawnPerson = null;
+let removePerson = null;
+
 /** data/events.json, fetched once at import. A run without it still gets the eleven set pieces. */
 let EVENTS = null;
 const EVENT_DATA = fetch(new URL('../data/events.json', import.meta.url))
@@ -129,6 +146,15 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
   };
   addEvents(data.events || EVENTS);
   if (!EVENTS && !data.events) EVENT_DATA.then(d => addEvents(d));
+
+  /**
+   * R16 — how far away an event survives, tied to how far away its BODIES survive.
+   *
+   * It was a hard-coded 520 m against `js/actors.js`'s 300 m despawn, and that eighty percent of
+   * slack is where a rescue used to win itself with nobody watching. A little over the despawn
+   * radius so that walking briefly out of earshot does not cancel something you are coming back to.
+   */
+  const closeRadius = Math.max(220, (balance.spawn?.despawnRadius ?? 320) * 1.15);
 
   /** Handed in if anyone wires one, otherwise whichever chest field is live. See js/chests.js. */
   let chestField = chests;
@@ -302,8 +328,19 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
   /** How many bodies are still on their feet in an event. */
   const standing = ev => ev.units.filter(u => u && !u.removed && u.dying == null).length;
 
-  /** Take an event off the board. Whatever it left on the ground stays there. */
-  function closeEvent(i) { events.splice(i, 1); }
+  /**
+   * Take an event off the board. Whatever it left on the ground stays there — a reward bag, an
+   * opened chest — but the DRESSING goes, because a cage with nobody in it standing on the road
+   * for the rest of the run is exactly the dead pointer this round set out to remove.
+   */
+  function closeEvent(i) {
+    const ev = events[i];
+    if (ev) {
+      propField?.clear(ev.propId);
+      if (ev.captive) removePerson?.(ev.propId);
+    }
+    events.splice(i, 1);
+  }
 
   /**
    * START ONE.
@@ -325,7 +362,25 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     const ev = {
       id: spec.id, kind: spec.kind, name: spec.name, spec,
       x, z, level, t: 0, units: [], chest: null, runner: null, sprung: false, at: Date.now(),
+      /**
+       * R16 — HAS ANYBODY ACTUALLY BEEN HERE?
+       *
+       * The bug this exists for: an event closes at 520 m but `js/actors.js` despawns every
+       * non-boss body past `balance.spawn.despawnRadius`, which is 300 m. So in the band between
+       * the two the guards were quietly culled, `standing(ev)` fell to zero, and a `rescue` WON
+       * ITSELF — dropping a gilded reward bag on a patch of grass a quarter of a kilometre away and
+       * logging "the cage comes open" at somebody who had walked the other way. `defend` did the
+       * same. A win now requires that the player came and looked.
+       */
+      seen: false,
+      propId: `ev:${spec.id}:${Math.round(x)},${Math.round(z)}`,
+      captive: null, dressed: [],
     };
+
+    // the dressing: a cage, a cart, a pyre — whatever this event is supposed to look like
+    if (spec.dressing?.length && propField) {
+      ev.dressed = propField.place(ev.propId, x, z, rng() * Math.PI * 2, spec.dressing) || [];
+    }
 
     if (spec.bait) {
       if (!chests) return null;
@@ -353,6 +408,24 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
       runner.state = 'flee';
       runner.fleeFor = (spec.seconds ?? 30) + 6;
       ev.runner = runner;
+    }
+
+    /**
+     * SOMEBODY TO GET OUT. The whole point of a rescue, and it was never built.
+     *
+     * The captive stands at whichever prop the spec names as the place they are held — normally the
+     * cage itself, so they are inside it and not beside it. They are an ordinary town NPC with no
+     * shop and no quest, which means `E` already talks to them and the greeting says why they are
+     * there. `freed` flips when the last guard goes down.
+     */
+    if (spec.captive && spawnPerson) {
+      const hold = ev.dressed.find(d => d.piece === (spec.captive.at || 'cage')) || { x, z };
+      spawnPerson({
+        groupId: ev.propId, role: spec.captive.role || 'villager',
+        roleName: spec.captive.roleName || 'Prisoner',
+        x: hold.x, z: hold.z, seed: Math.round(x * 31 + z),
+        greeting: spec.captive.greeting || 'Get them off me and I will make it worth your while.',
+      }).then(npc => { ev.captive = npc || null; }).catch(() => {});
     }
 
     events.push(ev);
@@ -397,11 +470,21 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
       const ev = events[i];
       const spec = ev.spec;
       ev.t += dt;
-      if (Math.hypot(ev.x - at.x, ev.z - at.z) > 520) { closeEvent(i); continue; }
+      /**
+       * R16 — the close radius now matches the field's own despawn radius, so an event cannot
+       * outlive the bodies that are supposed to be standing in it. `seen` is the belt to that
+       * braces: once you have been within sixty metres, the event is yours to win or lose even if
+       * you back off to fetch a bow.
+       */
+      const range = Math.hypot(ev.x - at.x, ev.z - at.z);
+      if (range < 60) ev.seen = true;
+      if (range > closeRadius) { closeEvent(i); continue; }
 
       if (ev.kind === 'rescue') {
-        if (standing(ev) === 0) {
-          chests?.rewardBag(ev.x, ev.z, { kind: spec.reward?.kind || 'iron', level: ev.level });
+        if (standing(ev) === 0 && ev.seen) {
+          // the bag lands at the CAPTIVE's feet if there is one, because that is who is handing it
+          const from = ev.captive || ev.dressed[0] || ev;
+          chests?.rewardBag(from.x, from.z, { kind: spec.reward?.kind || 'iron', level: ev.level });
           onLog(spec.win || 'They are out.', 'loot');
           closeEvent(i);
         } else if (spec.seconds && ev.t > spec.seconds) {
@@ -435,7 +518,7 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
       }
 
       if (ev.kind === 'defend') {
-        if (standing(ev) === 0) { onLog(spec.win || 'It is still standing.', 'loot'); closeEvent(i); continue; }
+        if (standing(ev) === 0 && ev.seen) { onLog(spec.win || 'It is still standing.', 'loot'); closeEvent(i); continue; }
         if (ev.t > (spec.seconds ?? 75)) {
           if (ev.chest && chests) chests.remove(ev.chest);
           ev.chest = null;
@@ -512,6 +595,13 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     setSites(s) { siteField = s; },
     /** Hand over the chest field, so the events that put a real box on the ground can. */
     setChests(c) { if (c) chestField = c; },
+    /** Hand over js/eventprops.js, so a cage is a cage and not a sentence. */
+    setProps(p) { propField = p; },
+    /**
+     * Hand over the two halves of "a person is standing here": how to make one and how to take
+     * them away again. Both come from js/town.js's folk — `spawnOne` and `depopulate`.
+     */
+    setFolk(spawn, remove) { spawnPerson = spawn || null; removePerson = remove || null; },
     get live() { return live; },
     /** The road events running right now, with how long each has left. */
     get events() {

@@ -19,10 +19,27 @@
  * where the bank never gets that high (a river running out onto a flat delta), so there is nothing
  * left to see under even there.
  */
-export function waterRibbon(points, heights, half, { terrain, reach, skirt = 2.5 }) {
+export function waterRibbon(points, heights, half, { terrain, reach, skirt = 2.5, bankTolerance = null }) {
   const position = [], normal = [], index = [];
   const step = Math.max(1.5, half * 0.5);
   const sides = [];                       // [leftDistance, rightDistance] per point
+  /**
+   * HOW FAR THE TWO BANKS MAY DISAGREE, IN METRES.
+   *
+   * *"There is a road clipping into the water, and the water level is lower on one side of the
+   * road."* The sheet is one flat quad per point, so both its edges are at the same HEIGHT — what
+   * differed was how far each edge ran. The widening below walks outward on each side until the
+   * carved ground comes back up to the water line, and anything that raises one bank (a road
+   * embankment, and now a quay) stops that side dead while the other side runs on to `reach`.
+   * Measured at the user's own spot, one side stopped at 6 m and the other at 32: an edge four
+   * metres from the road and an edge thirty metres from it, at the same height, which reads as two
+   * different water levels.
+   *
+   * A river is not that shape. The two sides are capped to within one river-width of each other
+   * (never less than four metres), so the sheet stays a river — and where the bank really is
+   * flatter on one side, the skirt covers what the trim gave up, exactly as it does for a low bank.
+   */
+  const tolerance = bankTolerance ?? Math.max(half, 4);
 
   for (let i = 0; i < points.length; i++) {
     const prev = points[Math.max(0, i - 1)], next = points[Math.min(points.length - 1, i + 1)];
@@ -38,6 +55,10 @@ export function waterRibbon(points, heights, half, { terrain, reach, skirt = 2.5
         if (terrain.heightAt(points[i][0] + nx * sign * d, points[i][1] + nz * sign * d) >= y) break;
       }
     }
+    // the two banks have to agree — see `tolerance` above
+    const cap = Math.min(out[0], out[1]) + tolerance;
+    out[0] = Math.min(out[0], cap);
+    out[1] = Math.min(out[1], cap);
     sides.push({ nx, nz, y, out });
     position.push(points[i][0] + nx * out[0], y, points[i][1] + nz * out[0]);
     position.push(points[i][0] - nx * out[1], y, points[i][1] - nz * out[1]);
@@ -148,8 +169,9 @@ export function pondSheet(lake, cellSize, terrain, { segments = 20 } = {}) {
  * same ribbon with a top, two sides and an underside `thick` metres down, so the crossing has an
  * edge to it from the bank.
  *
- * NOT WIRED YET: `js/features.js` `buildRibbons` still calls its own `ribbon()` for roads. Swapping
- * it for this on the spans that carry a `lift` is the one-line change — see the round-11 report.
+ * WIRED IN ROUND 16: `js/features.js` `buildRibbons` splits each road run by `path.lift` and draws
+ * the lifted stretches — bridges and causeways, the only places you can see the side of a road —
+ * with this instead of its flat `ribbon()`. Consecutive stretches share a point so there is no seam.
  */
 export function roadDeck(points, heights, width, { thick = 0.45, lift = 0.06 } = {}) {
   const position = [], normal = [], index = [];

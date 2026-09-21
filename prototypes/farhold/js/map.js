@@ -422,6 +422,10 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    *   `onKeep`     (hit) => marker                        keep one of them as a saved place
    */
   findables = null, onSweep = null, scanState = null, onKeep = null,
+  /** R16 — `() => boolean`: is the hand scanner running? See `pins` below. */
+  scanning = null,
+  /** R16 — `() => [{ id, x, z, name, resource, distance }]`: everything ever scanned. */
+  scanned = null,
   /**
    * R15 — THE SUPPLY TAB: your outposts, and what runs between them.
    *
@@ -448,7 +452,20 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   // a quest destination, a story objective and a pin the player dropped are one kind of thing and
   // the minimap and space mode can see them too.
   const book = markers;
-  const pins = () => (book ? book.here() : []);
+  /**
+   * R16 — WHILE THE SCANNER IS RUNNING, THE MAP IS A PROSPECTING MAP.
+   *
+   *   "When scanning for nodes, hide all the quest/markers and only show node markers for
+   *    simplicity, and show the name of the resource on the floating indicator."
+   *
+   * Which is the right instinct: a marker book with forty entries in it is unreadable exactly when
+   * you are trying to read one class of them. `scanning` is a predicate handed in by js/main.js so
+   * this file does not have to know what a scanner is.
+   */
+  const pins = () => {
+    const all = book ? book.here() : [];
+    return scanning && scanning() ? all.filter(m => m.kind === 'seam') : all;
+  };
   const world = terrain.world;
 
   /**
@@ -560,6 +577,9 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
   };
   /** R14: which material the Find panel is set to. Outside `state` because it is pure interface. */
   let findWant = null;
+/** R16 — how the Find list is ordered, and whether it is cut down to the starred ones. */
+let findSort = 'distance';
+let findFavOnly = false;
   /** R15: the outpost a supply route is being drawn FROM, mid two-click. */
   let supplyFrom = null;
   /** …and the most one cart may carry, which is the "max limit" the route is created with. */
@@ -883,33 +903,90 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
         onclick: () => { onSweep(findWant); buildSide(); draw(); },
       }));
 
-      const hits = st.hits || [];
-      if (st.swept) {
-        if (!hits.length) {
-          kids.push(el('p', { class: 'muted small', text: 'The last sweep found nothing in range. Walk somewhere else and try again.' }));
-        } else {
-          const list = el('div', { class: 'pin-list' });
-          for (const h of hits.slice(0, 12)) {
-            const row = el('div', { class: 'pin-row' },
-              el('i', { class: 'pin-dot', text: '\u25c6', style: `color:${h.colour}` }),
-              el('span', { class: 'pin-name', text: h.name }),
-              el('span', { class: 'muted small', text: distanceText(h.distance) }),
-              el('button', {
-                class: 'pin-go', text: '\u2316', title: `Show this ${h.name.toLowerCase()} on the map`,
-                onclick: () => locate({ x: h.x, z: h.z, name: h.name, kind: 'seam' }),
-              }),
-            );
-            if (onKeep) {
-              row.append(el('button', {
-                class: 'pin-keep', text: '\u2726', title: 'Keep this place, so you can find it again later',
-                onclick: () => { onKeep(h); buildSide(); draw(); },
-              }));
-            }
-            list.append(row);
+      /**
+       * R16 — THE FIND TAB READS THE SURVEY, NOT JUST THE LAST SWEEP.
+       *
+       *   "We should update the map in 'Find' mode to respect this and have a sort by distance
+       *    option and filter by favorites."
+       *
+       * Two lists were being kept and only one was being shown. The Sweep button's hits are a
+       * snapshot that a second sweep throws away; the hand scanner's survey is everything you have
+       * ever walked past with it running, and it survives the save. They are merged here, deduped
+       * by node id, so a deposit found by either route is in the one list.
+       *
+       * FAVOURITES are the marker book's starred entries — the same ✦ the Keep button files — so
+       * "filter by favourites" means the places you already said mattered, not a second idea of
+       * the word.
+       */
+      const me = whereIsPlayer();
+      const starred = new Set([...(book?.saved?.() || []), ...(book?.starred?.() || [])]
+        .map(m => `${Math.round(m.cell.x * M_PER_CELL)},${Math.round(m.cell.y * M_PER_CELL)}`));
+      const survey = (scanned?.() || []).map(r => ({ ...r, from: 'survey' }));
+      const seen = new Set();
+      const merged = [];
+      for (const h of [...(st.hits || []).map(h => ({ ...h, from: 'sweep' })), ...survey]) {
+        const key = String(h.id ?? `${Math.round(h.x)},${Math.round(h.z)}`);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const distance = h.distance ?? Math.hypot(h.x - me.x, h.z - me.z);
+        merged.push({ ...h, distance, fav: starred.has(`${Math.round(h.x)},${Math.round(h.z)}`) });
+      }
+      const shown = merged
+        .filter(h => !findWant || h.resource === findWant)
+        .filter(h => !findFavOnly || h.fav)
+        .sort((a, b) => (findSort === 'name'
+          ? String(a.name).localeCompare(String(b.name)) || a.distance - b.distance
+          : a.distance - b.distance));
+
+      const sortRow = el('div', { class: 'find-row' });
+      const sortPick = el('select', { class: 'find-pick' });
+      for (const [v, t] of [['distance', 'Nearest first'], ['name', 'By name']]) {
+        const o = el('option', { value: v, text: t });
+        if (v === findSort) o.selected = true;
+        sortPick.append(o);
+      }
+      sortPick.onchange = () => { findSort = sortPick.value; buildSide(); };
+      const favBox = el('label', { class: 'find-fav' });
+      const favTick = el('input');
+      favTick.type = 'checkbox';
+      favTick.checked = findFavOnly;
+      favTick.onchange = () => { findFavOnly = favTick.checked; buildSide(); };
+      favBox.append(favTick, el('span', { class: 'small', text: 'Favourites only' }));
+      sortRow.append(sortPick, favBox);
+      kids.push(sortRow);
+
+      if (!shown.length) {
+        kids.push(el('p', {
+          class: 'muted small',
+          text: st.swept || survey.length
+            ? (findFavOnly
+              ? 'Nothing in your survey is starred yet. The \u2726 on a row keeps it.'
+              : 'Nothing found. Sweep from somewhere else, or carry the scanner and walk.')
+            : 'Sweep from here, or build a Prospector\u2019s Scanner and everything you walk past is remembered.',
+        }));
+      } else {
+        const list = el('div', { class: 'pin-list' });
+        for (const h of shown.slice(0, 24)) {
+          const row = el('div', { class: 'pin-row' },
+            el('i', { class: 'pin-dot', text: '\u25c6', style: `color:${h.colour || '#c08a3e'}` }),
+            el('span', { class: 'pin-name', text: h.name }),
+            el('span', { class: 'muted small', text: distanceText(h.distance) }),
+            el('button', {
+              class: 'pin-go', text: '\u2316', title: `Show this ${String(h.name).toLowerCase()} on the map`,
+              onclick: () => locate({ x: h.x, z: h.z, name: h.name, kind: 'seam' }),
+            }),
+          );
+          if (onKeep) {
+            row.append(el('button', {
+              class: 'pin-keep' + (h.fav ? ' on' : ''), text: '\u2726',
+              title: h.fav ? 'Already kept' : 'Keep this place, so you can find it again later',
+              onclick: () => { onKeep(h); buildSide(); draw(); },
+            }));
           }
-          kids.push(list);
-          if (hits.length > 12) kids.push(el('p', { class: 'muted small', text: `and ${hits.length - 12} more` }));
+          list.append(row);
         }
+        kids.push(list);
+        if (shown.length > 24) kids.push(el('p', { class: 'muted small', text: `and ${shown.length - 24} more` }));
       }
       side.append(panel('Find', ...kids));
     }

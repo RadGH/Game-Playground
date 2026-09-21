@@ -209,24 +209,37 @@ test('roads merge into one corridor instead of weaving beside each other', () =>
   assert.ok(networks > 0, 'none of the test worlds had a road network to check');
 });
 
-test('a bridge is something you can stand on', () => {
+test('a lifted road is something you can stand on', () => {
   // "Roads, mainly ones crossing rivers, do not actually have any physics and you can walk right
   // through them." The carve used to run after the grading and only ever cuts down, so the river
   // took the deck back out again — 9.3 m of daylight between the drawn road and the collidable
   // ground on the user's own world.
+  //
+  // ROUND 16 SPLIT THIS IN TWO. Holding the GROUND up to the deck is right for a causeway, a
+  // shoreline road or an embankment, and it is exactly wrong over a river: it is an earth dam
+  // across the channel, which is what the user reported next ("roads pull the terrain up, cutting
+  // off the water"). So inside a crossing's footprint the ground is left as the river bed on
+  // purpose and `js/features.js` files the bridge deck itself as something to stand on
+  // (`ObstacleField.addDeck`). Everywhere else the old rule still holds.
+  const covers = (c, x, z) => {
+    const dx = x - c.x, dz = z - c.z;
+    return Math.abs(dx * c.tx + dz * c.tz) <= c.halfLength
+      && Math.abs(dx * -c.tz + dz * c.tx) <= c.halfWidth;
+  };
   for (const seed of [1, 7, 1337]) {
     const wr = createWorld({ seed, width: 128, height: 64 });
     const t = makeTerrain(wr.world, wr.planet);
-    let crossings = 0, worst = 0;
+    let lifted = 0, worst = 0, spanned = 0;
     for (const road of t.roadPaths) {
       for (let i = 0; i < road.points.length; i++) {
-        if (!(road.lift[i] > 0.5)) continue;          // not a crossing
-        crossings++;
+        if (!(road.lift[i] > 0.5)) continue;          // not lifted clear of anything
+        lifted++;
         const [x, z] = road.points[i];
+        if (t.crossings.some(c => covers(c, x, z))) { spanned++; continue; }   // a bridge carries it
         worst = Math.max(worst, road.surface[i] - t.heightAt(x, z));
       }
     }
-    assert.ok(worst < 0.25, `seed ${seed}: a bridge deck stands ${worst.toFixed(1)} m above the ground you collide with`);
-    assert.ok(crossings >= 0);
+    assert.ok(worst < 0.25, `seed ${seed}: a lifted road stands ${worst.toFixed(1)} m above the ground you collide with`);
+    assert.ok(lifted >= spanned);
   }
 });

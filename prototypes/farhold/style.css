@@ -2280,17 +2280,199 @@ body.building canvas { cursor: crosshair; }
 .build-next.done { background: rgba(26, 38, 52, .55); border-left-color: #6a7480; }
 .build-next.done b { color: #cfe6ff; }
 
-/* ---------------------------------------------------------------- R15: javelins left
-   A javelin is the only thing in the game with ammunition, and `carried: 6` was read by nobody, so
-   you threw an unlimited number of the best weapon there is. A limit you cannot see is not a limit,
-   it is a surprise. */
-.ammo-count {
-  position: fixed; right: 18px; bottom: 96px; z-index: 40;
-  font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
-  color: #e8dcc0; text-shadow: 0 1px 2px #000;
-  pointer-events: none; opacity: 0; transition: opacity .15s;
+
+/* ---------------------------------------------------------------- R16: the bar over the rock
+   "…starts a small progress bar above the resource that collects the item when complete, similar
+   to World of Warcraft." Every other bar in this game is pinned to a corner of the screen; this
+   one is put at a projected world point by hud.workBar(), the same way a damage number is. */
+.work-bar {
+  position: fixed; z-index: 45; transform: translate(-50%, -50%);
+  pointer-events: none; opacity: 0; transition: opacity .12s;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  text-shadow: 0 1px 2px #000;
 }
-.ammo-count.on { opacity: 1; }
-.ammo-count[data-state="low"] { color: #ffc65a; }
-.ammo-count[data-state="empty"] { color: #ff7a5a; }
-@media (prefers-reduced-motion: reduce) { .ammo-count { transition: none; } }
+.work-bar.on { opacity: 1; }
+.work-bar .wb-label { font-size: 12px; font-weight: 600; color: #e8dcc0; white-space: nowrap; }
+.work-bar .wb-track {
+  display: block; width: 108px; height: 7px; border-radius: 4px;
+  background: #0d1013cc; border: 1px solid #2c3a46; overflow: hidden;
+}
+.work-bar .wb-fill {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, #7ac8a0, #b8e06a);
+}
+
+/* ---------------------------------------------------------------- R16: what is in your hands
+   The mouse wheel changes it now, and a mode you cannot see is a mode you forget you are in. */
+.held-mode {
+  position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 40;
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+  text-align: center; text-shadow: 0 1px 2px #000;
+}
+.held-mode.on { opacity: 1; }
+.held-mode .hm-ring { display: flex; gap: 5px; justify-content: center; margin-bottom: 3px; }
+.held-mode .hm-pip {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #2c3a46; border: 1px solid #4a5a68;
+}
+.held-mode .hm-pip.on { background: #d8c48a; border-color: #d8c48a; }
+.held-mode .hm-name { font-size: 13px; font-weight: 600; color: #e8dcc0; }
+.held-mode .hm-note { font-size: 11px; }
+@media (prefers-reduced-motion: reduce) {
+  .work-bar, .held-mode { transition: none; }
+}
+
+/* R16: the Find tab's sort and favourites row */
+.find-row { display: flex; gap: 8px; align-items: center; margin: 4px 0; flex-wrap: wrap; }
+.find-fav { display: flex; gap: 4px; align-items: center; cursor: pointer; }
+.pin-keep.on { color: #8fe0a0; }
+
+/* ================================================================ R16 — the title flow
+   "I would also like to restructure the landing page." Four screens in the one #boot section
+   (menu / load / character / world) plus the appearance editor that opens over them. Everything
+   here is additive: the old #boot rules above still style the inputs, the class card and the save
+   rows, because those are the same controls in a different arrangement.            js/newgame.js */
+
+/* The two-column steps need more room than the old single column. The menu stays narrow, so it
+   still reads as a title screen rather than a spreadsheet. */
+#boot .boot-inner { max-width: 1040px; width: 100%; }
+#boot-menu { max-width: 620px; margin: 0 auto; }
+#boot .boot-screen.hidden { display: none; }
+#boot .boot-h2 {
+  margin: 0 0 14px; font-size: 20px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: #9fd8f6;
+}
+
+/* ---- the menu: one column of buttons, all the same width, keyboard-reachable top to bottom */
+.boot-menu-buttons { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.boot-menu-buttons button { min-width: 260px; }
+.boot-menu-buttons button[disabled] { opacity: .45; cursor: default; }
+.boot-menu-buttons .boot-back { margin-top: 6px; color: #7f8ea4; }
+
+/* ---- the two-column body of a step: controls one side, the preview the other */
+.boot-two { display: flex; gap: 26px; align-items: flex-start; text-align: left; }
+.boot-two .boot-col { flex: 1 1 0; min-width: 0; }
+.boot-two .boot-side { flex: 0 0 340px; max-width: 340px; }
+#boot .boot-two .row { justify-content: flex-start; margin-bottom: 10px; }
+.boot-actions {
+  display: flex; gap: 10px; justify-content: flex-end; align-items: center;
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid #1e2738;
+}
+.boot-actions .ghost { margin-right: auto; }
+#boot button.small-btn { padding: 6px 12px; font-size: 13px; }
+
+/* ---- step 1: the figure beside the picker. avatar-2d SVG, so it costs nothing to redraw. */
+.boot-figure {
+  display: flex; justify-content: center; align-items: flex-end;
+  min-height: 258px; margin-bottom: 4px;
+  background: linear-gradient(180deg, #0d1422, #131c2c);
+  border: 1px solid #22304a; border-radius: 10px; padding: 6px;
+}
+.boot-figure svg { max-width: 100%; height: auto; }
+#boot-figure-note { text-align: center; margin-bottom: 8px; }
+
+/* ---- step 2: the map of the planet you are about to land on */
+#boot-map {
+  width: 100%; height: auto; display: block; border-radius: 8px;
+  border: 1px solid #22304a; background: #0b1017;
+  image-rendering: auto;
+}
+#boot-map-status { min-height: 16px; margin-top: 6px; }
+.boot-map-where { color: #dfe9f6; font-weight: 600; margin: 2px 0 4px; }
+#boot-map-facts, #boot-world-facts { margin-bottom: 6px; }
+/* the knob column: label, control, explanation — the same shape it had inside the old <details> */
+#boot-world .boot-knobs .row > label:first-child,
+#boot-world .boot-knobs .row > .check { min-width: 128px; }
+#boot-world .boot-knobs .row > select { max-width: 320px; }
+
+/* one column on a laptop in a half-width window, or anything narrower */
+@media (max-width: 900px) {
+  .boot-two { flex-direction: column; }
+  .boot-two .boot-side { flex: 1 1 auto; max-width: none; width: 100%; }
+  #boot .boot-inner { max-width: 640px; }
+}
+
+/* ================================================================ R16 — appearance editor
+   js/appearance.js. It is avatar-2d's catalogue in a panel, not a second catalogue — see the note
+   at the top of that file about why `held`, `offhand` and `decor` are deliberately missing. */
+.appearance {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: safe center;
+  background: rgba(4, 7, 13, .86); padding: 20px; overflow-y: auto; overscroll-behavior: contain;
+}
+.appearance.hidden { display: none; }
+.ap-inner {
+  width: min(880px, 100%); background: #0e1523; border: 1px solid #27344c;
+  border-radius: 12px; padding: 18px; text-align: left; box-shadow: 0 18px 60px rgba(0, 0, 0, .6);
+}
+.ap-head h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; color: #e6eefa; }
+.ap-head p { margin: 0 0 12px; }
+.ap-body { display: flex; gap: 18px; align-items: flex-start; }
+.ap-left { flex: 0 0 250px; }
+.ap-figure {
+  display: flex; justify-content: center; align-items: flex-end; min-height: 324px;
+  background: linear-gradient(180deg, #0d1422, #131c2c);
+  border: 1px solid #22304a; border-radius: 10px; padding: 6px;
+}
+.ap-figure svg { max-width: 100%; height: auto; }
+.ap-right { flex: 1 1 0; min-width: 0; }
+.ap-tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.ap-tab {
+  background: #121826; color: #9fb0c8; border: 1px solid #2c3a52; border-radius: 6px;
+  padding: 6px 14px; font: inherit; font-size: 14px; cursor: pointer;
+}
+.ap-tab.on { background: #1b4a6a; border-color: #2f7ba8; color: #dff2ff; }
+.ap-controls { max-height: 330px; overflow-y: auto; padding-right: 4px; }
+.ap-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ap-row-wide { align-items: flex-start; }
+.ap-label { flex: 0 0 116px; color: #9fb0c8; font-size: 13px; }
+.ap-select {
+  flex: 1 1 0; min-width: 0; background: #121826; color: #e6e6e6;
+  border: 1px solid #2c3a52; border-radius: 6px; padding: 5px 7px; font: inherit; font-size: 13px;
+}
+.ap-range { flex: 1 1 0; min-width: 0; accent-color: #2f7ba8; }
+.ap-num { flex: 0 0 44px; text-align: right; color: #7f8ea4; font-size: 12px; font-variant-numeric: tabular-nums; }
+.ap-swatches { flex: 1 1 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ap-swatch {
+  width: 20px; height: 20px; border-radius: 5px; border: 1px solid #2c3a52;
+  padding: 0; cursor: pointer;
+}
+.ap-swatch.on { border-color: #7fd8ff; box-shadow: 0 0 0 2px rgba(127, 216, 255, .3); }
+.ap-colour {
+  width: 26px; height: 22px; padding: 0; border: 1px solid #2c3a52;
+  border-radius: 5px; background: #121826; cursor: pointer;
+}
+.ap-actions { display: flex; gap: 8px; align-items: center; margin-top: 16px; }
+.ap-spacer { flex: 1 1 auto; }
+.ap-actions button {
+  background: #1b4a6a; color: #dff2ff; border: 1px solid #2f7ba8; border-radius: 6px;
+  padding: 8px 18px; font: inherit; font-size: 15px; cursor: pointer;
+}
+.ap-actions button.ghost { background: #121826; border-color: #2c3a52; color: #9fb0c8; }
+.ap-actions button:hover { background: #24618a; }
+.ap-actions button.ghost:hover { background: #1a2333; }
+@media (max-width: 760px) {
+  .ap-body { flex-direction: column; }
+  .ap-left { flex: 1 1 auto; width: 100%; }
+  .ap-controls { max-height: none; }
+}
+
+/* ---------------------------------------------------------------- R16: handing a job in from the journal
+   "It's currently difficult to turn in a quest, finding the right quest giver. Allow quests to be
+   turned in through the interface journal page."
+
+   A finished row grows one more column. `.journal-row` in the pane is a grid, so the column count
+   has to be declared for every combination that can turn up — with a locate target, without one —
+   or the button wraps onto a line of its own, which is the bug the ⌖ button hit in round 14. */
+.pane .journal-row.has-action { grid-template-columns: 1fr auto auto; }
+.pane .journal-row.has-locate.has-action { grid-template-columns: 1fr auto auto auto; }
+.row-handin {
+  justify-self: end; align-self: center;
+  padding: 2px 9px; border: 1px solid #4a7a52; border-radius: 5px;
+  background: #1b3323; color: #a8e6ba;
+  font-size: 11px; font-family: inherit; line-height: 1.5; white-space: nowrap; cursor: pointer;
+}
+.row-handin:hover { background: #24472f; color: #d4ffe0; border-color: #6aa876; }
+.row-handin:focus-visible { outline: 2px solid #6aa876; outline-offset: 1px; }
+.row-handin:disabled { opacity: .45; cursor: default; }
+/* a job with nobody to hand it to says so where the button would have been */
+.row-selfpaid { justify-self: end; align-self: center; font-size: 11px; color: var(--ink-faint); font-style: italic; }

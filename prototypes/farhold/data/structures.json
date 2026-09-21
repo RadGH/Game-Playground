@@ -132,9 +132,13 @@
       "name": "Workshop",
       "_doc": "§3 benches. Each one unlocks a recipe family."
     },
+    "extract": {
+      "name": "Extraction",
+      "_doc": "R16. Things that take raw material OUT of the world \u2014 a drill on a seam, a pump in a river. Every one of them is pinned to a piece of world geometry by `needs`, and every one of them RUNS ITSELF: an extraction piece is never a js/refining.json machine, so it can never want a worker. That invariant is the whole reason this category is separate from Refining, and tests/round16-industry.test.js asserts it. \"Drills and similar resource extraction devices should be on their own building menu and are automated, separate from manufacturing devices which require work to be done by the player or NPC.\""
+    },
     "refine": {
       "name": "Refining",
-      "_doc": "§2. Raw to useful, three tiers."
+      "_doc": "§2. Raw to useful, three tiers \u2014 MANUFACTURING, which is the half of the old category that needs somebody at it. A tier-0 furnace always wants a worker, a tier-1 bench wants one until you wire it to the grid, and a tier-2 machine wants only power. Extraction moved out to `extract` in R16."
     },
     "power": {
       "name": "Power",
@@ -1435,7 +1439,7 @@
     {
       "id": "small_drill",
       "name": "Small Drill",
-      "cat": "refine",
+      "cat": "extract",
       "tier": 1,
       "w": 1.6,
       "d": 1.6,
@@ -1456,7 +1460,7 @@
     {
       "id": "drill",
       "name": "Drill",
-      "cat": "refine",
+      "cat": "extract",
       "tier": 2,
       "w": 2.8,
       "d": 2.8,
@@ -1479,7 +1483,7 @@
     {
       "id": "pump",
       "name": "Pump",
-      "cat": "refine",
+      "cat": "extract",
       "tier": 2,
       "w": 2,
       "d": 2,

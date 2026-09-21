@@ -265,11 +265,12 @@
   "fuel": {
     "id": "lift_fuel",
     "legs": {
-      "launch": 6,
-      "land": 3,
-      "jump": 8,
-      "warp": 20
+      "launch": 1,
+      "land": 1,
+      "jump": 1,
+      "warp": 1
     },
+    "_legsDoc": "R16: every leg costs one unit. It used to be launch 6 + a held-back landing 3, so the first flight demanded nine and the answer to \"can I go to space yet\" was another afternoon at the synthesiser. The gate that means anything is the SHIP — four subsystems, a pad, and a warp coil before you leave the star. Fuel is the reminder that the industry exists, not the wall.",
     "reserve": 1,
     "_reserveDoc": "A launch is refused unless there is enough left over to put the ship down again. Stranding a player in orbit with a dry tank is a loss they cannot undo, and that is not a difficulty setting, it is a bug.",
     "capacity": 60,

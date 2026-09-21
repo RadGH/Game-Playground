@@ -168,6 +168,20 @@ const HULLS = { raft: buildRaft, skiff: buildSkiff, cutter: buildCutter, launch:
  */
 export function createBoat() {
   const group = new THREE.Group();
+  /**
+   * R16 — THE CORNER THAT DIPPED.
+   *
+   *   "The raft also tilts asymmetrically dipping the top right corner into the water."
+   *
+   * The raft geometry is symmetric; the fault was the rotation ORDER. Three.js defaults to `XYZ`,
+   * which builds the matrix as Rx·Ry·Rz with the YAW IN THE MIDDLE — so `rotation.x` is a tilt
+   * about the WORLD x axis, not about the boat's own beam. Pointing north it lifted the bow as
+   * intended; pointing east the identical number became a pure roll, and on any heading between
+   * the two it went in diagonally and put one corner under the surface. `YXZ` turns the boat
+   * first and then pitches and rolls it in its own frame, which is what every one of these three
+   * numbers was written to mean.
+   */
+  group.rotation.order = 'YXZ';
   group.visible = false;
   const hulls = {};
   for (const [key, build] of Object.entries(HULLS)) {
@@ -178,6 +192,7 @@ export function createBoat() {
   }
   let current = null;
   let t = 0;
+  let pitch = 0;
 
   return {
     group,
@@ -202,13 +217,27 @@ export function createBoat() {
       group.position.set(x, surface - 0.12, z);
       group.rotation.y = yaw;
     },
-    /** A slow bob at rest and a heel into the direction of travel when moving. */
+    /**
+     * A slow bob at rest and a heel into the direction of travel when moving.
+     *
+     * The pitch EASES rather than snapping to its clamp. It used to be `-min(0.09, moving*0.012)`
+     * against a raft that does 11.3 m/s, so the term was pinned at its maximum from the first
+     * metre and never came back to level — a permanent 5° nose-up list on a 2.6 m hull.
+     */
     update(dt, moving = 0) {
       t += dt;
+      const wantPitch = -Math.min(0.055, Math.max(0, moving) * 0.006);
+      pitch += (wantPitch - pitch) * Math.min(1, dt * 2.2);
       group.position.y += Math.sin(t * 1.6) * 0.02;
-      group.rotation.z = Math.sin(t * 1.1) * 0.03;
-      group.rotation.x = -Math.min(0.09, moving * 0.012);      // the bow lifts as it gets going
+      group.rotation.z = Math.sin(t * 1.1) * 0.025;            // a gentle roll, in the boat's own frame
+      group.rotation.x = pitch;
     },
+    /**
+     * How far above the water the deck is, so whoever is aboard stands ON it. The raft's logs are
+     * 0.17 m in radius and the hull sits 0.12 m under the surface, which puts the top of the logs
+     * a few centimetres proud; the other three hulls have real floors, so they get a little more.
+     */
+    deckHeight() { return current === 'raft' ? 0.06 : 0.16; },
     dispose() {
       group.traverse(o => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
     },

@@ -54,18 +54,36 @@ test('walking to a seam and pressing E gets ore, and a worked seam runs out', as
     await new Promise(r => setTimeout(r, 400));
 
     const before = f.materials()[node.resource] || 0;
-    // press E the way a player does
-    for (let i = 0; i < 6; i++) {
-      window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyE', bubbles: true }));
-      await new Promise(r => setTimeout(r, 140));
-      window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyE', bubbles: true }));
-      await new Promise(r => setTimeout(r, 60));
+    /**
+     * R16 — E STARTS A BAR, IT DOES NOT TAKE A BITE.
+     *
+     *   "Change mining behavior instead of press E to collect an item or chop a tree, to press E or
+     *    attack a mineable resource with the tool equipped = starts a small progress bar above the
+     *    resource that collects the item when complete."
+     *
+     * So six presses 200 ms apart used to be six takings and are now one gather that has barely
+     * started. The press still has to be a real keydown — that is the path being tested — and then
+     * the test has to WAIT the way a player does. `gather.seamSeconds` is 3.2 at speed 1, and the
+     * starting Knapped Tool is slower than that, so five seconds with a little headroom.
+     */
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyE', bubbles: true }));
+    await new Promise(r => setTimeout(r, 80));
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyE', bubbles: true }));
+    const bars = [];
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      const bar = f.tools?.gathering?.bar?.();
+      if (bar) bars.push(bar.fraction);
+      if (!bar && bars.length) break;          // the bar filled and paid out
     }
     const after = f.materials()[node.resource] || 0;
     return {
       resource: node.resource,
       before, after,
       worked: node.worked,
+      // R16: the bar went up, moved, and came down again
+      barSteps: bars.length,
+      barRose: bars.length > 1 && bars[bars.length - 1] > bars[0],
       // …and the report is the rich-and-far trade-off in one number
       report: f.mining.report(node, { x: node.x + 400, z: node.z }),
     };

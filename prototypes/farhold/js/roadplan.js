@@ -483,3 +483,84 @@ export function createRoadBook({ terrain = null, terraform = null, saved = null 
 }
 
 const r3 = v => Math.round((v || 0) * 1000) / 1000;
+
+// ---------------------------------------------------------------- where a road meets a town's ring
+
+/** Which road outranks which, when there are more crossings than a town has gatehouses for. */
+export const ROAD_RANK = { highway: 3, road: 2, trail: 1, street: 0, built: 1 };
+
+/**
+ * EVERY PLACE A ROAD ACTUALLY CROSSES A CIRCLE, TO THE METRE.
+ *
+ * Round 16, and the reason it exists is the user's own report: *"At seed 4477, Delta Thiakean II,
+ * x 50788, z 23588, heading SSW there is a wall on the road with no gate, can't get through."*
+ *
+ * `js/features.js` had two ways of asking this question and only one of them worked. The town
+ * planner got this one — walk the polyline, find the step from outside the ring to inside, and
+ * interpolate. The WALL got a different one: scan every road SAMPLE POINT and keep any that lands
+ * within about ten metres of the ring. A road is sampled every `M_PER_CELL / 5` metres — 45 m on
+ * the default planet size, 128 m on a full-sized one — so a sample almost never lands in a
+ * twenty-metre-wide annulus. Measured at Pewargate, the town in that report: the scan found ZERO
+ * crossings and fell through to its "put a gate at a random bearing" fallback, while this walk
+ * finds the two real ones — including the trail at bearing 131 degrees, which is exactly the wall
+ * the user was standing in front of.
+ *
+ * So there is one function now and both readers call it. Returns world positions, the offset from
+ * the centre (which is what a town planner wants) and the bearing (which is what a wall wants),
+ * best road first.
+ */
+export function ringCrossings(paths, cx, cz, ring, { minGap = 10, limit = Infinity } = {}) {
+  const out = [];
+  for (const r of paths || []) {
+    const pts = r.points;
+    if (!pts || pts.length < 2) continue;
+    let wasIn = Math.hypot(pts[0][0] - cx, pts[0][1] - cz) <= ring;
+    for (let i = 1; i < pts.length; i++) {
+      const d = Math.hypot(pts[i][0] - cx, pts[i][1] - cz);
+      const isIn = d <= ring;
+      if (isIn !== wasIn) {
+        /**
+         * The real intersection of the segment with the circle, not an interpolation of the two
+         * distances. Lerping the distance is fine head-on and badly wrong on a road that comes in
+         * at a slant — measured on a 82 m wall ring it put a "crossing" 70 m from the middle of
+         * town, twelve metres inside its own wall, which would blank the masonry in the wrong place.
+         * Solving |A + t(B - A) - C|^2 = ring^2 costs one square root and is exact.
+         */
+        const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
+        const vx = bx - ax, vz = bz - az;
+        const fx = ax - cx, fz = az - cz;
+        const qa = vx * vx + vz * vz;
+        const qb = 2 * (fx * vx + fz * vz);
+        const qc = fx * fx + fz * fz - ring * ring;
+        const disc = qb * qb - 4 * qa * qc;
+        let t;
+        if (qa < 1e-12 || disc < 0) {
+          const da = Math.hypot(ax - cx, az - cz), db = Math.hypot(bx - cx, bz - cz);
+          t = Math.abs(db - da) < 1e-6 ? 0.5 : (ring - da) / (db - da);
+        } else {
+          const root = Math.sqrt(disc);
+          const t0 = (-qb - root) / (2 * qa), t1 = (-qb + root) / (2 * qa);
+          // one of the two roots is inside this segment — that is the step we just detected
+          t = (t0 >= -1e-6 && t0 <= 1 + 1e-6) ? t0 : t1;
+        }
+        t = Math.max(0, Math.min(1, t));
+        const x = ax + vx * t, z = az + vz * t;
+        const dx = x - cx, dz = z - cz;
+        // a road that grazes the ring crosses twice within a few metres; one gate is enough
+        if (!out.some(c => Math.hypot(c.dx - dx, c.dz - dz) < minGap)) {
+          out.push({
+            x, z, dx, dz,
+            angle: Math.atan2(dz, dx),
+            klass: r.klass || 'trail',
+            rank: ROAD_RANK[r.klass] ?? 1,
+            id: r.id,
+          });
+        }
+      }
+      wasIn = isIn;
+    }
+  }
+  // a highway earns its gatehouse before a trail does, when there are more crossings than gates
+  out.sort((a, b) => b.rank - a.rank);
+  return Number.isFinite(limit) ? out.slice(0, limit) : out;
+}

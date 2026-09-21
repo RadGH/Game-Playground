@@ -15,7 +15,7 @@ import {
   makeTerrain, setMetresPerCell, M_PER_CELL_DEFAULT,
 } from '../js/planet.js';
 import { PLANET_BANDS, bandForPlanet, planetThreat } from '../js/rpg.js';
-import { buildForest, RINGS, ringStep } from '../js/perks.js';
+import { buildForest, RINGS, ringStep, ARMS } from '../js/perks.js';
 import { buildZones } from '../js/zones.js';
 import { snapshot, restore, saveCarriesWorld } from '../js/save.js';
 
@@ -107,13 +107,28 @@ test('a band comes from what a world is, never from a coin flip', () => {
 
 test('the forest is a lattice: even rings, even angles, no jitter', () => {
   const forest = buildForest();
-  assert.equal(forest.nodes.length, 89, 'the node count should not have moved');
+  /**
+   * R16: eight arms, not four. "Add 4 more corner-facing quadrants to the Perks tree" — so the
+   * count is 1 hub + 8 arms x 20 + 8 oddballs. It is asserted rather than derived on purpose: a
+   * forest that quietly changes size is a forest where somebody's saved points moved.
+   */
+  assert.equal(forest.nodes.length, 169, 'the node count should not have moved');
 
   // every node sits exactly on its ring
   for (const node of forest.nodes) {
     if (node.kind === 'hub') { assert.equal(Math.hypot(node.x, node.y), 0); continue; }
     const r = Math.hypot(node.x, node.y);
-    const wanted = node.oddball ? [3, 5] : [RINGS.find(x => x.at === node.ring)?.radius];
+    if (node.oddball) {
+      // An oddball sits BETWEEN two rings, on a seam between two arms. Asserting the rule rather
+      // than the two numbers is what stops this test breaking every time the ladder moves.
+      const radii = RINGS.map(x => x.radius).sort((a, b) => a - b);
+      assert.ok(r > radii[0] && r < radii[radii.length - 1],
+        `${node.id} is at radius ${r.toFixed(3)}, outside the rings entirely`);
+      assert.ok(!radii.some(w => Math.abs(r - w) < 1e-9),
+        `${node.id} is at radius ${r.toFixed(3)}, which is a ring — it should be between two`);
+      continue;
+    }
+    const wanted = [RINGS.find(x => x.at === node.ring)?.radius];
     assert.ok(wanted.some(w => Math.abs(r - w) < 1e-9),
       `${node.id} is at radius ${r.toFixed(3)}, not ${wanted.join(' or ')}`);
   }
@@ -146,12 +161,19 @@ test('nothing in the forest sits on top of anything else', () => {
 
 test('an oddball is between the arms, not on one', () => {
   const forest = buildForest();
-  const armAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
+  /**
+   * R16: read the angles off ARMS rather than typing them. There are eight arms now and they are
+   * only pi/4 apart, so the old 0.6 rad of clearance from every one of them is not merely wrong,
+   * it is geometrically impossible — half the gap between two arms is 0.39. The rule that still
+   * means something is "an oddball is on the SEAM", i.e. as far from both neighbours as it can be.
+   */
+  const armAngles = ARMS.map(a => a.angle);
+  const halfGap = Math.PI / armAngles.length;          // half the angle between two arms
   for (const node of forest.nodes.filter(n => n.oddball)) {
     const angle = Math.atan2(node.y, node.x);
     for (const arm of armAngles) {
-      let diff = Math.abs(((angle - arm + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
-      assert.ok(diff > 0.6, `${node.id} is only ${diff.toFixed(2)} rad off an arm`);
+      const diff = Math.abs(((angle - arm + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+      assert.ok(diff > halfGap * 0.8, `${node.id} is only ${diff.toFixed(2)} rad off an arm`);
     }
   }
 });

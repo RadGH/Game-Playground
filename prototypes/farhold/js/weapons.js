@@ -272,7 +272,10 @@ export const RANGED = {
   shortbow: { kind: 'draw', min: 0.28, full: 0.75, powerMin: 0.55, powerFull: 1.40, hold: 1.4, decay: 0.03, range: 38, splash: 0.9 },
   longbow: { kind: 'draw', min: 0.40, full: 1.10, powerMin: 0.55, powerFull: 1.75, hold: 1.8, decay: 0.03, range: 54, splash: 0.9 },
   crossbow: { kind: 'reload', reload: 1.25, power: 1.80, range: 50, splash: 0.9 },
-  javelin: { kind: 'throw', power: 1.15, carried: 6, every: 0.75, range: 28, splash: 1.4 },
+  // R16 — no `carried`. There is no ammunition in this game: "I do not want any ammunition
+  // system in the game at this point." A javelin is a one-handed thrower with short reach and
+  // a wide splash, and that short reach is what pays for it now.
+  javelin: { kind: 'throw', power: 1.15, every: 0.75, range: 28, splash: 1.4 },
 };
 
 /** How a ranged weapon fires: a draw, a reload or a throw. Null for anything that is not one. */

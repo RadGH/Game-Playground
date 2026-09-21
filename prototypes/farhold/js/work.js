@@ -202,11 +202,34 @@ export function tagsMatch(tags, order) {
  * are standing in front of, and machines chew through whatever is at their own station.
  */
 export class WorkBoard {
-  constructor({ now = 0, keepDone = 40 } = {}) {
+  /**
+   * R16 — A BOARD BUILT FROM A SAVE KEEPS ITS ORDERS.
+   *
+   * `toJSON` has always written the open orders out and the constructor has always thrown them
+   * away: `new WorkBoard(save.work)` read `now` and nothing else, and `WorkBoard.fromJSON` — which
+   * does read them — is called by nobody in the game. So every load emptied the board. For a
+   * machine's `lab_*` order that was invisible (js/refine.js re-posts within the second), but a
+   * harvest or a build order posted by something that only posts once was simply lost, and the
+   * half a shift a citizen had already put into one went with it.
+   *
+   * Taking `orders` in the constructor rather than fixing every call site means the game's own
+   * `new WorkBoard(save?.work || {})` starts working with no change anywhere else, and a caller
+   * that passes nothing gets exactly the empty board it always got.
+   */
+  constructor({ now = 0, keepDone = 40, orders = null } = {}) {
     this.orders = [];
     this.finished = [];
     this.now = now;
     this.keepDone = keepDone;
+    // Anything already finished or cancelled in the save is not an open order; drop it rather than
+    // resurrecting a row the player has seen the end of.
+    if (Array.isArray(orders)) {
+      for (const o of orders) {
+        if (!o || o.complete || o.cancelled) continue;
+        // a saved order is a plain object, so fill in anything a newer field added
+        this.orders.push({ ledger: { player: 0, machine: 0, citizen: 0 }, credits: [], meta: {}, ...o });
+      }
+    }
   }
 
   post(order) {

@@ -11,6 +11,7 @@
     "hostile": "true if the layout belongs to something that will fight you (used by the POI test)"
   },
   "_worldBossDoc": "The four world-boss arenas used by data/worldbosses.json — boss_bonefield, boss_barrow, boss_slagpit, boss_ironmuster. They are built WIDE on purpose: the thing standing in the middle is six to nine metres tall and keeps calling bodies up, so the ring has to be somewhere you can actually back off inside. No new geometry — all four are composed out of the same nineteen pieces the strongholds already use.",
+  "_instanceDoc": "The twenty `inst_*` layouts are the MOUTHS of data/instances.json — what an instance looks like from outside, before you press E. Each one has to read as what it is from the next ridge: a cave is a den with rubble and bones round it, a fallow farmstead is a hut with its fence gone to stakes, a barrow is a mound with its doorstone lying flat, and the dragon's lair is a den at more than twice scale with bones in a ring and fires still lit. `tall` on every one of them is COMPUTED from the tallest piece it places times that piece's scale, not guessed — the gibbet above says 9 for a 6.16 m cage, and a set piece that lies about its height is culled at the wrong distance.",
   "layouts": {
     "wayshrine": {
       "tall": 15,
@@ -1664,6 +1665,1190 @@
         {
           "r": 13,
           "a": 0.75
+        }
+      ]
+    },
+    "inst_weeping_cave": {
+      "tall": 10.2,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 1.6
+        }
+      ],
+      "rings": [
+        {
+          "piece": "cairn",
+          "count": 5,
+          "radius": 9,
+          "rotate": "in",
+          "scale": 0.9,
+          "jitter": 0.8
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 5,
+        "from": 46,
+        "to": 14,
+        "spread": 2.6,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 12,
+          "radius": 22,
+          "inner": 6,
+          "scale": 1.1
+        },
+        {
+          "piece": "bonepile",
+          "count": 3,
+          "radius": 15,
+          "inner": 5,
+          "scale": 0.8
+        }
+      ]
+    },
+    "inst_bramble_burrow": {
+      "tall": 9.8,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 0.95
+        },
+        {
+          "piece": "menhir",
+          "scale": 1.2,
+          "x": 5.5,
+          "z": -2,
+          "spin": 0.3
+        }
+      ],
+      "rings": [
+        {
+          "piece": "cairn",
+          "count": 6,
+          "radius": 8.5,
+          "rotate": "random",
+          "scale": 0.75,
+          "jitter": 1.0
+        }
+      ],
+      "approach": {
+        "piece": "cairn",
+        "count": 4,
+        "from": 38,
+        "to": 12,
+        "spread": 2.2,
+        "scale": 0.7,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "bonepile",
+          "count": 5,
+          "radius": 16,
+          "inner": 4,
+          "scale": 0.8
+        },
+        {
+          "piece": "rubble",
+          "count": 6,
+          "radius": 18,
+          "inner": 7,
+          "scale": 0.9
+        }
+      ]
+    },
+    "inst_sinkhole_stair": {
+      "tall": 9.6,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 1.5,
+          "y": -1.2
+        }
+      ],
+      "rings": [
+        {
+          "piece": "menhir",
+          "count": 8,
+          "radius": 12,
+          "rotate": "in",
+          "scale": 0.8,
+          "jitter": 0.9
+        },
+        {
+          "piece": "waystone",
+          "count": 6,
+          "radius": 7,
+          "rotate": "in",
+          "scale": 0.7
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 4,
+        "from": 40,
+        "to": 15,
+        "spread": 2.4,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 10,
+          "radius": 20,
+          "inner": 13,
+          "scale": 1.0
+        }
+      ]
+    },
+    "inst_fallow_farmstead": {
+      "tall": 9.6,
+      "centre": [
+        {
+          "piece": "hut",
+          "scale": 1.45
+        },
+        {
+          "piece": "hut",
+          "scale": 0.9,
+          "x": 12,
+          "z": -7,
+          "spin": 0.4
+        },
+        {
+          "piece": "den",
+          "scale": 0.8,
+          "x": -5,
+          "z": 5.5
+        }
+      ],
+      "rings": [
+        {
+          "piece": "palisade",
+          "count": 7,
+          "radius": 21,
+          "rotate": "tangent",
+          "scale": 0.95,
+          "broken": true,
+          "jitter": 1.4
+        }
+      ],
+      "grids": [
+        {
+          "piece": "cairn",
+          "cols": 3,
+          "rows": 3,
+          "gapX": 7,
+          "gapZ": 7,
+          "jitter": 1.5,
+          "scale": 0.7,
+          "skip": [
+            4
+          ]
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 5,
+        "from": 44,
+        "to": 14,
+        "spread": 2.8,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 10,
+          "radius": 26,
+          "inner": 9,
+          "scale": 1.0
+        }
+      ]
+    },
+    "inst_hushed_chapel": {
+      "tall": 9.9,
+      "centre": [
+        {
+          "piece": "hut",
+          "scale": 1.5
+        },
+        {
+          "piece": "altar",
+          "scale": 1.2,
+          "z": 5.5
+        },
+        {
+          "piece": "den",
+          "scale": 0.8,
+          "x": -6.5,
+          "z": 2
+        }
+      ],
+      "rings": [
+        {
+          "piece": "menhir",
+          "count": 4,
+          "radius": 10,
+          "rotate": "in",
+          "scale": 0.7
+        }
+      ],
+      "grids": [
+        {
+          "piece": "cairn",
+          "cols": 4,
+          "rows": 3,
+          "gapX": 5,
+          "gapZ": 5.5,
+          "jitter": 1.1,
+          "scale": 0.9,
+          "skip": [
+            4
+          ]
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 6,
+        "from": 50,
+        "to": 16,
+        "spread": 2.6,
+        "scale": 0.85,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 8,
+          "radius": 24,
+          "inner": 11,
+          "scale": 0.9
+        }
+      ],
+      "fires": [
+        {
+          "r": 4.5,
+          "a": 0.6
+        }
+      ]
+    },
+    "inst_drowned_mill": {
+      "tall": 9.2,
+      "centre": [
+        {
+          "piece": "hut",
+          "scale": 1.4
+        },
+        {
+          "piece": "engine",
+          "scale": 1.25,
+          "x": 7.5,
+          "spin": 0.25
+        },
+        {
+          "piece": "den",
+          "scale": 0.85,
+          "x": -4,
+          "z": 6
+        }
+      ],
+      "rings": [
+        {
+          "piece": "hull",
+          "count": 1,
+          "radius": 16,
+          "angle": 0.35,
+          "scale": 0.8
+        },
+        {
+          "piece": "cairn",
+          "count": 6,
+          "radius": 12,
+          "rotate": "out",
+          "scale": 0.7,
+          "jitter": 1.0
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 5,
+        "from": 46,
+        "to": 15,
+        "spread": 2.6,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 9,
+          "radius": 24,
+          "inner": 10,
+          "scale": 1.0
+        }
+      ]
+    },
+    "inst_ivory_manor": {
+      "tall": 14.4,
+      "centre": [
+        {
+          "piece": "gatehouse",
+          "scale": 1.25
+        },
+        {
+          "piece": "hut",
+          "scale": 1.0,
+          "x": -11,
+          "z": -9
+        },
+        {
+          "piece": "hut",
+          "scale": 1.0,
+          "x": 11,
+          "z": -9
+        }
+      ],
+      "rings": [
+        {
+          "piece": "wall",
+          "count": 6,
+          "radius": 22,
+          "rotate": "tangent",
+          "scale": 1.0,
+          "broken": true,
+          "jitter": 1.2
+        },
+        {
+          "piece": "menhir",
+          "count": 4,
+          "radius": 14,
+          "rotate": "in",
+          "scale": 0.65
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 6,
+        "from": 56,
+        "to": 18,
+        "spread": 3.2,
+        "scale": 0.9,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 14,
+          "radius": 30,
+          "inner": 11,
+          "scale": 1.1
+        }
+      ],
+      "fires": [
+        {
+          "r": 6,
+          "a": 0.8
+        }
+      ]
+    },
+    "inst_cut_quarry": {
+      "tall": 9.9,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 1.55
+        },
+        {
+          "piece": "engine",
+          "scale": 1.1,
+          "x": 9.5,
+          "z": 3,
+          "spin": 0.15
+        }
+      ],
+      "rings": [
+        {
+          "piece": "hut",
+          "count": 3,
+          "radius": 18,
+          "rotate": "in",
+          "scale": 0.85,
+          "jitter": 1.0
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 6,
+        "from": 52,
+        "to": 16,
+        "spread": 3.0,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 16,
+          "radius": 28,
+          "inner": 6,
+          "scale": 1.3
+        },
+        {
+          "piece": "cairn",
+          "count": 4,
+          "radius": 22,
+          "inner": 14,
+          "scale": 0.8
+        }
+      ],
+      "fires": [
+        {
+          "r": 11,
+          "a": 0.42
+        }
+      ]
+    },
+    "inst_slumped_adit": {
+      "tall": 9.6,
+      "centre": [
+        {
+          "piece": "engine",
+          "scale": 1.3
+        },
+        {
+          "piece": "den",
+          "scale": 1.2,
+          "z": -6
+        }
+      ],
+      "rings": [
+        {
+          "piece": "hut",
+          "count": 2,
+          "radius": 15,
+          "rotate": "in",
+          "scale": 0.85
+        },
+        {
+          "piece": "cairn",
+          "count": 6,
+          "radius": 10,
+          "rotate": "random",
+          "scale": 0.8,
+          "jitter": 1.0
+        }
+      ],
+      "approach": {
+        "piece": "cairn",
+        "count": 5,
+        "from": 44,
+        "to": 14,
+        "spread": 2.4,
+        "scale": 0.7,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 12,
+          "radius": 24,
+          "inner": 8,
+          "scale": 1.1
+        },
+        {
+          "piece": "bonepile",
+          "count": 2,
+          "radius": 16,
+          "inner": 6,
+          "scale": 0.8
+        }
+      ]
+    },
+    "inst_kings_barrow": {
+      "tall": 10.2,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 1.35
+        },
+        {
+          "piece": "menhir",
+          "scale": 1.25,
+          "x": -4.5,
+          "z": 4,
+          "spin": 0.12
+        }
+      ],
+      "rings": [
+        {
+          "piece": "menhir",
+          "count": 8,
+          "radius": 14,
+          "rotate": "in",
+          "scale": 0.9,
+          "jitter": 1.0
+        }
+      ],
+      "approach": {
+        "piece": "menhir",
+        "count": 4,
+        "from": 46,
+        "to": 18,
+        "spread": 3.4,
+        "scale": 0.7,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "cairn",
+          "count": 6,
+          "radius": 22,
+          "inner": 17,
+          "scale": 0.9
+        },
+        {
+          "piece": "rubble",
+          "count": 6,
+          "radius": 24,
+          "inner": 16,
+          "scale": 0.9
+        }
+      ]
+    },
+    "inst_ash_tomb": {
+      "tall": 11.4,
+      "centre": [
+        {
+          "piece": "obelisk",
+          "scale": 0.75
+        },
+        {
+          "piece": "den",
+          "scale": 1.1,
+          "z": 7
+        }
+      ],
+      "rings": [
+        {
+          "piece": "cairn",
+          "count": 8,
+          "radius": 11,
+          "rotate": "in",
+          "scale": 0.85,
+          "jitter": 0.8
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 6,
+        "from": 50,
+        "to": 15,
+        "spread": 2.8,
+        "scale": 0.85,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 8,
+          "radius": 22,
+          "inner": 13,
+          "scale": 1.0
+        },
+        {
+          "piece": "bonepile",
+          "count": 4,
+          "radius": 18,
+          "inner": 9,
+          "scale": 0.9
+        }
+      ]
+    },
+    "inst_black_cistern": {
+      "tall": 10.4,
+      "centre": [
+        {
+          "piece": "tower",
+          "scale": 0.6
+        },
+        {
+          "piece": "altar",
+          "scale": 1.1,
+          "z": 6.5
+        },
+        {
+          "piece": "den",
+          "scale": 0.9,
+          "x": 6,
+          "z": 4
+        }
+      ],
+      "rings": [
+        {
+          "piece": "menhir",
+          "count": 6,
+          "radius": 13,
+          "rotate": "in",
+          "scale": 0.75,
+          "jitter": 0.8
+        },
+        {
+          "piece": "waystone",
+          "count": 8,
+          "radius": 8,
+          "rotate": "in",
+          "scale": 0.7
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 5,
+        "from": 46,
+        "to": 15,
+        "spread": 2.6,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 10,
+          "radius": 22,
+          "inner": 15,
+          "scale": 0.9
+        }
+      ]
+    },
+    "inst_sealed_vault": {
+      "tall": 12.7,
+      "centre": [
+        {
+          "piece": "gatehouse",
+          "scale": 1.1
+        },
+        {
+          "piece": "altar",
+          "scale": 1.0,
+          "z": 7
+        }
+      ],
+      "rings": [
+        {
+          "piece": "obelisk",
+          "count": 4,
+          "radius": 16,
+          "rotate": "in",
+          "scale": 0.6
+        },
+        {
+          "piece": "waystone",
+          "count": 10,
+          "radius": 10,
+          "rotate": "in",
+          "scale": 0.8
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 6,
+        "from": 54,
+        "to": 18,
+        "spread": 3.0,
+        "scale": 0.9,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 6,
+          "radius": 24,
+          "inner": 18,
+          "scale": 0.9
+        }
+      ],
+      "fires": [
+        {
+          "r": 5,
+          "a": 0.25
+        },
+        {
+          "r": 5,
+          "a": 0.75
+        }
+      ]
+    },
+    "inst_tidewrack_hold": {
+      "tall": 9.6,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 1.5
+        },
+        {
+          "piece": "hull",
+          "scale": 1.0,
+          "x": -10,
+          "z": 8,
+          "spin": 0.7
+        }
+      ],
+      "rings": [
+        {
+          "piece": "tent",
+          "count": 4,
+          "radius": 12,
+          "rotate": "in",
+          "scale": 1.0,
+          "jitter": 1.2
+        },
+        {
+          "piece": "cage",
+          "count": 1,
+          "radius": 14,
+          "angle": 0.62,
+          "scale": 0.9
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 4,
+        "from": 40,
+        "to": 13,
+        "spread": 2.4,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 7,
+          "radius": 22,
+          "inner": 14,
+          "scale": 0.9
+        },
+        {
+          "piece": "bonepile",
+          "count": 2,
+          "radius": 18,
+          "inner": 9,
+          "scale": 0.8
+        }
+      ],
+      "fires": [
+        {
+          "r": 7,
+          "a": 0.1
+        },
+        {
+          "r": 8,
+          "a": 0.55
+        }
+      ]
+    },
+    "inst_gnawed_warren": {
+      "tall": 10.2,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 1.6
+        }
+      ],
+      "rings": [
+        {
+          "piece": "den",
+          "count": 1,
+          "radius": 15,
+          "angle": 0.18,
+          "scale": 0.85
+        },
+        {
+          "piece": "bonepile",
+          "count": 8,
+          "radius": 13,
+          "rotate": "random",
+          "scale": 0.95,
+          "jitter": 1.4
+        }
+      ],
+      "approach": {
+        "piece": "cairn",
+        "count": 4,
+        "from": 38,
+        "to": 13,
+        "spread": 2.2,
+        "scale": 0.7,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "bonepile",
+          "count": 6,
+          "radius": 22,
+          "inner": 8,
+          "scale": 1.0
+        },
+        {
+          "piece": "rubble",
+          "count": 6,
+          "radius": 20,
+          "inner": 9,
+          "scale": 0.9
+        }
+      ]
+    },
+    "inst_pale_undercroft": {
+      "tall": 9.6,
+      "centre": [
+        {
+          "piece": "hut",
+          "scale": 1.45
+        },
+        {
+          "piece": "altar",
+          "scale": 1.3,
+          "z": 6
+        },
+        {
+          "piece": "den",
+          "scale": 0.85,
+          "x": 7,
+          "z": -3
+        }
+      ],
+      "rings": [
+        {
+          "piece": "menhir",
+          "count": 7,
+          "radius": 12,
+          "rotate": "in",
+          "scale": 0.95,
+          "jitter": 0.9
+        },
+        {
+          "piece": "cage",
+          "count": 2,
+          "radius": 16,
+          "rotate": "in",
+          "scale": 0.9
+        }
+      ],
+      "approach": {
+        "piece": "menhir",
+        "count": 4,
+        "from": 44,
+        "to": 16,
+        "spread": 3.0,
+        "scale": 0.6,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "bonepile",
+          "count": 6,
+          "radius": 21,
+          "inner": 8,
+          "scale": 0.9
+        },
+        {
+          "piece": "rubble",
+          "count": 8,
+          "radius": 24,
+          "inner": 13,
+          "scale": 0.9
+        }
+      ],
+      "fires": [
+        {
+          "r": 4.5,
+          "a": 0.15
+        },
+        {
+          "r": 4.5,
+          "a": 0.65
+        }
+      ]
+    },
+    "inst_rimeward_deep": {
+      "tall": 9.9,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 1.55
+        },
+        {
+          "piece": "menhir",
+          "scale": 1.15,
+          "x": -6,
+          "z": -3,
+          "spin": 0.42
+        }
+      ],
+      "rings": [
+        {
+          "piece": "menhir",
+          "count": 6,
+          "radius": 13,
+          "rotate": "in",
+          "scale": 0.8,
+          "jitter": 1.1
+        },
+        {
+          "piece": "cairn",
+          "count": 5,
+          "radius": 9,
+          "rotate": "random",
+          "scale": 0.8
+        }
+      ],
+      "approach": {
+        "piece": "cairn",
+        "count": 5,
+        "from": 46,
+        "to": 15,
+        "spread": 2.6,
+        "scale": 0.8,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 10,
+          "radius": 23,
+          "inner": 15,
+          "scale": 1.0
+        }
+      ]
+    },
+    "inst_slagworks": {
+      "tall": 10.0,
+      "centre": [
+        {
+          "piece": "engine",
+          "scale": 1.35
+        },
+        {
+          "piece": "hut",
+          "scale": 1.2,
+          "x": -10,
+          "z": 5
+        },
+        {
+          "piece": "den",
+          "scale": 1.0,
+          "x": 8,
+          "z": -5
+        }
+      ],
+      "rings": [
+        {
+          "piece": "engine",
+          "count": 2,
+          "radius": 15,
+          "rotate": "in",
+          "scale": 0.9
+        },
+        {
+          "piece": "hut",
+          "count": 3,
+          "radius": 20,
+          "rotate": "in",
+          "scale": 0.85,
+          "jitter": 1.2
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 6,
+        "from": 52,
+        "to": 16,
+        "spread": 3.0,
+        "scale": 0.85,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 14,
+          "radius": 28,
+          "inner": 10,
+          "scale": 1.2
+        },
+        {
+          "piece": "pyre",
+          "count": 3,
+          "radius": 20,
+          "inner": 9,
+          "scale": 1.1
+        }
+      ],
+      "fires": [
+        {
+          "r": 6.5,
+          "a": 0.05
+        },
+        {
+          "r": 7,
+          "a": 0.4
+        },
+        {
+          "r": 6.5,
+          "a": 0.72
+        }
+      ]
+    },
+    "inst_windward_gaol": {
+      "tall": 14.8,
+      "centre": [
+        {
+          "piece": "tower",
+          "scale": 0.85
+        },
+        {
+          "piece": "hut",
+          "scale": 1.0,
+          "x": -9,
+          "z": 7
+        }
+      ],
+      "rings": [
+        {
+          "piece": "cage",
+          "count": 5,
+          "radius": 11,
+          "rotate": "in",
+          "scale": 1.0,
+          "jitter": 0.8
+        },
+        {
+          "piece": "palisade",
+          "count": 8,
+          "radius": 19,
+          "rotate": "tangent",
+          "scale": 1.0,
+          "broken": true,
+          "jitter": 1.5
+        }
+      ],
+      "approach": {
+        "piece": "waystone",
+        "count": 6,
+        "from": 50,
+        "to": 16,
+        "spread": 2.8,
+        "scale": 0.85,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "rubble",
+          "count": 10,
+          "radius": 26,
+          "inner": 12,
+          "scale": 1.0
+        },
+        {
+          "piece": "bonepile",
+          "count": 3,
+          "radius": 20,
+          "inner": 10,
+          "scale": 0.9
+        }
+      ],
+      "fires": [
+        {
+          "r": 5.5,
+          "a": 0.3
+        }
+      ]
+    },
+    "inst_emberhold_lair": {
+      "tall": 14.1,
+      "centre": [
+        {
+          "piece": "den",
+          "scale": 2.2
+        },
+        {
+          "piece": "menhir",
+          "scale": 1.4,
+          "x": -12,
+          "z": 6,
+          "spin": 0.22
+        },
+        {
+          "piece": "menhir",
+          "scale": 1.4,
+          "x": 12,
+          "z": 6,
+          "spin": 0.78
+        }
+      ],
+      "rings": [
+        {
+          "piece": "bonepile",
+          "count": 10,
+          "radius": 17,
+          "rotate": "random",
+          "scale": 1.25,
+          "jitter": 2.0
+        }
+      ],
+      "approach": {
+        "piece": "menhir",
+        "count": 6,
+        "from": 72,
+        "to": 22,
+        "spread": 5.0,
+        "scale": 0.9,
+        "both": true
+      },
+      "scatter": [
+        {
+          "piece": "bonepile",
+          "count": 8,
+          "radius": 32,
+          "inner": 19,
+          "scale": 1.3
+        },
+        {
+          "piece": "rubble",
+          "count": 12,
+          "radius": 36,
+          "inner": 13,
+          "scale": 1.3
+        },
+        {
+          "piece": "pyre",
+          "count": 4,
+          "radius": 24,
+          "inner": 11,
+          "scale": 1.4
+        }
+      ],
+      "fires": [
+        {
+          "r": 9,
+          "a": 0.08
+        },
+        {
+          "r": 10,
+          "a": 0.32
+        },
+        {
+          "r": 9.5,
+          "a": 0.58
+        },
+        {
+          "r": 10,
+          "a": 0.86
         }
       ]
     }

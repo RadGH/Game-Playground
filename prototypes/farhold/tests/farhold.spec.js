@@ -189,7 +189,9 @@ test('the character sheet wears an item and the body picks up the weapon', async
   });
   expect(outcome.sheetVisible).toBe(true);
   // round 4b added a second ring, a mount slot and a light slot
-  expect(outcome.slotsDrawn).toBe(12);
+  // R16: thirteen. "Instead of having tool be based on weapon (no idea how that works) change it
+  // so you build new tools" — so there is a Tool slot now (js/rpg.js SLOTS, js/tools.js).
+  expect(outcome.slotsDrawn).toBe(13);
   expect(outcome.worn).toBe(outcome.item);
   expect(outcome.damageAfter[1]).toBeGreaterThan(outcome.damageBefore[1]);
 });

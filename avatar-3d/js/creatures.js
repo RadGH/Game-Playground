@@ -38,7 +38,7 @@ export function randomCreature(type, seed = Math.floor(Math.random() * 1e9)) {
 /** Build a creature. */
 export async function createCreature(spec) {
   const group = new THREE.Group(); group.userData.character = true;
-  const state = { anim: 'idle', t: 0, spec: null, parts: {}, plan: null, root: null };
+  const state = { anim: 'idle', t: 0, rate: 1, spec: null, parts: {}, plan: null, root: null };
   function clear() { while (group.children.length) { disposeObj(group.children[0]); group.remove(group.children[0]); } }
   function disposeObj(o) { o.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }); }
   function build(sp) {
@@ -48,9 +48,26 @@ export async function createCreature(spec) {
   }
   build(spec);
   return {
-    group, get anim() { return state.anim; }, setAnim(n) { state.anim = n; state.t = 0; }, setSpec(sp) { build(sp); }, get spec() { return state.spec; },
+    group,
+    get anim() { return state.anim; },
+    /**
+     * THE STUTTER. `setAnim` reset the clock EVERY TIME it was called, and the game calls it once
+     * a frame ("play walk") — so `state.t` was never more than one frame's dt and every creature
+     * in the game was frozen on the first sixteen milliseconds of its gait, jittering with the
+     * frame time instead of walking. The humanoid rig has had this guard since it was written
+     * (chibi2.js: `if (next === action && !ONE_SHOTS.has(name)) return;`); the beasts never did.
+     */
+    setAnim(n) { if (n === state.anim) return; state.anim = n; state.t = 0; },
+    /**
+     * How fast the gait runs, so four legs cover the ground the body is actually covering. The
+     * clip speeds below are radians a second for a creature travelling at its designed pace; this
+     * scales that, the same way `setRate` does for the humanoid.
+     */
+    setRate(r) { state.rate = Math.max(0.15, Math.min(3, Number(r) || 1)); },
+    get rate() { return state.rate; },
+    setSpec(sp) { build(sp); }, get spec() { return state.spec; },
     metrics() { const b = new THREE.Box3().setFromObject(group); return { height: b.max.y - b.min.y, length: b.max.z - b.min.z, width: b.max.x - b.min.x }; },
-    update(dt, t) { state.t += dt; const fn = ({ quad: animQuad, spider: animSpider, bat: animBat, snake: animSnake, biped: animBiped, float: animFloat, roller: animRoller })[state.plan]; if (fn) fn(state, dt); },
+    update(dt, t) { state.t += dt * (state.rate || 1); const fn = ({ quad: animQuad, spider: animSpider, bat: animBat, snake: animSnake, biped: animBiped, float: animFloat, roller: animRoller })[state.plan]; if (fn) fn(state, dt); },
     dispose() { clear(); },
   };
 }

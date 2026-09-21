@@ -231,9 +231,19 @@ export function createTerritory({
       if (Number.isFinite(saveRow.heat)) record.heat = saveRow.heat;
       if (Number.isFinite(saveRow.visits)) record.visits = saveRow.visits;
       if (Array.isArray(saveRow.incidents)) record.incidents = saveRow.incidents.map(i => ({ ...i }));
+      /**
+       * An adopted row (`s_<siteKey>`) describes a set piece this file did not invent, so it is not
+       * in `record.landmarks` yet on a fresh build. Keep the saved state on a stub and let
+       * `adoptLandmark` fill in the name and the gives when js/sites.js next reconciles — which
+       * happens before anything can be pressed, because a set piece has to be built to be reached.
+       */
       for (const l of saveRow.landmarks || []) {
-        const mark = record.landmarks.find(m => m.id === l.id);
-        if (mark) { mark.done = l.done ?? 0; mark.state = l.state || mark.state; }
+        let mark = record.landmarks.find(m => m.id === l.id);
+        if (!mark && l.siteKey) {
+          mark = { id: l.id, siteKey: l.siteKey, type: 'landmark', gives: {}, steps: 0, x: 0, z: 0, pending: true };
+          record.landmarks.push(mark);
+        }
+        if (mark) { mark.done = l.done ?? 0; mark.state = l.state || mark.state; mark.taken = !!l.taken; }
       }
       for (const c of saveRow.cleared || []) {
         const site = record.sites.find(s => s.id === c.id);
@@ -427,8 +437,68 @@ export function createTerritory({
     const mark = record?.landmarks.find(l => l.id === landmarkId);
     if (!mark || mark.taken) return false;
     mark.taken = true;
+    /**
+     * R16 — AND THEN IT STOPS BEING A PLACE ON THE MAP.
+     *
+     *   "I activated it, rewarding 20xp (very minor), yet the marker stayed there. This event is
+     *    not significant enough to warrant a global indicator and once consumed it should have
+     *    just gone away."
+     *
+     * Quite right. `taken` said the reward was spent and `state` said whether the WORK was done,
+     * and a gibbet has no work — `solve: false`, no steps — so its state sat on `visited` for ever
+     * and it kept its glyph. A place is finished when it has nothing left to give: no one-off
+     * reward still owed, and no standing offer (a shrine you can still rest at, a ford you can
+     * still cross, a bridge that still charges a toll) that would bring you back.
+     */
+    if (!standingOffer(mark)) mark.state = 'done';
     touch(record);
     return true;
+  }
+
+  /** Does this place still do something for you every time you come back? */
+  function standingOffer(mark) {
+    const g = mark?.gives || {};
+    return !!(g.rest || g.bench || g.crossing || g.travelBonus || g.reviveDaily || g.toll);
+  }
+
+  /**
+   * R16 — THE TWO LANDMARK SYSTEMS, JOINED UP AT LAST.
+   *
+   *   "Also, despite the name 'gibbet cage' there was no model there."
+   *
+   * There are two things in this game called a landmark and they had never met. THIS file invents
+   * a few per zone from `data/landmarks.json` and gives them coordinates, state and a save slot —
+   * and no geometry whatever. `js/sites.js` builds the set pieces you can actually see, out of the
+   * same JSON, at its own coordinates, with NUMERIC ids. So the gibbet the user walked up to was
+   * this file's phantom: a `◇` on the minimap, an `E look at Gibbet` prompt, 20 experience, and
+   * nothing standing there. Meanwhile every gibbet that DID have a cage on a post failed the id
+   * lookup below (`l3_0` is not `9012`), so it paid nothing, ever, and a `solve: true` one dead-
+   * ended with E doing literally nothing for the life of the save.
+   *
+   * `adoptLandmark` is the join. `js/sites.js` reconciles its set pieces against this record and
+   * hands the leftovers here; anything it adopts gets a record row keyed by the SITE's stable
+   * string key, so it visits, works, pays once and saves exactly like a native one. One code path,
+   * one ledger, one save format.
+   */
+  function adoptLandmark(zoneId, site) {
+    const record = of(zoneId);
+    if (!record || !site) return null;
+    const key = site.key != null ? String(site.key) : null;
+    if (!key) return null;
+    const already = record.landmarks.find(l => l.siteKey === key);
+    if (already) return already;
+    const mark = {
+      id: `s_${key}`, siteKey: key,
+      type: 'landmark', kind: site.type || site.plan, name: site.name,
+      blurb: site.blurb, does: site.does, faction: site.faction || null,
+      gives: site.gives || {},
+      steps: site.steps || 0,
+      done: 0, state: site.steps ? 'unsolved' : 'unvisited',
+      x: site.x, z: site.z, cell: site.cell || null,
+    };
+    record.landmarks.push(mark);
+    touch(record);
+    return mark;
   }
 
   /** You stood at one. That is all the surveyor wants. */
@@ -463,9 +533,29 @@ export function createTerritory({
 
   return {
     of, visit, clearSite, championKilled, press, tick, addIncident, resolveIncident,
-    workLandmark, visitLandmark, takeLandmark,
+    workLandmark, visitLandmark, takeLandmark, adoptLandmark, standingOffer,
+    /**
+     * The row a landmark should use, whichever of the two systems it came from. A set-piece
+     * landmark is adopted on the spot the first time somebody presses E at it.
+     */
+    recordFor(zoneId, mark) {
+      if (!mark) return null;
+      const record = of(zoneId);
+      if (!record) return null;
+      if (mark.siteKey || mark.id != null) {
+        const byId = record.landmarks.find(l => l === mark || l.id === mark.id);
+        if (byId && !byId.pending) return byId;
+      }
+      if (mark.key != null) return adoptLandmark(zoneId, mark);
+      return null;
+    },
     /** The landmarks of a zone, which is what five of the job frames bind to. */
-    landmarksIn(zoneId) { return of(zoneId)?.landmarks || []; },
+    /**
+     * A `pending` row is saved state waiting for js/sites.js to hand back the set piece it belongs
+     * to — it has a state and no coordinates, so it must never reach a map, a patrol route or a
+     * proximity test, or it becomes a landmark at the origin of the world.
+     */
+    landmarksIn(zoneId) { return (of(zoneId)?.landmarks || []).filter(l => !l.pending); },
     get hours() { return clock; },
     /** Every zone whose record has actually been touched — the map legend wants these. */
     known: () => [...records.values()],
@@ -490,8 +580,15 @@ export function createTerritory({
           heat: Math.round(record.heat * 1000) / 1000,
           visits: record.visits,
           cleared: record.sites.filter(s => s.cleared).map(s => ({ id: s.id, at: s.clearedAt })),
-          landmarks: record.landmarks.filter(l => l.done || l.state !== 'unsolved' && l.state !== 'unvisited')
-            .map(l => ({ id: l.id, done: l.done, state: l.state })),
+          /**
+           * R16: `taken` goes in the save now. It never did — so the one-shot gate that stopped a
+           * landmark paying infinite experience held until you reloaded, and then the Field of
+           * Cairns paid again. `siteKey` goes in too, because an adopted row has to find its set
+           * piece again on the next run.
+           */
+          landmarks: record.landmarks
+            .filter(l => l.taken || l.done || (l.state !== 'unsolved' && l.state !== 'unvisited'))
+            .map(l => ({ id: l.id, done: l.done, state: l.state, taken: !!l.taken, siteKey: l.siteKey || undefined })),
           incidents: record.incidents.map(i => ({ ...i })),
         };
       }

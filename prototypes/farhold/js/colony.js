@@ -728,6 +728,20 @@ export function createColony({
     rollMigration() {
       if (colony.pending.length >= (migCfg.maxPending || 2)) return null;
       if (colony.spareBeds() <= 0) return null;     // nowhere to put them; nobody comes
+      /**
+       * R16 — AND A HOUSE, NOT A BEDROLL.
+       *
+       *   "Once you have established a base and built at least one house, let's start a Population
+       *    system like warcraft 3… migration events that happen once and awhile but only when you
+       *    have available population to grow."
+       *
+       * A bedroll declares one bed, so a player who had thrown two on the ground was already
+       * eligible for migrants — which is not "established a base with at least one house". A real
+       * house is a structure that sleeps two or more; see HOUSE_MIN_BEDS in js/population.js, which
+       * the Town Hall and the recruit refusal both read.
+       */
+      const houses = (housing?.houses || []).filter(h => (h.beds || 0) >= 2).length;
+      if (housing && houses <= 0) return null;
       const a = colony.appeal();
       const chance = (migCfg.baseChance || 0) + ((migCfg.chanceAtFullAppeal || 0) - (migCfg.baseChance || 0)) * a.score;
       if (rng() > chance) return null;

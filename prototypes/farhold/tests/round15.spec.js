@@ -482,13 +482,16 @@ test('a furnace you are standing at runs, with no colony anywhere', async ({ pag
 });
 
 /**
- * R15 — a javelin runs out.
+ * R16 — A JAVELIN DOES NOT RUN OUT, BECAUSE NOTHING IN THIS GAME DOES.
  *
- * It is the best weapon in the game precisely because it is a one-handed bow that costs nothing:
- * 1.15x power at 28 m, `carried: 6`, and `carried` was read by NOBODY. Six throws is a fight and
- * gathering them afterwards is the cost — without the count it is simply a better bow.
+ *   "You also mentioned javelins 'cost nothing'. Are you referring to ammo? I do not want any
+ *    ammunition system in the game at this point."
+ *
+ * Round 15 gave it a count of six and a pick-them-up-off-the-ground loop; this is the same test
+ * turned round. A javelin is balanced by what it IS — 28 m of reach against a longbow's 54, on a
+ * 0.75 s throw clock — and throwing one costs nothing but the time.
  */
-test('a javelin is counted, runs out, and is picked back up off the ground', async ({ page }) => {
+test('a javelin throws for ever, and nothing counts ammunition', async ({ page }) => {
   const errors = await land(page);
   const out = await page.evaluate(async () => {
     const fh = window.farhold;
@@ -497,30 +500,20 @@ test('a javelin is counted, runs out, and is picked back up off the ground', asy
     fh.rpg.equip(fh.player, jav, { force: true });
     fh.rpg.refresh(fh.player);
     const carried = fh.player.derived.swing?.main?.carried ?? null;
-
-    /**
-     * Throw until it refuses, through the real path: `swingNow` sets the same attack flag a mouse
-     * click sets, and the frame tick does the rest — cooldown, wind-up and all.
-     */
     const thrown = [];
     for (let i = 0; i < 12; i++) {
-      const before = fh.player.javelins;
       fh.swingNow();
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       fh.control.attackCooldown = 0;
-      thrown.push({ before: before ?? null, after: fh.player.javelins ?? null });
+      thrown.push(i);
     }
-    return {
-      carried,
-      left: fh.player.javelins,
-      onGround: (fh.player.javelinsOnGround || []).length,
-      thrown: thrown.slice(0, 8),
-    };
+    return { carried, ammo: fh.player.javelins ?? null, onGround: (fh.player.javelinsOnGround || []).length, throws: thrown.length };
   });
   console.log('javelins:', JSON.stringify(out));
   if (out.skipped) { console.log('skipped:', out.skipped); return; }
-  expect(out.carried, 'a javelin does not declare how many you carry').toBeGreaterThan(0);
-  // it must NOT be unlimited
-  expect(out.left, 'a javelin still throws for ever').toBeLessThan(out.carried);
+  expect(out.carried, 'the ranged plan still declares an ammunition count').toBeFalsy();
+  expect(out.ammo, 'something is still counting javelins on the player').toBeNull();
+  expect(out.onGround, 'javelins are still being dropped on the ground to collect').toBe(0);
+  expect(out.throws, 'twelve throws did not happen').toBe(12);
   expect(errors).toEqual([]);
 });

@@ -168,8 +168,6 @@ export function createController(terrainIn, balance = {}, camera, {
     windPower: 1, windRecover: 0, windCharge: null,
     /** Consecutive connecting strikes, for the sword's momentum. Set by main.js/actors.js. */
     momentum: 0,
-    /** Javelins in hand. Throwing one spends it; there is no infinite spear.  */
-    ammo: null,
     attackEvery: b.attackEvery ?? 0.62,      // main.js keeps this in step with derived.attackEvery
     firstPerson: false, eyeHeight: 1.5,
     swimming: false, wading: false, waterDepth: 0, waterSurface: 0,

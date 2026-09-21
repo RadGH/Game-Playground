@@ -40,6 +40,9 @@ export class ObstacleField {
    * anything narrower than `STANDABLE_RADIUS` is solid all the way up and is never a floor.
    */
   topOf(o) {
+    // a deck's top is absolute: there is no ground under a bridge to measure from, which is the
+    // whole reason it exists
+    if (o.deck) return o.top;
     if (o._top === undefined) o._top = (this.ground ? this.ground(o.x, o.z) : 0) + o.h;
     return o._top;
   }
@@ -65,19 +68,62 @@ export class ObstacleField {
     this.count++;
   }
 
+  /**
+   * FILE A DECK: A FLAT TOP YOU WALK ON, NOT A CYLINDER YOU WALK AROUND.
+   *
+   * Round 16. *"Is it possible to have bridges span the gap rather than to raise the elevation up,
+   * and ensure the player can walk across the river."* A bridge could only ever carry you because
+   * `js/planet.js` raised the GROUND under it — an earth dam across the channel — and the moment
+   * that stops, there has to be something else to stand on. Everything in this file until now was a
+   * cylinder measured up from the ground below it, which is exactly the wrong shape: the ground
+   * under a bridge is the river bed, ten metres down and not a fixed distance away.
+   *
+   * So a deck carries its own absolute top height and a rotated rectangle for its footprint. It is
+   * never solid — you walk onto it, not into it — and `standAt` treats it like any other roof.
+   *
+   *   field.addDeck(x, z, angle, halfLength, halfWidth, top);   // +Z is along the deck at angle 0
+   */
+  addDeck(x, z, angle, halfLength, halfWidth, top) {
+    const r = Math.hypot(halfLength, halfWidth);
+    const item = {
+      x, z, r, h: 0, deck: true, top,
+      // the yaw convention every body in this game uses: local +Z points along `angle`
+      tx: Math.sin(angle), tz: Math.cos(angle), hl: halfLength, hw: halfWidth,
+    };
+    const b = this.bucket;
+    for (let bx = Math.floor((x - r) / b); bx <= Math.floor((x + r) / b); bx++) {
+      for (let bz = Math.floor((z - r) / b); bz <= Math.floor((z + r) / b); bz++) {
+        const k = this._key(bx, bz);
+        let list = this.buckets.get(k);
+        if (!list) this.buckets.set(k, list = []);
+        list.push(item);
+      }
+    }
+    this.count++;
+    return this;
+  }
+
+  /** Is this point over a deck's footprint? */
+  onDeck(o, x, z, radius = 0) {
+    const dx = x - o.x, dz = z - o.z;
+    if (Math.abs(dx * o.tx + dz * o.tz) > o.hl + radius) return false;
+    return Math.abs(dx * -o.tz + dz * o.tx) <= o.hw + radius;
+  }
+
   /** Everything filed near a point (may repeat across buckets; callers de-duplicate by effect). */
   near(x, z) {
     return this.buckets.get(this._key(Math.floor(x / this.bucket), Math.floor(z / this.bucket))) || null;
   }
 
   /** Can you stand on top of this one, or is it too narrow to be a floor? */
-  standable(o) { return o.r >= STANDABLE_RADIUS; }
+  standable(o) { return o.deck ? true : o.r >= STANDABLE_RADIUS; }
 
   /** Is this point inside something solid? */
   blocked(x, z, radius = 0) {
     const list = this.near(x, z);
     if (!list) return false;
     for (const o of list) {
+      if (o.deck) continue;                      // you walk ON a deck, never into it
       const dx = x - o.x, dz = z - o.z, reach = o.r + radius;
       if (dx * dx + dz * dz < reach * reach) return true;
     }
@@ -100,6 +146,7 @@ export class ObstacleField {
       if (!list) break;
       let moved = false;
       for (const o of list) {
+        if (o.deck) continue;                    // a deck never pushes you out; it holds you up
         if (over && this.standable(o) && this.topOf(o) <= feet + CLEARANCE) continue;
         const dx = out[0] - o.x, dz = out[1] - o.z;
         const reach = o.r + radius;
@@ -125,14 +172,18 @@ export class ObstacleField {
    * which is what a player who cleared it by several feet expects to happen.
    */
   standAt(x, z, feet, radius = 0.4) {
-    if (!this.ground) return null;
     const list = this.near(x, z);
     if (!list) return null;
     let best = null;
     for (const o of list) {
+      if (!o.deck && !this.ground) continue;           // a cylinder's top is measured from the ground
       if (!this.standable(o)) continue;
-      const dx = x - o.x, dz = z - o.z, reach = o.r + radius;
-      if (dx * dx + dz * dz >= reach * reach) continue;
+      if (o.deck) {
+        if (!this.onDeck(o, x, z, radius)) continue;
+      } else {
+        const dx = x - o.x, dz = z - o.z, reach = o.r + radius;
+        if (dx * dx + dz * dz >= reach * reach) continue;
+      }
       const top = this.topOf(o);
       if (top > feet + CLEARANCE) continue;            // we are under it, not on it
       if (best === null || top > best) best = top;

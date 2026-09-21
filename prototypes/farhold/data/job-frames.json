@@ -1,5 +1,5 @@
 {
-  "_doc": "Twenty-two quest frames — eighteen that bind to something particular, and four bread-and-butter ones at the top that bind to almost anything so a quiet farming zone still has a board. A frame is a template with typed slots; js/jobgen.js fills every slot from things that EXIST in the current territory right now and refuses to emit the frame if it cannot. That is the whole idea — a job is a fact about the world, phrased, not a coordinate rolled out of nothing. `scope` local means the pin is in the zone you are standing in; `adjacent` means a zone that touches it and the text says so; `rumour` never gets a pin at all. Placeholders are {slot.field}.",
+  "_doc": "Twenty-two quest frames — eighteen that bind to something particular, and four bread-and-butter ones at the top that bind to almost anything so a quiet farming zone still has a board. A frame is a template with typed slots; js/jobgen.js fills every slot from things that EXIST in the current territory right now and refuses to emit the frame if it cannot. That is the whole idea — a job is a fact about the world, phrased, not a coordinate rolled out of nothing. `scope` local means the pin is in the zone you are standing in; `adjacent` means a zone that touches it and the text says so; `rumour` never gets a pin at all. Placeholders are {slot.field}. A frame's `reward` may also name WHAT IT PAYS IN with `kind`: coin (money and experience), crate (a piece of gear through the loot popup), materials (a bag of stock — with `mats` to say exactly which, or `matPool` to name one of build/hunt/ruin), choice (the giver asks you which of those three you would rather have), or pick3 (three rare-or-better items, you take one). Say nothing and js/questrewards.js decides from the shape of the job. Every other key of `reward` is an EXTRA and is handed to a handler by name — perk, opens, reveals, brand.",
 
   "scopes": {
     "local": { "name": "here", "maxZoneHops": 0 },
@@ -53,7 +53,7 @@
       "title": "{beast.name} has taken {site.name}",
       "text": "Nobody has been up to {site.name} since {beast.name} moved in. Put it out.",
       "goal": { "kind": "kill", "target": "{beast.id}", "count": 1, "at": "{site}" },
-      "reward": { "gold": [60, 140], "xp": [70, 160], "standing": 6 },
+      "reward": { "gold": [60, 140], "xp": [70, 160], "standing": 6, "kind": "crate" },
       "onDone": { "grip": -0.12, "rumour": "the way up to {site.name} is walkable again" }
     },
     {
@@ -92,7 +92,7 @@
       "title": "{foe.name} is still out there",
       "text": "{foe.name} beat you and has not stopped telling people. It knows where you sleep.",
       "goal": { "kind": "kill", "target": "{foe.id}", "count": 1 },
-      "reward": { "gold": [120, 300], "xp": [150, 340], "standing": 12 },
+      "reward": { "gold": [120, 300], "xp": [150, 340], "standing": 12, "kind": "pick3" },
       "onDone": { "grip": -0.08, "rumour": "somebody finally put {foe.name} down" }
     },
     {
@@ -110,7 +110,7 @@
       "title": "{town.name} is short",
       "text": "{town.name} has been on half rations for a week. Bring what you can.",
       "goal": { "kind": "gather", "target": "rations", "count": 8, "at": "{town}" },
-      "reward": { "gold": [70, 150], "xp": [60, 130], "standing": 9 },
+      "reward": { "gold": [70, 150], "xp": [60, 130], "standing": 9, "kind": "materials", "matPool": "build" },
       "onDone": { "resolve": "hunger", "grip": 0.06 }
     },
     {
@@ -128,7 +128,7 @@
       "title": "{who.name}'s boy has not come back",
       "text": "{who.name}'s boy went into {hole.name} three days ago on a dare. Bring him out, one way or the other.",
       "goal": { "kind": "clear", "count": 1, "at": "{hole}" },
-      "reward": { "gold": [80, 180], "xp": [100, 220], "standing": 7 },
+      "reward": { "gold": [80, 180], "xp": [100, 220], "standing": 7, "kind": "crate" },
       "onDone": { "rumour": "{hole.name} has been walked, at least the first of it" }
     },
     {
@@ -137,7 +137,7 @@
       "title": "{relic.name} belongs to somebody",
       "text": "{keeper.name} says {relic.name} came out of a grave and should go back in one. You could also sell it and say nothing.",
       "goal": { "kind": "deliver", "target": "{relic.id}", "count": 1, "at": "{keeper}" },
-      "reward": { "gold": [40, 90], "xp": [80, 170], "standing": 10 },
+      "reward": { "gold": [40, 90], "xp": [80, 170], "standing": 10, "kind": "choice" },
       "onDone": { "rumour": "the House has {relic.name} now" }
     },
     {
@@ -146,7 +146,7 @@
       "title": "Break the hold on {zone.name}",
       "text": "Three camps hold {zone.name}. Take all three and the ground changes hands.",
       "goal": { "kind": "clearSites", "count": 3, "at": "{sites}" },
-      "reward": { "gold": [200, 420], "xp": [240, 500], "standing": 14 },
+      "reward": { "gold": [200, 420], "xp": [240, 500], "standing": 14, "kind": "pick3" },
       "onDone": { "grip": -0.3, "rumour": "{zone.name} does not belong to them any more" }
     },
     {
@@ -155,7 +155,7 @@
       "title": "Clear out {camp.name}",
       "text": "{camp.name} went up last week and it is already three tents bigger. Burn it before it takes root.",
       "goal": { "kind": "clear", "count": 1, "at": "{camp}" },
-      "reward": { "gold": [90, 190], "xp": [100, 210], "standing": 8 },
+      "reward": { "gold": [90, 190], "xp": [100, 210], "standing": 8, "kind": "materials", "matPool": "build" },
       "onDone": { "grip": 0.08 }
     },
     {
@@ -167,7 +167,7 @@
       "title": "Light {beacon.name}",
       "text": "There is a raid band on the road and nobody at the tower. Reach {beacon.name} before they reach the gate.",
       "goal": { "kind": "solve", "count": 1, "at": "{beacon}", "timed": 900 },
-      "reward": { "gold": [110, 240], "xp": [130, 280], "standing": 11 },
+      "reward": { "gold": [110, 240], "xp": [130, 280], "standing": 11, "kind": "choice" },
       "onDone": { "resolve": "raid_coming", "grip": 0.1 }
     },
     {
@@ -176,7 +176,7 @@
       "title": "Open {mine.name}",
       "text": "{mine.name} came down years ago with most of a shift still in it. It is three days' digging, and you can do a day at a time.",
       "goal": { "kind": "solve", "count": 3, "at": "{mine}" },
-      "reward": { "gold": [60, 140], "xp": [80, 190], "standing": 6, "opens": "dungeon" },
+      "reward": { "gold": [60, 140], "xp": [80, 190], "standing": 6, "opens": "dungeon", "kind": "materials", "mats": { "stone": 8, "iron_ore": 5, "cut_stone": 3 } },
       "onDone": { "rumour": "{mine.name} is open again, and something is down there" }
     },
     {

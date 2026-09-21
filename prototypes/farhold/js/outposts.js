@@ -67,8 +67,16 @@ export function roleOf(members, defOf = null) {
     keys.add(e.key);
   }
   if (members.some(e => e.waypoint)) return 'hub';
-  if (keys.has('drill') || keys.has('pump')) return 'mine';
-  if (cats.has('refine') || cats.has('craft')) return 'works';
+  /**
+   * R16 — the category answers this now, and it answers it for the Small Drill too.
+   *
+   * The id list here knew about `drill` and `pump` and had never heard of `small_drill`, which is
+   * the FIRST drill anybody builds — so a camp of small drills round a seam called itself a
+   * Workshops outpost. `extract` is the whole family, and a new digger joins it by being data.
+   * The old ids stay as a belt-and-braces fallback for a save whose entries predate the category.
+   */
+  if (cats.has('extract') || keys.has('drill') || keys.has('pump') || keys.has('small_drill')) return 'mine';
+  if (cats.has('refine') || cats.has('craft') || keys.has('workshop') || keys.has('manufactory')) return 'works';
   if (cats.has('power')) return 'power';
   if (cats.has('store')) return 'depot';
   if (cats.has('defence')) return 'fort';

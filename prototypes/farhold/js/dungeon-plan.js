@@ -15,6 +15,22 @@ export const DUNGEON_LOOKS = {
   hollow: { name: 'Hollow', floor: '#2e3a34', wall: '#3a4a40', trim: '#6a9a70', fog: '#060a08' },
   vault: { name: 'Vault', floor: '#3e3a4a', wall: '#4a4458', trim: '#9a80d0', fog: '#08060e' },
   rime: { name: 'Rimeworks', floor: '#46525e', wall: '#54626e', trim: '#a8ccdd', fog: '#080c10' },
+
+  /**
+   * ROUND 16 — five more, for the places `data/instances.json` opens.
+   *
+   * The six above are all DUG: somebody quarried them, laid the floor and set the sconces. An
+   * instance is often none of those things — a cave nobody made, a house that fell in, a cistern
+   * with water still in it — and reading a farmhouse cellar in the same grey stone as a crypt is
+   * how twenty new places end up feeling like one place with twenty doors on it.
+   *
+   * The six above are untouched, byte for byte: every existing dungeon looks exactly as it did.
+   */
+  cave: { name: 'Cave', floor: '#3c3a36', wall: '#4a4640', trim: '#7d8a86', fog: '#050606' },
+  ruin: { name: 'Ruin', floor: '#5a5446', wall: '#6a6356', trim: '#9a9080', fog: '#0b0a08' },
+  hoard: { name: 'Hoard', floor: '#5a3a20', wall: '#48301f', trim: '#e0b040', fog: '#140a04' },
+  flooded: { name: 'Flooded', floor: '#2a3a40', wall: '#36464c', trim: '#6ea8b0', fog: '#050a0c' },
+  warren: { name: 'Warren', floor: '#463626', wall: '#54422e', trim: '#8a7048', fog: '#080604' },
 };
 
 /** Which look a biome family digs into. */

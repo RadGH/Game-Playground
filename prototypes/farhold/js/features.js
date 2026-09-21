@@ -17,19 +17,17 @@
 
 import * as THREE from 'three';
 import { BUILDING_INFO, streetLanes } from './town-plan.js';
-import { laneRibbon } from './roadplan.js';
+import { laneRibbon, ringCrossings } from './roadplan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { padSpotFor, boardSpotFor } from './waypoints.js';
 import {
   describeBuilding, partsFor, describeStall, stallParts, stallsFor,
   radiusOf, mix, MESHES, CULTURE_KIT,
 } from '../../../proctown/js/buildkit.js';
-import { waterRibbon, lakeSheet } from './water-plan.js';
+import { waterRibbon, lakeSheet, roadDeck } from './water-plan.js';
 import { makeRng } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
 import { ObstacleField, BUILDING_SOLIDS } from './collide.js';
-
-const IDX_XY = (i, w) => [i % w, Math.floor(i / w)];
 
 /** A flat ribbon following a polyline, draped on the ground. Returns vertex/index arrays. */
 function ribbon(points, heights, width, { lift = 0.1 } = {}) {
@@ -344,7 +342,6 @@ export const BUILDING_KEYS = Object.keys(BUILDINGS);
  */
 export function createFeatures(scene, terrain, opts = {}) {
   const world = terrain.world;
-  const W = world.width;
   const palette = opts.palette || {};
   const radius = opts.radius ?? 2600;
   const refreshEvery = opts.refreshEvery ?? 260;
@@ -357,40 +354,27 @@ export function createFeatures(scene, terrain, opts = {}) {
    */
   const waypointLit = opts.waypointLit || null;
 
-  const toMetres = i => { const [x, y] = IDX_XY(i, W); return [x * M_PER_CELL, y * M_PER_CELL]; };
 
   // The paths are the terrain's own — the very lines it carved the channels and cuttings from — so
   // the water surface sits exactly on the carved bed instead of clipping through it.
   const rivers = terrain.riverPaths;
   const roads = terrain.roadPaths;
-  const riverSet = new Set();
-  for (const r of world.rivers || []) for (const c of r.cells) riverSet.add(c);
 
-  // Where a road crosses water. World Forge already works this out when it lays the network — its
-  // `road.bridges` are the cells where a road had to cross a river, a lake or a channel — so that
-  // is the list to trust. Looking for a road cell that is also a river cell finds almost nothing
-  // extra, because the overlaps are at road ENDS: towns are founded on rivers.
-  const bridges = [];
-  const seenBridge = new Set();
-  const addBridge = (road, i) => {
-    const cell = road.cells[i];
-    if (cell == null || seenBridge.has(cell)) return;
-    seenBridge.add(cell);
-    const [x, z] = toMetres(cell);
-    const [px, pz] = toMetres(road.cells[Math.max(0, i - 1)]);
-    const [nx, nz] = toMetres(road.cells[Math.min(road.cells.length - 1, i + 1)]);
-    const angle = (nx === px && nz === pz) ? 0 : Math.atan2(nx - px, nz - pz);
-    bridges.push({ x, z, angle, cell });
-  };
-  for (const road of roads) {
-    for (const cell of road.bridgeCells || []) {
-      const i = (road.cells || []).indexOf(cell);
-      if (i >= 0) addBridge(road, i);
-    }
-    for (let i = 1; i < (road.cells || []).length - 1; i++) {
-      if (riverSet.has(road.cells[i])) addBridge(road, i);
-    }
-  }
+  /**
+   * WHERE A ROAD CROSSES A RIVER — `js/planet.js`'s own list now, not a second one worked out here.
+   *
+   * This used to look for a road CELL that was also a river cell, plus whatever World Forge had
+   * flagged. On the user's own world — seed 4477, Delta Thiakean II, the town of Pewargate — that
+   * finds nothing at all: a map cell is 224 m across and both lines are smoothed curves that wander
+   * inside their cells, so the road passes 2.3 m from the middle of a twelve-metre river and the
+   * two never share a cell. No bridge was built, and the only thing carrying the player over the
+   * water was the earth plug `heightAt` left behind, which is the dam the user reported.
+   *
+   * `terrain.crossings` walks both polylines properly (see `findCrossings` in js/planet.js) and is
+   * the SAME list that decides where the channel is left open. One list, so the bridge you can see,
+   * the deck you stand on and the hole in the ground can never disagree.
+   */
+  const bridges = terrain.crossings || [];
 
   const settlements = (world.nodes || [])
     .filter(n => n.type === 'settlement' || n.type === 'port')
@@ -521,13 +505,42 @@ export function createFeatures(scene, terrain, opts = {}) {
           return !!terrain.waterAt(wx, wz);                        // …or genuinely over water
         };
 
+        /**
+         * A LIFTED SPAN IS A DECK WITH A THICKNESS, NOT A SHEET OF PAPER.
+         *
+         * *"When they cross rivers the road surface is paper thin and looks off."* `roadDeck` in
+         * js/water-plan.js was written for this in round 11 and then never called — its own header
+         * said so — which made it the twelfth finished-module-with-no-way-in in this project. Now
+         * it is called: a stretch the grading LIFTED (`path.lift`, which is a bridge or a causeway,
+         * the only places you can see the side of a road) is drawn with a top, two sides and an
+         * underside; everything else stays the flat draped ribbon, which is right where the ground
+         * is touching it.
+         *
+         * Consecutive stretches share their boundary point, so there is no seam where the deck ends
+         * and the flat ribbon carries on.
+         */
+        const lifted = i => (r.lift?.[i] ?? 0) > 0.5;
+        const pushRoadRun = (from, to) => {                    // points [from, to)
+          let k = from;
+          while (k < to - 1) {
+            const up = lifted(k);
+            let e = k + 1;
+            while (e < to && lifted(e) === up) e++;
+            const end = Math.min(to, e + 1);
+            const pts = r.points.slice(k, end), hs = r.surface.slice(k, end);
+            if (pts.length >= 2) {
+              if (up) push(road, roadDeck(pts, hs, r.half * 2, { thick: 0.5, lift: 0.06 }));
+              else push(road, ribbon(pts, hs, r.half * 2, { lift: 0.06 }));
+            }
+            k = e;
+          }
+        };
+
         let runStart = a;
         for (let i = a; i <= b + 1; i++) {
           const wet = i > b || wetAt(i);
           if (!wet) continue;
-          if (i - runStart >= 2) {
-            push(road, ribbon(r.points.slice(runStart, i), r.surface.slice(runStart, i), r.half * 2, { lift: 0.06 }));
-          }
+          if (i - runStart >= 2) pushRoadRun(runStart, i);
           runStart = i + 1;
         }
       }
@@ -558,31 +571,13 @@ export function createFeatures(scene, terrain, opts = {}) {
    *
    * Returned in the TOWN'S coordinates, because that is what the planner works in.
    */
+  /**
+   * Round 16: the walk itself moved to `ringCrossings` in js/roadplan.js, because the WALL needed
+   * exactly the same answer and was working it out a different (and wrong) way — see the note
+   * there, and the missing gate at Pewargate that it explains.
+   */
   function roadLinksFor(cx, cz, ring) {
-    const out = [];
-    for (const r of roads) {
-      const pts = r.points;
-      if (!pts || pts.length < 2) continue;
-      let wasIn = Math.hypot(pts[0][0] - cx, pts[0][1] - cz) <= ring;
-      for (let i = 1; i < pts.length; i++) {
-        const d = Math.hypot(pts[i][0] - cx, pts[i][1] - cz);
-        const isIn = d <= ring;
-        if (isIn !== wasIn) {
-          // linear crossing between the two samples: close enough at a road's sample spacing
-          const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
-          const da = Math.hypot(ax - cx, az - cz), db = Math.hypot(bx - cx, bz - cz);
-          const t = Math.abs(db - da) < 1e-6 ? 0.5 : (ring - da) / (db - da);
-          const x = ax + (bx - ax) * t, z = az + (bz - az) * t;
-          // a road that grazes the ring crosses twice within a few metres; one high street is enough
-          if (!out.some(([ox, oz]) => Math.hypot(ox - (x - cx), oz - (z - cz)) < 10)) {
-            out.push([x - cx, z - cz]);
-          }
-        }
-        wasIn = isIn;
-        if (out.length >= 4) return out;             // four gates is as many as a town ever needs
-      }
-    }
-    return out;
+    return ringCrossings(roads, cx, cz, ring, { limit: 4 }).map(c => [c.dx, c.dz]);
   }
 
   /** Lay out one settlement: a well in the middle, houses around it, walls if it is big enough. */
@@ -881,20 +876,29 @@ export function createFeatures(scene, terrain, opts = {}) {
       };
 
       /**
-       * WHERE THE GATES GO: wherever a road meets the wall.
+       * WHERE THE GATES GO: wherever a road really meets the wall.
        *
-       * The gate used to be a random segment, so a road ran straight up to a city and into a solid
-       * stretch of masonry. Every road that passes near this settlement is checked for the point it
-       * crosses the wall ring, and the segments either side of that bearing are left out.
+       * *"Heading SSW there is a wall on the road with no gate, can't get through."* (seed 4477,
+       * Delta Thiakean II, x 50788 z 23588 — the town is Pewargate.)
+       *
+       * What was here scanned every road SAMPLE POINT and kept any that landed within `SEG * 1.6`
+       * (9.6 m) of the wall ring. A road is sampled every `M_PER_CELL / 5` metres, which is 45 m on
+       * the default planet size and 128 m on a full-sized one, so a sample almost never lands in a
+       * nineteen-metre-wide annulus. At Pewargate it found ZERO — and then fell through to the
+       * "no road reaches this town" fallback, which drops a gate at a RANDOM bearing. So the town
+       * had a gate; it was just nowhere near either of the two roads that actually arrive.
+       *
+       * `ringCrossings` walks the polyline and interpolates the step from outside the ring to
+       * inside, which is the same maths `roadLinksFor` above was already using to tell the town
+       * planner where its high streets go. One question, one answer, and the wall and the streets
+       * can no longer disagree about where the road comes in. At Pewargate it finds both: a road at
+       * bearing 41 degrees and the trail at 131, which is the wall the user was standing at.
+       *
+       * EVERY crossing opens the wall. Only the best four get a gatehouse (the mesh has a cap, and
+       * four is as many as a town ever wants) — but an opening with no gatehouse in it is still a
+       * way through, which is the thing that was actually broken.
        */
-      const gateAngles = [];
-      for (const road of roads) {
-        for (const [rx, rz] of road.points || []) {
-          const d = Math.hypot(rx - cx, rz - cz);
-          if (Math.abs(d - wallR) > SEG * 1.6) continue;
-          gateAngles.push(Math.atan2(rz - cz, rx - cx));
-        }
-      }
+      const gateAngles = ringCrossings(roads, cx, cz, wallR).map(c => c.angle);
       // always at least one way in, even on a settlement no road reaches
       if (!gateAngles.length) gateAngles.push(rng() * Math.PI * 2);
       const isGate = i => {
@@ -905,20 +909,6 @@ export function createFeatures(scene, terrain, opts = {}) {
         });
       };
 
-      for (let i = 0; i < segments; i++) {
-        if (isGate(i)) continue;                            // a road comes through here
-        const [ax, az] = ringPoint(i), [bx, bz] = ringPoint(i + 1);
-        const mx = (ax + bx) / 2, mz = (az + bz) / 2;
-        if (terrain.underwater(mx, mz)) continue;
-        const chord = Math.hypot(bx - ax, bz - az);
-        // sit the segment on the LOWER of its two ends and make it taller, so a step in the ground
-        // is hidden under the wall instead of opening a gap beneath it
-        const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
-        const lean = Math.abs(terrain.heightAt(ax, az) - terrain.heightAt(bx, bz));
-        // the mesh runs along +Z, so the LENGTH scale goes on Z and the yaw is the standard one
-        place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, chord / SEG * 1.06],
-          0.9, low, { tint: cultKit.townWall.colour });
-      }
       /**
        * A GATEHOUSE THAT LINES UP WITH ITS WALL, AND THAT YOU CAN WALK THROUGH.
        *
@@ -983,6 +973,31 @@ export function createFeatures(scene, terrain, opts = {}) {
           for (const side of [-1, 1]) solids.add(gx + tx * off * side, gz + tz * off * side, r, jamb[1]);
         }
       }
+      /**
+       * …AND ONLY THEN THE WALL ITSELF.
+       *
+       * The gatehouses go down FIRST on purpose. Every building here is an InstancedMesh with a cap
+       * on it, and the caps are spent in the order things are placed: a town at the far edge of the
+       * feature radius that runs the `wall` mesh dry is a cosmetic gap, but one that runs the
+       * `gatehouse` mesh dry is a town you cannot get into. A gate is worth more than a wall
+       * segment, so it is bought first. (`isGate` is independent of whether the gatehouse mesh was
+       * actually placed, so even with the cap exhausted the opening is still there.)
+       */
+      for (let i = 0; i < segments; i++) {
+        if (isGate(i)) continue;                            // a road comes through here
+        const [ax, az] = ringPoint(i), [bx, bz] = ringPoint(i + 1);
+        const mx = (ax + bx) / 2, mz = (az + bz) / 2;
+        if (terrain.underwater(mx, mz)) continue;
+        const chord = Math.hypot(bx - ax, bz - az);
+        // sit the segment on the LOWER of its two ends and make it taller, so a step in the ground
+        // is hidden under the wall instead of opening a gap beneath it
+        const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
+        const lean = Math.abs(terrain.heightAt(ax, az) - terrain.heightAt(bx, bz));
+        // the mesh runs along +Z, so the LENGTH scale goes on Z and the yaw is the standard one
+        place('wall', mx, mz, Math.atan2(bx - ax, bz - az), [1, 1 + lean / 3.8, chord / SEG * 1.06],
+          0.9, low, { tint: cultKit.townWall.colour });
+      }
+
       // towers beside every gate, and at the quarters
       const towerAngles = [...gateAngles.flatMap(g => [g - 0.26, g + 0.26]),
         ...[0, 1, 2, 3].map(i => (i / 4) * Math.PI * 2 + 0.4)];
@@ -1004,23 +1019,60 @@ export function createFeatures(scene, terrain, opts = {}) {
       if (Math.hypot(node.wx - px, node.wz - pz) > radius) continue;
       buildSettlement(node, counts, px, pz, streets);
     }
+    /**
+     * THE BRIDGE, AND THE THING THAT CARRIES YOU ACROSS IT.
+     *
+     * Round 16. Until now `js/planet.js` raised the ground to the deck for a few metres either side
+     * of the road's centre line, which is what you actually walked on — an earth dam straight
+     * across the channel. That is gone, so the bridge has to carry you itself: the same record that
+     * told `heightAt` to leave the water alone puts the mesh down AND files a deck in the obstacle
+     * field, at the same place, the same width and the same length. `js/player.js` already stands
+     * on whatever `standAt` hands it, so nothing there had to change.
+     *
+     * `BUILDING_INFO.bridge.solid` is still `[0, 0]`: a bridge is walked ON, never into, and
+     * `place()` is not what files this.
+     */
     for (const b of bridges) {
       if (Math.hypot(b.x - px, b.z - pz) > radius) continue;
       if (counts.bridge >= BUILDINGS.bridge.cap) break;
-      // sit the deck on the road, which planet.js has already lifted clear of the water, and
-      // stretch the span to cover the channel and both banks
-      const river = terrain.riverInfoAt(b.x, b.z);
-      const deck = terrain.roadSurfaceAt(b.x, b.z) ?? (terrain.heightAt(b.x, b.z) + 2.4);
-      const needed = river ? river.width + 18 : 14;
-      const span = Math.max(1, needed / BUILDINGS.bridge.span);
+      const deck = b.deck ?? terrain.roadSurfaceAt(b.x, b.z) ?? (terrain.heightAt(b.x, b.z) + 2.4);
+      // the crossing knows how far the water reaches along the road and how wide the road is; the
+      // mesh is 10 long and 5 wide before scaling, so these two ratios make it match exactly
+      const halfLength = b.halfLength ?? 12;
+      const halfWidth = b.halfWidth ?? 2.9;
+      const meshHalf = b.meshHalfLength ?? halfLength;
+      const span = Math.max(1, (meshHalf * 2) / BUILDINGS.bridge.span);
+      const wide = Math.max(1, (halfWidth * 2) / 5);
       matrix.compose(
         new THREE.Vector3(b.x, deck, b.z),
         new THREE.Quaternion().setFromEuler(new THREE.Euler(0, b.angle, 0)),
-        new THREE.Vector3(1.15, 1.15, span),
+        new THREE.Vector3(wide, 1.15, span),
       );
       instanced.bridge.setMatrixAt(counts.bridge, matrix);
       instanced.bridge.setColorAt(counts.bridge, colour.setScalar(1));
       counts.bridge++;
+
+      /**
+       * THE COLLIDER FOLLOWS THE ROAD, RATHER THAN BEING ONE FLAT PLANK.
+       *
+       * The graded surface RAMPS up to a crossing over tens of metres, so a single rectangle at the
+       * deck's own height leaves a step where it meets the road — measured at Pewargate, 1.95 m,
+       * which is a wall you walk into. A chain of short decks each sitting on the road's own height
+       * is a ramp you walk up, and it covers every metre of the hole `heightAt` opened. Four metres
+       * a segment keeps each step inside `CLEARANCE`, which is what makes it walkable rather than
+       * something you have to jump.
+       */
+      const STEP = 4;
+      const n = Math.max(1, Math.ceil(halfLength / STEP));
+      const tx = b.tx ?? Math.sin(b.angle), tz = b.tz ?? Math.cos(b.angle);
+      for (let k = -n; k < n; k++) {
+        const d = ((k + 0.5) / n) * halfLength;
+        const sx = b.x + tx * d, sz = b.z + tz * d;
+        // the road where this piece of deck is; the bridge's own height where there is no road
+        const y = terrain.roadSurfaceAt(sx, sz) ?? deck;
+        // the top of the deck box: it is 0.45 tall about its own middle, scaled 1.15
+        solids.addDeck(sx, sz, b.angle, halfLength / n + 0.2, halfWidth, y + 0.225 * 1.15);
+      }
     }
 
     for (const key of BUILDING_KEYS) {

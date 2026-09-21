@@ -63,7 +63,14 @@ test("a bow's rate of fire is designed rather than inherited from the dagger swi
   assert.ok(bow.every > light.every * 2, 'a bow should not fire at melee speed');
   assert.ok(RANGED.bow.kind === 'draw' && RANGED.bow.min > 0, 'a bow must have a draw');
   assert.ok(RANGED.crossbow.reload >= 1.2, 'a crossbow must have a reload');
-  assert.equal(RANGED.javelin.carried, 6, 'a javelin must be counted');
+  /**
+   * R16 — A JAVELIN IS NOT COUNTED. "I do not want any ammunition system in the game at this
+   * point." So the assertion is the other way round now: nothing in the ranged table may carry a
+   * count, because a count is an ammunition system however small it is.
+   */
+  for (const [key, plan] of Object.entries(RANGED)) {
+    assert.equal(plan.carried, undefined, `${key} carries ammunition, and nothing in this game does`);
+  }
   // an arrow is no longer a free area attack
   assert.ok(balance.player.arrowSplash <= 1, 'an arrow should hit what you aimed at');
 });

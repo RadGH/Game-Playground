@@ -209,6 +209,16 @@ export const AFFIX_WEIGHT = {
 export const SLOTS = [
   'weapon', 'offhand', 'head', 'chest', 'legs', 'hands', 'feet',
   'ring', 'ring2', 'necklace', 'mount', 'light',
+  /**
+   * R16 — THE TOOL SLOT.
+   *
+   * "Instead of having tool be based on weapon (no idea how that works) change it so you build new
+   * tools." It was based on the weapon because there was nowhere else to look: js/main.js matched
+   * the weapon's NAME against `/steel|iron|stone/` and called the result a tool tier. So a bow was
+   * bare hands, a crystal staff was bare hands, and the refusal "you need a Steel Tool" pointed at
+   * a slot that did not exist. It exists now. See js/tools.js.
+   */
+  'tool',
 ];
 /** Slots whose contents are gear you fight with, for the "worth wearing" arrow. */
 export const RING_SLOTS = ['ring', 'ring2'];
@@ -643,6 +653,9 @@ export class Rpg {
       areaPct: 0, petDamagePct: 0, petSlots: 0, arrowDamage: 0, arrowsPerShot: 1, arrowHoming: 0,
       arrowBurst: 0, lightRange: 0, revealRange: 0, mountSpeed: 0, mountStamina: 0, mountSlope: 0,
       mountCalm: 0, trample: 0, stealth: 0, staminaEase: 0,
+      // R16: how fast the gather bar fills and how much comes off it, so an affix or a perk that
+      // says "you work faster" has somewhere real to land. js/tools.js reads both.
+      gatherSpeed: 0, gatherYield: 0,
       str: unit.attrs?.str ?? 0, dex: unit.attrs?.dex ?? 0, int: unit.attrs?.int ?? 0, con: unit.attrs?.con ?? 0,
       // passive-tree fields, zeroed here so the effect registry can add to them too
       resistAll: 0, thorns: 0, hpOnKill: 0, manaOnKill: 0, lifeStealFrac: 0,

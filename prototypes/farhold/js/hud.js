@@ -84,10 +84,26 @@ export function rarityClass(item) {
   return 'rarity-' + (item.rarity || 'normal');
 }
 
+/**
+ * R16: the same job `vehicleFunction` does for a boat, for the two slots that hold an item — what
+ * it is FOR, in figures, rather than the lore line. A tool says what it can work and how fast; a
+ * mount says how quickly it carries you.
+ */
+function toolFunction(slot, item) {
+  if (!item) return '';
+  if (slot === 'tool') {
+    const speed = item.speed && item.speed !== 1 ? ` · ${Math.round((item.speed - 1) * 100)}% faster` : '';
+    const extra = item.bonusYield ? ` · +${Math.round(item.bonusYield * 100)}% yield` : '';
+    return `Tier ${item.tier || 1} · pick and axe${speed}${extra}`;
+  }
+  const sp = item.speed || item.mountSpeed;
+  return sp ? `${Math.round(sp * 10) / 10} m/s` : 'Carries you.';
+}
+
 export const SLOT_LABELS = {
   weapon: 'Weapon', offhand: 'Off hand', head: 'Head', chest: 'Chest', legs: 'Legs',
   hands: 'Hands', feet: 'Feet', ring: 'Ring', ring2: 'Second ring', necklace: 'Necklace',
-  mount: 'Mount', light: 'Light',
+  mount: 'Mount', light: 'Light', tool: 'Tool',
 };
 /** The other place an item could go, for the Shift-to-compare card. */
 const ALT_SLOT = { weapon: 'offhand', offhand: 'weapon', ring: 'ring2', ring2: 'ring' };
@@ -175,6 +191,17 @@ export class Hud {
      * star it, forget it — and knows nothing else about the map screen.
      */
     onLocate = null, onStarSaved = null, onForgetSaved = null,
+    /**
+     * R16 — HANDING A JOB IN WITHOUT WALKING BACK FOR IT.
+     *
+     *   "It's currently difficult to turn in a quest, finding the right quest giver. Allow quests to
+     *    be turned in through the interface journal page."
+     *
+     * The journal gets the same callback treatment as the map: it is handed one function and knows
+     * nothing about the quest log, the reward kinds or the popup. `onTurnInQuest(id)` returns a
+     * promise; the row redraws when it settles.
+     */
+    onTurnInQuest = null,
     /** R14: the same list the Nearby panel draws, so the journal cannot disagree with it. */
     nearby = null,
     /** R15: which tool tier the weapon in your hand counts as, and how to get the next one. */
@@ -189,6 +216,7 @@ export class Hud {
     this.onLocate = onLocate;
     this.onStarSaved = onStarSaved;
     this.onForgetSaved = onForgetSaved;
+    this.onTurnInQuest = onTurnInQuest;
     this.objective = objective;
     this.settings = settings;
     this.standings = standings;
@@ -510,27 +538,6 @@ export class Hud {
     if (bar.state !== state) { bar.state = state; bar.root.dataset.state = state; }
   }
 
-  /**
-   * R15 — HOW MANY JAVELINS ARE LEFT.
-   *
-   * A javelin is the only thing in this game with ammunition, and `carried: 6` was read by nobody —
-   * so you threw an unlimited number of the best weapon in the game. Now that there are six, the
-   * count has to be on screen: a limit the player cannot see is not a limit, it is a surprise.
-   *
-   * Built once, and it fades out when you are not carrying a thrower rather than being rebuilt.
-   */
-  ammo(left, of) {
-    let box = this._ammo;
-    if (!box) {
-      box = this._ammo = el('div', 'ammo-count');
-      document.body.append(box);
-    }
-    if (left == null || !of) { box.classList.remove('on'); return; }
-    box.classList.add('on');
-    box.textContent = left > 0 ? `${left} / ${of}` : 'empty';
-    box.dataset.state = left > 0 ? (left <= Math.max(1, Math.round(of * 0.34)) ? 'low' : 'ok') : 'empty';
-  }
-
   prompt(text) {
     const box = $('prompt');
     if (!box) return;
@@ -810,6 +817,65 @@ export class Hud {
     setTimeout(() => n.remove(), 900);
     // never let a long fight leave hundreds of dead nodes behind
     while (box.childElementCount > 40) box.firstElementChild.remove();
+  }
+
+  /**
+   * R16 — THE BAR OVER THE ROCK.
+   *
+   *   "Change mining behavior instead of press E to collect an item or chop a tree, to press E or
+   *    attack a mineable resource with the tool equipped = starts a small progress bar above the
+   *    resource that collects the item when complete, similar to World of Warcraft."
+   *
+   * There was no world-anchored progress bar anywhere in the playground — every bar in the game is
+   * screen-furniture pinned to a corner, and the only thing that draws AT a world point is the
+   * floating damage number. So this is built the same way that is: project the point through the
+   * camera and put one absolutely-positioned element there. One element, reused, hidden when there
+   * is nothing to show — not rebuilt per frame, because this runs at sixty hertz for four seconds
+   * at a time and a `replaceChildren` on every one of those frames is visible as a flicker.
+   *
+   * `bar` is `{ pos, fraction, label }`. `pos` is a THREE.Vector3 built by the caller, exactly the
+   * way `hit()` above takes one — this file does not import Three.js and is not going to start.
+   */
+  workBar(bar, camera) {
+    let box = this._workBar;
+    if (!box) {
+      box = this._workBar = el('div', 'work-bar');
+      box.innerHTML = '<span class="wb-label"></span><i class="wb-track"><b class="wb-fill"></b></i>';
+      document.body.append(box);
+    }
+    if (!bar || !bar.pos || !camera) { box.classList.remove('on'); return; }
+    const p = bar.pos.clone().project(camera);
+    if (p.z > 1 || Math.abs(p.x) > 1.05 || Math.abs(p.y) > 1.05) { box.classList.remove('on'); return; }
+    box.classList.add('on');
+    box.style.left = `${(p.x * 0.5 + 0.5) * window.innerWidth}px`;
+    box.style.top = `${(-p.y * 0.5 + 0.5) * window.innerHeight}px`;
+    const label = box.querySelector('.wb-label');
+    if (label.textContent !== bar.label) label.textContent = bar.label || '';
+    box.querySelector('.wb-fill').style.width = `${Math.round(bar.fraction * 100)}%`;
+  }
+
+  /**
+   * R16 — WHAT IS IN YOUR HANDS, since the mouse wheel now changes it.
+   *
+   * A mode you cannot see is a mode you will forget you are in, and being in the Scanner when you
+   * meant to be holding a sword is the kind of thing that gets somebody killed once and then
+   * resented. Shows the ring only while it has more than one entry in it.
+   */
+  heldMode(mode, modes = [], labels = {}) {
+    let box = this._held;
+    if (!box) {
+      box = this._held = el('div', 'held-mode');
+      document.body.append(box);
+    }
+    if (!mode || modes.length < 2) { box.classList.remove('on'); return; }
+    if (box.dataset.mode === mode && box.dataset.n === String(modes.length)) { box.classList.add('on'); return; }
+    box.dataset.mode = mode; box.dataset.n = String(modes.length);
+    box.classList.add('on');
+    box.replaceChildren(
+      el('div', 'hm-ring', ...modes.map(m => el('i', 'hm-pip' + (m === mode ? ' on' : '')))),
+      el('div', 'hm-name', labels[mode]?.name || mode),
+      el('div', 'hm-note muted small', labels[mode]?.note || ''),
+    );
   }
 
   // ---------------------------------------------------------------- bars and place
@@ -1382,7 +1448,9 @@ export class Hud {
     }
     set('skills', talentsOpen);
     const quests = this.journal?.()?.quests || [];
-    set('journal', quests.filter(q => q.done).length);   // finished, waiting to be handed in
+    // R16: finished AND hand-in-able. A raid or a meteor pays itself the moment it finishes, so
+    // counting those would leave a number on the rail with no button anywhere that clears it.
+    set('journal', quests.filter(q => q.done && q.canHandIn !== false).length);
   }
 
   /** The worn-gear grid, used by both the character and inventory tabs. */
@@ -1535,6 +1603,56 @@ export class Hud {
     const vbox = $('sheet-vehicles');
     if (vbox) {
       const kids = [];
+
+      /**
+       * R16 — TOOL, MOUNT, BOAT, SHIP.
+       *
+       *   "Also similar to how the inventory has Boat, Ship, and Ride change to Tool (new), Mount,
+       *    Boat, Ship."
+       *
+       * The first two are ITEMS in equipment slots and the last two are unlockables, and that
+       * difference is real — a tool and a mount roll a rarity and upgrade at a bench, a ship does
+       * not. What the player wanted is one place to see and switch all four, which is a UI fact,
+       * not a data-model one. So these two rows read `player.equipment[slot]` and everything you
+       * are carrying that would fit it, and the two below go on reading `player.vehicles`.
+       */
+      for (const slot of ['tool', 'mount']) {
+        const worn = player.equipment?.[slot] || null;
+        const spare = (player.bag || []).filter(i => i && i.slot === slot);
+        const row = el('div', 'vehicle-row');
+        row.append(el('span', 'muted small', SLOT_LABELS[slot]));
+        if (!worn && !spare.length) {
+          row.append(el('span', 'muted small',
+            slot === 'tool'
+              ? 'None. A tool is built — a Knapped Tool costs nothing but timber, stone and fibre.'
+              : 'None. Mounts are bought at any shop, or forged at a bench.'));
+          kids.push(row);
+          continue;
+        }
+        const select = el('select');
+        const options = [...(worn ? [worn] : []), ...spare];
+        for (const it of options) {
+          const opt = document.createElement('option');
+          opt.value = it.id;
+          opt.textContent = displayName(it);
+          opt.selected = it === worn;
+          select.append(opt);
+        }
+        if (!worn) {
+          const opt = document.createElement('option');
+          opt.value = ''; opt.textContent = '— none —'; opt.selected = true;
+          select.prepend(opt);
+        }
+        select.onchange = () => {
+          const pick = options.find(i => i.id === select.value) || null;
+          if (pick) this.onEquip?.(pick, slot);
+          this.renderSheet();
+        };
+        row.append(select);
+        row.append(el('span', 'muted small', worn ? toolFunction(slot, worn) : 'Nothing in the slot.'));
+        kids.push(row);
+      }
+
       for (const [slot, spec] of Object.entries(VEHICLES)) {
         const owned = player.vehicles?.owned?.[slot] || [spec.starter];
         const active = player.vehicles?.active?.[slot] || spec.starter;
@@ -2884,13 +3002,45 @@ export class Hud {
     return b;
   }
 
+  /**
+   * R16 — THE "HAND IT IN" BUTTON, IN THE JOURNAL.
+   *
+   *   "It's currently difficult to turn in a quest, finding the right quest giver. Allow quests to
+   *    be turned in through the interface journal page."
+   *
+   * EVERY finished job gets this button, whoever asked for it and wherever they are standing. The
+   * complaint IS the walk back, so making half the list still need the giver would only have made
+   * the button look broken on the rows that did not have one. The started kinds — a raid you rang
+   * the bell for, a meteor you dug out — pay themselves the moment they finish, and they say so in
+   * words in the row rather than wearing a button that does nothing.
+   *
+   * It disables itself the instant it is pressed: paying out can open a chooser and wait on the
+   * player, and a second press in the meantime would be a second payout.
+   */
+  handInButton(quest) {
+    if (!this.onTurnInQuest || !quest?.id) return null;
+    const b = el('button', 'row-handin', 'Hand it in');
+    b.dataset.tip = `Send word that ${quest.title} is done, and take the reward. No need to walk back to ${quest.giverName || 'whoever asked'}.`;
+    b.onclick = async ev => {
+      ev.stopPropagation();
+      hideTip();
+      b.disabled = true;
+      b.textContent = '…';
+      try { await this.onTurnInQuest(quest.id); } catch (err) { console.warn('hand in', err); }
+      this.renderJournal();
+      this.railBadges();
+    };
+    return b;
+  }
+
   renderJournal() {
     const j = this.journal?.();
-    const row = (text, note, cls = '', place = null, what = '') => {
+    const row = (text, note, cls = '', place = null, what = '', action = null) => {
       const n = el('div', 'journal-row' + (cls ? ' ' + cls : ''));
       n.innerHTML = `<span>${text}</span><span class="muted">${note ?? ''}</span>`;
       const go = this.locateButton(place, what);
       if (go) { n.append(go); n.classList.add('has-locate'); }
+      if (action) { n.append(action); n.classList.add('has-action'); }
       return n;
     };
     const fill = (id, kids, emptyText) => {
@@ -2910,9 +3060,25 @@ export class Hud {
     meta('journal-share', j ? `${Math.round((j.share || 0) * 100)}% surveyed · ${j.title || ''}` : '');
 
     // ---- work in hand
-    const quests = (j?.quests || []).map(q => row(q.title, q.progress, q.done ? 'done' : '', q.place, q.title));
+    //
+    // R16: a finished row says what handing it in pays (`blurb`, off js/questrewards.js) and carries
+    // the button that does it. An unfinished one still says how far along it is.
+    const questRows = j?.quests || [];
+    const quests = questRows.map(q => {
+      // the blurb is what HANDING IT IN pays, so it only belongs on a row that has a button.
+      // A raid still reads "wave 3 / 4" — it settles itself and there is nothing to quote.
+      const note = q.done && q.canHandIn ? (q.blurb || 'finished') : q.progress;
+      const action = q.done && q.canHandIn ? this.handInButton(q) : null;
+      const n = row(q.title, note, q.done ? 'done' : '', q.place, q.title, action);
+      // done, but nobody to hand it to: say why in the row rather than showing a dead button
+      if (q.done && !q.canHandIn && !action) n.append(el('span', 'row-selfpaid', 'pays itself'));
+      return n;
+    });
     fill('journal-quests', quests, 'Nobody has asked you for anything.');
-    meta('journal-quest-count', (j?.quests || []).length ? `${j.quests.length}` : '');
+    const waiting = questRows.filter(q => q.done && q.canHandIn).length;
+    meta('journal-quest-count', questRows.length
+      ? `${questRows.length}${waiting ? ` · ${waiting} to hand in` : ''}`
+      : '');
 
     // ---- who is hunting you, and who you have put down for good
     const foes = [];

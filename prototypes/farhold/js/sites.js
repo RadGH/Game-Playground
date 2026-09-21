@@ -151,7 +151,7 @@ export const PIECES = {
   ]) },
 
   /** Fifteen metres of stepped base and tapering shaft. This is the "visible from the ridge" piece. */
-  obelisk: { tall: 15.2, cap: 16, solid: [1.6, 15], build: (stone = '#948b7c') => mergeParts([
+  obelisk: { tall: 15.2, cap: 28, solid: [1.6, 15], build: (stone = '#948b7c') => mergeParts([
     { geometry: BOX, color: '#6f675b', matrix: at(0, 0.45, 0, 5.2, 0.9, 5.2) },
     { geometry: BOX, color: stone, matrix: at(0, 1.35, 0, 3.8, 0.9, 3.8) },
     { geometry: TAPER, color: stone, matrix: at(0, 8.2, 0, 1.5, 12.8, 1.5, 0.3) },
@@ -256,7 +256,10 @@ export const PIECES = {
   ]) },
 
   /** The mouth of a den: an earth bank with a black hole in it and a path worn flat to the door. */
-  den: { tall: 6.4, cap: 16, solid: [3.6, 5], build: (earth = '#5b4c3a', rock = '#6e675c') => mergeParts([
+  // R16: a `den` is the centre of most instance mouths as well as the beast lairs, and twelve
+  // sites in range all building their centre overran a cap of 16 — `put()` drops the overflow in
+  // silence, which reads as a cave with no mouth on it.
+  den: { tall: 6.4, cap: 52, solid: [3.6, 5], build: (earth = '#5b4c3a', rock = '#6e675c') => mergeParts([
     { geometry: ICO, color: earth, matrix: at(0, 1.4, -1.6, 7.2, 4.6, 5.6) },
     { geometry: ICO, color: earth, matrix: at(-4.2, 0.9, 0.6, 3.0, 2.4, 2.6, 0.7) },
     { geometry: ICO, color: earth, matrix: at(4.4, 1.0, 0.4, 3.2, 2.6, 2.8, 1.9) },
@@ -380,8 +383,15 @@ const cap = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
  */
 let CACHE = null;
 const grab = name => fetch(new URL(`../data/${name}.json`, import.meta.url)).then(r => r.json());
-const SITE_DATA = Promise.all([grab('strongholds'), grab('setpieces'), grab('landmarks'), grab('worldbosses')])
-  .then(([strongholds, setpieces, landmarks, worldbosses]) => { CACHE = { strongholds, setpieces, landmarks, worldbosses }; return CACHE; })
+const SITE_DATA = Promise.all([
+  grab('strongholds'), grab('setpieces'), grab('landmarks'), grab('worldbosses'),
+  // R16 — the twenty instanced places: a cave mouth, an abandoned farmstead, a dragon's lair.
+  grab('instances').catch(() => null),
+])
+  .then(([strongholds, setpieces, landmarks, worldbosses, instances]) => {
+    CACHE = { strongholds, setpieces, landmarks, worldbosses, instances };
+    return CACHE;
+  })
   .catch(() => null);     // no places this run; the rest of the world still stands
 
 // ---------------------------------------------------------------------------- the sites
@@ -401,6 +411,7 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
   let setpieces = data?.setpieces || CACHE?.setpieces || null;
   let landmarkData = data?.landmarks || CACHE?.landmarks || null;
   let worldBossData = data?.worldbosses || CACHE?.worldbosses || null;
+  let instanceData = data?.instances || CACHE?.instances || null;
   let sites = [];
   let shown = [];
   let lastPoint = null;
@@ -577,6 +588,53 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       const tags = tagsFor(slot);
 
       const gap = townGap(slot.x, slot.z);
+
+      /**
+       * R16 — AN INSTANCE GETS FIRST REFUSAL, BEFORE EVEN THE WORLD BOSSES.
+       *
+       *   "Add about 20 new overworld events that feature an instance system. It could be an
+       *    abandoned building, a cave entrance, a dungeon entrance. These take you to a different
+       *    zone similar to our current dungeon system where a quest can be found, or a boss to
+       *    kill. Have one be a dragons lair, which can both be discovered randomly or through a
+       *    quest from someone in town or elsewhere."
+       *
+       * First refusal because World Forge marks only a handful of `dungeon` nodes on a planet, so
+       * anything that queues behind the strongholds ends up never appearing: a fort wants a pass,
+       * a camp wants a junction, and between them they take every slot worth having. An instance
+       * is the rarest thing on the list and the only one that leads anywhere, so it goes first and
+       * its own `chance` keeps it rare.
+       *
+       * `discovery: "quest"` entries are deliberately NOT rolled onto slots — those exist only
+       * when somebody in a town sends you to one, which is the other half of the dragon-lair ask.
+       */
+      const instKinds = (instanceData?.instances || []).filter(i => i.discovery !== 'quest');
+      const instChance = instanceData?.chance || { dungeon: 0.55, landmark: 0.16, pass: 0.18, crossing: 0.12, road: 0.05, junction: 0.1 };
+      const instFits = instKinds.filter(i => {
+        if (!(i.on || []).some(t => tags.has(t))) return false;
+        if ((i.minBand ?? 0) > band) return false;
+        if (i.maxBand != null && band > i.maxBand) return false;
+        if (!layouts[i.plan]) return false;
+        const b = i.biomes || ['any'];
+        if (!b.includes('any') && !b.some(t => tags.has(t))) return false;
+        return gap > (i.townGap ?? 200);
+      });
+      if (instFits.length && rng() < (instChance[slot.on] ?? 0.08)) {
+        const spec = weighted(instFits, rng());
+        out.push({
+          id: slot.id, key: slot.key,
+          kind: 'instance', type: spec.id, family: 'instance', plan: spec.plan, spec,
+          instance: spec,
+          name: slot.name && slot.on === 'dungeon' ? slot.name : spec.name,
+          blurb: spec.blurb, does: 'Go in.',
+          gives: spec.gives || {}, faction: null, hostile: false,
+          tier: 0, arch: spec.arch || 'stone',
+          x: slot.x, z: slot.z, cell: slot.cell, zone,
+          level: Math.max(1, (zone?.midLevel ?? 1) + (spec.interior?.overLevel ?? 0)),
+          pin: { color: '#b090ff', r: 3.6, glyph: spec.icon || 'dungeon' },
+          populated: false, cleared: false,
+        });
+        continue;
+      }
 
       /**
        * A WORLD BOSS GETS FIRST REFUSAL ON A SLOT.
@@ -1182,6 +1240,18 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     get visible() { return shown; },
     /** Every world boss on this planet, cleared or not — what a map layer or a quest would read. */
     get worldBosses() { return sites.filter(s => s.family === 'worldboss'); },
+    /**
+     * R16 — every instanced place on this planet, in the node shape `createGates({ extra })` wants.
+     * Ids are offset past the world's own node ids and past js/sites.js's road (9000) and junction
+     * (20000) slots, so a mouth can never shadow a real dungeon.
+     */
+    mouths() {
+      return sites.filter(s => s.family === 'instance').map(s => ({
+        id: 40000 + (s.id % 20000), name: s.name, kind: 'instance',
+        x: s.x, z: s.z, zone: s.zone, cleared: !!s.cleared,
+        arch: s.arch, instance: s.instance, siteKey: s.key,
+      }));
+    },
     /** The ones that are up right now, with their swarm. */
     liveBosses: () => waves.map(w => ({
       key: w.key, id: w.spec.id, name: w.spec.name, tier: w.spec.tier,
@@ -1198,6 +1268,97 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     },
     /** Mark one cleared, so it stops refilling. */
     clear(key) { const s = sites.find(v => v.key === key); if (s) { s.cleared = true; s.populated = true; } return s || null; },
+
+    /**
+     * R16 — A CONSUMED LANDMARK STOPS ADVERTISING ITSELF.
+     *
+     *   "This event is not significant enough to warrant a global indicator and once consumed it
+     *    should have just gone away."
+     *
+     * The set piece stays standing — a gibbet does not vanish because you read what was in it —
+     * but its map pin goes, which is the thing that was making a twenty-experience curiosity look
+     * like somewhere you had to go.
+     */
+    markTaken(key) {
+      const s = sites.find(v => String(v.key) === String(key));
+      if (s) { s.taken = true; s.pin = null; }
+      return s || null;
+    },
+
+    /**
+     * R16 — THE GIBBET WITH NO MODEL.
+     *
+     *   "Also, despite the name 'gibbet cage' there was no model there."
+     *
+     * `js/territory.js` invents a handful of landmarks per zone out of the same JSON this file
+     * reads, at its own coordinates, and builds NO geometry for any of them. This file builds the
+     * set pieces you can see, and the two were never introduced — so half the landmarks in the
+     * game were a prompt over empty grass, and the other half were models whose reward never paid
+     * because the id namespaces do not match (`l3_0` against `9012`).
+     *
+     * This reconciles them, in the one direction that cannot produce a duplicate:
+     *
+     *   * A territory mark that lands near a set piece ADOPTS it — the mark takes the set piece's
+     *     kind, name, blurb, gives and exact coordinates, so what you read and what you are
+     *     standing in front of are the same place. Nothing is built twice.
+     *   * A territory mark with nothing near it gets a set piece built FOR it, at its own spot,
+     *     from `data/setpieces.json` — the same layout the wild ones use.
+     *
+     * Returns the marks it touched, so the caller can see the join happened.
+     */
+    claimLandmarks(marks = [], { snap = 90 } = {}) {
+      if (!marks.length || !setpieces) return [];
+      const built = sites.filter(s => s.family === 'landmark');
+      const touched = [];
+      let fresh = 0;
+      for (const mark of marks) {
+        if (!mark || mark.siteKey) continue;
+        let near = null, nearD = snap;
+        for (const s of built) {
+          if (s.territoryId) continue;                      // one set piece, one record
+          const d = Math.hypot(s.x - mark.x, s.z - mark.z);
+          if (d < nearD) { nearD = d; near = s; }
+        }
+        if (near) {
+          // The set piece wins on everything you can SEE, because it is the thing standing there.
+          near.territoryId = mark.id;
+          mark.siteKey = String(near.key);
+          mark.kind = near.type; mark.name = near.name;
+          mark.blurb = near.blurb; mark.does = near.does;
+          mark.gives = near.gives || mark.gives || {};
+          mark.steps = near.steps || 0;
+          mark.x = near.x; mark.z = near.z; mark.cell = near.cell || mark.cell;
+          if (mark.taken) { near.taken = true; near.pin = null; }
+          touched.push(mark);
+          continue;
+        }
+        // Nothing near it: build one where the territory says it is.
+        const layout = setpieces?.layouts?.[mark.kind];
+        if (!layout) continue;
+        const key = `tl${mark.id}`;
+        if (sites.some(s => s.key === key)) continue;
+        const spec = (landmarkData?.landmarks || []).find(l => l.kind === mark.kind) || null;
+        const site = {
+          id: 30000 + (fresh++),
+          key, kind: 'landmark', type: mark.kind, family: 'landmark', plan: mark.kind,
+          spec, territoryId: mark.id,
+          name: mark.name, blurb: mark.blurb, does: mark.does,
+          gives: mark.gives || {}, faction: mark.faction || null,
+          steps: mark.steps || 0, done: mark.done || 0,
+          tier: 0, hostile: false,
+          x: mark.x, z: mark.z, cell: mark.cell || null, zone: null, level: 1,
+          pin: mark.taken ? null : { color: '#8fd0ff', r: 3, glyph: (spec && spec.icon) || 'shrine' },
+          taken: !!mark.taken,
+          populated: false, cleared: false,
+        };
+        sites.push(site);
+        built.push(site);
+        mark.siteKey = key;
+        touched.push(mark);
+      }
+      if (touched.length) { lastCentre = null; if (lastPoint) update(lastPoint[0], lastPoint[1], true); }
+      return touched;
+    },
     lights: () => fires.map(f => ({
       x: f.x, y: f.y, z: f.z,
       color: balance.light?.brazier?.color || '#ff9040',

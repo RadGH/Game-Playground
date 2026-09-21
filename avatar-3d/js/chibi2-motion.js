@@ -30,6 +30,25 @@ export const CHIBI2_COMBAT_ANIMS = [
 ];
 export const CHIBI2_COMBAT_ALL = [...CHIBI2_ALL_ANIMS, ...CHIBI2_COMBAT_ANIMS];
 
+/**
+ * BEING CARRIED BY SOMETHING, opt-in — added 2026-09-21.
+ *
+ *   "On the default Lashed Raft (and other water vehicles) the character sits leaning backwards
+ *    and doesn't look right."
+ *
+ * He was not sitting. He was SWIMMING: a boat leaves you `control.swimming`, and the swim clip
+ * pitches the root back 1.12 rad (64°) so the body floats flat — correct in the water, and on a
+ * raft it reads as a man lying back on the logs with his feet in the air. There was no clip for
+ * being aboard anything, so there was nothing better to play.
+ *
+ *   `boat` — braced on the deck, knees soft, working a pole with a slow sweep.
+ *   `sit`  — astride something: thighs forward, lower legs hanging, hands low.
+ *
+ * Their own list, so a game that has no boats and no mounts builds exactly what it built before.
+ */
+export const CHIBI2_RIDE_ANIMS = ['boat', 'sit'];
+export const CHIBI2_COMBAT_RIDE = [...CHIBI2_COMBAT_ALL, ...CHIBI2_RIDE_ANIMS];
+
 export const ONE_SHOTS = new Set([
   'attack', 'cast', 'hit', 'jump', 'dead',
   'slash', 'slashBack', 'thrust', 'overhead', 'sweep', 'jab', 'arcCut', 'slam', 'lunge',
@@ -41,6 +60,7 @@ const LENGTHS = {
   slash: 0.5, slashBack: 0.5, thrust: 0.42, overhead: 0.85, sweep: 0.92, jab: 0.26,
   arcCut: 0.62, slam: 1.05, lunge: 0.55, shoot: 0.6, reload: 1, castPoint: 0.35,
   castStaff: 0.7, channel: 1.6,
+  boat: 2.4, sit: 3,
 };
 
 // Keyframes are generated once per body template. Three.js handles interpolation and crossfades.
@@ -304,6 +324,34 @@ export function createClips(rig, anims = CHIBI2_ANIMS) {
           pose.elbowL[0] = pose.elbowR[0] = -0.8;
         }
         bob = Math.sin(cycle * 2) * 0.02;
+      } else if (name === 'boat') {
+        // Punting: one foot forward, weight low, both hands working a pole across the body. The
+        // sweep is slow on purpose — a raft is not rowed, it is pushed off the bottom.
+        const sweep = Math.sin(cycle);
+        pose.legL[0] = -0.24; pose.legR[0] = 0.12;
+        pose.kneeL[0] = 0.40; pose.kneeR[0] = 0.30;
+        pose.footL[0] = -0.14; pose.footR[0] = -0.10;
+        pose.hips[1] = -0.16; pose.chest[1] = 0.15;
+        pose.chest[0] = 0.10 + sweep * 0.07;
+        pose.armL[0] = -0.95 + sweep * 0.40; pose.armL[2] = -0.34;
+        pose.armR[0] = -0.55 - sweep * 0.32; pose.armR[2] = 0.28;
+        pose.elbowL[0] = -0.55; pose.elbowR[0] = -0.95;
+        pose.head[1] = sweep * 0.09;
+        bob = Math.sin(cycle * 2) * 0.012;
+      } else if (name === 'sit') {
+        // Astride: thighs forward and out, shins hanging, hands low on the reins. `rootY` drops the
+        // whole body so the seat is where a saddle is rather than where the feet were.
+        const ride = Math.sin(cycle);
+        rootY = -0.20;
+        pose.legL[0] = -1.15; pose.legR[0] = -1.15;
+        pose.legL[2] = -0.26; pose.legR[2] = 0.26;
+        pose.kneeL[0] = 0.85; pose.kneeR[0] = 0.85;
+        pose.chest[0] = 0.08 + ride * 0.02;
+        pose.armL[0] = -0.70; pose.armR[0] = -0.70;
+        pose.armL[2] = -0.20; pose.armR[2] = 0.20;
+        pose.elbowL[0] = -0.85; pose.elbowR[0] = -0.85;
+        pose.head[0] = ride * 0.03;
+        bob = ride * 0.01;
       } else if (name === 'dead') {
         const fall = THREE.MathUtils.smoothstep(u, 0.1, 0.85);
         pose.root[0] = -Math.PI / 2 * fall; rootY = fall * 0.13;

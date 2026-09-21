@@ -3,6 +3,9 @@
 // One panel does greeting, trade and work, because a village merchant is not worth three screens.
 // It owns no game state; `main.js` passes handlers in and the panel calls them.
 
+// R16: what a finished job actually pays, in a sentence — see js/questrewards.js.
+import { rewardBlurb } from './questrewards.js';
+
 const el = (tag, attrs = {}, ...kids) => {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -100,7 +103,9 @@ export function createTalkPanel(handlers = {}) {
         for (const q of ready) {
           kids.push(el('div', { class: 'talk-quest done' },
             el('div', { class: 'q-title', text: q.title }),
-            el('div', { class: 'muted small', text: `Finished — ${q.reward.gold} gold, ${q.reward.xp} xp` }),
+            // R16: a job can pay materials, a crate or a choice now, so quoting only the coin
+            // would understate three quarters of them. js/questrewards.js writes the sentence.
+            el('div', { class: 'muted small', text: `Finished — ${rewardBlurb(q)}` }),
             el('button', { class: 'talk-btn primary', text: 'Hand it in', onclick: () => { handlers.turnIn?.(q); render(); } }),
           ));
         }

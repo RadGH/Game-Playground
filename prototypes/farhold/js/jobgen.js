@@ -39,6 +39,21 @@
 // Everything stays backwards compatible: a candidate with no `away` (the node tests hand in plain
 // data with no position) is never filtered out, because an unknown distance is not a far one.
 
+import { rewardKindFor, REWARD_SHAPE_KEYS } from './questrewards.js';
+
+/**
+ * The quest log only understands four shapes — hunt, visit, gather, clear — because that is what the
+ * game already tracks progress against. A frame's goal is more expressive than that, so the richer
+ * kind is kept for the words and mapped on to one of the four for the counting. Module scope because
+ * the reward rule reads it too, and a job's reward is decided from what the job counts.
+ */
+const LOG_KIND = {
+  kill: 'hunt', hunt: 'hunt',
+  gather: 'gather',
+  clear: 'clear', clearSites: 'clear',
+  visit: 'visit', visitAll: 'visit', escort: 'visit', pay: 'visit', solve: 'visit', deliver: 'visit',
+};
+
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
 /** A deterministic 0..1 stream, so the same zone in the same state offers the same board. */
@@ -253,6 +268,31 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
     return out;
   }
 
+  /**
+   * R16 — WHAT A BOARD JOB PAYS IN, AND THE FOUR EXTRAS THAT WERE NEVER READ.
+   *
+   * `reward.extras` has been built here since the day this file was written — every key of a frame's
+   * `reward` that is not gold, xp or standing — and until `js/questrewards.js` existed nothing on
+   * the other end so much as looked at it. Four frames promised a perk point, an opened dungeon, a
+   * revealed zone and a brand on your weapon, and paid none of them.
+   *
+   * It also settles the reward KIND, from the frame if the frame says so and otherwise from the
+   * shape of the job. `kind`, `mats` and `matPool` are the reward's own shape, so they are lifted
+   * out rather than being swept into `extras` as if they were something to be granted.
+   */
+  function rewardFor(frame, { kind, level, standing, gold, xp, rng }) {
+    const src = frame.reward || {};
+    const reward = {
+      gold, xp, standing,
+      kind: src.kind || null,
+      mats: src.mats || null,
+      matPool: src.matPool || null,
+      extras: Object.fromEntries(Object.entries(src).filter(([k]) => !REWARD_SHAPE_KEYS.includes(k))),
+    };
+    reward.kind = rewardKindFor({ kind, logKind: LOG_KIND[kind] || 'visit', reward }, { rng, level });
+    return reward;
+  }
+
   /** Turn a scored frame into the job object the quest log and the HUD read. */
   function materialise(frame, bound, { zone, level, record, rng }) {
     const scale = 1 + (level - 1) * 0.12;
@@ -269,12 +309,6 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
      * richer kind is kept for the words and mapped on to one of the four for the counting.
      */
     const kind = frame.goal?.kind || 'visit';
-    const LOG_KIND = {
-      kill: 'hunt', hunt: 'hunt',
-      gather: 'gather',
-      clear: 'clear', clearSites: 'clear',
-      visit: 'visit', visitAll: 'visit', escort: 'visit', pay: 'visit', solve: 'visit', deliver: 'visit',
-    };
 
     return {
       id: 'j_' + hash(frame.id, zone.id, offers, Math.floor(rng() * 1e9)).toString(36),
@@ -299,12 +333,7 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
       bindings: Object.fromEntries(Object.entries(bound).map(([k, v]) => [
         k, Array.isArray(v) ? v.map(x => x.id ?? x.name) : (v?.id ?? v?.name ?? null),
       ])),
-      reward: {
-        gold: roll(money), xp: roll(learn),
-        standing: frame.reward?.standing || 0,
-        extras: Object.fromEntries(Object.entries(frame.reward || {})
-          .filter(([k]) => !['gold', 'xp', 'standing'].includes(k))),
-      },
+      reward: rewardFor(frame, { kind, level, rng, standing: frame.reward?.standing || 0, gold: roll(money), xp: roll(learn) }),
       onDone: frame.onDone || {},
     };
   }

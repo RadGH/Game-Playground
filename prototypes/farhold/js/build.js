@@ -491,6 +491,13 @@ export function createBuild(scene, {
     get entries() { return book.entries; },
     /** The catalogue row behind a piece, so a caller can read its `power` or `store` block. */
     defOf(key) { return book.byId(key) || null; },
+    /**
+     * R16 — does this piece DIG, rather than make?
+     *
+     * Straight through to js/buildplan.js so there is one answer in the game. The placement code in
+     * js/main.js binds a drill to a seam off this, instead of the id list it used to carry.
+     */
+    isExtractor(keyOrDef) { return book.isExtractor(keyOrDef); },
     get runPoints() { return runPoints; },
 
     /** §4.1 — a build mode you toggle. Nothing below does anything while it is off. */

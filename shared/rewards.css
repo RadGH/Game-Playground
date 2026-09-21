@@ -160,3 +160,29 @@
 @media (prefers-reduced-motion: reduce) {
   .rw-overlay, .rw-card, .rw-ribbon, .rw-item, .rw-extras li, .rw-btn, .rw-stage .rw-chest, .rw-rays, .rw-flash, .rw-spark { animation-duration: .01s !important; animation-delay: 0s !important; }
 }
+
+/* ---------------------------------------------------------------- the opt-in chooser (2026-09-21)
+   `showRewards({ items, choose: true })` — "a quest reward where you get to choose one of three rare
+   or better items". Only cards in a chooser get any of this; the plain popup is untouched. */
+.rw-item.rw-pick { cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.rw-item.rw-pick:hover { transform: translateY(-3px); }
+.rw-item.rw-pick:focus-visible { outline: 2px solid var(--c, #d8b26a); outline-offset: 3px; }
+.rw-item.rw-picked {
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 2px var(--c, #d8b26a), 0 0 26px color-mix(in srgb, var(--c, #d8b26a) 55%, transparent), 0 8px 22px rgba(0, 0, 0, .55);
+}
+/* The tick is a real element, not a ::after — a legendary card's ::after is already its spinning
+   rays, and stealing it would have quietly turned the rays off on exactly the best cards. */
+.rw-item .rw-tick {
+  position: absolute; top: -9px; left: -7px; display: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--c, #d8b26a); color: #120d08;
+  font-size: 12px; line-height: 20px; text-align: center; font-weight: 700; font-style: normal;
+}
+.rw-item.rw-picked .rw-tick { display: block; }
+.rw-item .note { font-size: 11px; color: var(--rw-muted); margin-top: 5px; line-height: 1.3; }
+.rw-btn:disabled { opacity: .45; cursor: default; transform: none; box-shadow: 0 0 0 1px #000; }
+.rw-btn:disabled:hover { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .rw-item.rw-pick, .rw-item.rw-picked { transition: none; transform: none; }
+}

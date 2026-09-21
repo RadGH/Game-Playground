@@ -605,3 +605,39 @@ running. The full write-up is in `RPG.md`; the build-mode half is in `BUILD-MODE
 `tests/round13.test.js` checks it over every biome, and it caught a second offender (`meteor_site`)
 within a minute of being written — which is the argument for writing the rule down as a test rather
 than fixing the one seam that was reported.
+
+## Round 16 — the seventeen-item play-test list
+
+Full write-up: the **Round 16** sections of `RPG.md` and `BUILD-MODE.md`. The short version of what
+changed for a player:
+
+* **You have a tool now.** It is an item, in a slot of its own, and you build it — one tool is pick
+  and axe, its tier says what it can work and its quality says how fast. The mouse wheel turns
+  between **weapon, tool, scanner and Command Rod**, and a mode with nothing behind it is not in the
+  ring. Pressing **E** *or the attack button* at a seam or a tree starts a **progress bar over the
+  thing**, and the take comes when it fills.
+  This is the fix for "ranged characters can't harvest": the tool tier used to be a regular
+  expression on your weapon's *name*, and a bow is made of yew.
+* **The scanner** is a device you build. It sweeps close to you and remembers everything it finds
+  for the rest of the save, on the map and in the Find tab (which now sorts by distance and filters
+  to your favourites). While it is running, the map shows nothing but deposits, each labelled.
+* **Twenty new places you can go into** — a cave, an abandoned farmstead, a flooded cistern, a
+  sealed vault, a dragon's lair — each with its own interior, its own inhabitants and something
+  worth the walk. Some are found; some a town sends you to.
+* **Quests can be handed in from the journal**, and they pay in four different ways now: coin,
+  a loot crate, materials, or the giver asking which you would rather have. The biggest jobs offer
+  **one of three rare-or-better items**.
+* **The perk tree has eight arms** instead of four: defence, bonus loot, recovery and mobility join
+  the original melee, ranged, arcane and wild.
+* **Houses are a population**, the **Town Hall** in any settlement of size three or more is a door
+  you can open, and the **Command Rod** lets you select your own people and tell them where to be.
+* **Drills have their own build menu and run themselves**; benches need work, and **holding E** at
+  one puts your back into the same job your people are doing.
+* **A new title screen**: menu, load, a character step with a live figure and an appearance editor,
+  and a world step that draws the actual planet for the seed you picked.
+* **No ammunition anywhere**, and a flight leg costs one unit of fuel.
+
+And a great many bugs, most of which were not what they looked like — a gibbet with no model was two
+landmark systems that had never been introduced; a raft tilting was a Euler rotation *order*; a
+stuttering horse was an animation clock reset sixty times a second; and "every JS file takes 2–5
+seconds over wifi" was a dev server speaking HTTP/1.0. A cold load is **7.31 s → 0.07 s**.

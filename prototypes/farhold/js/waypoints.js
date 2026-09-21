@@ -127,6 +127,37 @@ export function boardSpotFor(node, groundOk = null) {
   return { x: node.wx + base.x, z: node.wz + base.z };
 }
 
+/**
+ * R16 — WHERE THE TOWN HALL IS.
+ *
+ *   "The towns big enough to support a population should support a Town Hall which you can
+ *    interact with…"
+ *
+ * `BUILDING_INFO.hall` has `from: 3`, so every settlement of size three or more already has one
+ * standing in it — as scenery, with an elder near it and nothing to press. This is the spot you
+ * walk to, mirrored away from `boardSpotFor` above so the hall and the notice board are two
+ * different places rather than one square with two prompts fighting over it.
+ *
+ * Returns null for a hamlet, because a hamlet has no hall and offering one would be a lie.
+ */
+export function hallSpotFor(node, groundOk = null) {
+  const size = node.size || 1;
+  if (size < 3) return null;
+  const out = 6 + size * 1.2;
+  const base = { x: out * 0.55, z: -out };
+  if (!groundOk) return { x: node.wx + base.x, z: node.wz + base.z };
+  for (const ring of [1, 1.4, 1.9, 2.4]) {
+    for (const step of [0, 1, -1, 2, -2, 3, -3, 4]) {
+      const a = (step / 8) * Math.PI * 2;
+      const bx = (base.x * Math.cos(a) - base.z * Math.sin(a)) * ring;
+      const bz = (base.x * Math.sin(a) + base.z * Math.cos(a)) * ring;
+      const x = node.wx + bx, z = node.wz + bz;
+      if (groundOk(x, z)) return { x, z };
+    }
+  }
+  return { x: node.wx + base.x, z: node.wz + base.z };
+}
+
 export function createWaypoints({ settlements = [], seed = 1, groundOk = null, built = [] } = {}) {
   /** Lit pads, by settlement id. A `Set` because the only question ever asked is "is it lit?". */
   const lit = new Set();

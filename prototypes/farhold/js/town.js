@@ -461,6 +461,43 @@ export function createTownFolk(scene, terrain, opts = {}) {
             }
           }
 
+          /**
+           * R16 — SOMEWHERE TO BE.
+           *
+           *   "NPCs should interact with the player or can be assigned tasks. Add a Command Rod
+           *    that once built … allows you to select one or more NPCs and order them to a task."
+           *
+           * Every body in this file wandered on a 14 m leash from wherever it was spawned and had
+           * no way of being sent anywhere. `npc.goal` is the one addition: while it is set, the
+           * body walks to it and ignores its leash, and clears the goal on arrival. It is checked
+           * BEFORE the turn-to-face branch on purpose — somebody you have just sent to the furnace
+           * should walk to the furnace, not stop and look at you because you are standing nearby.
+           */
+          if (npc.goal) {
+            const gx = npc.goal[0] - npc.x, gz = npc.goal[1] - npc.z;
+            const away = Math.hypot(gx, gz);
+            if (away < 1.6) {
+              npc.home = [npc.goal[0], npc.goal[1]];   // and this is where they live now
+              npc.goal = null;
+              npc.arrivedAt = npc.goalName || null;
+              setActorAnim(npc.actor, 'idle');
+            } else {
+              npc.facing = Math.atan2(gx, gz);
+              const step = Math.min(away, (npc.goalRun ? 3.6 : 2.0) * dt);
+              const nx = npc.x + Math.sin(npc.facing) * step;
+              const nz = npc.z + Math.cos(npc.facing) * step;
+              // water still stops them; a body that swims to the sawmill is a body in the river
+              if (!terrain.waterAt(nx, nz)) { npc.x = nx; npc.z = nz; }
+              else { npc.goal = null; }
+              setActorAnim(npc.actor, npc.goalRun ? 'run' : 'walk');
+              npc.y = terrain.heightAt(npc.x, npc.z);
+              npc.actor.group.position.set(npc.x, npc.y, npc.z);
+              npc.actor.group.rotation.y = npc.facing;
+              npc.actor.update(dt);
+              continue;
+            }
+          }
+
           if (dist < talkRange * 2.4) {
             // turn to face whoever walks up
             npc.facing = Math.atan2(dx, dz);
@@ -562,6 +599,26 @@ export function createTownFolk(scene, terrain, opts = {}) {
 
     /** Everyone currently in the world, for the debug menu and the tests. */
     roster: () => [...live.values()].flat(),
+
+    /**
+     * R16 — YOUR OWN PEOPLE, as opposed to everybody standing in a market somewhere.
+     *
+     * A recruit is spawned into the `colony` group (js/main.js's `recruit:` handler), so that group
+     * IS the holding's population as far as bodies are concerned. The Command Rod points at this
+     * list and nothing else — ordering a stranger's blacksmith to go and chop wood would be a
+     * different game.
+     */
+    own: () => live.get('colony') || [],
+    ownById: id => (live.get('colony') || []).find(n => n.id === id) || null,
+    /** Send one of your own somewhere. `run` is for an order given in a hurry. */
+    sendTo(npc, x, z, { run = false, name = null } = {}) {
+      if (!npc) return false;
+      npc.goal = [x, z];
+      npc.goalRun = !!run;
+      npc.goalName = name;
+      npc.arrivedAt = null;
+      return true;
+    },
 
     /**
      * Take an item off a merchant. Buying something back out of the buyback list costs what you

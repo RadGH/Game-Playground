@@ -1776,3 +1776,96 @@ spell at 1.6x damage. All six are branches now: jet, dome (shoved through
 `e.push`, so it resists by rank the way a hammer does), wall, field, mortar and
 storm. A javelin's `carried: 6` was read by nobody too; it runs out now, and the
 ones you threw stick in the ground to be picked back up.
+
+---
+
+# Round 16 — the play-test list of 2026-09-21
+
+Seventeen items, from the user's own session notes. What follows is what each one turned out to be,
+because in more than half of them the reported symptom was not the bug.
+
+## The short version
+
+| # | Reported | What it actually was |
+|---|---|---|
+| 1 | "the Gibbet marker stayed after I used it, and there was no model there" | **Two landmark systems that had never been introduced.** `js/territory.js` invents a few landmarks per zone with state, a save slot and *no geometry*; `js/sites.js` builds the set pieces you can see, with **numeric** ids. `atLandmark` looked a mark up by id — so a set piece never matched, paid nothing ever, and a `solve: true` one dead-ended with E doing literally nothing. The marker stayed because `state` only reached `'done'` when *work* finished, and a gibbet has none. |
+| 2 | "'Somebody in a cage' — no person, nothing to interact with" | Exactly right. `js/encounters.js` was proud of owning no meshes, so a rescue was four idle guards in a field. **And** events closed at 520 m while their bodies despawned at 300, so in that band a rescue **won itself** and dropped a gilded bag on empty grass. |
+| 3 | "a wall on the road with no gate" | The gate scan looked at road **sample points** for one landing inside a 19 m annulus on the wall ring. Samples are 45–128 m apart, so it found none and fell through to "put a gate at a random bearing". |
+| 4 | "road clipping into water; water lower on one side" | `heightAt` re-imposed the road deck as a 12 m **earth plug** across the channel. And `waterRibbon` widened each bank independently until it hit ground, so a raised road stopped one side at 6 m while the other ran to 32. |
+| 5 | "the raft tilts and the character leans back" | Two things. The hull is symmetric; the **rotation order** was `XYZ`, which puts yaw in the middle, so "lift the bow" became a diagonal roll on any heading but north — pinned at its clamp, because a raft does 11.3 m/s. And he was not sitting, he was **swimming**: a boat leaves you `control.swimming`, and that clip tips the root back 64° on purpose. |
+| 6 | "the horse stutters" | `createCreature().setAnim` reset its clock **on every call**, and the game calls it once a frame. Every beast in the game was frozen on the first 16 ms of its gait. The humanoid rig has had the guard since it was written. |
+| 7 | "the health bar is almost never accurate" | It asked `field.target()` — a 2D yaw score from the player's **feet**, no pitch, no line of sight. `aim()` has done a proper 3D hitscan down the crosshair since round 4 and the bar never read it. |
+| 8 | "ranged characters can't harvest" | The tool tier was **a regular expression on the weapon's name**. A bow is made of yew, so an archer was bare-handed at every seam in the game — and the refusal ("you need a Steel Tool") pointed at a slot that did not exist. |
+| 9 | "meteors before I can mine one" | A crater seam is hardness 2. The fall also filed a quest and a map pin, so the early game pinned a thirty-second sprint to a rock you could not touch. |
+| 12 | "each JS file takes 2–5 seconds over wifi" | Not the wifi. The dev server spoke **HTTP/1.0**, so all 190 modules got their own TCP connection — and turning keep-alive on exposed a Nagle/delayed-ACK stall that added 40 ms to every single response. |
+| 14 | "add four corner quadrants" | Done — and doing it turned up `thorns: 6` on a wildcard node where the code reads a **fraction** (a 600% reflect), and `goldFind`, which is on the sheet, on an affix, on a perk, and multiplied by **nothing**. |
+| 16 | "drills on their own menu, manufacturing needs work" | The split was a data change. The interesting part was that routing the player's effort through `js/work.js` revealed that labour was only paid when a **whole order finished** — two minutes of cold furnace, then a lump sum. |
+| 17 | "javelins cost nothing — I don't want ammo" | Round 15's own feature, removed. The 9-fuel launch was `launch 6 + a held-back landing 3`. |
+
+## The theme, again
+
+Eight of the seventeen were **a finished thing with no way in**, which is now this project's signature
+fault and the reason it keeps being worth writing down:
+
+* `gives.namesFoe` threw `rng is not a function` on the line that names a foe — unreachable for the
+  whole life of the game, because a set-piece landmark could not pay out at all. Fixing item 1 made
+  it reachable and it fell over within a minute.
+* `reward.extras` had been built out of `data/job-frames.json` since the day `jobgen.js` was written
+  and read by nobody: four frames promised a perk point, an opened dungeon, a revealed zone and a
+  branded weapon, and paid none of them.
+* `m.enabled` is checked in three places in `js/refine.js` and nothing has ever set it.
+* `works.queue(id, recipe, count)` has always taken a count, and `count <= 0` has always meant "keep
+  going". The panel only ever sent `1`.
+* `WorkBoard.toJSON` wrote its orders and the constructor read only `now` — every load emptied it.
+* `js/water-plan.js`'s `roadDeck` carried a "NOT WIRED YET" header. It is wired now.
+* `BUILDING_INFO.bridge.solid` was `[0, 0]` — a bridge filed no collider at all, and you only walked
+  on one because of the earth plug that was damming the river.
+* `meteor_site` seams and `deep_vein` before them: a rule written into the data and read by nobody.
+
+## What is new
+
+**`js/tools.js` + `data/tools.json`** — a Tool is an item in a slot of its own, built rather than
+inferred, carrying a `toolKey` that is a row in `data/resources.json`'s existing tool table, so every
+hardness gate and refusal line in the game reads exactly what it read before. One tool is pick *and*
+axe. Rarity is speed, yield, reach and scan range. The mouse wheel turns a ring of *what you own* —
+weapon, tool, scanner, rod — and a mode with nothing behind it is not in it. You start with a Knapped
+Tool, because it costs timber and fibre and both come off things the game files as tier 1: the
+cheapest tool in the game was behind a tool.
+
+**Gathering is a bar.** `createGathering` is deliberately generic — a point, a clock, a payout and a
+cancel rule — which is what lets a seam, a tree and a manufacturing bench all use it. `E` **or** the
+attack button with the tool out starts one, which is the half that lets an archer gather at all.
+
+**The scanner** sweeps short and remembers for ever: what it finds becomes a marker, so it is on the
+map, in the Find tab, and in the save. While it is running the map and minimap show **only** deposits,
+each wearing its material's name.
+
+**`js/eventprops.js`** — a small disposable set of meshes an event can put down and take away, built
+from `js/sites.js`'s own `PIECES`. Every one of the 22 events (up from 11) now has a `dressing`, and a
+rescue has a `captive`: a real body inside the cage who tells you why they are in it.
+
+**`data/instances.json`** — twenty instanced places, each a mouth on the surface and a parameterised
+interior: a cave, an abandoned farmstead, a flooded cistern, a sealed vault, a dragon's lair. They
+reuse the dungeon machinery whole; what is new is that `createDungeon` takes a `shape`, a `nodeId` and
+what the place `holds`.
+
+**`js/population.js`, `js/command.js`, `js/townhall.js`** — houses are a population cap, the Town Hall
+in every settlement of size three or more is a door you can open, and the Command Rod is the first
+thing in this game that lets the player give an order.
+
+**`js/questrewards.js`** — one function pays a quest out, whatever kind it is, and all four paths go
+through it. Five reward kinds, including picking one of three rare-or-better items.
+
+**The title screen** is four screens: menu, load, character (with a live figure and an appearance
+editor built on avatar-2d's catalogue) and world (with the real planet drawn in a Web Worker).
+
+## Two traps worth keeping
+
+**Temporal dead zones, twice.** `createCommand({ colony, build })` reads its arguments eagerly and
+both are `const`s declared further down; `node --check` cannot see it, because a TDZ is perfectly
+good syntax. The rod takes accessor functions now — which it needed anyway, since `folk` is rebuilt
+from scratch every time you land on a new world.
+
+**A `modulepreload` tag says "this is a JavaScript module".** The generator emitted six for `.json`
+files it had found behind dynamic imports, and the browser refused each one with a console error —
+enough to fail every spec that asserts a clean console, with nothing whatever wrong with the page.

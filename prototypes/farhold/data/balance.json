@@ -66,8 +66,7 @@
       "bowPowerMin": 0.55,
       "bowPowerFull": 1.6,
       "crossbowReload": 1.25,
-      "crossbowPower": 1.8,
-      "javelinCarried": 6
+      "crossbowPower": 1.8
     },
     "staff": {
       "_doc": "A staff cast a free shaped area spell every 0.6 s with no cast time, no mana and no choice — the most powerful weapon in the game and the least interesting. It charges now: a tap is still free and weak, a full channel is 1.6x damage over twice the radius, and it drinks mana while it builds. js/weapons.js STAFF_CHARGE is the live copy.",

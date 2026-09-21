@@ -289,6 +289,17 @@ export function createBuildPlan({
     byId: id => byId.get(id) || null,
     all: () => [...byId.values()],
     inCategory: cat => [...byId.values()].filter(s => s.cat === cat),
+    /**
+     * R16 — IS THIS PIECE ONE THAT DIGS?
+     *
+     * One place, so no caller has to remember the word "extract" or keep its own list of drill ids.
+     * js/main.js's placement test used to be `def?.needs === 'node' || entry.key === 'drill' ||
+     * entry.key === 'pump'` — a hard-coded id list beside a rule that already covered two of them.
+     */
+    isExtractor: idOrDef => {
+      const def = typeof idOrDef === 'string' ? byId.get(idOrDef) : idOrDef;
+      return !!def && (def.cat === 'extract' || def.needs === 'node' || def.needs === 'water');
+    },
     costText,
 
     /**
@@ -658,8 +669,25 @@ export function createBuildPlan({
       };
     },
 
+    /**
+     * R16 — A SAVED ENTRY CARRIES A CATEGORY, AND CATEGORIES MOVE.
+     *
+     * `place` copies `def.cat` onto the entry, so every drill in a save made before R16 has
+     * `cat: "refine"` written into it — and js/outposts.js `roleOf` reads `e.cat` FIRST and only
+     * falls back to the definition. Without this line an old base full of drills would keep calling
+     * itself a Workshops outpost for ever, because nothing ever re-reads the catalogue for a piece
+     * that is already standing.
+     *
+     * The id is what a save really depends on and no id changed; the category is display data, so
+     * the catalogue is always right and the save is always stale. Re-derive it, every load.
+     */
     load(data) {
-      entries = (data?.entries || []).map(e => ({ ...e }));
+      entries = (data?.entries || []).map(e => {
+        const copy = { ...e };
+        const def = byId.get(copy.key);
+        if (def) copy.cat = def.cat;
+        return copy;
+      });
       claims = (data?.claims || []).map(c => ({ ...c }));
       nextEntry = entries.reduce((n, e) => Math.max(n, Number(String(e.id).slice(1)) + 1 || 0), 1);
       nextClaim = claims.reduce((n, c) => Math.max(n, Number(String(c.id).slice(2)) + 1 || 0), 1);

@@ -8,7 +8,17 @@
 const url = new URL('../data/elements.json', import.meta.url);
 
 let raw;
-if (typeof window !== 'undefined' && typeof fetch === 'function') {
+/**
+ * "In a browser?" is `process`, not `window`.
+ *
+ * This used to ask for `window`, which a page has and **a Web Worker does not** — so any worker
+ * that reached this module took the node branch and died on `import('node:fs')`, with the only
+ * symptom being "Failed to fetch dynamically imported module: node:fs" on the page that started it.
+ * Farhold's title-screen map preview (prototypes/farhold/js/worldpreview-worker.js) builds a whole
+ * world off the main thread and imports system.js, which imports this, which is how it turned up.
+ * Node 18+ has a global `fetch` too, so asking for `fetch` alone would not have worked either.
+ */
+if (typeof process === 'undefined' || !process.versions?.node) {
   raw = await (await fetch(url)).json();
 } else {
   const { readFileSync } = await import('node:fs');

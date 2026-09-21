@@ -114,6 +114,25 @@ export function snapshot({
   ore, mining, works, defence,
   // where the player was last standing on the surface, for a save taken underground
   surface = null, inDungeon = false,
+  /**
+   * R16 — the survey the hand scanner has built up. "…once a node is scanned it should remain
+   * visible on the map", which has to mean across a save or it is a torch, not a survey. The tool
+   * itself and the two devices ride in `player` below, with everything else the character owns.
+   */
+  scanner = null,
+  /**
+   * R16 — THE FACE YOU BUILT.
+   *
+   * The appearance editor on the new-game screen (js/appearance.js) hands back a whole `avatar`
+   * object in the shared character schema. Before this round the player's look was always
+   * `class-looks.json`'s entry for their class, which a load could rebuild from `classId` alone —
+   * so there was nothing to save. There is now, and leaving it off this list is exactly the bug the
+   * note further down records: passed on every save and silently dropped.
+   *
+   * `null` means "whatever the class wears", which is what every save written before this round
+   * says, so an old save loads unchanged.
+   */
+  avatar = null,
 }) {
   return {
     id, name, seed, classId,
@@ -135,17 +154,27 @@ export function snapshot({
       vehicles: player.vehicles,
       // R15: which of them H brings — the horse, or the motorcycle you built. One slot, one choice.
       rideChoice: player.rideChoice || null,
+      /**
+       * R16 — the Scanner and the Command Rod. Owned, not rolled (see js/tools.js), so they are
+       * a set of flags rather than items; `held` is which of the four things the mouse wheel has
+       * you holding. The TOOL itself is in `equipment` with everything else you are wearing.
+       */
+      devices: player.devices || {},
+      held: player.held || 'weapon',
     },
     position: { x: control.x, z: control.z, yaw: control.yaw, pitch: control.pitch },
     // Markers replaced the old bare `pins` array: a quest destination, a story objective and a
     // dropped pin are the same kind of thing now, and each carries the world it is on.
     markers: markers || null,
+    scanner: scanner || null,
     /**
      * Which star and which world, not just which seed the run began from. Without this a load
      * rebuilt the STARTING system every time, so travelling several stars out and saving put you
      * back where you began — in the ocean, because the coordinates came along and the world did not.
      */
     at: at || null,
+    // R16: the look the player built, or null for the class's own — see the note above
+    avatar: avatar || null,
     // round 4: the materials bag and which dungeons you have already emptied
     materials: materials || {},
     dungeonsCleared: [...(dungeonsCleared || [])],
@@ -232,11 +261,19 @@ export function restore(save, { rpg, player, control, map }) {
   if (p.vehicles) player.vehicles = p.vehicles;
   // R15: an old save has no ride choice and falls back to the mount, which is what it had
   player.rideChoice = p.rideChoice || 'mount';
+  // R16 — the two built devices, and which of the four things the wheel has you holding
+  player.devices = p.devices || {};
+  player.held = p.held || 'weapon';
   player.talents = p.talents || [];
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;
   player.equipment = p.equipment || {};
   player.bag = p.bag || [];
+  /**
+   * R16: the look. A save written before the appearance editor existed has no `avatar` on it, so the
+   * player keeps the one `createPlayer` gave them off their class — which is what that run had.
+   */
+  if (save.avatar) player.avatar = save.avatar;
   rpg.refresh(player, { full: true });
   if (Number.isFinite(p.hp)) player.hp = Math.min(player.maxHp, p.hp);
   if (Number.isFinite(p.mp)) player.mp = Math.min(player.maxMp, p.mp);

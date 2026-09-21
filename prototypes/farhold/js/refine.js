@@ -23,6 +23,11 @@
 // Pure: no DOM, no Three.js, no clock of its own. The machine's badge, the job list and the
 // progress bar are drawn from `snapshot()`.
 
+// R16 — the ledger's own sentence, so a machine can say who kept it lit last shift. This is the
+// only thing refine.js takes from js/work.js, and it takes nothing back: work.js still knows
+// nothing about machines.
+import { creditLine, progressFraction } from './work.js';
+
 /**
  * `stores` is a js/stores.js network — a machine draws from and delivers to the pool it stands in,
  * which is the whole point of §8: a machine outside every pool has nothing to work with.
@@ -47,7 +52,29 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
    * shift and dark all night. That is the readable number the whole round hangs on: **one worker is
    * one furnace.** Two furnaces and one smelter is two half-lit furnaces, and the panel says so.
    */
-  const LAB = { secondsPerUnit: 30, bankSeconds: 120, orderUnits: 4, ...(labour || {}) };
+  const LAB = {
+    secondsPerUnit: 30, bankSeconds: 120, orderUnits: 4,
+    /**
+     * R16 — WHAT YOUR OWN TWO HANDS ARE WORTH, per REAL second.
+     *
+     *   "Players can contribute work by holding E… NPCs can also work automatically and the player
+     *    can jump in to help make it go faster."
+     *
+     * `stand` is the rate R15 already gave you for being in the room: one unit every thirty seconds,
+     * which is thirty machine-seconds every thirty seconds — you attending a furnace keeps it lit
+     * exactly 1:1 and no better. `hold` is three times that, which is the whole point of holding the
+     * key: jumping in genuinely speeds it up rather than being a fancier way to stand still.
+     *
+     * A citizen is about 1.1 units an hour of game time and the game runs fifteen times real time,
+     * so a smelter is putting in roughly 0.0046 units a real second. You, holding E, are 0.1 — about
+     * twenty of them. That is deliberate and it is not a balance problem: you can only be at one
+     * machine, and only while you are standing there doing nothing else.
+     */
+    handStandPerSecond: 1 / 30,
+    handHoldPerSecond: 0.1,
+    ...(refining.handWork || {}),
+    ...(labour || {}),
+  };
   /**
    * …AND IT IS OFF UNTIL SOMEBODY IS THERE TO SWITCH IT ON.
    *
@@ -88,7 +115,23 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
        */
       workBank: 0,
       workedSeconds: 0,
+      /**
+       * R16 — THE SWITCH. `enabled` has been read by `step`, by `postLabour` and by `toJSON` since
+       * the building expansion landed, and there has never been a way to set it. Classic Farhold:
+       * a finished rule with no door. `setEnabled` is the door — see the note on it below.
+       */
       enabled: true,
+      /**
+       * R16 — HOW BADLY THIS ONE WANTS A WORKER, 0 / 1 / 2.
+       *
+       * It is the `priority` on the machine's own work order and nothing else, so it is sorted by
+       * js/work.js `nextFor` — which already put priority first and had nothing ever setting it
+       * above the default. A base with six benches and two smelters finally has a way to say which
+       * two of them get tended first.
+       */
+      priority: 1,
+      /** The ledger's sentence for the last four units this machine was paid — see `collectLabour`. */
+      lastCredit: '',
     };
     machines.set(id, m);
     // tell the grid about it so load shedding can find it. A tier-0 machine has no draw at all,
@@ -278,39 +321,113 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       const need = labourNeed(m);
       const id = `lab_${m.id}`;
       const open = board.get(id);
+      const live = open && !open.complete && !open.cancelled;
       if (!need || !m.queue.length || !m.enabled) {
         if (open && !open.complete) board.cancel(id);
         continue;
       }
       if (m.workBank >= bankCap(m) - 1e-6) continue;
-      if (open && !open.complete && !open.cancelled) continue;      // one open order per machine
+      // R16 — an order already up follows the machine's switch: changing the priority on a bench
+      // that somebody is already walking towards has to mean something NOW, not in four units' time
+      if (live) { open.priority = m.priority ?? 1; continue; }        // one open order per machine
       board.postJob({
         id, tag: 'refine', stationId: m.id,
-        name: `Work the ${m.name}`, units, priority: 1, postedAt: at,
+        name: `Work the ${m.name}`, units, priority: m.priority ?? 1, postedAt: at,
         meta: { machine: m.id, seconds: units * need },
       });
       posted++;
+    }
+    /**
+     * R16 — AN ORDER FOR A MACHINE THAT IS NO LONGER THERE.
+     *
+     * The loop above can only see machines that exist, so a bench you took down left its `lab_*`
+     * order on the board for ever: citizens would walk to a patch of grass and pour their shift
+     * into a counter nothing would ever collect. It could not happen before this round because the
+     * board never survived a load; it can now, and a drill or a bench being taken down is an
+     * ordinary thing to do.
+     */
+    for (const o of board.open?.() || []) {
+      if (!o.meta?.machine || machines.has(o.meta.machine)) continue;
+      board.cancel(o.id);
     }
     return posted;
   }
 
   /**
-   * Sweep a board's finished orders and pay the machines they were for.
+   * Sweep a board and pay the machines for the work that has gone into their orders.
    *
-   * Safe to run more than once: a swept order is stamped, so a caller that also sweeps for its own
-   * reasons cannot pay a furnace twice for the same four units.
+   * Safe to run more than once: an order remembers how many of its units have been paid for, so a
+   * caller that also sweeps for its own reasons cannot pay a furnace twice for the same four units.
+   *
+   * R16 — IT PAYS AS THE WORK GOES IN, NOT ONLY WHEN THE ORDER FINISHES.
+   *
+   * It used to wait for the whole four units. That was invisible while the player's own effort went
+   * straight into the bank round the side of the board (R15 called `credit` directly) — but now
+   * that standing at a bench goes through an ORDER like everybody else's effort does, waiting for
+   * the order meant a furnace you were attending stood cold for two full minutes and then ran for
+   * two minutes off a lump sum. Same throughput, and it reads as broken.
+   *
+   * Paying the delta fixes it for citizens too: a worker halfway through their order used to buy
+   * the machine nothing at all, so a bench with one person on it ran in two-minute pulses.
    */
   function collectLabour(board) {
-    if (!board?.finished) return 0;
+    if (!board) return 0;
     let units = 0;
-    for (const o of board.finished) {
-      if (!o.complete || o._labourPaid || !o.meta?.machine) continue;
-      o._labourPaid = true;
-      credit(o.meta.machine, o.units);
-      units += o.units;
+    for (const o of [...(board.finished || []), ...(board.open?.() || [])]) {
+      if (!o?.meta?.machine) continue;
+      const owed = Math.max(0, (o.done || 0) - (o._labourPaidUnits || 0));
+      if (owed <= 1e-6) continue;
+      o._labourPaidUnits = o.done;
+      credit(o.meta.machine, owed);
+      units += owed;
+      /**
+       * R16 — WHO KEPT IT LIT. `creditLine` has existed in js/work.js since the day it was written,
+       * with the comment "3 by Marwen is the sentence that makes a citizen feel like a person", and
+       * nothing has ever rendered it. The machine remembers its last shift and the bench panel
+       * prints it: "4 by hand" when you did it all, "2.5 by hand, 1.5 by Marwen" when you helped.
+       */
+      const m = get(o.meta.machine);
+      if (m && o.complete) m.lastCredit = creditLine(o);
     }
     return units;
   }
+
+  /**
+   * R16 — THE SWITCH, AND THE THREE PLACES THAT ALREADY READ IT.
+   *
+   * `m.enabled` is checked at the top of `step` (a switched-off machine does not run), in
+   * `postLabour` (it does not ask for a worker either, so nobody walks to it) and in `toJSON` (it
+   * survives a save). All three were written when the machine was. NOTHING HAS EVER SET IT — there
+   * was no `setEnabled`, no button, no key. This is the twelve-finished-modules-with-no-door fault
+   * this project keeps finding, in miniature, and it matters more now than it did: a bench you are
+   * not using still posts a labour order every second, so your one smelter splits their shift
+   * between the furnace you care about and the loom you built and forgot.
+   *
+   * Turning one off is NOT the same as clearing its queue: the queue, the half-finished batch and
+   * the bank all stay exactly where they are, and it carries on from there when you switch it back.
+   */
+  function setEnabled(machineId, on = true) {
+    const m = get(machineId);
+    if (!m) return null;
+    m.enabled = !!on;
+    if (!m.enabled) {
+      // it stops being 'running' the instant it is off, or the badge lies until the next frame
+      m.state = 'idle';
+      grid?.setBusy(m.id, false);
+    }
+    return m.enabled;
+  }
+
+  /** R16 — 0 low, 1 normal, 2 high. See the note on `place`'s `priority` field. */
+  function setPriority(machineId, p = 1) {
+    const m = get(machineId);
+    if (!m) return null;
+    m.priority = Math.max(0, Math.min(2, Math.round(Number(p) || 0)));
+    return m.priority;
+  }
+
+  /** The word for a priority, so the panel and the log say the same thing. */
+  const PRIORITY_WORDS = ['when there is nothing else', 'normal', 'first'];
 
   // ---------------------------------------------------------------- one machine, one step
 
@@ -491,11 +608,19 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       workBank: Math.round(m.workBank),
       workBankMax: bankCap(m),
       minutesLeft: Math.round((m.workBank / 60) * 10) / 10,
+      // R16 — the switch, the queue order, and who did the last shift
+      enabled: m.enabled !== false,
+      priority: m.priority ?? 1,
+      priorityWord: PRIORITY_WORDS[m.priority ?? 1] || 'normal',
+      lastCredit: m.lastCredit || '',
     };
   }
 
   /** The line under the badge. Plain language: a player should never have to guess. */
   function stateText(m) {
+    // R16 — the switch answers before anything else, because "Nothing queued" on a bench you turned
+    // off yourself is the game blaming you for a state you chose
+    if (m.enabled === false) return 'Switched off';
     switch (m.state) {
       case 'running': return `Working${m.fuelRes ? ` — burning ${nameOf(m.fuelRes)}` : ''}`;
       case 'idle': return m.queue.length ? 'Waiting' : 'Nothing queued';
@@ -534,6 +659,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
         queue: m.queue.map(j => ({ recipe: j.recipe, left: j.left === Infinity ? -1 : j.left, done: j.done })),
         progress: m.progress, crafting: m.crafting, fuelSeconds: m.fuelSeconds, fuelRes: m.fuelRes, made: m.made,
         workBank: m.workBank, workedSeconds: m.workedSeconds,
+        priority: m.priority ?? 1, lastCredit: m.lastCredit || '',
       })),
     };
   }
@@ -552,6 +678,9 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       machine.made = spec.made || 0;
       machine.workBank = spec.workBank || 0;
       machine.workedSeconds = spec.workedSeconds || 0;
+      // A save made before R16 has neither of these, and the defaults are what it has always done.
+      machine.priority = spec.priority == null ? 1 : Math.max(0, Math.min(2, spec.priority | 0));
+      machine.lastCredit = spec.lastCredit || '';
       machine.queue = (spec.queue || []).map(j => ({ recipe: j.recipe, left: j.left < 0 ? Infinity : j.left, done: j.done || 0 }));
     }
     return machines.size;
@@ -585,6 +714,10 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       workBank: Math.round(m.workBank), workBankMax: bankCap(m),
       queued: m.queue.length,
       lit: m.workedSeconds > 0 && m.state === 'running',
+      enabled: m.enabled !== false,
+      priority: m.priority ?? 1,
+      priorityWord: PRIORITY_WORDS[m.priority ?? 1] || 'normal',
+      lastCredit: m.lastCredit || '',
     }));
   }
 
@@ -593,6 +726,8 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     isUnlocked, unlockProgress, available, board, inputsOf, snapshot, stateText, allJobs,
     // the Civilization Expansion §3 — work runs the machines
     labourNeed, credit, postLabour, collectLabour, labourBoard, setTenders,
+    // R16 — the switch, the queue order, and the words for them
+    setEnabled, setPriority, PRIORITY_WORDS,
     machines: () => tenders,
     all: () => [...machines.values()],
     labour: LAB,
@@ -601,5 +736,141 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     get rare() { return rareElement; },
     toJSON, load,
     get size() { return machines.size; },
+  };
+}
+
+// ---------------------------------------------------------------------------- your own two hands
+
+/**
+ * R16 — HOLD E AT A BENCH AND YOU ARE THE WORKER.
+ *
+ *   "Drills and similar resource extraction devices should be on their own building menu and are
+ *    automated, separate from manufacturing devices which require work to be done by the player or
+ *    NPC. Players can contribute work by holding E, and the progress bar should be indicated over
+ *    the structure. NPCs can also work automatically and the player can jump in to help make it go
+ *    faster."
+ *
+ * THE ONE RULE THIS FILE EXISTS TO KEEP: your units go into the SAME ORDER a citizen fills.
+ *
+ * R15 already let you work a machine by standing near it, and it did it by calling `works.credit`
+ * directly — straight into the machine's bank, round the side of the board. That worked, and it was
+ * a parallel system: your effort never appeared in an order, never appeared in `ledgerRows`, never
+ * appeared in `creditLine`, and a citizen walking to the same furnace could not tell you had been
+ * there. "The player can jump in to help" has to mean helping with the job they are doing, not
+ * running a second invisible one beside it. So this goes through `board.swing`, which is
+ * `addWork(source: 'player')`, which is the identical function `colony._doWork` and the Tender Arm
+ * call — and the bar you see over the structure is that order's REAL fraction, not a local clock.
+ *
+ * It is not js/tools.js's `createGathering`, deliberately, and this is the one place that module's
+ * "the same object can run a seam, a tree and a manufacturing structure" header does not hold. A
+ * gather owns a clock and fires once at the end; this owns nothing and finishes nothing — the order
+ * is shared with two other kinds of worker who may fill it while you are stood there, and a bar
+ * driven by `elapsed / total` would be a lie the moment a citizen turned up to help.
+ *
+ *   const hand = createHandWork({ works, board, machineAt: () => nearestMachineEntry(), speed });
+ *   hand.tick(dt, { at: elapsed, holding: keys.has('KeyE') });
+ *   hud.workBar(hand.bar(), camera);
+ *
+ * Pure: no DOM, no Three.js. `machineAt()` hands back a build entry — `{ id, name, x, y, z, h }` —
+ * because this file has no idea where the player is standing.
+ */
+export function createHandWork({
+  works = null, board = null, machineAt = () => null,
+  speed = () => 1, onLog = null, byName = 'You',
+} = {}) {
+  let bar = null;
+  /** The machine the last complaint was about, so a refusal is said once and not sixty times. */
+  let said = '';
+  let atId = null;
+
+  const say = (id, text, kind = '') => {
+    const key = `${id}:${text}`;
+    if (said === key) return;
+    said = key;
+    onLog?.(text, kind);
+  };
+
+  /** The machine's own live order, posting one if the once-a-second sweep has not got to it yet. */
+  function orderFor(m, at) {
+    const id = `lab_${m.id}`;
+    let o = board.get(id);
+    if (!o || o.complete || o.cancelled) {
+      // safe to run more than once: `postLabour` refuses to post a second order for a machine that
+      // already has one open
+      works.postLabour?.(board, { at });
+      o = board.get(id);
+    }
+    return o && !o.complete && !o.cancelled ? o : null;
+  }
+
+  /**
+   * One frame. `holding` is simply whether the key is down — there is no channel to interrupt and
+   * nothing to cancel, because walking away IS the cancel: `machineAt` stops returning the bench.
+   */
+  function tick(dt = 0, { at = 0, holding = false, machine: given = null } = {}) {
+    bar = null;
+    if (!works || !board) return null;
+    const entry = given || machineAt();
+    if (!entry) { atId = null; return null; }
+    if (entry.id !== atId) { atId = entry.id; said = ''; }
+    const m = works.get(entry.id);
+    if (!m) return null;
+
+    if (m.enabled === false) {
+      if (holding) say(m.id, `The ${m.name} is switched off. Turn it back on before you work it.`, 'warn');
+      return null;
+    }
+    const need = works.labourNeed(m);
+    if (need <= 0) {
+      // Not a refusal — this is the automated half of the split, and saying so is the whole of
+      // "make that VISIBLE". A tier-2 machine on the grid genuinely does not want your help.
+      if (holding) say(m.id, `The ${m.name} runs itself. It wants power, not hands.`, '');
+      return null;
+    }
+    if (!m.queue.length) {
+      if (holding) say(m.id, `The ${m.name} has nothing queued. Press B and pick what it should make.`, 'warn');
+      return null;
+    }
+    const cap = m.def.labour?.bankSeconds ?? works.labour.bankSeconds;
+    if (m.workBank >= cap - 1e-6) {
+      if (holding) say(m.id, `The ${m.name} has all the work it can hold — ${Math.round(m.workBank / 60)} minutes of it.`, '');
+      return null;
+    }
+
+    const order = orderFor(m, at);
+    if (!order) return null;
+
+    const rate = holding ? works.labour.handHoldPerSecond : works.labour.handStandPerSecond;
+    const units = Math.max(0, rate) * Math.max(0.25, speed()) * Math.max(0, dt);
+    const res = units > 0 ? board.swing(order, { units, by: 'player', byName }) : { applied: 0 };
+    /**
+     * Pay it out NOW rather than waiting for js/civics.js's once-a-second sweep. The sweep is still
+     * the thing that runs for citizens and for benches you are nowhere near; this is here so that
+     * the frame you put work in is the frame the furnace starts burning. `collectLabour` only ever
+     * pays the units it has not paid for yet, so the two callers cannot double up.
+     */
+    if (res.applied > 0) works.collectLabour(board);
+
+    // The bar is only up while you are actually holding the key. Standing near a bench keeps it
+    // ticking over — that is R15's rule and it stays — but a bar that is up whenever you walk past
+    // a furnace would be on screen for most of the game.
+    if (holding) {
+      bar = {
+        x: entry.x, y: (entry.y ?? 0) + (entry.h ?? 2) + 0.6, z: entry.z,
+        fraction: progressFraction(order),
+        label: `Working the ${m.name}`,
+        machine: m.id, order: order.id,
+      };
+      said = '';                                  // you are working it; nothing to complain about
+    }
+    return { machine: m, order, units: res.applied || 0, bar };
+  }
+
+  return {
+    tick,
+    /** What js/hud.js's `workBar` wants, or null. `pos` is built by the caller — this file is pure. */
+    bar() { return bar; },
+    get at() { return atId; },
+    cancel() { bar = null; said = ''; },
   };
 }

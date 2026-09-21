@@ -69,8 +69,30 @@ const at = (x, y, z, sx, sy, sz) =>
 export async function createDungeon(scene, {
   seed = 1, balance = {}, node = null, level = 1, rpg = null, look = 'barrow', name = 'The Hollow',
   surface = null,
+  /**
+   * ROUND 16 — the shape of THIS interior, overriding `balance.dungeon` key by key.
+   *
+   * `{ rooms, roomSize, cellSize, corridor, wallHeight, sconceEvery, chestChance }`, all optional.
+   * A cave is three or four cramped rooms and a dragon's lair is three enormous ones, and neither
+   * of those is the six-to-eleven middling barrow that one global setting can describe. Passing
+   * nothing leaves `balance.dungeon` in charge, so every dungeon that existed before this round is
+   * built from exactly the same numbers it was built from before.
+   */
+  shape = null,
+  /** The same thing under the name the round-16 brief used. Whichever arrives, `shape` wins. */
+  plan: shapeAlias = null,
+  /**
+   * The id of the mouth you came in by, and the `data/instances.json` entry it belongs to.
+   *
+   * Both are simply carried through onto the returned object. The caller needs the id because it
+   * used to match a cleared dungeon by NAME (`gates.nodes.find(g => g.name === dungeon.name)`),
+   * and two mouths on one planet can honestly be called the same thing — a world with two
+   * "Weeping Cave"s marked the wrong one cleared. It needs the instance because that is where the
+   * payout for clearing the place is written down.
+   */
+  nodeId = null, instance = null,
 } = {}) {
-  const cfg = balance.dungeon || {};
+  const cfg = { ...(balance.dungeon || {}), ...(shapeAlias || {}), ...(shape || {}) };
   const L = DUNGEON_LOOKS[look] || DUNGEON_LOOKS.barrow;
   const rng = makeRng((seed >>> 0) ^ 0x51ed);
   const plan = layout({
@@ -269,6 +291,17 @@ export async function createDungeon(scene, {
     name, look: L, plan, group, terrain, solids, chests, placedChests,
     rooms: plan.rooms, entrance: plan.entrance, bossRoom: plan.boss,
     level, lights, dispose,
+    /**
+     * Which mouth this is, and what `data/instances.json` says is down here.
+     *
+     * `nodeId` is the fix for matching a cleared dungeon by name; `instance` is null for an
+     * ordinary World Forge dungeon and the whole entry for one of round 16's places, so the caller
+     * can read `instance.holds` to know what to put in the rooms and `instance.gives` to know what
+     * to pay when the boss goes down.
+     */
+    nodeId, instance,
+    /** The shape actually used, so a test or a debug panel can see what the override did. */
+    shape: { rooms: cfg.rooms, roomSize: cfg.roomSize, cellSize: cfg.cellSize, corridor: cfg.corridor, wallHeight: wallH },
     /** Where the player comes in, and where the way out is. */
     entryPoint: () => ({ x: plan.entrance.x, z: plan.entrance.z + plan.entrance.h / 2 - 2, y: 0 }),
     exitPoint: () => ({ x: plan.entrance.x, z: plan.entrance.z + plan.entrance.h / 2 - 2 }),
@@ -277,6 +310,25 @@ export async function createDungeon(scene, {
 }
 
 // ---------------------------------------------------------------------------- the way in
+
+/**
+ * FOUR WAYS IN, BECAUSE NOT EVERY WAY IN WAS BUILT BY A MASON.
+ *
+ * Round 16 puts twenty new mouths on the ground — cave mouths, cellar hatches, sealed tomb doors —
+ * and the dressed-stone arch below is only right for about a third of them. A cave with a lintel
+ * and two pilasters over it reads as a door somebody made, which is exactly the thing a cave is
+ * not. The geometry is identical; only the three colours change, so a second look costs one extra
+ * InstancedMesh and nothing else.
+ *
+ * A node picks one with `arch: 'rough'`; anything that says nothing gets `stone`, which is the arch
+ * every World Forge dungeon has always had.
+ */
+export const GATE_ARCHES = {
+  stone: ['#5a5248', '#0a0a0c', '#8a7a5a'],   // dressed blocks: a built dungeon
+  rough: ['#5b4c3a', '#07070a', '#6e675c'],   // earth and boulders: a cave, a burrow, a sinkhole
+  timber: ['#4a3a28', '#08080a', '#6a5638'],  // props and a lintel: a mine head, a cellar hatch
+  pale: ['#8a8275', '#0a0a10', '#c8bda0'],    // cut and fitted: a tomb, a vault, a cistern lid
+};
 
 /** A stone archway over a dark mouth: what a dungeon looks like from the outside. */
 function gateBody(stone = '#5a5248', dark = '#0a0a0c', trim = '#8a7a5a') {
@@ -299,7 +351,27 @@ function gateBody(stone = '#5a5248', dark = '#0a0a0c', trim = '#8a7a5a') {
  * same nodes the quest layer has always sent you to. Before round 4 there was nothing standing
  * there; now there is a door, and it opens.
  */
-export function createGates(scene, terrain, { balance = {}, zones = null, radius = 2600, collide = null } = {}) {
+export function createGates(scene, terrain, {
+  balance = {}, zones = null, radius = 2600, collide = null,
+  /**
+   * ROUND 16 — MOUTHS SOMEBODY ELSE PUT THERE.
+   *
+   * World Forge only ever marks `dungeon` nodes, so an instance standing at a pass, a crossroads
+   * or a ruined farm had no way in: the whole `E`-to-enter interaction below is keyed off this
+   * list, and a second copy of it somewhere else would be a second thing to keep in step. Hand
+   * them in instead. Same node shape as the ones built here —
+   *
+   *   { id, name, kind, x, z, zone, cleared }
+   *
+   * — plus, optionally, `arch` (a `GATE_ARCHES` key) and anything else the caller wants to hang
+   * off the node; nothing here reads the extra fields, and `nearest()` gives the whole node back,
+   * so an `instance` on it comes straight through to the code that opens the interior.
+   *
+   * Ids must not collide with the world's own node ids. js/sites.js already offsets its road and
+   * junction slots by 9000 and 20000 for the same reason.
+   */
+  extra = [],
+} = {}) {
   // the live cell size — see the note in js/sites.js; `balance.world.metresPerCell` is a stale 640
   const cell = terrain.metresPerCell || M_PER_CELL;
   const nodes = (terrain.world?.nodes || [])
@@ -310,15 +382,45 @@ export function createGates(scene, terrain, { balance = {}, zones = null, radius
       zone: zones?.at(n.x * cell, n.y * cell) || null,
       cleared: false,
     }));
+  for (const e of extra || []) {
+    if (!e || !Number.isFinite(e.x) || !Number.isFinite(e.z)) continue;
+    nodes.push({
+      kind: 'instance', cleared: false,
+      ...e,
+      zone: e.zone || zones?.at(e.x, e.z) || null,
+    });
+  }
 
-  const geometry = gateBody();
+  /**
+   * One InstancedMesh per arch look that is actually used, so a world with no instances on it
+   * still allocates exactly the one mesh it used to.
+   *
+   * The cap is the number of nodes wanting that look, which is the bug this replaces: the old cap
+   * was `min(48, dungeonNodes)` and knew nothing about the injected mouths, so on a busy world the
+   * last twenty of them were silently never drawn — a mouth you can walk into and cannot see.
+   */
   const material = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const mesh = new THREE.InstancedMesh(geometry, material, Math.max(1, Math.min(48, nodes.length)));
-  mesh.count = 0;
-  mesh.frustumCulled = false;
-  mesh.name = 'farhold-dungeon-gates';
-  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  scene.add(mesh);
+  const group = new THREE.Group();
+  group.name = 'farhold-dungeon-gates';
+  const kinds = new Map();                       // arch key -> how many nodes want it
+  for (const n of nodes) {
+    const key = GATE_ARCHES[n.arch] ? n.arch : 'stone';
+    n.arch = key;
+    kinds.set(key, (kinds.get(key) || 0) + 1);
+  }
+  if (!kinds.size) kinds.set('stone', 0);
+  const arches = new Map();
+  for (const [key, want] of kinds) {
+    const geometry = gateBody(...GATE_ARCHES[key]);
+    const mesh = new THREE.InstancedMesh(geometry, material, Math.max(1, Math.min(96, want)));
+    mesh.count = 0;
+    mesh.frustumCulled = false;
+    mesh.name = 'farhold-dungeon-gates-' + key;
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    group.add(mesh);
+    arches.set(key, { mesh, geometry });
+  }
+  scene.add(group);
 
   let centre = [Infinity, Infinity];
   const m = new THREE.Matrix4();
@@ -327,24 +429,46 @@ export function createGates(scene, terrain, { balance = {}, zones = null, radius
   function update(px, pz, force = false) {
     if (!force && Math.hypot(px - centre[0], pz - centre[1]) < 200) return;
     centre = [px, pz];
-    shown = nodes.filter(n => Math.hypot(n.x - px, n.z - pz) < radius).slice(0, mesh.instanceMatrix.count);
-    shown.forEach((n, i) => {
+    const used = new Map();
+    shown = [];
+    for (const n of nodes) {
+      if (Math.hypot(n.x - px, n.z - pz) >= radius) continue;
       n.y = terrain.heightAt(n.x, n.z);
-      m.compose(
-        new THREE.Vector3(n.x, n.y, n.z),
-        new THREE.Quaternion().setFromEuler(new THREE.Euler(0, (n.id % 8) * 0.78, 0)),
-        new THREE.Vector3(1, 1, 1),
-      );
-      mesh.setMatrixAt(i, m);
+      // In range, so it is enterable and lit whatever happens to the drawing below. `nearest()`
+      // reads this list, and a mouth you can see but not walk into would be the worse bug.
+      shown.push(n);
       collide?.add(n.x - 1.7, n.z, 0.8, 4);
       collide?.add(n.x + 1.7, n.z, 0.8, 4);
-    });
-    mesh.count = shown.length;
-    mesh.instanceMatrix.needsUpdate = true;
+      const a = arches.get(n.arch) || arches.get('stone');
+      if (!a) continue;
+      const i = used.get(n.arch) || 0;
+      // That look has run out of instances: over 96 of one arch inside the radius, or somebody
+      // pushed onto `nodes` after we sized the mesh. Skip the draw rather than write past the end.
+      if (i >= a.mesh.instanceMatrix.count) continue;
+      // A world node's id is a number; an injected mouth's might be a string, and `'a7' % 8` is
+      // NaN, which composes a matrix of NaNs and takes the whole InstancedMesh off the screen.
+      const spin = Number.isFinite(n.id) ? n.id % 8 : (String(n.id ?? '').length % 8);
+      m.compose(
+        new THREE.Vector3(n.x, n.y, n.z),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(0, spin * 0.78, 0)),
+        new THREE.Vector3(1, 1, 1),
+      );
+      a.mesh.setMatrixAt(i, m);
+      used.set(n.arch, i + 1);
+    }
+    for (const [key, a] of arches) {
+      a.mesh.count = used.get(key) || 0;
+      a.mesh.instanceMatrix.needsUpdate = true;
+    }
   }
 
   return {
-    nodes, mesh, update,
+    nodes, update,
+    /**
+     * The one handle main.js has always had — `gates.mesh.visible = on` when you go underground.
+     * It is a Group now rather than a single InstancedMesh, and `.visible` works the same on both.
+     */
+    mesh: group,
     get visible() { return shown; },
     /** The mouth you are standing in front of, or null. */
     nearest: (x, z, range = 4.5) => {
@@ -357,6 +481,10 @@ export function createGates(scene, terrain, { balance = {}, zones = null, radius
     },
     /** Torches either side of every mouth, so you can find one at night. */
     lights: () => shown.map(n => ({ x: n.x, y: (n.y || 0) + 3.4, z: n.z + 0.9, color: '#ff9040', range: 20, intensity: 1.8 })),
-    dispose() { scene.remove(mesh); geometry.dispose(); material.dispose(); },
+    dispose() {
+      scene.remove(group);
+      for (const a of arches.values()) { a.geometry.dispose(); a.mesh.dispose?.(); }
+      material.dispose();
+    },
   };
 }

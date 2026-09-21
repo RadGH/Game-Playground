@@ -25,7 +25,7 @@ import { makeRng } from '../../emberveil/js/rng.js';
 import { tickStatuses, slowOf, applyStatus, setStatusFx, setStatusPulse } from './skills.js';
 import { feel, staggerFor, pushFor } from './combat-feel.js';
 import { traitsOf } from './weapons.js';
-import { CHIBI2_COMBAT_ALL } from '../../../avatar-3d/js/chibi2-motion.js';
+import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
@@ -45,10 +45,11 @@ export async function makeActor(look = {}) {
    * THE COMBAT CLIPS, asked for by name.
    *
    * Every attack in the game played `attack` — the same overhead chop for a rapier thrust, an axe
-   * cleave, a bow shot and a staff cast. `CHIBI2_COMBAT_ALL` is the swimming set plus fourteen
-   * strike clips; it is a separate list in the shared module precisely so a game that does not ask
-   * for them builds exactly what it always built. `swim` is folded in rather than passed, because
-   * `chibi2.js` lets `opts.swim` win over `opts.anims` and we want both.
+   * cleave, a bow shot and a staff cast. `CHIBI2_COMBAT_RIDE` is the swimming set, plus fourteen
+   * strike clips, plus (round 16) `boat` and `sit` — being carried by something. They are separate
+   * lists in the shared module precisely so a game that does not ask for them builds exactly what
+   * it always built. `swim` is folded in rather than passed, because `chibi2.js` lets `opts.swim`
+   * win over `opts.anims` and we want both.
    *
    * THE COST, since it is paid by every body in the game and not only the player: clips are
    * generated once per distinct avatar and cached, and 29 of them take about 90 ms against 45 ms
@@ -56,7 +57,7 @@ export async function makeActor(look = {}) {
    * takes to place them; the town tests show no change in their timings. Enemies do not use the
    * new clips, but they share `makeActor` and there is no honest way to tell them apart here.
    */
-  const actor = await createChibi2Character(avatar, { anims: CHIBI2_COMBAT_ALL });
+  const actor = await createChibi2Character(avatar, { anims: CHIBI2_COMBAT_RIDE });
   actor.beast = false;
   actor.combatClips = true;
   /**

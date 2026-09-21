@@ -864,9 +864,47 @@ export function makeTerrain(world, planet = null, opts = {}) {
   const roadIndex = makePathIndex(roadPaths);
   // how far past the road's own edge the deck keeps its ground when a channel is carved under it
   const deckGrip = opts.deckGrip ?? 1.5;
+  /**
+   * ROUND 16 — the quay, and how square a crossing has to be before it counts as one.
+   *
+   * *"Since the road is near the water but doesn't need to cross it, it would be better to shape
+   * alongside the river like a quay."* `quayApron` is how far out from the road's edge the quay
+   * top runs, and `quayFade` is how far back from the water's edge it starts — so a road beside a
+   * river gets a defined lip at deck height instead of a shoulder that slumps into the sheet.
+   *
+   * `crossingDot` is the dot product of the two tangents above which a road is running ALONGSIDE a
+   * river rather than over it. 0.72 is about 44 degrees.
+   */
+  const quayApron = opts.quayApron ?? 10;
+  const quayFade = opts.quayFade ?? 10;
+  /**
+   * How high the quay's lip stands above the water it borders.
+   *
+   * A quay is a defined edge a step above the water, NOT a wall all the way up to the road. Holding
+   * the bank at the full deck height built a three-metre face right beside every bridge abutment —
+   * correct as engineering, wrong as a thing to look at, and it is not what the user asked for.
+   */
+  const quayRise = opts.quayRise ?? 1.4;
+  const CROSS_DOT = opts.crossingDot ?? 0.72;
 
   /** Height along a path at a nearest-point hit. */
   const surfaceOfHit = hit => lerp(hit.path.surface[hit.i], hit.path.surface[Math.min(hit.path.surface.length - 1, hit.i + 1)], hit.t);
+
+  /**
+   * Is this road running ACROSS this river, or along beside it?
+   *
+   * Written without allocating anything: `heightAt` reaches it for every terrain vertex that lands
+   * in a channel with a road over it, and two throwaway arrays a vertex is a lot of garbage.
+   */
+  function crossesSquarely(roadHit, riverHit) {
+    const rp = roadHit.path.points, ri = Math.min(rp.length - 2, Math.max(0, roadHit.i));
+    let ax = rp[ri + 1][0] - rp[ri][0], az = rp[ri + 1][1] - rp[ri][1];
+    const al = Math.hypot(ax, az) || 1; ax /= al; az /= al;
+    const vp = riverHit.path.points, vi = Math.min(vp.length - 2, Math.max(0, riverHit.i));
+    let bx = vp[vi + 1][0] - vp[vi][0], bz = vp[vi + 1][1] - vp[vi][1];
+    const bl = Math.hypot(bx, bz) || 1; bx /= bl; bz /= bl;
+    return Math.abs(ax * bx + az * bz) < CROSS_DOT;
+  }
 
   /**
    * Ground height in metres above sea level (or above the datum on a dry world), with the road
@@ -903,35 +941,299 @@ export function makeTerrain(world, planet = null, opts = {}) {
 
     // a river cuts a channel with a flat bed and banks either side
     const river = riverIndex.nearest(x, z);
+    let riverSurface = null;
     if (river && river.dist < river.path.reach) {
-      const surface = surfaceOfHit(river);
-      const bed = surface - river.path.depth;
+      riverSurface = surfaceOfHit(river);
+      const bed = riverSurface - river.path.depth;
       const t = smoothstep(river.path.half, river.path.reach, river.dist);
       const carved = lerp(bed, height, t);
       height = Math.min(height, carved);        // a river only ever cuts down, never fills up
     }
 
+    if (deck === null) return height;
+
     /**
-     * …AND THE ROAD DECK HAS THE LAST WORD, SO A BRIDGE IS SOMETHING YOU CAN STAND ON.
+     * A BRIDGE SPANS THE RIVER. IT DOES NOT DAM IT.
      *
-     * Reported: "roads, mainly ones crossing rivers, do not actually have any physics and you can
-     * walk right through them." They had none because the carve ran AFTER the grading and only ever
-     * cuts down: the road was lifted clear of the water a few lines above, and then the river cut
-     * the deck straight back out again. On the user's own world the worst crossing drew its deck
-     * 9.3 m above the ground you actually collided with, so you walked through the bridge and fell
-     * in the river.
+     * *"For other situations where roads overlap rivers I've seen them pull the terrain up, cutting
+     * off the water, is it possible to have bridges span the gap in that case rather than to raise
+     * the elevation up, and ensure the player can walk across the river."*
      *
-     * Collision comes from this function, so the deck has to be IN it. It holds for the width of
-     * the road plus `deckGrip` metres of abutment and then falls away to the carved channel again,
-     * which keeps the crossing the width of the bridge rather than damming the river with an
-     * embankment. Anywhere the carve did not touch the road this changes nothing: the deck already
-     * WAS the height here.
+     * That is exactly what the old clamp below did. It re-imposed the graded deck out to
+     * `half + deckGrip` metres either side of the centre line — measured at the user's own spot
+     * (seed 4477, Pewargate) that is a twelve-metre earth plug straight across a river that is
+     * fifty metres of water either side of it. A dam, not a bridge, and the only reason you could
+     * walk over the crossing at all.
+     *
+     * So the ground inside a real crossing's footprint is left carved, and the bridge itself carries
+     * you: `js/features.js` puts its deck mesh on exactly these records and files a matching deck
+     * collider (`ObstacleField.addDeck`), which is what `js/player.js` already stands on through
+     * `standAt`. ONE list decides both, so the thing you can see and the thing you can stand on can
+     * never disagree — which is how the old version ended up with a deck 9.3 m above its collision.
      */
-    if (deck !== null && road.dist < road.path.half + deckGrip) {
+    if (riverSurface !== null && height < riverSurface && spannedAt(x, z)) return height;
+
+    /**
+     * A QUAY WHERE THE ROAD RUNS ALONGSIDE THE WATER.
+     *
+     * *"There is a road clipping into the water, and the water level is lower on one side of the
+     * road. In this case since the road is near the water but doesn't need to cross it, it would be
+     * better to shape alongside the river like a quay."*
+     *
+     * The road's shoulder (up at the top of this function) lerps the ground from the deck back to
+     * the land over sixteen metres, and the river's carve then cuts that slope away again from
+     * below. What is left where the two meet is a slumped bank of no particular height, which the
+     * water sheet stops against at whatever point it happens to reach — one side short, the other
+     * running on, which is the "water level is lower on one side" the user saw.
+     *
+     * A quay is the opposite of a slumped bank: a flat top at the road's own height with a defined
+     * edge. It runs from the road out `quayApron` metres and fades in over the last `quayFade`
+     * metres before the water's edge, and it stops DEAD at the edge of the channel — so the sheet
+     * has a fixed, known place to stop on this side (see `waterRibbon` in js/water-plan.js).
+     */
+    // Three gates, and each one is in the user's own sentence. The channel itself is never touched
+    // (`river.dist >= half` keeps the plan's water width clear, so a quay can never narrow a river
+    // to nothing). The road has to be above the water, or it is a ford, not a quay. And the road
+    // has to be running ALONGSIDE the river — *"near the water but doesn't need to cross it"* — so
+    // a road that crosses gets abutments and a bridge and never a shelf in the middle of its own
+    // channel. It is the same test `findCrossings` uses to decide what a bridge is.
+    if (riverSurface !== null && river.dist >= river.path.half && deck > riverSurface + 0.3
+        && !crossesSquarely(road, river)) {
+      const toWater = 1 - smoothstep(river.path.half, river.path.half + quayFade, river.dist);
+      const toRoad = 1 - smoothstep(road.path.half, road.path.half + quayApron, road.dist);
+      const quay = toWater * toRoad;
+      // the lip: a step above the water, or the road's own level if the road is lower than that
+      const top = Math.min(deck, riverSurface + quayRise);
+      if (quay > 0) height = Math.max(height, lerp(height, top, quay));
+    }
+
+    /**
+     * …AND THE ROAD DECK HAS THE LAST WORD EVERYWHERE ELSE, SO A ROAD IS SOMETHING YOU CAN STAND ON.
+     *
+     * Reported in round 11: "roads, mainly ones crossing rivers, do not actually have any physics
+     * and you can walk right through them." They had none because the carve ran AFTER the grading
+     * and only ever cuts down: the road was lifted clear of the water a few lines above, and then
+     * the river cut the deck straight back out again.
+     *
+     * Collision comes from this function, so the deck has to be IN it — for a lake causeway, a
+     * shoreline road, a cutting, an embankment. The one case it is now NOT in is a river crossing,
+     * which is the branch above: there the bridge is the thing you stand on.
+     */
+    if (road.dist < road.path.half + deckGrip) {
       const t = smoothstep(road.path.half, road.path.half + deckGrip, road.dist);
       height = Math.max(height, lerp(deck, height, t));
     }
     return height;
+  }
+
+  // ------------------------------------------------------------- where a road really crosses a river
+
+  /**
+   * THE CROSSINGS, WORKED OUT FROM THE TWO POLYLINES — NOT FROM THE MAP CELLS.
+   *
+   * `js/features.js` used to find its bridges by looking for a road CELL that was also a river cell
+   * (plus whatever World Forge had already flagged). On the user's own world — seed 4477, Delta
+   * Thiakean II — that finds nothing at all, because a cell is 224 m across and both lines are
+   * smoothed curves that wander inside their cells: the road passes 2.3 m from the middle of a
+   * twelve-metre river and the two never share a cell. So there was no bridge, and the only thing
+   * carrying the player over the water was the earth plug the deck clamp left behind.
+   *
+   * This walks each road every `CROSS_STEP` metres and asks the river index directly. A step counts
+   * as a crossing when the road is over the water itself, the deck is genuinely clear above the
+   * surface, and the two lines meet at more than about 44 degrees — a road running ALONGSIDE a
+   * river is a quay, not a bridge. Consecutive steps are gathered into one crossing.
+   *
+   * ONE list, two readers: `heightAt` leaves the channel alone inside a crossing's footprint, and
+   * `js/features.js` stands its bridge mesh and its deck collider on the very same record.
+   */
+  const CROSS_STEP = 4;
+  /** How far past the deck clamp's own fade a crossing's footprint reaches. See `halfWidth` below. */
+  const SPAN_PAD = 0.75;
+
+  /** Would this point be under the river if no road had ever been graded over it? */
+  function openChannelAt(x, z, surf) {
+    const hit = riverIndex.nearest(x, z);
+    if (!hit || hit.dist >= hit.path.reach) return false;
+    const s = surfaceOfHit(hit);
+    const bed = s - hit.path.depth;
+    const natural = naturalHeightAt(x, z);
+    const t = smoothstep(hit.path.half, hit.path.reach, hit.dist);
+    return Math.min(natural, lerp(bed, natural, t)) < surf;
+  }
+
+  /**
+   * How far a flat plank at `deckY` stays level with the road under it, out to `limit` metres.
+   * Never shorter than the plan's own channel, or a bridge would stop short of the water.
+   */
+  function meshHalf(cx0, cz0, tx, tz, deckY, limit, surf) {
+    const LEVEL = 0.8;                            // metres of disagreement a rigid deck can hide
+    let out = 0;
+    for (let d = CROSS_STEP; d <= limit; d += CROSS_STEP) {
+      let ok = true;
+      for (const side of [-1, 1]) {
+        const hit = roadIndex.nearest(cx0 + tx * side * d, cz0 + tz * side * d);
+        if (!hit || hit.dist >= hit.path.reach || Math.abs(surfaceOfHit(hit) - deckY) > LEVEL) { ok = false; break; }
+      }
+      if (!ok) break;
+      out = d;
+    }
+    const river = riverIndex.nearest(cx0, cz0);
+    const channel = river ? river.path.half + 4 : 8;
+    return Math.max(out, channel, 6);
+  }
+
+  function findCrossings() {
+    const out = [];
+    for (const path of roadPaths) {
+      const pts = path.points;
+      if (!pts || pts.length < 2 || !path.surface) continue;
+      let run = null;
+      const finish = () => {
+        if (!run) return;
+        // how far the water reaches along the road either side of the run: the bridge has to land
+        // on dry ground, not stop at the edge of the plan's own channel
+        const mx = (run.sx + run.ex) / 2, mz = (run.sz + run.ez) / 2;
+        let back = 0, fwd = 0;
+        for (let d = CROSS_STEP; d <= 90; d += CROSS_STEP) {
+          if (!openChannelAt(mx - run.tx * d, mz - run.tz * d, run.surf)) break;
+          back = d;
+        }
+        for (let d = CROSS_STEP; d <= 90; d += CROSS_STEP) {
+          if (!openChannelAt(mx + run.tx * d, mz + run.tz * d, run.surf)) break;
+          fwd = d;
+        }
+        const shift = (fwd - back) / 2;
+        const ABUTMENT = 7;                       // metres of deck landed on each bank
+        const px = mx + run.tx * shift, pz = mz + run.tz * shift;
+        /**
+         * THE DECK HEIGHT IS THE ROAD AT THE MIDDLE OF THE CROSSING, NOT THE HIGHEST POINT OF IT.
+         *
+         * The graded surface RAMPS up to a crossing — `rampPerPoint` spreads the lift over the
+         * neighbouring road points, which are a fifth of a map cell apart (45 m on the default
+         * planet size). Taking the highest deck over the run and laying one flat plank at that
+         * height leaves a two-metre ledge where the plank meets the road at each end, which is a
+         * wall you walk into rather than a bridge you walk onto. Measured at Pewargate: the road is
+         * at 3.30 m thirty-one metres out and the deck was at 5.25.
+         */
+        const mid = roadIndex.nearest(px, pz);
+        const deckY = mid && mid.dist < mid.path.reach ? surfaceOfHit(mid) : run.deck;
+        const halfLength = (back + fwd) / 2 + ABUTMENT;
+        /**
+         * THE DECK IS EXACTLY AS WIDE AS THE HOLE IT COVERS.
+         *
+         * `SPAN_PAD` is not fussiness. The deck clamp fades out over `deckGrip` metres, so a
+         * footprint that ends on a knife edge leaves one sample's worth of full-height ground
+         * standing along the side of every bridge. But the pad cannot live in `spannedAt` alone
+         * either: measured, a road that curves through its crossing puts carriageway up to 0.7 m
+         * outside the rectangle, so a pad only `heightAt` knew about carved half a metre of road
+         * that the deck did not cover — a strip with no ground and no bridge. One number, stored on
+         * the record, used by the hole AND by the mesh AND by the collider.
+         */
+        const halfWidth = path.half + deckGrip + SPAN_PAD;
+        /**
+         * TWO ROADS OVER THE SAME WATER ARE ONE BRIDGE — A WIDER ONE.
+         *
+         * `mergeRoadNetwork` leaves pairs of lines running a couple of metres apart, and both of
+         * them walk the same crossing. Dropping the second one was the obvious thing and it was
+         * wrong: measured on seed 11, road 6 opened the channel and road 7 — 2.8 m away, not in
+         * anybody's footprint — put its own deck clamp straight back across it. The second road's
+         * corridor has to be INSIDE the footprint, or it dams what the first one opened.
+         */
+        const near = out.find(c => Math.hypot(c.x - px, c.z - pz) < 12);
+        if (near) {
+          const dx = px - near.x, dz = pz - near.z;
+          near.halfLength = Math.max(near.halfLength, Math.abs(dx * near.tx + dz * near.tz) + halfLength);
+          near.halfWidth = Math.max(near.halfWidth, Math.abs(dx * -near.tz + dz * near.tx) + halfWidth);
+          near.deck = Math.max(near.deck, deckY);
+          near.meshHalfLength = Math.max(near.meshHalfLength, meshHalf(px, pz, run.tx, run.tz, deckY, halfLength, run.surf));
+          run = null;
+          return;
+        }
+        out.push({
+          x: px, z: pz,
+          // `atan2(dx, dz)` is the standard yaw for a +Z-forward body, which the bridge mesh is
+          angle: Math.atan2(run.tx, run.tz),
+          tx: run.tx, tz: run.tz,
+          surf: run.surf, deck: deckY,
+          halfLength,
+          /**
+           * How long the flat BRIDGE MESH may be, as opposed to the footprint.
+           *
+           * The footprint is the hole in the ground, and every metre of it has to be covered by
+           * something you can stand on — `js/features.js` files a chain of short deck colliders
+           * along it that follow the road's own ramp. The mesh is one rigid box, so it is only as
+           * long as the stretch where the road is actually level with it; past that the drawn road
+           * ribbon (a thick `roadDeck`, see js/water-plan.js) carries the look.
+           */
+          meshHalfLength: meshHalf(px, pz, run.tx, run.tz, deckY, halfLength, run.surf),
+          // The deck is as wide as the ground the old clamp used to hold up, and no wider — that is
+          // the corridor the player used to walk across, so nothing they could stand on is lost.
+          // `js/features.js` scales the bridge mesh to this too, so what you see is what carries you.
+          halfWidth,
+          roadHalf: path.half, klass: path.klass, road: path.id,
+          river: run.river,
+        });
+        run = null;
+      };
+      for (let i = 0; i + 1 < pts.length; i++) {
+        const [ax, az] = pts[i], [bx, bz] = pts[i + 1];
+        const legX = bx - ax, legZ = bz - az;
+        const legLen = Math.hypot(legX, legZ);
+        if (legLen < 1e-6) continue;
+        const tx = legX / legLen, tz = legZ / legLen;
+        const steps = Math.max(1, Math.ceil(legLen / CROSS_STEP));
+        for (let s = 0; s < steps; s++) {
+          const u = s / steps;
+          const x = ax + legX * u, z = az + legZ * u;
+          const hit = riverIndex.nearest(x, z);
+          let over = false;
+          if (hit && hit.dist <= hit.path.half && crossesSquarely({ path, i }, hit)) {
+            const surf = surfaceOfHit(hit);
+            const deckHere = lerp(path.surface[i], path.surface[i + 1], u);
+            if (deckHere >= surf + bridgeClearance * 0.6) {
+              over = true;
+              if (!run) run = { sx: x, sz: z, ex: x, ez: z, tx, tz, surf, deck: deckHere, river: hit.path.id };
+              else { run.ex = x; run.ez = z; run.deck = Math.max(run.deck, deckHere); }
+            }
+          }
+          if (!over) finish();
+        }
+      }
+      finish();
+    }
+    return out;
+  }
+
+  const crossings = findCrossings();
+
+  // a coarse bucket grid, so `heightAt` can ask "am I under a bridge?" without walking the list
+  const CROSS_BUCKET = 96;
+  const crossMap = new Map();
+  const crossKey = (bx, bz) => bx * 73856093 ^ bz * 19349663;
+  for (const c of crossings) {
+    const r = c.halfLength + c.halfWidth;
+    for (let bx = Math.floor((c.x - r) / CROSS_BUCKET); bx <= Math.floor((c.x + r) / CROSS_BUCKET); bx++) {
+      for (let bz = Math.floor((c.z - r) / CROSS_BUCKET); bz <= Math.floor((c.z + r) / CROSS_BUCKET); bz++) {
+        const k = crossKey(bx, bz);
+        let list = crossMap.get(k);
+        if (!list) crossMap.set(k, list = []);
+        list.push(c);
+      }
+    }
+  }
+
+  /** Is this point inside a bridge's footprint — the rectangle the deck covers? */
+  function spannedAt(x, z) {
+    if (!crossMap.size) return false;
+    const list = crossMap.get(crossKey(Math.floor(x / CROSS_BUCKET), Math.floor(z / CROSS_BUCKET)));
+    if (!list) return false;
+    for (const c of list) {
+      const dx = x - c.x, dz = z - c.z;
+      if (Math.abs(dx * c.tx + dz * c.tz) > c.halfLength) continue;
+      if (Math.abs(dx * -c.tz + dz * c.tx) > c.halfWidth) continue;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -1198,6 +1500,12 @@ export function makeTerrain(world, planet = null, opts = {}) {
     world, planet, relief, hasSea, seaLevel, widthM, depthM, metresPerCell: M_PER_CELL,
     width: w, height: h,
     riverPaths, roadPaths, lakes,
+    /**
+     * Where a road really crosses a river, with the footprint of the deck that spans it.
+     * `js/features.js` builds one bridge (mesh + deck collider) per entry; `heightAt` leaves the
+     * channel under each one alone. See `findCrossings`.
+     */
+    crossings,
     /** How many lake cells were pushed out of a settlement's footprint, for the tests. */
     drainedForTowns: drained,
     /** …and how many were a single blue pixel rather than a body of water. */
@@ -1220,7 +1528,11 @@ export function makeTerrain(world, planet = null, opts = {}) {
       const hit = riverIndex.nearest(x, z);
       if (!hit || hit.dist >= hit.path.reach) return null;
       const surface = lerp(hit.path.surface[hit.i], hit.path.surface[Math.min(hit.path.surface.length - 1, hit.i + 1)], hit.t);
-      return { half: hit.path.half, width: hit.path.half * 2, depth: hit.path.depth, reach: hit.path.reach, surface, dist: hit.dist };
+      // the way the river runs here, so a caller can tell "across" from "alongside"
+      const pts = hit.path.points, i = Math.min(pts.length - 2, Math.max(0, hit.i));
+      const dx = pts[i + 1][0] - pts[i][0], dz = pts[i + 1][1] - pts[i][1];
+      const len = Math.hypot(dx, dz) || 1;
+      return { half: hit.path.half, width: hit.path.half * 2, depth: hit.path.depth, reach: hit.path.reach, surface, dist: hit.dist, dir: [dx / len, dz / len] };
     },
 
     /** Map cell under a world position, for the minimap and for "where am I". */

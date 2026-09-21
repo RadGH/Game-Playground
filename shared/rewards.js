@@ -15,6 +15,20 @@
 // skips straight to the fully revealed state first, so nothing is missed. `rarity` accepts the game's
 // ladder (normal/magic/rare/epic/legendary) plus `unique: true` / `set: true` flags, or the strings
 // 'unique' / 'set' directly. Rarity → gem icon uses the assets/data/ui/rarity_*.svg set.
+//
+// ---------------------------------------------------------------- CHOOSING ONE (opt-in, 2026-09-21)
+//
+// Farhold needed "a quest reward where you get to choose one of three rare or better items", and this
+// popup already draws exactly the card a player wants to compare — gem, name, slot, stat lines, rarity
+// glow. Writing a second set of item cards in Farhold would have been the same markup again, drifting
+// apart the first time either side changed. So the popup grew ONE opt-in flag instead.
+//
+//   const i = await showRewards({ title: 'Pick one', items: [a, b, c], choose: true }, opts);
+//
+// `choose` is off unless a caller passes it, and everything below only branches on `choosing`, so a
+// caller that does not pass it gets the popup it has always had and resolves with `undefined` exactly
+// as before. Emberveil passes it nowhere. With it on: the cards are buttons, the footer button stays
+// disabled until one is picked, and the promise resolves with the INDEX of the card taken.
 
 const GEM = { normal: 'rarity_common', common: 'rarity_common', uncommon: 'rarity_uncommon', magic: 'rarity_rare', rare: 'rarity_unique', epic: 'rarity_epic', legendary: 'rarity_legendary', unique: 'rarity_legendary', set: 'rarity_set' };
 const TAG = { legendary: 'Legendary', unique: 'Unique', set: 'Set piece', epic: 'Epic', rare: 'Rare' };
@@ -39,6 +53,8 @@ export function rewardsOpen() { return !!current; }
 
 /**
  * Show the popup. spec: { title, subtitle, gold, xp, fame, items[], extras[] } — every field optional.
+ * `choose: true` (or `{ prompt, confirm }`) turns the item cards into a one-of-N chooser; the promise
+ * then resolves with the index taken instead of `undefined`. Off by default — see the note up top.
  * opts: { speed (1 = normal, 2 = twice as fast), base (ui art folder), sounds { open, item(rarity), coin, close }, container }
  */
 export function showRewards(spec = {}, opts = {}) {
@@ -48,6 +64,11 @@ export function showRewards(spec = {}, opts = {}) {
   const items = (spec.items || []).filter(Boolean); const extras = (spec.extras || []).filter(Boolean);
   const sounds = opts.sounds || {};
   const hasItems = items.length > 0; const counters = [['gold', spec.gold], ['xp', spec.xp], ['fame', spec.fame]].filter(([, v]) => v > 0);
+  // opt-in chooser. `choosing` is false for every existing caller, and every branch below is guarded
+  // by it, so nothing about the plain popup moves.
+  const choosing = !!spec.choose && items.length > 0;
+  const chooseOpts = (spec.choose && spec.choose !== true) ? spec.choose : {};
+  let picked = -1;
 
   const overlay = el('div', { class: 'rw-overlay', role: 'dialog', 'aria-label': spec.title || 'Rewards' });
   const card = el('div', { class: 'rw-card' });
@@ -66,17 +87,40 @@ export function showRewards(spec = {}, opts = {}) {
   card.append(countersBox);
   const itemsBox = el('div', { class: 'rw-items' }); card.append(itemsBox);
   const extrasBox = el('ul', { class: 'rw-extras' }); card.append(extrasBox);
-  const btn = el('button', { class: 'rw-btn', type: 'button', text: spec.button || 'Continue' });
-  const hint = el('span', { class: 'rw-hint', text: 'click anywhere to skip · Enter · Space · Esc' });
+  const btn = el('button', { class: 'rw-btn', type: 'button', text: choosing ? (chooseOpts.prompt || 'Pick one') : (spec.button || 'Continue') });
+  if (choosing) btn.disabled = true;
+  const hint = el('span', { class: 'rw-hint', text: choosing ? 'click a card to take it · ← → to move · Enter' : 'click anywhere to skip · Enter · Space · Esc' });
   card.append(el('div', { class: 'rw-foot' }, btn, hint));
   (opts.container || document.body).append(overlay);
 
   let revealed = false; let finished = false; let resolveP; const done = new Promise(r => { resolveP = r; });
-  const cleanup = () => { document.removeEventListener('keydown', onKey); overlay.classList.add('rw-closing'); setTimeout(() => overlay.remove(), 200); current = null; sounds.close?.(); resolveP(); };
+  // `undefined` for every caller that did not ask to choose — the value the promise has always had.
+  const cleanup = () => { document.removeEventListener('keydown', onKey); overlay.classList.add('rw-closing'); setTimeout(() => overlay.remove(), 200); current = null; sounds.close?.(); resolveP(choosing ? picked : undefined); };
   // First press/click: skip every animation and show the finished result. Second: close.
   // `force` (Escape, or being replaced by another popup) closes straight away.
-  const dismiss = (force) => { if (finished) return; if (!revealed && !force) { revealAll(); return; } finished = true; cleanup(); };
-  const onKey = (e) => { if (['Enter', ' ', 'Escape'].includes(e.key)) { e.preventDefault(); dismiss(e.key === 'Escape'); } };
+  const dismiss = (force) => {
+    if (finished) return;
+    if (!revealed && !force) { revealAll(); return; }
+    /**
+     * A CHOOSER IS NEVER DISMISSED EMPTY-HANDED.
+     *
+     * Escape, a stray click on the dark surround, or another popup barging in would otherwise throw
+     * away a rare item the player had already earned — the same rule as handing in gathered items:
+     * a reward must never be a way to LOSE something. So nothing picked means the first card is
+     * taken, and a soft dismiss leaves the popup open so they can still change their mind.
+     */
+    if (choosing && picked < 0) { select(0); if (!force) return; }
+    finished = true; cleanup();
+  };
+  const onKey = (e) => {
+    if (choosing && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      e.preventDefault();
+      const step = e.key === 'ArrowRight' ? 1 : -1;
+      select((picked < 0 ? 0 : picked + step + items.length) % items.length);
+      return;
+    }
+    if (['Enter', ' ', 'Escape'].includes(e.key)) { e.preventDefault(); dismiss(e.key === 'Escape'); }
+  };
   document.addEventListener('keydown', onKey);
   // A click ANYWHERE — the card, the chest, the dark surround — skips (E24). Clicking the popup
   // itself used to do nothing, so the only way to skip was the small "skip ▸" label in the corner.
@@ -86,7 +130,7 @@ export function showRewards(spec = {}, opts = {}) {
   current = { dismiss, overlay };
 
   // Build item cards (hidden until their turn) and extras up front so a skip can show everything at once.
-  const itemNodes = items.map((it) => {
+  const itemNodes = items.map((it, i) => {
     const rc = rarityClass(it);
     const n = el('div', { class: 'rw-item ' + rc, style: 'animation-play-state: paused' });
     if (it.tipRender) { n.dataset.tipRender = it.tipRender; if (it.itemId) n.dataset.itemId = it.itemId; if (it.tipClass) n.dataset.tipClass = it.tipClass; }   // optional: the game's own hover card (shared/tooltip.js registerTip)
@@ -95,15 +139,37 @@ export function showRewards(spec = {}, opts = {}) {
     n.append(el('div', { class: 'name', text: it.name || 'Item' }));
     if (it.slot) n.append(el('div', { class: 'slot', text: it.slot }));
     if (it.lines?.length) n.append(el('div', { class: 'lines' }, ...it.lines.slice(0, 3).map(l => el('div', { text: l, title: l }))));
+    if (it.note) n.append(el('div', { class: 'note', text: it.note }));
+    if (choosing) {
+      // a card you can take is a button, and says so to a screen reader as well as to a mouse
+      n.classList.add('rw-pick');
+      n.append(el('i', { class: 'rw-tick', text: '✓' }));
+      n.setAttribute('role', 'button'); n.setAttribute('tabindex', '0');
+      n.setAttribute('aria-label', `Take ${it.name || 'this'}`);
+      // stopPropagation because the overlay's own click handler is "skip / close", and a click on a
+      // card must not be read as both
+      n.addEventListener('click', (e) => { e.stopPropagation(); if (!revealed) revealAll(); select(i); });
+      n.addEventListener('dblclick', (e) => { e.stopPropagation(); select(i); dismiss(true); });
+    }
     n.style.visibility = 'hidden'; itemsBox.append(n); return { n, rc };
   });
+  /** Highlight one card and arm the footer button with what taking it would mean. */
+  function select(i) {
+    if (!choosing || !itemNodes[i]) return;
+    picked = i;
+    itemNodes.forEach(({ n }, k) => { n.classList.toggle('rw-picked', k === i); n.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
+    btn.disabled = false;
+    btn.textContent = chooseOpts.confirm || `Take ${items[i].name || 'it'}`;
+  }
   const extraNodes = extras.map((x) => { const li = el('li', { class: x.kind || 'item', style: 'animation-play-state: paused; visibility: hidden' }, el('i'), el('span', { text: x.text || '' })); extrasBox.append(li); return li; });
   btn.style.visibility = 'hidden';
 
   const showItem = (i) => { const { n, rc } = itemNodes[i]; n.style.visibility = ''; n.style.animationPlayState = 'running'; sounds.item?.(rc); };
   const showCounter = (kind, instant) => { const k = counterNodes[kind]; if (!k) return Promise.resolve(); k.c.classList.add('show'); if (instant) { k.num.textContent = k.v.toLocaleString(); return Promise.resolve(); } sounds.coin?.(kind); k.c.classList.add('bump'); return countUp(k.num, k.v, T(600)); };
   const showExtra = (i) => { const li = extraNodes[i]; li.style.visibility = ''; li.style.animationPlayState = 'running'; };
-  const showButton = () => { btn.style.visibility = ''; btn.style.animationPlayState = 'running'; btn.focus({ preventScroll: true }); };
+  // choosing: the footer button starts disabled, so focus the first card instead — focusing a
+  // disabled button puts the keyboard nowhere
+  const showButton = () => { btn.style.visibility = ''; btn.style.animationPlayState = 'running'; (choosing ? itemNodes[0]?.n || btn : btn).focus?.({ preventScroll: true }); };
   const sparks = () => { for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2 + Math.random() * .3; const r = 50 + Math.random() * 60; const s = el('i', { class: 'rw-spark', style: `--dx:${Math.cos(a) * r}px; --dy:${Math.sin(a) * r - 30}px; --d:${(Math.random() * .15).toFixed(2)}s` }); stage.append(s); setTimeout(() => s.remove(), T(1000)); } };
   const openChest = () => { if (stage.classList.contains('open')) return; stage.classList.remove('landing', 'shake'); stage.classList.add('open'); sounds.open?.(); sparks(); };
   // Everything at once, with no animation left running: the chest open, the counters at their final

@@ -949,3 +949,96 @@ Twenty-four of them. In rough order of how much they matter:
 * the ground under a laid road is within half a metre of the surface it is drawn at;
 * a tile's corners are within 12 cm of the ground it sits on, and a slab levels to the mean;
 * a town street is a lane, and it breaks at the water instead of leaving a hole.
+
+---
+
+## Round 16 — Extraction, Refining, and holding E
+
+> "Drills and similar resource extraction devices should be on their own building menu and are
+> automated, separate from manufacturing devices which require work to be done by the player or NPC.
+> Players can contribute work by holding E, and the progress bar should be indicated over the
+> structure. NPCs can also work automatically and the player can jump in to help make it go faster.
+> This is more groundwork for the building system. Expand the building system by adding some more
+> features that would fit the new mechanisms I've described."
+
+### 16.1 The split
+
+`data/structures.json` grew a category. **Extraction** holds the three pieces that take raw material
+out of the world — Small Drill, Drill, Pump — and **Refining** keeps the seventeen that turn one
+thing into another. Ids did not move, because a saved base stores `entry.key`; what moved is `cat`,
+which is display data, so `js/buildplan.js` `load()` now re-reads it from the catalogue on every
+load. An old save's drill arrives filed under "refine" and is corrected before anything looks at it.
+
+The panel needed no code for the new button: `js/build-ui.js` derives its categories from
+`Object.keys(categories)` filtered by what has something in it, and `extract` is inserted before
+`refine` so the buttons read in the order you actually do the work.
+
+**The invariant the split rests on, and it is checked from both ends:** an extraction piece is never
+a `data/refining.json` machine. That is not a convention — it is the mechanism. `works.place` is
+only ever called for a structure with a machine definition, so a drill is not in `works` at all, so
+`postLabour` cannot see it, so there is no way for a drill to ask for a worker. `tests/round16-
+industry.test.js` asserts no `extract` structure has a machine def, no machine sits in `extract`,
+and that a base of drills posts zero orders.
+
+The two id lists that knew about drills are gone: `js/buildplan.js` `isExtractor()` is the one
+answer (`cat === 'extract' || needs === 'node' || needs === 'water'`), and `js/outposts.js` `roleOf`
+reads the category — which incidentally fixes the Small Drill, the FIRST drill anybody builds, never
+having been in that list, so a camp of them called itself a Workshops outpost.
+
+### 16.2 Holding E
+
+`js/refine.js` `createHandWork()`. One rule: **your units go into the same order a citizen fills.**
+
+R15 already let you work a machine by standing near it, and it did it by calling `works.credit`
+directly — straight into the machine's bank, round the side of the board. It worked, and it was a
+parallel system: your effort never appeared in an order, never in `ledgerRows`, never in
+`creditLine`, and a citizen walking to the same furnace could not tell you had been there. "The
+player can jump in to help" has to mean helping with the job they are doing.
+
+So it goes through `board.swing`, which is `addWork(source: 'player')`, which is the identical
+function `colony._doWork` and the Tender Arm call. The bar over the structure is that order's real
+`progressFraction` — a citizen filling the same order moves your bar, which a local clock could
+never do. Two rates, in `data/refining.json`'s `handWork` block: standing near a bench is
+`1/30` units a real second (R15's 1:1, kept exactly), holding E is `0.1`, three times that, scaled
+by the tool you are carrying.
+
+**It is not `createGathering`,** and this is the one place that module's "the same object can run a
+seam, a tree and a manufacturing structure" header does not hold. A gather owns a clock and fires
+once at the end; this owns nothing and finishes nothing.
+
+**E decides by the machine, not by how long you hold the key.** A bench with a job on it that wants
+hands is one you help; a bench that is idle, switched off or already running itself is one you talk
+to, and the recipe list comes up as it did in R15. There is always a door — B opens the bench panel
+on whatever you are standing at.
+
+### 16.3 The bug the join turned up
+
+Routing the player through the board meant labour was only paid when a four-unit order finished —
+two minutes of standing at a cold furnace, then two minutes of running off a lump sum. Same
+throughput, reads as broken. `collectLabour` now pays the DELTA of what an order has had put into
+it, open orders included. That fixes it for citizens too: one worker halfway through an order used
+to buy their machine nothing at all, so a bench with one person on it ran in two-minute pulses.
+
+### 16.4 What else got wired
+
+Three things that existed, were saved, were read — and had no way in.
+
+* **The switch.** `m.enabled` is checked at the top of `step`, in `postLabour` and in `toJSON`, and
+  nothing has ever set it. `works.setEnabled` and a button on the bench panel. A bench you turn off
+  keeps its queue, its half-finished batch and its bank; it stops, and it stops asking for a worker,
+  which matters because an idle loom was splitting your one smelter's shift with the furnace.
+* **Batches and standing orders.** `works.queue(id, recipe, count)` has taken a count since the day
+  it was written and `count <= 0` has always meant "keep going" — the queue rows have printed the
+  word "repeating" all along. The panel only ever sent 1, so clicking a recipe twenty times was the
+  only way to make twenty of anything. ×1 / ×5 / ×20 / keep going, chosen once.
+* **Priority.** New, and it is nothing but the `priority` on the machine's own work order, which
+  `js/work.js` `nextFor` has always sorted by and nothing ever set above the default. Last / Normal
+  / First on the bench panel; a change reaches an order that is already open.
+
+And one thing that existed and had never been *rendered*: `creditLine`. A machine remembers the
+sentence for its last shift, so a bench can say "2.5 by You, 1.5 by Marwen".
+
+`js/work.js`'s `WorkBoard` also keeps its orders when it is built from a save. `toJSON` has always
+written them out and the constructor read `now` and threw the rest away (`fromJSON`, which does read
+them, is called by nobody) — invisible for a machine's order, which is re-posted within the second,
+and a silent loss of every harvest and build order and the half-shift already in it.

@@ -575,6 +575,43 @@ export function placedNode({ data = {}, rng = makeRng(2), kindId, x = 0, z = 0, 
 const TILE = 512;
 
 /**
+ * ROUND 17 — NOTHING IS DUG OUT OF THE MIDDLE OF A ROAD.
+ *
+ * *"Try to prevent spawning Clay and other resources directly on the road."*
+ *
+ * The scatter below picks a spot, asks the biome what grows there and puts a seam down. It has
+ * never known where the roads are, so a clay bank on the carriageway is not a rare accident: 1.8%
+ * of the seams around the user's own town were on one, boulders and felled-tree stumps included.
+ *
+ * `roadAt` is the same field the megaflora and the town planner already keep clear of, and 0.45 is
+ * the same threshold `js/features.js` uses for a building — the carriageway and its kerb, not the
+ * whole eighteen-metre influence field, because a seam BESIDE a road is exactly where a seam wants
+ * to be. `bridgedAt` is asked as well: a bridge's footprint is a hole in the ground with a deck
+ * over it, so a boulder in one is a boulder floating over a river.
+ *
+ * THE NODE'S OWN RADIUS IS IN THE QUESTION. A two-metre seam whose centre is a metre off the kerb
+ * still has half of itself in the road.
+ *
+ * **It runs AFTER the scatter, never inside it.** Round 12's density bug is the reason: the tile's
+ * rng is shared by everything that comes after it, so rejecting a spot mid-loop (or breaking out of
+ * one) consumes a different number of rng calls and every seam downstream moves. Marking `gone` is
+ * how the underwater and cliff rejections already work, and it costs the rng nothing.
+ */
+function onTheRoad(terrain, node) {
+  const r = node.radius ?? 2;
+  if (terrain.bridgedAt?.(node.x, node.z, r)) return true;
+  if (!terrain.roadAt) return false;
+  if (terrain.roadAt(node.x, node.z) > 0.45) return true;
+  // the edge of the seam, not just its middle
+  for (let a = 0; a < 4; a++) {
+    const px = node.x + Math.cos((a / 4) * Math.PI * 2) * r;
+    const pz = node.z + Math.sin((a / 4) * Math.PI * 2) * r;
+    if (terrain.roadAt(px, pz) > 0.45) return true;
+  }
+  return false;
+}
+
+/**
  * Ore across a whole planet, generated a tile at a time and remembered.
  *
  * `createNodeField` above scatters seams inside one circle, which is the right shape for a test and
@@ -646,6 +683,7 @@ export function createNodeWorld({ data = {}, seed = 1, terrain = null, planet = 
       if (taken) Object.assign(n, taken);
       // a seam under the sea or inside a cliff is a seam nobody will ever work
       if (terrain && (terrain.underwater(n.x, n.z) || terrain.slopeAt(n.x, n.z, 4) > 0.8)) n.gone = true;
+      if (terrain && onTheRoad(terrain, n)) n.gone = true;
     }
     const live = nodes.filter(n => !n.gone).concat(placed.get(key) || []);
     tiles.set(key, live);

@@ -582,6 +582,22 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       // A road cell can sit on a ford, and a landmark node can sit a metre above the tide line. A
       // castle with its courtyard under water is not a castle, so the wet slots are simply dropped.
       if (terrain.underwater?.(slot.x, slot.z)) continue;
+      /**
+       * ROUND 17 — AND A SLOT IS NEVER ON A BRIDGE.
+       *
+       * `slotsFrom` puts a slot on a road cell and on every cell two roads share, and a `crossing`
+       * node is by definition where a road meets a river. A bridge's footprint is a hole: `heightAt`
+       * leaves the channel carved under it so the water runs through, and a watchtower standing
+       * there stands in mid-air over a river — which is what the user reported as *"there is a tower
+       * inside of the bridge"*. Measured on their world, 49 of 356 slots were inside one.
+       *
+       * The `underwater` line above happens to catch most of them today, because the ground under a
+       * bridge is usually still river. That is luck, not a rule: a shallow crossing leaves the bed
+       * above the waterline and the slot reads perfectly dry. `bridgedAt` asks the question that is
+       * actually being asked, and with the layout's own radius, because a fort is thirty metres
+       * across and its middle clearing the deck proves nothing about its walls.
+       */
+      if (terrain.bridgedAt?.(slot.x, slot.z, 12)) continue;
       const zone = zones?.at(slot.x, slot.z) || null;
       const band = zone?.band ?? 1;
       const rng = makeRng((seed ^ (slot.id * 2654435761)) >>> 0);

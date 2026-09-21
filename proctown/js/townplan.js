@@ -568,12 +568,31 @@ function planOnce({
   out.blocks = out.blocks.filter(b => Math.hypot(b.cx, b.cz) <= ring);
   out.streets = out.streets.map(st => clipPolyline(st, wall)).filter(Boolean);
 
-  // the central square: whichever block sits nearest the middle becomes open ground
+  /**
+   * The central square: whichever block sits nearest the middle becomes open ground.
+   *
+   * ROUND 17 — AND "THE MIDDLE" HAS TO BE SOMEWHERE YOU CAN STAND.
+   *
+   * *"The centre of the town has a bunch of stuff semi-underwater."* Farhold hangs the well, the
+   * market stalls and the civic district off `out.square`, and this took the block nearest 0,0
+   * whatever was there. On a settlement the world map founded with a river through it — Feafungate
+   * on seed 56138 has its map node in the middle of the channel, with 42% of its ring under water —
+   * that put the town square, and everything that rings it, in the river. The planner already knows
+   * which ground it may not use; it simply was not asking here.
+   *
+   * So a buildable block wins over a nearer one, and the old rule is the fallback for a town where
+   * nothing is buildable (a test's stand-in terrain says nothing at all is, and a square is still
+   * better than no square).
+   */
   let squareBlock = null, best = Infinity;
+  let anyBlock = null, anyBest = Infinity;
   for (const b of out.blocks) {
     const d = Math.hypot(b.cx, b.cz);
+    if (d < anyBest) { anyBest = d; anyBlock = b; }
+    if (buildable && !buildable(b.cx, b.cz)) continue;
     if (d < best) { best = d; squareBlock = b; }
   }
+  if (!squareBlock) squareBlock = anyBlock;
   if (squareBlock) {
     out.blocks = out.blocks.filter(b => b !== squareBlock);
     out.square = { cx: squareBlock.cx, cz: squareBlock.cz, r: Math.max(squareBlock.w, squareBlock.d) / 2 };

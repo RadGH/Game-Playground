@@ -50,10 +50,37 @@ export function waterRibbon(points, heights, half, { terrain, reach, skirt = 2.5
     const out = [half, half];
     for (let s = 0; s < 2; s++) {
       const sign = s === 0 ? 1 : -1;
+      const groundAt = d => terrain.heightAt(points[i][0] + nx * sign * d, points[i][1] + nz * sign * d);
+      let last = half;
       for (let d = half; d <= reach; d += step) {
         out[s] = d;
-        if (terrain.heightAt(points[i][0] + nx * sign * d, points[i][1] + nz * sign * d) >= y) break;
+        if (groundAt(d) >= y) {
+          /**
+           * ROUND 17 — AND THEN WALK BACK IN TO THE WATERLINE ITSELF.
+           *
+           * *"The water does not touch the shoreline."* The coarse walk steps in half a channel
+           * width — three metres on an average river, eight on a big one — and takes the first step
+           * where the bank has come back up. On anything but a cliff that step lands somewhere UP
+           * the bank rather than on the waterline, so the sheet's rim stood a slope's worth above the
+           * ground and you could see the edge of the water sitting proud of the shore.
+           *
+           * Five halvings put the edge within a tenth of the step of the real crossing, which is
+           * under 40 cm on a wide river and under 10 on a narrow one. It costs five height samples
+           * per bank per point and only at the point where the bank was actually found — nothing at
+           * all on the edges that run out to `reach`.
+           */
+          let lo = last, hi = d;
+          for (let k = 0; k < 5; k++) {
+            const mid = (lo + hi) / 2;
+            if (groundAt(mid) >= y) hi = mid; else lo = mid;
+          }
+          out[s] = hi;
+          break;
+        }
+        last = d;
       }
+      // never narrower than the water the plan asked for, whatever the bisection found
+      if (out[s] < half) out[s] = half;
     }
     // the two banks have to agree — see `tolerance` above
     const cap = Math.min(out[0], out[1]) + tolerance;

@@ -587,12 +587,47 @@ export function createFeatures(scene, terrain, opts = {}) {
     const ring = 16 + size * 13;                     // metres from the centre to the outer houses
     const cx = node.wx, cz = node.wz;
 
-    const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null,
-      { solid: wantSolid = true, tint = null } = {}) => {
-      if (counts[key] >= BUILDINGS[key].cap) return false;
+    /**
+     * ROUND 17 — "SEMI-UNDERWATER" IS A QUESTION ABOUT A FOOTPRINT, NOT ABOUT A CENTRE.
+     *
+     * *"The centre of the town has a bunch of stuff semi-underwater."* (seed 56138, Chodikvraun III,
+     * x 11572 z 2995 — the town is Feafungate, and a river runs straight through the middle of it.)
+     *
+     * Every water test in this file asked `underwater(x, z)` of ONE point: the exact middle of the
+     * thing being placed. A hut is three and a half metres across, a warehouse eleven, and the
+     * waypoint pad six — so anything whose centre cleared the water by a few centimetres went down
+     * with a third of itself in the river and passed every check there was. Measured at Feafungate,
+     * four of the hundred and forty things the builder stands on the ground came out wet that way:
+     * the well, the waypoint pad, a market stall and a length of the town wall.
+     *
+     * A ring of samples at the thing's own radius is what the player is actually looking at. It also
+     * wants freeboard rather than a bare waterline — the stalls already learned that one ("eight
+     * hundred millimetres settles it") and nothing else had.
+     *
+     * And it asks `bridgedAt` in the same breath, because a bridge's footprint is a HOLE: `heightAt`
+     * leaves the river channel carved under one so the water can run through, and anything built
+     * there stands in mid-air over the river. See the note on `bridgedAt` in js/planet.js.
+     */
+    const FREEBOARD = 0.4;                      // metres of dry ground under the lowest edge
+    const dryFor = (x, z, radius = 0) => {
+      if (terrain.bridgedAt?.(x, z, radius)) return false;
       if (terrain.underwater(x, z)) return false;
+      if (radius < 0.5) return true;            // a shrine, a sigil: its centre IS its footprint
+      for (let a = 0; a < 8; a++) {
+        const px = x + Math.cos((a / 8) * Math.PI * 2) * radius;
+        const pz = z + Math.sin((a / 8) * Math.PI * 2) * radius;
+        const water = terrain.waterAt(px, pz);
+        if (water && terrain.heightAt(px, pz) < water.surface + FREEBOARD) return false;
+      }
+      return true;
+    };
+
+    const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null,
+      { solid: wantSolid = true, tint = null, foot = null } = {}) => {
+      if (counts[key] >= BUILDINGS[key].cap) return false;
       // nothing is built in the channel or on the bank — towns sit BESIDE their river
       if (terrain.riverAt(x, z) > 0.3) return false;
+      if (!dryFor(x, z, foot ?? (BUILDING_SOLIDS[key]?.[0] || 0))) return false;
       const size = Array.isArray(scale) ? scale : [scale, scale, scale];
       matrix.compose(
         new THREE.Vector3(x, (y ?? terrain.heightAt(x, z)) - sink, z),
@@ -702,6 +737,18 @@ export function createFeatures(scene, terrain, opts = {}) {
         // reads 1.0 at its centre and fades to nothing by 18 m, and excluding all of that took 36%
         // of a town's ground. Buildings SHOULD front close to the road — that is what a road is for
         if (terrain.roadAt(x, z) > 0.45) return false;
+        /**
+         * …AND THE BRIDGE. Round 17, and the same mistake one level further on.
+         *
+         * A crossing's footprint is a rectangle drawn along the road's tangent, and `heightAt`
+         * leaves the river channel carved under every metre of it so the water can run through.
+         * `roadAt` does NOT read 1.0 across all of that — a road bends and ends, and the deck runs
+         * straight — so the ground at the far end of a bridge reads as perfectly good building land
+         * while the terrain under it has been dug out to the river bed. That is the user's *"there
+         * is a tower inside of the bridge"*, and it is why the footprint is asked for by name here
+         * rather than inferred from the road.
+         */
+        if (terrain.bridgedAt?.(x, z, 2)) return false;
         return !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 6) <= 0.62;
       },
     });
@@ -741,8 +788,12 @@ export function createFeatures(scene, terrain, opts = {}) {
       const tint = new THREE.Color(cultKit.street.colour);
       for (const lane of streetLanes(plan, {
         cx, cz, terrain,
-        // a street stops at the water and picks up on the far side, as a road does at a sea lane
-        skip: (x, z) => terrain.underwater(x, z) || terrain.riverAt(x, z) > 0.3,
+        // A street stops at the water and picks up on the far side, as a road does at a sea lane —
+        // and at a bridge, where the ground it would be draped on is a hole. Round 17: ten of
+        // Feafungate's street lanes ran over the deck of the bridge through the middle of the town,
+        // which draws a strip of paving hanging in the air over the river.
+        skip: (x, z) => terrain.underwater(x, z) || terrain.riverAt(x, z) > 0.3
+          || !!terrain.bridgedAt?.(x, z),
       })) {
         pushRibbon(streets, laneRibbon(lane, { lift: 0.12, color: [tint.r, tint.g, tint.b] }));
       }
@@ -770,7 +821,7 @@ export function createFeatures(scene, terrain, opts = {}) {
       const pad = padSpotFor(node, padOk);
       if (padOk(pad.x, pad.z)) {
         const lit = waypointLit ? !!waypointLit(node.id) : false;
-        place('waypoint', pad.x, pad.z, 0, 1, 0.12);
+        place('waypoint', pad.x, pad.z, 0, 1, 0.12, null, { foot: 3.2 });
         place('waysigil', pad.x, pad.z, 0, 1, 0.12, null,
           // dead stone until you have been here; then it burns
           { solid: false, tint: lit ? '#7fe8ff' : '#3a4048' });
@@ -804,6 +855,9 @@ export function createFeatures(scene, terrain, opts = {}) {
       if (terrain.riverAt(sx, sz) > 0.3) continue;
       if (terrain.slopeAt(sx, sz, 4) > 0.5) continue;
       const stall = describeStall({ kind: spot.kind, culture, seed: spot.seed });
+      // …and round 17 asks about the whole awning rather than about the spot its middle post stands
+      // on, which is what left a stall with two legs in the river at the user's own town square
+      if (!dryFor(sx, sz, Math.max(stall.w, stall.d) * 0.5)) continue;
       const yaw = Math.PI / 2 - spot.facing;
       const cos = Math.cos(yaw), sin = Math.sin(yaw);
       const ground = terrain.heightAt(sx, sz);
@@ -825,6 +879,10 @@ export function createFeatures(scene, terrain, opts = {}) {
       const [x, z] = toWorld(plot.cx, plot.cz);
       if (terrain.underwater(x, z)) continue;
       if (terrain.slopeAt(x, z, 6) > 0.62) continue;        // a town thins out uphill by itself
+      // …and no plot lands in a bridge's footprint, which is a hole in the ground with a deck over
+      // it. `buildable` below keeps the PLANNER off one; this catches the plots a re-plan produced
+      // against a different ring, so the two can never disagree.
+      if (terrain.bridgedAt?.(x, z, 2)) continue;
       const key = BUILDINGS[plot.want] ? plot.want : 'house';
       if (counts[key] >= BUILDINGS[key].cap) continue;
 
@@ -847,7 +905,9 @@ export function createFeatures(scene, terrain, opts = {}) {
        * under a wall when the ground falls away beneath it.
        */
       place(key, x, z, yaw, [desc.footprint.w + 0.7, 1, desc.footprint.d + 0.7], 0.26, ground,
-        { solid: false, tint: mix(desc.colour.wall, '#2a2621', 0.55) });
+        // the kit's own footprint, not the generic radius for this building type — a hut and a
+        // warehouse share the `place` path and are three and eleven metres across
+        { solid: false, foot: radiusOf(desc), tint: mix(desc.colour.wall, '#2a2621', 0.55) });
 
       // the tallest part is worked out on the way past, not by asking `heightOf` — that would build
       // the whole kit a second time, for every building, on every rebuild

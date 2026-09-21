@@ -138,8 +138,33 @@ test('a road crossing a river does not raise the terrain in the channel', () => 
       for (let d = -inner; d <= inner; d += 1) {
         const x = c.x + ax * d, z = c.z + az * d;
         const h = t.heightAt(x, z);
-        assert.ok(h < c.surf + 0.01,
-          `seed ${seed}: the ground stands ${(h - c.surf).toFixed(2)} m above the river INSIDE the crossing`);
+        /**
+         * ROUND 17 — AGAINST THE RIVER'S SURFACE HERE, NOT THE ONE RECORDED AT THE MIDDLE.
+         *
+         * `c.surf` is the water at the crossing's own centre, and a river falls. That did not matter
+         * while a footprint was six metres either side of the road; it does now that two roads over
+         * one river merge into one wider bridge (11.2 m either side on seed 7), because the walk
+         * then reaches ground whose own stretch of river is a fifth of a metre higher than the
+         * middle's. The ground there was 0.10 m UNDER its own water and 0.23 m over the number this
+         * line used to compare against.
+         *
+         * What the test is for is unchanged: no earth plug anywhere under a bridge.
+         */
+        const here = t.riverInfoAt(x, z);
+        /**
+         * …AND ONLY WHERE THERE IS A CHANNEL TO PLUG.
+         *
+         * Two roads over one river merge into one wider bridge, and round 17 widened the window
+         * that decides when (two decks eleven metres apart used to come out as two bridges with a
+         * 17 cm step between them). A merged footprint is 22 m across where the river is 12, so the
+         * walk now runs out onto the BANK — and a bank is meant to be above the water. The plug
+         * this test exists to catch is in the channel; the sibling test below walks the same line
+         * and requires it to be wet from end to end, which is the other half of the same fact.
+         */
+        if (!here || here.dist > here.half + 2) continue;
+        const line = Math.max(c.surf, here.surface);
+        assert.ok(h < line + 0.01,
+          `seed ${seed}: the ground stands ${(h - line).toFixed(2)} m above the river INSIDE the crossing`);
       }
       // …and the river is still a river there: the game agrees there is water under the deck
       const water = t.waterAt(c.x, c.z);
@@ -188,7 +213,19 @@ test('the bridge deck carries the player where the ground no longer does', () =>
     const feet = c.deck + 0.26;
     const top = field.standAt(c.x, c.z, feet, 0.4);
     assert.ok(top !== null, `nothing to stand on in the middle of the bridge at ${c.x | 0},${c.z | 0}`);
-    assert.ok(Math.abs(top - (c.deck + 0.26)) < 0.01, 'the deck is not where it was filed');
+    /**
+     * ROUND 17 — WITHIN A STEP OF THE DECK FILED HERE, NOT EXACTLY IT.
+     *
+     * A road crossing a river at forty degrees gets a bridge now (it used to be waved through as a
+     * quay and dammed instead), so a merged pair of roads twelve metres apart can put TWO bridges
+     * over one river. Their decks are graded independently and come out a few centimetres apart,
+     * and `standAt` hands back the higher of the two — which is the right answer for a player and
+     * not the one this line asked for. The thing that matters is that you are standing on a bridge
+     * at this bridge's height, and `CLEARANCE` is the project's own word for "near enough to stand
+     * on".
+     */
+    assert.ok(top >= c.deck + 0.26 - 0.01 && top - (c.deck + 0.26) <= CLEARANCE,
+      `the deck is ${(top - (c.deck + 0.26)).toFixed(2)} m from where it was filed`);
     // the ground under it really has gone away, or this proves nothing
     assert.ok(t.heightAt(c.x, c.z) < c.deck - 1, 'the terrain is still holding the road up here');
     // a deck is walked ON, not into: it must never push you sideways, or the road would be a wall

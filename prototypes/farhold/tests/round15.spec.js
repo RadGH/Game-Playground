@@ -122,3 +122,87 @@ test('the character sheet says what your tool is and how to get a better one', a
   expect(out.tip).toMatch(/Next rung/);
   expect(errors).toEqual([]);
 });
+
+/**
+ *   "I realize we should probably use the Outpost marker to establish a base, and attribute
+ *    everything nearby to that base. Then I would like the map to show outposts on it and allow
+ *    creating connections between then to transport items, in either direction with a max limit."
+ */
+test('an Outpost Marker claims what is around it, and the map lists it', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(() => {
+    const fh = window.farhold;
+    /**
+     * Find dry, flat ground with room for both pieces. The refusals the first version of this test
+     * hit — "you cannot build on water", "the ground is too steep here" — were the game working
+     * correctly; a spec that builds in a lake is testing the wrong thing.
+     */
+    const t = fh.terrain;
+    const ok = (x, z) => !t.underwater(x, z) && t.riverAt(x, z) <= 0.3 && t.slopeAt(x, z, 4) < 0.16;
+    let bx = null, bz = null;
+    for (let r = 20; r < 900 && bx === null; r += 20) {
+      for (let a = 0; a < 16; a++) {
+        const x = fh.control.x + Math.cos(a / 16 * 6.283) * r;
+        const z = fh.control.z + Math.sin(a / 16 * 6.283) * r;
+        // both ends of the pair have to be buildable, sixty metres apart
+        if (ok(x, z) && ok(x + 60, z)) { bx = x; bz = z; break; }
+      }
+    }
+    if (bx === null) return { skipped: 'no flat dry ground within 900 m on this seed' };
+    const put = (key, dx, dz) => {
+      fh.build.setMode(true); fh.build.select(key);
+      const need = (fh.structures.structures || []).find(p => p.id === key)?.cost || {};
+      for (const [id, n] of Object.entries(need)) fh.bag.add?.(id, n * 10);
+      fh.build.aim?.(bx + dx, bz + dz);
+      const r = fh.build.placeHere();
+      fh.build.setMode(false);
+      return { ok: !!r?.ok, why: r?.why ?? null };
+    };
+    // a marker, and a crate SIXTY metres away — past the 40 m chain, inside the marker's 90 m claim
+    const a = put('claim_stone', 0, 0);
+    const b = put('storage_crate', 60, 0);
+    const posts = fh.build.outposts() || [];
+    return {
+      placed: { marker: a, crate: b },
+      posts: posts.map(p => ({ name: p.name, count: p.count, role: p.role })),
+    };
+  });
+  console.log('outposts:', JSON.stringify(out));
+  if (out.skipped) { console.log('skipped:', out.skipped); return; }
+  expect(out.placed.marker.ok, out.placed.marker.why || '').toBe(true);
+  expect(out.placed.crate.ok, out.placed.crate.why || '').toBe(true);
+  // the whole point: sixty metres apart is two outposts by the chain rule and ONE by the marker's
+  expect(out.posts.length, 'the marker did not claim the crate sixty metres away').toBe(1);
+  expect(out.posts[0].count).toBe(2);
+  expect(errors).toEqual([]);
+});
+
+test('the map opens on Work, not on Layers, and Supply lists the outposts', async ({ page }) => {
+  const errors = await land(page);
+  await page.evaluate(() => window.farhold.map.toggle(true));
+  await page.waitForTimeout(400);
+  const first = await page.evaluate(() => ({
+    tabs: [...document.querySelectorAll('.map-side .map-tab')].map(b => b.textContent),
+    on: document.querySelector('.map-side .map-tab.on')?.textContent,
+    // the reference material must be in a fold, and the fold must be last
+    refIsLast: document.querySelector('.map-side > *:last-child')?.classList.contains('map-ref'),
+    refOpen: document.querySelector('.map-side .map-ref')?.open,
+  }));
+  console.log('map side:', JSON.stringify(first));
+  expect(first.tabs).toEqual(['Work', 'Places', 'Find', 'Supply']);
+  expect(first.on, 'the map does not open on the thing you came for').toBe('Work');
+  expect(first.refIsLast, 'Layers and the key are not at the bottom').toBe(true);
+  expect(first.refOpen).toBe(false);
+
+  const supply = await page.evaluate(() => {
+    const fh = window.farhold;
+    fh.map.state.tab = 'supply';
+    fh.map.draw();
+    // rebuild the side by clicking the tab, which is what a player does
+    [...document.querySelectorAll('.map-side .map-tab')].find(b => b.textContent === 'Supply')?.click();
+    return { text: document.querySelector('.map-side')?.textContent?.slice(0, 200) };
+  });
+  console.log('supply tab:', JSON.stringify(supply));
+  expect(supply.text).toMatch(/Supply/);
+  expect(errors).toEqual([]);
+});

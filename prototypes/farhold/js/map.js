@@ -122,6 +122,10 @@ export const MAP_MARKS = {
 
 /** The order the key lists them in, which is also the order they are drawn on the map. */
 /** R14: what each map layer is called in a sentence, for the legend strip and the fold's heading. */
+/** R15 — one glyph and one colour per outpost role, for the Supply list and the map. */
+export const ROLE_GLYPH = { mine: '\u26cf', refinery: '\u2699', farm: '\u2740', waypoint: '\u25c9', camp: '\u25a3', home: '\u2302' };
+export const ROLE_COLOUR = { mine: '#c08a3e', refinery: '#9fb4d4', farm: '#7ac86a', waypoint: '#7fe8ff', camp: '#c8b48a', home: '#9ae06a' };
+
 export const LAYER_WORDS = {
   biomes: 'Ground', elevation: 'Height', temperature: 'Temperature', rainfall: 'Rainfall',
   regions: 'Regions', weather: 'Weather', rivers: 'Water', political: 'Who holds it',
@@ -419,6 +423,19 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
    */
   findables = null, onSweep = null, scanState = null, onKeep = null,
   /**
+   * R15 — THE SUPPLY TAB: your outposts, and what runs between them.
+   *
+   *   "Then I would like the map to show outposts on it and allow creating connections between
+   *    then to transport items, in either direction with a max limit. Trade routes should be
+   *    visualized on the map using a filter."
+   *
+   *   `outposts()`   () => [{ id, name, role, x, z, count, poolId }]
+   *   `supplyLinks()` () => [{ id, from, to, fromName, toName, batch, only, quote }]
+   *   `onLink`       (fromId, toId, opts) => { ok, why?, quote? }
+   *   `onUnlink`     (linkId) => boolean
+   */
+  outposts = null, supplyLinks = null, onLink = null, onUnlink = null,
+  /**
    * R14 — THE PORTAL, WHICH HAD A FINISHED `mapMarkers()` THAT NOTHING IMPORTED.
    *
    * `js/portal.js:211` has built both ends of the town portal into map-ready rows since §6.8 landed,
@@ -533,9 +550,20 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
      * `{ x, y, name, kind, until }` in map cells, or null.
      */
     focus: null,
+    /**
+     * R15 — which of the four questions the sidebar is answering: work, places, find, supply.
+     * "The useful stuff is still at the bottom" — it is at the top now, and this says which.
+     */
+    tab: 'work',
+    /** …and whether the reference fold at the bottom was left open. */
+    legendOpen: false,
   };
   /** R14: which material the Find panel is set to. Outside `state` because it is pure interface. */
   let findWant = null;
+  /** R15: the outpost a supply route is being drawn FROM, mid two-click. */
+  let supplyFrom = null;
+  /** …and the most one cart may carry, which is the "max limit" the route is created with. */
+  let supplyBatch = 60;
   /** R14: every mark drawn this frame, in screen pixels, so a hover can be resolved. */
   const placeHits = [];
 
@@ -683,9 +711,45 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       + 'zoom in.' }));
   }
 
+  /**
+   * R15 — WHAT THE MAP IS FOR GOES AT THE TOP.
+   *
+   *   "The map does not seem like it was redesigned to my expectations and the useful stuff is
+   *    still at the bottom."
+   *
+   * Correct, and it was my fault: round 14 fixed what the map DREW and left the sidebar in the
+   * order it had grown in, which was Layers, then the key, then the biome breakdown, and only then
+   * the things you open the map to do. Three panels of reference material above the first thing
+   * anybody came for.
+   *
+   * The order is the argument. A player opens this screen to answer one of four questions — where
+   * is my work, where are the places I kept, where do I find X, and what is my industry doing — so
+   * those are four tabs at the top and one of them is always showing. Layers, the key and the
+   * composition are reference: true, occasionally needed, and now in a fold at the BOTTOM that
+   * remembers whether you left it open.
+   */
+  const SIDE_TABS = [
+    { key: 'work', name: 'Work' },
+    { key: 'places', name: 'Places' },
+    { key: 'find', name: 'Find' },
+    { key: 'supply', name: 'Supply' },
+  ];
+
   function buildSide() {
     side.replaceChildren();
     buildKey();
+
+    // ---- the rail, first, always
+    const rail = el('div', { class: 'map-tabs' });
+    for (const t of SIDE_TABS) {
+      rail.append(el('button', {
+        class: 'map-tab' + (state.tab === t.key ? ' on' : ''),
+        text: t.name,
+        onclick: () => { state.tab = t.key; buildSide(); draw(); },
+      }));
+    }
+    side.append(rail);
+
     const layerPanel = layersPanel({
       layer: state.layer, layers: state.layers,
       onLayer: name => { state.layer = name; buildSide(); draw(); },
@@ -693,9 +757,22 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       // changes what the key should read rebuilds the side, not only the canvas
       onToggle: (key, on) => { state.layers[key] = on; if (key === 'nodes') buildSide(); draw(); },
     });
-    side.append(layerPanel);
-    side.append(keyBox);
-    side.append(compositionBox);
+
+    /**
+     * R15 — "Trade routes should be visualized on the map using a filter." This is the filter: one
+     * more chip beside the rest, because a player looking to switch something off looks in Layers.
+     */
+    if (outposts) {
+      const chips = layerPanel.querySelector('.chips') || layerPanel.querySelector('div');
+      const chip = el('span', {
+        class: 'chip' + (state.layers.supply !== false ? ' on' : ''),
+        text: 'supply',
+        title: 'Your outposts, and the carts running between them.',
+        dataset: { layer: 'supply' },
+      });
+      chip.onclick = () => { state.layers.supply = state.layers.supply === false; buildSide(); draw(); };
+      if (chips) chips.append(chip); else side.append(chip);
+    }
 
     // "levels" reads as one more layer chip, sitting with Biomes / Elevation / … / Regions, because
     // that is where a player will look for it. It is an overlay rather than a base layer, so it
@@ -712,9 +789,11 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       if (chips) chips.append(chip); else side.append(chip);
     }
 
-    // B8: why half the map has no names on it. One line, under the layers, where the question gets
-    // asked — not buried in a tooltip.
-    if (zones && world.regions?.length) {
+    // R15: everything from here to the fold at the bottom belongs to one tab or another.
+    const tab = state.tab;
+
+    // B8: why half the map has no names on it. One line, where the question gets asked.
+    if (tab === 'places' && zones && world.regions?.length) {
       const total = world.regions.length;
       side.append(el('p', { class: 'muted small', text: known.size >= total
         ? `You have walked or heard of all ${total} regions on this world.`
@@ -724,10 +803,17 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     // Markers: quests, story objectives and dropped pins, each with a star that tracks or untracks
     // it. A tracked marker is the one the minimap draws and points an arrow at; an untracked one
     // still sits on this map, it just stops following you around.
-    const here = pins();
+    /**
+     * R15 — a quest marker is Work; anything you dropped or kept is a Place. The `fall` of a meteor
+     * counts as work: somebody did not set it, but it is a thing to go and do and it expires.
+     */
+    const WORK_KINDS = new Set(['quest', 'campaign', 'fall']);
+    const here = pins().filter(m => (tab === 'work') === WORK_KINDS.has(m.kind));
     const list = el('div', { class: 'pin-list' });
     if (!here.length) {
-      list.append(el('p', { class: 'muted small', text: 'Shift-click the map to drop a pin. Quests mark themselves.' }));
+      list.append(el('p', { class: 'muted small', text: tab === 'work'
+        ? 'Nothing on your list. Notice boards are in settlements; people on the road ask too.'
+        : 'Shift-click the map to drop a pin, or ctrl-shift-click to keep a place.' }));
     } else {
       const player = whereIsPlayer();
       for (const m of here) {
@@ -755,7 +841,14 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
         list.append(row);
       }
     }
-    side.append(panel('Tracking', list));
+    /**
+     * R15 — the tracking list is two different questions, so it is two tabs.
+     *
+     * "Work" is what somebody has asked you to do and where it is. "Places" is what you decided to
+     * remember. They were one list called Tracking, sorted by nothing in particular, which is why
+     * the answer to "where is my quest" was to read fourteen rows.
+     */
+    if (tab === 'work' || tab === 'places') side.append(panel(tab === 'work' ? 'Work in hand' : 'Places you keep', list));
 
     /**
      * R14 — FIND. A material, a sweep, and where the hits are.
@@ -767,7 +860,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
      * "where do you find clay?" is on the screen BEFORE you sweep — a sweep that comes back empty
      * still has to teach you something. The hits are listed nearest first with a ⌖ and a Keep.
      */
-    if (findables && onSweep) {
+    if (tab === 'find' && findables && onSweep) {
       const kids = [];
       const rows = findables() || [];
       const st = scanState?.() || {};
@@ -833,7 +926,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
           el('span', { class: 'muted small', text: `${g.markers.length}${g.tracked ? ' · ' + g.tracked + ' tracked' : ''}` }),
         ));
       }
-      side.append(panel('Other worlds', other));
+      if (tab === 'places') side.append(panel('Other worlds', other));
     }
 
     /**
@@ -865,7 +958,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
           row.append(go);
           list.append(row);
         }
-        side.append(panel('Your bases', list));
+        if (tab === 'places' || tab === 'supply') side.append(panel('Your bases', list));
       }
     }
 
@@ -913,6 +1006,107 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       }
       side.append(panel(`Cell ${s.x},${s.y}`, ...kids));
     }
+
+    // ---- R15: Supply — the outposts you have built and the carts running between them
+    if (tab === 'supply' && outposts) {
+      const posts = outposts() || [];
+      const links = (supplyLinks?.() || []);
+      const kids = [];
+
+      if (!posts.length) {
+        kids.push(el('p', { class: 'muted small', text:
+          'Nothing built yet. A drill and a crate standing near each other is an outpost — you do '
+          + 'not have to declare one. An Outpost Marker names it and claims ninety metres around itself.' }));
+      }
+
+      for (const p of posts) {
+        const row = el('div', { class: 'pin-row' + (supplyFrom === p.id ? ' tracked' : '') });
+        row.append(
+          el('i', { class: 'pin-dot', text: ROLE_GLYPH[p.role] || '\u25a3', style: `color:${ROLE_COLOUR[p.role] || '#c8b48a'}` }),
+          el('span', { class: 'pin-name', text: p.name }),
+          el('span', { class: 'muted small', text: `${p.count} piece${p.count === 1 ? '' : 's'}` }),
+          el('button', {
+            class: 'pin-go', text: '\u2316', title: `Show ${p.name} on the map`,
+            onclick: () => locate({ x: p.x, z: p.z, name: p.name, kind: 'base' }),
+          }),
+        );
+        /**
+         * Two clicks make a route: pick a source, then pick a destination. The same two-click shape
+         * the Route tool uses in build mode, because it is the same idea and learning it twice
+         * would be one time too many.
+         */
+        if (p.poolId) {
+          row.append(el('button', {
+            class: 'pin-keep',
+            text: supplyFrom === p.id ? '\u2717' : '\u2192',
+            title: supplyFrom === p.id
+              ? 'Stop — do not send from here after all'
+              : supplyFrom ? `Send from ${posts.find(q => q.id === supplyFrom)?.name} to ${p.name}` : `Send goods FROM ${p.name}`,
+            onclick: () => {
+              if (supplyFrom === p.id) { supplyFrom = null; buildSide(); return; }
+              if (!supplyFrom) { supplyFrom = p.id; buildSide(); return; }
+              const a = posts.find(q => q.id === supplyFrom);
+              const out = onLink?.(a?.poolId, p.poolId, { batch: supplyBatch });
+              supplyFrom = null;
+              buildSide(); draw();
+              return out;
+            },
+          }));
+        }
+        kids.push(row);
+      }
+
+      if (posts.length) {
+        /**
+         * The max limit, as the user asked for it. It is per SHIPMENT, not per hour: a cart holds
+         * what a cart holds, and a number of things per trip is something a player can picture.
+         */
+        const cap = el('div', { class: 'pin-row' },
+          el('span', { class: 'pin-name', text: 'Most per cart' }),
+          el('input', {
+            class: 'supply-cap', type: 'number', min: '1', max: '500', value: String(supplyBatch),
+            oninput: ev => { supplyBatch = Math.max(1, Math.min(500, Number(ev.target.value) || 1)); },
+          }),
+        );
+        kids.push(cap);
+      }
+
+      if (links.length) {
+        kids.push(el('div', { class: 'divider', text: 'Running' }));
+        for (const l of links) {
+          const row = el('div', { class: 'pin-row' },
+            el('i', { class: 'pin-dot', text: '\u2192', style: 'color:#8fd3ff' }),
+            el('span', { class: 'pin-name', text: `${l.fromName} → ${l.toName}` }),
+            el('span', { class: 'muted small', text: l.quote?.ok ? `${Math.round(l.quote.seconds)}s · ${l.batch}/cart` : 'no way through' }),
+          );
+          row.append(el('button', {
+            class: 'pin-del', text: '\u00d7', title: 'Stop this route',
+            onclick: () => { onUnlink?.(l.id); buildSide(); draw(); },
+          }));
+          kids.push(row);
+        }
+      }
+      side.append(panel('Supply', ...kids));
+    }
+
+    /**
+     * R15 — AND THE REFERENCE MATERIAL, AT THE BOTTOM, FOLDED.
+     *
+     * Layers, the key and the biome breakdown used to be the first three things on this panel, which
+     * put three blocks of "here is what the colours mean" above the first thing anybody opened the
+     * map for. They are true and occasionally needed and they are not what the screen is FOR.
+     *
+     * `state.legendOpen` survives a rebuild, so a player who wants the layers open while they work
+     * keeps them open — the fold is a default, not a rule.
+     */
+    const ref = el('details', { class: 'map-ref' });
+    ref.open = !!state.legendOpen;
+    ref.addEventListener('toggle', () => { state.legendOpen = ref.open; });
+    ref.append(el('summary', { text: 'Layers, key and what this world is made of' }));
+    const refBody = el('div', { class: 'map-ref-body' });
+    refBody.append(layerPanel, keyBox, compositionBox);
+    ref.append(refBody);
+    side.append(ref);
   }
 
   // ---------------------------------------------------------------- drawing
@@ -981,6 +1175,7 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
     drawWaypoints(ctx, scale, ox, oy);
     drawPortals(ctx, scale, ox, oy);
     drawScan(ctx, scale, ox, oy);
+    drawSupply(ctx, scale, ox, oy);
 
     // B8: where a name has been held back, say so in grey rather than leaving a gap the player
     // reads as empty ground. The band under it still tells them whether they could survive there.
@@ -1593,6 +1788,73 @@ export function createMapScreen({ terrain, getPlayer, getEnemies = () => [], onT
       drawMark(ctx, m.key, m.x, m.y, k);
       // R14: the hit radius is a little wider than the mark, because a 3 px pip is not a target
       placeHits.push({ x: m.x, y: m.y, r: Math.max(9, (MAP_MARKS[m.key]?.r || 3) * k + 4), mark: m });
+    }
+  }
+
+  /**
+   * R15 — YOUR OUTPOSTS, AND THE CARTS BETWEEN THEM.
+   *
+   *   "I would like the map to show outposts on it and allow creating connections between then to
+   *    transport items… Trade routes should be visualized on the map using a filter."
+   *
+   * Both are behind `state.layers.supply`, which is a chip in the Layers panel like every other
+   * layer — that is the filter. The routes are drawn UNDER the outposts so a line never crosses the
+   * mark it belongs to, and they are dashed and animated along their length so a glance tells you
+   * which way the goods are going, which is the one thing a plain line cannot say.
+   */
+  function drawSupply(ctx, scale, ox, oy) {
+    if (state.layers.supply === false || !outposts) return;
+    const posts = outposts() || [];
+    if (!posts.length) return;
+    const at = p => [ox + (p.x / M_PER_CELL + 0.5) * scale, oy + (p.z / M_PER_CELL + 0.5) * scale];
+    const byPool = new Map(posts.filter(p => p.poolId).map(p => [p.poolId, p]));
+
+    // ---- the routes, first, so the marks sit on top of them
+    const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    ctx.save();
+    ctx.lineWidth = Math.max(1.6, scale * 0.16);
+    ctx.strokeStyle = '#8fd3ff';
+    ctx.setLineDash([7, 6]);
+    // the dashes crawl from source to destination: direction, without an arrowhead to place
+    ctx.lineDashOffset = -(now / 55) % 13;
+    for (const l of supplyLinks?.() || []) {
+      const a = byPool.get(l.from), b = byPool.get(l.to);
+      if (!a || !b) continue;
+      const [ax, ay] = at(a), [bx, by] = at(b);
+      ctx.globalAlpha = l.quote?.ok === false ? 0.3 : 0.85;
+      ctx.beginPath();
+      ctx.moveTo(ax, ay);
+      ctx.lineTo(bx, by);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // ---- and the outposts themselves
+    for (const p of posts) {
+      const [px, py] = at(p);
+      if (px < -20 || py < -20 || px > canvas.width + 20 || py > canvas.height + 20) continue;
+      const r = Math.max(5, Math.min(11, 4 + scale * 0.5));
+      ctx.beginPath();
+      ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.fillStyle = ROLE_COLOUR[p.role] || '#c8b48a';
+      ctx.fill();
+      ctx.lineWidth = 2; ctx.strokeStyle = '#1a1208';
+      ctx.stroke();
+      if (scale >= 5) {
+        ctx.font = `700 ${Math.round(Math.min(13, Math.max(9, r * 1.3)))}px system-ui, sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#1a1208';
+        ctx.fillText(ROLE_GLYPH[p.role] || '\u25a3', px, py + 0.5);
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      }
+      // a name, once there is room for one
+      if (p.name && scale >= 4) {
+        ctx.font = '600 12px system-ui, sans-serif';
+        ctx.fillStyle = '#eaf6ff';
+        ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 3;
+        ctx.strokeText(p.name, px + r + 4, py + 4);
+        ctx.fillText(p.name, px + r + 4, py + 4);
+      }
     }
   }
 

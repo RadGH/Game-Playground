@@ -4142,6 +4142,47 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // R14: `portals.mapMarkers()` has been finished and unimported since §6.8 — the portal was on
       // the ground, in the save and in the journal, and not on the map
       portals: { mapMarkers: () => portals.mapMarkers?.() || [] },
+
+      /**
+       * R15 — THE SUPPLY TAB.
+       *
+       *   "I would like the map to show outposts on it and allow creating connections between then
+       *    to transport items, in either direction with a max limit."
+       *
+       * An outpost is worked out from the geometry (js/outposts.js) and a route between two of them
+       * is a `logistics` link, which already carried a per-shipment batch — the "max limit" — and
+       * already runs both ways if you make two of them. None of it was on a screen.
+       *
+       * `poolId` is the join: a route runs between STORES, not between places, so an outpost with
+       * nothing to put things in cannot be either end of one, and the list says so by simply not
+       * offering the arrow.
+       */
+      outposts: () => (build.outposts?.() || []).map(p => {
+        const pool = stores.poolAt?.(p.x, p.z);
+        return { id: p.id, name: p.name, role: p.role, x: p.x, z: p.z, count: p.count, poolId: pool?.id || null };
+      }),
+      supplyLinks: () => {
+        const pools = stores.pools?.() || [];
+        const nameOf = id => pools.find(q => q.id === id)?.name || 'a store';
+        return (logistics.links || []).map(l => ({
+          id: l.id, from: l.from, to: l.to,
+          fromName: nameOf(l.from), toName: nameOf(l.to),
+          batch: l.batch, only: l.only,
+          quote: logistics.quote({ from: l.from, to: l.to, hauler: l.hauler }),
+        }));
+      },
+      onLink: (fromPool, toPool, opts) => {
+        const out = logistics.link(fromPool, toPool, opts || {});
+        hud.log(out.ok
+          ? `Route laid. ${out.quote?.text || ''}`
+          : (out.why || 'That route cannot run.'), out.ok ? 'good' : 'bad');
+        return out;
+      },
+      onUnlink: id => {
+        const gone = logistics.unlink(id);
+        if (gone) hud.log('Route stopped.', '');
+        return gone;
+      },
       /**
        * R14 — THE SCANNER, ON THE MAP WHERE PEOPLE LOOK FOR IT.
        *

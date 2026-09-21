@@ -33,6 +33,16 @@
  */
 export const LINK_GAP = 40;
 
+/**
+ * R15 — how far an Outpost Marker's claim reaches, in metres, measured centre to centre.
+ *
+ * Ninety is chosen to cover "a few drills and a crate around a seam", which is the thing the user
+ * described wanting to build, without a marker on one hillside quietly swallowing the camp on the
+ * next one. It is deliberately much larger than LINK_GAP: chaining answers "did these grow into one
+ * place", and a marker answers "I have decided this is one place", which is a different question.
+ */
+export const MARKER_REACH = 90;
+
 /** Rough radius of a footprint — half its diagonal, so a rotated box is still covered. */
 const radiusOf = e => Math.hypot(e.w || 1, e.d || 1) / 2;
 
@@ -93,6 +103,31 @@ export function groupOutposts(entries = [], { gap = LINK_GAP, lanes = [], defOf 
   for (let i = 0; i < list.length; i++) {
     for (let j = i + 1; j < list.length; j++) {
       if (gapBetween(list[i], list[j]) <= gap) join(i, j);
+    }
+  }
+
+  /**
+   * R15 — A MARKER CLAIMS WHAT IS AROUND IT.
+   *
+   *   "I realize we should probably use the Outpost marker to establish a base, and attribute
+   *    everything nearby to that base."
+   *
+   * Chaining at forty metres is the right rule for "did these grow into one place", and the wrong
+   * one for "I decided this is a base". A few drills scattered over a seam field are ninety metres
+   * apart and the chain does not reach, so the player who deliberately walked out, planted a marker
+   * and built around it got four separate outposts called Mine 1 through Mine 4.
+   *
+   * A marker is a DECLARATION, so it gets a longer arm: anything inside `MARKER_REACH` of one joins
+   * it, chain or no chain. Two markers close enough to claim each other merge, which is right —
+   * planting a second stone beside the first is not how you split a base in two; moving the
+   * buildings is.
+   */
+  const markers = [];
+  for (let i = 0; i < list.length; i++) if (list[i].outpostName || list[i].claims) markers.push(i);
+  for (const m of markers) {
+    for (let i = 0; i < list.length; i++) {
+      if (i === m) continue;
+      if (Math.hypot(list[m].x - list[i].x, list[m].z - list[i].z) <= MARKER_REACH) join(m, i);
     }
   }
 

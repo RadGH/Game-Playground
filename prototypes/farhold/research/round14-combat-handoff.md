@@ -2,7 +2,13 @@
 
 `js/main.js`, `js/hud.js`, `index.html`, `style.css` and `data/items.json` were off limits this
 round because other agents were in them. Everything below is written as a copy-pasteable patch
-against the code as it stood when I finished. **Nothing in this file has been applied.**
+against the code as it stood when I finished.
+
+> **STATUS, 2026-09-21.** Three of the twelve have since been applied in commit `8a30e98`:
+> **1** (the staff nova), **2** (`spellfx.cast`'s dropped `scale`) and **12** (the charge meter,
+> done properly as a class in `style.css` rather than the inline styles sketched below). Their
+> sections are kept for the record and marked **APPLIED**; do not apply them again. Everything
+> else in this file is still outstanding.
 
 Read this first: **most of the combat revamp is already live.** Where a main.js change could be
 avoided it was, by putting the work in a file I own — `js/combat-feel.js` (new), `js/weapons.js`,
@@ -12,8 +18,8 @@ correctly without them. Each one says which it is.
 
 | # | File | What | Without it |
 |---|---|---|---|
-| 1 | main.js | the staff nova draws nothing (`aoe` called with the wrong shape) | **a real bug, still live** |
-| 2 | main.js | `spellfx.cast` is passed `scale`, which it does not take | **a real bug, still live** |
+| 1 | main.js | the staff nova draws nothing (`aoe` called with the wrong shape) | ~~a real bug~~ **APPLIED in `8a30e98`** |
+| 2 | main.js | `spellfx.cast` is passed `scale`, which it does not take | ~~a real bug~~ **APPLIED in `8a30e98`** |
 | 3 | main.js | a charged staff's nova and lob ignore the charge | **half a feature missing** |
 | 4 | main.js | a javelin is never counted | **a feature missing** |
 | 5 | main.js | `BatchedSpellFx` instead of `SpellFx` | performance only |
@@ -23,11 +29,11 @@ correctly without them. Each one says which it is.
 | 9 | main.js | the off hand's dice and the arrow's draw, passed explicitly | already covered by the channel |
 | 10 | main.js | `field.statusData` — one line, so an axe's bleed reads the real row | a copy of the row is used |
 | 11 | main.js | a wand's heavy bolt flies slower | cosmetic |
-| 12 | hud.js | the draw reticle, the charge meter and the javelin count | **the player cannot see the charge** |
+| 12 | hud.js | the draw reticle, the charge meter and the javelin count | **APPLIED in `8a30e98`** — `hud.chargeMeter` is live; the javelin count still needs patch 4 |
 
 ---
 
-## 1 — THE STAFF NOVA DRAWS NOTHING. `js/main.js`, in `swingWith`
+## 1 — THE STAFF NOVA DRAWS NOTHING. `js/main.js`, in `swingWith`  *(APPLIED — `8a30e98`)*
 
 **The bug.** `SpellFx.aoe`'s signature is `{ points = [], element, crit, stagger }`
 (`avatar-3d/js/spellfx.js:578`) — it walks `points` and draws one burst at each. This call passes
@@ -54,7 +60,7 @@ Replace with:
 
 ---
 
-## 2 — `spellfx.cast` is handed a `scale` it does not take. `js/main.js:5947`
+## 2 — `spellfx.cast` is handed a `scale` it does not take. `js/main.js:5947`  *(APPLIED — `8a30e98`)*
 
 **The bug.** `cast({ at, element, ms })` (`spellfx.js:749`). `scale` is silently dropped, so a
 wide-area build's cast flourish is the same size as everybody else's. `ms` is what it wants, and a
@@ -409,7 +415,11 @@ is a no-op. It is the smallest item on this list; skip it if the flight is not w
 
 ---
 
-## 12 — `js/hud.js`: THE PLAYER CANNOT SEE THE CHARGE
+## 12 — `js/hud.js`: THE PLAYER CANNOT SEE THE CHARGE  *(APPLIED — `8a30e98`)*
+
+**Done, and done better than this sketch:** `hud.chargeMeter()` is a real method styled from
+`style.css`, called from the tick. The inline-style version below is kept only so the intent is
+legible; `ammo()` and §12b's javelin wiring are still outstanding — see patch 4.
 
 This is the one genuinely missing piece. A bow has a draw and a staff has a channel, and both are
 live — `control.charge` is `{ fill, power, ready, kind }` every frame while the button is held — but

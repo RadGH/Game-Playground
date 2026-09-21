@@ -221,7 +221,7 @@ test('R16.15 — the Town Hall opens, and the rod points at your own people', as
     }
     const screen = document.getElementById('town-hall');
     const open = !!screen && !screen.hidden;
-    const tabs = screen ? [...screen.querySelectorAll('.civics-rail button')].map(b => b.textContent) : [];
+    const tabs = screen ? [...screen.querySelectorAll('.hall-rail button')].map(b => b.textContent) : [];
     const text = screen ? screen.textContent : '';
     f.townHall.close();
     return {

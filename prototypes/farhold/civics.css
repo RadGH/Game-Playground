@@ -204,3 +204,31 @@
 }
 .civ-go:hover { background: rgba(255, 210, 74, .24); }
 .civ-go:focus-visible { outline: 2px solid var(--civ-gold); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------- R16: the Town Hall
+   Its own structural names, sharing this file's look. The Holding screen's tests reach for
+   `.civics-head` / `.civics-rail` / `.civics-body` with `document.querySelector`, and a second
+   element wearing those means whichever comes first in the document wins — which is exactly how a
+   hidden Town Hall became the thing a muster test was reading its text out of. Everything INSIDE
+   a pane (`.civ-pane`, `.civ-row`, `.civ-grid`) is deliberately still shared: those are
+   components, and the two screens should look identical. */
+.hall-head {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--civ-line); padding-bottom: 10px;
+}
+.hall-head h2 { margin: 0; font-size: 20px; color: var(--civ-accent); }
+.hall-head .hall-sub { color: var(--civ-faint); font-size: 12px; }
+.hall-head .hall-close {
+  margin-left: auto; background: none; border: 1px solid var(--civ-line);
+  color: var(--civ-dim); border-radius: 6px; padding: 4px 12px; cursor: pointer; font: inherit;
+}
+.hall-head .hall-close:hover { color: var(--civ-ink); border-color: var(--civ-accent); }
+
+.hall-rail { display: flex; gap: 6px; flex-wrap: wrap; }
+.hall-rail button {
+  background: var(--civ-pane); border: 1px solid var(--civ-line); color: var(--civ-dim);
+  border-radius: 6px; padding: 6px 14px; cursor: pointer; font: inherit;
+}
+.hall-rail button.on { color: #061018; background: var(--civ-accent); border-color: var(--civ-accent); }
+
+.hall-body { overflow: auto; min-height: 0; padding-right: 4px; }

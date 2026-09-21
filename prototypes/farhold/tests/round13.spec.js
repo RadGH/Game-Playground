@@ -22,22 +22,46 @@ async function land(page) {
 }
 
 /** Walk to somewhere with trees on it, so the harvesting tests have something to hit. */
-const FIND_WOOD = async page => page.evaluate(async () => {
+/**
+ * Stand somewhere with things growing on it — and STAND ON THEM.
+ *
+ * R16: this used to accept any spot with four props inside 60 m and then hand back where the player
+ * happened to be. The two tests below measure inside 10 m and 14 m, so whether they passed came
+ * down to how that 60 m cluster happened to be arranged — and round 16's road and water work moved
+ * the terrain a little, which moved the scatter, which turned a lucky pass into "the raise/lower
+ * tools still do not affect the trees" on a test about something else entirely. It walks onto the
+ * thickest patch it can find now, so the radius the test uses is the radius that was checked.
+ */
+const FIND_WOOD = async (page, want = 14) => page.evaluate(async radius => {
   const f = window.farhold;
-  for (let tries = 0; tries < 40; tries++) {
-    const near = f.props.near(f.control.x, f.control.z, 60);
-    if (near.length >= 4) return { x: f.control.x, z: f.control.z, n: near.length };
+  for (let tries = 0; tries < 60; tries++) {
+    const near = f.props.near(f.control.x, f.control.z, 90);
+    if (near.length >= 4) {
+      // centre on whichever prop has the most neighbours inside the radius the caller will use
+      let best = null, bestN = 0;
+      for (const p of near) {
+        const n = near.filter(q => Math.hypot(q.x - p.x, q.z - p.z) <= radius * 0.8).length;
+        if (n > bestN) { bestN = n; best = p; }
+      }
+      if (best && bestN >= 2) {
+        f.control.teleport(best.x, best.z);
+        f.props.update(f.control.x, f.control.z, true);
+        await new Promise(r => setTimeout(r, 60));
+        const here = f.props.near(f.control.x, f.control.z, radius).length;
+        if (here > 0) return { x: f.control.x, z: f.control.z, n: here };
+      }
+    }
     // step across the map looking for a cell with something growing in it
     f.control.teleport(f.control.x + 180, f.control.z + 90);
     f.props.update(f.control.x, f.control.z, true);
     await new Promise(r => setTimeout(r, 30));
   }
   return null;
-});
+}, want);
 
 test('the Clear tool actually clears, and pays out the timber', async ({ page }) => {
   const errors = await land(page);
-  const spot = await FIND_WOOD(page);
+  const spot = await FIND_WOOD(page, 14);
   expect(spot, 'found nowhere with anything growing on it').toBeTruthy();
 
   const out = await page.evaluate(async () => {
@@ -70,7 +94,7 @@ test('the Clear tool actually clears, and pays out the timber', async ({ page })
 
 test('levelling the ground takes the trees with it, and pays for them', async ({ page }) => {
   const errors = await land(page);
-  const spot = await FIND_WOOD(page);
+  const spot = await FIND_WOOD(page, 10);
   expect(spot).toBeTruthy();
 
   const out = await page.evaluate(async () => {
@@ -94,7 +118,7 @@ test('levelling the ground takes the trees with it, and pays for them', async ({
 
 test('you can attack a tree down, and it leaves timber behind', async ({ page }) => {
   const errors = await land(page);
-  const spot = await FIND_WOOD(page);
+  const spot = await FIND_WOOD(page, 40);
   expect(spot).toBeTruthy();
 
   const out = await page.evaluate(async () => {

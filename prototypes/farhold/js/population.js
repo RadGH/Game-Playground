@@ -33,8 +33,19 @@ export const HOUSE_MIN_BEDS = 2;
 export function population({ colony = null, housing = null } = {}) {
   const reg = housing || colony?.housing || null;
   const report = reg?.report?.() || null;
-  const houses = (reg?.houses || []).filter(h => (h.beds || 0) >= HOUSE_MIN_BEDS).length;
   const cap = report ? report.beds : (colony?.base?.beds || 0);
+  /**
+   * WITH A HOUSING REGISTER, A HOUSE IS A HOUSE. WITHOUT ONE, BEDS ARE ALL THERE IS.
+   *
+   * js/colony.js keeps a legacy path for a holding set up with `setBase({ beds: n })` and no
+   * register at all — that is how every test and every save older than the Civilization Expansion
+   * puts people under a roof, and its own `_assignBeds` says so in as many words. There is no
+   * concept of a house down there, so insisting on one would refuse every one of them forever.
+   * `HOUSE_MIN_BEDS` is the same bar either way: two beds is a building, one is a bedroll.
+   */
+  const houses = reg
+    ? (reg.houses || []).filter(h => (h.beds || 0) >= HOUSE_MIN_BEDS).length
+    : (cap >= HOUSE_MIN_BEDS ? 1 : 0);
   const used = colony?.citizens?.length || 0;
   const spare = Math.max(0, cap - used);
   return {

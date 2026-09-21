@@ -6040,6 +6040,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // runs every few frames, so without the guard a board job that asks you what you want would
       // be re-entered sixty times a second while the popup was open.
       if (quest.paid) continue;
+      /**
+       * …AND A JOB THAT PAYS ITSELF CANNOT ASK YOU A QUESTION.
+       *
+       * This sweep fires with nobody having pressed anything — you finished the last kill and
+       * walked on. A `choice` or a `pick3` there would stop the game dead with a menu you did not
+       * open, and if you never answered it the job would never be turned in. Both downgrade to the
+       * crate, which is a reveal you can ignore; the two kinds that ask are for a hand-in you
+       * actually made, at a person or from the journal.
+       */
+      if (quest.reward && (quest.reward.kind === 'choice' || quest.reward.kind === 'pick3')) {
+        quest.reward.kind = 'crate';
+      }
       grantQuest(quest);
     }
   }

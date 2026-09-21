@@ -307,9 +307,24 @@ export async function grantReward(quest, ctx = {}) {
     out.extras.push({ key, value, text: typeof said === 'string' ? said : '' });
   }
 
-  // ---- the crate popup, for everything that is not already a popup of its own
-  if (showCrate && kind !== 'pick3') {
-    await showCrate({
+  /**
+   * THE CRATE POPUP — FOR THE KINDS THAT ARE WORTH ONE, AND NEVER AWAITED.
+   *
+   * Two things were wrong with opening it for everything and waiting on it.
+   *
+   * A `coin` job is "twenty gold and forty experience". A full-screen reveal for that is the game
+   * stopping to applaud itself, and the user asked for the popup to be what tells one reward kind
+   * from another — "some give money and xp, SOME give item reward via loot crate popup".
+   *
+   * And a board job PAYS ITSELF: `payBoardJobs` sweeps the log every few frames with nobody having
+   * pressed anything. Awaiting a popup there means the caller's `questLog.turnIn` never runs until
+   * somebody clicks — so the job sat finished-but-not-turned-in for ever, which is exactly what
+   * tests/round10.spec.js caught. The reveal is presentation: it is started and left to itself, and
+   * the ledger does not wait for it. The two kinds that genuinely need an answer — `choice` and
+   * `pick3` — asked their question further up, before any of this.
+   */
+  if (showCrate && (kind === 'crate' || kind === 'materials' || kind === 'choice')) {
+    const shown = showCrate({
       title: quest.title || 'Job done',
       subtitle: quest.giverName ? `${quest.giverName} settles up.` : 'Settled up.',
       gold: out.gold, xp: out.xp,
@@ -317,6 +332,8 @@ export async function grantReward(quest, ctx = {}) {
       mats: out.mats,
       extras: out.extras,
     });
+    // it may be a promise or it may not; either way nothing below depends on it
+    if (shown && typeof shown.catch === 'function') shown.catch(() => {});
   }
   return out;
 }

@@ -71,16 +71,20 @@ export function createTownHall({ read = () => ({}), onRecruit = null, onTakeJob 
     document.head.append(el('link', { rel: 'stylesheet', href: CSS_HREF }));
   }
   /**
-   * Built out of civics.css's OWN class names — `.civics`, `.civics-head`, `.civics-rail`,
-   * `.civics-body`, `.civ-pane`, `.civ-row` — rather than a second set that looks the same. A
-   * screen with its own private copy of somebody else's stylesheet is two screens to keep in step
-   * the first time the palette moves.
+   * Built out of civics.css's own look — a screen with a private copy of somebody else's palette is
+   * two screens to keep in step the first time a colour moves. But NOT out of its structural class
+   * names: `.civics-head`, `.civics-rail` and `.civics-body` are what the Holding screen's own
+   * tests reach for with `document.querySelector`, and two elements wearing them means the first
+   * one in the document wins — which is how a hidden Town Hall silently became the thing a test
+   * was reading the Holding screen's muster text out of. The three structural names are ours;
+   * everything inside (`.civ-pane`, `.civ-row`, `.civ-grid`) is shared on purpose, because those
+   * are components rather than landmarks.
    */
-  const root = el('div', { class: 'civics', id: 'town-hall' });
+  const root = el('div', { class: 'civics hall-screen', id: 'town-hall' });
   root.hidden = true;
-  const head = el('div', { class: 'civics-head' });
-  const rail = el('nav', { class: 'civics-rail' });
-  const body = el('div', { class: 'civics-body' });
+  const head = el('div', { class: 'hall-head' });
+  const rail = el('nav', { class: 'hall-rail' });
+  const body = el('div', { class: 'hall-body' });
   root.append(head, rail, body);
   document.body.append(root);
 
@@ -102,8 +106,8 @@ export function createTownHall({ read = () => ({}), onRecruit = null, onTakeJob 
     const T = r.town || {};
     head.replaceChildren(
       el('h2', { text: T.name ? `${T.name} — Town Hall` : 'Town Hall' }),
-      el('span', { class: 'civics-sub', text: `${T.kind || 'settlement'}${T.factionName ? ` \u00b7 ${T.factionName}` : ''}` }),
-      el('button', { class: 'civics-close', text: 'Close', onclick: () => toggle(false) }),
+      el('span', { class: 'hall-sub', text: `${T.kind || 'settlement'}${T.factionName ? ` \u00b7 ${T.factionName}` : ''}` }),
+      el('button', { class: 'hall-close', text: 'Close', onclick: () => toggle(false) }),
     );
     drawRail();
     body.replaceChildren(

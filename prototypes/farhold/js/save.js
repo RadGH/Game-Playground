@@ -133,6 +133,8 @@ export function snapshot({
       pendingTalent: player.pendingTalent, talents: player.talents,
       // unlockables rather than loot, so they travel with the character — see js/gear.js
       vehicles: player.vehicles,
+      // R15: which of them H brings — the horse, or the motorcycle you built. One slot, one choice.
+      rideChoice: player.rideChoice || null,
     },
     position: { x: control.x, z: control.z, yaw: control.yaw, pitch: control.pitch },
     // Markers replaced the old bare `pins` array: a quest destination, a story objective and a
@@ -228,6 +230,8 @@ export function restore(save, { rpg, player, control, map }) {
   player.pendingPassive = p.pendingPassive ?? 0;
   player.pendingTalent = p.pendingTalent ?? 0;
   if (p.vehicles) player.vehicles = p.vehicles;
+  // R15: an old save has no ride choice and falls back to the mount, which is what it had
+  player.rideChoice = p.rideChoice || 'mount';
   player.talents = p.talents || [];
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;

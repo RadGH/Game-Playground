@@ -179,8 +179,12 @@ export class Hud {
     nearby = null,
     /** R15: which tool tier the weapon in your hand counts as, and how to get the next one. */
     tool = null,
+    /** R15: the horse and every ground vehicle you own, as one choice. `onSelectRide` picks one. */
+    ground = null, onSelectRide = null,
   } = {}) {
     this.tool = tool;
+    this.ground = ground;
+    this.onSelectRide = onSelectRide;
     this.nearby = nearby;
     this.onLocate = onLocate;
     this.onStarSaved = onStarSaved;
@@ -1538,6 +1542,47 @@ export class Hud {
         row.append(el('span', 'muted small', vehicleFunction(slot, spec.kinds[active])));
         kids.push(row);
       }
+
+      /**
+       * R15 — WHAT YOU RIDE, ALL IN ONE ROW.
+       *
+       *   "Add a motorcycle, car, and truck, as crafting vehicles that move much faster than horse
+       *    but occupy the same slot."
+       *
+       * They existed and they were already faster — 20.0, 17.0 and 13.5 m/s against a horse's 11.34
+       * — but they lived in a slot of their own on a key of their own (G), so the game had two
+       * unrelated answers to "what am I travelling on" and you had to remember which key summoned
+       * which. The ask is that there be ONE choice, and this is it: the horse you are carrying and
+       * every ground vehicle you have built, in one dropdown, and H brings whichever you picked.
+       *
+       * The mount stays an ITEM and the vehicles stay unlockables — that distinction is real and
+       * round 10 settled it (a mount rolls a rarity and upgrades at a bench; a truck does not). What
+       * is unified is the CHOICE, not the two systems underneath it.
+       */
+      const ground = this.ground?.();
+      if (ground) {
+        const row = el('div', 'vehicle-row');
+        row.append(el('span', 'muted small', 'Ride'));
+        const select = el('select');
+        for (const opt of ground.options) {
+          const o = document.createElement('option');
+          o.value = opt.key;
+          o.textContent = opt.name;
+          o.selected = opt.key === ground.active;
+          select.append(o);
+        }
+        select.onchange = () => { this.onSelectRide?.(select.value); this.renderSheet(); };
+        row.append(select);
+        const picked = ground.options.find(o => o.key === ground.active);
+        row.append(el('span', 'muted small', picked?.note || ''));
+        kids.push(row);
+        if (ground.options.length === 1) {
+          kids.push(el('p', 'muted small',
+            'A motorcycle, a car or a truck is built at an assembler and appears in this list. '
+            + 'All three are faster than a horse; only the horse climbs anything steep.'));
+        }
+      }
+
       vbox.replaceChildren(...kids);
     }
 

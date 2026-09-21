@@ -206,3 +206,58 @@ test('the map opens on Work, not on Layers, and Supply lists the outposts', asyn
   expect(supply.text).toMatch(/Supply/);
   expect(errors).toEqual([]);
 });
+
+/**
+ *   "Add a motorcycle, car, and truck, as crafting vehicles that move much faster than horse but
+ *    occupy the same slot."
+ *
+ * They existed and were already faster — the fault was that they lived in a slot of their own on a
+ * key of their own, so the game had two unrelated answers to "what am I travelling on".
+ */
+test('the horse and every vehicle you own are one choice, and H honours it', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(() => {
+    const fh = window.farhold;
+    const before = fh.hud.ground();
+    // grant a motorcycle the way building one would
+    fh.player.vehicles.owned.ground = ['motorcycle'];
+    const after = fh.hud.ground();
+    fh.hud.onSelectRide('motorcycle');
+    return {
+      before: before.options.map(o => o.name),
+      after: after.options.map(o => ({ name: o.name, note: o.note })),
+      active: fh.hud.ground().active,
+      saved: fh.player.rideChoice,
+    };
+  });
+  console.log('ride:', JSON.stringify(out, null, 1));
+  // one list, horse first
+  expect(out.before.length).toBe(1);
+  expect(out.after.length).toBe(2);
+  expect(out.after[1].name).toMatch(/Scrambler|Motorcycle/i);
+  // the note has to say what each is FOR — the horse is the one that climbs
+  expect(out.after[0].note).toMatch(/climbs anything/);
+  expect(out.after[1].note).toMatch(/m\/s/);
+  expect(out.active).toBe('motorcycle');
+  expect(out.saved).toBe('motorcycle');
+  expect(errors).toEqual([]);
+});
+
+test('every ground vehicle is genuinely faster than the horse', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(() => {
+    const fh = window.farhold;
+    const walk = 5.4, mountMult = 1.6;   // the starting Trail Horse, from js/gear.js
+    const horse = walk * mountMult;
+    return {
+      horse,
+      vehicles: Object.values(fh.groundVehicles || {}).map(v => ({ name: v.name, speed: v.speed })),
+    };
+  });
+  console.log('speeds:', JSON.stringify(out));
+  expect(out.vehicles.length).toBe(3);
+  for (const v of out.vehicles) {
+    expect(v.speed, `${v.name} is not faster than the horse`).toBeGreaterThan(out.horse);
+  }
+  expect(errors).toEqual([]);
+});

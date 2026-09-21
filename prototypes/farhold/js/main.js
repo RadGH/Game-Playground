@@ -1210,6 +1210,50 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     /** R14: the journal's "Going on near you" reads the same list the panel under the minimap does. */
     nearby: () => nearbyRows,
+
+    /**
+     * R15 — ONE CHOICE FOR WHAT YOU TRAVEL ON.
+     *
+     *   "Add a motorcycle, car, and truck, as crafting vehicles that move much faster than horse
+     *    but occupy the same slot."
+     *
+     * They already existed and were already faster (20.0 / 17.0 / 13.5 m/s against a horse's
+     * 11.34), but they sat in a slot of their own on a key of their own, so the game had two
+     * unrelated answers to "what am I travelling on" and you had to remember which key summoned
+     * which. This is the one list: the mount in your mount slot, plus every ground vehicle you have
+     * built. `H` brings whichever is picked.
+     *
+     * `note` is what the thing is FOR, out of its own figures — the horse is the only one that will
+     * climb anything, which is the whole reason it never stops being useful.
+     */
+    ground: () => {
+      const owned = player.vehicles?.owned?.ground || [];
+      const mount = player.equipment?.mount;
+      const walk = balance.player?.moveSpeed ?? 5.4;
+      const options = [{
+        key: 'mount',
+        name: mount?.name || 'Trail Horse',
+        note: `${((mount?.speed ?? 1.6) * walk).toFixed(1)} m/s · climbs anything`,
+      }];
+      for (const key of owned) {
+        const v = GROUND_VEHICLES[key];
+        if (!v) continue;
+        options.push({
+          key,
+          name: v.name,
+          note: `${v.speed.toFixed(1)} m/s · ${v.maxSlope < 0.35 ? 'flat ground only' : 'takes rough ground'}`,
+        });
+      }
+      return { options, active: player.rideChoice || 'mount' };
+    },
+    onSelectRide: key => {
+      player.rideChoice = key;
+      if (key !== 'mount') selectGroundVehicle(player, key);
+      hud.log(key === 'mount'
+        ? `H whistles for the ${(player.equipment?.mount?.name || 'horse').toLowerCase()}.`
+        : `H brings the ${(GROUND_VEHICLES[key]?.name || key).toLowerCase()}.`, '');
+      autoSave();
+    },
     /**
      * R15 — WHAT COUNTS AS YOUR TOOL, AND HOW TO GET A BETTER ONE.
      *
@@ -5939,15 +5983,43 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     hud.chargeMeter?.(control.charge);
 
     if (step.mountChanged) {
-      if (control.mounted && !player.equipment.mount) {
+      /**
+       * R15 — H BRINGS WHATEVER YOU PICKED.
+       *
+       *   "Add a motorcycle, car, and truck, as crafting vehicles that move much faster than horse
+       *    but occupy the same slot."
+       *
+       * They were on their own key, so the game had two answers to "what am I travelling on". One
+       * choice now — the Ride dropdown on the character sheet — and H honours it. G still works and
+       * is still the quick way onto a vehicle; it just is not the only way any more.
+       */
+      const ride = player.rideChoice && player.rideChoice !== 'mount' ? player.rideChoice : null;
+      const ownsRide = ride && (player.vehicles?.owned?.ground || []).includes(ride);
+      if (ride && ownsRide) {
+        control.mounted = false;
+        if (horse) horse.group.visible = false;
+        if (control.driving) {
+          control.driving = null;
+          selectGroundVehicle(player, null);
+          rig.hide();
+          hud.log('You step off.');
+        } else if (control.swimming) {
+          hud.log('Not in the water.');
+        } else {
+          selectGroundVehicle(player, ride);
+          control.driving = { speed: 0 };
+          rig.show(modelFor(ride) || ride);
+          hud.log(`You get on the ${GROUND_VEHICLES[ride].name.toLowerCase()}. Shift is the throttle.`);
+        }
+      } else if (control.mounted && !player.equipment.mount) {
         // you cannot ride what you do not have — the mount slot is the thing that makes H work
         control.mounted = false;
         hud.log('You have nothing to ride. A mount goes in the mount slot.');
       } else {
         if (control.mounted) buildMount();     // the slot may have changed since the last ride
         hud.log(control.mounted ? `You swing up onto the ${(player.equipment.mount?.name || 'horse').toLowerCase()}.` : 'You dismount.');
+        if (horse) horse.group.visible = control.mounted;
       }
-      if (horse) horse.group.visible = control.mounted;
     }
     if (step.enteredWater && !step.boarded) hud.log('You wade in and start swimming.');
     if (step.boarded) hud.log(`You put the ${step.boarded.name} in the water.`);
@@ -7129,6 +7201,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     mapMarkFor,
     /** R15: what E would act on right now, so a spec can prove the furnace answers. */
     interactTarget,
+    /** R15: the three ground vehicles, for the spec that checks they all beat a horse. */
+    groundVehicles: GROUND_VEHICLES,
     /** The Civilization Expansion, for tests/civilization.spec.js. */
     get civics() { return civics; },
     get holding() { return holding; },

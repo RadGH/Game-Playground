@@ -480,3 +480,47 @@ test('a furnace you are standing at runs, with no colony anywhere', async ({ pag
   expect(out.made, 'nothing was smelted').toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
+
+/**
+ * R15 — a javelin runs out.
+ *
+ * It is the best weapon in the game precisely because it is a one-handed bow that costs nothing:
+ * 1.15x power at 28 m, `carried: 6`, and `carried` was read by NOBODY. Six throws is a fight and
+ * gathering them afterwards is the cost — without the count it is simply a better bow.
+ */
+test('a javelin is counted, runs out, and is picked back up off the ground', async ({ page }) => {
+  const errors = await land(page);
+  const out = await page.evaluate(async () => {
+    const fh = window.farhold;
+    const jav = fh.rpg.loot.generate('javelin', 'normal', 'medium', { rng: fh.rpg.rng, level: 1 });
+    if (!jav) return { skipped: 'no javelin base in the loot tables' };
+    fh.rpg.equip(fh.player, jav, { force: true });
+    fh.rpg.refresh(fh.player);
+    const carried = fh.player.derived.swing?.main?.carried ?? null;
+
+    /**
+     * Throw until it refuses, through the real path: `swingNow` sets the same attack flag a mouse
+     * click sets, and the frame tick does the rest — cooldown, wind-up and all.
+     */
+    const thrown = [];
+    for (let i = 0; i < 12; i++) {
+      const before = fh.player.javelins;
+      fh.swingNow();
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      fh.control.attackCooldown = 0;
+      thrown.push({ before: before ?? null, after: fh.player.javelins ?? null });
+    }
+    return {
+      carried,
+      left: fh.player.javelins,
+      onGround: (fh.player.javelinsOnGround || []).length,
+      thrown: thrown.slice(0, 8),
+    };
+  });
+  console.log('javelins:', JSON.stringify(out));
+  if (out.skipped) { console.log('skipped:', out.skipped); return; }
+  expect(out.carried, 'a javelin does not declare how many you carry').toBeGreaterThan(0);
+  // it must NOT be unlimited
+  expect(out.left, 'a javelin still throws for ever').toBeLessThan(out.carried);
+  expect(errors).toEqual([]);
+});

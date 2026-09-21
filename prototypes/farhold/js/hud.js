@@ -510,6 +510,27 @@ export class Hud {
     if (bar.state !== state) { bar.state = state; bar.root.dataset.state = state; }
   }
 
+  /**
+   * R15 — HOW MANY JAVELINS ARE LEFT.
+   *
+   * A javelin is the only thing in this game with ammunition, and `carried: 6` was read by nobody —
+   * so you threw an unlimited number of the best weapon in the game. Now that there are six, the
+   * count has to be on screen: a limit the player cannot see is not a limit, it is a surprise.
+   *
+   * Built once, and it fades out when you are not carrying a thrower rather than being rebuilt.
+   */
+  ammo(left, of) {
+    let box = this._ammo;
+    if (!box) {
+      box = this._ammo = el('div', 'ammo-count');
+      document.body.append(box);
+    }
+    if (left == null || !of) { box.classList.remove('on'); return; }
+    box.classList.add('on');
+    box.textContent = left > 0 ? `${left} / ${of}` : 'empty';
+    box.dataset.state = left > 0 ? (left <= Math.max(1, Math.round(of * 0.34)) ? 'low' : 'ok') : 'empty';
+  }
+
   prompt(text) {
     const box = $('prompt');
     if (!box) return;

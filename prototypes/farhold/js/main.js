@@ -780,6 +780,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
         reportHit(enemy, result);
       }
+      /**
+       * R15 — a thrown javelin sticks in the ground where it lands, and you can walk over it to
+       * pick it up. That loop is the whole reason `carried: 6` is a balance number and not just an
+       * annoyance: six throws is a fight, and gathering them afterwards is the cost.
+       */
+      if (player.derived.swing?.main?.carried) {
+        (player.javelinsOnGround || (player.javelinsOnGround = [])).push({ x: arrow.x, z: arrow.z });
+      }
     },
   });
 
@@ -6411,7 +6419,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const a = aim();
         const ax = a.dx, ay = a.dy, az = a.dz;
         const eyeY = a.y;
-        const range = balance.player?.arrowRange ?? 46;
+        /**
+         * R15 — A JAVELIN RUNS OUT.
+         *
+         * It is the best weapon in the game precisely because it is a one-handed bow that costs
+         * nothing: `RANGED.javelin` is 1.15x power at 28 m with `carried: 6`, and `carried` was
+         * read by nobody, so you threw an unlimited number of them. The six are the whole balance
+         * of the thing, and picking them back up off the ground is the loop that makes it a
+         * decision rather than an inconvenience.
+         */
+        const plan = player.derived.swing?.main;
+        const range = plan?.range ?? balance.player?.arrowRange ?? 46;
+        if (plan?.carried) {
+          if (player.javelins == null) player.javelins = plan.carried;
+          if (player.javelins <= 0) {
+            hud.log('Out of javelins. Pick them up off the ground, or draw something else.', 'warn');
+            return;
+          }
+          player.javelins--;
+          hud.ammo?.(player.javelins, plan.carried);
+        }
         // a quiver decides how many arrows leave and what they do when they land
         const shots = Math.max(1, Math.round(player.derived.arrowsPerShot || 1));
         const spread = shots > 1 ? 0.08 : 0;
@@ -7228,6 +7255,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     }
 
+    /**
+     * R15 — pick your javelins back up by walking over them. Next to the other proximity checks,
+     * and cheap: a handful of entries at most, and only while you are actually carrying a thrower.
+     */
+    if (player.javelinsOnGround?.length) {
+      const most = player.derived.swing?.main?.carried || 6;
+      for (let i = player.javelinsOnGround.length - 1; i >= 0; i--) {
+        const j = player.javelinsOnGround[i];
+        if (Math.hypot(j.x - control.x, j.z - control.z) > 1.8) continue;
+        player.javelinsOnGround.splice(i, 1);
+        player.javelins = Math.min(most, (player.javelins || 0) + 1);
+        hud.ammo?.(player.javelins, most);
+      }
+    }
+
     // R14: the ambient purse earns while you walk, and not at all during a fight or underground
     ambient.tick(dt, {
       fighting: field.enemies.some(e => e && e.state === 'chase'),
@@ -7393,6 +7435,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     groundVehicles: GROUND_VEHICLES,
     /** R15: the build panel, so a spec can prove the guidance survives building something. */
     get buildUI() { return buildUI; },
+    /**
+     * R15: one swing, for the spec that proves a javelin runs out.
+     *
+     * `swingWith` is a local inside the frame tick and cannot be reached from here, so this sets
+     * the flag the tick itself reads — which is better anyway: it goes through the same path a
+     * mouse click does, including the cooldown and the wind-up.
+     */
+    swingNow: () => { input.state.attack = true; },
     /** The Civilization Expansion, for tests/civilization.spec.js. */
     get civics() { return civics; },
     get holding() { return holding; },

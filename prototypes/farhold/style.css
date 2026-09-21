@@ -2279,3 +2279,18 @@ body.building canvas { cursor: crosshair; }
 .build-next-where::before { content: '→ '; }
 .build-next.done { background: rgba(26, 38, 52, .55); border-left-color: #6a7480; }
 .build-next.done b { color: #cfe6ff; }
+
+/* ---------------------------------------------------------------- R15: javelins left
+   A javelin is the only thing in the game with ammunition, and `carried: 6` was read by nobody, so
+   you threw an unlimited number of the best weapon there is. A limit you cannot see is not a limit,
+   it is a surprise. */
+.ammo-count {
+  position: fixed; right: 18px; bottom: 96px; z-index: 40;
+  font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+  color: #e8dcc0; text-shadow: 0 1px 2px #000;
+  pointer-events: none; opacity: 0; transition: opacity .15s;
+}
+.ammo-count.on { opacity: 1; }
+.ammo-count[data-state="low"] { color: #ffc65a; }
+.ammo-count[data-state="empty"] { color: #ff7a5a; }
+@media (prefers-reduced-motion: reduce) { .ammo-count { transition: none; } }

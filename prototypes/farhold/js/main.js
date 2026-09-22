@@ -10,7 +10,7 @@ import { createShip } from '../../../assets/js/space-models.js';
 import { createAtmosphere } from './atmos.js';
 import { createTownFolk } from './town.js';
 import { createTalkPanel } from './talkui.js';
-import { QuestLog, gatherable, submitGather, makeFallQuest, makeQuest } from './quests.js';
+import { QuestLog, gatherable, submitGather, makeFallQuest, makeQuest, isStarted } from './quests.js';
 import { Campaign } from './campaign.js';
 import { createSound } from './sound.js';
 import { createSpeech } from './speech.js';

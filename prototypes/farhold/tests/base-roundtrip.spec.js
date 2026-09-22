@@ -155,7 +155,20 @@ test('a base is built, saved, reloaded, and reachable from another star system',
   expect(out.darkFirst, 'a pad with no power was travelable — the grid rule does nothing').toBe(true);
   expect(out.crateOk, `the crate would not go down: ${out.crateWhy}`).toBe(true);
   expect(out.poolFound, 'a storage crate did not make a storage pool').toBe(true);
-  expect(out.coal, 'the crate would not take the coal').toBe(200);
+  /**
+   * R18 — NOT `toBe(200)`, AND THE REASON IS A BUG THIS SPEC WAS HIDING.
+   *
+   * Coal is `kind: "ore"`, so it is raw, so `roomFor` caps it at `perResource` (25%) of a single
+   * store — 100 of this chest's 400. It used to arrive at exactly 200 only because the caps were
+   * DEAD: `js/main.js` handed `createStoreNetwork` the whole of resources.json where it wanted the
+   * `materials` block, `kindOf` answered `'refined'` for every resource in the game, and
+   * `RAW.has('refined')` is false. Fixing that turned the caps back on and this assertion with it.
+   *
+   * What this spec is actually about is that the generator finds fuel in a store beside it and the
+   * base survives a save, so it asks for fuel to be there and for the generator to burn it — not
+   * for a number that only a particular capacity rule can produce.
+   */
+  expect(out.coal, 'the chest would not take any coal at all').toBeGreaterThan(0);
   expect(out.genOk, `the generator would not go down: ${out.genWhy}`).toBe(true);
   expect(out.burning, 'the generator never found the coal in the crate beside it').toBe('running');
   expect(out.onGrid, 'nothing joined the power grid').toBeGreaterThan(0);

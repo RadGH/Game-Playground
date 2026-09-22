@@ -15,7 +15,7 @@ const POWER = JSON.parse(readFileSync(new URL('../data/power.json', import.meta.
 
 /** A seam, a drill on it, and a crate `metres` away. The smallest thing that has a route in it. */
 function rig({ metres = 40 } = {}) {
-  const stores = createStoreNetwork({ power: POWER, materials: DATA });
+  const stores = createStoreNetwork({ power: POWER, materials: DATA.materials });
   const node = placedNode({ data: DATA, kindId: Object.keys(DATA.nodeKinds)[0], x: 0, z: 0, band: 'medium' });
   node.id = 'seam1';
   node.infinite = true;                       // this file is about rates, not about running out
@@ -111,7 +111,7 @@ test('swinging at a seam by hand puts the ore in the pool you are standing in', 
 });
 
 test('…and into your bag when there is no pool', () => {
-  const stores = createStoreNetwork({ power: POWER, materials: DATA });
+  const stores = createStoreNetwork({ power: POWER, materials: DATA.materials });
   const node = placedNode({ data: DATA, kindId: Object.keys(DATA.nodeKinds)[0], x: 0, z: 0 });
   node.infinite = true;
   const held = {};
@@ -233,4 +233,100 @@ test('the small drill costs iron and nothing else, and iron is something you can
   assert.deepEqual(Object.keys(p.cost), ['iron'], `it costs ${JSON.stringify(p.cost)} — the ask was iron only`);
   assert.ok(!p.power, 'it asks for power, which is the whole thing it exists to avoid');
   assert.equal(p.needs, 'node', 'a drill that does not have to stand on a seam is not a drill');
+});
+
+/**
+ * R18 — THE STORE NETWORK ACTUALLY KNOWS WHAT KIND OF THING EACH RESOURCE IS.
+ *
+ * `createStoreNetwork` wants resources.json's `materials` BLOCK. `js/main.js` — and both rigs in
+ * this very file — handed it the whole FILE, whose top level is `{schema, _doc, materials, …}`.
+ * So `materials['coal']` was undefined, `kindOf` answered its `'refined'` default for every
+ * resource in the game, and nothing anywhere said so. Every test passed, because the tests were
+ * making the same mistake as the code.
+ *
+ * These assert the CONSEQUENCES rather than the plumbing, because the plumbing is exactly what is
+ * easy to get wrong again: a silo is for bulk, a gas tank is for gas, a wooden box is not a bucket,
+ * and the raw-share caps in `roomFor` — which exist "because of a deadlock, not a design" — fire.
+ */
+test('a silo takes the bulk it exists for, not just the two ids accepts names', () => {
+  const stores = createStoreNetwork({ power: POWER, materials: DATA.materials });
+  stores.add({ id: 'silo', type: 'storage_silo', x: 0, z: 0 });
+  const pool = stores.poolAt(0, 0);
+  for (const id of ['iron_ore', 'copper_ore', 'stone', 'coal', 'gravel']) {
+    assert.ok(stores.put(pool, id, 10) > 0, `a Storage Silo refused ${id}, which is bulk`);
+  }
+});
+
+test('a gas tank takes gas, and a wooden box does not take water', () => {
+  const gases = Object.entries(DATA.materials).filter(([, m]) => m.kind === 'gas').map(([k]) => k);
+  const fluids = Object.entries(DATA.materials).filter(([, m]) => m.kind === 'fluid').map(([k]) => k);
+  assert.ok(gases.length, 'resources.json has no gas to test with');
+  assert.ok(fluids.length, 'resources.json has no fluid to test with');
+
+  const stores = createStoreNetwork({ power: POWER, materials: DATA.materials });
+  stores.add({ id: 'gas', type: 'gas_tank', x: 0, z: 0 });
+  const gasPool = stores.poolAt(0, 0);
+  assert.ok(stores.put(gasPool, gases[0], 10) > 0, `a Gas Tank refused ${gases[0]}`);
+
+  // …and a plain wooden crate, far enough away to be its own pool, refuses a fluid
+  const box = createStoreNetwork({ power: POWER, materials: DATA.materials });
+  box.add({ id: 'box', type: 'storage_crate', x: 0, z: 0 });
+  const boxPool = box.poolAt(0, 0);
+  assert.equal(box.put(boxPool, fluids[0], 10), 0, `a wooden Storage Box held ${fluids[0]}`);
+});
+
+test('the raw-share caps fire: one ore cannot fill a whole crate', () => {
+  const share = POWER.storeShare;
+  const cap = POWER.storage.storage_chest.cap;
+  const stores = createStoreNetwork({ power: POWER, materials: DATA.materials });
+  stores.add({ id: 'chest', type: 'storage_chest', x: 0, z: 0 });
+  const pool = stores.poolAt(0, 0);
+
+  // iron ore is raw, so one resource may take at most `perResource` of the store
+  const took = stores.put(pool, 'iron_ore', cap * 2);
+  assert.equal(took, cap * share.perResource,
+    `one raw material took ${took} of a ${cap} store — the perResource cap did nothing`);
+
+  // and all raw materials together stop at `rawTotal`, leaving room for what the machines make
+  let raw = took;
+  for (const id of ['copper_ore', 'stone', 'coal', 'log']) raw += stores.put(pool, id, cap);
+  assert.ok(raw <= cap * share.rawTotal + 0.001,
+    `raw materials filled ${raw} of a ${cap} store — the rawTotal cap did nothing`);
+  assert.ok(raw > 0, 'nothing raw went in at all');
+});
+
+/**
+ * R18 — WATER CAN GET INTO A POOL, SO THE RECIPES THAT NEED IT CAN RUN.
+ *
+ * `data/power.json` has carried a full `storage.fluid_tank` / `storage.gas_tank` spec since the
+ * building expansion landed and neither had a row in `data/structures.json`, so neither could be
+ * built. It did not show while `kindOf()` was broken — a wooden crate held water quite happily.
+ * Turning the kinds on left the game with no buildable store that takes a fluid at all, and
+ * `js/refine.js` sources machine inputs ONLY from the pool, never the player's bag: thirteen
+ * recipes, `cook_meat` among them, could never run.
+ */
+test('there is a buildable store for every kind of thing the game can produce', () => {
+  const structures = JSON.parse(readFileSync(new URL('../data/structures.json', import.meta.url)));
+  const buildable = new Set(structures.structures.map(s => s.id));
+  const kinds = new Set(Object.values(DATA.materials).map(m => m.kind).filter(Boolean));
+
+  for (const kind of kinds) {
+    const res = Object.keys(DATA.materials).find(k => DATA.materials[k].kind === kind);
+    let taken = false;
+    for (const id of Object.keys(POWER.storage)) {
+      if (!buildable.has(id)) continue;              // specced but not in the catalogue: unbuildable
+      const net = createStoreNetwork({ power: POWER, materials: DATA.materials });
+      net.add({ id: 's', type: id, x: 0, z: 0 });
+      if (net.put(net.poolAt(0, 0), res, 1) > 0) { taken = true; break; }
+    }
+    assert.ok(taken, `nothing you can BUILD will hold ${res} (kind "${kind}") — check data/structures.json`);
+  }
+});
+
+test('every store power.json specs can actually be built', () => {
+  const structures = JSON.parse(readFileSync(new URL('../data/structures.json', import.meta.url)));
+  const buildable = new Set(structures.structures.map(s => s.id));
+  for (const id of Object.keys(POWER.storage)) {
+    assert.ok(buildable.has(id), `power.json specs a "${id}" that data/structures.json cannot build`);
+  }
 });

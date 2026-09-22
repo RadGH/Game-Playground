@@ -2164,7 +2164,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * turns effort into progress, the colony supplies the effort, and `build` is the hand that puts
    * any of it on the ground.
    */
-  const stores = createStoreNetwork({ power: powerData || {}, materials: resourceData || {} });
+  // `materials` is resources.json's `materials` BLOCK, not the whole file — see the note at the
+  // top of createStoreNetwork for what handing it the file silently switched off (R18).
+  const stores = createStoreNetwork({ power: powerData || {}, materials: resourceData?.materials || {} });
   const grid = createGrid({ power: powerData || {}, stores, log: (t, c) => hud.log(t, c) });
   /**
    * The pools and the grid come back BEFORE build.load runs.

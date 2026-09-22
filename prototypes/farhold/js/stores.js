@@ -67,6 +67,35 @@ export class Store {
  * what kind of thing it is.
  */
 export function createStoreNetwork({ power = {}, materials = {} } = {}) {
+  /**
+   * R18 — TAKE THE WHOLE FILE OR ITS `materials` BLOCK, AND SAY SO WHEN IT IS NEITHER.
+   *
+   * `js/main.js` passed `resourceData` — the WHOLE of data/resources.json, whose top level is
+   * `{schema, _doc, materials, nodeKinds, …}` — where this wants the `materials` block. So
+   * `materials['coal']` was undefined, `kindOf` fell to its `'refined'` default for EVERY resource
+   * in the game, and nothing said a word about it. `tests/mining.test.js` passed the same wrong
+   * shape, which is why the unit tests agreed with it.
+   *
+   * What was silently off, for the whole life of the building expansion:
+   *   - a Storage Silo (`accepts: ['bulk']`) took only `coal` and `gravel`, the two ids `accepts`
+   *     escapes by name, and refused iron ore, stone and logs — the bulk it exists for;
+   *   - a Gas Tank (`accepts: ['gas']`) accepted nothing at all, so a vent collector could never
+   *     deliver anywhere;
+   *   - a Trade Post (`accepts: ['trade']`) accepted nothing, so no trade route could start or end;
+   *   - a Fluid Tank refused water, while a wooden crate happily held it;
+   *   - and `roomFor`'s raw-share caps NEVER FIRED, because `RAW.has('refined')` is false — the
+   *     deadlock guard the comment on `roomFor` says exists "because of a deadlock, not a design".
+   *
+   * Unwrapping here rather than only at the call site is deliberate: two of the three callers had
+   * it wrong, the failure is invisible from the outside, and the shapes are trivially distinguishable.
+   */
+  if (materials && materials.materials && typeof materials.materials === 'object') {
+    materials = materials.materials;
+  }
+  if (typeof console !== 'undefined' && materials && !Object.values(materials).some(m => m && m.kind)) {
+    // not one entry has a `kind`, so every `kindOf` below is about to answer 'refined'
+    console.warn('stores: no material carries a `kind` — accept rules and the raw-share caps will do nothing');
+  }
   const STORAGE = power.storage || {};
   const POLES = power.poles || {};
   const SHARE = power.storeShare || { perResource: 0.25, rawTotal: 0.5, rawKinds: [] };

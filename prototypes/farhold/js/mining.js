@@ -253,13 +253,37 @@ export function createMining({ data = {}, ore: oreIn = null, stores = null, grid
     swing(node, seconds = 1, ctx = {}) {
       if (!node) return { got: 0, why: 'Nothing here to dig.' };
       const out = mine(node, seconds, { data, ...ctx });
+      /**
+       * R18 — WHAT THE POOL WOULD NOT TAKE USED TO BE DESTROYED.
+       *
+       * This was `if (pool) stores.put(pool, node.resource, out.got);` — and `stores.put` returns
+       * how much actually FITTED. The remainder was neither stored nor put in the bag: it was
+       * simply gone, while `intoPool: true` went back regardless and js/main.js logged "5 water
+       * into the store beside you" for a store that took none of it. Every other caller in the
+       * game already reads the return value (main.js `payOut`, js/logistics.js `tick`).
+       *
+       * It only became reachable when round 18 fixed `createStoreNetwork`'s `materials` argument:
+       * before that `kindOf` answered `'refined'` for everything, so `accepts` refused nothing and
+       * `roomFor` capped nothing. Now a crate legitimately refuses water, and a crate already
+       * holding a quarter of its capacity in iron legitimately refuses more iron — so without this
+       * every swing at that seam was silently deleted.
+       *
+       * The bag is the fallback, which is also what happens when there is no pool at all, so the
+       * ore is never lost and the player simply carries what would not fit.
+       */
+      let intoPool = false;
       if (out.got > 0) {
         const pool = poolAt(node.x, node.z);
-        if (pool) stores.put(pool, node.resource, out.got);
-        else bag?.add?.(node.resource, out.got);
+        let left = out.got;
+        if (pool) {
+          const took = stores.put(pool, node.resource, left);
+          left -= took;
+          intoPool = took > 0;
+        }
+        if (left > 0) bag?.add?.(node.resource, left);
         ore?.noteWorked?.(node);
       }
-      return { ...out, resource: node.resource, intoPool: !!poolAt(node.x, node.z) };
+      return { ...out, resource: node.resource, intoPool };
     },
 
     /** What this seam is worth from where you are standing — the rich-and-far trade-off, in one number. */

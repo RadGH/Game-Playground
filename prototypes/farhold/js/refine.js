@@ -104,6 +104,8 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       name: name || def.name,
       queue: [],                 // [{ recipe, left, done }]
       crafting: false, progress: 0,
+      // R18 — what a finished-but-blocked batch still owes the pool; see the grant loop in `step`
+      pending: null,
       fuelSeconds: 0, fuelRes: null,
       state: 'idle', starvedFor: null, made: 0,
       /**
@@ -527,18 +529,46 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
 
       if (m.progress + 1e-9 < recipe.time) break;
 
-      // finished: everything has to fit somewhere or the machine holds the batch and says so
+      /**
+       * Finished: everything has to fit somewhere or the machine holds the batch and says so.
+       *
+       * R18 — A BLOCKED MACHINE USED TO RE-GRANT WHATEVER DID FIT, EVERY SINGLE TICK.
+       *
+       * The old loop poured the whole of `recipe.outputs` into the pool and set `blocked` if any
+       * of it was refused — but the parts that FITTED had already gone in, while `m.crafting` and
+       * `m.progress` were left at "finished". So the next `step()` fell straight past
+       * `if (m.progress + 1e-9 < recipe.time) break;` and ran this loop AGAIN, depositing the
+       * fitting outputs a second time. `works.tick` runs every frame, so that is sixty free
+       * batches a second for as long as the pool will take them.
+       *
+       * Measured: a Sawmill on `tap_resin` (2 log → 3 resin + 1 plank) beside a store that was
+       * full of resin turned 2 logs into 90 planks in two seconds.
+       *
+       * It only became reachable when round 18 fixed `createStoreNetwork`'s `materials` argument:
+       * before that `kindOf` answered `'refined'` for everything, so `roomFor` never capped
+       * anything and a store never refused a delivery at all.
+       *
+       * `pending` is what the batch still owes. It is created once when the batch finishes, and a
+       * retry only ever tries the remainder — so the outputs of one batch are granted exactly once
+       * however many ticks it spends blocked.
+       */
+      if (!m.pending) m.pending = { ...(recipe.outputs || {}) };
       let allOut = true;
-      for (const [res, n] of Object.entries(recipe.outputs || {})) {
-        if (putInto(m, res, n) < n - 1e-9) allOut = false;
+      for (const res of Object.keys(m.pending)) {
+        const owed = m.pending[res];
+        if (owed <= 1e-9) { delete m.pending[res]; continue; }
+        const left = owed - putInto(m, res, owed);
+        if (left > 1e-9) { m.pending[res] = left; allOut = false; } else delete m.pending[res];
       }
       if (!allOut) {
+        // …and say it ONCE, on the way in. This used to log every frame it stayed blocked.
+        if (m.state !== 'blocked') log?.(`${m.name} has finished and there is nowhere to put it.`);
         m.state = 'blocked';
         m.progress = recipe.time;
-        log?.(`${m.name} has finished and there is nowhere to put it.`);
         grid?.setBusy(m.id, false);
         break;
       }
+      m.pending = null;
       m.crafting = false; m.progress = 0; m.made++;
       job.done++;
       completed[recipe.id] = (completed[recipe.id] || 0) + 1;
@@ -657,7 +687,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       machines: [...machines.values()].map(m => ({
         id: m.id, type: m.type, x: m.x, z: m.z, enabled: m.enabled,
         queue: m.queue.map(j => ({ recipe: j.recipe, left: j.left === Infinity ? -1 : j.left, done: j.done })),
-        progress: m.progress, crafting: m.crafting, fuelSeconds: m.fuelSeconds, fuelRes: m.fuelRes, made: m.made,
+        progress: m.progress, crafting: m.crafting, pending: m.pending, fuelSeconds: m.fuelSeconds, fuelRes: m.fuelRes, made: m.made,
         workBank: m.workBank, workedSeconds: m.workedSeconds,
         priority: m.priority ?? 1, lastCredit: m.lastCredit || '',
       })),
@@ -673,6 +703,8 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       machine.enabled = spec.enabled !== false;
       machine.progress = spec.progress || 0;
       machine.crafting = !!spec.crafting;
+      // without this a save made while a machine was blocked re-grants the batch on load
+      machine.pending = spec.pending || null;
       machine.fuelSeconds = spec.fuelSeconds || 0;
       machine.fuelRes = spec.fuelRes || null;
       machine.made = spec.made || 0;

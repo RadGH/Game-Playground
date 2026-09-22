@@ -809,8 +809,8 @@ export function makeTerrain(world, planet = null, opts = {}) {
     /**
      * The river's own surface at a point, or null where there is no river within its banks.
      *
-     * `riverTopAt`, not the nearest-point interpolation: it is the number `waterAt` answers with and
-     * the number the sheet is drawn at, and a road lifted to clear a DIFFERENT number is a road the
+     * `surfaceOfHit` is the number `waterAt` answers with AND the number the sheet is drawn at (R18
+     * collapsed the two into one), and a road lifted to clear a DIFFERENT number is a road the
      * game thinks is under water. Measured on seed 7, a road approaching a bridge sat 2.35 m under
      * the river it was running beside because the lift cleared the nearest point and the water was
      * reported from the quad the sheet was actually drawn from.
@@ -818,7 +818,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
     const riverSurfaceNear = (x, z) => {
       const hit = riverIndex.nearest(x, z);
       if (!hit || hit.dist >= hit.path.reach) return null;
-      return riverTopAt(hit, x, z);
+      return surfaceOfHit(hit);
     };
     /** The highest water anywhere along a leg, walked rather than sampled at its ends. */
     const worstAlong = (ax, az, bx, bz, at) => {
@@ -1043,64 +1043,41 @@ export function makeTerrain(world, planet = null, opts = {}) {
   const quayRise = opts.quayRise ?? 1.4;
   const CROSS_DOT = opts.crossingDot ?? 0.72;
 
-  /** Height along a path at a nearest-point hit. */
-  const surfaceOfHit = hit => lerp(hit.path.surface[hit.i], hit.path.surface[Math.min(hit.path.surface.length - 1, hit.i + 1)], hit.t);
-
   /**
-   * ROUND 17 — THE HIGHEST WATER THAT COULD BE DRAWN OVER A POINT.
+   * Height along a path at a nearest-point hit — and, for a river, THE WATER SURFACE HERE.
    *
-   * `surfaceOfHit` answers about the NEAREST point of the river line. The drawn sheet
-   * (`waterRibbon` in js/water-plan.js) is built per river point and runs out across the channel
-   * from the point it belongs to — so on a bend, the sheet over a spot 24 m off the line comes from
-   * a point two or three segments away, and a river that falls a quarter of a metre in between
-   * leaves the two numbers disagreeing. That is enough for the game to call a spot dry while the
-   * blue layer is visibly over it, which is round 11's "I fall through the water layer and walk on
-   * the bottom" by another route — and the bank rim in `heightAt` made it reachable by making the
-   * ground sweep smoothly through exactly that quarter of a metre instead of jumping past it.
+   * R18 — this used to have a twin. `riverTopAt` answered `max(surface[i], surface[i + 1])`: the
+   * higher END of a segment, for the whole length of that segment. That is constant along a segment
+   * and it STEPS at every boundary, by 12.21 m at the worst pair of points on seed 7.
    *
-   * Seven points either side covers the widest channel on the widest river. The carve still uses
-   * `surfaceOfHit`, because the BED belongs under the water at this point, not under the water
-   * three points upstream.
+   * `waterRibbon` (js/water-plan.js) pushes one vertex per river point at that point's own height
+   * and fills the quad between two points with two triangles, so what is actually DRAWN between
+   * point i and point i+1 is a linear ramp — which is exactly this lerp. Measuring against the max
+   * meant the water the game tested against and the water you could see were two different
+   * surfaces: swimming down a river, `waterAt().surface` dropped several metres the instant you
+   * crossed a boundary, js/player.js found the body above the new surface, `swimming` went false,
+   * and you were falling through the air over water still drawn underneath you.
+   *
+   * `makePathIndex.nearest` has always returned `t`, so the ramp costs nothing the max did not.
+   * The two functions are one now, because two names for one lerp is how the prose on the other one
+   * came to describe behaviour it no longer had.
+   *
+   * THE BEND CASE, which the max used to hide: the sheet is drawn as a flat slab per point, both
+   * edges at that point's height, while this measures along the nearest SEGMENT. Out near the bank
+   * on a bend those are not the same quad and they differ by ~0.10 m (measured on seed 7, 24 m off
+   * the centre line). `waterAt` carries that as an explicit constant `EDGE` instead — see there.
    */
-  function riverTopAt(hit) {
+  // A `function` declaration, not a `const` arrow, because it is HOISTED: `riverSurfaceNear` is
+  // built and called during setup, hundreds of lines above this one. R18 collapsed the hoisted
+  // `riverTopAt` into this and briefly made it a const — which is a TDZ crash `node --check`
+  // cannot see, and this project has had three of those already.
+  function surfaceOfHit(hit) {
     const surf = hit.path.surface;
     const a = surf[hit.i], b = surf[Math.min(surf.length - 1, hit.i + 1)];
-    /**
-     * R18 — THE WATER SURFACE WAS A STAIRCASE, AND THE DRAWN ONE IS A RAMP.
-     *
-     * This used to return `Math.max(a, b)`: the higher of the segment's two ends, for the whole
-     * length of the segment. That is constant within a segment and STEPS at every boundary, and on
-     * seed 19 the biggest step between two neighbouring river points is 11.4 metres.
-     *
-     * `waterRibbon` (js/water-plan.js) pushes one vertex per point at `heights[i]` and fills the
-     * quad between two points with two triangles, so what is actually DRAWN between point i and
-     * point i+1 is a linear ramp from `a` to `b`. `nearest` already hands back `t`, the fraction
-     * along that segment, so the ramp is free to evaluate and the two answers now agree everywhere
-     * along a river instead of only at its upstream ends.
-     *
-     * What the staircase looked like in play: swimming down a river, `waterAt().surface` dropped
-     * several metres the instant you crossed a segment boundary, `player.js` found the body above
-     * the new surface, `swimming` went false — and you were suddenly falling through the air over
-     * water you could still see. tests/round3.spec.js's swim-stroke check is what caught it: the
-     * clip went to `jump` mid-river, with 6.9 m of water underneath.
-     *
-     * The old comment defended the max as making "is this under the water" agree with "is there
-     * water drawn here" on a bend, where the nearest corner is not always the corner the sheet over
-     * you came from. That is a real effect, but it is bounded by the difference between neighbouring
-     * segments across a bend and it is CONTINUOUS — which is the trade this is making, because the
-     * max turned that small bend error into an 11 m cliff along the whole length of every river.
-     *
-     * NOT A WINDOW OF SEVERAL POINTS. Three points is 384 m on a full-sized planet, and a mountain
-     * stream falls ten metres in that — which reported the river ten metres above the road beside
-     * it and dropped the player into it. round16-roads.test.js caught it on the first run.
-     */
-    // Every caller passes a hit straight from `makePathIndex.nearest`, which always sets `t`. The
-    // guard is for a hand-built hit: fall back to the old conservative max rather than silently
-    // picking an end of the segment, so a caller that forgets `t` errs towards more water and not
-    // towards dropping somebody through the surface.
+    // every caller passes a hit from `makePathIndex.nearest`, which always sets a clamped `t`;
+    // the guard is for a hand-built hit, and errs towards more water rather than less
     if (hit.t == null) return Math.max(a, b);
-    const t = hit.t < 0 ? 0 : hit.t > 1 ? 1 : hit.t;
-    return a + (b - a) * t;
+    return lerp(a, b, hit.t < 0 ? 0 : hit.t > 1 ? 1 : hit.t);
   }
 
   /**
@@ -1189,16 +1166,18 @@ export function makeTerrain(world, planet = null, opts = {}) {
        *   * it never dams a river mouth — at the sea the bank legitimately does not come back.
        */
       /**
-       * THE RIM IS BUILT TO THE HIGHEST WATER THAT COULD BE DRAWN OVER IT, NOT TO THE NEAREST POINT.
+       * THE RIM IS BUILT TO THE WATER THAT IS DRAWN OVER IT.
        *
-       * `waterAt` measures against the nearest point of the river line; the SHEET is drawn from the
-       * point it belongs to, out across the channel. On a bend those are not the same point, and a
-       * river falling a quarter of a metre between them is enough for a rim built to one to come
-       * out under the other — dry land under the blue layer, which is round 11's bug. Taking the
-       * highest surface over a few points either side costs seven array reads and makes the rim
-       * clear whichever of the two is asking.
+       * R18 — this used to call `riverTopAt`, a second function that answered the highest surface
+       * of the segment rather than the one drawn here, so the rim was built to a different number
+       * from the one `waterAt` measures against. Both are `surfaceOfHit` now, which is also the
+       * ramp `waterRibbon` draws, so the rim, the water test and the sheet cannot disagree.
+       *
+       * It is the SAME value as `riverSurface` above — same hit, same function — so it is reused
+       * rather than recomputed. This is the hottest sampler in the game: `heightAt` runs for every
+       * terrain vertex, and this block used to lerp the same two array entries twice per call.
        */
-      const bankTarget = riverTopAt(river);
+      const bankTarget = riverSurface;
       if (bankRise > 0 && river.dist > river.path.half && height < bankTarget + bankLip
           && !(hasSea && riverSurface <= seaLevel + 1)) {
         let want = Math.min(bankTarget + bankLip, height + bankRise);
@@ -1716,12 +1695,14 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * no case left where one says water and the other says land.
      */
     const river = riverIndex.nearest(x, z);
+    // R18 — the sub-`EDGE` shoreline sliver, held until the lake and the sea have had their say
+    let edgeOfRiver = null;
     // `<=`: the sheet is allowed to reach the top of the bank exactly, so the test has to as well,
     // or there is a one-metre sliver of drawn water standing over "dry" ground at the very edge
     if (river && river.dist <= river.path.reach) {
-      // the water that is DRAWN here, ramped along the segment — see `riverTopAt`, and round 11's
-      // "I walk on the bottom under the blue layer"
-      const surface = riverTopAt(river);
+      // the water that is DRAWN here, ramped along the segment — see `surfaceOfHit`, and round
+      // 11's "I walk on the bottom under the blue layer"
+      const surface = surfaceOfHit(river);
       const ground = heightAt(x, z);
       /**
        * R18 — A HAND'S BREADTH OF SLACK AT THE WATERLINE, AND NOWHERE ELSE.
@@ -1732,7 +1713,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
        * slab that was drawn over it, and the two land a few centimetres apart. Measured on seed 7:
        * 0.10 m, twenty-four metres off the centre line.
        *
-       * Before R18 that gap was papered over by `riverTopAt` answering the HIGHER end of the
+       * Before R18 that gap was papered over by a second function answering the HIGHER end of the
        * segment, which was generous enough to cover any bend — and which is exactly what made the
        * surface an 11 m staircase along every river. The slack is explicit now, and constant, so it
        * cannot reappear as a step: a spot within `EDGE` of the sheet counts as water, and the depth
@@ -1741,9 +1722,20 @@ export function makeTerrain(world, planet = null, opts = {}) {
        * changes what GROWS there and what the sheet agrees with, not how anybody moves.
        */
       const EDGE = 0.25;
-      if (surface + EDGE > ground) {
-        return { kind: 'river', surface, depth: Math.max(0, surface - ground), path: river.path, dist: river.dist };
+      if (surface > ground) {
+        return { kind: 'river', surface, depth: surface - ground, path: river.path, dist: river.dist };
       }
+      /**
+       * The sliver is a FALLBACK, never an answer that wins over real water.
+       *
+       * Taking it immediately meant an early `return` that skipped the lake and the sea below — so
+       * where a river runs into a lake or down to the sea, a spot inside the river's `reach` whose
+       * ground sits a few centimetres ABOVE the river surface but metres below the lake's would
+       * come back as `{kind:'river', depth:0}`: not wading, not swimming, and the player walks the
+       * bottom under a drawn sheet. That is round 11's bug in a narrow band, reintroduced by the
+       * slack that was meant to close a different one. It is held here and used at the end instead.
+       */
+      if (surface + EDGE > ground) edgeOfRiver = { kind: 'river', surface, depth: 0, path: river.path, dist: river.dist };
     }
     // Whether you are IN a lake is the map's own answer for this cell — the blurred field is for
     // shaping the basin, and a one-cell lake blurs away to almost nothing.
@@ -1756,7 +1748,8 @@ export function makeTerrain(world, planet = null, opts = {}) {
       const ground = heightAt(x, z);
       if (ground < seaLevel) return { kind: 'sea', surface: seaLevel, depth: seaLevel - ground, dist: 0 };
     }
-    return null;
+    // nothing has real depth here, so the shoreline sliver is the honest answer after all
+    return edgeOfRiver;
   }
 
   /** How steep the ground is here: rise over run, sampled across `step` metres. */
@@ -1812,7 +1805,7 @@ export function makeTerrain(world, planet = null, opts = {}) {
     const river = riverIndex.nearest(x, z);
     if (river && river.dist < river.path.reach + 2) {
       // the same number `waterAt` uses — nothing grows under the sheet that is actually drawn
-      const surface = riverTopAt(river);
+      const surface = surfaceOfHit(river);
       if (ground < surface + margin) return false;
     }
     return true;

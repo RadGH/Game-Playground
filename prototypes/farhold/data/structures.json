@@ -1838,6 +1838,62 @@
       "tech": "ironworking"
     },
     {
+      "id": "fluid_tank",
+      "name": "Fluid Tank",
+      "cat": "store",
+      "tier": 2,
+      "w": 2.2,
+      "d": 2.2,
+      "h": 3.0,
+      "snap": "grid",
+      "store": {
+        "slots": 30,
+        "accepts": [
+          "fluid"
+        ]
+      },
+      "cost": {
+        "steel": 12,
+        "resin": 6,
+        "parts": 1
+      },
+      "look": {
+        "kind": "silo",
+        "color": "#6f8a96"
+      },
+      "desc": "Water, coolant, acid, fuel. The only store that will take a liquid — a wooden box just gets wet.",
+      "tech": "ironworking",
+      "_r18": "R18 — data/power.json has carried a full spec for this (cap, linkRadius, accepts, a build cost and a desc) since the building expansion landed, and there has never been a row here, so it could not be built. That did not show while `kindOf()` was broken: js/main.js handed createStoreNetwork the whole of resources.json instead of its `materials` block, every resource came back `'refined'`, and a wooden crate cheerfully held water. Fixing that turned the accept rules on and left the game with NO buildable store that takes a fluid or a gas — and js/refine.js sources machine inputs only from the pool, never the bag, so thirteen recipes (cook_meat, bake_grain, pour_concrete, tan_leather, tan_heavy, leach_lye, make_acid, brew_coolant, wash_iron, wash_copper, synth_fuel_gas, synth_fuel_sulphur, melt_ice) could never run. Cost and tier are power.json's own numbers, written in the catalogue's vocabulary (see MATERIAL_ALIASES in js/buildplan.js)."
+    },
+    {
+      "id": "gas_tank",
+      "name": "Gas Tank",
+      "cat": "store",
+      "tier": 2,
+      "w": 2.0,
+      "d": 2.0,
+      "h": 3.4,
+      "snap": "grid",
+      "store": {
+        "slots": 20,
+        "accepts": [
+          "gas"
+        ]
+      },
+      "cost": {
+        "steel": 16,
+        "parts": 2,
+        "crystal": 1
+      },
+      "look": {
+        "kind": "silo",
+        "color": "#9a8f6f"
+      },
+      "desc": "Pressurised. The only thing a vent collector can deliver into.",
+      "tech": "ironworking",
+      "_r18": "R18 — data/power.json has carried a full spec for this (cap, linkRadius, accepts, a build cost and a desc) since the building expansion landed, and there has never been a row here, so it could not be built. That did not show while `kindOf()` was broken: js/main.js handed createStoreNetwork the whole of resources.json instead of its `materials` block, every resource came back `'refined'`, and a wooden crate cheerfully held water. Fixing that turned the accept rules on and left the game with NO buildable store that takes a fluid or a gas — and js/refine.js sources machine inputs only from the pool, never the bag, so thirteen recipes (cook_meat, bake_grain, pour_concrete, tan_leather, tan_heavy, leach_lye, make_acid, brew_coolant, wash_iron, wash_copper, synth_fuel_gas, synth_fuel_sulphur, melt_ice) could never run. Cost and tier are power.json's own numbers, written in the catalogue's vocabulary (see MATERIAL_ALIASES in js/buildplan.js). power.json prices it with a `composite_plate`, which is a real material but not one the catalogue's vocabulary declares; the nearest catalogue word for the same rung is `crystal` (crystal_raw), which the Gas Tank's lens-like pressure gauge can stand in for without inventing an alias."
+    },
+    {
       "id": "logistics_pole",
       "name": "Logistics Pole",
       "cat": "store",

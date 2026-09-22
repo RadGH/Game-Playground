@@ -281,27 +281,108 @@ test('the river surface is continuous along the channel, not a staircase', () =>
   );
 });
 
-/** The measured surface and the drawn vertex heights agree at the points themselves. */
-test('the water the game measures matches the sheet that is drawn, along the segment too', () => {
+/**
+ * R18 — MEASURED AGAINST THE MESH THAT IS ACTUALLY DRAWN, not against a restatement of the lerp.
+ *
+ * The first version of this test computed `surface[i] + (surface[i+1] - surface[i]) * u` and
+ * compared it to `waterAt().surface` — which, after the fix, is the same lerp over the same two
+ * array entries. It re-implemented the implementation, so it could not fail: any future change
+ * that kept both sides in step would stay green, including a wrong one.
+ *
+ * This builds the real ribbon and reads the HEIGHT OFF ITS TRIANGLES, which is the number on the
+ * screen. It also samples OFF the centre line, because the centre line is the one place the flat
+ * slab and the segment ramp are guaranteed to agree — the bend error the `EDGE` slack in
+ * `waterAt` exists for only appears out towards the bank.
+ */
+test('the water the game measures matches the sheet that is drawn, off the centre line too', () => {
   const river = terrain.riverPaths.find(r => r.points.length > 40);
   assert.ok(river, 'this world has no river long enough');
 
-  let worst = 0, worstAt = null;
-  for (let i = 6; i < Math.min(river.points.length - 6, 50); i++) {
-    const [ax, az] = river.points[i], [bx, bz] = river.points[i + 1];
-    for (const u of [0, 0.25, 0.5, 0.75]) {
-      const x = ax + (bx - ax) * u, z = az + (bz - az) * u;
-      const wat = terrain.waterAt(x, z);
-      if (!wat || wat.kind !== 'river') continue;
-      // what waterRibbon puts on screen here: the ramp between the two vertex heights
-      const drawn = river.surface[i] + (river.surface[i + 1] - river.surface[i]) * u;
-      const off = Math.abs(wat.surface - drawn);
-      if (off > worst) { worst = off; worstAt = { i, u, measured: wat.surface, drawn }; }
+  const a = 6, b = Math.min(river.points.length - 1, 40);
+  const slice = river.points.slice(a, b + 1);
+  const part = waterRibbon(slice, river.surface.slice(a, b + 1), river.half,
+    { terrain, reach: river.reach, skirt: river.depth });
+  const tris = triangles(part);
+
+  /** The drawn sheet's height at (x, z): the triangle containing it, barycentrically. */
+  function drawnAt(x, z) {
+    for (const [p, q, r] of tris) {
+      const d = (q[2] - r[2]) * (p[0] - r[0]) + (r[0] - q[0]) * (p[2] - r[2]);
+      if (Math.abs(d) < 1e-9) continue;
+      const w0 = ((q[2] - r[2]) * (x - r[0]) + (r[0] - q[0]) * (z - r[2])) / d;
+      const w1 = ((r[2] - p[2]) * (x - r[0]) + (p[0] - r[0]) * (z - r[2])) / d;
+      const w2 = 1 - w0 - w1;
+      if (w0 < -1e-6 || w1 < -1e-6 || w2 < -1e-6) continue;
+      return w0 * p[1] + w1 * q[1] + w2 * r[1];
+    }
+    return null;
+  }
+
+  let worst = 0, worstAt = null, checked = 0;
+  for (let i = 4; i < slice.length - 4; i++) {
+    const [px, pz] = slice[i];
+    const prev = slice[i - 1], next = slice[i + 1];
+    let dx = next[0] - prev[0], dz = next[1] - prev[1];
+    const len = Math.hypot(dx, dz) || 1;
+    const nx = -dz / len, nz = dx / len;
+    // along the line AND out towards both banks — the bend case lives off-centre
+    for (const along of [0, 0.35, 0.7]) {
+      for (const off of [0, river.half * 0.6, -river.half * 0.6, river.half * 1.4, -river.half * 1.4]) {
+        const bx = px + (next[0] - px) * along, bz = pz + (next[1] - pz) * along;
+        const x = bx + nx * off, z = bz + nz * off;
+        const drawn = drawnAt(x, z);
+        if (drawn === null) continue;                 // outside the sheet here
+        const wat = terrain.waterAt(x, z);
+        if (!wat || wat.kind !== 'river') continue;
+        checked++;
+        const gap = Math.abs(wat.surface - drawn);
+        if (gap > worst) { worst = gap; worstAt = { i, along, off: off.toFixed(1), measured: wat.surface, drawn }; }
+      }
     }
   }
+
+  assert.ok(checked > 40, `only ${checked} points landed on the drawn sheet`);
+
+  /**
+   * THE BAR, AND WHY IT IS NOT ZERO.
+   *
+   * A residual disagreement is inherent to the two shapes: `waterRibbon` draws a FLAT slab per
+   * river point, while this measures the ramp along the NEAREST SEGMENT. On a tight meander the
+   * nearest segment to a spot out near the bank is not the quad drawn over it, and on a steep
+   * stream those two carry very different heights. That is the case the old `Math.max` was hiding,
+   * and hiding it cost an 11 m staircase down the middle of every river.
+   *
+   * Measured on seed 7, this is what moved:
+   *
+   *   before R18 (max):  7.97 m, AT the centre line (0.0 m off) — where swimmers actually are
+   *   after  R18 (lerp): 1.96 m, and only 6.6 m off the line
+   *
+   * So the bar is 2.5 m: tight enough to catch the old behaviour and any regression towards it,
+   * honest about the residual rather than pretending it is gone. Closing the last 1.96 m means
+   * measuring against the QUAD rather than the polyline, which is a change to the hottest sampler
+   * in the game and is written up as outstanding work, not silently tolerated here.
+   */
   assert.ok(
-    worst < 0.6,
-    `the measured surface is ${worst.toFixed(2)} m from the drawn sheet at point ${worstAt?.i} `
-    + `(${worstAt?.measured.toFixed(2)} vs ${worstAt?.drawn.toFixed(2)})`,
+    worst < 2.5,
+    `the measured surface is ${worst.toFixed(2)} m from the drawn mesh at point ${worstAt?.i} `
+    + `(${worstAt?.off} m off the line: ${worstAt?.measured.toFixed(2)} vs ${worstAt?.drawn.toFixed(2)})`,
   );
+
+  /**
+   * AND THE INVARIANT THAT ACTUALLY MATTERS, which no tolerance expresses: wherever the sheet is
+   * drawn ABOVE the ground, the game must agree there is water there. That is round 11's "I fall
+   * through the blue layer and walk on the bottom", asked of the real mesh.
+   */
+  let dryUnderSheet = 0, worstDry = null;
+  for (const [p0, q0, r0] of tris) {
+    for (const [vx, vy, vz] of [p0, q0, r0]) {
+      const ground = terrain.heightAt(vx, vz);
+      if (ground >= vy - 0.05) continue;              // the bank is up here; nothing is drawn over it
+      const wat = terrain.waterAt(vx, vz);
+      if (!wat) { dryUnderSheet++; worstDry = { vx: vx | 0, vz: vz | 0, under: (vy - ground).toFixed(2) }; }
+    }
+  }
+  assert.equal(dryUnderSheet, 0,
+    `${dryUnderSheet} points have water drawn over them that the game calls dry`
+    + (worstDry ? ` (worst at ${worstDry.vx},${worstDry.vz}, ${worstDry.under} m under the sheet)` : ''));
 });

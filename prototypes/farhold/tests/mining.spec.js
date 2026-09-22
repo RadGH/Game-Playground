@@ -303,13 +303,19 @@ test('a bench you walk up to can be given work, and it makes the thing', async (
      * Everything a furnace recipe might want, so this is a test of the QUEUE and not of mining.
      *
      * R18 — this used to dump 120 of each into a `storage_crate` and the test failed with "the
-     * furnace made nothing (Out of fuel)". Neither number was arbitrary and neither was a bug:
-     * `roomFor` caps ONE raw material at 25% of a store and ALL raw materials together at 50%
-     * (data/power.json `storeShare`), so the iron and the copper ate the entire raw budget of a
-     * 120-unit box and the coal — seven of these eight ids are raw — got exactly zero room.
-     * A Storage Chest holds 400, and 24 of each keeps the whole load inside the 200 the raw
-     * share allows. The `stocked` check below is new: when a capacity rule moves again, the
-     * spec should say the POOL would not take the fuel, not that the furnace is broken.
+     * furnace made nothing (Out of fuel)".
+     *
+     * The cause was plain CAPACITY, and it is worth being precise because the first diagnosis
+     * written here was wrong. A Storage Box holds 120; `put(pool, 'iron_ore', 120)` filled the
+     * whole thing on the first line, and the coal — seven lines later — had nowhere to go. The
+     * raw-share caps in `roomFor` would have limited the iron long before that, but they were DEAD
+     * at the time: `js/main.js` handed `createStoreNetwork` the whole of resources.json where it
+     * wanted the `materials` block, so `kindOf` answered `'refined'` for everything and
+     * `RAW.has('refined')` is false. That is fixed now, so both rules are live.
+     *
+     * A Storage Chest holds 400, and 24 of each fits under the capacity AND under the 200 the raw
+     * share allows. The `stocked` check below is the point: when either rule moves again, the spec
+     * should say the POOL would not take the fuel, not that the furnace is broken.
      */
     const FEED = ['iron_ore', 'copper_ore', 'coal', 'charcoal', 'log', 'stone', 'sand', 'clay'];
     const stocked = {};

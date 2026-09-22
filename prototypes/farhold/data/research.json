@@ -68,7 +68,9 @@
         "pump",
         "storage_silo",
         "ballista_turret",
-        "reinforced_wall"
+        "reinforced_wall",
+        "fluid_tank",
+        "gas_tank"
       ],
       "grants": [],
       "blurb": "A hotter fire and a bellows. Ore that a furnace shrugged at goes to dust and then to metal, a drill works a seam while you are asleep, and steel makes a wall and a bolt-thrower worth the name.",

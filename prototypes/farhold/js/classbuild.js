@@ -452,7 +452,15 @@ export function applyOpeningKit({ player, rpg, classDef = null, data = null, log
       weapon.brand = build.element;
       weapon.castElement = null;
       attuneWeapon(weapon);
-      given.element = weapon.castElement || null;
+      /**
+       * R18 — fall back to the BRAND, because one weapon on this loadout's list never attunes.
+       *
+       * A quarterstaff is deliberately not a caster (see `attuneWeapon`), so `attuneWeapon` leaves
+       * its `castElement` null however it got here — and this loadout lists `quarterstaff` among
+       * its weapons. `elementOf()` and `describeWeapon` both read `brand` before `castElement`, so
+       * the damage IS the element the player chose; only this summary line was losing it.
+       */
+      given.element = weapon.castElement || weapon.brand || null;
     }
   }
 

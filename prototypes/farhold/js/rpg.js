@@ -135,10 +135,13 @@ export function attuneWeapon(item) {
    * fires while that still says `magic`: called a second time on the same item — a reload, a
    * re-roll at the bench — the block was skipped and the caster branch attuned it again anyway.
    */
-  const isQuarterstaff = item.baseKey === 'quarterstaff'
-    || sub === 'quarterstaff'
-    || item.baseItemId === 'quarterstaff';
-  if (isQuarterstaff && item.weaponCategory === 'magic') {
+  const isQuarterstaff = item.baseKey === 'quarterstaff' || sub === 'quarterstaff';
+  if (isQuarterstaff) {
+    // Unconditionally, NOT behind `weaponCategory === 'magic'`. Gating the clear on the category
+    // was the original bug from the other side: an item that arrives already filed `light` but
+    // still carrying a stale `castElement` — one persisted by an older build, or any path that
+    // sets the category before attuning — sailed through with its element intact, and
+    // `elementOf()` then routed its damage through `magicResist` and the spellPower multiplier.
     item.weaponCategory = 'light';
     item.castElement = null;
     item.castStatus = null;

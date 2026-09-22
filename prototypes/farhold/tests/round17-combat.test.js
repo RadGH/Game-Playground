@@ -711,3 +711,76 @@ test('26 — the fibre patch is a clump, and the iron outcrop is rock with ore i
   assert.ok(!/emissiveIntensity: 0\.35,\s*\n\s*roughness: look\.rough,\s*\n\s*metalness: 0\.05/.test(viewSrc),
     'the old whole-rock glow is back');
 });
+
+// ================================================================= R18 — the carried-forward item
+
+/**
+ * R18 — A QUARTERSTAFF IS NOT RE-ATTUNED BY THE BLOCK THAT DE-ATTUNES IT.
+ *
+ * Round 17 found this and recorded it, deliberately, as NOT fixed: "a quarterstaff is re-attuned by
+ * rpg.js's `attuneWeapon` — `CASTERS.has(sub)` fires because `sub` is the subtype, which items.json
+ * files as `staff`."
+ *
+ * The shape of it: `attuneWeapon` clears `castElement` for a quarterstaff, and the very next branch
+ * asks `CASTERS.has(sub) && !item.castElement`. `sub` is `staff`, `staff` is in CASTERS, and the
+ * clear had just made the second half true — so the de-attune was the thing that re-armed the
+ * attune. The raw base came out as "Arc Quarterstaff" with an arcane `castElement`, a `cast_arcane`
+ * affix on the card and a glowing element topper from `heldLookFor`.
+ *
+ * `spellShapeOf` was already null for it, because `isStaff()` excludes a quarterstaff BY NAME — so
+ * the test above passed throughout and none of this showed up in it. That is why this one asks
+ * about the attunement itself rather than about the spell.
+ *
+ * items.json is SHARED with Emberveil and has its own test over it, so the fix is on the item, in
+ * `attuneWeapon`, exactly like `ranged`, `offHandOk` and `markHands`.
+ */
+test('R18 — a quarterstaff comes out of attuneWeapon a pole, and stays one', () => {
+  const base = items.weaponBases.quarterstaff;
+  assert.ok(base, 'items.json has no quarterstaff');
+  // the two facts this whole bug rests on, asserted so the data moving is not silent
+  assert.equal(base.subtype, 'staff', 'the quarterstaff subtype moved — re-check the CASTERS guard');
+  assert.equal(base.weaponCategory, 'magic', 'items.json no longer files a quarterstaff as magic');
+
+  const staff = make('quarterstaff');
+  assert.ok(staff, 'the generator would not make a quarterstaff');
+
+  assert.equal(staff.weaponCategory, 'light', 'a quarterstaff is still filed as a magic weapon');
+  assert.equal(staff.castElement ?? null, null, 'a quarterstaff was given an element to cast');
+  assert.equal(staff.castStatus ?? null, null, 'a quarterstaff was given a cast status');
+  assert.ok(!staff.ranged, 'a quarterstaff became a ranged weapon');
+  assert.ok(
+    !(staff.affixes || []).some(a => a.stat === 'castElement'),
+    'a quarterstaff carries a castElement affix: ' + JSON.stringify(staff.affixes),
+  );
+  // the name is where it showed: "Arc Quarterstaff", "Flame Quarterstaff"…
+  for (const brand of ['Arc', 'Flame', 'Frost', 'Storm', 'Venom', 'Gloom', 'Ray']) {
+    assert.ok(!staff.name.startsWith(brand + ' '), `a quarterstaff was renamed "${staff.name}"`);
+  }
+  assert.equal(spellShapeOf(staff), null, 'a quarterstaff is a pole, not a spell launcher');
+  assert.ok(!isStaff(staff), 'a quarterstaff reads as a casting staff');
+
+  /**
+   * And again on the same object. The de-attune only fires while `weaponCategory` still says
+   * `magic`, so a second pass — a reload, a re-roll at the bench, anything that attunes an item it
+   * has already attuned — used to skip it and let the caster branch through unopposed.
+   */
+  const again = attuneWeapon(attuneWeapon(staff));
+  assert.equal(again.castElement ?? null, null, 'attuning a quarterstaff twice gave it an element');
+  assert.equal(again.weaponCategory, 'light', 'attuning a quarterstaff twice made it magic again');
+  assert.ok(
+    !(again.affixes || []).some(a => a.stat === 'castElement'),
+    'attuning a quarterstaff twice added a cast affix',
+  );
+});
+
+/** A real caster still gets attuned — the guard must not have turned the feature off. */
+test('R18 — wands, scepters, orbs and tomes are still attuned', () => {
+  for (const key of MAGIC_BASES) {
+    const base = items.weaponBases[key];
+    if (key === 'quarterstaff' || base.subtype === 'quarterstaff') continue;
+    if (!['wand', 'scepter', 'orb', 'staff', 'tome'].includes(base.subtype)) continue;
+    const item = make(key);
+    if (!item) continue;
+    assert.ok(item.castElement, `${key} lost its element — the quarterstaff guard is too wide`);
+  }
+});

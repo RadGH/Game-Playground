@@ -294,15 +294,26 @@ test('a bench you walk up to can be given work, and it makes the thing', async (
     // a furnace: the first refining step, and it burns rather than drawing power
     f.build.select('furnace'); f.build.aim(spot.x + 2, spot.z);
     const bench = f.build.placeHere();
-    f.build.select('storage_crate'); f.build.aim(spot.x + 4, spot.z);
+    f.build.select('storage_chest'); f.build.aim(spot.x + 4, spot.z);
     f.build.placeHere();
     if (!bench.ok) return { benchWhy: bench.why };
 
     const pool = f.stores.poolAt(spot.x + 4, spot.z);
-    // everything a furnace recipe might want, so this is a test of the QUEUE and not of mining
-    for (const id of ['iron_ore', 'copper_ore', 'coal', 'charcoal', 'log', 'stone', 'sand', 'clay']) {
-      f.stores.put(pool, id, 120);
-    }
+    /**
+     * Everything a furnace recipe might want, so this is a test of the QUEUE and not of mining.
+     *
+     * R18 — this used to dump 120 of each into a `storage_crate` and the test failed with "the
+     * furnace made nothing (Out of fuel)". Neither number was arbitrary and neither was a bug:
+     * `roomFor` caps ONE raw material at 25% of a store and ALL raw materials together at 50%
+     * (data/power.json `storeShare`), so the iron and the copper ate the entire raw budget of a
+     * 120-unit box and the coal — seven of these eight ids are raw — got exactly zero room.
+     * A Storage Chest holds 400, and 24 of each keeps the whole load inside the 200 the raw
+     * share allows. The `stocked` check below is new: when a capacity rule moves again, the
+     * spec should say the POOL would not take the fuel, not that the furnace is broken.
+     */
+    const FEED = ['iron_ore', 'copper_ore', 'coal', 'charcoal', 'log', 'stone', 'sand', 'clay'];
+    const stocked = {};
+    for (const id of FEED) stocked[id] = f.stores.put(pool, id, 24);
     await new Promise(r => setTimeout(r, 700));
 
     // the panel shows the bench you are standing next to
@@ -324,7 +335,7 @@ test('a bench you walk up to can be given work, and it makes the thing', async (
     f.build.setMode(false);
 
     return {
-      benchText, label,
+      benchText, label, stocked,
       recipes: rows.length,
       locked: rows.filter(r => r.classList.contains('locked')).length,
       queued,
@@ -337,6 +348,10 @@ test('a bench you walk up to can be given work, and it makes the thing', async (
   expect(out.benchWhy, `the furnace would not go down: ${out.benchWhy}`).toBeFalsy();
   expect(out.benchText, 'the panel does not show the bench you are standing at').toContain('Furnace');
   expect(out.recipes, 'the bench offers no recipes').toBeGreaterThan(0);
+  // before blaming the furnace, check the pool actually took what the test tried to feed it
+  for (const [id, n] of Object.entries(out.stocked || {})) {
+    expect(n, `the pool would not take the ${id} — a store capacity or share rule moved`).toBe(24);
+  }
   expect(out.queued, `clicking "${out.label}" did not queue it`).toBe(1);
   expect(out.madeAfter, `the furnace made nothing (${out.state})`).toBeGreaterThan(out.madeBefore);
   expect(errors).toEqual([]);

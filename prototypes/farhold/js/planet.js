@@ -1064,16 +1064,43 @@ export function makeTerrain(world, planet = null, opts = {}) {
    */
   function riverTopAt(hit) {
     const surf = hit.path.surface;
-    // The quad this spot is inside. `waterRibbon` lays one slab per river point, perpendicular to
-    // the line, so the sheet between two points runs from one height to the other — and on a bend
-    // the corner nearest a spot is not the corner the sheet over it came from. Taking the higher of
-    // the two is what makes "is this under the water" agree with "is there water drawn here", to
-    // within the couple of centimetres either answer is worth.
-    //
-    // NOT A WINDOW OF SEVERAL POINTS. Three points is 384 m on a full-sized planet, and a mountain
-    // stream falls ten metres in that — which reported the river ten metres above the road beside
-    // it and dropped the player into it. round16-roads.test.js caught it on the first run.
-    return Math.max(surf[hit.i], surf[Math.min(surf.length - 1, hit.i + 1)]);
+    const a = surf[hit.i], b = surf[Math.min(surf.length - 1, hit.i + 1)];
+    /**
+     * R18 — THE WATER SURFACE WAS A STAIRCASE, AND THE DRAWN ONE IS A RAMP.
+     *
+     * This used to return `Math.max(a, b)`: the higher of the segment's two ends, for the whole
+     * length of the segment. That is constant within a segment and STEPS at every boundary, and on
+     * seed 19 the biggest step between two neighbouring river points is 11.4 metres.
+     *
+     * `waterRibbon` (js/water-plan.js) pushes one vertex per point at `heights[i]` and fills the
+     * quad between two points with two triangles, so what is actually DRAWN between point i and
+     * point i+1 is a linear ramp from `a` to `b`. `nearest` already hands back `t`, the fraction
+     * along that segment, so the ramp is free to evaluate and the two answers now agree everywhere
+     * along a river instead of only at its upstream ends.
+     *
+     * What the staircase looked like in play: swimming down a river, `waterAt().surface` dropped
+     * several metres the instant you crossed a segment boundary, `player.js` found the body above
+     * the new surface, `swimming` went false — and you were suddenly falling through the air over
+     * water you could still see. tests/round3.spec.js's swim-stroke check is what caught it: the
+     * clip went to `jump` mid-river, with 6.9 m of water underneath.
+     *
+     * The old comment defended the max as making "is this under the water" agree with "is there
+     * water drawn here" on a bend, where the nearest corner is not always the corner the sheet over
+     * you came from. That is a real effect, but it is bounded by the difference between neighbouring
+     * segments across a bend and it is CONTINUOUS — which is the trade this is making, because the
+     * max turned that small bend error into an 11 m cliff along the whole length of every river.
+     *
+     * NOT A WINDOW OF SEVERAL POINTS. Three points is 384 m on a full-sized planet, and a mountain
+     * stream falls ten metres in that — which reported the river ten metres above the road beside
+     * it and dropped the player into it. round16-roads.test.js caught it on the first run.
+     */
+    // Every caller passes a hit straight from `makePathIndex.nearest`, which always sets `t`. The
+    // guard is for a hand-built hit: fall back to the old conservative max rather than silently
+    // picking an end of the segment, so a caller that forgets `t` errs towards more water and not
+    // towards dropping somebody through the surface.
+    if (hit.t == null) return Math.max(a, b);
+    const t = hit.t < 0 ? 0 : hit.t > 1 ? 1 : hit.t;
+    return a + (b - a) * t;
   }
 
   /**
@@ -1692,11 +1719,31 @@ export function makeTerrain(world, planet = null, opts = {}) {
     // `<=`: the sheet is allowed to reach the top of the bank exactly, so the test has to as well,
     // or there is a one-metre sliver of drawn water standing over "dry" ground at the very edge
     if (river && river.dist <= river.path.reach) {
-      // the highest water that could be DRAWN here, not the water at the nearest point — see
-      // `riverTopAt`, and round 11's "I walk on the bottom under the blue layer"
+      // the water that is DRAWN here, ramped along the segment — see `riverTopAt`, and round 11's
+      // "I walk on the bottom under the blue layer"
       const surface = riverTopAt(river);
       const ground = heightAt(x, z);
-      if (surface > ground) return { kind: 'river', surface, depth: surface - ground, path: river.path, dist: river.dist };
+      /**
+       * R18 — A HAND'S BREADTH OF SLACK AT THE WATERLINE, AND NOWHERE ELSE.
+       *
+       * `waterRibbon` draws one FLAT slab per river point, both of its edges at that point's own
+       * height; `waterAt` measures a ramp along the nearest SEGMENT. On a straight reach those are
+       * the same number, but on a bend the nearest segment to a spot out near the bank is not the
+       * slab that was drawn over it, and the two land a few centimetres apart. Measured on seed 7:
+       * 0.10 m, twenty-four metres off the centre line.
+       *
+       * Before R18 that gap was papered over by `riverTopAt` answering the HIGHER end of the
+       * segment, which was generous enough to cover any bend — and which is exactly what made the
+       * surface an 11 m staircase along every river. The slack is explicit now, and constant, so it
+       * cannot reappear as a step: a spot within `EDGE` of the sheet counts as water, and the depth
+       * is floored at zero so the shoreline sliver is water you cannot swim in rather than dry land
+       * with the blue layer drawn over it. Nothing can wade at 0 m (`boardDepth` is 0.55), so this
+       * changes what GROWS there and what the sheet agrees with, not how anybody moves.
+       */
+      const EDGE = 0.25;
+      if (surface + EDGE > ground) {
+        return { kind: 'river', surface, depth: Math.max(0, surface - ground), path: river.path, dist: river.dist };
+      }
     }
     // Whether you are IN a lake is the map's own answer for this cell — the blurred field is for
     // shaping the basin, and a one-cell lake blurs away to almost nothing.

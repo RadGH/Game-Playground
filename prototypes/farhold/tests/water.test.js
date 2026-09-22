@@ -217,3 +217,91 @@ test('a one-cell lake is not a lake, and a small one has no corners', () => {
   }
   assert.ok(corners <= 2, 'the pond is still drawn with straight axis-aligned edges');
 });
+
+/**
+ * R18 — THE SURFACE A SWIMMER FEELS IS THE SURFACE THAT IS DRAWN, ALL THE WAY DOWN THE RIVER.
+ *
+ * `riverTopAt` used to answer `max(surface[i], surface[i+1])` — the higher end of the segment, for
+ * the whole segment. That is a STAIRCASE: constant along a segment and stepping at every boundary,
+ * by 11.4 m at the worst pair of points on seed 19. `waterRibbon` above draws a linear ramp between
+ * the same two points, so the water the game measured against and the water you could see were
+ * metres apart in the middle of every segment.
+ *
+ * In play: swimming down a river, the surface dropped several metres the instant you crossed a
+ * boundary, js/player.js found the body above the new surface, `swimming` went false, and you fell
+ * through the air over water that was still drawn under you. round3.spec.js's swim-stroke check
+ * caught it as the clip going to `jump` with 6.9 m of water below.
+ *
+ * Walking the middle of a river is the honest test, because that is what a swimmer does.
+ */
+test('the river surface is continuous along the channel, not a staircase', () => {
+  const river = terrain.riverPaths.find(r => r.points.length > 40);
+  assert.ok(river, 'this world has no river long enough to walk');
+
+  let worstJump = 0, worstAt = null, samples = 0;
+  let prev = null;
+  /**
+   * Half a metre at a time, NOT a fixed number of steps per segment.
+   *
+   * A real river falls, and these points are ~10 m apart on a stream that drops a metre between
+   * two of them — a tenth of a segment is then a tenth of a metre of honest gradient, while a
+   * whole segment is a metre and reads like a cliff whatever the shape in between. Walking a fixed
+   * short distance is what separates "this river is steep" from "this river is a staircase".
+   */
+  const STEP_M = 0.5;
+  for (let i = 4; i < Math.min(river.points.length - 4, 60); i++) {
+    const [ax, az] = river.points[i], [bx, bz] = river.points[i + 1];
+    const legs = Math.max(2, Math.ceil(Math.hypot(bx - ax, bz - az) / STEP_M));
+    for (let s = 0; s < legs; s++) {
+      const u = s / legs;
+      const x = ax + (bx - ax) * u, z = az + (bz - az) * u;
+      const wat = terrain.waterAt(x, z);
+      if (!wat || wat.kind !== 'river') { prev = null; continue; }
+      if (prev) {
+        const stepM = Math.hypot(x - prev.x, z - prev.z);
+        const jump = Math.abs(wat.surface - prev.surface);
+        samples++;
+        if (jump > worstJump) { worstJump = jump; worstAt = { x, z, stepM, from: prev.surface, to: wat.surface }; }
+      }
+      prev = { x, z, surface: wat.surface };
+    }
+  }
+
+  assert.ok(samples > 100, `only ${samples} points of river were sampled`);
+  /**
+   * The bar: half a metre of swimming must not move the surface by a body's own float depth
+   * (0.55 m in js/player.js), because that is the point at which a swimmer stops being in the
+   * water. A real river does fall, so this is not asking for flat — it is asking that the fall is
+   * spread along the segment the way it is drawn, instead of arriving all at once.
+   */
+  assert.ok(
+    worstJump < 0.55,
+    `the water surface jumps ${worstJump.toFixed(2)} m over ${worstAt?.stepM.toFixed(1)} m of river `
+    + `(${worstAt?.from.toFixed(2)} -> ${worstAt?.to.toFixed(2)}) — riverTopAt is a staircase again`,
+  );
+});
+
+/** The measured surface and the drawn vertex heights agree at the points themselves. */
+test('the water the game measures matches the sheet that is drawn, along the segment too', () => {
+  const river = terrain.riverPaths.find(r => r.points.length > 40);
+  assert.ok(river, 'this world has no river long enough');
+
+  let worst = 0, worstAt = null;
+  for (let i = 6; i < Math.min(river.points.length - 6, 50); i++) {
+    const [ax, az] = river.points[i], [bx, bz] = river.points[i + 1];
+    for (const u of [0, 0.25, 0.5, 0.75]) {
+      const x = ax + (bx - ax) * u, z = az + (bz - az) * u;
+      const wat = terrain.waterAt(x, z);
+      if (!wat || wat.kind !== 'river') continue;
+      // what waterRibbon puts on screen here: the ramp between the two vertex heights
+      const drawn = river.surface[i] + (river.surface[i + 1] - river.surface[i]) * u;
+      const off = Math.abs(wat.surface - drawn);
+      if (off > worst) { worst = off; worstAt = { i, u, measured: wat.surface, drawn }; }
+    }
+  }
+  assert.ok(
+    worst < 0.6,
+    `the measured surface is ${worst.toFixed(2)} m from the drawn sheet at point ${worstAt?.i} `
+    + `(${worstAt?.measured.toFixed(2)} vs ${worstAt?.drawn.toFixed(2)})`,
+  );
+});

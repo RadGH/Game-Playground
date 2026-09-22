@@ -2728,3 +2728,117 @@ bridge), `proctown/js/townplan.js` (the square goes on buildable ground), `tools
 (new) and 14 tests in `tests/round17-worldgen.test.js`. Three assertions in `tests/round16-roads.test.js`
 were re-aimed rather than relaxed — each is commented with what changed underneath it and why the
 thing the test exists to catch is unchanged.
+
+## Round 18 — the five red specs, and the staircase under the river
+
+Round 17 closed with five red Playwright specs and a standing note: **do not publish to stable until
+those are green or re-aimed.** Four of them were tests that had gone stale under features round 17
+had deliberately added. The fifth was a real bug, and it was the largest thing in the round.
+
+The pattern worth keeping from this one: **three of the four "stale" specs failed with a message
+that pointed at the wrong component.** "The furnace made nothing (Out of fuel)" was a storage rule;
+"Cannot read properties of undefined (reading 'x')" was the onboarding line; "the crate would not
+take the coal" was the crate working correctly. In each case the spec has been given an assertion
+that fails EARLIER, at the thing that actually moved, so the next person does not start by reading
+the furnace.
+
+### Item 1 — the water surface was a staircase, and the drawn one is a ramp
+
+`round3.spec.js:106` read the swim clip as `jump` in the middle of a river. Round 17 had guessed at
+a one-frame artifact of the spec's own force-clear of `control.boating`. It was not.
+
+`js/planet.js` `riverTopAt` answered `Math.max(surface[i], surface[i + 1])` — the higher END of a
+segment, for the WHOLE length of that segment. That is constant along a segment and it STEPS at
+every boundary. `waterRibbon` in `js/water-plan.js` pushes one vertex per river point at that
+point's own height and fills the quad between two points with two triangles, so what is actually
+**drawn** between point i and point i+1 is a linear ramp.
+
+So the water the game measured against and the water you could see were two different surfaces:
+
+| | measured | drawn |
+|---|---|---|
+| along a segment | flat, at the upstream height | a ramp between the two heights |
+| at a boundary | a step | continuous |
+
+Measured: a **12.21 m** step on seed 7, **11.4 m** between the worst pair of points on seed 19, and
+the measured surface **10.01 m** away from the drawn sheet at one point.
+
+In play that is: swim down a river, cross a segment boundary, and the surface drops several metres
+at once. `js/player.js` computes `swimming = depth > swimDepth && y < surface + 0.2`, finds the body
+above the new surface, and `swimming` goes false — so you are falling through the air over water
+that is still drawn underneath you. The spec caught it as the clip going to `jump` with 6.9 m of
+water below.
+
+`makePathIndex.nearest` has always returned `t`, the fraction along the segment, so the ramp was
+free to evaluate. `riverTopAt` interpolates now and the two answers agree everywhere.
+
+**The old max was also papering over a second thing, and that is now explicit.** `waterRibbon` draws
+one FLAT slab per point — both its edges at that point's height — while `waterAt` measures a ramp
+along the nearest SEGMENT. On a bend, the nearest segment to a spot out near the bank is not the
+slab that was drawn over it, and the two land about 0.10 m apart (measured on seed 7, 24 m off the
+centre line). The max was generous enough to cover that, which is precisely what made it an 11 m
+staircase. `waterAt` now carries a constant **0.25 m `EDGE`** at the waterline with the depth floored
+at zero: a spot within a hand's breadth of the sheet is water you cannot swim in, rather than dry
+land with a blue layer drawn over it. Nothing wades at 0 m (`boardDepth` is 0.55), so it changes what
+GROWS in the shoreline sliver and what the sheet agrees with, not how anybody moves — and being
+constant, it cannot come back as a step.
+
+Two tests in `tests/water.test.js`, both of which fail hard against the old code (12.21 m and
+10.01 m). The first walks the middle of a river **half a metre at a time** rather than a fixed number
+of steps per segment: these points are ~10 m apart on a stream that drops a metre between two of
+them, so a whole segment is a metre of honest gradient and reads like a cliff whatever the shape in
+between. Walking a fixed short distance is what separates "this river is steep" from "this river is
+a staircase".
+
+### Item 2 — a quarterstaff, carried forward from round 17
+
+Round 17 found this and recorded it, on purpose, as **not fixed**: "a quarterstaff is re-attuned by
+`rpg.js`'s `attuneWeapon` — `CASTERS.has(sub)` fires because `sub` is the subtype, which items.json
+files as `staff`."
+
+The shape of it is worth writing down because it is a fix defeating itself. `attuneWeapon` clears
+`castElement` for a quarterstaff; the very next branch asks `CASTERS.has(sub) && !item.castElement`.
+`sub` is `staff`, `staff` is in `CASTERS`, and **the clear had just made the second half true** — so
+the de-attune was the thing that re-armed the attune. Calling it on the raw base returned
+`Arc Quarterstaff`, arcane, with a `cast_arcane` affix on the card and a glowing element topper out
+of `heldLookFor`.
+
+It also had to be read independently of `weaponCategory`, because the de-attune only fires while
+that still says `magic`: on a second pass over the same item — a reload, a re-roll at the bench — the
+block was skipped and the caster branch went through unopposed.
+
+`spellShapeOf` was already null for a quarterstaff, because `isStaff()` excludes it BY NAME, so
+round 17's test passed throughout and none of this appeared in it. The new test asks about the
+attunement itself, plus a companion test that wands, scepters, orbs and tomes are still attuned, so
+the guard cannot be widened into turning the feature off. `items.json` is shared with Emberveil and
+has its own test over it, so the fix is on the ITEM in `attuneWeapon`, exactly like `ranged`,
+`offHandOk` and `markHands`.
+
+### Items 3–5 — the specs that had gone stale
+
+* **`base-roundtrip.spec.js:45`** expected a crate to hold 200 coal and got 120. Round 17 made the
+  Storage Box the no-metal FIRST store (6 slots = 120) and added the Storage Chest above it
+  (20 slots = 400). `put` capping at 120 is the store system working correctly. The spec builds a
+  chest.
+* **`mining.spec.js:268`** — "the furnace made nothing (Out of fuel)". Neither number in it was
+  arbitrary and neither was a bug: `roomFor` caps ONE raw material at 25% of a store and ALL raw
+  materials together at 50% (`data/power.json` `storeShare`, there to stop three drills filling
+  every crate with ore and jamming the base). Seven of the eight ids the spec fed are raw, so the
+  iron and the copper ate the entire raw budget of a 120-unit box and the COAL got exactly zero
+  room. Now a chest and 24 of each, inside the 200 the raw share allows — and a `stocked` assertion
+  that blames the pool rather than the furnace when a capacity rule next moves.
+* **`town.spec.js:124`** — `Cannot read properties of undefined (reading 'x')`. Not a quest bug:
+  round 17 gave `js/quests.js` a `firstJob` hook and `js/onboarding.js` registers on it, so the
+  first job ANY giver hands over is now the five-step tutorial. Its kind is `onboard`, which is none
+  of the three the spec knew how to finish, so it fell to the `else` branch and read a `place` an
+  onboarding quest has never had. That the tutorial comes first is the feature, so the spec asserts
+  it, files it finished — which is what `offerFor`'s own `finishedAlready` gate reads — and asks
+  again for the ordinary work it is actually about.
+* **`round4.spec.js:100`** ("the world is busy") was already green. It was flaky, not broken.
+
+### Files
+
+`js/planet.js` (`riverTopAt` interpolates, `waterAt`'s `EDGE`), `js/rpg.js` (`isQuarterstaff`),
+`tests/water.test.js` (+2), `tests/round17-combat.test.js` (+2), and re-aims in
+`tests/base-roundtrip.spec.js`, `tests/mining.spec.js`, `tests/town.spec.js`, `tests/round3.spec.js`
+— each commented with what moved underneath it.

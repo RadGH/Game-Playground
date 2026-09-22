@@ -144,22 +144,51 @@ test('deep water makes you swim, and you cannot ride a horse into it', async ({ 
   expect(aboard.boating, 'the starting raft did not go in the water').toBe(true);
   expect(aboard.anim, 'on a raft the body is still playing a swimming clip').toBe('boat');
 
-  // …and with no hull under you, the stroke follows the keys, read through the real input path
-  await page.evaluate(() => { window.farhold.control.boating = null; });
+  /**
+   * …and with no hull under you, the stroke follows the keys, read through the real input path.
+   *
+   * R18 — THIS ASKED FOR A STROKE FROM A BODY THAT WAS NO LONGER IN DEEP WATER.
+   *
+   * It read `jump`, and `jump` is what main.js plays for "not swimming and not grounded", so the
+   * question was why `control.swimming` had gone false. Not the force-clear: `boating` is only
+   * set on the frame you ENTER wading water (js/player.js), so clearing it mid-river genuinely
+   * leaves you hull-less and it does not re-board — the old comment here was wrong about that.
+   *
+   * What actually happened is that the body SWAM OFF. Three keys held for 260 ms each, at boat
+   * and swim speed, carried it several metres out of a channel that is tens of metres wide, onto
+   * the carved rim where the water is still deep enough to wade (`boardDepth` 0.55) but not deep
+   * enough to swim. Round 17's river-carve rim moved that edge slightly and the drift started
+   * landing on the wrong side of it.
+   *
+   * So each stroke is now read from the middle of the channel rather than from wherever the last
+   * one finished, and `swimming` is asserted alongside the clip — if this fails again it will say
+   * whether the body was swimming, instead of only that the clip was wrong.
+   */
   const strokes = {};
   for (const [name, key] of [['forward', 'KeyW'], ['back', 'KeyS'], ['side', 'KeyD']]) {
+    await page.evaluate(`(() => {
+      const f = window.farhold;
+      ${GOTO_RIVER}
+      f.teleport(rx, rz);
+    })()`);
+    await page.waitForTimeout(320);
+    await page.evaluate(() => { window.farhold.control.boating = null; });
     await page.keyboard.down(key);
-    await page.waitForTimeout(260);
-    strokes[name] = await page.evaluate(() => {
-      window.farhold.control.boating = null;      // it re-boards the moment it can
-      return window.farhold.actor.anim;
-    });
+    await page.waitForTimeout(220);
+    strokes[name] = await page.evaluate(() => ({
+      anim: window.farhold.actor.anim,
+      swimming: window.farhold.control.swimming,
+      depth: window.farhold.control.waterDepth,
+    }));
     await page.keyboard.up(key);
     await page.waitForTimeout(120);
   }
-  expect(strokes.forward).toBe('swim');
-  expect(strokes.back).toBe('swimBack');
-  expect(strokes.side).toBe('swimSide');
+  for (const [name, got] of Object.entries(strokes)) {
+    expect(got.swimming, `the ${name} stroke was read ${got.depth?.toFixed?.(2)} m deep, not swimming`).toBe(true);
+  }
+  expect(strokes.forward.anim).toBe('swim');
+  expect(strokes.back.anim).toBe('swimBack');
+  expect(strokes.side.anim).toBe('swimSide');
 });
 
 // ---------------------------------------------------------------- roads

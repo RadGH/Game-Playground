@@ -121,12 +121,29 @@ export function attuneWeapon(item) {
    * Its damage becomes physical, which also takes away the `spellPower` multiplier it should never
    * have had.
    */
-  if ((item.baseKey === 'quarterstaff' || sub === 'quarterstaff') && item.weaponCategory === 'magic') {
+  /**
+   * R18 — …AND ITS SUBTYPE SAYS `staff`, SO THE NEXT BLOCK PUT IT ALL STRAIGHT BACK.
+   *
+   * Round 17 wrote the de-attune below and the round's own notes recorded it as NOT fixed. This is
+   * why: `sub` is `item.subtype`, items.json files a quarterstaff's subtype as `staff`, and `staff`
+   * is in `CASTERS`. So the de-attune set `castElement = null`, and two lines later
+   * `CASTERS.has(sub) && !item.castElement` was TRUE — the clear was the very thing that re-armed
+   * it. Proved by calling `attuneWeapon` on the raw base: out came "Arc Quarterstaff", arcane, with
+   * a `cast_arcane` affix on it and an element topper from `heldLookFor`.
+   *
+   * The flag also has to be read INDEPENDENTLY of `weaponCategory`, because the de-attune only
+   * fires while that still says `magic`: called a second time on the same item — a reload, a
+   * re-roll at the bench — the block was skipped and the caster branch attuned it again anyway.
+   */
+  const isQuarterstaff = item.baseKey === 'quarterstaff'
+    || sub === 'quarterstaff'
+    || item.baseItemId === 'quarterstaff';
+  if (isQuarterstaff && item.weaponCategory === 'magic') {
     item.weaponCategory = 'light';
     item.castElement = null;
     item.castStatus = null;
   }
-  if (CASTERS.has(sub) && !item.castElement) {
+  if (!isQuarterstaff && CASTERS.has(sub) && !item.castElement) {
     // a brand put on at the bench wins over the base's own attunement
     const forced = item.brand;
     const pick = forced

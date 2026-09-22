@@ -128,8 +128,31 @@ test('work is offered, tracked, and paid out by the person who gave it', async (
     const f = window.farhold;
     const giver = [...f.folk.live.values()].flat().find(p => p.givesQuests);
     if (!giver) return { skipped: true };
-    const quest = f.folk.questFrom(giver, { level: f.player.level, enemies: [], nodes: f.world.nodes });
+    const ask = () => f.folk.questFrom(giver, { level: f.player.level, enemies: [], nodes: f.world.nodes });
+
+    /**
+     * R18 — STEP PAST THE ONBOARDING LINE FIRST.
+     *
+     * This spec crashed on `quest.place.x` with "Cannot read properties of undefined". It was not
+     * a quest bug: round 17 gave js/quests.js a `firstJob` hook, and js/onboarding.js registers
+     * itself on it, so the FIRST job any giver hands over is now the five-step tutorial. Its kind
+     * is `onboard`, which is none of the three the loop below knows how to finish, so it fell to
+     * the `else` branch and read a `place` an onboarding quest has never had.
+     *
+     * That the tutorial comes first is the feature, so it is asserted rather than worked around;
+     * then it is filed as finished (which is exactly what `offerFor`'s own `finishedAlready` gate
+     * reads) and the giver is asked again for the ordinary work this spec is actually about.
+     */
+    let quest = ask();
+    let sawOnboarding = false;
+    if (quest && quest.kind === 'onboard') {
+      sawOnboarding = true;
+      f.questLog.finished.push(quest.id);
+      giver.offered = null;
+      quest = ask();
+    }
     if (!quest) return { skipped: true };
+    if (quest.kind === 'onboard') return { stillOnboarding: true };
     f.questLog.add(quest);
     const pinsBefore = f.map.pins.length;
 
@@ -147,7 +170,7 @@ test('work is offered, tracked, and paid out by the person who gave it', async (
     const reward = ready.length ? f.questLog.turnIn(ready[0]) : null;
     if (reward) { f.player.gold += reward.gold; f.rpg.gainXp(f.player, reward.xp); }
     return {
-      skipped: false, kind: quest.kind, title: quest.title,
+      skipped: false, kind: quest.kind, title: quest.title, sawOnboarding,
       wasReady: ready.length, reward,
       gained: { gold: f.player.gold - gold, xp: f.player.xp - xp },
       stillActive: f.questLog.active.length,
@@ -155,6 +178,8 @@ test('work is offered, tracked, and paid out by the person who gave it', async (
     };
   });
   if (job.skipped) return;
+  expect(job.stillOnboarding, 'the giver offered the tutorial twice — the finished gate does nothing').toBeFalsy();
+  expect(['hunt', 'visit', 'gather', 'clear']).toContain(job.kind);
   expect(job.title.length).toBeGreaterThan(4);
   expect(job.wasReady).toBe(1);
   expect(job.gained.gold).toBe(job.reward.gold);

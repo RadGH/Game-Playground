@@ -99,7 +99,14 @@ test('a base is built, saved, reloaded, and reachable from another star system',
      * the generator finds the coal because it is on the same pool, and the pad lights because it is
      * inside the generator's ten metres. Every one of those joins was missing.
      */
-    f.build.select('storage_crate');
+    /**
+     * R18 — this was a `storage_crate`, and the assertion below wanted 200 coal in it.
+     * Round 17 made the Storage Box the no-metal FIRST store (6 slots = 120) and added the
+     * Storage Chest above it (20 slots = 400), so `put` correctly capped at 120 and the spec
+     * read that as a failure. The capping is the store system working; the spec was asking a
+     * six-slot box to hold twenty slots' worth. It builds the chest now.
+     */
+    f.build.select('storage_chest');
     f.build.aim(f.control.x + 16, f.control.z + 10);
     const crate = f.build.placeHere();
     f.build.select('burner_generator');
@@ -178,7 +185,7 @@ test('a save taken beside a finished base reloads with the base still on it', as
     f.build.research?.unlockAll?.();   // R17 — the tech tree gates this piece; see the note above.
     f.build.select('waypoint_pad'); f.build.aim(f.control.x + 10, f.control.z + 10);
     const res = f.build.placeHere();
-    f.build.select('storage_crate'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();
+    f.build.select('storage_chest'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();
     f.build.select('burner_generator'); f.build.aim(f.control.x + 20, f.control.z + 10); f.build.placeHere();
     f.build.setMode(false);
     f.stores.put(f.stores.poolAt(f.control.x + 16, f.control.z + 10), 'coal', 200);
@@ -242,7 +249,7 @@ test('a base is one button away from another star system', async ({ page }) => {
     f.build.research?.unlockAll?.();   // R17 — the tech tree gates this piece; see the note above.
     f.build.select('waypoint_pad'); f.build.aim(f.control.x + 10, f.control.z + 10);
     const pad = f.build.placeHere();
-    f.build.select('storage_crate'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();
+    f.build.select('storage_chest'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();
     f.build.select('burner_generator'); f.build.aim(f.control.x + 20, f.control.z + 10); f.build.placeHere();
     f.build.setMode(false);
     f.stores.put(f.stores.poolAt(f.control.x + 16, f.control.z + 10), 'coal', 400);

@@ -295,19 +295,33 @@ function drawToolPanel(box, { entry, def, tools, redraw }) {
     return;
   }
   for (const r of rows) {
+    /**
+     * R19 — A DEVICE YOU HAVE OUTGROWN IS NOT AN OPTION.
+     *
+     * `tools.json` has said which device replaces which since R17 and `buildable()` now reports it.
+     * The panel says so rather than dropping the row: a Prospector's Scanner that has silently
+     * disappeared once you build the Deep Scanner looks like a bug, and the line is also the only
+     * place the game ever explains that the tiers are a ladder and not a set.
+     */
     const row = el('div', { class: 'build-yard-row' });
     // R17 — `mat()`, so a recipe never quotes a price with twelve decimals in it
     const cost = Object.entries(r.cost || {}).map(([m, n]) => `${mat(n)} ${(r.names?.[m] || m).toLowerCase()}`).join(', ');
     const b = el('button', {
       class: 'small',
-      text: r.owned && r.kind === 'device' ? `${r.name} ✓` : `Build the ${r.name}`,
+      text: r.supersededBy ? r.name
+        : r.owned && r.kind === 'device' ? `${r.name} ✓`
+        : `Build the ${r.name}`,
       onclick: () => { tools.build(r.kind, r.id); redraw(); },
     });
-    b.disabled = !r.canAfford || (r.owned && r.kind === 'device');
-    const note = r.owned && r.kind === 'device' ? r.desc
+    b.disabled = !!r.supersededBy || !r.canAfford || (r.owned && r.kind === 'device');
+    const note = r.supersededBy ? `Superseded by the ${r.supersededName}, which does everything this does.`
+      : r.owned && r.kind === 'device' ? r.desc
       : r.canAfford ? `${cost} — ${r.desc}`
       : `Short: ${(r.short || []).map(s => `${Math.ceil(s.n - s.got)} ${(r.names?.[s.m] || s.m).toLowerCase()}`).join(', ')}`;
-    row.append(b, el('span', { class: r.canAfford || r.owned ? 'small' : 'small bad', text: note }));
+    row.append(b, el('span', {
+      class: r.supersededBy ? 'small muted' : (r.canAfford || r.owned) ? 'small' : 'small bad',
+      text: note,
+    }));
     box.append(row);
   }
 }

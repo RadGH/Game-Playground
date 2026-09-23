@@ -105,6 +105,23 @@ export const ENGINE_UNIT = {
   cond_mountSlope: 'frac', cond_mountCalm: 'frac',
   cond_quiverDamage: 'flat', cond_quiverSplit: 'flat', cond_quiverHoming: 'flat',
   cond_quiverBurst: 'flat', cond_quiverElement: 'flag',
+  // R19 — the tool slot. Speed and yield are SHARES (1 + v); reach is metres, scan is a radius.
+  cond_toolSpeed: 'frac', cond_toolYield: 'frac',
+  cond_toolReach: 'flat', cond_toolScan: 'flat',
+  /**
+   * R19 — MINTED AT THE BENCH, NOT IN items.json, WHICH IS HOW IT DODGED THE AUDIT.
+   *
+   * `js/craft.js` `kind: 'brand'` pushes an affix with `stat: 'brand'` onto the item, and no unit
+   * table, effect registry or printer had ever heard of it — tests/affixes.test.js audits every
+   * affix DEFINITION in items.json, and this one has no definition anywhere: it is built at the
+   * moment you brand a weapon. So the row sat on the card as a stat nothing could resolve.
+   *
+   * A flag is what it truly is: the number on it is always 1 and carries nothing. The element is
+   * done by `item.brand`, which `elementOf()` in js/rpg.js reads (`item.brand || item.castElement`)
+   * and the seven `cond_brand*` intrinsics key off. The affix row exists so the card can SAY the
+   * weapon is branded; declaring it here is what stops it being a number with no unit.
+   */
+  brand: 'flag',
 };
 
 /**

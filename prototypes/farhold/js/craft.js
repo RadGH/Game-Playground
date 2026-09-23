@@ -101,11 +101,28 @@ const FORGE_POOLS = {
  * them this is exactly the bench it always was, paying out of the bag in your pockets.
  */
 export function createCrafting({ data, rpg, materials = new Materials(), rng = makeRng(7), stores = null, bench = null, resources = null }) {
+  /**
+   * R19 — `stores` MAY BE A FUNCTION, AND FROM js/main.js IT IS.
+   *
+   * The store pool half of this file was written in round 14 and never once ran, because main.js
+   * built the bench at line 635 and the store network at line 2306 — so it called
+   * `createCrafting({ data, rpg, materials, rng })` with none of `stores`, `resources` or `bench`,
+   * and `poolHere()` returned null forever. Crafting from a nearby crate was dead, and `M` lost
+   * `resources.materials`, which is why a refined material showed up in the bench and the
+   * inventory as a raw id ("iron_ingot" rather than "Iron Ingot").
+   *
+   * Same answer js/command.js reached for the same reason: never hold the reference, ask for it.
+   * The network is also rebuilt when you land on a new world, so holding the first one would have
+   * been a bug even with the ordering right.
+   */
+  const deref = v => (typeof v === 'function' ? v() : v);
+  const theStores = () => deref(stores);
+
   // the same maker the shops use, so a forged quiver and a bought one are the same kind of thing
   const gearShop = createGearShop({ rpg });
   // the bench knows the names of both halves of the economy: the three recycled materials, and
   // everything js/refine.js makes
-  const M = { ...(resources?.materials || {}), ...(data.materials || {}) };
+  const M = { ...(deref(resources)?.materials || {}), ...(data.materials || {}) };
   const recipes = data.recipes || [];
   const bandCost = data.bandCost || [1];
 
@@ -115,13 +132,16 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
   // reach — and then whatever store pool the bench is standing in. Two sources, one interface, so
   // nothing downstream (quote, apply, the buttons) had to learn about either of them.
   let benchAt = bench;
-  const poolHere = () => (stores && benchAt ? stores.poolAt(benchAt.x ?? 0, benchAt.z ?? 0) : null);
+  const poolHere = () => {
+    const net = theStores();
+    return net && benchAt ? net.poolAt(benchAt.x ?? 0, benchAt.z ?? 0) : null;
+  };
 
   const supply = {
     /** How much of one thing the bench can reach, bag and pool together. */
     count(id) {
       const pool = poolHere();
-      return materials.count(id) + (pool ? stores.count(pool, id) : 0);
+      return materials.count(id) + (pool ? theStores().count(pool, id) : 0);
     },
     /** What is short, for the "needs 3 more Resonant Dust" line on the button. */
     missing(cost) {
@@ -140,7 +160,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
         const fromBag = Math.min(n, materials.count(id));
         if (fromBag > 0) materials.spend({ [id]: fromBag });
         const left = n - fromBag;
-        if (left > 0 && pool) stores.take(pool, id, left);
+        if (left > 0 && pool) theStores().take(pool, id, left);
       }
       return true;
     },
@@ -610,7 +630,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       return [...ids]
         .map(id => {
           const bag = materials.count(id);
-          const stored = pool ? stores.count(pool, id) : 0;
+          const stored = pool ? theStores().count(pool, id) : 0;
           return { id, n: bag + stored, bag, stored, ...(M[id] || { name: id, tier: 1, color: '#9a9285' }) };
         })
         .filter(r => r.n > 0)

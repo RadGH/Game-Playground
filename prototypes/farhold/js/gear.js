@@ -270,6 +270,24 @@ export const SLOT_AFFIXES = {
     { id: 'trample', name: 'Trampling', stat: 'cond_mountTrample', min: 4, max: 14 },
     { id: 'calm', name: 'Calm', stat: 'cond_mountCalm', min: 0.15, max: 0.4 },
   ],
+  /**
+   * R19 — THE TOOL SLOT, because `data/tools.json` had already asked for it and nobody answered.
+   *
+   * Its `rarity` table has an `affixes` column — 0 / 1 / 2 / 3 up the ladder — which `makeTool`
+   * never read: a Masterwork pickaxe was a normal pickaxe with four better base numbers and an
+   * empty affix list, so the whole top of the tool ladder was a rarity word and nothing else.
+   *
+   * They live here rather than in tools.json because this is the table `SLOT_AFFIX_LIST` flattens
+   * into the loot pool's `extended` set, which is what gets them units, a registry entry, a card
+   * line and the bench — all of which a pool declared in tools.json would have had to grow again.
+   * Same decision light and mount made, for the same reason.
+   */
+  tool: [
+    { id: 'keen_edge', name: 'Keen', stat: 'cond_toolSpeed', min: 0.08, max: 0.22 },
+    { id: 'thrifty', name: 'Thrifty', stat: 'cond_toolYield', min: 0.06, max: 0.18 },
+    { id: 'long_handled', name: 'Long-handled', stat: 'cond_toolReach', min: 0.4, max: 1.2 },
+    { id: 'attuned_head', name: 'Attuned', stat: 'cond_toolScan', min: 6, max: 18 },
+  ],
 };
 
 /** Every slot-only affix, flat, for the loot pool to append. */
@@ -603,10 +621,18 @@ export function createGearShop({ rpg } = {}) {
     if (rarity !== 'normal' && rpg) {
       const pool = SLOT_AFFIXES[base.slot] || [];
       const want = rarity === 'legendary' ? 3 : rarity === 'rare' ? 2 : 1;
+      /**
+       * R19 — DRAW FROM WHAT IS LEFT. The old loop picked at random from the whole pool and
+       * `continue`d on a duplicate, which does not retry: it spends the iteration. A legendary
+       * mount wanting 3 of a 4-affix pool got 2 whenever it drew the same one twice, which is most
+       * of the time, and got 1 sometimes — so the top rarity of every mount and lantern in the
+       * game was quietly short-changed, by an amount that depended on the seed. Found by the same
+       * bug in js/tools.js, which passed on its own and failed inside the full suite.
+       */
+      const left = [...pool];
       const taken = new Set();
-      for (let i = 0; i < want && pool.length; i++) {
-        const def = pool[Math.floor(rng() * pool.length)];
-        if (taken.has(def.id)) continue;
+      for (let i = 0; i < want && left.length; i++) {
+        const def = left.splice(Math.floor(rng() * left.length), 1)[0];
         taken.add(def.id);
         const ilvl = Math.max(1, level);
         item.affixes.push({ ...def, value: rpg.rollSlotAffix ? rpg.rollSlotAffix(def, ilvl, rng) : def.min, ilvl });

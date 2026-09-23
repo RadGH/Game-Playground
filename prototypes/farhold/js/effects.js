@@ -386,6 +386,31 @@ def('affix:cond_mountBase',
 def('affix:cond_mountWind', v => `Gallops for ${n1(v)} seconds before it has to drop back to a walk`, {
   derive: (v, d) => { d.mountStamina = Math.max(d.mountStamina || 0, v); },
 });
+/**
+ * R19 — THE TOOL SLOT'S FOUR AFFIXES.
+ *
+ * `data/tools.json` rarity.*.affixes asked for 0/1/2/3 of these up the ladder and `makeTool` never
+ * rolled any, so a Masterwork tool was a name. Each one is read in js/tools.js, by the function
+ * named in its comment — nothing here is a number that only prints.
+ */
+// read by toolSpeed(): a share off the work bar's duration
+def('affix:cond_toolSpeed', v => `Works rock and timber ${pct(v)} faster`, {
+  // `gatherSpeed` is the hook toolSpeed() has read since R16, whose comment said it existed "so a
+  // 'you work faster' affix has somewhere to land instead of being invented later". This is it.
+  derive: (v, d) => { d.gatherSpeed = (d.gatherSpeed || 0) + v; },
+});
+// read by toolYield(): a share on top of what a swing gives you
+def('affix:cond_toolYield', v => `Brings up ${pct(v)} more from every seam and tree`, {
+  derive: (v, d) => { d.gatherYield = (d.gatherYield || 0) + v; },
+});
+// read by toolReach(): metres, so you can work a seam from further back
+def('affix:cond_toolReach', v => `Reaches ${n1(v)} metres further to work something`, {
+  derive: (v, d) => { d.toolReach = (d.toolReach || 0) + v; },
+});
+// read by scanRadius(): a bigger sweep, same as the scanner's own scanBonus
+def('affix:cond_toolScan', v => `Sweeps ${n1(v)} more metres of ground for buried things`, {
+  derive: (v, d) => { d.toolScan = (d.toolScan || 0) + v; },
+});
 def('affix:cond_lightRange', v => `Lights ${n1(v)} more metres of ground around you`, {
   derive: (v, d) => { d.lightRange = (d.lightRange || 0) + v; },
 });

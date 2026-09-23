@@ -632,7 +632,34 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // the materials bag: separate from the item bag, and it never fills
   const materials = Materials.from(save?.materials || {});
-  const craft = createCrafting({ data: craftData, rpg, materials, rng: rpg.rng });
+  /**
+   * R19 — THE BENCH GETS THE THREE THINGS IT WAS WRITTEN TO TAKE.
+   *
+   * `createCrafting` has taken `stores`, `resources` and `bench` since round 14 and this call
+   * passed none of them, which killed two features outright and nobody noticed either:
+   *
+   *   - §3.11 craft-from-storage. `poolHere()` was null forever, so the bench only ever paid out
+   *     of the bag in your pockets. You could stand on a crate holding 400 iron ingots and the
+   *     anvil would tell you that you needed iron.
+   *   - the names. `M` is built from `resources.materials` plus the recycling materials, so without
+   *     it every refined material printed as its raw id — "iron_ingot", "cut_stone" — on the bench
+   *     AND in the inventory's material strip, which reads as an unfinished game.
+   *
+   * `stores` goes in as a thunk because the store network is built ~1600 lines below this and is
+   * rebuilt every time you land on a new world; craft.js derefs it on each use.
+   */
+  /**
+   * The holder, not a closure over `stores` itself: `const stores` is declared ~1600 lines below,
+   * and a thunk that read it would throw a ReferenceError for anything that crafted before then —
+   * a temporal dead zone, which `node --check` cannot see and which this file has now produced
+   * five times. A field goes where its FIRST READER is, and the first reader is this line.
+   */
+  let storeNet = null;
+  const craft = createCrafting({
+    data: craftData, rpg, materials, rng: rpg.rng,
+    stores: () => storeNet,
+    resources: resourceData,
+  });
 
   if (!save) {
     // attuned like every other weapon, or a level-1 character's first sword has no facts on its
@@ -2304,6 +2331,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // `materials` is resources.json's `materials` BLOCK, not the whole file — see the note at the
   // top of createStoreNetwork for what handing it the file silently switched off (R18).
   const stores = createStoreNetwork({ power: powerData || {}, materials: resourceData?.materials || {} });
+  // …and the bench above can reach it from here on (R19: it never could before)
+  storeNet = stores;
   const grid = createGrid({ power: powerData || {}, stores, log: (t, c) => hud.log(t, c) });
   /**
    * The pools and the grid come back BEFORE build.load runs.
@@ -5059,7 +5088,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return;
     }
     const rarity = rpg.rarityFor(player.level, rpg.rng, player.derived?.magicFind || 0);
-    const item = makeTool(row.base, rarity, toolData, { level: player.level });
+    // R19 — `rpg` and the run's rng so the rarity table's `affixes` column rolls real values
+    const item = makeTool(row.base, rarity, toolData, { level: player.level, rpg, rng: rpg.rng });
     if (!item) return;
     const old = rpg.equip(player, item, { force: true });
     if (old) hud.log(`${old.name} goes into the bag.`, '');
@@ -8559,6 +8589,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       wind: blended.wind ?? 0.5,
     });
     works.tick(dt);
+    /**
+     * R19 — WHERE THE BENCH IS STANDING, which is wherever you are.
+     *
+     * `craft.setBench` is the third of the three joins this call never had, and the reason
+     * §3.11's craft-from-storage stayed dead even once `stores` was passed: `poolHere()` needs a
+     * POINT to ask `stores.poolAt` about, and `benchAt` started null and nothing ever moved it.
+     * Your own feet are the honest answer — you are standing at the anvil when you open the tab,
+     * and the pool's own reach is what decides whether a crate counts. Once every twenty frames
+     * because `poolAt` walks the network and the answer cannot change faster than you can walk.
+     */
+    if (state.frames % 20 === 0) craft.setBench({ x: control.x, z: control.z });
     // R14: the carts on the road between your outposts and your base — js/logistics.js
     for (const got of logistics.tick(dt).arrived) {
       hud.log(`${got.n} ${got.name.toLowerCase()} arrived at ${got.to}.`, 'good');

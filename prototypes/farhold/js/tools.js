@@ -37,6 +37,8 @@ import { feel } from './combat-feel.js';
 import { harvestInfo, propKindFromJobId } from './harvestinfo.js';
 // R17 — the SAME alias table the build catalogue was joined to in round 13. See `priceRow` below.
 import { realMaterial } from './buildplan.js';
+// R19 — the tool slot's affix pool lives beside light's and mount's; see `makeTool`.
+import { SLOT_AFFIXES } from './gear.js';
 
 /** The ring the mouse wheel turns. Order matters — it is the order you scroll through. */
 export const HELD_MODES = ['weapon', 'tool', 'scanner', 'rod'];
@@ -59,10 +61,10 @@ export const HELD_LABELS = {
  * would mean a sword shop stocking pickaxes in a game that cannot use them. This is the same
  * decision js/gear.js made for quivers and mounts, for the same reason.
  */
-export function makeTool(base, rarity = 'normal', data = null, { level = 1 } = {}) {
+export function makeTool(base, rarity = 'normal', data = null, { level = 1, rpg = null, rng = Math.random } = {}) {
   if (!base) return null;
   const r = data?.rarity?.[rarity] || data?.rarity?.normal || { speed: 1, yield: 0, reach: 0, scan: 0 };
-  return {
+  const item = {
     id: `tool_${base.id}_${rarity}_${Math.floor(Math.random() * 1e6).toString(36)}`,
     type: 'tool', slot: 'tool', subtype: 'tool',
     baseKey: base.id, toolKey: base.toolKey,
@@ -72,7 +74,44 @@ export function makeTool(base, rarity = 'normal', data = null, { level = 1 } = {
     speed: r.speed ?? 1, bonusYield: r.yield ?? 0, reachBonus: r.reach ?? 0, scanBonus: r.scan ?? 0,
     desc: base.desc || '',
     icon: 'tool',
+    affixes: [],
   };
+
+  /**
+   * R19 — AND THE AFFIXES THE RARITY TABLE HAS ASKED FOR SINCE R16.
+   *
+   * `data/tools.json` rarity.*.affixes is 0 / 1 / 2 / 3 up the ladder and this function read the
+   * other four columns and not that one, so a Masterwork tool was four better base numbers and an
+   * empty affix list — the top of the tool ladder was a word in front of the name. The pool is
+   * `SLOT_AFFIXES.tool` in js/gear.js, beside light and mount, so a tool affix gets its unit, its
+   * card line and the bench from the same path theirs do.
+   *
+   * `rpg` is optional: without it (node tests, a fixture) the affix rolls at its floor rather than
+   * not rolling at all, because a tool with no affixes is the bug this closes.
+   */
+  const want = Math.max(0, Math.round(r.affixes ?? 0));
+  if (want > 0) {
+    /**
+     * DRAW FROM WHAT IS LEFT, rather than rolling the whole pool and skipping a repeat.
+     *
+     * The obvious loop — pick at random, `continue` on a duplicate — silently rolls FEWER than
+     * asked, and how many fewer depends on the rng. It passed on its own and failed inside the
+     * full suite, which runs a different random sequence: a legendary wanting 3 of a 4-entry pool
+     * got 2 whenever it drew the same affix twice. js/gear.js has the same loop for light and
+     * mount and the same bug; both are fixed the same way.
+     */
+    const left = [...(SLOT_AFFIXES.tool || [])];
+    const ilvl = Math.max(1, item.level);
+    for (let i = 0; i < want && left.length; i++) {
+      const def = left.splice(Math.floor(rng() * left.length), 1)[0];
+      item.affixes.push({
+        ...def, ilvl,
+        value: rpg?.rollSlotAffix ? rpg.rollSlotAffix(def, ilvl, rng) : def.min,
+      });
+    }
+  }
+
+  return item;
 }
 
 /** A word in front of the name, so a rare tool reads as one at a glance in the bag. */
@@ -119,7 +158,8 @@ export function toolYield(player) {
 
 /** How far you may stand from a seam and still work it. */
 export function toolReach(player, base = 4) {
-  return base + (toolItem(player)?.reachBonus || 0);
+  // R19 — plus whatever a `cond_toolReach` affix adds, which is the Long-handled roll
+  return base + (toolItem(player)?.reachBonus || 0) + (player?.derived?.toolReach || 0);
 }
 
 /** Can this player work that node at all? The same question `faceRate` asks, asked early. */
@@ -155,8 +195,35 @@ export function buildable(data, player, have = () => 0, names = null) {
         || (player?.bag || []).some(i => i?.baseKey === base.id)),
     });
   }
-  for (const dev of data?.devices || []) {
+  /**
+   * R19 — `replaces`, WHICH THE FILE HAS DECLARED SINCE R17 AND NOBODY READ.
+   *
+   * `data/tools.json` says the Deep Scanner `replaces` the Prospector's Scanner and the Survey
+   * Array replaces the Deep Scanner. Nothing looked at it, so the Tools and devices panel went on
+   * offering all three side by side for the rest of the run: two of them strictly worse, both
+   * still quoting a full price, and the ✓ on the one you had outgrown reading as progress.
+   *
+   * A chain, not a step: owning the Survey Array supersedes the Deep Scanner AND, through it, the
+   * Prospector's Scanner, so `superseded` walks the links rather than checking one.
+   */
+  const devices = data?.devices || [];
+  const replacedBy = new Map();
+  for (const dev of devices) if (dev.replaces) replacedBy.set(dev.replaces, dev.id);
+  const superseded = id => {
+    // walk up the chain: is anything that (eventually) replaces this one already built?
+    const seen = new Set();
+    let next = replacedBy.get(id);
+    while (next && !seen.has(next)) {
+      if (player?.devices?.[next]) return next;
+      seen.add(next);
+      next = replacedBy.get(next);
+    }
+    return null;
+  };
+
+  for (const dev of devices) {
     const p = price(dev.cost || {});
+    const by = superseded(dev.id);
     rows.push({
       kind: 'device', id: dev.id, name: dev.name, device: dev, cost: p.cost, at: dev.at || 'workbench',
       desc: dev.desc, made: dev.made, level: dev.level || 1,
@@ -164,6 +231,11 @@ export function buildable(data, player, have = () => 0, names = null) {
       owned: !!player?.devices?.[dev.id],
       /** R17 — scanner tiers. `tier` is which sweep this device is; see SCANNER_TIERS below. */
       tier: dev.tier || 1,
+      /** What this one replaces, and what has replaced it — both null for most devices. */
+      replaces: dev.replaces || null,
+      supersededBy: by,
+      /** The name to say so, since a row this true of should explain itself rather than vanish. */
+      supersededName: by ? (devices.find(d => d.id === by)?.name || by) : null,
     });
   }
   return rows;
@@ -454,8 +526,6 @@ export function createScanner({ data = {}, markers = null, onLog = () => {}, lab
   let wanted = new Set();
   /** The tier doing the sweeping. Null until a player with a scanner ticks it. */
   let tier = null;
-  /** The right-click chooser, in a browser. Null in node — see `attachChooser` at the end. */
-  let chooser = null;
 
   function setOn(v, player = null) {
     const want = !!v;
@@ -487,7 +557,9 @@ export function createScanner({ data = {}, markers = null, onLog = () => {}, lab
     tier = scannerTier(player, data) || tier;
     if (since < (tier?.everySeconds ?? cfg.everySeconds ?? 0.45)) return [];
     since = 0;
-    const range = (tier?.range ?? cfg.range ?? 110) + (player?.equipment?.tool?.scanBonus || 0);
+    // R19 — the tool's own scan bonus, plus an Attuned roll's `cond_toolScan`
+    const range = (tier?.range ?? cfg.range ?? 110) + (player?.equipment?.tool?.scanBonus || 0)
+      + (player?.derived?.toolScan || 0);
     const fresh = [];
     for (const n of nodesNear(at.x, at.z, range)) {
       if (!n || n.gone) continue;
@@ -578,8 +650,17 @@ export function createScanner({ data = {}, markers = null, onLog = () => {}, lab
       return [...out.values()].sort((a, b) => b.count - a.count);
     },
 
-    /** The chooser panel, once a browser has built one. Null in node and until the import lands. */
-    get chooser() { return chooser; },
+    /**
+     * R19 — THERE IS NO `chooser` HERE, AND THERE NEVER WAS.
+     *
+     * This getter returned a `let chooser = null` that nothing in the game ever assigned, and its
+     * comment pointed at an `attachChooser` "at the end" of this file which was never written.
+     * Nobody read the getter either, so it was a dead field describing a feature that DOES exist
+     * somewhere else: the right-click chooser is `createScannerChooser` in js/scanner-ui.js, built
+     * by js/main.js beside the input it claims, and it drives this module through the real API
+     * below (`want`, `setWant`, `wanted`, `forget`). Removed rather than filled in, because a
+     * second handle on a panel this module does not own is how two owners start.
+     */
 
     /** Remembered across a save, because a survey you have to redo is not a survey. */
     toJSON() { return { on, found: [...found.values()], want: [...wanted] }; },

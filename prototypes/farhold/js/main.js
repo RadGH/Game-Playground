@@ -82,6 +82,7 @@ import { createGroundVehicle } from '../../../avatar-3d/js/ground-vehicles.js';
 import { createTerraform } from './terraform.js';
 import { createPortals } from './portal.js';
 import { createBuild } from './build.js';
+import { ObstacleField } from './collide.js';
 import { alignCatalogue } from './buildplan.js';
 import { createBuildUI } from './build-ui.js';
 import { nextStep as chainNextStep } from './nextstep.js';
@@ -769,8 +770,60 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // applied what it remembered to a forwarder that did nothing; run the real one over it now
   settingsApply(settings.all(), null);
 
+  /**
+   * R18 — WHAT YOU BUILD IS SOLID.
+   *
+   * Nothing the player built had ever collided with anything. `createBuild` was handed no collider
+   * and nothing anywhere filed a build entry as an obstacle — so you walked straight through your
+   * own palisade, stone wall, gate, barricade, turret and house, and so did everything chasing you.
+   * That is why `barricade`'s `blocks: true` was read by nobody: there was no collision for a built
+   * piece to plug into, and a whole defensive category existed to stop things and stopped nothing.
+   *
+   * It gets a field of its OWN rather than joining `features.solids`, because features clears that
+   * field on every world rebuild (every 260 m) and would take the base's walls with it. This one is
+   * rebuilt from the ledger, so it only changes when what is standing changes.
+   *
+   * A piece is a cylinder like every other solid in the game, and the radius is half its footprint's
+   * LONG side. That is the opposite of what I first wrote, and the probe caught it: half the SHORT
+   * side turns a 2 x 0.5 m palisade into a 0.25 m post, and a run of posts at 1.5 m spacing has a
+   * one-metre gap between each pair that you simply walk through — a fence that fences nothing. Half
+   * the long side (1.0 m here) makes consecutive pieces overlap, which is what a wall is for. A
+   * cylinder is a coarse fit for a thin fence either way, and blocking is the half that matters.
+   *
+   * It goes into `field.solids` as well as the player's own list, because a palisade that only
+   * stops YOU is worse than no palisade.
+   */
+  /**
+   * `ObstacleField`'s constructor takes a BUCKET SIZE, not an options object — the first version of
+   * this line passed `{ ground: … }` as the bucket, which made every bucket key NaN. `setGround` is
+   * how a field learns the terrain, and it is what props and features both use.
+   */
+  const buildSolids = new ObstacleField().setGround((x, z) => terrain.heightAt(x, z));
+  /** Flat, walk-on or decorative pieces: a rug is not a wall. */
+  const NO_COLLIDE = new Set(['road', 'lane', 'rug', 'flower_bed', 'moss_carpet', 'nameplate', 'bedroll']);
+  function rebuildBuildSolids() {
+    buildSolids.clear();
+    for (const e of build?.entries || []) {
+      const def = build.defOf?.(e.key);
+      if (!def || NO_COLLIDE.has(e.key)) continue;
+      if ((def.h ?? 1) <= 0.35) continue;            // ankle-high is not a wall
+      const r = Math.max(0.35, Math.min(1.4, Math.max(def.w ?? 1, def.d ?? 1) / 2));
+      buildSolids.add(e.x, e.z, r, def.h ?? 2);
+    }
+    return buildSolids.count;
+  }
+
+  /**
+   * Declared HERE, above `createController`, rather than beside `createBuild` where it is filled.
+   * `buildSolids` is read by the controller's obstacle list a few lines below, and a `const` read
+   * before its declaration is a TDZ crash `node --check` cannot see — the game simply does not
+   * boot, which is exactly what happened on the first attempt at this. Third time this project has
+   * been bitten by it, so the rule is: a field goes where its FIRST READER is, not where its owner
+   * is. `rebuildBuildSolids` reads `build` lazily, so it does not mind being declared before it.
+   */
+
   control = createController(terrain, balance, camera, {
-    obstacles: [props.solids, features.solids], settings,
+    obstacles: [props.solids, features.solids, buildSolids], settings,
     // which boat goes under you when you start swimming — read live, so buying one mid-run counts
     boat: () => vehicleFor(player, 'boat'),
     // …and everything the player is wearing, riding and has spent a perk on. Without this the legs
@@ -2006,7 +2059,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   let field = makeField();
   // whatever stops the player stops an enemy too
-  field.solids = [props.solids, features.solids];
+  field.solids = [props.solids, features.solids, buildSolids];
 
   // ---------------------------------------------------------------- companions
   const pets = createPets({
@@ -3213,6 +3266,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     onPlace: (entry, def) => {
       joinSystems(entry, def);
+      // R18 — and it is solid from this moment. See `rebuildBuildSolids`.
+      rebuildBuildSolids();
       // houses, utilities, watch posts, Trade Posts and Tender Arms, all worked out from where
       // things stand rather than declared — the same rule js/outposts.js applies to outposts
       civics.rebuild(build.entries, build.defOf);
@@ -3319,6 +3374,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return out;
     },
     onRemove: entry => {
+      // R18 — you can walk where it stood again
+      rebuildBuildSolids();
       grid.remove(entry.id);
       stores.remove(entry.id);
       works.remove(entry.id);
@@ -3833,6 +3890,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (save.mining) { mining.load(save.mining, id => (build.entries || []).find(e => e.id === id) || null); drawRoutes(); }
     // …and everything that came back joins the grid and the pools again, or a reloaded base is a
     // field of dead machinery beside a dark pad
+    // R18 — one pass for the whole reloaded base, rather than once per piece
+    rebuildBuildSolids();
     for (const entry of build.entries || []) {
       joinSystems(entry, build.defOf(entry.key));
       civics.rebuild(build.entries, build.defOf);
@@ -4248,13 +4307,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     dungeon.dispose();
     dungeon = null;
     field.terrain = terrain;
-    field.solids = [props.solids, features.solids];
+    field.solids = [props.solids, features.solids, buildSolids];
     field.rankBonus = 1;
     field.paused = false;
     pets.setTerrain(terrain);
     chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
     control.setTerrain(terrain, surfaceSpot ? { ...surfaceSpot, y: null } : null);
-    control.obstacles = [props.solids, features.solids];
+    control.obstacles = [props.solids, features.solids, buildSolids];
     surfaceVisible(true);
     rebuildWorldAround(true);
     hud.log('Daylight, or what passes for it.', 'good');
@@ -4395,9 +4454,26 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * The raid does not arrive; you ring for it. Before that it is an offer you have taken and
        * nothing at all is happening, which is the difference between a quest and a tax on building.
        */
+      /**
+       * R18 — matched on the `alarm` FLAG rather than on the id `alarm_bell`.
+       *
+       * data/structures.json has carried `alarm: true` on the bell since it landed and nothing read
+       * it; the bell worked only because this line named the piece. Reading the flag means the data
+       * is the rule — a second alarm, or a renamed one, rings without touching this file. Same
+       * reason the turret loop gates on `def.defence` and not on `cat`.
+       */
       const bell = (build.entries || [])
-        .find(e => e.key === 'alarm_bell' && Math.hypot(e.x - control.x, e.z - control.z) < 4);
+        .find(e => build.defOf?.(e.key)?.alarm && Math.hypot(e.x - control.x, e.z - control.z) < 4);
       if (bell) return { kind: 'bell', bell };
+
+      /**
+       * R18 — AND THE MUSTER STONE, which js/muster.js's own header says is one of the two ways to
+       * call a drill ("a MUSTER STONE at your own outpost"). `muster: true` was read by nobody, so
+       * the piece was a rock. Same shape as the bell above and matched the same way, on its flag.
+       */
+      const stone = (build.entries || [])
+        .find(e => build.defOf?.(e.key)?.muster && Math.hypot(e.x - control.x, e.z - control.z) < 4);
+      if (stone) return { kind: 'muster', stone };
 
       /**
        * R15 — E ON A MACHINE OPENS ITS RECIPES.
@@ -5486,12 +5562,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     });
 
     control = createController(terrain, balance, camera, {
-      obstacles: [props.solids, features.solids], settings,
+      obstacles: [props.solids, features.solids, buildSolids], settings,
       boat: () => vehicleFor(player, 'boat'),
       derived: () => player.derived,
     });
     field = makeField();
-    field.solids = [props.solids, features.solids];
+    field.solids = [props.solids, features.solids, buildSolids];
     encounters = createEncounters({
       field, zones, terrain, balance, data: encounterData,
       // R14: the same router as the first one, or landing on a second world would un-throttle the
@@ -7008,6 +7084,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * The report afterwards is the point of §1: it says what you got AND what it would deliver
          * per minute from where you are standing, which is the rich-and-far trade-off in one number.
          */
+        /**
+         * R18 — THE MUSTER STONE IS THE WAY IN, which is what it was built to be.
+         *
+         * js/muster.js's own header says "a MUSTER STONE at your own outpost" is one of the two
+         * ways to call a drill, and `muster: true` sat in data/structures.json read by nobody, so
+         * the piece was a rock you had paid for. The board itself already exists and works — it is
+         * a tab of the Holding — and `musterAt()` already recognises standing near home. So the
+         * stone opens that board rather than growing a second copy of the logic beside it.
+         */
+        else if (it.kind === 'muster') {
+          holding.show?.();
+          holding.tab = 'muster';
+          hud.log('The muster board. Pick a tier and they will come when you say.', 'level');
+        }
         else if (it.kind === 'bell') {
           const st = defence.standing();
           if (!st.state || st.state === 'won' || st.state === 'lost' || st.state === 'declined') {
@@ -8046,6 +8136,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          * as dense but closer" — the band is the density half of that, and you should be able to
          * read it off the ground without opening anything.
          */
+        : near.kind === 'muster' ? '<b>E</b> call a muster'
         : near.kind === 'bell' ? (() => {
           const st = defence.standing();
           return st.state === 'offered' ? '<b>E</b> take the fight on'
@@ -8319,6 +8410,39 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     defence.tick(dt, {
       enemies: field.enemies,
+      /**
+       * R18 — GROUND YOU DO NOT WANT TO CROSS.
+       *
+       * The three traps carried a `trap` block that nothing read, so a caltrops field across the
+       * approach was scenery that still made the wave bigger. js/defence.js owns the rule (who is
+       * standing on what) and this owns the field, the numbers and the picture, exactly as it does
+       * for a turret's `onHit`.
+       *
+       * `dps` is per SECOND and this runs every frame, so it is scaled by `dt` — the mistake the
+       * project has already made once, where a DoT paying `perSecond * dt` sixty times a second
+       * read as "1 damage" however right the total was. A trap also needs no line of fire and no
+       * projectile: the hit lands where the enemy is standing.
+       */
+      onTrap: (unit, trap, piece, dt) => {
+        const share = (trap.dps || 0) * dt / Math.max(1, player.derived?.damage || 10);
+        // `strikeArea` takes falloff/power/element/skill/onHit/applyStatus and nothing else —
+        // an option it does not read would be one more rule written for nobody.
+        if (share > 0) field.strikeArea(unit.x, unit.z, 0.8, player, { power: share, falloff: 0 });
+        // caltrops slow and a pit holds — both are real statuses, so they read on the enemy's bar
+        /**
+         * Caltrops slow and a pit holds. There is no `root` or `stun` in data/skills.json, so the
+         * hold is `web` — the heaviest slow the game has — given the pit's own `hold` SECONDS as
+         * extra duration. Using a status rather than a bespoke field means it reads on the enemy's
+         * own bar and is cleansed and resisted like everything else.
+         */
+        if (trap.slow) landStatus('chill', skillData.statuses.chill, unit, trap.slow);
+        if (trap.hold) applyStatus(unit, 'web', skillData.statuses.web, 1, { longer: trap.hold });
+        // a trap you cannot see going off reads as a broken trap
+        spellfx?.impact?.({
+          at: new THREE.Vector3(unit.x, (unit.y || 0) + 0.3, unit.z),
+          element: trap.hold ? 'earth' : 'physical',
+        });
+      },
       onHit: (unit, gun, turret) => {
         field.strikeArea(unit.x, unit.z, Math.max(0.8, gun.splash), player, {
           element: gun.element, power: gun.damage / Math.max(1, player.derived?.damage || 10),

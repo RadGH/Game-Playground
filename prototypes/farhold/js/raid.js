@@ -352,10 +352,29 @@ export function loseRaid(quest, { base = {}, materials = 0, data = null } = {}) 
       line: 'They got through. Nothing is broken and nothing is missing — it was a drill.',
     };
   }
+  /**
+   * R18 — A REPAIR STATION PUTS SOME OF IT BACK.
+   *
+   * `repair_station` has carried `repairs: { radius: 30, rate: 25 }` since it landed and nothing
+   * read it, so the piece cost 12 kW of live power to do nothing and to make the raid bigger.
+   *
+   * It cannot heal structures DURING the fight, because Farhold has no per-structure health at all
+   * — a lost raid breaks an abstract fraction of what you own (`structuresBrokenFraction`), which
+   * is the only damage model there is. So a repair station does the thing it can honestly do
+   * against that model: it repairs the breakage afterwards. `rate` is read as the percentage of the
+   * breakage one station undoes, and they stack to a floor rather than to zero — a base that can
+   * never be hurt is not worth defending.
+   *
+   * Making it heal moment to moment would need a structure-health system, which is a round of its
+   * own and is written up as such rather than faked here.
+   */
+  const repair = Math.min(L.repairCap ?? 0.75, (base.repairShare || 0));
+  const broken = Math.round((base.structures || 0) * L.structuresBrokenFraction * (1 - repair));
   return {
     ok: true,
     quest,
-    structuresBroken: Math.max(1, Math.round((base.structures || 0) * L.structuresBrokenFraction)),
+    repaired: repair,
+    structuresBroken: Math.max(repair >= 1 ? 0 : 1, broken),
     materialsTaken: Math.round(materials * L.materialsTakenFraction),
     citizensLeave: L.citizensLeave || 0,
     line: 'They got over the wall. Things are broken and the store is lighter — nothing is gone for good.',

@@ -2590,7 +2590,8 @@
       "snap": "grid",
       "hp": 200,
       "feeds": {
-        "radius": 22
+        "radius": 22,
+        "rate": 1.35
       },
       "cost": {
         "plank": 6,
@@ -2600,7 +2601,8 @@
         "kind": "crates",
         "color": "#6a6058"
       },
-      "desc": "Turrets need feeding. This is where the logistics pool stops being an abstraction."
+      "desc": "Turrets need feeding. This is where the logistics pool stops being an abstraction.",
+      "_r18": "R18 — `feeds` was read by nothing at all. There is no ammunition in Farhold (R16 removed it), so what a hopper honestly buys is RATE: a turret inside its radius reloads 35% faster. `rate` lives here so it is tunable without touching js/defence.js."
     },
     {
       "id": "foundation",

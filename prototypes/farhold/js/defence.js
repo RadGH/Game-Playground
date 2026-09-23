@@ -150,6 +150,16 @@ export function createDefence({
       citizens: colony?.citizens?.length || 0,
       throughput: getWorks?.()?.throughputPerMinute?.() || 0,
       waypoint: entries.some(e => e.waypoint),
+      /**
+       * R18 — how much of a loss the repair stations undo. See the note in js/raid.js `loseRaid`.
+       * A station has to be POWERED to count, like a turret: it draws 12 kW and an unpowered one
+       * is a shed.
+       */
+      repairShare: entries.reduce((sum, e) => {
+        const def = build.defOf?.(e.key);
+        if (!def?.repairs || e.powered === false) return sum;
+        return sum + (def.repairs.rate ?? 25) / 100;
+      }, 0),
       gold: 0,
       posted,
     };
@@ -345,17 +355,65 @@ export function createDefence({
      * simple — no leading, no target priority — because the interesting decision is WHERE you put
      * the turret, and a turret that never misses makes that decision for you.
      */
-    tick(dt, { enemies = [], onHit = null } = {}) {
+    tick(dt, { enemies = [], onHit = null, onTrap = null } = {}) {
       const build = getBuild();
       if (!build?.entries?.length) return;
       const live = enemies.filter(e => e && e.hp > 0);
       if (!live.length) return;
+
+      /**
+       * R18 — THE AMMO HOPPER FEEDS SOMETHING NOW.
+       *
+       * `ammo_hopper` has carried `feeds: { radius: 22 }` since it landed and nothing read it — the
+       * piece cost steel, stood there, and raised the raid tier it could not help you survive.
+       * There is no ammunition in Farhold (R16 took it out), so what a hopper can honestly buy is
+       * RATE: a turret with one behind it reloads faster. The multiplier is data, not a constant
+       * here, so it can be tuned without touching code.
+       */
+      const fed = new Set();
+      let feedRate = 1;
+      for (const h of build.entries) {
+        const hd = build.defOf?.(h.key);
+        if (!hd?.feeds || h.powered === false) continue;
+        feedRate = Math.max(feedRate, hd.feeds.rate ?? 1.35);
+        for (const t of build.entries) {
+          if (Math.hypot(t.x - h.x, t.z - h.z) <= (hd.feeds.radius ?? 22)) fed.add(t.id);
+        }
+      }
+
+      /**
+       * R18 — AND THE THREE TRAPS DO SOMETHING WHEN SOMETHING WALKS ON THEM.
+       *
+       * `spike_trap`, `caltrops` and `pit_trap` have carried a `trap` block — dps, area, slow,
+       * hold — read by NOBODY: `js/defence.js` gates firing on `def.defence`, which they do not
+       * have. You could lay a caltrops field across the approach and the raiders walked through it
+       * taking nothing, while the field still counted toward `baseOf().defences` and so toward the
+       * size of the wave it failed to stop.
+       *
+       * A trap needs no power and has no cooldown: it is ground you do not want to cross. The
+       * damage is handed out through `onTrap` for the same reason a turret's is handed out through
+       * `onHit` — this module owns the RULES and js/main.js owns the field, the numbers and the
+       * picture.
+       */
+      for (const e of build.entries) {
+        const def = build.defOf?.(e.key);
+        if (!def?.trap || !onTrap) continue;
+        const t = def.trap;
+        const area = t.area ?? 2;
+        for (const u of live) {
+          if (Math.hypot(u.x - e.x, u.z - e.z) > area) continue;
+          onTrap(u, t, e, dt);
+        }
+      }
+
       for (const e of build.entries) {
         const def = build.defOf?.(e.key);
         if (def?.cat !== 'defence' || !def.defence) continue;
         // an unpowered turret is a post
         if (e.powered === false) continue;
         const gun = gunOf(def);
+        // a hopper behind it reloads it faster — see `fed` above
+        if (fed.has(e.id) && feedRate > 1) gun.every = gun.every / feedRate;
         const left = (cooldowns.get(e.id) || 0) - dt;
         if (left > 0) { cooldowns.set(e.id, left); continue; }
 

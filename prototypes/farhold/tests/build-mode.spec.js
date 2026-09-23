@@ -267,3 +267,72 @@ test('with every section up, nothing falls off the bottom of the panel', async (
   expect(out.panelInView, 'the panel itself hangs off the screen').toBe(true);
   expect(errors).toEqual([]);
 });
+
+// ================================================================= R18 — walls that are walls
+
+/**
+ * NOTHING THE PLAYER BUILT HAD EVER COLLIDED WITH ANYTHING.
+ *
+ * `createBuild` was handed no collider and nothing anywhere filed a build entry as an obstacle, so
+ * you walked straight through your own palisade, stone wall, gate, barricade, turret and house —
+ * and so did everything chasing you. That is also why `barricade`'s `blocks: true` was read by
+ * nobody: there was no collision for a built piece to plug into. An entire defensive category
+ * existed to stop things and stopped nothing, while still counting toward the size of the raid it
+ * could not hold.
+ *
+ * Built pieces have their own `ObstacleField` now — their own, because `features.solids` is cleared
+ * on every world rebuild (every 260 m) and would take the base's walls with it — rebuilt from the
+ * ledger on place, on remove and on load, and handed to the player's controller AND to the enemy
+ * field, because a palisade that only stops you is worse than no palisade.
+ */
+test('R18 — a palisade you built is solid, and open ground beside it is not', async ({ page }) => {
+  const errors = await land(page);
+
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    for (const piece of f.structures.structures || []) {
+      for (const id of Object.keys(piece.cost || {})) f.bag.add(id, 800);
+    }
+    const t = f.terrain;
+    const flat = (x, z) => !t.underwater(x, z) && !t.waterAt(x, z) && t.slopeAt(x, z, 8) <= 0.25;
+    let spot = null;
+    outer: for (let r = 0; r <= 600; r += 20) for (let a = 0; a < 16; a++) {
+      const th = (a / 16) * Math.PI * 2;
+      const x = f.control.x + Math.cos(th) * r, z = f.control.z + Math.sin(th) * r;
+      if (flat(x, z) && flat(x + 6, z) && flat(x - 6, z)) { spot = { x, z }; break outer; }
+    }
+    if (!spot) return { none: true };
+    f.control.teleport(spot.x, spot.z);
+    await new Promise(r => setTimeout(r, 400));
+
+    f.build.setMode(true);
+    f.build.setTool('smooth'); f.build.setRadius(12);
+    f.build.aim(spot.x, spot.z); f.build.paint();
+    f.build.setTool('build');
+    f.build.select('claim_stone'); f.build.aim(spot.x - 4, spot.z - 4); f.build.placeHere();
+    for (const dz of [-1.5, 0, 1.5]) {
+      f.build.select('palisade'); f.build.aim(spot.x + 3, spot.z + dz); f.build.placeHere();
+    }
+    f.build.setMode(false);
+    await new Promise(r => setTimeout(r, 300));
+
+    // asked at the piece's OWN position: build mode snaps to a grid, so where you aimed and where
+    // it stands are up to a metre apart, and the first version of this check missed by exactly that
+    const pal = (f.build.entries || []).find(e => e.key === 'palisade');
+    const solidAt = p => f.control.obstacles.some(o => o.blocked?.(p.x, p.z, 0.4));
+    return {
+      built: (f.build.entries || []).filter(e => e.key === 'palisade').length,
+      atWall: pal ? solidAt(pal) : null,
+      beside: solidAt({ x: spot.x + 14, z: spot.z }),
+      // the enemies' field has to know about it too
+      enemyFields: (f.field?.solids || []).length,
+    };
+  });
+
+  if (out.none) return;                        // nowhere flat on this seed
+  expect(out.built, 'no palisade went down').toBeGreaterThan(0);
+  expect(out.atWall, 'a palisade you built is not solid — you can walk through your own wall').toBe(true);
+  expect(out.beside, 'open ground 14 m away is solid, so the radius is far too big').toBe(false);
+  expect(out.enemyFields, 'the enemy field has no obstacle list, so raiders ignore your walls').toBeGreaterThan(2);
+  expect(errors).toEqual([]);
+});

@@ -2319,7 +2319,19 @@ export class Hud {
           const row = el('div', 'tier-row');
           for (const node of tier.nodes) {
             const on = picks[tier.tier] === node.id;
-            const card = el('div', 'talent-card' + (on ? ' on' : '') + (open ? '' : ' locked'));
+            /**
+             * R20 — a card in a tier that is already spent is DIMMED, not merely inert.
+             *
+             * With the tier spent and this not being the one taken, the card had no click handler
+             * and no class, so it sat at full opacity with a hover border and did nothing — the
+             * explanation was in a tooltip, which needs a hover delay and never arrives at all on
+             * a touch screen. That is exactly the failure the Unbinder's own rows were fixed for
+             * ("a greyed row with no reason is the one answer a player cannot act on"), so the two
+             * screens now agree.
+             */
+            const spent = !!picks[tier.tier] && picks[tier.tier] !== node.id;
+            const card = el('div', 'talent-card' + (on ? ' on' : '')
+              + (open ? '' : ' locked') + (open && spent ? ' spent' : ''));
             card.innerHTML = `<b>${node.name}</b><span class="muted small">${node.desc}</span>`;
             /**
              * R20 — CLICKING ONE YOU ALREADY HAVE NO LONGER CLEARS IT.

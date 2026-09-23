@@ -1021,7 +1021,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * difference between the title screen (level 1, so only the opening slot is live) and this one.
    */
   let spellChooser = null;
-  function openSpellChooser() {
+  function openSpellChooser(slot = null) {
     if (!classbuildData || !player.build?.custom) {
       hud.log('Your six came with the class you chose — only a class you built yourself picks its own.', '');
       return;
@@ -1036,7 +1036,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       });
     }
     spellChooser.build = player.build;
-    spellChooser.show('spells');
+    // the card that was clicked knows which slot it is — open on that one, not on the first
+    spellChooser.show('spells', { slot });
   }
 
   // god rays, lens flare and the moment the star drops behind a ridge — screen space, over the
@@ -1722,7 +1723,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * `onChooseSpell` is what takes their place on this screen — the Skills tab's "spell available"
      * slot opening the chooser for whichever slot has come due.
      */
-    onChooseSpell: () => openSpellChooser(),
+    onChooseSpell: slot => openSpellChooser(slot),
     onPickTalent: (skillId, tier, nodeId, shape) => {
       const out = pickTalent(player, skillId, tier, nodeId, { shape });
       if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }

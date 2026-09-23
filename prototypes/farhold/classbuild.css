@@ -111,6 +111,9 @@
 .cb-slot.pending { border-color: var(--cb-good, #8fe0a0); cursor: pointer; }
 .cb-slot.pending .cb-pick { color: var(--cb-good, #8fe0a0); font-style: normal; }
 .cb-slot.shut { opacity: .5; }
+/* a filled slot on a build that has not started yet: still yours to change your mind about */
+.cb-slot.editable { cursor: pointer; }
+.cb-slot.editable:hover { border-color: var(--cb-accent); }
 
 .cb-tag { display: inline-block; border: 1px solid var(--cb-line); border-radius: 3px; padding: 0 5px; margin-right: 4px; font-size: 11px; color: var(--cb-faint); }
 

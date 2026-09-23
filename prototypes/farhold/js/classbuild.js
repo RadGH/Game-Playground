@@ -212,14 +212,22 @@ export function pickRefusal(build, slot, skillId, cat, { level = 1 } = {}) {
   const already = (build.spells || []).findIndex((id, i) => id === skillId && i !== slot);
   if (already >= 0) return `${spell.name} is already in slot ${already + 1}.`;
   /**
-   * AND A SLOT ALREADY LEARNED IS NOT RE-PICKED FOR FREE.
+   * AND A SLOT ALREADY LEARNED IS NOT RE-PICKED FOR FREE — ONCE THE RUN HAS STARTED.
    *
    * Unlearning used to be a button on the same screen, so swapping a spell was two free clicks.
    * It costs gold at an Unbinder now (js/retrain.js), and a slot you could simply overwrite would
    * be a way straight round that — the spell you are bored of would be gone and the counter never
-   * paid. An empty slot is the only thing a pick may fill.
+   * paid.
+   *
+   * `build.granted` is what separates the two cases, and it is already on the build: it is set once
+   * by `applyOpeningKit`, at the moment the character walks out of the gate. Before that the build
+   * is a DRAFT — nothing has been learned, nobody has cast anything, and the whole point of a
+   * builder is that you can try something and change your mind. The first version of this rule
+   * refused an overwrite from the moment the pick was made, which made the character creator's one
+   * decision irreversible on the title screen with no way back short of 120 gold at an NPC in a town
+   * the player has not reached yet. That is the opposite of what the counter is for.
    */
-  if (build.spells?.[slot]) {
+  if (build.spells?.[slot] && build.granted) {
     const worn = cat.byId.get(build.spells[slot]);
     return `${worn?.name || 'A spell'} is already in this slot. An Unbinder in town can take it back out.`;
   }
@@ -265,6 +273,14 @@ export function slotsOf(build, cat, { level = 1 } = {}) {
       level: at,
       open,
       pending: open && !spellId,
+      /**
+       * Can this slot be CHANGED right now? An empty one that has come due, always — and a filled
+       * one too while the build is still a draft on the title screen, because a creator you cannot
+       * take a decision back in is not a creator. Once `granted` is set the answer is the
+       * Unbinder. Same rule as `pickRefusal`, asked once so the screen and the refusal cannot
+       * disagree about which rows are live.
+       */
+      editable: open && (!spellId || !build?.granted),
       name: cat.tiers[i]?.name || `Tier ${i + 1}`,
       blurb: cat.tiers[i]?.blurb || '',
       spellId,

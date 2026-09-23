@@ -446,6 +446,26 @@ reachable by other means:
 * **The Unbinder's refused rows said why only in a `title` attribute** — after a second of hovering
   a button you cannot press, and never at all on a touch screen. Moved onto the row.
 
+## The review pass, and the one thing the first cut got wrong
+
+Three findings, all real:
+
+* **The creator's one decision was irreversible.** The overwrite rule fired from the moment the pick
+  was made, and the Unlearn button had just been removed, and `drawSpells` only drew the spell list
+  beside a *pending* slot — so clicking your opening spell on the title screen made the list vanish
+  with no control anywhere that could change it, and the only remedy was 120 gold at an NPC in a town
+  the character had not reached yet. **`build.granted` is what separates the two cases** and it was
+  already on the build: set once by `applyOpeningKit` as the character walks out of the gate. Before
+  that a build is a DRAFT and changing your mind is free, which is the whole point of a builder;
+  after it, the Unbinder. `slotsOf` gained `editable` so the screen and the refusal ask one rule.
+* **The "Spell available" card passed its slot index and `main.js` dropped it**, so a level-18
+  character who had never filled their level-3 slot clicked the sixth card and got the second one's
+  list. `show('spells', { slot })` now opens where the click pointed.
+* **A talent card in an already-spent tier looked exactly like one you could take** — full opacity, a
+  hover border, and "take" in the corner — and did nothing, with the reason in a tooltip that never
+  arrives on a touch screen. Dimmed, and the corner says "tier spent". That is the same failure the
+  Unbinder's own rows had been fixed for an hour earlier, on a different screen.
+
 ## Files
 
 | File | |

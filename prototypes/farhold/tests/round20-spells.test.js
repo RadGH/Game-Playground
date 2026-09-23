@@ -133,13 +133,37 @@ test('2.4 — a slot fills at its own level and not before', () => {
   assert.equal(pendingPicks(build, cat, 6), 1, 'slot 2 (level 3) is still owed');
 });
 
-test('2.5 — a filled slot is not overwritten for free', () => {
+/**
+ * The two halves of the overwrite rule, which are NOT the same rule.
+ *
+ * Before the run starts a build is a draft and changing your mind is free — the first version of
+ * this refused an overwrite from the moment the pick was made, which left the character creator's
+ * one decision irreversible on the title screen with no way back short of an NPC in a town the
+ * player has not reached. `build.granted` (set by `applyOpeningKit` as the character walks out of
+ * the gate) is what separates them.
+ */
+test('2.5a — a draft build can change its mind, free, before the run starts', () => {
   const cat = spellCatalogue({ classData, skillData, data: cbData });
   const build = starter(cat);
+  assert.equal(build.granted, false, 'a fresh build is already marked as started');
+  const swap = pickSpell(build, 0, 'aimed_shot', cat, { level: 1 });
+  assert.equal(swap.ok, true, 'the creator will not let you change the one choice it asks for');
+  assert.equal(build.spells[0], 'aimed_shot');
+  // …and the screen agrees the row is live, which is what draws the spell list beside it
+  const slot = slotsOf(build, cat, { level: 1 })[0];
+  assert.equal(slot.editable, true, 'a filled draft slot draws no spell list to change it with');
+  assert.equal(slot.pending, false, 'a filled slot is not also owed');
+});
+
+test('2.5b — once the run has started, a filled slot is not overwritten for free', () => {
+  const cat = spellCatalogue({ classData, skillData, data: cbData });
+  const build = starter(cat);
+  build.granted = true;                       // what `applyOpeningKit` does at the gate
   const over = pickSpell(build, 0, 'aimed_shot', cat, { level: 30 });
   assert.equal(over.ok, false, 'a spell can still be swapped out without paying anybody');
   assert.match(over.why, /Unbinder/);
   assert.equal(build.spells[0], 'power_strike');
+  assert.equal(slotsOf(build, cat, { level: 30 })[0].editable, false);
 });
 
 test('2.6 — the level defaults to 1, so a caller that forgets cannot fill all six', () => {
@@ -460,6 +484,27 @@ test('5.1 — the character sheet has no free undo for a spell, a perk or a tale
   for (const [name, src] of [['hud.js', hud], ['classbuild-ui.js', cb]]) {
     assert.match(src, /Unbinder/, `${name} removed the button without saying where to go`);
   }
+});
+
+test('5.1b — the clicked slot is the slot the chooser opens on', () => {
+  const hud = readSrc('js/hud.js');
+  const main = readSrc('js/main.js');
+  const cb = readSrc('js/classbuild-ui.js');
+  // the card knows which slot it is …
+  assert.match(hud, /onChooseSpell\?\.\(i\)/, 'the spell card does not say which slot it is');
+  // … main.js passes it on rather than dropping it …
+  assert.match(main, /onChooseSpell: slot => openSpellChooser\(slot\)/, 'main.js throws the slot away');
+  assert.match(main, /show\('spells', \{ slot \}\)/);
+  // … and the builder opens on it
+  assert.match(cb, /function show\(which = null, \{ slot = null \} = \{\}\)/);
+});
+
+test('5.1c — a talent tier that is already spent looks spent', () => {
+  const hud = readSrc('js/hud.js');
+  const css = readSrc('style.css');
+  assert.match(hud, /' spent'/, 'a card in a spent tier gets no class of its own');
+  assert.match(css, /\.talent-card\.spent/, 'a card in a spent tier is styled exactly like one you can take');
+  assert.match(css, /content: "tier spent"/, 'the corner of a dead card still says "take"');
 });
 
 test('5.2 — main.js wires every one of the Unbinder\'s six, and the chooser', () => {

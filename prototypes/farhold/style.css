@@ -1416,6 +1416,10 @@ body {
 .talent-card:hover { border-color: #3f5d80; }
 .talent-card.on { border-color: #7fd8ff; background: rgba(127, 216, 255, .1); }
 .talent-card.locked { opacity: .4; cursor: default; }
+/* R20 — this tier already has a talent on it, and it is not this one. Dimmed rather than merely
+   inert, so a card you cannot take does not look identical to one you can. */
+.talent-card.spent { opacity: .45; cursor: default; }
+.talent-card.spent:hover { border-color: #2b3a52; }
 
 /* a weapon's attack pattern */
 .tip-pattern { display: flex; align-items: baseline; gap: 8px; margin-top: 3px; }
@@ -1664,6 +1668,12 @@ body {
 }
 .pane .talent-card:not(.locked):hover { border-color: var(--accent); }
 .pane .talent-card:not(.locked):hover::after { color: var(--accent); }
+/* …and on the sheet, where the corner of every takeable card says "take", a spent tier says what
+   is actually true instead of inviting a click that does nothing. */
+.pane .talent-card.spent { opacity: .42; }
+.pane .talent-card.spent:not(.locked):not(.on)::after { content: "tier spent"; color: var(--ink-faint); }
+.pane .talent-card.spent:not(.locked):hover { border-color: #2b3a52; }
+.pane .talent-card.spent:not(.locked):hover::after { color: var(--ink-faint); }
 
 /* ---------------------------------------------------------------- 4. perks */
 .perks-body {

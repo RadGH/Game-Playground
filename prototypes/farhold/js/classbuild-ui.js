@@ -186,13 +186,14 @@ export function createClassBuilder({
      * every time would mean hunting for the row that is actually live. If `editing` points at a
      * slot that has not come due (or is already filled), it is moved to the first pending one.
      */
-    if (!slots[editing]?.pending) {
-      const next = slots.find(s => s.pending);
+    if (!slots[editing]?.editable) {
+      const next = slots.find(s => s.pending) || slots.find(s => s.editable);
       if (next) editing = next.index;
     }
     const left = slots.map(s => {
       const row = el('div', {
-        class: `cb-slot${editing === s.index ? ' on' : ''}${s.pending ? ' pending' : ''}${s.open ? '' : ' shut'}`,
+        class: `cb-slot${editing === s.index ? ' on' : ''}${s.pending ? ' pending' : ''}`
+          + `${s.open ? '' : ' shut'}${s.editable && !s.pending ? ' editable' : ''}`,
       }, [
         el('span', { class: 'cb-lv', text: s.level > 1 ? `level ${s.level}` : 'from the start' }),
         el('span', {
@@ -214,10 +215,12 @@ export function createClassBuilder({
        */
       row.append(el('span', {
         class: 'cb-note',
-        text: s.spell ? 'an Unbinder in town can take this one back out'
+        text: s.spell
+          // a draft can still be changed; a build that is out in the world cannot
+          ? (s.editable ? 'click to change it' : 'an Unbinder in town can take this one back out')
           : s.pending ? 'ready to choose' : 'not yet',
       }));
-      if (s.pending) row.addEventListener('click', () => { editing = s.index; draw(); });
+      if (s.editable) row.addEventListener('click', () => { editing = s.index; draw(); });
       return row;
     });
 
@@ -266,7 +269,7 @@ export function createClassBuilder({
           : el('div', { class: 'cb-note', text: 'Nothing to choose right now.' }),
         el('div', { class: 'cb-slots' }, left),
       ]),
-      slot.pending
+      slot.editable
         ? pane(`${slot.name} — what can go in slot ${slot.index + 1}`, [
           el('div', { class: 'cb-note', text: slot.blurb }),
           el('div', {
@@ -396,7 +399,22 @@ export function createClassBuilder({
     done.textContent = refusal ? 'Not finished' : 'Done — use this build';
   }
 
-  function show(which = null) { if (which) tab = which; open = true; root.hidden = false; draw(); }
+  /**
+   * Open it, optionally ON A PARTICULAR SLOT.
+   *
+   * R20 — the character sheet's "Spell available" card knows which slot it is; without `slot` here
+   * that was thrown away and `drawSpells` snapped to the FIRST pending one, so a level-18 character
+   * who had never filled their level-3 slot clicked the sixth card and got the second one's list.
+   * The click now goes where it points. An index that is not editable is ignored rather than
+   * refused, because `drawSpells` will pick a sensible slot on its own.
+   */
+  function show(which = null, { slot = null } = {}) {
+    if (which) tab = which;
+    if (Number.isInteger(slot) && slotsOf(state, cat, { level: levelNow() })[slot]?.editable) editing = slot;
+    open = true;
+    root.hidden = false;
+    draw();
+  }
   function hide() { open = false; root.hidden = true; }
 
   /**

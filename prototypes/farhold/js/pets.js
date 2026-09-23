@@ -34,6 +34,20 @@ import { scaleFollower } from './followers.js';
  * Which pets a class brings, and what it calls them. Data rather than code because the class list
  * is data: `data/classes.json` can override any of this per class.
  */
+/**
+ * R18 — DOES THIS ABILITY NEED SOMETHING TO AIM AT?
+ *
+ * The rule in one place, because expressing it twice is what broke it. `castAbility` had
+ * `if (!ab.heal && !target) continue;` and then `if (ab.heal && !ab.mult) { …heal… }`, which
+ * between them let an ability carrying BOTH `heal` and `mult` past the first guard (it has a heal)
+ * and past the second (it also has a mult) into the damage path, where the null target was
+ * dereferenced. `data/mercenaries.json`'s `tithe` is precisely that pair.
+ *
+ * Only a heal with no damage half is target-free. Exported so a test can ask it of every ability in
+ * the data without needing a scene, which is the check that would have caught this.
+ */
+export function isPureHeal(ab) { return !!(ab && ab.heal) && !(ab && ab.mult); }
+
 export const CLASS_PETS = {
   necromancer: { id: 'bone_thrall', count: 2, extra: { id: 'bone_archer', count: 1 }, verb: 'raises' },
   druid: { id: 'grove_wolf', count: 2, verb: 'calls' },
@@ -521,9 +535,26 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     const field = live();
     for (const ab of p.abilities) {
       if (ab.ready > 0) continue;
-      // a heal needs nobody to fight; everything else does
-      if (!ab.heal && !target) continue;
-      if (ab.heal && !ab.mult) {
+      /**
+       * R18 — A PURE heal needs nobody to fight. ONE THAT ALSO HITS STILL NEEDS A TARGET.
+       *
+       * This was `if (!ab.heal && !target) continue;`, and the branch below is
+       * `if (ab.heal && !ab.mult)`. An ability carrying BOTH `heal` and `mult` slipped through the
+       * first (it has a heal) and through the second (it also has a mult), and then fell into the
+       * damage path, where `Math.hypot(target.x - p.x, …)` dereferenced a null target.
+       *
+       * `data/mercenaries.json`'s `tithe` is exactly that — `{mult: 1.6, heal: 0.05, range: 22}`,
+       * the Bonesinger's, learned at level 18. Hire one, reach 18, stand in a quiet field, and it
+       * throws. `tick` has no try/catch and js/main.js calls it from the frame loop, so
+       * requestAnimationFrame re-throws every frame: the picture freezes while the game runs on,
+       * which reads as a hang rather than an error.
+       *
+       * Asked the right way round, the rule is obvious — only a heal with no damage half is
+       * target-free — and the `ab.heal && !ab.mult` branch below is that same pure-heal case.
+       */
+      const pureHeal = isPureHeal(ab);
+      if (!pureHeal && !target) continue;
+      if (pureHeal) {
         const owner = p.owner;
         if (!owner || owner.hp == null) continue;
         // never spend the cooldown on a full-health party — a healer that heals nothing is the

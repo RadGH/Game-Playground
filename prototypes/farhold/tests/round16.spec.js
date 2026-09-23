@@ -98,20 +98,46 @@ test('R16.8 — the scanner finds what is under the ground and keeps it', async 
      * because a label that is computed and not painted is the whole class of bug this round is about.
      */
     const mini = document.getElementById('minimap');
-    // the label is painted in #e8dfd2 on a dark map, so count the near-white pixels: the whole
-    // canvas is opaque, which makes an alpha test meaningless
+    /**
+     * R18 — COUNT THE LABEL'S OWN COLOUR, NOT "ANYTHING PALE".
+     *
+     * This counted every near-white pixel (r>200, g>195, b>185), and that made it flaky about one
+     * run in three: with the scanner UP the minimap draws only deposits (js/main.js calls it a
+     * prospecting minimap), and with it down it draws the ordinary marker set instead. The two
+     * branches paint DIFFERENT things, so "pale pixels with names" versus "pale pixels without" was
+     * never comparing like with like — it only worked while the labels happened to out-ink whatever
+     * the normal markers drew, and on seed 4477 the two land within a hundred pixels of each other.
+     *
+     * I mis-diagnosed this once by A/B-ing a single run each way and blaming a main.js change; three
+     * runs at the same commit gave pass, pass, fail. The label is drawn in exactly `#e8dfd2`, so
+     * that is what to count — a tight window on one colour, which no other marker uses.
+     */
     const ink = () => {
       const px = mini.getContext('2d').getImageData(0, 0, mini.width, mini.height).data;
       let n = 0;
       for (let i = 0; i < px.length; i += 4) {
-        if (px[i] > 200 && px[i + 1] > 195 && px[i + 2] > 185) n++;
+        if (Math.abs(px[i] - 232) <= 5 && Math.abs(px[i + 1] - 223) <= 5 && Math.abs(px[i + 2] - 210) <= 5) n++;
       }
       return n;
     };
     const withNames = ink();
     f.scanner.setOn(false);
-    await new Promise(r => setTimeout(r, 700));
-    const withoutNames = ink();
+    /**
+     * R18 — WAIT FOR THE CANVAS, NOT FOR A NUMBER OF MILLISECONDS.
+     *
+     * The minimap is redrawn every sixth frame, so 700 ms is about seven redraws on an idle machine
+     * and can be none at all when the world is streaming chunks — and then the reading is simply
+     * the stale canvas, with the labels still on it. One run in four.
+     *
+     * This is the third fixed sleep in this suite to lose that bet (base-roundtrip's grid waits and
+     * round16's own Town Hall spiral were the others), so: poll for the thing being asserted, with a
+     * ceiling long enough that a genuinely stuck label still fails.
+     */
+    let withoutNames = ink();
+    for (let i = 0; i < 60 && withoutNames > 0; i++) {
+      await new Promise(r => setTimeout(r, 100));
+      withoutNames = ink();
+    }
     return { before, found, marks: marks.length, named, on: f.scanner.on, withNames, withoutNames };
   });
   console.log('SCAN ' + JSON.stringify(out));
@@ -119,8 +145,15 @@ test('R16.8 — the scanner finds what is under the ground and keeps it', async 
   expect(out.marks, 'nothing the scanner found reached the map').toBeGreaterThan(out.before);
   expect(out.named, 'the deposits on the map do not say what they are').toBeGreaterThan(0);
   expect(out.on).toBe(false);
-  expect(out.withNames, 'the minimap draws no more while the scanner is up, so the names are not on it')
-    .toBeGreaterThan(out.withoutNames);
+  /**
+   * The label's own colour appears while the scanner is up and is gone when it is down. Stated as
+   * two facts rather than as one comparison, because a comparison between two different marker
+   * sets is what made this flaky — see the note on `ink` above.
+   */
+  expect(out.withNames, 'no label ink at all while the scanner is up, so the names are not painted')
+    .toBeGreaterThan(0);
+  expect(out.withoutNames, 'the deposit names are still painted after the scanner goes down')
+    .toBe(0);
   expect(errors).toEqual([]);
 });
 

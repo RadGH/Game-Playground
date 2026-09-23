@@ -2655,6 +2655,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     data: colonyData || null, goods: goodsData || null, raids: raidData || null,
     resources: resourceData || {}, refining: refiningData || {},
     colony, works, board, stores, farm, bestiary,
+    // R19 — so the Hauler Drone's `powerAtOrigin` is a real condition: no grid at the end it
+    // leaves from, no drone. `grid` is built ~300 lines above this, so it is safe to read here.
+    powerAt: place => grid.spareAt(place?.x, place?.z),
     dayLengthSeconds: balance.sky?.dayLengthSeconds ?? 900,
     seed, log: t => hud.log(t, 'level'),
   });

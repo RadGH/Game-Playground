@@ -139,7 +139,7 @@
     "moodGainPerNightHoused": 0.12,
     "spareBedsIgnoredAbove": 12
   },
-  "_taxDoc": "Gold out of people rather than out of loot. Only a citizen who is both FED and HOUSED pays — that is the whole lever, and it means the answer to 'how do I make money' is always 'look after more people'. Mood scales it, prosperity (your refined output, your waypoint, your walls) scales it again, and the cap stops a hundred peasants from replacing the game.",
+  "_taxDoc": "Gold out of people rather than out of loot. Only a citizen who is both FED and HOUSED pays — that is the whole lever, and it means the answer to 'how do I make money' is always 'look after more people'. Mood scales it, prosperity (your refined output, your waypoint, your walls) scales it again, and the cap stops a hundred peasants from replacing the game. R19: `unhousedPays` and `grumblingPays` are SHARES of the full rate, not flags — 0 is the cliff the design wants, and js/colony.js `collectTax` now reads them instead of hard-coding the same two zeroes. Set `grumblingPays` to 0.5 if a hungry village going broke ever reads as too sharp.",
   "tax": {
     "perCitizenPerDay": 6,
     "moodFloor": 0.25,
@@ -408,7 +408,7 @@
       "blurb": "Arrives once there is enough money here to be worth losing."
     }
   ],
-  "_guardDoc": "§8. A post is a structure with a `post` block; a guard is a citizen standing in one. A posted guard counts as a point of defence exactly the way a turret does, which is what makes 'spend gold on people' a real alternative to 'spend materials on walls'. One stat block, read by your guards AND by a town's, so the two are never quietly different. Nobody dies: a guard who falls in a raid is knocked down and is back at their post the next morning at half mood.",
+  "_guardDoc": "§8. A post is a structure with a `post` block; a guard is a citizen standing in one. A posted guard counts as a point of defence exactly the way a turret does, which is what makes 'spend gold on people' a real alternative to 'spend materials on walls'. One stat block, read by your guards AND by a town's, so the two are never quietly different. Nobody dies: a guard who falls in a raid is knocked down and is back at their post the next morning at half mood. `wardRadius` is how far that presence REACHES: js/colony.js `stationed(centre)` counts only guards whose post is inside it, so js/defence.js asks about the base being raided and a guard posted at the far mine stops raising the home base's raid tier (R19 — it was read by nobody, so every guard defended the whole planet).",
   "guard": {
     "hp": 260,
     "dmg": [

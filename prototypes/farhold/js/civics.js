@@ -41,6 +41,11 @@ export function createCivics({
   refining = null,          // data/refining.json   — and their recipes into it
   colony = null, works = null, board = null, stores = null, farm = null, bestiary = null,
   dayLengthSeconds = 900,
+  /**
+   * R19 — `powerAt(place)` -> spare kW on the grid there, or null where there is no grid.
+   * Only the Hauler Drone asks (`powerAtOrigin` in data/colony.json); everything else ignores it.
+   */
+  powerAt = null,
   seed = 1, log = null,
 } = {}) {
   /**
@@ -55,7 +60,7 @@ export function createCivics({
   const housing = createHousing({ data });
   const vendors = createVendors({ data });
   const hold = createHold({ goods: goods?.goods || [], capacity: data?.hold?.onBack ?? 40 });
-  const trade = createTrade({ goods: goods?.goods || [], data, seed });
+  const trade = createTrade({ goods: goods?.goods || [], data, seed, powerAt });
   const muster = createMuster({ data: raids, civics: { ...(data || {}), dayLengthSeconds }, bestiary, saved: null });
 
   const AWAY = data?.away || { rate: { away: 1, closed: 0.55 }, capSeconds: 28800, mercyDays: 3, sliceSeconds: 20, minCardSeconds: 900 };

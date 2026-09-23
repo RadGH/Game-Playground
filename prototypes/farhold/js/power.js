@@ -32,6 +32,23 @@ export function createGrid({ power = {}, stores = null, log = null } = {}) {
   const ORDER = SHED.order || ['life', 'defence', 'extraction', 'waypoint', 'refining', 'crafting', 'comfort'];
   const FLOOR = SHED.floor || {};
   const IDLE_SHARE = SHED.idleShare ?? 0.25;
+  /**
+   * R19 — THE SIX WORDS A MACHINE MAY SHOW, WHICH WERE DECLARED AND THEN READ BY NOBODY.
+   *
+   * data/power.json's `machineStates` is the enumeration `_stateDoc` says it is: "js/power.js and
+   * js/refine.js set exactly one of these and the UI paints it". Neither file read it. Both simply
+   * assigned string literals — fifteen of them across the two — and the proof that an unread
+   * enumeration drifts is already sitting in the data: §3 added `unworked` (a tended machine
+   * standing cold because nobody is working it) and the list in the file was never told, so the one
+   * state a player is most likely to be confused by was not a declared state at all.
+   *
+   * So `overview()` tallies machines by state in THIS order, and anything holding a word the data
+   * does not declare comes back in `undeclared` rather than vanishing out of the tally. A badge the
+   * panel cannot paint is now a named machine in a report instead of a blank square, and the next
+   * state somebody invents fails loudly the first time it is set.
+   */
+  const STATES = (power.machineStates?.length ? power.machineStates : ['running', 'idle', 'starved', 'unpowered', 'shed', 'blocked', 'unworked']).slice();
+  const isState = s => STATES.includes(s);
 
   const units = new Map();          // id -> unit
   let networks = [];
@@ -260,18 +277,31 @@ export function createGrid({ power = {}, stores = null, log = null } = {}) {
 
   /** The base overview's power half (§8.9). */
   function overview() {
-    return all().map(n => ({
-      id: n.id,
-      generators: n.members.filter(u => u.gen).length,
-      batteries: n.members.filter(u => u.store).length,
-      machines: n.members.filter(u => u.draw > 0).length,
-      gen: +(n.gen || 0).toFixed(1),
-      use: +(n.use || 0).toFixed(1),
-      charge: +(n.charge || 0).toFixed(1),
-      store: n.store || 0,
-      satisfaction: +(n.satisfaction ?? 1).toFixed(3),
-      shed: n.shed || [],
-    }));
+    return all().map(n => {
+      // R19 — one count per state data/power.json declares, in the order it declares them
+      const states = {};
+      for (const s of STATES) states[s] = 0;
+      const undeclared = [];
+      for (const u of n.members) {
+        if (!u.draw) continue;                       // a pole is not a machine with a badge
+        if (isState(u.state)) states[u.state]++;
+        else undeclared.push({ id: u.id, name: u.name, state: u.state });
+      }
+      return {
+        id: n.id,
+        generators: n.members.filter(u => u.gen).length,
+        batteries: n.members.filter(u => u.store).length,
+        machines: n.members.filter(u => u.draw > 0).length,
+        gen: +(n.gen || 0).toFixed(1),
+        use: +(n.use || 0).toFixed(1),
+        charge: +(n.charge || 0).toFixed(1),
+        store: n.store || 0,
+        satisfaction: +(n.satisfaction ?? 1).toFixed(3),
+        shed: n.shed || [],
+        states,
+        undeclared,
+      };
+    });
   }
 
   /**
@@ -298,6 +328,44 @@ export function createGrid({ power = {}, stores = null, log = null } = {}) {
     };
   }
 
+  /**
+   * R19 — HOW MANY kW ARE SPARE ON THE GRID THAT REACHES THIS POINT.
+   *
+   * The Hauler Drone in data/colony.json costs no gold and 12 kW `powerAtOrigin`, and js/trade.js
+   * needs to ask that question about a PLACE rather than about a machine — `whatIf` wants a unit
+   * id, and a trade post is not on the grid, it is standing next to it.
+   *
+   * A point is on a network when a supplier reaches it, which is the same test `rebuild()` uses to
+   * decide which network a machine belongs to, asked of bare ground. Returns null (not zero) when
+   * no supplier reaches the point at all: null means "there is no grid here" and zero means "there
+   * is one and it has nothing to give", and the drone's refusal line says something different for
+   * each of them.
+   */
+  function spareAt(x, z) {
+    if (!Number.isFinite(x) || !Number.isFinite(z)) return null;
+    const nets = all();
+    let best = null, bestD = Infinity;
+    for (const n of nets) {
+      for (const u of n.members) {
+        if (!(u.supplyRadius > 0)) continue;
+        const d = Math.hypot((u.x ?? 0) - x, (u.z ?? 0) - z);
+        if (d <= u.supplyRadius && d < bestD) { bestD = d; best = n; }
+      }
+    }
+    if (!best) return null;
+    /**
+     * CAPACITY minus load, not OUTPUT minus load.
+     *
+     * `supplied` is `gen * duty`, and duty is how hard the generators are being asked to work — so
+     * a base with nothing switched on has a burner generator sitting at zero output and `supplied
+     * - use` comes out as 0 spare. That is the opposite of the truth: a 30 kW generator with
+     * nothing drawing on it is the emptiest grid there is. The question the drone is really asking
+     * is "could this grid carry 12 kW more", and the answer is generation capacity less the load.
+     * My own test caught this on its first honest run, having passed vacuously before that.
+     */
+    return Math.max(0, (best.gen || 0) - (best.use || 0));
+  }
+
   function toJSON() {
     return { units: [...units.values()].map(u => ({ id: u.id, type: u.type, x: u.x, z: u.z, charge: u.charge, enabled: u.enabled, priority: u.priority, draw: u.draw })) };
   }
@@ -305,8 +373,10 @@ export function createGrid({ power = {}, stores = null, log = null } = {}) {
 
   return {
     add, remove, get, setBusy, setDraw, rebuild, networks: all,
-    potential, tick, stateOf, poweredOf, overview, whatIf, toJSON, load,
+    potential, tick, stateOf, poweredOf, overview, whatIf, spareAt, toJSON, load,
     order: ORDER,
+    // R19 — the declared badge words, so refine.js and any panel read the data instead of a literal
+    machineStates: STATES, isState,
     get brownout() { return brownout; },
     get size() { return units.size; },
   };

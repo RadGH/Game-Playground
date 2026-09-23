@@ -148,7 +148,16 @@ export function createDefence({
       return def?.cat === 'defence' && (e.powered !== false);
     });
     const colony = getColony?.() || null;
-    const posted = colony?.stationed?.() || 0;
+    /**
+     * R19 — the watch that can actually reach THIS base, not every guard on the planet.
+     *
+     * `colony.stationed(centre)` filters by `data/colony.json`'s `guard.wardRadius`, which until now
+     * nothing read. Handing it `baseSpot()` is what makes a guard at the outlying mine stop raising
+     * the home base's raid tier for a wall they are nowhere near. `baseSpot()` returns null before
+     * anything is built, and `stationed(null)` is the old whole-watch count, so an empty claim is
+     * unchanged. No recursion: `baseSpot` reads the build ledger and the outposts, never `baseOf`.
+     */
+    const posted = colony?.stationed?.(baseSpot()) || 0;
     return {
       structures: entries.length,
       // a guard standing a post is worth a turret, which is what makes "spend gold on people" a

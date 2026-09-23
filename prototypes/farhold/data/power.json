@@ -238,11 +238,12 @@
       }
     }
   },
-  "_stateDoc": "What a machine shows on its face (§8.8). js/power.js and js/refine.js set exactly one of these and the UI paints it: running, idle (nothing queued), starved (queued, missing an input), unpowered (no grid reaches it), shed (grid reaches it but the grid is short), or blocked (finished and nowhere to put the output).",
+  "_stateDoc": "What a machine shows on its face (§8.8). js/power.js and js/refine.js set exactly one of these and the UI paints it: running, idle (nothing queued), starved (queued, missing an input), unpowered (no grid reaches it), shed (grid reaches it but the grid is short), blocked (finished and nowhere to put the output), or unworked (a tended machine standing cold because nobody is working it, §3). R19 — js/power.js's createGrid finally READS this list: `grid.machineStates`/`grid.isState` are the declared words, and `overview()` tallies one count per state in this order and reports anything holding a word this list does not declare under `undeclared`. That is how `unworked` turned up missing: §3 invented it, nothing checked the enumeration, and the one badge a confused player is most likely to be looking at was not a declared state at all. 'queued' is deliberately NOT here — it is a row in a machine's queue, not a machine.",
   "machineStates": [
     "running",
     "idle",
     "starved",
+    "unworked",
     "unpowered",
     "shed",
     "blocked"

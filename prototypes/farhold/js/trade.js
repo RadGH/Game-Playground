@@ -125,7 +125,11 @@ export function installTradeGoods(resources, refining, tradegoods) {
   return { materials: mats, recipes: recs };
 }
 
-export function createTrade({ goods = [], data = null, seed = 1, caravans = null, territory = null, standings = null } = {}) {
+/**
+ * `powerAt(place)` answers "how many kW are spare on the grid at this place", or null when there is
+ * no grid there and null when the caller has not supplied one at all. See `powerNeed` below.
+ */
+export function createTrade({ goods = [], data = null, seed = 1, caravans = null, territory = null, standings = null, powerAt = null } = {}) {
   const GOODS = Array.isArray(goods) ? goods : (goods?.goods || []);
   const BY_ID = new Map(GOODS.map(g => [g.id, g]));
   const T = data?.trade || {};
@@ -330,6 +334,32 @@ export function createTrade({ goods = [], data = null, seed = 1, caravans = null
     if (kg > c.hold + 1e-9) {
       return { ok: false, why: `That is ${Math.round(kg)} kg and a ${c.name.toLowerCase()} carries ${c.hold}.`, kg, hold: c.hold };
     }
+    /**
+     * R19 — `powerAtOrigin`, WHICH data/colony.json HAS STATED SINCE THE HAULER DRONE LANDED.
+     *
+     * The drone's row is the only carrier with `upkeep: 0`, and its own blurb says why — "it dies
+     * with the grid". It costs power instead of money: 12 kW drawn at the END IT LEAVES FROM, which
+     * is the distinction that makes it interesting, because the far end of a route is usually
+     * somebody else's town with no grid of yours in it at all. None of that was read. A Hauler
+     * Drone was simply the fastest carrier in the game, free to run, with no condition on it.
+     *
+     * `powerAt` is optional: with no grid wired in (a node test, the away catch-up, a save being
+     * replayed) the check is skipped rather than refusing every route, because a drone that cannot
+     * be dispatched at all is worse than one that is not yet gated.
+     */
+    const need = c.powerAtOrigin || 0;
+    const spare = need > 0 && powerAt ? powerAt(from) : null;
+    if (need > 0 && spare != null && spare < need) {
+      return {
+        ok: false,
+        kg: round2(kg), hold: c.hold,
+        why: spare <= 0
+          ? `A ${c.name.toLowerCase()} runs on the grid and there is no power at ${from.name}.`
+          : `A ${c.name.toLowerCase()} draws ${need} kW and ${from.name} has ${Math.round(spare)} spare.`,
+        needsPower: need, sparePower: Math.round(spare),
+      };
+    }
+
     const g = Math.max(0, Math.min(guards, c.guardsMax || 0));
     const guardGold = g * (data?.guard?.routeGuardGold ?? 10);
     const upkeep = (c.upkeep || 0) + guardGold;
@@ -337,6 +367,9 @@ export function createTrade({ goods = [], data = null, seed = 1, caravans = null
     return {
       ok: true,
       fromId: from.id, fromName: from.name, toId: to.id, toName: to.name,
+      // the origin's position rides on the plan so `tick` can ask the grid about it later —
+      // without it `powerAt` got a place with no x/z, answered null, and nothing ever grounded
+      fromX: from.x ?? null, fromZ: from.z ?? null,
       carrier: c.key, carrierName: c.name,
       manifest: { ...manifest }, rows,
       kg: round2(kg), hold: c.hold,
@@ -347,6 +380,8 @@ export function createTrade({ goods = [], data = null, seed = 1, caravans = null
       profit: revenue - cost - upkeep,
       risk: ambushChance({ danger, guards: g }),
       repeat: !!repeat,
+      /** kW this carrier draws at the end it leaves from — 0 for everything but the drone. */
+      needsPower: need,
       why: null,
     };
   }
@@ -397,9 +432,32 @@ export function createTrade({ goods = [], data = null, seed = 1, caravans = null
    * road when you leave the planet is a cart that is further along when you come back.
    */
   function tick(seconds = 0, { day = 1, rng = Math.random } = {}) {
-    const out = { arrived: [], lost: [], repeated: [] };
+    const out = { arrived: [], lost: [], repeated: [], grounded: [], flying: [] };
     for (const r of routes.values()) {
       if (r.state !== 'travelling') continue;
+      /**
+       * R19 — "IT DIES WITH THE GRID", which is the second half of `powerAtOrigin`.
+       *
+       * A drone that needed the grid to set off needs it to keep going, so a brownout at home
+       * lands it where it stands and it goes on when the power comes back. It LANDS rather than
+       * being lost: losing a full hold to a cloudy afternoon is a reload, not a lesson, and the
+       * player has no warning a route is about to strand. Nothing else in the carrier table has a
+       * `powerAtOrigin`, so nothing else is affected by any of this.
+       */
+      if (r.needsPower > 0 && powerAt) {
+        const spare = powerAt({ id: r.fromId, name: r.fromName, x: r.fromX, z: r.fromZ });
+        const down = spare != null && spare < r.needsPower;
+        if (down && !r.grounded) {
+          r.grounded = true;
+          r.line = `${r.carrierName} set down short of ${r.toName}: no power at ${r.fromName}.`;
+          out.grounded.push(r);
+        } else if (!down && r.grounded) {
+          r.grounded = false;
+          r.line = `${r.carrierName} is up again and on its way to ${r.toName}.`;
+          out.flying.push(r);
+        }
+        if (r.grounded) continue;         // the clock stops too — it is not travelling
+      }
       r.elapsed += seconds;
       r.left = Math.max(0, r.left - seconds);
       if (r.robbed && !r.ambushed && r.elapsed >= r.seconds * 0.65) {

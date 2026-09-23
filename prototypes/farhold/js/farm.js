@@ -110,6 +110,7 @@ export function createFarm({ data = null, board = null, seed = 1, id = 'farm' } 
         grown: 0,
         soil: soilCfg.start,
         harvests: 0,
+        seed: 0,                  // R19 — grain kept back from the last harvest for the next sowing
         laidBy: 'player',         // recorded for ever: this field exists because a person dug it
         laidAt: at == null ? farm.now : at,
         ripeAt: null,
@@ -127,7 +128,36 @@ export function createFarm({ data = null, board = null, seed = 1, id = 'farm' } 
       if (i < 0) return { ok: false, why: 'No such plot.' };
       const [plot] = farm.plots.splice(i, 1);
       if (plot.orderId && board) board.cancel(plot.orderId);
+      // R19 — whatever was kept back for the next sowing goes into the store, not up in smoke
+      if (plot.seed > 0) { farm.store[plot.good] = (farm.store[plot.good] || 0) + plot.seed; plot.seed = 0; }
       return { ok: true, plot };
+    },
+
+    /**
+     * R19 — THE SEED THE HARVEST HAS TO PAY FOR, WHICH NOTHING HAS EVER CHARGED.
+     *
+     * Every crop in data/crops.json carries a `seedCost` — grain 2, sunroot 4 — and not one line of
+     * code read any of them, so a replant was free and every crop's real net was its gross. That
+     * quietly doubled grain (yield 4, cost 2: net 2, printed as 4) and multiplied sunroot by six
+     * (yield 5, cost 4: net 1), which is the whole shape of the crop table gone — a cheap reliable
+     * grain and an expensive showy gourd came out as "more yield is always better", and the food
+     * column was the only thing left to choose on.
+     *
+     * The seed is kept back AT HARVEST rather than charged at replant, and that is deliberate: a
+     * replant that could fail on an empty store is a field that dies for ever the first time the
+     * colony eats everything, and a permanently dead farm is a reload, not a lesson (COLONY.md §4).
+     * Held back on the plot, the seed cannot be eaten, cannot be traded and cannot go missing, so
+     * the field always replants itself and the player simply gets less. A plot the player has just
+     * broken has no seed set aside and needs none — sowing the first time is out of your own pack,
+     * which is exactly the fiction `layPlot`'s "the player sows it" already tells.
+     *
+     * `removePlot` gives the handful back, because tearing up a field should not burn the seed in it.
+     */
+    seedFor(plot) {
+      const crop = cropBy(plot.crop);
+      const cost = Math.max(0, Math.round(crop.seedCost ?? 0));
+      // never keep back more than the harvest actually brought in: a bad plot owes what it has
+      return Math.min(cost, farm.yieldOf(plot));
     },
 
     /** What a ripe plot is actually worth right now, soil and standing-too-long included. */
@@ -279,7 +309,11 @@ export function createFarm({ data = null, board = null, seed = 1, id = 'farm' } 
       plot.lastTendedBy = creditOf(order);
 
       if (kind === 'harvest' && plot.state === 'ripe') {
-        const got = farm.yieldOf(plot);
+        const gross = farm.yieldOf(plot);
+        // R19 — the next sowing's seed comes off the top and stays on the plot; see `seedFor`
+        const seed = farm.seedFor(plot);
+        const got = Math.max(0, gross - seed);
+        plot.seed = (plot.seed || 0) + seed;
         farm.store[plot.good] = (farm.store[plot.good] || 0) + got;
         plot.harvests++;
         plot.soil = clamp(plot.soil - (soilCfg.wearPerHarvest || 0), soilCfg.min, soilCfg.max);
@@ -287,12 +321,15 @@ export function createFarm({ data = null, board = null, seed = 1, id = 'farm' } 
         // a farmer can carry on for ever without ever breaking ground.
         plot.state = 'stubble';
         plot.ripeAt = null;
-        events.push({ kind: 'harvested', plot: plot.id, good: plot.good, count: got, by: plot.lastTendedBy });
+        events.push({ kind: 'harvested', plot: plot.id, good: plot.good, count: got, gross, seed, by: plot.lastTendedBy });
       } else if (kind === 'replant' && plot.state === 'stubble') {
         plot.state = 'growing';
         plot.grown = 0;
+        // the handful that was kept back goes in the hole. It is never short, by construction.
+        const sown = plot.seed || 0;
+        plot.seed = 0;
         plot.soil = clamp(plot.soil + (soilCfg.restorePerReplant || 0), soilCfg.min, soilCfg.max);
-        events.push({ kind: 'replanted', plot: plot.id, crop: plot.crop, by: plot.lastTendedBy });
+        events.push({ kind: 'replanted', plot: plot.id, crop: plot.crop, seed: sown, by: plot.lastTendedBy });
       }
       return events;
     },
@@ -343,6 +380,8 @@ export function createFarm({ data = null, board = null, seed = 1, id = 'farm' } 
         ...byState,
         meals: farm.meals,
         store: { ...farm.store },
+        // R19 — what the fields are holding back to sow again, so "where did my grain go" has an answer
+        seedHeld: round2(farm.plots.reduce((s, p) => s + (p.seed || 0), 0)),
         foodUnits: farm.foodUnits(),
         unitsWaiting: round2(waiting),
       };

@@ -54,16 +54,40 @@ export function perSwing(node, ctx = {}) {
  * is load-bearing: it is why a quarry two hundred metres out is a worse idea than an ore seam at
  * the same range.
  */
-export function walkSpeedFor(res, { data } = {}) {
+export function walkSpeedFor(res, { data, weight = null } = {}) {
   const haul = data?.haul || {};
-  const weight = data?.materials?.[res]?.weight ?? 1;
-  return (haul.walkSpeed ?? 4.6) / (1 + (haul.loadPenalty ?? 0.22) * weight);
+  const w = weight ?? data?.materials?.[res]?.weight ?? 1;
+  return (haul.walkSpeed ?? 4.6) / (1 + (haul.loadPenalty ?? 0.22) * w);
 }
 
 /** How much of this you can get your arms round in one trip. */
-export function carryFor(res, { data, carry = null } = {}) {
-  const stack = data?.materials?.[res]?.stack ?? 40;
-  return Math.min(carry ?? data?.haul?.carry ?? 40, stack);
+export function carryFor(res, { data, carry = null, stack = null } = {}) {
+  const s = stack ?? data?.materials?.[res]?.stack ?? 40;
+  return Math.min(carry ?? data?.haul?.carry ?? 40, s);
+}
+
+/**
+ * R19 — WHAT A RARE ELEMENT WEIGHS, WHICH NOTHING HAS EVER ASKED.
+ *
+ * Every other resource's haul numbers come out of `data.materials[res]`, and a rare element is
+ * deliberately NOT in that table: which rare elements exist is the universe's business (see
+ * `_rareDoc` in data/resources.json), so js/resources.js borrows the element's own name and colour
+ * from the planet and takes the rest from the `rareSeam` block. It took `baseYield`, `amountBand`,
+ * `hardness`, `radius` and `respawnSeconds` — and then `walkSpeedFor` and `carryFor` looked the
+ * weight and the stack up in `materials` by the element's key, missed, and fell back to the
+ * defaults of 1 and 40. So `rareSeam.weightPerUnit` (0.8) and `rareSeam.stack` (15) were both read
+ * by nobody, and a warp-core element hauled exactly like a sack of iron ore in arms that could hold
+ * forty of it. The stack is the one that mattered: fifteen a trip against forty is nearly three
+ * times the walking, which is the whole reason a rare seam is worth putting a store next to.
+ *
+ * Returns nulls for an ordinary node, so the `materials` lookup above stays in charge of everything
+ * that is actually in that table.
+ */
+export function haulUnitsFor(node, data = {}) {
+  const rare = !!node?.rare || node?.kind === 'rare_seam';
+  if (!rare) return { weight: null, stack: null };
+  const cfg = data.rareSeam || {};
+  return { weight: cfg.weightPerUnit ?? null, stack: cfg.stack ?? null };
 }
 
 /**
@@ -83,8 +107,10 @@ export function haulReport(node, ctx = {}) {
   const origin = ctx.origin || { x: 0, z: 0 };
   const distance = Math.hypot((node.x ?? 0) - (origin.x ?? 0), (node.z ?? 0) - (origin.z ?? 0));
   const pooled = ctx.pooled ?? (ctx.stores ? !!ctx.stores.poolAt(node.x, node.z) : false);
-  const speed = walkSpeedFor(res, { data });
-  const carry = carryFor(res, { data, carry: ctx.carry });
+  // R19 — a rare element is not in `materials`, so its weight and its stack come off `rareSeam`
+  const unit = haulUnitsFor(node, data);
+  const speed = walkSpeedFor(res, { data, weight: unit.weight });
+  const carry = carryFor(res, { data, carry: ctx.carry, stack: unit.stack });
 
   // the whole sum, in one line, and the reason this file exists
   const walkSeconds = pooled ? 0 : (2 * distance) / speed;
@@ -202,10 +228,10 @@ export function compareNodes(nodes, ctx = {}) {
  * often than you would think once a crusher is in the picture. This is the number to put on the
  * map when the player is choosing where to set up.
  */
-export function breakEvenDistance(rate, targetPerSecond, { data, resource = 'iron_ore', carry = null } = {}) {
+export function breakEvenDistance(rate, targetPerSecond, { data, resource = 'iron_ore', carry = null, weight = null, stack = null } = {}) {
   if (rate <= 0 || targetPerSecond <= 0) return 0;
-  const speed = walkSpeedFor(resource, { data });
-  const c = carryFor(resource, { data, carry });
+  const speed = walkSpeedFor(resource, { data, weight });
+  const c = carryFor(resource, { data, carry, stack });
   return (speed / 2) * (c / targetPerSecond - c / rate);
 }
 
@@ -216,7 +242,11 @@ export function breakEvenDistance(rate, targetPerSecond, { data, resource = 'iro
 export function breakEvenAgainst(richNode, nearNode, ctx = {}) {
   const near = haulReport(nearNode, ctx);
   const rate = faceRate(richNode, ctx);
-  const d = breakEvenDistance(rate, near.deliveredPerSecond, { data: ctx.data, resource: richNode.resource, carry: ctx.carry });
+  // R19 — the rich node may be the rare seam, and its arms-full is fifteen, not forty
+  const unit = haulUnitsFor(richNode, ctx.data || {});
+  const d = breakEvenDistance(rate, near.deliveredPerSecond, {
+    data: ctx.data, resource: richNode.resource, carry: ctx.carry, weight: unit.weight, stack: unit.stack,
+  });
   return {
     distance: +Math.max(0, d).toFixed(1),
     beatsIt: (haulReport(richNode, ctx).deliveredPerSecond) > near.deliveredPerSecond,

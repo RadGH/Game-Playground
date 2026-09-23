@@ -44,7 +44,7 @@ const FALLBACK = {
   jobs: [{ key: 'labourer', name: 'Labourer', tags: null, unitsPerHour: 1, mayBreakGround: false }],
   food: { perCitizenPerDay: 2, hungerPerDay: 0.5, hungerFedPerMeal: 0.34, rungs: { hungry: 0.3, grumbling: 0.55, downsTools: 0.78, leaves: 1 }, outputAtHungry: 0.65, moodLossPerDayHungry: 0.35, moodGainPerDayFed: 0.2 },
   housing: { moodLossPerDayUnhoused: 0.25, moodGainPerNightHoused: 0.12, spareBedsIgnoredAbove: 12 },
-  tax: { perCitizenPerDay: 6, moodFloor: 0.25, prosperityPerStructure: 0.01, prosperityMax: 1.5 },
+  tax: { perCitizenPerDay: 6, moodFloor: 0.25, prosperityPerStructure: 0.01, prosperityMax: 1.5, unhousedPays: 0, grumblingPays: 0 },
   migration: { rollEveryHours: 24, baseChance: 0.08, chanceAtFullAppeal: 0.55, weights: { spareBeds: 0.3, foodDays: 0.3, safety: 0.2, mood: 0.2 }, foodDaysForFullMarks: 6, spareBedsForFullMarks: 3, safetyForFullMarks: 6, offerExpiresHours: 12, maxPending: 2 },
   recruit: { poolPerSettlementSize: 1.5, poolRefillDays: 8, basePrice: 120, pricePerExistingCitizen: 18, priceBySkill: 90, standingDiscountAtMax: 0.35, maxSkill: 1.6, minSkill: 0.75 },
   names: { first: ['Ard', 'Bri', 'Cal'], last: ['a', 'en', 'ith'], family: ['Ashfoot', 'Bellow', 'Carrick'] },
@@ -355,10 +355,38 @@ export function createColony({
      * Somebody who has downed tools or is packing is not on the wall, so they are not a point of
      * defence — and `notorietyOf` reading them as one would mean a starving village being offered
      * a harder raid than a fed one.
+     *
+     * R19 — HOW FAR A GUARD'S PRESENCE REACHES, WHICH IS WHAT `guard.wardRadius` HAS ALWAYS SAID.
+     *
+     * data/colony.json's guard block has carried `wardRadius: 90` since the Civilization Expansion
+     * landed and not one line of code read it, which meant a guard was a point of defence for the
+     * whole planet: post somebody at the watch tower beside the mine four hundred metres out and
+     * the HOME base counted them, so data/raids.json's `minDefence` gate opened and
+     * `notoriety.perCitizen` climbed for a wall that guard could not see, let alone stand on. Worse
+     * in one direction than the other: the raid arrives at `baseSpot()` and the guard who made it
+     * harder is not there.
+     *
+     * So `centre` is the spot being defended, and only guards whose POST is inside `wardRadius` of
+     * it count. Called with nothing — which is every existing caller, the Holding screen and the
+     * forty-odd tests included — it counts the whole watch exactly as it always did, because
+     * "how many of my folk are standing a post" is a different question from "how many are standing
+     * one HERE". A guard whose post the game layer never handed in through `setPosts` also counts:
+     * an unknown position is not evidence of a distant one, and guessing would silently disarm a
+     * base whose posts had not been registered yet.
      */
-    stationed() {
-      return colony.citizens.filter(c => c.posted && c.rung !== 'downsTools' && c.rung !== 'leaving').length;
+    stationed(centre = null) {
+      const on = colony.citizens.filter(c => c.posted && c.rung !== 'downsTools' && c.rung !== 'leaving');
+      if (!centre || centre.x == null || centre.z == null) return on.length;
+      const ward = guardCfg.wardRadius ?? Infinity;
+      return on.filter(c => {
+        const post = colony.posts.find(p => p.id === c.posted);
+        if (!post || post.x == null || post.z == null) return true;
+        return Math.hypot(post.x - centre.x, post.z - centre.z) <= ward;
+      }).length;
     },
+
+    /** How far a posted guard's presence reaches, in metres. §8.1, and the panel prints it. */
+    wardRadius() { return guardCfg.wardRadius ?? Infinity; },
     tending() { return colony.citizens.filter(c => c.stationId != null).length; },
 
     // ---------------------------------------------------------------- standing a post
@@ -624,6 +652,19 @@ export function createColony({
      *
      * Fed AND housed, or nothing. A grumbling citizen keeps working and stops paying, which is the
      * clearest possible signal short of a message box — the gold line simply goes down.
+     *
+     * R19 — AND THOSE TWO WORDS WERE HARD-CODED, BESIDE THE TWO KNOBS THAT STATE THEM.
+     *
+     * data/colony.json's `tax` block has carried `unhousedPays: 0` and `grumblingPays: 0` since the
+     * colony landed and nothing anywhere read either of them: the loop below simply `continue`d on
+     * both cases. Same value, so the same behaviour — which is exactly why nobody noticed, and
+     * exactly the fault this project keeps finding. They are SHARES of the full rate, not flags:
+     * `grumblingPays: 0.5` means a hungry village still puts something in the purse, which is the
+     * knob to reach for if "feed them or get nothing" ever reads as too sharp a cliff. Both stay at
+     * 0 in the data, so this change moves no number in the shipped game.
+     *
+     * Unhoused is tested first and wins, as it did before: somebody sleeping rough AND grumbling is
+     * skipped for the bed, because the bed is the thing the player can do something about tonight.
      */
     collectTax() {
       const prosperity = colony.prosperity();
@@ -632,12 +673,18 @@ export function createColony({
       const skipped = [];
       for (const c of colony.citizens) {
         const rung = hungerRung(c, foodCfg);
-        if (!c.home) { skipped.push({ id: c.id, name: c.name, why: 'no bed' }); continue; }
-        if (rung !== 'content' && rung !== 'hungry') { skipped.push({ id: c.id, name: c.name, why: 'grumbling' }); continue; }
+        const grumbling = rung !== 'content' && rung !== 'hungry';
+        const share = !c.home ? (taxCfg.unhousedPays ?? 0)
+          : grumbling ? (taxCfg.grumblingPays ?? 0)
+          : 1;
+        if (share <= 0) {
+          skipped.push({ id: c.id, name: c.name, why: !c.home ? 'no bed' : 'grumbling' });
+          continue;
+        }
         const mood = clamp(c.mood, taxCfg.moodFloor ?? 0.25, 1);
-        const due = (taxCfg.perCitizenPerDay || 0) * mood * prosperity;
+        const due = (taxCfg.perCitizenPerDay || 0) * mood * prosperity * share;
         gold += due;
-        paid.push({ id: c.id, name: c.name, gold: round2(due) });
+        paid.push({ id: c.id, name: c.name, gold: round2(due), share: round2(share) });
       }
       /**
        * WAGES OUT AND RENT IN, IN THE SAME PASS. §5.6 and §8.3.

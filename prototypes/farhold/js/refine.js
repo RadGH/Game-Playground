@@ -652,6 +652,7 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       id: m.id, name: m.name, type: m.type, tier: m.def.tier,
       state: m.state,
       stateText: stateText(m),
+      declared: stateDeclared(m),       // R19 — data/power.json's `machineStates` knows this word
       recipe: recipe?.id || null,
       recipeName: recipe?.name || '',
       progress: recipe ? Math.min(1, m.progress / recipe.time) : 0,
@@ -685,9 +686,26 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
       case 'unworked': return 'Standing cold — nobody is working this';
       case 'unpowered': return 'No power reaches this';
       case 'shed': return 'Grid is short — this was switched off to keep the important things on';
-      default: return m.state;
+      default:
+        /**
+         * R19 — A BADGE THE DATA NEVER DECLARED IS A BUG, NOT A WORD TO PRINT AT THE PLAYER.
+         *
+         * data/power.json's `machineStates` is the list of what a machine may show, and the grid
+         * now hands it over as `isState`. Until R19 nothing read that list, so the enumeration and
+         * the code drifted the moment §3 invented `unworked` — and this branch's `return m.state`
+         * meant the drift came out as a raw key in the station panel rather than as anything
+         * anybody would report. `declared` on the snapshot is the same check for a screen that
+         * would rather not print the sentence.
+         */
+        if (grid?.isState && !grid.isState(m.state)) {
+          return `Something is wrong with this machine: nothing knows what "${m.state}" means.`;
+        }
+        return m.state;
     }
   }
+
+  /** R19 — is this machine showing a state data/power.json declares? True with no grid to ask. */
+  function stateDeclared(m) { return grid?.isState ? grid.isState(m.state) : true; }
 
   /** Every machine at once, for the base overview (§8.9) and the one shared job list (§3.19). */
   function allJobs() {

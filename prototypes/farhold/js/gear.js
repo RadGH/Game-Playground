@@ -254,14 +254,28 @@ export const SHOP_GEAR = {
  *
  * "Add affixes specifically for the light source and mount slots, that do not apply to other slots."
  * These are the properties that only make sense on the thing they are attached to — a light that
- * frightens what it shines on, a horse that does not spook. They roll and upgrade like any other
- * affix; `js/affixes.js` carries their units, floors and caps.
+ * lights further, a horse that does not spook. They roll and upgrade like any other affix;
+ * `js/affixes.js` carries their units, floors and caps.
+ *
+ * R22 — TWO LIGHT AFFIXES DELETED, because their condition is always true.
+ *
+ * "A lantern I found grants 15% damage reduction *while carrying a light*. That's silly, you are
+ * always carrying a light in this game." He is right, and it is worse than silly: `cond_lightWard`
+ * gated itself on `derived.lightRange > 0`, which is a stat the LANTERN ITSELF grants — so the
+ * affix's own item satisfied the affix's own condition, every time, forever. It was a flat 10-25%
+ * damage reduction wearing a condition as a costume, and the best defensive roll in the game was
+ * on the lamp slot.
+ *
+ * `cond_lightSteady` ("enemies are less likely to notice you while this light is lit") went for the
+ * same reason plus a second one: it is a LIGHT. Nothing in Farhold reads `derived.stealth` to make
+ * you harder to see anyway, so it was an inert stat describing a backwards fiction.
+ *
+ * They are deleted rather than re-tuned — the ask was "remove that affix entirely" — and the light
+ * pool is two affixes wide now. `DEAD_SLOT_STATS` below strips them off anything already rolled.
  */
 export const SLOT_AFFIXES = {
   light: [
     { id: 'wide_beam', name: 'Broad', stat: 'cond_lightRange', min: 8, max: 20 },
-    { id: 'steady_flame', name: 'Steady', stat: 'cond_lightSteady', min: 0.1, max: 0.25 },
-    { id: 'warding_light', name: 'Warding', stat: 'cond_lightWard', min: 0.1, max: 0.25 },
     { id: 'seeking_light', name: "Finder's", stat: 'cond_lightReveal', min: 12, max: 30 },
   ],
   mount: [

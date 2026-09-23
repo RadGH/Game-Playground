@@ -153,10 +153,24 @@ test('the title screen tagline is centred as a box, not only as text', () => {
   assert.match(css, /#boot \.tagline \{ color: #9fb0c8; margin: 0 auto 22px/);
 });
 
-test('the mount slot and the Ride row read the same number', () => {
+/**
+ * R22 — the rule, not the wording.
+ *
+ * R17's version asserted the exact expression `slot === 'mount' ? this.mountNote(worn)`, which
+ * kept a second mount row alive after the round that merged the two. The rule was always "one
+ * place computes a mount's speed"; R22 satisfies it by having one row instead of two that agree.
+ */
+test('there is exactly one mount control, and one place that computes its speed', () => {
   const hud = read('js/hud.js');
-  assert.match(hud, /slot === 'mount' \? this\.mountNote\(worn\)/);
-  assert.match(hud, /mountNote\(worn\) \{/);
+  const main = read('js/main.js');
+  // the sheet's own slot loop no longer carries 'mount' — the Ride row is the only mount picker
+  assert.equal(/for \(const slot of \['tool', 'mount'\]\)/.test(hud), false);
+  assert.match(hud, /'Mount \/ ride \(H\)'/);
+  // and the only m/s figure for a mount is built in ground(), through one formatter
+  assert.match(main, /const paceNote = \(ms, tail\) =>/);
+  assert.equal((main.match(/'climbs anything'/g) || []).length, 1);
+  // the sheet never computes a mount speed of its own
+  assert.equal(/mountNote\(worn\) \{/.test(hud), false);
 });
 
 test('an empty vehicle dropdown says (None) rather than being blank', () => {

@@ -17,11 +17,11 @@
 
 import { Loot } from '../../emberveil/js/loot.js';
 import { makeRng } from '../../emberveil/js/rng.js';
-import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, FARHOLD_AFFIXES } from './affixes.js';
+import { tuneAffixData, affixAllowed, rollAffixValue, itemLevelFor, requirementFor, tierFor, capValue, roundFor, scrubRetired, FARHOLD_AFFIXES } from './affixes.js';
 import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
 import {
-  handsOf, profileOf, offhandRefusal, OFFHAND_DAMAGE, markHands, describeWeapon,
+  handsOf, profileOf, offhandRefusal, quiverGoesWith, OFFHAND_DAMAGE, markHands, describeWeapon,
   strikeAt, traitsOf, familyWind, rangedPlan, clipFor, CLIP_SECONDS, isStaff, isWand, STAFF_CHARGE,
 } from './weapons.js';
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
@@ -1003,6 +1003,9 @@ export class Rpg {
 
   /** Recompute derived stats, keeping the same share of health unless `full` is asked for. */
   refresh(unit, { full = false } = {}) {
+    // R22 — a save may carry a lamp that rolled an affix this round retired. Take it off before the
+    // sheet is rebuilt, so the card never prints `Warding: 0.15` at a stat nothing can resolve.
+    for (const it of [...Object.values(unit.equipment || {}), ...(unit.bag || [])]) scrubRetired(it);
     const before = unit.derived;
     const d = this.derive(unit);
     const hpFrac = full || !before ? 1 : Math.min(1, (unit.hp ?? d.maxHp) / (before.maxHp || d.maxHp));
@@ -1097,8 +1100,10 @@ export class Rpg {
     if (!SLOTS.includes(slot)) return null;
     const old = player.equipment[slot] || null;
     player.equipment[slot] = item;
-    // a two-handed weapon clears the off hand — unless Doubled Grasp says both hands can hold one
-    if (slot === 'weapon' && item.twoHanded && player.equipment.offhand && !player.perkFlags?.doubleGrip) {
+    // a two-handed weapon clears the off hand — unless Doubled Grasp says both hands can hold one,
+    // or the off hand is a quiver and the weapon going on is the bow that quiver feeds (R22)
+    if (slot === 'weapon' && item.twoHanded && player.equipment.offhand && !player.perkFlags?.doubleGrip
+        && !quiverGoesWith(player.equipment.offhand, item)) {
       player.bag.push(player.equipment.offhand);
       delete player.equipment.offhand;
     }

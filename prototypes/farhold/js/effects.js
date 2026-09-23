@@ -452,15 +452,28 @@ def('affix:cond_toolScan', v => `Sweeps ${n1(v)} more metres of ground for burie
 def('affix:cond_lightRange', v => `Lights ${n1(v)} more metres of ground around you`, {
   derive: (v, d) => { d.lightRange = (d.lightRange || 0) + v; },
 });
-def('affix:cond_lightSteady', v => `Enemies are ${pct(v)} less likely to notice you while this light is lit`, {
-  derive: (v, d) => { d.stealth = (d.stealth || 0) + v; },
-});
-// The old line promised "less damage from anything standing in its light" and the hook took the
-// share off EVERY hit whether anything was lit or not. Nothing here knows where the light falls, so
-// the line now says what the hook actually does, gated on carrying a light at all.
-def('affix:cond_lightWard', v => `You take ${pct(v)} less damage while you are carrying a light`, {
-  dmgIn: (v, c) => ((c.self?.derived?.lightRange || 0) > 0 ? 1 - v : 1),
-});
+/**
+ * R22 — `cond_lightSteady` AND `cond_lightWard` ARE GONE. A CONDITION THAT IS ALWAYS TRUE IS NOT A
+ * CONDITION.
+ *
+ *   "A lantern I found grants 15% damage reduction 'while carrying a light'. That's silly, you are
+ *    always carrying a light in this game. […] Also remove the property 'enemies are less likely to
+ *    notice you' ITS A LIGHT LOL."
+ *
+ * `cond_lightWard` gated itself on `derived.lightRange > 0`, and `lightRange` is the stat the lamp
+ * ITSELF grants (`cond_lightBase`, written from the base's range in js/gear.js). So the item wearing
+ * the affix was the thing satisfying the affix's own condition, always, and R18's rewording — which
+ * was an honest attempt to make the line match the hook — made that visible rather than fixing it.
+ * A flat 10-25% damage reduction is the strongest defensive roll in the game and it was on the lamp.
+ *
+ * `cond_lightSteady` had the opposite problem twice over: it read backwards (a lit lamp making you
+ * *harder* to see), and `derived.stealth` is pooled with the perk arm and applied ungated in
+ * js/actors.js, so it was never conditional on the light either.
+ *
+ * Both are deleted from `SLOT_AFFIXES.light` in js/gear.js; `RETIRED_STATS` + `scrubRetired` in
+ * js/affixes.js take them off a lamp an old save is already carrying. `derived.stealth` stays —
+ * the perk arm still writes it and js/actors.js still reads it.
+ */
 /**
  * R18 — TWO WRITERS, TWO UNITS, AND ONE OF THEM BLEW THE MINIMAP OUT BY UP TO NINETY TIMES.
  *

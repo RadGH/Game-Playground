@@ -172,6 +172,26 @@ export const TALENT_LIBRARY = {
   // was `mult 1.5, cooldownPct +50` — the one node in the game that made a skill worse to press.
   overload: { id: 'overload', tier: 3, name: 'Overload', mod: { mult: 1.3 }, fx: 'overload' },
   brand: { id: 'brand', tier: 3, name: 'Branding', mod: { mark: 0.2, markSeconds: 6 }, fx: 'brand' },
+
+  /**
+   * ---- tier 4 (R22): the pick at level 28, where a skill stops being a skill and becomes a plan.
+   *
+   *   "add a new one at the end to make up for the gap"
+   *
+   * Every one of these is built out of mod keys that ALREADY have a reader — `chains`, `splash`,
+   * `sunder`, `mark`, `leech`, `killRefund`, `ground`, `barrier`, `mult`, `cooldownPct`. That is
+   * deliberate and it is this project's oldest lesson: a new talent whose mod key nothing reads is
+   * a sentence on a card and nothing else, and R21b only just got the count of those to zero.
+   * `tests/weapons.test.js` fails if one comes back, so a tier 4 made of new keys would have had to
+   * ship with six new readers or not ship at all. Combining two implemented mods gives a node that
+   * is genuinely bigger than a tier-3 pick without inventing a mechanic.
+   */
+  cascade: { id: 'cascade', tier: 4, name: 'Cascade', mod: { chains: 3, chainFalloff: 0.85, splash: 2 }, fx: 'chain' },
+  unmaking: { id: 'unmaking', tier: 4, name: 'Unmaking', mod: { sunder: 18, mark: 0.15, markSeconds: 5 }, fx: 'shatter' },
+  wellspring: { id: 'wellspring', tier: 4, name: 'Wellspring', mod: { leech: 0.18, killRefund: 3 }, fx: 'drain' },
+  crescendo: { id: 'crescendo', tier: 4, name: 'Crescendo', mod: { mult: 1.25, cooldownPct: -20 }, fx: 'overload' },
+  conflagration: { id: 'conflagration', tier: 4, name: 'Conflagration', mod: { ground: 6, groundRadius: 4.5, statusLonger: 3 }, fx: 'ground' },
+  aegis: { id: 'aegis', tier: 4, name: 'Aegis', mod: { barrier: 0.35, barrierSeconds: 8 }, fx: 'bulwark' },
 };
 
 // Every node's line, written from its own numbers. Done once, at load.
@@ -201,18 +221,18 @@ const OFFERS = {
    * now reads as three genuinely different projectiles (a fan, a piercing shot, a seeking one)
    * instead of two behaviours and a stat stick.
    */
-  bolt: { 1: ['fan', 'pierce', 'seeking'], 2: ['burst', 'chain', 'deepen'], 3: ['cauterise', 'echo', 'brand'] },
-  nova: { 1: ['wide', 'heavy', 'quick'], 2: ['linger', 'shatter', 'drain'], 3: ['bulwark', 'overload', 'hunger'] },
-  cone: { 1: ['wide', 'heavy', 'quick'], 2: ['linger', 'deepen', 'shatter'], 3: ['cauterise', 'overload', 'brand'] },
-  beam: { 1: ['pierce', 'heavy', 'quick'], 2: ['shatter', 'drain', 'chain'], 3: ['overload', 'echo', 'brand'] },
-  ground: { 1: ['wide', 'quick'], 2: ['linger', 'deepen', 'drain'], 3: ['hunger', 'bulwark', 'brand'] },
-  swipe: { 1: ['wide', 'heavy', 'quick'], 2: ['shatter', 'drain', 'burst'], 3: ['cauterise', 'hunger', 'overload'] },
-  dash: { 1: ['quick', 'heavy'], 2: ['burst', 'shatter'], 3: ['bulwark', 'hunger'] },
+  bolt: { 1: ['fan', 'pierce', 'seeking'], 2: ['burst', 'chain', 'deepen'], 3: ['cauterise', 'echo', 'brand'], 4: ['cascade', 'crescendo', 'unmaking'] },
+  nova: { 1: ['wide', 'heavy', 'quick'], 2: ['linger', 'shatter', 'drain'], 3: ['bulwark', 'overload', 'hunger'], 4: ['conflagration', 'aegis', 'wellspring'] },
+  cone: { 1: ['wide', 'heavy', 'quick'], 2: ['linger', 'deepen', 'shatter'], 3: ['cauterise', 'overload', 'brand'], 4: ['conflagration', 'crescendo', 'unmaking'] },
+  beam: { 1: ['pierce', 'heavy', 'quick'], 2: ['shatter', 'drain', 'chain'], 3: ['overload', 'echo', 'brand'], 4: ['cascade', 'unmaking', 'crescendo'] },
+  ground: { 1: ['wide', 'quick'], 2: ['linger', 'deepen', 'drain'], 3: ['hunger', 'bulwark', 'brand'], 4: ['conflagration', 'wellspring', 'aegis'] },
+  swipe: { 1: ['wide', 'heavy', 'quick'], 2: ['shatter', 'drain', 'burst'], 3: ['cauterise', 'hunger', 'overload'], 4: ['unmaking', 'wellspring', 'crescendo'] },
+  dash: { 1: ['quick', 'heavy'], 2: ['burst', 'shatter'], 3: ['bulwark', 'hunger'], 4: ['crescendo', 'aegis'] },
   // a skill you cast on yourself hits nothing, so it is offered the modifiers that still mean
   // something on it: a shorter cooldown, a stronger effect, a longer-lasting status
-  buff: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['echo', 'hunger'] },
-  heal: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['echo', 'hunger'] },
-  summon: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['hunger', 'bulwark'] },
+  buff: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['echo', 'hunger'], 4: ['crescendo', 'wellspring'] },
+  heal: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['echo', 'hunger'], 4: ['wellspring', 'aegis'] },
+  summon: { 1: ['quick', 'heavy'], 2: ['deepen', 'drain'], 3: ['hunger', 'bulwark'], 4: ['crescendo', 'aegis'] },
 };
 
 /** Every talent a player can actually pick, for the audit. */
@@ -236,11 +256,27 @@ export function offerShape(shape = 'bolt') {
   return OFFERS[shape] ? shape : (SHAPE_ALIASES[shape] || 'bolt');
 }
 
-/** Which levels a skill's tiers unlock at. One pick per tier, and they open as you grow. */
-export const TIER_LEVELS = [1, 8, 18];
+/**
+ * Which levels a skill's tiers unlock at. One pick per tier, and they open as you grow.
+ *
+ * R22 — NOBODY STARTS WITH A TALENT ANY MORE.
+ *
+ *   "Change it so you do NOT start with any skill talents, just start at level 3 instead and add a
+ *    new one at the end to make up for the gap."
+ *
+ * Tier 1 opened at level 1, so a brand-new character's very first character sheet had a free pick
+ * waiting on every skill on the bar — a decision asked before the player has cast anything, which
+ * is the worst moment to ask it. It opens at 3 now: you have used the skill by then, so the choice
+ * between a fan, a piercing shot and a seeking one is a choice about something you have seen.
+ *
+ * The fourth tier at 28 is the "make up for the gap" half, and it lands where the spell ladder
+ * (1/3/6/12/18/24, see CLASSES.md) has run out — from 24 to 50 nothing on a skill changed, and now
+ * the last thing that opens is the biggest one.
+ */
+export const TIER_LEVELS = [3, 8, 18, 28];
 
 /**
- * The tree for one skill: three tiers, two or three nodes in each.
+ * The tree for one skill: one tier per entry in `TIER_LEVELS`, two or three nodes in each.
  *
  * `shape` is the skill's own (`bolt`, `nova`, `cone`…), which is what decides the offer — a talent
  * that makes no sense for the skill is simply not on the board, rather than being on it and doing
@@ -258,10 +294,11 @@ export function treeFor(skillId, shape = 'bolt') {
   };
   return {
     skillId, shape, offer: key,
-    tiers: [1, 2, 3].map(tier => ({
-      tier,
-      level: TIER_LEVELS[tier - 1],
-      nodes: (offer[tier] || []).map(node).filter(Boolean),
+    // R22: driven by TIER_LEVELS rather than a hard-coded [1, 2, 3], so adding a tier is one edit
+    tiers: TIER_LEVELS.map((level, i) => ({
+      tier: i + 1,
+      level,
+      nodes: (offer[i + 1] || []).map(node).filter(Boolean),
     })),
   };
 }

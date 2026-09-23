@@ -92,6 +92,30 @@ export function createTownHall({ read = () => ({}), onRecruit = null, onTakeJob 
   let tab = 'town';
   let town = null;
 
+  /**
+   * R22 — THE WAY OUT IS BUILT ONCE, BEFORE ANYTHING CAN THROW.
+   *
+   *   "I had an option 'E to enter town hall' which opened a blue screen, but there was nothing but
+   *    a thin line at the top. I couldn't get out of the menu and had to refresh."
+   *
+   * The blue is `.civics`'s own background and the thin line is `.hall-head`'s bottom border — i.e.
+   * the screen opened and all three boxes stayed EMPTY, which happens when `draw()` throws. And it
+   * throws easily: `read(town)` in js/main.js reaches into `zones`, `folk`, `colony`, `works` and
+   * `standings`, and a settlement record missing `wx`/`wz` takes the whole call down.
+   *
+   * The close button was built INSIDE `draw()`, so the one failure that empties the screen is the
+   * same failure that removes the way out of it. It lives here now, outside the draw, in a bar that
+   * is appended once — and this file has its own Escape listener as well, the way js/station-ui.js
+   * and js/followers-ui.js both do, instead of relying on a global chain in js/main.js that an
+   * earlier branch can consume.
+   */
+  const closeBtn = el('button', { class: 'hall-close', text: 'Close  (Esc)', onclick: () => toggle(false) });
+  head.append(closeBtn);
+  document.addEventListener('keydown', e => {
+    if (!open) return;
+    if (e.key === 'Escape') { toggle(false); e.stopPropagation(); e.preventDefault(); }
+  }, true);
+
   function drawRail() {
     rail.replaceChildren(...HALL_TABS.map(t => el('button', {
       class: t.key === tab ? 'on' : null,
@@ -100,15 +124,38 @@ export function createTownHall({ read = () => ({}), onRecruit = null, onTakeJob 
     })));
   }
 
-  function draw() {
-    if (!open) return;
-    const r = read(town) || {};
-    const T = r.town || {};
+  /** Put the title back, keeping the Close button that was appended once at construction. */
+  function drawHead(T) {
     head.replaceChildren(
       el('h2', { text: T.name ? `${T.name} — Town Hall` : 'Town Hall' }),
       el('span', { class: 'hall-sub', text: `${T.kind || 'settlement'}${T.factionName ? ` \u00b7 ${T.factionName}` : ''}` }),
-      el('button', { class: 'hall-close', text: 'Close', onclick: () => toggle(false) }),
+      closeBtn,
     );
+  }
+
+  function draw() {
+    if (!open) return;
+    /**
+     * R22 — a screen that cannot draw still has to be a screen you can leave.
+     *
+     * Everything below the head is rebuilt from `read(town)`, and that is the part that can fail.
+     * When it does, say so where the panes would have been rather than leaving three empty boxes,
+     * and keep the head — and therefore Close — standing. The console still gets the real error.
+     */
+    let r;
+    try {
+      r = read(town) || {};
+    } catch (err) {
+      console.error('[town hall] read() failed', err);
+      drawHead({});
+      rail.replaceChildren();
+      body.replaceChildren(pane('Town Hall', [
+        el('p', { class: 'civ-note', text: 'This hall cannot be read right now. Press Esc or Close to go back outside.' }),
+      ]));
+      return;
+    }
+    const T = r.town || {};
+    drawHead(T);
     drawRail();
     body.replaceChildren(
       tab === 'town' ? drawTown(r)
@@ -116,6 +163,12 @@ export function createTownHall({ read = () => ({}), onRecruit = null, onTakeJob 
         : tab === 'hire' ? drawHire(r)
         : drawWork(r),
     );
+    // A tab that produced nothing at all looks exactly like the screen being broken. Say which it is.
+    if (!body.childElementCount) {
+      body.replaceChildren(pane('Nothing here yet', [
+        el('p', { class: 'civ-note', text: 'This tab has nothing to show for this settlement. Try another tab, or press Esc to go back outside.' }),
+      ]));
+    }
   }
 
   function drawTown(r) {

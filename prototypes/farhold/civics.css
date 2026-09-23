@@ -252,3 +252,8 @@
 .hall-rail button.on { color: #061018; background: var(--civ-accent); border-color: var(--civ-accent); }
 
 .hall-body { overflow: auto; min-height: 0; padding-right: 4px; }
+
+/* R22 — a Town Hall pane that has nothing to say, or could not be read at all. `.civ-note` was
+   only ever styled inside a `.civ-row`, so a bare one in a pane inherited nothing and came out
+   the same colour as the background it was explaining. */
+.civ-pane > .civ-note { color: var(--civ-faint); font-size: 13px; line-height: 1.5; margin: 6px 0 0; }

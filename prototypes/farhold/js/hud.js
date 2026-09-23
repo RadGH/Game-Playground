@@ -985,17 +985,13 @@ export class Hud {
   }
 
   /**
-   * What the mount in the slot is worth, in the same units as the Ride row.
+   * R22 — `mountNote` is gone with the row that called it.
    *
-   * Asks `ground()` for the answer rather than working it out again, because working it out again
-   * is how the two rows came to disagree in the first place.
+   * R17 added it so the Mount slot and the Ride row could quote the same figure. R22 deleted the
+   * Mount slot row instead: two rows that must agree is a rule somebody has to keep, and one row
+   * is a rule nobody can break. `ground()` in js/main.js is the only place a mount speed is
+   * computed now, and there is exactly one dropdown reading it.
    */
-  mountNote(worn) {
-    const mount = this.ground?.()?.options?.find(o => o.key === 'mount');
-    if (mount?.note) return mount.note;
-    // no ground list (a test, or the sheet opened before the world did) — say what we can
-    return worn?.speed ? `${Math.round(worn.speed * 100) / 100}× walking pace` : 'Carries you.';
-  }
 
   /**
    * Ask the held-mode readout to reconsider whether it should be on screen.
@@ -1861,59 +1857,65 @@ export class Hud {
        * not a data-model one. So these two rows read `player.equipment[slot]` and everything you
        * are carrying that would fit it, and the two below go on reading `player.vehicles`.
        */
-      for (const slot of ['tool', 'mount']) {
+      /**
+       * R22 — PICKING A MOUNT TOOK IT OFF, AND THERE WERE TWO DROPDOWNS FOR ONE HORSE.
+       *
+       *   "I bought a new mount and tried to equip it in the Character menu. It changed to
+       *    '- none -' and now I can't put my horse back. […] ride and mount ARE THE SAME THING so
+       *    one needs to be removed."
+       *
+       * Two separate faults, and the first is a one-argument mistake. `onEquip(item, unequipSlot)`
+       * reads its SECOND argument as "take this slot off" — that is how the bag's X button clears a
+       * slot (`this.onEquip(null, slot)` below). This row was calling `onEquip(pick, slot)`, so
+       * choosing a mount ran `rpg.unequip(player, 'mount')`: the horse came off, went to the bag,
+       * and the row re-drew as "— none —" with the horse now *in the bag*, which is why re-picking
+       * it did the same thing again. The Tool row had the identical bug.
+       *
+       * The second is the duplicate. The Mount row (what is in the slot) and the Ride row (what H
+       * whistles for) really are two questions, but with one horse and no truck they are the same
+       * two words twice, printed at two different speeds. They are ONE row now, below: every mount
+       * you own and every ground vehicle you have built, in one list. `mountNote` goes with it.
+       */
+      {
+        const slot = 'tool';
         const worn = player.equipment?.[slot] || null;
         const spare = (player.bag || []).filter(i => i && i.slot === slot);
         const row = el('div', 'vehicle-row');
         row.append(el('span', 'muted small', SLOT_LABELS[slot]));
         if (!worn && !spare.length) {
           row.append(el('span', 'muted small',
-            slot === 'tool'
-              ? 'None. A tool is built — a Knapped Tool costs nothing but timber, stone and fibre.'
-              : 'None. Mounts are bought at any shop, or forged at a bench.'));
+            'None. A tool is built — a Knapped Tool costs nothing but timber, stone and fibre.'));
           kids.push(row);
-          continue;
+        } else {
+          const select = el('select');
+          const options = [...(worn ? [worn] : []), ...spare];
+          for (const it of options) {
+            const opt = document.createElement('option');
+            opt.value = it.id;
+            opt.textContent = displayName(it);
+            opt.selected = it === worn;
+            select.append(opt);
+          }
+          const none = document.createElement('option');
+          none.value = ''; none.textContent = '— none —'; none.selected = !worn;
+          select.prepend(none);
+          select.onchange = () => {
+            const pick = options.find(i => i.id === select.value) || null;
+            if (pick) this.onEquip?.(pick);
+            else this.onEquip?.(null, slot);
+            this.renderSheet();
+          };
+          row.append(select);
+          row.append(el('span', 'muted small', worn ? toolFunction(slot, worn) : 'Nothing in the slot.'));
+          kids.push(row);
         }
-        const select = el('select');
-        const options = [...(worn ? [worn] : []), ...spare];
-        for (const it of options) {
-          const opt = document.createElement('option');
-          opt.value = it.id;
-          opt.textContent = displayName(it);
-          opt.selected = it === worn;
-          select.append(opt);
-        }
-        if (!worn) {
-          const opt = document.createElement('option');
-          opt.value = ''; opt.textContent = '— none —'; opt.selected = true;
-          select.prepend(opt);
-        }
-        select.onchange = () => {
-          const pick = options.find(i => i.id === select.value) || null;
-          if (pick) this.onEquip?.(pick, slot);
-          this.renderSheet();
-        };
-        row.append(select);
-        /**
-         * R17 — THE SAME HORSE AT TWO DIFFERENT SPEEDS.
-         *
-         *   "They both say trail horse, but the move speeds are different (1.6m/s vs 8.6m/s)."
-         *
-         * Both were printing the truth about different numbers. A mount's `speed` is a MULTIPLIER
-         * on the walk — the Trail Horse is 1.6× — and `toolFunction` was stamping "m/s" on the end
-         * of it. The Ride row multiplies it by the walk speed and gets the real 8.6 m/s. One
-         * number now, taken from the Ride row's own option so the two can never drift again.
-         */
-        row.append(el('span', 'muted small',
-          worn ? (slot === 'mount' ? this.mountNote(worn) : toolFunction(slot, worn)) : 'Nothing in the slot.'));
-        kids.push(row);
       }
 
       for (const [slot, spec] of Object.entries(VEHICLES)) {
         const owned = player.vehicles?.owned?.[slot] || [spec.starter];
         const active = player.vehicles?.active?.[slot] || spec.starter;
         const row = el('div', 'vehicle-row');
-        row.append(el('span', 'muted small', slot === 'boat' ? 'Boat' : 'Ship'));
+        row.append(el('span', 'muted small', slot === 'boat' ? 'Boat' : 'Space Ship'));
         const select = el('select');
         for (const key of owned) {
           const kind = spec.kinds[key];
@@ -1950,7 +1952,7 @@ export class Hud {
         row.append(el('span', 'muted small', spec.kinds[active]
           ? vehicleFunction(slot, spec.kinds[active])
           : (slot === 'ship'
-            ? 'None yet. A ship is built, never bought — four subsystems at an assembler, then a pad.'
+            ? 'None yet. A space ship is built, never bought — four subsystems at an assembler, then a pad.'
             : 'None yet.')));
         kids.push(row);
       }
@@ -1974,9 +1976,9 @@ export class Hud {
       const ground = this.ground?.();
       if (ground) {
         const row = el('div', 'vehicle-row');
-        // "Ride" and the Mount slot above it are two different questions — what you OWN, and what
-        // H brings — and naming them both after the horse is what made them look like a duplicate.
-        row.append(el('span', 'muted small', 'Ride (H)'));
+        // R22: this is now the only place a mount is chosen, so the label names both jobs — what is
+        // in the mount slot AND what H brings — because with the merge they are the same choice.
+        row.append(el('span', 'muted small', 'Mount / ride (H)'));
         const select = el('select');
         for (const opt of ground.options) {
           const o = document.createElement('option');
@@ -1990,11 +1992,7 @@ export class Hud {
         const picked = ground.options.find(o => o.key === ground.active);
         row.append(el('span', 'muted small', picked?.note || ''));
         kids.push(row);
-        if (ground.options.length === 1) {
-          kids.push(el('p', 'muted small',
-            'A motorcycle, a car or a truck is built at an assembler and appears in this list. '
-            + 'All three are faster than a horse; only the horse climbs anything steep.'));
-        }
+        if (ground.hint) kids.push(el('p', 'muted small', ground.hint));
       }
 
       vbox.replaceChildren(...kids);

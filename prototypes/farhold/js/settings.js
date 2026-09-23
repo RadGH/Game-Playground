@@ -130,7 +130,7 @@ export const BINDINGS = [
   // R17 — your company: who follows you, the mercenary board, and the spell respec.
   { action: 'company', label: 'Followers', code: 'KeyF' },
   { action: 'mount', label: 'Whistle for the horse', code: 'KeyH' },
-  { action: 'ship', label: 'Call the ship', code: 'KeyJ' },
+  { action: 'ship', label: 'Call the space ship', code: 'KeyJ' },
   { action: 'map', label: 'Map or star chart', code: 'KeyM' },
   { action: 'sheet', label: 'Character sheet', code: 'KeyI' },
   { action: 'settings', label: 'These settings', code: 'KeyO' },

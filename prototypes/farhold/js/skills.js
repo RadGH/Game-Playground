@@ -508,7 +508,26 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
     s.ready = cooldownFor(s);
 
     const d = player.derived;
-    // spell power lifts anything that is not a plain physical swing
+    /**
+     * R22 — SPELL POWER WAS APPLIED TWICE, AND IT IS WHY CONSECRATE HIT FOR 500.
+     *
+     *   "Consecrate dealt over 500 damage as a level 15 paladin where my basic attack only deals 7.
+     *    Why is that damage so high?"
+     *
+     * `mult` is what `js/main.js` hands `strikeArea` as `power`, and `js/rpg.js`'s `strike` already
+     * does `if (element !== 'physical' && a.spellPower) amount *= 1 + a.spellPower` — the one place
+     * that has to do it, because a wand bolt and an elemental weapon swing pass through there too
+     * and never touch this function. Folding it in here as well made every non-physical skill scale
+     * as **(1 + spellPower)²**. At the gear cap alone that is 6.25× where 2.5× was intended, and the
+     * perk arm stacks past the cap, so 4× spell power came out as 16×.
+     *
+     * It is also why a 140% holy skill beat a 190% physical one: a PHYSICAL skill gets neither
+     * squared term, so the asymmetry was not "Consecrate is strong", it was "elemental is squared".
+     *
+     * `damage` below keeps `magic`, and should: it is not passed to `strike`. It is the estimate the
+     * skill card prints and the number a damage-over-time and Bulwark's barrier are a share of, so
+     * it wants to be roughly what the cast will land for — once.
+     */
     const magic = s.element && s.element !== 'physical' ? 1 + (d.spellPower || 0) : 1;
     const mid = ((d.damage[0] + d.damage[1]) / 2) * (s.mult || 1) * magic;
     const plan = {
@@ -516,7 +535,7 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       skill: s,
       kind: s.shape,
       element: s.element || 'physical',
-      mult: (s.mult || 1) * magic,
+      mult: s.mult || 1,
       damage: Math.max(1, Math.round(mid)),
       reach: s.reach ?? 3, arc: s.arc ?? 1.5,
       radius: s.radius ?? 0, range: s.range ?? 0, splash: s.splash ?? 0, width: s.width ?? 1.8,

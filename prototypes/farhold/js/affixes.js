@@ -99,7 +99,6 @@ export const ENGINE_UNIT = {
   cond_lightRange: 'flat', cond_lightBase: 'flat',
   // R18 — a SHARE: the only consumer is `1 + revealRange` on the minimap span. See js/effects.js.
   cond_lightReveal: 'frac',
-  cond_lightSteady: 'frac', cond_lightWard: 'frac',
   cond_mountSpeed: 'flat', cond_mountBase: 'flat', cond_mountWind: 'flat',
   cond_mountStamina: 'flat', cond_mountTrample: 'flat',
   cond_mountSlope: 'frac', cond_mountCalm: 'frac',
@@ -142,6 +141,30 @@ export const ENGINE_UNIT = {
  */
 export const DROPPED_STATS = new Set(['hit']);
 
+/**
+ * R22 — stats that existed, were rolled onto real items, and are now retired.
+ *
+ * `DROPPED_STATS` above is about a shared file Farhold reads differently. This is about Farhold's
+ * own history: a save may be carrying a lantern that rolled one of these, and with the `def()` gone
+ * from js/effects.js its card line would degrade to `Warding: 0.15`. `scrubRetired` takes them off
+ * an item the first time the character sheet is rebuilt, so an old lamp quietly becomes a lamp with
+ * one affix instead of a lamp with a broken line on it.
+ *
+ * `cond_lightWard` — "you take 15% less damage while you are carrying a light". Its own item was
+ * what satisfied its own condition, so it was a flat damage reduction with a costume on.
+ * `cond_lightSteady` — "enemies are less likely to notice you while this light is lit". It is a
+ * light. See the note on `SLOT_AFFIXES` in js/gear.js.
+ */
+export const RETIRED_STATS = new Set(['cond_lightWard', 'cond_lightSteady']);
+
+/** Take every retired affix off an item. Returns how many were removed. */
+export function scrubRetired(item) {
+  if (!item?.affixes?.length) return 0;
+  const before = item.affixes.length;
+  item.affixes = item.affixes.filter(a => !RETIRED_STATS.has(a?.stat));
+  return before - item.affixes.length;
+}
+
 export const AFFIX_CAP = {
   critChance: 60, critDamage: 250, dodge: 45, lifeSteal: 25, manaSteal: 25,
   magicFind: 300, goldFind: 300, xpFind: 100, cooldownReduction: 50, block_chance: 65,
@@ -158,7 +181,7 @@ export const AFFIX_CAP = {
   // R18 — spellPower had no cap at all while it was (wrongly) flat. As a share, +150% from gear is
   // the ceiling; the perk arm stacks on top of this.
   spellPower: 1.5,
-  cond_lightRange: 60, cond_lightSteady: 0.6, cond_lightWard: 0.5, cond_lightReveal: 0.35,
+  cond_lightRange: 60, cond_lightReveal: 0.35,
   cond_mountSlope: 0.7, cond_mountCalm: 0.8, cond_mountStamina: 60, cond_mountTrample: 60,
   cond_quiverDamage: 40, cond_quiverSplit: 4, cond_quiverBurst: 6,
 };

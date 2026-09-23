@@ -339,9 +339,12 @@ test('every node kind is declared, and every keystone names an arm that exists',
 
 // ---------------------------------------------------------------- per-skill talents
 
-test('every skill gets three tiers, and you may only take one from each', () => {
+test('every skill gets one tier per TIER_LEVELS entry, and you may only take one from each', () => {
   const tree = treeFor('firebolt', 'bolt');
-  assert.equal(tree.tiers.length, 3);
+  // R22: four tiers now (3/8/18/28). The rule under the number is "one tier per entry in
+  // TIER_LEVELS, every one of them filled" — asserting the literal 3 is what would have let a
+  // fourth tier ship with an empty board.
+  assert.equal(tree.tiers.length, TIER_LEVELS.length);
   for (const tier of tree.tiers) {
     assert.ok(tier.nodes.length >= 2, `tier ${tier.tier} offers only ${tier.nodes.length}`);
     assert.ok(tier.nodes.length <= 3, `tier ${tier.tier} offers ${tier.nodes.length} — the ask was 2-3`);
@@ -376,14 +379,27 @@ test('every skill gets three tiers, and you may only take one from each', () => 
   assert.equal(pickTalent(player, 'firebolt', 1, 'wide', { shape: 'bolt' }).ok, false);
 });
 
-test('a tier is locked until its level', () => {
-  const player = { level: 1, skillTalents: {} };
+test('a tier is locked until its level, and nobody starts with a talent', () => {
+  // R22 — "you do NOT start with any skill talents, just start at level 3 instead"
+  const fresh = { level: 1, skillTalents: {} };
+  const early = pickTalent(fresh, 'firebolt', 1, 'fan');
+  assert.equal(early.ok, false, 'tier 1 is open at level 1 — a new character starts with a pick');
+  assert.match(early.why, /level 3/);
+
+  const player = { level: 3, skillTalents: {} };
   assert.equal(pickTalent(player, 'firebolt', 1, 'fan').ok, true);
   const late = pickTalent(player, 'firebolt', 3, 'echo');
   assert.equal(late.ok, false);
   assert.match(late.why, /level 18/);
   player.level = 18;
   assert.equal(pickTalent(player, 'firebolt', 3, 'echo').ok, true);
+
+  // …and the tier R22 added at the end
+  const last = pickTalent(player, 'firebolt', 4, 'cascade');
+  assert.equal(last.ok, false);
+  assert.match(last.why, /level 28/);
+  player.level = 28;
+  assert.equal(pickTalent(player, 'firebolt', 4, 'cascade').ok, true);
 });
 
 test('a talent changes the plan that gets cast, not a number on a sheet', () => {

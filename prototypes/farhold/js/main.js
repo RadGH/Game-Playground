@@ -1274,8 +1274,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (!plan.ok) { if (plan.why) hud.log(plan.why); return null; }
     const a = aim();
     const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.2, a.z + a.dz * 0.6);
-    // War Cry raises the damage of everything, including the skill that follows it
-    const power = plan.mult * outgoingFrom(player);
+    /**
+     * R22 — THE SECOND DOUBLE-COUNT ON THE SAME CAST.
+     *
+     * R18 moved `outgoingFrom(attacker) * incomingFrom(defender)` into `js/rpg.js`'s `strike`, where
+     * a swing, an arrow, a skill, a turret and a trap all pass through it, and its own comment says
+     * "nothing is counted twice". This line was left behind, so a skill — and only a skill — got
+     * War Cry and Rally applied on top of themselves: +30% became +69%, and it multiplied into the
+     * squared spell-power term above it.
+     *
+     * `plan.mult` alone now. `strike` is the one place a buff is worth what it says it is worth.
+     */
+    const power = plan.mult;
     const onHit = (enemy, result) => {
       // R21b: the share is `js/skills.js`'s constant, not a second copy of it here. The two were
       // 0.9 in both places and nothing compared them; the description generator read one and the
@@ -1548,32 +1558,72 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * `note` is what the thing is FOR, out of its own figures — the horse is the only one that will
      * climb anything, which is the whole reason it never stops being useful.
      */
+    /**
+     * R22 — every mount you own is IN this list, not in a second dropdown above it.
+     *
+     * An option key is either `mount:<item id>` (a mount item — picking it equips that item and
+     * points H at the horse) or a ground-vehicle key. `rideChoice` keeps its old two values —
+     * `'mount'` or a vehicle key — so a save written before this round still loads and still means
+     * the same thing; only the option keys the dropdown speaks are new.
+     *
+     * One speed, one unit. A mount's `speed` is a MULTIPLIER on the walk (the Trail Horse is 1.6×)
+     * and a vehicle's is metres a second, so both are printed through `paceNote` as m/s. Nothing
+     * else in the sheet computes a mount speed any more.
+     */
     ground: () => {
-      const owned = player.vehicles?.owned?.ground || [];
-      const mount = player.equipment?.mount;
       const walk = balance.player?.moveSpeed ?? 5.4;
-      const options = [{
-        key: 'mount',
-        name: mount?.name || 'Trail Horse',
-        note: `${((mount?.speed ?? 1.6) * walk).toFixed(1)} m/s · climbs anything`,
-      }];
-      for (const key of owned) {
+      const paceNote = (ms, tail) => `${ms.toFixed(1)} m/s · ${tail}`;
+      const worn = player.equipment?.mount || null;
+      const mounts = [...(worn ? [worn] : []), ...(player.bag || []).filter(i => i && i.slot === 'mount')];
+      const options = mounts.map(m => ({
+        key: `mount:${m.id}`,
+        name: displayName(m),
+        note: paceNote((m.speed ?? 1.6) * walk, 'climbs anything'),
+      }));
+      for (const key of player.vehicles?.owned?.ground || []) {
         const v = GROUND_VEHICLES[key];
         if (!v) continue;
         options.push({
           key,
           name: v.name,
-          note: `${v.speed.toFixed(1)} m/s · ${v.maxSlope < 0.35 ? 'flat ground only' : 'takes rough ground'}`,
+          note: paceNote(v.speed, v.maxSlope < 0.35 ? 'flat ground only' : 'takes rough ground'),
         });
       }
-      return { options, active: player.rideChoice || 'mount' };
+      options.push({ key: 'foot', name: '— on foot —', note: paceNote(walk, 'nothing in the mount slot') });
+      const active = player.rideChoice && player.rideChoice !== 'mount'
+        ? player.rideChoice
+        : (worn ? `mount:${worn.id}` : 'foot');
+      const hint = options.length <= 2
+        ? 'A motorcycle, a car or a truck is built at an assembler and appears in this list. '
+          + 'All three are faster than a horse; only a horse climbs anything steep.'
+        : '';
+      return { options, active: options.some(o => o.key === active) ? active : 'foot', hint };
     },
     onSelectRide: key => {
-      player.rideChoice = key;
-      if (key !== 'mount') selectGroundVehicle(player, key);
-      hud.log(key === 'mount'
-        ? `H whistles for the ${(player.equipment?.mount?.name || 'horse').toLowerCase()}.`
-        : `H brings the ${(GROUND_VEHICLES[key]?.name || key).toLowerCase()}.`, '');
+      if (key === 'foot') {
+        const off = rpg.unequip(player, 'mount');
+        if (off) hud.log(`Took off ${off.name}. You are on foot.`);
+        player.rideChoice = 'mount';
+      } else if (key.startsWith('mount:')) {
+        const id = key.slice(6);
+        const pick = player.equipment?.mount?.id === id
+          ? player.equipment.mount
+          : (player.bag || []).find(i => i && i.id === id);
+        if (pick && pick !== player.equipment?.mount) {
+          const out = rpg.equip(player, pick);
+          if (out?.refused) { hud.log(out.refused, 'bad'); return; }
+          sound.equip();
+        }
+        player.rideChoice = 'mount';
+        hud.log(`H whistles for the ${(player.equipment?.mount?.name || 'horse').toLowerCase()}.`, '');
+      } else {
+        player.rideChoice = key;
+        selectGroundVehicle(player, key);
+        hud.log(`H brings the ${(GROUND_VEHICLES[key]?.name || key).toLowerCase()}.`, '');
+      }
+      rpg.refresh(player);
+      applyGearLook();
+      hud.setPlayer(player);
       autoSave();
     },
     /**
@@ -9334,9 +9384,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (player.reviveDay != null && player.reviveDay !== today) player.reviveCharge = 0;
     if ((player.reviveCharge || 0) > 0) {
       player.reviveCharge--;
-      player.hp = Math.round(player.maxHp * 0.4);
-      player.mp = Math.round(player.maxMp * 0.25);
-      hud.log('The water holds. You get up where you fell.', 'level');
+      player.hp = player.maxHp;
+      player.mp = player.maxMp;
+      hud.log('The water holds. You get up where you fell, whole.', 'level');
       sound.questDone();
       hud.setPlayer(player);
       return;
@@ -9352,7 +9402,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       });
       if (named) hud.log(`${named.name} ${named.title} left you for dead. It will be back.`, 'bad');
     }
-    player.hp = Math.round(player.maxHp * 0.5);
+    /**
+     * R22 — YOU GET UP WHOLE.
+     *
+     *   "Change it so if you die and respawn, you start at full health and mana."
+     *
+     * Both paths, because the two disagreed in a way nobody would defend: the PUNISHING path gave
+     * 50% health and the forgiving one gave 40%, and neither had ever touched mana at all — so a
+     * caster who died mid-fight got up with whatever was left in the bar, which for a caster who
+     * died mid-fight is nothing. The cost of dying is the walk back and the tenth of your purse;
+     * it does not need to also be a second fight you cannot win.
+     */
+    player.hp = player.maxHp;
+    player.mp = player.maxMp;
     player.gold = Math.round(player.gold * 0.9);
     control.teleport(control.spawn.x, control.spawn.z);
     field.clear();

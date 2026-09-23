@@ -560,6 +560,24 @@ export function needsBothToDraw(item) {
   return !!(item?.ranged && item.weaponCategory !== 'magic');
 }
 
+/**
+ * R22 — A QUIVER IS THE EXCEPTION THE TWO-HANDED RULE HAS TO MAKE.
+ *
+ *   "If I have a shortbow equipped, I can't equip a quiver in the off-hand slot"
+ *
+ * Every bow in `data/items.json` carries `twoHanded: true`, which is correct — you cannot draw one
+ * and hold a shield. But the blanket "your main hand takes both hands" refusal then covered the
+ * quiver too, and a quiver is not held in a hand at all: it hangs at the hip, and `js/rpg.js` pays
+ * its `arrowDamage` **only** while a bow is in the main hand. So the six quivers in `js/gear.js`
+ * and the shop shelf that stocks them could never be worn by anybody.
+ *
+ * The exemption is deliberately narrow: this item must be a quiver, and the main hand must be the
+ * thing a quiver feeds. A quiver with a sword out is still refused — there is nothing to feed.
+ */
+export function quiverGoesWith(item, main) {
+  return !!(item?.quiver && main && needsBothToDraw(main));
+}
+
 /** Can this go in the off hand at all, ignoring what is currently in the main one? */
 export function canGoOffhand(item) {
   if (!item) return false;
@@ -1001,6 +1019,10 @@ export function handsOf(player) {
 export function offhandRefusal(player, item) {
   const hands = handsOf(player);
   if (!item) return null;
+  // R22 — the one thing a bow's off hand IS for. A quiver hangs at the hip; it is not held, and
+  // `js/rpg.js` only pays its arrow damage while a bow is in the main hand, so refusing it there
+  // meant every quiver in the game was unequippable by the only class that could use one.
+  if (quiverGoesWith(item, hands.main)) return null;
   if (hands.mainTwo && !hands.doubleGrip) {
     return `${hands.main.name} takes both hands. Put it away first, or find the grip that frees one.`;
   }

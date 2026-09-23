@@ -31,6 +31,7 @@ import {
   partCost, canBuildPart, buildPart, buyPart, buildPad, shipReady, assembleShip,
   fuelFor, tankCapacity, loadFuel, canLaunch, spendFlightFuel,
   stationProgress, stationGate, buildStationModule, nextStep, describeGate, gateValue,
+  stationGrants, refuel,
 } from '../js/shipyard.js';
 import { MATERIALS, isGathered, recipeFor, recipesFor, rawInputs, costValue } from '../js/vehicles.js';
 import { startingVehicles, unlockVehicle, SHIP_GATE_VERSION, VEHICLES } from '../js/gear.js';
@@ -512,4 +513,51 @@ test('nothing anywhere in the gate names a material that does not exist', () => 
   }
   assert.ok(MATERIALS[FUEL.id], 'the ship fuel itself has to be in the chain');
   assert.ok(MATERIALS[vehicleData.fuel.id], 'and so does the fuel an engine burns');
+});
+
+/**
+ * R18 — FINISHING THE ORBITAL YARD GRANTS WHAT IT SAYS IT GRANTS.
+ *
+ * `data/shipyard.json`'s `station.grants` — refuel, returnPad, warpFitting — was read by NOTHING,
+ * so the top of the tech tree paid out a sentence. §9's own history is why the refuel half matters:
+ * `canLaunch` refused while `spendFlightFuel` spent and nothing ever put fuel in, which is why
+ * `refuel()` had to be written at all — and then it still demanded you carry lift fuel up to the
+ * very thing whose job is to make fuel available in orbit.
+ */
+test('R18 — a completed station grants its own list, and an unfinished one grants nothing', () => {
+  const bare = { vehicles: { owned: {} } };
+  const none = stationGrants(bare);
+  assert.equal(none.complete, false, 'an empty yard reads as complete');
+  for (const k of ['refuel', 'returnPad', 'warpFitting']) {
+    assert.equal(none[k], false, `an unfinished station grants ${k}`);
+  }
+
+  // finish every module the data declares, however many there are
+  // the yard lives at `player.vehicles.shipyard` — see `yard()`; the first version of this test
+  // put it at `player.shipyard`, which `yard()` quietly replaced with an empty one
+  const done = { vehicles: { owned: {}, shipyard: { station: {} } } };
+  for (const m of STATION.modules) done.vehicles.shipyard.station[m.id] = true;
+  const all = stationGrants(done);
+  assert.equal(all.complete, true, 'every module is built and the station is not complete');
+  for (const [k, v] of Object.entries(STATION.grants || {})) {
+    if (typeof v !== 'boolean') continue;
+    assert.equal(all[k], v, `the data grants ${k} and stationGrants does not`);
+  }
+  assert.ok(Object.keys(STATION.grants || {}).some(k => typeof STATION.grants[k] === 'boolean'),
+    'station.grants has no flags left — re-aim this test');
+});
+
+test('R18 — a finished yard fills the tanks in orbit, with nothing in your bag', () => {
+  const done = { vehicles: { owned: {}, shipyard: { station: {}, fuel: 0 } } };
+  for (const m of STATION.modules) done.vehicles.shipyard.station[m.id] = true;
+  const empty = { count: () => 0, spend: () => true };
+  const out = refuel(done, empty);
+  assert.equal(out.ok, true, `a completed station would not refuel: ${out.why}`);
+  assert.ok(out.fuel > 0, 'the tanks are still empty');
+  assert.equal(out.fromStation, true, 'the fuel came from somewhere other than the station');
+
+  // …and without the station it still asks for fuel, as it always did
+  const bare = { vehicles: { owned: {}, shipyard: { station: {}, fuel: 0 } } };
+  const no = refuel(bare, empty);
+  assert.equal(no.ok, false, 'an empty bag and no station still filled the tanks');
 });

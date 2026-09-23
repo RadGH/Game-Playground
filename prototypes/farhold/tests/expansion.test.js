@@ -573,3 +573,31 @@ test('what you have heard about, and not been to, is the where-next list', () =>
   assert.equal(leads.length, 1);
   assert.equal(leads[0].zoneId, 3);
 });
+
+/**
+ * R18 — EVERY EFFECT AN INCIDENT DECLARES IS ONE THE MERGE KNOWS ABOUT.
+ *
+ * `createIncidents().effects()` merges by explicit lists of key names, which is the right shape: a
+ * typo in the data becomes a missing effect rather than a crash. The cost is that a key the data
+ * declares and the lists do not name is dropped in SILENCE, and four were — `patrol` (the band
+ * `raid_coming` puts on the road while a raid gathers, which is the whole point of the incident),
+ * `patrolMult`, `namedGrowth` and `rivalHunters`.
+ *
+ * This is the structural version of that fix: `NO_EFFECT` is the merge's own vocabulary, so any
+ * effect key in the data that is not in it is a rule nobody will ever read.
+ */
+test('R18 — no incident declares an effect the merge silently drops', () => {
+  const incidents = incidentData;
+  const known = new Set(Object.keys(NO_EFFECT));
+  const orphans = [];
+  for (const row of incidents.incidents || incidents.kinds || []) {
+    for (const key of Object.keys(row.effects || {})) {
+      // `opensFrame` is merged into the plural `opensFrames` list, which is in NO_EFFECT
+      if (key === 'opensFrame') continue;
+      if (!known.has(key)) orphans.push(`${row.kind || row.id}.${key}`);
+    }
+  }
+  assert.deepEqual(orphans, [],
+    'these incident effects are written in the data and read by nobody — add each to NO_EFFECT and '
+    + 'to the matching list in `effects()`:\n  ' + orphans.join('\n  '));
+});

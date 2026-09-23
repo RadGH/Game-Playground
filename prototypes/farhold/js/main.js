@@ -285,7 +285,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * were ever two words for the same thing. The display names come with it, so the panel still says
    * "6 timber".
    */
-  const structureData = alignCatalogue(rawStructures, resourceData);
+  const structureData = alignCatalogue(rawStructures, resourceData, powerData);
   /**
    * R16: what the player chose, from js/newgame.js. `begin` used to read `#boot-seed`, `#boot-class`,
    * `#boot-name` and the five knobs straight out of the DOM, which is why loading a save had to

@@ -302,10 +302,47 @@ export function grantShip(player, kind = 'lander') {
  * `bag` is anything with `count`/`spend` — the materials bag or a storage pool — so you can fuel up
  * out of a tank beside the pad without carrying it.
  */
+/**
+ * R18 — WHAT FINISHING THE ORBITAL YARD ACTUALLY BUYS.
+ *
+ * `data/shipyard.json`'s `station.grants` — `refuel`, `returnPad`, `warpFitting` — was read by
+ * NOTHING. Its own description says "Refuel in orbit, return to it from anywhere in the system, and
+ * fit the warp coil without a refinery on the ground", and finishing the top of the tech tree
+ * granted none of it.
+ *
+ * Exported so the grants are one question with one answer, rather than three call sites each
+ * re-deriving "is the station done".
+ */
+export function stationGrants(player) {
+  const done = stationProgress(player).complete;
+  const g = STATION.grants || {};
+  return {
+    complete: done,
+    refuel: done && !!g.refuel,
+    returnPad: done && !!g.returnPad,
+    warpFitting: done && !!g.warpFitting,
+    desc: g.desc || '',
+  };
+}
+
 export function refuel(player, bag, units = null) {
   const y = yard(player);
   const purse = bagOf(bag);
   const have = purse.count(FUEL.id);
+  /**
+   * R18 — a finished orbital yard fills the tanks itself.
+   *
+   * This is the concrete half of `station.grants.refuel`, and §9's own history is the argument for
+   * it: `canLaunch` refused while `spendFlightFuel` spent, and nothing ever PUT fuel in, which is
+   * why `refuel()` had to be written at all. Carrying lift fuel up to the thing whose job is to
+   * make fuel available in orbit was the last version of the same knot.
+   */
+  if (have <= 0 && stationGrants(player).refuel) {
+    const room = Math.max(0, (FUEL.capacity ?? 60) - y.fuel);
+    if (room <= 0) return { ok: false, why: 'The tanks are full.' };
+    y.fuel = Math.round((y.fuel + room) * 100) / 100;
+    return { ok: true, added: room, fuel: y.fuel, fromStation: true };
+  }
   if (have <= 0) {
     return { ok: false, why: `No ${MATERIALS[FUEL.id]?.name || 'lift fuel'} to hand. A fuel synthesiser makes it.` };
   }

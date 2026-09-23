@@ -32,6 +32,20 @@ export const NO_EFFECT = {
   nightSpawn: null, townClosed: false, gambler: false, minstrel: false,
   namedHunts: false, factionsFight: false, sealsDungeon: false, rareHerb: false,
   opensFrames: [],
+  /**
+   * R18 — FOUR MORE THAT WERE FALLING OFF THE WHITELIST.
+   *
+   * `effects()` below merges by explicit lists of keys, which is the right shape — a typo in the
+   * data becomes a missing effect rather than a crash. The cost is that a key the data declares and
+   * the lists do not name is dropped in silence, and four were:
+   *
+   *   `patrol`        `raid_coming` names the band that is supposed to be ON THE ROAD while a raid
+   *                   gathers. The whole point of the incident, and nobody could see it.
+   *   `patrolMult`    `feud` puts half again as many patrols out.
+   *   `namedGrowth`   `grudge` makes named enemies grow faster while it runs.
+   *   `rivalHunters`  `bounty_up` puts other people after the same bounty.
+   */
+  patrol: null, patrolMult: 1, namedGrowth: 0, rivalHunters: false,
 };
 
 export function createIncidents({ data, territory = null, factions = null, seed = 1 } = {}) {
@@ -149,14 +163,17 @@ export function createIncidents({ data, territory = null, factions = null, seed 
       const spec = byKind(row.kind);
       if (!spec) continue;
       const e = spec.effects || {};
-      for (const key of ['spawnMult', 'shopMult', 'stockMult', 'gatherMult', 'travelMult', 'fireDamage', 'visibility', 'bountyMult']) {
+      for (const key of ['spawnMult', 'shopMult', 'stockMult', 'gatherMult', 'travelMult', 'fireDamage', 'visibility', 'bountyMult', 'patrolMult']) {
         if (e[key] != null) out[key] *= e[key];
       }
       if (e.folkOut != null) out.folkOut += e.folkOut;
-      for (const key of ['townClosed', 'gambler', 'minstrel', 'namedHunts', 'factionsFight', 'sealsDungeon', 'rareHerb']) {
+      if (e.namedGrowth != null) out.namedGrowth += e.namedGrowth;
+      for (const key of ['townClosed', 'gambler', 'minstrel', 'namedHunts', 'factionsFight', 'sealsDungeon', 'rareHerb', 'rivalHunters']) {
         if (e[key]) out[key] = true;
       }
       if (e.nightSpawn) out.nightSpawn = e.nightSpawn;
+      // the band a gathering raid puts on the road — see the note on NO_EFFECT
+      if (e.patrol) out.patrol = e.patrol;
       if (e.opensFrame) out.opensFrames.push(e.opensFrame);
     }
     return out;

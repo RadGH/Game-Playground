@@ -293,3 +293,50 @@ test('aligning a catalogue twice is the same as aligning it once, and keeps the 
   assert.equal(once.materials.log.name, 'Timber');
   assert.equal(once.materials.iron_ingot.name, 'Iron Ingot');
 });
+
+/**
+ * R18 — THE PANEL'S NUMBER AND THE GRID'S NUMBER ARE THE SAME NUMBER.
+ *
+ * `js/power.js` runs the grid off data/power.json's `gen`; `js/build-ui.js` printed "Makes N kW"
+ * off data/structures.json's `power.make`. They disagreed on every generator in the game — solar
+ * 26 against 44, geothermal 70 against 95, wind 22 against 26, the battery bank 400 against 600 —
+ * so a base could not be planned from the panel describing it. Per the user's ruling,
+ * structures.json owns COST and power.json owns kW, so `alignCatalogue` joins them at the boundary
+ * rather than one file being edited to agree with the other, which is how they drifted.
+ */
+test('R18 — every generator the panel describes makes what the grid thinks it makes', () => {
+  const POWER = JSON.parse(readFileSync(new URL('../data/power.json', import.meta.url), 'utf8'));
+  const aligned = alignCatalogue(STRUCTURES, DATA, POWER);
+  const byId = Object.fromEntries(aligned.structures.map(s => [s.id, s]));
+
+  let checked = 0;
+  for (const [id, gen] of Object.entries(POWER.generators || {})) {
+    const st = byId[id];
+    if (!st?.power) continue;
+    assert.equal(st.power.make, gen.gen,
+      `the panel says ${id} makes ${st.power.make} kW and the grid uses ${gen.gen}`);
+    checked++;
+  }
+  for (const [id, cell] of Object.entries(POWER.batteries || {})) {
+    const st = byId[id];
+    if (!st?.power || cell.store == null) continue;
+    assert.equal(st.power.store, cell.store,
+      `the panel says ${id} stores ${st.power.store} and the grid uses ${cell.store}`);
+    checked++;
+  }
+  assert.ok(checked >= 4, `only ${checked} power pieces were cross-checked`);
+});
+
+test('R18 — the ground a generator needs reaches the thing that refuses placement', () => {
+  const POWER = JSON.parse(readFileSync(new URL('../data/power.json', import.meta.url), 'utf8'));
+  const aligned = alignCatalogue(STRUCTURES, DATA, POWER);
+  const byId = Object.fromEntries(aligned.structures.map(s => [s.id, s]));
+  let found = 0;
+  for (const [id, gen] of Object.entries(POWER.generators || {})) {
+    if (!gen.needsGround) continue;
+    found++;
+    assert.deepEqual(byId[id]?.power?.needsGround, gen.needsGround,
+      `${id} declares needsGround and the catalogue does not carry it, so nothing can enforce it`);
+  }
+  assert.ok(found > 0, 'no generator declares needsGround any more — re-aim this test');
+});

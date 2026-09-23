@@ -79,7 +79,7 @@ export const realMaterial = id => MATERIAL_ALIASES[id] || id;
  *
  *   const catalogue = alignCatalogue(structureData, resourceData);
  */
-export function alignCatalogue(catalogue, resources = null) {
+export function alignCatalogue(catalogue, resources = null, power = null) {
   if (!catalogue?.structures) return catalogue;
   const names = { ...(catalogue.materials || {}) };
   for (const [short, real] of Object.entries(MATERIAL_ALIASES)) {
@@ -89,10 +89,42 @@ export function alignCatalogue(catalogue, resources = null) {
   for (const [id, m] of Object.entries(resources?.materials || {})) {
     if (!names[id]) names[id] = { name: m.name, tier: m.tier };
   }
+  /**
+   * R18 — AND THE POWER FACTS COME FROM THE FILE THAT OWNS THEM.
+   *
+   * Two numbers for one thing, and only one of them live. `js/power.js` runs the grid off
+   * data/power.json's `gen`; `js/build-ui.js` printed "Makes N kW" off data/structures.json's
+   * `power.make`. They disagreed on every generator in the game — solar 26 against 44, geothermal
+   * 70 against 95, wind 22 against 26, the battery bank 400 against 600 — so you could not plan a
+   * base from the panel that was telling you about it.
+   *
+   * The user's ruling settles which side wins: **structures.json is authoritative for COST,
+   * power.json for kW.** So the panel's number is replaced here, once, at the same boundary the
+   * material vocabularies are joined — rather than by editing one file to agree with the other,
+   * which is how they drifted in the first place.
+   *
+   * It also carries `needsGround` across, which is the only reason that rule can ever be enforced:
+   * it lives on the power.json generator and `createBuildPlan` only ever sees the structure def.
+   * The Geothermal Tap's own description says "it only works where the ground is hot. A reason to
+   * build the base somewhere awkward" — and it worked on a lawn, at 95 kW, for free.
+   */
+  const gens = power?.generators || {};
+  const cells = power?.batteries || {};
+  const withPower = st => {
+    const src = gens[st.id] || cells[st.id];
+    if (!src || !st.power) return st;
+    const pw = { ...st.power };
+    if (src.gen != null) pw.make = src.gen;
+    if (src.store != null) pw.store = src.store;
+    if (src.needsGround) pw.needsGround = src.needsGround;
+    if (src.supplyRadius != null) pw.supplyRadius = src.supplyRadius;
+    return { ...st, power: pw };
+  };
+
   return {
     ...catalogue,
     materials: names,
-    structures: catalogue.structures.map(st => (st.cost ? { ...st, cost: realCost(st.cost) } : st)),
+    structures: catalogue.structures.map(st => withPower(st.cost ? { ...st, cost: realCost(st.cost) } : st)),
   };
 }
 
@@ -431,6 +463,24 @@ export function createBuildPlan({
       if (gate) { out.why = gate.text || 'You have not researched this yet.'; out.locked = gate; return out; }
 
       if (terrain?.waterAt && terrain.waterAt(x, z)) { out.why = 'You cannot build on water.'; return out; }
+
+      /**
+       * R18 — SOME GROUND IS THE POINT OF THE PIECE.
+       *
+       * `needsGround` has been on the Geothermal Tap since it landed and was read by nobody, so the
+       * best generator in the game — 95 kW, no fuel, no upkeep — worked on a lawn. Its own
+       * description says "it only works where the ground is hot. A reason to build the base somewhere
+       * awkward", which is a real decision the player was never asked to make.
+       */
+      const needs = def.power?.needsGround;
+      if (needs?.length && terrain?.biomeAt) {
+        const here = terrain.biomeAt(x, z);
+        const key = here?.key || here?.id || '';
+        if (!needs.includes(key)) {
+          out.why = `${def.name || 'This'} only works on ${needs.join(', ')} ground — this is ${here?.name || 'the wrong sort'}.`;
+          return out;
+        }
+      }
 
       /**
        * A piece that flattens its own ground is allowed to land on a slope — that is what it is for.

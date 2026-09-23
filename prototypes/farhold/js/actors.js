@@ -157,6 +157,16 @@ export class EnemyField {
     this.bosses = bosses; this.modifiers = modifiers; this.zones = zones;
     this.cfg = balance.spawn || {};
     this.baseAlive = this.cfg.maxAlive ?? 14;   // what `setBudget(null)` goes back to
+    /**
+     * R21 — how far a body that BELONGS to a set piece survives. It lives under `balance.encounters`
+     * because it is the encounter layer's number: it has to stay comfortably larger than the
+     * furthest `js/encounters.js` can place one, or an event loses its guards on the walk over.
+     */
+    this.keepRadius = Math.max(
+      balance.encounters?.keepRadius ?? 0,
+      (balance.encounters?.radius ?? 90) * 1.6,
+      this.cfg.despawnRadius ?? 320,
+    );
     this.zoneCfg = balance.zones || {};
     this.onLog = onLog; this.onKill = onKill;
     this.nameRare = nameRare;
@@ -467,6 +477,7 @@ export class EnemyField {
      * bodies in it have since been thrown away, so the loop is now safe whatever a hook gets up to.
      */
     const despawn = cfg.despawnRadius ?? 320;
+    const keepRadius = this.keepRadius ?? despawn;
     const list = this._tickList || (this._tickList = []);
     list.length = 0;
     for (const e of this.enemies) list.push(e);
@@ -484,8 +495,20 @@ export class EnemyField {
         if (e.dying > 2.4) this.removeUnit(e);
         continue;
       }
+      /**
+       * R21 — A SET PIECE'S BODIES OUTLIVE A PLAIN PACK'S, BECAUSE THEY START FURTHER OUT.
+       *
+       * Round 21 pushed set-piece placement from 90 m to 240 m so a building stops materialising
+       * in the player's lap. That immediately collides with this line: an event placed 264 m away
+       * (the `ahead` case at full stretch) is already within 36 m of the 300 m despawn, so its
+       * guards would be culled while the player was still walking toward them — and an event with
+       * no bodies left in it wins itself, which is the exact fault round 16 fixed from the other
+       * direction. `encounter` is stamped on every set-piece body by `spawnBodies`, so the ones
+       * that belong to something get the longer leash and ordinary wandering packs do not.
+       */
+      const leash = e.encounter ? keepRadius : despawn;
       // a boss never despawns while it is alive — you do not get to walk away from it by accident
-      if (dist > despawn && !e.boss) { this.removeUnit(e); continue; }
+      if (dist > leash && !e.boss) { this.removeUnit(e); continue; }
 
       if (e.hitFlash > 0) e.hitFlash -= dt;
       /**

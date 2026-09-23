@@ -1,15 +1,15 @@
 {
-  "_doc": "Farhold's talents. Emberveil's talents modify named skills, and Farhold has no skill bar, so its talent levels would have handed out points with nothing to spend them on. These are broad masteries instead — every one of them changes a number the game already reads, so none of them is decoration. Taken one per talent level (3, 8, 13, 18, 23, 28).",
+  "_doc": "Farhold's talents. Emberveil's talents modify named skills, and Farhold has no skill bar, so its talent levels would have handed out points with nothing to spend them on. These are broad masteries instead — every one of them changes a number the game already reads, so none of them is decoration. Taken one per talent level (3, 8, 13, 18, 23, 28). R21 checked every line against its own `grants`: Hardy said its 2 health a second was 'out of combat' and js/main.js adds `hpRegen` on every regen tick whether you are fighting or not, so the text was wrong rather than the number; Reaver now says which hits life steal actually pays on (melee and ranged physical, never a spell or a wand or a staff), matching js/effects.js; and Deep Lungs no longer promises you 'float higher', because `floatLift` is declared in js/rpg.js's derived table and READ BY NOTHING — the 0.15 is left in place so the stat is still findable, but a description must not promise a rule the game does not run.",
   "talents": [
     { "id": "sharpened", "name": "Sharpened Edge", "desc": "+10% weapon damage", "grants": { "damagePct": 10 } },
     { "id": "thick_hide", "name": "Thick Hide", "desc": "+15% armour and +20 health", "grants": { "armorPct": 15, "maxHp": 20 } },
     { "id": "fleet", "name": "Fleet Footed", "desc": "+12% move speed and +15% jump", "grants": { "movePct": 12, "jumpPct": 15 } },
-    { "id": "deep_lungs", "name": "Deep Lungs", "desc": "+40% swim speed, and you float higher", "grants": { "swimPct": 40, "floatLift": 0.15 } },
+    { "id": "deep_lungs", "name": "Deep Lungs", "desc": "+40% swim speed", "grants": { "swimPct": 40, "floatLift": 0.15 } },
     { "id": "keen_eye", "name": "Keen Eye", "desc": "+6% critical chance and +15% critical damage", "grants": { "critChance": 6, "critDamage": 15 } },
     { "id": "scavenger", "name": "Scavenger", "desc": "+20% magic find and +20% gold", "grants": { "magicFind": 20, "goldFind": 20 } },
     { "id": "horseman", "name": "Horseman", "desc": "+25% speed while riding", "grants": { "mountPct": 25 } },
     { "id": "steady_hand", "name": "Steady Hand", "desc": "+25% arrow range and +15% arrow speed", "grants": { "arrowRangePct": 25, "arrowSpeedPct": 15 } },
-    { "id": "hardy", "name": "Hardy", "desc": "+2 health a second out of combat", "grants": { "hpRegen": 2 } },
-    { "id": "reaver", "name": "Reaver", "desc": "+6% life stolen with every hit", "grants": { "lifeSteal": 6 } }
+    { "id": "hardy", "name": "Hardy", "desc": "+2 health a second, in a fight or out of one", "grants": { "hpRegen": 2 } },
+    { "id": "reaver", "name": "Reaver", "desc": "6% Life Steal on melee and ranged physical hits (not spells, wands or staves)", "grants": { "lifeSteal": 6 } }
   ]
 }

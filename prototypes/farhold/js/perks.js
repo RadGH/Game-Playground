@@ -65,22 +65,36 @@ export const NODE_KINDS = {
  * be a data table, and it is also the one way to write a node that does nothing:
  *
  *   * percent (the number IS the percent): magicFind, goldFind, xpFind, critChance, critDamage,
- *     dodge, hit, haste, lifeSteal, manaSteal, resistAll, blockChance, damagePct, armorPct,
+ *     dodge, haste, lifeSteal, manaSteal, resistAll, blockChance, damagePct, armorPct,
  *     movePct, areaPct, petDamagePct, cooldownReduction
  *   * flat: armor, magicResist, maxHp, maxMp, damageFlat, blockPower, barrier, hpOnKill,
  *     manaOnKill, hpRegen (a second), mpRegen (a second), lightRange (metres), str/dex/int/con
- *   * a FRACTION, where 0.1 means a tenth: stealth, revealRange, scavengeChance, echoChance, thorns
+ *   * a FRACTION, where 0.1 means a tenth: stealth, revealRange, scavengeChance, echoChance,
+ *     thorns, spellPower
+ *
+ * AND THE THIRD ENTRY IN EACH ROW IS WHAT THE PLAYER READS — it is the node's name AND its
+ * description, so it is written as a stat line: the number, the unit, and the word the genre
+ * already uses for the thing. See WORDING.md. A row whose text does not match its value is a lie
+ * on the one screen a player reads carefully, so the two are checked against each other by hand
+ * every time this table is touched.
  */
 export const ARMS = [
   {
     key: 'melee', name: 'The Close Ground', angle: -Math.PI / 2, color: '#e07a4a',
     blurb: 'Reach, weight and the willingness to be hit.',
     minor: [
-      ['str', 4, '+4 strength'], ['damageFlat', 3, '+3 damage'], ['armor', 6, '+6 armour'],
-      ['maxHp', 22, '+22 health'], ['critChance', 3, '+3% critical chance'], ['hit', 4, '+4% accuracy'],
+      // `str` is read in exactly one place (js/rpg.js `derive`): a HEAVY weapon's damage scales
+      // 3% a point off it. It is not carry weight — Farhold has no encumbrance — so the line
+      // does not promise any.
+      ['str', 4, '+4 Strength (heavy weapon damage)'], ['damageFlat', 3, '+3 damage on every hit'],
+      ['armor', 6, '+6 armour'],
+      ['maxHp', 22, '+22 maximum health'], ['critChance', 3, '+3% critical chance'],
+      ['damageFlat', 3, '+3 damage on every hit'],
     ],
     major: [
-      ['damagePct', 8, '+8% weapon damage'], ['str', 9, '+9 strength'],
+      // `damagePct` multiplies the whole damage roll, weapon dice and flat bonus together, so the
+      // line says "damage" and not "weapon damage".
+      ['damagePct', 8, '+8% damage'], ['str', 9, '+9 Strength (heavy weapon damage)'],
       ['armorPct', 12, '+12% armour'], ['critDamage', 18, '+18% critical damage'],
       ['areaPct', 10, '+10% attack area'],
     ],
@@ -89,11 +103,15 @@ export const ARMS = [
     key: 'ranged', name: 'The Long Shot', angle: 0, color: '#6ab0ff',
     blurb: 'Distance, precision and the shot you only get once.',
     minor: [
-      ['dex', 4, '+4 dexterity'], ['critChance', 4, '+4% critical chance'], ['hit', 5, '+5% accuracy'],
-      ['haste', 5, '+5% attack speed'], ['dodge', 3, '+3% dodge'], ['damageFlat', 3, '+3 damage'],
+      // `dex` does three things, all of them in js/rpg.js `derive`: a LIGHT or RANGED weapon's
+      // damage scales 3% a point off it, and it adds 0.2% critical chance and 0.3% dodge a point.
+      ['dex', 4, '+4 Dexterity (ranged and light weapon damage)'],
+      ['critChance', 4, '+4% critical chance'], ['critDamage', 8, '+8% critical damage'],
+      ['haste', 5, '+5% attack speed'], ['dodge', 3, '+3% dodge chance'],
+      ['damageFlat', 3, '+3 damage on every hit'],
     ],
     major: [
-      ['critDamage', 22, '+22% critical damage'], ['dex', 9, '+9 dexterity'],
+      ['critDamage', 22, '+22% critical damage'], ['dex', 9, '+9 Dexterity (ranged and light weapon damage)'],
       ['haste', 10, '+10% attack speed'], ['arrowDamage', 4, '+4 damage on every arrow'],
       ['areaPct', 10, '+10% attack area'],
     ],
@@ -102,13 +120,19 @@ export const ARMS = [
     key: 'arcane', name: 'The Deep Study', angle: Math.PI / 2, color: '#b090ff',
     blurb: 'Power that comes out of a book and goes back into one.',
     minor: [
-      ['int', 4, '+4 intellect'], ['maxMp', 18, '+18 mana'], ['spellPower', 0.04, '+4% spell power'],
+      // `int` adds 2 maximum mana a point and scales a MAGIC weapon's damage 3% a point. It does
+      // NOT touch `spellPower` — that is its own stat, granted on the two nodes below.
+      ['int', 4, '+4 Intellect (+8 mana, wand and staff damage)'],
+      ['maxMp', 18, '+18 maximum mana'],
+      // `spellPower` is a fraction: js/rpg.js multiplies non-physical damage by `1 + spellPower`.
+      ['spellPower', 0.04, '+4% spell damage'],
       ['mpRegen', 0.6, '+0.6 mana a second'], ['magicResist', 6, '+6 magic resistance'],
-      ['cooldownReduction', 3, 'skills come back 3% sooner'],
+      // capped at 60% by js/skills.js, however many of these you stack
+      ['cooldownReduction', 3, '−3% skill cooldowns'],
     ],
     major: [
-      ['spellPower', 0.10, '+10% spell power'], ['int', 9, '+9 intellect'],
-      ['cooldownReduction', 7, 'skills come back 7% sooner'], ['maxMp', 45, '+45 mana'],
+      ['spellPower', 0.10, '+10% spell damage'], ['int', 9, '+9 Intellect (+18 mana, wand and staff damage)'],
+      ['cooldownReduction', 7, '−7% skill cooldowns'], ['maxMp', 45, '+45 maximum mana'],
       ['areaPct', 12, '+12% spell area'],
     ],
   },
@@ -116,13 +140,14 @@ export const ARMS = [
     key: 'wild', name: 'The Kept Company', angle: Math.PI, color: '#7ae06a',
     blurb: 'What follows you, what keeps you standing, and what you find on the way.',
     minor: [
-      ['con', 4, '+4 constitution'], ['hpRegen', 1.2, '+1.2 health a second'],
-      ['petDamagePct', 8, 'companions deal 8% more damage'], ['magicFind', 8, '+8% better loot'],
-      ['movePct', 3, '+3% move speed'], ['goldFind', 12, '+12% gold'],
+      // `con` is read in one place: 4 maximum health a point.
+      ['con', 4, '+4 Constitution (+16 maximum health)'], ['hpRegen', 1.2, '+1.2 health a second'],
+      ['petDamagePct', 8, '+8% companion damage'], ['magicFind', 8, '+8% magic find (better loot)'],
+      ['movePct', 3, '+3% move speed'], ['goldFind', 12, '+12% gold found'],
     ],
     major: [
-      ['petDamagePct', 18, 'companions deal 18% more damage'], ['con', 9, '+9 constitution'],
-      ['lifeSteal', 4, '4% of damage comes back as health'], ['magicFind', 20, '+20% better loot'],
+      ['petDamagePct', 18, '+18% companion damage'], ['con', 9, '+9 Constitution (+36 maximum health)'],
+      ['lifeSteal', 4, '4% life steal'], ['magicFind', 20, '+20% magic find (better loot)'],
       /**
        * R17 — THIS NODE MOVES YOUR FOLLOWER LIMIT NOW, NOT YOUR SUMMON COUNT.
        *
@@ -136,7 +161,7 @@ export const ARMS = [
        * number of things that may walk with you, and it raises the per-type cap on a summon. A
        * mercenary, a class companion and a summoned wolf all take one of the same slots.
        */
-      ['followerSlots', 1, 'one more follower may walk with you — and one more of each thing you summon'],
+      ['followerSlots', 1, '+1 follower slot, and +1 of each thing you summon'],
     ],
   },
 
@@ -160,87 +185,95 @@ export const ARMS = [
     key: 'guard', name: 'The Held Line', angle: -Math.PI * 3 / 4, color: '#c8d2dc',
     blurb: 'Armour, a shield, and the patience to be the one who does not move.',
     minor: [
-      ['armor', 8, '+8 armour'], ['maxHp', 26, '+26 health'],
+      ['armor', 8, '+8 armour'], ['maxHp', 26, '+26 maximum health'],
       ['magicResist', 7, '+7 magic resistance'], ['blockChance', 4, '+4% chance to block'],
-      ['blockPower', 6, 'a block stops 6 more damage'], ['con', 4, '+4 constitution'],
+      ['blockPower', 6, 'A block stops 6 more damage'], ['con', 4, '+4 Constitution (+16 maximum health)'],
     ],
     major: [
       ['armorPct', 14, '+14% armour'],
-      ['resistAll', 4, 'everything that hits you lands 4% softer'],
-      ['blockPower', 14, 'a block stops 14 more damage'],
+      ['resistAll', 4, '+4% resistance to all damage'],
+      ['blockPower', 14, 'A block stops 14 more damage'],
       // A barrier is a second health bar that refills itself out of a fight (js/main.js tops it up
       // by 8% of its size a second once nothing is swinging at you), so it is the one defensive
       // number that does not need a healer to be worth anything.
-      ['barrier', 40, '+40 barrier, which fills itself back up between fights'],
-      ['maxHp', 60, '+60 health'],
+      ['barrier', 40, '+40 barrier, refilling 8% a second between fights'],
+      ['maxHp', 60, '+60 maximum health'],
     ],
   },
   /**
    * THE LOOT ARM, AND THE ONE STAT THAT IS NOT IN IT.
    *
-   * `goldFind` is the obvious first pick and it is NOT here, because it does nothing. It is
-   * declared in `rpg.derive`, granted by an affix, rounded, and printed on the character sheet as
-   * "Gold find +35%" — and not one of the eleven places in js/main.js and js/town.js that does
-   * `player.gold += …` multiplies by it. Putting it on six perk nodes would have been six lies on
-   * the one screen a player reads carefully, which is the mistake `petSlots` and Volley were both
-   * already caught making in this file. It is written up in the round-16 report instead, because
-   * turning it on is a change to js/main.js and this round only owns js/perks.js.
+   * `goldFind` is the obvious first pick and it is NOT here, because when this arm was written the
+   * stat did nothing: it was declared in `rpg.derive`, granted by an affix, rounded, printed on the
+   * character sheet as "Gold find +35%" — and not one of the eleven places in js/main.js and
+   * js/town.js that does `player.gold += …` multiplied by it. Putting it on six perk nodes would
+   * have been six lies on the one screen a player reads carefully.
    *
-   * What is left is everything that genuinely fires: `magicFind` (rpg.rarityFor, so it lifts the
-   * rarity of every drop, chest and craft), `xpFind` (rpg.gainXp), `scavengeChance` (js/main.js
-   * asks fx.sum('scavenge') on every kill), `revealRange` (the minimap's span) and `lightRange`
-   * (the reach of a lamp you are carrying — no lamp, no effect, so the line says "lamp").
+   * R21 — IT IS LIVE NOW. js/main.js `foundGold` does `1 + (player.derived.goldFind || 0) / 100` on
+   * every haul, so the stat pays out and The Kept Company's `+12% gold found` node is honest (found
+   * gold only — a sale price is earnings and is deliberately left alone). This arm was
+   * never given one back, which is a balance decision rather than a bug, so it is left alone here
+   * and flagged in the round-21 report.
+   *
+   * The rest of the arm is everything that genuinely fires: `magicFind` (rpg.rarityFor, so it lifts
+   * the rarity of every drop, chest and craft by `1 + magicFind / 100`), `xpFind` (rpg.gainXp),
+   * `scavengeChance` (js/main.js asks fx.sum('scavenge') on every kill), `revealRange` (the
+   * minimap's span) and `lightRange` (the reach of a lamp you are carrying — no lamp, no effect,
+   * so the line says "lamp").
    */
   {
     key: 'fortune', name: 'The Long Odds', angle: Math.PI * 3 / 4, color: '#f2c94c',
     blurb: 'What the dead leave behind, and how much of it you notice.',
     minor: [
-      ['magicFind', 10, '+10% better loot'], ['xpFind', 6, '+6% experience'],
-      ['scavengeChance', 0.05, 'one kill in twenty leaves crafting material behind'],
-      ['lightRange', 8, 'your lamp reaches 8 m further'],
-      ['magicFind', 14, '+14% better loot'], ['xpFind', 10, '+10% experience'],
+      ['magicFind', 10, '+10% magic find (better loot)'], ['xpFind', 6, '+6% experience'],
+      ['scavengeChance', 0.05, '5% chance a kill leaves crafting material'],
+      ['lightRange', 8, '+8 m lamp range'],
+      ['magicFind', 14, '+14% magic find (better loot)'], ['xpFind', 10, '+10% experience'],
     ],
     major: [
-      ['magicFind', 24, '+24% better loot'], ['xpFind', 16, '+16% experience'],
-      ['scavengeChance', 0.1, 'one kill in ten leaves crafting material behind'],
-      ['magicFind', 30, '+30% better loot'],
-      ['revealRange', 0.2, 'the minimap shows 20% more ground'],
+      ['magicFind', 24, '+24% magic find (better loot)'], ['xpFind', 16, '+16% experience'],
+      ['scavengeChance', 0.1, '10% chance a kill leaves crafting material'],
+      ['magicFind', 30, '+30% magic find (better loot)'],
+      ['revealRange', 0.2, '+20% minimap range'],
     ],
   },
   {
     key: 'mend', name: 'The Slow Mend', angle: -Math.PI / 4, color: '#ef6b8d',
-    blurb: 'Nothing here makes a hit hurt less. It makes what the hit cost you come back.',
+    blurb: 'Nothing on this arm makes a hit hurt less. It gives back what the hit cost you.',
     minor: [
       ['hpRegen', 1.4, '+1.4 health a second'],
-      ['lifeSteal', 3, '3% of the damage you deal comes back as health'],
-      ['manaSteal', 3, '3% of the damage you deal comes back as mana'],
+      // Life steal is physical weapon damage only — a swing or a fired shot. Not spells, not wands
+      // and not staves. See WORDING.md.
+      ['lifeSteal', 3, '3% life steal'],
+      ['manaSteal', 3, '3% mana steal'],
       ['mpRegen', 0.8, '+0.8 mana a second'],
-      ['hpOnKill', 6, 'every kill puts 6 health back'], ['con', 4, '+4 constitution'],
+      ['hpOnKill', 6, '+6 health on every kill'], ['con', 4, '+4 Constitution (+16 maximum health)'],
     ],
     major: [
-      ['lifeSteal', 7, '7% of the damage you deal comes back as health'],
+      ['lifeSteal', 7, '7% life steal'],
       ['hpRegen', 3, '+3 health a second'],
-      ['hpOnKill', 18, 'every kill puts 18 health back'],
-      ['manaOnKill', 12, 'every kill puts 12 mana back'],
-      ['manaSteal', 8, '8% of the damage you deal comes back as mana'],
+      ['hpOnKill', 18, '+18 health on every kill'],
+      ['manaOnKill', 12, '+12 mana on every kill'],
+      ['manaSteal', 8, '8% mana steal'],
     ],
   },
   {
     key: 'rove', name: 'The Light Step', angle: Math.PI / 4, color: '#3fd0c0',
     blurb: 'Ground covered, ground seen, and the hits that never land.',
     minor: [
-      ['movePct', 5, '+5% move speed'], ['dodge', 4, '+4% dodge'],
+      ['movePct', 5, '+5% move speed'], ['dodge', 4, '+4% dodge chance'],
       // `stealth` is a fraction: js/actors.js narrows an enemy's notice range to `1 - stealth` of
-      // what it was, and will not take it below a quarter however much you stack.
-      ['stealth', 0.05, 'enemies notice you 5% later'],
-      ['revealRange', 0.1, 'the minimap shows 10% more ground'],
-      ['movePct', 8, '+8% move speed'], ['dex', 4, '+4 dexterity'],
+      // what it was, and will not take it below a quarter however much you stack. So the line is a
+      // RANGE, not a delay — "notice you later" reads as seconds and it is metres.
+      ['stealth', 0.05, '−5% enemy notice range'],
+      ['revealRange', 0.1, '+10% minimap range'],
+      ['movePct', 8, '+8% move speed'], ['dex', 4, '+4 Dexterity (ranged and light weapon damage)'],
     ],
     major: [
-      ['movePct', 12, '+12% move speed'], ['dodge', 9, '+9% dodge'],
-      ['stealth', 0.15, 'enemies notice you 15% later'],
-      ['revealRange', 0.25, 'the minimap shows 25% more ground'],
-      ['dex', 9, '+9 dexterity'],
+      ['movePct', 12, '+12% move speed'], ['dodge', 9, '+9% dodge chance'],
+      ['stealth', 0.15, '−15% enemy notice range'],
+      ['revealRange', 0.25, '+25% minimap range'],
+      ['dex', 9, '+9 Dexterity (ranged and light weapon damage)'],
     ],
   },
 ];
@@ -255,13 +288,13 @@ export const ODDBALLS = [
    * wildcard node reflected six times everything that hit you, which is not a perk, it is a win
    * button. The id has not changed, so nobody loses the point they spent on it.
    */
-  { stat: 'thorns', value: 0.06, desc: 'attackers take back 6% of what they dealt' },
-  { stat: 'manaSteal', value: 4, desc: '4% of damage comes back as mana' },
-  { stat: 'dodge', value: 4, desc: '+4% dodge' },
+  { stat: 'thorns', value: 0.06, desc: '6% thorns — an attacker takes back 6% of the damage it dealt' },
+  { stat: 'manaSteal', value: 4, desc: '4% mana steal' },
+  { stat: 'dodge', value: 4, desc: '+4% dodge chance' },
   { stat: 'xpFind', value: 8, desc: '+8% experience' },
   { stat: 'movePct', value: 5, desc: '+5% move speed' },
-  { stat: 'resistAll', value: 5, desc: '+5% resistance to everything' },
-  { stat: 'lightRange', value: 12, desc: 'your light reaches 12 m further' },
+  { stat: 'resistAll', value: 5, desc: '+5% resistance to all damage' },
+  { stat: 'lightRange', value: 12, desc: '+12 m lamp range' },
   { stat: 'areaPct', value: 6, desc: '+6% attack area' },
 ];
 
@@ -273,8 +306,8 @@ export const ODDBALLS = [
  * second stat sheet.
  */
 export const TALENT_NODES = [
-  { id: 'riposte', arm: 'melee', name: 'Riposte', desc: 'Blocking or dodging a hit makes your next swing a guaranteed critical.', flag: 'riposte' },
-  { id: 'sunder', arm: 'melee', name: 'Sunder', desc: 'The last swing of every weapon pattern strips 8 armour, and the armour does not come back.', flag: 'sunder' },
+  { id: 'riposte', arm: 'melee', name: 'Riposte', desc: 'Block or dodge a hit and your next swing is a guaranteed critical — 100% critical chance on that one swing.', flag: 'riposte' },
+  { id: 'sunder', arm: 'melee', name: 'Sunder', desc: 'The last swing of every weapon pattern strips 8 armour off the target, permanently — that armour never comes back.', flag: 'sunder' },
   /**
    * VOLLEY was `flag: 'volley'` — "every fourth shot is two arrows" — and the flag was read by
    * nothing, because nothing counts your shots. `arrowsPerShot` is a real number that js/main.js
@@ -282,12 +315,12 @@ export const TALENT_NODES = [
    */
   // (`flag` is kept on every node because tests/weapons.test.js asserts one; for Volley, Echo and
   // Scavenger the GRANT is what does the work and the flag is just the node's name.)
-  { id: 'volley', arm: 'ranged', name: 'Volley', desc: 'Every shot looses one more arrow.', flag: 'volley', grants: { arrowsPerShot: 1 } },
-  { id: 'mark', arm: 'ranged', name: 'Quarry', desc: 'The first hit on a target marks it for 8 seconds: it takes 15% more damage from everything.', flag: 'mark' },
-  { id: 'cauterise', arm: 'arcane', name: 'Cauterise', desc: 'A critical hit also burns, for a quarter of its damage over four seconds.', flag: 'cauterise' },
-  { id: 'echo', arm: 'arcane', name: 'Echo', desc: 'One skill cast in six fires a second time, free.', flag: 'echo', grants: { echoChance: 1 / 6 } },
-  { id: 'pack', arm: 'wild', name: 'Pack Sense', desc: 'Your companions heal you for a tenth of the damage they deal.', flag: 'pack' },
-  { id: 'scavenge', arm: 'wild', name: 'Scavenger', desc: 'One kill in five leaves crafting material behind.', flag: 'scavenge', grants: { scavengeChance: 0.2 } },
+  { id: 'volley', arm: 'ranged', name: 'Volley', desc: '+1 arrow on every shot.', flag: 'volley', grants: { arrowsPerShot: 1 } },
+  { id: 'mark', arm: 'ranged', name: 'Quarry', desc: 'Your first hit on a target marks that target for 8s, and a marked target takes 15% more damage from every source.', flag: 'mark' },
+  { id: 'cauterise', arm: 'arcane', name: 'Cauterise', desc: 'A critical hit also sets the target burning: 25% of that hit’s damage again, as Burning damage over 4s.', flag: 'cauterise' },
+  { id: 'echo', arm: 'arcane', name: 'Echo', desc: '17% chance (1 cast in 6) that a skill fires a second time and costs no mana.', flag: 'echo', grants: { echoChance: 1 / 6 } },
+  { id: 'pack', arm: 'wild', name: 'Pack Sense', desc: 'Your companions heal you for 10% of the damage they deal.', flag: 'pack' },
+  { id: 'scavenge', arm: 'wild', name: 'Scavenger', desc: '20% chance a kill leaves crafting material behind.', flag: 'scavenge', grants: { scavengeChance: 0.2 } },
 
   /**
    * ROUND 16'S EIGHT, AND WHY THEY ARE ALL NUMBERS.
@@ -304,19 +337,19 @@ export const TALENT_NODES = [
    * report rather than shipped as promises: a block that staggers, a killing blow that refills a
    * barrier, a chest that opens one rarity higher, a first hit out of stealth that always crits.
    */
-  { id: 'bulwark', arm: 'guard', name: 'Bulwark', desc: 'You get your shield in the way far more often: +12% chance to block, and a block stops 22 more damage.', flag: 'bulwark', grants: { blockChance: 12, blockPower: 22 } },
+  { id: 'bulwark', arm: 'guard', name: 'Bulwark', desc: '+12% chance to block, and a block stops 22 more damage.', flag: 'bulwark', grants: { blockChance: 12, blockPower: 22 } },
   // `thorns` is a SHARE of the damage that got through, not a flat number — js/rpg.js does
   // `reflected = amount * share`, and the enemies that carry it in data/enemies.json carry 0.28.
-  { id: 'spite', arm: 'guard', name: 'Spite', desc: 'Anything that hits you takes back 12% of what it dealt.', flag: 'spite', grants: { thorns: 0.12 } },
+  { id: 'spite', arm: 'guard', name: 'Spite', desc: '12% thorns — anything that hits you takes back 12% of the damage it dealt.', flag: 'spite', grants: { thorns: 0.12 } },
 
-  { id: 'pickings', arm: 'fortune', name: 'Rich Pickings', desc: 'Everything that drops rolls better, and you learn more from everything you put down: +30% better loot and +15% experience.', flag: 'pickings', grants: { magicFind: 30, xpFind: 15 } },
-  { id: 'gleaner', arm: 'fortune', name: 'Gleaner', desc: 'One kill in four leaves crafting material behind, and +15% better loot on top.', flag: 'gleaner', grants: { scavengeChance: 0.25, magicFind: 15 } },
+  { id: 'pickings', arm: 'fortune', name: 'Rich Pickings', desc: '+30% magic find and +15% experience.', flag: 'pickings', grants: { magicFind: 30, xpFind: 15 } },
+  { id: 'gleaner', arm: 'fortune', name: 'Gleaner', desc: '25% chance a kill leaves crafting material behind, and +15% magic find.', flag: 'gleaner', grants: { scavengeChance: 0.25, magicFind: 15 } },
 
-  { id: 'long_breath', arm: 'mend', name: 'Long Breath', desc: 'You mend as you walk: +4 health and +2 mana a second, in a fight or out of one.', flag: 'longBreath', grants: { hpRegen: 4, mpRegen: 2 } },
-  { id: 'red_harvest', arm: 'mend', name: 'Red Harvest', desc: 'Every kill puts 25 health and 15 mana back.', flag: 'redHarvest', grants: { hpOnKill: 25, manaOnKill: 15 } },
+  { id: 'long_breath', arm: 'mend', name: 'Long Breath', desc: '+4 health and +2 mana a second, in a fight or out of one.', flag: 'longBreath', grants: { hpRegen: 4, mpRegen: 2 } },
+  { id: 'red_harvest', arm: 'mend', name: 'Red Harvest', desc: '+25 health and +15 mana on every kill.', flag: 'redHarvest', grants: { hpOnKill: 25, manaOnKill: 15 } },
 
-  { id: 'unseen', arm: 'rove', name: 'Unseen', desc: 'Enemies notice you 30% later, and you see 20% more of the map before they do.', flag: 'unseen', grants: { stealth: 0.3, revealRange: 0.2 } },
-  { id: 'long_stride', arm: 'rove', name: 'Long Stride', desc: 'You move 18% faster and slip 6% more of what is swung at you.', flag: 'longStride', grants: { movePct: 18, dodge: 6 } },
+  { id: 'unseen', arm: 'rove', name: 'Unseen', desc: '−30% enemy notice range and +20% minimap range.', flag: 'unseen', grants: { stealth: 0.3, revealRange: 0.2 } },
+  { id: 'long_stride', arm: 'rove', name: 'Long Stride', desc: '+18% move speed and +6% dodge chance.', flag: 'longStride', grants: { movePct: 18, dodge: 6 } },
 ];
 
 /**
@@ -335,19 +368,21 @@ export const KEYSTONES = [
      * from somebody else's game. `RENAMED_PERKS` below keeps a save made under the old id working.
      */
     id: 'doubled_grasp', arm: 'melee', name: 'Doubled Grasp', flag: 'doubleGrip',
-    desc: 'You can hold a two-handed weapon in each hand, and every swing covers 18% more ground.',
+    desc: 'Hold a two-handed weapon in each hand. +18% attack area.',
     cost: '−20% attack speed.',
     grants: { haste: -20, areaPct: 18 },
   },
   {
     id: 'far_shot', arm: 'ranged', name: 'Far Shot', flag: 'farShot',
-    desc: 'Arrows and bolts deal up to 50% more damage the further they have flown, and +5% critical chance.',
-    cost: 'Anything within four metres of you takes 25% less.',
+    // js/rpg.js: `away < 4 ? 0.75 : 1 + min(0.5, (away - 4) / 42 * 0.5)` — so the bonus starts at
+    // 4 m and reaches its full +50% at 46 m, and both numbers are on the card.
+    desc: 'An arrow or a bolt deals more damage the further it has flown: nothing extra at 4 m, up to +50% at 46 m. +5% critical chance.',
+    cost: 'Anything within 4 m of you takes 25% less damage.',
     grants: { critChance: 5 },
   },
   {
     id: 'blood_magic', arm: 'arcane', name: 'Blood Price', flag: 'bloodMagic',
-    desc: 'Skills are paid for in health instead of mana, and never fail for want of it. +14% spell power.',
+    desc: 'Skills are paid for in health instead of mana, and never fail for want of mana. +14% spell damage.',
     cost: 'Your mana pool stops mattering, and a skill can leave you on 1 health.',
     grants: { spellPower: 0.14 },      // R18 — a share, not 1400%
   },
@@ -359,8 +394,8 @@ export const KEYSTONES = [
     // cast rather than to a limit. Two more FOLLOWER SLOTS is a much bigger thing — five at level
     // one instead of three — and it raises the per-type cap on every summon by two on top.
     id: 'the_pack', arm: 'wild', name: 'The Pack', flag: 'thePack',
-    desc: 'Two more followers may walk with you, two more of each thing you summon, and all of them deal 20% more damage.',
-    cost: 'You deal 15% less damage yourself.',
+    desc: '+2 follower slots, +2 of each thing you summon, and +20% companion damage.',
+    cost: '−15% damage of your own.',
     grants: { followerSlots: 2, petDamagePct: 20, damagePct: -15 },
   },
 
@@ -372,26 +407,27 @@ export const KEYSTONES = [
    */
   {
     id: 'held_ground', arm: 'guard', name: 'Held Ground', flag: 'heldGround',
-    desc: 'You are a wall: +40% armour, everything lands 10% softer, and a block stops 25 more damage.',
-    cost: 'You move a quarter slower — there is no walking away from a fight you have started.',
+    desc: '+40% armour, +10% resistance to all damage, and a block stops 25 more damage.',
+    cost: '−25% move speed — there is no walking away from a fight you have started.',
     grants: { armorPct: 40, resistAll: 10, blockPower: 25, movePct: -25 },
   },
   {
     id: 'fortunes_tithe', arm: 'fortune', name: "Fortune's Tithe", flag: 'fortunesTithe',
-    desc: 'Everything you kill pays out: +70% better loot, and one kill in five leaves crafting material behind.',
-    cost: 'You deal 12% less damage — your eye is on the ground rather than on the fight.',
+    desc: '+70% magic find, and 20% chance a kill leaves crafting material behind.',
+    cost: '−12% damage — your eye is on the ground rather than on the fight.',
     grants: { magicFind: 70, scavengeChance: 0.2, damagePct: -12 },
   },
   {
     id: 'slow_blood', arm: 'mend', name: 'Slow Blood', flag: 'slowBlood',
-    desc: '14% of the damage you deal comes back as health, and you mend 5 a second on top of it.',
-    cost: 'Your health pool is 70 smaller. You live on what comes back, not on what you had.',
+    desc: '14% life steal, and +5 health a second on top.',
+    cost: '−70 maximum health. You live on what comes back, not on what you had.',
     grants: { lifeSteal: 14, hpRegen: 5, maxHp: -70 },
   },
   {
     id: 'wind_walk', arm: 'rove', name: 'Wind Walk', flag: 'windWalk',
-    desc: '+30% move speed, +15% dodge, and enemies notice you 25% later.',
-    cost: 'Your armour counts for a third less — nothing that does land is softened.',
+    desc: '+30% move speed, +15% dodge chance, and −25% enemy notice range.',
+    // The grant is −35%, and the old line said "a third less". Say the number the grant says.
+    cost: '−35% armour — nothing that does land is softened.',
     grants: { movePct: 30, dodge: 15, stealth: 0.25, armorPct: -35 },
   },
 ];
@@ -472,7 +508,7 @@ export function buildForest() {
   // the hub. Free, always taken, and the only thing everything else grows out of.
   const start = add({
     id: 'start', kind: 'hub', name: 'Where you began', x: 0, y: 0,
-    desc: 'Every road out of here costs the same. What it costs is the walking.',
+    desc: 'The middle of the forest. This node costs 0 points and grants nothing — every arm starts here, and 1 point moves you one node along whichever arm you pick.',
     grants: {}, arm: null, ring: 0,
   });
 
@@ -657,7 +693,11 @@ export function canTake(player, forest, id) {
   if (taken.has(id)) return { ok: false, why: 'You already have that one.' };
   if (pointsLeft(player) <= 0) return { ok: false, why: 'No points left. Come back a level from now.' };
   const near = forest.neighbours.get(id) || [];
-  if (!near.some(n => taken.has(n))) return { ok: false, why: 'Nothing you have taken connects to it yet.' };
+  // R21, WORDING.md rule 4: name the perk rather than saying "it". The regex in
+  // tests/round11-ui.test.js moved with this string.
+  if (!near.some(n => taken.has(n))) {
+    return { ok: false, why: `Nothing you have taken connects to ${node.name} yet.` };
+  }
   return { ok: true, node };
 }
 

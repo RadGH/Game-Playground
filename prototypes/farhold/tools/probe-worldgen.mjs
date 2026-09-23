@@ -470,5 +470,117 @@ rule('ITEMS 4d + 6 — bridges, and roads that stop at one');
   }
 }
 
+// ---------------------------------------------------------------------------- round 21
+
+/**
+ * R21 — the four things the round-21 play-test reported, each as a number.
+ *
+ *   "There is often an event directly at the town center node, which almost always has a road
+ *    going directly through it… There are lots of sub-roads that are totally meaningless and/or
+ *    don't connect to the main road… the terrain is very jagged… there are only rolling hills."
+ *
+ * Every one of those is measurable, and none of them was measured before the round that fixed
+ * them. They stay here so the next change to the ground or the town planner has to answer for
+ * them.
+ */
+function probeRound21() {
+  rule('R21 ITEM 4 — is the ground a ramp or a staircase?');
+  {
+    // The `Math.round` in elevationToMetres made the base height move a WHOLE METRE at a time.
+    // Walking half a metre should move the ground by centimetres, not by a step.
+    let worst = 0, worstAt = 0;
+    const steps = [];
+    for (let i = 0; i < 4000; i++) {
+      const x = AT_X - 1000 + i * 0.5;
+      const d = Math.abs(terrain.naturalHeightAt(x + 0.5, AT_Z) - terrain.naturalHeightAt(x, AT_Z));
+      steps.push(d);
+      if (d > worst) { worst = d; worstAt = x; }
+    }
+    steps.sort((a, b) => a - b);
+    line(`height step per 0.5 m walked: median ${f2(steps[steps.length >> 1])}`
+      + `  p99 ${f2(steps[(steps.length * 0.99) | 0])}  worst ${f2(worst)} m at x ${worstAt | 0}`);
+    line(worst > 0.9
+      ? '   ^ THE WHOLE-METRE STAIRCASE IS BACK — see elevationToMetresExact in worldgen/js/relief.js'
+      : '   (smooth — no rounding in the height path)');
+  }
+
+  rule('R21 ITEM 5 — are there any cliffs on this world?');
+  {
+    const slopes = [];
+    for (let z = AT_Z - 1000; z < AT_Z + 1000; z += 12) {
+      for (let x = AT_X - 1000; x < AT_X + 1000; x += 12) {
+        if (terrain.underwater(x, z)) continue;
+        slopes.push(terrain.slopeAt(x, z, 4));
+      }
+    }
+    slopes.sort((a, b) => a - b);
+    const q = pp => slopes[Math.min(slopes.length - 1, (slopes.length * pp) | 0)];
+    const share = t => ((slopes.filter(v => v > t).length / slopes.length) * 100).toFixed(2);
+    line(`slope over 2 km: p50 ${f2(q(0.5))}  p90 ${f2(q(0.9))}  p99 ${f2(q(0.99))}  max ${f2(slopes[slopes.length - 1])}`);
+    line(`   past 45°: ${share(1)}%   past 63°: ${share(2)}%   past 72°: ${share(3)}%`);
+    line(Number(share(2)) < 0.2
+      ? '   ^ ROLLING HILLS ONLY — the cliff term in js/planet.js is not firing here'
+      : '   (this world has real cliffs in it)');
+  }
+
+  if (node && node.d <= 1200) {
+    const t = node.t;
+    const cx = t.wx, cz = t.wz;
+    const { ring } = footprintOf(t.size || 1);
+    const culture = cultureFor({ race: t.race, biome: t.biome });
+    const plan = planTown({
+      seed: ((world.seed ?? systemSeed) ^ (t.id * 2654435761)) >>> 0,
+      size: t.size || 1,
+      culture,
+      links: ringCrossings(terrain.roadPaths, cx, cz, ring, { limit: 4 }).map(c => [c.dx, c.dz]),
+      heightAt: (lx, lz) => terrain.heightAt(cx + lx, cz + lz),
+      buildable: (lx, lz) => {
+        const x = cx + lx, z = cz + lz;
+        if (terrain.roadAt(x, z) > 0.45) return false;
+        if (terrain.bridgedAt?.(x, z)) return false;
+        return !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 6) <= 0.62;
+      },
+    });
+
+    rule('R21 ITEM 2 — streets that go nowhere, and streets on top of the road');
+    const skip = (x, z) => terrain.underwater(x, z) || terrain.riverAt(x, z) > 0.3
+      || !!terrain.bridgedAt?.(x, z) || terrain.roadAt(x, z) > 0.45;
+    const raw = streetLanes(plan, { cx, cz, terrain });
+    const drawn = streetLanes(plan, { cx, cz, terrain, skip, prune: true });
+    let onRoad = 0, pts = 0;
+    for (const lane of drawn) for (const p of lane.points) { pts++; if (terrain.roadAt(p[0], p[1]) > 0.45) onRoad++; }
+    const byCls = {};
+    for (const st of plan.streets) (byCls[st.cls] = (byCls[st.cls] || 0) + 1);
+    line(`${plan.streets.length} streets planned (${Object.entries(byCls).map(([k, n]) => `${k} ${n}`).join(', ')})`
+      + ` for ${plan.plots.length} plots`);
+    line(`${raw.length} lanes before pruning, ${drawn.length} drawn`);
+    line(`${onRoad}/${pts} drawn street samples lie on the world road`
+      + (onRoad ? '   <- PAVING ON TOP OF THE ROAD' : '   (none — good)'));
+
+    rule('R21 ITEMS 1 + 2 — what is standing on the town centre');
+    const padOk = (x, z) => {
+      if (terrain.waterAt(x, z) || terrain.underwater(x, z)) return false;
+      if (terrain.riverAt(x, z) > 0.3 || terrain.slopeAt(x, z, 4) > 0.5) return false;
+      if (terrain.bridgedAt?.(x, z) || terrain.roadAt(x, z) > 0.45) return false;
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2;
+        if (terrain.roadAt(x + Math.cos(a) * 3.2, z + Math.sin(a) * 3.2) > 0.45) return false;
+      }
+      return true;
+    };
+    const pad = padSpotFor(t, padOk);
+    const board = boardSpotFor(t, padOk);
+    const sq = [cx + (plan.square.cx || 0), cz + (plan.square.cz || 0)];
+    line(`town centre roadAt ${f2(terrain.roadAt(cx, cz))}`
+      + (terrain.roadAt(cx, cz) > 0.45 ? '   <- THE WORLD ROAD RUNS THROUGH THE ORIGIN' : ''));
+    line(`square at ${sq[0] | 0},${sq[1] | 0} roadAt ${f2(terrain.roadAt(sq[0], sq[1]))}`);
+    line(`waypoint pad at ${pad.x | 0},${pad.z | 0} roadAt ${f2(terrain.roadAt(pad.x, pad.z))}`
+      + (terrain.roadAt(pad.x, pad.z) > 0.45 ? '   <- THE PAD IS IN THE ROAD' : ''));
+    line(`notice board at ${board.x | 0},${board.z | 0} roadAt ${f2(terrain.roadAt(board.x, board.z))}`);
+  }
+}
+
+probeRound21();
+
 probeOre();
 line('');

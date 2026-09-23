@@ -47,7 +47,7 @@ export const STEPS = [
     id: 'tool',
     when: c => c.toolTier <= 0,
     text: 'Put a weapon in your hand — that is your tool.',
-    why: 'Bare hands barely scratch anything. Any weapon at all makes you a tier-1 tool; there is no separate tool slot.',
+    why: 'Bare hands harvest at half rate and cannot touch rock. Build a Knapped Tool — 4 logs and 8 fibre, no bench needed — and put it in the Tool slot.',
     where: 'Character sheet · Worn',
   },
   {

@@ -26,7 +26,11 @@ const ctxOf = p => ({ ...p, have: id => p.bag[id] || 0 });
 test('a player with nothing is told to pick up a weapon, not to build a refinery', () => {
   const s = nextStep(ctxOf(fresh()));
   assert.equal(s.id, 'tool');
-  assert.match(s.why, /no separate tool slot/i);
+  // R21: this used to assert "there is no separate tool slot", which stopped being true in R16
+  // when tools became real items in a real slot. A test that pins a sentence keeps the sentence
+  // alive long after the rule it describes has gone — so it now asserts the RULE.
+  assert.match(s.why, /Tool slot/i);
+  assert.match(s.why, /Knapped Tool/i);
 });
 
 test('the exact question that was asked: a furnace is built and nothing has happened', () => {

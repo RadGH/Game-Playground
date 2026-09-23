@@ -558,6 +558,57 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     return best;
   }
 
+  /**
+   * R21 — the road nearest a point: which way it runs there, and how wide it is.
+   *
+   * `terrain.roadPaths` carries each route's smoothed polyline and its own `half`, which is the one
+   * honest source for "where does the carriageway end" — `js/planet.js` builds the ribbon from the
+   * same number. A trail is 4.5 m across and a highway 7, so a single constant could never have
+   * been right for both.
+   */
+  function roadNear(x, z, within = 60) {
+    let best = null, bestD = within;
+    for (const path of terrain.roadPaths || []) {
+      const pts = path.points || path.pts || [];
+      for (let i = 1; i < pts.length; i++) {
+        const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
+        const dx = bx - ax, dz = bz - az;
+        const len2 = dx * dx + dz * dz;
+        if (!len2) continue;
+        const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / len2));
+        const px = ax + dx * t, pz = az + dz * t;
+        const d = Math.hypot(x - px, z - pz);
+        if (d >= bestD) continue;
+        bestD = d;
+        best = { heading: Math.atan2(dz, dx), half: path.half ?? 3.5, distance: d };
+      }
+    }
+    return best;
+  }
+
+  /**
+   * R21 — walk a point out of a town's ring, or say there is nowhere to go.
+   *
+   * Used by `claimLandmarks`. The spiral is deliberately coarse and bounded: a landmark wants to be
+   * near where the zone put it, so if there is no clear ground within a couple of hundred metres
+   * the honest answer is to build nothing rather than to fling a wayshrine over the horizon.
+   */
+  function nudgeClear(x, z, want = 200) {
+    if (townGap(x, z) > want) return [x, z];
+    for (let r = 60; r <= 260; r += 40) {
+      for (let i = 0; i < 12; i++) {
+        const a = (i / 12) * Math.PI * 2;
+        const px = x + Math.cos(a) * r, pz = z + Math.sin(a) * r;
+        if (townGap(px, pz) <= want) continue;
+        if (terrain.underwater?.(px, pz)) continue;
+        if (terrain.roadAt?.(px, pz) > 0.45) continue;
+        if (terrain.slopeAt?.(px, pz, 6) > 0.55) continue;
+        return [px, pz];
+      }
+    }
+    return null;
+  }
+
   /** Ground tags for a slot, so the `on`/`biomes` lists in both data files can be matched. */
   function tagsFor(slot) {
     const tags = new Set([slot.on, ...(slot.tags || [])]);
@@ -774,6 +825,7 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     const rng = makeRng((seed ^ (site.id * 40503) ^ 0x51ed) >>> 0);
     const cx = site.x, cz = site.z;
 
+
     const put = (piece, x, z, yaw, scale = 1, yOff = 0) => {
       const mesh = meshes[piece];
       if (!mesh) return;
@@ -788,6 +840,35 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       const solid = PIECES[piece].solid;
       if (solid && collide) collide.add(wx, wz, solid[0] * scale, solid[1] * scale);
     };
+
+    /**
+     * R21 — A SPENT LANDMARK LEAVES DEBRIS, IT DOES NOT STAND THERE REPEATING ITSELF.
+     *
+     * The play-test, on a Forge Fire at a town centre: *"Worst of all it doesn't go away, it just
+     * stays there saying 'you have already had what there is to have here'… The event should just
+     * go away, it's fine if it leaves some sort of debris behind as a signal of 'this event is
+     * complete'."*
+     *
+     * `taken` was already recorded (round 16 took the map pin off), but nothing here ever read it,
+     * so the geometry stood forever. Now a taken one-shot builds a scatter of rubble instead of its
+     * own layout — the place is still a place, it is visibly finished, and `interactTarget` in
+     * js/main.js no longer offers it.
+     *
+     * THE COLLIDER IS WHY THIS IS A REPLACEMENT AND NOT A REMOVAL. As js/eventprops.js documents,
+     * a collider filed with `collide.add` cannot be taken back — the obstacle field has no delete.
+     * Rubble carries `solid: null`, so swapping the plan at build time files no collider at all and
+     * nothing invisible is left behind; the whole instanced set is rebuilt from scratch on every
+     * `update`, so the swap costs nothing.
+     */
+    if (site.taken && site.family === 'landmark') {
+      const ring = makeRng((seed ^ (site.id * 7919) ^ 0xd06f) >>> 0);
+      for (let i = 0; i < 7; i++) {
+        const a = (i / 7) * Math.PI * 2 + ring() * 0.6;
+        const r = 1.2 + ring() * 3.4;
+        put('rubble', cx + Math.cos(a) * r, cz + Math.sin(a) * r, ring() * Math.PI * 2, 0.8 + ring() * 0.5);
+      }
+      return;
+    }
 
     for (const c of layout.centre || []) {
       put(c.piece, cx + (c.x || 0), cz + (c.z || 0), (c.spin ?? 0) + rng() * 0.2, c.scale ?? 1, c.y || 0);
@@ -844,18 +925,46 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
 
     // THE APPROACH. This is the difference between a set piece and a pile: markers that start sixty
     // metres out and walk you in, so you know you have arrived somewhere before you get there.
+    /**
+     * R21 — THE WAYSTONES STAND BESIDE THE ROAD, NOT IN IT.
+     *
+     * The play-test: *"there are some small pillars that appear to be going in the direction of the
+     * road. However, they are off center, spilling into the middle of the road."* Both halves of
+     * that sentence were true, and they were two separate bugs:
+     *
+     *   1. **The bearing was pure chance** — `heading = rng() * TAU`. A slot created ON a road cell
+     *      or at a junction never asked which way the road ran, so an avenue of waystones marched
+     *      across the carriageway at whatever angle the dice gave it. It only LOOKED like it was
+     *      following the road when the dice happened to agree.
+     *   2. **The offset was a bare constant.** `off = lane * app.spread`, with `spread` written in
+     *      `data/setpieces.json` as 3.2 / 3.4 / 3.6 / 4.5 and never once compared to the road. A
+     *      road-class carriageway is 7 m wide, so its edge is at 3.5 m, and a waystone's own footing
+     *      is 0.5 m across — three of the four layouts were therefore INSIDE the painted road by
+     *      construction. Compare `proctown/js/buildkit.js`, which does the same job correctly for
+     *      market stalls: `off = street.width / 2 + offset`.
+     *
+     * So the avenue now takes its bearing from the road it belongs to, and its offset is the road's
+     * own half-width plus the piece's own footing plus a clear metre — the data's `spread` becomes a
+     * floor rather than the answer.
+     */
     const app = layout.approach;
     if (app) {
-      const heading = rng() * Math.PI * 2;
+      const road = roadNear(cx, cz, 60);
+      const heading = road ? road.heading : rng() * Math.PI * 2;
       const side = heading + Math.PI / 2;
+      // the piece's own half-footprint, so a wide stone is pushed out further than a narrow one
+      const foot = (PIECES[app.piece]?.solid?.[0] ?? 0.5) * (app.scale ?? 1);
+      const clear = road ? road.half + foot + 1.0 : 0;
       for (let i = 0; i < (app.count || 0); i++) {
         const t = app.count === 1 ? 0 : i / (app.count - 1);
         const d = (app.from ?? 50) + t * ((app.to ?? 18) - (app.from ?? 50));
         const lanes = app.both ? [-1, 1] : [0];
         for (const lane of lanes) {
-          const off = lane * (app.spread ?? 3);
+          const off = lane * Math.max(app.spread ?? 3, clear);
           const x = cx + Math.cos(heading) * d + Math.cos(side) * off;
           const z = cz + Math.sin(heading) * d + Math.sin(side) * off;
+          // …and a last word from the ground itself, in case the road bends away under the avenue
+          if (terrain.roadAt?.(x, z) > 0.45) continue;
           put(app.piece, x, z, -heading + Math.PI / 2 + (rng() - 0.5) * 0.25, (app.scale ?? 1) * (0.9 + rng() * 0.2));
         }
       }
@@ -909,7 +1018,22 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
     for (let i = 0; i < shown.length; i++) {
       const s = shown[i];
       s.y = terrain.heightAt(s.x, s.z);
-      buildLayout(s, counts, i < FULL);
+      /**
+       * R21 — A LANDMARK IS ALWAYS BUILT IN FULL, HOWEVER MANY SITES ARE IN RANGE.
+       *
+       * The play-test: *"At the town center there is an event 'E look at forge fire' [but] there is
+       * no fire, it's just a building."* And there genuinely was no fire — `layouts.forge_fire`
+       * declares two fires, two banners, six waystones and an approach, and `buildLayout` throws
+       * all of it away after the centre piece unless the site is one of the nearest FIVE of the
+       * twelve shown. At a town centre plenty of sites are in range, so the forge fire lost that
+       * contest every time and rendered as a lone hut — a building with a name and nothing to
+       * explain it.
+       *
+       * The nearest-five rule is a sensible budget for scenery. It is the wrong rule for the one
+       * kind of site the game asks you to walk up to and press a key at, so a landmark opts out.
+       * There are only ever a few per zone, and a spent one is seven pieces of rubble.
+       */
+      buildLayout(s, counts, i < FULL || s.family === 'landmark');
     }
     for (const key of PIECE_KEYS) {
       const m = meshes[key];
@@ -1412,6 +1536,20 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
         // Nothing near it: build one where the territory says it is.
         const layout = setpieces?.layouts?.[mark.kind];
         if (!layout) continue;
+        /**
+         * R21 — AND NOT ON TOP OF A TOWN.
+         *
+         * `buildSites` has asked `townGap` since round 16; this path never did, so a landmark the
+         * territory layer invented could be built anywhere — including the exact centre of a
+         * settlement, which is what the play-test walked into. `js/territory.js` no longer offers a
+         * settlement node as a spot, and this is the belt to that braces: a zone's cells can still
+         * fall inside a town's ring, and a set piece with its own approach avenue has no business
+         * in a market square. `nudgeClear` walks it out to open ground rather than dropping the
+         * landmark entirely, so a zone keeps the number of places it is supposed to have.
+         */
+        const clear = nudgeClear(mark.x, mark.z, 200);
+        if (!clear) continue;
+        mark.x = clear[0]; mark.z = clear[1];
         const key = `tl${mark.id}`;
         if (sites.some(s => s.key === key)) continue;
         const spec = (landmarkData?.landmarks || []).find(l => l.kind === mark.kind) || null;

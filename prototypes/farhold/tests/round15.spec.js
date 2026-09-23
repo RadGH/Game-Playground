@@ -117,8 +117,9 @@ test('the character sheet says what your tool is and how to get a better one', a
   expect(out.tool, 'the game cannot say what your tool is').not.toBeNull();
   expect(out.rowOnScreen, 'there is no Tool row on the character sheet').toBe(true);
   expect(out.value).toBe(out.tool.name);
-  // the card has to answer the actual question — "there is no slot" and "here is the next rung"
-  expect(out.tip).toMatch(/no separate tool slot/i);
+  // the card has to answer the actual question — what is in the slot, and what the next rung is.
+  // R21: was /no separate tool slot/, which R16 made false when it added one.
+  expect(out.tip).toMatch(/Tool slot|Right now/i);
   expect(out.tip).toMatch(/Next rung/);
   expect(errors).toEqual([]);
 });

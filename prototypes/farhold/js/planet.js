@@ -24,9 +24,9 @@ import { generateSystem } from '../../../universe/js/system.js';
 import { generatePlanetMap, reliefFor, surfaceOf } from '../../../universe/js/planetmap.js';
 import { ARCH_BY_KEY } from '../../../universe/js/system.js';
 import { PLANET_BANDS, bandForPlanet } from './rpg.js';
-import { elevationToMetres } from '../../../worldgen/js/relief.js';
+import { elevationToMetres, elevationToMetresExact } from '../../../worldgen/js/relief.js';
 import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
-import { makeNoise2D, fbm, subSeed, clamp, lerp, makeRng, smoothstep, blur } from '../../../worldgen/js/noise.js';
+import { makeNoise2D, fbm, ridged, subSeed, clamp, lerp, makeRng, smoothstep, blur } from '../../../worldgen/js/noise.js';
 
 /** Metres across one world-map cell. The one number that sets the size of the planet. */
 /**
@@ -474,15 +474,92 @@ export function makeTerrain(world, planet = null, opts = {}) {
   const cellX = x => ((Math.round(x / M_PER_CELL) % w) + w) % w;    // longitude wraps
   const cellY = z => clamp(Math.round(z / M_PER_CELL), 0, h - 1);
 
+  /**
+   * R21 — CLIFFS, BECAUSE THE WHOLE WORLD WAS ROLLING HILLS.
+   *
+   * The play-test: *"in general for map generation, there are only rolling hills. There are almost
+   * no cliffs."* Measured over 2 km of the reported world: slope p50 0.27, p99 0.78, max 1.53, and
+   * **nothing at all steeper than 63°**. That is not a tuning accident, it is the shape of the
+   * formula — `naturalHeightAt` was a bilinear ramp plus two symmetric `fbm` terms, and symmetric
+   * fBm has no cliffs in it anywhere. Everything upstream that could have made one is smoothed
+   * away before Farhold sees it: `thermalErode` explicitly slumps anything past its talus angle,
+   * `hydraulicErode` carves the valleys back out, and `despike()` pulls outlying cells to the
+   * neighbour median.
+   *
+   * `ridged` noise is the opposite: `1 - |n|` raised to a power leaves CREASES — a sharp line where
+   * the field turns over, which is what a cliff edge is. Two things make it safe to add:
+   *
+   *   1. It is gated on `broken` (World Forge's own slope layer), so cliffs appear where the map
+   *      already says the ground is broken and never in the middle of a meadow. A grassland stays
+   *      a grassland; a headland gets a face.
+   *   2. `smoothstep(0.30, 0.72, …)` gives the gate a soft edge, so a cliff band fades in over some
+   *      hundreds of metres instead of starting mid-air.
+   *
+   * THE BUDGET IS REAL AND `tests/planet.test.js` OWNS IT. That test walks cell centres and fails
+   * if `heightAt` drifts more than 130 m from the cell's own elevation. `coarse` and `fine` already
+   * spend about 47 m of that at full tilt, so `cliffMetres` has roughly 83 m of headroom — and it
+   * is spent in exactly the same places `coarse` spends its own, because both are gated on
+   * `broken`. The default keeps the pair comfortably inside the bar while still being a drop you
+   * cannot walk up — and `cliffBand` sharpens the face without adding any height to it.
+   *
+   * THE FACE HAS TO BE NARROW, NOT JUST TALL. A cliff is steepness, and steepness is height over
+   * DISTANCE — piling amplitude onto a 500 m wavelength gives a bigger hill, not a cliff. So the
+   * crease field is run through a narrow `smoothstep` band (`cliffBand`): inside the band the
+   * ground climbs the whole `cliffMetres` over the few metres it takes the field to cross it, and
+   * outside the band it is flat. That is a bench, a face, and another bench.
+   *
+   * `cliffCellFreq` is in CELLS, not metres, deliberately: a map cell is 640 m on a full-size world
+   * and 64 m on Super tiny, and a cliff that stayed 500 m wide would be invisible on the small one
+   * (which is the world this was reported on). Tying it to the cell keeps escarpments the same
+   * shape relative to the hills they cut through, whatever size world you are standing on.
+   *
+   * AND CLIFF COUNTRY HAS TO BE RARE. The first cut of this gated on `broken` alone, and `broken`
+   * is over 0.30 across 47% of the map — which produced a corrugated world where 39% of the ground
+   * was steeper than 45°. Unwalkable, and no more interesting than the rolling hills it replaced,
+   * because a cliff you meet every fifty metres is just texture. So there are two gates, and a
+   * face has to pass both: `broken` (this ground is rugged at all) and a slow, separate mask
+   * (`cliffMask`) that says this REGION is cliff country. The mask turns over across kilometres,
+   * so escarpments come in ranges with quiet farmland between them.
+   */
+  const cliffMetres = (opts.cliffMetres ?? 220) * reliefScale / 0.22;
+  const cliffCellFreq = opts.cliffCellFreq ?? 0.21;
+  const cliffBand = opts.cliffBand ?? 0.02;
+  const cliffBroken = opts.cliffBroken ?? [0.55, 0.85];      // how rugged the ground must be
+  const cliffMaskAt = opts.cliffMask ?? [0.50, 0.66];        // how much of the world is cliff country
+  const cliffMaskFreq = (opts.cliffMaskCellFreq ?? 0.03) / M_PER_CELL;
+  const cliffFreq = cliffCellFreq / M_PER_CELL;
+  const n4 = makeNoise2D(subSeed(world.seed, 'farhold-cliff'));
+  const n5 = makeNoise2D(subSeed(world.seed, 'farhold-cliff-country'));
+
   /** The ground before any river or road touched it. */
   function naturalHeightAt(x, z) {
     const fx = x / M_PER_CELL, fy = z / M_PER_CELL;
-    const base = elevationToMetres(layer(world.elevation, fx, fy), relief);
+    // R21: the EXACT metres, not the rounded ones — the rounding was a 1 m staircase on every
+    // hillside and it is what made the slopes look faceted. See `elevationToMetresExact`.
+    const base = elevationToMetresExact(layer(world.elevation, fx, fy), relief);
     const broken = clamp(layer(world.slope, fx, fy), 0, 1);
     const damp = base < 0 ? 0.3 : 1;
     const coarse = (fbm(n1, x * 0.0055, z * 0.0055, { octaves: 4 }) - 0.5) * (detailFlat + broken * detailRelief) * damp;
     const fine = (fbm(n2, x * 0.016, z * 0.016, { octaves: 3 }) - 0.5) * (detailFine * (1 + broken * 3)) * damp;
-    return base + coarse + fine;
+    /**
+     * The cliff term. `gate` keeps it on broken ground; `terrace` bends the ridged field's own
+     * profile toward its top, which turns a rounded crease into a lip with a face under it.
+     */
+    let cliff = 0;
+    const rugged = smoothstep(cliffBroken[0], cliffBroken[1], broken) * damp;
+    if (rugged > 0.001) {
+      // is this cliff country at all? a slow field, so escarpments come in ranges
+      const country = smoothstep(cliffMaskAt[0], cliffMaskAt[1],
+        fbm(n5, x * cliffMaskFreq, z * cliffMaskFreq, { octaves: 2 }));
+      const gate = rugged * country;
+      if (gate > 0.001) {
+        const r = ridged(n4, x * cliffFreq, z * cliffFreq, { octaves: 3, sharpness: 2.2 });
+        // the narrow band IS the face: the ground crosses the whole drop while `r` crosses 2·band
+        const face = smoothstep(0.5 - cliffBand, 0.5 + cliffBand, r);
+        cliff = (face - 0.5) * cliffMetres * gate;
+      }
+    }
+    return base + coarse + fine + cliff;
   }
 
   // ---------------------------------------------------------------- rivers and roads as paths

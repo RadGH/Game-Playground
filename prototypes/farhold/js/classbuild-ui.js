@@ -115,7 +115,7 @@ export function createClassBuilder({
   const foot = el('div', { class: 'cb-foot' }, [why, done]);
   const root = el('div', { class: `cb${embedded ? ' cb--tab' : ''}`, hidden: true }, [
     el('div', { class: 'cb-head' }, [
-      el('h2', { text: 'Build your own' }),
+      el('h2', { text: 'Build your own class' }),
       subtitle,
       embedded ? null : el('button', { class: 'cb-close', type: 'button', text: 'Close  (Esc)', onclick: () => { hide(); onClose(state); } }),
     ]),
@@ -165,8 +165,8 @@ export function createClassBuilder({
       }))));
     }
     panes.push(pane('What comes with it', [
-      el('div', { class: 'cb-note', text: `${(data?.armour?.[current?.armour || 'medium'] || []).join(', ').replace(/_/g, ' ')} — the same way a preset class's starting armour is equipped.` }),
-      el('div', { class: 'cb-note', text: 'Everybody also starts with a torch, a horse and the crudest tool there is, whatever they built.' }),
+      el('div', { class: 'cb-note', text: `Worn from the first morning: ${(data?.armour?.[current?.armour || 'medium'] || []).join(', ').replace(/_/g, ' ')}.` }),
+      el('div', { class: 'cb-note', text: 'Every character also starts with a torch, a horse and a Knapped Tool, whatever loadout you pick.' }),
     ]));
     return panes;
   }
@@ -195,12 +195,18 @@ export function createClassBuilder({
         class: `cb-slot${editing === s.index ? ' on' : ''}${s.pending ? ' pending' : ''}`
           + `${s.open ? '' : ' shut'}${s.editable && !s.pending ? ' editable' : ''}`,
       }, [
-        el('span', { class: 'cb-lv', text: s.level > 1 ? `level ${s.level}` : 'from the start' }),
+        /**
+         * R21 — A LABEL IS A LABEL. (WORDING.md rule 6.)
+         *
+         * This row used to read "chosen when you get there — level 3" under a heading that already
+         * said "pick the spell you start with". It is a "Level 3 spell slot": two words and a number.
+         */
+        el('span', { class: 'cb-lv', text: `Level ${s.level}` }),
         el('span', {
           class: `cb-pick${s.spell ? ' filled' : ''}`,
           text: s.spell ? s.spell.name
-            : s.pending ? `${s.name} — choose one`
-              : `${s.name} — opens at level ${s.level}`,
+            : s.pending ? `Level ${s.level} spell slot — choose one`
+              : `Level ${s.level} spell slot`,
         }),
       ]);
       /**
@@ -217,8 +223,8 @@ export function createClassBuilder({
         class: 'cb-note',
         text: s.spell
           // a draft can still be changed; a build that is out in the world cannot
-          ? (s.editable ? 'click to change it' : 'an Unbinder in town can take this one back out')
-          : s.pending ? 'ready to choose' : 'not yet',
+          ? (s.editable ? 'Click to change this spell' : 'An Unbinder in town can unlearn this spell')
+          : s.pending ? 'Choose a spell now' : `Locked until level ${s.level}`,
       }));
       if (s.editable) row.addEventListener('click', () => { editing = s.index; draw(); });
       return row;
@@ -232,7 +238,9 @@ export function createClassBuilder({
      */
     const spellOption = sp => option({
       name: sp.name,
-      right: sp.tier > 1 ? `level ${sp.tier}` : 'from the start',
+      // R21: every rung reads the same way — "Level 1" beside "Level 3", not a sentence beside a
+      // label. tests/round17-class.spec.js moved with it.
+      right: `Level ${sp.tier}`,
       sub: `${sp.desc} · ${sp.shape}, ${sp.element}${sp.classes.length ? ` · ${sp.classes.slice(0, 3).join(', ')}${sp.classes.length > 3 ? '…' : ''}` : ''}`,
       on: slot.spellId === sp.id,
       why: pickRefusal(state, slot.index, sp.id, cat, { level }),
@@ -262,32 +270,32 @@ export function createClassBuilder({
       pane(`Your six (${state.spells.filter(Boolean).length} of ${PICK_COUNT} learned)`, [
         el('div', {
           class: 'cb-note',
-          text: `One spell now, and one more at levels ${rungs}. The rest are chosen from the character sheet when the level comes.`,
+          text: `You pick 1 spell now. The other ${PICK_COUNT - 1} unlock at levels ${rungs}, and you choose each one from the character sheet when that level arrives.`,
         }),
         owed
           ? el('div', { class: 'cb-good', text: `${owed} ${owed === 1 ? 'spell' : 'spells'} to choose.` })
-          : el('div', { class: 'cb-note', text: 'Nothing to choose right now.' }),
+          : el('div', { class: 'cb-note', text: 'No spell is waiting to be chosen right now.' }),
         el('div', { class: 'cb-slots' }, left),
       ]),
       slot.editable
-        ? pane(`${slot.name} — what can go in slot ${slot.index + 1}`, [
+        ? pane(`What can go in the level ${slot.level} spell slot`, [
           el('div', { class: 'cb-note', text: slot.blurb }),
           el('div', {
             class: 'cb-note',
             text: ready.length
-              ? `${ready.length} open ${ready.length === 1 ? 'spell' : 'spells'} at level ${slot.level}.`
-              : `Nothing new unlocks at level ${slot.level} — take anything from an earlier tier.`,
+              ? `${ready.length} ${ready.length === 1 ? 'spell is' : 'spells are'} open to a level ${slot.level} slot.`
+              : `No new spell unlocks at level ${slot.level}. This slot can take any spell from an earlier level.`,
           }),
           ...ready.map(spellOption),
           ...(later.length ? [
-            el('div', { class: 'cb-note', text: `Not yet — ${later.length} more open at higher levels.` }),
+            el('div', { class: 'cb-note', text: `Locked to this slot — ${later.length} more spells open above level ${slot.level}.` }),
             ...later.map(spellOption),
           ] : []),
         ])
         // nothing is owed, so the right-hand pane is the ladder rather than forty dead rows
         : pane('What is still to come', [
-          el('div', { class: 'cb-note', text: 'Every slot you have reached is filled. The next one opens on its own.' }),
-          ...slots.filter(s => !s.open).map(s => el('div', { class: 'cb-note', text: `Slot ${s.index + 1} — ${s.name}, at level ${s.level}. ${s.blurb}` })),
+          el('div', { class: 'cb-note', text: 'Every spell slot you have reached is filled. The next slot unlocks on its own when you reach its level.' }),
+          ...slots.filter(s => !s.open).map(s => el('div', { class: 'cb-note', text: `Spell slot ${s.index + 1} unlocks at level ${s.level}. ${s.blurb}` })),
         ]),
     ];
   }
@@ -301,7 +309,7 @@ export function createClassBuilder({
       pane('One or the other', [
         option({
           name: 'Somebody comes with you',
-          sub: 'A companion at your shoulder from the first morning. They scale with you and come back when they fall.',
+          sub: 'A companion fights at your shoulder from the first morning. The companion levels up whenever you do, and comes back 14s after falling.',
           on: state.opening?.kind === 'companion',
           onclick: () => {
             state.opening = { kind: 'companion', companion: state.opening?.companion || companions[0]?.id || null };
@@ -311,7 +319,7 @@ export function createClassBuilder({
         option({
           name: crate.name || 'A sealed chest',
           right: `${crate.gold ?? 450} gold`,
-          sub: crate.blurb || 'Three things of magic quality or better, and enough coin to buy a fourth.',
+          sub: crate.blurb || '3 items of magic quality or better, and 450 gold.',
           on: state.opening?.kind === 'crate',
           onclick: () => { state.opening = { kind: 'crate', companion: state.opening?.companion || null }; changed(); },
         }),
@@ -325,8 +333,8 @@ export function createClassBuilder({
           onclick: () => { state.opening = { kind: 'companion', companion: c.id }; changed(); },
         })))
         : pane('What is in it', [
-          el('div', { class: 'cb-note', text: `${crate.count ?? 3} items, none worse than ${crate.floor || 'magic'}, rolled through the same loot path as every chest in the game — so about a quarter of the time one of them comes out rare or better.` }),
-          el('div', { class: 'cb-note cb-gold', text: `And ${crate.gold ?? 450} gold on top.` }),
+          el('div', { class: 'cb-note', text: `${crate.count ?? 3} items, none worse than ${crate.floor || 'magic'} quality. The chest rolls on the same loot table as every chest in the game, so roughly 1 chest in 4 holds an item of rare quality or better.` }),
+          el('div', { class: 'cb-note cb-gold', text: `The chest also holds ${crate.gold ?? 450} gold.` }),
         ]),
     ];
   }
@@ -346,7 +354,7 @@ export function createClassBuilder({
     return [
       pane('Your own name for it', [
         field,
-        el('div', { class: 'cb-note', text: 'This is what the character sheet calls your class. Your character\'s own name is on the step behind this one.' }),
+        el('div', { class: 'cb-note', text: 'This name is what the character sheet calls your class. Your character\'s own name is on the previous step.' }),
       ]),
       /**
        * R18 — THE "START FROM" BODY PICKER IS GONE.
@@ -450,9 +458,15 @@ export function createClassBuilder({
       el('h4', { text: d.name }, [el('span', { text: ' Built to order' })]),
       el('p', { class: 'cb-note', text: `${d.loadout}${d.element ? ` · ${d.element}` : ''} · ${d.opening}` }),
       el('ul', {}, d.spells.map(s => el('li', {}, [
-        // R20 — an empty slot is not "nothing picked" any more, it is one you have not reached
-        el('b', { text: s.name || (s.level > 1 ? 'chosen when you get there' : 'nothing picked') }),
-        el('span', { class: 'cb-note', text: s.level > 1 ? ` — level ${s.level}` : ' — from the start' }),
+        /**
+         * R21 — an empty slot is named for the level that opens it. "chosen when you get there —
+         * level 3" was a sentence pretending to be a label; this is "Level 3 spell slot".
+         */
+        el('b', { text: s.name || `Level ${s.level} spell slot` }),
+        el('span', {
+          class: 'cb-note',
+          text: s.name ? ` — level ${s.level}` : (s.pending ? ' — choose one now' : ''),
+        }),
       ]))),
       refusal ? el('p', { class: 'cb-why', text: refusal }) : el('p', { class: 'cb-good', text: 'Ready.' }),
       el('button', { class: 'cb-open', type: 'button', text: refusal ? 'Open the builder' : 'Change it', onclick: () => show() }),

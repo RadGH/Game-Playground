@@ -88,7 +88,9 @@ test('taking a node makes exactly the nodes it is drawn joined to takeable', () 
   assert.ok(shut, 'every node in the tree is already reachable');
   const no = canTake(player, forest, shut.id);
   assert.equal(no.ok, false);
-  assert.match(no.why, /connects to it yet/);
+  // R21: the refusal names the perk now instead of saying "it" (WORDING.md rule 4)
+  assert.match(no.why, /connects to .+ yet/);
+  assert.ok(no.why.includes(shut.name), 'the refusal should name the perk it is refusing');
 });
 
 test('the guide circles are dotted and a link is not, so they cannot be read as the same thing', () => {

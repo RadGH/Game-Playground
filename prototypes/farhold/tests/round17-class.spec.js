@@ -180,7 +180,8 @@ test('R20 — the creator offers the opening slot only, and one pick finishes it
   // everything offered is genuinely a level-1 spell, not the whole forty with five greyed
   const levels = await page.evaluate(() => [...document.querySelectorAll('.cb-opt')]
     .filter(o => !o.disabled).map(o => o.querySelector('.cb-right')?.textContent?.trim() || ''));
-  expect(levels.every(t => t === 'from the start'),
+  // R21: the rung label is "Level 1" now, the same shape as every other rung (WORDING.md rule 6)
+  expect(levels.every(t => t === 'Level 1'),
     `the opening slot offers spells it cannot take: ${levels.join(', ')}`).toBe(true);
 
   await page.locator('.cb-opt:not([disabled])').first().click();

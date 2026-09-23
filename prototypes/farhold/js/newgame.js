@@ -384,7 +384,7 @@ export async function runTitle({
           if (!sk) return '';
           const at = unlock[i] ?? unlock[unlock.length - 1];
           return `<li><b>${sk.name}</b><span>${sk.desc || ''}</span>`
-            + `<i>${at > 1 ? `level ${at}` : 'from the start'}</i></li>`;
+            + `<i>Level ${at}</i></li>`;
         }).join('');
         box.innerHTML = `<h4>${c.name} <span>${c.role}</span></h4>`
           + `<p class="cc-kit">${kit.join(' · ')}</p>`

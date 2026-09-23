@@ -566,8 +566,10 @@
     "everySeconds": 26,
     "chance": 0.55,
     "maxLive": 3,
-    "radius": 90,
-    "ambushRadius": 26
+    "radius": 240,
+    "ambushRadius": 26,
+    "keepRadius": 620,
+    "_r21": "R21: `radius` was 90, which put a whole set piece \u2014 including its buildings \u2014 between 49 and 99 m away. The play-test: \"I just watched an entire building appear only ~100 meters away.\" 240 puts the ring at 132-240 m and the `ahead` case at 168-264 m, so a thing arrives on the horizon rather than in your lap. `ambushRadius` is deliberately NOT raised: an ambush is supposed to be on top of you. `keepRadius` is how far a set piece\u0027s own bodies survive, which HAS to be larger than the furthest a set piece can be placed \u2014 at the old 300 m despawn, an event placed at 264 m would have lost its guards almost immediately (see js/actors.js)."
   },
   "meteors": {
     "everySeconds": 300,

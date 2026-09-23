@@ -183,8 +183,26 @@ export function createTerritory({
      */
     const marks = [];
     if (landmarkKinds.length) {
+      /**
+       * R21 — A LANDMARK NEVER STANDS ON A TOWN.
+       *
+       * The play-test: *"There is often an event directly at the town center node, which almost
+       * always has a road going directly through it… It makes this town square dense."* This list
+       * is why. A settlement node was a perfectly good place to hang a landmark, and the spot taken
+       * from it is `node.x * metresPerCell` — which is EXACTLY the coordinate `js/features.js` uses
+       * as the town's own origin, to the float. So a wayshrine or a gibbet was dropped on the town
+       * square, on top of the well, the market stalls and the waypoint pad, all of which derive
+       * from that same multiplication.
+       *
+       * Every landmark in `data/landmarks.json` is a thing you find OUT THERE — a forge fire
+       * outside a town, a cairn field, a hunting blind. Put on a market square they are all
+       * pointless, and the Forge Fire is actively worse than pointless because the town it landed
+       * in already has the bench it was offering. `port` goes with `settlement` — js/features.js
+       * builds a town on both — leaving `landmark` and `pass`, which are the two node types that
+       * are a place on the road rather than a place with people in it.
+       */
       const spots = (nodesFor?.(zone) || [])
-        .filter(n => ['landmark', 'pass', 'settlement', 'port'].includes(n.type));
+        .filter(n => ['landmark', 'pass'].includes(n.type));
       const want = Math.min(3, Math.max(1, Math.round(1 + rng() * 2)));
       const pool = landmarkKinds.filter(l => fitsGround(l, zone));
       for (let i = 0; i < want && pool.length; i++) {

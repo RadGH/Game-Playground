@@ -36,7 +36,7 @@ const n1 = v => (Number.isInteger(v) ? v : Math.round(v * 10) / 10);
  */
 export const STAT_FIELDS = {
   hp: 'maxHp', mp: 'maxMp', armor: 'armor', magicResist: 'magicResist', dmg: 'damageFlat',
-  critChance: 'critChance', critDamage: 'critDamage', dodge: 'dodge', hit: 'hit', hpRegen: 'hpRegen',
+  critChance: 'critChance', critDamage: 'critDamage', dodge: 'dodge', hpRegen: 'hpRegen',
   mana_regen: 'mpRegen', str: 'str', dex: 'dex', int: 'int', con: 'con', spellPower: 'spellPower',
   lifeSteal: 'lifeSteal', magicFind: 'magicFind', goldFind: 'goldFind', xpFind: 'xpFind',
   block_chance: 'blockChance', block_power: 'blockPower',
@@ -56,20 +56,19 @@ function def(id, desc, spec = {}) {
 
 // Every plain stat gets an entry too, so "what does this affix do" has one answer for every id.
 const STAT_DESC = {
-  hp: v => `+${n1(v)} health`, mp: v => `+${n1(v)} mana`, armor: v => `+${n1(v)} armour`,
+  hp: v => `+${n1(v)} maximum health`, mp: v => `+${n1(v)} maximum mana`, armor: v => `+${n1(v)} armour`,
   magicResist: v => `+${n1(v)} magic resistance`, dmg: v => `+${n1(v)} damage`,
   critChance: v => `+${n1(v)}% critical chance`, critDamage: v => `+${n1(v)}% critical damage`,
   dodge: v => `+${n1(v)}% dodge`, hpRegen: v => `+${n1(v)} health a second`,
-  hit: v => `+${n1(v)}% accuracy — it cancels this much of the target's dodge`,
   mana_regen: v => `+${n1(v)} mana a second`, str: v => `+${n1(v)} strength`, dex: v => `+${n1(v)} dexterity`,
   int: v => `+${n1(v)} intellect`, con: v => `+${n1(v)} constitution`, spellPower: v => `+${n1(v)} spell power`,
-  lifeSteal: v => `${n1(v)}% of damage comes back as health`, magicFind: v => `+${n1(v)}% better loot`,
+  lifeSteal: v => `${n1(v)}% Life Steal (melee and ranged physical hits)`, magicFind: v => `+${n1(v)}% better loot`,
   goldFind: v => `+${n1(v)}% gold`, xpFind: v => `+${n1(v)}% experience`,
   block_chance: v => `${n1(v)}% chance to block`, block_power: v => `blocks ${n1(v)} damage`,
   barrier: v => `${n1(v)} points of barrier, refilled out of a fight`,
-  barrierRegen: v => `barrier comes back ${n1(v)} a second`,
+  barrierRegen: v => `+${n1(v)} barrier a second`,
   cooldownReduction: v => `skills come back ${n1(v)}% sooner`,
-  manaSteal: v => `${n1(v)}% of damage comes back as mana`,
+  manaSteal: v => `${n1(v)}% Mana Steal`,
   initiative: v => `+${n1(v * INITIATIVE_PER_POINT)}% attack speed`,
 };
 for (const [stat, field] of Object.entries(STAT_FIELDS)) {
@@ -102,11 +101,38 @@ def('affix:initiative', v => `+${n1(v * INITIATIVE_PER_POINT)}% attack speed`, {
 // `c` is the context object the caller passes. Fields it may carry:
 //   self, target, amount, crit, element, skill, dt, rt (the runtime's per-unit scratch)
 
+/**
+ * WHAT "THAT ELEMENT'S MARK" ACTUALLY IS, IN NUMBERS.
+ *
+ * `castElement`, the seven brands and `cond_quiverElement` all used to end on "leaves that element's
+ * mark", which names no quantity at all. The numbers are not in this file, so they are read off the
+ * two places that own them and repeated here — the same reason `WALK_MS` is repeated below:
+ *
+ *   * `data/skills.json` `statuses` — how long each status lasts and what it is worth a second.
+ *   * `js/main.js` `brandHit` — a branded hit lands its status at **70% of the hit's damage**.
+ *
+ * So a burn is `0.7 x perSecond 0.3 x 5s` = 105% of the hit, spread over 5s; a poison is
+ * `0.7 x 0.26 x 8s` = 146% over 8s. The slow and debuff statuses do not scale with the hit at all,
+ * so those read straight off skills.json. Holy and arcane have no status (js/rpg.js `CAST_ELEMENTS`
+ * lists none), and saying so is worth more than an atmospheric verb.
+ */
+const ELEMENT_MARK = {
+  fire: 'Burning, worth 105% of the hit as damage over 5s',
+  poison: 'Poisoned, worth 146% of the hit as damage over 8s',
+  ice: 'Chilled, -45% move speed for 4s',
+  lightning: 'Shocked, +30% damage taken for 5s',
+  shadow: 'Cursed, +25% damage taken and -15% move speed for 8s',
+};
+/** "…, applying Burning, worth 105%…" or "…, with no status effect" for holy and arcane. */
+const markClause = element => (ELEMENT_MARK[element] ? `, applying ${ELEMENT_MARK[element]}` : ', with no status effect');
+
 // `castElement` is not a stat — it is what a magic weapon is made of. It carries no number, so it
 // has no derive hook; it is here so the registry knows it and the card can describe it.
-def('affix:castElement', (v, a) => `Every hit lands as ${a?.element || 'its own element'} and leaves that element's mark`, {});
+def('affix:castElement', (v, a) => (a?.element
+  ? `Every hit deals ${a.element} damage instead of physical${markClause(a.element)}`
+  : "Every hit deals this weapon's own element as damage instead of physical, applying that element's status"), {});
 
-def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6 seconds after you use a skill`, {
+def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6s after you use a skill`, {
   onCast: (v, c) => { c.rt.skillPower = 6; c.rt.skillPowerValue = v; },
   derive: (v, d, unit, rt) => { if (rt?.skillPower > 0) d.spellPower += v; },
 });
@@ -123,13 +149,16 @@ def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6 seconds a
 def('affix:cond_ambushDmgFlat', v => `+${n1(v)} damage to anything that has not noticed you`, {
   flatOut: (v, c) => (c.target && c.target.state !== 'chase' ? v : 0),
 });
-def('affix:cond_bleedOnCrit', v => `Critical hits open a bleed for ${n1(v)} damage a second, for 6 seconds`, {
+// The hook sets `perSecond: v` over 6 seconds, so the TOTAL the player gets is `v * 6` — which is
+// the number the standard asks a damage-over-time to print.
+def('affix:cond_bleedOnCrit', v => `Critical hits apply a bleed for ${n1(v * 6)} damage over 6s`, {
   onCrit: (v, c) => c.applyStatus?.(c.target, 'bleed', { perSecond: v, seconds: 6, name: 'Bleeding', element: 'physical' }),
 });
-def('affix:cond_burnExtend', v => `Burns you set last ${n1(v)} seconds longer`, {
+def('affix:cond_burnExtend', v => `Burning damage you apply lasts ${n1(v)}s longer`, {
   statusLonger: (v, c) => (c.type === 'burn' ? v : 0),
 });
-def('affix:cond_cheatDeath', v => `Once a minute, survive a killing blow and stay up on ${pct(v)} of your health`, {
+// The cooldown is the `c.rt.cheatDeath = 60` two lines below — 60 seconds, so the card says 60s.
+def('affix:cond_cheatDeath', v => `Every 60s, one killing blow leaves you at ${pct(v)} of your maximum health instead of killing you.`, {
   preLethal: (v, c) => {
     if ((c.rt.cheatDeath || 0) > 0) return false;
     c.rt.cheatDeath = 60;
@@ -140,10 +169,11 @@ def('affix:cond_cheatDeath', v => `Once a minute, survive a killing blow and sta
 def('affix:cond_coldDmgVsBurning', v => `+${pct(v)} cold damage to anything burning`, {
   dmgOut: (v, c) => (c.element === 'ice' && c.target?.statuses?.burn ? 1 + v : 1),
 });
-def('affix:cond_combatStartBarrier', v => `Start every fight with a ${n1(v)}-point barrier`, {
+def('affix:cond_combatStartBarrier', v => `Every fight starts with a ${n1(v)}-point barrier`, {
   combatStart: (v, c) => { c.self.barrier = Math.max(c.self.barrier || 0, v); },
 });
-def('affix:cond_consecutiveHitDmg', v => `+${pct(v)} damage for each hit in a row on the same target, up to five`, {
+// `Math.min(5, streak)` is the cap, so the card can state both ends: per hit, and the total at 5.
+def('affix:cond_consecutiveHitDmg', v => `+${pct(v)} damage per hit in a row on the same target, up to +${pct(v * 5)} at 5 hits`, {
   dmgOut: (v, c) => 1 + v * Math.min(5, c.rt.streak || 0),
   onHit: (v, c) => {
     if (c.rt.streakOn === c.target?.id) c.rt.streak = (c.rt.streak || 0) + 1;
@@ -153,7 +183,7 @@ def('affix:cond_consecutiveHitDmg', v => `+${pct(v)} damage for each hit in a ro
 def('affix:cond_critArmorPen', v => `Critical hits ignore ${pct(v)} of the target's armour`, {
   armorPen: (v, c) => (c.crit ? v : 0),
 });
-def('affix:cond_dmgBelowHpThresh', v => `+${pct(v)} damage below half health`, {
+def('affix:cond_dmgBelowHpThresh', v => `+${pct(v)} damage while you are below 50% health`, {
   dmgOut: (v, c) => ((c.self.hp || 0) / Math.max(1, c.self.maxHp || 1) < 0.5 ? 1 + v : 1),
 });
 def('affix:cond_dmgVsDemon', v => `+${pct(v)} damage to fiends`, {
@@ -162,13 +192,14 @@ def('affix:cond_dmgVsDemon', v => `+${pct(v)} damage to fiends`, {
 def('affix:cond_dmgVsUndead', v => `+${pct(v)} damage to the undead`, {
   dmgOut: (v, c) => (c.target?.family === 'undead' ? 1 + v : 1),
 });
-def('affix:cond_dotDmgReduce', v => `Burns, bleeds and poisons on you deal ${pct(v)} less damage`, {
+def('affix:cond_dotDmgReduce', v => `Burning, bleeding and poison on you deal ${pct(v)} less damage`, {
   statusIn: (v) => 1 - v,
 });
-def('affix:cond_executeDmgPct', v => `+${pct(v)} damage to anything under a quarter health`, {
+def('affix:cond_executeDmgPct', v => `+${pct(v)} damage to targets below 25% health`, {
   dmgOut: (v, c) => ((c.target?.hp || 0) / Math.max(1, c.target?.maxHp || 1) < 0.25 ? 1 + v : 1),
 });
-def('affix:cond_extraSetPiece', () => 'Counts as one more piece of every set you are wearing', { setPieces: 1 });
+// `setPieces: 1` is the whole effect: one extra piece counted, so the sentence says 1 and 2.
+def('affix:cond_extraSetPiece', () => 'This item counts as 2 pieces of every set you are wearing instead of 1', { setPieces: 1 });
 def('affix:cond_fireDmgVsPoisoned', v => `+${pct(v)} fire damage to anything poisoned`, {
   dmgOut: (v, c) => (c.element === 'fire' && c.target?.statuses?.poison ? 1 + v : 1),
 });
@@ -186,16 +217,17 @@ def('affix:cond_goldOnEliteKill', v => `+${pct(v)} gold from everything you kill
  * rather than here, because it has to apply to its OWN item while that item is still in the bag —
  * a `derive` hook only ever runs on what is equipped.
  */
-def('affix:cond_levelReqReduce', v => `Needs ${n1(v)} fewer levels to wear — this item and everything else you have on`);
+def('affix:cond_levelReqReduce', v => `This item and everything else you have on needs ${n1(v)} fewer levels to wear`);
 def('affix:cond_hpOnKill', v => `Every kill gives you ${n1(v)} health back`, { onKill: (v, c) => { c.heal = (c.heal || 0) + v; } });
-def('affix:cond_killInitBonus', v => `A kill gives +${pct(v)} attack speed and +${pct(v)} move speed for 5 seconds`, {
+def('affix:cond_killInitBonus', v => `Every kill gives +${pct(v)} attack speed and +${pct(v)} move speed for 5s`, {
   onKill: (v, c) => { c.rt.killRush = 5; c.rt.killRushValue = v; },
   derive: (v, d, unit, rt) => { if (rt?.killRush > 0) { d.haste += v * 100; d.movePct += v * 100; } },
 });
 def('affix:cond_lightningVsSlowed', v => `+${pct(v)} lightning damage to anything slowed`, {
   dmgOut: (v, c) => (c.element === 'lightning' && (c.target?.statuses?.chill || c.target?.statuses?.web) ? 1 + v : 1),
 });
-def('affix:cond_lowManaRegenBonus', v => `+${n1(v)} mana a second below a third mana`, {
+// The threshold is the `< 0.34` below, not "a third" — so the card prints the number the code uses.
+def('affix:cond_lowManaRegenBonus', v => `+${n1(v)} mana a second while you are below 34% mana`, {
   derive: (v, d, unit) => { if ((unit.mp || 0) / Math.max(1, unit.maxMp || 1) < 0.34) d.mpRegen += v; },
 });
 def('affix:cond_magicDmgReducePct', v => `You take ${pct(v)} less elemental damage`, {
@@ -213,10 +245,10 @@ def('affix:cond_manaOnCrit', v => `Every critical hit returns ${n1(v)} mana`, {
 // This used to take a share of every hit out of your mana pool. In play that read as "the enemies
 // are draining my mana" — it emptied the pool, there was nothing to cast with, and it was not fun.
 // It is a plain damage reduction now, paid for by keeping your mana up rather than by spending it.
-def('affix:cond_manaShieldOnHit', v => `You take ${pct(v)} less damage while your mana is above a third`, {
+def('affix:cond_manaShieldOnHit', v => `You take ${pct(v)} less damage while you are above 34% mana`, {
   dmgIn: (v, c) => ((c.self.mp || 0) / Math.max(1, c.self.maxMp || 1) > 0.34 ? 1 - v : 1),
 });
-def('affix:cond_partyHpOnKill', v => `Every kill heals each of your companions for ${n1(v)}`, {
+def('affix:cond_partyHpOnKill', v => `Every kill heals each of your companions for ${n1(v)} health`, {
   onKill: (v, c) => { c.petHeal = (c.petHeal || 0) + v; },
 });
 def('affix:cond_physDmgReducePct', v => `You take ${pct(v)} less physical damage`, {
@@ -225,18 +257,19 @@ def('affix:cond_physDmgReducePct', v => `You take ${pct(v)} less physical damage
 def('affix:cond_poisonDmgVsBurning', v => `+${pct(v)} poison damage to anything burning`, {
   dmgOut: (v, c) => (c.element === 'poison' && c.target?.statuses?.burn ? 1 + v : 1),
 });
-def('affix:cond_poisonStackPower', v => `Poison you apply deals ${pct(v)} more damage a tick`, {
+def('affix:cond_poisonStackPower', v => `Poison you apply deals ${pct(v)} more damage`, {
   statusPower: (v, c) => (c.type === 'poison' ? 1 + v : 1),
 });
-def('affix:cond_setThresholdReduce', () => 'Set bonuses come on one piece early', { setPieces: 1 });
+// Same `setPieces: 1`, read from the other end: a 4-piece bonus lands on the 3rd piece.
+def('affix:cond_setThresholdReduce', () => 'Every set bonus you are wearing comes on 1 piece early', { setPieces: 1 });
 // items.json rolls this 1-3. Read as a fraction it said "skills cost 188% less mana", which is
 // gibberish; it is a flat saving on every skill, which is what a 1-3 roll can only have meant.
 def('affix:cond_skillMpCostReduce', v => `Every skill costs ${Math.round(v)} less mana`, { costFlat: v => v });
-def('affix:cond_speedOnFirstHit', v => `+${pct(v)} move speed for 4 seconds after the first hit of a fight`, {
+def('affix:cond_speedOnFirstHit', v => `+${pct(v)} move speed for 4s after the first hit of a fight`, {
   combatStart: (v, c) => { c.rt.openingRush = 4; c.rt.openingRushValue = v; },
   derive: (v, d, unit, rt) => { if (rt?.openingRush > 0) d.movePct += v * 100; },
 });
-def('affix:cond_sustainedDmgBonus', v => `+${pct(v)} damage for every 5 seconds you stay in the fight, up to +${pct(v * 5)}`, {
+def('affix:cond_sustainedDmgBonus', v => `+${pct(v)} damage for every 5s you stay in a fight, up to +${pct(v * 5)} at 25s`, {
   dmgOut: (v, c) => 1 + v * Math.min(5, Math.floor((c.rt.inCombat || 0) / 5)),
 });
 def('affix:cond_thornsFlat', v => `Anything that hits you takes ${n1(v)} damage back`, {
@@ -264,14 +297,17 @@ export const BRANDS = {
   cond_brandHoly: ['holy', 'Dawn Brand', 'sears'],
   cond_brandArcane: ['arcane', 'Star Brand', 'unmakes'],
 };
-for (const [stat, [element, , verb]] of Object.entries(BRANDS)) {
-  def(`affix:${stat}`, v => `Every hit lands as ${element}: it ${verb} what it touches, and ${element} damage you deal is +${pct(v)}`, {
+// The verb in the table ("burns", "chills") is what the brand is CALLED doing; `markClause` says
+// what that is worth, in the status's own numbers. Holy and arcane leave no status at all.
+for (const [stat, [element]] of Object.entries(BRANDS)) {
+  def(`affix:${stat}`, v => `Every hit deals ${element} damage instead of physical${markClause(element)}; +${pct(v)} ${element} damage`, {
     brandElement: () => element,
     dmgOut: (v, c) => (c.element === element ? 1 + v : 1),
   });
 }
 
-def('affix:cond_critFromWounds', v => `+${n1(v)}% critical chance for every quarter of its health the target has already lost`, {
+// `Math.floor(missing * 4)` is quarters of the target's missing health, so the ceiling is 4 steps.
+def('affix:cond_critFromWounds', v => `+${n1(v)}% critical chance for every 25% of health the target has lost, up to +${n1(v * 4)}%`, {
   critBonus: (v, c) => {
     const missing = 1 - (c.target?.hp || 0) / Math.max(1, c.target?.maxHp || 1);
     return v * Math.floor(missing * 4);
@@ -280,16 +316,16 @@ def('affix:cond_critFromWounds', v => `+${n1(v)}% critical chance for every quar
 def('affix:cond_dmgVsNamed', v => `+${pct(v)} damage to champions, rares and bosses`, {
   dmgOut: (v, c) => (c.target?.named || c.target?.nemesis || c.target?.rank === 'boss' ? 1 + v : 1),
 });
-def('affix:cond_sunderOnHit', v => `Every hit strips ${n1(v)} armour off the target, and the armour does not come back`, {
+def('affix:cond_sunderOnHit', v => `Every hit strips ${n1(v)} armour off the target permanently`, {
   onHit: (v, c) => { if (c.target) c.target.armor = Math.max(0, (c.target.armor || 0) - v); },
 });
 def('affix:cond_nemesisMark', v => `+${pct(v)} damage to whatever killed you last`, {
   dmgOut: (v, c) => (c.target?.nemesis ? 1 + v : 1),
 });
-def('affix:cond_killGrowth', v => `+${n1(v)} damage for every ten kills you have taken`, {
+def('affix:cond_killGrowth', v => `+${n1(v)} damage per 10 kills you have taken`, {
   derive: (v, d, unit) => { d.damageFlat += v * Math.floor((unit.kills || 0) / 10); },
 });
-def('affix:cond_killMemory', v => `+${n1(v)} health for every ten kills you have taken`, {
+def('affix:cond_killMemory', v => `+${n1(v)} maximum health per 10 kills you have taken`, {
   derive: (v, d, unit) => { d.maxHp += v * Math.floor((unit.kills || 0) / 10); },
 });
 
@@ -303,7 +339,7 @@ def('affix:cond_killMemory', v => `+${n1(v)} health for every ten kills you have
 // number; what this raises is how many things may walk with you at once, and how many of each
 // creature may be standing (js/followers.js). The key stays `petSlots` so an old save is unchanged
 // and js/followers.js `followerBonus` adds it to `followerSlots`.
-def('affix:cond_companionExtra', v => `${n1(v)} more follower may walk with you`, {
+def('affix:cond_companionExtra', v => `+${n1(v)} follower slot — that many more may walk with you`, {
   derive: (v, d) => { d.petSlots = (d.petSlots || 0) + v; },
 });
 def('affix:cond_companionFury', v => `Your companions deal ${pct(v)} more damage`, { petPower: v => 1 + v });
@@ -336,7 +372,9 @@ const LEG_TO_MOVE = 0.04;
 def('affix:cond_extraLeg', v => `+${pct(v * LEG_TO_MOVE)} move speed`, {
   derive: (v, d) => { d.movePct += v * LEG_TO_MOVE * 100; },
 });
-def('affix:cond_easeExhaustion', v => `+${n1(v)} health a second — you tire less easily`, {
+// The card says only the health, because only the health is real: `staminaEase` is written to the
+// sheet here and read by nothing in the game, so promising anything about tiring would be a lie.
+def('affix:cond_easeExhaustion', v => `+${n1(v)} health a second`, {
   derive: (v, d) => { d.staminaEase = (d.staminaEase || 0) + v; d.hpRegen += v; },
 });
 def('affix:cond_nightWard', v => `+${pct(v)} armour after dark`, {
@@ -380,10 +418,10 @@ def('affix:cond_lightBase', v => `Lights ${n1(v)} metres of ground around you`, 
 const WALK_MS = 5.4;
 const RUN_X = 2.1;
 def('affix:cond_mountBase',
-  v => `Rides at ${n1(v)}\u00d7 your walking speed — ${n1(v * WALK_MS)} m/s at a walk, ${n1(v * WALK_MS * RUN_X)} m/s at a gallop`, {
+  v => `This mount rides at ${n1(v)}\u00d7 your walking speed — ${n1(v * WALK_MS)} m/s at a walk, ${n1(v * WALK_MS * RUN_X)} m/s at a gallop`, {
     derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
   });
-def('affix:cond_mountWind', v => `Gallops for ${n1(v)} seconds before it has to drop back to a walk`, {
+def('affix:cond_mountWind', v => `This mount gallops for ${n1(v)}s before dropping back to a walk`, {
   derive: (v, d) => { d.mountStamina = Math.max(d.mountStamina || 0, v); },
 });
 /**
@@ -414,7 +452,7 @@ def('affix:cond_toolScan', v => `Sweeps ${n1(v)} more metres of ground for burie
 def('affix:cond_lightRange', v => `Lights ${n1(v)} more metres of ground around you`, {
   derive: (v, d) => { d.lightRange = (d.lightRange || 0) + v; },
 });
-def('affix:cond_lightSteady', v => `Enemies are ${pct(v)} less likely to notice you while it is lit`, {
+def('affix:cond_lightSteady', v => `Enemies are ${pct(v)} less likely to notice you while this light is lit`, {
   derive: (v, d) => { d.stealth = (d.stealth || 0) + v; },
 });
 // The old line promised "less damage from anything standing in its light" and the hook took the
@@ -440,19 +478,22 @@ def('affix:cond_lightReveal', v => `The minimap shows ${pct(v)} more ground whil
   derive: (v, d) => { d.revealRange = (d.revealRange || 0) + v; },
 });
 
-def('affix:cond_mountSpeed', v => `+${n1(v)}\u00d7 to how fast it carries you`, {
-  derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
-});
-def('affix:cond_mountStamina', v => `+${n1(v)} seconds of gallop before it has to drop back to a walk`, {
+// The derive is `Math.max`, not `+=`, so this SETS the mount's speed rather than adding to it \u2014
+// hence "rides at", the same wording as `cond_mountBase`, and the same two figures off WALK_MS.
+def('affix:cond_mountSpeed',
+  v => `This mount rides at ${n1(v)}\u00d7 your walking speed \u2014 ${n1(v * WALK_MS)} m/s at a walk, ${n1(v * WALK_MS * RUN_X)} m/s at a gallop`, {
+    derive: (v, d) => { d.mountSpeed = Math.max(d.mountSpeed || 0, v); },
+  });
+def('affix:cond_mountStamina', v => `+${n1(v)}s of gallop before this mount drops back to a walk`, {
   derive: (v, d) => { d.mountStamina = (d.mountStamina || 0) + v; },
 });
-def('affix:cond_mountSlope', v => `Loses ${pct(v)} less speed to hills and broken ground`, {
+def('affix:cond_mountSlope', v => `This mount loses ${pct(v)} less speed to hills and broken ground`, {
   derive: (v, d) => { d.mountSlope = (d.mountSlope || 0) + v; },
 });
-def('affix:cond_mountTrample', v => `Rides down whatever it runs into for ${n1(v)} damage`, {
+def('affix:cond_mountTrample', v => `This mount deals ${n1(v)} trample damage to anything in its path`, {
   derive: (v, d) => { d.trample = (d.trample || 0) + v; },
 });
-def('affix:cond_mountCalm', v => `${pct(v)} less likely to throw you when something charges it`, {
+def('affix:cond_mountCalm', v => `This mount is ${pct(v)} less likely to throw you when something charges`, {
   derive: (v, d) => { d.mountCalm = (d.mountCalm || 0) + v; },
 });
 
@@ -460,14 +501,22 @@ def('affix:cond_mountCalm', v => `${pct(v)} less likely to throw you when someth
 def('affix:cond_quiverDamage', v => `+${n1(v)} damage on every arrow you loose`, {
   derive: (v, d) => { d.arrowDamage = (d.arrowDamage || 0) + v; },
 });
-def('affix:cond_quiverElement', (v, a) => `Every arrow lands as ${a?.element || 'its element'} and leaves that element's mark`, {});
-def('affix:cond_quiverSplit', v => `Every shot looses ${n1(v)} arrows instead of one`, {
+def('affix:cond_quiverElement', (v, a) => (a?.element
+  ? `Every arrow deals ${a.element} damage instead of physical${markClause(a.element)}`
+  : "Every arrow deals this quiver's own element as damage instead of physical, applying that element's status"), {});
+def('affix:cond_quiverSplit', v => `Every shot looses ${n1(v)} arrows instead of 1`, {
   derive: (v, d) => { d.arrowsPerShot = Math.max(d.arrowsPerShot || 1, v); },
 });
-def('affix:cond_quiverHoming', () => 'Arrows steer toward whatever you aimed at', {
+/**
+ * Homing is a WIDER HIT TEST, not a curving arrow: js/main.js does
+ * `field.hitScan(..., { width: 1.1 + homing * 2.6 })`. So the honest number on the card is the
+ * width in metres that this quiver buys, against the 1.1 m a bare shot gets.
+ */
+def('affix:cond_quiverHoming', v => `Arrows hit anything within ${n1(1.1 + v * 2.6)} metres of your aim, up from 1.1 metres`, {
   derive: (v, d) => { d.arrowHoming = (d.arrowHoming || 0) + v; },
 });
-def('affix:cond_quiverBurst', v => `Arrows burst on impact, catching everything within ${n1(v)} metres`, {
+// js/main.js strikes the burst at `power: 0.55` — 55% of the arrow's damage to everything else.
+def('affix:cond_quiverBurst', v => `Arrows burst on impact, dealing 55% of their damage to everything else within ${n1(v)} metres`, {
   derive: (v, d) => { d.arrowBurst = Math.max(d.arrowBurst || 0, v); },
 });
 
@@ -476,75 +525,91 @@ def('affix:cond_quiverBurst', v => `Arrows burst on impact, catching everything 
 // layer — camping, foraging, map nodes, night raids — which Farhold does not have in that shape, so
 // each is translated to the nearest thing that is real here and the translation is written down.
 
-def('legendary:mage_missile_aoe', 'A bolt that lands bursts twice as wide.', { boltSplash: () => 2 });
-def('legendary:crit_bleed_5', 'Critical hits open a deep bleed.', {
+// js/main.js: `plan.splash * sum('boltSplash')`, so the multiplier IS the radius multiplier.
+def('legendary:mage_missile_aoe', "A spell bolt's impact covers 2x the radius.", { boltSplash: () => 2 });
+// `perSecond` is 12% of the hit (at least 3) over 6s, so the bleed's total is 72% of the hit —
+// the number the standard asks a damage-over-time to print — with a floor of 18 damage.
+def('legendary:crit_bleed_5', "Critical hits apply a bleed worth 72% of the hit as damage over 6s (at least 18 damage).", {
   onCrit: (v, c) => c.applyStatus?.(c.target, 'bleed', { perSecond: Math.max(3, (c.amount || 0) * 0.12), seconds: 6, name: 'Bleeding', element: 'physical' }),
 });
-def('legendary:low_mana_shockwave', 'Casting below a quarter mana throws out an arcane shockwave.', {
+// js/main.js answers the flag with `strikeArea(..., 7, { element: 'arcane', power: 1.2 })`.
+def('legendary:low_mana_shockwave', 'Casting a skill below 25% mana throws out an arcane shockwave, dealing 120% of your damage to everything within 7 metres.', {
   onCast: (v, c) => { if ((c.self.mp || 0) / Math.max(1, c.self.maxMp || 1) < 0.25) c.shockwave = 1; },
 });
-def('legendary:kill_party_heal', "A killing blow heals you and your companions for a tenth of what died.", {
+def('legendary:kill_party_heal', "Every kill heals you and each companion for 10% of the dead target's maximum health.", {
   onKill: (v, c) => { const h = Math.round((c.target?.maxHp || 0) * 0.1); c.heal = (c.heal || 0) + h; c.petHeal = (c.petHeal || 0) + h; },
 });
 // initiative is turn order there; here it is how fast you act, so it buys attack speed for the opening
-def('legendary:speed_combat_init', 'You open every fight fast — +40% attack speed for six seconds.', {
+def('legendary:speed_combat_init', '+40% attack speed for the first 6s of every fight.', {
   combatStart: (v, c) => { c.rt.openingHaste = 6; },
   derive: (v, d, unit, rt) => { if (rt?.openingHaste > 0) d.haste += 40; },
 });
-def('legendary:cheat_death_once', 'Once a fight, a killing blow leaves you on one health.', {
+def('legendary:cheat_death_once', 'Once a fight, a killing blow leaves you at 1 health instead of killing you.', {
   preLethal: (v, c) => { if (c.rt.cheatSpent) return false; c.rt.cheatSpent = true; c.survive = 1; return true; },
 });
-def('legendary:burn_extend', 'Burns you set last two seconds longer.', {
+def('legendary:burn_extend', 'Burning damage you apply lasts 2s longer.', {
   statusLonger: (v, c) => (c.type === 'burn' ? 2 : 0),
 });
-def('legendary:mana_on_attack', 'Every hit returns three mana.', {
+def('legendary:mana_on_attack', 'Every hit returns 3 mana.', {
   onHit: (v, c) => { c.mana = (c.mana || 0) + 3; },
 });
-def('legendary:critical_armorpen', 'Critical hits ignore a third of armour.', {
+def('legendary:critical_armorpen', "Critical hits ignore 30% of the target's armour.", {
   armorPen: (v, c) => (c.crit ? 0.3 : 0),
 });
-def('legendary:rally_on_kill', 'A kill rallies you and your companions — harder hitting for a while.', {
+// The numbers are data/skills.json's `rally` status, which js/main.js hangs on the player: +20%
+// damage, +15% resistance, 8s. Companions are NOT rallied — only the player is, so the card no
+// longer says they are.
+def('legendary:rally_on_kill', 'Every kill rallies you: +20% damage and +15% resistance for 8s.', {
   onKill: (v, c) => { c.rally = 8; },
 });
-def('legendary:echo_cast', 'A quarter of your skills go off a second time for half.', { echo: () => 0.25 });
-def('legendary:dragon_fury_breath', 'A killing blow breathes fire over everything else nearby.', {
+// js/main.js re-casts the echo at `mult * 0.5` and `damage * 0.5` — half damage, no mana.
+def('legendary:echo_cast', '25% of your skill casts fire a second time for 50% damage, free.', { echo: () => 0.25 });
+def('legendary:dragon_fury_breath', 'Every kill breathes fire over everything within 7 metres, dealing 60% of your damage and setting them burning.', {
   onKill: (v, c) => { c.breath = { element: 'fire', radius: 7, status: 'burn' }; },
 });
 // travel translation: there is no camp here, so it mends whatever mends you
-def('legendary:camp_mend', 'Anything that mends you mends 15% more.', { healBonus: () => 0.15 });
-// travel translation: rations become the materials a fight leaves behind
-def('legendary:forage_feast', 'A won fight often leaves crafting material behind.', { scavenge: () => 0.6 });
-def('legendary:naming_kills', 'At fifty kills the weapon earns a name, and hits harder for every one after.', {
+def('legendary:camp_mend', 'Every heal you receive restores 15% more health.', { healBonus: () => 0.15 });
+// travel translation: rations become the materials a fight leaves behind. js/main.js rolls the
+// chance on a kill and adds 2 scrap, so the card says both numbers.
+def('legendary:forage_feast', '60% of kills leave 2 scrap behind.', { scavenge: () => 0.6 });
+// `(kills - 50) * 0.004` capped at 0.4 — so 0.4% a kill past 50, and +40% at 150 kills.
+def('legendary:naming_kills', 'This weapon earns a name at 50 kills, then gains +0.4% damage per kill after that, up to +40%.', {
   dmgOut: (v, c) => 1 + Math.min(0.4, Math.max(0, ((c.rt.weaponKills || 0) - 50) * 0.004)),
   onKill: (v, c) => { c.rt.weaponKills = (c.rt.weaponKills || 0) + 1; c.nameAt = 50; },
 });
-// travel translation: a map node becomes a place you have not stood before
-def('legendary:road_cache', 'Every new place you reach turns up a small cache of coin.', { cache: () => 1 });
-def('legendary:companion_might', 'Your companions hit 40% harder and carry a quarter more health.', {
+// travel translation: a map node becomes a place you have not stood before.
+// No amount is stated because there is no amount to state — nothing in the game reads the `cache`
+// hook yet, so the coin has no number anywhere. Whoever wires it up should put the figure here.
+def('legendary:road_cache', 'Reaching a place you have not stood before turns up a cache of coin.', { cache: () => 1 });
+def('legendary:companion_might', 'Your companions deal 40% more damage and have 25% more health.', {
   petPower: () => 1.4, petHealth: () => 1.25,
 });
-def('legendary:strip_modifier', 'The biggest champion in a fight loses one of its tricks as it starts.', {
+// js/main.js pops ONE modifier off the first enemy in the fight that is not rank `normal`.
+def('legendary:strip_modifier', 'The first champion, rare or boss in a fight loses 1 of its modifiers when the fight starts.', {
   combatStart: (v, c) => { c.strip = 1; },
 });
-def('legendary:hated_blade', '+25% damage. (In Emberveil the party resents it; there is nobody here to mind.)', {
+def('legendary:hated_blade', '+25% damage. (In Emberveil the party resents this blade; there is nobody here to mind.)', {
   dmgOut: () => 1.25,
 });
-def('legendary:kill_ledger', '+1% damage for every five kills it has taken, up to +60%.', {
+def('legendary:kill_ledger', '+1% damage per 5 kills this weapon has taken, up to +60% at 300 kills.', {
   dmgOut: (v, c) => 1 + Math.min(0.6, Math.floor((c.rt.weaponKills || 0) / 5) * 0.01),
   onKill: (v, c) => { c.rt.weaponKills = (c.rt.weaponKills || 0) + 1; },
 });
-def('legendary:curse_spreads', 'A kill spills whatever it was suffering over everything still standing.', {
+// `spreadStatuses` is the RADIUS js/main.js copies the statuses over: 9 metres.
+def('legendary:curse_spreads', 'Every kill copies the burning, bleeding, poison and curses the target was suffering onto everything within 9 metres.', {
   onKill: (v, c) => { c.spreadStatuses = 9; },
 });
 // travel translation: an extra node of travel a day becomes ground covered on foot
-def('legendary:free_move', 'You cover ground noticeably faster.', {
+def('legendary:free_move', '+18% move speed.', {
   derive: (v, d) => { d.movePct += 18; },
 });
-def('legendary:nemesis_hunter', 'Double damage to rares and bosses; killing one heals you.', {
+def('legendary:nemesis_hunter', '+100% damage to rares and bosses, and killing one heals you for 30% of your maximum health.', {
   dmgOut: (v, c) => (c.target?.rank === 'rare' || c.target?.rank === 'boss' ? 2 : 1),
   onKill: (v, c) => { if (c.target?.rank === 'rare' || c.target?.rank === 'boss') c.heal = (c.heal || 0) + Math.round((c.self.maxHp || 0) * 0.3); },
 });
-def('legendary:no_night_raids', 'Nothing ambushes you in the dark — night spawns leave you alone.', { noAmbush: () => 1 });
+// js/main.js multiplies the night crowd's budget by 0.25 — a quarter as many, not none. The old
+// line said "nothing ambushes you", which the code has never done and would not be a good game.
+def('legendary:no_night_raids', '75% fewer enemies spawn around you after dark.', { noAmbush: () => 1 });
 
 /**
  * Derived stats whose ONLY consumer is one of the hooks above.

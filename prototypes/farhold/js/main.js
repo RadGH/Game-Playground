@@ -4700,8 +4700,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * is shaped with the `cell`/`steps`/`gives` fields `atLandmark` reads, so it can be handed
        * straight in.
        */
+      /**
+       * R21 — …and a SPENT landmark is not a target any more.
+       *
+       * The territory branch just above already filters `l.state !== 'done'`; this branch, which is
+       * the one that actually fires for a set piece you can see, had no such test at all. That is
+       * why a used Forge Fire kept offering itself and answering "you have already had what there
+       * is to have here" forever. A place that still does something every time you come back (a
+       * bench, a rest, a ford) is not spent and stays offered — `standingOffer` is the same test
+       * `atLandmark` uses to decide whether to mark it taken in the first place.
+       */
       const seen = sites.nearest?.(control.x, control.z, 18);
-      if (seen && seen.family === 'landmark') return { kind: 'landmark', mark: seen };
+      if (seen && seen.family === 'landmark'
+        && !(seen.taken && !holdings.standingOffer(seen))) return { kind: 'landmark', mark: seen };
 
       /**
        * THE NOTICE BOARD — where work comes from now, and it is a THING you walk up to.
@@ -5024,7 +5035,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // --- the standing offer. True every time you come back.
     if (gives.rest) { player.hp = player.maxHp; player.mp = player.maxMp; hud.log('You rest. Nothing follows you here.', 'good'); }
-    if (gives.bench) hud.log('An anvil, and a fire that never goes out. You can work here.', '');
+    /**
+     * R21 — `gives.bench` WAS A LOG LINE AND NOTHING ELSE, which is why a Forge Fire felt pointless.
+     *
+     * `data/landmarks.json` describes this place as "A crafting bench, outside a town, which is the
+     * whole point of it" — and grepping `gives.bench` found exactly one hit in the codebase: the
+     * line below, printing a sentence. So the landmark's entire reason to exist was never built,
+     * and what the player actually got was 30 experience and a building. Now the bench opens.
+     */
+    if (gives.bench) {
+      hud.log('An anvil, and a fire that never goes out. You can work here.', '');
+      if (!hud.sheetOpen) hud.toggleSheet(true);
+      hud.setTab('crafting');
+    }
     if (gives.crossing) hud.log('You can cross here.', '');
     if (gives.travelBonus) hud.log('The road is whole again. Travelling through here is quicker now.', 'good');
     if (gives.reviveDaily) {

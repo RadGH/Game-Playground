@@ -233,8 +233,30 @@ test('the bridge deck carries the player where the ground no longer does', () =>
     assert.ok(Math.hypot(rx - c.x, rz - c.z) < 1e-9, 'the bridge deck pushed the player out of itself');
     // and it stops at its own edge, rather than being an invisible floor over the whole river
     const ax = -c.tz, az = c.tx;
-    const off = field.standAt(c.x + ax * (c.halfWidth + 3), c.z + az * (c.halfWidth + 3), feet, 0.4);
-    assert.equal(off, null, 'the deck carries on past the side of the bridge');
+    const px = c.x + ax * (c.halfWidth + 3), pz = c.z + az * (c.halfWidth + 3);
+    /**
+     * R21 — …unless the ground three metres to the side is ANOTHER BRIDGE.
+     *
+     * The same round-17 note above applies to this line and was only ever applied to the one before
+     * it: a river can carry two crossings a dozen metres apart, and then a point just off the edge
+     * of one is genuinely standing on the other. Round 21's cliffs changed where seed 7's roads run
+     * and produced exactly that pair — two decks 13.9 m apart, half-width 5.75 each, so the probe
+     * at +8.75 m lands inside the neighbour.
+     *
+     * Asserting "nothing here" was always asserting something stronger than the game needs. What
+     * matters is that THIS deck stops at its own edge, so the probe is skipped where a different
+     * crossing legitimately covers it.
+     */
+    const covered = t.crossings.some(o => {
+      if (o === c) return false;
+      const dx = px - o.x, dz = pz - o.z;
+      return Math.abs(dx * o.tx + dz * o.tz) <= o.halfLength
+        && Math.abs(dx * -o.tz + dz * o.tx) <= o.halfWidth;
+    });
+    if (!covered) {
+      const off = field.standAt(px, pz, feet, 0.4);
+      assert.equal(off, null, 'the deck carries on past the side of the bridge');
+    }
   }
 });
 

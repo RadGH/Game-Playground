@@ -54,7 +54,7 @@
  */
 export const ENGINE_UNIT = {
   // plain stats, read as percentage points
-  critChance: 'pct', critDamage: 'pct', dodge: 'pct', hit: 'pct', lifeSteal: 'pct', manaSteal: 'pct',
+  critChance: 'pct', critDamage: 'pct', dodge: 'pct', lifeSteal: 'pct', manaSteal: 'pct',
   magicFind: 'pct', goldFind: 'pct', xpFind: 'pct', cooldownReduction: 'pct', block_chance: 'pct',
   initiative: 'pct',
   // plain stats, read as a raw amount
@@ -132,8 +132,18 @@ export const ENGINE_UNIT = {
  * an item repeatedly used to walk a conditional straight past any sane number, because nothing was
  * watching the result.
  */
+/**
+ * R21 — stats Farhold does not have, stripped out of the SHARED item table as it loads.
+ *
+ * `hit` is accuracy. Farhold's enemies are built with `dodge: 0`, so an accuracy roll cancelled a
+ * dodge chance that was always zero — it did nothing at all, and cost a line on every card to say
+ * so. Emberveil still uses it, and `data/items.json` belongs to both games, so it is removed here
+ * rather than there. See `tuneAffixData` and `WORDING.md`.
+ */
+export const DROPPED_STATS = new Set(['hit']);
+
 export const AFFIX_CAP = {
-  critChance: 60, critDamage: 250, dodge: 45, hit: 60, lifeSteal: 25, manaSteal: 25,
+  critChance: 60, critDamage: 250, dodge: 45, lifeSteal: 25, manaSteal: 25,
   magicFind: 300, goldFind: 300, xpFind: 100, cooldownReduction: 50, block_chance: 65,
   // `initiative` is multiplied by INITIATIVE_PER_POINT (4) before it is shown, so a cap of 15
   // reads as +60% attack speed — which is already the most anything should give.
@@ -189,7 +199,6 @@ export const AFFIX_TUNING = {
   // ---- percentages that were stored as fractions. ×100, then floored.
   crit_chance: { min: 4, max: 9, ilvl: 3 },           // was 0.02–0.1 → "0% critical chance"
   crit_damage: { min: 12, max: 25, ilvl: 3 },         // was 0.1–0.35 → "0.1% critical damage"
-  of_hit: { min: 4, max: 10, ilvl: 1 },
   of_dodge: { min: 3, max: 7, ilvl: 2 },
   of_speed: { min: 1.5, max: 3.5, ilvl: 2, growth: 2 },  // shown x4 as attack speed
   lifeSteal: { min: 3, max: 8, ilvl: 5 },
@@ -461,9 +470,35 @@ export function affixAllowed(def, slot = null, ilvl = 99) {
  */
 export function tuneAffixData(items) {
   const groups = items?.affixes;
-  if (!groups) return { tuned: 0, untuned: [] };
+  if (!groups) return { tuned: 0, untuned: [], dropped: 0 };
   let tuned = 0;
+  let dropped = 0;
   const untuned = [];
+  /**
+   * R21 — WHERE ACCURACY IS REMOVED, AND WHY IT IS REMOVED *HERE*.
+   *
+   * `data/items.json` is SHARED with Emberveil, which rolls `of Accuracy`, derives a real `hit`
+   * stat from it, and has a test asserting every affix in that file resolves in its registry. So
+   * the affix cannot be deleted from the file — doing that breaks a different game.
+   *
+   * It can be deleted from FARHOLD, though, and this function is already the place where Farhold
+   * restates the shared table in its own terms at load (that is what round 9 built it for). So
+   * every carrier of the stat is stripped on the way past: the rollable affix lists, the fixed and
+   * random affixes on uniques and set pieces, and the bare `{stat: value}` maps of a set's partial
+   * bonuses. Nothing downstream needs to know accuracy ever existed — it cannot be rolled, cannot
+   * be worn, and has no line on any card.
+   *
+   * An old save carrying a rolled `of Accuracy` is handled by the same rule from the other end:
+   * `hit` is gone from `STAT_FIELDS` in js/effects.js, so a legacy affix grants nothing.
+   */
+  const strip = list => {
+    if (!Array.isArray(list)) return list;
+    const before = list.length;
+    const kept = list.filter(a => !DROPPED_STATS.has(a?.stat));
+    dropped += before - kept.length;
+    return kept;
+  };
+  for (const key of Object.keys(groups)) groups[key] = strip(groups[key]);
   for (const list of Object.values(groups)) {
     for (const def of list) {
       const t = AFFIX_TUNING[def.id];
@@ -479,11 +514,15 @@ export function tuneAffixData(items) {
   // Uniques and set pieces carry their own fixed and random affixes, written in the same mixed
   // units. They get the same treatment: a value in the wrong unit is wrong wherever it is written.
   for (const u of items.uniques || []) {
+    if (u.fixedAffixes) u.fixedAffixes = strip(u.fixedAffixes);
+    if (u.randomAffixes) u.randomAffixes = strip(u.randomAffixes);
     for (const f of u.fixedAffixes || []) fixUnit(f);
     for (const r of u.randomAffixes || []) fixRange(r);
   }
   for (const set of items.sets || []) {
     for (const piece of set.items || set.pieces || []) {
+      if (piece.fixedAffixes) piece.fixedAffixes = strip(piece.fixedAffixes);
+      if (piece.randomAffixes) piece.randomAffixes = strip(piece.randomAffixes);
       for (const f of piece.fixedAffixes || []) fixUnit(f);
       for (const r of piece.randomAffixes || []) fixRange(r);
     }
@@ -491,11 +530,12 @@ export function tuneAffixData(items) {
     // thing that was printing "int +7, cooldownReduction +0.05" at the player.
     for (const table of Object.values(set.partialBonuses || {})) {
       for (const stat of Object.keys(table)) {
+        if (DROPPED_STATS.has(stat)) { delete table[stat]; dropped++; continue; }
         table[stat] = roundFor(stat, capValue(stat, convert(stat, table[stat])));
       }
     }
   }
-  return { tuned, untuned };
+  return { tuned, untuned, dropped };
 }
 
 /**

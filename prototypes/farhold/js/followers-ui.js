@@ -230,7 +230,7 @@ export function createFollowersScreen({
       return [pane('Your six', [
         // R20 — "a choice you can take back" is no longer free, so it no longer says free
         el('div', { class: 'flw-note', text: `${player?.classLabel || 'This class'} comes with a fixed six, unlocking as you level. Build your own class on the title screen and each one is a choice — made at the level it opens at, and undone by an Unbinder in town.` }),
-        ...ids.map((id, i) => row(skillData?.skills?.[id]?.name || id, at[i] > 1 ? `level ${at[i]}` : 'from the start', skillData?.skills?.[id]?.desc || '')),
+        ...ids.map((id, i) => row(skillData?.skills?.[id]?.name || id, `Level ${at[i]}`, skillData?.skills?.[id]?.desc || '')),
       ])];
     }
     if (!respec) {

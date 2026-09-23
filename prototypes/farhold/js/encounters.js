@@ -160,7 +160,21 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
    * slack is where a rescue used to win itself with nobody watching. A little over the despawn
    * radius so that walking briefly out of earshot does not cancel something you are coming back to.
    */
-  const closeRadius = Math.max(220, (balance.spawn?.despawnRadius ?? 320) * 1.15);
+  /**
+   * R21 — this now tracks the SET PIECE's leash, not the plain-pack despawn.
+   *
+   * Round 21 pushed placement out to 240 m, so a floor of 220 and a multiple of the 300 m plain
+   * despawn would have closed events that were still on screen and never reached. `keepRadius` is
+   * the distance a set piece's own bodies survive to (js/actors.js), so tying the two together is
+   * the same guarantee round 16 wrote — an event cannot outlive the bodies standing in it, and it
+   * cannot die while they are still standing either.
+   */
+  const keepRadius = Math.max(
+    cfg.keepRadius ?? 0,
+    (cfg.radius ?? 90) * 1.6,
+    balance.spawn?.despawnRadius ?? 320,
+  );
+  const closeRadius = Math.max(220, keepRadius * 1.15);
 
   /** Handed in if anyone wires one, otherwise whichever chest field is live. See js/chests.js. */
   let chestField = chests;
@@ -629,7 +643,9 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
 
   /** One tick. Rolls a set piece now and then, and forgets the ones that are dead or far away. */
   function update(dt, at, player) {
-    live = live.filter(r => r.units.some(u => u.dying == null) && Math.hypot(r.x - at.x, r.z - at.z) < 420);
+    // R21: was a hard-coded 420 against a derived close radius — the same split round 16 removed
+    // from the other half of this file. One number, so a record and its bodies die together.
+    live = live.filter(r => r.units.some(u => u.dying == null) && Math.hypot(r.x - at.x, r.z - at.z) < closeRadius);
     tickEvents(dt, at);
     since += dt;
     if (since < (cfg.everySeconds ?? 26)) return null;

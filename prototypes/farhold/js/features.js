@@ -666,10 +666,19 @@ export function createFeatures(scene, terrain, opts = {}) {
     };
 
     const place = (key, x, z, angle, scale = 1, sink = 0.3, y = null,
-      { solid: wantSolid = true, tint = null, foot = null } = {}) => {
+      { solid: wantSolid = true, tint = null, foot = null, onRoad = false } = {}) => {
       if (counts[key] >= BUILDINGS[key].cap) return false;
       // nothing is built in the channel or on the bank — towns sit BESIDE their river
       if (terrain.riverAt(x, z) > 0.3) return false;
+      /**
+       * R21 — and nothing is built in the ROAD, which `place` had never once asked about.
+       *
+       * The planner's own `buildable` rejects `roadAt > 0.45` for plots, but the well, the waypoint,
+       * the notice board, the stalls, the wall, the towers and the gates all come through here
+       * instead and only ever checked water. A gate is the one thing that WANTS to be on the road,
+       * so it opts out by passing `onRoad`.
+       */
+      if (!onRoad && (terrain.roadAt(x, z) > 0.45 || terrain.bridgedAt?.(x, z))) return false;
       if (!dryFor(x, z, foot ?? (BUILDING_SOLIDS[key]?.[0] || 0))) return false;
       const size = Array.isArray(scale) ? scale : [scale, scale, scale];
       matrix.compose(
@@ -831,12 +840,29 @@ export function createFeatures(scene, terrain, opts = {}) {
       const tint = new THREE.Color(cultKit.street.colour);
       for (const lane of streetLanes(plan, {
         cx, cz, terrain,
+        // R21: and throw away whatever the cut left stranded — see `keepConnected` in town-plan.js
+        prune: true,
         // A street stops at the water and picks up on the far side, as a road does at a sea lane —
         // and at a bridge, where the ground it would be draped on is a hole. Round 17: ten of
         // Feafungate's street lanes ran over the deck of the bridge through the middle of the town,
         // which draws a strip of paving hanging in the air over the river.
+        /**
+         * R21 — …AND WHERE THE WORLD ROAD ALREADY PAVES IT.
+         *
+         * The play-test: *"There are lots of sub-roads that are totally meaningless… The specific
+         * location I shared has several roads (and the waypoint) overlapping the main road, even if
+         * there is nothing on the other side."* Measured on that town: 160 of 940 street samples
+         * (17%) sat on top of the world road. The world road is drawn at `lift: 0.06` and a town
+         * street at `lift: 0.12`, so what the player saw was a second slab of paving floating six
+         * centimetres above the first one, at a slightly different angle.
+         *
+         * Nothing anywhere de-duplicated the two. `splitBlock` cuts its streets without ever being
+         * told where the road runs, and `linkRoads` deliberately lays a high street along the very
+         * corridor the road comes in on. Breaking the run at the carriageway is the cheap half of
+         * the fix and it is the half the player sees: the road IS the street there.
+         */
         skip: (x, z) => terrain.underwater(x, z) || terrain.riverAt(x, z) > 0.3
-          || !!terrain.bridgedAt?.(x, z),
+          || !!terrain.bridgedAt?.(x, z) || terrain.roadAt(x, z) > 0.45,
       })) {
         pushRibbon(streets, laneRibbon(lane, { lift: 0.12, color: [tint.r, tint.g, tint.b] }));
       }
@@ -859,8 +885,33 @@ export function createFeatures(scene, terrain, opts = {}) {
      */
     {
       // the same predicate the travel book uses, so the pad you see and the pad you land on match
+      /**
+       * R21 — A WAYPOINT PAD IS NOT BUILT IN THE MIDDLE OF THE ROAD.
+       *
+       * `padSpotFor` offers a fixed bearing off the town origin and then spirals if the ground is
+       * no good — but "no good" only ever meant water, a river or a slope. It never asked about the
+       * road, and the town origin is the exact cell the road is routed to, so on the reported town
+       * the pad landed at `roadAt 0.994`: dead centre of the carriageway. A 3.2 m concrete disc and
+       * a glowing sigil, in the road.
+       *
+       * The spiral in `padSpotFor` already exists to solve exactly this shape of problem; it simply
+       * was not being told about one of the four things that can be under a town.
+       */
+      const clearOfRoad = (x, z, foot = 0) => {
+        if (terrain.bridgedAt?.(x, z)) return false;
+        if (terrain.roadAt(x, z) > 0.45) return false;
+        // …and the EDGE, not only the middle. A waypoint pad is 3.2 m across, so a centre that
+        // clears the carriageway by a metre still puts a third of the disc in the road — the same
+        // footprint-versus-centre fault the probe tool was written to catch for the water tests.
+        for (let i = 0; i < 6 && foot > 0; i++) {
+          const a = (i / 6) * Math.PI * 2;
+          if (terrain.roadAt(x + Math.cos(a) * foot, z + Math.sin(a) * foot) > 0.45) return false;
+        }
+        return true;
+      };
       const padOk = (x, z) => !terrain.waterAt(x, z) && !terrain.underwater(x, z)
-        && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5;
+        && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5
+        && clearOfRoad(x, z, 3.2);
       const pad = padSpotFor(node, padOk);
       if (padOk(pad.x, pad.z)) {
         const lit = waypointLit ? !!waypointLit(node.id) : false;
@@ -897,6 +948,10 @@ export function createFeatures(scene, terrain, opts = {}) {
       if (terrain.heightAt(sx, sz) < (terrain.seaLevel ?? 0) + 0.8) continue;
       if (terrain.riverAt(sx, sz) > 0.3) continue;
       if (terrain.slopeAt(sx, sz, 4) > 0.5) continue;
+      // R21: a market stall does not stand in the carriageway. `stallsFor` lines the kerb of every
+      // `main` street, and `linkRoads` files its high streets as `main` — so the stalls were being
+      // hung off the world road as well as off the town's own.
+      if (terrain.roadAt(sx, sz) > 0.45 || terrain.bridgedAt?.(sx, sz)) continue;
       const stall = describeStall({ kind: spot.kind, culture, seed: spot.seed });
       // …and round 17 asks about the whole awning rather than about the spot its middle post stands
       // on, which is what left a stall with two legs in the river at the user's own town square
@@ -1058,7 +1113,9 @@ export function createFeatures(scene, terrain, opts = {}) {
         const wide = Math.max(1, chord / GATE_SPAN);
         const yaw = Math.atan2(Math.cos(g), Math.sin(g));   // +Z points out along the road
         const low = Math.min(terrain.heightAt(ax, az), terrain.heightAt(bx, bz));
-        if (!place('gatehouse', gx, gz, yaw, [wide, 1, 1], 0.9, low, { solid: false })) continue;
+        // R21: a gate is the ONE thing that belongs on the road — it is built at a ring crossing
+        // precisely so the road runs through it — so it opts out of `place`'s new road test.
+        if (!place('gatehouse', gx, gz, yaw, [wide, 1, 1], 0.9, low, { solid: false, onRoad: true })) continue;
 
         /**
          * The jambs, so the middle stays open.

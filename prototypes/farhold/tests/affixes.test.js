@@ -15,7 +15,7 @@ import { dirname, join } from 'node:path';
 import {
   ENGINE_UNIT, AFFIX_TUNING, AFFIX_CAP, AFFIX_TIERS, SLOT_RULES,
   tuneAffixData, rollAffixValue, itemLevelFor, requirementFor, affixAllowed,
-  tierFor, tierMult, capValue, convert,
+  tierFor, tierMult, capValue, convert, DROPPED_STATS,
 } from '../js/affixes.js';
 import { Rpg, SLOTS } from '../js/rpg.js';
 import { describeAffix, EFFECTS, INITIATIVE_PER_POINT } from '../js/effects.js';
@@ -246,6 +246,10 @@ test('every road-weapon property says what it does, in words', () => {
   }
   assert.ok(stats.size > 20, 'the road weapons lost their properties');
   for (const stat of stats) {
+    // R21: accuracy is removed from Farhold. items.json is shared with Emberveil, which still
+    // rolls it, so the stat is stripped as the file loads (see `tuneAffixData`) rather than
+    // deleted from the file — and a stat Farhold has thrown away owes nobody a description.
+    if (DROPPED_STATS.has(stat)) continue;
     assert.ok(EFFECTS['affix:' + stat], `${stat} has no entry — it would print as "name: value"`);
     const text = describeAffix({ stat, value: 2, name: 'X' });
     // the fallback is `name: value`; anything else is a real sentence

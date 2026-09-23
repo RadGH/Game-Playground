@@ -229,7 +229,7 @@ export function pickRefusal(build, slot, skillId, cat, { level = 1 } = {}) {
    */
   if (build.spells?.[slot] && build.granted) {
     const worn = cat.byId.get(build.spells[slot]);
-    return `${worn?.name || 'A spell'} is already in this slot. An Unbinder in town can take it back out.`;
+    return `${worn?.name || 'A spell'} is already in this slot. An Unbinder in town can unlearn ${worn?.name || 'that spell'} for gold.`;
   }
   return null;
 }
@@ -342,7 +342,7 @@ export function loadoutRefusal(loadout, { player = null, forest = null } = {}) {
   if (!loadout.needsPerk) return null;
   if (hasKeystone(player, loadout.needsPerk, forest)) return null;
   return loadout.needsPerk === 'doubled_grasp'
-    ? 'Two two-handers needs the grip that frees a hand — the Doubled Grasp keystone, out at the end of the melee arm of the Perks forest.'
+    ? 'Two two-handers needs the Doubled Grasp keystone, at the end of the melee arm of the Perks forest.'
     : `This one needs the ${String(loadout.needsPerk).replace(/_/g, ' ')} perk.`;
 }
 
@@ -597,7 +597,7 @@ export function buildRefusal(build, cat, data) {
    * are chosen at the level they open at, from the character sheet — so the only thing that has
    * to be settled before the first morning is what you walk out of the gate holding.
    */
-  if (!(build.spells || [])[0]) return 'Pick the spell you start with. The other five are chosen as you level.';
+  if (!(build.spells || [])[0]) return 'Pick the spell you start with. The other 5 spells are chosen at levels 3, 6, 12, 18 and 24.';
   if (build.opening?.kind === 'companion' && !build.opening.companion) return 'Pick which companion comes with you.';
   const loadout = loadoutOf(build, data);
   if (loadout?.element && !build.element) return 'Pick which element your caster is attuned to.';

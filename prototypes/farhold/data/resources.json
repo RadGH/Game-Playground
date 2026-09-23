@@ -1,1314 +1,1315 @@
 {
-  "schema": 1,
-  "_doc": "Farhold's raw materials and the nodes they come out of (BUILDING_EXPANSION §1). Until now the only materials in the game came out of recycled gear; this file is the other half — the stuff you dig, fell, cut and skim off a wreck. Read by js/resources.js, and by js/refine.js for the names of things.\n\nTHE ONE DESIGN DECISION THIS FILE EXISTS TO SERVE: a node has a richness AND a distance, and the player has to weigh one against the other. A mother lode four hundred metres away can be worse than a lean seam behind the house, because every trip home is time you are not swinging. `haul` below is the maths that makes that real, and js/resources.js turns it into a single number per node — units delivered per minute — so the choice is legible before you commit to it rather than a regret afterwards.\n\nWhat a node carries: `resource` (what comes out), `richness` (a multiplier drawn from `richnessBands`, printed to the player), `yieldPerSecond` (kind.baseYield x richness — what you actually get standing at the face), `amount` (how much is left) and a respawn timer. Nothing is infinite except water, and nothing stays dead except a wreck.",
-  "_materialsDoc": "kind: ore|stone|wood|organic|fluid|gas|salvage|rare|refined|part|goal. `tier` is roughly which age of the base wants it. `weight` is how heavy one unit hauls — it scales the walk home, which is why stone is annoying and gold is not. `value` is a rough coin-per-unit so shops and quests have somewhere to start. `stack` is the carry limit per trip on foot, before a cart.",
-  "materials": {
-    "iron_ore": {
-      "name": "Iron Ore",
-      "kind": "ore",
-      "tier": 1,
-      "weight": 1.0,
-      "value": 2,
-      "stack": 40,
-      "colour": "#8c7a6b",
-      "desc": "Rusty red rock. The backbone of every tool you will make."
-    },
-    "copper_ore": {
-      "name": "Copper Ore",
-      "kind": "ore",
-      "tier": 1,
-      "weight": 1.0,
-      "value": 3,
-      "stack": 40,
-      "colour": "#b5713b",
-      "desc": "Green-streaked and soft. Wire, fittings, and half of bronze."
-    },
-    "tin_ore": {
-      "name": "Tin Ore",
-      "kind": "ore",
-      "tier": 1,
-      "weight": 0.9,
-      "value": 4,
-      "stack": 40,
-      "colour": "#9fb0b8",
-      "desc": "Scarce, and useless on its own. The other half of bronze."
-    },
-    "coal": {
-      "name": "Coal",
-      "kind": "ore",
-      "tier": 1,
-      "weight": 0.8,
-      "value": 2,
-      "stack": 50,
-      "colour": "#3a3a3d",
-      "desc": "Burns hot enough to melt ore. The first fuel worth carrying."
-    },
-    "silver_ore": {
-      "name": "Silver Ore",
-      "kind": "ore",
-      "tier": 2,
-      "weight": 1.0,
-      "value": 9,
-      "stack": 30,
-      "colour": "#cfd6da",
-      "desc": "Bright in the rock. Wanted by smiths, jewellers, and anything that must not corrode."
-    },
-    "gold_ore": {
-      "name": "Gold Ore",
-      "kind": "ore",
-      "tier": 2,
-      "weight": 1.3,
-      "value": 16,
-      "stack": 25,
-      "colour": "#e0b13c",
-      "desc": "Heavy and soft. Contacts, coin, and things meant to impress."
-    },
-    "stone": {
-      "name": "Stone",
-      "kind": "stone",
-      "tier": 1,
-      "weight": 1.6,
-      "value": 1,
-      "stack": 30,
-      "colour": "#8b8178",
-      "desc": "The bulk material. Everything wants it and nobody wants to carry it."
-    },
-    "rubble": {
-      "name": "Rubble",
-      "kind": "stone",
-      "tier": 1,
-      "weight": 1.4,
-      "value": 1,
-      "stack": 35,
-      "colour": "#7a7268",
-      "desc": "Broken rock off a quarry face. Feed for the stonecutter."
-    },
-    "clay": {
-      "name": "Clay",
-      "kind": "stone",
-      "tier": 1,
-      "weight": 1.2,
-      "value": 2,
-      "stack": 35,
-      "colour": "#a8705a",
-      "desc": "Wet grey from a riverbank. Brick, tile and moulds."
-    },
-    "sand": {
-      "name": "Sand",
-      "kind": "stone",
-      "tier": 1,
-      "weight": 1.1,
-      "value": 2,
-      "stack": 40,
-      "colour": "#d8c68f",
-      "desc": "Shore and dune. Glass, and the mould a casting is poured into."
-    },
-    "flint": {
-      "name": "Flint",
-      "kind": "stone",
-      "tier": 1,
-      "weight": 0.6,
-      "value": 3,
-      "stack": 30,
-      "colour": "#57544f",
-      "desc": "Sharp when struck. Fire, and the first blade you will ever make."
-    },
-    "log": {
-      "name": "Log",
-      "kind": "wood",
-      "tier": 1,
-      "weight": 2.0,
-      "value": 2,
-      "stack": 20,
-      "colour": "#6b4f34",
-      "desc": "A felled trunk. Heavy in the arms, cheap at the sawmill."
-    },
-    "resin": {
-      "name": "Resin",
-      "kind": "wood",
-      "tier": 1,
-      "weight": 0.5,
-      "value": 5,
-      "stack": 25,
-      "colour": "#d39a3c",
-      "desc": "Bled from a cut trunk. Glue, pitch and waterproofing."
-    },
-    "fibre": {
-      "name": "Plant Fibre",
-      "kind": "organic",
-      "tier": 1,
-      "weight": 0.3,
-      "value": 1,
-      "stack": 60,
-      "colour": "#9fae62",
-      "desc": "Stripped stalks. Rope and coarse cloth."
-    },
-    "reed": {
-      "name": "Reed",
-      "kind": "organic",
-      "tier": 1,
-      "weight": 0.4,
-      "value": 1,
-      "stack": 50,
-      "colour": "#87a15c",
-      "desc": "Cut at the water's edge. Thatch, baskets, and a passable arrow shaft."
-    },
-    "hide": {
-      "name": "Raw Hide",
-      "kind": "organic",
-      "tier": 1,
-      "weight": 1.0,
-      "value": 6,
-      "stack": 20,
-      "colour": "#8d6a45",
-      "desc": "Off something that objected. Tans into leather."
-    },
-    "bone": {
-      "name": "Bone",
-      "kind": "organic",
-      "tier": 1,
-      "weight": 0.7,
-      "value": 4,
-      "stack": 30,
-      "colour": "#ded6c0",
-      "desc": "Glue, handles, and the ash a kiln wants."
-    },
-    "sinew": {
-      "name": "Sinew",
-      "kind": "organic",
-      "tier": 1,
-      "weight": 0.2,
-      "value": 7,
-      "stack": 30,
-      "colour": "#c8b28c",
-      "desc": "Dried tendon. Bowstrings and bindings that outlast rope."
-    },
-    "grain": {
-      "name": "Grain",
-      "kind": "organic",
-      "tier": 1,
-      "weight": 0.6,
-      "value": 3,
-      "stack": 50,
-      "colour": "#d9bf6c",
-      "desc": "From a plot you dug. Slow, safe, and it does not fight back."
-    },
-    "game_meat": {
-      "name": "Game Meat",
-      "kind": "organic",
-      "tier": 1,
-      "weight": 0.8,
-      "value": 5,
-      "stack": 25,
-      "colour": "#a4514a",
-      "desc": "Raw. Cook it or regret it."
-    },
-    "water": {
-      "name": "Water",
-      "kind": "fluid",
-      "tier": 1,
-      "weight": 1.0,
-      "value": 1,
-      "stack": 20,
-      "colour": "#4f9fd6",
-      "desc": "Rivers, wells and rain catchers. Coolant, mortar, and most of refining."
-    },
-    "ice": {
-      "name": "Ice",
-      "kind": "fluid",
-      "tier": 1,
-      "weight": 1.0,
-      "value": 1,
-      "stack": 25,
-      "colour": "#cfe6f2",
-      "desc": "On a frozen world it is the only water there is. Melt it."
-    },
-    "vent_gas": {
-      "name": "Vent Gas",
-      "kind": "gas",
-      "tier": 2,
-      "weight": 0.2,
-      "value": 8,
-      "stack": 20,
-      "colour": "#c7b9e8",
-      "desc": "Skimmed off a ground vent by a collector. You cannot pick this up by hand."
-    },
-    "crystal_raw": {
-      "name": "Rough Crystal",
-      "kind": "rare",
-      "tier": 2,
-      "weight": 0.7,
-      "value": 22,
-      "stack": 20,
-      "colour": "#9fd8ea",
-      "desc": "Snapped off a spire. Cuts into lenses, focusers, and the heart of a waypoint."
-    },
-    "obsidian": {
-      "name": "Volcanic Glass",
-      "kind": "rare",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 14,
-      "stack": 20,
-      "colour": "#2c2630",
-      "desc": "Black and murderously sharp. Blades and the cheap route to a lens."
-    },
-    "sulphur": {
-      "name": "Sulphur",
-      "kind": "rare",
-      "tier": 2,
-      "weight": 0.6,
-      "value": 12,
-      "stack": 25,
-      "colour": "#d9c34a",
-      "desc": "Yellow crust round a vent. Acid, powder, and the start of fuel."
-    },
-    "saltpetre": {
-      "name": "Saltpetre",
-      "kind": "rare",
-      "tier": 2,
-      "weight": 0.6,
-      "value": 11,
-      "stack": 25,
-      "colour": "#e6e0cf",
-      "desc": "Scraped from cave walls. Half of anything that goes bang."
-    },
-    "salt": {
-      "name": "Rock Salt",
-      "kind": "rare",
-      "tier": 1,
-      "weight": 0.8,
-      "value": 4,
-      "stack": 30,
-      "colour": "#f0ead8",
-      "desc": "Preserving, tanning, and the chemical bench's dullest input."
-    },
-    "salvage_metal": {
-      "name": "Salvaged Metal",
-      "kind": "salvage",
-      "tier": 1,
-      "weight": 1.2,
-      "value": 7,
-      "stack": 25,
-      "colour": "#8f939a",
-      "desc": "Worked metal off a wreck. Skips the smelting — which is exactly why wrecks run out."
-    },
-    "scrap_plate": {
-      "name": "Scrap Plate",
-      "kind": "salvage",
-      "tier": 2,
-      "weight": 1.4,
-      "value": 12,
-      "stack": 20,
-      "colour": "#77808a",
-      "desc": "Hull sheet, already rolled. Cut it down or melt it back."
-    },
-    "meteoric_iron": {
-      "name": "Meteoric Iron",
-      "kind": "rare",
-      "tier": 3,
-      "weight": 1.5,
-      "value": 45,
-      "stack": 15,
-      "colour": "#6f6a78",
-      "desc": "Fell out of the sky and cooled on the way down. Better than anything you can smelt."
-    },
-    "iron_ingot": {
-      "name": "Iron Ingot",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.8,
-      "value": 8,
-      "stack": 40,
-      "colour": "#9a9285",
-      "desc": "Ore, minus the rock."
-    },
-    "copper_ingot": {
-      "name": "Copper Ingot",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.8,
-      "value": 10,
-      "stack": 40,
-      "colour": "#c07a42",
-      "desc": "Drawn into wire, beaten into fittings."
-    },
-    "tin_ingot": {
-      "name": "Tin Ingot",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.7,
-      "value": 12,
-      "stack": 40,
-      "colour": "#b6c2c8",
-      "desc": "Waiting for copper."
-    },
-    "silver_ingot": {
-      "name": "Silver Ingot",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.8,
-      "value": 30,
-      "stack": 30,
-      "colour": "#dbe2e6",
-      "desc": "Contacts that never tarnish."
-    },
-    "gold_ingot": {
-      "name": "Gold Ingot",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 1.1,
-      "value": 55,
-      "stack": 25,
-      "colour": "#e8bf50",
-      "desc": "The wire that carries a signal you cannot afford to lose."
-    },
-    "bronze_ingot": {
-      "name": "Bronze Ingot",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.8,
-      "value": 26,
-      "stack": 35,
-      "colour": "#a87438",
-      "desc": "Copper and tin. The first alloy, and still a good one."
-    },
-    "steel_ingot": {
-      "name": "Steel Ingot",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 34,
-      "stack": 35,
-      "colour": "#8a8f96",
-      "desc": "Iron cooked with carbon until it stops bending. Everything structural."
-    },
-    "charcoal": {
-      "name": "Charcoal",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.4,
-      "value": 3,
-      "stack": 50,
-      "colour": "#3f3a36",
-      "desc": "Wood burnt with no air. Hotter than wood, cheaper than coal."
-    },
-    "ash": {
-      "name": "Ash",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.3,
-      "value": 1,
-      "stack": 50,
-      "colour": "#b7b1a7",
-      "desc": "What a fire leaves. Leach it for lye rather than sweeping it out."
-    },
-    "lye": {
-      "name": "Lye",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.8,
-      "value": 6,
-      "stack": 30,
-      "colour": "#e3e7cf",
-      "desc": "Ash and water. The tannery wants it; so do your hands not."
-    },
-    "slag": {
-      "name": "Slag",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 1.5,
-      "value": 0,
-      "stack": 40,
-      "colour": "#5c5349",
-      "desc": "The rock the ore was hiding in. Crush it for road gravel or tip it."
-    },
-    "tailings": {
-      "name": "Tailings",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 1.3,
-      "value": 0,
-      "stack": 40,
-      "colour": "#6b6055",
-      "desc": "What the washer rinses out. There is still metal in it if you can be bothered."
-    },
-    "gravel": {
-      "name": "Gravel",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 1.5,
-      "value": 1,
-      "stack": 40,
-      "colour": "#8a837a",
-      "desc": "Road base and foundation fill."
-    },
-    "cut_stone": {
-      "name": "Cut Stone",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 1.6,
-      "value": 5,
-      "stack": 25,
-      "colour": "#9a9288",
-      "desc": "Squared block. The wall tool eats these."
-    },
-    "brick": {
-      "name": "Brick",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 1.0,
-      "value": 4,
-      "stack": 35,
-      "colour": "#a85f45",
-      "desc": "Fired clay. Furnaces are built of it and then make more of it."
-    },
-    "glass": {
-      "name": "Glass",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.7,
-      "value": 9,
-      "stack": 30,
-      "colour": "#b9dce6",
-      "desc": "Sand, fired. Windows, flasks, and rough optics."
-    },
-    "plank": {
-      "name": "Plank",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.9,
-      "value": 4,
-      "stack": 35,
-      "colour": "#a37d4f",
-      "desc": "A log, sawn properly instead of hacked."
-    },
-    "beam": {
-      "name": "Beam",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 1.6,
-      "value": 9,
-      "stack": 20,
-      "colour": "#8a6539",
-      "desc": "What holds a roof up."
-    },
-    "leather": {
-      "name": "Leather",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.6,
-      "value": 14,
-      "stack": 30,
-      "colour": "#7d5733",
-      "desc": "Hide, tanned. Armour, straps, bellows."
-    },
-    "cloth": {
-      "name": "Cloth",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.3,
-      "value": 10,
-      "stack": 35,
-      "colour": "#cbbfa4",
-      "desc": "Woven fibre. Robes, sails, bandages."
-    },
-    "rope": {
-      "name": "Rope",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.5,
-      "value": 8,
-      "stack": 30,
-      "colour": "#b49a63",
-      "desc": "Twisted fibre. Everything you build needs some."
-    },
-    "iron_dust": {
-      "name": "Iron Dust",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 4,
-      "stack": 40,
-      "colour": "#7f776d",
-      "desc": "Crushed iron ore. Smelts better than rock, and washes better still. Dust keeps its metal — there is no such thing as generic dust, so there is a line for each."
-    },
-    "copper_dust": {
-      "name": "Copper Dust",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 5,
-      "stack": 40,
-      "colour": "#9a6a44",
-      "desc": "Crushed copper ore."
-    },
-    "iron_concentrate": {
-      "name": "Iron Concentrate",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 12,
-      "stack": 35,
-      "colour": "#a08a63",
-      "desc": "Washed dust: half the rock gone, so a smelter gets half again more metal out of a load. That is what the water is for."
-    },
-    "copper_concentrate": {
-      "name": "Copper Concentrate",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 14,
-      "stack": 35,
-      "colour": "#b2794a",
-      "desc": "The same trick, in copper."
-    },
-    "acid": {
-      "name": "Acid",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 18,
-      "stack": 20,
-      "colour": "#c6d84a",
-      "desc": "Sulphur and water, carefully. Etching and leaching."
-    },
-    "coolant": {
-      "name": "Coolant",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.9,
-      "value": 20,
-      "stack": 20,
-      "colour": "#6fd0e0",
-      "desc": "Keeps a refinery from cooking itself. It will not run without it."
-    },
-    "reagent": {
-      "name": "Reagent",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 0.5,
-      "value": 24,
-      "stack": 25,
-      "colour": "#b47ad8",
-      "desc": "The chemical bench's output and the refinery's appetite."
-    },
-    "lens": {
-      "name": "Ground Lens",
-      "kind": "part",
-      "tier": 2,
-      "weight": 0.3,
-      "value": 40,
-      "stack": 20,
-      "colour": "#cfeef5",
-      "desc": "Glass or crystal, ground true. Optics and sighting."
-    },
-    "focuser": {
-      "name": "Cut Focuser",
-      "kind": "part",
-      "tier": 3,
-      "weight": 0.3,
-      "value": 90,
-      "stack": 15,
-      "colour": "#9fe0d8",
-      "desc": "A crystal cut to hold a field steady. The waypoint core is mostly these."
-    },
-    "machine_part": {
-      "name": "Machine Part",
-      "kind": "part",
-      "tier": 2,
-      "weight": 1.0,
-      "value": 55,
-      "stack": 25,
-      "colour": "#8f969e",
-      "desc": "Gears, shafts, bearings. Every tier-three structure is a pile of these."
-    },
-    "wire": {
-      "name": "Wire",
-      "kind": "part",
-      "tier": 1,
-      "weight": 0.3,
-      "value": 14,
-      "stack": 40,
-      "colour": "#c88a4a",
-      "desc": "Copper drawn out thin. Ten structures in the catalogue ask for it — and until round 13 nothing in the game made a single unit, which is the sort of thing a catalogue written before its supply chain quietly leaves behind."
-    },
-    "concrete": {
-      "name": "Concrete",
-      "kind": "refined",
-      "tier": 2,
-      "weight": 1.5,
-      "value": 8,
-      "stack": 25,
-      "colour": "#a7a49c",
-      "desc": "Gravel, sand and water. Poured for the things that have to take a real load."
-    },
-    "control_board": {
-      "name": "Control Board",
-      "kind": "part",
-      "tier": 3,
-      "weight": 0.4,
-      "value": 120,
-      "stack": 20,
-      "colour": "#5fae7a",
-      "desc": "Copper and gold on fired board. What tells a machine what to do."
-    },
-    "tempered_alloy": {
-      "name": "Tempered Alloy",
-      "kind": "refined",
-      "tier": 3,
-      "weight": 0.9,
-      "value": 110,
-      "stack": 25,
-      "colour": "#7f8aa0",
-      "desc": "Steel taken further than a forge can take it. Hulls and drive housings."
-    },
-    "composite_plate": {
-      "name": "Composite Plate",
-      "kind": "part",
-      "tier": 3,
-      "weight": 1.2,
-      "value": 150,
-      "stack": 20,
-      "colour": "#6d7480",
-      "desc": "Alloy laid over cloth and resin. Light, and it does not care about heat."
-    },
-    "aether_cell": {
-      "name": "Aether Cell",
-      "kind": "part",
-      "tier": 3,
-      "weight": 0.5,
-      "value": 260,
-      "stack": 12,
-      "colour": "#b79cf5",
-      "desc": "A charged crystal in a sealed case. Holds power far longer than it should."
-    },
-    "blast_charge": {
-      "name": "Blast Charge",
-      "kind": "part",
-      "tier": 2,
-      "weight": 0.5,
-      "value": 35,
-      "stack": 20,
-      "colour": "#d9603c",
-      "desc": "Powder, packed. Opens a quarry face or a collapsed adit in one go instead of an afternoon."
-    },
-    "ration": {
-      "name": "Cooked Ration",
-      "kind": "refined",
-      "tier": 1,
-      "weight": 0.4,
-      "value": 6,
-      "stack": 30,
-      "colour": "#c98a52",
-      "desc": "Hot food. Eaten, not stored forever."
-    },
-    "lift_fuel": {
-      "name": "Lift Fuel",
-      "kind": "goal",
-      "tier": 3,
-      "weight": 1.0,
-      "value": 200,
-      "stack": 20,
-      "colour": "#ff9b4a",
-      "desc": "The last thing you make, and the thing you burn every time you fly."
-    },
-    "ship_hull": {
-      "name": "Hull Section",
-      "kind": "goal",
-      "tier": 3,
-      "weight": 4.0,
-      "value": 1400,
-      "stack": 4,
-      "colour": "#78818c",
-      "desc": "One of four. It will not fly without all of them."
-    },
-    "ship_drive": {
-      "name": "Drive Assembly",
-      "kind": "goal",
-      "tier": 3,
-      "weight": 3.0,
-      "value": 1800,
-      "stack": 4,
-      "colour": "#c07a42",
-      "desc": "Two of four."
-    },
-    "ship_tanks": {
-      "name": "Tank Set",
-      "kind": "goal",
-      "tier": 3,
-      "weight": 3.0,
-      "value": 1100,
-      "stack": 4,
-      "colour": "#9fb0b8",
-      "desc": "Three of four."
-    },
-    "ship_avionics": {
-      "name": "Avionics Rack",
-      "kind": "goal",
-      "tier": 3,
-      "weight": 1.5,
-      "value": 1600,
-      "stack": 4,
-      "colour": "#5fae7a",
-      "desc": "Four of four, and the only one that needs a rare element."
-    },
-    "waypoint_core": {
-      "name": "Waypoint Core",
-      "kind": "goal",
-      "tier": 3,
-      "weight": 2.0,
-      "value": 2200,
-      "stack": 2,
-      "colour": "#b79cf5",
-      "desc": "Seat it in a pad and your base joins the network."
-    },
-    "warp_core": {
-      "name": "Warp Core",
-      "kind": "goal",
-      "tier": 3,
-      "weight": 2.5,
-      "value": 5000,
-      "stack": 2,
-      "colour": "#d0a8ff",
-      "desc": "The second act. Another world's rare element, and a lot of patience."
-    }
+ "schema": 1,
+ "_doc": "Farhold's raw materials and the nodes they come out of (BUILDING_EXPANSION §1). Until now the only materials in the game came out of recycled gear; this file is the other half — the stuff you dig, fell, cut and skim off a wreck. Read by js/resources.js, and by js/refine.js for the names of things.\n\nTHE ONE DESIGN DECISION THIS FILE EXISTS TO SERVE: a node has a richness AND a distance, and the player has to weigh one against the other. A mother lode four hundred metres away can be worse than a lean seam behind the house, because every trip home is time you are not swinging. `haul` below is the maths that makes that real, and js/resources.js turns it into a single number per node — units delivered per minute — so the choice is legible before you commit to it rather than a regret afterwards.\n\nWhat a node carries: `resource` (what comes out), `richness` (a multiplier drawn from `richnessBands`, printed to the player), `yieldPerSecond` (kind.baseYield x richness — what you actually get standing at the face), `amount` (how much is left) and a respawn timer. Nothing is infinite except water, and nothing stays dead except a wreck.",
+ "_materialsDoc": "kind: ore|stone|wood|organic|fluid|gas|salvage|rare|refined|part|goal. `tier` is roughly which age of the base wants it. `weight` is how heavy one unit hauls — it scales the walk home, which is why stone is annoying and gold is not. `value` is a rough coin-per-unit so shops and quests have somewhere to start. `stack` is the carry limit per trip on foot, before a cart.",
+ "materials": {
+  "iron_ore": {
+   "name": "Iron Ore",
+   "kind": "ore",
+   "tier": 1,
+   "weight": 1.0,
+   "value": 2,
+   "stack": 40,
+   "colour": "#8c7a6b",
+   "desc": "Rusty red rock. The backbone of every tool you will make."
   },
-  "_rareDoc": "Rare elements are NOT listed above one by one, because which ones exist is the universe's business, not Farhold's — universe/data/elements.json assigns 1-2 to each planet. js/resources.js reads a planet's `rare` keys and makes a `rare_seam` node kind for each, borrowing the element's own name and colour. This table is only the bits Farhold needs that the universe does not say: how a seam behaves.",
-  "rareSeam": {
-    "baseYield": 0.14,
-    "amountBand": [
-      40,
-      110
-    ],
-    "respawnSeconds": 0,
-    "hardness": 3,
-    "radius": 3,
-    "weightPerUnit": 0.8,
-    "stack": 15
+  "copper_ore": {
+   "name": "Copper Ore",
+   "kind": "ore",
+   "tier": 1,
+   "weight": 1.0,
+   "value": 3,
+   "stack": 40,
+   "colour": "#b5713b",
+   "desc": "Green-streaked and soft. Wire, fittings, and half of bronze."
   },
-  "_nodeDoc": "A node kind. `baseYield` is units per second at the face at richness 1.0 with the right tool — multiply by the node's richness for what the player actually gets. `swingSeconds` turns that into a per-swing number for the held-tool interaction (yieldPerSecond x swingSeconds). `amountBand` is how much is in one node before richness. `respawnSeconds` 0 means it never comes back (a wreck, a meteor). `hardness` is the tool tier needed: 0 bare hands, 1 stone/iron tool, 2 steel, 3 powered. `handMinable` false means a structure has to take it — gas vents, per §1.14. `biomes` are worldgen biome keys; empty means anywhere on land — BUT `indoors: true` keeps a kind out of the open-air scatter (a deep vein is a dungeon seam, and one on the surface is a hardness-2 iron seam a new player cannot work and cannot get past), `placedOnly: true` keeps it out entirely because an event system puts it down by hand, and `fromPlanet: true` does the same for the rare seam the field places itself. All three are read by js/resources.js `kindsForBiome`.",
-  "nodeKinds": {
-    "ore_outcrop": {
-      "name": "Ore Outcrop",
-      "resources": {
-        "iron_ore": 4,
-        "copper_ore": 3,
-        "tin_ore": 1.2,
-        "coal": 2.5,
-        "silver_ore": 0.7,
-        "gold_ore": 0.35
-      },
-      "baseYield": 0.3,
-      "swingSeconds": 1.6,
-      "amountBand": [
-        60,
-        180
-      ],
-      "respawnSeconds": 5400,
-      "hardness": 1,
-      "radius": 2,
-      "biomes": [
-        "hills",
-        "mountains",
-        "badlands",
-        "shrubland",
-        "savanna",
-        "grassland",
-        "tundra",
-        "volcanic",
-        "ashPlain",
-        "snowyPeaks"
-      ],
-      "desc": "A seam breaking the surface. The bread and butter of a young base."
-    },
-    "deep_vein": {
-      "name": "Deep Vein",
-      "resources": {
-        "iron_ore": 3,
-        "copper_ore": 2.5,
-        "tin_ore": 1.5,
-        "coal": 2,
-        "silver_ore": 1.6,
-        "gold_ore": 1.0,
-        "saltpetre": 1.2
-      },
-      "baseYield": 0.55,
-      "swingSeconds": 1.6,
-      "amountBand": [
-        140,
-        380
-      ],
-      "respawnSeconds": 10800,
-      "hardness": 2,
-      "radius": 2,
-      "biomes": [],
-      "indoors": true,
-      "guarded": true,
-      "desc": "Underground, and something is usually standing in front of it. Roughly twice an outcrop, which is what pays for the fight."
-    },
-    "boulder": {
-      "name": "Boulder",
-      "resources": {
-        "stone": 8,
-        "flint": 1.4
-      },
-      "baseYield": 0.45,
-      "swingSeconds": 1.9,
-      "amountBand": [
-        30,
-        70
-      ],
-      "respawnSeconds": 0,
-      "hardness": 1,
-      "radius": 1,
-      "biomes": [],
-      "desc": "One rock. Breaks up, does not come back, and there are always more."
-    },
-    "quarry_face": {
-      "name": "Quarry Face",
-      "resources": {
-        "stone": 6,
-        "rubble": 4
-      },
-      "baseYield": 0.7,
-      "swingSeconds": 1.9,
-      "amountBand": [
-        400,
-        900
-      ],
-      "respawnSeconds": 14400,
-      "hardness": 1,
-      "radius": 4,
-      "biomes": [
-        "hills",
-        "mountains",
-        "badlands",
-        "snowyPeaks",
-        "volcanic"
-      ],
-      "desc": "A cliff you can work at for hours. Heavy, slow to carry — the node that most wants a cart."
-    },
-    "clay_bank": {
-      "name": "Clay Bank",
-      "resources": {
-        "clay": 10
-      },
-      "baseYield": 0.6,
-      "swingSeconds": 1.4,
-      "amountBand": [
-        80,
-        220
-      ],
-      "respawnSeconds": 7200,
-      "hardness": 0,
-      "radius": 3,
-      "biomes": [
-        "marsh",
-        "grassland",
-        "rainforest",
-        "temperateForest",
-        "beach",
-        "savanna"
-      ],
-      "nearWater": true,
-      "desc": "Cut out of a riverbank with your hands if you have to.",
-      "_r14": "R14: `nearWater` is honoured by createNodeField now, so a clay bank is on a bank. It was scattered evenly over six biomes before, which is why 'where do you find clay?' had no answer — and clay gates the furnace and the kiln, the first two machines in the game."
-    },
-    "sand_bar": {
-      "name": "Sand Bar",
-      "resources": {
-        "sand": 10,
-        "salt": 1.5
-      },
-      "baseYield": 0.65,
-      "swingSeconds": 1.4,
-      "amountBand": [
-        90,
-        240
-      ],
-      "respawnSeconds": 5400,
-      "hardness": 0,
-      "radius": 3,
-      "biomes": [
-        "beach",
-        "desert",
-        "badlands"
-      ],
-      "desc": "Shore or dune. Endless, but only where there is a shore or a dune."
-    },
-    "tree": {
-      "name": "Tree",
-      "resources": {
-        "log": 10,
-        "resin": 1.2
-      },
-      "baseYield": 0.38,
-      "swingSeconds": 1.7,
-      "amountBand": [
-        14,
-        40
-      ],
-      "respawnSeconds": 21600,
-      "hardness": 1,
-      "radius": 1,
-      "biomes": [
-        "temperateForest",
-        "rainforest",
-        "borealForest",
-        "blighted",
-        "hallowed",
-        "grassland",
-        "hills",
-        "marsh"
-      ],
-      "desc": "Felled for timber. Regrows over a few in-game days — §1.4 — so a clearing is a crop, not a scar."
-    },
-    "fibre_patch": {
-      "name": "Fibre Patch",
-      "resources": {
-        "fibre": 8,
-        "reed": 4
-      },
-      "baseYield": 0.55,
-      "swingSeconds": 1.2,
-      "amountBand": [
-        25,
-        70
-      ],
-      "respawnSeconds": 3600,
-      "hardness": 0,
-      "radius": 2,
-      "biomes": [
-        "grassland",
-        "marsh",
-        "savanna",
-        "shrubland",
-        "rainforest",
-        "temperateForest",
-        "hallowed"
-      ],
-      "desc": "Stalks and reeds. Free, fast, and you will still run out of rope."
-    },
-    "crystal_spire": {
-      "name": "Crystal Spire",
-      "resources": {
-        "crystal_raw": 10
-      },
-      "baseYield": 0.16,
-      "swingSeconds": 2.2,
-      "amountBand": [
-        30,
-        90
-      ],
-      "respawnSeconds": 18000,
-      "hardness": 2,
-      "radius": 2,
-      "biomes": [
-        "glimmerwaste",
-        "veiledHills",
-        "mountains",
-        "snowyPeaks",
-        "ice"
-      ],
-      "desc": "Snapped off in flakes. Slow work, and the only route to a focuser."
-    },
-    "obsidian_flow": {
-      "name": "Obsidian Flow",
-      "resources": {
-        "obsidian": 6,
-        "sulphur": 4
-      },
-      "baseYield": 0.34,
-      "swingSeconds": 1.8,
-      "amountBand": [
-        50,
-        150
-      ],
-      "respawnSeconds": 10800,
-      "hardness": 2,
-      "radius": 3,
-      "biomes": [
-        "volcanic",
-        "ashPlain",
-        "badlands"
-      ],
-      "desc": "Cooled lava and the yellow crust around it."
-    },
-    "ice_field": {
-      "name": "Ice Field",
-      "resources": {
-        "ice": 10
-      },
-      "baseYield": 0.7,
-      "swingSeconds": 1.5,
-      "amountBand": [
-        120,
-        300
-      ],
-      "respawnSeconds": 3600,
-      "hardness": 1,
-      "radius": 4,
-      "biomes": [
-        "ice",
-        "snowyPeaks",
-        "tundra"
-      ],
-      "desc": "On a frozen world this is the water supply. Melt it before you can drink it.",
-      "_r14": "R14: dropped `seaIce` — a water biome, so every ice field placed there was deleted as `gone`."
-    },
-    "water_source": {
-      "name": "Water",
-      "resources": {
-        "water": 10
-      },
-      "baseYield": 1.0,
-      "swingSeconds": 1.0,
-      "amountBand": [
-        0,
-        0
-      ],
-      "infinite": true,
-      "respawnSeconds": 0,
-      "hardness": 0,
-      "radius": 5,
-      "biomes": [
-        "marsh",
-        "grassland",
-        "temperateForest",
-        "rainforest",
-        "beach",
-        "savanna",
-        "tundra",
-        "borealForest",
-        "shrubland"
-      ],
-      "nearWater": true,
-      "desc": "A river, a lake, a well. The one node that never runs out.",
-      "_r14": "`lake` and `coast` are WATER biomes and createNodeWorld marks any node on water `gone` — so the one node that never runs out only ever existed in marsh. It keeps `nearWater: true`, which R14 finally made `createNodeField` read, so it still sits at the water's edge; it just sits on the DRY side of it now."
-    },
-    "gas_vent": {
-      "name": "Gas Vent",
-      "resources": {
-        "vent_gas": 10
-      },
-      "baseYield": 0.22,
-      "swingSeconds": 0,
-      "amountBand": [
-        200,
-        600
-      ],
-      "respawnSeconds": 21600,
-      "hardness": 3,
-      "radius": 3,
-      "handMinable": false,
-      "biomes": [
-        "volcanic",
-        "ashPlain",
-        "marsh",
-        "badlands"
-      ],
-      "desc": "You cannot cup this in your hands. Build a collector on it — §1.14.",
-      "_r14": "R14: dropped `toxic` — it is not a World Forge biome key, so it never matched anything."
-    },
-    "wreck": {
-      "name": "Wreck",
-      "resources": {
-        "salvage_metal": 7,
-        "scrap_plate": 3
-      },
-      "baseYield": 0.5,
-      "swingSeconds": 1.5,
-      "amountBand": [
-        40,
-        120
-      ],
-      "respawnSeconds": 0,
-      "hardness": 1,
-      "radius": 2,
-      "biomes": [],
-      "desc": "Worked metal without a furnace — the early shortcut, and it never comes back."
-    },
-    "camp_scrap": {
-      "name": "Cleared Camp",
-      "resources": {
-        "salvage_metal": 6,
-        "cloth": 2,
-        "leather": 2
-      },
-      "baseYield": 0.55,
-      "swingSeconds": 1.3,
-      "amountBand": [
-        25,
-        70
-      ],
-      "respawnSeconds": 0,
-      "hardness": 0,
-      "radius": 3,
-      "biomes": [],
-      "desc": "What the bandits left. Another reason to clear one — §1.16."
-    },
-    "meteor_site": {
-      "name": "Meteor Fall",
-      "resources": {
-        "meteoric_iron": 8,
-        "iron_ore": 2
-      },
-      "baseYield": 0.24,
-      "swingSeconds": 2.0,
-      "amountBand": [
-        15,
-        45
-      ],
-      "respawnSeconds": 0,
-      "hardness": 2,
-      "radius": 2,
-      "biomes": [],
-      "placedOnly": true,
-      "desc": "Still warm. Placed where a meteor actually lands (js/meteors.js), never scattered: it is hardness 2 and holds iron ore, so on open ground it reads to a new player as iron they cannot mine — and meteoric iron turning up in a field nothing fell on is the opposite of §1.15's 'worth walking to'."
-    },
-    "rare_seam": {
-      "name": "Rare Seam",
-      "resources": {},
-      "baseYield": 0.14,
-      "swingSeconds": 2.2,
-      "amountBand": [
-        40,
-        110
-      ],
-      "respawnSeconds": 0,
-      "hardness": 3,
-      "radius": 3,
-      "biomes": [],
-      "fromPlanet": true,
-      "desc": "Whatever this planet happens to hold, from universe/data/elements.json. Never respawns: a planet has what it has, and when it is gone you go somewhere else — which is §9.6's whole point."
-    }
+  "tin_ore": {
+   "name": "Tin Ore",
+   "kind": "ore",
+   "tier": 1,
+   "weight": 0.9,
+   "value": 4,
+   "stack": 40,
+   "colour": "#9fb0b8",
+   "desc": "Scarce, and useless on its own. The other half of bronze."
   },
-  "_richnessDoc": "How rich a node rolls. The player sees the band name and the multiplier before they commit — that is half the trade-off; the other half is how far they had to walk. Weights are relative, so most nodes are Fair and a Mother Lode is a small event.",
-  "richnessBands": [
-    {
-      "key": "lean",
-      "name": "Lean",
-      "range": [
-        0.45,
-        0.8
-      ],
-      "weight": 30,
-      "colour": "#8a8f96"
-    },
-    {
-      "key": "fair",
-      "name": "Fair",
-      "range": [
-        0.8,
-        1.2
-      ],
-      "weight": 44,
-      "colour": "#9fae62"
-    },
-    {
-      "key": "rich",
-      "name": "Rich",
-      "range": [
-        1.2,
-        1.85
-      ],
-      "weight": 20,
-      "colour": "#e0b13c"
-    },
-    {
-      "key": "mother",
-      "name": "Mother Lode",
-      "range": [
-        1.85,
-        2.7
-      ],
-      "weight": 6,
-      "colour": "#e8734a"
-    }
+  "coal": {
+   "name": "Coal",
+   "kind": "ore",
+   "tier": 1,
+   "weight": 0.8,
+   "value": 2,
+   "stack": 50,
+   "colour": "#3a3a3d",
+   "desc": "Burns hot enough to melt ore. The first fuel worth carrying."
+  },
+  "silver_ore": {
+   "name": "Silver Ore",
+   "kind": "ore",
+   "tier": 2,
+   "weight": 1.0,
+   "value": 9,
+   "stack": 30,
+   "colour": "#cfd6da",
+   "desc": "Bright in the rock. Wanted by smiths, jewellers, and anything that must not corrode."
+  },
+  "gold_ore": {
+   "name": "Gold Ore",
+   "kind": "ore",
+   "tier": 2,
+   "weight": 1.3,
+   "value": 16,
+   "stack": 25,
+   "colour": "#e0b13c",
+   "desc": "Heavy and soft. Contacts, coin, and things meant to impress."
+  },
+  "stone": {
+   "name": "Stone",
+   "kind": "stone",
+   "tier": 1,
+   "weight": 1.6,
+   "value": 1,
+   "stack": 30,
+   "colour": "#8b8178",
+   "desc": "The bulk material. Everything wants it and nobody wants to carry it."
+  },
+  "rubble": {
+   "name": "Rubble",
+   "kind": "stone",
+   "tier": 1,
+   "weight": 1.4,
+   "value": 1,
+   "stack": 35,
+   "colour": "#7a7268",
+   "desc": "Broken rock off a quarry face. Feed for the stonecutter."
+  },
+  "clay": {
+   "name": "Clay",
+   "kind": "stone",
+   "tier": 1,
+   "weight": 1.2,
+   "value": 2,
+   "stack": 35,
+   "colour": "#a8705a",
+   "desc": "Wet grey from a riverbank. Brick, tile and moulds."
+  },
+  "sand": {
+   "name": "Sand",
+   "kind": "stone",
+   "tier": 1,
+   "weight": 1.1,
+   "value": 2,
+   "stack": 40,
+   "colour": "#d8c68f",
+   "desc": "Shore and dune. Glass, and the mould a casting is poured into."
+  },
+  "flint": {
+   "name": "Flint",
+   "kind": "stone",
+   "tier": 1,
+   "weight": 0.6,
+   "value": 3,
+   "stack": 30,
+   "colour": "#57544f",
+   "desc": "Sharp when struck. Fire, and the first blade you will ever make."
+  },
+  "log": {
+   "name": "Log",
+   "kind": "wood",
+   "tier": 1,
+   "weight": 2.0,
+   "value": 2,
+   "stack": 20,
+   "colour": "#6b4f34",
+   "desc": "A felled trunk. Heavy in the arms, cheap at the sawmill."
+  },
+  "resin": {
+   "name": "Resin",
+   "kind": "wood",
+   "tier": 1,
+   "weight": 0.5,
+   "value": 5,
+   "stack": 25,
+   "colour": "#d39a3c",
+   "desc": "Bled from a cut trunk. Glue, pitch and waterproofing."
+  },
+  "fibre": {
+   "name": "Plant Fibre",
+   "kind": "organic",
+   "tier": 1,
+   "weight": 0.3,
+   "value": 1,
+   "stack": 60,
+   "colour": "#9fae62",
+   "desc": "Stripped stalks. Rope and coarse cloth."
+  },
+  "reed": {
+   "name": "Reed",
+   "kind": "organic",
+   "tier": 1,
+   "weight": 0.4,
+   "value": 1,
+   "stack": 50,
+   "colour": "#87a15c",
+   "desc": "Cut at the water's edge. Thatch, baskets, and a passable arrow shaft."
+  },
+  "hide": {
+   "name": "Raw Hide",
+   "kind": "organic",
+   "tier": 1,
+   "weight": 1.0,
+   "value": 6,
+   "stack": 20,
+   "colour": "#8d6a45",
+   "desc": "Off something that objected. Tans into leather."
+  },
+  "bone": {
+   "name": "Bone",
+   "kind": "organic",
+   "tier": 1,
+   "weight": 0.7,
+   "value": 4,
+   "stack": 30,
+   "colour": "#ded6c0",
+   "desc": "Glue, handles, and the ash a kiln wants."
+  },
+  "sinew": {
+   "name": "Sinew",
+   "kind": "organic",
+   "tier": 1,
+   "weight": 0.2,
+   "value": 7,
+   "stack": 30,
+   "colour": "#c8b28c",
+   "desc": "Dried tendon. Bowstrings and bindings that outlast rope."
+  },
+  "grain": {
+   "name": "Grain",
+   "kind": "organic",
+   "tier": 1,
+   "weight": 0.6,
+   "value": 3,
+   "stack": 50,
+   "colour": "#d9bf6c",
+   "desc": "From a plot you dug. Slow, safe, and it does not fight back."
+  },
+  "game_meat": {
+   "name": "Game Meat",
+   "kind": "organic",
+   "tier": 1,
+   "weight": 0.8,
+   "value": 5,
+   "stack": 25,
+   "colour": "#a4514a",
+   "desc": "Raw. Cook it or regret it."
+  },
+  "water": {
+   "name": "Water",
+   "kind": "fluid",
+   "tier": 1,
+   "weight": 1.0,
+   "value": 1,
+   "stack": 20,
+   "colour": "#4f9fd6",
+   "desc": "Rivers, wells and rain catchers. Coolant, mortar, and most of refining."
+  },
+  "ice": {
+   "name": "Ice",
+   "kind": "fluid",
+   "tier": 1,
+   "weight": 1.0,
+   "value": 1,
+   "stack": 25,
+   "colour": "#cfe6f2",
+   "desc": "On a frozen world it is the only water there is. Melt it."
+  },
+  "vent_gas": {
+   "name": "Vent Gas",
+   "kind": "gas",
+   "tier": 2,
+   "weight": 0.2,
+   "value": 8,
+   "stack": 20,
+   "colour": "#c7b9e8",
+   "desc": "Skimmed off a ground vent by a collector. You cannot pick this up by hand."
+  },
+  "crystal_raw": {
+   "name": "Rough Crystal",
+   "kind": "rare",
+   "tier": 2,
+   "weight": 0.7,
+   "value": 22,
+   "stack": 20,
+   "colour": "#9fd8ea",
+   "desc": "Snapped off a spire. Cuts into lenses, focusers, and the heart of a waypoint."
+  },
+  "obsidian": {
+   "name": "Volcanic Glass",
+   "kind": "rare",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 14,
+   "stack": 20,
+   "colour": "#2c2630",
+   "desc": "Black and murderously sharp. Blades and the cheap route to a lens."
+  },
+  "sulphur": {
+   "name": "Sulphur",
+   "kind": "rare",
+   "tier": 2,
+   "weight": 0.6,
+   "value": 12,
+   "stack": 25,
+   "colour": "#d9c34a",
+   "desc": "Yellow crust round a vent. Acid, powder, and the start of fuel."
+  },
+  "saltpetre": {
+   "name": "Saltpetre",
+   "kind": "rare",
+   "tier": 2,
+   "weight": 0.6,
+   "value": 11,
+   "stack": 25,
+   "colour": "#e6e0cf",
+   "desc": "Scraped from cave walls. Half of anything that goes bang."
+  },
+  "salt": {
+   "name": "Rock Salt",
+   "kind": "rare",
+   "tier": 1,
+   "weight": 0.8,
+   "value": 4,
+   "stack": 30,
+   "colour": "#f0ead8",
+   "desc": "Preserving, tanning, and the chemical bench's dullest input."
+  },
+  "salvage_metal": {
+   "name": "Salvaged Metal",
+   "kind": "salvage",
+   "tier": 1,
+   "weight": 1.2,
+   "value": 7,
+   "stack": 25,
+   "colour": "#8f939a",
+   "desc": "Worked metal off a wreck. Skips the smelting — which is exactly why wrecks run out."
+  },
+  "scrap_plate": {
+   "name": "Scrap Plate",
+   "kind": "salvage",
+   "tier": 2,
+   "weight": 1.4,
+   "value": 12,
+   "stack": 20,
+   "colour": "#77808a",
+   "desc": "Hull sheet, already rolled. Cut it down or melt it back."
+  },
+  "meteoric_iron": {
+   "name": "Meteoric Iron",
+   "kind": "rare",
+   "tier": 3,
+   "weight": 1.5,
+   "value": 45,
+   "stack": 15,
+   "colour": "#6f6a78",
+   "desc": "Fell out of the sky and cooled on the way down. Better than anything you can smelt."
+  },
+  "iron_ingot": {
+   "name": "Iron Ingot",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.8,
+   "value": 8,
+   "stack": 40,
+   "colour": "#9a9285",
+   "desc": "Ore, minus the rock."
+  },
+  "copper_ingot": {
+   "name": "Copper Ingot",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.8,
+   "value": 10,
+   "stack": 40,
+   "colour": "#c07a42",
+   "desc": "Drawn into wire, beaten into fittings."
+  },
+  "tin_ingot": {
+   "name": "Tin Ingot",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.7,
+   "value": 12,
+   "stack": 40,
+   "colour": "#b6c2c8",
+   "desc": "Waiting for copper."
+  },
+  "silver_ingot": {
+   "name": "Silver Ingot",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.8,
+   "value": 30,
+   "stack": 30,
+   "colour": "#dbe2e6",
+   "desc": "Contacts that never tarnish."
+  },
+  "gold_ingot": {
+   "name": "Gold Ingot",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 1.1,
+   "value": 55,
+   "stack": 25,
+   "colour": "#e8bf50",
+   "desc": "The wire that carries a signal you cannot afford to lose."
+  },
+  "bronze_ingot": {
+   "name": "Bronze Ingot",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.8,
+   "value": 26,
+   "stack": 35,
+   "colour": "#a87438",
+   "desc": "Copper and tin. The first alloy, and still a good one."
+  },
+  "steel_ingot": {
+   "name": "Steel Ingot",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 34,
+   "stack": 35,
+   "colour": "#8a8f96",
+   "desc": "Iron cooked with carbon until it stops bending. Everything structural."
+  },
+  "charcoal": {
+   "name": "Charcoal",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.4,
+   "value": 3,
+   "stack": 50,
+   "colour": "#3f3a36",
+   "desc": "Wood burnt with no air. Hotter than wood, cheaper than coal."
+  },
+  "ash": {
+   "name": "Ash",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.3,
+   "value": 1,
+   "stack": 50,
+   "colour": "#b7b1a7",
+   "desc": "What a fire leaves. Leach it for lye rather than sweeping it out."
+  },
+  "lye": {
+   "name": "Lye",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.8,
+   "value": 6,
+   "stack": 30,
+   "colour": "#e3e7cf",
+   "desc": "Ash and water. The tannery wants it; so do your hands not."
+  },
+  "slag": {
+   "name": "Slag",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 1.5,
+   "value": 0,
+   "stack": 40,
+   "colour": "#5c5349",
+   "desc": "The rock the ore was hiding in. Crush it for road gravel or tip it."
+  },
+  "tailings": {
+   "name": "Tailings",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 1.3,
+   "value": 0,
+   "stack": 40,
+   "colour": "#6b6055",
+   "desc": "What the washer rinses out. There is still metal in it if you can be bothered."
+  },
+  "gravel": {
+   "name": "Gravel",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 1.5,
+   "value": 1,
+   "stack": 40,
+   "colour": "#8a837a",
+   "desc": "Road base and foundation fill."
+  },
+  "cut_stone": {
+   "name": "Cut Stone",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 1.6,
+   "value": 5,
+   "stack": 25,
+   "colour": "#9a9288",
+   "desc": "Squared block. The wall tool eats these."
+  },
+  "brick": {
+   "name": "Brick",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 1.0,
+   "value": 4,
+   "stack": 35,
+   "colour": "#a85f45",
+   "desc": "Fired clay. Furnaces are built of it and then make more of it."
+  },
+  "glass": {
+   "name": "Glass",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.7,
+   "value": 9,
+   "stack": 30,
+   "colour": "#b9dce6",
+   "desc": "Sand, fired. Windows, flasks, and rough optics."
+  },
+  "plank": {
+   "name": "Plank",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.9,
+   "value": 4,
+   "stack": 35,
+   "colour": "#a37d4f",
+   "desc": "A log, sawn properly instead of hacked."
+  },
+  "beam": {
+   "name": "Beam",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 1.6,
+   "value": 9,
+   "stack": 20,
+   "colour": "#8a6539",
+   "desc": "What holds a roof up."
+  },
+  "leather": {
+   "name": "Leather",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.6,
+   "value": 14,
+   "stack": 30,
+   "colour": "#7d5733",
+   "desc": "Hide, tanned. Armour, straps, bellows."
+  },
+  "cloth": {
+   "name": "Cloth",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.3,
+   "value": 10,
+   "stack": 35,
+   "colour": "#cbbfa4",
+   "desc": "Woven fibre. Robes, sails, bandages."
+  },
+  "rope": {
+   "name": "Rope",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.5,
+   "value": 8,
+   "stack": 30,
+   "colour": "#b49a63",
+   "desc": "Twisted fibre. Everything you build needs some."
+  },
+  "iron_dust": {
+   "name": "Iron Dust",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 4,
+   "stack": 40,
+   "colour": "#7f776d",
+   "desc": "Crushed iron ore. Smelts better than rock, and washes better still. Dust keeps its metal — there is no such thing as generic dust, so there is a line for each."
+  },
+  "copper_dust": {
+   "name": "Copper Dust",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 5,
+   "stack": 40,
+   "colour": "#9a6a44",
+   "desc": "Crushed copper ore."
+  },
+  "iron_concentrate": {
+   "name": "Iron Concentrate",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 12,
+   "stack": 35,
+   "colour": "#a08a63",
+   "desc": "Washed dust: half the rock gone, so a smelter gets half again more metal out of a load. That is what the water is for."
+  },
+  "copper_concentrate": {
+   "name": "Copper Concentrate",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 14,
+   "stack": 35,
+   "colour": "#b2794a",
+   "desc": "The same trick, in copper."
+  },
+  "acid": {
+   "name": "Acid",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 18,
+   "stack": 20,
+   "colour": "#c6d84a",
+   "desc": "Sulphur and water, carefully. Etching and leaching."
+  },
+  "coolant": {
+   "name": "Coolant",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.9,
+   "value": 20,
+   "stack": 20,
+   "colour": "#6fd0e0",
+   "desc": "Keeps a refinery from cooking itself. It will not run without it."
+  },
+  "reagent": {
+   "name": "Reagent",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 0.5,
+   "value": 24,
+   "stack": 25,
+   "colour": "#b47ad8",
+   "desc": "The chemical bench's output and the refinery's appetite."
+  },
+  "lens": {
+   "name": "Ground Lens",
+   "kind": "part",
+   "tier": 2,
+   "weight": 0.3,
+   "value": 40,
+   "stack": 20,
+   "colour": "#cfeef5",
+   "desc": "Glass or crystal, ground true. Optics and sighting."
+  },
+  "focuser": {
+   "name": "Cut Focuser",
+   "kind": "part",
+   "tier": 3,
+   "weight": 0.3,
+   "value": 90,
+   "stack": 15,
+   "colour": "#9fe0d8",
+   "desc": "A crystal cut to hold a field steady. The waypoint core is mostly these."
+  },
+  "machine_part": {
+   "name": "Machine Part",
+   "kind": "part",
+   "tier": 2,
+   "weight": 1.0,
+   "value": 55,
+   "stack": 25,
+   "colour": "#8f969e",
+   "desc": "Gears, shafts, bearings. Every tier-three structure is a pile of these."
+  },
+  "wire": {
+   "name": "Wire",
+   "kind": "part",
+   "tier": 1,
+   "weight": 0.3,
+   "value": 14,
+   "stack": 40,
+   "colour": "#c88a4a",
+   "desc": "Copper drawn out thin. Ten structures in the catalogue ask for it — and until round 13 nothing in the game made a single unit, which is the sort of thing a catalogue written before its supply chain quietly leaves behind."
+  },
+  "concrete": {
+   "name": "Concrete",
+   "kind": "refined",
+   "tier": 2,
+   "weight": 1.5,
+   "value": 8,
+   "stack": 25,
+   "colour": "#a7a49c",
+   "desc": "Gravel, sand and water. Poured for the things that have to take a real load."
+  },
+  "control_board": {
+   "name": "Control Board",
+   "kind": "part",
+   "tier": 3,
+   "weight": 0.4,
+   "value": 120,
+   "stack": 20,
+   "colour": "#5fae7a",
+   "desc": "Copper and gold on fired board. What tells a machine what to do."
+  },
+  "tempered_alloy": {
+   "name": "Tempered Alloy",
+   "kind": "refined",
+   "tier": 3,
+   "weight": 0.9,
+   "value": 110,
+   "stack": 25,
+   "colour": "#7f8aa0",
+   "desc": "Steel taken further than a forge can take it. Hulls and drive housings."
+  },
+  "composite_plate": {
+   "name": "Composite Plate",
+   "kind": "part",
+   "tier": 3,
+   "weight": 1.2,
+   "value": 150,
+   "stack": 20,
+   "colour": "#6d7480",
+   "desc": "Alloy laid over cloth and resin. Light, and it does not care about heat."
+  },
+  "aether_cell": {
+   "name": "Aether Cell",
+   "kind": "part",
+   "tier": 3,
+   "weight": 0.5,
+   "value": 260,
+   "stack": 12,
+   "colour": "#b79cf5",
+   "desc": "A charged crystal in a sealed case. Holds power far longer than it should."
+  },
+  "blast_charge": {
+   "name": "Blast Charge",
+   "kind": "part",
+   "tier": 2,
+   "weight": 0.5,
+   "value": 35,
+   "stack": 20,
+   "colour": "#d9603c",
+   "desc": "Powder, packed. Opens a quarry face or a collapsed adit in one go instead of an afternoon."
+  },
+  "ration": {
+   "name": "Cooked Ration",
+   "kind": "refined",
+   "tier": 1,
+   "weight": 0.4,
+   "value": 6,
+   "stack": 30,
+   "colour": "#c98a52",
+   "desc": "Hot food. Eaten, not stored forever."
+  },
+  "lift_fuel": {
+   "name": "Lift Fuel",
+   "kind": "goal",
+   "tier": 3,
+   "weight": 1.0,
+   "value": 200,
+   "stack": 20,
+   "colour": "#ff9b4a",
+   "desc": "The last thing you make, and the thing you burn every time you fly."
+  },
+  "ship_hull": {
+   "name": "Hull Section",
+   "kind": "goal",
+   "tier": 3,
+   "weight": 4.0,
+   "value": 1400,
+   "stack": 4,
+   "colour": "#78818c",
+   "desc": "One of four. It will not fly without all of them."
+  },
+  "ship_drive": {
+   "name": "Drive Assembly",
+   "kind": "goal",
+   "tier": 3,
+   "weight": 3.0,
+   "value": 1800,
+   "stack": 4,
+   "colour": "#c07a42",
+   "desc": "Two of four."
+  },
+  "ship_tanks": {
+   "name": "Tank Set",
+   "kind": "goal",
+   "tier": 3,
+   "weight": 3.0,
+   "value": 1100,
+   "stack": 4,
+   "colour": "#9fb0b8",
+   "desc": "Three of four."
+  },
+  "ship_avionics": {
+   "name": "Avionics Rack",
+   "kind": "goal",
+   "tier": 3,
+   "weight": 1.5,
+   "value": 1600,
+   "stack": 4,
+   "colour": "#5fae7a",
+   "desc": "Four of four, and the only one that needs a rare element."
+  },
+  "waypoint_core": {
+   "name": "Waypoint Core",
+   "kind": "goal",
+   "tier": 3,
+   "weight": 2.0,
+   "value": 2200,
+   "stack": 2,
+   "colour": "#b79cf5",
+   "desc": "Seat it in a pad and your base joins the network."
+  },
+  "warp_core": {
+   "name": "Warp Core",
+   "kind": "goal",
+   "tier": 3,
+   "weight": 2.5,
+   "value": 5000,
+   "stack": 2,
+   "colour": "#d0a8ff",
+   "desc": "The second act. Another world's rare element, and a lot of patience."
+  }
+ },
+ "_rareDoc": "Rare elements are NOT listed above one by one, because which ones exist is the universe's business, not Farhold's — universe/data/elements.json assigns 1-2 to each planet. js/resources.js reads a planet's `rare` keys and makes a `rare_seam` node kind for each, borrowing the element's own name and colour. This table is only the bits Farhold needs that the universe does not say: how a seam behaves.",
+ "rareSeam": {
+  "baseYield": 0.14,
+  "amountBand": [
+   40,
+   110
   ],
-  "_bandDoc": "§1.19 — a low-band starter world has enough to leave and no more. `richness` scales every node's roll; `density` scales how many there are; `rareChance` is the odds a rare seam gets placed at all.",
-  "planetBands": {
-    "low": {
-      "richness": 0.85,
-      "density": 0.9,
-      "rareChance": 0.55,
-      "note": "Enough to build a ship. Not enough to get comfortable."
-    },
-    "medium": {
-      "richness": 1.0,
-      "density": 1.0,
-      "rareChance": 0.8
-    },
-    "high": {
-      "richness": 1.25,
-      "density": 1.15,
-      "rareChance": 1.0,
-      "note": "Worth coming back for once you can survive here."
-    }
+  "respawnSeconds": 0,
+  "hardness": 3,
+  "radius": 3,
+  "weightPerUnit": 0.8,
+  "stack": 15
+ },
+ "_nodeDoc": "A node kind. `baseYield` is units per second at the face at richness 1.0 with the right tool — multiply by the node's richness for what the player actually gets. `swingSeconds` turns that into a per-swing number for the held-tool interaction (yieldPerSecond x swingSeconds). `amountBand` is how much is in one node before richness. `respawnSeconds` 0 means it never comes back (a wreck, a meteor). `hardness` is the tool tier needed: 0 bare hands, 1 stone/iron tool, 2 steel, 3 powered. `handMinable` false means a structure has to take it — gas vents, per §1.14. `biomes` are worldgen biome keys; empty means anywhere on land — BUT `indoors: true` keeps a kind out of the open-air scatter (a deep vein is a dungeon seam, and one on the surface is a hardness-2 iron seam a new player cannot work and cannot get past), `placedOnly: true` keeps it out entirely because an event system puts it down by hand, and `fromPlanet: true` does the same for the rare seam the field places itself. All three are read by js/resources.js `kindsForBiome`.",
+ "nodeKinds": {
+  "ore_outcrop": {
+   "name": "Ore Outcrop",
+   "resources": {
+    "iron_ore": 4,
+    "copper_ore": 3,
+    "tin_ore": 1.2,
+    "coal": 2.5,
+    "silver_ore": 0.7,
+    "gold_ore": 0.35
+   },
+   "baseYield": 0.3,
+   "swingSeconds": 1.6,
+   "amountBand": [
+    60,
+    180
+   ],
+   "respawnSeconds": 5400,
+   "hardness": 1,
+   "radius": 2,
+   "biomes": [
+    "hills",
+    "mountains",
+    "badlands",
+    "shrubland",
+    "savanna",
+    "grassland",
+    "tundra",
+    "volcanic",
+    "ashPlain",
+    "snowyPeaks"
+   ],
+   "desc": "A seam breaking the surface. The bread and butter of a young base."
   },
-  "_respawnDoc": "§1.20 — nodes come back so a base site does not go sterile, but they come back a little poorer each time, down to a floor. So the ground around your house stays workable forever and is never as good as walking out to a fresh seam. That tension is the same one the distance trade-off is about.",
-  "respawn": {
-    "amountShare": 0.75,
-    "richnessDecay": 0.92,
-    "richnessFloor": 0.5
+  "deep_vein": {
+   "name": "Deep Vein",
+   "resources": {
+    "iron_ore": 3,
+    "copper_ore": 2.5,
+    "tin_ore": 1.5,
+    "coal": 2,
+    "silver_ore": 1.6,
+    "gold_ore": 1.0,
+    "saltpetre": 1.2
+   },
+   "baseYield": 0.55,
+   "swingSeconds": 1.6,
+   "amountBand": [
+    140,
+    380
+   ],
+   "respawnSeconds": 10800,
+   "hardness": 2,
+   "radius": 2,
+   "biomes": [],
+   "indoors": true,
+   "guarded": true,
+   "desc": "Underground, and something is usually standing in front of it. Roughly twice an outcrop, which is what pays for the fight."
   },
-  "_haulDoc": "THE TRADE-OFF, as numbers.\n\nStanding at a node you get `yieldPerSecond` units. Getting them home is the cost: you can carry `carry` units per trip and you walk at `walkSpeed` metres a second, so a node `d` metres from where you are stockpiling delivers\n\n    delivered = carry / (carry / yieldPerSecond + 2 * d / walkSpeed)\n\nunits a second. That single number is what js/resources.js prints on every node, and it is why a Mother Lode across the valley can lose to a Lean seam behind the workshop.\n\nThe escape hatch is §8: put a store inside a logistics pole's reach of the node and the ore goes straight into the pool — `d` becomes zero and the rich node wins again. So the real decision is not 'which node' but 'which node do I move my base to', which is the decision worth having.\n\n`loadPenalty` is how much a heavy material slows the walk home: walkSpeed / (1 + loadPenalty * weight). Stone is miserable to carry and that is on purpose.",
-  "haul": {
-    "carry": 40,
-    "walkSpeed": 4.6,
-    "loadPenalty": 0.22
+  "boulder": {
+   "name": "Boulder",
+   "resources": {
+    "stone": 8,
+    "flint": 1.4
+   },
+   "baseYield": 0.45,
+   "swingSeconds": 1.9,
+   "amountBand": [
+    30,
+    70
+   ],
+   "respawnSeconds": 0,
+   "hardness": 1,
+   "radius": 1,
+   "biomes": [],
+   "desc": "One rock. Breaks up, does not come back, and there are always more."
   },
-  "_toolDoc": "Tool tiers gate the hard nodes and multiply the soft ones — §1's recommendation that hand-mining stays slow enough that a drill feels like a promotion. `tier` must be >= the node's hardness or you cannot work it at all.\n\n`from` says where a tier comes from in the PLAYER'S terms. Farhold has no pick slot: the tier is read off whatever weapon you are carrying (js/main.js `toolTierFor`), and nothing on screen ever said so — which is why 'you need a Steel Tool' read as a dead end rather than as an instruction. js/resources.js prints this line with every refusal.",
-  "tools": {
-    "hands": {
-      "name": "Bare Hands",
-      "tier": 0,
-      "rate": 0.5,
-      "from": "nothing at all in your hands"
-    },
-    "stone_tool": {
-      "name": "Stone Tool",
-      "tier": 1,
-      "rate": 0.8,
-      "from": "carrying a stone, bone or wooden weapon"
-    },
-    "iron_tool": {
-      "name": "Iron Tool",
-      "tier": 1,
-      "rate": 1.0,
-      "from": "carrying an iron, bronze, copper or silver weapon"
-    },
-    "steel_tool": {
-      "name": "Steel Tool",
-      "tier": 2,
-      "rate": 1.35,
-      "from": "carrying a steel weapon: forge Steel at an Alloy Forge from iron ingots and charcoal, then craft or buy a steel blade"
-    },
-    "powered_tool": {
-      "name": "Powered Cutter",
-      "tier": 3,
-      "rate": 1.9,
-      "powerUse": 6,
-      "from": "a powered cutter"
-    },
-    "small_drill": {
-      "name": "Small Drill",
-      "tier": 1,
-      "rate": 1.4,
-      "from": "a Small Drill built on the seam — six iron ingots, and it needs no power at all",
-      "_r15": "R15: the early-game drill. Tier 1, so it works the same seams a plain iron weapon does and refuses the hard ones — it is automation, not a tech jump. 1.4x against the full Drill's 3.2x and an iron tool's 1.0x, so it beats standing there swinging and is comfortably worse than the powered thing it leads to.",
-      "handCranked": true
-    },
-    "drill": {
-      "name": "Drill",
-      "tier": 3,
-      "rate": 3.2,
-      "powerUse": 18,
-      "structure": true,
-      "from": "a Drill built on the seam and wired to a generator, which needs no tool of yours at all",
-      "note": "The promotion: it works the node while you are somewhere else, and it never gets tired."
-    }
+  "quarry_face": {
+   "name": "Quarry Face",
+   "resources": {
+    "stone": 6,
+    "rubble": 4
+   },
+   "baseYield": 0.7,
+   "swingSeconds": 1.9,
+   "amountBand": [
+    400,
+    900
+   ],
+   "respawnSeconds": 14400,
+   "hardness": 1,
+   "radius": 4,
+   "biomes": [
+    "hills",
+    "mountains",
+    "badlands",
+    "snowyPeaks",
+    "volcanic"
+   ],
+   "desc": "A cliff you can work at for hours. Heavy, slow to carry — the node that most wants a cart."
   },
-  "_r18Haul": "R18 — `haul.cart`, `haul.packAnimal` and `haul.hauler` removed. The live hauler table is data/power.json's `haulers`, read by js/stores.js `haulThroughput`; these three were a second, unread copy. `haul.carry`, `haul.walkSpeed` and `haul.loadPenalty` stay — js/resources.js does read those."
+  "clay_bank": {
+   "name": "Clay Bank",
+   "resources": {
+    "clay": 10
+   },
+   "baseYield": 0.6,
+   "swingSeconds": 1.4,
+   "amountBand": [
+    80,
+    220
+   ],
+   "respawnSeconds": 7200,
+   "hardness": 0,
+   "radius": 3,
+   "biomes": [
+    "marsh",
+    "grassland",
+    "rainforest",
+    "temperateForest",
+    "beach",
+    "savanna"
+   ],
+   "nearWater": true,
+   "desc": "Cut out of a riverbank with your hands if you have to.",
+   "_r14": "R14: `nearWater` is honoured by createNodeField now, so a clay bank is on a bank. It was scattered evenly over six biomes before, which is why 'where do you find clay?' had no answer — and clay gates the furnace and the kiln, the first two machines in the game."
+  },
+  "sand_bar": {
+   "name": "Sand Bar",
+   "resources": {
+    "sand": 10,
+    "salt": 1.5
+   },
+   "baseYield": 0.65,
+   "swingSeconds": 1.4,
+   "amountBand": [
+    90,
+    240
+   ],
+   "respawnSeconds": 5400,
+   "hardness": 0,
+   "radius": 3,
+   "biomes": [
+    "beach",
+    "desert",
+    "badlands"
+   ],
+   "desc": "Shore or dune. Endless, but only where there is a shore or a dune."
+  },
+  "tree": {
+   "name": "Tree",
+   "resources": {
+    "log": 10,
+    "resin": 1.2
+   },
+   "baseYield": 0.38,
+   "swingSeconds": 1.7,
+   "amountBand": [
+    14,
+    40
+   ],
+   "respawnSeconds": 21600,
+   "hardness": 1,
+   "radius": 1,
+   "biomes": [
+    "temperateForest",
+    "rainforest",
+    "borealForest",
+    "blighted",
+    "hallowed",
+    "grassland",
+    "hills",
+    "marsh"
+   ],
+   "desc": "Felled for timber. Regrows over a few in-game days — §1.4 — so a clearing is a crop, not a scar."
+  },
+  "fibre_patch": {
+   "name": "Fibre Patch",
+   "resources": {
+    "fibre": 8,
+    "reed": 4
+   },
+   "baseYield": 0.55,
+   "swingSeconds": 1.2,
+   "amountBand": [
+    25,
+    70
+   ],
+   "respawnSeconds": 3600,
+   "hardness": 0,
+   "radius": 2,
+   "biomes": [
+    "grassland",
+    "marsh",
+    "savanna",
+    "shrubland",
+    "rainforest",
+    "temperateForest",
+    "hallowed"
+   ],
+   "desc": "Stalks and reeds. Free, fast, and you will still run out of rope."
+  },
+  "crystal_spire": {
+   "name": "Crystal Spire",
+   "resources": {
+    "crystal_raw": 10
+   },
+   "baseYield": 0.16,
+   "swingSeconds": 2.2,
+   "amountBand": [
+    30,
+    90
+   ],
+   "respawnSeconds": 18000,
+   "hardness": 2,
+   "radius": 2,
+   "biomes": [
+    "glimmerwaste",
+    "veiledHills",
+    "mountains",
+    "snowyPeaks",
+    "ice"
+   ],
+   "desc": "Snapped off in flakes. Slow work, and the only route to a focuser."
+  },
+  "obsidian_flow": {
+   "name": "Obsidian Flow",
+   "resources": {
+    "obsidian": 6,
+    "sulphur": 4
+   },
+   "baseYield": 0.34,
+   "swingSeconds": 1.8,
+   "amountBand": [
+    50,
+    150
+   ],
+   "respawnSeconds": 10800,
+   "hardness": 2,
+   "radius": 3,
+   "biomes": [
+    "volcanic",
+    "ashPlain",
+    "badlands"
+   ],
+   "desc": "Cooled lava and the yellow crust around it."
+  },
+  "ice_field": {
+   "name": "Ice Field",
+   "resources": {
+    "ice": 10
+   },
+   "baseYield": 0.7,
+   "swingSeconds": 1.5,
+   "amountBand": [
+    120,
+    300
+   ],
+   "respawnSeconds": 3600,
+   "hardness": 1,
+   "radius": 4,
+   "biomes": [
+    "ice",
+    "snowyPeaks",
+    "tundra"
+   ],
+   "desc": "On a frozen world this is the water supply. Melt it before you can drink it.",
+   "_r14": "R14: dropped `seaIce` — a water biome, so every ice field placed there was deleted as `gone`."
+  },
+  "water_source": {
+   "name": "Water",
+   "resources": {
+    "water": 10
+   },
+   "baseYield": 1.0,
+   "swingSeconds": 1.0,
+   "amountBand": [
+    0,
+    0
+   ],
+   "infinite": true,
+   "respawnSeconds": 0,
+   "hardness": 0,
+   "radius": 5,
+   "biomes": [
+    "marsh",
+    "grassland",
+    "temperateForest",
+    "rainforest",
+    "beach",
+    "savanna",
+    "tundra",
+    "borealForest",
+    "shrubland"
+   ],
+   "nearWater": true,
+   "desc": "A river, a lake, a well. The one node that never runs out.",
+   "_r14": "`lake` and `coast` are WATER biomes and createNodeWorld marks any node on water `gone` — so the one node that never runs out only ever existed in marsh. It keeps `nearWater: true`, which R14 finally made `createNodeField` read, so it still sits at the water's edge; it just sits on the DRY side of it now."
+  },
+  "gas_vent": {
+   "name": "Gas Vent",
+   "resources": {
+    "vent_gas": 10
+   },
+   "baseYield": 0.22,
+   "swingSeconds": 0,
+   "amountBand": [
+    200,
+    600
+   ],
+   "respawnSeconds": 21600,
+   "hardness": 3,
+   "radius": 3,
+   "handMinable": false,
+   "biomes": [
+    "volcanic",
+    "ashPlain",
+    "marsh",
+    "badlands"
+   ],
+   "desc": "You cannot cup this in your hands. Build a collector on it — §1.14.",
+   "_r14": "R14: dropped `toxic` — it is not a World Forge biome key, so it never matched anything."
+  },
+  "wreck": {
+   "name": "Wreck",
+   "resources": {
+    "salvage_metal": 7,
+    "scrap_plate": 3
+   },
+   "baseYield": 0.5,
+   "swingSeconds": 1.5,
+   "amountBand": [
+    40,
+    120
+   ],
+   "respawnSeconds": 0,
+   "hardness": 1,
+   "radius": 2,
+   "biomes": [],
+   "desc": "Worked metal without a furnace — the early shortcut, and it never comes back."
+  },
+  "camp_scrap": {
+   "name": "Cleared Camp",
+   "resources": {
+    "salvage_metal": 6,
+    "cloth": 2,
+    "leather": 2
+   },
+   "baseYield": 0.55,
+   "swingSeconds": 1.3,
+   "amountBand": [
+    25,
+    70
+   ],
+   "respawnSeconds": 0,
+   "hardness": 0,
+   "radius": 3,
+   "biomes": [],
+   "desc": "What the bandits left. Another reason to clear one — §1.16."
+  },
+  "meteor_site": {
+   "name": "Meteor Fall",
+   "resources": {
+    "meteoric_iron": 8,
+    "iron_ore": 2
+   },
+   "baseYield": 0.24,
+   "swingSeconds": 2.0,
+   "amountBand": [
+    15,
+    45
+   ],
+   "respawnSeconds": 0,
+   "hardness": 2,
+   "radius": 2,
+   "biomes": [],
+   "placedOnly": true,
+   "desc": "Still warm. Placed where a meteor actually lands (js/meteors.js), never scattered: it is hardness 2 and holds iron ore, so on open ground it reads to a new player as iron they cannot mine — and meteoric iron turning up in a field nothing fell on is the opposite of §1.15's 'worth walking to'."
+  },
+  "rare_seam": {
+   "name": "Rare Seam",
+   "resources": {},
+   "baseYield": 0.14,
+   "swingSeconds": 2.2,
+   "amountBand": [
+    40,
+    110
+   ],
+   "respawnSeconds": 0,
+   "hardness": 3,
+   "radius": 3,
+   "biomes": [],
+   "fromPlanet": true,
+   "desc": "Whatever this planet happens to hold, from universe/data/elements.json. Never respawns: a planet has what it has, and when it is gone you go somewhere else — which is §9.6's whole point."
+  }
+ },
+ "_richnessDoc": "How rich a node rolls. The player sees the band name and the multiplier before they commit — that is half the trade-off; the other half is how far they had to walk. Weights are relative, so most nodes are Fair and a Mother Lode is a small event.",
+ "richnessBands": [
+  {
+   "key": "lean",
+   "name": "Lean",
+   "range": [
+    0.45,
+    0.8
+   ],
+   "weight": 30,
+   "colour": "#8a8f96"
+  },
+  {
+   "key": "fair",
+   "name": "Fair",
+   "range": [
+    0.8,
+    1.2
+   ],
+   "weight": 44,
+   "colour": "#9fae62"
+  },
+  {
+   "key": "rich",
+   "name": "Rich",
+   "range": [
+    1.2,
+    1.85
+   ],
+   "weight": 20,
+   "colour": "#e0b13c"
+  },
+  {
+   "key": "mother",
+   "name": "Mother Lode",
+   "range": [
+    1.85,
+    2.7
+   ],
+   "weight": 6,
+   "colour": "#e8734a"
+  }
+ ],
+ "_bandDoc": "§1.19 — a low-band starter world has enough to leave and no more. `richness` scales every node's roll; `density` scales how many there are; `rareChance` is the odds a rare seam gets placed at all.",
+ "planetBands": {
+  "low": {
+   "richness": 0.85,
+   "density": 0.9,
+   "rareChance": 0.55,
+   "note": "Enough to build a ship. Not enough to get comfortable."
+  },
+  "medium": {
+   "richness": 1.0,
+   "density": 1.0,
+   "rareChance": 0.8
+  },
+  "high": {
+   "richness": 1.25,
+   "density": 1.15,
+   "rareChance": 1.0,
+   "note": "Worth coming back for once you can survive here."
+  }
+ },
+ "_respawnDoc": "§1.20 — nodes come back so a base site does not go sterile, but they come back a little poorer each time, down to a floor. So the ground around your house stays workable forever and is never as good as walking out to a fresh seam. That tension is the same one the distance trade-off is about.",
+ "respawn": {
+  "amountShare": 0.75,
+  "richnessDecay": 0.92,
+  "richnessFloor": 0.5
+ },
+ "_haulDoc": "THE TRADE-OFF, as numbers.\n\nStanding at a node you get `yieldPerSecond` units. Getting them home is the cost: you can carry `carry` units per trip and you walk at `walkSpeed` metres a second, so a node `d` metres from where you are stockpiling delivers\n\n    delivered = carry / (carry / yieldPerSecond + 2 * d / walkSpeed)\n\nunits a second. That single number is what js/resources.js prints on every node, and it is why a Mother Lode across the valley can lose to a Lean seam behind the workshop.\n\nThe escape hatch is §8: put a store inside a logistics pole's reach of the node and the ore goes straight into the pool — `d` becomes zero and the rich node wins again. So the real decision is not 'which node' but 'which node do I move my base to', which is the decision worth having.\n\n`loadPenalty` is how much a heavy material slows the walk home: walkSpeed / (1 + loadPenalty * weight). Stone is miserable to carry and that is on purpose.",
+ "haul": {
+  "carry": 40,
+  "walkSpeed": 4.6,
+  "loadPenalty": 0.22
+ },
+ "_toolDoc": "Tool tiers gate the hard nodes and multiply the soft ones — §1's recommendation that hand-mining stays slow enough that a drill feels like a promotion. `tier` must be >= the node's hardness or you cannot work it at all.\n\n`from` says where a tier comes from in the PLAYER'S terms. Farhold has no pick slot: the tier is read off whatever weapon you are carrying (js/main.js `toolTierFor`), and nothing on screen ever said so — which is why 'you need a Steel Tool' read as a dead end rather than as an instruction. js/resources.js prints this line with every refusal.",
+ "tools": {
+  "hands": {
+   "name": "Bare Hands",
+   "tier": 0,
+   "rate": 0.5,
+   "from": "nothing at all in your hands"
+  },
+  "stone_tool": {
+   "name": "Stone Tool",
+   "tier": 1,
+   "rate": 0.8,
+   "from": "building a Knapped Tool — 4 logs and 8 fibre, no bench needed — and equipping it in the Tool slot"
+  },
+  "iron_tool": {
+   "name": "Iron Tool",
+   "tier": 1,
+   "rate": 1.0,
+   "from": "building an Ironhead Pick and Axe at an anvil (6 iron ingots, 3 logs, 2 leather) and equipping it in the Tool slot"
+  },
+  "steel_tool": {
+   "name": "Steel Tool",
+   "tier": 2,
+   "rate": 1.35,
+   "from": "building a Steelhead Pick and Axe at an anvil (6 steel ingots) and equipping it in the Tool slot — steel is forged from iron ingots and charcoal at an Alloy Forge"
+  },
+  "powered_tool": {
+   "name": "Powered Cutter",
+   "tier": 3,
+   "rate": 1.9,
+   "powerUse": 6,
+   "from": "a powered cutter"
+  },
+  "small_drill": {
+   "name": "Small Drill",
+   "tier": 1,
+   "rate": 1.4,
+   "from": "a Small Drill built on the seam — six iron ingots, and it needs no power at all",
+   "_r15": "R15: the early-game drill. Tier 1, so it works the same seams a plain iron weapon does and refuses the hard ones — it is automation, not a tech jump. 1.4x against the full Drill's 3.2x and an iron tool's 1.0x, so it beats standing there swinging and is comfortably worse than the powered thing it leads to.",
+   "handCranked": true
+  },
+  "drill": {
+   "name": "Drill",
+   "tier": 3,
+   "rate": 3.2,
+   "powerUse": 18,
+   "structure": true,
+   "from": "a Drill built on the seam and wired to a generator, which needs no tool of yours at all",
+   "note": "The promotion: it works the node while you are somewhere else, and it never gets tired."
+  },
+  "_r21": "R21: these sentences described the system R16 REPLACED — the tool tier used to be read off the weapon’s name, so they told the player to carry an iron sword. There has been a real Tool slot and real built tools (data/tools.json) since R16."
+ },
+ "_r18Haul": "R18 — `haul.cart`, `haul.packAnimal` and `haul.hauler` removed. The live hauler table is data/power.json's `haulers`, read by js/stores.js `haulThroughput`; these three were a second, unread copy. `haul.carry`, `haul.walkSpeed` and `haul.loadPenalty` stay — js/resources.js does read those."
 }

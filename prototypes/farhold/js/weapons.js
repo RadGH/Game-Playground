@@ -254,12 +254,26 @@ export function inputOf(item) {
 /** True when holding the button BUILDS something rather than swinging again. */
 export const chargesOnHold = item => inputOf(item) === 'charge';
 
-/** One sentence for the card: what this weapon's button does. */
+/**
+ * One sentence for the card: what a CHARGE weapon's charge is worth, in numbers.
+ *
+ * R21 — a `repeat` weapon gets nothing here at all. It used to say "Hold the attack button to keep
+ * attacking", which is a control, not a fact about the weapon: the controls screen already teaches
+ * it, and printing it on every sword in the game pushed the reach and the clock down the card.
+ * WORDING.md rule 5. The two charge branches stay because they carry a number the player cannot
+ * read anywhere else — how much the charge is actually worth.
+ */
 export function inputNote(item) {
-  if (inputOf(item) !== 'charge') return 'Hold the attack button to keep attacking.';
-  return isStaff(item)
-    ? 'Hold to build the spell, let go to cast it. A tap is the small version and costs nothing.'
-    : 'Hold to draw, let go to loose. A full draw is worth about three times a flinch.';
+  if (inputOf(item) !== 'charge') return '';
+  if (isStaff(item)) {
+    const c = STAFF_CHARGE;
+    return `Charged ${fmt(c.full)}s the spell casts at full damage, and holding to ${fmt(c.max)}s casts at `
+      + `${fmt(c.powerMax)}× damage over ${fmt(c.radiusMax)}× the area. Charging costs ${fmt(c.mana)} mana a second; `
+      + `a tap casts at ${fmt(c.tapPower)}× damage for no mana.`;
+  }
+  const plan = rangedPlan(item) || RANGED.bow;
+  return `Drawn for ${fmt(plan.full)}s the shot hits for ${fmt(plan.powerFull)}× damage; `
+    + `loosed early the shot hits for ${fmt(plan.powerMin)}× damage.`;
 }
 
 /** The trait bag for a weapon, read the same way its pattern is. Always an object. */
@@ -609,14 +623,22 @@ const FAMILY_WORDS = {
  * `castName` onto the item — so this table is only the fallback for a weapon that was branded at the
  * bench, or one a test built by hand. Same words, deliberately.
  */
+/**
+ * R21 — and it says what the element DOES, in numbers. (WORDING.md, which quotes three of these as
+ * the reason the standard was written: "Sets what it hits alight" — alight with what? for how long?
+ * how much?) Every line below is data/skills.json's `statuses` row carried at the power js/main.js
+ * `brandHit` hands it, which is 70% of the hit's damage — so burning's 0.3/s over 5s is
+ * 0.3 x 5 x 0.7 = about 105% of the hit again. Damage over time is stated as a TOTAL, never per
+ * second. Holy is here and is not in `CAST_ELEMENTS`, so `statusOf` leaves it with no status at all.
+ */
 const ELEMENT_WORDS = {
-  fire: { name: 'Flame', does: 'sets what it hits alight' },
-  ice: { name: 'Rime', does: 'slows what it hits' },
-  lightning: { name: 'Storm', does: 'leaves the target taking more of everything' },
-  poison: { name: 'Blight', does: 'keeps working after it lands' },
-  shadow: { name: 'Gloom', does: 'curses what it hits' },
-  arcane: { name: 'Arc', does: 'raw force — no status, but the hardest hitting' },
-  holy: { name: 'Dawn', does: 'burns what should not be walking' },
+  fire: { name: 'Flame', does: 'a hit also sets Burning, about 105% of that hit\'s damage again as fire damage over 5s' },
+  ice: { name: 'Rime', does: 'a hit also sets Chilled, and the target moves 45% slower for 4s' },
+  lightning: { name: 'Storm', does: 'a hit also sets Shocked, and the target takes 30% more damage from every source for 5s' },
+  poison: { name: 'Blight', does: 'a hit also sets Poisoned, about 146% of that hit\'s damage again as poison damage over 8s' },
+  shadow: { name: 'Gloom', does: 'a hit also sets Cursed, and the target takes 25% more damage and moves 15% slower for 8s' },
+  arcane: { name: 'Arc', does: 'plain arcane damage, and the one element that leaves no status on the target' },
+  holy: { name: 'Dawn', does: 'plain holy damage, which leaves no status on the target' },
 };
 
 /**
@@ -826,14 +848,14 @@ export function patternText(item) {
       : f.shotRange ? `out to about ${fmt(f.shotRange)} m`
       : null;
     const name = spell?.name || (shape.elementName ? `${shape.elementName} bolt` : 'Bolt');
-    return `${name} — a spell, ${shape.label.toLowerCase()}${size ? `, ${size}` : ''}. ${inputNote(item)}`;
+    return withNote(`${name} — a spell, ${shape.label.toLowerCase()}${size ? `, ${size}` : ''}.`, item);
   }
   if (f.ranged) {
     const plan = rangedPlan(item);
     const how = plan?.kind === 'draw' ? 'Drawn and loosed'
       : plan?.kind === 'reload' ? `One heavy bolt, then ${fmt(plan.reload)}s to crank it back`
       : 'Thrown';
-    return `${how} — about ${fmt(f.shotRange)} m. ${inputNote(item)}`;
+    return withNote(`${how} — about ${fmt(f.shotRange)} m.`, item);
   }
   const p = profileOf(item);
   const names = p.pattern.map(k => STRIKES[k]?.name || k);
@@ -845,8 +867,19 @@ export function patternText(item) {
    */
   /** An orb, a tome or a sceptre: a swing with an element on it, so say both. */
   const brand = isWand(item) ? spellShapeOf(item) : null;
-  return `${names.join(', then ')} — ${fmt(p.reach, { decimals: 1 })} m reach, `
-    + `a swing every ${fmt(p.every)}s.${brand ? ` ${brand.label}.` : ''} ${inputNote(item)}`;
+  return withNote(`${names.join(', then ')} — ${fmt(p.reach, { decimals: 1 })} m reach, `
+    + `a swing every ${fmt(p.every)}s.${brand ? ` ${brand.label}.` : ''}`, item);
+}
+
+/**
+ * Glue the charge note on, and nothing at all when there is none.
+ *
+ * `inputNote` returns an empty string for every weapon that simply swings, so joining it in with a
+ * template literal would have left a trailing space on the card for most of the game's weapons.
+ */
+function withNote(text, item) {
+  const note = inputNote(item);
+  return note ? `${text} ${note}` : text;
 }
 
 /**

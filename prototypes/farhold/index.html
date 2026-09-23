@@ -245,8 +245,8 @@
         <a class="back boot-back" href="../../index.html">← Back to playground</a>
       </div>
       <p class="note">A whole planet, a level band for every region, packs with champions and rares in
-        them, dungeons you go down into, and twelve factions who all remember what you did. Everything
-        you do not want recycles into the material you make better things out of.
+        them, dungeons you go down into, and 12 factions who all remember what you did. Gear you do not
+        want recycles into the materials the crafting bench builds better gear out of.
         <b>WASD</b> move · <b>Shift</b> run · <b>Space</b> jump · <b>click</b> swing ·
         <b>1–6</b> skills · <b>E</b> talk, open a chest, enter a dungeon · <b>L</b> light ·
         <b>H</b> horse · <b>J</b> ship · <b>M</b> map · <b>B</b> build · <b>K</b> the holding ·
@@ -281,8 +281,9 @@
             <button id="boot-customize" class="ghost">Customize appearance…</button>
             <button id="boot-appearance-reset" class="ghost small-btn">Use the class look</button>
           </div>
-          <p class="note small">Thirty classes, and the choice is locked in for the run. What each one
-            starts holding, what it may hold and whether it brings a companion is on the card.</p>
+          <p class="note small">30 classes, and the class is locked in for the whole run. The card on the
+            right says what the class starts holding, which weapons the class may hold, and whether the
+            class brings a companion.</p>
         </div>
         <aside class="boot-col boot-side">
           <div id="boot-figure" class="boot-figure"></div>
@@ -309,20 +310,21 @@
           <div class="row">
             <label for="boot-regions">Zones per world</label>
             <select id="boot-regions">
-              <option value="3">Many — small zones, a new level band often</option>
-              <option value="2" selected>Some — a zone is a walk, not a trek</option>
-              <option value="1">Few — World Forge’s own</option>
-              <option value="0.6">Very few — long journeys between bands</option>
+              <option value="3">Many — 3× the zones, so a new level band every few minutes</option>
+              <option value="2" selected>Some — 2× the zones, a zone is a walk rather than a trek</option>
+              <option value="1">Few — 1 zone per region the map generator drew</option>
+              <option value="0.6">Very few — 0.6× the zones, long journeys between level bands</option>
             </select>
-            <span class="small muted">how many level bands the same ground is cut into — use
-              <b>planet size</b> below to change how far a walk actually is</span>
+            <span class="small muted">how many level bands the same ground is cut into. This does not
+              change the size of the planet — <b>planet size</b> below does that</span>
           </div>
           <div class="row">
             <label class="check"><input type="checkbox" id="boot-habitable" checked>
               Habitable start</label>
-            <span class="small muted">land on a settled, many-biomed world. Turn it off and you come down
-              on the harshest rock in the system instead — no towns, no trade — with the blue world one
-              short flight away. Either way the starting system always has one.</span>
+            <span class="small muted">start on a settled world with several biomes, towns and trade.
+              Turn this off and you start on the harshest world in the system instead — no towns and
+              no trade — with a settled world 1 flight away. Either way the starting system always
+              holds a settled world.</span>
           </div>
           <div class="row">
             <label for="boot-scale">Planet size</label>
@@ -332,10 +334,10 @@
               <option value="0.35" selected>Small — 57 × 29 km, everything close</option>
               <option value="0.55">Compact — 90 × 45 km</option>
               <option value="0.75">Medium — 123 × 61 km</option>
-              <option value="1">Full — 163 × 82 km, as the world was designed</option>
+              <option value="1">Full — 163 × 82 km, the whole world at full size</option>
             </select>
-            <span class="small muted">this is the one that changes how far away everything is: the hills,
-              the ring of ground you can see, and how fast the ship flies all shrink with it</span>
+            <span class="small muted">planet size is what changes how far away everything is: the hills,
+              the ring of ground you can see and how fast the ship flies all shrink with the planet</span>
           </div>
           <div class="row">
             <label for="boot-band">Levels per zone</label>
@@ -348,10 +350,10 @@
           <div class="row">
             <label for="boot-density">Enemy density</label>
             <select id="boot-density">
-              <option value="0.6">Quiet</option>
-              <option value="1" selected>Normal</option>
-              <option value="1.6">Busy</option>
-              <option value="2.4">Swarming</option>
+              <option value="0.6">Quiet — 0.6× the enemies</option>
+              <option value="1" selected>Normal — 1× the enemies</option>
+              <option value="1.6">Busy — 1.6× the enemies</option>
+              <option value="2.4">Swarming — 2.4× the enemies</option>
             </select>
           </div>
           <p class="note small">A zone is one level band, and the bands always tile the whole range of
@@ -636,7 +638,7 @@
         <button id="inv-recycle-junk" class="chip">normal</button>
         <button id="inv-recycle-magic" class="chip">magic</button>
         <button id="inv-recycle-rare" class="chip">rare</button>
-        <span class="keyhint">uniques and set pieces are never taken in bulk</span>
+        <span class="keyhint">These buttons never recycle a unique or a set piece — recycle those one at a time</span>
       </div>
     </section>
 

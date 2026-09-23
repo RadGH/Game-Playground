@@ -1,6 +1,7 @@
 {
  "_markedDoc": "statuses.marked: Quarry (the ranged perk node) and Branding (a tier-3 skill talent) both hang this on a target. It is a plain takeMore debuff, so js/skills.js buffsOf already knows what to do with it; each caller passes its own seconds and share, so this row is the default and the name the log prints.",
-  "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` \u2014 so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide \u2014 a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
+  "_descDoc": "EVERY `desc` BELOW IS GENERATED, NOT WRITTEN. `js/skills.js` `describeSkill(skill, statuses)` builds each line out of that skill's own `mult`, `reach`, `arc`, `radius`, `range`, `splash`, `width`, `projectiles`, `spread`, `heal`, `status`, `mp` and `cooldown`, and out of the `statuses` row the skill names — so a description cannot promise something the numbers do not do. The text is stored here as well as generated so the screens that read this file directly (js/classbuild-ui.js, js/followers-ui.js, js/newgame.js) are right before any skill bar is built; `describeSkills(data)` runs at the top of `createSkillBar` and rewrites all forty anyway, so changing a number here changes the card even if nobody regenerated the file. Do not hand-edit a `desc`: change the number, or change `describeSkill`.",
+ "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` \u2014 so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide \u2014 a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
  "unlockAt": [
   1,
   3,
@@ -129,7 +130,7 @@
    "arc": 1.6,
    "cooldown": 4,
    "mp": 0,
-   "desc": "One heavy blow in front of you."
+   "desc": "Strikes everything in a 92\u00b0 arc 3.4 m in front of you for 190% weapon damage. No mana cost, 4s cooldown."
   },
   "cleave": {
    "name": "Cleave",
@@ -139,7 +140,7 @@
    "radius": 4.5,
    "cooldown": 7,
    "mp": 6,
-   "desc": "A sweep that catches everything around you."
+   "desc": "Strikes everything within 4.5 m of you for 115% weapon damage. 6 mana, 7s cooldown."
   },
   "sunder": {
    "name": "Sunder",
@@ -151,7 +152,7 @@
    "status": "weaken",
    "cooldown": 9,
    "mp": 8,
-   "desc": "A blow that takes the strength out of whatever it lands on."
+   "desc": "Strikes everything in an 80\u00b0 arc 3.2 m in front of you for 160% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
   },
   "shield_bash": {
    "name": "Shield Bash",
@@ -163,7 +164,7 @@
    "status": "web",
    "cooldown": 8,
    "mp": 6,
-   "desc": "Knock them off their feet and hold them there."
+   "desc": "Strikes everything in a 126\u00b0 arc 2.8 m in front of you for 130% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
   },
   "whirlwind": {
    "name": "Whirlwind",
@@ -173,7 +174,7 @@
    "radius": 5.5,
    "cooldown": 12,
    "mp": 14,
-   "desc": "Spin through everything within reach."
+   "desc": "Strikes everything within 5.5 m of you for 160% weapon damage. 14 mana, 12s cooldown."
   },
   "charge": {
    "name": "Charge",
@@ -184,7 +185,7 @@
    "splash": 2.4,
    "cooldown": 10,
    "mp": 10,
-   "desc": "Cover the ground between you fast, hitting everything on the way."
+   "desc": "Carries you 12 m forward, striking everything within 2.4 m of your path for 170% weapon damage. 10 mana, 10s cooldown."
   },
   "execute": {
    "name": "Execute",
@@ -195,7 +196,7 @@
    "arc": 1.2,
    "cooldown": 14,
    "mp": 12,
-   "desc": "An enormous blow. Wasted on anything healthy."
+   "desc": "Strikes everything in a 69\u00b0 arc 3 m in front of you for 320% weapon damage. 12 mana, 14s cooldown."
   },
   "aimed_shot": {
    "name": "Aimed Shot",
@@ -206,7 +207,7 @@
    "splash": 1.2,
    "cooldown": 5,
    "mp": 4,
-   "desc": "A single shot, aimed where you look."
+   "desc": "Looses one shot out to 42 m for 220% weapon damage, splashing everything within 1.2 m of where the shot lands. 4 mana, 5s cooldown."
   },
   "multi_shot": {
    "name": "Multi Shot",
@@ -217,7 +218,7 @@
    "splash": 1.6,
    "cooldown": 8,
    "mp": 10,
-   "desc": "A spread that scatters over whatever it lands near.",
+   "desc": "Looses 5 shots in an 11\u00b0 fan out to 34 m, each for 80% weapon damage, splashing everything within 1.6 m of where a shot lands. 10 mana, 8s cooldown.",
    "projectiles": 5,
    "spread": 0.2
   },
@@ -231,7 +232,7 @@
    "status": "web",
    "cooldown": 9,
    "mp": 8,
-   "desc": "Pins them where they stand.",
+   "desc": "Looses 2 shots in a 5\u00b0 fan out to 38 m, each for 100% weapon damage, splashing everything within 1.4 m of where a shot lands. Leaves the target Snared: the target moves 80% slower for 3s. 8 mana, 9s cooldown.",
    "projectiles": 2,
    "spread": 0.09
   },
@@ -244,7 +245,7 @@
    "radius": 6.5,
    "cooldown": 14,
    "mp": 16,
-   "desc": "Drops a volley on the spot you are looking at."
+   "desc": "Falls on a spot up to 32 m away, striking everything within 6.5 m of that spot for 150% weapon damage. 16 mana, 14s cooldown."
   },
   "poison_dart": {
    "name": "Poison Dart",
@@ -256,7 +257,7 @@
    "status": "poison",
    "cooldown": 5,
    "mp": 6,
-   "desc": "A dart that keeps working after it lands \u2014 most of its damage arrives over the next eight seconds.",
+   "desc": "Looses one bolt out to 34 m for 110% weapon damage as poison, splashing everything within 1.5 m of where the bolt lands. Leaves the target Poisoned: a further 371% weapon damage over 8s. 6 mana, 5s cooldown.",
    "statusMult": 1.8
   },
   "shadowstep": {
@@ -268,7 +269,7 @@
    "splash": 2,
    "cooldown": 9,
    "mp": 10,
-   "desc": "Cross the gap in the dark and open them up on arrival."
+   "desc": "Carries you 14 m forward, striking everything within 2 m of your path for 210% weapon damage as shadow. 10 mana, 9s cooldown."
   },
   "eviscerate": {
    "name": "Eviscerate",
@@ -280,7 +281,7 @@
    "status": "bleed",
    "cooldown": 7,
    "mp": 8,
-   "desc": "Deep, and it does not stop bleeding."
+   "desc": "Strikes everything in a 63\u00b0 arc 2.8 m in front of you for 240% weapon damage. Leaves the target Bleeding: a further 337% weapon damage over 6s. 8 mana, 7s cooldown."
   },
   "smoke": {
    "name": "Smoke",
@@ -289,7 +290,7 @@
    "status": "haste",
    "cooldown": 20,
    "mp": 12,
-   "desc": "Vanish for a moment and come out moving."
+   "desc": "Gives you Hastened: you attack 45% faster and move 30% faster for 10s. 12 mana, 20s cooldown."
   },
   "firebolt": {
    "name": "Firebolt",
@@ -301,7 +302,7 @@
    "status": "burn",
    "cooldown": 4,
    "mp": 8,
-   "desc": "A bolt of fire that leaves them burning."
+   "desc": "Looses one bolt out to 36 m for 160% weapon damage as fire, splashing everything within 2.6 m of where the bolt lands. Leaves the target Burning: a further 216% weapon damage over 5s. 8 mana, 4s cooldown."
   },
   "fire_wall": {
    "name": "Ember Field",
@@ -313,7 +314,7 @@
    "status": "burn",
    "cooldown": 13,
    "mp": 18,
-   "desc": "Sets the ground alight where you are looking."
+   "desc": "Falls on a spot up to 30 m away, striking everything within 6 m of that spot for 180% weapon damage as fire. Leaves the target Burning: a further 243% weapon damage over 5s. 18 mana, 13s cooldown."
   },
   "frost_nova": {
    "name": "Frost Nova",
@@ -324,7 +325,7 @@
    "status": "chill",
    "cooldown": 9,
    "mp": 14,
-   "desc": "A ring of ice that slows everything it touches."
+   "desc": "Strikes everything within 6 m of you for 120% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 14 mana, 9s cooldown."
   },
   "ice_lance": {
    "name": "Ice Lance",
@@ -336,7 +337,7 @@
    "status": "chill",
    "cooldown": 7,
    "mp": 12,
-   "desc": "A line of ice through everything in front of you."
+   "desc": "Fires a 1.8 m wide beam 26 m straight ahead, striking everything in the line for 190% weapon damage as ice. Leaves the target Chilled: the target moves 45% slower for 4s. 12 mana, 7s cooldown."
   },
   "chain_bolt": {
    "name": "Chain Bolt",
@@ -348,7 +349,7 @@
    "status": "shock",
    "cooldown": 7,
    "mp": 12,
-   "desc": "Lightning that jumps to whatever stands near where it lands.",
+   "desc": "Looses 3 bolts in an 8\u00b0 fan out to 40 m, each for 110% weapon damage as lightning, splashing everything within 3.2 m of where a bolt lands. Leaves the target Shocked: the target takes 30% more damage for 5s. 12 mana, 7s cooldown.",
    "projectiles": 3,
    "spread": 0.14
   },
@@ -361,7 +362,7 @@
    "status": "shock",
    "cooldown": 12,
    "mp": 18,
-   "desc": "The air splits around you."
+   "desc": "Strikes everything within 7 m of you for 170% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. 18 mana, 12s cooldown."
   },
   "storm_beam": {
    "name": "Storm Beam",
@@ -372,7 +373,7 @@
    "width": 2.4,
    "cooldown": 11,
    "mp": 20,
-   "desc": "A line of raw current, straight out from you."
+   "desc": "Fires a 2.4 m wide beam 30 m straight ahead, striking everything in the line for 220% weapon damage as lightning. 20 mana, 11s cooldown."
   },
   "shadow_lance": {
    "name": "Shadow Lance",
@@ -383,7 +384,7 @@
    "splash": 2,
    "cooldown": 5,
    "mp": 10,
-   "desc": "A lance of shadow."
+   "desc": "Looses one bolt out to 38 m for 190% weapon damage as shadow, splashing everything within 2 m of where the bolt lands. 10 mana, 5s cooldown."
   },
   "curse": {
    "name": "Curse",
@@ -395,7 +396,7 @@
    "status": "curse",
    "cooldown": 12,
    "mp": 14,
-   "desc": "Everything near where it lands takes more of everything."
+   "desc": "Looses one bolt out to 34 m for 80% weapon damage as shadow, splashing everything within 5 m of where the bolt lands. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 14 mana, 12s cooldown."
   },
   "drain": {
    "name": "Drain",
@@ -407,7 +408,7 @@
    "heal": 0.12,
    "cooldown": 9,
    "mp": 12,
-   "desc": "Takes their health and gives it to you."
+   "desc": "Fires a 1.6 m wide beam 22 m straight ahead, striking everything in the line for 150% weapon damage as shadow. Heals you for 12% of the damage dealt. 12 mana, 9s cooldown."
   },
   "arcane_burst": {
    "name": "Arcane Burst",
@@ -418,7 +419,7 @@
    "radius": 5,
    "cooldown": 10,
    "mp": 18,
-   "desc": "A detonation exactly where you are looking."
+   "desc": "Falls on a spot up to 34 m away, striking everything within 5 m of that spot for 230% weapon damage as arcane. 18 mana, 10s cooldown."
   },
   "meteor": {
    "name": "Fallstone",
@@ -430,7 +431,7 @@
    "status": "burn",
    "cooldown": 22,
    "mp": 30,
-   "desc": "Something enormous comes down where you point."
+   "desc": "Falls on a spot up to 36 m away, striking everything within 8 m of that spot for 340% weapon damage as fire. Leaves the target Burning: a further 459% weapon damage over 5s. 30 mana, 22s cooldown."
   },
   "mend": {
    "name": "Mend",
@@ -439,7 +440,7 @@
    "heal": 0.35,
    "cooldown": 14,
    "mp": 18,
-   "desc": "Close your own wounds."
+   "desc": "Heals you for 35% of your maximum health. 18 mana, 14s cooldown."
   },
   "renew": {
    "name": "Renew",
@@ -448,7 +449,7 @@
    "status": "regen",
    "cooldown": 16,
    "mp": 14,
-   "desc": "Keeps mending you for a while \u2014 and your companions with you."
+   "desc": "Gives you Mending: heals 25% of your maximum health over 10s. Everything following you is mended with you. 14 mana, 16s cooldown."
   },
   "warcry": {
    "name": "War Cry",
@@ -457,7 +458,7 @@
    "status": "might",
    "cooldown": 22,
    "mp": 10,
-   "desc": "Hit harder for a while."
+   "desc": "Gives you Might: you deal 30% more damage for 12s. 10 mana, 22s cooldown."
   },
   "guard_stance": {
    "name": "Guard",
@@ -466,7 +467,7 @@
    "status": "guard",
    "cooldown": 18,
    "mp": 8,
-   "desc": "Take much less for a while."
+   "desc": "Gives you Guarded: you take 45% less damage for 8s. 8 mana, 18s cooldown."
   },
   "stoneskin": {
    "name": "Stoneskin",
@@ -475,7 +476,7 @@
    "status": "stoneskin",
    "cooldown": 24,
    "mp": 14,
-   "desc": "Armour that is not made of anything."
+   "desc": "Gives you Stoneskin: you gain 60 armour for 14s. 14 mana, 24s cooldown."
   },
   "quicken": {
    "name": "Quicken",
@@ -484,7 +485,7 @@
    "status": "haste",
    "cooldown": 26,
    "mp": 16,
-   "desc": "Everything you do, faster."
+   "desc": "Gives you Hastened: you attack 45% faster and move 30% faster for 10s. 16 mana, 26s cooldown."
   },
   "rally": {
    "name": "Rally",
@@ -494,7 +495,7 @@
    "pets": true,
    "cooldown": 30,
    "mp": 18,
-   "desc": "You and everything following you fight harder."
+   "desc": "Gives you Rallied: you deal 20% more damage and take 15% less damage for 8s. Everything following you gets the same. 18 mana, 30s cooldown."
   },
   "consecrate": {
    "name": "Consecrate",
@@ -505,7 +506,7 @@
    "heal": 0.15,
    "cooldown": 16,
    "mp": 20,
-   "desc": "Burns the hostile and mends you in the same breath."
+   "desc": "Strikes everything within 6.5 m of you for 140% weapon damage as holy. Heals you for 15% of your maximum health. 20 mana, 16s cooldown."
   },
   "raise_thrall": {
    "name": "Raise Thrall",
@@ -515,7 +516,7 @@
    "count": 1,
    "cooldown": 26,
    "mp": 20,
-   "desc": "One more body between you and them."
+   "desc": "Summons 1 Bone Thrall to fight beside you. 20 mana, 26s cooldown."
   },
   "call_wolf": {
    "name": "Call the Pack",
@@ -525,7 +526,7 @@
    "count": 1,
    "cooldown": 26,
    "mp": 18,
-   "desc": "Another wolf answers."
+   "desc": "Summons 1 Grove Wolf to fight beside you. 18 mana, 26s cooldown."
   },
   "call_spirit": {
    "name": "Call a Spirit",
@@ -535,7 +536,7 @@
    "count": 1,
    "cooldown": 40,
    "mp": 26,
-   "desc": "Something old and heavy stands up beside you."
+   "desc": "Summons 1 Spirit Bear to fight beside you. 26 mana, 40s cooldown."
   },
   "bind_imp": {
    "name": "Bind a Fiend",
@@ -545,7 +546,7 @@
    "count": 1,
    "cooldown": 32,
    "mp": 22,
-   "desc": "It does not like you either, but it will do as it is told."
+   "desc": "Summons 1 Bound Imp to fight beside you. 22 mana, 32s cooldown."
   },
   "deploy_sentry": {
    "name": "Deploy Sentry",
@@ -555,7 +556,7 @@
    "count": 1,
    "cooldown": 30,
    "mp": 20,
-   "desc": "Wind it up and let it shoot."
+   "desc": "Summons 1 Clockwork Sentry to fight beside you. 20 mana, 30s cooldown."
   }
  },
  "classes": {

@@ -3037,3 +3037,179 @@ Three pre-existing bugs fell out of it, all written up in CLASSES.md:
 2. **Picked talents were never saved** — `player.skillTalents` was on no save list, so a reload
    silently un-picked every one. The same fault the perk forest had in R18, in the same list.
 3. **A refused row on the Unbinder's counter said why only in a tooltip.**
+
+## Round 21 — the ground, the town, and saying what things do
+
+An eight-item play-test list from one spot on one world: **seed 25392, Kydsel IV, Grassland,
+x 5265 z 1683**. `tools/probe-worldgen.mjs` rebuilds that exact world, and the town 83 m away is
+**Dearbigate**, size 5, human.
+
+The theme, again, is **a rule written into the data and read by nobody** — but this round it came
+with a second one that is new: **a number the player was never shown**. Half the list is geometry
+that nothing measured, and half is prose that described a feeling instead of a quantity.
+
+### 1 + 2 — everything piled onto the town centre, and paving that led nowhere
+
+Three systems independently compute a town's position as `node.x * M_PER_CELL`, and they all get
+the same float:
+
+* the town origin (`js/features.js` `nodesInRange`),
+* the world road's polyline — `toMetres` in `js/planet.js` emits raw cell corners and `smoothPath`
+  is Catmull-Rom, which **interpolates** its control points, so a road routed to a settlement cell
+  passes exactly through the origin and turns there,
+* `js/territory.js`, which listed `'settlement'` and `'port'` among the node types a zone landmark
+  may stand on.
+
+So a wayshrine with its own approach avenue was dropped on the market square, on top of the well,
+the stalls and the waypoint pad — which are themselves at fixed bearings from that same origin.
+`claimLandmarks` was the only site path that never asked `townGap`; `buildSites` has asked since
+round 16. Both are fixed, and `nudgeClear` walks a mark out of a town's ring rather than deleting it.
+
+Then the streets. Measured on Dearbigate: **164 planned streets, 159 of them alleys averaging
+11.2 m**, 69 under 8 m, **308 of 318 endpoints dead ends**, and **160 of 940 street samples (17%)
+lying on top of the world road** — a second slab of paving at `lift: 0.12` floating six centimetres
+above the road's `lift: 0.06`, at a slightly different angle. Nothing anywhere de-duplicated the
+two: `splitBlock` cuts its streets without being told where the road is, and `linkRoads`
+deliberately lays a high street along the corridor the road arrives on.
+
+proctown's `connectStreets` (round 13, written for this exact complaint) could not catch it,
+because of an **ordering** problem: it decides connectivity in plan space, and the run is cut
+afterwards and elsewhere — in `streetLanes`, at the water, at a bridge deck and now at the road. A
+street certified as connected is sliced up after the fact and the far piece is an orphan. So the
+question is asked again on the runs that will actually be drawn (`keepConnected`, `js/town-plan.js`):
+mains, lanes and anything touching the world road are seeds, everything else must reach a seed, and
+anything under 5.5 m is a paving slab rather than a street. **164 planned → 99 after the road cut →
+66 drawn, all joined.** It is opt-in (`prune: true`) because several tests drive `streetLanes` as
+the pure transform it otherwise is.
+
+And the waypoint: `padOk` tested water, river and slope and **never the road**, so on this town the
+pad sat at `roadAt 0.994` — dead centre of the carriageway, a 3.2 m concrete disc with a glowing
+sigil in it. It now tests the road across the pad's whole **footprint**, not its centre, which is
+the same footprint-versus-centre lesson round 17's probe tool was built to teach. `roadAt 0.994 →
+0.009`. `place()` itself had never asked about roads either — the well, the board, the stalls, the
+wall and the towers all came through it — and the gatehouse opts back in with `onRoad: true`,
+because a gate is the one thing that belongs on a road.
+
+### 3 — the pillars in the road
+
+Two bugs wearing one coat. `sites.js`'s approach avenue took its bearing from `rng() * TAU`, so a
+slot created **on a road cell** never asked which way the road ran; it only looked like it followed
+the road when the dice agreed. And the offset was `lane * app.spread`, a bare constant from
+`data/setpieces.json` — 3.2 / 3.4 / 3.6 / 4.5 — never once compared to the road. A road-class
+carriageway is 7 m wide, so its edge is at 3.5 m and a waystone's footing is 0.5 m: **three of the
+four layouts were inside the painted road by construction.** `roadNear` gives the avenue the road's
+real bearing and its real `half`, and the offset is now `half + footing + 1 m` with the JSON value
+as a floor. `proctown/js/buildkit.js` had been doing this correctly for market stalls all along.
+
+### 4 — `Math.round`, and why every hillside was faceted
+
+`worldgen/js/relief.js` `elevationToMetres` rounds to whole metres. For a readout ("1,250 m") that
+is right. Farhold's ground height is built on top of it, and there it was a **staircase**: a map
+cell is 640 m wide and the elevation between cells is interpolated smoothly, so a hillside should be
+a ramp — rounding made it flat treads with a 1 m riser every forty metres or so.
+
+Measured on seed 7: walking half a metre moved the unrounded base height by at most **0.0019 m** and
+the rounded one by a full **1.0000 m**. The mesh samples every 2 m near the camera, so one quad in
+twenty catches a riser and tilts ~25° while nineteen lie dead flat. Adjacent vertex normals differed
+by up to **27°**; without the rounding, **12°**. That is "you can clearly see a lot of triangles
+along the slopes", and it was one function call. `elevationToMetresExact` is the unrounded export;
+`elevationToMetres` now calls it and rounds, so the worldgen test that pins the rounding stays green.
+On the reported world the step per 0.5 m walked fell from **1.0000 m to 0.329 m**.
+
+### 5 — cliffs, which the formula could not produce
+
+`naturalHeightAt` was a bilinear ramp plus two symmetric `fbm` terms, and symmetric fBm has no
+cliffs in it. Everything upstream that could make one is smoothed away before Farhold sees it:
+`thermalErode` slumps anything past its talus angle, `hydraulicErode` carves the valleys back, and
+`despike()` pulls outliers to the neighbour median. Measured over 2 km: slope p50 0.27, p99 0.78,
+max 1.53, and **0.000% of the land steeper than 63°**.
+
+`ridged` noise is the opposite — `1 - |n|` to a power leaves creases — and a narrow `smoothstep`
+band turns a crease into a face, because a cliff is height over **distance** and piling amplitude
+onto a 500 m wavelength just makes a bigger hill. The first cut gated on World Forge's `broken`
+slope layer alone, which is over 0.30 across 47% of the map, and produced a corrugated world with
+**39% of the ground past 45°** — unwalkable, and no more interesting than the hills it replaced,
+because a cliff you meet every fifty metres is texture. So there are two gates: `broken` (this
+ground is rugged) and a slow `cliffMask` (this *region* is cliff country), and a face must pass
+both. `cliffCellFreq` is measured in CELLS, so escarpments keep their shape on a Super tiny world
+as on a full one.
+
+Result: **median slope 0.25 → 0.28** (the walkable world is unchanged), **p99 0.77 → 3.05**,
+**4% of land past 45°** and **2.5% past 63°**, where both were zero. Drift against
+`tests/planet.test.js`'s 130 m bar: 14 m.
+
+### 6 — a building that appeared a hundred metres away
+
+`balance.encounters.radius` was 90, which put a whole set piece between 49 and 99 m away, and
+`the_ferry_post` dresses itself with a `hut` — a 6.6 m stone house — at `where: 'ahead'`. Raised to
+**240** (ring 132–240 m, ahead 168–264 m). `ambushRadius` is deliberately left at 26: an ambush is
+supposed to be on top of you.
+
+The trap, and the reason this is more than one number: bodies despawn at 300 m, so an event placed
+at 264 m would lose its guards while you were still walking toward it — and an event with no bodies
+**wins itself**, which is the fault round 16 fixed from the other direction. Set-piece bodies carry
+`unit.encounter`, so they now get a longer leash (`keepRadius`, 620 m) while ordinary wandering
+packs do not. `encounters.js`'s hard-coded `420` for live records is gone; it derives from the same
+number, so a record and its bodies die together.
+
+### 7 — "E look at forge fire", which was neither
+
+Three faults stacked, and the landmark's own data file described a feature that had never been built.
+
+* **No fire.** `buildLayout` bails after the centre piece unless the site is one of the nearest FIVE
+  of twelve. At a town centre plenty of sites are in range, so the forge fire lost that contest every
+  time and rendered as a lone hut — while `layouts.forge_fire` declares two fires, two banners, six
+  waystones and an approach. A landmark now always builds in full: there are a few per zone, and it
+  is the one kind of site the game asks you to walk up to and press a key at.
+* **30 experience for the walk, forever.** `gives.bench` made `standingOffer` true, which skipped
+  `markTaken`, which left the pin and the prompt. And `gives.bench` was **a log line and nothing
+  else** — one grep hit in the whole codebase — so the place `data/landmarks.json` calls "a crafting
+  bench, outside a town, which is the whole point of it" never opened a bench. Now it does.
+* **It never went away.** The territory branch of `interactTarget` filters `state !== 'done'`; the
+  set-piece branch — the one that actually fires for something you can see — had no such test at all.
+  A spent one-shot is no longer a target, and `buildLayout` swaps its layout for a scatter of
+  rubble. It is a replacement rather than a removal because a collider filed with `collide.add`
+  cannot be taken back, and rubble carries `solid: null`, so nothing invisible is left standing.
+
+And landmarks no longer generate on settlement or port nodes at all, which is what put a bench in a
+town that already had one.
+
+### 8 — saying what things do
+
+`WORDING.md` is the new standard and the enforcement is `tests/wording.test.js`. The short version:
+name the effect with the word the genre already uses, give magnitude and duration as digits, say
+**damage** when you mean damage, and never use a bare "it" as a subject.
+
+**Accuracy is removed.** Farhold's enemies are built with `dodge: 0` hard-coded, so an accuracy roll
+cancelled a dodge chance that was always zero — a stat whose entire job was to give back damage the
+game never took, and whose own tooltip ("+7.8% accuracy — it cancels this much of the target's
+dodge") is the clearest evidence nobody could say what it was for. `data/items.json` is **shared
+with Emberveil**, which rolls it for real and has a test that every affix in the file resolves, so it
+is stripped as the file loads (`DROPPED_STATS` in `js/affixes.js`) rather than deleted from disk.
+Dodge survives on the player, which is the one direction it ever mattered.
+
+**Life steal is a weapon stat.** It used to fire on every source of damage in the game, including
+every spell, because `strike()` was handed `element` and `skill` and consulted neither — and a
+caster healing off their own spell damage makes armour, block, barrier and potions all pointless.
+`!skill && element === 'physical'` excludes spells, wands and staves in one test, because a wand
+arrives carrying its own cast element.
+
+The rewrite turned up **six descriptions that were not vague but false**:
+
+| what it said | what the code does |
+|---|---|
+| `no_night_raids`: "Nothing ambushes you in the dark" | multiplies the night spawn budget by 0.25 — never zero |
+| `rally_on_kill`: "you and your companions" | `main.js` applies the rally to the player only |
+| `cond_easeExhaustion`: "you tire less easily" | `staminaEase` is written to the sheet and read by nothing |
+| Execute: "Wasted on anything healthy" | no bonus against a hurt enemy exists; it is a flat 320% |
+| Smoke: "Vanish for a moment" | there is no vanish; it hands you Hastened |
+| Hardy: "+2 health a second **out of combat**" | `hpRegen` is added on every tick, fight or not |
+
+Skill descriptions are now **generated** (`describeSkill` in `js/skills.js`), the same way
+`skilltalents.js` has generated its talent lines since round 15 — every number was already on the
+skill object and none of it was ever shown. "A sweep that catches everything around you" is now
+"Strikes everything within 4.5 m of you for 115% weapon damage. 6 mana, 7s cooldown."
+
+That generator also exposed a real balance question, recorded and **not** acted on: `main.js` hangs
+a skill's status at `plan.damage * 0.9 * statusMult`, so Firebolt's burn is worth 216% weapon damage
+against the bolt's own 160%, and Poison Dart's poison 371%. The damage-over-time is the skill.

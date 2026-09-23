@@ -235,7 +235,7 @@ export const AFFIX_WEIGHT = {
   // what you actually want on a weapon
   dmg: 16, critChance: 10, critDamage: 9, str: 9, dex: 9, int: 9, con: 9,
   // what you actually want on armour
-  hp: 14, armor: 12, magicResist: 8, dodge: 7, hit: 6, mp: 6,
+  hp: 14, armor: 12, magicResist: 8, dodge: 7, mp: 6,
   // good, but not every time
   spellPower: 6, lifeSteal: 5, hpRegen: 5, mana_regen: 5, initiative: 5,
   magicFind: 4, goldFind: 4, xpFind: 4, manaSteal: 3, cooldownReduction: 3,
@@ -527,7 +527,7 @@ export function itemScore(item) {
   for (const a of item.affixes || []) {
     const field = LIVE_STATS[a.stat];
     if (!field) continue;
-    const weight = { maxHp: 0.5, armor: 2, damageFlat: 3, critChance: 4, critDamage: 2, dodge: 2, hit: 1, str: 3, dex: 3, int: 3, con: 3 }[field] ?? 1;
+    const weight = { maxHp: 0.5, armor: 2, damageFlat: 3, critChance: 4, critDamage: 2, dodge: 2, str: 3, dex: 3, int: 3, con: 3 }[field] ?? 1;
     score += (a.value || 0) * weight;
   }
   return Math.round(score);
@@ -734,9 +734,8 @@ export class Rpg {
       maxHp: (b.baseHp ?? 60) + (b.hpPerLevel ?? 14) * (lvl - 1),
       maxMp: (b.baseMp ?? 20) + (b.mpPerLevel ?? 4) * (lvl - 1),
       armor: 0, magicResist: 0, damageFlat: 0, critChance: b.critChance ?? 5, critDamage: b.critDamage ?? 50,
-      // Accuracy starts at ZERO. It used to start at 75, which — now that it cancels dodge — would
-      // have cancelled 37 points of it on every swing and made dodge worthless on everything.
-      dodge: 0, hit: 0, hpRegen: b.hpRegen ?? 0.5, mpRegen: 1, spellPower: 0, lifeSteal: 0,
+      // R21: `hit` (accuracy) is gone — see `strike`. `dodge` stays: it is the player's own.
+      dodge: 0, hpRegen: b.hpRegen ?? 0.5, mpRegen: 1, spellPower: 0, lifeSteal: 0,
       magicFind: 0, goldFind: 0, xpFind: 0, blockChance: 0, blockPower: 0,
       // round 4: the stats that used to be carried and ignored
       barrier: 0, barrierRegen: 0, cooldownReduction: 0, manaSteal: 0, haste: 0,
@@ -906,7 +905,7 @@ export class Rpg {
     for (const key of ['maxHp', 'maxMp', 'armor', 'magicResist', 'damageFlat', 'barrier']) {
       d[key] = Math.round(d[key] || 0);
     }
-    for (const key of ['critChance', 'critDamage', 'dodge', 'hit', 'hpRegen', 'mpRegen', 'spellPower',
+    for (const key of ['critChance', 'critDamage', 'dodge', 'hpRegen', 'mpRegen', 'spellPower',
       'lifeSteal', 'magicFind', 'goldFind', 'xpFind', 'blockChance', 'blockPower', 'barrierRegen',
       'cooldownReduction', 'manaSteal', 'haste', 'moveSpeed', 'resistAll', 'thorns',
       'attackEvery', 'levelScale', 'damagePct', 'armorPct', 'movePct']) {
@@ -1311,10 +1310,23 @@ export class Rpg {
      * regardless of its damage. See `derive`'s `offDamage`.
      */
     const dmgRange = (hand === 'off' && a?.offDamage) || a?.damage || attacker.dmg || [3, 5];
-    // Accuracy was carried and never read. It cancels the defender's dodge, which is the only thing
-    // dodge has ever meant — so `of Accuracy` is worth having against anything nimble.
-    const accuracy = (a?.hit ?? attacker.hit ?? 0);
-    const dodge = Math.max(0, (d?.dodge ?? defender.dodge ?? 0) - accuracy * 0.5) / 100;
+    /**
+     * R21 — ACCURACY IS GONE, AND DODGE IS THE PLAYER'S ALONE.
+     *
+     * The play-test, on an `of Accuracy` ring: *"let's just REMOVE accuracy entirely, it's stupid,
+     * nobody wants to build accuracy, enemies shouldn't have a significant dodge chance anyway."*
+     * Which was already true of the code, and that is the damning part — Farhold's enemies are
+     * built at `makeEnemy` with `dodge: 0` hard-coded, so the accuracy an item granted cancelled a
+     * dodge chance that was ALWAYS ZERO. It was a stat whose entire job was to give back damage
+     * the game never took, and its own tooltip ("+7.8% accuracy — it cancels this much of the
+     * target's dodge") is the clearest evidence nobody could say what it was for.
+     *
+     * So attacks connect, and damage is decided by damage. Dodge survives on the PLAYER only —
+     * it is read here when an enemy swings at you, which is the one direction it ever mattered.
+     * Nothing rolls `of Accuracy` any more (js/affixes.js), nothing describes it (js/effects.js)
+     * and the character sheet no longer has a row for it. See `WORDING.md`.
+     */
+    const dodge = Math.max(0, d?.dodge ?? defender.dodge ?? 0) / 100;
     if (rng() < Math.min(0.35, dodge)) {
       // RIPOSTE, the melee talent node: "blocking or dodging leaves your next swing a guaranteed
       // critical". It was a perk flag nothing in the game read. A dodge is only ever decided here,
@@ -1431,7 +1443,26 @@ export class Rpg {
     }
     defender.hp = hp;
 
-    const healed = a?.lifeSteal ? Math.round(amount * a.lifeSteal / 100) : 0;
+    /**
+     * R21 — LIFE STEAL IS A WEAPON STAT, NOT A UNIVERSAL ONE.
+     *
+     * It used to fire on literally every source of damage in the game: swings, arrows, splash, and
+     * every skill and spell cast, because `strike()` was handed `element` and `skill` and consulted
+     * neither. A caster healing a share of their own spell damage makes every other sustain stat in
+     * the game pointless — you never need armour, block, barrier or a potion if the damage you were
+     * already dealing pays for itself.
+     *
+     * So the rule the play-test asked for: *"Life steal should work with melee or ranged physical
+     * damage but not spells (or wands/staves)."* `skill` is set for every cast, and `element` is
+     * `physical` only for an unbranded weapon hit — a wand or staff arrives here carrying its own
+     * cast element (see `elementOf`), so the single test below excludes all three cases at once
+     * without needing to know what a wand is.
+     *
+     * `manaSteal` keeps the old behaviour deliberately: it pays a caster's own resource back, which
+     * is a cost reduction, not a second health bar.
+     */
+    const physicalHit = !skill && element === 'physical';
+    const healed = (physicalHit && a?.lifeSteal) ? Math.round(amount * a.lifeSteal / 100) : 0;
     if (healed && attacker.hp != null) attacker.hp = Math.min(attacker.maxHp, attacker.hp + healed);
     const manaBack = a?.manaSteal ? Math.round(amount * a.manaSteal / 100) : 0;
     if (manaBack && attacker.mp != null) attacker.mp = Math.min(attacker.maxMp, attacker.mp + manaBack);

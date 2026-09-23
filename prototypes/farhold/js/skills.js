@@ -24,6 +24,210 @@ import { talentPlan, talentsOn, castRulesFrom } from './skilltalents.js';
 // R17 — the one place the follower bonus is read off `derived`, so the summon cap and the follower
 // book can never drift apart about what The Kept Company is worth.
 import { followerBonus } from './followers.js';
+import { fmt, pct, pctOf, secs } from '../../../shared/format.js';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// R21 — A SKILL'S DESCRIPTION IS BUILT FROM THE SKILL'S OWN NUMBERS.
+//
+//   "We need to give numeric values where appropriate for magnitude and duration. Vague
+//    descriptions are TERRIBLE and go against the game."
+//
+// Every one of the forty skills carried a hand-written line that named no quantity at all —
+// "One heavy blow in front of you", "A sweep that catches everything around you", "A blow that
+// takes the strength out of whatever it lands on". A player reading that cannot tell whether
+// Sunder is worth a slot, and two of those lines were not even true: Execute promised it was
+// "wasted on anything healthy" and nothing in the game gives Execute a bonus against a hurt
+// enemy, and Smoke promised you "vanish for a moment" when all Smoke does is hand you Hastened.
+//
+// The numbers were already on the same object the whole time — `mult`, `reach`, `arc`, `radius`,
+// `range`, `splash`, `width`, `projectiles`, `spread`, `heal`, `status`, `mp`, `cooldown` — and
+// the status table below them carries the rest. So no skill has a hand-written sentence any more:
+// `describeSkill` writes every line from those fields, the same way `js/skilltalents.js`
+// `describeMod` writes every talent line, and for the same reason — a sentence that is generated
+// from the behaviour cannot drift away from the behaviour.
+//
+// `data/skills.json` carries the generated text as its `desc` so that the screens which read the
+// data file directly (js/classbuild-ui.js, js/followers-ui.js, js/newgame.js) are right without
+// having to build a skill bar first; `describeSkills` then rewrites all forty at load anyway, so
+// changing `mult` in the data file changes the card even if nobody remembered to regenerate.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Radians as whole degrees, for an arc or a fan. */
+function degrees(rad) { return `${fmt((rad || 0) * 180 / Math.PI, { decimals: 0 })}°`; }
+/** A distance on the ground. */
+function metres(n) { return `${fmt(n)} m`; }
+/**
+ * "a" or "an" in front of a figure, read aloud: an 8° arc, an 11° fan, an 80° arc, a 92° arc.
+ * Only the eights and the elevens/eighteens take "an", which covers every angle a skill can have.
+ */
+function article(text) {
+  const s = String(text);
+  return /^(8|11|18)/.test(s) ? 'an' : 'a';
+}
+/** `bone_thrall` → `Bone Thrall`, which is the name data/enemies.json gives every summon. */
+function petName(id) {
+  return String(id || '').split('_').filter(Boolean)
+    .map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+}
+
+/**
+ * How much of a hit's damage a status carries over, as a share of the weapon's damage.
+ *
+ * `js/main.js` hangs a skill's status with `power = plan.damage * 0.9 * statusMult`, and
+ * `tickStatuses` pays `perSecond * power` every second for `seconds`. So the total a burn deals is
+ * the skill's own multiplier times all of that — which is why Firebolt's burn is worth more than
+ * Firebolt's impact and the old line ("a bolt of fire that leaves them burning") never said so.
+ */
+export const STATUS_POWER_SHARE = 0.9;
+
+/** What a damage-over-time status adds, as a share of weapon damage. */
+function statusTotal(skill, spec) {
+  return (skill.mult || 1) * STATUS_POWER_SHARE * (skill.statusMult || 1)
+    * (spec.perSecond || 0) * (spec.seconds || 0);
+}
+
+/**
+ * The first sentence: what the shape reaches, how far, and what it hits for.
+ *
+ * ONE thing is deliberately left out — the distance falloff. Every area in the game pays full
+ * damage at the middle and a share of it at the rim (js/actors.js `strikeArea`, 0.5 for a bolt's
+ * splash, 0.6 for a ring, 0.8 along a dash), and printing that on every area skill in the game
+ * would lengthen each card to say the same thing again. The radius is the number the player is
+ * choosing between.
+ */
+function shapeSentence(skill) {
+  const n = Math.max(1, skill.projectiles || 1);
+  const dmg = `${pctOf(Math.round((skill.mult || 1) * 100))} weapon damage`
+    + (skill.element && skill.element !== 'physical' ? ` as ${skill.element}` : '');
+  const shot = skill.element === 'physical' ? 'shot' : 'bolt';
+  const splash = skill.splash
+    ? `, splashing everything within ${metres(skill.splash)} of where ${n > 1 ? 'a' : 'the'} ${shot} lands`
+    : '';
+  const arc = degrees(skill.arc ?? 1.5);
+  const fan = degrees(skill.spread || 0);
+  const width = metres(skill.width ?? 1.8);
+  switch (skill.shape) {
+    case 'melee':
+      return `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you for ${dmg}.`;
+    case 'around':
+      return `Strikes everything within ${metres(skill.radius ?? 4)} of you for ${dmg}.`;
+    case 'beam':
+      return `Fires ${article(width)} ${width} wide beam ${metres(skill.range ?? 20)} straight ahead, striking everything in the line for ${dmg}.`;
+    case 'ground':
+      return `Falls on a spot up to ${metres(skill.range ?? 30)} away, striking everything within ${metres(skill.radius ?? 5)} of that spot for ${dmg}.`;
+    case 'dash':
+      return `Carries you ${metres(skill.range ?? 10)} forward, striking everything within ${metres(skill.splash ?? 2)} of your path for ${dmg}.`;
+    case 'summon': {
+      const count = Math.max(1, skill.count || 1);
+      const who = petName(skill.pet) + (count > 1 ? 's' : '');
+      return `Summons ${fmt(count)} ${who} to fight beside you.`;
+    }
+    case 'self':
+      return '';
+    default:
+      // a bolt, or a fan of them
+      return n > 1
+        ? `Looses ${fmt(n)} ${shot}s in ${article(fan)} ${fan} fan out to ${metres(skill.range ?? 30)}, each for ${dmg}${splash}.`
+        : `Looses one ${shot} out to ${metres(skill.range ?? 30)} for ${dmg}${splash}.`;
+  }
+}
+
+/** The status sentence, with the magnitude and the duration the status table actually carries. */
+function statusSentence(skill, spec) {
+  if (!spec) return '';
+  const name = spec.name || 'an effect';
+  const dur = secs(spec.seconds || 0);
+  if (skill.shape === 'self' || spec.kind === 'buff') {
+    if (spec.healPerSecond) {
+      // a heal over time states the total and the span, never a per-second figure
+      return `Gives you ${name}: heals ${pct((spec.healPerSecond || 0) * (spec.seconds || 0))} of your maximum health over ${dur}.`
+        + (skill.pets || skill.status === 'regen' ? ' Everything following you is mended with you.' : '');
+    }
+    const bits = [];
+    if (spec.damage) bits.push(`deal ${pct(spec.damage)} more damage`);
+    if (spec.resist) bits.push(`take ${pct(spec.resist)} less damage`);
+    if (spec.armor) bits.push(`gain ${fmt(spec.armor)} armour`);
+    if (spec.haste) bits.push(`attack ${pct(spec.haste)} faster`);
+    if (spec.move) bits.push(`move ${pct(spec.move)} faster`);
+    if (spec.slow) bits.push(`move ${pct(spec.slow)} slower`);
+    if (!bits.length) return '';
+    return `Gives you ${name}: you ${list(bits)} for ${dur}.`
+      + (skill.pets ? ' Everything following you gets the same.' : '');
+  }
+  if (spec.kind === 'damage') {
+    const total = statusTotal(skill, spec);
+    return `Leaves the target ${name}: a further ${pctOf(Math.round(total * 100))} weapon damage over ${dur}.`;
+  }
+  const bits = [];
+  if (spec.takeMore) bits.push(`takes ${pct(spec.takeMore)} more damage`);
+  if (spec.dealLess) bits.push(`deals ${pct(spec.dealLess)} less damage`);
+  if (spec.slow) bits.push(`moves ${pct(spec.slow)} slower`);
+  if (!bits.length) return '';
+  return `Leaves the target ${name}: the target ${list(bits)} for ${dur}.`;
+}
+
+/** "a", "a and b", "a, b and c" — an Oxford-free list, because a stat line is not prose. */
+function list(bits) {
+  if (bits.length <= 1) return bits[0] || '';
+  return `${bits.slice(0, -1).join(', ')} and ${bits[bits.length - 1]}`;
+}
+
+/** What the skill gives back, which is a share of your health bar — except Drain. */
+function healSentence(skill) {
+  if (!skill.heal) return '';
+  // a beam heals a share of the damage it deals (js/main.js `healed += result.amount * healFrac`);
+  // everything else heals a share of your own maximum health
+  return skill.shape === 'beam'
+    ? `Heals you for ${pct(skill.heal)} of the damage dealt.`
+    : `Heals you for ${pct(skill.heal)} of your maximum health.`;
+}
+
+/**
+ * ONE skill's description, written from that skill's own fields.
+ *
+ * @param {object} skill    a row out of `data/skills.json` — `shape`, `mult`, `reach`, `arc`,
+ *                          `radius`, `range`, `splash`, `width`, `projectiles`, `spread`,
+ *                          `status`, `statusMult`, `heal`, `pet`, `count`, `mp`, `cooldown`
+ * @param {object} statuses the file's `statuses` block, for the magnitude and duration of `status`
+ * @param {{cost?: boolean}} [opts] `cost: false` leaves off the mana and cooldown clause, for the
+ *                          screens that already print both beside the name
+ * @returns {string} e.g. "Strikes everything within 4.5 m of you for 115% weapon damage.
+ *                        6 mana, 7s cooldown."
+ */
+export function describeSkill(skill, statuses = {}, { cost = true } = {}) {
+  if (!skill) return '';
+  const spec = skill.status ? statuses[skill.status] : null;
+  const parts = [shapeSentence(skill), statusSentence(skill, spec), healSentence(skill)].filter(Boolean);
+  if (cost) {
+    const price = skill.mp ? `${fmt(skill.mp)} mana` : 'No mana cost';
+    parts.push(`${price}, ${secs(skill.cooldown ?? 6)} cooldown.`);
+  }
+  return parts.join(' ');
+}
+
+/**
+ * Write every skill's line, from its own numbers. Done once, at load — the same thing
+ * `js/skilltalents.js` does to `TALENT_LIBRARY` at the bottom of its own table.
+ *
+ * Safe to run more than once: nothing here reads the old `desc`.
+ */
+export function describeSkills(data) {
+  if (!data?.skills) return data;
+  for (const skill of Object.values(data.skills)) {
+    skill.desc = describeSkill(skill, data.statuses || {});
+    /**
+     * R21 — the same line WITHOUT the mana and cooldown clause.
+     *
+     * The skill bar card and the hotkey tooltip both already print `12 mana · 4.0s cooldown` on
+     * their own row, directly above the description, so the generated line repeated it. The card's
+     * `.sk-desc` is also clamped to three lines, and the clause it was clipping was the duplicated
+     * one. Both readers take `descShort`; the item tooltip and the class builder, which print no
+     * cost of their own, keep the full line.
+     */
+    skill.descShort = describeSkill(skill, data.statuses || {}, { cost: false });
+  }
+  return data;
+}
 
 /**
  * A BURNING ENEMY DID NOT LOOK LIKE IT WAS BURNING.
@@ -135,6 +339,10 @@ export function incomingFrom(unit) {
 }
 
 export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = null }) {
+  // R21 — every skill's line, rewritten from that skill's own numbers before the bar is built, so
+  // a change to `mult` or `cooldown` in the data file reaches the card without anybody re-typing
+  // a sentence. See the note above `describeSkill`.
+  describeSkills(data);
   const unlockAt = unlocks || data.unlockAt || [1, 3, 6, 12, 18, 24];
   const slots = [];
 
@@ -355,7 +563,7 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
     relearn,
     /** For the HUD. */
     state: () => slots.map(s => ({
-      id: s.id, name: s.name, desc: s.desc, mp: costFor(s),
+      id: s.id, name: s.name, desc: s.desc, descShort: s.descShort, mp: costFor(s),
       ready: s.ready, cooldown: cooldownFor(s),
       locked: !unlocked(s), unlockAt: s.unlockAt,
       /**

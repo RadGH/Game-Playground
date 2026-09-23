@@ -306,44 +306,44 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
    */
   function quote(id, item, { index = 0, player = null } = {}) {
     const r = byId[id];
-    if (!r) return { ok: false, why: 'no such recipe' };
+    if (!r) return { ok: false, why: 'There is no such recipe.' };
     if (!applies(r, item, player)) return { ok: false, why: whyNot(r, item, player) };
 
     let cost = r.cost, extra = 1, note = '';
     if (r.kind === 'promote') {
       const to = RARITY[rarityAt(item.rarity) + 1];
-      if (!to) return { ok: false, why: 'this is already legendary' };
+      if (!to) return { ok: false, why: 'This item is already legendary, which is the top rarity.' };
       cost = r.costByTarget?.[to] || r.cost;
       note = `${item.rarity} → ${to}`;
     }
     if (r.kind === 'quality') {
       const q = ['low', 'medium', 'high', 'elite', 'exotic'];
       const at = q.indexOf(item.quality || 'medium');
-      if (at < 0 || at >= q.length - 1) return { ok: false, why: 'this is already as well made as it gets' };
+      if (at < 0 || at >= q.length - 1) return { ok: false, why: 'This item is already exotic quality, which is the best quality there is.' };
       note = `${item.quality} → ${q[at + 1]}`;
     }
     if (r.kind === 'reroll') {
       const a = (item.affixes || [])[index];
-      if (!a) return { ok: false, why: 'pick a property first' };
-      if (!rpg.loot.rerollable(a)) return { ok: false, why: 'that is part of the item itself, not a property' };
+      if (!a) return { ok: false, why: 'Pick which property to replace first.' };
+      if (!rpg.loot.rerollable(a)) return { ok: false, why: 'That line is part of the base item, not a rolled property.' };
       extra = Math.pow(r.growth || 1.4, item.reworks || 0);
-      note = `replaces "${a.name || a.stat}"`;
+      note = `Replaces "${a.name || a.stat}"`;
     }
     if (r.kind === 'addAffix') {
       const cap = { legendary: 6, rare: 4, magic: 2, normal: 0 }[item.rarity] || 0;
       const real = (item.affixes || []).filter(x => !x.baseIntrinsic).length;
-      if (real >= cap) return { ok: false, why: `all ${cap} property slots are full — reweave one instead` };
-      note = `${real} of ${cap} slots used`;
+      if (real >= cap) return { ok: false, why: `All ${cap} of this item's property slots are full. Reweave one of them instead.` };
+      note = `${real} of ${cap} property slots used`;
     }
     if (r.kind === 'brand') {
-      if ((item.affixes || []).some(a => a.stat === 'brand')) return { ok: false, why: 'this weapon already carries a brand' };
-      note = `on hit: ${r.element}`;
+      if ((item.affixes || []).some(a => a.stat === 'brand')) return { ok: false, why: 'This weapon already carries a brand.' };
+      note = `Adds ${r.element} damage on every hit`;
     }
     if (r.kind === 'intrinsic') {
       const times = item.reinforced?.[r.stat] || 0;
-      if (times >= 3) return { ok: false, why: 'the base will not take any more' };
+      if (times >= 3) return { ok: false, why: 'This item has already been reinforced 3 times, which is the limit.' };
       extra = 1 + times;
-      note = times ? `done ${times} of 3 times` : 'up to three times';
+      note = times ? `Done ${times} of 3 times` : 'Can be done up to 3 times';
     }
     if (r.kind === 'create') {
       cost = r.cost;
@@ -354,7 +354,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       return {
         ok: !Object.keys(short).length, recipe: r, cost: priced, costText: costText(priced),
         note: `${r.rarity} ${r.makes}, level ${player?.level || 1}`,
-        why: Object.keys(short).length ? `needs ${costText(short)} more` : null, short,
+        why: Object.keys(short).length ? `The bench needs ${costText(short)} more than you have.` : null, short,
         // what fits on a button, so the reason is where the click is
         need: Object.keys(short).length ? `Need ${costText(short)}` : null,
       };
@@ -364,23 +364,23 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
     const short = supply.missing(priced);
     return {
       ok: !Object.keys(short).length, recipe: r, cost: priced, costText: costText(priced), note,
-      why: Object.keys(short).length ? `needs ${costText(short)} more` : null, short,
+      why: Object.keys(short).length ? `The bench needs ${costText(short)} more than you have.` : null, short,
       need: Object.keys(short).length ? `Need ${costText(short)}` : null,
     };
   }
 
   function whyNot(r, item, player) {
-    if (!item) return 'pick an item first';
+    if (!item) return 'Pick an item first.';
     if (NEEDS_LOOT_BASE.includes(r.kind) && !hasLootBase(item)) {
-      return 'the bench cannot rework this kind of gear — mounts, lights, quivers and tools are upgraded at their own bench';
+      return 'The crafting bench cannot rework this kind of gear. Mounts, lights, quivers and tools are upgraded at their own bench.';
     }
-    if (r.kind === 'intrinsic' && r.stat === 'armor' && !(item.armor > 0)) return 'this carries no armour to reinforce';
-    if (item.isUnique) return 'a unique is what it is — it cannot be reworked';
-    if (r.minRarity && rarityAt(item.rarity) < rarityAt(r.minRarity)) return `needs a ${r.minRarity} item or better`;
-    if (r.slot === 'weapon') return 'weapons only';
-    if (r.slot === 'armour') return 'armour only';
-    if (r.minLevel && (player?.level || 1) < r.minLevel) return `you need to be level ${r.minLevel}`;
-    return 'cannot be done to this';
+    if (r.kind === 'intrinsic' && r.stat === 'armor' && !(item.armor > 0)) return 'This item has no armour value to reinforce.';
+    if (item.isUnique) return 'A unique item cannot be reworked.';
+    if (r.minRarity && rarityAt(item.rarity) < rarityAt(r.minRarity)) return `This recipe needs a ${r.minRarity} item or better.`;
+    if (r.slot === 'weapon') return 'This recipe works on weapons only.';
+    if (r.slot === 'armour') return 'This recipe works on armour only.';
+    if (r.minLevel && (player?.level || 1) < r.minLevel) return `You must be level ${r.minLevel} to use this recipe.`;
+    return 'This recipe cannot be applied to this item.';
   }
 
   /**
@@ -390,7 +390,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
   function apply(id, item, { index = 0, player = null, baseKey = null, magicFind = 0 } = {}) {
     const q = quote(id, item, { index, player });
     if (!q.ok) return q;
-    if (!supply.spend(q.cost)) return { ok: false, why: 'the materials went somewhere' };
+    if (!supply.spend(q.cost)) return { ok: false, why: 'The materials for this recipe are no longer there.' };
     const r = q.recipe;
 
     if (r.kind === 'create') {
@@ -430,7 +430,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       if (item.dmg) item.dmg = item.dmg.map(v => Math.max(1, Math.round(v * step)));
       if (item.armor) item.armor = Math.max(1, Math.round(item.armor * step));
       for (const a of item.affixes || []) if (typeof a.value === 'number') a.value = +(a.value * step).toFixed(2);
-      return { ok: true, text: `Tempered to ${to}.` };
+      return { ok: true, text: `Tempered to ${to} quality.` };
     }
 
     if (r.kind === 'promote') {
@@ -440,7 +440,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       // (the material name here is Emberveil's internal tier key, not one of our three.)
       rpg.loot.addAffix(item, 'iron_scrap', { iron_scrap: 99 }, rng);
       rpg.loot.rename(item);
-      return { ok: true, text: `Promoted to ${to}.` };
+      return { ok: true, text: `Promoted to ${to}, and a new property was added.` };
     }
 
     if (r.kind === 'addAffix') {
@@ -448,13 +448,13 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       rpg.loot.addAffix(item, 'rare_dust', { rare_dust: 99 }, rng);
       const added = (item.affixes || [])[before];
       rpg.loot.rename(item);
-      return { ok: true, affix: added, text: added ? `Inscribed: ${added.name || added.stat}.` : 'Nothing would take.' };
+      return { ok: true, affix: added, text: added ? `Inscribed: ${added.name || added.stat}.` : 'No new property would take.' };
     }
 
     if (r.kind === 'reroll') {
       const base = rpg.loot.base(item.baseKey);
       const pool = rpg.loot.pool(base, item.rarity).filter(a => !item.affixes.some(x => x.id === a.id));
-      if (!pool.length) return { ok: false, why: 'there is nothing else this item could carry' };
+      if (!pool.length) return { ok: false, why: 'There is no other property this item could carry.' };
       const pick = pool[Math.floor(rng() * pool.length)];
       const was = item.affixes[index];
       item.affixes[index] = { ...pick, value: rollFor(item, pick, rng), reworked: true };
@@ -477,7 +477,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       item.affixes = [...fresh, ...keep];
       item.reworks = (item.reworks || 0) + 1;
       rpg.loot.rename(item);
-      return { ok: true, text: 'Recast. Everything on it is new.' };
+      return { ok: true, text: 'Recast — every rolled property on this item is new.' };
     }
 
     if (r.kind === 'values') {
@@ -485,7 +485,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
         if (a.baseIntrinsic || a.min == null || a.max == null) continue;
         a.value = rollFor(item, a, rng);
       }
-      return { ok: true, text: 'Rolled again.' };
+      return { ok: true, text: 'Every rolled property on this item has a new value.' };
     }
 
     if (r.kind === 'brand') {
@@ -494,7 +494,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
         value: 1, element: r.element, baseIntrinsic: true, brand: true,
       });
       item.brand = r.element;
-      return { ok: true, text: `Branded with ${r.element}.` };
+      return { ok: true, text: `Branded — this weapon now deals ${r.element} damage on every hit.` };
     }
 
     if (r.kind === 'intrinsic') {
@@ -502,10 +502,15 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       item.reinforced[r.stat] = (item.reinforced[r.stat] || 0) + 1;
       if (r.stat === 'armor' && item.armor) item.armor = Math.round(item.armor * (1 + r.value));
       if (r.stat === 'dmg' && item.dmg) item.dmg = item.dmg.map(v => Math.max(1, Math.round(v * (1 + r.value))));
-      return { ok: true, text: r.stat === 'armor' ? 'Reinforced.' : 'Honed.' };
+      return {
+        ok: true,
+        text: r.stat === 'armor'
+          ? `Reinforced — this item's armour is ${Math.round(r.value * 100)}% higher.`
+          : `Honed — this weapon's damage is ${Math.round(r.value * 100)}% higher.`,
+      };
     }
 
-    return { ok: false, why: 'that recipe does nothing yet' };
+    return { ok: false, why: 'That recipe does nothing yet.' };
   }
 
   /**

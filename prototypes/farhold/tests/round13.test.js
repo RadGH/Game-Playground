@@ -71,13 +71,25 @@ test('a refusal says what tool you need AND where that tool comes from', () => {
   const spire = placedNode({ data: DATA, rng: makeRng(2), kindId: 'crystal_spire', x: 0, z: 0 });
   const why = haulReport(spire, { data: DATA, tool: 'iron_tool' }).why;
   assert.match(why, /Steel Tool/);
-  assert.match(why, /weapon/i, 'the refusal does not say where a tool tier comes from');
+  /**
+   * R21: this asserted `/weapon/i`, because when it was written the tool tier was read off the
+   * weapon in your hands. Round 16 gave the game a real Tool slot and real built tools, and the
+   * `from` sentences in data/resources.json were never updated — so this assertion was quietly
+   * keeping a description of the OLD system alive, which is exactly what the question in the
+   * comment above was complaining about. It now asserts what the refusal has to answer: which
+   * tool, and how you get one.
+   */
+  assert.match(why, /Tool slot/i, 'the refusal does not say where a tool tier comes from');
+  assert.match(why, /Steelhead Pick and Axe/, 'the refusal does not name the tool to build');
   assert.match(why, /Alloy Forge/, 'the refusal does not say how to get steel');
   // and bare hands do not read as "too hard for a Bare Hands"
   const outcrop = placedNode({ data: DATA, rng: makeRng(3), kindId: 'ore_outcrop', x: 0, z: 0 });
   assert.match(haulReport(outcrop, { data: DATA, tool: 'hands' }).why, /by hand/);
   // every tool says where it comes from, or the message above is empty for that tier
-  for (const [id, t] of Object.entries(DATA.tools)) assert.ok(t.from, `${id} does not say where it comes from`);
+  for (const [id, t] of Object.entries(DATA.tools)) {
+    if (id.startsWith('_')) continue;          // R21: `_r21` is a note to the next reader
+    assert.ok(t.from, `${id} does not say where it comes from`);
+  }
 });
 
 // ---------------------------------------------------------------- the walk, not the line

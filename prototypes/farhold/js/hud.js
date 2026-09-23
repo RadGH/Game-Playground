@@ -176,25 +176,26 @@ const STATUS_COLOR = {
 const STAT_HELP = {
   // R14: the four attributes are a readout now, under Stats. They are earned on perk nodes —
   // js/perks.js hands out str/dex/int/con — not bought a point at a time.
-  Strength: 'Raises the damage of every melee swing, and how much you can carry. Earned on perk nodes.',
-  Dexterity: 'Raises ranged damage and adds a little critical chance and dodge. Earned on perk nodes.',
-  Intellect: 'Raises spell power and the size of your mana pool. Earned on perk nodes.',
-  Constitution: 'Raises health and how fast it comes back. Earned on perk nodes.',
-  Health: 'How much damage you can take before you black out. Constitution and `+health` gear raise it.',
-  Mana: 'What skills are paid for with. Intellect and `+mana` gear raise the pool; mana regeneration refills it.',
-  Damage: 'The range one swing rolls in, after your weapon, your attribute, your talents and every damage property on your gear.',
-  Armour: 'Cuts physical damage. The curve is damage x 100/(100+armour), so the first points are worth the most.',
-  'Magic resistance': 'The same curve, against fire, ice, lightning, poison, shadow and arcane.',
-  Crit: 'The chance a hit rolls critical, and how much extra it does when it lands. Dexterity adds a little of the first.',
-  Dodge: 'The chance a hit misses you entirely. Capped at 35%, however high the number goes.',
-  Block: 'A share of hits take a flat chunk off before anything else. Shields only.',
-  Barrier: 'A pool that soaks damage before your health does, and refills when nothing is fighting you.',
-  'Attack speed': 'How many swings a second. Comes from the `initiative` property, which is turn order in Emberveil and haste here.',
-  Cooldowns: 'How much sooner every skill comes back.',
-  'Move speed': 'Metres a second at a walk. Heavy armour slows you; talents and haste do not.',
-  'Better loot': 'Magic find: shifts every drop roll towards the good end of the rarity table.',
+  Strength: 'Scales a HEAVY weapon only — an axe, a maul, a greatsword — by +3% damage a point. Nothing else reads Strength: Farhold has no carry weight. Earned on perk nodes.',
+  Dexterity: 'Scales a RANGED or LIGHT weapon by +3% damage a point, and adds +0.2% critical chance and +0.3% dodge chance a point. Earned on perk nodes.',
+  Intellect: 'Scales a WAND or STAFF by +3% damage a point, and adds +2 maximum mana a point. Spell damage is a separate stat, off perk nodes and gear. Earned on perk nodes.',
+  Constitution: '+4 maximum health a point, and nothing else — health regeneration is its own stat. Earned on perk nodes.',
+  Health: 'How much damage you can take before you black out. 70 at level 1, +16 a level, +4 for each point of Constitution, plus every `+health` property on your gear.',
+  Mana: 'What skills are paid for. 24 at level 1, +4 a level, +2 for each point of Intellect, plus every `+mana` property. Mana regeneration refills the pool a second at a time.',
+  Damage: 'The range one swing rolls in: the weapon dice scaled by your level (+11% a level), plus every flat damage bonus, all multiplied by your weapon attribute (+3% a point) and your damage %.',
+  Armour: 'Cuts physical damage. The curve is damage x 100/(100+armour), so the first points are worth the most: 100 armour cuts a hit in half, 300 cuts it to a quarter.',
+  'Magic resistance': 'The same curve — damage x 100/(100+resistance) — against fire, ice, lightning, poison, shadow and arcane.',
+  Crit: 'The chance a hit rolls critical, and how much extra damage a critical does. 5% and +50% at level 1; Dexterity adds +0.2% chance a point.',
+  Dodge: 'Your chance to take no damage at all from an incoming hit. Capped at 35%, however high the number goes.',
+  Block: 'Shields only. Block chance is the share of incoming hits that have Block power taken straight off the damage, after armour has already cut it.',
+  Barrier: 'A second health pool that soaks damage before your health does. Out of a fight the barrier refills at 8% of its own size a second.',
+  'Attack speed': 'How many swings a second. One swing takes 0.62s divided by 1 + your attack speed %, and never drops below 0.18s.',
+  Cooldowns: 'How much sooner every skill comes back. Capped at 60%, however high the number goes.',
+  'Move speed': 'Metres a second at a walk. 5.4 with nothing on; armour costs up to 20% of that (the full 20% at 400 armour); move speed % is added on top.',
+  'Better loot': 'Magic find. Every drop, chest and craft is 1 + magic find % more likely to roll above normal rarity — at +100% a legendary is twice as likely.',
+  'Gold find': 'Raises gold you FIND — hauls, chests, bodies — by that %. A sale price at a shop is earnings, not a find, and is deliberately left alone.',
   Kills: 'Everything you have put down, on every world.',
-  Tool: 'Your weapon IS your tool — there is no separate tool slot. A stone, bone or wooden weapon digs at tier 1; iron, bronze, copper or silver is tier 1 and faster; steel is tier 2 and opens the hard seams. Hover the row for what you are carrying and what the next rung takes.',
+  Tool: 'What you have in the Tool slot decides what you can harvest. A Knapped Tool is tier 1 and takes clay, sand, fibre and young trees; an Ironhead Pick and Axe is tier 1 and 25% faster; a Steelhead is tier 2 and opens the hard seams. Hover the row for what you are carrying and what the next rung costs.',
 };
 
 /** What a zone's colour means, spelled out under the banner. */
@@ -208,7 +209,7 @@ const TONE_WORDS = {
 
 /** How many properties each rarity rolls, for the "what comes out" panel. */
 const AFFIX_COUNT = {
-  normal: 'No properties — promote it afterwards to give it some.',
+  normal: 'No properties. Promote the item at the Upgrade bench afterwards to add 1.',
   magic: 'Two properties.',
   rare: 'Three properties.',
   legendary: 'Five or six properties.',
@@ -420,13 +421,13 @@ export class Hud {
       if (s.empty) {
         return s.pending
           ? `<b>Spell available</b><div class="tip-good">This slot opened at level ${s.unlockAt}.</div>`
-            + '<div class="tip-line">Open the character sheet, Skills, and pick what goes in it.</div>'
+            + '<div class="tip-line">Open the character sheet, Skills, and pick the spell that goes in this slot.</div>'
           : `<b>Not learned yet</b><div class="tip-bad">This slot opens at level ${s.unlockAt}.</div>`;
       }
       return `<b>${s.name}</b>`
         + (s.locked ? `<div class="tip-bad">Unlocks at level ${s.unlockAt}.</div>`
           : `<div class="tip-dim">${s.mp} mana · ${s.cooldown.toFixed(1)}s cooldown${s.ready > 0 ? ` · ${s.ready.toFixed(1)}s left` : ''}</div>`)
-        + `<div class="tip-line">${s.desc || ''}</div>`;
+        + `<div class="tip-line">${s.descShort || s.desc || ''}</div>`;
     });
     registerTip('stat', node => `<b>${node.dataset.tipStat}</b><div class="tip-line">${STAT_HELP[node.dataset.tipStat] || ''}</div>`);
     /** Items shown in a tooltip are held by id, because a dataset can only carry a string. */
@@ -1733,7 +1734,6 @@ export class Hud {
       ['Magic resistance', hpNum(d.magicResist)],
       ['Crit', `${fmt(d.critChance)}% for +${hpNum(d.critDamage)}%`],
       ['Dodge', `${fmt(d.dodge)}%`],
-      ['Accuracy', d.hit ? `+${fmt(d.hit)}% (cancels ${fmt(d.hit / 2)}% of their dodge)` : '—'],
       ['Block', d.blockChance ? `${fmt(d.blockChance)}% for ${hpNum(d.blockPower)}` : '—'],
       ['Barrier', d.barrier ? `${hpNum(player.barrier || 0)} / ${hpNum(d.barrier)}` : '—'],
       ['Attack speed', `${fmt(1 / (d.attackEvery || 0.62))} a second${d.haste ? ` (+${fmt(d.haste)}%)` : ''}`],
@@ -1785,7 +1785,7 @@ export class Hud {
     const GROUPS = {
       // R14: first, because they are what the rest is built out of
       attrs: ['Strength', 'Dexterity', 'Intellect', 'Constitution'],
-      offence: ['Damage', 'Crit', 'Accuracy', 'Attack speed', 'Cooldowns'],
+      offence: ['Damage', 'Crit', 'Attack speed', 'Cooldowns'],
       defence: ['Health', 'Armour', 'Magic resistance', 'Dodge', 'Block', 'Barrier'],
       utility: ['Mana', 'Move speed', 'Tool', 'Better loot', 'Gold find', 'Kills'],
     };
@@ -1796,10 +1796,10 @@ export class Hud {
       if (k === 'Tool') {
         const t = this.tool?.();
         dt.dataset.tip = t
-          ? `Your weapon is your tool — there is no separate tool slot.\n\nRight now: ${t.name}`
+          ? `Equip a tool in the Tool slot to harvest.\n\nRight now: ${t.name}`
             + ` (tier ${t.tier}, digs at ${t.rate}x).\nYou have it from ${t.from}.`
             + (t.next ? `\n\nNext rung — ${t.next.name}: ${t.next.from}` : '')
-          : 'Your weapon is your tool. There is no separate tool slot.';
+          : 'Nothing in your Tool slot. Build a Knapped Tool from 4 logs and 8 fibre to start harvesting.';
         dt.dataset.tipRender = '';
         dt.tabIndex = 0;
       }
@@ -2218,7 +2218,7 @@ export class Hud {
       row.onmouseleave = () => { if (this.hoverItem === item) this.hoverItem = null; };
       row.onfocus = () => { this.hoverItem = item; this.showCompare(item); };
       const scrap = el('button', 'scrap', '♺');
-      scrap.dataset.tip = 'Recycle this into crafting material. What you get back depends on its rarity, what it is made of, and how well made it is.';
+      scrap.dataset.tip = 'Recycle this item into crafting material. How much comes back depends on the item\u2019s rarity, what the item is made of, and its quality.';
       scrap.textContent = '♺';
       scrap.onclick = e => { e.stopPropagation(); hideTip(); this.onRecycle?.(item); this.renderSheet(); };
       row.append(scrap);
@@ -2272,8 +2272,8 @@ export class Hud {
         }
         const name = s.pending ? 'Spell available' : dead ? `level ${s.unlockAt}` : s.name;
         const cost = s.pending ? 'click to choose' : dead ? 'locked' : `${s.mp} mana · ${s.cooldown.toFixed(1)}s`;
-        const desc = s.pending ? `This slot opened at level ${s.unlockAt}. Pick what goes in it.`
-          : dead ? `unlocks at level ${s.unlockAt}` : (s.desc || '');
+        const desc = s.pending ? `This slot opened at level ${s.unlockAt}. Pick the spell that goes in this slot.`
+          : dead ? `Unlocks at level ${s.unlockAt}` : (s.descShort || s.desc || '');
         card.innerHTML = `<span class="sk-key">${i + 1}</span>`
           + `<span class="sk-name">${name}</span>`
           + `<span class="sk-cost">${cost}</span>`
@@ -2350,9 +2350,9 @@ export class Hud {
                 this.renderSheet();
               };
             } else if (on) {
-              card.dataset.tip = 'Taken. An Unbinder in town will take it back off, for a price.';
+              card.dataset.tip = 'Taken. An Unbinder in town will take this talent back off, for a price.';
             } else if (open && tierSpent) {
-              card.dataset.tip = 'This tier is already spent. An Unbinder in town takes the other one off first.';
+              card.dataset.tip = 'This tier is already spent. An Unbinder in town takes the talent you picked back off first.';
             }
             row.append(card);
           }
@@ -3228,7 +3228,7 @@ export class Hud {
     // ---- the detail panel
     const box = $('up-detail');
     const r = craft.byId[this.upRecipe];
-    if (!r) { box.replaceChildren(el('p', 'muted small', 'Pick one to see what it costs and what it changes.')); return; }
+    if (!r) { box.replaceChildren(el('p', 'muted small', 'Pick a recipe to see what the recipe costs and what it changes on the item.')); return; }
     const q = r.id === 'reweave'
       ? craft.quote('reweave', this.bench, { index: this.craftIndex || 0, player })
       : craft.quote(r.id, this.bench, { player });
@@ -3245,7 +3245,7 @@ export class Hud {
         const can = this.rpg.loot.rerollable(a);
         const row = el('div', 'bench-affix' + (this.craftIndex === i ? ' picked' : '') + (can ? ' pickable' : ' fixed'));
         row.innerHTML = `<span>${describeAffix(a)}</span>`;
-        row.dataset.tip = can ? 'Trade this one for a different property.' : 'Part of what the item is — it cannot be rewoven.';
+        row.dataset.tip = can ? 'Trade this one for a different property.' : 'Part of what the item is — this property cannot be rewoven.';
         if (can) row.onclick = () => { this.craftIndex = i; hideTip(); this.renderUpgrade(); };
         opts.append(row);
       });
@@ -3260,8 +3260,8 @@ export class Hud {
     out.push(el('h4', null, 'What changes'));
     const change = el('div', 'forge-result');
     change.innerHTML = q.ok
-      ? `<div>${q.note || CHANGE_TEXT[r.kind] || 'It is reworked.'}</div>`
-        + (r.kind === 'rerollAll' ? '<div class="tip-bad small">Every property is thrown away and rolled again. It can come out worse.</div>' : '')
+      ? `<div>${q.note || CHANGE_TEXT[r.kind] || 'The item is reworked.'}</div>`
+        + (r.kind === 'rerollAll' ? '<div class="tip-bad small">Every property is thrown away and rolled again. The item can come out worse than it is now.</div>' : '')
         + (r.kind === 'promote' ? '<div class="muted small">A promotion always comes with one more property.</div>' : '')
       : `<div class="tip-bad">${q.why}</div>`;
     out.push(change);
@@ -3679,7 +3679,7 @@ export class Hud {
         row.append(take);
       }
       return row;
-    }) : [el('p', 'muted small', 'Nothing is pinned to it today. Come back after something happens here.')]));
+    }) : [el('p', 'muted small', 'Nothing is pinned to the board today. Come back after something happens in this zone.')]));
   }
 
   /**
@@ -3782,7 +3782,7 @@ export class Hud {
       const p = profileOf(item);
       bits.push(`<div class="tip-pattern"><span class="glyphs">${patternGlyphs(item)}</span>`
         + `<span class="muted small">${patternText(item)}</span></div>`);
-      if (p.twoHanded) bits.push('<div class="tip-dim">Two-handed — it takes the off hand with it.</div>');
+      if (p.twoHanded) bits.push('<div class="tip-dim">Two-handed — this weapon fills the off hand as well, so nothing else can go there.</div>');
     }
 
     // Every property, in plain language, each one listed ONCE.
@@ -3803,9 +3803,9 @@ export class Hud {
       }).join('') + '</ul>');
     }
     if (intrinsic.length) {
-      bits.push('<ul class="tip-affixes">' + intrinsic.map(a => `<li class="tip-base-affix">${describeAffix(a)} <i class="tip-dim">(part of the item)</i></li>`).join('') + '</ul>');
+      bits.push('<ul class="tip-affixes">' + intrinsic.map(a => `<li class="tip-base-affix">${describeAffix(a)} <i class="tip-dim">(built in — cannot be removed or rerolled)</i></li>`).join('') + '</ul>');
     }
-    if (!affixes.length && !intrinsic.length) bits.push('<div class="tip-dim">No properties. Promote it at the bench to give it some.</div>');
+    if (!affixes.length && !intrinsic.length) bits.push('<div class="tip-dim">No properties. Promote this item at the Upgrade bench to add 1 property.</div>');
 
     // set progress
     if (item.setId && this.rpg?.loot?.setInfo) {
@@ -3828,12 +3828,12 @@ export class Hud {
             .filter(([k]) => k !== 'desc')
             .map(([stat, value]) => describeAffix({ stat, value }))
             .join(', ');
-          return `<li class="${on ? 'tip-set' : 'tip-dim'}">${st.at} pieces: ${names || st.bonus.desc || 'a power'}${on ? ' ✓' : ''}</li>`;
+          return `<li class="${on ? 'tip-set' : 'tip-dim'}">${st.at} pieces: ${names || st.bonus.desc || 'bonus not listed'}${on ? ' ✓' : ''}</li>`;
         }).join('') + '</ul>');
       }
     }
 
-    if (item.reworks) bits.push(`<div class="tip-dim">Reworked ${item.reworks} time${item.reworks > 1 ? 's' : ''} — the next one costs more.</div>`);
+    if (item.reworks) bits.push(`<div class="tip-dim">Reworked ${item.reworks} time${item.reworks > 1 ? 's' : ''} — each rework on this item costs more than the last.</div>`);
     if (item.lore) bits.push(`<div class="tip-lore">${item.lore}</div>`);
 
     // what changes if you wear it
@@ -3844,7 +3844,7 @@ export class Hud {
       const was = [];
       if (current.dmg) was.push(`${current.dmg[0]}\u2013${current.dmg[1]} damage`);
       if (current.armor) was.push(`${current.armor} armour`);
-      if (was.length) bits.push(`<div class="tip-dim">it has ${was.join(' · ')}</div>`);
+      if (was.length) bits.push(`<div class="tip-dim">${current.name} has ${was.join(' · ')}</div>`);
       const changed = (current.affixes || []).filter(a => !a.baseIntrinsic).map(a => describeAffix(a));
       if (changed.length) bits.push(`<ul class="tip-affixes tip-losing">${changed.map(t => `<li>${t}</li>`).join('')}</ul>`);
     } else if (!worn) {

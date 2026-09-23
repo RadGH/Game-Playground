@@ -115,8 +115,18 @@ export function footprintOf(size = 1) {
  *   import { streetLanes } from './town-plan.js';
  *   for (const lane of streetLanes(plan, { cx, cz, terrain })) push(streets, laneRibbon(lane, { lift: 0.12, color }));
  */
-export function streetLanes(plan, { cx = 0, cz = 0, terrain = null, skip = null, gradePasses = 2 } = {}) {
+export function streetLanes(plan, {
+  cx = 0, cz = 0, terrain = null, skip = null, gradePasses = 2,
+  /**
+   * R21 — drop paving that leads nowhere. Opt-in, because this function is otherwise a pure
+   * transform from a plan to ribbons and several tests drive it as one: handed a plan with two
+   * streets they expect two streets back, cut or not. The GAME wants the pruning; a unit test
+   * asking "does a break make two runs instead of one with a hole" does not. See `keepConnected`.
+   */
+  prune = false,
+} = {}) {
   const lanes = [];
+  const runs = [];
   for (const st of plan?.streets || []) {
     /**
      * Sampled BEFORE the water check, not after.
@@ -137,13 +147,7 @@ export function streetLanes(plan, { cx = 0, cz = 0, terrain = null, skip = null,
     let run = [];
     const flush = () => {
       if (run.length >= 2) {
-        lanes.push(planLane(run, {
-          terrain,
-          half: (st.width || 4) / 2,
-          gradePasses,
-          klass: st.cls || 'street',
-          surface: 'street',
-        }));
+        runs.push({ pts: run, half: (st.width || 4) / 2, cls: st.cls || 'street' });
       }
       run = [];
     };
@@ -153,7 +157,101 @@ export function streetLanes(plan, { cx = 0, cz = 0, terrain = null, skip = null,
     }
     flush();
   }
+
+  for (const r of (prune ? keepConnected(runs, terrain) : runs)) {
+    lanes.push(planLane(r.pts, {
+      terrain, half: r.half, gradePasses, klass: r.cls, surface: 'street',
+    }));
+  }
   return lanes;
+}
+
+/** How short a piece of paving has to be before it is not a street at all. */
+const MIN_RUN = 5.5;
+/** How close two runs must come to count as joined. Their own half-widths, plus a stride. */
+const JOIN_SLACK = 1.6;
+
+/**
+ * R21 — DROP THE PAVING THAT GOES NOWHERE.
+ *
+ * The play-test: *"There are lots of sub-roads that are totally meaningless and/or don't connect to
+ * the main road."* Measured on the reported town: 164 planned streets, of which **159 were alleys
+ * averaging 11 m**, 69 of them under 8 m, and **308 of 318 endpoints were dead ends** — the alleys
+ * did not even share corners with each other. 1,785 m of alley for 37 plots.
+ *
+ * proctown DOES have a connectivity pass (`connectStreets`, added in round 13 for exactly this
+ * complaint) and it is not enough, because of an ORDERING problem that round could not see: it
+ * decides connectivity in PLAN space, and then the run is cut afterwards and elsewhere — here, by
+ * `skip`, at the water, at a bridge deck and (new this round) at the world road. A street the
+ * planner certified as connected is sliced into pieces after the fact, and the far piece is an
+ * orphan ribbon in a field. That is the "random flat rectangles" report, returning by a different
+ * door.
+ *
+ * So the same question is asked again, on the runs that will actually be drawn:
+ *
+ *   * a `main` or `lane` run is a seed — those are the spine of the town;
+ *   * a run touching the WORLD ROAD is a seed too, because the road is the street there. This
+ *     matters more than it sounds: the new road `skip` means every street that used to be drawn on
+ *     top of the carriageway now ENDS at it, and every one of those would otherwise read as an
+ *     orphan;
+ *   * anything else is kept only if it reaches something already kept, growing to a fixed point;
+ *   * and a run under `MIN_RUN` is a paving slab, not a street, so it goes whatever it touches.
+ */
+function keepConnected(runs, terrain) {
+  const live = runs.filter(r => lengthOf(r.pts) >= MIN_RUN);
+  if (live.length <= 1) return live;
+
+  const onRoad = r => {
+    if (!terrain?.roadAt) return false;
+    for (const [x, z] of [r.pts[0], r.pts[r.pts.length - 1]]) {
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        if (terrain.roadAt(x + Math.cos(a) * 5, z + Math.sin(a) * 5) > 0.45) return true;
+      }
+    }
+    return false;
+  };
+
+  const keep = new Set();
+  live.forEach((r, i) => { if (r.cls === 'main' || r.cls === 'lane' || onRoad(r)) keep.add(i); });
+  // nothing anchored it — fall back to the longest run, so a town is never left with no streets
+  if (!keep.size) {
+    let best = 0;
+    live.forEach((r, i) => { if (lengthOf(r.pts) > lengthOf(live[best].pts)) best = i; });
+    keep.add(best);
+  }
+
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (let i = 0; i < live.length; i++) {
+      if (keep.has(i)) continue;
+      for (const j of keep) {
+        if (!meet(live[i], live[j])) continue;
+        keep.add(i); grew = true; break;
+      }
+    }
+  }
+  return live.filter((_, i) => keep.has(i));
+}
+
+function lengthOf(pts) {
+  let out = 0;
+  for (let i = 1; i < pts.length; i++) out += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+  return out;
+}
+
+/** Do two runs come close enough anywhere along their length to be one network? */
+function meet(a, b) {
+  const reach = a.half + b.half + JOIN_SLACK;
+  const r2 = reach * reach;
+  for (const [ax, az] of a.pts) {
+    for (const [bx, bz] of b.pts) {
+      const dx = ax - bx, dz = az - bz;
+      if (dx * dx + dz * dz <= r2) return true;
+    }
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------- where a settlement stands

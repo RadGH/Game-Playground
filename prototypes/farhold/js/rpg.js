@@ -27,7 +27,7 @@ import {
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
 // js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
 // every Branding talent were doing nothing to an enemy. See `strike` for how it is applied once.
-import { incomingFrom } from './skills.js';
+import { incomingFrom, outgoingFrom } from './skills.js';
 // Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
@@ -1278,15 +1278,23 @@ export class Rpg {
     if (crit) amount *= 1 + (a?.critDamage ?? attacker.critDamage ?? 50) / 100;
 
     /**
-     * WHAT THE DEFENDER IS ALREADY SUFFERING.
+     * WHAT BOTH OF THEM ARE ALREADY CARRYING.
      *
      * `shock` says it "leaves the target taking more of everything", Branding says the same, and
-     * neither did anything to an enemy: `js/main.js` multiplies by `incomingFrom(victim)` when an
-     * ENEMY swings and never when the player does. Applied here for the player's swings only —
-     * `attacker.equipment && !defender.equipment` is exactly "the player is hitting something that
-     * is not the player" — so the enemy path is untouched and nothing is counted twice.
+     * neither did anything to an enemy — so round 17 applied `incomingFrom(defender)` here, but
+     * only for `attacker.equipment && !defender.equipment`, i.e. the player hitting something else,
+     * because js/main.js was already multiplying by it on the enemy path.
+     *
+     * R18 — the OTHER half was still missing and is the bigger one: nothing anywhere applied
+     * `outgoingFrom(attacker)` to a weapon swing. `js/main.js` used it at exactly one call site, a
+     * skill cast. So War Cry ("Hit harder for a while", might +30%) and Rally (+20%) did nothing to
+     * your swings, and Weakened (-35%) did not weaken them either.
+     *
+     * Both sides, once, here — where a swing, an arrow, a skill, a turret and a trap all pass
+     * through. The enemy path keeps its own `incomingFrom(victim) * outgoingFrom(e)` in main.js and
+     * is excluded by the same test as before, so nothing is counted twice.
      */
-    if (attacker.equipment && !defender.equipment) amount *= incomingFrom(defender);
+    if (attacker.equipment && !defender.equipment) amount *= outgoingFrom(attacker) * incomingFrom(defender);
 
     /**
      * FAR SHOT, the ranged keystone: "arrows and bolts hit harder the further they have flown, up

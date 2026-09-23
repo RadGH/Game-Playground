@@ -1903,7 +1903,7 @@
       "h": 4.4,
       "snap": "grid",
       "pool": {
-        "radius": 40
+        "relay": true
       },
       "cost": {
         "timber": 4,
@@ -1914,7 +1914,8 @@
         "kind": "post",
         "color": "#6b4f34"
       },
-      "desc": "Draws the pool's edge on the ground. Stores inside it share everything."
+      "desc": "Draws the pool's edge on the ground. Stores inside it share everything.",
+      "_r18": "R18 — this carried `pool: { radius: 40 }` while data/power.json's `poles.logistics_pole.linkRadius` says 22, and js/stores.js `defFor` reads power.json. So the 40 was the dead half of a number stated twice. Per the ruling that power.json owns reach and this file owns cost, the number is gone and `pool` is now just the flag that says THIS IS A RELAY — which is what js/main.js `joinSystems` reads to put it in the store network at all. Before that it joined nothing: no `store.slots`, no `power`, so the piece whose whole job is 'everything inside the ring shares one pile' shared nothing."
     },
     {
       "id": "burner_generator",

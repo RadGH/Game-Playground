@@ -607,7 +607,20 @@ export function spentBy(player) {
 
 /** Points left. */
 export function pointsLeft(player) {
-  return pointsFor(player?.level ?? 1) - spentBy(player);
+  /**
+   * R18 — `bonusPerks` IS WRITTEN FIVE TIMES AND WAS READ NOWHERE.
+   *
+   * A world boss (`data/worldbosses.json` `perkPoint`), a first-time landmark, a stronghold and a
+   * job frame's `perk` extra all pay a perk point, and all five call sites do
+   * `player.bonusPerks = (player.bonusPerks || 0) + n` and log "A perk point, for the trouble."
+   * Nothing added it to the budget, so the Perks screen's badge never moved: every perk-point
+   * reward in the game paid nothing while saying it had paid. `grep -rn bonusPerks js/ tests/`
+   * returned only those five self-referential assignments.
+   *
+   * It is also now saved, because a point you earned and cannot keep is the same bug one reload
+   * later — see the `perks`/`bonusPerks` pair in js/save.js.
+   */
+  return pointsFor(player?.level ?? 1) + (player?.bonusPerks || 0) - spentBy(player);
 }
 
 /**

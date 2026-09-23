@@ -3093,7 +3093,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         });
       }
     }
-    if (def.store?.slots) {
+    /**
+     * R18 — AND A RELAY IS A STORE WITH NO SHELVES.
+     *
+     * This joined a store only `if (def.store?.slots)`. The Logistics Pole has a
+     * `pool: { radius: 40 }` block, no `store`, and no `power`, so it joined NOTHING — and
+     * `def.pool` is read nowhere else in js/ either. The player reads "Relays goods. Everything
+     * inside the ring shares one pile; a drill under it never needs carrying", pays 4 timber, 2
+     * iron and 1 cloth, plants it between a remote drill and their crates, and nothing shares:
+     * `poolAt` still answers null at the pole and the drill still needs a hauled route.
+     *
+     * js/stores.js has always known how to be a relay — `cap 0` with a `linkRadius` is one, by its
+     * own definition at the top of that file — and `defFor` would find `poles.logistics_pole` in
+     * data/power.json. Nobody ever asked. The node tests called `net.add({type:'logistics_pole'})`
+     * directly, which works, so the store module was exercised and the game's join never was.
+     */
+    if (def.store?.slots || def.pool) {
       stores.add({ id: entry.id, type: entry.key, name: entry.name, x: entry.x, z: entry.z });
     }
     /**

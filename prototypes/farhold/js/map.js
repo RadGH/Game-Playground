@@ -3268,6 +3268,20 @@ let findFavOnly = false;
     /** B8: which region names you have earned, for the tests and the debug menu. */
     known: () => [...known],
     knows,
+    /**
+     * R18 — PUT A REGION ON THE CHART.
+     *
+     * `map.revealZone(id)` was CALLED at five sites in js/main.js — behind `?.`, so it failed
+     * silently — and did not exist. `data/job-frames.json` pays `reveals: "zone"`,
+     * `data/worldbosses.json`, `data/landmarks.json` and `data/strongholds.json` all pay
+     * `revealZone: true`, and every one of them printed "Greyfen goes on your chart" while the map
+     * went on saying "somewhere you have not been".
+     *
+     * `remember` is exactly what those call sites wanted and was simply private: it adds the id,
+     * persists the set and reports whether it was new. This is that function under the name the
+     * game had already agreed on.
+     */
+    revealZone: id => remember(id),
     /** Take the screen out of the page (used when the world under it is replaced). */
     dispose() {
       root.remove();

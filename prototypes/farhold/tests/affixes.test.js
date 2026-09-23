@@ -19,6 +19,7 @@ import {
 } from '../js/affixes.js';
 import { Rpg, SLOTS } from '../js/rpg.js';
 import { describeAffix, EFFECTS, INITIATIVE_PER_POINT } from '../js/effects.js';
+import { pointsLeft } from '../js/perks.js';
 import { applyStatus, tickStatuses, TICK_EVERY } from '../js/skills.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 
@@ -384,4 +385,45 @@ test('R18 — an Emberveil "leg of travel" is a modest share here, not +200% mov
     + 'that value means legs on a stage map, so Farhold has to scale it rather than read it as a share');
   // and the card has to say the same number the sheet gets
   assert.match(leg.desc ? leg.desc(2) : '', /\+\s*8(\.0)?%/, 'the card and the sheet disagree');
+});
+
+// ================================================================= R18 — rewards that paid nothing
+
+/**
+ * FOUR THINGS THAT LOGGED A REWARD AND GAVE NOTHING.
+ *
+ * Each of these is the project's signature fault from a different angle: a value written by several
+ * call sites and read by none, a function called behind `?.` that does not exist, a rule applied at
+ * one call site out of five.
+ */
+test('R18 — a perk point you were paid reaches the budget', () => {
+  const at30 = { level: 30, perks: [] };
+  const base = pointsLeft(at30);
+  const paid = pointsLeft({ ...at30, bonusPerks: 3 });
+  assert.equal(paid, base + 3,
+    '`bonusPerks` is written by five call sites (a world boss, a landmark, a stronghold, a job '
+    + 'frame) and was read by none — every perk-point reward logged "A perk point, for the trouble." '
+    + 'and moved no badge');
+});
+
+test('R18 — your own buffs reach a weapon swing, not just a skill cast', () => {
+  const items = read('../../emberveil/data/items.json');
+  const r = new Rpg(items, balance);
+  const hero = r.createPlayer({ name: 'T', classId: 'warrior', level: 20 });
+  r.refresh(hero, { full: true });
+  const dummy = { name: 'post', hp: 99999, maxHp: 99999, derived: { resistAll: 0 }, dmg: [1, 1] };
+
+  const roll = (who, n = 400) => {
+    let total = 0;
+    for (let i = 0; i < n; i++) total += r.strike(who, { ...dummy, statuses: {} }, makeRng(i + 1)).amount;
+    return total / n;
+  };
+
+  const plain = roll(hero);
+  // "Hit harder for a while" — the status the game already has, on the player
+  applyStatus(hero, 'might', skillData.statuses.might, 1);
+  const buffed = roll(hero);
+  assert.ok(buffed > plain * 1.05,
+    `War Cry's might did nothing to a weapon swing (${plain.toFixed(1)} -> ${buffed.toFixed(1)}): `
+    + '`outgoingFrom` was applied at exactly one call site, a skill cast');
 });

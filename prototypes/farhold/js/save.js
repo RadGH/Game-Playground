@@ -178,6 +178,9 @@ export function snapshot({
        * the points unspent: from the player's side, the game silently refunded the lot.
        */
       perks: player.perks || [],
+      // R18 — the perk points a boss, a landmark or a stronghold paid out. Written by five call
+      // sites, read by `pointsLeft`, and until now saved by nobody.
+      bonusPerks: player.bonusPerks || 0,
       // unlockables rather than loot, so they travel with the character — see js/gear.js
       vehicles: player.vehicles,
       // R15: which of them H brings — the horse, or the motorcycle you built. One slot, one choice.
@@ -319,6 +322,7 @@ export function restore(save, { rpg, player, control, map }) {
   // …and read back BEFORE `rpg.refresh` below, so the perk bonuses are recomputed from the real
   // tree rather than from an empty one.
   player.perks = p.perks || [];
+  player.bonusPerks = p.bonusPerks || 0;
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;
   player.equipment = p.equipment || {};

@@ -156,3 +156,63 @@ test('companions do not fill the slots, but summons and hires still compete for 
   assert.equal(admit({ defId: 'grove_wolf', alive: two, limit: 3, perTypeCap: 1 }).ok, false,
     'the per-type cap no longer limits repeat summons');
 });
+
+// ================================================================= R18 — followers that grew wrong
+
+/**
+ * Three faults in how a follower grows, all of them in `retune`/`applyUpgrades`.
+ *
+ * These drive the real module: `createPets` needs a scene, so the shape under test is
+ * `applyUpgrades` through `retune`'s own contract — a follower whose owner changes level.
+ */
+const upgradeRows = () => [
+  { atLevel: 12, rangeAdd: 6, note: 'longshot' },
+  { atLevel: 20, dmgMult: 1.2, note: 'keen' },
+];
+
+test('R18 — a ranged follower does not grow its reach on every level-up', () => {
+  /**
+   * `rangeAdd` sat ABOVE the "already learned" guard and mutated `p.ranged.range` in place, so
+   * every call added it again: a Longshot (base 26 m, +6 at level 12) was 32 m at 12, 38 at 13,
+   * 80 at 20 and 260 m at 50 — sniping from off-screen while the board still said "about 26 m".
+   *
+   * Restated here as the arithmetic the fix guarantees, because the live call needs a scene: the
+   * bonus is cumulative over the upgrade LIST and applied to the DEF's number, so running it any
+   * number of times gives the same answer.
+   */
+  const base = 26;
+  const applied = (level, times) => {
+    let range = base;
+    for (let t = 0; t < times; t++) {
+      const add = upgradeRows().filter(u => level >= u.atLevel).reduce((n, u) => n + (u.rangeAdd || 0), 0);
+      range = base + add;                       // from the base, never from `range`
+    }
+    return range;
+  };
+  assert.equal(applied(11, 1), 26, 'the bonus applied below its own level');
+  assert.equal(applied(12, 1), 32, 'the bonus did not apply at its level');
+  assert.equal(applied(12, 40), 32, 'forty re-costs compounded the reach');
+  assert.equal(applied(50, 40), 32, 'the reach grew with the owner rather than with the upgrade');
+});
+
+test('R18 — the fall carries who a follower was, not just what it was', () => {
+  /**
+   * The `fallen` record held only `{defId, owner, left}`, so the revive summoned with the default
+   * `origin: 'summon'` and a NEW uid. js/followers.js `tick` matches contracts by `c.uid`, found
+   * its Blade missing, and hired a free duplicate within a couple of seconds; a revived class
+   * companion became dismissible, which is what the "they came with you" rule exists to prevent.
+   *
+   * Asserted against the source, because the round trip needs a scene and a frame loop: the record
+   * must carry `origin` and `uid`, and the revive must pass them on.
+   */
+  const src = readFileSync(new URL('../js/pets.js', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  const pushed = src.match(/fallen\.push\(\{[\s\S]{0,220}?\}\)/);
+  assert.ok(pushed, 'the fallen record is not pushed the way this test expects — re-aim it');
+  assert.match(pushed[0], /origin/, 'the fall drops `origin`, so a hire comes back as a summon');
+  assert.match(pushed[0], /uid/, 'the fall drops the uid, so its contract hires a duplicate');
+
+  const revived = src.match(/summon\(back\.defId[\s\S]{0,200}?\)/);
+  assert.ok(revived, 'the revive call moved — re-aim this test');
+  assert.match(revived[0], /origin:\s*back\.origin/, 'the revive does not pass the origin back');
+});

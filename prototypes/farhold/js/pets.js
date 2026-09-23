@@ -194,7 +194,21 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
   function retune(p) {
     const def = byId[p.defId];
     const level = p.owner?.level || 1;
-    if (!def || level === p.level) return;
+    /**
+     * R18 — `level === p.level` IS NOT "NOTHING TO DO".
+     *
+     * `make()` builds a follower at the owner's level and applies no upgrades, so a mercenary hired
+     * at 20 arrived stock — no longsword, no `rive`, no kit — and this early return then refused to
+     * fix it, because its level already matched. It caught up at 21, and at the level cap it never
+     * caught up at all: a Blade for Hire bought at 50 stayed a Blade for Hire at 50 forever, while
+     * the hire board advertised the growth explicitly.
+     *
+     * `applyUpgrades` is already idempotent (`learned` makes each one happen once), so the honest
+     * test is "have the upgrades for this level been applied", not "has the number changed".
+     */
+    if (!def) return;
+    if (level === p.level && p.upgradesAt === level) return;
+    p.upgradesAt = level;
     const frac = p.maxHp > 0 ? p.hp / p.maxHp : 1;
     const power = rpg.fx.product(p.owner, 'petPower');
     const health = rpg.fx.product(p.owner, 'petHealth');
@@ -210,6 +224,8 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
      * once: an upgrade already in that list is skipped however many times this runs.
      */
     const grown = applyUpgrades(p, level);
+    // R18 — from the DEF's range, never from the current one. See `out.rangeAdd`.
+    if (p.ranged) p.ranged.range = (def.ranged?.range ?? 20) + grown.rangeAdd;
     const at = scaleFollower({ def, level, perLevel: cfg.perLevel ?? 1.17, power, health, grown });
     p.maxHp = at.hp;
     p.hp = Math.max(1, Math.round(p.maxHp * frac));
@@ -225,13 +241,23 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
    * mercenary hitting for thousands.
    */
   function applyUpgrades(p, level) {
-    const out = { dmgMult: 1, hpMult: 1, armorAdd: 0 };
+    const out = { dmgMult: 1, hpMult: 1, armorAdd: 0, rangeAdd: 0 };
     for (const up of p.upgrades || []) {
       if (level < (up.atLevel ?? 1)) continue;
       out.dmgMult *= up.dmgMult ?? 1;
       out.hpMult *= up.hpMult ?? 1;
       out.armorAdd += up.armorAdd ?? 0;
-      if (up.rangeAdd && p.ranged) p.ranged.range = (p.ranged.range || 20) + up.rangeAdd;
+      /**
+       * R18 — CUMULATIVE, like `armorAdd` beside it, and applied to the BASE.
+       *
+       * This line used to sit above the `learned` guard and mutate `p.ranged.range` IN PLACE, so
+       * every call added the bonus again. A Longshot (base 26 m, +6 at level 12) was 32 m at 12,
+       * 38 at 13, 80 at 20 and 260 m at 50 — sniping from off-screen while the Followers board
+       * still said "about 26 m". The comment on this function already warned about exactly this
+       * for damage: "compounding a 1.16 damage bump on every re-cost would have a level-40
+       * mercenary hitting for thousands."
+       */
+      out.rangeAdd += up.rangeAdd ?? 0;
       if (p.learned.includes(up.atLevel + ':' + (up.note || ''))) continue;
       p.learned.push(up.atLevel + ':' + (up.note || ''));
       // a new spell out of the shared ability book, or off the type's own list
@@ -369,7 +395,13 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       fallen[i].left -= dt;
       if (fallen[i].left > 0) continue;
       const back = fallen.splice(i, 1)[0];
-      summon(back.defId, back.owner, { count: 1, at }).then(made => { if (made[0]) hooks.onReturned?.(made[0]); });
+      summon(back.defId, back.owner, { count: 1, at, origin: back.origin, name: back.name }).then(made => {
+        // …and it is the SAME follower, so the contract that hired it still recognises it
+        if (made[0]) {
+          if (back.uid) made[0].id = back.uid;
+          hooks.onReturned?.(made[0]);
+        }
+      });
     }
 
     for (let i = pets.length - 1; i >= 0; i--) {
@@ -386,7 +418,22 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
           // it comes back: the owner gets it again after the cooldown. `reviveSeconds` was in
           // balance.json from the start and nothing read it, so "will come back" was a lie and a
           // dead companion stayed dead for the rest of the run.
-          if (p.owner) fallen.push({ defId: p.defId, owner: p.owner, left: cfg.reviveSeconds ?? 14 });
+          /**
+           * R18 — CARRY THE `origin` AND THE `uid` ACROSS THE FALL.
+           *
+           * The record held only `{defId, owner, left}`, so the revive below summoned with the
+           * default `origin: 'summon'`. A hired mercenary therefore came back as a summon with a
+           * NEW uid — and js/followers.js `tick` matches contracts by `c.uid`, found its Blade
+           * missing, and hired a free duplicate within a couple of seconds. A revived class
+           * companion became dismissible for the same reason, which is the exact thing the "they
+           * came with you" rule exists to prevent.
+           */
+          if (p.owner) {
+            fallen.push({
+              defId: p.defId, owner: p.owner, left: cfg.reviveSeconds ?? 14,
+              origin: p.origin || 'summon', uid: p.id, name: p.name || null,
+            });
+          }
           hooks.onFallen?.(p);
         }
         continue;

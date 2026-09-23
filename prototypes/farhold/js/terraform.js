@@ -398,6 +398,29 @@ export function createTerraform({
     spent,
     budgetLeft(claim = null) { return Math.max(0, budget - spent(claim)); },
     get budget() { return budget; },
+    get maxLift() { return maxLift; },
+
+    /**
+     * R19 — THE TWO NUMBERS THE CATALOGUE STATES AND NOBODY EVER HANDED OVER.
+     *
+     * `data/structures.json`'s `rules` block writes down `terraformBudget: 60000` and
+     * `maxLift: 12`, and every other key in that block (grid, snapDistance, refund, claimRadius,
+     * undoDepth…) is unpacked by `createBuildPlan`. These two were not, and the only caller that
+     * matters — js/main.js — builds the book as `createTerraform({ saved })` with no options at
+     * all. So the live game ran on the DEFAULTS in this file's own signature, which happen to be
+     * the same two numbers. A balance pass that halved the budget in the JSON would have changed
+     * nothing at all, silently, which is the worst shape a knob can be in: it looks tuned.
+     *
+     * A setter rather than a constructor argument because the book is made before the catalogue
+     * has loaded (it comes out of the save on the first frame), so `createBuildPlan` pushes the
+     * rules in when it is handed both. Nothing is re-checked: brushes already painted stand, and
+     * lowering the budget simply means the next one is refused sooner.
+     */
+    setRules({ terraformBudget = null, maxLift: lift = null } = {}) {
+      if (Number.isFinite(terraformBudget) && terraformBudget >= 0) budget = terraformBudget;
+      if (Number.isFinite(lift) && lift > 0) maxLift = lift;
+      return { budget, maxLift };
+    },
 
     /**
      * The delta. Brushes and nothing else — no heights sampled from the world, no grid, no world.

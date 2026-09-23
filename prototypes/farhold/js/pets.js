@@ -132,10 +132,42 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
    * The default gate is the old behaviour exactly — `cfg.maxAlive` and nothing else — so a run with
    * no follower book behaves as it always did.
    */
+  /**
+   * R19 — ONE OWNER FOR THE BODY CAP.
+   *
+   * `cfg.maxAlive ?? 6` was written out TWICE in this file — once in the default gate below and
+   * once as a second, unconditional check inside `summon` — and `data/balance.json`'s `pets.maxAlive`
+   * is 6, so all three agreed and the duplication was invisible. It would not have stayed
+   * invisible: the two checks are not the same rule. The gate is a SLOT rule (how many followers
+   * you are allowed, which js/followers.js raises at level 20, at level 30 and again with The Kept
+   * Company, and which excludes class companions entirely), and the one in `summon` is a BODY
+   * budget (how many meshes may be in the scene). A player with five slots, a perk and two
+   * companions is legitimately over six bodies, and the copy in `summon` would have refused the
+   * sixth with "You have as many companions as you can keep" while the Followers screen showed a
+   * free slot — a limit nobody could see, in a number nobody had changed.
+   *
+   * So the number has one owner (`balance.pets.maxAlive`, this being its only fallback) and one
+   * reader, and the two rules are kept apart: the body budget is the SUM of the seats anyone could
+   * legitimately hold, so it never fights the gate, and it still stops an unbounded summon loop.
+   */
+  const DEFAULT_BODY_CAP = 6;
+  const bodyCap = () => Math.max(1, Math.round(cfg.maxAlive ?? DEFAULT_BODY_CAP));
+  /** Bodies in the scene or on their way into it — an actor mid-await is a body that is coming. */
+  const bodies = () => pets.length + pending;
+
   let gate = null;
   function admitted(defId, opts) {
-    if (gate) return gate(defId, opts);
-    return pets.length + pending >= (cfg.maxAlive ?? 6)
+    /**
+     * `pending` goes THROUGH the gate, which is the other half of having one cap.
+     *
+     * js/followers.js counts `pets.pets`, and a body being built is not in that list yet — an
+     * actor is an await inside a frame. Summoning three wolves into one free slot asked the gate
+     * three times before the first one landed and got a yes every time; the duplicate cap in
+     * `summon` below was what accidentally covered for that, and only up to six. The gate can see
+     * them now, so the rule it enforces is the only rule there is.
+     */
+    if (gate) return gate(defId, { ...opts, pending });
+    return bodies() >= bodyCap()
       ? { ok: false, why: 'You have as many companions as you can keep.' }
       : { ok: true, why: null };
   }
@@ -322,7 +354,15 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     for (let i = 0; i < count; i++) {
       const allow = admitted(defId, { origin, name: name || def.name });
       if (!allow.ok) { made.refused = allow.why; break; }
-      if (pets.length + pending >= (cfg.maxAlive ?? 6)) { made.refused = 'You have as many companions as you can keep.'; break; }
+      /**
+       * R19 — THE SECOND CAP, WHICH IS GONE.
+       *
+       * This line used to read `if (pets.length + pending >= (cfg.maxAlive ?? 6))` — a copy of the
+       * default gate's own test, applied even when js/followers.js had installed a gate that said
+       * yes. See `bodyCap` above for why that is a limit nobody could see. `admitted` is the one
+       * door now, it counts the bodies on their way in as well as the ones standing, and when
+       * there is no follower book it IS this test.
+       */
       const unit = make(def, owner);
       unit.origin = origin;
       if (name) unit.name = name;

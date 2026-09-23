@@ -28,7 +28,7 @@
 // Pure data and arithmetic: no DOM, no Three.js, so the node tests drive the whole arc end to end.
 
 import DATA from '../data/shipyard.json' with { type: 'json' };
-import { bagOf, costText, MATERIALS, STATIONS, costValue, recipeFor, recipesFor } from './vehicles.js';
+import { bagOf, costText, MATERIALS, STATIONS, costValue, recipeFor, recipesFor, towCapacity, firstTower } from './vehicles.js';
 import { VEHICLES, unlockVehicle } from './gear.js';
 import { fmt } from '../../../shared/format.js';
 
@@ -460,6 +460,35 @@ export function stationGate(player) {
     return { ok: false, why: `A module is too heavy for anything but the ${VEHICLES.ship.kinds[STATION.requires.ship].name}.` };
   }
   if (STATION.requires.pad && !y.pad) return { ok: false, why: 'Nothing goes up without a pad.' };
+  /**
+   * R19 — AND SOMETHING TO GET IT FROM THE BENCH TO THE PAD.
+   *
+   * data/vehicles.json has carried a `tow` flag on every row since the day it landed, true on the
+   * truck and nowhere else, and its own `_doc` says what it is for: the truck "is the only way to
+   * move a ship's hull plate across a valley (see js/shipyard.js)". It named THIS FILE and this
+   * file had never heard of it. So the one thing in the game that is explicitly too big to carry
+   * was carried, and the truck's whole reason to exist — it is the slowest of the three and
+   * drinks more than the other two together — was paid for with nothing.
+   *
+   * It is fitted at the ORBITAL YARD and not at the ship, deliberately. A first ship is four
+   * tier-1 subsystems and a pad; gating that on a vehicle costing a refinery, an alloy forge and
+   * thirty-four steel would move the whole arc, which is a balance decision and not an orphan.
+   * The yard is the far end — you have the industry by then, the rule reads as heavy things
+   * needing heavy machinery, and the refusal already has a sibling one line up: a module is too
+   * heavy for anything but the hauler in the air, and too heavy for anything but a flatbed on the
+   * ground.
+   *
+   * OWNED rather than driven (`towCapacity`, not `haulCapacity`): nobody expects to be told to
+   * pick a vehicle out of a dropdown before a bench will take a recipe.
+   */
+  if (towCapacity(player) <= 0) {
+    const truck = firstTower();
+    return {
+      ok: false,
+      why: `A module has to reach the pad. Nothing you own can take that weight — build a ${truck?.name || 'flatbed'}.`,
+      behind: ['tow'],
+    };
+  }
   return { ok: true };
 }
 
@@ -512,7 +541,22 @@ export function nextStep(player) {
     return { id: 'warp', text: `A warp coil, which wants ${fmt(rareInputFor('warp'))} more rare element than this world was ever going to give you.` };
   }
   const st = stationProgress(player);
-  if (!st.complete) return { id: 'station', text: `The ${STATION.name}: ${st.left.length} module${st.left.length === 1 ? '' : 's'} left to lift.` };
+  if (!st.complete) {
+    /**
+     * R19 — say what is in the way rather than how many are left.
+     *
+     * "Four modules left to lift" is not a next step when the yard will refuse all four; the gate
+     * already has the sentence (the hauler, the pad, or something that can tow a module to it), so
+     * the step is that sentence until it is satisfied.
+     */
+    const gate = stationGate(player);
+    return {
+      id: 'station',
+      text: gate.ok
+        ? `The ${STATION.name}: ${st.left.length} module${st.left.length === 1 ? '' : 's'} left to lift.`
+        : `The ${STATION.name}. ${gate.why}`,
+    };
+  }
   return { id: 'done', text: 'The yard is finished. There is nothing left down here that you need.' };
 }
 

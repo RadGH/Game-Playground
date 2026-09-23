@@ -1181,6 +1181,11 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
    *
    * Safe to run more than once. A cache that was looted stays looted; one that was cleaned up
    * because you walked out of range comes back when you walk in again.
+   *
+   * R19 — `atLandmark` is no longer the only reader. `js/encounters.js` now reads one key off the
+   * `gives` block copied onto every site above: `callsBeast`, the rank of the thing a hunting
+   * blind's bait hook or a Beast Lair draws to it. See `beastCallOf` there — it is why the site
+   * objects this file builds carry `gives`, `hostile`, `cleared` and `taken` at all.
    */
   let furnishIn = 0;
   function furnishLandmarks(px, pz) {

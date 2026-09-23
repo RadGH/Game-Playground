@@ -104,6 +104,21 @@ function gathered(rare = 40) {
 /** What a fresh character carries out of the character screen. */
 const freshPlayer = () => ({ gold: 0, vehicles: startingVehicles() });
 
+/**
+ * R19 — A MODULE HAS TO REACH THE PAD, AND THAT IS WHAT THE TRUCK IS FOR.
+ *
+ * `data/vehicles.json` has carried a `tow` flag on every row since the file landed — true on the
+ * truck and nowhere else — and its own `_doc` said what for: the truck "is the only way to move a
+ * ship's hull plate across a valley (see js/shipyard.js)". It named this module and this module had
+ * never read it. `stationGate` does now, so the two tests that lift modules give the player the
+ * flatbed that lifts them. Nothing before the orbital yard is gated on it; see the comment there
+ * for why the first ship deliberately is not.
+ */
+const withFlatbed = player => {
+  player.vehicles.owned.ground = [...(player.vehicles.owned.ground || []), 'truck'];
+  return player;
+};
+
 // ------------------------------------------------------------------ §9.1, §9.2
 
 test('a fresh character has no ship and is told exactly why they cannot fly', () => {
@@ -268,6 +283,7 @@ test('and the run goes on: a hauler, a warp coil and an orbital yard off the sam
   loadFuel(player, bag);
   assert.equal(canLaunch(player, { leg: 'warp' }).ok, true, 'a coil and a full tank is a star hop');
 
+  withFlatbed(player);                       // R19 — something has to get a module to the pad
   for (const mod of STATION.modules) {
     assert.ok(stock(bag, mod.cost), `could not refine ${mod.name}`);
     y.fuel = Math.max(y.fuel, STATION.fuelPerModule);
@@ -440,6 +456,10 @@ test('the orbital yard is a stated goal with stated requirements', () => {
   const y = yard(player);
   y.pad = true;
   y.built.tanks = 3;
+  // R19 — the ship can lift it and the pad can hold it; something still has to carry it there.
+  assert.equal(stationGate(player).ok, false, 'a module walked itself to the pad');
+  assert.match(stationGate(player).why, /reach the pad/);
+  withFlatbed(player);
   assert.equal(stationGate(player).ok, true);
 
   const bag = gathered();

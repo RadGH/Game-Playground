@@ -330,8 +330,65 @@ export function rangeLeft(player, key = driveFor(player)?.key) {
 export function carryBonus(player) { return driveFor(player)?.carry || 0; }
 /** How many people ride along — companions in a car, one of them on the back of a bike. */
 export function seats(player) { return driveFor(player)?.seats ?? 1; }
-/** Can the selected vehicle move a ship subsystem to the pad in one trip? (js/shipyard.js asks.) */
-export function haulCapacity(player) { return driveFor(player)?.haul || 0; }
+
+/**
+ * R19 — `tow` AND `shelter`, THE TWO FLAGS EVERY ROW CARRIED AND NOBODY ASKED ABOUT.
+ *
+ * Both have been in data/vehicles.json since the file landed and neither was read anywhere in the
+ * game. They are not decoration: the file's own `_doc` says the truck "is the only way to move a
+ * ship's hull plate across a valley (see js/shipyard.js)", and the car's `gives` line sells "a roof
+ * over the night". Two sentences of design, written down, costing the player nothing and buying
+ * them nothing.
+ *
+ * `tow` is the GATE and `haul` is the AMOUNT — they are one rule in two fields, which is how they
+ * came to disagree-proof: `tow` is true exactly where `haul > 0`, and tests/orphans-c.test.js
+ * fails if a tuning pass ever breaks that. Reading them together is what makes the flag load
+ * bearing: set the truck's `tow` to false and it can no longer move a subsystem, however big its
+ * bed says it is.
+ */
+export function canTow(spec) { return !!spec?.tow; }
+
+/**
+ * What the selected vehicle can move — 0 unless it can tow, whatever its bed says.
+ *
+ * js/shipyard.js asks. A vehicle with no tow bar is a vehicle you cannot hitch a subsystem to.
+ */
+export function haulCapacity(player) {
+  const spec = driveFor(player);
+  return canTow(spec) ? (spec.haul || 0) : 0;
+}
+
+/**
+ * …and the best thing you OWN that could do it, whether or not you are sitting on it.
+ *
+ * "Do you have a truck?" is the honest question for a gate about moving a heavy thing across a
+ * base: nobody expects to be told to go and select a vehicle from a dropdown first.
+ */
+export function towCapacity(player) {
+  let best = 0;
+  for (const key of ownedVehicles(player)) {
+    const spec = GROUND_VEHICLES[key];
+    if (canTow(spec)) best = Math.max(best, spec.haul || 0);
+  }
+  return best;
+}
+
+/** The cheapest thing in the ladder that can tow, for a refusal that names what to build. */
+export function firstTower() {
+  for (const key of LADDER) if (canTow(GROUND_VEHICLES[key])) return GROUND_VEHICLES[key];
+  return null;
+}
+
+/**
+ * Is there a roof over you right now?
+ *
+ * A car and a truck have glass and a cab; a motorcycle and a horse do not. What it buys is in
+ * js/encounters.js: the things that only come out at night do not come for somebody sitting in a
+ * cab with the doors shut. It is deliberately NOT a fight bonus — a roof should change what finds
+ * you, not how hard you hit, or the car stops being the slow comfortable one and becomes the best
+ * one.
+ */
+export function sheltered(player) { return !!driveFor(player)?.shelter; }
 
 // ---------------------------------------------------------------------------- saying so
 
@@ -357,6 +414,9 @@ export function describeVehicle(key) {
       `climbs a ${pct(spec.maxSlope)} slope (a horse manages ${pct(horse.maxSlope)})`,
       `${fmt(spec.seats)} seat${spec.seats === 1 ? '' : 's'} · carries ${fmt(spec.carry)} · fords ${fmt(spec.ford)} m of water`,
       `${fmt(spec.perKm)} ${GROUND_FUEL.name} a kilometre · a ${fmt(spec.tank)} unit hopper goes ${fmt(spec.tank / spec.perKm)} km`,
+      // R19 — the two flags, said out loud. A rule the player cannot read is a rule they cannot use.
+      `${spec.shelter ? 'A cab and glass: the night stays outside' : 'Open to the weather'} · ${
+        canTow(spec) ? `hitches a load of ${fmt(spec.haul)}` : 'nothing to hitch a load to'}`,
     ],
     cost: costText(spec.craft.cost),
     stations: (spec.craft.stations || []).map(s => STATIONS[s]?.name || s),

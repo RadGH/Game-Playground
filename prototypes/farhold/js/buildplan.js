@@ -283,6 +283,23 @@ export function createBuildPlan({
   const claimRadius = rules.claimRadius ?? 64;
   const undoDepth = rules.undoDepth ?? 30;
 
+  /**
+   * R19 — `terraformBudget` AND `maxLift`, WHICH THE CATALOGUE STATED AND NOBODY READ.
+   *
+   * Every other key of `rules` is unpacked in the block above and used somewhere in this file.
+   * These two belong to js/terraform.js instead, and the book is made in js/main.js as
+   * `createTerraform({ saved })` — no options — so the JSON's §4.20 cap on how much ground one
+   * claim may reshape has never once reached the code that enforces it. It only LOOKED wired
+   * because the default in terraform.js's own signature is the same 60000.
+   *
+   * This is the join, and it is made here because this is the one function handed both the
+   * catalogue and the terraform book. A book made without a catalogue (the balance harness, most
+   * of the node tests) keeps the defaults it was born with.
+   */
+  if (terraform?.setRules && (rules.terraformBudget != null || rules.maxLift != null)) {
+    terraform.setRules({ terraformBudget: rules.terraformBudget, maxLift: rules.maxLift });
+  }
+
   const byId = new Map((catalogue?.structures || []).map(s => [s.id, s]));
 
   const bank = bankAdapter(store);

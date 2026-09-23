@@ -122,7 +122,7 @@ export function perTypeCapFor({ spellCount = 1, derived = null, rules = null } =
  * cap is checked second and applies only to summons, because hiring four Blades for Hire is four
  * separate contracts and paying for each of them is its own limit.
  */
-export function admit({ defId, origin = 'summon', alive = [], limit = 3, perTypeCap = 1, name = null } = {}) {
+export function admit({ defId, origin = 'summon', alive = [], limit = 3, perTypeCap = 1, name = null, pending = 0 } = {}) {
   /**
    * R18 — A CLASS'S OWN COMPANIONS DO NOT SPEND YOUR FOLLOWER SLOTS.
    *
@@ -142,7 +142,18 @@ export function admit({ defId, origin = 'summon', alive = [], limit = 3, perType
    * Summons and hires go on competing for the slots you are given.
    */
   const spent = alive.filter(f => (f.origin || 'summon') !== 'companion');
-  const total = spent.length;
+  /**
+   * R19 — BODIES ON THEIR WAY IN COUNT TOO.
+   *
+   * `alive` is what js/pets.js is HOLDING, and a follower whose actor is still being built is not
+   * in that list — building one is an await inside a frame. So `call_wolf` with `count: 3` and one
+   * free slot asked three times before the first wolf landed and was told yes three times. A
+   * second, hard-coded cap inside `pets.summon` used to hide that (badly: it was a flat six and it
+   * fired even when this gate said there was room). `pending` closes the hole where the rule is,
+   * rather than putting a second rule somewhere else. Zero by default, so every existing caller
+   * and every node test behaves exactly as it did.
+   */
+  const total = spent.length + Math.max(0, pending | 0);
   if (total >= limit) {
     return {
       ok: false,
@@ -282,15 +293,56 @@ export function createFollowers({
    * is the whole of "If you have 5 follower slots and hire 4 mercenaries, you can only summon one
    * wolf": four contracts fill four of the five, and the fifth admits exactly one wolf.
    */
-  function gate(defId, { origin = 'summon', name = null } = {}) {
+  function gate(defId, { origin = 'summon', name = null, pending = 0 } = {}) {
     return admit({
       defId, origin, alive: alive(), limit: limit(),
-      perTypeCap: perTypeCap(defId), name,
+      perTypeCap: perTypeCap(defId), name, pending,
     });
   }
   pets?.setGate?.(gate);
 
   function say(text, kind = '') { if (log) log(text, kind); }
+
+  /**
+   * R19 — `brings`, WHICH THE HOUNDMASTER'S WHOLE BLURB IS ABOUT.
+   *
+   *   "Comes with the dog. The dog is the expensive half and they will tell you so."
+   *
+   * `data/mercenaries.json` gives the Houndmaster `brings: { id: 'grove_wolf', count: 1 }` and a
+   * level-32 upgrade that reads `bringsCount: 2` — "works a second hound". js/pets.js has stamped
+   * that upgrade onto the unit as `p.bringsCount` since R18 and NOBODY read either half, so the
+   * one type in the file whose price is explained by an animal turned up alone, for 700 gold, and
+   * the panel said nothing about it. The dog you paid for did not exist.
+   *
+   * THE ANIMAL IS A COMPANION, NOT A FOLLOWER. `admit()` excludes `companion` from both the total
+   * and the per-type cap (R18: "the wolves came with you, the spell is an extra"), which is the
+   * right side of that rule for a hound that came on the end of somebody else's rope: hiring one
+   * sword must not quietly cost you two slots, or the board's prices stop meaning anything. What
+   * it does cost is a body against js/pets.js's own budget, which is the honest limit — it is
+   * about how many things can be on the screen, not about how many you are allowed.
+   *
+   * `broughtBy` is the leash, and `dismiss` follows it: the dog leaves when its handler does.
+   */
+  async function bringAlong(player, merc, unit, { at = null } = {}) {
+    const brings = merc?.brings;
+    if (!brings?.id || !player || !pets?.summon) return [];
+    /**
+     * The upgrade wins when it has fired. `bringsCount` is an absolute number and not an extra
+     * one — "works a second hound" is two hounds, so a base count of 1 and a `bringsCount` of 2
+     * must not add up to three.
+     */
+    const want = Math.max(1, Math.round(unit?.bringsCount ?? brings.count ?? 1));
+    const made = await pets.summon(brings.id, player, {
+      count: want, at: at || getAt() || player, origin: 'companion',
+    });
+    for (const beast of made) beast.broughtBy = unit?.id || null;
+    return made;
+  }
+
+  /** Everything one mercenary brought with them, by uid — the leash `dismiss` pulls on. */
+  function broughtBy(uid) {
+    return (pets?.pets || []).filter(p => p.broughtBy && p.broughtBy === uid);
+  }
 
   /**
    * Hire somebody. Gold out, a body in, and a contract written down so a load puts them back.
@@ -321,7 +373,15 @@ export function createFollowers({
     };
     contracts().push(contract);
     say(`${merc.name} takes your ${price} gold and falls in beside you.`, 'good');
-    return { ok: true, contract, unit, price };
+    // …and whatever they brought with them. See `bringAlong`: the dog is half of what you paid for.
+    const brought = await bringAlong(player, merc, unit, { at });
+    if (brought.length) {
+      contract.brought = brought.map(b => b.id);
+      say(brought.length === 1
+        ? `${brought[0].name} comes with them.`
+        : `${brought.length} ${brought[0].name}s come with them.`, '');
+    }
+    return { ok: true, contract, unit, price, brought };
   }
 
   /** Let somebody go. A mercenary walks off; a summon is dismissed; a class companion stays. */
@@ -332,11 +392,23 @@ export function createFollowers({
     if (at >= 0) list.splice(at, 1);
     if (!unit) return { ok: at >= 0, why: at >= 0 ? null : 'Nobody by that name follows you.' };
     if (unit.origin === 'companion') {
-      return { ok: false, why: `${unit.name} came with you. They are not going anywhere.` };
+      // R19 — and an animal on somebody else's rope answers to them, not to you.
+      const handler = unit.broughtBy ? (pets?.pets || []).find(p => p.id === unit.broughtBy) : null;
+      return {
+        ok: false,
+        why: handler
+          ? `${unit.name} answers to ${handler.name}. Let ${handler.name} go and they both go.`
+          : `${unit.name} came with you. They are not going anywhere.`,
+      };
     }
     pets.remove?.(uid);
-    say(`${unit.name} goes their own way.`, '');
-    return { ok: true, why: null };
+    // R19 — the leash. A handler who walks off does not leave their hounds standing in the road.
+    const pack = broughtBy(uid);
+    for (const beast of pack) pets.remove?.(beast.id);
+    say(pack.length
+      ? `${unit.name} goes their own way, and ${pack.length === 1 ? pack[0].name : 'the animals'} with them.`
+      : `${unit.name} goes their own way.`, '');
+    return { ok: true, why: null, released: pack.length };
   }
 
   /**
@@ -361,8 +433,20 @@ export function createFollowers({
       // for a contract with no body at all, which means a load.
       if ((pets.waiting?.() || []).some(w => w.defId === c.mercId)) continue;
       if (!gate(c.mercId, { origin: 'mercenary', name: c.name }).ok) continue;
-      pets.summon(c.mercId, player, { count: 1, at: getAt() || player, origin: 'mercenary' }).then(made => {
-        if (made[0]) { made[0].name = c.name; c.uid = made[0].id; }
+      pets.summon(c.mercId, player, { count: 1, at: getAt() || player, origin: 'mercenary' }).then(async made => {
+        if (!made[0]) return;
+        made[0].name = c.name; c.uid = made[0].id;
+        /**
+         * R19 — and the animal comes back with them.
+         *
+         * A save carries the contract and not the bodies, so a Houndmaster restored after a load
+         * would otherwise walk back in without the hound you paid 700 gold for — the same bug as
+         * never bringing it in the first place, only harder to notice because it takes a reload.
+         * `bringsCount` is re-derived from the merc's upgrades when the body is rebuilt, so a
+         * level-32 handler gets both hounds back.
+         */
+        const brought = await bringAlong(player, BY_ID.get(c.mercId), made[0], { at: getAt() || player });
+        c.brought = brought.map(b => b.id);
       }).catch(() => {});
     }
   }
@@ -386,6 +470,9 @@ export function createFollowers({
       learned: (p.learned || []).slice(),
       carrying: p.carrying || null,
       canDismiss: (p.origin || 'summon') !== 'companion',
+      // R19 — what this one brought with them, and who brought this one. Both ends of `brings`.
+      brought: broughtBy(p.id).map(b => b.name),
+      broughtBy: p.broughtBy ? ((pets?.pets || []).find(o => o.id === p.broughtBy)?.name || null) : null,
     }));
     const next = level < 20 ? 20 : level < 30 ? 30 : null;
     return {

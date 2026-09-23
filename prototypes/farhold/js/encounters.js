@@ -54,6 +54,12 @@ let chestLookup = null;
 import('./chests.js').then(m => { chestLookup = m.currentChests; }).catch(() => {});
 
 /**
+ * R19 — whether the player is under a roof. Static, because js/vehicles.js is plain data and
+ * arithmetic with no Three.js in it, so importing it keeps this module loadable in a node test.
+ */
+import { sheltered } from './vehicles.js';
+
+/**
  * R16 — WHAT AN EVENT ACTUALLY PUTS ON THE GROUND.
  *
  *   "I also found a marker that reads 'Somebody in a cage' but there was no person to speak about,
@@ -177,6 +183,49 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
   const OWNED_BY = 380;        // metres. Further than this and a place has no say in what you meet.
 
   /** The hostile place nearest a point, if it is close enough to have a patrol out here. */
+  /**
+   * R19 — `gives.callsBeast`, WHICH WAS A LOG LINE AND NOTHING ELSE.
+   *
+   * Two places in the data carry it. `data/landmarks.json`'s hunting blind — "A platform in a tree
+   * and a hook for the bait… hang something on the hook and wait. Whatever comes is bigger than
+   * usual" — calls a `champion`, and `data/strongholds.json`'s Beast Lair calls a `boss`. The only
+   * code that ever looked at either was one line in js/main.js's `atLandmark` that prints "Bait on
+   * the hook. Something bigger than usual will come." and then nothing came, ever. A promise in the
+   * log is worse than no feature: the player waits.
+   *
+   * So a place that calls a beast has a say in what you meet near it, the same way a stockade
+   * already does (`ownerOf` above): the headline body of the next set piece is forced to the rank
+   * the data names, and the pool is narrowed to what a lair or a bait hook would draw.
+   *
+   * WHEN it has a say differs by what the place is, and that is the whole reason this is a function
+   * and not a field test:
+   *   * a hostile place IS the bait while it stands — a den with something living in it;
+   *   * a landmark is only bait once you have used it (`taken`, which js/main.js sets through
+   *     `sites.markTaken` on the first payout — the same moment it prints that line), because a
+   *     hook with nothing on it draws nothing.
+   */
+  const BEAST_CALL_FAMILIES = ['beast', 'dragonkin'];
+  function beastCallOf(site) {
+    const rank = site?.gives?.callsBeast;
+    if (!rank || typeof rank !== 'string') return null;
+    if (site.hostile) return site.cleared ? null : { rank, site };
+    return site.taken ? { rank, site } : null;
+  }
+
+  /** The nearest place near this spot that is calling something bigger, if any. */
+  function callerOf(x, z) {
+    const near = siteField?.visible || siteField?.sites || null;
+    if (!near) return null;
+    let best = null, bestD = OWNED_BY;
+    for (const s of near) {
+      const call = beastCallOf(s);
+      if (!call) continue;
+      const d = Math.hypot(s.x - x, s.z - z);
+      if (d < bestD) { bestD = d; best = call; }
+    }
+    return best;
+  }
+
   function ownerOf(x, z) {
     const near = siteField?.visible || siteField?.sites || null;
     if (!near) return null;
@@ -189,9 +238,19 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     return best;
   }
 
-  /** Pick an encounter by weight, skipping the ones that do not belong right now. */
-  function pick(rng, { night = false, allow = null } = {}) {
-    const usable = table.filter(e => (!e.nightOnly || night) && (!allow || allow(e)));
+  /**
+   * Pick an encounter by weight, skipping the ones that do not belong right now.
+   *
+   * R19 — `sheltered` is data/vehicles.json's `shelter` flag arriving here. A car and a truck have
+   * a cab and glass; a bike and a horse do not. Nothing that only comes out after dark comes for
+   * somebody sitting inside with the doors shut, which is what "the weather stays outside" and "a
+   * roof over the night" were promising in the car's own `gives` line while buying the player
+   * absolutely nothing. Night still happens, ordinary encounters still roll — it is the
+   * `nightOnly` half of the table, the things that hunt in the dark, that leaves you alone.
+   */
+  function pick(rng, { night = false, allow = null, sheltered = false } = {}) {
+    const dark = night && !sheltered;
+    const usable = table.filter(e => (!e.nightOnly || dark) && (!allow || allow(e)));
     if (!usable.length) return null;
     // Never the same set piece twice running: variety is the whole point of the file.
     const fresh = usable.filter(e => e.id !== history[history.length - 1]);
@@ -227,16 +286,21 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
    * raiders, because that is who is out here. If the two asks cannot both be met the encounter's
    * own preference wins — a beast hunt near a fort is still a beast hunt.
    */
-  function poolFor(spec, x, z, level, owner = null) {
+  function poolFor(spec, x, z, level, owner = null, caller = null) {
     const all = field.defsFor(x, z, level);
     if (!all.length) return [];
     const fits = (list, want) => list.filter(d =>
       (!want.families || want.families.includes(d.family)) &&
       (!want.roles || want.roles.includes(d.role)));
     const owned = owner?.spec?.garrison?.prefer ? fits(all, owner.spec.garrison.prefer) : all;
-    const base = owned.length ? owned : all;
+    // R19 — what a bait hook or a den draws is a BEAST, whoever else holds this ground.
+    const called = caller ? fits(owned.length ? owned : all, { families: BEAST_CALL_FAMILIES }) : [];
+    const base = called.length ? called : (owned.length ? owned : all);
     const narrow = fits(base, spec.prefer || {});
     if (narrow.length) return narrow;
+    // …and a call beats the encounter's own preference, which a fort's garrison does not: the hook
+    // was baited for something with teeth and that is what turned up.
+    if (called.length) return called;
     const wide = fits(all, spec.prefer || {});
     return wide.length ? wide : all;
   }
@@ -247,8 +311,8 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
    * Pulled out of `run` because the road events need exactly the same thing — a headline body with
    * a ring of escorts, already awake or not — and a second copy of it would have drifted.
    */
-  async function spawnBodies(spec, x, z, level, owner, rng) {
-    const pool = poolFor(spec, x, z, level, owner);
+  async function spawnBodies(spec, x, z, level, owner, rng, caller = null) {
+    const pool = poolFor(spec, x, z, level, owner, caller);
     if (!pool.length) return [];
 
     const span = spec.count || [3, 5];
@@ -259,7 +323,15 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
     // the headline body: the rare, the champion, the captain
     const leaders = spec.leader ? pool.filter(d => d.role === 'leader') : [];
     const headDef = leaders.length ? rng.pick(leaders) : rng.pick(pool);
-    const headRank = spec.forceRank || spec.leaderRank
+    /**
+     * R19 — A CALLED BEAST IS THE RANK THE DATA NAMED.
+     *
+     * `gives.callsBeast` is a rank word ('champion' at the hunting blind, 'boss' at a Beast Lair),
+     * and it wins over the encounter's own roll — that is the entire content of "whatever comes is
+     * bigger than usual". `spec.forceRank` still leads, because a set piece that states its own
+     * headline rank is stating it on purpose.
+     */
+    const headRank = spec.forceRank || caller?.rank || spec.leaderRank
       || field.rpg.rollRank(rng, { bonus: spec.rankBonus || 1 });
     const head = await field.addRanked(headDef, level, x, z, headRank);
     if (head) made.push(head);
@@ -297,7 +369,8 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
 
     const level = zones ? zones.levelFor(x, z, rng) : playerLevel;
     const owner = ownerOf(x, z);
-    const made = await spawnBodies(spec, x, z, level, owner, rng);
+    const caller = callerOf(x, z);
+    const made = await spawnBodies(spec, x, z, level, owner, rng, caller);
     if (!made.length) return null;
 
     history.push(spec.id);
@@ -393,7 +466,7 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
 
     // a trap holds its bodies back; a find never has any
     if (spec.kind !== 'find' && spec.kind !== 'trap') {
-      ev.units = await spawnBodies(spec, x, z, level, ownerOf(x, z), rng);
+      ev.units = await spawnBodies(spec, x, z, level, ownerOf(x, z), rng, callerOf(x, z));
       if (!ev.units.length) {
         if (ev.chest) chests?.remove(ev.chest);
         return null;
@@ -447,7 +520,7 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
 
   /** A trap goes off: whatever was in the grass comes out of it, already awake. */
   async function springTrap(ev) {
-    const made = await spawnBodies({ ...ev.spec, aggro: true }, ev.x, ev.z, ev.level, ownerOf(ev.x, ev.z), field.rng);
+    const made = await spawnBodies({ ...ev.spec, aggro: true }, ev.x, ev.z, ev.level, ownerOf(ev.x, ev.z), field.rng, callerOf(ev.x, ev.z));
     ev.units = made;
     onLog(made.length
       ? 'That was not left there for you.'
@@ -582,7 +655,8 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
       if (!eventRoom) return false;
       return e.kind === 'find' ? true : room;
     };
-    const spec = pick(field.rng, { night: isNight(), allow });
+    // R19 — a roof is a rule. See `pick`, and `sheltered` in js/vehicles.js.
+    const spec = pick(field.rng, { night: isNight(), sheltered: sheltered(player), allow });
     if (!spec) return null;
     if (spec.kind) runEvent(spec, at, player.level);
     else run(spec, at, player.level);

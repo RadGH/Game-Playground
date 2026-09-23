@@ -32,6 +32,9 @@
 //   * a scope carries a METRE BUDGET as well as a hop count, and `fits()` enforces it — a frame
 //     that cannot bind inside its own budget is skipped, exactly as it is skipped when a slot has
 //     nothing to bind to;
+//     (R19: the HOP half of that sentence was not true until R19. `maxMetres` was read and
+//     `maxZoneHops` — which is the field the JSON actually carries — was not, so "local" meant
+//     "within 4.2 km" and never "in this zone". It means both now.)
 //   * `bind()` prefers the near one. Given four towns inside the budget it does not roll flat, it
 //     rolls biased to the front of a distance-sorted list, so "adjacent towns preferred" is the
 //     default behaviour rather than a lucky roll.
@@ -104,6 +107,20 @@ function fits(need, candidate, ctx) {
    */
   if (ctx.maxMetres != null && Number.isFinite(candidate.away) && candidate.away > ctx.maxMetres) return false;
   /**
+   * R19 — AND THE HOP BUDGET, WHICH THE DATA HAS STATED SINCE THE DAY THE FILE LANDED.
+   *
+   * `data/job-frames.json`'s `scopes` block says `local: maxZoneHops 0`, `adjacent: 1`,
+   * `rumour: 99`. R14 read `maxMetres` off the same block and left `maxZoneHops` sitting there —
+   * so the ONLY thing stopping a "local" errand pointing across a border was the metre budget,
+   * and a metre budget cannot tell the difference between four kilometres of your own valley and
+   * four kilometres that cross into a level-22 band. Two zones can share a border a hundred metres
+   * from the notice board.
+   *
+   * A candidate with no `zoneHops` is never rejected, exactly as one with no `away` is not: the
+   * node tests hand in positionless data and an unknown distance is not a far one.
+   */
+  if (ctx.maxHops != null && Number.isFinite(candidate.zoneHops) && candidate.zoneHops > ctx.maxHops) return false;
+  /**
    * …and the level band. A town is a fine destination; a town six bands up with everything between
    * here and there able to kill you is not a job, it is a death sentence with a gold reward on it.
    */
@@ -119,6 +136,16 @@ function fits(need, candidate, ctx) {
  * its own text. A scope may override this in data/job-frames.json with `maxMetres`.
  */
 export const SCOPE_METRES = { local: 4200, adjacent: 12000, rumour: Infinity };
+
+/**
+ * …and how many ZONE BORDERS a frame of each scope may reach across.
+ *
+ * The fallback only. `data/job-frames.json` owns these numbers (`scopes.*.maxZoneHops`) and its
+ * values are the ones the game runs on; this table is what an unknown scope, or a caller who hands
+ * in frames with no `scopes` block, falls back to. Zero borders is "here", which is what `local`
+ * means and what it has never enforced.
+ */
+export const SCOPE_HOPS = { local: 0, adjacent: 1, rumour: 99 };
 
 /** How far above the player's level a job's destination may sit. Two bands, not six. */
 export const LEVEL_HEADROOM = 4;
@@ -195,7 +222,8 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
     const record = territory?.of?.(zone.id) || null;
     const ctx = { contested: record?.contested || null, holder: record?.holder || null };
     const rng = rngFrom(hash(seed, zone.id, record?.visits ?? 0, offers++));
-    const pool = candidates.concat([{ type: 'zone', ...zone, name: zone.name, adjacent: false }]);
+    // the zone you are standing in is a candidate in its own right, and it is nought borders away
+    const pool = candidates.concat([{ type: 'zone', ...zone, name: zone.name, adjacent: false, zoneHops: 0 }]);
 
     /**
      * Score every frame, then take the best few.
@@ -212,9 +240,16 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
     const ctxFor = frame => {
       const scope = scopes[frame.scope] || null;
       const metres = scope?.maxMetres ?? SCOPE_METRES[frame.scope] ?? SCOPE_METRES.local;
+      /**
+       * R19 — the scope's own hop cap. The JSON leads; SCOPE_HOPS is only what an unknown scope
+       * gets. `99` (what `rumour` carries) is "anywhere", so it is passed through as no cap at all
+       * rather than as a number nothing can exceed.
+       */
+      const hops = scope?.maxZoneHops ?? SCOPE_HOPS[frame.scope] ?? SCOPE_HOPS.local;
       return {
         ...ctx,
         maxMetres: Number.isFinite(metres) ? metres : null,
+        maxHops: Number.isFinite(hops) && hops < 99 ? hops : null,
         maxLevel: frame.scope === 'rumour' ? null : level + LEVEL_HEADROOM,
       };
     };
@@ -452,6 +487,16 @@ export function candidatesFrom({
    * being six level bands up rather than only for being far.
    */
   from = null, wrapM = 0, zoneAt = null,
+  /**
+   * R19 — HOW MANY BORDERS APART TWO ZONES ARE, if the caller knows.
+   *
+   * `(fromZoneId, toZoneId) => number` — the region graph's own hop count, which is what
+   * `js/zones.js` builds its level bands out of. Without it a candidate standing in a DIFFERENT
+   * zone is counted as one border away, which is the honest floor (it is at least one) and is all
+   * the `scopes` block needs to tell `local` from `adjacent`. Same zone is always zero, whoever
+   * is asked.
+   */
+  hopsBetween = null,
 } = {}) {
   const out = [];
   const record = territory?.of?.(zone?.id);
@@ -466,13 +511,26 @@ export function candidatesFrom({
     }
     return Math.hypot(dx, z - from.z);
   };
-  /** Stamp `away` and `zoneLevel` on anything that knows where it is. */
+  /** How many borders from the board's zone to this one. Same zone is free; elsewhere is at least one. */
+  const hopsTo = other => {
+    if (other == null || zone?.id == null) return undefined;
+    if (other === zone.id) return 0;
+    const asked = hopsBetween ? hopsBetween(zone.id, other) : null;
+    return Number.isFinite(asked) ? Math.max(1, asked) : 1;
+  };
+
+  /** Stamp `away`, `zoneLevel` and `zoneHops` on anything that knows where it is. */
   const placed = c => {
     const away = awayTo(c.x, c.z);
     if (away != null) c.away = away;
     if (zoneAt && Number.isFinite(c.x) && Number.isFinite(c.z)) {
       const z = zoneAt(c.x, c.z);
-      if (z) { c.zoneLevel = z.minLevel ?? z.midLevel ?? null; c.zoneName = z.name || null; c.adjacent = z.id !== zone?.id; }
+      if (z) {
+        c.zoneLevel = z.minLevel ?? z.midLevel ?? null; c.zoneName = z.name || null;
+        c.adjacent = z.id !== zone?.id;
+        const hops = hopsTo(z.id);
+        if (hops != null) c.zoneHops = hops;
+      }
     }
     return c;
   };

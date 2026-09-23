@@ -456,6 +456,53 @@ export function craftVehicle(player, slot, key, bag, { stations = [] } = {}) {
 }
 
 /**
+ * R18 — QUOTE A RECIPE WITHOUT BUILDING IT.
+ *
+ * `craftVehicle` SPENDS and unlocks the moment it can afford to, which is right for a button press
+ * and catastrophic for drawing a panel: a screen that quoted with it would build the thing on every
+ * redraw. So the checks are here, once, with nothing behind them, and both builders below use it.
+ */
+export function gearQuote(player, row, bag, { stations = [] } = {}) {
+  if (!row?.cost) return { ok: false, why: 'That is not something you put together.' };
+  if (row.station && row.station !== 'hand' && stations.length && !stations.includes(row.station)) {
+    return { ok: false, why: `You need a ${String(row.station).replace(/_/g, ' ')} for that.` };
+  }
+  const owned = row.kind === 'vehicle'
+    ? (player?.vehicles?.owned?.[row.slot] || []).includes(row.key)
+    : false;                                    // a lamp is an ITEM: you can own more than one
+  if (owned) return { ok: false, why: `You already own the ${row.name}.`, owned: true };
+  const purse = bagOf(bag);
+  if (!purse.canAfford(row.cost)) {
+    const short = Object.entries(purse.missing(row.cost))
+      .map(([id, n]) => `${n} ${id.replace(/_/g, ' ')}`).join(', ');
+    return { ok: false, why: `Short ${short}.`, short };
+  }
+  return { ok: true, why: 'Ready to build.' };
+}
+
+/**
+ * R18 — AND BUILD A GEAR PIECE, which nothing could do at all.
+ *
+ * `gearRecipes()` lists two kinds: `vehicle` rows, which `craftVehicle` builds, and `gear` rows out
+ * of `GEAR_BASES` — the Mirror Lamp and the Arc Lamp — which had NO builder anywhere.
+ * `unlockVehicle` only knows about `VEHICLES`, so a lamp could not be granted by any route: not
+ * bought (both are `buildOnly`), not built, not dropped. Returns the ITEM for the caller to put in
+ * the bag, because gear.js does not own the player's inventory.
+ */
+export function craftGearItem(player, key, bag, { stations = [], rpg = null, level = 1, rng = Math.random } = {}) {
+  const base = GEAR_BASES[key];
+  if (!base?.craft) return { ok: false, why: 'That is not something you put together.' };
+  const row = { kind: 'gear', slot: base.slot, key, name: base.name, ...base.craft };
+  const gate = gearQuote(player, row, bag, { stations });
+  if (!gate.ok) return gate;
+  bagOf(bag).spend(row.cost);
+  const made = createGearShop({ rpg }).make(key, base.craft.rarity || 'magic', level, rng);
+  if (!made) return { ok: false, why: `The ${base.name} would not come together.` };
+  made.crafted = true;
+  return { ok: true, item: made, name: base.name };
+}
+
+/**
  * The one place a light's, a boat's or a ship's recipe is read from, so a recipe book does not have
  * to know which of the three tables a thing came out of.
  */

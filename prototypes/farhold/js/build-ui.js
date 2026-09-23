@@ -164,6 +164,16 @@ function costLine(cost, have) {
 
 export function createBuildUI({ catalogue = null, build = null, store = null, onLog = null, onClose = null, mining = null, scan = null, works = null, nearest = null, shipyard = null, garage = null, holding = null, workboard = null,
   /**
+   * R18 — GEAR YOU BUILD RATHER THAN BUY.
+   *
+   * `gearRecipes()` and `craftVehicle()` in js/gear.js were imported by TESTS ONLY, so the three
+   * pieces flagged `buildOnly: true` — the Mirror Lamp, the Arc Lamp and the `launch` boat — could
+   * not be obtained by any route in the game: the shop path refuses `buildOnly` by design, and
+   * nothing else ever called the builder. `{ list(), build(key, slot) }`, so this panel does not
+   * have to know which of js/gear.js's three tables a thing came out of.
+   */
+  gear = null,
+  /**
    * R16 — `{ list(), build(kind, id) }`. R17 moved the rows themselves out to the station screen
    * (js/station-ui.js `drawToolPanel`), where they are filtered by each row's own `at` bench; this
    * panel only passes the callbacks through.
@@ -720,6 +730,14 @@ export function createBuildUI({ catalogue = null, build = null, store = null, on
       row.append(b, el('span', { class: ok ? 'small' : 'small bad', text: note }));
       yardBox.append(row);
     };
+
+    /**
+     * R18 — the `buildOnly` gear, drawn before the ship. It is the same kind of thing the yard is:
+     * something you assemble at a bench rather than find or buy.
+     */
+    for (const row of gear?.list?.() || []) {
+      action(`Build the ${row.name}`, row.why || row.costText || '', () => gear.build(row.key, row.slot), !!row.ok);
+    }
 
     if (!state.pad) action('Build the pad', state.padWhy, () => shipyard.buildPad(), state.padOk);
     for (const part of state.parts) {

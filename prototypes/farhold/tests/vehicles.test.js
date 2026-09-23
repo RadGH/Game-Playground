@@ -21,7 +21,7 @@ import { dirname, join } from 'node:path';
 import {
   GEAR_BASES, SHOP_GEAR, VEHICLES, VEHICLE_SLOTS, SHIP_GATE_VERSION,
   createGearShop, categoryOf, startingVehicles, vehicleFor, unlockVehicle, selectVehicle,
-  craftVehicle, gearRecipes,
+  craftVehicle, gearRecipes, gearQuote, craftGearItem,
 } from '../js/gear.js';
 // the material chain the craft blocks are written against — data/resources.json, reached through
 // the helpers in js/vehicles.js (see the note over MATERIALS in there)
@@ -349,4 +349,62 @@ test('a boat can be built at a bench instead of bought, and the built-only one o
   const launch = craftVehicle(player, 'boat', 'launch', bag, { stations: ['assembler'] });
   assert.equal(launch.ok, true);
   assert.equal(unlockVehicle(player, 'boat', 'raft').ok, false, 'and you still cannot own one twice');
+});
+
+/**
+ * R18 — THE THREE PIECES NOBODY COULD OBTAIN BY ANY ROUTE.
+ *
+ * `gearRecipes()` and `craftVehicle()` were imported by TESTS ONLY, so the Mirror Lamp, the Arc
+ * Lamp and the `launch` boat — all flagged `buildOnly: true` — existed in the data and could not be
+ * had: the shop path refuses `buildOnly` by design, and nothing in the game ever called a builder.
+ *
+ * Under that was a second gap the review had not found. `gearRecipes()` returns two kinds, and only
+ * the `vehicle` half had a builder at all: `unlockVehicle` knows about `VEHICLES` and nothing else,
+ * so the two LAMPS (which are `GEAR_BASES` items) could not be granted by any code path in the
+ * project — not bought, not built, not dropped.
+ *
+ * And a trap worth keeping: `craftVehicle` SPENDS and unlocks the moment it can afford to, so the
+ * panel listing these had to quote with something else or it would have built each piece on every
+ * redraw. That is what `gearQuote` is for.
+ */
+test('R18 — every buildOnly piece can be quoted and then actually built', () => {
+  const rich = { count: () => 9999, canAfford: () => true, missing: () => ({}), spend: () => true };
+  const rows = gearRecipes().filter(r => r.buildOnly);
+  assert.ok(rows.length >= 3, `only ${rows.length} buildOnly recipes — re-aim this test`);
+
+  for (const row of rows) {
+    const player = { level: 30, vehicles: { owned: {}, active: {} }, bag: [] };
+    const at = { stations: [row.station || 'hand'] };
+
+    const quote = gearQuote(player, row, rich, at);
+    assert.equal(quote.ok, true, `${row.key} cannot even be quoted: ${quote.why}`);
+
+    const built = row.kind === 'vehicle'
+      ? craftVehicle(player, row.slot, row.key, rich, at)
+      : craftGearItem(player, row.key, rich, { ...at, level: 30 });
+    assert.equal(built.ok, true, `${row.key} is flagged buildOnly and cannot be built: ${built.why}`);
+    if (row.kind === 'gear') {
+      assert.ok(built.item, `${row.key} built and handed back no item`);
+      assert.equal(built.item.slot, row.slot, `${row.key} came back in the wrong slot`);
+    } else {
+      assert.ok((player.vehicles.owned[row.slot] || []).includes(row.key), `${row.key} was not unlocked`);
+    }
+  }
+});
+
+test('R18 — quoting a recipe does not build it', () => {
+  /**
+   * The panel redraws constantly, so a quote with a side effect would hand the player a free lamp
+   * every frame. Stated as a test because `craftVehicle` looks exactly like a quote from the
+   * outside — it takes a bag and returns `{ ok, why }` — and differs only in spending.
+   */
+  const spent = [];
+  const bag = { count: () => 9999, canAfford: () => true, missing: () => ({}), spend: c => { spent.push(c); return true; } };
+  const player = { level: 30, vehicles: { owned: {}, active: {} }, bag: [] };
+  for (const row of gearRecipes().filter(r => r.buildOnly)) {
+    gearQuote(player, row, bag, { stations: [row.station || 'hand'] });
+  }
+  assert.deepEqual(spent, [], 'gearQuote spent materials — it is a quote, not a build');
+  assert.deepEqual(player.bag, [], 'gearQuote put something in the bag');
+  assert.deepEqual(player.vehicles.owned, {}, 'gearQuote unlocked a vehicle');
 });

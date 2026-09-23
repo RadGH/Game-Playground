@@ -131,7 +131,12 @@ import {
   holdWeapon, createGathering, createScanner,
 } from './tools.js';
 import { createLight, STARTER_TORCH, STARTER_MOUNT } from './light.js';
-import { unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES, mountLook } from './gear.js';
+import {
+  unlockVehicle, selectVehicle, startingVehicles, vehicleFor, VEHICLES, mountLook,
+  // R18 — both of these were imported by TESTS ONLY, so the three `buildOnly` pieces could not be
+  // obtained by any route in the game. See the `gear` block handed to createBuildUI below.
+  gearRecipes, craftVehicle, craftGearItem, gearQuote,
+} from './gear.js';
 import { createBoat } from './boat.js';
 import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, chargedForm, OFFHAND_DAMAGE } from './weapons.js';
 // R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
@@ -3673,7 +3678,38 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     onLog: (t, c) => hud.log(t, c),
   });
 
+  /**
+   * R18 — the gear you BUILD, for the build panel. `gearRecipes()` already knows which of js/gear.js's
+   * three tables a recipe came from; this only has to quote it against what the player can reach and
+   * hand the builder a bench list. Only `buildOnly` rows: everything else is on a shop shelf, and
+   * offering both would be two prices for one thing, which is a fault this round has already fixed
+   * twice.
+   */
+  const gearPanel = {
+    /**
+     * QUOTED, never built. `craftVehicle` spends the moment it can afford to, so listing with it
+     * would build the piece on every redraw of the panel — `gearQuote` is the same checks with
+     * nothing behind them, which is why it exists.
+     */
+    list: () => gearRecipes().filter(r => r.buildOnly).map(r => {
+      const gate = gearQuote(player, r, payBag(), { stations: benchesNear() });
+      return { ...r, ok: gate.ok, why: gate.why, costText: craft.costText ? craft.costText(r.cost || {}) : '' };
+    }),
+    build: (key, slot) => {
+      const row = gearRecipes().find(r => r.key === key && r.slot === slot);
+      if (!row) return { ok: false, why: 'No such recipe.' };
+      // a vehicle is UNLOCKED; a lamp is an ITEM that goes in the bag
+      const out = row.kind === 'vehicle'
+        ? craftVehicle(player, slot, key, payBag(), { stations: benchesNear() })
+        : craftGearItem(player, key, payBag(), { stations: benchesNear(), rpg, level: player.level || 1, rng: rpg.rng });
+      if (out.ok && out.item) player.bag.push(out.item);
+      hud.log(out.ok ? `You build the ${out.name || row.name}.` : (out.why || 'Not yet.'), out.ok ? 'good' : 'bad');
+      return out;
+    },
+  };
+
   const buildUI = createBuildUI({
+    gear: gearPanel,          // R18 — the buildOnly gear, which had no route at all
     catalogue: structureData || null,
     build,
     store: { have: id => {

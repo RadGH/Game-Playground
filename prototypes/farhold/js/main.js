@@ -5400,6 +5400,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       radius: lowQuality ? 500 : (balance.town?.radius ?? 900),
       // R14: so a crier's errand lands somewhere near, at a level you can survive — js/quests.js
       zoneAt: (x, z) => zones.at(x, z),
+      // R18 — `cond_guardBond`: read live, so equipping the hammer counts without a rebuild
+      guardPower: () => rpg.fx.product(player, 'guardPower'),
     });
   }
 
@@ -6580,7 +6582,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * rest of the world is unchanged.
      */
     const soft = hud.here && (hud.here.minLevel ?? 1) <= 4 ? 0.5 : 1;
-    const want = Math.round((spawnCfg.maxAlive ?? 38) * zoneEffects.spawnMult * soft);
+    /**
+     * R18 — `legendary:no_night_raids` — "Nothing ambushes you in the dark: night spawns leave you
+     * alone." Its `noAmbush` hook was defined in the registry and read by nobody, so The Long
+     * Watch's whole reason for existing did nothing.
+     *
+     * Applied to the crowd after dark, which is the only thing "night spawns leave you alone" can
+     * mean in a game where the spawner works to a budget: with it on, the field after dark is a
+     * quarter of what it would be. Not zero — an empty world is not a reward, it is a different
+     * game — and it does not touch daylight at all.
+     */
+    const dark = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
+    const warded = dark && rpg.fx.sum(player, 'noAmbush') > 0 ? 0.25 : 1;
+    const want = Math.round((spawnCfg.maxAlive ?? 38) * zoneEffects.spawnMult * soft * warded);
     if (want !== lastBudget) { lastBudget = want; field.setBudget?.(want); }
   }
 
@@ -7886,6 +7900,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (player.perkFlags?.sunder && shape.last) {
         for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
       }
+      /**
+       * R18 — `fx.onSwing` HAD A DISPATCHER AND NO CALLER.
+       *
+       * `Effects.onSwing(c)` exists, `affix:cond_manaOnAttack` ("Every swing returns 1-3 mana")
+       * hangs off it, the affix is rollable from item level 4 with a weight of 2 — and nothing in
+       * the game ever fired it. Here is the swing, so here is the call: one per swing, not one per
+       * enemy hit, which is what "every swing" says and also means a wide arc into six bodies does
+       * not hand back six times the mana.
+       */
+      const swung = { self: player, mana: 0 };
+      rpg.fx.onSwing(swung);
+      if (swung.mana > 0) player.mp = Math.min(player.derived.maxMp || player.mp, player.mp + swung.mana);
+
       // and a little splash behind the arc, scaled by the strike's own shape and the area stat
       const splash = (balance.player?.meleeSplash ?? 1) * (shape.splash || 1);
       if (splash > 0) {

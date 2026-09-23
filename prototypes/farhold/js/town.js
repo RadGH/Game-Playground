@@ -154,6 +154,12 @@ export function createTownFolk(scene, terrain, opts = {}) {
     // R14: the zone band at a point, so a village crier cannot send a level-3 player to a level-30
     // town. Optional — left out, quests are picked exactly as they were. See js/quests.js.
     zoneAt = null,
+    /**
+     * R18 — how much harder the guards hit while you are standing with them, as a MULTIPLIER, read
+     * live. Injected as a function so this module goes on knowing nothing about affixes; left out,
+     * guards hit exactly as they always did. See `cond_guardBond` in js/effects.js.
+     */
+    guardPower = null,
   } = opts;
   const cfg = balance.town || {};
   // every merchant carries a light, a mount and a quiver whatever else it sells
@@ -443,7 +449,18 @@ export function createTownFolk(scene, terrain, opts = {}) {
                 npc.guardTimer = GUARD.attackEvery;
                 setActorAnim(npc.actor, 'attack');
                 const scale = Math.pow(GUARD.perLevel, Math.max(0, level - 1));
-                const hit = Math.round((GUARD.dmg[0] + Math.random() * (GUARD.dmg[1] - GUARD.dmg[0])) * scale);
+                /**
+                 * R18 — `cond_guardBond`'s `guardPower` hook had no reader.
+                 *
+                 * "Town guards deal N% more damage while you are with them" is a 700-gold-class
+                 * property on the Covenant Hammer, and `guardPower` was defined in the registry and
+                 * asked by nobody, so the affix did nothing at all. This is the only place a guard
+                 * deals damage, so this is where it belongs. `guardPower` is injected as a function
+                 * rather than read off the player here, so js/town.js keeps knowing nothing about
+                 * affixes.
+                 */
+                const bond = guardPower ? (guardPower() || 1) : 1;
+                const hit = Math.round((GUARD.dmg[0] + Math.random() * (GUARD.dmg[1] - GUARD.dmg[0])) * scale * bond);
                 npc.target.hp = Math.max(0, npc.target.hp - hit);
                 npc.target.hitFlash = 0.18;
                 if (npc.target.state !== 'chase') npc.target.state = 'chase';

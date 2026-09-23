@@ -784,3 +784,60 @@ test('R18 — wands, scepters, orbs and tomes are still attuned', () => {
     assert.ok(item.castElement, `${key} lost its element — the quarterstaff guard is too wide`);
   }
 });
+
+/**
+ * R18 — EVERY HOOK THE REGISTRY DEFINES HAS SOMETHING THAT CALLS IT.
+ *
+ * This is the project's signature fault expressed as a test. `js/effects.js` defines a hook by
+ * giving an effect a named function — `onSwing`, `guardPower`, `noAmbush` — and something in the
+ * game has to ASK for it (`fx.sum`, `fx.product`, `fx.onSwing`, a dispatcher method). Three of them
+ * had no asker at all, so the affixes hanging off them were inert:
+ *
+ *   `onSwing`    — `cond_manaOnAttack`, "Every swing returns 1-3 mana", rollable from ilvl 4.
+ *   `guardPower` — `cond_guardBond`, a 700-gold-class property on the Covenant Hammer.
+ *   `noAmbush`   — `legendary:no_night_raids`, which is The Long Watch's whole reason to exist.
+ *
+ * A hook with no caller is indistinguishable from a feature that does not exist, and much harder to
+ * see than a crash: every test of the registry itself passes.
+ *
+ * WHAT THIS CATCHES AND WHAT IT DOES NOT. Verified against the code before those three were wired:
+ * it names `onSwing` and `noAmbush` and misses `guardPower`, because `guardPower` is read by one of
+ * the registry's own aggregators and is therefore exempt by the rule below — the aggregator existed,
+ * nothing asked it for that name. A regex cannot tell those apart without following the data flow.
+ * Two of three with no false positives is worth having; it is not a proof.
+ */
+test('R18 — no effect hook is defined without a caller', () => {
+  const effectsSrc = src('../js/effects.js');
+  const game = ['main', 'rpg', 'pets', 'town', 'skills', 'actors', 'defence', 'combat-fx', 'craft', 'classbuild']
+    .map(f => src(`../js/${f}.js`)).join('\n');
+
+  /** Hook names: a bare `name: (…) =>` or `name: fn` inside a `def(...)` spec object. */
+  const defined = new Set();
+  for (const m of effectsSrc.matchAll(/\b([a-zA-Z][\w]*)\s*:\s*\((?:v|\)|[a-z])/g)) defined.add(m[1]);
+  // the plain-stat plumbing and the description fields are not hooks
+  for (const skip of ['field', 'plain', 'desc', 'id', 'name', 'stat', 'value', 'element', 'min', 'max',
+    'ilvl', 'slots', 'growth', 'tier', 'kind', 'rt', 'self', 'target', 'get', 'set']) defined.delete(skip);
+
+  const orphans = [];
+  for (const hook of defined) {
+    // asked by name through any of the dispatch helpers, or by a dispatcher method of its own
+    /**
+     * Asked from OUTSIDE js/effects.js, and only outside. The first version of this test also
+     * accepted a mention inside effects.js, and effects.js contains
+     * `onSwing(c) { return this.fire('onSwing', c); }` — so a dispatcher counted as its own caller
+     * and the test passed against the broken code. A dispatcher with nothing calling it IS the bug.
+     */
+    const asked = new RegExp(`['"\`]${hook}['"\`]|\\bfx\\.${hook}\\b`);
+    /**
+     * …or consumed by one of the registry's own aggregators, which the game then calls. `flatOut`
+     * is read as `e.flatOut(v, c)` inside `damageOut`, and that is a real consumer — unlike
+     * `fire('onSwing', c)`, which only forwards. The difference between the two is exactly the
+     * difference between a hook that works and a hook that is waiting for somebody.
+     */
+    const consumed = new RegExp(`\\be\\.${hook}\\b`).test(effectsSrc);
+    if (!asked.test(game) && !consumed) orphans.push(hook);
+  }
+  assert.deepEqual(orphans, [],
+    'these hooks are defined in js/effects.js and nothing in the game asks for them, so every '
+    + 'affix hanging off them is inert:\n  ' + orphans.join('\n  '));
+});

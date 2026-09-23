@@ -1311,10 +1311,11 @@ export class Hud {
     const sunY = g.sky?.sunDirection?.y;
     if (Number.isFinite(sunY)) this.daylight = Math.max(0.28, Math.min(1, sunY * 1.7 + 0.3));
     const book = g.markers;
+    // R22 — a marker whose cell was lost gets no arrow rather than an arrow at world cell (0, 0)
     const marks = book ? book.tracked().map(m => {
       const b = book.bearing(m, ship, this.terrain);
-      return { ...m, x: b.x, z: b.z, distance: b.distance };
-    }) : [];
+      return b ? { ...m, x: b.x, z: b.z, distance: b.distance } : null;
+    }).filter(Boolean) : [];
     this.drawMinimap(ship, g.field?.enemies || [], [], marks);
   }
 

@@ -30,6 +30,19 @@ import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
 
+/**
+ * R22 — the three numbers behind "enemies seem to just ignore my pets". See `aimOf` and `taunt`.
+ *
+ *   THREAT_SECONDS  how long a bite holds an enemy's attention. Long enough to be a tank turn,
+ *                   short enough that a pet cannot park a boss forever by biting it once.
+ *   THREAT_LEASH    how far it will follow the thing that bit it before it gives up and looks
+ *                   around again — a companion that ran away is not a companion that is tanking.
+ *   THREAT_BLOCK    how far past its own reach an enemy will count a body as "in the way".
+ */
+export const THREAT_SECONDS = 5;
+export const THREAT_LEASH = 16;
+export const THREAT_BLOCK = 1.6;
+
 /** Build a body from a look: `{ avatar }` gives a Chibi 2 humanoid, `{ creature }` gives a beast. */
 export async function makeActor(look = {}) {
   // Note: do NOT spread the controller. Chibi 2 hands back an object with GETTERS (`anim`, `parts`,
@@ -449,6 +462,77 @@ export class EnemyField {
     return this.cfg.maxAlive;
   }
 
+  /**
+   * R22 — THE COMPANIONS THIS FIELD CAN SEE.
+   *
+   * A callback rather than a list, because js/pets.js owns the roster and it changes every time
+   * something is summoned, dies or is dismissed — a copy handed over once would go stale inside a
+   * fight. It returns live pet objects (`{ id, x, z, hp, dying, removed }`), which is exactly what
+   * `pets.pets` already is.
+   *
+   * Left unset (a test, a dungeon floor built before the companions are), `aimOf` answers "the
+   * player" for everything and this file behaves precisely as it did before the round.
+   */
+  setCompanions(fn) { this.companions = typeof fn === 'function' ? fn : null; }
+
+  /**
+   * Point an enemy at whatever is hurting it, or at whatever is standing in its way.
+   *
+   *   1. something hit it inside the last few seconds and is still alive and still nearby;
+   *   2. otherwise, the nearest live companion that is both inside its reach and closer than you —
+   *      a body in the way is a body it swings at;
+   *   3. otherwise, you.
+   *
+   * `playerDist` is passed in rather than recomputed so the two can never disagree about which is
+   * nearer, which is the whole of rule 2.
+   */
+  aimOf(e, player, playerDist, dt = 0) {
+    e.threatFor = Math.max(0, (e.threatFor || 0) - dt);
+    e.aimingAt = null;
+    const onPlayer = { x: player.x, z: player.z, pet: null };
+    if (e.state !== 'chase') { e.threatOn = null; e.threatFor = 0; return onPlayer; }
+    const pets = this.companions?.();
+    if (!pets || !pets.length) return onPlayer;
+    const usable = p => p && p.dying == null && !p.removed && (p.hp ?? 1) > 0;
+
+    // 1. it is busy with whatever bit it
+    if (e.threatFor > 0 && e.threatOn != null) {
+      const held = pets.find(p => p.id === e.threatOn);
+      if (usable(held) && Math.hypot(held.x - e.x, held.z - e.z) <= THREAT_LEASH) {
+        e.aimingAt = held;
+        return { x: held.x, z: held.z, pet: held };
+      }
+      e.threatOn = null;
+      e.threatFor = 0;
+    }
+
+    // 2. something is in the way
+    let best = null;
+    let bestD = Math.min(playerDist, (e.reach || 2.4) + THREAT_BLOCK);
+    for (const p of pets) {
+      if (!usable(p)) continue;
+      const d = Math.hypot(p.x - e.x, p.z - e.z);
+      if (d < bestD) { bestD = d; best = p; }
+    }
+    if (best) { e.aimingAt = best; return { x: best.x, z: best.z, pet: best }; }
+    return onPlayer;
+  }
+
+  /**
+   * A companion hurt this enemy — hold its attention. Called from js/pets.js when a bite lands.
+   *
+   * Seconds rather than a threat number on purpose: a meter would need every source of damage in
+   * the game to declare a value and then a pass to tune them against each other, and what a pet is
+   * for is being the thing the enemy is looking at for a while. Every fresh hit renews the clock,
+   * so a companion that keeps swinging keeps the attention, which is the behaviour anyway.
+   */
+  taunt(enemy, pet, seconds = THREAT_SECONDS) {
+    if (!enemy || !pet || enemy.dying != null || enemy.removed) return;
+    enemy.threatOn = pet.id;
+    enemy.threatFor = Math.max(enemy.threatFor || 0, seconds);
+    if (enemy.state !== 'chase' && enemy.state !== 'flee') enemy.state = 'chase';
+  }
+
   /** One tick of the whole field: spawn, think, move, swing, die, clean up. */
   update(dt, player, playerUnit, hooks = {}) {
     const cfg = this.cfg;
@@ -639,6 +723,33 @@ export class EnemyField {
         e.state = 'wander';
       }
 
+      /**
+       * R22 — WHO THIS ONE IS ACTUALLY GOING FOR.
+       *
+       *   "My pets are now actively aggressive, which is useful. However enemies seem to just
+       *    ignore my pets."
+       *
+       * They did, completely. There was no `e.target` in this file, no threat table and no taunt:
+       * `dx`, `dz`, `dist` and `facing` were all computed against `player` and nothing else, so an
+       * enemy could not have walked toward a companion if it wanted to. The only way a pet ever ate
+       * a hit was a coin flip in js/main.js at the instant a swing landed — the enemy walked THROUGH
+       * the pet to reach you and then happened to hit whatever was nearest. And js/pets.js made it
+       * worse from the other side: a pet landing a hit set `target.state = 'chase'`, which is chase
+       * the PLAYER, so biting something made it run at you faster.
+       *
+       * `aimOf` is the whole rule, and it is deliberately two clauses rather than a threat meter:
+       * whatever hurt it recently holds its attention for a few seconds, and failing that it swings
+       * at whatever body is standing between it and you. A meter would need a number on every
+       * source of damage and a tuning pass; this needs neither and produces the thing a pet is for.
+       *
+       * `dist` above stays the distance to the PLAYER, because that is what the despawn leash and
+       * the notice range are about — an enemy fighting your wolf thirty metres away must not be
+       * culled for being thirty metres from you.
+       */
+      const aim = this.aimOf(e, player, dist, dt);
+      const adx = aim.x - e.x, adz = aim.z - e.z;
+      const adist = Math.hypot(adx, adz);
+
       // how close this one wants to be: an archer or a caster holds off, everything else closes
       const standOff = e.ranged ? Math.min(e.ranged.range * 0.65, e.ranged.range - 6) : 0;
 
@@ -666,17 +777,19 @@ export class EnemyField {
          */
         if (e.quarry) e.facing = Math.atan2(-dx, -dz);
       } else if (e.state === 'chase') {
-        e.facing = Math.atan2(dx, dz);
+        // R22 — everything from here down is about the thing it is FIGHTING, which is usually you
+        // and is sometimes the companion that just bit it.
+        e.facing = Math.atan2(adx, adz);
         if (standOff > 0) {
-          // keep the gap: walk in when too far, back off when the player closes
-          if (dist > standOff + 3) speed = e.speed;
-          else if (dist < standOff * 0.55) { speed = e.speed * 0.8; e.facing += Math.PI; }
-          if (e.swingTimer <= 0 && dist <= e.ranged.range) {
+          // keep the gap: walk in when too far, back off when the target closes
+          if (adist > standOff + 3) speed = e.speed;
+          else if (adist < standOff * 0.55) { speed = e.speed * 0.8; e.facing += Math.PI; }
+          if (e.swingTimer <= 0 && adist <= e.ranged.range) {
             e.swingTimer = e.attackEvery;
             anim(e.actor, 'attack');
             hooks.onEnemyShoot?.(e);
           }
-        } else if (dist > e.reach) {
+        } else if (adist > e.reach) {
           speed = e.speed;
         } else if (e.swingTimer <= 0) {
           e.swingTimer = e.attackEvery;

@@ -16,7 +16,7 @@
 // city → capital). They have no people in them: NPCs, shops and interiors are phase 4.
 
 import * as THREE from 'three';
-import { BUILDING_INFO, streetLanes, settlementAnchor } from './town-plan.js';
+import { BUILDING_INFO, streetLanes, settlementAnchor, footprintOf } from './town-plan.js';
 import { laneRibbon, ringCrossings } from './roadplan.js';
 import { planTown, cultureFor } from '../../../proctown/js/townplan.js';
 import { padSpotFor, boardSpotFor } from './waypoints.js';
@@ -29,27 +29,18 @@ import { makeRng } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
 import { ObstacleField, BUILDING_SOLIDS } from './collide.js';
 
-/** A flat ribbon following a polyline, draped on the ground. Returns vertex/index arrays. */
-function ribbon(points, heights, width, { lift = 0.1 } = {}) {
-  const position = [], normal = [], index = [];
-  for (let i = 0; i < points.length; i++) {
-    const prev = points[Math.max(0, i - 1)], next = points[Math.min(points.length - 1, i + 1)];
-    let dx = next[0] - prev[0], dz = next[1] - prev[1];
-    const len = Math.hypot(dx, dz) || 1;
-    dx /= len; dz /= len;
-    const nx = -dz, nz = dx;
-    const half = (typeof width === 'function' ? width(i) : width) / 2;
-    const y = heights[i] + lift;
-    position.push(points[i][0] + nx * half, y, points[i][1] + nz * half);
-    position.push(points[i][0] - nx * half, y, points[i][1] - nz * half);
-    normal.push(0, 1, 0, 0, 1, 0);
-    if (i > 0) {
-      const a = (i - 1) * 2, b = a + 1, c = i * 2, d = c + 1;
-      index.push(a, c, b, b, c, d);
-    }
-  }
-  return { position, normal, index };
-}
+/**
+ * A flat ribbon following a polyline, draped on the ground. Returns vertex/index arrays.
+ *
+ * ROUND 22 — THERE IS ONLY ONE OF THESE NOW. This was a byte-for-byte twin of `laneRibbon` in
+ * js/roadplan.js, which round 14 wrote precisely so that a town street, a road the player lays and
+ * an inter-town highway would all be the same strip of triangles — and then this copy stayed here
+ * drawing the world's roads, so the one thing the split was meant to prevent was exactly what
+ * happened: `laneRibbon` learned to clear the ground it is drawn on and the world's roads did not.
+ * Rivers and streets already go through `laneRibbon`; roads do too now.
+ */
+const ribbon = (points, heights, width, opts = {}) =>
+  laneRibbon({ points, surface: heights, half: (typeof width === 'function' ? i => width(i) / 2 : width / 2) }, opts);
 
 // ---------------------------------------------------------------------------- building geometry
 
@@ -481,6 +472,12 @@ export function createFeatures(scene, terrain, opts = {}) {
   const colour = new THREE.Color();
 
 
+  /**
+   * The ground a road ribbon has to clear — see the note on `ribbon`. Under a bridge there is no
+   * ground (the channel is left open on purpose), so the deck keeps its own height there.
+   */
+  const roadGroundAt = (x, z) => (terrain.bridgedAt?.(x, z) ? -Infinity : terrain.heightAt(x, z));
+
   function buildRibbons(px, pz) {
     const near = (points) => {
       const spans = [];
@@ -573,7 +570,8 @@ export function createFeatures(scene, terrain, opts = {}) {
             const pts = r.points.slice(k, end), hs = r.surface.slice(k, end);
             if (pts.length >= 2) {
               if (up) push(road, roadDeck(pts, hs, r.half * 2, { thick: 0.5, lift: 0.06 }));
-              else push(road, ribbon(pts, hs, r.half * 2, { lift: 0.06 }));
+              // R22: the ribbon clears the ground it is drawn on — see the note on `ribbon`
+              else push(road, ribbon(pts, hs, r.half * 2, { lift: 0.06, groundAt: roadGroundAt }));
             }
             k = e;
           }
@@ -619,15 +617,51 @@ export function createFeatures(scene, terrain, opts = {}) {
    * exactly the same answer and was working it out a different (and wrong) way — see the note
    * there, and the missing gate at Pewargate that it explains.
    */
+  /**
+   * ROUND 22 — AND THE WALL AND THE STREETS ASK ABOUT THE SAME CIRCLE, WITH NO CAP ON EITHER.
+   *
+   * *"That road goes through the wall, but there is no gate."* Two separate faults met here.
+   * `ringCrossings` itself missed a road that clipped the corner of the ring (fixed in
+   * js/roadplan.js — it solves both roots on every span now). And the two callers asked about two
+   * different circles: the streets were linked where a road crosses `ring`, the wall was opened
+   * where it crosses `wallR = ring + 14`, and a road arriving at a slant crosses those at
+   * different bearings — so the high street and the gate were not in the same place.
+   *
+   * There was a third, quieter one: this truncated to four crossings while the gate list was
+   * unlimited, so a fifth road got an opening in the wall and no street to arrive on. Both are
+   * unlimited now; only the GATEHOUSE mesh is still capped at four, which is a cap on decoration
+   * rather than on ways in.
+   */
   function roadLinksFor(cx, cz, ring) {
-    return ringCrossings(roads, cx, cz, ring, { limit: 4 }).map(c => [c.dx, c.dz]);
+    return ringCrossings(roads, cx, cz, ring).map(c => [c.dx, c.dz]);
   }
 
   /** Lay out one settlement: a well in the middle, houses around it, walls if it is big enough. */
   function buildSettlement(node, counts, px = 0, pz = 0, streets = null) {
     const rng = makeRng((seed ^ (node.id * 2654435761)) >>> 0);
     const size = node.size || 1;
-    const ring = 16 + size * 13;                     // metres from the centre to the outer houses
+    /**
+     * ROUND 22 — THE PLANNER OWNS THESE TWO NUMBERS. THIS FILE ONLY BORROWS THEM.
+     *
+     * *"At this location houses clip through the wall."* (seed 25392, Kydsel IV, x 5240 z 1592.)
+     *
+     * `planTown` retries a crowded site — one that lost a third of its ground to a road or a river
+     * — at `ringScale` up to **1.65**, filters its plots against `ring * ringScale`, and reports
+     * both numbers back as `plan.ring` and `plan.wallRadius`. This file read neither. It worked its
+     * own out from the same formula the planner starts from and never scales: `16 + size * 13`.
+     *
+     * So a size-4 town that retried at 1.65 hands back plots out to 112 m while the wall was built
+     * at 82 m — and every plot between the two is a house standing in, or outside, its own wall.
+     * Nothing was wrong with either number; they were simply two answers to one question, and only
+     * one of them had been told what happened.
+     *
+     * These are the PROVISIONAL values, used for the two things that have to be decided before the
+     * plan exists (where the road meets the town, and the anchor). Everything after `planTown`
+     * reads `ring` and `wallR`, which are reassigned from the plan the moment it comes back.
+     */
+    const base = footprintOf(size);
+    let ring = base.ring;                            // metres from the centre to the outer houses
+    let wallR = base.wall;
     const cx = node.wx, cz = node.wz;
 
     /**
@@ -759,7 +793,10 @@ export function createFeatures(scene, terrain, opts = {}) {
        * is the other half of "random flat rectangles" — paving with no road attached to it is
        * dropped rather than drawn.
        */
-      links: roadLinksFor(cx, cz, ring),
+      // R22: at the WALL, which is the circle the gates are cut in — for an unwalled settlement
+      // the two are the same number, and `planTown` slides a link out with its own ring if it has
+      // to grow the town to fit it on the ground
+      links: roadLinksFor(cx, cz, wallR),
       // the real ground, so "follows the terrain" means this hillside and not a stand-in
       heightAt: (lx, lz) => terrain.heightAt(cx + lx, cz + lz),
       /**
@@ -804,6 +841,13 @@ export function createFeatures(scene, terrain, opts = {}) {
         return !terrain.underwater(x, z) && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 6) <= 0.62;
       },
     });
+
+    /**
+     * R22 — and from here on, the plan's own numbers. See the note where `ring` is declared: this
+     * is the whole of *"houses clip through the wall"*, and the fix is one assignment.
+     */
+    if (Number.isFinite(plan.ring)) ring = plan.ring;
+    if (Number.isFinite(plan.wallRadius)) wallR = plan.wallRadius;
 
     const toWorld = (lx, lz) => [cx + lx, cz + lz];
     const cultKit = CULTURE_KIT.cultures[culture] || CULTURE_KIT.cultures.human;
@@ -1025,8 +1069,8 @@ export function createFeatures(scene, terrain, opts = {}) {
       // Walk the ring corner to corner: each segment spans the CHORD between two ring points and is
       // placed at that chord's midpoint, stretched slightly so it overlaps its neighbour. Spacing
       // segments by arc length (and giving each its own ground height) is what left gaps.
-      const wallR = ring + 14;
-      const SEG = 6;                                        // the wall mesh is 6 long, along +Z
+      // R22: `wallR` is the plan's own `wallRadius` now — see the note where it is declared
+      const SEG = 6;                                      // the wall mesh is 6 long, along +Z
       const segments = Math.max(8, Math.round((Math.PI * 2 * wallR) / SEG));
       const ringPoint = i => {
         const a = (i / segments) * Math.PI * 2;

@@ -1094,7 +1094,9 @@ let findFavOnly = false;
      */
     function markerRow(m, { showDistance = true } = {}) {
       const player = whereIsPlayer();
-      const away = book ? book.bearing(m, player, terrain).distance : 0;
+      // R22 — `bearing` answers null for a marker with no place. A row with no distance is
+      // still a row you can rename or delete; an exception here takes the whole pin list down.
+      const away = (book ? book.bearing(m, player, terrain) : null)?.distance ?? 0;
       const row = el('div', { class: 'pin-row' + (m.tracked ? ' tracked' : '') });
 
       row.append(el('button', {
@@ -3251,6 +3253,7 @@ let findFavOnly = false;
       const rows = [];
       for (const m of book?.minimap?.() || []) {
         const b = book.bearing(m, player, terrain);
+        if (!b) continue;                       // R22 — nothing to point at, so no arrow
         rows.push({ ...m, x: b.x, z: b.z, distance: b.distance });
       }
       for (const p of padBook()?.minimapPads?.() || []) {

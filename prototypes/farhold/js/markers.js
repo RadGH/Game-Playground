@@ -136,9 +136,29 @@ export class MarkerBook {
   /**
    * Add a marker. `cell` is in map cells; world metres are derived, because the map screen thinks
    * in cells and the minimap thinks in metres and neither should have to convert.
+   *
+   * R22 — A MARKER WITH NO PLACE IS REFUSED, RATHER THAN FILED AT THE CORNER OF THE WORLD.
+   *
+   *   "There was a yellow quest indicator in the center of town, pointing at nothing… Quest arrows
+   *    should always point at something, otherwise the arrow has failed."
+   *
+   * `cellX` and `cellY` both defaulted to **0**, so a caller that had no cell to give — and there
+   * were two, `js/quests.js`'s `cell: { x: cell?.x ?? 0, y: cell?.y ?? 0 }` and anything passing an
+   * object with the field missing — produced a perfectly valid-looking marker at map cell (0, 0),
+   * the far north-west corner of the planet. Every consumer then drew an arrow at it in good faith:
+   * a rim arrow on the minimap, a pin on the map, a beacon in the world.
+   *
+   * There is no sensible default for "where is this", so there is no default. A marker without a
+   * finite cell is refused and says so in the console, which turns a silent wrong arrow into a
+   * visible missing one — and a missing arrow is a bug somebody will actually find.
    */
-  add({ kind = 'pin', name = '', cellX = 0, cellY = 0, tracked = true, questId = null, world = null,
+  add({ kind = 'pin', name = '', cellX = null, cellY = null, tracked = true, questId = null, world = null,
     showOnMap = true, showInWorld = true, locked = false, from = null } = {}) {
+    if (!Number.isFinite(cellX) || !Number.isFinite(cellY)) {
+      console.warn(`[markers] refused "${name || kind}" — a marker with no place on the map would `
+        + 'draw an arrow pointing at the corner of the world. Give it a cell.');
+      return null;
+    }
     const on = world ? { ...this.world, ...world } : this.world;
     const marker = {
       id: `m${this.nextId++}`,
@@ -360,7 +380,8 @@ export class MarkerBook {
   syncQuests(active = []) {
     const live = new Set();
     for (const q of active) {
-      if (!q.place?.cell) continue;
+      // R22 — metres are enough; `cellOf` below turns them into a cell
+      if (!q.place || (!q.place.cell && !(Number.isFinite(q.place.x) && Number.isFinite(q.place.z)))) continue;
       live.add(q.id);
       const had = this.markers.find(m => m.questId === q.id);
       if (had) {
@@ -368,13 +389,27 @@ export class MarkerBook {
         had.done = !!q.done;
         continue;
       }
+      /**
+       * R22 — a quest that knows WHERE but not WHICH CELL still gets a pin.
+       *
+       * The guard above this loop is `if (!q.place?.cell) continue` — no cell, no marker, silently.
+       * js/jobgen.js writes `cell: first.cell || null` and most of the things it binds to (a
+       * wanderer, a caravan, a patrol) carry metres and no cell at all, so a whole class of job was
+       * tracked in the log with no pin, no arrow and no explanation. Metres are the thing every
+       * caller does have; `cellOf` is the conversion, in the one module that owns it.
+       */
+      const cell = q.place.cell
+        || (Number.isFinite(q.place.x) && Number.isFinite(q.place.z)
+          ? MarkerBook.cellOf(q.place.x, q.place.z) : null);
+      if (!cell) continue;
       const m = this.add({
         // R14: a quest may ask for its own marker look — a meteor is an impact, not an exclamation
         // mark. Anything that does not ask is a quest, exactly as before.
         kind: MARKER_LOOKS[q.markerKind] ? q.markerKind : 'quest',
         name: q.title, questId: q.id,
-        cellX: q.place.cell.x, cellY: q.place.cell.y,
+        cellX: cell.x, cellY: cell.y,
       });
+      if (!m) continue;
       m.done = !!q.done;
     }
     // drop the markers of quests that are no longer in the log
@@ -437,9 +472,22 @@ export class MarkerBook {
 
   // ---------------------------------------------------------------- where is it from here
 
-  /** World metres of a marker. */
+  /** Map cells for a point in world metres — the conversion `add` needs and callers kept guessing. */
+  static cellOf(x, z) {
+    return { x: Math.floor(x / M_PER_CELL), y: Math.floor(z / M_PER_CELL) };
+  }
+
+  /**
+   * World metres of a marker.
+   *
+   * R22 — returns `null` rather than throwing on a marker whose `cell` was lost in a save round
+   * trip. Every drawing path already has to cope with a marker it cannot place (see `bearing`); one
+   * that throws takes the whole minimap down with it.
+   */
   static position(marker) {
-    return { x: (marker.cell.x + 0.5) * M_PER_CELL, z: (marker.cell.y + 0.5) * M_PER_CELL };
+    const c = marker?.cell;
+    if (!Number.isFinite(c?.x) || !Number.isFinite(c?.y)) return null;
+    return { x: (c.x + 0.5) * M_PER_CELL, z: (c.y + 0.5) * M_PER_CELL };
   }
 
   /**
@@ -449,6 +497,7 @@ export class MarkerBook {
    */
   bearing(marker, player, terrain = null) {
     const p = MarkerBook.position(marker);
+    if (!p) return null;
     let dx = p.x - player.x;
     const dz = p.z - player.z;
     if (terrain?.widthM) {

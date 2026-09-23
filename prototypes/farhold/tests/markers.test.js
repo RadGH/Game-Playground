@@ -156,7 +156,57 @@ test('every marker kind has a glyph and a colour, so nothing draws blank', () =>
   }
   const book = new MarkerBook();
   book.setWorld(world(1, 0));
-  for (const kind of MARKER_KINDS) assert.ok(book.add({ kind }).name, `${kind} defaulted to an empty name`);
+  for (const kind of MARKER_KINDS) {
+    assert.ok(book.add({ kind, cellX: 4, cellY: 7 }).name, `${kind} defaulted to an empty name`);
+  }
+});
+
+/**
+ * R22 — "There was a yellow quest indicator in the center of town, pointing at nothing… Quest
+ * arrows should always point at something, otherwise the arrow has failed."
+ *
+ * `cellX` and `cellY` defaulted to 0, so a caller with nothing to give produced a valid-looking
+ * marker at map cell (0, 0) — the far corner of the planet — and every consumer drew an arrow at it
+ * in good faith. There is no sensible default for "where is this", so there is no default.
+ */
+test('a marker with no place is refused, not filed at the corner of the world', () => {
+  const book = new MarkerBook();
+  book.setWorld(world(1, 0));
+  const warned = [];
+  const real = console.warn;
+  console.warn = m => warned.push(String(m));
+  try {
+    assert.equal(book.add({ kind: 'quest', name: 'Somewhere' }), null, 'a placeless marker was filed');
+    assert.equal(book.add({ kind: 'quest', name: 'NaN', cellX: NaN, cellY: 2 }), null);
+    assert.equal(book.add({ kind: 'quest', name: 'undefined', cellX: 3 }), null);
+  } finally { console.warn = real; }
+  assert.equal(book.markers.length, 0, 'a refused marker still went in the book');
+  assert.equal(warned.length, 3, 'a marker was refused silently, which is its own kind of bug');
+  assert.match(warned[0], /no place/);
+
+  // …and one that DOES know where it is behaves exactly as it always did
+  const ok = book.add({ kind: 'quest', name: 'The ford', cellX: 12, cellY: 30 });
+  assert.ok(ok);
+  const at = MarkerBook.position(ok);
+  assert.ok(at && Number.isFinite(at.x) && Number.isFinite(at.z));
+
+  // a marker whose cell was lost in a save round trip gets no arrow rather than taking the map down
+  ok.cell = null;
+  assert.equal(MarkerBook.position(ok), null);
+  assert.equal(book.bearing(ok, { x: 0, z: 0, yaw: 0 }), null);
+});
+
+test('metres are enough: a quest that knows where it is but not which cell still gets a pin', () => {
+  const book = new MarkerBook();
+  book.setWorld(world(1, 0));
+  // js/jobgen.js writes `cell: first.cell || null`, and most of what it binds to — a wanderer, a
+  // caravan, a patrol — carries metres and no cell. Those jobs had no pin, arrow or explanation.
+  book.syncQuests([{ id: 'q1', title: 'Find the pedlar', place: { x: 5000, z: 1800, name: 'the road' } }]);
+  const m = book.markers.find(x => x.questId === 'q1');
+  assert.ok(m, 'a quest with real coordinates and no cell still gets no marker');
+  const at = MarkerBook.position(m);
+  assert.ok(Math.abs(at.x - 5000) < 400 && Math.abs(at.z - 1800) < 400,
+    `the derived cell is nowhere near the quest: ${JSON.stringify(at)}`);
 });
 
 test('distances read as people say them', () => {

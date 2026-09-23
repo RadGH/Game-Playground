@@ -39,7 +39,7 @@
       "id": "timber",
       "name": "Cut timber and break stone",
       "hud": "E on a tree, then on a boulder",
-      "text": "Everything you are about to build starts as wood and rock. Put any weapon in your hand — that is your tool — and work a tree and a boulder until you have enough of both.",
+      "text": "Everything you are about to build starts as wood and rock. You start with a Knapped Tool in the Tool slot — that is what works a tree or a rock — so walk up to one and press E, or swing at it. You need 8 logs AND 20 stone, so do both: chopping only trees will not finish this step.",
       "where": "Anywhere with trees and loose rock",
       "check": {
         "kind": "materials",

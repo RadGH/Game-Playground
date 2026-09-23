@@ -230,25 +230,100 @@ function crownLane(points, heights, reach, heightAt, ramp) {
  * same strip of geometry, and the only honest way to guarantee that is for them to run the same
  * lines of code.
  */
-export function laneRibbon(lane, { lift = 0.06, color = null } = {}) {
+/**
+ * ROUND 22 — AND IT IS DRAWN ABOVE THE GROUND, not at a height the ground is asked to agree with.
+ *
+ * *"At this location the terrain repeatedly clips through the road."* (seed 25392, Kydsel IV,
+ * x 5160 z 1597, and again near x 5805 z 1788.)
+ *
+ * Most of that was two real faults in js/planet.js's grading, and they are fixed there — the ground
+ * a road runs over is held flat for a verge wider than a terrain cell, and a junction no longer
+ * comes out several metres off the trunk it joins. What is left is a mismatch no amount of grading
+ * closes, because the two sides answer different questions:
+ *
+ *   * a ribbon lays ONE flat cross-section at each point, at that point's graded height;
+ *   * `heightAt` puts the ground at the deck height interpolated along the NEAREST SEGMENT, and a
+ *     sample two metres off the centre line at a bend projects onto a different part of that
+ *     segment than the centre does.
+ *
+ * Where the deck is gentle the two agree to a millimetre. Where a road turns on a steep bank — a
+ * hairpin up one of round 21's new cliffs — the deck climbs a metre between two road points, and
+ * the outside corner of the ribbon is then drawn a quarter of a metre under the ground beside it.
+ * That is the grass cutting up through the road. Town streets have the same problem for a simpler
+ * reason: nothing levels the ground under a town at all.
+ *
+ * So the ribbon asks. Each cross-section sits `lift` above the HIGHEST of its own graded deck and
+ * the ground anywhere across its own width (and half a step toward each neighbour, because the
+ * quad between two cross-sections is flat and the hillside between them is not). Both kerbs get
+ * that one height, so a road stays flat across its width and simply rides a little higher where
+ * the ground insists. Fifteen terrain samples per point, and none at all when no `groundAt` is
+ * passed, so the tests that drive this as a pure transform still can.
+ */
+export function laneRibbon(lane, { lift = 0.06, color = null, groundAt = null } = {}) {
   const position = [], normal = [], index = [];
   // a town draws every street of every culture out of ONE mesh, so the colour has to travel with the
   // vertices rather than with the material
   const colour = color ? [] : null;
   const points = lane?.points || [];
   const heights = lane?.surface || [];
+  // both edges of every cross-section first, so a vertex can look at its neighbour on its own side
+  const sides = [];
   for (let i = 0; i < points.length; i++) {
     const prev = points[Math.max(0, i - 1)], next = points[Math.min(points.length - 1, i + 1)];
     let dx = next[0] - prev[0], dz = next[1] - prev[1];
     const len = Math.hypot(dx, dz) || 1;
     dx /= len; dz /= len;
-    const nx = -dz, nz = dx;
     const half = (typeof lane.half === 'function' ? lane.half(i) : lane.half) || 1;
-    const y = (heights[i] ?? 0) + lift;
-    position.push(points[i][0] + nx * half, y, points[i][1] + nz * half);
-    position.push(points[i][0] - nx * half, y, points[i][1] - nz * half);
-    normal.push(0, 1, 0, 0, 1, 0);
-    if (colour) colour.push(color[0], color[1], color[2], color[0], color[1], color[2]);
+    sides.push([[points[i][0] - dz * half, points[i][1] + dx * half],
+      [points[i][0] + dz * half, points[i][1] - dx * half]]);
+  }
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  /**
+   * The ground this cross-section has to clear: right across the carriageway, and half a step
+   * toward each neighbour, because the quad between two cross-sections is flat and the hillside
+   * between them is not.
+   *
+   * ACROSS, not just at the two kerbs. Where two roads cross at grade a couple of metres apart in
+   * height, the higher one's deck runs through the MIDDLE of the lower one's width — both kerbs
+   * clear it and the paving between them does not. Measured on seed 4477, forty samples out of
+   * 274,000 and up to 1.38 m, all of them exactly this.
+   *
+   * A point over a bridge opts out: `groundAt` answers −Infinity inside a crossing's footprint
+   * (there is no ground there on purpose — the channel is left open and the deck carries you), and
+   * a cross-section that reached past the footprint onto the abutment would otherwise haul the
+   * deck up to the bank.
+   */
+  const clearAt = (i) => {
+    const [a, b] = sides[i];
+    // the middle of the carriageway decides whether this point is on a bridge at all. Asking that
+    // of every sample instead was one of the six remaining faults: a cross-section with one corner
+    // over a footprint and the rest on the bank opted out entirely, and the bank then stood 1.4 cm
+    // through its own road.
+    if (!Number.isFinite(groundAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2))) return -Infinity;
+    let top = -Infinity;
+    const ask = (x, z) => { const g = groundAt(x, z); if (Number.isFinite(g) && g > top) top = g; };
+    for (let k = 0; k <= 10; k++) {
+      const u = k / 10;
+      ask(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u);
+    }
+    for (const s of [0, 1]) {
+      for (const j of [i - 1, i + 1]) {
+        if (j < 0 || j >= points.length) continue;
+        const m = mid(sides[i][s], sides[j][s]);
+        ask(m[0], m[1]);
+      }
+    }
+    return top;
+  };
+  for (let i = 0; i < points.length; i++) {
+    // one height for the whole cross-section, so a road stays flat across its width
+    const y = groundAt ? Math.max(heights[i] ?? 0, clearAt(i)) : (heights[i] ?? 0);
+    for (let s = 0; s < 2; s++) {
+      const here = sides[i][s];
+      position.push(here[0], y + lift, here[1]);
+      normal.push(0, 1, 0);
+      if (colour) colour.push(color[0], color[1], color[2]);
+    }
     if (i > 0) {
       const a = (i - 1) * 2, b = a + 1, c = i * 2, d = c + 1;
       index.push(a, c, b, b, c, d);

@@ -589,7 +589,17 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         // your minions' damage is your damage: this is what stops a guard walking off with the kill
         field?.credit?.(target, result.amount);
         target.hitFlash = 0.18;
-        if (target.state !== 'chase') target.state = 'chase';
+        /**
+         * R22 — BITING SOMETHING USED TO MAKE IT RUN AT YOU FASTER.
+         *
+         * This line was `if (target.state !== 'chase') target.state = 'chase'`, and js/actors.js's
+         * chase state is chase THE PLAYER — there was no other kind. So the one thing a companion
+         * does to an enemy was to wake it up and send it at its owner: the exact inverse of tanking,
+         * and the whole of "enemies seem to just ignore my pets".
+         *
+         * `field.taunt` sets the same chase state AND says who it is chasing.
+         */
+        field?.taunt?.(target, p);
         if (p.onHit?.length) field?.statusOnHit(p, target, statuses);
         hooks.onPetHit?.(p, target, result);
         if (result.dead) { field?.kill(target); p.target = null; }
@@ -672,7 +682,8 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         const result = rpg.strike(p, victim, rng, { multiplier: ab.mult || 1.5, element: ab.element || 'physical' });
         field?.credit?.(victim, result.amount);
         victim.hitFlash = 0.18;
-        if (victim.state !== 'chase') victim.state = 'chase';
+        // R22 — an ability lands the same way a bite does: it is the pet it should be looking at
+        field?.taunt?.(victim, p);
         if (ab.status && statuses?.[ab.status]) {
           applyStatus(victim, ab.status, statuses[ab.status], Math.max(1, (p.dmg?.[1] || 6) * 0.6 * (ab.statusMult || 1)));
         }

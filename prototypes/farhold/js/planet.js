@@ -758,6 +758,17 @@ export function makeTerrain(world, planet = null, opts = {}) {
     return {
       kind: 'road', id: r.id, klass: r.class || 'trail', cells: r.cells, bridgeCells: r.bridges || [],
       half: roadWidth(r.class) / 2, reach: roadWidth(r.class) / 2 + 16,
+      /**
+       * ROUND 22 — WHICH TWO PLACES THIS ROAD JOINS, carried through from World Forge.
+       *
+       * `worldgen/js/roads.js` writes `from` and `to` on every link it lays (the two settlement ids
+       * the A* ran between) and this map threw both of them away. Nothing downstream could then ask
+       * the only question that matters about a road — *"does it reach anything?"* — which is why
+       * *"it ends abruptly at nothing"* was invisible to every test in the project. `head`/`tail`
+       * say whether this piece still owns the original road's own two ends after the merge below
+       * has cut it up.
+       */
+      from: r.from ?? null, to: r.to ?? null, head: true, tail: true,
       points, surface: null,
     };
   });
@@ -827,13 +838,25 @@ export function makeTerrain(world, planet = null, opts = {}) {
             const j = onTrunk(run[run.length - 1]);
             if (j) { run.push(j.point); joins.push({ ...j, at: 'end' }); junctions++; }
           }
-          if (run.length >= 3) pieces.push({ run, joins });
+          /**
+           * ROUND 22 — A RUN TOO SHORT TO KEEP IS STILL A PIECE OF ROAD.
+           *
+           * `if (run.length >= 3)` dropped a one- or two-point run outright. Inside the network
+           * that is harmless (the trunk covers the ground either side of it), but at the very
+           * START or END of a road it is not: those are the only runs with no junction to anchor
+           * them, so throwing one away moves the road's terminus one sample — up to 128 m — short
+           * of the town it was routed to, and the road then stops in a field. That is half of
+           * *"it ends abruptly at nothing"*, and `head`/`tail` are what let the connectivity pass
+           * below see it.
+           */
+          if (run.length >= 3) pieces.push({ run, joins, head: start === 0, tail: i >= pts.length });
           start = -1;
         }
       }
       for (let k = 0; k < pieces.length; k++) {
         const piece = {
           ...path, points: pieces[k].run, joins: pieces[k].joins,
+          head: pieces[k].head, tail: pieces[k].tail,
           id: k ? `${path.id}.${k}` : path.id, merged: true,
         };
         claimed.push(piece);
@@ -844,6 +867,125 @@ export function makeTerrain(world, planet = null, opts = {}) {
 
   const merged = mergeRoadNetwork(roadPaths);
   roadPaths = merged.paths;
+
+  /**
+   * ROUND 22 — NO ROAD ENDS AT NOTHING.
+   *
+   * *"That road ends abruptly at nothing. How can we eliminate all the dead-ends-to-nowhere with
+   * the road system? Roads should connect towns together, or to special landmarks, but they should
+   * never just take you 5 feet out of town and end."*
+   *
+   * They should not, and until now nothing anywhere checked. There are three separate ways a road
+   * loses an end, and not one of them left a trace anybody could test for:
+   *
+   *   * World Forge routes every link with A* and `if (!path) return null` — a link whose route
+   *     fails is silently not laid, with no retry and no re-check that the network still reaches
+   *     everywhere it was supposed to;
+   *   * the map above dropped `from` and `to`, so no code past this line even knew what a road was
+   *     FOR, let alone whether it got there;
+   *   * `mergeRoadNetwork` cuts a road into pieces at the corridors it shares with a bigger road,
+   *     and a piece at the very start or end of the original had no junction to anchor it.
+   *
+   * So this is the road network's version of proctown's `connectStreets`, which has done the same
+   * job for a town's own paving since round 13. Every end of every road has to be one of three
+   * things: a place (a settlement, a port, a landmark — any node the map put on the ground), a
+   * junction with another road, or an end that can be EXTENDED to reach one within a sane
+   * distance. Anything else is not a road, it is a stub in a field, and it goes.
+   *
+   * It runs before the grading on purpose: it moves points, and every height, lift, floor and
+   * crossing after this line is computed from the points that survive it.
+   */
+  const NODE_REACH = M_PER_CELL * 0.75;     // a road routed to a town's cell arrives inside this
+  const JOIN_REACH = 16;                    // this close to another road and you are already on it
+  const MAX_SPUR = M_PER_CELL * 0.6;        // how far an orphan end may be walked to reach one
+  const placeNodes = (world.nodes || []).map(n => ({ x: n.x * M_PER_CELL, z: n.y * M_PER_CELL }));
+
+  function connectRoadNetwork(paths) {
+    /** The nearest point on any road but this one, walked span by span so a corner cannot hide. */
+    const nearestRoad = (paths, self, x, z) => {
+      let best = null;
+      for (const r of paths) {
+        if (r === self) continue;
+        const pts = r.points;
+        for (let i = 0; i + 1 < pts.length; i++) {
+          const [ax, az] = pts[i], [bx, bz] = pts[i + 1];
+          const vx = bx - ax, vz = bz - az;
+          const len2 = vx * vx + vz * vz;
+          const t = len2 > 0 ? Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / len2)) : 0;
+          const px = ax + vx * t, pz = az + vz * t;
+          const d = Math.hypot(px - x, pz - z);
+          if (!best || d < best.dist) best = { dist: d, x: px, z: pz, trunk: r, i, t };
+        }
+      }
+      return best;
+    };
+    const nearestPlace = (x, z) => {
+      let best = null;
+      for (const n of placeNodes) {
+        const d = Math.hypot(n.x - x, n.z - z);
+        if (!best || d < best.dist) best = { dist: d, x: n.x, z: n.z };
+      }
+      return best;
+    };
+
+    let live = paths.slice();
+    let dropped = 0, spurs = 0;
+    // dropping a road can orphan the road that was leaning on it, so the question is asked again
+    for (let pass = 0; pass < 4; pass++) {
+      let changed = false;
+      const keep = [];
+      for (const path of live) {
+        let ok = true;
+        for (const end of ['start', 'end']) {
+          const pts = path.points;
+          if (pts.length < 2) { ok = false; break; }
+          const [x, z] = end === 'start' ? pts[0] : pts[pts.length - 1];
+          if ((path.joins || []).some(j => j.at === end)) continue;     // a junction, by construction
+          const place = nearestPlace(x, z);
+          if (place && place.dist <= NODE_REACH) continue;              // a town, a port, a landmark
+          const road = nearestRoad(live, path, x, z);
+          if (road && road.dist <= JOIN_REACH) continue;                // already touching another road
+          // …otherwise walk it to whichever is closer, if either is close enough to be honest
+          const reach = [road, place].filter(c => c && c.dist <= MAX_SPUR).sort((a, b) => a.dist - b.dist)[0];
+          if (reach) {
+            if (end === 'start') pts.unshift([reach.x, reach.z]);
+            else pts.push([reach.x, reach.z]);
+            /**
+             * A SPUR ONTO ANOTHER ROAD IS A JUNCTION, AND HAS TO BE FILED AS ONE.
+             *
+             * The first version of this just moved the point, and the grading then gave the spur
+             * its own smoothed height there — 3.49 m off the trunk it had just been walked to on
+             * seed 7, which is the buried-road bug from item A, rebuilt by the fix for item C.
+             * Filing the join means the junction pass a few hundred lines down levels it with
+             * every other junction, so there is one rule for "two roads meet here" and not two.
+             */
+            if (reach.trunk) {
+              (path.joins || (path.joins = [])).push({
+                point: [reach.x, reach.z], trunk: reach.trunk, i: reach.i, t: reach.t, at: end,
+              });
+            }
+            spurs++; changed = true;
+            continue;
+          }
+          ok = false;
+          break;
+        }
+        if (ok) keep.push(path);
+        else { dropped++; changed = true; }
+      }
+      // a junction whose trunk was dropped is not a junction any more
+      const alive = new Set(keep);
+      for (const path of keep) {
+        if (path.joins?.length) path.joins = path.joins.filter(j => alive.has(j.trunk));
+      }
+      live = keep;
+      if (!changed) break;
+    }
+    return { paths: live, dropped, spurs };
+  }
+
+  const joined = connectRoadNetwork(roadPaths);
+  roadPaths = joined.paths;
   // A road is graded: the surface is the natural ground smoothed along the line, so the road itself
   // is flat across its width and gentle along its length instead of following every bump.
   const bridgeClearance = opts.bridgeClearance ?? 2.4;
@@ -1457,6 +1599,14 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * river and the crossing's own footprint does not reach, the clamp keeps exactly the band it
      * has always had. `spannedAt` is the authority on where a bridge is; nothing else gets to fill
      * that channel, this included.
+     *
+     * "Where there is a river" means anywhere inside its banks, not just in the channel — the
+     * QUAY is the pass that shapes a road's riverside verge, it has been doing that since round 16,
+     * and a wider clamp simply flattens the bank before the quay gets a look at it. Measured:
+     * `round16-roads.test.js` compares the bank the quay builds against the same world with the
+     * quay switched off, and with the verge applied here both came out identically flat — a
+     * shaping pass that cannot be measured against its own absence is decoration. The verge is for
+     * dry ground; the river's own bank already has an owner.
      */
     const band = (riverSurface === null || spanned) ? verge : road.path.half;
     if (road.dist < band + deckGrip) {
@@ -2166,6 +2316,9 @@ export function makeTerrain(world, planet = null, opts = {}) {
     drainedTiny: tinyDrained,
     /** How many junction nodes the road merge created, for the tests. */
     roadJunctions: merged.junctions,
+    /** R22: how many road ends were walked to something, and how many stubs went in the bin. */
+    roadSpurs: joined.spurs,
+    roadStubsDropped: joined.dropped,
     heightAt, naturalHeightAt, slopeAt, normalAt, colorAt, biomeAt, biomeIdAt, temperatureAt,
     underwater, plantable, waterAt, riverAt, roadAt, wrapAround,
     clampToWorld, spawnPoint, layer,

@@ -324,7 +324,13 @@ export function makeFallQuest({ x, z, cell, seconds = 30, id = null } = {}) {
     state: 'falling',
     seconds,
     chestKey: `meteor:${Math.round(x)},${Math.round(z)}`,
-    place: { x, z, name: 'Meteor Crater', cell: { x: cell?.x ?? 0, y: cell?.y ?? 0 } },
+    /**
+     * R22 — `cell: { x: cell?.x ?? 0, y: cell?.y ?? 0 }` was here, and a missing cell became a
+     * perfectly valid-looking marker at map cell (0, 0) — the far corner of the planet, with a real
+     * arrow pointing at it. The metres are always right; js/markers.js converts them when the cell
+     * is missing, and a marker with neither is refused rather than invented.
+     */
+    place: { x, z, name: 'Meteor Crater', ...(cell ? { cell: { x: cell.x, y: cell.y } } : {}) },
     /**
      * R15 — IT IS CALLED WHAT IT IS.
      *

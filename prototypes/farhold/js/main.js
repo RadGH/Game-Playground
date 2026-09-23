@@ -115,7 +115,7 @@ import {
 } from './shipyard.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
-import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, setLevelCap, levelCap, xpForLevel, eventXp, itemScore, displayName } from './rpg.js';
+import { Rpg, heldLookFor, offhandLookFor, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, setLevelCap, levelCap, xpForLevel, eventXp, itemScore, displayName } from './rpg.js';
 import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
 // R17: one rule for printing a quantity of a material. Ore, timber and clay are all floats —
 // "you are short of 6.000000000003 clay" was the stored number reaching the screen untouched.
@@ -566,6 +566,76 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   const patrols = createPatrols({ territory: holdings, factions: factionData, standings, seed });
   const trade = createCaravans({ territory: holdings, factions: factionData, standings, seed });
   const roadFolk = createWanderers({ data: wandererData, territory: holdings, standings, seed });
+
+  /**
+   * R22 — THE PEOPLE ON THE ROAD GET BODIES.
+   *
+   * `js/wanderers.js` is pure JavaScript on purpose, and that was right: it decides WHO is out there
+   * and what they want, and it should not need a scene to do it. What was missing is the other half
+   * — somebody to actually stand there — so the game offered "E to talk to Mercenary Captain" at
+   * twenty-two metres of empty grass, and the only trace of a wanderer anywhere in the world was a
+   * dot on the minimap.
+   *
+   * `folk.spawnOne` already builds a person with an avatar, an idle animation and a greeting; it was
+   * written for the freed prisoners in round 12 and used again for the townsfolk you recruit. This
+   * is the third caller. A wanderer's body is put down when you come within `WANDERER_BODY` metres
+   * and taken away again past `WANDERER_DROP`, which is the same shape as the enemy despawn leash
+   * and for the same reason: forty people standing on a road you cannot see is forty skinned meshes
+   * for nothing.
+   */
+  const WANDERER_TALK = 3.6;       // the same range the townsfolk use — you are next to them
+  const WANDERER_BODY = 90;        // put a person down inside this
+  const WANDERER_DROP = 130;       // and take them away again out here (hysteresis, so none flickers)
+  const wandererBodies = new Map(); // wanderer id -> the group id folk.spawnOne filed them under
+  const wandererPending = new Set();
+  let sinceWanderers = 0;
+
+  function keepWandererBodies(dt) {
+    sinceWanderers += dt;
+    if (sinceWanderers < 0.75) return;      // four times a second is plenty for people who walk
+    sinceWanderers = 0;
+    // `folk` is `let folk = null` until the first landing builds it, and a dungeon floor has no
+    // road on it at all — in both cases every body that exists goes away and none is made.
+    if (!folk?.spawnOne || dungeon) { clearWandererBodies(); return; }
+
+    const near = roadFolk.near(control.x, control.z, WANDERER_BODY);
+    const seen = new Set();
+    for (const w of near) {
+      seen.add(w.id);
+      if (wandererBodies.has(w.id) || wandererPending.has(w.id)) continue;
+      wandererPending.add(w.id);
+      const groupId = `road:${w.id}`;
+      folk.spawnOne({
+        groupId, role: w.role || 'wanderer', roleName: w.kindName || null,
+        name: w.name, x: w.x, z: w.z, greeting: w.greeting || null, seed: seed ^ 0x5bd1,
+      }).then(who => {
+        wandererPending.delete(w.id);
+        // they may have walked out of range, or the world may have been rebuilt, while we waited
+        if (!who) return;
+        if (Math.hypot(w.x - control.x, w.z - control.z) > WANDERER_DROP) { folk.depopulate?.(groupId); return; }
+        wandererBodies.set(w.id, groupId);
+      }).catch(() => { wandererPending.delete(w.id); });
+    }
+    for (const [id, groupId] of [...wandererBodies]) {
+      const still = roadFolk.near(control.x, control.z, WANDERER_DROP).some(w => w.id === id);
+      if (!still || !seen.has(id)) {
+        if (!still) { folk.depopulate?.(groupId); wandererBodies.delete(id); }
+      }
+    }
+  }
+
+  function dropWandererBody(id) {
+    const groupId = wandererBodies.get(id);
+    if (!groupId) return;
+    folk.depopulate?.(groupId);
+    wandererBodies.delete(id);
+  }
+
+  /** Every wanderer body goes when the world underneath them does. */
+  function clearWandererBodies() {
+    for (const id of [...wandererBodies.keys()]) dropWandererBody(id);
+    wandererPending.clear();
+  }
   const rumours = createRumours({ territory: holdings, factions: factionData, seed });
   if (save?.rumours) rumours.load(save.rumours);
 
@@ -1768,10 +1838,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (guide) return guide;
       if (dungeon) return { name: dungeon.name, where: 'find the way down' };
       const tracked = markers.tracked()[0];
-      if (tracked) {
-        const b = markers.bearing(tracked, control, terrain);
-        return { name: tracked.name, where: distanceText(b.distance) };
-      }
+      const trackedAt = tracked ? markers.bearing(tracked, control, terrain) : null;
+      if (trackedAt) return { name: tracked.name, where: distanceText(trackedAt.distance) };
       const town = features.nearestSettlement?.(control.x, control.z) || null;
       if (town) {
         const d = Math.hypot(town.x - control.x, town.z - control.z);
@@ -1908,6 +1976,31 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * when a chest has just opened. The question is "is this better than what I have on", and the
    * inventory already computes that number; the popup just never asked for it.
    */
+  /**
+   * R22 — THE LOOT CARD IS A CARD, AND THE DETAIL IS ON THE HOVER.
+   *
+   *   "On loot window, redesign the item rewards. The spot where the weapon type appears (Weapon,
+   *    Legs, etc) has an empty line below it. Properties are listed below (4-8 damage, 20.4 health,
+   *    3.4 damage) this should go away. Make it so you can hover over the items on this screen to
+   *    see their actual tooltip (with compare tool)."
+   *
+   * The property list was three lines of a summary the game already writes properly somewhere else:
+   * `hud.itemCard` is the full card — every affix spelled out, the set progress, the level
+   * requirement, the lore, and the standing comparison against what you are wearing with Shift to
+   * compare against the other hand. The reward popup had a cut-down version of it squeezed into
+   * 132 pixels and truncated to three lines with ellipses.
+   *
+   * `shared/rewards.js` has carried the hook for this since R16 (`it.tipRender` sets
+   * `dataset.tipRender`) and nothing ever used it — and it could not have worked if it had, because
+   * it wrote `dataset.itemId` while Farhold's renderer reads `dataset.tipItem`. Both halves are
+   * joined now, through `hud.tipFor`, which is the same function every other item in the game is
+   * registered with. So the popup's hover card is not a second implementation to keep in step; it
+   * IS the item card.
+   *
+   * The one line kept is the verdict. It is not a property — it is the decision — and a chooser
+   * that makes you hover all three cards to find out which is better is a worse popup, not a
+   * cleaner one.
+   */
   function rewardItem(item) {
     const slot = item.type === 'weapon' ? 'weapon' : item.slot === 'ring1' ? 'ring' : item.slot;
     const worn = player.equipment?.[slot];
@@ -1916,18 +2009,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       : delta > 0 ? `+${delta} over your ${worn.name}`
       : delta < 0 ? `worse than your ${worn.name}`
       : `no better than your ${worn.name}`;
+    // registers the item with the HUD's tooltip book and hands back the key it filed it under
+    const probe = hud.tipFor({ dataset: {} }, item);
     return {
       name: displayName(item), rarity: item.rarity, unique: !!item.isUnique, set: !!item.setId,
       slot: item.type === 'weapon' ? 'Weapon' : (SLOT_LABELS[slot] || item.slot || ''),
-      lines: [
-        item.dmg ? `${item.dmg[0]}–${item.dmg[1]} damage` : null,
-        item.armor ? `${item.armor} armour` : null,
-        ...(item.affixes || []).filter(a => !a.baseIntrinsic).slice(0, 2).map(a => describeAffixText(a)),
-        verdict,
-      ].filter(Boolean),
+      note: verdict,
+      tipRender: probe.dataset.tipRender,
+      tipItem: probe.dataset.tipItem,
+      tipClass: 'tip-item',
     };
   }
-  function describeAffixText(a) { try { return describeAffix(a); } catch { return `${a.name || a.stat} ${a.value}`; } }
 
   /**
    * ================================================================ R16 — PAYING A JOB OUT
@@ -2360,7 +2452,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
 
   function makeField(forTerrain = terrain, forZones = zones) {
-    return new EnemyField({
+    const made = new EnemyField({
       // C8: a Fiery enemy is visibly on fire because the field hands the modifier one of spellfx's
       // existing looping auras. Without this the modifier still works and still wears its coloured
       // ring — it just does not burn.
@@ -2373,6 +2465,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // a rare gets a real name, in the language of the region it turned up in
       nameRare,
     });
+    /**
+     * R22 — THE COMPANIONS THIS FIELD CAN BE MADE TO LOOK AT.
+     *
+     * A callback, not a list, for two reasons. The roster changes inside a fight, so a copy handed
+     * over once would go stale. And `makeField()` is first called ABOVE `const pets`, so naming
+     * `pets` directly here would be the fifth temporal-dead-zone crash this project has shipped —
+     * except that a closure is only a problem when it is CALLED early, and the first thing to call
+     * this is an enemy's own tick, hundreds of lines and one frame later. `?.` covers the rebuild
+     * path (js/main.js re-makes the field on landing) for the same reason.
+     */
+    made.setCompanions(() => pets?.pets || null);
+    return made;
   }
   /**
    * A rare or a stronghold's boss gets a real name, in the language of the region it turned up in.
@@ -4815,8 +4919,25 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (gate) return { kind: 'dungeon', gate };
       const who = folk.nearest(control.x, control.z);
       if (who) return { kind: 'talk', who };
-      // 6 m on a 57 km world meant you only met somebody by walking over the exact spot
-      const met = roadFolk.near(control.x, control.z, 22)[0];
+      /**
+       * R22 — "E TO TALK TO MERCENARY CAPTAIN" WITH NOBODY ANYWHERE NEAR YOU.
+       *
+       *   "the popup didn't go away until I walked almost 20 feet away. I was NOT standing next to
+       *    an NPC."
+       *
+       * Twenty feet is six metres, and this line was TWENTY-TWO. Worse, js/wanderers.js is pure
+       * JavaScript by design — "no Three.js, no DOM" is the first line of the file — so a wanderer
+       * is a name and a pair of coordinates and has never had a body. The prompt was offering a
+       * conversation with an empty field, and the widening to 22 m was an honest attempt to fix the
+       * opposite complaint (at 6 m on a 57 km world you only met somebody by walking over the exact
+       * spot) that made this one much more visible.
+       *
+       * Both halves are fixed rather than one: `keepWandererBodies` below puts a REAL PERSON on the
+       * ground for every wanderer within sight, so there is something to walk up to and something to
+       * see from a distance — and this radius drops to the same `talkRange` the townsfolk use, so
+       * the prompt appears when you are next to them and goes away when you are not.
+       */
+      const met = roadFolk.near(control.x, control.z, WANDERER_TALK)[0];
       if (met) return { kind: 'wanderer', met };
       const mark = hud.here && holdings.landmarksIn(hud.here.id)
         .find(l => l.state !== 'done' && Math.hypot(l.x - control.x, l.z - control.z) < 14);
@@ -4943,8 +5064,49 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
       const seam = oreHere().at(control.x, control.z, 4);
       if (seam) return { kind: 'seam', seam };
+
+      /**
+       * R22 — E ON A TREE.
+       *
+       *   "The onboarding quest at the top left says 'Cut timber and break stone - E on a tree then
+       *    on a boulder'. Actually, pressing E on a tree, even with tool equipped, says 'Nothing
+       *    here to do'."
+       *
+       * It did, and the tutorial was telling the truth about the wrong tree. Farhold has TWO tree
+       * objects: the scenery prop in js/props.js, which is what you can see, and a resource node in
+       * js/resources.js, which is invisible and is what the `seam` branch above finds. Only the
+       * second had ever been on E. `beginGather` has handled props since round 13 — it checks the
+       * tool tier, plays the work bar and pays out — but the only two things that called it were
+       * the attack button with a tool held and a melee swing that hit nothing.
+       *
+       * So this is the join, and it is last in the list on purpose: a seam, a machine, a person and
+       * a chest all beat a tree, because standing next to a tree is the default state of a forest.
+       */
+      const prop = props.nearest?.(control.x, control.z, toolReach(player, 4));
+      const about = prop ? props.describe?.(prop) : null;
+      if (about) return { kind: 'prop', prop, about };
     }
     return null;
+  }
+
+  /**
+   * What the prompt says about the tree or rock in front of you.
+   *
+   * It names the materials, because "E to fell the conifer" still leaves you guessing whether a
+   * conifer is the thing the tutorial wants, and it names the tool you are holding, because the one
+   * question the old "Nothing here to do" never answered was whether you had the wrong tool or were
+   * looking at scenery. A giant that refuses says the refusal instead — `props.describe` already
+   * carries `why` for exactly that case.
+   */
+  function propPrompt(about) {
+    const name = (about.name || 'it').toLowerCase();
+    if (about.harvestable === false) return `<b>${name}</b> · ${about.why}`;
+    const gives = Object.keys(about.drops || {})
+      .map(id => (resourceData?.materials?.[id]?.name || id).toLowerCase())
+      .slice(0, 3).join(', ');
+    const tool = (resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase();
+    return `<b>E</b> or swing to ${about.verb || 'work'} the ${name}`
+      + (gives ? ` · ${gives}` : '') + ` · ${tool}`;
   }
 
   /**
@@ -6114,6 +6276,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     sites.dispose();
     sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
     openMouths();
+    clearWandererBodies();
     folk = makeFolk();
     hud.setTerrain(terrain);
     map = makeMap();
@@ -7742,6 +7905,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             hud.log('Nothing comes loose.', 'warn');
           }
         }
+        // R22 — a tree or a boulder you can SEE, on the same key and through the same work bar
+        else if (it.kind === 'prop') {
+          if (!beginGather({ x: it.prop.x, z: it.prop.z, reach: toolReach(player, 4.2) })) {
+            hud.log('Nothing comes loose.', 'warn');
+          }
+        }
         else if (it.kind === 'portal') {
           const out = portals.use?.(it.end);
           if (out?.ok) {
@@ -8505,9 +8674,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         sound.combat('death', { beast: true });
       },
       onEnemyStrike: e => {
-        // it may go for a companion standing between you instead — that is what they are for
-        const pet = pets.nearest(e.x, e.z, (e.reach || 2.4) + 0.6);
-        const victim = pet && field.rng() < 0.55 ? pet : player;
+        /**
+         * R22 — IT HITS WHAT IT WALKED UP TO.
+         *
+         * This used to be `pets.nearest(...)` and a 55% coin flip at the instant the swing fired:
+         * the enemy walked to YOU whatever was in its way, and then half the time hit whichever
+         * companion happened to be standing nearby. That is not a companion drawing a hit, it is a
+         * companion being splashed by one. js/actors.js now decides who an enemy is fighting before
+         * it takes a step, and `e.aimingAt` is that decision — so the thing it closed on is the
+         * thing it swings at. `pets.nearest` stays as the fallback for a field built without the
+         * companion list (a dungeon floor, a test).
+         */
+        const pet = e.aimingAt || pets.nearest(e.x, e.z, (e.reach || 2.4) + 0.6);
+        const victim = pet && (e.aimingAt || field.rng() < 0.55) ? pet : player;
         const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
         if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
         if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
@@ -8542,8 +8721,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // archers and casters: a real bolt, drawn with the same spell effects the player uses
       onEnemyShoot: e => {
         const spec = e.ranged || { range: 24, element: 'physical' };
-        const pet = pets.nearest(control.x, control.z, 4);
-        const aimAt = pet && field.rng() < 0.4 ? pet : control;
+        // R22 — an archer shoots what it is standing off FROM, which js/actors.js decided before it
+        // took its step. The 40% coin flip below it is the same fallback the melee path keeps.
+        const pet = e.aimingAt || pets.nearest(control.x, control.z, 4);
+        const aimAt = pet && (e.aimingAt || field.rng() < 0.4) ? pet : control;
         const from = new THREE.Vector3(e.x, e.y + 1.1 + (e.hover || 0), e.z);
         const to = new THREE.Vector3(aimAt.x, (aimAt.y ?? control.y) + 1, aimAt.z);
         const flight = Math.max(110, from.distanceTo(to) / 40 * 1000);
@@ -8687,6 +8868,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // The watch: the spawner keeps out of these circles, and the guards inside them fight.
     field.safeZones = dungeon ? [] : folk.safeZones();
     folk.update(dt, control, { field, level: player.level, onLog: (t, c) => hud.log(t, c) });
+    // R22 — put a real person on the road for every wanderer you are close enough to see
+    keepWandererBodies(dt);
     sound.step(dt, control);
     // the survey counts the ground you actually cover
     const stepped = Math.hypot(control.x - lastPos[0], control.z - lastPos[1]);
@@ -8766,6 +8949,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         : near.kind === 'seam' ? `<b>E</b> or swing to work the ${(resourceData?.materials?.[near.seam.resource]?.name || near.seam.resource).toLowerCase()}`
           + ` · ${(resourceData?.richnessBands?.find(b => b.key === near.seam.band)?.name || near.seam.band || '').toLowerCase()}`
           + ` · ${(resourceData?.tools?.[toolTierFor(player)]?.name || 'bare hands').toLowerCase()}`
+        /**
+         * R22 — and the tree in front of you says what it gives and what it needs, because the one
+         * question the old "Nothing here to do" never answered was whether the thing was harvestable
+         * at all or whether you were simply carrying the wrong tool.
+         */
+        : near.kind === 'prop' ? propPrompt(near.about)
         /**
          * …and anything this list has not heard of is NOT a person.
          *
@@ -9208,8 +9397,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
          */
         ? markers.here().filter(m => m.kind === 'seam').map(m => {
           const b = markers.bearing(m, control, terrain);
-          return { ...m, x: b.x, z: b.z, distance: b.distance, label: m.name };
-        })
+          return b ? { ...m, x: b.x, z: b.z, distance: b.distance, label: m.name } : null;
+        }).filter(Boolean)
         /**
          * R17 — "Waypoints favorited on the map with a star do not show a star on the minimap."
          *
@@ -9304,7 +9493,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           // markers are filed in map CELLS; `bearing` is the one place that turns one into metres
           const b = m.kind === 'waypoint' ? { x: m.x, z: m.z, distance: Math.hypot(m.x - control.x, m.z - control.z) }
             : markers.bearing(m, control, terrain);
-          if (!Number.isFinite(b.x) || b.distance > BEACON_RANGE) continue;
+          if (!b || !Number.isFinite(b.x) || b.distance > BEACON_RANGE) continue;
           mine.push({
             id: 'mark:' + (m.id ?? m.name), x: b.x, z: b.z, name: m.name,
             color: (MARKER_LOOKS[m.kind] || MARKER_LOOKS.pin).color,

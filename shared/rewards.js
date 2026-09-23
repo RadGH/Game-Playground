@@ -133,7 +133,21 @@ export function showRewards(spec = {}, opts = {}) {
   const itemNodes = items.map((it, i) => {
     const rc = rarityClass(it);
     const n = el('div', { class: 'rw-item ' + rc, style: 'animation-play-state: paused' });
-    if (it.tipRender) { n.dataset.tipRender = it.tipRender; if (it.itemId) n.dataset.itemId = it.itemId; if (it.tipClass) n.dataset.tipClass = it.tipClass; }   // optional: the game's own hover card (shared/tooltip.js registerTip)
+    /**
+     * Optional: the game's own hover card, through `shared/tooltip.js` `registerTip`.
+     *
+     * R22 — `tipItem` was missing, and it is the field the renderer actually reads. Farhold's
+     * `registerTip('item', …)` looks the item up by `node.dataset.tipItem` (that is what
+     * `hud.tipFor` stamps everywhere else in the game), while this only ever wrote `itemId`. So the
+     * hook existed on both sides, spelled two different ways, and no reward card had ever shown a
+     * tooltip. `itemId` is still written, because it is what a chooser's own analytics reads.
+     */
+    if (it.tipRender) {
+      n.dataset.tipRender = it.tipRender;
+      if (it.itemId) n.dataset.itemId = it.itemId;
+      if (it.tipItem) n.dataset.tipItem = it.tipItem;
+      if (it.tipClass) n.dataset.tipClass = it.tipClass;
+    }
     if (TAG[rc]) n.append(el('span', { class: 'tag', text: TAG[rc] }));
     n.append(el('div', { class: 'gem', style: `background-image:url("${base}/${it.icon ? it.icon : GEM[rc] || 'rarity_common'}.svg")` }));
     n.append(el('div', { class: 'name', text: it.name || 'Item' }));

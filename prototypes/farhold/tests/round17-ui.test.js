@@ -52,9 +52,27 @@ test('main.js does not listen for a raw key that the table does not own', () => 
   // every `e.code === 'KeyX'` in the keydown handler must correspond to an action in the table,
   // or we are back to two owners of one key
   // chorded keys (Ctrl+Z is build-mode undo) are not bindings and are deliberately skipped
+  /**
+   * R18 — BOTH WAYS main.js READS A KEY, not just one.
+   *
+   * This matched `e.code === 'KeyX'` only, and main.js has a second route: the input snapshot,
+   * `snap.pressed.has('KeyX')`. `KeyG` — the Garage, which gets you on and off a motorcycle, car or
+   * truck — was read that way and was in no binding table at all, so this guard passed green over
+   * the exact fault it exists to catch. Binding anything else to G made the Garage permanently
+   * unreachable, with no row in the panel to move it to.
+   *
+   * The claim the test makes is "main.js does not listen for a raw key the table does not own", and
+   * that was only ever true of one of the two ways it listens.
+   */
   const codes = main.split('\n')
     .filter(l => !/(ctrl|meta|alt|shift)Key/.test(l))
-    .flatMap(l => [...l.matchAll(/e\.code === '(Key[A-Z])'/g)].map(m => m[1]));
+    .flatMap(l => [
+      ...[...l.matchAll(/e\.code === '(Key[A-Z])'/g)].map(m => m[1]),
+      // any `'KeyX'` literal on a line that reads the input snapshot. Deliberately loose: the
+      // precise form was `pressed?.has(settings.keyFor?.('garage') || 'KeyG')`, and a regex that
+      // tried to span the inner `)` missed it — which is how this guard came to pass over KeyG.
+      ...(/pressed\s*\??\.\s*has/.test(l) ? [...l.matchAll(/'(Key[A-Z])'/g)].map(m => m[1]) : []),
+    ]);
   const owned = new Set(BINDINGS.map(b => b.code).filter(Boolean));
   for (const code of new Set(codes)) {
     assert.ok(owned.has(code), `${code} is listened for in main.js but is not in BINDINGS`);

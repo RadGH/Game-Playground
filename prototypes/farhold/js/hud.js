@@ -94,8 +94,19 @@ const el = (tag, cls, text) => {
 export function screenOpen(hud = null) {
   if (hud?.sheetOpen) return true;
   return !!document.querySelector(
+    /**
+     * R18 — `.civ-screen:not(.hidden)` MATCHED NOTHING, EVER.
+     *
+     * `grep -rn civ-screen` across the whole prototype returns exactly this selector: no element
+     * has ever carried that class. The Holding is `.civics.civics--tab`, the Town Hall is
+     * `.civics.hall-screen` (`#town-hall`), and BOTH hide with the `hidden` ATTRIBUTE rather than a
+     * `.hidden` class — so even the right class name with `:not(.hidden)` would have matched them
+     * while they were hidden. `.civics:not([hidden])` is the one that is true of both, in both
+     * states. It only failed quietly because those screens sit at z-index 60 over a z-index 40
+     * readout, so luck was doing the job the predicate was written for.
+     */
     '#sheet:not(.hidden), #pause:not(.hidden), #map-screen:not(.hidden), '
-    + '.screen.chart:not(.hidden), #talk:not(.hidden), .civ-screen:not(.hidden), '
+    + '.screen.chart:not(.hidden), #talk:not(.hidden), .civics:not([hidden]), '
     + '#boot:not(.hidden)',
   );
 }

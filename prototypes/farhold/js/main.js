@@ -1057,9 +1057,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * running. The debug menu is deliberately NOT in here — it is a small dev overlay you often want
    * to read while something is moving.
    */
+  /**
+   * Anything that covers the game belongs in here — and the Town Hall did not.
+   *
+   * R18 — `townHall.isOpen` was in neither this nor `frozen`, while its root is
+   * `position: fixed; inset: 0; z-index: 60` (civics.css). It IS in the Escape chain and it DOES
+   * call `input.release()`, which is what shows this was an oversight rather than a decision. So
+   * press E at a Town Hall with a pack nearby and `uiPaused()` stayed false: the whole frame ran
+   * under the screen — enemies closed and hit you, holding W walked you out of the building, 1-6
+   * cast spells at nothing, and a click could re-take the pointer lock.
+   */
   function panelOpen() {
     return hud.sheetOpen || map.isOpen || chart.isOpen || talk.isOpen || settings.isOpen
-      || rewardsOpen() || pauseMenu.isOpen;
+      || rewardsOpen() || pauseMenu.isOpen || !!townHall?.isOpen;
   }
 
   /**
@@ -7321,7 +7331,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * does. Nothing to ride is said out loud — a key that does nothing silently is a key nobody
      * presses twice.
      */
-    if (!frozen && snap.pressed?.has('KeyG')) {
+    // R18 — read through the binding table, so rebinding G actually moves the Garage
+    if (!frozen && snap.pressed?.has(settings.keyFor?.('garage') || 'KeyG')) {
       const owned = player.vehicles?.owned?.ground || [];
       if (!owned.length) hud.log('You have nothing to drive. Build one at an assembler.');
       else if (control.swimming) hud.log('Not in the water.');

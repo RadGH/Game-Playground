@@ -84,6 +84,14 @@ export const DEFAULTS = {
  */
 export const BINDINGS = [
   { action: 'forward', label: 'Walk forward', code: 'KeyW' },
+  /**
+   * R18 — the Garage. `js/main.js` reads `snap.pressed.has('KeyG')` to get you on and off a
+   * motorcycle, car or truck, and G was in no binding table — the exact fault R17's guard test
+   * exists to catch, which it missed because it only matches `e.code === 'KeyX'` and this key is
+   * read through the input snapshot instead. Binding anything else to G used to make the Garage
+   * permanently unreachable, with no row in the panel to move it to.
+   */
+  { action: 'garage', label: 'Garage (mount a vehicle)', code: 'KeyG' },
   { action: 'back', label: 'Walk back', code: 'KeyS' },
   { action: 'left', label: 'Step left', code: 'KeyA' },
   { action: 'right', label: 'Step right', code: 'KeyD' },

@@ -356,6 +356,18 @@ export function createTerraform({
         out[0] = nx / len; out[1] = ny / len; out[2] = nz / len;
         return out;
       };
+      /**
+       * R18 — `naturalHeightAtEdited` is written here and read NOWHERE, and `touched()` above has
+       * the same shape: its own doc says "the renderer asks before rebuilding" while the renderer
+       * actually asks `view.editedAt()` (js/terrain.js, called from js/build.js).
+       *
+       * Both are kept, with this note on them. They are a complete alternative door to a feature
+       * that already works through another path — which is the OPPOSITE of the fault this round has
+       * been chasing. The bugs worth fixing were rules with no reader at all, where the player paid
+       * for something that did nothing; here the player gets the feature and there is simply a
+       * second handle nobody turns. Deleting a working function to quieten a grep is not a fix, and
+       * an unexplained one is what makes the next reader wonder if the feature is broken.
+       */
       terrain.naturalHeightAtEdited = natural;
       terrain.__terraformed = true;
       return terrain;

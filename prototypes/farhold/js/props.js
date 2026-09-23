@@ -1117,7 +1117,14 @@ export function createProps(scene, terrain, opts = {}) {
   }
 
   return {
-    meshes, grassMesh, cfg, solids, megaMeshes,
+    /**
+     * R18 — NOT `meshes`. There is a `get meshes()` further down this same object literal that
+     * merges in the megaflora and the grass, and a duplicate key in an object literal is not an
+     * error in JavaScript — it is a shrug: the later definition silently won and this one had never
+     * been reachable. The project has been bitten by this exact shape before, when `board` was
+     * declared twice on `window.farhold` and js/work.js became unreachable.
+     */
+    grassMesh, cfg, solids, megaMeshes,
     /** What the megaflora catalogue said, once it arrived. Null until then. */
     get megaflora() { return mega; },
 

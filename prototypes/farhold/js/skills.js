@@ -73,12 +73,35 @@ function petName(id) {
 /**
  * How much of a hit's damage a status carries over, as a share of the weapon's damage.
  *
- * `js/main.js` hangs a skill's status with `power = plan.damage * 0.9 * statusMult`, and
- * `tickStatuses` pays `perSecond * power` every second for `seconds`. So the total a burn deals is
- * the skill's own multiplier times all of that — which is why Firebolt's burn is worth more than
- * Firebolt's impact and the old line ("a bolt of fire that leaves them burning") never said so.
+ * `js/main.js` hangs a skill's status with `power = plan.damage * STATUS_POWER_SHARE * statusMult`,
+ * and `tickStatuses` pays `perSecond * power` every second for `seconds`. So the total a burn deals
+ * is the skill's own multiplier times all of that.
+ *
+ * R21b — IT WAS 0.9, AND THE DAMAGE-OVER-TIME WAS THE SKILL.
+ *
+ * Generating the skill descriptions in round 21 made this visible for the first time: every number
+ * was already on the skill object and none of it had ever been printed, so nobody had added them
+ * up. Measured across all forty skills, by damage per second of cooldown:
+ *
+ *     poison_dart  481% over 5s cd  ->  96%/s      power_strike  190% over 4s cd  ->  48%/s
+ *     firebolt     376% over 4s cd  ->  94%/s      aimed_shot    220% over 5s cd  ->  44%/s
+ *     eviscerate   577% over 7s cd  ->  82%/s      shadow_lance  190% over 5s cd  ->  38%/s
+ *
+ * The three best skills in the game were the three with a damage-over-time on them, and the five
+ * DoT skills averaged **68% of weapon damage a second against 20% for everything else** — three
+ * and a half times better. The burn was worth more than the bolt that applied it (216% against
+ * 160%), and Poison Dart's poison was worth more than three times its own dart.
+ *
+ * That is not a status, it is the whole skill with a delivery animation. 0.35 puts a DoT skill's
+ * total in the same band as the best direct skills (51-61%/s against power_strike's 48%/s) and
+ * leaves the burn a real but secondary part of the hit — about 45% of the impact, except on Poison
+ * Dart, which carries `statusMult: 1.8` because being mostly poison is the point of it.
+ *
+ * `js/main.js` READS THIS CONSTANT NOW. It used to carry its own `0.9` literal, so the description
+ * generator here and the code that actually applies the status were two copies of one number that
+ * nothing checked against each other — `tests/wording.test.js` now does.
  */
-export const STATUS_POWER_SHARE = 0.9;
+export const STATUS_POWER_SHARE = 0.35;
 
 /** What a damage-over-time status adds, as a share of weapon damage. */
 function statusTotal(skill, spec) {

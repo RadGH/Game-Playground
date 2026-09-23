@@ -84,7 +84,7 @@ export function describeMod(mod = {}, { heals = false } = {}) {
 
   if (mod.projectiles) parts.push(`Looses ${fmt(mod.projectiles)} projectiles in ${spreadWord}`);
   if (mod.pierce) parts.push(`Each shot passes through ${fmt(mod.pierce)} more target${mod.pierce === 1 ? '' : 's'} before it stops`);
-  if (mod.homing) parts.push('The projectile steers toward whatever you aimed at');
+  if (mod.homing) parts.push(`The projectile turns onto any target within ${fmt(2.5 + mod.homing * 3.5)} m of its flight path`);
   if (mod.radiusPct) parts.push(`Every impact, cone and blast is ${pctOf(mod.radiusPct)} wider`);
   if (mod.splash) parts.push(`Bursts on impact, hitting everything within ${fmt(mod.splash)} metres`);
   if (mod.chains) {
@@ -192,7 +192,16 @@ for (const node of Object.values(TALENT_LIBRARY)) node.desc = describeMod(node.m
  * `castRules` (js/effects.js DERIVED_INTO_SUM).
  */
 const OFFERS = {
-  bolt: { 1: ['fan', 'pierce', 'heavy'], 2: ['burst', 'chain', 'deepen'], 3: ['cauterise', 'echo', 'brand'] },
+  /**
+   * R21b — `seeking` takes `heavy`'s place on the bolt board, rather than being added beside it.
+   *
+   * A tier offers two or three picks and no more (tests/weapons.test.js), so making Seeking
+   * reachable meant choosing what it replaces. `heavy` is a flat damage multiplier and is still
+   * offered on seven other boards, so nothing is lost from the game — while a bolt's first tier
+   * now reads as three genuinely different projectiles (a fan, a piercing shot, a seeking one)
+   * instead of two behaviours and a stat stick.
+   */
+  bolt: { 1: ['fan', 'pierce', 'seeking'], 2: ['burst', 'chain', 'deepen'], 3: ['cauterise', 'echo', 'brand'] },
   nova: { 1: ['wide', 'heavy', 'quick'], 2: ['linger', 'shatter', 'drain'], 3: ['bulwark', 'overload', 'hunger'] },
   cone: { 1: ['wide', 'heavy', 'quick'], 2: ['linger', 'deepen', 'shatter'], 3: ['cauterise', 'overload', 'brand'] },
   beam: { 1: ['pierce', 'heavy', 'quick'], 2: ['shatter', 'drain', 'chain'], 3: ['overload', 'echo', 'brand'] },
@@ -426,11 +435,23 @@ export const IMPLEMENTED_MODS = new Set([
    * leaving it ON the list in code. Counted, not assumed: `grep -c 'plan.<key>' js/main.js`.
    */
   'chains', 'chainFalloff', 'ground', 'groundRadius',
+  /**
+   * R21b — `homing`, at last. `js/main.js` `fireBolt` widens its acquisition scan by this value and
+   * then sweeps the flight path for a body to turn onto. Taking it off `PENDING_MODS` without
+   * putting it here would have left `inertTalents` still reporting Seeking as unfinished, which is
+   * the audit doing its job — the two lists are the same claim from opposite ends.
+   */
+  'homing',
 ]);
 
 /** Mod keys nothing reads yet, with the file that would have to read them. */
 export const PENDING_MODS = {
-  homing: 'js/main.js fireBolt / js/combat-fx.js — a projectile cannot steer yet',
+  // R21b — `homing` came OFF this list. It sat here from round 7 while `js/main.js` carried the
+  // field all the way into `fireBolt` and then never read it, which also meant the `seeking` WAND
+  // BEHAVIOUR (js/weapons.js, "turns after what you aimed at") was inert on a weapon the player
+  // could buy. `fireBolt` widens its acquisition by the homing value and, failing that, sweeps the
+  // flight path for a body and turns onto it. `Seeking` is offered on the bolt board now, too — it
+  // was in TALENT_LIBRARY and in no OFFERS list, so nobody could have taken it even if it worked.
   // `ground` and `groundRadius` sat here from round 7 to round 12 with the note "no lingering
   // ground pool exists" — which was true, and meant the `linger` talent, offered on four of the
   // six skill trees, did nothing at all when taken. js/main.js has pools now (`dropPool` /

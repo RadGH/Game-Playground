@@ -1,7 +1,7 @@
 {
  "_markedDoc": "statuses.marked: Quarry (the ranged perk node) and Branding (a tier-3 skill talent) both hang this on a target. It is a plain takeMore debuff, so js/skills.js buffsOf already knows what to do with it; each caller passes its own seconds and share, so this row is the default and the name the log prints.",
-  "_descDoc": "EVERY `desc` BELOW IS GENERATED, NOT WRITTEN. `js/skills.js` `describeSkill(skill, statuses)` builds each line out of that skill's own `mult`, `reach`, `arc`, `radius`, `range`, `splash`, `width`, `projectiles`, `spread`, `heal`, `status`, `mp` and `cooldown`, and out of the `statuses` row the skill names — so a description cannot promise something the numbers do not do. The text is stored here as well as generated so the screens that read this file directly (js/classbuild-ui.js, js/followers-ui.js, js/newgame.js) are right before any skill bar is built; `describeSkills(data)` runs at the top of `createSkillBar` and rewrites all forty anyway, so changing a number here changes the card even if nobody regenerated the file. Do not hand-edit a `desc`: change the number, or change `describeSkill`.",
- "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` \u2014 so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide \u2014 a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
+ "_descDoc": "EVERY `desc` BELOW IS GENERATED, NOT WRITTEN. `js/skills.js` `describeSkill(skill, statuses)` builds each line out of that skill's own `mult`, `reach`, `arc`, `radius`, `range`, `splash`, `width`, `projectiles`, `spread`, `heal`, `status`, `mp` and `cooldown`, and out of the `statuses` row the skill names — so a description cannot promise something the numbers do not do. The text is stored here as well as generated so the screens that read this file directly (js/classbuild-ui.js, js/followers-ui.js, js/newgame.js) are right before any skill bar is built; `describeSkills(data)` runs at the top of `createSkillBar` and rewrites all forty anyway, so changing a number here changes the card even if nobody regenerated the file. Do not hand-edit a `desc`: change the number, or change `describeSkill`.",
+ "_doc": "Farhold's skill bar (round 4). Emberveil's skills are written for a turn-based party fight ('adjacent2', 'row', 'per_source'), which does not translate to one person in real time, so these are its ideas rebuilt around a shape, a radius and a cooldown. Each class gets SIX, on keys 1-6, unlocked at the levels in `unlockAt` — so a new character has one button and earns the rest. `element` picks the spell effect from avatar-3d/js/spellfx.js. `projectiles` on a bolt fires that many at once in a fan `spread` radians wide — a multi shot that fires one arrow is not a multi shot. Shapes: melee (an arc in front), around (a ring centred on you), bolt (flies where you look), beam (a line), ground (lands where you are looking), dash (you move, everything on the way is hit), self (you), summon (a temporary companion).",
  "unlockAt": [
   1,
   3,
@@ -130,7 +130,7 @@
    "arc": 1.6,
    "cooldown": 4,
    "mp": 0,
-   "desc": "Strikes everything in a 92\u00b0 arc 3.4 m in front of you for 190% weapon damage. No mana cost, 4s cooldown."
+   "desc": "Strikes everything in a 92° arc 3.4 m in front of you for 190% weapon damage. No mana cost, 4s cooldown."
   },
   "cleave": {
    "name": "Cleave",
@@ -152,7 +152,7 @@
    "status": "weaken",
    "cooldown": 9,
    "mp": 8,
-   "desc": "Strikes everything in an 80\u00b0 arc 3.2 m in front of you for 160% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
+   "desc": "Strikes everything in an 80° arc 3.2 m in front of you for 160% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. 8 mana, 9s cooldown."
   },
   "shield_bash": {
    "name": "Shield Bash",
@@ -164,7 +164,7 @@
    "status": "web",
    "cooldown": 8,
    "mp": 6,
-   "desc": "Strikes everything in a 126\u00b0 arc 2.8 m in front of you for 130% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
+   "desc": "Strikes everything in a 126° arc 2.8 m in front of you for 130% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 6 mana, 8s cooldown."
   },
   "whirlwind": {
    "name": "Whirlwind",
@@ -196,7 +196,7 @@
    "arc": 1.2,
    "cooldown": 14,
    "mp": 12,
-   "desc": "Strikes everything in a 69\u00b0 arc 3 m in front of you for 320% weapon damage. 12 mana, 14s cooldown."
+   "desc": "Strikes everything in a 69° arc 3 m in front of you for 320% weapon damage. 12 mana, 14s cooldown."
   },
   "aimed_shot": {
    "name": "Aimed Shot",
@@ -218,7 +218,7 @@
    "splash": 1.6,
    "cooldown": 8,
    "mp": 10,
-   "desc": "Looses 5 shots in an 11\u00b0 fan out to 34 m, each for 80% weapon damage, splashing everything within 1.6 m of where a shot lands. 10 mana, 8s cooldown.",
+   "desc": "Looses 5 shots in an 11° fan out to 34 m, each for 80% weapon damage, splashing everything within 1.6 m of where a shot lands. 10 mana, 8s cooldown.",
    "projectiles": 5,
    "spread": 0.2
   },
@@ -226,13 +226,13 @@
    "name": "Pinning Shot",
    "shape": "bolt",
    "element": "physical",
-   "mult": 1.0,
+   "mult": 1,
    "range": 38,
    "splash": 1.4,
    "status": "web",
    "cooldown": 9,
    "mp": 8,
-   "desc": "Looses 2 shots in a 5\u00b0 fan out to 38 m, each for 100% weapon damage, splashing everything within 1.4 m of where a shot lands. Leaves the target Snared: the target moves 80% slower for 3s. 8 mana, 9s cooldown.",
+   "desc": "Looses 2 shots in a 5° fan out to 38 m, each for 100% weapon damage, splashing everything within 1.4 m of where a shot lands. Leaves the target Snared: the target moves 80% slower for 3s. 8 mana, 9s cooldown.",
    "projectiles": 2,
    "spread": 0.09
   },
@@ -257,7 +257,7 @@
    "status": "poison",
    "cooldown": 5,
    "mp": 6,
-   "desc": "Looses one bolt out to 34 m for 110% weapon damage as poison, splashing everything within 1.5 m of where the bolt lands. Leaves the target Poisoned: a further 371% weapon damage over 8s. 6 mana, 5s cooldown.",
+   "desc": "Looses one bolt out to 34 m for 110% weapon damage as poison, splashing everything within 1.5 m of where the bolt lands. Leaves the target Poisoned: a further 144% weapon damage over 8s. 6 mana, 5s cooldown.",
    "statusMult": 1.8
   },
   "shadowstep": {
@@ -281,7 +281,7 @@
    "status": "bleed",
    "cooldown": 7,
    "mp": 8,
-   "desc": "Strikes everything in a 63\u00b0 arc 2.8 m in front of you for 240% weapon damage. Leaves the target Bleeding: a further 337% weapon damage over 6s. 8 mana, 7s cooldown."
+   "desc": "Strikes everything in a 63° arc 2.8 m in front of you for 240% weapon damage. Leaves the target Bleeding: a further 131% weapon damage over 6s. 8 mana, 7s cooldown."
   },
   "smoke": {
    "name": "Smoke",
@@ -302,7 +302,7 @@
    "status": "burn",
    "cooldown": 4,
    "mp": 8,
-   "desc": "Looses one bolt out to 36 m for 160% weapon damage as fire, splashing everything within 2.6 m of where the bolt lands. Leaves the target Burning: a further 216% weapon damage over 5s. 8 mana, 4s cooldown."
+   "desc": "Looses one bolt out to 36 m for 160% weapon damage as fire, splashing everything within 2.6 m of where the bolt lands. Leaves the target Burning: a further 84% weapon damage over 5s. 8 mana, 4s cooldown."
   },
   "fire_wall": {
    "name": "Ember Field",
@@ -314,7 +314,7 @@
    "status": "burn",
    "cooldown": 13,
    "mp": 18,
-   "desc": "Falls on a spot up to 30 m away, striking everything within 6 m of that spot for 180% weapon damage as fire. Leaves the target Burning: a further 243% weapon damage over 5s. 18 mana, 13s cooldown."
+   "desc": "Falls on a spot up to 30 m away, striking everything within 6 m of that spot for 180% weapon damage as fire. Leaves the target Burning: a further 95% weapon damage over 5s. 18 mana, 13s cooldown."
   },
   "frost_nova": {
    "name": "Frost Nova",
@@ -349,7 +349,7 @@
    "status": "shock",
    "cooldown": 7,
    "mp": 12,
-   "desc": "Looses 3 bolts in an 8\u00b0 fan out to 40 m, each for 110% weapon damage as lightning, splashing everything within 3.2 m of where a bolt lands. Leaves the target Shocked: the target takes 30% more damage for 5s. 12 mana, 7s cooldown.",
+   "desc": "Looses 3 bolts in an 8° fan out to 40 m, each for 110% weapon damage as lightning, splashing everything within 3.2 m of where a bolt lands. Leaves the target Shocked: the target takes 30% more damage for 5s. 12 mana, 7s cooldown.",
    "projectiles": 3,
    "spread": 0.14
   },
@@ -431,7 +431,7 @@
    "status": "burn",
    "cooldown": 22,
    "mp": 30,
-   "desc": "Falls on a spot up to 36 m away, striking everything within 8 m of that spot for 340% weapon damage as fire. Leaves the target Burning: a further 459% weapon damage over 5s. 30 mana, 22s cooldown."
+   "desc": "Falls on a spot up to 36 m away, striking everything within 8 m of that spot for 340% weapon damage as fire. Leaves the target Burning: a further 179% weapon damage over 5s. 30 mana, 22s cooldown."
   },
   "mend": {
    "name": "Mend",

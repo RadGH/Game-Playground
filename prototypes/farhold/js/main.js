@@ -122,7 +122,7 @@ import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
 // aliased: two functions in this file already have a local `mat` holding a material's NAME,
 // and a shadowed import is a bug waiting for whoever edits one of them next.
 import { mat as matAmount } from '../../../shared/format.js';
-import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom } from './skills.js';
+import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE } from './skills.js';
 // round 4: the RPG expansion
 import { buildZones } from './zones.js';
 import { createChests } from './chests.js';
@@ -1141,7 +1141,43 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * through, so with it the scan is simply not allowed to shorten the flight — the bolt flies its
      * full range and the splash along the way does the work.
      */
-    const target = field.hitScan(a.x, a.y, a.z, dx, dy, dz, { range: plan.range, width: 1.4 });
+    /**
+     * R21b — HOMING, WHICH WAS CARRIED ALL THE WAY HERE AND THEN DROPPED ON THE FLOOR.
+     *
+     * `plan.homing` arrives on every bolt: `js/skilltalents.js` sums it for the Seeking talent, and
+     * `js/main.js`'s wand path sets it from `wandBehaviour` — there is a whole wand behaviour called
+     * "seeking", described to the player as *"turns after what you aimed at"*, priced and sold. And
+     * `fireBolt` never read the field, so a seeking wand fired exactly the same straight bolt as
+     * every other wand, and the talent was on the project's own `PENDING_MODS` list as "a
+     * projectile cannot steer yet".
+     *
+     * It steers now, and it does it the way the ARROW path already did (`width: 1.1 + homing * 2.6`
+     * at the bow) so the two agree on what the word means:
+     *
+     *   1. a wider acquisition — a near miss is a hit;
+     *   2. and if that still finds nothing, the bolt LOOKS for a body near the line it was fired
+     *      along and turns onto it. That is the half that makes it "seeking" rather than "forgiving":
+     *      it sweeps out from the muzzle and takes the first enemy within reach of the flight path,
+     *      so it cannot snap onto something behind you.
+     *
+     * The impact already resolves against `chase`'s live position, so a body that moves during the
+     * flight is still hit — that part was right all along, which is probably why nobody noticed the
+     * bolt was not actually turning.
+     */
+    const homing = (!hop && plan.homing) ? plan.homing : 0;
+    let target = field.hitScan(a.x, a.y, a.z, dx, dy, dz, { range: plan.range, width: 1.4 + homing * 2.6 });
+    if (!target && homing > 0) {
+      const reach = 2.5 + homing * 3.5;
+      for (let t = 4; t <= plan.range && !target; t += 3) {
+        const found = field.nearestTo(a.x + dx * t, a.z + dz * t, reach);
+        if (!found) continue;
+        const ex = found.x - a.x, ey = (found.y + 0.9) - a.y, ez = found.z - a.z;
+        const len = Math.hypot(ex, ey, ez) || 1;
+        if (len > plan.range) continue;
+        dx = ex / len; dy = ey / len; dz = ez / len;          // turn onto it
+        target = { enemy: found, distance: len };
+      }
+    }
     let dist = (plan.pierce && !hop) ? plan.range : (target ? target.distance : plan.range);
     for (let t = 2; t < dist; t += 2) {
       const gx = a.x + dx * t, gz = a.z + dz * t;
@@ -1241,7 +1277,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // War Cry raises the damage of everything, including the skill that follows it
     const power = plan.mult * outgoingFrom(player);
     const onHit = (enemy, result) => {
-      if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * 0.9 * (plan.statusMult || 1)));
+      // R21b: the share is `js/skills.js`'s constant, not a second copy of it here. The two were
+      // 0.9 in both places and nothing compared them; the description generator read one and the
+      // game read the other.
+      if (plan.status && plan.statusSpec) landStatus(plan.status, plan.statusSpec, enemy, Math.max(1, plan.damage * STATUS_POWER_SHARE * (plan.statusMult || 1)));
       reportHit(enemy, result);
     };
     const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };

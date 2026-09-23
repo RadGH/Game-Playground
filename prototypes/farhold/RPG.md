@@ -3213,3 +3213,62 @@ skill object and none of it was ever shown. "A sweep that catches everything aro
 That generator also exposed a real balance question, recorded and **not** acted on: `main.js` hangs
 a skill's status at `plan.damage * 0.9 * statusMult`, so Firebolt's burn is worth 216% weapon damage
 against the bolt's own 160%, and Poison Dart's poison 371%. The damage-over-time is the skill.
+
+
+## Round 21b — the two the round-21 report should have just fixed
+
+Round 21 ended by "flagging for your call" two things it had found and not acted on. That was the
+wrong call: a flagged item with no proposed action is unfinished work handed back. Both are fixed.
+
+### The damage-over-time was the skill
+
+Generating the skill descriptions is what made this visible — every number was already on the skill
+object and none of it had ever been printed, so nobody had added them up. Measured across all forty
+skills by damage per second of cooldown:
+
+| skill | total | cooldown | per second |
+|---|---|---|---|
+| poison_dart | 481% | 5s | **96%/s** |
+| firebolt | 376% | 4s | **94%/s** |
+| eviscerate | 577% | 7s | **82%/s** |
+| power_strike | 190% | 4s | 48%/s |
+| aimed_shot | 220% | 5s | 44%/s |
+
+The three best skills in the game were the three with a damage-over-time on them, and the five DoT
+skills averaged **68% of weapon damage a second against 20% for everything else** — three and a half
+times better. Firebolt's burn was worth more than Firebolt's bolt (216% against 160%); Poison Dart's
+poison was worth more than three times its own dart. That is not a status, it is the whole skill
+with a delivery animation.
+
+`STATUS_POWER_SHARE` goes from **0.9 to 0.35**. A DoT is now about half the impact that applies it
+(52–55%), except Poison Dart at 131%, which carries `statusMult: 1.8` because being mostly poison is
+the point of it. The top of the table becomes firebolt 61%/s, eviscerate 53, poison_dart 51,
+power_strike 48, aimed_shot 44 — DoT skills are good, and no longer in their own league.
+
+The constant also had **two copies**: `js/skills.js` exported it for the description generator and
+`js/main.js` carried its own `0.9` literal for the code that actually applies the status. Nothing
+compared them. `main.js` imports the constant now, and `tests/round21-balance.test.js` fails if a
+hard-coded share comes back.
+
+### The seeking bolt did not seek
+
+`Seeking` was on `PENDING_MODS` as "a projectile cannot steer yet", which was true — and it was
+worse than the audit knew, because **`homing` is not only a talent**. `js/weapons.js` has a wand
+behaviour called `seeking`, described to the player as *"turns after what you aimed at"*, on a wand
+that can be found and bought. `js/main.js`'s wand path sets `plan.homing` from it, carries it all
+the way into `fireBolt`, and `fireBolt` never read the field. So a seeking wand fired exactly the
+same straight bolt as every other wand.
+
+And the talent was unreachable anyway: `seeking` was in `TALENT_LIBRARY` and in **no `OFFERS`
+list**, so nobody could have taken it even if it had worked.
+
+`fireBolt` now does what the bow path already did — widens its acquisition by the homing value
+(`width: 1.4 + homing * 2.6`, the same formula) and, failing that, sweeps the flight path for a body
+within `2.5 + homing * 3.5` m and turns onto it. Sweeping outward from the muzzle means it cannot
+snap onto something behind you. `Seeking` takes `heavy`'s place on the bolt board (a tier offers two
+or three picks and no more), which is a better first tier anyway: a fan, a piercing shot and a
+seeking one are three different projectiles, where two of those plus a damage multiplier was two.
+
+`homing` moves from `PENDING_MODS` to `IMPLEMENTED_MODS` — both, because they are the same claim
+from opposite ends and moving only one leaves `inertTalents` still reporting the node. **The game
+now has zero inert talents.**

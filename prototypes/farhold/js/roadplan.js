@@ -154,10 +154,29 @@ export function planLane(points, {
   id = null,
   key = null,
   name = '',
+  /**
+   * ROUND 22 — HOW FAR EITHER SIDE THE LANE HAS TO CLEAR THE GROUND, in metres past its own edge.
+   *
+   * Zero (the default) is the old behaviour and is right for anything whose ground gets levelled
+   * afterwards — the world's roads are carved into the terrain by js/planet.js, and a road the
+   * player lays is levelled by `levelLane` below. A TOWN STREET is neither: `features.js` has no
+   * terraform book, so nothing anywhere brings the hillside up or down to meet it, and the lane's
+   * height is sampled along its CENTRE LINE only. On a side slope the uphill kerb is then buried
+   * and the downhill one floats, which is *"the terrain repeatedly clips through the road"* on the
+   * town streets.
+   *
+   * Pass a margin and the lane is crowned instead: at each point the ground is sampled right
+   * across the carriageway plus that margin, and the deck is raised to the highest of it. A street
+   * then sits ON the slope like a shelf, which is what a levelled street bed looks like anyway.
+   */
+  clearAcross = 0,
+  /** The most the crown may climb between two lane points, so a crowned street is still walkable. */
+  clearRamp = 0.35,
 } = {}) {
   const laid = smoothPoints(resample(points, spacing), cornerPasses);
   const heightAt = terrain?.heightAt ? (x, z) => terrain.heightAt(x, z) : () => 0;
   const heights = gradeHeights(laid, heightAt, gradePasses);
+  if (clearAcross > 0 && laid.length >= 2) crownLane(laid, heights, half + clearAcross, heightAt, clearRamp);
   let metres = 0;
   for (let i = 0; i + 1 < laid.length; i++) {
     metres += Math.hypot(laid[i + 1][0] - laid[i][0], laid[i + 1][1] - laid[i][1]);
@@ -170,6 +189,37 @@ export function planLane(points, {
     surface: heights,
     metres,
   };
+}
+
+/**
+ * RAISE A GRADED LANE UNTIL NOTHING UNDER IT POKES THROUGH.
+ *
+ * Walks the same normal `laneRibbon` builds its vertices on — the mitre of `prev → next`, so the
+ * samples land where the drawn edge really is and not where the maths says it ought to be — and
+ * takes the highest ground across the strip. The deck goes to that, and then the two sweeps ramp
+ * the result so a crowned point drags its neighbours up with it rather than standing on a step.
+ *
+ * It only ever raises. A lane in a cutting is left in its cutting.
+ */
+function crownLane(points, heights, reach, heightAt, ramp) {
+  const cover = new Float64Array(points.length);
+  const STEPS = 6;                                   // across the strip, edge to edge
+  for (let i = 0; i < points.length; i++) {
+    const prev = points[Math.max(0, i - 1)], next = points[Math.min(points.length - 1, i + 1)];
+    let dx = next[0] - prev[0], dz = next[1] - prev[1];
+    const len = Math.hypot(dx, dz) || 1;
+    const nx = -dz / len, nz = dx / len;
+    let top = -Infinity;
+    for (let k = 0; k <= STEPS; k++) {
+      const s = (k / STEPS) * 2 - 1;
+      const g = heightAt(points[i][0] + nx * reach * s, points[i][1] + nz * reach * s);
+      if (g > top) top = g;
+    }
+    cover[i] = Math.max(0, top - heights[i]);
+  }
+  for (let i = 1; i < cover.length; i++) cover[i] = Math.max(cover[i], cover[i - 1] - ramp);
+  for (let i = cover.length - 2; i >= 0; i--) cover[i] = Math.max(cover[i], cover[i + 1] - ramp);
+  for (let i = 0; i < heights.length; i++) heights[i] += cover[i];
 }
 
 /**
@@ -509,55 +559,56 @@ export const ROAD_RANK = { highway: 3, road: 2, trail: 1, street: 0, built: 1 };
  * the centre (which is what a town planner wants) and the bearing (which is what a wall wants),
  * best road first.
  */
+/**
+ * ROUND 22 — BOTH ROOTS, ON EVERY SEGMENT, WHATEVER ITS ENDS ARE DOING.
+ *
+ * Reported: *"that road goes through the wall, but there is no gate."* Round 16 had already fixed
+ * the version of this bug where the question was asked of the road's SAMPLE POINTS instead of the
+ * road, and the answer here was still built on the same shape of assumption: a crossing was
+ * detected by watching for the step from a point outside the ring to a point inside it, and only
+ * then solved exactly.
+ *
+ * A road point is `M_PER_CELL / 5` metres from the next one — 45 m on the default planet size,
+ * 128 m on a full-sized one — and a size-4 town's wall ring is about 82 m across. So a road that
+ * clips the CORNER of the ring has BOTH of its sample points outside it while the chord between
+ * them passes straight through the masonry. No step, no crossing, no gate — and `js/features.js`
+ * draws the road's ribbon through the wall regardless, which is exactly what the user walked into.
+ *
+ * Solving the quadratic on every segment costs one extra square root per segment and has no
+ * special cases left in it: a chord that enters and leaves inside ONE segment yields two roots and
+ * two crossings, an ordinary entry yields one, a segment that misses yields none, and the
+ * inside/outside bookkeeping disappears along with the class of bug it carried.
+ */
 export function ringCrossings(paths, cx, cz, ring, { minGap = 10, limit = Infinity } = {}) {
   const out = [];
   for (const r of paths || []) {
     const pts = r.points;
     if (!pts || pts.length < 2) continue;
-    let wasIn = Math.hypot(pts[0][0] - cx, pts[0][1] - cz) <= ring;
     for (let i = 1; i < pts.length; i++) {
-      const d = Math.hypot(pts[i][0] - cx, pts[i][1] - cz);
-      const isIn = d <= ring;
-      if (isIn !== wasIn) {
-        /**
-         * The real intersection of the segment with the circle, not an interpolation of the two
-         * distances. Lerping the distance is fine head-on and badly wrong on a road that comes in
-         * at a slant — measured on a 82 m wall ring it put a "crossing" 70 m from the middle of
-         * town, twelve metres inside its own wall, which would blank the masonry in the wrong place.
-         * Solving |A + t(B - A) - C|^2 = ring^2 costs one square root and is exact.
-         */
-        const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
-        const vx = bx - ax, vz = bz - az;
-        const fx = ax - cx, fz = az - cz;
-        const qa = vx * vx + vz * vz;
-        const qb = 2 * (fx * vx + fz * vz);
-        const qc = fx * fx + fz * fz - ring * ring;
-        const disc = qb * qb - 4 * qa * qc;
-        let t;
-        if (qa < 1e-12 || disc < 0) {
-          const da = Math.hypot(ax - cx, az - cz), db = Math.hypot(bx - cx, bz - cz);
-          t = Math.abs(db - da) < 1e-6 ? 0.5 : (ring - da) / (db - da);
-        } else {
-          const root = Math.sqrt(disc);
-          const t0 = (-qb - root) / (2 * qa), t1 = (-qb + root) / (2 * qa);
-          // one of the two roots is inside this segment — that is the step we just detected
-          t = (t0 >= -1e-6 && t0 <= 1 + 1e-6) ? t0 : t1;
-        }
-        t = Math.max(0, Math.min(1, t));
+      const [ax, az] = pts[i - 1], [bx, bz] = pts[i];
+      const vx = bx - ax, vz = bz - az;
+      const fx = ax - cx, fz = az - cz;
+      const qa = vx * vx + vz * vz;
+      if (qa < 1e-12) continue;
+      const qb = 2 * (fx * vx + fz * vz);
+      const qc = fx * fx + fz * fz - ring * ring;
+      const disc = qb * qb - 4 * qa * qc;
+      if (disc < 0) continue;                       // this span never reaches the circle
+      const root = Math.sqrt(disc);
+      for (const t of [(-qb - root) / (2 * qa), (-qb + root) / (2 * qa)]) {
+        if (t < -1e-9 || t > 1 + 1e-9) continue;    // the crossing is on some other span
         const x = ax + vx * t, z = az + vz * t;
         const dx = x - cx, dz = z - cz;
         // a road that grazes the ring crosses twice within a few metres; one gate is enough
-        if (!out.some(c => Math.hypot(c.dx - dx, c.dz - dz) < minGap)) {
-          out.push({
-            x, z, dx, dz,
-            angle: Math.atan2(dz, dx),
-            klass: r.klass || 'trail',
-            rank: ROAD_RANK[r.klass] ?? 1,
-            id: r.id,
-          });
-        }
+        if (out.some(c => Math.hypot(c.dx - dx, c.dz - dz) < minGap)) continue;
+        out.push({
+          x, z, dx, dz,
+          angle: Math.atan2(dz, dx),
+          klass: r.klass || 'trail',
+          rank: ROAD_RANK[r.klass] ?? 1,
+          id: r.id,
+        });
       }
-      wasIn = isIn;
     }
   }
   // a highway earns its gatehouse before a trail does, when there are more crossings than gates

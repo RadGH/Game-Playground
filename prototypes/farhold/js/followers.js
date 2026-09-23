@@ -59,12 +59,54 @@ export const FOLLOWER_STATS = ['followerSlots', 'petSlots'];
  * numbers rather than to the current ones: compounding a 1.16 damage bump on every re-cost would
  * have a level-40 mercenary hitting for thousands.
  */
-export function scaleFollower({ def = null, level = 1, perLevel = 1.17, power = 1, health = 1, grown = null } = {}) {
+/**
+ * R22 — HOW MUCH OF THE FIGHT A COMPANION IS ALLOWED TO BE.
+ *
+ *   "Companions running around one-shotting everything, how do they scale so well? I was level 22
+ *    and teleported to a level 20-22 zone and after just a few kills from my companions I was level
+ *    30, 31, so quick."
+ *
+ * The scaling was not slightly off, it was scaling against the wrong thing entirely. A companion's
+ * damage is `base × perLevel^(level-1)` — a clean exponential on the OWNER'S LEVEL — while the
+ * player's damage comes from the weapon in their hand, which grows by finding better weapons and
+ * not by an exponent at all. Two curves that were never compared:
+ *
+ *   level  1   a hired blade does 16-26   ·  a level-1 character swings for a few
+ *   level 22   a hired blade does 433-703 ·  the character is still swinging for tens
+ *   level 40   a hired blade does 7301-11864
+ *
+ * On top of that, `perLevel` was 1.17 against the enemy health curve's 1.13, so the companion's
+ * share of a kill ALSO grew by (1.17/1.13)^(L-1) — 2.1x by level 22 and 5.5x by 50. Both knobs are
+ * 1.13 now, in `data/balance.json` and `data/mercenaries.json`, so that part is flat.
+ *
+ * But matching the exponents only fixes the drift; it does not fix the fact that the two curves were
+ * never related. `ownerDamage` is what relates them: a companion may not hit for more than
+ * `shareCap` of the top of your own swing. That is a ceiling, not a formula — under it everything
+ * behaves exactly as it did, so low levels are untouched — and it is the one rule that cannot come
+ * apart again, because it is stated in terms of the thing it is supposed to be a fraction of.
+ *
+ * 0.75 rather than something smaller because a hired sword you paid 180 gold for should be worth
+ * having. Three of them at 0.75 is still three-quarters of your damage each, which is a warband;
+ * what it is not is a warband that kills things before you have swung.
+ */
+export const FOLLOWER_SHARE_CAP = 0.75;
+
+export function scaleFollower({
+  def = null, level = 1, perLevel = 1.13, power = 1, health = 1, grown = null,
+  ownerDamage = null, shareCap = FOLLOWER_SHARE_CAP,
+} = {}) {
   const g = grown || { dmgMult: 1, hpMult: 1, armorAdd: 0 };
   const scale = Math.pow(perLevel, Math.max(0, (level || 1) - 1));
+  const raw = (def?.dmg ?? [4, 6]).map(v => Math.max(1, Math.round(v * scale * power * (g.dmgMult ?? 1))));
+  // the ceiling, when the caller knows what the owner swings for
+  const top = Array.isArray(ownerDamage) ? Number(ownerDamage[1]) : null;
+  const cap = Number.isFinite(top) && top > 0 ? top * (def?.shareCap ?? shareCap) : Infinity;
+  const dmg = raw[1] > cap
+    ? raw.map(v => Math.max(1, Math.round(v * (cap / raw[1]))))   // scale the pair, keep its spread
+    : raw;
   return {
     hp: Math.max(1, Math.round((def?.hp ?? 30) * scale * health * (g.hpMult ?? 1))),
-    dmg: (def?.dmg ?? [4, 6]).map(v => Math.max(1, Math.round(v * scale * power * (g.dmgMult ?? 1)))),
+    dmg,
     armor: Math.round((def?.armor ?? 0) * scale) + (g.armorAdd ?? 0),
   };
 }

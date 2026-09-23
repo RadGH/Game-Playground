@@ -124,6 +124,17 @@ export function streetLanes(plan, {
    * asking "does a break make two runs instead of one with a hole" does not. See `keepConnected`.
    */
   prune = false,
+  /**
+   * ROUND 22 — how far past its own kerb a street has to clear the ground, in metres.
+   *
+   * *"At this location the terrain repeatedly clips through the road."* The world's roads have the
+   * terrain carved down to meet them; a town street has nothing (see the note above about the
+   * terraform book), and `gradeHeights` only ever samples the CENTRE LINE. On any side slope the
+   * uphill half of the ribbon is therefore under the hill. Two metres past the kerb covers the
+   * innermost terrain ring's own cell size, which is what decides how far a triangle can carry a
+   * hillside across the paving before anyone can see it.
+   */
+  clearAcross = 2,
 } = {}) {
   const lanes = [];
   const runs = [];
@@ -161,6 +172,7 @@ export function streetLanes(plan, {
   for (const r of (prune ? keepConnected(runs, terrain) : runs)) {
     lanes.push(planLane(r.pts, {
       terrain, half: r.half, gradePasses, klass: r.cls, surface: 'street',
+      clearAcross: terrain?.heightAt ? clearAcross : 0,
     }));
   }
   return lanes;

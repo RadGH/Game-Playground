@@ -84,7 +84,21 @@
   },
   "progression": {
     "attrPerLevel": 3,
-    "_doc": "XP curve lives in js/rpg.js (xpForLevel); level 2 at 58 xp, level 10 at ~3,600, level 30 at ~38,000."
+    "levelCap": 50,
+    "_doc": "XP curve lives in js/rpg.js (xpForLevel), written in fractions of `levelCap` so a 100-level world is the same climb cut into twice as many steps. At cap 50: level 2 at 58 xp, level 10 at ~3,500, level 30 at ~30,400, level 50 at ~118,700. `levelCap` is set by the world screen and rewritten into this object at boot."
+  },
+
+  "_xpDoc": "R22 — WHERE EXPERIENCE COMES FROM, AND HOW MUCH. Every one of these is a multiplier on what the game paid before this round, and every XP award in the game goes through js/rpg.js `killXpFor` or `eventXp` so there is one place to change them. The report: 'Companions running around one-shotting everything... I was level 22 and teleported to a level 20-22 zone and after just a few kills from my companions I was level 30, 31. I reached level 30 in about 10 minutes.'",
+  "xp": {
+    "kill": 0.2,
+    "killFalloffPerLevel": 0.2,
+    "killBonusPerLevelAbove": 0.15,
+    "killBonusCap": 1.6,
+    "quest": 1.5,
+    "event": 1.5,
+    "landmark": 3.0,
+    "perZoneLevel": 0.12,
+    "_doc": "kill: a kill pays a fifth of what it used to ('cut XP gains from kills down to just 20% of the current value'). killFalloffPerLevel: each level the enemy is BELOW you takes this share off the award, so five levels below pays nothing at all ('anything 5 levels lower should not reward any xp'). killBonusPerLevelAbove/Cap: the other side of the same rule — something above your level is worth more, up to 60% more. quest/event/landmark: turn-ins, cleared places and the little 'experience for the walk' awards, which were 20-60 and are now 60-180 before the zone scaling. perZoneLevel: what a level of ZONE adds to an event award — it replaces five different per-PLAYER-level multipliers (0.15, 0.15, 0.1, 0.1, 0.12) that had grown up one at a time."
   },
   "enemies": {
     "_doc": "Health and damage are SEPARATE curves. They used to share `perLevel`, which meant a five-level gap doubled an enemy's damage as well as its health and the fight stopped being winnable. A higher-level enemy should be much tougher and only somewhat harder hitting.",
@@ -518,8 +532,8 @@
     ]
   },
   "pets": {
-    "_doc": "Companions. `perLevel` scales a pet off its OWNER's level so a pet never falls behind. `leash` is how far it may get from you before it gives up and comes back.",
-    "perLevel": 1.17,
+    "_doc": "Companions. `perLevel` scales a pet off its OWNER's level so a pet never falls behind. It is 1.13 — the SAME number as `enemies.perLevel` — so a companion's share of a kill is the same at level 50 as at level 1. It was 1.17, which meant the share grew by (1.17/1.13)^(level-1): 2.1x by level 22 and 5.5x by 50. On top of that, js/followers.js caps a companion's damage at 75% of the top of the OWNER's own swing, because matching the exponents only stops the drift and the two curves were never related in the first place. `leash` is how far it may get from you before it gives up and comes back.",
+    "perLevel": 1.13,
     "leash": 26,
     "follow": 4.5,
     "engage": 22,

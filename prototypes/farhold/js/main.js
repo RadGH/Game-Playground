@@ -10,7 +10,7 @@ import { createShip } from '../../../assets/js/space-models.js';
 import { createAtmosphere } from './atmos.js';
 import { createTownFolk } from './town.js';
 import { createTalkPanel } from './talkui.js';
-import { QuestLog, gatherable, submitGather, makeFallQuest, makeQuest, isStarted } from './quests.js';
+import { QuestLog, gatherable, submitGather, makeFallQuest, makeQuest, isStarted, setQuestXpMult } from './quests.js';
 import { Campaign } from './campaign.js';
 import { createSound } from './sound.js';
 import { createSpeech } from './speech.js';
@@ -115,7 +115,7 @@ import {
 } from './shipyard.js';
 import { createInput, createController, KEY_HELP } from './player.js';
 import { EnemyField, makeActor, setActorAnim } from './actors.js';
-import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, itemScore, displayName } from './rpg.js';
+import { Rpg, heldLookFor, offhandLookFor, describeAffix, attuneWeapon, elementOf, statusOf, CAST_ELEMENTS, bandForPlanet, PLANET_BANDS, setLevelCap, levelCap, xpForLevel, eventXp, itemScore, displayName } from './rpg.js';
 import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
 // R17: one rule for printing a quantity of a material. Ore, timber and clay are all floats —
 // "you are short of 6.000000000003 clay" was the stored number reaching the screen untouched.
@@ -335,9 +335,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     bandWidth: Number(params.get('band')) || 4,
     density: Number(params.get('density')) || 1,
     planetScale: Number(params.get('scale')) || 1,
+    levelCap: Number(params.get('levels')) || 50,
     // On by default: a first hour on a locked-biome rock with nobody on it is a poor first hour.
     habitable: params.has('habitable') ? params.get('habitable') !== '0' : true,
   };
+  /**
+   * R22 — the level ladder this world was generated with, set before anything asks how long it is.
+   *
+   * `setLevelCap` rewrites `PLANET_BANDS` in place and re-bases the XP curve, and `buildZones` a few
+   * hundred lines below reads the bands to lay its level bands out. So it has to happen HERE, above
+   * both, and it has to come out of `worldOpts` rather than a fresh read of the URL — a saved game
+   * carries the cap it was made with, and loading a 100-level run into a 50-level ladder would halve
+   * every character in it.
+   */
+  setLevelCap(worldOpts.levelCap ?? 50);
   // How big a planet feels underfoot. 640 m a cell gives 163 x 82 km, which is a lot of ground on
   // foot; the default is smaller now, and it is a knob because the full size is the right size once
   // you are riding. It has to be set BEFORE the world is built — every module reads the live binding.
@@ -348,7 +359,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     maxAlive: Math.round((balance.spawn?.maxAlive ?? 38) * worldOpts.density),
     everySeconds: (balance.spawn?.everySeconds ?? 1.1) / Math.max(0.3, worldOpts.density),
   };
-  balance = { ...balance, spawn: spawnCfg, zones: { ...balance.zones, bandWidth: worldOpts.bandWidth } };
+  balance = {
+    ...balance,
+    spawn: spawnCfg,
+    zones: { ...balance.zones, bandWidth: worldOpts.bandWidth },
+    progression: { ...balance.progression, levelCap: levelCap() },
+  };
+  /** R22 — the XP knobs, in one bag, handed to every award site. See `_xpDoc` in data/balance.json. */
+  const xpCfg = balance.xp || {};
+  // js/quests.js rolls a job's experience when the job is WRITTEN, so it needs the knob up front
+  setQuestXpMult(xpCfg.quest ?? 1.5);
+  /**
+   * How hard the ground under a point is, for an award that should be worth more out in the deep.
+   * Falls back to the player's own level so a place with no zone record (a dungeon floor, a moon
+   * with one region) still pays something sensible rather than the level-1 rate.
+   */
+  const zoneLevelAt = (x, z) => zones?.at?.(x, z)?.midLevel || player?.level || 1;
 
   /**
    * R19 — HAND THE COMBAT KNOBS TO THE MODULES THAT SPEND THEM.
@@ -2130,7 +2156,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       const near = sites.nearest?.(site.x, site.z, 40) || null;
       const pays = site.gives || site.spec?.gives || near?.gives || near?.spec?.gives || {};
       if (pays.xp) {
-        const levels = rpg.gainXp(player, Math.round(pays.xp * (1 + (player.level - 1) * 0.15)));
+        const paid = eventXp(pays.xp, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg });
+        const levels = rpg.gainXp(player, paid);
+        hud.log(`${paid} experience for taking ${site.name}.`, 'level');
         if (levels > 0) { hud.log(`Level ${player.level}.`, 'level'); }
       }
       if (pays.loot) {
@@ -2217,10 +2245,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
     }
 
-    const levels = rpg.gainXp(player, e.xp);
+    /**
+     * R22 — a kill is worth a fifth of what it was, and nothing at all five levels below you.
+     * `killXpFor` is the whole rule; see the note on it in js/rpg.js. The log prints what you were
+     * actually paid rather than the enemy's sticker price, because "+58 xp" on a fight that gave you
+     * none is the kind of line that makes a player think the save is broken.
+     */
+    const award = rpg.killXpFor(player, e, xpCfg);
+    const levels = rpg.gainXp(player, award);
     const coin = foundGold(e.gold);
     player.gold += coin;
-    hud.log(`${e.name} falls. +${e.xp} xp, +${coin} gold.`, e.rank && e.rank !== 'normal' ? 'loot' : 'good');
+    hud.log(award > 0
+      ? `${e.name} falls. +${award} xp, +${coin} gold.`
+      : `${e.name} falls. Too far beneath you to learn from. +${coin} gold.`,
+    e.rank && e.rank !== 'normal' ? 'loot' : 'good');
     if (levels) {
       /**
        * NAME THE CURRENCY THE GAME ACTUALLY PAYS IN.
@@ -4380,7 +4418,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       who.greeting = 'You came. I had stopped expecting anybody.';
     }
     player.freed = (player.freed || 0) + freed.length;
-    rpg.gainXp(player, 40 * freed.length * player.level);
+    // R22: was `40 × freed × playerLevel`, the one award in the game that scaled LINEARLY with your
+    // own level and so paid a level-40 character ten times what it paid a level-4 one for the same
+    // door. It is an event like any other now, priced by the zone it happened in.
+    rpg.gainXp(player, eventXp(40 * freed.length, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg }));
     hud.log(freed.length === 1
       ? `${freed[0].name} walks out of ${site.name} behind you.`
       : `${freed.length} walk out of ${site.name} behind you.`, 'level');
@@ -4388,7 +4429,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     // the rest of what the stronghold pays, which nothing read either — see BUILD-MODE.md §19
     const pays = site.gives || site.spec?.gives || {};
-    if (pays.xp) rpg.gainXp(player, Math.round(pays.xp * (1 + (player.level - 1) * 0.15)));
+    if (pays.xp) rpg.gainXp(player, eventXp(pays.xp, { zoneLevel: zoneLevelAt(site.x, site.z), kind: 'event', cfg: xpCfg }));
     if (pays.loot) {
       chests.place(pays.loot === 'legendary' ? 'gilded' : 'iron', site.x + 2, site.z + 2,
         { level: player.level, floor: pays.loot, name: `${site.name}: the spoils` });
@@ -4735,8 +4776,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (inst?.gives) {
       const g = inst.gives;
       if (g.xp) {
-        const levels = rpg.gainXp(player, Math.round(g.xp * (1 + (player.level - 1) * 0.1)));
-        hud.log(`${Math.round(g.xp)} experience.`, 'level');
+        const paid = eventXp(g.xp, { zoneLevel: zoneLevelAt(control.x, control.z), kind: 'event', cfg: xpCfg });
+        const levels = rpg.gainXp(player, paid);
+        hud.log(`${paid} experience.`, 'level');
         if (levels > 0) hud.log(`Level ${player.level}.`, 'level');
       }
       if (g.perkPoint) {
@@ -5182,8 +5224,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * knew something had happened at the standing stones and the player never found out.
      */
     if (gives.xp) {
-      const levels = rpg.gainXp(player, Math.round(gives.xp * (1 + (player.level - 1) * 0.1)));
-      hud.log(`${Math.round(gives.xp)} experience for the walk.`, 'level');
+      /**
+       * R22 — "you gain 50 xp for the walk… should be greatly increased like 150, probably scaling
+       * with level of the zone." Three times the written number, then the zone on top — and the log
+       * prints what was PAID. It used to print `gives.xp` raw while awarding the scaled figure, so
+       * the one number the player could see was the only one that was not true.
+       */
+      const paid = eventXp(gives.xp, { zoneLevel: zoneLevelAt(control.x, control.z), kind: 'landmark', cfg: xpCfg });
+      const levels = rpg.gainXp(player, paid);
+      hud.log(`${paid} experience for the walk.`, 'level');
       if (levels > 0) { hud.log(`Level ${player.level}.`, 'level'); sound.questDone(); }
     }
     if (gives.curse) {
@@ -5249,7 +5298,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (fell) {
       // R16: through the one payer, like everything else. `showCrate` is left off because the crate
       // popup for the meteor's own haul is opened three lines below and two would stack.
-      fell.reward = { gold: 0, xp: 40 + player.level * 12, kind: 'coin' };
+      // R22: priced by the ground it fell on rather than by how high a level you happen to be
+      fell.reward = { gold: 0, xp: eventXp(40, { zoneLevel: zoneLevelAt(fell.place?.x ?? control.x, fell.place?.z ?? control.z), kind: 'event', cfg: xpCfg }), kind: 'coin' };
       await grantReward(fell, { ...questRewardCtx(), showCrate: null });
       questLog.turnIn(fell);
       markers.syncQuests(questLog.active);
@@ -7306,9 +7356,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     voice: () => { const v = speech.setVoice(!speech.voiceOn); hud.log(v ? 'Voices on.' : 'Voices off.'); return v; },
   });
 
+  /**
+   * R22 — the debug "level up" button was still on the pre-round-7 one-section curve, so above
+   * level 30 it granted the wrong amount and above 40 it granted far too little to reach anything.
+   * It asks the real table now, which is the only table.
+   */
   function xpToNext() {
-    const next = Math.round(58 * Math.pow(player.level, 1.86));
-    return Math.max(1, next - player.xp);
+    return Math.max(1, xpForLevel(Math.min(levelCap(), player.level + 1)) - player.xp);
   }
 
   // ---------------------------------------------------------------- the pause menu

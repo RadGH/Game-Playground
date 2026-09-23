@@ -165,6 +165,7 @@ export async function runTitle({
   preset('boot-band', 'band');
   preset('boot-density', 'density');
   preset('boot-scale', 'scale');
+  preset('boot-levels', 'levels');
   if (params.has('habitable')) $('boot-habitable').checked = params.get('habitable') !== '0';
 
   /** Everything the form currently says, in the shape `begin` wants. */
@@ -173,6 +174,10 @@ export async function runTitle({
     bandWidth: Number($('boot-band')?.value) || 4,
     density: Number($('boot-density')?.value) || 1,
     planetScale: Number($('boot-scale')?.value) || 1,
+    // R22 — how long the ladder is. `js/rpg.js` `setLevelCap` re-bases the XP curve and the planet
+    // bands around it, so the whole climb costs the same and a bigger number just means more, and
+    // therefore smaller, steps. See the note on `setLevelCap`.
+    levelCap: Number($('boot-levels')?.value) || 50,
     habitable: $('boot-habitable')?.checked ?? true,
   });
   const readSeed = () => Number($('boot-seed').value) || 1;
@@ -577,11 +582,12 @@ export async function runTitle({
       const box = $('boot-world-facts');
       if (!box) return;
       box.textContent = `${km(0, PREVIEW.width)} × ${km(0, PREVIEW.height)} km to walk · `
-        + `${w.bandWidth} levels per zone · ${w.density === 1 ? 'normal' : w.density < 1 ? 'quiet' : 'busy'} spawns. `
-        + 'Planet size, levels per zone and enemy density do not change the shape of the map.';
+        + `levels 1-${w.levelCap} · ${w.bandWidth} levels per zone · `
+        + `${w.density === 1 ? 'normal' : w.density < 1 ? 'quiet' : 'busy'} spawns. `
+        + 'Planet size, level range, levels per zone and enemy density do not change the shape of the map.';
     }
 
-    for (const id of ['boot-seed', 'boot-regions', 'boot-habitable', 'boot-band', 'boot-density', 'boot-scale']) {
+    for (const id of ['boot-seed', 'boot-regions', 'boot-habitable', 'boot-band', 'boot-density', 'boot-scale', 'boot-levels']) {
       const node = $(id);
       if (!node) continue;
       node.addEventListener('input', () => schedulePreview());

@@ -549,6 +549,28 @@ function planOnce({
   const wall = base0.wall * ringScale;
   const walled = base0.walled;
 
+  /**
+   * ROUND 22 — A LINK IS A POINT ON THE WALL, SO IT HAS TO MOVE WHEN THE WALL DOES.
+   *
+   * `links` are handed in by the caller as the spots where a world road reaches the town, worked
+   * out against the town's NORMAL size. `planTown` then retries a crowded site at `ringScale` up
+   * to 1.65 — and every retry left the links exactly where they were, which is now somewhere in
+   * the middle of a bigger town rather than on its edge. `linkRoads` would then lay the high
+   * street from that inside point, and `clipPolyline` would keep the whole of it, so the road
+   * arrived at the wall and the town's own high street started sixty metres further in with
+   * nothing joining them.
+   *
+   * The bearing is what a link really is — which way the road comes from — so the fix is to slide
+   * each one out along its own bearing to the wall this plan actually built. Nothing moves when
+   * `ringScale` is 1, which is every town on an ordinary site.
+   */
+  const linkPoints = ringScale === 1 ? links : links.map(([lx, lz]) => {
+    const d = Math.hypot(lx, lz);
+    if (d < 1e-6) return [lx, lz];
+    const want = walled ? wall : ring;
+    return [lx / d * want, lz / d * want];
+  });
+
   // the ground the town is built on. Farhold passes its real terrain; the page passes a stand-in,
   // because "follows the terrain" cannot be judged against flat ground.
   const height = heightAt || demoTerrain(seed);
@@ -609,7 +631,7 @@ function planOnce({
    * roads again, which is the one thing this planner exists to make impossible. The plots are then
    * trimmed against the new streets below, since a spur crosses a block rather than bounding it.
    */
-  out.links = linkRoads(out, links);
+  out.links = linkRoads(out, linkPoints);
   out.connect = connectStreets(out);
 
   for (const b of out.blocks) plotsInBlock(b, rng, cfg, out, buildable);
@@ -941,9 +963,26 @@ function streetLength(s) {
  * Both plots and street spans are oriented boxes now, so one separating-axis test covers every
  * case. Used by the page's validator overlay and by the node tests — if this returns a hit, the
  * PLANNER is broken, not the renderer.
+ *
+ * ROUND 22 ADDED THE WALL, because *"houses clip through the wall"* and nothing here had ever
+ * looked at one. The planner keeps its plots inside `ring` and stands its wall at `wallRadius`,
+ * which is fourteen metres further out — so this should never fire, and that is exactly why it is
+ * worth asserting. The bug the user actually hit was a CONSUMER (Farhold) recomputing its own
+ * unscaled ring instead of reading `plan.wallRadius`, and the way to keep the two honest is for
+ * the planner to state, in one place, what "inside the wall" means.
  */
+/** Metres of daylight a plot must leave between its corner and the masonry. */
+export const WALL_CLEARANCE = 2;
+
 export function overlaps(plan) {
   const hits = [];
+  if (plan.wall && plan.wallRadius > 0) {
+    const limit = plan.wallRadius - WALL_CLEARANCE;
+    for (const p of plan.plots) {
+      const out = corners(p).find(([x, z]) => Math.hypot(x, z) > limit);
+      if (out) hits.push({ kind: 'plot-wall', p, at: out, over: Math.hypot(out[0], out[1]) - limit });
+    }
+  }
   for (let i = 0; i < plan.plots.length; i++) {
     for (let j = i + 1; j < plan.plots.length; j++) {
       if (obbOverlap(plan.plots[i], plan.plots[j], 0.02)) hits.push({ kind: 'plot-plot', i, j, p: plan.plots[i] });

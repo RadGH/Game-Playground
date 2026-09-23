@@ -493,14 +493,38 @@ test('8.3 — the road captain sells one of the ten types rather than always the
 
 test('9.1 — a follower\'s numbers track its owner\'s level', () => {
   const def = mercData.mercenaries.find(m => m.id === 'blade_for_hire');
-  const perLevel = balance.pets?.perLevel ?? 1.17;
+  const perLevel = balance.pets?.perLevel ?? 1.13;
   const at1 = scaleFollower({ def, level: 1, perLevel });
   const at20 = scaleFollower({ def, level: 20, perLevel });
   assert.equal(at1.hp, def.hp);
-  assert.ok(at20.hp > at1.hp * 15, `level 20 health ${at20.hp} against ${at1.hp}`);
-  assert.ok(at20.dmg[0] > at1.dmg[0] * 15);
+  assert.ok(at20.hp > at1.hp * 8, `level 20 health ${at20.hp} against ${at1.hp}`);
+  assert.ok(at20.dmg[0] > at1.dmg[0] * 8);
   // the exact promise: the same compounding step the class companions have always used
   assert.equal(at20.hp, Math.round(def.hp * Math.pow(perLevel, 19)));
+
+  /**
+   * R22 — AND IT IS THE SAME STEP THE ENEMIES USE, WHICH IT WAS NOT.
+   *
+   * `pets.perLevel` was 1.17 against `enemies.perLevel` 1.13, so a companion's share of a kill grew
+   * by (1.17/1.13)^(level-1) — 2.1x by 22 and 5.5x by 50 — and a hired blade went from "helps" to
+   * "kills everything before you have swung". This is the assertion that keeps them together: the
+   * rule is that they are the SAME NUMBER, not that either one is any particular value.
+   */
+  assert.equal(balance.pets.perLevel, balance.enemies.perLevel,
+    'a companion grows at a different rate from the things it fights');
+  assert.equal(mercData.scaling.perLevel, balance.enemies.perLevel,
+    'a mercenary grows at a different rate from a class companion');
+
+  /**
+   * R22 — and matching the exponents is only half of it, because the player's own damage is not an
+   * exponent at all: it comes out of the weapon in their hand. `ownerDamage` is the ceiling that
+   * relates the two. Under it nothing changes; over it a companion is pulled back to a share.
+   */
+  const capped = scaleFollower({ def, level: 20, perLevel, ownerDamage: [20, 40] });
+  assert.ok(capped.dmg[1] <= 40 * 0.75 + 1, `a companion out-hits its owner: ${capped.dmg.join('-')}`);
+  assert.ok(capped.dmg[0] < capped.dmg[1], 'the capped pair kept its spread');
+  const loose = scaleFollower({ def, level: 20, perLevel, ownerDamage: [4000, 9000] });
+  assert.deepEqual(loose.dmg, at20.dmg, 'the ceiling changed a companion that was nowhere near it');
 
   // …and an upgrade is applied to the BASE numbers rather than compounding on every re-cost
   const grown = { dmgMult: 1.16, hpMult: 1, armorAdd: 12 };

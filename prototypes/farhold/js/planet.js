@@ -1030,17 +1030,59 @@ export function makeTerrain(world, planet = null, opts = {}) {
    * of stepping. It runs after every road is graded, because a piece can be built before its trunk.
    */
   for (const path of roadPaths) {
-    for (const join of path.joins || []) {
+    const joins = path.joins || [];
+    /**
+     * ROUND 22 — TWO JOINS ON A SHORT ROAD MUST NOT REACH ACROSS EACH OTHER.
+     *
+     * The fade was a flat six points from each end whatever the road's length, and a merged piece
+     * can be four points long: at seed 11 road 18 leaves trunk 5 and rejoins the SAME segment of
+     * it a few metres later, so both of its ends were pinned and each fade ran the whole length of
+     * the road. The second one then lifted the first one's junction point by a quarter of its own
+     * correction, and road 18's ribbon started 2.02 m above the trunk it joins — a step in the
+     * ground at the junction and one of the two roads buried.
+     *
+     * Half the road each, so the two fades meet in the middle and neither touches the other's
+     * pinned end. On a four-point piece that is a span of one, which means the endpoints are set
+     * exactly and nothing else moves — which is the honest answer for a road that short.
+     */
+    const span0 = Math.min(6, Math.max(1, joins.length > 1
+      ? Math.floor(((path.surface?.length || 1) - 1) / 2)
+      : (path.surface?.length || 1)));
+    for (const join of joins) {
       const trunk = join.trunk;
       if (!trunk?.surface || !path.surface) continue;
       const y = lerp(trunk.surface[join.i], trunk.surface[Math.min(trunk.surface.length - 1, join.i + 1)], join.t);
       const at = join.at === 'start' ? 0 : path.surface.length - 1;
       const delta = y - path.surface[at];
       if (!Number.isFinite(delta) || Math.abs(delta) < 1e-4) continue;
-      const span = Math.min(6, path.surface.length);
+      const span = Math.min(span0, path.surface.length);
       for (let k = 0; k < span; k++) {
         const idx = join.at === 'start' ? k : path.surface.length - 1 - k;
-        path.surface[idx] += delta * (1 - k / span);
+        const want = path.surface[idx] + delta * (1 - k / span);
+        /**
+         * ROUND 22 — AND THE FADE MAY NOT PULL A POINT UNDER ITS OWN FLOOR.
+         *
+         * *"The terrain repeatedly clips through the road… the road also clips through the ground."*
+         * Measured at seed 19 the worst case in the whole world was 3.49 m, and it was HERE.
+         *
+         * The floor pass below this one exists to undo what this one does to a bridge, and the two
+         * were fighting. This pass drags the six points after a junction down onto the trunk's
+         * height; on road 7 that put point 1 nearly four metres under the river it has to bridge;
+         * the floor pass then pushed point 1 back up, and its own "no more than half a metre of
+         * step between two points" ramp dragged point 0 — THE JUNCTION ITSELF — up 3.56 m with it.
+         * So the branch's ribbon started three and a half metres above the trunk it was supposed
+         * to join, the terrain there is graded to whichever of the two roads is nearer, and one of
+         * them is buried. That is the clipping, and it is at every junction where the branch has a
+         * bridge in its first few points.
+         *
+         * Clamping the fade to the floor here settles it: the points the fade touches are already
+         * at or above their floor, so the floor pass finds nothing to restore and never reaches the
+         * junction. The junction point itself (k = 0) still takes the trunk's height exactly,
+         * unless its OWN floor is higher — which is a bridge starting on a junction, and there the
+         * water has to win.
+         */
+        const bottom = path.floor?.[idx] ?? -Infinity;
+        path.surface[idx] = Math.max(want, bottom);
       }
     }
   }
@@ -1097,6 +1139,32 @@ export function makeTerrain(world, planet = null, opts = {}) {
   const roadIndex = makePathIndex(roadPaths);
   // how far past the road's own edge the deck keeps its ground when a channel is carved under it
   const deckGrip = opts.deckGrip ?? 1.5;
+  /**
+   * ROUND 22 — THE FLAT SHELF EITHER SIDE OF A ROAD, IN METRES PAST ITS OWN KERB.
+   *
+   * *"At this location the terrain repeatedly clips through the road."* (seed 25392, Kydsel IV,
+   * x 5160 z 1597, and again at x 5805 z 1788.)
+   *
+   * The road ribbon is drawn six centimetres over the graded deck, and `heightAt` used to start
+   * blending the ground back to the natural hillside at the kerb EXACTLY. So the ground is at deck
+   * height at `half` and already climbing at `half + 0.1`. That would still be invisible if the
+   * terrain were drawn at infinite resolution — but the innermost terrain ring has two-metre cells,
+   * and a triangle whose outer vertex sits two metres past the kerb in a three-and-a-half-metre
+   * cutting is 0.14 m above the deck there. The triangle is a straight line from the kerb to that
+   * vertex, so it carries the hillside right across the paving: more than double the six
+   * centimetres of lift, and what the player sees is grass cutting up through the road.
+   *
+   * Lifting the ribbon instead would only paper over it (and would make every road a kerbstone).
+   * Holding the ground dead flat for a verge WIDER THAN ONE TERRAIN CELL means the nearest vertex
+   * outside the carriageway is at deck height too, so the triangle between them is flat and the
+   * ribbon clears it everywhere. Two and a half metres covers the two-metre inner ring with enough
+   * spare for the mitre: `ribbon()` in js/features.js turns its edge on the averaged tangent
+   * `prev → next`, so at a bend the drawn edge lies a little further out than `half`.
+   *
+   * It costs nothing at the far end — the blend simply runs from `half + roadVerge` to `reach`
+   * instead of from `half` — and a verge is what a real road has anyway.
+   */
+  const roadVerge = opts.roadVerge ?? 2.5;
   /**
    * ROUND 16 — the quay, and how square a crossing has to be before it counts as one.
    *
@@ -1183,10 +1251,12 @@ export function makeTerrain(world, planet = null, opts = {}) {
     // a road flattens the ground it runs over, and its shoulders blend back into the land
     const road = roadIndex.nearest(x, z);
     let deck = null;
+    let verge = 0;
     if (road && road.dist < road.path.reach) {
       const graded = surfaceOfHit(road);
       deck = graded;
-      const t = smoothstep(road.path.half, road.path.reach, road.dist);   // 0 on the road, 1 off it
+      verge = road.path.half + roadVerge;
+      const t = smoothstep(verge, road.path.reach, road.dist);   // 0 on the road, 1 off it
       height = lerp(graded, height, t);
     }
 
@@ -1271,7 +1341,9 @@ export function makeTerrain(world, planet = null, opts = {}) {
          * blends back into the land with, so the two cannot leave a step between them.
          */
         if (deck !== null) {
-          const shoulder = smoothstep(road.path.half, road.path.reach, road.dist);
+          // the same curve the carriageway blends back with — including R22's verge, or the rim
+          // would start climbing inside the flat shelf the verge exists to keep flat
+          const shoulder = smoothstep(verge, road.path.reach, road.dist);
           want = lerp(Math.max(height, deck), want, shoulder);
         }
         /**
@@ -1375,8 +1447,20 @@ export function makeTerrain(world, planet = null, opts = {}) {
      * shoreline road, a cutting, an embankment. The one case it is now NOT in is a river crossing,
      * which is the branch above: there the bridge is the thing you stand on.
      */
-    if (road.dist < road.path.half + deckGrip) {
-      const t = smoothstep(road.path.half, road.path.half + deckGrip, road.dist);
+    /**
+     * …AND THE VERGE STOPS AT THE WATER'S EDGE.
+     *
+     * The wider band is what stops a terrain triangle carrying a hillside across the paving. It is
+     * also, word for word, the earth plug round 16 took out of every river — the clamp only raises
+     * ground, so widening it beside a channel would shelve the riverbed up to the deck for another
+     * two and a half metres either side of a bridge that does not cover them. So where there is a
+     * river and the crossing's own footprint does not reach, the clamp keeps exactly the band it
+     * has always had. `spannedAt` is the authority on where a bridge is; nothing else gets to fill
+     * that channel, this included.
+     */
+    const band = (riverSurface === null || spanned) ? verge : road.path.half;
+    if (road.dist < band + deckGrip) {
+      const t = smoothstep(band, band + deckGrip, road.dist);
       height = Math.max(height, lerp(deck, height, t));
     }
     return height;

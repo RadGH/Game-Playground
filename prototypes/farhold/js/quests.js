@@ -57,6 +57,18 @@ export function setFirstJob(fn) { firstJob = typeof fn === 'function' ? fn : nul
 /** For the tests: what is registered right now. */
 export function getFirstJob() { return firstJob; }
 
+/**
+ * R22 — the "+50% on quest experience" knob, set once at boot from `data/balance.json` `xp.quest`.
+ *
+ * A module-level setting rather than a parameter on `makeQuest` because eleven call sites across
+ * js/town.js, js/jobgen.js, js/main.js and the tests build quests, and threading a balance number
+ * through all of them is how a knob ends up read by nine of the eleven. It defaults to 1, so a test
+ * that never calls the setter gets the unscaled roll and stays readable.
+ */
+let questXpMult = 1;
+export function setQuestXpMult(n) { questXpMult = Math.max(0, Number(n) || 1); }
+export function getQuestXpMult() { return questXpMult; }
+
 /** How many, and what it pays. Scaled by the player's level. */
 const SHAPE = {
   hunt:   { count: [3, 7],  gold: [35, 80],  xp: [40, 90] },
@@ -137,9 +149,20 @@ export function makeQuest(kind, ctx) {
   };
   const shape = SHAPE[kind] || SHAPE.hunt;
   const scale = 1 + (level - 1) * 0.12;
+  /**
+   * R22 — "Let's bump the XP gained from quests and other events by 50%."
+   *
+   * A quest's experience is rolled HERE, when the job is written, not when it is handed in — so
+   * this is where the 1.5 has to go, and a job already on a board keeps whatever it was offered
+   * for, which is right: the number is printed on the notice.
+   *
+   * It is the same `xp.quest` knob `js/rpg.js` `eventXp` reads for everything else, passed in by
+   * whoever builds the board rather than imported, because js/quests.js is pure and has no
+   * balance file of its own.
+   */
   const reward = {
     gold: Math.round(between(rng, shape.gold) * scale),
-    xp: Math.round(between(rng, shape.xp) * scale),
+    xp: Math.round(between(rng, shape.xp) * scale * questXpMult),
   };
   /**
    * R16 — WHAT IT PAYS IN, DECIDED WHERE THE JOB IS MADE.

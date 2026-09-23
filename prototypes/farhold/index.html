@@ -340,6 +340,18 @@
               the ring of ground you can see and how fast the space ship flies all shrink with the planet</span>
           </div>
           <div class="row">
+            <label for="boot-levels">Level range</label>
+            <select id="boot-levels">
+              <option value="30">1&ndash;30 &mdash; few, big levels</option>
+              <option value="50" selected>1&ndash;50 &mdash; the standard ladder</option>
+              <option value="100">1&ndash;100 &mdash; twice as many, half the size each</option>
+            </select>
+            <span class="small muted">how many levels the whole game is cut into. The <b>total</b>
+              experience is the same either way &mdash; a 1&ndash;100 world is the same climb in
+              twice as many steps, so you level up about twice as often and each one gives half as
+              much. Pair it with <b>many zones</b> above for a level band every few minutes</span>
+          </div>
+          <div class="row">
             <label for="boot-band">Levels per zone</label>
             <select id="boot-band">
               <option value="3">Tight (3)</option>
@@ -357,9 +369,11 @@
             </select>
           </div>
           <p class="note small">A zone is one level band, and the bands always tile the whole range of
-            the world you are on with no gaps — 1–30 on a settled world, 30–40 out in the far reach,
-            40–50 in the deep dark. You always start on a 1–30 world, and the system you start in always
-            has somewhere you can breathe.</p>
+            the world you are on with no gaps. A world's difficulty is the bottom 60%, the next 20%
+            and the top 20% of the level range you picked — on the standard ladder that is 1&ndash;30
+            on a settled world, 30&ndash;40 out in the far reach and 40&ndash;50 in the deep dark. You
+            always start on a settled world, and the system you start in always has somewhere you can
+            breathe.</p>
         </div>
         <aside class="boot-col boot-side">
           <!-- The real world for this seed, built by js/worldpreview.js in a worker. -->

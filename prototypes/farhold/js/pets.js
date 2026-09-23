@@ -178,7 +178,11 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     // affixes and legendary powers get a say in how strong a companion is
     const power = rpg.fx.product(owner, 'petPower');
     const health = rpg.fx.product(owner, 'petHealth');
-    const at = scaleFollower({ def, level, perLevel: cfg.perLevel ?? 1.17, power, health });
+    // R22 — the owner's own swing is the ceiling on a companion's. See `scaleFollower`.
+    const at = scaleFollower({
+      def, level, perLevel: cfg.perLevel ?? 1.13, power, health,
+      ownerDamage: owner.derived?.damage || null,
+    });
     return {
       id: 'p' + Math.floor(rng() * 1e9).toString(36),
       defId: def.id, name: def.name, kind: def.kind || 'beast', family: def.family || 'beast',
@@ -258,7 +262,10 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     const grown = applyUpgrades(p, level);
     // R18 — from the DEF's range, never from the current one. See `out.rangeAdd`.
     if (p.ranged) p.ranged.range = (def.ranged?.range ?? 20) + grown.rangeAdd;
-    const at = scaleFollower({ def, level, perLevel: cfg.perLevel ?? 1.17, power, health, grown });
+    const at = scaleFollower({
+      def, level, perLevel: cfg.perLevel ?? 1.13, power, health, grown,
+      ownerDamage: p.owner?.derived?.damage || null,
+    });
     p.maxHp = at.hp;
     p.hp = Math.max(1, Math.round(p.maxHp * frac));
     p.dmg = at.dmg;

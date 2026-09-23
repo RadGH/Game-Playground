@@ -13,7 +13,7 @@
   "perType": { "base": 1, "perkStat": "followerSlots" },
 
   "_scalingDoc": "Everybody who follows you is re-costed off YOUR level every frame js/pets.js runs (see `retune`), so a sentry summoned at level 1 is never still swinging for 1 at level 20. `perLevel` is the same compounding step balance.json uses for a class companion; `pricePerLevel` is how much more a broker charges for somebody who can survive where you are going.",
-  "scaling": { "perLevel": 1.17, "pricePerLevel": 0.12, "restockDays": 3, "offerCount": 4 },
+  "scaling": { "perLevel": 1.13, "pricePerLevel": 0.12, "restockDays": 3, "offerCount": 4 },
 
   "_mercDoc": "Each type is a whole body: the numbers js/pets.js builds a unit from, a look, the abilities it casts on its own cooldown, and the upgrades it grows into. `minLevel` keeps a 900-gold caster off a level-2 village's board. `minTownSize` is the settlement size that can support one. `abilities` fire at whatever the follower is already fighting; `upgrades` are read every time the follower is re-costed, so a mercenary hired at level 4 who reaches level 22 has learned everything below 22 by the time you look at them.",
   "mercenaries": [

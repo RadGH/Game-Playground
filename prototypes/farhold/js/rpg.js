@@ -263,7 +263,55 @@ export const SLOTS = [
 ];
 /** Slots whose contents are gear you fight with, for the "worth wearing" arrow. */
 export const RING_SLOTS = ['ring', 'ring2'];
+/**
+ * The DEFAULT level cap. A world can be generated with a different one — see `setLevelCap`.
+ *
+ * Kept as a plain export because a dozen call sites and three test files import it, and on a
+ * default world it is still exactly 50.
+ */
 export const MAX_LEVEL = 50;
+
+/** The caps the world screen offers. Anything in between works; these are the ones with a label. */
+export const LEVEL_CAPS = [30, 50, 100];
+
+let LEVEL_CAP = MAX_LEVEL;
+
+/** The cap this world was generated with. Everything that asks "how high does this go" asks here. */
+export function levelCap() { return LEVEL_CAP; }
+
+/**
+ * R22 — THE LEVEL CAP IS A WORLD SETTING NOW.
+ *
+ *   "Add a new world setting to change the level scaling. I'd like to see a world with levels
+ *    ranging from 1-100 and play with the region density to get a more natural growth as you
+ *    adventure. Right now I reach level 12 before I even leave the first zone."
+ *
+ * Two things had to move for that, and they are different things.
+ *
+ * **The curve** is written below in FRACTIONS of the cap rather than in the numbers 30 / 40 / 50,
+ * and `early()` is stretched so that the same total experience buys the whole ladder whatever the
+ * cap is. On a 100-level world, reaching 60 costs what reaching 30 costs on a 50-level one and
+ * reaching 100 costs what reaching 50 costs — the same climb, cut into twice as many steps. That is
+ * the point of the setting: a level is a smaller, more frequent event, not a slower one.
+ *
+ * **The planet bands** below are fractions of the cap as well, so "settled space" is always the
+ * bottom 60% of whatever ladder this world has. They are rewritten IN PLACE rather than rebuilt,
+ * because `PLANET_BANDS` is imported by js/main.js, js/hud.js and the tests as an array and a new
+ * array would leave every one of them holding the old one.
+ *
+ * Called once, at boot, from js/main.js — before `buildZones`, before any XP is awarded, and before
+ * anything asks `xpForLevel`.
+ */
+export function setLevelCap(n) {
+  const cap = Math.max(10, Math.min(200, Math.round(Number(n) || MAX_LEVEL)));
+  LEVEL_CAP = cap;
+  const low = Math.max(2, Math.round(cap * 0.6));
+  const mid = Math.max(low + 1, Math.round(cap * 0.8));
+  PLANET_BANDS[0].min = 1;   PLANET_BANDS[0].max = low;
+  PLANET_BANDS[1].min = low; PLANET_BANDS[1].max = mid;
+  PLANET_BANDS[2].min = mid; PLANET_BANDS[2].max = cap;
+  return cap;
+}
 
 /**
  * XP needed to *reach* a level.
@@ -282,21 +330,35 @@ export const LEVEL_BANDS = [
   { to: 50, share: 1.9 },      // …and 40→50 costs nearly twice THAT
 ];
 
-export function xpForLevel(level) {
+/**
+ * R22 — the same three sections, measured as fractions of the cap instead of as the numbers 30, 40
+ * and 50, so a world with a different cap gets the same SHAPE rather than a different game.
+ *
+ * `STRETCH` is what keeps the total honest. `early()` was written for the first 30 levels of a
+ * 50-level world; on a 100-level world the first section is 60 levels long, and squeezing the same
+ * `(n - 1) ^ 1.86` over 60 steps would make the whole ladder four times as expensive. Scaling the
+ * step down by `29 / (A - 1)` makes the cost at the END of the section identical whatever the cap,
+ * which is exactly the promise the setting makes: more levels, not more grinding. At cap 50 the
+ * stretch is 1 and every number below is bit-for-bit what it was before this round.
+ */
+export function xpForLevel(level, cap = LEVEL_CAP) {
   if (level <= 1) return 0;
-  const l = Math.min(level, MAX_LEVEL);
-  const early = n => Math.round(58 * Math.pow(n - 1, 1.86));
-  if (l <= 30) return early(l);
+  const l = Math.min(level, cap);
+  const A = Math.max(2, Math.round(cap * 0.6));    // 30 on a 50-level world
+  const B = Math.max(A + 1, Math.round(cap * 0.8)); // 40
+  const STRETCH = 29 / (A - 1);
+  const early = n => Math.round(58 * Math.pow((n - 1) * STRETCH, 1.86));
+  if (l <= A) return early(l);
 
-  const toThirty = early(30);
-  if (l <= 40) {
-    // a smooth climb across the band, costing `share` of the whole first thirty levels
-    const t = (l - 30) / 10;
-    return Math.round(toThirty + toThirty * LEVEL_BANDS[1].share * Math.pow(t, 1.35));
+  const toA = early(A);
+  if (l <= B) {
+    // a smooth climb across the band, costing `share` of the whole first section
+    const t = (l - A) / (B - A);
+    return Math.round(toA + toA * LEVEL_BANDS[1].share * Math.pow(t, 1.35));
   }
-  const toForty = xpForLevel(40);
-  const t = (l - 40) / 10;
-  return Math.round(toForty + toThirty * LEVEL_BANDS[2].share * Math.pow(t, 1.45));
+  const toB = xpForLevel(B, cap);
+  const t = (l - B) / Math.max(1, cap - B);
+  return Math.round(toB + toA * LEVEL_BANDS[2].share * Math.pow(t, 1.45));
 }
 
 /**
@@ -354,9 +416,39 @@ export function planetThreat(planet) {
   return Math.max(0, Math.round(score * 1000) / 1000);
 }
 
-export function levelFromXp(xp) {
+/**
+ * R22 — ONE FORMULA FOR EVERY EXPERIENCE AWARD THAT IS NOT A KILL.
+ *
+ *   "Let's bump the XP gained from quests and other events by 50%. Any of the events 'you gain 50
+ *    xp for the walk' should be greatly increased like 150, probably scaling with level of the zone."
+ *
+ * Before this there were FIVE scalings, each written at the call site that needed one:
+ * `× (1 + (level-1) × 0.15)` for a stronghold, the same for freeing prisoners, `× 0.1` for an
+ * instance, `× 0.1` for a landmark, `× 0.12` baked into a quest at generation, plus a bare
+ * `40 × level` and a `40 + level × 12`. Nobody had ever seen them side by side, which is the only
+ * reason they were different.
+ *
+ * All of them scaled on the PLAYER's level, which is backwards for the thing the user is describing:
+ * walking to a landmark in a level-40 zone is worth more than walking to one outside the starting
+ * town, whatever level you happen to be. So it scales on the ZONE, and `kind` picks the multiplier —
+ * `landmark` is 3× because a 20-xp award for a real walk was the specific complaint, while a quest
+ * turn-in and a cleared dungeon get the 1.5× that was asked for.
+ *
+ *   eventXp(30, { zoneLevel: 12, kind: 'landmark', cfg: balance.xp })   // 30 × 3 × 2.32 = 209
+ */
+export function eventXp(base, { zoneLevel = 1, kind = 'event', cfg = {} } = {}) {
+  const amount = Number(base) || 0;
+  if (amount <= 0) return 0;
+  const mult = kind === 'quest' ? (cfg.quest ?? 1.5)
+    : kind === 'landmark' ? (cfg.landmark ?? 3.0)
+      : (cfg.event ?? 1.5);
+  const byZone = 1 + Math.max(0, (zoneLevel || 1) - 1) * (cfg.perZoneLevel ?? 0.12);
+  return Math.max(1, Math.round(amount * mult * byZone));
+}
+
+export function levelFromXp(xp, cap = LEVEL_CAP) {
   let l = 1;
-  while (l < MAX_LEVEL && xp >= xpForLevel(l + 1)) l++;
+  while (l < cap && xp >= xpForLevel(l + 1, cap)) l++;
   return l;
 }
 
@@ -1142,6 +1234,40 @@ export class Rpg {
     player.bag.push(item);
     this.refresh(player);
     return item;
+  }
+
+  /**
+   * R22 — WHAT A KILL IS WORTH, WHICH UNTIL THIS ROUND DID NOT INVOLVE YOUR LEVEL AT ALL.
+   *
+   *   "We need more punishing diminishing returns for XP from lower levels kills, anything 5 levels
+   *    lower should not reward any xp. […] Let's cut XP gains from kills down to just 20% of the
+   *    current value (1/5, way less)."
+   *
+   * The old award was `gainXp(player, e.xp)` and `e.xp` is `base × 1.13^(enemyLevel-1) × rank` —
+   * the PLAYER'S level appears nowhere in it. So there was no grey-con rule of any kind: farming
+   * the level-1 zone outside the starting town paid the same at level 50 as it did on the first
+   * morning, and standing behind a companion that kills everything in a band you have outgrown paid
+   * full price forever. That, not the companions' damage on its own, is how ten minutes became
+   * eight levels.
+   *
+   * Two rules and a multiplier, all three in `data/balance.json` under `xp`:
+   *
+   *   * a flat fifth of what it used to pay;
+   *   * every level the enemy is below you takes 20% off, so 5 below is worth nothing;
+   *   * every level it is above you adds 15%, capped at +60% — because a falloff with no upside is
+   *     a reason to never fight anything hard.
+   *
+   * Returns 0, not a token amount, for something far beneath you. A "1 xp" award reads as a bug.
+   */
+  killXpFor(player, enemy, xpCfg = {}) {
+    const raw = enemy?.xp || 0;
+    if (raw <= 0) return 0;
+    const gap = (player?.level ?? 1) - (enemy?.level ?? 1);
+    let scale;
+    if (gap > 0) scale = Math.max(0, 1 - gap * (xpCfg.killFalloffPerLevel ?? 0.2));
+    else scale = Math.min(xpCfg.killBonusCap ?? 1.6, 1 + (-gap) * (xpCfg.killBonusPerLevelAbove ?? 0.15));
+    if (scale <= 0) return 0;
+    return Math.max(1, Math.round(raw * (xpCfg.kill ?? 0.2) * scale));
   }
 
   /** XP in, levels out. Returns how many levels were gained (0 most of the time). */

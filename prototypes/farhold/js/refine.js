@@ -617,6 +617,32 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
   // ---------------------------------------------------------------- telling the player
 
   /** What to draw on one machine: its badge, its job, and how far through it is. */
+  /**
+   * R18 — WHAT THIS BASE IS ACTUALLY MAKING, per minute.
+   *
+   * `js/defence.js` `baseOf()` has called `getWorks().throughputPerMinute()` since the colony
+   * landed and this module never exported it, so `|| 0` swallowed it and data/raids.json's
+   * `notoriety.perRefineryThroughput: 0.6` contributed nothing — a base with a full refining chain
+   * was exactly as noticeable to the world as a bare claim stone.
+   *
+   * Counted from what is STANDING and RUNNING rather than from history: a machine with a job and
+   * the inputs to do it contributes `60 / recipe.time` finished items a minute, scaled by how fast
+   * it is actually going. That is the number a raider could plausibly notice — smoke now, not smoke
+   * last week — and it falls to zero when the base goes quiet, which a lifetime count never would.
+   */
+  function throughputPerMinute() {
+    let per = 0;
+    for (const m of machines.values()) {
+      if (!m.enabled || m.state !== 'running') continue;
+      const job = m.queue[0];
+      const recipe = job && RECIPES[job.recipe];
+      if (!recipe?.time) continue;
+      const outs = Object.values(recipe.outputs || {}).reduce((n, v) => n + v, 0) || 1;
+      per += (60 / recipe.time) * outs * (m.def.speed ?? 1);
+    }
+    return Math.round(per * 10) / 10;
+  }
+
   function snapshot(id) {
     const m = get(id);
     if (!m) return null;
@@ -766,6 +792,8 @@ export function createWorks({ refining = {}, resources = {}, stores = null, grid
     recipes: RECIPES, machineDefs: MACHINES, completed,
     set rare(key) { rareElement = key; },
     get rare() { return rareElement; },
+    // R18 — read by js/defence.js `baseOf()`, which has been asking for it since the colony landed
+    throughputPerMinute,
     toJSON, load,
     get size() { return machines.size; },
   };

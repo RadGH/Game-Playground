@@ -947,7 +947,6 @@
       "d": 1.0,
       "h": 1.0,
       "snap": "grid",
-      "unlocks": "tools",
       "look": {
         "kind": "table",
         "color": "#6b4f34"
@@ -971,7 +970,8 @@
         "panels": [
           "tools"
         ]
-      }
+      },
+      "unlocksNotBuilt": "tools"
     },
     {
       "id": "anvil",
@@ -982,7 +982,6 @@
       "d": 0.8,
       "h": 1,
       "snap": "grid",
-      "unlocks": "smithing",
       "look": {
         "kind": "anvil",
         "color": "#4a4038"
@@ -998,7 +997,8 @@
         "panels": [
           "tools"
         ]
-      }
+      },
+      "unlocksNotBuilt": "smithing"
     },
     {
       "id": "workbench",
@@ -1009,7 +1009,6 @@
       "d": 1,
       "h": 1,
       "snap": "grid",
-      "unlocks": "parts",
       "look": {
         "kind": "table",
         "color": "#5a432c"
@@ -1025,7 +1024,8 @@
         "panels": [
           "tools"
         ]
-      }
+      },
+      "unlocksNotBuilt": "parts"
     },
     {
       "id": "garage",
@@ -1067,7 +1067,6 @@
       "d": 2,
       "h": 1.3,
       "snap": "grid",
-      "unlocks": "affixes",
       "look": {
         "kind": "altar",
         "color": "#6a5a84"
@@ -1081,7 +1080,8 @@
         "reagent": 2
       },
       "desc": "Where an affix is talked on to a blade. Hums when nobody is near it.",
-      "tech": "optics"
+      "tech": "optics",
+      "unlocksNotBuilt": "affixes"
     },
     {
       "id": "alchemy_bench",
@@ -1092,7 +1092,6 @@
       "d": 1,
       "h": 1.1,
       "snap": "grid",
-      "unlocks": "potions",
       "look": {
         "kind": "bench",
         "color": "#4a6a5a"
@@ -1103,7 +1102,8 @@
         "copper": 2
       },
       "desc": "Potions, oils and the explosives you will regret storing indoors.",
-      "tech": "chemistry"
+      "tech": "chemistry",
+      "unlocksNotBuilt": "potions"
     },
     {
       "id": "fletching_bench",
@@ -1114,7 +1114,6 @@
       "d": 0.9,
       "h": 1,
       "snap": "grid",
-      "unlocks": "arrows",
       "look": {
         "kind": "bench",
         "color": "#6b4f34"
@@ -1123,7 +1122,8 @@
         "plank": 4,
         "fibre": 3
       },
-      "desc": "Shafts, heads and fletches. Quivers do not fill themselves."
+      "desc": "Shafts, heads and fletches. Quivers do not fill themselves.",
+      "unlocksNotBuilt": "arrows"
     },
     {
       "id": "cooking_station",
@@ -1134,7 +1134,6 @@
       "d": 1.2,
       "h": 1.2,
       "snap": "grid",
-      "unlocks": "food",
       "look": {
         "kind": "stove",
         "color": "#7a6050"
@@ -1149,7 +1148,8 @@
         "stone": 8,
         "iron": 3
       },
-      "desc": "A hearth, a griddle and a rack. Food buffs come from here."
+      "desc": "A hearth, a griddle and a rack. Food buffs come from here.",
+      "unlocksNotBuilt": "food"
     },
     {
       "id": "campfire",
@@ -3332,5 +3332,6 @@
   ],
   "_defenceDoc": "A `defence` block is what makes a defensive structure SHOOT: range in metres, damage a hit, `every` seconds between shots, `splash` metres of area, and an element that js/effects.js already understands. A wall, a gate, a trap or a barricade has no block and does not fire — the category alone is not enough, because js/defence.js gates on the block rather than on `cat` and a palisade must never snipe. Tuned here so the numbers live beside the costs they are paid for.",
   "_stationDoc": "R17 — `station` IS THE WHOLE PER-BUILDING INTERFACE, AND IT IS DATA.\n\n\"I built a furnace, campfire, kiln, and loom, but I still cannot figure out how to convert iron ore into ingots. The furnace says it can smelt iron. But when I press E to open it it just opens the regular build menu.\"\n\nA structure carrying a `station` block has a screen of its own: js/station-ui.js draws it, E opens it, and adding another one later is a row in this file rather than a new panel in code.\n\n  title    what the screen is called.\n  blurb    one sentence saying what the thing is FOR, at the top of its own screen.\n  recipes  ids out of data/refining.json. The station runs exactly these and nothing else.\n  panels   the built-in sections it also shows: \"tools\" (the tool and device bench), \"garage\" (what you drive),\n           \"shipyard\" (the pad, the four subsystems and the orbital yard).\n\nA station with `panels` and no `recipes` is a bench you USE rather than one you queue — an anvil, a garage. It is still listed in data/refining.json (with `labour.secondsPerUnit: 0`, so it never asks for a worker) because that list is what js/main.js's `interactTarget` matches on, and without an entry there E has no door.",
-  "_techDoc": "R17 — `tech` NAMES THE RESEARCH NODE THAT OPENS A PIECE, and its absence means \"from the start\".\n\nThat default is the rule, not a convenience: AGE 1 IS EVERYTHING LOW-TECH AND IT IS NEVER RESEARCHED. A player who lands with nothing must be able to gather, build a Crafting Table, a Storage Box, a Campfire and a Furnace, and smelt iron, without ever opening the Research screen. Nodes live in data/research.json; js/research.js reads both and js/build-ui.js greys a locked row WITH THE SENTENCE saying which node opens it, because a greyed row with no reason is the one answer a player cannot act on."
+  "_techDoc": "R17 — `tech` NAMES THE RESEARCH NODE THAT OPENS A PIECE, and its absence means \"from the start\".\n\nThat default is the rule, not a convenience: AGE 1 IS EVERYTHING LOW-TECH AND IT IS NEVER RESEARCHED. A player who lands with nothing must be able to gather, build a Crafting Table, a Storage Box, a Campfire and a Furnace, and smelt iron, without ever opening the Research screen. Nodes live in data/research.json; js/research.js reads both and js/build-ui.js greys a locked row WITH THE SENTENCE saying which node opens it, because a greyed row with no reason is the one answer a player cannot act on.",
+  "_r18Unlocks": "R18 — the seven per-structure `unlocks` strings are renamed `unlocksNotBuilt`, because nothing reads them and their vocabulary matches nothing else in the project: `tools`, `smithing`, `parts`, `affixes`, `potions`, `arrows`, `food` are not craft groups (those are base/rarity/properties/brand) and are not research nodes. The only `unlocks` reader is js/research.js:56, which reads it off research.json NODES — a different field with the same name, which is how these came to look wired. They are a planned crafting-category system that was never built; inventing a gate for a vocabulary that exists nowhere else would be fiction. Renamed rather than deleted so the design intent survives, and renamed rather than left alone so the file stops implying a working gate. tests/round13.test.js fails if a bare `unlocks` reappears on a structure."
 }

@@ -370,3 +370,28 @@ test('R18 — no second price: power.json and refining.json carry no build costs
     'these carry a second build cost that nothing charges — the live price is data/structures.json\'s '
     + '`cost`:\n  ' + offenders.join('\n  '));
 });
+
+/**
+ * R18 — A STRUCTURE'S `unlocks` FIELD IS A TRAP, SO IT IS NOT CALLED THAT.
+ *
+ * Seven structures carried `unlocks: "tools" | "smithing" | "parts" | …`, read by nobody. The only
+ * `unlocks` reader in the project is js/research.js:56, and that reads it off research.json NODES
+ * (an array of structure ids) — a different field with the same name, which is exactly how these
+ * came to look wired for as long as they did.
+ *
+ * Their vocabulary matches nothing else: not the craft groups (base/rarity/properties/brand), not
+ * the research nodes. They are a planned crafting-category system nobody built, so they are parked
+ * as `unlocksNotBuilt` — the intent survives and the file stops implying a gate. This fails if a
+ * bare `unlocks` comes back on a structure, so the next person has to choose deliberately between
+ * implementing it and parking it.
+ */
+test('R18 — no structure carries a bare `unlocks` that nothing reads', () => {
+  const structures = JSON.parse(readFileSync(new URL('../data/structures.json', import.meta.url), 'utf8'));
+  const bare = (structures.structures || []).filter(r => r.unlocks != null).map(r => r.id);
+  assert.deepEqual(bare, [],
+    'these structures declare `unlocks`, which only js/research.js reads — off research NODES, not '
+    + 'off structures. Implement a reader or park it as `unlocksNotBuilt`:\n  ' + bare.join('\n  '));
+  // …and the parked ones are still there, so this test is guarding something real
+  const parked = (structures.structures || []).filter(r => r.unlocksNotBuilt).length;
+  assert.ok(parked >= 5, `only ${parked} parked unlocks rows — did they get implemented? move this test`);
+});

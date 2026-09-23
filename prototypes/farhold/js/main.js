@@ -2375,6 +2375,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * world offers, the player accepts, and the bell is the player choosing the hour.
    */
   const defence = createDefence({
+    getPlayer: () => player,   // R18 — for the purse in `baseOf()`; notoriety.perThousandGold
     data: raidData || null, bestiary, grid,
     rng: rpg.rng, log: (t, c) => hud.log(t, c), spellfx,
     // getters: the enemy field is rebuilt on every landing, and `build` is declared below this
@@ -6236,6 +6237,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return;
     }
 
+    /**
+     * R18 — `'launch'` AND `'land'` ARE UNREACHABLE, AND THEY STAY, WITH THIS NOTE ON THEM.
+     *
+     * `mode` is only ever assigned `'ground' | 'air' | 'space' | 'warp'` (twelve sites, all
+     * checked), and `landingTarget` is only ever READ or set back to null — nothing ever fills it.
+     * Both blocks are leftovers from before round 5's seamless take-off and landing, which replaced
+     * a staged launch/land sequence with a continuous climb through the atmosphere.
+     *
+     * Kept rather than deleted because they are the only written record of how the staged version
+     * worked, and this file has twice had a "dead" branch turn out to be the live one. Recorded
+     * rather than left silent, because the whole point of this round is that unreachable code which
+     * LOOKS live is the most expensive kind: the next person to read `mode === 'launch'` should know
+     * in one line that it cannot run, instead of spending an afternoon proving it.
+     */
     if (mode === 'launch') {
       // climb away from the ground. The fog closes and the light drains, and at the top the space
       // scene takes over — the swap happens while there is nothing left to see of the ground.

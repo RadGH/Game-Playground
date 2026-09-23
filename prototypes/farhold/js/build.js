@@ -639,7 +639,21 @@ export function createBuild(scene, {
       const res = book.place({ id: selected, x: at.x, z: at.z, rot: at.rot ?? rot });
       if (!res.ok) { log(res.why, 'warn'); return res; }
       const def = book.byId(selected);
-      if (def?.flatten) { groundChanged(at.x, at.z, Math.max(def.w, def.d)); clearProps(at.x, at.z, Math.max(def.w, def.d) * 0.6); }
+      /**
+       * R18 — THE SAME TEST buildplan USES, so the view hears about every piece that moves ground.
+       *
+       * `js/buildplan.js` levels under anything with `flatten` OR `h <= 0.3` — round 14's rule that
+       * "anything flat is a tile, and a tile levels under itself" — and this only told the view
+       * about `flatten`. So six catalogue pieces (rug, flower bed, moss carpet, nameplate, caltrops,
+       * bedroll) wrote a terraform delta that the clipmap never heard about: drop a bedroll on a
+       * slope and it clips through ground the height data already says is flat, until you walk far
+       * enough for the ring to rebuild on its own.
+       *
+       * Restated from the one in buildplan rather than re-derived, because two copies of "what
+       * counts as flat" is how they came apart in the first place.
+       */
+      const levels = !!def?.flatten || (def?.h ?? 1) <= 0.3;
+      if (levels) { groundChanged(at.x, at.z, Math.max(def.w, def.d)); clearProps(at.x, at.z, Math.max(def.w, def.d) * 0.6); }
       addMesh(res.entry);
       actions.push({ kind: 'entry', id: res.entry.id });
       log(`${res.entry.name} built.`, 'good');

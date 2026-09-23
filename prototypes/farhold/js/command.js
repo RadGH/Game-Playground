@@ -75,6 +75,26 @@ export function createCommand({
   }
 
   /** What is standing at a point that somebody could be told to work. */
+  /** A store you can be told to carry to — `def.store` is what js/stores.js joins on. */
+  function storeAt(x, z, r = 6) {
+    for (const e of theBuild()?.entries || []) {
+      const def = theBuild()?.defOf?.(e.key);
+      if (!def?.store?.slots && !def?.pool) continue;
+      if (Math.hypot(e.x - x, e.z - z) <= r) return e;
+    }
+    return null;
+  }
+
+  /** Somewhere to stand watch: a post with slots, or anything the defence category owns. */
+  function postAt(x, z, r = 7) {
+    for (const e of theBuild()?.entries || []) {
+      const def = theBuild()?.defOf?.(e.key);
+      if (!def?.post?.slots && def?.cat !== 'defence') continue;
+      if (Math.hypot(e.x - x, e.z - z) <= r) return e;
+    }
+    return null;
+  }
+
   function stationAt(x, z, r = 6) {
     const w = theWorks();
     for (const e of theBuild()?.entries || []) {
@@ -110,9 +130,25 @@ export function createCommand({
     const people = picked.map(bodyById).filter(Boolean);
     if (!people.length) return { ok: false, why: 'Nobody is selected.' };
 
+    /**
+     * R18 — ALL FOUR ORDERS, which is what the header above already describes.
+     *
+     * `ORDERS` declares work/haul/guard/move and this computed `station ? 'work' : 'move'`, so
+     * `haul` and `guard` could never be produced and `{ run: kind === 'guard' }` on the `sendTo`
+     * call below was always false — nobody ever ran to a post. The header says it plainly: "a
+     * machine means work it, a store means haul to it, a defensive structure means stand watch
+     * there, bare ground means go and stand there." Three of the four were the same branch.
+     *
+     * Tested in the order the header lists them, and each asks the ledger what is actually standing
+     * there rather than carrying its own idea of what a store or a post looks like.
+     */
     const station = stationAt(x, z);
-    const kind = station ? 'work' : 'move';
-    const where = station ? (station.name || 'it') : 'that spot';
+    const store = storeAt(x, z);
+    const post = postAt(x, z);
+    const kind = station ? 'work' : store ? 'haul' : post ? 'guard' : 'move';
+    // …and it says WHICH thing it is walking to, whichever of the three it turned out to be
+    const target = station || store || post;
+    const where = target ? (target.name || target.key || 'it') : 'that spot';
 
     let done = 0;
     for (const npc of people) {

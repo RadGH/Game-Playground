@@ -75,6 +75,11 @@ export function createDefence({
   getColony = () => null,
   getWorks = () => null,
   getOutposts = () => null,
+  /**
+   * R18 — the player, for their purse. A getter for the same reason the field and the ledger are:
+   * the object is rebuilt on a new game and a captured one would be last run's character.
+   */
+  getPlayer = () => null,
   folk = null,
 } = {}) {
   const say = (t, k) => { if (log) log(t, k); };
@@ -162,7 +167,13 @@ export function createDefence({
         if (!def?.repairs || e.powered === false) return sum;
         return sum + (def.repairs.rate ?? 25) / 100;
       }, 0),
-      gold: 0,
+      /**
+       * R18 — the purse, which was hard-coded to zero right next to the throughput that was also
+       * zero. data/raids.json's `notoriety.perThousandGold: 4` has never once fired, so a rich base
+       * was exactly as noticeable as a broke one. `getPlayer` is a new dependency, added for this —
+       * a getter, like the field and the ledger, because the player object is rebuilt on a new game.
+       */
+      gold: getPlayer?.()?.gold || 0,
       posted,
     };
   }

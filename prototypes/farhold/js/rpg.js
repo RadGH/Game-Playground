@@ -32,7 +32,7 @@ import { incomingFrom, outgoingFrom } from './skills.js';
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
 // Round 4: every affix an item can carry now does something. `js/effects.js` is the registry.
-import { Effects, STAT_FIELDS, effectFor, describeAffix, isMagic } from './effects.js';
+import { Effects, STAT_FIELDS, effectFor, describeAffix, isMagic, BRANDS } from './effects.js';
 
 export { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY };
 export { describeAffix, effectFor };
@@ -135,6 +135,27 @@ export function attuneWeapon(item) {
    * fires while that still says `magic`: called a second time on the same item — a reload, a
    * re-roll at the bench — the block was skipped and the caster branch attuned it again anyway.
    */
+  /**
+   * R18 — A BRAND ON THE ITEM BECOMES THE ITEM'S ELEMENT.
+   *
+   * `elementOf()` reads `item.brand || item.castElement`, and the seven `cond_brand*` intrinsics set
+   * a `brandElement` hook in the registry that NOTHING ever called. So all seven branded road
+   * weapons swung the wrong thing: the Rimecut Sabre, Dawnwarden Hammer, Starwake Bow and Stormpin
+   * Crossbow came out PHYSICAL — which also means their own "+30% of that element" could never
+   * fire — while the Emberbrand Wand threw poison, the Bramble Staff cast ice and the Gravebound
+   * Sceptre was arcane, because the element was a hash of the item id and matched the brand about
+   * one time in six.
+   *
+   * Read here, where every other item-level fact is settled and every creation path already calls
+   * in. `BRANDS` is imported rather than restated, so the seven ids have one home.
+   */
+  if (!item.brand) {
+    for (const a of item.affixes || []) {
+      const brand = BRANDS[a.stat];
+      if (brand) { item.brand = brand[0]; break; }
+    }
+  }
+
   const isQuarterstaff = item.baseKey === 'quarterstaff' || sub === 'quarterstaff';
   if (isQuarterstaff) {
     // Unconditionally, NOT behind `weaponCategory === 'magic'`. Gating the clear on the category
@@ -531,7 +552,24 @@ export class Rpg {
     // …and the ones only Farhold understands. items.json is shared with Emberveil, which has its
     // own registry and a test that every affix in the file resolves — so anything this game adds
     // goes in at load, never into the file.
-    items.affixes.farhold = FARHOLD_AFFIXES.map(a => ({ ...a }));
+    /**
+     * R18 — INTO THE GROUP THE POOL ACTUALLY READS.
+     *
+     * This wrote them into `items.affixes.farhold`, and Emberveil's `Loot.pool()` reads exactly
+     * `prefixes`, `suffixes`, `shield` and `extended` — so a group of our own was a group nobody
+     * looked in. `of Early Promise` could never appear on anything: 2768 items rolled at level 30
+     * with 300 magic find produced not one. That also made `AFFIX_TUNING.early_promise`,
+     * `SLOT_RULES.early_promise`, `AFFIX_CAP.cond_levelReqReduce` and both branches of
+     * `Rpg.levelRequirement` dead code hanging off it.
+     *
+     * `extended` is the right group: it is the one `pool()` takes when `opts.extended` is not
+     * false, which is every ordinary drop. Appended in MEMORY, at load, never written into
+     * items.json — that file is shared with Emberveil and has its own test that every affix in it
+     * resolves, so an affix only we understand must not go in it. Guarded, because `new Rpg()` runs
+     * more than once in a session (a new game, a load) and the list would otherwise grow each time.
+     */
+    items.affixes.extended = (items.affixes.extended || []).filter(a => !a.farhold);
+    for (const a of FARHOLD_AFFIXES) items.affixes.extended.push({ ...a, farhold: true });
     this.affixReport = tuneAffixData(items);
     this.weightAffixes();
     this.itemLevels();

@@ -96,7 +96,9 @@ export const ENGINE_UNIT = {
   // flags — present or absent, the value is ignored
   cond_extraSetPiece: 'flag', cond_setThresholdReduce: 'flag',
   // round 6: the light, mount and quiver slots' own properties (js/gear.js)
-  cond_lightRange: 'flat', cond_lightBase: 'flat', cond_lightReveal: 'flat',
+  cond_lightRange: 'flat', cond_lightBase: 'flat',
+  // R18 — a SHARE: the only consumer is `1 + revealRange` on the minimap span. See js/effects.js.
+  cond_lightReveal: 'frac',
   cond_lightSteady: 'frac', cond_lightWard: 'frac',
   cond_mountSpeed: 'flat', cond_mountBase: 'flat', cond_mountWind: 'flat',
   cond_mountStamina: 'flat', cond_mountTrample: 'flat',
@@ -129,7 +131,7 @@ export const AFFIX_CAP = {
   // R18 — spellPower had no cap at all while it was (wrongly) flat. As a share, +150% from gear is
   // the ceiling; the perk arm stacks on top of this.
   spellPower: 1.5,
-  cond_lightRange: 60, cond_lightSteady: 0.6, cond_lightWard: 0.5, cond_lightReveal: 90,
+  cond_lightRange: 60, cond_lightSteady: 0.6, cond_lightWard: 0.5, cond_lightReveal: 0.35,
   cond_mountSlope: 0.7, cond_mountCalm: 0.8, cond_mountStamina: 60, cond_mountTrample: 60,
   cond_quiverDamage: 40, cond_quiverSplit: 4, cond_quiverBurst: 6,
 };
@@ -240,7 +242,8 @@ export const AFFIX_TUNING = {
   wide_beam: { min: 8, max: 20, ilvl: 1, slots: ['light'] },
   steady_flame: { min: 0.1, max: 0.25, ilvl: 3, slots: ['light'] },
   warding_light: { min: 0.1, max: 0.22, ilvl: 5, slots: ['light'] },
-  seeking_light: { min: 12, max: 30, ilvl: 4, slots: ['light'] },
+  // R18 — a SHARE of the minimap's span, not metres. 12-30 read as a fraction was 1200-3000%.
+  seeking_light: { min: 0.08, max: 0.22, ilvl: 4, slots: ['light'] },
   surefoot: { min: 0.15, max: 0.35, ilvl: 1, slots: ['mount'] },
   longwind: { min: 6, max: 18, ilvl: 1, slots: ['mount'] },
   trample: { min: 4, max: 14, ilvl: 4, slots: ['mount'] },

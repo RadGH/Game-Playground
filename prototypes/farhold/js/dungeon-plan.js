@@ -123,7 +123,22 @@ export function insideLayout(plan, x, z, pad = 0) {
     if (Math.abs(z - h.az) <= half && x >= Math.min(h.ax, midX) - half && x <= Math.max(h.ax, midX) + half && h.bendX) return h;
     if (Math.abs(x - midX) <= half && z >= Math.min(h.az, h.bz) - half && z <= Math.max(h.az, h.bz) + half) return h;
     if (Math.abs(z - h.bz) <= half && x >= Math.min(midX, h.bx) - half && x <= Math.max(midX, h.bx) + half && !h.bendX) return h;
-    if (!h.bendX && Math.abs(z - h.az) <= half && x >= Math.min(h.ax, h.bx) - half && x <= Math.max(h.ax, h.bx) + half) return h;
+    /**
+     * R18 — THERE WAS A FOURTH CLAUSE HERE AND IT REPORTED FLOOR THAT IS NEVER DRAWN.
+     *
+     * It tested, for `!h.bendX`, a horizontal strip at `z = h.az` spanning the whole ax..bx range.
+     * js/dungeon.js draws a `!bendX` hall as a VERTICAL leg at `x = h.ax` (az..bz) and THEN a
+     * horizontal leg at `z = h.bz` (ax..bx) — so a strip at `z = h.az` is the other L, the one the
+     * renderer did not build. The clauses above already cover both real legs, and the only floor
+     * that genuinely exists at `z = h.az` is where the vertical leg starts, which the `|x - midX|`
+     * clause covers.
+     *
+     * It mattered because js/dungeon.js asks this question to decide where NOT to build a wall: it
+     * probes 1.4 m outside each room-wall segment and, when something else owns that floor, leaves
+     * the segment out to make a doorway. A phantom strip therefore punched a hole in a room wall
+     * with nothing behind it — measured at ~5 per dungeon across 38 of 40 seeds — and the same
+     * false positive dropped corridor rail segments.
+     */
   }
   return null;
 }

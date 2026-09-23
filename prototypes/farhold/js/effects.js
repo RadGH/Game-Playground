@@ -110,8 +110,17 @@ def('affix:cond_afterSkillSpellPow', v => `+${n1(v)} spell power for 6 seconds a
   onCast: (v, c) => { c.rt.skillPower = 6; c.rt.skillPowerValue = v; },
   derive: (v, d, unit, rt) => { if (rt?.skillPower > 0) d.spellPower += v; },
 });
+/**
+ * R18 — THIS PAID TWICE, ONCE AS FLAT DAMAGE AND ONCE AS A MULTIPLIER.
+ *
+ * It declared BOTH `dmgOut: 1 + v/baseDamage` and `flatOut: v`, and `rpg.strike` applies them as
+ * `(amount + out.flat) * out.mult` — so a `+20 damage` ambush affix on a level-5 character took a
+ * 4-damage hit to 158. On a low-damage build the multiplier alone is more than five times.
+ *
+ * Its own name and its own sentence say FLAT: "+20 damage to anything that has not noticed you".
+ * So `flatOut` is the payment and the multiplier goes. One property, one effect.
+ */
 def('affix:cond_ambushDmgFlat', v => `+${n1(v)} damage to anything that has not noticed you`, {
-  dmgOut: (v, c) => (c.target && c.target.state !== 'chase' ? 1 + v / Math.max(1, c.baseDamage || 20) : 1),
   flatOut: (v, c) => (c.target && c.target.state !== 'chase' ? v : 0),
 });
 def('affix:cond_bleedOnCrit', v => `Critical hits open a bleed for ${n1(v)} damage a second, for 6 seconds`, {
@@ -246,7 +255,7 @@ def('affix:cond_thornsFlat', v => `Anything that hits you takes ${n1(v)} damage 
 // no exhaustion, so the honest thing is to give each one the nearest meaning this game does have
 // and say plainly what that is, rather than leave it inert and undescribed.
 
-const BRANDS = {
+export const BRANDS = {
   cond_brandFire: ['fire', 'Ember Brand', 'burns'],
   cond_brandIce: ['ice', 'Rime Brand', 'chills'],
   cond_brandLightning: ['lightning', 'Storm Brand', 'shocks'],
@@ -389,7 +398,20 @@ def('affix:cond_lightSteady', v => `Enemies are ${pct(v)} less likely to notice 
 def('affix:cond_lightWard', v => `You take ${pct(v)} less damage while you are carrying a light`, {
   dmgIn: (v, c) => ((c.self?.derived?.lightRange || 0) > 0 ? 1 - v : 1),
 });
-def('affix:cond_lightReveal', v => `Shows chests and doorways ${n1(v)} metres further out`, {
+/**
+ * R18 — TWO WRITERS, TWO UNITS, AND ONE OF THEM BLEW THE MINIMAP OUT BY UP TO NINETY TIMES.
+ *
+ * The only consumer of `revealRange` is js/main.js's `hud.revealMul = 1 + derived.revealRange`,
+ * feeding `span = minimapSpan * revealMul` — so it is a FRACTION. The perk arm writes fractions
+ * (0.1 to 0.25) and was right; this affix wrote METRES, tuned 12-30 and capped at 90. A Finder's
+ * lantern — which a merchant stocks — took the minimap from 26 cells to between 340 and 2100, and
+ * the map drew outside its own texture.
+ *
+ * Its old sentence promised something else again: "shows chests and doorways N metres further out",
+ * which had no reader anywhere. Rather than leave the affix inert and describe a feature that does
+ * not exist, it now speaks the one unit that has a consumer, and says what it actually does.
+ */
+def('affix:cond_lightReveal', v => `The minimap shows ${pct(v)} more ground while you carry a light`, {
   derive: (v, d) => { d.revealRange = (d.revealRange || 0) + v; },
 });
 

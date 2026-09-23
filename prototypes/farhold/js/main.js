@@ -540,7 +540,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       && terrain.riverAt(x, z) <= 0.3 && terrain.slopeAt(x, z, 4) <= 0.5,
   });
   if (save?.waypoints) waypoints.load(save.waypoints);
-  const jobs = createJobGen({ frames: frameData, territory: holdings, factions: factionData, standings, seed });
+  // R18 — `incidentData` so `resolvedBy` is read: without it four incidents could never be cleared.
+  const jobs = createJobGen({ frames: frameData, territory: holdings, factions: factionData, standings, incidents: incidentData, seed });
   /** The board for the zone you are in. Rebuilt when you cross a border, not every frame. */
   let localBoard = [];
   let boardZone = null;
@@ -6304,7 +6305,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const x = at ? at.x : control.x, z = at ? at.z : control.z;
     view.update(x, z, force);
     props.update(x, z, force);
-    features.update(x, z, force);
+    /**
+     * R18 — AND WHOEVER ELSE FILED SOLIDS INTO THAT FIELD HAS TO FILE THEM AGAIN.
+     *
+     * `features.solids` is shared: main.js hands it to `createGates` and `createSites` as well.
+     * `features.buildInstances` calls `solids.clear()` on every rebuild, so a rebuild wipes the
+     * dungeon-mouth jamb posts and every set piece's palisades, towers and huts — and each of the
+     * three re-files on its OWN movement threshold (features 260 m, gates 200 m, sites 180 m).
+     * The frame order is gates, then sites, then this, so on the frame features rebuilds it erases
+     * what the other two just put in, and they do not come back until their own thresholds are
+     * crossed. Walking in a straight line that leaves a window between roughly 260 m and 400 m
+     * where a bandit camp's walls and a dungeon's doorposts are not solid — repeating for as long
+     * as you keep walking.
+     *
+     * `features.update` returns true only when it actually rebuilt, so this costs nothing on the
+     * frames it did not.
+     */
+    const rebuilt = features.update(x, z, force);
+    if (rebuilt) {
+      gates?.update?.(x, z, true);
+      sites?.update?.(x, z, true);
+    }
   }
 
   $('hud-planet').textContent = describePlanet(planet, star);

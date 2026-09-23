@@ -340,3 +340,33 @@ test('R18 — the ground a generator needs reaches the thing that refuses placem
   }
   assert.ok(found > 0, 'no generator declares needsGround any more — re-aim this test');
 });
+
+/**
+ * R18 — ONE PRICE PER BUILDING, AND IT LIVES IN data/structures.json.
+ *
+ * 25 of 35 buildings were priced twice, and the second price was dead: only structures.json's
+ * `cost` is ever spent (`alignCatalogue` -> js/build.js), while power.json and refining.json each
+ * carried a `build` block that nothing read. They disagreed on every row that had both —
+ * `fuel_synthesiser` differed in all four lines, the sawmill in three. A price stated twice is a
+ * price that will eventually be tuned in the wrong file, which is exactly what had happened.
+ *
+ * So: no `build` block in either file, ever again. If a designer wants to move a price, there is
+ * one place to move it.
+ */
+test('R18 — no second price: power.json and refining.json carry no build costs', () => {
+  const POWER = JSON.parse(readFileSync(new URL('../data/power.json', import.meta.url), 'utf8'));
+  const REFINING = JSON.parse(readFileSync(new URL('../data/refining.json', import.meta.url), 'utf8'));
+
+  const offenders = [];
+  for (const group of ['generators', 'batteries', 'storage', 'poles']) {
+    for (const [id, row] of Object.entries(POWER[group] || {})) {
+      if (row && row.build) offenders.push(`power.json ${group}.${id}`);
+    }
+  }
+  for (const [id, row] of Object.entries(REFINING.machines || {})) {
+    if (row && row.build) offenders.push(`refining.json machines.${id}`);
+  }
+  assert.deepEqual(offenders, [],
+    'these carry a second build cost that nothing charges — the live price is data/structures.json\'s '
+    + '`cost`:\n  ' + offenders.join('\n  '));
+});

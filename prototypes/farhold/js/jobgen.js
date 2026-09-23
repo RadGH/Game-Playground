@@ -171,7 +171,12 @@ export function phrase(text, bound) {
   });
 }
 
-export function createJobGen({ frames: data, territory = null, factions = null, standings = null, seed = 1 } = {}) {
+export function createJobGen({ frames: data, territory = null, factions = null, standings = null, incidents = null, seed = 1 } = {}) {
+  /**
+   * R18 — `incidents` is data/incidents.json, read only for its `resolvedBy` field. See `finish`
+   * below: without it four incidents in the game could never be cleared. Optional, so every
+   * existing caller and every node test keeps working exactly as it did.
+   */
   const frames = data?.frames || [];
   const scopes = data?.scopes || {};
   /** How recently each frame was offered, so a board does not repeat itself. */
@@ -352,7 +357,28 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
     if (territory && Number.isFinite(after.grip)) {
       out.flipped = territory.press(job.zoneId, after.grip)?.flipped || null;
     }
+    /**
+     * R18 — RESOLVE FROM THE INCIDENT'S SIDE AS WELL, WHICH IS WHERE THE DATA SAYS IT.
+     *
+     * `after.resolve` is a frame naming ONE incident, and only three of the eight frames carry it.
+     * data/incidents.json states the join the other way round with `resolvedBy` — and nothing read
+     * that at all, so four incidents could never be cleared: `grudge` and `bounty_up` both name the
+     * frame `the_grudge`, `collapse` and `road_out` both name `dig_it_out`, and neither frame has an
+     * `onDone.resolve`. You did the job, the trouble kept running, and when it timed out its
+     * `onExpire` fired the failure rumour and the grip penalty as though you had never turned up.
+     *
+     * One frame resolving TWO incidents is exactly why a single `onDone.resolve` string could not
+     * express it. Reading `resolvedBy` handles that for free, and both directions are honoured so
+     * the three frames that already worked keep working.
+     */
     if (territory && after.resolve) out.resolved = territory.resolveIncident(job.zoneId, after.resolve);
+    if (territory && job.frame) {
+      for (const row of incidents?.incidents || []) {
+        if (row.resolvedBy !== job.frame) continue;
+        const got = territory.resolveIncident(job.zoneId, row.kind);
+        if (got) out.resolved = out.resolved || got;
+      }
+    }
     if (after.rumour) out.rumour = phrase(after.rumour, { zone: { name: job.zoneName } }) || after.rumour;
     return out;
   }

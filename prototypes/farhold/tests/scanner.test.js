@@ -55,11 +55,22 @@ test('a material you can only get underground says so, and one you can get above
 });
 
 test('the furnace and the kiln both want clay, which is why this matters', () => {
-  const refining = JSON.parse(readFileSync(new URL('../data/refining.json', import.meta.url)));
-  const machines = refining.machines || {};
-  // the key is `build`, not `cost` — a machine's build cost and a recipe's input cost are different
-  // things in this file, and confusing them is how you write a test that passes for no reason
-  const wantsClay = Object.entries(machines).filter(([, m]) => (m.build || {}).clay > 0).map(([k]) => k);
+  /**
+   * R18 — RE-AIMED AT THE PRICE THAT IS ACTUALLY CHARGED.
+   *
+   * This read `machines[id].build` out of data/refining.json. That block was one of 38 dead second
+   * prices: only data/structures.json's `cost` is ever spent (js/buildplan.js `alignCatalogue` ->
+   * js/build.js), and the two files disagreed on 25 of 35 buildings. Deleting the dead copies broke
+   * this test, which is the test doing its job — it was asserting a design intent ("clay matters
+   * because the things you build want it") against a number nobody paid.
+   *
+   * The intent is unchanged and still worth guarding; it just has to ask the live file. Note the
+   * key is `cost` here and the vocabulary is the catalogue's, which is why `clay` is `clay` and not
+   * an alias.
+   */
+  const structures = JSON.parse(readFileSync(new URL('../data/structures.json', import.meta.url)));
+  const rows = Object.fromEntries((structures.structures || []).map(r => [r.id, r]));
+  const wantsClay = Object.entries(rows).filter(([, r]) => (r.cost || {}).clay > 0).map(([k]) => k);
   assert.ok(wantsClay.includes('furnace'), 'the furnace stopped costing clay');
   assert.ok(wantsClay.includes('kiln'), 'the kiln stopped costing clay');
 });

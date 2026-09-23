@@ -1,269 +1,1426 @@
 {
   "schema": 1,
   "_doc": "Farhold's refining chain (BUILDING_EXPANSION §2) as data. js/refine.js is the engine; nothing about a recipe lives in code.\n\nThree tiers, each needing the one before it:\n  tier 0 — campfire, furnace, kiln. No grid. They BURN something, which is why coal matters before power does.\n  tier 1 — smelter, alloy forge, sawmill, stonecutter, tannery, loom, chemical bench, crusher. Most want power; the ones that do not are the ones you build on day one.\n  tier 2 — refinery, washer, assembler, crystal cutter, fuel synthesiser. These do not run without a grid at all, which is §2.20: refining is where power starts to matter.\n\nTwo rules the tests enforce:\n  1. NO RECIPE IS A DEAD END (§3.20). Every output is an input to another recipe, a fuel, or listed in `goals`. Byproducts included — slag becomes gravel, ash becomes lye, tailings go back through the washer. Tipping them is a choice, not the only option.\n  2. Recipes unlock by doing (§2.18). `unlock` says which recipe you must have run, and how often. There is no tech-tree screen for tier 1; you smelt iron ten times and the alloy forge's bronze appears.\n\nEverything queues (§2.19). A job is set and forgotten: js/refine.js catches a machine up when you come back from a fight, so walking away is the intended way to use the place.",
-
   "handWork": {
     "handStandPerSecond": 0.0333,
     "handHoldPerSecond": 0.1,
-    "_doc": "R16 \u2014 what your own two hands are worth at a bench, in work units per REAL second. `handStandPerSecond` is just being in the room: one unit every thirty seconds, which is thirty machine-seconds every thirty seconds, so attending a furnace keeps it lit exactly 1:1 and no better (this is R15's rule, kept). `handHoldPerSecond` is holding E, and it is three times that \u2014 jumping in has to genuinely speed the thing up or the key is a fancier way of standing still. Both go through js/work.js's board as ordinary player units, so a citizen who turns up to help is filling the same order and the ledger says who did what. A machine that needs no worker (tier 2, or a tier-1 bench on the grid) takes neither: see js/refine.js `labourNeed`."
+    "_doc": "R16 — what your own two hands are worth at a bench, in work units per REAL second. `handStandPerSecond` is just being in the room: one unit every thirty seconds, which is thirty machine-seconds every thirty seconds, so attending a furnace keeps it lit exactly 1:1 and no better (this is R15's rule, kept). `handHoldPerSecond` is holding E, and it is three times that — jumping in has to genuinely speed the thing up or the key is a fancier way of standing still. Both go through js/work.js's board as ordinary player units, so a citizen who turns up to help is filling the same order and the ledger says who did what. A machine that needs no worker (tier 2, or a tier-1 bench on the grid) takes neither: see js/refine.js `labourNeed`."
   },
-
   "_r17MachineDoc": "R17 — FOUR BENCHES THAT HAD NO ENTRY IN HERE AT ALL, and why that mattered. js/main.js's `interactTarget` offers a `machine` when what you are standing at is one of these — that is the ONLY route E has into a station. A Crafting Table, an Anvil, a Workbench and a Garage were structures in data/structures.json and nothing here, so pressing E at one did nothing whatever and the build panel was the only door. Three of them run no refining recipe at all and still belong here: No `labour` block at all means they never ask for a worker and never post an order (js/refine.js `labourNeed` reads `L?.secondsPerUnit || 0`), so the cost of listing them is a name and a footprint.",
   "_machineDoc": "A machine. `tier` 0/1/2 as above. `powerUse` is the idle draw in units; `recipePower` on a recipe is the extra while it is working. `fuels` is what it can burn when there is no grid — the number is how many seconds of work one unit buys. `speed` multiplies every recipe's time. `priority` is the load-shedding class from data/power.json. `inputSlots` is how many different inputs it can hold, purely so the UI can draw it.",
   "machines": {
     "campfire": {
-      "name": "Campfire", "tier": 0, "speed": 1.0, "powerUse": 0, "priority": "refining",
-      "fuels": { "log": 40, "charcoal": 90, "coal": 120, "resin": 60 },
-      "build": { "stone": 6, "log": 4 },
-      "labour": { "secondsPerUnit": 30, "auto": false },
+      "name": "Campfire",
+      "tier": 0,
+      "speed": 1.0,
+      "powerUse": 0,
+      "priority": "refining",
+      "fuels": {
+        "log": 40,
+        "charcoal": 90,
+        "coal": 120,
+        "resin": 60
+      },
+      "labour": {
+        "secondsPerUnit": 30,
+        "auto": false
+      },
       "desc": "Cook, boil, burn. Free, no power, and the only thing you can build the hour you land."
     },
     "furnace": {
-      "name": "Furnace", "tier": 0, "speed": 1.0, "powerUse": 0, "priority": "refining",
-      "fuels": { "charcoal": 45, "coal": 70, "log": 18 },
-      "build": { "stone": 20, "clay": 10 },
-      "labour": { "secondsPerUnit": 30, "auto": false },
+      "name": "Furnace",
+      "tier": 0,
+      "speed": 1.0,
+      "powerUse": 0,
+      "priority": "refining",
+      "fuels": {
+        "charcoal": 45,
+        "coal": 70,
+        "log": 18
+      },
+      "labour": {
+        "secondsPerUnit": 30,
+        "auto": false
+      },
       "desc": "Ore in, ingot out, slag on the floor. The first real structure — §2.2."
     },
     "kiln": {
-      "name": "Kiln", "tier": 0, "speed": 1.0, "powerUse": 0, "priority": "refining",
-      "fuels": { "charcoal": 50, "coal": 80, "log": 20 },
-      "build": { "stone": 16, "clay": 16 },
-      "labour": { "secondsPerUnit": 30, "auto": false },
+      "name": "Kiln",
+      "tier": 0,
+      "speed": 1.0,
+      "powerUse": 0,
+      "priority": "refining",
+      "fuels": {
+        "charcoal": 50,
+        "coal": 80,
+        "log": 20
+      },
+      "labour": {
+        "secondsPerUnit": 30,
+        "auto": false
+      },
       "desc": "Clay to brick, sand to glass. Everything you build after this is made of its output."
     },
-
     "sawmill": {
-      "name": "Sawmill", "tier": 1, "speed": 1.6, "powerUse": 4, "priority": "refining",
-      "fuels": {}, "unpoweredSpeed": 0.35,
-      "build": { "plank": 14, "beam": 4, "iron_ingot": 6 },
-      "labour": { "secondsPerUnit": 45, "auto": true },
+      "name": "Sawmill",
+      "tier": 1,
+      "speed": 1.6,
+      "powerUse": 4,
+      "priority": "refining",
+      "fuels": {},
+      "unpoweredSpeed": 0.35,
+      "labour": {
+        "secondsPerUnit": 45,
+        "auto": true
+      },
       "desc": "Logs to planks at a sane rate. It turns by hand at a third the speed, so it is worth having before the grid is."
     },
     "stonecutter": {
-      "name": "Stonecutter", "tier": 1, "speed": 1.3, "powerUse": 5, "priority": "refining",
-      "fuels": {}, "unpoweredSpeed": 0.4,
-      "build": { "cut_stone": 10, "iron_ingot": 6, "beam": 2 },
-      "labour": { "secondsPerUnit": 45, "auto": true },
+      "name": "Stonecutter",
+      "tier": 1,
+      "speed": 1.3,
+      "powerUse": 5,
+      "priority": "refining",
+      "fuels": {},
+      "unpoweredSpeed": 0.4,
+      "labour": {
+        "secondsPerUnit": 45,
+        "auto": true
+      },
       "desc": "Rubble and slag to block and gravel. The wall tool's feedstock — §2.7."
     },
     "tannery": {
-      "name": "Tannery", "tier": 1, "speed": 1.0, "powerUse": 3, "priority": "refining",
-      "fuels": {}, "unpoweredSpeed": 0.6,
-      "build": { "plank": 12, "rope": 6, "brick": 8 },
-      "labour": { "secondsPerUnit": 45, "auto": true },
+      "name": "Tannery",
+      "tier": 1,
+      "speed": 1.0,
+      "powerUse": 3,
+      "priority": "refining",
+      "fuels": {},
+      "unpoweredSpeed": 0.6,
+      "labour": {
+        "secondsPerUnit": 45,
+        "auto": true
+      },
       "desc": "Hides to leather, with lye and a lot of water. It smells; put it downwind of the beds."
     },
     "loom": {
-      "name": "Loom", "tier": 1, "speed": 1.0, "powerUse": 3, "priority": "refining",
-      "fuels": {}, "unpoweredSpeed": 0.6,
-      "build": { "plank": 10, "fibre": 12, "iron_ingot": 2 },
-      "labour": { "secondsPerUnit": 45, "auto": true },
+      "name": "Loom",
+      "tier": 1,
+      "speed": 1.0,
+      "powerUse": 3,
+      "priority": "refining",
+      "fuels": {},
+      "unpoweredSpeed": 0.6,
+      "labour": {
+        "secondsPerUnit": 45,
+        "auto": true
+      },
       "desc": "Fibre to cloth to rope. Cheap, and everything wants rope. Round 14: it used to COST four rope, which only a loom makes — so nobody could ever build the first one."
     },
     "smelter": {
-      "name": "Smelter", "tier": 1, "speed": 2.2, "powerUse": 14, "priority": "refining",
-      "fuels": {}, "needsPower": true,
-      "build": { "brick": 30, "iron_ingot": 12, "machine_part": 2 },
+      "name": "Smelter",
+      "tier": 1,
+      "speed": 2.2,
+      "powerUse": 14,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
       "desc": "A furnace that does not need feeding and takes dust and concentrate the furnace cannot. §2.4."
     },
     "alloy_forge": {
-      "name": "Alloy Forge", "tier": 1, "speed": 1.4, "powerUse": 18, "priority": "refining",
-      "fuels": {}, "needsPower": true,
-      "build": { "brick": 24, "iron_ingot": 14, "cut_stone": 8 },
+      "name": "Alloy Forge",
+      "tier": 1,
+      "speed": 1.4,
+      "powerUse": 18,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
       "desc": "Two ingots in, one better one out. It is the gate on every mid-tier piece of gear — §2.5. Round 14: it used to cost three machine parts, which only the assembler makes, and the assembler costs ten of them — so the whole of tier 2 hung on a part nothing in the game could produce. It is built from iron and block now, and it files the first rough parts itself."
     },
     "chemical_bench": {
-      "name": "Chemical Bench", "tier": 1, "speed": 1.2, "powerUse": 6, "priority": "refining",
-      "fuels": {}, "unpoweredSpeed": 0.5,
-      "build": { "brick": 14, "glass": 10, "copper_ingot": 6 },
-      "labour": { "secondsPerUnit": 45, "auto": true },
+      "name": "Chemical Bench",
+      "tier": 1,
+      "speed": 1.2,
+      "powerUse": 6,
+      "priority": "refining",
+      "fuels": {},
+      "unpoweredSpeed": 0.5,
+      "labour": {
+        "secondsPerUnit": 45,
+        "auto": true
+      },
       "desc": "Sulphur, salt, ash and water into the things later machines refuse to run without."
     },
     "crusher": {
-      "name": "Crusher", "tier": 1, "speed": 1.8, "powerUse": 16, "priority": "refining",
-      "fuels": {}, "needsPower": true,
-      "build": { "steel_ingot": 10, "machine_part": 4, "cut_stone": 12 },
+      "name": "Crusher",
+      "tier": 1,
+      "speed": 1.8,
+      "powerUse": 16,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
       "desc": "Ore to dust. Costs power and buys yield — §2.13. The first machine that makes a poor node worth mining."
     },
-
     "washer": {
-      "name": "Washer", "tier": 2, "speed": 1.5, "powerUse": 12, "priority": "refining",
-      "fuels": {}, "needsPower": true,
-      "build": { "steel_ingot": 12, "machine_part": 5, "glass": 8 },
+      "name": "Washer",
+      "tier": 2,
+      "speed": 1.5,
+      "powerUse": 12,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
       "desc": "Dust and water to concentrate. Another yield step — and where tailings come from, so build the rework recipe too."
     },
     "refinery": {
-      "name": "Refinery", "tier": 2, "speed": 1.2, "powerUse": 45, "priority": "refining",
-      "fuels": {}, "needsPower": true, "coolant": { "coolant": 0.05 },
-      "build": { "steel_ingot": 24, "machine_part": 12, "brick": 20, "control_board": 2 },
+      "name": "Refinery",
+      "tier": 2,
+      "speed": 1.2,
+      "powerUse": 45,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
+      "coolant": {
+        "coolant": 0.05
+      },
       "desc": "The tier-2 gate. It will not start without coolant and it will not stay started without a real grid."
     },
     "assembler": {
-      "name": "Assembler", "tier": 2, "speed": 1.0, "powerUse": 35, "priority": "refining",
-      "fuels": {}, "needsPower": true,
-      "build": { "steel_ingot": 20, "machine_part": 10, "control_board": 3, "glass": 6 },
+      "name": "Assembler",
+      "tier": 2,
+      "speed": 1.0,
+      "powerUse": 35,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
       "desc": "Components to machine parts, and machine parts to the four things that make a ship. §2.15."
     },
     "crystal_cutter": {
-      "name": "Crystal Cutter", "tier": 2, "speed": 1.0, "powerUse": 22, "priority": "refining",
-      "fuels": {}, "needsPower": true,
-      "build": { "steel_ingot": 10, "machine_part": 6, "glass": 12, "silver_ingot": 4 },
+      "name": "Crystal Cutter",
+      "tier": 2,
+      "speed": 1.0,
+      "powerUse": 22,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
       "desc": "Glass and crystal to lenses and focusers. Slow on purpose: a focuser should feel expensive."
     },
     "fuel_synthesiser": {
-      "name": "Fuel Synthesiser", "tier": 2, "speed": 1.0, "powerUse": 70, "priority": "refining",
-      "fuels": {}, "needsPower": true, "coolant": { "coolant": 0.08 },
-      "build": { "tempered_alloy": 12, "machine_part": 16, "control_board": 4, "composite_plate": 4 },
+      "name": "Fuel Synthesiser",
+      "tier": 2,
+      "speed": 1.0,
+      "powerUse": 70,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
+      "coolant": {
+        "coolant": 0.08
+      },
       "desc": "The last structure you build, and the one you keep running — fuel is spent per flight, not per ship. §9.7, §9.10."
     },
     "workshop": {
-      "name": "Workshop", "tier": 1, "speed": 1.0, "powerUse": 4, "priority": "refining",
-      "fuels": {}, "unpoweredSpeed": 0.5,
-      "labour": { "secondsPerUnit": 45, "auto": true },
-      "build": { "plank": 16, "iron_ingot": 6, "rope": 4 },
+      "name": "Workshop",
+      "tier": 1,
+      "speed": 1.0,
+      "powerUse": 4,
+      "priority": "refining",
+      "fuels": {},
+      "unpoweredSpeed": 0.5,
+      "labour": {
+        "secondsPerUnit": 45,
+        "auto": true
+      },
       "desc": "Benches, vices and a rack of hand tools. Fourteen of the twenty-two trade goods are made here — one cheap bench is the whole trade tier. A pair of hands turns it; wire it to the grid and it turns itself."
     },
     "manufactory": {
-      "name": "Manufactory", "tier": 2, "speed": 1.5, "powerUse": 26, "priority": "refining",
-      "fuels": {}, "needsPower": true,
-      "build": { "steel_ingot": 18, "machine_part": 8, "brick": 16 },
+      "name": "Manufactory",
+      "tier": 2,
+      "speed": 1.5,
+      "powerUse": 26,
+      "priority": "refining",
+      "fuels": {},
+      "needsPower": true,
       "desc": "Line shafts and jigs. Makes the goods a workshop cannot, and needs nobody standing at it — power is the whole cost."
     },
-
     "crafting_table": {
-      "name": "Crafting Table", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "name": "Crafting Table",
+      "tier": 1,
+      "speed": 1.0,
+      "powerUse": 0,
+      "priority": "refining",
       "_tier": "Tier 1 rather than tier 0 although it is the cheapest bench in the game, because tier 0 in this file means BURNS SOMETHING (a campfire, a furnace, a kiln) and this one does not — it is a wedge and a mallet. tests/industry.test.js asserts that invariant, and it is worth more than the tidiness of calling the first bench tier 0.",
       "fuels": {},
-      "build": { "log": 6, "stone": 2 },
-      "labour": { "secondsPerUnit": 20, "auto": false },
+      "labour": {
+        "secondsPerUnit": 20,
+        "auto": false
+      },
       "_r17": "THE BENCH THAT MAKES THE FIRST PLANK, AND WHY IT HAS TO EXIST. The Storage Box costs six planks and no iron, which is what was asked for and what the onboarding line has always said. But a plank came off a Sawmill, a Sawmill cost eight iron ingots, iron came out of a Furnace, and a machine can only draw from a STORAGE POOL — so the first store in the game stood behind the first store in the game. This bench breaks the ring: it costs six logs and two stone, both of which bare hands take off a tree and a boulder; it carries its own three-slot shelf (data/power.json) so it IS a pool the moment it is down; and it splits logs into planks. Slowly — one log for two planks against the Sawmill's four, and twice the seconds — because it is a wedge and a mallet, not a mill.",
       "desc": "A trestle, a vice and a wedge. Splits logs into planks and twists cord, and it is where a tool is built — the only bench you can put down the hour you land."
     },
     "anvil": {
-      "name": "Anvil", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "name": "Anvil",
+      "tier": 1,
+      "speed": 1.0,
+      "powerUse": 0,
+      "priority": "refining",
       "fuels": {},
-      "build": { "iron_ingot": 10, "log": 3 },
       "desc": "Where an iron head is forged on to a haft. Walk up and press E."
     },
     "workbench": {
-      "name": "Workbench", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "name": "Workbench",
+      "tier": 1,
+      "speed": 1.0,
+      "powerUse": 0,
+      "priority": "refining",
       "fuels": {},
-      "build": { "plank": 8, "iron_ingot": 4 },
       "desc": "Fine work: a scanner, a command rod, the devices that are built once and owned rather than rolled. Walk up and press E."
     },
     "garage": {
-      "name": "Garage", "tier": 1, "speed": 1.0, "powerUse": 0, "priority": "refining",
+      "name": "Garage",
+      "tier": 1,
+      "speed": 1.0,
+      "powerUse": 0,
+      "priority": "refining",
       "_tier": "Tier 1 here and tier 2 in data/structures.json, and the two mean different things: this file's tier is what a machine NEEDS (tier 2 means it does not run at all without a grid, which tests/industry.test.js enforces) and the catalogue's tier is what order the build list puts it in. A garage needs nothing and belongs late in the list.",
       "fuels": {},
-      "build": { "plank": 16, "iron_ingot": 8, "cut_stone": 10 },
       "_r17": "\"There is also a garage menu. I haven't got that far yet, but there should be a distinct Garage building where you manage that sort of thing.\" The garage rows used to hang off the build panel and appeared whenever you stood near ANY bench at all. They are a building now. Note what it deliberately does not do: the parts are still cut on an Assembler (and for the bigger rigs an Alloy Forge and a Refinery), because data/vehicles.json owns that rule — a garage is a shed with a pit in it, not a machine shop. Put it beside the line.",
       "desc": "A pit, a bench and a fuel drum. Build, fuel and repair what you drive, from one screen."
     }
   },
-
   "_recipeDoc": "`time` is seconds at speed 1. `power` is the extra draw while working. `unlock` is { recipe, times } — you must have completed that recipe that many times for this one to appear. `byproduct` outputs are listed in `outputs` like anything else; they are marked in `waste` only so the UI can grey them.",
   "recipes": [
-    { "id": "cook_meat", "machine": "campfire", "name": "Cook Meat", "time": 14, "inputs": { "game_meat": 2, "water": 1 }, "outputs": { "ration": 2 }, "desc": "The first thing anybody does after landing." },
-    { "id": "bake_grain", "machine": "campfire", "name": "Bake Flatbread", "time": 18, "inputs": { "grain": 4, "water": 2 }, "outputs": { "ration": 3 }, "desc": "Slower than hunting and it does not bite back." },
-    { "id": "melt_ice", "machine": "campfire", "name": "Melt Ice", "time": 8, "inputs": { "ice": 4 }, "outputs": { "water": 4 }, "desc": "On a frozen world this is the water supply — §1.13." },
-    { "id": "burn_charcoal", "machine": "campfire", "name": "Burn Charcoal", "time": 30, "inputs": { "log": 3 }, "outputs": { "charcoal": 4, "ash": 1 }, "waste": ["ash"], "desc": "Wood smothered rather than burnt. Hotter than logs and it is how you smelt before you find coal." },
-
-    { "id": "smelt_iron", "machine": "furnace", "name": "Smelt Iron", "time": 16, "inputs": { "iron_ore": 2 }, "outputs": { "iron_ingot": 1, "slag": 1 }, "waste": ["slag"], "desc": "Two rocks, one ingot, one pile of the rock it was hiding in." },
-    { "id": "smelt_copper", "machine": "furnace", "name": "Smelt Copper", "time": 16, "inputs": { "copper_ore": 2 }, "outputs": { "copper_ingot": 1, "slag": 1 }, "waste": ["slag"] },
-    { "id": "smelt_tin", "machine": "furnace", "name": "Smelt Tin", "time": 16, "inputs": { "tin_ore": 2 }, "outputs": { "tin_ingot": 1, "slag": 1 }, "waste": ["slag"] },
-    { "id": "smelt_silver", "machine": "furnace", "name": "Smelt Silver", "time": 24, "inputs": { "silver_ore": 3 }, "outputs": { "silver_ingot": 1, "slag": 1 }, "waste": ["slag"], "unlock": { "recipe": "smelt_iron", "times": 6 } },
-    { "id": "smelt_gold", "machine": "furnace", "name": "Smelt Gold", "time": 28, "inputs": { "gold_ore": 3 }, "outputs": { "gold_ingot": 1, "slag": 1 }, "waste": ["slag"], "unlock": { "recipe": "smelt_silver", "times": 3 } },
-    { "id": "melt_salvage", "machine": "furnace", "name": "Melt Salvage", "time": 12, "inputs": { "salvage_metal": 2 }, "outputs": { "iron_ingot": 1 }, "desc": "The wreck shortcut — §1.9. No slag, because somebody else already smelted it." },
-    { "id": "melt_plate", "machine": "furnace", "name": "Melt Hull Plate", "time": 20, "inputs": { "scrap_plate": 2 }, "outputs": { "steel_ingot": 1 }, "unlock": { "recipe": "melt_salvage", "times": 4 }, "desc": "Somebody's ship is your steel, and it saves you the whole alloy step once." },
-
-    { "id": "fire_brick", "machine": "kiln", "name": "Fire Brick", "time": 18, "inputs": { "clay": 3 }, "outputs": { "brick": 2 } },
-    { "id": "melt_glass", "machine": "kiln", "name": "Melt Glass", "time": 22, "inputs": { "sand": 3 }, "outputs": { "glass": 2 } },
-    { "id": "burn_bone", "machine": "kiln", "name": "Burn Bone", "time": 16, "inputs": { "bone": 3 }, "outputs": { "ash": 3 }, "desc": "Bone ash. Not glamorous; it is where lye comes from." },
-
-    { "id": "split_planks", "machine": "crafting_table", "name": "Split Planks", "time": 20, "inputs": { "log": 1 }, "outputs": { "plank": 2 }, "desc": "A wedge and a mallet. Two planks a log against a Sawmill's four, and twice the time — but it costs no iron, which is the whole reason it is here. R17: without it the first Storage Box could not be built until after the first Furnace, and the onboarding asks for it before." },
-    { "id": "twist_cord", "machine": "crafting_table", "name": "Twist Cord", "time": 16, "inputs": { "fibre": 5 }, "outputs": { "rope": 1 }, "desc": "Rope by hand — a third of what a Loom gets out of the same fibre. Enough for a well head and a washing line before you own one." },
-    { "id": "saw_planks", "machine": "sawmill", "name": "Saw Planks", "time": 9, "inputs": { "log": 1 }, "outputs": { "plank": 4 }, "desc": "Four planks a log — §2.6. Hacking one apart by hand gives you two and a headache." },
-    { "id": "saw_beams", "machine": "sawmill", "name": "Cut Beams", "time": 14, "inputs": { "log": 2 }, "outputs": { "beam": 1, "plank": 2 }, "unlock": { "recipe": "saw_planks", "times": 8 } },
-    { "id": "tap_resin", "machine": "sawmill", "name": "Press Resin", "time": 12, "inputs": { "log": 2 }, "outputs": { "resin": 3, "plank": 1 }, "unlock": { "recipe": "saw_planks", "times": 4 } },
-
-    { "id": "cut_block", "machine": "stonecutter", "name": "Cut Block", "time": 12, "inputs": { "stone": 3 }, "outputs": { "cut_stone": 2 } },
-    { "id": "pour_concrete", "machine": "stonecutter", "name": "Pour Concrete", "time": 18, "inputs": { "gravel": 3, "sand": 2, "water": 2 }, "outputs": { "concrete": 3 }, "unlock": { "recipe": "crush_rubble", "times": 3 }, "desc": "The catalogue has always spent concrete and nothing has ever made any — this is where it comes from now." },
-    { "id": "crush_rubble", "machine": "stonecutter", "name": "Crush Rubble", "time": 8, "inputs": { "rubble": 3 }, "outputs": { "gravel": 4 } },
-    { "id": "crush_slag", "machine": "stonecutter", "name": "Crush Slag", "time": 10, "inputs": { "slag": 4 }, "outputs": { "gravel": 3 }, "desc": "Slag is not rubbish, it is road base. §2.17 — the byproducts are real and they all go somewhere." },
-
-    { "id": "tan_leather", "machine": "tannery", "name": "Tan Leather", "time": 26, "inputs": { "hide": 2, "lye": 1, "water": 2 }, "outputs": { "leather": 2 } },
-    { "id": "tan_heavy", "machine": "tannery", "name": "Tan Heavy Leather", "time": 34, "inputs": { "hide": 3, "lye": 2, "water": 3, "salt": 1 }, "outputs": { "leather": 5 }, "unlock": { "recipe": "tan_leather", "times": 6 } },
-
-    { "id": "spin_cloth", "machine": "loom", "name": "Spin Cloth", "time": 14, "inputs": { "fibre": 6 }, "outputs": { "cloth": 2 } },
-    { "id": "twist_rope", "machine": "loom", "name": "Twist Rope", "time": 10, "inputs": { "fibre": 4 }, "outputs": { "rope": 2 } },
-    { "id": "weave_matting", "machine": "loom", "name": "Weave Matting", "time": 12, "inputs": { "reed": 8 }, "outputs": { "cloth": 2 } },
-    { "id": "bind_sinew", "machine": "loom", "name": "Bind Sinew Cord", "time": 12, "inputs": { "sinew": 3, "fibre": 2 }, "outputs": { "rope": 4 }, "unlock": { "recipe": "twist_rope", "times": 5 }, "desc": "Stronger than fibre rope and it does not rot. Worth hunting for." },
-
-    { "id": "leach_lye", "machine": "chemical_bench", "name": "Leach Lye", "time": 16, "inputs": { "ash": 4, "water": 2 }, "outputs": { "lye": 2 } },
-    { "id": "make_acid", "machine": "chemical_bench", "name": "Draw Acid", "time": 22, "inputs": { "sulphur": 3, "water": 2 }, "outputs": { "acid": 2 } },
-    { "id": "mix_reagent", "machine": "chemical_bench", "name": "Mix Reagent", "time": 26, "inputs": { "acid": 2, "salt": 2, "lye": 1 }, "outputs": { "reagent": 2 }, "unlock": { "recipe": "make_acid", "times": 4 } },
-    { "id": "brew_coolant", "machine": "chemical_bench", "name": "Brew Coolant", "time": 24, "inputs": { "water": 4, "reagent": 1, "salt": 2 }, "outputs": { "coolant": 3 }, "unlock": { "recipe": "mix_reagent", "times": 3 }, "desc": "Made here rather than at the refinery on purpose — the refinery will not start without it, so it must come from a machine you already have." },
-    { "id": "pack_charge", "machine": "chemical_bench", "name": "Pack Blast Charge", "time": 20, "inputs": { "saltpetre": 3, "charcoal": 2, "sulphur": 1 }, "outputs": { "blast_charge": 2 }, "unlock": { "recipe": "make_acid", "times": 2 }, "desc": "What the quarry and clearing tools want when an afternoon of swinging is not on." },
-
-    { "id": "smelt_iron_dust", "machine": "smelter", "name": "Smelt Iron Dust", "time": 12, "power": 6, "inputs": { "iron_dust": 3 }, "outputs": { "iron_ingot": 2, "slag": 1 }, "waste": ["slag"] },
-    { "id": "smelt_copper_dust", "machine": "smelter", "name": "Smelt Copper Dust", "time": 12, "power": 6, "inputs": { "copper_dust": 3 }, "outputs": { "copper_ingot": 2, "slag": 1 }, "waste": ["slag"] },
-    { "id": "draw_wire", "machine": "smelter", "name": "Draw Wire", "time": 14, "power": 5, "inputs": { "copper_ingot": 1 }, "outputs": { "wire": 4 }, "desc": "Copper Ore's own description has said 'wire, fittings, and half of bronze' since it landed, and until round 13 there was no wire in the game — ten structures spent a material nothing produced." },
-    { "id": "smelt_iron_conc", "machine": "smelter", "name": "Smelt Iron Concentrate", "time": 14, "power": 8, "inputs": { "iron_concentrate": 2 }, "outputs": { "iron_ingot": 3 }, "unlock": { "recipe": "smelt_iron_dust", "times": 5 }, "desc": "Three ingots for two loads and no slag. Two machines' worth of effort for that, which is the whole yield chain in one line." },
-    { "id": "smelt_copper_conc", "machine": "smelter", "name": "Smelt Copper Concentrate", "time": 14, "power": 8, "inputs": { "copper_concentrate": 2 }, "outputs": { "copper_ingot": 3 }, "unlock": { "recipe": "smelt_copper_dust", "times": 5 } },
-    { "id": "smelt_bulk_iron", "machine": "smelter", "name": "Smelt Iron Ore", "time": 9, "power": 5, "inputs": { "iron_ore": 2 }, "outputs": { "iron_ingot": 1, "slag": 1 }, "waste": ["slag"], "desc": "The furnace recipe, twice as fast, for when you have not built the crusher yet." },
-
-    { "id": "forge_bronze", "machine": "alloy_forge", "name": "Forge Bronze", "time": 20, "power": 10, "inputs": { "copper_ingot": 3, "tin_ingot": 1 }, "outputs": { "bronze_ingot": 3 }, "unlock": { "recipe": "smelt_copper", "times": 10 }, "desc": "Ten coppers smelted and the recipe turns up on its own — §2.18." },
-    { "id": "forge_steel", "machine": "alloy_forge", "name": "Forge Steel", "time": 24, "power": 12, "inputs": { "iron_ingot": 3, "charcoal": 2 }, "outputs": { "steel_ingot": 3 }, "unlock": { "recipe": "smelt_iron", "times": 10 } },
-    { "id": "forge_rough_part", "machine": "alloy_forge", "name": "File a Rough Part", "time": 70, "power": 12, "inputs": { "iron_ingot": 4, "plank": 2 }, "outputs": { "machine_part": 1 }, "desc": "ROUND 14 \u2014 THE BOOTSTRAP. Until this recipe, the ONLY thing in the game that made a machine part was the assembler, and the assembler cost eight machine parts. Nothing in Farhold has ever produced one by any honest route, so the smelter, the crusher, the washer, the drill, the wind turbine and eleven other pieces were all unbuildable \u2014 the same self-gate as the claim stone, hidden one layer deeper. Gears and shafts cut and filed at a forge: three times the time of an assembled one and no bronze, so the assembler is still worth reaching." },
-    { "id": "forge_meteoric", "machine": "alloy_forge", "name": "Work Meteoric Iron", "time": 40, "power": 18, "inputs": { "meteoric_iron": 2, "steel_ingot": 1 }, "outputs": { "tempered_alloy": 2 }, "unlock": { "recipe": "forge_steel", "times": 6 }, "desc": "The only route to tempered alloy that does not need a refinery — which is why a meteor fall is worth the walk." },
-
-    { "id": "crush_iron", "machine": "crusher", "name": "Crush Iron Ore", "time": 7, "power": 8, "inputs": { "iron_ore": 2 }, "outputs": { "iron_dust": 3 }, "desc": "Three dust from two ore: half again the metal out of the same node. This is what makes a lean seam near the base beat a rich one across the valley." },
-    { "id": "crush_copper", "machine": "crusher", "name": "Crush Copper Ore", "time": 7, "power": 8, "inputs": { "copper_ore": 2 }, "outputs": { "copper_dust": 3 } },
-    { "id": "crush_stone", "machine": "crusher", "name": "Crush Stone", "time": 5, "power": 6, "inputs": { "stone": 2 }, "outputs": { "gravel": 3 } },
-
-    { "id": "wash_iron", "machine": "washer", "name": "Wash Iron Dust", "time": 10, "power": 6, "inputs": { "iron_dust": 3, "water": 2 }, "outputs": { "iron_concentrate": 2, "tailings": 1 }, "waste": ["tailings"] },
-    { "id": "wash_copper", "machine": "washer", "name": "Wash Copper Dust", "time": 10, "power": 6, "inputs": { "copper_dust": 3, "water": 2 }, "outputs": { "copper_concentrate": 2, "tailings": 1 }, "waste": ["tailings"] },
-    { "id": "rework_tailings", "machine": "washer", "name": "Rework Tailings", "time": 18, "power": 8, "inputs": { "tailings": 6, "acid": 1 }, "outputs": { "iron_dust": 2 }, "unlock": { "recipe": "wash_iron", "times": 8 }, "desc": "There is still metal in the rinsings. Slow, sour, and free ore." },
-
-    { "id": "grind_lens", "machine": "crystal_cutter", "name": "Grind Lens", "time": 26, "power": 12, "inputs": { "glass": 3 }, "outputs": { "lens": 1 } },
-    { "id": "grind_obsidian_lens", "machine": "crystal_cutter", "name": "Grind Volcanic Lens", "time": 22, "power": 12, "inputs": { "obsidian": 2 }, "outputs": { "lens": 1 }, "desc": "Volcanic glass is already glass. The cheap route, on the worlds that have any." },
-    { "id": "cut_focuser", "machine": "crystal_cutter", "name": "Cut Focuser", "time": 70, "power": 20, "inputs": { "crystal_raw": 4, "lens": 1, "silver_ingot": 1 }, "outputs": { "focuser": 1 }, "unlock": { "recipe": "grind_lens", "times": 4 } },
-
-    { "id": "refine_alloy", "machine": "refinery", "name": "Temper Alloy", "time": 44, "power": 30, "inputs": { "steel_ingot": 3, "reagent": 2 }, "outputs": { "tempered_alloy": 2 } },
-    { "id": "refine_composite", "machine": "refinery", "name": "Lay Composite Plate", "time": 50, "power": 28, "inputs": { "tempered_alloy": 1, "cloth": 3, "resin": 2 }, "outputs": { "composite_plate": 1 }, "unlock": { "recipe": "refine_alloy", "times": 4 } },
-    { "id": "charge_cell", "machine": "refinery", "name": "Charge Aether Cell", "time": 80, "power": 50, "inputs": { "focuser": 1, "silver_ingot": 2, "reagent": 2 }, "outputs": { "aether_cell": 1 }, "unlock": { "recipe": "refine_alloy", "times": 6 } },
-
-    { "id": "make_machine_part", "machine": "assembler", "name": "Assemble Machine Part", "time": 24, "power": 16, "inputs": { "steel_ingot": 2, "bronze_ingot": 1 }, "outputs": { "machine_part": 1 } },
-    { "id": "make_control_board", "machine": "assembler", "name": "Assemble Control Board", "time": 36, "power": 22, "inputs": { "copper_ingot": 3, "gold_ingot": 1, "glass": 1 }, "outputs": { "control_board": 1 }, "unlock": { "recipe": "make_machine_part", "times": 6 } },
-    { "id": "build_hull", "machine": "assembler", "name": "Build Hull Section", "time": 180, "power": 40, "inputs": { "composite_plate": 6, "tempered_alloy": 4, "machine_part": 4 }, "outputs": { "ship_hull": 1 }, "unlock": { "recipe": "make_control_board", "times": 2 } },
-    { "id": "build_drive", "machine": "assembler", "name": "Build Drive Assembly", "time": 220, "power": 48, "inputs": { "tempered_alloy": 6, "machine_part": 8, "aether_cell": 1 }, "outputs": { "ship_drive": 1 }, "unlock": { "recipe": "make_control_board", "times": 2 } },
-    { "id": "build_tanks", "machine": "assembler", "name": "Build Tank Set", "time": 150, "power": 36, "inputs": { "steel_ingot": 12, "composite_plate": 3, "machine_part": 3 }, "outputs": { "ship_tanks": 1 }, "unlock": { "recipe": "make_control_board", "times": 2 } },
-    { "id": "build_avionics", "machine": "assembler", "name": "Build Avionics Rack", "time": 200, "power": 44, "inputs": { "control_board": 6, "lens": 3, "machine_part": 2 }, "rareInput": 4, "outputs": { "ship_avionics": 1 }, "unlock": { "recipe": "make_control_board", "times": 4 }, "desc": "The one subsystem that needs a rare element — §9.6. `rareInput` is a count, not an id: js/refine.js fills in whichever element this planet actually holds, and if it holds none you are going somewhere else for it." },
-    { "id": "build_waypoint_core", "machine": "assembler", "name": "Build Waypoint Core", "time": 240, "power": 52, "inputs": { "focuser": 3, "tempered_alloy": 4, "aether_cell": 2, "control_board": 2 }, "outputs": { "waypoint_core": 1 }, "unlock": { "recipe": "make_control_board", "times": 3 }, "desc": "§5.6. It should be a milestone, so it costs one of everything the top of the chain makes." },
-    { "id": "build_warp_core", "machine": "assembler", "name": "Build Warp Core", "time": 400, "power": 60, "inputs": { "aether_cell": 4, "composite_plate": 4, "control_board": 4 }, "rareInput": 6, "outputs": { "warp_core": 1 }, "unlock": { "recipe": "build_drive", "times": 1 }, "desc": "§9.15 — the second act, gated behind a second world's rare element." },
-
-    { "id": "synth_fuel_gas", "machine": "fuel_synthesiser", "name": "Synthesise Lift Fuel", "time": 60, "power": 60, "inputs": { "vent_gas": 6, "reagent": 2, "water": 4 }, "outputs": { "lift_fuel": 3 }, "desc": "The cheap route, on a world with vents." },
-    { "id": "synth_fuel_sulphur", "machine": "fuel_synthesiser", "name": "Synthesise Lift Fuel (Sour)", "time": 90, "power": 70, "inputs": { "sulphur": 6, "acid": 2, "water": 4 }, "outputs": { "lift_fuel": 2 }, "desc": "The route for a world with no gas vents. Slower and dearer, and it is never a dead end — every planet can make fuel somehow." }
+    {
+      "id": "cook_meat",
+      "machine": "campfire",
+      "name": "Cook Meat",
+      "time": 14,
+      "inputs": {
+        "game_meat": 2,
+        "water": 1
+      },
+      "outputs": {
+        "ration": 2
+      },
+      "desc": "The first thing anybody does after landing."
+    },
+    {
+      "id": "bake_grain",
+      "machine": "campfire",
+      "name": "Bake Flatbread",
+      "time": 18,
+      "inputs": {
+        "grain": 4,
+        "water": 2
+      },
+      "outputs": {
+        "ration": 3
+      },
+      "desc": "Slower than hunting and it does not bite back."
+    },
+    {
+      "id": "melt_ice",
+      "machine": "campfire",
+      "name": "Melt Ice",
+      "time": 8,
+      "inputs": {
+        "ice": 4
+      },
+      "outputs": {
+        "water": 4
+      },
+      "desc": "On a frozen world this is the water supply — §1.13."
+    },
+    {
+      "id": "burn_charcoal",
+      "machine": "campfire",
+      "name": "Burn Charcoal",
+      "time": 30,
+      "inputs": {
+        "log": 3
+      },
+      "outputs": {
+        "charcoal": 4,
+        "ash": 1
+      },
+      "waste": [
+        "ash"
+      ],
+      "desc": "Wood smothered rather than burnt. Hotter than logs and it is how you smelt before you find coal."
+    },
+    {
+      "id": "smelt_iron",
+      "machine": "furnace",
+      "name": "Smelt Iron",
+      "time": 16,
+      "inputs": {
+        "iron_ore": 2
+      },
+      "outputs": {
+        "iron_ingot": 1,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ],
+      "desc": "Two rocks, one ingot, one pile of the rock it was hiding in."
+    },
+    {
+      "id": "smelt_copper",
+      "machine": "furnace",
+      "name": "Smelt Copper",
+      "time": 16,
+      "inputs": {
+        "copper_ore": 2
+      },
+      "outputs": {
+        "copper_ingot": 1,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ]
+    },
+    {
+      "id": "smelt_tin",
+      "machine": "furnace",
+      "name": "Smelt Tin",
+      "time": 16,
+      "inputs": {
+        "tin_ore": 2
+      },
+      "outputs": {
+        "tin_ingot": 1,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ]
+    },
+    {
+      "id": "smelt_silver",
+      "machine": "furnace",
+      "name": "Smelt Silver",
+      "time": 24,
+      "inputs": {
+        "silver_ore": 3
+      },
+      "outputs": {
+        "silver_ingot": 1,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ],
+      "unlock": {
+        "recipe": "smelt_iron",
+        "times": 6
+      }
+    },
+    {
+      "id": "smelt_gold",
+      "machine": "furnace",
+      "name": "Smelt Gold",
+      "time": 28,
+      "inputs": {
+        "gold_ore": 3
+      },
+      "outputs": {
+        "gold_ingot": 1,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ],
+      "unlock": {
+        "recipe": "smelt_silver",
+        "times": 3
+      }
+    },
+    {
+      "id": "melt_salvage",
+      "machine": "furnace",
+      "name": "Melt Salvage",
+      "time": 12,
+      "inputs": {
+        "salvage_metal": 2
+      },
+      "outputs": {
+        "iron_ingot": 1
+      },
+      "desc": "The wreck shortcut — §1.9. No slag, because somebody else already smelted it."
+    },
+    {
+      "id": "melt_plate",
+      "machine": "furnace",
+      "name": "Melt Hull Plate",
+      "time": 20,
+      "inputs": {
+        "scrap_plate": 2
+      },
+      "outputs": {
+        "steel_ingot": 1
+      },
+      "unlock": {
+        "recipe": "melt_salvage",
+        "times": 4
+      },
+      "desc": "Somebody's ship is your steel, and it saves you the whole alloy step once."
+    },
+    {
+      "id": "fire_brick",
+      "machine": "kiln",
+      "name": "Fire Brick",
+      "time": 18,
+      "inputs": {
+        "clay": 3
+      },
+      "outputs": {
+        "brick": 2
+      }
+    },
+    {
+      "id": "melt_glass",
+      "machine": "kiln",
+      "name": "Melt Glass",
+      "time": 22,
+      "inputs": {
+        "sand": 3
+      },
+      "outputs": {
+        "glass": 2
+      }
+    },
+    {
+      "id": "burn_bone",
+      "machine": "kiln",
+      "name": "Burn Bone",
+      "time": 16,
+      "inputs": {
+        "bone": 3
+      },
+      "outputs": {
+        "ash": 3
+      },
+      "desc": "Bone ash. Not glamorous; it is where lye comes from."
+    },
+    {
+      "id": "split_planks",
+      "machine": "crafting_table",
+      "name": "Split Planks",
+      "time": 20,
+      "inputs": {
+        "log": 1
+      },
+      "outputs": {
+        "plank": 2
+      },
+      "desc": "A wedge and a mallet. Two planks a log against a Sawmill's four, and twice the time — but it costs no iron, which is the whole reason it is here. R17: without it the first Storage Box could not be built until after the first Furnace, and the onboarding asks for it before."
+    },
+    {
+      "id": "twist_cord",
+      "machine": "crafting_table",
+      "name": "Twist Cord",
+      "time": 16,
+      "inputs": {
+        "fibre": 5
+      },
+      "outputs": {
+        "rope": 1
+      },
+      "desc": "Rope by hand — a third of what a Loom gets out of the same fibre. Enough for a well head and a washing line before you own one."
+    },
+    {
+      "id": "saw_planks",
+      "machine": "sawmill",
+      "name": "Saw Planks",
+      "time": 9,
+      "inputs": {
+        "log": 1
+      },
+      "outputs": {
+        "plank": 4
+      },
+      "desc": "Four planks a log — §2.6. Hacking one apart by hand gives you two and a headache."
+    },
+    {
+      "id": "saw_beams",
+      "machine": "sawmill",
+      "name": "Cut Beams",
+      "time": 14,
+      "inputs": {
+        "log": 2
+      },
+      "outputs": {
+        "beam": 1,
+        "plank": 2
+      },
+      "unlock": {
+        "recipe": "saw_planks",
+        "times": 8
+      }
+    },
+    {
+      "id": "tap_resin",
+      "machine": "sawmill",
+      "name": "Press Resin",
+      "time": 12,
+      "inputs": {
+        "log": 2
+      },
+      "outputs": {
+        "resin": 3,
+        "plank": 1
+      },
+      "unlock": {
+        "recipe": "saw_planks",
+        "times": 4
+      }
+    },
+    {
+      "id": "cut_block",
+      "machine": "stonecutter",
+      "name": "Cut Block",
+      "time": 12,
+      "inputs": {
+        "stone": 3
+      },
+      "outputs": {
+        "cut_stone": 2
+      }
+    },
+    {
+      "id": "pour_concrete",
+      "machine": "stonecutter",
+      "name": "Pour Concrete",
+      "time": 18,
+      "inputs": {
+        "gravel": 3,
+        "sand": 2,
+        "water": 2
+      },
+      "outputs": {
+        "concrete": 3
+      },
+      "unlock": {
+        "recipe": "crush_rubble",
+        "times": 3
+      },
+      "desc": "The catalogue has always spent concrete and nothing has ever made any — this is where it comes from now."
+    },
+    {
+      "id": "crush_rubble",
+      "machine": "stonecutter",
+      "name": "Crush Rubble",
+      "time": 8,
+      "inputs": {
+        "rubble": 3
+      },
+      "outputs": {
+        "gravel": 4
+      }
+    },
+    {
+      "id": "crush_slag",
+      "machine": "stonecutter",
+      "name": "Crush Slag",
+      "time": 10,
+      "inputs": {
+        "slag": 4
+      },
+      "outputs": {
+        "gravel": 3
+      },
+      "desc": "Slag is not rubbish, it is road base. §2.17 — the byproducts are real and they all go somewhere."
+    },
+    {
+      "id": "tan_leather",
+      "machine": "tannery",
+      "name": "Tan Leather",
+      "time": 26,
+      "inputs": {
+        "hide": 2,
+        "lye": 1,
+        "water": 2
+      },
+      "outputs": {
+        "leather": 2
+      }
+    },
+    {
+      "id": "tan_heavy",
+      "machine": "tannery",
+      "name": "Tan Heavy Leather",
+      "time": 34,
+      "inputs": {
+        "hide": 3,
+        "lye": 2,
+        "water": 3,
+        "salt": 1
+      },
+      "outputs": {
+        "leather": 5
+      },
+      "unlock": {
+        "recipe": "tan_leather",
+        "times": 6
+      }
+    },
+    {
+      "id": "spin_cloth",
+      "machine": "loom",
+      "name": "Spin Cloth",
+      "time": 14,
+      "inputs": {
+        "fibre": 6
+      },
+      "outputs": {
+        "cloth": 2
+      }
+    },
+    {
+      "id": "twist_rope",
+      "machine": "loom",
+      "name": "Twist Rope",
+      "time": 10,
+      "inputs": {
+        "fibre": 4
+      },
+      "outputs": {
+        "rope": 2
+      }
+    },
+    {
+      "id": "weave_matting",
+      "machine": "loom",
+      "name": "Weave Matting",
+      "time": 12,
+      "inputs": {
+        "reed": 8
+      },
+      "outputs": {
+        "cloth": 2
+      }
+    },
+    {
+      "id": "bind_sinew",
+      "machine": "loom",
+      "name": "Bind Sinew Cord",
+      "time": 12,
+      "inputs": {
+        "sinew": 3,
+        "fibre": 2
+      },
+      "outputs": {
+        "rope": 4
+      },
+      "unlock": {
+        "recipe": "twist_rope",
+        "times": 5
+      },
+      "desc": "Stronger than fibre rope and it does not rot. Worth hunting for."
+    },
+    {
+      "id": "leach_lye",
+      "machine": "chemical_bench",
+      "name": "Leach Lye",
+      "time": 16,
+      "inputs": {
+        "ash": 4,
+        "water": 2
+      },
+      "outputs": {
+        "lye": 2
+      }
+    },
+    {
+      "id": "make_acid",
+      "machine": "chemical_bench",
+      "name": "Draw Acid",
+      "time": 22,
+      "inputs": {
+        "sulphur": 3,
+        "water": 2
+      },
+      "outputs": {
+        "acid": 2
+      }
+    },
+    {
+      "id": "mix_reagent",
+      "machine": "chemical_bench",
+      "name": "Mix Reagent",
+      "time": 26,
+      "inputs": {
+        "acid": 2,
+        "salt": 2,
+        "lye": 1
+      },
+      "outputs": {
+        "reagent": 2
+      },
+      "unlock": {
+        "recipe": "make_acid",
+        "times": 4
+      }
+    },
+    {
+      "id": "brew_coolant",
+      "machine": "chemical_bench",
+      "name": "Brew Coolant",
+      "time": 24,
+      "inputs": {
+        "water": 4,
+        "reagent": 1,
+        "salt": 2
+      },
+      "outputs": {
+        "coolant": 3
+      },
+      "unlock": {
+        "recipe": "mix_reagent",
+        "times": 3
+      },
+      "desc": "Made here rather than at the refinery on purpose — the refinery will not start without it, so it must come from a machine you already have."
+    },
+    {
+      "id": "pack_charge",
+      "machine": "chemical_bench",
+      "name": "Pack Blast Charge",
+      "time": 20,
+      "inputs": {
+        "saltpetre": 3,
+        "charcoal": 2,
+        "sulphur": 1
+      },
+      "outputs": {
+        "blast_charge": 2
+      },
+      "unlock": {
+        "recipe": "make_acid",
+        "times": 2
+      },
+      "desc": "What the quarry and clearing tools want when an afternoon of swinging is not on."
+    },
+    {
+      "id": "smelt_iron_dust",
+      "machine": "smelter",
+      "name": "Smelt Iron Dust",
+      "time": 12,
+      "power": 6,
+      "inputs": {
+        "iron_dust": 3
+      },
+      "outputs": {
+        "iron_ingot": 2,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ]
+    },
+    {
+      "id": "smelt_copper_dust",
+      "machine": "smelter",
+      "name": "Smelt Copper Dust",
+      "time": 12,
+      "power": 6,
+      "inputs": {
+        "copper_dust": 3
+      },
+      "outputs": {
+        "copper_ingot": 2,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ]
+    },
+    {
+      "id": "draw_wire",
+      "machine": "smelter",
+      "name": "Draw Wire",
+      "time": 14,
+      "power": 5,
+      "inputs": {
+        "copper_ingot": 1
+      },
+      "outputs": {
+        "wire": 4
+      },
+      "desc": "Copper Ore's own description has said 'wire, fittings, and half of bronze' since it landed, and until round 13 there was no wire in the game — ten structures spent a material nothing produced."
+    },
+    {
+      "id": "smelt_iron_conc",
+      "machine": "smelter",
+      "name": "Smelt Iron Concentrate",
+      "time": 14,
+      "power": 8,
+      "inputs": {
+        "iron_concentrate": 2
+      },
+      "outputs": {
+        "iron_ingot": 3
+      },
+      "unlock": {
+        "recipe": "smelt_iron_dust",
+        "times": 5
+      },
+      "desc": "Three ingots for two loads and no slag. Two machines' worth of effort for that, which is the whole yield chain in one line."
+    },
+    {
+      "id": "smelt_copper_conc",
+      "machine": "smelter",
+      "name": "Smelt Copper Concentrate",
+      "time": 14,
+      "power": 8,
+      "inputs": {
+        "copper_concentrate": 2
+      },
+      "outputs": {
+        "copper_ingot": 3
+      },
+      "unlock": {
+        "recipe": "smelt_copper_dust",
+        "times": 5
+      }
+    },
+    {
+      "id": "smelt_bulk_iron",
+      "machine": "smelter",
+      "name": "Smelt Iron Ore",
+      "time": 9,
+      "power": 5,
+      "inputs": {
+        "iron_ore": 2
+      },
+      "outputs": {
+        "iron_ingot": 1,
+        "slag": 1
+      },
+      "waste": [
+        "slag"
+      ],
+      "desc": "The furnace recipe, twice as fast, for when you have not built the crusher yet."
+    },
+    {
+      "id": "forge_bronze",
+      "machine": "alloy_forge",
+      "name": "Forge Bronze",
+      "time": 20,
+      "power": 10,
+      "inputs": {
+        "copper_ingot": 3,
+        "tin_ingot": 1
+      },
+      "outputs": {
+        "bronze_ingot": 3
+      },
+      "unlock": {
+        "recipe": "smelt_copper",
+        "times": 10
+      },
+      "desc": "Ten coppers smelted and the recipe turns up on its own — §2.18."
+    },
+    {
+      "id": "forge_steel",
+      "machine": "alloy_forge",
+      "name": "Forge Steel",
+      "time": 24,
+      "power": 12,
+      "inputs": {
+        "iron_ingot": 3,
+        "charcoal": 2
+      },
+      "outputs": {
+        "steel_ingot": 3
+      },
+      "unlock": {
+        "recipe": "smelt_iron",
+        "times": 10
+      }
+    },
+    {
+      "id": "forge_rough_part",
+      "machine": "alloy_forge",
+      "name": "File a Rough Part",
+      "time": 70,
+      "power": 12,
+      "inputs": {
+        "iron_ingot": 4,
+        "plank": 2
+      },
+      "outputs": {
+        "machine_part": 1
+      },
+      "desc": "ROUND 14 — THE BOOTSTRAP. Until this recipe, the ONLY thing in the game that made a machine part was the assembler, and the assembler cost eight machine parts. Nothing in Farhold has ever produced one by any honest route, so the smelter, the crusher, the washer, the drill, the wind turbine and eleven other pieces were all unbuildable — the same self-gate as the claim stone, hidden one layer deeper. Gears and shafts cut and filed at a forge: three times the time of an assembled one and no bronze, so the assembler is still worth reaching."
+    },
+    {
+      "id": "forge_meteoric",
+      "machine": "alloy_forge",
+      "name": "Work Meteoric Iron",
+      "time": 40,
+      "power": 18,
+      "inputs": {
+        "meteoric_iron": 2,
+        "steel_ingot": 1
+      },
+      "outputs": {
+        "tempered_alloy": 2
+      },
+      "unlock": {
+        "recipe": "forge_steel",
+        "times": 6
+      },
+      "desc": "The only route to tempered alloy that does not need a refinery — which is why a meteor fall is worth the walk."
+    },
+    {
+      "id": "crush_iron",
+      "machine": "crusher",
+      "name": "Crush Iron Ore",
+      "time": 7,
+      "power": 8,
+      "inputs": {
+        "iron_ore": 2
+      },
+      "outputs": {
+        "iron_dust": 3
+      },
+      "desc": "Three dust from two ore: half again the metal out of the same node. This is what makes a lean seam near the base beat a rich one across the valley."
+    },
+    {
+      "id": "crush_copper",
+      "machine": "crusher",
+      "name": "Crush Copper Ore",
+      "time": 7,
+      "power": 8,
+      "inputs": {
+        "copper_ore": 2
+      },
+      "outputs": {
+        "copper_dust": 3
+      }
+    },
+    {
+      "id": "crush_stone",
+      "machine": "crusher",
+      "name": "Crush Stone",
+      "time": 5,
+      "power": 6,
+      "inputs": {
+        "stone": 2
+      },
+      "outputs": {
+        "gravel": 3
+      }
+    },
+    {
+      "id": "wash_iron",
+      "machine": "washer",
+      "name": "Wash Iron Dust",
+      "time": 10,
+      "power": 6,
+      "inputs": {
+        "iron_dust": 3,
+        "water": 2
+      },
+      "outputs": {
+        "iron_concentrate": 2,
+        "tailings": 1
+      },
+      "waste": [
+        "tailings"
+      ]
+    },
+    {
+      "id": "wash_copper",
+      "machine": "washer",
+      "name": "Wash Copper Dust",
+      "time": 10,
+      "power": 6,
+      "inputs": {
+        "copper_dust": 3,
+        "water": 2
+      },
+      "outputs": {
+        "copper_concentrate": 2,
+        "tailings": 1
+      },
+      "waste": [
+        "tailings"
+      ]
+    },
+    {
+      "id": "rework_tailings",
+      "machine": "washer",
+      "name": "Rework Tailings",
+      "time": 18,
+      "power": 8,
+      "inputs": {
+        "tailings": 6,
+        "acid": 1
+      },
+      "outputs": {
+        "iron_dust": 2
+      },
+      "unlock": {
+        "recipe": "wash_iron",
+        "times": 8
+      },
+      "desc": "There is still metal in the rinsings. Slow, sour, and free ore."
+    },
+    {
+      "id": "grind_lens",
+      "machine": "crystal_cutter",
+      "name": "Grind Lens",
+      "time": 26,
+      "power": 12,
+      "inputs": {
+        "glass": 3
+      },
+      "outputs": {
+        "lens": 1
+      }
+    },
+    {
+      "id": "grind_obsidian_lens",
+      "machine": "crystal_cutter",
+      "name": "Grind Volcanic Lens",
+      "time": 22,
+      "power": 12,
+      "inputs": {
+        "obsidian": 2
+      },
+      "outputs": {
+        "lens": 1
+      },
+      "desc": "Volcanic glass is already glass. The cheap route, on the worlds that have any."
+    },
+    {
+      "id": "cut_focuser",
+      "machine": "crystal_cutter",
+      "name": "Cut Focuser",
+      "time": 70,
+      "power": 20,
+      "inputs": {
+        "crystal_raw": 4,
+        "lens": 1,
+        "silver_ingot": 1
+      },
+      "outputs": {
+        "focuser": 1
+      },
+      "unlock": {
+        "recipe": "grind_lens",
+        "times": 4
+      }
+    },
+    {
+      "id": "refine_alloy",
+      "machine": "refinery",
+      "name": "Temper Alloy",
+      "time": 44,
+      "power": 30,
+      "inputs": {
+        "steel_ingot": 3,
+        "reagent": 2
+      },
+      "outputs": {
+        "tempered_alloy": 2
+      }
+    },
+    {
+      "id": "refine_composite",
+      "machine": "refinery",
+      "name": "Lay Composite Plate",
+      "time": 50,
+      "power": 28,
+      "inputs": {
+        "tempered_alloy": 1,
+        "cloth": 3,
+        "resin": 2
+      },
+      "outputs": {
+        "composite_plate": 1
+      },
+      "unlock": {
+        "recipe": "refine_alloy",
+        "times": 4
+      }
+    },
+    {
+      "id": "charge_cell",
+      "machine": "refinery",
+      "name": "Charge Aether Cell",
+      "time": 80,
+      "power": 50,
+      "inputs": {
+        "focuser": 1,
+        "silver_ingot": 2,
+        "reagent": 2
+      },
+      "outputs": {
+        "aether_cell": 1
+      },
+      "unlock": {
+        "recipe": "refine_alloy",
+        "times": 6
+      }
+    },
+    {
+      "id": "make_machine_part",
+      "machine": "assembler",
+      "name": "Assemble Machine Part",
+      "time": 24,
+      "power": 16,
+      "inputs": {
+        "steel_ingot": 2,
+        "bronze_ingot": 1
+      },
+      "outputs": {
+        "machine_part": 1
+      }
+    },
+    {
+      "id": "make_control_board",
+      "machine": "assembler",
+      "name": "Assemble Control Board",
+      "time": 36,
+      "power": 22,
+      "inputs": {
+        "copper_ingot": 3,
+        "gold_ingot": 1,
+        "glass": 1
+      },
+      "outputs": {
+        "control_board": 1
+      },
+      "unlock": {
+        "recipe": "make_machine_part",
+        "times": 6
+      }
+    },
+    {
+      "id": "build_hull",
+      "machine": "assembler",
+      "name": "Build Hull Section",
+      "time": 180,
+      "power": 40,
+      "inputs": {
+        "composite_plate": 6,
+        "tempered_alloy": 4,
+        "machine_part": 4
+      },
+      "outputs": {
+        "ship_hull": 1
+      },
+      "unlock": {
+        "recipe": "make_control_board",
+        "times": 2
+      }
+    },
+    {
+      "id": "build_drive",
+      "machine": "assembler",
+      "name": "Build Drive Assembly",
+      "time": 220,
+      "power": 48,
+      "inputs": {
+        "tempered_alloy": 6,
+        "machine_part": 8,
+        "aether_cell": 1
+      },
+      "outputs": {
+        "ship_drive": 1
+      },
+      "unlock": {
+        "recipe": "make_control_board",
+        "times": 2
+      }
+    },
+    {
+      "id": "build_tanks",
+      "machine": "assembler",
+      "name": "Build Tank Set",
+      "time": 150,
+      "power": 36,
+      "inputs": {
+        "steel_ingot": 12,
+        "composite_plate": 3,
+        "machine_part": 3
+      },
+      "outputs": {
+        "ship_tanks": 1
+      },
+      "unlock": {
+        "recipe": "make_control_board",
+        "times": 2
+      }
+    },
+    {
+      "id": "build_avionics",
+      "machine": "assembler",
+      "name": "Build Avionics Rack",
+      "time": 200,
+      "power": 44,
+      "inputs": {
+        "control_board": 6,
+        "lens": 3,
+        "machine_part": 2
+      },
+      "rareInput": 4,
+      "outputs": {
+        "ship_avionics": 1
+      },
+      "unlock": {
+        "recipe": "make_control_board",
+        "times": 4
+      },
+      "desc": "The one subsystem that needs a rare element — §9.6. `rareInput` is a count, not an id: js/refine.js fills in whichever element this planet actually holds, and if it holds none you are going somewhere else for it."
+    },
+    {
+      "id": "build_waypoint_core",
+      "machine": "assembler",
+      "name": "Build Waypoint Core",
+      "time": 240,
+      "power": 52,
+      "inputs": {
+        "focuser": 3,
+        "tempered_alloy": 4,
+        "aether_cell": 2,
+        "control_board": 2
+      },
+      "outputs": {
+        "waypoint_core": 1
+      },
+      "unlock": {
+        "recipe": "make_control_board",
+        "times": 3
+      },
+      "desc": "§5.6. It should be a milestone, so it costs one of everything the top of the chain makes."
+    },
+    {
+      "id": "build_warp_core",
+      "machine": "assembler",
+      "name": "Build Warp Core",
+      "time": 400,
+      "power": 60,
+      "inputs": {
+        "aether_cell": 4,
+        "composite_plate": 4,
+        "control_board": 4
+      },
+      "rareInput": 6,
+      "outputs": {
+        "warp_core": 1
+      },
+      "unlock": {
+        "recipe": "build_drive",
+        "times": 1
+      },
+      "desc": "§9.15 — the second act, gated behind a second world's rare element."
+    },
+    {
+      "id": "synth_fuel_gas",
+      "machine": "fuel_synthesiser",
+      "name": "Synthesise Lift Fuel",
+      "time": 60,
+      "power": 60,
+      "inputs": {
+        "vent_gas": 6,
+        "reagent": 2,
+        "water": 4
+      },
+      "outputs": {
+        "lift_fuel": 3
+      },
+      "desc": "The cheap route, on a world with vents."
+    },
+    {
+      "id": "synth_fuel_sulphur",
+      "machine": "fuel_synthesiser",
+      "name": "Synthesise Lift Fuel (Sour)",
+      "time": 90,
+      "power": 70,
+      "inputs": {
+        "sulphur": 6,
+        "acid": 2,
+        "water": 4
+      },
+      "outputs": {
+        "lift_fuel": 2
+      },
+      "desc": "The route for a world with no gas vents. Slower and dearer, and it is never a dead end — every planet can make fuel somehow."
+    }
   ],
-
   "_goalsDoc": "What a chain is allowed to end at. The 'no dead end' test walks every recipe output and demands it be an input somewhere, a machine fuel, or listed here. Anything in `consumedElsewhere` is eaten by a system this agent does not own — say which, so a future reader can check the claim rather than trust it.",
   "goals": {
-    "ship": ["ship_hull", "ship_drive", "ship_tanks", "ship_avionics", "lift_fuel", "warp_core"],
-    "network": ["waypoint_core"],
+    "ship": [
+      "ship_hull",
+      "ship_drive",
+      "ship_tanks",
+      "ship_avionics",
+      "lift_fuel",
+      "warp_core"
+    ],
+    "network": [
+      "waypoint_core"
+    ],
     "consumedElsewhere": {
       "build": {
         "note": "js/build.js — structure costs. Every machine's own `build` block above already spends these, so the chain closes even without the build system.",
-        "ids": ["cut_stone", "brick", "plank", "beam", "gravel", "glass", "rope", "cloth", "leather", "iron_ingot", "steel_ingot", "bronze_ingot", "machine_part", "control_board", "composite_plate", "tempered_alloy", "aether_cell", "silver_ingot", "gold_ingot", "copper_ingot", "tin_ingot", "focuser", "lens"]
+        "ids": [
+          "cut_stone",
+          "brick",
+          "plank",
+          "beam",
+          "gravel",
+          "glass",
+          "rope",
+          "cloth",
+          "leather",
+          "iron_ingot",
+          "steel_ingot",
+          "bronze_ingot",
+          "machine_part",
+          "control_board",
+          "composite_plate",
+          "tempered_alloy",
+          "aether_cell",
+          "silver_ingot",
+          "gold_ingot",
+          "copper_ingot",
+          "tin_ingot",
+          "focuser",
+          "lens"
+        ]
       },
       "bench": {
         "note": "js/craft.js — the anvil, the workbench and the alchemy bench take these alongside recycled materials (§3.8).",
-        "ids": ["iron_ingot", "steel_ingot", "bronze_ingot", "leather", "cloth", "rope", "plank", "glass", "lens", "flint", "sinew", "bone", "resin"]
+        "ids": [
+          "iron_ingot",
+          "steel_ingot",
+          "bronze_ingot",
+          "leather",
+          "cloth",
+          "rope",
+          "plank",
+          "glass",
+          "lens",
+          "flint",
+          "sinew",
+          "bone",
+          "resin"
+        ]
       },
       "eaten": {
         "note": "The player, the travel layer, and the terrain tools.",
-        "ids": ["ration", "blast_charge", "water", "lift_fuel"]
+        "ids": [
+          "ration",
+          "blast_charge",
+          "water",
+          "lift_fuel"
+        ]
       }
     }
-  }
+  },
+  "_r18Build": "R18 — the `build` blocks that used to sit on these rows are GONE. Only data/structures.json's `cost` is ever charged (js/buildplan.js `alignCatalogue` -> js/build.js); these were a second, dead price on 25 of 35 buildings, and they disagreed with the live one on every single row — `fuel_synthesiser` differed in all four lines. A price stated twice is a price that will be tuned in the wrong file, which is exactly what had happened. Per the standing ruling: structures.json owns COST, this file owns the power/throughput numbers."
 }

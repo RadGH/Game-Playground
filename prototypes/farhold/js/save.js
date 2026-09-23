@@ -100,6 +100,26 @@ export function snapshot({
   // the building expansion: the ground you reshaped, what you built on it, and who lives there
   terraform, build, portal, colony, farm, work,
   /**
+   * R18 — AND THESE FOUR WENT THE SAME WAY AS `world`/`quests`/`campaign` BELOW.
+   *
+   * `props`, `logistics` and `away` were PASSED by js/main.js on every save (6542, 6547, 6548) and
+   * were not on this list, so they were dropped on the floor — and all three already have loaders
+   * waiting for them (main.js 2218, 3362, 3363), which is what made it invisible.
+   *
+   *   * `props`  — the harvest ledger: which trees you felled and which circles you cleared. Every
+   *                reload stood the wood back up, potentially inside the base you cleared it for.
+   *   * `logistics` — carts in transit and every store-to-store supply line, gone on load.
+   *   * `away`   — `leftAt`, so `elapsed()` came back 0 and `resume()` did nothing: offline
+   *                production never happened across a quit, despite main.js:5958's comment saying
+   *                "It is also written into every save (see `snapshot`)". It was not.
+   *   * `research` — worse: it was not even passed. `sharedResearch().toJSON()/load()` have existed
+   *                since the tree landed with NO caller, so every point earned vanished and all 31
+   *                structures carrying a `tech` key re-locked on reload. The earning events (a
+   *                first-time landmark, a first-visit region, a boss kill) do not repeat, so those
+   *                points were unrecoverable.
+   */
+  props, logistics, away, research,
+  /**
    * The Civilization Expansion: houses and who sleeps in them, the traders who moved in, what is in
    * the hold and in the Trade Post, the carts on the long roads, and the muster cooldowns.
    *
@@ -150,6 +170,14 @@ export function snapshot({
       equipment: player.equipment, bag: player.bag,
       passiveRanks: player.passiveRanks, pendingPassive: player.pendingPassive,
       pendingTalent: player.pendingTalent, talents: player.talents,
+      /**
+       * THE PERK FOREST. 169 nodes, eight arms, and it is the whole replacement for attribute
+       * point-buy since round 7 — and it was never on this list, so every perk a character had
+       * ever taken was wiped by a reload. `pointsLeft` is `pointsFor(level) - spentBy(player)`,
+       * and `spentBy` reads exactly this array, so a load came back with the tree empty and all
+       * the points unspent: from the player's side, the game silently refunded the lot.
+       */
+      perks: player.perks || [],
       // unlockables rather than loot, so they travel with the character — see js/gear.js
       vehicles: player.vehicles,
       // R15: which of them H brings — the horse, or the motorcycle you built. One slot, one choice.
@@ -230,6 +258,10 @@ export function snapshot({
      */
     stores: stores || null,
     grid: grid || null,
+    props: props || null,
+    logistics: logistics || null,
+    away: away || null,
+    research: research || null,
     ore: ore || null,
     mining: mining || null,
     works: works || null,
@@ -284,6 +316,9 @@ export function restore(save, { rpg, player, control, map }) {
   player.build = p.build || null;
   player.followers = p.followers || { contracts: [] };
   player.talents = p.talents || [];
+  // …and read back BEFORE `rpg.refresh` below, so the perk bonuses are recomputed from the real
+  // tree rather than from an empty one.
+  player.perks = p.perks || [];
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;
   player.equipment = p.equipment || {};

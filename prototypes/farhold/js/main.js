@@ -2215,6 +2215,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     band: planet?.band || 'medium',
   });
   if (save?.ore) ore.load(save.ore);
+  // R18 — and the research tree, which nothing had ever loaded. Before `build`/`build-ui` read it,
+  // so a reloaded base's tech gates are right the first time they are asked.
+  if (save?.research) sharedResearch().load(save.research);
   if (save?.props) props.loadHarvest(save.props, control?.x ?? 0, control?.z ?? 0);
   /**
    * THE SEAMS ON THIS FLOOR, when you are underground.
@@ -6517,9 +6520,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       weather: blended.key,
       quests: questLog.toJSON(),
       campaign: campaign.toJSON(),
-      passiveRanks: player.passiveRanks,
-      pendingPassive: player.pendingPassive,
-      pendingTalent: player.pendingTalent,
+      // R18 — `passiveRanks`, `pendingPassive` and `pendingTalent` used to be passed here as well.
+      // `snapshot()` has never had them in its parameter list, so the top-level copies were dropped;
+      // the values are saved, off `player`, in its `player` block. Three lines that looked like they
+      // mattered and did nothing, which in this file is indistinguishable from the real bug next to
+      // them — so they are gone rather than added to a list of exceptions.
       materials: craft.materials.toJSON(),
       dungeonsCleared,
       world: worldOpts,
@@ -6546,6 +6551,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       // R14 — loads on the road, the standing orders behind them, and when you left
       logistics: logistics.toJSON(),
       away: away.toJSON(),
+      /**
+       * R18 — THE RESEARCH TREE, WHICH WAS NEVER PASSED AT ALL.
+       *
+       * `sharedResearch().toJSON()`/`load()` have existed since the tree landed with no caller, so
+       * every point earned vanished on save and all 31 structures carrying a `tech` key re-locked
+       * on the next load. The earning events — a first-time landmark, a first-visit region, a boss
+       * kill — do not repeat, so those points were unrecoverable.
+       */
+      research: sharedResearch().toJSON(),
       // §7 — the raid you took on, and how far through it you are
       defence: defence.toJSON(),
       /**

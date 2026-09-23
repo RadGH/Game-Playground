@@ -144,10 +144,26 @@ test('a fight gives xp, a level and loot', async ({ page }) => {
       for (let swing = 0; swing < 120 && enemy.hp > 0; swing++) f.hit();
       if (enemy.hp === 0) killed++;
     }
+    const after = { level: f.player.level, xp: f.player.xp, bag: f.player.bag.length, gold: f.player.gold, kills: f.player.kills };
+    // R22: a level is a mechanic, so make one happen rather than hoping the economy delivers it
+    const levelled = { before: f.player.level };
+    f.rpg.gainXp(f.player, 4000);
+    levelled.after = f.player.level;
+    // R22: what the same enemy is worth at, three below and five below your level
+    const cfg = f.balance?.xp || {};
+    const foe = lvl => ({ level: lvl, xp: 500 });
+    const me = { level: 20 };
+    const grey = {
+      even: f.rpg.killXpFor(me, foe(20), cfg),
+      threeBelow: f.rpg.killXpFor(me, foe(17), cfg),
+      fiveBelow: f.rpg.killXpFor(me, foe(15), cfg),
+    };
     return {
       killed,
       before,
-      after: { level: f.player.level, xp: f.player.xp, bag: f.player.bag.length, gold: f.player.gold, kills: f.player.kills },
+      after,
+      levelled,
+      grey,
       // round 7: a level opens the perk forest rather than handing out attribute points
       pending: f.perkPoints(),
       damage: f.player.derived.damage,
@@ -157,9 +173,26 @@ test('a fight gives xp, a level and loot', async ({ page }) => {
   expect(result.killed).toBeGreaterThan(10);
   expect(result.after.xp).toBeGreaterThan(result.before.xp);
   expect(result.after.gold).toBeGreaterThan(result.before.gold);
-  expect(result.after.level).toBeGreaterThan(result.before.level);
-  expect(result.pending).toBeGreaterThan(0);
   expect(result.after.bag).toBeGreaterThan(result.before.bag);
+  /**
+   * R22 — THIS USED TO ASSERT THAT 26 RATS IS A LEVEL, WHICH IS AN ECONOMY, NOT A MECHANIC.
+   *
+   * "Let's cut XP gains from kills down to just 20% of the current value" took 26 level-1 cairn rats
+   * from 208 experience to 52, and level 2 costs 58 — so the test failed on the tuning it was asked
+   * to make, having never actually checked the thing it was named after. What has to hold is that a
+   * level HAPPENS and that it opens a perk point; how many rats that is belongs in the balance file.
+   */
+  expect(result.levelled.after).toBeGreaterThan(result.levelled.before);
+  expect(result.pending).toBeGreaterThan(0);
+  /**
+   * …and R22's other half, in the live game rather than in a unit test: the same rat is worth less
+   * once you have outgrown it, and worth nothing at all five levels down. Before this round the
+   * player's level appeared nowhere in a kill award, so the starting zone paid the same at 50 as on
+   * the first morning.
+   */
+  expect(result.grey.even).toBeGreaterThan(0);
+  expect(result.grey.threeBelow).toBeLessThan(result.grey.even);
+  expect(result.grey.fiveBelow).toBe(0);
 });
 
 test('the character sheet wears an item and the body picks up the weapon', async ({ page }) => {

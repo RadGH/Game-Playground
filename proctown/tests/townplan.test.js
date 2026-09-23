@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import {
   planTown, overlaps, summarise, footprintOf, makeRng, corners, demoTerrain,
   connectStreets, linkRoads, nearestOnStreets,
-  CULTURES, STREET_CLASSES, WANT_ORDER, WANT_FROM,
+  CULTURES, STREET_CLASSES, WANT_ORDER, WANT_FROM, WALL_CLEARANCE,
 } from '../js/townplan.js';
 
 const CULTURE_KEYS = Object.keys(CULTURES);
@@ -320,4 +320,71 @@ test('linkRoads does nothing when the road already meets the plan', () => {
   assert.equal(linkRoads(out, [[10, 0.5]]), 0, 'a redundant high street was laid anyway');
   assert.equal(out.streets.length, 1);
   assert.equal(linkRoads(out, [[10, 30]]), 1, 'a road arriving 30 m away was not brought in');
+});
+
+// ------------------------------------------------------------------------ round 22: the wall
+
+test('R22 — no plot touches the wall, in any culture, at any size, on any seed', () => {
+  /**
+   * *"At this location houses clip through the wall."* (Farhold, seed 25392, Kydsel IV.)
+   *
+   * The fault was a consumer's — Farhold recomputed its own unscaled ring instead of reading
+   * `plan.wallRadius` — but `overlaps()` had no wall in it at all, which is why nothing in the
+   * shared library could have caught it. It has one now, and this is the sweep: every corner of
+   * every plot, inside the masonry with `WALL_CLEARANCE` metres of daylight, on a clear site and
+   * on one where the ground is taken and the ring has to grow.
+   */
+  const road = lx => Math.abs(lx) > 10;             // a 20 m corridor through the middle
+  let walled = 0, grown = 0;
+  for (const culture of CULTURE_KEYS) {
+    for (const seed of SEEDS) {
+      for (const size of [4, 5, 6]) {
+        for (const buildable of [null, road]) {
+          const plan = planTown({ seed, size, culture, buildable: buildable || undefined });
+          if (!plan.wall) continue;
+          walled++;
+          if (plan.wallRadius > footprintOf(size).wall + 0.01) grown++;
+          const hits = overlaps(plan).filter(h => h.kind === 'plot-wall');
+          assert.deepEqual(hits, [],
+            `${culture} size ${size} seed ${seed}: ${hits.length} plots reach the wall`
+            + (hits[0] ? `, worst ${hits[0].over.toFixed(1)} m past a ${plan.wallRadius.toFixed(0)} m wall` : ''));
+          for (const p of plan.plots) {
+            for (const [x, z] of corners(p)) {
+              assert.ok(Math.hypot(x, z) <= plan.wallRadius - WALL_CLEARANCE,
+                `${culture} size ${size} seed ${seed}: a plot corner ${Math.hypot(x, z).toFixed(1)} m out`);
+            }
+          }
+        }
+      }
+    }
+  }
+  assert.ok(walled > 100, `only ${walled} walled towns checked`);
+  assert.ok(grown > 0, 'no town in the sweep grew its ring — this test can no longer see the bug');
+});
+
+test('R22 — a link stays ON the wall when the town grows to fit it', () => {
+  /**
+   * `links` are worked out by the caller against the town's normal size. A crowded site then
+   * retries at `ringScale` up to 1.65, and the links used to stay where they were — in the middle
+   * of the bigger town rather than on its edge — so `linkRoads` laid the high street from an inside
+   * point and the road arrived at the wall with nothing joining it.
+   */
+  const road = lx => Math.abs(lx) > 10;
+  const base = footprintOf(4);
+  const link = [base.wall, 0];                      // a road arriving due east, on the wall
+  const grown = planTown({ seed: 11, size: 4, culture: 'human', buildable: road, links: [link] });
+  assert.ok(grown.wallRadius > base.wall + 0.01, 'this site no longer grows — pick another seed');
+  const high = grown.streets.filter(s => s.highway);
+  assert.equal(high.length, 1, `${high.length} high streets for one link`);
+  const [sx, sz] = high[0].pts[0];
+  assert.ok(Math.abs(Math.hypot(sx, sz) - grown.wallRadius) < 0.01,
+    `the high street starts ${Math.hypot(sx, sz).toFixed(1)} m out on a ${grown.wallRadius.toFixed(1)} m wall`);
+  assert.ok(Math.abs(Math.atan2(sz, sx)) < 1e-6, 'the link changed bearing as well as distance');
+
+  // …and a town that does not grow leaves its links exactly where they were put
+  const plain = planTown({ seed: 2, size: 4, culture: 'human', links: [link] });
+  assert.equal(plain.wallRadius, base.wall);
+  const kept = plain.streets.find(s => s.highway);
+  assert.ok(kept && Math.hypot(kept.pts[0][0] - link[0], kept.pts[0][1] - link[1]) < 1e-9,
+    'a link moved on a town that never grew');
 });

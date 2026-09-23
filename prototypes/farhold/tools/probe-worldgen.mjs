@@ -170,7 +170,7 @@ if (!node || node.d > 1200) {
   const t = node.t;
   line(`${t.name || 'a settlement'} (size ${t.size || 1}, ${t.race || 'human'}) at ${t.wx | 0},${t.wz | 0}`
     + ` — ${node.d | 0} m from the probe`);
-  const { ring } = footprintOf(t.size || 1);
+  const { ring, wall } = footprintOf(t.size || 1);
   const culture = cultureFor({ race: t.race, biome: t.biome });
   const cx = t.wx, cz = t.wz;
 
@@ -179,7 +179,10 @@ if (!node || node.d > 1200) {
     seed: ((world.seed ?? systemSeed) ^ (t.id * 2654435761)) >>> 0,
     size: t.size || 1,
     culture,
-    links: ringCrossings(terrain.roadPaths, cx, cz, ring, { limit: 4 }).map(c => [c.dx, c.dz]),
+    // R22 — the WALL circle and no cap, the same question js/features.js `roadLinksFor` asks.
+    // This probe exists to tell you what the game builds, so asking about a different circle
+    // from the one the game uses makes it a probe of something else.
+    links: ringCrossings(terrain.roadPaths, cx, cz, wall).map(c => [c.dx, c.dz]),
     heightAt: (lx, lz) => terrain.heightAt(cx + lx, cz + lz),
     buildable: (lx, lz) => {
       const x = cx + lx, z = cz + lz;
@@ -218,7 +221,7 @@ if (!node || node.d > 1200) {
   for (const spot of stallsFor(plan, { culture, seed: 1, max: (t.size || 1) >= 3 ? 24 : 10 })) {
     spots.push({ what: 'stall', x: cx + spot.x, z: cz + spot.z, r: 1.6 });
   }
-  const { wall, walled } = footprintOf(t.size || 1);
+  const { walled } = footprintOf(t.size || 1);
   const gateAngles = ringCrossings(terrain.roadPaths, cx, cz, wall).map(c => c.angle);
   if (walled) {
     const SEG = 6;
@@ -499,7 +502,17 @@ function probeRound21() {
     steps.sort((a, b) => a - b);
     line(`height step per 0.5 m walked: median ${f2(steps[steps.length >> 1])}`
       + `  p99 ${f2(steps[(steps.length * 0.99) | 0])}  worst ${f2(worst)} m at x ${worstAt | 0}`);
-    line(worst > 0.9
+    /**
+     * R22 — THE TEST FOR A STAIRCASE IS NOT "IS THERE A BIG STEP SOMEWHERE".
+     *
+     * `worst > 0.9` was written in R21, before R21 also ADDED real cliffs to the world — and a
+     * cliff is a big step, so this cried "the staircase is back" on every world with a crag on it
+     * (median step 0.03 m, p99 0.27 m, one 2.64 m cliff face, verdict: staircase). A staircase is a
+     * step of about one whole metre repeated ALL OVER the transect, which is what the p99 measures;
+     * a cliff is one or two samples out of four thousand, which is what `worst` measures.
+     */
+    const stair = steps[(steps.length * 0.99) | 0] > 0.9;
+    line(stair
       ? '   ^ THE WHOLE-METRE STAIRCASE IS BACK — see elevationToMetresExact in worldgen/js/relief.js'
       : '   (smooth — no rounding in the height path)');
   }
@@ -526,13 +539,14 @@ function probeRound21() {
   if (node && node.d <= 1200) {
     const t = node.t;
     const cx = t.wx, cz = t.wz;
-    const { ring } = footprintOf(t.size || 1);
+    const { ring, wall } = footprintOf(t.size || 1);
     const culture = cultureFor({ race: t.race, biome: t.biome });
     const plan = planTown({
       seed: ((world.seed ?? systemSeed) ^ (t.id * 2654435761)) >>> 0,
       size: t.size || 1,
       culture,
-      links: ringCrossings(terrain.roadPaths, cx, cz, ring, { limit: 4 }).map(c => [c.dx, c.dz]),
+      // R22 — the WALL circle and no cap, the same question js/features.js `roadLinksFor` asks.
+      links: ringCrossings(terrain.roadPaths, cx, cz, wall).map(c => [c.dx, c.dz]),
       heightAt: (lx, lz) => terrain.heightAt(cx + lx, cz + lz),
       buildable: (lx, lz) => {
         const x = cx + lx, z = cz + lz;

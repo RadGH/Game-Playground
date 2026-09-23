@@ -3272,3 +3272,353 @@ seeking one are three different projectiles, where two of those plus a damage mu
 `homing` moves from `PENDING_MODS` to `IMPLEMENTED_MODS` — both, because they are the same claim
 from opposite ends and moving only one leaves `inertTalents` still reporting the node. **The game
 now has zero inert talents.**
+
+---
+
+# Round 22 — the multiplier written twice, and the promise the world could not keep
+
+Fifteen reports from one play-test. Two themes underneath them.
+
+The first is **a multiplier applied in two places**. Consecrate hitting for 500 against a basic
+attack's 7 was not a tuning problem; spell power was folded into the plan by `js/skills.js` AND
+applied again by `js/rpg.js`'s `strike`, so every non-physical skill in the game scaled as
+`(1 + spellPower)²`. The outgoing buff was doubled on the same cast. Companions grew at 1.17 a level
+against an enemy health curve of 1.13. Five different per-level scalings had grown up on five
+different experience awards, none of which had ever been seen side by side.
+
+The second is **the game promising something the world could not deliver**. "E to talk to Mercenary
+Captain" offered a conversation with an empty field, because `js/wanderers.js` is pure JavaScript by
+design and a wanderer has never had a body. "E on a tree" said "Nothing here to do", because Farhold
+has two tree objects and only the invisible one was on E. A quest arrow pointed at the corner of the
+planet, because `markers.add()` defaulted a missing cell to (0, 0). Each of those is a feature that
+exists on one side of a join and not the other, which is this project's signature fault and the
+reason rounds 11-16 are written the way they are.
+
+## The experience economy
+
+> "Right now I reach level 12 before I even leave the first zone… I was level 22 and teleported to a
+> level 20-22 zone and after just a few kills from my companions I was level 30, 31, so quick. I
+> reached level 30 in about 10 minutes."
+
+**A kill never knew what level you were.** The award was `rpg.gainXp(player, e.xp)`, and `e.xp` is
+`base × 1.13^(enemyLevel-1) × rankMultiplier` — the player's level appears nowhere in it. So the
+game had no grey-con rule of any kind, in either direction: farming the zone outside the starting
+town paid exactly the same at level 50 as on the first morning, and standing behind a companion
+clearing a band you had outgrown paid full price forever.
+
+`rpg.killXpFor(player, enemy, cfg)` is the whole rule, and all four numbers are in
+`data/balance.json` under `xp`:
+
+| | |
+|---|---|
+| `kill: 0.2` | a fifth of what a kill used to pay |
+| `killFalloffPerLevel: 0.2` | 20% off for each level the enemy is beneath you, so **five below pays nothing** |
+| `killBonusPerLevelAbove: 0.15` | 15% on for each level above you… |
+| `killBonusCap: 1.6` | …to a ceiling of +60%, because a falloff with no upside is a reason never to fight anything hard |
+
+It returns **0**, not a token amount, for something far beneath you — a "1 xp" award reads as a bug —
+and the log says so in words rather than printing a number you did not get.
+
+**Everything that is not a kill had five different scalings.** `× (1 + (level-1) × 0.15)` for a
+stronghold, the same again in `freePrisonersOf`, `× 0.1` for an instance, `× 0.1` for a landmark,
+`× 0.12` baked into a quest at generation, plus a bare `40 × freed × player.level` and a
+`40 + player.level × 12`. They are one function now:
+
+```js
+eventXp(base, { zoneLevel, kind, cfg })   // kind: 'quest' | 'event' | 'landmark'
+```
+
+and it scales on the **zone**, not on you, which is the thing the report was actually describing:
+walking to a landmark out in the deep dark is worth more than walking to one outside the starting
+town, whatever level you happen to be. Quests and cleared places take the +50% that was asked for;
+the little "50 xp for the walk" awards take 3× on top of the zone, so `data/landmarks.json`'s
+20-60 becomes 60-180 at level 1 and several hundred out in a level-40 band.
+
+That line had a second bug worth recording: it printed `gives.xp` raw while awarding the scaled
+figure, so the one number the player could see was the only one that was not true.
+
+**Companions were scaling against the wrong thing entirely.** A companion's damage is
+`base × perLevel^(level-1)`, a clean exponential on the owner's level. The player's damage comes out
+of the weapon in their hand and does not have an exponent in it at all. Two curves that had never
+been compared:
+
+| owner level | a hired blade does | an unarmed character swings for |
+|---|---|---|
+| 1 | 16-26 | 1-4 |
+| 22 | 433-703 | 4-12 |
+| 40 | 7,301-11,864 | 6-19 |
+
+On top of which `pets.perLevel` was **1.17** against `enemies.perLevel` **1.13**, so a companion's
+share of a kill *also* grew by `(1.17/1.13)^(L-1)` — 2.1× by level 22 and 5.5× by 50. Both knobs are
+1.13 now, in `data/balance.json` and `data/mercenaries.json`, and `tests/round17-class.test.js`
+asserts they are the same number rather than asserting either value.
+
+But matching the exponents only stops the drift; it does not relate the two curves. `scaleFollower`
+takes `ownerDamage` and will not let a companion hit for more than **75%** of the top of your own
+swing. That is a ceiling, not a formula — under it everything behaves exactly as it did, so low
+levels are untouched — and it is the one rule that cannot come apart again, because it is stated in
+terms of the thing it is supposed to be a fraction of.
+
+## The level ladder is a world setting
+
+> "Add a new world setting to change the level scaling. I'd like to see a world with levels ranging
+> from 1-100 and play with the region density to get a more natural growth as you adventure."
+
+`setLevelCap(n)` in `js/rpg.js`, set once at boot from the new **Level range** knob on the world
+screen (30 / 50 / 100), and carried in the save so a run loads back into the ladder it was made with.
+
+Two things had to move, and they are different things.
+
+**The curve** is written in fractions of the cap rather than the literals 30 / 40 / 50, with
+`early()` stretched by `29 / (A - 1)` so the cost at the end of each section is identical whatever
+the cap:
+
+| | level 2 | 60% mark | 80% mark | the cap |
+|---|---|---|---|---|
+| cap 30 | 157 | 30,443 | 60,886 | 118,728 |
+| cap 50 | 58 | 30,443 | 60,886 | 118,728 |
+| cap 100 | 15 | 30,443 | 60,886 | 118,728 |
+
+A 1-100 world is **the same climb cut into twice as many steps** — you level about twice as often
+and each one is worth half as much. At cap 50 every number is bit-for-bit what it was before this
+round, which is the property that made the change safe to make at all.
+
+**`PLANET_BANDS`** is rewritten in place — not rebuilt, because js/main.js, js/hud.js and three test
+files import it as an array and a new array would leave every one of them holding the old one — so
+"settled space" is always the bottom 60% of whatever ladder this world has.
+
+Region density was already a knob (`boot-regions`, 0.6× to 3× the zones). Paired with a 100-level
+cap and `bandWidth` 3 it gives a new level band every few minutes, which is what was asked for.
+
+## Consecrate, and the two double-counts
+
+> "Consecrate dealt over 500 damage as a level 15 paladin where my basic attack only deals 7. Why is
+> that damage so high?"
+
+`data/skills.json` has Consecrate at `mult: 1.4` — 140% of weapon damage. Power Strike is 190% and
+was losing to it badly, which is the clue: **this was never about Consecrate**, it was about
+elemental versus physical.
+
+1. `js/skills.js` folded `1 + spellPower` into `plan.mult`, which becomes the `power` handed to
+   `strikeArea`. `js/rpg.js`'s `strike` then does `if (element !== 'physical' && a.spellPower)
+   amount *= 1 + a.spellPower` — and it has to, because a wand bolt and an elemental weapon swing
+   pass through there and never go near `js/skills.js`. Net: **`(1 + spellPower)²`**. At the gear cap
+   alone that is 6.25× where 2.5× was intended, and the perk arm stacks past the cap.
+2. R18 moved `outgoingFrom(attacker) * incomingFrom(defender)` into `strike`, where a swing, an
+   arrow, a skill, a turret and a trap all pass through it, and its own comment says "nothing is
+   counted twice". `castSkill`'s own `plan.mult * outgoingFrom(player)` was left behind, so War Cry's
+   +30% became +69% on a skill and nothing else.
+
+A **physical** skill got neither squared term. `plan.mult` is the skill's own multiplier now and
+`strike` is the one place a buff is worth what it says it is worth. `plan.damage` keeps the spell
+power, and should: it is not passed to `strike`, it is the estimate the skill card prints and the
+number a damage-over-time and Bulwark's barrier are a share of.
+
+## Enemies could not see a companion
+
+> "My pets are now actively aggressive, which is useful. However enemies seem to just ignore my pets."
+
+They could not have done otherwise. There was **no `e.target` in `js/actors.js`**, no threat table
+and no taunt: every `dx`, `dz`, `dist` and `facing` in the enemy AI was computed against `player` and
+nothing else. The only way a pet ever ate a hit was a coin flip in `js/main.js` at the instant a
+swing landed — the enemy walked *through* the pet to reach you and then happened to hit whatever was
+nearest. And `js/pets.js` made it worse from the other side: a pet landing a hit set
+`target.state = 'chase'`, and chase means chase the **player**. Biting something made it run at you
+faster, which is the exact inverse of tanking.
+
+`EnemyField.aimOf` is the whole rule, and it is deliberately two clauses rather than a threat meter —
+a meter needs a number on every source of damage in the game and then a pass to tune them against
+each other, and what a pet is *for* is being the thing the enemy is looking at for a while:
+
+1. whatever hurt it inside the last **5 seconds**, while that thing is alive and within **16 m**;
+2. failing that, the nearest live companion inside its reach + **1.6 m** that is also closer than you;
+3. failing that, you.
+
+`dist` stays the distance to the **player**, because that is what the despawn leash and the notice
+range are about — an enemy fighting your wolf thirty metres away must not be culled for being thirty
+metres from you. `field.taunt(enemy, pet)` is what `js/pets.js` calls instead of setting the chase
+state by hand, and `e.aimingAt` is what `onEnemyStrike` and `onEnemyShoot` hit, so the thing it
+closed on is the thing it swings at.
+
+## The rest
+
+**A quiver could not be worn with a bow.** Every bow in `data/items.json` is `twoHanded: true`, which
+is right, but `offhandRefusal` then covered the quiver too — the one thing a bow's off hand exists
+for, and the only thing `js/rpg.js` pays `arrowDamage` for. So the six quivers in `js/gear.js` and
+the shop shelf that stocks them were unwearable by anybody. `quiverGoesWith(item, main)` is the
+exemption, deliberately narrow (the item must be a quiver and the main hand must be something you
+draw), and it is checked in `equip`'s "a two-hander clears the off hand" branch too, so putting the
+bow back does not throw the quiver in the bag.
+
+**Picking a mount took it off.** `onEquip(item, unequipSlot)` reads its *second* argument as "take
+this slot off" — that is how the bag's X button clears a slot — and the sheet's own dropdown was
+calling `onEquip(pick, slot)`. So choosing a mount ran `rpg.unequip(player, 'mount')`: the horse came
+off, went to the bag, and the row redrew as "— none —" with the horse now *in the bag*, which is why
+re-picking it did the same thing again. The Tool row had it too. The Mount row and the Ride row are
+now **one row** — two rows that must agree is a rule somebody has to keep, and one row is a rule
+nobody can break — and `ground()` in js/main.js is the only place a mount speed is computed. "Ship"
+is "Space Ship" everywhere.
+
+**Two lantern affixes deleted.** `cond_lightWard` gated itself on `derived.lightRange > 0`, and
+`lightRange` is the stat the lamp **itself** grants — so the item wearing the affix was the thing
+satisfying the affix's own condition, always. A flat 10-25% damage reduction with a costume on, and
+the best defensive roll in the game was on the lamp slot. `cond_lightSteady` read backwards (a lit
+lamp making you *harder* to see) and was applied ungated anyway. `RETIRED_STATS` + `scrubRetired` in
+`js/affixes.js` take them off a lamp an old save is already carrying.
+
+**You get up whole.** Both respawn paths, and neither had ever touched mana — a caster who died
+mid-fight got up with an empty bar. The forgiving path also gave *less* health (40%) than the
+punishing one (50%).
+
+**No talent at level 1.** Tier 1 opened at level 1, so a brand-new character's first character sheet
+had a free pick waiting on every skill — a decision asked before the player has cast anything. Tiers
+are **3 / 8 / 18 / 28** now, and the fourth is built only out of mod keys that already have a reader
+(`chains`, `splash`, `sunder`, `mark`, `leech`, `killRefund`, `ground`, `barrier`, `mult`,
+`cooldownPct`), because R21b only just got the count of inert talents to zero.
+
+**The Town Hall's Close button was built inside `draw()`**, so the one failure that empties the
+screen is the same failure that removes the way out of it — and `read(town)` reaches into `zones`,
+`folk`, `colony`, `works` and `standings`, any of which can be missing. The navy rectangle with one
+border at the top is `.civics`'s background and `.hall-head`'s border, showing through three empty
+boxes. The button is built once, outside the draw, and this file has its own Escape listener now.
+
+**The loot card.** The property list was a cut-down summary of something the game already writes
+properly: `hud.itemCard` is the full card, with every affix, the set progress and the standing
+comparison with Shift to compare against the other hand. `shared/rewards.js` has carried the
+`tipRender` hook since R16 and it had never once fired — it wrote `dataset.itemId` while every
+renderer in Farhold reads `dataset.tipItem`. A hook spelled two different ways on the two sides is
+invisible to a test that only reads one of them, so `tests/round22-loot.spec.js` hovers the card in a
+browser and reads the tooltip. The one line kept is the verdict, because a chooser that makes you
+hover all three cards to find out which is better is a worse popup, not a cleaner one.
+
+**The research screen.** `.research` was a flex column with no height, and `.res-body`'s
+`flex: 1 1 auto; overflow-y: auto` only becomes a scroller inside a parent with a height. The
+standalone overlay bounded it with `max-height` and scrolled; the character-sheet tab did not, and
+`style.css`'s `overflow: hidden` cut off whatever hung over — which is why "Reagents" went off the
+bottom of the screen with no way to reach it. It is a node graph now: one column per age, a card per
+node placed on a row below everything it waits on, the `needs` relationships drawn as curves behind
+the cards, and a side panel carrying the blurb, the prerequisites as clickable chips, what the node
+opens and the Research button.
+
+**E on a tree.** Farhold has two tree objects: the scenery prop in `js/props.js`, which is the one
+you can see, and a resource node in `js/resources.js`, which is invisible. Only the second had ever
+been on E. `beginGather` has handled props since round 13 and the only two things that called it were
+the attack button with a tool held and a melee swing that hit nothing. The prop branch goes **last**
+in `interactTarget`, so a tree standing over an iron outcrop does not eat the outcrop. The tutorial
+step was still describing the pre-R16 "your weapon is your tool" system and never said out loud that
+it wants 8 logs **and** 20 stone, which is why chopping wood alone never advanced it.
+
+**The person on the road.** `js/wanderers.js` is pure JavaScript by design — "no Three.js, no DOM" is
+the first line of the file — so a wanderer is a name and a pair of coordinates and has never had a
+body. The interact prompt matched at **22 m** (widened from 6 to fix the opposite complaint, that on
+a 57 km world you only met somebody by walking over the exact spot), so it was offering a
+conversation with an empty field from sixty feet away. Both halves are fixed: `folk.spawnOne` — the
+function written for the freed prisoners in round 12 — puts a real person on the ground for every
+wanderer within 90 m and takes them away again past 130, and the prompt drops to the 3.6 m the
+townsfolk use.
+
+**The arrow pointing at nothing.** `markers.add()` defaulted `cellX` and `cellY` to **0**, so a caller
+with no cell to give produced a perfectly valid-looking marker at map cell (0, 0) — the far
+north-west corner of the planet — and every consumer drew an arrow at it in good faith. There is no
+sensible default for "where is this", so there is no default: a placeless marker is refused and says
+so in the console, which turns a silent wrong arrow into a visible missing one. From the other side,
+`js/jobgen.js` writes `cell: first.cell || null` and most of what it binds to (a wanderer, a caravan,
+a patrol) carries metres and no cell, so a whole class of job was tracked in the log with no pin and
+no explanation — `MarkerBook.cellOf` converts. `bearing` answers `null` rather than throwing, and all
+six consumers cope with it.
+
+## The road, the wall and the houses
+
+> "At (Beach, x 5160, z 1597) the terrain repeatedly clips through the road… that road goes through
+> the wall, but there is no gate. It also ends abruptly at nothing. How can we eliminate all the
+> dead-ends-to-nowhere with the road system? … At (Grassland, x 5240, z 1592) houses clip through
+> the wall."
+
+Four separate faults, measured rather than eyeballed, on five real worlds at the user's own 0.1
+planet scale.
+
+### Terrain through the road
+
+The survey found the obvious things — a 6 cm lift over a 2 m terrain grid, `heightAt` starting to
+blend back to natural ground at the kerb exactly, `ribbon()` mitring past `half` at bends — and
+measuring first turned up two faults an order of magnitude bigger that nobody had looked for:
+
+* **A junction fade fighting the bridge floor.** `planet.js` pins a merged road's endpoint onto its
+  trunk, and a *later* pass restores any point pulled under its bridge clearance. That pass's "no
+  more than half a metre of step per point" ramp dragged the junction itself up with it. Seed 19,
+  road 7: its ribbon started **3.49 m above the trunk it joins**.
+* **Two junction fades reaching across each other.** The fade was a flat six points in from each
+  end, and a merged piece can be four points long with a junction at *both* ends — so the second
+  fade undid the first. Seed 11, road 18: **2.02 m** off its trunk.
+
+And one that is this project's signature fault again: **`features.js` had a private `ribbon()` that
+was a byte-for-byte twin of `laneRibbon` in `roadplan.js`.** It is gone. World roads, town streets
+and player-laid roads all go through the one function, which asks `groundAt` and sits each
+cross-section above the highest ground across its own width. `roadVerge = 2.5` holds the ground dead
+flat for a verge wider than one terrain cell, so the triangle next to the kerb is flat too — except
+at a river bank, where the quay owns that ground.
+
+**Town streets had never been measured at all**, and were far worse than the roads: nothing carves
+the ground under a town and `gradeHeights` samples the centre line only. `planLane` gained
+`clearAcross` and `crownLane`.
+
+| | before | after |
+|---|---|---|
+| road ribbon, full drawn width, 273,862 samples | 1,058 over, worst **2.225 m** | **0 over, 0.000 m** |
+| town streets, ~108,000 samples | 8,853 over (7.9%), worst **12.67 m** | **0 over, 0.000 m** |
+| graded deck, 640 m-a-cell worlds | worst **3.490 m** | worst **1.264 m** |
+
+The 1.26 m that is left is a **crossroads**: World Forge routes each link with its own A\*, two
+routes can cross transversally without sharing a corridor, and `mergeRoadNetwork` therefore never
+makes a junction — so the two decks pass through each other. The ribbon crown covers it visually.
+The test names it and counts it rather than hiding it.
+
+### A road through the wall with no gate
+
+`ringCrossings` tested whether consecutive road POINTS were inside or outside the ring, and road
+points are 45-128 m apart against an 82 m ring — so a road that clipped the ring's corner, with both
+samples outside and the chord passing through, registered zero crossings and no gate was cut. It
+solves both roots of the segment/circle intersection on every span now, with no inside/outside
+bookkeeping left. There is a unit test with a bare 240 m span across an 82 m ring that returns 2
+crossings and used to return 0. On 640 m-a-cell worlds that was 1 walled town in 16.
+
+**But at Dearbigate — the user's own town — the gates were already right.** What was wrong there is
+that `roadLinksFor` asked at `ring` (81 m, bearing 9°) while the wall was cut at `wall` (95 m,
+bearing 16°), so the high street and the gate were 7° and about twelve metres apart; and the street
+links were capped at four while the gate list was not. Both ask about `wallR` now, uncapped.
+
+### Dead ends
+
+`worldgen/js/roads.js` does write `from` and `to` on every road — it builds them between settlement
+and port nodes — and `js/planet.js` threw both away when it converted to metres, so nothing
+downstream could ask whether a road reached anything. Under that, `mergeRoadNetwork`'s
+`if (run.length >= 3)` silently DELETED a run of one or two points, leaving the road either side of
+it hanging.
+
+`from`/`to` are carried now, a dropped run records its lost terminus, and `connectRoadNetwork` runs
+right after the merge and before grading: every road end must be a place, a junction, or close
+enough to another road's line, and anything else is walked to one within 0.6 cells or dropped. A
+spur onto another road **files a real join** — the first version of this did not, and rebuilt the
+3.49 m junction bug from the other direction.
+
+**5 of 236 road ends led nowhere → 0**, with all 118 roads still standing. There is a test for that
+second half, because emptying the network is the cheapest way to make the first assertion pass.
+
+### Houses through the wall
+
+This is the user's actual report and the diagnosis held exactly. `proctown`'s `planTown` retries with
+`ringScale` up to **1.65** when it is short of plots — which is routine on any town with a river or a
+road through it — and filters plots against the ring it settled on, publishing it as `plan.ring` and
+`plan.wallRadius`. **Farhold never read either.** It recomputed its own, unscaled: `16 + size * 13`,
+with the wall at `ring + 14`.
+
+At Dearbigate: `footprintOf` says ring 81 / wall 95; the planner retried and settled on ring
+**105.3** / wall **123.5**. So **15 of 49 plots (31%) reached or crossed the 95 m wall, the worst of
+them 8.8 m past it**. The user was standing 91 m from the town centre.
+
+One assignment each. And in proctown, which is shared, two things the planner should have been doing
+all along: `planOnce` slides `links` out to the wall it actually built (a link that stayed put on a
+grown town left the high street starting sixty metres inside the masonry), and `overlaps()` — the
+hard assertion that has checked plot-against-plot and plot-against-street since the day it was
+written — now has a `plot-wall` check with an exported `WALL_CLEARANCE`. The wall polygon had never
+been in it at all, which is why no test anywhere would have caught this.

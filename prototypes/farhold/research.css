@@ -72,6 +72,9 @@
   gap: 12px;
   flex-wrap: wrap;
   flex: 0 0 auto;
+  /* R22 — the legend ended flush with the right edge of the screen, so "Locked" read as clipped.
+     The screen is mounted edge to edge in the sheet tab, so the gutter has to come from here. */
+  padding-right: 10px;
 }
 
 .res-head h2 { margin: 0; font-size: 17px; letter-spacing: 0.02em; }

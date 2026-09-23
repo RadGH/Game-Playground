@@ -239,10 +239,10 @@ test('A — a town street clears the hillside it is laid on', () => {
   });
   assert.ok(towns > 10, `only ${towns} towns planned`);
   assert.ok(samples > 3000, `only ${samples} street samples`);
-  // the crown is raised in one piece across the width, so a street may still bank a couple of
-  // centimetres against a very steep verge; what it may not do is disappear into the hill
-  assert.ok(worst < 0.2,
-    `the ground stands ${worst.toFixed(3)} m through a town street (${where}) — ${over} of ${samples} samples`);
+  // the crown is raised in one piece across the width, so the street stays flat across itself and
+  // simply rides higher where the hillside insists. Measured: 0 of 105,651 samples, 0.000 m.
+  assert.equal(over, 0,
+    `${over} of ${samples} street samples have the ground standing through the paving — worst ${worst.toFixed(3)} m (${where})`);
 });
 
 test('A — features.js draws its roads with the one ribbon function, and asks it about the ground', () => {

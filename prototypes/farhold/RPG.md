@@ -2952,6 +2952,38 @@ written to move a knob to an unusual value and ask the running module what it no
 compare a data file against a constant, which is the check that would have passed against every
 single fault in this round.
 
+### The other six, and one cap with two owners
+
+The second half of the sweep, and two of them are worth more than a table row.
+
+| Where | What it said | What actually happened |
+|---|---|---|
+| `vehicles.json` `shelter` | this vehicle is a roof over you | four data lines, no reader. Now `sheltered(player)` is read by the encounter roll, so nothing that only comes out after dark comes for somebody sitting in a cab |
+| `vehicles.json` `tow` | this one can pull a load | `haul` was read only by an exported function nobody called. `tow` is the gate and `haul` the amount |
+| `job-frames.json` `scopes.*.maxZoneHops` | how far from home an errand may send you | round 14 read `maxMetres` off the same block and skipped this one, so a `local` errand could point across a border |
+| `structures.json` `rules.terraformBudget` | the cap on terrain edits | **the nastiest shape in the round**: `createTerraform`'s own defaults were the same 60000/12, so the orphan was invisible from either side — the file agreed with the code and neither was reading the other. `maxLift` was the same orphan and came along |
+| `mercenaries.json` `brings` | what a hire arrives carrying | unread — and `bringsCount` was stamped on the body by `js/pets.js` and read by nobody either, so it was an orphan from both ends |
+| `strongholds` `gives.callsBeast` | a baited hook draws something bigger | `main.js` logged "Bait on the hook. Something bigger than usual will come." and nothing ever came |
+
+**`tow` went to the orbital yard, not the first ship.** The data's own `_doc` pointed at
+`js/shipyard.js` — "the only way to move a ship's hull plate across a valley" — but gating the
+*first* ship on owning a truck (a refinery, an alloy forge and 34 steel) would move the whole shape
+of §9's arc. That is a balance decision, and this round is about wiring up rules that already exist,
+not about making new ones. Worth stating because the line between the two is exactly where a
+round like this goes wrong.
+
+**The cap with two owners.** `js/pets.js` wrote `cfg.maxAlive ?? 6` twice, and the second copy,
+inside `summon`, applied **even when `js/followers.js` had installed a gate that said yes**. A
+player with five follower slots, the Kept Company keystone and companions is legitimately over six
+bodies, and was refused by a limit nobody could see, in a game that never mentions the number six.
+
+The interesting part is *why* the duplicate was there, because deleting it would have reintroduced
+the bug it was accidentally covering: **a body mid-`await` is not in `pets.pets` yet.** Building an
+actor is an await inside a frame, so summoning three wolves into one free slot asked the gate three
+times before the first one landed and got a yes every time. The duplicate cap caught that — and
+only up to six. So `pending` goes through the gate now, `++` before the await and `--` in a
+`finally`, and the rule the gate enforces is the only rule there is.
+
 ### Files
 
 `js/combat-feel.js` (`tuneFeel`, `COMBAT_FEEL`, `feel.stopLeft`), `js/weapons.js` (`tuneWeapons`),
@@ -2962,5 +2994,16 @@ single fault in this round.
 `js/power.js` (`spareAt`, `machineStates`), `js/civics.js`, `js/colony.js`, `js/farm.js`,
 `js/refine.js`, `js/resources.js`, `js/defence.js`, `js/main.js` (the two tuners, the bench's three
 joins, `powerAt`), `data/balance.json`, `data/colony.json`, `data/crops.json`, `data/power.json`,
-`data/tools.json`. Tests: `tests/balance-combat.test.js`, `tests/orphans-a.test.js`,
-`tests/orphans-b.test.js`, `tests/orphans-d.test.js`.
+`data/tools.json`. And for the six above: `js/vehicles.js` (`sheltered`, `canTow`, `haulCapacity`),
+`js/encounters.js` (the shelter filter, `beastCallOf`), `js/shipyard.js` (`stationGate` asks for a
+tower), `js/jobgen.js` (`zoneHops`), `js/terraform.js` (`setRules`), `js/buildplan.js` (the join),
+`js/followers.js` (`bringAlong`), `js/pets.js` (`bodyCap`, `pending` through the gate),
+`js/sites.js`. Tests: `tests/balance-combat.test.js`, `tests/orphans-a.test.js`,
+`tests/orphans-b.test.js`, `tests/orphans-c.test.js`, `tests/orphans-d.test.js`, and
+`tests/shipyard.test.js`.
+
+**The round's count, finally: thirty-four rules that were written down and not read** — 21 combat
+knobs, 13 orphans across nine data files — plus three missing constructor arguments, one dead
+getter, one unit-less affix, one cap with two owners, and four bugs that only fixing those could
+find (the affix loop in `js/gear.js` since round 9, `spareAt` measuring output for capacity, the
+plan with no coordinates, and a test that skipped itself and reported green).

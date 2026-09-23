@@ -219,6 +219,8 @@ export function enhance(material, opts = {}) {
         '#include <roughnessmap_fragment>', fragment.rough);
       if (fragment.normal) shader.fragmentShader = shader.fragmentShader.replace(
         '#include <normal_fragment_maps>', fragment.normal);
+      if (fragment.emissive) shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' + fragment.emissive);
       if (fragment.main) shader.fragmentShader = shader.fragmentShader.replace(
         '#include <dithering_fragment>', fragment.main + '\n#include <dithering_fragment>');
     }

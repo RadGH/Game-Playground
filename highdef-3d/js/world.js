@@ -243,14 +243,47 @@ function makeWorld({ opt, dim, cell, size, half, heights, moisture, biome, water
     return best || { x: 0, z: 0, y: heightAt(0, 0), biome: biomeNameAt(0, 0) };
   }
 
+  /**
+   * March a ray until it goes under the ground, then bisect. Used for click-to-move and for
+   * working out what the pointer is over. Marching the heightmap directly rather than raycasting
+   * the meshes means the answer does not change with the terrain's detail level, and it is the
+   * same answer the character's feet will get.
+   */
+  function raycast(origin, dir, maxDist = 3000) {
+    const step0 = 0.6;
+    let t = 0, prev = origin.y - heightAt(origin.x, origin.z);
+    if (prev <= 0) return { x: origin.x, y: origin.y, z: origin.z, t: 0, hit: true };
+    while (t < maxDist) {
+      // longer strides high above the ground, short ones close to it
+      const step = Math.max(step0, Math.min(24, prev * 0.7));
+      t += step;
+      const x = origin.x + dir.x * t, y = origin.y + dir.y * t, z = origin.z + dir.z * t;
+      if (!contains(x, z)) return null;
+      const d = y - heightAt(x, z);
+      if (d <= 0) {
+        // bisect between the last point above and this one below
+        let lo = t - step, hi = t;
+        for (let i = 0; i < 24; i++) {
+          const mid = (lo + hi) / 2;
+          const mx = origin.x + dir.x * mid, my = origin.y + dir.y * mid, mz = origin.z + dir.z * mid;
+          if (my - heightAt(mx, mz) > 0) lo = mid; else hi = mid;
+        }
+        const ft = (lo + hi) / 2;
+        return { x: origin.x + dir.x * ft, y: origin.y + dir.y * ft, z: origin.z + dir.z * ft, t: ft, hit: true };
+      }
+      prev = d;
+    }
+    return null;
+  }
+
+  function contains(x, z) { return x >= -half && x <= half && z >= -half && z <= half; }
+
   return {
-    ...opt, dim, cell, size, half, waterLevel,
+    ...opt, dim, cell, size, half, waterLevel, raycast, contains,
     heights, moisture, biome,
     min: minH, max: maxH,
     heightAt, heightAtNode, normalAt, slopeAt,
     moistureAt, biomeAt, biomeNameAt, isWater, depthAt, findSpawn,
-    /** true when the point is inside the map at all. */
-    contains(x, z) { return x >= -half && x <= half && z >= -half && z <= half; },
   };
 }
 

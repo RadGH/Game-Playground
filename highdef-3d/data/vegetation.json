@@ -1,0 +1,112 @@
+{
+  "$comment": "What grows where. One entry per biome. `density` is plants per square metre before the quality multiplier; `weights` picks which kind, proportionally. Slope and height limits are in metres and 0..1 slope units.",
+  "version": 1,
+  "layers": {
+    "trees": {
+      "cellSize": 128,
+      "maxSlope": 0.42,
+      "clearRadius": 2.2,
+      "biomes": {
+        "shore":     { "density": 0.0012, "weights": { "palm_fan": 3, "dead_pine": 2, "pine": 1 } },
+        "meadow":    { "density": 0.0035, "weights": { "oak": 4, "birch": 3, "beech": 2, "sapling": 3 } },
+        "birchwood": { "density": 0.0210, "weights": { "birch": 7, "beech": 3, "oak": 2, "sapling": 3, "dead_snag": 1 } },
+        "pinewood":  { "density": 0.0330, "weights": { "pine": 6, "fir": 4, "spruce": 3, "sapling": 2, "dead_pine": 1 } },
+        "deepwood":  { "density": 0.0460, "weights": { "fir": 5, "spruce": 5, "pine": 3, "ancient_oak": 1, "dead_snag": 2, "sapling": 2 } },
+        "marsh":     { "density": 0.0090, "weights": { "willow": 5, "dead_pine": 4, "dead_snag": 3, "birch": 1 } },
+        "moor":      { "density": 0.0035, "weights": { "dead_snag": 3, "pine": 3, "spruce": 2, "stump": 2 } },
+        "crags":     { "density": 0.0009, "weights": { "dead_snag": 3, "fir": 2, "stump": 2 } },
+        "snowline":  { "density": 0.0011, "weights": { "frost_fir": 5, "dead_snag": 2 } }
+      }
+    },
+    "bushes": {
+      "cellSize": 64,
+      "maxSlope": 0.50,
+      "biomes": {
+        "shore":     { "density": 0.006, "weights": { "heather": 2, "bramble": 1 } },
+        "meadow":    { "density": 0.030, "weights": { "shrub": 4, "berry_bush": 2, "heather": 3 } },
+        "birchwood": { "density": 0.040, "weights": { "shrub": 5, "berry_bush": 3, "bramble": 2 } },
+        "pinewood":  { "density": 0.036, "weights": { "juniper": 4, "shrub": 3, "bramble": 2 } },
+        "deepwood":  { "density": 0.048, "weights": { "bramble": 4, "juniper": 3, "shrub": 3 } },
+        "marsh":     { "density": 0.030, "weights": { "bramble": 3, "shrub": 2 } },
+        "moor":      { "density": 0.034, "weights": { "heather": 6, "juniper": 2 } },
+        "crags":     { "density": 0.005, "weights": { "juniper": 2, "heather": 1 } },
+        "snowline":  { "density": 0.002, "weights": { "juniper": 1 } }
+      }
+    },
+    "ferns": {
+      "cellSize": 64,
+      "maxSlope": 0.45,
+      "biomes": {
+        "shore":     { "density": 0.010, "weights": { "reed": 4, "cattail": 3 } },
+        "meadow":    { "density": 0.030, "weights": { "broadleaf": 4, "fern": 2 } },
+        "birchwood": { "density": 0.075, "weights": { "fern": 5, "broadleaf": 4 } },
+        "pinewood":  { "density": 0.070, "weights": { "fern": 6, "broadleaf": 2 } },
+        "deepwood":  { "density": 0.105, "weights": { "fern": 8, "broadleaf": 3 } },
+        "marsh":     { "density": 0.110, "weights": { "reed": 6, "cattail": 5, "fern": 2 } },
+        "moor":      { "density": 0.022, "weights": { "fern": 2, "broadleaf": 2 } },
+        "crags":     { "density": 0.004, "weights": { "fern": 1 } },
+        "snowline":  { "density": 0.000, "weights": {} }
+      }
+    },
+    "flowers": {
+      "cellSize": 48,
+      "maxSlope": 0.42,
+      "biomes": {
+        "shore":     { "density": 0.006, "weights": { "thistle": 2 } },
+        "meadow":    { "density": 0.075, "weights": { "daisy": 6, "bluebell": 4, "thistle": 2 } },
+        "birchwood": { "density": 0.045, "weights": { "bluebell": 6, "daisy": 3, "toadstool": 2 } },
+        "pinewood":  { "density": 0.035, "weights": { "mushroom_cap": 4, "toadstool": 3, "bluebell": 2 } },
+        "deepwood":  { "density": 0.048, "weights": { "toadstool": 6, "mushroom_cap": 5 } },
+        "marsh":     { "density": 0.030, "weights": { "toadstool": 4, "mushroom_cap": 2 } },
+        "moor":      { "density": 0.030, "weights": { "thistle": 5, "daisy": 2 } },
+        "crags":     { "density": 0.006, "weights": { "thistle": 2 } },
+        "snowline":  { "density": 0.000, "weights": {} }
+      }
+    },
+    "rocks": {
+      "cellSize": 128,
+      "maxSlope": 1.0,
+      "biomes": {
+        "shore":     { "density": 0.0060, "weights": { "pebble": 6, "stone": 4, "slab": 2, "boulder": 1 } },
+        "meadow":    { "density": 0.0030, "weights": { "stone": 4, "boulder": 2, "mossy_boulder": 2, "pebble": 3 } },
+        "birchwood": { "density": 0.0040, "weights": { "mossy_boulder": 5, "stone": 3, "rock_cluster": 1 } },
+        "pinewood":  { "density": 0.0048, "weights": { "mossy_boulder": 6, "stone": 3, "rock_cluster": 2 } },
+        "deepwood":  { "density": 0.0055, "weights": { "mossy_boulder": 7, "rock_cluster": 3, "cracked_boulder": 2 } },
+        "marsh":     { "density": 0.0030, "weights": { "mossy_boulder": 4, "stone": 2 } },
+        "moor":      { "density": 0.0090, "weights": { "stone": 5, "boulder": 4, "slab": 3, "standing_stone": 1, "cairn": 1 } },
+        "crags":     { "density": 0.0210, "weights": { "shard": 5, "boulder": 5, "slab": 4, "cracked_boulder": 3, "rock_cluster": 3, "ore_vein": 1 } },
+        "snowline":  { "density": 0.0140, "weights": { "shard": 4, "boulder": 3, "slab": 3, "crystal_cluster": 1 } }
+      }
+    },
+    "debris": {
+      "cellSize": 128,
+      "maxSlope": 0.40,
+      "biomes": {
+        "shore":     { "density": 0.0009, "weights": { "fallen_log": 2, "branch_pile": 1 } },
+        "meadow":    { "density": 0.0009, "weights": { "broken_stump": 2, "branch_pile": 2 } },
+        "birchwood": { "density": 0.0032, "weights": { "fallen_log": 4, "broken_stump": 3, "branch_pile": 2 } },
+        "pinewood":  { "density": 0.0038, "weights": { "fallen_log": 5, "broken_stump": 3, "root_arch": 1, "branch_pile": 3 } },
+        "deepwood":  { "density": 0.0052, "weights": { "fallen_log": 6, "root_arch": 2, "broken_stump": 4, "branch_pile": 3 } },
+        "marsh":     { "density": 0.0030, "weights": { "fallen_log": 4, "broken_stump": 2 } },
+        "moor":      { "density": 0.0012, "weights": { "broken_stump": 2, "branch_pile": 1 } },
+        "crags":     { "density": 0.0004, "weights": { "branch_pile": 1 } },
+        "snowline":  { "density": 0.0003, "weights": { "broken_stump": 1 } }
+      }
+    },
+    "ground": {
+      "cellSize": 64,
+      "maxSlope": 0.34,
+      "biomes": {
+        "shore":     { "density": 0.0035, "weights": { "sand_ripple": 6, "bone_scatter": 1 } },
+        "meadow":    { "density": 0.0022, "weights": { "lichen_patch": 3, "puddle_ring": 1 } },
+        "birchwood": { "density": 0.0048, "weights": { "root_mat": 4, "lichen_patch": 3, "pine_cone_scatter": 2 } },
+        "pinewood":  { "density": 0.0060, "weights": { "pine_cone_scatter": 6, "root_mat": 4, "lichen_patch": 2 } },
+        "deepwood":  { "density": 0.0078, "weights": { "root_mat": 6, "mushroom_ring": 2, "pine_cone_scatter": 4 } },
+        "marsh":     { "density": 0.0060, "weights": { "puddle_ring": 6, "root_mat": 3 } },
+        "moor":      { "density": 0.0030, "weights": { "lichen_patch": 4, "ash_patch": 1 } },
+        "crags":     { "density": 0.0026, "weights": { "lichen_patch": 3, "bone_scatter": 1 } },
+        "snowline":  { "density": 0.0060, "weights": { "snow_drift": 8 } }
+      }
+    }
+  }
+}

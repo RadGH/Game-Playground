@@ -37,39 +37,39 @@
   </defs>
 
   <g transform="translate(128 0)">
-    <use href="#row" fill="url(#nd2)" transform="translate(0 240) rotate(5) scale(1.3)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 226) rotate(-4) scale(1.28)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 212) rotate(4) scale(1.25)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 198) rotate(-5) scale(1.2)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 184) rotate(3) scale(1.15)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 170) rotate(-4) scale(1.1)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 156) rotate(5) scale(1.04)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 142) rotate(-3) scale(0.98)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 128) rotate(4) scale(0.9)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 114) rotate(-4) scale(0.82)"/>
-    <use href="#row" fill="url(#nd2)" transform="translate(0 100) rotate(3) scale(0.72)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 240) rotate(5) scale(1.89)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 226) rotate(-4) scale(1.86)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 212) rotate(4) scale(1.81)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 198) rotate(-5) scale(1.74)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 184) rotate(3) scale(1.67)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 170) rotate(-4) scale(1.59)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 156) rotate(5) scale(1.51)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 142) rotate(-3) scale(1.42)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 128) rotate(4) scale(1.30)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 114) rotate(-4) scale(1.19)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 100) rotate(3) scale(1.04)"/>
   </g>
   <path d="M128,250 C130,200 126,130 128,36" fill="none" stroke="#4e3e33" stroke-width="5" stroke-linecap="round"/>
-  <use href="#shoot" transform="translate(129 206) rotate(-44) scale(1.0)"/>
-  <use href="#shoot" transform="translate(128 176) rotate(40) scale(0.95)"/>
-  <use href="#shoot" transform="translate(127 144) rotate(-42) scale(0.85)"/>
-  <use href="#shoot" transform="translate(128 114) rotate(38) scale(0.7)"/>
-  <use href="#shoot" transform="translate(128 88) rotate(-36) scale(0.55)"/>
+  <use href="#shoot" transform="translate(129 206) rotate(-44) scale(1.30)"/>
+  <use href="#shoot" transform="translate(128 176) rotate(40) scale(1.23)"/>
+  <use href="#shoot" transform="translate(127 144) rotate(-42) scale(1.10)"/>
+  <use href="#shoot" transform="translate(128 114) rotate(38) scale(0.91)"/>
+  <use href="#shoot" transform="translate(128 88) rotate(-36) scale(0.72)"/>
   <g transform="translate(128 0)">
-    <use href="#row" fill="url(#nd)" transform="translate(0 233) rotate(-3) scale(1.3)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 219) rotate(4) scale(1.27)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 205) rotate(-4) scale(1.22)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 191) rotate(3) scale(1.17)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 177) rotate(-5) scale(1.12)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 163) rotate(4) scale(1.06)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 149) rotate(-3) scale(1.0)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 135) rotate(4) scale(0.94)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 121) rotate(-4) scale(0.86)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 107) rotate(3) scale(0.78)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 93) rotate(-3) scale(0.7)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 79) rotate(3) scale(0.6)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 66) rotate(-2) scale(0.5)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 54) rotate(2) scale(0.4)"/>
-    <use href="#row" fill="url(#nd)" transform="translate(0 44) scale(0.3)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 233) rotate(-3) scale(1.89)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 219) rotate(4) scale(1.84)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 205) rotate(-4) scale(1.77)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 191) rotate(3) scale(1.70)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 177) rotate(-5) scale(1.62)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 163) rotate(4) scale(1.54)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 149) rotate(-3) scale(1.45)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 135) rotate(4) scale(1.36)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 121) rotate(-4) scale(1.25)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 107) rotate(3) scale(1.13)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 93) rotate(-3) scale(1.01)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 79) rotate(3) scale(0.87)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 66) rotate(-2) scale(0.72)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 54) rotate(2) scale(0.58)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 44) scale(0.43)"/>
   </g>
 </svg>

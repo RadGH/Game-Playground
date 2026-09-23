@@ -16,9 +16,9 @@ import { makeCloudTexture } from './kit/textures.js';
 
 /** Weather presets. Each one is a whole look, not a single slider. */
 export const WEATHER = {
-  clear:    { label: 'Clear',        turbidity: 2.6,  rayleigh: 1.4, mie: 0.004, mieG: 0.80, fog: 0.0060, fogHeight: 70, clouds: 0.22, cloudSpeed: 0.010, sun: 1.00, ambient: 1.00, sat: 1.04 },
-  golden:   { label: 'Golden hour',  turbidity: 5.2,  rayleigh: 2.4, mie: 0.010, mieG: 0.86, fog: 0.0115, fogHeight: 46, clouds: 0.34, cloudSpeed: 0.012, sun: 0.95, ambient: 0.95, sat: 1.10 },
-  hazy:     { label: 'Hazy',         turbidity: 7.0,  rayleigh: 2.0, mie: 0.014, mieG: 0.82, fog: 0.0180, fogHeight: 38, clouds: 0.42, cloudSpeed: 0.014, sun: 0.82, ambient: 1.05, sat: 0.96 },
+  clear:    { label: 'Clear',        turbidity: 2.6,  rayleigh: 1.4, mie: 0.004, mieG: 0.80, fog: 0.0032, fogHeight: 85, clouds: 0.22, cloudSpeed: 0.010, sun: 1.00, ambient: 1.00, sat: 1.04 },
+  golden:   { label: 'Golden hour',  turbidity: 5.2,  rayleigh: 2.4, mie: 0.010, mieG: 0.86, fog: 0.0070, fogHeight: 55, clouds: 0.34, cloudSpeed: 0.012, sun: 0.95, ambient: 0.95, sat: 1.10 },
+  hazy:     { label: 'Hazy',         turbidity: 7.0,  rayleigh: 2.0, mie: 0.014, mieG: 0.82, fog: 0.0130, fogHeight: 42, clouds: 0.42, cloudSpeed: 0.014, sun: 0.82, ambient: 1.05, sat: 0.96 },
   overcast: { label: 'Overcast',     turbidity: 11.0, rayleigh: 0.9, mie: 0.020, mieG: 0.70, fog: 0.0240, fogHeight: 34, clouds: 0.88, cloudSpeed: 0.020, sun: 0.34, ambient: 1.35, sat: 0.84 },
   fogbank:  { label: 'Deep fog',     turbidity: 9.0,  rayleigh: 1.2, mie: 0.022, mieG: 0.76, fog: 0.0520, fogHeight: 22, clouds: 0.60, cloudSpeed: 0.008, sun: 0.48, ambient: 1.25, sat: 0.78 },
   storm:    { label: 'Storm front',  turbidity: 14.0, rayleigh: 0.7, mie: 0.028, mieG: 0.66, fog: 0.0300, fogHeight: 30, clouds: 1.00, cloudSpeed: 0.045, sun: 0.22, ambient: 1.20, sat: 0.80 },
@@ -46,6 +46,10 @@ const DAY_TABLE = [
   { h: 21.0, sun: 0x4a4a74, sunI: 0.10, ground: 0x49495f, sky: 0x2b3450, inscatter: 0x5c5a80, ambS: 0x434f70, ambG: 0x22242c, ambI: 0.32, exposure: 0.68 },
   { h: 24.0, sun: 0x2a3550, sunI: 0.05, ground: 0x2a3244, sky: 0x1b2438, inscatter: 0x3d4a66, ambS: 0x2c3a58, ambG: 0x1a1d24, ambI: 0.28, exposure: 0.62 },
 ];
+
+/** How far away the sun and moon discs are drawn, and how big. 70 / 3000 is about 1.3 degrees
+ *  across — a little larger than the real sun, which reads better once bloom is on top. */
+const DISC_DIST = 3000, DISC_SUN = 70, DISC_MOON = 52;
 
 const _cA = new THREE.Color(), _cB = new THREE.Color();
 /** Read the day table at a given hour, blending between the two keyframes on either side. */
@@ -104,21 +108,26 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
   // Drawn as small additive sprites far away. The bloom pass picks them up and gives them a halo,
   // and the god-ray pass streaks light off them through the trees.
   const discGeo = new THREE.PlaneGeometry(1, 1);
+  // The discs sit at DISC_DIST, comfortably inside the camera's far plane, and they DO test
+  // against the depth buffer. Both matter. Anything beyond the far plane is clipped away however
+  // its material is set up; and with the depth test off, the sun draws straight through the tree
+  // in front of it, which both looks wrong and robs the light shafts of the thing that breaks
+  // them up. The sky dome behind is drawn without writing depth, so it never occludes them.
   const sunMat = new THREE.MeshBasicMaterial({
     color: 0xfff4e0, transparent: true, blending: THREE.AdditiveBlending,
-    depthWrite: false, depthTest: false, fog: false, map: discTexture(0xffffff, 1.0),
+    depthWrite: false, depthTest: true, fog: false, map: discTexture(0xffffff, 1.0),
   });
   const sunDisc = new THREE.Mesh(discGeo, sunMat);
-  sunDisc.scale.setScalar(2600);
+  sunDisc.scale.setScalar(DISC_SUN);
   sunDisc.renderOrder = -5;
   group.add(sunDisc);
 
   const moonMat = new THREE.MeshBasicMaterial({
     color: 0xcfd8ee, transparent: true, blending: THREE.AdditiveBlending,
-    depthWrite: false, depthTest: false, fog: false, map: discTexture(0xffffff, 0.55),
+    depthWrite: false, depthTest: true, fog: false, map: discTexture(0xffffff, 0.55),
   });
   const moonDisc = new THREE.Mesh(discGeo, moonMat);
-  moonDisc.scale.setScalar(1500);
+  moonDisc.scale.setScalar(DISC_MOON);
   moonDisc.renderOrder = -5;
   group.add(moonDisc);
 
@@ -225,6 +234,13 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
   let envTarget = null;
   let lastEnvHour = -999;
 
+  // A plain cube of the sky as well. The pre-filtered map above is what lights the world, but the
+  // water shader wants a straight `textureCube` lookup, and a pre-filtered map is not one — it is
+  // a 2D atlas with its own addressing. Rendering the dome into a small cube once per sky change
+  // costs almost nothing (it is six faces of one mesh) and gives the lake a real sky to mirror.
+  const skyCubeTarget = new THREE.WebGLCubeRenderTarget(256, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
+  const skyCubeCamera = new THREE.CubeCamera(1, 100000, skyCubeTarget);
+
   const state = {
     hour: 9.5, weather: 'clear', sunDir: new THREE.Vector3(), day: sampleDay(9.5),
     exposure: 1, sunLight: csm.lights[0],
@@ -246,7 +262,12 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
     if (envTarget) envTarget.dispose();
     envTarget = next;
     scene.environment = envTarget.texture;
-    scene.environmentIntensity = 0.85;
+
+    // and the plain cube for the water
+    const prevTarget = renderer.getRenderTarget();
+    skyCubeCamera.position.set(0, 60, 0);
+    skyCubeCamera.update(renderer, envScene);
+    renderer.setRenderTarget(prevTarget);
   }
 
   /** Move the whole world to a given hour of the day. */
@@ -265,13 +286,13 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
     skyU.sunPosition.value.copy(state.sunDir);
 
     // sun / moon discs sit far away along their directions
-    sunDisc.position.copy(state.sunDir).multiplyScalar(60000).add(camera.position);
+    sunDisc.position.copy(state.sunDir).multiplyScalar(DISC_DIST).add(camera.position);
     sunDisc.lookAt(camera.position);
-    sunMat.color.copy(d.sun).multiplyScalar(1.6);
+    sunMat.color.copy(d.sun).multiplyScalar(1.25);
     sunMat.opacity = THREE.MathUtils.clamp(state.sunDir.y * 6 + 0.1, 0, 1) * (1 - w.clouds * 0.6);
 
     const moonDir = state.sunDir.clone().multiplyScalar(-1);
-    moonDisc.position.copy(moonDir).multiplyScalar(60000).add(camera.position);
+    moonDisc.position.copy(moonDir).multiplyScalar(DISC_DIST).add(camera.position);
     moonDisc.lookAt(camera.position);
     moonMat.opacity = THREE.MathUtils.clamp(moonDir.y * 4, 0, 1) * 0.9 * (1 - w.clouds * 0.7);
 
@@ -279,7 +300,7 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
     starMat.uniforms.uOpacity.value = THREE.MathUtils.clamp(-state.sunDir.y * 7 - 0.1, 0, 1) * (1 - w.clouds * 0.8);
 
     // direct light
-    const sunUp = Math.max(0, state.sunDir.y);
+    const sunUp = Math.max(0, state.sunDir.y);   // also used by the ambient balance below
     const nightFloor = 0.045;
     const intensity = (d.sunI * w.sun) * (sunUp > 0.001 ? 1 : 0) + nightFloor;
     csm.lightDirection.copy(state.sunDir).multiplyScalar(-1).normalize();
@@ -293,7 +314,18 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
 
     hemi.color.copy(d.ambS);
     hemi.groundColor.copy(d.ambG);
-    hemi.intensity = d.ambI * w.ambient;
+
+    // The ratio between the sun and everything else IS the shadow.
+    //
+    // Fill light and direct light were coming out about equal, so a shadow only removed half the
+    // light falling on a surface and read as a slightly darker patch of grass rather than a
+    // shadow. Worse, the fill was a flat amount all day, so at dusk — when the sun is weakest and
+    // the shadows are longest — it was actually the brighter of the two. Both the sky probe and
+    // the hemisphere light now fall away with the sun, which keeps direct light roughly three
+    // times the fill through the day and lets the shadows read.
+    const sunLift = THREE.MathUtils.clamp(sunUp * 2.4, 0, 1);
+    hemi.intensity = d.ambI * w.ambient * (0.16 + 0.30 * sunLift);
+    scene.environmentIntensity = w.ambient * (0.16 + 0.34 * sunLift);
     fill.position.copy(state.sunDir).multiplyScalar(-1).setY(0.4).normalize();
     fill.color.copy(d.ambS);
     fill.intensity = 0.14 * w.ambient;
@@ -329,11 +361,11 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
   /** Per-frame: keep the dome centred on the camera and scroll the clouds. */
   function update(dt, elapsed) {
     group.position.set(camera.position.x, 0, camera.position.z);
-    sunDisc.position.copy(state.sunDir).multiplyScalar(60000)
+    sunDisc.position.copy(state.sunDir).multiplyScalar(DISC_DIST)
       .add(new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z))
       .sub(group.position);
     sunDisc.lookAt(camera.position.clone().sub(group.position));
-    const md = state.sunDir.clone().multiplyScalar(-60000)
+    const md = state.sunDir.clone().multiplyScalar(-DISC_DIST)
       .add(new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z))
       .sub(group.position);
     moonDisc.position.copy(md);
@@ -364,12 +396,14 @@ export function createSky(scene, renderer, camera, { quality, worldSize = 1024 }
   return {
     group, sky, csm, hemi, fill, stars, cloudLayers, sunDisc, moonDisc,
     state, setTime, setWeather, update, sunScreenPosition, regenerateEnv,
+    skyCubeTarget,
+    get envCube() { return skyCubeTarget.texture; },
     get hour() { return state.hour; },
     get weather() { return state.weather; },
     get sunDir() { return state.sunDir; },
     get exposure() { return state.exposure; },
     dispose() {
-      pmrem.dispose(); if (envTarget) envTarget.dispose();
+      pmrem.dispose(); if (envTarget) envTarget.dispose(); skyCubeTarget.dispose();
       starGeo.dispose(); starMat.dispose(); discGeo.dispose();
       csm.dispose();
     },

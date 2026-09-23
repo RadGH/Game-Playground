@@ -24,6 +24,8 @@ Every experiment here is standalone. A game can take one piece or all of them. T
 | **Avatar 2D** (`avatar-2d/js/render.js`, `random.js`) | `renderSVG, renderInto, normalizeAvatar, randomAvatar` | SVG portraits/paper-dolls from the `avatar` JSON; race-rule random | `avatar-2d/data/presets.json` | microseconds; DOM-free string |
 | **Avatar 3D** (`avatar-3d/js/mii.js`, `quaternius.js`, `scene.js`) | `createMiiCharacter, createQuaterniusCharacter, createScene` | Three.js characters from the same `avatar` JSON; procedural (Mii) or CC0 meshes with 43 animation clips | importmap for `three`; `avatar-3d/assets/quaternius/` (~32 MB) for the mesh mode | Mii ~60 draw calls/character; Quaternius ~6 skinned meshes |
 
+| **High-def 3D world** (`highdef-3d/js/*`) | `generateWorldSync, scatterWorld, createRenderer, createSky, createTerrain, createVegetation, createGrass, createWater, createCharacter, createCameras` | A lit, walkable outdoor world: heightfield terrain with biome splatting, an instanced forest, GPU grass, water, a physical sky with a day cycle and weather, cascaded shadows, height fog and a post chain (bloom, light shafts, ACES, grade). Plus a rigged character with a walk/jog/sprint blend tree and two cameras | `highdef-3d/data/vegetation.json`; the CC0 character in `avatar-3d/assets/quaternius/`. Everything else is generated | ~500 draws / 5M triangles at High, 1280x720. World generation ~1.6 s once |
+
 - **`worldgen/`** — a whole world map in one call: continents, climate, rivers, biomes, named regions, towns, dungeons, roads, plus region and local-tile zoom. Pure data, seeded, exports JSON/PNG. See its README.
 - **`universe/`** — a whole galaxy in one call: stars by class, systems of planets with moons, rings, belts and comets, resources and hazards per planet, and a planet's surface handed straight to `worldgen/`. Pure data, seeded. 3D models for all of it in `assets/js/space-models.js`. See its README.
 
@@ -499,6 +501,82 @@ cloud decks, including the ones on planets seen from another planet's surface.
 `prototypes/farhold/js/weather.js` is the matching renderer, if you want a reference: two scrolling
 cloud decks on a sky dome, rain as recycled line segments in a box that follows the camera, snow and
 dust as points, lightning that flashes the scene, and fog that closes the view to 90 m in a blizzard.
+
+
+## A world you can stand in and look at
+
+`highdef-3d/` is the answer to "what does it take for a browser world to stop looking like a
+programmer's test scene". It is not one trick; it is about eight, and the order they are applied in
+matters. The full write-up is `highdef-3d/README.md`; this is what to copy.
+
+```js
+import { generateWorldSync } from './highdef-3d/js/world.js';
+import { scatterWorld }       from './highdef-3d/js/scatter.js';
+import { resolveQuality }     from './highdef-3d/js/quality.js';
+import { createRenderer }     from './highdef-3d/js/renderer.js';
+import { createSky }          from './highdef-3d/js/sky.js';
+import { createTerrain }      from './highdef-3d/js/terrain.js';
+import { createVegetation }   from './highdef-3d/js/vegetation.js';
+import { createGrass }        from './highdef-3d/js/grass.js';
+import { createWater }        from './highdef-3d/js/water.js';
+
+const quality = resolveQuality('high');
+const world   = generateWorldSync({ seed });               // 1. nothing can start without this
+const scatter = scatterWorld(world, rules, { seed });
+const view    = createRenderer(container, quality);        // 2. the sky needs a live context
+const sky     = createSky(scene, view.renderer, camera, { quality });   // 3. owns the shadow rig
+const terrain = createTerrain(world, quality, { csm: sky.csm });        // 4. everything else
+const veg     = await createVegetation({ world, scatter, quality, csm: sky.csm });
+const grass   = createGrass(world, quality, { csm: sky.csm });
+const water   = createWater(world, quality);
+water.setEnvironment(sky.envCube);
+```
+
+**Boot order is the thing to copy, and it is not obvious.** The world field first, because the
+mesh, the grass, the scatter, the water depth and the character's feet all read it. The renderer
+second, because the sky renders itself into a reflection probe at build time and needs a graphics
+context. The sky third, because it owns the cascaded shadow rig and **every material has to be
+handed that rig as it is made** — a material created before the sky exists will not receive
+cascaded shadows, and nothing will tell you.
+
+**Every material goes through `enhance()`** (`highdef-3d/js/materials.js`). The cascaded-shadow
+addon replaces `material.onBeforeCompile` outright, so wind sway and our fog chunk cannot also
+assign to it — they have to chain. `enhance()` is the one place that chaining lives.
+
+**One heightmap, read by everything.** The most common way for a world like this to feel subtly
+wrong is two systems disagreeing about the ground by a few centimetres, which shows up as a
+character who sinks into hills and is very hard to trace. `js/world.js` bakes the heightmap once
+into a `Float32Array` and every other module reads it — including the terrain mesh, which samples
+grid nodes exactly rather than re-evaluating the noise. Whatever the array says IS the ground, and
+a node test asserts a downward ray agrees with it to 5 cm.
+
+**The five things that carry the look**, roughly in order of how much they buy:
+
+1. **A sky you can reflect.** Render the physical sky into a `PMREMGenerator` probe whenever the sun
+   moves. Image-based lighting from a real sky is most of the distance between "shaded" and "lit".
+2. **Cascaded shadow maps.** One shadow map over 250 m gives staircases; four slices each at full
+   resolution give crisp shadows underfoot and usable ones at the tree line.
+3. **Height fog with sun inscatter**, replacing three's fog chunk. There is a closed-form integral
+   for exponential-with-height density along a ray, so no marching and no banding.
+4. **Bloom before tone mapping, grade after.** Bloom on values already squashed into 0..1 is a blur
+   filter. Its threshold must be **above 1** — on a raw HDR frame a threshold of 0.9 catches the
+   ordinary lit ground.
+5. **Leaves as bowed cards and occlusion baked into vertex colours.** Both are free at run time and
+   both are the difference between foliage and cardboard.
+
+**The geometry contract**, if you write your own model kit: `position, normal, uv, color, aWind`,
+in that order. `color` is baked shading and tint, `aWind` is `(sway strength 0..1, phase 0..1)`.
+The order matters because the far ring gets merged, and `mergeGeometries` refuses inputs whose
+attributes differ — which fails as a refusal, not a crash, so it looks like a missing feature.
+
+**Two performance traps that cost real time here:**
+
+- **Measure a cell's distance to its nearest edge, not its middle.** Subtracting half a cell's
+  diagonal sounds like the same thing and is not; it drew full-detail trees out to 190 m and turned
+  a 500-draw frame into 6,776.
+- **Grouping too finely costs more than it saves.** A group is at least one draw whatever is in it,
+  so 64 m cells gave four hundred draws holding three trees each. 128 m cells plus a **baked** far
+  ring — at 22 triangles a tree, stamping two hundred into one geometry — took it to about 500.
 
 ## Worked example: Emberveil (a full RPG on the pieces)
 

@@ -36,11 +36,16 @@ export function createRenderer(container, quality) {
     powerPreference: 'high-performance',
     stencil: false,
     alpha: false,
+    // Keeps the last frame readable after it has been drawn. Without it, anything that reads the
+    // canvas outside the render tick — the screenshot key, and every test that checks the picture
+    // is not blank — gets an empty buffer and no error to say why.
+    preserveDrawingBuffer: true,
   });
   renderer.setPixelRatio(Math.min(quality.pixelRatio, window.devicePixelRatio || 1));
   renderer.setSize(container.clientWidth || 1280, container.clientHeight || 720);
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // r186 dropped PCFSoftShadowMap; PCF plus the cascades' own blur is what softens the edge now.
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;   // the filmic curve, not a straight clamp
   renderer.toneMappingExposure = 1.0;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -66,7 +71,7 @@ export function createRenderer(container, quality) {
       if (api.composer) api.composer.dispose();
 
       renderer.setPixelRatio(Math.min(q.pixelRatio, window.devicePixelRatio || 1));
-      renderer.shadowMap.type = q.shadowMapSize >= 2048 ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
 
       // A half-float target keeps values above 1.0 alive all the way to the tone mapper. `samples`
       // turns on hardware multisampling inside the target, which is what lets alpha-to-coverage
@@ -114,9 +119,18 @@ export function createRenderer(container, quality) {
       }
 
       if (q.bloom) {
-        // radius 0.5, threshold 0.9 — only genuinely bright things bloom. A low threshold makes
-        // the whole picture soft and is the classic sign of bloom used as a crutch.
-        const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), q.bloomStrength, 0.55, 0.92);
+        // Two numbers here were the difference between a lit scene and a milky one, and neither is
+        // obvious.
+        //
+        // The THRESHOLD runs on the raw high-dynamic-range frame, where a clear sky sits somewhere
+        // between 2 and 6. Anything at or below that and the whole sky qualifies as "bright" — and
+        // because the pass blurs its brightest mip at a thirty-second of the resolution, a
+        // qualifying sky does not glow at its edges, it washes evenly over the entire picture. At
+        // 2.0 only the sun and the brightest cloud edges get through.
+        //
+        // The RADIUS is how far the mip levels are blended outward. Above about half, the widest
+        // blur dominates and the bloom stops looking like light spilling round an edge.
+        const bloom = new UnrealBloomPass(new THREE.Vector2(size.x, size.y), q.bloomStrength, 0.45, 2.0);
         composer.addPass(bloom);
         api.passes.bloom = bloom;
       }

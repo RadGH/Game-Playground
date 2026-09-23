@@ -25,11 +25,19 @@ export class GodRayPass extends Pass {
     this.uniforms = {
       tDiffuse:  { value: null },
       uSunPos:   { value: new THREE.Vector2(0.5, 0.75) },
-      uDensity:  { value: 0.72 },
-      uDecay:    { value: 0.955 },
-      uWeight:   { value: 0.28 },
-      uExposure: { value: 0.30 },
-      uThreshold:{ value: 0.62 },
+      uDensity:  { value: 0.62 },
+      uDecay:    { value: 0.962 },
+      // These three used to be the brightness of the whole picture. The accumulation below adds
+      // one sample per step, so `weight` is multiplied by the sample count before it reaches the
+      // frame — at 40 samples a weight of 0.28 is a gain of eleven, and the sky went white. It is
+      // normalised by the sample count now, so the numbers mean what they look like they mean.
+      uWeight:   { value: 1.0 },
+      uExposure: { value: 0.060 },
+      // This is a HIGH-dynamic-range frame. Sunlit grass sits around 1, and the sky around the sun
+      // sits between 3 and 8 — so the threshold has to be well above the brightest GROUND, or the
+      // field itself becomes a light source and smears over the whole picture.
+      uThreshold:{ value: 2.40 },
+      uFalloff:  { value: 3.2 },
       uTint:     { value: new THREE.Color(0xffe2b0) },
       uAmount:   { value: 1.0 },
       uAspect:   { value: 1.0 },
@@ -44,7 +52,7 @@ export class GodRayPass extends Pass {
       fragmentShader: /* glsl */`
         uniform sampler2D tDiffuse;
         uniform vec2  uSunPos;
-        uniform float uDensity, uDecay, uWeight, uExposure, uThreshold, uAmount, uAspect;
+        uniform float uDensity, uDecay, uWeight, uExposure, uThreshold, uAmount, uAspect, uFalloff;
         uniform vec3  uTint;
         varying vec2  vUv;
 
@@ -52,7 +60,7 @@ export class GodRayPass extends Pass {
         vec3 bright( vec2 uv ) {
           vec3 c = texture2D( tDiffuse, uv ).rgb;
           float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
-          return c * smoothstep( uThreshold, uThreshold + 0.35, l );
+          return c * smoothstep( uThreshold, uThreshold + 0.9, l );
         }
 
         void main() {
@@ -63,19 +71,27 @@ export class GodRayPass extends Pass {
           vec2 delta = ( uv - uSunPos ) * ( uDensity / float( SAMPLES ) );
           float illum = 1.0;
           vec3 acc = vec3( 0.0 );
+          float norm = 0.0;
           for ( int i = 0; i < SAMPLES; i ++ ) {
             uv -= delta;
-            acc += bright( clamp( uv, 0.0, 1.0 ) ) * illum * uWeight;
+            acc += bright( clamp( uv, 0.0, 1.0 ) ) * illum;
+            norm += illum;
             illum *= uDecay;
           }
+          acc *= uWeight / max( norm, 1e-4 );     // an average, not a sum
           acc *= uExposure * uAmount;
 
-          // Fade the shafts out as the sun leaves the frame, or they pop when it crosses the edge.
-          vec2 d = ( vUv - uSunPos );
+          // Two separate fades, and both are needed.
+          //   near   — how far THIS pixel is from the sun. Without it every pixel in the frame
+          //            picks up sky along its ray and the shafts become a flat white wash.
+          //   onScreen — how far the SUN is from the middle of the frame, so the whole effect
+          //            eases off rather than popping as the sun crosses the edge.
+          vec2 d = vUv - uSunPos;
           d.x *= uAspect;
-          float edge = 1.0 - smoothstep( 0.35, 1.25, length( uSunPos - vec2( 0.5 ) ) * 2.0 );
+          float near = exp( -length( d ) * uFalloff );
+          float onScreen = 1.0 - smoothstep( 0.55, 1.35, length( uSunPos - vec2( 0.5 ) ) * 2.0 );
 
-          gl_FragColor = vec4( scene + acc * uTint * edge, 1.0 );
+          gl_FragColor = vec4( scene + acc * uTint * near * onScreen, 1.0 );
         }`,
     });
     this.fsQuad = new FullScreenQuad(this.material);

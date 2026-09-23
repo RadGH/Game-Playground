@@ -77,6 +77,8 @@ window.highdef = app;   // so the Playwright tests can drive it
 Object.defineProperty(app, '__renderer', { get: () => view.renderer });
 Object.defineProperty(app, '__csm', { get: () => sky.csm });
 Object.defineProperty(app, '__scene', { get: () => scene });
+Object.defineProperty(app, '__camera', { get: () => cameras.active() });
+Object.defineProperty(app, '__cameraState', { get: () => cameras.state });
 
 /** A look inside, for the tests and for tuning. Counts what is actually being drawn. */
 app.debug = () => {

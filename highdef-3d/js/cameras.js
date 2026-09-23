@@ -33,7 +33,7 @@ export function createCameras(world, { fov = 55, aspect = 16 / 9 } = {}) {
     zoom: 1,
     // follow
     followYaw: 0,
-    followPitch: THREE.MathUtils.degToRad(12),
+    followPitch: THREE.MathUtils.degToRad(15),
     followDist: 5.2,
     shoulder: 0.55,
     // shared
@@ -68,9 +68,13 @@ export function createCameras(world, { fov = 55, aspect = 16 / 9 } = {}) {
 
     const dist = state.followDist * state.zoom;
     const cp = Math.cos(state.followPitch), sp = Math.sin(state.followPitch);
+    // `dir` points from the camera toward the head, so its y has to be NEGATIVE for a camera that
+    // sits above and looks down. With it positive the camera ends up a metre BELOW the head —
+    // about knee height — which is not obviously wrong until you notice you are looking up at
+    // everything.
     const dir = _v2.set(
       -Math.sin(state.followYaw) * cp,
-      sp,
+      -sp,
       -Math.cos(state.followYaw) * cp
     );
     out.copy(head).addScaledVector(dir, -dist);
@@ -107,8 +111,17 @@ export function createCameras(world, { fov = 55, aspect = 16 / 9 } = {}) {
    */
   function update(dt, input, subject) {
     const wantFollow = state.mode === 'follow' && subject;
-    // the blend is what actually animates: everything else just feeds it
-    state.blend += ((wantFollow ? 1 : 0) - state.blend) * Math.min(1, dt * 2.6);
+    // The blend is what actually animates: everything else just feeds it.
+    //
+    // Two details. The rate is `1 - exp(-k * dt)` rather than `dt * k`, so a page running at
+    // fifteen frames a second blends over the same number of SECONDS as one running at sixty
+    // rather than taking four times as long. And it is snapped at the end, because an
+    // exponential ease never actually arrives: on a slow frame it was still 8% short of the
+    // third-person position after five seconds, which put the camera four metres too high and
+    // looked like a camera bug rather than an unfinished transition.
+    const wantBlend = wantFollow ? 1 : 0;
+    state.blend += (wantBlend - state.blend) * (1 - Math.exp(-4.5 * dt));
+    if (Math.abs(wantBlend - state.blend) < 0.002) state.blend = wantBlend;
 
     if (state.mode === 'overhead') updateOverhead(dt, input);
     else updateFollow(dt, input, subject);

@@ -76,8 +76,14 @@ export async function createVegetation({ world, scatter, quality, csm, seed = 1 
   barkSurface.map.anisotropy = quality.anisotropy;
   rockSurface.map.anisotropy = quality.anisotropy;
 
-  // Glowing bits — an ore seam, a rune, a crystal — are marked by the kits with a vertex colour
-  // above 1.0. Everything above 1 becomes light.
+  // Glowing bits — an ore seam, a rune, a crystal — are marked by the ROCK kit with a vertex
+  // colour above 1.0, and everything above 1 becomes light.
+  //
+  // This is deliberately NOT applied to the plants. The tree kit also uses colours above 1, but
+  // for something else entirely: a heather's purple tint is (1.0, 0.82, 1.15) and snow on a fir
+  // is (1.7, 1.75, 1.9). Those are meant to brighten the surface through the ordinary vertex
+  // colour multiply, not to emit — and treating them as emission put a glowing pink blob on
+  // every heather bush in the world.
   const EMISSIVE = /* glsl */`
     totalEmissiveRadiance += max( vColor.rgb - vec3( 1.0 ), vec3( 0.0 ) ) * 1.35;
   `;
@@ -87,11 +93,11 @@ export async function createVegetation({ world, scatter, quality, csm, seed = 1 
       map: barkSurface.map, normalMap: barkSurface.normalMap,
       vertexColors: true, roughness: 0.94, metalness: 0,
       normalScale: new THREE.Vector2(1.2, 1.2),
-    }), { csm, wind: 0.35, fragment: { emissive: EMISSIVE } }),
+    }), { csm, wind: 0.35 }),
 
     stem: enhance(new THREE.MeshStandardMaterial({
       vertexColors: true, roughness: 0.92, metalness: 0, color: 0xffffff,
-    }), { csm, wind: 0.9, fragment: { emissive: EMISSIVE } }),
+    }), { csm, wind: 0.9 }),
 
     foliage: enhance(new THREE.MeshStandardMaterial({
       // The sprites are drawn with soft edges. At 0.42 the cut-off eats a wide band off every
@@ -100,7 +106,7 @@ export async function createVegetation({ world, scatter, quality, csm, seed = 1 
       map: atlas.texture, alphaTest: 0.26, transparent: false,
       side: THREE.DoubleSide, vertexColors: true,
       roughness: 0.88, metalness: 0,
-    }), { csm, wind: 1.0, fragment: { emissive: EMISSIVE } }),
+    }), { csm, wind: 1.0 }),
 
     // Rocks are textured from three directions at once so a cliff face does not smear, and the
     // vertex colour is a tint on top rather than the colour itself.

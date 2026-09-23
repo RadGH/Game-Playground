@@ -1,10 +1,11 @@
 // Grass.
 //
 // A quarter of a million blades is not something you can move about on the processor sixty times a
-// second. So nothing moves: there is ONE instanced mesh whose blades sit at fixed offsets from a
-// centre point, and the centre point follows the camera. Every blade works out where it really is,
-// how tall the ground is under it, whether grass grows there at all and which way the wind has
-// bent it — all in the vertex shader.
+// second. So nothing moves: there is ONE instanced mesh, and its centre follows the camera a whole
+// lattice square at a time. An instance is a SLOT, not a blade — which square of ground it draws
+// depends on where the centre is, and everything about the blade standing on that square is hashed
+// from the square's own coordinates. Work out where it really is, how tall the ground is under it,
+// whether grass grows there at all and which way the wind has bent it — all in the vertex shader.
 //
 // For that to work the shader needs to be able to read the landscape, so the heightmap goes to the
 // graphics card as a texture, along with a second one holding "how much grass grows here" and the
@@ -16,7 +17,6 @@
 
 import * as THREE from 'three';
 import { enhance } from './materials.js';
-import { makeRng } from './noise.js';
 import { BIOME_BY_ID, BIOMES } from './world.js';
 
 /**
@@ -97,32 +97,57 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
     return { mesh: null, update() {}, setDensity() {}, dispose() {}, count: 0, visibleCount: 0 };
   }
 
-  // --- where the blades sit relative to the centre ----------------------------------------------
-  // Laid out in rings so the array is already sorted near-to-far: turning the density down is then
-  // just drawing fewer of them, and the ones that go are the far ones.
+  // --- where the blades sit ---------------------------------------------------------------------
+  // The blades sit on a LATTICE FIXED IN THE WORLD, not at random offsets from the camera. That
+  // distinction is the whole trick: with random offsets the patch travels with you, so every blade
+  // is standing somewhere different each time the centre moves and the field appears to crawl and
+  // re-shuffle as you walk. Here an instance is only a SLOT; which square of ground it draws comes
+  // from the centre, and everything about the blade standing on that square — where in the square
+  // it is, its heading, height and colour — is hashed from the square's own coordinates. So the
+  // same patch of ground always grows the same blade, whichever slot happens to be drawing it, and
+  // walking through the field moves you past the grass instead of dragging it along.
+  //
+  // A plain lattice would spread the blades evenly, which spends most of them on ground far enough
+  // away that nobody can tell. So a square gets up to four blades: the extra ones are only drawn
+  // within their own radius, and they shrink into the ground as you walk away rather than winking
+  // out. That gives a thick field underfoot and a thinner one in the distance, the way the old
+  // random layout did — without any of it being tied to where the camera happens to be.
+  const RINGS = [1, 0.55, 0.30, 0.16];   // how far out each extra blade per square is drawn
   const density = 62 * (quality.grassDensity || 1);   // blades per square metre at the centre
   const target = Math.min(420000, Math.round(Math.PI * radius * radius * density * 0.25));
-  const rng = makeRng(seed);
-  const offsets = new Float32Array(target * 2);
-  const rands = new Float32Array(target * 4);
-  for (let i = 0; i < target; i++) {
-    // sqrt spreads the points evenly over the disc instead of bunching them in the middle,
-    // then a bias back toward the centre keeps the blades densest where you can actually see them
-    const t = Math.pow(rng(), 0.62);
-    const r = t * radius;
-    const a = rng() * Math.PI * 2;
-    offsets[i * 2] = Math.cos(a) * r;
-    offsets[i * 2 + 1] = Math.sin(a) * r;
-    rands[i * 4] = rng();                 // rotation
-    rands[i * 4 + 1] = 0.6 + rng() * 0.8; // height
-    rands[i * 4 + 2] = rng();             // colour jitter
-    rands[i * 4 + 3] = rng();             // wind phase
+  const spread = RINGS.reduce((a, f) => a + f * f, 0);   // blades per square, averaged over the disc
+  const cell = Math.sqrt((Math.PI * radius * radius * spread) / Math.max(1, target));
+  const half = Math.ceil(radius / cell);
+  const pts = [];
+  for (let j = -half; j <= half; j++) {
+    for (let i = -half; i <= half; i++) {
+      const x = i * cell, z = j * cell;
+      const d2 = x * x + z * z;
+      if (d2 > radius * radius) continue;
+      const d = Math.sqrt(d2);
+      for (let k = 0; k < RINGS.length; k++) {
+        const lim = radius * RINGS[k];
+        if (d > lim) break;
+        pts.push([x, z, d2, k, lim]);
+      }
+    }
   }
+  // near-to-far, so turning the density down draws fewer blades and the ones that go are the far ones
+  pts.sort((a, b) => (a[2] - b[2]) || (a[3] - b[3]));
+  const count = pts.length;
+  const offsets = new Float32Array(count * 2);
+  const slots = new Float32Array(count * 2);
+  for (let i = 0; i < count; i++) {
+    offsets[i * 2] = pts[i][0]; offsets[i * 2 + 1] = pts[i][1];
+    slots[i * 2] = pts[i][3]; slots[i * 2 + 1] = pts[i][4];
+  }
+  void seed;   // the look of a blade comes from where it stands, not from a sequence
 
   const geo = bladeGeometry(4);
   geo.setAttribute('aOffset', new THREE.InstancedBufferAttribute(offsets, 2));
-  geo.setAttribute('aRand', new THREE.InstancedBufferAttribute(rands, 4));
-  geo.instanceCount = target;
+  // x — which of the square's blades this is; y — the distance at which it stops being drawn
+  geo.setAttribute('aSlot', new THREE.InstancedBufferAttribute(slots, 2));
+  geo.instanceCount = count;
   geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), radius * 1.5);
 
   const tHeight = heightTexture(world);
@@ -134,6 +159,7 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
     uWorldSize:{ value: world.size },
     uOrigin:   { value: new THREE.Vector3() },
     uRadius:   { value: radius },
+    uCell:     { value: cell },
     uBlade:    { value: new THREE.Vector2(0.028, 0.42) },  // width, base height in metres
     uPlayer:   { value: new THREE.Vector3(0, -999, 0) },
     uPlayerR:  { value: 0.65 },
@@ -158,12 +184,13 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
     vertex: {
       pars: /* glsl */`
         attribute vec2 aOffset;
-        attribute vec4 aRand;
+        attribute vec2 aSlot;
         uniform sampler2D tHeight;
         uniform sampler2D tMask;
         uniform float uWorldSize;
         uniform vec3  uOrigin;
         uniform float uRadius;
+        uniform float uCell;
         uniform vec2  uBlade;
         uniform vec3  uPlayer;
         uniform float uPlayerR;
@@ -176,30 +203,54 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
         varying float vDry;
 
         vec2 hdWorldToUv( vec2 p ) { return ( p + uWorldSize * 0.5 ) / uWorldSize; }
+
+        // Four random numbers from a pair of whole numbers. Same square in, same blade out, for as
+        // long as the world exists — which is what keeps the field still while the camera moves.
+        vec4 hdHash4( vec2 p ) {
+          vec4 q = fract( vec4( p.xyxy ) * vec4( 0.1031, 0.1030, 0.0973, 0.1099 ) );
+          q += dot( q, q.wzxy + 33.33 );
+          return fract( ( q.xxyz + q.yzzw ) * q.zywx );
+        }
       `,
       main: /* glsl */`
       {
-        vec2 wxz = uOrigin.xz + aOffset;
+        // Which square of ground this slot is drawing. uOrigin is snapped to the same lattice on
+        // the processor, so this is a whole number that belongs to the ground, not to the camera.
+        vec2 cellId = floor( ( uOrigin.xz + aOffset ) / uCell + 0.5 );
+        // A square can carry several blades; each one hashes the square with its own offset, so
+        // they are different blades but every one of them is still nailed to that square.
+        vec2 seedId = cellId + aSlot.x * 37.13;
+        vec4 aRand = hdHash4( seedId );
+        vec4 bRand = hdHash4( seedId + 17.13 );
+        // Jitter inside the square so the field is not a visible grid — fixed, because it is
+        // hashed from the square rather than handed to the instance.
+        vec2 wxz = cellId * uCell + ( aRand.xy - 0.5 ) * uCell * 0.92;
         vec2 muv = hdWorldToUv( wxz );
         vec4 mask = texture2D( tMask, muv );
         float grow = mask.r;
 
-        // Thin the blades out toward the edge of the patch rather than ending it with a line.
-        float dist = length( aOffset );
-        float edge = 1.0 - smoothstep( uRadius * 0.62, uRadius, dist );
-        // a per-blade cutoff, so thinning removes whole blades instead of shrinking all of them
-        float keep = step( 1.0 - grow * edge, aRand.z * 0.92 + 0.04 );
+        // Thin the blades out toward the edge of the range they are drawn over, rather than
+        // ending it with a line. For the square's first blade that range is the whole patch; for
+        // the extra ones it is their own smaller circle.
+        float dist = length( wxz - uOrigin.xz );
+        float edge = 1.0 - smoothstep( aSlot.y * 0.72, aSlot.y, dist );
+        // A per-blade cutoff, so thinning removes whole blades instead of shrinking all of them —
+        // but over a short band, so a blade at the far edge grows out of the ground as you walk
+        // toward it instead of appearing whole.
+        float cut = aRand.z * 0.92 + 0.04;
+        float keep = smoothstep( cut - 0.10, cut + 0.06, grow * edge );
 
         float h = texture2D( tHeight, muv ).r;
-        float height = uBlade.y * aRand.y * ( 0.55 + grow * 0.75 ) * keep;
-        float width  = uBlade.x * ( 0.7 + aRand.y * 0.5 ) * keep;
+        float rh = 0.6 + bRand.x * 0.8;
+        float height = uBlade.y * rh * ( 0.55 + grow * 0.75 ) * keep;
+        float width  = uBlade.x * ( 0.7 + rh * 0.5 ) * keep;
 
         float t = position.y;                 // 0 at the root, 1 at the tip
         vBladeT = t;
 
         // Wind. The bend grows with the square of the distance up the blade, which is roughly how
         // a real stem behaves — stiff at the base, loose at the tip.
-        float ph = aRand.w * 6.2831853;
+        float ph = bRand.y * 6.2831853;
         float tt = uTime * uWindSpeed;
         float gust = 0.55 + 0.45 * sin( tt * 0.31 + wxz.x * 0.013 + wxz.y * 0.009 );
         float wave = sin( tt * 1.9 + ph + wxz.x * 0.35 + wxz.y * 0.27 );
@@ -213,7 +264,7 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
         vec2 pushDir = pd > 0.001 ? away / pd : vec2( 1.0, 0.0 );
 
         // turn the blade to its own heading
-        float ang = aRand.x * 6.2831853;
+        float ang = aRand.w * 6.2831853;
         vec2 dir = vec2( cos( ang ), sin( ang ) );
         vec3 local = vec3( position.x * width * dir.x, t * height, position.x * width * dir.y );
 
@@ -222,7 +273,7 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
         // a bent blade is shorter, or it stretches
         local.y -= ( abs( bend ) * 0.35 + push * 0.5 * t ) * height * 0.45;
 
-        transformed = vec3( aOffset.x, 0.0, aOffset.y ) + local;
+        transformed = vec3( wxz.x - uOrigin.x, 0.0, wxz.y - uOrigin.z ) + local;
         transformed.y += h - uOrigin.y;
 
         // Colour: greener in damp ground and toward the tip, drier and paler on high dry ground.
@@ -260,7 +311,7 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
     },
   });
 
-  const mesh = new THREE.InstancedMesh(geo, material, target);
+  const mesh = new THREE.InstancedMesh(geo, material, count);
   mesh.name = 'grass';
   mesh.castShadow = false;       // a quarter million blades in the shadow pass is not worth it
   mesh.receiveShadow = true;
@@ -268,20 +319,22 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
   mesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);
   // every instance sits at the origin; the shader puts it where it belongs
   const id = new THREE.Matrix4();
-  for (let i = 0; i < target; i++) mesh.setMatrixAt(i, id);
+  for (let i = 0; i < count; i++) mesh.setMatrixAt(i, id);
   mesh.instanceMatrix.needsUpdate = true;
 
-  let visible = target;
+  let visible = count;
 
   return {
-    mesh, material, uniforms, count: target,
+    mesh, material, uniforms, count, cell,
     get visibleCount() { return visible; },
     /**
-     * Move the patch with the camera. Snapping to a grid stops the whole field crawling by a
-     * fraction of a blade every frame, which is very obvious once you have seen it.
+     * Move the patch with the camera. The centre is snapped to the blade lattice itself — anything
+     * finer and the squares an instance is drawing would shift by part of a square, which is
+     * exactly the crawl this layout exists to remove. Snapped, the patch moves a whole square at a
+     * time: the blades already on screen keep their ground, and one row appears at the far edge.
      */
     update(centre, playerPos) {
-      const snap = 0.5;
+      const snap = cell;
       uniforms.uOrigin.value.set(
         Math.round(centre.x / snap) * snap,
         world.heightAt(centre.x, centre.z),
@@ -292,7 +345,7 @@ export function createGrass(world, quality, { csm, seed = 99 } = {}) {
     },
     /** 0..1 — how many of the blades to actually draw. */
     setDensity(frac) {
-      visible = Math.max(0, Math.min(target, Math.round(target * frac)));
+      visible = Math.max(0, Math.min(count, Math.round(count * frac)));
       mesh.count = visible;
     },
     dispose() { geo.dispose(); material.dispose(); tHeight.dispose(); tMask.dispose(); },

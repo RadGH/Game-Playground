@@ -86,7 +86,7 @@ export function createHud(root, app) {
     knob('Vignette', { min: 0, max: 1, step: 0.01, value: 0.34 }, v => app.setGrade({ vignette: v })),
     knob('Split tone', { min: 0, max: 0.4, step: 0.005, value: 0.10 }, v => app.setGrade({ split: v })),
     knob('Grain', { min: 0, max: 0.08, step: 0.002, value: 0.018 }, v => app.setGrade({ grain: v })),
-    knob('Bloom strength', { min: 0, max: 1.4, step: 0.01, value: 0.26 }, v => app.setGrade({ bloom: v })),
+    knob('Bloom strength', { min: 0, max: 1.4, step: 0.01, value: 0.02 }, v => app.setGrade({ bloom: v })),
     knob('Light shaft strength', { min: 0, max: 2, step: 0.02, value: 1 }, v => app.setGrade({ rays: v })),
   );
 

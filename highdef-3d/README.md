@@ -56,6 +56,20 @@ character who sinks into hills — so there is only one answer to "how tall is t
 `js/world.js` owns it. A node test asserts that `heightAt` at a grid node returns exactly what the
 array holds, and that a downward ray lands within 5 cm of it.
 
+**The grass belongs to the ground, not to the camera.** There is one patch of instanced blades and
+it follows you, which is the only way to draw a quarter of a million of them. The trap is what an
+instance MEANS. When an instance is a blade sitting at a fixed offset from the centre, every blade
+stands somewhere different the moment the centre moves, and the whole field crawls and re-shuffles
+as you walk — it is the single most obvious wrong thing in a field of grass. Here an instance is a
+SLOT: it draws a square of a lattice that is fixed in the world, and where the blade sits inside
+that square, along with its heading, height and colour, is hashed in the shader from the square's
+own coordinates. Same ground, same blade, whichever slot happens to be drawing it. The centre is
+then snapped to a whole square, so walking gains and loses edge rows and moves nothing else. A
+square carries up to four blades — the extra ones drawn only within their own radius and shrinking
+into the ground as you walk away — which puts the blades where you can see them without tying any
+of it to where the camera is. `tests/grass.test.js` checks both halves, because neither is visible
+in a screenshot taken standing still.
+
 **Physically-based lighting with a real sky.** Three's atmospheric sky shader is rendered into a
 pre-filtered environment map every time the sun moves, so a wet rock at dusk reflects an actual
 dusk sky rather than a grey ball. That single step does more for "this looks lit" than any number
@@ -86,6 +100,8 @@ screen-space version would have given us.
 
 **Bloom before tone mapping, grade after.** Bloom on values that have already been squashed into
 0..1 is a blur filter. Bloom on the raw high-dynamic-range frame is light spilling around an edge.
+It is set low — 0.02 on every preset, the "Bloom strength" knob in the Picture panel — because on
+the raw frame a little goes a very long way and anything more washes the whole world out.
 The vignette, contrast, saturation, split tone and grain all happen after tone mapping, where they
 behave the way your eye expects.
 

@@ -67,7 +67,8 @@ export const CLASSBUILD_TABS = [
   { key: 'loadout', name: 'Loadout' },
   { key: 'spells', name: 'Spells' },
   { key: 'opening', name: 'Opening' },
-  { key: 'look', name: 'Look' },
+  // R18 — the body picker is gone, so this tab is only the class's own name now
+  { key: 'look', name: 'Name' },
 ];
 
 export function createClassBuilder({
@@ -188,12 +189,12 @@ export function createClassBuilder({
     });
 
     const slot = slots[editing] || slots[0];
-    const list = cat.spells.map(sp => {
+    const spellOption = sp => {
       const tooLate = sp.tier > slot.level;
       const elsewhere = state.spells.findIndex((id, i) => id === sp.id && i !== slot.index);
       return option({
         name: sp.name,
-        right: sp.tier > 1 ? `tier ${sp.tier}` : 'opening',
+        right: sp.tier > 1 ? `level ${sp.tier}` : 'from the start',
         sub: `${sp.desc} · ${sp.shape}, ${sp.element}${sp.classes.length ? ` · ${sp.classes.slice(0, 3).join(', ')}${sp.classes.length > 3 ? '…' : ''}` : ''}`,
         on: slot.spellId === sp.id,
         why: tooLate
@@ -201,7 +202,24 @@ export function createClassBuilder({
           : elsewhere >= 0 ? `Already in slot ${elsewhere + 1}.` : null,
         onclick: () => { pickSpell(state, slot.index, sp.id, cat); changed(); },
       });
-    });
+    };
+
+    /**
+     * R18 — WHAT IS OPEN AT *THIS* LEVEL, FIRST AND COUNTED.
+     *
+     * Reported as "all levels show the same spells", and they did: this listed `cat.spells` — the
+     * whole catalogue, all forty — for every one of the six slots, marking the ones you cannot take
+     * yet with a `why` (which `option()` turns into a disabled button). Correct, and unreadable:
+     * every slot drew an identical list of forty rows, so picking a different slot looked like it
+     * had done nothing. The catalogue itself was right the whole time — 11/15/9/2/0/3 spells at
+     * levels 1/3/7/12/18/24.
+     *
+     * Split, so a slot's pane is about that slot: what is open at its level, then what is not yet,
+     * under a heading that says so. The later ones are still shown — knowing Meteor is coming is
+     * part of choosing — but they are no longer mixed in with what you can actually click.
+     */
+    const ready = cat.spells.filter(sp => sp.tier <= slot.level);
+    const later = cat.spells.filter(sp => sp.tier > slot.level);
 
     return [
       pane(`Your six (${state.spells.filter(Boolean).length} of ${PICK_COUNT} picked)`, [
@@ -210,7 +228,17 @@ export function createClassBuilder({
       ]),
       pane(`${slot.name} — what can go in slot ${slot.index + 1}`, [
         el('div', { class: 'cb-note', text: slot.blurb }),
-        ...list,
+        el('div', {
+          class: 'cb-note',
+          text: ready.length
+            ? `${ready.length} open ${ready.length === 1 ? 'spell' : 'spells'} at level ${slot.level}.`
+            : `Nothing new unlocks at level ${slot.level} — take anything from an earlier tier.`,
+        }),
+        ...ready.map(spellOption),
+        ...(later.length ? [
+          el('div', { class: 'cb-note', text: `Not yet — ${later.length} more open at higher levels.` }),
+          ...later.map(spellOption),
+        ] : []),
       ]),
     ];
   }
@@ -254,10 +282,10 @@ export function createClassBuilder({
     ];
   }
 
-  // ------------------------------------------------------------------ the look tab
+  // ------------------------------------------------------------- the name tab (was 'look')
 
   function drawLook() {
-    const looks = data?.looks || [];
+    // (`data.looks` is no longer read here — see the note below on the body picker.)
     const field = el('div', { class: 'cb-field' }, [
       el('label', { text: 'Called', for: 'cb-name' }),
       el('input', {
@@ -271,15 +299,18 @@ export function createClassBuilder({
         field,
         el('div', { class: 'cb-note', text: 'This is what the character sheet calls your class. Your character\'s own name is on the step behind this one.' }),
       ]),
-      pane('Start from', [
-        el('div', { class: 'cb-note', text: 'Whose body you begin with. Customize on the character step replaces the whole face afterwards — this is only the starting point.' }),
-        ...looks.map(id => option({
-          name: classData?.classes?.find(c => c.id === id)?.name || id,
-          sub: classLooks?.classes?.[id]?.name || '',
-          on: state.look === id,
-          onclick: () => { state.look = id; changed(); },
-        })),
-      ]),
+      /**
+       * R18 — THE "START FROM" BODY PICKER IS GONE.
+       *
+       *   "It also asks which body to start from, but I actually customized my character before
+       *    opening that screen - so that option should probably go."
+       *
+       * Quite right, and it was worse than redundant: the character step BEHIND this one has both
+       * "Customize appearance…" and "Use the class look", so a player who had already built a face
+       * was being asked to choose a body that their own face then replaced. `build.look` keeps its
+       * default (`classbuild.json`'s `custom.baseLook`), which is what anybody who never opened the
+       * appearance editor got anyway, and `installCustomClass` reads it exactly as before.
+       */
     ];
   }
 

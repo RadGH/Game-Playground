@@ -97,6 +97,25 @@ export async function runTitle({
    */
   let build = classbuildData ? createBuild(classbuildData) : null;
   let builder = null;
+  /**
+   * R18 — `drawClassCard` IS DEFINED, AND NOT IN A SCOPE THIS CLOSURE CAN SEE.
+   *
+   * The bug, as reported: "when creating a custom character there is a JS error preventing me from
+   * selecting a loadout, or a spell slot… The opening menu does not work either."
+   *
+   * One fault behind all of it. `drawClassCard` is declared inside the `new Promise(resolve => …)`
+   * callback further down; `ensureBuilder` is out here, in the enclosing function, so its
+   * `onChange`/`onClose` closures referenced a binding that does not exist for them and threw
+   * `drawClassCard is not defined` on the FIRST click. That throw happened inside
+   * `classbuild-ui.js`'s `changed()`, before it re-rendered — so the whole builder froze on
+   * whatever it was showing: the loadout would not change, a spell slot would not take a pick, the
+   * Opening pane did nothing, and every tier went on showing the level-1 spells because the pane
+   * that redraws them never ran. Four reported symptoms, one missing binding.
+   *
+   * A redraw hook set by the screen that owns the card, rather than moving either function: the
+   * card belongs to the character step and the builder must not have to know where it lives.
+   */
+  let redrawClassCard = () => {};
   function ensureBuilder() {
     if (builder || !classbuildData) return builder;
     builder = createClassBuilder({
@@ -104,9 +123,9 @@ export async function runTitle({
       onChange: b => {
         build = b;
         installCustomClass({ classData, skillData, classLooks, data: classbuildData, build: b });
-        drawClassCard();
+        redrawClassCard();
       },
-      onClose: () => { drawClassCard(); select.focus(); },
+      onClose: () => { redrawClassCard(); select.focus(); },
     });
     return builder;
   }
@@ -327,6 +346,8 @@ export async function runTitle({
      * `data/skills.json` describes every skill, `data/classes.json` has the weapon it starts holding
      * and what it may hold, and `pets.js` knows which classes bring a companion.
      */
+    // the hook `ensureBuilder` above calls — see the note on `redrawClassCard`
+    redrawClassCard = () => drawClassCard();
     function drawClassCard() {
       const box = $('boot-class-card');
       /**

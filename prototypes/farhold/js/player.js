@@ -8,7 +8,7 @@
 // walking through them, and `H` puts you on a horse.
 
 import * as THREE from 'three';
-import { feel } from './combat-feel.js';
+import { feel, COMBAT_FEEL } from './combat-feel.js';
 import { drawPower, chargeAt, STAFF_CHARGE } from './weapons.js';
 
 export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person (hold: look around) · E talk/open/enter · L light · B build · H horse · G drive · J ship · M map · I sheet · K log · O settings · ` debug';
@@ -357,7 +357,7 @@ export function createController(terrainIn, balance = {}, camera, {
      * lining up a shot is the difference between weight and a fight with the controls.
      */
     const committed = self.windLeft > 0 || self.offWindLeft > 0;
-    const commitK = committed ? 0.55 : (self.held > 0 && self.charging) ? (STAFF_CHARGE.moveWhile ?? 0.6) : 1;
+    const commitK = committed ? COMBAT_FEEL.windCommitSpeed : (self.held > 0 && self.charging) ? (STAFF_CHARGE.moveWhile ?? 0.6) : 1;
 
     let speed = 0;
     if (!frozen && input && (input.forward || input.strafe)) {
@@ -619,7 +619,7 @@ export function createController(terrainIn, balance = {}, camera, {
          * rhythm with the animation kept dropping swings. It is remembered for 180 ms instead and
          * fires the instant recovery ends.
          */
-        if (holding && (self.recoverLeft > 0 || self.attackCooldown > 0)) self.buffered = 0.18;
+        if (holding && (self.recoverLeft > 0 || self.attackCooldown > 0)) self.buffered = COMBAT_FEEL.inputBufferSeconds;
         const want = holding || self.buffered > 0;
         if (want && self.attackCooldown <= 0 && self.windLeft <= 0 && self.recoverLeft <= 0) {
           const sp = stepOf(mainPlan, self.mainStep);

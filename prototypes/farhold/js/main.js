@@ -138,9 +138,9 @@ import {
   gearRecipes, craftVehicle, craftGearItem, gearQuote,
 } from './gear.js';
 import { createBoat } from './boat.js';
-import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, chargedForm, OFFHAND_DAMAGE } from './weapons.js';
+import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, chargedForm, OFFHAND_DAMAGE, tuneWeapons } from './weapons.js';
 // R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
-import { pushFor, feel } from './combat-feel.js';
+import { pushFor, feel, tuneFeel } from './combat-feel.js';
 import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
 import { allocate as allocatePerk, refundAll as refundPerks, refundOne as refundOnePerk, pointsLeft as perkPointsLeft } from './perks.js';
 import { createCrafting, Materials } from './craft.js';
@@ -335,6 +335,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     everySeconds: (balance.spawn?.everySeconds ?? 1.1) / Math.max(0.3, worldOpts.density),
   };
   balance = { ...balance, spawn: spawnCfg, zones: { ...balance.zones, bandWidth: worldOpts.bandWidth } };
+
+  /**
+   * R19 — HAND THE COMBAT KNOBS TO THE MODULES THAT SPEND THEM.
+   *
+   * `balance.json` `player.combat`, `player.ranged` and `player.staff` — 21 numbers — had no reader
+   * anywhere. js/combat-feel.js and js/weapons.js held the same 21 as constants, spelled
+   * differently, and they happened to agree, so the only symptom was that editing the balance file
+   * did nothing at all. Both tuners mutate in place, so this has to run before any module that
+   * reads them fires — which is here, right after `balance` stops being reassigned.
+   */
+  tuneFeel(balance.player?.combat);
+  tuneWeapons(balance.player);
 
   status('shaping the planet…');
   await frame();

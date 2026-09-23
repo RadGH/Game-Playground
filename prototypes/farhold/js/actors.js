@@ -23,7 +23,7 @@ import { normalizeAvatar } from '../../../avatar-2d/js/render.js';
 import { familiesOf } from '../../../worldgen/js/biomes.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { tickStatuses, slowOf, applyStatus, setStatusFx, setStatusPulse } from './skills.js';
-import { feel, staggerFor, pushFor } from './combat-feel.js';
+import { feel, staggerFor, pushFor, COMBAT_FEEL } from './combat-feel.js';
 import { traitsOf } from './weapons.js';
 import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
 
@@ -534,7 +534,7 @@ export class EnemyField {
           } else if (!p.walled) {
             // slammed into something: the blow had nowhere to go, so it went into the body
             p.walled = true;
-            e.hp = Math.max(0, e.hp - Math.max(1, Math.round((e.maxHp || 20) * 0.015)));
+            e.hp = Math.max(0, e.hp - Math.max(1, Math.round((e.maxHp || 20) * COMBAT_FEEL.wallSlamShare)));
             if (e.hp <= 0) { this.kill(e); continue; }
           }
         }
@@ -830,7 +830,7 @@ export class EnemyField {
     const r = e.recoil;
     if (!r) { e.actor.group.position.set(e.x, y, e.z); return; }
     const k = Math.max(0, r.t / r.span);
-    const back = 0.08 * k * k;
+    const back = COMBAT_FEEL.recoilMetres * k * k;
     e.actor.group.position.set(e.x + r.dx * back, y, e.z + r.dz * back);
   }
 
@@ -886,7 +886,8 @@ export class EnemyField {
     /** (d) KNOCKBACK. Travelled over 0.18 s, resisted by rank, and a wall makes it hurt more. */
     const push = pushFor(e, (strike.push || 0) * share);
     if (push > 0.01) {
-      e.push = { dx: dx / len, dz: dz / len, metres: push, t: 0.18, span: 0.18, done: 0 };
+      const span = COMBAT_FEEL.knockbackSeconds;
+      e.push = { dx: dx / len, dz: dz / len, metres: push, t: span, span, done: 0 };
     }
 
     /** (e) STAGGER, with the diminishing returns that stop a maul locking a boss for ever. */

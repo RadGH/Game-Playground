@@ -47,7 +47,7 @@
     "_regenDoc": "Share of maximum health you get back each second while nothing is fighting you. Without it a character who walked out of a fight at a third health stayed there — hpRegen is zero without gear that grants it, and there is no potion in the starting kit.",
     "_arrowSplashDoc": "Round 14: an arrow used to burst for 2.6 m at full power on every shot, for free, while a melee jab was 0.65 of a hit inside a 0.3 m splash. An arrow hits what you aimed at now; the quiver's arrowBurst affix is what turns it back into an area shot, which is what that affix is for.",
     "combat": {
-      "_doc": "What a hit feels like, round 14. The per-shape numbers — knockback, stagger, hit-stop, shake — live on the strike shapes in js/weapons.js, because a shape is where they belong. These are the few that are global.",
+      "_doc": "What a hit feels like, round 14. The per-shape numbers — knockback, stagger, hit-stop, shake — live on the strike shapes in js/weapons.js, because a shape is where they belong. These are the few that are global. R19 — THIS BLOCK IS NOW READ: js/combat-feel.js tuneFeel() takes it at boot, and its COMBAT_FEEL holds the five spent in js/actors.js and js/player.js. Note hitStopMaxMs is milliseconds where the code keeps seconds.",
       "hitStopFloor": 0.05,
       "hitStopMaxMs": 260,
       "shakePerPoint": 0.035,
@@ -60,7 +60,7 @@
       "wallSlamShare": 0.015
     },
     "ranged": {
-      "_doc": "A bow's rate of fire used to be the light-melee swing clock, because `bow` was in neither weapon table and profileOf fell through to the `light` category: 1.91 shots a second with no draw, no nock and no reload, and nobody designed it. The real numbers are per-base in js/weapons.js RANGED; these are the shared ones.",
+      "_doc": "A bow's rate of fire used to be the light-melee swing clock, because `bow` was in neither weapon table and profileOf fell through to the `light` category: 1.91 shots a second with no draw, no nock and no reload, and nobody designed it. The per-base numbers are in js/weapons.js RANGED; these are the shared ones, and R19 — they are now READ: tuneWeapons() overwrites RANGED with them at boot, so editing them here moves the game.",
       "bowDrawMin": 0.35,
       "bowDrawFull": 0.95,
       "bowPowerMin": 0.55,
@@ -69,7 +69,7 @@
       "crossbowPower": 1.8
     },
     "staff": {
-      "_doc": "A staff cast a free shaped area spell every 0.6 s with no cast time, no mana and no choice — the most powerful weapon in the game and the least interesting. It charges now: a tap is still free and weak, a full channel is 1.6x damage over twice the radius, and it drinks mana while it builds. js/weapons.js STAFF_CHARGE is the live copy.",
+      "_doc": "A staff cast a free shaped area spell every 0.6 s with no cast time, no mana and no choice — the most powerful weapon in the game and the least interesting. It charges now: a tap is still free and weak, a full channel is 1.6x damage over twice the radius, and it drinks mana while it builds. R19 — THIS BLOCK IS NOW THE LIVE COPY: tuneWeapons() writes it into js/weapons.js STAFF_CHARGE at boot, which js/player.js and js/rpg.js hold by reference.",
       "chargeMin": 0.35,
       "chargeFull": 1.4,
       "chargeMax": 2.6,

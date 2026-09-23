@@ -24,21 +24,34 @@
 //
 // Pure arithmetic — no DOM, no Three.js — so the node tests drive the real thing.
 
+/**
+ * R19 — THESE ARE DEFAULTS NOW, NOT THE TRUTH. `tuneFeel()` at the bottom is where the truth
+ * arrives, out of `data/balance.json` `player.combat`, which has carried every one of these since
+ * round 14 with no reader — under different names, and `hitStopMaxMs` in MILLISECONDS where this
+ * holds seconds. They agree today, so nothing is broken; the breakage is scheduled for whenever
+ * someone edits the file and the game does not move. `let`, not `const`, for that reason alone.
+ */
 /** How long a hit-stop may ever last, whatever the multipliers say. */
-const MAX_HITSTOP = 0.26;
+let MAX_HITSTOP = 0.26;
 /** Metres of camera shake per point of a strike's `shake`, and the ceiling. */
-const SHAKE_PER_POINT = 0.035;
-const MAX_SHAKE = 0.12;
+let SHAKE_PER_POINT = 0.035;
+let MAX_SHAKE = 0.12;
 /** Shake decays to nothing over this long, wobbling at this many cycles a second. */
 const SHAKE_SECONDS = 0.18;
 const SHAKE_HZ = 38;
 /** How long the world takes to come back up to speed after a hit-stop. */
 const RAMP = 0.04;
 /** How slow the world runs at the bottom of a hit-stop. Not zero — a frozen frame reads as a crash. */
-const FLOOR = 0.05;
+let FLOOR = 0.05;
 
-/** A stagger on the same body inside this many seconds is worth progressively less. */
-export const STAGGER_WINDOW = 6;
+/**
+ * A stagger on the same body inside this many seconds is worth progressively less.
+ *
+ * Read through `staggerWindow()` rather than the binding, because `tuneFeel` may move it and an
+ * importer that took the number at module load would keep the old one forever.
+ */
+export let STAGGER_WINDOW = 6;
+export const staggerWindow = () => STAGGER_WINDOW;
 export const STAGGER_FALLOFF = [1, 0.6, 0.3, 0];
 
 /** Knockback resistance by rank. Something that hovers has nothing to brace against. */
@@ -102,6 +115,8 @@ export function createFeel() {
       return FLOOR + (1 - FLOOR) * k * k * k;
     },
     get frozen() { return stopLeft > 0; },
+    /** Seconds of hold-still left. Exposed so a test can read the clock rather than infer it. */
+    get stopLeft() { return stopLeft; },
     get shakeAmount() { return shake; },
 
     /**
@@ -222,6 +237,56 @@ export function createFeel() {
 
 /** The one the game uses. Everything imports this rather than making its own. */
 export const feel = createFeel();
+
+/**
+ * THE FIVE KNOBS THIS MODULE DOES NOT SPEND ITSELF, held here because it OWNS them.
+ *
+ * `balance.json` `player.combat` describes the whole feel of a blow, but three of its numbers are
+ * spent in js/actors.js (the knockback ease, the recoil nudge, the wall slam) and two in
+ * js/player.js (how slow you move mid-wind-up, how long a press is remembered). Putting them in
+ * five more module-level constants across two more files is how this file came to be the second
+ * copy in the first place. This object is read BY REFERENCE, so `tuneFeel` moving a field moves it
+ * for everybody, including modules that imported it before boot ran.
+ */
+export const COMBAT_FEEL = {
+  /** Seconds a knockback eases out over. */
+  knockbackSeconds: 0.18,
+  /** Metres a body is nudged along the blow, easing back. Pure presentation. */
+  recoilMetres: 0.08,
+  /** A body with a wall behind it takes this share of its own maximum health instead of travelling. */
+  wallSlamShare: 0.015,
+  /** Your share of walking speed while committed to a wind-up. */
+  windCommitSpeed: 0.55,
+  /** How long an attack press is remembered while the last swing recovers. */
+  inputBufferSeconds: 0.18,
+};
+
+/**
+ * Take the combat feel out of `data/balance.json` instead of restating it here.
+ *
+ * Called once from js/main.js at boot with `balance.player?.combat`. Every knob is optional and a
+ * non-finite one is ignored, so a half-written block degrades to the defaults above rather than
+ * putting `NaN` into the hit-stop clock — which would freeze the world, since `dt * feel.scale` is
+ * what every simulated system ticks on.
+ *
+ * `hitStopMaxMs` is the one unit conversion: the file is in milliseconds because a strike's own
+ * `hitstop` is (see `hit()`), and this module holds seconds.
+ */
+export function tuneFeel(cfg = {}) {
+  const num = (v, fallback) => (Number.isFinite(v) ? v : fallback);
+
+  MAX_HITSTOP = num(cfg.hitStopMaxMs / 1000, MAX_HITSTOP);
+  FLOOR = Math.max(0, Math.min(0.9, num(cfg.hitStopFloor, FLOOR)));
+  SHAKE_PER_POINT = num(cfg.shakePerPoint, SHAKE_PER_POINT);
+  MAX_SHAKE = num(cfg.shakeMaxMetres, MAX_SHAKE);
+  STAGGER_WINDOW = num(cfg.staggerWindowSeconds, STAGGER_WINDOW);
+
+  for (const key of Object.keys(COMBAT_FEEL)) {
+    COMBAT_FEEL[key] = num(cfg[key], COMBAT_FEEL[key]);
+  }
+
+  return { maxHitstop: MAX_HITSTOP, floor: FLOOR, staggerWindow: STAGGER_WINDOW, ...COMBAT_FEEL };
+}
 
 /**
  * How long a stagger actually lasts on this body, and the book that makes it fair.

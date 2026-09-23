@@ -1202,6 +1202,51 @@ export const STAFF_CHARGE = {
 };
 
 /**
+ * R19 — THE BALANCE FILE IS THE KNOB, AND THIS IS THE ONE PLACE IT ARRIVES.
+ *
+ * `data/balance.json` has carried `player.ranged` and `player.staff` since round 14, and both
+ * blocks' own `_doc` pointed here and said the live copy was in this file. That is backwards: the
+ * point of a balance file is that these get tuned without opening a module. Worse, the two copies
+ * are spelled differently — `chargeMin` here is `min` there, `hitStopMaxMs` is milliseconds where
+ * the code holds seconds — so a designer who edits the file gets no error and no effect. They all
+ * agree today, which is exactly what makes it a bug waiting rather than a bug: the day someone
+ * tunes the file, the game does not move, and the next hour goes on finding out why.
+ *
+ * It mutates in place rather than returning a new table, because `RANGED` and `STAFF_CHARGE` are
+ * read BY REFERENCE from js/player.js and js/rpg.js (`plan.charge = STAFF_CHARGE`), and both hold
+ * that reference from before this runs. Called once, from main.js, at boot — the same shape as
+ * `alignCatalogue()` in js/buildplan.js, which joins two vocabularies once and then nobody thinks
+ * about it again. Every knob is optional; an absent one leaves the value the file above sets.
+ *
+ * @param {object} cfg `balance.player` — `.ranged` and `.staff` are read.
+ */
+export function tuneWeapons(cfg = {}) {
+  const r = cfg.ranged || {}, s = cfg.staff || {};
+
+  const set = (obj, key, v) => { if (Number.isFinite(v)) obj[key] = v; };
+
+  // Draw weights that differ per bow stay per bow: a shortbow's 0.28 s draw is not the shared one.
+  set(RANGED.bow, 'min', r.bowDrawMin);
+  set(RANGED.bow, 'full', r.bowDrawFull);
+  set(RANGED.bow, 'powerFull', r.bowPowerFull);
+  // …but the floor a part-drawn bow pays is the same 0.55 on all three, so it IS the shared one.
+  if (Number.isFinite(r.bowPowerMin)) {
+    for (const key of ['bow', 'shortbow', 'longbow']) set(RANGED[key], 'powerMin', r.bowPowerMin);
+  }
+  set(RANGED.crossbow, 'reload', r.crossbowReload);
+  set(RANGED.crossbow, 'power', r.crossbowPower);
+
+  set(STAFF_CHARGE, 'min', s.chargeMin);
+  set(STAFF_CHARGE, 'full', s.chargeFull);
+  set(STAFF_CHARGE, 'max', s.chargeMax);
+  set(STAFF_CHARGE, 'mana', s.channelMana);
+  set(STAFF_CHARGE, 'breakAt', s.breakAtShareOfHealth);
+  set(STAFF_CHARGE, 'moveWhile', s.moveWhileChannelling);
+
+  return { ranged: RANGED, staff: STAFF_CHARGE };
+}
+
+/**
  * What the staff has built up after `held` seconds.
  *
  * `ready` false means a release right now is a TAP: the same shaped spell, free, at 0.60x. That is

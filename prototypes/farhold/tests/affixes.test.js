@@ -18,7 +18,7 @@ import {
   tierFor, tierMult, capValue, convert,
 } from '../js/affixes.js';
 import { Rpg, SLOTS } from '../js/rpg.js';
-import { describeAffix, EFFECTS } from '../js/effects.js';
+import { describeAffix, EFFECTS, INITIATIVE_PER_POINT } from '../js/effects.js';
 import { applyStatus, tickStatuses, TICK_EVERY } from '../js/skills.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 
@@ -318,4 +318,70 @@ test('the registry re-derives the sheet while a timed affix is up', () => {
   player.derived.movePct = 20;
   rpg.refresh(player);
   assert.ok(player.derived.moveSpeed !== before || player.derived.movePct === 0);
+});
+
+// ================================================================= R18 — the three unit rulings
+
+/**
+ * THE USER'S RULINGS, AS TESTS.
+ *
+ *   1. "Potency/spellpower should be a percentage modifier that applies to spells."
+ *   2. "haste and extraleg should both be percent modifiers, 0.10 = 10% faster movespeed."
+ *
+ * Each of these was a case where the READER and the WRITERS disagreed about the unit, and in every
+ * one the disagreement was invisible on the card — the card printed whatever the writer meant.
+ */
+
+test('R18 — spellPower is a share, and one perk node cannot multiply magic damage by five', () => {
+  assert.equal(ENGINE_UNIT.spellPower, 'frac',
+    'spellPower is read as `1 + v` by both js/rpg.js and js/skills.js, so it is a fraction');
+
+  // the affix rolls as a share, at every item level, and never as points
+  for (const ilvl of [1, 20, 45, 60]) {
+    const def = { id: 'potency', stat: 'spellPower', min: 0.05, max: 0.15 };
+    for (let i = 0; i < 200; i++) {
+      const v = rollAffixValue(def, ilvl, Math.random);
+      assert.ok(v > 0 && v <= 1.5, `potency rolled ${v} at ilvl ${ilvl} — that is ${1 + v}x spell damage`);
+    }
+  }
+});
+
+test('R18 — every haste writer speaks percentage points, and only initiative converts', () => {
+  const d = () => ({ haste: 0, movePct: 0 });
+
+  // initiative is the one affix in POINTS, and it converts at its own site
+  const init = EFFECTS['affix:initiative'];
+  assert.ok(init?.derive, 'affix:initiative no longer has its own derive — the x4 has moved back');
+  assert.ok(!init.plain, 'affix:initiative is a plain field again, so the conversion is lost');
+  const a = d(); init.derive(3, a);
+  assert.equal(a.haste, 3 * INITIATIVE_PER_POINT, '3 points of initiative should be +12% attack speed');
+
+  /**
+   * …and nothing multiplies the SHEET's haste after the fact. This is the actual regression guard:
+   * `js/rpg.js` used to do `d.haste *= INITIATIVE_PER_POINT` after every writer had had its say, so
+   * the perk labelled "+5% attack speed" gave +20% and the Doubled Grasp keystone's -20% became
+   * -80%, clamped to -50% — it halved your attack rate instead of costing a fifth.
+   */
+  // comments stripped first — the note explaining the fix necessarily QUOTES the old line, and the
+  // first version of this guard matched its own documentation and failed
+  const rpgSrc = readFileSync(new URL('../js/rpg.js', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '');
+  assert.ok(!/d\.haste\s*\*=/.test(rpgSrc),
+    'js/rpg.js multiplies d.haste after the writers again — the perks and the speed legendary '
+    + 'already write percentage points and will be quadrupled');
+});
+
+test('R18 — an Emberveil "leg of travel" is a modest share here, not +200% move speed', () => {
+  const leg = EFFECTS['affix:cond_extraLeg'];
+  assert.ok(leg?.derive, 'cond_extraLeg lost its derive');
+  const d = { movePct: 0 };
+  // the Pathfinder Javelin's own value, straight out of the shared items.json
+  leg.derive(2, d);
+  assert.ok(d.movePct > 0, 'two legs of travel buy nothing at all');
+  assert.ok(d.movePct <= 25,
+    `two legs of travel gave +${d.movePct}% move speed — items.json is SHARED with Emberveil, where `
+    + 'that value means legs on a stage map, so Farhold has to scale it rather than read it as a share');
+  // and the card has to say the same number the sheet gets
+  assert.match(leg.desc ? leg.desc(2) : '', /\+\s*8(\.0)?%/, 'the card and the sheet disagree');
 });

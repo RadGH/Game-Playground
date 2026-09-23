@@ -102,12 +102,12 @@ export const ARMS = [
     key: 'arcane', name: 'The Deep Study', angle: Math.PI / 2, color: '#b090ff',
     blurb: 'Power that comes out of a book and goes back into one.',
     minor: [
-      ['int', 4, '+4 intellect'], ['maxMp', 18, '+18 mana'], ['spellPower', 4, '+4 spell power'],
+      ['int', 4, '+4 intellect'], ['maxMp', 18, '+18 mana'], ['spellPower', 0.04, '+4% spell power'],
       ['mpRegen', 0.6, '+0.6 mana a second'], ['magicResist', 6, '+6 magic resistance'],
       ['cooldownReduction', 3, 'skills come back 3% sooner'],
     ],
     major: [
-      ['spellPower', 10, '+10 spell power'], ['int', 9, '+9 intellect'],
+      ['spellPower', 0.10, '+10% spell power'], ['int', 9, '+9 intellect'],
       ['cooldownReduction', 7, 'skills come back 7% sooner'], ['maxMp', 45, '+45 mana'],
       ['areaPct', 12, '+12% spell area'],
     ],
@@ -347,9 +347,9 @@ export const KEYSTONES = [
   },
   {
     id: 'blood_magic', arm: 'arcane', name: 'Blood Price', flag: 'bloodMagic',
-    desc: 'Skills are paid for in health instead of mana, and never fail for want of it. +14 spell power.',
+    desc: 'Skills are paid for in health instead of mana, and never fail for want of it. +14% spell power.',
     cost: 'Your mana pool stops mattering, and a skill can leave you on 1 health.',
-    grants: { spellPower: 14 },
+    grants: { spellPower: 0.14 },      // R18 — a share, not 1400%
   },
   {
     // The old line also promised the pack "take a third of everything aimed at you", which nothing

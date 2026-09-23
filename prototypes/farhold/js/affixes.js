@@ -59,8 +59,24 @@ export const ENGINE_UNIT = {
   initiative: 'pct',
   // plain stats, read as a raw amount
   hp: 'flat', mp: 'flat', armor: 'flat', magicResist: 'flat', dmg: 'flat', hpRegen: 'flat',
-  mana_regen: 'flat', str: 'flat', dex: 'flat', int: 'flat', con: 'flat', spellPower: 'flat',
+  mana_regen: 'flat', str: 'flat', dex: 'flat', int: 'flat', con: 'flat',
   block_power: 'flat', barrier: 'flat', barrierRegen: 'flat',
+  /**
+   * R18 — `spellPower` WAS FILED `flat` AND BOTH READERS TREAT IT AS A SHARE.
+   *
+   * `js/rpg.js`'s `amount *= 1 + a.spellPower` and `js/skills.js`'s `1 + (d.spellPower || 0)` are
+   * the only two consumers and both want a fraction. Filing it `flat` let the writers grant POINTS:
+   * `AFFIX_TUNING.potency` was retuned to `{min:3, max:8}` under a comment claiming "spell power is
+   * read flat here, not as a share", which was simply false, and the perk arm granted 4/10/14 on
+   * top. A level-3 mage with one +4 node had `spellPower = 4`, so every spell and every elemental
+   * hit did FIVE TIMES damage; four arcane nodes was x33. Measured: a physical hit of 5 against a
+   * fire hit of 41 from a single +8 potency ring.
+   *
+   * The user's ruling: "Potency/spellpower should be a percentage modifier that applies to spells."
+   * So the readers were right all along and every writer moves. `frac` also makes `convert()`
+   * self-correcting from here on — anything above `MAX_SENSIBLE_FRAC` is divided by 100.
+   */
+  spellPower: 'frac',
   // conditionals, read as a multiplier share (`1 + v`, `1 - v`)
   cond_fireDmgVsPoisoned: 'frac', cond_coldDmgVsBurning: 'frac', cond_lightningVsSlowed: 'frac',
   cond_poisonDmgVsBurning: 'frac', cond_magicDmgVsAnyStatus: 'frac', cond_dmgBelowHpThresh: 'frac',
@@ -110,6 +126,9 @@ export const AFFIX_CAP = {
   cond_physDmgReducePct: 0.5, cond_magicDmgReducePct: 0.5, cond_manaShieldOnHit: 0.5,
   cond_goldOnEliteKill: 3, cond_killInitBonus: 0.6, cond_speedOnFirstHit: 0.5,
   cond_poisonStackPower: 1.5, cond_levelReqReduce: 12,
+  // R18 — spellPower had no cap at all while it was (wrongly) flat. As a share, +150% from gear is
+  // the ceiling; the perk arm stacks on top of this.
+  spellPower: 1.5,
   cond_lightRange: 60, cond_lightSteady: 0.6, cond_lightWard: 0.5, cond_lightReveal: 90,
   cond_mountSlope: 0.7, cond_mountCalm: 0.8, cond_mountStamina: 60, cond_mountTrample: 60,
   cond_quiverDamage: 40, cond_quiverSplit: 4, cond_quiverBurst: 6,
@@ -144,7 +163,9 @@ export const AFFIX_TUNING = {
   of_magic_resist: { min: 3, max: 9, ilvl: 1 },
   of_mana_regen: { min: 0.6, max: 1.6, ilvl: 2 },
   hp_regen: { min: 2, max: 8, ilvl: 2 },
-  potency: { min: 3, max: 8, ilvl: 3 },               // spell power is read flat here, not as a share
+  // R18 — a SHARE, per the user's ruling. items.json's own 0.05-0.15 is the same unit; this row
+  // stretches the top a little so a high-ilvl roll is worth finding.
+  potency: { min: 0.05, max: 0.18, ilvl: 3 },
 
   // ---- percentages that were stored as fractions. ×100, then floored.
   crit_chance: { min: 4, max: 9, ilvl: 3 },           // was 0.02–0.1 → "0% critical chance"

@@ -76,6 +76,28 @@ for (const [stat, field] of Object.entries(STAT_FIELDS)) {
   def('affix:' + stat, STAT_DESC[stat] || (v => `+${n1(v)} ${stat}`), { field, plain: true });
 }
 
+/**
+ * R18 — INITIATIVE IS THE ONE HASTE WRITER MEASURED IN POINTS, SO IT CONVERTS HERE.
+ *
+ * `js/rpg.js` used to do `d.haste *= INITIATIVE_PER_POINT` AFTER every writer had had its say.
+ * Only this affix is in points; the perk arm, `legendary:speed_combat_init` (`d.haste += 40`) and
+ * `cond_killInitBonus` (`v * 100`) all write percentage points already — so all three were
+ * quadrupled. The node labelled "+5% attack speed" gave +20%, and the Doubled Grasp keystone's
+ * "-20% attack speed" computed as -80%, clamped to -50%: the keystone HALVED your attack rate
+ * instead of costing a fifth of it.
+ *
+ * The user's ruling is that haste is a percent modifier, so the sheet's `haste` is percentage
+ * points and every writer speaks that. This one entry does the points -> percent conversion at its
+ * own site, which is the only place that knows it is in points. `AFFIX_CAP.initiative` of 15 still
+ * reads as +60%, exactly as its comment says.
+ *
+ * It replaces the generic `plain` entry above deliberately: `plain` short-circuits before `derive`
+ * (see the dispatcher below), so an entry with a `derive` and no `field` runs only this.
+ */
+def('affix:initiative', v => `+${n1(v * INITIATIVE_PER_POINT)}% attack speed`, {
+  derive: (v, d) => { d.haste += v * INITIATIVE_PER_POINT; },
+});
+
 // ───────────────────────────── conditionals ─────────────────────────────
 // `c` is the context object the caller passes. Fields it may carry:
 //   self, target, amount, crit, element, skill, dt, rt (the runtime's per-unit scratch)
@@ -282,8 +304,28 @@ def('affix:cond_guardBond', v => `Town guards deal ${pct(v)} more damage while y
 def('affix:cond_forageRation', v => `+${n1(v)} health a second while you are out of a fight`, {
   derive: (v, d, unit, rt) => { if (!(rt?.inCombat > 0)) d.hpRegen += v; },
 });
-def('affix:cond_extraLeg', v => `+${pct(v)} move speed`, {
-  derive: (v, d) => { d.movePct += v * 100; },
+/**
+ * R18 — "+200% MOVE SPEED ON AN ACT-1 WEAPON", AND THE CARD SAID SO HONESTLY.
+ *
+ * `cond_extraLeg` is an EMBERVEIL property and the two games read the same `data/items.json`. There
+ * it means "extra legs of travel" on a map you cross a stage at a time, so its values are small
+ * whole numbers: the Pathfinder Javelin carries 2, the Forager's Covenant boots 1. Farhold has no
+ * legs — it has a planet you walk across — so it re-read the same number as a share and did
+ * `movePct += v * 100`: the javelin took `moveSpeed` from 5.4 to 16.2 m/s, and the boots doubled it.
+ *
+ * The user's ruling is that this is a percent modifier where 0.10 is 10% faster. It cannot be
+ * applied to the VALUE, because the value belongs to Emberveil and changing it would move that
+ * game's travel maths. So the translation lives here, where Farhold decides what an Emberveil leg
+ * is worth on the ground: one leg buys `LEG_TO_MOVE` of move speed. Two legs is +8%, which is a
+ * good act-1 weapon property rather than a mount you can never take off.
+ *
+ * This is the same rule the file already follows for `ranged`, `offHandOk` and the quarterstaff:
+ * anything only one of the two games understands is applied on our side, never written into the
+ * shared file.
+ */
+const LEG_TO_MOVE = 0.04;
+def('affix:cond_extraLeg', v => `+${pct(v * LEG_TO_MOVE)} move speed`, {
+  derive: (v, d) => { d.movePct += v * LEG_TO_MOVE * 100; },
 });
 def('affix:cond_easeExhaustion', v => `+${n1(v)} health a second — you tire less easily`, {
   derive: (v, d) => { d.staminaEase = (d.staminaEase || 0) + v; d.hpRegen += v; },

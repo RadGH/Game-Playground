@@ -32,7 +32,7 @@ import { incomingFrom } from './skills.js';
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
 // Round 4: every affix an item can carry now does something. `js/effects.js` is the registry.
-import { Effects, STAT_FIELDS, effectFor, describeAffix, isMagic, INITIATIVE_PER_POINT } from './effects.js';
+import { Effects, STAT_FIELDS, effectFor, describeAffix, isMagic } from './effects.js';
 
 export { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY };
 export { describeAffix, effectFor };
@@ -815,9 +815,14 @@ export class Rpg {
     }
     d.levelScale = skill;
     d.moveSpeed = (b.moveSpeed ?? 5.2) * (1 - Math.min(0.2, (d.armor / 400))) * (1 + d.movePct / 100);
-    // how often you can swing, from `initiative`-style haste (a point of initiative is worth
-    // INITIATIVE_PER_POINT percent, because 1-3% would be beneath noticing)
-    d.haste *= INITIATIVE_PER_POINT;
+    /**
+     * How often you can swing. `d.haste` is PERCENTAGE POINTS and every writer speaks that.
+     *
+     * R18 — `d.haste *= INITIATIVE_PER_POINT` used to sit here, where it multiplied whatever had
+     * accumulated. Only the `initiative` affix is in points; it converts at its own site now
+     * (js/effects.js `affix:initiative`) and the perks, the speed legendary and `cond_killInitBonus`
+     * are left alone instead of being quadrupled.
+     */
     d.attackEvery = Math.max(0.18, (b.attackEvery ?? 0.62) / (1 + Math.max(-0.5, d.haste / 100)));
     d.maxBarrier = Math.round(d.barrier);
 

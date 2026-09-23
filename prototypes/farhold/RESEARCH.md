@@ -164,3 +164,57 @@ first hour needs is gated, the first age has no nodes, the tree can be finished 
 stranded, a locked piece refuses placement with the node and the age named, research survives a save,
 a save from before R17 is a fresh tree, and a `tech` key naming nothing does not brick its piece. The
 screen is rendered and a node is bought in `tests/tiny-dom.mjs`.
+
+---
+
+## 8. Round 22 — the screen is a graph now, and it can scroll
+
+> "The new Research screen is a good start. However 'Reagants' goes off screen and I can't scroll
+> down. Can we redesign this menu to be more like a tech tree, having smaller boxes with networked
+> relationship/requirements and click to view more details in a tooltip or side popup? Rather than
+> just a massive screen of text."
+
+### The scroll bug, which was not in this module at all
+
+`.research` is a flex column and `.res-body` asks for `flex: 1 1 auto; min-height: 0;
+overflow-y: auto`. **A flex child only becomes a scroller when its flex parent has a height to
+divide up.** The standalone overlay had one — `max-height: min(84vh, 820px)` — so the overlay always
+scrolled. The character-sheet tab did not, so the column simply grew past the bottom of the sheet,
+and `style.css`'s `overflow: hidden` on `.tab-body[data-tab="research"]` cut off whatever hung over.
+Nothing in the screen was broken; there was just no bottom for it to stop at, and "Reagents" is the
+last node in the Age of Iron column, so it was the first thing over the edge.
+
+The Holding and the Followers screens solve this with a flag their caller passes in (`.civics--tab`,
+`.flw--tab`). This one needs no flag: `.research` is `height: 100%; max-height: 100%` by default and
+`.research--overlay` puts its own bounded height back, so the chain from `.sheet-mount` (already
+`height: 100%`) down to `.res-body` has no gaps in it.
+
+### The board
+
+One column per age, one card per node, and the card is placed on a **row below everything it waits
+on** — `laneRows(ages)` pushes a node down again if the row it wants is already taken in its own
+column, which is what stops Drawn Wire and Reagents landing on top of each other when they both wait
+on Ironworking. Every wire therefore runs downward.
+
+The `needs` relationships are drawn as bezier curves on an SVG layer behind the cards, coloured by
+the target's state, and `layoutWires()` measures the laid-out cards before it writes the paths — it
+no-ops where there is no box model, so the node tests still run.
+
+A card carries the name, the cost, a state dot and one short line. Everything else — the blurb, the
+`why`, the prerequisites as **clickable chips that jump the panel to whatever is holding the node
+up**, what the node opens, and the Research button with its refusal sentence — is in a 272px side
+panel, which pre-selects the first node you could actually buy so it is never an empty box.
+Hovering or keyboard-focusing a card lights its whole prerequisite chain and dims every other wire.
+
+The "where points come from" ledger moved off the grid into a collapsible strip. It starts open only
+while you have earned nothing, which is the one moment it is an instruction rather than a reference.
+
+Under 760px the panel drops below the board rather than squeezing it.
+
+### Tests
+
+`tests/round22-research.test.js`: every node's age exists, every `needs` id resolves, nothing waits
+on a later age, there are no cycles, no structure is unlocked twice, `laneRows` never draws a wire
+upward and never double-books a slot, the board renders one column per age / one card per node / one
+wire per requirement, the blurb is out of the card and in the panel, the chips navigate, the buy
+button buys, and the CSS bounds `.research`'s height while the overlay keeps its own bound.

@@ -156,7 +156,18 @@ test('a journal row no longer takes the job, and the notice board still does', a
 
 // ---------------------------------------------------------------- 4.2 / 4.3 the perk forest
 
-test('a line on the forest is the unlock rule, and one perk can be handed back', async ({ page }) => {
+/**
+ * R20 — THE SCREEN STILL EXPLAINS THE FOREST; IT NO LONGER UNDOES IT.
+ *
+ *   "…remove the ability to do it directly from the inventory."
+ *
+ * Both free buttons are gone — the per-node give-back and the wholesale one. What the panel still
+ * owes the player is the STRUCTURAL answer, which is the half you cannot work out by walking to a
+ * town: whether this node is holding another one up. So the assertions flip from "there is a
+ * button and it is disabled for the right reason" to "there is no button, the reason is still
+ * printed, and the screen says where the undo actually happens".
+ */
+test('a line on the forest is the unlock rule, and the screen no longer undoes it', async ({ page }) => {
   const errors = await land(page);
 
   const out = await page.evaluate(() => {
@@ -179,31 +190,35 @@ test('a line on the forest is the unlock rule, and one perk can be handed back',
       f.hud.perkPick = id;
       f.hud.renderSheet();
       const side = document.getElementById('perk-side');
-      const button = [...side.querySelectorAll('button')].find(b => b.textContent.includes('Give this one back'));
-      return { text: side.textContent, disabled: button ? button.disabled : null, button: !!button };
+      return {
+        text: side.textContent,
+        // ANY button on this panel that would hand a point back, however it is worded
+        undo: [...side.querySelectorAll('button')]
+          .some(b => /give|back|refund|unbind|forget/i.test(b.textContent)),
+      };
     };
 
     const middle = panel(first);
     const tip = panel(second);
-    const took = f.player.perks.slice();
-    // the tip goes back, and only the tip
-    [...document.querySelectorAll('#perk-side button')]
-      .find(b => b.textContent.includes('Give this one back'))?.click();
+    const footer = document.getElementById('perk-refund');
     return {
-      took, left: f.player.perks.slice(),
-      middleDisabled: middle.disabled, middleSaysWhy: /reaches the middle through this one/.test(middle.text),
-      tipDisabled: tip.disabled, hasButton: middle.button && tip.button,
+      took: f.player.perks.slice(),
+      anyUndoButton: middle.undo || tip.undo,
+      middleSaysWhy: /reaches the middle through this one/.test(middle.text),
+      tipSaysWhere: /Unbinder/.test(tip.text),
+      footerSaysWhere: /Unbinder/.test(footer ? footer.textContent : ''),
+      footerIsAButton: footer ? footer.tagName === 'BUTTON' : false,
       // the edge list beside the node, which is the same set the unlock rule walks
       lists: /Connects to|Opens/.test(tip.text),
     };
   });
 
   expect(out.took.length).toBe(2);
-  expect(out.hasButton, 'there is no way to give one perk back').toBe(true);
-  expect(out.middleDisabled, 'a perk holding up another one could be given back').toBe(true);
-  expect(out.middleSaysWhy, 'the refund is refused without saying why').toBe(true);
-  expect(out.tipDisabled, 'the perk on the end of the walk could not be given back').toBe(false);
-  expect(out.left.length, 'giving one back took more than one').toBe(1);
+  expect(out.anyUndoButton, 'the sheet still hands a perk back for free').toBe(false);
+  expect(out.footerIsAButton, 'the wholesale refund button is still on the screen').toBe(false);
+  expect(out.middleSaysWhy, 'the screen no longer says a node is load-bearing').toBe(true);
+  expect(out.tipSaysWhere, 'a taken node does not say where it can be undone').toBe(true);
+  expect(out.footerSaysWhere, 'the forest footer does not point at the Unbinder').toBe(true);
   expect(out.lists, 'the panel does not say what the node connects to').toBe(true);
   expect(errors).toEqual([]);
 });

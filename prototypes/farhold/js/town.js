@@ -61,6 +61,8 @@ export function badgeFor(role) {
   if (role.gambles) return { glyph: '?', color: '#ffd24a', kind: 'gambler' };
   // R17: a broker is a shop for people, so the pip is a trader's with a colour of its own
   if (role.brokers) return { glyph: '$', color: '#c08aff', kind: 'broker' };
+  // R20: the Unbinder sells nothing, so the pip is not a trader's — it is the arrow that goes back
+  if (role.retrains) return { glyph: '↺', color: '#7fd0ff', kind: 'unbinder' };
   if (role.trades) return { glyph: '$', color: '#8fe0a0', kind: 'shop' };
   return null;
 }
@@ -91,6 +93,21 @@ export const ROLES = [
    * and up, because a hamlet has nobody to sell.
    */
   { key: 'broker', name: 'Mercenary Broker', minSize: 2, brokers: true, greeting: 'Four names on the board today. They all want paying up front.' },
+  /**
+   * R20 — THE UNBINDER. The only way a spell, a perk or a talent comes back off a character.
+   *
+   *   "Add an NPC at town who is able to reset individual or all spells, perks, and talents, and
+   *    remove the ability to do it directly from the inventory."
+   *
+   * All three used to be free buttons on the character sheet, which meant a build was a setting
+   * rather than a decision. They are a person and a price now. Size 2 and up, so you are never
+   * more than one proper settlement away from changing your mind, but a three-house hamlet does
+   * not keep one.
+   */
+  {
+    key: 'unbinder', name: 'Unbinder', minSize: 2, retrains: true,
+    greeting: 'What you learned, you can unlearn. It comes out harder than it went in, and I charge for the difference.',
+  },
 ];
 
 /**
@@ -176,12 +193,27 @@ export function createTownFolk(scene, terrain, opts = {}) {
     const rng = makeRng((seed ^ (node.id * 2654435761)) >>> 0);
     const size = Math.max(1, Math.min(5, node.size || 1));
     const allowed = ROLES.filter(r => (r.minSize ?? 1) <= size);
-    const want = Math.max(3, HEADCOUNT[size] || 3);
+    /**
+     * R20 — the Unbinder is GUARANTEED, and the headcount grows by one to carry them.
+     *
+     * The loop below fills up to `want` by walking ROLES in declaration order and stops the moment
+     * it is full, so a role added at the END of the list only ever appears in the biggest
+     * settlements. Counted out: a size-2 town filled up on the guard and the broker, and a size-3
+     * one on the smith, the innkeeper, the guard and the gambler — so an Unbinder declared last
+     * would have existed only in size 4 and 5, and a player who could not find one would
+     * reasonably conclude the feature was not in the game. Since unbinding is the ONLY way a spell,
+     * a perk or a talent comes back now, it is placed with the merchant and the elder, before
+     * anything can compete for the space, and `want` goes up by one so nobody is pushed out to
+     * make room.
+     */
+    const hasUnbinder = size >= (ROLES.find(r => r.key === 'unbinder')?.minSize ?? 2);
+    const want = Math.max(3, (HEADCOUNT[size] || 3) + (hasUnbinder ? 1 : 0));
     const roster = [];
     // A trader and somebody with work, always. "Every town should have at least two NPCs to talk
     // to, one as a shop" — so those two are placed before anything competes for the space.
     roster.push(ROLES.find(r => r.key === 'merchant'));
     roster.push(ROLES.find(r => r.key === 'elder'));
+    if (hasUnbinder) roster.push(ROLES.find(r => r.key === 'unbinder'));
     // then one of each other special role that fits, then villagers to fill
     for (const role of allowed) {
       if (role.key === 'villager') continue;
@@ -258,6 +290,8 @@ export function createTownFolk(scene, terrain, opts = {}) {
         guards: !!role.guards, guardTimer: 0, target: null,
         greeting: role.greeting,
         trades: !!role.trades, givesQuests: !!role.quests, gambles: !!role.gambles, brokers: !!role.brokers,
+        // R20 — the one counter where a spell, a perk or a talent can be taken back off you
+        retrains: !!role.retrains,
         node, x, z, y: terrain.heightAt(x, z),
         facing: rng() * Math.PI * 2,
         home: [x, z],
@@ -317,7 +351,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
       name: chosen.name, role: roleRow.key, roleName: roleName || roleRow.name, gender: chosen.gender,
       guards: false, guardTimer: 0, target: null,
       greeting: greeting || roleRow.greeting,
-      trades: false, givesQuests: false, gambles: false, brokers: false,
+      trades: false, givesQuests: false, gambles: false, brokers: false, retrains: false,
       node: node || null, x, z, y: terrain.heightAt(x, z),
       facing: rng() * Math.PI * 2,
       home: [x, z],
@@ -404,6 +438,16 @@ export function createTownFolk(scene, terrain, opts = {}) {
 
   return {
     live, ROLES,
+    /**
+     * R20 — who a settlement of a given size WOULD get, without building any of them.
+     *
+     * Exposed because the roster is the one part of this module with a silent priority: `rosterFor`
+     * fills up to a headcount by walking ROLES in declaration order and stops the moment it is
+     * full, so a role added at the end of that list quietly only ever appears in the biggest
+     * settlements. Asking this directly covers a hundred towns in a millisecond, where walking to
+     * them would take an hour — see tests/round20-unbinder.spec.js.
+     */
+    rosterFor,
 
     /** Keep the people near the player, and let them shuffle about. */
     update(dt, player, { field = null, level = 1, onLog = null } = {}) {

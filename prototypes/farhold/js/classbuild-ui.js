@@ -22,8 +22,8 @@
 // the skill bar. "You should be able to unlearn a skill at any time" is the same screen twice.
 
 import {
-  spellCatalogue, createBuild, pickSpell, unlearnSpell, slotsOf, loadoutOf,
-  loadoutRefusal, buildRefusal, describeBuild, PICK_COUNT,
+  spellCatalogue, createBuild, pickSpell, pickRefusal, slotsOf, loadoutOf,
+  loadoutRefusal, buildRefusal, describeBuild, pendingPicks, PICK_COUNT,
 } from './classbuild.js';
 
 const CSS_HREF = 'classbuild.css';
@@ -76,7 +76,22 @@ export function createClassBuilder({
   build = null, getPlayer = () => null, forest = null,
   onChange = () => {}, onClose = () => {},
   mount = document.body, embedded = false, tabs = null,
+  /**
+   * R20 — HOW FAR THIS CHARACTER HAS GOT, which is the only thing that decides what may be picked.
+   *
+   * The title screen leaves it alone and gets level 1, so five of the six slots refuse themselves
+   * and the creator asks for the opening spell only. In game this reads `player.level` and the
+   * same screen becomes the chooser for whatever has come due. One screen, one rule.
+   */
+  getLevel = null,
+  /**
+   * In game the footer is a way out, not a gate: the build is already in play and `buildRefusal`
+   * has nothing left to refuse. On the title screen it is the thing standing between you and a
+   * character with no spell at all.
+   */
+  inGame = false,
 } = {}) {
+  const levelNow = () => (getLevel ? (getLevel() || 1) : (getPlayer()?.level || 1));
   if (!document.querySelector(`link[href="${CSS_HREF}"]`)) {
     document.head.appendChild(el('link', { rel: 'stylesheet', href: CSS_HREF }));
   }
@@ -162,47 +177,64 @@ export function createClassBuilder({
   let editing = 0;
 
   function drawSpells() {
-    const slots = slotsOf(state, cat);
+    const level = levelNow();
+    const slots = slotsOf(state, cat, { level });
+    /**
+     * R20 — THE SCREEN OPENS ON THE SLOT YOU ARE OWED.
+     *
+     * Five of the six are empty now and only one of them is usually pickable, so landing on slot 1
+     * every time would mean hunting for the row that is actually live. If `editing` points at a
+     * slot that has not come due (or is already filled), it is moved to the first pending one.
+     */
+    if (!slots[editing]?.pending) {
+      const next = slots.find(s => s.pending);
+      if (next) editing = next.index;
+    }
     const left = slots.map(s => {
-      const row = el('div', { class: `cb-slot${editing === s.index ? ' on' : ''}` }, [
+      const row = el('div', {
+        class: `cb-slot${editing === s.index ? ' on' : ''}${s.pending ? ' pending' : ''}${s.open ? '' : ' shut'}`,
+      }, [
         el('span', { class: 'cb-lv', text: s.level > 1 ? `level ${s.level}` : 'from the start' }),
         el('span', {
           class: `cb-pick${s.spell ? ' filled' : ''}`,
-          text: s.spell ? s.spell.name : `${s.name} — nothing picked`,
+          text: s.spell ? s.spell.name
+            : s.pending ? `${s.name} — choose one`
+              : `${s.name} — opens at level ${s.level}`,
         }),
       ]);
       /**
-       * UNLEARN, AND IT IS ALWAYS THERE.
+       * R20 — UNLEARN IS NOT A BUTTON ON THIS SCREEN ANY MORE.
        *
-       * "You should be able to unlearn a skill at any time." So the button is on every filled slot
-       * on both the title screen and the in-game respec, it costs nothing, and the pick comes
-       * straight back to be spent again.
+       *   "Add an NPC at town who is able to reset individual or all spells, perks, and talents,
+       *    and remove the ability to do it directly from the inventory."
+       *
+       * It used to sit on every filled slot and cost nothing, which made a spell a setting rather
+       * than a choice. An Unbinder in any settlement of two houses or more takes one back out for
+       * gold (js/retrain.js). The row says where to go instead of offering a button that is gone.
        */
-      row.append(s.spell
-        ? el('button', {
-          type: 'button', text: 'Unlearn', title: `Take ${s.spell.name} back out of this slot`,
-          onclick: e => { e.stopPropagation(); unlearnSpell(state, s.index); editing = s.index; changed(); },
-        })
-        : el('span', { class: 'cb-note', text: 'empty' }));
-      row.addEventListener('click', () => { editing = s.index; draw(); });
+      row.append(el('span', {
+        class: 'cb-note',
+        text: s.spell ? 'an Unbinder in town can take this one back out'
+          : s.pending ? 'ready to choose' : 'not yet',
+      }));
+      if (s.pending) row.addEventListener('click', () => { editing = s.index; draw(); });
       return row;
     });
 
     const slot = slots[editing] || slots[0];
-    const spellOption = sp => {
-      const tooLate = sp.tier > slot.level;
-      const elsewhere = state.spells.findIndex((id, i) => id === sp.id && i !== slot.index);
-      return option({
-        name: sp.name,
-        right: sp.tier > 1 ? `level ${sp.tier}` : 'from the start',
-        sub: `${sp.desc} · ${sp.shape}, ${sp.element}${sp.classes.length ? ` · ${sp.classes.slice(0, 3).join(', ')}${sp.classes.length > 3 ? '…' : ''}` : ''}`,
-        on: slot.spellId === sp.id,
-        why: tooLate
-          ? `A level ${sp.tier} spell. This slot opens at level ${slot.level}.`
-          : elsewhere >= 0 ? `Already in slot ${elsewhere + 1}.` : null,
-        onclick: () => { pickSpell(state, slot.index, sp.id, cat); changed(); },
-      });
-    };
+    /**
+     * R20 — the greyed-out reason is `pickRefusal`'s own sentence rather than a second copy of the
+     * rules written out here. The two used to say the same thing twice, and a third rule (the level
+     * gate) would have had to be added in both places to be true in either.
+     */
+    const spellOption = sp => option({
+      name: sp.name,
+      right: sp.tier > 1 ? `level ${sp.tier}` : 'from the start',
+      sub: `${sp.desc} · ${sp.shape}, ${sp.element}${sp.classes.length ? ` · ${sp.classes.slice(0, 3).join(', ')}${sp.classes.length > 3 ? '…' : ''}` : ''}`,
+      on: slot.spellId === sp.id,
+      why: pickRefusal(state, slot.index, sp.id, cat, { level }),
+      onclick: () => { pickSpell(state, slot.index, sp.id, cat, { level }); changed(); },
+    });
 
     /**
      * R18 — WHAT IS OPEN AT *THIS* LEVEL, FIRST AND COUNTED.
@@ -212,7 +244,7 @@ export function createClassBuilder({
      * yet with a `why` (which `option()` turns into a disabled button). Correct, and unreadable:
      * every slot drew an identical list of forty rows, so picking a different slot looked like it
      * had done nothing. The catalogue itself was right the whole time — 11/15/9/2/0/3 spells at
-     * levels 1/3/7/12/18/24.
+     * levels 1/3/7/12/18/24 (1/3/6/12/18/24 since R20).
      *
      * Split, so a slot's pane is about that slot: what is open at its level, then what is not yet,
      * under a heading that says so. The later ones are still shown — knowing Meteor is coming is
@@ -220,26 +252,40 @@ export function createClassBuilder({
      */
     const ready = cat.spells.filter(sp => sp.tier <= slot.level);
     const later = cat.spells.filter(sp => sp.tier > slot.level);
+    const owed = pendingPicks(state, cat, level);
+    const rungs = cat.unlockAt.slice(1).join(', ');
 
     return [
-      pane(`Your six (${state.spells.filter(Boolean).length} of ${PICK_COUNT} picked)`, [
-        el('div', { class: 'cb-note', text: 'One spell at the start and one more at every level a class unlocks a skill at — the same ladder every preset class uses. Click a slot, then pick.' }),
-        el('div', { class: 'cb-slots' }, left),
-      ]),
-      pane(`${slot.name} — what can go in slot ${slot.index + 1}`, [
-        el('div', { class: 'cb-note', text: slot.blurb }),
+      pane(`Your six (${state.spells.filter(Boolean).length} of ${PICK_COUNT} learned)`, [
         el('div', {
           class: 'cb-note',
-          text: ready.length
-            ? `${ready.length} open ${ready.length === 1 ? 'spell' : 'spells'} at level ${slot.level}.`
-            : `Nothing new unlocks at level ${slot.level} — take anything from an earlier tier.`,
+          text: `One spell now, and one more at levels ${rungs}. The rest are chosen from the character sheet when the level comes.`,
         }),
-        ...ready.map(spellOption),
-        ...(later.length ? [
-          el('div', { class: 'cb-note', text: `Not yet — ${later.length} more open at higher levels.` }),
-          ...later.map(spellOption),
-        ] : []),
+        owed
+          ? el('div', { class: 'cb-good', text: `${owed} ${owed === 1 ? 'spell' : 'spells'} to choose.` })
+          : el('div', { class: 'cb-note', text: 'Nothing to choose right now.' }),
+        el('div', { class: 'cb-slots' }, left),
       ]),
+      slot.pending
+        ? pane(`${slot.name} — what can go in slot ${slot.index + 1}`, [
+          el('div', { class: 'cb-note', text: slot.blurb }),
+          el('div', {
+            class: 'cb-note',
+            text: ready.length
+              ? `${ready.length} open ${ready.length === 1 ? 'spell' : 'spells'} at level ${slot.level}.`
+              : `Nothing new unlocks at level ${slot.level} — take anything from an earlier tier.`,
+          }),
+          ...ready.map(spellOption),
+          ...(later.length ? [
+            el('div', { class: 'cb-note', text: `Not yet — ${later.length} more open at higher levels.` }),
+            ...later.map(spellOption),
+          ] : []),
+        ])
+        // nothing is owed, so the right-hand pane is the ladder rather than forty dead rows
+        : pane('What is still to come', [
+          el('div', { class: 'cb-note', text: 'Every slot you have reached is filled. The next one opens on its own.' }),
+          ...slots.filter(s => !s.open).map(s => el('div', { class: 'cb-note', text: `Slot ${s.index + 1} — ${s.name}, at level ${s.level}. ${s.blurb}` })),
+        ]),
     ];
   }
 
@@ -317,8 +363,9 @@ export function createClassBuilder({
   // ------------------------------------------------------------------ drawing
 
   function summaryLine() {
-    const d = describeBuild(state, cat, data);
-    return `${d.name} · ${d.loadout}${d.element ? ` (${d.element})` : ''} · ${d.picked}/${d.total} spells · ${d.opening}`;
+    const d = describeBuild(state, cat, data, { level: levelNow() });
+    return `${d.name} · ${d.loadout}${d.element ? ` (${d.element})` : ''} · ${d.picked}/${d.total} spells`
+      + (d.pending ? ` · ${d.pending} to choose` : '') + ` · ${d.opening}`;
   }
 
   function draw() {
@@ -331,6 +378,18 @@ export function createClassBuilder({
           : drawLook();
     body.textContent = '';
     body.appendChild(el('div', { class: 'cb-grid' }, panes));
+    /**
+     * R20 — in game the footer is a way out, not a gate. The build is already being played; there
+     * is nothing left for `buildRefusal` to refuse, and a disabled "Not finished" on a character
+     * who is out in the world would be a button that can never be pressed.
+     */
+    if (inGame) {
+      const owed = pendingPicks(state, cat, levelNow());
+      why.textContent = owed ? `${owed} ${owed === 1 ? 'spell' : 'spells'} still to choose.` : '';
+      done.disabled = false;
+      done.textContent = 'Close';
+      return;
+    }
     const refusal = buildRefusal(state, cat, data);
     why.textContent = refusal || '';
     done.disabled = !!refusal;
@@ -373,7 +432,8 @@ export function createClassBuilder({
       el('h4', { text: d.name }, [el('span', { text: ' Built to order' })]),
       el('p', { class: 'cb-note', text: `${d.loadout}${d.element ? ` · ${d.element}` : ''} · ${d.opening}` }),
       el('ul', {}, d.spells.map(s => el('li', {}, [
-        el('b', { text: s.name || 'nothing picked' }),
+        // R20 — an empty slot is not "nothing picked" any more, it is one you have not reached
+        el('b', { text: s.name || (s.level > 1 ? 'chosen when you get there' : 'nothing picked') }),
         el('span', { class: 'cb-note', text: s.level > 1 ? ` — level ${s.level}` : ' — from the start' }),
       ]))),
       refusal ? el('p', { class: 'cb-why', text: refusal }) : el('p', { class: 'cb-good', text: 'Ready.' }),

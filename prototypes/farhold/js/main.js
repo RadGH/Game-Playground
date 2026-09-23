@@ -64,7 +64,18 @@ import { createScannerChooser } from './scanner-ui.js';
 import { sharedResearch } from './research.js';
 import { createResearchScreen } from './research-ui.js';
 // R17 — the custom class: the opening kit a build asks for, and the screen that manages the company
-import { applyOpeningKit } from './classbuild.js';
+// R20 — …and the spell ladder: one pick at creation, one more at every rung of skills.json's
+// `unlockAt`, chosen from the character sheet when the level comes.
+import { applyOpeningKit, spellCatalogue, installCustomClass, pendingPicks } from './classbuild.js';
+import { createClassBuilder } from './classbuild-ui.js';
+/**
+ * R20 — THE UNBINDER. The only way a spell, a perk or a talent comes back off a character.
+ * Every price and every refusal is in js/retrain.js; this file only wires it to the person.
+ */
+import {
+  retrainMenu, forgetSpell, forgetAllSpells, forgetPerk, forgetAllPerks,
+  forgetTalent, forgetAllTalents,
+} from './retrain.js';
 import { createFollowers } from './followers.js';
 import { createFollowersScreen } from './followers-ui.js';
 import { roadHireOffer } from './hire.js';
@@ -141,8 +152,11 @@ import { createBoat } from './boat.js';
 import { handsOf, strikeAt, withArea, profileOf, isStaff, isWand, staffSpell, wandBehaviour, chargedForm, OFFHAND_DAMAGE, tuneWeapons } from './weapons.js';
 // R15: the dome's shove resists by rank through the same helper a hammer's knockback uses
 import { pushFor, feel, tuneFeel } from './combat-feel.js';
-import { talentPlan, pickTalent, clearTalent, talentsOn } from './skilltalents.js';
-import { allocate as allocatePerk, refundAll as refundPerks, refundOne as refundOnePerk, pointsLeft as perkPointsLeft } from './perks.js';
+// R20 — `clearTalent` moved with it: js/retrain.js is what empties a tier now, for gold.
+import { talentPlan, pickTalent, talentsOn } from './skilltalents.js';
+// R20 — `refundAll` and `refundOne` are no longer imported here: giving a perk back is an Unbinder
+// in a town and a price, and js/retrain.js is the only caller of either.
+import { allocate as allocatePerk, pointsLeft as perkPointsLeft } from './perks.js';
 import { createCrafting, Materials } from './craft.js';
 import { showRewards, rewardsOpen } from '../../../shared/rewards.js';
 import { grantReward, rewardBlurb } from './questrewards.js';
@@ -661,6 +675,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     resources: resourceData,
   });
 
+  /**
+   * R20 — what the opening kit said, held until there is a HUD to say it in. See the note below.
+   */
+  const openingLines = [];
+
   if (!save) {
     // attuned like every other weapon, or a level-1 character's first sword has no facts on its
     // card until the day it is replaced
@@ -699,7 +718,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * element a branded caster was attuned to, and the sealed chest. A preset class returns
      * immediately without doing anything at all.
      */
-    applyOpeningKit({ player, rpg, classDef, data: classbuildData, log: (t, k) => hud.log(t, k) });
+    /**
+     * R20 — AND ITS LINES ARE BUFFERED, BECAUSE THE HUD DOES NOT EXIST YET.
+     *
+     * This passed `(t, k) => hud.log(t, k)` straight in, and `hud` is a `const` declared some
+     * seven hundred lines below here — so the moment `applyOpeningKit` actually logged anything,
+     * the whole boot died with "Cannot access 'hud' before initialization" and the title screen
+     * said `failed:` and nothing else.
+     *
+     * It logs whenever the opening kit hands over a crate or a second weapon, and the DEFAULT
+     * opening for a new build is the crate (`createBuild` sets `opening: { kind: 'crate' }`). So
+     * every custom character made the ordinary way, through the title screen, has failed to start
+     * since the custom class shipped in R17 — the one path nobody had a browser test for. Found by
+     * tests/round20-unbinder.spec.js, which builds a character the way a player does.
+     *
+     * This is the fourth of these in the project (see BUILD-MODE.md, "three TDZ crashes") and
+     * `node --check` cannot see any of them: it is a scope question, not a syntax one.
+     */
+    applyOpeningKit({ player, rpg, classDef, data: classbuildData, log: (t, k) => openingLines.push([t, k]) });
   }
 
   // only the player swims, so only the player pays for the swim clips
@@ -939,6 +975,69 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      */
     canSummon: (petId, s) => pets?.canAdmit?.(petId, { name: s?.name }) ?? { ok: true },
   });
+
+  /**
+   * R20 — THE SPELL LADDER: ONE PICK AT CREATION, THE REST AS THE LEVELS COME.
+   *
+   *   "Let's change the character creator so that you only pick the first level spell. When you
+   *    reach levels 3/6/12/18/24 (+ also change 7 to 6) unlock the next spell and have a 'spell
+   *    available' slot in the inventory screen so you can open the dialog to choose the next spell."
+   *
+   * Three things have to agree whenever a pick is made, and this is the one place that makes them:
+   * the saved build (`player.build`), the synthetic class the rest of the game reads
+   * (`skillData.classes.custom`), and the live bar the number keys actually fire. `installCustomClass`
+   * rewrites the second; without `skills.relearn` the third would go on firing the spell that was
+   * there before — a change that reaches the screen and not the keys, which is the failure this
+   * project keeps finding.
+   *
+   * The catalogue is built once. It reads `data/classes.json` and `data/skills.json`, neither of
+   * which changes during a run, and rebuilding it on every redraw of the chooser was measurable.
+   */
+  const spellCat = classbuildData ? spellCatalogue({ classData, skillData, data: classbuildData }) : null;
+
+  /** How many spell slots have come open with nothing in them. Zero for a preset class. */
+  function spellsOwed() {
+    if (!spellCat || !player.build?.custom) return 0;
+    return pendingPicks(player.build, spellCat, player.level || 1);
+  }
+
+  /** A pick was made (or unbound): put it in the class, on the bar, and in the save. */
+  function buildChanged(build = player.build) {
+    if (!build || !classbuildData) return;
+    player.build = build;
+    installCustomClass({ classData, skillData, classLooks, data: classbuildData, build });
+    skills.relearn(skillData.classes[classbuildData.custom?.id || 'custom']);
+    hud.skills(skills.state());
+    hud.setPlayer(player);
+    autoSave();
+  }
+
+  /**
+   * THE CHOOSER, which is the class builder's own Spells tab with a level on it.
+   *
+   * Deliberately not a second screen. The rules about which spell may go in which slot live in
+   * js/classbuild.js and are drawn by js/classbuild-ui.js; a bespoke in-game dialog would be a
+   * second rendering of the same rules, correct on the day it was written. `getLevel` is the whole
+   * difference between the title screen (level 1, so only the opening slot is live) and this one.
+   */
+  let spellChooser = null;
+  function openSpellChooser() {
+    if (!classbuildData || !player.build?.custom) {
+      hud.log('Your six came with the class you chose — only a class you built yourself picks its own.', '');
+      return;
+    }
+    if (!spellChooser) {
+      spellChooser = createClassBuilder({
+        classData, skillData, classLooks, data: classbuildData, build: player.build,
+        getPlayer: () => player, getLevel: () => player.level || 1, forest: rpg.forest,
+        inGame: true, tabs: [{ key: 'spells', name: 'Spells' }],
+        onChange: b => buildChanged(b),
+        onClose: () => { hud.renderSheet?.(); },
+      });
+    }
+    spellChooser.build = player.build;
+    spellChooser.show('spells');
+  }
 
   // god rays, lens flare and the moment the star drops behind a ridge — screen space, over the
   // canvas. `terrain` is rebound when you land on a new world, so it is read through the binding.
@@ -1615,22 +1714,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.setPlayer(player);
       autoSave();
     },
-    onRefundPerk: id => {
-      const out = refundOnePerk(player, rpg.forest, id);
-      if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
-      sound.ui('click');
-      hud.log(`${out.node.name} given back.`, 'level');
-      rpg.refresh(player, { full: true });
-      hud.setPlayer(player);
-      autoSave();
-    },
-    onRefundPerks: () => {
-      const back = refundPerks(player);
-      hud.log(back ? `${back} perk point${back === 1 ? '' : 's'} back. Spend them again.` : 'Nothing to take back.', back ? 'level' : '');
-      rpg.refresh(player, { full: true });
-      hud.setPlayer(player);
-      autoSave();
-    },
+    /**
+     * R20 — `onRefundPerk` and `onRefundPerks` used to sit here, free and instant.
+     *
+     * "…remove the ability to do it directly from the inventory." Both are now the Unbinder's, with
+     * a price: see the `forgetPerk` / `forgetAllPerks` handlers on the talk panel further down.
+     * `onChooseSpell` is what takes their place on this screen — the Skills tab's "spell available"
+     * slot opening the chooser for whichever slot has come due.
+     */
+    onChooseSpell: () => openSpellChooser(),
     onPickTalent: (skillId, tier, nodeId, shape) => {
       const out = pickTalent(player, skillId, tier, nodeId, { shape });
       if (!out.ok) { hud.log(out.why, 'bad'); sound.ui('error'); return; }
@@ -1639,7 +1731,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.setPlayer(player);
       autoSave();
     },
-    onClearTalent: (skillId, tier) => { clearTalent(player, skillId, tier); sound.ui('click'); hud.setPlayer(player); autoSave(); },
+    // R20 — `onClearTalent` is gone with the click that cleared one. The Unbinder charges for it.
     onSelectVehicle: (slot, key) => {
       if (!selectVehicle(player, slot, key)) return;
       sound.ui('click');
@@ -1649,6 +1741,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     },
   });
   hud.setPlayer(player);
+
+  /**
+   * R20 — and now say what the opening kit handed over.
+   *
+   * These were written before the HUD existed (see the note at `applyOpeningKit`), so they have
+   * been sitting in `openingLines` waiting for a log to go in. Flushed here, at the first point
+   * there is one, so a custom character still opens their run being told what was in the crate.
+   */
+  for (const [text, kind] of openingLines) hud.log(text, kind);
+  openingLines.length = 0;
 
   /** A hit, in the log AND over the thing you hit — see `hud.hit`. */
   function reportHit(enemy, result) {
@@ -2039,9 +2141,19 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * buttons and "no points to spend". A level buys a PERK now, and sometimes a talent.
        */
       const gained = pointsFor(player.level) - pointsFor(player.level - levels);
+      /**
+       * R20 — AND SAY WHEN A SPELL SLOT HAS OPENED.
+       *
+       * The whole point of moving five of the six picks out of the character creator is that they
+       * arrive while you are playing, and a slot that opens in silence is a slot nobody finds. The
+       * Skills tab carries a badge and the bar draws the empty slot in green, but the level-up
+       * line is what the player is actually looking at in the moment it happens.
+       */
+      const owed = spellsOwed();
       const bits = [gained ? `${gained} perk point${gained === 1 ? '' : 's'}` : null,
+        owed ? `${owed} spell${owed === 1 ? '' : 's'} to choose` : null,
         player.pendingTalent ? `${player.pendingTalent} talent` : null].filter(Boolean);
-      hud.log(`Level ${player.level}!${bits.length ? ` ${bits.join(' and ')} to spend — press I.` : ''}`, 'level');
+      hud.log(`Level ${player.level}!${bits.length ? ` ${bits.join(', ')} — press I.` : ''}`, 'level');
       sound.levelUp();
     }
 
@@ -5206,6 +5318,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       mercBoard: npc.brokers
         ? followers.board({ town: npc.node, day: Math.floor(state.elapsed / (balance.sky?.dayLengthSeconds ?? 900)) + 1 })
         : null,
+      /**
+       * R20 — THE UNBINDER'S COUNTER: every spell, perk and talent you could have taken back off
+       * you, priced, with a sentence on anything they will not do. js/retrain.js owns the rules and
+       * js/talkui.js only draws them, so a price can never be quoted in one place and charged in
+       * another. `skillState` goes in because a talent's tree depends on its skill's SHAPE.
+       */
+      retrain: npc.retrains
+        ? retrainMenu({
+          player, build: player.build, cat: spellCat, forest: rpg.forest,
+          skillState: skills.state(), prices: balance.retrain,
+        })
+        : null,
       active: questLog.active,
       hasQuest: id => questLog.has(id),
       readyToTurnIn: giverId => questLog.readyToTurnIn(giverId),
@@ -5215,6 +5339,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   // what the gambler last pulled out of a crate, so the panel can show it
   let lastCrate = null, lastCrateLifted = false;
+
+  /**
+   * R20 — one shape for all six of the Unbinder's buttons.
+   *
+   * `result` is whatever js/retrain.js came back with. A refusal is said out loud and costs
+   * nothing; a success runs `then` (which is the only part that differs between the six) and then
+   * redraws the panel, because the prices and the lists it is showing have just changed under it —
+   * the gold went down and the thing you unbound is no longer on the shelf.
+   */
+  function unbind(result, then = null) {
+    if (!result?.ok) {
+      if (result?.why) hud.log(result.why, 'bad');
+      sound.ui('error');
+      return result;
+    }
+    sound.coin();
+    then?.(result);
+    hud.setPlayer(player);
+    if (talk.npc) talk.update(talkContext(talk.npc));
+    autoSave();
+    return result;
+  }
 
   /**
    * The recruit offer for one person, built once and remembered on them.
@@ -5386,6 +5532,44 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       talk.update(talkContext(talk.npc));
       autoSave();
     },
+    /**
+     * R20 — THE UNBINDER'S SIX BUTTONS.
+     *
+     * All six are the same four steps: ask js/retrain.js (which prices it, refuses it or takes the
+     * gold and makes the change), say what happened, rebuild whatever the change touched, save.
+     * Nothing here decides anything — a rule in this file would be a second copy of one in
+     * retrain.js, and the node tests only drive the latter.
+     */
+    forgetSpell: row => unbind(forgetSpell({
+      player, build: player.build, cat: spellCat, slot: row.slot, prices: balance.retrain,
+    }), out => {
+      hud.log(`${out.name} unbound for ${out.spent} gold. Slot ${out.slot + 1} is open again.`
+        + (out.talents ? ` Its ${out.talents} talent${out.talents === 1 ? '' : 's'} went with it.` : ''), 'level');
+      buildChanged();
+    }),
+    forgetAllSpells: () => unbind(forgetAllSpells({
+      player, build: player.build, cat: spellCat, prices: balance.retrain,
+    }), out => {
+      hud.log(`${out.count} spells unbound for ${out.spent} gold.`
+        + (out.talents ? ` ${out.talents} talent${out.talents === 1 ? '' : 's'} went with them.` : '')
+        + ' Choose again from the Skills screen.', 'level');
+      buildChanged();
+    }),
+    forgetPerk: row => unbind(forgetPerk({
+      player, forest: rpg.forest, id: row.id, prices: balance.retrain,
+    }), out => {
+      hud.log(`${out.name} given back for ${out.spent} gold. The point is yours again.`, 'level');
+      rpg.refresh(player, { full: true });
+    }),
+    forgetAllPerks: () => unbind(forgetAllPerks({ player, prices: balance.retrain }), out => {
+      hud.log(`${out.count} perk point${out.count === 1 ? '' : 's'} back, for ${out.spent} gold.`, 'level');
+      rpg.refresh(player, { full: true });
+    }),
+    forgetTalent: row => unbind(forgetTalent({
+      player, skillId: row.skillId, tier: row.tier, prices: balance.retrain,
+    }), out => hud.log(`${out.name} taken off ${row.skillName} for ${out.spent} gold.`, 'level')),
+    forgetAllTalents: () => unbind(forgetAllTalents({ player, prices: balance.retrain }), out =>
+      hud.log(`${out.count} talent${out.count === 1 ? '' : 's'} taken off, for ${out.spent} gold.`, 'level')),
     gamble: tier => {
       const r = folk.gamble(talk.npc, tier.key, player, { level: player.level });
       if (!r.ok) { hud.log(r.why, 'bad'); sound.ui('error'); }

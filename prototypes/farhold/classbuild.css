@@ -106,6 +106,12 @@
 }
 .cb-slot button:hover { color: var(--cb-bad); border-color: var(--cb-bad); }
 
+/* R20 — a slot you are OWED is the one thing on this screen you can act on, so it is the one
+   thing that is lit; a slot whose level has not come is dimmed back out of the way. */
+.cb-slot.pending { border-color: var(--cb-good, #8fe0a0); cursor: pointer; }
+.cb-slot.pending .cb-pick { color: var(--cb-good, #8fe0a0); font-style: normal; }
+.cb-slot.shut { opacity: .5; }
+
 .cb-tag { display: inline-block; border: 1px solid var(--cb-line); border-radius: 3px; padding: 0 5px; margin-right: 4px; font-size: 11px; color: var(--cb-faint); }
 
 .cb-foot { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--cb-line); padding-top: 10px; flex-wrap: wrap; }

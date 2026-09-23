@@ -3007,3 +3007,33 @@ knobs, 13 orphans across nine data files — plus three missing constructor argu
 getter, one unit-less affix, one cap with two owners, and four bugs that only fixing those could
 find (the affix loop in `js/gear.js` since round 9, `spareAt` measuring output for capacity, the
 plan with no coordinates, and a test that skipped itself and reported green).
+
+---
+
+## Round 20 — the spell ladder, and the Unbinder
+
+The full write-up is in **`CLASSES.md`, "Round 20"**. In short:
+
+* **The character creator asks for one spell.** The ladder is `1/3/6/12/18/24` (7 became 6), and a
+  pick is gated by the character's own level — one rule in `pickRefusal`, which is why the title
+  screen (a level-1 character) can only fill the opening slot with no code that knows about
+  creation. The other five are chosen from the character sheet as the levels come.
+* **An empty slot is a real slot.** `installCustomClass` no longer invents a spell for an unfilled
+  pick; `createSkillBar` carries `empty` / `pending`, the key spends nothing and says what is wrong,
+  and the sheet draws a green **Spell available** card that opens the chooser. The chooser is the
+  builder's own Spells tab with a level on it — not a second screen with a second copy of the rules.
+* **The Unbinder** (`js/retrain.js`, `js/town.js`) is a town role in any settlement of size 2+ who
+  takes a spell, a perk or a talent back off you for gold — one at a time or all of them. Prices
+  live in `data/balance.json`'s `retrain` block. Every free undo on the character sheet is gone,
+  **and so are the two back doors that survived removing the buttons**: overwriting a filled spell
+  slot, and re-picking a spent talent tier.
+
+Three pre-existing bugs fell out of it, all written up in CLASSES.md:
+
+1. **The custom class could not start a game at all** — a TDZ crash (`hud` read ~700 lines above its
+   own declaration) that killed the boot for every custom character made through the title screen,
+   since R17. The fourth of these in the project; `node --check` sees none of them. The existing
+   specs all opened the builder and never pressed Start.
+2. **Picked talents were never saved** — `player.skillTalents` was on no save list, so a reload
+   silently un-picked every one. The same fault the perk forest had in R18, in the same list.
+3. **A refused row on the Unbinder's counter said why only in a tooltip.**

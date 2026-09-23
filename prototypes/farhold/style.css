@@ -495,6 +495,11 @@ body {
 .talk-foot { margin-top: 12px; }
 /* why the prices are what they are — standing was invisible at the one counter it should show at */
 .talk-standing { color: #ffd24a; margin: 2px 0 6px; }
+/* R20 — an Unbinder's row that cannot be acted on, with the reason printed on it rather than
+   hidden in a tooltip the player has to hover a dead button to find. */
+.trade-row.refused { opacity: .75; }
+.trade-row.refused .trade-spec { color: #ffd24a; }
+.trade-row.unbind-all { border-top: 1px solid #2b3a52; margin-top: 6px; padding-top: 8px; }
 .talk-btn:disabled { opacity: .35; cursor: default; }
 .talk-gold { margin-top: 8px; }
 
@@ -1131,6 +1136,7 @@ body {
 .bench-card-wrap { margin-bottom: 4px; }
 .bag .row.on { border-color: #7fd8ff; background: rgba(24,44,62,.8); }
 .tip-bad { color: #ff9a8a; }
+.tip-good { color: var(--good); }   /* R20 — a spell slot standing open */
 
 /* ---------------------------------------------------------------- item hover cards */
 :is(.tipbox, .itemcard) .tip-dim { color: #8fa0b4; font-size: 12px; }
@@ -1619,6 +1625,14 @@ body {
 .sk-card.on { border-color: var(--accent); background: rgba(24, 44, 62, .9); box-shadow: inset 0 -2px 0 var(--accent); }
 .sk-card.locked { opacity: .45; cursor: default; }
 .sk-card.locked .sk-name { color: var(--ink-faint); }
+
+/* R20 — a slot whose level has come and has nothing in it. It is the one card on this strip you
+   can act on, so it is the one that is lit; clicking it opens the spell chooser. */
+.sk-card.pending { border-color: var(--good); background: rgba(22, 48, 36, .85); cursor: pointer; }
+.sk-card.pending .sk-name, .sk-card.pending .sk-cost { color: var(--good); }
+.sk-card.pending:hover { border-color: #b6f0c4; }
+.skill-slot.pending { border-color: var(--good); box-shadow: 0 0 0 1px var(--good) inset; }
+.skill-slot.pending .skill-name, .skill-slot.pending .skill-mp { color: var(--good); }
 
 /* three tiers side by side instead of three stacked rows that read as one list */
 .pane .skilltree {

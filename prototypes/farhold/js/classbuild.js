@@ -67,7 +67,7 @@ export const PICK_COUNT = 6;
  * order the builder draws them in.
  */
 export function spellCatalogue({ classData = null, skillData = null, data = null } = {}) {
-  const unlockAt = skillData?.unlockAt || [1, 3, 7, 12, 18, 24];
+  const unlockAt = skillData?.unlockAt || [1, 3, 6, 12, 18, 24];
   const skills = skillData?.skills || {};
   const classSkills = skillData?.classes || {};
   const classes = classData?.classes || [];
@@ -181,24 +181,54 @@ export function picksLeft(build) {
  * unlocks at, and no spell twice. The first is the point-buy — a level-1 slot cannot hold Meteor —
  * and it uses the EXISTING unlock ladder rather than a new one, which is the brief's own condition:
  * "match the existing unlock levels exactly — do not invent a new ladder".
+ *
+ * ---------------------------------------------------------------------------------------------
+ * R20 — AND A THIRD RULE, WHICH IS WHY THE CHARACTER CREATOR NOW ONLY ASKS FOR ONE SPELL.
+ *
+ *   "Let's change the character creator so that you only pick the first level spell. When you reach
+ *    levels 3/6/12/18/24 unlock the next spell…"
+ *
+ * `level` is how far the character has actually got, and a slot cannot be filled before the level
+ * it opens at. That single rule is the WHOLE of the change: the title screen builds a level-1
+ * character, so five of the six slots refuse themselves and the creator asks for one spell without
+ * needing to know anything about creation. The in-game chooser passes `player.level` and the same
+ * function opens exactly the slots that have come due.
+ *
+ * The default is 1 rather than Infinity on purpose. A caller that forgets to pass a level gets the
+ * conservative answer (only the opening slot), never a free run at all six.
  */
-export function pickRefusal(build, slot, skillId, cat) {
+export function pickRefusal(build, slot, skillId, cat, { level = 1 } = {}) {
   if (!cat) return 'No spell list loaded.';
   if (!Number.isInteger(slot) || slot < 0 || slot >= PICK_COUNT) return 'There is no such slot.';
   const spell = cat.byId.get(skillId);
   if (!spell) return `There is no spell called ${skillId}.`;
   const at = cat.unlockAt[slot];
+  if (level < at) {
+    return `This slot opens at level ${at}. You are level ${level}.`;
+  }
   if (spell.tier > at) {
     return `${spell.name} is a level ${spell.tier} spell and this slot opens at level ${at}.`;
   }
   const already = (build.spells || []).findIndex((id, i) => id === skillId && i !== slot);
   if (already >= 0) return `${spell.name} is already in slot ${already + 1}.`;
+  /**
+   * AND A SLOT ALREADY LEARNED IS NOT RE-PICKED FOR FREE.
+   *
+   * Unlearning used to be a button on the same screen, so swapping a spell was two free clicks.
+   * It costs gold at an Unbinder now (js/retrain.js), and a slot you could simply overwrite would
+   * be a way straight round that — the spell you are bored of would be gone and the counter never
+   * paid. An empty slot is the only thing a pick may fill.
+   */
+  if (build.spells?.[slot]) {
+    const worn = cat.byId.get(build.spells[slot]);
+    return `${worn?.name || 'A spell'} is already in this slot. An Unbinder in town can take it back out.`;
+  }
   return null;
 }
 
 /** Put a spell in a slot. Returns `{ ok, why }`. */
-export function pickSpell(build, slot, skillId, cat) {
-  const why = pickRefusal(build, slot, skillId, cat);
+export function pickSpell(build, slot, skillId, cat, { level = 1 } = {}) {
+  const why = pickRefusal(build, slot, skillId, cat, { level });
   if (why) return { ok: false, why };
   build.spells[slot] = skillId;
   return { ok: true, why: null };
@@ -220,18 +250,39 @@ export function unlearnSpell(build, slot) {
   return { ok: true, why: null, refunded: had };
 }
 
-/** Every slot, with what is in it and what it may hold. For the builder and the in-game respec. */
-export function slotsOf(build, cat) {
-  return cat.unlockAt.slice(0, PICK_COUNT).map((level, i) => ({
-    index: i,
-    level,
-    name: cat.tiers[i]?.name || `Tier ${i + 1}`,
-    blurb: cat.tiers[i]?.blurb || '',
-    spellId: build?.spells?.[i] || null,
-    spell: build?.spells?.[i] ? cat.byId.get(build.spells[i]) || null : null,
-    /** Every spell this slot could take right now — tier low enough, and not already picked. */
-    options: cat.spells.filter(s => s.tier <= level && !pickRefusal(build, i, s.id, cat)),
-  }));
+/**
+ * Every slot, with what is in it, whether it has come due, and what it may hold.
+ *
+ * `open` is "this character is high enough level to fill it", `pending` is "…and it is still
+ * empty", which is the thing the character sheet puts a badge on. `at` is the level it opens at.
+ */
+export function slotsOf(build, cat, { level = 1 } = {}) {
+  return cat.unlockAt.slice(0, PICK_COUNT).map((at, i) => {
+    const spellId = build?.spells?.[i] || null;
+    const open = level >= at;
+    return {
+      index: i,
+      level: at,
+      open,
+      pending: open && !spellId,
+      name: cat.tiers[i]?.name || `Tier ${i + 1}`,
+      blurb: cat.tiers[i]?.blurb || '',
+      spellId,
+      spell: spellId ? cat.byId.get(spellId) || null : null,
+      /** Every spell this slot could take right now — tier low enough, and not already picked. */
+      options: cat.spells.filter(s => s.tier <= at && !pickRefusal(build, i, s.id, cat, { level })),
+    };
+  });
+}
+
+/**
+ * How many spells this character is owed right now: slots whose level has come and gone with
+ * nothing in them. This is the number the character sheet badges and the HUD announces on a
+ * level-up, and it is the ONLY thing that decides whether the chooser has anything to offer.
+ */
+export function pendingPicks(build, cat, level = 1) {
+  if (!build || !cat) return 0;
+  return slotsOf(build, cat, { level }).filter(s => s.pending).length;
 }
 
 // ---------------------------------------------------------------------------- the loadout
@@ -302,13 +353,18 @@ export function installCustomClass({
   const spells = (build.spells || []).map(s => s || null);
 
   /**
-   * A SLOT WITH NOTHING IN IT STILL HAS TO BE A SKILL, or `createSkillBar` builds a slot with no
-   * name, no cooldown and no shape and the key does nothing with no explanation. An empty pick
-   * falls back to the cheapest thing of its own tier, and the builder will not let you start with
-   * one anyway — this is the seatbelt, not the rule.
+   * R20 — AN EMPTY SLOT STAYS EMPTY, AND THAT IS NOW THE NORMAL CASE.
+   *
+   * This used to fall back to the cheapest spell of the slot's own tier, on the grounds that the
+   * builder would never let you start with an empty one. It will now: five of the six are empty
+   * for every new character, and a fallback here would silently HAND the player four spells they
+   * never chose the moment they hit level 3 — the choice would be made for them and nothing would
+   * say so.
+   *
+   * `createSkillBar` takes a null id as a real, explainable empty slot (see js/skills.js `fill`),
+   * so nothing downstream needs a spell to point at.
    */
-  const cat = spellCatalogue({ classData, skillData, data });
-  const filled = spells.map((s, i) => s || cat.tiers[i]?.spells?.[0]?.id || cat.spells[0]?.id);
+  const filled = spells.map(s => s || null);
 
   const companion = build.opening?.kind === 'companion'
     ? (data.opening?.companions || []).find(c => c.id === build.opening.companion) || null
@@ -486,10 +542,11 @@ export function applyOpeningKit({ player, rpg, classDef = null, data = null, log
 /**
  * A custom build, in words, for the class card and the Followers screen.
  */
-export function describeBuild(build, cat, data) {
+export function describeBuild(build, cat, data, { level = 1 } = {}) {
   const loadout = loadoutOf(build, data);
   const el = (data?.elements || []).find(e => e.key === build?.element);
   const picked = (build?.spells || []).filter(Boolean).length;
+  const pending = pendingPicks(build, cat, level);
   const opening = build?.opening?.kind === 'companion'
     ? (data?.opening?.companions || []).find(c => c.id === build.opening.companion)?.name || 'a companion'
     : (data?.opening?.crate?.name || 'a sealed chest');
@@ -497,12 +554,18 @@ export function describeBuild(build, cat, data) {
     name: build?.name || 'Freelance',
     loadout: loadout?.name || '—',
     element: el ? el.name : null,
-    picked, total: PICK_COUNT,
+    picked, total: PICK_COUNT, pending,
     opening,
-    spells: (build?.spells || []).map((id, i) => ({
-      level: cat?.unlockAt?.[i] ?? 1,
-      name: id ? (cat?.byId?.get(id)?.name || id) : null,
-    })),
+    spells: (build?.spells || []).map((id, i) => {
+      const at = cat?.unlockAt?.[i] ?? 1;
+      return {
+        level: at,
+        name: id ? (cat?.byId?.get(id)?.name || id) : null,
+        // an empty slot is either one you are owed RIGHT NOW or one that has not come due yet,
+        // and those read very differently on a card
+        pending: !id && level >= at,
+      };
+    }),
   };
 }
 
@@ -510,8 +573,15 @@ export function describeBuild(build, cat, data) {
 export function buildRefusal(build, cat, data) {
   if (!build) return 'No build.';
   if (!loadoutOf(build, data)) return 'Pick a loadout.';
-  const empty = (build.spells || []).findIndex(s => !s);
-  if (empty >= 0) return `Slot ${empty + 1} has no spell in it. Every one of the six is picked before you start.`;
+  /**
+   * R20 — ONE SPELL, NOT SIX.
+   *
+   * This used to refuse until all six slots were full, which was the creator asking a level-1
+   * character to plan a level-24 build out of forty spells they have never cast. The other five
+   * are chosen at the level they open at, from the character sheet — so the only thing that has
+   * to be settled before the first morning is what you walk out of the gate holding.
+   */
+  if (!(build.spells || [])[0]) return 'Pick the spell you start with. The other five are chosen as you level.';
   if (build.opening?.kind === 'companion' && !build.opening.companion) return 'Pick which companion comes with you.';
   const loadout = loadoutOf(build, data);
   if (loadout?.element && !build.element) return 'Pick which element your caster is attuned to.';

@@ -80,6 +80,9 @@ export function createTalkPanel(handlers = {}) {
   let offerState = null;
   /** Which shelf of the shop is showing. Kept between renders so a buy does not reset it. */
   let shopTab = 'weapon';
+  /** R20 — which of the Unbinder's three shelves is showing, and which "all of it" is armed. */
+  let unbindTab = 'spells';
+  let armed = null;
   /** Which bag items are ticked for which gather job. Kept between renders so a tick sticks. */
   const handOver = new Map();
   let context = null;
@@ -480,6 +483,9 @@ export function createTalkPanel(handlers = {}) {
       }
     }
 
+    // ---- the Unbinder: taking a spell, a perk or a talent back off you, for coin
+    if (npc.retrains) kids.push(...unbinderNodes());
+
     // ---- what you are already carrying
     const active = context.active || [];
     if (active.length) {
@@ -493,6 +499,136 @@ export function createTalkPanel(handlers = {}) {
     }
 
     body.replaceChildren(...kids);
+  }
+
+  /**
+   * R20 — THE UNBINDER'S COUNTER.
+   *
+   *   "Add an NPC at town who is able to reset individual or all spells, perks, and talents, and
+   *    remove the ability to do it directly from the inventory. These should cost a small amount of
+   *    gold we can tweak later."
+   *
+   * Three shelves behind one chip row, because a level-30 character has one spell list, forty-odd
+   * perk nodes and a dozen talents, and stacking those into one column would bury the thing you
+   * came in for. Every price and every refusal comes off `context.retrain` — the menu js/retrain.js
+   * built — so this file holds no rules and cannot quote a price the counter does not charge.
+   */
+  function unbinderNodes() {
+    const menu = context.retrain;
+    const kids = [];
+    if (!menu) return [el('p', { class: 'muted small', text: 'Nothing to unbind.' })];
+
+    kids.push(el('div', { class: 'talk-gold muted small', text: `You have ${menu.gold} gold.` }));
+
+    const counts = {
+      spells: menu.spells.length, perks: menu.perks.length, talents: menu.talents.length,
+    };
+    const shelves = [['spells', 'Spells'], ['perks', 'Perks'], ['talents', 'Talents']];
+    kids.push(el('div', { class: 'shop-tabs' }, ...shelves.map(([key, label]) => el('button', {
+      class: 'chip' + (key === unbindTab ? ' on' : ''),
+      text: `${label}${counts[key] ? ` (${counts[key]})` : ''}`,
+      onclick: () => { unbindTab = key; armed = null; render(); },
+    }))));
+
+    /**
+     * One thing you could have taken back off you. A button you cannot press says why on its face,
+     * which is E1's rule: a refusal after the click is a refusal that cost you a click.
+     */
+    const unbindRow = (name, spec, price, refusal, onclick) => el('div', { class: 'trade-row' + (refusal ? ' refused' : '') },
+      el('div', { class: 'trade-what' },
+        el('span', { text: name }),
+        /**
+         * THE REASON IS ON THE ROW, NOT IN A TOOLTIP.
+         *
+         * It was only ever the button's `title`, which means it appears after a second of hovering
+         * a button you cannot press — and never at all on a touch screen. "A greyed row with no
+         * reason is the one answer a player cannot act on" is this project's own rule, and a perk
+         * that is holding another one up is exactly the case where the reason IS the instruction
+         * ("give that one back first"). Caught by tests/round20-unbinder.spec.js, which reads the
+         * row's text rather than its attributes.
+         */
+        el('span', { class: refusal ? 'trade-spec talk-standing' : 'trade-spec', text: refusal || spec }),
+      ),
+      el('span', { class: 'coin', text: `${price}g` }),
+      el('button', {
+        class: 'talk-btn', text: 'Unbind',
+        disabled: !!refusal, title: refusal || '',
+        onclick: refusal ? null : onclick,
+      }),
+    );
+
+    /**
+     * "…and all of them." Two clicks, because it is the one button here that can spend a large
+     * sum and undo an afternoon in a single press — the same arming the perk screen's own
+     * "Take it all back" used to have, kept now that the button has a price on it as well.
+     */
+    const allRow = (key, all, word, onclick) => {
+      const isArmed = armed === key;
+      return el('div', { class: 'trade-row unbind-all' },
+        el('div', { class: 'trade-what' },
+          el('span', { text: isArmed ? `Unbind all ${all.count} ${word}? Click again.` : `All ${all.count} ${word}` }),
+          el('span', { class: 'trade-spec', text: all.refusal || 'Every one of them, in one go.' }),
+        ),
+        el('span', { class: 'coin', text: `${all.price}g` }),
+        el('button', {
+          class: 'talk-btn' + (isArmed ? ' primary' : ''),
+          text: isArmed ? 'Yes, all of it' : 'Unbind all',
+          disabled: !!all.refusal, title: all.refusal || '',
+          onclick: all.refusal ? null : () => {
+            if (!isArmed) { armed = key; render(); return; }
+            armed = null;
+            onclick();
+          },
+        }),
+      );
+    };
+
+    if (unbindTab === 'spells') {
+      if (menu.spellsLocked) {
+        kids.push(el('p', { class: 'muted small', text: menu.spellsLocked }));
+      } else if (!menu.spells.length) {
+        kids.push(el('p', { class: 'muted small', text: 'You have not learned a spell yet.' }));
+      } else {
+        kids.push(el('p', { class: 'muted small', text: 'The slot opens again once it is out, and choosing its next spell costs nothing.' }));
+        for (const row of menu.spells) {
+          kids.push(unbindRow(
+            row.name,
+            row.at > 1 ? `slot ${row.slot + 1} · learned at level ${row.at}` : `slot ${row.slot + 1} · what you started with`,
+            row.price, row.refusal,
+            () => { handlers.forgetSpell?.(row); render(); },
+          ));
+        }
+        kids.push(allRow('spells', menu.spellsAll, 'spells', () => { handlers.forgetAllSpells?.(); render(); }));
+      }
+    }
+
+    if (unbindTab === 'perks') {
+      if (!menu.perks.length) {
+        kids.push(el('p', { class: 'muted small', text: 'You have not spent a perk point yet.' }));
+      } else {
+        kids.push(el('p', { class: 'muted small', text: 'A node that others reach the middle through has to wait until they are out first.' }));
+        for (const row of menu.perks) {
+          kids.push(unbindRow(row.name, row.arm ? `${row.arm} arm` : 'perk',
+            row.price, row.refusal,
+            () => { handlers.forgetPerk?.(row); render(); }));
+        }
+        kids.push(allRow('perks', menu.perksAll, 'perks', () => { handlers.forgetAllPerks?.(); render(); }));
+      }
+    }
+
+    if (unbindTab === 'talents') {
+      if (!menu.talents.length) {
+        kids.push(el('p', { class: 'muted small', text: 'You have not taken a talent yet.' }));
+      } else {
+        for (const row of menu.talents) {
+          kids.push(unbindRow(row.name, `${row.skillName} · tier ${row.tier}`,
+            row.price, row.refusal,
+            () => { handlers.forgetTalent?.(row); render(); }));
+        }
+        kids.push(allRow('talents', menu.talentsAll, 'talents', () => { handlers.forgetAllTalents?.(); render(); }));
+      }
+    }
+    return kids;
   }
 
   /**
@@ -573,6 +709,8 @@ export function createTalkPanel(handlers = {}) {
   function show(npc, ctx) {
     mode = 'talk';
     offerState = null;
+    // an "unbind all" left armed on the last person is not armed on this one
+    armed = null;
     current = npc;
     context = ctx;
     open = true;
@@ -611,6 +749,7 @@ export function createTalkPanel(handlers = {}) {
     current = null;
     mode = 'talk';
     offerState = null;
+    armed = null;
     root.classList.add('hidden');
     walked?.handlers?.dismiss?.(walked.offer);
   }

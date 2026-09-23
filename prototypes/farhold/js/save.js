@@ -181,6 +181,20 @@ export function snapshot({
       // R18 — the perk points a boss, a landmark or a stronghold paid out. Written by five call
       // sites, read by `pointsLeft`, and until now saved by nobody.
       bonusPerks: player.bonusPerks || 0,
+      /**
+       * R20 — THE PER-SKILL TALENTS, WHICH HAVE NEVER BEEN SAVED SINCE THEY LANDED IN ROUND 8.
+       *
+       * Exactly the fault the perk forest had two rounds ago, in the same list, and found the same
+       * way — `grep -rn skillTalents js/` returned js/skilltalents.js and nothing else. Everything
+       * a character had done to their spells (18 talents over 6 skills, the whole of "two rangers
+       * cast the same spell differently") was wiped by a reload, silently: `picksFor` reads this
+       * one object, a load came back with it undefined, and the Skills screen simply drew every
+       * tier as unspent. From the player's side the game quietly un-picked the lot.
+       *
+       * It matters more than it did yesterday, because R20 makes a talent cost gold to take back
+       * off — so a reload was about to refund something you paid an Unbinder to change.
+       */
+      skillTalents: player.skillTalents || {},
       // unlockables rather than loot, so they travel with the character — see js/gear.js
       vehicles: player.vehicles,
       // R15: which of them H brings — the horse, or the motorcycle you built. One slot, one choice.
@@ -323,6 +337,9 @@ export function restore(save, { rpg, player, control, map }) {
   // tree rather than from an empty one.
   player.perks = p.perks || [];
   player.bonusPerks = p.bonusPerks || 0;
+  // R20 — see the note beside `skillTalents` in `snapshot`. An older save has none, which loads as
+  // an empty board rather than as a crash.
+  player.skillTalents = p.skillTalents || {};
   player.kills = p.kills ?? 0;
   player.deaths = p.deaths ?? 0;
   player.equipment = p.equipment || {};

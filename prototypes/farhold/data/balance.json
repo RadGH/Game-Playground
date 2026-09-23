@@ -340,6 +340,12 @@
     "volume": 0.75,
     "_doc": "Which Sound Lab maker to use (synth, library, hybrid, retro) and the master volume. Audio starts on the first click, because a browser will not hand a page an audio context before that. ?sound=off turns both sound and voices off."
   },
+  "_retrainDoc": "R20 \u2014 what an Unbinder charges. Forgetting a spell, a perk or a talent is the only way any of the three comes back now: the character sheet shows what you have taken and no longer takes it away again. `one` is the price at level 1 and `perLevel` is what each level past the first adds, so the cost keeps pace with the purse rather than becoming free. `all` / `allPerLevel` are the same two numbers for the wipe-the-lot button. Read by js/retrain.js; every number here is safe to tune without touching code.",
+  "retrain": {
+    "spell": { "one": 120, "perLevel": 20, "all": 500, "allPerLevel": 60 },
+    "perk": { "one": 80, "perLevel": 12, "all": 400, "allPerLevel": 45 },
+    "talent": { "one": 60, "perLevel": 8, "all": 250, "allPerLevel": 30 }
+  },
   "town": {
     "talkRange": 3.6,
     "radius": 900,

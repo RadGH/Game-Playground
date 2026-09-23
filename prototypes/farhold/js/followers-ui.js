@@ -226,9 +226,10 @@ export function createFollowersScreen({
     const build = player?.build;
     if (!build?.custom || !classbuildData) {
       const ids = skillData?.classes?.[player?.classId] || [];
-      const at = skillData?.unlockAt || [1, 3, 7, 12, 18, 24];
+      const at = skillData?.unlockAt || [1, 3, 6, 12, 18, 24];
       return [pane('Your six', [
-        el('div', { class: 'flw-note', text: `${player?.classLabel || 'This class'} comes with a fixed six. Build your own class on the title screen and every one of them is a choice you can take back.` }),
+        // R20 — "a choice you can take back" is no longer free, so it no longer says free
+        el('div', { class: 'flw-note', text: `${player?.classLabel || 'This class'} comes with a fixed six, unlocking as you level. Build your own class on the title screen and each one is a choice — made at the level it opens at, and undone by an Unbinder in town.` }),
         ...ids.map((id, i) => row(skillData?.skills?.[id]?.name || id, at[i] > 1 ? `level ${at[i]}` : 'from the start', skillData?.skills?.[id]?.desc || '')),
       ])];
     }
@@ -237,6 +238,16 @@ export function createFollowersScreen({
         classData, skillData, classLooks, data: classbuildData, build,
         getPlayer, forest, embedded: true, mount: respecBox,
         tabs: [{ key: 'spells', name: 'Spells' }],
+        /**
+         * R20 — and it is level-gated, like every other door onto the same screen.
+         *
+         * This tab and the character sheet's spell chooser are the SAME builder with different
+         * framing, so a level passed in one place and not the other would have left this one as a
+         * way to fill all six slots at level 1. `inGame` also drops the "Not finished" gate, which
+         * cannot apply to a character already out in the world.
+         */
+        getLevel: () => getPlayer()?.level || 1,
+        inGame: true,
         /**
          * THE RESPEC HAS TO REACH THE KEYS, NOT ONLY THE SCREEN.
          *

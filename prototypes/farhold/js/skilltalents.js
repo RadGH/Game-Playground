@@ -268,8 +268,18 @@ export function tiersOpen(level = 1) {
 }
 
 /**
- * Take one. Replacing a pick in the same tier is allowed and free — the interesting decision is
- * which one, and charging to change your mind only means people look it up instead of trying it.
+ * Take one.
+ *
+ * R20 — A TIER THAT IS ALREADY SPENT IS NOT RE-SPENT FOR FREE.
+ *
+ * This used to allow replacing a pick in the same tier at no cost, on the grounds that charging to
+ * change your mind only means people look the answer up instead of trying it. That reasoning held
+ * while the sheet also cleared a talent for free; now that undoing one is a person in a town and a
+ * price ("…remove the ability to do it directly from the inventory"), a free swap would be the same
+ * undo wearing a different hat — click the other node in the tier and the first one is gone, no
+ * gold, no walk. So the tier has to be emptied first, and js/retrain.js is the only thing that
+ * empties it. Picking into an EMPTY tier is still free and instant: that is the decision, and
+ * charging for a decision nobody has made yet would only stop people making it.
  */
 export function pickTalent(player, skillId, tier, nodeId, { shape = 'bolt' } = {}) {
   const tree = treeFor(skillId, shape);
@@ -277,6 +287,14 @@ export function pickTalent(player, skillId, tier, nodeId, { shape = 'bolt' } = {
   if (!row) return { ok: false, why: 'No such tier.' };
   if ((player.level ?? 1) < row.level) return { ok: false, why: `That tier opens at level ${row.level}.` };
   if (!row.nodes.some(n => n.id === nodeId)) return { ok: false, why: 'That talent is not on this skill.' };
+  const already = picksFor(player, skillId)[tier];
+  if (already) {
+    const worn = row.nodes.find(n => n.id === already) || TALENT_LIBRARY[already];
+    return {
+      ok: false,
+      why: `${worn?.name || 'A talent'} is already on this tier. An Unbinder in town will take it off.`,
+    };
+  }
   player.skillTalents = player.skillTalents || {};
   player.skillTalents[skillId] = { ...(player.skillTalents[skillId] || {}), [tier]: nodeId };
   return { ok: true, node: TALENT_LIBRARY[nodeId] };

@@ -139,39 +139,60 @@ test('R18 — clicking in the builder does not throw, and the loadout actually c
   expect(card.length, 'the class card is empty').toBeGreaterThan(10);
 });
 
-test('R18 — every spell slot offers what is open at ITS level, not the whole catalogue', async ({ page }) => {
+/**
+ * R20 — THE CREATOR ASKS FOR ONE SPELL, AND THE OTHER FIVE ARE NOT ITS BUSINESS.
+ *
+ *   "Let's change the character creator so that you only pick the first level spell. When you reach
+ *    levels 3/6/12/18/24 unlock the next spell…"
+ *
+ * This spec used to click each of the six slots in turn and count what each one offered, which was
+ * R18's fix for "all levels show the same spells". That rule has not changed — a slot still offers
+ * exactly what its own level could unlock, and tests/round20-spells.test.js §2.1/2.4 assert it
+ * across the whole ladder. What HAS changed is that the title screen builds a level-1 character,
+ * so five of the six slots refuse themselves and are not clickable here at all. So this now checks
+ * the thing the screen is actually for: one live slot, the right spells in it, and a pick that
+ * sticks and finishes the build.
+ */
+test('R20 — the creator offers the opening slot only, and one pick finishes it', async ({ page }) => {
   const errors = watch(page);
   await openBuilder(page);
   await page.locator('.cb-rail > *', { hasText: 'Spells' }).click();
   await page.waitForTimeout(700);
 
-  const open = [];
-  for (let i = 0; i < 6; i++) {
-    await page.locator('.cb-slots > *').nth(i).click({ force: true });
-    await page.waitForTimeout(400);
-    open.push(await page.evaluate(() => [...document.querySelectorAll('.cb-opt')].filter(o => !o.disabled).length));
-  }
+  const before = await page.evaluate(() => ({
+    slots: document.querySelectorAll('.cb-slots > *').length,
+    pending: document.querySelectorAll('.cb-slot.pending').length,
+    shut: document.querySelectorAll('.cb-slot.shut').length,
+    // R20 — unlearn is an Unbinder in a town now, not a free button on this screen
+    unlearn: [...document.querySelectorAll('.cb-slots button')].filter(b => /unlearn/i.test(b.textContent)).length,
+    open: [...document.querySelectorAll('.cb-opt')].filter(o => !o.disabled).length,
+    done: document.querySelector('.cb-done')?.disabled,
+  }));
 
-  expect(errors, 'clicking a spell slot threw').toEqual([]);
-  /**
-   * The reported symptom was "all levels show the same spells". The catalogue was never wrong —
-   * 11/15/9/2/0/3 spells unlock at levels 1/3/7/12/18/24 — but the pane listed all forty for every
-   * slot with the unavailable ones merely disabled, so all six looked identical.
-   */
-  expect(open[0], 'the opening slot offers nothing').toBeGreaterThan(0);
-  expect(new Set(open).size, `every slot offers the same count (${open.join('/')}) — the pane is not reading its own level`).toBeGreaterThan(1);
-  // it can only grow: a later slot may take anything an earlier one could
-  for (let i = 1; i < open.length; i++) {
-    expect(open[i], `slot ${i + 1} offers fewer spells than slot ${i}`).toBeGreaterThanOrEqual(open[i - 1]);
-  }
+  expect(errors, 'opening the Spells tab threw').toEqual([]);
+  expect(before.slots, 'the ladder is not six slots long').toBe(6);
+  expect(before.pending, 'the creator should offer exactly one spell').toBe(1);
+  expect(before.shut, 'the other five slots are not shown as not-yet-open').toBe(5);
+  expect(before.unlearn, 'the free Unlearn button is still on the builder').toBe(0);
+  expect(before.open, 'the opening slot offers nothing to pick').toBeGreaterThan(0);
+  expect(before.done, 'the build was finishable with no spell at all').toBe(true);
 
-  // and a pick sticks
-  await page.locator('.cb-slots > *').nth(0).click({ force: true });
-  await page.waitForTimeout(400);
+  // everything offered is genuinely a level-1 spell, not the whole forty with five greyed
+  const levels = await page.evaluate(() => [...document.querySelectorAll('.cb-opt')]
+    .filter(o => !o.disabled).map(o => o.querySelector('.cb-right')?.textContent?.trim() || ''));
+  expect(levels.every(t => t === 'from the start'),
+    `the opening slot offers spells it cannot take: ${levels.join(', ')}`).toBe(true);
+
   await page.locator('.cb-opt:not([disabled])').first().click();
   await page.waitForTimeout(600);
-  const filled = await page.evaluate(() => document.querySelectorAll('.cb-pick.filled').length);
-  expect(filled, 'picking a spell did not fill the slot').toBeGreaterThan(0);
+  const after = await page.evaluate(() => ({
+    filled: document.querySelectorAll('.cb-pick.filled').length,
+    pending: document.querySelectorAll('.cb-slot.pending').length,
+    done: document.querySelector('.cb-done')?.disabled,
+  }));
+  expect(after.filled, 'picking a spell did not fill the slot').toBe(1);
+  expect(after.pending, 'the slot is still asking after it was filled').toBe(0);
+  expect(after.done, 'one spell picked and the build still will not start').toBe(false);
   expect(errors, 'picking a spell threw').toEqual([]);
 });
 

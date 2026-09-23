@@ -37,7 +37,7 @@ import { worldPixels } from '../../../worldgen/js/render.js';
 import { M_PER_CELL } from './planet.js';
 import { zoneTone } from './zones.js';
 import { treeFor, picksFor, talentSummary, tiersOpen, TIER_LEVELS } from './skilltalents.js';
-import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, canRefund, refundOne, linksOf, armProgress } from './perks.js';
+import { ARMS, NODE_KINDS, RINGS, pointsFor, pointsLeft, spentBy, takenOf, canTake, canRefund, linksOf, armProgress } from './perks.js';
 
 /**
  * HOW CLOSE YOU HAVE TO BE FOR A SHOP OR A JOB TO APPEAR ON THE MINIMAP.
@@ -231,7 +231,14 @@ export class Hud {
     onRecycle = null, onCraft = null, craft = null, pets = null, zones = null,
     journal = null, seed = 1, onOpen = null, onClose = null,
     // round 7: the perk forest, the per-skill talent trees, the vehicle dropdowns
-    onTakePerk = null, onRefundPerks = null, onRefundPerk = null, onPickTalent = null, onClearTalent = null,
+    /**
+     * R20 — `onRefundPerks`, `onRefundPerk` and `onClearTalent` are gone from this list.
+     *
+     * Undoing a perk or a talent is an Unbinder in a town and a price now (js/retrain.js), so the
+     * sheet has no button that could call any of them. `onChooseSpell` is the one that replaces
+     * them: the Skills tab opens the spell chooser for a slot whose level has come.
+     */
+    onTakePerk = null, onPickTalent = null, onChooseSpell = null,
     onSelectVehicle = null,
     // The Territory expansion: who holds the ground, what it is offering, and what people say
     standings = null, territoryHere = null, board = null, rumours = null, onTakeJob = null,
@@ -286,12 +293,9 @@ export class Hud {
     this.rumours = rumours;
     this.onTakeJob = onTakeJob;
     this.onTakePerk = onTakePerk;
-    this.onRefundPerks = onRefundPerks;
-    // 4.3: one perk back rather than all of them. main.js may not hand us a callback for it yet, in
-    // which case `refundPerk` does the work here — see the note there.
-    this.onRefundPerk = onRefundPerk;
     this.onPickTalent = onPickTalent;
-    this.onClearTalent = onClearTalent;
+    // R20 — open the spell chooser on a slot whose level has come. See `renderSkills`.
+    this.onChooseSpell = onChooseSpell;
     this.onSelectVehicle = onSelectVehicle;
     this.journal = journal;
     this.onSpendPassive = onSpendPassive;
@@ -411,6 +415,14 @@ export class Hud {
     registerTip('skill', node => {
       const s = this.skillState[+node.dataset.tipSkill];
       if (!s) return null;
+      // R20 — a slot with no spell in it, on the bar you stare at all game. It has no mana cost
+      // and no cooldown to quote, so quoting them would print "undefined mana".
+      if (s.empty) {
+        return s.pending
+          ? `<b>Spell available</b><div class="tip-good">This slot opened at level ${s.unlockAt}.</div>`
+            + '<div class="tip-line">Open the character sheet, Skills, and pick what goes in it.</div>'
+          : `<b>Not learned yet</b><div class="tip-bad">This slot opens at level ${s.unlockAt}.</div>`;
+      }
       return `<b>${s.name}</b>`
         + (s.locked ? `<div class="tip-bad">Unlocks at level ${s.unlockAt}.</div>`
           : `<div class="tip-dim">${s.mp} mana · ${s.cooldown.toFixed(1)}s cooldown${s.ready > 0 ? ` · ${s.ready.toFixed(1)}s left` : ''}</div>`)
@@ -840,8 +852,16 @@ export class Hud {
       const s = state[i], slot = this._skillSlots[i];
       // A locked slot used to read "level 7" and nothing else, so the bar you stare at all game told
       // you nothing about what you were working towards. Name the skill; put the level underneath.
-      slot.querySelector('.skill-name').textContent = s.name;
-      slot.querySelector('.skill-mp').textContent = s.locked ? `lvl ${s.unlockAt}` : (s.mp ? String(s.mp) : '');
+      /**
+       * R20 — AN EMPTY SLOT IS AN INVITATION, NOT A DEAD KEY.
+       *
+       * A custom character now starts with one spell and chooses the other five as the levels come,
+       * so five of these six are empty at level 1. A slot you are OWED says so on the bar itself;
+       * one whose level has not arrived reads exactly like a locked slot always did.
+       */
+      slot.querySelector('.skill-name').textContent = s.pending ? 'Spell ready' : s.name;
+      slot.querySelector('.skill-mp').textContent = s.pending ? 'choose'
+        : (s.locked || s.empty) ? `lvl ${s.unlockAt}` : (s.mp ? String(s.mp) : '');
       slot.querySelector('.skill-cd').style.height = `${Math.round((s.ready / s.cooldown) * 100)}%`;
       /**
        * C3: a dead key now says WHY it is dead. `blocked` covered both "on cooldown" and "you cannot
@@ -852,7 +872,8 @@ export class Hud {
       slot.classList.toggle('blocked', !s.usable);
       slot.classList.toggle('cooling', cooling);
       slot.classList.toggle('poor', poor);
-      slot.classList.toggle('locked', !!s.locked);
+      slot.classList.toggle('locked', !!s.locked || (!!s.empty && !s.pending));
+      slot.classList.toggle('pending', !!s.pending);
       slot.classList.toggle('ready', s.usable);
       const left = slot.querySelector('.skill-left');
       if (left) left.textContent = cooling && s.ready > 1.4 ? s.ready.toFixed(0) : '';
@@ -1653,11 +1674,19 @@ export class Hud {
     const openTiers = tiersOpen(player.level);
     let talentsOpen = 0;
     for (const skill of this.skillState || []) {
-      if (skill.locked) continue;
+      if (skill.locked || skill.empty) continue;
       const picks = picksFor(player, skill.id);
       for (let tier = 1; tier <= openTiers; tier++) if (!picks[tier]) talentsOpen++;
     }
-    set('skills', talentsOpen);
+    /**
+     * R20 — and a spell you are owed counts here too.
+     *
+     * The Skills tab is where both choices are made, and a spell slot that came open at level 6 is
+     * more urgent than an unspent talent — a badge that only counted talents would leave a
+     * character walking around with a dead key and nothing on screen saying why.
+     */
+    const spellsOwed = (this.skillState || []).filter(s => s.pending).length;
+    set('skills', talentsOpen + spellsOwed);
     const quests = this.journal?.()?.quests || [];
     // R16: finished AND hand-in-able. A raid or a meteor pays itself the moment it finishes, so
     // counting those would leave a number on the rail with no button anywhere that clears it.
@@ -2221,19 +2250,38 @@ export class Hud {
     if (bar) {
       const open = tiersOpen(player.level ?? 1);
       bar.replaceChildren(...this.skillState.map((s, i) => {
-        const picks = s.locked ? {} : picksFor(player, s.id);
+        const picks = (s.locked || s.empty) ? {} : picksFor(player, s.id);
+        /**
+         * R20 — THE "SPELL AVAILABLE" SLOT.
+         *
+         *   "When you reach levels 3/6/12/18/24 unlock the next spell and have a 'spell available'
+         *    slot in the inventory screen so you can open the dialog to choose the next spell."
+         *
+         * A pending slot is the card you can act on, so it is the card that is lit, and clicking it
+         * opens the chooser rather than selecting a talent tree that does not exist yet. An empty
+         * slot whose level has NOT come draws exactly like a locked one always did.
+         */
+        const dead = s.locked || (s.empty && !s.pending);
         const card = el('button', 'sk-card'
-          + (s.locked ? ' locked' : '')
-          + (s.id === this.talentSkill ? ' on' : ''));
-        card.dataset.tipRender = 'skill';
-        card.dataset.tipSkill = String(i);
+          + (dead ? ' locked' : '')
+          + (s.pending ? ' pending' : '')
+          + (!s.empty && s.id === this.talentSkill ? ' on' : ''));
+        if (!s.empty) {
+          card.dataset.tipRender = 'skill';
+          card.dataset.tipSkill = String(i);
+        }
+        const name = s.pending ? 'Spell available' : dead ? `level ${s.unlockAt}` : s.name;
+        const cost = s.pending ? 'click to choose' : dead ? 'locked' : `${s.mp} mana · ${s.cooldown.toFixed(1)}s`;
+        const desc = s.pending ? `This slot opened at level ${s.unlockAt}. Pick what goes in it.`
+          : dead ? `unlocks at level ${s.unlockAt}` : (s.desc || '');
         card.innerHTML = `<span class="sk-key">${i + 1}</span>`
-          + `<span class="sk-name">${s.locked ? `level ${s.unlockAt}` : s.name}</span>`
-          + `<span class="sk-cost">${s.locked ? 'locked' : `${s.mp} mana · ${s.cooldown.toFixed(1)}s`}</span>`
-          + `<span class="sk-desc">${s.locked ? `unlocks at level ${s.unlockAt}` : (s.desc || '')}</span>`
+          + `<span class="sk-name">${name}</span>`
+          + `<span class="sk-cost">${cost}</span>`
+          + `<span class="sk-desc">${desc}</span>`
           + '<span class="sk-pips">' + [1, 2, 3].map(t =>
-            `<i class="${picks[t] ? 'on' : t <= open ? 'open' : ''}"></i>`).join('') + '</span>';
-        if (!s.locked) card.onclick = () => { this.talentSkill = s.id; this.renderSheet(); };
+            `<i class="${picks[t] ? 'on' : (t <= open && !s.empty) ? 'open' : ''}"></i>`).join('') + '</span>';
+        if (s.pending) card.onclick = () => { hideTip(); this.onChooseSpell?.(i); };
+        else if (!dead) card.onclick = () => { this.talentSkill = s.id; this.renderSheet(); };
         return card;
       }));
       if (!this.skillState.length) bar.replaceChildren(el('p', 'muted small', 'No skills yet.'));
@@ -2250,7 +2298,8 @@ export class Hud {
      */
     const treeBox = $('sheet-skilltree');
     if (treeBox) {
-      const list = this.skillState.filter(s => !s.locked);
+      // R20 — an empty slot has no skill behind it, so it has no talent tree either
+      const list = this.skillState.filter(s => !s.locked && !s.empty);
       if (!list.length) {
         treeBox.replaceChildren(el('p', 'muted small', 'No skills yet. They unlock as you level.'));
       } else {
@@ -2272,12 +2321,26 @@ export class Hud {
             const on = picks[tier.tier] === node.id;
             const card = el('div', 'talent-card' + (on ? ' on' : '') + (open ? '' : ' locked'));
             card.innerHTML = `<b>${node.name}</b><span class="muted small">${node.desc}</span>`;
-            if (open) {
+            /**
+             * R20 — CLICKING ONE YOU ALREADY HAVE NO LONGER CLEARS IT.
+             *
+             *   "…remove the ability to do it directly from the inventory."
+             *
+             * It used to be a toggle: click the taken node and the tier emptied, free, mid-fight.
+             * An Unbinder in town takes a talent off for gold (js/retrain.js). Picking an EMPTY
+             * tier is still free and instant — that is the choice, not the undo — and a taken card
+             * says where to go rather than doing nothing without explanation.
+             */
+            const tierSpent = !!picks[tier.tier];
+            if (open && !tierSpent) {
               card.onclick = () => {
-                if (on) this.onClearTalent?.(chosen.id, tier.tier);
-                else this.onPickTalent?.(chosen.id, tier.tier, node.id, chosen.shape || 'bolt');
+                this.onPickTalent?.(chosen.id, tier.tier, node.id, chosen.shape || 'bolt');
                 this.renderSheet();
               };
+            } else if (on) {
+              card.dataset.tip = 'Taken. An Unbinder in town will take it back off, for a price.';
+            } else if (open && tierSpent) {
+              card.dataset.tip = 'This tier is already spent. An Unbinder in town takes the other one off first.';
             }
             row.append(card);
           }
@@ -2341,29 +2404,20 @@ export class Hud {
     }
 
     /**
-     * D4: two clicks for anything you cannot undo.
+     * R20 — THE WHOLESALE REFUND IS GONE FROM THIS SCREEN, AND IS A PERSON IN A TOWN INSTEAD.
      *
-     * "Take it all back" stated no cost and implied no confirmation, and the bulk-recycle chips
-     * looked exactly like the filter chips they sit beside while irreversibly destroying gear. The
-     * first click arms and says what it is about to do; the second does it.
+     * It was a free button that emptied the whole forest in two clicks (D4 added the arming, which
+     * was the right fix for the misclick and no fix at all for the fact that a build could be
+     * re-tuned for nothing between one fight and the next). The Unbinder charges for it — see
+     * js/retrain.js and the `unbinder` role in js/town.js. The footer element now says where to go,
+     * because a space where a button used to be, with nothing in it, reads as a feature removed.
      */
-    const refund = $('perk-refund');
-    if (refund && !refund.dataset.wired) {
-      refund.dataset.wired = '1';
-      refund.onclick = () => {
-        if (refund.dataset.armed !== '1') {
-          refund.dataset.armed = '1';
-          refund.textContent = `Give back all ${spentBy(this.player)}? Click again.`;
-          refund.classList.add('arm');
-          setTimeout(() => {
-            refund.dataset.armed = ''; refund.textContent = 'Take it all back'; refund.classList.remove('arm');
-          }, 4000);
-          return;
-        }
-        refund.dataset.armed = ''; refund.textContent = 'Take it all back'; refund.classList.remove('arm');
-        this.onRefundPerks?.();
-        this.renderSheet();
-      };
+    const refundNote = $('perk-refund');
+    if (refundNote) {
+      const held = spentBy(this.player);
+      refundNote.textContent = held
+        ? `${held} taken · an Unbinder in town will take one back, or all of them`
+        : 'an Unbinder in town takes perks back, for a price';
     }
 
     this.drawForest();
@@ -2762,25 +2816,12 @@ export class Hud {
   }
 
   /**
-   * Hand ONE perk back.
-   *
-   * main.js owns the point-spending callbacks, and its `onRefundPerks` takes no argument and empties
-   * the whole tree — so calling that with an id would quietly wipe a forty-point walk. When main.js
-   * hands us an `onRefundPerk` we use it (it can log, play the click and save); until then the work
-   * happens here and the sheet stays correct, because `rpg.refresh` is what rebuilds the stat sheet
-   * and the HUD already holds the rpg.
+   * R20 — the sheet's own single-node give-back method used to live here, free and instant. It is
+   * gone along with the button that called it; js/retrain.js `forgetPerk` is the one path now, it
+   * charges gold, and js/main.js wires it to the Unbinder in town. (The old names are deliberately
+   * not written out here: tests/round11-ui.test.js reads this file as text to check they are
+   * really gone, and a comment quoting them would read as the code still being present.)
    */
-  refundPerk(id) {
-    const player = this.player;
-    const forest = this.rpg?.forest;
-    if (!player || !forest) return;
-    if (this.onRefundPerk) { this.onRefundPerk(id); this.renderSheet(); return; }
-    const out = refundOne(player, forest, id);
-    if (!out.ok) { this.log(out.why, 'bad'); return; }
-    this.rpg?.refresh?.(player, { full: true });
-    this.log(`${out.node.name || 'That perk'} given back. The point is yours again.`, 'level');
-    this.renderSheet();
-  }
 
   /** The panel beside the forest: what the selected node does, and the button that takes it. */
   renderPerkSide() {
@@ -2817,21 +2858,25 @@ export class Hud {
       if (has) {
         kids.push(el('p', 'small good', 'Taken.'));
         /**
-         * ONE PERK BACK — "as long as nothing requires it".
+         * R20 — THE POINT NO LONGER COMES BACK FROM THIS SCREEN.
          *
-         * The button is always here and always says where it stands, because "you cannot" with no
-         * reason is the thing that sends a player back to Take it all back. `canRefund` names the
-         * perks that would be cut off from the middle if this one went.
+         *   "Add an NPC at town who is able to reset individual or all spells, perks, and talents,
+         *    and remove the ability to do it directly from the inventory."
+         *
+         * A free give-back button used to sit right here, so a walk down the wrong arm cost
+         * nothing and a perk was a setting rather than a decision. An Unbinder in any
+         * settlement of two houses or more takes one back for gold (js/retrain.js). What this
+         * screen still owes the player is the STRUCTURAL answer — whether it could come out at all
+         * — because that is the thing you cannot find out by walking to a town and back.
          */
         const back = canRefund(player, forest, node.id);
-        const b = el('button', 'chip perk-refund-one' + (back.ok ? '' : ' off'), 'Give this one back');
-        b.disabled = !back.ok;
-        b.dataset.tip = back.ok
-          ? 'Nothing you have taken reaches the middle through this one, so it can go back and the point is yours again.'
+        const line = el('p', 'muted small', back.ok
+          ? 'An Unbinder in town will take this one back out, for a price.'
+          : `${back.why} An Unbinder in town takes them out, for a price.`);
+        line.dataset.tip = back.ok
+          ? 'Nothing you have taken reaches the middle through this one, so an Unbinder can take it back and the point is yours again.'
           : back.why;
-        if (back.ok) b.onclick = () => { this.refundPerk(node.id); };
-        kids.push(b);
-        if (!back.ok) kids.push(el('p', 'warn small', back.why));
+        kids.push(line);
       } else if (check.ok) {
         const b = el('button', 'primary', 'Take it');
         b.onclick = () => { this.onTakePerk?.(node.id); this.renderSheet(); };

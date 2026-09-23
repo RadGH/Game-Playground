@@ -152,11 +152,21 @@ test('take it all back still empties the tree', () => {
   assert.deepEqual(player.perks, []);
 });
 
-test('the sheet offers the single refund and says why when it cannot', () => {
-  assert.match(hud, /refundPerk\(id\)/, 'the hud has no way to hand one perk back');
-  assert.match(hud, /Give this one back/);
-  assert.match(hud, /canRefund\(player, forest, node\.id\)/);
-  assert.match(css, /\.perk-refund-one/, 'the button has no style of its own');
+/**
+ * R20 — THE SHEET NO LONGER HANDS A PERK BACK AT ALL, and that is the assertion now.
+ *
+ * "…remove the ability to do it directly from the inventory." Both free buttons are gone — the
+ * per-node "Give this one back" and the wholesale "Take it all back" — and with them
+ * `hud.refundPerk`. What the screen still owes the player is the STRUCTURAL answer (`canRefund`:
+ * would taking this one out cut anything off from the middle), because that is the thing you
+ * cannot find out by walking to a town and back. js/retrain.js is the only path that undoes one.
+ */
+test('the sheet says whether a perk COULD come back, and offers no way to do it', () => {
+  assert.doesNotMatch(hud, /refundPerk\(id\)/, 'the sheet can still hand one perk back for free');
+  assert.doesNotMatch(hud, /Give this one back/);
+  assert.doesNotMatch(hud, /Take it all back/);
+  assert.match(hud, /canRefund\(player, forest, node\.id\)/, 'the screen stopped saying whether it could come back');
+  assert.match(hud, /Unbinder in town/, 'nothing on the screen says where a perk is undone');
 });
 
 // ---------------------------------------------------------------- 4.5 quests are not a menu

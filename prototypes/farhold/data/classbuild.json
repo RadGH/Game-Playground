@@ -16,7 +16,7 @@
   "tiers": [
     { "level": 1, "name": "Opening", "blurb": "What you walk out of the gate holding." },
     { "level": 3, "name": "Second", "blurb": "The first thing you learn from being hit." },
-    { "level": 7, "name": "Third", "blurb": "Where a build starts to have a shape." },
+    { "level": 6, "name": "Third", "blurb": "Where a build starts to have a shape." },
     { "level": 12, "name": "Fourth", "blurb": "The answer to whatever keeps killing you." },
     { "level": 18, "name": "Fifth", "blurb": "The one that costs something to cast." },
     { "level": 24, "name": "Sixth", "blurb": "The last slot. Spend it on the fight you keep losing." }

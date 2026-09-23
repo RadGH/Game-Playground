@@ -109,7 +109,8 @@ test('2.2 — nothing may be picked twice', () => {
   const cat = spellCatalogue({ classData, skillData, data: cbData });
   const build = createBuild(cbData);
   assert.equal(pickSpell(build, 0, 'power_strike', cat).ok, true);
-  const again = pickSpell(build, 1, 'power_strike', cat);
+  // R20 — slot 2 opens at level 3, so the duplicate check needs a character who has got there
+  const again = pickSpell(build, 1, 'power_strike', cat, { level: MAX_LEVEL });
   assert.equal(again.ok, false);
   assert.match(again.why, /already in slot 1/);
 });
@@ -117,8 +118,8 @@ test('2.2 — nothing may be picked twice', () => {
 test('2.3 — unlearn hands back exactly one pick, and it can be spent again', () => {
   const cat = spellCatalogue({ classData, skillData, data: cbData });
   const build = createBuild(cbData);
-  pickSpell(build, 0, 'power_strike', cat);
-  pickSpell(build, 1, 'cleave', cat);
+  pickSpell(build, 0, 'power_strike', cat, { level: MAX_LEVEL });
+  pickSpell(build, 1, 'cleave', cat, { level: MAX_LEVEL });
   const before = build.spells.filter(Boolean).length;
   assert.equal(before, 2);
 
@@ -129,7 +130,7 @@ test('2.3 — unlearn hands back exactly one pick, and it can be spent again', (
   assert.equal(build.spells[1], 'cleave', 'and nothing else moved');
 
   // the slot it came out of is spendable again, on the same spell or a different one
-  assert.equal(pickSpell(build, 0, 'aimed_shot', cat).ok, true);
+  assert.equal(pickSpell(build, 0, 'aimed_shot', cat, { level: MAX_LEVEL }).ok, true);
   assert.equal(build.spells.filter(Boolean).length, before);
   // unlearning an empty slot refunds nothing at all
   assert.equal(unlearnSpell(build, 5).ok, false);
@@ -189,7 +190,7 @@ test('4.1 — a custom build becomes a class the rest of the game can read', () 
   build.loadout = 'longbow';
   build.name = 'Roadwarden';
   const want = ['aimed_shot', 'poison_dart', 'multi_shot', 'mend', 'pinning_shot', 'rain_of_arrows'];
-  want.forEach((id, i) => assert.equal(pickSpell(build, i, id, cat).ok, true, `${id} in slot ${i}`));
+  want.forEach((id, i) => assert.equal(pickSpell(build, i, id, cat, { level: MAX_LEVEL }).ok, true, `${id} in slot ${i}`));
 
   const def = installCustomClass({ ...d, data: cbData, build });
   assert.equal(def.id, 'custom');
@@ -219,7 +220,7 @@ test('4.2 — the in-game respec reaches the KEYS, not only the screen', () => {
   const cat = spellCatalogue({ ...d, data: cbData });
   const build = createBuild(cbData);
   const want = ['power_strike', 'cleave', 'curse', 'drain', 'whirlwind', 'execute'];
-  want.forEach((id, i) => pickSpell(build, i, id, cat));
+  want.forEach((id, i) => pickSpell(build, i, id, cat, { level: MAX_LEVEL }));
   installCustomClass({ ...d, data: cbData, build });
 
   const player = { classId: 'custom', level: 30, derived: {}, perkFlags: {} };
@@ -228,7 +229,7 @@ test('4.2 — the in-game respec reaches the KEYS, not only the screen', () => {
 
   // unlearn slot 3 and spend it on something else — this is the whole of "unlearn at any time"
   unlearnSpell(build, 2);
-  pickSpell(build, 2, 'smoke', cat);
+  pickSpell(build, 2, 'smoke', cat, { level: MAX_LEVEL });
   installCustomClass({ ...d, data: cbData, build });
   bar.relearn(d.skillData.classes.custom);
   assert.equal(bar.slots[2].id, 'smoke', 'key 3 fires the new spell, not the old one');
@@ -531,13 +532,23 @@ test('9.2 — the upgrade thresholds are data, and every type grows into somethi
  * (level 18) has no spells of its own at all — no class hands anything out for the first time at
  * 18 — and a slot takes anything at or below its level, not only things of exactly its tier.
  */
-function fillAll(build, cat) {
+function fillAll(build, cat, level = MAX_LEVEL) {
   for (let i = 0; i < PICK_COUNT; i++) {
-    const options = slotsOf(build, cat)[i].options;
-    pickSpell(build, i, options[0].id, cat);
+    const options = slotsOf(build, cat, { level })[i].options;
+    pickSpell(build, i, options[0].id, cat, { level });
   }
   return build;
 }
+
+/**
+ * R20 — a level past the last rung of the ladder.
+ *
+ * A pick is now gated by how far the character has actually got: the title screen builds a level-1
+ * character and so may only fill the opening slot, and the other five are chosen from the
+ * character sheet as the levels come. Everything in this file that wants a FULL build is therefore
+ * building one for somebody who has reached level 24, which is what `MAX_LEVEL` says out loud.
+ */
+const MAX_LEVEL = 99;
 
 /** Everything `rpg.derive` declares that this file's callers read, at zero. */
 function zeroDerived() {

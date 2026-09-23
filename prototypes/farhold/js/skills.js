@@ -135,16 +135,31 @@ export function incomingFrom(unit) {
 }
 
 export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = null }) {
-  const unlockAt = unlocks || data.unlockAt || [1, 3, 7, 12, 18, 24];
+  const unlockAt = unlocks || data.unlockAt || [1, 3, 6, 12, 18, 24];
   const slots = [];
 
   /**
    * Fill the bar from a list of skill ids. One function rather than an expression, because R17's
    * custom class can change what is on the bar WHILE THE GAME IS RUNNING.
    */
+  /**
+   * R20 — A SLOT MAY HOLD NOTHING, AND THAT IS NOW THE NORMAL CASE FOR A CUSTOM CLASS.
+   *
+   * Five of a custom character's six slots are empty at level 1: the spell is chosen at the level
+   * the slot opens at, not at character creation. `installCustomClass` used to paper over that by
+   * filling an empty pick with the cheapest spell of its tier, which would now mean the game
+   * quietly choosing four spells on the player's behalf.
+   *
+   * So a null id builds a slot with `empty: true` and no skill row behind it. Everything that
+   * reads a slot — `check`, `state`, the HUD strip — asks `empty` first, and the key says what is
+   * actually wrong ("nothing learned yet") instead of "undefined unlocks at level 6".
+   */
   function fill(ids) {
     const next = (ids || []).map((id, i) => ({
-      id, ...(data.skills[id] || {}),
+      id: id || null,
+      empty: !id,
+      ...(data.skills[id] || {}),
+      name: data.skills[id]?.name || 'Not learned',
       cooldown: data.skills[id]?.cooldown ?? 6,
       // a slot keeps whatever cooldown it was already sitting on, so unlearning the thing in
       // slot 3 is not a free reset of slot 3 mid-fight
@@ -219,6 +234,15 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
   function check(index) {
     const s = slots[index];
     if (!s) return { ok: false, why: null };
+    /**
+     * A slot you have come of age for and not yet filled. The refusal names the way out, because
+     * a key that does nothing and says "nothing learned" is only half an answer.
+     */
+    if (s.empty) {
+      return unlocked(s)
+        ? { ok: false, why: `Slot ${index + 1} is open — choose its spell on the Skills screen.`, pending: true }
+        : { ok: false, why: `Slot ${index + 1} opens at level ${s.unlockAt}` };
+    }
     if (!unlocked(s)) return { ok: false, why: `${s.name} unlocks at level ${s.unlockAt}` };
     if (s.ready > 0) return { ok: false, why: `${s.name} is not ready (${s.ready.toFixed(1)}s)` };
     if (!bloodPrice() && costFor(s) > player.mp) return { ok: false, why: `Not enough mana for ${s.name}` };
@@ -334,7 +358,13 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       id: s.id, name: s.name, desc: s.desc, mp: costFor(s),
       ready: s.ready, cooldown: cooldownFor(s),
       locked: !unlocked(s), unlockAt: s.unlockAt,
-      usable: unlocked(s) && s.ready <= 0 && costFor(s) <= player.mp,
+      /**
+       * R20 — `empty` is "no spell in this slot" and `pending` is "…and you are owed one". The HUD
+       * draws a pending slot as an invitation and an empty-but-not-yet-due one as a locked slot,
+       * which is what it always did for a locked one.
+       */
+      empty: !!s.empty, pending: !!s.empty && unlocked(s),
+      usable: !s.empty && unlocked(s) && s.ready <= 0 && costFor(s) <= player.mp,
       // `shape` and `element` were missing, and the Skills screen asks for `chosen.shape || 'bolt'`
       // — so every skill in the game was offered the BOLT talent tree. A ground rune was offered
       // "Fanned". They are cheap to carry and nothing else has to change.

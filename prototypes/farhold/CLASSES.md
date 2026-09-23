@@ -339,3 +339,126 @@ level automatically" means, and what stops a sentry summoned at level 1 still sw
 | `js/newgame.js` | the Custom entry, the builder, and re-installing a saved build on load |
 | `tests/round17-class.test.js` | 25 tests |
 | `research/round17-class-handoff.md` | the `main.js` / `save.js` / `rpg.js` / `effects.js` patches |
+
+---
+
+# Round 20 — one spell at creation, the rest as you level, and the Unbinder
+
+> "Let's change the character creator so that you only pick the first level spell. When you reach
+> levels 3/7/12/18/24 (+ also change 7 to 6) unlock the next spell and have a 'spell available' slot
+> in the inventory screen so you can open the dialog to choose the next spell. Add an NPC at town who
+> is able to reset individual or all spells, perks, and talents, and remove the ability to do it
+> directly from the inventory. These should cost a small amount of gold we can tweak later."
+
+## The ladder moved, in both files that state it
+
+`1 / 3 / 6 / 12 / 18 / 24` — `data/skills.json`'s `unlockAt` and `data/classbuild.json`'s `tiers`.
+Those two are asserted equal at load (`spellCatalogue` throws if they drift), so changing one and
+not the other is a loud failure rather than a dead key. The three code fallbacks for a caller that
+hands in no data at all moved with them.
+
+## A pick is gated by your level, and that is the whole change
+
+One rule, in one function:
+
+```js
+pickRefusal(build, slot, skillId, cat, { level })   // level < cat.unlockAt[slot] → refused
+```
+
+The title screen builds a **level-1** character, so five of the six slots refuse themselves and the
+creator asks for one spell without knowing anything about creation. The in-game chooser passes
+`player.level` and the same function opens exactly the slots that have come due. `buildRefusal` now
+asks only for the opening spell.
+
+The default is `level = 1`, not `Infinity`, on purpose: a caller that forgets to pass a level gets
+the conservative answer, never a free run at all six.
+
+`installCustomClass` no longer fills an empty pick with the cheapest spell of its tier. That
+fallback was harmless when the builder refused to start with an empty slot; now that five of them
+are empty for every new character, it would have meant the game silently choosing four spells on
+the player's behalf. A null id builds a real, explainable empty slot in `createSkillBar`
+(`empty` / `pending` on the slot, a refusal that names the way out, no mana spent on a dead key).
+
+## Where you choose: the "spell available" slot
+
+`pendingPicks(build, cat, level)` — slots whose level has come with nothing in them — is the single
+number behind all of it:
+
+* the level-up line ("Level 6! 1 perk point, 1 spell to choose — press I.")
+* the Skills tab's rail badge, alongside the unspent talents
+* a green **Spell available** card on the sheet's bar strip, and a green slot on the HUD bar
+* clicking it opens the chooser
+
+**The chooser is `classbuild-ui.js`'s own Spells tab with a level on it**, not a new screen. A
+bespoke in-game dialog would have been a second rendering of the same pick rules, correct on the
+day it was written. `getLevel` is the only difference between the title screen and the sheet;
+`inGame` drops the "Not finished" gate, which cannot apply to a character already out in the world.
+
+## The Unbinder
+
+A town role (`js/town.js`), size 2 and up, glyph `↺`. The one door for all three undos, priced in
+`data/balance.json`'s `retrain` block, with the rules in the pure `js/retrain.js`:
+
+| | one | all |
+|---|---|---|
+| spell | 120 + 20/level | 500 + 60/level |
+| perk | 80 + 12/level | 400 + 45/level |
+| talent | 60 + 8/level | 250 + 30/level |
+
+**The Unbinder is rostered with the merchant and the elder, not at the end of the list.** `rosterFor`
+fills a settlement up to a headcount by walking `ROLES` in declaration order and stops the moment it
+is full — counted out, a role declared last would have existed in size 4 and 5 settlements only, and
+a player who could not find one would reasonably conclude the feature was not in the game. `want`
+goes up by one so nobody is pushed out to make room. `tests/round20-unbinder.spec.js` checks 40
+settlement ids at each of the five sizes rather than checking the reasoning.
+
+## What was removed, and the two back doors that came with it
+
+Three free buttons are gone from the character sheet: the per-node perk give-back, the wholesale
+"take it all back", and the builder's per-slot Unlearn. Clicking a talent you already have no longer
+clears it.
+
+Removing the buttons is not enough on its own, because two of the underlying operations were *also*
+reachable by other means:
+
+* **A filled spell slot could simply be overwritten.** `pickRefusal` now refuses a slot that already
+  holds something and names the Unbinder.
+* **A spent talent tier could be re-picked for free**, which was deliberate and right while the sheet
+  also cleared one for free — click the other node and the first was gone, no gold, no walk.
+  `pickTalent` now refuses a tier that is already spent. Picking into an *empty* tier is still free
+  and instant: that is the decision, and charging for a decision nobody has made yet only stops
+  people making it.
+
+## Three pre-existing bugs this round turned up
+
+* **The custom class could not start a game at all.** `applyOpeningKit` was passed
+  `log: (t, k) => hud.log(t, k)` and `hud` is a `const` declared ~700 lines further down `begin()`,
+  so the first line it logged killed the boot with *"Cannot access 'hud' before initialization"*.
+  The default opening is the crate and the crate logs — so **every** custom character made the
+  ordinary way, through the title screen, has failed to start since R17. This is the fourth TDZ
+  crash in the project and `node --check` cannot see any of them. The lines are buffered now and
+  flushed once the HUD exists. Found by writing a browser test that makes a character the way a
+  player does; the existing specs all reached the builder and never pressed Start.
+* **Picked talents were never saved.** `player.skillTalents` was on no save list, so every talent a
+  character had taken was wiped by a reload, silently — `picksFor` read an undefined object and the
+  screen simply drew every tier as unspent. Exactly the fault the perk forest had in R18, in the
+  same list, found the same way (`grep -rn skillTalents js/`).
+* **The Unbinder's refused rows said why only in a `title` attribute** — after a second of hovering
+  a button you cannot press, and never at all on a touch screen. Moved onto the row.
+
+## Files
+
+| File | |
+|---|---|
+| `js/retrain.js` | **new, pure** — prices, the six undos, and the whole counter as one `retrainMenu` |
+| `data/balance.json` | the `retrain` block: every price, tunable without touching code |
+| `js/classbuild.js` | the level gate, `pendingPicks`, `slotsOf({ level })`, no more fallback picks |
+| `js/classbuild-ui.js` | level-gated slots, no Unlearn, and `inGame` — the same screen as the chooser |
+| `js/skills.js` | an empty slot is a real slot: `empty` / `pending`, and a key that spends nothing |
+| `js/skilltalents.js` | a spent tier is not re-spent for free |
+| `js/town.js` | the `unbinder` role, its badge, and `rosterFor` exposed for the spec |
+| `js/talkui.js` | the counter: three shelves, a price on every row, the reason on every refusal |
+| `js/hud.js` | the "spell available" card, the badge, and the three removals |
+| `js/save.js` | `skillTalents` — see above |
+| `tests/round20-spells.test.js` | 25 node tests: the ladder, the gate, the empty slot, all six undos |
+| `tests/round20-unbinder.spec.js` | 3 browser tests: the role is rostered, the counter charges, the chooser opens |

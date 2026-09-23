@@ -352,11 +352,27 @@ test('every skill gets three tiers, and you may only take one from each', () => 
   const player = { level: 20, skillTalents: {} };
   assert.equal(pickTalent(player, 'firebolt', 1, 'fan', { shape: 'bolt' }).ok, true);
   assert.equal(player.skillTalents.firebolt[1], 'fan');
-  // picking another in the same tier REPLACES it — one per tier is the whole rule
+  /**
+   * R20 — A SPENT TIER IS NOT RE-SPENT FOR FREE. It used to replace silently.
+   *
+   * That was the right call while the sheet ALSO cleared a talent for free; now that undoing one
+   * is a person in a town and a price, a free swap would be the same undo wearing a different hat
+   * — click the other node in the tier and the first one is gone, no gold, no walk. One per tier
+   * is still the whole rule; what changed is that emptying the tier costs something.
+   */
+  const swap = pickTalent(player, 'firebolt', 1, 'pierce', { shape: 'bolt' });
+  assert.equal(swap.ok, false, 'a spent tier can still be re-spent for free');
+  assert.match(swap.why, /Unbinder/);
+  assert.equal(player.skillTalents.firebolt[1], 'fan', 'and the refusal left the old pick alone');
+  assert.equal(talentsOn(player, 'firebolt').length, 1);
+
+  // emptied, the tier takes a new one — and that is js/retrain.js's only job here
+  clearTalent(player, 'firebolt', 1);
   assert.equal(pickTalent(player, 'firebolt', 1, 'pierce', { shape: 'bolt' }).ok, true);
   assert.equal(player.skillTalents.firebolt[1], 'pierce');
-  assert.equal(talentsOn(player, 'firebolt').length, 1);
+
   // a talent from another skill's board is refused
+  clearTalent(player, 'firebolt', 1);
   assert.equal(pickTalent(player, 'firebolt', 1, 'wide', { shape: 'bolt' }).ok, false);
 });
 

@@ -661,3 +661,29 @@ And a great many bugs, most of which were not what they looked like — a gibbet
 landmark systems that had never been introduced; a raft tilting was a Euler rotation *order*; a
 stuttering horse was an animation clock reset sixty times a second; and "every JS file takes 2–5
 seconds over wifi" was a dev server speaking HTTP/1.0. A cold load is **7.31 s → 0.07 s**.
+
+## Round 20 — one spell at creation, the rest as you level, and the Unbinder
+
+Full write-up: the [`# Round 20`](CLASSES.md) section of `CLASSES.md`.
+
+* **The character creator asks for one spell, not six.** The ladder moved to **1 / 3 / 6 / 12 / 18 /
+  24** (7 became 6), and a pick is gated by the character's own level. That one rule is the whole
+  change: the title screen builds a level-1 character, so five of the six slots refuse themselves
+  and the creator needs no code that knows it is a creator.
+* **An unfilled slot is a real slot.** It is not quietly filled with the cheapest spell of its tier
+  any more — that would have meant the game choosing four spells on your behalf. The key spends
+  nothing and says what is wrong.
+* **A "Spell available" slot** on the character sheet, a badge on the tab, a green slot on the bar
+  and a line on the level-up. Clicking it opens the chooser — which is the builder's own Spells tab
+  with a level on it, not a second dialog holding a second copy of the rules.
+* **The Unbinder**, in any settlement of two houses or more, takes a **spell, a perk or a talent**
+  back off you for gold — one at a time or all of them. Every free undo left the character sheet,
+  and so did the two ways round it that survived removing the buttons: overwriting a filled spell
+  slot, and re-picking a spent talent tier. Prices are in `data/balance.json`.
+
+Three bugs that were already there before this round started, and one of them was the big one:
+**the custom class could not start a game at all.** The opening kit logged a line through a `hud`
+that would not exist for another seven hundred lines, and the default opening is the crate, and the
+crate logs — so every custom character made the ordinary way had died on boot since R17. Every spec
+we had opened the builder and none of them ever pressed Start. Picked talents were also never saved,
+and a refused row on the new counter explained itself only in a tooltip.

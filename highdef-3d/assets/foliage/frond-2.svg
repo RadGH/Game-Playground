@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Frond 2: bracken. One stalk forking into three smaller fronds, each with
+       its own row of leaflet pairs. Reads as a triangular silhouette. -->
+  <defs>
+    <linearGradient id="pl" x1="0" y1="1" x2="0.2" y2="0">
+      <stop offset="0" stop-color="#55703f"/>
+      <stop offset="1" stop-color="#849a5a"/>
+    </linearGradient>
+    <linearGradient id="pr" x1="0" y1="1" x2="-0.2" y2="0">
+      <stop offset="0" stop-color="#4b663a"/>
+      <stop offset="1" stop-color="#788f52"/>
+    </linearGradient>
+    <path id="p" d="M0,0 C4,-3 6,-8 5,-12 C7,-15 7,-20 5,-24 C6,-28 5,-32 2,-35 L0,-38 L-2,-35 C-5,-32 -6,-28 -5,-24 C-7,-20 -7,-15 -5,-12 C-6,-8 -4,-3 0,0 Z"/>
+    <path id="pv" d="M0,-1 L0,-36 M0,-12 L3,-15 M0,-12 L-3,-15 M0,-24 L3,-27 M0,-24 L-3,-27"/>
+    <g id="pair">
+      <g transform="rotate(-64)">
+        <use href="#p" fill="url(#pl)" stroke="#354b2c" stroke-width="0.6"/>
+        <use href="#pv" fill="none" stroke="#405935" stroke-width="0.7" opacity="0.8"/>
+      </g>
+      <g transform="rotate(64)">
+        <use href="#p" fill="url(#pr)" stroke="#354b2c" stroke-width="0.6"/>
+        <use href="#pv" fill="none" stroke="#405935" stroke-width="0.7" opacity="0.8"/>
+      </g>
+    </g>
+    <g id="mini">
+      <path d="M0,0 L0,-110" stroke="#66603e" stroke-width="2.4" stroke-linecap="round"/>
+      <use href="#pair" transform="translate(0 -10) scale(0.85)"/>
+      <use href="#pair" transform="translate(0 -26) scale(1.0)"/>
+      <use href="#pair" transform="translate(0 -42) scale(1.02)"/>
+      <use href="#pair" transform="translate(0 -58) scale(0.94)"/>
+      <use href="#pair" transform="translate(0 -74) scale(0.8)"/>
+      <use href="#pair" transform="translate(0 -88) scale(0.62)"/>
+      <use href="#pair" transform="translate(0 -100) scale(0.42)"/>
+      <use href="#pair" transform="translate(0 -108) scale(0.26)"/>
+    </g>
+  </defs>
+
+  <path d="M128,252 C128,220 128,190 128,160" fill="none" stroke="#5b5636" stroke-width="4" stroke-linecap="round"/>
+  <path d="M128,252 C128,220 128,190 128,160" fill="none" stroke="#8a8454" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+  <use href="#mini" transform="translate(128 160) rotate(-54) scale(1.05)"/>
+  <use href="#mini" transform="translate(128 160) rotate(52) scale(1.05)"/>
+  <use href="#mini" transform="translate(128 160) rotate(-2) scale(1.25)"/>
+</svg>

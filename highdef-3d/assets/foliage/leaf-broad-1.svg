@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Broadleaf cluster 1: oak. Seven lobed leaves on a forked twig.
+       Back leaves show their greyer underside; front leaves cast a soft shadow
+       on whatever is behind them. Corners stay transparent on purpose. -->
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#7f9757"/>
+      <stop offset="0.6" stop-color="#5f7a44"/>
+      <stop offset="1" stop-color="#4b6236"/>
+    </linearGradient>
+    <linearGradient id="top2" x1="0.2" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8a9f5d"/>
+      <stop offset="0.55" stop-color="#66804a"/>
+      <stop offset="1" stop-color="#4e6538"/>
+    </linearGradient>
+    <linearGradient id="under" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6f815a"/>
+      <stop offset="1" stop-color="#4c5b3e"/>
+    </linearGradient>
+    <linearGradient id="under2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#66785a"/>
+      <stop offset="1" stop-color="#46543b"/>
+    </linearGradient>
+    <!-- lobed oak outline, tip at the top (y=-50), stalk end at the bottom (y=50) -->
+    <path id="oak" d="M0,-50 C10,-48 18,-42 16,-34 C24,-36 30,-28 24,-20 C30,-16 30,-6 22,-2 C30,4 28,14 20,16 C26,24 20,34 12,32 C12,40 6,46 0,50 C-6,46 -12,40 -12,32 C-20,34 -26,24 -20,16 C-28,14 -30,4 -22,-2 C-30,-6 -30,-16 -24,-20 C-30,-28 -24,-36 -16,-34 C-18,-42 -10,-48 0,-50 Z"/>
+    <!-- midrib and side veins, one per lobe -->
+    <path id="oakv" d="M0,-47 L0,48 M0,-34 L13,-37 M0,-34 L-13,-37 M0,-20 L20,-22 M0,-20 L-20,-22 M0,-4 L22,-4 M0,-4 L-22,-4 M0,12 L19,15 M0,12 L-19,15 M0,28 L11,31 M0,28 L-11,31"/>
+  </defs>
+
+  <!-- twig, behind everything -->
+  <path d="M130,134 C128,110 130,80 132,58 M130,134 C110,120 84,106 62,96 M130,134 C150,120 176,104 196,92 M130,134 C112,146 92,156 76,162 M130,134 C150,146 170,156 186,168 M130,134 C130,152 130,172 128,192" fill="none" stroke="#5b4b38" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M130,134 C128,110 130,80 132,58 M130,134 C150,120 176,104 196,92" fill="none" stroke="#7a6850" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- back leaves: undersides -->
+  <g transform="translate(62 96) rotate(-40)">
+    <use href="#oak" fill="url(#under)" stroke="#3f4d33" stroke-width="0.8"/>
+    <use href="#oakv" fill="none" stroke="#59694b" stroke-width="1.3" opacity="0.8"/>
+  </g>
+  <g transform="translate(196 92) rotate(38) scale(0.95)">
+    <use href="#oak" fill="url(#under2)" stroke="#3f4d33" stroke-width="0.8"/>
+    <use href="#oakv" fill="none" stroke="#59694b" stroke-width="1.3" opacity="0.8"/>
+  </g>
+  <g transform="translate(128 192) rotate(175)">
+    <use href="#oak" fill="url(#under)" stroke="#3f4d33" stroke-width="0.8"/>
+    <use href="#oakv" fill="none" stroke="#59694b" stroke-width="1.3" opacity="0.8"/>
+  </g>
+
+  <!-- front leaves: shadow copy first, then the lit leaf -->
+  <g transform="translate(131 85) rotate(6) scale(1.15)">
+    <use href="#oak" fill="#2c3823" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#oak" fill="url(#top)" stroke="#3a4a2d" stroke-width="0.7"/>
+    <use href="#oakv" fill="none" stroke="#4a5f38" stroke-width="1.2" opacity="0.85"/>
+    <use href="#oakv" fill="none" stroke="#9db06e" stroke-width="0.5" opacity="0.5" transform="translate(-0.8 0)"/>
+  </g>
+  <g transform="translate(78 162) rotate(-58) scale(1.02)">
+    <use href="#oak" fill="#2c3823" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#oak" fill="url(#top2)" stroke="#3a4a2d" stroke-width="0.7"/>
+    <use href="#oakv" fill="none" stroke="#4a5f38" stroke-width="1.2" opacity="0.85"/>
+  </g>
+  <g transform="translate(188 168) rotate(52) scale(1.05)">
+    <use href="#oak" fill="#2c3823" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#oak" fill="url(#top)" stroke="#3a4a2d" stroke-width="0.7"/>
+    <use href="#oakv" fill="none" stroke="#4a5f38" stroke-width="1.2" opacity="0.85"/>
+  </g>
+  <g transform="translate(134 140) rotate(-14) scale(0.85)">
+    <use href="#oak" fill="#2c3823" opacity="0.45" transform="translate(2 3)"/>
+    <use href="#oak" fill="url(#top2)" stroke="#3a4a2d" stroke-width="0.7"/>
+    <use href="#oakv" fill="none" stroke="#4a5f38" stroke-width="1.2" opacity="0.85"/>
+    <use href="#oakv" fill="none" stroke="#9db06e" stroke-width="0.5" opacity="0.5" transform="translate(-0.8 0)"/>
+  </g>
+</svg>

@@ -225,12 +225,26 @@ test('R16.15 — the Town Hall opens, and the rod points at your own people', as
     if (towns.length) {
       const t = towns.sort((a, b) =>
         Math.hypot(a.wx - f.control.x, a.wz - f.control.z) - Math.hypot(b.wx - f.control.x, b.wz - f.control.z))[0];
-      // the hall spot is derived, so ask the game where it thinks it is by walking a small spiral
+      /**
+       * R18 — A FRAME, NOT FORTY MILLISECONDS.
+       *
+       * `interactTarget()` is recomputed by the frame loop, so after a teleport the test has to let
+       * a frame run before asking. It waited a flat 40 ms, which is about two and a half frames on
+       * an idle machine and NONE at the end of a 22-minute suite — so the spiral walked every
+       * position without the target ever being recomputed, found no door, and the test failed with
+       * "no town of size 3 or more has a door you can press E at". The town was there the whole
+       * time; this spec passes on its own.
+       *
+       * Two `requestAnimationFrame`s guarantee the loop has been round once and the target is for
+       * where the player now stands. It is faster than 40 ms when the machine is idle and it
+       * stretches by itself when it is not, which is the property a fixed sleep can never have.
+       */
+      const frame = () => new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
       for (let r = 0; r <= 24 && !hall; r += 3) {
         for (let k = 0; k < 12 && !hall; k++) {
           const a = (k / 12) * Math.PI * 2;
           f.control.teleport(t.wx + Math.cos(a) * r, t.wz + Math.sin(a) * r);
-          await new Promise(res => setTimeout(res, 40));
+          await frame();
           const it = f.interactTarget?.();
           if (it?.kind === 'hall') hall = { town: t.name, size: t.size };
         }
@@ -238,7 +252,12 @@ test('R16.15 — the Town Hall opens, and the rod points at your own people', as
     }
     if (hall) {
       f.townHall.open({ ...towns[0] });
-      await new Promise(r => setTimeout(r, 200));
+      // …and wait for the screen itself rather than guessing at 200 ms
+      for (let i = 0; i < 60; i++) {
+        const el = document.getElementById('town-hall');
+        if (el && !el.hidden) break;
+        await new Promise(res => setTimeout(res, 50));
+      }
     }
     const screen = document.getElementById('town-hall');
     const open = !!screen && !screen.hidden;

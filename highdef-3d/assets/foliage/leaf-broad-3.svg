@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Broadleaf cluster 3: round-lobed oak. Six wide leaves, drier and more
+       olive than cluster 1, hanging off a twig that runs corner to corner so
+       the transparent gaps sit top-right and bottom-left. -->
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#889a5a"/>
+      <stop offset="0.6" stop-color="#667a46"/>
+      <stop offset="1" stop-color="#506238"/>
+    </linearGradient>
+    <linearGradient id="top2" x1="0.4" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#93a35f"/>
+      <stop offset="0.6" stop-color="#6e814b"/>
+      <stop offset="1" stop-color="#55673b"/>
+    </linearGradient>
+    <linearGradient id="under" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#78855b"/>
+      <stop offset="1" stop-color="#525d3e"/>
+    </linearGradient>
+    <path id="rk" d="M0,-50 C14,-50 22,-40 18,-30 C28,-30 34,-18 26,-8 C34,0 32,14 22,16 C28,26 22,38 12,36 C10,44 6,48 0,50 C-6,48 -10,44 -12,36 C-22,38 -28,26 -22,16 C-32,14 -34,0 -26,-8 C-34,-18 -28,-30 -18,-30 C-22,-40 -14,-50 0,-50 Z"/>
+    <path id="rkv" d="M0,-47 L0,48 M0,-32 L16,-38 M0,-32 L-16,-38 M0,-14 L26,-14 M0,-14 L-26,-14 M0,6 L24,8 M0,6 L-24,8 M0,26 L14,30 M0,26 L-14,30"/>
+  </defs>
+
+  <path d="M40,214 C80,176 130,120 216,44 M118,130 L66,96 M118,130 L172,150 M156,96 L200,120 M156,96 L134,52 M84,160 L112,206" fill="none" stroke="#5a4934" stroke-width="3" stroke-linecap="round"/>
+
+  <g transform="translate(66 96) rotate(-70) scale(0.95)">
+    <use href="#rk" fill="url(#under)" stroke="#414c34" stroke-width="0.8"/>
+    <use href="#rkv" fill="none" stroke="#5f6c4c" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(200 122) rotate(70) scale(0.9)">
+    <use href="#rk" fill="url(#under)" stroke="#414c34" stroke-width="0.8"/>
+    <use href="#rkv" fill="none" stroke="#5f6c4c" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(112 206) rotate(160) scale(0.9)">
+    <use href="#rk" fill="url(#under)" stroke="#414c34" stroke-width="0.8"/>
+    <use href="#rkv" fill="none" stroke="#5f6c4c" stroke-width="1.2" opacity="0.8"/>
+  </g>
+
+  <g transform="translate(134 52) rotate(-20) scale(1.0)">
+    <use href="#rk" fill="#2b3420" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#rk" fill="url(#top)" stroke="#3d4a2e" stroke-width="0.7"/>
+    <use href="#rkv" fill="none" stroke="#4e5f37" stroke-width="1.1" opacity="0.85"/>
+    <use href="#rkv" fill="none" stroke="#aab873" stroke-width="0.5" opacity="0.45" transform="translate(-0.7 0.5)"/>
+  </g>
+  <g transform="translate(174 152) rotate(115) scale(1.08)">
+    <use href="#rk" fill="#2b3420" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#rk" fill="url(#top2)" stroke="#3d4a2e" stroke-width="0.7"/>
+    <use href="#rkv" fill="none" stroke="#4e5f37" stroke-width="1.1" opacity="0.85"/>
+  </g>
+  <g transform="translate(112 132) rotate(-40) scale(1.12)">
+    <use href="#rk" fill="#2b3420" opacity="0.45" transform="translate(2 3)"/>
+    <use href="#rk" fill="url(#top)" stroke="#3d4a2e" stroke-width="0.7"/>
+    <use href="#rkv" fill="none" stroke="#4e5f37" stroke-width="1.1" opacity="0.85"/>
+    <use href="#rkv" fill="none" stroke="#aab873" stroke-width="0.5" opacity="0.45" transform="translate(-0.7 0.5)"/>
+  </g>
+</svg>

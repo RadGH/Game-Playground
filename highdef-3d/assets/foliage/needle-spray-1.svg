@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Needle spray 1: pine. A central stem with rows of long needles, dense and
+       long at the base, shorter and sparser toward the tip, plus two side
+       shoots. Each needle is a thin lens shaded darker at its base. -->
+  <defs>
+    <linearGradient id="nd" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#3f5a35"/>
+      <stop offset="0.5" stop-color="#5c7a48"/>
+      <stop offset="1" stop-color="#7e9a5e"/>
+    </linearGradient>
+    <linearGradient id="nd2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#35492e"/>
+      <stop offset="0.5" stop-color="#4c653e"/>
+      <stop offset="1" stop-color="#6a8451"/>
+    </linearGradient>
+    <path id="n" d="M0,0 C1.5,-10 1.5,-26 0,-38 C-1.5,-26 -1.5,-10 0,0 Z"/>
+    <g id="row">
+      <use href="#n" transform="rotate(-74)"/>
+      <use href="#n" transform="rotate(-56) scale(1.08)"/>
+      <use href="#n" transform="rotate(-38) scale(0.95)"/>
+      <use href="#n" transform="rotate(-20) scale(0.8)"/>
+      <use href="#n" transform="rotate(20) scale(0.8)"/>
+      <use href="#n" transform="rotate(38) scale(0.95)"/>
+      <use href="#n" transform="rotate(56) scale(1.08)"/>
+      <use href="#n" transform="rotate(74)"/>
+    </g>
+    <g id="shoot">
+      <path d="M0,0 L0,-70" stroke="#5a4634" stroke-width="2.5" stroke-linecap="round"/>
+      <use href="#row" fill="url(#nd2)" transform="translate(0 -6) scale(0.7)"/>
+      <use href="#row" fill="url(#nd)" transform="translate(0 -18) scale(0.66)"/>
+      <use href="#row" fill="url(#nd2)" transform="translate(0 -30) scale(0.6)"/>
+      <use href="#row" fill="url(#nd)" transform="translate(0 -42) scale(0.52)"/>
+      <use href="#row" fill="url(#nd)" transform="translate(0 -54) scale(0.42)"/>
+      <use href="#row" fill="url(#nd)" transform="translate(0 -66) scale(0.32) rotate(0)"/>
+    </g>
+  </defs>
+
+  <!-- back rows (darker) sit behind the stem, front rows on top -->
+  <g transform="translate(128 0)">
+    <use href="#row" fill="url(#nd2)" transform="translate(0 232) rotate(-6) scale(1.15)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 208) rotate(5) scale(1.12)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 184) rotate(-4) scale(1.05)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 160) rotate(6) scale(0.98)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 136) rotate(-5) scale(0.9)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 112) rotate(4) scale(0.82)"/>
+    <use href="#row" fill="url(#nd2)" transform="translate(0 90) rotate(-3) scale(0.7)"/>
+  </g>
+  <path d="M128,246 C127,200 129,140 128,60 C128,50 129,40 130,32" fill="none" stroke="#54412f" stroke-width="5" stroke-linecap="round"/>
+  <path d="M128,246 C127,200 129,140 128,60" fill="none" stroke="#7a6248" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <use href="#shoot" transform="translate(128 150) rotate(-38) scale(0.9)"/>
+  <use href="#shoot" transform="translate(128 112) rotate(34) scale(0.8)"/>
+  <g transform="translate(128 0)">
+    <use href="#row" fill="url(#nd)" transform="translate(0 220) rotate(4) scale(1.18)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 196) rotate(-5) scale(1.12)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 172) rotate(3) scale(1.02)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 148) rotate(-6) scale(0.94)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 124) rotate(5) scale(0.86)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 100) rotate(-4) scale(0.76)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 78) rotate(3) scale(0.64)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(0 58) rotate(-2) scale(0.5)"/>
+    <use href="#row" fill="url(#nd)" transform="translate(1 40) rotate(2) scale(0.36)"/>
+    <use href="#n" fill="url(#nd)" transform="translate(2 34) rotate(-8) scale(0.5)"/>
+    <use href="#n" fill="url(#nd)" transform="translate(2 34) rotate(6) scale(0.45)"/>
+  </g>
+</svg>

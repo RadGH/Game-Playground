@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Broadleaf cluster 2: beech. Eight elliptical leaves fanning out from one
+       node, with a faint wavy edge and parallel side veins. Cooler, slightly
+       bluer green than the oak so the two do not read as one texture. -->
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#7d9660"/>
+      <stop offset="0.65" stop-color="#5a7546"/>
+      <stop offset="1" stop-color="#47603a"/>
+    </linearGradient>
+    <linearGradient id="top2" x1="0.3" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8aa066"/>
+      <stop offset="0.6" stop-color="#627c4c"/>
+      <stop offset="1" stop-color="#4a643c"/>
+    </linearGradient>
+    <linearGradient id="under" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#75876a"/>
+      <stop offset="1" stop-color="#4f5f46"/>
+    </linearGradient>
+    <path id="bee" d="M0,-50 C19,-42 30,-16 27,12 C25,34 13,46 0,50 C-13,46 -25,34 -27,12 C-30,-16 -19,-42 0,-50 Z"/>
+    <path id="beev" d="M0,-46 L0,47 M0,-36 L14,-28 M0,-36 L-14,-28 M0,-25 L19,-15 M0,-25 L-19,-15 M0,-13 L23,-2 M0,-13 L-23,-2 M0,0 L23,11 M0,0 L-23,11 M0,13 L19,23 M0,13 L-19,23 M0,26 L12,34 M0,26 L-12,34"/>
+  </defs>
+
+  <path d="M136,132 L58,84 M136,132 L120,40 M136,132 L204,66 M136,132 L216,146 M136,132 L184,214 M136,132 L104,222 M136,132 L44,170" fill="none" stroke="#5d4c3b" stroke-width="2.8" stroke-linecap="round"/>
+
+  <g transform="translate(58 84) rotate(-60) scale(0.95)">
+    <use href="#bee" fill="url(#under)" stroke="#3f4d38" stroke-width="0.8"/>
+    <use href="#beev" fill="none" stroke="#5f7052" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(204 66) rotate(48) scale(0.9)">
+    <use href="#bee" fill="url(#under)" stroke="#3f4d38" stroke-width="0.8"/>
+    <use href="#beev" fill="none" stroke="#5f7052" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(44 170) rotate(-110) scale(0.88)">
+    <use href="#bee" fill="url(#under)" stroke="#3f4d38" stroke-width="0.8"/>
+    <use href="#beev" fill="none" stroke="#5f7052" stroke-width="1.2" opacity="0.8"/>
+  </g>
+  <g transform="translate(184 214) rotate(150) scale(0.9)">
+    <use href="#bee" fill="url(#under)" stroke="#3f4d38" stroke-width="0.8"/>
+    <use href="#beev" fill="none" stroke="#5f7052" stroke-width="1.2" opacity="0.8"/>
+  </g>
+
+  <g transform="translate(120 44) rotate(-10) scale(1.05)">
+    <use href="#bee" fill="#27321f" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#bee" fill="url(#top)" stroke="#36472c" stroke-width="0.7"/>
+    <use href="#beev" fill="none" stroke="#465c37" stroke-width="1.1" opacity="0.85"/>
+    <use href="#beev" fill="none" stroke="#a1b676" stroke-width="0.5" opacity="0.45" transform="translate(-0.7 0.5)"/>
+  </g>
+  <g transform="translate(214 144) rotate(96) scale(1.0)">
+    <use href="#bee" fill="#27321f" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#bee" fill="url(#top2)" stroke="#36472c" stroke-width="0.7"/>
+    <use href="#beev" fill="none" stroke="#465c37" stroke-width="1.1" opacity="0.85"/>
+  </g>
+  <g transform="translate(104 218) rotate(190) scale(1.02)">
+    <use href="#bee" fill="#27321f" opacity="0.4" transform="translate(2 3)"/>
+    <use href="#bee" fill="url(#top)" stroke="#36472c" stroke-width="0.7"/>
+    <use href="#beev" fill="none" stroke="#465c37" stroke-width="1.1" opacity="0.85"/>
+  </g>
+  <g transform="translate(136 128) rotate(22) scale(1.1)">
+    <use href="#bee" fill="#27321f" opacity="0.45" transform="translate(2 3)"/>
+    <use href="#bee" fill="url(#top2)" stroke="#36472c" stroke-width="0.7"/>
+    <use href="#beev" fill="none" stroke="#465c37" stroke-width="1.1" opacity="0.85"/>
+    <use href="#beev" fill="none" stroke="#a1b676" stroke-width="0.5" opacity="0.45" transform="translate(-0.7 0.5)"/>
+  </g>
+</svg>

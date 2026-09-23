@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Frond 3: palm-like. A stiff spine with long, narrow leaflets that fan
+       outwards and droop toward the tips. Leaflets on the far side are darker. -->
+  <defs>
+    <linearGradient id="ll" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#4a6a3e"/>
+      <stop offset="1" stop-color="#7c9a5c"/>
+    </linearGradient>
+    <linearGradient id="ld" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#3b5533"/>
+      <stop offset="1" stop-color="#5f7a48"/>
+    </linearGradient>
+    <!-- a long thin leaflet with a gentle droop, base at origin, tip at y=-78 -->
+    <path id="l" d="M0,0 C4,-20 6,-50 4,-78 C1,-60 -1,-30 0,0 Z"/>
+    <path id="lm" d="M0,-2 C3,-22 4,-50 3,-74"/>
+  </defs>
+
+  <!-- back leaflets, darker -->
+  <g fill="url(#ld)" stroke="#2f4429" stroke-width="0.5">
+    <use href="#l" transform="translate(128 236) rotate(-82) scale(0.8)"/>
+    <use href="#l" transform="translate(128 236) rotate(82) scale(0.8)"/>
+    <use href="#l" transform="translate(128 212) rotate(-76) scale(0.95)"/>
+    <use href="#l" transform="translate(128 212) rotate(76) scale(0.95)"/>
+    <use href="#l" transform="translate(128 188) rotate(-70) scale(1.05)"/>
+    <use href="#l" transform="translate(128 188) rotate(70) scale(1.05)"/>
+    <use href="#l" transform="translate(128 164) rotate(-64) scale(1.1)"/>
+    <use href="#l" transform="translate(128 164) rotate(64) scale(1.1)"/>
+    <use href="#l" transform="translate(128 140) rotate(-58) scale(1.08)"/>
+    <use href="#l" transform="translate(128 140) rotate(58) scale(1.08)"/>
+    <use href="#l" transform="translate(128 116) rotate(-52) scale(1.0)"/>
+    <use href="#l" transform="translate(128 116) rotate(52) scale(1.0)"/>
+    <use href="#l" transform="translate(128 92) rotate(-46) scale(0.88)"/>
+    <use href="#l" transform="translate(128 92) rotate(46) scale(0.88)"/>
+    <use href="#l" transform="translate(128 70) rotate(-38) scale(0.72)"/>
+    <use href="#l" transform="translate(128 70) rotate(38) scale(0.72)"/>
+    <use href="#l" transform="translate(128 52) rotate(-26) scale(0.55)"/>
+    <use href="#l" transform="translate(128 52) rotate(26) scale(0.55)"/>
+  </g>
+  <path d="M128,252 C128,200 128,120 128,34" fill="none" stroke="#6b6640" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M128,252 C128,200 128,120 128,34" fill="none" stroke="#9a9260" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+  <!-- front leaflets, lit, offset half a step so they interleave -->
+  <g fill="url(#ll)" stroke="#33482c" stroke-width="0.5">
+    <use href="#l" transform="translate(128 224) rotate(-80) scale(0.85)"/>
+    <use href="#l" transform="translate(128 224) rotate(80) scale(0.85)"/>
+    <use href="#l" transform="translate(128 200) rotate(-74) scale(1.0)"/>
+    <use href="#l" transform="translate(128 200) rotate(74) scale(1.0)"/>
+    <use href="#l" transform="translate(128 176) rotate(-68) scale(1.08)"/>
+    <use href="#l" transform="translate(128 176) rotate(68) scale(1.08)"/>
+    <use href="#l" transform="translate(128 152) rotate(-62) scale(1.1)"/>
+    <use href="#l" transform="translate(128 152) rotate(62) scale(1.1)"/>
+    <use href="#l" transform="translate(128 128) rotate(-56) scale(1.04)"/>
+    <use href="#l" transform="translate(128 128) rotate(56) scale(1.04)"/>
+    <use href="#l" transform="translate(128 104) rotate(-50) scale(0.94)"/>
+    <use href="#l" transform="translate(128 104) rotate(50) scale(0.94)"/>
+    <use href="#l" transform="translate(128 80) rotate(-42) scale(0.8)"/>
+    <use href="#l" transform="translate(128 80) rotate(42) scale(0.8)"/>
+    <use href="#l" transform="translate(128 60) rotate(-32) scale(0.64)"/>
+    <use href="#l" transform="translate(128 60) rotate(32) scale(0.64)"/>
+    <use href="#l" transform="translate(128 44) rotate(-14) scale(0.5)"/>
+    <use href="#l" transform="translate(128 44) rotate(14) scale(0.5)"/>
+    <use href="#l" transform="translate(128 36) rotate(0) scale(0.42)"/>
+  </g>
+  <g fill="none" stroke="#a9be7a" stroke-width="0.6" opacity="0.35">
+    <use href="#lm" transform="translate(128 176) rotate(-68) scale(1.08)"/>
+    <use href="#lm" transform="translate(128 152) rotate(62) scale(1.1)"/>
+    <use href="#lm" transform="translate(128 128) rotate(-56) scale(1.04)"/>
+    <use href="#lm" transform="translate(128 104) rotate(50) scale(0.94)"/>
+  </g>
+</svg>

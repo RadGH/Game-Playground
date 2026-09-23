@@ -115,8 +115,29 @@ test('a base is built, saved, reloaded, and reachable from another star system',
     f.build.setMode(false);
     const pool = f.stores.poolAt(f.control.x + 16, f.control.z + 10);
     const coal = f.stores.put(pool, 'coal', 200);
-    // the grid is ticked from the frame loop; give it a couple of seconds of real time to notice
-    await new Promise(r => setTimeout(r, 2500));
+    /**
+     * R18 — WAIT FOR THE GRID, NOT FOR A NUMBER OF MILLISECONDS.
+     *
+     * These three tests each slept a flat 2.5 s for "the grid to notice the generator". Run on
+     * their own that is plenty — all three pass in 36 seconds. Run at the end of a 22-minute,
+     * 235-test suite it is not, and all three failed with a variation on "the pad is dark": the
+     * generator was fine, the coal was in the crate, the machines were on the grid, and the frame
+     * loop simply had not got round to settling it yet. A fixed sleep is a bet on how busy the
+     * machine is.
+     *
+     * So it polls for the thing the test is about to assert, and gives up after a long ceiling
+     * rather than a short guess — fast when the machine is idle, patient when it is not.
+     */
+    const settle = async (ready, ms = 15000) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        try { if (ready()) return true; } catch { /* not built yet */ }
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return false;
+    };
+    await settle(() => f.grid.stateOf(gen.entry?.id) === 'running'
+      && f.waypoints.canTravel(f.homes.all()[0]?.id, {}).ok);
 
     const where = { systemSeed: f.systemSeed, planetId: f.planet.id };
     const built = f.homes.all();
@@ -199,10 +220,34 @@ test('a save taken beside a finished base reloads with the base still on it', as
     f.build.select('waypoint_pad'); f.build.aim(f.control.x + 10, f.control.z + 10);
     const res = f.build.placeHere();
     f.build.select('storage_chest'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();
-    f.build.select('burner_generator'); f.build.aim(f.control.x + 20, f.control.z + 10); f.build.placeHere();
+    f.build.select('burner_generator'); f.build.aim(f.control.x + 20, f.control.z + 10);
+    const gen2 = f.build.placeHere();
     f.build.setMode(false);
     f.stores.put(f.stores.poolAt(f.control.x + 16, f.control.z + 10), 'coal', 200);
-    await new Promise(r => setTimeout(r, 2500));
+    /**
+     * R18 — WAIT FOR THE GRID, NOT FOR A NUMBER OF MILLISECONDS.
+     *
+     * These three tests each slept a flat 2.5 s for "the grid to notice the generator". Run on
+     * their own that is plenty — all three pass in 36 seconds. Run at the end of a 22-minute,
+     * 235-test suite it is not, and all three failed with a variation on "the pad is dark": the
+     * generator was fine, the coal was in the crate, the machines were on the grid, and the frame
+     * loop simply had not got round to settling it yet. A fixed sleep is a bet on how busy the
+     * machine is.
+     *
+     * So it polls for the thing the test is about to assert, and gives up after a long ceiling
+     * rather than a short guess — fast when the machine is idle, patient when it is not.
+     */
+    const settle = async (ready, ms = 15000) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        try { if (ready()) return true; } catch { /* not built yet */ }
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return false;
+    };
+    // the save has to be taken with the pad LIT, or the reload is asked to restore a dark one
+    await settle(() => f.grid.stateOf(gen2.entry?.id) === 'running'
+      && f.waypoints.list().some(w => w.kind === 'built' && w.lit));
     if (!res.ok) return { ok: false, why: res.why };
     const id = f.saveNow();
     return { ok: true, id, name: f.homes.all()[0].name, x: Math.round(res.entry.x), z: Math.round(res.entry.z) };
@@ -263,10 +308,34 @@ test('a base is one button away from another star system', async ({ page }) => {
     f.build.select('waypoint_pad'); f.build.aim(f.control.x + 10, f.control.z + 10);
     const pad = f.build.placeHere();
     f.build.select('storage_chest'); f.build.aim(f.control.x + 16, f.control.z + 10); f.build.placeHere();
-    f.build.select('burner_generator'); f.build.aim(f.control.x + 20, f.control.z + 10); f.build.placeHere();
+    f.build.select('burner_generator'); f.build.aim(f.control.x + 20, f.control.z + 10);
+    const gen3 = f.build.placeHere();
     f.build.setMode(false);
     f.stores.put(f.stores.poolAt(f.control.x + 16, f.control.z + 10), 'coal', 400);
-    await new Promise(r => setTimeout(r, 2500));
+    /**
+     * R18 — WAIT FOR THE GRID, NOT FOR A NUMBER OF MILLISECONDS.
+     *
+     * These three tests each slept a flat 2.5 s for "the grid to notice the generator". Run on
+     * their own that is plenty — all three pass in 36 seconds. Run at the end of a 22-minute,
+     * 235-test suite it is not, and all three failed with a variation on "the pad is dark": the
+     * generator was fine, the coal was in the crate, the machines were on the grid, and the frame
+     * loop simply had not got round to settling it yet. A fixed sleep is a bet on how busy the
+     * machine is.
+     *
+     * So it polls for the thing the test is about to assert, and gives up after a long ceiling
+     * rather than a short guess — fast when the machine is idle, patient when it is not.
+     */
+    const settle = async (ready, ms = 15000) => {
+      const t0 = Date.now();
+      while (Date.now() - t0 < ms) {
+        try { if (ready()) return true; } catch { /* not built yet */ }
+        await new Promise(r => setTimeout(r, 100));
+      }
+      return false;
+    };
+    // leave with the pad lit, so "can I get home" is a question about the register and not the grid
+    await settle(() => f.grid.stateOf(gen3.entry?.id) === 'running'
+      && f.waypoints.canTravel(f.homes.all()[0]?.id, {}).ok);
     if (!pad.ok) return { padWhy: pad.why };
 
     const base = f.homes.all()[0];

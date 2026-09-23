@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Grass blade 1: a single tall blade leaning right, pointed tip, darker at
+       the base, a faint crease down the middle with a highlight beside it.
+       Drawn large: this is the blade the camera stands next to. -->
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="252" x2="0" y2="12">
+      <stop offset="0" stop-color="#465f30"/>
+      <stop offset="0.35" stop-color="#5d7a3f"/>
+      <stop offset="0.8" stop-color="#7d9a54"/>
+      <stop offset="1" stop-color="#93aa62"/>
+    </linearGradient>
+  </defs>
+  <path d="M116,254 C112,190 124,110 170,10 C146,110 140,190 140,254 Z" fill="url(#g)" stroke="#3b5029" stroke-width="0.8" stroke-linejoin="round"/>
+  <path d="M128,252 C124,190 133,112 168,16" fill="none" stroke="#3d572b" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+  <path d="M131,252 C127,190 136,112 169,18" fill="none" stroke="#adc47a" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+  <path d="M118,252 C115,200 122,140 152,60" fill="none" stroke="#2f4222" stroke-width="1" stroke-linecap="round" opacity="0.3"/>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Frond 1: fern. A gently curved spine with paired lobed leaflets, short at
+       the base, longest a third of the way up, tapering to a curled tip. -->
+  <defs>
+    <linearGradient id="pl" x1="0" y1="1" x2="0.2" y2="0">
+      <stop offset="0" stop-color="#4c6a3e"/>
+      <stop offset="1" stop-color="#7a9558"/>
+    </linearGradient>
+    <linearGradient id="pr" x1="0" y1="1" x2="-0.2" y2="0">
+      <stop offset="0" stop-color="#45623a"/>
+      <stop offset="1" stop-color="#6e8a51"/>
+    </linearGradient>
+    <!-- one leaflet: lobed edge, base at the origin, tip at y=-42 -->
+    <path id="p" d="M0,0 C4,-2 6,-6 5,-9 C7,-11 8,-15 6,-18 C8,-20 8,-24 6,-27 C7,-30 7,-34 4,-37 L0,-42 L-4,-37 C-7,-34 -7,-30 -6,-27 C-8,-24 -8,-20 -6,-18 C-8,-15 -7,-11 -5,-9 C-6,-6 -4,-2 0,0 Z"/>
+    <path id="pv" d="M0,-1 L0,-40 M0,-9 L4,-12 M0,-9 L-4,-12 M0,-18 L4,-21 M0,-18 L-4,-21 M0,-27 L3,-30 M0,-27 L-3,-30"/>
+    <g id="pair">
+      <g transform="rotate(-68)">
+        <use href="#p" fill="url(#pl)" stroke="#334a2c" stroke-width="0.6" stroke-linejoin="round"/>
+        <use href="#pv" fill="none" stroke="#3f5735" stroke-width="0.8" opacity="0.8"/>
+      </g>
+      <g transform="rotate(68)">
+        <use href="#p" fill="url(#pr)" stroke="#334a2c" stroke-width="0.6" stroke-linejoin="round"/>
+        <use href="#pv" fill="none" stroke="#3f5735" stroke-width="0.8" opacity="0.8"/>
+      </g>
+    </g>
+  </defs>
+
+  <path d="M126,252 C122,200 126,120 138,24 C140,14 146,10 150,14" fill="none" stroke="#5f5a3a" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M126,252 C122,200 126,120 138,24" fill="none" stroke="#8c8656" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+
+  <use href="#pair" transform="translate(125 236) rotate(-3) scale(0.75)"/>
+  <use href="#pair" transform="translate(124 214) rotate(-2) scale(0.95)"/>
+  <use href="#pair" transform="translate(124 192) rotate(0) scale(1.1)"/>
+  <use href="#pair" transform="translate(124 170) rotate(2) scale(1.18)"/>
+  <use href="#pair" transform="translate(125 148) rotate(3) scale(1.15)"/>
+  <use href="#pair" transform="translate(127 126) rotate(5) scale(1.06)"/>
+  <use href="#pair" transform="translate(129 104) rotate(6) scale(0.95)"/>
+  <use href="#pair" transform="translate(131 84) rotate(7) scale(0.82)"/>
+  <use href="#pair" transform="translate(133 66) rotate(8) scale(0.68)"/>
+  <use href="#pair" transform="translate(135 50) rotate(9) scale(0.54)"/>
+  <use href="#pair" transform="translate(137 36) rotate(12) scale(0.4)"/>
+  <use href="#pair" transform="translate(140 24) rotate(30) scale(0.28)"/>
+</svg>

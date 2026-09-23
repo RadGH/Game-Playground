@@ -108,8 +108,28 @@ test('a drill on a seam plus a route fills the crate, and a longer route fills i
     // find a seam on ground flat enough to build on
     const t = f.terrain;
     const flat = (x, z) => !t.underwater(x, z) && !t.waterAt(x, z) && t.slopeAt(x, z, 8) <= 0.3;
+    /**
+     * R18 — A SEAM A WOODEN CRATE CAN ACTUALLY HOLD.
+     *
+     * This took the richest seam near the spawn whatever it was, and on seed 11 that is a WATER
+     * source. It then built a `storage_crate` for it and failed with "five seconds of drilling
+     * delivered nothing", which reads as a broken drill. The drill was fine: the drill dug water
+     * the whole time (stock climbing 12 -> 34 over five seconds) and a wooden box does not hold
+     * water, so the route had nowhere to put it and the overview correctly said `limit: hauling`.
+     *
+     * It only started failing when round 18 fixed `createStoreNetwork`'s `materials` argument —
+     * before that `kindOf` answered `'refined'` for every resource in the game and a crate happily
+     * held a liquid. This test is about whether ROUTE LENGTH sets the delivery rate, so it picks a
+     * seam whose output a crate can take and leaves fluids to the test below.
+     */
+    const KINDS = f.resources?.materials || {};
+    const crateCanHold = res => {
+      const kind = KINDS[res]?.kind;
+      return kind !== 'fluid' && kind !== 'gas'
+        && !['acid', 'coolant', 'lye', 'lift_fuel'].includes(res);
+    };
     const node = f.ore.around(f.control.x, f.control.z)
-      .filter(n => !n.depleted && flat(n.x, n.z) && flat(n.x + 30, n.z))
+      .filter(n => !n.depleted && flat(n.x, n.z) && flat(n.x + 30, n.z) && crateCanHold(n.resource))
       .sort((a, b) => b.amount - a.amount)[0];
     if (!node) return { none: true };
 
@@ -360,5 +380,69 @@ test('a bench you walk up to can be given work, and it makes the thing', async (
   }
   expect(out.queued, `clicking "${out.label}" did not queue it`).toBe(1);
   expect(out.madeAfter, `the furnace made nothing (${out.state})`).toBeGreaterThan(out.madeBefore);
+  expect(errors).toEqual([]);
+});
+
+/**
+ * R18 — AND A FLUID SEAM NEEDS A FLUID TANK.
+ *
+ * The other half of the test above. `data/power.json` has specced a `fluid_tank` since the building
+ * expansion landed and it had no row in `data/structures.json`, so it could not be built — which did
+ * not show while `kindOf()` was broken, because a wooden crate held water quite happily. With the
+ * accept rules live there was briefly NO buildable store in the game that takes a liquid, and
+ * js/refine.js draws machine inputs only from the pool, so thirteen recipes could never have run.
+ *
+ * This is the rule stated from the player's side: put a drill on a water source and a crate will
+ * not do.
+ */
+test('a drill on a water seam fills a fluid tank, and a wooden crate will not do', async ({ page }) => {
+  const errors = await land(page);
+
+  const out = await page.evaluate(async () => {
+    const f = window.farhold;
+    for (const piece of f.structures.structures || []) {
+      for (const id of Object.keys(piece.cost || {})) f.bag.add(id, 800);
+    }
+    const KINDS = f.resources?.materials || {};
+    const t = f.terrain;
+    const flat = (x, z) => !t.underwater(x, z) && !t.waterAt(x, z) && t.slopeAt(x, z, 8) <= 0.3;
+    const node = f.ore.around(f.control.x, f.control.z)
+      .filter(n => !n.depleted && flat(n.x, n.z) && flat(n.x + 30, n.z) && KINDS[n.resource]?.kind === 'fluid')
+      .sort((a, b) => b.amount - a.amount)[0];
+    if (!node) return { none: true };
+
+    f.control.teleport(node.x, node.z);
+    await new Promise(r => setTimeout(r, 500));
+    f.build.setMode(true);
+    f.build.setTool('smooth'); f.build.setRadius(18);
+    for (const dx of [0, 30]) { f.build.aim(node.x + dx, node.z); f.build.paint(); }
+    f.build.setTool('build');
+    f.build.select('claim_stone'); f.build.aim(node.x + 3, node.z + 6); f.build.placeHere();
+    f.build.research?.unlockAll?.();
+
+    // a crate 30 m off, and a fluid tank 60 m off: two different pools, one of which is wrong
+    f.build.select('storage_crate'); f.build.aim(node.x + 30, node.z);
+    const crate = f.build.placeHere();
+    f.build.select('fluid_tank'); f.build.aim(node.x + 60, node.z);
+    const tank = f.build.placeHere();
+    f.build.setMode(false);
+    if (!tank.ok) return { tankWhy: tank.why || 'the fluid tank would not go down' };
+
+    const cratePool = f.stores.poolAt(node.x + 30, node.z);
+    const tankPool = f.stores.poolAt(node.x + 60, node.z);
+    return {
+      resource: node.resource,
+      crateOk: crate.ok, tankOk: tank.ok,
+      intoCrate: cratePool ? f.stores.put(cratePool, node.resource, 20) : -1,
+      intoTank: tankPool ? f.stores.put(tankPool, node.resource, 20) : -1,
+    };
+  });
+
+  if (out.none) return;                       // this seed has no fluid seam in range; nothing to say
+  expect(out.tankWhy, `${out.tankWhy}`).toBeFalsy();
+  expect(out.crateOk, 'the crate would not go down').toBe(true);
+  expect(out.tankOk, 'the fluid tank would not go down — is it in data/structures.json?').toBe(true);
+  expect(out.intoCrate, `a wooden crate took ${out.resource}, which is a fluid`).toBe(0);
+  expect(out.intoTank, `the fluid tank would not take ${out.resource}`).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });

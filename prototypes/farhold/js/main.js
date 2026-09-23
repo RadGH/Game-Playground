@@ -8795,6 +8795,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get grid() { return grid; },
     /** The build catalogue, so a test or the debug menu can read a cost without a second fetch. */
     get structures() { return structureData || { structures: [] }; },
+    /**
+     * The resource table, same door as `structures` above and for the same reason: a test needs to
+     * ask what KIND a seam's output is. R18 — without this, `mining.spec.js` picked the richest
+     * seam near the spawn, got a WATER source on seed 11, built a wooden crate for it and then
+     * reported "five seconds of drilling delivered nothing" as though the drill were broken. The
+     * drill was fine; a wooden box does not hold water.
+     */
+    get resources() { return resourceData || { materials: {} }; },
     get works() { return works; },
     get colony() { return colony; },
     get farm() { return farm; },

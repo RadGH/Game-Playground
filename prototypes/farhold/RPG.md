@@ -2842,3 +2842,125 @@ has its own test over it, so the fix is on the ITEM in `attuneWeapon`, exactly l
 `tests/water.test.js` (+2), `tests/round17-combat.test.js` (+2), and re-aims in
 `tests/base-roundtrip.spec.js`, `tests/mining.spec.js`, `tests/town.spec.js`, `tests/round3.spec.js`
 — each commented with what moved underneath it.
+
+## Round 19 — the numbers nobody read
+
+Round 19 had one theme and it is this project's oldest one, in its purest form yet: **a rule written
+into a data file and read by nobody.** Not one of the items in this round crashed. Not one of them
+made the game play visibly wrong on a first look. Every one of them was a number, a column or a
+whole block sitting in `data/` describing a mechanic that did not exist, and in several cases a
+comment in the code beside it explaining the mechanic in detail.
+
+That is what makes this class of fault expensive. A crash gets fixed the same hour. A rule with no
+reader is **indistinguishable from a design decision** — you look at the balance file, you see
+`wallSlamShare: 0.015`, and you assume the wall slam is tuned. It is not tuned. It is not anything.
+
+The count for the round: **twenty-one combat knobs, seven data orphans, three missing joins on one
+constructor, one dead getter, one affix with no unit, and two bugs found only by fixing the others.**
+
+### The shape it takes, in four flavours
+
+**1. The same number in two files, agreeing.** `data/balance.json` has carried `player.combat`,
+`player.ranged` and `player.staff` — 21 numbers — since round 14, every one of them mirrored as a
+constant in `js/combat-feel.js` or `js/weapons.js`. Different names (`hitStopMaxMs` against
+`MAX_HITSTOP`), and in that case a different unit: the file is milliseconds, the code holds seconds.
+All 21 pairs agreed, so nothing played wrong. The bug was **scheduled**: the day somebody tunes the
+balance file, nothing moves, and the next hour goes on finding out why. Each block's own `_doc` even
+said "js/weapons.js STAFF_CHARGE is the live copy", which is the wrong way round — the point of a
+balance file is that it is tuned without opening a module.
+
+`tuneFeel()` and `tuneWeapons()` now take the file at boot, both mutating in place because `RANGED`
+and `STAFF_CHARGE` are held by reference from `js/player.js` and `js/rpg.js` (`plan.charge =
+STAFF_CHARGE`) before boot runs. `COMBAT_FEEL` owns the five knobs `combat-feel.js` does not spend
+itself — the knockback ease, the recoil nudge and the wall slam in `js/actors.js`, the wind-up move
+speed and the input buffer in `js/player.js` — because five more constants in two more files is how
+`combat-feel.js` became the second copy to begin with.
+
+**2. A column in a table, with four of its five siblings read.** `data/tools.json`'s `rarity` block
+has `speed`, `yield`, `reach`, `scan` and `affixes`. `makeTool` read the first four. So the entire
+top of the tool ladder was four better base numbers and an empty affix list: a Masterwork pickaxe
+was a word in front of a name. `SLOT_AFFIXES.tool` joins light and mount in `js/gear.js` with four
+affixes, and each one lands on a derived key its reader already had — `gatherSpeed` in particular,
+whose round-16 comment said it existed "so a 'you work faster' affix has somewhere to land instead
+of being invented later". This is it.
+
+**3. A constructor with a documented signature and a call that fills in a third of it.**
+`createCrafting({ data, rpg, materials, rng, stores, bench, resources })` — `js/main.js` passed the
+first four. Two finished features died of it and neither made a sound:
+
+* **§3.11 craft-from-storage never ran once.** `poolHere()` was null forever, so the bench only ever
+  paid out of the bag in your pockets. You could stand on a crate holding 400 iron ingots and the
+  anvil would tell you that you needed iron.
+* **Every refined material printed as its raw id.** `M` is built from `resources.materials` plus the
+  recycling materials, so without it the bench and the inventory's material strip said `iron_ingot`
+  and `cut_stone`. That reads as an unfinished game, and it was one line.
+
+`stores` goes in as a thunk: the store network is built ~1600 lines below the bench and is rebuilt
+every time you land on a new world, so holding the first one would have been a bug even with the
+ordering right. `craft.setBench` — the third join, never called by anything — gets the player's own
+feet every twenty frames, because the pool's reach is what decides whether a crate counts.
+
+**4. A field nothing ever assigns, with a comment pointing at a function nobody wrote.**
+`js/tools.js` had `get chooser()` over a `let chooser = null`, its comment promising an
+`attachChooser` "at the end" of the file. There is no such function and there never was. Nobody read
+the getter either. The right-click chooser is real and lives in `js/scanner-ui.js`, built beside the
+input it claims — so the dead handle is gone rather than filled in, because a second handle on a
+panel this module does not own is how two owners start.
+
+### The seven data orphans
+
+| Where | What it said | What actually happened |
+|---|---|---|
+| `colony.json` `tax.unhousedPays` / `grumblingPays` | what a citizen with no bed or a grudge pays | `collectTax` skipped both with a bare `continue` beside the two knobs that state them. Both are 0, so the behaviour matched and nobody noticed |
+| `colony.json` `guard.wardRadius` | how far a guard's watch reaches | unread, so a guard at a mine 400 m out was defence for the **home** base: it opened `raids.json`'s `minDefence` gate and raised notoriety for a wall they were not standing on, and then the raid spawned where that guard was not |
+| `colony.json` `carriers.hauler_drone.powerAtOrigin` | 12 kW drawn at the end it leaves from | unread, so the drone — the only carrier with `upkeep: 0`, whose own blurb says "it dies with the grid" — was simply the fastest carrier in the game, free to run, with no condition on it |
+| `crops.json` `crops[].seedCost` | the handful you keep back to sow again | never charged, so every crop netted its gross. Grain read as 4 instead of 2, sunroot 5 instead of 1, and the whole crop table collapsed into "more yield is always better" |
+| `power.json` `machineStates` | the badge words a machine may hold | unread — **and the list had drifted while nobody was looking.** §3 invented `unworked` and the file was never told, so the badge a confused player is most likely staring at was not a declared state |
+| `resources.json` `rareSeam.weightPerUnit` **and `stack`** | how a rare element is carried | a rare element is deliberately not in `materials`, so both were looked up by key, missed, and took the 1.0 / 40 defaults. The stack was the bigger miss: 15 a trip against 40 is nearly three times the walking, which is the whole reason a rare seam is worth a store next to it |
+| `tools.json` `devices[].replaces` | the scanner ladder | unread, so the Tools and devices panel offered all three rungs side by side for the rest of the run: two strictly worse, both quoting full price, and the ✓ on the one you had outgrown reading as progress |
+
+Two notes on the fixes rather than the faults. `seedCost` is kept back **at harvest, on the plot**,
+not charged at replant — charging at replant means an empty store kills a field permanently, and a
+dead farm is a reload, not a lesson. And the drone **lands** when its grid goes dark and goes on
+when the power returns, rather than being lost: a full hold gone to a cloudy afternoon is also a
+reload. `grid.spareAt(x, z)` is the new question the trade layer needed, because a trade post is not
+on the grid, it is standing next to it.
+
+### The two bugs that only fixing the others could find
+
+**Every legendary mount and lantern in the game was short an affix, most of the time.** Writing the
+tool affix roller, I copied the loop `js/gear.js` has used since round 9: pick at random from the
+pool, `continue` on a duplicate. **`continue` does not retry — it spends the iteration.** A
+legendary wanting 3 of a 4-affix pool got 2 whenever it drew the same one twice, which is most of
+the time, and 1 sometimes. By an amount that depended on the seed. My version passed on its own and
+failed inside the full suite, which runs a different random sequence; both draw from what is left
+now, and the tests run 400 and 320 draws rather than one.
+
+**`spareAt` measured output where it wanted capacity.** `supplied` is `gen * duty`, and duty is how
+hard the generators are being asked to work — so a base with nothing switched on has a 30 kW
+generator idling at zero and `supplied - use` reported **0 spare**, which is the exact opposite of
+the truth. The same test then caught that a fuel-burning generator with no store wired into the grid
+honestly makes nothing, which is why it tests a wind turbine.
+
+### And one about tests
+
+`R19.D8` passed on its first run **while checking nothing at all**. It looked for
+`powerData.units`, which does not exist in that file, and took its own "this build states suppliers
+differently" early return. A test that skips itself reports green, which is worse than no test.
+Both of the bugs above were caught by tests rather than by reading the code, and both tests were
+written to move a knob to an unusual value and ask the running module what it now thinks — never to
+compare a data file against a constant, which is the check that would have passed against every
+single fault in this round.
+
+### Files
+
+`js/combat-feel.js` (`tuneFeel`, `COMBAT_FEEL`, `feel.stopLeft`), `js/weapons.js` (`tuneWeapons`),
+`js/actors.js`, `js/player.js` (five knobs read instead of restated), `js/craft.js` (the deref, so
+`stores` may arrive late), `js/tools.js` (affix rolling, `replaces`, the dead getter removed),
+`js/gear.js` (`SLOT_AFFIXES.tool`, and the draw-from-what-is-left fix), `js/affixes.js` (5 units),
+`js/effects.js` (4 registry defs), `js/station-ui.js` (superseded rows), `js/trade.js` (the drone),
+`js/power.js` (`spareAt`, `machineStates`), `js/civics.js`, `js/colony.js`, `js/farm.js`,
+`js/refine.js`, `js/resources.js`, `js/defence.js`, `js/main.js` (the two tuners, the bench's three
+joins, `powerAt`), `data/balance.json`, `data/colony.json`, `data/crops.json`, `data/power.json`,
+`data/tools.json`. Tests: `tests/balance-combat.test.js`, `tests/orphans-a.test.js`,
+`tests/orphans-b.test.js`, `tests/orphans-d.test.js`.

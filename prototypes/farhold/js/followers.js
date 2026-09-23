@@ -123,7 +123,26 @@ export function perTypeCapFor({ spellCount = 1, derived = null, rules = null } =
  * separate contracts and paying for each of them is its own limit.
  */
 export function admit({ defId, origin = 'summon', alive = [], limit = 3, perTypeCap = 1, name = null } = {}) {
-  const total = alive.length;
+  /**
+   * R18 — A CLASS'S OWN COMPANIONS DO NOT SPEND YOUR FOLLOWER SLOTS.
+   *
+   *   "Class companions do NOT count toward summon per-type caps. A druid's two starting grove
+   *    wolves are separate from `call_wolf`; the spell always works. The wolves came with you, the
+   *    spell is an extra."
+   *
+   * `alive` is every pet js/pets.js is holding, and it used to be counted whole. A druid STARTS
+   * with two `grove_wolf` (CLASS_PETS) and `call_wolf` summons a `grove_wolf` against a
+   * `perTypeCap` of 1 — so the spell was refused the moment the character existed, and a
+   * necromancer with three thralls got "You have 3 of 3 follower slots filled" instead. Every class
+   * summon spell in the game was unreachable, silently, AFTER js/skills.js had already spent the
+   * mana and started the 26-second cooldown, because `made.refused` is read by nobody.
+   *
+   * Companions are excluded from BOTH limits, not just the per-type one: a total that still counted
+   * them would refuse the spell just as flatly, which is the opposite of "the spell always works".
+   * Summons and hires go on competing for the slots you are given.
+   */
+  const spent = alive.filter(f => (f.origin || 'summon') !== 'companion');
+  const total = spent.length;
   if (total >= limit) {
     return {
       ok: false,
@@ -131,7 +150,7 @@ export function admit({ defId, origin = 'summon', alive = [], limit = 3, perType
     };
   }
   if (origin === 'summon') {
-    const same = alive.filter(f => f.defId === defId).length;
+    const same = spent.filter(f => f.defId === defId).length;
     if (same >= perTypeCap) {
       return {
         ok: false,

@@ -32,6 +32,17 @@
 import { mat } from '../../../shared/format.js';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { GEAR_BASES, createGearShop } from './gear.js';
+/**
+ * R18 — Farhold's own affix roller and weapon attuner.
+ *
+ * `rpg.loot.rollValue` is EMBERVEIL's: a flat roll between the affix's min and max, with no item
+ * level in it at all. `Rpg.itemLevels()` wraps `loot.pool` and `loot.generate` so drops are tiered,
+ * and it does NOT wrap `rollValue` — so every reroll on this bench threw the tier away. Measured on
+ * a level-45 rare (ilvl 47, mythic tier): `sturdy 16.3 -> 3.21`, `execute 0.92 -> 0.23`. The
+ * "cheap, safe way to fix a bad roll" was a guaranteed downgrade.
+ */
+import { rollAffixValue } from './affixes.js';
+import { attuneWeapon } from './rpg.js';
 
 /**
  * The materials bag. Separate from the item bag on purpose — the user asked for it, and it is
@@ -223,9 +234,44 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
   const byId = Object.fromEntries(recipes.map(r => [r.id, r]));
 
   /** Does this recipe apply to this item at all? */
+  /**
+   * R18 — DOES items.json KNOW WHAT THIS IS?
+   *
+   * A mount, a lantern, a quiver and a tool come out of `GEAR_BASES` in js/gear.js, deliberately —
+   * they are Farhold's own and items.json is shared with Emberveil. But `promote`, `addAffix`,
+   * `reroll`, `rerollAll` and `values` all go through Emberveil's loot module, which looks the base
+   * up by key and reads `base.type` unguarded. For a gear base that lookup is `undefined` and the
+   * recipe throws a TypeError.
+   *
+   * That mattered more than a crash usually does, because `apply` SPENDS THE MATERIALS at the top
+   * and `promote` raises the rarity on the line before it throws: clicking Promote on a magic
+   * lantern took 14 scrap and 9 essence, made it rare, and threw — and clicking again made it
+   * legendary, with no new property and no message, because js/main.js has no try/catch around it.
+   * js/hud.js puts every worn and carried item on the bench with no filter, so it was reachable
+   * with the first lamp a merchant sells.
+   *
+   * Asked here, in `applies`, the button is simply greyed with a reason and nothing is spent.
+   */
+  const NEEDS_LOOT_BASE = ['promote', 'addAffix', 'reroll', 'rerollAll', 'values'];
+  const hasLootBase = item => {
+    if (!item?.baseKey) return false;
+    try { return !!rpg.loot.base(item.baseKey); } catch { return false; }
+  };
+
+  /** Roll an affix the way a DROP of this item's level would — see the import note above. */
+  const rollFor = (item, def, rand) => rollAffixValue(def, item?.ilvl || item?.levelReq || 1, rand);
+
   function applies(recipe, item, player) {
     if (recipe.kind === 'create') return true;
     if (!item) return false;
+    if (NEEDS_LOOT_BASE.includes(recipe.kind) && !hasLootBase(item)) return false;
+    /**
+     * R18 — and Reinforce/Hone only mean something on a thing that HAS the number they raise.
+     * `intrinsic` recipes add armour, and `recipe.slot === 'armour'` only excluded weapons — so a
+     * ring, an amulet, a quiver, a lamp and a mount all passed, charged full price and did nothing.
+     * Reproduced at three clicks and ~96 scrap on a level-20 rare ring.
+     */
+    if (recipe.kind === 'intrinsic' && recipe.stat === 'armor' && !(item.armor > 0)) return false;
     if (item.isUnique && ['reroll', 'rerollAll', 'promote', 'values'].includes(recipe.kind)) return false;
     if (recipe.minRarity && rarityAt(item.rarity) < rarityAt(recipe.minRarity)) return false;
     if (recipe.slot === 'weapon' && item.type !== 'weapon') return false;
@@ -305,6 +351,10 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
 
   function whyNot(r, item, player) {
     if (!item) return 'pick an item first';
+    if (NEEDS_LOOT_BASE.includes(r.kind) && !hasLootBase(item)) {
+      return 'the bench cannot rework this kind of gear — mounts, lights, quivers and tools are upgraded at their own bench';
+    }
+    if (r.kind === 'intrinsic' && r.stat === 'armor' && !(item.armor > 0)) return 'this carries no armour to reinforce';
     if (item.isUnique) return 'a unique is what it is — it cannot be reworked';
     if (r.minRarity && rarityAt(item.rarity) < rarityAt(r.minRarity)) return `needs a ${r.minRarity} item or better`;
     if (r.slot === 'weapon') return 'weapons only';
@@ -334,6 +384,15 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       const made = GEAR_BASES[key]
         ? gearShop.make(key, rarity, level, rng)
         : rpg.loot.generate(key, rarity, rpg.qualityFor(level), { rng, level });
+      /**
+       * R18 — and a forged caster is ATTUNED, like everything else that makes a weapon.
+       *
+       * `rollDrop`, js/town.js's shop stock and js/classbuild.js's starter all call `attuneWeapon`;
+       * the forge did not, and `FORGE_POOLS.weapon` contains wand, scepter and staff. A crafted
+       * wand came out `ranged: false, castElement: undefined, element: physical`, with no bolt and
+       * the whole weapon-description block missing from its card — a melee club with a wand's name.
+       */
+      if (made && made.type === 'weapon') attuneWeapon(made);
       if (made) made.crafted = true;
       const lucky = rarity !== r.rarity;
       return {
@@ -378,7 +437,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       if (!pool.length) return { ok: false, why: 'there is nothing else this item could carry' };
       const pick = pool[Math.floor(rng() * pool.length)];
       const was = item.affixes[index];
-      item.affixes[index] = { ...pick, value: rpg.loot.rollValue(pick, rng), reworked: true };
+      item.affixes[index] = { ...pick, value: rollFor(item, pick, rng), reworked: true };
       item.reworks = (item.reworks || 0) + 1;
       rpg.loot.rename(item);
       return { ok: true, was, now: item.affixes[index], text: `${was.name || was.stat} → ${pick.name || pick.stat}.` };
@@ -393,7 +452,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
       for (let i = 0; i < want && pool.length; i++) {
         const pick = pool[Math.floor(rng() * pool.length)];
         if (fresh.some(f => f.id === pick.id)) { i--; continue; }
-        fresh.push({ ...pick, value: rpg.loot.rollValue(pick, rng), reworked: true });
+        fresh.push({ ...pick, value: rollFor(item, pick, rng), reworked: true });
       }
       item.affixes = [...fresh, ...keep];
       item.reworks = (item.reworks || 0) + 1;
@@ -404,7 +463,7 @@ export function createCrafting({ data, rpg, materials = new Materials(), rng = m
     if (r.kind === 'values') {
       for (const a of item.affixes || []) {
         if (a.baseIntrinsic || a.min == null || a.max == null) continue;
-        a.value = rpg.loot.rollValue(a, rng);
+        a.value = rollFor(item, a, rng);
       }
       return { ok: true, text: 'Rolled again.' };
     }

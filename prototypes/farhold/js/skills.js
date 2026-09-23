@@ -134,7 +134,7 @@ export function incomingFrom(unit) {
   return (1 + b.takeMore) * (1 - b.resist);
 }
 
-export function createSkillBar({ data, player, rpg, unlocks = null }) {
+export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = null }) {
   const unlockAt = unlocks || data.unlockAt || [1, 3, 7, 12, 18, 24];
   const slots = [];
 
@@ -222,6 +222,18 @@ export function createSkillBar({ data, player, rpg, unlocks = null }) {
     if (!unlocked(s)) return { ok: false, why: `${s.name} unlocks at level ${s.unlockAt}` };
     if (s.ready > 0) return { ok: false, why: `${s.name} is not ready (${s.ready.toFixed(1)}s)` };
     if (!bloodPrice() && costFor(s) > player.mp) return { ok: false, why: `Not enough mana for ${s.name}` };
+    /**
+     * R18 — A SUMMON YOU CANNOT HAVE IS NOT CASTABLE, so pressing the key costs nothing.
+     *
+     * `use()` below spends the mana and starts the cooldown BEFORE anything summons, and the
+     * summon's own refusal was dropped on the floor — so a player at their follower limit pressed
+     * the key, paid for it, waited out 26 seconds and never learned why. Asking here means the
+     * button simply says what is wrong, like every other reason a skill will not fire.
+     */
+    if (canSummon && s.shape === 'summon' && s.pet) {
+      const allowed = canSummon(s.pet, s);
+      if (allowed && allowed.ok === false) return { ok: false, why: allowed.why || `You cannot keep another ${s.name}.` };
+    }
     return { ok: true, skill: s };
   }
 

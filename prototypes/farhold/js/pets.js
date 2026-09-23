@@ -655,6 +655,14 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
     // R17 — the three the follower book needs: add a type at runtime, install the limit, let one go
     register, remove,
     setGate: fn => { gate = typeof fn === 'function' ? fn : null; },
+    /**
+     * R18 — ASK THE GATE WITHOUT WALKING THROUGH IT.
+     *
+     * The gate was only ever consulted inside `summon`, which runs after js/skills.js has already
+     * spent the mana and started the cooldown — so a refused summon cost you both and said nothing,
+     * because `made.refused` is read by nobody. This is the same question, asked early.
+     */
+    canAdmit: (defId, opts = {}) => admitted(defId, { origin: 'summon', ...opts }),
     setTerrain: t => { currentTerrain = t; },
     /** Point the companions at a different enemy field. Rarely needed: `live()` finds it anyway. */
     setField: f => { boundField = f; },

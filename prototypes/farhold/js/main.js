@@ -814,7 +814,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     .then(a => a.fxTextures(THREE, { size: 128 }))
     .then(t => spellfx.setTextures(t))
     .catch(() => { /* geometry only, which still reads fine */ });
-  const skills = createSkillBar({ data: skillData, player, rpg });
+  const skills = createSkillBar({
+    data: skillData, player, rpg,
+    /**
+     * R18 — so a summon you cannot keep costs nothing to press. `pets` is built further down, hence
+     * the lazy reach: this is only ever called from a key press, long after everything exists.
+     */
+    canSummon: (petId, s) => pets?.canAdmit?.(petId, { name: s?.name }) ?? { ok: true },
+  });
 
   // god rays, lens flare and the moment the star drops behind a ridge — screen space, over the
   // canvas. `terrain` is rebound when you land on a new world, so it is read through the binding.
@@ -1029,6 +1036,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (plan.kind === 'summon') {
       pets.summon(plan.pet, player, { count: plan.petCount, at: control }).then(made => {
         if (made.length) hud.log(`${made[0].name} answers.`, 'good');
+        // R18 — and if it was refused, SAY so. `made.refused` carries the reason and was dropped on
+        // the floor, which is why every class summon failed in silence. `check()` catches this case
+        // before the mana is spent now, so reaching here means something changed mid-cast.
+        else if (made.refused) hud.log(made.refused, 'bad');
       });
       spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
       sound.ui('click');

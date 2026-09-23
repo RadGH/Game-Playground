@@ -538,3 +538,80 @@ test('the light settings actually light a large area, as asked for', () => {
   assert.ok(balance.light.ambientNight > 0, 'a moonless night would be pure black');
   assert.ok(balance.light.maxLights >= 6, 'too few world lights to read a camp by');
 });
+
+// ================================================================= R18 — the bench
+
+/**
+ * THE BENCH USED TO CRASH ON HALF OF WHAT IT WAS OFFERED, AFTER TAKING PAYMENT.
+ *
+ * A mount, a lantern, a quiver and a tool come out of `GEAR_BASES` in js/gear.js — Farhold's own,
+ * deliberately not in the shared items.json. But `promote`, `addAffix`, `reroll`, `rerollAll` and
+ * `values` all go through Emberveil's loot module, which looks the base up by key and reads
+ * `base.type` unguarded, so a gear base threw a TypeError.
+ *
+ * `apply()` spends the materials at the top and `promote` raises the rarity on the line BEFORE the
+ * throw — so clicking Promote on a magic lantern took the materials, made it rare, and threw; and
+ * clicking again made it legendary, with no new property and no message, because js/main.js has no
+ * try/catch. js/hud.js puts every worn and carried item on the bench with no filter, so the first
+ * lamp a merchant sells could do it.
+ */
+test('R18 — the bench refuses gear it cannot rework, and charges nothing for the refusal', () => {
+  const { craft, mats } = bench();
+  /**
+   * Affordable, and the ids matter. The first version of this test funded it with `iron_scrap`,
+   * `bound_essence` and `resonant_dust` — the material NAMES, not the ids, which are `scrap`,
+   * `essence` and `dust`. So every quote came back "needs 14 Scrap Iron more" and the test passed
+   * against the broken code for the wrong reason: it never got far enough to reach the guard. A
+   * test that cannot afford the recipe is not testing the recipe.
+   */
+  mats.addAll({ scrap: 999, essence: 999, dust: 999 });
+  const before = { ...mats.held };
+
+  // a lantern: a real Farhold item, and one items.json has never heard of. `rare` so that `recast`,
+  // which wants a rare or better, is reached on its own merits rather than bounced on rarity.
+  const lamp = { name: 'Shuttered Lantern', baseKey: 'lantern', type: 'light', rarity: 'rare', affixes: [], ilvl: 20 };
+
+  for (const kind of ['promote', 'inscribe', 'recast', 'sharpen']) {
+    const q = craft.quote(kind, lamp, { player: { level: 30 } });
+    assert.equal(q.ok, false, `the bench offered "${kind}" on a lantern — that used to throw mid-recipe`);
+    assert.ok(q.why && q.why.length > 8, `"${kind}" was refused with no reason to show the player`);
+    // and doing it anyway changes nothing and costs nothing
+    const done = craft.apply(kind, lamp, { player: { level: 30 } });
+    assert.equal(done.ok, false, `"${kind}" went ahead on a lantern`);
+  }
+  assert.equal(lamp.rarity, 'rare', 'the lantern was promoted by a recipe that then refused');
+  assert.deepEqual(mats.held, before, 'a refused recipe still took the materials');
+});
+
+test('R18 — Reinforce is not offered on things that carry no armour', () => {
+  const { craft } = bench();
+  const ring = { name: 'Band', baseKey: 'ring', type: 'accessory', rarity: 'rare', affixes: [], armor: 0, ilvl: 20 };
+  const q = craft.quote('reinforce', ring, { player: { level: 30 } });
+  assert.equal(q.ok, false, 'Reinforce was offered on a ring, charged full price and did nothing');
+  assert.match(q.why, /armour/i);
+});
+
+/**
+ * `rpg.loot.rollValue` is EMBERVEIL's — a flat roll between min and max with no item level in it.
+ * `Rpg.itemLevels()` wraps `loot.pool` and `loot.generate` so DROPS are tiered, and does not wrap
+ * `rollValue`, so every reroll on this bench threw the tier away: the cheap, safe way to fix a bad
+ * roll was a guaranteed downgrade on anything above a low level.
+ */
+test('R18 — a reroll on a high-level item rolls at that level, not at level one', () => {
+  const { craft, r } = bench();
+  const hi = r.loot.generate('sword', 'rare', 'high', { level: 45 });
+  hi.ilvl = 47;
+  const rollable = (hi.affixes || []).find(a => a.min != null && a.max != null && !a.baseIntrinsic);
+  if (!rollable) return;                       // nothing rollable on this roll; nothing to say
+
+  // sharpen re-rolls every value in place; at ilvl 47 it must not collapse to the bare minimum
+  const was = rollable.value;
+  craft.apply('sharpen', hi, { player: { level: 45 } });
+  const now = (hi.affixes || []).find(a => a.id === rollable.id)?.value;
+  assert.ok(now != null, 'the affix vanished');
+  assert.ok(now >= rollable.min,
+    `a reroll produced ${now}, below the affix's own minimum of ${rollable.min}`);
+  // the real regression: an ilvl-47 reroll landing at the un-tiered floor every time
+  assert.ok(now > rollable.min * 0.9,
+    `a reroll at item level 47 produced ${now} against a floor of ${rollable.min} — the tier is being thrown away (was ${was})`);
+});

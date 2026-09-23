@@ -95,3 +95,64 @@ test('isPureHeal is total: it never throws and never guesses', () => {
   assert.equal(isPureHeal({ mult: 1.6 }), false);
   assert.equal(isPureHeal({ heal: 0, mult: 0 }), false, 'an ability that does nothing is not a heal');
 });
+
+// ================================================================= R18 — the summons nobody could cast
+
+/**
+ * "Class companions do NOT count toward summon per-type caps. A druid's two starting grove wolves
+ *  are separate from `call_wolf`; the spell always works." — the user's ruling.
+ *
+ * `admit` counted `alive` whole. A druid STARTS with two `grove_wolf` (CLASS_PETS) and `call_wolf`
+ * summons a `grove_wolf` against a per-type cap of 1, so the spell was refused from the moment the
+ * character existed; a necromancer with three thralls got "You have 3 of 3 follower slots filled".
+ * Every class summon spell in the game was unreachable — silently, and AFTER js/skills.js had spent
+ * the mana and started a 26-second cooldown, because `made.refused` was read by nobody.
+ */
+const { admit } = await import('../js/followers.js');
+const { CLASS_PETS } = await import('../js/pets.js');
+
+/** The party a class starts with, in the shape `admit` reads. */
+function startingCompanions(classId) {
+  const spec = CLASS_PETS[classId];
+  if (!spec) return [];
+  const out = [];
+  for (let i = 0; i < (spec.count || 1); i++) out.push({ defId: spec.id, origin: 'companion' });
+  for (let i = 0; i < (spec.extra?.count || 0); i++) out.push({ defId: spec.extra.id, origin: 'companion' });
+  return out;
+}
+
+test('every class that starts with companions can still cast its own summon', () => {
+  for (const [classId, spec] of Object.entries(CLASS_PETS)) {
+    const alive = startingCompanions(classId);
+    // the spell summons the SAME kind the class already has — the exact collision
+    const got = admit({ defId: spec.id, origin: 'summon', alive, limit: 3, perTypeCap: 1, name: spec.id });
+    assert.equal(got.ok, true,
+      `a ${classId} cannot cast its own summon with its starting companions out: "${got.why}"`);
+  }
+});
+
+test('companions do not fill the slots, but summons and hires still compete for them', () => {
+  // three companions do not block a summon, however many there are
+  const many = [
+    { defId: 'bone_thrall', origin: 'companion' },
+    { defId: 'bone_thrall', origin: 'companion' },
+    { defId: 'bone_archer', origin: 'companion' },
+  ];
+  assert.equal(admit({ defId: 'grove_wolf', alive: many, limit: 3, perTypeCap: 1 }).ok, true,
+    'class companions are still spending follower slots');
+
+  // …but the limit is real for everything that is not a companion
+  const hired = [
+    { defId: 'blade', origin: 'mercenary' },
+    { defId: 'bowman', origin: 'mercenary' },
+    { defId: 'grove_wolf', origin: 'summon' },
+  ];
+  const full = admit({ defId: 'hunting_cat', alive: hired, limit: 3, perTypeCap: 1 });
+  assert.equal(full.ok, false, 'three hires and summons did not fill three slots');
+  assert.match(full.why, /slots/i);
+
+  // and the per-type cap still bites on actual summons
+  const two = [{ defId: 'grove_wolf', origin: 'summon' }];
+  assert.equal(admit({ defId: 'grove_wolf', alive: two, limit: 3, perTypeCap: 1 }).ok, false,
+    'the per-type cap no longer limits repeat summons');
+});

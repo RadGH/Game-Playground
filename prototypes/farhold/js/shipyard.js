@@ -168,7 +168,17 @@ export function canBuildPart(player, id, bag, { stations = [] } = {}) {
   if (!sub) return { ok: false, why: 'No such subsystem.' };
   const next = partCost(player, id);
   if (!next) return { ok: false, why: `The ${sub.name} is already as good as it gets.` };
-  if (stations.length && !stations.includes(sub.station)) {
+  /**
+   * R18 — `station.grants.warpFitting`, which was written and read by nobody.
+   *
+   * Its own description: "fit the warp coil without a refinery on the ground". Every subsystem
+   * wants an assembler within reach, which is the right rule while you are building a ship on a
+   * planet — and the whole point of finishing the orbital yard is that you are no longer doing
+   * that. So a completed station lifts the ground requirement for the warp coil, and only for the
+   * warp coil, which is exactly what the grant names.
+   */
+  const freed = id === 'warp' && stationGrants(player).warpFitting;
+  if (!freed && stations.length && !stations.includes(sub.station)) {
     return { ok: false, why: `The ${sub.name} needs ${STATIONS[sub.station]?.name || sub.station}.` };
   }
   const purse = bagOf(bag);
@@ -395,7 +405,20 @@ export function canLaunch(player, { leg = 'launch', fromPad = true } = {}) {
     return { ok: false, why: 'You have no ship. Build one: hull, drive, tanks, avionics, then put them together on a pad.' };
   }
   const y = yard(player);
-  if (leg === 'launch' && fromPad && !y.pad) return { ok: false, why: 'A ship lifts off a pad. You have not built one.' };
+  /**
+   * R18 — `station.grants.returnPad`, which was written and read by nobody.
+   *
+   * Its own description: "return to it from anywhere in the system". A launch normally wants the
+   * pad you built, which is the right rule right up until you own an orbital yard — at which point
+   * the yard IS the pad you are returning to, and being pinned to a patch of ground you happen to
+   * have levelled is exactly what finishing the top of the tech tree should buy off.
+   *
+   * The fuel check below still applies, so this frees you from the GROUND, not from the flight.
+   */
+  const anywhere = stationGrants(player).returnPad;
+  if (leg === 'launch' && fromPad && !y.pad && !anywhere) {
+    return { ok: false, why: 'A ship lifts off a pad. You have not built one.' };
+  }
   if (leg === 'warp' && !(y.built.warp > 0)) return { ok: false, why: 'Leaving the star needs a warp coil.' };
   const need = fuelFor(kind, leg) + (leg === 'launch' ? fuelFor(kind, 'land') * FUEL.reserve : 0);
   if (y.fuel < need) {

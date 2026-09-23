@@ -561,3 +561,55 @@ test('R18 — a finished yard fills the tanks in orbit, with nothing in your bag
   const no = refuel(bare, empty);
   assert.equal(no.ok, false, 'an empty bag and no station still filled the tanks');
 });
+
+/**
+ * R18 — AND THE OTHER TWO GRANTS REACH A REAL GATE.
+ *
+ * I first wrote these off as "the call sites do not exist", which is a reason to make them, not to
+ * skip them. Both grants name exactly what they free, and both had an obvious gate already:
+ *   `warpFitting` — "fit the warp coil without a refinery on the ground": every subsystem demands an
+ *                   assembler within reach, which is the right rule right up until you own an
+ *                   orbital yard, which is the point at which you are no longer building on a planet.
+ *   `returnPad`   — "return to it from anywhere in the system": a launch wants the pad you built,
+ *                   and the yard IS the pad you are returning to.
+ */
+test('R18 — a finished yard fits the warp coil with no assembler on the ground', () => {
+  const done = { vehicles: { owned: {}, shipyard: { station: {} } } };
+  for (const m of STATION.modules) done.vehicles.shipyard.station[m.id] = true;
+  const rich = { count: () => 9999, missing: () => ({}), spend: () => true };
+
+  // no station within reach at all
+  const warp = canBuildPart(done, 'warp', rich, { stations: ['furnace'] });
+  assert.ok(!/needs .*[Aa]ssembler/.test(warp.why || ''),
+    'a completed orbital yard still demands a ground assembler for the warp coil');
+
+  // …and the rule still holds for everything else, which is what makes it a grant and not a hole
+  const hull = canBuildPart({ vehicles: { owned: {} } }, 'hull', rich, { stations: ['furnace'] });
+  assert.match(hull.why || '', /[Aa]ssembler/, 'the ground rule is gone for every subsystem, not just the coil');
+});
+
+/**
+ * NOTE THE `gate: GATE_VERSION` IN THESE FIXTURES. Without it `yard()` sees a yard with no version
+ * stamp, treats it as a save written before the gate existed, and MIGRATES it — which hands out a
+ * pad and starter fuel. The first version of this test read `ok: true` on empty tanks and looked
+ * like a broken fuel check; the fuel check was fine and the fixture was a pre-gate save.
+ */
+test('R18 — a finished yard lets you lift off without a pad, but not without fuel', () => {
+  const done = { vehicles: { owned: { ship: ['runner'] }, active: { ship: 'runner' }, shipyard: { gate: GATE_VERSION, station: {}, pad: false, fuel: 0 } } };
+  for (const m of STATION.modules) done.vehicles.shipyard.station[m.id] = true;
+
+  const dry = canLaunch(done, { leg: 'launch' });
+  assert.equal(dry.ok, false, 'it launched with empty tanks');
+  assert.ok(!/pad/i.test(dry.why || ''),
+    'a completed station still refuses for want of a ground pad — that is what returnPad buys off');
+
+  // with fuel in the tanks it goes, pad or no pad
+  done.vehicles.shipyard.fuel = 9999;
+  assert.equal(canLaunch(done, { leg: 'launch' }).ok, true, `a fuelled ship would not lift: ${canLaunch(done).why}`);
+
+  // and without the station, no pad is still no launch
+  const bare = { vehicles: { owned: { ship: ['runner'] }, active: { ship: 'runner' }, shipyard: { gate: GATE_VERSION, station: {}, pad: false, fuel: 9999 } } };
+  const no = canLaunch(bare, { leg: 'launch' });
+  assert.equal(no.ok, false, 'no pad and no station still launched');
+  assert.match(no.why || '', /pad/i);
+});

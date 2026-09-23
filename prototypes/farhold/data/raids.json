@@ -246,5 +246,9 @@
     "citizensLeave": 1,
     "repairCap": 0.75
   },
-  "_r18Loss": "R18 — `repairCap` is the most the repair stations can undo of a lost raid's breakage. A base that can never be hurt is not worth defending, so they stack towards a floor rather than to nothing. Read by `loseRaid` in js/raid.js."
+  "_r18Loss": "R18 — `repairCap` is the most the repair stations can undo of a lost raid's breakage. A base that can never be hurt is not worth defending, so they stack towards a floor rather than to nothing. Read by `loseRaid` in js/raid.js.",
+  "shield": {
+    "cap": 180
+  },
+  "_r18Shield": "R18 — the most barrier ONE stand of shield pylons will hold up for the player at once. The pylon's own `absorb` (4000) is the CHARGE it can spend over a fight; this is the ceiling on how much of it can be standing at any moment, so a single pylon cannot hand a low-level character four thousand points of shield. Read by js/defence.js `shieldAt`."
 }

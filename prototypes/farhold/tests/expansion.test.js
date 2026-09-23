@@ -601,3 +601,39 @@ test('R18 — no incident declares an effect the merge silently drops', () => {
     'these incident effects are written in the data and read by nobody — add each to NO_EFFECT and '
     + 'to the matching list in `effects()`:\n  ' + orphans.join('\n  '));
 });
+
+/**
+ * R18 — THE FACTION REWARDS FILE SAYS WHICH OF ITSELF IS REAL.
+ *
+ * `js/main.js` `earnedRewards()` flattens every earned rank's `effect` into one map, and exactly
+ * two keys are ever read out of it: `freeTolls` and `rationPrice`. The other twenty are designed
+ * and not built — the dispatcher was written, the consumers were not — so every faction but two
+ * pays a rank-up reward that is a line of text. The round-10 review had already flagged this file
+ * as "parsed at boot and read by nothing".
+ *
+ * The user's decision was to park the twenty rather than build twenty effects in one pass. Parking
+ * is only honest if it is visible, so the file now carries `built` and `notBuiltYet` — and this
+ * test is what stops those lists rotting: a key that is neither read nor parked fails, and a parked
+ * key that no longer exists in the data fails too. Implement one, move it across, and the test says
+ * so if you forget.
+ */
+test('R18 — every faction reward effect is either built or openly parked', () => {
+  const rewards = read('../data/faction-rewards.json');
+  const declared = new Set();
+  for (const rows of Object.values(rewards.rewards || {})) {
+    for (const r of rows) for (const k of Object.keys(r.effect || {})) declared.add(k);
+  }
+  const built = new Set(rewards.built || []);
+  const parked = new Set(rewards.notBuiltYet || []);
+
+  const unaccounted = [...declared].filter(k => !built.has(k) && !parked.has(k));
+  assert.deepEqual(unaccounted, [],
+    'these reward effects are in the data and in neither list — add them to `built` once something '
+    + 'reads them, or to `notBuiltYet` so the file stops implying they work:\n  ' + unaccounted.join('\n  '));
+
+  const stale = [...built, ...parked].filter(k => !declared.has(k));
+  assert.deepEqual(stale, [], 'these are listed but no reward grants them any more: ' + stale.join(', '));
+
+  // and the two that ARE built have to stay built, or the file quietly becomes all promise
+  assert.ok(built.size >= 2, `only ${built.size} faction reward effects are implemented`);
+});

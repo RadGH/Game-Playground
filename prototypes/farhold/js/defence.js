@@ -83,6 +83,8 @@ export function createDefence({
   let quest = null;
   /** turret entry id -> seconds until it may fire again. */
   const cooldowns = new Map();
+  /** R18 — how much charge each shield pylon has spent this raid. See `shieldAt`. */
+  const shieldSpent = new Map();
   /** How many raiders are on the field, so a wave knows when it is done. */
   let onField = [];
 
@@ -212,6 +214,7 @@ export function createDefence({
      * it, at the hour you picked.
      */
     ring({ hour = 12, at = 0, level = 1 } = {}) {
+      shieldSpent.clear();                       // R18 — a fight starts with the pylons charged
       const out = beginRaid(quest, { at, hour, data });
       if (!out.ok) { say(out.why, 'bad'); return out; }
       say(quest.night
@@ -340,6 +343,9 @@ export function createDefence({
       if (!canFire(quest)) return null;
       const out = onRaiderKilled(quest);
       if (out?.raidDone) {
+        // R18 — the fight is over, so the pylons charge back up. Without a caller this ledger would
+        // only ever grow, which is the same "written and never read" fault from the other side.
+        shieldSpent.clear();
         const prize = raidRewards(quest, { rng, data });
         say(`The last of them is down. ${prize.crate ? `They left a ${prize.crate} crate.` : ''}`, 'level');
         return { ...out, prize };
@@ -427,6 +433,57 @@ export function createDefence({
         if (onHit) onHit(best, gun, e);
       }
     },
+
+    /**
+     * R18 — THE SHIELD PYLON, WHICH COST 30 kW TO DO NOTHING.
+     *
+     * `shield: { radius: 26, absorb: 4000 }` was read by nobody, so the piece drew live power, made
+     * the raid bigger and absorbed not one point of anything.
+     *
+     * I first wrote this one off as impossible: `absorb` reads as a pool protecting the BASE, and
+     * Farhold has no per-structure health for it to protect — a lost raid breaks an abstract
+     * fraction. That was too quick. The game has `barrier` already: a real pool, spent before health
+     * and regenerating toward a cap. A pylon that shields whoever is standing under it is the plain
+     * reading of the name, and it needs no new damage model at all.
+     *
+     * The pool is honest rather than decorative: the pylon holds `absorb` and pays for the barrier
+     * it keeps up, so it runs down over a long fight and refills between raids. `cap` keeps one
+     * pylon from handing a level-3 character four thousand points of shield — it is a data knob, so
+     * the balance of it is not buried in here.
+     */
+    shieldAt(x, z) {
+      const build = getBuild();
+      let pool = 0;
+      for (const e of build?.entries || []) {
+        const def = build.defOf?.(e.key);
+        if (!def?.shield || e.powered === false) continue;
+        if (Math.hypot(e.x - x, e.z - z) > (def.shield.radius ?? 26)) continue;
+        const spent = shieldSpent.get(e.id) || 0;
+        pool += Math.max(0, (def.shield.absorb ?? 0) - spent);
+      }
+      return Math.min(pool, data?.shield?.cap ?? 180);
+    },
+
+    /** Take `n` points out of the nearest charged pylon. Returns what it actually had. */
+    spendShield(x, z, n) {
+      if (!(n > 0)) return 0;
+      const build = getBuild();
+      let left = n;
+      for (const e of build?.entries || []) {
+        if (left <= 0) break;
+        const def = build.defOf?.(e.key);
+        if (!def?.shield || e.powered === false) continue;
+        if (Math.hypot(e.x - x, e.z - z) > (def.shield.radius ?? 26)) continue;
+        const spent = shieldSpent.get(e.id) || 0;
+        const have = Math.max(0, (def.shield.absorb ?? 0) - spent);
+        const take = Math.min(have, left);
+        if (take > 0) { shieldSpent.set(e.id, spent + take); left -= take; }
+      }
+      return n - left;
+    },
+
+    /** Between raids the pylons charge back up — §7's "a drill costs you nothing" rule. */
+    rechargeShields() { shieldSpent.clear(); },
 
     /** The base fell. §7.11: broken structures and a lighter store, never a deleted base. */
     lost({ materials = 0 } = {}) { return loseRaid(quest, { base: baseOf(), materials, data }); },

@@ -8086,10 +8086,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * player could be hit by anything. A cast barrier is tracked separately and ticks down on its
        * own clock; the gear's pool refills underneath it as it always did.
        */
-      const maxBarrier = player.derived.barrier || 0;
+      /**
+       * R18 — …and a Shield Pylon you are standing under adds to that pool.
+       *
+       * The pylon holds a charge and PAYS for the barrier it keeps up (js/defence.js `spendShield`),
+       * so it runs down over a long fight and recharges between raids. That is what makes it worth
+       * its 30 kW rather than a free permanent buff.
+       */
+      const fromPylon = defence.shieldAt?.(control.x, control.z) || 0;
+      const maxBarrier = (player.derived.barrier || 0) + fromPylon;
       if (maxBarrier > 0) {
         const rate = (player.derived.barrierRegen || 0) + (fighting ? 0 : maxBarrier * 0.08);
-        player.barrier = Math.min(maxBarrier, Math.max(player.barrier || 0, 0) + rate);
+        const was = Math.max(player.barrier || 0, 0);
+        player.barrier = Math.min(maxBarrier, was + rate);
+        // whatever of that rise the gear could not have paid for, the pylon just did
+        const overGear = Math.max(0, player.barrier - (player.derived.barrier || 0));
+        const grew = Math.max(0, player.barrier - was);
+        if (grew > 0 && overGear > 0) defence.spendShield?.(control.x, control.z, Math.min(grew, overGear));
       } else if ((player.castBarrierFor || 0) <= 0) {
         player.barrier = 0;
       }

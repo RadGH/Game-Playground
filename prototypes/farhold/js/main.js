@@ -800,6 +800,25 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * how a field learns the terrain, and it is what props and features both use.
    */
   const buildSolids = new ObstacleField().setGround((x, z) => terrain.heightAt(x, z));
+  /**
+   * R18 — AND GATES AND SET PIECES GET THEIR OWN FIELDS FOR THE SAME REASON.
+   *
+   * All three of these used to file into `features.solids`, and `features.buildInstances` calls
+   * `solids.clear()` on every world rebuild — so a rebuild wiped the dungeon-mouth jamb posts and
+   * every bandit camp's palisades, towers and huts. Each of the three re-files on its OWN movement
+   * threshold (features 260 m, gates 200 m, sites 180 m) and the frame order is gates, sites, then
+   * features, so features erased what the other two had just filed and they did not come back until
+   * their own thresholds were crossed: a window roughly 260-400 m into any straight walk where a
+   * camp's walls and a dungeon's doorposts were not solid, repeating for as long as you kept walking.
+   *
+   * My first fix for this was to force `gates.update`/`sites.update` whenever features rebuilt, and
+   * `prisoners.spec.js` caught it: a forced `sites.update` does far more than re-file colliders — it
+   * re-runs the whole layout and ticks the wave clock, so it ran twice a frame and the nearest
+   * person at a stronghold stopped being a prisoner. Separate fields are the actual fix: nobody
+   * clears anybody else's, and neither module has to be called more often than it wants.
+   */
+  const gateSolids = new ObstacleField().setGround((x, z) => terrain.heightAt(x, z));
+  const siteSolids = new ObstacleField().setGround((x, z) => terrain.heightAt(x, z));
   /** Flat, walk-on or decorative pieces: a rug is not a wall. */
   const NO_COLLIDE = new Set(['road', 'lane', 'rug', 'flower_bed', 'moss_carpet', 'nameplate', 'bedroll']);
   function rebuildBuildSolids() {
@@ -824,7 +843,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    */
 
   control = createController(terrain, balance, camera, {
-    obstacles: [props.solids, features.solids, buildSolids], settings,
+    obstacles: [props.solids, features.solids, buildSolids, gateSolids, siteSolids], settings,
     // which boat goes under you when you start swimming — read live, so buying one mid-run counts
     boat: () => vehicleFor(player, 'boat'),
     // …and everything the player is wearing, riding and has spent a perk on. Without this the legs
@@ -2060,7 +2079,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   let field = makeField();
   // whatever stops the player stops an enemy too
-  field.solids = [props.solids, features.solids, buildSolids];
+  field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
 
   // ---------------------------------------------------------------- companions
   const pets = createPets({
@@ -2103,7 +2122,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
    * gain, so `openMouths` is the one line that joins them, called right after `sites` exists and
    * again whenever the world is rebuilt.
    */
-  let gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: features.solids });
+  let gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
   /**
    * R16 — SOMEBODY TELLS YOU WHERE A PLACE IS.
    *
@@ -2151,7 +2170,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (!extra.length) return;
     gates.dispose();
     gates = createGates(scene, terrain, {
-      balance, zones, radius: balance.features?.radius ?? 2600, collide: features.solids, extra,
+      balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids, extra,
     });
     gates.update?.(control.x, control.z, true);
   }
@@ -2189,7 +2208,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   });
 
   // camps with a fire in them, and the lairs the world bosses keep
-  let sites = createSites(scene, terrain, { seed, balance, zones, collide: features.solids, radius: balance.features?.radius ?? 2600 });
+  let sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
   /**
    * A set piece near a stronghold is that stronghold's people.
    *
@@ -3974,14 +3993,40 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const held = filled?.prisoners || 0;
     if (held > 0) {
       site.heldFolk = [];
+      /**
+       * R18 — SOMEWHERE YOU CAN ACTUALLY REACH THEM.
+       *
+       * This put prisoners on a 3.4 m ring around the site centre, which is exactly where a
+       * stronghold's central buildings stand — so a prisoner was inside a solid. Nobody noticed
+       * while set-piece colliders were being wiped by every world rebuild (you could walk through
+       * the cage); the moment sites kept their colliders, `prisoners.spec.js` failed with the
+       * player shoved 7.85 m away and `folk.nearest` finding nobody at all.
+       *
+       * The spec's own title is the requirement — "a prisoner is a person you can walk up to, not
+       * a number" — so the answer is to place them where that is true, not to relax the check.
+       * Walks out from the ring until the ground is clear of everything the player collides with,
+       * and falls back to the original spot rather than refusing to place anybody.
+       */
+      const clearOf = (x, z) => !(control.obstacles || []).some(o => o.blocked?.(x, z, 0.6));
+      const spotFor = (i, n) => {
+        const base = (i / n) * Math.PI * 2;
+        for (let r = 3.4; r <= 14; r += 1.6) {
+          for (let k = 0; k < 8; k++) {
+            const a = base + (k / 8) * Math.PI * 2;
+            const x = site.x + Math.cos(a) * r, z = site.z + Math.sin(a) * r;
+            if (clearOf(x, z)) return { x, z };
+          }
+        }
+        return { x: site.x + Math.cos(base) * 3.4, z: site.z + Math.sin(base) * 3.4 };
+      };
       for (let i = 0; i < held; i++) {
-        const a = (i / held) * Math.PI * 2;
+        const at = spotFor(i, held);
         const who = await folk.spawnOne({
           groupId: `prisoner:${site.id}`,
           role: 'villager',
           roleName: 'prisoner',
-          x: site.x + Math.cos(a) * 3.4,
-          z: site.z + Math.sin(a) * 3.4,
+          x: at.x,
+          z: at.z,
           greeting: 'Keep your voice down. Kill the one in charge and we can all walk out of here.',
           seed,
         });
@@ -4323,13 +4368,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     dungeon.dispose();
     dungeon = null;
     field.terrain = terrain;
-    field.solids = [props.solids, features.solids, buildSolids];
+    field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
     field.rankBonus = 1;
     field.paused = false;
     pets.setTerrain(terrain);
     chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
     control.setTerrain(terrain, surfaceSpot ? { ...surfaceSpot, y: null } : null);
-    control.obstacles = [props.solids, features.solids, buildSolids];
+    control.obstacles = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
     surfaceVisible(true);
     rebuildWorldAround(true);
     hud.log('Daylight, or what passes for it.', 'good');
@@ -5578,12 +5623,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     });
 
     control = createController(terrain, balance, camera, {
-      obstacles: [props.solids, features.solids, buildSolids], settings,
+      obstacles: [props.solids, features.solids, buildSolids, gateSolids, siteSolids], settings,
       boat: () => vehicleFor(player, 'boat'),
       derived: () => player.derived,
     });
     field = makeField();
-    field.solids = [props.solids, features.solids, buildSolids];
+    field.solids = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
     encounters = createEncounters({
       field, zones, terrain, balance, data: encounterData,
       // R14: the same router as the first one, or landing on a second world would un-throttle the
@@ -5598,9 +5643,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     chests.clear();
     chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
     gates.dispose();
-    gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: features.solids });
+    gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
     sites.dispose();
-    sites = createSites(scene, terrain, { seed, balance, zones, collide: features.solids, radius: balance.features?.radius ?? 2600 });
+    sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
     openMouths();
     folk = makeFolk();
     hud.setTerrain(terrain);
@@ -6305,27 +6350,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const x = at ? at.x : control.x, z = at ? at.z : control.z;
     view.update(x, z, force);
     props.update(x, z, force);
-    /**
-     * R18 — AND WHOEVER ELSE FILED SOLIDS INTO THAT FIELD HAS TO FILE THEM AGAIN.
-     *
-     * `features.solids` is shared: main.js hands it to `createGates` and `createSites` as well.
-     * `features.buildInstances` calls `solids.clear()` on every rebuild, so a rebuild wipes the
-     * dungeon-mouth jamb posts and every set piece's palisades, towers and huts — and each of the
-     * three re-files on its OWN movement threshold (features 260 m, gates 200 m, sites 180 m).
-     * The frame order is gates, then sites, then this, so on the frame features rebuilds it erases
-     * what the other two just put in, and they do not come back until their own thresholds are
-     * crossed. Walking in a straight line that leaves a window between roughly 260 m and 400 m
-     * where a bandit camp's walls and a dungeon's doorposts are not solid — repeating for as long
-     * as you keep walking.
-     *
-     * `features.update` returns true only when it actually rebuilt, so this costs nothing on the
-     * frames it did not.
-     */
-    const rebuilt = features.update(x, z, force);
-    if (rebuilt) {
-      gates?.update?.(x, z, true);
-      sites?.update?.(x, z, true);
-    }
+    features.update(x, z, force);
   }
 
   $('hud-planet').textContent = describePlanet(planet, star);

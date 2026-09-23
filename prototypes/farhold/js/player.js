@@ -117,6 +117,16 @@ export function createController(terrainIn, balance = {}, camera, {
     vy: 0, yaw: 0, pitch: -0.18, grounded: true,
     camDistance: 7.5, camDistanceUsed: 7.5, moving: 0, running: false,
     /**
+     * R18 — THE GALLOP, so `cond_mountStamina` means something.
+     *
+     * "+N seconds of gallop before it has to drop back to a walk" was the affix's own sentence and
+     * there was no gallop: `mountStamina` landed in `derived` and nothing read it. Rather than
+     * re-label the affix, here is the mechanic it describes. `gallopLeft` is seconds of hard riding
+     * left; it drains while you hold run on a mount and recovers when you do not, so a long chase
+     * is a decision and a Long-winded saddle is worth finding.
+     */
+    gallopLeft: 0, galloping: false,
+    /**
      * R14 — FREE LOOK, so you can stand still and look at your own character's face.
      *
      *   "Allow holding V in walk mode to cause the camera to change to rotation mode, where mouse
@@ -371,6 +381,25 @@ export function createController(terrainIn, balance = {}, camera, {
         speed = base * (input.run ? (b.runMultiplier ?? 2.1) : 1);
         // the mount you actually bought: gear.js gives the pony 1.9, the courser 2.5, the elk 2.1
         if (self.mounted) speed *= sheet().mountSpeed || (b.mountSpeed ?? 2.1);
+        /**
+         * …and the gallop on top of it — see `gallopLeft` above. A mount asked to run flat out goes
+         * `gallopBonus` faster until its wind runs out, then drops back to a canter; the seconds it
+         * has are `gallopSeconds` plus whatever `cond_mountStamina` adds.
+         */
+        if (self.mounted) {
+          const total = (b.gallopSeconds ?? 4) + (sheet().mountStamina || 0);
+          if (input.run && self.gallopLeft > 0) {
+            self.galloping = true;
+            self.gallopLeft = Math.max(0, self.gallopLeft - dt);
+            speed *= b.gallopBonus ?? 1.35;
+          } else {
+            self.galloping = false;
+            // it gets its wind back at a third of the rate it spends it, up to its own total
+            self.gallopLeft = Math.min(total, self.gallopLeft + dt * ((b.gallopRecover ?? 0.34)));
+          }
+        } else {
+          self.galloping = false;
+        }
         const steep = terrain.slopeAt(self.x, self.z, 2);
         /**
          * A GROUND VEHICLE IS NOT A FASTER HORSE.

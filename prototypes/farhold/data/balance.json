@@ -76,7 +76,11 @@
       "channelMana": 4,
       "breakAtShareOfHealth": 0.25,
       "moveWhileChannelling": 0.6
-    }
+    },
+    "gallopSeconds": 4,
+    "gallopBonus": 1.35,
+    "gallopRecover": 0.34,
+    "mountThrowChance": 0.28
   },
   "progression": {
     "attrPerLevel": 3,
@@ -580,5 +584,6 @@
     "hoverFloor": 12,
     "hoverPush": 16,
     "_doc": "Flying the ship inside the atmosphere. W and S are the throttle and the mouse steers, so the nose is where you are looking and the ship goes where the nose points. `liftMax` is how much of the ship's weight the wing carries at `liftSpeedFull`: at or above 1 the ship holds its altitude in level flight, which is what lets you cross a continent with one hand. `hoverFloor` is a soft floor over the terrain so looking at the scenery does not fly you into it - you can still dive into a hill deliberately. `ceiling` is where the air ends and js/space.js takes over."
-  }
+  },
+  "_r18Mount": "R18 — the gallop and the throw. Three mount affixes (`cond_mountStamina`, `cond_mountTrample`, `cond_mountCalm`) landed in derived fields nothing read, because the mechanics they describe did not exist. These are those mechanics' knobs: `gallopSeconds` is how long a mount can run flat out before dropping back (extended by mountStamina), `gallopBonus` how much faster that is, `gallopRecover` how fast it gets its wind back, and `mountThrowChance` the chance a hit while riding throws you (reduced by mountCalm)."
 }

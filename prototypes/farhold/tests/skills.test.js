@@ -6,6 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { inertTalents } from '../js/skilltalents.js';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf } from '../js/skills.js';
@@ -176,4 +177,36 @@ test('the bar reports what the HUD needs to draw', () => {
   skills.use(0);
   assert.equal(skills.state()[0].usable, false);
   assert.ok(skills.state()[0].ready > 0);
+});
+
+/**
+ * R18 — THE AUDIT THIS FILE ALREADY HAD, GIVEN A CALLER.
+ *
+ * js/skilltalents.js exports `inertTalents()`, which walks every talent and reports the `mod` keys
+ * nothing implements. It had ZERO callers — an audit written to catch exactly this project's
+ * signature fault, itself never run, which is that fault wearing its own uniform. And it was stale:
+ * `barrier`/`barrierSeconds` sat on its pending list from round 7 until R18 finally granted a
+ * barrier off a cast, so Bulwark spent a talent point and did nothing for eleven rounds.
+ *
+ * This is the caller. The list is allowed to be non-empty — a talent may honestly be waiting on a
+ * mechanic — but it has to be DECLARED, so a new inert talent fails and a fixed one has to be taken
+ * off `PENDING_MODS` deliberately.
+ */
+test('R18 — no talent is inert except the ones this test names', () => {
+  const inert = inertTalents();
+  /**
+   * Known to be waiting on a mechanic, with the reason. Anything else is a talent that takes a
+   * point and gives nothing, which is the bug.
+   */
+  const ALLOWED = new Set([
+    // `seeking` wants `homing`, and a projectile in this game cannot steer: js/combat-fx.js fires a
+    // bolt along a fixed ray. That is a real mechanic to build, not a join to make, and it is the
+    // only talent on this list — the other five were all working already and the audit was stale
+    // about every one of them.
+    'seeking',
+  ]);
+  const surprises = inert.filter(t => !ALLOWED.has(t.id));
+  assert.deepEqual(surprises.map(t => `${t.id} (${t.missing.join(', ')})`), [],
+    'these talents grant fields nothing reads — implement them, or add the id to ALLOWED with a '
+    + 'reason:\n  ' + surprises.map(t => `${t.id}: ${t.missing.join(', ')}`).join('\n  '));
 });

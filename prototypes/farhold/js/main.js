@@ -1102,6 +1102,23 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     };
     const strikeOpts = { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: statusHook };
 
+    /**
+     * R18 — BULWARK. `plan.barrier` was written by js/skilltalents.js and read by nobody, while
+     * `player.castBarrierFor` was READ twice in the frame loop and written nowhere — the two halves
+     * of one feature, neither of them joined. js/skilltalents.js's own audit table even names this:
+     * "barrier: js/main.js castSkill — nothing grants a barrier off a cast".
+     *
+     * So taking Bulwark on a shielding skill spent the point and granted nothing. The barrier is a
+     * share of the cast's own damage, which is what the talent's description promises, and it ticks
+     * down on its own clock that the frame loop was already watching for.
+     */
+    if (plan.barrier > 0) {
+      const gained = Math.max(1, Math.round((plan.damage || 0) * plan.barrier));
+      player.barrier = Math.max(player.barrier || 0, gained);
+      player.castBarrierFor = plan.barrierSeconds || 6;
+      hud.log(`A barrier worth ${gained} holds for ${Math.round(player.castBarrierFor)}s.`, 'good');
+    }
+
     // every "when you cast" affix and legendary gets its turn first
     if (!echo) {
       const cast = rpg.fx.onCast({ self: player, skill: plan.skill, applyStatus: statusHook });
@@ -6610,6 +6627,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   /** The world moving while you are in it. Cheap enough to run twice a second. */
   let lastPhase = null;
+  /** R18 — twice a second at most, so a canter is not sixty hits. See the trample block. */
+  let trampleIn = 0;
   function tickTerritory(seconds) {
     applyIncidents();
     payBoardJobs();
@@ -8042,6 +8061,22 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
         if (result.dodged) { hud.log(`You dodge ${e.name}.`); return; }
         hud.log(`${e.name} hits you for ${result.amount}${result.absorbed ? ` (${result.absorbed} on the barrier)` : ''}.`, 'bad');
+        /**
+         * R18 — AND IT MIGHT PUT YOU ON THE GROUND, so `cond_mountCalm` means something.
+         *
+         * "N% less likely to throw you when something charges it" was the affix's own sentence and
+         * there was nothing that could throw you: `mountCalm` landed in `derived` and nothing read
+         * it. So here is the mechanic — a hit taken while riding can dismount you — which is also
+         * what makes fighting from the saddle a choice rather than a free speed bonus.
+         */
+        if (control.mounted) {
+          const calm = Math.max(0, Math.min(0.9, player.derived.mountCalm || 0));
+          if (field.rng() < (balance.player?.mountThrowChance ?? 0.28) * (1 - calm)) {
+            control.mounted = false;
+            if (horse) horse.group.visible = false;
+            hud.log('It throws you.', 'bad');
+          }
+        }
         hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), result.amount, 'taken', camera);
         if (result.saved) hud.log('Something would not let you die.', 'level');
         if (result.reflected) hud.log(`Thorns bite back for ${result.reflected}.`, 'good');
@@ -8570,6 +8605,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         });
       },
     });
+
+    /**
+     * R18 — TRAMPLE, so `cond_mountTrample` means something.
+     *
+     * "Things you ride through take N damage" was the affix's own sentence and nothing read
+     * `derived.trample`. It needs no new state: you are mounted, you are moving, and anything inside
+     * the horse's shoulders takes a share of it. Gated on actually MOVING and on the gallop, so
+     * standing still in a crowd is not a free damage aura — trampling is something you do by
+     * riding at something.
+     */
+    if (control.mounted && !dungeon && (player.derived.trample || 0) > 0 && control.moving > 2) {
+      trampleIn -= dt;
+      if (trampleIn <= 0) {
+        trampleIn = 0.5;
+        const share = (player.derived.trample || 0) / Math.max(1, player.derived.damage?.[1] || 10);
+        field.strikeArea(control.x, control.z, 1.8, player, { power: share, falloff: 0.2 });
+      }
+    }
 
     // …and the rocks on the ground. It does its own "has anything changed" check.
     if (state.frames % 10 === 0) {

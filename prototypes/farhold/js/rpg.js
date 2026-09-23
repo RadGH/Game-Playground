@@ -614,6 +614,39 @@ export class Rpg {
       }
       return item;
     };
+
+    /**
+     * R18 — AND THE TWO PATHS THAT WENT ROUND IT.
+     *
+     * `itemLevels` wrapped `pool` and `generate`, and `rollDrop` calls `generateUnique` and
+     * `maybeSetItem` DIRECTLY — so a unique and a set piece came back with `ilvl` and `levelReq`
+     * both undefined. `levelRequirement` then answered 1 and `equipRefusal` returned null, which
+     * means a level-1 character could wear any legendary in the game the moment one dropped; their
+     * random affixes were never tier-scaled either, so a level-45 unique rolled its numbers as
+     * though it were level 1.
+     *
+     * Stamped here rather than at the two call sites, for the reason the wrapper exists at all:
+     * a third path would go round two call sites just as easily as it went round one.
+     */
+    const stamp = (item, level, rng) => {
+      if (!item || item.ilvl != null) return item;
+      const ilvl = itemLevelFor(level ?? 1, item.rarity || 'legendary', rng || this.rng);
+      item.ilvl = ilvl;
+      item.levelReq = requirementFor(ilvl);
+      for (const a of item.affixes || []) {
+        // a unique's FIXED affixes are the whole point of it — only the rolled ones are tiered
+        if (a.baseIntrinsic || a.intrinsic || a.setFixed || a.fixed) continue;
+        if (a.min == null || a.max == null) continue;
+        a.value = rollAffixValue(a, ilvl, rng || this.rng);
+        a.ilvl = ilvl;
+        a.tier = tierFor(ilvl).name;
+      }
+      return item;
+    };
+    const generateUnique = loot.generateUnique.bind(loot);
+    loot.generateUnique = (id, rng, ...rest) => stamp(generateUnique(id, rng, ...rest), this.lastDropLevel, rng);
+    const maybeSetItem = loot.maybeSetItem.bind(loot);
+    loot.maybeSetItem = (act, rng, ...rest) => stamp(maybeSetItem(act, rng, ...rest), this.lastDropLevel, rng);
   }
 
   /** Roll one of the light/mount slot affixes. Same tiers, same caps as anything else. */
@@ -1535,6 +1568,12 @@ export class Rpg {
    * Emberveil uses, so a legendary here is a real Emberveil legendary with its own power on it.
    */
   rollDrop({ level = 1, rng = this.rng, magicFind = 0, chance = null, bases = null, rarityBoost = 1, floor = null } = {}) {
+    /**
+     * R18 — the level this drop is FOR, so the unique and set paths can be stamped with an item
+     * level like everything else. `generateUnique` and `maybeSetItem` take an act, not a level, and
+     * the wrappers in `itemLevels` need one — see the note there.
+     */
+    this.lastDropLevel = level;
     const dropChance = chance ?? (this.b.loot?.dropRate ?? 0.42);
     if (rng() > dropChance) return null;
     let rarity = this.rarityFor(level, rng, magicFind, rarityBoost);

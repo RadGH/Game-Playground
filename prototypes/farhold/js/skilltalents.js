@@ -389,20 +389,38 @@ export const IMPLEMENTED_MODS = new Set([
   // `echo` rides castRules too, but its reader is js/main.js `castSkill`, which already asks
   // rpg.fx.sum(player, 'echo') for the legendary of the same name (js/effects.js DERIVED_INTO_SUM)
   'echo',
+  /**
+   * R18 — `pierce` and `barrier` move ACROSS, because both are now read.
+   *
+   * `pierce` has been read at js/main.js:1001 (`plan.pierce ? plan.range : …`) for rounds and sat
+   * on the pending list regardless, so this audit reported a working talent as inert — and nothing
+   * called the audit, so nobody found out. `barrier` is read by `castSkill` as of R18.
+   *
+   * That is the argument for the test that now calls `inertTalents()`: a list of what is unfinished
+   * is only useful if something checks it, and an unchecked one rots in both directions — claiming
+   * a working feature is broken as readily as the reverse.
+   */
+  'pierce', 'barrier', 'barrierSeconds',
+  /**
+   * …and `chains`/`chainFalloff`/`ground`/`groundRadius`, all four of which js/main.js reads —
+   * `plan.chains` three times, `plan.ground` eight. The comment below this list already said the
+   * ground pools existed "as of round 12" and took `ground` off the pending list in prose while
+   * leaving it ON the list in code. Counted, not assumed: `grep -c 'plan.<key>' js/main.js`.
+   */
+  'chains', 'chainFalloff', 'ground', 'groundRadius',
 ]);
 
 /** Mod keys nothing reads yet, with the file that would have to read them. */
 export const PENDING_MODS = {
-  pierce: 'js/main.js fireBolt — the bolt stops at the first body it meets',
   homing: 'js/main.js fireBolt / js/combat-fx.js — a projectile cannot steer yet',
-  chains: 'js/main.js fireBolt — nothing jumps from one body to the next',
-  chainFalloff: 'js/main.js fireBolt',
   // `ground` and `groundRadius` sat here from round 7 to round 12 with the note "no lingering
   // ground pool exists" — which was true, and meant the `linger` talent, offered on four of the
   // six skill trees, did nothing at all when taken. js/main.js has pools now (`dropPool` /
   // `tickPools`), so they are off this list.
-  barrier: 'js/main.js castSkill — nothing grants a barrier off a cast',
-  barrierSeconds: 'js/main.js castSkill',
+  // R18 — `barrier`/`barrierSeconds` are OFF this list: js/main.js `castSkill` grants the barrier
+  // now and the frame loop was already ticking `castBarrierFor` down, so Bulwark finally does what
+  // its own description says. They sat here from round 7, which is the whole argument for the
+  // caller this audit has just been given — see `inertTalents`.
   speed: 'js/main.js fireBolt — removed from every node in round 11, kept here for old saves',
 };
 

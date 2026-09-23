@@ -242,6 +242,26 @@ test('the orbital yard is reachable once you have a hauler, and the panel says w
     f.shipyardApi.refuel();
     await new Promise(r => setTimeout(r, 400));
 
+    /**
+     * R19 — THE YARD WANTS SOMETHING THAT CAN CARRY A MODULE TO THE PAD.
+     *
+     * `data/vehicles.json` has carried a `tow` flag since the file landed — true on the truck and
+     * nowhere else — and its own `_doc` named js/shipyard.js as what it was for. Nothing read it
+     * until round 19. So a ship on the pad is no longer the whole of it, and this spec now checks
+     * the half that matters: **the panel says which vehicle to build** before it will open the
+     * yard. A gate that refuses without naming what it wants is the thing this round is about.
+     */
+    const noTow = document.querySelector('#build-ui .build-shipyard')?.textContent || '';
+    const { stationGate: gateNow } = await import('/prototypes/farhold/js/shipyard.js');
+    const { firstTower } = await import('/prototypes/farhold/js/vehicles.js');
+    const towGate = gateNow(f.player);
+    // the name comes out of data/vehicles.json, not out of this spec — the truck is called the
+    // Longbed Hauler, which a hard-coded /truck/ missed on the first run
+    const towerName = firstTower()?.name || '';
+    f.player.vehicles.owned.ground = [...(f.player.vehicles.owned.ground || []), 'truck'];
+    f.build.setMode(false); f.build.setMode(true);
+    await new Promise(r => setTimeout(r, 400));
+
     const late = document.querySelector('#build-ui .build-shipyard')?.textContent || '';
     const rows = [...document.querySelectorAll('#build-ui .build-shipyard .build-yard-row')]
       .map(r => [r.querySelector('button')?.textContent, r.querySelector('button')?.disabled, r.querySelector('span')?.textContent]);
@@ -259,6 +279,8 @@ test('the orbital yard is reachable once you have a hauler, and the panel says w
       yardEarly, hasNext: /Next:/.test(early),
       haulerOk: hauler.ok, haulerWhy: hauler.why || '', partLog,
       yardLate: /Orbital Yard/.test(late),
+      yardBeforeTow: /Orbital Yard/.test(noTow),
+      towWhy: towGate.why || '', towBehind: (towGate.behind || []).join(','), towerName,
       liftLabel: lift?.[0] || null, liftDisabled: lift?.[1], liftNote: lift?.[2] || '',
       up: stationProgress(f.player).done,
       beforeUp,
@@ -269,7 +291,12 @@ test('the orbital yard is reachable once you have a hauler, and the panel says w
   expect(out.hasNext, 'the shipyard never says what to do next').toBe(true);
   expect(out.yardEarly, 'the orbital yard was offered before there was a ship to lift it with').toBe(false);
   expect(out.haulerOk, `could not build a hauler: ${out.haulerWhy} · parts: ${JSON.stringify(out.partLog)}`).toBe(true);
-  expect(out.yardLate, 'a hauler on the pad did not bring up the orbital yard').toBe(true);
+  // R19 — a ship alone is no longer enough, and the refusal has to name the vehicle it wants
+  expect(out.towBehind, 'the yard is no longer gated on being able to move a module').toBe('tow');
+  expect(out.towerName, 'no vehicle in the ladder can tow, so the gate can never be passed').toBeTruthy();
+  expect(out.towWhy, 'the refusal does not name the vehicle it wants').toContain(out.towerName);
+  expect(out.yardBeforeTow, 'the yard opened with nothing that could carry a module to the pad').toBe(false);
+  expect(out.yardLate, 'a hauler AND a flatbed did not bring up the orbital yard').toBe(true);
   expect(out.liftLabel, 'the yard offers no module to lift').toMatch(/Lift the/);
   expect(out.up.length, `nothing went up (${out.liftNote})`).toBeGreaterThan(0);
   expect(errors).toEqual([]);

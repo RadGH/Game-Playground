@@ -483,9 +483,18 @@ export function stationGate(player) {
    */
   if (towCapacity(player) <= 0) {
     const truck = firstTower();
+    /**
+     * R19 — SAY "GROUND VEHICLE", BECAUSE "HAULER" IS FOUR DIFFERENT THINGS.
+     *
+     * The word is on the tier-3 SHIP (data/shipyard.json), on the truck (`Longbed Hauler`), on the
+     * `hauler_drone` carrier and on the Hauler Post. A player who has just assembled a hauler and
+     * is then told to "build a Longbed Hauler" reads that as "you already have one" and goes
+     * looking for the bug. The refusal names the vehicle AND says what kind of thing it is; the
+     * shipyard spec asserts it contains `firstTower().name` rather than a word this file guesses.
+     */
     return {
       ok: false,
-      why: `A module has to reach the pad. Nothing you own can take that weight — build a ${truck?.name || 'flatbed'}.`,
+      why: `A module has to reach the pad. Nothing you own can tow that weight — build the ${truck?.name || 'flatbed'}, the six-wheeled ground truck, in a Garage.`,
       behind: ['tow'],
     };
   }

@@ -3359,6 +3359,33 @@ swing. That is a ceiling, not a formula — under it everything behaves exactly 
 levels are untouched — and it is the one rule that cannot come apart again, because it is stated in
 terms of the thing it is supposed to be a fraction of.
 
+### And a level stopped getting cheaper the higher you climbed
+
+Measuring the new economy across the whole ladder turned up something the report had not named and
+the round would have shipped without: **what a kill is worth was tied to the enemy HEALTH curve**
+(`perLevel`, 1.13, exponential) while the cost of a level is `xpForLevel`, which is polynomial for
+the first 60% of the ladder. Exponential income against a polynomial price means levelling
+*accelerates*. Measured in even-level kills per level:
+
+| | L5 | L10 | L20 | L30 | L40 |
+|---|---|---|---|---|---|
+| before | 98 | 107 | 58 | **16** | **7** |
+| after | 131 | 150 | 116 | 47 | 30 |
+
+Seven fights for a level at 40 is the far end of the same complaint that opened this round, and no
+amount of cutting the base rate fixes it — a flat multiplier scales both ends equally.
+
+`enemies.xpPerLevel` is a **third curve**, at 1.09, which is the same separation `dmgPerLevel`
+already had and for the same kind of reason. The spread between the fastest and slowest level on the
+ladder falls from **16× to 5×**, and level 1 is untouched because both curves start at 1.
+
+`xpPerLevelFor()` then restates that exponent for the ladder the world actually has, exactly the way
+`xpForLevel` does: 1.09 over 49 steps is about 64× from the first enemy to the last, and compounding
+the same number over 99 steps would be 4,100× — which would put the top of a 1-100 world straight
+back where this section started. At cap 50 it is exactly the configured number. On a 1-100 world the
+pacing comes out at 14 / 35 / 50 / 74 / 67 / 53 / 44 / 34 / 27 kills a level from level 2 to 99,
+which is the "more natural growth as you adventure" the setting was asked for.
+
 ## The level ladder is a world setting
 
 > "Add a new world setting to change the level scaling. I'd like to see a world with levels ranging

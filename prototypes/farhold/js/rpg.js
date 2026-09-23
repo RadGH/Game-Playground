@@ -446,6 +446,22 @@ export function eventXp(base, { zoneLevel = 1, kind = 'event', cfg = {} } = {}) 
   return Math.max(1, Math.round(amount * mult * byZone));
 }
 
+/**
+ * R22 — the enemy experience exponent, restated for the ladder this world actually has.
+ *
+ * `xpPerLevel` is written for the 50-level ladder, where `1.09^49` is about 64x from the first
+ * enemy to the last. On a 100-level world the same exponent compounds over twice as many steps and
+ * comes out at 4,100x, which puts the top of that ladder back where this round found it: a level
+ * every two fights. The fix is the same one `xpForLevel` uses — measure in fractions of the cap —
+ * so the growth from the first enemy to the last is the same whatever the cap, and cap 50 is
+ * exactly the configured number.
+ */
+export function xpPerLevelFor(perLevel, cap = LEVEL_CAP) {
+  const k = Number(perLevel) || 1.09;
+  if (k <= 1 || cap === MAX_LEVEL) return k;
+  return Math.pow(k, (MAX_LEVEL - 1) / Math.max(1, cap - 1));
+}
+
 export function levelFromXp(xp, cap = LEVEL_CAP) {
   let l = 1;
   while (l < cap && xp >= xpForLevel(l + 1, cap)) l++;
@@ -1379,6 +1395,20 @@ export class Rpg {
     // are separate curves now: a higher-level enemy is much tougher and only somewhat harder hitting.
     const scale = Math.pow(e.perLevel ?? 1.13, lvl - 1);
     const hitScale = Math.pow(e.dmgPerLevel ?? e.perLevel ?? 1.09, lvl - 1);
+    /**
+     * R22 — AND EXPERIENCE IS A THIRD CURVE, FOR THE SAME REASON THE DAMAGE IS A SECOND ONE.
+     *
+     * What a kill is worth had always been tied to the HEALTH curve, which compounds at 1.13 — while
+     * the cost of a level is `xpForLevel`, which is polynomial for the first 60% of the ladder. An
+     * exponential income against a polynomial price means levelling ACCELERATES, and badly: an
+     * even-level kill was 107 of them for level 10 and **7** for level 40. The whole top of the game
+     * went past in a few fights, which is the far end of the same complaint that opened this round.
+     *
+     * At 1.09 the same measurement is 150 / 116 / 47 / 30 across levels 10, 20, 30 and 40 — the
+     * spread across the whole ladder falls from **16x to 5x** — and level 1 is unchanged either way,
+     * because both curves start at 1.
+     */
+    const xpScale = Math.pow(xpPerLevelFor(e.xpPerLevel ?? e.perLevel ?? 1.13), lvl - 1);
 
     // rank first, then every modifier on top of it
     let hpMult = (R.hp ?? 1), dmgMult = (R.dmg ?? 1), armorMult = (R.armor ?? 1);
@@ -1409,7 +1439,7 @@ export class Rpg {
       speed: (def.speed ?? 3.1) * speedMult,
       reach: def.reach ?? 2.2, aggroRange: def.aggroRange ?? 26,
       attackEvery: (def.attackEvery ?? 1.5) * swingMult,
-      xp: Math.round((def.xp ?? 12) * scale * (e.xp ?? 1) * (R.xp ?? 1)),
+      xp: Math.round((def.xp ?? 12) * xpScale * (e.xp ?? 1) * (R.xp ?? 1)),
       gold: Math.round((def.gold ?? 4) * scale * (e.gold ?? 1) * goldMult),
       lifeSteal,
       onHit: onHit.length ? onHit : null,

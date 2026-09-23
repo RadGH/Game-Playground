@@ -232,13 +232,27 @@ test('the horse and every vehicle you own are one choice, and H honours it', asy
     };
   });
   console.log('ride:', JSON.stringify(out, null, 1));
-  // one list, horse first
-  expect(out.before.length).toBe(1);
-  expect(out.after.length).toBe(2);
-  expect(out.after[1].name).toMatch(/Scrambler|Motorcycle/i);
+  /**
+   * R22 — THE LIST IS EVERY MOUNT YOU OWN, EVERY VEHICLE YOU BUILT, AND ON FOOT.
+   *
+   * R15 made this one choice where there had been two systems; R22 finished the job by folding the
+   * character sheet's separate Mount dropdown into it, because with one horse and no truck the two
+   * were the same two words printed twice at two different speeds. So the list carries the mounts
+   * as well now, and an "— on foot —" row, which is the only way to take a mount off once the row
+   * that did that is gone. The rule is still "one list with the horse at the top of it"; the count
+   * is not the rule.
+   */
+  const rideable = rows => rows.filter(r => !/on foot/i.test(r.name ?? r));
+  expect(rideable(out.before).length).toBe(1);
+  expect(out.before.some(n => /on foot/i.test(n))).toBe(true);
+  const after = rideable(out.after);
+  expect(after.length).toBe(2);
+  expect(after[1].name).toMatch(/Scrambler|Motorcycle/i);
   // the note has to say what each is FOR — the horse is the one that climbs
-  expect(out.after[0].note).toMatch(/climbs anything/);
-  expect(out.after[1].note).toMatch(/m\/s/);
+  expect(after[0].note).toMatch(/climbs anything/);
+  expect(after[1].note).toMatch(/m\/s/);
+  // …and every row is in the same unit, which is what the two dropdowns used to disagree about
+  for (const r of out.after) expect(r.note).toMatch(/m\/s/);
   expect(out.active).toBe('motorcycle');
   expect(out.saved).toBe('motorcycle');
   expect(errors).toEqual([]);

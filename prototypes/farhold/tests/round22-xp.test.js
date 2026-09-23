@@ -20,7 +20,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import { Rpg, xpForLevel, levelFromXp, eventXp, setLevelCap, levelCap, MAX_LEVEL, PLANET_BANDS } from '../js/rpg.js';
+import { Rpg, xpForLevel, levelFromXp, eventXp, setLevelCap, levelCap, xpPerLevelFor, MAX_LEVEL, PLANET_BANDS } from '../js/rpg.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const read = f => readFileSync(join(here, '..', f), 'utf8');
@@ -167,4 +167,62 @@ test('spell power and the outgoing buff are each applied exactly once', () => {
   assert.match(main, /const power = plan\.mult;/);
   assert.equal(/const power = plan\.mult \* outgoingFrom/.test(main), false,
     'castSkill is multiplying by the outgoing buff that strike already applies');
+});
+
+// ---------------------------------------------------------------- the shape of the whole ladder
+
+/**
+ * R22 — LEVELLING USED TO GET FASTER THE HIGHER YOU WENT, WHICH IS THE OPPOSITE OF THE ASK.
+ *
+ *   "play with the region density to get a more natural growth as you adventure"
+ *
+ * What a kill is worth was tied to the enemy HEALTH curve (`perLevel`, 1.13, exponential) while the
+ * cost of a level is `xpForLevel`, which is polynomial for the first 60% of the ladder. Exponential
+ * income against a polynomial price means the top of the game goes past in a few fights: measured
+ * in even-level kills, a level cost 107 of them at level 10 and **7** at level 40.
+ *
+ * `enemies.xpPerLevel` is a third curve — the same separation `dmgPerLevel` already had, for the
+ * same reason — and `xpPerLevelFor` restates it for the ladder this world has, so a 100-level world
+ * does not compound the 50-level exponent over twice as many steps.
+ *
+ * The assertion is the SPREAD, not any figure in it: a ladder whose fastest level is four times its
+ * slowest is a ladder; one where it is sixteen times is two different games.
+ */
+function killsPerLevel(cap) {
+  setLevelCap(cap);
+  const r = rpg();
+  const k = xpPerLevelFor(balance.enemies.xpPerLevel);
+  const out = [];
+  for (let L = 2; L < cap; L++) {
+    const enemyXp = Math.round(12 * Math.pow(k, L - 1));
+    const per = r.killXpFor({ level: L }, { level: L, xp: enemyXp }, xpCfg);
+    out.push((xpForLevel(L + 1) - xpForLevel(L)) / Math.max(1, per));
+  }
+  return out;
+}
+
+test('a level does not get cheaper the higher you climb', () => {
+  for (const cap of [50, 100]) {
+    const kills = killsPerLevel(cap);
+    const spread = Math.max(...kills) / Math.min(...kills);
+    assert.ok(spread < 7, `cap ${cap}: the fastest level is ${spread.toFixed(1)}x the slowest`);
+    // and the last third of the ladder is not a formality
+    const late = kills.slice(Math.floor(kills.length * 0.7));
+    const early = kills.slice(0, Math.floor(kills.length * 0.3));
+    const avg = a => a.reduce((x, y) => x + y, 0) / a.length;
+    assert.ok(avg(late) > avg(early) * 0.25,
+      `cap ${cap}: the top of the ladder costs ${(avg(late) / avg(early)).toFixed(2)} of the bottom`);
+  }
+  setLevelCap(50);
+});
+
+test('the enemy experience exponent is restated for the ladder, and is exact at the default', () => {
+  assert.equal(xpPerLevelFor(1.09, 50), 1.09, 'the 50-level world must be the configured number');
+  // 100 levels means half the step, so the growth from the first enemy to the last is the same
+  const fifty = Math.pow(xpPerLevelFor(1.09, 50), 49);
+  const hundred = Math.pow(xpPerLevelFor(1.09, 100), 99);
+  assert.ok(Math.abs(fifty - hundred) < 0.01, `${fifty} against ${hundred}`);
+  // …and it is a THIRD curve, separate from health and damage, on purpose
+  assert.ok(balance.enemies.xpPerLevel < balance.enemies.perLevel,
+    'experience must grow more slowly than health, or levelling accelerates');
 });

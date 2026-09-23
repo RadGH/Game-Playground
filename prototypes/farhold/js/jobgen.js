@@ -219,6 +219,17 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
       };
     };
 
+    /**
+     * Which frames a place in this zone can host — see the `usesHere` nudge in the scoring below.
+     * Gathered once per board rather than per frame, and tolerant of a territory module that does
+     * not offer landmarks at all (the node tests pass none).
+     */
+    const usesHere = new Set();
+    for (const mark of territory?.landmarksIn?.(zone?.id) || []) {
+      const list = mark?.uses || mark?.gives?.uses;
+      for (const id of (Array.isArray(list) ? list : [list]).filter(Boolean)) usesHere.add(id);
+    }
+
     const scored = [];
     for (const frame of frames) {
       if (exclude.includes(frame.id)) continue;
@@ -241,6 +252,21 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
         if (/push_them_out|the_claim/.test(frame.id)) score += record.heat * 6;
         if (/beast_moved_in|the_grudge/.test(frame.id)) score += (1 - record.grip) * 3;
       }
+      /**
+       * R18 — A PLACE NEARBY THAT CAN HOST THIS ERRAND MAKES IT MORE LIKELY.
+       *
+       * `data/landmarks.json` and `data/strongholds.json` carry `uses` lists — which job frames a
+       * place can host — and nothing read them, so "this ruin is where you would be sent to do
+       * that" was written down eleven times and meant nothing. Three of the eleven ids named no
+       * frame at all, which is the usual sign that a field has never been resolved against
+       * anything.
+       *
+       * A preference rather than a requirement, deliberately: a board that could only offer errands
+       * with a matching landmark in range would go empty in open country, and `fits()` already
+       * refuses anything whose slots do not bind. This just means the ruin down the road is the one
+       * you get sent to.
+       */
+      if (usesHere.has(frame.id)) score += 5;
       scored.push({ frame, bound, score });
     }
 
@@ -376,7 +402,15 @@ export function createJobGen({ frames: data, territory = null, factions = null, 
       for (const row of incidents?.incidents || []) {
         if (row.resolvedBy !== job.frame) continue;
         const got = territory.resolveIncident(job.zoneId, row.kind);
-        if (got) out.resolved = out.resolved || got;
+        if (got) {
+          out.resolved = out.resolved || got;
+          /**
+           * R18 — `deeds.incident_resolved` was declared, shown on the standings screen and
+           * credited by nobody. Clearing a zone's trouble is exactly the deed it describes, and
+           * this is the one place the game now knows it happened.
+           */
+          if (job.faction && standings) standings.deed(job.faction, 'incident_resolved');
+        }
       }
     }
     if (after.rumour) out.rumour = phrase(after.rumour, { zone: { name: job.zoneName } }) || after.rumour;

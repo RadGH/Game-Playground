@@ -587,5 +587,10 @@
       "respawnHours": 0
     }
   },
-  "_pluralDoc": "Whether the faction takes a plural verb. \"the Cut are pushing in\" is right and \"the Stone Count are pushing in\" is not — a Count is one person and the Longsight is a body. Read by js/rumours.js."
+  "_pluralDoc": "Whether the faction takes a plural verb. \"the Cut are pushing in\" is right and \"the Stone Count are pushing in\" is not — a Count is one person and the Longsight is a body. Read by js/rumours.js.",
+  "_r18Deeds": "R18 — `relic_returned` and `landmark_desecrated` are declared here, are SHOWN to the player on the standings screen as though they were the rules (js/main.js ~1433/1554), and are credited by nothing: there is no relic to return and no way to desecrate a place. They are kept because the standings screen reads this table to explain itself and a missing row would leave a gap in that list, but they are named here so nobody assumes they fire. `nemesis_killed` and `incident_resolved` were in the same state until R18 and are credited now — a settled grudge and a cleared incident are both real events the game already knew about. tests/expansion.test.js keeps this honest: a deed that is neither credited nor named here fails.",
+  "deedsNotCredited": [
+    "relic_returned",
+    "landmark_desecrated"
+  ]
 }

@@ -1953,6 +1953,15 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     if (settled === 'nemesis') {
       hud.log('The grudge is settled.', 'level');
       sound.questDone();
+      /**
+       * R18 — and somebody is pleased about it. `deeds.nemesis_killed` is declared in
+       * data/factions.json, is DISPLAYED to the player on the standings screen as though it were
+       * the rules (js/main.js:1433), and was credited by nobody — so killing the thing that has
+       * been hunting you moved no standing anywhere. Credited to whoever holds the ground it died
+       * on, which is the faction that had to live with it.
+       */
+      const holder = holdings?.of?.(hud.here?.id)?.holder;
+      if (holder) standings.deed(holder, 'nemesis_killed');
     }
     const back = rpg.onKillRestore(player);
     if (back.hp || back.mp) hud.log(`The kill returns ${[back.hp && `${back.hp} health`, back.mp && `${back.mp} mana`].filter(Boolean).join(' and ')}.`);

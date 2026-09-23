@@ -637,3 +637,74 @@ test('R18 — every faction reward effect is either built or openly parked', () 
   // and the two that ARE built have to stay built, or the file quietly becomes all promise
   assert.ok(built.size >= 2, `only ${built.size} faction reward effects are implemented`);
 });
+
+/**
+ * R18 — EVERY DEED IS EITHER CREDITED OR OPENLY NAMED AS NOT.
+ *
+ * `data/factions.json` declares twelve deeds and js/main.js DISPLAYS the table on the standings
+ * screen as though it were the rules. Four of them were credited by nothing: `nemesis_killed`,
+ * `incident_resolved`, `relic_returned`, `landmark_desecrated` — so the screen was telling the
+ * player about consequences that did not exist.
+ *
+ * Two are credited now (a settled grudge, a cleared incident — both real events the game already
+ * knew about). The other two have no mechanic at all: there is no relic to return and no way to
+ * desecrate a place. They stay, because the screen reads this table to explain itself, and they are
+ * named in `deedsNotCredited` so nobody assumes they fire. This test is what stops that list rotting
+ * in either direction.
+ */
+test('R18 — no faction deed is silently uncredited', () => {
+  const declared = Object.keys(factions.deeds || {}).filter(k => !k.startsWith('_'));
+  const parked = new Set(factions.deedsNotCredited || []);
+
+  // what the game actually credits, read off every `.deed(…, 'name')` call in js/
+  /**
+   * Read as TEXT, and NOT inside a try/catch that hides a mistake. The first version of this called
+   * a `src()` helper this file does not have, and the catch turned that into an empty string — so
+   * nothing looked credited and the test reported all ten working deeds as silent. A catch around
+   * the thing the test depends on is a catch around its own correctness.
+   */
+  const js = ['main', 'jobgen', 'caravans', 'patrols', 'wanderers', 'territory']
+    .map(f => readFileSync(join(here, `../js/${f}.js`), 'utf8')).join('\n');
+  const credited = new Set([...js.matchAll(/\.deed\([^,]+,\s*'([a-z_]+)'/g)].map(m => m[1]));
+
+  const silent = declared.filter(d => !credited.has(d) && !parked.has(d));
+  assert.deepEqual(silent, [],
+    'these deeds are declared and shown to the player and nothing credits them — credit them, or '
+    + 'add them to `deedsNotCredited` with a reason:\n  ' + silent.join('\n  '));
+
+  const stale = [...parked].filter(d => credited.has(d));
+  assert.deepEqual(stale, [], 'these are parked but ARE credited now — take them off the list: ' + stale.join(', '));
+});
+
+/**
+ * R18 — EVERY `uses` ID NAMES A REAL JOB FRAME.
+ *
+ * `data/landmarks.json` and `data/strongholds.json` say which errands a place can host, and nothing
+ * read those lists — so three of the eleven ids named no frame at all, which is the usual sign that
+ * a field has never been resolved against anything. `burn_it_out` and `cull` named nothing;
+ * `hold_the_line` is a MERCENARY ABILITY id out of data/mercenaries.json.
+ *
+ * js/jobgen.js prefers a frame a nearby place can host now, so a dangling id is a preference that
+ * can never apply — silent, and exactly the shape this round has been clearing out.
+ */
+test('R18 — no landmark or stronghold offers an errand that does not exist', () => {
+  const frames = new Set((read('../data/job-frames.json').frames || []).map(f => f.id));
+  assert.ok(frames.size > 15, 'the frame list did not load');
+
+  const named = new Set();
+  const walk = o => {
+    if (Array.isArray(o)) { o.forEach(walk); return; }
+    if (!o || typeof o !== 'object') return;
+    const list = o.uses;
+    if (list) for (const id of (Array.isArray(list) ? list : [list])) named.add(id);
+    Object.values(o).forEach(walk);
+  };
+  walk(read('../data/landmarks.json'));
+  walk(read('../data/strongholds.json'));
+  assert.ok(named.size >= 8, `only ${named.size} uses ids found — re-aim this test`);
+
+  const dangling = [...named].filter(id => !frames.has(id));
+  assert.deepEqual(dangling, [],
+    'these places offer errands that are not job frames, so the preference can never apply:\n  '
+    + dangling.join('\n  '));
+});

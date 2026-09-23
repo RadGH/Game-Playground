@@ -1257,26 +1257,7 @@
   "haul": {
     "carry": 40,
     "walkSpeed": 4.6,
-    "loadPenalty": 0.22,
-    "cart": {
-      "name": "Hand Cart",
-      "capacity": 160,
-      "speed": 3.4,
-      "loadSeconds": 12
-    },
-    "packAnimal": {
-      "name": "Pack Mule",
-      "capacity": 260,
-      "speed": 4.0,
-      "loadSeconds": 16
-    },
-    "hauler": {
-      "name": "Hauler Drone",
-      "capacity": 200,
-      "speed": 7.5,
-      "loadSeconds": 4,
-      "powerUse": 12
-    }
+    "loadPenalty": 0.22
   },
   "_toolDoc": "Tool tiers gate the hard nodes and multiply the soft ones — §1's recommendation that hand-mining stays slow enough that a drill feels like a promotion. `tier` must be >= the node's hardness or you cannot work it at all.\n\n`from` says where a tier comes from in the PLAYER'S terms. Farhold has no pick slot: the tier is read off whatever weapon you are carrying (js/main.js `toolTierFor`), and nothing on screen ever said so — which is why 'you need a Steel Tool' read as a dead end rather than as an instruction. js/resources.js prints this line with every refusal.",
   "tools": {
@@ -1328,5 +1309,6 @@
       "from": "a Drill built on the seam and wired to a generator, which needs no tool of yours at all",
       "note": "The promotion: it works the node while you are somewhere else, and it never gets tired."
     }
-  }
+  },
+  "_r18Haul": "R18 — `haul.cart`, `haul.packAnimal` and `haul.hauler` removed. The live hauler table is data/power.json's `haulers`, read by js/stores.js `haulThroughput`; these three were a second, unread copy. `haul.carry`, `haul.walkSpeed` and `haul.loadPenalty` stay — js/resources.js does read those."
 }

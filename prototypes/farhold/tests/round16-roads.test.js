@@ -16,6 +16,7 @@
 // thing that is restated rather than imported is the couple of magic numbers `js/features.js` uses
 // for a town's ring, which `footprintOf` in js/town-plan.js already owns.
 
+import { planBridge } from '../js/bridge-plan.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorld, createSystem, makeTerrain, setMetresPerCell } from '../js/planet.js';
@@ -410,12 +411,17 @@ test('you can walk a road across a bridge without climbing anything', () => {
 test('features.js still files a chain of decks, not one flat plank', () => {
   // The restatement above is only honest while this holds. A single `addDeck` over the whole span
   // is the version that left a 1.95 m ledge where the plank met the ramping road.
+  //
+  // Round 23: the chain is built by js/bridge-plan.js now (sloped pieces between samples ~2 m
+  // apart, filed by `fileDeck`), and tests/round23-bridge-gate.test.js measures the drawn deck
+  // against it. So this asks the rule — features files a plan's pieces, and a plan is a chain —
+  // rather than pinning the old loop's wording.
   const src = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../js/features.js'), 'utf8');
-  assert.match(src, /solids\.addDeck\(/, 'features.js no longer files a deck collider for a bridge');
-  assert.match(src, /terrain\.roadSurfaceAt\(sx, sz\)/,
-    'the deck chain no longer takes its height from the road it sits on');
-  assert.match(src, /const n = Math\.max\(1, Math\.ceil\(halfLength \/ STEP\)\)/,
-    'the bridge collider went back to being one rectangle over the whole span');
+  assert.match(src, /fileDeck\(plan, solids\)/, 'features.js no longer files a deck collider for a bridge');
+  const plan = planBridge({ x: 0, z: 0, tx: 0, tz: 1, angle: 0, halfLength: 40, halfWidth: 5, deck: 3 },
+    { roadSurfaceAt: (x, z) => 3 - Math.abs(z) * 0.05, heightAt: () => 0, underwater: () => true });
+  assert.ok(plan.pieces.length >= 20, `a 80 m bridge is ${plan.pieces.length} deck pieces`);
+  assert.ok(plan.pieces.some(p => Math.abs(p.slope) > 0.01), 'the pieces no longer follow the ramping road');
 });
 
 // ------------------------------------------------------------------ 4. the sheet's two banks agree

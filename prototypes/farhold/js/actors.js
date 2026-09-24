@@ -26,6 +26,8 @@ import { tickStatuses, slowOf, applyStatus, setStatusFx, setStatusPulse } from '
 import { feel, staggerFor, pushFor, COMBAT_FEEL } from './combat-feel.js';
 import { traitsOf } from './weapons.js';
 import { CHIBI2_COMBAT_RIDE } from '../../../avatar-3d/js/chibi2-motion.js';
+// R23: a body stands on a bridge deck, not on the river bed under it — see js/ground.js
+import { groundAt, wetAt } from './ground.js';
 
 /** `bleed` out of data/skills.json — the field applies it without owning the skill data. */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
@@ -349,7 +351,7 @@ export class EnemyField {
   /** Add a specific enemy at a specific spot (packs, bosses, the tests and the console use this). */
   async add(def, level, x, z, { rank = 'normal', modifiers = [], name = null, boss = false } = {}) {
     const unit = this.rpg.makeEnemy(def, level, this.rng, { rank: boss ? 'boss' : rank, modifiers, name });
-    unit.x = x; unit.z = z; unit.y = this.terrain.heightAt(x, z);
+    unit.x = x; unit.z = z; unit.y = groundAt(this.terrain, x, z);
     unit.state = 'wander'; unit.wanderTimer = 0; unit.swingTimer = 0; unit.hitFlash = 0;
     // round 14: the physics book — knockback in flight, stagger left, armour stripped, recoil
     unit.stagger = 0; unit.push = null; unit.recoil = null; unit.sunder = 0; unit.sunderLeft = 0; unit.closing = 0;
@@ -636,7 +638,7 @@ export class EnemyField {
           const nx = e.x + p.dx * step, nz = e.z + p.dz * step;
           let [cx, cz] = this.terrain.clampToWorld(nx, nz);
           if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
-          if (!this.terrain.underwater(cx, cz) && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
+          if (!wetAt(this.terrain, cx, cz, e.y) && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
             e.x = cx; e.z = cz;
           } else if (!p.walled) {
             // slammed into something: the blow had nowhere to go, so it went into the body
@@ -756,7 +758,7 @@ export class EnemyField {
       let speed = 0;
       if (e.stagger > 0) {
         // reeling: no walk, no swing, no shot. The body still gets its frame so the clip plays.
-        e.y = this.terrain.heightAt(e.x, e.z);
+        e.y = groundAt(this.terrain, e.x, e.z, e.y);
         let sy = e.y;
         if (e.hover) { e.bob += dt * 1.6; sy += e.hover + Math.sin(e.bob) * 0.22; }
         this.placeBody(e, sy);
@@ -817,13 +819,13 @@ export class EnemyField {
         // Walls, trees and houses stop a body the same way they stop the player. Anything airborne
         // is allowed over them — a bat that cannot cross a wall is a worse bat.
         if (!e.hover) [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
-        if (!this.terrain.underwater(cx, cz)) {
+        if (!wetAt(this.terrain, cx, cz, e.y)) {
           // if the push put it back where it started it is up against something: turn and try again
           if (Math.hypot(cx - e.x, cz - e.z) < speed * dt * 0.25) e.facing += (this.rng() - 0.5) * 1.6 + Math.PI * 0.5;
           e.x = cx; e.z = cz;
         } else { e.facing += Math.PI; }
       }
-      e.y = this.terrain.heightAt(e.x, e.z);
+      e.y = groundAt(this.terrain, e.x, e.z, e.y);
       let y = e.y;
       if (e.hover) { e.bob += dt * 1.6; y += e.hover + Math.sin(e.bob) * 0.22; }
       if (e.recoil) { e.recoil.t -= dt; if (e.recoil.t <= 0) e.recoil = null; }
@@ -920,9 +922,9 @@ export class EnemyField {
     if (!dx && !dz) return;
     let [cx, cz] = this.terrain.clampToWorld(e.x + dx, e.z + dz);
     [cx, cz] = this.unstick(cx, cz, (e.reach || 2) * 0.28);
-    if (this.terrain.underwater(cx, cz)) return;
+    if (wetAt(this.terrain, cx, cz, e.y)) return;
     e.x = cx; e.z = cz;
-    e.y = this.terrain.heightAt(cx, cz);
+    e.y = groundAt(this.terrain, cx, cz, e.y);
     e.actor.group.position.set(e.x, e.y + (e.hover || 0), e.z);
   }
 

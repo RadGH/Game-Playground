@@ -23,6 +23,9 @@ import { createGearShop, categoryOf, VEHICLES } from './gear.js';
 // it — so it lives in its own module and the node tests can drive it. See js/hire.js.
 export { hireOffer, HIRE_ROLE_WORDS } from './hire.js';
 import { hireOffer as buildHireOffer } from './hire.js';
+// R23: townsfolk stand on bridge decks (js/ground.js), and a walled town posts guards at its gates
+import { groundAt, wetAt } from './ground.js';
+import { sentryPosts } from './town-plan.js';
 
 /**
  * The little badge that floats over somebody worth talking to. Drawn into a canvas once per glyph
@@ -292,7 +295,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
         trades: !!role.trades, givesQuests: !!role.quests, gambles: !!role.gambles, brokers: !!role.brokers,
         // R20 — the one counter where a spell, a perk or a talent can be taken back off you
         retrains: !!role.retrains,
-        node, x, z, y: terrain.heightAt(x, z),
+        node, x, z, y: groundAt(terrain, x, z),
         facing: rng() * Math.PI * 2,
         home: [x, z],
         wanderTimer: rng() * 4,
@@ -311,6 +314,48 @@ export function createTownFolk(scene, terrain, opts = {}) {
         npc.badgeSprite = sprite;
       }
       actor.group.position.set(x, npc.y, z);
+      actor.group.rotation.y = npc.facing;
+      scene.add(actor.group);
+      setActorAnim(actor, 'idle');
+      people.push(npc);
+    }
+
+    /**
+     * ROUND 23 — A GUARD AT EACH SIDE OF EVERY GATE.
+     *
+     * *"Let's make them open instead and have a guard by each entrance."* The posts come from the
+     * gates js/features.js actually built (`gatesOf`), through `sentryPosts` in js/town-plan.js, so
+     * a guard stands at the gate you can see. They are ordinary guards — they fight what comes near,
+     * using the same code as the watch in the square — with a `post`: when there is nothing to fight
+     * they walk back to it and stand facing out along the road instead of wandering off.
+     */
+    const posts = sentryPosts(features.gatesOf?.(node.id) || []);
+    const guardRole = ROLES.find(r => r.key === 'guard');
+    for (const [k, post] of posts.entries()) {
+      if (!live.has(node.id)) return;              // the town was let go while we were building
+      const { name, gender } = nameFor(node, guardRole, rng);
+      const look = looks.length ? looks[Math.floor(rng() * looks.length)] : null;
+      pending++;
+      let actor = null;
+      try {
+        actor = await makeActor({ avatar: look ? JSON.parse(JSON.stringify(look)) : {} });
+      } catch { /* a body we cannot build is a guard we skip */ }
+      finally { pending--; }
+      if (!actor) continue;
+      const npc = {
+        id: `${node.id}:gate${k}`,
+        name, role: 'guard', roleName: 'Gate Guard', gender,
+        guards: true, guardTimer: 0, target: null,
+        greeting: guardRole.greeting,
+        trades: false, givesQuests: false, gambles: false, brokers: false, retrains: false,
+        node, x: post.x, z: post.z, y: groundAt(terrain, post.x, post.z),
+        facing: post.facing,
+        home: [post.x, post.z],
+        post: { facing: post.facing, gate: post.gate, side: post.side },
+        wanderTimer: 0,
+        actor, stock: null, offered: null,
+      };
+      actor.group.position.set(npc.x, npc.y, npc.z);
       actor.group.rotation.y = npc.facing;
       scene.add(actor.group);
       setActorAnim(actor, 'idle');
@@ -352,7 +397,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
       guards: false, guardTimer: 0, target: null,
       greeting: greeting || roleRow.greeting,
       trades: false, givesQuests: false, gambles: false, brokers: false, retrains: false,
-      node: node || null, x, z, y: terrain.heightAt(x, z),
+      node: node || null, x, z, y: groundAt(terrain, x, z),
       facing: rng() * Math.PI * 2,
       home: [x, z],
       wanderTimer: rng() * 4,
@@ -485,7 +530,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
                 // never leave the settlement to chase — a guard that runs off is not a guard
                 const step = GUARD.speed * dt;
                 const nx = npc.x + Math.sin(npc.facing) * step, nz = npc.z + Math.cos(npc.facing) * step;
-                if (Math.hypot(nx - npc.home[0], nz - npc.home[1]) < guardReach && !terrain.waterAt(nx, nz)) {
+                if (Math.hypot(nx - npc.home[0], nz - npc.home[1]) < guardReach && !wetAt(terrain, nx, nz, npc.y, { test: 'waterAt' })) {
                   npc.x = nx; npc.z = nz;
                 }
                 setActorAnim(npc.actor, 'run');
@@ -514,7 +559,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
                   npc.target = null;
                 }
               }
-              npc.y = terrain.heightAt(npc.x, npc.z);
+              npc.y = groundAt(terrain, npc.x, npc.z, npc.y);
               npc.actor.group.position.set(npc.x, npc.y, npc.z);
               npc.actor.group.rotation.y = npc.facing;
               npc.actor.update(dt);
@@ -525,13 +570,28 @@ export function createTownFolk(scene, terrain, opts = {}) {
               npc.facing = Math.atan2(npc.home[0] - npc.x, npc.home[1] - npc.z);
               npc.x += Math.sin(npc.facing) * 2.2 * dt;
               npc.z += Math.cos(npc.facing) * 2.2 * dt;
-              npc.y = terrain.heightAt(npc.x, npc.z);
+              npc.y = groundAt(terrain, npc.x, npc.z, npc.y);
               npc.actor.group.position.set(npc.x, npc.y, npc.z);
               npc.actor.group.rotation.y = npc.facing;
               setActorAnim(npc.actor, 'walk');
               npc.actor.update(dt);
               continue;
             }
+          }
+
+          /**
+           * R23 — a gate guard holds the gate. At the post (the guard block above has already
+           * walked them back to it), they face out along the road; they turn to whoever walks up to
+           * speak to them, and they never wander.
+           */
+          if (npc.post) {
+            npc.facing = dist < talkRange * 2.4 ? Math.atan2(dx, dz) : npc.post.facing;
+            setActorAnim(npc.actor, 'idle');
+            npc.y = groundAt(terrain, npc.x, npc.z, npc.y);
+            npc.actor.group.position.set(npc.x, npc.y, npc.z);
+            npc.actor.group.rotation.y = npc.facing;
+            npc.actor.update(dt);
+            continue;
           }
 
           /**
@@ -560,10 +620,10 @@ export function createTownFolk(scene, terrain, opts = {}) {
               const nx = npc.x + Math.sin(npc.facing) * step;
               const nz = npc.z + Math.cos(npc.facing) * step;
               // water still stops them; a body that swims to the sawmill is a body in the river
-              if (!terrain.waterAt(nx, nz)) { npc.x = nx; npc.z = nz; }
+              if (!wetAt(terrain, nx, nz, npc.y, { test: 'waterAt' })) { npc.x = nx; npc.z = nz; }
               else { npc.goal = null; }
               setActorAnim(npc.actor, npc.goalRun ? 'run' : 'walk');
-              npc.y = terrain.heightAt(npc.x, npc.z);
+              npc.y = groundAt(terrain, npc.x, npc.z, npc.y);
               npc.actor.group.position.set(npc.x, npc.y, npc.z);
               npc.actor.group.rotation.y = npc.facing;
               npc.actor.update(dt);
@@ -587,7 +647,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
               const nx = npc.x + Math.sin(npc.facing) * step;
               const nz = npc.z + Math.cos(npc.facing) * step;
               // never wander far from home, into water, or onto the road
-              if (Math.hypot(nx - npc.home[0], nz - npc.home[1]) < 14 && !terrain.waterAt(nx, nz)) {
+              if (Math.hypot(nx - npc.home[0], nz - npc.home[1]) < 14 && !wetAt(terrain, nx, nz, npc.y, { test: 'waterAt' })) {
                 npc.x = nx; npc.z = nz;
               } else {
                 npc.facing += Math.PI;
@@ -595,7 +655,7 @@ export function createTownFolk(scene, terrain, opts = {}) {
             }
             setActorAnim(npc.actor, npc.strolling ? 'walk' : 'idle');
           }
-          npc.y = terrain.heightAt(npc.x, npc.z);
+          npc.y = groundAt(terrain, npc.x, npc.z, npc.y);
           npc.actor.group.position.set(npc.x, npc.y, npc.z);
           npc.actor.group.rotation.y = npc.facing;
           npc.actor.update(dt);

@@ -35,7 +35,9 @@ test('a settlement has people in it, standing on the ground with names of its ow
       names: people.map(p => p.name),
       onGround: people.every(p => Math.abs(p.y - f.terrain.heightAt(p.x, p.z)) < 0.05),
       dry: people.every(p => !f.terrain.waterAt(p.x, p.z)),
-      nearTown: people.every(p => Math.hypot(p.x - f.control.x, p.z - f.control.z) < 90),
+      // R23: a walled town posts two guards at each gate, out at the wall itself (up to ~140 m
+      // from the middle of a big city), so they are measured against the wall, not the square
+      nearTown: people.every(p => Math.hypot(p.x - f.control.x, p.z - f.control.z) < (p.post ? 170 : 90)),
     };
   });
   expect(errors).toEqual([]);

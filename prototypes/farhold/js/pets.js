@@ -29,6 +29,8 @@ import { tickStatuses, slowOf, applyStatus } from './skills.js';
 // R17 — the level-scaling arithmetic lives in the (Three.js-free) follower book so a node test can
 // drive it. See `scaleFollower` there; this file is the only caller.
 import { scaleFollower } from './followers.js';
+// R23: companions stand on bridge decks too — see js/ground.js
+import { groundAt, wetAt } from './ground.js';
 
 /**
  * Which pets a class brings, and what it calls them. Data rather than code because the class list
@@ -377,7 +379,7 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
       const a = rng() * Math.PI * 2;
       unit.x = home.x + Math.cos(a) * 2.4;
       unit.z = home.z + Math.sin(a) * 2.4;
-      unit.y = currentTerrain.heightAt(unit.x, unit.z);
+      unit.y = groundAt(currentTerrain, unit.x, unit.z, owner?.y ?? Infinity);
       unit.facing = a;
       unit.hover = def.flying ? 1.3 + rng() * 0.5 : 0;
       unit.bob = rng() * Math.PI * 2;
@@ -501,7 +503,7 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         const a = rng() * Math.PI * 2;
         p.x = at.x + Math.cos(a) * 3;
         p.z = at.z + Math.sin(a) * 3;
-        p.y = currentTerrain.heightAt(p.x, p.z);
+        p.y = groundAt(currentTerrain, p.x, p.z, at.y ?? Infinity);
         p.actor.group.position.set(p.x, p.y + (p.hover || 0), p.z);
         p.target = null;
         continue;
@@ -611,10 +613,10 @@ export function createPets({ scene, terrain, rpg, defs = [], balance = {}, field
         const nz = p.z + Math.cos(p.facing) * speed * dt;
         let [cx, cz] = currentTerrain.clampToWorld(nx, nz);
         if (!p.hover && field) [cx, cz] = field.unstick(cx, cz, (p.reach || 2) * 0.28);
-        if (!currentTerrain.underwater(cx, cz)) { p.x = cx; p.z = cz; }
+        if (!wetAt(currentTerrain, cx, cz, p.y)) { p.x = cx; p.z = cz; }
         else { p.x = at.x; p.z = at.z; }        // a companion will not drown chasing you across a river
       }
-      p.y = currentTerrain.heightAt(p.x, p.z);
+      p.y = groundAt(currentTerrain, p.x, p.z, p.y);
       let y = p.y;
       if (p.hover) { p.bob += dt * 1.8; y += p.hover + Math.sin(p.bob) * 0.2; }
       p.actor.group.position.set(p.x, y, p.z);

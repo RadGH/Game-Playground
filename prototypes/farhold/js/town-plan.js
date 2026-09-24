@@ -26,7 +26,9 @@ export const BUILDING_INFO = {
   house: { cap: 400, solid: [3.6, 6], from: 0, role: null },
   hall: { cap: 200, solid: [6.0, 8], from: 3, role: 'elder' },
   tower: { cap: 200, solid: [2.6, 12], from: 4, role: null },
-  wall: { cap: 700, solid: [3.2, 4], from: 4, role: null },
+  // R23: 1400 — a wall piece now also fills the kerb beside a gate, and a cap that runs out drops
+  // masonry the collider map still expects to be there
+  wall: { cap: 1400, solid: [3.2, 4], from: 4, role: null },
   well: { cap: 120, solid: [1.4, 3], from: 0, role: null },
   bridge: { cap: 120, solid: [0, 0], from: 0, role: null },
 
@@ -318,4 +320,34 @@ export function settlementAnchor(terrain, x0, z0, ring, cell = 224) {
     }
   }
   return best;
+}
+
+/**
+ * ROUND 23 — WHERE THE GATE GUARDS STAND.
+ *
+ * *"Let's make them open instead and have a guard by each entrance."* Two per opening, one either
+ * side of the road just outside the wall, in front of the gate towers and facing out along the road
+ * — close enough to read as "the gate is watched", far enough off the carriageway that you do not
+ * have to walk round them.
+ *
+ * `gates` is `features.gatesOf(id)`: `{ x, z, yaw, open, span, depth, tx, tz, ox, oz }`, where
+ * (tx, tz) runs along the wall and (ox, oz) points out of the town. Pure, so a node test checks the
+ * posts against the colliders the gate itself filed.
+ */
+export function sentryPosts(gates = []) {
+  const out = [];
+  for (const [i, g] of gates.entries()) {
+    // just past the outer face of the gate, and a metre beyond the edge of the opening
+    const outward = (g.depth ?? 3.4) / 2 + 1.4;
+    const aside = (g.open ?? 8) / 2 + 1.0;
+    for (const side of [-1, 1]) {
+      out.push({
+        gate: i, side,
+        x: g.x + g.ox * outward + g.tx * side * aside,
+        z: g.z + g.oz * outward + g.tz * side * aside,
+        facing: g.yaw,                           // the gate's +Z is out along the road
+      });
+    }
+  }
+  return out;
 }

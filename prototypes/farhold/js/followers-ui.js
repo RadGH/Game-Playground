@@ -12,13 +12,15 @@
 //   const company = createFollowersScreen({ followers, pets, getPlayer, hireAt, … });
 //   company.toggle();     // `F`
 //
-// THREE TABS, and each one is a job the user asked for:
+// TWO TABS, and each one is a job the user asked for:
 //   Company  — the roster, the slot ladder, and a dismiss on everything that can be dismissed
 //   Hire     — the mercenary broker's board, in whatever settlement you are standing in
-//   Spells   — the in-game respec: unlearn a pick and spend it again, at any time
-
-import { createClassBuilder } from './classbuild-ui.js';
-import { installCustomClass } from './classbuild.js';
+//
+// R23 — there used to be a third, Spells: R17's in-game respec. "How come the Followers screen
+// has a Spells menu?" — because nobody took it out when R20 moved spells to their proper homes:
+// a new pick is the character sheet's "Spell available" card, and taking one back is the
+// Unbinder in town, for gold. The tab was a spell screen on a companion screen, and a third door
+// onto the same builder that the other two already cover.
 
 const CSS_HREF = 'followers.css';
 
@@ -50,7 +52,6 @@ function row(label, right, sub = null, cls = '') {
 export const FOLLOWER_TABS = [
   { key: 'company', name: 'Company' },
   { key: 'hire', name: 'Hire' },
-  { key: 'spells', name: 'Spells' },
 ];
 
 export function createFollowersScreen({
@@ -65,13 +66,6 @@ export function createFollowersScreen({
    */
   hireAt = () => null,
   log = null, mount = document.body, embedded = false,
-  /**
-   * The respec needs the same four things the title-screen builder does, plus the live skill bar so
-   * a changed pick reaches the keys and not only the screen. Left out, the Spells tab says what it
-   * is and offers nothing — which is the honest thing for a preset class.
-   */
-  classData = null, skillData = null, classLooks = null, classbuildData = null,
-  skills = null, forest = null,
 } = {}) {
   if (!document.querySelector(`link[href="${CSS_HREF}"]`)) {
     document.head.appendChild(el('link', { rel: 'stylesheet', href: CSS_HREF }));
@@ -81,14 +75,6 @@ export function createFollowersScreen({
   let open = false;
 
   const body = el('div', { class: 'flw-body' });
-  /**
-   * The respec's own box, beside the body rather than inside it.
-   *
-   * `draw()` empties `body` on every redraw, and the class builder owns a root element of its own —
-   * mounted inside `body` it would be thrown away the first time you looked at another tab and
-   * never come back, which is a screen that works exactly once.
-   */
-  const respecBox = el('div', { class: 'flw-respec', hidden: true });
   const railButtons = new Map();
   const rail = el('div', { class: 'flw-rail' }, FOLLOWER_TABS.map(t => {
     const b = el('button', { type: 'button', text: t.name, onclick: () => { tab = t.key; draw(); } });
@@ -104,7 +90,6 @@ export function createFollowersScreen({
     ]),
     rail,
     body,
-    respecBox,
   ]);
   mount.appendChild(root);
 
@@ -217,58 +202,6 @@ export function createFollowersScreen({
     ];
   }
 
-  // ------------------------------------------------------------------ the spells tab
-
-  /** The respec, built lazily and only for a character who has a build to respend. */
-  let respec = null;
-  function drawSpells() {
-    const player = getPlayer();
-    const build = player?.build;
-    if (!build?.custom || !classbuildData) {
-      const ids = skillData?.classes?.[player?.classId] || [];
-      const at = skillData?.unlockAt || [1, 3, 6, 12, 18, 24];
-      return [pane('Your six', [
-        // R20 — "a choice you can take back" is no longer free, so it no longer says free
-        el('div', { class: 'flw-note', text: `${player?.classLabel || 'This class'} comes with a fixed six, unlocking as you level. Build your own class on the title screen and each one is a choice — made at the level it opens at, and undone by an Unbinder in town.` }),
-        ...ids.map((id, i) => row(skillData?.skills?.[id]?.name || id, `Level ${at[i]}`, skillData?.skills?.[id]?.desc || '')),
-      ])];
-    }
-    if (!respec) {
-      respec = createClassBuilder({
-        classData, skillData, classLooks, data: classbuildData, build,
-        getPlayer, forest, embedded: true, mount: respecBox,
-        tabs: [{ key: 'spells', name: 'Spells' }],
-        /**
-         * R20 — and it is level-gated, like every other door onto the same screen.
-         *
-         * This tab and the character sheet's spell chooser are the SAME builder with different
-         * framing, so a level passed in one place and not the other would have left this one as a
-         * way to fill all six slots at level 1. `inGame` also drops the "Not finished" gate, which
-         * cannot apply to a character already out in the world.
-         */
-        getLevel: () => getPlayer()?.level || 1,
-        inGame: true,
-        /**
-         * THE RESPEC HAS TO REACH THE KEYS, NOT ONLY THE SCREEN.
-         *
-         * `installCustomClass` rewrites `skillData.classes.custom`, and `createSkillBar` read that
-         * list once at boot — so without `relearn` the screen would show the new spell and key 3
-         * would still fire the old one. That is a change that looks applied and is not, which is
-         * the worst kind and the one this round keeps finding.
-         */
-        onChange: b => {
-          installCustomClass({ classData, skillData, classLooks, data: classbuildData, build: b });
-          skills?.relearn?.(skillData.classes[classbuildData.custom?.id || 'custom']);
-          player.build = b;
-        },
-      });
-      respec.show('spells');
-    }
-    // the builder owns its own root inside `body`, so this tab draws nothing else
-    respec.draw();
-    return null;
-  }
-
   // ------------------------------------------------------------------ drawing
 
   function draw() {
@@ -276,22 +209,12 @@ export function createFollowersScreen({
     for (const [key, btn] of railButtons) btn.classList.toggle('on', key === tab);
     const r = followers?.report?.() || { limit: 3, used: 0, free: 3, followers: [], waiting: [], ladder: [], perType: 1 };
     subtitle.textContent = `${r.used} of ${r.limit} slots · level ${r.level || 1}`;
-    if (tab === 'spells') {
-      const panes = drawSpells();
-      body.textContent = '';
-      body.hidden = !panes;
-      respecBox.hidden = !!panes;
-      if (panes) body.appendChild(el('div', { class: 'flw-grid' }, panes));
-      return;
-    }
-    respecBox.hidden = true;
-    body.hidden = false;
     body.textContent = '';
     const panes = tab === 'company' ? drawCompany(r) : drawHire(r);
     body.appendChild(el('div', { class: 'flw-grid' }, panes));
   }
 
-  function show(which = null) { if (which) tab = which; open = true; root.hidden = false; draw(); }
+  function show(which = null) { if (which && FOLLOWER_TABS.some(t => t.key === which)) tab = which; open = true; root.hidden = false; draw(); }
   function hide() { open = false; root.hidden = true; }
   function toggle(which = null) { if (open) hide(); else show(which); }
 

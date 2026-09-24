@@ -96,5 +96,3 @@
 }
 
 /* the respec's box, which lives beside the tab body rather than inside it — see js/followers-ui.js */
-.flw-respec { overflow: auto; min-height: 0; }
-.flw-respec[hidden] { display: none !important; }

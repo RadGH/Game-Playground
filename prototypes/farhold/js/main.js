@@ -3180,9 +3180,6 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return town ? { town, name: town.name } : null;
     },
     log: (t, k) => hud.log(t, k),
-    // the Spells tab is the in-game respec, and it needs the live bar or a changed pick would
-    // reach the screen and not the keys
-    classData, skillData, classLooks, classbuildData, skills, forest: rpg.forest,
   });
   hud.mount('followers', company);
 

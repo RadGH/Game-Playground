@@ -23,6 +23,9 @@ import { createSky } from './sky.js';
 import { createProps } from './props.js';
 import { createFeatures } from './features.js';
 import { createWeatherView } from './weather.js';
+// R23 — the graphics round: post-processing, the sky table, height fog, one wind, GPU rain and grass
+import { createGraphics } from './graphics.js';
+import { resolveGraphics } from './gfx.js';
 import { createCombatFx } from './combat-fx.js';
 import { createSunFx } from './sunfx.js';
 import { createDebugMenu } from './debug.js';
@@ -480,7 +483,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   await frame();
 
   // ---------------------------------------------------------------- renderer
-  const renderer = new THREE.WebGLRenderer({ antialias: !lowQuality, logarithmicDepthBuffer: true });
+  // R23: with the picture pipeline on, the frame is multisampled in its own HDR target and the
+  // canvas only ever receives one full-screen quad, so canvas antialiasing would be wasted work
+  const bootGraphics = resolveGraphics(settings.get('graphics'), { lowQuality, override: params.get('graphics') });
+  const renderer = new THREE.WebGLRenderer({ antialias: !lowQuality && !bootGraphics.postfx, logarithmicDepthBuffer: true });
   renderer.setPixelRatio(lowQuality ? 1 : Math.min(2, window.devicePixelRatio || 1));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.autoClear = false;
@@ -528,9 +534,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     waypointLit: id => waypoints?.isLit?.(id),
     palette, seed, radius: lowQuality ? 1500 : (balance.features?.radius ?? 2600),
   });
-  let weatherView = createWeatherView({
-    scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
+  // R23 — see js/graphics.js. `world` is read through a getter because every one of these is rebuilt
+  // when you land somewhere else.
+  const graphics = createGraphics({
+    renderer, scene, camera, settings, lowQuality, seed, override: params.get('graphics'),
+    world: () => ({ sky, terrain, view, props, features }),
   });
+  let weatherView = createWeatherView({
+    scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high', ...graphics.weatherOpts(),
+  });
+  graphics.setWeatherView(weatherView);
 
   // phase 7: sound and speech. Both start silent and come up on the first click, because a
   // browser will not give a page an audio context until somebody has interacted with it.
@@ -936,6 +949,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
       }
       if ((!key || key === 'sunfx') && sunfx) sunfx.setEnabled(v.sunfx);
+      // R23: Off / Low / High (js/gfx.js). `?quality=low` holds it at Off and `?graphics=` wins over both.
+      if (!key || key === 'graphics') graphics.setLevel(v.graphics);
       // D15: the field of view. settings.js used to reach for `window.farhold.camera` on a timer,
       // because the agent that added it could not edit this file — it has the camera handed to it.
       if ((!key || key === 'fov') && camera?.isPerspectiveCamera && camera.fov !== v.fov) {
@@ -6245,8 +6260,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       && terrain.slopeAt(x, z, 4) <= 0.5,
   });
     weatherView = createWeatherView({
-      scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high',
+      scene, skyScene: sky.scene, palette, seed, quality: lowQuality ? 'low' : 'high', ...graphics.weatherOpts(),
     });
+    graphics.setWeatherView(weatherView);
+    graphics.rebind();
 
     control = createController(terrain, balance, camera, {
       obstacles: [props.solids, features.solids, buildSolids, gateSolids, siteSolids], settings,
@@ -6722,7 +6739,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       const blend = air.spaceBlend();
       // the sky drains to black on the way up and fills back in on the way down
-      sky.update(state.elapsed, { gloom: blend, cloud: blended.cloud, longitude: air.state.x / terrain.widthM });
+      // R23: `space` drains the sky table to black from the top down (js/sky-palette.js) and takes the
+      // height fog with it, so orbit has no fog wall; a little gloom still steals the light
+      sky.update(state.elapsed, { gloom: blend * 0.3, space: blend, cloud: blended.cloud, longitude: air.state.x / terrain.widthM });
+      graphics.update(dt, { mode, blended, space: blend, x: air.state.x, z: air.state.z, y: air.state.y });
       sky.sunLight.intensity *= 1 - blend * 0.35;
       scene.fog.near = 40 + blend * 4000;
       scene.fog.far = 7000 + blend * 40000;
@@ -6933,6 +6953,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
   /** Draw whichever world we are in. */
   function renderFrame() {
+    // R23: through js/postfx.js — an HDR frame, bloom, shafts, ACES and the grade — or, with the
+    // Graphics setting Off, straight to the screen exactly as before
+    graphics.render(mode, () => {
     renderer.clear();
     if (mode === 'ground' || mode === 'launch' || mode === 'air') {
       // Underground there is no sky to draw — just black behind the walls, which is what a dungeon
@@ -6945,6 +6968,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     } else {
       renderer.render(space.scene, camera);
     }
+    });
     document.body.dataset.ready = '1';
     state.ready = true;
   }
@@ -7687,6 +7711,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   function resize() {
     const w = window.innerWidth, h = window.innerHeight;
     renderer.setSize(w, h, false);
+    graphics.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
@@ -8999,9 +9024,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
 
     const daylight = Math.max(0, Math.min(1, sky.sunDirection.y * 1.4));
     sky.update(state.elapsed, { gloom: blended.gloom, flash: weatherView.state.flash, cloud: blended.cloud, longitude: control.x / terrain.widthM });
+    graphics.update(dt, { mode, blended, indoors: !!dungeon, x: control.x, z: control.z, y: control.y });
     // the sky writes the ambient colour every frame, so underground has to have the last word
     if (dungeon) light.update(0, control, { day: 0, inside: true, ambient: sky.ambient });
-    weatherView.update(dt, blended, { camera, daylight, sunDir: sky.sunDirection, baseFogColor: sky.fog.color });
+    weatherView.update(dt, blended, { camera, daylight, sunDir: sky.sunDirection, baseFogColor: sky.fog.color, ...graphics.weatherCtx() });
     sunfx.update({
       camera, sunDirection: sky.sunDirection, dt,
       cloud: blended.cloud, eclipse: sky.eclipse.solar, day: daylight,
@@ -9817,6 +9843,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     get features() { return features; },
     get view() { return view; },
     get sky() { return sky; },
+    /** R23: the graphics round — the setting, the pipeline, the wind, the fog, the grass. */
+    get graphics() { return graphics; },
     get world() { return world; },
     /** R14: which mark a place wears, so a test can prove the landmarks are drawn at all. */
     mapMarkFor,

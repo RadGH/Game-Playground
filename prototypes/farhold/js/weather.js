@@ -4,17 +4,35 @@
 // This file draws it: cloud decks in the sky scene, rain, snow and blown dust around the camera,
 // lightning that actually lights the ground, and the fog and gloom that a heavy sky brings with it.
 //
-//   const view = createWeatherView({ scene, skyScene, palette, seed });
-//   view.update(dt, clock.blend(), { camera, sunDir, daylight });
+//   const view = createWeatherView({ scene, skyScene, palette, seed, wind, gfx, terrain });
+//   view.update(dt, clock.blend(), { camera, sunDir, daylight, sky: sky.state });
 //   scene.fog.color.copy(view.fogColor); scene.fog.far = view.fogFar;
 //
 // Clouds live in the sky scene (the one drawn with a camera at the origin), so they sit between you
-// and the planets overhead and never clip into a mountain. Precipitation lives in the world scene
-// and is recycled in a box that follows the camera — a few thousand particles are enough when they
-// only ever exist within 40 m of your face.
+// and the planets overhead and never clip into a mountain. Precipitation lives in the world scene.
+//
+// R23 — THE ROUND THIS FILE GOT ATMOSPHERE:
+//
+//   * ONE WIND. Everything that moves in the wind reads `wind` (js/wind.js): the rain's lean, the
+//     snow's drift, the dust, which way the cloud deck crosses the sky, and — through
+//     js/atmosphere.js — the trees and the grass. It used to be a strength with no direction at all,
+//     so the rain slanted along +x, the dust blew along +x, and the clouds scrolled round the zenith.
+//   * THE CLOUDS CROSS THE SKY. The deck's texture was wrapped onto the dome by its own u/v, so
+//     scrolling it turned the clouds round the zenith like a record. It is now projected as a flat
+//     sheet overhead (`dir.xz / dir.y`), which is what a cloud layer is: scrolling moves them across
+//     the sky downwind, and they bunch toward the horizon the way real ones do.
+//   * CLOUDS LIT FROM BELOW. At sunset the underside of a deck takes the sky table's sunset colours —
+//     gold and orange on the sun's side, rose and violet away from it — and a thin edge near the sun
+//     gets a silver lining that the bloom picks up.
+//   * RAIN, SNOW AND BLOWN THINGS on the graphics card (js/rain.js) whenever the Graphics setting is
+//     Low or High. Off keeps the line rain below, now leaning with the wind.
+//   * LIGHTNING that flickers the way it does — a strike, a gap, a second stroke — with a bolt bright
+//     enough (on the HDR frame) to bloom.
 
 import * as THREE from 'three';
 import { makeNoise2D, subSeed, clamp, lerp } from '../../../worldgen/js/noise.js';
+import { createWind, rainVelocity, snowDrift, debrisVelocity, cloudDrift } from './wind.js';
+import { createPrecipitation } from './rain.js';
 
 const DOME = 1000;
 
@@ -53,33 +71,87 @@ function cloudCanvas(seed, size = 256, sharpness = 1) {
 }
 
 /**
- * opts: { scene (world), skyScene, palette (from worldgen weather.js atmospherePalette), seed,
- *         quality ('low' halves every particle budget) }
+ * The deck's shader: a flat sheet overhead, lit from below at sunset, with a silver lining.
+ * `uniforms` are the deck's own; the hook is kept as a named function so every deck shares one
+ * compiled program.
  */
-export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, quality = 'high' } = {}) {
+function deckShader(uniforms) {
+  return function farholdCloudDeck(shader) {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vFhSkyDir;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvFhSkyDir = position;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>
+        varying vec3 vFhSkyDir;
+        uniform vec2 uCloudOffset;
+        uniform float uCloudScale, uCloudDusk;
+        uniform vec3 uCloudSun, uCloudUnder, uCloudAnti, uCloudSilver;`)
+      .replace('#include <map_fragment>', `
+        vec3 fhD = normalize( vFhSkyDir );
+        vec2 fhUv = fhD.xz / max( fhD.y, 0.07 ) * uCloudScale - uCloudOffset;
+        vec4 sampledDiffuseColor = texture2D( map, fhUv );
+        diffuseColor *= sampledDiffuseColor;
+        // thin out into the haze at the horizon rather than ending at the dome's rim
+        diffuseColor.a *= smoothstep( 0.015, 0.2, fhD.y );
+        float fhCs = max( dot( fhD, uCloudSun ), 0.0 );
+        vec2 fhDh = fhD.xz / max( length( fhD.xz ), 1e-4 );
+        vec2 fhSh = uCloudSun.xz / max( length( uCloudSun.xz ), 1e-4 );
+        float fhSide = dot( fhDh, fhSh ) * 0.5 + 0.5;
+        float fhLow = 1.0 - smoothstep( 0.02, 0.6, fhD.y );
+        vec3 fhUnder = mix( uCloudAnti, uCloudUnder, fhSide * fhSide );
+        diffuseColor.rgb = mix( diffuseColor.rgb, fhUnder, uCloudDusk * ( 0.35 + 0.65 * fhLow ) );
+        float fhThin = 1.0 - sampledDiffuseColor.a;
+        diffuseColor.rgb += uCloudSilver * pow( fhCs, 10.0 ) * ( 0.25 + fhThin * 1.5 );`);
+  };
+}
+
+/**
+ * opts: { scene (world), skyScene, palette (from worldgen weather.js atmospherePalette), seed,
+ *         quality ('low' halves every particle budget), wind (js/wind.js — THE wind; one is made if
+ *         none is given), gfx (js/gfx.js — whether the GPU rain and snow are on), terrain (for the
+ *         splashes and the ground under the rain; an object or a function returning one) }
+ */
+export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, quality = 'high', wind = null, gfx = null, terrain = null } = {}) {
   const low = quality === 'low';
   const cloudColor = new THREE.Color(palette.cloud || '#dfe6ee');
   const shadowColor = new THREE.Color(palette.cloudShadow || '#8d97a3');
+  // the ONE wind — main.js passes the shared object; a view on its own makes its own
+  const ownWind = !wind;
+  wind = wind || createWind({ seed });
+  const groundOf = () => (typeof terrain === 'function' ? terrain() : terrain);
 
   // ---------------------------------------------------------------- cloud decks
   const decks = [];
-  for (const [i, spec] of [[0, { radius: 640, repeat: 3, speed: 0.004, sharp: 1.5 }], [1, { radius: 720, repeat: 2, speed: 0.0022, sharp: 2.2 }]]) {
+  for (const [i, spec] of [[0, { radius: 640, scale: 0.9, speed: 1, sharp: 1.5 }], [1, { radius: 720, scale: 0.55, speed: 0.6, sharp: 2.2 }]]) {
     const tex = new THREE.CanvasTexture(cloudCanvas(seed + i * 977, low ? 128 : 256, spec.sharp));
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(spec.repeat, spec.repeat);
+    const uniforms = {
+      uCloudOffset: { value: new THREE.Vector2() }, uCloudScale: { value: spec.scale },
+      uCloudDusk: { value: 0 }, uCloudSun: { value: new THREE.Vector3(0, 1, 0) },
+      uCloudUnder: { value: new THREE.Color(1, 0.6, 0.4) }, uCloudAnti: { value: new THREE.Color(0.7, 0.5, 0.6) },
+      uCloudSilver: { value: new THREE.Color(0, 0, 0) },
+    };
+    const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0, side: THREE.BackSide });
+    material.onBeforeCompile = deckShader(uniforms);
+    material.customProgramCacheKey = () => 'farhold-cloud-deck-v2';
     const mesh = new THREE.Mesh(
       // an upper dome only: clouds belong above the horizon, not wrapped around your ankles
       new THREE.SphereGeometry(spec.radius, low ? 20 : 36, low ? 10 : 18, 0, Math.PI * 2, 0, Math.PI * 0.54),
-      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0, side: THREE.BackSide }),
+      material,
     );
     mesh.renderOrder = 5 + i;
     mesh.frustumCulled = false;
     mesh.name = 'farhold-clouds-' + i;
     skyScene.add(mesh);
-    decks.push({ mesh, tex, speed: spec.speed });
+    decks.push({ mesh, tex, uniforms, speed: spec.speed, offset: [Math.random() * 10, Math.random() * 10] });
   }
 
-  // ---------------------------------------------------------------- precipitation
+  // ---------------------------------------------------------------- precipitation on the card
+  const wantsPrecip = g => !!g && (g.rainDrops > 0 || g.snowFlakes > 0 || g.debris > 0);
+  let precip = wantsPrecip(gfx) ? createPrecipitation(scene, gfx) : null;
+
+  // ---------------------------------------------------------------- precipitation, the old way
   const BOX = 44;                                   // metres of rain that exist at any moment
   const rainCount = low ? 700 : 2000;
   const rainPos = new Float32Array(rainCount * 2 * 3);
@@ -92,11 +164,11 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
   }
   const rainGeom = new THREE.BufferGeometry();
   rainGeom.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
-  const rain = new THREE.LineSegments(rainGeom, new THREE.LineBasicMaterial({ color: 0xa8c4dd, transparent: true, opacity: 0 }));
-  rain.frustumCulled = false;
-  rain.visible = false;
-  rain.name = 'farhold-rain';
-  scene.add(rain);
+  const lineRain = new THREE.LineSegments(rainGeom, new THREE.LineBasicMaterial({ color: 0xa8c4dd, transparent: true, opacity: 0 }));
+  lineRain.frustumCulled = false;
+  lineRain.visible = false;
+  lineRain.name = 'farhold-rain';
+  scene.add(lineRain);
 
   const flakeCount = low ? 500 : 1400;
   const flakePos = new Float32Array(flakeCount * 3);
@@ -136,14 +208,14 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
 
   const flakeGeom = new THREE.BufferGeometry();
   flakeGeom.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
-  const snow = new THREE.Points(flakeGeom, new THREE.PointsMaterial({
+  const pointSnow = new THREE.Points(flakeGeom, new THREE.PointsMaterial({
     color: 0xffffff, size: 0.26, transparent: true, opacity: 0, sizeAttenuation: true,
     map: SPRITE, depthWrite: false,
   }));
-  snow.frustumCulled = false;
-  snow.visible = false;
-  snow.name = 'farhold-snow';
-  scene.add(snow);
+  pointSnow.frustumCulled = false;
+  pointSnow.visible = false;
+  pointSnow.name = 'farhold-snow';
+  scene.add(pointSnow);
 
   const dustCount = low ? 400 : 1100;
   const dustPos = new Float32Array(dustCount * 3);
@@ -165,10 +237,13 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
   dust.name = 'farhold-dust';
   scene.add(dust);
 
+
   // ---------------------------------------------------------------- lightning
   const boltGeom = new THREE.BufferGeometry();
   boltGeom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(18 * 2 * 3), 3));
-  const bolt = new THREE.LineSegments(boltGeom, new THREE.LineBasicMaterial({ color: 0xdfeaff, transparent: true, opacity: 0 }));
+  // brighter than white on purpose: on the HDR frame the bloom turns this into a glowing channel
+  const boltColor = new THREE.Color(0xdfeaff).multiplyScalar(precip ? 6 : 1);
+  const bolt = new THREE.LineSegments(boltGeom, new THREE.LineBasicMaterial({ color: boltColor, transparent: true, opacity: 0 }));
   bolt.frustumCulled = false;
   bolt.visible = false;
   bolt.renderOrder = 9;
@@ -177,6 +252,8 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
   let nextStrike = 4 + Math.random() * 8;
   let flash = 0;
   let boltLife = 0;
+  // a strike is rarely one flash: a stroke, a gap of a tenth of a second, and a second stroke
+  let restrike = -1;
 
   /** Draw a fresh zig-zag somewhere in the sky. */
   function strike() {
@@ -195,6 +272,7 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
     boltGeom.attributes.position.needsUpdate = true;
     boltLife = 0.16;
     flash = 1;
+    restrike = Math.random() < 0.65 ? 0.09 + Math.random() * 0.12 : -1;
   }
 
   const state = {
@@ -207,87 +285,123 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
     gloom: 0,
     lastStrike: 0,
     strikes: 0,
+    /** R23: what the GPU precipitation is doing (null when the Graphics setting is Off). */
+    precip: null,
   };
 
-  const tmp = new THREE.Vector3();
+  const white = new THREE.Color(0xffffff);
+  const rainLit = new THREE.Color();
+  const setC = (c, v) => (v ? c.setRGB(v[0], v[1], v[2], THREE.SRGBColorSpace) : c);
 
   /**
    * dt in seconds, `w` is the blended weather from WeatherClock.blend(),
-   * ctx: { camera, sunDir, daylight (0..1), baseFogColor }
+   * ctx: { camera, sunDir, daylight (0..1), baseFogColor, sky (js/sky.js `state`), indoors, biome,
+   *        viewHeight (drawing-buffer pixels, for the snow's point size) }
    */
   function update(dt, w = {}, ctx = {}) {
     const camera = ctx.camera;
     const daylight = ctx.daylight ?? 1;
     const cloud = clamp(w.cloud ?? 0, 0, 1);
-    const wind = clamp(w.wind ?? 0, 0, 1);
+    if (ownWind) wind.update(dt, w.wind ?? 0);
+    const sky = ctx.sky || null;
 
-    // --- cloud decks: thicker cover means more opaque and darker, and they scroll with the wind
+    // --- cloud decks: thicker cover means more opaque and darker, and they cross the sky downwind
+    const drift = cloudDrift(wind);
     for (const [i, deck] of decks.entries()) {
       const opacity = clamp(cloud * (i === 0 ? 0.95 : 0.6), 0, 1);
       deck.mesh.material.opacity = opacity;
       deck.mesh.visible = opacity > 0.01;
-      deck.tex.offset.x += deck.speed * (0.3 + wind * 2.6) * dt * 60 * 0.016;
-      deck.tex.offset.y += deck.speed * 0.28 * dt * 60 * 0.016;
-      // lit from above by day, and darker underneath the heavier the deck
-      const lit = 0.35 + daylight * 0.65;
+      deck.offset[0] = (deck.offset[0] + drift.u * deck.speed * dt) % 1000;
+      deck.offset[1] = (deck.offset[1] + drift.v * deck.speed * dt) % 1000;
+      deck.uniforms.uCloudOffset.value.set(deck.offset[0], deck.offset[1]);
+      deck.tex.offset.set(deck.offset[0], deck.offset[1]);
+      // lit from above by day, and darker underneath the heavier the deck; moonlit, not black, at night
+      const lit = 0.18 + daylight * 0.82;
       deck.mesh.material.color.copy(cloudColor).lerp(shadowColor, cloud * 0.55).multiplyScalar(lit);
+      if (ctx.sunDir) deck.uniforms.uCloudSun.value.copy(ctx.sunDir);
+      if (sky) {
+        // the underside at sunset: the sky's own low bands, a little brighter than the sky itself
+        setC(deck.uniforms.uCloudUnder.value, sky.low).lerp(setC(rainLit, sky.horizon), 0.5).multiplyScalar(1.1);
+        setC(deck.uniforms.uCloudAnti.value, sky.aLow).multiplyScalar(0.95);
+        deck.uniforms.uCloudDusk.value = clamp(sky.dusk, 0, 1) * (1 - (sky.gloom || 0) * 0.6);
+        const silver = (precip ? 2.2 : 0.7) * clamp((ctx.sunDir?.y ?? 0) * 5 + 0.3, 0, 1) * (1 - cloud * 0.5);
+        setC(deck.uniforms.uCloudSilver.value, sky.sun).multiplyScalar(silver);
+      }
     }
 
-    // --- precipitation, recycled in a box that follows the camera
+    // --- the rain's colour: the sky it falls out of, lit by any lightning
+    if (sky) setC(rainLit, sky.mid).lerp(setC(state.fogColor.clone(), sky.fog), 0.5).multiplyScalar(0.6 + daylight * 0.6);
+    else rainLit.set(0xa8c4dd);
+
     const rainAmount = clamp(w.rain ?? 0, 0, 1);
-    rain.visible = rainAmount > 0.01;
-    rain.material.opacity = rainAmount * 0.55;
-    if (rain.visible && camera) {
+    const snowAmount = clamp(w.snow ?? 0, 0, 1);
+    const useGpu = !!precip;
+    if (useGpu) {
+      state.precip = precip.update(dt, {
+        camera, weather: w, wind, terrain: groundOf(), colour: rainLit, flash: state.flash,
+        indoors: !!ctx.indoors, biome: ctx.biome, daylight: 0.35 + daylight * 0.65,
+        viewHeight: ctx.viewHeight, fogColour: state.fogColor,
+      });
+    }
+
+    // --- the old line rain, now leaning with the wind (Graphics: Off)
+    lineRain.visible = !useGpu && rainAmount > 0.01;
+    lineRain.material.opacity = rainAmount * 0.55;
+    if (lineRain.visible && camera) {
       const pos = rainGeom.attributes.position.array;
-      const slant = wind * 10;
+      const v = rainVelocity(wind, 30);
+      const sx = v.x / 30, sz = v.z / 30;
       for (let i = 0; i < rainCount; i++) {
         const fall = rainVel[i] * dt * (0.5 + rainAmount);
         for (const k of [0, 1]) {
           pos[i * 6 + k * 3 + 1] -= fall;
-          pos[i * 6 + k * 3] += slant * dt;
+          pos[i * 6 + k * 3] += sx * fall;
+          pos[i * 6 + k * 3 + 2] += sz * fall;
         }
         if (pos[i * 6 + 1] < 0) {
           const x = (Math.random() - 0.5) * BOX, z = (Math.random() - 0.5) * BOX;
           pos[i * 6] = x; pos[i * 6 + 1] = BOX; pos[i * 6 + 2] = z;
-          pos[i * 6 + 3] = x + slant * 0.03; pos[i * 6 + 4] = BOX - 0.75; pos[i * 6 + 5] = z;
+          pos[i * 6 + 3] = x - sx * 0.75; pos[i * 6 + 4] = BOX - 0.75; pos[i * 6 + 5] = z - sz * 0.75;
         }
       }
       rainGeom.attributes.position.needsUpdate = true;
-      rain.position.set(camera.position.x, camera.position.y - BOX / 2, camera.position.z);
+      lineRain.position.set(camera.position.x, camera.position.y - BOX / 2, camera.position.z);
     }
 
-    const snowAmount = clamp(w.snow ?? 0, 0, 1);
-    snow.visible = snowAmount > 0.01;
-    snow.material.opacity = snowAmount * 0.9;
-    if (snow.visible && camera) {
+    pointSnow.visible = !useGpu && snowAmount > 0.01;
+    pointSnow.material.opacity = snowAmount * 0.9;
+    if (pointSnow.visible && camera) {
       const pos = flakeGeom.attributes.position.array;
+      const d = snowDrift(wind);
       for (let i = 0; i < flakeCount; i++) {
         pos[i * 3 + 1] -= (1.1 + snowAmount * 2.4) * dt;
-        pos[i * 3] += flakeDrift[i * 2] * (0.4 + wind * 5) * dt;
-        pos[i * 3 + 2] += flakeDrift[i * 2 + 1] * (0.4 + wind * 5) * dt;
-        if (pos[i * 3 + 1] < 0) {
+        pos[i * 3] += (d.x + flakeDrift[i * 2] * 0.4) * dt;
+        pos[i * 3 + 2] += (d.z + flakeDrift[i * 2 + 1] * 0.4) * dt;
+        if (pos[i * 3 + 1] < 0 || Math.abs(pos[i * 3]) > BOX / 2 || Math.abs(pos[i * 3 + 2]) > BOX / 2) {
           pos[i * 3] = (Math.random() - 0.5) * BOX;
           pos[i * 3 + 1] = BOX;
           pos[i * 3 + 2] = (Math.random() - 0.5) * BOX;
         }
       }
       flakeGeom.attributes.position.needsUpdate = true;
-      snow.position.set(camera.position.x, camera.position.y - BOX / 2, camera.position.z);
+      pointSnow.position.set(camera.position.x, camera.position.y - BOX / 2, camera.position.z);
     }
 
     const dustAmount = clamp(w.dust ?? 0, 0, 1);
-    dust.visible = dustAmount > 0.01;
+    dust.visible = dustAmount > 0.01 && !ctx.indoors;
     dust.material.opacity = dustAmount * 0.5;
     if (dust.visible && camera) {
       const pos = dustGeom.attributes.position.array;
+      const v = debrisVelocity(wind);
+      const k = 1 + dustAmount * 1.5;
       for (let i = 0; i < dustCount; i++) {
-        pos[i * 3] += (7 + wind * 26) * dt;
+        pos[i * 3] += v.x * k * dt;
+        pos[i * 3 + 2] += v.z * k * dt;
         pos[i * 3 + 1] -= 0.4 * dt;
-        if (pos[i * 3] > BOX / 2 || pos[i * 3 + 1] < 0) {
-          pos[i * 3] = -BOX / 2;
-          pos[i * 3 + 1] = Math.random() * BOX * 0.6;
-          pos[i * 3 + 2] = (Math.random() - 0.5) * BOX;
-        }
+        // wrap in the box round the camera, whichever way it is blowing
+        if (pos[i * 3] > BOX / 2) pos[i * 3] -= BOX; else if (pos[i * 3] < -BOX / 2) pos[i * 3] += BOX;
+        if (pos[i * 3 + 2] > BOX / 2) pos[i * 3 + 2] -= BOX; else if (pos[i * 3 + 2] < -BOX / 2) pos[i * 3 + 2] += BOX;
+        if (pos[i * 3 + 1] < 0) pos[i * 3 + 1] = Math.random() * BOX * 0.6;
       }
       dustGeom.attributes.position.needsUpdate = true;
       dust.position.set(camera.position.x, camera.position.y - BOX * 0.3, camera.position.z);
@@ -304,6 +418,10 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
         state.lastStrike = 0;
       }
     }
+    if (restrike > 0) {
+      restrike -= dt;
+      if (restrike <= 0) { flash = Math.max(flash, 0.8); boltLife = 0.12; restrike = -1; }
+    }
     state.lastStrike += dt;
     if (boltLife > 0) {
       boltLife -= dt;
@@ -319,7 +437,7 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
     state.gloom = clamp(w.gloom ?? 0, 0, 1);
     const fogAmount = clamp(w.fog ?? 0, 0, 1);
     const base = ctx.baseFogColor || state.fogColor;
-    state.fogColor.copy(base).lerp(shadowColor, state.gloom * 0.5).lerp(new THREE.Color(0xffffff), state.flash * 0.6);
+    state.fogColor.copy(base).lerp(shadowColor, state.gloom * 0.5).lerp(white, state.flash * 0.6);
     // clear air sees for miles; a blizzard sees a few dozen metres
     state.fogFar = lerp(7000, 90, Math.pow(fogAmount, 1.35));
     state.fogNear = lerp(300, 2, Math.pow(fogAmount, 1.6));
@@ -327,12 +445,25 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
   }
 
   return {
-    state, decks, rain, snow, dust, bolt,
+    state, decks, dust, bolt, wind, lineRain, pointSnow,
+    // the rain and the snow the rest of the game (and the tests) look at: whichever is drawing
+    get rain() { return precip?.streaks?.mesh || lineRain; },
+    get snow() { return precip?.snow?.mesh || pointSnow; },
+    get precip() { return precip; },
     update,
+    /** R23: the Graphics setting changed — build or drop the GPU precipitation to match. */
+    setGfx(next) {
+      if (wantsPrecip(next) === !!precip && (!precip || next.rainDrops === gfx?.rainDrops)) { gfx = next; return; }
+      precip?.dispose();
+      gfx = next;
+      precip = wantsPrecip(next) ? createPrecipitation(scene, next) : null;
+      bolt.material.color.set(0xdfeaff).multiplyScalar(precip ? 6 : 1);
+    },
     /** Hide the sky's weather — indoors there is none. */
     setVisible(on) {
       for (const d of decks) d.visible = !!on;
-      for (const m of [rain, snow, dust, bolt]) if (m) m.visible = !!on;
+      for (const m of [lineRain, pointSnow, dust, bolt]) if (m) m.visible = !!on;
+      if (!on) precip?.setVisible(false);
     },
     get fogColor() { return state.fogColor; },
     get fogFar() { return state.fogFar; },
@@ -346,8 +477,9 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
     },
     dispose() {
       for (const d of decks) { skyScene.remove(d.mesh); d.mesh.geometry.dispose(); d.mesh.material.dispose(); d.tex.dispose(); }
-      for (const m of [rain, snow, dust]) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
+      for (const m of [lineRain, pointSnow, dust]) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); }
       skyScene.remove(bolt); boltGeom.dispose(); bolt.material.dispose();
+      precip?.dispose();
     },
   };
 }

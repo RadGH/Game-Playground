@@ -28,6 +28,15 @@ export const DEFAULTS = {
   density: 1,                  // how thick the scatter is, up to 6x on a strong card
   grass: true,
   sunfx: true,                 // god rays, lens flare and the sunset wash
+  /**
+   * R23 — GRAPHICS EFFECTS: off, low or high (js/gfx.js says what each one turns on).
+   *
+   * High is the default because the game is played on a strong card; it is the HDR picture with
+   * bloom, light shafts and the colour grade, the GPU grass field, and the fuller rain and snow.
+   * Low keeps the picture pipeline at half the cost; Off is the picture from before round 23.
+   * `?quality=low` (the test harness) always runs at Off.
+   */
+  graphics: 'high',
   sound: true,
   voices: true,
   volume: 0.75,
@@ -196,6 +205,7 @@ const FIELDS = [
   { key: 'viewDistance', label: 'View distance', kind: 'range', min: 1, max: 6, step: 0.5, unit: '×', group: 'Picture' },
   { key: 'density', label: 'Trees and rocks', kind: 'range', min: 0, max: 6, step: 0.25, unit: '×', group: 'Picture' },
   { key: 'grass', label: 'Grass', kind: 'toggle', group: 'Picture' },
+  { key: 'graphics', label: 'Graphics effects', kind: 'choice', options: [['off', 'Off'], ['low', 'Low'], ['high', 'High']], group: 'Picture' },
   { key: 'sunfx', label: 'Sun rays and flare', kind: 'toggle', group: 'Picture' },
   { key: 'damageNumbers', label: 'Damage numbers', kind: 'toggle', group: 'Picture' },
   { key: 'hitStop', label: 'Impact freeze', kind: 'toggle', group: 'Picture' },

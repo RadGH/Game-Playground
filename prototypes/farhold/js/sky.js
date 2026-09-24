@@ -23,6 +23,7 @@ import { clamp } from '../../../worldgen/js/noise.js';
 import { createPlanet, createStar } from '../../../assets/js/space-models.js';
 import { cloudTexture } from '../../../universe/js/texture.js';
 import { atmospherePalette } from '../../../worldgen/js/weather.js';
+import { skyState, paletteShift, hex } from './sky-palette.js';
 
 const DOME = 1000;                 // sky-scene radius; everything sits on this shell
 const EARTH_RADII_PER_AU = 23455;  // 1 AU / Earth's radius — turns "radius in Earths" into AU
@@ -100,7 +101,9 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   // the loose stars stay transparent (they need to fade at dawn), but they DEPTH TEST, so a planet
   // in front of one hides it
   const starMat = new THREE.PointsMaterial({
-    color: 0xdfe8ff, size: DOME * 0.004, sizeAttenuation: true,
+    // R23: smaller — on the HDR frame the bloom gives every star its own halo, and at the old size
+    // they read as snowflakes
+    color: 0xdfe8ff, size: DOME * 0.0026, sizeAttenuation: true,
     transparent: true, opacity: 1, depthWrite: false, depthTest: true,
   });
   const starField = new THREE.Points(starGeom, starMat);
@@ -139,7 +142,7 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   // (bodies live at 0.60-0.98 of the dome), so it veils them the way real air does: a planet low on
   // the horizon goes pale and soft, and in daylight the sky washes the lot out instead of leaving
   // crisp discs stuck on a blue sheet.
-  const airGeom = new THREE.SphereGeometry(DOME * 0.45, 32, 18);
+  const airGeom = new THREE.SphereGeometry(DOME * 0.45, 48, 24);
   {
     // densest at the horizon, thinnest straight up — the same reason a sunset is red
     const pos = airGeom.attributes.position;
@@ -150,25 +153,79 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
     }
     airGeom.setAttribute('density', new THREE.BufferAttribute(dens, 1));
   }
+  /**
+   * R23 — THE SKY IS NINE COLOURS, NOT ONE.
+   *
+   * The shell used to be a single colour with a paler horizon, so a sunset was one flat orange wash
+   * that went straight to black. The colours now come from js/sky-palette.js — five bands up the
+   * side of the sky facing the sun (deep blue, violet, rose, orange, gold at the horizon) and four on
+   * the side away from it (the planet's own shadow and the pink band above it) — and this shader
+   * blends them by where you are looking. `SKY_U` is shared by the two meshes that draw it:
+   *
+   *   backdrop — behind every body, in front of the galaxy. Opaque by day; at night it thins so the
+   *              stars and the galaxy come through with a blue moonlit wash over them. It carries
+   *              the sun's bright core, so a planet or moon in front of the sun really covers it.
+   *   air      — the old veil in FRONT of the bodies, same colours, alpha thickest at the horizon.
+   *              A planet low in the sky goes pale into the same sunset the backdrop is showing.
+   *
+   * The sun's core is HIGH DYNAMIC RANGE (well above 1) when the post-processing chain is on, so the
+   * bloom and the light shafts have something to work with; without the chain it stays at zero and
+   * the star model is what you see, as before.
+   */
+  const SKY_U = {
+    uZenith: { value: new THREE.Color() }, uUpper: { value: new THREE.Color() }, uMid: { value: new THREE.Color() },
+    uLow: { value: new THREE.Color() }, uHorizon: { value: new THREE.Color() },
+    uAUpper: { value: new THREE.Color() }, uAMid: { value: new THREE.Color() }, uALow: { value: new THREE.Color() },
+    uAHorizon: { value: new THREE.Color() }, uGlow: { value: new THREE.Color() }, uSunCol: { value: new THREE.Color() },
+    uSunDir: { value: new THREE.Vector3(0, 1, 0) },
+    uGlowAmt: { value: 1 }, uDisc: { value: 0 }, uBackdrop: { value: 1 },
+  };
+  const SKY_PARS = /* glsl */`
+    uniform vec3 uZenith, uUpper, uMid, uLow, uHorizon, uAUpper, uAMid, uALow, uAHorizon, uGlow, uSunCol;
+    uniform vec3 uSunDir;
+    uniform float uGlowAmt, uDisc;
+    varying vec3 vDir;
+    vec3 skyBands( vec3 d ) {
+      float e = max( d.y, 0.0 );
+      vec3 s = mix( uHorizon, uLow, smoothstep( 0.0, 0.07, e ) );
+      s = mix( s, uMid, smoothstep( 0.05, 0.24, e ) );
+      s = mix( s, uUpper, smoothstep( 0.2, 0.52, e ) );
+      s = mix( s, uZenith, smoothstep( 0.46, 1.0, e ) );
+      vec3 a = mix( uAHorizon, uALow, smoothstep( 0.0, 0.09, e ) );
+      a = mix( a, uAMid, smoothstep( 0.07, 0.27, e ) );
+      a = mix( a, uAUpper, smoothstep( 0.22, 0.56, e ) );
+      a = mix( a, uZenith, smoothstep( 0.46, 1.0, e ) );
+      vec2 dh = d.xz / max( length( d.xz ), 1e-4 );
+      vec2 sh = uSunDir.xz / max( length( uSunDir.xz ), 1e-4 );
+      float side = smoothstep( 0.0, 1.0, dot( dh, sh ) * 0.5 + 0.5 );
+      vec3 c = mix( a, s, side );
+      // under the horizon the haze darkens toward the ground (seen from the air, or over the sea)
+      c *= mix( 1.0, 0.55, smoothstep( 0.0, -0.3, d.y ) );
+      float cs = max( dot( d, uSunDir ), 0.0 );
+      c += uGlow * ( pow( cs, 8.0 ) * 0.5 + pow( cs, 64.0 ) * 1.1 ) * uGlowAmt;
+      c += uSunCol * smoothstep( 0.99965, 0.99988, cs ) * uDisc;
+      return c;
+    }`;
+  const SKY_VERT = /* glsl */`
+    attribute float density;
+    varying float vD;
+    varying vec3 vDir;
+    void main() {
+      vD = density;
+      vDir = normalize( position );
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }`;
   const airMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uColor: { value: new THREE.Color(0x7fb0d8) },
-      uHorizon: { value: new THREE.Color(0xd8e4f0) },
-      uStrength: { value: 0 },
-    },
-    vertexShader: `
-      attribute float density;
+    uniforms: { ...SKY_U, uStrength: { value: 0 } },
+    vertexShader: SKY_VERT,
+    fragmentShader: SKY_PARS + /* glsl */`
+      uniform float uStrength;
       varying float vD;
       void main() {
-        vD = density;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }`,
-    fragmentShader: `
-      uniform vec3 uColor; uniform vec3 uHorizon; uniform float uStrength;
-      varying float vD;
-      void main() {
-        vec3 c = mix(uColor, uHorizon, vD * 0.6);
-        gl_FragColor = vec4(c, clamp(uStrength * (0.28 + vD * 0.72), 0.0, 0.97));
+        vec3 c = skyBands( normalize( vDir ) );
+        gl_FragColor = vec4( c, clamp( uStrength * ( 0.28 + vD * 0.72 ), 0.0, 0.97 ) );
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
       }`,
     side: THREE.BackSide, transparent: true, depthWrite: false, depthTest: false,
   });
@@ -176,6 +233,31 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   air.frustumCulled = false;
   air.renderOrder = 2000;              // drawn last, so it is genuinely over the bodies
   scene.add(air);
+
+  const backdropGeom = new THREE.SphereGeometry(DOME * 2.2, 48, 24);
+  backdropGeom.setAttribute('density', new THREE.BufferAttribute(new Float32Array(backdropGeom.attributes.position.count), 1));
+  const backdropMat = new THREE.ShaderMaterial({
+    uniforms: SKY_U,
+    vertexShader: SKY_VERT,
+    fragmentShader: SKY_PARS + /* glsl */`
+      uniform float uBackdrop;
+      varying float vD;
+      void main() {
+        gl_FragColor = vec4( skyBands( normalize( vDir ) ), uBackdrop );
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
+    side: THREE.BackSide, depthWrite: false, depthTest: false,
+    // NOT transparent — see the galaxy's note: a transparent backdrop would draw after every opaque
+    // body. Opaque with its own blend function, it sorts with the galaxy and still blends over it.
+    transparent: false, blending: THREE.CustomBlending,
+    blendSrc: THREE.SrcAlphaFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+  });
+  const backdrop = new THREE.Mesh(backdropGeom, backdropMat);
+  backdrop.frustumCulled = false;
+  backdrop.renderOrder = -1990;
+  backdrop.name = 'farhold-sky-backdrop';
+  scene.add(backdrop);
 
   // ------------------------------------------------------------------ the neighbours
   /** Every body we draw in the sky: the other planets of this system, plus our own moons. */
@@ -232,10 +314,18 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
   // ------------------------------------------------------------------ colours
   // the planet's own sky, varied per world by worldgen's palette (two lava worlds are not the
   // same lava world)
-  const dayColor = new THREE.Color(palette.sky || planet?.skyColor || '#7fb0d8');
-  const duskColor = new THREE.Color(palette.skyHorizon || '#d8783c');
+  // the planet's own sky, varied per world by worldgen's palette (two lava worlds are not the
+  // same lava world). R23: the palette now TURNS the whole sky table round the colour wheel
+  // (js/sky-palette.js), so this world's sunsets are its own and not an Earth sunset pasted on.
+  const skyPalette = { ...palette, sky: palette.sky || planet?.skyColor || '#7fb0d8' };
+  const shift = paletteShift(skyPalette);
+  const cloudGrey = hex(palette.cloudShadow || '#6a7079');
   const nightColor = new THREE.Color('#050810');
   const skyColor = new THREE.Color();
+  /** The last table reading — js/postfx.js grades the picture from it, js/weather.js lights clouds. */
+  let skyNow = null;
+  const setBand = (u, c) => u.value.setRGB(c[0], c[1], c[2], THREE.SRGBColorSpace);
+  let hdr = false;
   // NOT scene.background any more: the backdrop is the galaxy sphere, and this colour is the air in
   // front of the bodies instead. `scene.background` would have painted over the stars.
   scene.background = null;
@@ -284,26 +374,48 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
 
     const up = Math.max(-1, Math.min(1, sunDir.y));      // -1 midnight … 1 noon
     const day = Math.max(0, up);
-    const dusk = Math.max(0, 1 - Math.abs(up) * 4);
-    skyColor.copy(nightColor).lerp(dayColor, day).lerp(duskColor, dusk * 0.55);
-    // heavy weather steals the light and washes the colour out of the sky
-    if (gloom > 0) skyColor.lerp(new THREE.Color(0x6a7079), gloom * 0.6).multiplyScalar(1 - gloom * 0.25);
-    if (flash > 0) skyColor.lerp(new THREE.Color(0xd8e4ff), flash * 0.7);
-    sunLight.intensity = (0.15 + day * 2.1) * (1 - gloom * 0.7) + flash * 1.6;
-    ambient.intensity = (0.16 + day * 0.5) * (1 - gloom * 0.35) + flash * 0.8;
-    ambient.color.copy(skyColor).lerp(new THREE.Color(0xffffff), 0.35);
+    const space = clamp(env.space ?? 0, 0, 1);
+    const st = skyState(up, skyPalette, { gloom, flash, space, cloud: env.cloud ?? 0, shift, cloudGrey });
+    skyNow = st;
+    // the air's colour, for the fog and the old readers: the horizon, halfway round
+    skyColor.setRGB(st.fog[0], st.fog[1], st.fog[2], THREE.SRGBColorSpace);
+    /**
+     * R23 — AT NIGHT THE LIGHT IS THE MOON'S.
+     *
+     * With the sun under the ground the directional light shone UP through it, which lit the
+     * undersides of everything and left every top face black — the "flat black night". Below the
+     * horizon it swings to the antisolar point, which is where a full moon would be, and takes the
+     * table's cool blue moonlight. The swap happens in the few minutes of twilight when the table's
+     * light is nearly nothing, so there is no visible jump.
+     */
+    const moonlit = up < -0.02;
+    const lightDir = moonlit ? tmp.copy(sunDir).negate() : tmp.copy(sunDir);
+    sunLight.position.copy(lightDir).multiplyScalar(500);
+    sunLight.color.setRGB(st.sun[0], st.sun[1], st.sun[2], THREE.SRGBColorSpace);
+    sunLight.intensity = st.sunI + flash * 1.6;
+    ambient.intensity = st.ambI;
+    ambient.color.setRGB(st.hemiSky[0], st.hemiSky[1], st.hemiSky[2], THREE.SRGBColorSpace);
+    ambient.groundColor.setRGB(st.hemiGround[0], st.hemiGround[1], st.hemiGround[2], THREE.SRGBColorSpace);
     fog.color.copy(skyColor);
     // cloud cover hides the stars as surely as daylight does — and the galaxy with them
-    const starVisible = Math.max(0, 1 - day * 3) * (1 - clamp(env.cloud ?? 0, 0, 1) * 0.95);
+    const starVisible = st.stars;
     starMat.opacity = starVisible;
     // darken rather than fade — see the note where the galaxy is built
     galaxy.material.color.setScalar(starVisible);
     galaxy.visible = starVisible > 0.01;
+    // the bands, into the shared sky uniforms
+    for (const [u, k] of [['uZenith', 'zenith'], ['uUpper', 'upper'], ['uMid', 'mid'], ['uLow', 'low'], ['uHorizon', 'horizon'],
+      ['uAUpper', 'aUpper'], ['uAMid', 'aMid'], ['uALow', 'aLow'], ['uAHorizon', 'aHorizon'], ['uGlow', 'glow'], ['uSunCol', 'sun']]) setBand(SKY_U[u], st[k]);
+    SKY_U.uSunDir.value.copy(sunDir);
+    const cover = clamp(env.cloud ?? 0, 0, 1);
+    // the halo round the sun: strong in a clear sky, a smudge through cloud, gone below the horizon
+    SKY_U.uGlowAmt.value = (1 - cover * 0.6) * (1 - gloom * 0.5) * clamp(up * 6 + 0.6, 0, 1);
+    SKY_U.uDisc.value = hdr ? 18 * (1 - cover * 0.85) * (1 - gloom * 0.8) * clamp(up * 12 + 0.5, 0, 1) : 0;
+    // by day the backdrop is the sky; by night it thins to a blue wash over the stars
+    SKY_U.uBackdrop.value = clamp(1 - starVisible * 0.62 - space * 0.4, 0, 1);
     // the air in front: thick in daylight, thin but never gone at night, thicker in bad weather
-    airMat.uniforms.uColor.value.copy(skyColor);
-    airMat.uniforms.uHorizon.value.copy(skyColor).lerp(new THREE.Color(0xffffff), 0.35 + dusk * 0.2);
     airMat.uniforms.uStrength.value = Math.min(0.97,
-      0.045 + day * 0.90 + clamp(env.cloud ?? 0, 0, 1) * 0.08 + (gloom || 0) * 0.12);
+      0.045 + day * 0.90 + cover * 0.08 + (gloom || 0) * 0.12) * (1 - space * 0.85);
 
     // the neighbours
     for (const b of bodies) {
@@ -424,6 +536,9 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       ambient.intensity *= 1 - dark * 0.8;
       skyColor.lerp(nightColor, dark * 0.92);
       fog.color.copy(skyColor);
+      for (const k of ['uZenith', 'uUpper', 'uMid', 'uLow', 'uHorizon', 'uAUpper', 'uAMid', 'uALow', 'uAHorizon', 'uGlow']) SKY_U[k].value.lerp(nightColor, dark * 0.9);
+      SKY_U.uDisc.value *= 1 - solar;
+      SKY_U.uBackdrop.value = Math.min(SKY_U.uBackdrop.value, 1 - dark * 0.6);
       starMat.opacity = Math.max(starMat.opacity, dark * 0.85);
       sunModel.group.scale.setScalar(1 + solar * 0.4);
     } else {
@@ -444,6 +559,12 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
 
   return {
     scene, sunLight, ambient, fog, sunDirection: sunDir, bodies, eclipse,
+    /** R23: the sky table's reading this frame (js/sky-palette.js `skyState`). */
+    get state() { return skyNow; },
+    /** R23: the sun's bright core is drawn only when the picture is HDR (js/postfx.js is on). */
+    setHdr(on) { hdr = !!on; },
+    get backdrop() { return backdrop; },
+    get air() { return air; },
     /**
      * No eclipse until this moment of run time.
      *

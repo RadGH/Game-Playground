@@ -21,6 +21,18 @@ import { BIOMES, isWater } from '../../../worldgen/js/biomes.js';
 import { ObstacleField, PROP_SOLIDS } from './collide.js';
 // R17 — the no-dependency registry js/tools.js reads the gather clock and the work clip out of.
 import { harvestInfo } from './harvestinfo.js';
+// R23 — the plants bend in the wind (the one wind, js/wind.js, through js/atmosphere.js)
+import { markSway } from './atmosphere.js';
+
+/**
+ * R23 — HOW FAR EACH KIND BENDS, as a fraction of its own height at a full gale. A tree's crown moves
+ * a few per cent, a fern or a reed a good deal more; rocks, ruins, crystals and cacti do not move.
+ * "Props do not sway" was on README.md's list of cheap wins since phase 2.
+ */
+export const PROP_SWAY = {
+  broadleaf: 0.035, conifer: 0.028, palm: 0.05, deadtree: 0.012,
+  bush: 0.07, fern: 0.1, reed: 0.14, mushroom: 0.015,
+};
 
 const CELL = 64;                     // metres across one prop cell
 
@@ -620,6 +632,7 @@ export function createProps(scene, terrain, opts = {}) {
     const kind = PROP_KINDS[key];
     const geometry = kind.build();
     const material = new THREE.MeshLambertMaterial({ vertexColors: true });
+    if (PROP_SWAY[key]) markSway(material, { height: kind.tall || 1, amount: PROP_SWAY[key] });
     const mesh = new THREE.InstancedMesh(geometry, material, kind.cap);
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     mesh.count = 0;
@@ -644,7 +657,14 @@ export function createProps(scene, terrain, opts = {}) {
   grassMesh.count = 0;
   grassMesh.frustumCulled = false;
   grassMesh.name = 'farhold-grass';
+  markSway(grassMesh.material, { height: 0.44, amount: 0.22 });
   scene.add(grassMesh);
+  /**
+   * R23 — `'gpu'` hands the grass to js/grass-gpu.js (the Graphics setting on High). The CPU tufts
+   * are simply not placed: grass is the LAST thing a cell draws from its rng, so skipping it moves
+   * nothing else (see the note in `rebuild`).
+   */
+  let grassMode = 'cpu';
 
   /**
    * MEGAFLORA ARRIVES A MOMENT AFTER THE REST OF THE WORLD.
@@ -706,6 +726,8 @@ export function createProps(scene, terrain, opts = {}) {
    */
   const felled = new Map();          // propKey -> { kind, x, z, regrowIn }
   let cleared = [];                  // { x, z, r }
+  // R23: bumped whenever the cleared list changes, so js/grass-gpu.js knows to re-read the ground
+  let clearedVersion = 0;
   /** Live damage on things that are standing, by propKey. Not saved: a half-chopped tree heals. */
   const wounded = new Map();
   /** Everything actually placed this rebuild, so `nearest` can find something to hit. */
@@ -1001,7 +1023,7 @@ export function createProps(scene, terrain, opts = {}) {
         }
 
         // grass, only in the cells you are standing among
-        if (Math.abs(dx) <= cfg.grassRadius && Math.abs(dz) <= cfg.grassRadius && grassVisible) {
+        if (Math.abs(dx) <= cfg.grassRadius && Math.abs(dz) <= cfg.grassRadius && grassVisible && grassMode === 'cpu') {
           const id = terrain.biomeIdAt(baseX, baseZ);
           const tags = BIOMES[id]?.tags || [];
           const lush = tags.includes('fertile') ? 1 : tags.includes('open') ? 0.7 : tags.includes('forest') ? 0.6 : tags.includes('cold') || tags.includes('dry') || tags.includes('harsh') ? 0.12 : 0.35;
@@ -1239,6 +1261,7 @@ export function createProps(scene, terrain, opts = {}) {
       }
       if (!keepGround) {
         cleared.push({ x: +x.toFixed(1), z: +z.toFixed(1), r: +r.toFixed(1) });
+        clearedVersion++;
         if (cleared.length > CLEAR_CAP) cleared = cleared.slice(-CLEAR_CAP);
       }
       rebuild(lastPoint ? lastPoint[0] : x, lastPoint ? lastPoint[1] : z);
@@ -1291,6 +1314,7 @@ export function createProps(scene, terrain, opts = {}) {
       felled.clear();
       wounded.clear();
       cleared = (json?.cleared || []).slice(-CLEAR_CAP);
+      clearedVersion++;
       for (const [id, kind, fx, fz, regrowIn] of json?.felled || []) {
         felled.set(id, { kind, x: fx, z: fz, regrowIn: regrowIn ?? null });
       }
@@ -1347,6 +1371,19 @@ export function createProps(scene, terrain, opts = {}) {
     get meshes() { return { ...meshes, ...megaMeshes, grass: grassMesh }; },
     setVisible(v, x, z) { visible = !!v; rebuild(x, z); },
     setGrass(v, x, z) { grassVisible = !!v; rebuild(x, z); },
+    /** R23: is the grass switched on at all (the setting, and not flying too high for it)? */
+    get grassOn() { return grassVisible; },
+    /** R23: 'cpu' (the tufts, as before) or 'gpu' (js/grass-gpu.js draws the grass instead). */
+    setGrassMode(mode, x, z) {
+      const next = mode === 'gpu' ? 'gpu' : 'cpu';
+      if (next === grassMode) return;
+      grassMode = next;
+      if (x != null) rebuild(x, z);
+    },
+    get grassMode() { return grassMode; },
+    /** R23: is this point inside a cleared (levelled) circle? */
+    isCleared: (x, z) => insideCleared(x, z),
+    get clearedVersion() { return clearedVersion; },
     stats() {
       let instances = 0, drawCalls = 0, triangles = 0;
       for (const key of PROP_KEYS) {

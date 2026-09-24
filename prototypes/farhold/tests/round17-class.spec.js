@@ -54,8 +54,9 @@ test('F opens the company on the sheet, with slots, a board and the respec', asy
   const panel = page.locator('#sheet-body-followers .flw');
   await expect(panel).toBeVisible();
   const text = await panel.innerText();
-  // the three tabs the round asked for
-  for (const tab of ['Company', 'Hire', 'Spells']) expect(text).toContain(tab);
+  // the two tabs the round asked for — R23 took Spells off: spells are the sheet's and the Unbinder's
+  for (const tab of ['Company', 'Hire']) expect(text).toContain(tab);
+  expect(await panel.locator('.flw-rail button', { hasText: 'Spells' }).count()).toBe(0);
   // three slots at level one, and the ladder written down
   expect(text).toMatch(/of 3 slots/i);
   expect(text).toContain('Level 20');

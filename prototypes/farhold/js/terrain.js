@@ -84,6 +84,8 @@ class Ring {
   }
 
   rebuild(cx, cz) {
+    // R23: js/grass-gpu.js reads this ring's heights as a texture and re-uploads when this moves
+    this.version = (this.version || 0) + 1;
     const { res, cell, extent, terrain } = this;
     const half = extent / 2;
     const P = this.positions, C = this.colors, N = this.normals;

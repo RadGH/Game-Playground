@@ -40,8 +40,15 @@ import { CLASS_PETS } from './pets.js';
  */
 import { createBuild, installCustomClass } from './classbuild.js';
 import { createClassBuilder } from './classbuild-ui.js';
-import { renderSVG, normalizeAvatar } from '../../../avatar-2d/js/render.js';
 import { openAppearance } from './appearance.js';
+/**
+ * R23 — the figure is the 3D body now: `makeActor` (the call main.js makes for the player) on a
+ * small renderer of its own, dressed by js/titlelook.js in the kit the run will actually hand over.
+ */
+import { createFigureView } from './figure3d.js';
+import { createLookMaker } from './titlelook.js';
+import { skillFacts, skillBody } from './spellcard.js';
+import { installTooltips } from '../../../shared/tooltip.js';
 
 const $ = id => document.getElementById(id);
 
@@ -54,6 +61,9 @@ const SCREENS = ['boot-menu', 'boot-load-screen', 'boot-character', 'boot-world'
 
 function show(id) {
   for (const s of SCREENS) $(s)?.classList.toggle('hidden', s !== id);
+  // R23 — title.css lays the two steps out as full-window screens off this one attribute
+  const boot = $('boot');
+  if (boot) boot.dataset.screen = id;
   // put the keyboard somewhere useful on the screen that just appeared
   const first = $(id)?.querySelector('input, select, button, a');
   first?.focus?.({ preventScroll: true });
@@ -116,10 +126,46 @@ export async function runTitle({
    * card belongs to the character step and the builder must not have to know where it lives.
    */
   let redrawClassCard = () => {};
+
+  /**
+   * R23 — THE FIGURE, IN 3D, AND WHO MAY BORROW IT.
+   *
+   * One view, made the first time the character step is drawn, and moved (not copied) into the
+   * appearance editor and the class builder while either is open — so there is one WebGL context
+   * for the whole title, and `finish()` disposes it before `begin()` makes the game's own.
+   *
+   * Out here at `runTitle` scope rather than inside the promise below, for the reason
+   * `redrawClassCard` is: `ensureBuilder` is out here too, and R18 was a closure reaching for a
+   * function it could not see.
+   */
+  let figure = null, looks = null;
+  function ensureFigure() {
+    if (!figure && $('boot-figure')) figure = createFigureView($('boot-figure'));
+    return figure;
+  }
+  /** The avatar with the class's first-morning kit on it — js/titlelook.js, i.e. `applyGearLook`. */
+  function dressed(avatar) {
+    const def = classes.find(x => x.id === select.value);
+    if (!def || !items) return avatar;
+    try {
+      looks = looks || createLookMaker({ items, balance, classbuildData });
+      return looks.startingLook({ classDef: def, avatar });
+    } catch (err) {
+      console.warn('title: could not dress the preview', err);
+      return avatar;
+    }
+  }
+  const figureHook = {
+    attach: host => ensureFigure()?.attach(host),
+    restore: () => figure?.restore(),
+  };
+  function disposeFigure() { try { figure?.dispose(); } catch { /* already gone */ } figure = null; }
+
   function ensureBuilder() {
     if (builder || !classbuildData) return builder;
     builder = createClassBuilder({
       classData, skillData, classLooks, data: classbuildData, build,
+      figure: figureHook,
       onChange: b => {
         build = b;
         installCustomClass({ classData, skillData, classLooks, data: classbuildData, build: b });
@@ -152,10 +198,61 @@ export async function runTitle({
       rows.unshift(o);
     }
     select.replaceChildren(...rows);
+    fillClassList();
+  }
+
+  /**
+   * R23 — THE SAME CLASSES AS A LIST YOU CAN READ DOWN.
+   *
+   * Thirty-one entries in a dropdown is thirty-one things you cannot see until you open it. The
+   * list beside the figure shows every name with its role under it and marks the classes that
+   * bring a companion. The `<select>` stays the one source of truth — the form is read from it,
+   * `?class=` presets it, the specs pick from it — and a click here just sets it and fires its
+   * change, so there is no second copy of "which class is chosen" to fall out of step.
+   */
+  function fillClassList() {
+    const list = $('boot-class-list');
+    if (!list) return;
+    const rows = [...select.options].map(o => {
+      const c = classes.find(x => x.id === o.value);
+      const custom = o.value === CUSTOM_ID;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = `cl-row${custom ? ' custom' : ''}`;
+      b.dataset.classId = o.value;
+      b.setAttribute('role', 'option');
+      const name = document.createElement('b');
+      name.textContent = custom ? 'Custom' : (c?.name || o.value);
+      const tag = document.createElement('span');
+      tag.className = 'cl-tag';
+      tag.textContent = !custom && (c?.pet || CLASS_PETS[o.value]) ? 'companion' : '';
+      const role = document.createElement('span');
+      role.className = 'cl-role';
+      role.textContent = custom ? 'Build your own class' : (c?.role || '');
+      b.append(name, tag, role);
+      b.onclick = () => {
+        if (select.value === o.value) return;
+        select.value = o.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+      return b;
+    });
+    list.replaceChildren(...rows);
+    markClassList();
+  }
+  function markClassList() {
+    const list = $('boot-class-list');
+    if (!list) return;
+    for (const b of list.children) {
+      const on = b.dataset.classId === select.value;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    }
   }
   fillPicker();
   const pickable = id => [...select.options].some(o => o.value === id);
   select.value = pickable(params.get('class')) ? params.get('class') : 'ranger';
+  markClassList();
 
   $('boot-seed').value = params.get('seed') || String(balance?.seed ?? 1);
   $('boot-name').value = params.get('name') || '';
@@ -263,6 +360,7 @@ export async function runTitle({
     if (exit) exit.hidden = !canExit(params);
   }
 
+  installTooltips();
   return new Promise(resolve => {
     let finished = false;
     const finish = value => {
@@ -270,6 +368,9 @@ export async function runTitle({
       finished = true;
       window.removeEventListener('keydown', onKey, true);
       stopPreview();
+      // R23 — the preview's WebGL context goes before `begin()` makes the game's own
+      disposeFigure();
+      builder?.hide?.();
       resolve(value);
     };
 
@@ -279,6 +380,16 @@ export async function runTitle({
       // the settings panel owns Escape while it is up
       if (settings?.isOpen) { e.preventDefault(); e.stopImmediatePropagation(); settings.toggle(false); return; }
       if (document.getElementById('appearance') && !document.getElementById('appearance').classList.contains('hidden')) return;
+      /**
+       * R23 — THE BUILDER OWNS ESCAPE WHILE IT IS UP.
+       *
+       * js/classbuild-ui.js listens on the capture phase too, and says it stops the event — but it
+       * is made lazily, the first time Custom is picked, so its listener was added AFTER this one
+       * and this one ran first: Escape in the builder stepped the title back to the menu underneath
+       * it, and the builder stayed open over a menu whose buttons it was covering. Standing aside
+       * here lets the builder's own listener close just the builder.
+       */
+      if (builder?.open) return;
       const at = SCREENS.find(s => !$(s)?.classList.contains('hidden'));
       if (!at || at === 'boot-menu') return;
       e.preventDefault();
@@ -369,59 +480,125 @@ export async function runTitle({
         installCustomClass({ classData, skillData, classLooks, data: classbuildData, build });
         b?.card(box);
         drawFigure();
+        drawSummary();
         return;
       }
       if (box) box.classList.remove('cb-card');
       const c = classes.find(x => x.id === select.value);
-      if (box && c) {
-        const unlock = skillData.unlockAt || [1];
-        const kit = [];
-        const starter = items.weaponBases?.[c.starter];
-        if (starter) kit.push(`starts with a ${starter.name.toLowerCase()}`);
-        if (c.weapons?.length) kit.push(`can hold ${c.weapons.join(', ')}`);
-        if (c.armorTier) kit.push(`${c.armorTier} armour`);
-        if (c.shield) kit.push('a shield');
-        if (c.primaryAttr) kit.push(c.primaryAttr);
-        const pet = c.pet || CLASS_PETS[c.id];
-        const petDef = pet && (bestiary.pets || []).find(x => x.id === pet.id);
-        const rows = (c.skills || []).map((id, i) => {
-          const sk = skillData.skills?.[id];
-          if (!sk) return '';
-          const at = unlock[i] ?? unlock[unlock.length - 1];
-          return `<li><b>${sk.name}</b><span>${sk.desc || ''}</span>`
-            + `<i>Level ${at}</i></li>`;
-        }).join('');
-        box.innerHTML = `<h4>${c.name} <span>${c.role}</span></h4>`
-          + `<p class="cc-kit">${kit.join(' · ')}</p>`
-          + `<ul class="cc-skills">${rows}</ul>`
-          + (petDef ? `<p class="cc-pet">Brings a companion: ${petDef.name}`
-            + `${pet.count > 1 ? ` ×${pet.count}` : ''}`
-            + `${pet.extra ? `, and ${(bestiary.pets.find(x => x.id === pet.extra.id) || {}).name || 'another'}` : ''}.</p>` : '');
-      }
+      if (box && c) box.replaceChildren(...presetCard(c));
       drawFigure();
+      drawSummary();
+    }
+
+    /** One element, with a class and text. */
+    function node(tag, cls, text) {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
     }
 
     /**
-     * The figure beside the picker. avatar-2d's renderer is pure SVG with no Three.js behind it, so
-     * a live preview that redraws on every keystroke costs nothing at all — and it is the same
-     * catalogue `chibi2.js` builds the in-world body from, so this is genuinely what you will see
-     * walking around, not an illustration of it.
+     * R23 — THE CARD LEADS WITH FACTS, AND THE SENTENCES WAIT TO BE ASKED FOR.
+     *
+     * Round 21 generated every skill description from its numbers, which made each one a
+     * forty-word sentence — right for a tooltip, a wall of text six deep in a card. Each skill is
+     * now its name and level, then chips for what you compare skills by (js/spellcard.js: kind,
+     * element, how hard, what it costs), then the sentence clamped to two lines. Click (or Enter)
+     * opens the whole sentence in place, and hovering shows it in the tooltip.
+     *
+     * The class's `hook` line is NOT shown: it is Emberveil's flavour text ("Precise Strike never
+     * misses") and describes skills Farhold does not have, which WORDING.md rules out.
+     */
+    function presetCard(c) {
+      const unlock = skillData.unlockAt || [1];
+      const head = node('div', 'cc-head');
+      const h4 = node('h4', null, c.name + ' ');
+      h4.append(node('span', null, c.role || ''));
+      head.append(h4);
+
+      const chips = node('ul', 'cc-chips');
+      const starter = items.weaponBases?.[c.starter];
+      const kit = [];
+      if (starter) kit.push(`Starts with a ${starter.name.toLowerCase()}`);
+      if (c.weapons?.length) kit.push(`Can hold ${c.weapons.join(', ')}`);
+      if (c.armorTier) kit.push(`${c.armorTier[0].toUpperCase()}${c.armorTier.slice(1)} armour`);
+      if (c.shield) kit.push('May carry a shield');
+      if (c.primaryAttr) kit.push(`Main attribute ${c.primaryAttr}`);
+      for (const k of kit) chips.append(node('li', null, k));
+
+      const out = [head, chips];
+      const pet = c.pet || CLASS_PETS[c.id];
+      const petDef = pet && (bestiary.pets || []).find(x => x.id === pet.id);
+      if (petDef) {
+        const extra = pet.extra ? `, and ${(bestiary.pets.find(x => x.id === pet.extra.id) || {}).name || 'another'}` : '';
+        out.push(node('p', 'cc-pet', `Brings a companion: ${petDef.name}${pet.count > 1 ? ` ×${pet.count}` : ''}${extra}.`));
+      }
+
+      out.push(node('h5', null, `Skills — ${(c.skills || []).length}, unlocked by level`));
+      const list = node('ul', 'cc-skills');
+      (c.skills || []).forEach((id, i) => {
+        const sk = skillData.skills?.[id];
+        if (!sk) return;
+        const at = unlock[i] ?? unlock[unlock.length - 1];
+        const li = node('li', 'cc-skill');
+        li.tabIndex = 0;
+        li.setAttribute('role', 'button');
+        li.setAttribute('aria-expanded', 'false');
+        li.dataset.tip = sk.desc || '';
+        const top = node('div', 'cs-top');
+        top.append(node('b', null, sk.name), node('span', 'cs-lv', `Level ${at}`));
+        const facts = node('div', 'sc-facts');
+        for (const f of skillFacts(sk, skillData.statuses)) {
+          facts.append(node('span', `sc-chip k-${f.kind}${f.el ? ' el-' + f.el : ''}`, f.text));
+        }
+        li.append(top, facts, node('p', 'sc-desc', skillBody(sk)));
+        const toggle = () => {
+          const open = li.classList.toggle('open');
+          li.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+        li.onclick = toggle;
+        li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+        list.append(li);
+      });
+      out.push(list);
+      return out;
+    }
+
+    /**
+     * R23 — the figure beside the picker is the 3D body now (js/figure3d.js), dressed in the kit
+     * the run hands over (js/titlelook.js). It replaced avatar-2d's SVG, which showed the class's
+     * drawn weapon rather than the one you are actually given — the warrior's picture held a
+     * greataxe (class-looks.json) while the warrior starts with a longsword (classes.json).
      */
     function drawFigure() {
-      const box = $('boot-figure');
-      if (!box) return;
+      const view = ensureFigure();
       const a = liveAvatar();
-      box.innerHTML = a ? renderSVG(normalizeAvatar(a), { width: 190, height: 254 }) : '';
+      view?.show(dressed(a || {}));
       const note = $('boot-figure-note');
-      if (note) note.textContent = chosenAvatar ? 'Your own look' : 'The class as it comes';
+      if (note) note.textContent = (chosenAvatar ? 'Your own look' : 'The class as it comes') + ' · drag to turn';
+    }
+
+    /** "Wren · Stormcaller", under the step, so the world step still says who is going. */
+    function drawSummary() {
+      const c = classes.find(x => x.id === select.value);
+      const who = `${readName()} · ${select.value === CUSTOM_ID ? (build?.name || 'Custom class') : (c?.name || select.value)}`;
+      const char = $('boot-char-summary');
+      if (char) char.textContent = who;
+      const world = $('boot-world-summary');
+      if (world) {
+        const size = $('boot-scale')?.selectedOptions?.[0]?.textContent?.split(' — ')[0] || '';
+        world.textContent = `${who} · seed ${readSeed()}${size ? ' · ' + size + ' planet' : ''}`;
+      }
     }
 
     select.onchange = () => {
       // Changing class after customising keeps the face you built — only the untouched look follows
       // the class, which is what somebody who has just spent two minutes on a face expects.
+      markClassList();
       drawClassCard();
     };
-    $('boot-name').oninput = () => { /* nothing to redraw; the name is read when you press Next */ };
+    $('boot-name').oninput = () => drawSummary();
 
     $('boot-customize').onclick = async () => {
       const race = classLooks.classes[select.value]?.race || 'human';
@@ -429,11 +606,16 @@ export async function runTitle({
        * The editor draws into the figure behind it as you work, which means Cancel has to put back
        * what was there BEFORE it opened — not "whatever the last onChange said", which is the change
        * you just backed out of. So the old value is kept here and restored on a null.
+       *
+       * R23 — and it draws with the SAME 3D figure: the view's canvas moves into the editor while it
+       * is open (`figure`), each change is dressed in the class kit first (`dress`), and the canvas
+       * comes back to this screen when the editor closes.
        */
       const before = chosenAvatar;
       const picked = await openAppearance({
         avatar: liveAvatar(), classAvatar: classAvatar(), race,
         onChange: a => { chosenAvatar = a; drawFigure(); },
+        figure: ensureFigure() ? { ...figureHook, show: a => figure?.show(dressed(a)) } : null,
       });
       chosenAvatar = picked || before;
       drawFigure();
@@ -577,6 +759,7 @@ export async function runTitle({
 
     /** What the three knobs that do not change the map actually do. */
     function captionWorld() {
+      drawSummary();
       const w = readWorld();
       const km = (n, cells) => Math.round(cells * M_PER_CELL_DEFAULT * w.planetScale / 1000);
       const box = $('boot-world-facts');

@@ -25,6 +25,7 @@ import {
   spellCatalogue, createBuild, pickSpell, pickRefusal, slotsOf, loadoutOf,
   loadoutRefusal, buildRefusal, describeBuild, pendingPicks, PICK_COUNT,
 } from './classbuild.js';
+import { skillFacts, skillBody } from './spellcard.js';
 
 const CSS_HREF = 'classbuild.css';
 
@@ -52,14 +53,25 @@ const empty = text => el('div', { class: 'cb-empty', text });
  * One choosable row. `why` is the sentence that says why it is greyed — a greyed row with no reason
  * is the one answer a player cannot act on, which is the rule the whole project runs on.
  */
-function option({ name, right = null, sub = null, on = false, why = null, onclick = null }) {
+function option({ name, right = null, sub = null, on = false, why = null, onclick = null, facts = null, tip = null, clamp = false }) {
   const kids = [el('b', { text: name })];
   if (right != null) kids.push(el('span', { class: 'cb-right', text: String(right) }));
-  if (sub) kids.push(el('span', { class: 'cb-sub', text: sub }));
+  /**
+   * R23 — a spell leads with its facts as chips (js/spellcard.js) and its sentence is clamped to two
+   * lines; the selected card, and the tooltip, show the whole of it. A loadout or a companion has
+   * no facts and a short line, and looks exactly as it did.
+   */
+  if (facts?.length) {
+    kids.push(el('span', { class: 'cb-facts sc-facts' }, facts.map(f => el('span', {
+      class: `sc-chip k-${f.kind}${f.el ? ' el-' + f.el : ''}`, text: f.text,
+    }))));
+  }
+  if (sub) kids.push(el('span', { class: `cb-sub${clamp ? ' sc-desc' : ''}`, text: sub }));
   if (why) kids.push(el('span', { class: 'cb-why', text: why }));
   return el('button', {
     class: `cb-opt${on ? ' on' : ''}`, type: 'button',
     disabled: !!why, onclick: why ? null : onclick,
+    'data-tip': tip || null,
   }, kids);
 }
 
@@ -90,6 +102,12 @@ export function createClassBuilder({
    * character with no spell at all.
    */
   inGame = false,
+  /**
+   * R23 — the title screen's 3D figure, lent while the builder is open (`attach(box)` /
+   * `restore()`, js/figure3d.js), so a change of loadout shows the new weapon in the character's
+   * hands. In game there is no figure to lend and the builder has no stage column at all.
+   */
+  figure = null,
 } = {}) {
   const levelNow = () => (getLevel ? (getLevel() || 1) : (getPlayer()?.level || 1));
   if (!document.querySelector(`link[href="${CSS_HREF}"]`)) {
@@ -113,6 +131,12 @@ export function createClassBuilder({
   const why = el('span', { class: 'cb-why' });
   const done = el('button', { class: 'cb-done', type: 'button', text: 'Done', onclick: () => { hide(); onClose(state); } });
   const foot = el('div', { class: 'cb-foot' }, [why, done]);
+  // the stage the figure is lent into — outside `body`, which is emptied on every redraw
+  const stage = figure ? el('div', { class: 'cb-stage', 'aria-label': 'Your character, turning' }) : null;
+  const main = el('div', { class: `cb-main${stage ? ' has-stage' : ''}` }, [
+    body,
+    stage ? el('aside', { class: 'cb-aside' }, [stage, el('div', { class: 'cb-note cb-stage-note', text: 'What you start holding · drag to turn' })]) : null,
+  ]);
   const root = el('div', { class: `cb${embedded ? ' cb--tab' : ''}`, hidden: true }, [
     el('div', { class: 'cb-head' }, [
       el('h2', { text: 'Build your own class' }),
@@ -120,7 +144,7 @@ export function createClassBuilder({
       embedded ? null : el('button', { class: 'cb-close', type: 'button', text: 'Close  (Esc)', onclick: () => { hide(); onClose(state); } }),
     ]),
     rail,
-    body,
+    main,
     foot,
   ]);
   mount.appendChild(root);
@@ -154,15 +178,15 @@ export function createClassBuilder({
       });
     });
 
-    const panes = [pane('Both hands', rows)];
+    const panes = [pane('Both hands', [el('div', { class: 'cb-choices' }, rows)])];
     if (current?.element) {
-      panes.push(pane('Attuned to', (data?.elements || []).map(e => option({
+      panes.push(pane('Attuned to', el('div', { class: 'cb-choices cb-choices--small' }, (data?.elements || []).map(e => option({
         name: e.name,
         right: e.key,
         sub: e.blurb,
         on: state.element === e.key,
         onclick: () => { state.element = e.key; changed(); },
-      }))));
+      })))));
     }
     panes.push(pane('What comes with it', [
       el('div', { class: 'cb-note', text: `Worn from the first morning: ${(data?.armour?.[current?.armour || 'medium'] || []).join(', ').replace(/_/g, ' ')}.` }),
@@ -219,12 +243,16 @@ export function createClassBuilder({
        * than a choice. An Unbinder in any settlement of two houses or more takes one back out for
        * gold (js/retrain.js). The row says where to go instead of offering a button that is gone.
        */
+      /**
+       * R23 — the right-hand tag is the slot's STATE in a word or two. It used to repeat the level
+       * the row already leads with ("Level 3 · Level 3 spell slot · Locked until level 3").
+       */
       row.append(el('span', {
-        class: 'cb-note',
+        class: `cb-note cb-state${s.pending ? ' cb-good' : ''}`,
         text: s.spell
           // a draft can still be changed; a build that is out in the world cannot
-          ? (s.editable ? 'Click to change this spell' : 'An Unbinder in town can unlearn this spell')
-          : s.pending ? 'Choose a spell now' : `Locked until level ${s.level}`,
+          ? (s.editable ? 'Click to change' : 'Unbinder can unlearn')
+          : s.pending ? 'Choose now' : 'Locked',
       }));
       if (s.editable) row.addEventListener('click', () => { editing = s.index; draw(); });
       return row;
@@ -236,16 +264,26 @@ export function createClassBuilder({
      * rules written out here. The two used to say the same thing twice, and a third rule (the level
      * gate) would have had to be added in both places to be true in either.
      */
-    const spellOption = sp => option({
-      name: sp.name,
-      // R21: every rung reads the same way — "Level 1" beside "Level 3", not a sentence beside a
-      // label. tests/round17-class.spec.js moved with it.
-      right: `Level ${sp.tier}`,
-      sub: `${sp.desc} · ${sp.shape}, ${sp.element}${sp.classes.length ? ` · ${sp.classes.slice(0, 3).join(', ')}${sp.classes.length > 3 ? '…' : ''}` : ''}`,
-      on: slot.spellId === sp.id,
-      why: pickRefusal(state, slot.index, sp.id, cat, { level }),
-      onclick: () => { pickSpell(state, slot.index, sp.id, cat, { level }); changed(); },
-    });
+    const spellOption = sp => {
+      const skill = skillData?.skills?.[sp.id] || sp;
+      const users = sp.classes.length
+        ? ` Classes that use this spell: ${sp.classes.slice(0, 4).join(', ')}${sp.classes.length > 4 ? ` and ${sp.classes.length - 4} more` : ''}.`
+        : '';
+      return option({
+        name: sp.name,
+        // R21: every rung reads the same way — "Level 1" beside "Level 3", not a sentence beside a
+        // label. tests/round17-class.spec.js moved with it.
+        right: `Level ${sp.tier}`,
+        // R23: the facts first as chips, then the sentence without the cost the chips already show
+        facts: skillFacts(skill, skillData?.statuses),
+        sub: `${skillBody(skill)}${users}`,
+        clamp: true,
+        tip: `${sp.desc}${users}`,
+        on: slot.spellId === sp.id,
+        why: pickRefusal(state, slot.index, sp.id, cat, { level }),
+        onclick: () => { pickSpell(state, slot.index, sp.id, cat, { level }); changed(); },
+      });
+    };
 
     /**
      * R18 — WHAT IS OPEN AT *THIS* LEVEL, FIRST AND COUNTED.
@@ -286,10 +324,17 @@ export function createClassBuilder({
               ? `${ready.length} ${ready.length === 1 ? 'spell is' : 'spells are'} open to a level ${slot.level} slot.`
               : `No new spell unlocks at level ${slot.level}. This slot can take any spell from an earlier level.`,
           }),
-          ...ready.map(spellOption),
+          el('div', { class: 'cb-choices cb-choices--spells' }, ready.map(spellOption)),
+          /**
+           * R23 — the spells a higher slot will offer are still here (knowing Meteor is coming is
+           * part of choosing) but folded away: they were twenty-nine greyed cards under the eleven
+           * you could click, which is most of what made this tab a wall.
+           */
           ...(later.length ? [
-            el('div', { class: 'cb-note', text: `Locked to this slot — ${later.length} more spells open above level ${slot.level}.` }),
-            ...later.map(spellOption),
+            el('details', { class: 'cb-later' }, [
+              el('summary', { text: `Spells for later slots — ${later.length} more open above level ${slot.level}` }),
+              el('div', { class: 'cb-choices cb-choices--spells' }, later.map(spellOption)),
+            ]),
           ] : []),
         ])
         // nothing is owed, so the right-hand pane is the ladder rather than forty dead rows
@@ -388,7 +433,7 @@ export function createClassBuilder({
         : tab === 'opening' ? drawOpening()
           : drawLook();
     body.textContent = '';
-    body.appendChild(el('div', { class: 'cb-grid' }, panes));
+    body.appendChild(el('div', { class: `cb-grid cb-grid--${tab}` }, panes));
     /**
      * R20 — in game the footer is a way out, not a gate. The build is already being played; there
      * is nothing left for `buildRefusal` to refuse, and a disabled "Not finished" on a character
@@ -421,9 +466,14 @@ export function createClassBuilder({
     if (Number.isInteger(slot) && slotsOf(state, cat, { level: levelNow() })[slot]?.editable) editing = slot;
     open = true;
     root.hidden = false;
+    if (stage) { try { figure.attach(stage); } catch { /* no figure, no stage */ } }
     draw();
   }
-  function hide() { open = false; root.hidden = true; }
+  function hide() {
+    if (open && stage) { try { figure.restore(); } catch { /* the title redraws it */ } }
+    open = false;
+    root.hidden = true;
+  }
 
   /**
    * ESC CLOSES IT, and it has to win over the title screen's own Esc.
@@ -454,22 +504,29 @@ export function createClassBuilder({
     const refusal = buildRefusal(state, cat, data);
     box.textContent = '';
     box.classList.add('cb-card');
+    /**
+     * R23 — the same shape as a preset class's card: the name and a way in at the top, the build
+     * as chips, then the six slots as a short ladder. The "Open the builder" button used to sit
+     * under all six rows and the refusal, below the fold at 1280 x 800.
+     */
+    const facts = [d.loadout, d.element, d.opening].filter(Boolean);
     box.append(
-      el('h4', { text: d.name }, [el('span', { text: ' Built to order' })]),
-      el('p', { class: 'cb-note', text: `${d.loadout}${d.element ? ` · ${d.element}` : ''} · ${d.opening}` }),
-      el('ul', {}, d.spells.map(s => el('li', {}, [
+      el('div', { class: 'cc-head' }, [
+        el('h4', { text: `${d.name} ` }, [el('span', { text: 'Built to order' })]),
+      ]),
+      el('ul', { class: 'cc-chips' }, facts.map(f => el('li', { text: f }))),
+      refusal ? el('p', { class: 'cb-why', text: refusal }) : el('p', { class: 'cb-good', text: 'Ready.' }),
+      el('button', { class: 'cb-open', type: 'button', text: refusal ? 'Open the builder' : 'Change it', onclick: () => show() }),
+      el('h5', { text: `Spells — ${d.picked} of ${d.total} learned` }),
+      el('ul', { class: 'cb-ladder' }, d.spells.map(s => el('li', { class: s.name ? 'filled' : (s.pending ? 'pending' : 'later') }, [
+        el('span', { class: 'cb-lv', text: `Level ${s.level}` }),
         /**
          * R21 — an empty slot is named for the level that opens it. "chosen when you get there —
          * level 3" was a sentence pretending to be a label; this is "Level 3 spell slot".
          */
         el('b', { text: s.name || `Level ${s.level} spell slot` }),
-        el('span', {
-          class: 'cb-note',
-          text: s.name ? ` — level ${s.level}` : (s.pending ? ' — choose one now' : ''),
-        }),
+        el('span', { class: 'cb-note', text: s.name ? '' : (s.pending ? 'choose one now' : '') }),
       ]))),
-      refusal ? el('p', { class: 'cb-why', text: refusal }) : el('p', { class: 'cb-good', text: 'Ready.' }),
-      el('button', { class: 'cb-open', type: 'button', text: refusal ? 'Open the builder' : 'Change it', onclick: () => show() }),
     );
   }
 

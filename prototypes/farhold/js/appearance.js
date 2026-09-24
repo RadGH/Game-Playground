@@ -100,7 +100,13 @@ let panel = null;   // built once, reused — a second one would double every li
  * Open the editor over whatever is on screen. Resolves with the finished avatar, or null if the
  * player backed out. Escape and the Cancel button both mean "back out".
  */
-export function openAppearance({ avatar, classAvatar = null, race = 'human', onChange = () => {} } = {}) {
+/**
+ * R23 — `figure` is the title screen's 3D view (js/figure3d.js), lent to the editor while it is
+ * open: `attach(box)` moves its canvas in here, `show(avatar)` dresses and draws a look, `restore()`
+ * gives the canvas back. Without one (an old caller) the editor draws avatar-2d's SVG as it always
+ * did, so nothing that calls this has to change.
+ */
+export function openAppearance({ avatar, classAvatar = null, race = 'human', onChange = () => {}, figure = null } = {}) {
   return loadPresets().then(data => new Promise(resolve => {
     const start = normalizeAvatar(avatar || classAvatar || DEFAULT_AVATAR);
     let current = JSON.parse(JSON.stringify(start));
@@ -112,12 +118,14 @@ export function openAppearance({ avatar, classAvatar = null, race = 'human', onC
       document.body.append(panel);
     }
 
-    const figure = el('div', { class: 'ap-figure', id: 'ap-figure' });
+    const figureBox = el('div', { class: 'ap-figure', id: 'ap-figure' });
+    const view = figure && typeof figure.show === 'function' ? figure : null;
     const controls = el('div', { class: 'ap-controls', id: 'ap-controls' });
     const tabRail = el('div', { class: 'ap-tabs', role: 'tablist' });
 
     function touch() {
-      figure.innerHTML = renderSVG(current, { width: 240, height: 320 });
+      if (view) view.show(JSON.parse(JSON.stringify(current)));
+      else figureBox.innerHTML = renderSVG(current, { width: 240, height: 320 });
       try { onChange(JSON.parse(JSON.stringify(current))); } catch { /* the caller's problem, not ours */ }
     }
 
@@ -209,6 +217,8 @@ export function openAppearance({ avatar, classAvatar = null, race = 'human', onC
       done = true;
       window.removeEventListener('keydown', onKey, true);
       panel.classList.add('hidden');
+      // the canvas goes home before the panel it is sitting in is emptied
+      try { view?.restore?.(); } catch { /* the title screen will redraw it */ }
       panel.replaceChildren();
       resolve(value);
     }
@@ -240,15 +250,16 @@ export function openAppearance({ avatar, classAvatar = null, race = 'human', onC
     panel.replaceChildren(el('div', { class: 'ap-inner' },
       el('div', { class: 'ap-head' },
         el('h2', { text: 'Customize appearance' }),
-        el('p', { class: 'small muted', text: 'Armour you find replaces the hat, top, legs and boots while you are wearing it. Your weapon and your light fill the hands.' }),
+        el('p', { class: 'small muted', text: 'Armour you find replaces the hat, top, legs and boots while you are wearing it. Your weapon and your light fill the hands. Drag the figure to turn it.' }),
       ),
       el('div', { class: 'ap-body' },
-        el('div', { class: 'ap-left' }, figure),
+        el('div', { class: 'ap-left' }, figureBox),
         el('div', { class: 'ap-right' }, tabRail, controls),
       ),
       actions,
     ));
     panel.classList.remove('hidden');
+    view?.attach?.(figureBox);
     drawControls();
     touch();
     window.addEventListener('keydown', onKey, true);

@@ -24,6 +24,24 @@ function watch(page) {
   return errors;
 }
 
+/**
+ * R23 — the figure is a 3D canvas now (js/figure3d.js), so "the figure changed" is its `data-look`
+ * key changing, not its innerHTML — a canvas's markup is the same whatever it is drawing. The key is
+ * written once a look has actually been put on the body, so these wait for it rather than read it.
+ */
+const lookOf = page => page.evaluate(() => document.querySelector('#boot-figure canvas, #ap-figure canvas')?.dataset.look || '');
+async function lookChanges(page, from, sel = '#boot-figure canvas') {
+  await page.waitForFunction(([s, f]) => {
+    const c = document.querySelector(s);
+    return c && c.dataset.look && c.dataset.look !== f;
+  }, [sel, from], { timeout: 20000 });
+  return page.evaluate(s => document.querySelector(s).dataset.look, sel);
+}
+async function firstLook(page, sel = '#boot-figure canvas') {
+  await page.waitForFunction(s => document.querySelector(s)?.dataset.look, sel, { timeout: 20000 });
+  return page.evaluate(s => document.querySelector(s).dataset.look, sel);
+}
+
 async function openTitle(page, query = '') {
   await page.goto(BASE + query);
   await page.waitForSelector('#boot-menu:not(.hidden)', { timeout: 30000 });
@@ -89,14 +107,14 @@ test('New game step 1: a name, a class, and the class previewed beside it', asyn
   expect(await page.locator('#boot-class option').count()).toBe(31);
   expect(await page.locator('#boot-class option[value="custom"]').count()).toBe(1);
   await expect(page.locator('#boot-class-card h4')).toContainText('Ranger');
-  // …and a rendered figure, which is avatar-2d's SVG and nothing heavier
-  expect(await page.locator('#boot-figure svg').count()).toBe(1);
+  // …and a rendered figure — R23: the 3D body, on its own canvas
+  expect(await page.locator('#boot-figure canvas').count()).toBe(1);
 
   // change class and both halves of the preview follow
-  const before = await page.locator('#boot-figure').innerHTML();
+  const before = await firstLook(page);
   await page.selectOption('#boot-class', 'necromancer');
   await expect(page.locator('#boot-class-card h4')).toContainText('Necromancer');
-  expect(await page.locator('#boot-figure').innerHTML()).not.toBe(before);
+  expect(await lookChanges(page, before)).not.toBe(before);
 
   expect(errors).toEqual([]);
 });
@@ -105,20 +123,21 @@ test('Customize opens the appearance editor and changes the preview', async ({ p
   const errors = watch(page);
   await openTitle(page);
   await page.click('#boot-new');
-  const before = await page.locator('#boot-figure').innerHTML();
+  const before = await firstLook(page);
 
   await page.click('#boot-customize');
   await expect(page.locator('#appearance')).toBeVisible();
-  await expect(page.locator('#ap-figure svg')).toBeVisible();
+  // R23 — the editor borrows the same 3D canvas rather than drawing a second, 2D figure
+  await expect(page.locator('#ap-figure canvas')).toBeVisible();
 
   // the four tabs, and the body sliders under the first one
   expect(await page.locator('.ap-tab').count()).toBe(4);
   expect(await page.locator('#ap-controls .ap-range').count()).toBeGreaterThanOrEqual(3);
 
   // Randomise changes the figure in the editor
-  const editorBefore = await page.locator('#ap-figure').innerHTML();
+  const editorBefore = await firstLook(page, '#ap-figure canvas');
   await page.click('#ap-random');
-  expect(await page.locator('#ap-figure').innerHTML()).not.toBe(editorBefore);
+  expect(await lookChanges(page, editorBefore, '#ap-figure canvas')).not.toBe(editorBefore);
 
   // a face part picked by hand lands in the avatar
   await page.click('.ap-tab >> nth=1');
@@ -126,20 +145,23 @@ test('Customize opens the appearance editor and changes the preview', async ({ p
   await page.click('#ap-done');
   await expect(page.locator('#appearance')).toBeHidden();
 
-  // …and the preview behind it is now a different figure
-  expect(await page.locator('#boot-figure').innerHTML()).not.toBe(before);
+  // …and the preview behind it is now a different figure, and the canvas came back to it
+  await expect(page.locator('#boot-figure canvas')).toBeVisible();
+  expect(await lookChanges(page, before)).not.toBe(before);
   await expect(page.locator('#boot-figure-note')).toContainText('Your own look');
 
   // Escape backs out of the editor without taking the change with it — and the editor draws into
   // the figure behind it while you work, so this is a real test and not a no-op
-  const kept = await page.locator('#boot-figure').innerHTML();
+  const kept = await lookOf(page);
   await page.click('#boot-customize');
   await expect(page.locator('#appearance')).toBeVisible();
   await page.click('#ap-random');
-  expect(await page.locator('#boot-figure').innerHTML(), 'the editor is not drawing into the preview').not.toBe(kept);
+  expect(await lookChanges(page, kept, '#ap-figure canvas'), 'the editor is not drawing into the preview').not.toBe(kept);
   await page.keyboard.press('Escape');
   await expect(page.locator('#appearance')).toBeHidden();
-  expect(await page.locator('#boot-figure').innerHTML(), 'Cancel kept the change it was cancelling').toBe(kept);
+  await page.waitForFunction(k => document.querySelector('#boot-figure canvas')?.dataset.look === k, kept, { timeout: 20000 })
+    .catch(() => {});
+  expect(await lookOf(page), 'Cancel kept the change it was cancelling').toBe(kept);
 
   expect(errors).toEqual([]);
 });

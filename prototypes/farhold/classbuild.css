@@ -141,7 +141,77 @@
 .cb-card ul { margin: 6px 0 0; padding-left: 18px; }
 .cb-card li { margin-bottom: 2px; }
 
+/* ================================================================ R23 — the builder, laid out again
+   Same palette. What changed: options sit in a grid of cards instead of one long column; a spell card
+   leads with chips (js/spellcard.js) and clamps its sentence to two lines, the selected one opening
+   in full; the spells a higher slot will offer are folded into a <details>; on the Spells tab the
+   six slots stay in view while the list beside them scrolls; and on the title screen a column on the
+   right holds the character in 3D, so a change of loadout shows in the hands. */
+
+.cb { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+.cb-main { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.cb-main.has-stage { grid-template-columns: minmax(0, 1fr) minmax(220px, 300px); }
+.cb-main > .cb-body { min-height: 0; }
+.cb-aside { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+.cb-stage {
+  position: relative; flex: 1 1 0; min-height: 260px; border: 1px solid var(--cb-line); border-radius: 8px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 85%, #1a2b44 0%, #0d1422 60%, #0a0f19 100%);
+}
+.cb-stage-note { text-align: center; }
+
+/* a set of options, as cards across the pane */
+.cb-choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.cb-choices--small { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.cb-choices--spells { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.cb-choices .cb-opt { margin-bottom: 0; align-content: start; }
+.cb-opt .cb-facts { grid-column: 1 / -1; margin: 2px 0 2px; }
+.cb-opt .cb-sub.sc-desc { display: -webkit-box; }
+.cb-opt.on .cb-sub.sc-desc { display: block; -webkit-line-clamp: unset; line-clamp: unset; }
+
+.cb-later { margin-top: 10px; }
+.cb-later > summary {
+  cursor: pointer; color: var(--cb-dim); font-size: 12px; padding: 6px 2px; list-style-position: inside;
+}
+.cb-later > summary:hover { color: var(--cb-ink); }
+.cb-later[open] > summary { margin-bottom: 6px; }
+
+/* the Spells tab: the six slots on the left stay put while the list on the right scrolls past */
+.cb-grid--spells { grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); }
+.cb-grid--spells > .cb-pane:first-child { position: sticky; top: 0; }
+.cb-slot { grid-template-columns: 64px 1fr auto; }
+.cb-slot .cb-state { white-space: nowrap; }
+
+/* the title screen's card for a custom class: the six slots as a short ladder */
+.cb-card .cc-head span { color: var(--cb-accent, #7fd8ff); font-size: 13px; font-weight: 400; }
+.cb-card .cb-open { margin: 2px 0 10px; }
+.cb-card .cb-why, .cb-card .cb-good { margin: 0 0 6px; font-size: 13px; }
+/* the card lives in the title screen, outside `.cb`, so it cannot read the builder's variables */
+.cb-card .cb-why { color: #ff9a8a; }
+.cb-card .cb-good { color: #8fe0a0; }
+.cb-card .cb-note { color: #7f8ea4; font-size: 12px; }
+.cb-card ul.cb-ladder { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.cb-ladder li {
+  display: grid; grid-template-columns: 64px 1fr auto; gap: 8px; align-items: baseline;
+  padding: 4px 8px; border: 1px solid #1e2a40; border-radius: 6px; background: #0e1523; margin: 0;
+}
+.cb-ladder .cb-lv { color: #ffd24a; font-size: 12px; font-variant-numeric: tabular-nums; }
+.cb-ladder li.later { opacity: .55; }
+.cb-ladder li.later b { font-weight: 400; font-style: italic; }
+.cb-ladder li.pending { border-color: #2e5a3a; }
+.cb-ladder li.pending b, .cb-ladder li.pending .cb-note { color: #8fe0a0; }
+
+@media (max-width: 900px) {
+  .cb-main.has-stage { grid-template-columns: minmax(0, 1fr); }
+  .cb-aside { display: none; }
+  .cb-grid--spells { grid-template-columns: 1fr; }
+  .cb-grid--spells > .cb-pane:first-child { position: static; }
+}
+
 @media (max-width: 720px) {
   .cb { padding: 12px; }
   .cb-grid { grid-template-columns: 1fr; }
+  .cb-choices, .cb-choices--spells { grid-template-columns: 1fr; }
 }
+
+/* the loadout list is the whole width; the element and the kit notes sit under it */
+.cb-grid--loadout > .cb-pane:first-child { grid-column: 1 / -1; }

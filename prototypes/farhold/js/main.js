@@ -123,6 +123,9 @@ import { Hud, SLOT_LABELS, MINIMAP_NEAR } from './hud.js';
 // and a shadowed import is a bug waiting for whoever edits one of them next.
 import { mat as matAmount } from '../../../shared/format.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE } from './skills.js';
+// R23 — Farhold's own uniques and the requests their powers make (see js/uniques.js)
+import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
+import { EFFECTS as FX_TABLE } from './effects.js';
 // round 4: the RPG expansion
 import { buildZones } from './zones.js';
 import { createChests } from './chests.js';
@@ -260,6 +263,23 @@ async function boot() {
     loadJSON('data/classbuild.json').catch(() => null),
     loadJSON('data/mercenaries.json').catch(() => null),
   ]);
+
+  /**
+   * R23 — FARHOLD'S 184 UNIQUES, put into the shared item table IN MEMORY before anything reads it.
+   *
+   * `items.json` belongs to Emberveil too, and none of these powers exist there, so they are never
+   * written into the file. Done here, before the title screen, because the title screen already
+   * holds `items` (the class preview draws starter weapons from it) and everything after it shares
+   * the same object. `.catch(() => null)` like every file added since round 14: without it the game
+   * simply has Emberveil's thirty-six uniques and nothing else changes.
+   */
+  {
+    const [uniqueData, uniqueTools] = await Promise.all([
+      loadJSON('data/uniques.json').catch(() => null),
+      loadJSON('data/tools.json').catch(() => null),
+    ]);
+    installUniques(items, uniqueData, { tools: uniqueTools, describe: id => FX_TABLE['legendary:' + id]?.desc?.() || null });
+  }
 
   /**
    * R16 — THE TITLE SCREEN IS ITS OWN MODULE NOW.
@@ -1038,9 +1058,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     onArrowLand: arrow => {
       const splash = balance.player?.arrowSplash ?? 2.6;
       const bow = player.equipment.weapon;
-      const element = elementOf(bow);
-      const leaves = statusOf(bow);
-      const hits = field.strikeArea(arrow.x, arrow.z, splash, player, { element });
+      // R23 — a power may have changed this shot's element when it left the string (Prism Dancer)
+      const shot = arrow.payload || null;
+      const element = shot?.element || elementOf(bow);
+      const leaves = shot?.element ? statusForElement(shot.element) : statusOf(bow);
+      const hits = field.strikeArea(arrow.x, arrow.z, splash, player, { element, applyStatus: statusHook });
       sound.combat('arrow');
       for (const { enemy, result } of hits) {
         if (leaves && skillData.statuses[leaves] && result.amount > 0) {
@@ -1048,6 +1070,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
         reportHit(enemy, result);
       }
+      // R23 — and whatever the shot's powers asked for: a ricochet, a chain, a patch of fire
+      if (shot?.mods) resolveAttack(uniqueEnv, shot.mods, hits, { x: control.x, z: control.z, at: { x: arrow.x, z: arrow.z }, element });
       // R16 — nothing sticks in the ground to be collected. See the note on RANGED.javelin: there
       // is no ammunition in this game, so there is nothing to go and pick back up.
     },
@@ -1155,6 +1179,61 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   }
   /** The callback every strike hands to the effect registry, so a crit can open a bleed. */
   const statusHook = (target, type, spec) => { if (target && spec) landStatus(type, spec, target, 1); };
+
+  /** R23 — the status an element leaves, for an attack whose element a unique's power changed. */
+  const statusForElement = el => CAST_ELEMENTS.find(e => e.element === el)?.status || null;
+
+  /**
+   * R23 — WHAT THE UNIQUES' POWERS ARE CARRIED OUT AGAINST.
+   *
+   * js/uniques.js `resolveAttack`, `afterKill`, `afterDamaged` and `tickAuras` are pure and take
+   * this object instead of reaching into the field themselves, so the node tests can hand them a
+   * field made of plain objects and the real `rpg.strike`. Every function here is read lazily —
+   * `field`, `player` and `control` do not exist yet when this line runs.
+   *
+   * A strike made from here carries `proc: true`, which is how a chain does not chain off itself.
+   */
+  const uniqueEnv = {
+    get player() { return player; },
+    at: () => ({ x: control.x, z: control.z }),
+    rng: () => field.rng(),
+    near: (x, z, r, except) => field.near(x, z, r, except),
+    strikeOne(e, { power = 1, element = 'physical' } = {}) {
+      if (!e || e.dying != null || e.removed) return null;
+      const result = rpg.strike(player, e, field.rng, { multiplier: power, element, proc: true, applyStatus: statusHook });
+      field.land(e, result, { fromX: control.x, fromZ: control.z, element, share: power });
+      reportHit(e, result);
+      if (result.dead) field.kill(e);
+      return result;
+    },
+    strikeArea(x, z, r, { power = 1, element = 'physical', falloff = 0.5 } = {}) {
+      const hits = field.strikeArea(x, z, r, player, { power, element, falloff, proc: true, applyStatus: statusHook });
+      for (const h of hits) reportHit(h.enemy, h.result);
+      if (hits.length) spellfx.impact({ at: new THREE.Vector3(x, terrain.heightAt(x, z) + 0.6, z), element });
+      return hits;
+    },
+    push(e, fromX, fromZ, metres) {
+      const dx = e.x - fromX, dz = e.z - fromZ;
+      const len = Math.hypot(dx, dz) || 1;
+      const sign = metres < 0 ? -1 : 1;
+      // a pull never drags a body PAST the point it is being pulled to
+      const want = sign < 0 ? Math.min(-metres, len * 0.9) : metres;
+      const m = pushFor(e, want);
+      if (m > 0.01) e.push = { dx: sign * dx / len, dz: sign * dz / len, metres: m, t: 0.18, span: 0.18, done: 0 };
+    },
+    dropPool: spec => dropPool(spec),
+    later: (ms, fn) => setTimeout(() => { if (state.running) fn(); }, ms),
+    applyStatus: (t, type, spec, power = 1) => { if (t && spec) landStatus(type, spec, t, power); },
+    applySelf: (type, spec) => applyStatus(player, type, spec, 1),
+    statusSpec: type => skillData.statuses[type] || null,
+    kill: e => field.kill(e),
+    arc(from, to, element) {
+      if (!from || !to) return;
+      const y0 = (from.y ?? terrain.heightAt(from.x, from.z)) + 1, y1 = (to.y ?? terrain.heightAt(to.x, to.z)) + 1;
+      spellfx.projectile({ from: new THREE.Vector3(from.x, y0, from.z), to: new THREE.Vector3(to.x, y1, to.z), element, ms: 120 })
+        .catch(() => { /* the scene went away */ });
+    },
+  };
 
   /**
    * Where the player is AIMING — which is not the same as where the player is standing.
@@ -1291,6 +1370,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const splash = plan.splash * (rpg.fx.sum(player, 'boltSplash') || 1);
         const hits = field.strikeArea(at.x, at.z, splash, player, { falloff: 0.5, ...strikeOpts });
         if (hits.length && loud) sound.combat('hit', { crit: hits.some(h => h.result.crit) });
+        // R23 — the attack's powers, where the bolt burst: shards, the pull, a chain, a patch. Only the
+        // first bolt of a chain carries them, so a hop is not a fresh attack with fresh procs.
+        if (plan.mods && !hop) resolveAttack(uniqueEnv, plan.mods, hits, { x: control.x, z: control.z, at: { x: at.x, z: at.z }, element: plan.element });
 
         /**
          * CHAIN: jump to the next body along.
@@ -2336,6 +2418,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         for (const [type, st] of Object.entries(e.statuses)) applyStatus(other, type, skillData.statuses[type], st.power);
       }
     }
+    // R23 — Rot passes on to whatever stood near, and Gorewind's Siphon starts mending you
+    uniquesAfterKill(uniqueEnv, post, e);
 
     /**
      * R22 — a kill is worth a fifth of what it was, and nothing at all five levels below you.
@@ -3355,7 +3439,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         seconds: gathering.secondsFor('seam', 1), speed,
         onDone: () => {
           const seconds = toolData.gather?.seamSeconds ?? 3.2;
-          const out = mining.swing(seam, seconds * toolYield(player), { tool: toolTierFor(player) });
+          // R23 — Prospector's Pride can pay a gather twice; Quickhand Pick starts its run of speed
+          const bonus = rpg.gatherBonus(player, field.rng);
+          if (bonus.times > 1) hud.log('A second vein shows in the same stroke.', 'good');
+          const out = mining.swing(seam, seconds * toolYield(player) * bonus.times, { tool: toolTierFor(player) });
           if (out.got <= 0) { hud.log(out.why ? `You cannot work this: ${out.why}.` : 'Nothing comes loose.', 'warn'); return; }
           sound.ui('click');
           const mat = (resourceData?.materials?.[out.resource]?.name || out.resource).toLowerCase();
@@ -3395,6 +3482,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           const res = props.strike(prop.x, prop.z, { damage: 1e6, reach: Math.max(3, range), tier });
           if (!res.hit) { hud.log(res.why || 'There is nothing there now.', 'warn'); return; }
           sound.combat('hit');
+          // R23 — the same two powers as a seam, on a tree or a boulder
+          const bonus = rpg.gatherBonus(player, field.rng);
+          if (bonus.times > 1) for (const k of Object.keys(res.materials || {})) res.materials[k] *= bonus.times;
           payOut(res.materials);
           const got = matText(res.materials);
           hud.log(`You ${res.verb} the ${res.name}.${got ? ` ${got}.` : ''}`, 'good');
@@ -4605,8 +4695,24 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       p.next -= dt;
       if (p.next <= 0) {
         p.next = p.every;
-        const hits = field.strikeArea(p.x, p.z, p.r, player, { falloff: 0.2, element: p.element, power: p.power });
-        for (const h of hits) brandHit(h.enemy, h.result);
+        const hits = field.strikeArea(p.x, p.z, p.r, player, { falloff: 0.2, element: p.element, power: p.power, proc: true });
+        /**
+         * R23 — THIS CALLED `brandHit`, WHICH DOES NOT EXIST HERE.
+         *
+         * `brandHit` is a `const` declared inside the frame loop's `swingWith` block, ~3,600 lines
+         * down; this function is at the top of `begin` and cannot see it. So the first time a pool
+         * touched anything — the Ground talent, a charged staff's wall — the frame threw
+         * "brandHit is not defined" and the pool never paid a second tick. It went unnoticed because
+         * nothing in the round-23 list had made a pool you could stand an enemy in until Pyrewright.
+         * A pool now lands its own element's status and reports its own numbers.
+         */
+        const leaves = statusForElement(p.element);
+        for (const h of hits) {
+          if (leaves && skillData.statuses[leaves] && h.result?.amount > 0) {
+            landStatus(leaves, skillData.statuses[leaves], h.enemy, Math.max(1, h.result.amount * 0.7));
+          }
+          reportHit(h.enemy, h.result);
+        }
       }
       // it fades as it burns out, so you can see how long you have left to stand clear of it
       if (p.ring) p.ring.material.opacity = 0.32 * Math.max(0, p.left / p.life);
@@ -8030,9 +8136,17 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     {
       const night = sky.dayFraction < 0.25 || sky.dayFraction > 0.78;
       const still = control.moving <= 0.05;
-      if (player.atNight !== night || (player.moving > 0) === still) {
+      /**
+       * R23 — …and `self.mounted`, which was the third of the three and was never set either.
+       * `cond_vehicleDmg` ("+N% damage while you are mounted") read `self.mounted` off the player,
+       * and only `control.mounted` was ever written, so the Wagon-Axle Club's property was inert.
+       * Brambleback's Rider's Fury reads the same flag.
+       */
+      const mounted = !!control.mounted;
+      if (player.atNight !== night || (player.moving > 0) === still || !!player.mounted !== mounted) {
         player.atNight = night;
         player.moving = still ? 0 : 1;
+        player.mounted = mounted;
         rpg.refresh?.(player);
       }
     }
@@ -8266,14 +8380,28 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const swingWith = (hand, stepIndex) => {
       const hands = handsOf(player);
       const weapon = hand === 'off' ? hands.off : hands.main;
-      const share = hand === 'off' ? OFFHAND_DAMAGE : 1;
-      const shape = withArea(strikeAt(weapon, stepIndex), player.derived.areaPct || 0);
+      /**
+       * R23 — THE UNIQUES' POWERS GET ONE LOOK AT EVERY ATTACK, before anything is struck.
+       *
+       * `rpg.attackMods` runs every `onAttack` hook once per swing, shot, bolt or staff cast and hands
+       * back what they asked for: a `power` and a `scale` to multiply in (Overload), an `element` to
+       * swing instead of the weapon's own (Prism Dancer), a full circle (Hearthsplitter), and the
+       * requests `resolveAttack` carries out once the hits are in. Blood Price has already been paid
+       * by the time this returns.
+       */
+      const kind = isStaff(weapon) ? 'staff' : (weapon?.castElement && weapon?.ranged) ? 'bolt' : weapon?.ranged ? 'arrow' : 'melee';
+      const mods = rpg.attackMods(player, kind, { weapon, hand });
+      const share = (hand === 'off' ? OFFHAND_DAMAGE : 1) * (mods.power || 1);
+      const shape = { ...withArea(strikeAt(weapon, stepIndex), player.derived.areaPct || 0) };
+      if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
       const reach = shape.reach;
-      const arc = shape.arc;
+      const arc = mods.fullCircle ? Math.PI * 2 : shape.arc;
       // What this weapon is made of. A wand throws its element; a branded sword carries it into the
       // swing. Both go through `magicResist` instead of armour and leave their status behind.
-      const element = elementOf(weapon);
-      const leaves = statusOf(weapon);
+      const element = mods.element || elementOf(weapon);
+      const leaves = mods.element ? statusForElement(mods.element) : statusOf(weapon);
+      /** Carry out what this attack's powers asked for, once its hits are known. */
+      const resolveHits = (hits, at = null) => resolveAttack(uniqueEnv, mods, hits, { x: control.x, z: control.z, at, element });
       const brandHit = (enemy, result) => {
         if (leaves && skillData.statuses[leaves] && result?.amount > 0) {
           landStatus(leaves, skillData.statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
@@ -8361,9 +8489,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
            * the one thing a caster has never had and the reason a staff felt like a worse bow.
            */
           spellfx.aoe({ points: ringPoints(control.x, control.z, radius, 12), element, stagger: 0.03 });
-          for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, {
+          const domeHits = field.strikeArea(control.x, control.z, radius, player, {
             falloff: 0.2, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1),
-          })) {
+          });
+          resolveHits(domeHits);
+          for (const { enemy, result } of domeHits) {
             brandHit(enemy, result);
             if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
             /**
@@ -8414,17 +8544,21 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           // into the radius and into the shapes that route through `meleeOpts`; this branch
           // computes its own power and so never saw it — a full charge was twice the circle at the
           // same damage, which reads as the charge doing nothing.
-          for (const { enemy, result } of field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) })) {
+          const novaHits = field.strikeArea(control.x, control.z, radius, player, { falloff: 0.35, element, power: share * (spell.mult || 1) * (shape.charge?.power || 1) });
+          for (const { enemy, result } of novaHits) {
             brandHit(enemy, result);
             if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
           }
+          resolveHits(novaHits);
         } else if (spell.shape === 'cone' || spell.shape === 'wave') {
           const range = (spell.range || 9) * shape.scale;
           const wide = spell.shape === 'cone' ? (spell.arc || 0.9) * shape.scale : 0.45;
           fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: range, arc: wide });
-          for (const { enemy, result } of field.strike(control, player, { reach: range, arc: wide, ...meleeOpts })) {
+          const coneHits = field.strike(control, player, { reach: range, arc: wide, ...meleeOpts });
+          for (const { enemy } of coneHits) {
             if (spell.status) landStatus(spell.status, skillData.statuses[spell.status], enemy, Math.max(1, base * 0.6));
           }
+          resolveHits(coneHits);
         } else {
           // lob, ground and chain all leave the hand as a bolt and do their work where they land
           const plan = talentPlan(player, 'staff:' + spell.key, {
@@ -8451,8 +8585,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             hud.log('It jumps.', '');
           }
           const from = new THREE.Vector3(a.x + a.dx * 0.6, a.y - 0.1, a.z + a.dz * 0.6);
-          // R15: …and so does a charged lob. Same fault, same fix.
-          fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (spell.mult || 1) * (shape.charge?.power || 1) }, from, true);
+          // R23 — the bolt carries this attack's requests to where it lands (Loomstaff's pull)
+          plan.mods = mods;
+          // R15: …and so does a charged lob. Same fault, same fix. R23: `share` carries Overload.
+          fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) }, from, true);
         }
         control.swing = Math.max(control.swing, 0.32);
         return;
@@ -8474,9 +8610,20 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           projectiles: how.projectiles || 1, spread: how.spread || 0,
           chains: how.chains || 0, homing: how.homing || 0,
           status: leaves, statusSpec: leaves ? skillData.statuses[leaves] : null,
+          // R23 — the requests this attack's powers made, resolved where the bolt lands
+          mods,
         };
         sound.combat('bow');
         fireBolt(plan, a, a.dx, a.dy, a.dz, { ...meleeOpts, power: (how.mult || 1) * share }, from, true);
+        // R23 — Twin Bolt: a second bolt a beat behind the first, at a share of its damage
+        if (mods.twin) {
+          uniqueEnv.later(mods.twin.ms, () => {
+            const again = aim();
+            fireBolt({ ...plan, mods: null }, again, again.dx, again.dy, again.dz,
+              { ...meleeOpts, power: (how.mult || 1) * share * mods.twin.power },
+              new THREE.Vector3(again.x + again.dx * 0.6, again.y - 0.15, again.z + again.dz * 0.6), false);
+          });
+        }
         control.swing = Math.max(control.swing, 0.3);
         return;
       }
@@ -8499,7 +8646,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const plan = player.derived.swing?.main;
         const range = plan?.range ?? balance.player?.arrowRange ?? 46;
         // a quiver decides how many arrows leave and what they do when they land
-        const shots = Math.max(1, Math.round(player.derived.arrowsPerShot || 1));
+        // …and a power may ask for more (Warden's Volley: every 4th shot is three)
+        const shots = Math.max(1, Math.round(player.derived.arrowsPerShot || 1), mods.shots || 1);
         const spread = shots > 1 ? 0.08 : 0;
         sound.combat('bow');
         for (let i = 0; i < shots; i++) {
@@ -8510,6 +8658,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             x: control.x + dx * 0.7, y: eyeY + ay * 0.5, z: control.z + dz * 0.7,
             dirX: dx, dirY: ay, dirZ: dz,
             range, speed: balance.player?.arrowSpeed ?? 42,
+            // R23 — the arrow carries this shot's requests to where it lands (Hawkfeather's bounce)
+            payload: { mods, element },
           });
           /**
            * A QUIVER DECIDES WHAT AN ARROW DOES, AND NOTHING WAS ASKING IT.
@@ -8544,6 +8694,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach, arc });
       const hits = field.strike(control, player, { reach, arc, ...meleeOpts });
       sound.combat(hits.length ? 'hit' : 'swing', { crit: hits.some(h => h.result.crit) });
+      // R23 — chain lightning, burning ground, the slam, the echo: see js/uniques.js
+      resolveHits(hits);
       // a branded weapon flashes its element on every body it lands on
       if (element !== 'physical') {
         for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element, crit: h.result.crit });
@@ -8686,6 +8838,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         const victim = pet && (e.aimingAt || field.rng() < 0.55) ? pet : player;
         const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e) });
         if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
+        // R23 — a frost nova off the hit, a barrier that bursts, a body the thorns just killed
+        if (victim === player) {
+          const after = uniquesAfterDamaged(uniqueEnv, result, e);
+          if (result.defenderPost?.secondWind) hud.log('A second wind: a barrier holds you up.', 'good');
+          if (after.killed) hud.log(`${e.name} dies on the thorns.`, 'good');
+        }
         if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
         if (victim !== player) {
           if (result.dead) { pets.fall(victim); hud.log(`${victim.name} goes down.`, 'bad'); }
@@ -8732,9 +8890,11 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             const missed = Math.hypot(aimAt.x - to.x, aimAt.z - to.z) > 2.6;
             if (missed) return;
             const victim = aimAt === control ? player : aimAt;
-            const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element: spec.element });
+            const result = rpg.strike(e, victim, field.rng, { multiplier: incomingFrom(victim) * outgoingFrom(e), element: spec.element, ranged: true });
             if (e.onHit?.length) field.statusOnHit(e, victim, skillData.statuses);
             if (victim === player) {
+              // R23 — the same answers a melee hit gets; Frost Skin alone asks `ranged` and stays out
+              uniquesAfterDamaged(uniqueEnv, result, e);
               hud.log(`${e.name} hits you for ${result.amount}.`, 'bad');
               hud.hit(new THREE.Vector3(control.x, control.y + 1.9, control.z), result.amount, 'taken', camera);
               if (player.hp <= 0) respawn(e);
@@ -8806,6 +8966,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     fx.update(dt);
     spellfx.update(dt);
     skills.update(dt);
+    // R23 — the powers that pulse on a clock: Pyre, Searing Light, the Dread Lantern, Stormrider
+    tickAuras(uniqueEnv, rpg, player, dt, { fighting });
     // whatever is burning or blessing the player keeps working while they run
     const selfTick = tickStatuses(player, dt, { resist: rpg.fx.product(player, 'statusIn') });
     if (selfTick > 0 && player.hp <= 0) respawn(null);

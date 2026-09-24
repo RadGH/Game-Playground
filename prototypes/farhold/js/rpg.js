@@ -27,7 +27,8 @@ import {
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
 // js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
 // every Branding talent were doing nothing to an enemy. See `strike` for how it is applied once.
-import { incomingFrom, outgoingFrom } from './skills.js';
+import { incomingFrom, outgoingFrom, applyStatus as applyStatusRaw } from './skills.js';
+import { dressUnique, makeGearUnique } from './uniques.js';
 // Emberveil already worked out twenty passive nodes and a tree per class. Reuse them rather than
 // invent a second set that means the same thing.
 import { passiveTree, PASSIVE_NODES, TALENT_LEVELS, PASSIVE_EVERY } from '../../emberveil/js/rules.js';
@@ -168,8 +169,9 @@ export function attuneWeapon(item) {
     item.castStatus = null;
   }
   if (!isQuarterstaff && CASTERS.has(sub) && !item.castElement) {
-    // a brand put on at the bench wins over the base's own attunement
-    const forced = item.brand;
+    // a brand put on at the bench wins over the base's own attunement — and so does the element a
+    // round-23 unique was written for (`attune`), or "a wand of fire" would be fire one drop in six
+    const forced = item.brand || item.attune;
     const pick = forced
       ? CAST_ELEMENTS.find(e => e.element === forced) || CAST_ELEMENTS[0]
       : CAST_ELEMENTS[Math.floor(hashOf(item.id || item.baseKey) * CAST_ELEMENTS.length)];
@@ -752,7 +754,20 @@ export class Rpg {
       return item;
     };
     const generateUnique = loot.generateUnique.bind(loot);
-    loot.generateUnique = (id, rng, ...rest) => stamp(generateUnique(id, rng, ...rest), this.lastDropLevel, rng);
+    /**
+     * R23 — Farhold's own uniques (data/uniques.json, put into `items.uniques` at boot by
+     * js/uniques.js `installUniques`). Most sit on an items.json base and go through Emberveil's
+     * generator like any other; a mount, a lamp, a quiver or a tool is not in items.json at all, so
+     * those are built from Farhold's own bases and dressed the same way. Either way `dressUnique`
+     * writes the element, the wand behaviour and the staff spell the entry was written for.
+     */
+    loot.generateUnique = (id, rng, ...rest) => {
+      const u = (this.items.uniques || []).find(x => x.id === id);
+      const made = u?.farhold && (u.gearBase || u.toolBase)
+        ? makeGearUnique(u, { rpg: this, rng: rng || this.rng, level: this.lastDropLevel || 1 })
+        : generateUnique(id, rng, ...rest);
+      return stamp(u?.farhold ? dressUnique(made, u) : made, this.lastDropLevel, rng);
+    };
     const maybeSetItem = loot.maybeSetItem.bind(loot);
     loot.maybeSetItem = (act, rng, ...rest) => stamp(maybeSetItem(act, rng, ...rest), this.lastDropLevel, rng);
   }
@@ -1459,7 +1474,7 @@ export class Rpg {
    * One swing. Returns what happened so the caller can show numbers, play an animation and write
    * a line in the log. Attacker and defender are any `{ derived }` character or plain enemy.
    */
-  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null, hand = 'main', pen = 0 } = {}) {
+  strike(attacker, defender, rng = this.rng, { multiplier = 1, element = 'physical', skill = null, applyStatus = null, hand = 'main', pen = 0, proc = false, ranged = false } = {}) {
     const a = attacker.derived, d = defender.derived;
     // Read every field with a fallback, NEVER `a ? a.x : fallback`. Round 4 gave enemies and pets a
     // small `derived` bag (resistAll / thorns / dodge) so modifiers could hang off them, which made
@@ -1497,7 +1512,9 @@ export class Rpg {
     }
 
     // the attacker's affixes get a say before the roll: crit chance, then the multipliers
-    const ctx = { self: attacker, target: defender, element, skill, applyStatus, baseDamage: (dmgRange[0] + dmgRange[1]) / 2 };
+    // R23 — `proc` marks a strike made BY a unique's power (a chain, a ricochet, an echo), so the
+    // powers that start more strikes do not start them off each other. `rng` is the fight's own.
+    const ctx = { self: attacker, target: defender, element, skill, applyStatus, proc, rng, baseDamage: (dmgRange[0] + dmgRange[1]) / 2 };
     const critBonus = attacker.equipment ? this.fx.critBonus(ctx) : 0;
     // a riposte spends itself on the next swing, whatever the dice say
     const riposte = !!(attacker.perkFlags?.riposte && attacker.riposteReady);
@@ -1714,18 +1731,78 @@ export class Rpg {
 
     // after the hit: streaks, bleeds, mana on hit, first-hit marks
     if (attacker.equipment) {
-      const post = { self: attacker, target: defender, amount, crit, element, applyStatus };
+      const post = { self: attacker, target: defender, amount, crit, element, applyStatus, proc, rng, skill };
       this.fx.onHit(post);
       if (crit) this.fx.onCrit(post);
       if (post.mana && attacker.mp != null) attacker.mp = Math.min(attacker.maxMp, attacker.mp + post.mana);
+      /**
+       * R23 — `legendary:cull`. The hook only says the hit qualified; the kill is made HERE, where
+       * the result is still being written, so `result.dead` and the kill that follows it in
+       * js/actors.js agree with the health bar.
+       */
+      if (post.cull && defender.hp > 0) {
+        defender.hp = 0;
+        result.dead = true;
+        result.culled = true;
+      }
       result.post = post;
     }
     if (defender.equipment) {
-      const hurt = { self: defender, target: attacker, amount, element };
+      /**
+       * R23 — the defender's hooks get to ACT on the attacker now, not only read it: Frost Skin
+       * chills whatever struck you, which needs a status function even when the enemy that swung
+       * passed none (the enemy path never does). `blocked`, `absorbed` and `ranged` are what
+       * Bulwark, Barrier Burst and Frost Skin ask about.
+       */
+      const hurt = {
+        self: defender, target: attacker, amount, element, rng, ranged, blocked, absorbed,
+        applyStatus: applyStatus || ((t, type, spec, power = 1) => applyStatusRaw(t, type, spec, power)),
+      };
       this.fx.onDamaged(hurt);
       result.defenderPost = hurt;
     }
     return result;
+  }
+
+  // ---------------------------------------------------------------- round 23: the attack itself
+
+  /**
+   * ONE ATTACK, asked once — a swing, a shot, a bolt or a staff cast. `kind` is 'melee', 'arrow',
+   * 'bolt' or 'staff'. Returns the context every `onAttack` hook wrote into: a damage `power` and an
+   * area `scale` to multiply in, an `element` to use instead of the weapon's, and the requests
+   * js/uniques.js `resolveAttack` carries out once the hits are in (`fullCircle`, `slam`, `chain`,
+   * `patch`, `ricochet`, `split`, `pull`, `echo`, `shockwave`, `twin`, `shots`).
+   *
+   * The one thing settled here rather than there is Blood Price's cost, because it is paid whether
+   * the attack lands or not.
+   */
+  attackMods(unit, kind = 'melee', { weapon = null, hand = 'main' } = {}) {
+    const c = { self: unit, kind, weapon, hand, power: 1, scale: 1 };
+    if (!unit?.equipment) return c;
+    this.fx.onAttack(c);
+    if (c.selfCost > 0 && unit.hp != null) {
+      c.paid = Math.max(0, Math.min(c.selfCost, unit.hp - 1));
+      unit.hp = Math.max(1, unit.hp - c.selfCost);
+    }
+    return c;
+  }
+
+  /** Every aura this character is carrying right now, for js/uniques.js `tickAuras`. */
+  auraList(unit) {
+    if (!unit?.equipment) return [];
+    const c = { self: unit, auras: [] };
+    this.fx.fire('aura', c);
+    return c.auras;
+  }
+
+  /**
+   * A gather bar has filled. Returns `{ times }` — how many times the gather pays — after Prospector
+   * and Quick Hands have had their say. js/main.js multiplies the yield by `times`.
+   */
+  gatherBonus(unit, rng = this.rng) {
+    const c = { self: unit, times: 1, rng };
+    if (unit?.equipment) this.fx.fire('gatherDone', c);
+    return c;
   }
 
   // ---------------------------------------------------------------- loot

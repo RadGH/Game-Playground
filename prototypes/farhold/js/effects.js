@@ -624,6 +624,372 @@ def('legendary:nemesis_hunter', '+100% damage to rares and bosses, and killing o
 // line said "nothing ambushes you", which the code has never done and would not be a good game.
 def('legendary:no_night_raids', '75% fewer enemies spawn around you after dark.', { noAmbush: () => 1 });
 
+// ───────────────────────── round 23: the uniques' own powers ─────────────────────────
+//
+// "Generate 2 uniques of every type… Some of these new weapons could inflict special dots or impart
+// effects on the user or have interesting auto-attack mechanics." data/uniques.json holds the items;
+// these are the powers they carry. Every number a card prints is a constant in `U23` below, and the
+// hook reads the SAME constant — so the sentence and the code cannot drift apart.
+//
+// Three families, and where each one is paid out:
+//
+//   * damage over time and marks — the hook calls `c.applyStatus` from inside `rpg.strike`, with a
+//     status spec js/skills.js knows how to stack, ramp, grow or detonate;
+//   * the wielder — `derive` on a timer in `rt`, or `dmgOut`/`dmgIn`/`critBonus`/`onDamaged`;
+//   * the attack itself — `onAttack` runs once per swing, shot, bolt or staff cast
+//     (`rpg.attackMods`) and writes REQUESTS onto the context (`fullCircle`, `chain`, `patch`…).
+//     js/uniques.js `resolveAttack` carries each request out against the field, and js/main.js calls
+//     it after every attack. A request nothing carries out would be this project's signature bug,
+//     so tests/round23-uniques.test.js drives every one of them through `resolveAttack`.
+//
+// A strike made BY one of these procs carries `proc: true`, and every hook that starts another proc
+// checks it first — otherwise chain lightning would chain off its own chain until the field ran dry.
+
+/** Every magnitude the round-23 powers use. One place, read by the text and the hook alike. */
+export const U23 = {
+  rot: { share: 0.6, seconds: 6, radius: 6 },
+  frostbite: { slowPerStack: 0.08, stacks: 5, seconds: 5, freeze: 1.5 },
+  hemorrhage: { share: 0.5, seconds: 5, perMetre: 0.1, cap: 1.5 },
+  kindling: { start: 0.08, seconds: 5, ramp: 0.5, cap: 3 },
+  venom: { share: 0.2, seconds: 6, stacks: 5 },
+  doom: { seconds: 4, share: 0.4 },
+  shatter: 0.5,
+  staticArc: { range: 8, power: 0.5 },
+  bloodPrice: { damage: 0.35, cost: 0.015 },
+  critWard: { share: 0.2, cap: 0.25 },
+  frenzy: { seconds: 6, stacks: 5, haste: 8, move: 4 },
+  manaBurn: { mana: 4, damage: 0.45 },
+  glassHeart: { out: 0.5, in: 0.25 },
+  siphon: { share: 0.12, seconds: 4 },
+  secondWind: { below: 0.3, barrier: 0.35, every: 45 },
+  stride: 0.25,
+  stillness: { crit: 30, after: 1.5 },
+  thornmail: 0.4,
+  retaliate: { chance: 0.2, radius: 5, power: 0.6 },
+  pyre: { every: 1, radius: 4, power: 0.15 },
+  critHeal: 0.03,
+  cull: 0.1,
+  bulwark: { damage: 0.2, seconds: 4 },
+  barrierBurst: { radius: 5, power: 0.8, every: 10 },
+  resonance: { per: 0.12, cap: 0.6 },
+  opportunist: 0.3,
+  trance: 5,
+  overflow: { regen: 2, damage: 0.2 },
+  cleave: 3,
+  slam: { every: 3, radius: 4, power: 0.7, push: 2 },
+  cycle: ['fire', 'ice', 'lightning'],
+  trail: { radius: 2.5, seconds: 3, power: 0.25, every: 1 },
+  chain: { jumps: 3, range: 8, power: 0.4 },
+  ricochet: { bounces: 2, range: 10, power: 0.6 },
+  split: { shards: 3, range: 8, power: 0.35 },
+  volley: { every: 4, arrows: 3 },
+  gravity: { radius: 5, pull: 2.5 },
+  echo: { chance: 0.25, ms: 300, power: 0.6 },
+  crescendo: { per: 0.06, cap: 5, radius: 5, power: 1, idle: 3 },
+  twin: { ms: 200, power: 0.5 },
+  overload: { every: 4, power: 2, scale: 1.5 },
+  riderFury: { damage: 0.3, speed: 0.15, seconds: 5 },
+  stormrider: { every: 2, range: 12, power: 0.6 },
+  searing: { every: 2, radius: 10, power: 0.12 },
+  dread: { radius: 8, dealLess: 0.15, every: 1 },
+  prospector: 0.2,
+  quickHands: { speed: 0.3, move: 20, seconds: 5 },
+};
+
+/** The timers the round-23 powers run on. `Effects.update` ticks every one of them. */
+export const U23_TIMERS = ['frenzyFor', 'secondWind', 'barrierBurst', 'bulwark', 'riderRush', 'quickHands', 'crescendoIdle', 'trailCd'];
+
+const hpFrac = u => (u?.hp ?? 0) / Math.max(1, u?.maxHp || 1);
+const slowed = t => Object.values(t?.statuses || {}).some(s => (s?.slow || 0) > 0);
+/** Count an attack of one kind on the runtime. Returns the new count. */
+const countAttack = (c, key) => { c.rt[key] = (c.rt[key] || 0) + 1; return c.rt[key]; };
+
+// ---- damage over time and marks
+
+def('legendary:rot_spread', `Every hit applies Rot: ${pct(U23.rot.share)} of the hit as poison damage over ${U23.rot.seconds}s. An enemy that dies while rotting passes the Rot to every enemy within ${U23.rot.radius} metres.`, {
+  onHit: (v, c) => {
+    if (!c.target || !(c.amount > 0)) return;
+    c.applyStatus?.(c.target, 'rot', { perSecond: c.amount * U23.rot.share / U23.rot.seconds, seconds: U23.rot.seconds, element: 'poison', name: 'Rot', kind: 'damage' });
+  },
+  onKill: (v, c) => {
+    const st = c.target?.statuses?.rot;
+    if (st) c.spreadRot = { radius: U23.rot.radius, perSecond: st.perSecond, power: st.power || 1, seconds: U23.rot.seconds };
+  },
+});
+def('legendary:frostbite', `Every hit adds a stack of Frostbite for ${U23.frostbite.seconds}s: -${pct(U23.frostbite.slowPerStack)} move speed per stack. At ${U23.frostbite.stacks} stacks the enemy is Frozen and cannot move for ${U23.frostbite.freeze}s, and the stacks clear.`, {
+  onHit: (v, c) => {
+    if (!c.target || !(c.amount > 0) || c.target.statuses?.frozen) return;
+    c.applyStatus?.(c.target, 'frostbite', {
+      seconds: U23.frostbite.seconds, slowPerStack: U23.frostbite.slowPerStack, stackMax: U23.frostbite.stacks,
+      element: 'ice', name: 'Frostbite', kind: 'slow',
+      onMax: { type: 'frozen', spec: { seconds: U23.frostbite.freeze, slow: 1, element: 'ice', name: 'Frozen', kind: 'slow' } },
+    });
+  },
+});
+def('legendary:hemorrhage', `Critical hits open a Hemorrhage: ${pct(U23.hemorrhage.share)} of the hit as bleed damage over ${U23.hemorrhage.seconds}s, +${pct(U23.hemorrhage.perMetre)} for every metre the enemy moves while bleeding, up to +${pct(U23.hemorrhage.cap)}.`, {
+  onCrit: (v, c) => {
+    if (!c.target || !(c.amount > 0)) return;
+    c.applyStatus?.(c.target, 'hemorrhage', {
+      perSecond: c.amount * U23.hemorrhage.share / U23.hemorrhage.seconds, seconds: U23.hemorrhage.seconds,
+      growOnMove: U23.hemorrhage.perMetre, growCap: U23.hemorrhage.cap, element: 'physical', name: 'Hemorrhage', kind: 'damage',
+    });
+  },
+});
+def('legendary:kindling', `Every hit sets Kindling for ${U23.kindling.seconds}s: fire damage starting at ${pct(U23.kindling.start)} of the hit a second and rising by ${pct(U23.kindling.start * U23.kindling.ramp)} of the hit for every second Kindling keeps burning, up to ${pct(U23.kindling.start * U23.kindling.cap)} a second.`, {
+  onHit: (v, c) => {
+    if (!c.target || !(c.amount > 0)) return;
+    c.applyStatus?.(c.target, 'kindling', {
+      perSecond: c.amount * U23.kindling.start, seconds: U23.kindling.seconds,
+      ramp: U23.kindling.ramp, rampCap: U23.kindling.cap, element: 'fire', name: 'Kindling', kind: 'damage',
+    });
+  },
+});
+def('legendary:venom_stack', `Every hit adds a stack of Venom, up to ${U23.venom.stacks}: each stack deals ${pct(U23.venom.share)} of the hit as poison damage over ${U23.venom.seconds}s, and each new stack refreshes the rest.`, {
+  onHit: (v, c) => {
+    if (!c.target || !(c.amount > 0)) return;
+    c.applyStatus?.(c.target, 'venom', {
+      perSecond: c.amount * U23.venom.share / U23.venom.seconds, seconds: U23.venom.seconds, stackMax: U23.venom.stacks,
+      element: 'poison', name: 'Venom', kind: 'damage',
+    });
+  },
+});
+def('legendary:doom', `The first hit on an enemy lays Doom for ${U23.doom.seconds}s. When Doom ends, the enemy takes ${pct(U23.doom.share)} of all the damage you dealt that enemy in those ${U23.doom.seconds}s again, as shadow damage.`, {
+  onHit: (v, c) => {
+    if (!c.target || !(c.amount > 0)) return;
+    if (!c.target.statuses?.doom) {
+      c.applyStatus?.(c.target, 'doom', { seconds: U23.doom.seconds, detonate: U23.doom.share, element: 'shadow', name: 'Doom', kind: 'debuff' });
+    }
+    const st = c.target.statuses?.doom;
+    if (st) st.stored = (st.stored || 0) + c.amount;
+  },
+});
+def('legendary:shatter', `+${pct(U23.shatter)} damage to Chilled, Frostbitten or Frozen enemies.`, {
+  dmgOut: (v, c) => {
+    const s = c.target?.statuses || {};
+    return s.chill || s.frozen || s.frostbite ? 1 + U23.shatter : 1;
+  },
+});
+def('legendary:static_charge', `Every hit on a Shocked enemy arcs lightning to 1 other enemy within ${U23.staticArc.range} metres for ${pct(U23.staticArc.power)} of your damage.`, {
+  onHit: (v, c) => {
+    if (c.proc || !c.target?.statuses?.shock || !(c.amount > 0)) return;
+    (c.procs || (c.procs = [])).push({ kind: 'arc', from: c.target, range: U23.staticArc.range, power: U23.staticArc.power, element: 'lightning' });
+  },
+});
+
+// ---- the wielder
+
+def('legendary:blood_price', `+${pct(U23.bloodPrice.damage)} damage. Every attack costs ${n1(U23.bloodPrice.cost * 100)}% of your maximum health; this cannot take you below 1 health.`, {
+  dmgOut: () => 1 + U23.bloodPrice.damage,
+  onAttack: (v, c) => { c.selfCost = (c.selfCost || 0) + (c.self?.maxHp || 0) * U23.bloodPrice.cost; },
+});
+def('legendary:crit_ward', `Critical hits give you a barrier worth ${pct(U23.critWard.share)} of the damage dealt, up to ${pct(U23.critWard.cap)} of your maximum health.`, {
+  onCrit: (v, c) => {
+    if (!c.self || !(c.amount > 0)) return;
+    const cap = (c.self.maxHp || 0) * U23.critWard.cap;
+    c.self.barrier = Math.min(cap, (c.self.barrier || 0) + c.amount * U23.critWard.share);
+  },
+});
+def('legendary:kill_frenzy', `Every kill adds a stack of Frenzy for ${U23.frenzy.seconds}s, up to ${U23.frenzy.stacks}: +${U23.frenzy.haste}% attack speed and +${U23.frenzy.move}% move speed per stack.`, {
+  onKill: (v, c) => { c.rt.frenzy = Math.min(U23.frenzy.stacks, (c.rt.frenzy || 0) + 1); c.rt.frenzyFor = U23.frenzy.seconds; },
+  derive: (v, d, unit, rt) => {
+    if (!(rt?.frenzyFor > 0) || !rt.frenzy) return;
+    d.haste += rt.frenzy * U23.frenzy.haste;
+    d.movePct += rt.frenzy * U23.frenzy.move;
+  },
+});
+def('legendary:mana_burn', `Every hit spends ${U23.manaBurn.mana} mana to deal +${pct(U23.manaBurn.damage)} damage. With less than ${U23.manaBurn.mana} mana, hits deal normal damage.`, {
+  dmgOut: (v, c) => {
+    c.rt.burnArmed = !c.proc && (c.self?.mp || 0) >= U23.manaBurn.mana;
+    return c.rt.burnArmed ? 1 + U23.manaBurn.damage : 1;
+  },
+  onHit: (v, c) => {
+    if (!c.rt.burnArmed) return;
+    c.rt.burnArmed = false;
+    c.self.mp = Math.max(0, (c.self.mp || 0) - U23.manaBurn.mana);
+  },
+});
+def('legendary:glass_heart', `+${pct(U23.glassHeart.out)} damage dealt and +${pct(U23.glassHeart.in)} damage taken.`, {
+  dmgOut: () => 1 + U23.glassHeart.out,
+  dmgIn: () => 1 + U23.glassHeart.in,
+});
+def('legendary:vampire_kill', `Every kill heals you for ${pct(U23.siphon.share)} of your maximum health over ${U23.siphon.seconds}s.`, {
+  onKill: (v, c) => {
+    c.selfStatus = { type: 'siphon', spec: { healPerSecond: U23.siphon.share / U23.siphon.seconds, seconds: U23.siphon.seconds, name: 'Siphon', kind: 'buff', element: 'shadow' } };
+  },
+});
+def('legendary:second_wind', `When a hit leaves you below ${pct(U23.secondWind.below)} health, you gain a barrier worth ${pct(U23.secondWind.barrier)} of your maximum health. Once every ${U23.secondWind.every}s.`, {
+  onDamaged: (v, c) => {
+    if ((c.rt.secondWind || 0) > 0 || hpFrac(c.self) >= U23.secondWind.below || (c.self?.hp ?? 0) <= 0) return;
+    c.rt.secondWind = U23.secondWind.every;
+    c.self.barrier = (c.self.barrier || 0) + (c.self.maxHp || 0) * U23.secondWind.barrier;
+    c.secondWind = true;
+  },
+});
+def('legendary:stride', `+${pct(U23.stride)} damage while you are moving.`, {
+  dmgOut: (v, c) => (c.self?.moving > 0 ? 1 + U23.stride : 1),
+});
+def('legendary:stillness', `+${U23.stillness.crit}% critical chance once you have stood still for ${U23.stillness.after}s.`, {
+  critBonus: (v, c) => ((c.rt.still || 0) >= U23.stillness.after ? U23.stillness.crit : 0),
+});
+// read by `rpg.strike`'s thorns line: `share = d.thorns + fx.sum(defender, 'reflect')`
+def('legendary:thornmail', `${pct(U23.thornmail)} of the damage you take from each hit is dealt back to the attacker.`, {
+  reflect: () => U23.thornmail,
+});
+def('legendary:retaliate_nova', `Every hit you take has a ${pct(U23.retaliate.chance)} chance to release a frost nova: ${pct(U23.retaliate.power)} of your damage as ice damage to every enemy within ${U23.retaliate.radius} metres, applying Chilled (-45% move speed for 4s).`, {
+  onDamaged: (v, c) => {
+    if (!(c.amount > 0) || (c.rng ? c.rng() : Math.random()) >= U23.retaliate.chance) return;
+    (c.procs || (c.procs = [])).push({ kind: 'nova', radius: U23.retaliate.radius, power: U23.retaliate.power, element: 'ice', status: 'chill' });
+  },
+});
+def('legendary:frost_skin', 'Every enemy that hits you in melee is Chilled: -45% move speed for 4s.', {
+  onDamaged: (v, c) => {
+    if (c.ranged || !c.target || c.target.equipment) return;
+    c.applyStatus?.(c.target, 'chill', { slow: 0.45, seconds: 4, element: 'ice', name: 'Chilled', kind: 'slow' });
+  },
+});
+// asked by `rpg.auraList` every frame; js/uniques.js `tickAuras` owns the clock and the strike
+def('legendary:pyre_aura', `Every ${U23.pyre.every}s in a fight, every enemy within ${U23.pyre.radius} metres of you takes ${pct(U23.pyre.power)} of your damage as fire damage and is set Burning (105% of that hit as fire damage over 5s).`, {
+  aura: (v, c) => { c.auras.push({ id: 'pyre', every: U23.pyre.every, radius: U23.pyre.radius, power: U23.pyre.power, element: 'fire', status: 'burn' }); },
+});
+def('legendary:crit_heal', `Critical hits heal you for ${pct(U23.critHeal)} of your maximum health.`, {
+  onCrit: (v, c) => {
+    if (!c.self || c.self.hp == null) return;
+    c.self.hp = Math.min(c.self.maxHp || c.self.hp, c.self.hp + Math.round((c.self.maxHp || 0) * U23.critHeal));
+  },
+});
+def('legendary:cull', `A hit that leaves an ordinary enemy or a champion below ${pct(U23.cull)} health kills that enemy outright. Rares and bosses are immune.`, {
+  onHit: (v, c) => {
+    const t = c.target;
+    if (!t || (t.hp ?? 0) <= 0 || t.equipment) return;
+    if (t.rank === 'rare' || t.rank === 'boss' || t.worldBoss) return;
+    if (hpFrac(t) < U23.cull) c.cull = true;
+  },
+});
+def('legendary:bulwark', `Every hit you block gives +${pct(U23.bulwark.damage)} damage for ${U23.bulwark.seconds}s.`, {
+  onDamaged: (v, c) => { if (c.blocked > 0) c.rt.bulwark = U23.bulwark.seconds; },
+  dmgOut: (v, c) => ((c.rt.bulwark || 0) > 0 ? 1 + U23.bulwark.damage : 1),
+});
+def('legendary:barrier_burst', `When your barrier breaks, the barrier bursts: ${pct(U23.barrierBurst.power)} of your damage as arcane damage to every enemy within ${U23.barrierBurst.radius} metres. Once every ${U23.barrierBurst.every}s.`, {
+  onDamaged: (v, c) => {
+    if (!(c.absorbed > 0) || (c.self?.barrier || 0) > 0 || (c.rt.barrierBurst || 0) > 0) return;
+    c.rt.barrierBurst = U23.barrierBurst.every;
+    (c.procs || (c.procs = [])).push({ kind: 'nova', radius: U23.barrierBurst.radius, power: U23.barrierBurst.power, element: 'arcane' });
+  },
+});
+def('legendary:resonance', `+${pct(U23.resonance.per)} damage for every different status on the enemy, up to +${pct(U23.resonance.cap)}.`, {
+  dmgOut: (v, c) => 1 + Math.min(U23.resonance.cap, Object.keys(c.target?.statuses || {}).length * U23.resonance.per),
+});
+def('legendary:opportunist', `+${pct(U23.opportunist)} damage to enemies that are slowed by anything: Chilled, Frostbitten, Frozen, Cursed or Snared.`, {
+  dmgOut: (v, c) => (slowed(c.target) ? 1 + U23.opportunist : 1),
+});
+def('legendary:battle_trance', `Every ${U23.trance}th hit in a row on the same enemy is a guaranteed critical hit.`, {
+  critBonus: (v, c) => (c.rt.tranceOn === c.target?.id && ((c.rt.trance || 0) + 1) % U23.trance === 0 ? 1000 : 0),
+  onHit: (v, c) => {
+    if (c.proc) return;
+    if (c.rt.tranceOn === c.target?.id) c.rt.trance = (c.rt.trance || 0) + 1;
+    else { c.rt.tranceOn = c.target?.id; c.rt.trance = 1; }
+  },
+});
+def('legendary:overflow', `+${U23.overflow.regen} mana a second, and +${pct(U23.overflow.damage)} damage while your mana is full.`, {
+  derive: (v, d) => { d.mpRegen += U23.overflow.regen; },
+  dmgOut: (v, c) => ((c.self?.mp ?? 0) >= (c.self?.maxMp ?? Infinity) - 0.5 ? 1 + U23.overflow.damage : 1),
+});
+
+// ---- the attack itself. `c.kind` is 'melee', 'arrow', 'bolt' or 'staff'.
+
+def('legendary:third_cleave', `Every ${U23.cleave}rd melee swing becomes a full circle around you at the weapon's reach.`, {
+  onAttack: (v, c) => { if (c.kind === 'melee' && countAttack(c, 'cleaveCount') % U23.cleave === 0) c.fullCircle = true; },
+});
+def('legendary:quake_slam', `Every ${U23.slam.every}rd melee swing also slams the ground: ${pct(U23.slam.power)} of your damage to every enemy within ${U23.slam.radius} metres, knocking them ${U23.slam.push} metres back.`, {
+  onAttack: (v, c) => {
+    if (c.kind === 'melee' && countAttack(c, 'slamCount') % U23.slam.every === 0) c.slam = { radius: U23.slam.radius, power: U23.slam.power, push: U23.slam.push };
+  },
+});
+def('legendary:alternate_elements', 'Your attacks cycle fire, ice, lightning: each attack deals that element\'s damage and applies its status (Burning: 105% of the hit over 5s; Chilled: -45% move speed for 4s; Shocked: +30% damage taken for 5s).', {
+  onAttack: (v, c) => {
+    const i = c.rt.cycle || 0;
+    c.element = U23.cycle[i % U23.cycle.length];
+    c.rt.cycle = (i + 1) % U23.cycle.length;
+  },
+});
+def('legendary:fire_trail', `An attack that hits leaves burning ground under the first enemy hit, at most once every ${U23.trail.every}s: ${n1(U23.trail.radius * 2)} metres across for ${U23.trail.seconds}s, dealing ${pct(U23.trail.power)} of your damage as fire damage every 0.75s.`, {
+  onAttack: (v, c) => {
+    if ((c.rt.trailCd || 0) > 0) return;
+    c.patch = { radius: U23.trail.radius, seconds: U23.trail.seconds, power: U23.trail.power, element: 'fire', cooldown: U23.trail.every };
+  },
+});
+def('legendary:chain_lightning', `Every attack that hits jumps lightning to up to ${U23.chain.jumps} more enemies within ${U23.chain.range} metres, dealing ${pct(U23.chain.power)} of your damage to each.`, {
+  onAttack: (v, c) => { c.chain = { jumps: U23.chain.jumps, range: U23.chain.range, power: U23.chain.power, element: 'lightning' }; },
+});
+def('legendary:ricochet', `Arrows that hit an enemy bounce to another enemy within ${U23.ricochet.range} metres for ${pct(U23.ricochet.power)} of your damage, up to ${U23.ricochet.bounces} bounces.`, {
+  onAttack: (v, c) => { if (c.kind === 'arrow') c.ricochet = { bounces: U23.ricochet.bounces, range: U23.ricochet.range, power: U23.ricochet.power }; },
+});
+def('legendary:split_bolt', `Bolts split on impact into ${U23.split.shards} shards, each hitting a different enemy within ${U23.split.range} metres for ${pct(U23.split.power)} of your damage.`, {
+  onAttack: (v, c) => { if (c.kind === 'bolt' || c.kind === 'staff') c.split = { shards: U23.split.shards, range: U23.split.range, power: U23.split.power }; },
+});
+def('legendary:fourth_volley', `Every ${U23.volley.every}th shot looses ${U23.volley.arrows} arrows in a fan instead of 1.`, {
+  onAttack: (v, c) => { if (c.kind === 'arrow' && countAttack(c, 'volleyCount') % U23.volley.every === 0) c.shots = Math.max(c.shots || 1, U23.volley.arrows); },
+});
+def('legendary:gravity_bolt', `Bolt impacts pull every enemy within ${U23.gravity.radius} metres ${U23.gravity.pull} metres toward the impact.`, {
+  onAttack: (v, c) => { if (c.kind === 'bolt' || c.kind === 'staff') c.pull = { radius: U23.gravity.radius, metres: U23.gravity.pull }; },
+});
+def('legendary:echo_strike', `${pct(U23.echo.chance)} of your melee hits strike the same enemy again ${U23.echo.ms / 1000}s later for ${pct(U23.echo.power)} of your damage.`, {
+  onAttack: (v, c) => { if (c.kind === 'melee') c.echo = { chance: U23.echo.chance, ms: U23.echo.ms, power: U23.echo.power }; },
+});
+def('legendary:crescendo', `Every attack in a row adds +${pct(U23.crescendo.per)} damage, up to +${pct(U23.crescendo.per * U23.crescendo.cap)} at ${U23.crescendo.cap} attacks. The ${U23.crescendo.cap + 1}th attack releases a shockwave, ${pct(U23.crescendo.power)} of your damage to every enemy within ${U23.crescendo.radius} metres, and the count starts again. The count resets after ${U23.crescendo.idle}s without attacking.`, {
+  onAttack: (v, c) => {
+    c.rt.crescendoIdle = U23.crescendo.idle;
+    const n = (c.rt.crescendo || 0) + 1;
+    if (n > U23.crescendo.cap) {
+      c.rt.crescendo = 0;
+      c.shockwave = { radius: U23.crescendo.radius, power: U23.crescendo.power };
+    } else c.rt.crescendo = n;
+  },
+  dmgOut: (v, c) => 1 + U23.crescendo.per * Math.min(U23.crescendo.cap, c.rt.crescendo || 0),
+});
+def('legendary:twin_bolt', `Every bolt is followed by a second bolt ${U23.twin.ms / 1000}s later for ${pct(U23.twin.power)} of the damage.`, {
+  onAttack: (v, c) => { if (c.kind === 'bolt') c.twin = { ms: U23.twin.ms, power: U23.twin.power }; },
+});
+def('legendary:overload', `Every ${U23.overload.every}th spell a staff casts deals ${U23.overload.power}x damage and covers ${pct(U23.overload.scale - 1)} more ground.`, {
+  onAttack: (v, c) => {
+    if (c.kind !== 'staff' || countAttack(c, 'overloadCount') % U23.overload.every !== 0) return;
+    c.power *= U23.overload.power;
+    c.scale *= U23.overload.scale;
+    c.overloaded = true;
+  },
+});
+
+// ---- the mount, the light and the tool
+
+def('legendary:rider_fury', `+${pct(U23.riderFury.damage)} damage while mounted. Every kill while mounted makes your mount ${pct(U23.riderFury.speed)} faster for ${U23.riderFury.seconds}s.`, {
+  dmgOut: (v, c) => (c.self?.mounted ? 1 + U23.riderFury.damage : 1),
+  onKill: (v, c) => { if (c.self?.mounted) c.rt.riderRush = U23.riderFury.seconds; },
+  derive: (v, d, unit, rt) => { if (rt?.riderRush > 0) d.mountSpeed = (d.mountSpeed || 0) * (1 + U23.riderFury.speed); },
+});
+def('legendary:stormrider', `While you are mounted and in a fight, every ${U23.stormrider.every}s lightning strikes the nearest enemy within ${U23.stormrider.range} metres for ${pct(U23.stormrider.power)} of your damage.`, {
+  aura: (v, c) => { if (c.self?.mounted) c.auras.push({ id: 'stormrider', every: U23.stormrider.every, radius: U23.stormrider.range, power: U23.stormrider.power, element: 'lightning', nearestOnly: true }); },
+});
+def('legendary:searing_light', `Every ${U23.searing.every}s in a fight, the light burns every enemy within ${U23.searing.radius} metres of you for ${pct(U23.searing.power)} of your damage as holy damage.`, {
+  aura: (v, c) => { c.auras.push({ id: 'searing', every: U23.searing.every, radius: U23.searing.radius, power: U23.searing.power, element: 'holy' }); },
+});
+def('legendary:dread_lantern', `Every enemy within ${U23.dread.radius} metres of you in a fight is Unnerved and deals ${pct(U23.dread.dealLess)} less damage.`, {
+  aura: (v, c) => {
+    c.auras.push({ id: 'dread', every: U23.dread.every, radius: U23.dread.radius, power: 0,
+      apply: { type: 'unnerved', spec: { dealLess: U23.dread.dealLess, seconds: U23.dread.every + 0.5, name: 'Unnerved', kind: 'debuff', element: 'shadow' } } });
+  },
+});
+// asked by `rpg.gatherBonus` when a gather bar fills (js/main.js `beginGather`)
+def('legendary:prospector', `Every gather you finish has a ${pct(U23.prospector)} chance to pay out twice.`, {
+  gatherDone: (v, c) => { if ((c.rng ? c.rng() : Math.random()) < U23.prospector) c.times = Math.max(c.times || 1, 2); },
+});
+def('legendary:quick_hands', `+${pct(U23.quickHands.speed)} gathering speed, and every gather you finish gives +${U23.quickHands.move}% move speed for ${U23.quickHands.seconds}s.`, {
+  derive: (v, d, unit, rt) => {
+    d.gatherSpeed = (d.gatherSpeed || 0) + U23.quickHands.speed;
+    if (rt?.quickHands > 0) d.movePct += U23.quickHands.move;
+  },
+  gatherDone: (v, c) => { c.rt.quickHands = U23.quickHands.seconds; },
+});
+
 /**
  * Derived stats whose ONLY consumer is one of the hooks above.
  *
@@ -694,15 +1060,31 @@ export class Effects {
   /** Every `{ effect, value }` this character's gear grants. Rebuilt when gear changes. */
   list(unit) {
     const out = [];
+    /**
+     * R23 — A UNIQUE'S POWER WAS COUNTED TWICE.
+     *
+     * A unique carries its power as an affix row (`stat: 'cond_legendaryEffect'`, so the card can
+     * print it) AND as `legendaryEffectId`, which `rpg.legendaryPowers` collects so set powers and
+     * unique powers arrive through one list. This loop read both — so every unique in the game ran
+     * its legendary twice: The Ingrate's "+25% damage" was +56%, Truthseeker's splash was 4x the
+     * radius, and every on-kill heal paid double. Found by the first round-23 test that asked a
+     * unique for its multiplier. A legendary power is one thing, whatever carries it, and a second
+     * copy from a second item is not a second power either — `legendaryPowers` is already a Set.
+     */
+    const legendary = new Set();
     for (const item of Object.values(unit.equipment || {})) {
       if (!item) continue;
       for (const a of item.affixes || []) {
         const id = effectFor(a);
-        if (id) out.push({ id, e: EFFECTS[id], v: a.value ?? 1 });
+        if (!id) continue;
+        if (id.startsWith('legendary:')) { if (legendary.has(id)) continue; legendary.add(id); }
+        out.push({ id, e: EFFECTS[id], v: a.value ?? 1 });
       }
     }
     for (const id of unit.legendaryPowers || []) {
-      if (EFFECTS[id]) out.push({ id, e: EFFECTS[id], v: 1 });
+      if (!EFFECTS[id] || legendary.has(id)) continue;
+      legendary.add(id);
+      out.push({ id, e: EFFECTS[id], v: 1 });
     }
     return out;
   }
@@ -731,10 +1113,15 @@ export class Effects {
   update(unit, dt, { fighting = false } = {}) {
     const rt = this.rt(unit);
     rt.inCombat = fighting ? rt.inCombat + dt : 0;
-    if (!fighting) { rt.streak = 0; rt.streakOn = null; rt.hitOnce = new Set(); }
-    for (const k of ['cheatDeath', 'skillPower', 'killRush', 'openingRush']) {
+    if (!fighting) { rt.streak = 0; rt.streakOn = null; rt.hitOnce = new Set(); rt.trance = 0; rt.tranceOn = null; }
+    for (const k of ['cheatDeath', 'skillPower', 'killRush', 'openingRush', ...U23_TIMERS]) {
       if (rt[k] > 0) rt[k] = Math.max(0, rt[k] - dt);
     }
+    // R23: a stack or a count that lives on a timer goes when its timer does
+    if (!(rt.frenzyFor > 0)) rt.frenzy = 0;
+    if (!(rt.crescendoIdle > 0)) rt.crescendo = 0;
+    // `legendary:stillness` — how long this unit has stood still, read by its crit hook
+    rt.still = unit.moving > 0 ? 0 : (rt.still || 0) + dt;
     const sig = this.timerSignature(rt);
     rt.dirty = sig !== rt._sig;
     rt._sig = sig;
@@ -755,6 +1142,10 @@ export class Effects {
       rt.killRush > 0 ? 1 : 0,
       rt.skillPower > 0 ? 1 : 0,
       Math.min(5, Math.floor((rt.inCombat || 0) / 5)),
+      // R23: the timed powers that write to the sheet — Frenzy's stacks, the rider's rush, quick hands
+      rt.frenzyFor > 0 ? rt.frenzy || 0 : 0,
+      rt.riderRush > 0 ? 1 : 0,
+      rt.quickHands > 0 ? 1 : 0,
     ].join('');
   }
 
@@ -816,6 +1207,8 @@ export class Effects {
   onSwing(c) { return this.fire('onSwing', c); }
   onCast(c) { return this.fire('onCast', c); }
   onDamaged(c) { return this.fire('onDamaged', c); }
+  /** R23 — once per swing, shot, bolt or staff cast. See `rpg.attackMods`. */
+  onAttack(c) { return this.fire('onAttack', c); }
   combatStart(c) { return this.fire('combatStart', c); }
 
   /** Before a killing blow: returns the health to survive on, or 0 to let it land. */

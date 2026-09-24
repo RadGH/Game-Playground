@@ -1145,7 +1145,7 @@ export class EnemyField {
    * Damage everything within `radius` of a point — an arrow landing, or a heavy weapon's shockwave.
    * Every attack in the game goes through this or `strike`, so nothing is ever single-target.
    */
-  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null } = {}) {
+  strikeArea(x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false } = {}) {
     const hits = [];
     /**
      * AN ARROW CARRIES THE DRAW IT WAS LOOSED AT.
@@ -1165,7 +1165,9 @@ export class EnemyField {
       if (d > radius + (e.reach || 2) * 0.25) continue;
       // full damage at the centre, `falloff` of it at the rim
       const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
-      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn });
+      // R23 — `proc` marks a strike a unique's power made (a pool, an aura, a slam), so the powers
+      // that start more strikes do not start them off this one
+      const result = this.rpg.strike(attacker, e, this.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn, proc });
       this.land(e, result, { strike: shape, fromX: x, fromZ: z, element, share: near });
       onHit?.(e, result);
       hits.push({ enemy: e, result });

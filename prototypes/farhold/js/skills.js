@@ -283,6 +283,42 @@ export function applyStatus(target, type, spec, power = 1, { longer = 0, strengt
     healPerSecond: spec.healPerSecond ?? 0,
     element: spec.element, name: spec.name, kind: spec.kind,
   };
+  /**
+   * R23 — THE FOUR SHAPES A UNIQUE'S STATUS CAN TAKE, all carried on the spec so nothing else in
+   * the game has to know which weapon applied it:
+   *
+   *   stackMax    a status that STACKS instead of refreshing (Venom, Frostbite). `perSecond` and
+   *               `slowPerStack` are per stack; `onMax` swaps the stack for another status at the
+   *               ceiling (Frostbite at 5 becomes Frozen).
+   *   ramp        damage that rises every tick it keeps burning (Kindling), capped at `rampCap`x.
+   *   growOnMove  damage that rises with every metre the target walks (Hemorrhage).
+   *   detonate    pays `detonate` x whatever was stored on it when it runs out (Doom).
+   *
+   * A refresh keeps the PROGRESS of any of them — the ramp's tick count, the metres walked, the
+   * damage stored — because a Kindling that restarted from its first tick on every hit would
+   * never climb at all for anybody swinging faster than once a second.
+   */
+  if (spec.stackMax) {
+    const stacks = Math.min(spec.stackMax, (existing?.stacks || 0) + 1);
+    entry.stacks = stacks;
+    entry.perStack = Math.max(existing?.perStack || 0, (spec.perSecond ?? 0));
+    entry.perSecond = entry.perStack * stacks;
+    entry.slowPerStack = spec.slowPerStack ?? 0;
+    entry.slow = Math.min(0.95, entry.slowPerStack * stacks);
+    if (spec.onMax && stacks >= spec.stackMax) {
+      if (existing) { delete target.statuses[type]; statusFx?.(target, type, false); }
+      return applyStatus(target, spec.onMax.type, spec.onMax.spec, 1);
+    }
+    target.statuses[type] = { ...entry, since: existing?.since || 0 };
+    if (!existing) statusFx?.(target, type, true);
+    return target.statuses[type];
+  }
+  if (spec.ramp) { entry.ramp = spec.ramp; entry.rampCap = spec.rampCap ?? 3; }
+  if (spec.growOnMove) { entry.growOnMove = spec.growOnMove; entry.growCap = spec.growCap ?? 1; }
+  if (spec.detonate) entry.detonate = spec.detonate;
+  if (existing) {
+    for (const k of ['ticks', 'moved', 'lastX', 'lastZ', 'stored', 'since']) if (existing[k] != null) entry[k] = existing[k];
+  }
   // refreshing beats stacking: a second burn resets the timer rather than doubling the pain
   target.statuses[type] = existing ? { ...entry, remaining: Math.max(existing.remaining, entry.remaining) } : entry;
   if (!existing) statusFx?.(target, type, true);
@@ -308,6 +344,11 @@ export function tickStatuses(unit, dt, { resist = 1 } = {}) {
   let damage = 0, healed = 0;
   for (const [type, st] of Object.entries(unit.statuses)) {
     st.remaining -= dt;
+    // R23 — Hemorrhage: every metre walked while it bleeds is worth more damage on the next tick
+    if (st.growOnMove && unit.x != null) {
+      if (st.lastX != null) st.moved = (st.moved || 0) + Math.hypot(unit.x - st.lastX, unit.z - st.lastZ);
+      st.lastX = unit.x; st.lastZ = unit.z;
+    }
     if (st.perSecond) {
       st.since = (st.since || 0) + dt;
       const expiring = st.remaining <= 0;
@@ -315,13 +356,19 @@ export function tickStatuses(unit, dt, { resist = 1 } = {}) {
       // three-and-a-half-second burn does not silently drop its last half second
       if (st.since >= TICK_EVERY || expiring) {
         const span = expiring ? st.since : TICK_EVERY;
-        damage += st.perSecond * st.power * span * resist;
+        // R23 — Kindling climbs a step every tick it has already paid; Hemorrhage by the metre
+        const ramp = st.ramp ? Math.min(st.rampCap || 3, 1 + st.ramp * (st.ticks || 0)) : 1;
+        const grow = st.growOnMove ? 1 + Math.min(st.growCap || 1, (st.moved || 0) * st.growOnMove) : 1;
+        st.ticks = (st.ticks || 0) + 1;
+        damage += st.perSecond * st.power * span * resist * ramp * grow;
         st.since = expiring ? 0 : st.since - TICK_EVERY;
         // a burn that ticks should LOOK like it ticked: a 1.7x pop on the aura, once a second
         if (!expiring) statusPulse?.(unit, type);
       }
     }
     if (st.healPerSecond) healed += st.healPerSecond * (unit.maxHp || 0) * dt;
+    // R23 — Doom: whatever was stored on it lands, once, as it runs out
+    if (st.detonate && st.remaining <= 0 && st.stored > 0) damage += st.stored * st.detonate * resist;
     if (st.remaining <= 0) { delete unit.statuses[type]; statusFx?.(unit, type, false); }
   }
   if (healed > 0) unit.hp = Math.min(unit.maxHp ?? unit.hp, (unit.hp ?? 0) + healed);

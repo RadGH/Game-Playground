@@ -1,0 +1,5405 @@
+{
+ "_doc": "Round 23 — Farhold's own uniques. Built by tools/build-uniques.mjs from its rows (edit those, not this file). Loaded at boot and put into items.uniques IN MEMORY by js/uniques.js installUniques: items.json is shared with Emberveil, which has no registry entry for any of these powers. `type` is the taxonomy key from js/uniques.js UNIQUE_TYPES; `element`, `wandBehaviour` and `staffSpell` are written onto the item by dressUnique; `gearBase` / `toolBase` name a js/gear.js or data/tools.json base for the four slots that have no items.json base. Units are Farhold engine units (js/affixes.js ENGINE_UNIT). See research/round23-uniques.md.",
+ "uniques": [
+  {
+   "id": "fh_nettlepin",
+   "name": "Nettlepin",
+   "type": "dagger",
+   "slot": "weapon",
+   "baseItemId": "dagger",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 6
+    },
+    {
+     "stat": "critChance",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "A sliver of green bronze. The wound it leaves never quite closes, and neither does the next one."
+  },
+  {
+   "id": "fh_widows_tithe",
+   "name": "Widow's Tithe",
+   "type": "dagger",
+   "slot": "weapon",
+   "baseItemId": "tithe_dagger",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "dmg",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "cull",
+   "lore": "It takes only what is almost gone already. The collectors of the old church called that mercy."
+  },
+  {
+   "id": "fh_the_quiet_second",
+   "name": "The Quiet Second",
+   "type": "dagger",
+   "slot": "weapon",
+   "baseItemId": "dagger",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 14
+    },
+    {
+     "stat": "critDamage",
+     "value": 32
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4,
+     "max": 8
+    }
+   ],
+   "legendaryEffect": "echo_strike",
+   "lore": "Every cut is answered by a second one nobody saw coming."
+  },
+  {
+   "id": "fh_emberfang",
+   "name": "Emberfang",
+   "type": "dagger",
+   "slot": "weapon",
+   "baseItemId": "dragonfang_dagger",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 6.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 7,
+     "max": 16
+    }
+   ],
+   "legendaryEffect": "hemorrhage",
+   "lore": "Pulled from the jaw of something that burned. The bleeding it starts runs faster the more its victim runs."
+  },
+  {
+   "id": "fh_oathcutter",
+   "name": "Oathcutter",
+   "type": "sword",
+   "slot": "weapon",
+   "baseItemId": "sword",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 6
+    },
+    {
+     "stat": "initiative",
+     "value": 2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "battle_trance",
+   "lore": "Swung the same way five times, it remembers the promise it was forged to keep."
+  },
+  {
+   "id": "fh_hedgewarden",
+   "name": "Hedgewarden",
+   "type": "sword",
+   "slot": "weapon",
+   "baseItemId": "forager_blade",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 9
+    },
+    {
+     "stat": "hp",
+     "value": 40
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ],
+   "legendaryEffect": "crit_heal",
+   "lore": "A hedge-knight's blade, notched and resharpened a hundred times. Every good cut feeds the hand that holds it."
+  },
+  {
+   "id": "fh_carrion_oath",
+   "name": "Carrion Oath",
+   "type": "sword",
+   "slot": "weapon",
+   "baseItemId": "hunters_edge",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "rot_spread",
+   "lore": "Dipped in the grave-water of a plague town. What it kills does not rot alone."
+  },
+  {
+   "id": "fh_pyrewright",
+   "name": "Pyrewright",
+   "type": "sword",
+   "slot": "weapon",
+   "baseItemId": "dragonfang_sword",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "dmg",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "fire_trail",
+   "lore": "Every stroke leaves the grass alight behind it."
+  },
+  {
+   "id": "fh_vigil_of_harrow",
+   "name": "Vigil of Harrow",
+   "type": "longsword",
+   "slot": "weapon",
+   "baseItemId": "longsword",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "critDamage",
+     "value": 20
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ],
+   "legendaryEffect": "second_wind",
+   "lore": "Carried by the last watch of Harrow Keep, who held the gate long after they should have fallen."
+  },
+  {
+   "id": "fh_stormwake",
+   "name": "Stormwake",
+   "type": "longsword",
+   "slot": "weapon",
+   "baseItemId": "longsword",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 4.4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 4,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "Thunder follows it out of the scabbard and finds everyone standing near."
+  },
+  {
+   "id": "fh_crescent_hymn",
+   "name": "Crescent Hymn",
+   "type": "longsword",
+   "slot": "weapon",
+   "baseItemId": "longsword",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 16
+    },
+    {
+     "stat": "initiative",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 25,
+     "max": 45
+    }
+   ],
+   "legendaryEffect": "crescendo",
+   "lore": "A duelling blade that sings louder the longer the fight goes on, until the last note breaks something."
+  },
+  {
+   "id": "fh_tyrants_end",
+   "name": "Tyrant's End",
+   "type": "longsword",
+   "slot": "weapon",
+   "baseItemId": "longsword",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "hp",
+     "value": 96
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "nemesis_hunter",
+   "lore": "Forged to end one crowned butcher. It never stopped looking for the next."
+  },
+  {
+   "id": "fh_needle_of_vess",
+   "name": "Needle of Vess",
+   "type": "rapier",
+   "slot": "weapon",
+   "baseItemId": "rapier",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 6
+    },
+    {
+     "stat": "critChance",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "stillness",
+   "lore": "A duellist's needle. Plant your feet, breathe once, and it finds the gap."
+  },
+  {
+   "id": "fh_quicksilver_pact",
+   "name": "Quicksilver Pact",
+   "type": "rapier",
+   "slot": "weapon",
+   "baseItemId": "rapier",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "dmg",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "kill_frenzy",
+   "lore": "Its bearer grows faster with every body, until the blade seems to move on its own."
+  },
+  {
+   "id": "fh_riposte_of_glass",
+   "name": "Riposte of Glass",
+   "type": "rapier",
+   "slot": "weapon",
+   "baseItemId": "rapier",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 14
+    },
+    {
+     "stat": "critDamage",
+     "value": 32
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4,
+     "max": 8
+    }
+   ],
+   "legendaryEffect": "glass_heart",
+   "lore": "Thin as a vow and as easily broken. It strikes like a hammer and leaves you nothing to hide behind."
+  },
+  {
+   "id": "fh_the_last_courtesy",
+   "name": "The Last Courtesy",
+   "type": "rapier",
+   "slot": "weapon",
+   "baseItemId": "rapier",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 6.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 7,
+     "max": 16
+    }
+   ],
+   "legendaryEffect": "stride",
+   "lore": "A travelling blade that fights best on the move, and never where it was expected."
+  },
+  {
+   "id": "fh_winterbite",
+   "name": "Winterbite",
+   "type": "sabre",
+   "slot": "weapon",
+   "baseItemId": "rimecut_sabre",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 9
+    },
+    {
+     "stat": "initiative",
+     "value": 2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "frostbite",
+   "lore": "It numbs before it cuts. Stand against it long enough and you stop moving at all."
+  },
+  {
+   "id": "fh_prism_dancer",
+   "name": "Prism Dancer",
+   "type": "sabre",
+   "slot": "weapon",
+   "baseItemId": "obsidian_scimitar",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 54
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3.5,
+     "max": 7
+    }
+   ],
+   "legendaryEffect": "alternate_elements",
+   "lore": "Three flames were quenched in the glass: one red, one pale, and one that crackled."
+  },
+  {
+   "id": "fh_shiverlight",
+   "name": "Shiverlight",
+   "type": "sabre",
+   "slot": "weapon",
+   "baseItemId": "rimecut_sabre",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 16
+    },
+    {
+     "stat": "critChance",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 25,
+     "max": 45
+    }
+   ],
+   "legendaryEffect": "shatter",
+   "lore": "Its cold edge breaks whatever has already frozen."
+  },
+  {
+   "id": "fh_duskreaver",
+   "name": "Duskreaver",
+   "type": "sabre",
+   "slot": "weapon",
+   "baseItemId": "obsidian_scimitar",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "dmg",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "doom",
+   "lore": "Obsidian cut from beneath a dead temple. It marks what it cuts, and comes back for the rest."
+  },
+  {
+   "id": "fh_woodsmans_grudge",
+   "name": "Woodsman's Grudge",
+   "type": "axe",
+   "slot": "weapon",
+   "baseItemId": "battleaxe",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 6
+    },
+    {
+     "stat": "critDamage",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.5,
+     "max": 5
+    }
+   ],
+   "legendaryEffect": "crit_bleed_5",
+   "lore": "It felled a forest for a lord who never paid. It has been collecting ever since."
+  },
+  {
+   "id": "fh_reavers_due",
+   "name": "Reaver's Due",
+   "type": "axe",
+   "slot": "weapon",
+   "baseItemId": "battleaxe",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 4.4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 4,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "blood_price",
+   "lore": "It drinks from both ends of the haft."
+  },
+  {
+   "id": "fh_hearthsplitter",
+   "name": "Hearthsplitter",
+   "type": "axe",
+   "slot": "weapon",
+   "baseItemId": "battleaxe",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "initiative",
+     "value": 3
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "third_cleave",
+   "lore": "A clan axe, swung in a circle at weddings and funerals alike."
+  },
+  {
+   "id": "fh_gorewind",
+   "name": "Gorewind",
+   "type": "axe",
+   "slot": "weapon",
+   "baseItemId": "battleaxe",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "hp",
+     "value": 96
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "vampire_kill",
+   "lore": "Every life it ends pours a little back into the arm that swung it."
+  },
+  {
+   "id": "fh_rendmaw",
+   "name": "Rendmaw",
+   "type": "greataxe",
+   "slot": "weapon",
+   "baseItemId": "axe2h",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "critChance",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "quake_slam",
+   "lore": "Heavy enough that every third swing ends in the dirt, and the dirt ends up everywhere."
+  },
+  {
+   "id": "fh_quarryhound",
+   "name": "Quarryhound",
+   "type": "greataxe",
+   "slot": "weapon",
+   "baseItemId": "breakers_pick",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "dmg",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "opportunist",
+   "lore": "A mine-breaker's pick, happiest against anything that cannot get out of the way."
+  },
+  {
+   "id": "fh_greymarch_headsman",
+   "name": "Greymarch Headsman",
+   "type": "greataxe",
+   "slot": "weapon",
+   "baseItemId": "axe2h",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 16
+    },
+    {
+     "stat": "critDamage",
+     "value": 38
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4.5,
+     "max": 9
+    }
+   ],
+   "legendaryEffect": "cull",
+   "lore": "The headsman of Greymarch never needed a second stroke."
+  },
+  {
+   "id": "fh_worldrender",
+   "name": "Worldrender",
+   "type": "greataxe",
+   "slot": "weapon",
+   "baseItemId": "axe2h",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 6.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 7,
+     "max": 16
+    }
+   ],
+   "legendaryEffect": "dragon_fury_breath",
+   "lore": "Tempered in a dragon's last breath. Every death it deals exhales the forge again."
+  },
+  {
+   "id": "fh_candlemace",
+   "name": "Candlemace",
+   "type": "mace",
+   "slot": "weapon",
+   "baseItemId": "lantern_mace",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 6
+    },
+    {
+     "stat": "initiative",
+     "value": 2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "pyre_aura",
+   "lore": "Its head still holds the coals of the shrine it was stolen from."
+  },
+  {
+   "id": "fh_penitents_weight",
+   "name": "Penitent's Weight",
+   "type": "mace",
+   "slot": "weapon",
+   "baseItemId": "iron_mace",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 54
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3.5,
+     "max": 7
+    }
+   ],
+   "legendaryEffect": "thornmail",
+   "lore": "Carried by the penitent brothers, who held that every blow taken should be returned."
+  },
+  {
+   "id": "fh_bellbreaker",
+   "name": "Bellbreaker",
+   "type": "mace",
+   "slot": "weapon",
+   "baseItemId": "iron_mace",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "resonance",
+   "lore": "It rings like a struck bell, and louder for every hurt already on its target."
+  },
+  {
+   "id": "fh_saint_osserys_knuckle",
+   "name": "Saint Ossery's Knuckle",
+   "type": "mace",
+   "slot": "weapon",
+   "baseItemId": "iron_mace",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "dmg",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "crit_ward",
+   "lore": "A relic-mace of bone and silver. It shields the faithful with the pain of the faithless."
+  },
+  {
+   "id": "fh_anvilheart",
+   "name": "Anvilheart",
+   "type": "hammer",
+   "slot": "weapon",
+   "baseItemId": "hammer",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "critDamage",
+     "value": 20
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ],
+   "legendaryEffect": "quake_slam",
+   "lore": "A smith's hammer that forgot what it was for. The ground remembers."
+  },
+  {
+   "id": "fh_mountainsong",
+   "name": "Mountainsong",
+   "type": "hammer",
+   "slot": "weapon",
+   "baseItemId": "hammer",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 4.4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 4,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "echo_strike",
+   "lore": "Every blow echoes off the far hills and comes back."
+  },
+  {
+   "id": "fh_first_light_maul",
+   "name": "First Light Maul",
+   "type": "hammer",
+   "slot": "weapon",
+   "baseItemId": "dawnwarden_hammer",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "initiative",
+     "value": 3
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "searing_light",
+   "lore": "It was lit at the first sunrise after the long night, and it has not gone out."
+  },
+  {
+   "id": "fh_wyrmknell",
+   "name": "Wyrmknell",
+   "type": "hammer",
+   "slot": "weapon",
+   "baseItemId": "drakehammer",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "hp",
+     "value": 96
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "third_cleave",
+   "lore": "Swung by the dragon-callers in wide rings to clear the ground about them."
+  },
+  {
+   "id": "fh_gatecrusher",
+   "name": "Gatecrusher",
+   "type": "warhammer",
+   "slot": "weapon",
+   "baseItemId": "warhammer",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "critChance",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "critical_armorpen",
+   "lore": "It has opened more castle doors than any key."
+  },
+  {
+   "id": "fh_grievance",
+   "name": "Grievance",
+   "type": "warhammer",
+   "slot": "weapon",
+   "baseItemId": "warhammer",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "dmg",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "rally_on_kill",
+   "lore": "Every name its bearer ever cursed is scratched into the haft."
+  },
+  {
+   "id": "fh_thunderhead",
+   "name": "Thunderhead",
+   "type": "warhammer",
+   "slot": "weapon",
+   "baseItemId": "warhammer",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 16
+    },
+    {
+     "stat": "critDamage",
+     "value": 38
+    },
+    {
+     "stat": "cond_brandLightning",
+     "value": 0.3
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4.5,
+     "max": 9
+    }
+   ],
+   "legendaryEffect": "static_charge",
+   "lore": "The storm it was forged in never finished. Strike one thing and the rest of the sky comes down."
+  },
+  {
+   "id": "fh_doomsday_bell",
+   "name": "Doomsday Bell",
+   "type": "warhammer",
+   "slot": "weapon",
+   "baseItemId": "warhammer",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 6.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 7,
+     "max": 16
+    }
+   ],
+   "legendaryEffect": "doom",
+   "lore": "They rang it for the ends of cities. It still tolls once for every life it takes."
+  },
+  {
+   "id": "fh_the_long_scythe",
+   "name": "The Long Scythe",
+   "type": "greatsword",
+   "slot": "weapon",
+   "baseItemId": "greatsword",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "initiative",
+     "value": 2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "third_cleave",
+   "lore": "Too long to swing any way but around."
+  },
+  {
+   "id": "fh_grave_harvest",
+   "name": "Grave Harvest",
+   "type": "greatsword",
+   "slot": "weapon",
+   "baseItemId": "sword2h",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 54
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3.5,
+     "max": 7
+    }
+   ],
+   "legendaryEffect": "curse_spreads",
+   "lore": "The blade of the plague-reapers. What it cuts down, it passes on."
+  },
+  {
+   "id": "fh_hollowing",
+   "name": "Hollowing",
+   "type": "greatsword",
+   "slot": "weapon",
+   "baseItemId": "voidsteel_greatsword",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "mana_burn",
+   "lore": "Voidsteel drinks the will of its bearer and pays it out in blood."
+  },
+  {
+   "id": "fh_emberlords_reckoning",
+   "name": "Emberlord's Reckoning",
+   "type": "greatsword",
+   "slot": "weapon",
+   "baseItemId": "dragonfang_greatsword",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "dmg",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "pyre_aura",
+   "lore": "Hold it close and the air itself begins to burn."
+  },
+  {
+   "id": "fh_longwatch_pike",
+   "name": "Longwatch Pike",
+   "type": "halberd",
+   "slot": "weapon",
+   "baseItemId": "halberd",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "critDamage",
+     "value": 20
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ],
+   "legendaryEffect": "frost_skin",
+   "lore": "Northern sentries set it in the snow and let the cold do the rest."
+  },
+  {
+   "id": "fh_hookjaw",
+   "name": "Hookjaw",
+   "type": "halberd",
+   "slot": "weapon",
+   "baseItemId": "halberd",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 4.4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 4,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "opportunist",
+   "lore": "The hook drags a fleeing foe back onto the blade."
+  },
+  {
+   "id": "fh_the_sentinels_arc",
+   "name": "The Sentinel's Arc",
+   "type": "halberd",
+   "slot": "weapon",
+   "baseItemId": "halberd",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 16
+    },
+    {
+     "stat": "initiative",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 25,
+     "max": 45
+    }
+   ],
+   "legendaryEffect": "crescendo",
+   "lore": "A gate-guard's polearm. The longer the siege, the harder it answers."
+  },
+  {
+   "id": "fh_starfall_glaive",
+   "name": "Starfall Glaive",
+   "type": "halberd",
+   "slot": "weapon",
+   "baseItemId": "halberd",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "hp",
+     "value": 96
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "A shard of a fallen star is bound into the spike. It still wants to go back up."
+  },
+  {
+   "id": "fh_boarsplitter",
+   "name": "Boarsplitter",
+   "type": "spear",
+   "slot": "weapon",
+   "baseItemId": "spear",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 6
+    },
+    {
+     "stat": "critChance",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "hemorrhage",
+   "lore": "A hunting spear. Anything that runs from it bleeds harder."
+  },
+  {
+   "id": "fh_tidecaller",
+   "name": "Tidecaller",
+   "type": "spear",
+   "slot": "weapon",
+   "baseItemId": "spear",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "dmg",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "frostbite",
+   "lore": "Its blade was quenched in a northern sea that never thaws."
+  },
+  {
+   "id": "fh_serpents_reach",
+   "name": "Serpent's Reach",
+   "type": "spear",
+   "slot": "weapon",
+   "baseItemId": "spear",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 14
+    },
+    {
+     "stat": "critDamage",
+     "value": 32
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4,
+     "max": 8
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "The shaft is carved as a snake. The point is its only tooth, and it is enough."
+  },
+  {
+   "id": "fh_skyrend",
+   "name": "Skyrend",
+   "type": "spear",
+   "slot": "weapon",
+   "baseItemId": "spear",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 6.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 7,
+     "max": 16
+    }
+   ],
+   "legendaryEffect": "stride",
+   "lore": "A cavalry lance cut down for the foot. It still wants to be moving."
+  },
+  {
+   "id": "fh_pilgrim_oak",
+   "name": "Pilgrim Oak",
+   "type": "quarterstaff",
+   "slot": "weapon",
+   "baseItemId": "quarterstaff",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 6
+    },
+    {
+     "stat": "initiative",
+     "value": 2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "crit_heal",
+   "lore": "Cut from the tree at the crossroads shrine. Travellers swear it mends the walker."
+  },
+  {
+   "id": "fh_monsoon_rod",
+   "name": "Monsoon Rod",
+   "type": "quarterstaff",
+   "slot": "weapon",
+   "baseItemId": "quarterstaff",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 54
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3.5,
+     "max": 7
+    }
+   ],
+   "legendaryEffect": "echo_strike",
+   "lore": "Every blow lands twice, like rain on a roof."
+  },
+  {
+   "id": "fh_nine_winds",
+   "name": "Nine Winds",
+   "type": "quarterstaff",
+   "slot": "weapon",
+   "baseItemId": "quarterstaff",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "battle_trance",
+   "lore": "A monastery staff. Its drills are counted in fives, and the fifth never misses."
+  },
+  {
+   "id": "fh_the_unbent_reed",
+   "name": "The Unbent Reed",
+   "type": "quarterstaff",
+   "slot": "weapon",
+   "baseItemId": "quarterstaff",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 18
+    },
+    {
+     "stat": "dmg",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "retaliate_nova",
+   "lore": "Strike its bearer and the winter it was cut in strikes back."
+  },
+  {
+   "id": "fh_hawkfeather",
+   "name": "Hawkfeather",
+   "type": "bow",
+   "slot": "weapon",
+   "baseItemId": "bow",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 6
+    },
+    {
+     "stat": "critDamage",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.5,
+     "max": 5
+    }
+   ],
+   "legendaryEffect": "ricochet",
+   "lore": "Its arrows never seem to stop where they should."
+  },
+  {
+   "id": "fh_wardens_volley",
+   "name": "Warden's Volley",
+   "type": "bow",
+   "slot": "weapon",
+   "baseItemId": "roadwarden_bow",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 4.4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 4,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "fourth_volley",
+   "lore": "The road wardens drill in fours. The fourth draw is never alone."
+  },
+  {
+   "id": "fh_comets_wake",
+   "name": "Comet's Wake",
+   "type": "bow",
+   "slot": "weapon",
+   "baseItemId": "starwake_bow",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 16
+    },
+    {
+     "stat": "initiative",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 25,
+     "max": 45
+    }
+   ],
+   "legendaryEffect": "resonance",
+   "lore": "Strung with a thread of cold light, it hits hardest where the hurt is already deep."
+  },
+  {
+   "id": "fh_ashstring",
+   "name": "Ashstring",
+   "type": "bow",
+   "slot": "weapon",
+   "baseItemId": "wyrmscale_bow",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "hp",
+     "value": 96
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "kindling",
+   "lore": "The string was plaited from a drake's tendon. Its arrows keep burning after they land."
+  },
+  {
+   "id": "fh_skipping_stone",
+   "name": "Skipping Stone",
+   "type": "shortbow",
+   "slot": "weapon",
+   "baseItemId": "shortbow",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 6
+    },
+    {
+     "stat": "critChance",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "ricochet",
+   "lore": "A child's first bow, made by someone who meant the child to live."
+  },
+  {
+   "id": "fh_wasps_nest",
+   "name": "Wasp's Nest",
+   "type": "shortbow",
+   "slot": "weapon",
+   "baseItemId": "shortbow",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 9
+    },
+    {
+     "stat": "dmg",
+     "value": 6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 24,
+     "max": 44
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "Every shaft is fletched with the wings of something that stings."
+  },
+  {
+   "id": "fh_quickdraw_oath",
+   "name": "Quickdraw Oath",
+   "type": "shortbow",
+   "slot": "weapon",
+   "baseItemId": "shortbow",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 14
+    },
+    {
+     "stat": "critDamage",
+     "value": 32
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4,
+     "max": 8
+    }
+   ],
+   "legendaryEffect": "kill_frenzy",
+   "lore": "Sworn by the border scouts: never nock slower than the last one fell."
+  },
+  {
+   "id": "fh_galewhisper",
+   "name": "Galewhisper",
+   "type": "shortbow",
+   "slot": "weapon",
+   "baseItemId": "shortbow",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 6.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 7,
+     "max": 16
+    }
+   ],
+   "legendaryEffect": "blood_price",
+   "lore": "It asks a little of your blood with every draw, and the wind carries the rest."
+  },
+  {
+   "id": "fh_bolt_of_judgement",
+   "name": "Bolt of Judgement",
+   "type": "crossbow",
+   "slot": "weapon",
+   "baseItemId": "crossbow",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 9
+    },
+    {
+     "stat": "initiative",
+     "value": 2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "cull",
+   "lore": "A magistrate's arbalest. Its sentence is always final."
+  },
+  {
+   "id": "fh_frostlatch",
+   "name": "Frostlatch",
+   "type": "crossbow",
+   "slot": "weapon",
+   "baseItemId": "crossbow",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 54
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3.5,
+     "max": 7
+    }
+   ],
+   "legendaryEffect": "frostbite",
+   "lore": "The mechanism is packed with glacier ice that never melts."
+  },
+  {
+   "id": "fh_crackling_arbalest",
+   "name": "Crackling Arbalest",
+   "type": "crossbow",
+   "slot": "weapon",
+   "baseItemId": "stormpin_crossbow",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "static_charge",
+   "lore": "The pins sing with a storm that was nailed down and never forgave it."
+  },
+  {
+   "id": "fh_ironhail",
+   "name": "Ironhail",
+   "type": "crossbow",
+   "slot": "weapon",
+   "baseItemId": "crossbow",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "dmg",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "fourth_volley",
+   "lore": "A siege crossbow with four grooves where one should be."
+  },
+  {
+   "id": "fh_hunters_throw",
+   "name": "Hunter's Throw",
+   "type": "javelin",
+   "slot": "weapon",
+   "baseItemId": "javelin",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 6
+    },
+    {
+     "stat": "critDamage",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.5,
+     "max": 5
+    }
+   ],
+   "legendaryEffect": "hemorrhage",
+   "lore": "Barbed and cruel. What it strikes is best left to run itself out."
+  },
+  {
+   "id": "fh_longstrider",
+   "name": "Longstrider",
+   "type": "javelin",
+   "slot": "weapon",
+   "baseItemId": "pathfinder_javelin",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "lifeSteal",
+     "value": 4.4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "dmg",
+     "min": 4,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "ricochet",
+   "lore": "A scout's javelin that goes where it likes and comes to no harm."
+  },
+  {
+   "id": "fh_vipers_tongue",
+   "name": "Viper's Tongue",
+   "type": "javelin",
+   "slot": "weapon",
+   "baseItemId": "javelin",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 14
+    },
+    {
+     "stat": "initiative",
+     "value": 3
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "Its point is hollow and never quite empty."
+  },
+  {
+   "id": "fh_noon_spear",
+   "name": "Noon Spear",
+   "type": "javelin",
+   "slot": "weapon",
+   "baseItemId": "watchfire_glaive",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 18
+    },
+    {
+     "stat": "hp",
+     "value": 96
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "Thrown at the height of a summer storm, it came back full of it."
+  },
+  {
+   "id": "fh_cinderquill",
+   "name": "Cinderquill",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 1,
+   "quality": "high",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.09
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.5,
+     "max": 5
+    }
+   ],
+   "legendaryEffect": "kindling",
+   "lore": "A burnt feather set in a tin ferrule. It writes in fire, and the words keep burning.",
+   "wandBehaviour": "plain"
+  },
+  {
+   "id": "fh_ashmouth",
+   "name": "Ashmouth",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "dragontooth_wand",
+   "act": 5,
+   "quality": "exotic",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "mp",
+     "value": 50
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 25,
+     "max": 45
+    }
+   ],
+   "legendaryEffect": "split_bolt",
+   "lore": "A drake's fang, still hot. Every bolt it spits breaks apart in the air.",
+   "wandBehaviour": "burst"
+  },
+  {
+   "id": "fh_rimeglass_wand",
+   "name": "Rimeglass Wand",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 2,
+   "quality": "high",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.11
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 24,
+     "max": 44
+    }
+   ],
+   "legendaryEffect": "frostbite",
+   "lore": "A rod of clear ice that has never melted. Its cold gathers on whatever it strikes.",
+   "wandBehaviour": "plain"
+  },
+  {
+   "id": "fh_hailcaller",
+   "name": "Hailcaller",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "dragontooth_wand",
+   "act": 5,
+   "quality": "exotic",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "mana_regen",
+     "value": 2.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.11,
+     "max": 0.21
+    }
+   ],
+   "legendaryEffect": "twin_bolt",
+   "lore": "Where one hailstone falls, another follows.",
+   "wandBehaviour": "split"
+  },
+  {
+   "id": "fh_sparkthorn",
+   "name": "Sparkthorn",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 1,
+   "quality": "high",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "critChance",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.05,
+     "max": 0.09
+    }
+   ],
+   "legendaryEffect": "static_charge",
+   "lore": "A thorn from a lightning-struck briar. The charge never left it.",
+   "wandBehaviour": "chain"
+  },
+  {
+   "id": "fh_tempest_needle",
+   "name": "Tempest Needle",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 4,
+   "quality": "elite",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.16
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4,
+     "max": 8
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "Thin as a sewing needle. The storm it carries is not.",
+   "wandBehaviour": "seeking"
+  },
+  {
+   "id": "fh_blightwhistle",
+   "name": "Blightwhistle",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 2,
+   "quality": "high",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "mp",
+     "value": 26
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "A marsh-reed pipe. Its song is the last thing a fever hears.",
+   "wandBehaviour": "split"
+  },
+  {
+   "id": "fh_mourning_reed",
+   "name": "Mourning Reed",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 5,
+   "quality": "exotic",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.19
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 48,
+     "max": 86
+    }
+   ],
+   "legendaryEffect": "rot_spread",
+   "lore": "Cut from the banks of a river that carried a plague downstream.",
+   "wandBehaviour": "burst"
+  },
+  {
+   "id": "fh_gloamfinger",
+   "name": "Gloamfinger",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 3,
+   "quality": "elite",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "mana_regen",
+     "value": 2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.08,
+     "max": 0.15
+    }
+   ],
+   "legendaryEffect": "doom",
+   "lore": "The bone of a hanged man's finger. It points, and it remembers.",
+   "wandBehaviour": "seeking"
+  },
+  {
+   "id": "fh_hollow_wand",
+   "name": "Hollow Wand",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 6,
+   "quality": "exotic",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "critChance",
+     "value": 9
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.12,
+     "max": 0.24
+    }
+   ],
+   "legendaryEffect": "mana_burn",
+   "lore": "There is nothing inside it, and it hungers to be filled.",
+   "wandBehaviour": "heavy"
+  },
+  {
+   "id": "fh_starpin",
+   "name": "Starpin",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 1,
+   "quality": "high",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.09
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.5,
+     "max": 5
+    }
+   ],
+   "legendaryEffect": "gravity_bolt",
+   "lore": "A pin from a broken orrery. Everything nearby falls toward where it lands.",
+   "wandBehaviour": "burst"
+  },
+  {
+   "id": "fh_echoing_tine",
+   "name": "Echoing Tine",
+   "type": "wand",
+   "slot": "weapon",
+   "baseItemId": "wand",
+   "act": 4,
+   "quality": "elite",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "mp",
+     "value": 42
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "twin_bolt",
+   "lore": "A tuning fork that never stops ringing. Every bolt has its answer.",
+   "wandBehaviour": "plain"
+  },
+  {
+   "id": "fh_sootcrown",
+   "name": "Sootcrown",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "staff",
+   "act": 2,
+   "quality": "high",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.11
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 24,
+     "max": 44
+    }
+   ],
+   "legendaryEffect": "overload",
+   "lore": "A charred crook topped with a crown of cinders. Every fourth spell it casts comes out enormous.",
+   "staffSpell": "nova"
+  },
+  {
+   "id": "fh_brandstaff_of_kell",
+   "name": "Brandstaff of Kell",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "dragonbone_staff",
+   "act": 5,
+   "quality": "exotic",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "mana_regen",
+     "value": 2.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.11,
+     "max": 0.21
+    }
+   ],
+   "legendaryEffect": "kindling",
+   "lore": "The pyre-priests of Kell carried it to light their dead. The fire it sets climbs.",
+   "staffSpell": "cone"
+  },
+  {
+   "id": "fh_glaciers_spine",
+   "name": "Glacier's Spine",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "staff",
+   "act": 3,
+   "quality": "elite",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "critChance",
+     "value": 6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.08,
+     "max": 0.15
+    }
+   ],
+   "legendaryEffect": "shatter",
+   "lore": "A length of blue ice from the heart of a glacier. What it chills, it breaks.",
+   "staffSpell": "nova"
+  },
+  {
+   "id": "fh_rimefold_crook",
+   "name": "Rimefold Crook",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "abyssal_rod",
+   "act": 6,
+   "quality": "exotic",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.21
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "frostbite",
+   "lore": "A shepherd's crook from the high passes. The flock it keeps does not move.",
+   "staffSpell": "shard"
+  },
+  {
+   "id": "fh_stormherds_crook",
+   "name": "Stormherd's Crook",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "staff",
+   "act": 2,
+   "quality": "high",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "mp",
+     "value": 26
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "static_charge",
+   "lore": "The storm-herders drove lightning across the plains with this.",
+   "staffSpell": "arc"
+  },
+  {
+   "id": "fh_skyfathers_rod",
+   "name": "Skyfather's Rod",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "dragonbone_staff",
+   "act": 5,
+   "quality": "exotic",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.19
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 48,
+     "max": 86
+    }
+   ],
+   "legendaryEffect": "overload",
+   "lore": "The old sky-god's rod, found in a crater. Every fourth word it speaks is thunder.",
+   "staffSpell": "nova"
+  },
+  {
+   "id": "fh_rotwood_staff",
+   "name": "Rotwood Staff",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "staff",
+   "act": 1,
+   "quality": "high",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "mana_regen",
+     "value": 1.2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.05,
+     "max": 0.09
+    }
+   ],
+   "legendaryEffect": "rot_spread",
+   "lore": "Cut from a tree that grew in a mass grave. It spreads what it feeds on.",
+   "staffSpell": "ground"
+  },
+  {
+   "id": "fh_bog_mothers_cane",
+   "name": "Bog Mother's Cane",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "bramble_staff",
+   "act": 4,
+   "quality": "elite",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.09,
+     "max": 0.18
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "The marsh-witch walked with it for three hundred years. It kept her company.",
+   "staffSpell": "lob"
+  },
+  {
+   "id": "fh_nightspine",
+   "name": "Nightspine",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "staff",
+   "act": 3,
+   "quality": "elite",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3.5,
+     "max": 7
+    }
+   ],
+   "legendaryEffect": "doom",
+   "lore": "The spine of something that should not have had one. It marks, and waits.",
+   "staffSpell": "nova"
+  },
+  {
+   "id": "fh_graveshroud_staff",
+   "name": "Graveshroud Staff",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "abyssal_rod",
+   "act": 6,
+   "quality": "exotic",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "mp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 29,
+     "max": 52
+    }
+   ],
+   "legendaryEffect": "curse_spreads",
+   "lore": "Wrapped in burial linen that never rots. Whatever it curses, the curse remembers.",
+   "staffSpell": "ground"
+  },
+  {
+   "id": "fh_loomstaff",
+   "name": "Loomstaff",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "staff",
+   "act": 2,
+   "quality": "high",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.11
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 24,
+     "max": 44
+    }
+   ],
+   "legendaryEffect": "gravity_bolt",
+   "lore": "A weaver's beam. Every thread in the field is pulled toward where it strikes.",
+   "staffSpell": "lob"
+  },
+  {
+   "id": "fh_starwrights_rod",
+   "name": "Starwright's Rod",
+   "type": "staff",
+   "slot": "weapon",
+   "baseItemId": "dragonbone_staff",
+   "act": 5,
+   "quality": "exotic",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "mana_regen",
+     "value": 2.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.11,
+     "max": 0.21
+    }
+   ],
+   "legendaryEffect": "overload",
+   "lore": "The star-smiths measured the sky with it. Every fourth measure spills over.",
+   "staffSpell": "lob"
+  },
+  {
+   "id": "fh_coalcrown_sceptre",
+   "name": "Coalcrown Sceptre",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 2,
+   "quality": "high",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "critChance",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.06,
+     "max": 0.12
+    }
+   ],
+   "legendaryEffect": "pyre_aura",
+   "lore": "The regalia of a burned court. Its heat still clears a path through the crowd."
+  },
+  {
+   "id": "fh_ember_regent",
+   "name": "Ember Regent",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 5,
+   "quality": "exotic",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.19
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4.5,
+     "max": 9
+    }
+   ],
+   "legendaryEffect": "fire_trail",
+   "lore": "Wherever the regent walked, the floor was left scorched."
+  },
+  {
+   "id": "fh_frostmantle_sceptre",
+   "name": "Frostmantle Sceptre",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 3,
+   "quality": "elite",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "mp",
+     "value": 34
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 17,
+     "max": 31
+    }
+   ],
+   "legendaryEffect": "frost_skin",
+   "lore": "The ice-queens of the north never needed guards. Anyone who touched them froze."
+  },
+  {
+   "id": "fh_pale_monarch",
+   "name": "Pale Monarch",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 6,
+   "quality": "exotic",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.21
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "shatter",
+   "lore": "A crown of frost on a rod of bone. It rules over what has stopped moving."
+  },
+  {
+   "id": "fh_thunder_regalia",
+   "name": "Thunder Regalia",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 2,
+   "quality": "high",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "mana_regen",
+     "value": 1.6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.06,
+     "max": 0.12
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "A storm-lord's sceptre. Its judgement falls on everyone nearby."
+  },
+  {
+   "id": "fh_voltaic_sceptre",
+   "name": "Voltaic Sceptre",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 5,
+   "quality": "exotic",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "critChance",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.11,
+     "max": 0.21
+    }
+   ],
+   "legendaryEffect": "static_charge",
+   "lore": "Copper and amber, humming. Every shocked thing it touches passes the charge along."
+  },
+  {
+   "id": "fh_marsh_kings_sceptre",
+   "name": "Marsh King's Sceptre",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 1,
+   "quality": "high",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.09
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.5,
+     "max": 5
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "The mire-king's rod of office. His subjects died slowly, and in order."
+  },
+  {
+   "id": "fh_plaguewrights_rod",
+   "name": "Plaguewright's Rod",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 4,
+   "quality": "elite",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "mp",
+     "value": 42
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 21,
+     "max": 38
+    }
+   ],
+   "legendaryEffect": "rot_spread",
+   "lore": "An instrument of the plague-doctors. It was never meant to cure."
+  },
+  {
+   "id": "fh_duskcrown",
+   "name": "Duskcrown",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "gravebound_scepter",
+   "act": 3,
+   "quality": "elite",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "doom",
+   "lore": "The last crown of a kingdom that ended at dusk. It passes that ending on."
+  },
+  {
+   "id": "fh_gravebound_rule",
+   "name": "Gravebound Rule",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "gravebound_scepter",
+   "act": 6,
+   "quality": "exotic",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "mana_regen",
+     "value": 3.2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.12,
+     "max": 0.24
+    }
+   ],
+   "legendaryEffect": "vampire_kill",
+   "lore": "The dead king still holds court through it, and still collects his tithe."
+  },
+  {
+   "id": "fh_orrery_sceptre",
+   "name": "Orrery Sceptre",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 2,
+   "quality": "high",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "critChance",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.06,
+     "max": 0.12
+    }
+   ],
+   "legendaryEffect": "resonance",
+   "lore": "A little clockwork sky turns in its head. It finds the weakness in every wound."
+  },
+  {
+   "id": "fh_sceptre_of_the_seventh_sphere",
+   "name": "Sceptre of the Seventh Sphere",
+   "type": "scepter",
+   "slot": "weapon",
+   "baseItemId": "scepter",
+   "act": 5,
+   "quality": "exotic",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.19
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4.5,
+     "max": 9
+    }
+   ],
+   "legendaryEffect": "overflow",
+   "lore": "It hums with a sphere of the heavens nobody has named. It is never empty."
+  },
+  {
+   "id": "fh_heart_of_the_kiln",
+   "name": "Heart of the Kiln",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 2,
+   "quality": "high",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "mp",
+     "value": 26
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 13,
+     "max": 24
+    }
+   ],
+   "legendaryEffect": "crit_ward",
+   "lore": "A glass bead from the kiln that fired the first city. It shields whoever holds it."
+  },
+  {
+   "id": "fh_sunstone_orb",
+   "name": "Sunstone Orb",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 5,
+   "quality": "exotic",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.19
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 48,
+     "max": 86
+    }
+   ],
+   "legendaryEffect": "pyre_aura",
+   "lore": "A pebble of solid sunlight. Its heat will not stay in your hand."
+  },
+  {
+   "id": "fh_frozen_tear",
+   "name": "Frozen Tear",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 1,
+   "quality": "high",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "mana_regen",
+     "value": 1.2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.05,
+     "max": 0.09
+    }
+   ],
+   "legendaryEffect": "frost_skin",
+   "lore": "A widow's tear that froze on her cheek. It keeps everyone at a distance."
+  },
+  {
+   "id": "fh_stillwater_globe",
+   "name": "Stillwater Globe",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 4,
+   "quality": "elite",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.09,
+     "max": 0.18
+    }
+   ],
+   "legendaryEffect": "stillness",
+   "lore": "Hold it without moving and you can see the whole fight in it."
+  },
+  {
+   "id": "fh_captured_storm",
+   "name": "Captured Storm",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 3,
+   "quality": "elite",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3.5,
+     "max": 7
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "A thunderhead in a jar. It is not happy about it."
+  },
+  {
+   "id": "fh_thunderegg",
+   "name": "Thunderegg",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 6,
+   "quality": "exotic",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "mp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 29,
+     "max": 52
+    }
+   ],
+   "legendaryEffect": "static_charge",
+   "lore": "Something is growing inside it, and it crackles."
+  },
+  {
+   "id": "fh_blightpearl",
+   "name": "Blightpearl",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 2,
+   "quality": "high",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.11
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 24,
+     "max": 44
+    }
+   ],
+   "legendaryEffect": "rot_spread",
+   "lore": "Taken from an oyster in a poisoned bay. It has been spreading ever since."
+  },
+  {
+   "id": "fh_witchbile_orb",
+   "name": "Witchbile Orb",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 5,
+   "quality": "exotic",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "mana_regen",
+     "value": 2.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.11,
+     "max": 0.21
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "A gall-stone from a marsh-witch. It weeps green."
+  },
+  {
+   "id": "fh_eye_of_the_hollow",
+   "name": "Eye of the Hollow",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 3,
+   "quality": "elite",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "critChance",
+     "value": 6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.08,
+     "max": 0.15
+    }
+   ],
+   "legendaryEffect": "glass_heart",
+   "lore": "It looks back. What it sees in you, it takes."
+  },
+  {
+   "id": "fh_nightglass",
+   "name": "Nightglass",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 6,
+   "quality": "exotic",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.21
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "doom",
+   "lore": "Black glass from the night the moon went out. It remembers every hurt."
+  },
+  {
+   "id": "fh_mirrorsphere",
+   "name": "Mirrorsphere",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 1,
+   "quality": "high",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "mp",
+     "value": 18
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 9,
+     "max": 17
+    }
+   ],
+   "legendaryEffect": "barrier_burst",
+   "lore": "A sphere of mirrors that reflects the world a moment late. Break its guard and it breaks you back."
+  },
+  {
+   "id": "fh_worldseed",
+   "name": "Worldseed",
+   "type": "orb",
+   "slot": "weapon",
+   "baseItemId": "orb",
+   "act": 4,
+   "quality": "elite",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.16
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 40,
+     "max": 72
+    }
+   ],
+   "legendaryEffect": "overflow",
+   "lore": "Something the size of a world is folded up inside it, and it is always full."
+  },
+  {
+   "id": "fh_book_of_cinders",
+   "name": "Book of Cinders",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 1,
+   "quality": "high",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "mana_regen",
+     "value": 1.2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.05,
+     "max": 0.09
+    }
+   ],
+   "legendaryEffect": "burn_extend",
+   "lore": "The pages are ash. The words still burn."
+  },
+  {
+   "id": "fh_the_ashen_codex",
+   "name": "The Ashen Codex",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 4,
+   "quality": "elite",
+   "element": "fire",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.09,
+     "max": 0.18
+    }
+   ],
+   "legendaryEffect": "kindling",
+   "lore": "A fire-priest's prayer book, every psalm a little hotter than the last."
+  },
+  {
+   "id": "fh_frostbound_primer",
+   "name": "Frostbound Primer",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 2,
+   "quality": "high",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.11
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ],
+   "legendaryEffect": "shatter",
+   "lore": "A schoolbook for the ice-schools. Its first lesson is how cold things break."
+  },
+  {
+   "id": "fh_hymnal_of_the_long_winter",
+   "name": "Hymnal of the Long Winter",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 5,
+   "quality": "exotic",
+   "element": "ice",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "mp",
+     "value": 50
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 25,
+     "max": 45
+    }
+   ],
+   "legendaryEffect": "frostbite",
+   "lore": "Sung for a hundred years of winter. Everyone who heard it stopped moving."
+  },
+  {
+   "id": "fh_stormscript",
+   "name": "Stormscript",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 3,
+   "quality": "elite",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 32,
+     "max": 58
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "Written by lightning on the pages of a burnt library."
+  },
+  {
+   "id": "fh_litany_of_sparks",
+   "name": "Litany of Sparks",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 6,
+   "quality": "exotic",
+   "element": "lightning",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "mana_regen",
+     "value": 3.2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.12,
+     "max": 0.24
+    }
+   ],
+   "legendaryEffect": "crescendo",
+   "lore": "Each line louder than the last. Nobody has ever read it to the end aloud."
+  },
+  {
+   "id": "fh_herbal_of_ruin",
+   "name": "Herbal of Ruin",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 2,
+   "quality": "high",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 9
+    },
+    {
+     "stat": "critChance",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.06,
+     "max": 0.12
+    }
+   ],
+   "legendaryEffect": "venom_stack",
+   "lore": "An apothecary's herbal with every cure crossed out."
+  },
+  {
+   "id": "fh_grimoire_of_the_mire",
+   "name": "Grimoire of the Mire",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 5,
+   "quality": "exotic",
+   "element": "poison",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 16
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.19
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4.5,
+     "max": 9
+    }
+   ],
+   "legendaryEffect": "rot_spread",
+   "lore": "Its pages are damp and growing. Something in it is still alive."
+  },
+  {
+   "id": "fh_book_of_unnaming",
+   "name": "Book of Unnaming",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 3,
+   "quality": "elite",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "mp",
+     "value": 34
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critDamage",
+     "min": 17,
+     "max": 31
+    }
+   ],
+   "legendaryEffect": "mana_burn",
+   "lore": "Every name written in it is forgotten by the world. It costs the reader too."
+  },
+  {
+   "id": "fh_obituary",
+   "name": "Obituary",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 6,
+   "quality": "exotic",
+   "element": "shadow",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 18
+    },
+    {
+     "stat": "spellPower",
+     "value": 0.21
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hp",
+     "min": 56,
+     "max": 100
+    }
+   ],
+   "legendaryEffect": "doom",
+   "lore": "It lists the dead of every war. There is always room for one more."
+  },
+  {
+   "id": "fh_primer_of_echoes",
+   "name": "Primer of Echoes",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 1,
+   "quality": "high",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 6
+    },
+    {
+     "stat": "mana_regen",
+     "value": 1.2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.05,
+     "max": 0.09
+    }
+   ],
+   "legendaryEffect": "echo_cast",
+   "lore": "A child's spell primer. Every lesson in it repeats itself."
+  },
+  {
+   "id": "fh_the_endless_index",
+   "name": "The Endless Index",
+   "type": "tome",
+   "slot": "weapon",
+   "baseItemId": "tome",
+   "act": 4,
+   "quality": "elite",
+   "element": "arcane",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "critChance",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.09,
+     "max": 0.18
+    }
+   ],
+   "legendaryEffect": "resonance",
+   "lore": "An index to a book that was never written. It finds every weakness it is asked for."
+  },
+  {
+   "id": "fh_seers_veil",
+   "name": "Seer's Veil",
+   "type": "head:cloth",
+   "slot": "head",
+   "baseItemId": "cloth_helm",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 4
+    },
+    {
+     "stat": "int",
+     "value": 7
+    },
+    {
+     "stat": "con",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 7,
+     "max": 14
+    }
+   ],
+   "legendaryEffect": "overflow",
+   "lore": "A veil of spider-silk worn by the oracles, who never ran out of words."
+  },
+  {
+   "id": "fh_cowl_of_quiet_hours",
+   "name": "Cowl of Quiet Hours",
+   "type": "head:cloth",
+   "slot": "head",
+   "baseItemId": "cloth_helm",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 7
+    },
+    {
+     "stat": "int",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 13,
+     "max": 26
+    }
+   ],
+   "legendaryEffect": "stillness",
+   "lore": "Worn by the hermits who sat so still the birds nested on them."
+  },
+  {
+   "id": "fh_scouts_brow",
+   "name": "Scout's Brow",
+   "type": "head:light",
+   "slot": "head",
+   "baseItemId": "light_helm",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 5
+    },
+    {
+     "stat": "dex",
+     "value": 5
+    },
+    {
+     "stat": "con",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "stride",
+   "lore": "A cap of oiled leather that has crossed every border in the south."
+  },
+  {
+   "id": "fh_mask_of_the_fox",
+   "name": "Mask of the Fox",
+   "type": "head:light",
+   "slot": "head",
+   "baseItemId": "light_helm",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 9
+    },
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.6,
+     "max": 5.2
+    }
+   ],
+   "legendaryEffect": "kill_frenzy",
+   "lore": "A red-leather mask. Its wearer grows quicker with every kill, and harder to follow."
+  },
+  {
+   "id": "fh_coif_of_second_breath",
+   "name": "Coif of Second Breath",
+   "type": "head:medium",
+   "slot": "head",
+   "baseItemId": "medium_helm",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 8
+    },
+    {
+     "stat": "con",
+     "value": 7
+    },
+    {
+     "stat": "hp",
+     "value": 34
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.1,
+     "max": 2.2
+    }
+   ],
+   "legendaryEffect": "second_wind",
+   "lore": "A coif worn by a soldier who was left for dead three times."
+  },
+  {
+   "id": "fh_iron_halo",
+   "name": "Iron Halo",
+   "type": "head:medium",
+   "slot": "head",
+   "baseItemId": "medium_helm",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 14
+    },
+    {
+     "stat": "con",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2,
+     "max": 4
+    }
+   ],
+   "legendaryEffect": "crit_heal",
+   "lore": "A ring of iron worn like a saint's crown. It mends whoever strikes true."
+  },
+  {
+   "id": "fh_bellhelm",
+   "name": "Bellhelm",
+   "type": "head:heavy",
+   "slot": "head",
+   "baseItemId": "heavy_helm",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 13
+    },
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "con",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "retaliate_nova",
+   "lore": "Strike it and it rings with the cold of the mountain it was forged under."
+  },
+  {
+   "id": "fh_crown_of_the_drake_warden",
+   "name": "Crown of the Drake Warden",
+   "type": "head:heavy",
+   "slot": "head",
+   "baseItemId": "wyrmscale_helm",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 20
+    },
+    {
+     "stat": "str",
+     "value": 15
+    },
+    {
+     "stat": "hp",
+     "value": 82
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2.3,
+     "max": 4.6
+    }
+   ],
+   "legendaryEffect": "pyre_aura",
+   "lore": "The drake wardens wore their charges' fire as a crown."
+  },
+  {
+   "id": "fh_robe_of_the_last_lamp",
+   "name": "Robe of the Last Lamp",
+   "type": "chest:cloth",
+   "slot": "chest",
+   "baseItemId": "cloth_chest",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 3
+    },
+    {
+     "stat": "int",
+     "value": 5
+    },
+    {
+     "stat": "con",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "barrier_burst",
+   "lore": "The lamplighters of the old city wore it on the night the lamps went out."
+  },
+  {
+   "id": "fh_wyrmsilk_vestment",
+   "name": "Wyrmsilk Vestment",
+   "type": "chest:cloth",
+   "slot": "chest",
+   "baseItemId": "dragonscale_cloth",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 7
+    },
+    {
+     "stat": "int",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 13,
+     "max": 26
+    }
+   ],
+   "legendaryEffect": "echo_cast",
+   "lore": "Woven from the shed skin of a sky-drake. Every spell cast in it echoes."
+  },
+  {
+   "id": "fh_hunters_jerkin",
+   "name": "Hunter's Jerkin",
+   "type": "chest:light",
+   "slot": "chest",
+   "baseItemId": "light_chest",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 6
+    },
+    {
+     "stat": "dex",
+     "value": 7
+    },
+    {
+     "stat": "con",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 1.8,
+     "max": 3.6
+    }
+   ],
+   "legendaryEffect": "opportunist",
+   "lore": "The hunter who wore it never chased anything that could still run."
+  },
+  {
+   "id": "fh_nightrunner_coat",
+   "name": "Nightrunner Coat",
+   "type": "chest:light",
+   "slot": "chest",
+   "baseItemId": "light_chest",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 9
+    },
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.6,
+     "max": 5.2
+    }
+   ],
+   "legendaryEffect": "vampire_kill",
+   "lore": "A long black coat. Everyone who wore it lived a very long time on other people's blood."
+  },
+  {
+   "id": "fh_mail_of_the_frozen_march",
+   "name": "Mail of the Frozen March",
+   "type": "chest:medium",
+   "slot": "chest",
+   "baseItemId": "medium_chest",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 10
+    },
+    {
+     "stat": "con",
+     "value": 9
+    },
+    {
+     "stat": "hp",
+     "value": 46
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "frost_skin",
+   "lore": "Worn on the winter march that nobody came back from. The cold came back in it."
+  },
+  {
+   "id": "fh_hydra_scale",
+   "name": "Hydra Scale",
+   "type": "chest:medium",
+   "slot": "chest",
+   "baseItemId": "scaled_chest",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 16
+    },
+    {
+     "stat": "con",
+     "value": 15
+    },
+    {
+     "stat": "hp",
+     "value": 82
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2.3,
+     "max": 4.6
+    }
+   ],
+   "legendaryEffect": "thornmail",
+   "lore": "Every scale was cut from a head that grew back. Strike one and it strikes you."
+  },
+  {
+   "id": "fh_penance_plate",
+   "name": "Penance Plate",
+   "type": "chest:heavy",
+   "slot": "chest",
+   "baseItemId": "heavy_chest",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 10
+    },
+    {
+     "stat": "str",
+     "value": 7
+    },
+    {
+     "stat": "con",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.1,
+     "max": 2.2
+    }
+   ],
+   "legendaryEffect": "thornmail",
+   "lore": "The armour of a knight who swore to answer every blow in kind."
+  },
+  {
+   "id": "fh_bastion_of_kharr",
+   "name": "Bastion of Kharr",
+   "type": "chest:heavy",
+   "slot": "chest",
+   "baseItemId": "dragonsteel_chest",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 18
+    },
+    {
+     "stat": "str",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2,
+     "max": 4
+    }
+   ],
+   "legendaryEffect": "second_wind",
+   "lore": "The last wall of Kharr, beaten into a breastplate when the city fell."
+  },
+  {
+   "id": "fh_leggings_of_the_ley",
+   "name": "Leggings of the Ley",
+   "type": "legs:cloth",
+   "slot": "legs",
+   "baseItemId": "cloth_legs",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 3
+    },
+    {
+     "stat": "int",
+     "value": 5
+    },
+    {
+     "stat": "con",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 5,
+     "max": 10
+    }
+   ],
+   "legendaryEffect": "crit_ward",
+   "lore": "Stitched with thread drawn along the ley-lines. Every true strike pulls a ward up around you."
+  },
+  {
+   "id": "fh_mooncloth_wraps",
+   "name": "Mooncloth Wraps",
+   "type": "legs:cloth",
+   "slot": "legs",
+   "baseItemId": "cloth_legs",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 6
+    },
+    {
+     "stat": "int",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 11,
+     "max": 22
+    }
+   ],
+   "legendaryEffect": "free_move",
+   "lore": "Cloth woven by moonlight. It never tires, and neither does its wearer."
+  },
+  {
+   "id": "fh_pathless_breeches",
+   "name": "Pathless Breeches",
+   "type": "legs:light",
+   "slot": "legs",
+   "baseItemId": "light_legs",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 6
+    },
+    {
+     "stat": "dex",
+     "value": 7
+    },
+    {
+     "stat": "con",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 1.8,
+     "max": 3.6
+    }
+   ],
+   "legendaryEffect": "stride",
+   "lore": "Worn by the road-less, who fight as they walk and never stop."
+  },
+  {
+   "id": "fh_deerstalkers_leathers",
+   "name": "Deerstalker's Leathers",
+   "type": "legs:light",
+   "slot": "legs",
+   "baseItemId": "light_legs",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 11
+    },
+    {
+     "stat": "dex",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ],
+   "legendaryEffect": "stillness",
+   "lore": "The deerstalker waited a whole day for one shot, and never missed."
+  },
+  {
+   "id": "fh_chain_of_the_long_road",
+   "name": "Chain of the Long Road",
+   "type": "legs:medium",
+   "slot": "legs",
+   "baseItemId": "medium_legs",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 10
+    },
+    {
+     "stat": "con",
+     "value": 9
+    },
+    {
+     "stat": "hp",
+     "value": 46
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "kill_frenzy",
+   "lore": "Every link was forged in a different town along the old road."
+  },
+  {
+   "id": "fh_dragonhide_greaves",
+   "name": "Dragonhide Greaves",
+   "type": "legs:medium",
+   "slot": "legs",
+   "baseItemId": "dragonhide_legs",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 16
+    },
+    {
+     "stat": "con",
+     "value": 15
+    },
+    {
+     "stat": "hp",
+     "value": 82
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2.3,
+     "max": 4.6
+    }
+   ],
+   "legendaryEffect": "pyre_aura",
+   "lore": "The hide is still warm, and it has not forgotten how to burn."
+  },
+  {
+   "id": "fh_rampart_greaves",
+   "name": "Rampart Greaves",
+   "type": "legs:heavy",
+   "slot": "legs",
+   "baseItemId": "heavy_legs",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 10
+    },
+    {
+     "stat": "str",
+     "value": 7
+    },
+    {
+     "stat": "con",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.1,
+     "max": 2.2
+    }
+   ],
+   "legendaryEffect": "frost_skin",
+   "lore": "Greaves from a frontier fort built on the permafrost. The cold came up through the stone."
+  },
+  {
+   "id": "fh_runeward_greaves",
+   "name": "Runeward Greaves",
+   "type": "legs:heavy",
+   "slot": "legs",
+   "baseItemId": "runed_legs",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 18
+    },
+    {
+     "stat": "str",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2,
+     "max": 4
+    }
+   ],
+   "legendaryEffect": "barrier_burst",
+   "lore": "Every rune is a promise to hold. When the last one breaks, they all break at once."
+  },
+  {
+   "id": "fh_cutpurse_gloves",
+   "name": "Cutpurse Gloves",
+   "type": "hands:light",
+   "slot": "hands",
+   "baseItemId": "light_gauntlets",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 5
+    },
+    {
+     "stat": "dex",
+     "value": 5
+    },
+    {
+     "stat": "con",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "battle_trance",
+   "lore": "The fingers were worn smooth by a thousand patient thefts."
+  },
+  {
+   "id": "fh_gloves_of_the_quick_draw",
+   "name": "Gloves of the Quick Draw",
+   "type": "hands:light",
+   "slot": "hands",
+   "baseItemId": "light_gauntlets",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 9
+    },
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.6,
+     "max": 5.2
+    }
+   ],
+   "legendaryEffect": "fourth_volley",
+   "lore": "An archer's gloves, worn through at the fingertips."
+  },
+  {
+   "id": "fh_gauntlets_of_the_last_word",
+   "name": "Gauntlets of the Last Word",
+   "type": "hands:medium",
+   "slot": "hands",
+   "baseItemId": "medium_gauntlets",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 10
+    },
+    {
+     "stat": "con",
+     "value": 9
+    },
+    {
+     "stat": "hp",
+     "value": 46
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "cull",
+   "lore": "The executioner's gloves. He never needed to say anything twice."
+  },
+  {
+   "id": "fh_stormgrip",
+   "name": "Stormgrip",
+   "type": "hands:medium",
+   "slot": "hands",
+   "baseItemId": "medium_gauntlets",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 14
+    },
+    {
+     "stat": "con",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2,
+     "max": 4
+    }
+   ],
+   "legendaryEffect": "chain_lightning",
+   "lore": "Copper wire is woven through the mail. Every blow arcs."
+  },
+  {
+   "id": "fh_fists_of_the_quarry",
+   "name": "Fists of the Quarry",
+   "type": "hands:heavy",
+   "slot": "hands",
+   "baseItemId": "heavy_gauntlets",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 10
+    },
+    {
+     "stat": "str",
+     "value": 7
+    },
+    {
+     "stat": "con",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.1,
+     "max": 2.2
+    }
+   ],
+   "legendaryEffect": "quake_slam",
+   "lore": "The quarrymen split mountains with these, and never needed a hammer."
+  },
+  {
+   "id": "fh_wyrmclaw_grips",
+   "name": "Wyrmclaw Grips",
+   "type": "hands:heavy",
+   "slot": "hands",
+   "baseItemId": "dragonclaw_gauntlets",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 20
+    },
+    {
+     "stat": "str",
+     "value": 15
+    },
+    {
+     "stat": "hp",
+     "value": 82
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2.3,
+     "max": 4.6
+    }
+   ],
+   "legendaryEffect": "hemorrhage",
+   "lore": "Each finger ends in a drake's claw. The wounds they make open wider as you run."
+  },
+  {
+   "id": "fh_boots_of_the_hare",
+   "name": "Boots of the Hare",
+   "type": "feet:light",
+   "slot": "feet",
+   "baseItemId": "light_boots",
+   "act": 1,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 5
+    },
+    {
+     "stat": "dex",
+     "value": 5
+    },
+    {
+     "stat": "con",
+     "value": 4
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "kill_frenzy",
+   "lore": "Soft boots for a hunter who never stood still long enough to be hunted."
+  },
+  {
+   "id": "fh_ashstep_boots",
+   "name": "Ashstep Boots",
+   "type": "feet:light",
+   "slot": "feet",
+   "baseItemId": "light_boots",
+   "act": 4,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 9
+    },
+    {
+     "stat": "dex",
+     "value": 11
+    },
+    {
+     "stat": "hp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 2.6,
+     "max": 5.2
+    }
+   ],
+   "legendaryEffect": "fire_trail",
+   "lore": "Wherever they walk into a fight, the ground catches."
+  },
+  {
+   "id": "fh_marchwarden_boots",
+   "name": "Marchwarden Boots",
+   "type": "feet:medium",
+   "slot": "feet",
+   "baseItemId": "medium_boots",
+   "act": 2,
+   "quality": "high",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 8
+    },
+    {
+     "stat": "con",
+     "value": 7
+    },
+    {
+     "stat": "hp",
+     "value": 34
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.1,
+     "max": 2.2
+    }
+   ],
+   "legendaryEffect": "second_wind",
+   "lore": "The boots of a marchwarden who walked home from a massacre."
+  },
+  {
+   "id": "fh_frostprint_sabatons",
+   "name": "Frostprint Sabatons",
+   "type": "feet:medium",
+   "slot": "feet",
+   "baseItemId": "medium_boots",
+   "act": 5,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 14
+    },
+    {
+     "stat": "con",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2,
+     "max": 4
+    }
+   ],
+   "legendaryEffect": "frostbite",
+   "lore": "They leave frost in the footprints, and on whatever they kick."
+  },
+  {
+   "id": "fh_stonestep_sabatons",
+   "name": "Stonestep Sabatons",
+   "type": "feet:heavy",
+   "slot": "feet",
+   "baseItemId": "heavy_boots",
+   "act": 3,
+   "quality": "elite",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 13
+    },
+    {
+     "stat": "str",
+     "value": 9
+    },
+    {
+     "stat": "con",
+     "value": 7
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 1.4,
+     "max": 2.8
+    }
+   ],
+   "legendaryEffect": "quake_slam",
+   "lore": "Every step is a small earthquake. Every third swing is a larger one."
+  },
+  {
+   "id": "fh_groundswell_sabatons",
+   "name": "Groundswell Sabatons",
+   "type": "feet:heavy",
+   "slot": "feet",
+   "baseItemId": "runed_boots",
+   "act": 6,
+   "quality": "exotic",
+   "fixedAffixes": [
+    {
+     "stat": "armor",
+     "value": 20
+    },
+    {
+     "stat": "str",
+     "value": 15
+    },
+    {
+     "stat": "hp",
+     "value": 82
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "hpRegen",
+     "min": 2.3,
+     "max": 4.6
+    }
+   ],
+   "legendaryEffect": "crescendo",
+   "lore": "Runes up the shin build like a wave, and break."
+  },
+  {
+   "id": "fh_parrys_promise",
+   "name": "Parry's Promise",
+   "type": "shield",
+   "act": 1,
+   "quality": "high",
+   "legendaryEffect": "bulwark",
+   "lore": "A duellist's buckler, dented in the centre from ten thousand turned blades.",
+   "slot": "offhand",
+   "baseItemId": "buckler",
+   "fixedAffixes": [
+    {
+     "stat": "con",
+     "value": 6
+    },
+    {
+     "stat": "block_power",
+     "value": 11
+    },
+    {
+     "stat": "block_chance",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "armor",
+     "min": 5,
+     "max": 9
+    }
+   ]
+  },
+  {
+   "id": "fh_aegis_of_last_light",
+   "name": "Aegis of Last Light",
+   "type": "shield",
+   "act": 5,
+   "quality": "exotic",
+   "legendaryEffect": "thornmail",
+   "lore": "The shield of the last paladin of the dawn order. It still punishes the wicked.",
+   "slot": "offhand",
+   "baseItemId": "aegis_shield",
+   "fixedAffixes": [
+    {
+     "stat": "con",
+     "value": 14
+    },
+    {
+     "stat": "block_power",
+     "value": 31
+    },
+    {
+     "stat": "block_chance",
+     "value": 9
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "armor",
+     "min": 13,
+     "max": 21
+    }
+   ]
+  },
+  {
+   "id": "fh_glimmerward",
+   "name": "Glimmerward",
+   "type": "ward",
+   "act": 2,
+   "quality": "high",
+   "legendaryEffect": "barrier_burst",
+   "lore": "A disc of polished crystal. When its ward shatters, so does everything near it.",
+   "slot": "offhand",
+   "baseItemId": "warded_focus",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 8
+    },
+    {
+     "stat": "barrier",
+     "value": 22
+    },
+    {
+     "stat": "barrierRegen",
+     "value": 3
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 8,
+     "max": 16
+    }
+   ]
+  },
+  {
+   "id": "fh_veilguard_orb",
+   "name": "Veilguard Orb",
+   "type": "ward",
+   "act": 5,
+   "quality": "exotic",
+   "legendaryEffect": "second_wind",
+   "lore": "An orb of layered veils that throws a new one up when the last one falls.",
+   "slot": "offhand",
+   "baseItemId": "spellguard_orb",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 14
+    },
+    {
+     "stat": "barrier",
+     "value": 43
+    },
+    {
+     "stat": "barrierRegen",
+     "value": 6
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 14,
+     "max": 28
+    }
+   ]
+  },
+  {
+   "id": "fh_emberwing_quiver",
+   "name": "Emberwing Quiver",
+   "type": "quiver",
+   "act": 2,
+   "quality": "high",
+   "legendaryEffect": "kindling",
+   "lore": "The fletchings are phoenix down, or so the seller swore. They do not stop burning.",
+   "gearBase": "quiver_ember",
+   "slot": "offhand",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 9
+    },
+    {
+     "stat": "cond_quiverDamage",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ]
+  },
+  {
+   "id": "fh_quiver_of_the_wild_hunt",
+   "name": "Quiver of the Wild Hunt",
+   "type": "quiver",
+   "act": 5,
+   "quality": "exotic",
+   "legendaryEffect": "ricochet",
+   "lore": "The arrows of the wild hunt never stop at one quarry.",
+   "gearBase": "quiver_seeker",
+   "slot": "offhand",
+   "fixedAffixes": [
+    {
+     "stat": "dex",
+     "value": 16
+    },
+    {
+     "stat": "cond_quiverDamage",
+     "value": 10
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 4.5,
+     "max": 9
+    }
+   ]
+  },
+  {
+   "id": "fh_band_of_echoes",
+   "name": "Band of Echoes",
+   "type": "ring",
+   "act": 1,
+   "quality": "high",
+   "legendaryEffect": "echo_strike",
+   "lore": "A plain iron band that hums a moment after every blow.",
+   "slot": "ring",
+   "baseItemId": "ring",
+   "fixedAffixes": [
+    {
+     "stat": "int",
+     "value": 5
+    },
+    {
+     "stat": "con",
+     "value": 5
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 1.5,
+     "max": 3
+    }
+   ]
+  },
+  {
+   "id": "fh_signet_of_the_glass_throne",
+   "name": "Signet of the Glass Throne",
+   "type": "ring",
+   "act": 4,
+   "quality": "elite",
+   "legendaryEffect": "glass_heart",
+   "lore": "The seal of a queen who ruled by fear and died by it.",
+   "slot": "ring",
+   "baseItemId": "gold_signet",
+   "fixedAffixes": [
+    {
+     "stat": "str",
+     "value": 11
+    },
+    {
+     "stat": "dex",
+     "value": 11
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "critChance",
+     "min": 3,
+     "max": 6
+    }
+   ]
+  },
+  {
+   "id": "fh_pendant_of_wounds",
+   "name": "Pendant of Wounds",
+   "type": "necklace",
+   "act": 2,
+   "quality": "high",
+   "legendaryEffect": "resonance",
+   "lore": "A string of old arrowheads, one for every wound its owner survived.",
+   "slot": "necklace",
+   "baseItemId": "necklace",
+   "fixedAffixes": [
+    {
+     "stat": "con",
+     "value": 7
+    },
+    {
+     "stat": "hp",
+     "value": 34
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.06,
+     "max": 0.12
+    }
+   ]
+  },
+  {
+   "id": "fh_veinstone_of_vael",
+   "name": "Veinstone of Vael",
+   "type": "necklace",
+   "act": 5,
+   "quality": "exotic",
+   "legendaryEffect": "crit_ward",
+   "lore": "A red stone that beats. It shields the heart it hangs over.",
+   "slot": "necklace",
+   "baseItemId": "silver_amulet",
+   "fixedAffixes": [
+    {
+     "stat": "con",
+     "value": 13
+    },
+    {
+     "stat": "hp",
+     "value": 70
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "spellPower",
+     "min": 0.11,
+     "max": 0.21
+    }
+   ]
+  },
+  {
+   "id": "fh_brambleback",
+   "name": "Brambleback",
+   "type": "mount",
+   "act": 2,
+   "quality": "high",
+   "legendaryEffect": "rider_fury",
+   "lore": "A bad-tempered moor pony with a scar for every fight it enjoyed.",
+   "gearBase": "pony",
+   "slot": "mount",
+   "fixedAffixes": [
+    {
+     "stat": "con",
+     "value": 7
+    },
+    {
+     "stat": "cond_mountStamina",
+     "value": 8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "cond_mountSlope",
+     "min": 0.14,
+     "max": 0.26
+    }
+   ]
+  },
+  {
+   "id": "fh_thunderhoof",
+   "name": "Thunderhoof",
+   "type": "mount",
+   "act": 5,
+   "quality": "exotic",
+   "legendaryEffect": "stormrider",
+   "lore": "A storm-elk from the high plains. Lightning follows it like a herd.",
+   "gearBase": "dray",
+   "slot": "mount",
+   "fixedAffixes": [
+    {
+     "stat": "con",
+     "value": 13
+    },
+    {
+     "stat": "cond_mountStamina",
+     "value": 14
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "cond_mountSlope",
+     "min": 0.2,
+     "max": 0.35
+    }
+   ]
+  },
+  {
+   "id": "fh_lantern_of_morrow",
+   "name": "Lantern of Morrow",
+   "type": "light",
+   "act": 2,
+   "quality": "high",
+   "legendaryEffect": "dread_lantern",
+   "lore": "A lamp from a haunted lighthouse. Its light makes brave things falter.",
+   "gearBase": "lantern",
+   "slot": "light",
+   "fixedAffixes": [
+    {
+     "stat": "cond_lightRange",
+     "value": 18
+    },
+    {
+     "stat": "hp",
+     "value": 28
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 7,
+     "max": 14
+    }
+   ]
+  },
+  {
+   "id": "fh_sunjar",
+   "name": "Sunjar",
+   "type": "light",
+   "act": 5,
+   "quality": "exotic",
+   "legendaryEffect": "searing_light",
+   "lore": "A jar of noon, sealed with wax. Nothing that hates the day can stand near it.",
+   "gearBase": "wisplamp",
+   "slot": "light",
+   "fixedAffixes": [
+    {
+     "stat": "cond_lightRange",
+     "value": 33
+    },
+    {
+     "stat": "hp",
+     "value": 58
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "magicResist",
+     "min": 13,
+     "max": 26
+    }
+   ]
+  },
+  {
+   "id": "fh_prospectors_pride",
+   "name": "Prospector's Pride",
+   "type": "tool",
+   "act": 2,
+   "quality": "high",
+   "legendaryEffect": "prospector",
+   "lore": "The pick that struck the first silver in the western hills. It still finds double.",
+   "toolBase": "ironhead_tool",
+   "slot": "tool",
+   "fixedAffixes": [
+    {
+     "stat": "cond_toolYield",
+     "value": 0.14
+    },
+    {
+     "stat": "cond_toolReach",
+     "value": 0.8
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "cond_toolSpeed",
+     "min": 0.1,
+     "max": 0.18
+    }
+   ]
+  },
+  {
+   "id": "fh_quickhand_pick",
+   "name": "Quickhand Pick",
+   "type": "tool",
+   "act": 4,
+   "quality": "elite",
+   "legendaryEffect": "quick_hands",
+   "lore": "A miner's tool worn smooth by a lifetime of piecework. It hurries you along.",
+   "toolBase": "steelhead_tool",
+   "slot": "tool",
+   "fixedAffixes": [
+    {
+     "stat": "cond_toolYield",
+     "value": 0.2
+    },
+    {
+     "stat": "cond_toolReach",
+     "value": 1.2
+    }
+   ],
+   "randomAffixes": [
+    {
+     "stat": "cond_toolSpeed",
+     "min": 0.14,
+     "max": 0.24
+    }
+   ]
+  }
+ ]
+}

@@ -3649,3 +3649,70 @@ grown town left the high street starting sixty metres inside the masonry), and `
 hard assertion that has checked plot-against-plot and plot-against-street since the day it was
 written — now has a `plot-wall` check with an exported `WALL_CLEARANCE`. The wall polygon had never
 been in it at all, which is why no test anywhere would have caught this.
+
+---
+
+## Round 23 — uniques, the title screens, a bridge, a gate, and the weather
+
+Six requests; the full write-ups are in `research/round23-*.md`, each with before/after
+screenshots in the folder of the same name.
+
+**1. Uniques** (`research/round23-uniques.md`, `js/uniques.js`, `data/uniques.json` built by
+`tools/build-uniques.mjs`). 184 uniques: 4 for each of the 18 weapon types with no subtypes, 2 per
+element for each of the five casters (wand, staff, sceptre, orb, tome x fire / ice / lightning /
+poison / shadow / arcane), and 2 for every armour slot and weight, shield, ward, quiver, ring,
+necklace, mount, light and tool. A weapon's "type" is whatever `profileOf` swings it as, so the
+count is over what the game actually does, not over names. Scanners, boats and ships are left out:
+they are bought, never rolled. 48 new powers in `js/effects.js` — stacking, ramping, moving-grows
+and detonating damage-over-time, self effects, and auto-attack shapes (chain, ricochet, split bolt,
+every-third-swing cleave, burning ground, auras) — carried out by `resolveAttack` / `afterKill` /
+`afterDamaged` / `tickAuras`, with every number on a card read from the same `U23` table the code
+uses. Injected into `items.uniques` at load; the shared items.json is untouched. Emberveil's older
+caster uniques now drop as the element their lore promises (`LEGACY_CASTER_ELEMENTS`).
+Bugs found on the way: **every unique's power ran twice** (The Ingrate's +25% was +56%), lingering
+ground pools crashed on their first tick (`brandHit` did not exist there — this also broke the Ground
+talent and the charged staff wall), "+damage while mounted" read a `player.mounted` nothing set,
+arrows never applied on-hit statuses, and thorns kills left enemies standing at 0 health.
+
+**2. The Followers screen had a Spells tab** because R17 put the respec there and R20 moved spells
+to the sheet's "Spell available" card and the Unbinder without taking it out. Removed.
+
+**3. The title, character and world screens** (`research/round23-title.md`, `title.css`,
+`js/figure3d.js`, `js/titlelook.js`, `js/spellcard.js`). Same look, new structure: a step bar, a
+three-column character step (classes / 3D figure / class card with fact chips and two-line
+descriptions that expand), card grids in the class builder with later-slot spells folded, a
+two-group world step. The figure is `makeActor` dressed by the game's own opening-kit steps on a
+private copy of the data, one renderer shared by the character step, appearance editor and builder,
+and disposed before the game makes its own. Escape inside the builder no longer drops the title back
+to the menu underneath it.
+
+**4 + 5. The bridge and the gate at Fenkeep** (`research/round23-bridge-gate.md`,
+`js/bridge-plan.js`, `js/ground.js`). The bridge was a flat drawn box over a chain of sloped pads —
+half a metre apart, which is the clipping — and nothing but the player ever stood on a deck. Now one
+list of heights builds the mesh and the colliders, the ends come down to the ground (or ramp to the
+nearest bank), every walker asks `groundAt`, and the rails are walls that only apply at deck height
+(`addSegment(..., { band })`), so a swimmer underneath is never stopped. The gate hole was two rules
+choosing the gatehouse and the gap separately, a kerb dropping the wall piece beside it, and walls
+filed as a string of circles; walls are straight `addSegment` pieces now, the gatehouse takes the
+town's wall colour, the doors stand open and collide, and two guards hold every entrance.
+`addSegment` also files a piece 1.5 m wider than its outline, because `resolve` looks a wall up from
+where a move ENDS and a fast step past a thin wall could land in a bucket the wall was never in.
+
+**6. Graphics** (`research/round23-graphics.md`, `js/graphics.js`, `postfx.js`, `sky-palette.js`,
+`wind.js`, `atmosphere.js`, `rain.js`, `grass-gpu.js`, `grass-plan.js`). From highdef-3d: HDR →
+half-res light shafts → bloom → ACES + a grade that follows the hour and the weather; a sky colour
+table keyed on the sun's height with nine bands at sunset, turned round the colour wheel by each
+planet's palette; height fog that pools in valleys and fades out on the climb to orbit; ONE wind
+that rain, snow, dust, clouds, trees and grass all read; GPU rain with splashes, ripples and distant
+curtains, wet ground, double-strike lightning, blown leaves/dust/ash; and ~48k blades of GPU grass
+within 38 m on the world-fixed lattice, standing on the exact triangles the ground is drawn with.
+Settings → Picture → Graphics effects (Off / Low / High, default High; `?quality=low` boots Off).
+Off and Low cost what the game did before on the software renderer; High has only been timed on a
+software renderer and needs checking on a real card.
+
+### Still open from round 23
+- 1-4 bridge ends a world still stop over water — roads routed to a town sitting in a river (R17's open item).
+- A second one-handed weapon draws nothing in the off hand (needs an off-hand part in shared Chibi 2).
+- Rain falls through roofs; snow does not settle; rivers do not get the wet look; lightning has no direction.
+- Grass bends round the player only.
+- Seen, not investigated: seed 11's dungeon is black on entry; the desert world was in eclipse at noon and dawn when screenshotted.

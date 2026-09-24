@@ -177,7 +177,9 @@ export function buildFace(a, rig, c) {
         const iy = dy - 0.01 * H, slit = eyeId === 'slit';
         ellipsoid(pupil, a.eyes.color, [dx, iy, 0.024 * H], [ex * 0.62, ey * 0.68, 0.012 * H]);
         ellipsoid(pupil, '#17272c', [dx, iy + 0.003 * H, 0.031 * H], slit ? [ex * 0.12, ey * 0.55, 0.008 * H] : [ex * 0.34, ey * 0.44, 0.008 * H]);
-        ellipsoid(pupil, '#ffffff', [dx - s * 0.018 * H, dy + 0.018 * H, 0.039 * H], [0.014 * H, 0.017 * H, 0.005 * H]);
+        // under a lid the highlight sits lower, so it never shows above the lid's edge
+        const lidded = ['narrow', 'sleepy', 'tired', 'angry'].includes(eyeId);
+        ellipsoid(pupil, '#ffffff', [dx - s * 0.018 * H, dy + (lidded ? -0.012 : 0.018) * H, 0.039 * H], [0.014 * H, 0.017 * H, 0.005 * H]);
       }
     }
     // ---- lids. Every lid is drawn ON the eye's front (eyeFront), never across it at a fixed depth.

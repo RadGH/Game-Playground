@@ -425,6 +425,7 @@ export async function createChibi2Character(avatar, opts = {}) {
     const next = acquire(a, anims);
     if (asset) { group.remove(asset.root); asset.release(); }
     asset = next; group.add(asset.root); action = null; elapsed = 0;
+    asset.lidded = ['narrow', 'sleepy', 'tired', 'angry'].includes(a?.eyes?.id);   // lidded eyes never glance up under the lid
     asset.mixer.addEventListener('finished', e => { if (e.action === action && anim !== 'dead') play('idle'); });
     play('idle', 0); group.userData.fxHeight = asset.rig.height;
   }
@@ -482,7 +483,7 @@ export async function createChibi2Character(avatar, opts = {}) {
       gaze.x += (gaze.tx - gaze.x) * k; gaze.y += (gaze.ty - gaze.y) * k;
       const dead = anim === 'dead';
       for (const s of ['L', 'R']) {
-        bones['pupil' + s].position.set(dead ? 0 : gaze.x, dead ? 0.006 * H : gaze.y, 0);
+        bones['pupil' + s].position.set(dead ? 0 : gaze.x, dead ? 0.006 * H : Math.min(gaze.y, asset.lidded ? 0 : gaze.y), 0);
         bones['eye' + s].scale.y = dead ? 0.55 : 1;
       }
       if (handsFree) for (const s of ['L', 'R']) bones['grip' + s].scale.setScalar(0.001);

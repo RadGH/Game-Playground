@@ -1,4 +1,87 @@
-# Chibi 2: First Milestone
+# Chibi 2
+
+**Chibi 2 is the flagship Avatar 3D model** (2026-09-24). The original procedural Chibi (`mii.js`)
+and the Quaternius mesh mode (`quaternius.js`) are **deprecated**: they stay on the avatar page,
+labelled as such, only so the three can be compared. Nothing new is built for them.
+
+## The 2026-09-24 overhaul (races, bodies, faces, animation)
+
+A play-test list against the Avatar 3D page, all of it done in the model so every game gets it:
+
+| File | What it owns now |
+|---|---|
+| `js/chibi2-races.js` | **Nine races** as parameter sets on the one body (no Three.js; node tests read it): `human`, `elf`, `dwarf`, `orc`, `giant`, `goblin`, `halfling`, `undead`, `beast` (Beastkin). Each has body multipliers (leg, torso, width, shoulders, arm, hand, head, neck, default roundness), face shaping (jaw, brow, ear size, cheek hollow, muzzle), a posture folded into every clip, body-slider ranges, a skin/hair palette and **weights** per part slot. `randomChibi2()` rolls a look with the 2D generator and then re-picks the slots the race has an opinion about by weight — so a random dwarf is bearded in heavy boots 60/60 times, and a human still rolls pointed ears, just rarely. Labels read "Chibi 2 Human", "Chibi 2 Dwarf"... |
+| `js/chibi2-body.js` | The torso, neck, arms, hands, legs, feet and **every garment**. Tops, bottoms and shoes are tables (`TOP_STYLES`, `BOTTOM_STYLES`, `SHOE_STYLES`): a top says its sleeve, collar, front, hem, belt, armour and cuffs and nothing else is drawn. (The first body wore one jacket — collar, buttons, cross strap, belt, pouch, leather cuffs, knee-high boots — on EVERY character, and each top piled its own pieces on top of it.) The torso has a waist and sloping shoulders, and **roundness** (`body.round`, 0..1, default from the race) adds a belly, hips and thicker limbs; limbs also thicken with body width (`LW`). Everything laid on the body asks `chestZ(x, y)` / `hipsZ(x, y)` for the surface under it. |
+| `js/chibi2-face.js` | The head shell, ears, eyes, lids, brows, nose, mouth, beards, face marks and things worn on the face. One surface, `faceZ(x, y)`, read off the head's own rings; every feature is placed ON it and relative to the one above it (brow above the eye TOP, moustache under the nose, mouth under the moustache, beard under the mouth). Lids are curved sheets on the eye's dome, so a sleepy or narrow eye has a real arched lid rather than a bar. **Closed eyes are gone**: `happy`/`wink` are open smiling eyes (the cheek pushes up), and the blink is replaced by a **glance** — the iris and pupil ride their own `pupilL`/`pupilR` bones and drift to a new spot every couple of seconds. Cheek circles are an option (`body.cheeks`), not on every face. Glasses, monocle, eyepatch, goggles, masks, blindfold, earrings and nose ring are modelled. |
+| `js/chibi2-hats.js` | Eleven hats the first milestone left unmodelled: crown, circlet, headband, feather band, flower, cap, leather cap, bandana, straw hat, top hat, mail coif. A brimmed hat shows the hair flattened under its brim (`HAT_BRIM` in chibi2.js), and a back-of-head shell now reaches the nape for every hairstyle (the crown cap used to stop at the skull's equator). |
+| `js/chibi2-motion.js` | Rewritten. See **Animation** below. |
+| `js/chibi2-weapon-ids.js` | Adds `holdFor(avatar)` — what each hand carries (`right`, `left`, `twoHand`, `dualTwo`, edge axes) — which the clips read. |
+
+New parts (registered in `avatar-2d/js/parts/chibi2-parts.js` so the shared normaliser keeps them —
+Farhold normalises every look before building it): tops `travel_shirt`, `gambeson`; bottoms
+`breeches`, `leggings`; shoes `shoes`, `wraps`; capes `travel_cloak` (hood rolled at the neck,
+brooch), `tattered_cape`; decorations `belt_pouches`, `bedroll_pack`, `waterskin`, `trophy_belt`;
+facial hair `braided_beard`; accessory `bandolier` (existing 2D id, now modelled); the off-hand
+`book` is a real tome. **Any held weapon id may go in the off hand** (a second sword, an axe, a
+two-hander) and is built in the left hand.
+
+### Rig
+
+22 bones: root, hips, chest, head, `eyeL`/`eyeR` with `pupilL`/`pupilR`, three per arm and leg, and
+one **grip bone per hand** (`gripR`, `gripL`, in the palm). Everything held is skinned to a grip
+bone (`SkinBuilder.add(..., { skinTo })` places a piece in one bone's space and skins it to another),
+so a clip can point the weapon, roll the wrist through a cut, or scale the grip to nothing.
+
+### Animation
+
+* **Grip solve.** A clip says where the weapon's business end should face — `pitch` (0 down, -PI/2
+  forward, -PI up, in the chest's frame), `yaw`, `roll` — and `aim()` solves the grip rotation from
+  the arm chain, so a sword points FORWARD at rest instead of at the floor, and a slash rolls the
+  edge over as it crosses. Each item has an edge axis (a sword's edges are ±x, an axe head faces -z,
+  a hammer face -x, a crossbow muzzle +z).
+* **Follow-through.** After sampling, each child joint trails its parent by a few frames (head behind
+  chest, chest behind hips, forearm behind upper arm, hand behind forearm) — one pass over every clip,
+  including clips written later. This is the main fix for "stiff".
+* **Hold-aware clips.** `idle`, `walk`, `run`, `ready`, `guard` and `attack` carry whatever is in the
+  hands: a two-hander rests on the shoulder, a polearm stands upright, a staff is planted, a bow is in
+  the LEFT hand and stands upright, a strapped shield hangs FACE OUT at the side. `guard` with a shield
+  brings the forearm across the chest with the shield face square to the front (a real block);
+  without one it parries with the blade, or raises the fists. `attack` plays the strike the hands
+  suggest (`attackFor`), so a game that only ever asks for `attack` still gets a chop, a stab, a
+  shot or a cast.
+* **New opt-in lists.** `CHIBI2_MELEE_ANIMS` (chop, hack, smash, uppercut, stab, flurry, bash, block,
+  parry, offSlash, offThrust, crossSlash, twinCleave, twinSlam, spinSweep, thrust2h, punch, kick,
+  throw, castBook) and `CHIBI2_EMOTE_ANIMS` (cheer, bowGreet, point, shrug, nod, headShake, laugh,
+  clap, salute, kneel, sitGround, pray, dance, lookAround, crossArms, stretch, drink, sleep).
+  `CHIBI2_EVERY_ANIMS` is all of them; `CHIBI2_ANIM_GROUPS` groups them for a menu. The original
+  lists (`CHIBI2_ANIMS`, `CHIBI2_SWIM_ANIMS`, `CHIBI2_COMBAT_ANIMS`, `CHIBI2_RIDE_ANIMS`,
+  `CHIBI2_WORK_ANIMS`) are unchanged; `CHIBI2_COMBAT_RIDE` (Farhold's) now includes the new two.
+* **Hands free — answered at the MODEL level.** "Should Wave unequip the items in the hand — model
+  or game?" The model: clips in `HANDS_FREE` (wave, talk, every emote, swimming, punch, kick) shrink
+  the grip bones to nothing for their length, so the weapon and the off-hand item are put away and
+  come back as the clip fades out. Every game gets it for free. `actor.setHandsFree(true)` is there
+  for a game that wants empty hands for its own reasons (a cutscene, carrying something). A future
+  step would sheathe the weapon on the back/hip instead of vanishing it; that is a game-side choice.
+
+### Fixes the overhaul makes to the old catalogue
+
+* The four original hafted weapons (`greataxe`, `hammer`, `warhammer`, `mace`) had their heads at +y,
+  behind the fist; they are turned head-first about the grip (a rotation, not a mirror).
+* Every shield is strapped to the forearm face out (`strapShield` in `chibi2-weapons.js`), including
+  the original `heater_shield`/`kite_shield`/`round_shield`/`tower_shield`/`buckler`.
+* `daggers`/`fh_daggers` drop their left knife when the off hand holds something else.
+
+### Verify
+
+`avatar-3d/tests/chibi2-races.test.js` (node: races, weights against the catalogue, normaliser
+survival, race-weighted random, holdFor) and `avatar-3d/tests/chibi2-overhaul.spec.js` (browser:
+race heights and budgets, roundness depth, sword direction at rest, shield out at rest and forward
+in guard, a wave hides the weapon, every clip in eight holds is finite, the avatar page leads with
+Chibi 2 and the race picker changes the body).
+
+---
+
+## First milestone (2026-09-15)
 
 A performance-budgeted procedural humanoid for game use. Geometry is authored in code, compiled
 once when an avatar is built, and animated with Three.js skeletal animation at runtime. Blender
@@ -99,8 +182,8 @@ Use `?renderer=chibi1` to select the original renderer for a direct gameplay com
 Body pieces are not independent runtime meshes. `SkinBuilder` transforms them into bind space,
 adds vertex color and skin data, then merges them by opaque cloth or metallic material. The
 limbs blend weights across the knees/elbows; rigid features and equipment use one bone. The
-rig has 18 bones: root, hips, chest, head, two blink bones, and three per arm/leg. Blinks scale
-the eye bones. Conservative mesh bounds avoid recomputing skinned bounds every frame.
+rig had 18 bones at this milestone (22 since the overhaul, see Rig above), and the blink that scaled
+the eye bones is now a glance. Conservative mesh bounds avoid recomputing skinned bounds every frame.
 
 Identical normalized avatar JSON shares geometry, materials and animation clips in a
 reference-counted template cache. Skeletons and animation mixers remain independent.

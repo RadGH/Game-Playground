@@ -12,6 +12,7 @@
 // NPCs only exist near you. They are built from a small fixed set of looks so the Chibi 2 template
 // cache is shared — a unique body per villager would build a new skinned mesh for each one.
 
+import { CHIBI2_RACES } from '../../../avatar-3d/js/chibi2-races.js';
 import * as THREE from 'three';
 import { makeRng } from '../../emberveil/js/rng.js';
 import { makeActor, setActorAnim } from './actors.js';
@@ -233,6 +234,21 @@ export function createTownFolk(scene, terrain, opts = {}) {
     return { roster, rng, size };
   }
 
+  /**
+   * R24 — WHO LIVES HERE. A settlement carries its Name Forge race (human, elf, dwarf, halfling,
+   * gnome, giant, troll, orc, goblin, dragon, undead, fey) and Chibi 2 now has race BODIES
+   * (avatar-3d/js/chibi2-races.js), so an elf town is mostly elves and a dwarf hold mostly dwarves.
+   * A quarter of the people anywhere are human travellers, and the skin comes from the race's own
+   * palette so an orc is not wearing a human's complexion. Human towns keep the look as it was.
+   */
+  const CHIBI2_RACE_OF = { human: 'human', elf: 'elf', fey: 'elf', dwarf: 'dwarf', gnome: 'halfling', halfling: 'halfling', giant: 'giant', troll: 'orc', orc: 'orc', goblin: 'goblin', undead: 'undead', dragon: 'beast' };
+  function peopleOf(node, rng) {
+    const race = CHIBI2_RACE_OF[node.race] || 'human';
+    if (race === 'human' || rng() < 0.25) return null;
+    const r = CHIBI2_RACES[race];
+    return { race, skin: r.skin[Math.floor(rng() * r.skin.length)], round: r.ranges.round[0] + rng() * (r.ranges.round[1] - r.ranges.round[0]) };
+  }
+
   function nameFor(node, role, rng) {
     const gender = rng() < 0.5 ? 'f' : 'm';
     if (namegen) {
@@ -279,10 +295,14 @@ export function createTownFolk(scene, terrain, opts = {}) {
       if (x === null) continue;                  // this settlement really is built on a lake
 
       const look = looks.length ? looks[Math.floor(rng() * looks.length)] : null;
+      const body = peopleOf(node, rng);
       pending++;
       let actor = null;
       try {
-        actor = await makeActor({ avatar: look ? JSON.parse(JSON.stringify(look)) : {} });
+        const avatar = look ? JSON.parse(JSON.stringify(look)) : {};
+        // R24 — the town's people are the town's race (a Chibi 2 body race; see peopleOf)
+        if (body) avatar.body = { ...(avatar.body || {}), ...body };
+        actor = await makeActor({ avatar });
       } catch { /* a body we cannot build is a person we skip */ }
       finally { pending--; }
       if (!actor) continue;
@@ -335,10 +355,14 @@ export function createTownFolk(scene, terrain, opts = {}) {
       if (!live.has(node.id)) return;              // the town was let go while we were building
       const { name, gender } = nameFor(node, guardRole, rng);
       const look = looks.length ? looks[Math.floor(rng() * looks.length)] : null;
+      const body = peopleOf(node, rng);
       pending++;
       let actor = null;
       try {
-        actor = await makeActor({ avatar: look ? JSON.parse(JSON.stringify(look)) : {} });
+        const avatar = look ? JSON.parse(JSON.stringify(look)) : {};
+        // R24 — the town's people are the town's race (a Chibi 2 body race; see peopleOf)
+        if (body) avatar.body = { ...(avatar.body || {}), ...body };
+        actor = await makeActor({ avatar });
       } catch { /* a body we cannot build is a guard we skip */ }
       finally { pending--; }
       if (!actor) continue;

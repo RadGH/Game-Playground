@@ -3716,3 +3716,59 @@ software renderer and needs checking on a real card.
 - Rain falls through roofs; snow does not settle; rivers do not get the wet look; lightning has no direction.
 - Grass bends round the player only.
 - Seen, not investigated: seed 11's dungeon is black on entry; the desert world was in eclipse at noon and dawn when screenshotted.
+
+## Round 24 — the Chibi 2 overhaul, as Farhold uses it (2026-09-24)
+
+The character model was overhauled in `avatar-3d/` (see `avatar-3d/CHIBI2.md`, "The 2026-09-24
+overhaul"). Almost all of it reaches Farhold with no change here, because every body in the game is
+`createChibi2Character`: better faces, self-contained outfits, a sword that points forward at rest,
+shields strapped face-out that block in `guard`, follow-through on every clip, the glance instead of
+the blink, and emotes that put the weapon away. What Farhold itself changed:
+
+* **Weapon families pick their own clip.** `animFamilyOf(item)` (js/weapons.js) says axe / mace /
+  hammer / dagger / polearm, and `clipFor` swaps in the family clip: an axe `cleave` is a diagonal
+  `chop`, a mace or hammer `overhead` is a `smash` with the body dropping under it, a dagger `jab` is
+  a reverse-grip `stab`, a polearm thrust is `thrust2h`. (`familyOf` already existed — it is the
+  weapon's NAME for the card — hence the different name.)
+* **The off hand swings as the off hand.** `swingPlanFor(item, { off: true })` asks for `offSlash` /
+  `offThrust`, and js/player.js now posts that clip when the off hand swings (it used to replay
+  whatever the main hand last did, so a second weapon never visibly moved).
+* **Doubled Grasp** (two two-handers): `pairedTwo` — each hand chops, and the pattern's last strike
+  is `twinCleave` or `twinSlam`, both weapons together.
+* **A second weapon is SEEN.** `offhandLookFor` used to return `none` for any weapon but a dagger, so
+  a dual wielder's left hand was empty. It now returns the same look the main hand would (Chibi 2
+  builds any held weapon in either hand); a tome is the off-hand `book`, an orb the off-hand `orb`.
+  So a **wand + tome** (both existing item bases) is the wizard's loadout, wand right, book left.
+* **Race and roundness** in the appearance editor (js/appearance.js): a Race picker over Chibi 2's
+  nine races, a Roundness slider, a Round cheeks toggle, and Randomise rolls race-weighted looks.
+  All three live in `avatar.body`, which survives every normalise in the game and every save.
+* **Townsfolk have their town's race** (js/town.js `peopleOf`): the settlement's Name Forge race maps
+  to a Chibi 2 body (gnome → halfling, troll → orc, fey → elf, dragon → beastkin); a quarter of any
+  town are human travellers; skin comes from the race palette.
+
+`tests/round24-chibi2.test.js` checks the clip routing (every clip Farhold can ask for is one the
+body builds, with a length for `setRate`) and the off-hand looks.
+
+### For the next agent — Farhold follow-ups this round did NOT do
+
+These are Farhold-side choices the model now makes possible; none of them is broken, they are just
+not built:
+
+1. **Body size and the world.** A giant is ~1.35x a human's height and a dwarf ~0.88x. The camera
+   (`player.js` `headY = self.y + 1.55`), the collision radius, doorways, mount seats and boat
+   positions all assume the human size. The first-person eye already reads the model's own eye bone.
+   If a player picks a giant, scale `headY`, the capsule and the seat offsets by
+   `actor.metrics().height / 1.73` (1.73 is the default human's rig height).
+2. **Emotes in the world.** `CHIBI2_EMOTE_ANIMS` (cheer, bow, point, shrug, nod, laugh, clap, salute,
+   kneel, sit, pray, dance, look around, cross arms, stretch, drink, sleep) are built for every body
+   and unused. Obvious homes: townsfolk idles (`js/town.js`), a `/emote` wheel, the innkeeper's
+   `drink`, a camp `sitGround` / `sleep`, a quest-giver's `point`.
+3. **Shield block.** The `block` clip (a looping shield raise) exists; Farhold's block/guard stat
+   (`blockChance`) has no button. A held-right-mouse block that plays `block` would make the
+   shield's new pose a mechanic.
+4. **Hands free for non-emote moments** — `actor.setHandsFree(true)` for trading, talking in town
+   and cutscenes, if the weapon in hand at a shop counter bothers anyone.
+5. **Enemy humanoids** use `makeActor` and ask for `attack`, which Chibi 2 now resolves from what
+   the body holds (an axe bandit chops, a dagger bandit stabs, an archer shoots). They do not get the
+   player's pattern variety (alternating cuts, finishers); routing an enemy's weapon through
+   `clipFor` with a step counter would.

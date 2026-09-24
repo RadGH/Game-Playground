@@ -1,10 +1,17 @@
 # Avatar 3D — Three.js character builder
 
-Three renderers for the **same avatar JSON** that Avatar 2D produces:
+Three renderers for the **same avatar JSON** that Avatar 2D produces. **Chibi 2 is the flagship** and
+the page opens on it; the other two are **deprecated** (kept, labelled, for comparison only).
 
-1. **Mii-style (procedural)** — `js/mii.js`. Body from primitives (capsules, rounded boxes, spheres), the face drawn from the 2D face parts onto a curved patch in front of the head (the Mii technique), procedural hair/hat/ear/clothing meshes mapped from the 2D ids, body height/width/headSize as group scaling, and procedural animations (idle, walk, run, wave, talk, dead). Zero downloads, everything authored in code, so Claude can extend it.
-2. **Quaternius (CC0 meshes)** — `js/quaternius.js`. Universal Base Characters body (male/female), 6 hairstyles + beard, Modular Outfits – Fantasy (Peasant, Ranger sets) and the Universal Animation Library (43 clips), all on one skeleton. Real modelled characters with real animation; the 2D ids are mapped onto the nearest mesh; face sliders do not apply.
-3. **Chibi 2 (milestone 1)** — `js/chibi2.js`. Profiled procedural surfaces compiled into two skinned meshes, an 18-bone rig, modelled facial features (eyes, brows, noses, mouths, facial hair and marks), layered equipment and 12 animation states. The Vanguard preset is about 8,000 triangles. This is a focused humanoid foundation; existing part ids are accepted but not all have distinct models. [Architecture, supported mappings, integration and benchmark](CHIBI2.md).
+0. **Chibi 2 (flagship)** — see item 3 and [CHIBI2.md](CHIBI2.md). Since the 2026-09-24 overhaul: nine
+   races (`body.race`: human, elf, dwarf, orc, giant, goblin, halfling, undead, beast) that change the
+   body's proportions and roll race-weighted looks, a roundness slider (`body.round`), optional round
+   cheeks (`body.cheeks`), self-contained outfits, a face rebuilt on the face's own surface, weapons
+   aimed through grip bones, and ~90 animations including weapon-family attacks and emotes.
+
+1. **Mii-style (procedural) — DEPRECATED** — `js/mii.js`. Body from primitives (capsules, rounded boxes, spheres), the face drawn from the 2D face parts onto a curved patch in front of the head (the Mii technique), procedural hair/hat/ear/clothing meshes mapped from the 2D ids, body height/width/headSize as group scaling, and procedural animations (idle, walk, run, wave, talk, dead). Zero downloads, everything authored in code, so Claude can extend it.
+2. **Quaternius (CC0 meshes) — DEPRECATED** — `js/quaternius.js`. Universal Base Characters body (male/female), 6 hairstyles + beard, Modular Outfits – Fantasy (Peasant, Ranger sets) and the Universal Animation Library (43 clips), all on one skeleton. Real modelled characters with real animation; the 2D ids are mapped onto the nearest mesh; face sliders do not apply.
+3. **Chibi 2** — `js/chibi2.js` (+ `chibi2-body.js`, `chibi2-face.js`, `chibi2-hats.js`, `chibi2-races.js`, `chibi2-motion.js`, `chibi2-gear.js`, `chibi2-weapons.js`). Profiled procedural surfaces compiled into two skinned meshes, a 22-bone rig (18 at milestone 1), modelled facial features (eyes, brows, noses, mouths, facial hair and marks), layered equipment and 12 animation states. The Vanguard preset is about 8,000 triangles. This is a focused humanoid foundation; existing part ids are accepted but not all have distinct models. [Architecture, supported mappings, integration and benchmark](CHIBI2.md).
 
 Open: `http://<LAN-IP>:8400/avatar-3d/`. Presets, random generation and the slot catalog are shared with `../avatar-2d/`.
 

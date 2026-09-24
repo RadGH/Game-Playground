@@ -577,7 +577,7 @@ const CLIPS = {
     o.bob = (stance(p, 0.8) + 0.03 * raise - 0.13 * down) * rec;
     p.armR = [(-2.6 * raise + 0.3 * down - 0.2) * rec, 0, -0.18 * rec]; p.armL = [(-2.5 * raise + 0.25 * down - 0.2) * rec, 0, 0.3 * rec];
     p.elbowR[0] = (-0.5 - 0.6 * hold * (1 - down) - 0.2 * down) * rec - 0.16; p.elbowL[0] = p.elbowR[0];
-    p.chest[0] += (-0.35 * raise + 0.6 * down) * rec; p.head[0] += (-0.25 * raise + 0.3 * down) * rec;
+    p.chest[0] += (-0.18 * raise + 0.35 * down) * rec; p.head[0] += (-0.12 * raise + 0.18 * down) * rec;
     p.kneeL[0] += 0.6 * down * rec; p.kneeR[0] += 0.6 * down * rec; p.legL[0] -= 0.3 * down * rec; p.legR[0] -= 0.3 * down * rec;
     return { R: [(-3.3 * raise - 1.2 * down) * rec + END(ctx) * (1 - rec), 0.2 * raise * rec, 0] };
   },
@@ -670,7 +670,7 @@ const CLIPS = {
     o.bob = stance(p, 0.9) * rec - 0.07 * strike * rec;
     p.armR = [(-2.3 * up + 0.3 * strike - 0.25) * rec, (0.35 * up - 0.4 * strike) * rec, (0.55 * up - 0.1 * strike) * rec + 0.12];
     p.elbowR[0] = (-1.3 * up - 0.1 * strike) * rec - 0.2;
-    p.chest[1] += (0.5 * up - 0.7 * strike) * rec; p.chest[0] += (-0.15 * up + 0.4 * strike) * rec; p.hips[1] += p.chest[1] * 0.4;
+    p.chest[1] += (0.5 * up - 0.7 * strike) * rec; p.chest[0] += (-0.12 * up + 0.24 * strike) * rec; p.hips[1] += p.chest[1] * 0.4;
     p.chest[2] = (0.1 * up - 0.12 * strike) * rec;
     p.kneeL[0] += 0.3 * strike * rec; p.armL[0] = (-0.6 + 0.3 * strike) * rec; p.elbowL[0] = -0.9 * rec - 0.16;
     if (ctx.hold.left === 'shield') { p.armL = [-0.45 * rec, 0.9 * rec, 0.05]; p.elbowL = [-1.35 * rec - 0.2, -0.4 * rec, 0]; }
@@ -691,7 +691,7 @@ const CLIPS = {
     const { wind, strike, rec, up } = phases(u, 0, 0.4, 0.4, 0.58, 0.76);
     o.bob = (stance(p, 0.8) - 0.1 * strike) * rec;
     p.armR = [(-2.7 * up + 0.1 * strike - 0.2) * rec, -0.1 * rec, 0.25 * rec + 0.12]; p.elbowR[0] = (-1.5 * up - 0.2 * strike) * rec - 0.2;
-    p.chest[0] += (-0.25 * up + 0.5 * strike) * rec; p.head[0] += (-0.15 * up + 0.2 * strike) * rec; p.chest[1] += 0.2 * up * rec;
+    p.chest[0] += (-0.15 * up + 0.28 * strike) * rec; p.head[0] += (-0.1 * up + 0.12 * strike) * rec; p.chest[1] += 0.2 * up * rec;
     p.kneeL[0] += 0.45 * strike * rec; p.kneeR[0] += 0.4 * strike * rec;
     p.armL[0] = (-0.7 * up + 0.2 * strike) * rec; p.armL[2] = -0.14 - 0.4 * up * rec; p.elbowL[0] = -0.7 * rec - 0.16;
     if (ctx.hold.left === 'shield') { p.armL = [-0.45 * rec, 0.9 * rec, 0.05]; p.elbowL = [-1.35 * rec - 0.2, -0.4 * rec, 0]; }
@@ -792,7 +792,7 @@ const CLIPS = {
     const inward = ctx.hold.dualTwo ? 0 : 0.3;
     p.armR = [(-2.6 * raise + 0.3 * down - 0.2) * rec, 0, (0.15 - inward) * rec]; p.armL = [(-2.6 * raise + 0.3 * down - 0.2) * rec, 0, (-0.15 + inward) * rec];
     p.elbowR[0] = p.elbowL[0] = (-0.6 - 0.5 * hold * (1 - down)) * rec - 0.16;
-    p.chest[0] += (-0.35 * raise + 0.65 * down) * rec; p.head[0] += (-0.2 * raise + 0.3 * down) * rec;
+    p.chest[0] += (-0.18 * raise + 0.36 * down) * rec; p.head[0] += (-0.1 * raise + 0.18 * down) * rec;
     p.kneeL[0] += 0.6 * down * rec; p.kneeR[0] += 0.6 * down * rec; p.legL[0] -= 0.3 * down * rec; p.legR[0] -= 0.3 * down * rec;
     const pitch = (-3.4 * raise - 1.3 * down) * rec + END(ctx) * (1 - rec);
     const aims = { R: [pitch, 0, 0] }; if (ctx.hold.dualTwo) aims.L = [pitch, 0, 0];
@@ -873,7 +873,7 @@ const CLIPS = {
   },
   bowGreet(p, u, cy, ctx, o) {
     const b = env(u, 0.05, 0.35, 0.65, 0.95);
-    p.chest[0] += 0.8 * b; p.hips[0] = 0.25 * b; p.head[0] += 0.2 * b;
+    p.chest[0] += 0.5 * b; p.hips[0] = 0.12 * b; p.head[0] += 0.12 * b;
     p.armR = [-0.9 * b, -0.6 * b, 0.1]; p.elbowR[0] = -1.4 * b - 0.16; p.armL = [0.4 * b, 0, -0.2 * b]; p.elbowL[0] = -0.4 * b - 0.16;
     p.legR[0] += 0.25 * b; p.kneeR[0] += 0.2 * b; return {};
   },

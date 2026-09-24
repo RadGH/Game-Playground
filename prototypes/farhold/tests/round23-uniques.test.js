@@ -731,3 +731,28 @@ test('R23 — a lingering pool no longer calls a function that does not exist wh
   assert.ok(start > 0 && end > start);
   assert.ok(!/\bbrandHit\(/.test(main.slice(start, end)), 'tickPools still calls brandHit, a const inside the frame loop');
 });
+
+// R23 — the older caster uniques from the shared items.json are pinned to one element in Farhold
+test('the older caster uniques always drop as the element their lore promises', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { installUniques, LEGACY_CASTER_ELEMENTS } = await import('../js/uniques.js');
+  const { Rpg } = await import('../js/rpg.js');
+  const items = JSON.parse(readFileSync(new URL('../../emberveil/data/items.json', import.meta.url)));
+  const data = JSON.parse(readFileSync(new URL('../data/uniques.json', import.meta.url)));
+  installUniques(items, data);
+  const rpg = new Rpg(items, {});
+  for (const [id, element] of Object.entries(LEGACY_CASTER_ELEMENTS)) {
+    const seen = new Set();
+    for (let s = 1; s <= 12; s++) {
+      let n = s * 7919;
+      const rng = () => ((n = (n * 16807) % 2147483647) / 2147483647);
+      rng.pick = a => a[Math.floor(rng() * a.length)];
+      const raw = rpg.loot.generateUnique(id, rng);
+      const u = items.uniques.find(x => x.id === id);
+      const { dressUnique } = await import('../js/uniques.js');
+      const { attuneWeapon } = await import('../js/rpg.js');
+      seen.add(attuneWeapon(dressUnique(raw, u)).castElement);
+    }
+    assert.deepEqual([...seen], [element], `${id} came out as ${[...seen].join(', ')}`);
+  }
+});

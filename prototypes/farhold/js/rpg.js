@@ -766,7 +766,7 @@ export class Rpg {
       const made = u?.farhold && (u.gearBase || u.toolBase)
         ? makeGearUnique(u, { rpg: this, rng: rng || this.rng, level: this.lastDropLevel || 1 })
         : generateUnique(id, rng, ...rest);
-      return stamp(u?.farhold ? dressUnique(made, u) : made, this.lastDropLevel, rng);
+      return stamp(u?.farhold || u?.dressed ? dressUnique(made, u) : made, this.lastDropLevel, rng);
     };
     const maybeSetItem = loot.maybeSetItem.bind(loot);
     loot.maybeSetItem = (act, rng, ...rest) => stamp(maybeSetItem(act, rng, ...rest), this.lastDropLevel, rng);

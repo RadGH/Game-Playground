@@ -132,9 +132,28 @@ export function typeOfUnique(u, items, patterns = {}) {
  * — which copies `legendaryEffects[id]` onto the item as a `descriptor` — finds text rather than
  * `undefined`. The sentence comes FROM js/effects.js, so the two cannot disagree.
  */
+/**
+ * R23 — THE OLDER CASTER UNIQUES GET AN ELEMENT TOO.
+ *
+ * Emberveil's own caster uniques (items.json) went through the generator like any other wand, so
+ * the Magma Sceptre came out as ice five drops in six. The element each one's name and lore
+ * already promise is written here, in memory, and `dressUnique` forces it the same way it does
+ * for ours. The Gravebound Sceptre is absent on purpose: its brand affix already settles it.
+ */
+export const LEGACY_CASTER_ELEMENTS = {
+  truthseeker: 'arcane',
+  magma_scepter: 'fire',
+  malgraths_soulbrand: 'shadow',
+  unravelers_sigil: 'arcane',
+  staff_of_primordial: 'fire',
+};
+
 export function installUniques(items, data, { tools = null, describe = null } = {}) {
   if (!items) return items;
   items.uniques = (items.uniques || []).filter(u => !u.farhold);
+  for (const u of items.uniques) {
+    if (LEGACY_CASTER_ELEMENTS[u.id]) { u.element = LEGACY_CASTER_ELEMENTS[u.id]; u.dressed = true; }
+  }
   items.legendaryEffects = items.legendaryEffects || {};
   const list = data?.uniques || [];
   for (const raw of list) {

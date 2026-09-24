@@ -130,17 +130,31 @@ export class ObstacleField {
    *
    *   field.addSegment(ax, az, bx, bz, half, height);
    */
-  addSegment(ax, az, bx, bz, half = 0.6, height = 4) {
+  addSegment(ax, az, bx, bz, half = 0.6, height = 4, { band = null } = {}) {
     const len = Math.hypot(bx - ax, bz - az) || 1e-6;
     const item = {
       seg: true, ax, az, bx, bz, half, h: height,
+      /**
+       * R23b — A WALL THAT IS ONLY THERE AT ONE HEIGHT: a bridge rail. `[lo, hi]` in world metres;
+       * the segment is solid only for a body whose feet are inside that band, so a rail keeps you
+       * on the deck and does nothing to a swimmer in the river under it. A body that does not say
+       * where its feet are is never stopped by one — that is every caller that cannot be on a deck.
+       */
+      band,
       x: (ax + bx) / 2, z: (az + bz) / 2, r: len / 2 + half,
       // unit direction a -> b and its length, so the closest-point test is a dot product
       ux: (bx - ax) / len, uz: (bz - az) / len, len,
     };
     const b = this.bucket;
-    const x0 = Math.min(ax, bx) - half, x1 = Math.max(ax, bx) + half;
-    const z0 = Math.min(az, bz) - half, z1 = Math.max(az, bz) + half;
+    /**
+     * R23b — filed a STEP'S WORTH wider than the masonry. `resolve` looks the wall up from where
+     * a move ENDS, and a move that ends a metre past a thin wall can end in a bucket the wall's own
+     * outline never touched — so the crossing check never saw it and you walked through. 1.5 m
+     * covers a sprint on a slow frame plus a body's radius.
+     */
+    const pad = half + SEG_REACH;
+    const x0 = Math.min(ax, bx) - pad, x1 = Math.max(ax, bx) + pad;
+    const z0 = Math.min(az, bz) - pad, z1 = Math.max(az, bz) + pad;
     for (let bxi = Math.floor(x0 / b); bxi <= Math.floor(x1 / b); bxi++) {
       for (let bzi = Math.floor(z0 / b); bzi <= Math.floor(z1 / b); bzi++) {
         const k = this._key(bxi, bzi);
@@ -176,6 +190,12 @@ export class ObstacleField {
     return [o.ux * s * inA, o.uz * s * inA];
   }
 
+  /** Does a height-banded segment (a rail) apply to feet at this height? */
+  inBand(o, feet) {
+    if (!o.band) return true;
+    return Number.isFinite(feet) && feet >= o.band[0] && feet <= o.band[1];
+  }
+
   /** Is this point over a deck's footprint? */
   onDeck(o, x, z, radius = 0) {
     const dx = x - o.x, dz = z - o.z;
@@ -198,6 +218,7 @@ export class ObstacleField {
     for (const o of list) {
       if (o.deck) continue;                      // you walk ON a deck, never into it
       if (o.seg) {
+        if (o.band) continue;                    // a rail needs feet to know if it applies
         if (this.segPush(o, x, z, radius)) return true;
         continue;
       }
@@ -225,7 +246,7 @@ export class ObstacleField {
       const list = this.near(x, z);
       if (list) {
         for (const o of list) {
-          if (!o.seg) continue;
+          if (!o.seg || !this.inBand(o, feet)) continue;
           // the wall's normal, and each end's signed distance from its centre line
           const nx = -o.uz, nz = o.ux;
           const s0 = (from[0] - o.ax) * nx + (from[1] - o.az) * nz;
@@ -256,6 +277,7 @@ export class ObstacleField {
       for (const o of list) {
         if (o.deck) continue;                    // a deck never pushes you out; it holds you up
         if (o.seg) {
+          if (!this.inBand(o, feet)) continue;
           const push = this.segPush(o, out[0], out[1], radius);
           if (!push) continue;
           out[0] += push[0]; out[1] += push[1];
@@ -307,6 +329,9 @@ export class ObstacleField {
     return best;
   }
 }
+
+/** How far past a wall segment a single move may land and still be checked against it. Metres. */
+export const SEG_REACH = 1.5;
 
 /** Narrower than this and you cannot stand on it — a trunk, a column, a cactus. Metres. */
 export const STANDABLE_RADIUS = 0.8;

@@ -466,3 +466,40 @@ test('planBridge on a synthetic crossing: ends on the ground, deck on the road, 
     assert.ok(Math.abs(f.standAt(0, d, 10, 0) - deckTopAlong(plan, d)) < 1e-6, `collider off the plan at ${d}`);
   }
 });
+
+// R23b — "no physics": the deck held you up and nothing held you ON it. The rails are walls now,
+// but only at deck height, so a swimmer in the river underneath is never stopped by one.
+test('a bridge rail stops a walker on the deck and not a swimmer under it', async () => {
+  const { railRuns } = await import('../js/bridge-plan.js');
+  const bad = [];
+  let checked = 0;
+  for (const seed of SEEDS) {
+    const w = worldFor(seed);
+    const t = w.terrain.crossings?.[0];
+    w.features.update(seed === 47 ? 13269 : t?.x ?? 0, seed === 47 ? 2876 : t?.z ?? 0, true);
+    const plans = w.features.bridgePlans;
+    for (const plan of plans) {
+      for (const { a, b, o } of railRuns(plan, plans)) {
+        const mx = (a.x + b.x) / 2, mz = (a.z + b.z) / 2, top = (a.top + b.top) / 2;
+        const s = Math.sign(o);
+        // one step from just inside the rail to a metre past it
+        const from = [mx + plan.nx * (o - s * 0.8), mz + plan.nz * (o - s * 0.8)];
+        const to = [mx + plan.nx * (o + s * 1.0), mz + plan.nz * (o + s * 1.0)];
+        const across = p => (p[0] - mx) * plan.nx + (p[1] - mz) * plan.nz;
+        const walker = w.features.solids.resolve(to[0], to[1], 0.4, [0, 0], top, from);
+        if (!(s * across(walker) < Math.abs(o))) bad.push(`seed ${seed} rail at ${mx.toFixed(0)}, ${mz.toFixed(0)} (feet ${top.toFixed(2)})`);
+        // four metres down is a swimmer in the river: the rail is not there for them
+        const swimmer = w.features.solids.resolve(to[0], to[1], 0.4, [0, 0], top - 4, from);
+        const railHeld = s * across(swimmer) < Math.abs(o) && Math.abs(across(swimmer) - across(walker)) < 1e-6;
+        if (railHeld && Math.hypot(swimmer[0] - to[0], swimmer[1] - to[1]) > 0.01) {
+          // something else stopped them; only a rail doing it would be wrong, and a rail would stop
+          // them at exactly the walker's spot — which is what `railHeld` asks
+          bad.push(`seed ${seed}: a swimmer under the rail at ${mx.toFixed(0)}, ${mz.toFixed(0)} was stopped by it`);
+        }
+        checked++;
+      }
+    }
+  }
+  assert.ok(checked >= 50, `only ${checked} stretches of rail to test`);
+  assert.deepEqual(bad.slice(0, 8), [], `${bad.length} of ${checked} rail stretches failed`);
+});

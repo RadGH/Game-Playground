@@ -197,6 +197,49 @@ export function deckTopAlong(plan, d) {
   return s[s.length - 1].top;
 }
 
+export const RAIL_H = 1.1, RAIL_T = 0.25;
+
+/**
+ * Every stretch of rail a bridge has: `{ a, b, o, side }` — two deck samples, the rail's offset
+ * across the deck, and which side. ONE list for the drawn rails and the rail colliders, so a rail you
+ * can see is a rail that stops you, and a gap in the rail (where two decks overlap) is a gap in both.
+ */
+export function railRuns(plan, others = []) {
+  const { samples, nx, nz, halfWidth: hw } = plan;
+  const inner = plan.halfLength - Math.min(END_RAMP, plan.halfLength / 3);
+  const railFrom = plan.ends?.back === 'landing' ? plan.from + 1.5 : -inner;
+  const railTo = plan.ends?.fwd === 'landing' ? plan.to - 1.5 : inner;
+  const out = [];
+  for (const side of [1, -1]) {
+    const o = side * (hw - RAIL_T / 2);
+    for (let k = 0; k + 1 < samples.length; k++) {
+      const a = samples[k], b = samples[k + 1];
+      if (a.d < railFrom || b.d > railTo) continue;
+      // where two roads meet over one river their decks overlap, and a rail of one standing across
+      // the other's deck is a fence across the road — leave that stretch of rail out
+      const mx = (a.x + b.x) / 2 + nx * o, mz = (a.z + b.z) / 2 + nz * o;
+      if (others.some(q => q !== plan && onPlan(q, mx, mz, 0.3))) continue;
+      out.push({ a, b, o, side });
+    }
+  }
+  return out;
+}
+
+/**
+ * R23b — FILE THE RAILS: "the bridge has no physics". The deck held you up and nothing held you
+ * ON it; walking into the rail dropped you in the river. Each run is a wall segment that only
+ * applies to feet between just under the deck and the top of the rail (js/collide.js `band`), so
+ * it never blocks a swimmer under the bridge or a body that does not say where its feet are.
+ */
+export function fileRails(plan, field, others = []) {
+  const { nx, nz } = plan;
+  for (const { a, b, o } of railRuns(plan, others)) {
+    const lo = Math.min(a.top, b.top) - 0.6, hi = Math.max(a.top, b.top) + RAIL_H;
+    field.addSegment(a.x + nx * o, a.z + nz * o, b.x + nx * o, b.z + nz * o, RAIL_T / 2, RAIL_H, { band: [lo, hi] });
+  }
+  return field;
+}
+
 /** File a plan's deck into an ObstacleField (js/collide.js). */
 export function fileDeck(plan, field) {
   for (const p of plan.pieces) field.addDeck(p.x, p.z, p.angle, p.halfLength, p.halfWidth, p.top, p.slope);
@@ -259,26 +302,14 @@ export function bridgeGeometry(plan, terrain, out = { position: [], normal: [], 
   }
 
   // the rails: a post-and-beam each side, stopping short of the ramps so they never stand on grass
-  const railH = 1.1, railT = 0.25;
-  const inner = plan.halfLength - Math.min(END_RAMP, plan.halfLength / 3);
-  const railFrom = plan.ends?.back === 'landing' ? plan.from + 1.5 : -inner;
-  const railTo = plan.ends?.fwd === 'landing' ? plan.to - 1.5 : inner;
-  for (const side of [1, -1]) {
-    const o = side * (hw - railT / 2);
-    for (let k = 0; k + 1 < samples.length; k++) {
-      const a = samples[k], b = samples[k + 1];
-      if (a.d < railFrom || b.d > railTo) continue;
-      // where two roads meet over one river their decks overlap, and a rail of one standing across
-      // the other's deck is a fence across the road — leave that stretch of rail out
-      const mx = (a.x + b.x) / 2 + nx * o, mz = (a.z + b.z) / 2 + nz * o;
-      if (others.some(q => q !== plan && onPlan(q, mx, mz, 0.3))) continue;
-      const lo = side * railT / 2;
-      pushBox(out, orderCCW([
-        at(a, o + lo, 0), at(b, o + lo, 0), at(b, o - lo, 0), at(a, o - lo, 0),
-      ], [
-        at(a, o + lo, railH), at(b, o + lo, railH), at(b, o - lo, railH), at(a, o - lo, railH),
-      ]), RAIL);
-    }
+  for (const r of railRuns(plan, others)) {
+    const { a, b, o, side } = r;
+    const lo = side * RAIL_T / 2;
+    pushBox(out, orderCCW([
+      at(a, o + lo, 0), at(b, o + lo, 0), at(b, o - lo, 0), at(a, o - lo, 0),
+    ], [
+      at(a, o + lo, RAIL_H), at(b, o + lo, RAIL_H), at(b, o - lo, RAIL_H), at(a, o - lo, RAIL_H),
+    ]), RAIL);
   }
 
   // piers, where the ground has fallen away far enough under the deck to need holding up

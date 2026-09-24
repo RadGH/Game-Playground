@@ -28,7 +28,7 @@ import { waterRibbon, lakeSheet, roadDeck } from './water-plan.js';
 import { makeRng } from '../../../worldgen/js/noise.js';
 import { M_PER_CELL } from './planet.js';
 import { ObstacleField, BUILDING_SOLIDS } from './collide.js';
-import { bridgeGeometry, fileDeck } from './bridge-plan.js';
+import { bridgeGeometry, fileDeck, fileRails } from './bridge-plan.js';
 import { bridgeIndex } from './ground.js';
 
 /**
@@ -1384,6 +1384,7 @@ export function createFeatures(scene, terrain, opts = {}) {
     for (const plan of bridgePlans) {
       bridgeGeometry(plan, terrain, bridgeData, bridgePlans);
       fileDeck(plan, solids);
+      fileRails(plan, solids, bridgePlans);
     }
     bridgeMesh.geometry.dispose();
     const bg = new THREE.BufferGeometry();

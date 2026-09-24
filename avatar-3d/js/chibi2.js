@@ -3,9 +3,16 @@ import { normalizeAvatar, shade } from '../../avatar-2d/js/render.js';
 import { profile, taperedCurve, createRig, SkinBuilder } from './chibi2-geometry.js';
 import { createClips, CHIBI2_ANIMS, CHIBI2_ALL_ANIMS, CHIBI2_SWIM_ANIMS, ONE_SHOTS } from './chibi2-motion.js';
 import { buildGear, CAPELETS } from './chibi2-gear.js';
+import { buildBody } from './chibi2-body.js';
+import { buildFace, HEAD_SHAPES } from './chibi2-face.js';
+import { buildExtraHat, HATS_COVER_CROWN } from './chibi2-hats.js';
+import { raceOf } from './chibi2-races.js';
+import { holdFor } from './chibi2-weapon-ids.js';
 
 export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
+/** Hats with a brim the hair shows beneath, and the height (head units) the hair is cut off at. */
+const HAT_BRIM = { wizard: 0.5, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4 };
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const ring = (r, tube) => new THREE.TorusGeometry(r, tube, 4, 12);
 
@@ -14,193 +21,50 @@ function buildTemplate(a, rig) {
   rig.byName.eyeL.rotation.z = -(a.eyes.rot || 0) * Math.PI / 180;
   rig.byName.eyeR.rotation.z = (a.eyes.rot || 0) * Math.PI / 180;
   rig.root.updateMatrixWorld(true);
-  const skin = a.body.skin, hair = a.hair.color, cloth = a.top.color, lining = shade(cloth, -0.28);
+  const hair = a.hair.color;
   const trim = '#d9b477', leather = '#493c36', steel = '#c4d4d6', darkSteel = '#536a73';
-  const armor = /plate|mail|armor|cuirass|knight|paladin/.test(a.top.id);
-  const longTop = /robe|dress|coat/.test(a.top.id);
   const add = (...args) => b.add(...args);
   const ellipsoid = (bone, color, position, scale, options = {}) => add(sphere(), bone, color, { position, scale, ...options });
   const strip = (bone, points, radius, color, options = {}) => add(taperedCurve(points, [radius, radius, radius], 4, 4), bone, color, options);
   const head = (g, color, options = {}) => add(g, 'head', color, { ...options, position: (options.position || [0, 0, 0]).map(v => v * H), scale: (options.scale || [1, 1, 1]).map(v => v * H) });
 
-  add(profile([[-0.11, 0.13, 0.11], [-0.1, 0.20, 0.13], [0.02, 0.19, 0.13], [0.06, 0.12, 0.10]], 12), 'hips', a.bottom.color, { scale: [W, 1, W] });
-  add(profile([[-0.14, 0.18, 0.115], [-0.11, 0.215, 0.14], [0.04, 0.20, 0.13], [0.18, 0.245, 0.14], [0.27, 0.22, 0.115], [0.30, 0.10, 0.07]], 16), 'chest', cloth, { scale: [W, T, W] });
-  add(profile([[0.27, 0.07, 0.06], [0.4, 0.063, 0.057]], 10), 'chest', skin, { scale: [1, T, 1] });
-  add(profile([[-0.115, 0.217, 0.145], [-0.07, 0.217, 0.145]], 12), 'chest', leather, { scale: [W, T, W] });
-  ellipsoid('chest', trim, [0, -0.09 * T, 0.15 * W], [0.047, 0.035, 0.013], { metal: true });
-  ellipsoid('chest', leather, [0, -0.09 * T, 0.163 * W], [0.027, 0.018, 0.008]);
-  // Jacket opening and raised collar, with stitched hems.
-  for (const s of [-1, 1]) {
-    strip('chest', [[s * 0.08 * W, 0.295 * T, 0.073 * W], [s * 0.12 * W, 0.20 * T, 0.132 * W], [s * 0.03 * W, 0.07 * T, 0.139 * W]], 0.016, lining);
-    strip('chest', [[s * 0.205 * W, -0.12 * T, 0.05], [s * 0.13 * W, -0.135 * T, 0.126 * W], [s * 0.018, -0.135 * T, 0.15 * W]], 0.01, trim);
-    for (let i = 0; i < 3; i++) ellipsoid('chest', trim, [s * 0.065, 0.10 - i * 0.05, 0.145 * W], [0.012, 0.012, 0.008], { metal: true });
-  }
-  // Cross-body strap and pouch remain part of the two shared material buckets.
-  strip('chest', [[-0.16 * W, 0.25 * T, 0.12 * W], [0, 0.10, 0.15 * W], [0.16 * W, -0.06, 0.14 * W]], 0.024, leather);
-  ellipsoid('chest', trim, [-0.04, 0.13, 0.171 * W], [0.027, 0.031, 0.014], { metal: true });
-  ellipsoid('hips', leather, [0.20 * W, -0.07, 0.10], [0.075, 0.095, 0.045]);
-  ellipsoid('hips', trim, [0.20 * W, -0.06, 0.147], [0.015, 0.012, 0.006], { metal: true });
-  if (armor) {
-    add(profile([[-0.025, 0.16, 0.07, 0.08], [0.02, 0.2, 0.065, 0.092], [0.17, 0.22, 0.066, 0.087], [0.235, 0.12, 0.04, 0.08]], 12), 'chest', steel, { scale: [W, T, W], metal: true });
-    strip('chest', [[0, 0.19, 0.166 * W], [0, 0.08, 0.169 * W], [0, 0, 0.16 * W]], 0.009, trim, { metal: true });
-  }
-  if (longTop) add(profile([[-0.27, 0.27, 0.18], [-0.23, 0.265, 0.18], [-0.02, 0.20, 0.14], [0.07, 0.18, 0.13]], 14), 'hips', cloth, { scale: [W, 1, W] });
-  const topId = a.top.id;
-  if (topId === 'hoodie' || topId === 'high_collar_robe') {
-    add(profile([[0.23, 0.19, 0.15], [0.31, 0.22, 0.16], [0.38, 0.13, 0.11]], 12), 'chest', lining, { scale: [W, T, W] });
-  }
-  if (topId === 'tunic') {
-    // Tunic: a short flared hem over the hips and a laced neckline.
-    add(profile([[-0.19, 0.228, 0.162], [-0.12, 0.218, 0.152], [-0.02, 0.203, 0.14]], 14), 'hips', cloth, { scale: [W, 1, W] });
-    add(profile([[-0.195, 0.23, 0.164], [-0.182, 0.23, 0.164]], 14), 'hips', lining, { scale: [W, 1, W] });
-    for (let i = 0; i < 3; i++) strip('chest', [[-0.025, (0.26 - i * 0.04) * T, 0.12 * W], [0.025, (0.24 - i * 0.04) * T, 0.13 * W]], 0.005, lining);
-  }
-  if (topId === 'vest' || topId === 'leather' || topId === 'strapped_leather') {
-    strip('chest', [[-0.19 * W, 0.27 * T, 0.13], [-0.12 * W, -0.08, 0.16], [-0.08 * W, -0.14, 0.14]], 0.018, trim);
-    strip('chest', [[0.19 * W, 0.27 * T, 0.13], [0.12 * W, -0.08, 0.16], [0.08 * W, -0.14, 0.14]], 0.018, trim);
-  }
-  if (topId === 'chainmail') for (let i = 0; i < 5; i++) strip('chest', [[-0.18, 0.19 - i * 0.06, 0.14], [0.18, 0.19 - i * 0.06, 0.14]], 0.006, darkSteel, { metal: true });
-  if (topId === 'dress' || topId === 'coat' || topId === 'sash_robe' || topId === 'trim_robe') add(profile([[-0.27, 0.24, 0.17], [-0.18, 0.29, 0.19], [0.08, 0.23, 0.15]], 14), 'hips', cloth, { scale: [W, 1, W] });
-  if (topId === 'apron' || topId === 'smith_apron') add(profile([[-0.21, 0.16, 0.19], [-0.04, 0.18, 0.18], [0.12, 0.13, 0.14]], 10), 'hips', a.top.color2 || trim, { scale: [W, 1, W] });
-  if (topId === 'doublet') for (const s of [-1, 1]) strip('chest', [[s * 0.19 * W, 0.28 * T, 0.15], [s * 0.19 * W, -0.08, 0.16]], 0.018, a.top.color2 || trim);
-  if (topId === 'fur_tunic') for (const s of [-1, 1]) strip('chest', [[s * 0.20 * W, 0.29 * T, 0.11], [s * 0.27 * W, 0.15 * T, 0.08]], 0.035, a.top.color2 || lining);
-  if (topId === 'open_coat' || topId === 'coat' || topId === 'trench') for (const s of [-1, 1]) add(profile([[s * 0.05, -0.02, 0.13], [s * 0.16, -0.18, 0.13], [s * 0.25, -0.30, 0.10]], 8), 'hips', cloth, { scale: [W, 1, W] });
-  if (topId === 'silks') {
-    // Fitted silks: one sash across the chest and a knotted waist sash with a hanging tail.
-    strip('chest', [[-0.20 * W, 0.24 * T, 0.12 * W], [0, 0.10, 0.155 * W], [0.20 * W, -0.04, 0.14 * W]], 0.028, a.top.color2 || lining);
-    add(profile([[-0.13, 0.215, 0.145], [-0.08, 0.215, 0.145]], 14), 'chest', a.top.color2 || lining, { scale: [W, T, W] });
-    strip('hips', [[-0.14 * W, 0.0, 0.14 * W], [-0.17 * W, -0.10, 0.155 * W], [-0.15 * W, -0.20, 0.16 * W]], 0.022, a.top.color2 || lining);
-  }
-  if (topId === 'sash_robe') {
-    // Layered robe: crossed collar and a wide sash with a tail at the side.
-    for (const s of [-1, 1]) strip('chest', [[s * 0.10 * W, 0.29 * T, 0.09 * W], [-s * 0.04 * W, 0.10, 0.155 * W]], 0.022, a.top.color2 || lining);
-    add(profile([[-0.10, 0.225, 0.155], [-0.03, 0.225, 0.155]], 14), 'chest', a.top.color2 || lining, { scale: [W, T, W] });
-    strip('hips', [[0.17 * W, 0.0, 0.12 * W], [0.21 * W, -0.14, 0.13 * W], [0.19 * W, -0.26, 0.15 * W]], 0.03, a.top.color2 || lining);
-  }
-  if (topId === 'trim_robe') {
-    // Trimmed robe: a contrasting band down the front opening and around the collar.
-    strip('chest', [[0, 0.30 * T, 0.10 * W], [0, 0.12, 0.155 * W], [0, -0.10, 0.145 * W]], 0.02, a.top.color2 || trim);
-    strip('hips', [[0, 0.02, 0.15 * W], [0, -0.14, 0.195 * W], [0, -0.26, 0.20 * W]], 0.02, a.top.color2 || trim);
-    add(profile([[0.285 * T, 0.13, 0.10], [0.30 * T, 0.13, 0.10]], 12), 'chest', a.top.color2 || trim);
-  }
-  if (topId === 'wraps') for (let i = 0; i < 4; i++) strip('chest', [[-0.20, 0.16 - i * 0.06, 0.14], [0.20, 0.16 - i * 0.06, 0.14]], 0.009, i % 2 ? lining : cloth);
-  if (topId === 'surcoat' || topId === 'scale_plate') add(profile([[-0.19, 0.20, 0.17], [-0.05, 0.23, 0.19], [0.16, 0.15, 0.15]], 10), 'hips', a.top.color2 || trim, { scale: [W, 1, W] });
-  const bottomId = a.bottom.id;
-  if (bottomId === 'skirt') add(profile([[-0.29, 0.19, 0.13], [-0.25, -0.08, 0.17], [0.24, -0.08, 0.17], [0.29, 0.19, 0.13]], 12), 'hips', a.bottom.color, { scale: [W, 1, W] });
-  if (bottomId === 'baggy') add(profile([[-0.25, 0.14, 0.12], [-0.31, -0.18, 0.13], [0.28, -0.18, 0.13], [0.25, 0.14, 0.12]], 10), 'hips', a.bottom.color, { scale: [W, 1, W] });
-  if (bottomId === 'ragged') for (const s of [-1, 1]) strip('hips', [[s * 0.08, 0.12, 0.14], [s * 0.18, -0.12, 0.145]], 0.012, lining);
-
-  for (const [side, s] of [['L', -1], ['R', 1]]) {
-    const arm = 'arm' + side, elbow = 'elbow' + side, hand = 'hand' + side;
-    // One continuous sleeve with blended skin weights at the elbow.
-    add(profile([[-0.405, 0.057, 0.063], [-0.37, 0.074, 0.072], [-0.26, 0.072, 0.071], [-0.21, 0.07, 0.068], [-0.17, 0.076, 0.074], [-0.065, 0.093, 0.087], [0.025, 0.07, 0.07], [0.045, 0.01, 0.01]], 10), arm, cloth, { scale: [1, T, 1], bend: { bone: elbow, at: 0.21 * T, width: 0.075 * T } });
-    add(profile([[-0.2 * T, 0.064, 0.068], [-0.16 * T, 0.077, 0.078], [-0.06 * T, 0.074, 0.075]], 10), elbow, armor ? darkSteel : leather, { metal: armor });
-    add(ring(0.074, 0.009), elbow, trim, { position: [0, -0.17 * T, 0], rotation: [Math.PI / 2, 0, 0], metal: true });
-    ellipsoid(hand, skin, [0, -0.035, 0.003], [0.065, 0.082, 0.061]);
-    ellipsoid(hand, shade(skin, -0.05), [-s * 0.046, -0.013, 0.025], [0.03, 0.043, 0.034]);
-    for (let i = 0; i < 2; i++) strip(hand, [[-0.033, -0.043 - i * 0.018, 0.054], [0, -0.048 - i * 0.018, 0.061], [0.027, -0.043 - i * 0.018, 0.054]], 0.0026, shade(skin, -0.26));
-    if (armor && a.decor?.id !== 'pauldrons') { // decor pauldrons replace the plate top's own shoulder caps
-      ellipsoid(arm, darkSteel, [s * 0.015, 0.008, 0], [0.132, 0.074, 0.117], { metal: true });
-      ellipsoid(arm, steel, [s * 0.025, 0.038, 0], [0.126, 0.066, 0.112], { metal: true });
-      ellipsoid(arm, trim, [s * 0.023, 0.053, 0.102], [0.015, 0.016, 0.008], { metal: true });
-    }
-    const leg = 'leg' + side, knee = 'knee' + side, foot = 'foot' + side, L = rig.leg;
-    add(profile([[-L + 0.08, 0.075, 0.078], [-L * 0.63, 0.080, 0.085], [-L * 0.51, 0.084, 0.088], [-L * 0.39, 0.095, 0.094], [-0.10, 0.105, 0.104], [-0.03, 0.097, 0.085], [0.025, 0.01, 0.01]], 10), leg, a.bottom.color, { bend: { bone: knee, at: L * 0.51, width: 0.07 } });
-    add(profile([[-L * 0.49 + 0.02, 0.077, 0.079], [-L * 0.49 + 0.08, 0.081, 0.087], [-0.07, 0.098, 0.10], [-0.035, 0.105, 0.104]], 10), knee, a.shoes.color);
-    add(ring(0.103, 0.012), knee, lining, { position: [0, -0.04, 0], rotation: [Math.PI / 2, 0, 0] });
-    const shoeId = a.shoes.id, barefoot = shoeId === 'barefoot', footColor = barefoot ? skin : a.shoes.color;
-    ellipsoid(foot, footColor, [0, -0.005, 0.047], barefoot ? [0.10, 0.055, 0.145] : shoeId === 'heavy' ? [0.12, 0.075, 0.17] : shoeId === 'slippers' ? [0.115, 0.055, 0.145] : [0.103, 0.062, 0.159]);
-    if (shoeId === 'sandals') for (const z of [0.02, 0.075]) strip(foot, [[-0.07, 0.02, z], [0, 0.055, z + 0.01], [0.07, 0.02, z]], 0.009, leather);
-    if (shoeId === 'heavy') add(ring(0.11, 0.018), foot, darkSteel, { position: [0, -0.025, 0.02], rotation: [Math.PI / 2, 0, 0], metal: true });
-    add(profile([[-0.066, 0.075, 0.12, 0.048], [-0.05, 0.105, 0.154, 0.048], [-0.035, 0.104, 0.15, 0.048]], 12), foot, '#2c3032');
-    strip(foot, [[-0.075, 0.025, 0.12], [0, 0.052, 0.14], [0.075, 0.025, 0.12]], 0.008, trim);
-    for (const z of [0.02, 0.065]) strip(foot, [[-0.035, 0.049, z], [0, 0.056, z + 0.008], [0.035, 0.049, z]], 0.006, lining);
-  }
-
-  const faceWidth = ['wide', 'square'].includes(a.headShape) ? 1.07 : a.headShape === 'long' ? 0.92 : a.headShape === 'oval' ? 0.95 : 1;
-  const faceDepth = ['square', 'chiseled'].includes(a.headShape) ? 1.04 : a.headShape === 'wide' ? 0.94 : 1;
-  const jaw = a.headShape === 'heart' ? 0.86 : a.headShape === 'chiseled' ? 1.06 : a.headShape === 'oval' ? 0.93 : 1;
-  head(profile([[-0.035, 0.10, 0.09], [0.005, 0.22, 0.195], [0.105, 0.30, 0.249], [0.25, 0.335, 0.271], [0.39, 0.325 * jaw, 0.267], [0.50, 0.265 * jaw, 0.227], [0.57, 0.15 * jaw, 0.143], [0.60, 0.005, 0.006]], 20), skin, { scale: [faceWidth, 1, faceDepth] });
-  for (const [side, s] of [['L', -1], ['R', 1]]) {
-    if (a.ears.id !== 'none' && !['hood', 'dragon_helm', 'goggles_up'].includes(a.hat.id)) { // Hoods, the dragon helm and the aviator cap's flaps cover the ears.
-      head(sphere(), skin, { position: [s * 0.325 * faceWidth, 0.225, 0.0], scale: a.ears.id === 'pointed' ? [0.105, 0.10, 0.044] : [0.058, 0.091, 0.043], rotation: [0, 0, -s * 0.22] });
-      head(sphere(), shade(skin, -0.18), { position: [s * 0.339 * faceWidth, 0.227, 0.036], scale: [0.022, 0.049, 0.009] });
-    }
-    const eye = 'eye' + side, eyeId = a.eyes.id, eyeSize = THREE.MathUtils.clamp(a.eyes.scale || 1, 0.5, 1.6);
-    const dx = s * (a.eyes.x || 0) * 0.035 * H, dy = (a.eyes.y || 0) * -0.045 * H;
-    const closed = eyeId === 'happy' || (eyeId === 'wink' && side === 'R');
-    const narrow = eyeId === 'narrow' || eyeId === 'sleepy' || eyeId === 'tired' || eyeId === 'angry';
-    const dot = eyeId === 'dot', hollow = eyeId === 'hollow';
-    const almond = eyeId === 'almond';
-    const ex = (dot ? 0.052 : narrow ? 0.078 : almond ? 0.09 : 0.082) * H * eyeSize, ey = (dot ? 0.052 : narrow ? 0.062 : almond ? 0.08 : 0.10) * H * eyeSize;
-    if (closed) {
-      add(taperedCurve([[dx - s * ex, dy + 0.01 * H, 0.034 * H], [dx, dy - 0.03 * H, 0.038 * H], [dx + s * ex, dy + 0.01 * H, 0.034 * H]], [0.009, 0.013, 0.009], 5, 6), eye, '#443333');
-    } else if (eyeId === 'glow' || eyeId === 'glow_tear') {
-      // Glowing eyes: no iris or pupil, a lit fill in the eye colour and a small highlight; glow_tear adds a light trail.
-      const glow = '#' + new THREE.Color(a.eyes.color).lerp(new THREE.Color('#ffffff'), 0.3).getHexString();
-      ellipsoid(eye, '#' + new THREE.Color(a.eyes.color).multiplyScalar(0.35).getHexString(), [dx, dy, 0], [ex * 1.1, ey * 1.1, 0.016 * H]);
-      ellipsoid(eye, glow, [dx, dy - 0.004 * H, 0.014 * H], [ex * 0.92, ey * 0.92, 0.018 * H]);
-      ellipsoid(eye, '#ffffff', [dx - s * 0.02 * H, dy + 0.025 * H, 0.03 * H], [0.02 * H, 0.016 * H, 0.006 * H]);
-      if (eyeId === 'glow_tear') { const bx = s * 0.12 * H + dx + s * 0.02 * H, by = 0.25 * H + dy; add(taperedCurve([[bx, by - ey * 0.8, 0.268 * H], [bx + s * 0.01 * H, by - ey * 1.6, 0.27 * H], [bx, by - ey * 2.3, 0.262 * H]], [0.012, 0.01, 0.004], 4, 5), 'head', glow); }
-    } else if (dot) {
-      ellipsoid(eye, '#17272c', [dx, dy, 0.028 * H], [ex, ey, 0.013 * H]);
-      ellipsoid(eye, '#ffffff', [dx - s * 0.012 * H, dy + 0.014 * H, 0.043 * H], [0.012 * H, 0.014 * H, 0.004 * H]);
-    } else {
-      ellipsoid(eye, hollow ? '#1c2325' : '#443333', [dx, dy, 0], [ex * 1.08, ey * 1.08, 0.016 * H]);
-      ellipsoid(eye, hollow ? '#7bd6c8' : '#fff8e8', [dx, dy - 0.007 * H, 0.012 * H], [ex * 0.88, ey * 0.88, 0.017 * H]);
-      if (!hollow) {
-        const irisY = eyeId === 'wide' || eyeId === 'anime' ? -0.008 : -0.012;
-        ellipsoid(eye, a.eyes.color, [dx + s * 0.006 * H, dy + irisY * H, 0.029 * H], [ex * 0.65, ey * 0.72, 0.012 * H]);
-        ellipsoid(eye, '#17272c', [dx + s * 0.006 * H, dy + (irisY + 0.003) * H, 0.038 * H], [ex * 0.36, ey * 0.48, 0.008 * H]);
-        ellipsoid(eye, '#ffffff', [dx - s * 0.013 * H, dy + 0.02 * H, 0.047 * H], [0.014 * H, 0.017 * H, 0.005 * H]);
-      }
-    }
-    if (eyeId === 'slit') add(taperedCurve([[dx, dy - ey * 0.55, 0.045 * H], [dx, dy, 0.047 * H], [dx, dy + ey * 0.55, 0.045 * H]], [0.008, 0.012, 0.008], 4, 4), eye, '#17272c');
-    if (narrow) add(taperedCurve([[dx - s * ex, dy - ey * 0.55, 0.045 * H], [dx, dy - ey * 0.78, 0.048 * H], [dx + s * ex, dy - ey * 0.55, 0.045 * H]], [0.006, 0.009, 0.006], 4, 4), eye, '#443333');
-    // Per-style lids: angry slants down toward the nose, sleepy has a heavy skin lid, tired adds bags, almond a lash flick.
-    if (eyeId === 'angry') add(taperedCurve([[dx - s * ex * 1.05, dy + ey * 0.35, 0.05 * H], [dx, dy + ey * 0.8, 0.052 * H], [dx + s * ex * 1.1, dy + ey * 1.05, 0.05 * H]], [0.012, 0.01, 0.006], 4, 4), eye, '#443333');
-    if (eyeId === 'sleepy') ellipsoid(eye, shade(skin, -0.04), [dx, dy + ey * 0.55, 0.036 * H], [ex * 1.12, ey * 0.7, 0.022 * H]);
-    if (eyeId === 'tired') for (const k of [1.25, 1.5]) add(taperedCurve([[dx - s * ex * 0.8, dy - ey * k, 0.04 * H], [dx, dy - ey * (k + 0.2), 0.042 * H], [dx + s * ex * 0.8, dy - ey * k, 0.04 * H]], [0.003, 0.005, 0.003], 4, 4), eye, shade(skin, -0.25));
-    if (almond) add(taperedCurve([[dx + s * ex * 0.55, dy + ey * 0.75, 0.05 * H], [dx + s * ex * 1.05, dy + ey * 0.55, 0.05 * H], [dx + s * ex * 1.3, dy + ey * 0.8, 0.046 * H]], [0.009, 0.008, 0.003], 4, 4), eye, '#443333');
-    // Brows are separate modeled locks, so the expression survives when the eye style changes.
-    const brow = a.brows.id, browY = (a.brows.y || 0) * -0.035 * H, browX = (a.brows.x || 0) * 0.02 * H;
-    if (brow !== 'none') {
-      const tilt = brow === 'angry' ? -s * 0.20 : brow === 'worried' ? s * 0.16 : brow === 'raised' ? -s * 0.12 : 0;
-      const thick = brow === 'thick' || brow === 'angry' ? 0.018 : brow === 'thin' ? 0.008 : 0.012;
-      add(taperedCurve([[dx - s * 0.082 * H + browX, dy + 0.115 * H + browY, 0.044 * H], [dx + tilt * H, dy + (0.135 + Math.abs(tilt) * 0.15) * H + browY, 0.048 * H], [dx + s * 0.082 * H + browX, dy + 0.115 * H + browY, 0.044 * H]], [thick, thick * 1.2, thick], 5, 5), 'head', hair);
-    }
-    head(taperedCurve([[s * 0.052, 0.361, 0.272], [s * 0.115, 0.378, 0.267], [s * 0.184, 0.355, 0.24]], [0.014, 0.019, 0.008], 5, 5), hair);
-    head(sphere(), shade(skin, -0.055), { position: [s * 0.215, 0.13, 0.216], scale: [0.044, 0.024, 0.011] });
-  }
-  head(sphere(), shade(skin, 0.035), { position: [0, 0.177, 0.278], scale: [0.041, 0.042, 0.047] });
-  const mouthScale = THREE.MathUtils.clamp(a.mouth.scale || 1, 0.5, 1.8), mouthY = -(a.mouth.y || 0) * 0.025, mouth = a.mouth.id;
-  const mouthColor = shade(a.mouth.color, -0.30), mouthPts = mouth === 'frown' ? [[-0.066, 0.071], [0, 0.095], [0.066, 0.071]] : mouth === 'smirk' ? [[-0.066, 0.088], [0.01, 0.081], [0.066, 0.058]] : [[-0.066, 0.095], [0, 0.071], [0.066, 0.095]];
-  if (mouth === 'open' || mouth === 'o' || mouth === 'sad_open') ellipsoid('head', '#3a1518', [0, mouthY + (mouth === 'o' ? 0.075 : 0.082), 0.257], [mouth === 'o' ? 0.033 : 0.055, mouth === 'o' ? 0.033 : 0.043, 0.012]);
-  else add(taperedCurve(mouthPts.map(([x, y]) => [x * mouthScale, y + mouthY, 0.257]), [0.004, mouth === 'neutral' ? 0.005 : 0.008, 0.004], 5, 8), 'head', mouthColor, { bone: 'head' });
-  if (mouth === 'grin') strip('head', [[-0.07, 0.084 + mouthY, 0.26], [0, 0.066 + mouthY, 0.261], [0.07, 0.084 + mouthY, 0.26]], 0.018, '#fff8e8');
-  if (mouth === 'fangs' || mouth === 'tusks') for (const s of [-1, 1]) head(new THREE.ConeGeometry(0.018, mouth === 'tusks' ? 0.09 : 0.055, 5), '#f2f0dc', { position: [s * 0.045, 0.068 + mouthY, 0.268], rotation: [Math.PI, 0, 0] });
-  head(taperedCurve([[-0.032, 0.054, 0.239], [0, 0.050, 0.244], [0.028, 0.056, 0.24]], [0.002, 0.003, 0.001], 4, 4), shade(skin, -0.16));
-
-  const nose = a.nose.id, noseScale = THREE.MathUtils.clamp(a.nose.scale || 1, 0.5, 1.7), noseY = 0.177 + (a.nose.y || 0) * -0.035;
-  if (nose !== 'none') {
-    const ns = nose === 'wide' || nose === 'snout' ? [0.075, 0.042, 0.052] : nose === 'long' || nose === 'hook' ? [0.035, 0.075, 0.065] : nose === 'button' ? [0.055, 0.05, 0.052] : nose === 'dot' ? [0.026, 0.026, 0.028] : [0.041, 0.052, 0.045];
-    ellipsoid('head', shade(skin, -0.055), [0, noseY, 0.282], ns.map(v => v * noseScale));
-    if (nose === 'snout') { ellipsoid('head', '#2a2222', [-0.025, noseY, 0.326], [0.014, 0.009, 0.008]); ellipsoid('head', '#2a2222', [0.025, noseY, 0.326], [0.014, 0.009, 0.008]); }
-  }
+  // Body and clothes (chibi2-body.js), then the face (chibi2-face.js). Both hand back the surfaces
+  // the hair, hats and gear are laid on.
+  const body = buildBody(a, rig, { add, ellipsoid, strip, trim, leather, steel, darkSteel });
+  const face = buildFace(a, rig, { add, head, ellipsoid, strip });
+  const hs = HEAD_SHAPES[a.headShape] || HEAD_SHAPES.round, faceWidth = hs.w, faceDepth = hs.d;
 
   if (a.hair.id !== 'bald') {
     const hairId = a.hair.id;
-    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim', 'goggles_up'].includes(a.hat.id);
+    const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim', 'goggles_up', 'wizard', ...HATS_COVER_CROWN].includes(a.hat.id);
     // A raised hood tucks away everything outside the face opening; only a fringe shows under its brow.
-    const hoodUp = a.hat.id === 'hood', fringeUnder = hoodUp || a.hat.id === 'goggles_up';
+    const hoodUp = a.hat.id === 'hood', fringeUnder = hoodUp || a.hat.id === 'goggles_up';   // a brimmed hat shows the flattened cap instead (HAT_BRIM)
     const cap = new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
     const p = cap.attributes.position;
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-      p.setXYZ(i, x * 0.348, 0.32 + y * 0.31 + Math.max(0, z) * 0.055, z * 0.28 - 0.012);
+      p.setXYZ(i, x * 0.348 * faceWidth, 0.32 + y * 0.31 + Math.max(0, z) * 0.055, (z * 0.28 - 0.012) * faceDepth);
     }
     cap.computeVertexNormals();
+    // Under a BRIMMED hat the hair still shows below the brim (the back of a wizard's head was bare
+    // skin when the whole cap was dropped): the cap is flattened to sit just under the hat instead.
+    const brim = HAT_BRIM[a.hat.id];
+    if (headwearCoversCrown && brim && !['afro', 'mohawk', 'buzz'].includes(hairId)) {
+      for (let i = 0; i < p.count; i++) p.setY(i, Math.min(p.getY(i), brim));
+      cap.computeVertexNormals();
+      head(cap, hair);
+    }
     if (!headwearCoversCrown && !['afro', 'mohawk'].includes(hairId)) head(cap, hairId === 'buzz' ? shade(hair, -0.12) : hair, { scale: hairId === 'buzz' ? [0.995, 0.97, 0.995] : [1, 1, 1] }); // buzz stays outside the skull top (0.60)
+    // THE BACK OF THE HEAD. The crown cap stops at the skull's equator (y 0.32), so every hairstyle
+    // left the back of the head bare skin from there down to the neck — invisible from the front, and
+    // the whole of what a third-person camera sees. A shell over the back of the skull reaches the
+    // nape (lower for long hair); it is the same size as the cap, so hats and hoods fit over it.
+    if (!hoodUp && !['buzz', 'mohawk', 'tonsure', 'afro'].includes(hairId)) {
+      const long = /long|wavy|braids|pony|bob|hood_hair/.test(hairId);
+      const back = new THREE.SphereGeometry(1, 14, 6, Math.PI - 0.5, Math.PI + 1.0, Math.PI / 2 - 0.08, long ? Math.PI * 0.42 : Math.PI * 0.3);
+      const R = rig.round || 0;
+      head(back, shade(hair, -0.05), { position: [0, 0.32, -0.02], scale: [(0.365 + R * 0.02) * faceWidth, 0.325, (0.3 + R * 0.01) * faceDepth] });
+    }
     const fringe = hairId === 'short' || hairId === 'long' || hairId === 'wavy';
     if (fringe && (!headwearCoversCrown || fringeUnder)) for (let i = 0; i < 7; i++) {
       if (fringeUnder && (i === 0 || i === 6)) continue; // The outer locks would reach the hood's inner wall.
@@ -223,9 +87,9 @@ function buildTemplate(a, rig) {
       for (let i = 0; i < 7; i++) { const x = (i - 3) * 0.09; head(taperedCurve([[x, 0.36, 0.20], [x * 1.1, 0.50 + (i % 2) * 0.05, 0.17], [x * 1.2, 0.68 + (i % 3) * 0.06, 0.04]], [0.07, 0.05, 0.004], 5, 5), hair); }
     }
     if (hairId === 'mohawk' && !hoodUp) {
-      for (let i = 0; i < 5; i++) head(taperedCurve([[0, 0.34 + i * 0.03, 0.18], [0, 0.54 + i * 0.02, 0.14], [0, 0.83 - i * 0.035, 0.03]], [0.08, 0.07, 0.008], 5, 5), i % 2 ? shade(hair, 0.10) : hair);
+      for (let i = 0; i < 5; i++) head(taperedCurve([[0, 0.46 + i * 0.025, 0.1], [0, 0.6 + i * 0.015, 0.1], [0, 0.83 - i * 0.035, 0.0]], [0.075, 0.065, 0.008], 5, 5), i % 2 ? shade(hair, 0.10) : hair);
     }
-    if (hairId === 'pixie' && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.06, 0.48, 0.12], [s * 0.18, 0.39, 0.25], [s * 0.30, 0.25, 0.12]], [0.07, 0.06, 0.008], 6, 6), hair);
+    if (hairId === 'pixie' && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.05, 0.52, 0.14], [s * 0.2, 0.47, 0.235], [s * 0.315, 0.36, 0.12]], [0.07, 0.055, 0.008], 6, 6), hair); // swept above the brow, never across it
     if (hairId === 'tonsure' && !hoodUp) { head(new THREE.TorusGeometry(0.20, 0.055, 6, 14), hair, { position: [0, 0.51, 0.01], rotation: [Math.PI / 2, 0, 0], scale: [1.2, 0.8, 1] }); }
     if (hairId === 'hood_hair' && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.18, 0.48, 0.05], [s * 0.30, 0.28, 0.10], [s * 0.26, -0.02, 0.03]], [0.11, 0.08, 0.018], 6, 7), hair);
     // Curly: tight curls over a normal cap. Afro: one large rounded mass with curls on its rim.
@@ -252,18 +116,6 @@ function buildTemplate(a, rig) {
     if (hairId === 'ponytail' && !hoodUp) head(taperedCurve([[0.27, 0.38, -0.10], [0.38, 0.10, -0.13], [0.31, -0.20, -0.08]], [0.11, 0.09, 0.02], 7, 8), hair);
     if ((hairId === 'bun' || hairId === 'buns') && !hoodUp) for (const s of hairId === 'bun' ? [1] : [-1, 1]) head(sphere(), hair, { position: [s * (hairId === 'bun' ? 0 : 0.22), 0.47, -0.04], scale: [0.13, 0.13, 0.11] });
   }
-  if (a.facialHair.id === 'stubble') head(profile([[0.12, 0.20, 0.13], [0.23, 0.25, 0.17], [0.38, 0.22, 0.15]], 12), shade(hair, -0.12), { scale: [1, 0.7, 0.35] });
-  if (a.facialHair.id === 'mustache') head(taperedCurve([[-0.11, 0.17, 0.272], [0, 0.19, 0.286], [0.11, 0.17, 0.272]], [0.025, 0.032, 0.025], 6, 6), hair);
-  if (a.facialHair.id === 'goatee') head(taperedCurve([[0, 0.12, 0.27], [0, 0.055, 0.275], [0, -0.005, 0.235]], [0.035, 0.045, 0.012], 6, 5), hair);
-  if (a.facialHair.id === 'soul_patch') head(sphere(), hair, { position: [0, 0.05, 0.262], scale: [0.03, 0.028, 0.012] });
-  if (a.facialHair.id === 'full' || a.facialHair.id === 'long') head(profile([[-0.11, 0.025, 0.015, 0.13], [-0.015, 0.17, 0.067, 0.18], [0.08, 0.20, 0.075, 0.16]], 12), hair);
-  if (a.facialHair.id === 'long') head(taperedCurve([[0, -0.05, 0.19], [0, -0.20, 0.21], [0.01, -0.33, 0.17]], [0.11, 0.07, 0.01], 7, 6), hair);
-  if (a.facialHair.id === 'chinstrap') head(taperedCurve([[-0.31, 0.24, 0.07], [-0.25, 0.06, 0.18], [0, -0.01, 0.235], [0.25, 0.06, 0.18], [0.31, 0.24, 0.07]], [0.02, 0.026, 0.03, 0.026, 0.02], 5, 14), hair);
-  if (a.extras.id === 'freckles') for (const s of [-1, 1]) for (let i = 0; i < 3; i++) ellipsoid('head', shade(skin, -0.16), [s * (0.12 + i * 0.045), 0.13 - (i % 2) * 0.03, 0.273], [0.009, 0.009, 0.004]);
-  if (a.extras.id === 'blush') for (const s of [-1, 1]) ellipsoid('head', a.extras.color, [s * 0.20, 0.125, 0.267], [0.09, 0.035, 0.008]);
-  if (a.extras.id === 'third_eye') { ellipsoid('head', '#fff8e8', [0, 0.36, 0.255], [0.065, 0.042, 0.012]); ellipsoid('head', a.eyes.color, [0, 0.36, 0.27], [0.028, 0.028, 0.008]); }
-  if (a.extras.id === 'scar' || a.extras.id === 'scar_cheek') strip('head', [[a.extras.id === 'scar' ? -0.18 : 0.17, 0.27, 0.27], [a.extras.id === 'scar' ? -0.10 : 0.23, 0.15, 0.274], [a.extras.id === 'scar' ? -0.04 : 0.29, 0.05, 0.27]], 0.009, a.extras.color);
-  if (a.accessory.id === 'glasses' || a.accessory.id === 'round_glasses') for (const s of [-1, 1]) { const round = a.accessory.id === 'round_glasses'; add(round ? ring(0.105, 0.012) : new THREE.RingGeometry(0.075, 0.09, 12), 'head', a.accessory.color, { position: [s * 0.125, 0.27, 0.285], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.78, 1], bone: 'head' }); }
   if (a.hat.id === 'dragon_helm') {
     buildDragonHelm(a, head);
   } else if (/helmet|helm/.test(a.hat.id)) {
@@ -297,9 +149,9 @@ function buildTemplate(a, rig) {
     head(new THREE.TorusGeometry(0.362, 0.018, 5, 16), trim, { position: [0, 0.462, 0], rotation: [Math.PI / 2, 0, 0], scale: [1, 0.86, 1], metal: true });
   } else if (a.hat.id === 'goggles_up') {
     buildAviatorCap(a, head, leather);
-  }
+  } else buildExtraHat(a, { add, head, H, W, T, trim, leather, steel, darkSteel });
   // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
-  buildGear(a, { add, head, ellipsoid, strip, H, W, T, L: rig.leg, trim, leather, steel, darkSteel, skin, faceWidth, faceDepth });
+  buildGear(a, { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig });
   return b.finish();
 }
 
@@ -528,7 +380,8 @@ function normalizeForChibi2(avatar) {
 }
 
 function acquire(avatar, anims = CHIBI2_ANIMS) {
-  const a = normalizeForChibi2(avatar), rig = createRig(a.body);
+  const a = normalizeForChibi2(avatar), rig = createRig(a.body, raceOf(a));
+  rig.hold = holdFor(a);            // what the hands carry decides how every clip carries it
   // the clip set is part of the cache key: two characters with different animation sets are not
   // the same template
   const key = JSON.stringify(a) + '|' + anims.length;
@@ -566,7 +419,8 @@ function acquire(avatar, anims = CHIBI2_ANIMS) {
 export async function createChibi2Character(avatar, opts = {}) {
   const anims = opts.swim ? CHIBI2_ALL_ANIMS : (opts.anims || CHIBI2_ANIMS);
   const group = new THREE.Group(); group.userData.character = true;
-  let asset, action, anim = 'idle', elapsed = 0, disposed = false;
+  let asset, action, anim = 'idle', elapsed = 0, disposed = false, handsFree = false;
+  const gaze = { x: 0, y: 0, tx: 0, ty: 0, next: 0.8 + Math.random() * 1.5 };
   function install(a) {
     const next = acquire(a, anims);
     if (asset) { group.remove(asset.root); asset.release(); }
@@ -614,9 +468,32 @@ export async function createChibi2Character(avatar, opts = {}) {
     update(dt) {
       if (disposed) return;
       const d = Math.min(0.1, Math.max(0, dt)); elapsed += d; asset.mixer.update(d * rate);
-      const blinkTime = elapsed % 3.7, blink = anim === 'dead' ? 0.05 : 1 - 0.95 * Math.max(0, 1 - Math.abs(blinkTime - 3.5) / 0.075);
-      asset.rig.byName.eyeL.scale.y = asset.rig.byName.eyeR.scale.y = blink;
+      // THE EYES GLANCE instead of blinking. A blink squashed the eye to a line, which on a face this
+      // simple read as eyes clamped shut every few seconds; now the iris drifts to a new spot every
+      // couple of seconds and settles there, which is what makes a face look alive.
+      const bones = asset.rig.byName, H = asset.rig.headScale;
+      if (elapsed >= gaze.next) {
+        gaze.next = elapsed + 1.4 + Math.random() * 2.6;
+        const wide = Math.random() < 0.3;
+        gaze.tx = (Math.random() * 2 - 1) * (wide ? 0.02 : 0.009) * H; gaze.ty = (Math.random() * 2 - 1) * (wide ? 0.01 : 0.005) * H;
+        if (Math.random() < 0.35) gaze.tx = gaze.ty = 0;
+      }
+      const k = 1 - Math.exp(-d * 14);
+      gaze.x += (gaze.tx - gaze.x) * k; gaze.y += (gaze.ty - gaze.y) * k;
+      const dead = anim === 'dead';
+      for (const s of ['L', 'R']) {
+        bones['pupil' + s].position.set(dead ? 0 : gaze.x, dead ? 0.006 * H : gaze.y, 0);
+        bones['eye' + s].scale.y = dead ? 0.55 : 1;
+      }
+      if (handsFree) for (const s of ['L', 'R']) bones['grip' + s].scale.setScalar(0.001);
     },
+    /**
+     * Put what is in the hands away (true) or bring it back (false). The emotes and `wave` do this on
+     * their own; this is for a game that wants empty hands for its own reasons.
+     */
+    setHandsFree(v) { handsFree = !!v; if (!v) for (const s of ['L', 'R']) asset.rig.byName['grip' + s].scale.setScalar(1); },
+    get handsFree() { return handsFree; },
+    get hold() { return asset.rig.hold; },
     dispose() { if (disposed) return; disposed = true; group.remove(asset.root); asset.release(); },
   };
 }

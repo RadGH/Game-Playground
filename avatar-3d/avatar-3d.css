@@ -13,3 +13,9 @@
 .mini2d { width: 150px; margin: 0 auto; } .mini2d svg { width: 100%; height: auto; }
 .compare { display: flex; gap: 8px; align-items: flex-start; }
 .compare .side { flex: 1; }
+/* 2026-09-24: the two older renderers are deprecated; Chibi 2 is the flagship */
+.mode-btns button.deprecated { opacity: 0.6; font-size: 0.85em; }
+.mode-btns button.deprecated.on { opacity: 0.9; }
+.anim-chips { display: flex; flex-direction: column; gap: 4px; }
+.anim-chips .anim-group { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+.anim-chips .anim-group b { font-size: 0.75em; opacity: 0.7; min-width: 64px; text-transform: uppercase; letter-spacing: 0.04em; }

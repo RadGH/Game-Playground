@@ -929,12 +929,47 @@ export const CLIP_SECONDS = {
   slash: 0.5, slashBack: 0.5, thrust: 0.42, overhead: 0.85, sweep: 0.92, jab: 0.26,
   arcCut: 0.62, slam: 1.05, lunge: 0.55, shoot: 0.6, reload: 1, castPoint: 0.35,
   castStaff: 0.7, channel: 1.6, attack: 0.85, cast: 1.25,
+  // 2026-09-24, avatar-3d/js/chibi2-motion.js CHIBI2_MELEE_ANIMS
+  chop: 0.72, hack: 0.6, smash: 0.9, stab: 0.42, offSlash: 0.5, offThrust: 0.42,
+  twinCleave: 0.95, twinSlam: 1.1, thrust2h: 0.55, bash: 0.55, throw: 0.7, castBook: 1.1,
 };
 
-/** The clip for one strike of one weapon. `step` alternates the two sword cuts. */
-export function clipFor(shapeKey, { twoHanded = false, step = 0 } = {}) {
+/**
+ * WHAT KIND OF WEAPON IT IS, for the animation (2026-09-24). A strike SHAPE says a cut is a cleave
+ * or a slam; the FAMILY says how the body throws it — an axe chops diagonally with its weight going
+ * on through, a mace or hammer smashes straight down with the body dropping under it, a dagger stabs
+ * in a reverse grip and a polearm is driven with both hands on the shaft.
+ */
+export function animFamilyOf(item) {
+  const key = String(item?.baseKey || ''), sub = String(item?.subtype || '');
+  const is = (...ids) => ids.some(id => key === id || sub === id || key.endsWith('_' + id));
+  if (is('dagger')) return 'dagger';
+  if (is('axe', 'battleaxe', 'axe2h', 'pick')) return 'axe';
+  if (is('mace', 'scepter')) return 'mace';
+  if (is('hammer', 'warhammer', 'maul', 'club')) return 'hammer';
+  if (is('halberd', 'spear', 'polearm', 'glaive')) return 'polearm';
+  return null;
+}
+const FAMILY_CLIPS = {
+  axe: { cleave: 'chop', slash: 'hack', overhead: 'chop' },
+  mace: { overhead: 'smash', slash: 'hack' },
+  hammer: { overhead: 'smash', sweep: 'hack' },
+  dagger: { jab: 'stab' },
+  polearm: { thrust: 'thrust2h' },
+};
+
+/**
+ * The clip for one strike of one weapon. `step` alternates the two sword cuts; `family` (from
+ * `animFamilyOf`) swaps in the family's own clip; `off` is the off hand's swing; `pairedTwo` is a
+ * two-hander in EACH hand (the Doubled Grasp keystone), whose finisher brings both down together.
+ */
+export function clipFor(shapeKey, { twoHanded = false, step = 0, family = null, off = false, pairedTwo = false, last = false } = {}) {
   const row = CLIPS[shapeKey];
+  if (off) return ['thrust', 'jab', 'lunge'].includes(shapeKey) ? 'offThrust' : 'offSlash';
+  if (pairedTwo) return last ? (['slam', 'overhead'].includes(shapeKey) ? 'twinSlam' : 'twinCleave') : (FAMILY_CLIPS.axe[shapeKey] || 'chop');
   if (!row) return 'attack';
+  const fam = family && FAMILY_CLIPS[family]?.[shapeKey];
+  if (fam && !(twoHanded && family !== 'polearm')) return fam;
   if (twoHanded) return row.two;
   return row.alt && step % 2 === 1 ? row.alt : row.one;
 }

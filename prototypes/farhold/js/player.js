@@ -661,6 +661,11 @@ export function createController(terrainIn, balance = {}, camera, {
           self.offCooldown = every;
           self.offWindLeft = wind; self.offWindSpan = wind;
           self.swing = Math.max(self.swing, wind + 0.2);
+          // the off hand plays the OFF HAND's clip (offSlash / offThrust) — it used to replay the
+          // main hand's last swing, so a second weapon never visibly swung
+          self.swingClip = sp?.clip || 'offSlash';
+          feel.swing.clip = self.swingClip;
+          self.swingRate = sp?.clipSeconds > 0 ? Math.max(0.35, Math.min(2.6, sp.clipSeconds / Math.max(0.12, wind * 1.45))) : 1;
           if (wind <= 0) landOff();
         }
       }

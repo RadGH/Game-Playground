@@ -172,14 +172,16 @@ function gem(c, bone, y, size, colour, x = 0) {
 
 const BUILDERS = {
   // ---- blades
-  fh_dagger(c, hc, q, bone = 'handR') {
+  fh_dagger(c, hc, q, which = 'handR') {
+    const bone = typeof which === 'string' ? which : 'handR';   // the dispatcher passes the avatar as the 4th argument
     grip(c, bone, -0.10, 0.05, 0.017);
     pommel(c, bone, 0.07, 'disc', 0.026, c.trim);
     guard(c, bone, -0.09, 0.05, 0.012, 0.011, c.trim);
     blade(c, bone, -0.10, -0.36, 0.026, hc, { thick: 0.011 });
     if (q >= 2) gem(c, bone, 0.07, 0.016, hc);
   },
-  fh_daggers(c, hc, q) { BUILDERS.fh_dagger(c, hc, q, 'handR'); BUILDERS.fh_dagger(c, hc, q, 'handL'); },
+  // the pair: a knife in each hand — unless the off hand is already holding something
+  fh_daggers(c, hc, q, a) { BUILDERS.fh_dagger(c, hc, q, 'handR'); if (!a || !a.offhand || a.offhand.id === 'none') BUILDERS.fh_dagger(c, hc, q, 'handL'); },
 
   fh_sword(c, hc, q) {
     grip(c, 'handR', -0.13, 0.06, 0.019);
@@ -399,33 +401,48 @@ const BUILDERS = {
  * from y 0 to y -0.205T, so y -0.10 is about its middle.
  */
 const OFFHAND_BUILDERS = {
-  fh_heater_shield(c, oc) { strapped(c, oc, 'heater'); },
-  fh_kite_shield(c, oc) { strapped(c, oc, 'kite'); },
-  fh_tower_shield(c, oc) { strapped(c, oc, 'tower'); },
+  fh_heater_shield(c, oc, q) { strapShield(c, oc, 'heater', q); },
+  fh_kite_shield(c, oc, q) { strapShield(c, oc, 'kite', q); },
+  fh_tower_shield(c, oc, q) { strapShield(c, oc, 'tower', q); },
 };
 
-function strapped(c, oc, kind) {
+/**
+ * A shield on the forearm, FACE OUT. At rest the arm hangs and the shield hangs at the side with its
+ * face to the outside — which is how a shield is carried — and the `guard` / `block` clips roll the
+ * forearm across the chest so the face comes square to the front. (It used to face forward at rest,
+ * so every swing lifted it flat in front of the chest "like a serving tray".)
+ *
+ * Built in elbowL space: the forearm runs down -y, the outside of the left forearm is -x. The face is
+ * drawn in its own plane and turned a quarter turn so its front looks along -x; its width runs
+ * front-to-back along the forearm's side and its height along the forearm.
+ */
+export function strapShield(c, oc, kind, q = 0, emblem = null) {
   const L = 'elbowL';
-  // A shield covers a body. The first pass was 0.34 units across on a body 1.35 tall — the size of
-  // a dinner plate, and it read as one. These are a real heater, kite and tower, in that order.
-  const w = kind === 'tower' ? 0.23 : kind === 'kite' ? 0.19 : 0.21;
-  const h = kind === 'tower' ? 0.74 : kind === 'kite' ? 0.64 : 0.52;
-  // mid-forearm and a little proud of it, cocked out so it faces whatever is in front of you
-  const pos = [0, -0.07, 0.10];
-  const rot = [0, 0, 0.18];
+  const w = kind === 'tower' ? 0.23 : kind === 'kite' ? 0.19 : kind === 'round' ? 0.22 : kind === 'buckler' ? 0.12 : 0.21;
+  const h = kind === 'tower' ? 0.74 : kind === 'kite' ? 0.64 : kind === 'round' ? 0.44 : kind === 'buckler' ? 0.24 : 0.52;
+  const T = c.T || 1, A = c.A || 1;
+  const pos = [-0.1, -0.11 * T * A, 0.02];
+  const rot = [0, -Math.PI / 2, 0];
   const face = kind === 'kite'
     ? [[-w, h * 0.5], [w, h * 0.5], [w * 0.85, -h * 0.1], [0, -h * 0.5], [-w * 0.85, -h * 0.1]]
     : kind === 'tower'
       ? [[-w, h * 0.5], [w, h * 0.5], [w, -h * 0.5], [-w, -h * 0.5]]
-      : [[-w, h * 0.5], [w, h * 0.5], [w * 0.8, -h * 0.15], [0, -h * 0.5], [-w * 0.8, -h * 0.15]];
+      : kind === 'round' || kind === 'buckler'
+        ? Array.from({ length: 14 }, (_, i) => { const t = i / 14 * Math.PI * 2; return [Math.cos(t) * w, Math.sin(t) * h * 0.5]; })
+        : [[-w, h * 0.5], [w, h * 0.5], [w * 0.8, -h * 0.15], [0, -h * 0.5], [-w * 0.8, -h * 0.15]];
+  // the board, and a rim a shade darker just behind it
   c.add(extrude(face, 0.024), L, oc, { position: pos, rotation: rot, metal: true });
-  // the rim and the boss, so it is a shield rather than a board
-  c.add(extrude(face.map(([x, y]) => [x * 1.06, y * 1.04]), 0.012), L, tone(oc, 0.7), { position: [pos[0], pos[1], pos[2] - 0.006], rotation: rot, metal: true });
-  c.add(low(), L, lift(oc, 0.3), { position: [pos[0], pos[1] + h * 0.05, pos[2] + 0.03], scale: [0.05, 0.05, 0.022], metal: true });
-  // …and the straps the arm actually goes through
+  c.add(extrude(face.map(([x, y]) => [x * 1.06, y * 1.04]), 0.012), L, tone(oc, 0.7), { position: [pos[0] + 0.006, pos[1], pos[2]], rotation: rot, metal: true });
+  // the boss on the outside
+  c.add(low(), L, lift(oc, 0.3), { position: [pos[0] - 0.03, pos[1] + h * 0.05, pos[2]], scale: [0.022, 0.05, 0.05], metal: true });
+  if (emblem === 'cross') {
+    c.add(new THREE.BoxGeometry(0.012, h * 0.7, 0.04), L, '#f4f4f4', { position: [pos[0] - 0.016, pos[1] - h * 0.04, pos[2]] });
+    c.add(new THREE.BoxGeometry(0.012, 0.04, w * 1.3), L, '#f4f4f4', { position: [pos[0] - 0.017, pos[1] + h * 0.12, pos[2]] });
+  }
+  if (q >= 2) c.add(new THREE.IcosahedronGeometry(1, 0), L, lift(oc, 0.5), { position: [pos[0] - 0.05, pos[1] + h * 0.05, pos[2]], scale: [0.012, 0.02, 0.02], metal: true });
+  // the straps the forearm goes through
   for (const s of [-1, 1]) {
-    c.add(profile([[-0.035, 0.011, 0.011], [0.035, 0.011, 0.011]], 5), L, '#4a3624',
-      { position: [0, pos[1] + s * 0.07, pos[2] - 0.035], rotation: [0, 0, Math.PI / 2] });
+    c.add(new THREE.TorusGeometry(0.085, 0.01, 4, 10, Math.PI), L, '#4a3624', { position: [pos[0] + 0.02, pos[1] + s * 0.06, 0], rotation: [Math.PI / 2, 0, -Math.PI / 2] });
   }
 }
 
@@ -449,7 +466,7 @@ export function buildFarholdHeld(a, c) {
   const id = a.held?.id;
   const fn = BUILDERS[id];
   if (!fn) return false;
-  fn(c, a.held.color || STEEL, a.held.quality ?? 0);
+  fn(c, a.held.color || STEEL, a.held.quality ?? 0, a);
   return true;
 }
 

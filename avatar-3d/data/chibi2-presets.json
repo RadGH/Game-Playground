@@ -1,7 +1,789 @@
 {
-  "presets": [
-    { "id": "vanguard", "name": "Vanguard", "avatar": { "body": { "skin": "#e7b891" }, "headShape": "square", "hair": { "id": "short", "color": "#483a37" }, "eyes": { "id": "narrow", "color": "#477e81" }, "brows": { "id": "straight" }, "nose": { "id": "button" }, "mouth": { "id": "neutral" }, "top": { "id": "plate", "color": "#397a76", "color2": "#d9b477" }, "bottom": { "id": "pants", "color": "#394c53" }, "shoes": { "id": "boots", "color": "#62524a" }, "held": { "id": "sword", "color": "#bcccd1" }, "offhand": { "id": "heater_shield", "color": "#397a76" } } },
-    { "id": "wayfarer", "name": "Wayfarer", "avatar": { "body": { "skin": "#b67b5e", "width": 0.4 }, "headShape": "wide", "hair": { "id": "side_part", "color": "#282b35" }, "eyes": { "id": "almond", "color": "#9a6c3e", "scale": 0.92 }, "brows": { "id": "arched" }, "nose": { "id": "wide" }, "mouth": { "id": "smirk", "color": "#9e4652" }, "extras": { "id": "freckles", "color": "#9a5f4b" }, "top": { "id": "tunic", "color": "#a85b62", "color2": "#e3be8b" }, "bottom": { "id": "pants", "color": "#42575e" }, "shoes": { "id": "boots", "color": "#4c4540" } } },
-    { "id": "spellkeeper", "name": "Spellkeeper", "avatar": { "body": { "skin": "#e1ac86", "height": 0.4 }, "headShape": "heart", "hair": { "id": "long", "color": "#d4c7ad" }, "eyes": { "id": "anime", "color": "#5488a8" }, "brows": { "id": "worried" }, "nose": { "id": "small" }, "mouth": { "id": "o", "color": "#a94465" }, "extras": { "id": "blush", "color": "#d96d78" }, "ears": { "id": "pointed" }, "top": { "id": "robe", "color": "#575986", "color2": "#c5d9d0" }, "bottom": { "id": "pants", "color": "#3e4254" }, "shoes": { "id": "boots", "color": "#4b4558" }, "held": { "id": "staff_crystal", "color": "#7bdbd0" } } }
-  ]
+ "presets": [
+  {
+   "id": "vanguard",
+   "name": "Vanguard",
+   "avatar": {
+    "body": {
+     "skin": "#e7b891"
+    },
+    "headShape": "square",
+    "hair": {
+     "id": "short",
+     "color": "#483a37"
+    },
+    "eyes": {
+     "id": "narrow",
+     "color": "#477e81"
+    },
+    "brows": {
+     "id": "straight"
+    },
+    "nose": {
+     "id": "button"
+    },
+    "mouth": {
+     "id": "neutral"
+    },
+    "top": {
+     "id": "plate",
+     "color": "#397a76",
+     "color2": "#d9b477"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#394c53"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#62524a"
+    },
+    "held": {
+     "id": "sword",
+     "color": "#bcccd1"
+    },
+    "offhand": {
+     "id": "heater_shield",
+     "color": "#397a76"
+    }
+   }
+  },
+  {
+   "id": "wayfarer",
+   "name": "Wayfarer",
+   "avatar": {
+    "body": {
+     "skin": "#b67b5e",
+     "width": 0.4
+    },
+    "headShape": "wide",
+    "hair": {
+     "id": "side_part",
+     "color": "#282b35"
+    },
+    "eyes": {
+     "id": "almond",
+     "color": "#9a6c3e",
+     "scale": 0.92
+    },
+    "brows": {
+     "id": "arched"
+    },
+    "nose": {
+     "id": "wide"
+    },
+    "mouth": {
+     "id": "smirk",
+     "color": "#9e4652"
+    },
+    "extras": {
+     "id": "freckles",
+     "color": "#9a5f4b"
+    },
+    "top": {
+     "id": "tunic",
+     "color": "#a85b62",
+     "color2": "#e3be8b"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#42575e"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#4c4540"
+    }
+   }
+  },
+  {
+   "id": "spellkeeper",
+   "name": "Spellkeeper",
+   "avatar": {
+    "body": {
+     "skin": "#e1ac86",
+     "height": 0.4
+    },
+    "headShape": "heart",
+    "hair": {
+     "id": "long",
+     "color": "#d4c7ad"
+    },
+    "eyes": {
+     "id": "anime",
+     "color": "#5488a8"
+    },
+    "brows": {
+     "id": "worried"
+    },
+    "nose": {
+     "id": "small"
+    },
+    "mouth": {
+     "id": "o",
+     "color": "#a94465"
+    },
+    "extras": {
+     "id": "blush",
+     "color": "#d96d78"
+    },
+    "ears": {
+     "id": "pointed"
+    },
+    "top": {
+     "id": "robe",
+     "color": "#575986",
+     "color2": "#c5d9d0"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#3e4254"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#4b4558"
+    },
+    "held": {
+     "id": "staff_crystal",
+     "color": "#7bdbd0"
+    }
+   }
+  },
+  {
+   "id": "human_wayfarer",
+   "name": "Human wayfarer",
+   "race": "human",
+   "avatar": {
+    "body": {
+     "race": "human",
+     "skin": "#e0ac69",
+     "height": 0.55,
+     "width": 0.5
+    },
+    "headShape": "oval",
+    "hair": {
+     "id": "side_part",
+     "color": "#6b4a2a"
+    },
+    "eyes": {
+     "id": "round",
+     "color": "#4a6b8a"
+    },
+    "brows": {
+     "id": "straight"
+    },
+    "nose": {
+     "id": "small"
+    },
+    "mouth": {
+     "id": "smile",
+     "color": "#b5484d"
+    },
+    "facialHair": {
+     "id": "stubble"
+    },
+    "top": {
+     "id": "travel_shirt",
+     "color": "#c8b890",
+     "color2": "#8a6a4a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#4a4038"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#5a4030"
+    },
+    "cape": {
+     "id": "travel_cloak",
+     "color": "#4a5a3a"
+    },
+    "decor": {
+     "id": "bedroll_pack",
+     "color": "#7a6a4a"
+    },
+    "held": {
+     "id": "fh_sword",
+     "color": "#c8ccd6"
+    }
+   }
+  },
+  {
+   "id": "elf_archer",
+   "name": "Elf archer",
+   "race": "elf",
+   "avatar": {
+    "body": {
+     "race": "elf",
+     "skin": "#f1c27d"
+    },
+    "headShape": "oval",
+    "hair": {
+     "id": "long",
+     "color": "#f2e2b0"
+    },
+    "eyes": {
+     "id": "almond",
+     "color": "#3a8a5a"
+    },
+    "brows": {
+     "id": "thin"
+    },
+    "nose": {
+     "id": "small"
+    },
+    "mouth": {
+     "id": "neutral",
+     "color": "#a04040"
+    },
+    "ears": {
+     "id": "pointed"
+    },
+    "top": {
+     "id": "leather",
+     "color": "#3a5a3a",
+     "color2": "#c8c0a0"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#2a3a2a"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#4a3a2a"
+    },
+    "hat": {
+     "id": "circlet",
+     "color": "#c8c8d8"
+    },
+    "held": {
+     "id": "bow",
+     "color": "#6a4a2a"
+    },
+    "offhand": {
+     "id": "quiver",
+     "color": "#5a3a2a"
+    }
+   }
+  },
+  {
+   "id": "dwarf_smith",
+   "name": "Dwarf smith (round)",
+   "race": "dwarf",
+   "avatar": {
+    "body": {
+     "race": "dwarf",
+     "skin": "#e0ac69",
+     "round": 0.85
+    },
+    "headShape": "square",
+    "hair": {
+     "id": "braids",
+     "color": "#a86a3a"
+    },
+    "eyes": {
+     "id": "narrow",
+     "color": "#6b4a2a"
+    },
+    "brows": {
+     "id": "thick"
+    },
+    "nose": {
+     "id": "button"
+    },
+    "mouth": {
+     "id": "neutral",
+     "color": "#a04040"
+    },
+    "facialHair": {
+     "id": "braided_beard",
+     "color": "#a86a3a"
+    },
+    "top": {
+     "id": "smith_apron",
+     "color": "#5a3a28",
+     "color2": "#c8b8a0"
+    },
+    "bottom": {
+     "id": "baggy",
+     "color": "#4a4a52"
+    },
+    "shoes": {
+     "id": "heavy",
+     "color": "#3a2a1a"
+    },
+    "extras": {
+     "id": "soot",
+     "color": "#333333"
+    },
+    "decor": {
+     "id": "belt_pouches",
+     "color": "#6a4a2a"
+    },
+    "held": {
+     "id": "fh_hammer",
+     "color": "#8a8f99"
+    }
+   }
+  },
+  {
+   "id": "orc_berserker",
+   "name": "Orc berserker (two two-handers)",
+   "race": "orc",
+   "avatar": {
+    "body": {
+     "race": "orc",
+     "skin": "#7fa86a"
+    },
+    "headShape": "wide",
+    "hair": {
+     "id": "mohawk",
+     "color": "#111111"
+    },
+    "eyes": {
+     "id": "angry",
+     "color": "#c33333"
+    },
+    "brows": {
+     "id": "angry"
+    },
+    "nose": {
+     "id": "wide"
+    },
+    "mouth": {
+     "id": "tusks",
+     "color": "#7a2a2a"
+    },
+    "ears": {
+     "id": "pointed"
+    },
+    "extras": {
+     "id": "warpaint",
+     "color": "#8a2e2e"
+    },
+    "top": {
+     "id": "harness",
+     "color": "#4a3020"
+    },
+    "bottom": {
+     "id": "loincloth",
+     "color": "#6a4a2a"
+    },
+    "shoes": {
+     "id": "wraps",
+     "color": "#8a7a5a"
+    },
+    "cape": {
+     "id": "tattered_cape",
+     "color": "#3a3030"
+    },
+    "decor": {
+     "id": "trophy_belt",
+     "color": "#6a5030"
+    },
+    "held": {
+     "id": "fh_greataxe",
+     "color": "#9aa0a8"
+    },
+    "offhand": {
+     "id": "fh_greatsword",
+     "color": "#9aa0a8"
+    }
+   }
+  },
+  {
+   "id": "hill_giant",
+   "name": "Hill giant",
+   "race": "giant",
+   "avatar": {
+    "body": {
+     "race": "giant",
+     "skin": "#b8a18a"
+    },
+    "headShape": "square",
+    "hair": {
+     "id": "long",
+     "color": "#888888"
+    },
+    "eyes": {
+     "id": "narrow",
+     "color": "#4a6b8a"
+    },
+    "brows": {
+     "id": "thick"
+    },
+    "nose": {
+     "id": "wide"
+    },
+    "mouth": {
+     "id": "frown",
+     "color": "#8a4040"
+    },
+    "facialHair": {
+     "id": "braided_beard",
+     "color": "#888888"
+    },
+    "top": {
+     "id": "fur_tunic",
+     "color": "#6a4a2a",
+     "color2": "#d8c8a8"
+    },
+    "bottom": {
+     "id": "kilt",
+     "color": "#3a5a3a"
+    },
+    "shoes": {
+     "id": "wraps",
+     "color": "#8a7a5a"
+    },
+    "cape": {
+     "id": "fur_mantle",
+     "color": "#8a7050"
+    },
+    "held": {
+     "id": "fh_maul",
+     "color": "#7a7068"
+    }
+   }
+  },
+  {
+   "id": "goblin_scrapper",
+   "name": "Goblin scrapper",
+   "race": "goblin",
+   "avatar": {
+    "body": {
+     "race": "goblin",
+     "skin": "#8aa05a"
+    },
+    "headShape": "heart",
+    "hair": {
+     "id": "bald",
+     "color": "#111111"
+    },
+    "eyes": {
+     "id": "wide",
+     "color": "#e0c040"
+    },
+    "brows": {
+     "id": "raised"
+    },
+    "nose": {
+     "id": "long"
+    },
+    "mouth": {
+     "id": "grin",
+     "color": "#7a2a2a"
+    },
+    "ears": {
+     "id": "big"
+    },
+    "top": {
+     "id": "rags",
+     "color": "#6a5a4a"
+    },
+    "bottom": {
+     "id": "shorts",
+     "color": "#4a3a2a"
+    },
+    "shoes": {
+     "id": "barefoot"
+    },
+    "hat": {
+     "id": "leather_cap",
+     "color": "#5a4030"
+    },
+    "decor": {
+     "id": "knife_rig",
+     "color": "#4a3020"
+    },
+    "held": {
+     "id": "fh_daggers",
+     "color": "#b0b4bc"
+    }
+   }
+  },
+  {
+   "id": "halfling_traveller",
+   "name": "Halfling traveller (round)",
+   "race": "halfling",
+   "avatar": {
+    "body": {
+     "race": "halfling",
+     "skin": "#f1c27d",
+     "round": 0.7,
+     "cheeks": true
+    },
+    "headShape": "round",
+    "hair": {
+     "id": "curly",
+     "color": "#6b4a2a"
+    },
+    "eyes": {
+     "id": "happy",
+     "color": "#6b4a2a"
+    },
+    "brows": {
+     "id": "arched"
+    },
+    "nose": {
+     "id": "button"
+    },
+    "mouth": {
+     "id": "smile",
+     "color": "#b5484d"
+    },
+    "ears": {
+     "id": "pointed"
+    },
+    "top": {
+     "id": "vest",
+     "color": "#6a3a2a",
+     "color2": "#e8e2d2"
+    },
+    "bottom": {
+     "id": "breeches",
+     "color": "#3a4a2a"
+    },
+    "shoes": {
+     "id": "barefoot"
+    },
+    "decor": {
+     "id": "waterskin",
+     "color": "#7a5a3a"
+    },
+    "hat": {
+     "id": "straw",
+     "color": "#d8c078"
+    }
+   }
+  },
+  {
+   "id": "barrow_wight",
+   "name": "Barrow wight",
+   "race": "undead",
+   "avatar": {
+    "body": {
+     "race": "undead",
+     "skin": "#a8b0a0"
+    },
+    "headShape": "long",
+    "hair": {
+     "id": "long",
+     "color": "#eeeeee"
+    },
+    "eyes": {
+     "id": "glow",
+     "color": "#7fe0ee"
+    },
+    "brows": {
+     "id": "none"
+    },
+    "nose": {
+     "id": "small"
+    },
+    "mouth": {
+     "id": "stitched",
+     "color": "#5a2a2a"
+    },
+    "extras": {
+     "id": "undead_skin",
+     "color": "#5a5a5a"
+    },
+    "top": {
+     "id": "chainmail",
+     "color": "#5a5f66",
+     "color2": "#3a3a3a"
+    },
+    "bottom": {
+     "id": "ragged",
+     "color": "#3a3a3a"
+    },
+    "shoes": {
+     "id": "wraps",
+     "color": "#6a6a5a"
+    },
+    "cape": {
+     "id": "tattered_cape",
+     "color": "#2a2a30"
+    },
+    "hat": {
+     "id": "crown",
+     "color": "#8a8a70"
+    },
+    "held": {
+     "id": "fh_longsword",
+     "color": "#8a9aa8"
+    },
+    "offhand": {
+     "id": "round_shield",
+     "color": "#4a4a4a"
+    }
+   }
+  },
+  {
+   "id": "beastkin_hunter",
+   "name": "Beastkin hunter",
+   "race": "beast",
+   "avatar": {
+    "body": {
+     "race": "beast",
+     "skin": "#a87a4a"
+    },
+    "headShape": "wide",
+    "hair": {
+     "id": "spiky",
+     "color": "#3b2a1a"
+    },
+    "eyes": {
+     "id": "slit",
+     "color": "#e0c040"
+    },
+    "brows": {
+     "id": "angry"
+    },
+    "nose": {
+     "id": "snout"
+    },
+    "mouth": {
+     "id": "fangs",
+     "color": "#7a2a2a"
+    },
+    "ears": {
+     "id": "pointed"
+    },
+    "top": {
+     "id": "strapped_leather",
+     "color": "#5a4030"
+    },
+    "bottom": {
+     "id": "kilt",
+     "color": "#4a3a2a"
+    },
+    "shoes": {
+     "id": "barefoot"
+    },
+    "cape": {
+     "id": "fur_mantle",
+     "color": "#6a5a4a"
+    },
+    "held": {
+     "id": "fh_spear",
+     "color": "#a0a8b0"
+    }
+   }
+  },
+  {
+   "id": "wizard",
+   "name": "Wizard (wand and tome)",
+   "race": "human",
+   "avatar": {
+    "body": {
+     "race": "human",
+     "skin": "#ffdbb4",
+     "height": 0.7,
+     "width": 0.3
+    },
+    "headShape": "long",
+    "hair": {
+     "id": "long",
+     "color": "#eeeeee"
+    },
+    "eyes": {
+     "id": "sleepy",
+     "color": "#5a4aaa"
+    },
+    "brows": {
+     "id": "thick"
+    },
+    "nose": {
+     "id": "hook"
+    },
+    "mouth": {
+     "id": "neutral",
+     "color": "#a04040"
+    },
+    "facialHair": {
+     "id": "long",
+     "color": "#eeeeee"
+    },
+    "top": {
+     "id": "robe",
+     "color": "#3b3d8a",
+     "color2": "#c9a227"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#2a2a3a"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#3b2a1a"
+    },
+    "hat": {
+     "id": "wizard",
+     "color": "#3b3d8a"
+    },
+    "held": {
+     "id": "fh_wand",
+     "color": "#b8a0ff"
+    },
+    "offhand": {
+     "id": "book",
+     "color": "#3a2a6a"
+    }
+   }
+  },
+  {
+   "id": "shield_fighter",
+   "name": "Shield fighter",
+   "race": "human",
+   "avatar": {
+    "body": {
+     "race": "human",
+     "skin": "#e0ac69",
+     "width": 0.65
+    },
+    "headShape": "round",
+    "hair": {
+     "id": "curly",
+     "color": "#3b2a1a"
+    },
+    "eyes": {
+     "id": "narrow",
+     "color": "#4a6b8a"
+    },
+    "brows": {
+     "id": "straight"
+    },
+    "nose": {
+     "id": "small"
+    },
+    "mouth": {
+     "id": "neutral",
+     "color": "#a04040"
+    },
+    "top": {
+     "id": "plate",
+     "color": "#8a8f99",
+     "color2": "#c9a227"
+    },
+    "bottom": {
+     "id": "greaves",
+     "color": "#5a5f66"
+    },
+    "shoes": {
+     "id": "heavy",
+     "color": "#3a2a1a"
+    },
+    "held": {
+     "id": "fh_sword",
+     "color": "#c8ccd6"
+    },
+    "offhand": {
+     "id": "fh_heater_shield",
+     "color": "#2f4f7f"
+    }
+   }
+  }
+ ]
 }

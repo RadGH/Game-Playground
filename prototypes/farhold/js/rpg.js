@@ -22,7 +22,7 @@ import { SLOT_AFFIX_LIST, startingVehicles } from './gear.js';
 import { buildForest, perkBonuses, pointsFor, pointsLeft } from './perks.js';
 import {
   handsOf, profileOf, offhandRefusal, quiverGoesWith, OFFHAND_DAMAGE, markHands, describeWeapon,
-  strikeAt, traitsOf, familyWind, rangedPlan, clipFor, CLIP_SECONDS, isStaff, isWand, STAFF_CHARGE,
+  strikeAt, traitsOf, familyWind, rangedPlan, clipFor, CLIP_SECONDS, animFamilyOf, isStaff, isWand, STAFF_CHARGE,
 } from './weapons.js';
 // `incomingFrom` is the one place a status's "takes more of everything" is turned into a number.
 // js/main.js applies it when an ENEMY swings and never when the player does, so shock, marks and
@@ -480,20 +480,23 @@ export function levelFromXp(xp, cap = LEVEL_CAP) {
  *
  * Pure arithmetic over js/weapons.js, so the node tests drive it without a browser.
  */
-function swingPlanFor(item, { off = false } = {}) {
+function swingPlanFor(item, { off = false, pairedTwo = false } = {}) {
   if (!item || item.type !== 'weapon') {
-    return { hold: null, steps: [{ key: 'jab', windMs: 60, every: 0.46, clip: 'jab', clipSeconds: 0.26 }] };
+    return { hold: null, steps: [{ key: 'jab', windMs: 60, every: 0.46, clip: off ? 'offThrust' : 'jab', clipSeconds: 0.26 }] };
   }
   const profile = profileOf(item);
   const two = !!profile.twoHanded;
+  const family = animFamilyOf(item);
   const steps = profile.pattern.map((key, i) => {
     const strike = strikeAt(item, i);
+    // R24 (Chibi 2 overhaul): the clip knows the weapon FAMILY and which hand is swinging
+    const clip = clipFor(key, { twoHanded: two, step: i, family, off, pairedTwo, last: i === profile.pattern.length - 1 });
     return {
       key,
       windMs: familyWind(item) * (strike.wind || 1),
       every: strike.every,
-      clip: clipFor(key, { twoHanded: two, step: i }),
-      clipSeconds: CLIP_SECONDS[clipFor(key, { twoHanded: two, step: i })] || 0.5,
+      clip,
+      clipSeconds: CLIP_SECONDS[clip] || 0.5,
     };
   });
   const traits = traitsOf(item);
@@ -614,6 +617,19 @@ export function offhandLookFor(item) {
   if (item.look?.offhand) return { id: item.look.offhand, color: item.look.color || '#9aa3ad' };
   // strapped to the forearm, not gripped in the fist — see chibi2-weapons.js
   if (item.isShield || item.isMagicShield) return { id: item.isMagicShield ? 'fh_kite_shield' : 'fh_heater_shield', color: '#8d97a3', quality: item.rarity === 'legendary' ? 3 : item.rarity === 'rare' ? 2 : 0 };
+  /**
+   * A SECOND WEAPON IS SEEN. Anything in the off hand that is not on the list above used to render
+   * as nothing at all, so a dual wielder — and a Doubled Grasp pair of two-handers — swung an
+   * invisible weapon with the left hand. Chibi 2 builds any held weapon in either hand now
+   * (avatar-3d/js/chibi2-gear.js `buildOffhandWeapon`), so the off hand shows what the main hand
+   * would; a tome is the off-hand book and an orb the off-hand orb.
+   */
+  if (item.type === 'weapon' && !OFFHAND_BY_SUBTYPE[item.subtype]) {
+    if (item.subtype === 'tome' || item.baseKey === 'tome') return { id: 'book', color: item.rarity === 'legendary' ? '#6a2a6a' : '#5a2a2a' };
+    if (item.subtype === 'orb' || item.baseKey === 'orb') return { id: 'orb', color: '#8fd0ff' };
+    const held = heldLookFor(item);
+    if (held.id && held.id !== 'none' && !/^staff|^bow$|^crossbow$|^fh_wand$|^book$|^orb$/.test(held.id)) return { ...held };
+  }
   const id = OFFHAND_BY_SUBTYPE[item.subtype] || 'none';
   return { id, color: '#9aa3ad' };
 }
@@ -1043,9 +1059,11 @@ export class Rpg {
      * whole plan goes here: how long each strike of the pattern takes to come round, which clip it
      * plays, and whether this weapon is held rather than clicked.
      */
+    // two two-handers at once (Doubled Grasp) swing as a pair: see clipFor's `pairedTwo`
+    const pairedTwo = !!(unit.equipment?.weapon?.twoHanded && unit.equipment?.offhand?.type === 'weapon' && unit.equipment?.offhand?.twoHanded);
     d.swing = {
-      main: swingPlanFor(unit.equipment?.weapon),
-      off: swingPlanFor(unit.equipment?.offhand, { off: true }),
+      main: swingPlanFor(unit.equipment?.weapon, { pairedTwo }),
+      off: swingPlanFor(unit.equipment?.offhand, { off: true, pairedTwo }),
     };
     /** A weapon that parries. A staff, a rapier and a polearm all do; a hammer does not. */
     const guard = traitsOf(unit.equipment?.weapon)?.guard || 0;

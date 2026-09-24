@@ -660,6 +660,14 @@
     },
     "extras": {
      "id": "wrinkles"
+    },
+    "held": {
+     "id": "fh_wand",
+     "color": "#b8a0ff"
+    },
+    "offhand": {
+     "id": "book",
+     "color": "#3a2a6a"
     }
    }
   },

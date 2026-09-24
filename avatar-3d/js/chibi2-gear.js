@@ -17,7 +17,8 @@ import { profile, taperedCurve } from './chibi2-geometry.js';
  * id that nothing in this file has ever used, so a look that does not name one reaches exactly the
  * code it always did. See `avatar-3d/js/chibi2-weapons.js` for why it is a separate file.
  */
-import { buildFarholdHeld, buildFarholdOffhand } from './chibi2-weapons.js';
+import { buildFarholdHeld, buildFarholdOffhand, strapShield } from './chibi2-weapons.js';
+import { HELD_WEAPON_IDS } from './chibi2-weapon-ids.js';
 
 const low = () => new THREE.SphereGeometry(1, 8, 5);
 const gem = () => new THREE.IcosahedronGeometry(1, 0);
@@ -43,11 +44,13 @@ function polyline(c, bone, pts, r, color, opts = {}) {
   for (let i = 0; i < pts.length - 1; i++) c.add(taperedCurve([pts[i], pts[i + 1]], [r, r], 4, 1), bone, color, opts);
 }
 /** A hanging sheet on the chest bone: width and z blend from top to bottom, both sides visible. */
-function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx = 5, sy = 7, ripple = 0.012 }) {
+function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx = 5, sy = 7, ripple = 0.012, tatter = 0 }) {
   const g = new THREE.PlaneGeometry(1, 1, sx, sy), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const u = p.getX(i), v = 0.5 - p.getY(i);
-    p.setXYZ(i, x + u * THREE.MathUtils.lerp(width, bottom, v), top - v * length, THREE.MathUtils.lerp(zTop, zBottom, v) + Math.cos(u * 18) * ripple * v);
+    // a tattered hem: every other column of the bottom row is pulled up into a notch
+    const notch = tatter && v > 0.99 ? (Math.round((u + 0.5) * sx) % 2 ? tatter : 0) : 0;
+    p.setXYZ(i, x + u * THREE.MathUtils.lerp(width, bottom, v), top - v * length + notch, THREE.MathUtils.lerp(zTop, zBottom, v) + Math.cos(u * 18) * ripple * v);
   }
   g.computeVertexNormals();
   const back = backface(g);
@@ -94,9 +97,15 @@ export function buildHeld(a, c) {
     return;
   }
   if (id === 'bow') {
-    shaft(R, -0.08, 0.08, 0.02, leather);
-    add(taperedCurve([[0, -0.42, z], [0.18, 0, z], [0, 0.42, z]], [0.018, 0.028, 0.018], 5, 6), R, hc, { metal: true });
-    polyline(c, R, [[0, -0.42, z], [0, 0.42, z]], 0.004, '#e8e0c0'); return;
+    // THE BOW IS IN THE LEFT HAND (the right draws the string). Built for the shot: with the arm
+    // held out, the hand's +z is up and -y is toward the target, so the limbs run along z and the
+    // belly faces -y. The grip bone stands it upright at rest (see REST_PITCH.bow).
+    const L = 'handL', G = [0, -0.035, 0.055];
+    const at = ([x, y, z]) => [x + G[0], y + G[1], z + G[2]];
+    add(profile([[-0.06, 0.022, 0.022], [0.06, 0.022, 0.022]], 8), L, leather, { position: G, rotation: [Math.PI / 2, 0, 0] });
+    for (const k of [-1, 1]) add(taperedCurve([at([0, -0.01, k * 0.05]), at([0, 0.02, k * 0.24]), at([0, 0.1, k * 0.4]), at([0, 0.09, k * 0.46])], [0.024, 0.02, 0.014, 0.008], 5, 8), L, hc, { metal: true });
+    polyline(c, L, [at([0, 0.095, -0.455]), at([0, 0.095, 0.455])], 0.004, '#e8e0c0');
+    return;
   }
   if (id === 'crossbow') {
     add(new THREE.BoxGeometry(0.05, 0.055, 0.36), R, wood, { position: [0, -0.07, 0.19] });
@@ -105,27 +114,40 @@ export function buildHeld(a, c) {
     polyline(c, R, [[0, -0.035, 0.20], [0, -0.035, 0.40]], 0.007, steel, { metal: true });
     add(new THREE.ConeGeometry(0.014, 0.04, 5), R, steel, { position: [0, -0.035, 0.42], rotation: [Math.PI / 2, 0, 0], metal: true }); return;
   }
-  if (id === 'greataxe') {
+  // The four hafted weapons of the original kit were built with the head at +y — BEHIND the fist,
+  // up the forearm — so a chop swung the butt at the target. They are turned half a turn about the
+  // grip (a rotation, so no face is turned inside out) and now point the way every clip aims them.
+  if (['greataxe', 'hammer', 'warhammer', 'mace'].includes(id)) {
+    const flip = new THREE.Matrix4().makeRotationZ(Math.PI), m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler();
+    const addFlipped = (g, bone, color, o = {}) => {
+      g.applyMatrix4(m.compose(new THREE.Vector3(...(o.position || [0, 0, 0])), q.setFromEuler(e.set(...(o.rotation || [0, 0, 0]))), new THREE.Vector3(...(o.scale || [1, 1, 1]))));
+      g.applyMatrix4(flip);
+      add(g, bone, color, { metal: o.metal, skinTo: o.skinTo });
+    };
+    return buildHeld({ ...a, held: { ...a.held, id: id + '__raw' } }, { ...c, add: addFlipped });
+  }
+  const rawId = id.replace(/__raw$/, '');
+  if (rawId === 'greataxe') {
     shaft(R, -0.55, 0.55, 0.02, wood);
     const right = [[0.02, 0.08], [0.12, 0.10], [0.25, 0.18], [0.21, 0.06], [0.21, -0.06], [0.25, -0.18], [0.12, -0.10], [0.02, -0.08]];
     add(extrude(right, 0.02), R, hc, { position: [0, 0.44, z], metal: true });
     add(extrude(right.map(([x, y]) => [-x, y]).reverse(), 0.02), R, hc, { position: [0, 0.44, z], metal: true });
     add(new THREE.ConeGeometry(0.025, 0.09, 5), R, hc, { position: [0, 0.58, z], metal: true }); return;
   }
-  if (/hammer/.test(id)) {
-    const big = id === 'warhammer';
+  if (/hammer/.test(rawId)) {
+    const big = rawId === 'warhammer';
     shaft(R, big ? -0.55 : -0.14, big ? 0.55 : 0.36, 0.02, wood);
     add(new THREE.BoxGeometry(big ? 0.30 : 0.24, 0.14, 0.14), R, hc, { position: [0, big ? 0.46 : 0.40, z], metal: true });
     if (big) add(new THREE.ConeGeometry(0.035, 0.12, 5), R, hc, { position: [0.20, 0.46, z], rotation: [0, 0, -Math.PI / 2], metal: true });
     return;
   }
-  if (id === 'mace') {
+  if (rawId === 'mace') {
     shaft(R, -0.14, 0.34, 0.02, wood);
     add(new THREE.DodecahedronGeometry(0.11, 0), R, hc, { position: [0, 0.42, z], metal: true });
     for (const [x, y, zz, rx, rz] of [[0.11, 0.42, 0, 0, -1.57], [-0.11, 0.42, 0, 0, 1.57], [0, 0.53, 0, 0, 0], [0, 0.42, 0.11, 1.57, 0], [0, 0.42, -0.11, -1.57, 0]]) add(new THREE.ConeGeometry(0.025, 0.07, 4), R, hc, { position: [x, y, z + zz], rotation: [rx, 0, rz], metal: true });
     return;
   }
-  if (id === 'daggers') { sword(R, 0.34); sword('handL', 0.34); return; }
+  if (id === 'daggers') { sword(R, 0.34); if (a.offhand.id === 'none') sword('handL', 0.34); return; }
   if (id === 'rapier') {
     shaft(R, -0.12, 0.08, 0.017, '#333333');
     add(profile([[-0.68, 0.003, 0.003], [-0.14, 0.012, 0.012]], 5), R, steel, { position: [0, -0.025, z], metal: true });
@@ -203,11 +225,21 @@ export function buildOffhand(a, c) {
   if (id === 'none') return;
   if (buildFarholdOffhand(a, c)) return;         // an `fh_` shield, strapped to the forearm
   if (id === 'dagger') { add(profile([[-0.22, 0.015, 0.015], [0.15, 0.015, 0.015]], 5), L, steel, { position: [0, 0.01, 0.08], metal: true }); return; }
-  if (id === 'book') { add(new THREE.BoxGeometry(0.16, 0.20, 0.035), L, oc, { position: [0, 0.02, 0.10] }); return; }
+  if (id === 'book') {
+    // A TOME, carried by its spine in the left hand: a thick board cover, a page block set back inside
+    // it, corner caps, a clasp across the fore-edge and a ribbon marker hanging out of the bottom.
+    const B = [0, -0.1, 0.1], cover = oc || '#5a2a2a', brass = '#c8a040';
+    add(new THREE.BoxGeometry(0.05, 0.24, 0.18), L, cover, { position: B });
+    add(new THREE.BoxGeometry(0.036, 0.226, 0.17), L, parchment, { position: [B[0], B[1], B[2] + 0.006] });
+    add(new THREE.CylinderGeometry(0.027, 0.027, 0.24, 8, 1, false, Math.PI, Math.PI), L, tone(cover, 0.8), { position: [B[0], B[1], B[2] - 0.09], rotation: [0, 0, 0] });
+    for (const y of [-1, 1]) for (const z of [1]) add(new THREE.BoxGeometry(0.056, 0.03, 0.03), L, brass, { position: [B[0], B[1] + y * 0.108, B[2] + z * 0.078], metal: true });
+    add(new THREE.BoxGeometry(0.058, 0.03, 0.05), L, brass, { position: [B[0], B[1], B[2] + 0.085], metal: true });
+    for (const x of [-1, 1]) add(low(), L, lift(cover, 0.35), { position: [B[0] + x * 0.027, B[1], B[2]], scale: [0.006, 0.035, 0.035], metal: true });
+    add(new THREE.BoxGeometry(0.004, 0.09, 0.012), L, '#b03030', { position: [B[0], B[1] - 0.15, B[2] + 0.02] });
+    return;
+  }
   if (id === 'orb') { add(new THREE.SphereGeometry(0.11, 10, 6), L, oc, { position: [0, 0.16, 0.12], metal: true }); return; }
   if (id === 'torch') { add(profile([[-0.28, 0.018, 0.018], [0.18, 0.018, 0.018]], 6), L, leather, { position: [0, 0.02, 0.08] }); add(new THREE.ConeGeometry(0.11, 0.22, 6), L, '#ff8c2a', { position: [0, 0.29, 0.08], metal: true }); return; }
-  if (id === 'round_shield') { add(new THREE.CylinderGeometry(0.22, 0.22, 0.045, 12), L, oc, { position: [0, 0.02, 0.10], rotation: [Math.PI / 2, 0, 0], metal: true }); return; }
-  if (id === 'tower_shield') { add(new THREE.BoxGeometry(0.30, 0.50, 0.06), L, oc, { position: [0, -0.02, 0.10], metal: true }); return; }
   if (id === 'quiver') {
     // Worn on the back, top over the right shoulder, with a strap across the chest.
     const rot = new THREE.Euler(0.15, 0, -0.45), dir = new THREE.Vector3(0, 1, 0).applyEuler(rot), base = new THREE.Vector3(0.07 * W, 0.08 * T, -0.20 * W);
@@ -229,24 +261,14 @@ export function buildOffhand(a, c) {
     polyline(c, L, [[-0.08, -0.09, 0.143], [-0.04, -0.04, 0.132], [0.0, -0.06, 0.125], [0.05, -0.02, 0.132]], 0.004, '#a03030');
     return;
   }
-  const shieldShape = id === 'kite_shield'
-    ? [[0, -0.36], [-0.17, -0.02], [-0.16, 0.14], [-0.09, 0.22], [0, 0.24], [0.09, 0.22], [0.16, 0.14], [0.17, -0.02]]
-    : null;
-  const shape = new THREE.Shape();
-  if (shieldShape) { shape.moveTo(...shieldShape[0]); for (const p of shieldShape.slice(1)) shape.lineTo(...p); shape.closePath(); }
-  else { shape.moveTo(0, -0.27); shape.lineTo(-0.18, -0.05); shape.lineTo(-0.18, 0.17); shape.quadraticCurveTo(0, 0.24, 0.18, 0.17); shape.lineTo(0.18, -0.05); shape.closePath(); }
-  const options = { depth: id === 'buckler' ? 0.025 : 0.035, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.014, bevelSegments: 1, steps: 1, curveSegments: 5 };
-  add(new THREE.ExtrudeGeometry(shape, options), L, trim, { position: [0, 0.02, 0.083], metal: true });
-  add(new THREE.ExtrudeGeometry(shape, options), L, oc, { position: [0, 0.02, 0.13], scale: [0.84, 0.84, 0.3] });
-  if (id === 'kite_shield') {
-    add(new THREE.BoxGeometry(0.04, 0.44, 0.012), L, '#f4f4f4', { position: [0, -0.05, 0.152] });
-    add(new THREE.BoxGeometry(0.24, 0.04, 0.012), L, '#f4f4f4', { position: [0, 0.07, 0.153] });
-  } else add(new THREE.OctahedronGeometry(0.065), L, steel, { position: [0, 0.025, 0.153], scale: [0.7, 1.1, 0.25], metal: true });
+  // every shield is strapped to the forearm, face out — see strapShield in chibi2-weapons.js
+  const kind = { kite_shield: 'kite', round_shield: 'round', tower_shield: 'tower', buckler: 'buckler' }[id] || 'heater';
+  strapShield(c, oc, kind, a.offhand.quality ?? 0, id === 'kite_shield' ? 'cross' : null);
 }
 
 // ---------------------------------------------------------------- accessories (neck, chest, wrist)
 export function buildAccessory(a, c) {
-  const id = a.accessory.id, ac = a.accessory.color, { add, W, T } = c;
+  const id = a.accessory.id, ac = a.accessory.color, { add, W, T, leather } = c;
   // Over a capelet the chain rides on the capelet and the charm hangs just below its hem.
   const over = CAPELETS.includes(a.cape.id), cz = over ? 0.07 * W : 0, cy = over ? -0.03 : 0;
   const chain = color => add(taperedCurve([[-0.09 * W, 0.29 * T, 0.07 * W + cz * 0.6], [-0.08 * W, 0.19 * T, 0.14 * W + cz], [0, 0.08 * T + cy, 0.175 * W + cz], [0.08 * W, 0.19 * T, 0.14 * W + cz], [0.09 * W, 0.29 * T, 0.07 * W + cz * 0.6]], [0.006, 0.006, 0.006], 4, 12), 'chest', color, { metal: true });
@@ -265,6 +287,10 @@ export function buildAccessory(a, c) {
   } else if (id === 'prayer_beads') {
     for (let k = 0; k < 8; k++) { const t = k / 8 * Math.PI * 2; add(gem(), 'handR', ac, { position: [Math.sin(t) * 0.074, 0.03, Math.cos(t) * 0.074], scale: [0.019, 0.019, 0.019] }); }
     add(new THREE.ConeGeometry(0.014, 0.05, 5), 'handR', '#c83a2a', { position: [0, -0.01, 0.085], rotation: [Math.PI, 0, 0] });
+  } else if (id === 'bandolier') {
+    // a strap from the right shoulder to the left hip with a row of bolts in loops
+    add(taperedCurve([[0.17 * W, 0.26 * T, 0.09 * W], [0.02, 0.1, 0.16 * W], [-0.17 * W, -0.08, 0.14 * W]], [0.022, 0.022, 0.022], 4, 8), 'chest', ac || leather);
+    for (let k = 0; k < 5; k++) { const t = 0.2 + k * 0.14, x = (0.15 - t * 0.3) * W, y = 0.24 * T - t * 0.3, zz = 0.155 * W; add(new THREE.CylinderGeometry(0.006, 0.006, 0.07, 4), 'chest', '#e8e0c0', { position: [x, y + 0.02, zz + 0.02], rotation: [0, 0, 0.8] }); }
   } else if (id === 'pocketwatch') {
     const at = [0.09 * W, 0.0, 0.155 * W];
     add(new THREE.CylinderGeometry(0.04, 0.04, 0.014, 10), 'chest', ac, { position: at, rotation: [Math.PI / 2, 0, 0], metal: true });
@@ -324,6 +350,24 @@ export function buildCape(a, c) {
     add(low(), 'chest', trim, { position: [0.12 * W, 0.26 * T, 0.13 * W], scale: [0.025, 0.025, 0.012], metal: true });
     return;
   }
+  if (id === 'travel_cloak') {
+    // A TRAVEL CLOAK: long, heavy, a hood lying rolled round the neck and a brooch pinning it at the
+    // left shoulder. The road-worn thing every Farhold traveller wears.
+    drape(c, cc, { top: 0.31 * T, length: 0.86, width: 0.44 * W, bottom: 0.66 * W, zTop: -0.155 * W, zBottom: -0.36, sx: 6, sy: 8, ripple: 0.02 });
+    for (const sgn of [-1, 1]) drape(c, tone(cc, 0.92), { x: sgn * 0.215 * W, top: 0.3 * T, length: 0.62, width: 0.06 * W, bottom: 0.1 * W, zTop: 0.02, zBottom: -0.1, sx: 2, sy: 5 });
+    const roll = [];
+    for (let k = 0; k <= 10; k++) { const t = -2.3 + k / 10 * 4.6, back = Math.max(0, -Math.cos(t)); roll.push([Math.sin(t) * (0.16 + back * 0.05) * W, (0.29 + back * 0.04) * T, Math.cos(t) * (0.11 + back * 0.06) * W - 0.01]); }
+    add(taperedCurve(roll, [0.035, 0.055, 0.065, 0.055, 0.035], 7, 18), 'chest', tone(cc, 0.85));
+    add(new THREE.TorusGeometry(0.026, 0.009, 4, 10), 'chest', '#c8a040', { position: [-0.13 * W, 0.24 * T, 0.13 * W], metal: true });
+    add(low(), 'chest', '#7a2a2a', { position: [-0.13 * W, 0.24 * T, 0.135 * W], scale: [0.016, 0.016, 0.01] });
+    return;
+  }
+  if (id === 'tattered_cape') {
+    // a ragged cape: the hem torn into points, and a couple of holes' worth of darker patches
+    drape(c, cc, { top: 0.30 * T, length: 0.72, width: 0.4 * W, bottom: 0.58 * W, zTop: -0.15 * W, zBottom: -0.3, sx: 8, sy: 7, ripple: 0.018, tatter: 0.09 });
+    add(taperedCurve([[-0.17 * W, 0.29 * T, -0.02], [0, 0.31 * T, -0.145 * W], [0.17 * W, 0.29 * T, -0.02]], [0.025, 0.028, 0.025], 5, 8), 'chest', tone(cc, 0.8));
+    return;
+  }
   // Full cape: shoulders to above the knees, flaring back so the legs clear it when walking.
   drape(c, cc, { top: 0.30 * T, length: 0.70, width: 0.40 * W, bottom: 0.60 * W, zTop: -0.15 * W, zBottom: -0.32 });
   add(taperedCurve([[-0.17 * W, 0.29 * T, -0.02], [0, 0.31 * T, -0.145 * W], [0.17 * W, 0.29 * T, -0.02]], [0.03, 0.032, 0.03], 5, 8), 'chest', cc);
@@ -332,14 +376,13 @@ export function buildCape(a, c) {
 
 // ---------------------------------------------------------------- legs: greaves and boot cuffs
 export function buildLegGear(a, c) {
-  const { add, L } = c;
+  // (Boot shafts and cuffs are part of the leg now — chibi2-body.js — so only armour is added here.)
+  const { add, L } = c, k = c.LW || 1;
   for (const side of ['L', 'R']) {
     const knee = 'knee' + side;
     if (a.bottom.id === 'greaves') {
-      add(profile([[-L * 0.40, 0.098, 0.10, 0.012], [-L * 0.22, 0.108, 0.112, 0.016], [-0.06, 0.112, 0.114, 0.014], [-0.02, 0.10, 0.10, 0.01]], 10), knee, a.bottom.color, { metal: true });
-      add(low(), knee, a.bottom.color, { position: [0, 0.0, 0.085], scale: [0.07, 0.06, 0.035], metal: true });
-    } else if (a.shoes.id === 'boots') {
-      add(profile([[-0.08, 0.112, 0.111], [-0.03, 0.12, 0.118], [-0.018, 0.105, 0.104]], 10), knee, tone(a.shoes.color, 0.8));
+      add(profile([[-L * 0.40, 0.098 * k, 0.10 * k, 0.012], [-L * 0.22, 0.108 * k, 0.112 * k, 0.016], [-0.06, 0.112 * k, 0.114 * k, 0.014], [-0.02, 0.10 * k, 0.10 * k, 0.01]], 10), knee, a.bottom.color, { metal: true });
+      add(low(), knee, a.bottom.color, { position: [0, 0.0, 0.085 * k], scale: [0.07, 0.06, 0.035], metal: true });
     }
   }
 }
@@ -439,6 +482,41 @@ export function buildDecor(a, c) {
       }
       break;
     }
+    case 'belt_pouches':
+      // two leather pouches on the belt, one each side of the buckle, with flaps and a toggle
+      for (const sx of [-1, 1]) {
+        const x = sx * 0.12 * W, y = -0.06, zz = (c.hipsZ ? c.hipsZ(x, y, 1, 0.04) : 0.19 * W);
+        add(new THREE.BoxGeometry(0.085, 0.09, 0.05), 'hips', dc, { position: [x, y, zz], rotation: [0, sx * 0.35, 0] });
+        add(new THREE.BoxGeometry(0.09, 0.04, 0.056), 'hips', tone(dc, 0.75), { position: [x, y + 0.03, zz + 0.002], rotation: [0.12, sx * 0.35, 0] });
+        add(gem(), 'hips', bone, { position: [x + sx * 0.004, y + 0.01, zz + 0.03], scale: [0.008, 0.014, 0.008] });
+      }
+      break;
+    case 'bedroll_pack': {
+      // a canvas pack on the back with a rolled blanket strapped across the top, and two shoulder straps
+      const zz = -0.2 * W;
+      add(new THREE.BoxGeometry(0.28 * W, 0.26, 0.12), 'chest', dc, { position: [0, 0.07 * T, zz] });
+      add(new THREE.BoxGeometry(0.29 * W, 0.09, 0.125), 'chest', tone(dc, 0.8), { position: [0, 0.16 * T, zz - 0.002] });
+      add(new THREE.CylinderGeometry(0.06, 0.06, 0.4 * W, 10), 'chest', '#8a6a4a', { position: [0, 0.27 * T, zz + 0.01], rotation: [0, 0, Math.PI / 2] });
+      for (const x of [-0.12, 0.12]) add(new THREE.TorusGeometry(0.062, 0.008, 4, 10), 'chest', leather, { position: [x * W, 0.27 * T, zz + 0.01], rotation: [0, Math.PI / 2, 0] });
+      for (const sx of [-1, 1]) add(taperedCurve([[sx * 0.1 * W, 0.3 * T, -0.06], [sx * 0.14 * W, 0.24 * T, 0.13 * W], [sx * 0.12 * W, 0.02 * T, 0.15 * W]], [0.016, 0.016, 0.016], 4, 6), 'chest', leather);
+      break;
+    }
+    case 'waterskin': {
+      // a leather water bag hanging at the right hip on a strap from the left shoulder
+      const x = 0.19 * W, y = -0.08, zz = 0.1 * W;
+      add(low(), 'hips', dc, { position: [x, y, zz], scale: [0.06, 0.09, 0.045] });
+      add(new THREE.CylinderGeometry(0.014, 0.018, 0.04, 6), 'hips', '#2a2a2a', { position: [x, y + 0.1, zz] });
+      add(taperedCurve([[-0.15 * W, 0.27 * T, 0.1 * W], [0.02, 0.1, 0.16 * W], [0.17 * W, -0.06, 0.13 * W]], [0.013, 0.013, 0.013], 4, 6), 'chest', tone(dc, 0.7));
+      break;
+    }
+    case 'trophy_belt':
+      // a war belt hung with what it has taken: teeth, a small skull and fur tails
+      add(taperedCurve([[-0.21 * W, 0.02, 0.1 * W], [0, -0.01, 0.18 * W], [0.21 * W, 0.02, 0.1 * W]], [0.018, 0.018, 0.018], 4, 10), 'hips', leather);
+      for (let k = 0; k < 7; k++) { const x = (-0.15 + k * 0.05) * W, zz = 0.175 * W - Math.abs(x) * 0.25; add(new THREE.ConeGeometry(0.012, 0.05, 4), 'hips', bone, { position: [x, -0.04, zz], rotation: [Math.PI, 0, 0] }); }
+      add(low(), 'hips', bone, { position: [0.12 * W, -0.06, 0.17 * W], scale: [0.032, 0.036, 0.03] });
+      for (const sx of [-1, 1]) add(gem(), 'hips', '#1c1c1c', { position: [0.12 * W + sx * 0.012, -0.055, 0.197 * W], scale: [0.008, 0.009, 0.004] });
+      for (const x of [-0.16, 0.2]) add(taperedCurve([[x * W, -0.01, 0.12 * W], [x * W * 1.05, -0.12, 0.13 * W], [x * W * 1.02, -0.22, 0.12 * W]], [0.022, 0.018, 0.004], 5, 5), 'hips', dc);
+      break;
     case 'bone_charms':
       add(taperedCurve([[-0.20 * W, 0.03, 0.12 * W], [0, -0.01, 0.17 * W], [0.20 * W, 0.03, 0.12 * W]], [0.008, 0.008, 0.008], 4, 10), 'hips', dc);
       for (const x of [-0.10, -0.05, 0.05, 0.10]) {
@@ -534,6 +612,24 @@ export function buildDecor(a, c) {
   }
 }
 
+/**
+ * Everything in a hand is skinned to that hand's GRIP bone (see createRig), which is how a clip can
+ * point a blade forward, roll the wrist through a cut, or put the weapon away for a wave.
+ */
+function gripped(c) {
+  return { ...c, add: (g, bone, color, o = {}) => c.add(g, bone, color, { ...o, skinTo: o.skinTo || (bone === 'handR' ? 'gripR' : bone === 'handL' || bone === 'elbowL' ? 'gripL' : undefined) }) };
+}
+
+/**
+ * A second weapon in the off hand: the same builder as the main hand, moved onto the left hand.
+ * `swap` exchanges the two hands' bones, so a builder written for the right hand lands in the left.
+ */
+function buildOffhandWeapon(a, c) {
+  const swap = b => b === 'handR' ? 'handL' : b === 'handL' ? 'handR' : b === 'elbowR' ? 'elbowL' : b;
+  const cc = { ...c, add: (g, bone, color, o = {}) => c.add(g, swap(bone), color, o) };
+  buildHeld({ ...a, held: { ...a.offhand } }, cc);
+}
+
 /** All gear in build order. `c` carries add/head helpers, body scale factors and shared colours. */
 export function buildGear(a, c) {
   buildLegGear(a, c);
@@ -541,6 +637,8 @@ export function buildGear(a, c) {
   buildAccessory(a, c);
   buildCape(a, c);
   buildDecor(a, c);
-  buildHeld(a, c);
-  buildOffhand(a, c);
+  const g = gripped(c);
+  buildHeld(a, g);
+  if (HELD_WEAPON_IDS.includes(a.offhand.id) && a.offhand.id !== 'dagger') buildOffhandWeapon(a, g);
+  else buildOffhand(a, g);
 }

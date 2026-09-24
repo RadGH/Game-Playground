@@ -42,3 +42,54 @@ export const FARHOLD_OFFHAND_INFO = {
   fh_tower_shield: { bone: 'elbowL', kind: 'tower' },
 };
 export const FARHOLD_OFFHAND = Object.keys(FARHOLD_OFFHAND_INFO);
+
+// ---------------------------------------------------------------- what is in each hand
+
+/**
+ * The family each held id belongs to, for the animation clips (see `HOLD_NONE` in chibi2-motion.js).
+ * Covers the original vocabulary and every `fh_` id; anything unknown is carried like a sword.
+ */
+const RIGHT_KIND = {
+  sword: 'blade', rapier: 'blade', saber: 'blade', cleaver: 'blade',
+  fh_sword: 'blade', fh_longsword: 'blade', fh_sabre: 'blade', fh_rapier: 'blade',
+  greatsword: 'heavy', greataxe: 'heavy', warhammer: 'heavy', fh_greatsword: 'heavy', fh_greataxe: 'heavy', fh_maul: 'heavy',
+  hammer: 'haft', mace: 'haft', fh_axe: 'haft', fh_hammer: 'haft', fh_mace: 'haft', fh_scepter: 'haft',
+  daggers: 'dagger', fh_dagger: 'dagger', fh_daggers: 'dagger',
+  fh_spear: 'polearm', fh_halberd: 'polearm', fh_javelin: 'polearm', fh_quarterstaff: 'polearm',
+  quarterstaff: 'staff', staff_orb: 'staff', staff_skull: 'staff', staff_crook: 'staff', staff_crystal: 'staff', staff_totem: 'staff',
+  fh_wand: 'wand', wand: 'wand',
+  lute: 'caster', book: 'caster', hourglass: 'caster', orb: 'caster', flame: 'caster', lightning: 'caster', ring_rune: 'caster',
+  crossbow: 'crossbow', bow: 'none', none: 'none',
+};
+const TWO_HANDED = new Set(['greatsword', 'greataxe', 'warhammer', 'fh_greatsword', 'fh_greataxe', 'fh_maul', 'fh_halberd', 'fh_quarterstaff', 'quarterstaff']);
+const LEFT_KIND = {
+  heater_shield: 'shield', kite_shield: 'shield', round_shield: 'shield', tower_shield: 'shield', buckler: 'shield',
+  fh_heater_shield: 'shield', fh_kite_shield: 'shield', fh_tower_shield: 'shield',
+  dagger: 'dagger', book: 'book', orb: 'orb', torch: 'torch', map: 'caster', quiver: 'none', none: 'none',
+};
+
+/**
+ * Which of an item's own axes is its striking EDGE (the rest are '+x', like a sword's edges): an axe
+ * head is extruded on its side and faces -z, a hammer's face plate is at -x, a crossbow's muzzle is
+ * +z and a bow's belly -y with its limbs along z. The clips' grip solve reads this.
+ */
+const EDGE_AXIS = { fh_axe: '-z', fh_greataxe: '-z', fh_halberd: '-z', fh_hammer: '-x', fh_maul: '-x', crossbow: '-z', bow: '-z' };
+
+/** Held ids that are weapons a hand can swing — the ones an off hand may carry as a second weapon. */
+export const HELD_WEAPON_IDS = Object.keys(RIGHT_KIND).filter(id => !['caster', 'none', 'crossbow', 'staff', 'wand'].includes(RIGHT_KIND[id]));
+
+/** `{ right, left, twoHand, dualTwo, dual }` for an avatar — see chibi2-motion.js. */
+export function holdFor(a) {
+  const hid = a?.held?.id || 'none', oid = a?.offhand?.id || 'none';
+  let right = RIGHT_KIND[hid] ?? 'blade';
+  let left = LEFT_KIND[oid] ?? (RIGHT_KIND[oid] && RIGHT_KIND[oid] !== 'none' ? RIGHT_KIND[oid] : 'none');
+  if (hid === 'bow') left = 'bow';
+  if ((hid === 'daggers' || hid === 'fh_daggers') && oid === 'none') left = 'dagger';
+  const dualTwo = right === 'heavy' && left === 'heavy';
+  const twoHand = TWO_HANDED.has(hid) && left === 'none';
+  const edgeOf = id => EDGE_AXIS[id] || '+x';
+  return {
+    right, left, twoHand, dualTwo, dual: left !== 'none' && ['blade', 'dagger', 'haft', 'heavy'].includes(left),
+    edgeR: edgeOf(hid), edgeL: hid === 'bow' ? '-z' : edgeOf(oid),
+  };
+}

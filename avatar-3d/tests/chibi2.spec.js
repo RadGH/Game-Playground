@@ -192,7 +192,7 @@ test('every part id an Emberveil class uses builds its own Chibi 2 shape, and ev
     for (const [cls, look] of Object.entries(looks.classes)) {
       const n = normalizeAvatar(look.avatar);
       if (!look.avatar.decor || look.avatar.decor.id === 'none' || n.decor.id !== look.avatar.decor.id) missingDecor.push(cls);
-      const b = await print(look.avatar); budgets[cls] = b.triangles; if (b.meshes !== 2) problems.push(cls + ': ' + b.meshes + ' meshes');
+      const b = await print(look.avatar); budgets[cls] = b.triangles; if (b.meshes < 1 || b.meshes > 2) problems.push(cls + ': ' + b.meshes + ' meshes'); // one when a look has no metal at all
       for (const slot of SLOTS) {
         const id = slot === 'headShape' ? look.avatar.headShape : look.avatar[slot]?.id; if (!id) continue;
         if ((slot === 'headShape' ? n.headShape : n[slot].id) !== id) fallback.push(cls + ' ' + slot + ':' + id);
@@ -290,7 +290,8 @@ test('the full avatar builder keeps Chibi 2 separate from the original renderer'
   await expect(page.locator('#status')).toContainText('Chibi 2:');
   await page.locator('.anim-chips .chip', { hasText: /^cast$/ }).click();
   expect(await page.evaluate(() => window.avatar3d.character.anim)).toBe('cast');
-  await page.getByRole('button', { name: 'Chibi (procedural)', exact: true }).click();
+  // the original renderer is deprecated (2026-09-24) but still selectable for comparison
+  await page.getByRole('button', { name: 'Chibi (procedural) · deprecated', exact: true }).click();
   await page.waitForFunction(() => !window.avatar3d.isBuilding() && !window.avatar3d.character.skeleton);
   await expect(page.locator('#status')).toContainText('Chibi:');
   await page.evaluate(() => { window.avatar3d.setMode('quaternius'); window.avatar3d.setMode('chibi2'); });

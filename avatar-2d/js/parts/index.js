@@ -6,8 +6,12 @@ import { top, bottom, shoes, bodyBase, armsBase, legsBase } from './clothes.js';
 import { accessory, hat, extras } from './accessories.js';
 import { cape, held, offhand, EXTRA_HATS, EXTRA_TOPS, EXTRA_ACCESSORIES, EXTRA_MARKS, EXTRA_EYES } from './gear.js';
 import { decor } from './decor.js';
+import { CHIBI2_2D } from './chibi2-parts.js';
 // Emberveil-era additions merge into the original catalogs (gear.js documents them)
-Object.assign(hat, EXTRA_HATS); Object.assign(top, EXTRA_TOPS); Object.assign(accessory, EXTRA_ACCESSORIES); Object.assign(extras, EXTRA_MARKS); Object.assign(eyes, EXTRA_EYES);
+Object.assign(hat, EXTRA_HATS);
+// Chibi 2's 2026-09-24 parts (chibi2-parts.js documents them)
+for (const [slot, extra] of Object.entries(CHIBI2_2D)) Object.assign({ top, bottom, shoes, cape, decor, facialHair, offhand }[slot], extra);
+ Object.assign(top, EXTRA_TOPS); Object.assign(accessory, EXTRA_ACCESSORIES); Object.assign(extras, EXTRA_MARKS); Object.assign(eyes, EXTRA_EYES);
 
 export const LAYERS = ['decorBack', 'hairBack', 'hatBack', 'capeBack', 'arms', 'legs', 'shoes', 'bottom', 'body', 'top', 'skirtOver', 'sleeves', 'capeFront', 'decor', 'headShape', 'ears', 'extras', 'eyes', 'brows', 'nose', 'mouth', 'facialHair', 'hairFront', 'accessory', 'hat', 'hatFront', 'offhand', 'held'];
 /** Slots a character JSON can set (each maps to a catalog). */

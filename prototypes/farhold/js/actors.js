@@ -107,6 +107,9 @@ const COMBAT_CLIPS = {
   slash: 'attack', slashBack: 'attack', thrust: 'attack', overhead: 'attack', sweep: 'attack',
   jab: 'attack', arcCut: 'attack', slam: 'attack', lunge: 'attack',
   shoot: 'attack', reload: 'attack', castPoint: 'cast', castStaff: 'cast', channel: 'cast',
+  // 2026-09-24 — the weapon families (avatar-3d/js/chibi2-motion.js CHIBI2_MELEE_ANIMS)
+  chop: 'attack', hack: 'attack', smash: 'attack', stab: 'attack', offSlash: 'attack', offThrust: 'attack',
+  twinCleave: 'attack', twinSlam: 'attack', thrust2h: 'attack', bash: 'attack', throw: 'attack', castBook: 'cast',
 };
 
 /** Animation names differ slightly between the two builders; this is the translation. */

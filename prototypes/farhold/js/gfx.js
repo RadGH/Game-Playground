@@ -8,10 +8,11 @@
 //
 // Three levels, because that is what a player can reason about:
 //
-//   off   today's picture. Straight to the screen, no tone mapping, the CPU grass tufts and the old
-//         line rain. The sky colours, the height fog, the wind and the wet ground are ON even here —
-//         they are a handful of shader instructions and no extra draw calls, so turning them off
-//         would buy nothing and lose the sunsets.
+//   off   today's picture at today's cost. Straight to the screen, no tone mapping, the CPU grass
+//         tufts and the old line rain, and the height fog and the wet ground compiled OUT of every
+//         shader. What stays: the sky's colours (worked out once a frame on the processor, so the
+//         sunsets are free) and the wind (the rain leans with it and the trees sway — a few vertex
+//         instructions, no measurable cost).
 //   low   the picture pipeline without the expensive half: an HDR frame, bloom at half resolution,
 //         ACES tone mapping and the colour grade, the GPU rain and snow with splashes, rain sheets
 //         and blown leaves at small budgets. No light shafts, no GPU grass, no multisampling.
@@ -52,9 +53,10 @@ export function resolveGraphics(level, { lowQuality = false, override = null } =
     splashes: high ? 220 : on ? 90 : 0,
     rainSheets: on,
     debris: high ? 380 : on ? 150 : 0,
-    // always on: these cost shader instructions, not draws
-    heightFog: true,
+    // per-pixel arithmetic: on everywhere but Off, which is the "as it was" level
+    heightFog: on,
+    wetGround: on,
+    // a few vertex instructions — on at every level
     sway: true,
-    wetGround: true,
   };
 }

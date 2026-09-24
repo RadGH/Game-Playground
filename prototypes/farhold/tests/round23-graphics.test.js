@@ -235,8 +235,14 @@ test('the Graphics setting: Off really turns the pipeline off, and ?quality=low 
   assert.equal(resolveGraphics('high', { lowQuality: true }).level, 'off', '?quality=low must mean Off');
   assert.equal(resolveGraphics('off', { lowQuality: true, override: 'high' }).level, 'high', '?graphics= wins');
   assert.equal(resolveGraphics('nonsense').level, 'high');
-  // the always-on pieces cost instructions, not draws, so even Off has them
-  assert.ok(off.heightFog && off.sway && off.wetGround);
+  // Off is the old cost: the per-pixel fog and wet ground are compiled out; the sway stays
+  assert.equal(off.heightFog, false);
+  assert.equal(off.wetGround, false);
+  assert.ok(off.sway && low.heightFog && low.wetGround);
+  const atmo = src('atmosphere.js');
+  assert.match(atmo, /#ifdef FH_NO_HFOG/);
+  assert.match(atmo, /'\|fh' \+ featureVersion/, 'a feature change must change every program key or nothing recompiles');
+  assert.match(src('graphics.js'), /setAtmosphereFeatures\(\{ fog: gfx\.heightFog, wet: gfx\.wetGround \}\)/);
 });
 
 test('the setting is on the panel, and the pipeline obeys it', () => {
@@ -250,7 +256,7 @@ test('the setting is on the panel, and the pipeline obeys it', () => {
   assert.ok(post.indexOf('bloom.render(renderer, null, src') < post.indexOf('final.render(renderer)'));
   assert.match(post, /vec3 col = toSRGB\( aces\( hdr \) \);/);
   const main = src('main.js');
-  assert.match(main, /if \(!key \|\| key === 'graphics'\) graphics\.setLevel\(v\.graphics\);/);
+  assert.match(main, /if \(!key \|\| key === 'graphics'\) graphics\.setLevel\(v\.graphics, \{ explicit: key === 'graphics' \}\);/);
   assert.match(main, /graphics\.render\(mode, \(\) => \{/);
 });
 
@@ -264,8 +270,9 @@ test('grass grows on grass: none on sand, ice, ash, rock, water, roads or town s
   const field = { biomeKey: 'grassland', plantable: true, road: 0, cleared: false, town: 0 };
   assert.ok(grassAt(field) > 0.7);
   assert.equal(grassAt({ ...field, plantable: false }), 0, 'grass under water');
-  assert.equal(grassAt({ ...field, road: 0.8 }), 0, 'grass on the road');
-  assert.ok(grassAt({ ...field, road: 0.35 }) < grassAt(field), 'the road shoulder should thin the grass');
+  assert.equal(grassAt({ ...field, road: 1 }), 0, 'grass on the road');
+  assert.ok(grassAt({ ...field, road: 0.95 }) < grassAt(field), 'the verge should thin the grass');
+  assert.equal(grassAt({ ...field, road: 0.5 }), grassAt(field), 'grass should reach the verge, not stop 12 m short');
   assert.equal(grassAt({ ...field, cleared: true }), 0, 'grass on a levelled plot');
   assert.equal(grassAt({ ...field, town: 1 }), 0, 'a lawn in the town square');
 });

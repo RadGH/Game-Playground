@@ -203,7 +203,8 @@ export function createPostFx(renderer, gfx) {
         F.uHighTint.value.setRGB(grade.highTint[0], grade.highTint[1], grade.highTint[2], THREE.SRGBColorSpace);
         if (bloom) bloom.strength = grade.bloom;
       }
-      if (indoors) { F.uExposure.value = 1.15; F.uSplit.value = 0.05; }
+      // underground the torch is all there is, and ACES crushes the darks — open the camera up
+      if (indoors) { F.uExposure.value = 1.6; F.uSplit.value = 0.05; }
       if (bloom) bloom.threshold = space > 0.5 ? 0.85 : 1.35;
       if (sunScreen) S.uSunPos.value.set(sunScreen.x, sunScreen.y);
       S.uAmount.value = flags.shafts ? sunVisible : 0;

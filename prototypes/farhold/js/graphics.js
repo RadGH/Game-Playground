@@ -23,7 +23,7 @@
 import * as THREE from 'three';
 import { resolveGraphics } from './gfx.js';
 import { createWind } from './wind.js';
-import { setWind, setAtmosphere, ATMO } from './atmosphere.js';
+import { setWind, setAtmosphere, setAtmosphereFeatures, refreshMaterials, ATMO } from './atmosphere.js';
 import { fogFor, gradeFor } from './sky-palette.js';
 import { createPostFx } from './postfx.js';
 import { createGpuGrass } from './grass-gpu.js';
@@ -56,6 +56,8 @@ export function createGraphics({ renderer, scene, camera, settings = null, lowQu
     document.body.classList.toggle('fh-shafts', !!gfx.shafts);
     document.body.dataset.graphics = gfx.level;
     const w = world();
+    // Off compiles the height fog and the wet ground out altogether (js/atmosphere.js FEATURES)
+    if (setAtmosphereFeatures({ fog: gfx.heightFog, wet: gfx.wetGround })) refreshMaterials(scene, w.sky?.scene);
     w.sky?.setHdr?.(gfx.postfx);
     weatherView?.setGfx?.(gfx);
     ensureGrass();
@@ -93,9 +95,12 @@ export function createGraphics({ renderer, scene, camera, settings = null, lowQu
     get level() { return gfx.level; },
     get grass() { return grass; },
     get wet() { return wet; },
-    /** The Graphics setting changed (or the world was rebuilt and the new pieces need wiring). */
-    setLevel(level) {
-      const next = resolveGraphics(level, { lowQuality, override });
+    /**
+     * The Graphics setting changed. `explicit` is the player picking a level on the panel, which
+     * wins over `?quality=low` and `?graphics=` — those only decide what the page BOOTS at.
+     */
+    setLevel(level, { explicit = false } = {}) {
+      const next = explicit ? resolveGraphics(level) : resolveGraphics(level, { lowQuality, override });
       const changed = next.level !== gfx.level;
       gfx = next;
       if (changed || !api._applied) { api._applied = true; applyLevel(); }

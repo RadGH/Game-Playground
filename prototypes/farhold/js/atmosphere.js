@@ -61,7 +61,9 @@ export const ATMO = {
 const FOG_PARS_VERTEX = /* glsl */`
 #ifdef USE_FOG
 	varying float vFogDepth;
+	#ifndef FH_NO_HFOG
 	varying vec3 vFhWorld;
+	#endif
 #endif
 #ifdef FH_SWAY
 	uniform float uFhTime;
@@ -75,16 +77,20 @@ const FOG_PARS_VERTEX = /* glsl */`
 const FOG_VERTEX = /* glsl */`
 #ifdef USE_FOG
 	vFogDepth = - mvPosition.z;
+	#ifndef FH_NO_HFOG
 	// world position without an inverse: the view matrix is a rotation R and a translation t, so
 	// world = transpose(R) * (view - t)
 	vFhWorld = transpose( mat3( viewMatrix ) ) * ( mvPosition.xyz - viewMatrix[ 3 ].xyz );
+	#endif
 #endif`;
 
 const FOG_PARS_FRAGMENT = /* glsl */`
 #ifdef USE_FOG
 	uniform vec3 fogColor;
 	varying float vFogDepth;
+	#ifndef FH_NO_HFOG
 	varying vec3 vFhWorld;
+	#endif
 	#ifdef FOG_EXP2
 		uniform float fogDensity;
 	#else
@@ -109,6 +115,9 @@ const FOG_FRAGMENT = /* glsl */`
 	#else
 		float fogFactor = smoothstep( fogNear, fogFar, vFogDepth );
 	#endif
+	#ifdef FH_NO_HFOG
+	gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+	#else
 	vec3 fhRay = vFhWorld - cameraPosition;
 	float fhDist = length( fhRay );
 	vec3 fhDir = fhRay / max( fhDist, 1e-3 );
@@ -125,10 +134,11 @@ const FOG_FRAGMENT = /* glsl */`
 	vec3 fhFogColor = mix( fogColor, uFhSunFog, fhSun );
 	fogFactor = 1.0 - ( 1.0 - fogFactor ) * ( 1.0 - fhHeightFog );
 	gl_FragColor.rgb = mix( gl_FragColor.rgb, fhFogColor, fogFactor );
+	#endif
 #endif`;
 
 const WET = /* glsl */`
-#if defined( FH_WET ) && defined( USE_FOG )
+#if defined( FH_WET ) && defined( USE_FOG ) && !defined( FH_NO_HFOG )
 	if ( uFhWet > 0.001 ) {
 		vec3 fhUp = normalize( ( viewMatrix * vec4( 0.0, 1.0, 0.0, 0.0 ) ).xyz );
 		float fhFlat = smoothstep( 0.35, 0.9, dot( normal, fhUp ) );
@@ -170,6 +180,16 @@ const SWAY = /* glsl */`
 
 let installed = false;
 
+/**
+ * What the chunks compile in. The Graphics setting's Off turns the height fog and the wet ground OFF
+ * AT COMPILE TIME, so Off costs exactly what the picture cost before round 23: on a software
+ * renderer the extra per-pixel arithmetic was measurable even with both at zero strength, because a
+ * branch on a uniform still runs both sides. Changing these bumps `featureVersion`, which is part of
+ * every program's cache key, and `refreshMaterials` recompiles what is on screen.
+ */
+const FEATURES = { fog: true, wet: true };
+let featureVersion = 0;
+
 /** Patch the chunks and the material hook. Safe to call more than once. */
 export function installAtmosphere() {
   if (installed || THREE.ShaderChunk.__farholdAtmosphere) { installed = true; return; }
@@ -194,7 +214,11 @@ export function installAtmosphere() {
       u.uFhSwayH = material.__fhSwayH || (material.__fhSwayH = { value: sway.height });
       shader.vertexShader = '#define FH_SWAY\n' + shader.vertexShader;
     }
-    if (material.isMeshLambertMaterial && material.userData?.fhWet !== false) {
+    if (!FEATURES.fog) {
+      shader.vertexShader = '#define FH_NO_HFOG\n' + shader.vertexShader;
+      shader.fragmentShader = '#define FH_NO_HFOG\n' + shader.fragmentShader;
+    }
+    if (FEATURES.wet && material.isMeshLambertMaterial && material.userData?.fhWet !== false) {
       shader.fragmentShader = '#define FH_WET\n' + shader.fragmentShader;
     }
   };
@@ -214,6 +238,7 @@ export function installAtmosphere() {
   proto.customProgramCacheKey = function () {
     const user = own.get(this);
     return (user ? user.toString() : '')
+      + '|fh' + featureVersion
       + (this.userData?.fhSway ? '|fh-sway' : '')
       + (this.isMeshLambertMaterial && this.userData?.fhWet === false ? '|fh-dry' : '');
   };
@@ -232,6 +257,26 @@ export function markSway(material, { height = 1, amount = 0.05 } = {}) {
   if (material.__fhSwayH) material.__fhSwayH.value = height;
   material.needsUpdate = true;
   return material;
+}
+
+/** Turn the height fog and the wet ground on or off (recompiles; see FEATURES). True if it changed. */
+export function setAtmosphereFeatures({ fog = true, wet = true } = {}) {
+  if (FEATURES.fog === !!fog && FEATURES.wet === !!wet) return false;
+  FEATURES.fog = !!fog; FEATURES.wet = !!wet;
+  featureVersion++;
+  return true;
+}
+export const atmosphereFeatures = () => ({ ...FEATURES, version: featureVersion });
+
+/** Ask every material in these scenes to recompile — after `setAtmosphereFeatures` changed. */
+export function refreshMaterials(...scenes) {
+  for (const scene of scenes) {
+    scene?.traverse?.(o => {
+      const m = o.material;
+      if (!m) return;
+      for (const x of Array.isArray(m) ? m : [m]) x.needsUpdate = true;
+    });
+  }
 }
 
 /** Once a frame, from js/wind.js. */

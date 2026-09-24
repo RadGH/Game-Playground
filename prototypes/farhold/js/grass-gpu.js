@@ -120,7 +120,7 @@ export function createGpuGrass(scene, { terrain, view, props = null, features = 
     uHCell: { value: 2 },
     uHRes: { value: 96 },
     uPlayer: { value: new THREE.Vector3(0, -1e4, 0) },
-    uBlade: { value: new THREE.Vector2(0.07, 0.36) },
+    uBlade: { value: new THREE.Vector2(0.075, 0.3) },
     uDensity: { value: 1 },
   };
 
@@ -214,7 +214,10 @@ export function createGpuGrass(scene, { terrain, view, props = null, features = 
         vFhGrass = fhMask.rgb * mix( 0.5, 1.12, fhT ) * ( 0.85 + fhR2.z * 0.3 );`);
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying vec3 vFhGrass;')
-      .replace('#include <color_fragment>', 'diffuseColor.rgb *= vFhGrass;');
+      .replace('#include <color_fragment>', 'diffuseColor.rgb *= vFhGrass;')
+      // both faces of a blade take the same, upward-leaning normal: three flips it for the back
+      // face of a double-sided material, which lit every blade seen from behind from below — black
+      .replace('#include <normal_fragment_begin>', 'float faceDirection = 1.0;\nvec3 normal = normalize( vNormal );\nvec3 nonPerturbedNormal = normal;');
   };
   material.customProgramCacheKey = () => 'farhold-gpu-grass-v1';
 
@@ -225,6 +228,7 @@ export function createGpuGrass(scene, { terrain, view, props = null, features = 
   scene.add(mesh);
 
   let visible = true;
+  const ground = [0, 0, 0];
   let townList = [], townAt = [Infinity, Infinity];
   let clearedVersion = -1;
   const stats = { sampled: 0, pending: 0, blades: count, cell };
@@ -248,12 +252,21 @@ export function createGpuGrass(scene, { terrain, view, props = null, features = 
       cleared: props?.isCleared ? props.isCleared(x, z) : false,
       town: Math.max(0, town),
     });
+    /**
+     * The blade's colour is half the biome's leaf tint and half THE GROUND IT STANDS ON (the same
+     * `colorAt` the clipmap paints its vertices with), so a field sits in its ground instead of
+     * floating over it in a different green. The ground colour is linear (it is a vertex colour);
+     * the tint is sRGB (a picked colour); they are mixed in linear and stored as sRGB bytes, which
+     * the texture decodes on the way back.
+     */
     const tint = hex(grassTintFor(key));
+    terrain.colorAt?.(x, z, undefined, undefined, ground);
     // a slow wobble in the colour so a meadow is not one flat green
-    const wob = 0.9 + 0.2 * (0.5 + 0.5 * Math.sin(x * 0.043 + Math.sin(z * 0.031) * 2.1));
-    maskData[o] = Math.min(255, tint[0] * wob * 255);
-    maskData[o + 1] = Math.min(255, tint[1] * wob * 255);
-    maskData[o + 2] = Math.min(255, tint[2] * wob * 255);
+    const wob = 0.88 + 0.24 * (0.5 + 0.5 * Math.sin(x * 0.043 + Math.sin(z * 0.031) * 2.1));
+    for (let c = 0; c < 3; c++) {
+      const lin = (Math.pow(tint[c], 2.2) * 0.55 + (terrain.colorAt ? ground[c] : Math.pow(tint[c], 2.2)) * 0.45) * wob;
+      maskData[o + c] = Math.min(255, Math.round(Math.pow(Math.max(0, lin), 1 / 2.2) * 255));
+    }
     maskData[o + 3] = Math.round(d * 255);
   }
 
@@ -321,7 +334,7 @@ export function createGpuGrass(scene, { terrain, view, props = null, features = 
       }
       const cv = props?.clearedVersion ?? 0;
       if (cv !== clearedVersion) { clearedVersion = cv; held.fill(-2147483648); }
-      refreshMask(px, pz, 2200);
+      refreshMask(px, pz, 1500);
       const oc = [Math.round(px / cell), Math.round(pz / cell)];
       uniforms.uOriginCell.value.set(oc[0], oc[1]);
       const r = ring();

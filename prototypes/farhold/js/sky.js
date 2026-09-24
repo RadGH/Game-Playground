@@ -222,8 +222,13 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
       uniform float uStrength;
       varying float vD;
       void main() {
-        vec3 c = skyBands( normalize( vDir ) );
-        gl_FragColor = vec4( c, clamp( uStrength * ( 0.28 + vD * 0.72 ), 0.0, 0.97 ) );
+        vec3 d = normalize( vDir );
+        vec3 c = skyBands( d );
+        float a = clamp( uStrength * ( 0.28 + vD * 0.72 ), 0.0, 0.97 );
+        // the sun's own disc is in front of the air, not behind it: at the horizon the veil is
+        // nearly opaque, and without this a setting sun faded to a dim ring
+        float disc = smoothstep( 0.99965, 0.99988, max( dot( d, uSunDir ), 0.0 ) ) * step( 0.001, uDisc );
+        gl_FragColor = vec4( c, max( a, disc ) );
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
@@ -410,7 +415,8 @@ export function createSky({ star, system, planet, balance = {}, palette = {} } =
     const cover = clamp(env.cloud ?? 0, 0, 1);
     // the halo round the sun: strong in a clear sky, a smudge through cloud, gone below the horizon
     SKY_U.uGlowAmt.value = (1 - cover * 0.6) * (1 - gloom * 0.5) * clamp(up * 6 + 0.6, 0, 1);
-    SKY_U.uDisc.value = hdr ? 18 * (1 - cover * 0.85) * (1 - gloom * 0.8) * clamp(up * 12 + 0.5, 0, 1) : 0;
+    // HDR: a core far brighter than white for the bloom and the shafts; without it, just white
+    SKY_U.uDisc.value = (hdr ? 18 : 0.9) * (1 - cover * 0.85) * (1 - gloom * 0.8) * clamp(up * 12 + 0.5, 0, 1);
     // by day the backdrop is the sky; by night it thins to a blue wash over the stars
     SKY_U.uBackdrop.value = clamp(1 - starVisible * 0.62 - space * 0.4, 0, 1);
     // the air in front: thick in daylight, thin but never gone at night, thicker in bad weather

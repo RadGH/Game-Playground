@@ -47,7 +47,7 @@ function createStreaks(count) {
   geo.instanceCount = count;
   const uniforms = {
     uCamMod: { value: new THREE.Vector3() }, uFallOff: { value: 0 }, uWindOff: { value: new THREE.Vector2() },
-    uVel: { value: new THREE.Vector3(0, -30, 0) }, uLen: { value: 0.9 }, uWidth: { value: 0.022 },
+    uVel: { value: new THREE.Vector3(0, -30, 0) }, uLen: { value: 0.9 }, uWidth: { value: 0.016 },
     uAmount: { value: 0 }, uColor: { value: new THREE.Color(0xa8c4dd) }, uGround: { value: -1e4 },
     uCamPos: { value: new THREE.Vector3() },
   };
@@ -75,7 +75,7 @@ function createStreaks(count) {
         float horiz = length( p.xz );
         // fade at the edge of the tile, right against your face, and under the ground
         vA = ( 1.0 - smoothstep( ${(BOX * 0.32).toFixed(1)}, ${(BOX * 0.5).toFixed(1)}, horiz ) )
-           * smoothstep( 0.4, 1.6, length( p ) )
+           * smoothstep( 1.2, 4.0, length( p ) )
            * step( uGround - 0.3, p.y )
            * ( 0.55 + aSeed.w * 0.45 );
         vX = position.x;
@@ -93,7 +93,9 @@ function createStreaks(count) {
         #include <logdepthbuf_fragment>
         gl_FragColor = vec4( uColor, uAmount * vA * edge * 0.62 );
       }`,
-    transparent: true, depthWrite: false,
+    // the quad is turned to face the camera round the drop's own axis, so which way its winding
+    // faces depends on where the drop is — draw both sides or half the rain culls itself away
+    transparent: true, depthWrite: false, side: THREE.DoubleSide,
   });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.frustumCulled = false;
@@ -351,7 +353,7 @@ export function createPrecipitation(scene, gfx) {
         U.uWindOff.value.set(streaks.wind[0], streaks.wind[1]);
         U.uCamMod.value.set(posMod(cx, BOX), posMod(cy, HIGH), posMod(cz, BOX));
         U.uAmount.value = 0.35 + rainAmt * 0.65;
-        U.uLen.value = 0.8 + rainAmt * 0.7;
+        U.uLen.value = 0.45 + rainAmt * 0.45;
         U.uGround.value = ground - cy;
         // a drop catches the light: a little brighter than the sky behind it
         U.uColor.value.copy(lit).lerp(white, 0.35);

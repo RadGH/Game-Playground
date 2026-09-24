@@ -950,7 +950,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       }
       if ((!key || key === 'sunfx') && sunfx) sunfx.setEnabled(v.sunfx);
       // R23: Off / Low / High (js/gfx.js). `?quality=low` holds it at Off and `?graphics=` wins over both.
-      if (!key || key === 'graphics') graphics.setLevel(v.graphics);
+      if (!key || key === 'graphics') graphics.setLevel(v.graphics, { explicit: key === 'graphics' });
       // D15: the field of view. settings.js used to reach for `window.farhold.camera` on a timer,
       // because the agent that added it could not edit this file — it has the camera handed to it.
       if ((!key || key === 'fov') && camera?.isPerspectiveCamera && camera.fov !== v.fov) {
@@ -9970,7 +9970,10 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return planet.name;
     },
     setWeather: (key, lock = true) => { if (key === null) weather.unlock(); else weather.set(key, { lock, instant: true }); blended = weather.blend(blended); return blended; },
-    setTime: t => { state.elapsed = t; sky.update(t, { gloom: blended.gloom, cloud: blended.cloud }); },
+    // R23: WITH the player's longitude, as the frame loop does — without it `sky.isNight` right after
+    // a setTime described the time at the map's left edge, hours off local time (round4.spec's
+    // "genuinely night HERE" loop found a lon-0 night and then read a local morning sky)
+    setTime: t => { state.elapsed = t; sky.update(t, { gloom: blended.gloom, cloud: blended.cloud, longitude: control ? control.x / terrain.widthM : 0 }); },
     spawn: async (defId, level = player.level) => {
       const def = bestiary.enemies.find(d => d.id === defId) || bestiary.enemies[0];
       return field.add(def, level, control.x + 3, control.z + 3);

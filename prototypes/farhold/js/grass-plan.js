@@ -35,12 +35,14 @@ export function grassTintFor(biomeKey) { return GRASS_TINT[biomeKey] || DEFAULT_
 /**
  * The density at one point of ground, 0..1. `q` is whatever the terrain can answer:
  *   { biomeKey, plantable, road (0..1), cleared, town (0..1 how far inside a settlement) }
- * Grass fades out over the last stretch of a road's shoulder rather than stopping at a line.
+ * Grass thins over the verge of a road rather than stopping at a line.
  */
 export function grassAt(q = {}) {
   if (!q.plantable || q.cleared) return 0;
   let d = grassDensityFor(q.biomeKey);
-  d *= 1 - smoothstep(0.25, 0.5, q.road || 0);
+  // `roadAt` is a wide falloff (0.45 still twelve metres out on a 3.5 m road); the paving itself is
+  // where it is nearly 1, so the grass comes right up to the verge instead of a bare strip either side
+  d *= 1 - smoothstep(0.9, 0.985, q.road || 0);
   d *= 1 - smoothstep(0.55, 0.9, q.town || 0);
   return Math.max(0, Math.min(1, d));
 }

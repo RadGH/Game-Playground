@@ -89,11 +89,11 @@ const NUMS = ['sunI', 'ambI', 'exposure', 'dusk', 'stars', 'split', 'sat'];
 export const SKY_TABLE = [
   { y: -1.00, zenith: '#040816', upper: '#060c20', mid: '#0a1428', low: '#0e1a32', horizon: '#121f3a',
     aUpper: '#060c20', aMid: '#0a1428', aLow: '#0e1a32', aHorizon: '#121f3a', glow: '#101830',
-    sun: '#7a8cc4', sunI: 0.3, hemiSky: '#34487a', hemiGround: '#10141c', ambI: 0.46, fog: '#0d1628',
+    sun: '#8aa0d8', sunI: 0.42, hemiSky: '#4a62a0', hemiGround: '#141a26', ambI: 0.55, fog: '#0f1a30',
     exposure: 1.45, dusk: 0, stars: 1, shadowTint: '#1c2c60', highTint: '#b4c4ff', split: 0.14, sat: 0.92 },
   { y: -0.30, zenith: '#050a1c', upper: '#08102a', mid: '#0d1832', low: '#12203c', horizon: '#172644',
     aUpper: '#08102a', aMid: '#0d1832', aLow: '#12203c', aHorizon: '#172644', glow: '#182040',
-    sun: '#7a8cc4', sunI: 0.28, hemiSky: '#34487a', hemiGround: '#10141c', ambI: 0.46, fog: '#101a2e',
+    sun: '#8aa0d8', sunI: 0.4, hemiSky: '#4a62a0', hemiGround: '#141a26', ambI: 0.55, fog: '#121e34',
     exposure: 1.42, dusk: 0.05, stars: 1, shadowTint: '#1c2c60', highTint: '#b4c4ff', split: 0.14, sat: 0.92 },
   { y: -0.14, zenith: '#070d26', upper: '#0e1638', mid: '#1c1c48', low: '#322455', horizon: '#4a2a5c',
     aUpper: '#0c1330', aMid: '#0f1834', aLow: '#141c3c', aHorizon: '#172040', glow: '#5a2e60',
@@ -101,15 +101,15 @@ export const SKY_TABLE = [
     exposure: 1.3, dusk: 0.4, stars: 0.85, shadowTint: '#241e5a', highTint: '#d0a0ff', split: 0.16, sat: 1.0 },
   { y: -0.05, zenith: '#122050', upper: '#26307a', mid: '#58408c', low: '#aa507c', horizon: '#f27a48',
     aUpper: '#1c2a5e', aMid: '#2e3468', aLow: '#5c4a7a', aHorizon: '#28345c', glow: '#ff7a40',
-    sun: '#ff6a3a', sunI: 0.03, hemiSky: '#6a64a0', hemiGround: '#221c24', ambI: 0.46, fog: '#4c3c5c',
+    sun: '#ff6a3a', sunI: 0.03, hemiSky: '#7068a8', hemiGround: '#261e28', ambI: 0.56, fog: '#4c3c5c',
     exposure: 1.2, dusk: 1, stars: 0.4, shadowTint: '#3a2a6a', highTint: '#ffb080', split: 0.2, sat: 1.12 },
   { y: 0.00, zenith: '#1e3a7a', upper: '#3a4c9a', mid: '#8a5a98', low: '#e26a5a', horizon: '#ffa248',
     aUpper: '#34488e', aMid: '#5e5a96', aLow: '#b07a98', aHorizon: '#5a6690', glow: '#ffb050',
-    sun: '#ff8a40', sunI: 0.8, hemiSky: '#a08ab8', hemiGround: '#4a3430', ambI: 0.6, fog: '#b87a70',
+    sun: '#ff8a40', sunI: 0.9, hemiSky: '#a890c0', hemiGround: '#503834', ambI: 0.74, fog: '#b87a70',
     exposure: 1.08, dusk: 1, stars: 0.1, shadowTint: '#3a3070', highTint: '#ffb070', split: 0.22, sat: 1.15 },
   { y: 0.06, zenith: '#2a4a90', upper: '#4a64ac', mid: '#9a7aa8', low: '#f09060', horizon: '#ffc468',
     aUpper: '#4a64a8', aMid: '#7a82b0', aLow: '#c4a0a8', aHorizon: '#9aa0b8', glow: '#ffc070',
-    sun: '#ffa860', sunI: 1.25, hemiSky: '#a8aad0', hemiGround: '#4e3e32', ambI: 0.6, fog: '#d0a488',
+    sun: '#ffa860', sunI: 1.35, hemiSky: '#b0b0d4', hemiGround: '#524034', ambI: 0.7, fog: '#d0a488',
     exposure: 0.98, dusk: 0.75, stars: 0, shadowTint: '#2e3a66', highTint: '#ffc890', split: 0.18, sat: 1.1 },
   { y: 0.15, zenith: '#3456a6', upper: '#5278c0', mid: '#8aa2cc', low: '#e0b890', horizon: '#ffd8a0',
     aUpper: '#5a7cc0', aMid: '#8aa4cc', aLow: '#b8c0d0', aHorizon: '#c8ccd4', glow: '#ffd8a0',
@@ -218,13 +218,15 @@ export function skyState(sunY, palette = {}, env = {}) {
     // heavy weather steals the colour and the light — but a sunset under a storm still burns along
     // the horizon, where the cloud deck breaks, so the lowest bands keep more of theirs
     const grey = env.cloudGrey || GLOOM_GREY;
-    const dark = 1 - gloom * 0.3;
+    // a storm is a dark thing: the grey itself is taken down, and the camera does not open up for it
+    const dark = 1 - gloom * 0.5;
     for (const k of ['zenith', 'upper', 'mid', 'aUpper', 'aMid', 'fog', 'hemiSky']) s[k] = scale(mix(s[k], grey, gloom * 0.65), dark);
     for (const k of ['low', 'aLow']) s[k] = scale(mix(s[k], grey, gloom * 0.55), dark);
     for (const k of ['horizon', 'aHorizon', 'glow']) s[k] = scale(mix(s[k], grey, gloom * 0.42), dark);
     s.sunI *= 1 - gloom * 0.7;
     s.ambI *= 1 - gloom * 0.35;
     s.sat *= 1 - gloom * 0.22;
+    s.exposure *= 1 - gloom * 0.22;
     s.shadowTint = mix(s.shadowTint, hex('#3a4656'), gloom * 0.6);
     s.highTint = mix(s.highTint, hex('#dde4ea'), gloom * 0.6);
   }

@@ -310,7 +310,8 @@ export function createWeatherView({ scene, skyScene, palette = {}, seed = 1, qua
     for (const [i, deck] of decks.entries()) {
       const opacity = clamp(cloud * (i === 0 ? 0.95 : 0.6), 0, 1);
       deck.mesh.material.opacity = opacity;
-      deck.mesh.visible = opacity > 0.01;
+      // a clear sky's 4% cover is invisible anyway, and a whole-sky shader is not free
+      deck.mesh.visible = opacity > 0.06;
       deck.offset[0] = (deck.offset[0] + drift.u * deck.speed * dt) % 1000;
       deck.offset[1] = (deck.offset[1] + drift.v * deck.speed * dt) % 1000;
       deck.uniforms.uCloudOffset.value.set(deck.offset[0], deck.offset[1]);

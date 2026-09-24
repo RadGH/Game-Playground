@@ -327,7 +327,7 @@ test('B — the streets and the wall are told about the same circle', () => {
     'the town planner is being told about a different circle from the one the wall is built on');
   assert.ok(!/ringCrossings\(roads, cx, cz, ring, \{ limit/.test(code),
     'the link list is capped again while the gate list is not');
-  assert.match(code, /const gateAngles = ringCrossings\(roads, cx, cz, wallR\)/,
+  assert.match(code, /const (gateAngles|crossings) = ringCrossings\(roads, cx, cz, wallR\)/,
     'the gates stopped being cut where the roads actually cross the wall');
 });
 

@@ -676,9 +676,13 @@ export function ringCrossings(paths, cx, cz, ring, { minGap = 10, limit = Infini
         const dx = x - cx, dz = z - cz;
         // a road that grazes the ring crosses twice within a few metres; one gate is enough
         if (out.some(c => Math.hypot(c.dx - dx, c.dz - dz) < minGap)) continue;
+        const len = Math.sqrt(qa);
         out.push({
           x, z, dx, dz,
           angle: Math.atan2(dz, dx),
+          // R23: which way the road runs here and how wide it is, so a gate can be sized to the
+          // carriageway measured along the wall rather than guessed
+          tx: vx / len, tz: vz / len, half: r.half ?? null,
           klass: r.klass || 'trail',
           rank: ROAD_RANK[r.klass] ?? 1,
           id: r.id,

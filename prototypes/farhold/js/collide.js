@@ -83,10 +83,14 @@ export class ObstacleField {
    *
    *   field.addDeck(x, z, angle, halfLength, halfWidth, top);   // +Z is along the deck at angle 0
    */
-  addDeck(x, z, angle, halfLength, halfWidth, top) {
+  addDeck(x, z, angle, halfLength, halfWidth, top, slope = 0) {
     const r = Math.hypot(halfLength, halfWidth);
     const item = {
       x, z, r, h: 0, deck: true, top,
+      // ROUND 23: a deck may RISE along its length. `top` is the height at its middle and `slope`
+      // is metres of rise per metre along +Z, so a chain of these is a ramp with no steps in it —
+      // exactly the straight line the drawn bridge deck runs between the same two samples.
+      slope,
       // the yaw convention every body in this game uses: local +Z points along `angle`
       tx: Math.sin(angle), tz: Math.cos(angle), hl: halfLength, hw: halfWidth,
     };
@@ -103,6 +107,75 @@ export class ObstacleField {
     return this;
   }
 
+  /** A deck's top at this point: its middle height plus its rise, clamped to its own length. */
+  deckTop(o, x, z) {
+    if (!o.slope) return o.top;
+    const along = (x - o.x) * o.tx + (z - o.z) * o.tz;
+    return o.top + o.slope * Math.max(-o.hl, Math.min(o.hl, along));
+  }
+
+  /**
+   * FILE A WALL: A STRAIGHT LENGTH OF MASONRY, NOT A ROW OF CIRCLES.
+   *
+   * Round 23. *"The gate does not properly connect to the walls, you can just walk through the
+   * wall."* A town wall was filed as one 3.4 m cylinder per six-metre segment, which is a string of
+   * beads: solid where two circles overlap, and nothing at all past the last bead — so wherever a
+   * run of wall stopped short of the gate there was a gap the width of a person, invisible because
+   * the drawn wall was not where the circles were. A segment is the thing that is drawn: the line
+   * from one end of the wall piece to the other, `half` metres thick either side of it.
+   *
+   * It is never a floor (a wall top is not a walkway here) and it is always solid, whatever height
+   * your feet are at — a four-metre wall is not something anybody in this game can jump. Its ends
+   * are square (see `segPush`), so a length of wall stops where its drawn masonry stops.
+   *
+   *   field.addSegment(ax, az, bx, bz, half, height);
+   */
+  addSegment(ax, az, bx, bz, half = 0.6, height = 4) {
+    const len = Math.hypot(bx - ax, bz - az) || 1e-6;
+    const item = {
+      seg: true, ax, az, bx, bz, half, h: height,
+      x: (ax + bx) / 2, z: (az + bz) / 2, r: len / 2 + half,
+      // unit direction a -> b and its length, so the closest-point test is a dot product
+      ux: (bx - ax) / len, uz: (bz - az) / len, len,
+    };
+    const b = this.bucket;
+    const x0 = Math.min(ax, bx) - half, x1 = Math.max(ax, bx) + half;
+    const z0 = Math.min(az, bz) - half, z1 = Math.max(az, bz) + half;
+    for (let bxi = Math.floor(x0 / b); bxi <= Math.floor(x1 / b); bxi++) {
+      for (let bzi = Math.floor(z0 / b); bzi <= Math.floor(z1 / b); bzi++) {
+        const k = this._key(bxi, bzi);
+        let list = this.buckets.get(k);
+        if (!list) this.buckets.set(k, list = []);
+        list.push(item);
+      }
+    }
+    this.count++;
+    return this;
+  }
+
+  /**
+   * How far a body at (x, z) with this radius is INSIDE a wall segment, as the shortest way out:
+   * `[dx, dz]` to add to the position, or null when it is clear.
+   *
+   * A segment is a box, not a capsule: square ends, `half` either side of the line. Rounded ends
+   * would reach `half` past the drawn end of the wall — at a gate, a 1.7 m tower rounded off would
+   * narrow a ten-metre opening by three and a half metres of air you cannot walk through.
+   */
+  segPush(o, x, z, radius) {
+    const rx = x - o.ax, rz = z - o.az;
+    const along = rx * o.ux + rz * o.uz;
+    const across = rx * -o.uz + rz * o.ux;
+    const inA = Math.min(along + radius, o.len + radius - along);
+    const inV = o.half + radius - Math.abs(across);
+    if (inA <= 0 || inV <= 0) return null;
+    if (inV <= inA) {
+      const s = across >= 0 ? 1 : -1;
+      return [-o.uz * s * inV, o.ux * s * inV];
+    }
+    const s = along + radius < o.len + radius - along ? -1 : 1;
+    return [o.ux * s * inA, o.uz * s * inA];
+  }
+
   /** Is this point over a deck's footprint? */
   onDeck(o, x, z, radius = 0) {
     const dx = x - o.x, dz = z - o.z;
@@ -116,7 +189,7 @@ export class ObstacleField {
   }
 
   /** Can you stand on top of this one, or is it too narrow to be a floor? */
-  standable(o) { return o.deck ? true : o.r >= STANDABLE_RADIUS; }
+  standable(o) { return o.deck ? true : o.seg ? false : o.r >= STANDABLE_RADIUS; }
 
   /** Is this point inside something solid? */
   blocked(x, z, radius = 0) {
@@ -124,6 +197,10 @@ export class ObstacleField {
     if (!list) return false;
     for (const o of list) {
       if (o.deck) continue;                      // you walk ON a deck, never into it
+      if (o.seg) {
+        if (this.segPush(o, x, z, radius)) return true;
+        continue;
+      }
       const dx = x - o.x, dz = z - o.z, reach = o.r + radius;
       if (dx * dx + dz * dz < reach * reach) return true;
     }
@@ -134,8 +211,39 @@ export class ObstacleField {
    * Push a position out of anything it is inside. Returns [x, z] — unchanged when nothing is in
    * the way. Sliding along a wall falls out of this for free: only the overlapping axis moves.
    */
-  resolve(x, z, radius = 0.4, out = [0, 0], feet = null) {
+  resolve(x, z, radius = 0.4, out = [0, 0], feet = null, from = null) {
     out[0] = x; out[1] = z;
+    /**
+     * ROUND 23 — A THIN WALL CANNOT BE STEPPED THROUGH IN ONE FRAME.
+     *
+     * A cylinder three metres across could not be crossed in a frame; a wall segment is a metre
+     * thick, and a galloping horse on a slow frame covers more than that. So when the caller says
+     * where it came FROM, a move whose line crosses a wall segment is put back on the side it
+     * started, at the wall's face — and it keeps its movement along the wall, so it still slides.
+     */
+    if (from) {
+      const list = this.near(x, z);
+      if (list) {
+        for (const o of list) {
+          if (!o.seg) continue;
+          // the wall's normal, and each end's signed distance from its centre line
+          const nx = -o.uz, nz = o.ux;
+          const s0 = (from[0] - o.ax) * nx + (from[1] - o.az) * nz;
+          const s1 = (out[0] - o.ax) * nx + (out[1] - o.az) * nz;
+          if (s0 === 0 || Math.sign(s0) === Math.sign(s1)) continue;
+          // where along the wall the move crossed its line — only a crossing ON the wall counts
+          const k = s0 / (s0 - s1);
+          const cx = from[0] + (out[0] - from[0]) * k, cz = from[1] + (out[1] - from[1]) * k;
+          const t = (cx - o.ax) * o.ux + (cz - o.az) * o.uz;
+          if (t < -radius || t > o.len + radius) continue;
+          // a thick box (a gate tower) is not a thin wall: it is only crossed if the move also
+          // started outside it, which the ordinary push-out below handles on its own
+          if (Math.abs(s0) < o.half + radius) continue;
+          const want = Math.sign(s0) * (o.half + radius + 1e-3);
+          out[0] += nx * (want - s1); out[1] += nz * (want - s1);
+        }
+      }
+    }
     // `feet` is how high the character's feet are in the world. With it, anything whose top is
     // already below them stops being solid — which is the whole of "I cannot jump over a wall even
     // if I clear it by several feet". Without it (the default) every cylinder is infinitely tall,
@@ -147,6 +255,13 @@ export class ObstacleField {
       let moved = false;
       for (const o of list) {
         if (o.deck) continue;                    // a deck never pushes you out; it holds you up
+        if (o.seg) {
+          const push = this.segPush(o, out[0], out[1], radius);
+          if (!push) continue;
+          out[0] += push[0]; out[1] += push[1];
+          moved = true;
+          continue;
+        }
         if (over && this.standable(o) && this.topOf(o) <= feet + CLEARANCE) continue;
         const dx = out[0] - o.x, dz = out[1] - o.z;
         const reach = o.r + radius;
@@ -171,11 +286,12 @@ export class ObstacleField {
    * This is what turns "jump over the wall" into "jump ONTO the wall and then off the other side",
    * which is what a player who cleared it by several feet expects to happen.
    */
-  standAt(x, z, feet, radius = 0.4) {
+  standAt(x, z, feet, radius = 0.4, { decksOnly = false } = {}) {
     const list = this.near(x, z);
     if (!list) return null;
     let best = null;
     for (const o of list) {
+      if (decksOnly && !o.deck) continue;
       if (!o.deck && !this.ground) continue;           // a cylinder's top is measured from the ground
       if (!this.standable(o)) continue;
       if (o.deck) {
@@ -184,7 +300,7 @@ export class ObstacleField {
         const dx = x - o.x, dz = z - o.z, reach = o.r + radius;
         if (dx * dx + dz * dz >= reach * reach) continue;
       }
-      const top = this.topOf(o);
+      const top = o.deck ? this.deckTop(o, x, z) : this.topOf(o);
       if (top > feet + CLEARANCE) continue;            // we are under it, not on it
       if (best === null || top > best) best = top;
     }

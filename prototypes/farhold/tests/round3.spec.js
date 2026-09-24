@@ -569,24 +569,18 @@ test('a bridge spans its river, sits above the water, and is turned the right wa
     f.teleport(b.x, b.z);
     await new Promise(r => setTimeout(r, 400));
 
-    const mesh = f.features.instanced.bridge;
-    const m = new THREE.Matrix4();
-    const pos = new THREE.Vector3(), quat = new THREE.Quaternion(), scale = new THREE.Vector3();
-    let found = null;
-    for (let i = 0; i < mesh.count; i++) {
-      mesh.getMatrixAt(i, m); m.decompose(pos, quat, scale);
-      if (Math.hypot(pos.x - b.x, pos.z - b.z) < 2) { found = { pos: pos.clone(), quat: quat.clone(), scale: scale.clone() }; break; }
-    }
-    if (!found) return { skipped: true };
+    // R23: a bridge is drawn from its plan (js/bridge-plan.js), not as a stretched instanced box
+    const plan = f.features.bridgePlans.find(p => p.crossing === b)
+      || f.features.bridgePlans.find(p => Math.hypot(p.crossing.x - b.x, p.crossing.z - b.z) < 2);
+    if (!plan || !f.features.bridgeMesh.geometry.attributes.position) return { skipped: true };
     const river = f.terrain.riverInfoAt(b.x, b.z);
-    // the deck's long axis, in world space
-    const along = new THREE.Vector3(0, 0, 1).applyQuaternion(found.quat);
     const roadDir = new THREE.Vector3(Math.sin(b.angle), 0, Math.cos(b.angle));
+    const mid = plan.samples.reduce((m, s) => (Math.abs(s.d) < Math.abs(m.d) ? s : m));
     return {
       skipped: false,
-      alongDotRoad: Math.abs(along.dot(roadDir)),
-      deckY: found.pos.y, waterY: river.surface, riverWidth: river.width,
-      spanMetres: found.scale.z * 10,
+      alongDotRoad: Math.abs(new THREE.Vector3(plan.tx, 0, plan.tz).dot(roadDir)),
+      deckY: mid.top, waterY: river.surface, riverWidth: river.width,
+      spanMetres: plan.to - plan.from,
     };
   });
   if (bridges.skipped) return;

@@ -10,6 +10,7 @@
 import * as THREE from 'three';
 import { feel, COMBAT_FEEL } from './combat-feel.js';
 import { drawPower, chargeAt, STAFF_CHARGE } from './weapons.js';
+import { groundAt } from './ground.js';
 
 export const KEY_HELP = 'WASD move · Shift run · Space jump · click attack · 1-6 skills · V first person (hold: look around) · E talk/open/enter · L light · B build · H horse · G drive · J ship · M map · I sheet · K log · O settings · ` debug';
 
@@ -225,11 +226,12 @@ export function createController(terrainIn, balance = {}, camera, {
    * solid, so a wall you have genuinely cleared lets you through — "I cannot jump over walls and
    * structures even if I clear them by several feet".
    */
-  function unstick(x, z, feet = null) {
+  function unstick(x, z, feet = null, fromX = null, fromZ = null) {
     let ox = x, oz = z;
+    const from = fromX === null ? null : [fromX, fromZ];
     for (const field of obstacles) {
       if (!field) continue;
-      field.resolve(ox, oz, self.radius, resolved, feet);
+      field.resolve(ox, oz, self.radius, resolved, feet, from);
       ox = resolved[0]; oz = resolved[1];
     }
     return [ox, oz];
@@ -429,7 +431,8 @@ export function createController(terrainIn, balance = {}, camera, {
       let nx = self.x + (dx / len) * speed * dt;
       let nz = self.z + (dz / len) * speed * dt;
       [nx, nz] = terrain.clampToWorld(nx, nz);
-      [nx, nz] = unstick(nx, nz, self.y);
+      // R23: say where the step started, so a thin wall cannot be stepped through in one frame
+      [nx, nz] = unstick(nx, nz, self.y, self.x, self.z);
       [self.x, self.z] = terrain.clampToWorld(nx, nz);
     } else if (!frozen) {
       // even standing still, never be left inside something that was just built around you
@@ -736,7 +739,8 @@ export function createController(terrainIn, balance = {}, camera, {
     // R14: a camera swung round behind you is not something to carry across a teleport
     self.freeLook = false; self.freeYaw = 0; self.freePitch = 0;
     [self.x, self.z] = terrain.clampToWorld(x, z);
-    self.y = terrain.heightAt(self.x, self.z);
+    // R23: dropped on to a bridge, you arrive on its deck, not on the river bed under it
+    self.y = groundAt(terrain, self.x, self.z);
     self.vy = 0; self.grounded = true; self.swimming = false;
   }
 

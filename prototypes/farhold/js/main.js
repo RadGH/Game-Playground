@@ -4994,6 +4994,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     field.rankBonus = 1.7;                     // more champions and rares than out in the open
     pets.setTerrain(dungeon.terrain);
     chests = dungeon.chests;
+    handOverChests();
 
     // a pack in every room but the one you came in by, and the boss at the far end
     const packs = inst?.interior?.packs || balance.dungeon?.packsPerRoom || [1, 3];
@@ -5142,6 +5143,27 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     autoSave();
   }
 
+  /**
+   * R26 — EVERY TIME `chests` IS REPLACED, THE TWO MODULES THAT PUT BOXES DOWN ARE TOLD.
+   *
+   *   "A loot crate dropped from an event… it sat on the ground and I could not pick it up. It does
+   *    not offer to press E and does not get picked up when I walk over it… They used to work."
+   *
+   * js/encounters.js and js/sites.js were each handed the chest field ONCE, at boot. Going down into
+   * a dungeon swaps `chests` for the dungeon's own field, and coming back up builds a brand-new
+   * surface field — and nobody told either of them. From the first dungeon onwards, every road
+   * event put its crate (a defend's strongbox, a trap's bait, a find's cache) and its reward bag (a
+   * rescue, a chase) into the OLD field: the mesh and the beacon went into the scene, but `E` asks
+   * `chests.nearest` and walking over a bag asks `chests.collect`, both on the NEW field, which had
+   * never heard of them. A beam of light over a box that nothing in the game could reach. A new
+   * world (`buildPlanet`) recreated encounters and sites with no hand-over either; they happened to
+   * fall back to the chest registry there, which is why it only showed after a dungeon.
+   */
+  function handOverChests() {
+    encounters?.setChests?.(chests);
+    sites?.setChests?.(chests);
+  }
+
   function leaveDungeon() {
     if (!dungeon) return;
     dungeonOre = null;                          // the floor's seams go with the floor
@@ -5156,6 +5178,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     field.paused = false;
     pets.setTerrain(terrain);
     chests = createChests(scene, terrain, { seed, balance, zones, rpg, collide: props.solids });
+    handOverChests();
     control.setTerrain(terrain, surfaceSpot ? { ...surfaceSpot, y: null } : null);
     control.obstacles = [props.solids, features.solids, buildSolids, gateSolids, siteSolids];
     surfaceVisible(true);
@@ -6597,6 +6620,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     gates = createGates(scene, terrain, { balance, zones, radius: balance.features?.radius ?? 2600, collide: gateSolids });
     sites.dispose();
     sites = createSites(scene, terrain, { seed, balance, zones, collide: siteSolids, radius: balance.features?.radius ?? 2600 });
+    handOverChests();
     openMouths();
     clearWandererBodies();
     folk = makeFolk();
@@ -10327,6 +10351,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       return enterDungeon(g);
     },
     leaveDungeon,
+    /** R26 — the chest field that is live NOW (the `chests` key above is the one from boot). */
+    get chestField() { return chests; },
     openChest: () => { const c = chests.nearest(control.x, control.z, 999); return c ? openChest(c) : null; },
     placeChest: (kind = 'gilded') => chests.place(kind, control.x + 2, control.z + 2, { level: player.level }),
     materials: () => craft.materials.toJSON(),

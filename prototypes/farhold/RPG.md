@@ -3974,3 +3974,17 @@ Notes for the next agent:
 * The player's camera, capsule and seats still assume a human body (see Round 24 follow-up 1); a
   dwarf or halfling player works but the camera sits where a human's head would be.
 * Raidable warband bases are on the wishlist: `FUTURE_SYSTEM_BRAINSTORM.md` §7b.
+
+### Round 26 bug — event crates nobody could open (after any dungeon)
+
+"A loot crate dropped from an event… it does not offer to press E and does not get picked up when I
+walk over it." js/encounters.js and js/sites.js were handed the chest field once, at boot
+(`setChests`). Entering a dungeon swaps main.js's `chests` for the dungeon's field and leaving builds
+a NEW surface field — and neither module was told. From the first dungeon on, every road event's
+crate (defend / trap / find) and reward bag (rescue / chase) went into the old field: the mesh and
+its beacon were in the scene, but `E` asks the new field's `nearest` and walking over a bag asks its
+`collect`. Fix: `handOverChests()` in main.js, called at every place `chests` is replaced (entering a
+dungeon, leaving one, landing on a new world). No payout changed: a bag event pays by bag only and a
+crate event by crate only, so nothing pays twice. `tests/round26-event-crates.spec.js` goes down and
+back up first, then runs all 22 crate/bag events in data/events.json (fails on the old wiring at the
+first rescue bag, passes on the new).

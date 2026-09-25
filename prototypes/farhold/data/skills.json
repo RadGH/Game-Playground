@@ -250,7 +250,7 @@
    "radius": 6.5,
    "cooldown": 14,
    "mp": 16,
-   "desc": "Falls on a spot up to 32 m away, striking everything within 6.5 m of that spot for 270% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 16 mana, 14s cooldown.",
+   "desc": "Falls on a spot up to 32 m away striking everything within 6.5 m of that spot for 270% weapon damage. Leaves the target Snared: the target moves 80% slower for 3s. 16 mana, 14s cooldown.",
    "status": "web"
   },
   "poison_dart": {
@@ -320,7 +320,7 @@
    "status": "burn",
    "cooldown": 13,
    "mp": 18,
-   "desc": "Falls on a spot up to 30 m away, striking everything within 6 m of that spot for 310% weapon damage as fire. Leaves the target Burning: a further 163% weapon damage over 5s. 18 mana, 13s cooldown."
+   "desc": "Falls on a spot up to 30 m away striking everything within 6 m of that spot for 310% weapon damage as fire. Leaves the target Burning: a further 163% weapon damage over 5s. 18 mana, 13s cooldown."
   },
   "frost_nova": {
    "name": "Frost Nova",
@@ -426,7 +426,7 @@
    "radius": 5,
    "cooldown": 10,
    "mp": 18,
-   "desc": "Falls on a spot up to 34 m away, striking everything within 5 m of that spot for 340% weapon damage as arcane. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 18 mana, 10s cooldown.",
+   "desc": "Falls on a spot up to 34 m away striking everything within 5 m of that spot for 340% weapon damage as arcane. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 18 mana, 10s cooldown.",
    "status": "curse"
   },
   "meteor": {
@@ -439,7 +439,7 @@
    "status": "burn",
    "cooldown": 22,
    "mp": 30,
-   "desc": "Falls on a spot up to 36 m away, striking everything within 8 m of that spot for 830% weapon damage as fire. Leaves the target Burning: a further 436% weapon damage over 5s. 30 mana, 22s cooldown."
+   "desc": "Falls on a spot up to 36 m away striking everything within 8 m of that spot for 830% weapon damage as fire. Leaves the target Burning: a further 436% weapon damage over 5s. 30 mana, 22s cooldown."
   },
   "mend": {
    "name": "Mend",
@@ -565,6 +565,111 @@
    "cooldown": 30,
    "mp": 20,
    "desc": "Summons 1 Clockwork Sentry to fight beside you. 20 mana, 30s cooldown."
+  },
+  "flamethrower": {
+   "name": "Flamethrower",
+   "shape": "melee",
+   "element": "fire",
+   "mult": 0.4,
+   "reach": 7,
+   "arc": 0.9,
+   "repeats": 10,
+   "repeatEvery": 0.22,
+   "breath": true,
+   "status": "burn",
+   "cooldown": 10,
+   "mp": 18,
+   "desc": "Breathes a stream that strikes everything in a 52° cone 7 m in front of you 10 times over 2.2s, for 59% weapon damage as fire each time. Leaves the target Burning: a further 31% weapon damage over 5s. 18 mana, 10s cooldown."
+  },
+  "ember_stride": {
+   "name": "Ember Stride",
+   "shape": "self",
+   "element": "fire",
+   "mult": 0.25,
+   "trail": {
+    "seconds": 8,
+    "every": 0.3,
+    "radius": 1.8,
+    "burns": 2.5,
+    "step": 1.4
+   },
+   "cooldown": 20,
+   "mp": 16,
+   "desc": "For 8s, every step leaves burning ground behind you, 3.6 m across, that lasts 2.5s and strikes whatever stands in it for 57% weapon damage as fire every 0.75s. 16 mana, 20s cooldown."
+  },
+  "storm_orbs": {
+   "name": "Storm Orbs",
+   "shape": "self",
+   "element": "lightning",
+   "mult": 0.15,
+   "orbs": {
+    "count": 3,
+    "seconds": 12,
+    "every": 1.2,
+    "radius": 8,
+    "status": "shock"
+   },
+   "cooldown": 24,
+   "mp": 22,
+   "desc": "For 12s, 3 orbs circle you in a fight; each one strikes the nearest enemy within 8 m every 1.2s for 39% weapon damage as lightning and leaves it Shocked. 22 mana, 24s cooldown."
+  },
+  "blizzard": {
+   "name": "Blizzard",
+   "shape": "ground",
+   "element": "ice",
+   "mult": 0.35,
+   "range": 30,
+   "radius": 5.5,
+   "repeats": 6,
+   "repeatEvery": 0.5,
+   "weather": true,
+   "status": "chill",
+   "cooldown": 14,
+   "mp": 24,
+   "desc": "Falls on a spot up to 30 m away and strikes everything within 5.5 m of it 6 times over 3s, for 63% weapon damage as ice each time. Leaves the target Chilled: the target moves 45% slower for 4s. 24 mana, 14s cooldown."
+  },
+  "toxic_cloud": {
+   "name": "Toxic Cloud",
+   "shape": "ground",
+   "element": "poison",
+   "mult": 0.25,
+   "range": 26,
+   "radius": 5,
+   "repeats": 8,
+   "repeatEvery": 0.6,
+   "weather": true,
+   "status": "poison",
+   "cooldown": 14,
+   "mp": 20,
+   "desc": "Falls on a spot up to 26 m away and strikes everything within 5 m of it 8 times over 4.8s, for 45% weapon damage as poison each time. Leaves the target Poisoned: a further 33% weapon damage over 8s. 20 mana, 14s cooldown."
+  },
+  "judgement": {
+   "name": "Judgement",
+   "shape": "ground",
+   "element": "holy",
+   "mult": 2.4,
+   "range": 28,
+   "radius": 3.5,
+   "delay": 0.7,
+   "status": "weaken",
+   "cooldown": 12,
+   "mp": 22,
+   "desc": "Falls on a spot up to 28 m away, 0.7s after you cast, striking everything within 3.5 m of that spot for 394% weapon damage as holy. Leaves the target Weakened: the target deals 35% less damage for 7s. 22 mana, 12s cooldown."
+  },
+  "void_rift": {
+   "name": "Void Rift",
+   "shape": "ground",
+   "element": "shadow",
+   "mult": 0.45,
+   "range": 26,
+   "radius": 5,
+   "repeats": 4,
+   "repeatEvery": 0.5,
+   "pull": 2.5,
+   "status": "curse",
+   "cooldown": 16,
+   "mp": 24,
+   "desc": "Falls on a spot up to 26 m away and strikes everything within 5 m of it 4 times over 2s, for 88% weapon damage as shadow each time. Every pulse drags everything 2.5 m toward the middle. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. 24 mana, 16s cooldown."
   }
  },
  "classes": {
@@ -613,7 +718,7 @@
    "guard_stance",
    "consecrate",
    "renew",
-   "shadow_lance",
+   "judgement",
    "rally"
   ],
   "bard": [
@@ -638,14 +743,14 @@
    "curse",
    "drain",
    "poison_dart",
-   "rally"
+   "toxic_cloud"
   ],
   "warlock": [
    "shadow_lance",
    "bind_imp",
    "curse",
    "drain",
-   "fire_wall",
+   "void_rift",
    "meteor"
   ],
   "demon_hunter": [
@@ -676,23 +781,23 @@
    "power_strike",
    "cleave",
    "firebolt",
-   "guard_stance",
+   "flamethrower",
    "fire_wall",
    "meteor"
   ],
   "pyromancer": [
    "firebolt",
    "fire_wall",
-   "thunderclap",
+   "flamethrower",
    "arcane_burst",
-   "quicken",
+   "ember_stride",
    "meteor"
   ],
   "stormcaller": [
    "chain_bolt",
    "frost_nova",
    "storm_beam",
-   "thunderclap",
+   "storm_orbs",
    "quicken",
    "meteor"
   ],
@@ -700,7 +805,7 @@
    "poison_dart",
    "call_wolf",
    "renew",
-   "frost_nova",
+   "toxic_cloud",
    "stoneskin",
    "rally"
   ],
@@ -725,7 +830,7 @@
    "quicken",
    "ice_lance",
    "frost_nova",
-   "smoke",
+   "blizzard",
    "meteor"
   ],
   "monk": [
@@ -765,7 +870,7 @@
    "chain_bolt",
    "arcane_burst",
    "storm_beam",
-   "quicken",
+   "storm_orbs",
    "meteor"
   ],
   "runesmith": [
@@ -797,7 +902,7 @@
    "renew",
    "consecrate",
    "curse",
-   "guard_stance",
+   "judgement",
    "rally"
   ],
   "enchanter": [
@@ -809,5 +914,6 @@
    "meteor"
   ]
  },
- "_r25Doc": "R25: a skill's damage share is multiplied by js/skills.js effectiveMult — its unlock level (x1.0 at 1 to x2.0 at 24) and its cooldown (+8% per second past 4) — so a long wait and a late unlock buy a bigger hit. The late damage skills that had no debuff got one (Storm Beam shock, Arcane Burst curse, Rain of Arrows web, Whirlwind bleed, Execute and Charge weaken). Whirlwind spins five times at 80% (was one hit at 160%)."
+ "_r25Doc": "R25: a skill's damage share is multiplied by js/skills.js effectiveMult — its unlock level (x1.0 at 1 to x2.0 at 24) and its cooldown (+8% per second past 4) — so a long wait and a late unlock buy a bigger hit. The late damage skills that had no debuff got one (Storm Beam shock, Arcane Burst curse, Rain of Arrows web, Whirlwind bleed, Execute and Charge weaken). Whirlwind spins five times at 80% (was one hit at 160%).",
+ "_r25NewDoc": "R25 — seven new skills (Flamethrower, Ember Stride, Storm Orbs, Blizzard, Toxic Cloud, Judgement, Void Rift). New fields: `repeats`/`repeatEvery` on melee and ground (the whole strike again that many times), `breath` (drawn as a stream), `weather` (drawn as falling weather over the circle), `delay` (seconds between the cast and the hit landing), `pull` (metres every pulse drags a body toward the middle), `trail` (self: for `seconds` every step leaves `burns`-second burning ground `radius` wide), `orbs` (self: `count` orbs for `seconds`, each striking the nearest enemy within `radius` every `every` s for the skill's share, and laying `status`)."
 }

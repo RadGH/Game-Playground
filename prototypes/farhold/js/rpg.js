@@ -1833,6 +1833,8 @@ export class Rpg {
     if (!unit?.equipment) return [];
     const c = { self: unit, auras: [] };
     this.fx.fire('aura', c);
+    // R25 — a skill's own pulsing pieces (Storm Orbs), counted down by js/main.js
+    for (const a of unit.skillAuras || []) if (a.left > 0) c.auras.push(a);
     return c.auras;
   }
 

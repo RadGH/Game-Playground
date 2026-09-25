@@ -1579,10 +1579,31 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     } else if (plan.kind === 'ground') {
       // it lands where you are looking, not where you are
       const spot = groundTarget(plan.range);
-      spellfx.aoe({ points: ringPoints(spot.x, spot.z, plan.radius), element: plan.element, stagger: 0.05 });
-      spellfx.impact({ at: new THREE.Vector3(spot.x, spot.y + 0.6, spot.z), element: plan.element });
-      const hits = field.strikeArea(spot.x, spot.z, plan.radius, player, { falloff: 0.55, ...strikeOpts });
-      skillSound(plan, hits);
+      const at = new THREE.Vector3(spot.x, spot.y, spot.z);
+      /**
+       * R25 — THE NEW GROUND SKILLS. Judgement lands `delay` seconds after the cast (a ring shows
+       * where); Blizzard, Toxic Cloud and Void Rift PULSE `repeats` times on the same spot, one whole
+       * `strikeArea` a pulse, so a body is hit once a pulse; Void Rift drags everything `pull` metres
+       * toward the middle every pulse. Each is drawn by its own spellfx piece where one exists.
+       */
+      const pulse = (first) => {
+        if (!state.running) return;
+        if (plan.pull) for (const e of field.enemies) {
+          if (e.dying != null || Math.hypot(e.x - spot.x, e.z - spot.z) > plan.radius + 1) continue;
+          uniqueEnv.push(e, spot.x, spot.z, -plan.pull);
+        }
+        if (first || !plan.weather) spellfx.aoe({ points: ringPoints(spot.x, spot.z, plan.radius), element: plan.element, stagger: first ? 0.05 : 0.02 });
+        if (first && !plan.weather) spellfx.impact({ at: new THREE.Vector3(spot.x, spot.y + 0.6, spot.z), element: plan.element });
+        skillSound(plan, field.strikeArea(spot.x, spot.z, plan.radius, player, { falloff: 0.55, ...strikeOpts }));
+      };
+      const span = plan.repeats * (plan.repeatEvery || 0.5) * 1000;
+      if (plan.weather) spellfx.storm?.({ at, radius: plan.radius, element: plan.element, ms: span + 400 });
+      if (plan.pull) spellfx.vortex?.({ at, radius: plan.radius, element: plan.element, ms: span + 300 });
+      if (plan.delay) {
+        spellfx.aoe({ points: ringPoints(spot.x, spot.z, plan.radius), element: plan.element, stagger: 0.02 });
+        setTimeout(() => { spellfx.pillar?.({ at, radius: plan.radius, element: plan.element, ms: 700 }); pulse(true); }, plan.delay * 1000);
+      } else pulse(true);
+      for (let k = 1; k < plan.repeats; k++) setTimeout(() => pulse(false), (plan.delay + k * (plan.repeatEvery || 0.5)) * 1000);
       // `linger`: the ground keeps burning after the cast
       if (plan.ground > 0) {
         dropPool({
@@ -1625,14 +1646,35 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         }
         hud.log(`${plan.statusSpec.name}.`, 'good');
       }
+      // R25 — Ember Stride and Storm Orbs: something that goes on fighting after the cast
+      if (plan.trail) {
+        player.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: control.x, lastZ: control.z };
+        hud.log(`${plan.skill.name}: the ground burns where you walk for ${plan.trail.seconds}s.`, 'good');
+      }
+      if (plan.orbs) startOrbs(plan);
       spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 420 });
       sound.ui('click');
     } else if (plan.kind === 'melee') {
-      fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: plan.reach, arc: plan.arc });
-      const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, ...strikeOpts });
-      skillSound(plan, hits);
-      for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element: plan.element, crit: h.result.crit });
-      control.swing = Math.max(control.swing, 0.35);
+      /**
+       * R25 — FLAMETHROWER. A melee cone with `repeats`: the same `field.strike` again every
+       * `repeatEvery` seconds from wherever you are standing and facing NOW, so you can sweep the
+       * stream across a crowd. `breath` draws it as a stream (spellfx.breath) instead of a swipe.
+       */
+      const cone = (first) => {
+        if (!state.running || player.hp <= 0) return;
+        if (plan.breath) {
+          const dir = new THREE.Vector3(Math.sin(control.yaw), 0, Math.cos(control.yaw));
+          const mouth = new THREE.Vector3(control.x + dir.x * 0.6, control.y + 1.1, control.z + dir.z * 0.6);
+          if (spellfx.breath) spellfx.breath({ from: mouth, dir, length: plan.reach, arc: plan.arc, element: plan.element, ms: 300 });
+          else spellfx.aoe({ points: [mouth.clone().addScaledVector(dir, plan.reach * 0.6)], element: plan.element, stagger: 0 });
+        } else fx.swipe({ x: control.x, y: control.y, z: control.z, yaw: control.yaw, reach: plan.reach, arc: plan.arc });
+        const hits = field.strike(control, player, { reach: plan.reach, arc: plan.arc, ...strikeOpts });
+        skillSound(plan, hits);
+        if (first || !plan.breath) for (const h of hits) spellfx.impact({ at: new THREE.Vector3(h.enemy.x, h.enemy.y + 0.9, h.enemy.z), element: plan.element, crit: h.result.crit });
+        control.swing = Math.max(control.swing, plan.repeats > 1 ? (plan.repeatEvery || 0.32) + 0.05 : 0.35);
+      };
+      cone(true);
+      for (let k = 1; k < plan.repeats; k++) setTimeout(() => cone(false), k * (plan.repeatEvery || 0.32) * 1000);
     } else if (plan.kind === 'around') {
       // a ring on the ground, drawn where the ground actually is so it does not float on a slope
       const points = [];
@@ -4742,6 +4784,59 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     fire: '#ff7a3a', frost: '#8fd6ff', shock: '#ffe86a', poison: '#9ede6a',
     shadow: '#c090ff', holy: '#ffe6a8', nature: '#8ad66a', arcane: '#b79cf5', physical: '#d8dcea',
   };
+  /**
+   * R25 — STORM ORBS. `player.skillAuras` is read by js/rpg.js `auraList`, so each orb is one more
+   * `nearestOnly` aura run by js/uniques.js `tickAuras` — the same clock, the same targeting and the
+   * same status hand-off every pulsing power already uses. The orbs are only drawn here.
+   */
+  const orbs = [];
+  function startOrbs(plan) {
+    stopOrbs();
+    const o = plan.orbs;
+    const clock = rpg.fx.rt(player).auraClock || (rpg.fx.rt(player).auraClock = {});
+    player.skillAuras = [];
+    for (let k = 0; k < o.count; k++) {
+      const id = `storm_orb_${k}`;
+      // staggered, so three orbs crack one after another rather than all at once
+      clock[id] = -k * (o.every / o.count);
+      player.skillAuras.push({ id, left: o.seconds, every: o.every, radius: o.radius, power: plan.mult, element: plan.element, nearestOnly: true, status: o.status || null, always: true });
+      const handle = spellfx.orbitOrb?.({ element: plan.element, size: 0.25 }) || null;
+      orbs.push({ id, handle, phase: (k / o.count) * Math.PI * 2 });
+    }
+    hud.log(`${plan.skill.name}: ${o.count} orbs circle you for ${o.seconds}s.`, 'good');
+  }
+  function stopOrbs() {
+    for (const orb of orbs) orb.handle?.dispose?.();
+    orbs.length = 0;
+    player.skillAuras = [];
+  }
+  function tickSkillLeftovers(dt, fired = []) {
+    // the orbs: count down, circle the player, flash when one fires
+    if (player.skillAuras?.length) {
+      for (const a of player.skillAuras) a.left -= dt;
+      if (player.skillAuras.every(a => a.left <= 0)) stopOrbs();
+      else {
+        const t = performance.now() / 1000;
+        for (const orb of orbs) {
+          const ang = orb.phase + t * 2.2;
+          orb.handle?.setPosition?.(new THREE.Vector3(control.x + Math.cos(ang) * 1.3, control.y + 1.3 + Math.sin(t * 3 + orb.phase) * 0.15, control.z + Math.sin(ang) * 1.3));
+          if (fired.some(f => f.id === orb.id)) orb.handle?.pulse?.();
+        }
+      }
+    }
+    // Ember Stride: a burning patch every `step` metres you move
+    const tr = player.trail;
+    if (tr) {
+      tr.left -= dt;
+      if (tr.left <= 0 || player.hp <= 0) { player.trail = null; return; }
+      if (Math.hypot(control.x - tr.lastX, control.z - tr.lastZ) >= tr.step) {
+        tr.lastX = control.x; tr.lastZ = control.z;
+        dropPool({ x: control.x, z: control.z, r: tr.radius, seconds: tr.burns, element: tr.element, power: tr.power });
+        spellfx.footfall?.({ at: new THREE.Vector3(control.x, terrain.heightAt(control.x, control.z), control.z), element: tr.element });
+      }
+    }
+  }
+
   function dropPool({ x, z, r, seconds, element = 'physical', power = 0.5 }) {
     const geo = new THREE.CircleGeometry(r, 24);
     const mat = new THREE.MeshBasicMaterial({
@@ -9060,7 +9155,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     spellfx.update(dt);
     skills.update(dt);
     // R23 — the powers that pulse on a clock: Pyre, Searing Light, the Dread Lantern, Stormrider
-    tickAuras(uniqueEnv, rpg, player, dt, { fighting });
+    tickSkillLeftovers(dt, tickAuras(uniqueEnv, rpg, player, dt, { fighting }));
     // whatever is burning or blessing the player keeps working while they run
     const selfTick = tickStatuses(player, dt, { resist: rpg.fx.product(player, 'statusIn') });
     if (selfTick > 0 && player.hp <= 0) respawn(null);
@@ -10126,6 +10221,8 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     swingNow: () => { input.state.attack = true; },
     /** R25 — hold (true) or release (false) the attack button, for a charged staff or a bow draw */
     holdAttack: on => { input.state.attackHeld = !!on; input.state.attack = !!on; },
+    // R25 — where a ground skill would land right now (the tests put their targets there)
+    groundTarget: range => groundTarget(range),
     /** The Civilization Expansion, for tests/civilization.spec.js. */
     get civics() { return civics; },
     get holding() { return holding; },

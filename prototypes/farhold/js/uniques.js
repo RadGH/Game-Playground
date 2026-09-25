@@ -445,7 +445,9 @@ export function tickAuras(env, rpg, player, dt, { fighting = false } = {}) {
   const me = env.at?.() || { x: player.x, z: player.z };
   for (const a of auras) {
     clock[a.id] = (clock[a.id] || 0) + dt;
-    if (!fighting) { clock[a.id] = Math.min(clock[a.id], a.every); continue; }
+    // `always`: a pulse you CAST (Storm Orbs) fires at whatever is near, fight or not — the gate is
+    // for the passive powers, so a lamp never starts a fight with a grazing deer
+    if (!fighting && !a.always) { clock[a.id] = Math.min(clock[a.id], a.every); continue; }
     if (clock[a.id] < a.every) continue;
     clock[a.id] = 0;
     const hit = [];

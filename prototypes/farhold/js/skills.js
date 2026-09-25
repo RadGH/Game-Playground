@@ -118,6 +118,9 @@ function statusTotal(skill, spec) {
  * would lengthen each card to say the same thing again. The radius is the number the player is
  * choosing between.
  */
+/** Status names for a sentence that only needs the word ("Shocked"), kept beside the generator. */
+const STATUS_NAMES = { shock: 'Shocked', chill: 'Chilled', burn: 'Burning', poison: 'Poisoned', curse: 'Cursed', weaken: 'Weakened' };
+
 function shapeSentence(skill) {
   const n = Math.max(1, skill.projectiles || 1);
   const dmg = `${pctOf(Math.round((skill.mult || 1) * 100))} weapon damage`
@@ -131,7 +134,10 @@ function shapeSentence(skill) {
   const width = metres(skill.width ?? 1.8);
   switch (skill.shape) {
     case 'melee':
-      return `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you for ${dmg}.`;
+      // R25 — Flamethrower: the same cone again and again while you hold it
+      return skill.repeats > 1
+        ? `${skill.breath ? 'Breathes a stream that strikes' : 'Strikes'} everything in ${article(arc)} ${arc} cone ${metres(skill.reach ?? 3)} in front of you ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, for ${dmg} each time.`
+        : `Strikes everything in ${article(arc)} ${arc} arc ${metres(skill.reach ?? 3)} in front of you for ${dmg}.`;
     case 'around':
       // R25 — Whirlwind spins five times: say so, and say it is per spin
       return skill.repeats > 1
@@ -139,8 +145,14 @@ function shapeSentence(skill) {
         : `Strikes everything within ${metres(skill.radius ?? 4)} of you for ${dmg}.`;
     case 'beam':
       return `Fires ${article(width)} ${width} wide beam ${metres(skill.range ?? 20)} straight ahead, striking everything in the line for ${dmg}.`;
-    case 'ground':
-      return `Falls on a spot up to ${metres(skill.range ?? 30)} away, striking everything within ${metres(skill.radius ?? 5)} of that spot for ${dmg}.`;
+    case 'ground': {
+      // R25 — Blizzard, Toxic Cloud and Void Rift pulse; Judgement lands a beat after the cast
+      const lands = skill.delay ? `, ${secs(skill.delay)} after you cast,` : '';
+      const pull = skill.pull ? ` Every pulse drags everything ${metres(skill.pull)} toward the middle.` : '';
+      return skill.repeats > 1
+        ? `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} and strikes everything within ${metres(skill.radius ?? 5)} of it ${fmt(skill.repeats)} times over ${secs(skill.repeats * (skill.repeatEvery ?? 0.32))}, for ${dmg} each time.${pull}`
+        : `Falls on a spot up to ${metres(skill.range ?? 30)} away${lands} striking everything within ${metres(skill.radius ?? 5)} of that spot for ${dmg}.${pull}`;
+    }
     case 'dash':
       return `Carries you ${metres(skill.range ?? 10)} forward, striking everything within ${metres(skill.splash ?? 2)} of your path for ${dmg}.`;
     case 'summon': {
@@ -148,8 +160,16 @@ function shapeSentence(skill) {
       const who = petName(skill.pet) + (count > 1 ? 's' : '');
       return `Summons ${fmt(count)} ${who} to fight beside you.`;
     }
-    case 'self':
+    case 'self': {
+      // R25 — the two self skills that fight for you: Ember Stride's trail and Storm Orbs
+      const t = skill.trail, o = skill.orbs;
+      if (t) return `For ${secs(t.seconds)}, every step leaves burning ground behind you, ${metres(t.radius * 2)} across, that lasts ${secs(t.burns)} and strikes whatever stands in it for ${dmg} every 0.75s.`;
+      if (o) {
+        const st = o.status && STATUS_NAMES[o.status] ? ` and leaves it ${STATUS_NAMES[o.status]}` : '';
+        return `For ${secs(o.seconds)}, ${fmt(o.count)} orbs circle you in a fight; each one strikes the nearest enemy within ${metres(o.radius)} every ${secs(o.every)} for ${dmg}${st}.`;
+      }
       return '';
+    }
     default:
       // a bolt, or a fan of them
       return n > 1
@@ -223,7 +243,7 @@ function healSentence(skill) {
 export function describeSkill(skill, statuses = {}, { cost = true, unlockAt = 1 } = {}) {
   if (!skill) return '';
   // R25 — the card says what it will actually hit for (cooldown and unlock level included)
-  if (skill.mult && skill.shape !== 'self' && skill.shape !== 'summon') skill = { ...skill, mult: effectiveMult(skill, unlockAt) };
+  if (skill.mult && skill.shape !== 'summon' && (skill.shape !== 'self' || skill.trail || skill.orbs)) skill = { ...skill, mult: effectiveMult(skill, unlockAt) };
   const spec = skill.status ? statuses[skill.status] : null;
   const parts = [shapeSentence(skill), statusSentence(skill, spec), healSentence(skill)].filter(Boolean);
   if (cost) {
@@ -629,6 +649,9 @@ export function createSkillBar({ data, player, rpg, unlocks = null, canSummon = 
       damage: Math.max(1, Math.round(mid)),
       // R25 — Whirlwind: the whole strike again, `repeats` times, `repeatEvery` seconds apart
       repeats: Math.max(1, s.repeats || 1), repeatEvery: s.repeatEvery ?? 0.32,
+      // R25 — the new skills' own parts (see data/skills.json `_r25NewDoc`)
+      breath: !!s.breath, weather: !!s.weather, delay: s.delay || 0, pull: s.pull || 0,
+      trail: s.trail || null, orbs: s.orbs || null,
       reach: s.reach ?? 3, arc: s.arc ?? 1.5,
       radius: s.radius ?? 0, range: s.range ?? 0, splash: s.splash ?? 0, width: s.width ?? 1.8,
       // a bolt can be a fan of several: Multi Shot firing one arrow was not a multi shot

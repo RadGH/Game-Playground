@@ -1525,7 +1525,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
         // R18 — and if it was refused, SAY so. `made.refused` carries the reason and was dropped on
         // the floor, which is why every class summon failed in silence. `check()` catches this case
         // before the mana is spent now, so reaching here means something changed mid-cast.
-        else if (made.refused) hud.log(made.refused, 'bad');
+        else if (made.refused) hud.notice(made.refused, 'bad');
       });
       spellfx.cast({ at: new THREE.Vector3(control.x, control.y + 0.4, control.z), element: plan.element, ms: 520 });
       sound.ui('click');
@@ -1713,7 +1713,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       if (unequipSlot) { const off = rpg.unequip(player, unequipSlot); if (off) hud.log(`Took off ${off.name}.`); }
       else {
         const out = rpg.equip(player, item);
-        if (out?.refused) hud.log(out.refused, 'bad');
+        if (out?.refused) { hud.notice(out.refused, 'bad'); sound.ui?.('error'); }
         else { hud.log(`Equipped ${item.name}.`, 'loot'); sound.equip(); }
       }
       applyGearLook();
@@ -1804,7 +1804,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
           : (player.bag || []).find(i => i && i.id === id);
         if (pick && pick !== player.equipment?.mount) {
           const out = rpg.equip(player, pick);
-          if (out?.refused) { hud.log(out.refused, 'bad'); return; }
+          if (out?.refused) { hud.notice(out.refused, 'bad'); return; }
           sound.equip();
         }
         player.rideChoice = 'mount';
@@ -3425,7 +3425,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     scanner,
     onLog: (t, c) => hud.log(t, c),
     materialName: id => resourceData?.materials?.[id]?.name || id,
-    canOpen: () => heldNow(player) === 'scanner',
+    canOpen: () => heldModes(player).includes('scanner') && !build.mode,   // R25: owning one is enough
   });
 
   /**
@@ -4460,26 +4460,12 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       else build.setRadius(build.radius - Math.sign(e.deltaY) * 2);
       return;
     }
-    if (hud.sheetOpen || map.isOpen || talk.isOpen) return;
     /**
-     * R16 — THE WHEEL CHOOSES WHAT IS IN YOUR HANDS.
-     *
-     *   "Let's make it so mousewheel changes between: Weapon, Mining tool, Scanner."
-     *   "…add a Command Rod that once built can be scrolled to as the 4th item on the mousewheel."
-     *
-     * Outside build mode the wheel did nothing at all, so this costs nothing to take. The ring only
-     * holds modes you can actually use: a new character scrolls between a weapon and nothing, and
-     * each of the other three appears the moment you build the thing behind it.
+     * R25 — the wheel no longer changes what is in your hands. The weapon/tool/scanner/rod ring
+     * (R16) overlapped the "E to …" prompt, and E already works every seam and every tree with the
+     * tool in your Tool slot whatever you hold, so the ring only ever added a way to be holding the
+     * wrong thing. The scanner is X and the Command Rod is R now (js/settings.js BINDINGS).
      */
-    const modes = heldModes(player);
-    if (modes.length < 2) return;
-    e.preventDefault();
-    const next = cycleHeld(player, Math.sign(e.deltaY) > 0 ? 1 : -1);
-    if (!next) return;
-    if (next !== 'scanner' && scanner.on) scanner.setOn(false);
-    gathering.cancel();
-    sound.ui('click');
-    hud.heldMode(next, modes, HELD_LABELS);
   }, { passive: false });
 
   if (save?.build) {
@@ -5639,7 +5625,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     spend(row.cost);
     if (kind === 'device') {
       if (!giveDevice(player, row.id)) { hud.log(`You already have a ${row.name}.`, 'warn'); return; }
-      hud.log(`${row.name} built. Scroll to it with the mouse wheel.`, 'level');
+      hud.log(`${row.name} built. ${row.id === 'scanner' || /scan/.test(row.id) ? 'Press X to sweep with it.' : 'Press R to give an order where you look.'}`, 'level');
       sound.questDone();
       hud.heldMode(heldNow(player), heldModes(player), HELD_LABELS);
       autoSave();
@@ -8068,6 +8054,18 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
      * to K to make room. The lamp can only be lit while you are actually carrying one; the ship's
      * spotlights are part of the ship, so they have nothing to carry.
      */
+    // R25 — the scanner and the Command Rod, one key each (they used to be on the mouse-wheel ring)
+    if (snap.pressed?.has('KeyX') && !build.mode) {
+      if (!heldModes(player).includes('scanner')) hud.log('You have no scanner. Build one at the bench first.', 'warn');
+      else { scanner.toggle(player); sound.ui('click'); }
+    }
+    if (snap.pressed?.has('KeyR') && !build.mode && !hud.sheetOpen) {
+      if (heldModes(player).includes('rod')) {
+        const spot = aimSpot(60);
+        const out = commandRod?.use?.(spot, { add: !!snap.pressed?.has('ShiftLeft') });
+        if (out && out.ok === false && out.why) hud.log(out.why, 'warn');
+      }
+    }
     if (snap.pressed?.has('KeyL')) {
       if (!carryingLight()) hud.log('You have nothing to light. A torch or a lantern goes in the off hand.');
       else {
@@ -8761,7 +8759,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        * times a minute is the thing that gathers. Only when the swing landed on nothing living —
        * hitting a wolf standing in front of an oak should fight the wolf.
        */
-      if (!hits.length) harvestSwing(share * shape.damage, reach);
+      // R25 — a swing that hits nothing is just a swing; E is how you gather (see the attack branch)
     };
 
     /**
@@ -8812,27 +8810,14 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
        *
        * The old harvest path rode on the MELEE swing: `swingWith` found nothing to hit and fell
        * through to `harvestSwing`. An archer's attack fires an arrow and never reaches that line,
-       * and a mage's throws a bolt, so two thirds of the class list could not gather at all. The
-       * mouse wheel decides now: with the Tool in hand the attack button starts a gather, with the
-       * Scanner it turns the sweep on and off, with the Rod it gives an order, and with the Weapon
-       * it does exactly what it always did.
+       * and a mage's throws a bolt, so two thirds of the class list could not gather at all.
+       *
+       * R25 — and now the attack button ALWAYS attacks. "Pressing E works to harvest a lot of
+       * things even if your weapon is equipped, let's just remove the whole weapon/tool menu and
+       * just make it so pressing E harvests ALL things. Not weapon attacks." E is the one way to
+       * gather; X sweeps the scanner and R gives a Command Rod order.
        */
-      const holding = heldNow(player);
-      if (step.attacked && holding === 'tool') {
-        const [fx0, fz0] = control.facing();
-        const reach = toolReach(player, 4.2);
-        if (!beginGather({ x: control.x + fx0 * reach * 0.6, z: control.z + fz0 * reach * 0.6, reach })) {
-          hud.log('Nothing here to work.', 'warn');
-        }
-      } else if (step.attacked && holding === 'scanner') {
-        scanner.toggle(player);
-        sound.ui('click');
-      } else if (step.attacked && holding === 'rod') {
-        // the rod points where you are LOOKING, the same ray the build cursor uses
-        const spot = aimSpot(60);
-        const out = commandRod?.use?.(spot, { add: !!snap.pressed?.has('ShiftLeft') });
-        if (out && out.ok === false && out.why) hud.log(out.why, 'warn');
-      } else {
+      {
         if (step.attacked) swingWith('main', step.step || 0);
         if (step.attackedOff) swingWith('off', step.offStep || 0);
       }
@@ -9503,7 +9488,6 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     });
     if (state.frames % 6 === 0) {
       // R16: what is in your hands, and how many things the wheel can reach
-      hud.heldMode(heldNow(player), heldModes(player), HELD_LABELS);
       hud.daylight = Math.max(0.28, Math.min(1, sky.sunDirection.y * 1.7 + 0.3));
       /**
        * `revealRange` WIDENS THE MINIMAP, WHICH IS THE ONLY THING IT COULD MEAN.
@@ -9653,7 +9637,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
             id: 'scan:' + h.id, x: h.x, z: h.z, name: h.name,
             color: h.colour, where: distanceText(h.distance),
           }))
-          : rows.slice(0, 6).map(a => ({
+          /**
+           * R25 — NO ARROW AT NOBODY. A person only has a body inside 90 m (keepWandererBodies),
+           * but their row reached the beacon from anywhere in the zone, so a yellow arrow stood over
+           * an empty field saying "E speak to …, Mercenary Captain". A person gets a beacon only
+           * once there is somebody standing there to point at.
+           */
+          : rows.filter(a => a.kind !== 'person' || wandererBodies.has(String(a.id).slice(4))).slice(0, 6).map(a => ({
             id: a.id, x: a.x, z: a.z, name: a.name,
             color: (MARKER_LOOKS[a.kind] || MARKER_LOOKS.quest).color,
             where: `${a.where} ${a.compass}`,
@@ -9765,7 +9755,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
       hud.workBar(bar ? { ...bar, pos: new THREE.Vector3(bar.x, bar.y, bar.z) } : null, camera);
     }
     // R16: the rod says when somebody got where they were sent
-    if (heldNow(player) === 'rod') commandRod?.tick?.();
+    if (heldModes(player).includes('rod')) commandRod?.tick?.();
     if (scanner.on) {
       const fresh = scanner.tick(dt, control, {
         player,

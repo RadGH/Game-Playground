@@ -982,14 +982,21 @@ const CLIPS = {
     p.elbowL[0] = -0.85; p.elbowR[0] = -0.85; p.head[0] = ride * 0.03; o.bob = ride * 0.01; return restAims(ctx);
   },
   pickSwing(p, u, cy, ctx, o) {
-    const raise = ss(u, 0.02, 0.4), strike = ss(u, 0.4, 0.54), rec = 1 - ss(u, 0.66, 0.98), up = raise * (1 - strike);
-    p.armR[0] = (-2.45 * up + 1.15 * strike) * rec; p.armL[0] = (-2.35 * up + 1.1 * strike) * rec;
-    p.armR[2] = 0.12 + 0.1 * rec; p.armL[2] = -0.12 - 0.1 * rec;
-    p.elbowR[0] = -0.12 + (-0.55 * up + 0.72 * strike) * rec; p.elbowL[0] = p.elbowR[0];
-    p.chest[0] += (-0.26 * up + 0.62 * strike) * rec; p.head[0] += (-0.2 * up + 0.34 * strike) * rec;
-    p.kneeL[0] += 0.5 * strike * rec; p.kneeR[0] += 0.5 * strike * rec; p.legL[0] -= 0.26 * strike * rec; p.legR[0] -= 0.26 * strike * rec;
-    o.bob = (0.028 * up - 0.11 * strike) * rec;
-    return REST_PITCH[ctx.hold.right] ? { R: [(-3.3 * up - 1.6 * strike) * rec - 0.95 * (1 - rec) * (1 - strike), 0, 0] } : {};
+    // A ONE-ARMED PICK SWING (2026-09-24: "the character leans over at the hips and swings both
+    // arms — the mining animation should swing your dominant arm with some slight back
+    // leaning/twist"). The right arm takes the pick up and back while the chest leans back a little
+    // and twists away; then the arm comes down into the rock with the chest turning back through it.
+    // The left hand stays low and loose. Loops, and returns to rest at the loop point.
+    const raise = ss(u, 0.02, 0.4), strike = ss(u, 0.4, 0.53), rec = 1 - ss(u, 0.66, 0.98), up = raise * (1 - strike);
+    p.armR = [(-2.5 * up - 0.75 * strike) * rec, (0.25 * up) * rec, 0.12 + 0.2 * up * rec];
+    p.elbowR[0] = -0.16 + (-1.0 * up + 0.55 * strike) * rec;
+    p.chest[0] += (-0.12 * up + 0.14 * strike) * rec;
+    p.chest[1] += (0.28 * up - 0.18 * strike) * rec; p.hips[1] += (0.1 * up - 0.06 * strike) * rec;
+    p.head[0] += (-0.05 * up + 0.1 * strike) * rec; p.head[1] = -p.chest[1] * 0.4;
+    p.armL[0] = (-0.3 - 0.15 * strike) * rec; p.elbowL[0] = -0.16 - 0.5 * rec;
+    p.kneeL[0] += 0.12 * strike * rec; p.kneeR[0] += 0.08 * strike * rec;
+    o.bob = (0.01 * up - 0.03 * strike) * rec;
+    return REST_PITCH[ctx.hold.right] ? { R: [(-3.2 * up - 1.2 * strike) * rec - 0.95 * (1 - rec) * (1 - strike), 0, 0] } : {};
   },
   chopSwing(p, u, cy, ctx, o) {
     const raise = ss(u, 0.02, 0.36), cut = ss(u, 0.36, 0.52), rec = 1 - ss(u, 0.62, 0.98), up = raise * (1 - cut);

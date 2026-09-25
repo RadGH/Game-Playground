@@ -130,6 +130,14 @@ export const BINDINGS = [
   { action: 'log', label: 'What has happened (also sheet tab 8)', code: null },
   { action: 'holding', label: 'The Holding', code: 'KeyK' },
   /**
+   * R25 — the scanner and the Command Rod get keys of their own. They used to be picked from a
+   * mouse-wheel ring (weapon / tool / scanner / rod), which overlapped the "E to …" prompt and
+   * meant a gather could depend on what you had scrolled to. E now works everything, the attack
+   * button always attacks, and these two are one key each once you have built the device.
+   */
+  { action: 'scan', label: 'Scanner sweep (right-click: pick a material)', code: 'KeyX' },
+  { action: 'order', label: 'Command Rod: give an order where you look', code: 'KeyR' },
+  /**
    * Build mode had the same gap the Holding did — hard-coded on KeyB in js/main.js and missing
    * from this table, so it could not be rebound and nothing stopped a later round handing KeyB to
    * something else as well. tests/round17-ui.test.js now fails if any key listened for in

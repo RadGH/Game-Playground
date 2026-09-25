@@ -542,6 +542,21 @@ export class Hud {
    * introduces a whole system — "The Bleak Moor is the Reach's ground." — was gone before it had
    * been read. Twelve stay up, all fifty stay in `history`, and the text is brighter than it was.
    */
+  /**
+   * R25 — A NOTICE AT THE BOTTOM OF THE SCREEN, for the things a player must not miss: "You are not
+   * the required level…" used to be one more line in the log, so an item that would not equip
+   * looked like a click that did nothing. It also goes in the log, so the history keeps it.
+   */
+  notice(text, kind = 'bad', ms = 3400) {
+    let box = document.getElementById('hud-notice');
+    if (!box) { box = el('div', 'hud-notice'); box.id = 'hud-notice'; box.setAttribute('role', 'status'); document.body.append(box); }
+    box.textContent = text;
+    box.className = 'hud-notice show ' + kind;
+    clearTimeout(this._noticeTimer);
+    this._noticeTimer = setTimeout(() => box.classList.remove('show'), ms);
+    this.log(text, kind);
+  }
+
   log(text, cls = '') {
     this.lines.unshift({ text, cls });
     if (this.lines.length > 12) this.lines.pop();
@@ -943,45 +958,12 @@ export class Hud {
   }
 
   /**
-   * R16 — WHAT IS IN YOUR HANDS, since the mouse wheel now changes it.
-   *
-   * A mode you cannot see is a mode you will forget you are in, and being in the Scanner when you
-   * meant to be holding a sword is the kind of thing that gets somebody killed once and then
-   * resented. Shows the ring only while it has more than one entry in it.
+   * R25 — the weapon/tool/scanner/rod ring is gone. It overlapped the "E to …" prompt, and E
+   * already gathers everything with the tool in your Tool slot; the scanner is X and the Command
+   * Rod is R. Kept as a method (it removes a ring left from an older session) so no caller breaks.
    */
-  heldMode(mode, modes = [], labels = {}) {
-    let box = this._held;
-    if (!box) {
-      box = this._held = el('div', 'held-mode');
-      document.body.append(box);
-    }
-    /**
-     * R17 — "[object HTMLElement]" ABOVE THE WEAPON NAME.
-     *
-     * `el(tag, cls, text)` takes exactly three arguments and the third is set with `textContent`.
-     * This was calling `el('div', 'hm-ring', ...modes.map(...))`, so the FIRST pip element was
-     * stringified into the ring's text — which is what "[object HTMLElement]" is — and every pip
-     * after it was dropped on the floor. The ring has to be built by appending.
-     */
-    // remembered so `refreshHeld()` can re-ask the question when a screen opens or closes
-    if (mode) this._heldArgs = { mode, modes, labels };
-    if (!mode || modes.length < 2) { box.classList.remove('on'); return; }
-    /**
-     * …and it has to go away while a screen owns the window. The held-mode readout is a fixed box
-     * on top of everything at z-index 40; the character sheet does not paint over it, so "Weapon —
-     * Swing at what is in front of you" sat across the middle of the inventory.
-     */
-    if (screenOpen(this)) { box.classList.remove('on'); return; }
-    if (box.dataset.mode === mode && box.dataset.n === String(modes.length)) { box.classList.add('on'); return; }
-    box.dataset.mode = mode; box.dataset.n = String(modes.length);
-    box.classList.add('on');
-    const ring = el('div', 'hm-ring');
-    for (const m of modes) ring.append(el('i', 'hm-pip' + (m === mode ? ' on' : '')));
-    box.replaceChildren(
-      ring,
-      el('div', 'hm-name', labels[mode]?.name || mode),
-      el('div', 'hm-note muted small', labels[mode]?.note || ''),
-    );
+  heldMode() {
+    if (this._held) { this._held.remove(); this._held = null; }
   }
 
   /**

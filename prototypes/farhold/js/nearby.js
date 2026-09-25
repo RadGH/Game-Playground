@@ -100,6 +100,8 @@ export function nearbyList({
   // people with offers. They never said a word before — a row and no line is the right trade.
   for (const p of folk) {
     if (!p.offer && !p.wants) continue;
+    // R25 — "that should not be an event like that, it should just be an NPC in town, no arrow"
+    if (p.inTown) continue;
     add({
       id: 'who:' + (p.id ?? p.name), kind: 'person', name: p.name || 'Somebody on the road',
       ttl: null, state: p.offer || p.wants || '',

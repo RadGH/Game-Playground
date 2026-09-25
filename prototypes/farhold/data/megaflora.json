@@ -33,7 +33,7 @@
         "drops": { "log": 75 }, "regrow": 216000 } },
     "tor":             { "name": "Tor",             "tall": 19, "solid": [5.2, 19], "leafy": false, "cap": 12,
       "wood": false, "why": "A tor is the hill with the soil washed off it. There is no felling that." },
-    "stone_arch":      { "name": "Stone Arch",      "tall": 21, "solid": [3.2, 21], "leafy": false, "cap": 10,
+    "stone_arch":      { "name": "Stone Arch",      "tall": 21, "solid": [3.2, 21], "solids": [[-7.4, 0, 2.1], [7.2, 0, 1.9], [-9.5, 2.4, 1.0]], "leafy": false, "cap": 10,
       "wood": false, "why": "The arch is one piece of bedrock. Take a bite out of it and the rest comes down on you." },
     "basalt_stack":    { "name": "Basalt Stack",    "tall": 22, "solid": [3.6, 22], "leafy": false, "cap": 12,
       "wood": false, "why": "Cooled lava, in columns, all the way through. Quarry it properly or leave it alone." },
@@ -43,7 +43,7 @@
       "wood": false, "why": "Ice this old is rock. A tool made for wood only polishes it." },
     "cap_mushroom":    { "name": "Cap Mushroom",    "tall": 18, "solid": [1.6, 18], "leafy": false, "cap": 12,
       "wood": false, "why": "The stalk is wet pulp — it tears rather than cuts, and nothing useful comes off it." },
-    "rib_arch":        { "name": "Rib Arch",        "tall": 18, "solid": [3.4, 18], "leafy": false, "cap": 10,
+    "rib_arch":        { "name": "Rib Arch",        "tall": 18, "solid": [3.4, 18], "solids": [[-4.57, -13.0, 0.9], [4.57, -13.0, 0.9], [-5.75, -8.1, 0.9], [5.75, -8.1, 0.9], [-6.53, -3.0, 0.9], [6.53, -3.0, 0.9], [-6.4, 2.0, 0.9], [6.4, 2.0, 0.9], [-5.49, 7.1, 0.9], [5.49, 7.1, 0.9], [-4.18, 11.9, 0.9], [4.18, 11.9, 0.9]], "leafy": false, "cap": 10,
       "wood": false, "why": "Whatever it was the bones of, they went to stone a long time ago." },
     "mast_cactus":     { "name": "Mast Cactus",     "tall": 18, "solid": [1.4, 18], "leafy": false, "cap": 12,
       "wood": false, "why": "Under the spines it is all water and pith. There is no timber in a cactus." }

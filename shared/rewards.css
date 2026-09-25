@@ -59,9 +59,13 @@
 .rw-rays {
   position: absolute; width: 360px; height: 360px; left: 50%; top: 50%; translate: -50% -50%;
   background: url("../assets/data/ui/rays.svg") no-repeat center / contain; opacity: 0; z-index: 0;
-  mix-blend-mode: screen; animation: rw-spin 18s linear infinite;
+  mix-blend-mode: screen;
 }
-.rw-stage.open .rw-rays { animation: rw-spin 18s linear infinite, rw-rays-in .6s ease-out both; }
+/* The rays are a WHEEL, not a fan (2026-09-24): one quick turn as the lid comes up, slowing to a
+   stop. They used to spin forever — and under "reduce motion" the shortened duration made that
+   forever ~100 turns a second. */
+.rw-stage.open .rw-rays { animation: rw-wheel 3.4s cubic-bezier(.12, .75, .25, 1) both, rw-rays-in .6s ease-out both; }
+@keyframes rw-wheel { from { rotate: -40deg; } to { rotate: 110deg; } }
 @keyframes rw-spin { to { rotate: 360deg; } }
 @keyframes rw-rays-in { from { opacity: 0; scale: .4; } to { opacity: .8; scale: 1; } }
 .rw-chest { position: relative; width: 132px; height: 132px; z-index: 1; }
@@ -123,7 +127,7 @@
 }
 .rw-item.legendary::after, .rw-item.unique::after {
   content: ""; position: absolute; left: 50%; top: 30px; width: 180px; height: 180px; translate: -50% -50%; z-index: -1; pointer-events: none;
-  background: url("../assets/data/ui/rays.svg") no-repeat center / contain; opacity: .35; mix-blend-mode: screen; animation: rw-spin 14s linear infinite;
+  background: url("../assets/data/ui/rays.svg") no-repeat center / contain; opacity: .35; mix-blend-mode: screen; animation: rw-spin 60s linear infinite;
 }
 @keyframes rw-glow { from { opacity: .55; } to { opacity: 1; } }
 
@@ -158,7 +162,10 @@
   .rw-stage { height: 110px; } .rw-chest { width: 92px; height: 92px; } .rw-item { width: 46%; } .rw-hint { display: none; } .rw-counter { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rw-overlay, .rw-card, .rw-ribbon, .rw-item, .rw-extras li, .rw-btn, .rw-stage .rw-chest, .rw-rays, .rw-flash, .rw-spark { animation-duration: .01s !important; animation-delay: 0s !important; }
+  .rw-overlay, .rw-card, .rw-ribbon, .rw-item, .rw-extras li, .rw-btn, .rw-stage .rw-chest, .rw-flash, .rw-spark { animation-duration: .01s !important; animation-delay: 0s !important; }
+  /* never shorten a looping animation: that is what turned the rays into a fan */
+  .rw-stage.open .rw-rays { animation: none !important; opacity: .8; }
+  .rw-item.legendary::after, .rw-item.unique::after, .rw-item::before { animation: none !important; }
 }
 
 /* ---------------------------------------------------------------- the opt-in chooser (2026-09-21)

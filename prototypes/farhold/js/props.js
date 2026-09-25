@@ -987,9 +987,10 @@ export function createProps(scene, terrain, opts = {}) {
              * complaint from the other direction. A giant comes down when you cut it down.
              */
             if (felled.has(megaId)) continue;
+            const megaYaw = mrng() * Math.PI * 2;
             matrix.compose(
               new THREE.Vector3(x, terrain.heightAt(x, z) - 0.3, z),
-              new THREE.Quaternion().setFromEuler(new THREE.Euler(0, mrng() * Math.PI * 2, 0)),
+              new THREE.Quaternion().setFromEuler(new THREE.Euler(0, megaYaw, 0)),
               new THREE.Vector3(scale, scale * (0.9 + mrng() * 0.25), scale),
             );
             mesh.setMatrixAt(n, matrix);
@@ -1006,7 +1007,20 @@ export function createProps(scene, terrain, opts = {}) {
              */
             const v = 0.88 + mrng() * 0.22;
             mesh.setColorAt(n, colour.setScalar(v));
-            if (spec.solid) solids.add(x, z, spec.solid[0] * scale, spec.solid[1] * scale);
+            /**
+             * R25 — AN ARCH IS SOLID IN ITS LEGS, NOT IN ITS DOORWAY. `solid` is one circle at the
+             * origin, which for an arch is the empty middle: you walked into nothing and could not
+             * pass under it, while the legs themselves had no collision at all. `solids` lists the
+             * pieces that really stand on the ground ([x, z, radius] in model space), turned by the
+             * same yaw and scaled by the same scale as the mesh.
+             */
+            if (spec.solids) {
+              const c = Math.cos(megaYaw), sn = Math.sin(megaYaw);
+              for (const [lx, lz, r] of spec.solids) {
+                // three's Y rotation: x' = x cos + z sin, z' = -x sin + z cos
+                solids.add(x + (lx * c + lz * sn) * scale, z + (-lx * sn + lz * c) * scale, r * scale, spec.tall * scale);
+              }
+            } else if (spec.solid) solids.add(x, z, spec.solid[0] * scale, spec.solid[1] * scale);
             megaCounts[key] = n + 1;
             /**
              * …AND YOU CAN WALK UP TO IT. The one line item 12 was missing.

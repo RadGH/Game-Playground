@@ -204,7 +204,7 @@ export const PIECES = {
   ]) },
 
   /** The way in: an arch between two squat turrets. A ring of wall with one of these is a fort. */
-  gatehouse: { tall: 11.5, cap: 14, solid: [5.4, 11], build: (stone = '#8a8275') => mergeParts([
+  gatehouse: { tall: 11.5, cap: 14, solid: [5.4, 11], solids: [[-4.4, 0, 2.1], [4.4, 0, 2.1], [-2.4, 0, 0.9], [2.4, 0, 0.9]], build: (stone = '#8a8275') => mergeParts([
     ...[-4.4, 4.4].map(x => ({ geometry: BOX, color: stone, matrix: at(x, 4.8, 0, 3.4, 9.6, 3.4) })),
     ...[-4.4, 4.4].map(x => ({ geometry: BOX, color: '#7a7264', matrix: at(x, 10.0, 0, 4.0, 0.8, 4.0) })),
     ...[-5.4, -4.4, 4.4, 5.4].map(x => ({ geometry: BOX, color: stone, matrix: at(x, 10.9, 0, 0.8, 1.2, 3.6) })),
@@ -837,8 +837,16 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
         new THREE.Vector3(scale, scale, scale));
       mesh.setMatrixAt(n, m4);
       counts[piece] = n + 1;
-      const solid = PIECES[piece].solid;
-      if (solid && collide) collide.add(wx, wz, solid[0] * scale, solid[1] * scale);
+      const solid = PIECES[piece].solid, legs = PIECES[piece].solids;
+      /**
+       * R25 — a gatehouse is solid in its turrets and gate posts, not in its gateway: one circle at
+       * the middle blocked the very opening the piece exists to provide. `solids` is [x, z, r] in
+       * model space, turned by the same yaw.
+       */
+      if (legs && collide) {
+        const c = Math.cos(yaw), sn = Math.sin(yaw);
+        for (const [lx, lz, r] of legs) collide.add(wx + (lx * c + lz * sn) * scale, wz + (-lx * sn + lz * c) * scale, r * scale, solid[1] * scale);
+      } else if (solid && collide) collide.add(wx, wz, solid[0] * scale, solid[1] * scale);
     };
 
     /**

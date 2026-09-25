@@ -1265,7 +1265,7 @@ export class Rpg {
     if (!item) return null;
     const req = this.levelRequirement(item, player);
     if ((player.level ?? 1) < req.level) {
-      return `${item.name} needs level ${req.level}. You are ${player.level ?? 1}.`;
+      return `You are not the required level for ${item.name}: it needs level ${req.level}, and you are level ${player.level ?? 1}.`;
     }
     // …and a two-handed weapon takes the off hand with it, unless a keystone says otherwise
     const slot = into || (item.type === 'weapon' ? 'weapon' : item.slot);

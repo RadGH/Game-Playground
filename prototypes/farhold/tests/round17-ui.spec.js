@@ -37,37 +37,17 @@ test('the title tagline is centred, not left-aligned inside a centred block', as
   expect(off).toBeLessThan(2);
 });
 
-test('the held-mode readout is real text, and it gets out of the way of a screen', async ({ page }) => {
+// R25 — the held-mode ring was removed on request (it overlapped the "E to …" prompt). This
+// replaces R17's test of how the ring drew: with a scanner owned, there is still no ring on screen.
+test('R25 — owning a scanner puts no weapon/tool ring on the screen', async ({ page }) => {
   const errors = watch(page);
   await land(page);
-
-  // give the character a second held mode so the ring is drawn at all (it hides below two)
   await page.evaluate(() => {
     const g = window.farhold;
     g.player.devices = { ...(g.player.devices || {}), scanner: true };
   });
-  await page.waitForFunction(() => document.querySelector('.held-mode.on'), null, { timeout: 15000 });
-
-  const box = page.locator('.held-mode');
-  await expect(box).toHaveClass(/\bon\b/);
-  // the bug: the ring's text was the string form of an element
-  await expect(box).not.toContainText('[object');
-  // …and every pip after the first was thrown away
-  const pips = await page.locator('.held-mode .hm-pip').count();
-  const modes = await page.evaluate(() => window.farhold.debugHeld?.modes?.length
-    ?? window.farhold.player.devices ? 2 : 1);
-  expect(pips).toBeGreaterThanOrEqual(2);
-  expect(pips).toBeGreaterThanOrEqual(Math.min(2, modes));
-
-  // open the character sheet — the readout must stand down rather than sit over the inventory
-  await page.keyboard.press('KeyI');
-  await page.waitForSelector('#sheet:not(.hidden)');
-  await page.waitForFunction(() => !document.querySelector('.held-mode')?.classList.contains('on'),
-    null, { timeout: 5000 });
-  await page.keyboard.press('Escape');
-  await page.waitForFunction(() => document.querySelector('.held-mode')?.classList.contains('on'),
-    null, { timeout: 5000 });
-
+  await page.waitForTimeout(1500);
+  expect(await page.locator('.held-mode.on').count()).toBe(0);
   expect(errors).toEqual([]);
 });
 

@@ -2525,3 +2525,13 @@ body.building canvas { cursor: crosshair; }
 .row-handin:disabled { opacity: .45; cursor: default; }
 /* a job with nobody to hand it to says so where the button would have been */
 .row-selfpaid { justify-self: end; align-self: center; font-size: 11px; color: var(--ink-faint); font-style: italic; }
+
+/* R25 — the bottom-of-screen notice (hud.notice): refusals a player must not miss */
+.hud-notice {
+  position: fixed; left: 50%; bottom: 128px; translate: -50% 12px; z-index: 60; pointer-events: none;
+  max-width: min(90vw, 560px); padding: 10px 18px; border-radius: 8px; text-align: center;
+  background: rgba(20, 14, 12, 0.92); border: 1px solid #a8452f; color: #ffd8cc; font-size: 15px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity .2s, translate .2s;
+}
+.hud-notice.show { opacity: 1; translate: -50% 0; }
+.hud-notice.good { border-color: #6aa84f; color: #dff5d4; }

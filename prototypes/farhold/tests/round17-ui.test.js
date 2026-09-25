@@ -133,19 +133,30 @@ test('the character sheet prints material amounts through mat()', () => {
 
 // ---------------------------------------------------------------- the two reported HUD faults
 
-test('the held-mode ring is built by appending, not by passing elements as text', () => {
-  const hud = read('js/hud.js');
-  // `el(tag, cls, text)` sets textContent — handing it an element is what printed
-  // "[object HTMLElement]" above the weapon name, and dropped every pip after the first.
-  const code = hud.split('\n').filter(l => !/^\s*(\*|\/\/|\/\*)/.test(l)).join('\n');
-  assert.equal(/el\('div', 'hm-ring', \.\.\./.test(code), false);
-  assert.match(code, /for \(const m of modes\) ring\.append/);
+/**
+ * R25 — the held-mode ring (weapon / tool / scanner / rod) was REMOVED on request: "The weapon /
+ * tool indicator overlaps the 'E to interact with' popup… let's just remove the whole weapon/tool
+ * menu and just make it so pressing E harvests ALL things. Not weapon attacks." These replace the
+ * two R17 tests that guarded how the ring was built.
+ */
+test('R25 — there is no held-mode ring, and the attack button always attacks', () => {
+  const hud = read('js/hud.js'), main = read('js/main.js');
+  const code = t => t.split('\n').filter(l => !/^\s*(\*|\/\/|\/\*)/.test(l)).join('\n');
+  assert.equal(/'held-mode'/.test(code(hud)), false, 'the ring is still built');
+  assert.equal(/cycleHeld\(player, Math\.sign/.test(code(main)), false, 'the mouse wheel still cycles what is in your hands');
+  assert.equal(/holding === 'tool'/.test(code(main)), false, 'the attack button still gathers with a tool in hand');
+  assert.match(code(main), /if \(step\.attacked\) swingWith\('main'/);
 });
 
-test('the held-mode readout stands down while a screen owns the window', () => {
-  const hud = read('js/hud.js');
-  assert.match(hud, /if \(screenOpen\(this\)\) \{ box\.classList\.remove\('on'\); return; \}/);
-  assert.match(hud, /this\.refreshHeld\(\);/);
+test('R25 — the scanner and the Command Rod have keys of their own', async () => {
+  const { BINDINGS } = await import('../js/settings.js').catch(() => ({ BINDINGS: null }));
+  const src = read('js/settings.js');
+  assert.match(src, /action: 'scan'[^}]*code: 'KeyX'/);
+  assert.match(src, /action: 'order'[^}]*code: 'KeyR'/);
+  if (BINDINGS) assert.ok(BINDINGS.some(b => b.action === 'scan') && BINDINGS.some(b => b.action === 'order'));
+  const main = read('js/main.js');
+  assert.match(main, /snap\.pressed\?\.has\('KeyX'\)/);
+  assert.match(main, /snap\.pressed\?\.has\('KeyR'\)/);
 });
 
 test('the title screen tagline is centred as a box, not only as text', () => {

@@ -93,6 +93,8 @@ export function createWanderers({ data, territory = null, standings = null, seed
       out.push({
         id: `w${zone.id}_${night ? 'n' : 'd'}_${i}`,
         type: 'npc',
+        // R25 — somebody standing in a town is a townsperson, not an errand: no pin, no arrow
+        inTown: spot.kind === 'settlement' || spot.kind === 'port',
         kind: kind.key, name: first + byname, kindName: kind.name, role: kind.role,
         faction: kind.faction || record?.holder || null,
         blurb: kind.blurb, lines: kind.lines || [],

@@ -13,6 +13,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: '.',
   testMatch: ['tests/**/*.spec.js', '*/tests/**/*.spec.js', 'prototypes/*/tests/**/*.spec.js'],
+  testIgnore: ['prototypes/tinyrts/**'], // own repo (symlink) with its own suite on port 8460
   timeout: 60_000,
   workers: 1, // WebGL + audio synthesis pages are CPU heavy; run serially for stable timings
   use: { baseURL: 'http://localhost:8401/', headless: true, viewport: { width: 1280, height: 800 } },

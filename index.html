@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground — Experiments</title>
+<link rel="stylesheet" href="shared/style.css">
+<style>
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+  .card { display: block; color: inherit; text-decoration: none; }
+  .card h2 { color: var(--accent); }
+  .card:hover { border-color: var(--accent); }
+  .tag { margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Playground</h1>
+  <p class="muted">Experiments and prototypes for future games. Each lives in its own folder with a README. This page is maintained by Claude whenever an experiment is added.</p>
+
+  <a class="panel card" href="voice-lab/">
+    <h2>1. Voice Lab</h2>
+    <p>Synthetic character voices in the browser, knob-driven. Compare engines (Web Speech, espeak, SAM, babble, Piper neural), tune pitch / speed / tone / texture knobs, apply audio effects, build presets, stress-test crowds, and export voice JSON.</p>
+    <span class="badge tag">audio</span><span class="badge tag">tts</span><span class="badge tag">web-audio</span>
+  </a>
+
+  <a class="panel card" href="lingo/">
+    <h2>2. Lingo</h2>
+    <p>Text-based language system: phrase templates with <code>{placeholders}</code>, a game-defined dictionary (races, spells, items, people) with singular/plural/possessive forms, personality knobs, trait tags, custom catchphrases, and a two-character conversation simulator.</p>
+    <span class="badge tag">text</span><span class="badge tag">dialog</span><span class="badge tag">personality</span>
+  </a>
+
+  <a class="panel card" href="avatar-2d/">
+    <h2>3a. Avatar 2D</h2>
+    <p>Paper-doll character builder from stacked SVG layers: hair, eyes, brows, nose, mouth, body height / width, tops, bottoms, shoes, accessories. Presets, randomize, save in browser, export JSON.</p>
+    <span class="badge tag">svg</span><span class="badge tag">character</span>
+  </a>
+
+  <a class="panel card" href="avatar-3d/">
+    <h2>3b. Avatar 3D</h2>
+    <p>Three.js character builder. <b>Chibi 2</b> is the flagship: nine races (human, elf, dwarf, orc, giant, goblin, halfling, undead, beastkin), a roundness slider, self-contained outfits and ~90 animations with weapon-aware attacks and emotes. The original procedural Chibi and the Quaternius (CC0) mesh mode are kept for comparison and marked deprecated. Same JSON as the 2D version.</p>
+    <span class="badge tag">three.js</span><span class="badge tag">character</span>
+  </a>
+
+  <a class="panel card" href="namegen/">
+    <h2>4. Name Forge</h2>
+    <p>Procedural names for people, factions, regions, settlements, landmarks, artifacts and mottos across 12 races, each with its own language (sound rules + concept dictionary), meanings, plural/adjective forms and pronunciations. Exports Lingo dictionary entries.</p>
+    <span class="badge tag">names</span><span class="badge tag">languages</span><span class="badge tag">tags</span>
+  </a>
+
+  <a class="panel card" href="items/">
+    <h2>5. Item Vault</h2>
+    <p>Tagged catalog of ~340 items (weapons, armour, vessels, regalia, lore, tools, instruments, food…) with race affinities and exclusives, plus a loot roller: material, quality, enchantment, artifact name, value and lore.</p>
+    <span class="badge tag">items</span><span class="badge tag">loot</span><span class="badge tag">tags</span>
+  </a>
+
+  <a class="panel card" href="conversations/">
+    <h2>Conversations</h2>
+    <p>Back-and-forth talk with structure: topics with roles and requirements over real memories, loot, gear comparisons and weapon kill counts, spoken through Lingo personalities.</p>
+    <span class="badge tag">dialog</span><span class="badge tag">memory</span>
+  </a>
+
+  <a class="panel card" href="meters/">
+    <h2>Damage Meter</h2>
+    <p>Drill-down combat meter: bars per fighter, drill into sources, drill into every hit with crit, overkill and damage type. Feed it from any combat system.</p>
+    <span class="badge tag">combat</span><span class="badge tag">ui</span>
+  </a>
+
+  <a class="panel card" href="assets/">
+    <h2>Asset Library</h2>
+    <p>The drawn art both prototypes share, in files instead of code: 32 scenery backdrops (villages, forests, caves, volcanic plateaus, voids) with tags and a night wash, plus the map node icons. Browse them in a gallery, load them by id.</p>
+    <span class="badge tag">svg</span><span class="badge tag">scenery</span><span class="badge tag">icons</span>
+  </a>
+
+  <a class="panel card" href="library/">
+    <h2>Library</h2>
+    <p>Blueprints of characters, NPCs, items and parties shared by every experiment and prototype. Stamp copies into games; export JSON or sync straight to Claude.</p>
+    <span class="badge tag">blueprints</span><span class="badge tag">sync</span>
+  </a>
+
+  <a class="panel card" href="avatar-3d/creatures.html">
+    <h2>Creatures 3D</h2>
+    <p>Chibi procedural bodies for non-humanoids: wolves, boars, bears, rats, horses, deer, bats, spiders, snakes, drakes and dragons, with walk/attack/dead animations and a creature JSON.</p>
+    <span class="badge tag">3D</span><span class="badge tag">procedural</span><span class="badge tag">animals</span>
+  </a>
+
+  <a class="panel card" href="avatar-3d/vehicles.html">
+    <h2>Vehicles 3D</h2>
+    <p>Procedural travel vehicles in the creature style: hand cart, pack mule, covered wagon, ox cart, iron-plated war wagon, closed coach and a sled pulled by a drake — with real animal bodies in the shafts.</p>
+    <span class="badge tag">3D</span><span class="badge tag">procedural</span><span class="badge tag">travel</span>
+  </a>
+
+  <a class="panel card" href="avatar-3d/spellfx.html">
+    <h2>Spell FX</h2>
+    <p>Spell effects for a 3D stage: element projectiles (flame cones, ice shard clusters, jagged bolts, arcing runes), impact bursts and 23 looping status auras, built from shaped geometry and the fx sprite sheet.</p>
+    <span class="badge tag">3D</span><span class="badge tag">particles</span><span class="badge tag">combat</span>
+  </a>
+
+  <a class="panel card" href="sfx/">
+    <h2>Sound Lab</h2>
+    <p>Sound effects with four interchangeable makers — our own synthesizer, a CC0 sample pack, a hybrid of the two, and chiptune — over one catalog of 118 logical ids (spells, statuses, melee, deaths, loot, interface, ambience). Every clip is measured and levelled, so nothing is too quiet or too loud.</p>
+    <span class="badge tag">audio</span><span class="badge tag">web-audio</span><span class="badge tag">loudness</span>
+  </a>
+
+  <a class="panel card" href="worldgen/">
+    <h2>World Forge</h2>
+    <p>Procedural world maps with a lot of knobs: seven ways to grow continents, erosion, rivers and lakes, climate and biomes, an evil/blessed aura layer, named regions, towns, dungeons and roads — then zoom from the world into a region and into a single 640 m tile.</p>
+    <span class="badge tag">worldgen</span><span class="badge tag">map</span><span class="badge tag">noise</span>
+  </a>
+
+  <a class="panel card" href="universe/">
+    <h2>Star Forge</h2>
+    <p>A universe with a lot of knobs: a galaxy laid out in spiral arms, clusters or rings; eleven kinds of star from blue giants to black holes; systems of planets with moons, rings, belts and comets; fourteen planet archetypes with their own hazards and rare elements — then land on one and World Forge draws its surface.</p>
+    <span class="badge tag">universe</span><span class="badge tag">space</span><span class="badge tag">3d</span><span class="badge tag">worldgen</span>
+  </a>
+
+  <a class="panel card" href="proctown/">
+    <h2>Procedural Towns</h2>
+    <p>The one true town planner, and a page to tune it on. A town is cut into blocks and the cuts become its streets, so a house can never sit on a road; each plot knows which way it faces, so a door is never on a blank back wall. Seven cultures — human, elf, dwarf, undead, orc, halfling, desert — are parameter sets over one generator. Farhold imports this module, so tuning here tunes the game.</p>
+    <span class="badge tag">towns</span><span class="badge tag">procgen</span><span class="badge tag">layout</span>
+  </a>
+
+  <a class="panel card" href="proctown/kit.html">
+    <h2>Building Kit</h2>
+    <p>The parts every building in a town is made of — walls, roofs, doors, windows, chimneys, stalls — drawn on their own so a roof that does not meet its walls is obvious here rather than three hundred metres away in the game. Same module the planner fills its plots with.</p>
+    <span class="badge tag">towns</span><span class="badge tag">3d</span><span class="badge tag">parts</span>
+  </a>
+
+  <a class="panel card" href="highdef-3d/">
+    <h2>3D High Def</h2>
+    <p>A high-detail atmospheric world you can walk around in: a generated landscape with biomes, forests, weather and water, lit with cascaded shadows, a physical sky that the world reflects, height fog that glows toward the sun and a quarter of a million blades of grass. Fly over it with a free isometric strategy camera or drop in behind a rigged character with a proper walk/jog/sprint blend. Every tree, rock, leaf and texture is generated in code.</p>
+    <span class="badge tag">3d</span><span class="badge tag">terrain</span><span class="badge tag">lighting</span><span class="badge tag">vegetation</span>
+  </a>
+
+  <a class="panel card" href="combined/">
+    <h2>Combined demo</h2>
+    <p>One character sheet that ties the three together: an avatar with a voice and a personality that talks.</p>
+    <span class="badge tag">integration</span>
+  </a>
+
+  <h2 style="margin-top:24px">Prototypes</h2>
+  <p class="muted">Small throwaway games built from the experiments, to test ideas before they get their own project.</p>
+  <a class="panel card" href="prototypes/party-quest/">
+    <h2>Party Quest</h2>
+    <p>Assemble four adventurers, talk to townsfolk, take quests, travel by choosing directions, auto-battle with reactive banter, camp at night and listen to the party talk about the day.</p>
+    <span class="badge tag">prototype</span><span class="badge tag">party</span><span class="badge tag">auto-battler</span>
+  </a>
+  <a class="panel card" href="prototypes/emberveil/">
+    <h2>Emberveil (rebuilt)</h2>
+    <p>The user's Emberveil RPG rebuilt on the playground pieces: thirty classes as chibi characters with new gear parts, a branching world map across six acts, loot with affixes, uniques and sets, talents and passives, towns, events, dungeons.</p>
+    <span class="badge tag">prototype</span><span class="badge tag">rpg</span><span class="badge tag">loot</span>
+  </a>
+
+  <a class="panel card" href="prototypes/frontier-foundry/">
+    <h2>Frontier Foundry</h2>
+    <p>A 4X + RTS automation game, playable end to end. Survey a star system, land a pod, scan for what is under the ground, put drills on it, haul it with delivery routes, refine it, place outlines that builders walk over and finish, research your way up an 82-node tree, hold off waves that arrive on a clock driven by your own smoke, and leave on a rocket carrying whatever fits in the hold. Six screens over a headless engine, and a 480-tile map that generates more ground around the camera as you pan.</p>
+    <span class="badge tag">prototype</span><span class="badge tag">4X</span><span class="badge tag">automation</span><span class="badge tag">tower-defence</span><span class="badge tag">playable</span>
+  </a>
+
+  <a class="panel card" href="prototypes/farhold/">
+    <h2>Farhold</h2>
+    <p>A third-person RPG on a whole planet, and off it. Land on a world of a seeded star system, walk 163 km by 82 km of real elevation out to a horizon almost eight kilometres away, and fight, loot and level your way across it &mdash; with weather, rivers, roads, towns full of people who talk, four skills a class, jobs, a campaign and a nemesis. The star crosses a fifteen-minute sky and the neighbours are genuinely up there, where their orbits put them; press <b>J</b> and you can fly to one. All ten phases done.</p>
+    <span class="badge tag">prototype</span><span class="badge tag">rpg</span><span class="badge tag">planet</span><span class="badge tag">3d</span><span class="badge tag">loot</span><span class="badge tag">space</span>
+  </a>
+
+  <a class="panel card" href="prototypes/tinyrts/">
+    <h2>Tiny RTS</h2>
+    <p>A side-view RTS / defence game where everything is made of pixels. Mine crystal out of the ground, paint walls a cell at a time, put laser turrets on them and hold against waves of geometric void-creatures &mdash; or against a rival commander building its own fort across the map. Shots chip walls away, overhangs break off and crush what&rsquo;s under them, drills hollow out the ground. An 8-mission campaign, Siege and Versus free play, synthesized sound and music. Keyboard and mouse.</p>
+    <span class="badge tag">prototype</span><span class="badge tag">rts</span><span class="badge tag">tower-defence</span><span class="badge tag">physics</span><span class="badge tag">playable</span><span class="badge tag">own repo</span>
+  </a>
+
+  <p class="small muted">Serve with <code>./serve.sh --bg</code> (port 8400). See <code>CLAUDE.md</code> for the conventions.</p>
+</div>
+</body>
+</html>

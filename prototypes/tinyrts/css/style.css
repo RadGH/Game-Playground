@@ -1,0 +1,41 @@
+/* Base styles: full-window canvas, pixel font, shared colors. */
+:root {
+  --bg: #07060d;
+  --panel: rgba(10, 12, 28, 0.92);
+  --panel-solid: #0b0d1f;
+  --line: #2b3a66;
+  --line-hi: #4ee6ff;
+  --text: #cfe3ff;
+  --dim: #7c8bb0;
+  --cyan: #4ee6ff;
+  --crystal: #46e8f5;
+  --ferrite: #f59f55;
+  --alloy: #c18bff;
+  --power: #ffe066;
+  --good: #6dff9e;
+  --warn: #ffb347;
+  --bad: #ff5a6e;
+  --umbra: #ffab40;
+  --hollow: #ff4fd8;
+  --font: 'Silkscreen', 'Courier New', monospace;
+}
+body.hc {
+  --text: #ffffff; --dim: #c0c8e0; --line: #6a80c0; --cyan: #00ffff; --bad: #ff2020; --good: #00ff60;
+  --hollow: #ff00ff; --umbra: #ffcc00;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); overflow: hidden; user-select: none; -webkit-user-select: none; }
+canvas#view { position: fixed; inset: 0; display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: crosshair; }
+button { font-family: var(--font); }
+[hidden] { display: none !important; }
+#tooltip {
+  position: fixed; z-index: 50; pointer-events: none; max-width: 300px;
+  background: var(--panel-solid); border: 1px solid var(--line-hi); padding: 8px 10px; font-size: 11px; line-height: 1.5;
+  box-shadow: 0 0 12px rgba(78, 230, 255, 0.25);
+}
+#tooltip .tt-title { color: var(--cyan); font-size: 12px; margin-bottom: 3px; }
+#tooltip .tt-cost { margin: 3px 0; }
+#tooltip .tt-key { color: var(--power); }
+#tooltip .tt-why { color: var(--bad); }
+.c-crystal { color: var(--crystal); } .c-ferrite { color: var(--ferrite); } .c-alloy { color: var(--alloy); } .c-power { color: var(--power); }
+.c-good { color: var(--good); } .c-bad { color: var(--bad); } .c-warn { color: var(--warn); } .c-dim { color: var(--dim); }

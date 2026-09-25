@@ -1,0 +1,111 @@
+{
+ "_doc": "Research projects (one Research Lab needed, one project per lab at a time). effect: team mods. slot: key on the lab's card.",
+ "list": {
+  "hardened": {
+   "name": "Hardened Plate",
+   "slot": "KeyQ",
+   "cost": {
+    "c": 80,
+    "f": 60
+   },
+   "time": 40,
+   "effect": {
+    "wallHp": 1.3
+   },
+   "desc": "+30% HP for walls built from now on."
+  },
+  "drills": {
+   "name": "Efficient Drills",
+   "slot": "KeyW",
+   "cost": {
+    "c": 100,
+    "f": 20
+   },
+   "time": 35,
+   "effect": {
+    "mining": 1.3
+   },
+   "desc": "Drills mine 30% faster."
+  },
+  "capacitors": {
+   "name": "Capacitors",
+   "slot": "KeyE",
+   "cost": {
+    "c": 60,
+    "f": 40
+   },
+   "time": 30,
+   "effect": {
+    "battery": 2
+   },
+   "desc": "Batteries hold twice as much."
+  },
+  "lenses": {
+   "name": "Focused Lenses",
+   "slot": "KeyR",
+   "cost": {
+    "c": 100,
+    "a": 20
+   },
+   "time": 45,
+   "effect": {
+    "laserDmg": 1.15
+   },
+   "desc": "+15% laser damage."
+  },
+  "assembly": {
+   "name": "Rapid Assembly",
+   "slot": "KeyA",
+   "cost": {
+    "c": 90,
+    "f": 30
+   },
+   "time": 35,
+   "effect": {
+    "build": 1.4
+   },
+   "desc": "Drones build 40% faster."
+  },
+  "ricochet": {
+   "name": "Refraction",
+   "slot": "KeyS",
+   "cost": {
+    "c": 80,
+    "a": 25
+   },
+   "time": 45,
+   "effect": {
+    "refraction": 2
+   },
+   "desc": "Enemy lasers bounced back by your Prism walls hit twice as hard."
+  },
+  "lattice": {
+   "name": "Supply Lattice",
+   "slot": "KeyD",
+   "cost": {
+    "c": 120,
+    "f": 60
+   },
+   "time": 50,
+   "effect": {
+    "popCap": 10
+   },
+   "desc": "+10 population cap."
+  },
+  "deepcore": {
+   "name": "Deep Core",
+   "slot": "KeyF",
+   "cost": {
+    "c": 150,
+    "f": 80,
+    "a": 30
+   },
+   "time": 60,
+   "effect": {
+    "coreHp": 1.5,
+    "linkRange": 1.2
+   },
+   "desc": "Core HP +50% and link range +20%."
+  }
+ }
+}

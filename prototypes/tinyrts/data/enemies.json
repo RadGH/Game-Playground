@@ -1,0 +1,333 @@
+{
+ "_doc": "The Hollow. size [w,h]. speed cells/s. move: crawl|fly|burrow|walk(boss). cost = director budget points. from = first wave the director may use it. bite: melee {dmg, unitDmg, area (cells square), rate, builtMult}.",
+ "list": {
+  "mite": {
+   "name": "Mite",
+   "size": [
+    4,
+    3
+   ],
+   "hp": 20,
+   "speed": 22,
+   "move": "crawl",
+   "cost": 1,
+   "from": 1,
+   "bite": {
+    "dmg": 3,
+    "unitDmg": 4,
+    "area": 3,
+    "rate": 1.5
+   },
+   "tags": [
+    "swarm"
+   ],
+   "desc": "Small, fast, in swarms."
+  },
+  "gnawer": {
+   "name": "Gnawer",
+   "size": [
+    7,
+    5
+   ],
+   "hp": 90,
+   "speed": 12,
+   "move": "crawl",
+   "cost": 4,
+   "from": 3,
+   "bite": {
+    "dmg": 8,
+    "unitDmg": 8,
+    "area": 5,
+    "rate": 1,
+    "builtMult": 3,
+    "dtype": "acid"
+   },
+   "tags": [
+    "wallbreaker"
+   ],
+   "desc": "Acid jaws: triple damage to walls. Goes for the weakest spot."
+  },
+  "spitter": {
+   "name": "Spitter",
+   "size": [
+    6,
+    6
+   ],
+   "hp": 60,
+   "speed": 10,
+   "move": "crawl",
+   "cost": 4,
+   "from": 4,
+   "bite": {
+    "dmg": 3,
+    "unitDmg": 4,
+    "area": 3,
+    "rate": 1
+   },
+   "weapon": {
+    "kind": "glob",
+    "dtype": "acid",
+    "dmg": 10,
+    "radius": 4,
+    "rate": 0.5,
+    "range": 110,
+    "speed": 110,
+    "ground": true,
+    "air": false
+   },
+   "tags": [
+    "artillery"
+   ],
+   "desc": "Lobs acid over walls. Flak shoots the globs down."
+  },
+  "glare": {
+   "name": "Glare",
+   "size": [
+    6,
+    7
+   ],
+   "hp": 70,
+   "speed": 10,
+   "move": "crawl",
+   "cost": 5,
+   "from": 6,
+   "bite": {
+    "dmg": 3,
+    "unitDmg": 4,
+    "area": 3,
+    "rate": 1
+   },
+   "weapon": {
+    "kind": "beam",
+    "dtype": "laser",
+    "dps": 10,
+    "range": 100,
+    "ground": true,
+    "air": true
+   },
+   "tags": [
+    "laser"
+   ],
+   "desc": "A Hollow eye that fires a laser. Prism walls bounce it back."
+  },
+  "wisp": {
+   "name": "Wisp",
+   "size": [
+    5,
+    4
+   ],
+   "hp": 35,
+   "speed": 30,
+   "move": "fly",
+   "cost": 3,
+   "from": 3,
+   "cruise": 40,
+   "bite": {
+    "dmg": 4,
+    "unitDmg": 15,
+    "area": 3,
+    "rate": 1,
+    "dive": true
+   },
+   "tags": [
+    "air"
+   ],
+   "desc": "Dives at turrets. Flak and Skimmers."
+  },
+  "splitter": {
+   "name": "Splitter",
+   "size": [
+    7,
+    6
+   ],
+   "hp": 90,
+   "speed": 14,
+   "move": "crawl",
+   "cost": 5,
+   "from": 5,
+   "bite": {
+    "dmg": 8,
+    "unitDmg": 8,
+    "area": 3,
+    "rate": 1
+   },
+   "splits": {
+    "into": "mite",
+    "count": 4
+   },
+   "tags": [
+    "swarm"
+   ],
+   "desc": "Bursts into 4 Mites."
+  },
+  "carapace": {
+   "name": "Carapace",
+   "size": [
+    10,
+    8
+   ],
+   "hp": 240,
+   "speed": 8,
+   "move": "crawl",
+   "cost": 10,
+   "from": 7,
+   "bite": {
+    "dmg": 20,
+    "unitDmg": 20,
+    "area": 5,
+    "rate": 0.8
+   },
+   "frontReflect": true,
+   "tags": [
+    "armored"
+   ],
+   "desc": "Its front shell reflects lasers. Hit it from above or behind, or use shells and slugs."
+  },
+  "borer": {
+   "name": "Borer",
+   "size": [
+    8,
+    5
+   ],
+   "hp": 120,
+   "speed": 8,
+   "move": "burrow",
+   "cost": 8,
+   "from": 8,
+   "bite": {
+    "dmg": 10,
+    "unitDmg": 10,
+    "area": 5,
+    "rate": 1
+   },
+   "tags": [
+    "burrow"
+   ],
+   "desc": "Tunnels under walls and surfaces inside. Watch for tremor lines."
+  },
+  "bombard": {
+   "name": "Bombard",
+   "size": [
+    12,
+    7
+   ],
+   "hp": 160,
+   "speed": 10,
+   "move": "fly",
+   "cost": 12,
+   "from": 9,
+   "cruise": 60,
+   "weapon": {
+    "kind": "bomb",
+    "dtype": "blast",
+    "dmg": 25,
+    "radius": 12,
+    "rate": 0.33,
+    "range": 8,
+    "ground": true,
+    "air": false
+   },
+   "tags": [
+    "air",
+    "artillery"
+   ],
+   "desc": "Drops bombs that crater. Flak shoots bombs."
+  },
+  "titan": {
+   "name": "Titan",
+   "size": [
+    22,
+    28
+   ],
+   "hp": 4000,
+   "speed": 5,
+   "move": "crawl",
+   "boss": true,
+   "cost": 120,
+   "from": 10,
+   "bite": {
+    "dmg": 30,
+    "unitDmg": 40,
+    "area": 9,
+    "rate": 1,
+    "builtMult": 2
+   },
+   "weapon": {
+    "kind": "stomp",
+    "dtype": "blast",
+    "dmg": 60,
+    "radius": 25,
+    "rate": 0.2,
+    "range": 20,
+    "ground": true,
+    "air": false
+   },
+   "tags": [
+    "boss"
+   ],
+   "desc": "Too tall for low walls. Carves the ground as it stomps."
+  },
+  "hivemother": {
+   "name": "Hive Mother",
+   "size": [
+    24,
+    14
+   ],
+   "hp": 3000,
+   "speed": 6,
+   "move": "fly",
+   "boss": true,
+   "cost": 120,
+   "from": 10,
+   "cruise": 70,
+   "spawn": {
+    "type": "wisp",
+    "count": 2,
+    "interval": 4
+   },
+   "weapon": {
+    "kind": "glob",
+    "dtype": "acid",
+    "dmg": 8,
+    "radius": 5,
+    "rate": 1.5,
+    "range": 60,
+    "speed": 80,
+    "ground": true,
+    "air": false,
+    "rain": true
+   },
+   "tags": [
+    "boss",
+    "air"
+   ],
+   "desc": "Rains acid and births Wisps."
+  },
+  "nest": {
+   "name": "Nest",
+   "size": [
+    20,
+    12
+   ],
+   "hp": 1000,
+   "move": "static",
+   "structure": true,
+   "cost": 0,
+   "spawn": {
+    "type": "mite",
+    "count": 3,
+    "interval": 12,
+    "pool": [
+     "mite",
+     "mite",
+     "gnawer",
+     "spitter"
+    ]
+   },
+   "tags": [
+    "structure"
+   ],
+   "desc": "A Hollow hive. Keeps spawning until destroyed."
+  }
+ }
+}

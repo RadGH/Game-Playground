@@ -1,0 +1,218 @@
+{
+ "_doc": "Lumen/Umbra units. size [w,h] cells (x = center, y = feet). speed cells/s. move: walk|fly. pop: population used. slot: key on the training building's card.",
+ "list": {
+  "drone": {
+   "name": "Drone",
+   "size": [
+    5,
+    4
+   ],
+   "hp": 60,
+   "speed": 40,
+   "move": "fly",
+   "cruise": 14,
+   "pop": 0,
+   "cost": {
+    "c": 30
+   },
+   "train": 6,
+   "max": 10,
+   "slot": "KeyQ",
+   "builder": {
+    "buildRate": 1,
+    "wallRate": 12,
+    "digRate": 6,
+    "repairRate": 8,
+    "range": 20,
+    "repairCost": 0.05
+   },
+   "weapon": {
+    "kind": "pulse",
+    "dtype": "laser",
+    "dmg": 3,
+    "rate": 1,
+    "range": 30,
+    "air": true,
+    "ground": true
+   },
+   "desc": "Builds, digs, repairs and salvages. Doesn't count toward population."
+  },
+  "trooper": {
+   "name": "Trooper",
+   "size": [
+    4,
+    7
+   ],
+   "hp": 90,
+   "speed": 16,
+   "jump": 8,
+   "move": "walk",
+   "pop": 1,
+   "cost": {
+    "c": 40,
+    "f": 10
+   },
+   "train": 8,
+   "slot": "KeyQ",
+   "weapon": {
+    "kind": "pulse",
+    "dtype": "laser",
+    "dmg": 6,
+    "rate": 1.5,
+    "range": 60,
+    "air": true,
+    "ground": true
+   },
+   "desc": "Line infantry with a pulse rifle."
+  },
+  "lancer": {
+   "name": "Lancer",
+   "size": [
+    4,
+    8
+   ],
+   "hp": 70,
+   "speed": 12,
+   "jump": 4,
+   "move": "walk",
+   "pop": 2,
+   "cost": {
+    "c": 60,
+    "a": 10
+   },
+   "train": 12,
+   "slot": "KeyW",
+   "weapon": {
+    "kind": "beam",
+    "dtype": "laser",
+    "dps": 16,
+    "range": 100,
+    "air": false,
+    "ground": true,
+    "pierce": true
+   },
+   "desc": "Long piercing beam that burns through lines of enemies. Fragile."
+  },
+  "skimmer": {
+   "name": "Skimmer",
+   "size": [
+    7,
+    4
+   ],
+   "hp": 70,
+   "speed": 45,
+   "move": "fly",
+   "cruise": 30,
+   "pop": 1,
+   "cost": {
+    "c": 50,
+    "f": 20
+   },
+   "train": 10,
+   "slot": "KeyE",
+   "weapon": {
+    "kind": "pulse",
+    "dtype": "laser",
+    "dmg": 4,
+    "rate": 2,
+    "range": 60,
+    "air": true,
+    "ground": true,
+    "airFirst": true
+   },
+   "desc": "Fast flyer. Hunts other flyers first."
+  },
+  "siege": {
+   "name": "Siege Walker",
+   "size": [
+    10,
+    10
+   ],
+   "hp": 300,
+   "speed": 8,
+   "jump": 3,
+   "move": "walk",
+   "pop": 3,
+   "cost": {
+    "c": 120,
+    "f": 60,
+    "a": 20
+   },
+   "train": 18,
+   "slot": "KeyR",
+   "weapon": {
+    "kind": "shell",
+    "dtype": "blast",
+    "dmg": 30,
+    "radius": 10,
+    "rate": 0.33,
+    "range": 150,
+    "minRange": 40,
+    "air": false,
+    "ground": true,
+    "speed": 150,
+    "ammoF": 1
+   },
+   "deploy": {
+    "range": 190
+   },
+   "desc": "Walking mortar. Deploy (Q) for 190 range - it can't move while deployed."
+  },
+  "commander": {
+   "name": "Commander",
+   "size": [
+    5,
+    9
+   ],
+   "hp": 600,
+   "speed": 18,
+   "jump": 10,
+   "move": "walk",
+   "pop": 0,
+   "hero": true,
+   "respawn": 30,
+   "weapon": {
+    "kind": "pulse",
+    "dtype": "laser",
+    "dmg": 12,
+    "rate": 2,
+    "range": 70,
+    "air": true,
+    "ground": true
+   },
+   "abilities": {
+    "overcharge": {
+     "name": "Overcharge",
+     "slot": "KeyQ",
+     "cd": 30,
+     "radius": 50,
+     "dur": 8,
+     "mult": 1.5,
+     "desc": "Your turrets within 50 fire 50% faster for 8 s."
+    },
+    "blink": {
+     "name": "Blink",
+     "slot": "KeyW",
+     "cd": 12,
+     "range": 80,
+     "target": true,
+     "desc": "Teleport to a spot within 80."
+    },
+    "orbital": {
+     "name": "Orbital Lance",
+     "slot": "KeyE",
+     "cd": 90,
+     "delay": 2,
+     "width": 12,
+     "depth": 40,
+     "dmg": 500,
+     "coreSafe": 60,
+     "target": true,
+     "desc": "After 2 s, a beam from orbit hits a 12-wide column for 500 and carves 40 deep. Not within 60 of any Core."
+    }
+   },
+   "desc": "Your hero. Free, respawns at the Core 30 s after falling."
+  }
+ },
+ "popCap": 30
+}

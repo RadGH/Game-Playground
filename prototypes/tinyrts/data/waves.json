@@ -1,0 +1,55 @@
+{
+ "_doc": "Director settings. budget: points for waves 1-10, then growth per wave. weights: base pick weights. firstDelay/between: build-phase seconds (normal). difficulty: budget multipliers.",
+ "budget": [
+  8,
+  12,
+  18,
+  24,
+  32,
+  40,
+  50,
+  62,
+  75,
+  90
+ ],
+ "growth": 1.1,
+ "surgeEvery": 5,
+ "surgeMult": 1.4,
+ "bossEvery": 10,
+ "bosses": [
+  "titan",
+  "hivemother"
+ ],
+ "firstDelay": {
+  "short": 50,
+  "normal": 75,
+  "long": 100
+ },
+ "between": {
+  "short": 25,
+  "normal": 40,
+  "long": 60
+ },
+ "straggle": 90,
+ "spawnSpread": 10,
+ "previewAt": 20,
+ "difficulty": {
+  "easy": 0.65,
+  "normal": 1,
+  "hard": 1.5,
+  "brutal": 2.0,
+  "story": 0.6
+ },
+ "hpGrowthAfter10": 0.04,
+ "weights": {
+  "mite": 3,
+  "gnawer": 2,
+  "spitter": 2,
+  "glare": 1.5,
+  "wisp": 2,
+  "splitter": 1.5,
+  "carapace": 1,
+  "borer": 1,
+  "bombard": 1
+ }
+}

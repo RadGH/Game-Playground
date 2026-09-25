@@ -1,0 +1,747 @@
+{
+ "_doc": "Campaign 'Signal Line'. tech: what the player may build/train (cumulative lists are written out per mission). waves: authored waves [{units:{type:n}, lanes:[...]}]. script: key into js/sim/missions.js for special setup/objectives.",
+ "title": "Signal Line",
+ "missions": [
+  {
+   "id": "m0",
+   "name": "First Light",
+   "script": "tutorial",
+   "blurb": "Land, dig in, and light the first beacon of the line.",
+   "briefing": "Commander, the Core is down and humming. This world is dead rock and old crystal \u2014 and something under it is waking up.\nMine crystal, raise a wall, and put a turret behind it. Small Hollow swarms will test you.\nFollow the hints in the corner. Survive four waves and the line begins.",
+   "map": {
+    "size": "small",
+    "seed": 1101,
+    "style": "rolling"
+   },
+   "start": {
+    "c": 220,
+    "f": 0
+   },
+   "commander": false,
+   "tech": [
+    "drill",
+    "solar",
+    "relay",
+    "pulse",
+    "panel",
+    "foam"
+   ],
+   "newTech": [
+    "drill",
+    "relay",
+    "pulse",
+    "panel"
+   ],
+   "newEnemies": [
+    "mite"
+   ],
+   "waves": {
+    "firstDelay": 110,
+    "between": 45,
+    "list": [
+     {
+      "units": {
+       "mite": 4
+      }
+     },
+     {
+      "units": {
+       "mite": 7
+      }
+     },
+     {
+      "units": {
+       "mite": 10
+      }
+     },
+     {
+      "units": {
+       "mite": 14
+      }
+     }
+    ]
+   },
+   "objective": "Survive 4 waves",
+   "stars": [
+    "Win",
+    "Core never damaged",
+    "Win in under 8 minutes"
+   ]
+  },
+  {
+   "id": "m1",
+   "name": "Deep Vein",
+   "script": "survive",
+   "blurb": "Ferrite runs deep here. So do the things that eat walls.",
+   "briefing": "A ferrite seam \u2014 orange ore \u2014 runs under this ridge. Ferrite builds Plate walls, Mortars and Refineries, and it's the ammo shells run on.\nYour Commander joins you: click it to select it, then use Q, W and E for its powers.\nGnawers chew walls three times faster, and Spitters lob acid over them. Mortars answer both.",
+   "map": {
+    "size": "small",
+    "seed": 2207,
+    "style": "rolling"
+   },
+   "start": {
+    "c": 250,
+    "f": 60
+   },
+   "commander": true,
+   "tech": [
+    "drill",
+    "solar",
+    "relay",
+    "pulse",
+    "panel",
+    "foam",
+    "plate",
+    "mortar",
+    "refinery",
+    "battery"
+   ],
+   "newTech": [
+    "plate",
+    "mortar",
+    "refinery",
+    "battery"
+   ],
+   "newEnemies": [
+    "gnawer",
+    "spitter"
+   ],
+   "waves": {
+    "firstDelay": 90,
+    "between": 40,
+    "list": [
+     {
+      "units": {
+       "mite": 8
+      }
+     },
+     {
+      "units": {
+       "mite": 8,
+       "gnawer": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 10,
+       "spitter": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 10,
+       "gnawer": 3,
+       "spitter": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 14,
+       "gnawer": 4,
+       "spitter": 3
+      }
+     },
+     {
+      "units": {
+       "mite": 18,
+       "gnawer": 5,
+       "spitter": 4
+      }
+     }
+    ]
+   },
+   "objective": "Survive 6 waves",
+   "stars": [
+    "Win",
+    "No building lost",
+    "Commander never falls"
+   ]
+  },
+  {
+   "id": "m2",
+   "name": "Extend the Line",
+   "script": "beacons",
+   "blurb": "Three beacons, three hills, one network.",
+   "briefing": "Three dormant beacons stand across the ridge. Link each of them to your network with Relays \u2014 links need a clear line through terrain, so go over the hills or dig through them.\nWhen all three are linked at once and stay linked for 60 seconds, the line is lit. Dormant beacons are ignored by the Hollow — but once lit, they're targets. A destroyed beacon reforms 30 s later.\nWisps are coming: they fly, and they love turrets. Flak Arrays shoot them \u2014 and acid \u2014 out of the sky.",
+   "map": {
+    "size": "medium",
+    "seed": 3311,
+    "style": "rolling"
+   },
+   "start": {
+    "c": 350,
+    "f": 120
+   },
+   "commander": true,
+   "tech": [
+    "drill",
+    "solar",
+    "relay",
+    "pulse",
+    "panel",
+    "foam",
+    "plate",
+    "mortar",
+    "refinery",
+    "battery",
+    "flak",
+    "gate"
+   ],
+   "newTech": [
+    "flak",
+    "gate"
+   ],
+   "newEnemies": [
+    "wisp"
+   ],
+   "waves": {
+    "firstDelay": 80,
+    "between": 45,
+    "total": 30,
+    "list": [
+     {
+      "units": {
+       "mite": 10,
+       "wisp": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 10,
+       "gnawer": 2,
+       "wisp": 4
+      }
+     },
+     {
+      "units": {
+       "mite": 12,
+       "spitter": 3,
+       "wisp": 4
+      }
+     },
+     {
+      "units": {
+       "mite": 14,
+       "gnawer": 4,
+       "wisp": 6
+      }
+     },
+     {
+      "units": {
+       "mite": 16,
+       "spitter": 4,
+       "gnawer": 4,
+       "wisp": 8
+      }
+     }
+    ]
+   },
+   "objective": "Link all 3 beacons for 60 seconds",
+   "stars": [
+    "Win",
+    "No beacon destroyed",
+    "Win in under 12 minutes"
+   ]
+  },
+  {
+   "id": "m3",
+   "name": "Undertow",
+   "script": "undertow",
+   "blurb": "The ground here is hollow. So are the things inside it.",
+   "briefing": "Caves riddle this valley, and Borers tunnel through rock to surface right under your base. Watch for pink tremor lines on the ground and the minimap.\nDig moats, plug tunnels with Foam, and meet them with Railguns \u2014 slugs punch through rock and lines of enemies alike.\nHold for eight waves.",
+   "map": {
+    "size": "medium",
+    "seed": 4419,
+    "style": "canyons",
+    "caves": 1
+   },
+   "start": {
+    "c": 400,
+    "f": 200,
+    "a": 40
+   },
+   "commander": true,
+   "tech": [
+    "drill",
+    "solar",
+    "relay",
+    "pulse",
+    "panel",
+    "foam",
+    "plate",
+    "mortar",
+    "refinery",
+    "battery",
+    "flak",
+    "gate",
+    "railgun"
+   ],
+   "newTech": [
+    "railgun",
+    "foam"
+   ],
+   "newEnemies": [
+    "borer"
+   ],
+   "waves": {
+    "firstDelay": 90,
+    "between": 40,
+    "lanes": [
+     "right"
+    ],
+    "list": [
+     {
+      "units": {
+       "mite": 12,
+       "borer": 1
+      }
+     },
+     {
+      "units": {
+       "mite": 12,
+       "gnawer": 3,
+       "borer": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 14,
+       "spitter": 3,
+       "borer": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 16,
+       "gnawer": 4,
+       "wisp": 4,
+       "borer": 3
+      }
+     },
+     {
+      "units": {
+       "mite": 18,
+       "spitter": 4,
+       "gnawer": 4,
+       "borer": 3
+      }
+     },
+     {
+      "units": {
+       "mite": 20,
+       "gnawer": 6,
+       "wisp": 6,
+       "borer": 4
+      }
+     },
+     {
+      "units": {
+       "mite": 22,
+       "spitter": 6,
+       "gnawer": 6,
+       "borer": 5
+      }
+     },
+     {
+      "units": {
+       "mite": 26,
+       "gnawer": 8,
+       "spitter": 6,
+       "wisp": 6,
+       "borer": 6
+      }
+     }
+    ]
+   },
+   "objective": "Survive 8 waves",
+   "stars": [
+    "Win",
+    "No Borer surfaces near your Core",
+    "Core never damaged"
+   ]
+  },
+  {
+   "id": "m4",
+   "name": "Demolition",
+   "script": "nests",
+   "blurb": "Take the fight to them. Bring the roof down.",
+   "briefing": "Three Hollow Nests are breeding in the eastern ridge. Nests keep spawning until they're destroyed.\nThe Fabricator is yours now: train Troopers, Lancers and Siege Walkers, and send them with right-click or A-move.\nOne Nest sits under an old stone slab held up by pillars. Knock out the pillars \u2014 with shells, the Orbital Lance, or by digging \u2014 and let gravity finish it.",
+   "map": {
+    "size": "medium",
+    "seed": 5507,
+    "style": "rolling"
+   },
+   "start": {
+    "c": 500,
+    "f": 250,
+    "a": 60
+   },
+   "commander": true,
+   "tech": [
+    "drill",
+    "solar",
+    "relay",
+    "pulse",
+    "panel",
+    "foam",
+    "plate",
+    "mortar",
+    "refinery",
+    "battery",
+    "flak",
+    "gate",
+    "railgun",
+    "fabricator",
+    "trooper",
+    "lancer",
+    "siege"
+   ],
+   "newTech": [
+    "fabricator",
+    "trooper",
+    "lancer",
+    "siege"
+   ],
+   "newEnemies": [
+    "splitter",
+    "nest"
+   ],
+   "waves": {
+    "firstDelay": 120,
+    "between": 60,
+    "total": 40,
+    "list": [
+     {
+      "units": {
+       "mite": 8
+      }
+     },
+     {
+      "units": {
+       "mite": 10,
+       "splitter": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 12,
+       "gnawer": 3,
+       "splitter": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 14,
+       "spitter": 3,
+       "splitter": 3,
+       "wisp": 3
+      }
+     }
+    ]
+   },
+   "objective": "Destroy 3 Nests",
+   "stars": [
+    "Win",
+    "A Nest crushed by the slab",
+    "No army units lost"
+   ]
+  },
+  {
+   "id": "m5",
+   "name": "Glass Garden",
+   "script": "bridge",
+   "blurb": "Lasers in the dark. Mirrors on the bridge.",
+   "briefing": "Past this chasm the Hollow grow eyes: Glares fire lasers, and Carapace shells reflect lasers from the front.\nPrism walls bounce enemy lasers straight back at whoever fired them. Lance Turrets burn through lines. A Research Lab can harden it all.\nAn old stone bridge spans the chasm in front of you. Hold it for ten waves \u2014 a Titan is coming at the end.",
+   "map": {
+    "size": "medium",
+    "seed": 6613,
+    "style": "rolling"
+   },
+   "start": {
+    "c": 600,
+    "f": 300,
+    "a": 120
+   },
+   "commander": true,
+   "tech": [
+    "drill",
+    "solar",
+    "relay",
+    "pulse",
+    "panel",
+    "foam",
+    "plate",
+    "mortar",
+    "refinery",
+    "battery",
+    "flak",
+    "gate",
+    "railgun",
+    "fabricator",
+    "trooper",
+    "lancer",
+    "siege",
+    "prism",
+    "lance",
+    "lab",
+    "skimmer",
+    "research:*"
+   ],
+   "newTech": [
+    "prism",
+    "lance",
+    "lab",
+    "skimmer"
+   ],
+   "newEnemies": [
+    "glare",
+    "carapace",
+    "titan"
+   ],
+   "waves": {
+    "firstDelay": 100,
+    "between": 45,
+    "list": [
+     {
+      "units": {
+       "mite": 10,
+       "glare": 1
+      }
+     },
+     {
+      "units": {
+       "mite": 10,
+       "glare": 2,
+       "gnawer": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 12,
+       "glare": 3,
+       "spitter": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 12,
+       "glare": 3,
+       "gnawer": 3,
+       "carapace": 1
+      }
+     },
+     {
+      "units": {
+       "mite": 14,
+       "glare": 4,
+       "carapace": 2,
+       "wisp": 4
+      }
+     },
+     {
+      "units": {
+       "mite": 16,
+       "glare": 5,
+       "carapace": 2,
+       "gnawer": 5
+      }
+     },
+     {
+      "units": {
+       "mite": 20,
+       "glare": 6,
+       "carapace": 3,
+       "spitter": 6,
+       "wisp": 6
+      }
+     },
+     {
+      "units": {
+       "mite": 22,
+       "glare": 8,
+       "carapace": 4,
+       "gnawer": 6,
+       "bombard": 1
+      }
+     },
+     {
+      "units": {
+       "mite": 26,
+       "glare": 8,
+       "carapace": 5,
+       "spitter": 6,
+       "wisp": 8,
+       "bombard": 2
+      }
+     },
+     {
+      "units": {
+       "titan": 1,
+       "mite": 20,
+       "glare": 6,
+       "carapace": 3
+      }
+     }
+    ]
+   },
+   "objective": "Survive 10 waves",
+   "stars": [
+    "Win",
+    "The bridge stands (70% intact)",
+    "Core never damaged"
+   ]
+  },
+  {
+   "id": "m6",
+   "name": "Umbra",
+   "script": "rival",
+   "blurb": "Someone else wants the line.",
+   "briefing": "An Umbra commander has dug in across the valley. Same tools as you. Same rules. Different color.\nIt will build, mass an army, and push. Watch for its warnings and hold your wall.\nThen go destroy its Core.",
+   "map": {
+    "size": "medium",
+    "seed": 7717,
+    "style": "rolling"
+   },
+   "start": {
+    "c": 400,
+    "f": 150,
+    "a": 40
+   },
+   "commander": true,
+   "ai": {
+    "difficulty": "easy",
+    "style": "bastion"
+   },
+   "tech": [
+    "drill",
+    "solar",
+    "relay",
+    "pulse",
+    "panel",
+    "foam",
+    "plate",
+    "mortar",
+    "refinery",
+    "battery",
+    "flak",
+    "gate",
+    "railgun",
+    "fabricator",
+    "trooper",
+    "lancer",
+    "siege",
+    "prism",
+    "lance",
+    "lab",
+    "skimmer",
+    "arc",
+    "reactor",
+    "research:*"
+   ],
+   "newTech": [
+    "arc",
+    "reactor"
+   ],
+   "newEnemies": [],
+   "objective": "Destroy the Umbra Core",
+   "stars": [
+    "Win",
+    "Win in under 15 minutes",
+    "Your Core above 50%"
+   ]
+  },
+  {
+   "id": "m7",
+   "name": "Two Fronts",
+   "script": "twofronts",
+   "blurb": "The Umbra ahead. The Hollow behind. The line between.",
+   "briefing": "This is the last gap in the line, and everything wants it.\nThe Umbra commander holds the east, and it has learned. The Hollow are pouring in from the west \u2014 behind you \u2014 and a Hive Mother leads them.\nDestroy the Umbra Core. Don't let the Hollow take yours while you do.",
+   "map": {
+    "size": "large",
+    "seed": 8821,
+    "style": "rolling"
+   },
+   "start": {
+    "c": 500,
+    "f": 200,
+    "a": 60
+   },
+   "commander": true,
+   "ai": {
+    "difficulty": "normal",
+    "style": "bastion"
+   },
+   "tech": null,
+   "newTech": [],
+   "newEnemies": [
+    "hivemother",
+    "bombard"
+   ],
+   "waves": {
+    "firstDelay": 200,
+    "between": 70,
+    "total": 40,
+    "lanes": [
+     "left"
+    ],
+    "list": [
+     {
+      "units": {
+       "mite": 8
+      }
+     },
+     {
+      "units": {
+       "mite": 10,
+       "gnawer": 2
+      }
+     },
+     {
+      "units": {
+       "mite": 10,
+       "spitter": 2,
+       "wisp": 3
+      }
+     },
+     {
+      "units": {
+       "mite": 12,
+       "gnawer": 3,
+       "glare": 2,
+       "wisp": 4
+      }
+     },
+     {
+      "units": {
+       "hivemother": 1,
+       "mite": 14,
+       "gnawer": 4
+      }
+     },
+     {
+      "units": {
+       "mite": 20,
+       "glare": 5,
+       "carapace": 3,
+       "spitter": 5
+      }
+     },
+     {
+      "units": {
+       "mite": 24,
+       "gnawer": 6,
+       "bombard": 2,
+       "wisp": 8
+      }
+     }
+    ]
+   },
+   "objective": "Destroy the Umbra Core",
+   "stars": [
+    "Win",
+    "Win in under 20 minutes",
+    "Your Core above 50%"
+   ]
+  }
+ ]
+}

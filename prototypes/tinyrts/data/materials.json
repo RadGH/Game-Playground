@@ -1,0 +1,223 @@
+{
+ "_doc": "Cell materials. state: empty|static|loose|structural|sticky|footprint. hp is per-cell integrity (0-255). resist multiplies incoming damage by type (1 = normal). maxSpan: how many cells a structural material can reach sideways from support. colors: shades picked per cell by position hash.",
+ "list": [
+  {
+   "id": 0,
+   "key": "empty",
+   "name": "Empty",
+   "state": "empty",
+   "hp": 0,
+   "colors": [
+    "#000000"
+   ]
+  },
+  {
+   "id": 1,
+   "key": "bedrock",
+   "name": "Bedrock",
+   "state": "static",
+   "hp": 255,
+   "indestructible": true,
+   "colors": [
+    "#1b1a2b",
+    "#201f33",
+    "#17162a",
+    "#232238"
+   ]
+  },
+  {
+   "id": 2,
+   "key": "rock",
+   "name": "Rock",
+   "state": "static",
+   "hp": 30,
+   "colors": [
+    "#3b3e5c",
+    "#363856",
+    "#42466a",
+    "#31334f"
+   ],
+   "resist": {
+    "laser": 0.5,
+    "arc": 0
+   }
+  },
+  {
+   "id": 3,
+   "key": "dust",
+   "name": "Dust",
+   "state": "loose",
+   "hp": 5,
+   "colors": [
+    "#5d5a7e",
+    "#57547a",
+    "#655f86",
+    "#524f72"
+   ],
+   "resist": {
+    "laser": 0.5,
+    "arc": 0
+   }
+  },
+  {
+   "id": 4,
+   "key": "crystal",
+   "name": "Crystal ore",
+   "state": "static",
+   "hp": 40,
+   "colors": [
+    "#2ad4e8",
+    "#1ba6c9",
+    "#46e8f5",
+    "#1f8fb8"
+   ],
+   "glint": true,
+   "mine": "crystal",
+   "resist": {
+    "laser": 0.4,
+    "arc": 0
+   }
+  },
+  {
+   "id": 5,
+   "key": "ferrite",
+   "name": "Ferrite ore",
+   "state": "static",
+   "hp": 50,
+   "colors": [
+    "#e8853a",
+    "#c96a28",
+    "#f59f55",
+    "#a85a26"
+   ],
+   "mine": "ferrite",
+   "resist": {
+    "laser": 0.4,
+    "arc": 0
+   }
+  },
+  {
+   "id": 6,
+   "key": "panel",
+   "name": "Panel",
+   "state": "structural",
+   "hp": 20,
+   "maxSpan": 10,
+   "built": true,
+   "colors": [
+    "#8fa3c7",
+    "#7f93b8",
+    "#9db1d4",
+    "#7488ad"
+   ],
+   "resist": {
+    "arc": 0
+   }
+  },
+  {
+   "id": 7,
+   "key": "plate",
+   "name": "Plate",
+   "state": "structural",
+   "hp": 60,
+   "maxSpan": 18,
+   "built": true,
+   "colors": [
+    "#c4ccd8",
+    "#b3bccb",
+    "#d2d9e3",
+    "#a6afbf"
+   ],
+   "resist": {
+    "laser": 0.6,
+    "acid": 0.7,
+    "arc": 0
+   }
+  },
+  {
+   "id": 8,
+   "key": "prism",
+   "name": "Prism",
+   "state": "structural",
+   "hp": 15,
+   "maxSpan": 8,
+   "built": true,
+   "reflect": true,
+   "colors": [
+    "#b77dff",
+    "#d6a8ff",
+    "#9c5cf0",
+    "#e3c4ff"
+   ],
+   "resist": {
+    "laser": 0.1,
+    "kinetic": 1.5,
+    "blast": 1.5,
+    "arc": 0
+   }
+  },
+  {
+   "id": 9,
+   "key": "foam",
+   "name": "Foam",
+   "state": "sticky",
+   "hp": 8,
+   "built": true,
+   "colors": [
+    "#b9d97a",
+    "#a8c96a",
+    "#c7e38c",
+    "#9dbd60"
+   ],
+   "resist": {
+    "arc": 0,
+    "laser": 1.5,
+    "acid": 1.5
+   },
+   "maxSpan": 3
+  },
+  {
+   "id": 11,
+   "key": "rubble",
+   "name": "Rubble",
+   "state": "loose",
+   "hp": 3,
+   "colors": [
+    "#6d7189",
+    "#62667d",
+    "#777b94",
+    "#585c72"
+   ],
+   "resist": {
+    "arc": 0
+   }
+  },
+  {
+   "id": 12,
+   "key": "slag",
+   "name": "Slag",
+   "state": "loose",
+   "hp": 4,
+   "hot": true,
+   "colors": [
+    "#ff7a2e",
+    "#ffb347",
+    "#ff5a1f",
+    "#ffd27a"
+   ],
+   "resist": {
+    "arc": 0
+   }
+  },
+  {
+   "id": 13,
+   "key": "footprint",
+   "name": "Building",
+   "state": "footprint",
+   "hp": 255,
+   "colors": [
+    "#000000"
+   ]
+  }
+ ]
+}

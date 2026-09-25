@@ -1,0 +1,463 @@
+{
+ "_doc": "Buildings. size [w,h] in cells. cost {c,f,a} = crystal/ferrite/alloy. power: + makes, - draws per second (lasers draw only while firing via weapon.power). build = seconds for one drone. card = where it sits on the Build card (cat + key slot). weapon: dtype laser|kinetic|blast|arc|acid; kind pulse|beam|shell|rail|flak|arc.",
+ "cats": {
+  "walls": {
+   "name": "Walls",
+   "slot": "KeyQ",
+   "icon": "wall"
+  },
+  "turrets": {
+   "name": "Turrets",
+   "slot": "KeyW",
+   "icon": "turret"
+  },
+  "economy": {
+   "name": "Economy",
+   "slot": "KeyE",
+   "icon": "econ"
+  },
+  "base": {
+   "name": "Base",
+   "slot": "KeyR",
+   "icon": "base"
+  }
+ },
+ "walls": {
+  "panel": {
+   "name": "Panel",
+   "mat": 6,
+   "cells": 2,
+   "cost": {
+    "c": 1
+   },
+   "slot": "KeyQ",
+   "desc": "Cheap wall. Reaches 10 cells sideways from support."
+  },
+  "plate": {
+   "name": "Plate",
+   "mat": 7,
+   "cells": 3,
+   "cost": {
+    "c": 1,
+    "f": 1
+   },
+   "slot": "KeyW",
+   "desc": "Armored wall. Resists lasers and acid. Reaches 18 cells sideways."
+  },
+  "prism": {
+   "name": "Prism",
+   "mat": 8,
+   "cells": 2,
+   "cost": {
+    "c": 1
+   },
+   "alloyPer": 10,
+   "slot": "KeyE",
+   "desc": "Bounces ENEMY lasers back at whoever fired them. Your own shots pass through. Fragile to shells and slugs."
+  },
+  "foam": {
+   "name": "Foam",
+   "mat": 9,
+   "cells": 4,
+   "cost": {
+    "c": 1
+   },
+   "slot": "KeyR",
+   "desc": "Cheapest plug. Sticks to terrain on any side but only reaches 3 cells. Weak to lasers and acid."
+  }
+ },
+ "list": {
+  "core": {
+   "name": "Core",
+   "size": [
+    24,
+    20
+   ],
+   "hp": 3000,
+   "power": 10,
+   "linkRange": 90,
+   "noFall": true,
+   "cat": null,
+   "trickle": {
+    "c": 2
+   },
+   "trains": [
+    "drone"
+   ],
+   "weapon": {
+    "kind": "pulse",
+    "dtype": "laser",
+    "dmg": 6,
+    "rate": 1,
+    "range": 60,
+    "air": true,
+    "ground": true,
+    "power": 0
+   },
+   "desc": "Your base. If it falls, you lose. Builds drones, stores resources, links nearby buildings."
+  },
+  "drill": {
+   "name": "Drill",
+   "size": [
+    12,
+    10
+   ],
+   "hp": 300,
+   "cost": {
+    "c": 40
+   },
+   "power": -2,
+   "build": 8,
+   "cat": "economy",
+   "slot": "KeyQ",
+   "mine": {
+    "w": 20,
+    "h": 48,
+    "interval": 1.4,
+    "yield": 4
+   },
+   "desc": "Mines ore in a 20 x 48 area below it. Ore cells vanish as it works - watch what stands on them."
+  },
+  "solar": {
+   "name": "Solar Array",
+   "size": [
+    12,
+    6
+   ],
+   "hp": 150,
+   "cost": {
+    "c": 30
+   },
+   "power": 3,
+   "build": 6,
+   "cat": "economy",
+   "slot": "KeyW",
+   "needsSky": true,
+   "desc": "+3 power with open sky above. Output drops for every column that is covered."
+  },
+  "reactor": {
+   "name": "Reactor",
+   "size": [
+    16,
+    14
+   ],
+   "hp": 600,
+   "cost": {
+    "c": 150,
+    "f": 80,
+    "a": 20
+   },
+   "power": 20,
+   "build": 25,
+   "cat": "economy",
+   "slot": "KeyE",
+   "deathBlast": {
+    "radius": 30,
+    "dmg": 400
+   },
+   "desc": "+20 power. Explodes violently when destroyed."
+  },
+  "battery": {
+   "name": "Battery",
+   "size": [
+    8,
+    8
+   ],
+   "hp": 250,
+   "cost": {
+    "c": 40,
+    "f": 20
+   },
+   "store": 300,
+   "build": 6,
+   "cat": "economy",
+   "slot": "KeyR",
+   "desc": "Stores 300 power for when turrets fire faster than you generate."
+  },
+  "relay": {
+   "name": "Relay",
+   "size": [
+    4,
+    14
+   ],
+   "hp": 150,
+   "cost": {
+    "c": 20
+   },
+   "linkRange": 60,
+   "build": 4,
+   "cat": "economy",
+   "slot": "KeyA",
+   "desc": "Extends your link network 60 cells. Links need a clear line through terrain."
+  },
+  "refinery": {
+   "name": "Refinery",
+   "size": [
+    16,
+    12
+   ],
+   "hp": 450,
+   "cost": {
+    "c": 80,
+    "f": 40
+   },
+   "power": -5,
+   "build": 15,
+   "cat": "economy",
+   "slot": "KeyS",
+   "toggle": true,
+   "refine": {
+    "in": {
+     "c": 2,
+     "f": 1
+    },
+    "out": {
+     "a": 1
+    },
+    "interval": 3
+   },
+   "desc": "Turns 2 Crystal + 1 Ferrite into 1 Alloy every 3 s."
+  },
+  "fabricator": {
+   "name": "Fabricator",
+   "size": [
+    20,
+    14
+   ],
+   "hp": 700,
+   "cost": {
+    "c": 120,
+    "f": 60
+   },
+   "power": -4,
+   "build": 20,
+   "cat": "base",
+   "slot": "KeyQ",
+   "trains": [
+    "trooper",
+    "lancer",
+    "skimmer",
+    "siege"
+   ],
+   "desc": "Trains army units. Queue up to 5. Set a rally point with V."
+  },
+  "lab": {
+   "name": "Research Lab",
+   "size": [
+    16,
+    12
+   ],
+   "hp": 500,
+   "cost": {
+    "c": 100,
+    "f": 60
+   },
+   "power": -3,
+   "build": 15,
+   "cat": "base",
+   "slot": "KeyW",
+   "desc": "Researches upgrades, one at a time."
+  },
+  "gate": {
+   "name": "Gate",
+   "size": [
+    4,
+    16
+   ],
+   "hp": 400,
+   "cost": {
+    "c": 20
+   },
+   "build": 5,
+   "cat": "base",
+   "slot": "KeyE",
+   "gate": true,
+   "noLink": true,
+   "desc": "A wall your own units walk through. Enemies must break it."
+  },
+  "pulse": {
+   "name": "Pulse Turret",
+   "size": [
+    8,
+    8
+   ],
+   "hp": 260,
+   "cost": {
+    "c": 50
+   },
+   "build": 8,
+   "cat": "turrets",
+   "slot": "KeyQ",
+   "turret": true,
+   "weapon": {
+    "kind": "pulse",
+    "dtype": "laser",
+    "dmg": 8,
+    "rate": 2,
+    "range": 90,
+    "air": true,
+    "ground": true,
+    "power": 1
+   },
+   "desc": "Cheap all-round laser. Hits ground and air."
+  },
+  "lance": {
+   "name": "Lance Turret",
+   "size": [
+    10,
+    12
+   ],
+   "hp": 320,
+   "cost": {
+    "c": 90,
+    "a": 10
+   },
+   "build": 12,
+   "cat": "turrets",
+   "slot": "KeyW",
+   "turret": true,
+   "weapon": {
+    "kind": "beam",
+    "dtype": "laser",
+    "dps": 24,
+    "range": 140,
+    "air": false,
+    "ground": true,
+    "power": 5,
+    "pierce": true
+   },
+   "desc": "Continuous piercing beam. Burns through lines of enemies."
+  },
+  "mortar": {
+   "name": "Mortar",
+   "size": [
+    12,
+    10
+   ],
+   "hp": 380,
+   "cost": {
+    "c": 80,
+    "f": 30
+   },
+   "build": 12,
+   "cat": "turrets",
+   "slot": "KeyE",
+   "turret": true,
+   "weapon": {
+    "kind": "shell",
+    "dtype": "blast",
+    "dmg": 35,
+    "radius": 10,
+    "rate": 0.4,
+    "range": 160,
+    "minRange": 40,
+    "air": false,
+    "ground": true,
+    "ammoF": 1,
+    "speed": 150
+   },
+   "desc": "Lobs shells over walls. Blasts carve terrain. Can't hit anything closer than 40."
+  },
+  "railgun": {
+   "name": "Railgun",
+   "size": [
+    14,
+    8
+   ],
+   "hp": 400,
+   "cost": {
+    "c": 100,
+    "f": 60,
+    "a": 20
+   },
+   "build": 18,
+   "cat": "turrets",
+   "slot": "KeyR",
+   "turret": true,
+   "weapon": {
+    "kind": "rail",
+    "dtype": "kinetic",
+    "dmg": 150,
+    "rate": 0.333,
+    "range": 170,
+    "air": true,
+    "ground": true,
+    "ammoF": 2,
+    "pierce": true,
+    "speed": 900
+   },
+   "desc": "Slow, huge piercing slug. Punches through lines of enemies and their walls. Ignores reflection."
+  },
+  "flak": {
+   "name": "Flak Array",
+   "size": [
+    10,
+    8
+   ],
+   "hp": 300,
+   "cost": {
+    "c": 70,
+    "f": 30
+   },
+   "build": 10,
+   "cat": "turrets",
+   "slot": "KeyA",
+   "turret": true,
+   "weapon": {
+    "kind": "flak",
+    "dtype": "blast",
+    "dmg": 5,
+    "radius": 4,
+    "rate": 1,
+    "burst": 4,
+    "range": 120,
+    "air": true,
+    "ground": false,
+    "intercept": true,
+    "ammoF": 1,
+    "speed": 400
+   },
+   "desc": "Anti-air bursts. Also shoots down acid globs and bombs in flight."
+  },
+  "arc": {
+   "name": "Arc Coil",
+   "size": [
+    8,
+    12
+   ],
+   "hp": 300,
+   "cost": {
+    "c": 90,
+    "a": 15
+   },
+   "build": 12,
+   "cat": "turrets",
+   "slot": "KeyS",
+   "turret": true,
+   "weapon": {
+    "kind": "arc",
+    "dtype": "arc",
+    "dmg": 20,
+    "rate": 1,
+    "range": 60,
+    "chain": 5,
+    "chainRange": 30,
+    "air": true,
+    "ground": true,
+    "power": 4
+   },
+   "desc": "Lightning that jumps between up to 5 enemies. Made for swarms."
+  },
+  "beacon": {
+   "name": "Beacon",
+   "size": [
+    6,
+    18
+   ],
+   "hp": 900,
+   "cat": null,
+   "beacon": true,
+   "desc": "A signal beacon. Link it to your network and keep it standing."
+  }
+ }
+}

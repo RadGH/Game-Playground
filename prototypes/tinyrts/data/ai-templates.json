@@ -1,0 +1,356 @@
+{
+ "_doc": "Umbra rival AI. Build orders are steps run in order; after the order is done the AI loops its 'late' rules. zone: back (behind the core), mid (just in front), front (turret line), ore (best drill spot), wallLine. Difficulty scales income, think interval (reaction), and the army value needed before a push.",
+ "difficulty": {
+  "easy": {
+   "income": 0.8,
+   "think": 4,
+   "pushValue": 900,
+   "pushDecay": 0.6,
+   "firstPush": 420,
+   "retreatAt": 0.2
+  },
+  "normal": {
+   "income": 1.0,
+   "think": 2,
+   "pushValue": 700,
+   "pushDecay": 0.8,
+   "firstPush": 330,
+   "retreatAt": 0.3
+  },
+  "hard": {
+   "income": 1.15,
+   "think": 1,
+   "pushValue": 600,
+   "pushDecay": 1.0,
+   "firstPush": 270,
+   "retreatAt": 0.3
+  },
+  "brutal": {
+   "income": 1.35,
+   "think": 0.5,
+   "pushValue": 520,
+   "pushDecay": 1.2,
+   "firstPush": 220,
+   "retreatAt": 0.35
+  }
+ },
+ "styles": {
+  "bastion": {
+   "name": "Bastion",
+   "desc": "Thick walls, artillery, and a slow, heavy push.",
+   "order": [
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "pulse",
+     "zone": "mid"
+    },
+    {
+     "b": "drill",
+     "zone": "ferrite"
+    },
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "b": "relay",
+     "zone": "front"
+    },
+    {
+     "b": "pulse",
+     "zone": "front"
+    },
+    {
+     "wall": "panel",
+     "zone": "wallLine"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "b": "mortar",
+     "zone": "front"
+    },
+    {
+     "b": "fabricator",
+     "zone": "back"
+    },
+    {
+     "b": "refinery",
+     "zone": "back"
+    },
+    {
+     "train": "trooper",
+     "n": 3
+    },
+    {
+     "b": "battery",
+     "zone": "back"
+    },
+    {
+     "b": "flak",
+     "zone": "mid"
+    },
+    {
+     "wall": "plate",
+     "zone": "wallLine"
+    },
+    {
+     "b": "lab",
+     "zone": "back"
+    },
+    {
+     "research": "hardened"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "mortar",
+     "zone": "front"
+    },
+    {
+     "train": "siege",
+     "n": 2
+    },
+    {
+     "b": "lance",
+     "zone": "front"
+    },
+    {
+     "research": "lenses"
+    }
+   ],
+   "army": {
+    "trooper": 4,
+    "lancer": 2,
+    "siege": 3,
+    "skimmer": 1
+   },
+   "late": [
+    "pulse",
+    "mortar",
+    "lance",
+    "flak",
+    "railgun"
+   ]
+  },
+  "swarm": {
+   "name": "Swarm",
+   "desc": "Early infantry pressure, fewer walls, constant raids.",
+   "order": [
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "drill",
+     "zone": "ferrite"
+    },
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "b": "fabricator",
+     "zone": "back"
+    },
+    {
+     "train": "trooper",
+     "n": 4
+    },
+    {
+     "b": "pulse",
+     "zone": "mid"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "train": "trooper",
+     "n": 3
+    },
+    {
+     "b": "relay",
+     "zone": "front"
+    },
+    {
+     "b": "pulse",
+     "zone": "front"
+    },
+    {
+     "b": "refinery",
+     "zone": "back"
+    },
+    {
+     "train": "skimmer",
+     "n": 2
+    },
+    {
+     "wall": "panel",
+     "zone": "wallLine"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "train": "lancer",
+     "n": 2
+    },
+    {
+     "b": "flak",
+     "zone": "mid"
+    },
+    {
+     "b": "lab",
+     "zone": "back"
+    },
+    {
+     "research": "lattice"
+    }
+   ],
+   "army": {
+    "trooper": 8,
+    "skimmer": 3,
+    "lancer": 3,
+    "siege": 1
+   },
+   "late": [
+    "pulse",
+    "arc",
+    "flak",
+    "pulse"
+   ],
+   "pushMult": 0.6
+  },
+  "defender": {
+   "name": "Defender",
+   "desc": "Test bot for balance sims: turrets, walls and economy; never attacks.",
+   "order": [
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "b": "pulse",
+     "zone": "mid"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "drill",
+     "zone": "ferrite"
+    },
+    {
+     "b": "pulse",
+     "zone": "front"
+    },
+    {
+     "wall": "panel",
+     "zone": "wallLine"
+    },
+    {
+     "b": "drill",
+     "zone": "ore"
+    },
+    {
+     "b": "mortar",
+     "zone": "front"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "pulse",
+     "zone": "front"
+    },
+    {
+     "b": "refinery",
+     "zone": "back"
+    },
+    {
+     "b": "flak",
+     "zone": "mid"
+    },
+    {
+     "b": "battery",
+     "zone": "back"
+    },
+    {
+     "wall": "plate",
+     "zone": "wallLine"
+    },
+    {
+     "b": "solar",
+     "zone": "back"
+    },
+    {
+     "b": "lance",
+     "zone": "front"
+    },
+    {
+     "b": "mortar",
+     "zone": "front"
+    },
+    {
+     "b": "arc",
+     "zone": "front"
+    },
+    {
+     "b": "lab",
+     "zone": "back"
+    },
+    {
+     "research": "hardened"
+    },
+    {
+     "b": "railgun",
+     "zone": "front"
+    },
+    {
+     "research": "lenses"
+    },
+    {
+     "b": "flak",
+     "zone": "front"
+    }
+   ],
+   "army": {},
+   "late": [
+    "pulse",
+    "mortar",
+    "flak",
+    "lance",
+    "arc",
+    "railgun"
+   ],
+   "pushMult": 1000
+  }
+ }
+}

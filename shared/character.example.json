@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "id": "thalen",
+  "name": "Thalen Ashvine",
+  "entry": "thalen",
+  "avatar": {
+    "body": {
+      "height": 0.85,
+      "width": 0.3,
+      "headSize": 0.4,
+      "skin": "#f1c27d"
+    },
+    "headShape": "oval",
+    "hair": {
+      "id": "ponytail",
+      "color": "#d9c27a"
+    },
+    "eyes": {
+      "id": "almond",
+      "color": "#3a8a5a",
+      "x": 0.1,
+      "y": 0,
+      "scale": 1,
+      "rot": 6
+    },
+    "brows": {
+      "id": "arched",
+      "y": 0,
+      "rot": 0,
+      "x": 0.1
+    },
+    "nose": {
+      "id": "small",
+      "y": 0,
+      "scale": 1
+    },
+    "mouth": {
+      "id": "smirk",
+      "y": 0,
+      "scale": 1,
+      "color": "#b5484d"
+    },
+    "ears": {
+      "id": "pointed"
+    },
+    "facialHair": {
+      "id": "none"
+    },
+    "top": {
+      "id": "leather",
+      "color": "#2a6a4a",
+      "color2": "#6b4a2a"
+    },
+    "bottom": {
+      "id": "pants",
+      "color": "#4a3a2a"
+    },
+    "shoes": {
+      "id": "pointed",
+      "color": "#6b4a2a"
+    },
+    "accessory": {
+      "id": "none",
+      "color": "#333333"
+    },
+    "hat": {
+      "id": "hood",
+      "color": "#2a6a4a"
+    },
+    "extras": {
+      "id": "tattoo",
+      "color": "#2a7a5a"
+    }
+  },
+  "voice": {
+    "engine": "espeak",
+    "pitch": 0.55,
+    "speed": 0.3,
+    "depth": 0.45,
+    "tone": 0.6,
+    "breath": 0.15,
+    "rough": 0.05,
+    "flutter": 0.05,
+    "intonation": 3,
+    "wordgap": 0.05,
+    "gender": "m",
+    "accent": "en-rp",
+    "variant": "custom",
+    "fx": {
+      "reverb": 0.1
+    }
+  },
+  "speech": {
+    "traits": [
+      "pompous",
+      "honorable",
+      "scholar"
+    ],
+    "formality": 0.85,
+    "verbosity": 0.7,
+    "cheer": 0.4,
+    "aggression": 0.3,
+    "confidence": 0.8,
+    "custom": {
+      "greeting": "Well met",
+      "farewell": "Walk with the Root",
+      "catchphrase": "{~The roots remember.|The Root keeps count.|Ask the old trees; they saw it.|Rootwarden's word on it.|The forest has a long memory, and so do I.|Every leaf remembers a hand.}",
+      "oath": "by the Root",
+      "curse": "rot and ruin"
+    },
+    "customRate": {
+      "catchphrase": 0.3
+    },
+    "tics": [],
+    "mood": 0.1
+  }
+}

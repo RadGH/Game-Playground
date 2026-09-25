@@ -1126,6 +1126,31 @@ export class SpellFx {
 
   // ---- loop -------------------------------------------------------------------------------------
 
+  /**
+   * LIGHT FROM SPELLS (2026-09-24, for Farhold's nights). Every effect a public call adds is tagged
+   * with a glow in its element's colour; `lights()` hands the live ones to a game as point-light
+   * SOURCES (the game owns the lights — this module never creates one, because every light is a cost
+   * in every lit material's shader and only the game knows its budget). A projectile glows at full
+   * strength the whole flight; a burst, a nova or a cast flares and fades over its life.
+   */
+  _tagGlow(before, element, { range = 10, intensity = 2.4, moving = false } = {}) {
+    const E = elementOf(element), color = '#' + new THREE.Color(E.color).getHexString();
+    for (let i = before; i < this.live.length; i++) if (!this.live[i].glow) this.live[i].glow = { color, range, intensity, moving };
+  }
+  lights(max = 6) {
+    const out = [], v = new THREE.Vector3();
+    for (let i = this.live.length - 1; i >= 0 && out.length < max; i--) {
+      const e = this.live[i];
+      if (!e.glow || !e.obj) continue;
+      e.obj.getWorldPosition(v);
+      const k = e.life ? Math.min(1, e.age / e.life) : 0;
+      const fade = e.glow.moving ? 1 : Math.max(0, 1 - k) * (k < 0.15 ? k / 0.15 : 1);
+      if (fade <= 0.02) continue;
+      out.push({ x: v.x, y: v.y + 0.3, z: v.z, color: e.glow.color, range: e.glow.range, intensity: e.glow.intensity * fade, flicker: false, priority: 6 });
+    }
+    return out;
+  }
+
   /** Drive every running effect. Call once per frame from the stage's ticker. */
   update(dt) {
     const d = Math.min(0.05, Math.max(0, dt || 0));
@@ -1169,3 +1194,21 @@ export async function createSpellFx(scene, { assets = null, camera = null, scale
 }
 
 export default SpellFx;
+
+// ---- tag each public effect with its glow (see SpellFx#lights) ------------------------------
+{
+  const wrap = (name, opts) => {
+    const inner = SpellFx.prototype[name];
+    if (!inner) return;
+    SpellFx.prototype[name] = function (args = {}, ...rest) {
+      const before = this.live.length;
+      const out = inner.call(this, args, ...rest);
+      try { this._tagGlow(before, args.element || 'arcane', opts(args)); } catch { /* a glow is decoration */ }
+      return out;
+    };
+  };
+  wrap('projectile', () => ({ range: 9, intensity: 2.6, moving: true }));
+  wrap('impact', a => ({ range: 11 * (a.scale || 1), intensity: a.crit ? 4 : 3 }));
+  wrap('aoe', a => ({ range: 13, intensity: 3.2 }));
+  wrap('cast', () => ({ range: 7, intensity: 2 }));
+}

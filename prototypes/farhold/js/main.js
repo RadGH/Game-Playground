@@ -3,6 +3,7 @@
 // Everything the game does is in the modules next door; this file wires them together and owns the
 // frame loop. `window.farhold` is the handle the Playwright specs drive.
 
+import { createNightLights } from './nightlights.js';
 import * as THREE from 'three';
 import { createWorld, makeTerrain, describePlanet, createSystem, chooseLanding, isHabitableStart, landableBodies, M_PER_CELL, setMetresPerCell, M_PER_CELL_DEFAULT } from './planet.js';
 import { createSpace } from './space.js';
@@ -1099,6 +1100,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
   // prototypes draw with, so a firebolt here is the firebolt Emberveil throws. Textures load in the
   // background; until they arrive every effect draws its geometry and nothing throws.
   const spellfx = new SpellFx(scene, { camera, scale: 1.15, maxParticles: 260, maxLive: 36 });
+  const nightLights = createNightLights();          // R25 — torches carried at night
   Assets.open(new URL('../../../assets/', import.meta.url).href)
     .then(a => a.fxTextures(THREE, { size: 128 }))
     .then(t => spellfx.setTextures(t))
@@ -9073,9 +9075,29 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // warded chests and dungeon mouths hand their positions over and the nearest handful get lit.
     // …and anything the player has built that burns. A lamp post you put up has to light the street
     // it stands on, or there is no reason to put one up.
-    light.setSources(dungeon
-      ? dungeon.lights()
-      : [...chests.lights(), ...gates.lights(), ...sites.lights(), ...(build.lights?.() || [])]);
+    /**
+     * R25 — people carry torches at night (js/nightlights.js), and spells light up what they hit:
+     * a bolt in flight, a nova, a burst all hand a coloured source to the pool (SpellFx#lights).
+     */
+    {
+      const night = Math.max(0, Math.min(1, 1 - (sky.sunDirection.y + 0.05) * 4));
+      const bodies = [];
+      if (!dungeon) {
+        for (const n of folk?.roster?.() || []) {
+          if (!n.actor || Math.hypot(n.x - control.x, n.z - control.z) > 140) continue;
+          bodies.push({ key: n.id, actor: n.actor, kind: String(n.id).startsWith('road:') ? 'wanderer' : n.guards ? 'guard' : 'townsfolk' });
+        }
+      }
+      for (const e of field.enemies) {
+        if (!e.actor || e.dying != null || Math.hypot(e.x - control.x, e.z - control.z) > 140) continue;
+        bodies.push({ key: (e.__torchKey ??= String(e.id ?? Math.random())), actor: e.actor, kind: 'enemy' });
+      }
+      nightLights.update(bodies, dungeon ? 1 : night, state.elapsed);
+    }
+    light.setSources([
+      ...(dungeon ? dungeon.lights() : [...chests.lights(), ...gates.lights(), ...sites.lights(), ...(build.lights?.() || [])]),
+      ...nightLights.sources(), ...(spellfx.lights?.() || []),
+    ]);
     light.setRange(player.equipment.light?.range || null);
     light.update(dt, control, {
       day: Math.max(0, Math.min(1, sky.sunDirection.y * 1.6)),
@@ -10096,6 +10118,9 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     }),
     // through `clampToWorld` first: a coordinate off the map used to reach `colorAt` with a biome id
     // that has no colour, which threw inside the ring rebuild and killed the frame loop
+    /** R25 — the carried torches and the spell glows, for tests */
+    get nightLights() { return nightLights; },
+    get spellfx() { return spellfx; },
     teleport: (x, z) => {
       const [cx, cz] = terrain.clampToWorld(Number(x) || 0, Number(z) || 0);
       control.teleport(cx, cz);

@@ -582,7 +582,7 @@
       "height": 1.55
     },
     "ambientNight": 0.16,
-    "maxLights": 10,
+    "maxLights": 12,
     "brazier": {
       "range": 26,
       "intensity": 2.4,

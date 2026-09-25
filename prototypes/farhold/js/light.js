@@ -148,10 +148,11 @@ export function createLight(scene, { balance = {} } = {}) {
     }
 
     // the nearest sources get a light each
+    // R25 — `priority` lets a spell's flash or a carried torch win a slot over a far brazier
     const near = sources
       .map(s => ({ s, d: (s.x - at.x) ** 2 + (s.z - at.z) ** 2 }))
       .filter(o => o.d < 260 * 260)
-      .sort((a, b) => a.d - b.d)
+      .sort((a, b) => a.d / (a.s.priority || 1) ** 2 - b.d / (b.s.priority || 1) ** 2)
       .slice(0, maxLights);
 
     for (let i = 0; i < pool.length; i++) {

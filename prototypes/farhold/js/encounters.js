@@ -487,6 +487,11 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
       }
     }
 
+    // R25 — the prize waits for the fight: a defend's chest belongs to its attackers, and a trap's
+    // bait is shut until whatever is in the grass has come out and been dealt with
+    if (ev.chest && spec.kind === 'defend') ev.chest.guards = ev.units;
+    if (ev.chest && spec.kind === 'trap') ev.chest.guardPending = true;
+
     if (spec.kind === 'chase') {
       // js/actors.js: `quarry` is what keeps a fleeing body turning away from you rather than
       // running its original heading into your swing.
@@ -536,6 +541,8 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
   async function springTrap(ev) {
     const made = await spawnBodies({ ...ev.spec, aggro: true }, ev.x, ev.z, ev.level, ownerOf(ev.x, ev.z), field.rng, callerOf(ev.x, ev.z));
     ev.units = made;
+    ev.spawned = true;
+    if (ev.chest) { ev.chest.guards = made; ev.chest.guardPending = false; }
     onLog(made.length
       ? 'That was not left there for you.'
       : (ev.spec.win || 'Nobody came. Take it.'), made.length ? 'bad' : 'loot');
@@ -565,7 +572,11 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
        */
       const range = Math.hypot(ev.x - at.x, ev.z - at.z);
       if (range < 60) ev.seen = true;
-      if (range > closeRadius) { closeEvent(i); continue; }
+      if (range > closeRadius) {
+        // R25 — walked away from an unbeaten ambush or siege: the prize goes with the ones holding it
+        if (ev.chest && !ev.chest.opened && (ev.chest.guardPending || (ev.chest.guards || []).some(u => u && u.dying == null))) chests?.remove(ev.chest);
+        closeEvent(i); continue;
+      }
 
       if (ev.kind === 'rescue') {
         if (standing(ev) === 0 && ev.seen) {
@@ -616,9 +627,22 @@ export function createEncounters({ field, zones, terrain, balance = {}, data = {
       }
 
       if (ev.kind === 'trap') {
-        if (ev.sprung) { closeEvent(i); continue; }
-        // opening the lid springs it too, which is the honest way round
-        if (ev.chest?.opened || Math.hypot(ev.x - at.x, ev.z - at.z) < (spec.springAt ?? 16)) {
+        /**
+         * R25 — THE TRAP IS WON, NOT WALKED PAST. It used to close the moment it was sprung — the
+         * dressing vanished, the ambush appeared, and the bait chest could be opened while they
+         * stood there. Now it stays up until every body that came out of the grass is down; the
+         * chest (guarded, see js/chests.js `open`) opens after that, and only then does the event
+         * clear its dressing.
+         */
+        if (ev.sprung) {
+          if (ev.spawned && standing(ev) === 0) {
+            if (ev.units.length) onLog(spec.win || 'That was the last of them. The chest is yours.', 'loot');
+            closeEvent(i);
+          }
+          continue;
+        }
+        // touching the lid springs it too, which is the honest way round
+        if (ev.chest?.touched || ev.chest?.opened || Math.hypot(ev.x - at.x, ev.z - at.z) < (spec.springAt ?? 16)) {
           ev.sprung = true;
           springTrap(ev);
         } else if (!chests || !chests.chests.includes(ev.chest)) {

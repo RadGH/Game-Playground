@@ -393,6 +393,21 @@ export function createChests(scene, terrain, { seed = 1, balance = {}, zones = n
    */
   function open(chest, { level = 1, magicFind = 0, rng = null } = {}) {
     if (!chest || chest.opened) return null;
+    /**
+     * R25 — A GUARDED CHEST STAYS SHUT UNTIL ITS GUARDS ARE DOWN.
+     *
+     *   "You can just ignore the enemies, run up and steal the loot, and run away. These events
+     *    should only drop the reward chest after you've killed all the enemies that spawned."
+     *
+     * `guards` is the list of bodies the chest belongs to (an event's ambush, a camp's garrison, a
+     * world boss); `guardPending` is a trap whose bodies have not come out of the grass yet. Either
+     * way the lid does not come up — and touching it is what springs a trap (`touched`).
+     */
+    const standingGuards = (chest.guards || []).filter(u => u && !u.removed && u.dying == null);
+    if (chest.guardPending || standingGuards.length) {
+      chest.touched = true;
+      return { sealed: chest.guardPending ? 'Something is watching this chest.' : `Not while ${standingGuards.length === 1 ? 'its guard is' : `${standingGuards.length} of its guards are`} still standing.`, chest };
+    }
     const r = rng || chest.rng || makeRng(cellSeed(seed, Math.round(chest.x), Math.round(chest.z), 0x1234));
     const spec = chest.spec || {};
     chest.opened = true;

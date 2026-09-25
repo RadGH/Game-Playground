@@ -5542,6 +5542,7 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     const level = dungeon ? dungeon.level : (zones.at(control.x, control.z)?.midLevel || player.level);
     const haul = chests.open(chest, { level, magicFind: player.derived.magicFind });
     if (!haul) return;
+    if (haul.sealed) { hud.notice(haul.sealed, 'bad'); return; }    // R25: kill the guards first
     sound.ui('open');
     if (haul.mimic) {
       hud.log('The chest opens its own lid. That is not a chest.', 'bad');

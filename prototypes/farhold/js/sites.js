@@ -1119,6 +1119,8 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
       const a = rng() * Math.PI * 2, r = 3 + (spec.tier || 1);
       out.chest = chests.place(spec.chest.kind, site.x + Math.cos(a) * r, site.z + Math.sin(a) * r,
         { level: lvl, facing: rng() * Math.PI * 2, name: `${site.name}: the Strongbox` });
+      // R25 — the strongbox belongs to the garrison: it stays shut until they are down
+      if (out.chest) out.chest.guards = [...out.garrison, ...(out.boss ? [out.boss] : [])];
     }
     out.prisoners = site.gives?.prisoners || 0;
     return out;
@@ -1227,6 +1229,8 @@ export function createSites(scene, terrain, { seed = 1, balance = {}, zones = nu
         key: `worldboss:${site.key}`, level: lvl, facing: rng() * Math.PI * 2,
         name: `${spec.name}: the Hoard`,
       });
+      // R25 — the hoard is the boss's: it stays shut until the boss is down
+      if (out.chest) out.chest.guards = [unit];
     }
 
     const rec = { key: site.key, site, spec, field, level: lvl, boss: unit, minions: [], t: 0 };

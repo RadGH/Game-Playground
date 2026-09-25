@@ -1,5 +1,5 @@
 {
- "_doc": "Every class Farhold can be played as \u2014 all 30 from Emberveil, because the looks, the passive trees and the names already exist there and inventing a second, smaller list would only make the game poorer. `skills` comes from data/skills.json; `starter` is what the character has in hand on the first morning; `pet` is the companion the class brings, driven by js/pets.js. `armorTier` is what the class can wear and `weapons` is what it can hold \u2014 rpg.js refuses anything else.",
+ "_doc": "Every class Farhold can be played as — all 30 from Emberveil, because the looks, the passive trees and the names already exist there and inventing a second, smaller list would only make the game poorer. `skills` comes from data/skills.json; `starter` is what the character has in hand on the first morning; `pet` is the companion the class brings, driven by js/pets.js. `armorTier` is what the class can wear and `weapons` is what it can hold — rpg.js refuses anything else. `offStarter` (optional) is a second weapon put in the off hand on the first morning (the rogue's second dagger). 2026-09-25: the warrior starts with a shield, the fighter with a two-handed sword, the paladin with a one-handed sword and a Psalter (a focus that strengthens spells).",
  "classes": [
   {
    "id": "warrior",
@@ -18,7 +18,8 @@
    "startingArmour": [
     "heavy_chest",
     "heavy_helm",
-    "heavy_gauntlets"
+    "heavy_gauntlets",
+    "shield"
    ],
    "shield": true,
    "skills": [
@@ -113,7 +114,7 @@
     "hammer",
     "sword2h"
    ],
-   "starter": "longsword",
+   "starter": "sword2h",
    "startingArmour": [
     "medium_chest",
     "heavy_helm",
@@ -211,10 +212,11 @@
     "sword",
     "scepter"
    ],
-   "starter": "scepter",
+   "starter": "sword",
    "startingArmour": [
     "medium_chest",
-    "medium_helm"
+    "medium_helm",
+    "psalter"
    ],
    "shield": true,
    "skills": [
@@ -493,7 +495,8 @@
      "color": "#2a2a2a"
     }
    },
-   "sample": "Sable Quick"
+   "sample": "Sable Quick",
+   "offStarter": "dagger"
   },
   {
    "id": "cleric",
@@ -1111,7 +1114,7 @@
    "id": "scavenger",
    "name": "Scavenger",
    "role": "Resource Specialist",
-   "hook": "Lucky Strike inflicts random statuses. Big Score is a high-variance gambling strike \u2014 crit huge or whiff.",
+   "hook": "Lucky Strike inflicts random statuses. Big Score is a high-variance gambling strike — crit huge or whiff.",
    "primaryAttr": "DEX",
    "armorTier": "light",
    "weapons": [
@@ -1609,7 +1612,7 @@
    "id": "druid",
    "name": "Druid",
    "role": "Shapeshifting Healer",
-   "hook": "Rejuvenation HoTs. Wild Shape for raw damage. Nature\u2019s Wrath in the late game.",
+   "hook": "Rejuvenation HoTs. Wild Shape for raw damage. Nature’s Wrath in the late game.",
    "primaryAttr": "INT",
    "armorTier": "medium",
    "weapons": [

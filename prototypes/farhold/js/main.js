@@ -129,6 +129,8 @@ import { mat as matAmount } from '../../../shared/format.js';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom, STATUS_POWER_SHARE } from './skills.js';
 // R23 — Farhold's own uniques and the requests their powers make (see js/uniques.js)
 import { installFoci } from './foci.js';
+import { dressClassLooks, wearClassLook } from './classwear.js';
+import { loadClassOutfits } from '../../../avatar-3d/js/class-outfits.js';
 import { installWarbands, createWarbandMap } from './warbands.js';
 import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
 import { EFFECTS as FX_TABLE } from './effects.js';
@@ -310,6 +312,9 @@ async function boot() {
    * There is one call site now, so there is nothing to keep in step.
    */
   const settings = createSettings({ apply: (v, key) => settingsApply(v, key) });
+  // 2026-09-25 — each class's look wears its outfit (avatar-3d/data/class-outfits.json), and the
+  // starting armour is drawn as that look rather than by tier (js/classwear.js)
+  dressClassLooks(classLooks, await loadClassOutfits());
   const data = { items, balance, bestiary, talents, campaignData, classLooks, skillData, classData,
     craftData, encounterData, namegen, factionData, frameData, incidentData, wandererData,
     landmarkData, rewardData, resourceData, refiningData, powerData, structureData, colonyData,
@@ -827,9 +832,13 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // card until the day it is replaced
     const starter = attuneWeapon(rpg.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng: rpg.rng }));
     if (starter) rpg.equip(player, starter, { force: true });
+    // a second weapon for the off hand (the rogue's second dagger)
+    const offStarter = classDef.offStarter ? attuneWeapon(rpg.loot.generate(classDef.offStarter, 'normal', 'low', { rng: rpg.rng })) : null;
+    if (offStarter) rpg.equip(player, offStarter, { into: 'offhand', force: true });
+    const classAvatar = classLooks?.classes?.[classDef.id]?.avatar;
     for (const key of classDef.startingArmour || []) {
       const piece = attuneWeapon(rpg.loot.generate(key, 'normal', 'low', { rng: rpg.rng }));
-      if (piece) rpg.equip(player, piece, { force: true });
+      if (piece) rpg.equip(player, wearClassLook(piece, classAvatar), { force: true });
     }
     // EVERY character starts with a torch and a horse — both in slots of their own, so a torch does
     // not cost you your shield and a mount is a thing you own rather than a key you press.

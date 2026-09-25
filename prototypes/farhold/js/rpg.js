@@ -594,7 +594,7 @@ const ELEMENT_TINT = {
  * `chibi2-gear.js` binds every shield to `handL` at weight 1, which is how a buckler is held and
  * how nothing else is. The strapped versions live in `chibi2-weapons.js` and ride `elbowL`.
  */
-const OFFHAND_BY_SUBTYPE = { shield: 'fh_heater_shield', buckler: 'buckler', quiver: 'quiver', dagger: 'dagger' };
+const OFFHAND_BY_SUBTYPE = { shield: 'fh_heater_shield', buckler: 'buckler', quiver: 'quiver', dagger: 'fh_dagger' };
 
 /** What a weapon looks like in the character's hand — the item's own look wins if it has one. */
 export function heldLookFor(item) {
@@ -625,7 +625,8 @@ export function offhandLookFor(item) {
   // R25 — a caster FOCUS (grimoire, seer's orb, reliquary, effigy) and the old orb/warded foci are
   // held up in the left hand as themselves, not drawn as a kite shield
   const focus = focusLook(item);
-  if (focus) return { id: focus, color: FOCUS_COLOURS[focus]?.[item.rarity === 'legendary' ? 1 : 0] };
+  // the paladin's Psalter is a white-and-gold book, not the grimoire's purple
+  if (focus) return { id: focus, color: item.baseKey === 'psalter' ? '#e8e0c8' : FOCUS_COLOURS[focus]?.[item.rarity === 'legendary' ? 1 : 0] };
   // strapped to the forearm, not gripped in the fist — see chibi2-weapons.js
   if (item.isShield || item.isMagicShield) return { id: item.isMagicShield ? 'fh_kite_shield' : 'fh_heater_shield', color: '#8d97a3', quality: item.rarity === 'legendary' ? 3 : item.rarity === 'rare' ? 2 : 0 };
   /**
@@ -1940,6 +1941,9 @@ export class Rpg {
     for (const [slot, key] of [['head', 'head'], ['chest', 'chest'], ['legs', 'legs'], ['feet', 'feet']]) {
       const item = player.equipment[slot];
       if (!item) continue;
+      const target0 = key === 'head' ? 'hat' : key === 'chest' ? 'top' : key === 'legs' ? 'bottom' : 'shoes';
+      // a class's starting piece is drawn as that class's own part (js/classwear.js)
+      if (item.look?.worn?.id) { out[target0] = JSON.parse(JSON.stringify(item.look.worn)); continue; }
       const tier = this.loot.base(item.baseKey)?.tier;
       const part = ARMOUR_LOOK[key]?.[tier];
       if (!part) continue;
@@ -1967,7 +1971,11 @@ export class Rpg {
       if (held === 'torch') {
         // a torch is carried in the hand when that hand is free, and hangs off the belt when a
         // shield or a second weapon has it
-        if (player.equipment.offhand) out.decor = { id: 'belt_torch', color: colour };
+        // …and on the belt too when the weapon needs both hands or is a bow, which is held in the
+        // LEFT hand: a ranger's torch was drawn in the same fist as the bow
+        const w = player.equipment.weapon, sub = w?.subtype || w?.baseKey || '';
+        const handsFull = !!w && (w.twoHanded || /bow$/.test(sub));
+        if (player.equipment.offhand || handsFull) out.decor = { id: 'belt_torch', color: colour };
         else out.offhand = { id: 'torch', color: colour };
       } else {
         out.decor = { id: held === 'lamp' ? 'wisp_lamp' : 'belt_lantern', color: colour };

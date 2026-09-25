@@ -148,7 +148,7 @@ export async function runTitle({
     const def = classes.find(x => x.id === select.value);
     if (!def || !items) return avatar;
     try {
-      looks = looks || createLookMaker({ items, balance, classbuildData });
+      looks = looks || createLookMaker({ items, balance, classbuildData, classLooks });
       return looks.startingLook({ classDef: def, avatar });
     } catch (err) {
       console.warn('title: could not dress the preview', err);

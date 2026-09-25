@@ -10,7 +10,7 @@ import { CHIBI2_2D } from './chibi2-parts.js';
 // Emberveil-era additions merge into the original catalogs (gear.js documents them)
 Object.assign(hat, EXTRA_HATS);
 // Chibi 2's 2026-09-24 parts (chibi2-parts.js documents them)
-for (const [slot, extra] of Object.entries(CHIBI2_2D)) Object.assign({ top, bottom, shoes, cape, decor, facialHair, offhand }[slot], extra);
+for (const [slot, extra] of Object.entries(CHIBI2_2D)) Object.assign({ top, bottom, shoes, cape, decor, facialHair, offhand, hat }[slot], extra);
  Object.assign(top, EXTRA_TOPS); Object.assign(accessory, EXTRA_ACCESSORIES); Object.assign(extras, EXTRA_MARKS); Object.assign(eyes, EXTRA_EYES);
 
 export const LAYERS = ['decorBack', 'hairBack', 'hatBack', 'capeBack', 'arms', 'legs', 'shoes', 'bottom', 'body', 'top', 'skirtOver', 'sleeves', 'capeFront', 'decor', 'headShape', 'ears', 'extras', 'eyes', 'brows', 'nose', 'mouth', 'facialHair', 'hairFront', 'accessory', 'hat', 'hatFront', 'offhand', 'held'];

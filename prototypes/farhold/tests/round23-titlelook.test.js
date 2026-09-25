@@ -41,13 +41,19 @@ test('every preset class is holding its own starter weapon, the one begin() give
   }
 });
 
-test('a preset class carries the torch in its free hand, as it does on the first morning', () => {
-  // no preset class's startingArmour holds a shield (the warrior's `shield: true` is what it MAY
-  // carry, not what it starts with), so every one of them has the torch in hand
-  const maker = createLookMaker({ items, balance });
-  for (const id of ['ranger', 'warrior', 'stormcaller']) {
+test('a preset class carries the torch in a free hand, and on the belt when both hands are busy', () => {
+  // 2026-09-25: the warrior starts with a shield, the fighter with a two-hander, and a bow is held in
+  // the LEFT hand — so those three hang the torch on the belt rather than drawing it in a hand that
+  // is already holding something (the ranger's torch was drawn in the same fist as the bow)
+  const maker = createLookMaker({ items, balance, classLooks });
+  for (const id of ['stormcaller', 'swashbuckler', 'tactician']) {
     const look = maker.startingLook({ classDef: cls(id), avatar: {} });
     assert.equal(look.offhand?.id, 'torch', `${id}'s torch is missing from the free hand`);
+  }
+  for (const id of ['ranger', 'warrior', 'fighter']) {
+    const look = maker.startingLook({ classDef: cls(id), avatar: {} });
+    assert.notEqual(look.offhand?.id, 'torch', `${id} holds the torch in a hand that is busy`);
+    assert.equal(look.decor?.id, 'belt_torch', `${id}'s torch is not on the belt`);
   }
 });
 
@@ -82,7 +88,7 @@ test('a custom loadout puts its shield or its second weapon in the off hand, and
   assert.match(board.offhand?.id || '', /shield/, 'Blade and Board has no shield');
   assert.equal(board.decor?.id, 'belt_torch');
   const knives = maker.startingLook({ classDef: customClass('knife_pair').def, avatar: {} });
-  assert.equal(knives.offhand?.id, 'dagger', 'the second knife is not in the off hand');
+  assert.equal(knives.offhand?.id, 'fh_dagger', 'the second knife is not in the off hand');
   // and the two builds are not served out of one cache entry
   assert.notEqual(board.held?.id, undefined);
 });

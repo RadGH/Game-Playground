@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf } from '../js/skills.js';
 import { Rpg } from '../js/rpg.js';
+import { installFoci } from '../js/foci.js';
 
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -50,11 +51,14 @@ test('every class gets six skills and every skill is real', () => {
 test('every class in classes.json can actually be played', () => {
   const classes = JSON.parse(readFileSync(join(here, '../data/classes.json'), 'utf8')).classes;
   assert.equal(classes.length, 30);
-  const weaponBases = { ...items.weaponBases, ...items.armorBases };
+  // the foci (grimoire, psalter…) are put into the shared table at load, as main.js does
+  const loaded = installFoci(structuredClone(items));
+  const weaponBases = { ...loaded.weaponBases, ...loaded.armorBases };
   for (const c of classes) {
     assert.ok(data.classes[c.id], `${c.id} has no skill set`);
     assert.ok(weaponBases[c.starter], `${c.id} starts with ${c.starter}, which is not a real base`);
     for (const k of c.startingArmour || []) assert.ok(weaponBases[k], `${c.id} starts in ${k}, which is not real`);
+    if (c.offStarter) assert.ok(weaponBases[c.offStarter], `${c.id}'s second weapon ${c.offStarter} is not a real base`);
     assert.ok(c.look && c.name && c.role, `${c.id} is missing its look or its name`);
   }
 });

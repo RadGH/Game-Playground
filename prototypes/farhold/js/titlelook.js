@@ -30,6 +30,7 @@
 import { Rpg, heldLookFor, offhandLookFor, attuneWeapon } from './rpg.js';
 import { applyOpeningKit } from './classbuild.js';
 import { STARTER_TORCH } from './light.js';
+import { wearClassLook } from './classwear.js';
 
 const clone = v => JSON.parse(JSON.stringify(v ?? null));
 
@@ -40,7 +41,7 @@ const clone = v => JSON.parse(JSON.stringify(v ?? null));
  * @param {object} [opts.classbuildData] data/classbuild.json, for a custom class's opening kit
  * @param {object} [opts.torch]         the light every character starts with (STARTER_TORCH)
  */
-export function createLookMaker({ items, balance = {}, classbuildData = null, torch = STARTER_TORCH } = {}) {
+export function createLookMaker({ items, balance = {}, classbuildData = null, classLooks = null, torch = STARTER_TORCH } = {}) {
   let rpg = null;
   const cache = new Map();
 
@@ -87,9 +88,12 @@ export function createLookMaker({ items, balance = {}, classbuildData = null, to
     // ---- the same order as `begin()` in js/main.js, for a character with no save
     const starter = attuneWeapon(r.loot.generate(classDef.starter || 'sword', 'normal', 'low', { rng }));
     if (starter) r.equip(player, starter, { force: true });
+    const offStarter = classDef.offStarter ? attuneWeapon(r.loot.generate(classDef.offStarter, 'normal', 'low', { rng })) : null;
+    if (offStarter) r.equip(player, offStarter, { into: 'offhand', force: true });
+    const classAvatar = classLooks?.classes?.[classDef.id]?.avatar;
     for (const k of classDef.startingArmour || []) {
       const piece = attuneWeapon(r.loot.generate(k, 'normal', 'low', { rng }));
-      if (piece) r.equip(player, piece, { force: true });
+      if (piece) r.equip(player, wearClassLook(piece, classAvatar), { force: true });
     }
     if (torch) r.equip(player, clone(torch), { force: true });
     if (build && classbuildData) {

@@ -7,6 +7,7 @@
 // sword in each hand shows two swords in the portrait too.
 import { top, bottom, shoes } from './clothes.js';
 import { cape, held } from './gear.js';
+import { hat } from './accessories.js';
 import { decor } from './decor.js';
 import { facialHair } from './face.js';
 
@@ -18,7 +19,17 @@ const offWeapon = (from, name) => ({
 });
 
 export const CHIBI2_2D = {
+  // 2026-09-25 class headwear: the 3D models are in avatar-3d/js/chibi2-hats.js (great_helm and
+  // plate_helm already had 2D art and only needed a 3D model, so they are not listed here)
+  hat: {
+    war_helm: alias(hat, 'helmet', "Warrior's helm (nasal and cheek guards)"),
+    wolf_helm: alias(hat, 'hood', 'Wolf helm'),
+    bone_headdress: alias(hat, 'feather_band', 'Feathered headdress'),
+    rune_helm: alias(hat, 'helmet', "Runesmith's helm"),
+    tricorn: alias(hat, 'wide_brim', 'Tricorn'),
+  },
   top: {
+    gi: alias(top, 'sash_robe', 'Fitted wrap jacket (gi)'),
     travel_shirt: alias(top, 'tshirt', 'Travel shirt (rolled sleeves)'),
     gambeson: alias(top, 'leather', 'Quilted gambeson'),
   },

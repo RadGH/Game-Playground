@@ -54,7 +54,8 @@ test('a second weapon in the off hand is SEEN, and a tome is the off-hand book',
   const greatsword = { type: 'weapon', subtype: 'sword2h', baseKey: 'greatsword', twoHanded: true, rarity: 'normal' };
   assert.equal(offhandLookFor(greatsword).id, 'fh_greatsword');
   assert.equal(offhandLookFor({ type: 'weapon', subtype: 'tome', baseKey: 'tome' }).id, 'book');
-  assert.equal(offhandLookFor({ type: 'weapon', subtype: 'dagger', baseKey: 'dagger' }).id, 'dagger', 'a dagger keeps its own off-hand model');
+  // 2026-09-25: the off-hand dagger is the same fh_dagger model as the main hand's, not the old one
+  assert.equal(offhandLookFor({ type: 'weapon', subtype: 'dagger', baseKey: 'dagger' }).id, 'fh_dagger', 'a dagger keeps its own off-hand model');
   assert.equal(offhandLookFor({ isShield: true }).id, 'fh_heater_shield');
   // and a wand + tome is the wizard: the wand in the right hand, the book in the left
   assert.equal(heldLookFor({ type: 'weapon', subtype: 'wand', baseKey: 'wand' }).id, 'fh_wand');

@@ -277,7 +277,21 @@ export function buildOffhand(a, c) {
     for (const x of [-1, 1]) add(new THREE.ConeGeometry(0.015, 0.05, 4), L, tone(straw, 0.8), { position: [x * 0.115, 0.14, 0.10], rotation: [0, 0, x * Math.PI / 2] });
     return;
   }
-  if (id === 'torch') { add(profile([[-0.28, 0.018, 0.018], [0.18, 0.018, 0.018]], 6), L, leather, { position: [0, 0.02, 0.08] }); add(new THREE.ConeGeometry(0.11, 0.22, 6), L, '#ff8c2a', { position: [0, 0.29, 0.08], metal: true }); return; }
+  /**
+   * THE TORCH POINTS OUT PAST THE FINGERS (2026-09-25). It was built up the hand's +y — toward the
+   * elbow — so with the forearm raised the flame sat on the shoulder and the stick ran back into it
+   * ("an arrow in his off hand, pointing into his shoulder"). Like a blade, it now runs down -y from
+   * the fist, and the grip bone tips it forward and up (REST_PITCH.torch in chibi2-motion.js).
+   * A wrapped head, then a flame of two cones — a torch, not a spear point.
+   */
+  if (id === 'torch') {
+    const tz = 0.055, fire = a.offhand.color && a.offhand.color !== '#9aa3ad' ? a.offhand.color : '#ff8c2a';
+    add(profile([[-0.34, 0.02, 0.02], [0.07, 0.016, 0.016]], 6), L, wood, { position: [0, 0, tz] });
+    add(profile([[-0.42, 0.034, 0.034], [-0.40, 0.042, 0.042], [-0.33, 0.036, 0.036], [-0.31, 0.024, 0.024]], 7), L, leather, { position: [0, 0, tz] });
+    add(new THREE.ConeGeometry(0.05, 0.16, 6), L, fire, { position: [0, -0.49, tz], rotation: [Math.PI, 0, 0] });
+    add(new THREE.ConeGeometry(0.028, 0.1, 5), L, glowWarm, { position: [0, -0.47, tz], rotation: [Math.PI, 0, 0] });
+    return;
+  }
   if (id === 'quiver') {
     // Worn on the back, top over the right shoulder, with a strap across the chest.
     const rot = new THREE.Euler(0.15, 0, -0.45), dir = new THREE.Vector3(0, 1, 0).applyEuler(rot), base = new THREE.Vector3(0.07 * W, 0.08 * T, -0.20 * W);

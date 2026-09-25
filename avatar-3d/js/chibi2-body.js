@@ -53,6 +53,8 @@ export const TOP_STYLES = {
   robe: { sleeve: 'bell', collar: 'v', front: 'none', hem: 'long', belt: 'sash' },
   trim_robe: { sleeve: 'bell', collar: 'v', front: 'band', hem: 'long', belt: 'sash' },
   sash_robe: { sleeve: 'bell', collar: 'crossed', front: 'none', hem: 'long', belt: 'sash' },
+  // a fitted wrap jacket: crossed collar, sleeves to the forearm, a short skirt and a sash (the monk)
+  gi: { sleeve: 'long', collar: 'crossed', front: 'none', hem: 'short', belt: 'sash', cuffs: 'wraps' },
   high_collar_robe: { sleeve: 'bell', collar: 'high', front: 'band', hem: 'long', belt: 'none' },
   dress: { sleeve: 'puff', collar: 'round', front: 'none', hem: 'knee', belt: 'sash' },
   coat: { sleeve: 'long', collar: 'lapels', front: 'buttons', hem: 'coat', belt: 'none', cuffs: 'cuff' },

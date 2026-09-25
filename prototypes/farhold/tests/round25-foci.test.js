@@ -60,8 +60,13 @@ test('every focus base generates, is an off-hand, carries its property and drops
     assert.ok(!item.isShield && !item.isMagicShield, `${key} is not a shield`);
     const prop = FOCUS_BASES[key].intrinsic[0].stat;
     assert.ok(item.affixes.some(a => a.stat === prop), `${key} lost ${prop}`);
-    assert.equal(ENGINE_UNIT[prop], 'flag');
-    assert.ok(effectFor({ stat: prop }) || EFFECTS['affix:' + prop], `${prop} has no effect`);
+    // the Psalter (2026-09-25, the paladin's book) is the plain focus: its property is a straight
+    // spell-power share rather than a flag with a power of its own
+    if (key === 'psalter') assert.equal(ENGINE_UNIT[prop], 'frac');
+    else {
+      assert.equal(ENGINE_UNIT[prop], 'flag');
+      assert.ok(effectFor({ stat: prop }) || EFFECTS['affix:' + prop], `${prop} has no effect`);
+    }
     assert.ok(top.includes(key), `${key} never drops`);
     assert.equal(offhandLookFor(item).id, FOCUS_BASES[key].look, `${key} is drawn as the wrong thing`);
   }

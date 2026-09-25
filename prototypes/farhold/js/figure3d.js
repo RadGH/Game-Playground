@@ -104,7 +104,7 @@ export function createFigureView(host, { spin = 0.52, drag = true } = {}) {
 
   let actor = null, building = null, wanted = null, height = 1.3;
   let raf = 0, last = performance.now(), disposed = false, frames = 0;
-  let yaw = -0.2, swayT = 0, dragging = false, dragX = 0, idleAfterDrag = 0;
+  let yaw = -0.2, swayT = 0, dragging = false, dragX = 0, idleAfterDrag = 0, held = false;
   const SWAY = 0.87;
 
   function frame() {
@@ -142,7 +142,7 @@ export function createFigureView(host, { spin = 0.52, drag = true } = {}) {
      * twelve seconds a swing, so the face you are building is in view most of the time and the
      * weapon and the back still come round. Dragging turns it all the way.
      */
-    if (!dragging) {
+    if (!dragging && !held) {
       if (idleAfterDrag > 0) idleAfterDrag -= dt;
       else swayT += dt;
     }
@@ -209,7 +209,12 @@ export function createFigureView(host, { spin = 0.52, drag = true } = {}) {
     for (let i = 3; i < px.length; i += 4) if (px[i] > 200) solid++;
     return { width: w, height: h, solid, share: solid / (w * h) };
   }
-  canvas.__figure = { sample };
+  /** Tests and the look harness: hold the figure at one angle (radians, 0 = facing you), or `null` to let it sway again. */
+  function face(angle) {
+    if (angle == null) { held = false; return; }
+    held = true; yaw = angle; swayT = 0;
+  }
+  canvas.__figure = { sample, face, show: a => show(a) };
 
   function dispose() {
     if (disposed) return;

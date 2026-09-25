@@ -10,9 +10,19 @@ export function profile(rings, segments = 12) {
       positions.push(Math.sin(a) * rx, y, Math.cos(a) * rz + z);
     }
   }
+  /**
+   * WHICH WAY IS OUT. The winding below faces outward when the rings climb (y rising). Legs, upper
+   * arms, tunic hems, skirts and robes are all written top-to-bottom, so for years they were built
+   * INSIDE OUT: the outer wall was culled and what you saw was the inside of the far wall — skin
+   * showing through trousers, a tunic's hem showing through greaves in green patches, a robe you
+   * could see straight through from the front. Ring order is how a part is authored, not a choice
+   * of which side is visible, so the winding follows the direction the rings run.
+   */
+  const down = rings.length > 1 && rings[rings.length - 1][0] < rings[0][0];
   for (let i = 0; i < rings.length - 1; i++) for (let j = 0; j < segments; j++) {
     const a = i * (segments + 1) + j, b = a + segments + 1;
-    indices.push(a, a + 1, b, a + 1, b + 1, b);
+    if (down) indices.push(a, b, a + 1, a + 1, b, b + 1);
+    else indices.push(a, a + 1, b, a + 1, b + 1, b);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));

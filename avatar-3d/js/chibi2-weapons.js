@@ -16,7 +16,7 @@
 //      butt at positive y, and `tests/gear.test.js` asserts exactly that, family by family.
 //   2. THE SILHOUETTES DID NOT READ. A sword was a flat four-sided taper with a curved bar for a
 //      guard; at the distance you actually fight from, a longsword, a greatsword and a rapier were
-//      three grey sticks. Every blade here has a spine, a fuller and two lighter edge stripes, and
+//      three grey sticks. Every blade here has a spine and a fuller (the edge stripes went in 2026-09-25), and
 //      every haft has ferrules and langets — the details that say "this is a weapon" from 15 m.
 //   3. FOUR FAMILIES HAD NO MODEL AT ALL. A greatsword rendered as an axe; a spear, a halberd and
 //      a javelin were all a bare pole; a wand was a cone of fire floating in the palm.
@@ -114,14 +114,14 @@ function blade(c, bone, from, to, width, colour, { thick = 0.016, curve = 0, sin
     [tip + len * 0.18, width * 0.3, thick * 0.55],
     [from - len * 0.06, width * 0.34, thick * 0.6],
   ], 4), bone, tone(colour, 0.66), { position: [belly * 0.5, 0, Z], metal: true });
-  // …and the edge stripes, one a side, or one only on a single-edged blade
-  const stripe = lift(colour, 0.45);
-  for (const s of single ? [1] : [-1, 1]) {
-    c.add(profile([
-      [tip + len * 0.08, thick * 0.3, thick * 0.3],
-      [from, thick * 0.34, thick * 0.34],
-    ], 4), bone, stripe, { position: [belly * 0.5 + s * width * 0.94, 0, Z], metal: true });
-  }
+  /**
+   * NO EDGE STRIPES (2026-09-25). There were two: straight rods at ±0.94 of the blade's FULL width,
+   * running from the guard to near the point. The blade tapers to its point and the rods did not, so
+   * for the last third of every blade they stood out in the air beside it — "two lines going
+   * straight out alongside the edge of the blade" on the sword, the dagger and the spear alike.
+   * The fuller and the tapered flat read as a blade on their own. `single` is kept for callers.
+   */
+  void single;
 }
 
 /** A haft: a wooden pole with two iron ferrules and a wrap where the hands go. */

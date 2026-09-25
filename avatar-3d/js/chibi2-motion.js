@@ -187,7 +187,9 @@ function aim(p, side, pitch, roll = 0, yaw = 0, edgeAxis = '+x') {
 const REST_PITCH = {
   blade: { idle: -0.95, walk: -0.95, ready: -1.85 },
   dagger: { idle: -0.8, walk: -0.8, ready: -1.6 },
-  haft: { idle: -0.55, walk: -0.6, ready: -1.95 },
+  // 2026-09-25: a one-handed hammer, mace or axe hung head-down by the boot at -0.55; carried with
+  // the head up and forward it reads as held rather than dragged ("back 45-90 degrees in his hand")
+  haft: { idle: -2.0, walk: -2.0, ready: -1.95 },
   heavy: { idle: 2.5, walk: 2.5, ready: -2.1 },          // idle/walk: over the shoulder
   polearm: { idle: -PI + 0.12, walk: -PI + 0.2, ready: -1.45 },
   staff: { idle: 0.05, walk: 0.1, ready: 0.15 },        // staffs carry the topper at +y: pitch is the butt
@@ -195,8 +197,11 @@ const REST_PITCH = {
   crossbow: { idle: 0, walk: 0, ready: 0 },              // the stock lies along +z, so pitch 0 holds it level
   // a bow is built for the SHOT (limbs up the hand's +z with the arm held out, belly toward -y), so
   // the same pitch that holds it level in the shot stands it upright in a hanging hand
-  bow: { idle: -1.72, walk: -1.72, ready: -1.72 },
-  caster: null, none: null, shield: null, book: null, orb: null, torch: null,
+  // …tipped forward at rest so the upper limb clears the forearm instead of running through it
+  bow: { idle: -1.25, walk: -1.25, ready: -1.72 },
+  // the torch runs down -y from the fist like a blade; this stands it forward and up
+  torch: { idle: -2.45, walk: -2.45, ready: -2.2 },
+  caster: null, none: null, shield: null, book: null, orb: null,
 };
 
 // ---------------------------------------------------------------------------- the clips
@@ -310,7 +315,7 @@ function carry(p, ctx, mode, swing = 0) {
     if (mode === 'ready') { p.armL = [-0.45, 0.9, 0.05]; p.elbowL = [-1.35, -0.4, 0]; }
     else { p.armL[2] -= 0.08; p.elbowL[0] = -0.3; }
   } else if (h.left === 'book') { p.armL[0] = -0.35; p.elbowL = [-1.25, 0.2, 0]; p.handL = [0, 0, 0.2]; }
-  else if (h.left === 'torch' || h.left === 'orb' || h.left === 'caster') { p.elbowL[0] = mode === 'ready' ? -1.2 : -0.7; }
+  else if (h.left === 'torch' || h.left === 'orb' || h.left === 'caster') { p.elbowL[0] = mode === 'ready' ? -1.2 : -0.7; if (lp) aims.L = [lp[mode] ?? lp.idle, 0, 0]; }
   else if (h.dualTwo && h.left === 'heavy') {
     if (mode === 'ready') { p.armL = [-0.6, 0, 0.1]; p.elbowL[0] = -0.9; p.armR = [-0.6, 0, -0.1]; p.elbowR[0] = -0.9; aims.L = [-2.0, 0, -0.3]; aims.R = [-2.0, 0, 0.3]; }
     else { p.armL = [-0.55 + swing * 0.1, -0.1, -0.38]; p.elbowL = [-2.05, 0, 0]; aims.L = [2.5, -0.2, -0.15]; }

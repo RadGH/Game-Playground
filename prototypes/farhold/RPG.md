@@ -3772,3 +3772,127 @@ not built:
    the body holds (an axe bandit chops, a dagger bandit stabs, an archer shoots). They do not get the
    player's pattern variety (alternating cuts, finishers); routing an enemy's weapon through
    `clipFor` with a step counter would.
+
+## Round 25 — the 9-24 play-test list (2026-09-25)
+
+Source: `9-24-2026-UPDATES.md` (19 items) plus two late bug reports. Every item is below with where
+it landed. Tests: `tests/round25-*.test.js` (foci, perks, skills) and the updated round 17/22/24 files.
+
+### The list
+
+1. **Off-hand weapon models, two-handers in both hands.** Landed with the Chibi 2 overhaul (round 24
+   above): `offhandLookFor` shows the second weapon, `buildOffhandWeapon` builds any held weapon in
+   the left hand, Doubled Grasp pairs swing `twinCleave` / `twinSlam`.
+2. **The upward swipe is gone.** The sceptre / smash strike that swung into the air now finishes at
+   body height (`avatar-3d/js/chibi2-motion.js`, one-armed pick swings, strikes that end low).
+3. **"Speak to the Mercenary Captain" with an arrow to nothing.** A wanderer standing in a town is
+   `inTown` (js/wanderers.js) — an ordinary townsperson, no marker; js/nearby.js skips it and a
+   beacon now needs a spawned body.
+4. **Grass distance.** Settings → Grass distance (`GRASS_DISTANCES` in js/grass-gpu.js): near, far,
+   very far (default: 150 m, 140k blades) and extreme; blades thin and widen with distance, a second
+   height ring feeds the far blades.
+5. **Level-refused equip says so**: `hud.notice("You are not the required level…")` at the bottom.
+6. **The chest wheel spins briefly and stops** (`shared/rewards.css` `rw-wheel`, a decelerating
+   spin; reduced motion makes no fan at all).
+7. **Combat log.** Pet damage dealt and taken are logged; every log line carries a kind
+   (`hud.log(text, cls, kind)`, `LOG_KINDS`) and the Log page has filter toggles, saved in
+   localStorage `farhold.logHidden`, that filter the corner log in game too.
+8. **Perks branch.** See "The branched keystones" below.
+9. **Footsteps**: `travel.step.soft` on natural ground (`sound.setGround`), quieter overall.
+10. **Firebolt no longer scrapes**: the fire launch/impact recipes were rebuilt in
+    `sfx/tools/build-catalog.py` (no sawtooth), spell voices use triangle/sine, and every cast plays
+    its element's launch and, if it hit, its impact (`skillSound`).
+11. **The weapon/tool wheel is gone.** The mouse wheel no longer cycles held modes; attack always
+    attacks; `E` harvests everything; scanning is `X`, giving an order `R` (both rebindable).
+12. **The arch at seed 39864** (and every `stone_arch` / `rib_arch`) collides on its legs only
+    (`solids` in data/megaflora.json, read by js/props.js); gatehouses got the same.
+13. **Night lights.** Townsfolk, wanderers and some humanoid enemies carry torches at night
+    (js/nightlights.js, a flame on the `handL` bone); spells report coloured lights
+    (`SpellFx#lights`) and the light pool (js/light.js, 12 lights, sorted by priority) lights them.
+14. **Mining swing**: the dominant arm swings with a slight lean and twist, no longer both arms bent
+    at the hips.
+15. **Event loot waits for the fight.** Garrison / world-boss chests carry `guards`; `chests.open`
+    returns `{ sealed }` while any stand; trap and defend events stay guarded until the ambush is
+    beaten (js/encounters.js).
+16. **Fewer, plainer drops**: `dropRate` 0.315 (−30%), legendaries and rares ramp in with level
+    (`rarityFor`, `legendaryFullAt` / `rareFullAt` in data/balance.json), chest counts trimmed.
+17. **Whirlwind spins five times at half damage**, one `strikeArea` per spin (so one hit per enemy
+    per spin), on the looping `whirl` clip. **Skill balance**: `effectiveMult = mult ×
+    cooldownPower × unlockPower` (js/skills.js) — a skill hits harder the later its slot opens (×1
+    at level 1 to ×2 at 24) and the longer its cooldown (+8% a second past 4s); the cards print the
+    effective number. Late skills gained debuffs (Storm Beam shocks, Arcane Burst curses, Rain of
+    Arrows snares, Execute and Charge weaken).
+18. **New skills + the effects overhaul.** See "Seven new skills" below.
+19. **Caster off-hands.** See "The foci" below.
+
+Late reports:
+
+* **#20 — the promoted Arc Staff "deals no damage".** Not reproduced (tap cast, charged dome and a
+  save/load all hit). Real faults found and fixed on the way: the bench re-attuned a staff after
+  EVERY recipe, so promote or temper could change its element and spell (only a brand re-attunes
+  now); attune ignored the element already recorded on the item; temper scaled the `castElement`
+  marker. A staff cast that catches nobody now says so in the log.
+* **#21 — Consecrate for ~600.** Not reproduced (a plain cleric's Consecrate hits for ~10; 400
+  random level-15 paladins topped out at 95). Any player hit above 8× the weapon's top damage now
+  writes its whole breakdown to the log (`strike` returns `why`), so the next one explains itself.
+* **Found on the way**: the player's strike clips restarted every frame and never got past the
+  wind-up (`play(name, fade, restart)` in Chibi 2 + `feel.swing.seq` in Farhold).
+
+### The foci (#19)
+
+`js/foci.js` puts four off-hand bases, eight uniques and a set into the shared item table IN MEMORY
+(items.json is Emberveil's too), like js/uniques.js. A focus is off-hand ARMOUR: it never swings,
+and its whole value is its property (js/effects.js `FOCI`):
+
+| Base | Model | Property |
+|---|---|---|
+| Grimoire | `book` | every 3rd wand bolt throws a page (a second bolt at 60%); skills cost 15% less mana |
+| Seer's Orb | `orb` | a mote strikes the nearest enemy within 9 m every 1.4 s for 30% |
+| Reliquary | `relic` | 25% of blows taken answer with a holy nova (60%) and heal 4%; +2 barrier regen |
+| Effigy | `idol` | every status you lay lasts 2 s longer and does 25% more |
+
+Uniques: Codex of Tides (page_storm), Ledger of Ash (archivist), Eye of the Marsh and Starwell
+(twin_motes), Pilgrim's Last Bone (sanctuary), Ward of the First Lamp (searing_light), Knot of Nine
+Grudges (hexbound), The Hollow Mother (dread_lantern). Set: **The Archivist's Regalia** (wand +
+grimoire + robe) — every 4th skill is free and goes off twice. The Chibi 2 `relic` and `idol`
+models are new and the `orb` was rebuilt on a claw cradle (avatar-3d/js/chibi2-gear.js, 2D pieces
+in avatar-2d/js/parts/gear.js). The old Spellguard Orb and Warded Focus now draw as an orb and a
+relic instead of a kite shield.
+
+### The branched keystones (#8)
+
+The Close Ground and The Deep Study stop being one road past ring 6: each fans into four paths of
+three stat nodes (js/perks.js `BRANCHES`), ending in keystones. 169 nodes became 203.
+
+* Melee, one per pair of hands: **Doubled Grasp** (two two-handers, unchanged), **Full Swing** (one
+  two-hander: +30% damage, every 3rd swing a slam that throws back), **Flurry** (a one-hander in
+  each hand: +20% speed, 25% of hits land again), **Shield Wall** (one-hander + shield: more block,
+  and a block answers with a shockwave). The stat half is gated by `handsFit` in `perkBonuses`, the
+  power half by `handsOf` in the effect hook — change weapons and the sheet moves.
+* Arcane, one per element plus Blood Price (kept): **Pyre Heart** (burning deaths burst and spread
+  the fire), **Shatter** (chilled deaths throw shards; chilled enemies take 30% more), **Storm
+  Within** (a spark every 1.5 s shocks the nearest), **Plague Bearer** / **Hollow Pact** (poison /
+  curse walks from a dead body to its neighbours; shadow hits heal), **Halo** (a burning, weakening
+  ring; holy hits heal), **Overflow** (every 3rd skill goes off twice). The elemental ones cost 20%
+  damage of every other kind.
+* The powers are `perk:*` entries in js/effects.js, put on `unit.legendaryPowers` by `rpg.derive`,
+  so they run through the hooks every legendary already uses. New kill requests in js/uniques.js
+  `afterKill`: `burst`, `shards`, `spread`.
+* **Saves keep their keystones**: the two old keystone nodes kept their ids (`melee:7:0`,
+  `arcane:7:0`) and sit at the ends of their paths.
+
+### Seven new skills (#18)
+
+| Skill | Element | What is new | Classes |
+|---|---|---|---|
+| Flamethrower | fire | a melee cone that `repeats` 10× over 2.2 s, drawn as a stream (`breath`) | pyromancer, dragon knight |
+| Ember Stride | fire | `trail`: for 8 s every 1.4 m you walk leaves burning ground | pyromancer |
+| Storm Orbs | lightning | `orbs`: three orbs for 12 s, each an `always` aura zapping the nearest enemy and Shocking it | stormcaller, sorcerer |
+| Blizzard | ice | a ground skill that pulses 6× (`weather`) and chills | chronomancer |
+| Toxic Cloud | poison | pulses 8× and poisons | druid, necromancer |
+| Judgement | holy | lands `delay` 0.7 s after the cast, a column of light, weakens | cleric, priest |
+| Void Rift | shadow | pulses 4×, each pulse `pull`s bodies 2.5 m inward, curses | warlock |
+
+Orbs live on `player.skillAuras`, read by `rpg.auraList`, so js/uniques.js `tickAuras` runs them
+like every other pulsing power; `always: true` lets a CAST aura fire before a fight has formally
+started (the gate exists so a lamp never starts a fight with a grazing deer).

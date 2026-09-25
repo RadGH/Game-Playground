@@ -27,6 +27,7 @@ A specific example of "what went wrong" was on 9/17/2026, the agent stopped afte
    * Promote with `tools/publish-stable.sh` once the work is committed and green. Why this exists: an agent that has written an `import` and not yet the matching `export` takes the whole page down for as long as that lasts, and the user had a blank screen and a `SyntaxError` because they were pointed at the tree an agent was editing.
    * LAN IP via `hostname -I | awk '{print $1}'`. The user cannot open localhost links; always give the LAN URL.
    * `./serve.sh --bg` still exists and serves the working tree on 8400 — do not use it now that the split is in place, or it will take the stable port.
+   * **GitHub Pages** (public): https://radgh.github.io/Game-Playground/ — the `gh-pages` branch, built by `tools/publish-pages.sh` from `stable` + TinyRTS's `master` (symlink inlined, tests/research shots left out). After `publish-stable.sh`, run `publish-pages.sh` to update the public site. Never use a path starting with `/` in a page — the site lives under `/Game-Playground/`.
 5. **Tests**: Playwright specs in `tests/` (root) or `<experiment>/tests/`, run with `npm test`. Node unit tests (`node --test`) for pure logic.
 6. **When adding an experiment**: create the folder, add a card to `index.html`, add a section to the table below, add a line to `~/claude/docs/playground.md`, and write the README. Keep this file's table current.
 7. **Data first**: anything a game would reuse (presets, phrase libraries, part catalogs) goes in JSON or a plain data module, separate from UI code.
